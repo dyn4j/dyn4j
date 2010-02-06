@@ -1,0 +1,196 @@
+/*
+ * Copyright (c) 2010, William Bittle
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without modification, are permitted 
+ * provided that the following conditions are met:
+ * 
+ *   * Redistributions of source code must retain the above copyright notice, this list of conditions 
+ *     and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
+ *     and the following disclaimer in the documentation and/or other materials provided with the 
+ *     distribution.
+ *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *     promote products derived from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package org.dyn4j.game2d.geometry;
+
+/**
+ * Represents a {@link Rectangle} (either axis aligned or oriented).
+ * <p>
+ * A {@link Rectangle} cannot have a width or height of zero.
+ * @author William Bittle
+ */
+public class Rectangle extends Polygon implements Shape, Transformable {
+	/** The {@link Rectangle}'s width */
+	protected double width;
+	
+	/** The {@link Rectangle}'s height */
+	protected double height;
+
+	/**
+	 * Full constructor.
+	 * <p>
+	 * The center of the {@link Rectangle} is (0, 0).
+	 * @param width the width
+	 * @param height the height
+	 */
+	public Rectangle(double width, double height) {
+		if (width <= 0.0) throw new IllegalArgumentException("A rectangle must have a positive non-zero width.");
+		if (height <= 0.0) throw new IllegalArgumentException("A rectangle must have a positive non-zero height.");
+		// set the vertices
+		this.vertices = new Vector[] {
+			new Vector(-width / 2.0, -height / 2.0),
+			new Vector( width / 2.0, -height / 2.0),
+			new Vector( width / 2.0,  height / 2.0),
+			new Vector(-width / 2.0,  height / 2.0)	
+		};
+		// use the average method for the centroid
+		this.center = Geometry.getAverageCenter(this.vertices);
+		// set the width and height
+		this.width = width;
+		this.height = height;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.geometry.Wound#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("RECTANGLE[").append(super.toString()).append("|")
+		.append(width).append("|").append(height).append("]");
+		return sb.toString();
+	}
+	
+	/**
+	 * Returns the height.
+	 * @return double
+	 */
+	public double getHeight() {
+		return this.height;
+	}
+	
+	/**
+	 * Returns the width.
+	 * @return double
+	 */
+	public double getWidth() {
+		return this.width;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.geometry.Polygon#getAxes(java.util.List, org.dyn4j.game2d.geometry.Transform)
+	 */
+	@Override
+	public Vector[] getAxes(Vector[] foci, Transform transform) {
+		// get the number of foci
+		int fociSize = foci != null ? foci.length : 0;
+		// create an array to hold the axes
+		Vector[] axes = new Vector[2 + fociSize];
+		int n = 0;
+		// get the vertices required to make the 2 surface normals
+		Vector p1 = transform.getTransformed(this.vertices[0]);
+		Vector p2 = transform.getTransformed(this.vertices[1]);
+		Vector p4 = transform.getTransformed(this.vertices[3]);
+		// return the normals to the surfaces, since this is a 
+		// rectangle we only have two axes to test against
+		axes[n++] = p1.to(p2);
+		axes[n++] = p1.to(p4);
+		// get the closest point to each focus
+		for (int i = 0; i < fociSize; i++) {
+			// get the current focus
+			Vector f = foci[i];
+			// create a place for the closest point
+			Vector closest = null;
+			double d = Double.MAX_VALUE;
+			// find the minimum distance vertex
+			for (int j = 0; j < 4; j++) {
+				// get the vertex
+				Vector p = this.vertices[j];
+				// transform it into world space
+				p = transform.getTransformed(p);
+				// get the squared distance to the focus
+				double dt = f.distanceSquared(p);
+				// compare with the last distance
+				if (dt < d) {
+					// if its closer then save it
+					closest = p;
+					d = dt;
+				}
+			}
+			// once we have found the closest point create 
+			// a vector from the focal point to the point
+			axes[n++] = f.to(closest);
+		}
+		// return all the axes
+		return axes;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.geometry.Polygon#contains(org.dyn4j.game2d.geometry.Vector, org.dyn4j.game2d.geometry.Transform)
+	 */
+	@Override
+	public boolean contains(Vector point, Transform transform) {
+		// put the point in local coordinates
+		Vector p = transform.getInverseTransformed(point);
+		// get the center and vertices
+		Vector c = this.center;
+		Vector p1 = this.vertices[0];
+		Vector p2 = this.vertices[1];
+		Vector p4 = this.vertices[3];
+		// get the width and height squared
+		double widthSquared = p1.distanceSquared(p2);
+		double heightSquared = p1.distanceSquared(p4);
+		// i could call the polygon one instead of this method, but im not sure which is faster
+		Vector projectAxis0 = p1.to(p2);
+		Vector projectAxis1 = p1.to(p4);
+		// create a vector from the centroid to the point
+		Vector toPoint = c.to(p);
+		// find the projection of this vector onto the vector from the
+		// centroid to the edge
+		if (toPoint.project(projectAxis0).getMagnitudeSquared() <= (widthSquared / 4.0)) {
+			// if the projection of the v vector onto the x separating axis is
+			// smaller than the half width then we know that the point is within the
+			// x bounds of the rectangle
+			if (toPoint.project(projectAxis1).getMagnitudeSquared() <= (heightSquared / 4.0)) {
+				// if the projection of the v vector onto the y separating axis is 
+				// smaller than the half height then we know that the point is within
+				// the y bounds of the rectangle
+				return true;
+			}
+		}
+		// return null if they do not intersect
+		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.geometry.Polygon#project(org.dyn4j.game2d.geometry.Vector, org.dyn4j.game2d.geometry.Transform)
+	 */
+	@Override
+	public Interval project(Vector axis, Transform transform) {
+		// get the center and vertices
+		Vector center = transform.getTransformed(this.center);
+		Vector p1 = transform.getTransformed(this.vertices[0]);
+		Vector p2 = transform.getTransformed(this.vertices[1]);
+		Vector p4 = transform.getTransformed(this.vertices[3]);
+		// create the project axes
+		Vector projectAxis0 = p1.to(p2);
+		Vector projectAxis1 = p1.to(p4);
+		projectAxis0.normalize();
+		projectAxis1.normalize();
+		// project the shape on the axis
+		double c = center.dot(axis);
+		double e = (this.width * 0.5) * Math.abs(projectAxis0.dot(axis)) + (this.height * 0.5) * Math.abs(projectAxis1.dot(axis));
+        return new Interval(c - e, c + e);
+	}
+}
