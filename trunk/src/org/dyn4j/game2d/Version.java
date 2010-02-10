@@ -50,4 +50,12 @@ public final class Version {
 	public static String getVersion() {
 		return MAJOR + "." + MINOR + "." + REVISION;
 	}
+	
+	/**
+	 * Main class to print the version to the console.
+	 * @param args command line arguments (none accepted)
+	 */
+	public static final void main(String[] args) {
+		System.out.println("dyn4j v" + Version.getVersion());
+	}
 }

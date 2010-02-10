@@ -79,11 +79,17 @@ public class AppletDriver extends AppletLoader<G2dSurface> {
 		Dimension size = new Dimension(800, 600);
 		// create the rendering surface
 		G2dSurface surface = new G2dSurface();
+		surface.setFocusable(true);
+		surface.setFocusTraversalKeysEnabled(true);
 		// create the container for the surface
 		Applet<G2dSurface> applet = new Applet<G2dSurface>(this, surface, size);
 		// create the core and set its rendering container
 		this.core = new TestBed<Applet<G2dSurface>>(applet);
 		// start the core
 		this.core.start();
+		
+		if (this.isVisible()) {
+			this.requestFocus();
+		}
 	}
 }

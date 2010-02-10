@@ -436,8 +436,6 @@ public class ControlPanel extends JFrame {
 					// add all the new ones
 					addTestControls(pnlTestControls, test.getControls());
 				}
-				// re-pack the frame
-				pack();
 			}
 		});
 		// add the button to the panel
