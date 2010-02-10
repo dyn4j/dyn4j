@@ -119,6 +119,8 @@ public class Island {
 			Body b = this.bodies.get(i);
 			// check if the body has infinite mass and infinite inertia
 			if (b.isStatic()) continue;
+			// accumulate the forces and torques
+			b.accumulate();
 			// integrate force and torque to modify the velocity and
 			// angular velocity (sympletic euler)
 			// v1 = v0 + (f / m) + g) * dt
@@ -132,9 +134,6 @@ public class Island {
 			angular = Interval.clamp(angular, 0.0, 1.0);
 			b.v.multiply(linear);
 			b.av *= angular;
-			// clear the forces
-			b.clearForce();
-			b.clearTorque();
 			// make sure the bodies aren't going too fast
 			if (b.v.dot(b.v) > maxVelocity * maxVelocity) {
 				b.v.normalize();
