@@ -121,6 +121,12 @@ public class Body implements Collidable, Transformable {
 	/** The current torque */
 	protected double torque;
 	
+	/** The force accumulator */
+	protected List<Force> forces;
+	
+	/** The torque accumulator */
+	protected List<Torque> torques;
+	
 	/** The coefficient of friction */
 	protected double mu;
 	
@@ -169,6 +175,8 @@ public class Body implements Collidable, Transformable {
 		this.av = 0.0;
 		this.force = new Vector();
 		this.torque = 0.0;
+		this.forces = new ArrayList<Force>();
+		this.torques = new ArrayList<Torque>();
 		this.mu = Body.DEFAULT_MU;
 		this.e = Body.DEFAULT_E;
 		// initialize the state
@@ -215,8 +223,15 @@ public class Body implements Collidable, Transformable {
 	 * @param force the force
 	 */
 	public void apply(Vector force) {
-		this.force.add(force);
-		this.awaken();
+		this.apply(new Force(force));
+	}
+	
+	/**
+	 * Applies the given {@link Force} to this {@link Body}
+	 * @param force the force
+	 */
+	public void apply(Force force) {
+		this.forces.add(force);
 	}
 
 	/**
@@ -226,23 +241,81 @@ public class Body implements Collidable, Transformable {
 	 * @param point the application point in world coordinates
 	 */
 	public void apply(Vector force, Vector point) {
-		this.force.add(force);
-		this.torque += point.difference(this.getWorldCenter()).cross(force);
-		this.awaken();
+		this.apply(new Torque(force, point));
 	}
 	
 	/**
-	 * Clears the force on the {@link Body}.
+	 * Applies the given {@link Torque} to this {@link Body}.
+	 * @param torque the torque
+	 */
+	public void apply(Torque torque) {
+		this.torques.add(torque);
+	}
+	
+	/**
+	 * Clears the last time step's force on the {@link Body}.
 	 */
 	public void clearForce() {
 		this.force.zero();
 	}
 	
 	/**
-	 * Clears the torque on the {@link Body}.
+	 * Clears the forces stored in the force accumulator.
+	 */
+	public void clearForces() {
+		this.forces.clear();
+	}
+	
+	/**
+	 * Clears the last time step's torque on the {@link Body}.
 	 */
 	public void clearTorque() {
 		this.torque = 0.0;
+	}
+	
+	/**
+	 * Clears the torques stored in the torque accumulator.
+	 */
+	public void clearTorques() {
+		this.torques.clear();
+	}
+	
+	/**
+	 * Accumulates the forces and torques.
+	 */
+	public void accumulate() {
+		// set the current force to zero
+		this.force.zero();
+		// get the number of forces
+		int size = this.forces.size();
+		// check if the size is greater than zero
+		if (size > 0) {
+			// apply all the forces
+			for (int i = 0; i < size; i++) {
+				Force force = this.forces.get(i);
+				force.apply(this);
+			}
+			// wake the body up
+			this.awaken();
+		}
+		// remove the forces from the accumulator
+		this.forces.clear();
+		// set the current torque to zero
+		this.torque = 0.0;
+		// get the number of torques
+		size = this.torques.size();
+		// check the size
+		if (size > 0) {
+			// apply all the torques
+			for (int i = 0; i < size; i++) {
+				Torque torque = this.torques.get(i);
+				torque.apply(this);
+			}
+			// wake the body up
+			this.awaken();
+		}
+		// remove the torques from the accumulator
+		this.torques.clear();
 	}
 	
 	/**
