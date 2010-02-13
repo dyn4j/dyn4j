@@ -103,6 +103,9 @@ public class Body implements Collidable, Transformable {
 	/** The {@link Body}'s {@link Shape} list */
 	protected List<Convex> shapes;
 	
+	/** The user data associated to this {@link Body} */
+	protected Object userData;
+	
 	/** The {@link Body}'s collision {@link Filter} */
 	protected Filter filter;
 	
@@ -153,6 +156,27 @@ public class Body implements Collidable, Transformable {
 	
 	/**
 	 * Full constructor.
+	 * @param shape the {@link Convex} {@link Shape}
+	 * @param mass the {@link Mass}
+	 */
+	public Body(Convex shape, Mass mass) {
+		super();
+		// check the geometry
+		if (shape == null) {
+			throw new IllegalArgumentException("The shape cannot be null.");
+		}
+		// check the mass
+		if (mass == null) {
+			throw new IllegalArgumentException("The mass cannot be null.");
+		}
+		this.shapes = new ArrayList<Convex>(1);
+		this.shapes.add(shape);
+		this.mass = mass;
+		this.initialize();
+	}
+	
+	/**
+	 * Full constructor.
 	 * @param shapes the {@link Convex} {@link Shape} list; at least one {@link Convex} {@link Shape}
 	 * @param mass the {@link Mass}; the {@link Mass} of all the {@link Shape}s
 	 */
@@ -166,11 +190,18 @@ public class Body implements Collidable, Transformable {
 		if (mass == null) {
 			throw new IllegalArgumentException("The mass cannot be null.");
 		}
+		this.shapes = shapes;
+		this.mass = mass;
+		this.initialize();
+	}
+	
+	/**
+	 * Initializes all fields not set in the constructor.
+	 */
+	private void initialize() {
 		this.id = UUID.randomUUID().toString();
 		this.transform = new Transform();
 		this.filter = Filter.DEFAULT_FILTER;
-		this.shapes = shapes;
-		this.mass = mass;
 		this.v = new Vector();
 		this.av = 0.0;
 		this.force = new Vector();
@@ -551,6 +582,22 @@ public class Body implements Collidable, Transformable {
 	 */
 	public void setFilter(Filter filter) {
 		this.filter = filter;
+	}
+	
+	/**
+	 * Returns the user data associated to this {@link Body}.
+	 * @return Object
+	 */
+	public Object getUserData() {
+		return userData;
+	}
+	
+	/**
+	 * Sets the user data associated to this {@link Body}.
+	 * @param userData the user data object
+	 */
+	public void setUserData(Object userData) {
+		this.userData = userData;
 	}
 	
 	/**

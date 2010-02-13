@@ -51,7 +51,8 @@ public class Island {
 	protected List<Joint> joints;
 	
 	/**
-	 * Default constructor
+	 * Full constructor.
+	 * @param sleepListener the sleep listener
 	 */
 	public Island() {
 		super();
