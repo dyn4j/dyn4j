@@ -76,25 +76,25 @@ public class World {
 	protected Bounds bounds;
 	
 	/** The {@link BroadphaseDetector} */
-	protected BroadphaseDetector bpd;
+	protected BroadphaseDetector broadphaseDetector;
 	
 	/** The {@link NarrowphaseDetector} */
-	protected NarrowphaseDetector npd;
+	protected NarrowphaseDetector narrowphaseDetector;
 	
 	/** The {@link ManifoldSolver} */
-	protected ManifoldSolver mfs;
+	protected ManifoldSolver manifoldSolver;
 
 	/** The {@link ContactManager} */
-	protected ContactManager cm;
+	protected ContactManager contactManager;
 
 	/** The {@link BoundsListener} */
-	protected BoundsListener bl;
+	protected BoundsListener boundsListener;
 	
 	/** The {@link DestructionListener} */
-	protected DestructionListener dl;
+	protected DestructionListener destructionListener;
 	
 	/** The {@link StepListener} */
-	protected StepListener sl;
+	protected StepListener stepListener;
 	
 	/** The {@link Body} list */
 	protected List<Body> bodies;
@@ -120,15 +120,14 @@ public class World {
 		this.step = new Step();
 		this.gravity = World.EARTH_GRAVITY;
 		this.bounds = bounds;
-		this.bpd = new Sap();
-		this.npd = new Gjk();
-		this.mfs = new ClippingManifoldSolver();
+		this.broadphaseDetector = new Sap();
+		this.narrowphaseDetector = new Gjk();
+		this.manifoldSolver = new ClippingManifoldSolver();
 		// create empty listeners
-		ContactListener col = new ContactAdapter();
-		this.cm = new ContactManager(col);
-		this.bl = new BoundsAdapter();
-		this.dl = new DestructionAdapter();
-		this.sl = new StepAdapter();
+		this.contactManager = new ContactManager(new ContactAdapter());
+		this.boundsListener = new BoundsAdapter();
+		this.destructionListener = new DestructionAdapter();
+		this.stepListener = new StepAdapter();
 		this.bodies = new ArrayList<Body>();
 		this.joints = new ArrayList<Joint>();
 		this.island = new Island();
@@ -180,11 +179,11 @@ public class World {
 	 */
 	protected void step() {
 		// notify the step listener
-		this.sl.step(this);
+		this.stepListener.step(this);
 		
 		// clear the old contact list (does NOT clear the contact map
 		// which is used to warm start)
-		this.cm.clear();
+		this.contactManager.clear();
 		
 		// get the number of bodies
 		int size = this.bodies.size();
@@ -201,7 +200,7 @@ public class World {
 				// set the body to frozen
 				b.freeze();
 				// if so, notify via the listener
-				this.bl.outside(b);
+				this.boundsListener.outside(b);
 			}
 			// clear all the old contacts
 			b.contacts.clear();
@@ -219,7 +218,7 @@ public class World {
 		}
 		
 		// test for collisions via the broad-phase
-		List<BroadphasePair<Body>> pairs = this.bpd.detect(this.bodies);
+		List<BroadphasePair<Body>> pairs = this.broadphaseDetector.detect(this.bodies);
 		int pSize = pairs.size();		
 		
 		// using the broad-phase results, test for narrow-phase
@@ -259,10 +258,10 @@ public class World {
 				for (int k = 0; k < b2Size; k++) {
 					Convex c2 = g2.get(k);
 					// test the two convex shapes
-					if (this.npd.detect(c1, t1, c2, t2, p)) {
+					if (this.narrowphaseDetector.detect(c1, t1, c2, t2, p)) {
 						// if there is penetration then find a contact manifold
 						// using the filled in penetration object
-						if (this.mfs.getManifold(p, c1, t1, c2, t2, m)) {
+						if (this.manifoldSolver.getManifold(p, c1, t1, c2, t2, m)) {
 							// get the manifold points
 							List<ManifoldPoint> points = m.getPoints();
 							// a valid manifold was found
@@ -291,11 +290,11 @@ public class World {
 								b1.contacts.add(ce1);
 								b2.contacts.add(ce2);
 								// add the contact constraint to the contact manager
-								this.cm.add(contactConstraint);
+								this.contactManager.add(contactConstraint);
 							} else {
 								// notify the contact manager's contact listener of the
 								// sensed contact points
-								ContactListener cl = cm.getContactListener();
+								ContactListener cl = contactManager.getContactListener();
 								for (int l = 0; l < mSize; l++) {
 									// get the manifold point
 									ManifoldPoint mp = points.get(l);
@@ -310,7 +309,7 @@ public class World {
 		}
 		
 		// warm start the contact constraints
-		this.cm.warm();
+		this.contactManager.warm();
 		
 		// perform a depth first search of the contact graph
 		// to create islands for constraint solving
@@ -394,7 +393,7 @@ public class World {
 		}
 		
 		// notify of the solved contacts
-		this.cm.solved();
+		this.contactManager.solved();
 	}
 	
 	/**
@@ -456,7 +455,7 @@ public class World {
 				}
 			}
 			// notify of the destroyed joint
-			this.dl.destroyed(joint);
+			this.destructionListener.destroyed(joint);
 		}
 		
 		// remove any contacts this body had with any other body
@@ -483,7 +482,7 @@ public class World {
 				}
 			}
 			// remove the contact constraint from the contact manager
-			this.cm.remove(cc);
+			this.contactManager.remove(cc);
 			// loop over the contact points
 			int size = cc.getContacts().length;
 			for (int i = 0; i < size; i++) {
@@ -492,7 +491,7 @@ public class World {
 				// create a contact point for notification
 				ContactPoint cp = new ContactPoint(c.getPoint(), cc.getNormal(), c.getDepth(), cc.getBody1(), cc.getConvex1(), cc.getBody2(), cc.getConvex2());
 				// call the destruction listener
-				this.dl.destroyed(cp);
+				this.destructionListener.destroyed(cp);
 			}
 		}
 	}
@@ -587,10 +586,10 @@ public class World {
 	
 	/**
 	 * Sets the gravity.
-	 * @param g the gravity in meters/second<sup>2</sup>
+	 * @param gravity the gravity in meters/second<sup>2</sup>
 	 */
-	public void setGravity(Vector g) {
-		this.gravity = g;
+	public void setGravity(Vector gravity) {
+		this.gravity = gravity;
 	}
 	
 	/**
@@ -619,10 +618,10 @@ public class World {
 	
 	/**
 	 * Sets the bounds listener.
-	 * @param bl the bounds listener
+	 * @param boundsListener the bounds listener
 	 */
-	public void setBoundsListener(BoundsListener bl) {
-		this.bl = bl;
+	public void setBoundsListener(BoundsListener boundsListener) {
+		this.boundsListener = boundsListener;
 	}
 	
 	/**
@@ -630,15 +629,15 @@ public class World {
 	 * @return {@link BoundsListener} the bounds listener
 	 */
 	public BoundsListener getBoundsListener() {
-		return this.bl;
+		return this.boundsListener;
 	}
 	
 	/**
 	 * Sets the {@link ContactListener}.
-	 * @param cl the contact listener
+	 * @param contactListener the contact listener
 	 */
-	public void setContactListener(ContactListener cl) {
-		this.cm.setContactListener(cl);
+	public void setContactListener(ContactListener contactListener) {
+		this.contactManager.setContactListener(contactListener);
 	}
 	
 	/**
@@ -646,15 +645,15 @@ public class World {
 	 * @return {@link ContactListener} the contact listener
 	 */
 	public ContactListener getContactListener() {
-		return this.cm.getContactListener();
+		return this.contactManager.getContactListener();
 	}
 	
 	/**
 	 * Sets the {@link DestructionListener}.
-	 * @param dl the {@link DestructionListener}
+	 * @param destructionListener the {@link DestructionListener}
 	 */
-	public void setDestructionListener(DestructionListener dl) {
-		this.dl = dl;
+	public void setDestructionListener(DestructionListener destructionListener) {
+		this.destructionListener = destructionListener;
 	}
 	
 	/**
@@ -662,15 +661,15 @@ public class World {
 	 * @return {@link DestructionListener} the destruction listener
 	 */
 	public DestructionListener getDestructionListener() {
-		return this.dl;
+		return this.destructionListener;
 	}
 	
 	/**
 	 * Sets the {@link StepListener}.
-	 * @param sl the {@link StepListener}
+	 * @param stepListener the {@link StepListener}
 	 */
-	public void setStepListener(StepListener sl) {
-		this.sl = sl;
+	public void setStepListener(StepListener stepListener) {
+		this.stepListener = stepListener;
 	}
 	
 	/**
@@ -678,15 +677,15 @@ public class World {
 	 * @return {@link StepListener}
 	 */
 	public StepListener getStepListener() {
-		return this.sl;
+		return this.stepListener;
 	}
 	
 	/**
 	 * Sets the broad-phase collision detection algorithm.
-	 * @param bpd the broad-phase collision detection algorithm
+	 * @param broadphaseDetector the broad-phase collision detection algorithm
 	 */
-	public void setBroadphaseDetector(BroadphaseDetector bpd) {
-		this.bpd = bpd;
+	public void setBroadphaseDetector(BroadphaseDetector broadphaseDetector) {
+		this.broadphaseDetector = broadphaseDetector;
 	}
 	
 	/**
@@ -694,15 +693,15 @@ public class World {
 	 * @return {@link BroadphaseDetector} the broad-phase collision detection algorithm
 	 */
 	public BroadphaseDetector getBroadphaseDetector() {
-		return this.bpd;
+		return this.broadphaseDetector;
 	}
 	
 	/**
 	 * Sets the narrow-phase collision detection algorithm.
-	 * @param npd the narrow-phase collision detection algorithm
+	 * @param narrowphaseDetector the narrow-phase collision detection algorithm
 	 */
-	public void setNarrowphaseDetector(NarrowphaseDetector npd) {
-		this.npd = npd;
+	public void setNarrowphaseDetector(NarrowphaseDetector narrowphaseDetector) {
+		this.narrowphaseDetector = narrowphaseDetector;
 	}
 	
 	/**
@@ -710,15 +709,15 @@ public class World {
 	 * @return {@link NarrowphaseDetector} the narrow-phase collision detection algorithm
 	 */
 	public NarrowphaseDetector getNarrowphaseDetector() {
-		return this.npd;
+		return this.narrowphaseDetector;
 	}
 	
 	/**
 	 * Sets the manifold solver.
-	 * @param mfs the manifold solver
+	 * @param manifoldSolver the manifold solver
 	 */
-	public void setManifoldSolver(ManifoldSolver mfs) {
-		this.mfs = mfs;
+	public void setManifoldSolver(ManifoldSolver manifoldSolver) {
+		this.manifoldSolver = manifoldSolver;
 	}
 	
 	/**
@@ -726,7 +725,7 @@ public class World {
 	 * @return {@link ManifoldSolver} the manifold solver
 	 */
 	public ManifoldSolver getManifoldSolver() {
-		return this.mfs;
+		return this.manifoldSolver;
 	}
 	
 	/**
