@@ -39,6 +39,13 @@ public interface Filter {
 			// always return true
 			return true;
 		}
+		
+		/* (non-Javadoc)
+		 * @see java.lang.Object#toString()
+		 */
+		public String toString() {
+			return "FILTER[default]";
+		}
 	};
 	
 	/**

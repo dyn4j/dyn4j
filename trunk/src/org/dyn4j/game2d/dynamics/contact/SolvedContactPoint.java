@@ -36,13 +36,13 @@ import org.dyn4j.game2d.geometry.Vector;
  */
 public class SolvedContactPoint extends ContactPoint {
 	/** The accumulated normal impulse */
-	public double normalImpulse;
+	protected double normalImpulse;
 	
 	/** The accumulated tangential impulse */
-	public double tangentialImpulse;
+	protected double tangentialImpulse;
 	
 	/** Whether the contact was a resting contact or not */
-	public boolean resting;
+	protected boolean resting;
 	
 	/** Default constructor */
 	public SolvedContactPoint() {}
@@ -67,6 +67,39 @@ public class SolvedContactPoint extends ContactPoint {
 		this.normalImpulse = normalImpulse;
 		this.tangentialImpulse = tangentialImpulse;
 		this.resting = resting;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("CONTACT_POINT[")
+		.append(this.point).append("|")
+		.append(this.normal).append("|")
+		.append(this.depth).append("|")
+		.append(this.normalImpulse).append("|")
+		.append(this.tangentialImpulse).append("|")
+		.append(this.resting).append("|")
+		.append(this.body1).append("|")
+		.append(this.body2).append("|")
+		.append(this.convex1).append("|")
+		.append(this.convex2).append("]");
+		return sb.toString();
+	}
+	
+	/**
+	 * Copy constructor.
+	 * <p>
+	 * This performs a shallow copy.
+	 * @param scp the {@link SolvedContactPoint} to copy
+	 */
+	public SolvedContactPoint(SolvedContactPoint scp) {
+		super(scp);
+		this.normalImpulse = scp.normalImpulse;
+		this.tangentialImpulse = scp.tangentialImpulse;
+		this.resting = scp.resting;
 	}
 	
 	/**

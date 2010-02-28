@@ -268,22 +268,8 @@ public class World {
 							int mSize = points.size();
 							// don't add sensor manifolds to the contact constraints list
 							if (!b1.isSensor() && !b2.isSensor()) {
-								// create contact array
-								Contact[] contacts = new Contact[mSize];
-								for (int l = 0; l < mSize; l++) {
-									// get the manifold point
-									ManifoldPoint point = points.get(l);
-									// create a contact from the manifold point
-									Contact contact = new Contact(
-											point.getPoint(),
-											point.getDepth(),
-											b1.getLocalPoint(point.getPoint()),
-											b2.getLocalPoint(point.getPoint()));
-									// add the contact to the array
-									contacts[l] = contact;
-								}
-								// create the contact constraint
-								ContactConstraint contactConstraint = new ContactConstraint(b1, c1, b2, c2, contacts, m.getNormal());
+								// create a contact constraint
+								ContactConstraint contactConstraint = new ContactConstraint(b1, c1, b2, c2, m);
 								// add a contact edge to both bodies
 								ContactEdge ce1 = new ContactEdge(b2, contactConstraint);
 								ContactEdge ce2 = new ContactEdge(b1, contactConstraint);
@@ -331,6 +317,8 @@ public class World {
 				island.add(b);
 				// flag that it has been added
 				b.setIsland(true);
+				// make sure the body is awake but dont reset the sleep time
+				b.state &= ~Body.ASLEEP;
 				// if its static then continue since we dont want the
 				// island to span more than one static object
 				// this keeps the size of the islands small

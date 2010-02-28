@@ -24,9 +24,9 @@
  */
 package org.dyn4j.game2d.dynamics;
 
-import org.junit.Test;
-
 import junit.framework.TestCase;
+
+import org.junit.Test;
 
 /**
  * Tests the methods of the {@link Settings} class.

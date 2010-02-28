@@ -52,7 +52,9 @@ public class JointEdge {
 	 */
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(this.joint).append("->").append(this.other);
+		sb.append("JOINT_EDGE[")
+		.append(this.joint).append("|")
+		.append(this.other).append("]");
 		return sb.toString();
 	}
 	

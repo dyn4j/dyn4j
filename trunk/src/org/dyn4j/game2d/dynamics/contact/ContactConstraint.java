@@ -24,6 +24,8 @@
  */
 package org.dyn4j.game2d.dynamics.contact;
 
+import org.dyn4j.game2d.collision.manifold.Manifold;
+import org.dyn4j.game2d.collision.manifold.ManifoldPoint;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.Island;
 import org.dyn4j.game2d.geometry.Convex;
@@ -68,16 +70,46 @@ public class ContactConstraint {
 	 * @param c1 the first {@link Body}'s {@link Convex} {@link Shape}
 	 * @param b2 the second {@link Body}
 	 * @param c2 the second {@link Body}'s {@link Convex} {@link Shape}
-	 * @param contacts the array of {@link Contact}s
-	 * @param normal the collision normal
+	 * @param m the contact manifold
 	 */
-	public ContactConstraint(Body b1, Convex c1, Body b2, Convex c2, Contact[] contacts, Vector normal) {
-		this.b1 = b1;
-		this.b2 = b2;
-		this.c1 = c1;
-		this.c2 = c2;
-		this.contacts = contacts;
-		this.normal = normal;
+	public ContactConstraint(Body b1, Convex c1, Body b2, Convex c2, Manifold m) {
+		// get the flip flag
+		boolean flip = m.flipped();
+		// set the body's
+		if (flip) {
+			// reverse the shape/body order
+			this.b1 = b2;
+			this.c1 = c2;
+			this.b2 = b1;
+			this.c2 = c1;
+		} else {
+			this.b1 = b1;
+			this.c1 = c1;
+			this.b2 = b2;
+			this.c2 = c2;
+		}
+		// get the manifold point size
+		int mSize = m.getPoints().size();
+		// create contact array
+		this.contacts = new Contact[mSize];
+		for (int l = 0; l < mSize; l++) {
+			// get the manifold point
+			ManifoldPoint point = m.getPoints().get(l);
+			// create a contact id for the point
+			ContactId id = new ContactId(m.getReferenceIndex(), 
+					                     m.getIncidentIndex(), 
+					                     point.getIndex(), 
+					                     m.flipped());
+			// create a contact from the manifold point
+			Contact contact = new Contact(id, point.getPoint(), 
+					                      point.getDepth(), 
+					                      this.b1.getLocalPoint(point.getPoint()), 
+					                      this.b2.getLocalPoint(point.getPoint()));
+			// add the contact to the array
+			this.contacts[l] = contact;
+		}
+		// set the normal
+		this.normal = m.getNormal();
 		// compute mu and e
 		this.mu = Math.sqrt(b1.getMu() * b2.getMu());
 		this.e = Math.max(b1.getE(), b2.getE());
@@ -92,18 +124,16 @@ public class ContactConstraint {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("CONTACT_CONSTRAINT[")
-		.append("BODY1[").append(b1).append("]")
-		.append("|SHAPE1[").append(c1).append("]")
-		.append("|BODY2[").append(b2).append("]")
-		.append("|SHAPE2[").append(c2).append("]")
-		.append("|NORMAL[").append(normal).append("]")
-		.append("|MU[").append(mu).append("]")
-		.append("|E[").append(e).append("]")
-		.append("|ISLAND[").append(island).append("]")
-		.append("|CONTACTS{");
+		.append(this.b1).append("|")
+		.append(this.c1).append("|")
+		.append(this.b2).append("|")
+		.append(this.c2).append("|")
+		.append(this.normal).append("|")
+		.append(this.mu).append("|")
+		.append(this.e).append("|")
+		.append(this.island).append("|{");
 		int size = contacts.length;
 		for (int i = 0; i < size; i++) {
-			if (i != 0) sb.append("|");
 			sb.append(contacts[i]);
 		}
 		sb.append("}]");

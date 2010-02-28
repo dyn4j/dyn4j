@@ -34,6 +34,8 @@ import org.codezealot.game.input.Keyboard;
 import org.codezealot.game.input.Mouse;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.World;
+import org.dyn4j.game2d.dynamics.contact.ContactPoint;
+import org.dyn4j.game2d.dynamics.contact.SolvedContactPoint;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Vector;
 
@@ -172,27 +174,73 @@ public abstract class Test {
 			Entity obj = (Entity) bodies.get(i);
 			obj.render(g, this.scale);
 		}
-
-		if (draw.drawContacts()) {
+		
+		// see if the user wanted any contact information drawn
+		if (draw.drawContacts() || draw.drawContactForces() 
+		 || draw.drawFrictionForces() || draw.drawContactPairs()) {
 			// get the contact counter
 			ContactCounter cc = (ContactCounter) this.world.getContactListener();
 			// get the contacts from the counter
-			List<Vector> contacts = cc.getContacts();
-			g.setColor(Color.ORANGE);
-			// render all the contact points
-			if (contacts != null && contacts.size() > 0) {
-				int cSize = contacts.size();
-				for (int i = 0; i < cSize; i++) {
-					Vector c = contacts.get(i);
+			List<ContactPoint> contacts = cc.getContacts();
+			
+			// loop over the contacts
+			int cSize = contacts.size();
+			for (int i = 0; i < cSize; i++) {
+				ContactPoint cp = contacts.get(i);
+				Vector c = cp.getPoint();
+				
+				// draw the contact pairs
+				if (draw.drawContactPairs()) {
+					// get the centers of the convex shapes
+					Vector c1 = cp.getBody1().getTransform().getTransformed(cp.getConvex1().getCenter());
+					Vector c2 = cp.getBody2().getTransform().getTransformed(cp.getConvex2().getCenter());
+					// draw a line between them
+					g.setColor(Color.YELLOW);
+					g.drawLine((int) Math.ceil(c1.x * scale),
+							   (int) Math.ceil(c1.y * scale), 
+							   (int) Math.ceil(c2.x * scale),
+							   (int) Math.ceil(c2.y * scale));
+				}
+				
+				// draw the contact
+				if (draw.drawContacts()) {
+					g.setColor(Color.ORANGE);
 					// draw the contact as a square
-					g.drawRect((int) Math.ceil((c.x - 0.05) * scale),
-							   (int) Math.ceil((c.y - 0.05) * scale), 
-							   (int) Math.ceil(0.10 * scale),
-							   (int) Math.ceil(0.10 * scale));
+					g.fillRect((int) Math.ceil((c.x - 0.025) * scale),
+							   (int) Math.ceil((c.y - 0.025) * scale), 
+							   (int) Math.ceil(0.05 * scale),
+							   (int) Math.ceil(0.05 * scale));
+				}
+				
+				// check if the contact is a solved contact
+				if (cp instanceof SolvedContactPoint) {
+					g.setColor(Color.BLUE);
+					SolvedContactPoint scp = (SolvedContactPoint) cp;
+					Vector n = scp.getNormal();
+					Vector t = n.cross(1.0);
+					double j = scp.getNormalImpulse();
+					double jt = scp.getTangentialImpulse();
+					
+					// draw the contact forces
+					if (draw.drawContactForces()) {
+						g.drawLine((int) Math.ceil(c.x * scale),
+								   (int) Math.ceil(c.y * scale), 
+								   (int) Math.ceil((c.x + n.x * j) * scale),
+								   (int) Math.ceil((c.y + n.y * j) * scale));
+					}
+					
+					// draw the friction forces
+					if (draw.drawFrictionForces()) {
+						g.drawLine((int) Math.ceil(c.x * scale),
+								   (int) Math.ceil(c.y * scale), 
+								   (int) Math.ceil((c.x + t.x * jt) * scale),
+								   (int) Math.ceil((c.y + t.y * jt) * scale));
+					}
 				}
 			}
 		}
 		
+		// draw the bounds
 		if (draw.drawBounds()) {
 			// draw the bounds
 			g.setColor(Color.CYAN);

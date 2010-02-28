@@ -36,10 +36,10 @@ import org.dyn4j.game2d.geometry.Vector;
  */
 public class Separation {
 	/** The normalized axis of separation */
-	protected Vector normal = null;
+	protected Vector normal;
 	
 	/** The separating distance along the axis */
-	protected double distance = 0;
+	protected double distance;
 	
 	/** The closest point on the first {@link Convex} {@link Shape} to the second */
 	protected Vector point1;
@@ -73,10 +73,10 @@ public class Separation {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("SEPARATION[")
-		.append(normal).append("|")
-		.append(distance).append("|")
-		.append(point1).append("|")
-		.append(point2).append("]");
+		.append(this.normal).append("|")
+		.append(this.distance).append("|")
+		.append(this.point1).append("|")
+		.append(this.point2).append("]");
 		return sb.toString();
 	}
 	

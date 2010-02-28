@@ -57,7 +57,7 @@ public class ContactCounter implements ContactListener, StepListener {
 	private int solved = 0;
 	
 	/** The current contact points */
-	private List<Vector> contacts = new ArrayList<Vector>();
+	private List<ContactPoint> contacts = new ArrayList<ContactPoint>();
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.dynamics.contact.ContactListener#sensed(org.dyn4j.game2d.dynamics.contact.ContactPoint)
@@ -65,7 +65,7 @@ public class ContactCounter implements ContactListener, StepListener {
 	@Override
 	public void sensed(ContactPoint p) {
 		this.sensed++;
-		this.contacts.add(p.getPoint().copy());
+		this.contacts.add(new ContactPoint(p));
 	}
 	
 	/* (non-Javadoc)
@@ -98,7 +98,7 @@ public class ContactCounter implements ContactListener, StepListener {
 	@Override
 	public void solved(SolvedContactPoint c) {
 		this.solved++;
-		this.contacts.add(c.getPoint().copy());
+		this.contacts.add(new SolvedContactPoint(c));
 	}
 	
 	/* (non-Javadoc)
@@ -153,7 +153,7 @@ public class ContactCounter implements ContactListener, StepListener {
 	 * Returns the list of contact points.
 	 * @return List&lt;{@link Vector}&gt;
 	 */
-	public List<Vector> getContacts() {
+	public List<ContactPoint> getContacts() {
 		return this.contacts;
 	}
 }

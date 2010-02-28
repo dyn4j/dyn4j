@@ -22,69 +22,73 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.game2d.dynamics;
-
-import org.dyn4j.game2d.geometry.Vector;
+package org.dyn4j.game2d.dynamics.contact;
 
 /**
- * Represents a torque; a {@link Force} applied at a point on a {@link Body}.
+ * Represents a contact ID.
+ * <p>
+ * This is used to match contacts when attempting to warm
+ * start the {@link ContactConstraintSolver}.
  * @author William Bittle
  */
-public class Torque extends Force {
-	/** The point where the {@link Force} is applied in world coordinates */
-	protected Vector point;
+public class ContactId {
+	/** The index of the reference edge */
+	protected int referenceIndex;
+	
+	/** The index of the incident edge */
+	protected int incidentIndex;
+	
+	/** The index of the manifold point */
+	protected int index;
+	
+	/** Whether the shape/body order was flipped */
+	protected boolean flip;
 	
 	/**
-	 * Creates a {@link Torque} using the force components 
-	 * and world point coordinates.
-	 * @param fx the x component of the force
-	 * @param fy the y component of the force
-	 * @param px the world space x coordinate of the application point
-	 * @param py the world space y coordinate of the application point
+	 * Default constructor.
 	 */
-	public Torque(double fx, double fy, double px, double py) {
-		super(fx, fy);
-		this.point = new Vector(px, py);
+	public ContactId() {}
+	
+	/**
+	 * Full constructor.
+	 * @param referenceIndex the referenced edge index
+	 * @param incidentIndex the incident edge index
+	 * @param index the manifold point index
+	 * @param flip if the shape/body order was flipped
+	 */
+	public ContactId(int referenceIndex, int incidentIndex, int index, boolean flip) {
+		this.referenceIndex = referenceIndex;
+		this.incidentIndex = incidentIndex;
+		this.index = index;
+		this.flip = flip;
 	}
 	
 	/**
-	 * Creates a {@link Torque} using the given force and world
-	 * space point.
-	 * @param force the force
-	 * @param point the world space application point
+	 * Returns true if the contacts are the same.
+	 * @param id the id
+	 * @return booolean
 	 */
-	public Torque(Vector force, Vector point) {
-		super(force);
-		this.point = point;
-	}
-	
-	/**
-	 * Copy constructor.
-	 * @param torque the {@link Torque} to copy
-	 */
-	public Torque(Torque torque) {
-		super(torque.force.copy());
-		this.point = torque.point.copy();
-	}
-	
-	/**
-	 * Applies this {@link Torque} to the given {@link Body}.
-	 * @param body the {@link Body} to apply the {@link Torque} to
-	 */
-	public void apply(Body body) {
-		super.apply(body);
-		body.torque += this.point.difference(body.getWorldCenter()).cross(this.force);
+	public boolean equals(ContactId id) {
+		if (id.referenceIndex == this.referenceIndex
+		 && id.incidentIndex == this.incidentIndex
+		 && id.index == this.index
+		 && id.flip == this.flip) {
+			return true;
+		}
+		return false;
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.dynamics.Force#toString()
+	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("TORQUE[")
-		.append(this.force).append("|")
-		.append(this.point).append("]");
+		sb.append("CONTACT_ID[")
+		.append(this.referenceIndex).append("|")
+		.append(this.incidentIndex).append("|")
+		.append(this.index).append("|")
+		.append(this.flip).append("]");
 		return sb.toString();
 	}
 }

@@ -40,7 +40,8 @@
  */
 package org.dyn4j.game2d.dynamics.contact;
 
-import org.dyn4j.game2d.dynamics.World;
+import org.dyn4j.game2d.collision.manifold.Manifold;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.Island;
-import org.dyn4j.game2d.collision.manifold.Manifold;
+import org.dyn4j.game2d.dynamics.World;
+

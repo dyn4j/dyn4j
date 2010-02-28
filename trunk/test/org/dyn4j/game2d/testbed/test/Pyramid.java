@@ -43,7 +43,7 @@ import org.dyn4j.game2d.testbed.Test;
  */
 public class Pyramid extends Test {
 	/** The height of the pyramid */
-	private static final int HEIGHT = 10;
+	private static final int HEIGHT = 15;
 	
 	/* (non-Javadoc)
 	 * @see test.Test#getDescription()
@@ -65,7 +65,8 @@ public class Pyramid extends Test {
 		this.home();
 
 		// set the bounds
-		this.bounds = new Rectangle(16.0, 15.0);
+		this.bounds = new Rectangle(16.0, 20.0);
+		this.bounds.translate(0.0, 7.0);
 		
 		// create the world
 		Bounds bounds = new RectangularBounds(this.bounds);
@@ -103,24 +104,25 @@ public class Pyramid extends Test {
 		Rectangle rect = new Rectangle(width, height);
 		List<Convex> geometry = new ArrayList<Convex>(1);
 		geometry.add(rect);
-		Mass mass = Mass.create(rect, 1.0);
+		Mass mass = Mass.create(rect, 5.0);
 		
 		// the current x position
 		double x = 0.0;
 		// the current y position
-		double y = 0.25;
+		double y = 0.26;
 		
 		// the spacing between the boxes
-		double spacing = 0.01;
+		double yspacing = 0.01;
+		double xspacing = 0.01;
 		
 		// loop to create the rows
 		for (int i = 0; i < HEIGHT; i++) {
 			// the number of boxes on this row
 			int num = HEIGHT - i;
 			// increment y
-			y += height + spacing;
+			y += height + yspacing;
 			// set x
-			x = -(num * (width + spacing)) / 2.0 + ((width + spacing) / 2.0);
+			x = -(num * (width + xspacing)) / 2.0 + ((width + xspacing) / 2.0);
 			// loop to create the bodies in the rows
 			for (int j = 0; j < num; j++) {
 				// create a body
@@ -130,7 +132,7 @@ public class Pyramid extends Test {
 				// add it to the world
 				this.world.add(e);
 				// increment x
-				x += (width + spacing);
+				x += (width + xspacing);
 			}
 		}
 	}
@@ -143,6 +145,6 @@ public class Pyramid extends Test {
 		// set the scale
 		this.scale = 64.0;
 		// move the camera a bit
-		this.offset.set(0.0, -2.0);
+		this.offset.set(0.0, -3.0);
 	}
 }

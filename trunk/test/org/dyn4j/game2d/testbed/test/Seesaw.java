@@ -126,7 +126,7 @@ public class Seesaw extends Test {
 		
 		// create a box on the left side
 		Entity lBox = new Entity(shapes, mass);
-		lBox.translate(-4.0, 2.0);
+		lBox.translate(-4.0, 2.5);
 		this.world.add(lBox);
 		
 		// create a box on the right side

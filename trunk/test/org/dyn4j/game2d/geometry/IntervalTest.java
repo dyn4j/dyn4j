@@ -24,9 +24,9 @@
  */
 package org.dyn4j.game2d.geometry;
 
-import org.junit.Test;
-
 import junit.framework.TestCase;
+
+import org.junit.Test;
 
 /**
  * Test case for the {@link Interval} class.

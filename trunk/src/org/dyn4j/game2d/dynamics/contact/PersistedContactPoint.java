@@ -70,6 +70,39 @@ public class PersistedContactPoint extends ContactPoint {
 	}
 	
 	/**
+	 * Copy constructor.
+	 * <p>
+	 * This performs a shallow copy.
+	 * @param pcp the {@link PersistedContactPoint} to copy
+	 */
+	public PersistedContactPoint(PersistedContactPoint pcp) {
+		super(pcp);
+		this.oldPoint = pcp.oldPoint;
+		this.oldNormal = pcp.oldNormal;
+		this.oldDepth = pcp.oldDepth;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("CONTACT_POINT[")
+		.append(this.point).append("|")
+		.append(this.normal).append("|")
+		.append(this.depth).append("|")
+		.append(this.oldPoint).append("|")
+		.append(this.oldNormal).append("|")
+		.append(this.oldDepth).append("|")
+		.append(this.body1).append("|")
+		.append(this.body2).append("|")
+		.append(this.convex1).append("|")
+		.append(this.convex2).append("]");
+		return sb.toString();
+	}
+	
+	/**
 	 * Returns the old contact point.
 	 * @return {@link Vector}
 	 */

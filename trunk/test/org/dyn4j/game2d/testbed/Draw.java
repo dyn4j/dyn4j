@@ -38,6 +38,15 @@ public class Draw {
 	/** Whether to draw contacts or not */
 	private boolean contacts = false;
 	
+	/** Whether to draw contact forces or not */
+	private boolean contactForces = false;
+	
+	/** Whether to draw contact pairs or not */
+	private boolean contactPairs = false;
+	
+	/** Whether to draw contact friction forces or not */
+	private boolean frictionForces = false;
+	
 	/** Whether to draw joints or not */
 	private boolean joints = true;
 	
@@ -110,6 +119,54 @@ public class Draw {
 	 */
 	public synchronized void setDrawContacts(boolean flag) {
 		this.contacts = flag;
+	}
+	
+	/**
+	 * Returns true if contact forces should be drawn.
+	 * @return boolean
+	 */
+	public boolean drawContactForces() {
+		return this.contactForces;
+	}
+	
+	/**
+	 * Returns true if contact pairs should be drawn.
+	 * @return boolean
+	 */
+	public boolean drawContactPairs() {
+		return contactPairs;
+	}
+
+	/**
+	 * Sets whether contact pairs should be drawn.
+	 * @param flag true if contact pairs should be drawn
+	 */
+	public void setDrawContactPairs(boolean flag) {
+		this.contactPairs = flag;
+	}
+
+	/**
+	 * Sets whether contact forces should be drawn.
+	 * @param flag true if contact forces should be drawn
+	 */
+	public synchronized void setDrawContactForces(boolean flag) {
+		this.contactForces = flag;
+	}
+	
+	/**
+	 * Returns true if friction forces should be drawn.
+	 * @return boolean
+	 */
+	public boolean drawFrictionForces() {
+		return this.frictionForces;
+	}
+	
+	/**
+	 * Sets whether friction forces should be drawn.
+	 * @param flag true if friction forces should be drawn
+	 */
+	public synchronized void setDrawFrictionForces(boolean flag) {
+		this.frictionForces = flag;
 	}
 	
 	/**

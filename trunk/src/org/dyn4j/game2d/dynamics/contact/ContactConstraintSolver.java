@@ -191,19 +191,9 @@ public class ContactConstraintSolver {
 	 */
 	public void setup(List<ContactConstraint> ccs) {
 		this.contactConstraints = ccs;
-	}
-	
-	/**
-	 * Performs intialization of velocity constraint solving.
-	 * @param hz the frequency of the solving steps; used to determine the bounce target velocity
-	 * @param step the current step object
-	 */
-	public void initializeConstraints(double hz, Step step) {
+		
 		// get the restitution velocity from the settings object
 		double restitutionVelocity = Settings.getInstance().getRestitutionVelocity();
-		
-		// pre divide for performance
-		double ratio = 1.0 / step.getDeltaTimeRatio();
 		
 		// loop through the contact constraints
 		int size = this.contactConstraints.size();
@@ -267,10 +257,6 @@ public class ContactConstraintSolver {
 				
 				// set the velocity bias
 				contact.vb = 0.0;
-				// if the objects are separated
-				if (contact.depth < 0.0) {
-					contact.vb = hz * contact.depth;
-				}
 				
 				// find the relative velocity
 				Vector lv1 = r1.cross(b1.getAv()).add(b1.getV());
@@ -284,7 +270,41 @@ public class ContactConstraintSolver {
 					// use the coefficient of elasticity
 					contact.vb += -contactConstraint.e * rvn; 
 				}
-
+			}
+		}
+	}
+	
+	/**
+	 * Performs intialization of velocity constraint solving.
+	 * @param step the current step object
+	 */
+	public void initializeConstraints(Step step) {
+		// pre divide for performance
+		double ratio = 1.0 / step.getDeltaTimeRatio();
+		
+		// we have to perform a separate loop to warm start
+		for (int i = 0; i < this.contactConstraints.size(); i++) {
+			ContactConstraint cc = this.contactConstraints.get(i);
+			
+			// get the bodies
+			Body b1 = cc.b1;
+			Body b2 = cc.b2;
+			// get the body masses
+			Mass m1 = b1.getMass();
+			Mass m2 = b2.getMass();
+			
+			double invM1 = m1.getInverseMass();
+			double invM2 = m2.getInverseMass();
+			double invI1 = m1.getInverseInertia();
+			double invI2 = m2.getInverseInertia();
+			
+			// get the penetration axis
+			Vector N = cc.normal;
+			// get the tangent vector
+			Vector T = N.cross(1.0);
+			
+			for (int j = 0; j < cc.getContacts().length; j++) {
+				Contact contact = cc.getContacts()[j];
 				// scale the accumulated impulses by the delta time ratio
 				contact.jn *= ratio;
 				contact.jt *= ratio;
@@ -293,9 +313,9 @@ public class ContactConstraintSolver {
 				Vector J = N.product(contact.jn);
 				J.add(T.product(contact.jt));
 				b1.getV().add(J.product(invM1));
-				b1.setAv(b1.getAv() + invI1 * r1.cross(J));
+				b1.setAv(b1.getAv() + invI1 * contact.r1.cross(J));
 				b2.getV().subtract(J.product(invM2));
-				b2.setAv(b2.getAv() - invI2 * r2.cross(J));
+				b2.setAv(b2.getAv() - invI2 * contact.r2.cross(J));
 			}
 		}
 	}
@@ -304,12 +324,6 @@ public class ContactConstraintSolver {
 	 * Solves the velocity constraints.
 	 */
 	public void solveVelocityContraints() {
-		// setup local variables
-		Vector dv1 = new Vector();
-		Vector dv2 = new Vector();
-		double dav1;
-		double dav2;
-		
 		// loop through the contact constraints
 		int size = this.contactConstraints.size();
 		for (int i = 0; i < size; i++) {
@@ -333,12 +347,6 @@ public class ContactConstraintSolver {
 			// get the penetration axis and tangent
 			Vector N = contactConstraint.normal;
 			Vector T = N.cross(1.0);
-
-			// reset the local variables
-			dv1.zero();
-			dv2.zero();
-			dav1 = 0.0;
-			dav2 = 0.0;
 
 			// loop through the contact points
 			for (int k = 0; k < cSize; k++) {
@@ -365,17 +373,11 @@ public class ContactConstraintSolver {
 				
 				// only update the bodies after processing all the contacts
 				Vector J = N.product(j);
-				dv1.add(J.product(invM1));
-				dav1 += invI1 * r1.cross(J);
-				dv2.subtract(J.product(invM2));
-				dav2 -= invI2 * r2.cross(J);
+				b1.getV().add(J.product(invM1));
+				b1.setAv(b1.getAv() + invI1 * r1.cross(J));
+				b2.getV().subtract(J.product(invM2));
+				b2.setAv(b2.getAv() - invI2 * r2.cross(J));
 			}
-			
-			// apply to the bodies
-			b1.getV().add(dv1);
-			b1.setAv(b1.getAv() + dav1);
-			b2.getV().add(dv2);
-			b2.setAv(b2.getAv() + dav2);
 			
 			// evaluate friction impulse
 			// since this requires the jn to be computed we must loop through

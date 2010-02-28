@@ -62,6 +62,8 @@ package org.dyn4j.game2d.dynamics;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.BoundsListener;
-import org.dyn4j.game2d.dynamics.contact.ContactListener;
 import org.dyn4j.game2d.dynamics.contact.ContactConstraint;
+import org.dyn4j.game2d.dynamics.contact.ContactListener;
 import org.dyn4j.game2d.geometry.Shape;
+
+

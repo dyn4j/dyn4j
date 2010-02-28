@@ -102,11 +102,10 @@ public class MinkowskiSum {
 		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
-			sb.append("MINKOWSKI-POINT[")
+			sb.append("MINKOWSKI_POINT[")
 			.append(p1).append("|")
 			.append(p2).append("|")
-			.append(p)
-			.append("]");
+			.append(p).append("]");
 			return sb.toString();
 		}
 	}
@@ -131,10 +130,9 @@ public class MinkowskiSum {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("MINKOWSKI-SUM[(")
-		.append(c1).append("|").append(t1).append(")|(")
-		.append(c2).append("|").append(t2).append(")")
-		.append("]");
+		sb.append("MINKOWSKI_SUM[")
+		.append(c1).append("|").append(t1).append("|")
+		.append(c2).append("|").append(t2).append("]");
 		return sb.toString();
 	}
 	

@@ -75,6 +75,18 @@ public class CategoryFilter implements Filter {
 		return true;
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("CATEGORY_FILTER[")
+		.append(this.category).append("|")
+		.append(this.mask).append("]");
+		return sb.toString();
+	}
+	
 	/**
 	 * Returns the category bits.
 	 * @return int the category bits

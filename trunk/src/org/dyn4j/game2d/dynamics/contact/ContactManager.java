@@ -175,7 +175,7 @@ public class ContactManager {
 						Contact o = occ.contacts[k];
 						// only warm start if the distance between the contacts is
 						// within the warm start distance
-						if (n.p.distanceSquared(o.p) <= warmStartDistance) {
+						if (n.id.equals(o.id) && n.p.distanceSquared(o.p) <= warmStartDistance) {
 							// warm start by setting the new contact constraint
 							// accumulated impulses to the old contact constraint
 							n.jn = o.jn;

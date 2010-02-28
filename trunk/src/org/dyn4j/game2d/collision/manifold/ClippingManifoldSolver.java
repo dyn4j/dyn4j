@@ -51,6 +51,8 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 			m.points.clear();
 		}
 		
+		m.flip = false;
+		
 		// get the penetration normal
 		Vector n = p.getNormal();
 		
@@ -58,69 +60,64 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 		Vector center1 = t1.getTransformed(c1.getCenter());
 		Vector center2 = t2.getTransformed(c2.getCenter());
         
-		// make sure the axis is pointing from object2 to object1
+		Convex refConvex, incConvex;
+		Transform refTransform, incTransform;
+		
+		// get the direction of object1 to object2
 		Vector cToc = center1.to(center2);
+		// which direction is the normal in?
 		if (cToc.dot(n) > 0) {
-			n.negate();
+			refConvex = c1;
+			refTransform = t1;
+			incConvex = c2;
+			incTransform = t2;
+		} else {
+			// then the normal must be pointing from object2 to object1
+			refConvex = c2;
+			refTransform = t2;
+			incConvex = c1;
+			incTransform = t1;
+			m.flip = true;
 		}
         
-		// get the farthest feature on convex1
-		Feature f1 = c1.getFarthestFeature(n.getNegative(), t1);
-		// check for vertex feature
-		if (f1.isVertex()) {
-			// if its a vertex feature we can immediately exit with the vertex as
-			// the one collision point
-			ManifoldPoint mp = new ManifoldPoint(f1.max, p.getDepth());
+		// get the reference edge
+		Feature refFeature = refConvex.getFarthestFeature(n, refTransform);
+		// check for vertex
+		if (refFeature.isVertex()) {
+			ManifoldPoint mp = new ManifoldPoint(refFeature.max, p.getDepth(), 0);
 			m.points.add(mp);
-			m.normal = n;
+			m.normal = n.negate();
 			return true;
 		}
-		// get the farthest feature on convex2
-		Feature f2 = c2.getFarthestFeature(n, t2);
-		// check for vertex feature
-		if (f2.isVertex()) {
-			// if its a vertex feature we can immediately exit with the vertex as
-			// the one collision point
-			ManifoldPoint mp = new ManifoldPoint(f2.max, p.getDepth());
-			m.points.add(mp);
-			m.normal = n;
-			return true;
-		}
-		// otherwise we have edge-edge and we need to perform a clipping method
-		// to obtain the correct collision points
 		
-		// choose the reference/incident edge
-		Feature ref = null;
-		Feature inc = null;
-		// create edge1 and edge2
-		Vector e1 = f1.edge[0].to(f1.edge[1]);
-		Vector e2 = f2.edge[0].to(f2.edge[1]);
-		boolean flip = false;
-		// which edge is more perpendicular to the normal?
-		if (Math.abs(e1.dot(n)) < Math.abs(e2.dot(n))) {
-			ref = f1;
-			inc = f2;
-		} else {
-			ref = f2;
-			inc = f1;
-			// set flip to true since the opposing edge's normal
-			// is more perpendicular to the collision normal
-			flip = true;
+		// get the incident edge
+		Feature incFeature = incConvex.getFarthestFeature(n.getNegative(), incTransform);
+		// check for vertex
+		if (incFeature.isVertex()) {
+			ManifoldPoint mp = new ManifoldPoint(incFeature.max, p.getDepth(), 0);
+			m.points.add(mp);
+			m.normal = n.negate();
+			return true;
 		}
-		// get the vector that represents the reference edge
-		Vector rEdge = ref.edge[0].to(ref.edge[1]);
-		rEdge.normalize();
-		// find the offsets of the reference edge end points along the reference edge
-		double offset1 = -rEdge.dot(ref.edge[0]);
-		double offset2 = rEdge.dot(ref.edge[1]);
+		
+		// create the reference edge vector
+		Vector refEdge = refFeature.edge[0].to(refFeature.edge[1]);
+		// normalize it
+		refEdge.normalize();
+		
+		// compute the offestes of the reference edge points along the reference edge
+		double offset1 = -refEdge.dot(refFeature.edge[0]);
+		double offset2 = refEdge.dot(refFeature.edge[1]);
+		
 		// clip the incident edge by the reference edge's left edge
-		List<Vector> clip1 = this.clip(inc.edge[0], inc.edge[1], rEdge.getNegative(), offset1);
+		List<Vector> clip1 = this.clip(incFeature.edge[0], incFeature.edge[1], refEdge.getNegative(), offset1);
 		// check the number of points
 		if (clip1.size() < 2) {
 			return false;
 		}
+		
 		// clip the clip1 edge by the reference edge's right edge
-		List<Vector> clip2 = this.clip(clip1.get(0), clip1.get(1), rEdge, offset2);
+		List<Vector> clip2 = this.clip(clip1.get(0), clip1.get(1), refEdge, offset2);
 		// check the number of points
 		if (clip2.size() < 2) {
 			return false;
@@ -128,16 +125,22 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 		
 		// we need to change the normal to the reference edge's normal
 		// since they may not have been the same
-		Vector frontNormal = rEdge.cross(1.0);
-		double frontOffset = frontNormal.dot(ref.max);
-		// negate the normal if shape 2's edge was more perpendicular
-		m.normal = flip ? frontNormal.getNegative() : frontNormal;
+		Vector frontNormal = refEdge.cross(1.0);
+		double frontOffset = frontNormal.dot(refFeature.max);
+		
+		// negate the normal if n was pointing from object2 to object1
+		m.normal = m.flip ? frontNormal.getNegative() : frontNormal;
+		
+		// set the feature indices
+		m.referenceIndex = refFeature.index;
+		m.incidentIndex = incFeature.index;
 		
 		// test if the clip points are behind the reference edge
-		for (Vector point : clip2) {
+		for (int i = 0; i < clip2.size(); i++) {
+			Vector point = clip2.get(i);
 			double depth = frontNormal.dot(point) - frontOffset;
 			if (depth >= 0.0) {
-				ManifoldPoint mp = new ManifoldPoint(point, depth);
+				ManifoldPoint mp = new ManifoldPoint(point, depth, 0);
 				m.points.add(mp);
 			}
 		}
