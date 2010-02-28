@@ -32,6 +32,9 @@ import org.dyn4j.game2d.geometry.Vector;
  * @author William Bittle
  */
 public class Contact {
+	/** The contact id for warm starting */
+	protected ContactId id = null;
+	
 	/** The contact point in world space */
 	protected Vector p = null;
 	
@@ -73,12 +76,14 @@ public class Contact {
 	
 	/**
 	 * Full constructor.
+	 * @param id the contact id used for warm starting
 	 * @param point the world space collision point
 	 * @param depth the penetration depth of this point
 	 * @param p1 the collision point in {@link Body}1's local space
 	 * @param p2 the collision point in {@link Body}2's local space
 	 */
-	public Contact(Vector point, double depth, Vector p1, Vector p2) {
+	public Contact(ContactId id, Vector point, double depth, Vector p1, Vector p2) {
+		this.id = id;
 		this.p = point;
 		this.depth = depth;
 		this.p1 = p1;
@@ -92,20 +97,20 @@ public class Contact {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("CONTACT[")
-		.append("POINT[").append(p).append("]")
-		.append("|").append("POINT1[").append(p1).append("]")
-		.append("|").append("POINT2[").append(p2).append("]")
-		.append("|").append("DEPTH[").append(depth).append("]")
-		.append("|").append("R1[").append(r1).append("]")
-		.append("|").append("R2[").append(r2).append("]")
-		.append("|").append("NORMAL_IMPULSE[").append(jn).append("]")
-		.append("|").append("TANGENTIAL_IMPULSE[").append(jt).append("]")
-		.append("|").append("POSITION_IMPULSE[").append(jp).append("]")
-		.append("|").append("NORMAL_MASS[").append(massN).append("]")
-		.append("|").append("TANGENTIAL_MASS[").append(massT).append("]")
-		.append("|").append("EQUALIZED_MASS[").append(massE).append("]")
-		.append("|").append("VELOCITY_BIAS[").append(vb).append("]")
-		.append("]");
+		.append(this.id).append("|")
+		.append(this.p).append("|")
+		.append(this.p1).append("|")
+		.append(this.p2).append("|")
+		.append(this.depth).append("|")
+		.append(this.r1).append("|")
+		.append(this.r2).append("|")
+		.append(this.jn).append("|")
+		.append(this.jt).append("|")
+		.append(this.jp).append("|")
+		.append(this.massN).append("|")
+		.append(this.massT).append("|")
+		.append(this.massE).append("|")
+		.append(this.vb).append("]");
 		return sb.toString();
 	}
 	

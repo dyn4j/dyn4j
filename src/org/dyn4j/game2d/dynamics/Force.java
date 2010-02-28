@@ -66,4 +66,14 @@ public class Force {
 	public void apply(Body body) {
 		body.force.add(this.force);
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("FORCE[").append(this.force).append("]");
+		return sb.toString();
+	}
 }

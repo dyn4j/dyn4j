@@ -44,6 +44,15 @@ public class Manifold {
 	/** The penetration normal */
 	protected Vector normal;
 	
+	/** The reference edge index */
+	protected int referenceIndex;
+	
+	/** The incident edge index */
+	protected int incidentIndex;
+	
+	/** Whether the shape/body order must be reversed */
+	protected boolean flip;
+	
 	/**
 	 * Default constructor.
 	 */
@@ -55,10 +64,16 @@ public class Manifold {
 	 * Full constructor.
 	 * @param points the manifold points
 	 * @param normal the manifold normal
+	 * @param referenceIndex the reference edge index
+	 * @param incidentIndex the incident edge index
+	 * @param flip whether the shape/body order must be reversed
 	 */
-	public Manifold(List<ManifoldPoint> points, Vector normal) {
+	public Manifold(List<ManifoldPoint> points, Vector normal, int referenceIndex, int incidentIndex, boolean flip) {
 		this.points = points;
 		this.normal = normal;
+		this.referenceIndex = referenceIndex;
+		this.incidentIndex = incidentIndex;
+		this.flip = flip;
 	}
 	
 	/* (non-Javadoc)
@@ -67,12 +82,15 @@ public class Manifold {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("MANIFOLD[").append(normal);
+		sb.append("MANIFOLD[").append("{");
 		int size = points.size();
 		for (int i = 0; i < size; i++) {
-			sb.append("|").append(points.get(i));
+			sb.append(this.points.get(i));
 		}
-		sb.append("]");
+		sb.append("}|").append(this.normal).append("|")
+		.append(this.referenceIndex).append("|")
+		.append(this.incidentIndex).append("|")
+		.append(this.flip).append("]");
 		return sb.toString();
 	}
 	
@@ -81,7 +99,7 @@ public class Manifold {
 	 * @return List&lt;{@link ManifoldPoint}&gt;
 	 */
 	public List<ManifoldPoint> getPoints() {
-		return points;
+		return this.points;
 	}
 	
 	/**
@@ -89,6 +107,30 @@ public class Manifold {
 	 * @return {@link Vector}
 	 */
 	public Vector getNormal() {
-		return normal;
+		return this.normal;
+	}
+	
+	/**
+	 * Returns the incident index.
+	 * @return int
+	 */
+	public int getIncidentIndex() {
+		return this.incidentIndex;
+	}
+	
+	/**
+	 * Returns the reference index.
+	 * @return int
+	 */
+	public int getReferenceIndex() {
+		return this.referenceIndex;
+	}
+	
+	/**
+	 * Returns true if the shape/body order must be reversed
+	 * @return boolean
+	 */
+	public boolean flipped() {
+		return this.flip;
 	}
 }

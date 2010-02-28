@@ -37,6 +37,9 @@ public class ManifoldPoint {
 	/** The penetration depth */
 	protected double depth;
 	
+	/** The index of the point in the manifold; could be 1 even though this is the only point */
+	protected int index;
+	
 	/**
 	 * Default constructor.
 	 */
@@ -46,10 +49,12 @@ public class ManifoldPoint {
 	 * Full constructor.
 	 * @param point the manifold point in world coordinates
 	 * @param depth the penetration depth
+	 * @param index the index of the manifold point
 	 */
-	public ManifoldPoint(Vector point, double depth) {
+	public ManifoldPoint(Vector point, double depth, int index) {
 		this.point = point;
 		this.depth = depth;
+		this.index = index;
 	}
 	
 	/* (non-Javadoc)
@@ -58,7 +63,10 @@ public class ManifoldPoint {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("MANIFOLD_POINT[").append(point).append("|").append(depth).append("]");
+		sb.append("MANIFOLD_POINT[")
+		.append(this.point).append("|")
+		.append(this.depth).append("|")
+		.append(this.index).append("]");
 		return sb.toString();
 	}
 	
@@ -67,7 +75,7 @@ public class ManifoldPoint {
 	 * @return {@link Vector} the point in world coordinates
 	 */
 	public Vector getPoint() {
-		return point;
+		return this.point;
 	}
 	
 	/**
@@ -75,6 +83,14 @@ public class ManifoldPoint {
 	 * @return double
 	 */
 	public double getDepth() {
-		return depth;
+		return this.depth;
+	}
+	
+	/**
+	 * Returns the index of the manifold point.
+	 * @return int
+	 */
+	public int getIndex() {
+		return this.index;
 	}
 }

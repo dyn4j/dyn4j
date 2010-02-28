@@ -56,7 +56,7 @@ public class Settings {
 	public static final int DEFAULT_SI_SOLVER_ITERATIONS = 10;
 
 	/** The default warm starting distance; in meters<sup>2</sup> */
-	public static final double DEFAULT_WARM_START_DISTANCE = 1.0e-3;
+	public static final double DEFAULT_WARM_START_DISTANCE = 1.0e-2;
 	
 	/** The default restitution velocity; in meters/second */
 	public static final double DEFAULT_RESTITUTION_VELOCITY = 1.0;
@@ -68,7 +68,7 @@ public class Settings {
 	public static final double DEFAULT_MAX_LINEAR_CORRECTION = 0.2;
 	
 	/** The default baumgarte */
-	public static final double DEFAULT_BAUMGARTE = 0.20;
+	public static final double DEFAULT_BAUMGARTE = 0.2;
 
 	/** The step frequency of the dynamics engine */
 	private double stepFequency = Settings.DEFAULT_STEP_FREQUENCY;

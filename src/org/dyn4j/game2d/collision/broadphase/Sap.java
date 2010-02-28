@@ -86,10 +86,10 @@ public class Sap extends AbstractAABBDetector implements BroadphaseDetector {
 	 */
 	protected class Projection implements Comparable<Projection> {
 		/** The interval of the projection */
-		protected Interval interval = null;
+		protected Interval interval;
 		
 		/** The object id */
-		protected int id = 0;
+		protected int id;
 		
 		/* (non-Javadoc)
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)

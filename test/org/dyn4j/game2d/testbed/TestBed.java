@@ -723,7 +723,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		}
 
 		// convert the nanosecond elapsed time to elapsed time in seconds
-		double dt = elapsedTime / 1000000000.0;
+		double dt = (double)elapsedTime / 1.0e9;
 		// update the test
 		this.test.update(this.isPaused(), this.stepMode, dt);
 

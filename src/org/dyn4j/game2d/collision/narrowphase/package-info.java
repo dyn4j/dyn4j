@@ -48,5 +48,6 @@
  */
 package org.dyn4j.game2d.collision.narrowphase;
 
-import org.dyn4j.game2d.geometry.Shape;
 import org.dyn4j.game2d.geometry.Convex;
+import org.dyn4j.game2d.geometry.Shape;
+

@@ -62,7 +62,9 @@ public class Penetration {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("PENETRATION[").append(normal).append("|").append(depth).append("]");
+		sb.append("PENETRATION[")
+		.append(this.normal).append("|")
+		.append(this.depth).append("]");
 		return sb.toString();
 	}
 	
@@ -71,7 +73,7 @@ public class Penetration {
 	 * @return {@link Vector}
 	 */
 	public Vector getNormal() {
-		return normal;
+		return this.normal;
 	}
 	
 	/**
@@ -79,6 +81,6 @@ public class Penetration {
 	 * @return double
 	 */
 	public double getDepth() {
-		return depth;
+		return this.depth;
 	}
 }

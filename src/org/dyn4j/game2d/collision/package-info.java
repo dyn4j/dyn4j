@@ -62,15 +62,17 @@
  */
 package org.dyn4j.game2d.collision;
 
-import org.dyn4j.game2d.geometry.Convex;
-import org.dyn4j.game2d.geometry.Shape;
 import org.dyn4j.game2d.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.game2d.collision.broadphase.BroadphasePair;
 import org.dyn4j.game2d.collision.broadphase.Sap;
+import org.dyn4j.game2d.collision.manifold.ClippingManifoldSolver;
+import org.dyn4j.game2d.collision.manifold.Manifold;
+import org.dyn4j.game2d.collision.manifold.ManifoldSolver;
 import org.dyn4j.game2d.collision.narrowphase.Gjk;
 import org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector;
-import org.dyn4j.game2d.collision.narrowphase.Sat;
 import org.dyn4j.game2d.collision.narrowphase.Penetration;
-import org.dyn4j.game2d.collision.manifold.ManifoldSolver;
-import org.dyn4j.game2d.collision.manifold.Manifold;
-import org.dyn4j.game2d.collision.manifold.ClippingManifoldSolver;;
+import org.dyn4j.game2d.collision.narrowphase.Sat;
+import org.dyn4j.game2d.geometry.Convex;
+import org.dyn4j.game2d.geometry.Shape;
+
+;

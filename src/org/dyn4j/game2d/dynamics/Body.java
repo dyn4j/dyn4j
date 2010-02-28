@@ -227,24 +227,33 @@ public class Body implements Collidable, Transformable {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("BODY[").append(id).append("|SHAPES{");
+		sb.append("BODY[").append(id).append("|{");
 		// append all the shapes
 		int size = this.shapes.size();
 		for (int i = 0; i < size; i++) {
-			if (i != 0) sb.append("|");
-			sb.append(shapes.get(i));
+			sb.append(this.shapes.get(i));
 		}
-		sb.append("}|").append("TRANSFORM[").append(transform).append("]")
-		.append("|").append(mass).append("|VELOCITY[").append(v).append("]")
-		.append("|").append("ANGULAR_VELOCITY[").append(av).append("]")
-		.append("|").append("FORCE[").append(force).append("]")
-		.append("|").append("TORQUE[").append(torque).append("]")
-		.append("|").append("MU[").append(mu).append("]")
-		.append("|").append("E[").append(e).append("]")
-		.append("|").append("STATE[").append(state).append("]")
-		.append("|").append("LINEAR_DAMPING[").append(linearDamping).append("]")
-		.append("|").append("ANGULAR_DAMPING[").append(angularDamping).append("]")
-		.append("|").append("SLEEP_TIME[").append(sleepTime).append("]");
+		sb.append("}|").append(this.transform).append("]")
+		.append("|").append(this.mass)
+		.append("|").append(this.v)
+		.append("|").append(this.av)
+		.append("|").append(this.force)
+		.append("|").append(this.torque)
+		.append("|{");
+		for (Force f : this.forces) {
+			sb.append(f);
+		}
+		sb.append("}|{");
+		for (Torque t : this.torques) {
+			sb.append(t);
+		}
+		sb.append("}|").append(this.mu)
+		.append("|").append(this.e)
+		.append("|").append(this.state)
+		.append("|").append(this.linearDamping)
+		.append("|").append(this.angularDamping)
+		.append("|").append(this.sleepTime)
+		.append("|").append(this.filter);
 		sb.append("]");
 		return sb.toString();
 	}
@@ -328,9 +337,9 @@ public class Body implements Collidable, Transformable {
 			}
 			// wake the body up
 			this.awaken();
+			// remove the forces from the accumulator
+			this.forces.clear();
 		}
-		// remove the forces from the accumulator
-		this.forces.clear();
 		// set the current torque to zero
 		this.torque = 0.0;
 		// get the number of torques
@@ -344,9 +353,9 @@ public class Body implements Collidable, Transformable {
 			}
 			// wake the body up
 			this.awaken();
+			// remove the torques from the accumulator
+			this.torques.clear();
 		}
-		// remove the torques from the accumulator
-		this.torques.clear();
 	}
 	
 	/**
@@ -414,6 +423,8 @@ public class Body implements Collidable, Transformable {
 			this.av = 0.0;
 			this.clearForce();
 			this.clearTorque();
+			this.forces.clear();
+			this.torques.clear();
 		}
 	}
 	

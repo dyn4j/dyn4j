@@ -52,7 +52,9 @@ public class ContactEdge {
 	 */
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(this.contactConstraint).append("->").append(this.other);
+		sb.append("CONTACT_EDGE[")
+		.append(this.contactConstraint).append("|")
+		.append(this.other).append("]");
 		return sb.toString();
 	}
 	

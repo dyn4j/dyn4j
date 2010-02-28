@@ -80,6 +80,40 @@ public class ContactPoint {
 	}
 	
 	/**
+	 * Copy constructor.
+	 * <p>
+	 * This performs a shallow copy.
+	 * @param cp the {@link ContactPoint} to copy
+	 */
+	public ContactPoint(ContactPoint cp) {
+		// shallow copy all the fields
+		this.point = cp.point;
+		this.normal = cp.normal;
+		this.depth = cp.depth;
+		this.body1 = cp.body1;
+		this.body2 = cp.body2;
+		this.convex1 = cp.convex1;
+		this.convex2 = cp.convex2;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("CONTACT_POINT[")
+		.append(this.point).append("|")
+		.append(this.normal).append("|")
+		.append(this.depth).append("|")
+		.append(this.body1).append("|")
+		.append(this.body2).append("|")
+		.append(this.convex1).append("|")
+		.append(this.convex2).append("]");
+		return sb.toString();
+	}
+	
+	/**
 	 * Returns the contact point.
 	 * @return {@link Vector}
 	 */

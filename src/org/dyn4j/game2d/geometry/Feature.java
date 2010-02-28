@@ -53,6 +53,10 @@ public class Feature {
 	/** The edge of maximum perp to a {@link Vector} that contains the vertex of maximum projection along that same {@link Vector} */
 	public Vector[] edge;
 	
+	/** The edge index */
+	public int index;
+	// TODO add to the toString method
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -61,7 +65,7 @@ public class Feature {
 		StringBuilder sb = new StringBuilder();
 		sb.append(type).append("[");
 		if (type == Type.EDGE) {
-			sb.append(edge[0]).append("->").append(edge[1]).append("|").append(max);
+			sb.append("{").append(edge[0]).append(edge[1]).append("}").append("|").append(max);
 		} else {
 			sb.append(max);
 		}

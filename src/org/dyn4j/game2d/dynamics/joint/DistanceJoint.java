@@ -87,8 +87,16 @@ public class DistanceJoint extends Joint {
 	 */
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(this.localAnchor1)
-		.append("|").append(this.localAnchor2);
+		sb.append("DISTANCE_JOINT[")
+		.append(super.toString()).append("|")
+		.append(this.localAnchor1).append("|")
+		.append(this.localAnchor2).append("|")
+		.append(this.distance).append("|")
+		.append(this.mass).append("|")
+		.append(this.n).append("|")
+		.append(this.bias).append("|")
+		.append(this.gamma).append("|")
+		.append(this.j).append("]");
 		return sb.toString();
 	}
 	

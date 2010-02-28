@@ -285,9 +285,11 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		if (left.to(feature.max).dot(n) < right.to(feature.max).dot(n)) {
 			feature.edge[0] = feature.max;
 			feature.edge[1] = left;
+			feature.index = index;
 		} else {
 			feature.edge[0] = right;
 			feature.edge[1] = feature.max;
+			feature.index = index - 1;
 		}
 		// return the feature
 		return feature;

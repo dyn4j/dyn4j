@@ -52,7 +52,6 @@ public class Island {
 	
 	/**
 	 * Full constructor.
-	 * @param sleepListener the sleep listener
 	 */
 	public Island() {
 		super();
@@ -104,7 +103,6 @@ public class Island {
 	public void solve(Vector gravity, Step step) {
 		// get the settings
 		Settings settings = Settings.getInstance();
-		double hz = settings.getStepFrequency();
 		double maxVelocity = settings.getMaxVelocity();
 		double maxAngularVelocity = settings.getMaxAngularVelocity();
 		int siSolverIterations = settings.getSiSolverIterations();
@@ -125,7 +123,8 @@ public class Island {
 			// integrate force and torque to modify the velocity and
 			// angular velocity (sympletic euler)
 			// v1 = v0 + (f / m) + g) * dt
-			b.v.add(b.force.product(b.mass.invM).add(gravity).multiply(step.dt));
+			b.v.x += (b.force.x * b.mass.invM + gravity.x) * step.dt;
+			b.v.y += (b.force.y * b.mass.invM + gravity.y) * step.dt;
 			// av1 = av0 + (t / I) * dt
 			b.av += step.dt * b.mass.invI * b.torque;
 			// apply damping
@@ -141,7 +140,12 @@ public class Island {
 				b.v.multiply(maxVelocity);
 			}
 			if (b.av * b.av > maxAngularVelocity * maxAngularVelocity) {
-				b.av = maxAngularVelocity;
+				// check if the angular velocity is in the negative direction
+				if (b.av < 0) {
+					b.av = -maxAngularVelocity;
+				} else {
+					b.av = maxAngularVelocity;
+				}
 			}
 		}
 		
@@ -149,7 +153,7 @@ public class Island {
 		this.solver.setup(ccs);
 		
 		// initialize the constraints
-		this.solver.initializeConstraints(hz, step);
+		this.solver.initializeConstraints(step);
 		
 		// initialize joint constraints
 		for (int i = 0; i < jSize; i++) {

@@ -295,7 +295,7 @@ public class ControlPanel extends JFrame {
 		// create a container for the tests selection tab
 		JPanel pnlDraw = this.createDrawingOptionsPanel();
 		// create the tab from the panel
-		tabs.addTab(" Draw Options / Color Key ", null, pnlDraw, "Select drawing options.");
+		tabs.addTab(" Drawing Options ", null, pnlDraw, "Select drawing options.");
 
 		JPanel pnlSettings = this.createSimulationSettingsPanel();
 		// create a tab from the panel
@@ -559,10 +559,67 @@ public class ControlPanel extends JFrame {
 				1, 2, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
+		// draw contact forces
+		JLabel lblContactForces = new JLabel("Contact Forces");
+		pnlDraw.add(lblContactForces, new GridBagConstraints(
+				0, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JCheckBox chkContactForces = new JCheckBox();
+		chkContactForces.setSelected(draw.drawContactForces());
+		chkContactForces.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// toggle the checkbox
+				Draw draw = Draw.getInstance();
+				draw.setDrawContactForces(!draw.drawContactForces());
+			}
+		});
+		pnlDraw.add(chkContactForces, new GridBagConstraints(
+				1, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		
+		// draw contact pairs
+		JLabel lblContactPairs = new JLabel("Contact Pairs");
+		pnlDraw.add(lblContactPairs, new GridBagConstraints(
+				0, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JCheckBox chkContactPairs = new JCheckBox();
+		chkContactPairs.setSelected(draw.drawContactPairs());
+		chkContactPairs.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// toggle the checkbox
+				Draw draw = Draw.getInstance();
+				draw.setDrawContactPairs(!draw.drawContactPairs());
+			}
+		});
+		pnlDraw.add(chkContactPairs, new GridBagConstraints(
+				1, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		
+		// draw friction forces
+		JLabel lblFrictionForces = new JLabel("Friction Forces");
+		pnlDraw.add(lblFrictionForces, new GridBagConstraints(
+				0, 5, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JCheckBox chkFrictionForces = new JCheckBox();
+		chkFrictionForces.setSelected(draw.drawFrictionForces());
+		chkFrictionForces.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// toggle the checkbox
+				Draw draw = Draw.getInstance();
+				draw.setDrawFrictionForces(!draw.drawFrictionForces());
+			}
+		});
+		pnlDraw.add(chkFrictionForces, new GridBagConstraints(
+				1, 5, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		
 		// draw joints
 		JLabel lblJoints = new JLabel("Joints");
 		pnlDraw.add(lblJoints, new GridBagConstraints(
-				0, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				0, 6, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkJoints = new JCheckBox();
 		chkJoints.setSelected(draw.drawJoints());
@@ -575,13 +632,13 @@ public class ControlPanel extends JFrame {
 			}
 		});
 		pnlDraw.add(chkJoints, new GridBagConstraints(
-				1, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				1, 6, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// draw world bounds
 		JLabel lblBounds = new JLabel("World Bounds");
 		pnlDraw.add(lblBounds, new GridBagConstraints(
-				0, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				0, 7, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkBounds = new JCheckBox();
 		chkBounds.setSelected(draw.drawBounds());
@@ -594,13 +651,13 @@ public class ControlPanel extends JFrame {
 			}
 		});
 		pnlDraw.add(chkBounds, new GridBagConstraints(
-				1, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				1, 7, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// draw text
 		JLabel lblText = new JLabel("Text");
 		pnlDraw.add(lblText, new GridBagConstraints(
-				0, 5, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				0, 8, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkText = new JCheckBox();
 		chkText.setSelected(draw.drawText());
@@ -613,13 +670,13 @@ public class ControlPanel extends JFrame {
 			}
 		});
 		pnlDraw.add(chkText, new GridBagConstraints(
-				1, 5, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				1, 8, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 
 		// fill shapes?
 		JLabel lblFill = new JLabel("Shape Fill");
 		pnlDraw.add(lblFill, new GridBagConstraints(
-				0, 6, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				0, 9, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkFill = new JCheckBox();
 		chkFill.setSelected(draw.drawFill());
@@ -632,13 +689,13 @@ public class ControlPanel extends JFrame {
 			}
 		});
 		pnlDraw.add(chkFill, new GridBagConstraints(
-				1, 6, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				1, 9, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// draw outlines?
 		JLabel lblOutline = new JLabel("Shape Outlines");
 		pnlDraw.add(lblOutline, new GridBagConstraints(
-				0, 7, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
+				0, 10, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkOutline = new JCheckBox();
 		chkOutline.setSelected(draw.drawOutline());
@@ -651,7 +708,7 @@ public class ControlPanel extends JFrame {
 			}
 		});
 		pnlDraw.add(chkOutline, new GridBagConstraints(
-				1, 7, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, 
+				1, 10, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		panel.add(pnlDraw);
@@ -1017,12 +1074,12 @@ public class ControlPanel extends JFrame {
 		
 		// baumgarte
 		JLabel lblBaum = new JLabel("Baumgarte", this.helpIcon, JLabel.LEFT);
-		lblBaum.setToolTipText("Specifies a setting used in position solving.");
+		lblBaum.setToolTipText("Specifies the rate at which the position constraints are solved.");
 		pnlConstraint.add(lblBaum, new GridBagConstraints(
 				0, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		JSpinner spnBaum = new JSpinner(new SpinnerNumberModel(settings.getBaumgarte(), 0.0, 2.0, 0.05));
+		JSpinner spnBaum = new JSpinner(new SpinnerNumberModel(settings.getBaumgarte(), 0.0, 1.0, 0.05));
 		spnBaum.setEditor(new JSpinner.NumberEditor(spnBaum, "0.00"));
 		spnBaum.addChangeListener(new ChangeListener() {
 			@Override
