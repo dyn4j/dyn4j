@@ -26,9 +26,12 @@ package org.dyn4j.game2d.testbed.test;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.util.ArrayList;
+import java.awt.event.KeyEvent;
 import java.util.List;
 
+import org.codezealot.game.input.Input;
+import org.codezealot.game.input.Keyboard;
+import org.codezealot.game.input.Mouse;
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.collision.manifold.ClippingManifoldSolver;
@@ -40,8 +43,12 @@ import org.dyn4j.game2d.collision.narrowphase.Sat;
 import org.dyn4j.game2d.collision.narrowphase.Separation;
 import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.dynamics.World;
+import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Convex;
+import org.dyn4j.game2d.geometry.Geometry;
+import org.dyn4j.game2d.geometry.Polygon;
 import org.dyn4j.game2d.geometry.Rectangle;
+import org.dyn4j.game2d.geometry.Segment;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Triangle;
 import org.dyn4j.game2d.geometry.Vector;
@@ -60,7 +67,19 @@ public class Plotter extends Test {
 	/** The second entity */
 	private Entity e2 = null;
 	
-	/** The radius of the points */
+	/** The list of entities for the first object */
+	private Entity[] e1List = new Entity[5];
+	
+	/** The list of entities for the second object */
+	private Entity[] e2List = new Entity[5];
+	
+	/** The first entity's current shape */
+	private int e1Shape = 0;
+	
+	/** The second entity's current shape */
+	private int e2Shape = 0;
+	
+	/** The render radius of the points */
 	private static final double r = 0.01;
 	
 	/* (non-Javadoc)
@@ -106,88 +125,42 @@ public class Plotter extends Test {
 	 */
 	@Override
 	protected void setup() {
-		//////////////////////////////////////
-		// create the bodies
-		//////////////////////////////////////
+		// create the circle bodies
+		Circle c1 = new Circle(1.0);
+		Circle c2 = new Circle(0.5);
+		this.e1List[0] = new Entity(c1, Mass.create(c1.getCenter()), 128);
+		this.e2List[0] = new Entity(c2, Mass.create(c2.getCenter()), 128);
 		
-		List<Convex> shapes = null;
-		Mass mass = null;
+		// create the polygon bodies
+		Polygon p1 = Geometry.getUnitCirclePolygon(5, 0.5);
+		Polygon p2 = Geometry.getUnitCirclePolygon(8, 1.0);
+		this.e1List[1] = new Entity(p1, Mass.create(p1.getCenter()), 128);
+		this.e2List[1] = new Entity(p2, Mass.create(p2.getCenter()), 128);
 		
-//		Circle c = new Circle(1.0);
-//		shapes = new ArrayList<Convex>(1);
-//		shapes.add(c);
-//		mass = Mass.create(c.getCenter());
-//		e2 = new Entity(shapes, mass);
-//		e2.translate(-1.0, 0.0);
-//		this.world.add(e2);
+		// create the rectangle bodies
+		Rectangle r1 = new Rectangle(0.5, 0.5);
+		Rectangle r2 = new Rectangle(1.0, 1.0);
+		this.e1List[2] = new Entity(r1, Mass.create(r1.getCenter()), 128);
+		this.e2List[2] = new Entity(r2, Mass.create(r2.getCenter()), 128);
 		
-		Triangle t = new Triangle(
-				new Vector(0.45, -0.12),
-				new Vector(-0.45, 0.38),
-				new Vector(-0.15, -0.22));
-		shapes = new ArrayList<Convex>(1);
-		shapes.add(t);
-		mass = Mass.create(t.getCenter());
-		e2 = new Entity(shapes, mass, 128);
-		e2.translate(0.0, 0.5);
-		this.world.add(e2);
+		// create the segment bodies
+		Segment s1 = new Segment(new Vector(-0.3, 0.2), new Vector(0.0, -0.1));
+		Segment s2 = new Segment(new Vector(-0.3, -0.3), new Vector(0.2, 0.3));
+		this.e1List[3] = new Entity(s1, Mass.create(s1.getCenter()), 128);
+		this.e2List[3] = new Entity(s2, Mass.create(s2.getCenter()), 128);
 		
-		Triangle t2 = new Triangle(
-				new Vector(1.29, 0.25),
-				new Vector(-0.71, 0.65),
-				new Vector(-0.59, -0.85));
-		shapes = new ArrayList<Convex>(1);
-		shapes.add(t2);
-		mass = Mass.create(t2.getCenter());
-		e1 = new Entity(shapes, mass, 128);
-//		e1.translate(0.15, 0.2);
-		this.world.add(e1);
+		// create the triangle bodies
+		Triangle t1 = new Triangle(new Vector(0.45, -0.12), new Vector(-0.45, 0.38), new Vector(-0.15, -0.22));
+		Triangle t2 = new Triangle(new Vector(1.29, 0.25), new Vector(-0.71, 0.65), new Vector(-0.59, -0.85));
+		this.e1List[4] = new Entity(t1, Mass.create(t1.getCenter()), 128);
+		this.e2List[4] = new Entity(t2, Mass.create(t2.getCenter()), 128);
 		
-//		Polygon p1 = Geometry.getUnitCirclePolygon(5, 1.0);
-//		shapes = new ArrayList<Convex>(1);
-//		shapes.add(p1);
-//		mass = Mass.create(p1.getCenter());
-//		e1 = new Entity(shapes, mass);
-//		e1.translate(-0.3, 0.0);
-//		this.world.add(e1);
+		// default to the first two
+		this.e1 = this.e1List[0];
+		this.e2 = this.e2List[0];
 		
-//		Polygon p2 = Geometry.getUnitCirclePolygon(6, 0.5);
-//		shapes = new ArrayList<Convex>(1);
-//		shapes.add(p2);
-//		mass = Mass.create(p2.getCenter());
-//		e2 = new Entity(shapes, mass);
-//		e2.translate(0.0, 0.0);
-//		this.world.add(e2);
-		
-//		Rectangle r1 = new Rectangle(0.5, 0.5);
-//		shapes = new ArrayList<Convex>(1);
-//		shapes.add(r1);
-//		mass = Mass.create(r1.getCenter());
-//		e1 = new Entity(shapes, mass);
-//		this.world.add(e1);
-		
-//		Rectangle r = new Rectangle(1.0, 1.0);
-//		shapes = new ArrayList<Convex>(1);
-//		shapes.add(r);
-//		mass = Mass.create(r.getCenter());
-//		e2 = new Entity(shapes, mass);
-//		this.world.add(e2);
-		
-//		Segment s = new Segment(new Vector(-0.3, 0.2), new Vector(0.0, -0.1));
-//		shapes = new ArrayList<Convex>(1);
-//		shapes.add(s);
-//		mass = Mass.create(s.getCenter());
-//		e1 = new Entity(shapes, mass);
-//		e1.translate(0.0, 0.0);
-//		this.world.add(e1);
-		
-//		Segment s2 = new Segment(new Vector(-0.3, -0.3), new Vector(0.2, 0.3));
-//		shapes = new ArrayList<Convex>(1);
-//		shapes.add(s2);
-//		mass = Mass.create(s2.getCenter());
-//		e2 = new Entity(shapes, mass);
-//		e2.translate(0.0, 0.0);
-//		this.world.add(e2);
+		this.world.add(this.e1);
+		this.world.add(this.e2);
 	}
 	
 	/* (non-Javadoc)
@@ -426,6 +399,73 @@ public class Plotter extends Test {
 				// draw the minor ticks
 				g.drawLine(xmi, mio, xmi, -mio);
 			}
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.testbed.Test#getControls()
+	 */
+	@Override
+	public String[][] getControls() {
+		return new String[][] {
+				{"1", "Cycle the shape type for the first body."},
+				{"2", "Cycle the shape type for the second body."}
+				};
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.testbed.Test#initializeInput(org.codezealot.game.input.Keyboard, org.codezealot.game.input.Mouse)
+	 */
+	@Override
+	public void initializeInput(Keyboard keyboard, Mouse mouse) {
+		super.initializeInput(keyboard, mouse);
+		
+		// setup the 1 and 2 keys
+		keyboard.add(new Input(KeyEvent.VK_1, Input.Hold.NO_HOLD));
+		keyboard.add(new Input(KeyEvent.VK_2, Input.Hold.NO_HOLD));
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.testbed.Test#poll(org.codezealot.game.input.Keyboard, org.codezealot.game.input.Mouse)
+	 */
+	@Override
+	public void poll(Keyboard keyboard, Mouse mouse) {
+		super.poll(keyboard, mouse);
+		
+		// look for the 1 key
+		if (keyboard.isPressed(KeyEvent.VK_1)) {
+			// save the current entity
+			Entity te = this.e1;
+			// increment the current shape
+			this.e1Shape = this.e1Shape == 4 ? 0 : this.e1Shape + 1;
+			// remove the current body from the world
+			this.world.remove(this.e1);
+			// set the new shape
+			this.e1 = this.e1List[this.e1Shape];
+			// find the difference in the centers
+			Vector tx = te.getWorldCenter().difference(this.e1.getWorldCenter());
+			// translate the shape to that position
+			this.e1.translate(tx);
+			// add it to the world
+			this.world.add(this.e1);
+		}
+		
+		// look for the 2 key
+		if (keyboard.isPressed(KeyEvent.VK_2)) {
+			// save the current entity
+			Entity te = this.e2;
+			// increment the current shape
+			this.e2Shape = this.e2Shape == 4 ? 0 : this.e2Shape + 1;
+			// remove the current body from the world
+			this.world.remove(this.e2);
+			// set the new shape
+			this.e2 = this.e2List[this.e2Shape];
+			// find the difference in the centers
+			Vector tx = te.getWorldCenter().difference(this.e2.getWorldCenter());
+			// translate the shape to that position
+			this.e2.translate(tx);
+			// add it to the world
+			this.world.add(this.e2);
 		}
 	}
 	

@@ -90,6 +90,30 @@ public class Entity extends Body {
 	/** The random fill color */
 	private Color color = null;
 	
+	/** The alpha value */
+	private int alpha = 0;
+	
+	/**
+	 * Optional constructor.
+	 * @param shape the shape of the body
+	 * @param mass the mass of the body/shape
+	 */
+	public Entity(Convex shape, Mass mass) {
+		this(shape, mass, 255);
+	}
+	
+	/**
+	 * Full constructor.
+	 * @param shape the shape of the body
+	 * @param mass the mass of the body/shape
+	 * @param alpha the alpha value used for the colors
+	 */
+	public Entity(Convex shape, Mass mass, int alpha) {
+		super(shape, mass);
+		this.alpha = alpha;
+		this.initialize();
+	}
+	
 	/**
 	 * Optional constructor.
 	 * @param shapes the list of shapes
@@ -107,15 +131,23 @@ public class Entity extends Body {
 	 */
 	public Entity(List<Convex> shapes, Mass mass, int alpha) {
 		super(shapes, mass);
-		int offset = Entity.COLOR_BRIGHTNESS - (255 - alpha) / 2;
+		this.alpha = alpha;
+		this.initialize();
+	}
+	
+	/**
+	 * Initializes the entity.
+	 */
+	private void initialize() {
+		int offset = Entity.COLOR_BRIGHTNESS - (255 - this.alpha) / 2;
 		int range = 255 - offset;
 		// create a random (pastel) fill color
 		this.color = new Color((int)(Math.random() * (range) + offset),
 							   (int)(Math.random() * (range) + offset),
 							   (int)(Math.random() * (range) + offset),
-							   alpha);
+							   this.alpha);
 	}
-
+	
 	/**
 	 * Renders the body to the given graphics object using the given
 	 * world to device/screen space transform.
@@ -162,10 +194,10 @@ public class Entity extends Body {
 			// draw the center of mass
 			graphics.setColor(Color.GREEN);
 			graphics.drawOval(
-					(int) Math.ceil((wCenter.x - 0.125) * scale),
-					(int) Math.ceil((wCenter.y - 0.125) * scale),
-					(int) Math.ceil(0.25 * scale),
-					(int) Math.ceil(0.25 * scale));
+					(int) Math.ceil((wCenter.x - 0.0625) * scale),
+					(int) Math.ceil((wCenter.y - 0.0625) * scale),
+					(int) Math.ceil(0.125 * scale),
+					(int) Math.ceil(0.125 * scale));
 		}
 		
 		if (draw.drawVelocityVectors()) {

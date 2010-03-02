@@ -26,6 +26,7 @@ package org.dyn4j.game2d.testbed;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -303,6 +304,9 @@ public class ControlPanel extends JFrame {
 
 		// add the tabs to the frame
 		this.add(tabs, BorderLayout.CENTER);
+		
+		// set the preferred width
+		this.setPreferredSize(new Dimension(450, 580));
 		
 		// pack the layout
 		this.pack();
