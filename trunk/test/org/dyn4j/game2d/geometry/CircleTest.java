@@ -116,22 +116,22 @@ public class CircleTest {
 		Transform t = new Transform();
 		Vector y = new Vector(0.0, -1.0);
 		
-		Feature f = c.getFarthestFeature(y, t);
+		Feature.Vertex f = c.getFarthestFeature(y, t);
 		TestCase.assertTrue(f.isVertex());
-		TestCase.assertEquals( 0.000, f.max.x, 1.0e-3);
-		TestCase.assertEquals(-1.500, f.max.y, 1.0e-3);
+		TestCase.assertEquals( 0.000, f.point.x, 1.0e-3);
+		TestCase.assertEquals(-1.500, f.point.y, 1.0e-3);
 		
 		Vector p = c.getFarthestPoint(y, t);
-		TestCase.assertEquals( 0.000, f.max.x, 1.0e-3);
-		TestCase.assertEquals(-1.500, f.max.y, 1.0e-3);
+		TestCase.assertEquals( 0.000, p.x, 1.0e-3);
+		TestCase.assertEquals(-1.500, p.y, 1.0e-3);
 		
 		// move the circle a bit
 		t.translate(0.0, -0.5);
 		
 		f = c.getFarthestFeature(y.getNegative(), t);
 		TestCase.assertTrue(f.isVertex());
-		TestCase.assertEquals(0.000, f.max.x, 1.0e-3);
-		TestCase.assertEquals(1.000, f.max.y, 1.0e-3);
+		TestCase.assertEquals(0.000, f.point.x, 1.0e-3);
+		TestCase.assertEquals(1.000, f.point.y, 1.0e-3);
 		
 		p = c.getFarthestPoint(y.getNegative(), t);
 		TestCase.assertEquals(0.000, p.x, 1.0e-3);

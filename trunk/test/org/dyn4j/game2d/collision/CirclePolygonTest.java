@@ -192,7 +192,7 @@ public class CirclePolygonTest extends AbstractTest {
 		TestCase.assertTrue(this.sat.detect(poly, t2, circ, t1));
 		n = p.getNormal();
 		TestCase.assertEquals(0.0, n.x, 1.0e-10);
-		TestCase.assertEquals(-1.0, n.y, 1.0e-10);
+		TestCase.assertEquals(1.0, n.y, 1.0e-10);
 		TestCase.assertEquals(1.433, p.getDepth(), 1.0e-3);
 		
 		// test overlap
@@ -207,7 +207,7 @@ public class CirclePolygonTest extends AbstractTest {
 		TestCase.assertTrue(this.sat.detect(poly, t2, circ, t1, p));
 		TestCase.assertTrue(this.sat.detect(poly, t2, circ, t1));
 		n = p.getNormal();
-		TestCase.assertEquals(1.0, n.x, 1.0e-10);
+		TestCase.assertEquals(-1.0, n.x, 1.0e-10);
 		TestCase.assertEquals(0.0, n.y, 1.0e-10);
 		TestCase.assertEquals(0.5, p.getDepth());
 		

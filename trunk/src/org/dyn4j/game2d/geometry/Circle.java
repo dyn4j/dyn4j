@@ -94,19 +94,20 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 		return new Interval(c - this.radius, c + this.radius);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.geometry.Convex#getFarthestFeature(org.dyn4j.game2d.geometry.Vector, org.dyn4j.game2d.geometry.Transform)
+	/**
+	 * Returns the feature farthest in the given direction.
+	 * <p>
+	 * For a {@link Circle} this is always a point.
+	 * @param n the direction
+	 * @param transform the local to world space {@link Transform} of this {@link Convex} {@link Shape}
+	 * @return {@link Feature.Vertex}
 	 */
 	@Override
-	public Feature getFarthestFeature(Vector n, Transform transform) {
+	public Feature.Vertex getFarthestFeature(Vector n, Transform transform) {
+		// obtain the farthest point along the given vector
+		Vector farthest = this.getFarthestPoint(n, transform);
 		// for a circle the farthest feature along a vector will always be a vertex
-		Feature feature = new Feature();
-		// get the farthest point
-		feature.max = this.getFarthestPoint(n, transform);
-		// set the type to vertex
-		feature.type = Feature.Type.VERTEX;
-		// return the feature
-		return feature;
+		return new Feature.Vertex(farthest);
 	}
 	
 	/* (non-Javadoc)

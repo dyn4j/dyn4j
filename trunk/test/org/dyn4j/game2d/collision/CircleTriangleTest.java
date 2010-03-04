@@ -193,8 +193,8 @@ public class CircleTriangleTest extends AbstractTest {
 		TestCase.assertTrue(this.sat.detect(tri, t2, circ, t1, p));
 		TestCase.assertTrue(this.sat.detect(tri, t2, circ, t1));
 		n = p.getNormal();
-		TestCase.assertEquals(0.780, n.x, 1.0e-3);
-		TestCase.assertEquals(-0.624, n.y, 1.0e-3);
+		TestCase.assertEquals(-0.780, n.x, 1.0e-3);
+		TestCase.assertEquals(0.624, n.y, 1.0e-3);
 		TestCase.assertEquals(0.921, p.getDepth(), 1.0e-3);
 		
 		// test overlap
@@ -209,8 +209,8 @@ public class CircleTriangleTest extends AbstractTest {
 		TestCase.assertTrue(this.sat.detect(tri, t2, circ, t1, p));
 		TestCase.assertTrue(this.sat.detect(tri, t2, circ, t1));
 		n = p.getNormal();
-		TestCase.assertEquals(0.813, n.x, 1.0e-3);
-		TestCase.assertEquals(-0.581, n.y, 1.0e-3);
+		TestCase.assertEquals(-0.813, n.x, 1.0e-3);
+		TestCase.assertEquals(0.581, n.y, 1.0e-3);
 		TestCase.assertEquals(0.139, p.getDepth(), 1.0e-3);
 		
 		// test AABB overlap

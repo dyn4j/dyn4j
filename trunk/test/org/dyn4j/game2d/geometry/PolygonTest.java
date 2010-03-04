@@ -182,15 +182,15 @@ public class PolygonTest {
 		Transform t = new Transform();
 		Vector y = new Vector(0.0, -1.0);
 		
-		Feature f = p.getFarthestFeature(y, t);
+		Feature.Edge f = p.getFarthestFeature(y, t);
 		// should always get an edge
 		TestCase.assertTrue(f.isEdge());
 		TestCase.assertEquals(-1.000, f.max.x, 1.0e-3);
 		TestCase.assertEquals(-1.000, f.max.y, 1.0e-3);
-		TestCase.assertEquals(-1.000, f.edge[0].x, 1.0e-3);
-		TestCase.assertEquals(-1.000, f.edge[0].y, 1.0e-3);
-		TestCase.assertEquals( 1.000, f.edge[1].x, 1.0e-3);
-		TestCase.assertEquals(-1.000, f.edge[1].y, 1.0e-3);
+		TestCase.assertEquals(-1.000, f.vertices[0].x, 1.0e-3);
+		TestCase.assertEquals(-1.000, f.vertices[0].y, 1.0e-3);
+		TestCase.assertEquals( 1.000, f.vertices[1].x, 1.0e-3);
+		TestCase.assertEquals(-1.000, f.vertices[1].y, 1.0e-3);
 		
 		Vector pt = p.getFarthestPoint(y, t);
 		
