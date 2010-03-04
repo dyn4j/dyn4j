@@ -206,8 +206,8 @@ public class CircleRectangleTest extends AbstractTest {
 		TestCase.assertTrue(this.sat.detect(rect, t2, circ, t1, p));
 		TestCase.assertTrue(this.sat.detect(rect, t2, circ, t1));
 		n = p.getNormal();
-		TestCase.assertEquals(1.0, n.x);
-		TestCase.assertEquals(0.0, n.y);
+		TestCase.assertEquals(-1.0, n.x);
+		TestCase.assertEquals(0.0, Math.abs(n.y));
 		TestCase.assertEquals(0.5, p.getDepth());
 		
 		// test AABB overlap

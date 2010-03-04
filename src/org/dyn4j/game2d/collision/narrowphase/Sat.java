@@ -164,6 +164,15 @@ public class Sat extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 			}
 		}
 		
+		// make sure the vector is pointing from shape1 to shape2
+		Vector c1 = t1.getTransformed(s1.getCenter());
+		Vector c2 = t2.getTransformed(s2.getCenter());
+		Vector cToc = c1.to(c2);
+		if (cToc.dot(n) < 0) {
+			// negate the normal if its not
+			n.negate();
+		}
+		
 		// fill the penetration object
 		p.normal = n;
 		p.depth = overlap;

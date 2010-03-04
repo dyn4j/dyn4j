@@ -284,15 +284,18 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.geometry.Convex#getFurthestFeature(org.dyn4j.game2d.geometry.Vector, org.dyn4j.game2d.geometry.Transform)
+	/**
+	 * Returns the feature farthest in the direction of n.
+	 * <p>
+	 * For a {@link Segment} it's always the {@link Segment} itself.
+	 * @param n the direction
+	 * @param transform the local to world space {@link Transform} of this {@link Convex} {@link Shape}
+	 * @return {@link Feature}
 	 */
 	@Override
-	public Feature getFarthestFeature(Vector n, Transform transform) {
+	public Feature.Edge getFarthestFeature(Vector n, Transform transform) {
 		// the furthest feature for a line is always the line itself
-		Feature feature = new Feature();
-		feature.type = Feature.Type.EDGE;
-		feature.edge = new Vector[2];
+		Vector max = null;
 		// get the vertices and the center
 		Vector p1 = transform.getTransformed(this.vertices[0]);
 		Vector p2 = transform.getTransformed(this.vertices[1]);
@@ -305,20 +308,17 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 		double dot2 = n.dot(v2);
 		// find the greatest projection
 		if (dot1 >= dot2) {
-			feature.max = p1;
+			max = p1;
 		} else {
-			feature.max = p2;
+			max = p2;
 		}
 		// return the points of the segment in the
 		// opposite direction as the other shape
 		if (p1.to(p2).right().dot(n) > 0) {
-			feature.edge[0] = p2;
-			feature.edge[1] = p1;
+			return new Feature.Edge(new Vector[] {p2, p1}, max);
 		} else {
-			feature.edge[0] = p1;
-			feature.edge[1] = p2;
+			return new Feature.Edge(new Vector[] {p1, p2}, max);
 		}
-		return feature;
 	}
 	
 	/* (non-Javadoc)

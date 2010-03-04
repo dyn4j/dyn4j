@@ -186,8 +186,8 @@ public class SegmentTriangleTest extends AbstractTest {
 		TestCase.assertTrue(this.sat.detect(seg, t1, tri, t2, p));
 		TestCase.assertTrue(this.sat.detect(seg, t1, tri, t2));
 		n = p.getNormal();
-		TestCase.assertEquals(-0.894, n.x, 1.0e-3);
-		TestCase.assertEquals(-0.447, n.y, 1.0e-3);
+		TestCase.assertEquals(0.894, n.x, 1.0e-3);
+		TestCase.assertEquals(0.447, n.y, 1.0e-3);
 		TestCase.assertEquals(0.187, p.getDepth(), 1.0e-3);
 		// try reversing the shapes
 		TestCase.assertTrue(this.sat.detect(tri, t2, seg, t1, p));
@@ -202,8 +202,8 @@ public class SegmentTriangleTest extends AbstractTest {
 		TestCase.assertTrue(this.sat.detect(seg, t1, tri, t2, p));
 		TestCase.assertTrue(this.sat.detect(seg, t1, tri, t2));
 		n = p.getNormal();
-		TestCase.assertEquals(-0.894, n.x, 1.0e-3);
-		TestCase.assertEquals(-0.447, n.y, 1.0e-3);
+		TestCase.assertEquals(0.894, n.x, 1.0e-3);
+		TestCase.assertEquals(0.447, n.y, 1.0e-3);
 		TestCase.assertEquals(0.053, p.getDepth(), 1.0e-3);
 		// try reversing the shapes
 		TestCase.assertTrue(this.sat.detect(tri, t2, seg, t1, p));
@@ -403,17 +403,17 @@ public class SegmentTriangleTest extends AbstractTest {
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
 		p1 = mp.getPoint();
-		TestCase.assertEquals(0.000, p1.x, 1.0e-3);
-		TestCase.assertEquals(-0.100, p1.y, 1.0e-3);
-		TestCase.assertEquals(0.053, mp.getDepth(), 1.0e-3);
+		TestCase.assertEquals(-0.040, p1.x, 1.0e-3);
+		TestCase.assertEquals(-0.139, p1.y, 1.0e-3);
+		TestCase.assertEquals(0.056, mp.getDepth(), 1.0e-3);
 		// try reversing the shapes
 		TestCase.assertTrue(this.cmfs.getManifold(p, tri, t2, seg, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
 		p1 = mp.getPoint();
-		TestCase.assertEquals(0.000, p1.x, 1.0e-3);
-		TestCase.assertEquals(-0.100, p1.y, 1.0e-3);
-		TestCase.assertEquals(0.053, mp.getDepth(), 1.0e-3);
+		TestCase.assertEquals(-0.040, p1.x, 1.0e-3);
+		TestCase.assertEquals(-0.139, p1.y, 1.0e-3);
+		TestCase.assertEquals(0.056, mp.getDepth(), 1.0e-3);
 		
 		// test overlap sat
 		this.sat.detect(seg, t1, tri, t2, p);
@@ -421,16 +421,16 @@ public class SegmentTriangleTest extends AbstractTest {
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
 		p1 = mp.getPoint();
-		TestCase.assertEquals(0.000, p1.x, 1.0e-3);
-		TestCase.assertEquals(-0.100, p1.y, 1.0e-3);
-		TestCase.assertEquals(0.053, mp.getDepth(), 1.0e-3);
+		TestCase.assertEquals(-0.040, p1.x, 1.0e-3);
+		TestCase.assertEquals(-0.139, p1.y, 1.0e-3);
+		TestCase.assertEquals(0.056, mp.getDepth(), 1.0e-3);
 		// try reversing the shapes
 		TestCase.assertTrue(this.cmfs.getManifold(p, tri, t2, seg, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
 		p1 = mp.getPoint();
-		TestCase.assertEquals(0.000, p1.x, 1.0e-3);
-		TestCase.assertEquals(-0.100, p1.y, 1.0e-3);
-		TestCase.assertEquals(0.053, mp.getDepth(), 1.0e-3);
+		TestCase.assertEquals(-0.040, p1.x, 1.0e-3);
+		TestCase.assertEquals(-0.139, p1.y, 1.0e-3);
+		TestCase.assertEquals(0.056, mp.getDepth(), 1.0e-3);
 	}
 }

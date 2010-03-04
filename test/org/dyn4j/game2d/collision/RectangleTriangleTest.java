@@ -195,7 +195,7 @@ public class RectangleTriangleTest extends AbstractTest {
 		n = p.getNormal();
 		TestCase.assertEquals(0.720, p.getDepth(), 1.0e-3);
 		TestCase.assertEquals(0.000, n.x, 1.0e-3);
-		TestCase.assertEquals(1.000, n.y, 1.0e-3);
+		TestCase.assertEquals(-1.000, n.y, 1.0e-3);
 		
 		// test overlap
 		t1.translate(-0.5, 0.0);
@@ -210,7 +210,7 @@ public class RectangleTriangleTest extends AbstractTest {
 		TestCase.assertTrue(this.sat.detect(tri, t2, rect, t1));
 		n = p.getNormal();
 		TestCase.assertEquals(0.450, p.getDepth(), 1.0e-3);
-		TestCase.assertEquals(1.000, n.x, 1.0e-3);
+		TestCase.assertEquals(-1.000, n.x, 1.0e-3);
 		TestCase.assertEquals(0.000, n.y, 1.0e-3);
 		
 		// test AABB overlap

@@ -192,7 +192,7 @@ public class RectangleRectangleTest extends AbstractTest {
 		TestCase.assertTrue(this.sat.detect(rect2, t2, rect1, t1));
 		n = p.getNormal();
 		TestCase.assertEquals(0.250, p.getDepth(), 1.0e-3);
-		TestCase.assertEquals(1.0, n.x, 1.0e-3);
+		TestCase.assertEquals(-1.0, n.x, 1.0e-3);
 		TestCase.assertEquals(0.0, n.y, 1.0e-3);
 		
 		// test no overlap
@@ -371,10 +371,10 @@ public class RectangleRectangleTest extends AbstractTest {
 		mp2 = m.getPoints().get(1);
 		p1 = mp1.getPoint();
 		p2 = mp2.getPoint();
-		TestCase.assertEquals(0.000, p1.x, 1.0e-3);
+		TestCase.assertEquals(-0.250, p1.x, 1.0e-3);
 		TestCase.assertEquals(0.250, p1.y, 1.0e-3);
 		TestCase.assertEquals(0.250, mp1.getDepth(), 1.0e-3);
-		TestCase.assertEquals(0.000, p2.x, 1.0e-3);
+		TestCase.assertEquals(-0.250, p2.x, 1.0e-3);
 		TestCase.assertEquals(-0.250, p2.y, 1.0e-3);
 		TestCase.assertEquals(0.250, mp2.getDepth(), 1.0e-3);
 		// try reversing the shapes
@@ -399,10 +399,10 @@ public class RectangleRectangleTest extends AbstractTest {
 		mp2 = m.getPoints().get(1);
 		p1 = mp1.getPoint();
 		p2 = mp2.getPoint();
-		TestCase.assertEquals(0.000, p1.x, 1.0e-3);
+		TestCase.assertEquals(-0.250, p1.x, 1.0e-3);
 		TestCase.assertEquals(0.250, p1.y, 1.0e-3);
 		TestCase.assertEquals(0.250, mp1.getDepth(), 1.0e-3);
-		TestCase.assertEquals(0.000, p2.x, 1.0e-3);
+		TestCase.assertEquals(-0.250, p2.x, 1.0e-3);
 		TestCase.assertEquals(-0.250, p2.y, 1.0e-3);
 		TestCase.assertEquals(0.250, mp2.getDepth(), 1.0e-3);
 		// try reversing the shapes

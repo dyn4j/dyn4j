@@ -109,7 +109,7 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 			// get the edge
 			Vector v = p1.to(p2);
 			// get the edge normal
-			v.left();
+			v.right();
 			// add it to the list
 			axes[n++] = v;
 		}
@@ -245,13 +245,10 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 	 * @see org.dyn4j.game2d.geometry.Convex#getFarthestFeature(org.dyn4j.game2d.geometry.Vector, org.dyn4j.game2d.geometry.Transform)
 	 */
 	@Override
-	public Feature getFarthestFeature(Vector n, Transform transform) {
+	public Feature.Edge getFarthestFeature(Vector n, Transform transform) {
+		Vector maximum = new Vector();
 		double max = -Double.MAX_VALUE;
 		int index = 0;
-		Feature feature = new Feature();
-		feature.type = Feature.Type.EDGE;
-		feature.edge = new Vector[2];
-		feature.max = new Vector();
 		// create a reference to the center
 		Vector c = transform.getTransformed(this.center);
 		// find the vertex on the polygon that is further along on the penetration axis
@@ -267,7 +264,7 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 			// keep the maximum projection point
 			if (projection > max) {
 				// set the max point
-				feature.max.set(temp);
+				maximum.set(temp);
 				// set the new maximum
 				max = projection;
 				// save the index
@@ -282,17 +279,11 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		Vector left = transform.getTransformed(this.vertices[l]);
 		Vector right = transform.getTransformed(this.vertices[r]);
 		// is the left or right edge more perpendicular?
-		if (left.to(feature.max).dot(n) < right.to(feature.max).dot(n)) {
-			feature.edge[0] = feature.max;
-			feature.edge[1] = left;
-			feature.index = index;
+		if (left.to(maximum).dot(n) < right.to(maximum).dot(n)) {
+			return new Feature.Edge(new Vector[] {maximum, left}, maximum, index);
 		} else {
-			feature.edge[0] = right;
-			feature.edge[1] = feature.max;
-			feature.index = index - 1;
+			return new Feature.Edge(new Vector[] {right, maximum}, maximum, index - 1);
 		}
-		// return the feature
-		return feature;
 	}
 	
 	/* (non-Javadoc)

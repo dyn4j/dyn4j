@@ -192,8 +192,8 @@ public class PolygonSegmentTest extends AbstractTest {
 		TestCase.assertTrue(this.sat.detect(seg, t2, poly, t1));
 		n = p.getNormal();
 		TestCase.assertEquals(0.634, p.getDepth(), 1.0e-3);
-		TestCase.assertEquals(-0.707, n.x, 1.0e-3);
-		TestCase.assertEquals(0.707, n.y, 1.0e-3);
+		TestCase.assertEquals(0.707, n.x, 1.0e-3);
+		TestCase.assertEquals(-0.707, n.y, 1.0e-3);
 		
 		// test overlap
 		t1.translate(-1.0, 0.0);
@@ -208,8 +208,8 @@ public class PolygonSegmentTest extends AbstractTest {
 		TestCase.assertTrue(this.sat.detect(seg, t2, poly, t1));
 		n = p.getNormal();
 		TestCase.assertEquals(0.404, p.getDepth(), 1.0e-3);
-		TestCase.assertEquals(0.809, n.x, 1.0e-3);
-		TestCase.assertEquals(0.587, n.y, 1.0e-3);
+		TestCase.assertEquals(-0.809, n.x, 1.0e-3);
+		TestCase.assertEquals(-0.587, n.y, 1.0e-3);
 		
 		// test AABB overlap
 		t2.translate(0.0, 0.9);
@@ -464,12 +464,12 @@ public class PolygonSegmentTest extends AbstractTest {
 		mp2 = m.getPoints().get(1);
 		p1 = mp1.getPoint();
 		p2 = mp2.getPoint();
-		TestCase.assertEquals(-0.690, p1.x, 1.0e-3);
-		TestCase.assertEquals(-0.951, p1.y, 1.0e-3);
-		TestCase.assertEquals(0.333, mp1.getDepth(), 1.0e-3);
-		TestCase.assertEquals(-0.456, p2.x, 1.0e-3);
-		TestCase.assertEquals(-0.628, p2.y, 1.0e-3);
-		TestCase.assertEquals(0.270, mp2.getDepth(), 1.0e-3);
+		TestCase.assertEquals(-0.648, p1.x, 1.0e-3);
+		TestCase.assertEquals(-0.437, p1.y, 1.0e-3);
+		TestCase.assertEquals(0.267, mp1.getDepth(), 1.0e-3);
+		TestCase.assertEquals(-0.963, p2.x, 1.0e-3);
+		TestCase.assertEquals(-0.752, p2.y, 1.0e-3);
+		TestCase.assertEquals(0.337, mp2.getDepth(), 1.0e-3);
 		// try to reverse the shapes
 		TestCase.assertTrue(this.sat.detect(seg, t2, poly, t1, p));
 		TestCase.assertTrue(this.cmfs.getManifold(p, seg, t2, poly, t1, m));
@@ -491,12 +491,12 @@ public class PolygonSegmentTest extends AbstractTest {
 		mp2 = m.getPoints().get(1);
 		p1 = mp1.getPoint();
 		p2 = mp2.getPoint();
-		TestCase.assertEquals(-0.690, p1.x, 1.0e-3);
-		TestCase.assertEquals(-0.951, p1.y, 1.0e-3);
-		TestCase.assertEquals(0.333, mp1.getDepth(), 1.0e-3);
-		TestCase.assertEquals(-0.456, p2.x, 1.0e-3);
-		TestCase.assertEquals(-0.628, p2.y, 1.0e-3);
-		TestCase.assertEquals(0.270, mp2.getDepth(), 1.0e-3);
+		TestCase.assertEquals(-0.648, p1.x, 1.0e-3);
+		TestCase.assertEquals(-0.437, p1.y, 1.0e-3);
+		TestCase.assertEquals(0.267, mp1.getDepth(), 1.0e-3);
+		TestCase.assertEquals(-0.963, p2.x, 1.0e-3);
+		TestCase.assertEquals(-0.752, p2.y, 1.0e-3);
+		TestCase.assertEquals(0.337, mp2.getDepth(), 1.0e-3);
 		// try to reverse the shapes
 		TestCase.assertTrue(this.gjk.detect(seg, t2, poly, t1, p));
 		TestCase.assertTrue(this.cmfs.getManifold(p, seg, t2, poly, t1, m));

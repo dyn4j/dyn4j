@@ -188,8 +188,8 @@ public class TriangleTriangleTest extends AbstractTest {
 		TestCase.assertTrue(this.sat.detect(tri1, t1, tri2, t2, p));
 		TestCase.assertTrue(this.sat.detect(tri1, t1, tri2, t2));
 		n = p.getNormal();
-		TestCase.assertEquals(0.196, n.x, 1.0e-3);
-		TestCase.assertEquals(0.980, n.y, 1.0e-3);
+		TestCase.assertEquals(-0.196, n.x, 1.0e-3);
+		TestCase.assertEquals(-0.980, n.y, 1.0e-3);
 		TestCase.assertEquals(0.743, p.getDepth(), 1.0e-3);
 		// try reversing the shapes
 		TestCase.assertTrue(this.sat.detect(tri2, t2, tri1, t1, p));
@@ -211,8 +211,8 @@ public class TriangleTriangleTest extends AbstractTest {
 		TestCase.assertTrue(this.sat.detect(tri2, t2, tri1, t1, p));
 		TestCase.assertTrue(this.sat.detect(tri2, t2, tri1, t1));
 		n = p.getNormal();
-		TestCase.assertEquals(0.196, n.x, 1.0e-3);
-		TestCase.assertEquals(0.980, n.y, 1.0e-3);
+		TestCase.assertEquals(-0.196, n.x, 1.0e-3);
+		TestCase.assertEquals(-0.980, n.y, 1.0e-3);
 		TestCase.assertEquals(0.252, p.getDepth(), 1.0e-3);
 		
 		// test AABB overlap
