@@ -229,8 +229,12 @@ public class World {
 			Body b1 = pair.getObject1();
 			Body b2 = pair.getObject2();
 			
+			// frozen pairs don't have collision detection/response
 			if (b1.isFrozen() || b2.isFrozen()) continue;
+			// static pairs don't have collision detection/response
 			if (b1.isStatic() && b2.isStatic()) continue;
+			// check for connected pairs who are not allowed to collide
+			if (b1.isConnectedNoCollision(b2)) continue;
 			
 			// determine using the collision filter whether to allow this one
 			if (!b1.getFilter().isAllowed(b2.getFilter())) {

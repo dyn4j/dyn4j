@@ -39,17 +39,34 @@ public abstract class Joint {
 	/** The second {@link Body} */
 	protected Body b2;
 	
+	/** Whether the pair of bodies joined together can collide with each other */
+	protected boolean collisionAllowed;
+	
 	/** Whether the joint has been added to an island or not */
 	protected boolean island;
+	
+	/**
+	 * Optional constructor.
+	 * <p>
+	 * Assumes that the joined bodies do not participate 
+	 * in collision detection and resolution.
+	 * @param b1 the first {@link Body}
+	 * @param b2 the second {@link Body}
+	 */
+	public Joint(Body b1, Body b2) {
+		this(b1, b2, false);
+	}
 	
 	/**
 	 * Full constructor.
 	 * @param b1 the first {@link Body}
 	 * @param b2 the second {@link Body}
+	 * @param collisionAllowed true if the joined {@link Body}s can take part in collision detection
 	 */
-	public Joint(Body b1, Body b2) {
+	public Joint(Body b1, Body b2, boolean collisionAllowed) {
 		this.b1 = b1;
 		this.b2 = b2;
+		this.collisionAllowed = collisionAllowed;
 	}
 	
 	/* (non-Javadoc)
@@ -57,7 +74,9 @@ public abstract class Joint {
 	 */
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(this.b1).append("|").append(this.b2);
+		sb.append(this.b1).append("|")
+		.append(this.b2).append("|")
+		.append(this.collisionAllowed);
 		return sb.toString();
 	}
 	
@@ -95,6 +114,14 @@ public abstract class Joint {
 	 */
 	public Body getBody2() {
 		return b2;
+	}
+	
+	/**
+	 * Returns true if collision between the joined {@link Body}s is allowed.
+	 * @return boolean
+	 */
+	public boolean isCollisionAllowed() {
+		return this.collisionAllowed;
 	}
 	
 	/**

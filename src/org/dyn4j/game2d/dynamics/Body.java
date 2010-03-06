@@ -31,6 +31,7 @@ import java.util.UUID;
 import org.dyn4j.game2d.collision.Collidable;
 import org.dyn4j.game2d.collision.Filter;
 import org.dyn4j.game2d.dynamics.contact.ContactEdge;
+import org.dyn4j.game2d.dynamics.joint.Joint;
 import org.dyn4j.game2d.dynamics.joint.JointEdge;
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Shape;
@@ -522,6 +523,57 @@ public class Body implements Collidable, Transformable {
 		} else {
 			this.state &= ~Body.ISLAND;
 		}
+	}
+	
+	/**
+	 * Returns true if the given {@link Body} is connected
+	 * to this {@link Body} by a {@link Joint}.
+	 * @param body the suspect connected body
+	 * @return boolean
+	 */
+	public boolean isConnected(Body body) {
+		int size = this.joints.size();
+		// check the size
+		if (size == 0) return false;
+		// loop over all the joints
+		for (int i = 0; i < size; i++) {
+			JointEdge je = this.joints.get(i);
+			// testing object references should be sufficient
+			if (je.getOther() == body) {
+				// if it is then return true
+				return true;
+			}
+		}
+		// not found, so return false
+		return false;
+	}
+	
+	/**
+	 * Returns true if the given {@link Body} is connected to this
+	 * {@link Body} and collision detection is <b>NOT</b> allowed between 
+	 * the two {@link Body}s.
+	 * @param body the suspect connected body
+	 * @return boolean
+	 */
+	public boolean isConnectedNoCollision(Body body) {
+		int size = this.joints.size();
+		// check the size
+		if (size == 0) return false;
+		// loop over all the joints
+		for (int i = 0; i < size; i++) {
+			JointEdge je = this.joints.get(i);
+			// testing object references should be sufficient
+			if (je.getOther() == body) {
+				// get the joint
+				Joint joint = je.getJoint();
+				// check if collision is allowed
+				if (!joint.isCollisionAllowed()) {
+					return true;
+				}
+			}
+		}
+		// not found, so return false
+		return false;
 	}
 	
 	/* (non-Javadoc)
