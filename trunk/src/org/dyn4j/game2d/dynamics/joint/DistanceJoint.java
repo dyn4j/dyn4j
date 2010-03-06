@@ -69,14 +69,30 @@ public class DistanceJoint extends Joint {
 	/**
 	 * Optional constructor.
 	 * <p>
-	 * Creates a fixed distance joint.
+	 * Creates a fixed distance {@link Joint} where the joined 
+	 * {@link Body}s do not participate in collision detection and
+	 * resolution.
 	 * @param b1 the first {@link Body}
 	 * @param b2 the second {@link Body}
 	 * @param anchor1 in world coordinates
 	 * @param anchor2 in world coordinates
 	 */
 	public DistanceJoint(Body b1, Body b2, Vector anchor1, Vector anchor2) {
-		super(b1, b2);
+		this(b1, b2, false, anchor1, anchor2);
+	}
+	
+	/**
+	 * Full constructor.
+	 * <p>
+	 * Creates a fixed distance joint.
+	 * @param b1 the first {@link Body}
+	 * @param b2 the second {@link Body}
+	 * @param collisionAllowed true if collision between the two {@link Body}s is allowed
+	 * @param anchor1 in world coordinates
+	 * @param anchor2 in world coordinates
+	 */
+	public DistanceJoint(Body b1, Body b2, boolean collisionAllowed, Vector anchor1, Vector anchor2) {
+		super(b1, b2, collisionAllowed);
 		this.localAnchor1 = b1.getLocalPoint(anchor1);
 		this.localAnchor2 = b2.getLocalPoint(anchor2);
 		this.distance = anchor1.distance(anchor2);

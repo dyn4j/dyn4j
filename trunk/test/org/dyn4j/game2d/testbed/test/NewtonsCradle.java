@@ -117,7 +117,11 @@ public class NewtonsCradle extends Test {
 			this.world.add(ball);
 			
 			// create the joint
-			DistanceJoint dj = new DistanceJoint(floor, ball, new Vector(x, 4.0), ball.getWorldCenter());
+			DistanceJoint dj = new DistanceJoint(floor,
+					                             ball,
+					                             true,
+					                             new Vector(x, 4.0), 
+					                             ball.getWorldCenter());
 			this.world.add(dj);
 			
 			x += 1.0;
