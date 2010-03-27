@@ -393,6 +393,10 @@ public class World {
 	 * @param body the {@link Body} to add
 	 */
 	public void add(Body body) {
+		// make sure its setup
+		if (body.mass == null || body.shapes.size() == 0) {
+			throw new IllegalArgumentException("A body must have at least one shape and its mass set before being added to the world.");
+		}
 		this.bodies.add(body);
 	}
 	
@@ -552,7 +556,7 @@ public class World {
 		// save the original mass
 		Mass m = body.getMass();
 		// set the mass to infinite
-		body.setMass(Mass.create(m.getCenter()));
+		body.setMass(m, Mass.Type.INFINITE);
 		// make sure this body is awake
 		body.awaken();
 		body.setSleep(false);

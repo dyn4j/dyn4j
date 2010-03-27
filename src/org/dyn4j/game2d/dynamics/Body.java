@@ -104,6 +104,9 @@ public class Body implements Collidable, Transformable {
 	/** The {@link Body}'s {@link Shape} list */
 	protected List<Convex> shapes;
 	
+	/** The list of masses of the shapes */
+	protected List<Mass> masses;
+	
 	/** The user data associated to this {@link Body} */
 	protected Object userData;
 	
@@ -156,50 +159,12 @@ public class Body implements Collidable, Transformable {
 	protected List<JointEdge> joints;
 	
 	/**
-	 * Full constructor.
-	 * @param shape the {@link Convex} {@link Shape}
-	 * @param mass the {@link Mass}
+	 * Default constructor.
 	 */
-	public Body(Convex shape, Mass mass) {
-		super();
-		// check the geometry
-		if (shape == null) {
-			throw new IllegalArgumentException("The shape cannot be null.");
-		}
-		// check the mass
-		if (mass == null) {
-			throw new IllegalArgumentException("The mass cannot be null.");
-		}
+	public Body() {
+		// the majority of bodies will contain one shape
 		this.shapes = new ArrayList<Convex>(1);
-		this.shapes.add(shape);
-		this.mass = mass;
-		this.initialize();
-	}
-	
-	/**
-	 * Full constructor.
-	 * @param shapes the {@link Convex} {@link Shape} list; at least one {@link Convex} {@link Shape}
-	 * @param mass the {@link Mass}; the {@link Mass} of all the {@link Shape}s
-	 */
-	public Body(List<Convex> shapes, Mass mass) {
-		super();
-		// check the geometry
-		if (shapes == null || shapes.size() == 0) {
-			throw new IllegalArgumentException("You must supply at least one shape.");
-		}
-		// check the mass
-		if (mass == null) {
-			throw new IllegalArgumentException("The mass cannot be null.");
-		}
-		this.shapes = shapes;
-		this.mass = mass;
-		this.initialize();
-	}
-	
-	/**
-	 * Initializes all fields not set in the constructor.
-	 */
-	private void initialize() {
+		this.masses = new ArrayList<Mass>(1);
 		this.id = UUID.randomUUID().toString();
 		this.transform = new Transform();
 		this.filter = Filter.DEFAULT_FILTER;
@@ -257,6 +222,168 @@ public class Body implements Collidable, Transformable {
 		.append("|").append(this.filter);
 		sb.append("]");
 		return sb.toString();
+	}
+	
+	/**
+	 * Adds a {@link Convex} {@link Shape} to this {@link Body}.
+	 * <p>
+	 * After adding or removing shapes make sure to call the {@link #setMassFromShapes()}
+	 * or {@link #setMassFromShapes(Mass.Type)} method to compute the new total
+	 * {@link Mass}.
+	 * @param convex the {@link Convex} {@link Shape}
+	 * @param mass the {@link Mass} of the {@link Convex} {@link Shape}
+	 * @return {@link Body} this body
+	 */
+	public Body addShape(Convex convex, Mass mass) {
+		// make sure neither is null
+		if (convex == null) throw new IllegalArgumentException("The convex shape cannot be null.");
+		if (mass == null) throw new IllegalArgumentException("The mass cannot be null.");
+		// add the shape and mass to the respective lists
+		this.shapes.add(convex);
+		this.masses.add(mass);
+		// return this body to facilitate chaining
+		return this;
+	}
+	
+	/**
+	 * Removes the given {@link Convex} {@link Shape} from the {@link Body}
+	 * and returns the {@link Shape}'s {@link Mass}.
+	 * <p>
+	 * If there is only one {@link Shape} on this body this method does nothing
+	 * and returns null.
+	 * <p>
+	 * A {@link Body} cannot have zero {@link Shape}s.  If the {@link Body} 
+	 * needs all {@link Shape}s changed then add the new {@link Shape}s first then 
+	 * remove the old {@link Shape}s.
+	 * <p>
+	 * After adding or removing shapes make sure to call the {@link #setMassFromShapes()}
+	 * or {@link #setMassFromShapes(Mass.Type)} method to compute the new total
+	 * {@link Mass}.
+	 * @param convex the {@link Convex} {@link Shape}
+	 * @return {@link Mass}
+	 */
+	public Mass removeShape(Convex convex) {
+		// check the shape size
+		if (this.shapes.size() > 1) {
+			// find where the shape is
+			int index = this.shapes.indexOf(convex);
+			// remove the shape and mass from the lists
+			this.shapes.remove(index);
+			return this.masses.remove(index);
+		}
+		return null;
+	}
+	
+	/**
+	 * This method should be called after shape modification
+	 * is complete.
+	 * <p>
+	 * This method will calculate a total mass for the body 
+	 * given the masses of the shapes.
+	 * @return {@link Body} this body
+	 * @see #setMassFromShapes(Mass.Type)
+	 * @see #addShape(Convex, Mass)
+	 * @see #removeShape(Convex)
+	 */
+	public Body setMassFromShapes() {
+		return this.setMassFromShapes(Mass.Type.NORMAL);
+	}
+	
+	/**
+	 * This method should be called after shape modification
+	 * is complete.
+	 * <p>
+	 * This method will calculate a total mass for the body 
+	 * given the masses of the shapes.
+	 * <p>
+	 * A {@link Mass.Type} can be used to create special mass
+	 * types.
+	 * <p>
+	 * If <code>Mass.Type.INFINITE</code> is passed, the center
+	 * of mass will be an average of the centers of each shape.
+	 * @param type the mass type; can be null
+	 * @return {@link Body} this body
+	 * @see #addShape(Convex, Mass)
+	 * @see #removeShape(Convex)
+	 */
+	public Body setMassFromShapes(Mass.Type type) {
+		// get the size
+		int size = this.masses.size();
+		// check the size
+		if (size == 0) {
+			// do nothing
+			return this;
+		} else if (size == 1) {
+			// then just use the mass for the first shape
+			this.setMass(this.masses.get(0), type);
+		} else {
+			// check for infinite mass type
+			if (type == Mass.Type.INFINITE) {
+				// if the type desired is infinite then we need to 
+				// compute the average center of mass
+				Vector c = new Vector();
+				for (int i = 0; i < size; i++) {
+					c.add(this.masses.get(i).c);
+				}
+				c.divide(size);
+				this.mass = new Mass(c);
+			} else {
+				// then create the mass from the list
+				this.setMass(Mass.create(this.masses), type);
+			}
+		}
+		// return this body to facilitate chaining
+		return this;
+	}
+	
+	/**
+	 * Sets this {@link Body}'s mass information.
+	 * <p>
+	 * This method can be used to set the mass of the body
+	 * to a mass other than the total mass of the shapes.
+	 * @param mass the new {@link Mass}
+	 * @return {@link Body} this body
+	 */
+	public Body setMass(Mass mass) {
+		this.mass = mass;
+		// return this body to facilitate chaining
+		return this;
+	}
+	
+	/**
+	 * Sets this {@link Body}'s mass information.
+	 * <p>
+	 * This method can be used to set the mass of the body
+	 * to a mass other than the total mass of the shapes.
+	 * <p>
+	 * A {@link Mass.Type} can be used to create special mass
+	 * types.
+	 * @param mass the new {@link Mass}
+	 * @param type the {@link Mass.Type}
+	 * @return {@link Body} this body
+	 */
+	public Body setMass(Mass mass, Mass.Type type) {
+		// make a copy of the mass
+		this.mass = Mass.create(mass);
+		// modify the mass depending on the flag passed in
+		if (type == Mass.Type.INFINITE || type == Mass.Type.FIXED_TRANSLATION) {
+			this.mass.m = 0.0;
+			this.mass.invM = 0.0;
+		}
+		if (type == Mass.Type.INFINITE || type == Mass.Type.FIXED_ROTATION) {
+			this.mass.I = 0.0;
+			this.mass.invI = 0.0;
+		}
+		// return this body to facilitate chaining
+		return this;
+	}
+	
+	/**
+	 * Returns this {@link Body}'s mass information.
+	 * @return {@link Mass}
+	 */
+	public Mass getMass() {
+		return mass;
 	}
 	
 	/**
@@ -599,6 +726,15 @@ public class Body implements Collidable, Transformable {
 	public void rotate(double theta) {
 		this.transform.rotate(theta);
 	}
+	
+	/**
+	 * Rotates the {@link Body} about its center of mass.
+	 * @param theta the angle of rotation in radians
+	 */
+	public void rotateAboutCenter(double theta) {
+		Vector center = this.getWorldCenter();
+		this.rotate(theta, center);
+	}
 
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.geometry.Transformable#translate(double, double)
@@ -623,7 +759,7 @@ public class Body implements Collidable, Transformable {
 	public List<Convex> getShapes() {
 		return this.shapes;
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.collision.Collidable#getTransform()
 	 */
@@ -671,22 +807,6 @@ public class Body implements Collidable, Transformable {
 		return this.id;
 	}
 	
-	/**
-	 * Returns this {@link Body}'s mass information.
-	 * @return {@link Mass}
-	 */
-	public Mass getMass() {
-		return mass;
-	}
-	
-	/**
-	 * Sets this {@link Body}'s mass information.
-	 * @param mass the new {@link Mass}
-	 */
-	public void setMass(Mass mass) {
-		this.mass = mass;
-	}
-
 	/**
 	 * Returns the center of mass for the body in local coordinates.
 	 * @return {@link Vector} the center of mass in local coordinates

@@ -31,6 +31,9 @@ package org.dyn4j.game2d.geometry;
  * @author William Bittle
  */
 public class Rectangle extends Polygon implements Shape, Transformable {
+	/** The rectangle {@link Shape.Type} */
+	public static final Shape.Type TYPE = new Shape.Type(Polygon.TYPE);
+	
 	/** The {@link Rectangle}'s width */
 	protected double width;
 	
@@ -60,7 +63,15 @@ public class Rectangle extends Polygon implements Shape, Transformable {
 		this.width = width;
 		this.height = height;
 	}
-
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.geometry.Polygon#getType()
+	 */
+	@Override
+	public Type getType() {
+		return Rectangle.TYPE;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.geometry.Wound#toString()
 	 */

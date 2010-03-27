@@ -24,15 +24,11 @@
  */
 package org.dyn4j.game2d.testbed.test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Circle;
-import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Geometry;
 import org.dyn4j.game2d.geometry.Polygon;
 import org.dyn4j.game2d.geometry.Rectangle;
@@ -96,80 +92,67 @@ public class Terrain extends Test {
 		Segment s3 = new Segment(new Vector(0.0, -1.0), new Vector(-2.0, 3.0));
 		Segment s4 = new Segment(new Vector(-2.0, 3.0), new Vector(-4.0, 0.0));
 		Segment s5 = new Segment(new Vector(-4.0, 0.0), new Vector(-6.0, 1.0));
-		List<Convex> ss = new ArrayList<Convex>(5);
-		ss.add(s1);
-		ss.add(s2);
-		ss.add(s3);
-		ss.add(s4);
-		ss.add(s5);
-		Vector center = Geometry.getAverageCenter(s1.getCenter(), s2.getCenter(), s3.getCenter(), s4.getCenter(), s5.getCenter());
-		Mass m = Mass.create(center);
-		Entity e1 = new Entity(ss, m);
-		e1.translate(0.0, -2.0);
-		this.world.add(e1);
+		Entity terrain = new Entity();
+		terrain.addShape(s1, Mass.create(s1));
+		terrain.addShape(s2, Mass.create(s2));
+		terrain.addShape(s3, Mass.create(s3));
+		terrain.addShape(s4, Mass.create(s4));
+		terrain.addShape(s5, Mass.create(s5));
+		terrain.setMassFromShapes(Mass.Type.INFINITE);
+		terrain.translate(0.0, -2.0);
+		this.world.add(terrain);
 		
-		// temp variables
-		List<Convex> shapes = null;
-		Mass mass = null;
-
 		// create a triangle object
-		Triangle t = new Triangle(new Vector(0.0, 0.5), new Vector(-0.5, -0.5), new Vector(0.5, -0.5));
-		shapes = new ArrayList<Convex>(1);
-		shapes.add(t);
-		mass = Mass.create(t, 1.0);
-		Entity obj1 = new Entity(shapes, mass);
-		obj1.translate(0.0, 2.0);
+		Triangle triShape = new Triangle(
+				new Vector(0.0, 0.5), 
+				new Vector(-0.5, -0.5), 
+				new Vector(0.5, -0.5));
+		Entity triangle = new Entity();
+		triangle.addShape(triShape, Mass.create(triShape));
+		triangle.setMassFromShapes();
+		triangle.translate(0.0, 2.0);
 		// test having a velocity
-		obj1.getV().add(5.0, 0.0);
-		this.world.add(obj1);
+		triangle.getV().add(5.0, 0.0);
+		this.world.add(triangle);
 		
 		// create a circle
-		Circle c = new Circle(0.5);
-		shapes = new ArrayList<Convex>(1);
-		shapes.add(c);
-		mass = Mass.create(c, 1.0);
-		Entity obj2 = new Entity(shapes, mass);
-		obj2.translate(2.0, 2.0);
+		Circle cirShape = new Circle(0.5);
+		Entity circle = new Entity();
+		circle.addShape(cirShape, Mass.create(cirShape));
+		circle.setMassFromShapes();
+		circle.translate(2.0, 2.0);
 		// test adding some force
-		obj2.apply(new Vector(-100.0, 0.0));
+		circle.apply(new Vector(-100.0, 0.0));
 		// set some linear damping to simulate rolling friction
-		obj2.setLinearDamping(0.05);
-		this.world.add(obj2);
+		circle.setLinearDamping(0.05);
+		this.world.add(circle);
 
 		// try a thin rectangle
-		Rectangle r = new Rectangle(2.0, 0.1);
-		shapes = new ArrayList<Convex>(1);
-		shapes.add(r);
-		mass = Mass.create(r, 2.0);
-		Entity obj4 = new Entity(shapes, mass);
-		obj4.translate(0.0, 3.0);
-		obj4.rotate(Math.toRadians(10.0));
-		this.world.add(obj4);
+		Rectangle rectShape = new Rectangle(2.0, 0.1);
+		Entity rectangle = new Entity();
+		rectangle.addShape(rectShape, Mass.create(rectShape));
+		rectangle.setMassFromShapes();
+		rectangle.translate(0.0, 3.0);
+		rectangle.rotate(Math.toRadians(10.0));
+		this.world.add(rectangle);
 		
 		// try a segment (shouldn't work)
-		Segment s = new Segment(new Vector(0.5, 0.0), new Vector(-0.5, 0.0));
-		shapes = new ArrayList<Convex>(1);
-		shapes.add(s);
-		mass = Mass.create(s, 1.0);
-		Entity obj6 = new Entity(shapes, mass);
-		obj6.translate(-5.0, 4.0);
-		this.world.add(obj6);
+		Segment segShape = new Segment(new Vector(0.5, 0.0), new Vector(-0.5, 0.0));
+		Entity segment = new Entity();
+		segment.addShape(segShape, Mass.create(segShape));
+		segment.setMassFromShapes();
+		segment.translate(-5.0, 4.0);
+		this.world.add(segment);
 		
 		// try a polygon with lots of vertices
-		Vector[] verts = new Vector[10];
-		double angle = 2.0 * Math.PI / 10.0;
-		for (int i = 9; i >= 0; i--) {
-			verts[i] = new Vector(Math.cos(angle * i), Math.sin(angle * i));
-		}
-		Polygon p = new Polygon(verts);
-		shapes = new ArrayList<Convex>(1);
-		shapes.add(p);
-		mass = Mass.create(p, 1.0);
-		Entity obj5 = new Entity(shapes, mass);
-		obj5.translate(-2.0, 5.0);
+		Polygon polyShape = Geometry.getUnitCirclePolygon(10, 1.0);
+		Entity polygon = new Entity();
+		polygon.addShape(polyShape, Mass.create(polyShape));
+		polygon.setMassFromShapes();
+		polygon.translate(-2.0, 5.0);
 		// set the angular velocity
-		obj5.setAv(Math.toRadians(20.0));
-		this.world.add(obj5);
+		polygon.setAv(Math.toRadians(20.0));
+		this.world.add(polygon);
 	}
 	
 	/* (non-Javadoc)

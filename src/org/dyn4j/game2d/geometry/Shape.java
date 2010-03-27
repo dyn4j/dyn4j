@@ -30,9 +30,91 @@ package org.dyn4j.game2d.geometry;
  * {@link Shape}s are {@link Transformable}, however, in general a {@link Transform} object should
  * be used instead of directly transforming the {@link Shape}.  Doing so will allow reuse of
  * the same {@link Shape} object in multiple places, where only the {@link Transform} differs.
+ * <p>
+ * If a class extends this class they must contain a since static final member called TYPE that
+ * specifies the type of shape.  The member must be static and final because the {@link Shape.Type}
+ * class method <code>is</code> only performs a reference comparison. When creating the type make 
+ * sure to pass the super type {@link Shape.Type}.
  * @author William Bittle
  */
-public interface Shape extends Transformable {
+public interface Shape extends Transformable {	
+	/**
+	 * Represents a {@link Shape} type.
+	 * <p>
+	 * The type of a shape is static and doesn't
+	 * change therefore the comparison of shape 
+	 * types only does a reference comparison.
+	 * <p>
+	 * Shape types are also hierarchical in nature.
+	 * For example, performing a check like:
+	 * <pre>
+	 * Rectangle r = new Rectangle(1.0, 1.0);
+	 * r.isType(Polygon.TYPE);
+	 * // or
+	 * Rectangle.TYPE.is(Polygon.TYPE);
+	 * </pre>
+	 * will return true.
+	 * @author William Bittle
+	 */
+	public class Type {
+		/** The parent shape type */
+		private Shape.Type parent;
+		
+		/**
+		 * Default constructor.
+		 * <p>
+		 * Creates a shape type with no parent
+		 * shape type associated with it.
+		 */
+		public Type() {}
+		
+		/**
+		 * Full constructor.
+		 * <p>
+		 * Creates a shape type using the parent
+		 * shape type.
+		 * @param parent the parent shape type
+		 */
+		public Type(Shape.Type parent) {
+			this.parent = parent;
+		}
+		
+		/**
+		 * Returns true if this shape type is a type
+		 * like the one given.
+		 * <p>
+		 * This method will search recursively up the
+		 * parents to determine if this type matches
+		 * the given type.
+		 * @param type the type to test
+		 * @return boolean
+		 */
+		public boolean is(Shape.Type type) {
+			// check if the given type is null
+			if (type == null) return false;
+			// check if this type is the same object
+			if (this == type) return true;
+			// recursively check the type
+			if (this.parent != null) {
+				return this.parent.is(type);
+			}
+			return false;
+		}
+	}
+	
+	/**
+	 * Returns the {@link Shape.Type}.
+	 * @return {@link Shape.Type}
+	 */
+	public abstract Shape.Type getType();
+	
+	/**
+	 * Convenience method to test the type of {@link Shape}.
+	 * @param type the type to test for
+	 * @return boolean
+	 */
+	public abstract boolean isType(Shape.Type type);
+	
 	/**
 	 * Returns a unique identifier for this shape instance.
 	 * @return String
@@ -44,6 +126,18 @@ public interface Shape extends Transformable {
 	 * @return {@link Vector}
 	 */
 	public abstract Vector getCenter();
+	
+	/**
+	 * Returns the user data.
+	 * @return Object
+	 */
+	public abstract Object getUserData();
+	
+	/**
+	 * Sets the user data.
+	 * @param userData the user data
+	 */
+	public abstract void setUserData(Object userData);
 	
 	/**
 	 * Rotates the {@link Shape} about it's center.

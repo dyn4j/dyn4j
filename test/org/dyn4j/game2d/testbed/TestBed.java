@@ -32,8 +32,6 @@ import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
 import java.text.AttributedString;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 
 import javax.naming.ConfigurationException;
@@ -655,8 +653,10 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		// check for the B key
 		if (this.keyboard.isPressed(KeyEvent.VK_B)) {
 			// launch a bomb
-			Circle bombShape = new Circle(0.25); List<Convex> shapes = new ArrayList<Convex>(1); shapes.add(bombShape);
-			Entity bomb = new Entity(shapes, Mass.create(bombShape, 1.0));
+			Circle bombShape = new Circle(0.25);
+			Entity bomb = new Entity();
+			bomb.addShape(bombShape, Mass.create(bombShape, 1.0));
+			bomb.setMassFromShapes();
 			// set the elasticity
 			bomb.setE(0.3);
 			// launch from the left

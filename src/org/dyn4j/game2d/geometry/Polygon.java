@@ -34,6 +34,9 @@ package org.dyn4j.game2d.geometry;
  * @author William Bittle
  */
 public class Polygon extends Wound implements Convex, Shape, Transformable {
+	/** The polygon {@link Shape.Type}  */
+	public static final Shape.Type TYPE = new Shape.Type();
+	
 	/**
 	 * Default constructor for sub classes.
 	 */
@@ -74,7 +77,15 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		this.vertices = vertices;
 		this.center = Geometry.getAreaWeightedCenter(this.vertices);
 	}
-
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.geometry.Shape#getType()
+	 */
+	@Override
+	public Type getType() {
+		return Polygon.TYPE;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.geometry.Wound#toString()
 	 */

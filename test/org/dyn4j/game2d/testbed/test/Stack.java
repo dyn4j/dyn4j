@@ -24,14 +24,10 @@
  */
 package org.dyn4j.game2d.testbed.test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.dynamics.World;
-import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Entity;
@@ -89,11 +85,9 @@ public class Stack extends Test {
 	protected void setup() {
 		// create the floor
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
-		List<Convex> floorGeom = new ArrayList<Convex>();
-		floorGeom.add(floorRect);
-		Mass floorMass = Mass.create(floorRect.getCenter());
-		
-		Entity floor = new Entity(floorGeom, floorMass);
+		Entity floor = new Entity();
+		floor.addShape(floorRect, Mass.create(floorRect));
+		floor.setMassFromShapes(Mass.Type.INFINITE);
 		this.world.add(floor);
 		
 		// create the stack
@@ -104,8 +98,6 @@ public class Stack extends Test {
 		
 		// create a reusable rect for the boxes
 		Rectangle rect = new Rectangle(width, height);
-		List<Convex> geometry = new ArrayList<Convex>(1);
-		geometry.add(rect);
 		Mass mass = Mass.create(rect, 1.0);
 		
 		// initialize the y translation
@@ -113,7 +105,9 @@ public class Stack extends Test {
 		
 		// loop to create the stack
 		for (int i = 0; i < SIZE; i++) {
-			Entity e = new Entity(geometry, mass);
+			Entity e = new Entity();
+			e.addShape(rect, mass);
+			e.setMassFromShapes();
 			e.translate(0.0, y);
 			this.world.add(e);
 			// increment y

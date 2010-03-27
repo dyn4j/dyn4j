@@ -42,6 +42,9 @@ public abstract class Joint {
 	/** Whether the pair of bodies joined together can collide with each other */
 	protected boolean collisionAllowed;
 	
+	/** The user data */
+	protected Object userData;
+	
 	/** Whether the joint has been added to an island or not */
 	protected boolean island;
 	
@@ -99,6 +102,22 @@ public abstract class Joint {
 	 * @return boolean
 	 */
 	public abstract boolean solvePositionConstraints();
+	
+	/**
+	 * Returns the user data for this {@link Joint}.
+	 * @return Object
+	 */
+	public Object getUserData() {
+		return this.userData;
+	}
+	
+	/**
+	 * Sets the user data for this {@link Joint}.
+	 * @param userData the user data
+	 */
+	public void setUserData(Object userData) {
+		this.userData = userData;
+	}
 	
 	/**
 	 * Returns the first {@link Body}.

@@ -38,8 +38,8 @@ import org.dyn4j.game2d.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.game2d.collision.manifold.Manifold;
 import org.dyn4j.game2d.collision.manifold.ManifoldPoint;
 import org.dyn4j.game2d.collision.narrowphase.Gjk;
+import org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.game2d.collision.narrowphase.Penetration;
-import org.dyn4j.game2d.collision.narrowphase.Sat;
 import org.dyn4j.game2d.collision.narrowphase.Separation;
 import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.dynamics.World;
@@ -128,32 +128,42 @@ public class Plotter extends Test {
 		// create the circle bodies
 		Circle c1 = new Circle(1.0);
 		Circle c2 = new Circle(0.5);
-		this.e1List[0] = new Entity(c1, Mass.create(c1.getCenter()), 128);
-		this.e2List[0] = new Entity(c2, Mass.create(c2.getCenter()), 128);
+		this.e1List[0] = new Entity(128);
+		this.e2List[0] = new Entity(128);
+		this.e1List[0].addShape(c1, Mass.create(c1)).setMassFromShapes(Mass.Type.INFINITE);
+		this.e2List[0].addShape(c2, Mass.create(c2)).setMassFromShapes(Mass.Type.INFINITE);
 		
 		// create the polygon bodies
 		Polygon p1 = Geometry.getUnitCirclePolygon(5, 0.5);
 		Polygon p2 = Geometry.getUnitCirclePolygon(8, 1.0);
-		this.e1List[1] = new Entity(p1, Mass.create(p1.getCenter()), 128);
-		this.e2List[1] = new Entity(p2, Mass.create(p2.getCenter()), 128);
+		this.e1List[1] = new Entity(128);
+		this.e2List[1] = new Entity(128);
+		this.e1List[1].addShape(p1, Mass.create(p1)).setMassFromShapes(Mass.Type.INFINITE);
+		this.e2List[1].addShape(p2, Mass.create(p2)).setMassFromShapes(Mass.Type.INFINITE);
 		
 		// create the rectangle bodies
 		Rectangle r1 = new Rectangle(0.5, 0.5);
 		Rectangle r2 = new Rectangle(1.0, 1.0);
-		this.e1List[2] = new Entity(r1, Mass.create(r1.getCenter()), 128);
-		this.e2List[2] = new Entity(r2, Mass.create(r2.getCenter()), 128);
+		this.e1List[2] = new Entity(128);
+		this.e2List[2] = new Entity(128);
+		this.e1List[2].addShape(r1, Mass.create(r1)).setMassFromShapes(Mass.Type.INFINITE);
+		this.e2List[2].addShape(r2, Mass.create(r2)).setMassFromShapes(Mass.Type.INFINITE);
 		
 		// create the segment bodies
 		Segment s1 = new Segment(new Vector(-0.3, 0.2), new Vector(0.0, -0.1));
 		Segment s2 = new Segment(new Vector(-0.3, -0.3), new Vector(0.2, 0.3));
-		this.e1List[3] = new Entity(s1, Mass.create(s1.getCenter()), 128);
-		this.e2List[3] = new Entity(s2, Mass.create(s2.getCenter()), 128);
+		this.e1List[3] = new Entity(128);
+		this.e2List[3] = new Entity(128);
+		this.e1List[3].addShape(s1, Mass.create(s1)).setMassFromShapes(Mass.Type.INFINITE);
+		this.e2List[3].addShape(s2, Mass.create(s2)).setMassFromShapes(Mass.Type.INFINITE);
 		
 		// create the triangle bodies
 		Triangle t1 = new Triangle(new Vector(0.45, -0.12), new Vector(-0.45, 0.38), new Vector(-0.15, -0.22));
 		Triangle t2 = new Triangle(new Vector(1.29, 0.25), new Vector(-0.71, 0.65), new Vector(-0.59, -0.85));
-		this.e1List[4] = new Entity(t1, Mass.create(t1.getCenter()), 128);
-		this.e2List[4] = new Entity(t2, Mass.create(t2.getCenter()), 128);
+		this.e1List[4] = new Entity(128);
+		this.e2List[4] = new Entity(128);
+		this.e1List[4].addShape(t1, Mass.create(t1)).setMassFromShapes(Mass.Type.INFINITE);
+		this.e2List[4].addShape(t2, Mass.create(t2)).setMassFromShapes(Mass.Type.INFINITE);
 		
 		// default to the first two
 		this.e1 = this.e1List[0];
@@ -187,11 +197,11 @@ public class Plotter extends Test {
 		Separation s = new Separation();
 		Penetration p = new Penetration();
 		
-		Sat sat = new Sat();
-		Gjk gjk = new Gjk();
+		// use whatever npd was set using the control panel
+		NarrowphaseDetector npd = this.world.getNarrowphaseDetector();
 		ClippingManifoldSolver cmf = new ClippingManifoldSolver();
 		
-		if (sat.detect(c1, t1, c2, t2, p)) {
+		if (npd.detect(c1, t1, c2, t2, p)) {
 			Manifold m = new Manifold();
 			if (cmf.getManifold(p, c1, t1, c2, t2, m)) {
 				// get the points
@@ -222,6 +232,7 @@ public class Plotter extends Test {
 				}
 			}
 		} else {
+			Gjk gjk = new Gjk();
 			if (gjk.distance(c1, t1, c2, t2, s)) {
 				Vector p1 = s.getPoint1();
 				Vector p2 = s.getPoint2();

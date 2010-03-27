@@ -25,8 +25,6 @@
 package org.dyn4j.game2d.testbed.test;
 
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.codezealot.game.input.Input;
 import org.codezealot.game.input.Keyboard;
@@ -36,7 +34,6 @@ import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.dynamics.World;
-import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Entity;
@@ -90,36 +87,40 @@ public class Sleep extends Test {
 	@Override
 	protected void setup() {
 		// create the floor
-		Rectangle rect2 = new Rectangle(15.0, 1.0);
-		List<Convex> geometry2 = new ArrayList<Convex>();
-		geometry2.add(rect2);
-		Mass mass2 = Mass.create(rect2.getCenter());
-		
-		Entity obj0 = new Entity(geometry2, mass2);
-		this.world.add(obj0);
+		Rectangle floorRect = new Rectangle(15.0, 1.0);
+		Entity floor = new Entity();
+		floor.addShape(floorRect, Mass.create(floorRect));
+		floor.setMassFromShapes(Mass.Type.INFINITE);
+		this.world.add(floor);
 		
 		// create the stack
 		
 		Rectangle rect = new Rectangle(1.0, 1.0);
-		List<Convex> geometry = new ArrayList<Convex>(1);
-		geometry.add(rect);
 		Mass mass = Mass.create(rect, 1.0);
 		
-		Entity obj1 = new Entity(geometry, mass);
-		obj1.translate(0.0, 1.0);
-		this.world.add(obj1);
+		Entity box1 = new Entity();
+		box1.addShape(rect, mass);
+		box1.setMassFromShapes();
+		box1.translate(0.0, 1.0);
+		this.world.add(box1);
 		
-		Entity obj2 = new Entity(geometry, mass);
-		obj2.translate(0.0, 2.0);
-		this.world.add(obj2);
+		Entity box2 = new Entity();
+		box2.addShape(rect, mass);
+		box2.setMassFromShapes();
+		box2.translate(0.0, 2.0);
+		this.world.add(box2);
 
-		Entity obj3 = new Entity(geometry, mass);
-		obj3.translate(0.0, 3.0);
-		this.world.add(obj3);
+		Entity box3 = new Entity();
+		box3.addShape(rect, mass);
+		box3.setMassFromShapes();
+		box3.translate(0.0, 3.0);
+		this.world.add(box3);
 		
-		Entity obj4 = new Entity(geometry, mass);
-		obj4.translate(0.0, 4.0);
-		this.world.add(obj4);
+		Entity box4 = new Entity();
+		box4.addShape(rect, mass);
+		box4.setMassFromShapes();
+		box4.translate(0.0, 4.0);
+		this.world.add(box4);
 	}
 	
 	/* (non-Javadoc)

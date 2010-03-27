@@ -22,66 +22,47 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.game2d.dynamics.contact;
+package org.dyn4j.game2d.geometry;
+
+import junit.framework.TestCase;
+
+import org.junit.Test;
 
 /**
- * Represents a contact ID.
- * <p>
- * This is used to match contacts when attempting to warm
- * start the {@link ContactConstraintSolver}.
+ * Test case for the {@link Shape.Type} class.
  * @author William Bittle
  */
-public class ContactId {
-	/** The index of the reference edge */
-	protected int referenceIndex;
-	
-	/** The index of the incident edge */
-	protected int incidentIndex;
-	
-	/** The index of the manifold point */
-	protected int index;
-	
+public class ShapeTypeTest {
 	/**
-	 * Default constructor.
+	 * Tests the is method of the {@link Shape.Type} class.
 	 */
-	public ContactId() {}
-	
-	/**
-	 * Full constructor.
-	 * @param referenceIndex the referenced edge index
-	 * @param incidentIndex the incident edge index
-	 * @param index the manifold point index
-	 */
-	public ContactId(int referenceIndex, int incidentIndex, int index) {
-		this.referenceIndex = referenceIndex;
-		this.incidentIndex = incidentIndex;
-		this.index = index;
-	}
-	
-	/**
-	 * Returns true if the contacts are the same.
-	 * @param id the id
-	 * @return booolean
-	 */
-	public boolean equals(ContactId id) {
-		if (id.referenceIndex == this.referenceIndex
-		 && id.incidentIndex == this.incidentIndex
-		 && id.index == this.index) {
-			return true;
-		}
-		return false;
-	}
-	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("CONTACT_ID[")
-		.append(this.referenceIndex).append("|")
-		.append(this.incidentIndex).append("|")
-		.append(this.index).append("]");
-		return sb.toString();
+	@Test
+	public void is() {
+		// base types
+		Shape.Type t1 = new Shape.Type();
+		Shape.Type t2 = new Shape.Type();
+		
+		// sub types
+		Shape.Type t3 = new Shape.Type(t1);
+		Shape.Type t4 = new Shape.Type(t3);
+		
+		// not the same
+		TestCase.assertFalse(t1.is(t2));
+		
+		// sub type
+		TestCase.assertTrue(t3.is(t1));
+		
+		// sub sub type
+		TestCase.assertTrue(t4.is(t1));
+		
+		// sub type
+		TestCase.assertTrue(t4.is(t3));
+		
+		Circle c = new Circle(1.0);
+		TestCase.assertTrue(c.isType(Circle.TYPE));
+		
+		Rectangle r = new Rectangle(1.0, 1.0);
+		TestCase.assertTrue(r.isType(Rectangle.TYPE));
+		TestCase.assertTrue(r.isType(Polygon.TYPE));
 	}
 }

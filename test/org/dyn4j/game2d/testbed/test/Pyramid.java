@@ -24,14 +24,10 @@
  */
 package org.dyn4j.game2d.testbed.test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.dynamics.World;
-import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Entity;
@@ -88,11 +84,9 @@ public class Pyramid extends Test {
 	protected void setup() {
 		// create the floor
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
-		List<Convex> floorGeom = new ArrayList<Convex>();
-		floorGeom.add(floorRect);
-		Mass floorMass = Mass.create(floorRect.getCenter());
-		
-		Entity floor = new Entity(floorGeom, floorMass);
+		Entity floor = new Entity();
+		floor.addShape(floorRect, Mass.create(floorRect));
+		floor.setMassFromShapes(Mass.Type.INFINITE);
 		this.world.add(floor);
 		
 		// create the rows
@@ -102,8 +96,6 @@ public class Pyramid extends Test {
 		
 		// reuse the geometry and mass
 		Rectangle rect = new Rectangle(width, height);
-		List<Convex> geometry = new ArrayList<Convex>(1);
-		geometry.add(rect);
 		Mass mass = Mass.create(rect, 5.0);
 		
 		// the current x position
@@ -126,7 +118,9 @@ public class Pyramid extends Test {
 			// loop to create the bodies in the rows
 			for (int j = 0; j < num; j++) {
 				// create a body
-				Entity e = new Entity(geometry, mass);
+				Entity e = new Entity();
+				e.addShape(rect, mass);
+				e.setMassFromShapes();
 				// move it to the right position
 				e.translate(x, y);
 				// add it to the world

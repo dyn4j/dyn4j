@@ -50,9 +50,6 @@ public class Manifold {
 	/** The incident edge index */
 	protected int incidentIndex;
 	
-	/** Whether the shape/body order must be reversed */
-	protected boolean flip;
-	
 	/**
 	 * Default constructor.
 	 */
@@ -66,14 +63,12 @@ public class Manifold {
 	 * @param normal the manifold normal
 	 * @param referenceIndex the reference edge index
 	 * @param incidentIndex the incident edge index
-	 * @param flip whether the shape/body order must be reversed
 	 */
-	public Manifold(List<ManifoldPoint> points, Vector normal, int referenceIndex, int incidentIndex, boolean flip) {
+	public Manifold(List<ManifoldPoint> points, Vector normal, int referenceIndex, int incidentIndex) {
 		this.points = points;
 		this.normal = normal;
 		this.referenceIndex = referenceIndex;
 		this.incidentIndex = incidentIndex;
-		this.flip = flip;
 	}
 	
 	/* (non-Javadoc)
@@ -89,8 +84,7 @@ public class Manifold {
 		}
 		sb.append("}|").append(this.normal).append("|")
 		.append(this.referenceIndex).append("|")
-		.append(this.incidentIndex).append("|")
-		.append(this.flip).append("]");
+		.append(this.incidentIndex).append("]");
 		return sb.toString();
 	}
 	
@@ -124,13 +118,5 @@ public class Manifold {
 	 */
 	public int getReferenceIndex() {
 		return this.referenceIndex;
-	}
-	
-	/**
-	 * Returns true if the shape/body order must be reversed
-	 * @return boolean
-	 */
-	public boolean flipped() {
-		return this.flip;
 	}
 }

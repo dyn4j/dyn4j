@@ -31,7 +31,8 @@ import org.dyn4j.game2d.geometry.Vector;
 /**
  * Represents a {@link Penetration} of one {@link Convex} {@link Shape} into another.
  * <p>
- * The penetration axis should always be normalized.
+ * The penetration axis should always be normalized and point from {@link Convex}1
+ * to {@link Convex}2.
  * @author William Bittle
  */
 public class Penetration {
@@ -48,7 +49,7 @@ public class Penetration {
 	
 	/**
 	 * Full constructor.
-	 * @param normal the penetration normal
+	 * @param normal the penetration normal from {@link Convex}1 to {@link Convex}2
 	 * @param depth the penetration depth
 	 */
 	public Penetration(Vector normal, double depth) {

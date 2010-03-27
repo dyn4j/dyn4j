@@ -73,21 +73,10 @@ public class ContactConstraint {
 	 * @param m the contact manifold
 	 */
 	public ContactConstraint(Body b1, Convex c1, Body b2, Convex c2, Manifold m) {
-		// get the flip flag
-		boolean flip = m.flipped();
-		// set the body's
-		if (flip) {
-			// reverse the shape/body order
-			this.b1 = b2;
-			this.c1 = c2;
-			this.b2 = b1;
-			this.c2 = c1;
-		} else {
-			this.b1 = b1;
-			this.c1 = c1;
-			this.b2 = b2;
-			this.c2 = c2;
-		}
+		this.b1 = b1;
+		this.c1 = c1;
+		this.b2 = b2;
+		this.c2 = c2;
 		// get the manifold point size
 		int mSize = m.getPoints().size();
 		// create contact array
@@ -98,8 +87,7 @@ public class ContactConstraint {
 			// create a contact id for the point
 			ContactId id = new ContactId(m.getReferenceIndex(), 
 					                     m.getIncidentIndex(), 
-					                     point.getIndex(), 
-					                     m.flipped());
+					                     point.getIndex());
 			// create a contact from the manifold point
 			Contact contact = new Contact(id, point.getPoint(), 
 					                      point.getDepth(), 

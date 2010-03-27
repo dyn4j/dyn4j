@@ -24,8 +24,6 @@
  */
 package org.dyn4j.game2d.testbed.test;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import org.dyn4j.game2d.collision.Bounds;
@@ -33,10 +31,7 @@ import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Circle;
-import org.dyn4j.game2d.geometry.Convex;
-import org.dyn4j.game2d.geometry.Geometry;
 import org.dyn4j.game2d.geometry.Rectangle;
-import org.dyn4j.game2d.geometry.Vector;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Entity;
 import org.dyn4j.game2d.testbed.Test;
@@ -100,19 +95,15 @@ public class Bucket extends Test {
 		// translate in local coordinates the left and right sides
 		left.translate(-7.5, 7.0);
 		right.translate(7.5, 7.0);
-		List<Convex> bucketShapes = new ArrayList<Convex>(3);
-		bucketShapes.add(bottom);
-		bucketShapes.add(left);
-		bucketShapes.add(right);
-		Vector center = Geometry.getAverageCenter(bottom.getCenter(), left.getCenter(), right.getCenter());
-		Mass bucketMass = Mass.create(center);
 		
-		Entity bucket = new Entity(bucketShapes, bucketMass);
+		Entity bucket = new Entity();
+		bucket.addShape(bottom, Mass.create(bottom));
+		bucket.addShape(left, Mass.create(left));
+		bucket.addShape(right, Mass.create(right));
+		bucket.setMassFromShapes(Mass.Type.INFINITE);
 		this.world.add(bucket);
 		
 		// temp variables
-		List<Convex> shapes = null;
-		Mass mass = null;
 		Random random = new Random();
 		
 		// create a ton of shapes
@@ -126,18 +117,15 @@ public class Bucket extends Test {
 			int t = random.nextInt(2);
 			
 			// create the body
+			Entity e = new Entity();
 			if (t == 0) {
 				Rectangle r = new Rectangle(s, s);
-				shapes = new ArrayList<Convex>(1);
-				shapes.add(r);
-				mass = Mass.create(r, 0.1);
+				e.addShape(r, Mass.create(r, 0.1));
 			} else {
 				Circle c = new Circle(s * 0.5);
-				shapes = new ArrayList<Convex>(1);
-				shapes.add(c);
-				mass = Mass.create(c, 0.1);
+				e.addShape(c, Mass.create(c, 0.1));
 			}
-			Entity e = new Entity(shapes, mass);
+			e.setMassFromShapes();
 			e.translate(x, y);
 			this.world.add(e);
 		}
