@@ -31,13 +31,11 @@ import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.List;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 
 import org.dyn4j.game2d.dynamics.Body;
-import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.dynamics.joint.DistanceJoint;
 import org.dyn4j.game2d.dynamics.joint.Joint;
 import org.dyn4j.game2d.dynamics.joint.JointEdge;
@@ -95,42 +93,16 @@ public class Entity extends Body {
 	
 	/**
 	 * Optional constructor.
-	 * @param shape the shape of the body
-	 * @param mass the mass of the body/shape
 	 */
-	public Entity(Convex shape, Mass mass) {
-		this(shape, mass, 255);
+	public Entity() {
+		this(255);
 	}
 	
 	/**
 	 * Full constructor.
-	 * @param shape the shape of the body
-	 * @param mass the mass of the body/shape
 	 * @param alpha the alpha value used for the colors
 	 */
-	public Entity(Convex shape, Mass mass, int alpha) {
-		super(shape, mass);
-		this.alpha = alpha;
-		this.initialize();
-	}
-	
-	/**
-	 * Optional constructor.
-	 * @param shapes the list of shapes
-	 * @param mass the mass of the all the shapes
-	 */
-	public Entity(List<Convex> shapes, Mass mass) {
-		this(shapes, mass, 255);
-	}
-	
-	/**
-	 * Full constructor.
-	 * @param shapes the list of shapes
-	 * @param mass the mass of the all the shapes
-	 * @param alpha the alpha value used for the colors
-	 */
-	public Entity(List<Convex> shapes, Mass mass, int alpha) {
-		super(shapes, mass);
+	public Entity(int alpha) {
 		this.alpha = alpha;
 		this.initialize();
 	}

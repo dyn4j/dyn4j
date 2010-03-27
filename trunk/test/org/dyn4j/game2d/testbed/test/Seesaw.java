@@ -24,14 +24,10 @@
  */
 package org.dyn4j.game2d.testbed.test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.dynamics.World;
-import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Triangle;
 import org.dyn4j.game2d.geometry.Vector;
@@ -88,11 +84,9 @@ public class Seesaw extends Test {
 	protected void setup() {
 		// create the floor
 		Rectangle floorShape = new Rectangle(15.0, 1.0);
-		List<Convex> floorShapes = new ArrayList<Convex>();
-		floorShapes.add(floorShape);
-		Mass floorMass = Mass.create(floorShape.getCenter());
-		
-		Entity floor = new Entity(floorShapes, floorMass);
+		Entity floor = new Entity();
+		floor.addShape(floorShape, Mass.create(floorShape));
+		floor.setMassFromShapes(Mass.Type.INFINITE);
 		this.world.add(floor);
 		
 		// create the pivot
@@ -100,38 +94,34 @@ public class Seesaw extends Test {
 				new Vector(0.0, 0.5),
 				new Vector(-1.0, 0.0),
 				new Vector(1.0, 0.0));
-		
-		List<Convex> pivotShapes = new ArrayList<Convex>(1);
-		pivotShapes.add(pivotShape);
-		Mass pivotMass = Mass.create(pivotShape.getCenter());
-
-		Entity pivot = new Entity(pivotShapes, pivotMass);
+		Entity pivot = new Entity();
+		pivot.addShape(pivotShape, Mass.create(pivotShape));
+		pivot.setMassFromShapes(Mass.Type.INFINITE);
 		pivot.translate(0.0, 0.5);
 		this.world.add(pivot);
 		
 		// create the plank
 		Rectangle plankShape = new Rectangle(10.0, 0.2);
-		List<Convex> plankShapes = new ArrayList<Convex>();
-		plankShapes.add(plankShape);
-		Mass plankMass = Mass.create(plankShape, 1.0);
-		Entity plank = new Entity(plankShapes, plankMass);
+		Entity plank = new Entity();
+		plank.addShape(plankShape, Mass.create(plankShape));
+		plank.setMassFromShapes();
 		plank.translate(0.0, 1.5);
 		this.world.add(plank);
 		
 		// create a box
 		Rectangle box = new Rectangle(1.0, 1.0);
-		List<Convex> shapes = new ArrayList<Convex>();
-		shapes.add(box);
-		Mass mass = Mass.create(box, 1.0);
 		
 		// create a box on the left side
-		Entity lBox = new Entity(shapes, mass);
+		Entity lBox = new Entity();
+		lBox.addShape(box, Mass.create(box));
+		lBox.setMassFromShapes();
 		lBox.translate(-4.0, 2.5);
 		this.world.add(lBox);
 		
 		// create a box on the right side
-		Mass massr = Mass.create(box, 3.0);
-		Entity rBox = new Entity(shapes, massr);
+		Entity rBox = new Entity();
+		rBox.addShape(box, Mass.create(box, 3.0));
+		rBox.setMassFromShapes();
 		rBox.translate(4.0, 5.7);
 		this.world.add(rBox);
 	}

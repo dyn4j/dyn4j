@@ -24,8 +24,6 @@
  */
 package org.dyn4j.game2d.testbed.test;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import org.dyn4j.game2d.collision.Bounds;
@@ -33,7 +31,6 @@ import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Circle;
-import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Entity;
@@ -93,43 +90,34 @@ public class Funnel extends Test {
 	@Override
 	protected void setup() {
 		// create the floor
-		Rectangle bottom = new Rectangle(15.0, 1.0);
-		List<Convex> floorShapes = new ArrayList<Convex>(1);
-		floorShapes.add(bottom);
-		Mass floorMass = Mass.create(bottom.getCenter());
-		Entity floor = new Entity(floorShapes, floorMass);
+		Rectangle floorShape = new Rectangle(15.0, 1.0);
+		Entity floor = new Entity();
+		floor.addShape(floorShape, Mass.create(floorShape));
+		floor.setMassFromShapes(Mass.Type.INFINITE);
 		this.world.add(floor);
 		
 		// create the funnel sides
-		Rectangle left = new Rectangle(1.0, 7.0);
-		List<Convex> lFunnelShapes = new ArrayList<Convex>(1);
-		lFunnelShapes.add(left);
-		Mass lFunnelMass = Mass.create(left.getCenter());
-		Entity lFunnel = new Entity(lFunnelShapes, lFunnelMass);
-		// translate them
-		lFunnel.translate(-8.0, 8.0);
-		// rotate them about their centers
-		lFunnel.rotate(Math.toRadians(30.0), lFunnel.getTransform().getTransformed(lFunnel.getMass().getCenter()));
-		this.world.add(lFunnel);
+		Rectangle leftShape = new Rectangle(1.0, 7.0);
+		Entity left = new Entity();
+		left.addShape(leftShape, Mass.create(leftShape));
+		left.setMassFromShapes(Mass.Type.INFINITE);
+		left.translate(-8.0, 8.0);
+		left.rotateAboutCenter(Math.toRadians(30.0));
+		this.world.add(left);
 		
-		Rectangle right = new Rectangle(1.0, 7.0);
-		List<Convex> rFunnelShapes = new ArrayList<Convex>(1);
-		rFunnelShapes.add(right);
-		Mass rFunnelMass = Mass.create(right.getCenter());
-		Entity rFunnel = new Entity(rFunnelShapes, rFunnelMass);
-		// translate them
-		rFunnel.translate(8.0, 8.0);
-		// rotate them about their centers
-		rFunnel.rotate(-Math.toRadians(30.0), rFunnel.getTransform().getTransformed(rFunnel.getMass().getCenter()));
-		this.world.add(rFunnel);
+		Rectangle rightShape = new Rectangle(1.0, 7.0);
+		Entity right = new Entity();
+		right.addShape(rightShape, Mass.create(rightShape));
+		right.setMassFromShapes(Mass.Type.INFINITE);
+		right.translate(8.0, 8.0);
+		right.rotateAboutCenter(-Math.toRadians(30.0));
+		this.world.add(right);
 		
 		// temp variables
-		List<Convex> shapes = null;
-		Mass mass = null;
 		Random random = new Random();
 		
 		// create a ton of shapes
-		for (int i = 0; i < 200; i++) {
+		for (int i = 0; i < SIZE; i++) {
 			// randomize the size
 			double s = random.nextDouble() + 0.3;
 			// randomize the position (alternate sign instead of randomize it)
@@ -139,18 +127,15 @@ public class Funnel extends Test {
 			int t = random.nextInt(2);
 			
 			// create the body
+			Entity e = new Entity();
 			if (t == 0) {
 				Rectangle r = new Rectangle(s, s);
-				shapes = new ArrayList<Convex>(1);
-				shapes.add(r);
-				mass = Mass.create(r, 0.1);
+				e.addShape(r, Mass.create(r, 0.1));
 			} else {
 				Circle c = new Circle(s * 0.5);
-				shapes = new ArrayList<Convex>(1);
-				shapes.add(c);
-				mass = Mass.create(c, 0.1);
+				e.addShape(c, Mass.create(c, 0.1));
 			}
-			Entity e = new Entity(shapes, mass);
+			e.setMassFromShapes();
 			e.translate(x, y);
 			this.world.add(e);
 		}

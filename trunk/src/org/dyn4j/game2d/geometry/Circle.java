@@ -31,6 +31,9 @@ package org.dyn4j.game2d.geometry;
  * @author William Bittle
  */
 public class Circle extends AbstractShape implements Convex, Shape, Transformable {
+	/** The circle {@link Shape.Type} */
+	public static final Shape.Type TYPE = new Shape.Type();
+	
 	/** The radius of the {@link Circle} */
 	protected double radius;
 
@@ -40,12 +43,19 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 	 * @throws IllegalArgumentException if the given radius is less than or equal to zero
 	 */
 	public Circle(double radius) {
-		super();
 		if (radius <= 0.0) throw new IllegalArgumentException();
 		this.center = new Vector();
 		this.radius = radius;
 	}
-
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.geometry.Shape#getType()
+	 */
+	@Override
+	public Type getType() {
+		return Circle.TYPE;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.geometry.Wound#toString()
 	 */

@@ -51,34 +51,17 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 			m.points.clear();
 		}
 		
-		m.flip = false;
-		
 		// get the penetration normal
 		Vector n = p.getNormal();
 		
-        // get the centers in world coordinates
-		Vector center1 = t1.getTransformed(c1.getCenter());
-		Vector center2 = t2.getTransformed(c2.getCenter());
-        
 		Convex refConvex, incConvex;
 		Transform refTransform, incTransform;
 		
-		// get the direction of object1 to object2
-		Vector cToc = center1.to(center2);
-		// which direction is the normal in?
-		if (cToc.dot(n) > 0) {
-			refConvex = c1;
-			refTransform = t1;
-			incConvex = c2;
-			incTransform = t2;
-		} else {
-			// then the normal must be pointing from object2 to object1
-			refConvex = c2;
-			refTransform = t2;
-			incConvex = c1;
-			incTransform = t1;
-			m.flip = true;
-		}
+		// set the reference and incident objects
+		refConvex = c1;
+		refTransform = t1;
+		incConvex = c2;
+		incTransform = t2;
         
 		// get the reference edge
 		Feature refFeature = refConvex.getFarthestFeature(n, refTransform);
@@ -140,8 +123,8 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 		// also get the maximum point's depth
 		double frontOffset = frontNormal.dot(refEdge.getMaximum());
 		
-		// negate the normal if n was pointing from object2 to object1
-		m.normal = m.flip ? frontNormal.getNegative() : frontNormal;
+		// set the normal
+		m.normal = frontNormal;
 		
 		// set the feature indices
 		m.referenceIndex = refEdge.getIndex();

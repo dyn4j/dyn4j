@@ -37,6 +37,9 @@ public abstract class AbstractShape implements Shape, Transformable {
 	/** The center of this {@link Shape} */
 	protected Vector center;
 	
+	/** Custom user data object */
+	protected Object userData;
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -45,6 +48,15 @@ public abstract class AbstractShape implements Shape, Transformable {
 		StringBuilder sb = new StringBuilder();
 		sb.append(id).append("|").append(this.center);
 		return sb.toString();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.geometry.Shape#isType(org.dyn4j.game2d.geometry.Shape.Type)
+	 */
+	@Override
+	public boolean isType(Type type) {
+		// return the result
+		return this.getType().is(type);
 	}
 	
 	/* (non-Javadoc)
@@ -62,7 +74,23 @@ public abstract class AbstractShape implements Shape, Transformable {
 	public Vector getCenter() {
 		return this.center;
 	}
-
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.geometry.Shape#getUserData()
+	 */
+	@Override
+	public Object getUserData() {
+		return this.userData;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.geometry.Shape#setUserData(java.lang.Object)
+	 */
+	@Override
+	public void setUserData(Object userData) {
+		this.userData = userData;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.geometry.Shape#rotate(double)
 	 */

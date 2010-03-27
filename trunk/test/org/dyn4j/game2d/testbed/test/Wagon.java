@@ -24,16 +24,12 @@
  */
 package org.dyn4j.game2d.testbed.test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.dynamics.joint.DistanceJoint;
 import org.dyn4j.game2d.geometry.Circle;
-import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Entity;
@@ -86,44 +82,39 @@ public class Wagon extends Test {
 	protected void setup() {
 		// create the floor
 		Rectangle floorRect = new Rectangle(20.0, 1.0);
-		List<Convex> floorShapes = new ArrayList<Convex>();
-		floorShapes.add(floorRect);
-		Mass floorMass = Mass.create(floorRect.getCenter());
-		Entity floor = new Entity(floorShapes, floorMass);
+		Entity floor = new Entity();
+		floor.addShape(floorRect, Mass.create(floorRect));
+		floor.setMassFromShapes(Mass.Type.INFINITE);
 		
 		// create some slopes
 		Rectangle slope1Rect = new Rectangle(9.0, 0.5);
-		List<Convex> slope1Shapes = new ArrayList<Convex>();
-		slope1Shapes.add(slope1Rect);
-		Mass slope1Mass = Mass.create(slope1Rect.getCenter());
-		Entity slope1 = new Entity(slope1Shapes, slope1Mass);
+		Entity slope1 = new Entity();
+		slope1.addShape(slope1Rect, Mass.create(slope1Rect));
+		slope1.setMassFromShapes(Mass.Type.INFINITE);
 		slope1.translate(-3.0, 7.0);
 		slope1.rotate(Math.toRadians(-20), slope1.getWorldCenter());
 		this.world.add(slope1);
 		
 		Rectangle slope2Rect = new Rectangle(7.0, 0.5);
-		List<Convex> slope2Shapes = new ArrayList<Convex>();
-		slope2Shapes.add(slope2Rect);
-		Mass slope2Mass = Mass.create(slope2Rect.getCenter());
-		Entity slope2 = new Entity(slope2Shapes, slope2Mass);
+		Entity slope2 = new Entity();
+		slope2.addShape(slope2Rect, Mass.create(slope2Rect));
+		slope2.setMassFromShapes(Mass.Type.INFINITE);
 		slope2.translate(3.0, 4.0);
 		slope2.rotate(Math.toRadians(20), slope2.getWorldCenter());
 		this.world.add(slope2);
 		
 		Rectangle slope3Rect = new Rectangle(3.0, 0.2);
-		List<Convex> slope3Shapes = new ArrayList<Convex>();
-		slope3Shapes.add(slope3Rect);
-		Mass slope3Mass = Mass.create(slope3Rect.getCenter());
-		Entity slope3 = new Entity(slope3Shapes, slope3Mass);
+		Entity slope3 = new Entity();
+		slope3.addShape(slope3Rect, Mass.create(slope3Rect));
+		slope3.setMassFromShapes(Mass.Type.INFINITE);
 		slope3.translate(5.0, 0.8);
 		slope3.rotate(Math.toRadians(30), slope3.getWorldCenter());
 		this.world.add(slope3);
 		
 		Rectangle slope4Rect = new Rectangle(3.0, 0.2);
-		List<Convex> slope4Shapes = new ArrayList<Convex>();
-		slope4Shapes.add(slope4Rect);
-		Mass slope4Mass = Mass.create(slope4Rect.getCenter());
-		Entity slope4 = new Entity(slope4Shapes, slope4Mass);
+		Entity slope4 = new Entity();
+		slope4.addShape(slope4Rect, Mass.create(slope4Rect));
+		slope4.setMassFromShapes(Mass.Type.INFINITE);
 		slope4.translate(-5.0, 0.8);
 		slope4.rotate(Math.toRadians(-30), slope4.getWorldCenter());
 		this.world.add(slope4);
@@ -131,33 +122,27 @@ public class Wagon extends Test {
 		// render the floor after the slope3 and slope4
 		this.world.add(floor);
 		
-		// temp variables
-		List<Convex> shapes = null;
-		Mass mass = null;
-		
 		// create a circle
-		Circle c1 = new Circle(0.5);
-		shapes = new ArrayList<Convex>(1);
-		shapes.add(c1);
-		mass = Mass.create(c1, 1.0);
-		Entity obj1 = new Entity(shapes, mass);
-		obj1.translate(-1.5, 7.5);
-		this.world.add(obj1);
+		Circle circle = new Circle(0.5);
 		
-		Circle c2 = new Circle(0.5);
-		shapes = new ArrayList<Convex>(1);
-		shapes.add(c2);
-		mass = Mass.create(c2, 1.0);
-		Entity obj2 = new Entity(shapes, mass);
-		obj2.translate(-2.9, 8.0);
-		this.world.add(obj2);
+		Entity wheel1 = new Entity();
+		wheel1.addShape(circle, Mass.create(circle));
+		wheel1.setMassFromShapes();
+		wheel1.translate(-1.5, 7.5);
+		this.world.add(wheel1);
+		
+		Entity wheel2 = new Entity();
+		wheel2.addShape(circle, Mass.create(circle));
+		wheel2.setMassFromShapes();
+		wheel2.translate(-2.9, 8.0);
+		this.world.add(wheel2);
 		
 		// create a distance joint between them
-		DistanceJoint j1 = new DistanceJoint(obj1,
-				                             obj2,
+		DistanceJoint j1 = new DistanceJoint(wheel1,
+											 wheel2,
 				                             true,
-				                             obj1.getWorldCenter().copy(),
-				                             obj2.getWorldCenter().copy());
+				                             wheel1.getWorldCenter().copy(),
+				                             wheel2.getWorldCenter().copy());
 		
 		this.world.add(j1);
 	}

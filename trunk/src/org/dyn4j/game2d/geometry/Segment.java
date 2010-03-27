@@ -29,6 +29,12 @@ package org.dyn4j.game2d.geometry;
  * @author William Bittle
  */
 public class Segment extends Wound implements Convex, Shape, Transformable {
+	/** The segment {@link Shape.Type} */
+	public static final Shape.Type TYPE = new Shape.Type();
+	
+	/** The segment length */
+	protected double length;
+	
 	/**
 	 * Full constructor.
 	 * @param point1 the first point
@@ -44,6 +50,15 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 		this.vertices[0] = point1;
 		this.vertices[1] = point2;
 		this.center = Geometry.getAverageCenter(this.vertices);
+		this.length = point1.distance(point2);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.geometry.Shape#getType()
+	 */
+	@Override
+	public Type getType() {
+		return Segment.TYPE;
 	}
 	
 	/* (non-Javadoc)
@@ -77,7 +92,7 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	 * @return double
 	 */
 	public double getLength() {
-		return this.vertices[0].distance(this.vertices[1]);
+		return this.length;
 	}
 	
 	/**

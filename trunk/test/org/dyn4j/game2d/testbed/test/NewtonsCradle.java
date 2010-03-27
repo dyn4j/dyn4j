@@ -24,16 +24,12 @@
  */
 package org.dyn4j.game2d.testbed.test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.dynamics.joint.DistanceJoint;
 import org.dyn4j.game2d.geometry.Circle;
-import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Vector;
 import org.dyn4j.game2d.testbed.ContactCounter;
@@ -87,17 +83,12 @@ public class NewtonsCradle extends Test {
 	protected void setup() {
 		// create the floor
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
-		List<Convex> floorShapes = new ArrayList<Convex>();
-		floorShapes.add(floorRect);
-		Mass floorMass = Mass.create(floorRect.getCenter());
-		Entity floor = new Entity(floorShapes, floorMass);
+		Entity floor = new Entity();
+		floor.addShape(floorRect, Mass.create(floorRect));
+		floor.setMassFromShapes(Mass.Type.INFINITE);
 		// move the floor up a bit
 		floor.translate(0.0, 4.0);
 		this.world.add(floor);
-		
-		// temp variables
-		List<Convex> shapes = null;
-		Mass mass = null;
 		
 		double x = -2.0;
 		double y =  0.0;
@@ -106,10 +97,9 @@ public class NewtonsCradle extends Test {
 		for (int i = 0; i < 5; i++) {
 			// create a circle
 			Circle circle = new Circle(0.5);
-			shapes = new ArrayList<Convex>(1);
-			shapes.add(circle);
-			mass = Mass.create(circle, 1.0);
-			Entity ball = new Entity(shapes, mass);
+			Entity ball = new Entity();
+			ball.addShape(circle, Mass.create(circle));
+			ball.setMassFromShapes();
 			ball.setE(0.8);
 			ball.setLinearDamping(0.1);
 			ball.translate(x, y);

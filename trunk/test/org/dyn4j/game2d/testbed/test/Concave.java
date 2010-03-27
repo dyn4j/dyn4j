@@ -24,14 +24,10 @@
  */
 package org.dyn4j.game2d.testbed.test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.dynamics.World;
-import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Entity;
@@ -89,13 +85,11 @@ public class Concave extends Test {
 		//////////////////////////////////////
 		
 		// create the floor
-		Rectangle rect2 = new Rectangle(15.0, 1.0);
-		List<Convex> geometry2 = new ArrayList<Convex>();
-		geometry2.add(rect2);
-		Mass mass2 = Mass.create(rect2.getCenter());
-		
-		Entity obj0 = new Entity(geometry2, mass2);
-		this.world.add(obj0);
+		Rectangle floorShape = new Rectangle(15.0, 1.0);
+		Entity floor = new Entity();
+		floor.addShape(floorShape, Mass.create(floorShape));
+		floor.setMassFromShapes(Mass.Type.INFINITE);
+		this.world.add(floor);
 		
 		// create the concave object
 		/* +-----------------+
@@ -115,32 +109,22 @@ public class Concave extends Test {
 		left.translate(-1.0, -0.5);
 		right.translate(1.0, -0.5);
 		
-		// add all the shapes
-		List<Convex> geometry = new ArrayList<Convex>(3);
-		geometry.add(top);
-		geometry.add(left);
-		geometry.add(right);
-		
-		// create the mass
-		Mass massTop = Mass.create(top, 1.0);
-		Mass massLeft = Mass.create(left, 1.0);
-		Mass massRight = Mass.create(right, 1.0);
-		
-		Mass mass = Mass.create(massTop, massLeft, massRight);
-		
 		// create the object
-		Entity obj1 = new Entity(geometry, mass);
-		obj1.translate(0.0, 4.0);
-		this.world.add(obj1);
+		Entity concave = new Entity();
+		concave.addShape(top, Mass.create(top));
+		concave.addShape(left, Mass.create(left));
+		concave.addShape(right, Mass.create(right));
+		concave.setMassFromShapes();
+		concave.translate(0.0, 4.0);
+		this.world.add(concave);
 		
-		// setup a small object to go in between the n
-		Rectangle small = new Rectangle(0.5, 0.5);
-		List<Convex> smallGeometry = new ArrayList<Convex>();
-		smallGeometry.add(small);
-		Mass smallMass = Mass.create(small, 1.0);
-		Entity obj2 = new Entity(smallGeometry, smallMass);
-		obj2.translate(0.0, 1.0);
-		this.world.add(obj2);
+		// setup a small object to go in between the concave shape
+		Rectangle smallShape = new Rectangle(0.5, 0.5);
+		Entity small = new Entity();
+		small.addShape(smallShape, Mass.create(smallShape));
+		small.setMassFromShapes();
+		small.translate(0.0, 1.0);
+		this.world.add(small);
 	}
 	
 	/* (non-Javadoc)

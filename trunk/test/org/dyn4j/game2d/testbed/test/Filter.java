@@ -24,15 +24,11 @@
  */
 package org.dyn4j.game2d.testbed.test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.CategoryFilter;
 import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.dynamics.World;
-import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Entity;
@@ -88,10 +84,9 @@ public class Filter extends Test {
 		// if no filter is supplied or if the filter is not the same type 
 		// as the other body then the body will collide with everything
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
-		List<Convex> floorShapes = new ArrayList<Convex>(1);
-		floorShapes.add(floorRect);
-		Mass floorMass = Mass.create(floorRect.getCenter());
-		Entity floor = new Entity(floorShapes, floorMass);
+		Entity floor = new Entity();
+		floor.addShape(floorRect, Mass.create(floorRect));
+		floor.setMassFromShapes(Mass.Type.INFINITE);
 		this.world.add(floor);
 		
 		// create some filters (collide with all & in category 1 by default)
@@ -99,15 +94,11 @@ public class Filter extends Test {
 		// in category 2 and will collide only with objects in category 2
 		CategoryFilter filter2 = new CategoryFilter(2, 2);
 		
-		// reusables
-		List<Convex> shapes;
-		
 		// create a left traveling object
 		Rectangle r1 = new Rectangle(1.0, 1.0);
-		shapes = new ArrayList<Convex>(1);
-		shapes.add(r1);
-		
-		Entity left = new Entity(shapes, Mass.create(r1, 1.0));
+		Entity left = new Entity();
+		left.addShape(r1, Mass.create(r1));
+		left.setMassFromShapes();
 		left.translate(0.0, 2.0);
 		left.getV().set(-5.0, 0.0);
 		left.setFilter(filter);
@@ -115,20 +106,18 @@ public class Filter extends Test {
 		
 		// create a right traveling object
 		Rectangle r2 = new Rectangle(1.0, 1.0);
-		shapes = new ArrayList<Convex>(1);
-		shapes.add(r2);
-		
-		Entity right1 = new Entity(shapes, Mass.create(r2, 1.0));
+		Entity right1 = new Entity();
+		right1.addShape(r2, Mass.create(r2));
+		right1.setMassFromShapes();
 		right1.translate(-2.0, 2.0);
 		right1.setFilter(filter2);
 		this.world.add(right1);
 		
 		// create a second right traveling object
 		Rectangle r3 = new Rectangle(1.0, 1.0);
-		shapes = new ArrayList<Convex>(1);
-		shapes.add(r3);
-		
-		Entity right2 = new Entity(shapes, Mass.create(r3, 1.0));
+		Entity right2 = new Entity();
+		right2.addShape(r3, Mass.create(r3));
+		right2.setMassFromShapes();
 		right2.translate(-4.0, 2.0);
 		right2.setFilter(filter);
 		this.world.add(right2);

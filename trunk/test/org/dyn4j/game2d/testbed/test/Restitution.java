@@ -24,15 +24,11 @@
  */
 package org.dyn4j.game2d.testbed.test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Circle;
-import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Entity;
@@ -85,10 +81,9 @@ public class Restitution extends Test {
 	protected void setup() {
 		// create the floor
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
-		List<Convex> floorShapes = new ArrayList<Convex>();
-		floorShapes.add(floorRect);
-		Mass floorMass = Mass.create(floorRect.getCenter());
-		Entity floor = new Entity(floorShapes, floorMass);
+		Entity floor = new Entity();
+		floor.addShape(floorRect, Mass.create(floorRect));
+		floor.setMassFromShapes(Mass.Type.INFINITE);
 		// move the floor up a bit
 		floor.translate(0.0, -4.0);
 		this.world.add(floor);
@@ -104,7 +99,9 @@ public class Restitution extends Test {
 		
 		for (int i = 0; i < count; i++) {
 			Circle c = new Circle(r);
-			Entity e = new Entity(c, Mass.create(c, 1.0));
+			Entity e = new Entity();
+			e.addShape(c, Mass.create(c));
+			e.setMassFromShapes();
 			e.setE(min + increment * i);
 			e.translate(x, y);
 			x += r + r + 0.25;

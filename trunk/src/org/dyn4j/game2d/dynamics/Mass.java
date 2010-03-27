@@ -24,6 +24,8 @@
  */
 package org.dyn4j.game2d.dynamics;
 
+import java.util.List;
+
 import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Polygon;
 import org.dyn4j.game2d.geometry.Rectangle;
@@ -37,6 +39,24 @@ import org.dyn4j.game2d.geometry.Vector;
  * @author William Bittle
  */
 public class Mass {
+	/**
+	 * Enumeration for special mass types.
+	 * @author William Bittle
+	 */
+	public static enum Type {
+		/** Indicates a normal mass */
+		NORMAL,
+		/** Indicates that the mass is infinite */
+		INFINITE,
+		/** Indicates that the mass's rotation should not change */
+		FIXED_ROTATION,
+		/** Indicates that the mass's translation should not change */
+		FIXED_TRANSLATION
+	}
+	
+	/** The default density in kg/m<sup>2</sup> */
+	public static final double DEFAULT_DENSITY = 1.0;
+	
 	/** The center of mass */
 	protected Vector c;
 	
@@ -51,43 +71,68 @@ public class Mass {
 		
 	/** The inverse inertia tensor */
 	protected double invI;
-
+	
 	/**
 	 * Full Constructor.
 	 * @param c center of {@link Mass} in local coordinates
 	 * @param m mass in kg
 	 * @param I inertia tensor in kg &middot; m<sup>2</sup>
 	 */
-	private Mass(Vector c, double m, double I) {
-		super();
+	protected Mass(Vector c, double m, double I) {
 		this.c = c;
 		this.m = m;
-		this.I = I;
 		this.invM = 1.0 / m;
+		this.I = I;
 		this.invI = 1.0 / I;
 	}
 	
 	/**
-	 * Full constructor used to create an infinite mass.
-	 * @param c the center of {@link Mass} in local coordinates
+	 * Infinite mass constructor.
+	 * @param c center of {@link Mass} in local coordinates
 	 */
-	private Mass(Vector c) {
-		super();
+	protected Mass(Vector c) {
 		this.c = c;
 		this.m = 0.0;
 		this.I = 0.0;
-		this.invI = 0.0;
 		this.invM = 0.0;
+		this.invI = 0.0;
 	}
-
+	
+	/**
+	 * Copy constructor.
+	 * <p>
+	 * Performs a deep copy.
+	 * @param mass the {@link Mass} to copy
+	 */
+	protected Mass(Mass mass) {
+		super();
+		this.c = mass.c.copy();
+		this.m = mass.m;
+		this.I = mass.I;
+		this.invM = mass.invM;
+		this.invI = mass.invI;
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("MASS[").append(c).append("|").append(m).append("|").append(I).append("]");
+		sb.append("MASS[")
+		.append(c).append("|")
+		.append(m).append("|")
+		.append(I).append("]");
 		return sb.toString();
+	}
+	
+	/**
+	 * Creates a deep copy of the given {@link Mass}.
+	 * @param mass the {@link Mass} to copy
+	 * @return {@link Mass} the copy
+	 */
+	public static Mass create(Mass mass) {
+		return new Mass(mass);
 	}
 	
 	/**
@@ -100,6 +145,7 @@ public class Mass {
 	 */
 	public static Mass create(Vector c, double m, double I) {
 		// verify the passed in values
+		if (c == null) throw new IllegalArgumentException("The center point cannot be null.");
 		if (m <= 0.0) throw new IllegalArgumentException("The mass must be greater than zero.");
 		if (I <= 0.0) throw new IllegalArgumentException("The inertia tensor must be greater than zero.");
 		// create the mass if validation passed
@@ -107,13 +153,14 @@ public class Mass {
 	}
 	
 	/**
-	 * Creates a {@link Mass} object for the given center
-	 * that has infinite mass.
-	 * @param c the center of mass
-	 * @return {@link Mass} the mass object
+	 * Creates a {@link Mass} object for the given {@link Circle}
+	 * using the default density.
+	 * @param c the {@link Circle}
+	 * @return {@link Mass}
+	 * @see #create(Circle, double)
 	 */
-	public static Mass create(Vector c) {
-		return new Mass(c);
+	public static Mass create(Circle c) {
+		return Mass.create(c, Mass.DEFAULT_DENSITY);
 	}
 	
 	/**
@@ -125,12 +172,12 @@ public class Mass {
 	 * I = m * r<sup>2</sup> / 2
 	 * </pre>
 	 * @param c the {@link Circle}
-	 * @param d the density in kg/m<sup>2</sup>; cannot be negative
+	 * @param d the density in kg/m<sup>2</sup>; must be greater than zero
 	 * @return {@link Mass}
 	 */
 	public static Mass create(Circle c, double d) {
 		// check the density input
-		if (d < 0.0) throw new IllegalArgumentException("The density cannot be negative.");
+		if (d <= 0.0) throw new IllegalArgumentException("The density cannot be negative.");
 		// get the radius
 		double r = c.getRadius();
 		// compute the mass
@@ -139,6 +186,16 @@ public class Mass {
 		double I = m * r * r / 2.0;
 		// use the center supplied to the circle
 		return new Mass(c.getCenter().copy(), m, I);
+	}
+	
+	/**
+	 * Creates a {@link Mass} object for the given {@link Polygon}
+	 * using the default density.
+	 * @param p the {@link Polygon}
+	 * @return {@link Mass}
+	 */
+	public static Mass create(Polygon p) {
+		return Mass.create(p, Mass.DEFAULT_DENSITY);
 	}
 	
 	/**
@@ -171,12 +228,12 @@ public class Mass {
 	 * d * area
 	 * </pre>
 	 * @param p the {@link Polygon}
-	 * @param d the density in kg/m<sup>2</sup>; cannot be negative
+	 * @param d the density in kg/m<sup>2</sup>; must be greater than zero
 	 * @return {@link Mass}
 	 */
 	public static Mass create(Polygon p, double d) {
 		// check the density input
-		if (d < 0.0) throw new IllegalArgumentException("The density cannot be negative.");
+		if (d <= 0.0) throw new IllegalArgumentException("The density cannot be negative.");
 		// can't use normal centroid calculation since it will be weighted towards sides
 		// that have larger distribution of points.
 		Vector center = new Vector();
@@ -219,7 +276,17 @@ public class Mass {
 	}
 	
 	/**
-	 * Creates a {@link Mass} object for the given {@link Rectangle} about its center.
+	 * Creates a {@link Mass} object for the given {@link Rectangle}
+	 * using the default density.
+	 * @param r the {@link Rectangle}
+	 * @return {@link Mass}
+	 */
+	public static Mass create(Rectangle r) {
+		return Mass.create(r, Mass.DEFAULT_DENSITY);
+	}
+	
+	/**
+	 * Creates a {@link Mass} object for the given {@link Rectangle}.
 	 * <p>
 	 * Supplying a zero density creates an infinite {@link Mass}.
 	 * <pre>
@@ -227,12 +294,12 @@ public class Mass {
 	 * I = m * (h<sup>2</sup> + w<sup>2</sup>) / 12
 	 * </pre>
 	 * @param r the {@link Rectangle}
-	 * @param d the density in kg/m<sup>2</sup>; cannot be negative
+	 * @param d the density in kg/m<sup>2</sup>; must be greater than zero
 	 * @return {@link Mass}
 	 */
 	public static Mass create(Rectangle r, double d) {
 		// check the density input
-		if (d < 0.0) throw new IllegalArgumentException("The density cannot be negative.");
+		if (d <= 0.0) throw new IllegalArgumentException("The density cannot be negative.");
 		double h = r.getHeight();
 		double w = r.getWidth();
 		// compute the mass
@@ -244,9 +311,19 @@ public class Mass {
 		// for the centroid
 		return new Mass(r.getCenter().copy(), m, I);
 	}
-
+	
 	/**
-	 * Creates a {@link Mass} object for the given line {@link Segment} about its center.
+	 * Creates a {@link Mass} object for the given line {@link Segment}
+	 * using the default density.
+	 * @param s the line {@link Segment}
+	 * @return {@link Mass}
+	 */
+	public static Mass create(Segment s) {
+		return Mass.create(s, Mass.DEFAULT_DENSITY);
+	}
+	
+	/**
+	 * Creates a {@link Mass} object for the given line {@link Segment}.
 	 * <p>
 	 * Supplying a zero density creates an infinite {@link Mass}.
 	 * <pre>
@@ -254,12 +331,12 @@ public class Mass {
 	 * I = l<sup>2</sup> * m / 12
 	 * </pre>
 	 * @param s the line {@link Segment}
-	 * @param d the density in kg/m<sup>2</sup>; cannot be negative
+	 * @param d the density in kg/m<sup>2</sup>; must be greater than zero
 	 * @return {@link Mass}
 	 */
 	public static Mass create(Segment s, double d) {
 		// check the density input
-		if (d < 0.0) throw new IllegalArgumentException("The density cannot be negative.");
+		if (d <= 0.0) throw new IllegalArgumentException("The density cannot be negative.");
 		double length = s.getLength();
 		// compute the mass
 		double m = d * length;
@@ -280,23 +357,18 @@ public class Mass {
 	 * I<sub>total</sub> = &sum; I<sub>dis</sub>
 	 * </pre>
 	 * The center for the resulting mass will be a mass weighted center.
-	 * <p>
-	 * Do not use this method for a list of infinite {@link Mass} objects
-	 * or for a list containing an infinite {@link Mass} object.
-	 * @param masses the array of {@link Mass} objects to combine
+	 * @param masses the list of {@link Mass} objects to combine
 	 * @return {@link Mass} the combined {@link Mass}
 	 */
-	public static Mass create(Mass... masses) {
+	public static Mass create(List<Mass> masses) {
 		Vector c = new Vector();
 		double m = 0.0;
 		double I = 0.0;
 		// get the length of the masses array
-		int size = masses.length;
+		int size = masses.size();
 		// loop over the masses
 		for (int i = 0; i < size; i++) {
-			Mass mass = masses[i];
-			// check for infinite mass
-			if (mass.isInfinite()) throw new IllegalArgumentException("The create(Mass...) method cannot be used with infinite mass objects.");
+			Mass mass = masses.get(i);
 			// add the center's up (weighting them by their respective mass)
 			c.add(mass.c.product(mass.m));
 			// sum the masses
@@ -311,7 +383,7 @@ public class Mass {
 		// between the two parallel axes
 		for (int i = 0; i < size; i++) {
 			// get the mass 
-			Mass mass = masses[i];
+			Mass mass = masses.get(i);
 			// compute the distance from the new center to
 			// the current mass's center
 			double d2 = mass.c.distanceSquared(c);
@@ -329,7 +401,7 @@ public class Mass {
 	 * @return boolean
 	 */
 	public boolean isInfinite() {
-		return this.m == 0.0;
+		return this.m == 0.0 && this.I == 0.0;
 	}
 	
 	/**

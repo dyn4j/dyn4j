@@ -24,14 +24,10 @@
  */
 package org.dyn4j.game2d.testbed.test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.dynamics.World;
-import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Triangle;
 import org.dyn4j.game2d.geometry.Vector;
@@ -91,32 +87,25 @@ public class Sensor extends Test {
 	@Override
 	protected void setup() {
 		// create the floor
-		Rectangle rect2 = new Rectangle(15.0, 1.0);
-		List<Convex> geometry2 = new ArrayList<Convex>();
-		geometry2.add(rect2);
-		Mass mass2 = Mass.create(rect2.getCenter());
-		
-		Entity obj0 = new Entity(geometry2, mass2);
-		this.world.add(obj0);
+		Rectangle floorRect = new Rectangle(15.0, 1.0);
+		Entity floor = new Entity();
+		floor.addShape(floorRect, Mass.create(floorRect));
+		floor.setMassFromShapes(Mass.Type.INFINITE);
+		this.world.add(floor);
 		
 		// create a sensor object
-		Triangle t = new Triangle(
+		Triangle triangle = new Triangle(
 				new Vector(0.0, 0.5),
 				new Vector(-0.5,-0.5),
 				new Vector(0.5, -0.5));
 		
-		// add all the shapes
-		List<Convex> shapes = new ArrayList<Convex>(1);
-		shapes.add(t);
-		
-		// create the mass
-		Mass mass = Mass.create(t, 1.0);
-		
 		// create the object
-		Entity obj1 = new Entity(shapes, mass);
-		obj1.translate(0.0, 4.0);
-		obj1.setSensor(true);
-		this.world.add(obj1);
+		Entity sensor = new Entity();
+		sensor.addShape(triangle, Mass.create(triangle));
+		sensor.setMassFromShapes();
+		sensor.translate(0.0, 4.0);
+		sensor.setSensor(true);
+		this.world.add(sensor);
 	}
 	
 	/* (non-Javadoc)

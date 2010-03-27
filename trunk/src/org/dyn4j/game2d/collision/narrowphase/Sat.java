@@ -54,7 +54,7 @@ public class Sat extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 	@Override
 	public boolean detect(Convex s1, Transform t1, Convex s2, Transform t2, Penetration p) {
 		// check for circles
-		if (s1 instanceof Circle && s2 instanceof Circle) {
+		if (s1.isType(Circle.TYPE) && s2.isType(Circle.TYPE)) {
 			// if its a circle - circle collision use the faster method
 			return super.detect((Circle) s1, t1, (Circle) s2, t2, p);
 		}
@@ -186,7 +186,7 @@ public class Sat extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 	@Override
 	public boolean detect(Convex s1, Transform t1, Convex s2, Transform t2) {
 		// check for circles
-		if (s1 instanceof Circle && s2 instanceof Circle) {
+		if (s1.isType(Circle.TYPE) && s2.isType(Circle.TYPE)) {
 			// if its a circle - circle collision use the faster method
 			return super.detect((Circle) s1, t1, (Circle) s2, t2);
 		}

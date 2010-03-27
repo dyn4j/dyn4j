@@ -34,6 +34,9 @@ package org.dyn4j.game2d.geometry;
  * @author William Bittle
  */
 public class Triangle extends Polygon implements Convex, Shape, Transformable {
+	/** The triangle {@link Shape.Type} */
+	public static final Shape.Type TYPE = new Shape.Type(Polygon.TYPE);
+	
 	/**
 	 * Full constructor.
 	 * @param point1 the first point
@@ -43,7 +46,15 @@ public class Triangle extends Polygon implements Convex, Shape, Transformable {
 	public Triangle(Vector point1, Vector point2, Vector point3) {
 		super(new Vector[] {point1, point2, point3});
 	}
-
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.geometry.Polygon#getType()
+	 */
+	@Override
+	public Type getType() {
+		return Triangle.TYPE;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.geometry.Wound#toString()
 	 */

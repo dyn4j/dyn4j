@@ -24,6 +24,9 @@
  */
 package org.dyn4j.game2d.dynamics;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import junit.framework.TestCase;
 
 import org.dyn4j.game2d.geometry.Circle;
@@ -80,15 +83,6 @@ public class MassTest {
 	}
 	
 	/**
-	 * Tests the isInfinite mehtod.
-	 */
-	@Test
-	public void infinite() {
-		Mass m = Mass.create(new Vector());
-		TestCase.assertTrue(m.isInfinite());
-	}
-	
-	/**
 	 * Test the create method.
 	 */
 	@Test
@@ -97,16 +91,6 @@ public class MassTest {
 		TestCase.assertTrue(m.c.equals(new Vector()));
 		TestCase.assertEquals(m.m, 1.0);
 		TestCase.assertEquals(m.I, 1.0);
-	}
-	
-	/**
-	 * Test the create method for infinite mass.
-	 */
-	@Test
-	public void createSuccessInfinite() {
-		Mass m = Mass.create(new Vector());
-		TestCase.assertTrue(m.c.equals(new Vector()));
-		TestCase.assertTrue(m.isInfinite());
 	}
 	
 	/**
@@ -120,10 +104,6 @@ public class MassTest {
 		TestCase.assertEquals(56.548, m.m, 1.0e-3);
 		// I should be m * r * r / 2
 		TestCase.assertEquals(254.469, m.I, 1.0e-3);
-		
-		// test an infinte mass
-		m = Mass.create(c, 0.0);
-		TestCase.assertTrue(m.isInfinite());
 	}
 	
 	/**
@@ -137,6 +117,16 @@ public class MassTest {
 	}
 	
 	/**
+	 * Test case for the circle create method passing
+	 * a zero density value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createCircleZeroDensity() {
+		Circle c = new Circle(3.0);
+		Mass.create(c, 0.0);
+	}
+	
+	/**
 	 * Test case for the polygon create method.
 	 */
 	@Test
@@ -146,10 +136,6 @@ public class MassTest {
 		// the polygon mass should be the area * d
 		TestCase.assertEquals(0.594, m.m, 1.0e-3);
 		TestCase.assertEquals(0.057, m.I, 1.0e-3);
-		
-		// test an infinte mass
-		m = Mass.create(p, 0.0);
-		TestCase.assertTrue(m.isInfinite());
 	}
 	
 	/**
@@ -163,6 +149,16 @@ public class MassTest {
 	}
 	
 	/**
+	 * Test case for the polygon create method passing
+	 * a zero density value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonZeroDensity() {
+		Polygon p = Geometry.getUnitCirclePolygon(5, 0.5);
+		Mass.create(p, 0.0);
+	}
+	
+	/**
 	 * Test case for the rectangle create method.
 	 */
 	@Test
@@ -172,10 +168,6 @@ public class MassTest {
 		// the mass of a rectangle should be h * w * d
 		TestCase.assertEquals(1.500, m.m, 1.0e-3);
 		TestCase.assertEquals(0.250, m.I, 1.0e-3);
-		
-		// test an infinte mass
-		m = Mass.create(r, 0.0);
-		TestCase.assertTrue(m.isInfinite());
 	}
 	
 	/**
@@ -189,6 +181,16 @@ public class MassTest {
 	}
 	
 	/**
+	 * Test case for the rectangle create method passing
+	 * a zero density value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createRectangleZeroDensity() {
+		Rectangle r = new Rectangle(1.0, 1.0);
+		Mass.create(r, 0.0);
+	}
+	
+	/**
 	 * Test case for the segment create method.
 	 */
 	@Test
@@ -199,10 +201,6 @@ public class MassTest {
 		TestCase.assertEquals(2.061, m.m, 1.0e-3);
 		// the I of a segment should be 1 / 12 * l ^ 2 * m
 		TestCase.assertEquals(0.730, m.I, 1.0e-3);
-		
-		// test an infinte mass
-		m = Mass.create(s, 0.0);
-		TestCase.assertTrue(m.isInfinite());
 	}
 	
 	/**
@@ -216,16 +214,13 @@ public class MassTest {
 	}
 	
 	/**
-	 * Test the create method accepting an array of {@link Mass} objects
-	 * where one of the {@link Mass} objects is infinite.
+	 * Test case for the segment create method passing
+	 * a zero density value.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void createArrayInfinite() {
-		Vector c = new Vector();
-		Mass infin = Mass.create(c);
-		Mass norm1 = Mass.create(c, 1.0, 0.322);
-		Mass norm2 = Mass.create(c, 2.6, 1.2);
-		Mass.create(norm1, infin, norm2);
+	public void createSegmentZeroDensity() {
+		Segment s = new Segment(new Vector(-1.0, 0.0), new Vector(1.0, 0.5));
+		Mass.create(s, 0.0);
 	}
 	
 	/**
@@ -236,7 +231,11 @@ public class MassTest {
 		Mass m1 = Mass.create(new Vector( 1.0,  1.0), 3.00, 1.00);
 		Mass m2 = Mass.create(new Vector(-1.0,  0.0), 0.50, 0.02);
 		Mass m3 = Mass.create(new Vector( 1.0, -2.0), 2.00, 3.00);
-		Mass m = Mass.create(m1, m2, m3);
+		List<Mass> masses = new ArrayList<Mass>();
+		masses.add(m1);
+		masses.add(m2);
+		masses.add(m3);
+		Mass m = Mass.create(masses);
 		
 		TestCase.assertEquals( 0.818, m.c.x, 1.0e-3);
 		TestCase.assertEquals(-0.181, m.c.y, 1.0e-3);

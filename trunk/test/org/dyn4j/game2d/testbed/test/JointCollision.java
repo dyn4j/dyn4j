@@ -83,7 +83,9 @@ public class JointCollision extends Test {
 	protected void setup() {
 		// create the floor
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
-		Entity floor = new Entity(floorRect, Mass.create(floorRect.getCenter()));
+		Entity floor = new Entity();
+		floor.addShape(floorRect, Mass.create(floorRect));
+		floor.setMassFromShapes(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
 		this.world.add(floor);
@@ -103,11 +105,19 @@ public class JointCollision extends Test {
 		 * +-----+
 		 */
 		
+		// create a reusable rectangle
 		Rectangle r = new Rectangle(0.5, 1.0);
-		Entity obj1 = new Entity(r, Mass.create(r, 1.0));
+		
+		Entity obj1 = new Entity();
+		obj1.addShape(r, Mass.create(r));
+		obj1.setMassFromShapes();
 		obj1.translate(2.0, 3.6);
-		Entity obj2 = new Entity(r, Mass.create(r, 1.0));
+		
+		Entity obj2 = new Entity();
+		obj2.addShape(r, Mass.create(r));
+		obj2.setMassFromShapes();
 		obj2.translate(2.0, 2.4);
+		
 		this.world.add(obj1);
 		this.world.add(obj2);
 		
@@ -121,10 +131,16 @@ public class JointCollision extends Test {
 		Joint j1 = new DistanceJoint(obj1, obj2, true, p1, p2);
 		this.world.add(j1);
 		
-		Entity obj3 = new Entity(r, Mass.create(r, 1.0));
+		Entity obj3 = new Entity();
+		obj3.addShape(r, Mass.create(r));
+		obj3.setMassFromShapes();
 		obj3.translate(-2.0, 3.6);
-		Entity obj4 = new Entity(r, Mass.create(r, 1.0));
+		
+		Entity obj4 = new Entity();
+		obj4.addShape(r, Mass.create(r));
+		obj4.setMassFromShapes();
 		obj4.translate(-2.0, 2.4);
+		
 		this.world.add(obj3);
 		this.world.add(obj4);
 		
