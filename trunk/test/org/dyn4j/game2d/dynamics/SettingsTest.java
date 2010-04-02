@@ -210,11 +210,11 @@ public class SettingsTest {
 		Settings s = Settings.getInstance();
 		s.reset();
 		// invalid values
-		s.setAllowedPenetration(-1.0);
-		TestCase.assertEquals(0.0, s.getAllowedPenetration());
+		s.setLinearTolerance(-1.0);
+		TestCase.assertEquals(0.0, s.getLinearTolerance());
 		// valid values
-		s.setAllowedPenetration(10);
-		TestCase.assertEquals(10.0, s.getAllowedPenetration());
+		s.setLinearTolerance(10);
+		TestCase.assertEquals(10.0, s.getLinearTolerance());
 	}
 	
 	/**

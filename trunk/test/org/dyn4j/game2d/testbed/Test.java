@@ -24,9 +24,11 @@
  */
 package org.dyn4j.game2d.testbed;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.util.List;
 
@@ -36,6 +38,8 @@ import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.dynamics.contact.ContactPoint;
 import org.dyn4j.game2d.dynamics.contact.SolvedContactPoint;
+import org.dyn4j.game2d.dynamics.joint.DistanceJoint;
+import org.dyn4j.game2d.dynamics.joint.Joint;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Vector;
 
@@ -235,6 +239,92 @@ public abstract class Test {
 								   (int) Math.ceil(c.y * scale), 
 								   (int) Math.ceil((c.x + t.x * jt) * scale),
 								   (int) Math.ceil((c.y + t.y * jt) * scale));
+					}
+				}
+			}
+		}
+		
+		// see if we should draw joints or not
+		if (draw.drawJoints()) {
+			List<Joint> joints = this.world.getJoints();
+			// draw the joints
+			for (Joint joint : joints) {
+				// check the joint type
+				if (joint instanceof DistanceJoint) {
+					DistanceJoint dj = (DistanceJoint) joint;
+					Vector v1 = dj.getWorldAnchor1();
+					Vector v2 = dj.getWorldAnchor2();
+					// set the color to be mostly transparent
+					g.setColor(new Color(0, 0, 0, 64));
+					// check for spring distance joint
+					if (dj.isSpring()) {
+						// draw a spring
+						final double h = 0.03;
+						final double w = 0.25;
+						// compute the offset from the first joint point to the start
+						// of the spring loops
+						double offset = h * 0.5;
+						// compute the number of spring loops
+						// we have to use the joint's desired distance here so that the
+						// number of loops in the spring doesnt change as the simulation
+						// progresses
+						int loops = (int) Math.ceil((dj.getDistance() - offset * 2.0) / h);
+						// get the vector between the two points
+						Vector n = v1.to(v2);
+						// normalize it to get the current distance
+						double x = n.normalize();
+						// get the tangent to the normal
+						Vector t = n.getRightHandOrthogonalVector();
+						// compute the distance between each loop along the normal
+						double d = (x - offset * 2.0) / (loops - 1);
+						// draw a line straight down using the offset
+						Vector d1 = n.product(offset).add(v1);
+						g.drawLine((int) Math.ceil(v1.x * scale),
+								   (int) Math.ceil(v1.y * scale), 
+								   (int) Math.ceil(d1.x * scale),
+								   (int) Math.ceil(d1.y * scale));
+						// draw the first loop (half loop)
+						Vector ct = t.product(w * 0.5);
+						Vector cn = n.product(d * 0.5);
+						Vector first = ct.sum(cn).add(d1);
+						g.drawLine((int) Math.ceil(d1.x * scale),
+								   (int) Math.ceil(d1.y * scale), 
+								   (int) Math.ceil(first.x * scale),
+								   (int) Math.ceil(first.y * scale));
+						// draw the middle loops
+						Vector prev = first;
+						for (int i = 1; i < loops - 1; i++) {
+							ct = t.product(w * 0.5 * ((i + 1) % 2 == 1 ? 1.0 : -1.0));
+							cn = n.product(d * (i + 0.5) + offset);
+							Vector p2 = ct.sum(cn).add(v1);
+							// draw the line
+							g.drawLine((int) Math.ceil(prev.x * scale),
+									   (int) Math.ceil(prev.y * scale), 
+									   (int) Math.ceil(p2.x * scale),
+									   (int) Math.ceil(p2.y * scale));
+							prev = p2;
+						}
+						// draw the final loop (half loop)
+						Vector d2 = n.product(-offset).add(v2);
+						g.drawLine((int) Math.ceil(prev.x * scale),
+								   (int) Math.ceil(prev.y * scale), 
+								   (int) Math.ceil(d2.x * scale),
+								   (int) Math.ceil(d2.y * scale));
+						// draw a line straight down using the offset
+						g.drawLine((int) Math.ceil(d2.x * scale),
+								   (int) Math.ceil(d2.y * scale), 
+								   (int) Math.ceil(v2.x * scale),
+								   (int) Math.ceil(v2.y * scale));
+					} else {
+						// save the original stroke
+						Stroke stroke = g.getStroke();
+						g.setStroke(new BasicStroke((float)(0.1 * scale), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+						g.drawLine((int) Math.ceil(v1.x * scale),
+								   (int) Math.ceil(v1.y * scale), 
+								   (int) Math.ceil(v2.x * scale),
+								   (int) Math.ceil(v2.y * scale));
+						// set back the original stroke
+						g.setStroke(stroke);
 					}
 				}
 			}

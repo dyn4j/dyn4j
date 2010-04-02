@@ -24,10 +24,8 @@
  */
 package org.dyn4j.game2d.testbed;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -36,9 +34,6 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 
 import org.dyn4j.game2d.dynamics.Body;
-import org.dyn4j.game2d.dynamics.joint.DistanceJoint;
-import org.dyn4j.game2d.dynamics.joint.Joint;
-import org.dyn4j.game2d.dynamics.joint.JointEdge;
 import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Polygon;
@@ -176,30 +171,6 @@ public class Entity extends Body {
 			// draw the velocity vector
 			graphics.setColor(Color.MAGENTA);
 			this.renderVector(graphics, this.v, wCenter, scale);
-		}
-		
-		if (draw.drawJoints()) {
-			// draw the joints
-			for (JointEdge je : this.joints) {
-				// get the joint for this joint edge
-				Joint joint = je.getJoint();
-				// check the joint type
-				if (joint instanceof DistanceJoint) {
-					DistanceJoint dj = (DistanceJoint) joint;
-					Vector v1 = dj.getWorldAnchor1();
-					Vector v2 = dj.getWorldAnchor2();
-					graphics.setColor(new Color(0, 0, 0, 64));
-					// save the original stroke
-					Stroke stroke = graphics.getStroke();
-					graphics.setStroke(new BasicStroke((float)(0.1 * scale), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-					graphics.drawLine((int) Math.ceil(v1.x * scale),
-									  (int) Math.ceil(v1.y * scale), 
-									  (int) Math.ceil(v2.x * scale),
-									  (int) Math.ceil(v2.y * scale));
-					// set back the original stroke
-					graphics.setStroke(stroke);
-				}
-			}
 		}
 	}
 	

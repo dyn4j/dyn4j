@@ -25,6 +25,7 @@
 package org.dyn4j.game2d.dynamics;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
@@ -205,7 +206,7 @@ public class World {
 			// clear all the old contacts
 			b.contacts.clear();
 			// remove the island flags
-			b.setIsland(false);
+			b.setOnIsland(false);
 		}
 		
 		// clear the joint island flags
@@ -214,7 +215,7 @@ public class World {
 			// get the joint
 			Joint joint = this.joints.get(i);
 			// set the island flag to false
-			joint.setIsland(false);
+			joint.setOnIsland(false);
 		}
 		
 		// test for collisions via the broad-phase
@@ -309,7 +310,7 @@ public class World {
 		for (int i = 0; i < size; i++) {
 			Body seed = this.bodies.get(i);
 			// skip if asleep, frozen, static, or already on an island
-			if (seed.isAsleep() || seed.isFrozen() || seed.isStatic() || seed.onIsland()) continue;
+			if (seed.isAsleep() || seed.isFrozen() || seed.isStatic() || seed.isOnIsland()) continue;
 			
 			island.clear();
 			stack.clear();
@@ -320,7 +321,7 @@ public class World {
 				// add it to the island
 				island.add(b);
 				// flag that it has been added
-				b.setIsland(true);
+				b.setOnIsland(true);
 				// make sure the body is awake but dont reset the sleep time
 				b.state &= ~Body.ASLEEP;
 				// if its static then continue since we dont want the
@@ -336,16 +337,16 @@ public class World {
 					// get the other body
 					Body other = e.getOther();
 					// check if the contact constraint has already been added to an island
-					if (cc.onIsland()) continue;
+					if (cc.isOnIsland()) continue;
 					// add the contact constraint to the island list
 					island.add(cc);
 					// set the island flag on the contact constraint
-					cc.setIsland(true);
+					cc.setOnIsland(true);
 					// has the other body been added to an island yet?
-					if (!other.onIsland()) {
+					if (!other.isOnIsland()) {
 						// if not then add this body to the stack
 						stack.push(other);
-						other.setIsland(true);
+						other.setOnIsland(true);
 					}
 				}
 				// loop over the joint edges of this body
@@ -358,16 +359,16 @@ public class World {
 					// get the other body
 					Body other = e.getOther();
 					// check if the joint has already been added to an island
-					if (joint.onIsland()) continue;
+					if (joint.isOnIsland()) continue;
 					// add the joint to the island
 					island.add(joint);
 					// set the island flag on the joint
-					joint.setIsland(true);
+					joint.setOnIsland(true);
 					// check if the other body has been added to an island
-					if (!other.onIsland()) {
+					if (!other.isOnIsland()) {
 						// if not then add the body to the stack
 						stack.push(other);
-						other.setIsland(true);
+						other.setOnIsland(true);
 					}
 				}
 			}
@@ -379,7 +380,7 @@ public class World {
 			for (int j = 0; j < size; j++) {
 				Body b = this.bodies.get(j);
 				if (b.isStatic()) {
-					b.setIsland(false);
+					b.setOnIsland(false);
 				}
 			}
 		}
@@ -725,11 +726,19 @@ public class World {
 	}
 	
 	/**
-	 * Returns the list of {@link Body} objects.
+	 * Returns an unmodifiable list of {@link Body} objects.
 	 * @return List&lt;{@link Body}&gt; the list of bodies
 	 */
 	public List<Body> getBodies() {
-		return this.bodies;
+		return Collections.unmodifiableList(this.bodies);
+	}
+	
+	/**
+	 * Returns an unmodifiable list of {@link Joint} objects.
+	 * @return List&lt;{@link Joint}&gt; the list of joints
+	 */
+	public List<Joint> getJoints() {
+		return Collections.unmodifiableList(this.joints);
 	}
 	
 	/**
@@ -738,5 +747,13 @@ public class World {
 	 */
 	public int getNumberOfBodies() {
 		return this.bodies.size();
+	}
+	
+	/**
+	 * Returns the number of {@link Joint} objects.
+	 * @return int the number of joints
+	 */
+	public int getNumberOfJoints() {
+		return this.joints.size();
 	}
 }

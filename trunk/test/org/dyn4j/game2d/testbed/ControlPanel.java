@@ -1129,13 +1129,13 @@ public class ControlPanel extends JFrame {
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// allowed penetration
-		JLabel lblPene = new JLabel("Allowed penetration", this.helpIcon, JLabel.LEFT);
+		JLabel lblPene = new JLabel("Linear tolerance", this.helpIcon, JLabel.LEFT);
 		lblPene.setToolTipText("Specifies the amount of penetration allowed between bodies. This setting is used to control jitter.");
 		pnlConstraint.add(lblPene, new GridBagConstraints(
 				0, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		JSpinner spnPene = new JSpinner(new SpinnerNumberModel(settings.getAllowedPenetration(), 0.0, 0.1, 0.005));
+		JSpinner spnPene = new JSpinner(new SpinnerNumberModel(settings.getLinearTolerance(), 0.0, 0.1, 0.005));
 		spnPene.setEditor(new JSpinner.NumberEditor(spnPene, "0.000"));
 		spnPene.addChangeListener(new ChangeListener() {
 			@Override
@@ -1143,7 +1143,7 @@ public class ControlPanel extends JFrame {
 				JSpinner spnr = (JSpinner) e.getSource();
 				double pene = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
 				Settings settings = Settings.getInstance();
-				settings.setAllowedPenetration(pene);
+				settings.setLinearTolerance(pene);
 			}
 		});
 		pnlConstraint.add(spnPene, new GridBagConstraints(

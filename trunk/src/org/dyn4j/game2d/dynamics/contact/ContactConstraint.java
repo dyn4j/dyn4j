@@ -27,7 +27,7 @@ package org.dyn4j.game2d.dynamics.contact;
 import org.dyn4j.game2d.collision.manifold.Manifold;
 import org.dyn4j.game2d.collision.manifold.ManifoldPoint;
 import org.dyn4j.game2d.dynamics.Body;
-import org.dyn4j.game2d.dynamics.Island;
+import org.dyn4j.game2d.dynamics.Constraint;
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Shape;
 import org.dyn4j.game2d.geometry.Vector;
@@ -36,12 +36,9 @@ import org.dyn4j.game2d.geometry.Vector;
  * Represents a {@link Contact} constraint for each {@link Body} pair.  
  * @author William Bittle
  */
-public class ContactConstraint {
-	/** The first {@link Body} */
-	protected Body b1;
-	
-	/** The second {@link Body} */
-	protected Body b2;
+public class ContactConstraint extends Constraint {
+	/** The unique contact id */
+	protected String id;
 	
 	/** The first {@link Body}'s {@link Convex} {@link Shape} */
 	protected Convex c1;
@@ -61,9 +58,6 @@ public class ContactConstraint {
 	/** The coefficient of restitution */
 	protected double e;
 	
-	/** Flag indicating that the {@link ContactConstraint} has been added to an {@link Island} */
-	protected boolean island;
-	
 	/**
 	 * Full constructor.
 	 * @param b1 the first {@link Body}
@@ -73,10 +67,14 @@ public class ContactConstraint {
 	 * @param m the contact manifold
 	 */
 	public ContactConstraint(Body b1, Convex c1, Body b2, Convex c2, Manifold m) {
-		this.b1 = b1;
+		super(b1, b2);
+		// set the involved convexes
 		this.c1 = c1;
-		this.b2 = b2;
 		this.c2 = c2;
+		// set the id
+		StringBuilder sb = new StringBuilder();
+		sb.append(b1.getId()).append(b2.getId()).append(c1.getId()).append(c2.getId());
+		this.id = sb.toString();
 		// get the manifold point size
 		int mSize = m.getPoints().size();
 		// create contact array
@@ -102,7 +100,7 @@ public class ContactConstraint {
 		this.mu = Math.sqrt(b1.getMu() * b2.getMu());
 		this.e = Math.max(b1.getE(), b2.getE());
 		// default to false
-		this.island = false;
+		this.onIsland = false;
 	}
 	
 	/* (non-Javadoc)
@@ -112,36 +110,18 @@ public class ContactConstraint {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("CONTACT_CONSTRAINT[")
-		.append(this.b1).append("|")
+		.append(super.toString()).append("|")
 		.append(this.c1).append("|")
-		.append(this.b2).append("|")
 		.append(this.c2).append("|")
 		.append(this.normal).append("|")
 		.append(this.mu).append("|")
-		.append(this.e).append("|")
-		.append(this.island).append("|{");
+		.append(this.e).append("|{");
 		int size = contacts.length;
 		for (int i = 0; i < size; i++) {
 			sb.append(contacts[i]);
 		}
 		sb.append("}]");
 		return sb.toString();
-	}
-	
-	/**
-	 * Returns true if this {@link ContactConstraint} has already been added to an {@link Island}.
-	 * @return boolean true if already added to an {@link Island}
-	 */
-	public boolean onIsland() {
-		return this.island;
-	}
-	
-	/**
-	 * Sets the flag determining whether this {@link ContactConstraint} has been added to an {@link Island}.
-	 * @param flag true if added to an {@link Island}
-	 */
-	public void setIsland(boolean flag) {
-		this.island = flag;
 	}
 	
 	/**

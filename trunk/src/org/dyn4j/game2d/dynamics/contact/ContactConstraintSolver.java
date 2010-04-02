@@ -200,8 +200,8 @@ public class ContactConstraintSolver {
 		for (int i = 0; i < size; i++) {
 			ContactConstraint contactConstraint = this.contactConstraints.get(i);
 			// get the bodies
-			Body b1 = contactConstraint.b1;
-			Body b2 = contactConstraint.b2;
+			Body b1 = contactConstraint.getBody1();
+			Body b2 = contactConstraint.getBody2();
 			// get the body transforms
 			Transform t1 = b1.getTransform();
 			Transform t2 = b2.getTransform();
@@ -287,8 +287,8 @@ public class ContactConstraintSolver {
 			ContactConstraint cc = this.contactConstraints.get(i);
 			
 			// get the bodies
-			Body b1 = cc.b1;
-			Body b2 = cc.b2;
+			Body b1 = cc.getBody1();
+			Body b2 = cc.getBody2();
 			// get the body masses
 			Mass m1 = b1.getMass();
 			Mass m2 = b2.getMass();
@@ -329,8 +329,8 @@ public class ContactConstraintSolver {
 		for (int i = 0; i < size; i++) {
 			ContactConstraint contactConstraint = this.contactConstraints.get(i);
 			// get the bodies
-			Body b1 = contactConstraint.b1;
-			Body b2 = contactConstraint.b2;
+			Body b1 = contactConstraint.getBody1();
+			Body b2 = contactConstraint.getBody2();
 			// get the masses
 			Mass m1 = b1.getMass();
 			Mass m2 = b2.getMass();
@@ -424,7 +424,7 @@ public class ContactConstraintSolver {
 		// the settings object.
 		Settings settings = Settings.getInstance();
 		double maxLinearCorrection = settings.getMaxLinearCorrection();
-		double allowedPenetration = settings.getAllowedPenetration();
+		double allowedPenetration = settings.getLinearTolerance();
 		double baumgarte = settings.getBaumgarte();
 		
 		// track the minimum separation
@@ -435,8 +435,8 @@ public class ContactConstraintSolver {
 		for (int i = 0; i < size; i++) {
 			ContactConstraint contactConstraint = this.contactConstraints.get(i);
 			// get the bodies
-			Body b1 = contactConstraint.b1;
-			Body b2 = contactConstraint.b2;
+			Body b1 = contactConstraint.getBody1();
+			Body b2 = contactConstraint.getBody2();
 			// get their transforms
 			Transform t1 = b1.getTransform();
 			Transform t2 = b2.getTransform();

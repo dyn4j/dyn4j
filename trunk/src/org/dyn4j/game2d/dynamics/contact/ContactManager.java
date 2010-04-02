@@ -75,7 +75,7 @@ public class ContactManager {
 	 */
 	public void remove(ContactConstraint cc) {
 		// remove the contact from the cache
-		this.map.remove(this.getId(cc));
+		this.map.remove(cc.id);
 	}
 	
 	/**
@@ -91,18 +91,6 @@ public class ContactManager {
 	public void reset() {
 		// clear the current contact constraints
 		this.map.clear();
-	}
-	
-	/**
-	 * Returns a unique id used to map a contact constraint between
-	 * two bodies and their colliding shapes.
-	 * @param cc the contact constraint
-	 * @return String the unique id
-	 */
-	private String getId(ContactConstraint cc) {
-		StringBuilder sb = new StringBuilder(36 * 4);
-		sb.append(cc.b1.getId()).append(cc.b2.getId()).append(cc.c1.getId()).append(cc.c2.getId());
-		return sb.toString();
 	}
 	
 	/**
@@ -139,8 +127,6 @@ public class ContactManager {
 			// define the old contact constraint
 			ContactConstraint occ = null;
 			
-			// create the id
-			String id = this.getId(ncc);
 			// body/shape combinations may reverse, but in that case we
 			// don't want to warm start so don't worry about the id being
 			// in the same order
@@ -150,12 +136,12 @@ public class ContactManager {
 			// removal
 			if (this.map != null) {
 				// get the old contact constraint
-				occ = this.map.remove(id);
+				occ = this.map.remove(ncc.id);
 			}
 			// set the body, shapes, and normal
 			cp.normal = ncc.normal;
-			cp.body1 = ncc.b1;
-			cp.body2 = ncc.b2;
+			cp.body1 = ncc.getBody1();
+			cp.body2 = ncc.getBody2();
 			cp.convex1 = ncc.c1;
 			cp.convex2 = ncc.c2;
 			// check if the contact constraint exists
@@ -187,8 +173,8 @@ public class ContactManager {
 							pcp.oldNormal = occ.normal;
 							pcp.oldPoint = o.p;
 							pcp.oldDepth = o.depth;
-							pcp.body1 = ncc.b1;
-							pcp.body2 = ncc.b2;
+							pcp.body1 = ncc.getBody1();
+							pcp.body2 = ncc.getBody2();
 							pcp.convex1 = ncc.c1;
 							pcp.convex2 = ncc.c2;
 							// notify of persisted contact
@@ -236,7 +222,7 @@ public class ContactManager {
 				}
 			}
 			// add the contact constraint to the map
-			newMap.put(id, ncc);
+			newMap.put(ncc.id, ncc);
 		}
 		
 		// check the map and its size
@@ -247,8 +233,8 @@ public class ContactManager {
 				ContactConstraint cc = icc.next();
 				// set the body, shapes, and normal
 				cp.normal = cc.normal;
-				cp.body1 = cc.b1;
-				cp.body2 = cc.b2;
+				cp.body1 = cc.getBody1();
+				cp.body2 = cc.getBody2();
 				cp.convex1 = cc.c1;
 				cp.convex2 = cc.c2;
 				// loop over the contact points
@@ -286,8 +272,8 @@ public class ContactManager {
 				ContactConstraint cc = this.list.get(i);
 				// set the body, shapes, and normal
 				scp.normal = cc.normal;
-				scp.body1 = cc.b1;
-				scp.body2 = cc.b2;
+				scp.body1 = cc.getBody1();
+				scp.body2 = cc.getBody2();
 				scp.convex1 = cc.c1;
 				scp.convex2 = cc.c2;
 				// loop over the contacts

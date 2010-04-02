@@ -56,6 +56,7 @@ import org.dyn4j.game2d.geometry.Vector;
  * @author William Bittle
  * @param <E> the container type
  */
+// TODO need a shape editing test
 public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	/** The class logger */
 	private static final Logger LOGGER = Logger.getLogger(TestBed.class.getName());
