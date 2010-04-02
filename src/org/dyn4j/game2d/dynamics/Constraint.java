@@ -22,40 +22,74 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.game2d;
+package org.dyn4j.game2d.dynamics;
 
 /**
- * The version of the engine.
+ * Represents some physical constraint.
  * @author William Bittle
  */
-public final class Version {
-	/** The major version number; API changes, major enhancements, etc. */
-	public static final int MAJOR = 0;
+public abstract class Constraint {
+	/** The first {@link Body} */
+	protected Body b1;
 	
-	/** The minor version number; minor enhancements, major bug fixes, etc. */
-	public static final int MINOR = 6;
+	/** The second {@link Body} */
+	protected Body b2;
 	
-	/** The revision number; minor bug fixes */
-	public static final int REVISION = 0;
-	
-	/**
-	 * Hide the constructor.
-	 */
-	private Version() {}
+	/** Whether the {@link Constraint} has been added to an {@link Island} or not */
+	protected boolean onIsland;
 	
 	/**
-	 * Returns the version as a string.
-	 * @return String
+	 * Full constructor.
+	 * @param b1 the first participating {@link Body}
+	 * @param b2 the second participating {@link Body}
 	 */
-	public static String getVersion() {
-		return MAJOR + "." + MINOR + "." + REVISION;
+	public Constraint(Body b1, Body b2) {
+		this.b1 = b1;
+		this.b2 = b2;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(this.b1).append("|")
+		.append(this.b2).append("|")
+		.append(this.onIsland);
+		return sb.toString();
 	}
 	
 	/**
-	 * Main class to print the version to the console.
-	 * @param args command line arguments (none accepted)
+	 * Returns the first {@link Body}.
+	 * @return {@link Body}
 	 */
-	public static final void main(String[] args) {
-		System.out.println("dyn4j v" + Version.getVersion());
+	public Body getBody1() {
+		return this.b1;
+	}
+	
+	/**
+	 * Returns the second {@link Body}.
+	 * @return {@link Body}
+	 */
+	public Body getBody2() {
+		return this.b2;
+	}
+	
+	/**
+	 * Sets the on {@link Island} flag to the given value.
+	 * @param onIsland true if the {@link Constraint} has been added to an {@link Island}
+	 */
+	protected void setOnIsland(boolean onIsland) {
+		this.onIsland = onIsland;
+	}
+	
+	/**
+	 * Returns true if this {@link Constraint} has been added
+	 * to an {@link Island}
+	 * @return boolean
+	 */
+	protected boolean isOnIsland() {
+		return this.onIsland;
 	}
 }

@@ -25,28 +25,19 @@
 package org.dyn4j.game2d.dynamics.joint;
 
 import org.dyn4j.game2d.dynamics.Body;
-import org.dyn4j.game2d.dynamics.Island;
+import org.dyn4j.game2d.dynamics.Constraint;
 import org.dyn4j.game2d.dynamics.Step;
 
 /**
  * Represents constrained motion between two {@link Body}s.
  * @author William Bittle
  */
-public abstract class Joint {
-	/** The first {@link Body} */
-	protected Body b1;
-	
-	/** The second {@link Body} */
-	protected Body b2;
-	
+public abstract class Joint extends Constraint {
 	/** Whether the pair of bodies joined together can collide with each other */
 	protected boolean collisionAllowed;
 	
 	/** The user data */
 	protected Object userData;
-	
-	/** Whether the joint has been added to an island or not */
-	protected boolean island;
 	
 	/**
 	 * Optional constructor.
@@ -67,8 +58,7 @@ public abstract class Joint {
 	 * @param collisionAllowed true if the joined {@link Body}s can take part in collision detection
 	 */
 	public Joint(Body b1, Body b2, boolean collisionAllowed) {
-		this.b1 = b1;
-		this.b2 = b2;
+		super(b1, b2);
 		this.collisionAllowed = collisionAllowed;
 	}
 	
@@ -77,8 +67,7 @@ public abstract class Joint {
 	 */
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(this.b1).append("|")
-		.append(this.b2).append("|")
+		sb.append(super.toString()).append("|")
 		.append(this.collisionAllowed);
 		return sb.toString();
 	}
@@ -120,42 +109,10 @@ public abstract class Joint {
 	}
 	
 	/**
-	 * Returns the first {@link Body}.
-	 * @return {@link Body}
-	 */
-	public Body getBody1() {
-		return b1;
-	}
-	
-	/**
-	 * Returns the second {@link Body}.
-	 * @return {@link Body}
-	 */
-	public Body getBody2() {
-		return b2;
-	}
-	
-	/**
 	 * Returns true if collision between the joined {@link Body}s is allowed.
 	 * @return boolean
 	 */
 	public boolean isCollisionAllowed() {
 		return this.collisionAllowed;
-	}
-	
-	/**
-	 * Returns true if the {@link Joint} has been added to an {@link Island}.
-	 * @return boolean
-	 */
-	public boolean onIsland() {
-		return island;
-	}
-	
-	/**
-	 * Sets the {@link Island} flag to given boolean value.
-	 * @param flag true if the {@link Joint} has been added to an {@link Island}
-	 */
-	public void setIsland(boolean flag) {
-		this.island = flag;
 	}
 }

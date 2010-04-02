@@ -61,8 +61,8 @@ public class Settings {
 	/** The default restitution velocity; in meters/second */
 	public static final double DEFAULT_RESTITUTION_VELOCITY = 1.0;
 	
-	/** The default allowed penetration; in meters */
-	public static final double DEFAULT_ALLOWED_PENETRATION = 0.005;
+	/** The default linear tolerance; in meters */
+	public static final double DEFAULT_LINEAR_TOLERANCE = 0.005;
 
 	/** The default maximum linear correction; in meters */
 	public static final double DEFAULT_MAX_LINEAR_CORRECTION = 0.2;
@@ -101,7 +101,7 @@ public class Settings {
 	private double restitutionVelocity = Settings.DEFAULT_RESTITUTION_VELOCITY;
 	
 	/** The allowed penetration */
-	private double allowedPenetration = Settings.DEFAULT_ALLOWED_PENETRATION;
+	private double linearTolerance = Settings.DEFAULT_LINEAR_TOLERANCE;
 
 	/** The maximum linear correction */
 	private double maxLinearCorrection = Settings.DEFAULT_MAX_LINEAR_CORRECTION;
@@ -137,7 +137,7 @@ public class Settings {
 		this.siSolverIterations = Settings.DEFAULT_SI_SOLVER_ITERATIONS;
 		this.warmStartDistance = Settings.DEFAULT_WARM_START_DISTANCE;
 		this.restitutionVelocity = Settings.DEFAULT_RESTITUTION_VELOCITY;
-		this.allowedPenetration = Settings.DEFAULT_ALLOWED_PENETRATION;
+		this.linearTolerance = Settings.DEFAULT_LINEAR_TOLERANCE;
 		this.maxLinearCorrection = Settings.DEFAULT_MAX_LINEAR_CORRECTION;
 		this.baumgarte = Settings.DEFAULT_BAUMGARTE;
 	}
@@ -393,10 +393,10 @@ public class Settings {
 	/**
 	 * Returns the allowed penetration.
 	 * @return double the allowed penetration
-	 * @see #setAllowedPenetration(double)
+	 * @see #setLinearTolerance(double)
 	 */
-	public double getAllowedPenetration() {
-		return this.allowedPenetration;
+	public double getLinearTolerance() {
+		return this.linearTolerance;
 	}
 
 	/**
@@ -407,11 +407,11 @@ public class Settings {
 	 * Valid values are in the range (0, &infin;] meters
 	 * @param allowedPenetration the allowed penetration
 	 */
-	public void setAllowedPenetration(double allowedPenetration) {
+	public void setLinearTolerance(double allowedPenetration) {
 		if (allowedPenetration < 0) {
-			this.allowedPenetration = 0;
+			this.linearTolerance = 0;
 		} else {
-			this.allowedPenetration = allowedPenetration;
+			this.linearTolerance = allowedPenetration;
 		}
 	}
 

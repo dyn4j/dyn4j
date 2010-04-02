@@ -636,7 +636,7 @@ public class Body implements Collidable, Transformable {
 	 * Returns true if this {@link Body} has been added to an {@link Island}.
 	 * @return boolean true if this {@link Body} has been added to an {@link Island} 
 	 */
-	protected boolean onIsland() {
+	protected boolean isOnIsland() {
 		return (this.state & Body.ISLAND) == Body.ISLAND;
 	}
 	
@@ -644,7 +644,7 @@ public class Body implements Collidable, Transformable {
 	 * Sets the flag indicating that the {@link Body} has been added to an {@link Island}.
 	 * @param flag true if the {@link Body} has been added to an {@link Island}
 	 */
-	protected void setIsland(boolean flag) {
+	protected void setOnIsland(boolean flag) {
 		if (flag) {
 			this.state |= Body.ISLAND;
 		} else {
