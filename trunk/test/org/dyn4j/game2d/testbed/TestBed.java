@@ -88,6 +88,12 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	/** The average rendering time in milliseconds */
 	private double renderAvgTime = 0;
 	
+	/** The current free memory */
+	private long freeMemory = 0;
+	
+	/** The current used memory */
+	private long usedMemory = 0;
+	
 	/** The decimal formater */
 	private DecimalFormat format = new DecimalFormat("000.00000");
 
@@ -135,6 +141,12 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	private Text updateLabel;
 	/** The label indicating paused state */
 	private Text pausedLabel;
+	/** The label memory */
+	private Text memoryLabel;
+	/** The label for used memory */
+	private Text usedMemoryLabel;
+	/** The label for free memory */
+	private Text freeMemoryLabel;
 	
 	// picking
 	/** The selected {@link Body} for picking capability */
@@ -304,6 +316,18 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		pausedString.addAttribute(TextAttribute.FOREGROUND, Color.RED);
 		this.pausedLabel = new Text(pausedString);
 		this.pausedLabel.generate();
+		
+		AttributedString memString = new AttributedString("Memory:");
+		this.memoryLabel = new Text(memString);
+		this.memoryLabel.generate();
+		
+		AttributedString usedMemString = new AttributedString("K Used");
+		this.usedMemoryLabel = new Text(usedMemString);
+		this.usedMemoryLabel.generate();
+		
+		AttributedString freeMemString = new AttributedString("K Free");
+		this.freeMemoryLabel = new Text(freeMemString);
+		this.freeMemoryLabel.generate();
 	}
 	
 	/* (non-Javadoc)
@@ -351,7 +375,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 			AttributedString testString = new AttributedString(this.test.name);
 			Text test = new Text(testString);
 			test.generate();
-			test.render(g, 50, 5);
+			test.render(g, 60, 5);
 
 			// show the zoom
 			// render the label
@@ -360,7 +384,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 			AttributedString zoomString = new AttributedString(this.test.getZoom() + "x");
 			Text zoom = new Text(zoomString);
 			zoom.generate();
-			zoom.render(g, 50, 20);
+			zoom.render(g, 60, 20);
 			
 			// show the number of bodies
 			// render the label
@@ -369,7 +393,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 			AttributedString bodiesString = new AttributedString(String.valueOf(this.test.getWorld().getBodies().size()));
 			Text bodies = new Text(bodiesString);
 			bodies.generate();
-			bodies.render(g, 50, 35);
+			bodies.render(g, 60, 35);
 			
 			// show the mode
 			// render the label
@@ -377,10 +401,30 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 			
 			// render the value
 			if (this.stepMode) {
-				this.stepModeLabel.render(g, 50, 50);
+				this.stepModeLabel.render(g, 60, 50);
 			} else {
-				this.continuousModeLabel.render(g, 50, 50);
+				this.continuousModeLabel.render(g, 60, 50);
 			}
+			
+			// show the used/free memory
+			this.memoryLabel.render(g, 5, 65);
+			String usedS = String.valueOf(this.usedMemory);
+			String freeS = String.valueOf(this.freeMemory);
+			AttributedString usedAS = new AttributedString(usedS);
+			AttributedString freeAS = new AttributedString(freeS);
+			usedAS.addAttribute(TextAttribute.FOREGROUND, Color.RED);
+			freeAS.addAttribute(TextAttribute.FOREGROUND, Color.BLUE);
+			Text usedT = new Text(usedAS);
+			Text freeT = new Text(freeAS);
+			usedT.generate();
+			freeT.generate();
+			double maxWidth = Math.max(usedT.getWidth(), freeT.getWidth());
+			// show the used memory
+			usedT.render(g, 60 + (maxWidth - usedT.getWidth()), 65);
+			this.usedMemoryLabel.render(g, 60 + maxWidth, 65);
+			// show the free memory
+			freeT.render(g, 60 + (maxWidth - freeT.getWidth()), 80);
+			this.freeMemoryLabel.render(g, 60 + maxWidth, 80);
 			
 			// show contact information in the top right corner
 			
@@ -742,6 +786,9 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 			this.inputElapsedTime = 0;
 			this.lastUpdateTime = 0;
 			this.iterations = 0;
+			long total = Runtime.getRuntime().totalMemory() / 1024; 
+			this.freeMemory = Runtime.getRuntime().freeMemory() / 1024;
+			this.usedMemory = total - this.freeMemory;
 		}
 	}
 	
