@@ -89,10 +89,10 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	private double renderAvgTime = 0;
 	
 	/** The current free memory */
-	private long freeMemory = 0;
+	private double freeMemory = 1.0;
 	
-	/** The current used memory */
-	private long usedMemory = 0;
+	/** The current total memory */
+	private double totalMemory = 2.0;
 	
 	/** The decimal formater */
 	private DecimalFormat format = new DecimalFormat("000.00000");
@@ -143,10 +143,6 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	private Text pausedLabel;
 	/** The label memory */
 	private Text memoryLabel;
-	/** The label for used memory */
-	private Text usedMemoryLabel;
-	/** The label for free memory */
-	private Text freeMemoryLabel;
 	
 	// picking
 	/** The selected {@link Body} for picking capability */
@@ -320,14 +316,6 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		AttributedString memString = new AttributedString("Memory:");
 		this.memoryLabel = new Text(memString);
 		this.memoryLabel.generate();
-		
-		AttributedString usedMemString = new AttributedString("K Used");
-		this.usedMemoryLabel = new Text(usedMemString);
-		this.usedMemoryLabel.generate();
-		
-		AttributedString freeMemString = new AttributedString("K Free");
-		this.freeMemoryLabel = new Text(freeMemString);
-		this.freeMemoryLabel.generate();
 	}
 	
 	/* (non-Javadoc)
@@ -408,23 +396,22 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 			
 			// show the used/free memory
 			this.memoryLabel.render(g, 5, 65);
-			String usedS = String.valueOf(this.usedMemory);
-			String freeS = String.valueOf(this.freeMemory);
-			AttributedString usedAS = new AttributedString(usedS);
-			AttributedString freeAS = new AttributedString(freeS);
-			usedAS.addAttribute(TextAttribute.FOREGROUND, Color.RED);
-			freeAS.addAttribute(TextAttribute.FOREGROUND, Color.BLUE);
-			Text usedT = new Text(usedAS);
-			Text freeT = new Text(freeAS);
-			usedT.generate();
-			freeT.generate();
-			double maxWidth = Math.max(usedT.getWidth(), freeT.getWidth());
-			// show the used memory
-			usedT.render(g, 60 + (maxWidth - usedT.getWidth()), 65);
-			this.usedMemoryLabel.render(g, 60 + maxWidth, 65);
-			// show the free memory
-			freeT.render(g, 60 + (maxWidth - freeT.getWidth()), 80);
-			this.freeMemoryLabel.render(g, 60 + maxWidth, 80);
+			double memw = 50;
+			
+			g.setColor(Color.WHITE);
+			g.fillRect(60, 67, (int) Math.ceil(memw), 12);
+			g.fillRect(60, 82, (int) Math.ceil(memw), 12);
+			g.setColor(Color.RED);
+			g.fillRect(60, 67, (int) Math.ceil((this.totalMemory - this.freeMemory) / this.totalMemory * memw) - 1, 12);
+			g.setColor(Color.BLUE);
+			g.fillRect(60, 82, (int) Math.ceil(this.freeMemory / this.totalMemory * memw) - 1, 12);
+			g.setColor(Color.BLACK);
+			g.drawRect(60, 67, (int) Math.ceil(memw), 12);
+			g.drawRect(60, 82, (int) Math.ceil(memw), 12);
+			AttributedString tot = new AttributedString(String.valueOf((int) this.totalMemory) + "K");
+			Text tota = new Text(tot);
+			tota.generate();
+			tota.render(g, 60, 97);
 			
 			// show contact information in the top right corner
 			
@@ -786,10 +773,9 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 			this.inputElapsedTime = 0;
 			this.lastUpdateTime = 0;
 			this.iterations = 0;
-			long total = Runtime.getRuntime().totalMemory() / 1024; 
-			this.freeMemory = Runtime.getRuntime().freeMemory() / 1024;
-			this.usedMemory = total - this.freeMemory;
 		}
+		this.totalMemory = Runtime.getRuntime().totalMemory() / 1024.0;
+		this.freeMemory = Runtime.getRuntime().freeMemory() / 1024.0;
 	}
 	
 	/* (non-Javadoc)
