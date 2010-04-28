@@ -204,6 +204,22 @@ public class SegmentTest {
 	}
 	
 	/**
+	 * Tests the contains with radius method.
+	 */
+	@Test
+	public void containsRadius() {
+		Segment s = new Segment(
+				new Vector(1.0, 1.0),
+				new Vector(-1.0, -1.0)
+			);
+			Transform t = new Transform();
+			
+			TestCase.assertFalse(s.contains(new Vector(2.0, 2.0), t, 0.1));
+			TestCase.assertTrue(s.contains(new Vector(1.05, 1.05), t, 0.1));
+			TestCase.assertTrue(s.contains(new Vector(0.505, 0.5), t, 0.1));
+	}
+	
+	/**
 	 * Tests the project method.
 	 */
 	@Test

@@ -31,7 +31,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
 import java.text.AttributedString;
-import java.text.DecimalFormat;
 import java.util.logging.Logger;
 
 import javax.naming.ConfigurationException;
@@ -49,6 +48,7 @@ import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Convex;
+import org.dyn4j.game2d.geometry.Segment;
 import org.dyn4j.game2d.geometry.Vector;
 
 /**
@@ -60,33 +60,9 @@ import org.dyn4j.game2d.geometry.Vector;
 public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	/** The class logger */
 	private static final Logger LOGGER = Logger.getLogger(TestBed.class.getName());
-
-	/** One second in nanoseconds */
-	private static final long ONE_SECOND_IN_NANOSECONDS = 1000000000;
-		
-	/** The last update time in nanoseconds */
-	private long lastUpdateTime = 0;
 	
-	/** The input polling elapsed time in nanoseconds */
-	private long inputElapsedTime = 0;
-	
-	/** The updating elapsed time in nanoseconds */
-	private long updateElapsedTime = 0;
-	
-	/** The rendering elapsed time in nanoseconds */
-	private long renderElapsedTime = 0;
-	
-	/** The number of iterations between metric time calculations */
-	private long iterations = 0;
-	
-	/** The average input polling time in milliseconds */
-	private double inputAvgTime = 0;
-	
-	/** The average updating time in milliseconds */
-	private double updateAvgTime = 0;
-	
-	/** The average rendering time in milliseconds */
-	private double renderAvgTime = 0;
+	/** The time usage object */
+	private Usage usage = new Usage();
 	
 	/** The current free memory */
 	private double freeMemory = 1.0;
@@ -94,9 +70,6 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	/** The current total memory */
 	private double totalMemory = 2.0;
 	
-	/** The decimal formater */
-	private DecimalFormat format = new DecimalFormat("000.00000");
-
 	/** The current test */
 	private Test test;
 	
@@ -133,16 +106,16 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	private Text cRemovedLabel;
 	/** The label for the frame rate */
 	private Text fpsLabel;
-	/** The label for the time to render */
-	private Text renderLabel;
-	/** The label for the time to accept input */
-	private Text inputLabel;
-	/** The label for the time to update the simulation */
-	private Text updateLabel;
 	/** The label indicating paused state */
 	private Text pausedLabel;
-	/** The label memory */
+	/** The label for memory usage */
 	private Text memoryLabel;
+	/** The label for used memory */
+	private Text usedMemoryLabel;
+	/** The label for free memory */
+	private Text freeMemoryLabel;
+	/** The label for time usage */
+	private Text timeUsageLabel;
 	
 	// picking
 	/** The selected {@link Body} for picking capability */
@@ -295,19 +268,6 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		this.fpsLabel = new Text(fpsString);
 		this.fpsLabel.generate();
 		
-		// text for rendering duration
-		AttributedString renderingString = new AttributedString("Rendering:");
-		this.renderLabel = new Text(renderingString);
-		this.renderLabel.generate();
-		
-		AttributedString inputString = new AttributedString("Input:");
-		this.inputLabel = new Text(inputString);
-		this.inputLabel.generate();
-		
-		AttributedString updateString = new AttributedString("Updating:");
-		this.updateLabel = new Text(updateString);
-		this.updateLabel.generate();
-		
 		AttributedString pausedString = new AttributedString("Paused");
 		pausedString.addAttribute(TextAttribute.FOREGROUND, Color.RED);
 		this.pausedLabel = new Text(pausedString);
@@ -316,6 +276,21 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		AttributedString memString = new AttributedString("Memory:");
 		this.memoryLabel = new Text(memString);
 		this.memoryLabel.generate();
+		
+		AttributedString umemString = new AttributedString("Used");
+		this.usedMemoryLabel = new Text(umemString);
+		this.usedMemoryLabel.generate();
+		
+		AttributedString fmemString = new AttributedString("Free");
+		this.freeMemoryLabel = new Text(fmemString);
+		this.freeMemoryLabel.generate();
+		
+		AttributedString timeString = new AttributedString("Time (Render/Update/System)");
+		timeString.addAttribute(TextAttribute.FOREGROUND, Color.MAGENTA, 6, 12);
+		timeString.addAttribute(TextAttribute.FOREGROUND, Color.GREEN, 13, 19);
+		timeString.addAttribute(TextAttribute.FOREGROUND, Color.LIGHT_GRAY, 20, 26);
+		this.timeUsageLabel = new Text(timeString);
+		this.timeUsageLabel.generate();
 	}
 	
 	/* (non-Javadoc)
@@ -386,7 +361,6 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 			// show the mode
 			// render the label
 			this.modeLabel.render(g, 5, 50);
-			
 			// render the value
 			if (this.stepMode) {
 				this.stepModeLabel.render(g, 60, 50);
@@ -394,24 +368,49 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 				this.continuousModeLabel.render(g, 60, 50);
 			}
 			
-			// show the used/free memory
-			this.memoryLabel.render(g, 5, 65);
-			double memw = 50;
+			// render the frames per second
+			// render the label
+			this.fpsLabel.render(g, 5, 65);
+			// render the value
+			AttributedString fpsString = new AttributedString(String.valueOf(this.fps.getFps()));
+			Text fps = new Text(fpsString);
+			fps.generate();
+			fps.render(g, 60, 65);
 			
-			g.setColor(Color.WHITE);
-			g.fillRect(60, 67, (int) Math.ceil(memw), 12);
-			g.fillRect(60, 82, (int) Math.ceil(memw), 12);
-			g.setColor(Color.RED);
-			g.fillRect(60, 67, (int) Math.ceil((this.totalMemory - this.freeMemory) / this.totalMemory * memw) - 1, 12);
-			g.setColor(Color.BLUE);
-			g.fillRect(60, 82, (int) Math.ceil(this.freeMemory / this.totalMemory * memw) - 1, 12);
-			g.setColor(Color.BLACK);
-			g.drawRect(60, 67, (int) Math.ceil(memw), 12);
-			g.drawRect(60, 82, (int) Math.ceil(memw), 12);
-			AttributedString tot = new AttributedString(String.valueOf((int) this.totalMemory) + "K");
+			// show the used/free memory bar
+			this.memoryLabel.render(g, 5, 80);
+			AttributedString tot = new AttributedString(String.valueOf((int) this.totalMemory) + "K Total");
 			Text tota = new Text(tot);
 			tota.generate();
-			tota.render(g, 60, 97);
+			tota.render(g, 60, 80);
+			double barWidth = 100;
+			g.setColor(Color.WHITE);
+			g.fillRect(5, 95, (int) Math.ceil(barWidth), 12);
+			g.fillRect(5, 110, (int) Math.ceil(barWidth), 12);
+			g.setColor(Color.RED);
+			g.fillRect(5, 95, (int) Math.ceil((this.totalMemory - this.freeMemory) / this.totalMemory * barWidth), 12);
+			g.setColor(Color.BLUE);
+			g.fillRect(5, 110, (int) Math.ceil(this.freeMemory / this.totalMemory * barWidth), 12);
+			g.setColor(Color.BLACK);
+			g.drawRect(5, 95, (int) Math.ceil(barWidth) + 1, 12);
+			g.drawRect(5, 110, (int) Math.ceil(barWidth) + 1, 12);
+			this.usedMemoryLabel.render(g, barWidth + 10, 95);
+			this.freeMemoryLabel.render(g, barWidth + 10, 110);
+			
+			// show the time usage bar
+			this.timeUsageLabel.render(g, 5, 125);
+			double renderW = this.usage.getRenderTimePercentage() * barWidth;
+			double updateW = this.usage.getUpdateTimePercentage() * barWidth;
+			// since input polling time is so low, just consider it part of the system time
+			double systemW = (this.usage.getSystemTimePercentage() + this.usage.getInputTimePercentage()) * barWidth;
+			g.setColor(Color.MAGENTA);
+			g.fillRect(5, 140, (int) Math.ceil(renderW), 12);
+			g.setColor(Color.GREEN);
+			g.fillRect(5 + (int) Math.ceil(renderW), 140, (int) Math.ceil(updateW), 12);
+			g.setColor(Color.LIGHT_GRAY);
+			g.fillRect(5 + (int) Math.ceil(renderW) + (int) Math.ceil(updateW), 140, (int) Math.ceil(systemW), 12);
+			g.setColor(Color.BLACK);
+			g.drawRect(5, 140, (int) Math.ceil(barWidth) + 1, 12);
 			
 			// show contact information in the top right corner
 			
@@ -451,35 +450,6 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 			Text cr = new Text(crString);
 			cr.generate();
 			cr.render(g, width - cr.getWidth() - 5, 65);
-
-			// show frame rate information in the bottom left corner
-			
-			// render the frames per second
-			// render the label
-			this.fpsLabel.render(g, 5, 535);
-			this.renderLabel.render(g, 5, 550);
-			this.inputLabel.render(g, 5, 565);
-			this.updateLabel.render(g, 5, 580);
-			// render the value
-			AttributedString fpsString = new AttributedString(String.valueOf(this.fps.getFps()));
-			Text fps = new Text(fpsString);
-			fps.generate();
-			fps.render(g, 150 - fps.getWidth(), 535);
-			
-			AttributedString renderingString = new AttributedString(this.format.format(this.renderAvgTime) + " ms");
-			Text render = new Text(renderingString);
-			render.generate();
-			render.render(g, 150 - render.getWidth(), 550);
-			
-			AttributedString inputString = new AttributedString(this.format.format(this.inputAvgTime) + " ms");
-			Text input = new Text(inputString);
-			input.generate();
-			input.render(g, 150 - input.getWidth(), 565);
-			
-			AttributedString updateString = new AttributedString(this.format.format(this.updateAvgTime) + " ms");
-			Text update = new Text(updateString);
-			update.generate();
-			update.render(g, 150 - update.getWidth(), 580);
 		}
 		
 		// always show the paused box
@@ -489,7 +459,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 			this.pausedLabel.render(g, (width - this.pausedLabel.getWidth()) / 2.0, height - this.pausedLabel.getHeight() - 5);
 		}
 		
-		this.renderElapsedTime += this.timer.getCurrentTime() - startTime;
+		this.usage.renderComplete(this.timer.getCurrentTime() - startTime);
 	}
 	
 	/* (non-Javadoc)
@@ -662,6 +632,21 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 							this.mOld = this.test.world.control(this.selected);
 							// break from the loop
 							break;
+						} else {
+							// check for line segment
+							if (c.isType(Segment.TYPE)) {
+								Segment s = (Segment) c;
+								// if you are a tenth of a meter from it then consider that
+								// selecting the segment
+								if (s.contains(v, b.getTransform(), 0.05)) {
+									// selected item
+									this.selected = b;
+									// control the body
+									this.mOld = this.test.world.control(this.selected);
+									// break from the loop
+									break;
+								}
+							}
 						}
 					}
 					// check if we found an object
@@ -702,7 +687,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		// call the test poll method
 		this.test.poll(this.keyboard, this.mouse);
 		
-		this.inputElapsedTime += this.timer.getCurrentTime() - startTime;
+		this.usage.setInput(this.timer.getCurrentTime() - startTime);
 	}
 	
 	/* (non-Javadoc)
@@ -710,6 +695,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	 */
 	@Override
 	public void update(long elapsedTime) {
+		this.usage.update(elapsedTime);
 		long startTime = this.timer.getCurrentTime();
 		
 		super.update(elapsedTime);
@@ -759,23 +745,10 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		// update the test
 		this.test.update(this.isPaused(), this.stepMode, dt);
 
-		this.lastUpdateTime += elapsedTime;
-		this.updateElapsedTime += this.timer.getCurrentTime() - startTime;
-
-		this.iterations++;
-		
-		if (this.lastUpdateTime >= ONE_SECOND_IN_NANOSECONDS) {
-			this.renderAvgTime = (double)this.renderElapsedTime / (double)this.iterations / 1000000.0;
-			this.updateAvgTime = (double)this.updateElapsedTime / (double)this.iterations / 1000000.0;
-			this.inputAvgTime = (double)this.inputElapsedTime / (double)this.iterations / 1000000.0;
-			this.renderElapsedTime = 0;
-			this.updateElapsedTime = 0;
-			this.inputElapsedTime = 0;
-			this.lastUpdateTime = 0;
-			this.iterations = 0;
-		}
 		this.totalMemory = Runtime.getRuntime().totalMemory() / 1024.0;
 		this.freeMemory = Runtime.getRuntime().freeMemory() / 1024.0;
+		
+		this.usage.setUpdate(this.timer.getCurrentTime() - startTime);
 	}
 	
 	/* (non-Javadoc)

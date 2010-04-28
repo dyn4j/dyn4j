@@ -252,6 +252,49 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 		}
 		return false;
 	}
+	
+	/**
+	 * Returns true if the given point is inside this {@link Shape}.
+	 * <p>
+	 * If the given point lies on an edge the point is considered
+	 * to be inside the {@link Shape}.
+	 * <p>
+	 * The given point is assumed to be in world space.
+	 * <p>
+	 * If the radius is greater than zero then the point is tested to be
+	 * within the shape expanded radially by the radius.
+	 * @param point world space point
+	 * @param transform {@link Transform} for this {@link Shape}
+	 * @param radius the expansion radius; in the range [0, &infin;]
+	 * @return boolean
+	 */
+	public boolean contains(Vector point, Transform transform, double radius) {
+		// if the radius is zero or less then perform the normal procedure
+		if (radius <= 0) {
+			return contains(point, transform);
+		} else {
+			// put the point in local coordinates
+			Vector p = transform.getInverseTransformed(point);
+			// otherwise act like the segment is two circles and a rectangle
+			if (this.vertices[0].distanceSquared(p) <= radius * radius) {
+				return true;
+			} else if (this.vertices[1].distanceSquared(p) <= radius * radius) {
+				return true;
+			} else {
+				// see if the point is in the rectangle portion
+				Vector l = this.vertices[0].to(this.vertices[1]);
+				Vector p1 = this.vertices[0].to(p);
+				Vector p2 = this.vertices[1].to(p);
+				if (l.dot(p1) > 0 && -l.dot(p2) > 0) {
+					double dist = p1.project(l.getRightHandOrthogonalVector()).getMagnitudeSquared();
+					if (dist <= radius * radius) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
 
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.geometry.Shape#project(org.dyn4j.game2d.geometry.Vector, org.dyn4j.game2d.geometry.Transform)
