@@ -742,6 +742,14 @@ public class World {
 	}
 	
 	/**
+	 * Clears the joints and bodies from the world.
+	 */
+	public void clear() {
+		this.joints.clear();
+		this.bodies.clear();
+	}
+	
+	/**
 	 * Returns the number of {@link Body} objects.
 	 * @return int the number of bodies
 	 */

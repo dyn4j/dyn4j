@@ -107,7 +107,7 @@ public abstract class Test {
 	 */
 	public void reset() {
 		// clear all the bodies
-		this.world.getBodies().clear();
+		this.world.clear();
 		// setup the test
 		this.setup();
 	}
