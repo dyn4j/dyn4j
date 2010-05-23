@@ -25,6 +25,15 @@ public class Usage {
 	/** The time used by the system */
 	private long systemTime;
 	
+	/** The total memory */
+	private long totalMemoryAcc;
+	
+	/** The free memory */
+	private long freeMemoryAcc;
+	
+	/** The number of iterations */
+	private long iterations;
+	
 	/** Last second's render to total time percentage */
 	private double renderTimePercentage;
 	
@@ -37,6 +46,15 @@ public class Usage {
 	/** Last second's system to total time percentage */
 	private double systemTimePercentage;
 	
+	/** Last second's used memory percentage */
+	private double usedMemoryPercentage;
+	
+	/** Last second's free memory percentage */
+	private double freeMemoryPercentage;
+	
+	/** Last second's total memory */
+	private double totalMemory;
+	
 	/**
 	 * Updates the elapsed time and performs an evaluation of
 	 * usage at one second intervals.
@@ -45,6 +63,11 @@ public class Usage {
 	public void update(long elapsedTime) {
 		// increment the total time
 		this.elapsedTime += elapsedTime;
+		// increment the total and free memory
+		Runtime runtime = Runtime.getRuntime();
+		this.totalMemoryAcc += runtime.totalMemory();
+		this.freeMemoryAcc += runtime.freeMemory();
+		this.iterations++;
 		// has it been a second?
 		if (this.elapsedTime >= Usage.ONE_SECOND_IN_NANOSECONDS) {
 			// calculate the system time
@@ -58,6 +81,12 @@ public class Usage {
 			} else {
 				this.systemTimePercentage = 0;
 			}
+			// calculate the percentage of memory free/used
+			this.totalMemory = (double) this.totalMemoryAcc / (double) this.iterations;
+			double freeMem = (double) this.freeMemoryAcc / (double) this.iterations;
+			double usedMem = this.totalMemory - freeMem;
+			this.freeMemoryPercentage = freeMem / this.totalMemory;
+			this.usedMemoryPercentage = usedMem / this.totalMemory;
 			this.elapsedTime = 0;
 			this.renderTime = 0;
 			this.updateTime = 0;
@@ -122,5 +151,29 @@ public class Usage {
 	 */
 	public double getSystemTimePercentage() {
 		return this.systemTimePercentage;
+	}
+	
+	/**
+	 * Returns the free memory as a percentage of the total memory available.
+	 * @return double
+	 */
+	public double getFreeMemoryPercentage() {
+		return this.freeMemoryPercentage;
+	}
+	
+	/**
+	 * Returns the used memory as a percentage of the total memory available.
+	 * @return double
+	 */
+	public double getUsedMemoryPercentage() {
+		return this.usedMemoryPercentage;
+	}
+	
+	/**
+	 * Returns the total memory.
+	 * @return double
+	 */
+	public double getTotalMemory() {
+		return this.totalMemory;
 	}
 }
