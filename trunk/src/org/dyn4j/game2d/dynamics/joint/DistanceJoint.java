@@ -148,7 +148,7 @@ public class DistanceJoint extends Joint {
 		// verify the frequency
 		if (frequency <= 0) throw new IllegalArgumentException("The frequency must be greater than zero.");
 		// verify the damping ratio
-		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException("The damping ratio must be between 0 and 1.");
+		if (dampingRatio <= 0 || dampingRatio >= 1) throw new IllegalArgumentException("The damping ratio must be between 0 and 1.");
 		this.localAnchor1 = b1.getLocalPoint(anchor1);
 		this.localAnchor2 = b2.getLocalPoint(anchor2);
 		this.distance = anchor1.distance(anchor2);
@@ -431,7 +431,7 @@ public class DistanceJoint extends Joint {
 	 * @param dampingRatio the damping ratio; in the range [0, 1]
 	 */
 	public void setDampingRatio(double dampingRatio) {
-		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException("The damping ratio must be between 0 and 1.");
+		if (dampingRatio <= 0 || dampingRatio >= 1) throw new IllegalArgumentException("The damping ratio must be between 0 and 1.");
 		this.dampingRatio = dampingRatio;
 	}
 	

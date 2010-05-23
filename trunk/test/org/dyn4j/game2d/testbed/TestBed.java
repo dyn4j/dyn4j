@@ -31,6 +31,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
 import java.text.AttributedString;
+import java.text.NumberFormat;
 import java.util.logging.Logger;
 
 import javax.naming.ConfigurationException;
@@ -63,12 +64,6 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	
 	/** The time usage object */
 	private Usage usage = new Usage();
-	
-	/** The current free memory */
-	private double freeMemory = 1.0;
-	
-	/** The current total memory */
-	private double totalMemory = 2.0;
 	
 	/** The current test */
 	private Test test;
@@ -114,6 +109,8 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	private Text usedMemoryLabel;
 	/** The label for free memory */
 	private Text freeMemoryLabel;
+	/** The label for total memory */
+	private Text totalMemoryLabel;
 	/** The label for time usage */
 	private Text timeUsageLabel;
 	
@@ -285,10 +282,14 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		this.freeMemoryLabel = new Text(fmemString);
 		this.freeMemoryLabel.generate();
 		
-		AttributedString timeString = new AttributedString("Time (Render/Update/System)");
-		timeString.addAttribute(TextAttribute.FOREGROUND, Color.MAGENTA, 6, 12);
-		timeString.addAttribute(TextAttribute.FOREGROUND, Color.GREEN, 13, 19);
-		timeString.addAttribute(TextAttribute.FOREGROUND, Color.LIGHT_GRAY, 20, 26);
+		AttributedString tmemString = new AttributedString("Total");
+		this.totalMemoryLabel = new Text(tmemString);
+		this.totalMemoryLabel.generate();
+		
+		AttributedString timeString = new AttributedString("Time ( Render | Update | System )");
+		timeString.addAttribute(TextAttribute.FOREGROUND, new Color(2103832), 7, 13);
+		timeString.addAttribute(TextAttribute.FOREGROUND, new Color(7687216), 16, 22);
+		timeString.addAttribute(TextAttribute.FOREGROUND, new Color(11433281), 25, 31);
 		this.timeUsageLabel = new Text(timeString);
 		this.timeUsageLabel.generate();
 	}
@@ -368,49 +369,55 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 				this.continuousModeLabel.render(g, 60, 50);
 			}
 			
+			// render running metrics in the bottom left corner
+			
 			// render the frames per second
 			// render the label
-			this.fpsLabel.render(g, 5, 65);
+			this.fpsLabel.render(g, 5, 500);
 			// render the value
 			AttributedString fpsString = new AttributedString(String.valueOf(this.fps.getFps()));
 			Text fps = new Text(fpsString);
 			fps.generate();
-			fps.render(g, 60, 65);
+			fps.render(g, 60, 500);
 			
 			// show the used/free memory bar
-			this.memoryLabel.render(g, 5, 80);
-			AttributedString tot = new AttributedString(String.valueOf((int) this.totalMemory) + "K Total");
+			double barWidth = 100;
+			this.memoryLabel.render(g, 5, 515);
+			NumberFormat nf = NumberFormat.getNumberInstance();
+			nf.setMaximumFractionDigits(2);
+			nf.setMinimumFractionDigits(2);
+			AttributedString tot = new AttributedString(nf.format(this.usage.getTotalMemory() / 1024.0 / 1024.0) + "M");
 			Text tota = new Text(tot);
 			tota.generate();
-			tota.render(g, 60, 80);
-			double barWidth = 100;
+			tota.render(g, 60, 515);
+			this.totalMemoryLabel.render(g, barWidth + 10, 515);
 			g.setColor(Color.WHITE);
-			g.fillRect(5, 95, (int) Math.ceil(barWidth), 12);
-			g.fillRect(5, 110, (int) Math.ceil(barWidth), 12);
-			g.setColor(Color.RED);
-			g.fillRect(5, 95, (int) Math.ceil((this.totalMemory - this.freeMemory) / this.totalMemory * barWidth), 12);
-			g.setColor(Color.BLUE);
-			g.fillRect(5, 110, (int) Math.ceil(this.freeMemory / this.totalMemory * barWidth), 12);
-			g.setColor(Color.BLACK);
-			g.drawRect(5, 95, (int) Math.ceil(barWidth) + 1, 12);
-			g.drawRect(5, 110, (int) Math.ceil(barWidth) + 1, 12);
-			this.usedMemoryLabel.render(g, barWidth + 10, 95);
-			this.freeMemoryLabel.render(g, barWidth + 10, 110);
+			g.fillRect(5, 530, (int) Math.ceil(barWidth), 12);
+			g.fillRect(5, 545, (int) Math.ceil(barWidth), 12);
+			g.setColor(new Color(14300672));
+			g.fillRect(5, 530, (int) Math.ceil(this.usage.getUsedMemoryPercentage() * barWidth), 12);
+			g.setColor(new Color(16754696));
+			g.fillRect(5, 545, (int) Math.ceil(this.usage.getFreeMemoryPercentage() * barWidth), 12);
+			g.setColor(Color.DARK_GRAY);
+			g.drawRect(5, 530, (int) Math.ceil(barWidth) + 1, 12);
+			g.drawRect(5, 545, (int) Math.ceil(barWidth) + 1, 12);
+			this.usedMemoryLabel.render(g, barWidth + 10, 530);
+			this.freeMemoryLabel.render(g, barWidth + 10, 545);
 			
 			// show the time usage bar
-			this.timeUsageLabel.render(g, 5, 125);
+			this.timeUsageLabel.render(g, 5, 560);
 			double renderW = this.usage.getRenderTimePercentage() * barWidth;
 			double updateW = this.usage.getUpdateTimePercentage() * barWidth;
 			// since input polling time is so low, just consider it part of the system time
 			double systemW = (this.usage.getSystemTimePercentage() + this.usage.getInputTimePercentage()) * barWidth;
-			g.setColor(Color.MAGENTA);
-			g.fillRect(5, 140, (int) Math.ceil(renderW), 12);
-			g.setColor(Color.GREEN);
-			g.fillRect(5 + (int) Math.ceil(renderW), 140, (int) Math.ceil(updateW), 12);
-			g.setColor(Color.LIGHT_GRAY);
-			g.fillRect(5 + (int) Math.ceil(renderW) + (int) Math.ceil(updateW), 140, (int) Math.ceil(systemW), 12);
-			g.setColor(Color.BLACK);
-			g.drawRect(5, 140, (int) Math.ceil(barWidth) + 1, 12);
+			g.setColor(new Color(2103832));
+			g.fillRect(5, 575, (int) Math.ceil(renderW), 12);
+			g.setColor(new Color(7687216));
+			g.fillRect(5 + (int) Math.ceil(renderW), 575, (int) Math.ceil(updateW), 12);
+			g.setColor(new Color(11433281));
+			g.fillRect(5 + (int) Math.ceil(renderW) + (int) Math.ceil(updateW), 575, (int) Math.ceil(systemW), 12);
+			g.setColor(Color.DARK_GRAY);
+			g.drawRect(5, 575, (int) Math.ceil(barWidth) + 1, 12);
 			
 			// show contact information in the top right corner
 			
@@ -744,9 +751,6 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		double dt = (double)elapsedTime / 1.0e9;
 		// update the test
 		this.test.update(this.isPaused(), this.stepMode, dt);
-
-		this.totalMemory = Runtime.getRuntime().totalMemory() / 1024.0;
-		this.freeMemory = Runtime.getRuntime().freeMemory() / 1024.0;
 		
 		this.usage.setUpdate(this.timer.getCurrentTime() - startTime);
 	}
