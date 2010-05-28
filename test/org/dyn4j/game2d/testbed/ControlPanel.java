@@ -106,7 +106,9 @@ public class ControlPanel extends JFrame {
 		{"Move Mouse", "Move to translate the selected shape."},
 		{"z", "Hold to rotate the selected shape."},
 		{"o", "Outputs all the bodies current state to std out."},
-		{"b", "Launches a bomb from the left side."}
+		{"b", "Launches a bomb from the left side."},
+		{"i", "Increases the metrics update rate."},
+		{"d", "Decreases the metrics update rate."}
 		};
 	
 	/** Map of available test to run */
@@ -659,18 +661,18 @@ public class ControlPanel extends JFrame {
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// draw text
-		JLabel lblText = new JLabel("Text");
+		JLabel lblText = new JLabel("Information Panel");
 		pnlDraw.add(lblText, new GridBagConstraints(
 				0, 8, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkText = new JCheckBox();
-		chkText.setSelected(draw.drawText());
+		chkText.setSelected(draw.drawPanel());
 		chkText.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// toggle the checkbox
 				Draw draw = Draw.getInstance();
-				draw.setDrawText(!draw.drawText());
+				draw.setDrawPanel(!draw.drawPanel());
 			}
 		});
 		pnlDraw.add(chkText, new GridBagConstraints(
@@ -699,7 +701,7 @@ public class ControlPanel extends JFrame {
 		// draw outlines?
 		JLabel lblOutline = new JLabel("Shape Outlines");
 		pnlDraw.add(lblOutline, new GridBagConstraints(
-				0, 10, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
+				0, 10, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkOutline = new JCheckBox();
 		chkOutline.setSelected(draw.drawOutline());
@@ -712,7 +714,26 @@ public class ControlPanel extends JFrame {
 			}
 		});
 		pnlDraw.add(chkOutline, new GridBagConstraints(
-				1, 10, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, 
+				1, 10, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		
+		// draw normals?
+		JLabel lblNormals = new JLabel("Edge Normals");
+		pnlDraw.add(lblNormals, new GridBagConstraints(
+				0, 11, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JCheckBox chkNormals = new JCheckBox();
+		chkNormals.setSelected(draw.drawNormals());
+		chkNormals.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// toggle the checkbox
+				Draw draw = Draw.getInstance();
+				draw.setDrawNormals(!draw.drawNormals());
+			}
+		});
+		pnlDraw.add(chkNormals, new GridBagConstraints(
+				1, 11, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		panel.add(pnlDraw);

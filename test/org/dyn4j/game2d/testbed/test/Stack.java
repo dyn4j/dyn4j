@@ -121,8 +121,8 @@ public class Stack extends Test {
 	@Override
 	public void home() {
 		// set the scale
-		this.scale = 32.0;
+		this.scale = 64.0;
 		// set the camera offset
-		this.offset.zero();
+		this.offset.set(0.0, -2.0);
 	}
 }

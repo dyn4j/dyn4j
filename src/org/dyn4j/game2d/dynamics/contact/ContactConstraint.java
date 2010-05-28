@@ -38,7 +38,7 @@ import org.dyn4j.game2d.geometry.Vector;
  */
 public class ContactConstraint extends Constraint {
 	/** The unique contact id */
-	protected String id;
+	protected ContactConstraintId id;
 	
 	/** The first {@link Body}'s {@link Convex} {@link Shape} */
 	protected Convex c1;
@@ -68,13 +68,11 @@ public class ContactConstraint extends Constraint {
 	 */
 	public ContactConstraint(Body b1, Convex c1, Body b2, Convex c2, Manifold m) {
 		super(b1, b2);
-		// set the involved convexes
+		// set the involved convex shapes
 		this.c1 = c1;
 		this.c2 = c2;
-		// set the id
-		StringBuilder sb = new StringBuilder();
-		sb.append(b1.getId()).append(b2.getId()).append(c1.getId()).append(c2.getId());
-		this.id = sb.toString();
+		// create the constraint id
+		this.id = new ContactConstraintId(b1, b2, c1, c2);
 		// get the manifold point size
 		int mSize = m.getPoints().size();
 		// create contact array
@@ -82,12 +80,9 @@ public class ContactConstraint extends Constraint {
 		for (int l = 0; l < mSize; l++) {
 			// get the manifold point
 			ManifoldPoint point = m.getPoints().get(l);
-			// create a contact id for the point
-			ContactId id = new ContactId(m.getReferenceIndex(), 
-					                     m.getIncidentIndex(), 
-					                     point.getIndex());
 			// create a contact from the manifold point
-			Contact contact = new Contact(id, point.getPoint(), 
+			Contact contact = new Contact(point.getId(),
+					                      point.getPoint(), 
 					                      point.getDepth(), 
 					                      this.b1.getLocalPoint(point.getPoint()), 
 					                      this.b2.getLocalPoint(point.getPoint()));

@@ -57,6 +57,12 @@ public class Rectangle extends Polygon implements Shape, Transformable {
 			new Vector( width / 2.0,  height / 2.0),
 			new Vector(-width / 2.0,  height / 2.0)	
 		};
+		// set the normals
+		this.normals = new Vector[4];
+		this.normals[0] = new Vector(0.0, -1.0);
+		this.normals[1] = new Vector(1.0, 0.0);
+		this.normals[2] = new Vector(0.0, 1.0);
+		this.normals[3] = new Vector(-1.0, 0.0);
 		// use the average method for the centroid
 		this.center = Geometry.getAverageCenter(this.vertices);
 		// set the width and height
@@ -109,14 +115,10 @@ public class Rectangle extends Polygon implements Shape, Transformable {
 		// create an array to hold the axes
 		Vector[] axes = new Vector[2 + fociSize];
 		int n = 0;
-		// get the vertices required to make the 2 surface normals
-		Vector p1 = transform.getTransformed(this.vertices[0]);
-		Vector p2 = transform.getTransformed(this.vertices[1]);
-		Vector p4 = transform.getTransformed(this.vertices[3]);
 		// return the normals to the surfaces, since this is a 
 		// rectangle we only have two axes to test against
-		axes[n++] = p1.to(p2);
-		axes[n++] = p1.to(p4);
+		axes[n++] = transform.getTransformedR(this.normals[1]);
+		axes[n++] = transform.getTransformedR(this.normals[2]);
 		// get the closest point to each focus
 		for (int i = 0; i < fociSize; i++) {
 			// get the current focus
@@ -191,14 +193,9 @@ public class Rectangle extends Polygon implements Shape, Transformable {
 	public Interval project(Vector axis, Transform transform) {
 		// get the center and vertices
 		Vector center = transform.getTransformed(this.center);
-		Vector p1 = transform.getTransformed(this.vertices[0]);
-		Vector p2 = transform.getTransformed(this.vertices[1]);
-		Vector p4 = transform.getTransformed(this.vertices[3]);
 		// create the project axes
-		Vector projectAxis0 = p1.to(p2);
-		Vector projectAxis1 = p1.to(p4);
-		projectAxis0.normalize();
-		projectAxis1.normalize();
+		Vector projectAxis0 = transform.getTransformedR(this.normals[1]);
+		Vector projectAxis1 = transform.getTransformedR(this.normals[2]);
 		// project the shape on the axis
 		double c = center.dot(axis);
 		double e = (this.width * 0.5) * Math.abs(projectAxis0.dot(axis)) + (this.height * 0.5) * Math.abs(projectAxis1.dot(axis));

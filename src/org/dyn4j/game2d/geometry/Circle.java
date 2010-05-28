@@ -110,14 +110,14 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 	 * For a {@link Circle} this is always a point.
 	 * @param n the direction
 	 * @param transform the local to world space {@link Transform} of this {@link Convex} {@link Shape}
-	 * @return {@link Feature.Vertex}
+	 * @return {@link Vertex}
 	 */
 	@Override
-	public Feature.Vertex getFarthestFeature(Vector n, Transform transform) {
+	public Vertex getFarthestFeature(Vector n, Transform transform) {
 		// obtain the farthest point along the given vector
 		Vector farthest = this.getFarthestPoint(n, transform);
 		// for a circle the farthest feature along a vector will always be a vertex
-		return new Feature.Vertex(farthest);
+		return new Vertex(farthest);
 	}
 	
 	/* (non-Javadoc)

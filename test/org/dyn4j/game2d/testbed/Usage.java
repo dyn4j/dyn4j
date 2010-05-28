@@ -8,7 +8,10 @@ package org.dyn4j.game2d.testbed;
  */
 public class Usage {
 	/** One second in nanoseconds */
-	private static final double ONE_SECOND_IN_NANOSECONDS = 1.0E9;
+	private static final long ONE_SECOND_IN_NANOSECONDS = 1000000000;
+	
+	/** The refresh rate in nanoseconds */
+	private long refreshRate;
 	
 	/** The elapsed time since the last evaluation */
 	private long elapsedTime;
@@ -56,6 +59,23 @@ public class Usage {
 	private double totalMemory;
 	
 	/**
+	 * Default constructor.
+	 * <p>
+	 * Refreshes every second.
+	 */
+	public Usage() {
+		this(Usage.ONE_SECOND_IN_NANOSECONDS);
+	}
+	
+	/**
+	 * Full constructor.
+	 * @param refreshRate the rate in nanoseconds
+	 */
+	public Usage(long refreshRate) {
+		this.refreshRate = refreshRate;
+	}
+	
+	/**
 	 * Updates the elapsed time and performs an evaluation of
 	 * usage at one second intervals.
 	 * @param elapsedTime the elapsed time since the last update in nanoseconds
@@ -69,7 +89,7 @@ public class Usage {
 		this.freeMemoryAcc += runtime.freeMemory();
 		this.iterations++;
 		// has it been a second?
-		if (this.elapsedTime >= Usage.ONE_SECOND_IN_NANOSECONDS) {
+		if (this.elapsedTime >= this.refreshRate) {
 			// calculate the system time
 			this.systemTime = this.elapsedTime - (this.renderTime + this.inputTime + this.updateTime);
 			// calculate the percentages of the total time
@@ -95,11 +115,27 @@ public class Usage {
 	}
 	
 	/**
+	 * Sets the refresh rate.
+	 * @param refreshRate the rate in nanoseconds
+	 */
+	public void setRefreshRate(long refreshRate) {
+		this.refreshRate = refreshRate;
+	}
+	
+	/**
+	 * Returns the refresh rate.
+	 * @return long the refresh rate in nanoseconds
+	 */
+	public long getRefreshRate() {
+		return this.refreshRate;
+	}
+	
+	/**
 	 * Increments the total render time by the given
 	 * elapsed time in nanoseconds.
 	 * @param elapsedTime the elapsed time in nanoseconds
 	 */
-	public void renderComplete(long elapsedTime) {
+	public void setRender(long elapsedTime) {
 		this.renderTime += elapsedTime;
 	}
 	

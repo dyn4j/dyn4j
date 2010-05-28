@@ -37,10 +37,10 @@ import org.dyn4j.game2d.geometry.Vector;
  */
 public class Penetration {
 	/** The normalized axis of projection */
-	protected Vector normal = null;
+	protected Vector normal;
 	
 	/** The penetration amount on this axis */
-	protected double depth = 0;
+	protected double depth;
 	
 	/**
 	 * Default constructor.
@@ -70,6 +70,14 @@ public class Penetration {
 	}
 	
 	/**
+	 * Clears the penetration information.
+	 */
+	public void clear() {
+		this.normal = null;
+		this.depth = 0;
+	}
+	
+	/**
 	 * Returns the penetration normal.
 	 * @return {@link Vector}
 	 */
@@ -83,5 +91,23 @@ public class Penetration {
 	 */
 	public double getDepth() {
 		return this.depth;
+	}
+	
+	/**
+	 * Sets the penetration normal.
+	 * <p>
+	 * Must be normalized.
+	 * @param normal the penetration normal
+	 */
+	public void setNormal(Vector normal) {
+		this.normal = normal;
+	}
+	
+	/**
+	 * Sets the penetration depth.
+	 * @param depth the penetration depth
+	 */
+	public void setDepth(double depth) {
+		this.depth = depth;
 	}
 }

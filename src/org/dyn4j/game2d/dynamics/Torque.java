@@ -39,8 +39,8 @@ public class Torque extends Force {
 	 * and world point coordinates.
 	 * @param fx the x component of the force
 	 * @param fy the y component of the force
-	 * @param px the world space x coordinate of the application point
-	 * @param py the world space y coordinate of the application point
+	 * @param px the world space x coordinate of the world space application point
+	 * @param py the world space y coordinate of the world space application point
 	 */
 	public Torque(double fx, double fy, double px, double py) {
 		super(fx, fy);
@@ -65,6 +65,37 @@ public class Torque extends Force {
 	public Torque(Torque torque) {
 		super(torque.force.copy());
 		this.point = torque.point.copy();
+	}
+	
+	/**
+	 * Sets this {@link Torque} to the given force a the given point.
+	 * @param fx the x component of the force
+	 * @param fy the y component of the force
+	 * @param px the x coordinate of the world space application point
+	 * @param py the y coordinate of the world space application point
+	 */
+	public void set(double fx, double fy, double px, double py) {
+		this.force.set(fx, fy);
+		this.point.set(px, py);
+	}
+	
+	/**
+	 * Sets this {@link Torque} to the given force at the given point.
+	 * @param force the force vector
+	 * @param point the world space application point
+	 */
+	public void set(Vector force, Vector point) {
+		this.force.set(force);
+		this.point.set(point);
+	}
+	
+	/**
+	 * Sets this {@link Torque} to the given {@link Torque}.
+	 * @param torque the {@link Torque} to copy
+	 */
+	public void set(Torque torque) {
+		this.force.set(torque.force);
+		this.point.set(torque.point);
 	}
 	
 	/**

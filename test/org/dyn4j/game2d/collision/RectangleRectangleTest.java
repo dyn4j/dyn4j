@@ -378,16 +378,17 @@ public class RectangleRectangleTest extends AbstractTest {
 		TestCase.assertEquals(-0.250, p2.y, 1.0e-3);
 		TestCase.assertEquals(0.250, mp2.getDepth(), 1.0e-3);
 		// try reversing the shapes
+		this.gjk.detect(rect2, t2, rect1, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, rect2, t2, rect1, t1, m));
 		TestCase.assertEquals(2, m.getPoints().size());
 		mp1 = m.getPoints().get(0);
 		mp2 = m.getPoints().get(1);
 		p1 = mp1.getPoint();
 		p2 = mp2.getPoint();
-		TestCase.assertEquals(-0.250, p1.x, 1.0e-3);
+		TestCase.assertEquals(0.000, p1.x, 1.0e-3);
 		TestCase.assertEquals(0.250, p1.y, 1.0e-3);
 		TestCase.assertEquals(0.250, mp1.getDepth(), 1.0e-3);
-		TestCase.assertEquals(-0.250, p2.x, 1.0e-3);
+		TestCase.assertEquals(0.000, p2.x, 1.0e-3);
 		TestCase.assertEquals(-0.250, p2.y, 1.0e-3);
 		TestCase.assertEquals(0.250, mp2.getDepth(), 1.0e-3);
 		
@@ -406,16 +407,17 @@ public class RectangleRectangleTest extends AbstractTest {
 		TestCase.assertEquals(-0.250, p2.y, 1.0e-3);
 		TestCase.assertEquals(0.250, mp2.getDepth(), 1.0e-3);
 		// try reversing the shapes
+		this.sat.detect(rect2, t2, rect1, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, rect2, t2, rect1, t1, m));
 		TestCase.assertEquals(2, m.getPoints().size());
 		mp1 = m.getPoints().get(0);
 		mp2 = m.getPoints().get(1);
 		p1 = mp1.getPoint();
 		p2 = mp2.getPoint();
-		TestCase.assertEquals(-0.250, p1.x, 1.0e-3);
+		TestCase.assertEquals(0.000, p1.x, 1.0e-3);
 		TestCase.assertEquals(0.250, p1.y, 1.0e-3);
 		TestCase.assertEquals(0.250, mp1.getDepth(), 1.0e-3);
-		TestCase.assertEquals(-0.250, p2.x, 1.0e-3);
+		TestCase.assertEquals(0.000, p2.x, 1.0e-3);
 		TestCase.assertEquals(-0.250, p2.y, 1.0e-3);
 		TestCase.assertEquals(0.250, mp2.getDepth(), 1.0e-3);
 	}

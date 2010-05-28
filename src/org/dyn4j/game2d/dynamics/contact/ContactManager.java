@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.dyn4j.game2d.collision.manifold.ManifoldPointId;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.Settings;
 import org.dyn4j.game2d.dynamics.World;
@@ -42,7 +43,7 @@ import org.dyn4j.game2d.dynamics.World;
  */
 public class ContactManager {
 	/** Map for fast look up of  {@link ContactConstraint}s */
-	protected Map<String, ContactConstraint> map = null;
+	protected Map<ContactConstraintId, ContactConstraint> map = null;
 
 	/** The current list of contact constraints */
 	protected List<ContactConstraint> list = null;
@@ -111,9 +112,11 @@ public class ContactManager {
 
 		// get the warm start distance from the settings
 		double warmStartDistance = Settings.getInstance().getWarmStartDistance();
+		// square it for comparison later
+		warmStartDistance *= warmStartDistance;
 		
 		// create a new map for the new contacts constraints
-		Map<String, ContactConstraint> newMap = new HashMap<String, ContactConstraint>(this.list.size() * 2);
+		Map<ContactConstraintId, ContactConstraint> newMap = new HashMap<ContactConstraintId, ContactConstraint>(this.list.size() * 2);
 		
 		// create a contact point and a persisted contact point to be used by the listener
 		ContactPoint cp = new ContactPoint();
@@ -126,10 +129,6 @@ public class ContactManager {
 			ContactConstraint ncc = this.list.get(i);
 			// define the old contact constraint
 			ContactConstraint occ = null;
-			
-			// body/shape combinations may reverse, but in that case we
-			// don't want to warm start so don't worry about the id being
-			// in the same order
 			
 			// doing a remove here will ensure that the remaining contact
 			// constraints in the map will be contacts that need to be notified of
@@ -159,9 +158,9 @@ public class ContactManager {
 					for (int k = 0; k < osize; k++) {
 						// get the old contact
 						Contact o = occ.contacts[k];
-						// only warm start if the distance between the contacts is
-						// within the warm start distance
-						if (n.id.equals(o.id) && n.p.distanceSquared(o.p) <= warmStartDistance) {
+						// check if the id type is distance, if so perform a distance check using the warm start distance
+						// else just compare the ids
+						if ((n.id == ManifoldPointId.DISTANCE && n.p.distanceSquared(o.p) <= warmStartDistance) || n.id.equals(o.id)) {
 							// warm start by setting the new contact constraint
 							// accumulated impulses to the old contact constraint
 							n.jn = o.jn;

@@ -131,6 +131,6 @@ public class Filter extends Test {
 		// set the scale
 		this.scale = 32.0;
 		// set the offset
-		this.offset.set(0.0, -5.0);
+		this.offset.set(0.0, -4.0);
 	}
 }

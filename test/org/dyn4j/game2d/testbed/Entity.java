@@ -39,8 +39,10 @@ import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Polygon;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Segment;
+import org.dyn4j.game2d.geometry.Shape;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Wound;
 
 /**
  * Represents a game entity.
@@ -146,7 +148,7 @@ public class Entity extends Body {
 			
 			// check if we should render outlines
 			if (draw.drawOutline()) {
-				// set the color to red
+				// set the color
 				graphics.setColor(this.color.darker());
 				// if the body is asleep set the render color to blue
 				if (this.isAsleep()) graphics.setColor(Entity.ASLEEP_COLOR.darker());
@@ -154,6 +156,14 @@ public class Entity extends Body {
 				if (this.isFrozen()) graphics.setColor(Entity.FROZEN_COLOR.darker());
 				// render the convex shape
 				this.renderConvex(graphics, c, tx, scale);
+			}
+			
+			// check if we should render normals
+			if (draw.drawNormals()) {
+				// set the color
+				graphics.setColor(Color.RED);
+				// render the normals
+				this.renderNormals(graphics, c, tx, scale);
 			}
 		}
 		
@@ -290,6 +300,40 @@ public class Entity extends Body {
 					(int) Math.ceil(p1.y * scale),
 					(int) Math.ceil(p2.x * scale),
 					(int) Math.ceil(p2.y * scale));
+		}
+	}
+	
+	/**
+	 * Renders the edge normals of the given {@link Convex} {@link Shape} if the {@link Shape}
+	 * is a {@link Wound} {@link Shape}.
+	 * @param g the graphics object to render to
+	 * @param c the convex object to render on top of
+	 * @param t the transform of the convex object
+	 * @param s the world to screen space scale factor
+	 */
+	private void renderNormals(Graphics2D g, Convex c, Transform t, double s) {
+		// set the normal length
+		final double l = 0.1;
+		// make sure the shape is of type wound
+		if (c instanceof Wound) {
+			Wound shape = (Wound) c;
+			Vector[] vertices = shape.getVertices();
+			Vector[] normals = shape.getNormals();
+			int size = normals.length;
+			// render all the normals
+			for (int i = 0; i < size; i++) {
+				Vector p1 = t.getTransformed(vertices[i]);
+				Vector p2 = t.getTransformed(vertices[(i + 1 == size) ? 0 : i + 1]);
+				Vector n = t.getTransformedR(normals[i]);
+				// find the mid point between p1 and p2
+				Vector mid = p1.to(p2).multiply(0.5).add(p1);
+				// draw a line from the mid point along n
+				g.drawLine(
+						(int) Math.ceil(mid.x * s),
+						(int) Math.ceil(mid.y * s),
+						(int) Math.ceil((mid.x + n.x * l) * s),
+						(int) Math.ceil((mid.y + n.y * l) * s));
+			}
 		}
 	}
 	

@@ -31,14 +31,14 @@ import org.dyn4j.game2d.geometry.Vector;
  * @author William Bittle
  */
 public class ManifoldPoint {
+	/** The id for this manifold point */
+	protected ManifoldPointId id;
+	
 	/** The point in world coordinates */
 	protected Vector point;
 	
 	/** The penetration depth */
 	protected double depth;
-	
-	/** The index of the point in the manifold; could be 1 even though this is the only point */
-	protected int index;
 	
 	/**
 	 * Default constructor.
@@ -47,14 +47,14 @@ public class ManifoldPoint {
 	
 	/**
 	 * Full constructor.
+	 * @param id the id for this manifold point
 	 * @param point the manifold point in world coordinates
 	 * @param depth the penetration depth
-	 * @param index the index of the manifold point
 	 */
-	public ManifoldPoint(Vector point, double depth, int index) {
+	public ManifoldPoint(ManifoldPointId id, Vector point, double depth) {
+		this.id = id;
 		this.point = point;
 		this.depth = depth;
-		this.index = index;
 	}
 	
 	/* (non-Javadoc)
@@ -64,10 +64,18 @@ public class ManifoldPoint {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("MANIFOLD_POINT[")
+		.append(this.id).append("|")
 		.append(this.point).append("|")
-		.append(this.depth).append("|")
-		.append(this.index).append("]");
+		.append(this.depth).append("]");
 		return sb.toString();
+	}
+	
+	/**
+	 * Returns the id for this manifold point.
+	 * @return {@link ManifoldPointId}
+	 */
+	public ManifoldPointId getId() {
+		return this.id;
 	}
 	
 	/**
@@ -84,13 +92,5 @@ public class ManifoldPoint {
 	 */
 	public double getDepth() {
 		return this.depth;
-	}
-	
-	/**
-	 * Returns the index of the manifold point.
-	 * @return int
-	 */
-	public int getIndex() {
-		return this.index;
 	}
 }

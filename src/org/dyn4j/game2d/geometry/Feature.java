@@ -44,6 +44,9 @@ public abstract class Feature {
 		EDGE
 	}
 	
+	/** Index for non-indexed vertices */
+	public static final int NOT_INDEXED = -1;
+	
 	/** The {@link Feature.Type} */
 	protected Feature.Type type;
 	
@@ -69,120 +72,5 @@ public abstract class Feature {
 	 */
 	public boolean isVertex() {
 		return this.type == Feature.Type.VERTEX;
-	}
-	
-	/**
-	 * Represents a straight edge comprised of
-	 * two points.
-	 * @author William Bittle
-	 */
-	public static class Edge extends Feature {
-		/** The vertices making the edge */
-		protected Vector[] vertices;
-		
-		/** The vertex of maximum projection along a {@link Vector} */
-		protected Vector max;
-		
-		/** The index of the edge on the shape */
-		protected int index;
-		
-		/**
-		 * Creates an edge feature.
-		 * <p>
-		 * Assumes the index is zero.
-		 * @param vertices the vertices making the edge
-		 * @param max the maximum point
-		 */
-		public Edge(Vector[] vertices, Vector max) {
-			this(vertices, max, 0);
-		}
-		
-		/**
-		 * Creates an edge feature.
-		 * @param vertices the vertices making the edge
-		 * @param max the maximum point
-		 * @param index the index of the edge
-		 */
-		public Edge(Vector[] vertices, Vector max, int index) {
-			super(Feature.Type.EDGE);
-			this.vertices = vertices;
-			this.max = max;
-			this.index = index;
-		}
-		
-		/* (non-Javadoc)
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			StringBuilder sb = new StringBuilder();
-			sb.append("FEATURE").append("[");
-			sb.append(this.type).append("|");
-			sb.append("{").append(this.vertices[0]).append(this.vertices[1]).append("}|");
-			sb.append(this.max).append("]");
-			return sb.toString();
-		}
-		
-		/**
-		 * Returns the edge vertices.
-		 * @return {@link Vector}[]
-		 */
-		public Vector[] getVertices() {
-			return this.vertices;
-		}
-		
-		/**
-		 * Returns the maximum point.
-		 * @return {@link Vector}
-		 */
-		public Vector getMaximum() {
-			return this.max;
-		}
-		
-		/**
-		 * Returns the edge index.
-		 * @return int
-		 */
-		public int getIndex() {
-			return this.index;
-		}
-	}
-	
-	/**
-	 * Represents a vertex feature.
-	 * @author William Bittle
-	 */
-	public static class Vertex extends Feature {
-		/** The vertex or point */
-		protected Vector point;
-		
-		/**
-		 * Full constructor.
-		 * @param point the vertex or point
-		 */
-		public Vertex(Vector point) {
-			super(Feature.Type.VERTEX);
-			this.point = point;
-		}
-		
-		/* (non-Javadoc)
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			StringBuilder sb = new StringBuilder();
-			sb.append("FEATURE").append("[");
-			sb.append(this.type).append("|");
-			sb.append(this.point).append("]");
-			return sb.toString();
-		}
-		
-		/**
-		 * Returns the point.
-		 * @return {@link Vector}
-		 */
-		public Vector getPoint() {
-			return this.point;
-		}
 	}
 }

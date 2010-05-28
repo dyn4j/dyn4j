@@ -22,54 +22,38 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.game2d.dynamics.contact;
+package org.dyn4j.game2d.geometry;
 
 /**
- * Represents a contact ID.
- * <p>
- * This is used to match contacts when attempting to warm
- * start the {@link ContactConstraintSolver}.
+ * Represents a point on the edge of a {@link Shape}.
  * @author William Bittle
  */
-public class ContactId {
-	/** The index of the reference edge */
-	protected int referenceIndex;
+public class Vertex extends Feature {
+	/** The vertex or point */
+	protected Vector point;
 	
-	/** The index of the incident edge */
-	protected int incidentIndex;
-	
-	/** The index of the manifold point */
+	/** The index in the  */
 	protected int index;
 	
 	/**
-	 * Default constructor.
+	 * Optional constructor.
+	 * <p>
+	 * Assumes the given point is not indexed.
+	 * @param point the vertex point
 	 */
-	public ContactId() {}
-	
-	/**
-	 * Full constructor.
-	 * @param referenceIndex the referenced edge index
-	 * @param incidentIndex the incident edge index
-	 * @param index the manifold point index
-	 */
-	public ContactId(int referenceIndex, int incidentIndex, int index) {
-		this.referenceIndex = referenceIndex;
-		this.incidentIndex = incidentIndex;
-		this.index = index;
+	public Vertex(Vector point) {
+		this(point, Feature.NOT_INDEXED);
 	}
 	
 	/**
-	 * Returns true if the contacts are the same.
-	 * @param id the id
-	 * @return booolean
+	 * Full constructor.
+	 * @param point the vertex point
+	 * @param index the index 
 	 */
-	public boolean equals(ContactId id) {
-		if (id.referenceIndex == this.referenceIndex
-		 && id.incidentIndex == this.incidentIndex
-		 && id.index == this.index) {
-			return true;
-		}
-		return false;
+	public Vertex(Vector point, int index) {
+		super(Feature.Type.VERTEX);
+		this.point = point;
+		this.index = index;
 	}
 	
 	/* (non-Javadoc)
@@ -78,10 +62,25 @@ public class ContactId {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("CONTACT_ID[")
-		.append(this.referenceIndex).append("|")
-		.append(this.incidentIndex).append("|")
-		.append(this.index).append("]");
+		sb.append("VERTEX").append("[");
+		sb.append(this.point).append("|");
+		sb.append(this.index).append("]");
 		return sb.toString();
+	}
+	
+	/**
+	 * Returns the point.
+	 * @return {@link Vector}
+	 */
+	public Vector getPoint() {
+		return this.point;
+	}
+	
+	/**
+	 * Returns the index of this vertex.
+	 * @return int
+	 */
+	public int getIndex() {
+		return this.index;
 	}
 }

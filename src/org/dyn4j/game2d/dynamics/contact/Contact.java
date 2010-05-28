@@ -24,6 +24,7 @@
  */
 package org.dyn4j.game2d.dynamics.contact;
 
+import org.dyn4j.game2d.collision.manifold.ManifoldPointId;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.geometry.Vector;
 
@@ -32,8 +33,8 @@ import org.dyn4j.game2d.geometry.Vector;
  * @author William Bittle
  */
 public class Contact {
-	/** The contact id for warm starting */
-	protected ContactId id = null;
+	/** The manifold point id for warm starting */
+	protected ManifoldPointId id = null;
 	
 	/** The contact point in world space */
 	protected Vector p = null;
@@ -76,13 +77,13 @@ public class Contact {
 	
 	/**
 	 * Full constructor.
-	 * @param id the contact id used for warm starting
+	 * @param id the manifold point id used for warm starting
 	 * @param point the world space collision point
 	 * @param depth the penetration depth of this point
 	 * @param p1 the collision point in {@link Body}1's local space
 	 * @param p2 the collision point in {@link Body}2's local space
 	 */
-	public Contact(ContactId id, Vector point, double depth, Vector p1, Vector p2) {
+	public Contact(ManifoldPointId id, Vector point, double depth, Vector p1, Vector p2) {
 		this.id = id;
 		this.p = point;
 		this.depth = depth;
