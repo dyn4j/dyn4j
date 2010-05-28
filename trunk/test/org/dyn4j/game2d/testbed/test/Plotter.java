@@ -68,16 +68,19 @@ public class Plotter extends Test {
 	private Entity e2 = null;
 	
 	/** The list of entities for the first object */
-	private Entity[] e1List = new Entity[5];
+	private Entity[] e1List = new Entity[13];
 	
 	/** The list of entities for the second object */
-	private Entity[] e2List = new Entity[5];
+	private Entity[] e2List = new Entity[13];
 	
 	/** The first entity's current shape */
 	private int e1Shape = 0;
 	
 	/** The second entity's current shape */
 	private int e2Shape = 0;
+	
+	/** Whether to flip the shape order or not */
+	private boolean flip = false;
 	
 	/** The render radius of the points */
 	private static final double r = 0.01;
@@ -125,52 +128,71 @@ public class Plotter extends Test {
 	 */
 	@Override
 	protected void setup() {
-		// create the circle bodies
-		Circle c1 = new Circle(1.0);
-		Circle c2 = new Circle(0.5);
-		this.e1List[0] = new Entity(128);
-		this.e2List[0] = new Entity(128);
-		this.e1List[0].addShape(c1, Mass.create(c1)).setMassFromShapes(Mass.Type.INFINITE);
-		this.e2List[0].addShape(c2, Mass.create(c2)).setMassFromShapes(Mass.Type.INFINITE);
-		
-		// create the polygon bodies
-		Polygon p1 = Geometry.getUnitCirclePolygon(5, 0.5);
-		Polygon p2 = Geometry.getUnitCirclePolygon(8, 1.0);
-		this.e1List[1] = new Entity(128);
-		this.e2List[1] = new Entity(128);
-		this.e1List[1].addShape(p1, Mass.create(p1)).setMassFromShapes(Mass.Type.INFINITE);
-		this.e2List[1].addShape(p2, Mass.create(p2)).setMassFromShapes(Mass.Type.INFINITE);
-		
-		// create the rectangle bodies
-		Rectangle r1 = new Rectangle(0.5, 0.5);
-		Rectangle r2 = new Rectangle(1.0, 1.0);
-		this.e1List[2] = new Entity(128);
-		this.e2List[2] = new Entity(128);
-		this.e1List[2].addShape(r1, Mass.create(r1)).setMassFromShapes(Mass.Type.INFINITE);
-		this.e2List[2].addShape(r2, Mass.create(r2)).setMassFromShapes(Mass.Type.INFINITE);
-		
-		// create the segment bodies
-		Segment s1 = new Segment(new Vector(-0.3, 0.2), new Vector(0.0, -0.1));
-		Segment s2 = new Segment(new Vector(-0.3, -0.3), new Vector(0.2, 0.3));
-		this.e1List[3] = new Entity(128);
-		this.e2List[3] = new Entity(128);
-		this.e1List[3].addShape(s1, Mass.create(s1)).setMassFromShapes(Mass.Type.INFINITE);
-		this.e2List[3].addShape(s2, Mass.create(s2)).setMassFromShapes(Mass.Type.INFINITE);
-		
-		// create the triangle bodies
-		Triangle t1 = new Triangle(new Vector(0.45, -0.12), new Vector(-0.45, 0.38), new Vector(-0.15, -0.22));
-		Triangle t2 = new Triangle(new Vector(1.29, 0.25), new Vector(-0.71, 0.65), new Vector(-0.59, -0.85));
-		this.e1List[4] = new Entity(128);
-		this.e2List[4] = new Entity(128);
-		this.e1List[4].addShape(t1, Mass.create(t1)).setMassFromShapes(Mass.Type.INFINITE);
-		this.e2List[4].addShape(t2, Mass.create(t2)).setMassFromShapes(Mass.Type.INFINITE);
-		
-		// default to the first two
+		// create all the bodies
+		for (int i = 0; i < 13; i++) {
+			this.e1List[i] = this.getEntity(i);
+			this.e2List[i] = this.getEntity(i);
+		}
+		// default to the first set
 		this.e1 = this.e1List[0];
 		this.e2 = this.e2List[0];
-		
+		// add them to the world
 		this.world.add(this.e1);
 		this.world.add(this.e2);
+	}
+	
+	/**
+	 * Helper method to create the various shapes from the collision tests.
+	 * @param index the shape index
+	 * @return {@link Entity}
+	 */
+	public Entity getEntity(int index) {
+		Entity e = new Entity(128);
+		// which shape to make?
+		if (index == 0) {
+			Circle c = new Circle(1.0);
+			e.addShape(c, Mass.create(c));
+		} else if (index == 1) {
+			Circle c = new Circle(0.5);
+			e.addShape(c, Mass.create(c));
+		} else if (index == 2) {
+			Polygon p = Geometry.getUnitCirclePolygon(6, 0.5);
+			e.addShape(p, Mass.create(p));
+		} else if (index == 3) {
+			Polygon p = Geometry.getUnitCirclePolygon(5, 1.0);
+			e.addShape(p, Mass.create(p));
+		} else if (index == 4) {
+			Rectangle r = new Rectangle(1.0, 1.0);
+			e.addShape(r, Mass.create(r));
+		} else if (index == 5) {
+			Rectangle r = new Rectangle(0.5, 0.5);
+			e.addShape(r, Mass.create(r));
+		} else if (index == 6) {
+			Triangle t = new Triangle(new Vector(0.45, -0.12), new Vector(-0.45, 0.38), new Vector(-0.15, -0.22));
+			e.addShape(t, Mass.create(t));
+		} else if (index == 7) {
+			Triangle t = new Triangle(new Vector(1.29, 0.25), new Vector(-0.71, 0.65), new Vector(-0.59, -0.85));
+			e.addShape(t, Mass.create(t));
+		} else if (index == 8) {
+			Triangle t = new Triangle(new Vector(0.5, 0.5), new Vector(-0.3, -0.5), new Vector(1.0, -0.3));
+			e.addShape(t, Mass.create(t));
+		} else if (index == 9) {	
+			Segment s = new Segment(new Vector(-0.5, 0.0), new Vector(0.5, 0.0));
+			e.addShape(s, Mass.create(s));
+		} else if (index == 10) {
+			Segment s = new Segment(new Vector(0.1, -0.3), new Vector(-0.8, 0.2));
+			e.addShape(s, Mass.create(s));
+		} else if (index == 11) {
+			Segment s = new Segment(new Vector(-0.3, -0.3), new Vector(0.2, 0.3));
+			e.addShape(s, Mass.create(s));
+		} else {
+			Segment s = new Segment(new Vector(-0.3, 0.2), new Vector(0.0, -0.1));
+			e.addShape(s, Mass.create(s));
+		}
+		// set the mass to infinite
+		e.setMassFromShapes(Mass.Type.INFINITE);
+		// return the entity
+		return e;
 	}
 	
 	/* (non-Javadoc)
@@ -189,10 +211,19 @@ public class Plotter extends Test {
 	protected void renderAfter(Graphics2D g) {
 		g.setColor(Color.GREEN);
 		
-		Convex c1 = e1.getShapes().get(0);
-		Transform t1 = e1.getTransform();
-		Convex c2 = e2.getShapes().get(0);
-		Transform t2 = e2.getTransform();
+		Convex c1, c2;
+		Transform t1, t2;
+		if (this.flip) {
+			c1 = e2.getShapes().get(0);
+			t1 = e2.getTransform();
+			c2 = e1.getShapes().get(0);
+			t2 = e1.getTransform();
+		} else {
+			c1 = e1.getShapes().get(0);
+			t1 = e1.getTransform();
+			c2 = e2.getShapes().get(0);
+			t2 = e2.getTransform();
+		}
 		
 		Separation s = new Separation();
 		Penetration p = new Penetration();
@@ -420,8 +451,8 @@ public class Plotter extends Test {
 	public String[][] getControls() {
 		return new String[][] {
 				{"1", "Cycle the shape type for the first body."},
-				{"2", "Cycle the shape type for the second body."}
-				};
+				{"2", "Cycle the shape type for the second body."},
+				{"f", "Flips the order of the shapes in manifold generation."}};
 	}
 	
 	/* (non-Javadoc)
@@ -434,6 +465,7 @@ public class Plotter extends Test {
 		// setup the 1 and 2 keys
 		keyboard.add(new Input(KeyEvent.VK_1, Input.Hold.NO_HOLD));
 		keyboard.add(new Input(KeyEvent.VK_2, Input.Hold.NO_HOLD));
+		keyboard.add(new Input(KeyEvent.VK_F, Input.Hold.NO_HOLD));
 	}
 	
 	/* (non-Javadoc)
@@ -448,7 +480,7 @@ public class Plotter extends Test {
 			// save the current entity
 			Entity te = this.e1;
 			// increment the current shape
-			this.e1Shape = this.e1Shape == 4 ? 0 : this.e1Shape + 1;
+			this.e1Shape = this.e1Shape + 1 == this.e1List.length ? 0 : this.e1Shape + 1;
 			// remove the current body from the world
 			this.world.remove(this.e1);
 			// set the new shape
@@ -466,7 +498,7 @@ public class Plotter extends Test {
 			// save the current entity
 			Entity te = this.e2;
 			// increment the current shape
-			this.e2Shape = this.e2Shape == 4 ? 0 : this.e2Shape + 1;
+			this.e2Shape = this.e2Shape + 1 == this.e2List.length ? 0 : this.e2Shape + 1;
 			// remove the current body from the world
 			this.world.remove(this.e2);
 			// set the new shape
@@ -477,6 +509,12 @@ public class Plotter extends Test {
 			this.e2.translate(tx);
 			// add it to the world
 			this.world.add(this.e2);
+		}
+		
+		// look for the f key
+		if (keyboard.isPressed(KeyEvent.VK_F)) {
+			// then switch the body order
+			this.flip = !this.flip;
 		}
 	}
 	

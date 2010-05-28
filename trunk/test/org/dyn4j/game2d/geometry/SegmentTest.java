@@ -270,15 +270,15 @@ public class SegmentTest {
 		Transform t = new Transform();
 		Vector n = new Vector(1.0, 0.0);
 		
-		Feature.Edge f = s.getFarthestFeature(n, t);
+		Edge f = s.getFarthestFeature(n, t);
 		TestCase.assertTrue(f.isEdge());
-		TestCase.assertEquals(1.500, f.max.x, 1.0e-3);
-		TestCase.assertEquals(3.000, f.max.y, 1.0e-3);
+		TestCase.assertEquals(1.500, f.max.point.x, 1.0e-3);
+		TestCase.assertEquals(3.000, f.max.point.y, 1.0e-3);
 		
-		TestCase.assertEquals(0.000, f.vertices[0].x, 1.0e-3);
-		TestCase.assertEquals(1.000, f.vertices[0].y, 1.0e-3);
-		TestCase.assertEquals(1.500, f.vertices[1].x, 1.0e-3);
-		TestCase.assertEquals(3.000, f.vertices[1].y, 1.0e-3);
+		TestCase.assertEquals(0.000, f.vertices[0].point.x, 1.0e-3);
+		TestCase.assertEquals(1.000, f.vertices[0].point.y, 1.0e-3);
+		TestCase.assertEquals(1.500, f.vertices[1].point.x, 1.0e-3);
+		TestCase.assertEquals(3.000, f.vertices[1].point.y, 1.0e-3);
 		
 		Vector p = s.getFarthestPoint(n, t);
 		TestCase.assertEquals(1.500, p.x, 1.0e-3);

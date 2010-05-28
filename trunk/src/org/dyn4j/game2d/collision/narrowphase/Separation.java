@@ -81,6 +81,16 @@ public class Separation {
 	}
 	
 	/**
+	 * Clears the separation information.
+	 */
+	public void clear() {
+		this.normal = null;
+		this.distance = 0;
+		this.point1 = null;
+		this.point2 = null;
+	}
+	
+	/**
 	 * Returns the separation normal.
 	 * @return {@link Vector}
 	 */
@@ -110,5 +120,39 @@ public class Separation {
 	 */
 	public Vector getPoint2() {
 		return point2;
+	}
+	
+	/**
+	 * Sets the separation normal.
+	 * <p>
+	 * Must be normalized.
+	 * @param normal the separation normal
+	 */
+	public void setNormal(Vector normal) {
+		this.normal = normal;
+	}
+	
+	/**
+	 * Sets the separation distance.
+	 * @param distance the separation distance
+	 */
+	public void setDistance(double distance) {
+		this.distance = distance;
+	}
+	
+	/**
+	 * Sets the closest point on the first {@link Convex} {@link Shape}.
+	 * @param point1 the closest point on the first {@link Convex} {@link Shape}
+	 */
+	public void setPoint1(Vector point1) {
+		this.point1 = point1;
+	}
+	
+	/**
+	 * Sets the closest point on the second {@link Convex} {@link Shape}.
+	 * @param point2 the closest point on the second {@link Convex} {@link Shape}
+	 */
+	public void setPoint2(Vector point2) {
+		this.point2 = point2;
 	}
 }

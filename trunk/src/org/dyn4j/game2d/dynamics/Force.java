@@ -60,6 +60,31 @@ public class Force {
 	}
 	
 	/**
+	 * Sets this {@link Force} to the given components.
+	 * @param x the x component
+	 * @param y the y component
+	 */
+	public void set(double x, double y) {
+		this.force.set(x, y);
+	}
+	
+	/**
+	 * Sets this {@link Force} to the given force {@link Vector}.
+	 * @param force the force {@link Vector}
+	 */
+	public void set(Vector force) {
+		this.force.set(force);
+	}
+	
+	/**
+	 * Sets this {@link Force} to the given {@link Force}.
+	 * @param force the {@link Force} to copy
+	 */
+	public void set(Force force) {
+		this.force.set(force.force);
+	}
+	
+	/**
 	 * Applies this {@link Force} to the {@link Body}.
 	 * @param body the {@link Body} to apply the {@link Force} to
 	 */

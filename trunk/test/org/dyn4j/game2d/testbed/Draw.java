@@ -53,14 +53,17 @@ public class Draw {
 	/** Whether to draw the bounds or not */
 	private boolean bounds = false;
 	
-	/** Whether to draw text or not */
-	private boolean text = true;
+	/** Whether to draw the metrics panel or not */
+	private boolean panel = true;
 	
 	/** Whether to fill shapes with color */
 	private boolean fill = true;
 	
 	/** Whether to draw shape outlines */
 	private boolean outline = true;
+	
+	/** Whether to draw edge normals */
+	private boolean normals = false;
 	
 	/** The singleton instance */
 	private static final Draw instance = new Draw();
@@ -202,19 +205,19 @@ public class Draw {
 	}
 
 	/**
-	 * Returns true if text should be drawn.
+	 * Returns true if the metrics panel should be drawn.
 	 * @return boolean
 	 */
-	public boolean drawText() {
-		return text;
+	public boolean drawPanel() {
+		return panel;
 	}
 
 	/**
-	 * Sets whether text should be drawn.
-	 * @param flag true if text should be drawn
+	 * Sets whether the metrics panel should be drawn.
+	 * @param flag true if the metrics panel should be drawn
 	 */
-	public synchronized void setDrawText(boolean flag) {
-		this.text = flag;
+	public synchronized void setDrawPanel(boolean flag) {
+		this.panel = flag;
 	}
 	
 	/**
@@ -229,7 +232,7 @@ public class Draw {
 	 * Sets whether shapes should be filled with a random color.
 	 * @param flag true if shapes should be filled
 	 */
-	public void setDrawFill(boolean flag) {
+	public synchronized void setDrawFill(boolean flag) {
 		this.fill = flag;
 	}
 	
@@ -242,10 +245,26 @@ public class Draw {
 	}
 	
 	/**
-	 * Sets whether a shapes 
+	 * Sets whether a shapes outlines should be drawn.
 	 * @param flag true if shape outlines should be drawn
 	 */
-	public void setDrawOutline(boolean flag) {
+	public synchronized void setDrawOutline(boolean flag) {
 		this.outline = flag;
+	}
+	
+	/**
+	 * Returns true if shape edge normals should be drawn.
+	 * @return boolean
+	 */
+	public boolean drawNormals() {
+		return normals;
+	}
+	
+	/**
+	 * Sets whether a shape edge normals should be drawn.
+	 * @param flag true if shape edge normals should be drawn
+	 */
+	public synchronized void setDrawNormals(boolean flag) {
+		this.normals = flag;
 	}
 }

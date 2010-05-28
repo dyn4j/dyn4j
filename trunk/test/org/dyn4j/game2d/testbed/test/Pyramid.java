@@ -137,7 +137,7 @@ public class Pyramid extends Test {
 	@Override
 	public void home() {
 		// set the scale
-		this.scale = 64.0;
+		this.scale = 32.0;
 		// move the camera a bit
 		this.offset.set(0.0, -3.0);
 	}

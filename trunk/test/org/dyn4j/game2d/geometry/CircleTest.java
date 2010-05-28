@@ -116,7 +116,7 @@ public class CircleTest {
 		Transform t = new Transform();
 		Vector y = new Vector(0.0, -1.0);
 		
-		Feature.Vertex f = c.getFarthestFeature(y, t);
+		Vertex f = c.getFarthestFeature(y, t);
 		TestCase.assertTrue(f.isVertex());
 		TestCase.assertEquals( 0.000, f.point.x, 1.0e-3);
 		TestCase.assertEquals(-1.500, f.point.y, 1.0e-3);

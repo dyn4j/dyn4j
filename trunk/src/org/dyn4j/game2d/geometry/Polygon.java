@@ -75,6 +75,13 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 			throw new IllegalArgumentException("A polygon must have Counter-Clockwise vertex winding.");
 		}
 		this.vertices = vertices;
+		this.normals = new Vector[size];
+		for (int i = 0; i < size; i++) {
+			Vector p1 = vertices[i];
+			Vector p2 = (i + 1 == size) ? vertices[0] : vertices[i + 1];
+			this.normals[i] = p1.to(p2).left();
+			this.normals[i].normalize();
+		}
 		this.center = Geometry.getAreaWeightedCenter(this.vertices);
 	}
 	
@@ -109,20 +116,12 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		// plus the closest point to each focus
 		Vector[] axes = new Vector[size + fociSize];
 		int n = 0;
-		// loop over the vertices to get the edge normals
+		// loop over the edge normals and put them into world space
 		for (int i = 0; i < size; i++) {
 			// create references to the current points
-			Vector p1 = this.vertices[i];
-			Vector p2 = this.vertices[(i + 1) == size ? 0 : i + 1];
-			// transform the points into world space
-			p1 = transform.getTransformed(p1);
-			p2 = transform.getTransformed(p2);
-			// get the edge
-			Vector v = p1.to(p2);
-			// get the edge normal
-			v.right();
-			// add it to the list
-			axes[n++] = v;
+			Vector v = this.normals[i];
+			// transform it into world space and add it to the list
+			axes[n++] = transform.getTransformedR(v);;
 		}
 		// loop over the focal points and find the closest
 		// points on the polygon to the focal points
@@ -210,6 +209,7 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		int size = this.vertices.length;
 		for (int i = 0; i < size; i++) {
 			this.vertices[i].rotate(theta, x, y);
+			this.normals[i].rotate(theta, x, y);
 		}
 	}
 
@@ -256,7 +256,7 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 	 * @see org.dyn4j.game2d.geometry.Convex#getFarthestFeature(org.dyn4j.game2d.geometry.Vector, org.dyn4j.game2d.geometry.Transform)
 	 */
 	@Override
-	public Feature.Edge getFarthestFeature(Vector n, Transform transform) {
+	public Edge getFarthestFeature(Vector n, Transform transform) {
 		Vector maximum = new Vector();
 		double max = -Double.MAX_VALUE;
 		int index = 0;
@@ -287,13 +287,18 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		// see which edge is most perpendicular
 		int l = index + 1 == count ? 0 : index + 1;
 		int r = index - 1 < 0 ? count - 1 : index - 1;
-		Vector left = transform.getTransformed(this.vertices[l]);
-		Vector right = transform.getTransformed(this.vertices[r]);
+		Vector leftN = transform.getTransformedR(this.normals[index == 0 ? count - 1 : index - 1]);
+		Vector rightN = transform.getTransformedR(this.normals[index]);
 		// is the left or right edge more perpendicular?
-		if (left.to(maximum).dot(n) < right.to(maximum).dot(n)) {
-			return new Feature.Edge(new Vector[] {maximum, left}, maximum, index);
+		Vertex vm = new Vertex(maximum, index);
+		if (leftN.dot(n) < rightN.dot(n)) {
+			Vector left = transform.getTransformed(this.vertices[l]);
+			Vertex vl = new Vertex(left, l);
+			return new Edge(new Vertex[] {vm, vl}, maximum.to(left), vm, index + 1);
 		} else {
-			return new Feature.Edge(new Vector[] {right, maximum}, maximum, index - 1);
+			Vector right = transform.getTransformed(this.vertices[r]);
+			Vertex vr = new Vertex(right, r);
+			return new Edge(new Vertex[] {vr, vm}, right.to(maximum), vm, index);
 		}
 	}
 	

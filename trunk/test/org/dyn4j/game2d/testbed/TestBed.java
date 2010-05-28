@@ -25,12 +25,14 @@
 package org.dyn4j.game2d.testbed;
 
 import java.awt.Color;
+import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
 import java.text.AttributedString;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.logging.Logger;
 
@@ -41,6 +43,7 @@ import org.codezealot.game.input.Input;
 import org.codezealot.game.input.Input.Hold;
 import org.codezealot.game.render.Container;
 import org.codezealot.game.render.G2dSurface;
+import org.dyn4j.game2d.Version;
 import org.dyn4j.game2d.collision.broadphase.Sap;
 import org.dyn4j.game2d.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.game2d.collision.narrowphase.Gjk;
@@ -58,9 +61,13 @@ import org.dyn4j.game2d.geometry.Vector;
  * @param <E> the container type
  */
 // TODO need a shape editing test
+// TODO fix the spinners on control panel
 public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	/** The class logger */
 	private static final Logger LOGGER = Logger.getLogger(TestBed.class.getName());
+	
+	/** The text color */
+	private static final Color TEXT_COLOR = Color.GRAY;
 	
 	/** The time usage object */
 	private Usage usage = new Usage();
@@ -73,10 +80,12 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 
 	/** Flag indicating step mode */
 	private boolean stepMode = false;
-	
+		
 	// text labels
 	/** The label for the control panel key */
 	private Text controlsLabel;
+	/** The label for the version */
+	private Text versionLabel;
 	/** The label for the current test */
 	private Text testLabel;
 	/** The label for the current zoom */
@@ -195,6 +204,9 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		this.keyboard.add(new Input(KeyEvent.VK_Z));
 		// key to launch a bomb
 		this.keyboard.add(new Input(KeyEvent.VK_B, Hold.NO_HOLD));
+		// key to increas/decrease the metrics update rate
+		this.keyboard.add(new Input(KeyEvent.VK_I, Hold.NO_HOLD));
+		this.keyboard.add(new Input(KeyEvent.VK_D, Hold.NO_HOLD));
 		
 		// initialize the keys for the test
 		this.test.initializeInput(this.keyboard, this.mouse);
@@ -208,6 +220,11 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		AttributedString controlsString = new AttributedString("Press 'c' to open the Test Bed Control Panel.");
 		this.controlsLabel = new Text(controlsString);
 		this.controlsLabel.generate();
+		
+		// text for the current test
+		AttributedString versionString = new AttributedString("Version:");
+		this.versionLabel = new Text(versionString);
+		this.versionLabel.generate();
 		
 		// text for the current test
 		AttributedString testString = new AttributedString("Test:");
@@ -234,13 +251,11 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		this.continuousModeLabel.generate();
 		
 		AttributedString sModeString = new AttributedString("Step");
-		sModeString.addAttribute(TextAttribute.FOREGROUND, Color.BLUE);
 		this.stepModeLabel = new Text(sModeString);
 		this.stepModeLabel.generate();
 		
 		// text for contacts
-		AttributedString contactsString = new AttributedString("Contacts");
-		contactsString.addAttribute(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+		AttributedString contactsString = new AttributedString("Contact Information");
 		this.contactLabel = new Text(contactsString);
 		this.contactLabel.generate();
 		
@@ -266,7 +281,6 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		this.fpsLabel.generate();
 		
 		AttributedString pausedString = new AttributedString("Paused");
-		pausedString.addAttribute(TextAttribute.FOREGROUND, Color.RED);
 		this.pausedLabel = new Text(pausedString);
 		this.pausedLabel.generate();
 		
@@ -287,9 +301,9 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		this.totalMemoryLabel.generate();
 		
 		AttributedString timeString = new AttributedString("Time ( Render | Update | System )");
-		timeString.addAttribute(TextAttribute.FOREGROUND, new Color(2103832), 7, 13);
-		timeString.addAttribute(TextAttribute.FOREGROUND, new Color(7687216), 16, 22);
-		timeString.addAttribute(TextAttribute.FOREGROUND, new Color(11433281), 25, 31);
+		timeString.addAttribute(TextAttribute.FOREGROUND, new Color(222, 48, 12), 7, 13);
+		timeString.addAttribute(TextAttribute.FOREGROUND, new Color(222, 117, 0), 16, 22);
+		timeString.addAttribute(TextAttribute.FOREGROUND, new Color(20, 134, 222), 25, 31);
 		this.timeUsageLabel = new Text(timeString);
 		this.timeUsageLabel.generate();
 	}
@@ -307,10 +321,12 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		int width = this.renderer.getDisplaySize().width;
 		int height = this.renderer.getDisplaySize().height;
 		
-		// set the color to black
-		g.setColor(Color.WHITE);
+		// set the background color to white
+		g.setBackground(Color.WHITE);
+		g.setClip(0, 0, width, height);
+		
 		// paint the background
-		g.fillRect(0, 0, width, height);
+		g.clearRect(0, 0, width, height);
 		
 		// paint the test
 		this.test.render(g, width, height);
@@ -318,155 +334,279 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		// get the draw singleton
 		Draw draw = Draw.getInstance();
 		
-		// set the color to white
-		g.setColor(Color.DARK_GRAY);
+		// render the controls label top center
+		this.renderControls(g, (int) Math.ceil((width - this.controlsLabel.getWidth()) / 2.0), 5);
 		
-		// make sure we should draw text
-		if (draw.drawText()) {
-			// show the controls message in the bottom right corner
+		// make sure we should draw the metrics panel
+		if (draw.drawPanel()) {
+			// draw the translucent background
+			g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.8f));
+			g.fillRect(0, height - 110, width, 110);
 			
-			// get the width of the text
-			double w = controlsLabel.getWidth();
-			double h = controlsLabel.getHeight();
-			controlsLabel.render(g, width - w - 5, height - h - 5);
+			// draw the gradient top
+			g.setPaint(new GradientPaint(0, height - 110, new Color(0.5f, 0.5f, 0.5f, 0.5f), 0, height - 101, new Color(0.0f, 0.0f, 0.0f, 0.5f)));
+			g.fillRect(0, height - 110, width, 10);
 			
-			// show general information in the top left corner
+			// draw the small box around the test info
+			g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.2f));
+			g.fillRect(2, height - 98, 150, 95);
+			g.setColor(Color.BLACK);
+			g.drawRect(2, height - 98, 150, 95);
+			// render the general test information
+			this.renderTestInformation(g, 7, height - 95);
 			
-			// show the curren test
-			// render the label
-			this.testLabel.render(g, 5, 5);
-			// render the value
-			AttributedString testString = new AttributedString(this.test.name);
-			Text test = new Text(testString);
-			test.generate();
-			test.render(g, 60, 5);
-
-			// show the zoom
-			// render the label
-			this.zoomLabel.render(g, 5, 20);
-			// render the value
-			AttributedString zoomString = new AttributedString(this.test.getZoom() + "x");
-			Text zoom = new Text(zoomString);
-			zoom.generate();
-			zoom.render(g, 60, 20);
+			// draw the small box around the contact info
+			g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.2f));
+			g.fillRect(155, height - 98, 120, 95);
+			g.setColor(Color.BLACK);
+			g.drawRect(155, height - 98, 120, 95);
+			// render the contact information
+			this.renderContactInformation(g, 159, height - 95);
 			
-			// show the number of bodies
-			// render the label
-			this.bodyCountLabel.render(g, 5, 35);
-			// render the value
-			AttributedString bodiesString = new AttributedString(String.valueOf(this.test.getWorld().getBodies().size()));
-			Text bodies = new Text(bodiesString);
-			bodies.generate();
-			bodies.render(g, 60, 35);
-			
-			// show the mode
-			// render the label
-			this.modeLabel.render(g, 5, 50);
-			// render the value
-			if (this.stepMode) {
-				this.stepModeLabel.render(g, 60, 50);
-			} else {
-				this.continuousModeLabel.render(g, 60, 50);
-			}
-			
-			// render running metrics in the bottom left corner
-			
-			// render the frames per second
-			// render the label
-			this.fpsLabel.render(g, 5, 500);
-			// render the value
-			AttributedString fpsString = new AttributedString(String.valueOf(this.fps.getFps()));
-			Text fps = new Text(fpsString);
-			fps.generate();
-			fps.render(g, 60, 500);
-			
-			// show the used/free memory bar
-			double barWidth = 100;
-			this.memoryLabel.render(g, 5, 515);
-			NumberFormat nf = NumberFormat.getNumberInstance();
-			nf.setMaximumFractionDigits(2);
-			nf.setMinimumFractionDigits(2);
-			AttributedString tot = new AttributedString(nf.format(this.usage.getTotalMemory() / 1024.0 / 1024.0) + "M");
-			Text tota = new Text(tot);
-			tota.generate();
-			tota.render(g, 60, 515);
-			this.totalMemoryLabel.render(g, barWidth + 10, 515);
-			g.setColor(Color.WHITE);
-			g.fillRect(5, 530, (int) Math.ceil(barWidth), 12);
-			g.fillRect(5, 545, (int) Math.ceil(barWidth), 12);
-			g.setColor(new Color(14300672));
-			g.fillRect(5, 530, (int) Math.ceil(this.usage.getUsedMemoryPercentage() * barWidth), 12);
-			g.setColor(new Color(16754696));
-			g.fillRect(5, 545, (int) Math.ceil(this.usage.getFreeMemoryPercentage() * barWidth), 12);
-			g.setColor(Color.DARK_GRAY);
-			g.drawRect(5, 530, (int) Math.ceil(barWidth) + 1, 12);
-			g.drawRect(5, 545, (int) Math.ceil(barWidth) + 1, 12);
-			this.usedMemoryLabel.render(g, barWidth + 10, 530);
-			this.freeMemoryLabel.render(g, barWidth + 10, 545);
-			
-			// show the time usage bar
-			this.timeUsageLabel.render(g, 5, 560);
-			double renderW = this.usage.getRenderTimePercentage() * barWidth;
-			double updateW = this.usage.getUpdateTimePercentage() * barWidth;
-			// since input polling time is so low, just consider it part of the system time
-			double systemW = (this.usage.getSystemTimePercentage() + this.usage.getInputTimePercentage()) * barWidth;
-			g.setColor(new Color(2103832));
-			g.fillRect(5, 575, (int) Math.ceil(renderW), 12);
-			g.setColor(new Color(7687216));
-			g.fillRect(5 + (int) Math.ceil(renderW), 575, (int) Math.ceil(updateW), 12);
-			g.setColor(new Color(11433281));
-			g.fillRect(5 + (int) Math.ceil(renderW) + (int) Math.ceil(updateW), 575, (int) Math.ceil(systemW), 12);
-			g.setColor(Color.DARK_GRAY);
-			g.drawRect(5, 575, (int) Math.ceil(barWidth) + 1, 12);
-			
-			// show contact information in the top right corner
-			
-			// show the contact label
-			this.contactLabel.render(g, 700, 5);
-			// show the contact values
-			// render the labels
-			this.cTotalLabel.render(g, 700, 20);
-			this.cAddedLabel.render(g, 700, 35);
-			this.cPersistedLabel.render(g, 700, 50);
-			this.cRemovedLabel.render(g, 700, 65);
-			
-			// display the number of persisted
-			ContactCounter cc = (ContactCounter) this.test.getWorld().getContactListener();
-			// get the numbers
-			int total = cc.getSolved();
-			int added = cc.getAdded();
-			int persisted = cc.getPersisted();
-			int removed = cc.getRemoved();
-			
-			AttributedString ctString = new AttributedString(String.valueOf(total));
-			Text ct = new Text(ctString);
-			ct.generate();
-			ct.render(g, width - ct.getWidth() - 5, 20);
-			
-			AttributedString caString = new AttributedString(String.valueOf(added));
-			Text ca = new Text(caString);
-			ca.generate();
-			ca.render(g, width - ca.getWidth() - 5, 35);
-			
-			AttributedString cpString = new AttributedString(String.valueOf(persisted));
-			Text cp = new Text(cpString);
-			cp.generate();
-			cp.render(g, width - cp.getWidth() - 5, 50);
-			
-			AttributedString crString = new AttributedString(String.valueOf(removed));
-			Text cr = new Text(crString);
-			cr.generate();
-			cr.render(g, width - cr.getWidth() - 5, 65);
+			// draw the small box around the performance info
+			g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.2f));
+			g.fillRect(278, height - 98, 200, 95);
+			g.setColor(Color.BLACK);
+			g.drawRect(278, height - 98, 200, 95);
+			// render the performance information
+			this.renderPerformanceInformation(g, 282, height - 95);
 		}
 		
-		// always show the paused box
+		// always show the paused box on top of everything
 		if (this.isPaused()) {
-			// show the paused text top center and bottom center
-			this.pausedLabel.render(g, (width - this.pausedLabel.getWidth()) / 2.0, 5);
-			this.pausedLabel.render(g, (width - this.pausedLabel.getWidth()) / 2.0, height - this.pausedLabel.getHeight() - 5);
+			// show the paused label in the top left corner
+			this.renderPaused(g, 0, 0, 100, 20);
 		}
 		
-		this.usage.renderComplete(this.timer.getCurrentTime() - startTime);
+		this.usage.setRender(this.timer.getCurrentTime() - startTime);
+	}
+	
+	/**
+	 * Renders the paused label to the given graphics object at the
+	 * given screen coordinates.
+	 * @param g the graphics object to render to
+	 * @param x the x coordinate
+	 * @param y the y coordinate
+	 * @param w the width of the bounding rectangle
+	 * @param h the height of the bounding rectangle
+	 */
+	private void renderPaused(Graphics2D g, int x, int y, int w, int h) {
+		g.setColor(new Color(1.0f, 0.0f, 0.0f, 0.7f));
+		// render a red background behind the text
+		g.fillRect(x, y, w, h);
+		
+		// set the paused text color to white
+		g.setColor(Color.WHITE);
+		// get the text metrics
+		double tw = this.pausedLabel.getWidth();
+		double th = this.pausedLabel.getHeight();
+		
+		// render the text in the center of the given rect
+		this.pausedLabel.render(g, x + (int) Math.ceil((w - tw) / 2.0), y + (int) Math.ceil((h - th) / 2.0));
+	}
+	
+	/**
+	 * Renders the controls label to the given graphics object at the
+	 * given screen coordinates.
+	 * @param g the graphics object to render to
+	 * @param x the x coordinate
+	 * @param y the y coordinate
+	 */
+	private void renderControls(Graphics2D g, int x, int y) {
+		// set the text color
+		g.setColor(Color.BLACK);
+		
+		//width - w - 5, height - h - 5
+		controlsLabel.render(g, x, y);
+	}
+	
+	/**
+	 * Renders the test information to the given graphics object at the
+	 * given screen coordinates.
+	 * @param g the graphics object to render to
+	 * @param x the x coordinate
+	 * @param y the y coordinate
+	 */
+	private void renderTestInformation(Graphics2D g, int x, int y) {
+		// set the padding/spacing of the text lines and values
+		final int padding = 55;
+		final int spacing = 15;
+		
+		// set the text color
+		g.setColor(TEXT_COLOR);
+		
+		// render the label
+		this.versionLabel.render(g, x, y);
+		// render the value
+		AttributedString versionString = new AttributedString("v" + Version.getVersion());
+		Text version = new Text(versionString);
+		version.generate();
+		version.render(g, x + padding, y);
+		
+		// render the label
+		this.testLabel.render(g, x, y + spacing);
+		// render the value
+		AttributedString testString = new AttributedString(this.test.name);
+		Text test = new Text(testString);
+		test.generate();
+		test.render(g, x + padding, y + spacing);
+
+		// show the zoom
+		// render the label
+		this.zoomLabel.render(g, x, y + spacing * 2);
+		// render the value
+		AttributedString zoomString = new AttributedString(this.test.getZoom() + "x");
+		Text zoom = new Text(zoomString);
+		zoom.generate();
+		zoom.render(g, x + padding, y + spacing * 2);
+		
+		// show the number of bodies
+		// render the label
+		this.bodyCountLabel.render(g, x, y + spacing * 3);
+		// render the value
+		AttributedString bodiesString = new AttributedString(String.valueOf(this.test.getWorld().getBodies().size()));
+		Text bodies = new Text(bodiesString);
+		bodies.generate();
+		bodies.render(g, x + padding, y + spacing * 3);
+		
+		// show the mode
+		// render the label
+		this.modeLabel.render(g, x, y + spacing * 4);
+		// render the value
+		if (this.stepMode) {
+			this.stepModeLabel.render(g, x + padding, y + spacing * 4);
+		} else {
+			this.continuousModeLabel.render(g, x + padding, y + spacing * 4);
+		}
+		
+		Point loc = this.mouse.getRelativeLocation();
+		Vector pos = this.test.screenToWorld(loc.x, loc.y);
+		DecimalFormat df = new DecimalFormat("0.000");
+		// show the current x,y of the mouse
+		AttributedString mouseString = new AttributedString("( " + df.format(pos.x) + ", " + df.format(pos.y) + " )");
+		Text mousePos = new Text(mouseString);
+		mousePos.generate();
+		mousePos.render(g, x, y + spacing * 5);
+	}
+	
+	/**
+	 * Renders the contace information to the given graphics object at the
+	 * given screen coordinates.
+	 * @param g the graphics object to render to
+	 * @param x the x coordinate
+	 * @param y the y coordinate
+	 */
+	private void renderContactInformation(Graphics2D g, int x, int y) {
+		// set the padding/spacing of the text lines and values
+		final int padding = 105;
+		final int spacing = 15;
+		
+		// set the text color
+		g.setColor(TEXT_COLOR);
+		// render the contact header
+		this.contactLabel.render(g, x, y);
+		
+		// render the various labels
+		this.cTotalLabel.render(g, x, y + spacing);
+		this.cAddedLabel.render(g, x, y + spacing * 2);
+		this.cPersistedLabel.render(g, x, y + spacing * 3);
+		this.cRemovedLabel.render(g, x, y + spacing * 4);
+		
+		// get the contact counter
+		ContactCounter cc = (ContactCounter) this.test.getWorld().getContactListener();
+		// get the numbers
+		int total = cc.getSolved();
+		int added = cc.getAdded();
+		int persisted = cc.getPersisted();
+		int removed = cc.getRemoved();
+		
+		// create the texts
+		AttributedString ctString = new AttributedString(String.valueOf(total));
+		Text ct = new Text(ctString);
+		ct.generate();
+		
+		AttributedString caString = new AttributedString(String.valueOf(added));
+		Text ca = new Text(caString);
+		ca.generate();
+		
+		AttributedString cpString = new AttributedString(String.valueOf(persisted));
+		Text cp = new Text(cpString);
+		cp.generate();
+		
+		AttributedString crString = new AttributedString(String.valueOf(removed));
+		Text cr = new Text(crString);
+		cr.generate();
+		
+		// render the values
+		ct.render(g, x + padding - ct.getWidth(), y + spacing);
+		ca.render(g, x + padding - ca.getWidth(), y + spacing * 2);
+		cp.render(g, x + padding - cp.getWidth(), y + spacing * 3);
+		cr.render(g, x + padding - cr.getWidth(), y + spacing * 4);
+	}
+	
+	/**
+	 * Renders the performance information to the given graphics object at the
+	 * given screen coordinates.
+	 * @param g the graphics object to render to
+	 * @param x the x coordinate
+	 * @param y the y coordinate
+	 */
+	private void renderPerformanceInformation(Graphics2D g, int x, int y) {
+		// set the padding/spacing of the text lines and values
+		final int padding = 55;
+		final int spacing = 15;
+		
+		// set the text color
+		g.setColor(TEXT_COLOR);
+		
+		// render the frames per second
+		this.fpsLabel.render(g, x, y);
+		// render the value
+		AttributedString fpsString = new AttributedString(String.valueOf(this.fps.getFps()));
+		Text fps = new Text(fpsString);
+		fps.generate();
+		fps.render(g, x + padding, y);
+		
+		// show the total memory usage
+		double barWidth = 100;
+		this.memoryLabel.render(g, x, y + spacing);
+		NumberFormat nf = NumberFormat.getNumberInstance();
+		nf.setMaximumFractionDigits(2);
+		nf.setMinimumFractionDigits(2);
+		AttributedString tot = new AttributedString(nf.format(this.usage.getTotalMemory() / 1024.0 / 1024.0) + "M");
+		Text tota = new Text(tot);
+		tota.generate();
+		tota.render(g, x + padding, y + spacing);
+		this.totalMemoryLabel.render(g, x + barWidth + 10, y + spacing);
+		
+		// show the used/free memory bars
+		g.setColor(new Color(255, 152, 63));
+		g.fillRect(x, y + spacing * 2, (int) Math.ceil(this.usage.getUsedMemoryPercentage() * barWidth), 12);
+		g.setColor(new Color(129, 186, 4));
+		g.fillRect(x, y + spacing * 3, (int) Math.ceil(this.usage.getFreeMemoryPercentage() * barWidth), 12);
+		g.setColor(Color.BLACK);
+		g.drawRect(x, y + spacing * 2, (int) Math.ceil(barWidth) + 1, 12);
+		g.drawRect(x, y + spacing * 3, (int) Math.ceil(barWidth) + 1, 12);
+		
+		// render the used/free labels
+		g.setColor(TEXT_COLOR);
+		this.usedMemoryLabel.render(g, x + barWidth + 10, y + spacing * 2);
+		this.freeMemoryLabel.render(g, x + barWidth + 10, y + spacing * 3);
+		
+		// show the time usage bar
+		this.timeUsageLabel.render(g, x, y + spacing * 4);
+		double renderW = this.usage.getRenderTimePercentage() * barWidth;
+		double updateW = this.usage.getUpdateTimePercentage() * barWidth;
+		// since input polling time is so low, just consider it part of the system time
+		double systemW = (this.usage.getSystemTimePercentage() + this.usage.getInputTimePercentage()) * barWidth;
+		g.setColor(new Color(222, 48, 12));
+		g.fillRect(x, y + spacing * 5, (int) Math.ceil(renderW), 12);
+		g.setColor(new Color(222, 117, 0));
+		g.fillRect(x + (int) Math.ceil(renderW), y + spacing * 5, (int) Math.ceil(updateW), 12);
+		g.setColor(new Color(20, 134, 222));
+		g.fillRect(x + (int) Math.ceil(renderW) + (int) Math.ceil(updateW), y + spacing * 5, (int) Math.ceil(systemW), 12);
+		g.setColor(Color.BLACK);
+		g.drawRect(x, y + spacing * 5, (int) Math.ceil(barWidth) + 1, 12);
 	}
 	
 	/* (non-Javadoc)
@@ -476,7 +616,6 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	public void poll() {
 		long startTime = this.timer.getCurrentTime();
 		super.poll();
-		
 		// check the escape key
 		if (this.keyboard.isPressed(KeyEvent.VK_ESCAPE) || this.keyboard.isPressed(KeyEvent.VK_E)) {
 			// only exit if its not applet mode
@@ -689,6 +828,16 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 			bomb.translate(-6.0, 3.0);
 			// add the bomb to the world
 			this.test.world.add(bomb);
+		}
+		
+		// check the i key
+		if (this.keyboard.isPressed(KeyEvent.VK_I)) {
+			this.usage.setRefreshRate(this.usage.getRefreshRate() / 2);
+		}
+		
+		// check the d key
+		if (this.keyboard.isPressed(KeyEvent.VK_D)) {
+			this.usage.setRefreshRate(this.usage.getRefreshRate() * 2);
 		}
 		
 		// call the test poll method

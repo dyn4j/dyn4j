@@ -47,8 +47,13 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 			throw new IllegalArgumentException("A line segment must have two different vertices.");
 		}
 		this.vertices = new Vector[2];
+		this.normals = new Vector[2];
 		this.vertices[0] = point1;
 		this.vertices[1] = point2;
+		this.normals[0] = point1.to(point2).right();
+		this.normals[0].normalize();
+		this.normals[1] = point1.to(point2).left();
+		this.normals[1].normalize();
 		this.center = Geometry.getAverageCenter(this.vertices);
 		this.length = point1.distance(point2);
 	}
@@ -348,11 +353,11 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	 * For a {@link Segment} it's always the {@link Segment} itself.
 	 * @param n the direction
 	 * @param transform the local to world space {@link Transform} of this {@link Convex} {@link Shape}
-	 * @return {@link Feature}
+	 * @return {@link Edge}
 	 */
 	@Override
-	public Feature.Edge getFarthestFeature(Vector n, Transform transform) {
-		// the furthest feature for a line is always the line itself
+	public Edge getFarthestFeature(Vector n, Transform transform) {
+		// the farthest feature for a line is always the line itself
 		Vector max = null;
 		// get the vertices and the center
 		Vector p1 = transform.getTransformed(this.vertices[0]);
@@ -365,17 +370,23 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 		double dot1 = n.dot(v1);
 		double dot2 = n.dot(v2);
 		// find the greatest projection
+		int index = 0;
 		if (dot1 >= dot2) {
 			max = p1;
+			index = 0;
 		} else {
 			max = p2;
+			index = 1;
 		}
 		// return the points of the segment in the
 		// opposite direction as the other shape
+		Vertex vp1 = new Vertex(p1, 0);
+		Vertex vp2 = new Vertex(p2, 1);
+		Vertex vm = new Vertex(max, index);
 		if (p1.to(p2).right().dot(n) > 0) {
-			return new Feature.Edge(new Vector[] {p2, p1}, max);
+			return new Edge(new Vertex[] {vp2, vp1}, p2.to(p1), vm, 0);
 		} else {
-			return new Feature.Edge(new Vector[] {p1, p2}, max);
+			return new Edge(new Vertex[] {vp1, vp2}, p1.to(p2), vm, 0);
 		}
 	}
 	
@@ -387,6 +398,8 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 		super.rotate(theta, x, y);
 		this.vertices[0].rotate(theta, x, y);
 		this.vertices[1].rotate(theta, x, y);
+		this.normals[0].rotate(theta, x, y);
+		this.normals[1].rotate(theta, x, y);
 	}
 
 	/* (non-Javadoc)

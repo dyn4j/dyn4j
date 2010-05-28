@@ -44,12 +44,6 @@ public class Manifold {
 	/** The penetration normal */
 	protected Vector normal;
 	
-	/** The reference edge index */
-	protected int referenceIndex;
-	
-	/** The incident edge index */
-	protected int incidentIndex;
-	
 	/**
 	 * Default constructor.
 	 */
@@ -61,14 +55,10 @@ public class Manifold {
 	 * Full constructor.
 	 * @param points the manifold points
 	 * @param normal the manifold normal
-	 * @param referenceIndex the reference edge index
-	 * @param incidentIndex the incident edge index
 	 */
-	public Manifold(List<ManifoldPoint> points, Vector normal, int referenceIndex, int incidentIndex) {
+	public Manifold(List<ManifoldPoint> points, Vector normal) {
 		this.points = points;
 		this.normal = normal;
-		this.referenceIndex = referenceIndex;
-		this.incidentIndex = incidentIndex;
 	}
 	
 	/* (non-Javadoc)
@@ -82,10 +72,16 @@ public class Manifold {
 		for (int i = 0; i < size; i++) {
 			sb.append(this.points.get(i));
 		}
-		sb.append("}|").append(this.normal).append("|")
-		.append(this.referenceIndex).append("|")
-		.append(this.incidentIndex).append("]");
+		sb.append("}|").append(this.normal).append("]");
 		return sb.toString();
+	}
+	
+	/**
+	 * Clears the {@link Manifold} information.
+	 */
+	public void clear() {
+		this.points.clear();
+		this.normal = null;
 	}
 	
 	/**
@@ -105,18 +101,20 @@ public class Manifold {
 	}
 	
 	/**
-	 * Returns the incident index.
-	 * @return int
+	 * Sets the point list of this {@link Manifold}.
+	 * @param points the point list
 	 */
-	public int getIncidentIndex() {
-		return this.incidentIndex;
+	public void setPoints(List<ManifoldPoint> points) {
+		this.points = points;
 	}
 	
 	/**
-	 * Returns the reference index.
-	 * @return int
+	 * Sets the manifold normal.
+	 * <p>
+	 * Must be normalized.
+	 * @param normal the manifold normal
 	 */
-	public int getReferenceIndex() {
-		return this.referenceIndex;
+	public void setNormal(Vector normal) {
+		this.normal = normal;
 	}
 }

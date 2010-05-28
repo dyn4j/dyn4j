@@ -145,6 +145,6 @@ public class Revolute extends Test {
 		// set the scale
 		this.scale = 64.0;
 		// set the camera offset
-		this.offset.zero();
+		this.offset.set(0.0, 2.0);
 	}
 }

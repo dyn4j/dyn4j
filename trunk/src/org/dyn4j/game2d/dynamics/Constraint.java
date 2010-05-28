@@ -77,6 +77,22 @@ public abstract class Constraint {
 	}
 	
 	/**
+	 * Sets the first {@link Body}.
+	 * @param b1 the first {@link Body}
+	 */
+	public void setBody1(Body b1) {
+		this.b1 = b1;
+	}
+	
+	/**
+	 * Sets the second {@link Body}.
+	 * @param b2 the second {@link Body}
+	 */
+	public void setBody2(Body b2) {
+		this.b2 = b2;
+	}
+
+	/**
 	 * Sets the on {@link Island} flag to the given value.
 	 * @param onIsland true if the {@link Constraint} has been added to an {@link Island}
 	 */

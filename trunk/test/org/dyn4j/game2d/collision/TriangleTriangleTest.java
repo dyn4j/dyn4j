@@ -414,18 +414,19 @@ public class TriangleTriangleTest extends AbstractTest {
 		TestCase.assertEquals(0.380, p2.y, 1.0e-3);
 		TestCase.assertEquals(0.037, mp2.getDepth(), 1.0e-3);
 		// try reversing the shapes
+		this.gjk.detect(tri2, t2, tri1, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, tri2, t2, tri1, t1, m));
 		TestCase.assertEquals(2, m.getPoints().size());
 		mp1 = m.getPoints().get(0);
 		mp2 = m.getPoints().get(1);
 		p1 = mp1.getPoint();
 		p2 = mp2.getPoint();
-		TestCase.assertEquals(-0.150, p1.x, 1.0e-3);
-		TestCase.assertEquals(0.280, p1.y, 1.0e-3);
-		TestCase.assertEquals(0.252, mp1.getDepth(), 1.0e-3);
-		TestCase.assertEquals(0.450, p2.x, 1.0e-3);
-		TestCase.assertEquals(0.380, p2.y, 1.0e-3);
-		TestCase.assertEquals(0.037, mp2.getDepth(), 1.0e-3);
+		TestCase.assertEquals(-0.194, p1.x, 1.0e-3);
+		TestCase.assertEquals(0.546, p1.y, 1.0e-3);
+		TestCase.assertEquals(0.270, mp1.getDepth(), 1.0e-3);
+		TestCase.assertEquals(0.443, p2.x, 1.0e-3);
+		TestCase.assertEquals(0.419, p2.y, 1.0e-3);
+		TestCase.assertEquals(0.039, mp2.getDepth(), 1.0e-3);
 		
 		// test overlap sat
 		this.sat.detect(tri1, t1, tri2, t2, p);
@@ -442,18 +443,19 @@ public class TriangleTriangleTest extends AbstractTest {
 		TestCase.assertEquals(0.380, p2.y, 1.0e-3);
 		TestCase.assertEquals(0.037, mp2.getDepth(), 1.0e-3);
 		// try reversing the shapes
+		this.sat.detect(tri2, t2, tri1, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, tri2, t2, tri1, t1, m));
 		TestCase.assertEquals(2, m.getPoints().size());
 		mp1 = m.getPoints().get(0);
 		mp2 = m.getPoints().get(1);
 		p1 = mp1.getPoint();
 		p2 = mp2.getPoint();
-		TestCase.assertEquals(-0.150, p1.x, 1.0e-3);
-		TestCase.assertEquals(0.280, p1.y, 1.0e-3);
-		TestCase.assertEquals(0.252, mp1.getDepth(), 1.0e-3);
-		TestCase.assertEquals(0.450, p2.x, 1.0e-3);
-		TestCase.assertEquals(0.380, p2.y, 1.0e-3);
-		TestCase.assertEquals(0.037, mp2.getDepth(), 1.0e-3);
+		TestCase.assertEquals(-0.194, p1.x, 1.0e-3);
+		TestCase.assertEquals(0.546, p1.y, 1.0e-3);
+		TestCase.assertEquals(0.270, mp1.getDepth(), 1.0e-3);
+		TestCase.assertEquals(0.443, p2.x, 1.0e-3);
+		TestCase.assertEquals(0.419, p2.y, 1.0e-3);
+		TestCase.assertEquals(0.039, mp2.getDepth(), 1.0e-3);
 	}
 	
 	/**

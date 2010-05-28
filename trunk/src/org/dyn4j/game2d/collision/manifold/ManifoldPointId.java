@@ -22,77 +22,24 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.game2d.dynamics;
+package org.dyn4j.game2d.collision.manifold;
 
 /**
- * Represents a time {@link Step} of the dynamics system.
+ * Represents the identification of a specific point of a {@link Manifold}.
  * @author William Bittle
  */
-public class Step {
-	/** The last elapsed time */
-	protected double dt0;
-	
-	/** The last inverse elapsed time */
-	protected double invdt0;
-	
-	/** The elapsed time */
-	protected double dt;
-	
-	/** The inverse elapsed time */
-	protected double invdt;
-	
-	/** The elapsed time ratio from the last to the current */
-	protected double dtRatio;
-
+public interface ManifoldPointId {
 	/**
-	 * Default constructor.
+	 * The default {@link ManifoldPointId}.  Flags that the points should be
+	 * tested for equality by performing a distance check.
 	 */
-	public Step() {
-		super();
-		// get the current settings
-		Settings settings = Settings.getInstance();
-		// 1.0 / hz
-		this.dt = settings.getStepFrequency();
-		this.invdt = 1.0 / dt;
-		this.dt0 = this.dt;
-		this.invdt0 = this.invdt;
-		this.dtRatio = 1.0;
-	}
-
-	/**
-	 * Updates the current {@link Step} using the new elapsed time.
-	 * @param dt in seconds.
-	 */
-	public void update(double dt) {
-		this.dt0 = this.dt;
-		this.invdt0 = this.invdt;
-		this.dt = dt;
-		this.invdt = 1.0 / dt;
-		this.dtRatio = this.invdt0 * dt;
-	}
-	
-	/**
-	 * Returns the elapsed time since the last time step.
-	 * @return double
-	 */
-	public double getDeltaTime() {
-		return this.dt;
-	}
-	
-	/**
-	 * Returns the ratio of the last elapsed time to the current
-	 * elapsed time.
-	 * @return double
-	 */
-	public double getDeltaTimeRatio() {
-		return this.dtRatio;
-	}
-	
-	/**
-	 * Returns the previous frame's elapsed time.
-	 * @return double
-	 */
-	public double getPrevousDeltaTime() {
-		return this.dt0;
-	}
+	public static final ManifoldPointId DISTANCE = new ManifoldPointId() {
+		/* (non-Javadoc)
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			return "DISTANCE_MANIFOLD_POINT_ID[]";
+		}
+	};
 }

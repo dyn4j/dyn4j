@@ -405,13 +405,14 @@ public class PolygonSegmentTest extends AbstractTest {
 		TestCase.assertEquals(0.000, p1.y, 1.0e-3);
 		TestCase.assertEquals(0.404, mp.getDepth(), 1.0e-3);
 		// try reversing the shapes
+		this.gjk.detect(seg, t2, poly, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, seg, t2, poly, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
 		p1 = mp.getPoint();
-		TestCase.assertEquals(-0.500, p1.x, 1.0e-3);
-		TestCase.assertEquals(0.0, p1.y, 1.0e-3);
-		TestCase.assertEquals(0.404, mp.getDepth(), 1.0e-3);
+		TestCase.assertEquals(0.000, p1.x, 1.0e-3);
+		TestCase.assertEquals(0.000, p1.y, 1.0e-3);
+		TestCase.assertEquals(0.353, mp.getDepth(), 1.0e-3);
 		
 		// test overlap sat
 		this.sat.detect(poly, t1, seg, t2, p);
@@ -423,13 +424,14 @@ public class PolygonSegmentTest extends AbstractTest {
 		TestCase.assertEquals(0.0, p1.y, 1.0e-3);
 		TestCase.assertEquals(0.404, mp.getDepth(), 1.0e-3);
 		// try reversing the shapes
+		this.sat.detect(seg, t2, poly, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, seg, t2, poly, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
 		p1 = mp.getPoint();
-		TestCase.assertEquals(-0.500, p1.x, 1.0e-3);
-		TestCase.assertEquals(0.0, p1.y, 1.0e-3);
-		TestCase.assertEquals(0.404, mp.getDepth(), 1.0e-3);
+		TestCase.assertEquals(0.000, p1.x, 1.0e-3);
+		TestCase.assertEquals(0.000, p1.y, 1.0e-3);
+		TestCase.assertEquals(0.353, mp.getDepth(), 1.0e-3);
 	}
 	
 	/**

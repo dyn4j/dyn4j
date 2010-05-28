@@ -25,12 +25,13 @@
 package org.dyn4j.game2d.collision.broadphase;
 
 import org.dyn4j.game2d.collision.Collidable;
+import org.dyn4j.game2d.geometry.Convex;
 
 /**
  * Represents a pair of {@link Collidable}s that have been detected as
  * colliding in the {@link BroadphaseDetector}.
  * @author William Bittle
- * @param <E> the {@link Collidable} type
+ * @param <E> the object type; intended to be of type {@link Collidable} or {@link Convex}
  */
 public class BroadphasePair<E> {
 	/** The first object */
@@ -78,5 +79,21 @@ public class BroadphasePair<E> {
 	 */
 	public E getObject2() {
 		return object2;
+	}
+	
+	/**
+	 * Sets the first object.
+	 * @param object1 the first object
+	 */
+	public void setObject1(E object1) {
+		this.object1 = object1;
+	}
+	
+	/**
+	 * Sets the second object.
+	 * @param object2 the second object
+	 */
+	public void setObject2(E object2) {
+		this.object2 = object2;
 	}
 }

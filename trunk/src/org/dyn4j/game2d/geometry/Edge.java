@@ -22,77 +22,83 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.game2d.dynamics;
+package org.dyn4j.game2d.geometry;
 
 /**
- * Represents a time {@link Step} of the dynamics system.
+ * Represents an edge feature of a {@link Shape}.
  * @author William Bittle
  */
-public class Step {
-	/** The last elapsed time */
-	protected double dt0;
+public class Edge extends Feature {
+	/** The vertices making the edge */
+	protected Vertex[] vertices;
 	
-	/** The last inverse elapsed time */
-	protected double invdt0;
+	/** The edge vector */
+	protected Vector edge;
 	
-	/** The elapsed time */
-	protected double dt;
+	/** The vertex of maximum projection along a {@link Vector} */
+	protected Vertex max;
 	
-	/** The inverse elapsed time */
-	protected double invdt;
+	/** The index of the edge on the shape */
+	protected int index;
 	
-	/** The elapsed time ratio from the last to the current */
-	protected double dtRatio;
-
 	/**
-	 * Default constructor.
+	 * Creates an edge feature.
+	 * @param vertices the vertices making the edge
+	 * @param edge the vector representing the edge
+	 * @param max the maximum point
+	 * @param index the index of the edge
 	 */
-	public Step() {
-		super();
-		// get the current settings
-		Settings settings = Settings.getInstance();
-		// 1.0 / hz
-		this.dt = settings.getStepFrequency();
-		this.invdt = 1.0 / dt;
-		this.dt0 = this.dt;
-		this.invdt0 = this.invdt;
-		this.dtRatio = 1.0;
-	}
-
-	/**
-	 * Updates the current {@link Step} using the new elapsed time.
-	 * @param dt in seconds.
-	 */
-	public void update(double dt) {
-		this.dt0 = this.dt;
-		this.invdt0 = this.invdt;
-		this.dt = dt;
-		this.invdt = 1.0 / dt;
-		this.dtRatio = this.invdt0 * dt;
+	public Edge(Vertex[] vertices, Vector edge, Vertex max, int index) {
+		super(Feature.Type.EDGE);
+		this.vertices = vertices;
+		this.edge = edge;
+		this.max = max;
+		this.index = index;
 	}
 	
-	/**
-	 * Returns the elapsed time since the last time step.
-	 * @return double
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
 	 */
-	public double getDeltaTime() {
-		return this.dt;
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("EDGE[");
+		sb.append("{").append(this.vertices[0]).append(this.vertices[1]).append("}|");
+		sb.append(this.edge).append("|");
+		sb.append(this.max).append("|");
+		sb.append(this.index).append("]");
+		return sb.toString();
 	}
 	
 	/**
-	 * Returns the ratio of the last elapsed time to the current
-	 * elapsed time.
-	 * @return double
+	 * Returns the edge vertices.
+	 * @return {@link Vertex}[]
 	 */
-	public double getDeltaTimeRatio() {
-		return this.dtRatio;
+	public Vertex[] getVertices() {
+		return this.vertices;
 	}
 	
 	/**
-	 * Returns the previous frame's elapsed time.
-	 * @return double
+	 * Returns the vector represeting this edge.
+	 * @return {@link Vector}
 	 */
-	public double getPrevousDeltaTime() {
-		return this.dt0;
+	public Vector getEdge() {
+		return this.edge;
+	}
+	
+	/**
+	 * Returns the maximum point.
+	 * @return {@link Vertex}
+	 */
+	public Vertex getMaximum() {
+		return this.max;
+	}
+	
+	/**
+	 * Returns the edge index.
+	 * @return int
+	 */
+	public int getIndex() {
+		return this.index;
 	}
 }

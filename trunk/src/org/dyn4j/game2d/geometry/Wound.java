@@ -32,6 +32,9 @@ public abstract class Wound extends AbstractShape implements Shape, Transformabl
 	/** The array of vertices */
 	protected Vector[] vertices;
 	
+	/** The edge normals */
+	protected Vector[] normals;
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -43,6 +46,10 @@ public abstract class Wound extends AbstractShape implements Shape, Transformabl
 		for (int i = 0; i < vertices.length; i++) {
 			sb.append(vertices[i]);
 		}
+		sb.append("}|{");
+		for (int i = 0; i < normals.length; i++) {
+			sb.append(normals[i]);
+		}
 		sb.append("}");
 		return sb.toString();
 	}
@@ -53,5 +60,13 @@ public abstract class Wound extends AbstractShape implements Shape, Transformabl
 	 */
 	public Vector[] getVertices() {
 		return this.vertices;
+	}
+	
+	/**
+	 * Returns the array of edge normals in local coordinates.
+	 * @return {@link Vector}[]
+	 */
+	public Vector[] getNormals() {
+		return this.normals;
 	}
 }
