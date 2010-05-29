@@ -58,7 +58,22 @@ public class Step {
 		this.invdt0 = this.invdt;
 		this.dtRatio = 1.0;
 	}
-
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("STEP[")
+		.append(this.dt).append("|")
+		.append(this.invdt).append("|")
+		.append(this.dt0).append("|")
+		.append(this.invdt0).append("|")
+		.append(this.dtRatio).append("]");
+		return sb.toString();
+	}
+	
 	/**
 	 * Updates the current {@link Step} using the new elapsed time.
 	 * @param dt in seconds.

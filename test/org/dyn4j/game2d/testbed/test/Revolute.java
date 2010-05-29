@@ -26,11 +26,11 @@ package org.dyn4j.game2d.testbed.test;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
-import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.dynamics.joint.Joint;
 import org.dyn4j.game2d.dynamics.joint.RevoluteJoint;
 import org.dyn4j.game2d.geometry.Circle;
+import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Vector;
 import org.dyn4j.game2d.testbed.ContactCounter;
@@ -85,7 +85,7 @@ public class Revolute extends Test {
 		// create the floor
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
-		floor.addShape(floorRect, Mass.create(floorRect));
+		floor.addShape(floorRect);
 		floor.setMassFromShapes(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
@@ -102,22 +102,24 @@ public class Revolute extends Test {
 		
 		// create a reusable rectangle
 		Rectangle r = new Rectangle(3.0, 0.5);
+		r.setDensity(0.2);
 		// create a reusable circle
 		Circle c = new Circle(0.25);
+		c.setDensity(0.5);
 		
 		Entity body = new Entity();
-		body.addShape(r, Mass.create(r, 0.2));
+		body.addShape(r);
 		body.setMassFromShapes();
 		body.translate(0, 4.25);
 		
 		Entity wheel1 = new Entity();
-		wheel1.addShape(c, Mass.create(c, 0.5));
+		wheel1.addShape(c);
 		wheel1.setMassFromShapes();
 		wheel1.setMu(0.5);
 		wheel1.translate(-1.0, 3.6);
 		
 		Entity wheel2 = new Entity();
-		wheel2.addShape(c, Mass.create(c, 0.5));
+		wheel2.addShape(c);
 		wheel2.setMassFromShapes();
 		wheel2.setMu(0.5);
 		wheel2.translate(1.0, 3.6);

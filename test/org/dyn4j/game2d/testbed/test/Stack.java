@@ -26,8 +26,8 @@ package org.dyn4j.game2d.testbed.test;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
-import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.dynamics.World;
+import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Entity;
@@ -86,7 +86,7 @@ public class Stack extends Test {
 		// create the floor
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
-		floor.addShape(floorRect, Mass.create(floorRect));
+		floor.addShape(floorRect);
 		floor.setMassFromShapes(Mass.Type.INFINITE);
 		this.world.add(floor);
 		
@@ -98,7 +98,6 @@ public class Stack extends Test {
 		
 		// create a reusable rect for the boxes
 		Rectangle rect = new Rectangle(width, height);
-		Mass mass = Mass.create(rect, 1.0);
 		
 		// initialize the y translation
 		double y = 0.75;
@@ -106,7 +105,7 @@ public class Stack extends Test {
 		// loop to create the stack
 		for (int i = 0; i < SIZE; i++) {
 			Entity e = new Entity();
-			e.addShape(rect, mass);
+			e.addShape(rect);
 			e.setMassFromShapes();
 			e.translate(0.0, y);
 			this.world.add(e);

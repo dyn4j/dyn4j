@@ -49,9 +49,9 @@ import org.dyn4j.game2d.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.game2d.collision.narrowphase.Gjk;
 import org.dyn4j.game2d.collision.narrowphase.Sat;
 import org.dyn4j.game2d.dynamics.Body;
-import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Convex;
+import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Segment;
 import org.dyn4j.game2d.geometry.Vector;
 
@@ -61,7 +61,6 @@ import org.dyn4j.game2d.geometry.Vector;
  * @param <E> the container type
  */
 // TODO need a shape editing test
-// TODO fix the spinners on control panel
 public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	/** The class logger */
 	private static final Logger LOGGER = Logger.getLogger(TestBed.class.getName());
@@ -818,7 +817,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 			// launch a bomb
 			Circle bombShape = new Circle(0.25);
 			Entity bomb = new Entity();
-			bomb.addShape(bombShape, Mass.create(bombShape, 1.0));
+			bomb.addShape(bombShape);
 			bomb.setMassFromShapes();
 			// set the elasticity
 			bomb.setE(0.3);

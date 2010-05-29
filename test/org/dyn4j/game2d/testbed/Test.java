@@ -40,8 +40,12 @@ import org.dyn4j.game2d.dynamics.contact.ContactPoint;
 import org.dyn4j.game2d.dynamics.contact.SolvedContactPoint;
 import org.dyn4j.game2d.dynamics.joint.DistanceJoint;
 import org.dyn4j.game2d.dynamics.joint.Joint;
+import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Rectangle;
+import org.dyn4j.game2d.geometry.Shape;
+import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Wound;
 
 /**
  * Represents a test.
@@ -177,6 +181,35 @@ public abstract class Test {
 		for (int i = 0; i < size; i++) {
 			Entity obj = (Entity) bodies.get(i);
 			obj.render(g, this.scale);
+		}
+
+		// check if we should render normals
+		if (draw.drawNormals()) {
+			// set the color
+			g.setColor(Color.RED);
+			// draw all the normals for every convex on each shape
+			for (int i = 0; i < size; i++) {
+				Body b = bodies.get(i);
+				Transform t = b.getTransform();
+				// loop over the convex shapes again
+				for (Convex c : b.getShapes()) {
+					// render the normals
+					this.renderNormals(g, c, t, this.scale);
+				}
+			}
+		}
+
+		if (draw.drawVelocityVectors()) {
+			// set the color
+			g.setColor(Color.MAGENTA);
+			// draw all the normals for every convex on each shape
+			for (int i = 0; i < size; i++) {
+				Body b = bodies.get(i);
+				Vector center = b.getWorldCenter();
+				Vector v = b.getV();
+				// draw the velocity vector
+				this.renderVector(g, v, center, scale);
+			}
 		}
 		
 		// see if the user wanted any contact information drawn
@@ -434,5 +467,54 @@ public abstract class Test {
 	 */
 	public Dimension getSize() {
 		return this.size;
+	}
+
+	/**
+	 * Renders the edge normals of the given {@link Convex} {@link Shape} if the {@link Shape}
+	 * is a {@link Wound} {@link Shape}.
+	 * @param g the graphics object to render to
+	 * @param c the convex object to render on top of
+	 * @param t the transform of the convex object
+	 * @param s the world to screen space scale factor
+	 */
+	private void renderNormals(Graphics2D g, Convex c, Transform t, double s) {
+		// set the normal length
+		final double l = 0.1;
+		// make sure the shape is of type wound
+		if (c instanceof Wound) {
+			Wound shape = (Wound) c;
+			Vector[] vertices = shape.getVertices();
+			Vector[] normals = shape.getNormals();
+			int size = normals.length;
+			// render all the normals
+			for (int i = 0; i < size; i++) {
+				Vector p1 = t.getTransformed(vertices[i]);
+				Vector p2 = t.getTransformed(vertices[(i + 1 == size) ? 0 : i + 1]);
+				Vector n = t.getTransformedR(normals[i]);
+				// find the mid point between p1 and p2
+				Vector mid = p1.to(p2).multiply(0.5).add(p1);
+				// draw a line from the mid point along n
+				g.drawLine(
+						(int) Math.ceil(mid.x * s),
+						(int) Math.ceil(mid.y * s),
+						(int) Math.ceil((mid.x + n.x * l) * s),
+						(int) Math.ceil((mid.y + n.y * l) * s));
+			}
+		}
+	}
+
+	/**
+	 * Renders a vector from a start position.
+	 * @param g the graphics object to render to
+	 * @param v the vector to render
+	 * @param s the start position to render the vector from
+	 * @param scale the scaling factor from world space to screen space
+	 */
+	private void renderVector(Graphics2D g, Vector v, Vector s, double scale) {
+		g.drawLine(
+				(int) Math.ceil(s.x * scale),
+				(int) Math.ceil(s.y * scale),
+				(int) Math.ceil((s.x + v.x) * scale),
+				(int) Math.ceil((s.y + v.y) * scale));
 	}
 }

@@ -26,10 +26,10 @@ package org.dyn4j.game2d.testbed.test;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
-import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Geometry;
+import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Polygon;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Segment;
@@ -88,7 +88,7 @@ public class Shapes extends Test {
 		// create the floor
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
-		floor.addShape(floorRect, Mass.create(floorRect));
+		floor.addShape(floorRect);
 		floor.setMassFromShapes(Mass.Type.INFINITE);
 		this.world.add(floor);
 		
@@ -98,7 +98,7 @@ public class Shapes extends Test {
 				new Vector(-0.5, -0.5), 
 				new Vector(0.5, -0.5));
 		Entity triangle = new Entity();
-		triangle.addShape(triShape, Mass.create(triShape));
+		triangle.addShape(triShape);
 		triangle.setMassFromShapes();
 		triangle.translate(-1.0, 2.0);
 		// test having a velocity
@@ -108,7 +108,7 @@ public class Shapes extends Test {
 		// create a circle
 		Circle cirShape = new Circle(0.5);
 		Entity circle = new Entity();
-		circle.addShape(cirShape, Mass.create(cirShape));
+		circle.addShape(cirShape);
 		circle.setMassFromShapes();
 		circle.translate(2.0, 2.0);
 		// test adding some force
@@ -120,14 +120,14 @@ public class Shapes extends Test {
 		// create a line segment
 		Segment segShape = new Segment(new Vector(0.5, 0.5), new Vector(-0.5, -0.5));
 		Entity segment1 = new Entity();
-		segment1.addShape(segShape, Mass.create(segShape));
+		segment1.addShape(segShape);
 		segment1.setMassFromShapes();
 		segment1.translate(1.0, 6.0);
 		this.world.add(segment1);
 		
 		// try a segment parallel to the floor
 		Entity segment2 = new Entity();
-		segment2.addShape(segShape, Mass.create(segShape));
+		segment2.addShape(segShape);
 		segment2.setMassFromShapes();
 		segment2.rotateAboutCenter(Math.toRadians(-45.0));
 		segment2.translate(-4.5, 1.0);
@@ -136,7 +136,7 @@ public class Shapes extends Test {
 		// try a rectangle
 		Rectangle rectShape = new Rectangle(1.0, 1.0);
 		Entity rectangle = new Entity();
-		rectangle.addShape(rectShape, Mass.create(rectShape));
+		rectangle.addShape(rectShape);
 		rectangle.setMassFromShapes();
 		rectangle.translate(0.0, 2.0);
 		rectangle.getV().set(-5.0, 0.0);
@@ -145,7 +145,7 @@ public class Shapes extends Test {
 		// try a polygon with lots of vertices
 		Polygon polyShape = Geometry.getUnitCirclePolygon(10, 1.0);
 		Entity polygon = new Entity();
-		polygon.addShape(polyShape, Mass.create(polyShape));
+		polygon.addShape(polyShape);
 		polygon.setMassFromShapes();
 		polygon.translate(-2.5, 2.0);
 		// set the angular velocity
@@ -153,16 +153,16 @@ public class Shapes extends Test {
 		this.world.add(polygon);
 		
 		// try a compound object (Capsule)
-		Circle c1 = new Circle(0.5);
-		Circle c2 = new Circle(0.5);
+		Circle c1 = new Circle(0.5); c1.setDensity(0.5);
+		Circle c2 = new Circle(0.5); c2.setDensity(0.5);
 		Rectangle rm = new Rectangle(2.0, 1.0);
 		// translate the circles in local coordinates
 		c1.translate(-1.0, 0.0);
 		c2.translate(1.0, 0.0);
 		Entity capsule = new Entity();
-		capsule.addShape(c1, Mass.create(c1, 0.5));
-		capsule.addShape(c2, Mass.create(c2, 0.5));
-		capsule.addShape(rm, Mass.create(rm));
+		capsule.addShape(c1);
+		capsule.addShape(c2);
+		capsule.addShape(rm);
 		capsule.setMassFromShapes();
 		capsule.translate(0.0, 4.0);
 		this.world.add(capsule);

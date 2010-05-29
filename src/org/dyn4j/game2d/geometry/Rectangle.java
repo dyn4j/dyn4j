@@ -201,4 +201,28 @@ public class Rectangle extends Polygon implements Shape, Transformable {
 		double e = (this.width * 0.5) * Math.abs(projectAxis0.dot(axis)) + (this.height * 0.5) * Math.abs(projectAxis1.dot(axis));
         return new Interval(c - e, c + e);
 	}
+	
+	/**
+	 * Creates a {@link Mass} object using the geometric properties of
+	 * this {@link Rectangle} and the set density.
+	 * <pre>
+	 * m = d * h * w
+	 * I = m * (h<sup>2</sup> + w<sup>2</sup>) / 12
+	 * </pre>
+	 * @return {@link Mass} the {@link Mass} of this {@link Rectangle}
+	 */
+	@Override
+	public Mass createMass() {
+		double d = this.density;
+		double h = this.height;
+		double w = this.width;
+		// compute the mass
+		double m = d * h * w;
+		// compute the inertia tensor
+		double I = m * (h * h + w * w) / 12.0;
+		// since we know that a rectangle has only four points that are
+		// evenly distributed we can feel safe using the averaging method 
+		// for the centroid
+		return new Mass(this.center.copy(), m, I);
+	}
 }

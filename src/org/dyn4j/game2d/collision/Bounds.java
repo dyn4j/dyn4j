@@ -26,12 +26,70 @@ package org.dyn4j.game2d.collision;
 
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Transformable;
+import org.dyn4j.game2d.geometry.Vector;
 
 /**
  * Represents the {@link Bounds} of the simulation/world.
  * @author William Bittle
  */
 public interface Bounds extends Transformable {
+	/** 
+	 * The default bounds object.
+	 * <p>
+	 * This bounds object will always return false from the {@link #isOutside(Collidable)}
+	 * method and returns a new identity transform from the {@link #getTransform()}
+	 * method.
+	 * <p>
+	 * Take care in using this bounds object since overflow can happen.
+	 */
+	public static final Bounds UNBOUNDED = new Bounds() {
+		/* (non-Javadoc)
+		 * @see org.dyn4j.game2d.geometry.Transformable#translate(org.dyn4j.game2d.geometry.Vector)
+		 */
+		@Override
+		public void translate(Vector vector) {}
+		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.game2d.geometry.Transformable#translate(double, double)
+		 */
+		@Override
+		public void translate(double x, double y) {}
+		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.game2d.geometry.Transformable#rotate(double, double, double)
+		 */
+		@Override
+		public void rotate(double theta, double x, double y) {}
+		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.game2d.geometry.Transformable#rotate(double, org.dyn4j.game2d.geometry.Vector)
+		 */
+		@Override
+		public void rotate(double theta, Vector point) {}
+		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.game2d.geometry.Transformable#rotate(double)
+		 */
+		@Override
+		public void rotate(double theta) {}
+		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.game2d.collision.Bounds#isOutside(org.dyn4j.game2d.collision.Collidable)
+		 */
+		@Override
+		public boolean isOutside(Collidable collidable) {
+			return false;
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.game2d.collision.Bounds#getTransform()
+		 */
+		@Override
+		public Transform getTransform() {
+			return new Transform();
+		}
+	};
+	
 	/**
 	 * Returns the {@link Bounds} {@link Transform}.
 	 * @return {@link Transform}

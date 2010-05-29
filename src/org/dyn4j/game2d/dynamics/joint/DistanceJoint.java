@@ -25,10 +25,10 @@
 package org.dyn4j.game2d.dynamics.joint;
 
 import org.dyn4j.game2d.dynamics.Body;
-import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.dynamics.Settings;
 import org.dyn4j.game2d.dynamics.Step;
 import org.dyn4j.game2d.geometry.Interval;
+import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Vector;
 
@@ -124,6 +124,7 @@ public class DistanceJoint extends Joint {
 	 */
 	public DistanceJoint(Body b1, Body b2, boolean collisionAllowed, Vector anchor1, Vector anchor2) {
 		super(b1, b2, collisionAllowed);
+		if (anchor1 == null || anchor2 == null) throw new NullPointerException("Both anchor points cannot be null.");
 		this.localAnchor1 = b1.getLocalPoint(anchor1);
 		this.localAnchor2 = b2.getLocalPoint(anchor2);
 		this.distance = anchor1.distance(anchor2);
@@ -145,6 +146,8 @@ public class DistanceJoint extends Joint {
 	 */
 	public DistanceJoint(Body b1, Body b2, boolean collisionAllowed, Vector anchor1, Vector anchor2, double frequency, double dampingRatio) {
 		super(b1, b2, collisionAllowed);
+		// verify the anchor points
+		if (anchor1 == null || anchor2 == null) throw new NullPointerException("Both anchor points cannot be null.");
 		// verify the frequency
 		if (frequency <= 0) throw new IllegalArgumentException("The frequency must be greater than zero.");
 		// verify the damping ratio

@@ -35,6 +35,14 @@ public class Torque extends Force {
 	protected Vector point;
 	
 	/**
+	 * Default constructor.
+	 */
+	public Torque() {
+		super();
+		this.point = new Vector();
+	}
+	
+	/**
 	 * Creates a {@link Torque} using the force components 
 	 * and world point coordinates.
 	 * @param fx the x component of the force
@@ -50,21 +58,38 @@ public class Torque extends Force {
 	/**
 	 * Creates a {@link Torque} using the given force and world
 	 * space point.
+	 * <p>
+	 * If the given force is null this force is set to the zero vector.
+	 * <p>
+	 * If the given point is null this point is set to the origin.
 	 * @param force the force
 	 * @param point the world space application point
 	 */
 	public Torque(Vector force, Vector point) {
 		super(force);
-		this.point = point;
+		if (point == null) {
+			this.point = new Vector();
+		} else {
+			this.point = point;
+		}
 	}
 	
 	/**
 	 * Copy constructor.
+	 * <p>
+	 * If the given force is null this force is set to the zero vector.
+	 * <p>
+	 * If the given point is null this point is set to the origin.
 	 * @param torque the {@link Torque} to copy
 	 */
 	public Torque(Torque torque) {
-		super(torque.force.copy());
-		this.point = torque.point.copy();
+		if (torque == null) {
+			this.force = new Vector();
+			this.point = new Vector();
+		} else {
+			this.force = torque.force.copy();
+			this.point = torque.point.copy();
+		}
 	}
 	
 	/**
@@ -81,21 +106,45 @@ public class Torque extends Force {
 	
 	/**
 	 * Sets this {@link Torque} to the given force at the given point.
+	 * <p>
+	 * If the given force is null this force is set to the zero vector.
+	 * <p>
+	 * If the given point is null this point is set to the origin.
 	 * @param force the force vector
 	 * @param point the world space application point
 	 */
 	public void set(Vector force, Vector point) {
-		this.force.set(force);
-		this.point.set(point);
+		if (force == null) {
+			this.force.zero();
+		} else {
+			this.force.set(force);
+		}
+		if (point == null) {
+			this.point.zero();
+		} else {
+			this.point.set(point);
+		}
 	}
 	
 	/**
 	 * Sets this {@link Torque} to the given {@link Torque}.
+	 * <p>
+	 * If the given force is null this force is set to the zero vector.
+	 * <p>
+	 * If the given point is null this point is set to the origin.
 	 * @param torque the {@link Torque} to copy
 	 */
 	public void set(Torque torque) {
-		this.force.set(torque.force);
-		this.point.set(torque.point);
+		if (force == null) {
+			this.force.zero();
+		} else {
+			this.force.set(torque.force);
+		}
+		if (point == null) {
+			this.point.zero();
+		} else {
+			this.point.set(torque.point);
+		}
 	}
 	
 	/**
@@ -117,5 +166,13 @@ public class Torque extends Force {
 		.append(this.force).append("|")
 		.append(this.point).append("]");
 		return sb.toString();
+	}
+	
+	/**
+	 * Returns this {@link Torque}'s application point.
+	 * @return {@link Vector}
+	 */
+	public Vector getPoint() {
+		return point;
 	}
 }

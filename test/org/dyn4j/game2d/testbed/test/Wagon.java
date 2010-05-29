@@ -26,10 +26,10 @@ package org.dyn4j.game2d.testbed.test;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
-import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.dynamics.joint.DistanceJoint;
 import org.dyn4j.game2d.geometry.Circle;
+import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Entity;
@@ -83,13 +83,13 @@ public class Wagon extends Test {
 		// create the floor
 		Rectangle floorRect = new Rectangle(20.0, 1.0);
 		Entity floor = new Entity();
-		floor.addShape(floorRect, Mass.create(floorRect));
+		floor.addShape(floorRect);
 		floor.setMassFromShapes(Mass.Type.INFINITE);
 		
 		// create some slopes
 		Rectangle slope1Rect = new Rectangle(9.0, 0.5);
 		Entity slope1 = new Entity();
-		slope1.addShape(slope1Rect, Mass.create(slope1Rect));
+		slope1.addShape(slope1Rect);
 		slope1.setMassFromShapes(Mass.Type.INFINITE);
 		slope1.translate(-3.0, 7.0);
 		slope1.rotate(Math.toRadians(-20), slope1.getWorldCenter());
@@ -97,7 +97,7 @@ public class Wagon extends Test {
 		
 		Rectangle slope2Rect = new Rectangle(7.0, 0.5);
 		Entity slope2 = new Entity();
-		slope2.addShape(slope2Rect, Mass.create(slope2Rect));
+		slope2.addShape(slope2Rect);
 		slope2.setMassFromShapes(Mass.Type.INFINITE);
 		slope2.translate(3.0, 4.0);
 		slope2.rotate(Math.toRadians(20), slope2.getWorldCenter());
@@ -105,7 +105,7 @@ public class Wagon extends Test {
 		
 		Rectangle slope3Rect = new Rectangle(3.0, 0.2);
 		Entity slope3 = new Entity();
-		slope3.addShape(slope3Rect, Mass.create(slope3Rect));
+		slope3.addShape(slope3Rect);
 		slope3.setMassFromShapes(Mass.Type.INFINITE);
 		slope3.translate(5.0, 0.8);
 		slope3.rotate(Math.toRadians(30), slope3.getWorldCenter());
@@ -113,7 +113,7 @@ public class Wagon extends Test {
 		
 		Rectangle slope4Rect = new Rectangle(3.0, 0.2);
 		Entity slope4 = new Entity();
-		slope4.addShape(slope4Rect, Mass.create(slope4Rect));
+		slope4.addShape(slope4Rect);
 		slope4.setMassFromShapes(Mass.Type.INFINITE);
 		slope4.translate(-5.0, 0.8);
 		slope4.rotate(Math.toRadians(-30), slope4.getWorldCenter());
@@ -126,13 +126,13 @@ public class Wagon extends Test {
 		Circle circle = new Circle(0.5);
 		
 		Entity wheel1 = new Entity();
-		wheel1.addShape(circle, Mass.create(circle));
+		wheel1.addShape(circle);
 		wheel1.setMassFromShapes();
 		wheel1.translate(-1.5, 7.5);
 		this.world.add(wheel1);
 		
 		Entity wheel2 = new Entity();
-		wheel2.addShape(circle, Mass.create(circle));
+		wheel2.addShape(circle);
 		wheel2.setMassFromShapes();
 		wheel2.translate(-2.9, 8.0);
 		this.world.add(wheel2);

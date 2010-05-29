@@ -41,11 +41,11 @@ import org.dyn4j.game2d.collision.narrowphase.Gjk;
 import org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.game2d.collision.narrowphase.Penetration;
 import org.dyn4j.game2d.collision.narrowphase.Separation;
-import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Geometry;
+import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Polygon;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Segment;
@@ -151,43 +151,43 @@ public class Plotter extends Test {
 		// which shape to make?
 		if (index == 0) {
 			Circle c = new Circle(1.0);
-			e.addShape(c, Mass.create(c));
+			e.addShape(c);
 		} else if (index == 1) {
 			Circle c = new Circle(0.5);
-			e.addShape(c, Mass.create(c));
+			e.addShape(c);
 		} else if (index == 2) {
 			Polygon p = Geometry.getUnitCirclePolygon(6, 0.5);
-			e.addShape(p, Mass.create(p));
+			e.addShape(p);
 		} else if (index == 3) {
 			Polygon p = Geometry.getUnitCirclePolygon(5, 1.0);
-			e.addShape(p, Mass.create(p));
+			e.addShape(p);
 		} else if (index == 4) {
 			Rectangle r = new Rectangle(1.0, 1.0);
-			e.addShape(r, Mass.create(r));
+			e.addShape(r);
 		} else if (index == 5) {
 			Rectangle r = new Rectangle(0.5, 0.5);
-			e.addShape(r, Mass.create(r));
+			e.addShape(r);
 		} else if (index == 6) {
 			Triangle t = new Triangle(new Vector(0.45, -0.12), new Vector(-0.45, 0.38), new Vector(-0.15, -0.22));
-			e.addShape(t, Mass.create(t));
+			e.addShape(t);
 		} else if (index == 7) {
 			Triangle t = new Triangle(new Vector(1.29, 0.25), new Vector(-0.71, 0.65), new Vector(-0.59, -0.85));
-			e.addShape(t, Mass.create(t));
+			e.addShape(t);
 		} else if (index == 8) {
 			Triangle t = new Triangle(new Vector(0.5, 0.5), new Vector(-0.3, -0.5), new Vector(1.0, -0.3));
-			e.addShape(t, Mass.create(t));
+			e.addShape(t);
 		} else if (index == 9) {	
 			Segment s = new Segment(new Vector(-0.5, 0.0), new Vector(0.5, 0.0));
-			e.addShape(s, Mass.create(s));
+			e.addShape(s);
 		} else if (index == 10) {
 			Segment s = new Segment(new Vector(0.1, -0.3), new Vector(-0.8, 0.2));
-			e.addShape(s, Mass.create(s));
+			e.addShape(s);
 		} else if (index == 11) {
 			Segment s = new Segment(new Vector(-0.3, -0.3), new Vector(0.2, 0.3));
-			e.addShape(s, Mass.create(s));
+			e.addShape(s);
 		} else {
 			Segment s = new Segment(new Vector(-0.3, 0.2), new Vector(0.0, -0.1));
-			e.addShape(s, Mass.create(s));
+			e.addShape(s);
 		}
 		// set the mass to infinite
 		e.setMassFromShapes(Mass.Type.INFINITE);

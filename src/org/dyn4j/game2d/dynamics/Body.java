@@ -34,6 +34,7 @@ import org.dyn4j.game2d.dynamics.contact.ContactEdge;
 import org.dyn4j.game2d.dynamics.joint.Joint;
 import org.dyn4j.game2d.dynamics.joint.JointEdge;
 import org.dyn4j.game2d.geometry.Convex;
+import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Shape;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Transformable;
@@ -104,9 +105,6 @@ public class Body implements Collidable, Transformable {
 	/** The {@link Body}'s {@link Shape} list */
 	protected List<Convex> shapes;
 	
-	/** The list of masses of the shapes */
-	protected List<Mass> masses;
-	
 	/** The user data associated to this {@link Body} */
 	protected Object userData;
 	
@@ -164,7 +162,6 @@ public class Body implements Collidable, Transformable {
 	public Body() {
 		// the majority of bodies will contain one shape
 		this.shapes = new ArrayList<Convex>(1);
-		this.masses = new ArrayList<Mass>(1);
 		this.id = UUID.randomUUID().toString();
 		this.transform = new Transform();
 		this.filter = Filter.DEFAULT_FILTER;
@@ -231,47 +228,32 @@ public class Body implements Collidable, Transformable {
 	 * or {@link #setMassFromShapes(Mass.Type)} method to compute the new total
 	 * {@link Mass}.
 	 * @param convex the {@link Convex} {@link Shape}
-	 * @param mass the {@link Mass} of the {@link Convex} {@link Shape}
 	 * @return {@link Body} this body
 	 */
-	public Body addShape(Convex convex, Mass mass) {
+	public Body addShape(Convex convex) {
 		// make sure neither is null
-		if (convex == null) throw new IllegalArgumentException("The convex shape cannot be null.");
-		if (mass == null) throw new IllegalArgumentException("The mass cannot be null.");
+		if (convex == null) throw new NullPointerException("The convex shape cannot be null.");
 		// add the shape and mass to the respective lists
 		this.shapes.add(convex);
-		this.masses.add(mass);
 		// return this body to facilitate chaining
 		return this;
 	}
 	
 	/**
-	 * Removes the given {@link Convex} {@link Shape} from the {@link Body}
-	 * and returns the {@link Shape}'s {@link Mass}.
-	 * <p>
-	 * If there is only one {@link Shape} on this body this method does nothing
-	 * and returns null.
-	 * <p>
-	 * A {@link Body} cannot have zero {@link Shape}s.  If the {@link Body} 
-	 * needs all {@link Shape}s changed then add the new {@link Shape}s first then 
-	 * remove the old {@link Shape}s.
+	 * Removes the given {@link Convex} {@link Shape} from the {@link Body}.
 	 * <p>
 	 * After adding or removing shapes make sure to call the {@link #setMassFromShapes()}
 	 * or {@link #setMassFromShapes(Mass.Type)} method to compute the new total
 	 * {@link Mass}.
 	 * @param convex the {@link Convex} {@link Shape}
-	 * @return {@link Mass}
+	 * @return boolean true if the {@link Convex} was removed from this {@link Body}
 	 */
-	public Mass removeShape(Convex convex) {
+	public boolean removeShape(Convex convex) {
 		// check the shape size
-		if (this.shapes.size() > 1) {
-			// find where the shape is
-			int index = this.shapes.indexOf(convex);
-			// remove the shape and mass from the lists
-			this.shapes.remove(index);
-			return this.masses.remove(index);
+		if (this.shapes.size() > 0) {
+			return this.shapes.remove(convex);
 		}
-		return null;
+		return false;
 	}
 	
 	/**
@@ -282,7 +264,7 @@ public class Body implements Collidable, Transformable {
 	 * given the masses of the shapes.
 	 * @return {@link Body} this body
 	 * @see #setMassFromShapes(Mass.Type)
-	 * @see #addShape(Convex, Mass)
+	 * @see #addShape(Convex)
 	 * @see #removeShape(Convex)
 	 */
 	public Body setMassFromShapes() {
@@ -301,35 +283,47 @@ public class Body implements Collidable, Transformable {
 	 * <p>
 	 * If <code>Mass.Type.INFINITE</code> is passed, the center
 	 * of mass will be an average of the centers of each shape.
-	 * @param type the mass type; can be null
+	 * <p>
+	 * If this method is called before any shapes are added the
+	 * mass is set to an infinite mass with the center at the
+	 * origin.
+	 * @param type the {@link Mass.Type}; can be null
 	 * @return {@link Body} this body
-	 * @see #addShape(Convex, Mass)
+	 * @see #addShape(Convex)
 	 * @see #removeShape(Convex)
 	 */
 	public Body setMassFromShapes(Mass.Type type) {
 		// get the size
-		int size = this.masses.size();
+		int size = this.shapes.size();
 		// check the size
 		if (size == 0) {
-			// do nothing
+			// set the mass to an infinite point mass at (0, 0)
+			this.setMass(Mass.create(new Vector()));
 			return this;
 		} else if (size == 1) {
 			// then just use the mass for the first shape
-			this.setMass(this.masses.get(0), type);
+			this.setMass(this.shapes.get(0).createMass(), type);
 		} else {
+			// create a list of mass objects
+			List<Mass> masses = new ArrayList<Mass>();
+			for (int i = 0; i < size; i++) {
+				Convex convex = this.shapes.get(i);
+				Mass mass = convex.createMass();
+				masses.add(mass);
+			}
 			// check for infinite mass type
 			if (type == Mass.Type.INFINITE) {
 				// if the type desired is infinite then we need to 
 				// compute the average center of mass
 				Vector c = new Vector();
 				for (int i = 0; i < size; i++) {
-					c.add(this.masses.get(i).c);
+					c.add(masses.get(i).getCenter());
 				}
 				c.divide(size);
-				this.mass = new Mass(c);
+				this.setMass(Mass.create(c));
 			} else {
 				// then create the mass from the list
-				this.setMass(Mass.create(this.masses), type);
+				this.setMass(Mass.create(masses), type);
 			}
 		}
 		// return this body to facilitate chaining
@@ -364,16 +358,7 @@ public class Body implements Collidable, Transformable {
 	 */
 	public Body setMass(Mass mass, Mass.Type type) {
 		// make a copy of the mass
-		this.mass = Mass.create(mass);
-		// modify the mass depending on the flag passed in
-		if (type == Mass.Type.INFINITE || type == Mass.Type.FIXED_TRANSLATION) {
-			this.mass.m = 0.0;
-			this.mass.invM = 0.0;
-		}
-		if (type == Mass.Type.INFINITE || type == Mass.Type.FIXED_ROTATION) {
-			this.mass.I = 0.0;
-			this.mass.invI = 0.0;
-		}
+		this.mass = Mass.create(mass, type);
 		// return this body to facilitate chaining
 		return this;
 	}
@@ -780,7 +765,14 @@ public class Body implements Collidable, Transformable {
 	 * @param filter the collision {@link Filter}
 	 */
 	public void setFilter(Filter filter) {
-		this.filter = filter;
+		// check for null
+		if (filter == null) {
+			// if its null then set it to the default filter
+			this.filter = Filter.DEFAULT_FILTER;
+		} else {
+			// if not null then 
+			this.filter = filter;
+		}
 	}
 	
 	/**
@@ -812,7 +804,7 @@ public class Body implements Collidable, Transformable {
 	 * @return {@link Vector} the center of mass in local coordinates
 	 */
 	public Vector getLocalCenter() {
-		return this.mass.c;
+		return this.mass.getCenter();
 	}
 	
 	/**
@@ -820,7 +812,7 @@ public class Body implements Collidable, Transformable {
 	 * @return {@link Vector} the center of mass in world coordinates
 	 */
 	public Vector getWorldCenter() {
-		return this.transform.getTransformed(this.mass.c);
+		return this.transform.getTransformed(this.mass.getCenter());
 	}
 	
 	/**
@@ -853,10 +845,17 @@ public class Body implements Collidable, Transformable {
 	
 	/**
 	 * Sets the velocity {@link Vector}.
+	 * <p>
+	 * If the given velocity is null then v is set to
+	 * the zero vector.
 	 * @param v the velocity
 	 */
 	public void setV(Vector v) {
-		this.v = v;
+		if (v == null) {
+			this.v.zero();
+		} else {
+			this.v = v;
+		}
 	}
 
 	/**
