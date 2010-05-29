@@ -335,4 +335,76 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		}
 		return point;
 	}
+	
+	/**
+	 * Creates a {@link Mass} object using the geometric properties of
+	 * this {@link Polygon} and the set density.
+	 * <p>
+	 * A {@link Polygon}'s centroid must be computed by the area weighted method since the
+	 * average method can be bias to one side if there are more points on that one
+	 * side than another.
+	 * <p>
+	 * Finding the area of a {@link Polygon} can be done by using the following
+	 * summation:
+	 * <pre>
+	 * 0.5 * &sum;(x<sub>i</sub> * y<sub>i + 1</sub> - x<sub>i + 1</sub> * y<sub>i</sub>)
+	 * </pre>
+	 * Finding the area weighted centroid can be done by using the following
+	 * summation:
+	 * <pre>
+	 * 1 / (6 * A) * &sum;(p<sub>i</sub> + p<sub>i + 1</sub>) * (x<sub>i</sub> * y<sub>i + 1</sub> - x<sub>i + 1</sub> * y<sub>i</sub>)
+	 * </pre>
+	 * Finding the inertia tensor can by done by using the following equation:
+	 * <pre>
+	 *          &sum;(p<sub>i + 1</sub> x p<sub>i</sub>) * (p<sub>i</sub><sup>2</sup> + p<sub>i</sub> &middot; p<sub>i + 1</sub> + p<sub>i + 1</sub><sup>2</sup>)
+	 * m / 6 * -------------------------------------------
+	 *                        &sum;(p<sub>i + 1</sub> x p<sub>i</sub>)
+	 * </pre>
+	 * Where the mass is computed by:
+	 * <pre>
+	 * d * area
+	 * </pre>
+	 * @return {@link Mass} the {@link Mass} of this {@link Polygon}
+	 */
+	@Override
+	public Mass createMass() {
+		double d = this.density;
+		// can't use normal centroid calculation since it will be weighted towards sides
+		// that have larger distribution of points.
+		Vector center = new Vector();
+		double area = 0.0;
+		double I = 0.0;
+		int n = this.vertices.length;
+		// calculate inverse three once
+		double inv3 = 1.0 / 3.0;
+		// loop through the vertices
+		for (int i = 0; i < n; i++) {
+			// get two verticies
+			Vector p1 = this.vertices[i];
+			Vector p2 = i + 1 < n ? this.vertices[i + 1] : this.vertices[0];
+			// perform the cross product (yi * x(i+1) - y(i+1) * xi)
+			double D = p1.cross(p2);
+			// multiply by half
+			double triangleArea = 0.5 * D;
+			// add it to the total area
+			area += triangleArea;
+
+			// area weighted centroid
+			// (p1 + p2) * (D / 6)
+			// = (x1 + x2) * (yi * x(i+1) - y(i+1) * xi) / 6
+			// we will divide by the total area later
+			center.add(p1.sum(p2).multiply(inv3).multiply(triangleArea));
+
+			// (yi * x(i+1) - y(i+1) * xi) * (p2^2 + p2 . p1 + p1^2)
+			I += triangleArea * (p2.dot(p2) + p2.dot(p1) + p1.dot(p1));
+			// we will do the m / 6A = (d / 6) when we have the area summed up
+		}
+		// compute the mass
+		double m = d * area;
+		// finish the centroid calculation by dividing by the total area
+		center.divide(area);
+		// finish the inertia tensor by dividing by the total area and multiplying by d / 6
+		I *= (d / 6);
+		return new Mass(center, m, I);
+	}
 }

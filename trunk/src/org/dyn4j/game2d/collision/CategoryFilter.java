@@ -64,6 +64,8 @@ public class CategoryFilter implements Filter {
 	 */
 	@Override
 	public boolean isAllowed(Filter filter) {
+		// make sure the given filter is not null
+		if (filter == null) return true;
 		// check the type
 		if (filter instanceof CategoryFilter) {
 			// cast the filter

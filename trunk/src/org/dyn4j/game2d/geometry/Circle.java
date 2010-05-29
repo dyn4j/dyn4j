@@ -155,4 +155,26 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 		foci[0] = transform.getTransformed(this.center);
 		return foci;
 	}
+	
+	/**
+	 * Creates a {@link Mass} object using the geometric properties of
+	 * this {@link Circle} and the set density.
+	 * <pre>
+	 * m = d * &pi; * r<sup>2</sup>
+	 * I = m * r<sup>2</sup> / 2
+	 * </pre>
+	 * @return {@link Mass} the {@link Mass} of this {@link Circle}
+	 */
+	@Override
+	public Mass createMass() {
+		// get the radius and density
+		double r = this.radius;
+		double d = this.density;
+		// compute the mass
+		double m = d * Math.PI * r * r;
+		// compute the inertia tensor
+		double I = m * r * r / 2.0;
+		// use the center supplied to the circle
+		return new Mass(this.center.copy(), m, I);
+	}
 }

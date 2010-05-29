@@ -35,6 +35,8 @@ public class Geometry {
 	 * @return {@link Vector}
 	 */
 	public static final Vector getAverageCenter(Vector... points) {
+		// check for null array
+		if (points == null) throw new NullPointerException("The points array cannot be null.");
 		double x = 0;
 		double y = 0;
 		for (int i = 0; i < points.length; i++) {
@@ -65,6 +67,8 @@ public class Geometry {
 	 * @return {@link Vector} the area weighted centroid
 	 */
 	public static final Vector getAreaWeightedCenter(Vector... points) {
+		// check for null array
+		if (points == null) throw new NullPointerException("The points array cannot be null.");
 		Vector center = new Vector();
 		double area = 0.0;
 		// get the size

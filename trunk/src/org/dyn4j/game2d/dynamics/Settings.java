@@ -123,6 +123,29 @@ public class Settings {
 	/** Constructor */
 	private Settings() {}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("SETTINGS[")
+		.append(this.stepFequency).append("|")
+		.append(this.maxVelocity).append("|")
+		.append(this.maxAngularVelocity).append("|")
+		.append(this.sleep).append("|")
+		.append(this.sleepVelocity).append("|")
+		.append(this.sleepAngularVelocity).append("|")
+		.append(this.sleepTime).append("|")
+		.append(this.siSolverIterations).append("|")
+		.append(this.warmStartDistance).append("|")
+		.append(this.restitutionVelocity).append("|")
+		.append(this.linearTolerance).append("|")
+		.append(this.maxLinearCorrection).append("|")
+		.append(this.baumgarte).append("]");
+		return sb.toString();
+	}
+	
 	/**
 	 * Resets the settings back to defaults.
 	 */

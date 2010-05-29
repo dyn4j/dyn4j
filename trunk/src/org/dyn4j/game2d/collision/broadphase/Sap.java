@@ -134,29 +134,32 @@ public class Sap extends AbstractAABBDetector implements BroadphaseDetector {
 			List<Convex> shapes = c.getShapes();
 			int sSize = shapes.size();
 			
-			// prime the intervals
-			Convex s = shapes.get(0);
-			Interval x = s.project(AbstractAABBDetector.X_AXIS, tx);
-			Interval y = s.project(AbstractAABBDetector.Y_AXIS, tx);
-			
-			// loop over the remaining shapes
-			for (int j = 1; j < sSize; j++) {
-				s = shapes.get(j);
-				x.union(s.project(AbstractAABBDetector.X_AXIS, tx));
-				y.union(s.project(AbstractAABBDetector.Y_AXIS, tx));
+			// check the size
+			if (sSize > 0) {
+				// prime the intervals
+				Convex s = shapes.get(0);
+				Interval x = s.project(AbstractAABBDetector.X_AXIS, tx);
+				Interval y = s.project(AbstractAABBDetector.Y_AXIS, tx);
+				
+				// loop over the remaining shapes
+				for (int j = 1; j < sSize; j++) {
+					s = shapes.get(j);
+					x.union(s.project(AbstractAABBDetector.X_AXIS, tx));
+					y.union(s.project(AbstractAABBDetector.Y_AXIS, tx));
+				}
+				
+				// add the x projection
+				Projection px = new Projection();
+				px.interval = x;
+				px.id = i;
+				xProjections.add(px);
+				
+				// add the y projection
+				Projection py = new Projection();
+				py.interval = y;
+				py.id = i;
+				yProjections.add(py);
 			}
-			
-			// add the x projection
-			Projection px = new Projection();
-			px.interval = x;
-			px.id = i;
-			xProjections.add(px);
-			
-			// add the y projection
-			Projection py = new Projection();
-			py.interval = y;
-			py.id = i;
-			yProjections.add(py);
 		}
 
 		// sort the lists of projections
@@ -218,9 +221,6 @@ public class Sap extends AbstractAABBDetector implements BroadphaseDetector {
 				}
 			}
 		}
-		
-		// trim the collection
-		collisions.trimToSize();
 		
 		return collisions;
 	}

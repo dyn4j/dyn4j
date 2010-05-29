@@ -25,7 +25,6 @@
 package org.dyn4j.game2d.dynamics;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
@@ -53,6 +52,7 @@ import org.dyn4j.game2d.dynamics.contact.ContactPoint;
 import org.dyn4j.game2d.dynamics.joint.Joint;
 import org.dyn4j.game2d.dynamics.joint.JointEdge;
 import org.dyn4j.game2d.geometry.Convex;
+import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Vector;
 
@@ -120,7 +120,12 @@ public class World {
 		super();
 		this.step = new Step();
 		this.gravity = World.EARTH_GRAVITY;
-		this.bounds = bounds;
+		// check if the passed bounds object is null
+		if (bounds == null) {
+			bounds = Bounds.UNBOUNDED;
+		} else {
+			this.bounds = bounds;
+		}
 		this.broadphaseDetector = new Sap();
 		this.narrowphaseDetector = new Gjk();
 		this.manifoldSolver = new ClippingManifoldSolver();
@@ -218,79 +223,82 @@ public class World {
 			joint.setOnIsland(false);
 		}
 		
-		// test for collisions via the broad-phase
-		List<BroadphasePair<Body>> pairs = this.broadphaseDetector.detect(this.bodies);
-		int pSize = pairs.size();		
-		
-		// using the broad-phase results, test for narrow-phase
-		for (int i = 0; i < pSize; i++) {
-			BroadphasePair<Body> pair = pairs.get(i);
+		// make sure there are some bodies
+		if (size > 0) {
+			// test for collisions via the broad-phase
+			List<BroadphasePair<Body>> pairs = this.broadphaseDetector.detect(this.bodies);
+			int pSize = pairs.size();		
 			
-			// get the bodies
-			Body b1 = pair.getObject1();
-			Body b2 = pair.getObject2();
-			
-			// frozen pairs don't have collision detection/response
-			if (b1.isFrozen() || b2.isFrozen()) continue;
-			// static pairs don't have collision detection/response
-			if (b1.isStatic() && b2.isStatic()) continue;
-			// check for connected pairs who are not allowed to collide
-			if (b1.isConnectedNoCollision(b2)) continue;
-			
-			// determine using the collision filter whether to allow this one
-			if (!b1.getFilter().isAllowed(b2.getFilter())) {
-				continue;
-			}
-
-			// get their transforms
-			Transform t1 = b1.transform;
-			Transform t2 = b2.transform;
-			// get their geometry
-			List<Convex> g1 = b1.shapes;
-			List<Convex> g2 = b2.shapes;
-			
-			// create a reusable penetration object
-			Penetration p = new Penetration();
-			// create a reusable manifold object
-			Manifold m = new Manifold();
-			
-			// loop through the geometries of body 1
-			int b1Size = g1.size();
-			int b2Size = g2.size();
-			for (int j = 0; j < b1Size; j++) {
-				Convex c1 = g1.get(j);
-				// test against each geometry of body 2
-				for (int k = 0; k < b2Size; k++) {
-					Convex c2 = g2.get(k);
-					// test the two convex shapes
-					if (this.narrowphaseDetector.detect(c1, t1, c2, t2, p)) {
-						// if there is penetration then find a contact manifold
-						// using the filled in penetration object
-						if (this.manifoldSolver.getManifold(p, c1, t1, c2, t2, m)) {
-							// get the manifold points
-							List<ManifoldPoint> points = m.getPoints();
-							// a valid manifold was found
-							int mSize = points.size();
-							// don't add sensor manifolds to the contact constraints list
-							if (!b1.isSensor() && !b2.isSensor()) {
-								// create a contact constraint
-								ContactConstraint contactConstraint = new ContactConstraint(b1, c1, b2, c2, m);
-								// add a contact edge to both bodies
-								ContactEdge ce1 = new ContactEdge(b2, contactConstraint);
-								ContactEdge ce2 = new ContactEdge(b1, contactConstraint);
-								b1.contacts.add(ce1);
-								b2.contacts.add(ce2);
-								// add the contact constraint to the contact manager
-								this.contactManager.add(contactConstraint);
-							} else {
-								// notify the contact manager's contact listener of the
-								// sensed contact points
-								ContactListener cl = contactManager.getContactListener();
-								for (int l = 0; l < mSize; l++) {
-									// get the manifold point
-									ManifoldPoint mp = points.get(l);
-									// notify of the contact point
-									cl.sensed(new ContactPoint(mp.getPoint(), m.getNormal(), mp.getDepth(), b1, c1, b2, c2));
+			// using the broad-phase results, test for narrow-phase
+			for (int i = 0; i < pSize; i++) {
+				BroadphasePair<Body> pair = pairs.get(i);
+				
+				// get the bodies
+				Body b1 = pair.getObject1();
+				Body b2 = pair.getObject2();
+				
+				// frozen pairs don't have collision detection/response
+				if (b1.isFrozen() || b2.isFrozen()) continue;
+				// static pairs don't have collision detection/response
+				if (b1.isStatic() && b2.isStatic()) continue;
+				// check for connected pairs who are not allowed to collide
+				if (b1.isConnectedNoCollision(b2)) continue;
+				
+				// determine using the collision filter whether to allow this one
+				if (!b1.getFilter().isAllowed(b2.getFilter())) {
+					continue;
+				}
+	
+				// get their transforms
+				Transform t1 = b1.transform;
+				Transform t2 = b2.transform;
+				// get their geometry
+				List<Convex> g1 = b1.shapes;
+				List<Convex> g2 = b2.shapes;
+				
+				// create a reusable penetration object
+				Penetration p = new Penetration();
+				// create a reusable manifold object
+				Manifold m = new Manifold();
+				
+				// loop through the geometries of body 1
+				int b1Size = g1.size();
+				int b2Size = g2.size();
+				for (int j = 0; j < b1Size; j++) {
+					Convex c1 = g1.get(j);
+					// test against each geometry of body 2
+					for (int k = 0; k < b2Size; k++) {
+						Convex c2 = g2.get(k);
+						// test the two convex shapes
+						if (this.narrowphaseDetector.detect(c1, t1, c2, t2, p)) {
+							// if there is penetration then find a contact manifold
+							// using the filled in penetration object
+							if (this.manifoldSolver.getManifold(p, c1, t1, c2, t2, m)) {
+								// get the manifold points
+								List<ManifoldPoint> points = m.getPoints();
+								// a valid manifold was found
+								int mSize = points.size();
+								// don't add sensor manifolds to the contact constraints list
+								if (!b1.isSensor() && !b2.isSensor()) {
+									// create a contact constraint
+									ContactConstraint contactConstraint = new ContactConstraint(b1, c1, b2, c2, m);
+									// add a contact edge to both bodies
+									ContactEdge ce1 = new ContactEdge(b2, contactConstraint);
+									ContactEdge ce2 = new ContactEdge(b1, contactConstraint);
+									b1.contacts.add(ce1);
+									b2.contacts.add(ce2);
+									// add the contact constraint to the contact manager
+									this.contactManager.add(contactConstraint);
+								} else {
+									// notify the contact manager's contact listener of the
+									// sensed contact points
+									ContactListener cl = contactManager.getContactListener();
+									for (int l = 0; l < mSize; l++) {
+										// get the manifold point
+										ManifoldPoint mp = points.get(l);
+										// notify of the contact point
+										cl.sensed(new ContactPoint(mp.getPoint(), m.getNormal(), mp.getDepth(), b1, c1, b2, c2));
+									}
 								}
 							}
 						}
@@ -391,21 +399,32 @@ public class World {
 	
 	/**
 	 * Adds a {@link Body} to the {@link World}.
+	 * <p>
+	 * If the {@link Body} is null then the method immediately returns.
+	 * <p>
+	 * A NullPointerException is thrown if the given {@link Body}
+	 * does not have a {@link Mass} already set.
 	 * @param body the {@link Body} to add
 	 */
 	public void add(Body body) {
+		// check for null body
+		if (body == null) return;
 		// make sure its setup
-		if (body.mass == null || body.shapes.size() == 0) {
-			throw new IllegalArgumentException("A body must have at least one shape and its mass set before being added to the world.");
+		if (body.mass == null) {
+			throw new NullPointerException("The body mass is not set!  Call the setMassFromShapes or setMass method before adding the body to the world.");
 		}
 		this.bodies.add(body);
 	}
 	
 	/**
 	 * Adds a {@link Joint} to the {@link World}.
+	 * <p>
+	 * If the given {@link Joint} is null then this method immediately returns.
 	 * @param joint the {@link Joint} to add
 	 */
 	public void add(Joint joint) {
+		// check for null joint
+		if (joint == null) return;
 		// add the joint to the joint list
 		this.joints.add(joint);
 		// get the associated bodies
@@ -423,14 +442,21 @@ public class World {
 	
 	/**
 	 * Removes the given {@link Body} from the {@link World}.
+	 * <p>
+	 * If the given {@link Body} is null this method immediately returns.
 	 * @param body the {@link Body} to remove
 	 */
 	public void remove(Body body) {
+		// check for null joint
+		if (body == null) return;
 		// remove the body from the list
 		this.bodies.remove(body);
 		
 		// wake up any bodies connected to this body by a joint
-		for (JointEdge je : body.joints) {
+		int jsize = body.joints.size();
+		for (int i = 0; i < jsize; i++) {
+			// get the joint edge
+			JointEdge je = body.joints.get(i);
 			// get the joint
 			Joint joint = je.getJoint();
 			// get the other body
@@ -456,7 +482,10 @@ public class World {
 		}
 		
 		// remove any contacts this body had with any other body
-		for (ContactEdge ce : body.contacts) {
+		int csize = body.contacts.size();
+		for (int i = 0; i < csize; i++) {
+			// get the contact edge
+			ContactEdge ce = body.contacts.get(i);
 			// get the contact constraint
 			ContactConstraint cc = ce.getContactConstraint();
 			// get the other body
@@ -482,9 +511,9 @@ public class World {
 			this.contactManager.remove(cc);
 			// loop over the contact points
 			int size = cc.getContacts().length;
-			for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
 				// get the contact
-				Contact c = cc.getContacts()[i];
+				Contact c = cc.getContacts()[j];
 				// create a contact point for notification
 				ContactPoint cp = new ContactPoint(c.getPoint(), cc.getNormal(), c.getDepth(), cc.getBody1(), cc.getConvex1(), cc.getBody2(), cc.getConvex2());
 				// call the destruction listener
@@ -495,13 +524,17 @@ public class World {
 	
 	/**
 	 * Removes the given {@link Joint} from the {@link World}.
+	 * <p>
+	 * If the given {@link Joint} is null then this method immediately returns.
 	 * @param joint the {@link Joint} to remove
 	 */
 	public void remove(Joint joint) {
+		// check for null joint
+		if (joint == null) return;
 		// remove the joint from the joint list
 		this.joints.remove(joint);
 		
-		// removed the joint edges from body1
+		// remove the joint edges from body1
 		Iterator<JointEdge> iterator = joint.getBody1().joints.iterator();
 		while (iterator.hasNext()) {
 			// see if this is the edge we want to remove
@@ -538,10 +571,15 @@ public class World {
 	 * returned {@link Mass} object should be stored so that it can 
 	 * be restored to the {@link Body} when the relinquish method is
 	 * called.
+	 * <p>
+	 * If the given {@link Body} is null then this method immediately
+	 * returns null.
 	 * @param body the {@link Body} to control
 	 * @return {@link Mass} the original {@link Body}'s {@link Mass}
 	 */
 	public Mass control(Body body) {
+		// check for null body
+		if (body == null) return null;
 		// wake up all attached bodies
 		int jSize = body.joints.size();
 		for (int i = 0; i < jSize; i++) {
@@ -571,21 +609,37 @@ public class World {
 	/**
 	 * Releases control of the given {@link Body} and sets the
 	 * {@link Mass} to the given {@link Mass}.
+	 * <p>
+	 * If the given {@link Body} is null then this method returns immediately.
+	 * <p>
+	 * If the given {@link Mass} is null but the given {@link Body} is not null
+	 * then the control of the {@link Body} is released and the {@link Mass}
+	 * of the {@link Body} is set via the {@link Body#setMassFromShapes()} method.
 	 * @param body the {@link Body} to release control of
 	 * @param mass the {@link Body}'s original {@link Mass}
 	 */
 	public void relinquish(Body body, Mass mass) {
+		if (body == null) return;
 		body.awaken();
 		body.thaw();
-		body.setMass(mass);
+		if (mass == null) {
+			body.setMassFromShapes();
+		} else {
+			body.setMass(mass);
+		}
 		body.setSleep(true);
 	}
 	
 	/**
 	 * Sets the gravity.
+	 * <p>
+	 * Setting the gravity vector to the zero vector eliminates gravity.
+	 * <p>
+	 * A NullPointerException is thrown if the given gravity vector is null.
 	 * @param gravity the gravity in meters/second<sup>2</sup>
 	 */
 	public void setGravity(Vector gravity) {
+		if (gravity == null) throw new NullPointerException("The gravity vector cannot be null.");
 		this.gravity = gravity;
 	}
 	
@@ -599,10 +653,18 @@ public class World {
 
 	/**
 	 * Sets the bounds of the {@link World}.
+	 * <p>
+	 * If the given bounds is null then the bounds is set to the
+	 * default UNBOUNDED bounds object.
 	 * @param bounds the bounds
 	 */
 	public void setBounds(Bounds bounds) {
-		this.bounds = bounds;
+		// check for null bounds
+		if (bounds == null) {
+			this.bounds = Bounds.UNBOUNDED;
+		} else {
+			this.bounds = bounds;
+		}
 	}
 	
 	/**
@@ -615,10 +677,17 @@ public class World {
 	
 	/**
 	 * Sets the bounds listener.
+	 * <p>
+	 * If the given {@link BoundsListener} is null the default {@link BoundsAdapter}
+	 * is set as the current bounds listener.
 	 * @param boundsListener the bounds listener
 	 */
 	public void setBoundsListener(BoundsListener boundsListener) {
-		this.boundsListener = boundsListener;
+		if (boundsListener == null) {
+			this.boundsListener = new BoundsAdapter();
+		} else {
+			this.boundsListener = boundsListener;
+		}
 	}
 	
 	/**
@@ -631,10 +700,17 @@ public class World {
 	
 	/**
 	 * Sets the {@link ContactListener}.
+	 * <p>
+	 * If the given {@link ContactListener} is null the default {@link ContactAdapter}
+	 * is set as the current contact listener.
 	 * @param contactListener the contact listener
 	 */
 	public void setContactListener(ContactListener contactListener) {
-		this.contactManager.setContactListener(contactListener);
+		if (contactListener == null) {
+			this.contactManager.setContactListener(new ContactAdapter());
+		} else {
+			this.contactManager.setContactListener(contactListener);
+		}
 	}
 	
 	/**
@@ -647,10 +723,17 @@ public class World {
 	
 	/**
 	 * Sets the {@link DestructionListener}.
+	 * <p>
+	 * If the given {@link DestructionListener} is null the default {@link DestructionAdapter}
+	 * is set as the current destruction listener.
 	 * @param destructionListener the {@link DestructionListener}
 	 */
 	public void setDestructionListener(DestructionListener destructionListener) {
-		this.destructionListener = destructionListener;
+		if (destructionListener == null) {
+			this.destructionListener = new DestructionAdapter();
+		} else {
+			this.destructionListener = destructionListener;
+		}
 	}
 	
 	/**
@@ -663,10 +746,17 @@ public class World {
 	
 	/**
 	 * Sets the {@link StepListener}.
+	 * <p>
+	 * If the given {@link StepListener} is null the default {@link StepAdapter}
+	 * is set as the current step listener.
 	 * @param stepListener the {@link StepListener}
 	 */
 	public void setStepListener(StepListener stepListener) {
-		this.stepListener = stepListener;
+		if (stepListener == null) {
+			this.stepListener = new StepAdapter();
+		} else {
+			this.stepListener = stepListener;
+		}
 	}
 	
 	/**
@@ -679,10 +769,17 @@ public class World {
 	
 	/**
 	 * Sets the broad-phase collision detection algorithm.
+	 * <p>
+	 * If the given detector is null then the default {@link Sap}
+	 * {@link BroadphaseDetector} is set as the current broad phase.
 	 * @param broadphaseDetector the broad-phase collision detection algorithm
 	 */
 	public void setBroadphaseDetector(BroadphaseDetector broadphaseDetector) {
-		this.broadphaseDetector = broadphaseDetector;
+		if (broadphaseDetector == null) {
+			this.broadphaseDetector = new Sap();
+		} else {
+			this.broadphaseDetector = broadphaseDetector;
+		}
 	}
 	
 	/**
@@ -695,10 +792,17 @@ public class World {
 	
 	/**
 	 * Sets the narrow-phase collision detection algorithm.
+	 * <p>
+	 * If the given detector is null then the default {@link Gjk}
+	 * {@link NarrowphaseDetector} is set as the current narrow phase.
 	 * @param narrowphaseDetector the narrow-phase collision detection algorithm
 	 */
 	public void setNarrowphaseDetector(NarrowphaseDetector narrowphaseDetector) {
-		this.narrowphaseDetector = narrowphaseDetector;
+		if (narrowphaseDetector == null) {
+			this.narrowphaseDetector = new Gjk();
+		} else {
+			this.narrowphaseDetector = narrowphaseDetector;
+		}
 	}
 	
 	/**
@@ -711,10 +815,17 @@ public class World {
 	
 	/**
 	 * Sets the manifold solver.
+	 * <p>
+	 * If the given detector is null then the default {@link ClippingManifoldSolver}
+	 * {@link ManifoldSolver} is set as the current manifold solver.
 	 * @param manifoldSolver the manifold solver
 	 */
 	public void setManifoldSolver(ManifoldSolver manifoldSolver) {
-		this.manifoldSolver = manifoldSolver;
+		if (manifoldSolver == null) {
+			this.manifoldSolver = new ClippingManifoldSolver();
+		} else {
+			this.manifoldSolver = manifoldSolver;
+		}
 	}
 	
 	/**
@@ -726,19 +837,27 @@ public class World {
 	}
 	
 	/**
-	 * Returns an unmodifiable list of {@link Body} objects.
+	 * Returns the list of {@link Body} objects.
+	 * <p>
+	 * This list should not be modified.  If a {@link Body} needs to 
+	 * be add or removed, call the {@link #add(Body)} and {@link #remove(Body)}
+	 * methods instead. 
 	 * @return List&lt;{@link Body}&gt; the list of bodies
 	 */
 	public List<Body> getBodies() {
-		return Collections.unmodifiableList(this.bodies);
+		return this.bodies;
 	}
 	
 	/**
-	 * Returns an unmodifiable list of {@link Joint} objects.
+	 * Returns the list of {@link Joint} objects.
+	 * <p>
+	 * This list should not be modified.  If a {@link Joint} needs to 
+	 * be add or removed, call the {@link #add(Joint)} and {@link #remove(Joint)}
+	 * methods instead.
 	 * @return List&lt;{@link Joint}&gt; the list of joints
 	 */
 	public List<Joint> getJoints() {
-		return Collections.unmodifiableList(this.joints);
+		return this.joints;
 	}
 	
 	/**

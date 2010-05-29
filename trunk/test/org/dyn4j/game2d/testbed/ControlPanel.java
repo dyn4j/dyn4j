@@ -32,6 +32,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,19 +46,21 @@ import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 import javax.naming.ConfigurationException;
+import javax.swing.AbstractSpinnerModel;
 import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
 import javax.swing.JTextPane;
-import javax.swing.SpinnerListModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -861,8 +865,9 @@ public class ControlPanel extends JFrame {
 				0, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		JSpinner spnStep = new JSpinner(new SpinnerNumberModel(1.0 / settings.getStepFrequency(), 30.0, null, 5.0));
-		spnStep.setEditor(new JSpinner.NumberEditor(spnStep, "##0"));
+		JSpinner spnStep = new JSpinner(new SpinnerNumberModel(1.0 / settings.getStepFrequency(), 30.0, 999.0, 5.0));
+		spnStep.setEditor(new JSpinner.NumberEditor(spnStep, "0"));
+		((JSpinner.DefaultEditor)spnStep.getEditor()).getTextField().setColumns(3);
 		spnStep.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -889,8 +894,9 @@ public class ControlPanel extends JFrame {
 				0, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		JSpinner spnMaxV = new JSpinner(new SpinnerNumberModel(settings.getMaxVelocity(), 0.0, null, 1.0));
-		spnMaxV.setEditor(new JSpinner.NumberEditor(spnMaxV, "    0"));
+		JSpinner spnMaxV = new JSpinner(new SpinnerNumberModel(settings.getMaxVelocity(), 0.0, 9999.0, 1.0));
+		spnMaxV.setEditor(new JSpinner.NumberEditor(spnMaxV, "0"));
+		((JSpinner.DefaultEditor)spnMaxV.getEditor()).getTextField().setColumns(4);
 		spnMaxV.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -917,8 +923,9 @@ public class ControlPanel extends JFrame {
 				0, 5, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		JSpinner spnMaxAv = new JSpinner(new SpinnerNumberModel(Math.toDegrees(settings.getMaxAngularVelocity()), 0.0, null, 1.0));
-		spnMaxAv.setEditor(new JSpinner.NumberEditor(spnMaxAv, "    0"));
+		JSpinner spnMaxAv = new JSpinner(new SpinnerNumberModel(Math.toDegrees(settings.getMaxAngularVelocity()), 0, 9999, 1));
+		spnMaxAv.setEditor(new JSpinner.NumberEditor(spnMaxAv, "0"));
+		((JSpinner.DefaultEditor)spnMaxAv.getEditor()).getTextField().setColumns(4);
 		spnMaxAv.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -980,8 +987,9 @@ public class ControlPanel extends JFrame {
 				0, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		// create the spinner
-		JSpinner spnSleepTime = new JSpinner(new SpinnerNumberModel(settings.getSleepTime(), 0.0, null, 0.1));
+		JSpinner spnSleepTime = new JSpinner(new SpinnerNumberModel(settings.getSleepTime(), 0.0, 9.9, 0.1));
 		spnSleepTime.setEditor(new JSpinner.NumberEditor(spnSleepTime, "0.0"));
+		((JSpinner.DefaultEditor)spnSleepTime.getEditor()).getTextField().setColumns(3);
 		spnSleepTime.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -1009,8 +1017,9 @@ public class ControlPanel extends JFrame {
 				0, 2, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		// create the spinner
-		JSpinner spnSleepMaxV = new JSpinner(new SpinnerNumberModel(settings.getSleepVelocity(), 0.0, null, 0.01));
+		JSpinner spnSleepMaxV = new JSpinner(new SpinnerNumberModel(settings.getSleepVelocity(), 0.0, 9.99, 0.01));
 		spnSleepMaxV.setEditor(new JSpinner.NumberEditor(spnSleepMaxV, "0.00"));
+		((JSpinner.DefaultEditor)spnSleepMaxV.getEditor()).getTextField().setColumns(5);
 		spnSleepMaxV.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -1038,8 +1047,9 @@ public class ControlPanel extends JFrame {
 				0, 3, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		// create the spinner
-		JSpinner spnSleepMaxAv = new JSpinner(new SpinnerNumberModel(Math.toDegrees(settings.getSleepAngularVelocity()), 0.0, null, 0.5));
+		JSpinner spnSleepMaxAv = new JSpinner(new SpinnerNumberModel(Math.toDegrees(settings.getSleepAngularVelocity()), 0.0, 999.9, 0.5));
 		spnSleepMaxAv.setEditor(new JSpinner.NumberEditor(spnSleepMaxAv, "0.0"));
+		((JSpinner.DefaultEditor)spnSleepMaxAv.getEditor()).getTextField().setColumns(5);
 		spnSleepMaxAv.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -1081,8 +1091,9 @@ public class ControlPanel extends JFrame {
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// create the slider for the si solver iterations
-		JSpinner spnSiIter = new JSpinner(new SpinnerNumberModel(settings.getSiSolverIterations(), 5, null, 1));
-		spnSiIter.setEditor(new JSpinner.NumberEditor(spnSiIter, "   0"));
+		JSpinner spnSiIter = new JSpinner(new SpinnerNumberModel(settings.getSiSolverIterations(), 5, 999, 1));
+		spnSiIter.setEditor(new JSpinner.NumberEditor(spnSiIter, "0"));
+		((JSpinner.DefaultEditor)spnSiIter.getEditor()).getTextField().setColumns(3);
 		spnSiIter.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -1106,6 +1117,7 @@ public class ControlPanel extends JFrame {
 		
 		JSpinner spnBaum = new JSpinner(new SpinnerNumberModel(settings.getBaumgarte(), 0.0, 1.0, 0.05));
 		spnBaum.setEditor(new JSpinner.NumberEditor(spnBaum, "0.00"));
+		((JSpinner.DefaultEditor)spnBaum.getEditor()).getTextField().setColumns(4);
 		spnBaum.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -1127,16 +1139,16 @@ public class ControlPanel extends JFrame {
 				0, 2, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 
-		JSpinner spnWarm = new JSpinner(new SpinnerListModel(new String[] {
-				"0.0", "1.0E-9", "1.0E-8", "1.0E-7", "1.0E-6", "1.0E-5", "1.0E-4", "1.0E-3", "1.0E-2", "1.0E-1", "1.0"  
-				}));
-		DecimalFormat fmtWarm = new DecimalFormat("0.0E0");
-		spnWarm.setValue(fmtWarm.format(settings.getWarmStartDistance()));
+//		JSpinner spnWarm = new JSpinner(new SpinnerListModel(new String[] {
+//				"0.0", "1.0E-9", "1.0E-8", "1.0E-7", "1.0E-6", "1.0E-5", "1.0E-4", "1.0E-3", "1.0E-2", "1.0E-1", "1.0"  
+//				}));
+		JSpinner spnWarm = new JSpinner(new MultiplicativeSpinnerNumberModel(settings.getWarmStartDistance(), 1.0E-9, 1.0, 10.0));
+		spnWarm.setEditor(new MultiplicativeSpinnerModelEditor(spnWarm));
 		spnWarm.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				JSpinner spnr = (JSpinner) e.getSource();
-				double warm = Double.valueOf((String) ((SpinnerListModel) spnr.getModel()).getValue());
+				double warm = ((MultiplicativeSpinnerNumberModel) spnr.getModel()).getValue();
 				Settings settings = Settings.getInstance();
 				settings.setWarmStartDistance(warm);
 			}
@@ -1156,8 +1168,9 @@ public class ControlPanel extends JFrame {
 				0, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		JSpinner spnPene = new JSpinner(new SpinnerNumberModel(settings.getLinearTolerance(), 0.0, 0.1, 0.005));
+		JSpinner spnPene = new JSpinner(new SpinnerNumberModel(settings.getLinearTolerance(), 0.0, 1.0, 0.005));
 		spnPene.setEditor(new JSpinner.NumberEditor(spnPene, "0.000"));
+		((JSpinner.DefaultEditor)spnPene.getEditor()).getTextField().setColumns(5);
 		spnPene.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -1184,6 +1197,7 @@ public class ControlPanel extends JFrame {
 		
 		JSpinner spnLinear = new JSpinner(new SpinnerNumberModel(settings.getMaxLinearCorrection(), 0.0, 1.0, 0.05));
 		spnLinear.setEditor(new JSpinner.NumberEditor(spnLinear, "0.00"));
+		((JSpinner.DefaultEditor)spnLinear.getEditor()).getTextField().setColumns(4);
 		spnLinear.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -1208,8 +1222,9 @@ public class ControlPanel extends JFrame {
 				0, 5, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		JSpinner spnRest = new JSpinner(new SpinnerNumberModel(settings.getRestitutionVelocity(), 0.0, null, 0.1));
+		JSpinner spnRest = new JSpinner(new SpinnerNumberModel(settings.getRestitutionVelocity(), 0.0, 9.9, 0.1));
 		spnRest.setEditor(new JSpinner.NumberEditor(spnRest, "0.0"));
+		((JSpinner.DefaultEditor)spnLinear.getEditor()).getTextField().setColumns(3);
 		spnRest.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -1281,4 +1296,157 @@ public class ControlPanel extends JFrame {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Number model that performs multiplication/division instead of addition/subtraction
+	 * @author William Bittle
+	 */
+	private class MultiplicativeSpinnerNumberModel extends AbstractSpinnerModel {
+		/** The serializable id */
+		private static final long serialVersionUID = 2898451773505206196L;
+		
+		/** The current/initial value */
+		private double value;
+		
+		/** The minimum value */
+		private double minimum;
+		
+		/** The maximum value */
+		private double maximum;
+		
+		/** The increment */
+		private double increment;
+		
+		/**
+		 * Full constructor.
+		 * @param value the initial value
+		 * @param minimum the minimum value
+		 * @param maximum the maximum value
+		 * @param increment the increment amount
+		 */
+		public MultiplicativeSpinnerNumberModel(double value, double minimum, double maximum, double increment) {
+			super();
+			this.value = value;
+			this.minimum = minimum;
+			this.maximum = maximum;
+			this.increment = increment;
+		}
+		
+		/* (non-Javadoc)
+		 * @see javax.swing.SpinnerNumberModel#getNextValue()
+		 */
+		@Override
+		public Object getNextValue() {
+			if (this.value < this.maximum) {
+				return this.value * this.increment;
+			}
+			return this.value;
+		}
+		
+		/* (non-Javadoc)
+		 * @see javax.swing.SpinnerNumberModel#getPreviousValue()
+		 */
+		@Override
+		public Object getPreviousValue() {
+			if (this.value > this.minimum) {
+				return this.value / this.increment;
+			}
+			return this.value;
+		}
+		
+		/* (non-Javadoc)
+		 * @see javax.swing.SpinnerModel#getValue()
+		 */
+		@Override
+		public Double getValue() {
+			return this.value;
+		}
+		
+		/* (non-Javadoc)
+		 * @see javax.swing.SpinnerNumberModel#setValue(java.lang.Object)
+		 */
+		@Override
+		public void setValue(Object value) {
+			if ((value == null) || !(value instanceof Double  )) {}
+			if (!value.equals(this.value)) {
+				this.value = (Double) value;
+				fireStateChanged();
+			}
+		}
+		
+		/**
+		 * Returns the minimum value allowed.
+		 * @return double
+		 */
+		public double getMinimum() {
+			return minimum;
+		}
+		
+		/**
+		 * Returns the maximum value allowed.
+		 * @return double
+		 */
+		public double getMaximum() {
+			return maximum;
+		}
+	}
+	
+	/**
+	 * Spinner editor for the {@link MultiplicativeSpinnerNumberModel}.
+	 * @author William Bittle
+	 */
+	private class MultiplicativeSpinnerModelEditor extends JFormattedTextField implements ChangeListener, PropertyChangeListener {
+		/** The serializable id */
+		private static final long serialVersionUID = -7174664815660393176L;
+		
+		/** The spinner model */
+		private MultiplicativeSpinnerNumberModel model;
+		
+		/**
+		 * Full constructor.
+		 * @param spinner the spinner to attach to
+		 */
+        public MultiplicativeSpinnerModelEditor(JSpinner spinner) {
+        	super(new DecimalFormat("0E0"));
+            // get the current value
+            this.model = (MultiplicativeSpinnerNumberModel)(spinner.getModel());
+            this.setValue(this.model.getValue());
+            
+            // add this as a change listener
+            spinner.addChangeListener(this);
+            
+            // set the text box size
+            this.setColumns(4);
+            this.setHorizontalAlignment(JTextField.RIGHT);
+            
+            // look for changes on the value property
+            this.addPropertyChangeListener("value", this);
+        }
+        
+        /* (non-Javadoc)
+         * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
+         */
+        public void stateChanged(ChangeEvent e) {
+            JSpinner spinner = (JSpinner)(e.getSource());
+            MultiplicativeSpinnerNumberModel model = (MultiplicativeSpinnerNumberModel)(spinner.getModel());
+            this.setValue(model.getValue());
+        }
+        
+        /* (non-Javadoc)
+         * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+         */
+        @Override
+        public void propertyChange(PropertyChangeEvent e) {
+        	double max = this.model.getMaximum();
+        	double min = this.model.getMinimum();
+        	double value = Double.parseDouble(this.getText());
+        	// check if the value is in range
+        	if (value >= min && value <= max) {
+        		this.model.setValue(value);
+        	} else {
+        		// reset the text field to the current value
+        		this.setValue(this.model.getValue());
+        	}
+        }
+    }
 }

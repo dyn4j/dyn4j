@@ -32,8 +32,8 @@ import org.codezealot.game.input.Mouse;
 import org.codezealot.game.input.Input.Hold;
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
-import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.dynamics.World;
+import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Entity;
@@ -89,35 +89,34 @@ public class Sleep extends Test {
 		// create the floor
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
-		floor.addShape(floorRect, Mass.create(floorRect));
+		floor.addShape(floorRect);
 		floor.setMassFromShapes(Mass.Type.INFINITE);
 		this.world.add(floor);
 		
 		// create the stack
 		
 		Rectangle rect = new Rectangle(1.0, 1.0);
-		Mass mass = Mass.create(rect, 1.0);
 		
 		Entity box1 = new Entity();
-		box1.addShape(rect, mass);
+		box1.addShape(rect);
 		box1.setMassFromShapes();
 		box1.translate(0.0, 1.0);
 		this.world.add(box1);
 		
 		Entity box2 = new Entity();
-		box2.addShape(rect, mass);
+		box2.addShape(rect);
 		box2.setMassFromShapes();
 		box2.translate(0.0, 2.0);
 		this.world.add(box2);
 
 		Entity box3 = new Entity();
-		box3.addShape(rect, mass);
+		box3.addShape(rect);
 		box3.setMassFromShapes();
 		box3.translate(0.0, 3.0);
 		this.world.add(box3);
 		
 		Entity box4 = new Entity();
-		box4.addShape(rect, mass);
+		box4.addShape(rect);
 		box4.setMassFromShapes();
 		box4.translate(0.0, 4.0);
 		this.world.add(box4);

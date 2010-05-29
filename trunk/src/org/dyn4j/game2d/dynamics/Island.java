@@ -113,6 +113,8 @@ public class Island {
 		int size = this.bodies.size();
 		int jSize = this.joints.size();
 		
+		double invM, invI;
+		
 		// integrate the velocities
 		for (int i = 0; i < size; i++) {
 			Body b = this.bodies.get(i);
@@ -120,13 +122,16 @@ public class Island {
 			if (b.isStatic()) continue;
 			// accumulate the forces and torques
 			b.accumulate();
+			// get the mass properties
+			invM = b.mass.getInverseMass();
+			invI = b.mass.getInverseInertia();
 			// integrate force and torque to modify the velocity and
 			// angular velocity (sympletic euler)
 			// v1 = v0 + (f / m) + g) * dt
-			b.v.x += (b.force.x * b.mass.invM + gravity.x) * step.dt;
-			b.v.y += (b.force.y * b.mass.invM + gravity.y) * step.dt;
+			b.v.x += (b.force.x * invM + gravity.x) * step.dt;
+			b.v.y += (b.force.y * invM + gravity.y) * step.dt;
 			// av1 = av0 + (t / I) * dt
-			b.av += step.dt * b.mass.invI * b.torque;
+			b.av += step.dt * invI * b.torque;
 			// apply damping
 			double linear = 1.0 - step.dt * b.linearDamping;
 			double angular = 1.0 - step.dt * b.angularDamping;
@@ -180,8 +185,7 @@ public class Island {
 			
 			b.translate(b.v.product(step.dt));
 
-			Vector c = b.transform.getTransformed(b.mass.c);
-			b.rotate(b.av * step.dt, c);
+			b.rotateAboutCenter(b.av * step.dt);
 		}
 		
 		// solve the position constraints

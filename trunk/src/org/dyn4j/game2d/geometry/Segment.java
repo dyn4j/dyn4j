@@ -42,6 +42,8 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	 */
 	public Segment(Vector point1, Vector point2) {
 		super();
+		// make sure either point is not null
+		if (point1 == null || point2 == null) throw new NullPointerException("Both point1 and point2 cannot be null.");
 		// make sure the two points are not coincident
 		if (point1.equals(point2)) {
 			throw new IllegalArgumentException("A line segment must have two different vertices.");
@@ -410,5 +412,27 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 		super.translate(x, y);
 		this.vertices[0].add(x, y);
 		this.vertices[1].add(x, y);
+	}
+	
+	/**
+	 * Creates a {@link Mass} object using the geometric properties of
+	 * this {@link Segment} and the set density.
+	 * <pre>
+	 * m = d * length
+	 * I = l<sup>2</sup> * m / 12
+	 * </pre>
+	 * @return {@link Mass} the {@link Mass} of this {@link Segment}
+	 */
+	@Override
+	public Mass createMass() {
+		double d = this.density;
+		double l = this.length;
+		// compute the mass
+		double m = d * l;
+		// compute the inertia tensor
+		double I = 1.0 / 12.0 * l * l * m;
+		// since we know that a line segment has only two points we can
+		// feel safe using the averaging method for the centroid
+		return new Mass(this.center.copy(), m, I);
 	}
 }

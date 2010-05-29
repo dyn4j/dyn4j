@@ -28,9 +28,9 @@ import java.util.Random;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
-import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Circle;
+import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Entity;
@@ -97,9 +97,9 @@ public class Bucket extends Test {
 		right.translate(7.5, 7.0);
 		
 		Entity bucket = new Entity();
-		bucket.addShape(bottom, Mass.create(bottom));
-		bucket.addShape(left, Mass.create(left));
-		bucket.addShape(right, Mass.create(right));
+		bucket.addShape(bottom);
+		bucket.addShape(left);
+		bucket.addShape(right);
 		bucket.setMassFromShapes(Mass.Type.INFINITE);
 		this.world.add(bucket);
 		
@@ -120,10 +120,12 @@ public class Bucket extends Test {
 			Entity e = new Entity();
 			if (t == 0) {
 				Rectangle r = new Rectangle(s, s);
-				e.addShape(r, Mass.create(r, 0.1));
+				r.setDensity(0.1);
+				e.addShape(r);
 			} else {
 				Circle c = new Circle(s * 0.5);
-				e.addShape(c, Mass.create(c, 0.1));
+				c.setDensity(0.1);
+				e.addShape(c);
 			}
 			e.setMassFromShapes();
 			e.translate(x, y);

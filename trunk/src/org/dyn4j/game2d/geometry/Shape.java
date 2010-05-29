@@ -116,7 +116,7 @@ public interface Shape extends Transformable {
 	public abstract boolean isType(Shape.Type type);
 	
 	/**
-	 * Returns a unique identifier for this shape instance.
+	 * Returns the unique identifier for this shape instance.
 	 * @return String
 	 */
 	public abstract String getId();
@@ -166,4 +166,23 @@ public interface Shape extends Transformable {
 	 * @return boolean
 	 */
 	public abstract boolean contains(Vector point, Transform transform);
+	
+	/**
+	 * Creates a {@link Mass} object using the geometric properties of
+	 * this {@link Shape} and the set density.
+	 * @return {@link Mass} the {@link Mass} of this {@link Shape}
+	 */
+	public abstract Mass createMass();
+	
+	/**
+	 * Sets the density of this shape in kg/m<sup>2</sup>.
+	 * @param density the density in kg/m<sup>2</sup>
+	 */
+	public abstract void setDensity(double density);
+	
+	/**
+	 * Returns the density of this shape in kg/m<sup>2</sup>.
+	 * @return double the density in kg/m<sup>2</sup>
+	 */
+	public abstract double getDensity();
 }

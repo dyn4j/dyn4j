@@ -59,9 +59,9 @@ public class RectangularBounds extends AbstractBounds implements Bounds, Transfo
 	 * @param bounds the rectangular bounds
 	 */
 	public RectangularBounds(Rectangle bounds) {
-		super();
+		if (bounds == null) throw new NullPointerException("The bounds rectangle cannot be null.");
 		this.transform = new Transform();
-		this.setBounds(bounds);
+		this.bounds = bounds;
 	}
 	
 	/* (non-Javadoc)
@@ -111,6 +111,7 @@ public class RectangularBounds extends AbstractBounds implements Bounds, Transfo
 	 * @param bounds the bounds
 	 */
 	public void setBounds(Rectangle bounds) {
+		if (bounds == null) throw new NullPointerException("The bounds rectangle cannot be null.");
 		this.bounds = bounds;
 	}
 	

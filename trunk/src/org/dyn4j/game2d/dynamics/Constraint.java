@@ -44,8 +44,11 @@ public abstract class Constraint {
 	 * @param b2 the second participating {@link Body}
 	 */
 	public Constraint(Body b1, Body b2) {
+		// the bodies cannot be null
+		if (b1 == null || b2 == null) throw new NullPointerException("Both body1 and body2 cannot be null.");
 		this.b1 = b1;
 		this.b2 = b2;
+		this.onIsland = false;
 	}
 	
 	/* (non-Javadoc)

@@ -26,10 +26,10 @@ package org.dyn4j.game2d.testbed.test;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
-import org.dyn4j.game2d.dynamics.Mass;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.dynamics.joint.DistanceJoint;
 import org.dyn4j.game2d.dynamics.joint.Joint;
+import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Vector;
 import org.dyn4j.game2d.testbed.ContactCounter;
@@ -84,7 +84,7 @@ public class JointCollision extends Test {
 		// create the floor
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
-		floor.addShape(floorRect, Mass.create(floorRect));
+		floor.addShape(floorRect);
 		floor.setMassFromShapes(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
@@ -109,12 +109,12 @@ public class JointCollision extends Test {
 		Rectangle r = new Rectangle(0.5, 1.0);
 		
 		Entity obj1 = new Entity();
-		obj1.addShape(r, Mass.create(r));
+		obj1.addShape(r);
 		obj1.setMassFromShapes();
 		obj1.translate(2.0, 3.6);
 		
 		Entity obj2 = new Entity();
-		obj2.addShape(r, Mass.create(r));
+		obj2.addShape(r);
 		obj2.setMassFromShapes();
 		obj2.translate(2.0, 2.4);
 		
@@ -132,12 +132,12 @@ public class JointCollision extends Test {
 		this.world.add(j1);
 		
 		Entity obj3 = new Entity();
-		obj3.addShape(r, Mass.create(r));
+		obj3.addShape(r);
 		obj3.setMassFromShapes();
 		obj3.translate(-2.0, 3.6);
 		
 		Entity obj4 = new Entity();
-		obj4.addShape(r, Mass.create(r));
+		obj4.addShape(r);
 		obj4.setMassFromShapes();
 		obj4.translate(-2.0, 2.4);
 		
