@@ -1,96 +1,92 @@
+/*
+ * Copyright (c) 2010, William Bittle
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without modification, are permitted 
+ * provided that the following conditions are met:
+ * 
+ *   * Redistributions of source code must retain the above copyright notice, this list of conditions 
+ *     and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
+ *     and the following disclaimer in the documentation and/or other materials provided with the 
+ *     distribution.
+ *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *     promote products derived from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package org.dyn4j.game2d.dynamics.joint;
 
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.Settings;
 import org.dyn4j.game2d.dynamics.Step;
 import org.dyn4j.game2d.geometry.Mass;
+import org.dyn4j.game2d.geometry.Matrix;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Vector;
 
+/**
+ * Represents a pivot joint.
+ * @author William Bittle
+ */
+// TODO implement motor constraint
 public class RevoluteJoint extends Joint {
+	/** The local anchor point on the first {@link Body} */
 	protected Vector localAnchor1;
+	
+	/** The local anchor point on the second {@link Body} */
 	protected Vector localAnchor2;
 	
-	protected Matrix22 pivotMass;
+	/** The pivot mass */
+	protected Matrix K;
+	
+	/** The pivot force */
 	protected Vector pivotForce = new Vector();
 	
-	// TODO this needs to be moved to geometry package
-	public static class Matrix22 {
-		public Vector c1 = new Vector();
-		public Vector c2 = new Vector();
-		
-		public Matrix22 invert() {
-			double a = c1.x;
-			double b = c2.x;
-			double c = c1.y;
-			double d = c2.y;
-			Matrix22 r = new Matrix22();
-			double det = a * d - b * c;
-			// check for zero determinant
-			if (det == 0.0) throw new ArithmeticException();
-			det = 1.0 / det;
-			r.c1.x =  det * d;
-			r.c2.x = -det * b;
-			r.c1.y = -det * c;
-			r.c2.y =  det * a;
-			return r;
-		}
-		
-		public Vector solve(Vector b) {
-			double m11 = c1.x;
-			double m12 = c2.x;
-			double m21 = c1.y;
-			double m22 = c2.y;
-			double det = m11 * m22 - m12 * m21;
-			// check for zero determinant
-			if (det == 0.0) throw new ArithmeticException();
-			det = 1.0 / det;
-			Vector r = new Vector();
-			r.x = det * (m22 * b.x - m12 * b.y);
-			r.y = det * (m11 * b.y - m21 * b.x);
-			return r;
-		}
-		
-		public Matrix22 add(Matrix22 m) {
-			this.c1.add(m.c1);
-			this.c2.add(m.c2);
-			return this;
-		}
-		
-		public Matrix22 sum(Matrix22 m) {
-			Matrix22 r = new Matrix22();
-			r.c1.add(this.c1).add(m.c1);
-			r.c2.add(this.c2).add(m.c2);
-			return r;
-		}
-		
-		public Vector multiply(Vector v) {
-			Vector r = new Vector();
-			r.x = c1.x * v.x + c2.x * v.y;
-			r.y = c1.y * v.x + c2.y * v.y;
-			return r;
-		}
-	}
-	
+	/**
+	 * Full constructor.
+	 * @param b1 the first {@link Body}
+	 * @param b2 the second {@link Body}
+	 * @param anchor the anchor point in world coordinates
+	 */
 	public RevoluteJoint(Body b1, Body b2, Vector anchor) {
 		super(b1, b2);
+		if (anchor == null) throw new NullPointerException("The anchor point cannot be null.");
 		this.localAnchor1 = b1.getLocalPoint(anchor);
 		this.localAnchor2 = b2.getLocalPoint(anchor);
 	}
-
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.dynamics.joint.Joint#toString()
+	 */
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
+		sb.append("REVOLUTE_JOINT[")
+		.append(super.toString()).append("|")
+		.append(this.localAnchor1).append("|")
+		.append(this.localAnchor2).append("|")
+		.append(this.pivotForce).append("]");
 		return sb.toString();
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.dynamics.joint.Joint#initializeConstraints(org.dyn4j.game2d.dynamics.Step)
+	 */
 	@Override
 	public void initializeConstraints(Step step) {
 		Transform t1 = this.b1.getTransform();
 		Transform t2 = this.b2.getTransform();
 		
-		Mass m1 = b1.getMass();
-		Mass m2 = b2.getMass();
+		Mass m1 = this.b1.getMass();
+		Mass m2 = this.b2.getMass();
 		
 		double invM1 = m1.getInverseMass();
 		double invM2 = m2.getInverseMass();
@@ -99,35 +95,24 @@ public class RevoluteJoint extends Joint {
 		
 		Vector r1 = t1.getTransformedR(this.b1.getLocalCenter().to(this.localAnchor1));
 		Vector r2 = t2.getTransformedR(this.b2.getLocalCenter().to(this.localAnchor2));
-//		b2Body* b1 = m_body1;
-//		b2Body* b2 = m_body2;
-//
-//		// Compute the effective mass matrix.
-//		b2Vec2 r1 = b2Mul(b1->GetXForm().R, m_localAnchor1 - b1->GetLocalCenter());
-//		b2Vec2 r2 = b2Mul(b2->GetXForm().R, m_localAnchor2 - b2->GetLocalCenter());
+		
+		// compute the K inverse matrix
+		Matrix K1 = new Matrix();
+		K1.m00 = invM1 + invM2;	K1.m01 = 0.0;
+		K1.m10 = 0.0;			K1.m11 = invM1 + invM2;
 
-		// K    = [(1/m1 + 1/m2) * eye(2) - skew(r1) * invI1 * skew(r1) - skew(r2) * invI2 * skew(r2)]
-		//      = [1/m1+1/m2     0    ] + invI1 * [r1.y*r1.y -r1.x*r1.y] + invI2 * [r2.y*r2.y -r2.x*r2.y]
-		//        [    0     1/m1+1/m2]           [-r1.x*r1.y r1.x*r1.x]           [-r2.x*r2.y r2.x*r2.x]
-//		float32 invMass1 = b1->m_invMass, invMass2 = b2->m_invMass;
-//		float32 invI1 = b1->m_invI, invI2 = b2->m_invI;
+		Matrix K2 = new Matrix();
+		K2.m00 =  invI1 * r1.y * r1.y;	K2.m01 = -invI1 * r1.x * r1.y;
+		K2.m10 = -invI1 * r1.x * r1.y;	K2.m11 =  invI1 * r1.x * r1.x;
 
-		Matrix22 K1 = new Matrix22();
-		K1.c1.x = invM1 + invM2;	K1.c2.x = 0.0;
-		K1.c1.y = 0.0;				K1.c2.y = invM1 + invM2;
+		Matrix K3 = new Matrix();
+		K3.m00 =  invI2 * r2.y * r2.y;	K3.m01 = -invI2 * r2.x * r2.y;
+		K3.m10 = -invI2 * r2.x * r2.y;	K3.m11 =  invI2 * r2.x * r2.x;
 
-		Matrix22 K2 = new Matrix22();
-		K2.c1.x =  invI1 * r1.y * r1.y;	K2.c2.x = -invI1 * r1.x * r1.y;
-		K2.c1.y = -invI1 * r1.x * r1.y;	K2.c2.y =  invI1 * r1.x * r1.x;
-
-		Matrix22 K3 = new Matrix22();
-		K3.c1.x =  invI2 * r2.y * r2.y;	K3.c2.x = -invI2 * r2.x * r2.y;
-		K3.c1.y = -invI2 * r2.x * r2.y;	K3.c2.y =  invI2 * r2.x * r2.x;
-
-		Matrix22 K = new Matrix22();
+		Matrix K = new Matrix();
 		K.add(K1).add(K2).add(K3);
-		//Matrix22 K = K1 + K2 + K3;
-		this.pivotMass = K.invert();
+		
+		this.K = K.invert();
 
 //		m_motorMass = 1.0f / (invI1 + invI2);
 
@@ -173,16 +158,10 @@ public class RevoluteJoint extends Joint {
 //		if (step.warmStarting)
 //		{
 			double dt = step.getDeltaTime();
-			b1.getV().add(this.pivotForce.product(invM1 * dt));
-			b1.setAv(b1.getAv() + dt * invI1 * r1.cross(this.pivotForce));
-			b2.getV().subtract(this.pivotForce.product(invM2 * dt));
-			b2.setAv(b2.getAv() - dt * invI2 * r2.cross(this.pivotForce));
-			
-//			b1->m_linearVelocity -= B2FORCE_SCALE(step.dt) * invMass1 * m_pivotForce;
-//			b1->m_angularVelocity -= B2FORCE_SCALE(step.dt) * invI1 * (b2Cross(r1, m_pivotForce) + B2FORCE_INV_SCALE(m_motorForce + m_limitForce));
-//
-//			b2->m_linearVelocity += B2FORCE_SCALE(step.dt) * invMass2 * m_pivotForce;
-//			b2->m_angularVelocity += B2FORCE_SCALE(step.dt) * invI2 * (b2Cross(r2, m_pivotForce) + B2FORCE_INV_SCALE(m_motorForce + m_limitForce));
+			this.b1.getV().add(this.pivotForce.product(invM1 * dt));
+			this.b1.setAv(this.b1.getAv() + dt * invI1 * r1.cross(this.pivotForce));
+			this.b2.getV().subtract(this.pivotForce.product(invM2 * dt));
+			this.b2.setAv(this.b2.getAv() - dt * invI2 * r2.cross(this.pivotForce));
 //		}
 //		else
 //		{
@@ -193,14 +172,17 @@ public class RevoluteJoint extends Joint {
 
 //		m_limitPositionImpulse = 0.0f;
 	}
-
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.game2d.dynamics.Step)
+	 */
 	@Override
 	public void solveVelocityConstraints(Step step) {
 		Transform t1 = this.b1.getTransform();
 		Transform t2 = this.b2.getTransform();
 		
-		Mass m1 = b1.getMass();
-		Mass m2 = b2.getMass();
+		Mass m1 = this.b1.getMass();
+		Mass m2 = this.b2.getMass();
 		
 		double invM1 = m1.getInverseMass();
 		double invM2 = m2.getInverseMass();
@@ -210,29 +192,20 @@ public class RevoluteJoint extends Joint {
 		Vector r1 = t1.getTransformedR(this.b1.getLocalCenter().to(this.localAnchor1));
 		Vector r2 = t2.getTransformedR(this.b2.getLocalCenter().to(this.localAnchor2));
 
-		// Solve point-to-point constraint
-		Vector v1 = b1.getV().sum(r1.cross(b1.getAv()));
-		Vector v2 = b2.getV().sum(r2.cross(b2.getAv()));
+		// solve the point-to-point constraint
+		Vector v1 = this.b1.getV().sum(r1.cross(this.b1.getAv()));
+		Vector v2 = this.b2.getV().sum(r2.cross(this.b2.getAv()));
 		Vector pivotV = v1.subtract(v2);
 		
 		double dt = step.getDeltaTime();
-		Vector pivotF = this.pivotMass.multiply(pivotV).multiply(-1.0 / dt);
+		Vector pivotF = this.K.multiply(pivotV).multiply(-1.0 / dt);
 		this.pivotForce.add(pivotF);
-		//b2Vec2 pivotCdot = b2->m_linearVelocity + b2Cross(b2->m_angularVelocity, r2) - b1->m_linearVelocity - b2Cross(b1->m_angularVelocity, r1);
-		//b2Vec2 pivotForce = -B2FORCE_INV_SCALE(step.inv_dt) * b2Mul(m_pivotMass, pivotCdot);
-		//m_pivotForce += pivotForce;
 		
 		Vector P = pivotF.product(dt);
-		//b2Vec2 P = B2FORCE_SCALE(step.dt) * pivotForce;
-		b1.getV().add(P.product(invM1));
-		b1.setAv(b1.getAv() + invI1 * r1.cross(P));
-		b2.getV().subtract(P.product(invM2));
-		b2.setAv(b2.getAv() - invI2 * r2.cross(P));
-//		b1->m_linearVelocity -= b1->m_invMass * P;
-//		b1->m_angularVelocity -= b1->m_invI * b2Cross(r1, P);
-//
-//		b2->m_linearVelocity += b2->m_invMass * P;
-//		b2->m_angularVelocity += b2->m_invI * b2Cross(r2, P);
+		this.b1.getV().add(P.product(invM1));
+		this.b1.setAv(this.b1.getAv() + invI1 * r1.cross(P));
+		this.b2.getV().subtract(P.product(invM2));
+		this.b2.setAv(this.b2.getAv() - invI2 * r2.cross(P));
 
 //		if (m_enableMotor && m_limitState != e_equalLimits)
 //		{
@@ -275,19 +248,19 @@ public class RevoluteJoint extends Joint {
 //		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.dynamics.joint.Joint#solvePositionConstraints()
+	 */
 	@Override
 	public boolean solvePositionConstraints() {
-//		b2Body* b1 = m_body1;
-//		b2Body* b2 = m_body2;
-		
 		Settings settings = Settings.getInstance();
 		double linearTolerance = settings.getLinearTolerance();
 		
 		Transform t1 = this.b1.getTransform();
 		Transform t2 = this.b2.getTransform();
 		
-		Mass m1 = b1.getMass();
-		Mass m2 = b2.getMass();
+		Mass m1 = this.b1.getMass();
+		Mass m2 = this.b2.getMass();
 		
 		double invM1 = m1.getInverseMass();
 		double invM2 = m2.getInverseMass();
@@ -298,61 +271,37 @@ public class RevoluteJoint extends Joint {
 
 		Vector r1 = t1.getTransformedR(this.b1.getLocalCenter().to(this.localAnchor1));
 		Vector r2 = t2.getTransformedR(this.b2.getLocalCenter().to(this.localAnchor2));
-		// Solve point-to-point position error.
-//		b2Vec2 r1 = b2Mul(b1->GetXForm().R, m_localAnchor1 - b1->GetLocalCenter());
-//		b2Vec2 r2 = b2Mul(b2->GetXForm().R, m_localAnchor2 - b2->GetLocalCenter());
 		
-		Vector p1 = b1.getWorldCenter().sum(r1);
-		Vector p2 = b2.getWorldCenter().sum(r2);
+		Vector p1 = this.b1.getWorldCenter().sum(r1);
+		Vector p2 = this.b2.getWorldCenter().sum(r2);
 		Vector p = p1.difference(p2);
-//		b2Vec2 p1 = b1->m_sweep.c + r1;
-//		b2Vec2 p2 = b2->m_sweep.c + r2;
-//		b2Vec2 ptpC = p2 - p1;
 
 		error = p.getMagnitude();
-//		positionError = ptpC.Length();
 
-		// Prevent overly large corrections.
-		//b2Vec2 dpMax(b2_maxLinearCorrection, b2_maxLinearCorrection);
-		//ptpC = b2Clamp(ptpC, -dpMax, dpMax);
+		// compute the K inverse matrix
+		Matrix K1 = new Matrix();
+		K1.m00 = invM1 + invM2;	K1.m01 = 0.0;
+		K1.m10 = 0.0;			K1.m11 = invM1 + invM2;
 
-//		float32 invMass1 = b1->m_invMass, invMass2 = b2->m_invMass;
-//		float32 invI1 = b1->m_invI, invI2 = b2->m_invI;
+		Matrix K2 = new Matrix();
+		K2.m00 =  invI1 * r1.y * r1.y;	K2.m01 = -invI1 * r1.x * r1.y;
+		K2.m10 = -invI1 * r1.x * r1.y;	K2.m11 =  invI1 * r1.x * r1.x;
 
-		Matrix22 K1 = new Matrix22();
-		K1.c1.x = invM1 + invM2;	K1.c2.x = 0.0f;
-		K1.c1.y = 0.0f;				K1.c2.y = invM1 + invM2;
+		Matrix K3 = new Matrix();
+		K3.m00 =  invI2 * r2.y * r2.y;	K3.m01 = -invI2 * r2.x * r2.y;
+		K3.m10 = -invI2 * r2.x * r2.y;	K3.m11 =  invI2 * r2.x * r2.x;
 
-		Matrix22 K2 = new Matrix22();
-		K2.c1.x =  invI1 * r1.y * r1.y;	K2.c2.x = -invI1 * r1.x * r1.y;
-		K2.c1.y = -invI1 * r1.x * r1.y;	K2.c2.y =  invI1 * r1.x * r1.x;
-
-		Matrix22 K3 = new Matrix22();
-		K3.c1.x =  invI2 * r2.y * r2.y;	K3.c2.x = -invI2 * r2.x * r2.y;
-		K3.c1.y = -invI2 * r2.x * r2.y;	K3.c2.y =  invI2 * r2.x * r2.x;
-
-		Matrix22 K = new Matrix22();
+		Matrix K = new Matrix();
 		K.add(K1).add(K2).add(K3);
 		
 		Vector J = K.solve(p.getNegative());
-		
-//		b2Vec2 impulse = K.Solve(-ptpC);
 
 		// translate and rotate the objects
-		b1.translate(J.product(invM1));
-		b1.rotateAboutCenter(invI1 * r1.cross(J));
+		this.b1.translate(J.product(invM1));
+		this.b1.rotateAboutCenter(invI1 * r1.cross(J));
 		
-		b2.translate(J.product(-invM2));
-		b2.rotateAboutCenter(-invI2 * r2.cross(J));
-		
-//		b1->m_sweep.c -= b1->m_invMass * impulse;
-//		b1->m_sweep.a -= b1->m_invI * b2Cross(r1, impulse);
-//
-//		b2->m_sweep.c += b2->m_invMass * impulse;
-//		b2->m_sweep.a += b2->m_invI * b2Cross(r2, impulse);
-//
-//		b1->SynchronizeTransform();
-//		b2->SynchronizeTransform();
+		this.b2.translate(J.product(-invM2));
+		this.b2.rotateAboutCenter(-invI2 * r2.cross(J));
 
 		// Handle limits.
 //		float32 angularError = 0.0f;
@@ -401,6 +350,6 @@ public class RevoluteJoint extends Joint {
 //			b2->SynchronizeTransform();
 //		}
 
-		return error <= linearTolerance;// && angularError <= b2_angularSlop;
+		return error <= linearTolerance;
 	}
 }

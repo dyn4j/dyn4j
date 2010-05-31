@@ -1139,9 +1139,6 @@ public class ControlPanel extends JFrame {
 				0, 2, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 
-//		JSpinner spnWarm = new JSpinner(new SpinnerListModel(new String[] {
-//				"0.0", "1.0E-9", "1.0E-8", "1.0E-7", "1.0E-6", "1.0E-5", "1.0E-4", "1.0E-3", "1.0E-2", "1.0E-1", "1.0"  
-//				}));
 		JSpinner spnWarm = new JSpinner(new MultiplicativeSpinnerNumberModel(settings.getWarmStartDistance(), 1.0E-9, 1.0, 10.0));
 		spnWarm.setEditor(new MultiplicativeSpinnerModelEditor(spnWarm));
 		spnWarm.addChangeListener(new ChangeListener() {
@@ -1156,7 +1153,7 @@ public class ControlPanel extends JFrame {
 		pnlConstraint.add(spnWarm, new GridBagConstraints(
 				1, 2, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, 
 				GridBagConstraints.NONE, insets, 0, 0));
-		JLabel lblWarmUnit = new JLabel("<html>meters<sup>2</sup></html>");
+		JLabel lblWarmUnit = new JLabel("meters");
 		pnlConstraint.add(lblWarmUnit, new GridBagConstraints(
 				2, 2, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));

@@ -40,13 +40,6 @@ import org.dyn4j.game2d.geometry.Vector;
  * <p>
  * This joint doubles as a spring/damping distance joint where the length can
  * change but is constantly approaching the target distance.
- * <p>
- * 1D Particle with a 1D point constraint
- * <pre>
- * m (v2 - v1) = lambda
- * v2 - v1 - lambda / m = 0
- * 
- * </pre>
  * @author William Bittle
  */
 public class DistanceJoint extends Joint {
@@ -66,7 +59,7 @@ public class DistanceJoint extends Joint {
 	protected double distance;
 	
 	/** The effective mass of the two body system */
-	protected double mass;
+	protected double K;
 	
 	/** The normal */
 	protected Vector n;
@@ -208,21 +201,12 @@ public class DistanceJoint extends Joint {
 			this.n.divide(l);
 		}
 		
-		// compute the mass of the two body system
-		// mc = 1 / (J * Minv * Jtrans)
-		// J = Xtrans / mag(X)
-		// mc = 1 / ((Xtrans / mag(X)) * Minv * (Xtrans / mag(X))trans)
-		// mc = 1 / ((Xtrans * Minv * X) / mag(X)^2)
-		// mc = mag(X)^2 / (Xtrans * Minv * X)
-		// mc = mag(X)^2 / (X.dot(X) * Minv)
-		// mc = mag(X)^2 / (mag(X)^2 * Minv)
-		// mc = 1 / Minv
-		// mc = 1 / (m1inv + m2inv + I1inv * (r1 x n)^2 + I2inv * (r2 x n)^2)
-		double cr1n = r1.cross(n);
-		double cr2n = r2.cross(n);
+		// compute K inverse
+		double cr1n = r1.cross(this.n);
+		double cr2n = r2.cross(this.n);
 		double invMass = invM1 + invI1 * cr1n * cr1n;
 		invMass += invM2 + invI2 * cr2n * cr2n;
-		this.mass = 1.0 / invMass;
+		this.K = 1.0 / invMass;
 		
 		// see if we need to compute spring damping
 		if (this.frequency > 0.0) {
@@ -232,16 +216,16 @@ public class DistanceJoint extends Joint {
 			// compute the natural frequency; f = w / (2 * pi) -> w = 2 * pi * f
 			double w = 2.0 * Math.PI * this.frequency;
 			// compute the damping coefficient; dRatio = d / (2 * m * w) -> d = 2 * m * w * dRatio
-			double d = 2.0 * this.mass * this.dampingRatio * w;
+			double d = 2.0 * this.K * this.dampingRatio * w;
 			// compute the spring constant; w = sqrt(k / m) -> k = m * w * w
-			double k = this.mass * w * w;
-						
-			// compute gamma
+			double k = this.K * w * w;
+			
+			// compute gamma = CMF = 1 / (hk + d)
 			this.gamma = 1.0 / (dt * (d + dt * k));
-			// compute the bias
+			// compute the bias = x * ERP where ERP = hk / (hk + d)
 			this.bias = x * dt * k * this.gamma;
 			// compute the effective mass
-			this.mass = 1.0 / (invMass + this.gamma); 
+			this.K = 1.0 / (invMass + this.gamma); 
 		}
 		
 		// warm start
@@ -257,19 +241,6 @@ public class DistanceJoint extends Joint {
 	 * @see org.dyn4j.game2d.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.game2d.dynamics.Step)
 	 */
 	public void solveVelocityConstraints(Step step) {
-		// solve the constraint:
-		// C = mag(n) - L
-		// C = sqrt(x^2 + y^2) - L
-		// take the derivative with respect to time:
-		// C = 1 / (2 * sqrt(x^2 + y^2)) * d/dt(x^2 + y^2) - 0
-		// by the chain rule we take the derivative of the contents of the sqrt
-		// C = 1 / (2 * sqrt(x^2 + y^2)) * 2 * (x * vx + y * vy)
-		// since x and y are functions of time we use the chain rule to obtain vx and vy
-		// C = (x * vx + y * vy) / sqrt(x^2 + y^2)
-		// C = (x * vx + y * vy) / mag(n)
-		// C = L.dot(v) / mag(L)
-		// C = n.dot(v)
-		
 		Transform t1 = b1.getTransform();
 		Transform t2 = b2.getTransform();
 		Mass m1 = b1.getMass();
@@ -288,25 +259,11 @@ public class DistanceJoint extends Joint {
 		Vector v1 = b1.getV().sum(r1.cross(b1.getAv()));
 		Vector v2 = b2.getV().sum(r2.cross(b2.getAv()));
 		
-		// compute C
-		double C = n.dot(v1.difference(v2));
+		// compute Jv
+		double Jv = n.dot(v1.difference(v2));
 		
-		// newton's law for impulses
-		// M * Vdelta = P
-		// re-written as:
-		// v2 = v1 + MinvP
-		// Virtual work:
-		// P = Jtrans * lambda
-		// constraint
-		// Jv1 + b = 0
-		// solve for lambda (substitute 2nd two equations into the first)
-		// v2 = -b/J + Minv * Jtrans * lambda
-		// lambda = (v2 + b/J) / Minv * Jtrans
-		// lambda = (1/J)(Jv2 + b) (1/Minv) (1/Jtrans)
-		// lambda = (1/(J * Minv * Jtrans) * (Jv2 + b)
-		// where Mc =  (1/(J * Minv * Jtrans)
-		// compute the impulse lambda = -m (Jv + b)
-		double j = -this.mass * (C + this.bias + this.gamma * this.j);
+		// compute lambda (the magnitude of the impulse)
+		double j = -this.K * (Jv + this.bias + this.gamma * this.j);
 		this.j += j;
 		
 		// apply the impulse
@@ -350,7 +307,7 @@ public class DistanceJoint extends Joint {
 		double C = l - this.distance;
 		C = Interval.clamp(C, -maxLinearCorrection, maxLinearCorrection);
 		
-		double impulse = -this.mass * C;
+		double impulse = -this.K * C;
 		
 		Vector J = n.product(impulse);
 		
