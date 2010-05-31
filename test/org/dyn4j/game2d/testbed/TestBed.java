@@ -121,6 +121,30 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	private Text totalMemoryLabel;
 	/** The label for time usage */
 	private Text timeUsageLabel;
+	/** The label for the jre version */
+	private Text jreVersionLabel;
+	/** The label for the jre mode */
+	private Text jreModeLabel;
+	/** The label for the operating system name */
+	private Text osNameLabel;
+	/** The label for the architecture name */
+	private Text osArchitectureLabel;
+	/** The label for the data model name */
+	private Text osDataModelLabel;
+	/** The label for the number of processors */
+	private Text processorCountLabel;
+	/** The label for the jre version */
+	private Text jreVersionValue;
+	/** The label for the jre mode */
+	private Text jreModeValue;
+	/** The label for the operating system name */
+	private Text osNameValue;
+	/** The label for the architecture name */
+	private Text osArchitectureValue;
+	/** The label for the data model name */
+	private Text osDataModelValue;
+	/** The label for the number of processors */
+	private Text processorCountValue;
 	
 	// picking
 	/** The selected {@link Body} for picking capability */
@@ -305,6 +329,56 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		timeString.addAttribute(TextAttribute.FOREGROUND, new Color(20, 134, 222), 25, 31);
 		this.timeUsageLabel = new Text(timeString);
 		this.timeUsageLabel.generate();
+		
+		AttributedString jreVersionString = new AttributedString("JRE Version:");
+		this.jreVersionLabel = new Text(jreVersionString);
+		this.jreVersionLabel.generate();
+		
+		AttributedString jreModeString = new AttributedString("JRE Mode:");
+		this.jreModeLabel = new Text(jreModeString);
+		this.jreModeLabel.generate();
+		
+		AttributedString osNameString = new AttributedString("OS Name:");
+		this.osNameLabel = new Text(osNameString);
+		this.osNameLabel.generate();
+		
+		AttributedString osArchitectureString = new AttributedString("Architecture:");
+		this.osArchitectureLabel = new Text(osArchitectureString);
+		this.osArchitectureLabel.generate();
+		
+		AttributedString osDataModelString = new AttributedString("Data Model:");
+		this.osDataModelLabel = new Text(osDataModelString);
+		this.osDataModelLabel.generate();
+		
+		AttributedString processorCountString = new AttributedString("Processors:");
+		this.processorCountLabel = new Text(processorCountString);
+		this.processorCountLabel.generate();
+		
+		String jreVersion = System.getProperty("java.runtime.version"); // the jre version
+		String jreMode = System.getProperty("java.vm.info"); // mixed mode or interpreted
+		String osArchitecture = System.getProperty("os.arch"); // x86, amd64, etc.
+		String osDataModel = System.getProperty("sun.arch.data.model"); // 32 or 64 bit
+		String osName = System.getProperty("os.name"); // os name
+		// get the number of processors
+		int processors = Runtime.getRuntime().availableProcessors();
+		
+		this.jreVersionValue = new Text(new AttributedString(jreVersion));
+		this.jreVersionValue.generate();
+		
+		this.jreModeValue = new Text(new AttributedString(jreMode));
+		this.jreModeValue.generate();
+		
+		this.osNameValue = new Text(new AttributedString(osName));
+		this.osNameValue.generate();
+		
+		this.osArchitectureValue = new Text(new AttributedString(osArchitecture));
+		this.osArchitectureValue.generate();
+		
+		this.osDataModelValue = new Text(new AttributedString(osDataModel));
+		this.osDataModelValue.generate();
+		
+		this.processorCountValue = new Text(new AttributedString(String.valueOf(processors)));
+		this.processorCountValue.generate();
 	}
 	
 	/* (non-Javadoc)
@@ -369,6 +443,14 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 			g.drawRect(278, height - 98, 200, 95);
 			// render the performance information
 			this.renderPerformanceInformation(g, 282, height - 95);
+			
+			// draw the small box around the system info
+			g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.2f));
+			g.fillRect(481, height - 98, 200, 95);
+			g.setColor(Color.BLACK);
+			g.drawRect(481, height - 98, 200, 95);
+			// render the system information
+			this.renderSystemInformation(g, 485, height - 95);
 		}
 		
 		// always show the paused box on top of everything
@@ -606,6 +688,39 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		g.fillRect(x + (int) Math.ceil(renderW) + (int) Math.ceil(updateW), y + spacing * 5, (int) Math.ceil(systemW), 12);
 		g.setColor(Color.BLACK);
 		g.drawRect(x, y + spacing * 5, (int) Math.ceil(barWidth) + 1, 12);
+	}
+	
+	/**
+	 * Renders some system information.
+	 * @param g the graphics object to render to
+	 * @param x the x coordinate
+	 * @param y the y coordinate
+	 */
+	private void renderSystemInformation(Graphics2D g, int x, int y) {
+		// set the padding/spacing of the text lines and values
+		final int padding = 80;
+		final int spacing = 15;
+		
+		// set the text color
+		g.setColor(TEXT_COLOR);
+		
+		this.jreVersionLabel.render(g, x, y);
+		this.jreVersionValue.render(g, x + padding, y);
+		
+		this.jreModeLabel.render(g, x, y + spacing);
+		this.jreModeValue.render(g, x + padding, y + spacing);
+		
+		this.osNameLabel.render(g, x, y + spacing * 2);
+		this.osNameValue.render(g, x + padding, y + spacing * 2);
+		
+		this.osArchitectureLabel.render(g, x, y + spacing * 3);
+		this.osArchitectureValue.render(g, x + padding, y + spacing * 3);
+		
+		this.osDataModelLabel.render(g, x, y + spacing * 4);
+		this.osDataModelValue.render(g, x + padding, y + spacing * 4);
+		
+		this.processorCountLabel.render(g, x, y + spacing * 5);
+		this.processorCountValue.render(g, x + padding, y + spacing * 5);
 	}
 	
 	/* (non-Javadoc)

@@ -191,6 +191,7 @@ public class Vector {
 	 * @return boolean
 	 */
 	public boolean equals(Vector vector) {
+		if (vector == null) return false;
 		if (this == vector) {
 			return true;
 		} else {

@@ -134,8 +134,8 @@ public class Plotter extends Test {
 			this.e2List[i] = this.getEntity(i);
 		}
 		// default to the first set
-		this.e1 = this.e1List[0];
-		this.e2 = this.e2List[0];
+		this.e1 = this.e1List[1];
+		this.e2 = this.e2List[3];
 		// add them to the world
 		this.world.add(this.e1);
 		this.world.add(this.e2);

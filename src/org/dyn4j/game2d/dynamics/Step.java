@@ -95,6 +95,14 @@ public class Step {
 	}
 	
 	/**
+	 * Returns the inverse of the elapsed time since the last time step.
+	 * @return double
+	 */
+	public double getInverseDeltaTime() {
+		return this.invdt;
+	}
+	
+	/**
 	 * Returns the ratio of the last elapsed time to the current
 	 * elapsed time.
 	 * @return double
@@ -109,5 +117,13 @@ public class Step {
 	 */
 	public double getPrevousDeltaTime() {
 		return this.dt0;
+	}
+
+	/**
+	 * Returns the previous frame's inverse elapsed time.
+	 * @return double
+	 */
+	public double getPreviousInverseDeltaTime() {
+		return this.invdt0;
 	}
 }
