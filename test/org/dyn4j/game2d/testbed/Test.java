@@ -40,6 +40,7 @@ import org.dyn4j.game2d.dynamics.contact.ContactPoint;
 import org.dyn4j.game2d.dynamics.contact.SolvedContactPoint;
 import org.dyn4j.game2d.dynamics.joint.DistanceJoint;
 import org.dyn4j.game2d.dynamics.joint.Joint;
+import org.dyn4j.game2d.dynamics.joint.RevoluteJoint;
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Shape;
@@ -191,8 +192,10 @@ public abstract class Test {
 			for (int i = 0; i < size; i++) {
 				Body b = bodies.get(i);
 				Transform t = b.getTransform();
+				int cSize = b.getShapes().size();
 				// loop over the convex shapes again
-				for (Convex c : b.getShapes()) {
+				for (int j = 0; j < cSize; j++) {
+					Convex c = b.getShapes().get(j);
 					// render the normals
 					this.renderNormals(g, c, t, this.scale);
 				}
@@ -280,8 +283,10 @@ public abstract class Test {
 		// see if we should draw joints or not
 		if (draw.drawJoints()) {
 			List<Joint> joints = this.world.getJoints();
+			size = joints.size();
 			// draw the joints
-			for (Joint joint : joints) {
+			for (int j = 0; j < size; j++) {
+				Joint joint = joints.get(j);
 				// check the joint type
 				if (joint instanceof DistanceJoint) {
 					DistanceJoint dj = (DistanceJoint) joint;
@@ -359,6 +364,20 @@ public abstract class Test {
 						// set back the original stroke
 						g.setStroke(stroke);
 					}
+				} else if (joint instanceof RevoluteJoint) {
+					// draw a circle at the joint anchor
+					RevoluteJoint rj = (RevoluteJoint) joint;
+					Vector anchor = rj.getAnchorPoint();
+					g.setColor(Color.LIGHT_GRAY);
+					g.fillOval((int) Math.ceil((anchor.x - 0.025) * scale),
+							   (int) Math.ceil((anchor.y - 0.025) * scale), 
+							   (int) Math.ceil(0.05 * scale),
+							   (int) Math.ceil(0.05 * scale));
+					g.setColor(Color.DARK_GRAY);
+					g.drawOval((int) Math.ceil((anchor.x - 0.025) * scale),
+							   (int) Math.ceil((anchor.y - 0.025) * scale), 
+							   (int) Math.ceil(0.05 * scale),
+							   (int) Math.ceil(0.05 * scale));
 				}
 			}
 		}

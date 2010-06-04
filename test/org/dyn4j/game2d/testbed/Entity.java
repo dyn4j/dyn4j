@@ -130,8 +130,10 @@ public class Entity extends Body {
 		// get the world center
 		Vector wCenter = tx.getTransformed(center);
 		
+		int size = this.shapes.size();
 		// draw the shapes
-		for (Convex c : this.shapes) {
+		for (int i = 0; i < size; i++) {
+			Convex c = this.shapes.get(i);
 			// check if we should render fill color
 			if (draw.drawFill()) {
 				// set the color
