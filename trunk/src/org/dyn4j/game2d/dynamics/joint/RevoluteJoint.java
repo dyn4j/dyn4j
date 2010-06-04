@@ -48,19 +48,32 @@ public class RevoluteJoint extends Joint {
 	protected Matrix K;
 	
 	/** The pivot force */
-	protected Vector pivotForce = new Vector();
+	protected Vector pivotForce;
 	
 	/**
-	 * Full constructor.
+	 * Optional constructor.
 	 * @param b1 the first {@link Body}
 	 * @param b2 the second {@link Body}
 	 * @param anchor the anchor point in world coordinates
 	 */
 	public RevoluteJoint(Body b1, Body b2, Vector anchor) {
-		super(b1, b2);
+		this(b1, b2, false, anchor);
+	}
+	
+	/**
+	 * Full constructor.
+	 * @param b1 the first {@link Body}
+	 * @param b2 the second {@link Body}
+	 * @param collisionAllowed whether collision between the joined {@link Body}s is allowed
+	 * @param anchor the anchor point in world coordinates
+	 */
+	public RevoluteJoint(Body b1, Body b2, boolean collisionAllowed, Vector anchor) {
+		super(b1, b2, collisionAllowed);
 		if (anchor == null) throw new NullPointerException("The anchor point cannot be null.");
 		this.localAnchor1 = b1.getLocalPoint(anchor);
 		this.localAnchor2 = b2.getLocalPoint(anchor);
+		// initialize the pivot force
+		this.pivotForce = new Vector();
 	}
 	
 	/* (non-Javadoc)
@@ -109,8 +122,8 @@ public class RevoluteJoint extends Joint {
 		K3.m00 =  invI2 * r2.y * r2.y;	K3.m01 = -invI2 * r2.x * r2.y;
 		K3.m10 = -invI2 * r2.x * r2.y;	K3.m11 =  invI2 * r2.x * r2.x;
 
-		Matrix K = new Matrix();
-		K.add(K1).add(K2).add(K3);
+		Matrix K = new Matrix(K1);
+		K.add(K2).add(K3);
 		
 		this.K = K.invert();
 
@@ -351,5 +364,29 @@ public class RevoluteJoint extends Joint {
 //		}
 
 		return error <= linearTolerance;
+	}
+	
+	/**
+	 * Returns the world space anchor point for this joint.
+	 * @return {@link Vector}
+	 */
+	public Vector getAnchorPoint() {
+		return this.b1.getWorldPoint(this.localAnchor1);
+	}
+	
+	/**
+	 * Returns the local anchor point on the first {@link Body}.
+	 * @return {@link Vector}
+	 */
+	public Vector getLocalAnchor1() {
+		return this.localAnchor1;
+	}
+
+	/**
+	 * Returns the local anchor point on the second {@link Body}.
+	 * @return {@link Vector}
+	 */
+	public Vector getLocalAnchor2() {
+		return this.localAnchor2;
 	}
 }

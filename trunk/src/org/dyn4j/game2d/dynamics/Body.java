@@ -203,12 +203,14 @@ public class Body implements Collidable, Transformable {
 		.append("|").append(this.force)
 		.append("|").append(this.torque)
 		.append("|{");
-		for (Force f : this.forces) {
-			sb.append(f);
+		size = this.forces.size();
+		for (int i = 0; i < size; i++) {
+			sb.append(this.forces.get(i));
 		}
 		sb.append("}|{");
-		for (Torque t : this.torques) {
-			sb.append(t);
+		size = this.torques.size();
+		for (int i = 0; i < size; i++) {
+			sb.append(this.torques.get(i));
 		}
 		sb.append("}|").append(this.mu)
 		.append("|").append(this.e)

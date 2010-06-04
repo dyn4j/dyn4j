@@ -34,6 +34,7 @@ import java.awt.font.TextAttribute;
 import java.text.AttributedString;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.naming.ConfigurationException;
@@ -880,9 +881,14 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 				// convert to world coordinates
 				Vector v = this.test.screenToWorld(p.x, p.y);
 				// try to find the object that we are clicking on
-				for (Body b : this.test.world.getBodies()) {
+				List<Body> bodies = this.test.world.getBodies();
+				int bSize = bodies.size();
+				for (int i = 0; i < bSize; i++) {
+					Body b = bodies.get(i);
+					int cSize = b.getShapes().size();
 					// loop over the shapes in the body
-					for (Convex c : b.getShapes()) {
+					for (int j = 0; j < cSize; j++) {
+						Convex c = b.getShapes().get(j);
 						// see if the point is contained in it
 						if (c.contains(v, b.getTransform())) {
 							// if it is then set the body as the current
