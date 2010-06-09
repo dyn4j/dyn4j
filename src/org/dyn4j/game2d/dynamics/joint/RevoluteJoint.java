@@ -44,8 +44,8 @@ public class RevoluteJoint extends Joint {
 	/** The local anchor point on the second {@link Body} */
 	protected Vector localAnchor2;
 	
-	/** The pivot mass */
-	protected Matrix K;
+	/** The pivot mass (Kinv = (J * Minv * Jtrans)inv) */
+	protected Matrix invK;
 	
 	/** The pivot force */
 	protected Vector pivotForce;
@@ -125,7 +125,7 @@ public class RevoluteJoint extends Joint {
 		Matrix K = new Matrix(K1);
 		K.add(K2).add(K3);
 		
-		this.K = K.invert();
+		this.invK = K.invert();
 
 //		m_motorMass = 1.0f / (invI1 + invI2);
 
@@ -211,10 +211,9 @@ public class RevoluteJoint extends Joint {
 		Vector pivotV = v1.subtract(v2);
 		
 		double dt = step.getDeltaTime();
-		Vector pivotF = this.K.multiply(pivotV).multiply(-1.0 / dt);
-		this.pivotForce.add(pivotF);
+		Vector P = this.invK.multiply(pivotV).negate();
+		this.pivotForce.add(P.product(1.0 / dt));
 		
-		Vector P = pivotF.product(dt);
 		this.b1.getV().add(P.product(invM1));
 		this.b1.setAv(this.b1.getAv() + invI1 * r1.cross(P));
 		this.b2.getV().subtract(P.product(invM2));
@@ -285,8 +284,8 @@ public class RevoluteJoint extends Joint {
 		Vector r1 = t1.getTransformedR(this.b1.getLocalCenter().to(this.localAnchor1));
 		Vector r2 = t2.getTransformedR(this.b2.getLocalCenter().to(this.localAnchor2));
 		
-		Vector p1 = this.b1.getWorldCenter().sum(r1);
-		Vector p2 = this.b2.getWorldCenter().sum(r2);
+		Vector p1 = this.b1.getWorldCenter().add(r1);
+		Vector p2 = this.b2.getWorldCenter().add(r2);
 		Vector p = p1.difference(p2);
 
 		error = p.getMagnitude();
@@ -304,10 +303,10 @@ public class RevoluteJoint extends Joint {
 		K3.m00 =  invI2 * r2.y * r2.y;	K3.m01 = -invI2 * r2.x * r2.y;
 		K3.m10 = -invI2 * r2.x * r2.y;	K3.m11 =  invI2 * r2.x * r2.x;
 
-		Matrix K = new Matrix();
-		K.add(K1).add(K2).add(K3);
+		Matrix K = new Matrix(K1);
+		K.add(K2).add(K3);
 		
-		Vector J = K.solve(p.getNegative());
+		Vector J = K.solve(p.negate());
 
 		// translate and rotate the objects
 		this.b1.translate(J.product(invM1));

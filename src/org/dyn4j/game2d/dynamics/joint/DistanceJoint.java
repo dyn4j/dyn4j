@@ -58,8 +58,8 @@ public class DistanceJoint extends Joint {
 	/** The computed distance between the two world space anchor points */
 	protected double distance;
 	
-	/** The effective mass of the two body system */
-	protected double K;
+	/** The effective mass of the two body system (Kinv = J * Minv * Jtrans) */
+	protected double invK;
 	
 	/** The normal */
 	protected Vector n;
@@ -206,7 +206,7 @@ public class DistanceJoint extends Joint {
 		double cr2n = r2.cross(this.n);
 		double invMass = invM1 + invI1 * cr1n * cr1n;
 		invMass += invM2 + invI2 * cr2n * cr2n;
-		this.K = 1.0 / invMass;
+		this.invK = 1.0 / invMass;
 		
 		// see if we need to compute spring damping
 		if (this.frequency > 0.0) {
@@ -216,16 +216,16 @@ public class DistanceJoint extends Joint {
 			// compute the natural frequency; f = w / (2 * pi) -> w = 2 * pi * f
 			double w = 2.0 * Math.PI * this.frequency;
 			// compute the damping coefficient; dRatio = d / (2 * m * w) -> d = 2 * m * w * dRatio
-			double d = 2.0 * this.K * this.dampingRatio * w;
+			double d = 2.0 * this.invK * this.dampingRatio * w;
 			// compute the spring constant; w = sqrt(k / m) -> k = m * w * w
-			double k = this.K * w * w;
+			double k = this.invK * w * w;
 			
 			// compute gamma = CMF = 1 / (hk + d)
 			this.gamma = 1.0 / (dt * (d + dt * k));
 			// compute the bias = x * ERP where ERP = hk / (hk + d)
 			this.bias = x * dt * k * this.gamma;
 			// compute the effective mass
-			this.K = 1.0 / (invMass + this.gamma); 
+			this.invK = 1.0 / (invMass + this.gamma); 
 		}
 		
 		// warm start
@@ -263,7 +263,7 @@ public class DistanceJoint extends Joint {
 		double Jv = n.dot(v1.difference(v2));
 		
 		// compute lambda (the magnitude of the impulse)
-		double j = -this.K * (Jv + this.bias + this.gamma * this.j);
+		double j = -this.invK * (Jv + this.bias + this.gamma * this.j);
 		this.j += j;
 		
 		// apply the impulse
@@ -307,7 +307,7 @@ public class DistanceJoint extends Joint {
 		double C = l - this.distance;
 		C = Interval.clamp(C, -maxLinearCorrection, maxLinearCorrection);
 		
-		double impulse = -this.K * C;
+		double impulse = -this.invK * C;
 		
 		Vector J = n.product(impulse);
 		
