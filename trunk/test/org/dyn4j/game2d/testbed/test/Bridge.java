@@ -42,7 +42,7 @@ import org.dyn4j.game2d.testbed.Test;
  */
 public class Bridge extends Test {
 	/** The length of the chain in number of bodies */
-	private static final int LENGTH = 30;
+	private static final int LENGTH = 24;
 	
 	/* (non-Javadoc)
 	 * @see test.Test#getDescription()

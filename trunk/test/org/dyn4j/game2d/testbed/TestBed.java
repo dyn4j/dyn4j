@@ -256,7 +256,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		this.testLabel.generate();
 		
 		// text for the current zoom
-		AttributedString zoomString = new AttributedString("Zoom:");
+		AttributedString zoomString = new AttributedString("Scale:");
 		this.zoomLabel = new Text(zoomString);
 		this.zoomLabel.generate();
 		
@@ -537,7 +537,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		// render the label
 		this.zoomLabel.render(g, x, y + spacing * 2);
 		// render the value
-		AttributedString zoomString = new AttributedString(this.test.getZoom() + "x");
+		AttributedString zoomString = new AttributedString(String.valueOf(this.test.getZoom()));
 		Text zoom = new Text(zoomString);
 		zoom.generate();
 		zoom.render(g, x + padding, y + spacing * 2);

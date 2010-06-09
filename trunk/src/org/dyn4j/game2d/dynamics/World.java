@@ -84,7 +84,10 @@ public class World {
 	
 	/** The {@link ManifoldSolver} */
 	protected ManifoldSolver manifoldSolver;
-
+	
+	/** The {@link CollisionListener} */
+	protected CollisionListener collisionListener;
+	
 	/** The {@link ContactManager} */
 	protected ContactManager contactManager;
 
@@ -130,6 +133,7 @@ public class World {
 		this.narrowphaseDetector = new Gjk();
 		this.manifoldSolver = new ClippingManifoldSolver();
 		// create empty listeners
+		this.collisionListener = new CollisionAdapter();
 		this.contactManager = new ContactManager(new ContactAdapter());
 		this.boundsListener = new BoundsAdapter();
 		this.destructionListener = new DestructionAdapter();
@@ -248,6 +252,9 @@ public class World {
 				if (!b1.getFilter().isAllowed(b2.getFilter())) {
 					continue;
 				}
+				
+				// notify of the broadphase collision
+				this.collisionListener.collision(b1, b2);
 	
 				// get their transforms
 				Transform t1 = b1.transform;
@@ -271,9 +278,13 @@ public class World {
 						Convex c2 = g2.get(k);
 						// test the two convex shapes
 						if (this.narrowphaseDetector.detect(c1, t1, c2, t2, p)) {
+							// notify of the narrowphase collision
+							this.collisionListener.collision(b1, b2, c1, c2, p);
 							// if there is penetration then find a contact manifold
 							// using the filled in penetration object
 							if (this.manifoldSolver.getManifold(p, c1, t1, c2, t2, m)) {
+								// notify of the manifold solving result
+								this.collisionListener.collision(b1, b2, c1, c2, p, m);
 								// get the manifold points
 								List<ManifoldPoint> points = m.getPoints();
 								// a valid manifold was found
@@ -834,6 +845,29 @@ public class World {
 	 */
 	public ManifoldSolver getManifoldSolver() {
 		return this.manifoldSolver;
+	}
+	
+	/**
+	 * Sets the collision listener.
+	 * <p>
+	 * If the given {@link CollisionListener} is null the default {@link CollisionAdapter}
+	 * is set as the current collision listener.
+	 * @param collisionListener the collision listener
+	 */
+	public void setCollisionListener(CollisionListener collisionListener) {
+		if (collisionListener == null) {
+			this.collisionListener = new CollisionAdapter();
+		} else {
+			this.collisionListener = collisionListener;
+		}
+	}
+	
+	/**
+	 * Returns the collision listener.
+	 * @return {@link CollisionListener} the collision listener
+	 */
+	public CollisionListener getCollisionListener() {
+		return this.collisionListener;
 	}
 	
 	/**

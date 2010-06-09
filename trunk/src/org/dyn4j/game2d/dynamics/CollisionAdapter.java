@@ -22,40 +22,35 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.game2d;
+package org.dyn4j.game2d.dynamics;
+
+import org.dyn4j.game2d.collision.manifold.Manifold;
+import org.dyn4j.game2d.collision.narrowphase.Penetration;
+import org.dyn4j.game2d.geometry.Convex;
 
 /**
- * The version of the engine.
+ * Convience class for implementing the {@link CollisionListener} interface.
+ * <p>
+ * This class can be used to implement only the methods desired instead of all
+ * the methods contained in the {@link CollisionListener} interface.
  * @author William Bittle
  */
-public final class Version {
-	/** The major version number; API changes, major enhancements, etc. */
-	public static final int MAJOR = 0;
-	
-	/** The minor version number; minor enhancements, major bug fixes, etc. */
-	public static final int MINOR = 7;
-	
-	/** The revision number; minor bug fixes */
-	public static final int REVISION = 3;
-	
-	/**
-	 * Hide the constructor.
+public class CollisionAdapter implements CollisionListener {
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.dynamics.CollisionListener#collision(org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.dynamics.Body)
 	 */
-	private Version() {}
+	@Override
+	public void collision(Body body1, Body body2) {}
 	
-	/**
-	 * Returns the version as a string.
-	 * @return String
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.dynamics.CollisionListener#collision(org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.collision.narrowphase.Penetration)
 	 */
-	public static String getVersion() {
-		return MAJOR + "." + MINOR + "." + REVISION;
-	}
+	@Override
+	public void collision(Body body1, Body body2, Convex convex1, Convex convex2, Penetration p) {}
 	
-	/**
-	 * Main class to print the version to the console.
-	 * @param args command line arguments (none accepted)
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.dynamics.CollisionListener#collision(org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.collision.narrowphase.Penetration, org.dyn4j.game2d.collision.manifold.Manifold)
 	 */
-	public static final void main(String[] args) {
-		System.out.println("dyn4j v" + Version.getVersion());
-	}
+	@Override
+	public void collision(Body body1, Body body2, Convex convex1, Convex convex2, Penetration p, Manifold m) {}
 }
