@@ -32,7 +32,7 @@ package org.dyn4j.game2d.geometry;
  */
 public class Rectangle extends Polygon implements Shape, Transformable {
 	/** The rectangle {@link Shape.Type} */
-	public static final Shape.Type TYPE = new Shape.Type(Polygon.TYPE);
+	public static final Shape.Type TYPE = new Shape.Type(Polygon.TYPE, "Rectangle");
 	
 	/** The {@link Rectangle}'s width */
 	protected double width;
@@ -204,25 +204,25 @@ public class Rectangle extends Polygon implements Shape, Transformable {
 	
 	/**
 	 * Creates a {@link Mass} object using the geometric properties of
-	 * this {@link Rectangle} and the set density.
+	 * this {@link Rectangle} and the given density.
 	 * <pre>
 	 * m = d * h * w
 	 * I = m * (h<sup>2</sup> + w<sup>2</sup>) / 12
 	 * </pre>
+	 * @param density the density in kg/m<sup>2</sup>
 	 * @return {@link Mass} the {@link Mass} of this {@link Rectangle}
 	 */
 	@Override
-	public Mass createMass() {
-		double d = this.density;
-		double h = this.height;
-		double w = this.width;
+	public Mass createMass(double density) {
+		double height = this.height;
+		double width = this.width;
 		// compute the mass
-		double m = d * h * w;
+		double mass = density * height * width;
 		// compute the inertia tensor
-		double I = m * (h * h + w * w) / 12.0;
+		double inertia = mass * (height * height + width * width) / 12.0;
 		// since we know that a rectangle has only four points that are
 		// evenly distributed we can feel safe using the averaging method 
 		// for the centroid
-		return new Mass(this.center.copy(), m, I);
+		return Mass.create(this.center, mass, inertia);
 	}
 }

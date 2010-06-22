@@ -628,7 +628,7 @@ public class Vector {
 	public Vector project(Vector vector) {
 		double dotProd = this.dot(vector);
 		double denominator = vector.dot(vector);
-		if (denominator == 0.0) throw new ArithmeticException();
+		if (denominator == 0.0) return new Vector();
 		denominator = dotProd / denominator;
 		return new Vector(denominator * vector.x, denominator * vector.y);		
 	}

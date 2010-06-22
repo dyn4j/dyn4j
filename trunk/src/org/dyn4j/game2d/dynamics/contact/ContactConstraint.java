@@ -24,12 +24,13 @@
  */
 package org.dyn4j.game2d.dynamics.contact;
 
+import java.util.List;
+
 import org.dyn4j.game2d.collision.manifold.Manifold;
 import org.dyn4j.game2d.collision.manifold.ManifoldPoint;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.Constraint;
-import org.dyn4j.game2d.geometry.Convex;
-import org.dyn4j.game2d.geometry.Shape;
+import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.geometry.Vector;
 
 /**
@@ -40,11 +41,11 @@ public class ContactConstraint extends Constraint {
 	/** The unique contact id */
 	protected ContactConstraintId id;
 	
-	/** The first {@link Body}'s {@link Convex} {@link Shape} */
-	protected Convex c1;
+	/** The first {@link Body}'s {@link Fixture} */
+	protected Fixture fixture1;
 	
-	/** The second {@link Body}'s {@link Convex} {@link Shape} */
-	protected Convex c2;
+	/** The second {@link Body}'s {@link Fixture} */
+	protected Fixture fixture2;
 	
 	/** The {@link Contact}s */
 	protected Contact[] contacts;
@@ -53,47 +54,52 @@ public class ContactConstraint extends Constraint {
 	protected Vector normal;
 	
 	/** The coefficient of friction */
-	protected double mu;
+	protected double friction;
 	
 	/** The coefficient of restitution */
-	protected double e;
+	protected double restitution;
 	
 	/**
 	 * Full constructor.
-	 * @param b1 the first {@link Body}
-	 * @param c1 the first {@link Body}'s {@link Convex} {@link Shape}
-	 * @param b2 the second {@link Body}
-	 * @param c2 the second {@link Body}'s {@link Convex} {@link Shape}
-	 * @param m the contact manifold
+	 * @param body1 the first {@link Body}
+	 * @param fixture1 the first {@link Body}'s {@link Fixture}
+	 * @param body2 the second {@link Body}
+	 * @param fixture2 the second {@link Body}'s {@link Fixture}
+	 * @param manifold the contact {@link Manifold}
+	 * @param friction the contact's coefficient of friction
+	 * @param restitution the contact's coefficient of restitution
 	 */
-	public ContactConstraint(Body b1, Convex c1, Body b2, Convex c2, Manifold m) {
-		super(b1, b2);
+	public ContactConstraint(Body body1, Fixture fixture1, Body body2, Fixture fixture2, Manifold manifold, double friction, double restitution) {
+		super(body1, body2);
 		// set the involved convex shapes
-		this.c1 = c1;
-		this.c2 = c2;
+		this.fixture1 = fixture1;
+		this.fixture2 = fixture2;
 		// create the constraint id
-		this.id = new ContactConstraintId(b1, b2, c1, c2);
+		this.id = new ContactConstraintId(body1, fixture1, body2, fixture2);
+		// get the manifold points
+		List<ManifoldPoint> points = manifold.getPoints();
 		// get the manifold point size
-		int mSize = m.getPoints().size();
+		int mSize = points.size();
 		// create contact array
 		this.contacts = new Contact[mSize];
+		// create contacts for each point
 		for (int l = 0; l < mSize; l++) {
 			// get the manifold point
-			ManifoldPoint point = m.getPoints().get(l);
+			ManifoldPoint point = points.get(l);
 			// create a contact from the manifold point
 			Contact contact = new Contact(point.getId(),
 					                      point.getPoint(), 
 					                      point.getDepth(), 
-					                      this.b1.getLocalPoint(point.getPoint()), 
-					                      this.b2.getLocalPoint(point.getPoint()));
+					                      this.body1.getLocalPoint(point.getPoint()), 
+					                      this.body2.getLocalPoint(point.getPoint()));
 			// add the contact to the array
 			this.contacts[l] = contact;
 		}
 		// set the normal
-		this.normal = m.getNormal();
-		// compute mu and e
-		this.mu = Math.sqrt(b1.getMu() * b2.getMu());
-		this.e = Math.max(b1.getE(), b2.getE());
+		this.normal = manifold.getNormal();
+		// set the coefficients
+		this.friction = friction;
+		this.restitution = restitution;
 		// default to false
 		this.onIsland = false;
 	}
@@ -106,17 +112,25 @@ public class ContactConstraint extends Constraint {
 		StringBuilder sb = new StringBuilder();
 		sb.append("CONTACT_CONSTRAINT[")
 		.append(super.toString()).append("|")
-		.append(this.c1).append("|")
-		.append(this.c2).append("|")
+		.append(this.fixture1).append("|")
+		.append(this.fixture2).append("|")
 		.append(this.normal).append("|")
-		.append(this.mu).append("|")
-		.append(this.e).append("|{");
+		.append(this.friction).append("|")
+		.append(this.restitution).append("|{");
 		int size = contacts.length;
 		for (int i = 0; i < size; i++) {
 			sb.append(contacts[i]);
 		}
 		sb.append("}]");
 		return sb.toString();
+	}
+	
+	/**
+	 * Returns the contact constraint id.
+	 * @return {@link ContactConstraintId}
+	 */
+	public ContactConstraintId getId() {
+		return id;
 	}
 	
 	/**
@@ -140,15 +154,15 @@ public class ContactConstraint extends Constraint {
 	 * @return {@link Body} the first {@link Body}
 	 */
 	public Body getBody1() {
-		return this.b1;
+		return this.body1;
 	}
 	
 	/**
-	 * Returns the first {@link Body}'s {@link Convex} {@link Shape}.
-	 * @return {@link Convex} the first {@link Body}'s {@link Convex} {@link Shape}
+	 * Returns the first {@link Body}'s {@link Fixture}.
+	 * @return {@link Fixture} the first {@link Body}'s {@link Fixture}
 	 */
-	public Convex getConvex1() {
-		return this.c1;
+	public Fixture getFixture1() {
+		return this.fixture1;
 	}
 	
 	/**
@@ -156,14 +170,30 @@ public class ContactConstraint extends Constraint {
 	 * @return {@link Body} the second {@link Body}
 	 */
 	public Body getBody2() {
-		return this.b2;
+		return this.body2;
 	}
 	
 	/**
-	 * Returns the second {@link Body}'s {@link Convex} {@link Shape}.
-	 * @return {@link Convex} the second {@link Body}'s {@link Convex} {@link Shape}
+	 * Returns the second {@link Body}'s {@link Fixture}.
+	 * @return {@link Fixture} the second {@link Body}'s {@link Fixture}
 	 */
-	public Convex getConvex2() {
-		return this.c2;
+	public Fixture getFixture2() {
+		return this.fixture2;
+	}
+	
+	/**
+	 * Returns the coefficient of friction for this contact constraint.
+	 * @return double
+	 */
+	public double getFriction() {
+		return friction;
+	}
+	
+	/**
+	 * Returns the coefficient of restitution for this contact constraint.
+	 * @return double
+	 */
+	public double getRestitution() {
+		return restitution;
 	}
 }

@@ -26,6 +26,7 @@ package org.dyn4j.game2d.testbed.test;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
+import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Rectangle;
@@ -89,7 +90,7 @@ public class Sensor extends Test {
 		// create the floor
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
-		floor.addShape(floorRect);
+		floor.addFixture(new Fixture(floorRect));
 		floor.setMassFromShapes(Mass.Type.INFINITE);
 		this.world.add(floor);
 		
@@ -99,12 +100,15 @@ public class Sensor extends Test {
 				new Vector(-0.5,-0.5),
 				new Vector(0.5, -0.5));
 		
+		// flag that the triangle is a sensor
+		Fixture fixture = new Fixture(triangle);
+		fixture.setSensor(true);
+		
 		// create the object
 		Entity sensor = new Entity();
-		sensor.addShape(triangle);
+		sensor.addFixture(fixture);
 		sensor.setMassFromShapes();
 		sensor.translate(0.0, 4.0);
-		sensor.setSensor(true);
 		this.world.add(sensor);
 	}
 	

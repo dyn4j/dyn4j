@@ -53,20 +53,20 @@ public interface BroadphaseDetector {
 	/**
 	 * Performs a broadphase collision test on the given {@link Collidable}s and
 	 * returns true if they could possibly intersect.
-	 * @param c1 the first {@link Collidable}
-	 * @param c2 the second {@link Collidable}
+	 * @param collidable1 the first {@link Collidable}
+	 * @param collidable2 the second {@link Collidable}
 	 * @return boolean
 	 */
-	public abstract boolean detect(Collidable c1, Collidable c2);
+	public abstract boolean detect(Collidable collidable1, Collidable collidable2);
 
 	/**
 	 * Performs a broadphase collision test on the given {@link Convex} {@link Shape}s and
 	 * returns true if they could possibly intersect.
-	 * @param c1 the first {@link Convex} {@link Shape}
-	 * @param t1 the first {@link Convex} {@link Shape}'s {@link Transform}
-	 * @param c2 the second {@link Convex} {@link Shape}
-	 * @param t2 the second {@link Convex} {@link Shape}'s {@link Transform}
+	 * @param convex1 the first {@link Convex} {@link Shape}
+	 * @param transform1 the first {@link Convex} {@link Shape}'s {@link Transform}
+	 * @param convex2 the second {@link Convex} {@link Shape}
+	 * @param transform2 the second {@link Convex} {@link Shape}'s {@link Transform}
 	 * @return boolean
 	 */
-	public abstract boolean detect(Convex c1, Transform t1, Convex c2, Transform t2);
+	public abstract boolean detect(Convex convex1, Transform transform1, Convex convex2, Transform transform2);
 }

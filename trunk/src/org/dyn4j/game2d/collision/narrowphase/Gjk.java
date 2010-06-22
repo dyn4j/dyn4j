@@ -125,16 +125,13 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 	public static final double DEFAULT_GJK_DISTANCE_EPSILON = 1.0e-9;
 	
 	/** The penetration solver; defaults to {@link Epa} */
-	protected MinkowskiPenetrationSolver mps = new Epa();
+	protected MinkowskiPenetrationSolver minkowskiPenetrationSolver = new Epa();
 	
 	/** The maximum number of {@link Gjk} iterations */
 	protected int gjkMaxIterations = Gjk.DEFAULT_GJK_MAX_ITERATIONS;
 	
 	/** The {@link Gjk} distance epsilon in meters */
 	protected double gjkDistanceEpsilon = Gjk.DEFAULT_GJK_DISTANCE_EPSILON;
-	
-	/** The {@link Gjk} distance epsilon squared in meters<sup>2</sup> */
-	protected double gjkDistanceEpsilonSquared = Gjk.DEFAULT_GJK_DISTANCE_EPSILON * Gjk.DEFAULT_GJK_DISTANCE_EPSILON;
 	
 	/**
 	 * Default constructor.
@@ -143,29 +140,30 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 	
 	/**
 	 * Optional constructor.
-	 * @param mps the {@link MinkowskiPenetrationSolver} to use
+	 * @param minkowskiPenetrationSolver the {@link MinkowskiPenetrationSolver} to use
 	 */
-	public Gjk(MinkowskiPenetrationSolver mps) {
-		this.mps = mps;
+	public Gjk(MinkowskiPenetrationSolver minkowskiPenetrationSolver) {
+		if (minkowskiPenetrationSolver == null) throw new NullPointerException("The MinkowskiPenetrationSolver cannot be null.");
+		this.minkowskiPenetrationSolver = minkowskiPenetrationSolver;
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector#detect(org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.geometry.Transform, org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.geometry.Transform, org.dyn4j.game2d.collision.narrowphase.Penetration)
 	 */
 	@Override
-	public boolean detect(Convex s1, Transform t1, Convex s2, Transform t2, Penetration p) {
+	public boolean detect(Convex convex1, Transform transform1, Convex convex2, Transform transform2, Penetration penetration) {
 		// check for circles
-		if (s1.isType(Circle.TYPE) && s2.isType(Circle.TYPE)) {
+		if (convex1.isType(Circle.TYPE) && convex2.isType(Circle.TYPE)) {
 			// if its a circle - circle collision use the faster method
-			return super.detect((Circle) s1, t1, (Circle) s2, t2, p);
+			return super.detect((Circle) convex1, transform1, (Circle) convex2, transform2, penetration);
 		}
 		// define the simplex
 		List<Vector> simplex = new ArrayList<Vector>(3);
 		// create a Minkowski sum
-		MinkowskiSum ms = new MinkowskiSum(s1, t1, s2, t2);
+		MinkowskiSum ms = new MinkowskiSum(convex1, transform1, convex2, transform2);
 		// transform into world space if transform is not null
-		Vector c1 = t1.getTransformed(s1.getCenter());
-		Vector c2 = t2.getTransformed(s2.getCenter());
+		Vector c1 = transform1.getTransformed(convex1.getCenter());
+		Vector c2 = transform2.getTransformed(convex2.getCenter());
 		// choose some search direction
 		Vector d = c1.to(c2);
 		// check for a zero direction vector
@@ -190,7 +188,7 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 					// if the simplex contains the origin then we know that there is an intersection.
 					// if we broke out of the loop then we know there was an intersection
 					// perform epa to get the penetration vector
-					this.mps.getPenetration(simplex, ms, p);
+					this.minkowskiPenetrationSolver.getPenetration(simplex, ms, penetration);
 					return true;
 				}
 				// if the simplex does not contain the origin then we need to loop using the new
@@ -200,22 +198,22 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector#test(org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.geometry.Transform, org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.geometry.Transform)
+	 * @see org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector#detect(org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.geometry.Transform, org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.geometry.Transform)
 	 */
 	@Override
-	public boolean detect(Convex s1, Transform t1, Convex s2, Transform t2) {
+	public boolean detect(Convex convex1, Transform transform1, Convex convex2, Transform transform2) {
 		// check for circles
-		if (s1.isType(Circle.TYPE) && s2.isType(Circle.TYPE)) {
+		if (convex1.isType(Circle.TYPE) && convex2.isType(Circle.TYPE)) {
 			// if its a circle - circle collision use the faster method
-			return super.detect((Circle) s1, t1, (Circle) s2, t2);
+			return super.detect((Circle) convex1, transform1, (Circle) convex2, transform2);
 		}
 		// define the simplex
 		List<Vector> simplex = new ArrayList<Vector>(3);
 		// create a Minkowski sum
-		MinkowskiSum ms = new MinkowskiSum(s1, t1, s2, t2);
+		MinkowskiSum ms = new MinkowskiSum(convex1, transform1, convex2, transform2);
 		// transform into world space if transform is not null
-		Vector c1 = t1.getTransformed(s1.getCenter());
-		Vector c2 = t2.getTransformed(s2.getCenter());
+		Vector c1 = transform1.getTransformed(convex1.getCenter());
+		Vector c2 = transform2.getTransformed(convex2.getCenter());
 		// choose some search direction
 		Vector d = c1.to(c2);
 		// check for a zero direction vector
@@ -329,28 +327,28 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 	/**
 	 * Returns true if the two shapes are separated and fills the given
 	 * {@link Separation} object with the minimum distance vector.
-	 * @param s1 the first {@link Shape}
-	 * @param t1 the first {@link Shape}'s {@link Transform}
-	 * @param s2 the second {@link Shape}
-	 * @param t2 the second {@link Shape}'s {@link Transform}
-	 * @param s the {@link Separation} object to fill
+	 * @param convex1 the first {@link Shape}
+	 * @param transform1 the first {@link Shape}'s {@link Transform}
+	 * @param convex2 the second {@link Shape}
+	 * @param transform2 the second {@link Shape}'s {@link Transform}
+	 * @param separation the {@link Separation} object to fill
 	 * @return boolean
 	 */
-	public boolean distance(Convex s1, Transform t1, Convex s2, Transform t2, Separation s) {
+	public boolean distance(Convex convex1, Transform transform1, Convex convex2, Transform transform2, Separation separation) {
 		// check for circles
-		if (s1.isType(Circle.TYPE) && s2.isType(Circle.TYPE)) {
+		if (convex1.isType(Circle.TYPE) && convex2.isType(Circle.TYPE)) {
 			// if its a circle - circle collision use the faster method
-			return super.distance((Circle) s1, t1, (Circle) s2, t2, s);
+			return super.distance((Circle) convex1, transform1, (Circle) convex2, transform2, separation);
 		}
 		// create a Minkowski sum
-		MinkowskiSum ms = new MinkowskiSum(s1, t1, s2, t2);
+		MinkowskiSum ms = new MinkowskiSum(convex1, transform1, convex2, transform2);
 		// create some Minkowski points
 		MinkowskiSum.Point a = new MinkowskiSum.Point();
 		MinkowskiSum.Point b = new MinkowskiSum.Point();
 		MinkowskiSum.Point c = new MinkowskiSum.Point();
 		// transform into world space if transform is not null
-		Vector c1 = t1.getTransformed(s1.getCenter());
-		Vector c2 = t2.getTransformed(s2.getCenter());
+		Vector c1 = transform1.getTransformed(convex1.getCenter());
+		Vector c2 = transform2.getTransformed(convex2.getCenter());
 		// choose some search direction
 		Vector d = c1.to(c2);
 		// check for a zero direction vector
@@ -389,10 +387,10 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 			if ((projection - a.p.dot(d)) < this.gjkDistanceEpsilon) {
 				// then the new point we just made is not far enough
 				// in the direction of n so we can stop now
-				s.normal = d;
-				s.distance = -projection;
+				separation.normal = d;
+				separation.distance = -projection;
 				// get the closest points
-				this.findClosestPoints(a, b, s);
+				this.findClosestPoints(a, b, separation);
 				// return true to indicate separation
 				return true;
 			}
@@ -410,10 +408,10 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 		}
 		// if we made it here then we know that we hit the maximum number of iterations
 		// this is really a catch all termination case
-		s.normal = d;
-		s.distance = -c.p.dot(d);
+		separation.normal = d;
+		separation.distance = -c.p.dot(d);
 		// get the closest points
-		this.findClosestPoints(a, b, s);
+		this.findClosestPoints(a, b, separation);
 		// return true to indicate separation
 		return true;
 	}
@@ -591,7 +589,6 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 	public void setGjkDistanceEpsilon(double gjkDistanceEpsilon) {
 		if (gjkDistanceEpsilon <= 0) throw new IllegalArgumentException("The GJK distance epsilon must be larger than zero.");
 		this.gjkDistanceEpsilon = gjkDistanceEpsilon;
-		this.gjkDistanceEpsilonSquared = gjkDistanceEpsilon * gjkDistanceEpsilon;
 	}
 	
 	/**
@@ -600,7 +597,7 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 	 * @return {@link MinkowskiPenetrationSolver}
 	 */
 	public MinkowskiPenetrationSolver getMinkowskiPenetrationSolver() {
-		return mps;
+		return minkowskiPenetrationSolver;
 	}
 	
 	/**
@@ -609,6 +606,7 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 	 * @param minkowskiPenetrationSolver the {@link MinkowskiPenetrationSolver}
 	 */
 	public void setMinkowskiPenetrationSolver(MinkowskiPenetrationSolver minkowskiPenetrationSolver) {
-		this.mps = minkowskiPenetrationSolver;
+		if (minkowskiPenetrationSolver == null) throw new NullPointerException("The MinkowskiPenetrationSolver cannot be null.");
+		this.minkowskiPenetrationSolver = minkowskiPenetrationSolver;
 	}
 }

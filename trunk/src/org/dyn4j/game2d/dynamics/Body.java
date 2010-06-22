@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.dyn4j.game2d.collision.Collidable;
-import org.dyn4j.game2d.collision.Filter;
 import org.dyn4j.game2d.dynamics.contact.ContactEdge;
 import org.dyn4j.game2d.dynamics.joint.Joint;
 import org.dyn4j.game2d.dynamics.joint.JointEdge;
@@ -69,12 +68,6 @@ import org.dyn4j.game2d.geometry.Vector;
  * @author William Bittle
  */
 public class Body implements Collidable, Transformable {
-	/** The default coefficient of friction; value = {@value #DEFAULT_MU} */
-	public static final double DEFAULT_MU = 0.2;
-	
-	/** The default coefficient of restitution; value = {@value #DEFAULT_E} */
-	public static final double DEFAULT_E = 0.0;
-	
 	/** The default linear damping; value = {@value #DEFAULT_LINEAR_DAMPING} */
 	public static final double DEFAULT_LINEAR_DAMPING = 0.0;
 	
@@ -87,14 +80,11 @@ public class Body implements Collidable, Transformable {
 	/** The state flag for the {@link Body} being asleep */
 	protected static final int ASLEEP = 2;
 	
-	/** The state flag for the {@link Body} being frozen (out of bounds) */
-	protected static final int FROZEN = 4;
-
-	/** The state flag for the {@link Body} being a sensor */
-	protected static final int SENSOR = 8;
+	/** The state flag for the {@link Body} being active (out of bounds for example) */
+	protected static final int ACTIVE = 4;
 	
 	/** The state flag indicating the {@link Body} has been added to an {@link Island} */
-	protected static final int ISLAND = 16;
+	protected static final int ISLAND = 8;
 	
 	/** The {@link Body}'s unique identifier */
 	protected String id;
@@ -102,23 +92,20 @@ public class Body implements Collidable, Transformable {
 	/** The current {@link Transform} */
 	protected Transform transform;
 
-	/** The {@link Body}'s {@link Shape} list */
-	protected List<Convex> shapes;
+	/** The {@link Fixture}s list */
+	protected List<Fixture> fixtures;
 	
 	/** The user data associated to this {@link Body} */
 	protected Object userData;
-	
-	/** The {@link Body}'s collision {@link Filter} */
-	protected Filter filter;
 	
 	/** The {@link Mass} information */
 	protected Mass mass;
 	
 	/** The current linear velocity */
-	protected Vector v;
+	protected Vector velocity;
 
 	/** The current angular velocity */
-	protected double av;
+	protected double angularVelocity;
 
 	/** The current force */
 	protected Vector force;
@@ -132,12 +119,6 @@ public class Body implements Collidable, Transformable {
 	/** The torque accumulator */
 	protected List<Torque> torques;
 	
-	/** The coefficient of friction */
-	protected double mu;
-	
-	/** The coefficient of restitution */
-	protected double e;
-
 	/** The {@link Body}'s state */
 	protected int state;
 	
@@ -160,23 +141,23 @@ public class Body implements Collidable, Transformable {
 	 * Default constructor.
 	 */
 	public Body() {
-		// the majority of bodies will contain one shape
-		this.shapes = new ArrayList<Convex>(1);
+		// the majority of bodies will contain one fixture/shape
+		this.fixtures = new ArrayList<Fixture>(1);
+		this.mass = Mass.UNDEFINED;
 		this.id = UUID.randomUUID().toString();
 		this.transform = new Transform();
-		this.filter = Filter.DEFAULT_FILTER;
-		this.v = new Vector();
-		this.av = 0.0;
+		this.velocity = new Vector();
+		this.angularVelocity = 0.0;
 		this.force = new Vector();
 		this.torque = 0.0;
 		this.forces = new ArrayList<Force>();
 		this.torques = new ArrayList<Torque>();
-		this.mu = Body.DEFAULT_MU;
-		this.e = Body.DEFAULT_E;
 		// initialize the state
 		this.state = 0;
 		// allow sleeping
 		this.state |= Body.SLEEP;
+		// start off active
+		this.state |= Body.ACTIVE;
 		this.sleepTime = 0.0;
 		this.linearDamping = Body.DEFAULT_LINEAR_DAMPING;
 		this.angularDamping = Body.DEFAULT_ANGULAR_DAMPING;
@@ -192,14 +173,14 @@ public class Body implements Collidable, Transformable {
 		StringBuilder sb = new StringBuilder();
 		sb.append("BODY[").append(id).append("|{");
 		// append all the shapes
-		int size = this.shapes.size();
+		int size = this.fixtures.size();
 		for (int i = 0; i < size; i++) {
-			sb.append(this.shapes.get(i));
+			sb.append(this.fixtures.get(i));
 		}
 		sb.append("}|").append(this.transform).append("]")
 		.append("|").append(this.mass)
-		.append("|").append(this.v)
-		.append("|").append(this.av)
+		.append("|").append(this.velocity)
+		.append("|").append(this.angularVelocity)
 		.append("|").append(this.force)
 		.append("|").append(this.torque)
 		.append("|{");
@@ -212,50 +193,72 @@ public class Body implements Collidable, Transformable {
 		for (int i = 0; i < size; i++) {
 			sb.append(this.torques.get(i));
 		}
-		sb.append("}|").append(this.mu)
-		.append("|").append(this.e)
-		.append("|").append(this.state)
+		sb.append("}|").append(this.state)
 		.append("|").append(this.linearDamping)
 		.append("|").append(this.angularDamping)
-		.append("|").append(this.sleepTime)
-		.append("|").append(this.filter);
+		.append("|").append(this.sleepTime);
 		sb.append("]");
 		return sb.toString();
 	}
 	
 	/**
-	 * Adds a {@link Convex} {@link Shape} to this {@link Body}.
+	 * Adds a {@link Fixture} to this {@link Body}.
 	 * <p>
-	 * After adding or removing shapes make sure to call the {@link #setMassFromShapes()}
+	 * After adding or removing fixtures make sure to call the {@link #setMassFromShapes()}
 	 * or {@link #setMassFromShapes(Mass.Type)} method to compute the new total
 	 * {@link Mass}.
-	 * @param convex the {@link Convex} {@link Shape}
+	 * @param fixture the {@link Fixture}
 	 * @return {@link Body} this body
 	 */
-	public Body addShape(Convex convex) {
+	public Body addFixture(Fixture fixture) {
 		// make sure neither is null
-		if (convex == null) throw new NullPointerException("The convex shape cannot be null.");
+		if (fixture == null) throw new NullPointerException("The fixture cannot be null.");
 		// add the shape and mass to the respective lists
-		this.shapes.add(convex);
+		this.fixtures.add(fixture);
 		// return this body to facilitate chaining
 		return this;
 	}
-	
+
 	/**
-	 * Removes the given {@link Convex} {@link Shape} from the {@link Body}.
+	 * Removes the given {@link Fixture} from the {@link Body}.
 	 * <p>
-	 * After adding or removing shapes make sure to call the {@link #setMassFromShapes()}
+	 * After adding or removing fixtures make sure to call the {@link #setMassFromShapes()}
 	 * or {@link #setMassFromShapes(Mass.Type)} method to compute the new total
 	 * {@link Mass}.
-	 * @param convex the {@link Convex} {@link Shape}
-	 * @return boolean true if the {@link Convex} was removed from this {@link Body}
+	 * @param fixture the {@link Fixture}
+	 * @return boolean true if the {@link Fixture} was removed from this {@link Body}
 	 */
-	public boolean removeShape(Convex convex) {
-		// check the shape size
-		if (this.shapes.size() > 0) {
-			return this.shapes.remove(convex);
+	public boolean removeFixture(Fixture fixture) {
+		// make sure the passed in fixture is not null
+		if (fixture == null) return false;
+		// get the number of fixtures
+		int size = this.fixtures.size();
+		// check fixtures size
+		if (size > 0) {
+			this.fixtures.remove(fixture);
 		}
 		return false;
+	}
+	
+	/**
+	 * Removes the {@link Fixture} at the given index.
+	 * <p>
+	 * Returns null if the index is less than zero or if there
+	 * are zero {@link Fixture}s on this body.
+	 * @param index the index
+	 * @return {@link Fixture} the fixture removed
+	 */
+	public Fixture removeFixture(int index) {
+		// check the index
+		if (index < 0) return null;
+		// get the number of fixtures
+		int size = this.fixtures.size();
+		// check the size
+		if (size > 0) {
+			return this.fixtures.remove(index);
+		}
+		// otherwise return null
+		return null;
 	}
 	
 	/**
@@ -266,8 +269,9 @@ public class Body implements Collidable, Transformable {
 	 * given the masses of the shapes.
 	 * @return {@link Body} this body
 	 * @see #setMassFromShapes(Mass.Type)
-	 * @see #addShape(Convex)
-	 * @see #removeShape(Convex)
+	 * @see #addFixture(Fixture)
+	 * @see #removeFixture(Fixture)
+	 * @see #removeFixture(int)
 	 */
 	public Body setMassFromShapes() {
 		return this.setMassFromShapes(Mass.Type.NORMAL);
@@ -283,49 +287,43 @@ public class Body implements Collidable, Transformable {
 	 * A {@link Mass.Type} can be used to create special mass
 	 * types.
 	 * <p>
-	 * If <code>Mass.Type.INFINITE</code> is passed, the center
-	 * of mass will be an average of the centers of each shape.
-	 * <p>
 	 * If this method is called before any shapes are added the
-	 * mass is set to an infinite mass with the center at the
-	 * origin.
+	 * mass is set to Mass.UNDEFINED.
 	 * @param type the {@link Mass.Type}; can be null
 	 * @return {@link Body} this body
-	 * @see #addShape(Convex)
-	 * @see #removeShape(Convex)
+	 * @see #addFixture(Fixture)
+	 * @see #removeFixture(Fixture)
+	 * @see #removeFixture(int)
 	 */
 	public Body setMassFromShapes(Mass.Type type) {
 		// get the size
-		int size = this.shapes.size();
+		int size = this.fixtures.size();
 		// check the size
 		if (size == 0) {
 			// set the mass to an infinite point mass at (0, 0)
-			this.setMass(Mass.create(new Vector()));
-			return this;
+			this.setMass(Mass.UNDEFINED);
+			// ignore the passed in type
 		} else if (size == 1) {
 			// then just use the mass for the first shape
-			this.setMass(this.shapes.get(0).createMass(), type);
+			this.mass = this.fixtures.get(0).createMass();
+			// make sure the type is not null
+			if (type != null) {
+				// set the type
+				this.mass.setType(type);
+			}
 		} else {
 			// create a list of mass objects
 			List<Mass> masses = new ArrayList<Mass>();
+			// create a mass object for each shape
 			for (int i = 0; i < size; i++) {
-				Convex convex = this.shapes.get(i);
-				Mass mass = convex.createMass();
+				Mass mass = this.fixtures.get(i).createMass();
 				masses.add(mass);
 			}
-			// check for infinite mass type
-			if (type == Mass.Type.INFINITE) {
-				// if the type desired is infinite then we need to 
-				// compute the average center of mass
-				Vector c = new Vector();
-				for (int i = 0; i < size; i++) {
-					c.add(masses.get(i).getCenter());
-				}
-				c.divide(size);
-				this.setMass(Mass.create(c));
-			} else {
-				// then create the mass from the list
-				this.setMass(Mass.create(masses), type);
+			this.mass = Mass.create(masses);
+			// make sure the type is not null
+			if (type != null) {
+				// set the type
+				this.mass.setType(type);
 			}
 		}
 		// return this body to facilitate chaining
@@ -341,26 +339,11 @@ public class Body implements Collidable, Transformable {
 	 * @return {@link Body} this body
 	 */
 	public Body setMass(Mass mass) {
+		// make sure the mass is not null
+		if (mass == null) throw new NullPointerException("The mass cannot be null.");
+		if (mass == Mass.UNDEFINED) throw new IllegalArgumentException("Cannot set the mass to Mass.UNDEFINED.");
+		// set the mass
 		this.mass = mass;
-		// return this body to facilitate chaining
-		return this;
-	}
-	
-	/**
-	 * Sets this {@link Body}'s mass information.
-	 * <p>
-	 * This method can be used to set the mass of the body
-	 * to a mass other than the total mass of the shapes.
-	 * <p>
-	 * A {@link Mass.Type} can be used to create special mass
-	 * types.
-	 * @param mass the new {@link Mass}
-	 * @param type the {@link Mass.Type}
-	 * @return {@link Body} this body
-	 */
-	public Body setMass(Mass mass, Mass.Type type) {
-		// make a copy of the mass
-		this.mass = Mass.create(mass, type);
 		// return this body to facilitate chaining
 		return this;
 	}
@@ -376,17 +359,29 @@ public class Body implements Collidable, Transformable {
 	/**
 	 * Applies the given force to this {@link Body}.
 	 * @param force the force
+	 * @return {@link Body} this body
 	 */
-	public void apply(Vector force) {
+	public Body apply(Vector force) {
+		// check for null
+		if (force == null) throw new NullPointerException("Cannot apply a null force.");
+		// apply the force
 		this.apply(new Force(force));
+		// return this body to facilitate chaining
+		return this;
 	}
 	
 	/**
 	 * Applies the given {@link Force} to this {@link Body}
 	 * @param force the force
+	 * @return {@link Body} this body
 	 */
-	public void apply(Force force) {
+	public Body apply(Force force) {
+		// check for null
+		if (force == null) throw new NullPointerException("Cannot apply a null force.");
+		// add the force to the list
 		this.forces.add(force);
+		// return this body to facilitate chaining
+		return this;
 	}
 
 	/**
@@ -394,17 +389,30 @@ public class Body implements Collidable, Transformable {
 	 * given point (torque).
 	 * @param force the force
 	 * @param point the application point in world coordinates
+	 * @return {@link Body} this body
 	 */
-	public void apply(Vector force, Vector point) {
+	public Body apply(Vector force, Vector point) {
+		// check for null
+		if (force == null) throw new NullPointerException("Cannot apply a torque with a null force.");
+		if (point == null) throw new NullPointerException("Cannot apply a torque with a null application point.");
+		// apply the torque
 		this.apply(new Torque(force, point));
+		// return this body to facilitate chaining
+		return this;
 	}
 	
 	/**
 	 * Applies the given {@link Torque} to this {@link Body}.
 	 * @param torque the torque
+	 * @return {@link Body} this body
 	 */
-	public void apply(Torque torque) {
+	public Body apply(Torque torque) {
+		// check for null
+		if (torque == null) throw new NullPointerException("Cannot apply a null torque.");
+		// add the torque to the list
 		this.torques.add(torque);
+		// return this body to facilitate chaining
+		return this;
 	}
 	
 	/**
@@ -451,7 +459,7 @@ public class Body implements Collidable, Transformable {
 				force.apply(this);
 			}
 			// wake the body up
-			this.awaken();
+			this.setAsleep(false);
 			// remove the forces from the accumulator
 			this.forces.clear();
 		}
@@ -467,26 +475,36 @@ public class Body implements Collidable, Transformable {
 				torque.apply(this);
 			}
 			// wake the body up
-			this.awaken();
+			this.setAsleep(false);
 			// remove the torques from the accumulator
 			this.torques.clear();
 		}
 	}
 	
 	/**
-	 * Returns true if both inertia and mass are infinite.
+	 * Returns true if this body has infinite mass and
+	 * the velocity and angular velocity is zero.
 	 * @return boolean
 	 */
 	public boolean isStatic() {
-		return this.mass.isInfinite();
+		return this.mass.isInfinite() && this.velocity.isZero() && this.angularVelocity == 0.0;
 	}
 	
 	/**
-	 * Returns true if this body is dynamic.
+	 * Returns true if this body has infinite mass and
+	 * the velocity or angular velocity are NOT zero.
+	 * @return boolean
+	 */
+	public boolean isKinematic() {
+		return this.mass.isInfinite() && (!this.velocity.isZero() || this.angularVelocity != 0.0);
+	}
+	
+	/**
+	 * Returns true if this body does not have infinite mass.
 	 * @return boolean
 	 */
 	public boolean isDynamic() {
-		return !this.isStatic();
+		return !this.mass.isInfinite();
 	}
 	
 	/**
@@ -500,7 +518,7 @@ public class Body implements Collidable, Transformable {
 			// remove the state, otherwise do nothing
 			if (!flag) {
 				this.state ^= Body.SLEEP;
-				this.awaken();
+				this.setAsleep(false);
 			}
 		} else {
 			// if it cannot sleep and the user does want it to
@@ -528,18 +546,29 @@ public class Body implements Collidable, Transformable {
 	}
 	
 	/**
-	 * Sets this {@link Body} to sleep.
+	 * Sets whether this {@link Body} is awake or not.
+	 * @param flag true if the body should be put to sleep
 	 */
-	public void sleep() {
-		// make sure we are allowed to sleep it
-		if (this.canSleep()) {
-			this.state |= Body.ASLEEP;
-			this.v.zero();
-			this.av = 0.0;
-			this.clearForce();
-			this.clearTorque();
-			this.forces.clear();
-			this.torques.clear();
+	public void setAsleep(boolean flag) {
+		if (flag) {
+			// make sure this body is allowed to sleep
+			if (this.canSleep()) {
+				this.state |= Body.ASLEEP;
+				this.velocity.zero();
+				this.angularVelocity = 0.0;
+				this.clearForce();
+				this.clearTorque();
+				this.forces.clear();
+				this.torques.clear();
+			}
+		} else {
+			// check if the body is asleep
+			if ((this.state & Body.ASLEEP) == Body.ASLEEP) {
+				// if the body is asleep then wake it up
+				this.sleepTime = 0.0;
+				this.state &= ~Body.ASLEEP;
+			}
+			// otherwise do nothing
 		}
 	}
 	
@@ -566,56 +595,22 @@ public class Body implements Collidable, Transformable {
 	}
 	
 	/**
-	 * Wakes up this {@link Body} from sleeping.
-	 */
-	public void awaken() {
-		this.sleepTime = 0.0;
-		this.state &= ~Body.ASLEEP;
-	}
-	
-	/**
-	 * Returns true if this {@link Body} is frozen.
+	 * Returns true if this {@link Body} is active.
 	 * @return boolean
 	 */
-	public boolean isFrozen() {
-		return (this.state & Body.FROZEN) == Body.FROZEN;
+	public boolean isActive() {
+		return (this.state & Body.ACTIVE) == Body.ACTIVE;
 	}
 	
 	/**
-	 * Freezes the {@link Body}.
+	 * Sets whether this {@link Body} is active or not.
+	 * @param flag true if this {@link Body} should be active
 	 */
-	public void freeze() {
-		this.state |= Body.FROZEN;
-		this.v.zero();
-		this.av = 0.0;
-		this.force.zero();
-		this.torque = 0.0;
-	}
-	
-	/**
-	 * Un-freezes the {@link Body}.
-	 */
-	public void thaw() {
-		this.state &= ~Body.FROZEN;
-	}
-
-	/**
-	 * Returns true if the {@link Body} is a sensor.
-	 * @return boolean true if the {@link Body} is a sensor
-	 */
-	public boolean isSensor() {
-		return (this.state & Body.SENSOR) == Body.SENSOR;
-	}
-	
-	/**
-	 * Sets the {@link Body} to be a sensor if given true.
-	 * @param flag if true the {@link Body} will be a sensor
-	 */
-	public void setSensor(boolean flag) {
+	public void setActive(boolean flag) {
 		if (flag) {
-			this.state |= Body.SENSOR;
+			this.state |= Body.ACTIVE;
 		} else {
-			this.state &= ~Body.SENSOR;
+			this.state &= ~Body.ACTIVE;
 		}
 	}
 	
@@ -646,6 +641,8 @@ public class Body implements Collidable, Transformable {
 	 * @return boolean
 	 */
 	public boolean isConnected(Body body) {
+		// check for a null body
+		if (body == null) return false;
 		int size = this.joints.size();
 		// check the size
 		if (size == 0) return false;
@@ -670,6 +667,8 @@ public class Body implements Collidable, Transformable {
 	 * @return boolean
 	 */
 	public boolean isConnectedNoCollision(Body body) {
+		// check for a null body
+		if (body == null) return false;
 		int size = this.joints.size();
 		// check the size
 		if (size == 0) return false;
@@ -738,13 +737,21 @@ public class Body implements Collidable, Transformable {
 	public void translate(Vector vector) {
 		this.transform.translate(vector);
 	}
-
+	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.collision.Collidable#getShapes()
+	 * @see org.dyn4j.game2d.collision.Collidable#getShape(int)
 	 */
 	@Override
-	public List<Convex> getShapes() {
-		return this.shapes;
+	public Convex getShape(int index) {
+		return this.fixtures.get(index).getShape();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.collision.Collidable#getShapeCount()
+	 */
+	@Override
+	public int getShapeCount() {
+		return this.fixtures.size();
 	}
 	
 	/* (non-Javadoc)
@@ -754,27 +761,25 @@ public class Body implements Collidable, Transformable {
 		return this.transform;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.collision.Collidable#getFilter()
+	/**
+	 * Returns the {@link Fixture} at the given index.
+	 * @param index the index
+	 * @return {@link Fixture}
 	 */
-	@Override
-	public Filter getFilter() {
-		return this.filter;
+	public Fixture getFixture(int index) {
+		return this.fixtures.get(index);
 	}
 	
 	/**
-	 * Sets the collision {@link Filter} for this {@link Body}.
-	 * @param filter the collision {@link Filter}
+	 * Returns the number of {@link Fixture}s on this {@link Body}.
+	 * <p>
+	 * This method returns the same value as {@link #getShapeCount()}
+	 * since there is a one-to-one relationship between a shape and
+	 * a fixture.
+	 * @return int
 	 */
-	public void setFilter(Filter filter) {
-		// check for null
-		if (filter == null) {
-			// if its null then set it to the default filter
-			this.filter = Filter.DEFAULT_FILTER;
-		} else {
-			// if not null then 
-			this.filter = filter;
-		}
+	public int getFixtureCount() {
+		return this.fixtures.size();
 	}
 	
 	/**
@@ -841,39 +846,33 @@ public class Body implements Collidable, Transformable {
 	 * Returns the velocity {@link Vector}.
 	 * @return {@link Vector}
 	 */
-	public Vector getV() {
-		return v;
+	public Vector getVelocity() {
+		return velocity;
 	}
 	
 	/**
 	 * Sets the velocity {@link Vector}.
-	 * <p>
-	 * If the given velocity is null then v is set to
-	 * the zero vector.
-	 * @param v the velocity
+	 * @param velocity the velocity
 	 */
-	public void setV(Vector v) {
-		if (v == null) {
-			this.v.zero();
-		} else {
-			this.v = v;
-		}
+	public void setVelocity(Vector velocity) {
+		if (velocity == null) throw new NullPointerException("The velocity vector cannot be null.");
+		this.velocity = velocity;
 	}
 
 	/**
 	 * Returns the angular velocity.
 	 * @return double
 	 */
-	public double getAv() {
-		return av;
+	public double getAngularVelocity() {
+		return angularVelocity;
 	}
 
 	/**
 	 * Sets the angular velocity.
-	 * @param av the angular velocity
+	 * @param angularVelocity the angular velocity
 	 */
-	public void setAv(double av) {
-		this.av = av;
+	public void setAngularVelocity(double angularVelocity) {
+		this.angularVelocity = angularVelocity;
 	}
 	
 	/**
@@ -890,40 +889,6 @@ public class Body implements Collidable, Transformable {
 	 */
 	public double getTorque() {
 		return torque;
-	}
-
-	/**
-	 * Returns the coefficient of friction.
-	 * @return double
-	 */
-	public double getMu() {
-		return mu;
-	}
-
-	/**
-	 * Sets the coefficient of friction.
-	 * @param mu the coefficient of friction
-	 */
-	public void setMu(double mu) {
-		if (mu < 0) throw new IllegalArgumentException("The coefficient of friction cannot be negative.");
-		this.mu = mu;
-	}
-	
-	/**
-	 * Returns the coefficient of restitution.
-	 * @return double
-	 */
-	public double getE() {
-		return e;
-	}
-
-	/**
-	 * Sets the coefficient of restitution.
-	 * @param e the coefficient of restitution
-	 */
-	public void setE(double e) {
-		if (e < 0 || e > 1) throw new IllegalArgumentException("The coefficient of restitution must be between 0 and 1 inclusive.");
-		this.e = e;
 	}
 	
 	/**

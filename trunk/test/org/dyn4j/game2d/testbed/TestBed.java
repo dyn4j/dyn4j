@@ -34,7 +34,6 @@ import java.awt.font.TextAttribute;
 import java.text.AttributedString;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.List;
 import java.util.logging.Logger;
 
 import javax.naming.ConfigurationException;
@@ -50,9 +49,10 @@ import org.dyn4j.game2d.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.game2d.collision.narrowphase.Gjk;
 import org.dyn4j.game2d.collision.narrowphase.Sat;
 import org.dyn4j.game2d.dynamics.Body;
+import org.dyn4j.game2d.dynamics.Fixture;
+import org.dyn4j.game2d.dynamics.joint.MouseJoint;
 import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Convex;
-import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Segment;
 import org.dyn4j.game2d.geometry.Vector;
 
@@ -147,13 +147,15 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	/** The label for the number of processors */
 	private Text processorCountValue;
 	
-	// picking
+	// picking using left click
+	/** The mouse joint created when picking shapes */
+	private MouseJoint mouseJoint = null;
+	
+	// picking using right click
 	/** The selected {@link Body} for picking capability */
 	private Body selected = null;
 	/** The old position for picking capability */
 	private Vector vOld = null;
-	/** The old mass for picking capability */
-	private Mass mOld = null;
 	
 	/**
 	 * Full constructor.
@@ -222,8 +224,10 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		this.keyboard.add(new Input(KeyEvent.VK_S, Hold.NO_HOLD));
 		// output the state of all the objects on the scene
 		this.keyboard.add(new Input(KeyEvent.VK_O, Hold.NO_HOLD));
-		// button to hold to pick a shape
+		// button to hold to pick a shape using the mouse joint
 		this.mouse.add(new Input(MouseEvent.BUTTON1));
+		// button to hold to pick a shape and control directly
+		this.mouse.add(new Input(MouseEvent.BUTTON3));
 		// key to hold when rotating a picked shape
 		this.keyboard.add(new Input(KeyEvent.VK_Z));
 		// key to launch a bomb
@@ -546,7 +550,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		// render the label
 		this.bodyCountLabel.render(g, x, y + spacing * 3);
 		// render the value
-		AttributedString bodiesString = new AttributedString(String.valueOf(this.test.getWorld().getBodies().size()));
+		AttributedString bodiesString = new AttributedString(String.valueOf(this.test.getWorld().getBodyCount()));
 		Text bodies = new Text(bodiesString);
 		bodies.generate();
 		bodies.render(g, x + padding, y + spacing * 3);
@@ -830,9 +834,129 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		// look for the o key
 		if (this.keyboard.isPressed(KeyEvent.VK_O)) {
 			// output the current state of the objects
-			for (Body b : this.test.getWorld().getBodies()) {
-				System.out.println(b);
+			int size = this.test.world.getBodyCount();
+			for (int i = 0; i < size; i++) {
+				System.out.println(this.test.world.getBody(i));
 			}
+		}
+		
+		// look for left click press
+		if (this.mouse.isPressed(MouseEvent.BUTTON1)) {
+			// don't do anything if we have already determined that the
+			// click is in one of the shapes
+			if (this.mouseJoint == null) {
+				// get the mouse location
+				Point p = this.mouse.getRelativeLocation();
+				// convert to world coordinates
+				Vector v = this.test.screenToWorld(p.x, p.y);
+				// try to find the object that we are clicking on
+				int bSize = this.test.world.getBodyCount();
+				for (int i = 0; i < bSize; i++) {
+					Body b = this.test.world.getBody(i);
+					int cSize = b.getShapeCount();
+					// loop over the shapes in the body
+					for (int j = 0; j < cSize; j++) {
+						Convex c = b.getShape(j);
+						// see if the point is contained in it
+						if (c.contains(v, b.getTransform())) {
+							// once we find the body, create a mouse joint
+							this.mouseJoint = new MouseJoint(b, v, 4.0, 0.7, 1000.0 * b.getMass().getMass());
+							// add the joint to the world
+							this.test.world.add(this.mouseJoint);
+							// make sure the body is awake
+							b.setAsleep(false);
+							// break from the loop
+							break;
+						} else {
+							// check for line segment
+							if (c.isType(Segment.TYPE)) {
+								Segment s = (Segment) c;
+								// if you are a tenth of a meter from it then consider that
+								// selecting the segment
+								if (s.contains(v, b.getTransform(), 0.05)) {
+									// once we find the body, create a mouse joint
+									this.mouseJoint = new MouseJoint(b, v, 4.0, 0.7, 1000.0 * b.getMass().getMass());
+									// add the joint to the world
+									this.test.world.add(this.mouseJoint);
+									// make sure the body is awake
+									b.setAsleep(false);
+									// break from the loop
+									break;
+								}
+							}
+						}
+					}
+					// check if we found an object
+					if (selected != null) {
+						// if we found one then break from the loop
+						break;
+					}
+				}
+			}
+		} else if (this.mouseJoint != null) {
+			// remove the mouse joint from the world
+			this.test.world.remove(this.mouseJoint);
+			// make the local reference null
+			this.mouseJoint = null;
+		}
+		
+		// look for right click press
+		if (this.mouse.isPressed(MouseEvent.BUTTON3)) {
+			// don't do anything if we have already determined that the
+			// click is in one of the shapes
+			if (this.selected == null) {
+				// get the move location
+				Point p = this.mouse.getRelativeLocation();
+				// convert to world coordinates
+				Vector v = this.test.screenToWorld(p.x, p.y);
+				// try to find the object that we are clicking on
+				int bSize = this.test.world.getBodyCount();
+				for (int i = 0; i < bSize; i++) {
+					Body b = this.test.world.getBody(i);
+					int cSize = b.getShapeCount();
+					// loop over the shapes in the body
+					for (int j = 0; j < cSize; j++) {
+						Convex c = b.getShape(j);
+						// see if the point is contained in it
+						if (c.contains(v, b.getTransform())) {
+							// if it is then set the body as the current
+							// selected item
+							this.selected = b;
+							// control the body
+							this.test.world.control(this.selected);
+							// break from the loop
+							break;
+						} else {
+							// check for line segment
+							if (c.isType(Segment.TYPE)) {
+								Segment s = (Segment) c;
+								// if you are a tenth of a meter from it then consider that
+								// selecting the segment
+								if (s.contains(v, b.getTransform(), 0.05)) {
+									// selected item
+									this.selected = b;
+									// control the body
+									this.test.world.control(this.selected);
+									// break from the loop
+									break;
+								}
+							}
+						}
+					}
+					// check if we found an object
+					if (selected != null) {
+						// if we found one then break from the loop
+						break;
+					}
+				}
+			}
+		} else if (this.selected != null) {
+			// once the mouse button is no longer held down
+			// release the body
+			this.test.world.relinquish(this.selected);
+			// then set the selected shape and old point to null
+			this.selected = null;
+			this.vOld = null;
 		}
 		
 		// see if we should check the mouse movement
@@ -869,81 +993,27 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 			}
 			// set the new position
 			this.vOld = vNew;
-		}
-		
-		// look for left click press
-		if (mouse.isPressed(MouseEvent.BUTTON1)) {
-			// don't do anything if we have already determined that the
-			// click is in one of the shapes
-			if (this.selected == null) {
-				// get the move location
-				Point p = mouse.getRelativeLocation();
-				// convert to world coordinates
-				Vector v = this.test.screenToWorld(p.x, p.y);
-				// try to find the object that we are clicking on
-				List<Body> bodies = this.test.world.getBodies();
-				int bSize = bodies.size();
-				for (int i = 0; i < bSize; i++) {
-					Body b = bodies.get(i);
-					int cSize = b.getShapes().size();
-					// loop over the shapes in the body
-					for (int j = 0; j < cSize; j++) {
-						Convex c = b.getShapes().get(j);
-						// see if the point is contained in it
-						if (c.contains(v, b.getTransform())) {
-							// if it is then set the body as the current
-							// selected item
-							this.selected = b;
-							// control the body
-							this.mOld = this.test.world.control(this.selected);
-							// break from the loop
-							break;
-						} else {
-							// check for line segment
-							if (c.isType(Segment.TYPE)) {
-								Segment s = (Segment) c;
-								// if you are a tenth of a meter from it then consider that
-								// selecting the segment
-								if (s.contains(v, b.getTransform(), 0.05)) {
-									// selected item
-									this.selected = b;
-									// control the body
-									this.mOld = this.test.world.control(this.selected);
-									// break from the loop
-									break;
-								}
-							}
-						}
-					}
-					// check if we found an object
-					if (selected != null) {
-						// if we found one then break from the loop
-						break;
-					}
-				}
-			}
-		} else if (this.selected != null) {
-			// once the mouse button is no longer held down
-			// release the body
-			this.test.world.relinquish(this.selected, this.mOld);
-			// then set the selected shape and old point to null
-			this.selected = null;
-			this.vOld = null;
-			// set the old mass to null
-			this.mOld = null;
+		} else if (this.mouseJoint != null) {
+			// get the new location
+			Point newLoc = mouse.getRelativeLocation();
+			// convert it to world coordinates
+			Vector vNew = this.test.screenToWorld(newLoc.x, newLoc.y);
+			// set the target point for the mouse joint
+			this.mouseJoint.setTarget(vNew);
 		}
 		
 		// check for the B key
 		if (this.keyboard.isPressed(KeyEvent.VK_B)) {
 			// launch a bomb
 			Circle bombShape = new Circle(0.25);
+			Fixture bombFixture = new Fixture(bombShape);
 			Entity bomb = new Entity();
-			bomb.addShape(bombShape);
+			bomb.addFixture(bombFixture);
 			bomb.setMassFromShapes();
 			// set the elasticity
-			bomb.setE(0.3);
+			bombFixture.setRestitution(0.3);
 			// launch from the left
-			bomb.getV().set(20.0, 0.0);
+			bomb.getVelocity().set(20.0, 0.0);
 			// move the bomb 'off' screen
 			bomb.translate(-6.0, 3.0);
 			// add the bomb to the world

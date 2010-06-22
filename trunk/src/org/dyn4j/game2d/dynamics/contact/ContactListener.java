@@ -25,6 +25,7 @@
 package org.dyn4j.game2d.dynamics.contact;
 
 import org.dyn4j.game2d.dynamics.Body;
+import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.dynamics.World;
 
 /**
@@ -33,55 +34,44 @@ import org.dyn4j.game2d.dynamics.World;
  * Implement this interface and register it with the {@link World}
  * to be notified when contact events occur.
  * <p>
- * NOTE: The {@link ContactPoint}, {@link PersistedContactPoint}, and 
- * {@link SolvedContactPoint} objects passed by this listener may be
- * reused per call.
+ * {@link Body} objects can be removed from the {@link World} from any of these methods.
  * @author William Bittle
  */
 public interface ContactListener {
 	/**
+	 * Called when a two fixtures begin to overlap generating a contact point.
+	 * @param point the contact point that was added
+	 */
+	public abstract void begin(ContactPoint point);
+	
+	/**
+	 * Called when a two {@link Fixture}s begin to separate.
+	 * @param point the contact point that was removed
+	 */
+	public abstract void end(ContactPoint point);
+	
+	/**
+	 * Called when two {@link Fixture}s remain in contact.
+	 * @param point the persisted contact point
+	 */
+	public abstract void persist(PersistedContactPoint point);
+	
+	/**
 	 * Called when a contact has been sensed between two {@link Body}s,
 	 * where one or both {@link Body}s are sensors.
-	 * @param p the contact point that was sensed
+	 * @param point the contact point that was sensed
 	 */
-	public abstract void sensed(ContactPoint p);
+	public abstract void sensed(SensedContactPoint point);
 	
 	/**
-	 * Called when a new contact has been added.
-	 * <p>
-	 * This can happen when two bodies begin to penetrate and when two already
-	 * penetrating bodies move far enough to not allow contact persistence.
-	 * @param p the contact point that was added
+	 * Called before the contact constraints are solved.
+	 * @param point the contact point
 	 */
-	public abstract void added(ContactPoint p);
+	public abstract void preSolve(ContactPoint point);
 	
 	/**
-	 * Called when a contact has been removed.
-	 * <p>
-	 * A contact is removed if it does not get persisted.  This can happen when
-	 * two bodies separate or move far enough while in contact to not allow 
-	 * contact persistence.
-	 * @param p the contact point that was removed
+	 * Called after a contact has been solved.
+	 * @param point the contact point that was solved
 	 */
-	public abstract void removed(ContactPoint p);
-	
-	/**
-	 * Called when a contact has been persisted.
-	 * <p>
-	 * A contact is persisted when the bodies penetrating have not moved a
-	 * significant amount.  Persisting the contact will use the previous
-	 * contact's accumulated impulses to warm start the {@link ContactConstraintSolver}.
-	 * <p>
-	 * The new contact point, normal, and depth are used in the next solving step.
-	 * @param p the contact point that was persisted
-	 */
-	public abstract void persist(PersistedContactPoint p);
-	
-	/**
-	 * Called when a contact has been solved.
-	 * <p>
-	 * A solved contact will contain the normal and tangential accumulated impulses.
-	 * @param p the contact point that was solved
-	 */
-	public abstract void solved(SolvedContactPoint p);
+	public abstract void postSolve(SolvedContactPoint point);
 }

@@ -39,7 +39,7 @@ public class DestructionAdapter implements DestructionListener {
 	 * @see org.dyn4j.game2d.dynamics.DestructionListener#destroyed(org.dyn4j.game2d.dynamics.contact.ContactPoint)
 	 */
 	@Override
-	public void destroyed(ContactPoint c) {}
+	public void destroyed(ContactPoint contactPoint) {}
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.dynamics.DestructionListener#destroyed(org.dyn4j.game2d.dynamics.joint.Joint)

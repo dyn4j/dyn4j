@@ -33,50 +33,64 @@ import java.util.Map;
 import org.dyn4j.game2d.collision.manifold.ManifoldPointId;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.Settings;
-import org.dyn4j.game2d.dynamics.World;
 
 /**
  * Maintains {@link ContactConstraint}s between {@link Body}s.
  * <p>
- * This class performs the {@link ContactConstraint} warm starting.
+ * This class performs the {@link ContactConstraint} warm starting and manages contact
+ * listening.
  * @author William Bittle
  */
 public class ContactManager {
 	/** Map for fast look up of  {@link ContactConstraint}s */
-	protected Map<ContactConstraintId, ContactConstraint> map = null;
+	protected Map<ContactConstraintId, ContactConstraint> map;
 
 	/** The current list of contact constraints */
-	protected List<ContactConstraint> list = null;
+	protected List<ContactConstraint> list;
+	
+	/** The list of sensed contacts for notification */
+	protected List<SensedContactPoint> sensed;
 	
 	/** The contact listener */
-	protected ContactListener listener = null;
+	protected ContactListener listener;
 	
 	/**
 	 * Full constructor.
 	 * @param listener the {@link ContactListener}
 	 */
 	public ContactManager(ContactListener listener) {
+		if (listener == null) throw new NullPointerException("The contact listener cannot be null.");
+		this.map = new HashMap<ContactConstraintId, ContactConstraint>();
 		this.list = new ArrayList<ContactConstraint>();
+		this.sensed = new ArrayList<SensedContactPoint>();
 		this.listener = listener;
 	}
 
 	/**
 	 * Adds a {@link ContactConstraint} to the contact manager.
-	 * @param cc the {@link ContactConstraint}
+	 * @param contactConstraint the {@link ContactConstraint}
 	 */
-	public void add(ContactConstraint cc) {
-		this.list.add(cc);
+	public void add(ContactConstraint contactConstraint) {
+		this.list.add(contactConstraint);
 	}
 	
 	/**
 	 * Removes a {@link ContactConstraint} from the contact manager.
 	 * <p>
 	 * This method does not notify the {@link ContactListener}.
-	 * @param cc the {@link ContactConstraint}
+	 * @param contactConstraint the {@link ContactConstraint}
 	 */
-	public void remove(ContactConstraint cc) {
+	public void remove(ContactConstraint contactConstraint) {
 		// remove the contact from the cache
-		this.map.remove(cc.id);
+		this.map.remove(contactConstraint.id);
+	}
+	
+	/**
+	 * Adds a sensed contact to the contact manager.
+	 * @param sensedContact the sensed contact
+	 */
+	public void add(SensedContactPoint sensedContact) {
+		this.sensed.add(sensedContact);
 	}
 	
 	/**
@@ -84,6 +98,7 @@ public class ContactManager {
 	 */
 	public void clear() {
 		this.list.clear();
+		this.sensed.clear();
 	}
 	
 	/**
@@ -100,84 +115,71 @@ public class ContactManager {
 	 * <p>
 	 * This method will notify using the {@link ContactListener} of any added, persisted, or
 	 * removed {@link Contact}s.
-	 * <p>
-	 * Use the {@link #solved()} method after solving the {@link ContactConstraint}s to
-	 * notify using the {@link ContactListener} of the solved {@link Contact}s.
 	 */
 	public void warm() {
 		// check the given list
-		if (this.list == null || this.list.isEmpty()) {
+		if (this.list.isEmpty()) {
 			return;
 		}
 
 		// get the warm start distance from the settings
-		double warmStartDistance = Settings.getInstance().getWarmStartDistance();
-		// square it for comparison later
-		warmStartDistance *= warmStartDistance;
+		double warmStartDistanceSquared = Settings.getInstance().getWarmStartDistanceSquared();
 		
 		// create a new map for the new contacts constraints
 		Map<ContactConstraintId, ContactConstraint> newMap = new HashMap<ContactConstraintId, ContactConstraint>(this.list.size() * 2);
 		
-		// create a contact point and a persisted contact point to be used by the listener
-		ContactPoint cp = new ContactPoint();
-		PersistedContactPoint pcp = new PersistedContactPoint();
-		
 		// loop over the new contact constraints
+		// and attempt to persist contacts
 		int size = this.list.size();
 		for (int i = 0; i < size; i++) {
 			// get the new contact constraint
-			ContactConstraint ncc = this.list.get(i);
+			ContactConstraint newContactConstraint = this.list.get(i);
 			// define the old contact constraint
-			ContactConstraint occ = null;
+			ContactConstraint oldContactConstraint = null;
 			
+			// get the old contact constraint
 			// doing a remove here will ensure that the remaining contact
 			// constraints in the map will be contacts that need to be notified of
 			// removal
-			if (this.map != null) {
-				// get the old contact constraint
-				occ = this.map.remove(ncc.id);
-			}
-			// set the body, shapes, and normal
-			cp.normal = ncc.normal;
-			cp.body1 = ncc.getBody1();
-			cp.body2 = ncc.getBody2();
-			cp.convex1 = ncc.c1;
-			cp.convex2 = ncc.c2;
+			oldContactConstraint = this.map.remove(newContactConstraint.id);
+			
 			// check if the contact constraint exists
-			if (occ != null) {
+			if (oldContactConstraint != null) {
 				// create an array for removed contacts
-				boolean[] persisted = new boolean[occ.contacts.length];
+				boolean[] persisted = new boolean[oldContactConstraint.contacts.length];
 				// warm start the constraint
-				int nsize = ncc.contacts.length;
+				int nsize = newContactConstraint.contacts.length;
 				for (int j = 0; j < nsize; j++) {
 					// get the new contact
-					Contact n = ncc.contacts[j];
+					Contact newContact = newContactConstraint.contacts[j];
 					// loop over the old contacts
-					int osize = occ.contacts.length;
+					int osize = oldContactConstraint.contacts.length;
 					boolean found = false;
 					for (int k = 0; k < osize; k++) {
 						// get the old contact
-						Contact o = occ.contacts[k];
+						Contact oldContact = oldContactConstraint.contacts[k];
 						// check if the id type is distance, if so perform a distance check using the warm start distance
 						// else just compare the ids
-						if ((n.id == ManifoldPointId.DISTANCE && n.p.distanceSquared(o.p) <= warmStartDistance) || n.id.equals(o.id)) {
+						if ((newContact.id == ManifoldPointId.DISTANCE && newContact.p.distanceSquared(oldContact.p) <= warmStartDistanceSquared) || newContact.id.equals(oldContact.id)) {
 							// warm start by setting the new contact constraint
 							// accumulated impulses to the old contact constraint
-							n.jn = o.jn;
-							n.jt = o.jt;
-							// set the contact point values
-							pcp.normal = ncc.normal;
-							pcp.point = n.p;
-							pcp.depth = n.depth;
-							pcp.oldNormal = occ.normal;
-							pcp.oldPoint = o.p;
-							pcp.oldDepth = o.depth;
-							pcp.body1 = ncc.getBody1();
-							pcp.body2 = ncc.getBody2();
-							pcp.convex1 = ncc.c1;
-							pcp.convex2 = ncc.c2;
-							// notify of persisted contact
-							this.listener.persist(pcp);
+							newContact.jn = oldContact.jn;
+							newContact.jt = oldContact.jt;
+							// notify of a persisted contact
+							PersistedContactPoint point = new PersistedContactPoint();
+							// set the values for the new point
+							point.normal = newContactConstraint.normal;
+							point.point = newContact.p;
+							point.depth = newContact.depth;
+							point.body1 = newContactConstraint.getBody1();
+							point.body2 = newContactConstraint.getBody2();
+							point.fixture1 = newContactConstraint.getFixture1();
+							point.fixture2 = newContactConstraint.getFixture2();
+							// set the values for the old point
+							point.oldNormal = oldContactConstraint.normal;
+							point.oldPoint = oldContact.p;
+							point.oldDepth = oldContact.depth;
+							this.listener.persist(point);
 							// flag that the contact was persisted
 							persisted[k] = true;
 							found = true;
@@ -186,66 +188,87 @@ public class ContactManager {
 					}
 					// check for persistence
 					if (!found) {
-						// set the contact point values
-						cp.point = n.p;
-						cp.depth = n.depth;
-						// notify of new contact
-						this.listener.added(cp);
+						// notify of new contact (begin of contact)
+						ContactPoint point = new ContactPoint();
+						// set the values
+						point.normal = newContactConstraint.normal;
+						point.point = newContact.p;
+						point.depth = newContact.depth;
+						point.body1 = newContactConstraint.getBody1();
+						point.body2 = newContactConstraint.getBody2();
+						point.fixture1 = newContactConstraint.getFixture1();
+						point.fixture2 = newContactConstraint.getFixture2();
+						this.listener.begin(point);
 					}
 				}
+				
 				// check for removed contacts
+				// if the contact was not persisted then it was removed
 				int rsize = persisted.length;
 				for (int j = 0; j < rsize; j++) {
 					// check the boolean array
 					if (!persisted[j]) {
 						// get the contact
-						Contact c = occ.contacts[j];
-						// set the contact point values
-						cp.point = c.p;
-						cp.depth = c.depth;
-						// if the contact was not persisted then it was removed
-						this.listener.removed(cp);
+						Contact contact = oldContactConstraint.contacts[j];
+						// notify of new contact (begin of contact)
+						ContactPoint point = new ContactPoint();
+						// set the values
+						point.normal = newContactConstraint.normal;
+						point.point = contact.p;
+						point.depth = contact.depth;
+						point.body1 = newContactConstraint.getBody1();
+						point.body2 = newContactConstraint.getBody2();
+						point.fixture1 = newContactConstraint.getFixture1();
+						point.fixture2 = newContactConstraint.getFixture2();
+						this.listener.end(point);
 					}
 				}
 			} else {
 				// notify new contacts
-				int nsize = ncc.contacts.length;
+				// if the old contact point was not found notify of the new contact
+				int nsize = newContactConstraint.contacts.length;
 				for (int j = 0; j < nsize; j++) {
 					// get the contact
-					Contact c = ncc.contacts[j];
-					// set the contact point values
-					cp.point = c.p;
-					cp.depth = c.depth;
-					// if the old contact point was not found notify of the new contact
-					this.listener.added(cp);
+					Contact contact = newContactConstraint.contacts[j];
+					// notify of new contact (begin of contact)
+					ContactPoint point = new ContactPoint();
+					// set the values
+					point.normal = newContactConstraint.normal;
+					point.point = contact.p;
+					point.depth = contact.depth;
+					point.body1 = newContactConstraint.getBody1();
+					point.body2 = newContactConstraint.getBody2();
+					point.fixture1 = newContactConstraint.getFixture1();
+					point.fixture2 = newContactConstraint.getFixture2();
+					this.listener.begin(point);
 				}
 			}
 			// add the contact constraint to the map
-			newMap.put(ncc.id, ncc);
+			newMap.put(newContactConstraint.id, newContactConstraint);
 		}
 		
 		// check the map and its size
-		if (this.map != null && !this.map.isEmpty()) {
+		if (!this.map.isEmpty()) {
 			// now loop over the remaining contacts in the map to notify of any removed contacts
 			Iterator<ContactConstraint> icc = this.map.values().iterator();
 			while (icc.hasNext()) {
-				ContactConstraint cc = icc.next();
-				// set the body, shapes, and normal
-				cp.normal = cc.normal;
-				cp.body1 = cc.getBody1();
-				cp.body2 = cc.getBody2();
-				cp.convex1 = cc.c1;
-				cp.convex2 = cc.c2;
+				ContactConstraint contactConstraint = icc.next();
 				// loop over the contact points
-				int rsize = cc.contacts.length;
+				int rsize = contactConstraint.contacts.length;
 				for (int i = 0; i < rsize; i++) {
 					// get the contact
-					Contact c = cc.contacts[i];
+					Contact contact = contactConstraint.contacts[i];
 					// set the contact point values
-					cp.point = c.p;
-					cp.depth = c.depth;
+					ContactPoint point = new ContactPoint();
+					point.normal = contactConstraint.normal;
+					point.point = contact.p;
+					point.depth = contact.depth;
+					point.body1 = contactConstraint.getBody1();
+					point.body2 = contactConstraint.getBody2();
+					point.fixture1 = contactConstraint.getFixture1();
+					point.fixture2 = contactConstraint.getFixture2();
 					// notify via the listener
-					this.listener.removed(cp);
+					this.listener.end(point);
 				}
 			}
 		}
@@ -254,41 +277,73 @@ public class ContactManager {
 	}
 	
 	/**
-	 * Calls the contact listener for all {@link ContactConstraint}s.
+	 * Called before the contact constraints are solved.
 	 * <p>
-	 * This method should be called after the {@link ContactConstraint}s have been solved.
+	 * This method notifies of both sensed and normal contacts.
 	 * <p>
-	 * This method must be called before the next {@link World} step.
+	 * Sensed contacts are not solved.
 	 */
-	public void solved() {
-		// create the solved contact point
-		SolvedContactPoint scp = new SolvedContactPoint();
+	public void preSolveNotify() {
 		// loop through the list of contacts that were solved
-		if (this.list != null && !this.list.isEmpty()) {
-			int size = this.list.size();
-			for (int i = 0; i < size; i++) {
-				// get the contact constraint
-				ContactConstraint cc = this.list.get(i);
-				// set the body, shapes, and normal
-				scp.normal = cc.normal;
-				scp.body1 = cc.getBody1();
-				scp.body2 = cc.getBody2();
-				scp.convex1 = cc.c1;
-				scp.convex2 = cc.c2;
-				// loop over the contacts
-				int rsize = cc.contacts.length;
-				for (int j = 0; j < rsize; j++) {
-					// get the contact
-					Contact c = cc.contacts[j];
-					// set the contact point values
-					scp.point = c.p;
-					scp.depth = c.depth;
-					scp.normalImpulse = c.jn;
-					scp.tangentialImpulse = c.jt;
-					scp.resting = (c.vb == 0.0);
-					// notify of them being solved
-					this.listener.solved(scp);
-				}
+		int size = this.list.size();
+		for (int i = 0; i < size; i++) {
+			// get the contact constraint
+			ContactConstraint contactConstraint = this.list.get(i);
+			// loop over the contacts
+			int rsize = contactConstraint.contacts.length;
+			for (int j = 0; j < rsize; j++) {
+				// get the contact
+				Contact contact = contactConstraint.contacts[j];
+				// set the contact point values
+				ContactPoint point = new ContactPoint();
+				point.normal = contactConstraint.normal;
+				point.point = contact.p;
+				point.depth = contact.depth;
+				point.body1 = contactConstraint.getBody1();
+				point.body2 = contactConstraint.getBody2();
+				point.fixture1 = contactConstraint.getFixture1();
+				point.fixture2 = contactConstraint.getFixture2();
+				// notify of them being solved
+				this.listener.preSolve(point);
+			}
+		}
+		
+		// notify of sensed contacts
+		size = this.sensed.size();
+		for (int i = 0; i < size; i++) {
+			// notify of the sensed contact
+			this.listener.sensed(this.sensed.get(i));
+		}
+	}
+	
+	/**
+	 * Called after the contact constraints have been solved.
+	 */
+	public void postSolveNotify() {
+		// loop through the list of contacts that were solved
+		int size = this.list.size();
+		for (int i = 0; i < size; i++) {
+			// get the contact constraint
+			ContactConstraint contactConstraint = this.list.get(i);
+			// loop over the contacts
+			int rsize = contactConstraint.contacts.length;
+			for (int j = 0; j < rsize; j++) {
+				// get the contact
+				Contact contact = contactConstraint.contacts[j];
+				// set the contact point values
+				SolvedContactPoint point = new SolvedContactPoint();
+				point.normal = contactConstraint.normal;
+				point.point = contact.p;
+				point.depth = contact.depth;
+				point.body1 = contactConstraint.getBody1();
+				point.body2 = contactConstraint.getBody2();
+				point.fixture1 = contactConstraint.getFixture1();
+				point.fixture2 = contactConstraint.getFixture2();
+				// set the solved attributes
+				point.normalImpulse = contact.jn;
+				point.tangentialImpulse = contact.jt;
+				// notify of them being solved
+				this.listener.postSolve(point);
 			}
 		}
 	}
@@ -298,6 +353,7 @@ public class ContactManager {
 	 * @param listener the {@link ContactListener}
 	 */
 	public void setContactListener(ContactListener listener) {
+		if (listener == null) throw new NullPointerException("The contact listener cannot be null.");
 		this.listener = listener;
 	}
 	

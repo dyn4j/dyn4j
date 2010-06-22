@@ -70,9 +70,6 @@ public class Epa implements MinkowskiPenetrationSolver {
 	/** The {@link Epa} distance epsilon in meters */
 	protected double epaDistanceEpsilon = Epa.DEFAULT_EPA_DISTANCE_EPSILON;
 	
-	/** The {@link Epa} distance epsilon squared in meters<sup>2</sup> */
-	protected double epaDistanceEpsilonSquared = Epa.DEFAULT_EPA_DISTANCE_EPSILON * Epa.DEFAULT_EPA_DISTANCE_EPSILON;
-	
 	/**
 	 * Represents an {@link Edge} of the simplex.
 	 * @author William Bittle
@@ -106,11 +103,11 @@ public class Epa implements MinkowskiPenetrationSolver {
 	 * Returns the penetration in the given penetration object given the simplex
 	 * created by {@link Gjk} and the {@link MinkowskiSum}.
 	 * @param simplex the simplex
-	 * @param ms the {@link MinkowskiSum}
-	 * @param p the {@link Penetration} object to fill
+	 * @param minkowskiSum the {@link MinkowskiSum}
+	 * @param penetration the {@link Penetration} object to fill
 	 */
 	@Override
-	public void getPenetration(List<Vector> simplex, MinkowskiSum ms, Penetration p) {
+	public void getPenetration(List<Vector> simplex, MinkowskiSum minkowskiSum, Penetration penetration) {
 		// this method is called from the GJK detect method and therefore we can assume
 		// that the simplex has 3 points
 		
@@ -127,7 +124,7 @@ public class Epa implements MinkowskiPenetrationSolver {
 			// get the closest edge to the origin
 			edge = this.findClosestEdge(simplex, winding);
 			// get a new support point in the direction of the edge normal
-			point = ms.support(edge.n);
+			point = minkowskiSum.support(edge.n);
 			
 			// see if the new point is significantly past the edge
 			double projection = point.dot(edge.n);
@@ -137,8 +134,8 @@ public class Epa implements MinkowskiPenetrationSolver {
 				// return n as the direction and the projection
 				// as the depth since this is the closest found
 				// edge and it cannot increase any more
-				p.normal = edge.n;
-				p.depth = projection;
+				penetration.normal = edge.n;
+				penetration.depth = projection;
 				return;
 			}
 			
@@ -150,8 +147,8 @@ public class Epa implements MinkowskiPenetrationSolver {
 		// if we made it here then we know that we hit the maximum number of iterations
 		// this is really a catch all termination case
 		// set the normal and depth equal to the last edge we created
-		p.normal = edge.n;
-		p.depth = point.dot(edge.n);
+		penetration.normal = edge.n;
+		penetration.depth = point.dot(edge.n);
 	}
 	
 	/**
@@ -271,6 +268,5 @@ public class Epa implements MinkowskiPenetrationSolver {
 	public void setEpaDistanceEpsilon(double epaDistanceEpsilon) {
 		if (epaDistanceEpsilon <= 0) throw new IllegalArgumentException("The EPA distance epsilon must be larger than zero.");
 		this.epaDistanceEpsilon = epaDistanceEpsilon;
-		this.epaDistanceEpsilonSquared = epaDistanceEpsilon * epaDistanceEpsilon;
 	}
 }

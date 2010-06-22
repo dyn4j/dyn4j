@@ -50,39 +50,39 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 	 * @see org.dyn4j.game2d.collision.manifold.ManifoldSolver#getManifold(org.dyn4j.game2d.collision.narrowphase.Penetration, org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.geometry.Transform, org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.geometry.Transform, org.dyn4j.game2d.collision.manifold.Manifold)
 	 */
 	@Override
-	public boolean getManifold(Penetration p, Convex c1, Transform t1, Convex c2, Transform t2, Manifold m) {
+	public boolean getManifold(Penetration penetration, Convex convex1, Transform transform1, Convex convex2, Transform transform2, Manifold manifold) {
 		// make sure the manifold passed in is cleared
-		m.clear();
+		manifold.clear();
 		
 		// get the penetration normal
-		Vector n = p.getNormal();
+		Vector n = penetration.getNormal();
 		
 		// get the reference feature for the first convex shape
-		Feature f1 = c1.getFarthestFeature(n, t1);
+		Feature feature1 = convex1.getFarthestFeature(n, transform1);
 		// check for vertex
-		if (f1.isVertex()) {
+		if (feature1.isVertex()) {
 			// if the maximum
-			Vertex vertex = (Vertex) f1;
-			ManifoldPoint mp = new ManifoldPoint(ManifoldPointId.DISTANCE, vertex.getPoint(), p.getDepth());
-			m.points.add(mp);
-			m.normal = n.negate();
+			Vertex vertex = (Vertex) feature1;
+			ManifoldPoint mp = new ManifoldPoint(ManifoldPointId.DISTANCE, vertex.getPoint(), penetration.getDepth());
+			manifold.points.add(mp);
+			manifold.normal = n.negate();
 			return true;
 		}
 		
 		// get the reference feature for the second convex shape
-		Feature f2 = c2.getFarthestFeature(n.getNegative(), t2);
+		Feature feature2 = convex2.getFarthestFeature(n.getNegative(), transform2);
 		// check for vertex
-		if (f2.isVertex()) {
-			Vertex vertex = (Vertex) f2;
-			ManifoldPoint mp = new ManifoldPoint(ManifoldPointId.DISTANCE, vertex.getPoint(), p.getDepth());
-			m.points.add(mp);
-			m.normal = n.negate();
+		if (feature2.isVertex()) {
+			Vertex vertex = (Vertex) feature2;
+			ManifoldPoint mp = new ManifoldPoint(ManifoldPointId.DISTANCE, vertex.getPoint(), penetration.getDepth());
+			manifold.points.add(mp);
+			manifold.normal = n.negate();
 			return true;
 		}
 		
 		// both features are edge features
-		Edge reference = (Edge) f1;
-		Edge incident = (Edge) f2;
+		Edge reference = (Edge) feature1;
+		Edge incident = (Edge) feature2;
 		
 		// choose the reference and incident edges
 //		boolean flipped = false;
@@ -100,21 +100,17 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 //			incident = fe2;
 //		}
 		
-		// get the reference and incident edge vertices
-		Vertex[] refVertices = reference.getVertices();
-		Vertex[] incVertices = incident.getVertices();
-		
 		// create the reference edge vector
 		Vector refev = reference.getEdge();
 		// normalize it
 		refev.normalize();
 		
 		// compute the offestes of the reference edge points along the reference edge
-		double offset1 = -refev.dot(refVertices[0].getPoint());
-		double offset2 = refev.dot(refVertices[1].getPoint());
+		double offset1 = -refev.dot(reference.getVertex1().getPoint());
+		double offset2 = refev.dot(reference.getVertex2().getPoint());
 		
 		// clip the incident edge by the reference edge's left edge
-		List<Vertex> clip1 = this.clip(incVertices[0], incVertices[1], refev.getNegative(), offset1);
+		List<Vertex> clip1 = this.clip(incident.getVertex1(), incident.getVertex2(), refev.getNegative(), offset1);
 		// check the number of points
 		if (clip1.size() < 2) {
 			return false;
@@ -135,7 +131,7 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 		
 		// set the normal
 //		m.normal = flipped ? frontNormal.getNegative() : frontNormal;
-		m.normal = frontNormal;
+		manifold.normal = frontNormal;
 		
 		// test if the clip points are behind the reference edge
 		for (int i = 0; i < clip2.size(); i++) {
@@ -149,7 +145,7 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 				// create the manifold point
 				ManifoldPoint mp = new ManifoldPoint(id, point, depth);
 				// add it to the list
-				m.points.add(mp);
+				manifold.points.add(mp);
 			}
 		}
 		// return the clipped points

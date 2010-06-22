@@ -24,6 +24,7 @@
  */
 package org.dyn4j.game2d.collision;
 
+import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Transformable;
 import org.dyn4j.game2d.geometry.Vector;
@@ -98,6 +99,9 @@ public interface Bounds extends Transformable {
 	
 	/**
 	 * Returns true if the given {@link Collidable} is outside the bounds.
+	 * <p>
+	 * If the {@link Collidable} contains zero {@link Fixture}s then 
+	 * {@link Collidable} is considered to be outside the bounds.
 	 * @param collidable the {@link Collidable} to test
 	 * @return boolean true if outside the bounds
 	 */

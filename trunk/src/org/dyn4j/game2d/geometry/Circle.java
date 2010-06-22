@@ -24,6 +24,8 @@
  */
 package org.dyn4j.game2d.geometry;
 
+
+
 /**
  * Represents a {@link Circle}.
  * <p>
@@ -32,7 +34,7 @@ package org.dyn4j.game2d.geometry;
  */
 public class Circle extends AbstractShape implements Convex, Shape, Transformable {
 	/** The circle {@link Shape.Type} */
-	public static final Shape.Type TYPE = new Shape.Type();
+	public static final Shape.Type TYPE = new Shape.Type("Circle");
 	
 	/** The radius of the {@link Circle} */
 	protected double radius;
@@ -43,7 +45,7 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 	 * @throws IllegalArgumentException if the given radius is less than or equal to zero
 	 */
 	public Circle(double radius) {
-		if (radius <= 0.0) throw new IllegalArgumentException();
+		if (radius <= 0.0) throw new IllegalArgumentException("The radius must be greater than zero.");
 		this.center = new Vector();
 		this.radius = radius;
 	}
@@ -158,23 +160,23 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 	
 	/**
 	 * Creates a {@link Mass} object using the geometric properties of
-	 * this {@link Circle} and the set density.
+	 * this {@link Circle} and the given density.
 	 * <pre>
 	 * m = d * &pi; * r<sup>2</sup>
 	 * I = m * r<sup>2</sup> / 2
 	 * </pre>
+	 * @param density the density in kg/m<sup>2</sup>
 	 * @return {@link Mass} the {@link Mass} of this {@link Circle}
 	 */
 	@Override
-	public Mass createMass() {
+	public Mass createMass(double density) {
 		// get the radius and density
-		double r = this.radius;
-		double d = this.density;
+		double radius = this.radius;
 		// compute the mass
-		double m = d * Math.PI * r * r;
+		double mass = density * Math.PI * radius * radius;
 		// compute the inertia tensor
-		double I = m * r * r / 2.0;
+		double inertia = mass * radius * radius / 2.0;
 		// use the center supplied to the circle
-		return new Mass(this.center.copy(), m, I);
+		return Mass.create(this.center, mass, inertia);
 	}
 }

@@ -259,8 +259,8 @@ public class ContactConstraintSolver {
 				contact.vb = 0.0;
 				
 				// find the relative velocity
-				Vector lv1 = r1.cross(b1.getAv()).add(b1.getV());
-				Vector lv2 = r2.cross(b2.getAv()).add(b2.getV());
+				Vector lv1 = r1.cross(b1.getAngularVelocity()).add(b1.getVelocity());
+				Vector lv2 = r2.cross(b2.getAngularVelocity()).add(b2.getVelocity());
 				Vector rv = lv1.subtract(lv2);
 				
 				// project the relative velocity onto the penetration normal
@@ -268,7 +268,7 @@ public class ContactConstraintSolver {
 				// if its negative then the bodies are moving away from one another
 				if (rvn < -restitutionVelocity) {
 					// use the coefficient of elasticity
-					contact.vb += -contactConstraint.e * rvn; 
+					contact.vb += -contactConstraint.restitution * rvn; 
 				}
 			}
 		}
@@ -312,10 +312,10 @@ public class ContactConstraintSolver {
 				// apply accumulated impulses to warm start the solver
 				Vector J = N.product(contact.jn);
 				J.add(T.product(contact.jt));
-				b1.getV().add(J.product(invM1));
-				b1.setAv(b1.getAv() + invI1 * contact.r1.cross(J));
-				b2.getV().subtract(J.product(invM2));
-				b2.setAv(b2.getAv() - invI2 * contact.r2.cross(J));
+				b1.getVelocity().add(J.product(invM1));
+				b1.setAngularVelocity(b1.getAngularVelocity() + invI1 * contact.r1.cross(J));
+				b2.getVelocity().subtract(J.product(invM2));
+				b2.setAngularVelocity(b2.getAngularVelocity() - invI2 * contact.r2.cross(J));
 			}
 		}
 	}
@@ -356,8 +356,8 @@ public class ContactConstraintSolver {
 				Vector r2 = contact.r2;
 				
 				// get the relative velocity
-				Vector lv1 = r1.cross(b1.getAv()).add(b1.getV());
-				Vector lv2 = r2.cross(b2.getAv()).add(b2.getV());
+				Vector lv1 = r1.cross(b1.getAngularVelocity()).add(b1.getVelocity());
+				Vector lv2 = r2.cross(b2.getAngularVelocity()).add(b2.getVelocity());
 				Vector rv = lv1.subtract(lv2);
 				
 				// project the relative velocity onto the penetration normal
@@ -373,10 +373,10 @@ public class ContactConstraintSolver {
 				
 				// only update the bodies after processing all the contacts
 				Vector J = N.product(j);
-				b1.getV().add(J.product(invM1));
-				b1.setAv(b1.getAv() + invI1 * r1.cross(J));
-				b2.getV().subtract(J.product(invM2));
-				b2.setAv(b2.getAv() - invI2 * r2.cross(J));
+				b1.getVelocity().add(J.product(invM1));
+				b1.setAngularVelocity(b1.getAngularVelocity() + invI1 * r1.cross(J));
+				b2.getVelocity().subtract(J.product(invM2));
+				b2.setAngularVelocity(b2.getAngularVelocity() - invI2 * r2.cross(J));
 			}
 			
 			// evaluate friction impulse
@@ -389,8 +389,8 @@ public class ContactConstraintSolver {
 				Vector r2 = contact.r2;
 				
 				// get the relative velocity
-				Vector lv1 = r1.cross(b1.getAv()).add(b1.getV());
-				Vector lv2 = r2.cross(b2.getAv()).add(b2.getV());
+				Vector lv1 = r1.cross(b1.getAngularVelocity()).add(b1.getVelocity());
+				Vector lv2 = r2.cross(b2.getAngularVelocity()).add(b2.getVelocity());
 				Vector rv = lv1.subtract(lv2);
 				
 				// project the relative velocity onto the tangent normal
@@ -399,7 +399,7 @@ public class ContactConstraintSolver {
 				double jt = contact.massT * (-rvt);
 				
 				// apply the coefficient of friction
-				double maxJt = contactConstraint.mu * contact.jn;
+				double maxJt = contactConstraint.friction * contact.jn;
 				// clamp the accumulated tangential impulse
 				double Jt0 = contact.jt;
 				contact.jt = Math.max(-maxJt, Math.min(Jt0 + jt, maxJt));
@@ -407,10 +407,10 @@ public class ContactConstraintSolver {
 				
 				// apply to the bodies immediately
 				Vector J = T.product(jt);
-				b1.getV().add(J.product(invM1));
-				b1.setAv(b1.getAv() + invI1 * r1.cross(J));
-				b2.getV().subtract(J.product(invM2));
-				b2.setAv(b2.getAv() - invI2 * r2.cross(J));
+				b1.getVelocity().add(J.product(invM1));
+				b1.setAngularVelocity(b1.getAngularVelocity() + invI1 * r1.cross(J));
+				b2.getVelocity().subtract(J.product(invM2));
+				b2.setAngularVelocity(b2.getAngularVelocity() - invI2 * r2.cross(J));
 			}
 		}
 	}

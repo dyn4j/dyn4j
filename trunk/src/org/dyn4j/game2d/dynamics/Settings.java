@@ -37,11 +37,11 @@ public class Settings {
 	/** The default step frequency of the dynamics engine; in seconds */
 	public static final double DEFAULT_STEP_FREQUENCY = 1.0 / 60.0;
 	
-	/** The default maximum velocity a {@link Body} can have; in meters/second */
-	public static final double DEFAULT_MAX_VELOCITY = 200.0;
+	/** The default maximum translation a {@link Body} can have in one time step; in meters */
+	public static final double DEFAULT_MAX_TRANSLATION = 2.0;
 	
-	/** The default maximum angular velocity a {@link Body} can have; in radians/second */
-	public static final double DEFAULT_MAX_ANGULAR_VELOCITY = Math.toRadians(250.0);
+	/** The default maximum rotation a {@link Body} can have in one time step; in radians */
+	public static final double DEFAULT_MAX_ROTATION = 0.5 * Math.PI;
 	
 	/** The default maximum velocity for a {@link Body} to go to sleep; in meters/second */
 	public static final double DEFAULT_SLEEP_VELOCITY = 0.01;
@@ -52,8 +52,8 @@ public class Settings {
 	/** The default required time a {@link Body} must maintain small motion so that its put to sleep; in seconds */
 	public static final double DEFAULT_SLEEP_TIME = 0.5;
 
-	/** The default number of SI solver iterations */
-	public static final int DEFAULT_SI_SOLVER_ITERATIONS = 10;
+	/** The default number of solver iterations */
+	public static final int DEFAULT_SOLVER_ITERATIONS = 10;
 
 	/** The default warm starting distance; in meters<sup>2</sup> */
 	public static final double DEFAULT_WARM_START_DISTANCE = 1.0e-2;
@@ -64,8 +64,14 @@ public class Settings {
 	/** The default linear tolerance; in meters */
 	public static final double DEFAULT_LINEAR_TOLERANCE = 0.005;
 
+	/** The default angular tolerance; in radians */
+	public static final double DEFAULT_ANGULAR_TOLERANCE = Math.toRadians(2.0);
+	
 	/** The default maximum linear correction; in meters */
 	public static final double DEFAULT_MAX_LINEAR_CORRECTION = 0.2;
+	
+	/** The default maximum angular correction; in radians */
+	public static final double DEFAULT_MAX_ANGULAR_CORRECTION = Math.toRadians(8.0);
 	
 	/** The default baumgarte */
 	public static final double DEFAULT_BAUMGARTE = 0.2;
@@ -73,38 +79,77 @@ public class Settings {
 	/** The step frequency of the dynamics engine */
 	private double stepFequency = Settings.DEFAULT_STEP_FREQUENCY;
 	
-	/** The maximum velocity a {@link Body} can have */
-	private double maxVelocity = Settings.DEFAULT_MAX_VELOCITY;
+	/** The maximum translation a {@link Body} can have in one time step */
+	private double maxTranslation = Settings.DEFAULT_MAX_TRANSLATION;
 	
-	/** The maximum angular velocity a {@link Body} can have */
-	private double maxAngularVelocity = Settings.DEFAULT_MAX_ANGULAR_VELOCITY;
+	/** The squared value of {@link #maxTranslation} */
+	private double maxTranslationSquared = Settings.DEFAULT_MAX_TRANSLATION * Settings.DEFAULT_MAX_TRANSLATION;
+	
+	/** The maximum rotation a {@link Body} can have in one time step */
+	private double maxRotation = Settings.DEFAULT_MAX_ROTATION;
 
+	/** The squared value of {@link #maxRotation} */
+	private double maxRotationSquared = Settings.DEFAULT_MAX_ROTATION * Settings.DEFAULT_MAX_ROTATION;
+	
 	/** Whether on an engine level {@link Body}s can sleep */
 	private boolean sleep = true;
 	
 	/** The maximum velocity before a {@link Body} is considered to sleep */
 	private double sleepVelocity = Settings.DEFAULT_SLEEP_VELOCITY;
 	
+	/** The squared value of {@link #sleepVelocity} */
+	private double sleepVelocitySquared = Settings.DEFAULT_SLEEP_VELOCITY * Settings.DEFAULT_SLEEP_VELOCITY;
+	
 	/** The maximum angular velocity before a {@link Body} is considered to sleep */
 	private double sleepAngularVelocity = Settings.DEFAULT_SLEEP_ANGULAR_VELOCITY;
+	
+	/** The squared value of {@link #sleepAngularVelocity} */
+	private double sleepAngularVelocitySquared = Settings.DEFAULT_SLEEP_ANGULAR_VELOCITY * Settings.DEFAULT_SLEEP_ANGULAR_VELOCITY;
 	
 	/** The time required for a {@link Body} to stay motionless before going to sleep */
 	private double sleepTime = Settings.DEFAULT_SLEEP_TIME;
 	
-	/** The number of SI solver iterations */
-	private int siSolverIterations = Settings.DEFAULT_SI_SOLVER_ITERATIONS;
+	/** The number of iterations used to solve velocity constraints */
+	private int velocityConstraintSolverIterations = Settings.DEFAULT_SOLVER_ITERATIONS;
+	
+	/** The maximum number of iterations used to solve position constraints */
+	private int positionConstraintSolverIterations = Settings.DEFAULT_SOLVER_ITERATIONS;
 	
 	/** The warm start distance */
 	private double warmStartDistance = Settings.DEFAULT_WARM_START_DISTANCE;
 	
+	/** The squared value of {@link #warmStartDistance} */
+	private double warmStartDistanceSquared = Settings.DEFAULT_WARM_START_DISTANCE * Settings.DEFAULT_WARM_START_DISTANCE;
+	
 	/** The restitution velocity */
 	private double restitutionVelocity = Settings.DEFAULT_RESTITUTION_VELOCITY;
 	
-	/** The allowed penetration */
+	/** The squared value of {@link #restitutionVelocity} */
+	private double restitutionVelocitySquared = Settings.DEFAULT_RESTITUTION_VELOCITY * Settings.DEFAULT_RESTITUTION_VELOCITY;
+	
+	/** The allowed linear tolerance */
 	private double linearTolerance = Settings.DEFAULT_LINEAR_TOLERANCE;
-
+	
+	/** The squared value of {@link #linearTolerance} */
+	private double linearToleranceSquared = Settings.DEFAULT_LINEAR_TOLERANCE * Settings.DEFAULT_LINEAR_TOLERANCE;
+	
+	/** The allowed angular tolerance */
+	private double angularTolerance = Settings.DEFAULT_ANGULAR_TOLERANCE;
+	
+	/** The squared value of {@link #angularTolerance} */
+	private double angularToleranceSquared = Settings.DEFAULT_ANGULAR_TOLERANCE * Settings.DEFAULT_ANGULAR_TOLERANCE;
+	
 	/** The maximum linear correction */
 	private double maxLinearCorrection = Settings.DEFAULT_MAX_LINEAR_CORRECTION;
+	
+	/** The squared value of {@link #maxLinearCorrection} */
+	private double maxLinearCorrectionSquared = Settings.DEFAULT_MAX_LINEAR_CORRECTION * Settings.DEFAULT_MAX_LINEAR_CORRECTION;
+	
+	/** The maximum angular correction */
+	private double maxAngularCorrection = Settings.DEFAULT_MAX_ANGULAR_CORRECTION;
+	
+	/** The squared value of {@link #maxAngularCorrection} */
+	private double maxAngularCorrectionSquared = Settings.DEFAULT_MAX_ANGULAR_CORRECTION * Settings.DEFAULT_MAX_ANGULAR_CORRECTION;
 	
 	/** The baumgarte factor */
 	private double baumgarte = Settings.DEFAULT_BAUMGARTE;
@@ -131,17 +176,20 @@ public class Settings {
 		StringBuilder sb = new StringBuilder();
 		sb.append("SETTINGS[")
 		.append(this.stepFequency).append("|")
-		.append(this.maxVelocity).append("|")
-		.append(this.maxAngularVelocity).append("|")
+		.append(this.maxTranslation).append("|")
+		.append(this.maxRotation).append("|")
 		.append(this.sleep).append("|")
 		.append(this.sleepVelocity).append("|")
 		.append(this.sleepAngularVelocity).append("|")
 		.append(this.sleepTime).append("|")
-		.append(this.siSolverIterations).append("|")
+		.append(this.velocityConstraintSolverIterations).append("|")
+		.append(this.positionConstraintSolverIterations).append("|")
 		.append(this.warmStartDistance).append("|")
 		.append(this.restitutionVelocity).append("|")
 		.append(this.linearTolerance).append("|")
+		.append(this.angularTolerance).append("|")
 		.append(this.maxLinearCorrection).append("|")
+		.append(this.maxAngularCorrection).append("|")
 		.append(this.baumgarte).append("]");
 		return sb.toString();
 	}
@@ -151,17 +199,28 @@ public class Settings {
 	 */
 	public void reset() {
 		this.stepFequency = Settings.DEFAULT_STEP_FREQUENCY;
-		this.maxVelocity = Settings.DEFAULT_MAX_VELOCITY;
-		this.maxAngularVelocity = Settings.DEFAULT_MAX_ANGULAR_VELOCITY;
+		this.maxTranslation = Settings.DEFAULT_MAX_TRANSLATION;
+		this.maxTranslationSquared = Settings.DEFAULT_MAX_TRANSLATION * Settings.DEFAULT_MAX_TRANSLATION;
+		this.maxRotation = Settings.DEFAULT_MAX_ROTATION;
+		this.maxRotationSquared = Settings.DEFAULT_MAX_ROTATION * Settings.DEFAULT_MAX_ROTATION;
 		this.sleep = true;
 		this.sleepVelocity = Settings.DEFAULT_SLEEP_VELOCITY;
+		this.sleepVelocitySquared = Settings.DEFAULT_SLEEP_VELOCITY * Settings.DEFAULT_SLEEP_VELOCITY;
 		this.sleepAngularVelocity = Settings.DEFAULT_SLEEP_ANGULAR_VELOCITY;
+		this.sleepAngularVelocitySquared = Settings.DEFAULT_SLEEP_ANGULAR_VELOCITY * Settings.DEFAULT_SLEEP_ANGULAR_VELOCITY;
 		this.sleepTime = Settings.DEFAULT_SLEEP_TIME;
-		this.siSolverIterations = Settings.DEFAULT_SI_SOLVER_ITERATIONS;
+		this.velocityConstraintSolverIterations = Settings.DEFAULT_SOLVER_ITERATIONS;
+		this.positionConstraintSolverIterations = Settings.DEFAULT_SOLVER_ITERATIONS;
 		this.warmStartDistance = Settings.DEFAULT_WARM_START_DISTANCE;
+		this.warmStartDistanceSquared = Settings.DEFAULT_WARM_START_DISTANCE * Settings.DEFAULT_WARM_START_DISTANCE;
 		this.restitutionVelocity = Settings.DEFAULT_RESTITUTION_VELOCITY;
+		this.restitutionVelocitySquared = Settings.DEFAULT_RESTITUTION_VELOCITY * Settings.DEFAULT_RESTITUTION_VELOCITY;
 		this.linearTolerance = Settings.DEFAULT_LINEAR_TOLERANCE;
+		this.linearToleranceSquared = Settings.DEFAULT_LINEAR_TOLERANCE * Settings.DEFAULT_LINEAR_TOLERANCE;
 		this.maxLinearCorrection = Settings.DEFAULT_MAX_LINEAR_CORRECTION;
+		this.maxLinearCorrectionSquared = Settings.DEFAULT_MAX_LINEAR_CORRECTION * Settings.DEFAULT_MAX_LINEAR_CORRECTION;
+		this.angularTolerance = Settings.DEFAULT_ANGULAR_TOLERANCE;
+		this.angularToleranceSquared = Settings.DEFAULT_ANGULAR_TOLERANCE * Settings.DEFAULT_ANGULAR_TOLERANCE;
 		this.baumgarte = Settings.DEFAULT_BAUMGARTE;
 	}
 	
@@ -186,57 +245,70 @@ public class Settings {
 	 * @param stepFrequency the step frequency
 	 */
 	public void setStepFrequency(double stepFrequency) {
-		if (stepFrequency < 30.0) {
-			this.stepFequency = 1.0 / 30.0;
-		} else {
-			this.stepFequency = 1.0 / stepFrequency;
-		}
+		if (stepFrequency < 30.0) throw new IllegalArgumentException("The step frequency must be 30.0 hz or greater.");
+		this.stepFequency = 1.0 / stepFrequency;
 	}
 	
 	/**
-	 * Returns the maximum velocity a {@link Body} can have.
-	 * @return double the maximum velocity
-	 * @see #setMaxVelocity(double)
+	 * Returns the maximum translation a {@link Body} can have in one time step.
+	 * @return double the maximum translation in meters
+	 * @see #setMaxTranslation(double)
 	 */
-	public double getMaxVelocity() {
-		return this.maxVelocity;
-	}
-
-	/**
-	 * Sets the maximum velocity a {@link Body} can have.
-	 * <p>
-	 * Valid values are in the range [0, &infin;] meters/second
-	 * @param maxVelocity the maximum velocity
-	 */
-	public void setMaxVelocity(double maxVelocity) {
-		if (maxVelocity < 0) {
-			this.maxVelocity = 0;
-		} else {
-			this.maxVelocity = maxVelocity;
-		}
-	}
-
-	/**
-	 * Returns the maximum angular velocity a {@link Body} can have.
-	 * @return double the maximum angular velocity
-	 * @see #setMaxAngularVelocity(double)
-	 */
-	public double getMaxAngularVelocity() {
-		return this.maxAngularVelocity;
+	public double getMaxTranslation() {
+		return this.maxTranslation;
 	}
 	
 	/**
-	 * Sets the maximum angular velocity a {@link Body} can have.
-	 * <p>
-	 * Valid values are in the range [0, &infin;] radians/second
-	 * @param maxAngularVelocity the maximum angular velocity
+	 * Returns the maximum translation squared.
+	 * @see #getMaxTranslation()
+	 * @see #setMaxTranslation(double)
+	 * @return double
 	 */
-	public void setMaxAngularVelocity(double maxAngularVelocity) {
-		if (maxAngularVelocity < 0) {
-			this.maxAngularVelocity = 0;
-		} else {
-			this.maxAngularVelocity = maxAngularVelocity;
-		}
+	public double getMaxTranslationSquared() {
+		return this.maxTranslationSquared;
+	}
+	
+	/**
+	 * Sets the maximum translation a {@link Body} can have in one time step.
+	 * <p>
+	 * Valid values are in the range [0, &infin;] meters
+	 * @param maxTranslation the maximum translation
+	 */
+	public void setMaxTranslation(double maxTranslation) {
+		if (maxTranslation < 0) throw new IllegalArgumentException("The max translation cannot be negative.");
+		this.maxTranslation = maxTranslation;
+		this.maxTranslationSquared = maxTranslation * maxTranslation;
+	}
+
+	/**
+	 * Returns the maximum rotation a {@link Body} can have in one time step.
+	 * @return double the maximum rotation in radians
+	 * @see #setMaxRotation(double)
+	 */
+	public double getMaxRotation() {
+		return this.maxRotation;
+	}
+	
+	/**
+	 * Returns the max rotation squared.
+	 * @see #getMaxRotation()
+	 * @see #setMaxRotation(double)
+	 * @return double
+	 */
+	public double getMaxRotationSquared() {
+		return this.maxRotationSquared;
+	}
+	
+	/**
+	 * Sets the maximum rotation a {@link Body} can have in one time step.
+	 * <p>
+	 * Valid values are in the range [0, &infin;] radians
+	 * @param maxRotation the maximum rotation
+	 */
+	public void setMaxRotation(double maxRotation) {
+		if (maxRotation < 0) throw new IllegalArgumentException("The max rotation cannot be negative.");
+		this.maxRotation = maxRotation;
+		this.maxRotationSquared = maxRotation * maxRotation;
 	}
 
 	/**
@@ -263,6 +335,16 @@ public class Settings {
 	public double getSleepVelocity() {
 		return this.sleepVelocity;
 	}
+	
+	/**
+	 * Returns the sleep velocity squared.
+	 * @see #getSleepVelocity()
+	 * @see #setSleepVelocity(double)
+	 * @return double
+	 */
+	public double getSleepVelocitySquared() {
+		return this.sleepVelocitySquared;
+	}
 
 	/**
 	 * Sets the sleep velocity.
@@ -274,11 +356,9 @@ public class Settings {
 	 * @param sleepVelocity the sleep velocity
 	 */
 	public void setSleepVelocity(double sleepVelocity) {
-		if (sleepVelocity < 0) {
-			this.sleepVelocity = 0;
-		} else {
-			this.sleepVelocity = sleepVelocity;
-		}
+		if (sleepVelocity < 0) throw new IllegalArgumentException("The sleep velocity cannot be negative.");
+		this.sleepVelocity = sleepVelocity;
+		this.sleepVelocitySquared = sleepVelocity * sleepVelocity;
 	}
 	
 	/**
@@ -288,6 +368,16 @@ public class Settings {
 	 */
 	public double getSleepAngularVelocity() {
 		return this.sleepAngularVelocity;
+	}
+	
+	/**
+	 * Returns the sleep angular velocity squared.
+	 * @see #getSleepAngularVelocity()
+	 * @see #setSleepAngularVelocity(double)
+	 * @return double
+	 */
+	public double getSleepAngularVelocitySquared() {
+		return this.sleepAngularVelocitySquared;
 	}
 
 	/**
@@ -300,11 +390,9 @@ public class Settings {
 	 * @param sleepAngularVelocity the sleep angular velocity
 	 */
 	public void setSleepAngularVelocity(double sleepAngularVelocity) {
-		if (sleepAngularVelocity < 0) {
-			this.sleepAngularVelocity = 0;
-		} else {
-			this.sleepAngularVelocity = sleepAngularVelocity;
-		}
+		if (sleepAngularVelocity < 0) throw new IllegalArgumentException("The sleep angular velocity cannot be negative.");
+		this.sleepAngularVelocity = sleepAngularVelocity;
+		this.sleepAngularVelocitySquared = sleepAngularVelocity * sleepAngularVelocity;
 	}
 
 	/**
@@ -326,40 +414,52 @@ public class Settings {
 	 * @param sleepTime the sleep time
 	 */
 	public void setSleepTime(double sleepTime) {
-		if (sleepTime < 0) {
-			this.sleepTime = 0;
-		} else {
-			this.sleepTime = sleepTime;
-		}
+		if (sleepTime < 0) throw new IllegalArgumentException("The sleep time cannot be negative.");
+		this.sleepTime = sleepTime;
 	}
-
+	
 	/**
-	 * Returns the number of SI solver iterations.
-	 * @return int the number of solver iterations
-	 * @see #setSiSolverIterations(int)
+	 * Returns the number of iterations used to solve velocity constraints.
+	 * @return int
 	 */
-	public int getSiSolverIterations() {
-		return this.siSolverIterations;
+	public int getVelocityConstraintSolverIterations() {
+		return this.velocityConstraintSolverIterations;
 	}
-
+	
 	/**
-	 * Sets the number of SI solver iterations.
+	 * Sets the number of iterations used to solve velocity constraints.
 	 * <p>
-	 * The number of SI solver iterations is the number that controls the 
-	 * accuracy of the {@link ContactConstraintSolver}.  The higher the number
-	 * the more accurate the solution.
+	 * Increasing the number will increase accuracy but decrease performance.
 	 * <p>
 	 * Valid values are in the range [5, &infin;]
-	 * @param siSolverIterations the number of SI solver iterations
+	 * @param velocityConstraintSolverIterations the number of iterations used to solve velocity constraints
 	 */
-	public void setSiSolverIterations(int siSolverIterations) {
-		if (siSolverIterations < 5) {
-			this.siSolverIterations = 5;
-		} else {
-			this.siSolverIterations = siSolverIterations;
-		}
+	public void setVelocityConstraintSolverIterations(int velocityConstraintSolverIterations) {
+		if (velocityConstraintSolverIterations < 5) throw new IllegalArgumentException("The minimum number of iterations is 5.");
+		this.velocityConstraintSolverIterations = velocityConstraintSolverIterations;
 	}
-
+	
+	/**
+	 * Returns the number of iterations used to solve position constraints.
+	 * @return int
+	 */
+	public int getPositionConstraintSolverIterations() {
+		return this.positionConstraintSolverIterations;
+	}
+	
+	/**
+	 * Sets the number of iterations used to solve position constraints.
+	 * <p>
+	 * Increasing the number will increase accuracy but decrease performance.
+	 * <p>
+	 * Valid values are in the range [5, &infin;]
+	 * @param positionConstraintSolverIterations the number of iterations used to solve position constraints
+	 */
+	public void setPositionConstraintSolverIterations(int positionConstraintSolverIterations) {
+		if (positionConstraintSolverIterations < 5) throw new IllegalArgumentException("The minimum number of iterations is 5.");
+		this.positionConstraintSolverIterations = positionConstraintSolverIterations;
+	}
+	
 	/**
 	 * Returns the warm start distance.
 	 * @return double the warm start distance
@@ -367,6 +467,16 @@ public class Settings {
 	 */
 	public double getWarmStartDistance() {
 		return this.warmStartDistance;
+	}
+	
+	/**
+	 * Returns the warm start distance squared.
+	 * @see #getWarmStartDistance()
+	 * @see #setWarmStartDistance(double)
+	 * @return double
+	 */
+	public double getWarmStartDistanceSquared() {
+		return warmStartDistanceSquared;
 	}
 
 	/**
@@ -376,15 +486,13 @@ public class Settings {
 	 * same.  This distance is used to determine if the points can carry over another
 	 * points accumulated impulses to be used for warm starting the {@link ContactConstraintSolver}.
 	 * <p>
-	 * Valid values are in the range [0, &infin;] meters<sup>2</sup>
+	 * Valid values are in the range [0, &infin;] meters
 	 * @param warmStartDistance the warm start distance
 	 */
 	public void setWarmStartDistance(double warmStartDistance) {
-		if (warmStartDistance < 0) {
-			this.warmStartDistance = 0;
-		} else {
-			this.warmStartDistance = warmStartDistance;
-		}
+		if (warmStartDistance < 0) throw new IllegalArgumentException("The warm start distance cannot be negative.");
+		this.warmStartDistance = warmStartDistance;
+		this.warmStartDistanceSquared = this.warmStartDistance * this.warmStartDistance;
 	}
 
 	/**
@@ -395,7 +503,17 @@ public class Settings {
 	public double getRestitutionVelocity() {
 		return this.restitutionVelocity;
 	}
-
+	
+	/**
+	 * Returns the restitution velocity squared.
+	 * @see #getRestitutionVelocity()
+	 * @see #setRestitutionVelocity(double)
+	 * @return double
+	 */
+	public double getRestitutionVelocitySquared() {
+		return restitutionVelocitySquared;
+	}
+	
 	/**
 	 * Sets the restitution velocity.
 	 * <p>
@@ -406,38 +524,77 @@ public class Settings {
 	 * @param restitutionVelocity the restitution velocity
 	 */
 	public void setRestitutionVelocity(double restitutionVelocity) {
-		if (restitutionVelocity < 0) {
-			this.restitutionVelocity = 0;
-		} else {
-			this.restitutionVelocity = restitutionVelocity;
-		}
+		if (restitutionVelocity < 0) throw new IllegalArgumentException("The restitution velocity cannot be negative.");
+		this.restitutionVelocity = restitutionVelocity;
+		this.restitutionVelocitySquared = restitutionVelocity * restitutionVelocity;
 	}
 
 	/**
-	 * Returns the allowed penetration.
+	 * Returns the linear tolerance.
 	 * @return double the allowed penetration
 	 * @see #setLinearTolerance(double)
 	 */
 	public double getLinearTolerance() {
 		return this.linearTolerance;
 	}
-
+	
 	/**
-	 * Sets the allowed penetration.
+	 * Returns the linear tolerance squared.
+	 * @see #getLinearTolerance()
+	 * @see #setLinearTolerance(double)
+	 * @return double
+	 */
+	public double getLinearToleranceSquared() {
+		return linearToleranceSquared;
+	}
+	
+	/**
+	 * Sets the linear tolerance.
 	 * <p>
-	 * The maximum allowed penetration of objects to avoid jitter and facilitate stacking.
+	 * Used to avoid jitter and facilitate stacking.
 	 * <p>
 	 * Valid values are in the range (0, &infin;] meters
-	 * @param allowedPenetration the allowed penetration
+	 * @param linearTolerance the linear tolerance
 	 */
-	public void setLinearTolerance(double allowedPenetration) {
-		if (allowedPenetration < 0) {
-			this.linearTolerance = 0;
-		} else {
-			this.linearTolerance = allowedPenetration;
-		}
+	public void setLinearTolerance(double linearTolerance) {
+		if (linearTolerance < 0) throw new IllegalArgumentException("The linear tolerance cannot be negative.");
+		this.linearTolerance = linearTolerance;
+		this.linearToleranceSquared = linearTolerance * linearTolerance;
 	}
-
+	
+	/**
+	 * Returns the angular tolerance.
+	 * @see #setAngularTolerance(double)
+	 * @return double
+	 */
+	public double getAngularTolerance() {
+		return angularTolerance;
+	}
+	
+	/**
+	 * Returns the angular tolerance squared.
+	 * @see #getAngularTolerance()
+	 * @see #setAngularTolerance(double)
+	 * @return double
+	 */
+	public double getAngularToleranceSquared() {
+		return angularToleranceSquared;
+	}
+	
+	/**
+	 * Sets the angular tolerance.
+	 * <p>
+	 * Used to avoid jitter and facilitate stacking.
+	 * <p>
+	 * Valid values are in the range (0, &infin;] radians
+	 * @param angularTolerance the angular tolerance
+	 */
+	public void setAngularTolerance(double angularTolerance) {
+		if (angularTolerance < 0) throw new IllegalArgumentException("The angular tolerance cannot be negative.");
+		this.angularTolerance = angularTolerance;
+		this.angularToleranceSquared = angularTolerance * angularTolerance;
+	}
+	
 	/**
 	 * Returns the maximum linear correction.
 	 * @return double the maximum linear correction
@@ -446,12 +603,22 @@ public class Settings {
 	public double getMaxLinearCorrection() {
 		return this.maxLinearCorrection;
 	}
+	
+	/**
+	 * Returns the maximum linear correction squared.
+	 * @see #getMaxLinearCorrection()
+	 * @see #setMaxLinearCorrection(double)
+	 * @return double
+	 */
+	public double getMaxLinearCorrectionSquared() {
+		return maxLinearCorrectionSquared;
+	}
 
 	/**
 	 * Sets the maximum linear correction.
 	 * <p>
 	 * The maximum linear correction used when estimating the current penetration depth
-	 * during the position constraint solving step of the {@link ContactConstraintSolver}.
+	 * during the position constraint solving step.
 	 * <p>
 	 * This is used to avoid large corrections.
 	 * <p>
@@ -459,13 +626,44 @@ public class Settings {
 	 * @param maxLinearCorrection the maximum linear correction
 	 */
 	public void setMaxLinearCorrection(double maxLinearCorrection) {
-		if (maxLinearCorrection < 0) {
-			this.maxLinearCorrection = 0;
-		} else {
-			this.maxLinearCorrection = maxLinearCorrection;
-		}
+		if (maxLinearCorrection < 0) throw new IllegalArgumentException("The maximum linear correction cannot be negative.");
+		this.maxLinearCorrection = maxLinearCorrection;
+		this.maxLinearCorrectionSquared = maxLinearCorrection * maxLinearCorrection;
 	}
-
+	
+	/**
+	 * Returns the maximum angular correction.
+	 * @see #setMaxAngularCorrection(double)
+	 * @return double
+	 */
+	public double getMaxAngularCorrection() {
+		return maxAngularCorrection;
+	}
+	
+	/**
+	 * Returns the maximum angular correction squared.
+	 * @see #getMaxAngularCorrection()
+	 * @see #setMaxAngularCorrection(double)
+	 * @return double
+	 */
+	public double getMaxAngularCorrectionSquared() {
+		return maxAngularCorrectionSquared;
+	}
+	
+	/**
+	 * Sets the maximum angular correction.
+	 * <p>
+	 * This is used to prevent large angular corrections.
+	 * <p>
+	 * Valid values are in the range [0, &infin;] radians
+	 * @param maxAngularCorrection the maximum angular correction
+	 */
+	public void setMaxAngularCorrection(double maxAngularCorrection) {
+		if (maxAngularCorrection < 0) throw new IllegalArgumentException("The maximum angular correction cannot be negative.");
+		this.maxAngularCorrection = maxAngularCorrection;
+		this.maxAngularCorrectionSquared = maxAngularCorrection * maxAngularCorrection;
+	}
+	
 	/**
 	 * Returns the baumgarte factor.
 	 * @return double baumgarte
@@ -478,16 +676,13 @@ public class Settings {
 	/**
 	 * Sets the baumgarte factor.
 	 * <p>
-	 * The position correction bias factor.
+	 * The position correction bias factor that determines the rate at which the position constraints are solved.
 	 * <p>
 	 * Valid values are in the range [0, &infin;].
 	 * @param baumgarte the baumgarte factor
 	 */
 	public void setBaumgarte(double baumgarte) {
-		if (baumgarte < 0) {
-			this.baumgarte = 0;
-		} else {
-			this.baumgarte = baumgarte;
-		}
+		if (baumgarte < 0) throw new IllegalArgumentException("The baumgarte factor cannot be negative.");
+		this.baumgarte = baumgarte;
 	}
 }

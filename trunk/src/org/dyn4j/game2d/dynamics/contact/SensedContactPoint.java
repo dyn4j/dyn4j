@@ -22,24 +22,54 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.game2d.dynamics;
+package org.dyn4j.game2d.dynamics.contact;
+
+import org.dyn4j.game2d.dynamics.Body;
+import org.dyn4j.game2d.dynamics.Fixture;
+import org.dyn4j.game2d.geometry.Vector;
 
 /**
- * Listener notified before and after a simulation step by the {@link World}.
+ * Represents a sensed contact point.
+ * <p>
+ * A sensed contact point is a contact point that is not solved.
  * @author William Bittle
  */
-public interface StepListener {
+public class SensedContactPoint extends ContactPoint {
 	/**
-	 * Called before a simulation step is performed.
-	 * @param step the step information
-	 * @param world the simulation {@link World}
+	 * Full constructor.
+	 * @param point the world space contact point
+	 * @param normal the world space contact normal
+	 * @param depth the penetration depth
+	 * @param body1 the first {@link Body} in contact
+	 * @param fixture1 the first {@link Body}'s {@link Fixture}
+	 * @param body2 the second {@link Body} in contact
+	 * @param fixture2 the second {@link Body}'s {@link Fixture}
 	 */
-	public void begin(Step step, World world);
+	public SensedContactPoint(Vector point, Vector normal, double depth, Body body1, 
+			Fixture fixture1, Body body2, Fixture fixture2) {
+		this.point = point;
+		this.normal = normal;
+		this.depth = depth;
+		this.body1 = body1;
+		this.fixture1 = fixture1;
+		this.body2 = body2;
+		this.fixture2 = fixture2;
+	}
 	
-	/**
-	 * Called after a simulation step has been performed.
-	 * @param step the step information
-	 * @param world the simulation {@link World}
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
 	 */
-	public void end(Step step, World world);
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("SENSED_CONTACT_POINT[")
+		.append(this.point).append("|")
+		.append(this.normal).append("|")
+		.append(this.depth).append("|")
+		.append(this.body1).append("|")
+		.append(this.body2).append("|")
+		.append(this.fixture1).append("|")
+		.append(this.fixture2).append("]");
+		return sb.toString();
+	}
 }

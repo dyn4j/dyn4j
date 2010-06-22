@@ -35,7 +35,7 @@ package org.dyn4j.game2d.geometry;
  */
 public class Triangle extends Polygon implements Convex, Shape, Transformable {
 	/** The triangle {@link Shape.Type} */
-	public static final Shape.Type TYPE = new Shape.Type(Polygon.TYPE);
+	public static final Shape.Type TYPE = new Shape.Type(Polygon.TYPE, "Triangle");
 	
 	/**
 	 * Full constructor.

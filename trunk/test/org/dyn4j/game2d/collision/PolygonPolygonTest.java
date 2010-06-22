@@ -38,7 +38,6 @@ import org.dyn4j.game2d.collision.narrowphase.Gjk;
 import org.dyn4j.game2d.collision.narrowphase.Penetration;
 import org.dyn4j.game2d.collision.narrowphase.Sat;
 import org.dyn4j.game2d.collision.narrowphase.Separation;
-import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Geometry;
 import org.dyn4j.game2d.geometry.Polygon;
 import org.dyn4j.game2d.geometry.Shape;
@@ -63,8 +62,8 @@ public class PolygonPolygonTest extends AbstractTest {
 	 */
 	@Before
 	public void setup() {
-		this.poly1 = Geometry.getUnitCirclePolygon(5, 1.0);
-		this.poly2 = Geometry.getUnitCirclePolygon(6, 0.5);
+		this.poly1 = Geometry.createUnitCirclePolygon(5, 1.0);
+		this.poly2 = Geometry.createUnitCirclePolygon(6, 0.5);
 	}
 	
 	/**
@@ -100,14 +99,9 @@ public class PolygonPolygonTest extends AbstractTest {
 	 */
 	@Test	
 	public void detectCollidableAABB() {
-		List<Convex> shapes = null;
-		
 		// create some collidables
-		shapes = new ArrayList<Convex>(1); shapes.add(poly1);
-		CollidableTest ct1 = new CollidableTest(shapes, Filter.DEFAULT_FILTER);
-		
-		shapes = new ArrayList<Convex>(1); shapes.add(poly2);
-		CollidableTest ct2 = new CollidableTest(shapes, Filter.DEFAULT_FILTER);
+		CollidableTest ct1 = new CollidableTest(poly1);
+		CollidableTest ct2 = new CollidableTest(poly2);
 		
 		// test containment
 		TestCase.assertTrue(this.aabb.detect(ct1, ct2));
@@ -134,15 +128,11 @@ public class PolygonPolygonTest extends AbstractTest {
 	 */
 	@Test
 	public void detectSap() {
-		List<Convex> shapes;
 		List<BroadphasePair<CollidableTest>> pairs;
 		
 		// create some collidables
-		shapes = new ArrayList<Convex>(1); shapes.add(poly1);
-		CollidableTest ct1 = new CollidableTest(shapes, Filter.DEFAULT_FILTER);
-		
-		shapes = new ArrayList<Convex>(1); shapes.add(poly2);
-		CollidableTest ct2 = new CollidableTest(shapes, Filter.DEFAULT_FILTER);
+		CollidableTest ct1 = new CollidableTest(poly1);
+		CollidableTest ct2 = new CollidableTest(poly2);
 		
 		List<CollidableTest> objs = new ArrayList<CollidableTest>();
 		objs.add(ct1);

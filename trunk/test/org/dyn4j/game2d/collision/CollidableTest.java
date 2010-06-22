@@ -24,10 +24,11 @@
  */
 package org.dyn4j.game2d.collision;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.geometry.Convex;
-import org.dyn4j.game2d.geometry.Shape;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Transformable;
 import org.dyn4j.game2d.geometry.Vector;
@@ -37,40 +38,51 @@ import org.dyn4j.game2d.geometry.Vector;
  * @author William Bittle
  */
 public class CollidableTest implements Collidable, Transformable {
-	/** The collision {@link Filter} */
-	protected Filter filter;
-	
-	/** The {@link Convex} {@link Shape} list */
-	protected List<Convex> shapes;
+	/** The {@link Fixture}s list */
+	protected List<Fixture> fixtures;
 	
 	/** The {@link Transform} */
 	protected Transform transform;
 	
 	/**
 	 * Full constructor.
-	 * @param shapes the {@link Convex} {@link Shape} list
-	 * @param filter the collision {@link Filter}
+	 * @param fixtures the {@link Fixture}s list
 	 */
-	public CollidableTest(List<Convex> shapes, Filter filter) {
-		this.shapes = shapes;
-		this.filter = filter;
+	public CollidableTest(List<Fixture> fixtures) {
+		this.fixtures = fixtures;
+		this.transform = new Transform();
+	}
+	
+	/**
+	 * Optional constructor.
+	 * <p>
+	 * Uses default {@link Fixture} settings.
+	 * @param shape the shape to use
+	 */
+	public CollidableTest(Convex shape) {
+		this.fixtures = new ArrayList<Fixture>();
+		this.fixtures.add(new Fixture(shape));
 		this.transform = new Transform();
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.collision.Collidable#getFilter()
+	 * @see org.dyn4j.game2d.collision.Collidable#getShape(int)
 	 */
 	@Override
-	public Filter getFilter() {
-		return filter;
+	public Convex getShape(int index) {
+		int size = this.fixtures.size();
+		if (size > 0 && index < size) {
+			return this.fixtures.get(index).getShape();
+		}
+		throw new ArrayIndexOutOfBoundsException();
 	}
-
+	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.collision.Collidable#getShapes()
+	 * @see org.dyn4j.game2d.collision.Collidable#getShapeCount()
 	 */
 	@Override
-	public List<Convex> getShapes() {
-		return shapes;
+	public int getShapeCount() {
+		return this.fixtures.size();
 	}
 
 	/* (non-Javadoc)

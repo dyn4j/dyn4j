@@ -26,6 +26,7 @@ package org.dyn4j.game2d.testbed.test;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
+import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Rectangle;
@@ -85,7 +86,7 @@ public class Seesaw extends Test {
 		// create the floor
 		Rectangle floorShape = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
-		floor.addShape(floorShape);
+		floor.addFixture(new Fixture(floorShape));
 		floor.setMassFromShapes(Mass.Type.INFINITE);
 		this.world.add(floor);
 		
@@ -95,7 +96,7 @@ public class Seesaw extends Test {
 				new Vector(-1.0, 0.0),
 				new Vector(1.0, 0.0));
 		Entity pivot = new Entity();
-		pivot.addShape(pivotShape);
+		pivot.addFixture(new Fixture(pivotShape));
 		pivot.setMassFromShapes(Mass.Type.INFINITE);
 		pivot.translate(0.0, 0.5);
 		this.world.add(pivot);
@@ -103,7 +104,7 @@ public class Seesaw extends Test {
 		// create the plank
 		Rectangle plankShape = new Rectangle(10.0, 0.2);
 		Entity plank = new Entity();
-		plank.addShape(plankShape);
+		plank.addFixture(new Fixture(plankShape));
 		plank.setMassFromShapes();
 		plank.translate(0.0, 1.5);
 		this.world.add(plank);
@@ -113,17 +114,19 @@ public class Seesaw extends Test {
 		
 		// create a box on the left side
 		Entity lBox = new Entity();
-		lBox.addShape(box);
+		lBox.addFixture(new Fixture(box));
 		lBox.setMassFromShapes();
 		lBox.translate(-4.0, 2.5);
 		this.world.add(lBox);
 		
 		box = new Rectangle(1.0, 1.0);
-		box.setDensity(3.0);
+		
+		Fixture boxFixture = new Fixture(box);
+		boxFixture.setDensity(3.0);
 		
 		// create a box on the right side
 		Entity rBox = new Entity();
-		rBox.addShape(box);
+		rBox.addFixture(boxFixture);
 		rBox.setMassFromShapes();
 		rBox.translate(4.0, 5.7);
 		this.world.add(rBox);

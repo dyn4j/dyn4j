@@ -32,6 +32,7 @@ import org.codezealot.game.input.Mouse;
 import org.codezealot.game.input.Input.Hold;
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
+import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Rectangle;
@@ -89,7 +90,7 @@ public class Sleep extends Test {
 		// create the floor
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
-		floor.addShape(floorRect);
+		floor.addFixture(new Fixture(floorRect));
 		floor.setMassFromShapes(Mass.Type.INFINITE);
 		this.world.add(floor);
 		
@@ -98,25 +99,25 @@ public class Sleep extends Test {
 		Rectangle rect = new Rectangle(1.0, 1.0);
 		
 		Entity box1 = new Entity();
-		box1.addShape(rect);
+		box1.addFixture(new Fixture(rect));
 		box1.setMassFromShapes();
 		box1.translate(0.0, 1.0);
 		this.world.add(box1);
 		
 		Entity box2 = new Entity();
-		box2.addShape(rect);
+		box2.addFixture(new Fixture(rect));
 		box2.setMassFromShapes();
 		box2.translate(0.0, 2.0);
 		this.world.add(box2);
 
 		Entity box3 = new Entity();
-		box3.addShape(rect);
+		box3.addFixture(new Fixture(rect));
 		box3.setMassFromShapes();
 		box3.translate(0.0, 3.0);
 		this.world.add(box3);
 		
 		Entity box4 = new Entity();
-		box4.addShape(rect);
+		box4.addFixture(new Fixture(rect));
 		box4.setMassFromShapes();
 		box4.translate(0.0, 4.0);
 		this.world.add(box4);
@@ -153,8 +154,8 @@ public class Sleep extends Test {
 		// check for the enter key
 		if (keyboard.isPressed(KeyEvent.VK_ENTER)) {
 			// check the size of the list
-			if (this.world.getBodies().size() > 1) {
-				this.world.remove(this.world.getBodies().get(1));
+			if (this.world.getBodyCount() > 1) {
+				this.world.remove(this.world.getBody(1));
 			}
 		}
 	}

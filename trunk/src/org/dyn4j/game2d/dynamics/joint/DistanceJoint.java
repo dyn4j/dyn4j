@@ -43,6 +43,9 @@ import org.dyn4j.game2d.geometry.Vector;
  * @author William Bittle
  */
 public class DistanceJoint extends Joint {
+	/** The joint type */
+	public static final Joint.Type TYPE = new Joint.Type("Distance");
+	
 	/** The local anchor point on the first {@link Body} */
 	protected Vector localAnchor1;
 	
@@ -71,7 +74,7 @@ public class DistanceJoint extends Joint {
 	protected double gamma;
 	
 	/** The accumulated impulse from the previous time step */
-	protected double j;
+	protected double impulse;
 	
 	/**
 	 * Optional constructor.
@@ -117,7 +120,7 @@ public class DistanceJoint extends Joint {
 	 */
 	public DistanceJoint(Body b1, Body b2, boolean collisionAllowed, Vector anchor1, Vector anchor2) {
 		super(b1, b2, collisionAllowed);
-		if (anchor1 == null || anchor2 == null) throw new NullPointerException("Both anchor points cannot be null.");
+		if (anchor1 == null || anchor2 == null) throw new NullPointerException("Neither anchor point can be null.");
 		this.localAnchor1 = b1.getLocalPoint(anchor1);
 		this.localAnchor2 = b2.getLocalPoint(anchor2);
 		this.distance = anchor1.distance(anchor2);
@@ -140,11 +143,11 @@ public class DistanceJoint extends Joint {
 	public DistanceJoint(Body b1, Body b2, boolean collisionAllowed, Vector anchor1, Vector anchor2, double frequency, double dampingRatio) {
 		super(b1, b2, collisionAllowed);
 		// verify the anchor points
-		if (anchor1 == null || anchor2 == null) throw new NullPointerException("Both anchor points cannot be null.");
+		if (anchor1 == null || anchor2 == null) throw new NullPointerException("Neither anchor point can be null.");
 		// verify the frequency
 		if (frequency <= 0) throw new IllegalArgumentException("The frequency must be greater than zero.");
 		// verify the damping ratio
-		if (dampingRatio <= 0 || dampingRatio >= 1) throw new IllegalArgumentException("The damping ratio must be between 0 and 1.");
+		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException("The damping ratio must be between 0 and 1 inclusive.");
 		this.localAnchor1 = b1.getLocalPoint(anchor1);
 		this.localAnchor2 = b2.getLocalPoint(anchor2);
 		this.distance = anchor1.distance(anchor2);
@@ -164,22 +167,27 @@ public class DistanceJoint extends Joint {
 		.append(this.frequency).append("|")
 		.append(this.dampingRatio).append("|")
 		.append(this.distance).append("|")
-		.append(this.j).append("]");
+		.append(this.invK).append("|")
+		.append(this.n).append("|")
+		.append(this.bias).append("|")
+		.append(this.gamma).append("|")
+		.append(this.impulse).append("]");
 		return sb.toString();
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.dynamics.joint.Joint#initializeConstraints(org.dyn4j.game2d.dynamics.Step)
 	 */
+	@Override
 	public void initializeConstraints(Step step) {
 		// get the current settings
 		Settings settings = Settings.getInstance();
 		double linearTolerance = settings.getLinearTolerance();
 		
-		Transform t1 = b1.getTransform();
-		Transform t2 = b2.getTransform();
-		Mass m1 = b1.getMass();
-		Mass m2 = b2.getMass();
+		Transform t1 = body1.getTransform();
+		Transform t2 = body2.getTransform();
+		Mass m1 = body1.getMass();
+		Mass m2 = body2.getMass();
 		
 		double invM1 = m1.getInverseMass();
 		double invM2 = m2.getInverseMass();
@@ -187,18 +195,18 @@ public class DistanceJoint extends Joint {
 		double invI2 = m2.getInverseInertia();
 		
 		// compute the normal
-		Vector r1 = t1.getTransformedR(this.b1.getLocalCenter().to(this.localAnchor1));
-		Vector r2 = t2.getTransformedR(this.b2.getLocalCenter().to(this.localAnchor2));
-		this.n = r1.sum(this.b1.getWorldCenter()).subtract(r2.sum(this.b2.getWorldCenter()));
+		Vector r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
+		Vector r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
+		this.n = r1.sum(this.body1.getWorldCenter()).subtract(r2.sum(this.body2.getWorldCenter()));
 		
 		// get the current length
-		double l = this.n.getMagnitude();
+		double length = this.n.getMagnitude();
 		// check for the tolerance
-		if (l < linearTolerance) {
+		if (length < linearTolerance) {
 			this.n.zero();
 		} else {
 			// normalize it
-			this.n.divide(l);
+			this.n.divide(length);
 		}
 		
 		// compute K inverse
@@ -206,13 +214,15 @@ public class DistanceJoint extends Joint {
 		double cr2n = r2.cross(this.n);
 		double invMass = invM1 + invI1 * cr1n * cr1n;
 		invMass += invM2 + invI2 * cr2n * cr2n;
-		this.invK = 1.0 / invMass;
+		
+		// check for zero before inverting
+		this.invK = invMass == 0.0 ? 0.0 : 1.0 / invMass;
 		
 		// see if we need to compute spring damping
 		if (this.frequency > 0.0) {
 			double dt = step.getDeltaTime();
 			// get the current compression/extension of the spring
-			double x = l - this.distance;
+			double x = length - this.distance;
 			// compute the natural frequency; f = w / (2 * pi) -> w = 2 * pi * f
 			double w = 2.0 * Math.PI * this.frequency;
 			// compute the damping coefficient; dRatio = d / (2 * m * w) -> d = 2 * m * w * dRatio
@@ -221,30 +231,36 @@ public class DistanceJoint extends Joint {
 			double k = this.invK * w * w;
 			
 			// compute gamma = CMF = 1 / (hk + d)
-			this.gamma = 1.0 / (dt * (d + dt * k));
+			this.gamma = dt * (d + dt * k);
+			// check for zero before inverting
+			this.gamma = this.gamma == 0.0 ? 0.0 : 1.0 / this.gamma;			
 			// compute the bias = x * ERP where ERP = hk / (hk + d)
 			this.bias = x * dt * k * this.gamma;
-			// compute the effective mass
-			this.invK = 1.0 / (invMass + this.gamma); 
+			
+			// compute the effective mass			
+			this.invK = invMass + this.gamma;
+			// check for zero before inverting
+			this.invK = this.invK == 0.0 ? 0.0 : 1.0 / this.invK;
 		}
 		
 		// warm start
-		j *= step.getDeltaTimeRatio();
-		Vector J = n.product(j);
-		b1.getV().add(J.product(invM1));
-		b1.setAv(b1.getAv() + invI1 * r1.cross(J));
-		b2.getV().subtract(J.product(invM2));
-		b2.setAv(b2.getAv() - invI2 * r2.cross(J));
+		impulse *= step.getDeltaTimeRatio();
+		Vector J = n.product(impulse);
+		body1.getVelocity().add(J.product(invM1));
+		body1.setAngularVelocity(body1.getAngularVelocity() + invI1 * r1.cross(J));
+		body2.getVelocity().subtract(J.product(invM2));
+		body2.setAngularVelocity(body2.getAngularVelocity() - invI2 * r2.cross(J));
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.game2d.dynamics.Step)
 	 */
+	@Override
 	public void solveVelocityConstraints(Step step) {
-		Transform t1 = b1.getTransform();
-		Transform t2 = b2.getTransform();
-		Mass m1 = b1.getMass();
-		Mass m2 = b2.getMass();
+		Transform t1 = body1.getTransform();
+		Transform t2 = body2.getTransform();
+		Mass m1 = body1.getMass();
+		Mass m2 = body2.getMass();
 		
 		double invM1 = m1.getInverseMass();
 		double invM2 = m2.getInverseMass();
@@ -252,26 +268,26 @@ public class DistanceJoint extends Joint {
 		double invI2 = m2.getInverseInertia();
 		
 		// compute r1 and r2
-		Vector r1 = t1.getTransformedR(this.b1.getLocalCenter().to(this.localAnchor1));
-		Vector r2 = t2.getTransformedR(this.b2.getLocalCenter().to(this.localAnchor2));
+		Vector r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
+		Vector r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
 		
 		// compute the relative velocity
-		Vector v1 = b1.getV().sum(r1.cross(b1.getAv()));
-		Vector v2 = b2.getV().sum(r2.cross(b2.getAv()));
+		Vector v1 = body1.getVelocity().sum(r1.cross(body1.getAngularVelocity()));
+		Vector v2 = body2.getVelocity().sum(r2.cross(body2.getAngularVelocity()));
 		
 		// compute Jv
 		double Jv = n.dot(v1.difference(v2));
 		
 		// compute lambda (the magnitude of the impulse)
-		double j = -this.invK * (Jv + this.bias + this.gamma * this.j);
-		this.j += j;
+		double j = -this.invK * (Jv + this.bias + this.gamma * this.impulse);
+		this.impulse += j;
 		
 		// apply the impulse
 		Vector J = n.product(j);
-		b1.getV().add(J.product(invM1));
-		b1.setAv(b1.getAv() + invI1 * r1.cross(J));
-		b2.getV().subtract(J.product(invM2));
-		b2.setAv(b2.getAv() - invI2 * r2.cross(J));
+		body1.getVelocity().add(J.product(invM1));
+		body1.setAngularVelocity(body1.getAngularVelocity() + invI1 * r1.cross(J));
+		body2.getVelocity().subtract(J.product(invM2));
+		body2.setAngularVelocity(body2.getAngularVelocity() - invI2 * r2.cross(J));
 	}
 	
 	/* (non-Javadoc)
@@ -279,28 +295,34 @@ public class DistanceJoint extends Joint {
 	 */
 	@Override
 	public boolean solvePositionConstraints() {
+		// check if this is a spring damper
+		if (this.frequency > 0.0) {
+			// don't solve position constraints for spring damper
+			return true;
+		}
+		
 		// get the current settings
 		Settings settings = Settings.getInstance();
 		double linearTolerance = settings.getLinearTolerance();
 		double maxLinearCorrection = settings.getMaxLinearCorrection();
 		
-		Transform t1 = b1.getTransform();
-		Transform t2 = b2.getTransform();
-		Mass m1 = b1.getMass();
-		Mass m2 = b2.getMass();
+		Transform t1 = body1.getTransform();
+		Transform t2 = body2.getTransform();
+		Mass m1 = body1.getMass();
+		Mass m2 = body2.getMass();
 		
 		double invM1 = m1.getInverseMass();
 		double invM2 = m2.getInverseMass();
 		double invI1 = m1.getInverseInertia();
 		double invI2 = m2.getInverseInertia();
 		
-		Vector c1 = b1.getWorldCenter();
-		Vector c2 = b2.getWorldCenter();
+		Vector c1 = body1.getWorldCenter();
+		Vector c2 = body2.getWorldCenter();
 		
 		// recompute n since it may have changed after integration
-		Vector r1 = t1.getTransformedR(this.b1.getLocalCenter().to(this.localAnchor1));
-		Vector r2 = t2.getTransformedR(this.b2.getLocalCenter().to(this.localAnchor2));
-		n = r1.sum(b1.getWorldCenter()).subtract(r2.sum(b2.getWorldCenter()));
+		Vector r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
+		Vector r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
+		n = r1.sum(body1.getWorldCenter()).subtract(r2.sum(body2.getWorldCenter()));
 		
 		// solve the position constraint
 		double l = n.normalize();
@@ -312,45 +334,51 @@ public class DistanceJoint extends Joint {
 		Vector J = n.product(impulse);
 		
 		// translate and rotate the objects
-		b1.translate(J.product(invM1));
-		b1.rotate(invI1 * r1.cross(J), c1);
+		body1.translate(J.product(invM1));
+		body1.rotate(invI1 * r1.cross(J), c1);
 		
-		b2.translate(J.product(-invM2));
-		b2.rotate(-invI2 * r2.cross(J), c2);
+		body2.translate(J.product(-invM2));
+		body2.rotate(-invI2 * r2.cross(J), c2);
 		
 		return Math.abs(C) < linearTolerance;
 	}
 	
-	/**
-	 * Returns the local anchor point for the first {@link Body}.
-	 * @return {@link Vector}
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.dynamics.joint.Joint#getType()
 	 */
-	public Vector getLocalAnchor1() {
-		return this.localAnchor1;
+	@Override
+	public Type getType() {
+		return DistanceJoint.TYPE;
 	}
 	
-	/**
-	 * Returns the local anchor point for the second {@link Body}.
-	 * @return {@link Vector}
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.dynamics.joint.Joint#getAnchor1()
 	 */
-	public Vector getLocalAnchor2() {
-		return this.localAnchor2;
+	public Vector getAnchor1() {
+		return body1.getWorldPoint(this.localAnchor1);
 	}
 	
-	/**
-	 * Returns the world space anchor point for the first {@link Body}.
-	 * @return {@link Vector}
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.dynamics.joint.Joint#getAnchor2()
 	 */
-	public Vector getWorldAnchor1() {
-		return b1.getWorldPoint(this.localAnchor1);
+	public Vector getAnchor2() {
+		return body2.getWorldPoint(this.localAnchor2);
 	}
 	
-	/**
-	 * Returns the world space anchor point for the second {@link Body}.
-	 * @return {@link Vector}
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.dynamics.joint.Joint#getReactionForce(double)
 	 */
-	public Vector getWorldAnchor2() {
-		return b2.getWorldPoint(this.localAnchor2);
+	@Override
+	public Vector getReactionForce(double invdt) {
+		return this.n.product(this.impulse * invdt);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.dynamics.joint.Joint#getReactionTorque(double)
+	 */
+	@Override
+	public double getReactionTorque(double invdt) {
+		return 0.0;
 	}
 	
 	/**
@@ -371,11 +399,26 @@ public class DistanceJoint extends Joint {
 	}
 	
 	/**
-	 * Returns the rest distance between the two constrained {@link Body}s.
+	 * Returns the rest distance between the two constrained {@link Body}s in meters.
 	 * @return double
 	 */
 	public double getDistance() {
 		return this.distance;
+	}
+	
+	/**
+	 * Sets the rest distance between the two constrained {@link Body}s in meters.
+	 * @param distance the distance in meters
+	 */
+	public void setDistance(double distance) {
+		// check if the value changed
+		if (this.distance != distance) {
+			// wake up both bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+			// set the new target distance
+			this.distance = distance;
+		}
 	}
 	
 	/**
@@ -391,8 +434,16 @@ public class DistanceJoint extends Joint {
 	 * @param dampingRatio the damping ratio; in the range [0, 1]
 	 */
 	public void setDampingRatio(double dampingRatio) {
-		if (dampingRatio <= 0 || dampingRatio >= 1) throw new IllegalArgumentException("The damping ratio must be between 0 and 1.");
-		this.dampingRatio = dampingRatio;
+		// make sure its within range
+		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException("The damping ratio must be between 0 and 1.");
+		// is it different than the current value
+		if (this.dampingRatio != dampingRatio) {
+			// wake up both bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+			// set the new value
+			this.dampingRatio = dampingRatio;
+		}
 	}
 	
 	/**
@@ -408,15 +459,15 @@ public class DistanceJoint extends Joint {
 	 * @param frequency the spring frequency in hz; must be greater than zero
 	 */
 	public void setFrequency(double frequency) {
+		// check for valid value
 		if (frequency <= 0) throw new IllegalArgumentException("The frequency must be greater than zero.");
-		this.frequency = frequency;
-	}
-	
-	/**
-	 * Returns the last frame's accumulated impulse.
-	 * @return double
-	 */
-	public double getImpulse() {
-		return this.j;
+		// is it different than the current value
+		if (this.frequency != frequency) {
+			// wake up both bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+			// set the new value
+			this.frequency = frequency;
+		}
 	}
 }

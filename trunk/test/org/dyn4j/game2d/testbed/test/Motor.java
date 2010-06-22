@@ -26,11 +26,13 @@ package org.dyn4j.game2d.testbed.test;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
+import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.dynamics.joint.Joint;
 import org.dyn4j.game2d.dynamics.joint.RevoluteJoint;
 import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Mass;
+import org.dyn4j.game2d.geometry.Polygon;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Vector;
 import org.dyn4j.game2d.testbed.ContactCounter;
@@ -38,16 +40,16 @@ import org.dyn4j.game2d.testbed.Entity;
 import org.dyn4j.game2d.testbed.Test;
 
 /**
- * Tests the distance joint in a Newton's Cradle configuration.
+ * Tests the a motorized revolute joint.
  * @author William Bittle
  */
-public class Revolute extends Test {
+public class Motor extends Test {
 	/* (non-Javadoc)
 	 * @see test.Test#getDescription()
 	 */
 	@Override
 	public String getDescription() {
-		return "Tests a revolute joint.";
+		return "Tests a motorized revolute joint.";
 	}
 	
 	/* (non-Javadoc)
@@ -85,7 +87,7 @@ public class Revolute extends Test {
 		// create the floor
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
-		floor.addShape(floorRect);
+		floor.addFixture(new Fixture(floorRect));
 		floor.setMassFromShapes(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
@@ -101,28 +103,43 @@ public class Revolute extends Test {
 		 */
 		
 		// create a reusable rectangle
-		Rectangle r = new Rectangle(3.0, 0.5);
-		r.setDensity(0.2);
+		Rectangle frameRect = new Rectangle(3.0, 0.175);
+		Rectangle bodyRect = new Rectangle(3.2, 0.5);
+		bodyRect.translate(0.0, 0.0875 + 0.25);
+		Polygon cabinPoly = new Polygon(new Vector[] {
+				new Vector(1.25, 0.0),
+				new Vector(0.25, 0.35),
+				new Vector(-0.5, 0.35),
+				new Vector(-0.75, 0.0)
+		});
+		cabinPoly.translate(-0.25, 0.0875 + 0.5);
+		
 		// create a reusable circle
-		Circle c = new Circle(0.25);
-		c.setDensity(0.5);
+		Circle c = new Circle(0.35);
+		
+		Fixture fc1 = new Fixture(c);
+		fc1.setDensity(2.0);
+		
+		Fixture fc2 = new Fixture(c);
+		fc2.setDensity(1.0);
+		fc2.setFriction(0.1);
 		
 		Entity body = new Entity();
-		body.addShape(r);
+		body.addFixture(new Fixture(frameRect));
+		body.addFixture(new Fixture(bodyRect));
+		body.addFixture(new Fixture(cabinPoly));
 		body.setMassFromShapes();
-		body.translate(0, 4.25);
+		body.translate(-3.0, -3.1);
 		
 		Entity wheel1 = new Entity();
-		wheel1.addShape(c);
+		wheel1.addFixture(fc1);
 		wheel1.setMassFromShapes();
-		wheel1.setMu(0.5);
-		wheel1.translate(-1.0, 3.6);
+		wheel1.translate(-4.0, -3.1);
 		
 		Entity wheel2 = new Entity();
-		wheel2.addShape(c);
+		wheel2.addFixture(fc2);
 		wheel2.setMassFromShapes();
-		wheel2.setMu(0.5);
-		wheel2.translate(1.0, 3.6);
+		wheel2.translate(-2.0, -3.1);
 		
 		this.world.add(body);
 		this.world.add(wheel1);
@@ -133,9 +150,9 @@ public class Revolute extends Test {
 		Vector p2 = wheel2.getWorldCenter().copy();
 		
 		// join them
-		Joint j1 = new RevoluteJoint(wheel1, body, p1);
+		Joint j1 = new RevoluteJoint(wheel1, body, false, p1);
 		this.world.add(j1);
-		Joint j2 = new RevoluteJoint(wheel2, body, p2);
+		Joint j2 = new RevoluteJoint(wheel2, body, false, p2, true, -2.0 * Math.PI, 100.0);
 		this.world.add(j2);
 	}
 	

@@ -26,6 +26,7 @@ package org.dyn4j.game2d.testbed.test;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
+import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.dynamics.joint.RevoluteJoint;
 import org.dyn4j.game2d.geometry.Mass;
@@ -86,7 +87,7 @@ public class Chain extends Test {
 		// create the floor
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
-		floor.addShape(floorRect);
+		floor.addFixture(new Fixture(floorRect));
 		floor.setMassFromShapes(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
@@ -114,7 +115,7 @@ public class Chain extends Test {
 		for (int i = 0; i < LENGTH; i++) {
 			// create a chain link
 			Entity link = new Entity();
-			link.addShape(r);
+			link.addFixture(new Fixture(r));
 			link.setMassFromShapes();
 			link.translate(x, y);
 			this.world.add(link);

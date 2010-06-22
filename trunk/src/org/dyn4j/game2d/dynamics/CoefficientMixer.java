@@ -25,21 +25,42 @@
 package org.dyn4j.game2d.dynamics;
 
 /**
- * Listener notified before and after a simulation step by the {@link World}.
+ * Interface used to customize the way friction and restitution values are mixed.
  * @author William Bittle
  */
-public interface StepListener {
-	/**
-	 * Called before a simulation step is performed.
-	 * @param step the step information
-	 * @param world the simulation {@link World}
-	 */
-	public void begin(Step step, World world);
+public interface CoefficientMixer {
+	/** The default dynamics mixer */
+	public static final CoefficientMixer DEFAULT_MIXER = new CoefficientMixer() {
+		/* (non-Javadoc)
+		 * @see org.dyn4j.game2d.dynamics.DynamicsMixer#mixFriction(double, double)
+		 */
+		@Override
+		public double mixFriction(double friction1, double friction2) {
+			return Math.sqrt(friction1 * friction2);
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.game2d.dynamics.DynamicsMixer#mixRestitution(double, double)
+		 */
+		@Override
+		public double mixRestitution(double restitution1, double restitution2) {
+			return Math.max(restitution1, restitution2);
+		}
+	};
 	
 	/**
-	 * Called after a simulation step has been performed.
-	 * @param step the step information
-	 * @param world the simulation {@link World}
+	 * Method used to mix the coefficients of friction of two {@link Fixture}s.
+	 * @param friction1 the coefficient of friction for the first {@link Fixture}
+	 * @param friction2 the coefficient of friction for the second {@link Fixture}
+	 * @return double
 	 */
-	public void end(Step step, World world);
+	public abstract double mixFriction(double friction1, double friction2);
+	
+	/**
+	 * Method used to mix the coefficients of restitution of two {@link Fixture}s.
+	 * @param restitution1 the coefficient of restitution for the first {@link Fixture}
+	 * @param restitution2 the coefficient of restitution for the second {@link Fixture}
+	 * @return double
+	 */
+	public abstract double mixRestitution(double restitution1, double restitution2);
 }

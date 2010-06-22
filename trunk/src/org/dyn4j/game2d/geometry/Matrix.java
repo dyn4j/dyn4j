@@ -79,11 +79,11 @@ public class Matrix {
 	
 	/**
 	 * Copy constructor.
-	 * @param m the {@link Matrix} to copy
+	 * @param matrix the {@link Matrix} to copy
 	 */
-	public Matrix(Matrix m) {
-		this.m00 = m.m00; this.m01 = m.m01;
-		this.m10 = m.m10; this.m11 = m.m11;
+	public Matrix(Matrix matrix) {
+		this.m00 = matrix.m00; this.m01 = matrix.m01;
+		this.m10 = matrix.m10; this.m11 = matrix.m11;
 	}
 	
 	/* (non-Javadoc)
@@ -94,11 +94,11 @@ public class Matrix {
 		if (obj == null) return false;
 		if (obj == this) return true;
 		if (obj instanceof Matrix) {
-			Matrix o = (Matrix) obj;
-			if (o.m00 == this.m00
-			 && o.m01 == this.m01
-			 && o.m10 == this.m10
-			 && o.m11 == this.m11) {
+			Matrix other = (Matrix) obj;
+			if (other.m00 == this.m00
+			 && other.m01 == this.m01
+			 && other.m10 == this.m10
+			 && other.m11 == this.m11) {
 				return true;
 			}
 		}
@@ -124,14 +124,14 @@ public class Matrix {
 	 * <pre>
 	 * this = this + m
 	 * </pre>
-	 * @param m the {@link Matrix} to add
+	 * @param matrix the {@link Matrix} to add
 	 * @return {@link Matrix} this matrix
 	 */
-	public Matrix add(Matrix m) {
-		this.m00 += m.m00;
-		this.m01 += m.m01;
-		this.m10 += m.m10;
-		this.m11 += m.m11;
+	public Matrix add(Matrix matrix) {
+		this.m00 += matrix.m00;
+		this.m01 += matrix.m01;
+		this.m10 += matrix.m10;
+		this.m11 += matrix.m11;
 		return this;
 	}
 	
@@ -141,17 +141,17 @@ public class Matrix {
 	 * <pre>
 	 * r = this + m
 	 * </pre>
-	 * @param m the {@link Matrix} to add
+	 * @param matrix the {@link Matrix} to add
 	 * @return {@link Matrix} a new matrix containing the result
 	 */
-	public Matrix sum(Matrix m) {
+	public Matrix sum(Matrix matrix) {
 		// make a copy of this matrix
 		Matrix rm = new Matrix(this);
 		// perform the addition
-		rm.m00 += m.m00;
-		rm.m01 += m.m01;
-		rm.m10 += m.m10;
-		rm.m11 += m.m11;
+		rm.m00 += matrix.m00;
+		rm.m01 += matrix.m01;
+		rm.m10 += matrix.m10;
+		rm.m11 += matrix.m11;
 		// return the new matrix
 		return rm;
 	}
@@ -162,14 +162,14 @@ public class Matrix {
 	 * <pre>
 	 * this = this - m
 	 * </pre>
-	 * @param m the {@link Matrix} to subtract
+	 * @param matrix the {@link Matrix} to subtract
 	 * @return {@link Matrix} this matrix
 	 */
-	public Matrix subtract(Matrix m) {
-		this.m00 -= m.m00;
-		this.m01 -= m.m01;
-		this.m10 -= m.m10;
-		this.m11 -= m.m11;
+	public Matrix subtract(Matrix matrix) {
+		this.m00 -= matrix.m00;
+		this.m01 -= matrix.m01;
+		this.m10 -= matrix.m10;
+		this.m11 -= matrix.m11;
 		return this;
 	}
 	
@@ -179,17 +179,17 @@ public class Matrix {
 	 * <pre>
 	 * r = this - m
 	 * </pre>
-	 * @param m the {@link Matrix} to subtract
+	 * @param matrix the {@link Matrix} to subtract
 	 * @return {@link Matrix} a new matrix containing the result
 	 */
-	public Matrix difference(Matrix m) {
+	public Matrix difference(Matrix matrix) {
 		// make a copy of this matrix
 		Matrix rm = new Matrix(this);
 		// perform the addition
-		rm.m00 -= m.m00;
-		rm.m01 -= m.m01;
-		rm.m10 -= m.m10;
-		rm.m11 -= m.m11;
+		rm.m00 -= matrix.m00;
+		rm.m01 -= matrix.m01;
+		rm.m10 -= matrix.m10;
+		rm.m11 -= matrix.m11;
 		// return the new matrix
 		return rm;
 	}
@@ -200,18 +200,18 @@ public class Matrix {
 	 * <pre>
 	 * this = this * m
 	 * </pre>
-	 * @param m the {@link Matrix} to subtract
+	 * @param matrix the {@link Matrix} to subtract
 	 * @return {@link Matrix} this matrix
 	 */
-	public Matrix multiply(Matrix m) {
+	public Matrix multiply(Matrix matrix) {
 		double m00 = this.m00;
 		double m01 = this.m01;
 		double m10 = this.m10;
 		double m11 = this.m11;
-		this.m00 = m00 * m.m00 + m01 * m.m10;
-		this.m01 = m00 * m.m01 + m01 * m.m11;
-		this.m10 = m10 * m.m00 + m11 * m.m10;
-		this.m11 = m10 * m.m01 + m11 * m.m11;
+		this.m00 = m00 * matrix.m00 + m01 * matrix.m10;
+		this.m01 = m00 * matrix.m01 + m01 * matrix.m11;
+		this.m10 = m10 * matrix.m00 + m11 * matrix.m10;
+		this.m11 = m10 * matrix.m01 + m11 * matrix.m11;
 		return this;
 	}
 	
@@ -221,15 +221,15 @@ public class Matrix {
 	 * <pre>
 	 * r = this * m
 	 * </pre>
-	 * @param m the {@link Matrix} to multiply
+	 * @param matrix the {@link Matrix} to multiply
 	 * @return {@link Matrix} a new matrix containing the result
 	 */
-	public Matrix product(Matrix m) {
+	public Matrix product(Matrix matrix) {
 		Matrix rm = new Matrix();
-		rm.m00 = this.m00 * m.m00 + this.m01 * m.m10;
-		rm.m01 = this.m00 * m.m01 + this.m01 * m.m11;
-		rm.m10 = this.m10 * m.m00 + this.m11 * m.m10;
-		rm.m11 = this.m10 * m.m01 + this.m11 * m.m11;
+		rm.m00 = this.m00 * matrix.m00 + this.m01 * matrix.m10;
+		rm.m01 = this.m00 * matrix.m01 + this.m01 * matrix.m11;
+		rm.m10 = this.m10 * matrix.m00 + this.m11 * matrix.m10;
+		rm.m11 = this.m10 * matrix.m01 + this.m11 * matrix.m11;
 		return rm;
 	}
 	
@@ -239,15 +239,15 @@ public class Matrix {
 	 * <pre>
 	 * v = this * v
 	 * </pre>
-	 * @param v the {@link Vector} to multiply
+	 * @param vector the {@link Vector} to multiply
 	 * @return {@link Vector} the vector result
 	 */
-	public Vector multiply(Vector v) {
-		double x = v.x;
-		double y = v.y;
-		v.x = this.m00 * x + this.m01 * y;
-		v.y = this.m10 * x + this.m11 * y;
-		return v;
+	public Vector multiply(Vector vector) {
+		double x = vector.x;
+		double y = vector.y;
+		vector.x = this.m00 * x + this.m01 * y;
+		vector.y = this.m10 * x + this.m11 * y;
+		return vector;
 	}
 	
 	/**
@@ -256,13 +256,13 @@ public class Matrix {
 	 * <pre>
 	 * r = this * v
 	 * </pre>
-	 * @param v the {@link Vector} to multiply
+	 * @param vector the {@link Vector} to multiply
 	 * @return {@link Vector} the vector result
 	 */
-	public Vector product(Vector v) {
+	public Vector product(Vector vector) {
 		Vector r = new Vector();
-		r.x = this.m00 * v.x + this.m01 * v.y;
-		r.y = this.m10 * v.x + this.m11 * v.y;
+		r.x = this.m00 * vector.x + this.m01 * vector.y;
+		r.y = this.m10 * vector.x + this.m11 * vector.y;
 		return r;
 	}
 	
@@ -272,15 +272,15 @@ public class Matrix {
 	 * <pre>
 	 * v = v<sup>T</sup> * this
 	 * </pre>
-	 * @param v the {@link Vector} to multiply
+	 * @param vector the {@link Vector} to multiply
 	 * @return {@link Vector} the vector result
 	 */
-	public Vector multiplyT(Vector v) {
-		double x = v.x;
-		double y = v.y;
-		v.x = this.m00 * x + this.m10 * y;
-		v.y = this.m01 * x + this.m11 * y;
-		return v;
+	public Vector multiplyT(Vector vector) {
+		double x = vector.x;
+		double y = vector.y;
+		vector.x = this.m00 * x + this.m10 * y;
+		vector.y = this.m01 * x + this.m11 * y;
+		return vector;
 	}
 	
 	/**
@@ -289,13 +289,13 @@ public class Matrix {
 	 * <pre>
 	 * r = v<sup>T</sup> * this
 	 * </pre>
-	 * @param v the {@link Vector} to multiply
+	 * @param vector the {@link Vector} to multiply
 	 * @return {@link Vector} the vector result
 	 */
-	public Vector productT(Vector v) {
+	public Vector productT(Vector vector) {
 		Vector r = new Vector();
-		r.x = this.m00 * v.x + this.m10 * v.y;
-		r.y = this.m01 * v.x + this.m11 * v.y;
+		r.x = this.m00 * vector.x + this.m10 * vector.y;
+		r.y = this.m01 * vector.x + this.m11 * vector.y;
 		return r;
 	}
 	

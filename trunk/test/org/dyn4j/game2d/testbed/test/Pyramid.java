@@ -26,6 +26,7 @@ package org.dyn4j.game2d.testbed.test;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
+import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Rectangle;
@@ -85,7 +86,7 @@ public class Pyramid extends Test {
 		// create the floor
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
-		floor.addShape(floorRect);
+		floor.addFixture(new Fixture(floorRect));
 		floor.setMassFromShapes(Mass.Type.INFINITE);
 		this.world.add(floor);
 		
@@ -96,7 +97,8 @@ public class Pyramid extends Test {
 		
 		// reuse the geometry and mass
 		Rectangle rect = new Rectangle(width, height);
-		rect.setDensity(5.0);
+		Fixture fixture = new Fixture(rect);
+		fixture.setDensity(5.0);
 		
 		// the current x position
 		double x = 0.0;
@@ -119,7 +121,7 @@ public class Pyramid extends Test {
 			for (int j = 0; j < num; j++) {
 				// create a body
 				Entity e = new Entity();
-				e.addShape(rect);
+				e.addFixture(fixture);
 				e.setMassFromShapes();
 				// move it to the right position
 				e.translate(x, y);

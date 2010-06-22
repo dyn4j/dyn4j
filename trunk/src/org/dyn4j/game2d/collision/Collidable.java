@@ -24,8 +24,6 @@
  */
 package org.dyn4j.game2d.collision;
 
-import java.util.List;
-
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Shape;
 import org.dyn4j.game2d.geometry.Transform;
@@ -37,20 +35,22 @@ import org.dyn4j.game2d.geometry.Transformable;
  */
 public interface Collidable extends Transformable {
 	/**
-	 * Returns the {@link Convex} {@link Shape}s that make up the {@link Collidable} object.
-	 * @return List&lt;{@link Convex}&gt;
+	 * Returns the {@link Convex} {@link Shape} at the given index.
+	 * @param index the index of the {@link Convex} {@link Shape}
+	 * @return {@link Convex}
 	 */
-	public abstract List<Convex> getShapes();
+	public abstract Convex getShape(int index);
+	
+	/**
+	 * Returns the number of {@link Convex} {@link Shape}s attached
+	 * to this {@link Collidable} object.
+	 * @return int
+	 */
+	public abstract int getShapeCount();
 	
 	/**
 	 * Returns the {@link Transform} of the object.
 	 * @return {@link Transform}
 	 */
 	public abstract Transform getTransform();
-	
-	/**
-	 * Returns this {@link Collidable}'s {@link Filter} object.
-	 * @return {@link Filter}
-	 */
-	public abstract Filter getFilter();
 }

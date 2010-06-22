@@ -25,29 +25,29 @@
 package org.dyn4j.game2d.dynamics;
 
 /**
- * Represents some physical constraint.
+ * Represents some physical constraint between a pair of {@link Body}s.
  * @author William Bittle
  */
 public abstract class Constraint {
 	/** The first {@link Body} */
-	protected Body b1;
+	protected Body body1;
 	
 	/** The second {@link Body} */
-	protected Body b2;
+	protected Body body2;
 	
 	/** Whether the {@link Constraint} has been added to an {@link Island} or not */
 	protected boolean onIsland;
 	
 	/**
 	 * Full constructor.
-	 * @param b1 the first participating {@link Body}
-	 * @param b2 the second participating {@link Body}
+	 * @param body1 the first participating {@link Body}
+	 * @param body2 the second participating {@link Body}
 	 */
-	public Constraint(Body b1, Body b2) {
+	public Constraint(Body body1, Body body2) {
 		// the bodies cannot be null
-		if (b1 == null || b2 == null) throw new NullPointerException("Both body1 and body2 cannot be null.");
-		this.b1 = b1;
-		this.b2 = b2;
+		if (body1 == null || body2 == null) throw new NullPointerException("Neither body1 nor body2 can be null.");
+		this.body1 = body1;
+		this.body2 = body2;
 		this.onIsland = false;
 	}
 	
@@ -57,8 +57,8 @@ public abstract class Constraint {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(this.b1).append("|")
-		.append(this.b2).append("|")
+		sb.append(this.body1).append("|")
+		.append(this.body2).append("|")
 		.append(this.onIsland);
 		return sb.toString();
 	}
@@ -68,7 +68,7 @@ public abstract class Constraint {
 	 * @return {@link Body}
 	 */
 	public Body getBody1() {
-		return this.b1;
+		return this.body1;
 	}
 	
 	/**
@@ -76,23 +76,23 @@ public abstract class Constraint {
 	 * @return {@link Body}
 	 */
 	public Body getBody2() {
-		return this.b2;
+		return this.body2;
 	}
 	
 	/**
 	 * Sets the first {@link Body}.
-	 * @param b1 the first {@link Body}
+	 * @param body1 the first {@link Body}
 	 */
-	public void setBody1(Body b1) {
-		this.b1 = b1;
+	public void setBody1(Body body1) {
+		this.body1 = body1;
 	}
 	
 	/**
 	 * Sets the second {@link Body}.
-	 * @param b2 the second {@link Body}
+	 * @param body2 the second {@link Body}
 	 */
-	public void setBody2(Body b2) {
-		this.b2 = b2;
+	public void setBody2(Body body2) {
+		this.body2 = body2;
 	}
 
 	/**

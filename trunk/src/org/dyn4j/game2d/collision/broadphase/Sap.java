@@ -113,6 +113,7 @@ public class Sap extends AbstractAABBDetector implements BroadphaseDetector {
 	public <E extends Collidable> List<BroadphasePair<E>> detect(List<E> collidables) {
 		// get the size of the list
 		int size = collidables.size();
+		
 		// create a upper packed storage mode array to store our
 		// upper triangular matrix
 		boolean[] matrix = new boolean[size * (size + 1) / 2];
@@ -129,23 +130,24 @@ public class Sap extends AbstractAABBDetector implements BroadphaseDetector {
 		// loop through all the objects and project them on both the
 		// y-axis and the x-axis and assign each object a unique id
 		for (int i = 0; i < size; i++) {
-			E c = collidables.get(i);
-			Transform tx = c.getTransform();
-			List<Convex> shapes = c.getShapes();
-			int sSize = shapes.size();
+			E collidable = collidables.get(i);
+			Transform transform = collidable.getTransform();
+			int sSize = collidable.getShapeCount();
+			
+			Convex convex;
 			
 			// check the size
 			if (sSize > 0) {
 				// prime the intervals
-				Convex s = shapes.get(0);
-				Interval x = s.project(AbstractAABBDetector.X_AXIS, tx);
-				Interval y = s.project(AbstractAABBDetector.Y_AXIS, tx);
+				convex = collidable.getShape(0);
+				Interval x = convex.project(AbstractAABBDetector.X_AXIS, transform);
+				Interval y = convex.project(AbstractAABBDetector.Y_AXIS, transform);
 				
 				// loop over the remaining shapes
 				for (int j = 1; j < sSize; j++) {
-					s = shapes.get(j);
-					x.union(s.project(AbstractAABBDetector.X_AXIS, tx));
-					y.union(s.project(AbstractAABBDetector.Y_AXIS, tx));
+					convex = collidable.getShape(j);
+					x.union(convex.project(AbstractAABBDetector.X_AXIS, transform));
+					y.union(convex.project(AbstractAABBDetector.Y_AXIS, transform));
 				}
 				
 				// add the x projection

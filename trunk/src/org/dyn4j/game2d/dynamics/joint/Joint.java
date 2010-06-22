@@ -27,12 +27,50 @@ package org.dyn4j.game2d.dynamics.joint;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.Constraint;
 import org.dyn4j.game2d.dynamics.Step;
+import org.dyn4j.game2d.geometry.Vector;
 
 /**
  * Represents constrained motion between two {@link Body}s.
  * @author William Bittle
  */
 public abstract class Joint extends Constraint {
+	/**
+	 * Represents a {@link Joint} type.
+	 * <p>
+	 * The type of a joint is static and doesn't
+	 * change therefore the comparison of joint 
+	 * types only does a reference comparison.
+	 * @author William Bittle
+	 */
+	public static class Type {
+		/** The type name */
+		private String name;
+		
+		/**
+		 * Default constructor.
+		 * @param name the name of the type
+		 */
+		public Type(String name) {
+			this.name = name;
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			return this.name;
+		}
+		
+		/**
+		 * Returns the name of this type.
+		 * @return String
+		 */
+		public String getName() {
+			return this.name;
+		}
+	}
+	
 	/** Whether the pair of bodies joined together can collide with each other */
 	protected boolean collisionAllowed;
 	
@@ -76,21 +114,65 @@ public abstract class Joint extends Constraint {
 	 * Performs any initialization of the velocity and position constraints.
 	 * @param step the current step
 	 */
-	public abstract void initializeConstraints(Step step);
+	public void initializeConstraints(Step step) {};
 	
 	/**
 	 * Solves the velocity constraints.
 	 * @param step the current step
 	 */
-	public abstract void solveVelocityConstraints(Step step);
+	public void solveVelocityConstraints(Step step) {};
 	
 	/**
 	 * Solves the position constraints.
+	 * @return boolean true if the position constraints were solved
+	 */
+	public boolean solvePositionConstraints() { return true; };
+	
+	/**
+	 * Returns this joint's type.
+	 * @return {@link Joint.Type}
+	 */
+	public abstract Joint.Type getType();
+	
+	/**
+	 * Returns the anchor point on the first {@link Body} in
+	 * world coordinates.
+	 * @return {@link Vector}
+	 */
+	public abstract Vector getAnchor1();
+	
+	/**
+	 * Returns the anchor point on the second {@link Body} in
+	 * world coordinates.
+	 * @return {@link Vector}
+	 */
+	public abstract Vector getAnchor2();
+	
+	/**
+	 * Returns the force applied to the {@link Body}s in order
+	 * to satisfy the constraint in newtons.
+	 * @param invdt the inverse delta time
+	 * @return {@link Vector}
+	 */
+	public abstract Vector getReactionForce(double invdt);
+	
+	/**
+	 * Returns the torque applied to the {@link Body}s in order
+	 * to satisfy the constraint in newton-meters.
+	 * @param invdt the inverse delta time
+	 * @return double
+	 */
+	public abstract double getReactionTorque(double invdt);
+	
+	/**
+	 * Returns true if this {@link Joint} is active.
 	 * <p>
-	 * Returns true if the position constraints were solved.
+	 * A joint is only active if both joined {@link Body}s are active.
 	 * @return boolean
 	 */
-	public abstract boolean solvePositionConstraints();
+	public boolean isActive() {
+		return this.body1.isActive() && this.body2.isActive();
+	}
 	
 	/**
 	 * Returns the user data for this {@link Joint}.
@@ -114,5 +196,20 @@ public abstract class Joint extends Constraint {
 	 */
 	public boolean isCollisionAllowed() {
 		return this.collisionAllowed;
+	}
+	
+	/**
+	 * Sets whether collision is allowed between the joined {@link Body}s.
+	 * @param flag true if collisions are allowed
+	 */
+	public void setCollisionAllowed(boolean flag) {
+		// is it different than the current value
+		if (this.collisionAllowed != flag) {
+			// wake up both bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+			// set the new value
+			this.collisionAllowed = flag;
+		}
 	}
 }

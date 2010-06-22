@@ -35,6 +35,31 @@ import org.dyn4j.game2d.dynamics.Body;
  * @author William Bittle
  */
 public class Mass {
+	/** 
+	 * The mass used when a mass object cannot be created.
+	 * <p>
+	 * This mass object is immutable.  The {@link #getCenter()} method returns
+	 * a copy of this mass object's center.  The {@link #setType(Type)} method
+	 * throws an UnsupportedOperationException.
+	 */
+	public static final Mass UNDEFINED = new Mass() {
+		/* (non-Javadoc)
+		 * @see org.dyn4j.game2d.geometry.Mass#getCenter()
+		 */
+		public Vector getCenter() {
+			// make sure they cannot modify the default mass's
+			// center of mass
+			return super.getCenter().copy();
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.game2d.geometry.Mass#setType(org.dyn4j.game2d.geometry.Mass.Type)
+		 */
+		public void setType(Type type) {
+			throw new UnsupportedOperationException("Cannot modify the Mass.Type of the UNDEFINED mass.");
+		}
+	};
+	
 	/**
 	 * Enumeration for special mass types.
 	 * @author William Bittle
@@ -44,62 +69,70 @@ public class Mass {
 		NORMAL,
 		/** Indicates that the mass is infinite */
 		INFINITE,
-		/** Indicates that the mass's rotation should not change */
-		FIXED_ROTATION,
-		/** Indicates that the mass's translation should not change */
-		FIXED_TRANSLATION
+		/** Indicates that the mass's rate of rotation should not change */
+		FIXED_ANGULAR_VELOCITY,
+		/** Indicates that the mass's rate of translation should not change */
+		FIXED_VELOCITY,
 	}
 	
-	/** The default density in kg/m<sup>2</sup> */
-	public static final double DEFAULT_DENSITY = 1.0;
+	/** The mass type */
+	private Mass.Type type;
+
+	/** The previous mass type */
+	private Mass.Type previousType;
 	
 	/** The center of mass */
-	protected Vector c;
+	private Vector center;
 	
 	/** The mass in kg */
-	protected double m;
+	private double mass;
 	
 	/** The inertia tensor in kg &middot; m<sup>2</sup> */
-	protected double I;
+	private double inertia;
 	
 	/** The inverse mass */
-	protected double invM;
+	private double invMass;
 		
 	/** The inverse inertia tensor */
-	protected double invI;
+	private double invInertia;
+	
+	/**
+	 * Default constructor.
+	 * <p>
+	 * Creates an infinite mass centered at the origin.
+	 */
+	private Mass() {
+		this.type = Mass.Type.INFINITE;
+		this.previousType = this.type;
+		this.center = new Vector();
+		this.mass = 0.0;
+		this.inertia = 0.0;
+		this.invMass = 0.0;
+		this.invInertia = 0.0;
+	}
 	
 	/**
 	 * Full Constructor.
-	 * @param c center of {@link Mass} in local coordinates
-	 * @param m mass in kg
-	 * @param I inertia tensor in kg &middot; m<sup>2</sup>
+	 * @param center center of {@link Mass} in local coordinates
+	 * @param mass mass in kg
+	 * @param inertia inertia tensor in kg &middot; m<sup>2</sup>
 	 */
-	protected Mass(Vector c, double m, double I) {
-		this.c = c;
-		this.m = m;
-		this.I = I;
-		if (m > 0) {
-			this.invM = 1.0 / m;
+	private Mass(Vector center, double mass, double inertia) {
+		this.type = Mass.Type.NORMAL;
+		this.previousType = this.type;
+		this.center = center.copy();
+		this.mass = mass;
+		this.inertia = inertia;
+		if (mass > 0) {
+			this.invMass = 1.0 / mass;
 		} else {
-			this.invM = 0.0;
+			this.invMass = 0.0;
 		}
-		if (I > 0) {
-			this.invI = 1.0 / I;
+		if (inertia > 0) {
+			this.invInertia = 1.0 / inertia;
 		} else {
-			this.invI = 0.0;
+			this.invInertia = 0.0;
 		}
-	}
-	
-	/**
-	 * Infinite mass constructor.
-	 * @param c center of {@link Mass} in local coordinates
-	 */
-	protected Mass(Vector c) {
-		this.c = c;
-		this.m = 0.0;
-		this.I = 0.0;
-		this.invM = 0.0;
-		this.invI = 0.0;
 	}
 	
 	/**
@@ -108,13 +141,15 @@ public class Mass {
 	 * Performs a deep copy.
 	 * @param mass the {@link Mass} to copy
 	 */
-	protected Mass(Mass mass) {
+	private Mass(Mass mass) {
 		super();
-		this.c = mass.c.copy();
-		this.m = mass.m;
-		this.I = mass.I;
-		this.invM = mass.invM;
-		this.invI = mass.invI;
+		this.type = mass.type;
+		this.previousType = mass.previousType;
+		this.center = mass.center.copy();
+		this.mass = mass.mass;
+		this.inertia = mass.inertia;
+		this.invMass = mass.invMass;
+		this.invInertia = mass.invInertia;
 	}
 	
 	/* (non-Javadoc)
@@ -124,21 +159,10 @@ public class Mass {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("MASS[")
-		.append(c).append("|")
-		.append(m).append("|")
-		.append(I).append("]");
+		.append(center).append("|")
+		.append(mass).append("|")
+		.append(inertia).append("]");
 		return sb.toString();
-	}
-	
-	/**
-	 * Creates an infinite {@link Mass} object with the center at
-	 * the given point.
-	 * @param c the center
-	 * @return {@link Mass} an infinite {@link Mass}
-	 */
-	public static Mass create(Vector c) {
-		if (c == null) throw new NullPointerException("The center point cannot be null.");
-		return new Mass(c.copy());
 	}
 	
 	/**
@@ -152,48 +176,20 @@ public class Mass {
 	}
 	
 	/**
-	 * Creates a specialized {@link Mass} from the given {@link Mass}.
-	 * <p>
-	 * This method is intended to be used with {@link Mass} objects
-	 * who are of type NORMAL.  Using any specialized mass will have
-	 * unexpected results.
-	 * @param mass the {@link Mass} to specialize
-	 * @param type the type of {@link Mass} to create
-	 * @return {@link Mass} the specialized {@link Mass}
-	 */
-	public static Mass create(Mass mass, Mass.Type type) {
-		if (mass == null) throw new NullPointerException("Cannot copy a null mass.");
-		if (type == null) throw new NullPointerException("The type parameter cannot be null.");
-		if (type == Mass.Type.NORMAL) {
-			// perform a simple copy
-			return new Mass(mass);
-		} else if (type == Mass.Type.INFINITE) {
-			// create an infinite mass from the given mass
-			return new Mass(mass.c.copy());
-		} else if (type == Mass.Type.FIXED_ROTATION) {
-			// create a fixed rotation mass
-			return new Mass(mass.c.copy(), mass.m, 0.0);
-		} else {
-			// create a fixed rotation mass
-			return new Mass(mass.c.copy(), 0.0, mass.I);
-		}
-	}
-	
-	/**
 	 * Creates a {@link Mass} object for the given center
 	 * of mass, mass, and inertia tensor.
-	 * @param c the center of mass
-	 * @param m the mass in kg; must be zero or greater
-	 * @param I the inertia tensor kg &middot; m<sup>2</sup>; must be zero or greater
+	 * @param center the center of mass in local coordinates
+	 * @param mass the mass in kg; must be zero or greater
+	 * @param inertia the inertia tensor kg &middot; m<sup>2</sup>; must be zero or greater
 	 * @return {@link Mass} the mass object
 	 */
-	public static Mass create(Vector c, double m, double I) {
+	public static Mass create(Vector center, double mass, double inertia) {
 		// verify the passed in values
-		if (c == null) throw new NullPointerException("The center point cannot be null.");
-		if (m < 0.0) throw new IllegalArgumentException("The mass must be greater than zero.");
-		if (I < 0.0) throw new IllegalArgumentException("The inertia tensor must be greater than zero.");
+		if (center == null) throw new NullPointerException("The center point cannot be null.");
+		if (mass <= 0.0) throw new IllegalArgumentException("The mass must be greater than zero.");
+		if (inertia <= 0.0) throw new IllegalArgumentException("The inertia tensor must be greater than zero.");
 		// create the mass if validation passed
-		return new Mass(c, m, I);
+		return new Mass(center, mass, inertia);
 	}
 	
 	/**
@@ -226,9 +222,9 @@ public class Mass {
 		for (int i = 0; i < size; i++) {
 			Mass mass = masses.get(i);
 			// add the center's up (weighting them by their respective mass)
-			c.add(mass.c.product(mass.m));
+			c.add(mass.center.product(mass.mass));
 			// sum the masses
-			m += mass.m;
+			m += mass.mass;
 		}
 		// compute the center by dividing by the total mass
 		c.divide(m);
@@ -242,9 +238,9 @@ public class Mass {
 			Mass mass = masses.get(i);
 			// compute the distance from the new center to
 			// the current mass's center
-			double d2 = mass.c.distanceSquared(c);
+			double d2 = mass.center.distanceSquared(c);
 			// compute Idis
-			double Idis = mass.I + mass.m * d2;
+			double Idis = mass.inertia + mass.mass * d2;
 			// add it to the sum
 			I += Idis;
 		}
@@ -257,7 +253,37 @@ public class Mass {
 	 * @return boolean
 	 */
 	public boolean isInfinite() {
-		return this.m == 0.0 && this.I == 0.0;
+		return this.type == Mass.Type.INFINITE;
+	}
+	
+	/**
+	 * Returns the previous mass type.
+	 * <p>
+	 * The previous mass type can be used to recall the previous
+	 * type of this mass object if the mass type was changed temporarily
+	 * for some reason.
+	 * @return {@link Mass.Type}
+	 */
+	public Mass.Type getPreviousType() {
+		return this.previousType;
+	}
+	
+	/**
+	 * Sets the mass type.
+	 * @param type the mass type
+	 */
+	public void setType(Mass.Type type) {
+		if (type == null) throw new NullPointerException("The mass type cannot be null.");
+		this.previousType = this.type;
+		this.type = type;
+	}
+	
+	/**
+	 * Returns the mass type.
+	 * @return {@link Mass.Type}
+	 */
+	public Mass.Type getType() {
+		return this.type;
 	}
 	
 	/**
@@ -265,7 +291,7 @@ public class Mass {
 	 * @return {@link Vector}
 	 */
 	public Vector getCenter() {
-		return c;
+		return center;
 	}
 	
 	/**
@@ -273,7 +299,11 @@ public class Mass {
 	 * @return double
 	 */
 	public double getMass() {
-		return m;
+		if (this.type == Mass.Type.INFINITE || this.type == Mass.Type.FIXED_VELOCITY) {
+			return 0.0;
+		} else {
+			return mass;
+		}
 	}
 	
 	/**
@@ -281,7 +311,11 @@ public class Mass {
 	 * @return double
 	 */
 	public double getInertia() {
-		return I;
+		if (this.type == Mass.Type.INFINITE || this.type == Mass.Type.FIXED_ANGULAR_VELOCITY) {
+			return 0.0;
+		} else {
+			return inertia;
+		}
 	}
 	
 	/**
@@ -289,7 +323,11 @@ public class Mass {
 	 * @return double
 	 */
 	public double getInverseMass() {
-		return invM;
+		if (this.type == Mass.Type.INFINITE || this.type == Mass.Type.FIXED_VELOCITY) {
+			return 0.0;
+		} else {
+			return invMass;
+		}
 	}
 	
 	/**
@@ -297,7 +335,11 @@ public class Mass {
 	 * @return double
 	 */
 	public double getInverseInertia() {
-		return invI;
+		if (this.type == Mass.Type.INFINITE || this.type == Mass.Type.FIXED_ANGULAR_VELOCITY) {
+			return 0.0;
+		} else {
+			return invInertia;
+		}
 	}
 }
 

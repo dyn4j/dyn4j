@@ -26,6 +26,7 @@ package org.dyn4j.game2d.testbed.test;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
+import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.dynamics.joint.RevoluteJoint;
 import org.dyn4j.game2d.geometry.Mass;
@@ -88,7 +89,7 @@ public class Bridge extends Test {
 		// create the floor
 		Rectangle floorRect = new Rectangle(40.0, 1.0);
 		Entity floor = new Entity();
-		floor.addShape(floorRect);
+		floor.addFixture(new Fixture(floorRect));
 		floor.setMassFromShapes(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
@@ -98,7 +99,8 @@ public class Bridge extends Test {
 		final double h = 0.25;
 		final double w = 1.0;
 		Rectangle r = new Rectangle(w, h);
-		r.setDensity(20.0);
+		Fixture f = new Fixture(r);
+		f.setDensity(20.0);
 		
 		Entity previous = floor;
 		
@@ -107,7 +109,7 @@ public class Bridge extends Test {
 		for (int i = 0; i < LENGTH; i++) {
 			// create a chain link
 			Entity link = new Entity();
-			link.addShape(r);
+			link.addFixture(f);
 			link.setMassFromShapes();
 			link.translate(-x + w * (i + 0.5), y);
 			this.world.add(link);

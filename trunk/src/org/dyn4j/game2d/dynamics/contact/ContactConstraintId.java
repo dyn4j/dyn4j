@@ -25,6 +25,7 @@
 package org.dyn4j.game2d.dynamics.contact;
 
 import org.dyn4j.game2d.dynamics.Body;
+import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Shape;
 
@@ -35,29 +36,29 @@ import org.dyn4j.game2d.geometry.Shape;
  */
 public class ContactConstraintId {
 	/** The first {@link Body}'s id */
-	protected String b1;
+	protected String body1Id;
 	
 	/** The second {@link Body}'s id */
-	protected String b2;
+	protected String body2Id;
 	
 	/** The first {@link Body}'s {@link Convex} {@link Shape} id */
-	protected String c1;
+	protected String fixture1Id;
 	
 	/** The second {@link Body}'s {@link Convex} {@link Shape} id */
-	protected String c2;
+	protected String fixture2Id;
 	
 	/**
 	 * Full constructor.
-	 * @param b1 the first {@link Body}
-	 * @param b2 the second {@link Body}
-	 * @param c1 the first {@link Body}'s {@link Convex} {@link Shape}
-	 * @param c2 the second {@link Body}'s {@link Convex} {@link Shape}
+	 * @param body1 the first {@link Body}
+	 * @param fixture1 the first {@link Body}'s {@link Fixture}
+	 * @param body2 the second {@link Body}
+	 * @param fixture2 the second {@link Body}'s {@link Fixture}
 	 */
-	public ContactConstraintId(Body b1, Body b2, Convex c1, Convex c2) {
-		this.b1 = b1.getId();
-		this.b2 = b2.getId();
-		this.c1 = c1.getId();
-		this.c2 = c2.getId();
+	public ContactConstraintId(Body body1, Fixture fixture1, Body body2, Fixture fixture2) {
+		this.body1Id = body1.getId();
+		this.body2Id = body2.getId();
+		this.fixture1Id = fixture1.getShape().getId();
+		this.fixture2Id = fixture2.getShape().getId();
 	}
 	
 	/* (non-Javadoc)
@@ -69,11 +70,11 @@ public class ContactConstraintId {
 		if (other == this) return true;
 		if (other instanceof ContactConstraintId) {
 			ContactConstraintId o = (ContactConstraintId) other;
-			if ((this.b1.equals(o.b1) && this.b2.equals(o.b2)
-			  && this.c1.equals(o.c1) && this.c2.equals(o.c2))
+			if ((this.body1Id.equals(o.body1Id) && this.body2Id.equals(o.body2Id)
+			  && this.fixture1Id.equals(o.fixture1Id) && this.fixture2Id.equals(o.fixture2Id))
 			  // the order of the objects doesn't matter
-			 || (this.b1.equals(o.b2) && this.b2.equals(o.b1)
-			  && this.c1.equals(o.c2) && this.c2.equals(o.c1))) {
+			 || (this.body1Id.equals(o.body2Id) && this.body2Id.equals(o.body1Id)
+			  && this.fixture1Id.equals(o.fixture2Id) && this.fixture2Id.equals(o.fixture1Id))) {
 				return true;
 			}
 		}
@@ -86,8 +87,8 @@ public class ContactConstraintId {
 	@Override
 	public int hashCode() {
 		int hash = 1;
-		hash = hash * 31 + b1.hashCode() + b2.hashCode();
-		hash = hash * 31 + c1.hashCode() + c2.hashCode();
+		hash = hash * 31 + body1Id.hashCode() + body2Id.hashCode();
+		hash = hash * 31 + fixture1Id.hashCode() + fixture2Id.hashCode();
 		return hash;
 	}
 	
@@ -98,10 +99,10 @@ public class ContactConstraintId {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("CONTACT_CONSTRAINT_ID[")
-		.append(this.b1).append("|")
-		.append(this.b2).append("|")
-		.append(this.c1).append("|")
-		.append(this.c2).append("]");
+		.append(this.body1Id).append("|")
+		.append(this.body2Id).append("|")
+		.append(this.fixture1Id).append("|")
+		.append(this.fixture2Id).append("]");
 		return sb.toString();
 	}
 }

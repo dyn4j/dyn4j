@@ -187,10 +187,10 @@ public class PolygonTest {
 		TestCase.assertTrue(f.isEdge());
 		TestCase.assertEquals(-1.000, f.max.point.x, 1.0e-3);
 		TestCase.assertEquals(-1.000, f.max.point.y, 1.0e-3);
-		TestCase.assertEquals(-1.000, f.vertices[0].point.x, 1.0e-3);
-		TestCase.assertEquals(-1.000, f.vertices[0].point.y, 1.0e-3);
-		TestCase.assertEquals( 1.000, f.vertices[1].point.x, 1.0e-3);
-		TestCase.assertEquals(-1.000, f.vertices[1].point.y, 1.0e-3);
+		TestCase.assertEquals(-1.000, f.vertex1.point.x, 1.0e-3);
+		TestCase.assertEquals(-1.000, f.vertex1.point.y, 1.0e-3);
+		TestCase.assertEquals( 1.000, f.vertex2.point.x, 1.0e-3);
+		TestCase.assertEquals(-1.000, f.vertex2.point.y, 1.0e-3);
 		
 		Vector pt = p.getFarthestPoint(y, t);
 		

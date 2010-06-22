@@ -27,6 +27,7 @@ package org.dyn4j.game2d.dynamics.joint;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.Settings;
 import org.dyn4j.game2d.dynamics.Step;
+import org.dyn4j.game2d.geometry.Interval;
 import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Matrix;
 import org.dyn4j.game2d.geometry.Transform;
@@ -36,19 +37,37 @@ import org.dyn4j.game2d.geometry.Vector;
  * Represents a pivot joint.
  * @author William Bittle
  */
-// TODO implement motor constraint
+// TODO implement limits
 public class RevoluteJoint extends Joint {
+	/** The joint type */
+	public static final Joint.Type TYPE = new Joint.Type("Revolute");
+	
 	/** The local anchor point on the first {@link Body} */
 	protected Vector localAnchor1;
 	
 	/** The local anchor point on the second {@link Body} */
 	protected Vector localAnchor2;
 	
+	/** Whether the motor for this {@link Joint} is enabled or not */
+	protected boolean motorEnabled;
+	
+	/** The target motor speed; in radians / second */
+	protected double motorSpeed;
+	
+	/** The maximum torque the motor can apply */
+	protected double maxMotorTorque;
+	
 	/** The pivot mass (Kinv = (J * Minv * Jtrans)inv) */
 	protected Matrix invK;
 	
-	/** The pivot force */
-	protected Vector pivotForce;
+	/** The accumulated impulse for warm starting */
+	protected Vector impulse;
+	
+	/** The motor mass that resists motion */
+	protected double motorMass;
+	
+	/** The impulse applied by the motor */
+	protected double motorImpulse;
 	
 	/**
 	 * Optional constructor.
@@ -61,19 +80,44 @@ public class RevoluteJoint extends Joint {
 	}
 	
 	/**
-	 * Full constructor.
+	 * Optional constructor.
+	 * <p>
+	 * Creates a revolute joint between the given {@link Body}s using the given
+	 * world space anchor point.
 	 * @param b1 the first {@link Body}
 	 * @param b2 the second {@link Body}
 	 * @param collisionAllowed whether collision between the joined {@link Body}s is allowed
 	 * @param anchor the anchor point in world coordinates
 	 */
 	public RevoluteJoint(Body b1, Body b2, boolean collisionAllowed, Vector anchor) {
+		this(b1, b2, collisionAllowed, anchor, false, 0.0, 0.0);
+	}
+	
+	/**
+	 * Full constructor.
+	 * <p>
+	 * Creates a revolute joint between the given {@link Body}s using the given
+	 * world space anchor point.
+	 * <p>
+	 * Allows a motor to be built into the joint by setting the target motor speed.
+	 * @param b1 the first {@link Body}
+	 * @param b2 the second {@link Body}
+	 * @param collisionAllowed whether collision between the joined {@link Body}s is allowed
+	 * @param anchor the anchor point in world coordinates
+	 * @param motorEnabled true if the motor should be enabled
+	 * @param motorSpeed the target motor speed in radians/second
+	 * @param maxMotorTorque the maximum torque the motor can apply in newton-meters
+	 */
+	public RevoluteJoint(Body b1, Body b2, boolean collisionAllowed, Vector anchor, 
+			boolean motorEnabled, double motorSpeed, double maxMotorTorque) {
 		super(b1, b2, collisionAllowed);
 		if (anchor == null) throw new NullPointerException("The anchor point cannot be null.");
 		this.localAnchor1 = b1.getLocalPoint(anchor);
 		this.localAnchor2 = b2.getLocalPoint(anchor);
-		// initialize the pivot force
-		this.pivotForce = new Vector();
+		this.impulse = new Vector();
+		this.motorEnabled = motorEnabled;
+		this.motorSpeed = motorSpeed;
+		this.maxMotorTorque = maxMotorTorque;
 	}
 	
 	/* (non-Javadoc)
@@ -86,7 +130,11 @@ public class RevoluteJoint extends Joint {
 		.append(super.toString()).append("|")
 		.append(this.localAnchor1).append("|")
 		.append(this.localAnchor2).append("|")
-		.append(this.pivotForce).append("]");
+		.append(this.impulse).append("|")
+		.append(this.motorEnabled).append("|")
+		.append(this.motorSpeed).append("|")
+		.append(this.maxMotorTorque).append("|")
+		.append(this.motorImpulse).append("]");
 		return sb.toString();
 	}
 	
@@ -95,19 +143,29 @@ public class RevoluteJoint extends Joint {
 	 */
 	@Override
 	public void initializeConstraints(Step step) {
-		Transform t1 = this.b1.getTransform();
-		Transform t2 = this.b2.getTransform();
+		Transform t1 = this.body1.getTransform();
+		Transform t2 = this.body2.getTransform();
 		
-		Mass m1 = this.b1.getMass();
-		Mass m2 = this.b2.getMass();
+		Mass m1 = this.body1.getMass();
+		Mass m2 = this.body2.getMass();
 		
 		double invM1 = m1.getInverseMass();
 		double invM2 = m2.getInverseMass();
 		double invI1 = m1.getInverseInertia();
 		double invI2 = m2.getInverseInertia();
 		
-		Vector r1 = t1.getTransformedR(this.b1.getLocalCenter().to(this.localAnchor1));
-		Vector r2 = t2.getTransformedR(this.b2.getLocalCenter().to(this.localAnchor2));
+		// is the motor enabled?
+		if (this.motorEnabled) {
+			// compute the motor mass
+			if (invI1 <= 0.0 && invI2 <= 0.0) {
+				// cannot have a motor with two bodies
+				// who have fixed angular velocities
+				throw new IllegalStateException("A RevoluteJoint must have at least one body without fixed angular velocity.");
+			}
+		}
+		
+		Vector r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
+		Vector r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
 		
 		// compute the K inverse matrix
 		Matrix K1 = new Matrix();
@@ -126,64 +184,27 @@ public class RevoluteJoint extends Joint {
 		K.add(K2).add(K3);
 		
 		this.invK = K.invert();
-
-//		m_motorMass = 1.0f / (invI1 + invI2);
-
-//		if (m_enableMotor == false)
-//		{
-//			m_motorForce = 0.0f;
-//		}
-
-//		if (m_enableLimit)
-//		{
-//			float32 jointAngle = b2->m_sweep.a - b1->m_sweep.a - m_referenceAngle;
-//			if (b2Abs(m_upperAngle - m_lowerAngle) < 2.0f * b2_angularSlop)
-//			{
-//				m_limitState = e_equalLimits;
-//			}
-//			else if (jointAngle <= m_lowerAngle)
-//			{
-//				if (m_limitState != e_atLowerLimit)
-//				{
-//					m_limitForce = 0.0f;
-//				}
-//				m_limitState = e_atLowerLimit;
-//			}
-//			else if (jointAngle >= m_upperAngle)
-//			{
-//				if (m_limitState != e_atUpperLimit)
-//				{
-//					m_limitForce = 0.0f;
-//				}
-//				m_limitState = e_atUpperLimit;
-//			}
-//			else
-//			{
-//				m_limitState = e_inactiveLimit;
-//				m_limitForce = 0.0f;
-//			}
-//		}
-//		else
-//		{
-//			m_limitForce = 0.0f;
-//		}
-
-//		if (step.warmStarting)
-//		{
-			double dt = step.getDeltaTime();
-			this.b1.getV().add(this.pivotForce.product(invM1 * dt));
-			this.b1.setAv(this.b1.getAv() + dt * invI1 * r1.cross(this.pivotForce));
-			this.b2.getV().subtract(this.pivotForce.product(invM2 * dt));
-			this.b2.setAv(this.b2.getAv() - dt * invI2 * r2.cross(this.pivotForce));
-//		}
-//		else
-//		{
-//			m_pivotForce.SetZero();
-//			m_motorForce = 0.0f;
-//			m_limitForce = 0.0f;
-//		}
-
-//		m_limitPositionImpulse = 0.0f;
+		
+		// compute the motor mass
+		this.motorMass = invI1 + invI2;
+		if (this.motorMass != 0.0) {
+			this.motorMass = 1.0 / this.motorMass;
+		}
+		
+		// check if the motor is still enabled
+		if (!this.motorEnabled) {
+			this.motorImpulse = 0.0;
+		}
+		
+		// account for variable time step
+		this.impulse.multiply(step.getDeltaTimeRatio());
+		this.motorImpulse *= step.getDeltaTimeRatio();
+		
+		// warm start
+		this.body1.getVelocity().add(this.impulse.product(invM1));
+		this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(this.impulse) + this.motorImpulse);
+		this.body2.getVelocity().subtract(this.impulse.product(invM2));
+		this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * r2.cross(this.impulse) - this.motorImpulse);
 	}
 	
 	/* (non-Javadoc)
@@ -191,73 +212,50 @@ public class RevoluteJoint extends Joint {
 	 */
 	@Override
 	public void solveVelocityConstraints(Step step) {
-		Transform t1 = this.b1.getTransform();
-		Transform t2 = this.b2.getTransform();
+		Transform t1 = this.body1.getTransform();
+		Transform t2 = this.body2.getTransform();
 		
-		Mass m1 = this.b1.getMass();
-		Mass m2 = this.b2.getMass();
+		Mass m1 = this.body1.getMass();
+		Mass m2 = this.body2.getMass();
 		
 		double invM1 = m1.getInverseMass();
 		double invM2 = m2.getInverseMass();
 		double invI1 = m1.getInverseInertia();
 		double invI2 = m2.getInverseInertia();
 		
-		Vector r1 = t1.getTransformedR(this.b1.getLocalCenter().to(this.localAnchor1));
-		Vector r2 = t2.getTransformedR(this.b2.getLocalCenter().to(this.localAnchor2));
-
-		// solve the point-to-point constraint
-		Vector v1 = this.b1.getV().sum(r1.cross(this.b1.getAv()));
-		Vector v2 = this.b2.getV().sum(r2.cross(this.b2.getAv()));
+		// solve the motor constraint
+		if (this.motorEnabled) {
+			// get the relative velocity - the target motor speed
+			double C = this.body1.getAngularVelocity() - this.body2.getAngularVelocity() - this.motorSpeed;
+			// get the impulse required to obtain the speed
+			double impulse = this.motorMass * -C;
+			// clamp the impulse between the maximum torque
+			double oldImpulse = this.motorImpulse;
+			double maxImpulse = this.maxMotorTorque * step.getDeltaTime();
+			this.motorImpulse = Interval.clamp(this.motorImpulse + impulse, -maxImpulse, maxImpulse);
+			// get the impulse we need to apply to the bodies
+			impulse = this.motorImpulse - oldImpulse;
+			
+			// apply the impulse
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * impulse);
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * impulse);
+        }
+		
+		// solve the point-to-point constraint		
+		Vector r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
+		Vector r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
+		
+		Vector v1 = this.body1.getVelocity().sum(r1.cross(this.body1.getAngularVelocity()));
+		Vector v2 = this.body2.getVelocity().sum(r2.cross(this.body2.getAngularVelocity()));
 		Vector pivotV = v1.subtract(v2);
 		
-		double dt = step.getDeltaTime();
 		Vector P = this.invK.multiply(pivotV).negate();
-		this.pivotForce.add(P.product(1.0 / dt));
+		this.impulse.add(P);
 		
-		this.b1.getV().add(P.product(invM1));
-		this.b1.setAv(this.b1.getAv() + invI1 * r1.cross(P));
-		this.b2.getV().subtract(P.product(invM2));
-		this.b2.setAv(this.b2.getAv() - invI2 * r2.cross(P));
-
-//		if (m_enableMotor && m_limitState != e_equalLimits)
-//		{
-//			float32 motorCdot = b2->m_angularVelocity - b1->m_angularVelocity - m_motorSpeed;
-//			float32 motorForce = -step.inv_dt * m_motorMass * motorCdot;
-//			float32 oldMotorForce = m_motorForce;
-//			m_motorForce = b2Clamp(m_motorForce + motorForce, -m_maxMotorTorque, m_maxMotorTorque);
-//			motorForce = m_motorForce - oldMotorForce;
-//
-//			float32 P = step.dt * motorForce;
-//			b1->m_angularVelocity -= b1->m_invI * P;
-//			b2->m_angularVelocity += b2->m_invI * P;
-//		}
-//
-//		if (m_enableLimit && m_limitState != e_inactiveLimit)
-//		{
-//			float32 limitCdot = b2->m_angularVelocity - b1->m_angularVelocity;
-//			float32 limitForce = -step.inv_dt * m_motorMass * limitCdot;
-//
-//			if (m_limitState == e_equalLimits)
-//			{
-//				m_limitForce += limitForce;
-//			}
-//			else if (m_limitState == e_atLowerLimit)
-//			{
-//				float32 oldLimitForce = m_limitForce;
-//				m_limitForce = b2Max(m_limitForce + limitForce, 0.0f);
-//				limitForce = m_limitForce - oldLimitForce;
-//			}
-//			else if (m_limitState == e_atUpperLimit)
-//			{
-//				float32 oldLimitForce = m_limitForce;
-//				m_limitForce = b2Min(m_limitForce + limitForce, 0.0f);
-//				limitForce = m_limitForce - oldLimitForce;
-//			}
-//
-//			float32 P = step.dt * limitForce;
-//			b1->m_angularVelocity -= b1->m_invI * P;
-//			b2->m_angularVelocity += b2->m_invI * P;
-//		}
+		this.body1.getVelocity().add(P.product(invM1));
+		this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(P));
+		this.body2.getVelocity().subtract(P.product(invM2));
+		this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * r2.cross(P));
 	}
 	
 	/* (non-Javadoc)
@@ -268,11 +266,11 @@ public class RevoluteJoint extends Joint {
 		Settings settings = Settings.getInstance();
 		double linearTolerance = settings.getLinearTolerance();
 		
-		Transform t1 = this.b1.getTransform();
-		Transform t2 = this.b2.getTransform();
+		Transform t1 = this.body1.getTransform();
+		Transform t2 = this.body2.getTransform();
 		
-		Mass m1 = this.b1.getMass();
-		Mass m2 = this.b2.getMass();
+		Mass m1 = this.body1.getMass();
+		Mass m2 = this.body2.getMass();
 		
 		double invM1 = m1.getInverseMass();
 		double invM2 = m2.getInverseMass();
@@ -281,11 +279,11 @@ public class RevoluteJoint extends Joint {
 		
 		double error = 0.0f;
 
-		Vector r1 = t1.getTransformedR(this.b1.getLocalCenter().to(this.localAnchor1));
-		Vector r2 = t2.getTransformedR(this.b2.getLocalCenter().to(this.localAnchor2));
+		Vector r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
+		Vector r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
 		
-		Vector p1 = this.b1.getWorldCenter().add(r1);
-		Vector p2 = this.b2.getWorldCenter().add(r2);
+		Vector p1 = this.body1.getWorldCenter().add(r1);
+		Vector p2 = this.body2.getWorldCenter().add(r2);
 		Vector p = p1.difference(p2);
 
 		error = p.getMagnitude();
@@ -309,83 +307,138 @@ public class RevoluteJoint extends Joint {
 		Vector J = K.solve(p.negate());
 
 		// translate and rotate the objects
-		this.b1.translate(J.product(invM1));
-		this.b1.rotateAboutCenter(invI1 * r1.cross(J));
+		this.body1.translate(J.product(invM1));
+		this.body1.rotateAboutCenter(invI1 * r1.cross(J));
 		
-		this.b2.translate(J.product(-invM2));
-		this.b2.rotateAboutCenter(-invI2 * r2.cross(J));
-
-		// Handle limits.
-//		float32 angularError = 0.0f;
-//
-//		if (m_enableLimit && m_limitState != e_inactiveLimit)
-//		{
-//			float32 angle = b2->m_sweep.a - b1->m_sweep.a - m_referenceAngle;
-//			float32 limitImpulse = 0.0f;
-//
-//			if (m_limitState == e_equalLimits)
-//			{
-//				// Prevent large angular corrections
-//				float32 limitC = b2Clamp(angle, -b2_maxAngularCorrection, b2_maxAngularCorrection);
-//				limitImpulse = -m_motorMass * limitC;
-//				angularError = b2Abs(limitC);
-//			}
-//			else if (m_limitState == e_atLowerLimit)
-//			{
-//				float32 limitC = angle - m_lowerAngle;
-//				angularError = b2Max(0.0f, -limitC);
-//
-//				// Prevent large angular corrections and allow some slop.
-//				limitC = b2Clamp(limitC + b2_angularSlop, -b2_maxAngularCorrection, 0.0f);
-//				limitImpulse = -m_motorMass * limitC;
-//				float32 oldLimitImpulse = m_limitPositionImpulse;
-//				m_limitPositionImpulse = b2Max(m_limitPositionImpulse + limitImpulse, 0.0f);
-//				limitImpulse = m_limitPositionImpulse - oldLimitImpulse;
-//			}
-//			else if (m_limitState == e_atUpperLimit)
-//			{
-//				float32 limitC = angle - m_upperAngle;
-//				angularError = b2Max(0.0f, limitC);
-//
-//				// Prevent large angular corrections and allow some slop.
-//				limitC = b2Clamp(limitC - b2_angularSlop, 0.0f, b2_maxAngularCorrection);
-//				limitImpulse = -m_motorMass * limitC;
-//				float32 oldLimitImpulse = m_limitPositionImpulse;
-//				m_limitPositionImpulse = b2Min(m_limitPositionImpulse + limitImpulse, 0.0f);
-//				limitImpulse = m_limitPositionImpulse - oldLimitImpulse;
-//			}
-//
-//			b1->m_sweep.a -= b1->m_invI * limitImpulse;
-//			b2->m_sweep.a += b2->m_invI * limitImpulse;
-//
-//			b1->SynchronizeTransform();
-//			b2->SynchronizeTransform();
-//		}
-
+		this.body2.translate(J.product(-invM2));
+		this.body2.rotateAboutCenter(-invI2 * r2.cross(J));
+		
 		return error <= linearTolerance;
 	}
 	
-	/**
-	 * Returns the world space anchor point for this joint.
-	 * @return {@link Vector}
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.dynamics.joint.Joint#getType()
 	 */
-	public Vector getAnchorPoint() {
-		return this.b1.getWorldPoint(this.localAnchor1);
+	@Override
+	public Type getType() {
+		return RevoluteJoint.TYPE;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.dynamics.joint.Joint#getAnchor1()
+	 */
+	@Override
+	public Vector getAnchor1() {
+		return this.body1.getWorldPoint(this.localAnchor1);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.dynamics.joint.Joint#getAnchor2()
+	 */
+	@Override
+	public Vector getAnchor2() {
+		return this.body2.getWorldPoint(this.localAnchor2);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.dynamics.joint.Joint#getReactionForce(double)
+	 */
+	@Override
+	public Vector getReactionForce(double invdt) {
+		return this.impulse.product(invdt);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.dynamics.joint.Joint#getReactionTorque(double)
+	 */
+	@Override
+	public double getReactionTorque(double invdt) {
+		return 0;
 	}
 	
 	/**
-	 * Returns the local anchor point on the first {@link Body}.
-	 * @return {@link Vector}
+	 * Returns true if this motor is enabled.
+	 * @return boolean
 	 */
-	public Vector getLocalAnchor1() {
-		return this.localAnchor1;
+	public boolean isMotorEnabled() {
+		return this.motorEnabled;
 	}
-
+	
 	/**
-	 * Returns the local anchor point on the second {@link Body}.
-	 * @return {@link Vector}
+	 * Sets whether the motor for this joint is enabled or not.
+	 * @param flag true if the motor should be enabled
 	 */
-	public Vector getLocalAnchor2() {
-		return this.localAnchor2;
+	public void setMotorEnabled(boolean flag) {
+		// did the state change?
+		if (flag != this.motorEnabled) {
+			// wake up the associated bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+			// set the flag
+			this.motorEnabled = flag;
+		}
+	}
+	
+	/**
+	 * Returns the maximum torque this motor will apply in newton-meters.
+	 * @return double
+	 */
+	public double getMaxMotorTorque() {
+		return this.maxMotorTorque;
+	}
+	
+	/**
+	 * Sets the maximum torque this motor will apply in newton-meters.
+	 * @param maxMotorTorque the maximum motor torque in newton-meters
+	 */
+	public void setMaxMotorTorque(double maxMotorTorque) {
+		// see if the maximum is different than the current
+		if (this.maxMotorTorque != maxMotorTorque) {
+			// wake up the bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+			// set the max
+			this.maxMotorTorque = maxMotorTorque;
+		}
+	}
+	
+	/**
+	 * Returns the desired motor speed in radians/second.
+	 * @return double
+	 */
+	public double getMotorSpeed() {
+		return motorSpeed;
+	}
+	
+	/**
+	 * Sets the target motor speed in radians/second
+	 * @param motorSpeed the motor speed desired in radians/second
+	 */
+	public void setMotorSpeed(double motorSpeed) {
+		// check if the given motor speed is different than the current
+		if (this.motorSpeed != motorSpeed) {
+			// if so, then wake up the bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+			// set the motor speed
+			this.motorSpeed = motorSpeed;
+		}
+	}
+	
+	/**
+	 * Returns the relative speed at which the {@link Body}s
+	 * are rotating in radians/second.
+	 * @return double
+	 */
+	public double getJointSpeed() {
+		return this.body2.getAngularVelocity() - this.body1.getAngularVelocity();
+	}
+	
+	/**
+	 * Returns the motor torque in newton-meters.
+	 * @return double
+	 */
+	public double getMotorTorque() {
+		return this.motorImpulse;
 	}
 }

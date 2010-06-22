@@ -28,6 +28,7 @@ import java.util.Random;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
+import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Mass;
@@ -92,14 +93,14 @@ public class Funnel extends Test {
 		// create the floor
 		Rectangle floorShape = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
-		floor.addShape(floorShape);
+		floor.addFixture(new Fixture(floorShape));
 		floor.setMassFromShapes(Mass.Type.INFINITE);
 		this.world.add(floor);
 		
 		// create the funnel sides
 		Rectangle leftShape = new Rectangle(1.0, 7.0);
 		Entity left = new Entity();
-		left.addShape(leftShape);
+		left.addFixture(new Fixture(leftShape));
 		left.setMassFromShapes(Mass.Type.INFINITE);
 		left.translate(-8.0, 8.0);
 		left.rotateAboutCenter(Math.toRadians(30.0));
@@ -107,7 +108,7 @@ public class Funnel extends Test {
 		
 		Rectangle rightShape = new Rectangle(1.0, 7.0);
 		Entity right = new Entity();
-		right.addShape(rightShape);
+		right.addFixture(new Fixture(rightShape));
 		right.setMassFromShapes(Mass.Type.INFINITE);
 		right.translate(8.0, 8.0);
 		right.rotateAboutCenter(-Math.toRadians(30.0));
@@ -130,12 +131,14 @@ public class Funnel extends Test {
 			Entity e = new Entity();
 			if (t == 0) {
 				Rectangle r = new Rectangle(s, s);
-				r.setDensity(0.1);
-				e.addShape(r);
+				Fixture f = new Fixture(r);
+				f.setDensity(0.1);
+				e.addFixture(f);
 			} else {
 				Circle c = new Circle(s * 0.5);
-				c.setDensity(0.1);
-				e.addShape(c);
+				Fixture f = new Fixture(c);
+				f.setDensity(0.1);
+				e.addFixture(f);
 			}
 			e.setMassFromShapes();
 			e.translate(x, y);

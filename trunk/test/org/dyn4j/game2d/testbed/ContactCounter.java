@@ -28,11 +28,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dyn4j.game2d.dynamics.Body;
+import org.dyn4j.game2d.dynamics.Step;
 import org.dyn4j.game2d.dynamics.StepListener;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.dynamics.contact.ContactListener;
 import org.dyn4j.game2d.dynamics.contact.ContactPoint;
 import org.dyn4j.game2d.dynamics.contact.PersistedContactPoint;
+import org.dyn4j.game2d.dynamics.contact.SensedContactPoint;
 import org.dyn4j.game2d.dynamics.contact.SolvedContactPoint;
 import org.dyn4j.game2d.geometry.Vector;
 
@@ -60,10 +62,10 @@ public class ContactCounter implements ContactListener, StepListener {
 	private List<ContactPoint> contacts = new ArrayList<ContactPoint>();
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.dynamics.contact.ContactListener#sensed(org.dyn4j.game2d.dynamics.contact.ContactPoint)
+	 * @see org.dyn4j.game2d.dynamics.contact.ContactListener#sensed(org.dyn4j.game2d.dynamics.contact.SensedContactPoint)
 	 */
 	@Override
-	public void sensed(ContactPoint p) {
+	public void sensed(SensedContactPoint p) {
 		this.sensed++;
 		this.contacts.add(new ContactPoint(p));
 	}
@@ -72,7 +74,7 @@ public class ContactCounter implements ContactListener, StepListener {
 	 * @see org.dyn4j.game2d.dynamics.contact.ContactListener#add(org.dyn4j.game2d.dynamics.contact.ContactPoint)
 	 */
 	@Override
-	public void added(ContactPoint c) {
+	public void begin(ContactPoint c) {
 		this.added++;
 	}
 	
@@ -88,24 +90,30 @@ public class ContactCounter implements ContactListener, StepListener {
 	 * @see org.dyn4j.game2d.dynamics.contact.ContactListener#remove(org.dyn4j.game2d.dynamics.contact.ContactPoint)
 	 */
 	@Override
-	public void removed(ContactPoint c) {
+	public void end(ContactPoint c) {
 		this.removed++;
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.dynamics.contact.ContactListener#solved(org.dyn4j.game2d.dynamics.contact.SolvedContactPoint)
+	 * @see org.dyn4j.game2d.dynamics.contact.ContactListener#preSolve(org.dyn4j.game2d.dynamics.contact.ContactPoint)
 	 */
 	@Override
-	public void solved(SolvedContactPoint c) {
+	public void preSolve(ContactPoint point) {}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.dynamics.contact.ContactListener#postSolve(org.dyn4j.game2d.dynamics.contact.SolvedContactPoint)
+	 */
+	@Override
+	public void postSolve(SolvedContactPoint c) {
 		this.solved++;
 		this.contacts.add(new SolvedContactPoint(c));
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.dynamics.StepListener#step(org.dyn4j.game2d.dynamics.World)
+	 * @see org.dyn4j.game2d.dynamics.StepListener#begin()
 	 */
 	@Override
-	public void step(World world) {
+	public void begin(Step step, World world) {
 		// reset the values
 		this.sensed = 0;
 		this.added = 0;
@@ -114,6 +122,12 @@ public class ContactCounter implements ContactListener, StepListener {
 		this.solved = 0;
 		this.contacts.clear();
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.dynamics.StepListener#end(org.dyn4j.game2d.dynamics.Step, org.dyn4j.game2d.dynamics.World)
+	 */
+	@Override
+	public void end(Step step, World world) {}
 
 	/**
 	 * Returns the number of new contacts.

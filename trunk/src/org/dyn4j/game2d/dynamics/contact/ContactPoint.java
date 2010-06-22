@@ -25,8 +25,7 @@
 package org.dyn4j.game2d.dynamics.contact;
 
 import org.dyn4j.game2d.dynamics.Body;
-import org.dyn4j.game2d.geometry.Convex;
-import org.dyn4j.game2d.geometry.Shape;
+import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.geometry.Vector;
 
 /**
@@ -49,11 +48,11 @@ public class ContactPoint {
 	/** The second {@link Body} in contact */
 	protected Body body2;
 	
-	/** The first {@link Body}'s {@link Convex} {@link Shape} that is in contact */
-	protected Convex convex1;
+	/** The first {@link Body}'s {@link Fixture} */
+	protected Fixture fixture1;
 	
-	/** The second {@link Body}'s {@link Convex} {@link Shape} that is in contact */
-	protected Convex convex2;
+	/** The second {@link Body}'s {@link Fixture} */
+	protected Fixture fixture2;
 	
 	/** Default constructor */
 	public ContactPoint() {}
@@ -64,36 +63,35 @@ public class ContactPoint {
 	 * @param normal the world space contact normal
 	 * @param depth the penetration depth
 	 * @param body1 the first {@link Body} in contact
-	 * @param convex1 the first {@link Body}'s {@link Convex} {@link Shape} in contact
+	 * @param fixture1 the first {@link Body}'s {@link Fixture}
 	 * @param body2 the second {@link Body} in contact
-	 * @param convex2 the second {@link Body}'s {@link Convex} {@link Shape} in contact
+	 * @param fixture2 the second {@link Body}'s {@link Fixture}
 	 */
 	public ContactPoint(Vector point, Vector normal, double depth,
-			Body body1, Convex convex1, Body body2, Convex convex2) {
+			Body body1, Fixture fixture1, Body body2, Fixture fixture2) {
 		this.point = point;
 		this.normal = normal;
 		this.depth = depth;
 		this.body1 = body1;
-		this.convex1 = convex1;
+		this.fixture1 = fixture1;
 		this.body2 = body2;
-		this.convex2 = convex2;
+		this.fixture2 = fixture2;
 	}
 	
 	/**
-	 * Copy constructor.
-	 * <p>
-	 * This performs a shallow copy.
-	 * @param cp the {@link ContactPoint} to copy
+	 * Copy constructor (shallow).
+	 * @param contactPoint the {@link ContactPoint} to copy
 	 */
-	public ContactPoint(ContactPoint cp) {
+	public ContactPoint(ContactPoint contactPoint) {
+		if (contactPoint == null) throw new NullPointerException("Cannot copy a null contact point.");
 		// shallow copy all the fields
-		this.point = cp.point;
-		this.normal = cp.normal;
-		this.depth = cp.depth;
-		this.body1 = cp.body1;
-		this.body2 = cp.body2;
-		this.convex1 = cp.convex1;
-		this.convex2 = cp.convex2;
+		this.point = contactPoint.point;
+		this.normal = contactPoint.normal;
+		this.depth = contactPoint.depth;
+		this.body1 = contactPoint.body1;
+		this.body2 = contactPoint.body2;
+		this.fixture1 = contactPoint.fixture1;
+		this.fixture2 = contactPoint.fixture2;
 	}
 	
 	/* (non-Javadoc)
@@ -108,8 +106,8 @@ public class ContactPoint {
 		.append(this.depth).append("|")
 		.append(this.body1).append("|")
 		.append(this.body2).append("|")
-		.append(this.convex1).append("|")
-		.append(this.convex2).append("]");
+		.append(this.fixture1).append("|")
+		.append(this.fixture2).append("]");
 		return sb.toString();
 	}
 	
@@ -154,18 +152,18 @@ public class ContactPoint {
 	}
 	
 	/**
-	 * Returns the first {@link Body}'s {@link Convex} {@link Shape}.
-	 * @return {@link Convex}
+	 * Returns the first {@link Body}'s {@link Fixture}.
+	 * @return {@link Fixture}
 	 */
-	public Convex getConvex1() {
-		return convex1;
+	public Fixture getFixture1() {
+		return fixture1;
 	}
 	
 	/**
-	 * Returns the second {@link Body}'s {@link Convex} {@link Shape}.
-	 * @return {@link Convex}
+	 * Returns the second {@link Body}'s {@link Fixture}.
+	 * @return {@link Fixture}
 	 */
-	public Convex getConvex2() {
-		return convex2;
+	public Fixture getFixture2() {
+		return fixture2;
 	}
 }

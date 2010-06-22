@@ -30,7 +30,7 @@ package org.dyn4j.game2d.geometry;
  */
 public class Segment extends Wound implements Convex, Shape, Transformable {
 	/** The segment {@link Shape.Type} */
-	public static final Shape.Type TYPE = new Shape.Type();
+	public static final Shape.Type TYPE = new Shape.Type("Segment");
 	
 	/** The segment length */
 	protected double length;
@@ -48,15 +48,19 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 		if (point1.equals(point2)) {
 			throw new IllegalArgumentException("A line segment must have two different vertices.");
 		}
+		// assign the verices
 		this.vertices = new Vector[2];
-		this.normals = new Vector[2];
 		this.vertices[0] = point1;
 		this.vertices[1] = point2;
+		// create the normals
+		this.normals = new Vector[2];
 		this.normals[0] = point1.to(point2).right();
 		this.normals[0].normalize();
 		this.normals[1] = point1.to(point2).left();
 		this.normals[1].normalize();
+		// get the center
 		this.center = Geometry.getAverageCenter(this.vertices);
+		// compute the length
 		this.length = point1.distance(point2);
 	}
 	
@@ -385,10 +389,11 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 		Vertex vp1 = new Vertex(p1, 0);
 		Vertex vp2 = new Vertex(p2, 1);
 		Vertex vm = new Vertex(max, index);
+		// make sure the edge is the right winding
 		if (p1.to(p2).right().dot(n) > 0) {
-			return new Edge(new Vertex[] {vp2, vp1}, p2.to(p1), vm, 0);
+			return new Edge(vp2, vp1, vm, p2.to(p1), 0);
 		} else {
-			return new Edge(new Vertex[] {vp1, vp2}, p1.to(p2), vm, 0);
+			return new Edge(vp1, vp2, vm, p1.to(p2), 0);
 		}
 	}
 	
@@ -416,23 +421,23 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	
 	/**
 	 * Creates a {@link Mass} object using the geometric properties of
-	 * this {@link Segment} and the set density.
+	 * this {@link Segment} and the given density.
 	 * <pre>
 	 * m = d * length
 	 * I = l<sup>2</sup> * m / 12
 	 * </pre>
+	 * @param density the density in kg/m<sup>2</sup>
 	 * @return {@link Mass} the {@link Mass} of this {@link Segment}
 	 */
 	@Override
-	public Mass createMass() {
-		double d = this.density;
-		double l = this.length;
+	public Mass createMass(double density) {
+		double length = this.length;
 		// compute the mass
-		double m = d * l;
+		double mass = density * length;
 		// compute the inertia tensor
-		double I = 1.0 / 12.0 * l * l * m;
+		double inertia = 1.0 / 12.0 * length * length * mass;
 		// since we know that a line segment has only two points we can
 		// feel safe using the averaging method for the centroid
-		return new Mass(this.center.copy(), m, I);
+		return Mass.create(this.center, mass, inertia);
 	}
 }

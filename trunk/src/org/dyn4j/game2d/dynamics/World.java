@@ -32,6 +32,7 @@ import java.util.Stack;
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.BoundsAdapter;
 import org.dyn4j.game2d.collision.BoundsListener;
+import org.dyn4j.game2d.collision.Filter;
 import org.dyn4j.game2d.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.game2d.collision.broadphase.BroadphasePair;
 import org.dyn4j.game2d.collision.broadphase.Sap;
@@ -49,6 +50,7 @@ import org.dyn4j.game2d.dynamics.contact.ContactEdge;
 import org.dyn4j.game2d.dynamics.contact.ContactListener;
 import org.dyn4j.game2d.dynamics.contact.ContactManager;
 import org.dyn4j.game2d.dynamics.contact.ContactPoint;
+import org.dyn4j.game2d.dynamics.contact.SensedContactPoint;
 import org.dyn4j.game2d.dynamics.joint.Joint;
 import org.dyn4j.game2d.dynamics.joint.JointEdge;
 import org.dyn4j.game2d.geometry.Convex;
@@ -100,6 +102,9 @@ public class World {
 	/** The {@link StepListener} */
 	protected StepListener stepListener;
 	
+	/** The {@link CoefficientMixer} */
+	protected CoefficientMixer coefficientMixer;
+	
 	/** The {@link Body} list */
 	protected List<Body> bodies;
 	
@@ -113,6 +118,15 @@ public class World {
 	protected double time;
 	
 	/**
+	 * Default constructor.
+	 * <p>
+	 * Builds a simulation {@link World} without bounds.
+	 */
+	public World() {
+		this(Bounds.UNBOUNDED);
+	}
+	
+	/**
 	 * Full constructor.
 	 * <p>
 	 * Defaults to using {@link #EARTH_GRAVITY}, {@link Sap} broad-phase,
@@ -120,15 +134,10 @@ public class World {
 	 * @param bounds the bounds of the {@link World}
 	 */
 	public World(Bounds bounds) {
-		super();
+		if (bounds == null) throw new NullPointerException("The bounds cannot be null.  Use the Bounds.UNBOUNDED object to have no bounds.");
 		this.step = new Step();
 		this.gravity = World.EARTH_GRAVITY;
-		// check if the passed bounds object is null
-		if (bounds == null) {
-			bounds = Bounds.UNBOUNDED;
-		} else {
-			this.bounds = bounds;
-		}
+		this.bounds = bounds;
 		this.broadphaseDetector = new Sap();
 		this.narrowphaseDetector = new Gjk();
 		this.manifoldSolver = new ClippingManifoldSolver();
@@ -138,6 +147,7 @@ public class World {
 		this.boundsListener = new BoundsAdapter();
 		this.destructionListener = new DestructionAdapter();
 		this.stepListener = new StepAdapter();
+		this.coefficientMixer = CoefficientMixer.DEFAULT_MIXER;
 		this.bodies = new ArrayList<Body>();
 		this.joints = new ArrayList<Joint>();
 		this.island = new Island();
@@ -146,10 +156,24 @@ public class World {
 	
 	/**
 	 * Updates the {@link World}.
-	 * @param elapsedTime in seconds
+	 * <p>
+	 * This method will only update the world given the step frequency contained
+	 * in the {@link Settings} object.  You can use the {@link StepListener} interface
+	 * to listen for when a step is actually performed.  In addition, this method will
+	 * return true if a step was performed.
+	 * <p>
+	 * Alternatively you can call the {@link #update(double)} method to use a variable
+	 * time step.
+	 * <p>
+	 * This method immediately returns if the given elapsedTime is less than or equal to
+	 * zero.
+	 * @see #update(double)
+	 * @param elapsedTime the elapsed time in seconds
 	 * @return boolean true if the {@link World} performed a simulation step
 	 */
 	public boolean update(double elapsedTime) {
+		// make sure the update time is greater than zero
+		if (elapsedTime <= 0.0) return false;
 		// update the time
 		this.time += elapsedTime;
 		// check the frequency in settings
@@ -169,16 +193,52 @@ public class World {
 	}
 	
 	/**
-	 * Performs n simulation steps using the step frequency in {@link Settings}.
-	 * @param n the number of simulation steps to perform
+	 * Updates the {@link World}.
+	 * <p>
+	 * This method will update the world on every call.  Unlike the {@link #update(double)}
+	 * method, this method uses the given elapsed time and does not attempt to update the world
+	 * in a set interval.
+	 * <p>
+	 * This method immediately returns if the given elapsedTime is less than or equal to
+	 * zero.
+	 * @see #update(double)
+	 * @param elapsedTime the elapsed time in seconds
 	 */
-	public void step(int n) {
+	public void updatev(double elapsedTime) {
+		// make sure the update time is greater than zero
+		if (elapsedTime <= 0.0) return;
+		// update the step
+		this.step.update(elapsedTime);
+		// step the world
+		this.step();
+	}
+	
+	/**
+	 * Performs the given number of simulation steps using the step frequency in {@link Settings}.
+	 * @param steps the number of simulation steps to perform
+	 */
+	public void step(int steps) {
 		// get the frequency from settings
 		double invhz = Settings.getInstance().getStepFrequency();
 		// perform the steps
-		for (int i = 0; i < n; i++) {
+		this.step(steps, invhz);
+	}
+	
+	/**
+	 * Performs the given number of simulation steps using the given step frequency.
+	 * <p>
+	 * This method immediately returns if the given elapsedTime is less than or equal to
+	 * zero.
+	 * @param steps the number of simulation steps to perform
+	 * @param elapsedTime the elapsed time for each step
+	 */
+	public void step(int steps, double elapsedTime) {
+		// make sure the update time is greater than zero
+		if (elapsedTime <= 0.0) return;
+		// perform the steps
+		for (int i = 0; i < steps; i++) {
 			// update the step object
-			this.step.update(invhz);
+			this.step.update(elapsedTime);
 			// step the world
 			this.step();
 		}
@@ -186,10 +246,18 @@ public class World {
 	
 	/**
 	 * Steps the {@link World} using the current {@link Step}.
+	 * <p>
+	 * Performs collision detection and resolution.
+	 * <p>
+	 * Use the various listeners to listen for events during the execution of
+	 * this method.
+	 * <p>
+	 * Take care when performing methods on the {@link World} object in any
+	 * event listeners tied to this method.
 	 */
 	protected void step() {
 		// notify the step listener
-		this.stepListener.step(this);
+		this.stepListener.begin(this.step, this);
 		
 		// clear the old contact list (does NOT clear the contact map
 		// which is used to warm start)
@@ -202,20 +270,20 @@ public class World {
 		// clear the body contacts
 		// clear the island flag
 		for (int i = 0; i < size; i++) {
-			Body b = this.bodies.get(i);
-			// skip if already frozen
-			if (b.isFrozen()) continue;
+			Body body = this.bodies.get(i);
+			// skip if already not active
+			if (!body.isActive()) continue;
 			// check if the body is out of bounds
-			if (this.bounds.isOutside(b)) {
-				// set the body to frozen
-				b.freeze();
+			if (this.bounds.isOutside(body)) {
+				// set the body to inactive
+				body.setActive(false);
 				// if so, notify via the listener
-				this.boundsListener.outside(b);
+				this.boundsListener.outside(body);
 			}
 			// clear all the old contacts
-			b.contacts.clear();
-			// remove the island flags
-			b.setOnIsland(false);
+			body.contacts.clear();
+			// remove the island flag
+			body.setOnIsland(false);
 		}
 		
 		// clear the joint island flags
@@ -238,77 +306,97 @@ public class World {
 				BroadphasePair<Body> pair = pairs.get(i);
 				
 				// get the bodies
-				Body b1 = pair.getObject1();
-				Body b2 = pair.getObject2();
+				Body body1 = pair.getObject1();
+				Body body2 = pair.getObject2();
 				
-				// frozen pairs don't have collision detection/response
-				if (b1.isFrozen() || b2.isFrozen()) continue;
-				// static pairs don't have collision detection/response
-				if (b1.isStatic() && b2.isStatic()) continue;
+				// inactive objects don't have collision detection/response
+				if (!body1.isActive() || !body2.isActive()) continue;
+				// one body must be dynamic
+				if (!body1.isDynamic() && !body2.isDynamic()) continue;
 				// check for connected pairs who are not allowed to collide
-				if (b1.isConnectedNoCollision(b2)) continue;
-				
-				// determine using the collision filter whether to allow this one
-				if (!b1.getFilter().isAllowed(b2.getFilter())) {
-					continue;
-				}
+				if (body1.isConnectedNoCollision(body2)) continue;
 				
 				// notify of the broadphase collision
-				this.collisionListener.collision(b1, b2);
+				if (!this.collisionListener.collision(body1, body2)) {
+					// if the collision listener returned false then skip this collision
+					continue;
+				}
 	
 				// get their transforms
-				Transform t1 = b1.transform;
-				Transform t2 = b2.transform;
-				// get their geometry
-				List<Convex> g1 = b1.shapes;
-				List<Convex> g2 = b2.shapes;
+				Transform transform1 = body1.transform;
+				Transform transform2 = body2.transform;
 				
 				// create a reusable penetration object
-				Penetration p = new Penetration();
+				Penetration penetration = new Penetration();
 				// create a reusable manifold object
-				Manifold m = new Manifold();
+				Manifold manifold = new Manifold();
 				
-				// loop through the geometries of body 1
-				int b1Size = g1.size();
-				int b2Size = g2.size();
+				// loop through the fixtures of body 1
+				int b1Size = body1.getFixtureCount();
+				int b2Size = body2.getFixtureCount();
 				for (int j = 0; j < b1Size; j++) {
-					Convex c1 = g1.get(j);
-					// test against each geometry of body 2
+					Fixture fixture1 = body1.getFixture(j);
+					Filter filter1 = fixture1.getFilter();
+					Convex convex1 = fixture1.getShape();
+					// test against each fixture of body 2
 					for (int k = 0; k < b2Size; k++) {
-						Convex c2 = g2.get(k);
+						Fixture fixture2 = body2.getFixture(k);
+						Filter filter2 = fixture2.getFilter();
+						Convex convex2 = fixture2.getShape();
+						// test the filter
+						if (!filter1.isAllowed(filter2)) {
+							// if the collision is not allowed then continue
+							continue;
+						}
 						// test the two convex shapes
-						if (this.narrowphaseDetector.detect(c1, t1, c2, t2, p)) {
+						if (this.narrowphaseDetector.detect(convex1, transform1, convex2, transform2, penetration)) {
 							// notify of the narrowphase collision
-							this.collisionListener.collision(b1, b2, c1, c2, p);
+							if (!this.collisionListener.collision(body1, fixture1, body2, fixture2, penetration)) {
+								// if the collision listener returned false then skip this collision
+								continue;
+							}
 							// if there is penetration then find a contact manifold
 							// using the filled in penetration object
-							if (this.manifoldSolver.getManifold(p, c1, t1, c2, t2, m)) {
+							if (this.manifoldSolver.getManifold(penetration, convex1, transform1, convex2, transform2, manifold)) {
 								// notify of the manifold solving result
-								this.collisionListener.collision(b1, b2, c1, c2, p, m);
+								if (!this.collisionListener.collision(body1, fixture1, body2, fixture2, manifold)) {
+									// if the collision listener returned false then skip this collision
+									continue;
+								}
 								// get the manifold points
-								List<ManifoldPoint> points = m.getPoints();
+								List<ManifoldPoint> points = manifold.getPoints();
 								// a valid manifold was found
 								int mSize = points.size();
 								// don't add sensor manifolds to the contact constraints list
-								if (!b1.isSensor() && !b2.isSensor()) {
+								if (!fixture1.isSensor() && !fixture2.isSensor()) {
+									// compute the friction and restitution
+									double friction = this.coefficientMixer.mixFriction(fixture1.getFriction(), fixture2.getFriction());
+									double restitution = this.coefficientMixer.mixRestitution(fixture1.getRestitution(), fixture2.getRestitution());
 									// create a contact constraint
-									ContactConstraint contactConstraint = new ContactConstraint(b1, c1, b2, c2, m);
+									ContactConstraint contactConstraint = new ContactConstraint(body1, fixture1, body2, fixture2, manifold, friction, restitution);
 									// add a contact edge to both bodies
-									ContactEdge ce1 = new ContactEdge(b2, contactConstraint);
-									ContactEdge ce2 = new ContactEdge(b1, contactConstraint);
-									b1.contacts.add(ce1);
-									b2.contacts.add(ce2);
+									ContactEdge contactEdge1 = new ContactEdge(body2, contactConstraint);
+									ContactEdge contactEdge2 = new ContactEdge(body1, contactConstraint);
+									body1.contacts.add(contactEdge1);
+									body2.contacts.add(contactEdge2);
 									// add the contact constraint to the contact manager
 									this.contactManager.add(contactConstraint);
 								} else {
-									// notify the contact manager's contact listener of the
-									// sensed contact points
-									ContactListener cl = contactManager.getContactListener();
+									// add the sensed contacts to the contact manager
 									for (int l = 0; l < mSize; l++) {
 										// get the manifold point
-										ManifoldPoint mp = points.get(l);
-										// notify of the contact point
-										cl.sensed(new ContactPoint(mp.getPoint(), m.getNormal(), mp.getDepth(), b1, c1, b2, c2));
+										ManifoldPoint manifoldPoint = points.get(l);
+										// create the sensed contact
+										SensedContactPoint point = new SensedContactPoint(
+																			manifoldPoint.getPoint(),
+																			manifold.getNormal(),
+																			manifoldPoint.getDepth(),
+																			body1,
+																			fixture1,
+																			body2,
+																			fixture2);
+										// add the sensed contact
+										this.contactManager.add(point);
 									}
 								}
 							}
@@ -321,6 +409,9 @@ public class World {
 		// warm start the contact constraints
 		this.contactManager.warm();
 		
+		// notify of all the contacts that will be solved and all the sensed contacts
+		this.contactManager.preSolveNotify();
+		
 		// perform a depth first search of the contact graph
 		// to create islands for constraint solving
 		Stack<Body> stack = new Stack<Body>();
@@ -328,39 +419,39 @@ public class World {
 		// loop over the bodies and their contact edges to create the islands
 		for (int i = 0; i < size; i++) {
 			Body seed = this.bodies.get(i);
-			// skip if asleep, frozen, static, or already on an island
-			if (seed.isAsleep() || seed.isFrozen() || seed.isStatic() || seed.isOnIsland()) continue;
+			// skip if asleep, in active, static, or already on an island
+			if (seed.isOnIsland() || seed.isAsleep() || !seed.isActive() || seed.isStatic()) continue;
 			
 			island.clear();
 			stack.clear();
 			stack.push(seed);
 			while (stack.size() > 0) {
 				// get the next body
-				Body b = stack.pop();
+				Body body = stack.pop();
 				// add it to the island
-				island.add(b);
+				island.add(body);
 				// flag that it has been added
-				b.setOnIsland(true);
-				// make sure the body is awake but dont reset the sleep time
-				b.state &= ~Body.ASLEEP;
+				body.setOnIsland(true);
+				// make sure the body is awake
+				body.setAsleep(false);
 				// if its static then continue since we dont want the
 				// island to span more than one static object
 				// this keeps the size of the islands small
-				if (b.isStatic()) continue;
+				if (body.isStatic()) continue;
 				// loop over the contact edges of this body
-				int ceSize = b.contacts.size();
+				int ceSize = body.contacts.size();
 				for (int j = 0; j < ceSize; j++) {
-					ContactEdge e = b.contacts.get(j);
+					ContactEdge contactEdge = body.contacts.get(j);
 					// get the contact constraint
-					ContactConstraint cc = e.getContactConstraint();
+					ContactConstraint contactConstraint = contactEdge.getContactConstraint();
 					// get the other body
-					Body other = e.getOther();
+					Body other = contactEdge.getOther();
 					// check if the contact constraint has already been added to an island
-					if (cc.isOnIsland()) continue;
+					if (contactConstraint.isOnIsland()) continue;
 					// add the contact constraint to the island list
-					island.add(cc);
+					island.add(contactConstraint);
 					// set the island flag on the contact constraint
-					cc.setOnIsland(true);
+					contactConstraint.setOnIsland(true);
 					// has the other body been added to an island yet?
 					if (!other.isOnIsland()) {
 						// if not then add this body to the stack
@@ -369,16 +460,19 @@ public class World {
 					}
 				}
 				// loop over the joint edges of this body
-				int jeSize = b.joints.size();
+				int jeSize = body.joints.size();
 				for (int j = 0; j < jeSize; j++) {
 					// get the joint edge
-					JointEdge e = b.joints.get(j);
+					JointEdge jointEdge = body.joints.get(j);
 					// get the joint
-					Joint joint = e.getJoint();
+					Joint joint = jointEdge.getJoint();
+					// check if the joint is inactive
+					if (!joint.isActive()) continue;
 					// get the other body
-					Body other = e.getOther();
+					Body other = jointEdge.getOther();
 					// check if the joint has already been added to an island
-					if (joint.isOnIsland()) continue;
+					// or if the other body is not active
+					if (joint.isOnIsland() || !other.isActive()) continue;
 					// add the joint to the island
 					island.add(joint);
 					// set the island flag on the joint
@@ -397,64 +491,58 @@ public class World {
 			
 			// allow static bodies to participate in other islands
 			for (int j = 0; j < size; j++) {
-				Body b = this.bodies.get(j);
-				if (b.isStatic()) {
-					b.setOnIsland(false);
+				Body body = this.bodies.get(j);
+				if (body.isStatic()) {
+					body.setOnIsland(false);
 				}
 			}
 		}
 		
-		// notify of the solved contacts
-		this.contactManager.solved();
+		// notify of the all solved contacts
+		this.contactManager.postSolveNotify();
+		
+		// notify the step listener
+		this.stepListener.end(this.step, this);
 	}
 	
 	/**
 	 * Adds a {@link Body} to the {@link World}.
-	 * <p>
-	 * If the {@link Body} is null then the method immediately returns.
-	 * <p>
-	 * A NullPointerException is thrown if the given {@link Body}
-	 * does not have a {@link Mass} already set.
 	 * @param body the {@link Body} to add
 	 */
 	public void add(Body body) {
 		// check for null body
-		if (body == null) return;
+		if (body == null) throw new NullPointerException("Cannot add a null body to the world.");
 		// make sure its setup
-		if (body.mass == null) {
-			throw new NullPointerException("The body mass is not set!  Call the setMassFromShapes or setMass method before adding the body to the world.");
+		if (body.mass == Mass.UNDEFINED) {
+			throw new NullPointerException("The body mass is not set.  Call the setMassFromShapes or setMass method before adding the body to the world.");
 		}
 		this.bodies.add(body);
 	}
 	
 	/**
 	 * Adds a {@link Joint} to the {@link World}.
-	 * <p>
-	 * If the given {@link Joint} is null then this method immediately returns.
 	 * @param joint the {@link Joint} to add
 	 */
 	public void add(Joint joint) {
 		// check for null joint
-		if (joint == null) return;
+		if (joint == null) throw new NullPointerException("Cannot add a null joint to the world.");
 		// add the joint to the joint list
 		this.joints.add(joint);
 		// get the associated bodies
-		Body b1 = joint.getBody1();
-		Body b2 = joint.getBody2();
+		Body body1 = joint.getBody1();
+		Body body2 = joint.getBody2();
 		// create a joint edge from the first body to the second
-		JointEdge je1 = new JointEdge(b2, joint);
+		JointEdge jointEdge1 = new JointEdge(body2, joint);
 		// add the edge to the body
-		b1.joints.add(je1);
+		body1.joints.add(jointEdge1);
 		// create a joint edge from the second body to the first
-		JointEdge je2 = new JointEdge(b1, joint);
+		JointEdge jointEdge2 = new JointEdge(body1, joint);
 		// add the edge to the body
-		b2.joints.add(je2);
+		body2.joints.add(jointEdge2);
 	}
 	
 	/**
 	 * Removes the given {@link Body} from the {@link World}.
-	 * <p>
-	 * If the given {@link Body} is null this method immediately returns.
 	 * @param body the {@link Body} to remove
 	 */
 	public void remove(Body body) {
@@ -467,21 +555,21 @@ public class World {
 		int jsize = body.joints.size();
 		for (int i = 0; i < jsize; i++) {
 			// get the joint edge
-			JointEdge je = body.joints.get(i);
+			JointEdge jointEdge = body.joints.get(i);
 			// get the joint
-			Joint joint = je.getJoint();
+			Joint joint = jointEdge.getJoint();
 			// get the other body
-			Body other = je.getOther();
+			Body other = jointEdge.getOther();
 			// wake up the other body
-			other.awaken();
+			other.setAsleep(false);
 			// remove the contact edge from the other body
 			Iterator<JointEdge> iterator = other.joints.iterator();
 			while (iterator.hasNext()) {
 				// get the joint edge
-				JointEdge jeOther = iterator.next();
+				JointEdge otherJointEdge = iterator.next();
 				// get the joint
-				Joint jOther = jeOther.getJoint();
-				if (jOther == joint) {
+				Joint otherJoint = otherJointEdge.getJoint();
+				if (otherJoint == joint) {
 					// remove the joint edge
 					iterator.remove();
 					// since they are the same contact constraint object
@@ -496,13 +584,13 @@ public class World {
 		int csize = body.contacts.size();
 		for (int i = 0; i < csize; i++) {
 			// get the contact edge
-			ContactEdge ce = body.contacts.get(i);
+			ContactEdge contactEdge = body.contacts.get(i);
 			// get the contact constraint
-			ContactConstraint cc = ce.getContactConstraint();
+			ContactConstraint contactConstraint = contactEdge.getContactConstraint();
 			// get the other body
-			Body other = ce.getOther();
+			Body other = contactEdge.getOther();
 			// wake up the other body
-			other.awaken();
+			other.setAsleep(false);
 			// remove the contact edge connected from the other body
 			// to this body
 			Iterator<ContactEdge> iterator = other.contacts.iterator();
@@ -511,7 +599,7 @@ public class World {
 				// get the contact constraint
 				ContactConstraint ccOther = ceOther.getContactConstraint();
 				// check if the contact constraint is the same
-				if (ccOther == cc) {
+				if (ccOther == contactConstraint) {
 					// remove the contact edge
 					iterator.remove();
 					// since they are the same contact constraint object
@@ -519,24 +607,29 @@ public class World {
 				}
 			}
 			// remove the contact constraint from the contact manager
-			this.contactManager.remove(cc);
+			this.contactManager.remove(contactConstraint);
 			// loop over the contact points
-			int size = cc.getContacts().length;
+			int size = contactConstraint.getContacts().length;
 			for (int j = 0; j < size; j++) {
 				// get the contact
-				Contact c = cc.getContacts()[j];
+				Contact contact = contactConstraint.getContacts()[j];
 				// create a contact point for notification
-				ContactPoint cp = new ContactPoint(c.getPoint(), cc.getNormal(), c.getDepth(), cc.getBody1(), cc.getConvex1(), cc.getBody2(), cc.getConvex2());
+				ContactPoint contactPoint = new ContactPoint(
+													contact.getPoint(), 
+													contactConstraint.getNormal(), 
+													contact.getDepth(), 
+													contactConstraint.getBody1(), 
+													contactConstraint.getFixture1(), 
+													contactConstraint.getBody2(), 
+													contactConstraint.getFixture2());
 				// call the destruction listener
-				this.destructionListener.destroyed(cp);
+				this.destructionListener.destroyed(contactPoint);
 			}
 		}
 	}
 	
 	/**
 	 * Removes the given {@link Joint} from the {@link World}.
-	 * <p>
-	 * If the given {@link Joint} is null then this method immediately returns.
 	 * @param joint the {@link Joint} to remove
 	 */
 	public void remove(Joint joint) {
@@ -549,8 +642,8 @@ public class World {
 		Iterator<JointEdge> iterator = joint.getBody1().joints.iterator();
 		while (iterator.hasNext()) {
 			// see if this is the edge we want to remove
-			JointEdge je = iterator.next();
-			if (je.getJoint() == joint) {
+			JointEdge jointEdge = iterator.next();
+			if (jointEdge.getJoint() == joint) {
 				// then remove this joint edge
 				iterator.remove();
 			}
@@ -559,16 +652,16 @@ public class World {
 		iterator = joint.getBody2().joints.iterator();
 		while (iterator.hasNext()) {
 			// see if this is the edge we want to remove
-			JointEdge je = iterator.next();
-			if (je.getJoint() == joint) {
+			JointEdge jointEdge = iterator.next();
+			if (jointEdge.getJoint() == joint) {
 				// then remove this joint edge
 				iterator.remove();
 			}
 		}
 		
 		// finally wake both bodies
-		joint.getBody1().awaken();
-		joint.getBody2().awaken();
+		joint.getBody1().setAsleep(false);
+		joint.getBody2().setAsleep(false);
 	}
 	
 	/**
@@ -578,66 +671,49 @@ public class World {
 	 * to infinite.
 	 * <p>
 	 * This method is used to directly control a {@link Body} by
-	 * translation and rotation instead of velocity/force.  The
-	 * returned {@link Mass} object should be stored so that it can 
-	 * be restored to the {@link Body} when the relinquish method is
-	 * called.
-	 * <p>
-	 * If the given {@link Body} is null then this method immediately
-	 * returns null.
+	 * translation and rotation instead of velocity/force.
 	 * @param body the {@link Body} to control
-	 * @return {@link Mass} the original {@link Body}'s {@link Mass}
 	 */
-	public Mass control(Body body) {
+	public void control(Body body) {
 		// check for null body
-		if (body == null) return null;
+		if (body == null) throw new NullPointerException("Cannot control a null body.");
 		// wake up all attached bodies
 		int jSize = body.joints.size();
 		for (int i = 0; i < jSize; i++) {
-			JointEdge je = body.joints.get(i);
-			je.getOther().awaken();
+			JointEdge jointEdge = body.joints.get(i);
+			jointEdge.getOther().setAsleep(false);
 		}
 		// wake up bodies in contact
 		int cSize = body.contacts.size();
 		for (int i = 0; i < cSize; i++) {
-			ContactEdge ce = body.contacts.get(i);
-			ce.getOther().awaken();
+			ContactEdge contactEdge = body.contacts.get(i);
+			contactEdge.getOther().setAsleep(false);
 		}
 		// save the original mass
-		Mass m = body.getMass();
+		Mass mass = body.getMass();
 		// set the mass to infinite
-		body.setMass(m, Mass.Type.INFINITE);
+		mass.setType(Mass.Type.INFINITE);
 		// make sure this body is awake
-		body.awaken();
+		body.setAsleep(false);
 		body.setSleep(false);
 		// stop any movement
-		body.av = 0.0;
-		body.v.zero();
-		// return the mass
-		return m;
+		body.angularVelocity = 0.0;
+		body.velocity.zero();
 	}
 	
 	/**
-	 * Releases control of the given {@link Body} and sets the
-	 * {@link Mass} to the given {@link Mass}.
-	 * <p>
-	 * If the given {@link Body} is null then this method returns immediately.
-	 * <p>
-	 * If the given {@link Mass} is null but the given {@link Body} is not null
-	 * then the control of the {@link Body} is released and the {@link Mass}
-	 * of the {@link Body} is set via the {@link Body#setMassFromShapes()} method.
+	 * Releases control of the given {@link Body}.
 	 * @param body the {@link Body} to release control of
-	 * @param mass the {@link Body}'s original {@link Mass}
 	 */
-	public void relinquish(Body body, Mass mass) {
-		if (body == null) return;
-		body.awaken();
-		body.thaw();
-		if (mass == null) {
-			body.setMassFromShapes();
-		} else {
-			body.setMass(mass);
-		}
+	public void relinquish(Body body) {
+		if (body == null) throw new NullPointerException("Cannot release control of a null body.");
+		// awaken the body and make sure its not frozen
+		body.setAsleep(false);
+		body.setActive(true);
+		// get the body's mass
+		Mass mass = body.getMass();
+		// set the mass type back to the previous type
+		mass.setType(mass.getPreviousType());
 		body.setSleep(true);
 	}
 	
@@ -664,18 +740,12 @@ public class World {
 
 	/**
 	 * Sets the bounds of the {@link World}.
-	 * <p>
-	 * If the given bounds is null then the bounds is set to the
-	 * default UNBOUNDED bounds object.
 	 * @param bounds the bounds
 	 */
 	public void setBounds(Bounds bounds) {
 		// check for null bounds
-		if (bounds == null) {
-			this.bounds = Bounds.UNBOUNDED;
-		} else {
-			this.bounds = bounds;
-		}
+		if (bounds == null) throw new NullPointerException("The bounds cannot be null.  To creat an unbounded world use the Bounds.UNBOUNDED static member.");
+		this.bounds = bounds;
 	}
 	
 	/**
@@ -688,17 +758,11 @@ public class World {
 	
 	/**
 	 * Sets the bounds listener.
-	 * <p>
-	 * If the given {@link BoundsListener} is null the default {@link BoundsAdapter}
-	 * is set as the current bounds listener.
 	 * @param boundsListener the bounds listener
 	 */
 	public void setBoundsListener(BoundsListener boundsListener) {
-		if (boundsListener == null) {
-			this.boundsListener = new BoundsAdapter();
-		} else {
-			this.boundsListener = boundsListener;
-		}
+		if (boundsListener == null) throw new NullPointerException("The bounds listener cannot be null.  Create an instance of the BoundsAdapter class to set it to the default.");
+		this.boundsListener = boundsListener;
 	}
 	
 	/**
@@ -711,17 +775,11 @@ public class World {
 	
 	/**
 	 * Sets the {@link ContactListener}.
-	 * <p>
-	 * If the given {@link ContactListener} is null the default {@link ContactAdapter}
-	 * is set as the current contact listener.
 	 * @param contactListener the contact listener
 	 */
 	public void setContactListener(ContactListener contactListener) {
-		if (contactListener == null) {
-			this.contactManager.setContactListener(new ContactAdapter());
-		} else {
-			this.contactManager.setContactListener(contactListener);
-		}
+		if (contactListener == null) throw new NullPointerException("The contact listener cannot be null.  Create an instance of the ContactAdapter class to set it to the default.");
+		this.contactManager.setContactListener(contactListener);
 	}
 	
 	/**
@@ -734,17 +792,11 @@ public class World {
 	
 	/**
 	 * Sets the {@link DestructionListener}.
-	 * <p>
-	 * If the given {@link DestructionListener} is null the default {@link DestructionAdapter}
-	 * is set as the current destruction listener.
 	 * @param destructionListener the {@link DestructionListener}
 	 */
 	public void setDestructionListener(DestructionListener destructionListener) {
-		if (destructionListener == null) {
-			this.destructionListener = new DestructionAdapter();
-		} else {
-			this.destructionListener = destructionListener;
-		}
+		if (destructionListener == null) throw new NullPointerException("The destruction listener cannot be null.  Create an instance of the DestructionAdapter class to set it to the default.");
+		this.destructionListener = destructionListener;
 	}
 	
 	/**
@@ -757,17 +809,11 @@ public class World {
 	
 	/**
 	 * Sets the {@link StepListener}.
-	 * <p>
-	 * If the given {@link StepListener} is null the default {@link StepAdapter}
-	 * is set as the current step listener.
 	 * @param stepListener the {@link StepListener}
 	 */
 	public void setStepListener(StepListener stepListener) {
-		if (stepListener == null) {
-			this.stepListener = new StepAdapter();
-		} else {
-			this.stepListener = stepListener;
-		}
+		if (stepListener == null) throw new NullPointerException("The step listener cannot be null.  Create an instance of the StepAdapter class to set it to the default.");
+		this.stepListener = stepListener;
 	}
 	
 	/**
@@ -786,11 +832,8 @@ public class World {
 	 * @param broadphaseDetector the broad-phase collision detection algorithm
 	 */
 	public void setBroadphaseDetector(BroadphaseDetector broadphaseDetector) {
-		if (broadphaseDetector == null) {
-			this.broadphaseDetector = new Sap();
-		} else {
-			this.broadphaseDetector = broadphaseDetector;
-		}
+		if (broadphaseDetector == null) throw new NullPointerException("The broadphase detector cannot be null.");
+		this.broadphaseDetector = broadphaseDetector;
 	}
 	
 	/**
@@ -809,11 +852,8 @@ public class World {
 	 * @param narrowphaseDetector the narrow-phase collision detection algorithm
 	 */
 	public void setNarrowphaseDetector(NarrowphaseDetector narrowphaseDetector) {
-		if (narrowphaseDetector == null) {
-			this.narrowphaseDetector = new Gjk();
-		} else {
-			this.narrowphaseDetector = narrowphaseDetector;
-		}
+		if (narrowphaseDetector == null) throw new NullPointerException("The narrowphase detector cannot be null.");
+		this.narrowphaseDetector = narrowphaseDetector;
 	}
 	
 	/**
@@ -826,17 +866,11 @@ public class World {
 	
 	/**
 	 * Sets the manifold solver.
-	 * <p>
-	 * If the given detector is null then the default {@link ClippingManifoldSolver}
-	 * {@link ManifoldSolver} is set as the current manifold solver.
 	 * @param manifoldSolver the manifold solver
 	 */
 	public void setManifoldSolver(ManifoldSolver manifoldSolver) {
-		if (manifoldSolver == null) {
-			this.manifoldSolver = new ClippingManifoldSolver();
-		} else {
-			this.manifoldSolver = manifoldSolver;
-		}
+		if (manifoldSolver == null) throw new NullPointerException("The manifold solver cannot be null.");
+		this.manifoldSolver = manifoldSolver;
 	}
 	
 	/**
@@ -849,17 +883,11 @@ public class World {
 	
 	/**
 	 * Sets the collision listener.
-	 * <p>
-	 * If the given {@link CollisionListener} is null the default {@link CollisionAdapter}
-	 * is set as the current collision listener.
 	 * @param collisionListener the collision listener
 	 */
 	public void setCollisionListener(CollisionListener collisionListener) {
-		if (collisionListener == null) {
-			this.collisionListener = new CollisionAdapter();
-		} else {
-			this.collisionListener = collisionListener;
-		}
+		if (collisionListener == null) throw new NullPointerException("The collision listener cannot be null.  Create an instance of the CollisionAdapter class to set it to the default.");
+		this.collisionListener = collisionListener;
 	}
 	
 	/**
@@ -871,27 +899,20 @@ public class World {
 	}
 	
 	/**
-	 * Returns the list of {@link Body} objects.
-	 * <p>
-	 * This list should not be modified.  If a {@link Body} needs to 
-	 * be add or removed, call the {@link #add(Body)} and {@link #remove(Body)}
-	 * methods instead. 
-	 * @return List&lt;{@link Body}&gt; the list of bodies
+	 * Returns the {@link CoefficientMixer}.
+	 * @return {@link CoefficientMixer}
 	 */
-	public List<Body> getBodies() {
-		return this.bodies;
+	public CoefficientMixer getCoefficientMixer() {
+		return coefficientMixer;
 	}
 	
 	/**
-	 * Returns the list of {@link Joint} objects.
-	 * <p>
-	 * This list should not be modified.  If a {@link Joint} needs to 
-	 * be add or removed, call the {@link #add(Joint)} and {@link #remove(Joint)}
-	 * methods instead.
-	 * @return List&lt;{@link Joint}&gt; the list of joints
+	 * Sets the {@link CoefficientMixer}.
+	 * @param coefficientMixer the coefficient mixer
 	 */
-	public List<Joint> getJoints() {
-		return this.joints;
+	public void setCoefficientMixer(CoefficientMixer coefficientMixer) {
+		if (coefficientMixer == null) throw new NullPointerException("The coefficient mixer cannot be null.");
+		this.coefficientMixer = coefficientMixer;
 	}
 	
 	/**
@@ -906,15 +927,42 @@ public class World {
 	 * Returns the number of {@link Body} objects.
 	 * @return int the number of bodies
 	 */
-	public int getNumberOfBodies() {
+	public int getBodyCount() {
 		return this.bodies.size();
+	}
+	
+	/**
+	 * Returns the {@link Body} at the given index.
+	 * @param index the index
+	 * @return {@link Body}
+	 */
+	public Body getBody(int index) {
+		return this.bodies.get(index);
 	}
 	
 	/**
 	 * Returns the number of {@link Joint} objects.
 	 * @return int the number of joints
 	 */
-	public int getNumberOfJoints() {
+	public int getJointCount() {
 		return this.joints.size();
+	}
+	
+	/**
+	 * Returns the {@link Joint} at the given index.
+	 * @param index the index
+	 * @return {@link Joint}
+	 */
+	public Joint getJoint(int index) {
+		return this.joints.get(index);
+	}
+	
+	/**
+	 * Returns the {@link Step} object used to advance
+	 * the simulation.
+	 * @return {@link Step} the current step object
+	 */
+	public Step getStep() {
+		return this.step;
 	}
 }

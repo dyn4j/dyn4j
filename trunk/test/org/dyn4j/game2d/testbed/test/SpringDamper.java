@@ -26,6 +26,7 @@ package org.dyn4j.game2d.testbed.test;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
+import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.dynamics.joint.DistanceJoint;
 import org.dyn4j.game2d.dynamics.joint.Joint;
@@ -85,7 +86,7 @@ public class SpringDamper extends Test {
 		// create the floor
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
-		floor.addShape(floorRect);
+		floor.addFixture(new Fixture(floorRect));
 		floor.setMassFromShapes(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
@@ -102,26 +103,27 @@ public class SpringDamper extends Test {
 		
 		// create a reusable rectangle
 		Rectangle r = new Rectangle(3.0, 0.5);
-		r.setDensity(0.2);
+		Fixture fr = new Fixture(r);
+		fr.setDensity(0.2);
 		// create a reusable circle
 		Circle c = new Circle(0.25);
-		c.setDensity(0.5);
+		Fixture fc = new Fixture(c);
+		fc.setDensity(0.5);
+		fc.setFriction(0.5);
 		
 		Entity body = new Entity();
-		body.addShape(r);
+		body.addFixture(fr);
 		body.setMassFromShapes();
 		body.translate(0, 4.25);
 		
 		Entity wheel1 = new Entity();
-		wheel1.addShape(c);
+		wheel1.addFixture(fc);
 		wheel1.setMassFromShapes();
-		wheel1.setMu(0.5);
 		wheel1.translate(-1.0, 3.6);
 		
 		Entity wheel2 = new Entity();
-		wheel2.addShape(c);
+		wheel2.addFixture(fc);
 		wheel2.setMassFromShapes();
-		wheel2.setMu(0.5);
 		wheel2.translate(1.0, 3.6);
 		
 		this.world.add(body);
