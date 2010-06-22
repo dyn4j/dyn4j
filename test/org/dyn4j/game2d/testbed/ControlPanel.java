@@ -106,7 +106,8 @@ public class ControlPanel extends JFrame {
 		{"r", "Resets the current test"},
 		{"Space", "Toggles step mode"},
 		{"s", "Performs 1 step when in step mode"},
-		{"Left Mouse Button", "Click and hold to select a shape."},
+		{"Left Mouse Button", "Click and hold to create a MouseJoint with a shape."},
+		{"Right Mouse Button", "Click and hold to select a shape."},
 		{"Move Mouse", "Move to translate the selected shape."},
 		{"z", "Hold to rotate the selected shape."},
 		{"o", "Outputs all the bodies current state to std out."},
@@ -312,7 +313,7 @@ public class ControlPanel extends JFrame {
 		this.add(tabs, BorderLayout.CENTER);
 		
 		// set the preferred width
-		this.setPreferredSize(new Dimension(450, 580));
+		this.setPreferredSize(new Dimension(450, 650));
 		
 		// pack the layout
 		this.pack();
@@ -888,22 +889,22 @@ public class ControlPanel extends JFrame {
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// max velocity
-		JLabel lblMaxV = new JLabel("Maximum Velocity", this.helpIcon, JLabel.LEFT);
-		lblMaxV.setToolTipText("Specifies the maximum velocity a body can have.");
+		JLabel lblMaxV = new JLabel("Maximum Translation", this.helpIcon, JLabel.LEFT);
+		lblMaxV.setToolTipText("Specifies the maximum translation a body can have in one time step.");
 		pnlGeneral.add(lblMaxV, new GridBagConstraints(
 				0, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		JSpinner spnMaxV = new JSpinner(new SpinnerNumberModel(settings.getMaxVelocity(), 0.0, 9999.0, 1.0));
-		spnMaxV.setEditor(new JSpinner.NumberEditor(spnMaxV, "0"));
+		JSpinner spnMaxV = new JSpinner(new SpinnerNumberModel(settings.getMaxTranslation(), 0.0, 10.0, 0.1));
+		spnMaxV.setEditor(new JSpinner.NumberEditor(spnMaxV, "0.0"));
 		((JSpinner.DefaultEditor)spnMaxV.getEditor()).getTextField().setColumns(4);
 		spnMaxV.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				JSpinner spnr = (JSpinner) e.getSource();
-				double v = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
+				double t = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
 				Settings settings = Settings.getInstance();
-				settings.setMaxVelocity(v);
+				settings.setMaxTranslation(t);
 			}
 		});
 		// add the spinner to the layout
@@ -911,28 +912,28 @@ public class ControlPanel extends JFrame {
 				1, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		// create the unit label
-		JLabel lblMaxVUnit = new JLabel("meters / second");
+		JLabel lblMaxVUnit = new JLabel("meters");
 		pnlGeneral.add(lblMaxVUnit, new GridBagConstraints(
 				2, 4, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// max angular velocity
-		JLabel lblMaxAv = new JLabel("Maximum Angular Velocity", this.helpIcon, JLabel.LEFT);
-		lblMaxAv.setToolTipText("Specifies the maximum angular velocity a body can have.");
+		JLabel lblMaxAv = new JLabel("Maximum Rotation", this.helpIcon, JLabel.LEFT);
+		lblMaxAv.setToolTipText("Specifies the maximum rotation a body can have in one time step.");
 		pnlGeneral.add(lblMaxAv, new GridBagConstraints(
 				0, 5, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		JSpinner spnMaxAv = new JSpinner(new SpinnerNumberModel(Math.toDegrees(settings.getMaxAngularVelocity()), 0, 9999, 1));
-		spnMaxAv.setEditor(new JSpinner.NumberEditor(spnMaxAv, "0"));
+		JSpinner spnMaxAv = new JSpinner(new SpinnerNumberModel(Math.toDegrees(settings.getMaxRotation()), 0.0, 3600.0, 1.0));
+		spnMaxAv.setEditor(new JSpinner.NumberEditor(spnMaxAv, "0.0"));
 		((JSpinner.DefaultEditor)spnMaxAv.getEditor()).getTextField().setColumns(4);
 		spnMaxAv.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				JSpinner spnr = (JSpinner) e.getSource();
-				double v = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
+				double r = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
 				Settings settings = Settings.getInstance();
-				settings.setMaxAngularVelocity(Math.toRadians(v));
+				settings.setMaxRotation(Math.toRadians(r));
 			}
 		});
 		// add the spinner to the layout
@@ -940,7 +941,7 @@ public class ControlPanel extends JFrame {
 				1, 5, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_END, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		// create the unit label
-		JLabel lblMaxAvUnit = new JLabel("degrees / second");
+		JLabel lblMaxAvUnit = new JLabel("degrees");
 		pnlGeneral.add(lblMaxAvUnit, new GridBagConstraints(
 				2, 5, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
@@ -1083,60 +1084,64 @@ public class ControlPanel extends JFrame {
 		// set the layout
 		pnlConstraint.setLayout(new GridBagLayout());
 		
-		// si solver iterations
-		JLabel lblSiIter = new JLabel("Iterations", this.helpIcon, JLabel.LEFT);
-		lblSiIter.setToolTipText("Specifies the accuracy of the contraint solver.  Increasing this value increases the accuracy but lowers performance.");
-		pnlConstraint.add(lblSiIter, new GridBagConstraints(
-				0, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
+		int y = 0;
 		
+		// velocity constraint solver iterations
+		JLabel lblVelIter = new JLabel("Velocity Iterations", this.helpIcon, JLabel.LEFT);
+		lblVelIter.setToolTipText("Specifies the accuracy of the velocity contraint solver.  Increasing this value increases the accuracy but lowers performance.");
+		pnlConstraint.add(lblVelIter, new GridBagConstraints(
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
 		// create the slider for the si solver iterations
-		JSpinner spnSiIter = new JSpinner(new SpinnerNumberModel(settings.getSiSolverIterations(), 5, 999, 1));
-		spnSiIter.setEditor(new JSpinner.NumberEditor(spnSiIter, "0"));
-		((JSpinner.DefaultEditor)spnSiIter.getEditor()).getTextField().setColumns(3);
-		spnSiIter.addChangeListener(new ChangeListener() {
+		JSpinner spnVelIter = new JSpinner(new SpinnerNumberModel(settings.getVelocityConstraintSolverIterations(), 5, 999, 1));
+		spnVelIter.setEditor(new JSpinner.NumberEditor(spnVelIter, "0"));
+		((JSpinner.DefaultEditor)spnVelIter.getEditor()).getTextField().setColumns(3);
+		spnVelIter.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				JSpinner spnr = (JSpinner) e.getSource();
 				int iter = ((SpinnerNumberModel) spnr.getModel()).getNumber().intValue();
 				Settings settings = Settings.getInstance();
-				settings.setSiSolverIterations(iter);
+				settings.setVelocityConstraintSolverIterations(iter);
 			}
 		});
 		// add it to the panel
-		pnlConstraint.add(spnSiIter, new GridBagConstraints(
-				1, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, 
+		pnlConstraint.add(spnVelIter, new GridBagConstraints(
+				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		// baumgarte
-		JLabel lblBaum = new JLabel("Baumgarte", this.helpIcon, JLabel.LEFT);
-		lblBaum.setToolTipText("Specifies the rate at which the position constraints are solved.");
-		pnlConstraint.add(lblBaum, new GridBagConstraints(
-				0, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+		// position constraint solver iterations
+		y++;
+		JLabel lblPosIter = new JLabel("Position Iterations", this.helpIcon, JLabel.LEFT);
+		lblPosIter.setToolTipText("Specifies the accuracy of the position contraint solver.  Increasing this value increases the accuracy but lowers performance.");
+		pnlConstraint.add(lblPosIter, new GridBagConstraints(
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
-		
-		JSpinner spnBaum = new JSpinner(new SpinnerNumberModel(settings.getBaumgarte(), 0.0, 1.0, 0.05));
-		spnBaum.setEditor(new JSpinner.NumberEditor(spnBaum, "0.00"));
-		((JSpinner.DefaultEditor)spnBaum.getEditor()).getTextField().setColumns(4);
-		spnBaum.addChangeListener(new ChangeListener() {
+		// create the slider for the si solver iterations
+		JSpinner spnPosIter = new JSpinner(new SpinnerNumberModel(settings.getPositionConstraintSolverIterations(), 5, 999, 1));
+		spnPosIter.setEditor(new JSpinner.NumberEditor(spnPosIter, "0"));
+		((JSpinner.DefaultEditor)spnPosIter.getEditor()).getTextField().setColumns(3);
+		spnPosIter.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				JSpinner spnr = (JSpinner) e.getSource();
-				double baum = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
+				int iter = ((SpinnerNumberModel) spnr.getModel()).getNumber().intValue();
 				Settings settings = Settings.getInstance();
-				settings.setBaumgarte(baum);
+				settings.setPositionConstraintSolverIterations(iter);
 			}
 		});
-		pnlConstraint.add(spnBaum, new GridBagConstraints(
-				1, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, 
+		// add it to the panel
+		pnlConstraint.add(spnPosIter, new GridBagConstraints(
+				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// warm start distance
+		y++;
 		JLabel lblWarm = new JLabel("Warm start distance", this.helpIcon, JLabel.LEFT);
 		lblWarm.setToolTipText("Specifies the distance between two iteration's contact points to determine whether to warm start or not.  " +
 				"Set this value to to zero to turn off warm starting.  Warm starting provides better performance and accuracy.");
 		pnlConstraint.add(lblWarm, new GridBagConstraints(
-				0, 2, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 
 		JSpinner spnWarm = new JSpinner(new MultiplicativeSpinnerNumberModel(settings.getWarmStartDistance(), 1.0E-9, 1.0, 10.0));
@@ -1151,45 +1156,103 @@ public class ControlPanel extends JFrame {
 			}
 		});
 		pnlConstraint.add(spnWarm, new GridBagConstraints(
-				1, 2, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, 
+				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JLabel lblWarmUnit = new JLabel("meters");
 		pnlConstraint.add(lblWarmUnit, new GridBagConstraints(
-				2, 2, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
+				2, y, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		// allowed penetration
-		JLabel lblPene = new JLabel("Linear tolerance", this.helpIcon, JLabel.LEFT);
-		lblPene.setToolTipText("Specifies the amount of penetration allowed between bodies. This setting is used to control jitter.");
-		pnlConstraint.add(lblPene, new GridBagConstraints(
-				0, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+		// restitution velocity
+		y++;
+		JLabel lblRest = new JLabel("Restitution velocity", this.helpIcon, JLabel.LEFT);
+		lblRest.setToolTipText("Specifies at what relative velocity objects should bounce or attempt to come to rest.");
+		pnlConstraint.add(lblRest, new GridBagConstraints(
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		JSpinner spnPene = new JSpinner(new SpinnerNumberModel(settings.getLinearTolerance(), 0.0, 1.0, 0.005));
-		spnPene.setEditor(new JSpinner.NumberEditor(spnPene, "0.000"));
-		((JSpinner.DefaultEditor)spnPene.getEditor()).getTextField().setColumns(5);
-		spnPene.addChangeListener(new ChangeListener() {
+		JSpinner spnRest = new JSpinner(new SpinnerNumberModel(settings.getRestitutionVelocity(), 0.0, 9.9, 0.1));
+		spnRest.setEditor(new JSpinner.NumberEditor(spnRest, "0.0"));
+		((JSpinner.DefaultEditor)spnRest.getEditor()).getTextField().setColumns(3);
+		spnRest.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				JSpinner spnr = (JSpinner) e.getSource();
-				double pene = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
+				double r = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
 				Settings settings = Settings.getInstance();
-				settings.setLinearTolerance(pene);
+				settings.setRestitutionVelocity(r);
 			}
 		});
-		pnlConstraint.add(spnPene, new GridBagConstraints(
-				1, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, 
+		pnlConstraint.add(spnRest, new GridBagConstraints(
+				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, 
 				GridBagConstraints.NONE, insets, 0, 0));
-		JLabel lblPeneUnit = new JLabel("meters");
-		pnlConstraint.add(lblPeneUnit, new GridBagConstraints(
-				2, 3, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
+		JLabel lblRestUnit = new JLabel("meters / second");
+		pnlConstraint.add(lblRestUnit, new GridBagConstraints(
+				2, y, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		
+		// linear tolerance
+		y++;
+		JLabel lblLinTol = new JLabel("Linear tolerance", this.helpIcon, JLabel.LEFT);
+		lblLinTol.setToolTipText("Specifies the linear tolerance. This setting is used to control jitter.");
+		pnlConstraint.add(lblLinTol, new GridBagConstraints(
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		
+		JSpinner spnLinTol = new JSpinner(new SpinnerNumberModel(settings.getLinearTolerance(), 0.000, 9.995, 0.005));
+		spnLinTol.setEditor(new JSpinner.NumberEditor(spnLinTol, "0.000"));
+		((JSpinner.DefaultEditor)spnLinTol.getEditor()).getTextField().setColumns(5);
+		spnLinTol.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				JSpinner spnr = (JSpinner) e.getSource();
+				double tol = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
+				Settings settings = Settings.getInstance();
+				settings.setLinearTolerance(tol);
+			}
+		});
+		pnlConstraint.add(spnLinTol, new GridBagConstraints(
+				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JLabel lblLinTolUnit = new JLabel("meters");
+		pnlConstraint.add(lblLinTolUnit, new GridBagConstraints(
+				2, y, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		
+		// angular tolerance
+		y++;
+		JLabel lblAngTol = new JLabel("Angular tolerance", this.helpIcon, JLabel.LEFT);
+		lblAngTol.setToolTipText("Specifies the angular tolerance. This setting is used to control jitter.");
+		pnlConstraint.add(lblAngTol, new GridBagConstraints(
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		
+		JSpinner spnAngTol = new JSpinner(new SpinnerNumberModel(Math.toDegrees(settings.getAngularTolerance()), 0.0, 90.0, 1.0));
+		spnAngTol.setEditor(new JSpinner.NumberEditor(spnAngTol, "0.0"));
+		((JSpinner.DefaultEditor)spnAngTol.getEditor()).getTextField().setColumns(4);
+		spnAngTol.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				JSpinner spnr = (JSpinner) e.getSource();
+				double tol = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
+				Settings settings = Settings.getInstance();
+				settings.setAngularTolerance(Math.toRadians(tol));
+			}
+		});
+		pnlConstraint.add(spnAngTol, new GridBagConstraints(
+				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JLabel lblAngTolUnit = new JLabel("degrees");
+		pnlConstraint.add(lblAngTolUnit, new GridBagConstraints(
+				2, y, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// linear correction
+		y++;
 		JLabel lblLinear = new JLabel("Maximum linear correction", this.helpIcon, JLabel.LEFT);
 		lblLinear.setToolTipText("Specifies the maximum amount of linear correction to perform in position solving.  This is used to avoid large position corrections.");
 		pnlConstraint.add(lblLinear, new GridBagConstraints(
-				0, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		JSpinner spnLinear = new JSpinner(new SpinnerNumberModel(settings.getMaxLinearCorrection(), 0.0, 1.0, 0.05));
@@ -1205,38 +1268,62 @@ public class ControlPanel extends JFrame {
 			}
 		});
 		pnlConstraint.add(spnLinear, new GridBagConstraints(
-				1, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, 
+				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JLabel lblLinearUnit = new JLabel("meters");
 		pnlConstraint.add(lblLinearUnit, new GridBagConstraints(
-				2, 4, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
+				2, y, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		// restitution velocity
-		JLabel lblRest = new JLabel("Restitution velocity", this.helpIcon, JLabel.LEFT);
-		lblRest.setToolTipText("Specifies at what relative velocity objects should bounce or attempt to come to rest.");
-		pnlConstraint.add(lblRest, new GridBagConstraints(
-				0, 5, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
+		// angular correction
+		y++;
+		JLabel lblAngular = new JLabel("Maximum angular correction", this.helpIcon, JLabel.LEFT);
+		lblAngular.setToolTipText("Specifies the maximum amount of angular correction to perform in position solving.  This is used to avoid large position corrections.");
+		pnlConstraint.add(lblAngular, new GridBagConstraints(
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		JSpinner spnRest = new JSpinner(new SpinnerNumberModel(settings.getRestitutionVelocity(), 0.0, 9.9, 0.1));
-		spnRest.setEditor(new JSpinner.NumberEditor(spnRest, "0.0"));
-		((JSpinner.DefaultEditor)spnLinear.getEditor()).getTextField().setColumns(3);
-		spnRest.addChangeListener(new ChangeListener() {
+		JSpinner spnAngular = new JSpinner(new SpinnerNumberModel(Math.toDegrees(settings.getMaxLinearCorrection()), 0.0, 90.0, 1.0));
+		spnAngular.setEditor(new JSpinner.NumberEditor(spnAngular, "0.0"));
+		((JSpinner.DefaultEditor)spnAngular.getEditor()).getTextField().setColumns(4);
+		spnAngular.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				JSpinner spnr = (JSpinner) e.getSource();
-				double r = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
+				double ang = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
 				Settings settings = Settings.getInstance();
-				settings.setRestitutionVelocity(r);
+				settings.setMaxLinearCorrection(Math.toRadians(ang));
 			}
 		});
-		pnlConstraint.add(spnRest, new GridBagConstraints(
-				1, 5, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_END, 
+		pnlConstraint.add(spnAngular, new GridBagConstraints(
+				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, 
 				GridBagConstraints.NONE, insets, 0, 0));
-		JLabel lblRestUnit = new JLabel("meters / second");
-		pnlConstraint.add(lblRestUnit, new GridBagConstraints(
-				2, 5, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, 
+		JLabel lblAngularUnit = new JLabel("degrees");
+		pnlConstraint.add(lblAngularUnit, new GridBagConstraints(
+				2, y, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		
+		// baumgarte
+		y++;
+		JLabel lblBaum = new JLabel("Baumgarte", this.helpIcon, JLabel.LEFT);
+		lblBaum.setToolTipText("Specifies the rate at which the position constraints are solved.");
+		pnlConstraint.add(lblBaum, new GridBagConstraints(
+				0, y, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JSpinner spnBaum = new JSpinner(new SpinnerNumberModel(settings.getBaumgarte(), 0.0, 1.0, 0.05));
+		spnBaum.setEditor(new JSpinner.NumberEditor(spnBaum, "0.00"));
+		((JSpinner.DefaultEditor)spnBaum.getEditor()).getTextField().setColumns(4);
+		spnBaum.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				JSpinner spnr = (JSpinner) e.getSource();
+				double baum = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
+				Settings settings = Settings.getInstance();
+				settings.setBaumgarte(baum);
+			}
+		});
+		pnlConstraint.add(spnBaum, new GridBagConstraints(
+				1, y, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_END, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// add the sleep panel to the over all panel

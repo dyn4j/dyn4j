@@ -24,8 +24,6 @@
  */
 package org.dyn4j.game2d.collision.broadphase;
 
-import java.util.List;
-
 import org.dyn4j.game2d.collision.Collidable;
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Interval;
@@ -48,35 +46,39 @@ public abstract class AbstractAABBDetector implements BroadphaseDetector {
 	 * @see org.dyn4j.game2d.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.game2d.collision.Collidable, org.dyn4j.game2d.collision.Collidable)
 	 */
 	@Override
-	public boolean detect(Collidable c1, Collidable c2) {
-		// get the shapes
-		List<Convex> shapes1 = c1.getShapes();
-		List<Convex> shapes2 = c2.getShapes();
-		int size1 = shapes1.size();
-		int size2 = shapes2.size();
+	public boolean detect(Collidable collidable1, Collidable collidable2) {
+		int size1 = collidable1.getShapeCount();
+		int size2 = collidable2.getShapeCount();
+		
+		// see if either collidable has zero fixtures
+		if (size1 == 0 || size2 == 0) {
+			return false;
+		}
 		
 		// get the transforms
-		Transform t1 = c1.getTransform();
-		Transform t2 = c2.getTransform();
+		Transform transform1 = collidable1.getTransform();
+		Transform transform2 = collidable2.getTransform();
+		
+		Convex convex;
 		
 		// project all the shapes of collidable1
-		Convex s1 = shapes1.get(0);
-		Interval x1 = s1.project(Sap.X_AXIS, t1);
-		Interval y1 = s1.project(Sap.Y_AXIS, t1);
-		for (int j = 1; j < size1; j++) {
-			s1 = shapes1.get(j);
-			x1.union(s1.project(Sap.X_AXIS, t1));
-			y1.union(s1.project(Sap.Y_AXIS, t1));
+		convex = collidable1.getShape(0);
+		Interval x1 = convex.project(Sap.X_AXIS, transform1);
+		Interval y1 = convex.project(Sap.Y_AXIS, transform1);
+		for (int i = 1; i < size1; i++) {
+			convex = collidable1.getShape(i);
+			x1.union(convex.project(Sap.X_AXIS, transform1));
+			y1.union(convex.project(Sap.Y_AXIS, transform1));
 		}
 		
 		// project all the shapes of collidable2
-		Convex s2 = shapes2.get(0);
-		Interval x2 = s2.project(Sap.X_AXIS, t2);
-		Interval y2 = s2.project(Sap.Y_AXIS, t2);
-		for (int j = 1; j < size2; j++) {
-			s2 = shapes2.get(j);
-			x2.union(s2.project(Sap.X_AXIS, t2));
-			y2.union(s2.project(Sap.Y_AXIS, t2));
+		convex = collidable2.getShape(0);
+		Interval x2 = convex.project(Sap.X_AXIS, transform2);
+		Interval y2 = convex.project(Sap.Y_AXIS, transform2);
+		for (int i = 1; i < size2; i++) {
+			convex = collidable2.getShape(i);
+			x2.union(convex.project(Sap.X_AXIS, transform2));
+			y2.union(convex.project(Sap.Y_AXIS, transform2));
 		}
 		
 		// if both sets of intervals overlap then we have a possible intersection
@@ -91,12 +93,12 @@ public abstract class AbstractAABBDetector implements BroadphaseDetector {
 	 * @see org.dyn4j.game2d.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.geometry.Transform, org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.geometry.Transform)
 	 */
 	@Override
-	public boolean detect(Convex c1, Transform t1, Convex c2, Transform t2) {
+	public boolean detect(Convex convex1, Transform transform1, Convex convex2, Transform transform2) {
 		// project both convex shapes onto the x and y axes
-		Interval x1 = c1.project(Sap.X_AXIS, t1);
-		Interval x2 = c2.project(Sap.X_AXIS, t2);
-		Interval y1 = c1.project(Sap.Y_AXIS, t1);
-		Interval y2 = c2.project(Sap.Y_AXIS, t2);
+		Interval x1 = convex1.project(Sap.X_AXIS, transform1);
+		Interval x2 = convex2.project(Sap.X_AXIS, transform2);
+		Interval y1 = convex1.project(Sap.Y_AXIS, transform1);
+		Interval y2 = convex2.project(Sap.Y_AXIS, transform2);
 		
 		// if both sets of intervals overlap then we have a possible intersection
 		if (x1.overlaps(x2) && y1.overlaps(y2)) {

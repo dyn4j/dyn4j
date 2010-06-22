@@ -26,6 +26,7 @@ package org.dyn4j.game2d.dynamics;
 
 import org.dyn4j.game2d.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.game2d.collision.manifold.Manifold;
+import org.dyn4j.game2d.collision.manifold.ManifoldSolver;
 import org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.game2d.collision.narrowphase.Penetration;
 import org.dyn4j.game2d.geometry.Convex;
@@ -40,33 +41,40 @@ public interface CollisionListener {
 	 * Called when two {@link Body}s are colliding as determined by the {@link BroadphaseDetector}.
 	 * @param body1 the first {@link Body}
 	 * @param body2 the second {@link Body}
+	 * @return boolean true if processing should continue for this collision
 	 */
-	public abstract void collision(Body body1, Body body2);
+	public abstract boolean collision(Body body1, Body body2);
 	
 	/**
 	 * Called when two {@link Body}s are colliding as determined by the {@link NarrowphaseDetector}.
 	 * <p>
 	 * {@link Body} objects can have many {@link Convex} {@link Shape}s that make up their geometry.  Because
 	 * of this this method may be called multiple times.
+	 * <p>
+	 * Modification of the {@link Penetration} object is allowed and will be used to generate the contact
+	 * manifold in the {@link ManifoldSolver}.
 	 * @param body1 the first {@link Body}
+	 * @param fixture1 the first {@link Body}'s {@link Fixture}
 	 * @param body2 the second {@link Body}
-	 * @param convex1 the {@link Convex} {@link Shape} on the first {@link Body}
-	 * @param convex2 the {@link Convex} {@link Shape} on the second {@link Body}
-	 * @param p the {@link Penetration} between the {@link Shape}s
+	 * @param fixture2 the second {@link Body}'s {@link Fixture}
+	 * @param penetration the {@link Penetration} between the {@link Shape}s
+	 * @return boolean true if processing should continue for this collision
 	 */
-	public abstract void collision(Body body1, Body body2, Convex convex1, Convex convex2, Penetration p);
+	public abstract boolean collision(Body body1, Fixture fixture1, Body body2, Fixture fixture2, Penetration penetration);
 	
 	/**
 	 * Called when two {@link Body}s are colliding and a contact {@link Manifold} has been found.
 	 * <p>
 	 * {@link Body} objects can have many {@link Convex} {@link Shape}s that make up their geometry.  Because
 	 * of this this method may be called multiple times.
+	 * <p>
+	 * Modification of the {@link Manifold} object is allowed.  The {@link Manifold} is used to create contact constraints.
 	 * @param body1 the first {@link Body}
+	 * @param fixture1 the first {@link Body}'s {@link Fixture}
 	 * @param body2 the second {@link Body}
-	 * @param convex1 the {@link Convex} {@link Shape} on the first {@link Body}
-	 * @param convex2 the {@link Convex} {@link Shape} on the second {@link Body}
-	 * @param p the {@link Penetration} between the {@link Shape}s
-	 * @param m the contact {@link Manifold} for the collision
+	 * @param fixture2 the second {@link Body}'s {@link Fixture}
+	 * @param manifold the contact {@link Manifold} for the collision
+	 * @return boolean true if processing should continue for this collision
 	 */
-	public abstract void collision(Body body1, Body body2, Convex convex1, Convex convex2, Penetration p, Manifold m);
+	public abstract boolean collision(Body body1, Fixture fixture1, Body body2, Fixture fixture2, Manifold manifold);
 }

@@ -105,6 +105,8 @@ public class Step {
 	/**
 	 * Returns the ratio of the last elapsed time to the current
 	 * elapsed time.
+	 * <p>
+	 * This is used to cope with a variable time step.
 	 * @return double
 	 */
 	public double getDeltaTimeRatio() {

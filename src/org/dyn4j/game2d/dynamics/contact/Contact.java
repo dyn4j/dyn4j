@@ -146,12 +146,4 @@ public class Contact {
 	public double getTangentialImpulse() {
 		return this.jt;
 	}
-	
-	/**
-	 * Returns the accumulated position impulse applied at this point.
-	 * @return double the accumulated position impulse
-	 */
-	public double getPositionImpulse() {
-		return this.jp;
-	}
 }

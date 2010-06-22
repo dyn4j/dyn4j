@@ -35,7 +35,6 @@ import org.dyn4j.game2d.collision.narrowphase.Gjk;
 import org.dyn4j.game2d.collision.narrowphase.Penetration;
 import org.dyn4j.game2d.collision.narrowphase.Sat;
 import org.dyn4j.game2d.collision.narrowphase.Separation;
-import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Segment;
 import org.dyn4j.game2d.geometry.Shape;
 import org.dyn4j.game2d.geometry.Transform;
@@ -91,14 +90,9 @@ public class SegmentSegmentTest extends AbstractTest {
 	 */
 	@Test	
 	public void detectCollidableAABB() {
-		List<Convex> shapes = null;
-		
 		// create some collidables
-		shapes = new ArrayList<Convex>(1); shapes.add(seg1);
-		CollidableTest ct1 = new CollidableTest(shapes, Filter.DEFAULT_FILTER);
-		
-		shapes = new ArrayList<Convex>(1); shapes.add(seg2);
-		CollidableTest ct2 = new CollidableTest(shapes, Filter.DEFAULT_FILTER);
+		CollidableTest ct1 = new CollidableTest(seg1);
+		CollidableTest ct2 = new CollidableTest(seg2);
 		
 		// test overlap
 		TestCase.assertTrue(this.aabb.detect(ct1, ct2));
@@ -120,15 +114,11 @@ public class SegmentSegmentTest extends AbstractTest {
 	 */
 	@Test
 	public void detectSap() {
-		List<Convex> shapes;
 		List<BroadphasePair<CollidableTest>> pairs;
 		
 		// create some collidables
-		shapes = new ArrayList<Convex>(1); shapes.add(seg1);
-		CollidableTest ct1 = new CollidableTest(shapes, Filter.DEFAULT_FILTER);
-		
-		shapes = new ArrayList<Convex>(1); shapes.add(seg2);
-		CollidableTest ct2 = new CollidableTest(shapes, Filter.DEFAULT_FILTER);
+		CollidableTest ct1 = new CollidableTest(seg1);
+		CollidableTest ct2 = new CollidableTest(seg2);
 		
 		List<CollidableTest> objs = new ArrayList<CollidableTest>();
 		objs.add(ct1);

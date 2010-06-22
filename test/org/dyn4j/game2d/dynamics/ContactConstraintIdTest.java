@@ -44,19 +44,19 @@ public class ContactConstraintIdTest {
 		Body b2 = new Body();
 		Body b3 = new Body();
 		
-		Rectangle r1 = new Rectangle(1.0, 1.0);
-		Rectangle r2 = new Rectangle(2.0, 2.0);
-		Rectangle r3 = new Rectangle(3.0, 3.0);
+		Fixture f1 = new Fixture(new Rectangle(1.0, 1.0));
+		Fixture f2 = new Fixture(new Rectangle(2.0, 2.0));
+		Fixture f3 = new Fixture(new Rectangle(3.0, 3.0));
 		
 		// since im just testing the id's im not going to fully setup the bodies
 		
-		ContactConstraintId cci1 = new ContactConstraintId(b1, b2, r1, r2);
-		ContactConstraintId cci2 = new ContactConstraintId(b2, b1, r2, r1);
+		ContactConstraintId cci1 = new ContactConstraintId(b1, f1, b2, f2);
+		ContactConstraintId cci2 = new ContactConstraintId(b2, f2, b1, f1);
 		
 		// the two above should have the same hashcode
 		TestCase.assertEquals(cci2.hashCode(), cci1.hashCode());
 		
-		ContactConstraintId cci3 = new ContactConstraintId(b3, b1, r3, r1);
+		ContactConstraintId cci3 = new ContactConstraintId(b3, f3, b1, f1);
 		
 		// should not be equal
 		TestCase.assertFalse(cci3.hashCode() == cci2.hashCode());

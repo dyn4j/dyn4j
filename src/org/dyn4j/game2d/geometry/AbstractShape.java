@@ -40,9 +40,6 @@ public abstract class AbstractShape implements Shape, Transformable {
 	/** Custom user data object */
 	protected Object userData;
 	
-	/** The shape's density in kg/m<sup>2</sup> */
-	protected double density = Mass.DEFAULT_DENSITY;
-	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -50,8 +47,7 @@ public abstract class AbstractShape implements Shape, Transformable {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.id).append("|")
-		.append(this.center).append("|")
-		.append(this.density);
+		.append(this.center);
 		return sb.toString();
 	}
 	
@@ -69,7 +65,7 @@ public abstract class AbstractShape implements Shape, Transformable {
 	 */
 	@Override
 	public String getId() {
-		return id;
+		return this.id;
 	}
 	
 	/* (non-Javadoc)
@@ -138,22 +134,5 @@ public abstract class AbstractShape implements Shape, Transformable {
 	@Override
 	public void translate(Vector vector) {
 		this.translate(vector.x, vector.y);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.geometry.Shape#setDensity(double)
-	 */
-	@Override
-	public void setDensity(double density) {
-		if (density <= 0) throw new IllegalArgumentException("The density must be greater than 0.");
-		this.density = density;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.geometry.Shape#getDensity()
-	 */
-	@Override
-	public double getDensity() {
-		return this.density;
 	}
 }

@@ -30,8 +30,14 @@ package org.dyn4j.game2d.dynamics;
  */
 public class StepAdapter implements StepListener {
 	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.dynamics.StepListener#step(org.dyn4j.game2d.dynamics.World)
+	 * @see org.dyn4j.game2d.dynamics.StepListener#begin(org.dyn4j.game2d.dynamics.Step, org.dyn4j.game2d.dynamics.World)
 	 */
 	@Override
-	public void step(World world) {}
+	public void begin(Step step, World world) {}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.dynamics.StepListener#end(org.dyn4j.game2d.dynamics.Step, org.dyn4j.game2d.dynamics.World)
+	 */
+	@Override
+	public void end(Step step, World world) {}
 }

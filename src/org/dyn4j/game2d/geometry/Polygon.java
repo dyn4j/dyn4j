@@ -24,6 +24,8 @@
  */
 package org.dyn4j.game2d.geometry;
 
+
+
 /**
  * Represents a {@link Convex} {@link Polygon}.
  * <p>
@@ -35,7 +37,7 @@ package org.dyn4j.game2d.geometry;
  */
 public class Polygon extends Wound implements Convex, Shape, Transformable {
 	/** The polygon {@link Shape.Type}  */
-	public static final Shape.Type TYPE = new Shape.Type();
+	public static final Shape.Type TYPE = new Shape.Type("Polygon");
 	
 	/**
 	 * Default constructor for sub classes.
@@ -51,9 +53,16 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 	public Polygon(Vector[] vertices) {
 		super();
 		// check the vertex array
-		if (vertices == null || vertices.length < 3) throw new IllegalArgumentException("A polygon must have 3 or more vertices.");
-		// check for convex
+		if (vertices == null) throw new NullPointerException("The vertices array cannot be null.");
+		// get the size
 		int size = vertices.length;
+		// check the size
+		if (size < 3) throw new IllegalArgumentException("A polygon must have 3 or more vertices.");
+		// check for null vertices
+		for (int i = 0; i < size; i++) {
+			if (vertices[i] == null) throw new NullPointerException("The vertices array cannot contain null points.");
+		}
+		// check for convex
 		double area = 0.0;
 		for (int i = 0; i < size; i++) {
 			Vector p0 = (i - 1 < 0) ? vertices[size - 1] : vertices[i - 1];
@@ -74,14 +83,21 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		if (area < 0) {
 			throw new IllegalArgumentException("A polygon must have Counter-Clockwise vertex winding.");
 		}
+		// set the vertices
 		this.vertices = vertices;
+		// create the normals
 		this.normals = new Vector[size];
 		for (int i = 0; i < size; i++) {
+			// get the edge points
 			Vector p1 = vertices[i];
 			Vector p2 = (i + 1 == size) ? vertices[0] : vertices[i + 1];
-			this.normals[i] = p1.to(p2).left();
-			this.normals[i].normalize();
+			// create the edge and get its left perpedicular vector
+			Vector n = p1.to(p2).left();
+			// normalize it
+			n.normalize();
+			this.normals[i] = n;
 		}
+		// perform the area weighted center to otain the center
 		this.center = Geometry.getAreaWeightedCenter(this.vertices);
 	}
 	
@@ -294,11 +310,13 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		if (leftN.dot(n) < rightN.dot(n)) {
 			Vector left = transform.getTransformed(this.vertices[l]);
 			Vertex vl = new Vertex(left, l);
-			return new Edge(new Vertex[] {vm, vl}, maximum.to(left), vm, index + 1);
+			// make sure the edge is the right winding
+			return new Edge(vm, vl, vm, maximum.to(left), index + 1);
 		} else {
 			Vector right = transform.getTransformed(this.vertices[r]);
 			Vertex vr = new Vertex(right, r);
-			return new Edge(new Vertex[] {vr, vm}, right.to(maximum), vm, index);
+			// make sure the edge is the right winding
+			return new Edge(vr, vm, vm, right.to(maximum), index);
 		}
 	}
 	
@@ -338,7 +356,7 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 	
 	/**
 	 * Creates a {@link Mass} object using the geometric properties of
-	 * this {@link Polygon} and the set density.
+	 * this {@link Polygon} and the given density.
 	 * <p>
 	 * A {@link Polygon}'s centroid must be computed by the area weighted method since the
 	 * average method can be bias to one side if there are more points on that one
@@ -364,11 +382,11 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 	 * <pre>
 	 * d * area
 	 * </pre>
+	 * @param density the density in kg/m<sup>2</sup>
 	 * @return {@link Mass} the {@link Mass} of this {@link Polygon}
 	 */
 	@Override
-	public Mass createMass() {
-		double d = this.density;
+	public Mass createMass(double density) {
 		// can't use normal centroid calculation since it will be weighted towards sides
 		// that have larger distribution of points.
 		Vector center = new Vector();
@@ -379,7 +397,7 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		double inv3 = 1.0 / 3.0;
 		// loop through the vertices
 		for (int i = 0; i < n; i++) {
-			// get two verticies
+			// get two vertices
 			Vector p1 = this.vertices[i];
 			Vector p2 = i + 1 < n ? this.vertices[i + 1] : this.vertices[0];
 			// perform the cross product (yi * x(i+1) - y(i+1) * xi)
@@ -400,11 +418,11 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 			// we will do the m / 6A = (d / 6) when we have the area summed up
 		}
 		// compute the mass
-		double m = d * area;
+		double m = density * area;
 		// finish the centroid calculation by dividing by the total area
 		center.divide(area);
 		// finish the inertia tensor by dividing by the total area and multiplying by d / 6
-		I *= (d / 6);
-		return new Mass(center, m, I);
+		I *= (density / 6.0);
+		return Mass.create(center, m, I);
 	}
 }

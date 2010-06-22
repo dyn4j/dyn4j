@@ -39,12 +39,12 @@ public class ShapeTypeTest {
 	@Test
 	public void is() {
 		// base types
-		Shape.Type t1 = new Shape.Type();
-		Shape.Type t2 = new Shape.Type();
+		Shape.Type t1 = new Shape.Type("type1");
+		Shape.Type t2 = new Shape.Type("type2");
 		
 		// sub types
-		Shape.Type t3 = new Shape.Type(t1);
-		Shape.Type t4 = new Shape.Type(t3);
+		Shape.Type t3 = new Shape.Type(t1, "type3");
+		Shape.Type t4 = new Shape.Type(t3, "type4");
 		
 		// not the same
 		TestCase.assertFalse(t1.is(t2));

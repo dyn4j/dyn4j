@@ -26,7 +26,6 @@ package org.dyn4j.game2d.dynamics;
 
 import org.dyn4j.game2d.collision.manifold.Manifold;
 import org.dyn4j.game2d.collision.narrowphase.Penetration;
-import org.dyn4j.game2d.geometry.Convex;
 
 /**
  * Convience class for implementing the {@link CollisionListener} interface.
@@ -40,17 +39,17 @@ public class CollisionAdapter implements CollisionListener {
 	 * @see org.dyn4j.game2d.dynamics.CollisionListener#collision(org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.dynamics.Body)
 	 */
 	@Override
-	public void collision(Body body1, Body body2) {}
+	public boolean collision(Body body1, Body body2) { return true; }
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.dynamics.CollisionListener#collision(org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.collision.narrowphase.Penetration)
+	 * @see org.dyn4j.game2d.dynamics.CollisionListener#collision(org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.dynamics.Fixture, org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.dynamics.Fixture, org.dyn4j.game2d.collision.manifold.Manifold)
 	 */
 	@Override
-	public void collision(Body body1, Body body2, Convex convex1, Convex convex2, Penetration p) {}
+	public boolean collision(Body body1, Fixture fixture1, Body body2, Fixture fixture2, Manifold manifold) { return true; }
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.dynamics.CollisionListener#collision(org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.collision.narrowphase.Penetration, org.dyn4j.game2d.collision.manifold.Manifold)
+	 * @see org.dyn4j.game2d.dynamics.CollisionListener#collision(org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.dynamics.Fixture, org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.dynamics.Fixture, org.dyn4j.game2d.collision.narrowphase.Penetration)
 	 */
 	@Override
-	public void collision(Body body1, Body body2, Convex convex1, Convex convex2, Penetration p, Manifold m) {}
+	public boolean collision(Body body1, Fixture fixture1, Body body2, Fixture fixture2, Penetration penetration) { return true; }
 }

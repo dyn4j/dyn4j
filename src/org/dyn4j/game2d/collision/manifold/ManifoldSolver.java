@@ -38,13 +38,13 @@ public interface ManifoldSolver {
 	 * Returns true if there exists a valid contact manifold between the two
 	 * {@link Convex} {@link Shape}s and fills in the {@link Manifold} object
 	 * with the points, depths, and normal.
-	 * @param p the {@link Penetration}
-	 * @param s1 the first {@link Convex} {@link Shape}
-	 * @param t1 the first {@link Shape}'s {@link Transform}
-	 * @param s2 the second {@link Convex} {@link Shape}
-	 * @param t2 the second {@link Shape}'s {@link Transform}
-	 * @param m the {@link Manifold} object to fill
+	 * @param penetration the {@link Penetration}
+	 * @param convex1 the first {@link Convex} {@link Shape}
+	 * @param transform1 the first {@link Shape}'s {@link Transform}
+	 * @param convex2 the second {@link Convex} {@link Shape}
+	 * @param transform2 the second {@link Shape}'s {@link Transform}
+	 * @param manifold the {@link Manifold} object to fill
 	 * @return boolean
 	 */
-	public abstract boolean getManifold(Penetration p, Convex s1, Transform t1, Convex s2, Transform t2, Manifold m);
+	public abstract boolean getManifold(Penetration penetration, Convex convex1, Transform transform1, Convex convex2, Transform transform2, Manifold manifold);
 }

@@ -130,18 +130,18 @@ public class Entity extends Body {
 		// get the world center
 		Vector wCenter = tx.getTransformed(center);
 		
-		int size = this.shapes.size();
+		int size = this.getShapeCount();
 		// draw the shapes
 		for (int i = 0; i < size; i++) {
-			Convex c = this.shapes.get(i);
+			Convex c = this.getShape(i);
 			// check if we should render fill color
 			if (draw.drawFill()) {
 				// set the color
 				graphics.setColor(this.color);
 				// if the body is asleep set the render color to blue
 				if (this.isAsleep()) graphics.setColor(Entity.ASLEEP_COLOR);
-				// if the body is frozen set the render color to yellow
-				if (this.isFrozen()) graphics.setColor(Entity.FROZEN_COLOR);
+				// if the body is inactive set the render color to yellow
+				if (!this.isActive()) graphics.setColor(Entity.FROZEN_COLOR);
 				// render the fill color
 				this.renderFill(graphics, c, tx, scale);
 			}
@@ -153,7 +153,7 @@ public class Entity extends Body {
 				// if the body is asleep set the render color to blue
 				if (this.isAsleep()) graphics.setColor(Entity.ASLEEP_COLOR.darker());
 				// if the body is frozen set the render color to yellow
-				if (this.isFrozen()) graphics.setColor(Entity.FROZEN_COLOR.darker());
+				if (!this.isActive()) graphics.setColor(Entity.FROZEN_COLOR.darker());
 				// render the convex shape
 				this.renderConvex(graphics, c, tx, scale);
 			}

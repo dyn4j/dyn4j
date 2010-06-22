@@ -39,8 +39,8 @@ public interface MinkowskiPenetrationSolver {
 	 * Returns the penetration vector and depth in the given {@link Penetration} object
 	 * given the created simplex and {@link MinkowskiSum}. 
 	 * @param simplex the simplex containing the origin
-	 * @param ms the {@link MinkowskiSum}
-	 * @param p the {@link Penetration} object to fill
+	 * @param minkowskiSum the {@link MinkowskiSum}
+	 * @param penetration the {@link Penetration} object to fill
 	 */
-	public abstract void getPenetration(List<Vector> simplex, MinkowskiSum ms, Penetration p);
+	public abstract void getPenetration(List<Vector> simplex, MinkowskiSum minkowskiSum, Penetration penetration);
 }

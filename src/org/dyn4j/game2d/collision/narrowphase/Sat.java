@@ -52,11 +52,11 @@ public class Sat extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 	 * @see org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector#detect(org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.geometry.Transform, org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.geometry.Transform, org.dyn4j.game2d.collision.narrowphase.Penetration)
 	 */
 	@Override
-	public boolean detect(Convex s1, Transform t1, Convex s2, Transform t2, Penetration p) {
+	public boolean detect(Convex convex1, Transform transform1, Convex convex2, Transform transform2, Penetration penetration) {
 		// check for circles
-		if (s1.isType(Circle.TYPE) && s2.isType(Circle.TYPE)) {
+		if (convex1.isType(Circle.TYPE) && convex2.isType(Circle.TYPE)) {
 			// if its a circle - circle collision use the faster method
-			return super.detect((Circle) s1, t1, (Circle) s2, t2, p);
+			return super.detect((Circle) convex1, transform1, (Circle) convex2, transform2, penetration);
 		}
 		
 		Vector n = null;
@@ -64,12 +64,12 @@ public class Sat extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 		
 		// get the foci from both shapes, the foci are used to test any
 		// voronoi regions of the other shape
-		Vector[] foci1 = s1.getFoci(t1);
-		Vector[] foci2 = s2.getFoci(t2);
+		Vector[] foci1 = convex1.getFoci(transform1);
+		Vector[] foci2 = convex2.getFoci(transform2);
 		
 		// get the vector arrays for the separating axes tests
-		Vector[] axes1 = s1.getAxes(foci2, t1);
-		Vector[] axes2 = s2.getAxes(foci1, t2);
+		Vector[] axes1 = convex1.getAxes(foci2, transform1);
+		Vector[] axes2 = convex2.getAxes(foci1, transform2);
 		
 		// loop through shape1 axes
 		if (axes1 != null) {
@@ -81,8 +81,8 @@ public class Sat extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 					// normalize the vector first so we can get an accurate penetration depth
 					axis.normalize();
 					// project both shapes onto the axis
-	        		Interval intervalA = s1.project(axis, t1);
-		            Interval intervalB = s2.project(axis, t2);
+	        		Interval intervalA = convex1.project(axis, transform1);
+		            Interval intervalB = convex2.project(axis, transform2);
 		            // if the intervals do not overlap then the two shapes
 		            // cannot be intersecting
 		            if (!intervalA.overlaps(intervalB)) {
@@ -128,8 +128,8 @@ public class Sat extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 					// normalize the vector first so we can get an accurate penetration depth
 					axis.normalize();
 					// project both shapes onto the axis
-	        		Interval intervalA = s1.project(axis, t1);
-		            Interval intervalB = s2.project(axis, t2);
+	        		Interval intervalA = convex1.project(axis, transform1);
+		            Interval intervalB = convex2.project(axis, transform2);
 		            // if the intervals do not overlap then the two shapes
 		            // cannot be intersecting
 		            if (!intervalA.overlaps(intervalB)) {
@@ -165,8 +165,8 @@ public class Sat extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 		}
 		
 		// make sure the vector is pointing from shape1 to shape2
-		Vector c1 = t1.getTransformed(s1.getCenter());
-		Vector c2 = t2.getTransformed(s2.getCenter());
+		Vector c1 = transform1.getTransformed(convex1.getCenter());
+		Vector c2 = transform2.getTransformed(convex2.getCenter());
 		Vector cToc = c1.to(c2);
 		if (cToc.dot(n) < 0) {
 			// negate the normal if its not
@@ -174,8 +174,8 @@ public class Sat extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 		}
 		
 		// fill the penetration object
-		p.normal = n;
-		p.depth = overlap;
+		penetration.normal = n;
+		penetration.depth = overlap;
 		// return true
         return true;
 	}
@@ -184,21 +184,21 @@ public class Sat extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 	 * @see org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector#test(org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.geometry.Transform, org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.geometry.Transform)
 	 */
 	@Override
-	public boolean detect(Convex s1, Transform t1, Convex s2, Transform t2) {
+	public boolean detect(Convex convex1, Transform transform1, Convex convex2, Transform transform2) {
 		// check for circles
-		if (s1.isType(Circle.TYPE) && s2.isType(Circle.TYPE)) {
+		if (convex1.isType(Circle.TYPE) && convex2.isType(Circle.TYPE)) {
 			// if its a circle - circle collision use the faster method
-			return super.detect((Circle) s1, t1, (Circle) s2, t2);
+			return super.detect((Circle) convex1, transform1, (Circle) convex2, transform2);
 		}
 
 		// get the foci from both shapes, the foci are used to test any
 		// voronoi regions of the other shape
-		Vector[] foci1 = s1.getFoci(t1);
-		Vector[] foci2 = s2.getFoci(t2);
+		Vector[] foci1 = convex1.getFoci(transform1);
+		Vector[] foci2 = convex2.getFoci(transform2);
 		
 		// get the vector arrays for the separating axes tests
-		Vector[] axes1 = s1.getAxes(foci2, t1);
-		Vector[] axes2 = s2.getAxes(foci1, t2);
+		Vector[] axes1 = convex1.getAxes(foci2, transform1);
+		Vector[] axes2 = convex2.getAxes(foci1, transform2);
 
 		// loop through shape1 axes
 		if (axes1 != null) {
@@ -210,8 +210,8 @@ public class Sat extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 					// normalize the vector first so we can get an accurate penetration depth
 					axis.normalize();
 					// project both shapes onto the axis
-	        		Interval intervalA = s1.project(axis, t1);
-		            Interval intervalB = s2.project(axis, t2);
+	        		Interval intervalA = convex1.project(axis, transform1);
+		            Interval intervalB = convex2.project(axis, transform2);
 		            // if the intervals do not overlap then the two shapes
 		            // cannot be intersecting
 		            if (!intervalA.overlaps(intervalB)) {
@@ -232,8 +232,8 @@ public class Sat extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 					// normalize the vector first so we can get an accurate penetration depth
 					axis.normalize();
 					// project both shapes onto the axis
-	        		Interval intervalA = s1.project(axis, t1);
-		            Interval intervalB = s2.project(axis, t2);
+	        		Interval intervalA = convex1.project(axis, transform1);
+		            Interval intervalB = convex2.project(axis, transform2);
 		            // if the intervals do not overlap then the two shapes
 		            // cannot be intersecting
 		            if (!intervalA.overlaps(intervalB)) {

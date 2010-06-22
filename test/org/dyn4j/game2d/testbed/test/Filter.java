@@ -27,6 +27,7 @@ package org.dyn4j.game2d.testbed.test;
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.CategoryFilter;
 import org.dyn4j.game2d.collision.RectangularBounds;
+import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Rectangle;
@@ -85,7 +86,7 @@ public class Filter extends Test {
 		// as the other body then the body will collide with everything
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
-		floor.addShape(floorRect);
+		floor.addFixture(new Fixture(floorRect));
 		floor.setMassFromShapes(Mass.Type.INFINITE);
 		this.world.add(floor);
 		
@@ -96,30 +97,42 @@ public class Filter extends Test {
 		
 		// create a left traveling object
 		Rectangle r1 = new Rectangle(1.0, 1.0);
+		
+		Fixture f1 = new Fixture(r1);
+		f1.setFilter(filter);
+		
 		Entity left = new Entity();
-		left.addShape(r1);
+		left.addFixture(f1);
 		left.setMassFromShapes();
 		left.translate(0.0, 2.0);
-		left.getV().set(-5.0, 0.0);
-		left.setFilter(filter);
+		left.getVelocity().set(-5.0, 0.0);
+		
 		this.world.add(left);
 		
 		// create a right traveling object
 		Rectangle r2 = new Rectangle(1.0, 1.0);
+		
+		Fixture f2 = new Fixture(r2);
+		f2.setFilter(filter2);
+		
 		Entity right1 = new Entity();
-		right1.addShape(r2);
+		right1.addFixture(f2);
 		right1.setMassFromShapes();
 		right1.translate(-2.0, 2.0);
-		right1.setFilter(filter2);
+		
 		this.world.add(right1);
 		
 		// create a second right traveling object
 		Rectangle r3 = new Rectangle(1.0, 1.0);
+		
+		Fixture f3 = new Fixture(r3);
+		f3.setFilter(filter);
+		
 		Entity right2 = new Entity();
-		right2.addShape(r3);
+		right2.addFixture(f3);
 		right2.setMassFromShapes();
 		right2.translate(-4.0, 2.0);
-		right2.setFilter(filter);
+		
 		this.world.add(right2);
 	}
 	

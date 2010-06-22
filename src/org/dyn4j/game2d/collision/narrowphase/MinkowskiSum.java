@@ -112,16 +112,16 @@ public class MinkowskiSum {
 		
 	/**
 	 * Full constructor.
-	 * @param c1 the first {@link Convex}
-	 * @param t1 the first {@link Convex}'s {@link Transform}
-	 * @param c2 the second {@link Convex}
-	 * @param t2 the second {@link Convex}'s {@link Transform}
+	 * @param convex1 the first {@link Convex}
+	 * @param transform1 the first {@link Convex}'s {@link Transform}
+	 * @param convex2 the second {@link Convex}
+	 * @param transform2 the second {@link Convex}'s {@link Transform}
 	 */
-	public MinkowskiSum(Convex c1, Transform t1, Convex c2, Transform t2) {
-		this.convex1 = c1;
-		this.convex2 = c2;
-		this.transform1 = t1;
-		this.transform2 = t2;
+	public MinkowskiSum(Convex convex1, Transform transform1, Convex convex2, Transform transform2) {
+		this.convex1 = convex1;
+		this.convex2 = convex2;
+		this.transform1 = transform1;
+		this.transform2 = transform2;
 	}
 	
 	/* (non-Javadoc)

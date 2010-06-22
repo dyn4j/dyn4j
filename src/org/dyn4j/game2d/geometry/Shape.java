@@ -24,6 +24,8 @@
  */
 package org.dyn4j.game2d.geometry;
 
+
+
 /**
  * Represents a geometric {@link Shape}.
  * <p>
@@ -60,13 +62,19 @@ public interface Shape extends Transformable {
 		/** The parent shape type */
 		private Shape.Type parent;
 		
+		/** The type name */
+		private String name;
+		
 		/**
 		 * Default constructor.
 		 * <p>
 		 * Creates a shape type with no parent
 		 * shape type associated with it.
+		 * @param name the name of the type
 		 */
-		public Type() {}
+		public Type(String name) {
+			this.name = name;
+		}
 		
 		/**
 		 * Full constructor.
@@ -74,9 +82,11 @@ public interface Shape extends Transformable {
 		 * Creates a shape type using the parent
 		 * shape type.
 		 * @param parent the parent shape type
+		 * @param name the name of the type
 		 */
-		public Type(Shape.Type parent) {
+		public Type(Shape.Type parent, String name) {
 			this.parent = parent;
+			this.name = name;
 		}
 		
 		/**
@@ -99,6 +109,27 @@ public interface Shape extends Transformable {
 				return this.parent.is(type);
 			}
 			return false;
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			sb.append(this.name);
+			if (this.parent != null) {
+				sb.append("->").append(this.parent.toString());
+			}
+			return sb.toString();
+		}
+		
+		/**
+		 * Returns the name of this type.
+		 * @return String
+		 */
+		public String getName() {
+			return this.name;
 		}
 	}
 	
@@ -169,20 +200,9 @@ public interface Shape extends Transformable {
 	
 	/**
 	 * Creates a {@link Mass} object using the geometric properties of
-	 * this {@link Shape} and the set density.
+	 * this {@link Shape} and the given density.
+	 * @param density the density in kg/m<sup>2</sup>
 	 * @return {@link Mass} the {@link Mass} of this {@link Shape}
 	 */
-	public abstract Mass createMass();
-	
-	/**
-	 * Sets the density of this shape in kg/m<sup>2</sup>.
-	 * @param density the density in kg/m<sup>2</sup>
-	 */
-	public abstract void setDensity(double density);
-	
-	/**
-	 * Returns the density of this shape in kg/m<sup>2</sup>.
-	 * @return double the density in kg/m<sup>2</sup>
-	 */
-	public abstract double getDensity();
+	public abstract Mass createMass(double density);
 }

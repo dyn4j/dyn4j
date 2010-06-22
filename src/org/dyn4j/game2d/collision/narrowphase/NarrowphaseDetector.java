@@ -45,25 +45,25 @@ public interface NarrowphaseDetector {
 	/**
 	 * Returns true if the two {@link Convex} {@link Shape}s intersect and fills
 	 * the {@link Penetration} object with the penetration vector and depth.
-	 * @param s1 the first {@link Convex} {@link Shape}
-	 * @param t1 the first {@link Shape}'s {@link Transform}
-	 * @param s2 the second {@link Convex} {@link Shape}
-	 * @param t2 the second {@link Shape}'s {@link Transform}
-	 * @param p the {@link Penetration} object to fill
+	 * @param convex1 the first {@link Convex} {@link Shape}
+	 * @param transform1 the first {@link Shape}'s {@link Transform}
+	 * @param convex2 the second {@link Convex} {@link Shape}
+	 * @param transform2 the second {@link Shape}'s {@link Transform}
+	 * @param penetration the {@link Penetration} object to fill
 	 * @return boolean
 	 */
-	public abstract boolean detect(Convex s1, Transform t1, Convex s2, Transform t2, Penetration p);
+	public abstract boolean detect(Convex convex1, Transform transform1, Convex convex2, Transform transform2, Penetration penetration);
 	
 	/**
 	 * Returns true if the two {@link Convex} {@link Shape}s intersect.
 	 * <p>
 	 * Used to quickly test if two {@link Convex} {@link Shape}s intersect without
 	 * incurring the cost of determining {@link Penetration}.
-	 * @param s1 the first {@link Convex} {@link Shape}
-	 * @param t1 the first {@link Shape}'s {@link Transform}
-	 * @param s2 the second {@link Convex} {@link Shape}
-	 * @param t2 the second {@link Shape}'s {@link Transform}
+	 * @param convex1 the first {@link Convex} {@link Shape}
+	 * @param transform1 the first {@link Shape}'s {@link Transform}
+	 * @param convex2 the second {@link Convex} {@link Shape}
+	 * @param transform2 the second {@link Shape}'s {@link Transform}
 	 * @return boolean
 	 */
-	public abstract boolean detect(Convex s1, Transform t1, Convex s2, Transform t2);
+	public abstract boolean detect(Convex convex1, Transform transform1, Convex convex2, Transform transform2);
 }

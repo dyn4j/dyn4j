@@ -26,6 +26,7 @@ package org.dyn4j.game2d.testbed.test;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
+import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.dynamics.joint.DistanceJoint;
 import org.dyn4j.game2d.geometry.Circle;
@@ -84,7 +85,7 @@ public class NewtonsCradle extends Test {
 		// create the floor
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
-		floor.addShape(floorRect);
+		floor.addFixture(new Fixture(floorRect));
 		floor.setMassFromShapes(Mass.Type.INFINITE);
 		// move the floor up a bit
 		floor.translate(0.0, 4.0);
@@ -97,10 +98,13 @@ public class NewtonsCradle extends Test {
 		for (int i = 0; i < 5; i++) {
 			// create a circle
 			Circle circle = new Circle(0.5);
+			
+			Fixture fixture = new Fixture(circle);
+			fixture.setRestitution(0.8);
+			
 			Entity ball = new Entity();
-			ball.addShape(circle);
+			ball.addFixture(fixture);
 			ball.setMassFromShapes();
-			ball.setE(0.8);
 			ball.setLinearDamping(0.1);
 			ball.translate(x, y);
 			e = ball;

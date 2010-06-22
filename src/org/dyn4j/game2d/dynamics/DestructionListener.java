@@ -44,7 +44,7 @@ public interface DestructionListener {
 	
 	/**
 	 * Called when implicit destruction of a {@link ContactConstraint} has occurred.
-	 * @param c the {@link ContactPoint} that was removed
+	 * @param contactPoint the {@link ContactPoint} that was removed
 	 */
-	public void destroyed(ContactPoint c);
+	public void destroyed(ContactPoint contactPoint);
 }

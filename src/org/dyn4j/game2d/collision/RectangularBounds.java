@@ -24,8 +24,6 @@
  */
 package org.dyn4j.game2d.collision;
 
-import java.util.List;
-
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Interval;
 import org.dyn4j.game2d.geometry.Rectangle;
@@ -80,18 +78,25 @@ public class RectangularBounds extends AbstractBounds implements Bounds, Transfo
 	@Override
 	public boolean isOutside(Collidable collidable) {
 		// project the collidable on the x and y axes
-		List<Convex> shapes = collidable.getShapes();
-		Transform t = collidable.getTransform();
-		int size = shapes.size();
+		Transform transform = collidable.getTransform();
+		int size = collidable.getShapeCount();
+		
+		// check for zero fixtures
+		if (size == 0) {
+			return true;
+		}
+		
+		Convex convex;
+		
 		// perform the projection the first time to create an interval
-		Convex s = shapes.get(0);
-		Interval x = s.project(RectangularBounds.X_AXIS, t);
-		Interval y = s.project(RectangularBounds.Y_AXIS, t);
+		convex = collidable.getShape(0);
+		Interval x = convex.project(RectangularBounds.X_AXIS, transform);
+		Interval y = convex.project(RectangularBounds.Y_AXIS, transform);
 		// loop through the rest, union the resulting intervals
 		for (int i = 1; i < size; i++) {
-			s = shapes.get(i);
-			x.union(s.project(RectangularBounds.X_AXIS, t));
-			y.union(s.project(RectangularBounds.Y_AXIS, t));
+			convex = collidable.getShape(i);
+			x.union(convex.project(RectangularBounds.X_AXIS, transform));
+			y.union(convex.project(RectangularBounds.Y_AXIS, transform));
 		}
 		
 		// project the bounds

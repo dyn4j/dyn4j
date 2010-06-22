@@ -52,30 +52,20 @@ public class Force {
 	
 	/**
 	 * Creates a new {@link Force} using the given {@link Vector}.
-	 * <p>
-	 * If the given force is null this force is set to the zero vector.
 	 * @param force the force {@link Vector}
 	 */
 	public Force(Vector force) {
-		if (force == null) {
-			this.force = new Vector();
-		} else {
-			this.force = force;
-		}
+		if (force == null) throw new NullPointerException("The force vector cannot be null.");
+		this.force = force;
 	}
 	
 	/**
 	 * Copy constructor.
-	 * <p>
-	 * If the given force is null this force is set to the zero vector.
 	 * @param force the {@link Force} to copy
 	 */
 	public Force(Force force) {
-		if (force == null) {
-			this.force = new Vector();
-		} else {
-			this.force = force.force.copy();
-		}
+		if (force == null) throw new NullPointerException("Cannot copy a null force.");
+		this.force = force.force.copy();
 	}
 	
 	/**
@@ -89,30 +79,20 @@ public class Force {
 	
 	/**
 	 * Sets this {@link Force} to the given force {@link Vector}.
-	 * <p>
-	 * If the given force is null this force is set to the zero vector.
 	 * @param force the force {@link Vector}
 	 */
 	public void set(Vector force) {
-		if (force == null) {
-			this.force.zero();
-		} else {
-			this.force.set(force);
-		}
+		if (force == null) throw new NullPointerException("Cannot set this force vector to a null vector.");
+		this.force.set(force);
 	}
 	
 	/**
 	 * Sets this {@link Force} to the given {@link Force}.
-	 * <p>
-	 * If the given force is null this force is set to the zero vector.
 	 * @param force the {@link Force} to copy
 	 */
 	public void set(Force force) {
-		if (force == null) {
-			this.force.zero();
-		} else {
-			this.force.set(force.force);
-		}
+		if (force == null) throw new NullPointerException("Cannot set this force to a null force.");
+		this.force.set(force.force);
 	}
 	
 	/**

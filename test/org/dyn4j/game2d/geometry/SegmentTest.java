@@ -275,10 +275,10 @@ public class SegmentTest {
 		TestCase.assertEquals(1.500, f.max.point.x, 1.0e-3);
 		TestCase.assertEquals(3.000, f.max.point.y, 1.0e-3);
 		
-		TestCase.assertEquals(0.000, f.vertices[0].point.x, 1.0e-3);
-		TestCase.assertEquals(1.000, f.vertices[0].point.y, 1.0e-3);
-		TestCase.assertEquals(1.500, f.vertices[1].point.x, 1.0e-3);
-		TestCase.assertEquals(3.000, f.vertices[1].point.y, 1.0e-3);
+		TestCase.assertEquals(0.000, f.vertex1.point.x, 1.0e-3);
+		TestCase.assertEquals(1.000, f.vertex1.point.y, 1.0e-3);
+		TestCase.assertEquals(1.500, f.vertex2.point.x, 1.0e-3);
+		TestCase.assertEquals(3.000, f.vertex2.point.y, 1.0e-3);
 		
 		Vector p = s.getFarthestPoint(n, t);
 		TestCase.assertEquals(1.500, p.x, 1.0e-3);

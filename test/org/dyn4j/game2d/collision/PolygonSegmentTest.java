@@ -38,7 +38,6 @@ import org.dyn4j.game2d.collision.narrowphase.Gjk;
 import org.dyn4j.game2d.collision.narrowphase.Penetration;
 import org.dyn4j.game2d.collision.narrowphase.Sat;
 import org.dyn4j.game2d.collision.narrowphase.Separation;
-import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Geometry;
 import org.dyn4j.game2d.geometry.Polygon;
 import org.dyn4j.game2d.geometry.Segment;
@@ -64,7 +63,7 @@ public class PolygonSegmentTest extends AbstractTest {
 	 */
 	@Before
 	public void setup() {
-		this.poly = Geometry.getUnitCirclePolygon(5, 1.0);
+		this.poly = Geometry.createUnitCirclePolygon(5, 1.0);
 		this.seg = new Segment(new Vector(-0.5, 0.0), new Vector(0.0, 0.5));
 	}
 	
@@ -101,14 +100,9 @@ public class PolygonSegmentTest extends AbstractTest {
 	 */
 	@Test	
 	public void detectCollidableAABB() {
-		List<Convex> shapes = null;
-		
 		// create some collidables
-		shapes = new ArrayList<Convex>(1); shapes.add(poly);
-		CollidableTest ct1 = new CollidableTest(shapes, Filter.DEFAULT_FILTER);
-		
-		shapes = new ArrayList<Convex>(1); shapes.add(seg);
-		CollidableTest ct2 = new CollidableTest(shapes, Filter.DEFAULT_FILTER);
+		CollidableTest ct1 = new CollidableTest(poly);
+		CollidableTest ct2 = new CollidableTest(seg);
 		
 		// test containment
 		TestCase.assertTrue(this.aabb.detect(ct1, ct2));
@@ -135,15 +129,11 @@ public class PolygonSegmentTest extends AbstractTest {
 	 */
 	@Test
 	public void detectSap() {
-		List<Convex> shapes;
 		List<BroadphasePair<CollidableTest>> pairs;
 		
 		// create some collidables
-		shapes = new ArrayList<Convex>(1); shapes.add(poly);
-		CollidableTest ct1 = new CollidableTest(shapes, Filter.DEFAULT_FILTER);
-		
-		shapes = new ArrayList<Convex>(1); shapes.add(seg);
-		CollidableTest ct2 = new CollidableTest(shapes, Filter.DEFAULT_FILTER);
+		CollidableTest ct1 = new CollidableTest(poly);
+		CollidableTest ct2 = new CollidableTest(seg);
 		
 		List<CollidableTest> objs = new ArrayList<CollidableTest>();
 		objs.add(ct1);

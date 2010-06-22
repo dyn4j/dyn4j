@@ -24,13 +24,9 @@
  */
 package org.dyn4j.game2d.collision;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import junit.framework.TestCase;
 
 import org.dyn4j.game2d.geometry.Circle;
-import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Geometry;
 import org.dyn4j.game2d.geometry.Polygon;
 import org.dyn4j.game2d.geometry.Rectangle;
@@ -64,11 +60,7 @@ public class RectangularBoundsTest {
 	public void isOutsideCircle() {
 		// create some shapes
 		Circle c = new Circle(1.0);
-		
-		List<Convex> shapes = new ArrayList<Convex>(1);
-		shapes.add(c);
-		
-		CollidableTest ct = new CollidableTest(shapes, Filter.DEFAULT_FILTER);
+		CollidableTest ct = new CollidableTest(c);
 		
 		// should be in
 		TestCase.assertFalse(rb.isOutside(ct));
@@ -108,10 +100,7 @@ public class RectangularBoundsTest {
 	public void isOutsideRectangle() {
 		// create some shapes
 		Rectangle r = new Rectangle(1.0, 1.0);
-		List<Convex> shapes = new ArrayList<Convex>(1);
-		shapes.add(r);
-		
-		CollidableTest ct = new CollidableTest(shapes, Filter.DEFAULT_FILTER);
+		CollidableTest ct = new CollidableTest(r);
 		
 		// should be in
 		TestCase.assertFalse(rb.isOutside(ct));
@@ -150,11 +139,8 @@ public class RectangularBoundsTest {
 	@Test
 	public void isOutsidePolygon() {
 		// create some shapes
-		Polygon p = Geometry.getUnitCirclePolygon(6, 0.5);
-		List<Convex> shapes = new ArrayList<Convex>(1);
-		shapes.add(p);
-		
-		CollidableTest ct = new CollidableTest(shapes, Filter.DEFAULT_FILTER);
+		Polygon p = Geometry.createUnitCirclePolygon(6, 0.5);
+		CollidableTest ct = new CollidableTest(p);
 		
 		// should be in
 		TestCase.assertFalse(rb.isOutside(ct));
@@ -198,10 +184,7 @@ public class RectangularBoundsTest {
 				new Vector(-0.5, -0.5),
 				new Vector( 0.5, -0.5)
 			);
-		List<Convex> shapes = new ArrayList<Convex>(1);
-		shapes.add(t);
-		
-		CollidableTest ct = new CollidableTest(shapes, Filter.DEFAULT_FILTER);
+		CollidableTest ct = new CollidableTest(t);
 		
 		// should be in
 		TestCase.assertFalse(rb.isOutside(ct));
@@ -241,10 +224,7 @@ public class RectangularBoundsTest {
 	public void isOutsideSegment() {
 		// create some shapes
 		Segment s = new Segment(new Vector(0.5, -0.5), new Vector(-0.5, 0.5));
-		List<Convex> shapes = new ArrayList<Convex>(1);
-		shapes.add(s);
-		
-		CollidableTest ct = new CollidableTest(shapes, Filter.DEFAULT_FILTER);
+		CollidableTest ct = new CollidableTest(s);
 		
 		// should be in
 		TestCase.assertFalse(rb.isOutside(ct));

@@ -31,6 +31,57 @@ package org.dyn4j.game2d.geometry;
  * @author William Bittle
  */
 public class Transform implements Transformable {
+	/**
+	 * An immutable identity transform.
+	 */
+	public static final Transform IDENTITY = new Transform() {
+		/* (non-Javadoc)
+		 * @see org.dyn4j.game2d.geometry.Transform#identity()
+		 */
+		@Override
+		public void identity() {}
+		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.game2d.geometry.Transform#rotate(double)
+		 */
+		@Override
+		public void rotate(double theta) {
+			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.game2d.geometry.Transform#rotate(double, double, double)
+		 */
+		@Override
+		public void rotate(double theta, double x, double y) {
+			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.game2d.geometry.Transform#rotate(double, org.dyn4j.game2d.geometry.Vector)
+		 */
+		@Override
+		public void rotate(double theta, Vector point) {
+			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.game2d.geometry.Transform#translate(double, double)
+		 */
+		@Override
+		public void translate(double x, double y) {
+			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.game2d.geometry.Transform#translate(org.dyn4j.game2d.geometry.Vector)
+		 */
+		@Override
+		public void translate(Vector vector) {
+			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
+		}
+	};
+	
 	/** The first row, first column entry */
 	protected double m00 = 1.0;
 	

@@ -29,8 +29,11 @@ package org.dyn4j.game2d.geometry;
  * @author William Bittle
  */
 public class Edge extends Feature {
-	/** The vertices making the edge */
-	protected Vertex[] vertices;
+	/** The first vertex of the edge */
+	protected Vertex vertex1;
+	
+	/** The second vertex of the edge */
+	protected Vertex vertex2;
 	
 	/** The edge vector */
 	protected Vector edge;
@@ -43,14 +46,16 @@ public class Edge extends Feature {
 	
 	/**
 	 * Creates an edge feature.
-	 * @param vertices the vertices making the edge
+	 * @param vertex1 the first vertex of the edge
+	 * @param vertex2 the second vertex of the edge
 	 * @param edge the vector representing the edge
 	 * @param max the maximum point
 	 * @param index the index of the edge
 	 */
-	public Edge(Vertex[] vertices, Vector edge, Vertex max, int index) {
+	public Edge(Vertex vertex1, Vertex vertex2, Vertex max, Vector edge, int index) {
 		super(Feature.Type.EDGE);
-		this.vertices = vertices;
+		this.vertex1 = vertex1;
+		this.vertex2 = vertex2;
 		this.edge = edge;
 		this.max = max;
 		this.index = index;
@@ -62,24 +67,33 @@ public class Edge extends Feature {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("EDGE[");
-		sb.append("{").append(this.vertices[0]).append(this.vertices[1]).append("}|");
-		sb.append(this.edge).append("|");
-		sb.append(this.max).append("|");
-		sb.append(this.index).append("]");
+		sb.append("EDGE[")
+		.append(this.vertex1).append("|")
+		.append(this.vertex2).append("|")
+		.append(this.edge).append("|")
+		.append(this.max).append("|")
+		.append(this.index).append("]");
 		return sb.toString();
 	}
 	
 	/**
-	 * Returns the edge vertices.
-	 * @return {@link Vertex}[]
+	 * Returns the first vertex of the edge.
+	 * @return {@link Vertex}
 	 */
-	public Vertex[] getVertices() {
-		return this.vertices;
+	public Vertex getVertex1() {
+		return vertex1;
 	}
 	
 	/**
-	 * Returns the vector represeting this edge.
+	 * Returns the second vertex of the edge.
+	 * @return {@link Vertex}
+	 */
+	public Vertex getVertex2() {
+		return vertex2;
+	}
+	
+	/**
+	 * Returns the vector representing this edge.
 	 * @return {@link Vector}
 	 */
 	public Vector getEdge() {

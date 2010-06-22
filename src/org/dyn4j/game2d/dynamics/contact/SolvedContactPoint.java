@@ -25,8 +25,7 @@
 package org.dyn4j.game2d.dynamics.contact;
 
 import org.dyn4j.game2d.dynamics.Body;
-import org.dyn4j.game2d.geometry.Convex;
-import org.dyn4j.game2d.geometry.Shape;
+import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.geometry.Vector;
 
 /**
@@ -41,9 +40,6 @@ public class SolvedContactPoint extends ContactPoint {
 	/** The accumulated tangential impulse */
 	protected double tangentialImpulse;
 	
-	/** Whether the contact was a resting contact or not */
-	protected boolean resting;
-	
 	/** Default constructor */
 	public SolvedContactPoint() {}
 	
@@ -53,20 +49,18 @@ public class SolvedContactPoint extends ContactPoint {
 	 * @param normal the world space contact normal
 	 * @param depth the penetration depth
 	 * @param body1 the first {@link Body} in contact
-	 * @param convex1 the first {@link Body}'s {@link Convex} {@link Shape} in contact
+	 * @param fixture1 the first {@link Body}'s {@link Fixture}
 	 * @param body2 the second {@link Body} in contact
-	 * @param convex2 the second {@link Body}'s {@link Convex} {@link Shape} in contact
+	 * @param fixture2 the second {@link Body}'s {@link Fixture}
 	 * @param normalImpulse the accumulated normal impulse
 	 * @param tangentialImpulse the accumulated tangential impulse
-	 * @param resting whether the contact is a resting contact or not
 	 */
 	public SolvedContactPoint(Vector point, Vector normal, double depth,
-			Body body1, Convex convex1, Body body2, Convex convex2,
-			double normalImpulse, double tangentialImpulse, boolean resting) {
-		super(point, normal, depth, body1, convex1, body2, convex2);
+			Body body1, Fixture fixture1, Body body2, Fixture fixture2,
+			double normalImpulse, double tangentialImpulse) {
+		super(point, normal, depth, body1, fixture1, body2, fixture2);
 		this.normalImpulse = normalImpulse;
 		this.tangentialImpulse = tangentialImpulse;
-		this.resting = resting;
 	}
 	
 	/* (non-Javadoc)
@@ -75,31 +69,27 @@ public class SolvedContactPoint extends ContactPoint {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("CONTACT_POINT[")
+		sb.append("SOLVED_CONTACT_POINT[")
 		.append(this.point).append("|")
 		.append(this.normal).append("|")
 		.append(this.depth).append("|")
 		.append(this.normalImpulse).append("|")
 		.append(this.tangentialImpulse).append("|")
-		.append(this.resting).append("|")
 		.append(this.body1).append("|")
 		.append(this.body2).append("|")
-		.append(this.convex1).append("|")
-		.append(this.convex2).append("]");
+		.append(this.fixture1).append("|")
+		.append(this.fixture2).append("]");
 		return sb.toString();
 	}
 	
 	/**
-	 * Copy constructor.
-	 * <p>
-	 * This performs a shallow copy.
+	 * Copy constructor (shallow).
 	 * @param scp the {@link SolvedContactPoint} to copy
 	 */
 	public SolvedContactPoint(SolvedContactPoint scp) {
 		super(scp);
 		this.normalImpulse = scp.normalImpulse;
 		this.tangentialImpulse = scp.tangentialImpulse;
-		this.resting = scp.resting;
 	}
 	
 	/**
@@ -116,13 +106,5 @@ public class SolvedContactPoint extends ContactPoint {
 	 */
 	public double getTangentialImpulse() {
 		return tangentialImpulse;
-	}
-	
-	/**
-	 * Returns true if this contact is a resting contact.
-	 * @return boolean
-	 */
-	public boolean isResting() {
-		return resting;
 	}
 }

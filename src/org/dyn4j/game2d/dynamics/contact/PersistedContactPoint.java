@@ -25,8 +25,7 @@
 package org.dyn4j.game2d.dynamics.contact;
 
 import org.dyn4j.game2d.dynamics.Body;
-import org.dyn4j.game2d.geometry.Convex;
-import org.dyn4j.game2d.geometry.Shape;
+import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.geometry.Vector;
 
 /**
@@ -56,23 +55,21 @@ public class PersistedContactPoint extends ContactPoint {
 	 * @param oldNormal the previous world space contact normal
 	 * @param oldDepth the previous penetration depth
 	 * @param body1 the first {@link Body} in contact
-	 * @param convex1 the first {@link Body}'s {@link Convex} {@link Shape} in contact
+	 * @param fixture1 the first {@link Body}'s {@link Fixture}
 	 * @param body2 the second {@link Body} in contact
-	 * @param convex2 the second {@link Body}'s {@link Convex} {@link Shape} in contact
+	 * @param fixture2 the second {@link Body}'s {@link Fixture}
 	 */
 	public PersistedContactPoint(Vector point, Vector normal, double depth,
 			Vector oldPoint, Vector oldNormal, double oldDepth,
-			Body body1, Convex convex1, Body body2, Convex convex2) {
-		super(point, normal, depth, body1, convex1, body2, convex2);
+			Body body1, Fixture fixture1, Body body2, Fixture fixture2) {
+		super(point, normal, depth, body1, fixture1, body2, fixture2);
 		this.oldPoint = oldPoint;
 		this.oldNormal = oldNormal;
 		this.oldDepth = oldDepth;
 	}
 	
 	/**
-	 * Copy constructor.
-	 * <p>
-	 * This performs a shallow copy.
+	 * Copy constructor (shallow).
 	 * @param pcp the {@link PersistedContactPoint} to copy
 	 */
 	public PersistedContactPoint(PersistedContactPoint pcp) {
@@ -88,7 +85,7 @@ public class PersistedContactPoint extends ContactPoint {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("CONTACT_POINT[")
+		sb.append("PERSISTED_CONTACT_POINT[")
 		.append(this.point).append("|")
 		.append(this.normal).append("|")
 		.append(this.depth).append("|")
@@ -97,8 +94,8 @@ public class PersistedContactPoint extends ContactPoint {
 		.append(this.oldDepth).append("|")
 		.append(this.body1).append("|")
 		.append(this.body2).append("|")
-		.append(this.convex1).append("|")
-		.append(this.convex2).append("]");
+		.append(this.fixture1).append("|")
+		.append(this.fixture2).append("]");
 		return sb.toString();
 	}
 	

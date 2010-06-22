@@ -45,28 +45,28 @@ public abstract class AbstractNarrowphaseDetector implements NarrowphaseDetector
 	 * will be the zero {@link Vector}, however, the penetration depth will be
 	 * correct.  In this case its up to the caller to determine a reasonable penetration
 	 * {@link Vector}.
-	 * @param c1 the first {@link Circle}
-	 * @param t1 the first {@link Circle}'s {@link Transform}
-	 * @param c2 the second {@link Circle}
-	 * @param t2 the second {@link Circle}'s {@link Transform}
-	 * @param p the {@link Penetration} object to fill
+	 * @param circle1 the first {@link Circle}
+	 * @param transform1 the first {@link Circle}'s {@link Transform}
+	 * @param circle2 the second {@link Circle}
+	 * @param transform2 the second {@link Circle}'s {@link Transform}
+	 * @param penetration the {@link Penetration} object to fill
 	 * @return boolean
 	 */
-	public boolean detect(Circle c1, Transform t1, Circle c2, Transform t2, Penetration p) {
+	public boolean detect(Circle circle1, Transform transform1, Circle circle2, Transform transform2, Penetration penetration) {
 		// get their world centers
-		Vector ce1 = t1.getTransformed(c1.getCenter());
-		Vector ce2 = t2.getTransformed(c2.getCenter());
+		Vector ce1 = transform1.getTransformed(circle1.getCenter());
+		Vector ce2 = transform2.getTransformed(circle2.getCenter());
 		// create a vector from one center to the other
 		Vector v = ce1.to(ce2);
 		// check the magnitude against the sum of the radii
-		double radii = c1.getRadius() + c2.getRadius();
+		double radii = circle1.getRadius() + circle2.getRadius();
 		// get the magnitude squared
 		double mag = v.getMagnitude();
 		// check difference
 		if (mag < radii) {
 			// then we have a collision
-			p.normal = v;
-			p.depth = radii - v.normalize();
+			penetration.normal = v;
+			penetration.depth = radii - v.normalize();
 			return true;
 		}
 		return false;
@@ -74,20 +74,20 @@ public abstract class AbstractNarrowphaseDetector implements NarrowphaseDetector
 	
 	/**
 	 * Fast method for determining a collision between two {@link Circle}s.
-	 * @param c1 the first {@link Circle}
-	 * @param t1 the first {@link Circle}'s {@link Transform}
-	 * @param c2 the second {@link Circle}
-	 * @param t2 the second {@link Circle}'s {@link Transform}
+	 * @param circle1 the first {@link Circle}
+	 * @param transform1 the first {@link Circle}'s {@link Transform}
+	 * @param circle2 the second {@link Circle}
+	 * @param transform2 the second {@link Circle}'s {@link Transform}
 	 * @return boolean true if the two circles intersect
 	 */
-	public boolean detect(Circle c1, Transform t1, Circle c2, Transform t2) {
+	public boolean detect(Circle circle1, Transform transform1, Circle circle2, Transform transform2) {
 		// get their world centers
-		Vector ce1 = t1.getTransformed(c1.getCenter());
-		Vector ce2 = t2.getTransformed(c2.getCenter());
+		Vector ce1 = transform1.getTransformed(circle1.getCenter());
+		Vector ce2 = transform2.getTransformed(circle2.getCenter());
 		// create a vector from one center to the other
 		Vector v = ce1.to(ce2);
 		// check the magnitude against the sum of the radii
-		double radii = c1.getRadius() + c2.getRadius();
+		double radii = circle1.getRadius() + circle2.getRadius();
 		// get the magnitude squared
 		double mag = v.getMagnitude();
 		// check difference
@@ -103,20 +103,20 @@ public abstract class AbstractNarrowphaseDetector implements NarrowphaseDetector
 	 * <p>
 	 * Returns true if the given {@link Circle}s are separated and places the
 	 * separating vector and distance in the given {@link Separation} object.
-	 * @param c1 the first {@link Circle}
-	 * @param t1 the first {@link Circle}'s {@link Transform}
-	 * @param c2 the second {@link Circle}
-	 * @param t2 the second {@link Circle}'s {@link Transform}
-	 * @param s the {@link Separation} object to fill
+	 * @param circle1 the first {@link Circle}
+	 * @param transform1 the first {@link Circle}'s {@link Transform}
+	 * @param circle2 the second {@link Circle}
+	 * @param transform2 the second {@link Circle}'s {@link Transform}
+	 * @param separation the {@link Separation} object to fill
 	 * @return boolean
 	 */
-	public boolean distance(Circle c1, Transform t1, Circle c2, Transform t2, Separation s) {
+	public boolean distance(Circle circle1, Transform transform1, Circle circle2, Transform transform2, Separation separation) {
 		// get their world centers
-		Vector ce1 = t1.getTransformed(c1.getCenter());
-		Vector ce2 = t2.getTransformed(c2.getCenter());
+		Vector ce1 = transform1.getTransformed(circle1.getCenter());
+		Vector ce2 = transform2.getTransformed(circle2.getCenter());
 		// get the radii
-		double r1 = c1.getRadius();
-		double r2 = c2.getRadius();
+		double r1 = circle1.getRadius();
+		double r2 = circle2.getRadius();
 		// create a vector from one center to the other
 		Vector v = ce1.to(ce2);
 		// check the magnitude against the sum of the radii
@@ -126,10 +126,10 @@ public abstract class AbstractNarrowphaseDetector implements NarrowphaseDetector
 		// check difference
 		if (mag >= radii) {
 			// then the circles are separated
-			s.normal = v;
-			s.distance = v.normalize() - radii;
-			s.point1 = ce1.add(v.x * r1, v.y * r1);
-			s.point2 = ce2.add(-v.x * r2, -v.y * r2);
+			separation.normal = v;
+			separation.distance = v.normalize() - radii;
+			separation.point1 = ce1.add(v.x * r1, v.y * r1);
+			separation.point2 = ce2.add(-v.x * r2, -v.y * r2);
 			return true;
 		}
 		return false;

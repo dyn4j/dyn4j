@@ -42,7 +42,7 @@ public class Interval {
 	 * @throws IllegalArgumentException if min &gt; max
 	 */
 	public Interval(double min, double max) {
-		if (min > max) throw new IllegalArgumentException();
+		if (min > max) throw new IllegalArgumentException("The minimum value cannot be larger than the maximum: " + min + " > " + max);
 		this.min = min;
 		this.max = max;
 	}
@@ -79,7 +79,7 @@ public class Interval {
 	 * @throws IllegalArgumentException if min &gt; max
 	 */
 	public void setMin(double min) {
-		if (min > this.max) throw new IllegalArgumentException();
+		if (min > this.max) throw new IllegalArgumentException("The minimum value must be smaller than the maximum.");
 		this.min = min;
 	}
 	
@@ -89,7 +89,7 @@ public class Interval {
 	 * @throws IllegalArgumentException if max &lt; min
 	 */
 	public void setMax(double max) {
-		if (max < this.min) throw new IllegalArgumentException();
+		if (max < this.min) throw new IllegalArgumentException("The maximum value must be larger than the minimum.");
 		this.max = max;
 	}
 

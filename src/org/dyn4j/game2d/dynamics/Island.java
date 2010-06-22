@@ -39,13 +39,13 @@ import org.dyn4j.game2d.geometry.Vector;
  */
 public class Island {
 	/** The {@link ContactConstraintSolver} */
-	protected ContactConstraintSolver solver;
+	protected ContactConstraintSolver contactConstraintSolver;
 	
 	/** The list of {@link Body}s on this {@link Island} */
 	protected List<Body> bodies;
 	
 	/** The list of {@link ContactConstraint}s on this {@link Island} */
-	protected List<ContactConstraint> ccs;
+	protected List<ContactConstraint> contactConstraints;
 	
 	/** The list of {@link Joint}s on this {@link Island} */
 	protected List<Joint> joints;
@@ -55,9 +55,9 @@ public class Island {
 	 */
 	public Island() {
 		super();
-		this.solver = new ContactConstraintSolver();
+		this.contactConstraintSolver = new ContactConstraintSolver();
 		this.bodies = new ArrayList<Body>();
-		this.ccs = new ArrayList<ContactConstraint>();
+		this.contactConstraints = new ArrayList<ContactConstraint>();
 		this.joints = new ArrayList<Joint>();
 	}
 
@@ -66,24 +66,32 @@ public class Island {
 	 */
 	public void clear() {
 		this.bodies.clear();
-		this.ccs.clear();
+		this.contactConstraints.clear();
 		this.joints.clear();
 	}
 	
 	/**
 	 * Adds the given {@link Body} to the {@link Body} list.
-	 * @param b the {@link Body}
+	 * @param body the {@link Body}
 	 */
-	public void add(Body b) {
-		this.bodies.add(b);
+	public void add(Body body) {
+		this.bodies.add(body);
 	}
 	
 	/**
 	 * Adds the given {@link ContactConstraint} to the {@link ContactConstraint} list.
-	 * @param cc the {@link ContactConstraint}
+	 * @param contactConstraint the {@link ContactConstraint}
 	 */
-	public void add(ContactConstraint cc) {
-		this.ccs.add(cc);
+	public void add(ContactConstraint contactConstraint) {
+		// add static constraints to the beginning of the list and normal constraints
+		// at the end of the list
+		Body b1 = contactConstraint.getBody1();
+		Body b2 = contactConstraint.getBody2();
+		if (b1.isStatic() || b2.isStatic()) {
+			this.contactConstraints.add(0, contactConstraint);
+		} else {
+			this.contactConstraints.add(contactConstraint);
+		}
 	}
 	
 	/**
@@ -103,11 +111,12 @@ public class Island {
 	public void solve(Vector gravity, Step step) {
 		// get the settings
 		Settings settings = Settings.getInstance();
-		double maxVelocity = settings.getMaxVelocity();
-		double maxAngularVelocity = settings.getMaxAngularVelocity();
-		int siSolverIterations = settings.getSiSolverIterations();
-		double sleepAngularVelocity = settings.getSleepAngularVelocity();
-		double sleepVelocity = settings.getSleepVelocity();
+		// the number of solver iterations
+		int velocitySolverIterations = settings.getVelocityConstraintSolverIterations();
+		int positionSolverIterations = settings.getPositionConstraintSolverIterations();
+		// the sleep settings
+		double sleepAngularVelocitySquared = settings.getSleepAngularVelocitySquared();
+		double sleepVelocitySquared = settings.getSleepVelocitySquared();
 		double sleepTime = settings.getSleepTime();
 
 		int size = this.bodies.size();
@@ -117,48 +126,35 @@ public class Island {
 		
 		// integrate the velocities
 		for (int i = 0; i < size; i++) {
-			Body b = this.bodies.get(i);
+			Body body = this.bodies.get(i);
 			// check if the body has infinite mass and infinite inertia
-			if (b.isStatic()) continue;
+			if (body.isStatic()) continue;
 			// accumulate the forces and torques
-			b.accumulate();
+			body.accumulate();
 			// get the mass properties
-			invM = b.mass.getInverseMass();
-			invI = b.mass.getInverseInertia();
+			invM = body.mass.getInverseMass();
+			invI = body.mass.getInverseInertia();
 			// integrate force and torque to modify the velocity and
 			// angular velocity (sympletic euler)
 			// v1 = v0 + (f / m) + g) * dt
-			b.v.x += (b.force.x * invM + gravity.x) * step.dt;
-			b.v.y += (b.force.y * invM + gravity.y) * step.dt;
+			body.velocity.x += (body.force.x * invM + gravity.x) * step.dt;
+			body.velocity.y += (body.force.y * invM + gravity.y) * step.dt;
 			// av1 = av0 + (t / I) * dt
-			b.av += step.dt * invI * b.torque;
+			body.angularVelocity += step.dt * invI * body.torque;
 			// apply damping
-			double linear = 1.0 - step.dt * b.linearDamping;
-			double angular = 1.0 - step.dt * b.angularDamping;
+			double linear = 1.0 - step.dt * body.linearDamping;
+			double angular = 1.0 - step.dt * body.angularDamping;
 			linear = Interval.clamp(linear, 0.0, 1.0);
 			angular = Interval.clamp(angular, 0.0, 1.0);
-			b.v.multiply(linear);
-			b.av *= angular;
-			// make sure the bodies aren't going too fast
-			if (b.v.dot(b.v) > maxVelocity * maxVelocity) {
-				b.v.normalize();
-				b.v.multiply(maxVelocity);
-			}
-			if (b.av * b.av > maxAngularVelocity * maxAngularVelocity) {
-				// check if the angular velocity is in the negative direction
-				if (b.av < 0) {
-					b.av = -maxAngularVelocity;
-				} else {
-					b.av = maxAngularVelocity;
-				}
-			}
+			body.velocity.multiply(linear);
+			body.angularVelocity *= angular;
 		}
 		
 		// set the contact constraints
-		this.solver.setup(ccs);
+		this.contactConstraintSolver.setup(contactConstraints);
 		
 		// initialize the constraints
-		this.solver.initializeConstraints(step);
+		this.contactConstraintSolver.initializeConstraints(step);
 		
 		// initialize joint constraints
 		for (int i = 0; i < jSize; i++) {
@@ -167,8 +163,8 @@ public class Island {
 		}
 
 		// solve the velocity constraints
-		for (int i = 0; i < siSolverIterations; i++) {
-			this.solver.solveVelocityContraints();
+		for (int i = 0; i < velocitySolverIterations; i++) {
+			this.contactConstraintSolver.solveVelocityContraints();
 			
 			// solve the joint velocity constraints
 			for (int j = 0; j < jSize; j++) {
@@ -176,21 +172,43 @@ public class Island {
 				joint.solveVelocityConstraints(step);
 			}
 		}
-
+		
+		// the max settings
+		double maxTranslation = settings.getMaxTranslation();
+		double maxRotation = settings.getMaxRotation();
+		double maxTranslationSqrd = settings.getMaxTranslationSquared();
+		double maxRotationSqrd = settings.getMaxRotationSquared();
+		
 		// integrate the positions
 		for (int i = 0; i < size; i++) {
-			Body b = this.bodies.get(i);
+			Body body = this.bodies.get(i);
 			
-			if (b.isStatic()) continue;
+			if (body.isStatic()) continue;
 			
-			b.translate(b.v.product(step.dt));
-
-			b.rotateAboutCenter(b.av * step.dt);
+			// compute the translation and rotation for this time step
+			Vector translation = body.velocity.product(step.dt);
+			double rotation = body.angularVelocity * step.dt;
+			
+			// make sure the translation is not over the maximum
+			if (translation.getMagnitudeSquared() > maxTranslationSqrd) {
+				double ratio = maxTranslation / translation.getMagnitude();
+				body.velocity.multiply(ratio);
+			}
+			
+			// make sure the rotation is not over the maximum
+			if (rotation * rotation > maxRotationSqrd) {
+				double ratio = maxRotation / Math.abs(rotation);
+				body.angularVelocity *= ratio;
+			}
+			
+			// recompute the translation/rotation in case we hit the maximums
+			body.translate(body.velocity.product(step.dt));
+			body.rotateAboutCenter(body.angularVelocity * step.dt);
 		}
 		
 		// solve the position constraints
-		for (int i = 0; i < siSolverIterations; i++) {
-			boolean solved = this.solver.solvePositionContraints();
+		for (int i = 0; i < positionSolverIterations; i++) {
+			boolean solved = this.contactConstraintSolver.solvePositionContraints();
 			
 			// solve the joint position constraints
 			for (int j = 0; j < jSize; j++) {
@@ -208,22 +226,21 @@ public class Island {
 			double minSleepTime = Double.MAX_VALUE;
 			// check for sleep-able bodies
 			for (int i = 0; i < size; i++) {
-				Body b = this.bodies.get(i);
+				Body body = this.bodies.get(i);
 				// see if the body is allowed to sleep
-				if (b.canSleep()) {
+				if (body.canSleep()) {
 					// just skip static bodies
-					if (b.isStatic()) continue;
+					if (body.isStatic()) continue;
 					// check the linear and angular velocity
-					if (b.v.dot(b.v) > sleepVelocity * sleepVelocity
-					 || Math.abs(b.av) > sleepAngularVelocity) {
+					if (body.velocity.dot(body.velocity) > sleepVelocitySquared || body.angularVelocity * body.angularVelocity > sleepAngularVelocitySquared) {
 						// if either the linear or angular velocity is above the 
 						// threshold then reset the sleep time
-						b.awaken();
+						body.setAsleep(false);
 						minSleepTime = 0.0;
 					} else {
 						// then increment the sleep time
-						b.incrementSleepTime(step.dt);
-						minSleepTime = Math.min(minSleepTime, b.getSleepTime());
+						body.incrementSleepTime(step.dt);
+						minSleepTime = Math.min(minSleepTime, body.getSleepTime());
 					}
 				} else {
 					minSleepTime = 0.0;
@@ -233,8 +250,8 @@ public class Island {
 			// check the min sleep time
 			if (minSleepTime >= sleepTime) {
 				for (int i = 0; i < size; i++) {
-					Body b = this.bodies.get(i);
-					b.sleep();
+					Body body = this.bodies.get(i);
+					body.setAsleep(true);
 				}
 			}
 		}

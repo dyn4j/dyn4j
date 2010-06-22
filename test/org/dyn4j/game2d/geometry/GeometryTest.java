@@ -81,7 +81,7 @@ public class GeometryTest {
 	 */
 	@Test
 	public void unitCirclePolygon() {
-		Polygon p = Geometry.getUnitCirclePolygon(5, 0.5);
+		Polygon p = Geometry.createUnitCirclePolygon(5, 0.5);
 		// no exception indicates the generated polygon is valid
 		// test that the correct vertices are created
 		TestCase.assertEquals( 0.154, p.vertices[4].x, 1.0e-3);
@@ -97,7 +97,7 @@ public class GeometryTest {
 		
 		Vector v11 = p.vertices[0];
 		
-		p = Geometry.getUnitCirclePolygon(5, 0.5, Math.PI / 2.0);
+		p = Geometry.createUnitCirclePolygon(5, 0.5, Math.PI / 2.0);
 		// no exception indicates the generated polygon is valid
 		// test that the correct vertices are created
 		TestCase.assertEquals( 0.475, p.vertices[4].x, 1.0e-3);

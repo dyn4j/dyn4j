@@ -30,32 +30,38 @@ package org.dyn4j.game2d.dynamics.contact;
  */
 public class ContactAdapter implements ContactListener {
 	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.dynamics.contact.ContactListener#sensed(org.dyn4j.game2d.dynamics.contact.ContactPoint)
+	 * @see org.dyn4j.game2d.dynamics.contact.ContactListener#sensed(org.dyn4j.game2d.dynamics.contact.SensedContactPoint)
 	 */
 	@Override
-	public void sensed(ContactPoint p) {}
+	public void sensed(SensedContactPoint point) {}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.dynamics.contact.ContactListener#add(org.dyn4j.game2d.dynamics.contact.ContactPoint)
+	 * @see org.dyn4j.game2d.dynamics.contact.ContactListener#begin(org.dyn4j.game2d.dynamics.contact.ContactPoint)
 	 */
 	@Override
-	public void added(ContactPoint p) {}
+	public void begin(ContactPoint point) {}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.dynamics.contact.ContactListener#end(org.dyn4j.game2d.dynamics.contact.ContactPoint)
+	 */
+	@Override
+	public void end(ContactPoint point) {}
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.dynamics.contact.ContactListener#persist(org.dyn4j.game2d.dynamics.contact.PersistedContactPoint)
 	 */
 	@Override
-	public void persist(PersistedContactPoint p) {}
+	public void persist(PersistedContactPoint point) {}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.dynamics.contact.ContactListener#remove(org.dyn4j.game2d.dynamics.contact.ContactPoint)
+	 * @see org.dyn4j.game2d.dynamics.contact.ContactListener#preSolve(org.dyn4j.game2d.dynamics.contact.ContactPoint)
 	 */
 	@Override
-	public void removed(ContactPoint p) {}
-	
+	public void preSolve(ContactPoint point) {}
+
 	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.dynamics.contact.ContactListener#solved(org.dyn4j.game2d.dynamics.contact.SolvedContactPoint)
+	 * @see org.dyn4j.game2d.dynamics.contact.ContactListener#postSolve(org.dyn4j.game2d.dynamics.contact.SolvedContactPoint)
 	 */
 	@Override
-	public void solved(SolvedContactPoint p) {}
+	public void postSolve(SolvedContactPoint point) {}
 }

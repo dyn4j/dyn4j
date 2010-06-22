@@ -26,6 +26,7 @@ package org.dyn4j.game2d.testbed.test;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
+import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Mass;
@@ -82,7 +83,7 @@ public class Restitution extends Test {
 		// create the floor
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
-		floor.addShape(floorRect);
+		floor.addFixture(new Fixture(floorRect));
 		floor.setMassFromShapes(Mass.Type.INFINITE);
 		// move the floor up a bit
 		floor.translate(0.0, -4.0);
@@ -99,10 +100,13 @@ public class Restitution extends Test {
 		
 		for (int i = 0; i < count; i++) {
 			Circle c = new Circle(r);
+			
+			Fixture f = new Fixture(c);
+			f.setRestitution(min + increment * i);
+			
 			Entity e = new Entity();
-			e.addShape(c);
+			e.addFixture(f);
 			e.setMassFromShapes();
-			e.setE(min + increment * i);
 			e.translate(x, y);
 			x += r + r + 0.25;
 			this.world.add(e);

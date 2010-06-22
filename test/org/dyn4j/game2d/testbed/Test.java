@@ -35,13 +35,16 @@ import java.util.List;
 import org.codezealot.game.input.Keyboard;
 import org.codezealot.game.input.Mouse;
 import org.dyn4j.game2d.dynamics.Body;
+import org.dyn4j.game2d.dynamics.Step;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.dynamics.contact.ContactPoint;
 import org.dyn4j.game2d.dynamics.contact.SolvedContactPoint;
 import org.dyn4j.game2d.dynamics.joint.DistanceJoint;
 import org.dyn4j.game2d.dynamics.joint.Joint;
+import org.dyn4j.game2d.dynamics.joint.MouseJoint;
 import org.dyn4j.game2d.dynamics.joint.RevoluteJoint;
 import org.dyn4j.game2d.geometry.Convex;
+import org.dyn4j.game2d.geometry.Interval;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Shape;
 import org.dyn4j.game2d.geometry.Transform;
@@ -177,10 +180,9 @@ public abstract class Test {
 		this.renderBefore(g);
 		
 		// render all the bodies
-		List<Body> bodies = this.world.getBodies();
-		int size = bodies.size();
+		int size = this.world.getBodyCount();
 		for (int i = 0; i < size; i++) {
-			Entity obj = (Entity) bodies.get(i);
+			Entity obj = (Entity) this.world.getBody(i);
 			obj.render(g, this.scale);
 		}
 
@@ -190,12 +192,12 @@ public abstract class Test {
 			g.setColor(Color.RED);
 			// draw all the normals for every convex on each shape
 			for (int i = 0; i < size; i++) {
-				Body b = bodies.get(i);
+				Body b = this.world.getBody(i);
 				Transform t = b.getTransform();
-				int cSize = b.getShapes().size();
+				int cSize = b.getShapeCount();
 				// loop over the convex shapes again
 				for (int j = 0; j < cSize; j++) {
-					Convex c = b.getShapes().get(j);
+					Convex c = b.getShape(j);
 					// render the normals
 					this.renderNormals(g, c, t, this.scale);
 				}
@@ -207,9 +209,9 @@ public abstract class Test {
 			g.setColor(Color.MAGENTA);
 			// draw all the normals for every convex on each shape
 			for (int i = 0; i < size; i++) {
-				Body b = bodies.get(i);
+				Body b = this.world.getBody(i);
 				Vector center = b.getWorldCenter();
-				Vector v = b.getV();
+				Vector v = b.getVelocity();
 				// draw the velocity vector
 				this.renderVector(g, v, center, scale);
 			}
@@ -232,8 +234,8 @@ public abstract class Test {
 				// draw the contact pairs
 				if (draw.drawContactPairs()) {
 					// get the centers of the convex shapes
-					Vector c1 = cp.getBody1().getTransform().getTransformed(cp.getConvex1().getCenter());
-					Vector c2 = cp.getBody2().getTransform().getTransformed(cp.getConvex2().getCenter());
+					Vector c1 = cp.getBody1().getTransform().getTransformed(cp.getFixture1().getShape().getCenter());
+					Vector c2 = cp.getBody2().getTransform().getTransformed(cp.getFixture2().getShape().getCenter());
 					// draw a line between them
 					g.setColor(Color.YELLOW);
 					g.drawLine((int) Math.ceil(c1.x * scale),
@@ -282,102 +284,17 @@ public abstract class Test {
 		
 		// see if we should draw joints or not
 		if (draw.drawJoints()) {
-			List<Joint> joints = this.world.getJoints();
-			size = joints.size();
+			size = this.world.getJointCount();
 			// draw the joints
 			for (int j = 0; j < size; j++) {
-				Joint joint = joints.get(j);
+				Joint joint = this.world.getJoint(j);
 				// check the joint type
 				if (joint instanceof DistanceJoint) {
-					DistanceJoint dj = (DistanceJoint) joint;
-					Vector v1 = dj.getWorldAnchor1();
-					Vector v2 = dj.getWorldAnchor2();
-					// set the color to be mostly transparent
-					g.setColor(new Color(0, 0, 0, 64));
-					// check for spring distance joint
-					if (dj.isSpring()) {
-						// draw a spring
-						final double h = 0.03;
-						final double w = 0.25;
-						// compute the offset from the first joint point to the start
-						// of the spring loops
-						double offset = h * 0.5;
-						// compute the number of spring loops
-						// we have to use the joint's desired distance here so that the
-						// number of loops in the spring doesnt change as the simulation
-						// progresses
-						int loops = (int) Math.ceil((dj.getDistance() - offset * 2.0) / h);
-						// get the vector between the two points
-						Vector n = v1.to(v2);
-						// normalize it to get the current distance
-						double x = n.normalize();
-						// get the tangent to the normal
-						Vector t = n.getRightHandOrthogonalVector();
-						// compute the distance between each loop along the normal
-						double d = (x - offset * 2.0) / (loops - 1);
-						// draw a line straight down using the offset
-						Vector d1 = n.product(offset).add(v1);
-						g.drawLine((int) Math.ceil(v1.x * scale),
-								   (int) Math.ceil(v1.y * scale), 
-								   (int) Math.ceil(d1.x * scale),
-								   (int) Math.ceil(d1.y * scale));
-						// draw the first loop (half loop)
-						Vector ct = t.product(w * 0.5);
-						Vector cn = n.product(d * 0.5);
-						Vector first = ct.sum(cn).add(d1);
-						g.drawLine((int) Math.ceil(d1.x * scale),
-								   (int) Math.ceil(d1.y * scale), 
-								   (int) Math.ceil(first.x * scale),
-								   (int) Math.ceil(first.y * scale));
-						// draw the middle loops
-						Vector prev = first;
-						for (int i = 1; i < loops - 1; i++) {
-							ct = t.product(w * 0.5 * ((i + 1) % 2 == 1 ? 1.0 : -1.0));
-							cn = n.product(d * (i + 0.5) + offset);
-							Vector p2 = ct.sum(cn).add(v1);
-							// draw the line
-							g.drawLine((int) Math.ceil(prev.x * scale),
-									   (int) Math.ceil(prev.y * scale), 
-									   (int) Math.ceil(p2.x * scale),
-									   (int) Math.ceil(p2.y * scale));
-							prev = p2;
-						}
-						// draw the final loop (half loop)
-						Vector d2 = n.product(-offset).add(v2);
-						g.drawLine((int) Math.ceil(prev.x * scale),
-								   (int) Math.ceil(prev.y * scale), 
-								   (int) Math.ceil(d2.x * scale),
-								   (int) Math.ceil(d2.y * scale));
-						// draw a line straight down using the offset
-						g.drawLine((int) Math.ceil(d2.x * scale),
-								   (int) Math.ceil(d2.y * scale), 
-								   (int) Math.ceil(v2.x * scale),
-								   (int) Math.ceil(v2.y * scale));
-					} else {
-						// save the original stroke
-						Stroke stroke = g.getStroke();
-						g.setStroke(new BasicStroke((float)(0.1 * scale), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-						g.drawLine((int) Math.ceil(v1.x * scale),
-								   (int) Math.ceil(v1.y * scale), 
-								   (int) Math.ceil(v2.x * scale),
-								   (int) Math.ceil(v2.y * scale));
-						// set back the original stroke
-						g.setStroke(stroke);
-					}
+					this.render(g, (DistanceJoint) joint);
 				} else if (joint instanceof RevoluteJoint) {
-					// draw a circle at the joint anchor
-					RevoluteJoint rj = (RevoluteJoint) joint;
-					Vector anchor = rj.getAnchorPoint();
-					g.setColor(Color.LIGHT_GRAY);
-					g.fillOval((int) Math.ceil((anchor.x - 0.025) * scale),
-							   (int) Math.ceil((anchor.y - 0.025) * scale), 
-							   (int) Math.ceil(0.05 * scale),
-							   (int) Math.ceil(0.05 * scale));
-					g.setColor(Color.DARK_GRAY);
-					g.drawOval((int) Math.ceil((anchor.x - 0.025) * scale),
-							   (int) Math.ceil((anchor.y - 0.025) * scale), 
-							   (int) Math.ceil(0.05 * scale),
-							   (int) Math.ceil(0.05 * scale));
+					this.render(g, (RevoluteJoint) joint);
+				} else if (joint instanceof MouseJoint) {
+					this.render(g, (MouseJoint) joint);
 				}
 			}
 		}
@@ -398,6 +315,143 @@ public abstract class Test {
 		this.renderAfter(g);
 		
 		g.setTransform(af);
+	}
+	
+	/**
+	 * Renders a {@link DistanceJoint} to the given graphics object.
+	 * @param g the graphics object to render to
+	 * @param joint the {@link DistanceJoint} to render
+	 */
+	private void render(Graphics2D g, DistanceJoint joint) {
+		Vector v1 = joint.getAnchor1();
+		Vector v2 = joint.getAnchor2();
+		// set the color to be mostly transparent
+		g.setColor(new Color(0, 0, 0, 64));
+		// check for spring distance joint
+		if (joint.isSpring()) {
+			// draw a spring
+			final double h = 0.03;
+			final double w = 0.25;
+			// compute the offset from the first joint point to the start
+			// of the spring loops
+			double offset = h * 0.5;
+			// compute the number of spring loops
+			// we have to use the joint's desired distance here so that the
+			// number of loops in the spring doesnt change as the simulation
+			// progresses
+			int loops = (int) Math.ceil((joint.getDistance() - offset * 2.0) / h);
+			// get the vector between the two points
+			Vector n = v1.to(v2);
+			// normalize it to get the current distance
+			double x = n.normalize();
+			// get the tangent to the normal
+			Vector t = n.getRightHandOrthogonalVector();
+			// compute the distance between each loop along the normal
+			double d = (x - offset * 2.0) / (loops - 1);
+			// draw a line straight down using the offset
+			Vector d1 = n.product(offset).add(v1);
+			g.drawLine((int) Math.ceil(v1.x * scale),
+					   (int) Math.ceil(v1.y * scale), 
+					   (int) Math.ceil(d1.x * scale),
+					   (int) Math.ceil(d1.y * scale));
+			// draw the first loop (half loop)
+			Vector ct = t.product(w * 0.5);
+			Vector cn = n.product(d * 0.5);
+			Vector first = ct.sum(cn).add(d1);
+			g.drawLine((int) Math.ceil(d1.x * scale),
+					   (int) Math.ceil(d1.y * scale), 
+					   (int) Math.ceil(first.x * scale),
+					   (int) Math.ceil(first.y * scale));
+			// draw the middle loops
+			Vector prev = first;
+			for (int i = 1; i < loops - 1; i++) {
+				ct = t.product(w * 0.5 * ((i + 1) % 2 == 1 ? 1.0 : -1.0));
+				cn = n.product(d * (i + 0.5) + offset);
+				Vector p2 = ct.sum(cn).add(v1);
+				// draw the line
+				g.drawLine((int) Math.ceil(prev.x * scale),
+						   (int) Math.ceil(prev.y * scale), 
+						   (int) Math.ceil(p2.x * scale),
+						   (int) Math.ceil(p2.y * scale));
+				prev = p2;
+			}
+			// draw the final loop (half loop)
+			Vector d2 = n.product(-offset).add(v2);
+			g.drawLine((int) Math.ceil(prev.x * scale),
+					   (int) Math.ceil(prev.y * scale), 
+					   (int) Math.ceil(d2.x * scale),
+					   (int) Math.ceil(d2.y * scale));
+			// draw a line straight down using the offset
+			g.drawLine((int) Math.ceil(d2.x * scale),
+					   (int) Math.ceil(d2.y * scale), 
+					   (int) Math.ceil(v2.x * scale),
+					   (int) Math.ceil(v2.y * scale));
+		} else {
+			// save the original stroke
+			Stroke stroke = g.getStroke();
+			g.setStroke(new BasicStroke((float)(0.1 * scale), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			g.drawLine((int) Math.ceil(v1.x * scale),
+					   (int) Math.ceil(v1.y * scale), 
+					   (int) Math.ceil(v2.x * scale),
+					   (int) Math.ceil(v2.y * scale));
+			// set back the original stroke
+			g.setStroke(stroke);
+		}
+	}
+	
+	/**
+	 * Renders a {@link RevoluteJoint} to the given graphics object.
+	 * @param g the graphics object to render to
+	 * @param joint the {@link RevoluteJoint} to render
+	 */
+	private void render(Graphics2D g, RevoluteJoint joint) {
+		Vector anchor = joint.getAnchor1();
+		g.setColor(Color.LIGHT_GRAY);
+		g.fillOval((int) Math.ceil((anchor.x - 0.025) * scale),
+				   (int) Math.ceil((anchor.y - 0.025) * scale), 
+				   (int) Math.ceil(0.05 * scale),
+				   (int) Math.ceil(0.05 * scale));
+		g.setColor(Color.DARK_GRAY);
+		g.drawOval((int) Math.ceil((anchor.x - 0.025) * scale),
+				   (int) Math.ceil((anchor.y - 0.025) * scale), 
+				   (int) Math.ceil(0.05 * scale),
+				   (int) Math.ceil(0.05 * scale));
+	}
+	
+	/**
+	 * Renders a {@link MouseJoint} to the given graphics object.
+	 * @param g the graphics object to render to
+	 * @param joint the {@link MouseJoint} to render
+	 */
+	private void render(Graphics2D g, MouseJoint joint) {
+		g.setColor(Color.BLACK);
+		// draw the anchor point
+		Vector anchor = joint.getAnchor2();
+		g.fillRect((int) Math.ceil((anchor.x - 0.025) * scale),
+				   (int) Math.ceil((anchor.y - 0.025) * scale), 
+				   (int) Math.ceil(0.05 * scale),
+				   (int) Math.ceil(0.05 * scale));
+		// draw the target point
+		Vector target = joint.getTarget();
+		g.fillRect((int) Math.ceil((target.x - 0.025) * scale),
+				   (int) Math.ceil((target.y - 0.025) * scale), 
+				   (int) Math.ceil(0.05 * scale),
+				   (int) Math.ceil(0.05 * scale));
+		// draw a line connecting them
+		// make the line color a function of stress (black to red)
+		Step step = this.world.getStep();
+		double invdt = step.getInverseDeltaTime();
+		double maxForce = joint.getMaxForce();
+		double force = joint.getReactionForce(invdt).getMagnitude();
+		double red = force / maxForce;
+		red *= 1.10;
+		red = Interval.clamp(red, 0.0, 1.0);
+		// set the color
+		g.setColor(new Color((float)red, 0.0f, 0.0f));		
+		g.drawLine((int) Math.ceil(anchor.x * scale),
+				   (int) Math.ceil(anchor.y * scale), 
+				   (int) Math.ceil(target.x * scale),
+				   (int) Math.ceil(target.y * scale));
 	}
 	
 	/**

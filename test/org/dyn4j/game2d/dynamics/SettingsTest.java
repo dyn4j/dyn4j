@@ -26,6 +26,7 @@ package org.dyn4j.game2d.dynamics;
 
 import junit.framework.TestCase;
 
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -33,6 +34,17 @@ import org.junit.Test;
  * @author William Bittle
  */
 public class SettingsTest {
+	/** The test settings */
+	private Settings settings = Settings.getInstance();
+	
+	/**
+	 * Setup the test case.
+	 */
+	@Before
+	public void setup() {
+		settings.reset();
+	}
+	
 	/**
 	 * Tests that the {@link Settings} class is
 	 * performing as expected as a singleton.
@@ -49,50 +61,69 @@ public class SettingsTest {
 	 * Tests the set step frequency method.
 	 */
 	@Test
-	public void setFrequency() {
-		Settings s = Settings.getInstance();
-		s.reset();
-		// invalid values
-		s.setStepFrequency(10);
-		TestCase.assertEquals(1.0 / 30.0, s.getStepFrequency());
-		s.setStepFrequency(0);
-		TestCase.assertEquals(1.0 / 30.0, s.getStepFrequency());
-		s.setStepFrequency(-1.0);
-		TestCase.assertEquals(1.0 / 30.0, s.getStepFrequency());
-		
-		// valid value
-		s.setStepFrequency(40);
-		TestCase.assertEquals(1.0 / 40.0, s.getStepFrequency());
+	public void setValidFrequency() {
+		settings.setStepFrequency(70.0);
+		TestCase.assertEquals(1.0 / 70.0, settings.getStepFrequency());
 	}
 	
 	/**
-	 * Tests the set max velocity method.
+	 * Tests the set step frequency method passing a negative frequency value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNegativeFrequency() {
+		settings.setStepFrequency(-30.0);
+	}
+	
+	/**
+	 * Tests the set step frequency method passing a zero frequency value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setZeroFrequency() {
+		settings.setStepFrequency(0.0);
+	}
+	
+	/**
+	 * Tests the set step frequency method passing a frequency value &lt; 30.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setLessThan30Frequency() {
+		settings.setStepFrequency(22.0);
+	}
+	
+	/**
+	 * Tests the set max translation method.
 	 */
 	@Test
-	public void setMaxVelocity() {
-		Settings s = Settings.getInstance();
-		s.reset();
-		// invalid values
-		s.setMaxVelocity(-1.0);
-		TestCase.assertEquals(0.0, s.getMaxVelocity());
-		// valid values
-		s.setMaxVelocity(12.0);
-		TestCase.assertEquals(12.0, s.getMaxVelocity());
+	public void setValidMaxTranslation() {
+		settings.setMaxTranslation(3.0);
+		TestCase.assertEquals(3.0, settings.getMaxTranslation());
+		TestCase.assertEquals(9.0, settings.getMaxTranslationSquared());
+	}
+	
+	/**
+	 * Tests the set max translation method passing a negative value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNegativeMaxTranslation() {
+		settings.setMaxTranslation(-3.0);
 	}
 	
 	/**
 	 * Tests the set max angular velocity method.
 	 */
 	@Test
-	public void setMaxAngularVelocity() {
-		Settings s = Settings.getInstance();
-		s.reset();
-		// invalid values
-		s.setMaxAngularVelocity(-1.0);
-		TestCase.assertEquals(0.0, s.getMaxAngularVelocity());
-		// valid values
-		s.setMaxAngularVelocity(12.0);
-		TestCase.assertEquals(12.0, s.getMaxAngularVelocity());
+	public void setMaxRotation() {
+		settings.setMaxRotation(3.0);
+		TestCase.assertEquals(3.0, settings.getMaxRotation());
+		TestCase.assertEquals(9.0, settings.getMaxRotationSquared());
+	}
+
+	/**
+	 * Tests the set max translation method passing a negative value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNegativeMaxRotation() {
+		settings.setMaxRotation(Math.toRadians(-3.0));
 	}
 	
 	/**
@@ -112,138 +143,249 @@ public class SettingsTest {
 	 * Tests the set sleep velocity method.
 	 */
 	@Test
-	public void setSleepVelocity() {
-		Settings s = Settings.getInstance();
-		s.reset();
-		// invalid values
-		s.setSleepVelocity(-1.0);
-		TestCase.assertEquals(0.0, s.getSleepVelocity());
-		// valid values
-		s.setSleepVelocity(12.0);
-		TestCase.assertEquals(12.0, s.getSleepVelocity());
+	public void setValidSleepVelocity() {
+		settings.setSleepVelocity(3.0);
+		TestCase.assertEquals(3.0, settings.getSleepVelocity());
+		TestCase.assertEquals(9.0, settings.getSleepVelocitySquared());
+	}
+	
+	/**
+	 * Tests the set sleep velocity method passing a negative value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNegativeSleepVelocity() {
+		settings.setSleepVelocity(-1.0);
 	}
 	
 	/**
 	 * Tests the set sleep angular velocity method.
 	 */
 	@Test
-	public void setSleepAngularVelocity() {
-		Settings s = Settings.getInstance();
-		s.reset();
-		// invalid values
-		s.setSleepAngularVelocity(-1.0);
-		TestCase.assertEquals(0.0, s.getSleepAngularVelocity());
-		// valid values
-		s.setSleepAngularVelocity(12.0);
-		TestCase.assertEquals(12.0, s.getSleepAngularVelocity());
+	public void setValidSleepAngularVelocity() {
+		settings.setSleepAngularVelocity(2.0);
+		TestCase.assertEquals(2.0, settings.getSleepAngularVelocity());
+		TestCase.assertEquals(4.0, settings.getSleepAngularVelocitySquared());
+	}
+	
+	/**
+	 * Tests the set sleep angular velocity method passing a negative value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNegativeSleepAngularVelocity() {
+		settings.setSleepAngularVelocity(-1.0);
 	}
 	
 	/**
 	 * Tests the set sleep time method.
 	 */
 	@Test
-	public void setSleepTime() {
-		Settings s = Settings.getInstance();
-		s.reset();
-		// invalid values
-		s.setSleepTime(-1.0);
-		TestCase.assertEquals(0.0, s.getSleepTime());
-		// valid values
-		s.setSleepTime(12.0);
-		TestCase.assertEquals(12.0, s.getSleepTime());
+	public void setValidSleepTime() {
+		settings.setSleepTime(12.0);
+		TestCase.assertEquals(12.0, settings.getSleepTime());
 	}
 	
 	/**
-	 * Tests the set solver iterations method.
+	 * Tests the set sleep time method passing a negative value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNegativeSleepTime() {
+		settings.setSleepTime(-1.0);
+	}
+	
+	/**
+	 * Tests the set velocity constraint solver iterations method.
 	 */
 	@Test
-	public void setSolverIterations() {
-		Settings s = Settings.getInstance();
-		s.reset();
-		// invalid values
-		s.setSiSolverIterations(-1);
-		TestCase.assertEquals(5, s.getSiSolverIterations());
-		s.setSiSolverIterations(0);
-		TestCase.assertEquals(5, s.getSiSolverIterations());
-		s.setSiSolverIterations(4);
-		TestCase.assertEquals(5, s.getSiSolverIterations());
-		// valid values
-		s.setSiSolverIterations(10);
-		TestCase.assertEquals(10, s.getSiSolverIterations());
+	public void setValidVelocityConstraintSolverIterations() {
+		settings.setVelocityConstraintSolverIterations(17);
+		TestCase.assertEquals(17, settings.getVelocityConstraintSolverIterations());
+	}
+	
+	/**
+	 * Tests the set velocity constraint solver iterations method passing
+	 * a negative value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNegativeVelocityConstraintSolverIterations() {
+		settings.setVelocityConstraintSolverIterations(-3);
+	}
+	
+	/**
+	 * Tests the set velocity constraint solver iterations method passing
+	 * a zero value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setZeroVelocityConstraintSolverIterations() {
+		settings.setVelocityConstraintSolverIterations(0);
+	}
+	
+	/**
+	 * Tests the set velocity constraint solver iterations method passing
+	 * a value less than 5.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setLessThan5VelocityConstraintSolverIterations() {
+		settings.setVelocityConstraintSolverIterations(2);
+	}
+	
+	/**
+	 * Tests the set position constraint solver iterations method.
+	 */
+	@Test
+	public void setValidPositionConstraintSolverIterations() {
+		settings.setPositionConstraintSolverIterations(17);
+		TestCase.assertEquals(17, settings.getPositionConstraintSolverIterations());
+	}
+	
+	/**
+	 * Tests the set position constraint solver iterations method passing
+	 * a negative value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNegativePositionConstraintSolverIterations() {
+		settings.setPositionConstraintSolverIterations(-3);
+	}
+	
+	/**
+	 * Tests the set position constraint solver iterations method passing
+	 * a zero value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setZeroPositionConstraintSolverIterations() {
+		settings.setPositionConstraintSolverIterations(0);
+	}
+	
+	/**
+	 * Tests the set position constraint solver iterations method passing
+	 * a value less than 5.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setLessThan5PositionConstraintSolverIterations() {
+		settings.setPositionConstraintSolverIterations(2);
 	}
 	
 	/**
 	 * Tests the set warm start distance method.
 	 */
 	@Test
-	public void setWarmStartDistance() {
-		Settings s = Settings.getInstance();
-		s.reset();
-		// invalid values
-		s.setWarmStartDistance(-1.0);
-		TestCase.assertEquals(0.0, s.getWarmStartDistance());
-		// valid values
-		s.setWarmStartDistance(10);
-		TestCase.assertEquals(10.0, s.getWarmStartDistance());
+	public void setValidWarmStartDistance() {
+		settings.setWarmStartDistance(2.0);
+		TestCase.assertEquals(2.0, settings.getWarmStartDistance());
+		TestCase.assertEquals(4.0, settings.getWarmStartDistanceSquared());
+	}
+	
+	/**
+	 * Tests the set warm start distance method passing a negative value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNegativeWarmStartDistance() {
+		settings.setWarmStartDistance(-2.0);
 	}
 	
 	/**
 	 * Tests the set restitution velocity method.
 	 */
 	@Test
-	public void setRestitutionVelocity() {
-		Settings s = Settings.getInstance();
-		s.reset();
-		// invalid values
-		s.setRestitutionVelocity(-1.0);
-		TestCase.assertEquals(0.0, s.getRestitutionVelocity());
-		// valid values
-		s.setRestitutionVelocity(10);
-		TestCase.assertEquals(10.0, s.getRestitutionVelocity());
+	public void setValidRestitutionVelocity() {
+		settings.setRestitutionVelocity(3.0);
+		TestCase.assertEquals(3.0, settings.getRestitutionVelocity());
+		TestCase.assertEquals(9.0, settings.getRestitutionVelocitySquared());
 	}
 	
 	/**
-	 * Tests the set allowed penetration method.
+	 * Tests the set restitution velocity method passing a negative value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNegativeRestitutionVelocity() {
+		settings.setRestitutionVelocity(-2.0);
+	}
+	
+	/**
+	 * Tests the set linear tolerance method.
 	 */
 	@Test
-	public void setAllowedPenetration() {
-		Settings s = Settings.getInstance();
-		s.reset();
-		// invalid values
-		s.setLinearTolerance(-1.0);
-		TestCase.assertEquals(0.0, s.getLinearTolerance());
-		// valid values
-		s.setLinearTolerance(10);
-		TestCase.assertEquals(10.0, s.getLinearTolerance());
+	public void setValidLinearTolerance() {
+		settings.setLinearTolerance(2.0);
+		TestCase.assertEquals(2.0, settings.getLinearTolerance());
+		TestCase.assertEquals(4.0, settings.getLinearToleranceSquared());
+	}
+
+	/**
+	 * Tests the set linear tolerance method passing a negative value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNegativeLinearTolerance() {
+		settings.setLinearTolerance(-0.3);
+	}
+
+	/**
+	 * Tests the set angular tolerance method.
+	 */
+	@Test
+	public void setValidAngularTolerance() {
+		settings.setAngularTolerance(2.0);
+		TestCase.assertEquals(2.0, settings.getAngularTolerance());
+		TestCase.assertEquals(4.0, settings.getAngularToleranceSquared());
+	}
+
+	/**
+	 * Tests the set angular tolerance method passing a negative value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNegativeAngularTolerance() {
+		settings.setAngularTolerance(-2.0);
 	}
 	
 	/**
 	 * Tests the set max linear correction method.
 	 */
 	@Test
-	public void setMaxLinearCorrection() {
-		Settings s = Settings.getInstance();
-		s.reset();
-		// invalid values
-		s.setMaxLinearCorrection(-1.0);
-		TestCase.assertEquals(0.0, s.getMaxLinearCorrection());
-		// valid values
-		s.setMaxLinearCorrection(10);
-		TestCase.assertEquals(10.0, s.getMaxLinearCorrection());
+	public void setValidMaxLinearCorrection() {
+		settings.setMaxLinearCorrection(2.0);
+		TestCase.assertEquals(2.0, settings.getMaxLinearCorrection());
+		TestCase.assertEquals(4.0, settings.getMaxLinearCorrectionSquared());
+	}
+
+	/**
+	 * Tests the set max linear correction method passing a negative value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNegativeMaxLinearCorrection() {
+		settings.setMaxLinearCorrection(-3.0);
+	}
+
+	/**
+	 * Tests the set max angular correction method.
+	 */
+	@Test
+	public void setValidMaxAngularCorrection() {
+		settings.setMaxAngularCorrection(2.0);
+		TestCase.assertEquals(2.0, settings.getMaxAngularCorrection());
+		TestCase.assertEquals(4.0, settings.getMaxAngularCorrectionSquared());
+	}
+
+	/**
+	 * Tests the set max angular correction method passing a negative value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNegativeMaxAngularCorrection() {
+		settings.setMaxAngularCorrection(-3.0);
 	}
 	
 	/**
 	 * Tests the set baumgarte method.
 	 */
 	@Test
-	public void setBaumgarte() {
-		Settings s = Settings.getInstance();
-		s.reset();
-		// invalid values
-		s.setBaumgarte(-1.0);
-		TestCase.assertEquals(0.0, s.getBaumgarte());
-		// valid values
-		s.setBaumgarte(10);
-		TestCase.assertEquals(10.0, s.getBaumgarte());
+	public void setValidBaumgarte() {
+		settings.setBaumgarte(0.3);
+		TestCase.assertEquals(0.3, settings.getBaumgarte());
+	}
+
+	/**
+	 * Tests the set baumgarte method passing a negative value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNegativeBaumgarte() {
+		settings.setBaumgarte(-0.3);
 	}
 }

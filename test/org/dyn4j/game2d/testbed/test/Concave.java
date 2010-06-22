@@ -26,6 +26,7 @@ package org.dyn4j.game2d.testbed.test;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
+import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Rectangle;
@@ -87,7 +88,7 @@ public class Concave extends Test {
 		// create the floor
 		Rectangle floorShape = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
-		floor.addShape(floorShape);
+		floor.addFixture(new Fixture(floorShape));
 		floor.setMassFromShapes(Mass.Type.INFINITE);
 		this.world.add(floor);
 		
@@ -111,9 +112,9 @@ public class Concave extends Test {
 		
 		// create the object
 		Entity concave = new Entity();
-		concave.addShape(top);
-		concave.addShape(left);
-		concave.addShape(right);
+		concave.addFixture(new Fixture(top));
+		concave.addFixture(new Fixture(left));
+		concave.addFixture(new Fixture(right));
 		concave.setMassFromShapes();
 		concave.translate(0.0, 4.0);
 		this.world.add(concave);
@@ -121,7 +122,7 @@ public class Concave extends Test {
 		// setup a small object to go in between the concave shape
 		Rectangle smallShape = new Rectangle(0.5, 0.5);
 		Entity small = new Entity();
-		small.addShape(smallShape);
+		small.addFixture(new Fixture(smallShape));
 		small.setMassFromShapes();
 		small.translate(0.0, 1.0);
 		this.world.add(small);
