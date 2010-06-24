@@ -27,7 +27,5 @@
  * Sub package of the Dynamics package handling joints.
  * <p>
  * Joints are solved using an iterative constraint based approach in the same manner as contacts.
- * <p>
- * This package is currently under development and should not be used yet.
  */
 package org.dyn4j.game2d.dynamics.joint;

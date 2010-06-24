@@ -50,7 +50,7 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 	 * Full constructor.
 	 * @param vertices the array of vertices
 	 */
-	public Polygon(Vector[] vertices) {
+	public Polygon(Vector2[] vertices) {
 		super();
 		// check the vertex array
 		if (vertices == null) throw new NullPointerException("The vertices array cannot be null.");
@@ -65,9 +65,9 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		// check for convex
 		double area = 0.0;
 		for (int i = 0; i < size; i++) {
-			Vector p0 = (i - 1 < 0) ? vertices[size - 1] : vertices[i - 1];
-			Vector p1 = vertices[i];
-			Vector p2 = (i + 1 == size) ? vertices[0] : vertices[i + 1];
+			Vector2 p0 = (i - 1 < 0) ? vertices[size - 1] : vertices[i - 1];
+			Vector2 p1 = vertices[i];
+			Vector2 p2 = (i + 1 == size) ? vertices[0] : vertices[i + 1];
 			// check the cross product for CCW winding
 			area += p1.cross(p2);
 			// check for coincident vertices
@@ -86,13 +86,13 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		// set the vertices
 		this.vertices = vertices;
 		// create the normals
-		this.normals = new Vector[size];
+		this.normals = new Vector2[size];
 		for (int i = 0; i < size; i++) {
 			// get the edge points
-			Vector p1 = vertices[i];
-			Vector p2 = (i + 1 == size) ? vertices[0] : vertices[i + 1];
+			Vector2 p1 = vertices[i];
+			Vector2 p2 = (i + 1 == size) ? vertices[0] : vertices[i + 1];
 			// create the edge and get its left perpedicular vector
-			Vector n = p1.to(p2).left();
+			Vector2 n = p1.to(p2).left();
 			// normalize it
 			n.normalize();
 			this.normals[i] = n;
@@ -123,19 +123,19 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 	 * @see org.dyn4j.game2d.geometry.Convex#getAxes(java.util.List, org.dyn4j.game2d.geometry.Transform)
 	 */
 	@Override
-	public Vector[] getAxes(Vector[] foci, Transform transform) {
+	public Vector2[] getAxes(Vector2[] foci, Transform transform) {
 		// get the size of the foci list
 		int fociSize = foci != null ? foci.length : 0;
 		// get the number of vertices this polygon has
 		int size = this.vertices.length;
 		// the axes of a polygon are created from the normal of the edges
 		// plus the closest point to each focus
-		Vector[] axes = new Vector[size + fociSize];
+		Vector2[] axes = new Vector2[size + fociSize];
 		int n = 0;
 		// loop over the edge normals and put them into world space
 		for (int i = 0; i < size; i++) {
 			// create references to the current points
-			Vector v = this.normals[i];
+			Vector2 v = this.normals[i];
 			// transform it into world space and add it to the list
 			axes[n++] = transform.getTransformedR(v);;
 		}
@@ -143,14 +143,14 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		// points on the polygon to the focal points
 		for (int i = 0; i < fociSize; i++) {
 			// get the current focus
-			Vector f = foci[i];
+			Vector2 f = foci[i];
 			// create a place for the closest point
-			Vector closest = null;
+			Vector2 closest = null;
 			double d = Double.MAX_VALUE;
 			// find the minimum distance vertex
 			for (int j = 0; j < size; j++) {
 				// get the vertex
-				Vector p = this.vertices[j];
+				Vector2 p = this.vertices[j];
 				// transform it into world space
 				p = transform.getTransformed(p);
 				// get the squared distance to the focus
@@ -174,7 +174,7 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 	 * @see org.dyn4j.game2d.geometry.Convex#getFoci(org.dyn4j.game2d.geometry.Transform)
 	 */
 	@Override
-	public Vector[] getFoci(Transform transform) {
+	public Vector2[] getFoci(Transform transform) {
 		return null;
 	}
 
@@ -182,16 +182,16 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 	 * @see org.dyn4j.game2d.geometry.Shape#contains(org.dyn4j.game2d.geometry.Vector, org.dyn4j.game2d.geometry.Transform)
 	 */
 	@Override
-	public boolean contains(Vector point, Transform transform) {
+	public boolean contains(Vector2 point, Transform transform) {
 		// if the polygon is convex then do a simple inside test
 		// if the the sign of the location of the point on the side of an edge (or line)
 		// is always the same and the polygon is convex then we know that the
 		// point lies inside the polygon
 		// This method doesn't care about vertex winding
 		// inverse transform the point to put it in local coordinates
-		Vector p = transform.getInverseTransformed(point);
-		Vector p1 = this.vertices[0];
-		Vector p2 = this.vertices[1];
+		Vector2 p = transform.getInverseTransformed(point);
+		Vector2 p1 = this.vertices[0];
+		Vector2 p2 = this.vertices[1];
 		// get the location of the point relative to the first two vertices
 		double last = Segment.getLocation(p, p1, p2);
 		int size = this.vertices.length;
@@ -245,10 +245,10 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 	 * @see org.dyn4j.game2d.geometry.Shape#project(org.dyn4j.game2d.geometry.Vector, org.dyn4j.game2d.geometry.Transform)
 	 */
 	@Override
-	public Interval project(Vector n, Transform transform) {
+	public Interval project(Vector2 n, Transform transform) {
 		double v = 0.0;
     	// get the first point
-		Vector p = transform.getTransformed(this.vertices[0]);
+		Vector2 p = transform.getTransformed(this.vertices[0]);
 		// project the point onto the vector
     	double min = n.dot(p);
     	double max = min;
@@ -272,20 +272,20 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 	 * @see org.dyn4j.game2d.geometry.Convex#getFarthestFeature(org.dyn4j.game2d.geometry.Vector, org.dyn4j.game2d.geometry.Transform)
 	 */
 	@Override
-	public Edge getFarthestFeature(Vector n, Transform transform) {
-		Vector maximum = new Vector();
+	public Edge getFarthestFeature(Vector2 n, Transform transform) {
+		Vector2 maximum = new Vector2();
 		double max = -Double.MAX_VALUE;
 		int index = 0;
 		// create a reference to the center
-		Vector c = transform.getTransformed(this.center);
+		Vector2 c = transform.getTransformed(this.center);
 		// find the vertex on the polygon that is further along on the penetration axis
 		int count = this.vertices.length;
-		Vector temp = new Vector();
+		Vector2 temp = new Vector2();
 		for (int i = 0; i < count; i++) {
 			// get the vertex
 			transform.getTransformed(this.vertices[i], temp);
 			// create a vector from the center to the point
-			Vector v = c.to(temp);
+			Vector2 v = c.to(temp);
 			// get the scalar projection of v onto axis
 			double projection = n.dot(v);
 			// keep the maximum projection point
@@ -303,17 +303,17 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		// see which edge is most perpendicular
 		int l = index + 1 == count ? 0 : index + 1;
 		int r = index - 1 < 0 ? count - 1 : index - 1;
-		Vector leftN = transform.getTransformedR(this.normals[index == 0 ? count - 1 : index - 1]);
-		Vector rightN = transform.getTransformedR(this.normals[index]);
+		Vector2 leftN = transform.getTransformedR(this.normals[index == 0 ? count - 1 : index - 1]);
+		Vector2 rightN = transform.getTransformedR(this.normals[index]);
 		// is the left or right edge more perpendicular?
 		Vertex vm = new Vertex(maximum, index);
 		if (leftN.dot(n) < rightN.dot(n)) {
-			Vector left = transform.getTransformed(this.vertices[l]);
+			Vector2 left = transform.getTransformed(this.vertices[l]);
 			Vertex vl = new Vertex(left, l);
 			// make sure the edge is the right winding
 			return new Edge(vm, vl, vm, maximum.to(left), index + 1);
 		} else {
-			Vector right = transform.getTransformed(this.vertices[r]);
+			Vector2 right = transform.getTransformed(this.vertices[r]);
 			Vertex vr = new Vertex(right, r);
 			// make sure the edge is the right winding
 			return new Edge(vr, vm, vm, right.to(maximum), index);
@@ -324,11 +324,11 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 	 * @see org.dyn4j.game2d.geometry.Convex#getFarthestPoint(org.dyn4j.game2d.geometry.Vector, org.dyn4j.game2d.geometry.Transform)
 	 */
 	@Override
-	public Vector getFarthestPoint(Vector n, Transform transform) {
-		Vector temp = new Vector();
-		Vector point = new Vector();
+	public Vector2 getFarthestPoint(Vector2 n, Transform transform) {
+		Vector2 temp = new Vector2();
+		Vector2 point = new Vector2();
 		// get the transformed center
-		Vector c = transform.getTransformed(this.center);
+		Vector2 c = transform.getTransformed(this.center);
 		// set the farthest point to the first one
 		transform.getTransformed(this.vertices[0], temp);
 		point.set(temp);
@@ -340,7 +340,7 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 			// get the next vertex
 			transform.getTransformed(this.vertices[i], temp);
 			// create a vector from the center to the vertex
-			Vector v = c.to(temp);
+			Vector2 v = c.to(temp);
 			// project the vector onto the axis
 			double projection = n.dot(v);
 			// check to see if the projection is greater than the last
@@ -389,7 +389,7 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 	public Mass createMass(double density) {
 		// can't use normal centroid calculation since it will be weighted towards sides
 		// that have larger distribution of points.
-		Vector center = new Vector();
+		Vector2 center = new Vector2();
 		double area = 0.0;
 		double I = 0.0;
 		int n = this.vertices.length;
@@ -398,8 +398,8 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		// loop through the vertices
 		for (int i = 0; i < n; i++) {
 			// get two vertices
-			Vector p1 = this.vertices[i];
-			Vector p2 = i + 1 < n ? this.vertices[i + 1] : this.vertices[0];
+			Vector2 p1 = this.vertices[i];
+			Vector2 p2 = i + 1 < n ? this.vertices[i + 1] : this.vertices[0];
 			// perform the cross product (yi * x(i+1) - y(i+1) * xi)
 			double D = p1.cross(p2);
 			// multiply by half
@@ -420,7 +420,7 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		// compute the mass
 		double m = density * area;
 		// finish the centroid calculation by dividing by the total area
-		center.divide(area);
+		center.multiply(1.0 / area);
 		// finish the inertia tensor by dividing by the total area and multiplying by d / 6
 		I *= (density / 6.0);
 		return Mass.create(center, m, I);

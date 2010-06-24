@@ -52,7 +52,7 @@ import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Segment;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Triangle;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Entity;
 import org.dyn4j.game2d.testbed.Test;
@@ -118,7 +118,7 @@ public class Plotter extends Test {
 		this.world.setStepListener(cc);
 		
 		// turn off gravity
-		this.world.setGravity(new Vector());
+		this.world.setGravity(new Vector2());
 		
 		// setup the bodies in the world
 		this.setup();
@@ -169,25 +169,25 @@ public class Plotter extends Test {
 			Rectangle r = new Rectangle(0.5, 0.5);
 			e.addFixture(new Fixture(r));
 		} else if (index == 6) {
-			Triangle t = new Triangle(new Vector(0.45, -0.12), new Vector(-0.45, 0.38), new Vector(-0.15, -0.22));
+			Triangle t = new Triangle(new Vector2(0.45, -0.12), new Vector2(-0.45, 0.38), new Vector2(-0.15, -0.22));
 			e.addFixture(new Fixture(t));
 		} else if (index == 7) {
-			Triangle t = new Triangle(new Vector(1.29, 0.25), new Vector(-0.71, 0.65), new Vector(-0.59, -0.85));
+			Triangle t = new Triangle(new Vector2(1.29, 0.25), new Vector2(-0.71, 0.65), new Vector2(-0.59, -0.85));
 			e.addFixture(new Fixture(t));
 		} else if (index == 8) {
-			Triangle t = new Triangle(new Vector(0.5, 0.5), new Vector(-0.3, -0.5), new Vector(1.0, -0.3));
+			Triangle t = new Triangle(new Vector2(0.5, 0.5), new Vector2(-0.3, -0.5), new Vector2(1.0, -0.3));
 			e.addFixture(new Fixture(t));
 		} else if (index == 9) {	
-			Segment s = new Segment(new Vector(-0.5, 0.0), new Vector(0.5, 0.0));
+			Segment s = new Segment(new Vector2(-0.5, 0.0), new Vector2(0.5, 0.0));
 			e.addFixture(new Fixture(s));
 		} else if (index == 10) {
-			Segment s = new Segment(new Vector(0.1, -0.3), new Vector(-0.8, 0.2));
+			Segment s = new Segment(new Vector2(0.1, -0.3), new Vector2(-0.8, 0.2));
 			e.addFixture(new Fixture(s));
 		} else if (index == 11) {
-			Segment s = new Segment(new Vector(-0.3, -0.3), new Vector(0.2, 0.3));
+			Segment s = new Segment(new Vector2(-0.3, -0.3), new Vector2(0.2, 0.3));
 			e.addFixture(new Fixture(s));
 		} else {
-			Segment s = new Segment(new Vector(-0.3, 0.2), new Vector(0.0, -0.1));
+			Segment s = new Segment(new Vector2(-0.3, 0.2), new Vector2(0.0, -0.1));
 			e.addFixture(new Fixture(s));
 		}
 		// set the mass to infinite
@@ -238,14 +238,14 @@ public class Plotter extends Test {
 			if (cmf.getManifold(p, c1, t1, c2, t2, m)) {
 				// get the points
 				List<ManifoldPoint> points = m.getPoints();
-				Vector n = m.getNormal();
+				Vector2 n = m.getNormal();
 				// if we got a manifold lets show it
 				// there are only two cases for 2D (2 points or 1 point)
 				if (points.size() == 2) {
 					ManifoldPoint mp1 = points.get(0);
 					ManifoldPoint mp2 = points.get(1);
-					Vector p1 = mp1.getPoint();
-					Vector p2 = mp2.getPoint();
+					Vector2 p1 = mp1.getPoint();
+					Vector2 p2 = mp2.getPoint();
 					this.renderPoint(g, p1.x, p1.y, r);
 					this.renderPoint(g, p2.x, p2.y, r);
 					g.setColor(Color.RED);
@@ -255,7 +255,7 @@ public class Plotter extends Test {
 					this.renderVector(g, p2.x, p2.y, n.x, n.y, mp2.getDepth());
 				} else if (points.size() == 1) {
 					ManifoldPoint mp1 = points.get(0);
-					Vector p1 = mp1.getPoint();
+					Vector2 p1 = mp1.getPoint();
 					this.renderPoint(g, p1.x, p1.y, r);
 					g.setColor(Color.RED);
 					this.renderVector(g, p1.x, p1.y, n.x, n.y, p.getDepth());
@@ -266,9 +266,9 @@ public class Plotter extends Test {
 		} else {
 			Gjk gjk = new Gjk();
 			if (gjk.distance(c1, t1, c2, t2, s)) {
-				Vector p1 = s.getPoint1();
-				Vector p2 = s.getPoint2();
-				Vector n = s.getNormal();
+				Vector2 p1 = s.getPoint1();
+				Vector2 p2 = s.getPoint2();
+				Vector2 n = s.getNormal();
 				this.renderPoint(g, p1.x, p1.y, r);
 				this.renderPoint(g, p2.x, p2.y, r);
 				this.renderVector(g, p1.x, p1.y, n.x, n.y, s.getDistance());
@@ -487,7 +487,7 @@ public class Plotter extends Test {
 			// set the new shape
 			this.e1 = this.e1List[this.e1Shape];
 			// find the difference in the centers
-			Vector tx = te.getWorldCenter().difference(this.e1.getWorldCenter());
+			Vector2 tx = te.getWorldCenter().difference(this.e1.getWorldCenter());
 			// translate the shape to that position
 			this.e1.translate(tx);
 			// add it to the world
@@ -505,7 +505,7 @@ public class Plotter extends Test {
 			// set the new shape
 			this.e2 = this.e2List[this.e2Shape];
 			// find the difference in the centers
-			Vector tx = te.getWorldCenter().difference(this.e2.getWorldCenter());
+			Vector2 tx = te.getWorldCenter().difference(this.e2.getWorldCenter());
 			// translate the shape to that position
 			this.e2.translate(tx);
 			// add it to the world

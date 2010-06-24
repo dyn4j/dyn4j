@@ -24,6 +24,8 @@
  */
 package org.dyn4j.game2d.dynamics;
 
+import java.util.UUID;
+
 import org.dyn4j.game2d.collision.Filter;
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Mass;
@@ -42,6 +44,9 @@ public class Fixture {
 
 	/** The default density in kg/m<sup>2</sup> */
 	public static final double DEFAULT_DENSITY = 1.0;
+	
+	/** The id for the fixture */
+	protected String id = UUID.randomUUID().toString();
 	
 	/** The convex shape for this fixture */
 	protected Convex shape;
@@ -85,6 +90,7 @@ public class Fixture {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("FIXTURE[")
+		.append(this.id).append("|")
 		.append(this.shape).append("|")
 		.append(this.density).append("|")
 		.append(this.filter).append("|")
@@ -94,6 +100,14 @@ public class Fixture {
 		.append(this.userData).append("|")
 		.append("]");
 		return sb.toString();
+	}
+	
+	/**
+	 * Returns the id for this fixture.
+	 * @return String
+	 */
+	public String getId() {
+		return this.id;
 	}
 	
 	/**

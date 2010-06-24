@@ -27,7 +27,7 @@ package org.dyn4j.game2d.dynamics.joint;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.Constraint;
 import org.dyn4j.game2d.dynamics.Step;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Represents constrained motion between two {@link Body}s.
@@ -137,24 +137,24 @@ public abstract class Joint extends Constraint {
 	/**
 	 * Returns the anchor point on the first {@link Body} in
 	 * world coordinates.
-	 * @return {@link Vector}
+	 * @return {@link Vector2}
 	 */
-	public abstract Vector getAnchor1();
+	public abstract Vector2 getAnchor1();
 	
 	/**
 	 * Returns the anchor point on the second {@link Body} in
 	 * world coordinates.
-	 * @return {@link Vector}
+	 * @return {@link Vector2}
 	 */
-	public abstract Vector getAnchor2();
+	public abstract Vector2 getAnchor2();
 	
 	/**
 	 * Returns the force applied to the {@link Body}s in order
 	 * to satisfy the constraint in newtons.
 	 * @param invdt the inverse delta time
-	 * @return {@link Vector}
+	 * @return {@link Vector2}
 	 */
-	public abstract Vector getReactionForce(double invdt);
+	public abstract Vector2 getReactionForce(double invdt);
 	
 	/**
 	 * Returns the torque applied to the {@link Body}s in order

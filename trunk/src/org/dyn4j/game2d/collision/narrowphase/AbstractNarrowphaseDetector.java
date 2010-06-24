@@ -26,7 +26,7 @@ package org.dyn4j.game2d.collision.narrowphase;
 
 import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Transform;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Abstract implementation of a narrow-phase collision detection algorithm.
@@ -41,10 +41,10 @@ public abstract class AbstractNarrowphaseDetector implements NarrowphaseDetector
 	 * Returns true if the given {@link Circle}s are intersecting and places the
 	 * penetration vector and depth in the given {@link Penetration} object.
 	 * <p>
-	 * If the {@link Circle} centers are coincident then the penetration {@link Vector}
-	 * will be the zero {@link Vector}, however, the penetration depth will be
+	 * If the {@link Circle} centers are coincident then the penetration {@link Vector2}
+	 * will be the zero {@link Vector2}, however, the penetration depth will be
 	 * correct.  In this case its up to the caller to determine a reasonable penetration
-	 * {@link Vector}.
+	 * {@link Vector2}.
 	 * @param circle1 the first {@link Circle}
 	 * @param transform1 the first {@link Circle}'s {@link Transform}
 	 * @param circle2 the second {@link Circle}
@@ -54,10 +54,10 @@ public abstract class AbstractNarrowphaseDetector implements NarrowphaseDetector
 	 */
 	public boolean detect(Circle circle1, Transform transform1, Circle circle2, Transform transform2, Penetration penetration) {
 		// get their world centers
-		Vector ce1 = transform1.getTransformed(circle1.getCenter());
-		Vector ce2 = transform2.getTransformed(circle2.getCenter());
+		Vector2 ce1 = transform1.getTransformed(circle1.getCenter());
+		Vector2 ce2 = transform2.getTransformed(circle2.getCenter());
 		// create a vector from one center to the other
-		Vector v = ce1.to(ce2);
+		Vector2 v = ce1.to(ce2);
 		// check the magnitude against the sum of the radii
 		double radii = circle1.getRadius() + circle2.getRadius();
 		// get the magnitude squared
@@ -82,10 +82,10 @@ public abstract class AbstractNarrowphaseDetector implements NarrowphaseDetector
 	 */
 	public boolean detect(Circle circle1, Transform transform1, Circle circle2, Transform transform2) {
 		// get their world centers
-		Vector ce1 = transform1.getTransformed(circle1.getCenter());
-		Vector ce2 = transform2.getTransformed(circle2.getCenter());
+		Vector2 ce1 = transform1.getTransformed(circle1.getCenter());
+		Vector2 ce2 = transform2.getTransformed(circle2.getCenter());
 		// create a vector from one center to the other
-		Vector v = ce1.to(ce2);
+		Vector2 v = ce1.to(ce2);
 		// check the magnitude against the sum of the radii
 		double radii = circle1.getRadius() + circle2.getRadius();
 		// get the magnitude squared
@@ -112,13 +112,13 @@ public abstract class AbstractNarrowphaseDetector implements NarrowphaseDetector
 	 */
 	public boolean distance(Circle circle1, Transform transform1, Circle circle2, Transform transform2, Separation separation) {
 		// get their world centers
-		Vector ce1 = transform1.getTransformed(circle1.getCenter());
-		Vector ce2 = transform2.getTransformed(circle2.getCenter());
+		Vector2 ce1 = transform1.getTransformed(circle1.getCenter());
+		Vector2 ce2 = transform2.getTransformed(circle2.getCenter());
 		// get the radii
 		double r1 = circle1.getRadius();
 		double r2 = circle2.getRadius();
 		// create a vector from one center to the other
-		Vector v = ce1.to(ce2);
+		Vector2 v = ce1.to(ce2);
 		// check the magnitude against the sum of the radii
 		double radii = r1 + r2;
 		// get the magnitude squared

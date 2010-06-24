@@ -27,7 +27,7 @@ package org.dyn4j.game2d.collision.narrowphase;
 import java.util.List;
 
 import org.dyn4j.game2d.geometry.Polygon;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * {@link Epa} stands for Expanding Polytope Algorithm and is used to find the 
@@ -80,7 +80,7 @@ public class Epa implements MinkowskiPenetrationSolver {
 		public double distance;
 		
 		/** The edge normal */
-		public Vector n;
+		public Vector2 n;
 		
 		/** The edge index in the simplex */
 		public int index;
@@ -107,7 +107,7 @@ public class Epa implements MinkowskiPenetrationSolver {
 	 * @param penetration the {@link Penetration} object to fill
 	 */
 	@Override
-	public void getPenetration(List<Vector> simplex, MinkowskiSum minkowskiSum, Penetration penetration) {
+	public void getPenetration(List<Vector2> simplex, MinkowskiSum minkowskiSum, Penetration penetration) {
 		// this method is called from the GJK detect method and therefore we can assume
 		// that the simplex has 3 points
 		
@@ -116,7 +116,7 @@ public class Epa implements MinkowskiPenetrationSolver {
 		// however EPA will preserve the winding so we only need to compute this once
 		int winding = this.getWinding(simplex);
 		// store the last point added to the simplex
-		Vector point = null;
+		Vector2 point = null;
 		// the current closest edge
 		Edge edge = null;
 		// start the loop
@@ -157,7 +157,7 @@ public class Epa implements MinkowskiPenetrationSolver {
 	 * @param winding the simplex winding
 	 * @return {@link Edge} the closest edge to the origin
 	 */
-	protected Edge findClosestEdge(List<Vector> simplex, int winding) {
+	protected Edge findClosestEdge(List<Vector2> simplex, int winding) {
 		// get the current size of the simplex
 		int size = simplex.size();
 		// create an edge
@@ -169,10 +169,10 @@ public class Epa implements MinkowskiPenetrationSolver {
 			// compute j
 			int j = i + 1 == size ? 0 : i + 1;
 			// get the points that make up the current edge
-			Vector a = simplex.get(i);
-			Vector b = simplex.get(j);
+			Vector2 a = simplex.get(i);
+			Vector2 b = simplex.get(j);
 			// create the edge
-			Vector normal = a.to(b);
+			Vector2 normal = a.to(b);
 			// depending on the winding get the edge normal
 			// it would be better to use Vector.tripleProduct(ab, ao, ab);
 			// where ab is the edge and ao is a.to(ORIGIN) but this will
@@ -215,12 +215,12 @@ public class Epa implements MinkowskiPenetrationSolver {
 	 * @param simplex the simplex
 	 * @return int the winding
 	 */
-	protected int getWinding(List<Vector> simplex) {
+	protected int getWinding(List<Vector2> simplex) {
 		int size = simplex.size();
 		for (int i = 0; i < size; i++) {
 			int j = i + 1 == size ? 0 : i + 1;
-			Vector a = simplex.get(i);
-			Vector b = simplex.get(j);
+			Vector2 a = simplex.get(i);
+			Vector2 b = simplex.get(j);
 			if (a.cross(b) > 0) {
 				return 1;
 			} else if (a.cross(b) < 0) {

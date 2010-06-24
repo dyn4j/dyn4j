@@ -27,7 +27,7 @@ package org.dyn4j.game2d.collision;
 import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Transformable;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Represents the {@link Bounds} of the simulation/world.
@@ -48,7 +48,7 @@ public interface Bounds extends Transformable {
 		 * @see org.dyn4j.game2d.geometry.Transformable#translate(org.dyn4j.game2d.geometry.Vector)
 		 */
 		@Override
-		public void translate(Vector vector) {}
+		public void translate(Vector2 vector) {}
 		
 		/* (non-Javadoc)
 		 * @see org.dyn4j.game2d.geometry.Transformable#translate(double, double)
@@ -66,7 +66,7 @@ public interface Bounds extends Transformable {
 		 * @see org.dyn4j.game2d.geometry.Transformable#rotate(double, org.dyn4j.game2d.geometry.Vector)
 		 */
 		@Override
-		public void rotate(double theta, Vector point) {}
+		public void rotate(double theta, Vector2 point) {}
 		
 		/* (non-Javadoc)
 		 * @see org.dyn4j.game2d.geometry.Transformable#rotate(double)

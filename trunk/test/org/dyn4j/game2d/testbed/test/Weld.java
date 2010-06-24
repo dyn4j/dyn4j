@@ -28,8 +28,7 @@ import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.dynamics.World;
-import org.dyn4j.game2d.dynamics.joint.DistanceJoint;
-import org.dyn4j.game2d.dynamics.joint.Joint;
+import org.dyn4j.game2d.dynamics.joint.WeldJoint;
 import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Vector2;
@@ -38,16 +37,16 @@ import org.dyn4j.game2d.testbed.Entity;
 import org.dyn4j.game2d.testbed.Test;
 
 /**
- * Tests the distance joint in a Newton's Cradle configuration.
+ * Tests the weld joint.
  * @author William Bittle
  */
-public class JointCollision extends Test {
+public class Weld extends Test {
 	/* (non-Javadoc)
 	 * @see test.Test#getDescription()
 	 */
 	@Override
 	public String getDescription() {
-		return "Tests a distance joint with the no collide flag enabled/disabled.";
+		return "Tests a weld joint.";
 	}
 	
 	/* (non-Javadoc)
@@ -96,11 +95,9 @@ public class JointCollision extends Test {
 		 * +-----+
 		 * |     |
 		 * |     |
-		 * |  .  |
-		 * +--|--+
-		 *    |
-		 * +--|--+
-		 * |  .  |
+		 * |     |
+		 * +--.--+
+		 * |     |
 		 * |     |
 		 * |     |
 		 * +-----+
@@ -109,51 +106,23 @@ public class JointCollision extends Test {
 		// create a reusable rectangle
 		Rectangle r = new Rectangle(0.5, 1.0);
 		
-		Entity obj1 = new Entity();
-		obj1.addFixture(new Fixture(r));
-		obj1.setMassFromShapes();
-		obj1.translate(2.0, 3.6);
+		Entity top = new Entity();
+		top.addFixture(new Fixture(r));
+		top.setMassFromShapes();
+		top.translate(0.0, -1.5);
+		top.getVelocity().set(2.0, 0.0);
 		
-		Entity obj2 = new Entity();
-		obj2.addFixture(new Fixture(r));
-		obj2.setMassFromShapes();
-		obj2.translate(2.0, 2.4);
+		Entity bot = new Entity();
+		bot.addFixture(new Fixture(r));
+		bot.setMassFromShapes();
+		bot.translate(0.0, -0.5);
 		
-		this.world.add(obj1);
-		this.world.add(obj2);
+		this.world.add(top);
+		this.world.add(bot);
 		
-		// compute the joint points
-		Vector2 p1 = obj1.getWorldCenter().copy();
-		Vector2 p2 = obj2.getWorldCenter().copy();
-		p1.add(0.0, -0.4);
-		p2.add(0.0, 0.4);
+		WeldJoint joint = new WeldJoint(top, bot, new Vector2(0.0, -1.0));
 		
-		// join them
-		Joint j1 = new DistanceJoint(obj1, obj2, true, p1, p2);
-		this.world.add(j1);
-		
-		Entity obj3 = new Entity();
-		obj3.addFixture(new Fixture(r));
-		obj3.setMassFromShapes();
-		obj3.translate(-2.0, 3.6);
-		
-		Entity obj4 = new Entity();
-		obj4.addFixture(new Fixture(r));
-		obj4.setMassFromShapes();
-		obj4.translate(-2.0, 2.4);
-		
-		this.world.add(obj3);
-		this.world.add(obj4);
-		
-		// compute the joint points
-		Vector2 p3 = obj3.getWorldCenter().copy();
-		Vector2 p4 = obj4.getWorldCenter().copy();
-		p3.add(0.0, -0.4);
-		p4.add(0.0, 0.4);
-		
-		// join them
-		Joint j2 = new DistanceJoint(obj3, obj4, false, p3, p4);
-		this.world.add(j2);
+		this.world.add(joint);
 	}
 	
 	/* (non-Javadoc)

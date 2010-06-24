@@ -27,7 +27,7 @@ package org.dyn4j.game2d.collision.manifold;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Represents a collision {@link Manifold}.
@@ -42,7 +42,7 @@ public class Manifold {
 	protected List<ManifoldPoint> points;
 	
 	/** The penetration normal */
-	protected Vector normal;
+	protected Vector2 normal;
 	
 	/**
 	 * Default constructor.
@@ -56,7 +56,7 @@ public class Manifold {
 	 * @param points the manifold points
 	 * @param normal the manifold normal
 	 */
-	public Manifold(List<ManifoldPoint> points, Vector normal) {
+	public Manifold(List<ManifoldPoint> points, Vector2 normal) {
 		this.points = points;
 		this.normal = normal;
 	}
@@ -94,9 +94,9 @@ public class Manifold {
 	
 	/**
 	 * Returns the normal.
-	 * @return {@link Vector}
+	 * @return {@link Vector2}
 	 */
-	public Vector getNormal() {
+	public Vector2 getNormal() {
 		return this.normal;
 	}
 	
@@ -114,7 +114,7 @@ public class Manifold {
 	 * Must be normalized.
 	 * @param normal the manifold normal
 	 */
-	public void setNormal(Vector normal) {
+	public void setNormal(Vector2 normal) {
 		this.normal = normal;
 	}
 }

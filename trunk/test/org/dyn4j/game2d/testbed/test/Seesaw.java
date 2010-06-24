@@ -31,7 +31,7 @@ import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Triangle;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Entity;
 import org.dyn4j.game2d.testbed.Test;
@@ -92,9 +92,9 @@ public class Seesaw extends Test {
 		
 		// create the pivot
 		Triangle pivotShape = new Triangle(
-				new Vector(0.0, 0.5),
-				new Vector(-1.0, 0.0),
-				new Vector(1.0, 0.0));
+				new Vector2(0.0, 0.5),
+				new Vector2(-1.0, 0.0),
+				new Vector2(1.0, 0.0));
 		Entity pivot = new Entity();
 		pivot.addFixture(new Fixture(pivotShape));
 		pivot.setMassFromShapes(Mass.Type.INFINITE);

@@ -32,7 +32,7 @@ import org.dyn4j.game2d.dynamics.joint.DistanceJoint;
 import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Rectangle;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Entity;
 import org.dyn4j.game2d.testbed.Test;
@@ -114,7 +114,7 @@ public class NewtonsCradle extends Test {
 			DistanceJoint dj = new DistanceJoint(floor,
 					                             ball,
 					                             true,
-					                             new Vector(x, 4.0), 
+					                             new Vector2(x, 4.0), 
 					                             ball.getWorldCenter());
 			this.world.add(dj);
 			

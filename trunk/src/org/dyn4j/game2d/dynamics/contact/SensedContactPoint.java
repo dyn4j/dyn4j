@@ -26,7 +26,7 @@ package org.dyn4j.game2d.dynamics.contact;
 
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.Fixture;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Represents a sensed contact point.
@@ -45,7 +45,7 @@ public class SensedContactPoint extends ContactPoint {
 	 * @param body2 the second {@link Body} in contact
 	 * @param fixture2 the second {@link Body}'s {@link Fixture}
 	 */
-	public SensedContactPoint(Vector point, Vector normal, double depth, Body body1, 
+	public SensedContactPoint(Vector2 point, Vector2 normal, double depth, Body body1, 
 			Fixture fixture1, Body body2, Fixture fixture2) {
 		this.point = point;
 		this.normal = normal;

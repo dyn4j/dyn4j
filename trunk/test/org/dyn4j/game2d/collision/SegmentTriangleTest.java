@@ -42,7 +42,7 @@ import org.dyn4j.game2d.geometry.Segment;
 import org.dyn4j.game2d.geometry.Shape;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Triangle;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -62,11 +62,11 @@ public class SegmentTriangleTest extends AbstractTest {
 	 */
 	@Before
 	public void setup() {
-		this.seg = new Segment(new Vector(-0.3, 0.2), new Vector(0.0, -0.1));
+		this.seg = new Segment(new Vector2(-0.3, 0.2), new Vector2(0.0, -0.1));
 		this.tri = new Triangle(
-						new Vector(0.45, -0.12),
-						new Vector(-0.45, 0.38),
-						new Vector(-0.15, -0.22));
+						new Vector2(0.45, -0.12),
+						new Vector2(-0.45, 0.38),
+						new Vector2(-0.15, -0.22));
 	}
 	
 	/**
@@ -170,7 +170,7 @@ public class SegmentTriangleTest extends AbstractTest {
 		Transform t1 = new Transform();
 		Transform t2 = new Transform();
 		
-		Vector n = null;
+		Vector2 n = null;
 		
 		// test containment
 		TestCase.assertTrue(this.sat.detect(seg, t1, tri, t2, p));
@@ -229,7 +229,7 @@ public class SegmentTriangleTest extends AbstractTest {
 		Transform t1 = new Transform();
 		Transform t2 = new Transform();
 		
-		Vector n = null;
+		Vector2 n = null;
 		
 		// test containment
 		TestCase.assertTrue(this.gjk.detect(seg, t1, tri, t2, p));
@@ -289,7 +289,7 @@ public class SegmentTriangleTest extends AbstractTest {
 		Transform t1 = new Transform();
 		Transform t2 = new Transform();
 		
-		Vector n, p1, p2;
+		Vector2 n, p1, p2;
 		
 		// test containment
 		TestCase.assertFalse(this.gjk.distance(seg, t1, tri, t2, s));
@@ -367,7 +367,7 @@ public class SegmentTriangleTest extends AbstractTest {
 		Transform t2 = new Transform();
 		
 		ManifoldPoint mp;
-		Vector p1;
+		Vector2 p1;
 		
 		// test containment gjk
 		this.gjk.detect(seg, t1, tri, t2, p);

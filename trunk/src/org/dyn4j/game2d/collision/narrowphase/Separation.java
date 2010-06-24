@@ -26,7 +26,7 @@ package org.dyn4j.game2d.collision.narrowphase;
 
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Shape;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Represents a {@link Separation} of one {@link Convex} {@link Shape} between another.
@@ -36,16 +36,16 @@ import org.dyn4j.game2d.geometry.Vector;
  */
 public class Separation {
 	/** The normalized axis of separation */
-	protected Vector normal;
+	protected Vector2 normal;
 	
 	/** The separating distance along the axis */
 	protected double distance;
 	
 	/** The closest point on the first {@link Convex} {@link Shape} to the second */
-	protected Vector point1;
+	protected Vector2 point1;
 	
 	/** The closest point on the second {@link Convex} {@link Shape} to the first */
-	protected Vector point2;
+	protected Vector2 point2;
 	
 	/**
 	 * Default constructor.
@@ -59,7 +59,7 @@ public class Separation {
 	 * @param point1 the closest point on the first {@link Convex} {@link Shape} to the second
 	 * @param point2 the closest point on the second {@link Convex} {@link Shape} to the first
 	 */
-	public Separation(Vector normal, double distance, Vector point1, Vector point2) {
+	public Separation(Vector2 normal, double distance, Vector2 point1, Vector2 point2) {
 		this.normal = normal;
 		this.distance = distance;
 		this.point1 = point1;
@@ -92,9 +92,9 @@ public class Separation {
 	
 	/**
 	 * Returns the separation normal.
-	 * @return {@link Vector}
+	 * @return {@link Vector2}
 	 */
-	public Vector getNormal() {
+	public Vector2 getNormal() {
 		return normal;
 	}
 	
@@ -108,17 +108,17 @@ public class Separation {
 	
 	/**
 	 * Returns the closest point on the first {@link Convex} {@link Shape}.
-	 * @return {@link Vector}
+	 * @return {@link Vector2}
 	 */
-	public Vector getPoint1() {
+	public Vector2 getPoint1() {
 		return point1;
 	}
 	
 	/**
 	 * Returns the closest point on the second {@link Convex} {@link Shape}.
-	 * @return {@link Vector}
+	 * @return {@link Vector2}
 	 */
-	public Vector getPoint2() {
+	public Vector2 getPoint2() {
 		return point2;
 	}
 	
@@ -128,7 +128,7 @@ public class Separation {
 	 * Must be normalized.
 	 * @param normal the separation normal
 	 */
-	public void setNormal(Vector normal) {
+	public void setNormal(Vector2 normal) {
 		this.normal = normal;
 	}
 	
@@ -144,7 +144,7 @@ public class Separation {
 	 * Sets the closest point on the first {@link Convex} {@link Shape}.
 	 * @param point1 the closest point on the first {@link Convex} {@link Shape}
 	 */
-	public void setPoint1(Vector point1) {
+	public void setPoint1(Vector2 point1) {
 		this.point1 = point1;
 	}
 	
@@ -152,7 +152,7 @@ public class Separation {
 	 * Sets the closest point on the second {@link Convex} {@link Shape}.
 	 * @param point2 the closest point on the second {@link Convex} {@link Shape}
 	 */
-	public void setPoint2(Vector point2) {
+	public void setPoint2(Vector2 point2) {
 		this.point2 = point2;
 	}
 }

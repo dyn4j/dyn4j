@@ -27,7 +27,7 @@ package org.dyn4j.game2d.collision.narrowphase;
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Shape;
 import org.dyn4j.game2d.geometry.Transform;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Represents the Minkowski sum of the given {@link Convex} {@link Shape}s.
@@ -55,13 +55,13 @@ public class MinkowskiSum {
 	 */
 	public static class Point {
 		/** The support point in the first {@link Convex} {@link Shape} */
-		protected Vector p1;
+		protected Vector2 p1;
 		
 		/** The support point in the second {@link Convex} {@link Shape} */
-		protected Vector p2;
+		protected Vector2 p2;
 		
 		/** The Minkowski sum point */
-		protected Vector p;
+		protected Vector2 p;
 		
 		/** Default constructor */
 		protected Point() {}
@@ -71,7 +71,7 @@ public class MinkowskiSum {
 		 * @param p1 the support point in the first {@link Convex} {@link Shape}
 		 * @param p2 the support point in the second {@link Convex} {@link Shape}
 		 */
-		public Point(Vector p1, Vector p2) {
+		public Point(Vector2 p1, Vector2 p2) {
 			this.set(p1, p2);
 		}
 		
@@ -80,7 +80,7 @@ public class MinkowskiSum {
 		 * @param p1 the support point in the first {@link Convex} {@link Shape}
 		 * @param p2 the support point in the second {@link Convex} {@link Shape}
 		 */
-		public void set(Vector p1, Vector p2) {
+		public void set(Vector2 p1, Vector2 p2) {
 			this.p1 = p1;
 			this.p2 = p2;
 			this.p = p1.difference(p2);
@@ -139,14 +139,14 @@ public class MinkowskiSum {
 	/**
 	 * Returns the farthest point in the Minkowski sum given the direction.
 	 * @param direction the search direction
-	 * @return {@link Vector} the point farthest in the given direction
+	 * @return {@link Vector2} the point farthest in the given direction
 	 */
-	public Vector support(Vector direction) {
+	public Vector2 support(Vector2 direction) {
 		// get the farthest point in the given direction in convex1
-		Vector point1 = this.convex1.getFarthestPoint(direction, this.transform1);
+		Vector2 point1 = this.convex1.getFarthestPoint(direction, this.transform1);
 		direction.negate();
 		// get the farthest point in the opposite direction in convex2
-		Vector point2 = this.convex2.getFarthestPoint(direction, this.transform2);
+		Vector2 point2 = this.convex2.getFarthestPoint(direction, this.transform2);
 		direction.negate();
 		// return the Minkowski sum point
 		return point1.subtract(point2);
@@ -158,12 +158,12 @@ public class MinkowskiSum {
 	 * @param direction the search direction
 	 * @param p the {@link MinkowskiSum.Point} object to fill
 	 */
-	public void support(Vector direction, MinkowskiSum.Point p) {
+	public void support(Vector2 direction, MinkowskiSum.Point p) {
 		// get the farthest point in the given direction in convex1
-		Vector point1 = this.convex1.getFarthestPoint(direction, this.transform1);
+		Vector2 point1 = this.convex1.getFarthestPoint(direction, this.transform1);
 		direction.negate();
 		// get the farthest point in the opposite direction in convex2
-		Vector point2 = this.convex2.getFarthestPoint(direction, this.transform2);
+		Vector2 point2 = this.convex2.getFarthestPoint(direction, this.transform2);
 		direction.negate();
 		// set the Minkowski sum point given the support points
 		p.set(point1, point2);

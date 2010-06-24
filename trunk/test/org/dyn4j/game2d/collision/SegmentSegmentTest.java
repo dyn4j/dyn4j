@@ -38,7 +38,7 @@ import org.dyn4j.game2d.collision.narrowphase.Separation;
 import org.dyn4j.game2d.geometry.Segment;
 import org.dyn4j.game2d.geometry.Shape;
 import org.dyn4j.game2d.geometry.Transform;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -58,8 +58,8 @@ public class SegmentSegmentTest extends AbstractTest {
 	 */
 	@Before
 	public void setup() {
-		this.seg1 = new Segment(new Vector(-0.3, -0.3), new Vector(0.2, 0.3));
-		this.seg2 = new Segment(new Vector(-0.5, 0.0), new Vector(0.5, 0.0));
+		this.seg1 = new Segment(new Vector2(-0.3, -0.3), new Vector2(0.2, 0.3));
+		this.seg2 = new Segment(new Vector2(-0.5, 0.0), new Vector2(0.5, 0.0));
 	}
 	
 	/**
@@ -215,7 +215,7 @@ public class SegmentSegmentTest extends AbstractTest {
 		Transform t1 = new Transform();
 		Transform t2 = new Transform();
 		
-		Vector n, p1, p2;
+		Vector2 n, p1, p2;
 		
 		// test overlap
 		TestCase.assertFalse(this.gjk.distance(seg1, t1, seg2, t2, s));

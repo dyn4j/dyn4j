@@ -179,7 +179,8 @@ public class ContactManager {
 							point.oldNormal = oldContactConstraint.normal;
 							point.oldPoint = oldContact.p;
 							point.oldDepth = oldContact.depth;
-							this.listener.persist(point);
+							// call the listener and set the enabled flag to the result
+							newContact.enabled = this.listener.persist(point);
 							// flag that the contact was persisted
 							persisted[k] = true;
 							found = true;
@@ -198,7 +199,8 @@ public class ContactManager {
 						point.body2 = newContactConstraint.getBody2();
 						point.fixture1 = newContactConstraint.getFixture1();
 						point.fixture2 = newContactConstraint.getFixture2();
-						this.listener.begin(point);
+						// call the listener and set the enabled flag to the result
+						newContact.enabled = this.listener.begin(point);
 					}
 				}
 				
@@ -220,7 +222,8 @@ public class ContactManager {
 						point.body2 = newContactConstraint.getBody2();
 						point.fixture1 = newContactConstraint.getFixture1();
 						point.fixture2 = newContactConstraint.getFixture2();
-						this.listener.end(point);
+						// call the listener and set the enabled flag to the result
+						contact.enabled = this.listener.end(point);
 					}
 				}
 			} else {
@@ -240,7 +243,8 @@ public class ContactManager {
 					point.body2 = newContactConstraint.getBody2();
 					point.fixture1 = newContactConstraint.getFixture1();
 					point.fixture2 = newContactConstraint.getFixture2();
-					this.listener.begin(point);
+					// call the listener and set the enabled flag to the result
+					contact.enabled = this.listener.begin(point);
 				}
 			}
 			// add the contact constraint to the map
@@ -267,8 +271,8 @@ public class ContactManager {
 					point.body2 = contactConstraint.getBody2();
 					point.fixture1 = contactConstraint.getFixture1();
 					point.fixture2 = contactConstraint.getFixture2();
-					// notify via the listener
-					this.listener.end(point);
+					// call the listener and set the enabled flag to the result
+					contact.enabled = this.listener.end(point);
 				}
 			}
 		}
@@ -303,8 +307,8 @@ public class ContactManager {
 				point.body2 = contactConstraint.getBody2();
 				point.fixture1 = contactConstraint.getFixture1();
 				point.fixture2 = contactConstraint.getFixture2();
-				// notify of them being solved
-				this.listener.preSolve(point);
+				// call the listener and set the enabled flag to the result
+				contact.enabled = this.listener.preSolve(point);
 			}
 		}
 		

@@ -35,7 +35,7 @@ import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Polygon;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Segment;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 import org.junit.Test;
 
 /**
@@ -50,7 +50,7 @@ public class MassTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createNegativeMass() {
-		Mass.create(new Vector(), -1.0, 1.0);
+		Mass.create(new Vector2(), -1.0, 1.0);
 	}
 	
 	/**
@@ -60,7 +60,7 @@ public class MassTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createNegativeInertia() {
-		Mass.create(new Vector(), 1.0, -1.0);
+		Mass.create(new Vector2(), 1.0, -1.0);
 	}
 	
 	/**
@@ -68,8 +68,8 @@ public class MassTest {
 	 */
 	@Test
 	public void createSuccess() {
-		Mass m = Mass.create(new Vector(), 1.0, 1.0);
-		TestCase.assertTrue(m.getCenter().equals(new Vector()));
+		Mass m = Mass.create(new Vector2(), 1.0, 1.0);
+		TestCase.assertTrue(m.getCenter().equals(new Vector2()));
 		TestCase.assertEquals(m.getMass(), 1.0);
 		TestCase.assertEquals(m.getInertia(), 1.0);
 	}
@@ -116,7 +116,7 @@ public class MassTest {
 	 */
 	@Test
 	public void createSegment() {
-		Segment s = new Segment(new Vector(-1.0, 0.0), new Vector(1.0, 0.5));
+		Segment s = new Segment(new Vector2(-1.0, 0.0), new Vector2(1.0, 0.5));
 		Mass m = s.createMass(1.0);
 		// the mass of a segment should be l * d
 		TestCase.assertEquals(2.061, m.getMass(), 1.0e-3);
@@ -129,16 +129,16 @@ public class MassTest {
 	 */
 	@Test
 	public void createArray() {
-		Mass m1 = Mass.create(new Vector( 1.0,  1.0), 3.00, 1.00);
-		Mass m2 = Mass.create(new Vector(-1.0,  0.0), 0.50, 0.02);
-		Mass m3 = Mass.create(new Vector( 1.0, -2.0), 2.00, 3.00);
+		Mass m1 = Mass.create(new Vector2( 1.0,  1.0), 3.00, 1.00);
+		Mass m2 = Mass.create(new Vector2(-1.0,  0.0), 0.50, 0.02);
+		Mass m3 = Mass.create(new Vector2( 1.0, -2.0), 2.00, 3.00);
 		List<Mass> masses = new ArrayList<Mass>();
 		masses.add(m1);
 		masses.add(m2);
 		masses.add(m3);
 		Mass m = Mass.create(masses);
 		
-		Vector c = m.getCenter();		
+		Vector2 c = m.getCenter();		
 		TestCase.assertEquals( 0.818, c.x, 1.0e-3);
 		TestCase.assertEquals(-0.181, c.y, 1.0e-3);
 		TestCase.assertEquals( 5.500, m.getMass(), 1.0e-3);

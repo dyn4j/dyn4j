@@ -39,14 +39,14 @@ public class TriangleTest {
 	@Test
 	public void contains() {
 		Triangle t = new Triangle(
-			new Vector( 0.0,  0.5),
-			new Vector(-0.5, -0.5),
-			new Vector( 0.5, -0.5)
+			new Vector2( 0.0,  0.5),
+			new Vector2(-0.5, -0.5),
+			new Vector2( 0.5, -0.5)
 		);
 		Transform tx = new Transform();
 		
 		// outside
-		Vector p = new Vector(1.0, 1.0);
+		Vector2 p = new Vector2(1.0, 1.0);
 		TestCase.assertFalse(t.contains(p, tx));
 		
 		// inside

@@ -41,15 +41,15 @@ public class GeometryTest {
 	 */
 	@Test
 	public void getAverageCenter() {
-		Vector[] vertices = new Vector[6];
-		vertices[0] = new Vector(-2.0, 1.0);
-		vertices[1] = new Vector(-1.0, 2.0);
-		vertices[2] = new Vector(1.2, 0.5);
-		vertices[3] = new Vector(1.3, 0.3);
-		vertices[4] = new Vector(1.4, 0.2);
-		vertices[5] = new Vector(0.0, -1.0);
+		Vector2[] vertices = new Vector2[6];
+		vertices[0] = new Vector2(-2.0, 1.0);
+		vertices[1] = new Vector2(-1.0, 2.0);
+		vertices[2] = new Vector2(1.2, 0.5);
+		vertices[3] = new Vector2(1.3, 0.3);
+		vertices[4] = new Vector2(1.4, 0.2);
+		vertices[5] = new Vector2(0.0, -1.0);
 		
-		Vector c = Geometry.getAverageCenter(vertices);
+		Vector2 c = Geometry.getAverageCenter(vertices);
 		
 		TestCase.assertEquals(0.150, c.x, 1.0e-3);
 		TestCase.assertEquals(0.500, c.y, 1.0e-3);
@@ -60,16 +60,16 @@ public class GeometryTest {
 	 */
 	@Test
 	public void getAreaWeightedCenter() {
-		Vector[] vertices = new Vector[6];
-		vertices[0] = new Vector(-2.0, 1.0);
-		vertices[1] = new Vector(-1.0, 2.0);
+		Vector2[] vertices = new Vector2[6];
+		vertices[0] = new Vector2(-2.0, 1.0);
+		vertices[1] = new Vector2(-1.0, 2.0);
 		// test dense area of points
-		vertices[2] = new Vector(1.2, 0.5);
-		vertices[3] = new Vector(1.3, 0.3);
-		vertices[4] = new Vector(1.4, 0.2);
-		vertices[5] = new Vector(0.0, -1.0);
+		vertices[2] = new Vector2(1.2, 0.5);
+		vertices[3] = new Vector2(1.3, 0.3);
+		vertices[4] = new Vector2(1.4, 0.2);
+		vertices[5] = new Vector2(0.0, -1.0);
 		
-		Vector c = Geometry.getAreaWeightedCenter(vertices);
+		Vector2 c = Geometry.getAreaWeightedCenter(vertices);
 		
 		// note the x is closer to the "real" center of the object
 		TestCase.assertEquals(-0.318, c.x, 1.0e-3);
@@ -95,7 +95,7 @@ public class GeometryTest {
 		TestCase.assertEquals( 0.500, p.vertices[0].x, 1.0e-3);
 		TestCase.assertEquals( 0.000, p.vertices[0].y, 1.0e-3);
 		
-		Vector v11 = p.vertices[0];
+		Vector2 v11 = p.vertices[0];
 		
 		p = Geometry.createUnitCirclePolygon(5, 0.5, Math.PI / 2.0);
 		// no exception indicates the generated polygon is valid
@@ -111,7 +111,7 @@ public class GeometryTest {
 		TestCase.assertEquals( 0.000, p.vertices[0].x, 1.0e-3);
 		TestCase.assertEquals( 0.500, p.vertices[0].y, 1.0e-3);
 		
-		Vector v21 = p.vertices[0];
+		Vector2 v21 = p.vertices[0];
 		
 		// the angle between any two vertices of the two polygons should be PI / 2
 		double angle = v11.getAngleBetween(v21);

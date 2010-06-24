@@ -54,7 +54,7 @@ import org.dyn4j.game2d.dynamics.joint.MouseJoint;
 import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Segment;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Container for the tests.
@@ -155,7 +155,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	/** The selected {@link Body} for picking capability */
 	private Body selected = null;
 	/** The old position for picking capability */
-	private Vector vOld = null;
+	private Vector2 vOld = null;
 	
 	/**
 	 * Full constructor.
@@ -566,7 +566,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		}
 		
 		Point loc = this.mouse.getRelativeLocation();
-		Vector pos = this.test.screenToWorld(loc.x, loc.y);
+		Vector2 pos = this.test.screenToWorld(loc.x, loc.y);
 		DecimalFormat df = new DecimalFormat("0.000");
 		// show the current x,y of the mouse
 		AttributedString mouseString = new AttributedString("( " + df.format(pos.x) + ", " + df.format(pos.y) + " )");
@@ -848,11 +848,13 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 				// get the mouse location
 				Point p = this.mouse.getRelativeLocation();
 				// convert to world coordinates
-				Vector v = this.test.screenToWorld(p.x, p.y);
+				Vector2 v = this.test.screenToWorld(p.x, p.y);
 				// try to find the object that we are clicking on
 				int bSize = this.test.world.getBodyCount();
 				for (int i = 0; i < bSize; i++) {
 					Body b = this.test.world.getBody(i);
+					// dont bother trying to attach to static bodies
+					if (b.isStatic()) continue;
 					int cSize = b.getShapeCount();
 					// loop over the shapes in the body
 					for (int j = 0; j < cSize; j++) {
@@ -887,7 +889,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 						}
 					}
 					// check if we found an object
-					if (selected != null) {
+					if (this.mouseJoint != null) {
 						// if we found one then break from the loop
 						break;
 					}
@@ -908,7 +910,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 				// get the move location
 				Point p = this.mouse.getRelativeLocation();
 				// convert to world coordinates
-				Vector v = this.test.screenToWorld(p.x, p.y);
+				Vector2 v = this.test.screenToWorld(p.x, p.y);
 				// try to find the object that we are clicking on
 				int bSize = this.test.world.getBodyCount();
 				for (int i = 0; i < bSize; i++) {
@@ -964,16 +966,16 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 			// get the new location
 			Point newLoc = mouse.getRelativeLocation();
 			// convert it to world coordinates
-			Vector vNew = this.test.screenToWorld(newLoc.x, newLoc.y);
+			Vector2 vNew = this.test.screenToWorld(newLoc.x, newLoc.y);
 			// make sure there is a previous location to compare to
 			if (this.vOld != null) {
 				// see if the z key is held down
 				if (keyboard.isPressed(KeyEvent.VK_Z)) {
 					// then we should rotate the shape
 					// get the angle between the new point and the old point
-					Vector c = this.selected.getWorldCenter();
-					Vector p1 = c.to(this.vOld);
-					Vector p2 = c.to(vNew);
+					Vector2 c = this.selected.getWorldCenter();
+					Vector2 p1 = c.to(this.vOld);
+					Vector2 p2 = c.to(vNew);
 					double theta = p1.getAngleBetween(p2);
 					// check if theta is more than zero
 					if (theta != 0) {
@@ -997,7 +999,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 			// get the new location
 			Point newLoc = mouse.getRelativeLocation();
 			// convert it to world coordinates
-			Vector vNew = this.test.screenToWorld(newLoc.x, newLoc.y);
+			Vector2 vNew = this.test.screenToWorld(newLoc.x, newLoc.y);
 			// set the target point for the mouse joint
 			this.mouseJoint.setTarget(vNew);
 		}

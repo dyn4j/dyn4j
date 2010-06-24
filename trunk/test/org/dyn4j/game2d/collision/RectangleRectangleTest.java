@@ -41,7 +41,7 @@ import org.dyn4j.game2d.collision.narrowphase.Separation;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Shape;
 import org.dyn4j.game2d.geometry.Transform;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -152,7 +152,7 @@ public class RectangleRectangleTest extends AbstractTest {
 		Transform t1 = new Transform();
 		Transform t2 = new Transform();
 		
-		Vector n = null;
+		Vector2 n = null;
 		
 		// test containment
 		TestCase.assertTrue(this.sat.detect(rect1, t1, rect2, t2, p));
@@ -203,7 +203,7 @@ public class RectangleRectangleTest extends AbstractTest {
 		Transform t1 = new Transform();
 		Transform t2 = new Transform();
 		
-		Vector n = null;
+		Vector2 n = null;
 		
 		// test containment
 		TestCase.assertTrue(this.gjk.detect(rect1, t1, rect2, t2, p));
@@ -255,7 +255,7 @@ public class RectangleRectangleTest extends AbstractTest {
 		Transform t1 = new Transform();
 		Transform t2 = new Transform();
 		
-		Vector n, p1, p2;
+		Vector2 n, p1, p2;
 		
 		// test containment
 		TestCase.assertFalse(this.gjk.distance(rect1, t1, rect2, t2, s));
@@ -333,7 +333,7 @@ public class RectangleRectangleTest extends AbstractTest {
 		Transform t2 = new Transform();
 		
 		ManifoldPoint mp1, mp2;
-		Vector p1, p2;
+		Vector2 p1, p2;
 		
 		// test containment gjk
 		this.gjk.detect(rect1, t1, rect2, t2, p);

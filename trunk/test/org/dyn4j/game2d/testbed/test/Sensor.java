@@ -31,7 +31,7 @@ import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Triangle;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Entity;
 import org.dyn4j.game2d.testbed.Test;
@@ -76,7 +76,7 @@ public class Sensor extends Test {
 		this.world.setStepListener(cc);
 		
 		// make gravity far less so that it falls slower
-		this.world.setGravity(new Vector(0.0, -1.0));
+		this.world.setGravity(new Vector2(0.0, -1.0));
 		
 		// setup the test
 		this.setup();
@@ -96,9 +96,9 @@ public class Sensor extends Test {
 		
 		// create a sensor object
 		Triangle triangle = new Triangle(
-				new Vector(0.0, 0.5),
-				new Vector(-0.5,-0.5),
-				new Vector(0.5, -0.5));
+				new Vector2(0.0, 0.5),
+				new Vector2(-0.5,-0.5),
+				new Vector2(0.5, -0.5));
 		
 		// flag that the triangle is a sensor
 		Fixture fixture = new Fixture(triangle);

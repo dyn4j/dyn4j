@@ -40,7 +40,7 @@ public interface Transformable {
 	 * @param theta the angle of rotation in radians
 	 * @param point the point to rotate about
 	 */
-	public abstract void rotate(double theta, Vector point);
+	public abstract void rotate(double theta, Vector2 point);
 	
 	/**
 	 * Rotates the object about the given coordinates.
@@ -61,6 +61,6 @@ public interface Transformable {
 	 * Translates the object along the given vector.
 	 * @param vector the translation along a vector
 	 */
-	public abstract void translate(Vector vector);
+	public abstract void translate(Vector2 vector);
 }
 

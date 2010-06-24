@@ -35,7 +35,7 @@ import org.dyn4j.game2d.geometry.Polygon;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Segment;
 import org.dyn4j.game2d.geometry.Triangle;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Entity;
 import org.dyn4j.game2d.testbed.Test;
@@ -88,11 +88,11 @@ public class Terrain extends Test {
 	@Override
 	protected void setup() {
 		// create the terrain
-		Segment s1 = new Segment(new Vector(6.0, 4.0), new Vector(3.0, 2.0));
-		Segment s2 = new Segment(new Vector(3.0, 2.0), new Vector(0.0, -1.0));
-		Segment s3 = new Segment(new Vector(0.0, -1.0), new Vector(-2.0, 3.0));
-		Segment s4 = new Segment(new Vector(-2.0, 3.0), new Vector(-4.0, 0.0));
-		Segment s5 = new Segment(new Vector(-4.0, 0.0), new Vector(-6.0, 1.0));
+		Segment s1 = new Segment(new Vector2(6.0, 4.0), new Vector2(3.0, 2.0));
+		Segment s2 = new Segment(new Vector2(3.0, 2.0), new Vector2(0.0, -1.0));
+		Segment s3 = new Segment(new Vector2(0.0, -1.0), new Vector2(-2.0, 3.0));
+		Segment s4 = new Segment(new Vector2(-2.0, 3.0), new Vector2(-4.0, 0.0));
+		Segment s5 = new Segment(new Vector2(-4.0, 0.0), new Vector2(-6.0, 1.0));
 		Entity terrain = new Entity();
 		terrain.addFixture(new Fixture(s1));
 		terrain.addFixture(new Fixture(s2));
@@ -105,9 +105,9 @@ public class Terrain extends Test {
 		
 		// create a triangle object
 		Triangle triShape = new Triangle(
-				new Vector(0.0, 0.5), 
-				new Vector(-0.5, -0.5), 
-				new Vector(0.5, -0.5));
+				new Vector2(0.0, 0.5), 
+				new Vector2(-0.5, -0.5), 
+				new Vector2(0.5, -0.5));
 		Entity triangle = new Entity();
 		triangle.addFixture(new Fixture(triShape));
 		triangle.setMassFromShapes();
@@ -123,7 +123,7 @@ public class Terrain extends Test {
 		circle.setMassFromShapes();
 		circle.translate(2.0, 2.0);
 		// test adding some force
-		circle.apply(new Vector(-100.0, 0.0));
+		circle.apply(new Vector2(-100.0, 0.0));
 		// set some linear damping to simulate rolling friction
 		circle.setLinearDamping(0.05);
 		this.world.add(circle);
@@ -138,7 +138,7 @@ public class Terrain extends Test {
 		this.world.add(rectangle);
 		
 		// try a segment (shouldn't work)
-		Segment segShape = new Segment(new Vector(0.5, 0.0), new Vector(-0.5, 0.0));
+		Segment segShape = new Segment(new Vector2(0.5, 0.0), new Vector2(-0.5, 0.0));
 		Entity segment = new Entity();
 		segment.addFixture(new Fixture(segShape));
 		segment.setMassFromShapes();

@@ -78,7 +78,7 @@ public class TransformTest {
 		t.translate(5, 5);
 		t.rotate(Math.toRadians(90));
 		
-		Vector v = t.getTranslation();
+		Vector2 v = t.getTranslation();
 		TestCase.assertEquals(-5.000, v.x, 1.0e-3);
 		TestCase.assertEquals( 5.000, v.y, 1.0e-3);
 		
@@ -126,10 +126,10 @@ public class TransformTest {
 		t.translate(2.0, 1.0);
 		t.rotate(Math.toRadians(25), 1.0, -1.0);
 		
-		Vector v = new Vector(1.0, 0.0);
+		Vector2 v = new Vector2(1.0, 0.0);
 		
 		// test transformation
-		Vector vt = t.getTransformed(v);
+		Vector2 vt = t.getTransformed(v);
 		TestCase.assertEquals(1.967, vt.x, 1.0e-3);
 		TestCase.assertEquals(1.657, vt.y, 1.0e-3);
 		

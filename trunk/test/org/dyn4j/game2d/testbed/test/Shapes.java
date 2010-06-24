@@ -35,7 +35,7 @@ import org.dyn4j.game2d.geometry.Polygon;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Segment;
 import org.dyn4j.game2d.geometry.Triangle;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Entity;
 import org.dyn4j.game2d.testbed.Test;
@@ -95,9 +95,9 @@ public class Shapes extends Test {
 		
 		// create a triangle object
 		Triangle triShape = new Triangle(
-				new Vector(0.0, 0.5), 
-				new Vector(-0.5, -0.5), 
-				new Vector(0.5, -0.5));
+				new Vector2(0.0, 0.5), 
+				new Vector2(-0.5, -0.5), 
+				new Vector2(0.5, -0.5));
 		Entity triangle = new Entity();
 		triangle.addFixture(new Fixture(triShape));
 		triangle.setMassFromShapes();
@@ -113,13 +113,13 @@ public class Shapes extends Test {
 		circle.setMassFromShapes();
 		circle.translate(2.0, 2.0);
 		// test adding some force
-		circle.apply(new Vector(-100.0, 0.0));
+		circle.apply(new Vector2(-100.0, 0.0));
 		// set some linear damping to simulate rolling friction
 		circle.setLinearDamping(0.05);
 		this.world.add(circle);
 		
 		// create a line segment
-		Segment segShape = new Segment(new Vector(0.5, 0.5), new Vector(-0.5, -0.5));
+		Segment segShape = new Segment(new Vector2(0.5, 0.5), new Vector2(-0.5, -0.5));
 		Entity segment1 = new Entity();
 		segment1.addFixture(new Fixture(segShape));
 		segment1.setMassFromShapes();

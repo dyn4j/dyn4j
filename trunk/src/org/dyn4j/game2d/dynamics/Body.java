@@ -37,7 +37,7 @@ import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Shape;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Transformable;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Represents some physical {@link Body}.
@@ -102,13 +102,13 @@ public class Body implements Collidable, Transformable {
 	protected Mass mass;
 	
 	/** The current linear velocity */
-	protected Vector velocity;
+	protected Vector2 velocity;
 
 	/** The current angular velocity */
 	protected double angularVelocity;
 
 	/** The current force */
-	protected Vector force;
+	protected Vector2 force;
 	
 	/** The current torque */
 	protected double torque;
@@ -146,9 +146,9 @@ public class Body implements Collidable, Transformable {
 		this.mass = Mass.UNDEFINED;
 		this.id = UUID.randomUUID().toString();
 		this.transform = new Transform();
-		this.velocity = new Vector();
+		this.velocity = new Vector2();
 		this.angularVelocity = 0.0;
-		this.force = new Vector();
+		this.force = new Vector2();
 		this.torque = 0.0;
 		this.forces = new ArrayList<Force>();
 		this.torques = new ArrayList<Torque>();
@@ -235,7 +235,7 @@ public class Body implements Collidable, Transformable {
 		int size = this.fixtures.size();
 		// check fixtures size
 		if (size > 0) {
-			this.fixtures.remove(fixture);
+			return this.fixtures.remove(fixture);
 		}
 		return false;
 	}
@@ -361,7 +361,7 @@ public class Body implements Collidable, Transformable {
 	 * @param force the force
 	 * @return {@link Body} this body
 	 */
-	public Body apply(Vector force) {
+	public Body apply(Vector2 force) {
 		// check for null
 		if (force == null) throw new NullPointerException("Cannot apply a null force.");
 		// apply the force
@@ -391,7 +391,7 @@ public class Body implements Collidable, Transformable {
 	 * @param point the application point in world coordinates
 	 * @return {@link Body} this body
 	 */
-	public Body apply(Vector force, Vector point) {
+	public Body apply(Vector2 force, Vector2 point) {
 		// check for null
 		if (force == null) throw new NullPointerException("Cannot apply a torque with a null force.");
 		if (point == null) throw new NullPointerException("Cannot apply a torque with a null application point.");
@@ -661,12 +661,18 @@ public class Body implements Collidable, Transformable {
 	
 	/**
 	 * Returns true if the given {@link Body} is connected to this
-	 * {@link Body} and collision detection is <b>NOT</b> allowed between 
-	 * the two {@link Body}s.
+	 * {@link Body} given the collision flag.
+	 * <p>
+	 * If the given collision flag is true, this method will return true
+	 * only if collision is allowed between the two joined {@link Body}s.
+	 * <p>
+	 * If the given collision flage is false, this method will return true
+	 * only if collision is <b>NOT</b> allowed between the two joined {@link Body}s.
 	 * @param body the suspect connected body
+	 * @param collisionAllowed the collision allowed flag
 	 * @return boolean
 	 */
-	public boolean isConnectedNoCollision(Body body) {
+	public boolean isConnected(Body body, boolean collisionAllowed) {
 		// check for a null body
 		if (body == null) return false;
 		int size = this.joints.size();
@@ -680,7 +686,7 @@ public class Body implements Collidable, Transformable {
 				// get the joint
 				Joint joint = je.getJoint();
 				// check if collision is allowed
-				if (!joint.isCollisionAllowed()) {
+				if (joint.isCollisionAllowed() == collisionAllowed) {
 					return true;
 				}
 			}
@@ -701,7 +707,7 @@ public class Body implements Collidable, Transformable {
 	 * @see org.dyn4j.game2d.geometry.Transformable#rotate(double, org.dyn4j.game2d.geometry.Vector)
 	 */
 	@Override
-	public void rotate(double theta, Vector point) {
+	public void rotate(double theta, Vector2 point) {
 		this.transform.rotate(theta, point);
 	}
 
@@ -718,7 +724,7 @@ public class Body implements Collidable, Transformable {
 	 * @param theta the angle of rotation in radians
 	 */
 	public void rotateAboutCenter(double theta) {
-		Vector center = this.getWorldCenter();
+		Vector2 center = this.getWorldCenter();
 		this.rotate(theta, center);
 	}
 
@@ -734,7 +740,7 @@ public class Body implements Collidable, Transformable {
 	 * @see org.dyn4j.game2d.geometry.Transformable#translate(org.dyn4j.game2d.geometry.Vector)
 	 */
 	@Override
-	public void translate(Vector vector) {
+	public void translate(Vector2 vector) {
 		this.transform.translate(vector);
 	}
 	
@@ -808,17 +814,17 @@ public class Body implements Collidable, Transformable {
 	
 	/**
 	 * Returns the center of mass for the body in local coordinates.
-	 * @return {@link Vector} the center of mass in local coordinates
+	 * @return {@link Vector2} the center of mass in local coordinates
 	 */
-	public Vector getLocalCenter() {
+	public Vector2 getLocalCenter() {
 		return this.mass.getCenter();
 	}
 	
 	/**
 	 * Returns the center of mass for the body in world coordinates.
-	 * @return {@link Vector} the center of mass in world coordinates
+	 * @return {@link Vector2} the center of mass in world coordinates
 	 */
-	public Vector getWorldCenter() {
+	public Vector2 getWorldCenter() {
 		return this.transform.getTransformed(this.mass.getCenter());
 	}
 	
@@ -826,9 +832,9 @@ public class Body implements Collidable, Transformable {
 	 * Returns a new point in local coordinates of this body given
 	 * a point in world coordinates.
 	 * @param worldPoint a world space point
-	 * @return {@link Vector} local space point
+	 * @return {@link Vector2} local space point
 	 */
-	public Vector getLocalPoint(Vector worldPoint) {
+	public Vector2 getLocalPoint(Vector2 worldPoint) {
 		return this.transform.getInverseTransformed(worldPoint);
 	}
 	
@@ -836,25 +842,25 @@ public class Body implements Collidable, Transformable {
 	 * Returns a new point in world coordinates given a point in the
 	 * local coordinates of this {@link Body}.
 	 * @param localPoint a point in the local coordinates of this {@link Body}
-	 * @return {@link Vector} world space point
+	 * @return {@link Vector2} world space point
 	 */
-	public Vector getWorldPoint(Vector localPoint) {
+	public Vector2 getWorldPoint(Vector2 localPoint) {
 		return this.transform.getTransformed(localPoint);
 	}
 	
 	/**
-	 * Returns the velocity {@link Vector}.
-	 * @return {@link Vector}
+	 * Returns the velocity {@link Vector2}.
+	 * @return {@link Vector2}
 	 */
-	public Vector getVelocity() {
+	public Vector2 getVelocity() {
 		return velocity;
 	}
 	
 	/**
-	 * Sets the velocity {@link Vector}.
+	 * Sets the velocity {@link Vector2}.
 	 * @param velocity the velocity
 	 */
-	public void setVelocity(Vector velocity) {
+	public void setVelocity(Vector2 velocity) {
 		if (velocity == null) throw new NullPointerException("The velocity vector cannot be null.");
 		this.velocity = velocity;
 	}
@@ -876,11 +882,11 @@ public class Body implements Collidable, Transformable {
 	}
 	
 	/**
-	 * Return the force {@link Vector}.
-	 * @return {@link Vector}
+	 * Return the force {@link Vector2}.
+	 * @return {@link Vector2}
 	 */
-	public Vector getForce() {
-		return force;
+	public Vector2 getForce() {
+		return this.force;
 	}
 
 	/**
@@ -888,7 +894,7 @@ public class Body implements Collidable, Transformable {
 	 * @return double
 	 */
 	public double getTorque() {
-		return torque;
+		return this.torque;
 	}
 	
 	/**
@@ -896,7 +902,7 @@ public class Body implements Collidable, Transformable {
 	 * @return double
 	 */
 	public double getLinearDamping() {
-		return linearDamping;
+		return this.linearDamping;
 	}
 
 	/**
@@ -913,7 +919,7 @@ public class Body implements Collidable, Transformable {
 	 * @return double
 	 */
 	public double getAngularDamping() {
-		return angularDamping;
+		return this.angularDamping;
 	}
 	
 	/**

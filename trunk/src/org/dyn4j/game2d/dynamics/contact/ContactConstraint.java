@@ -31,7 +31,7 @@ import org.dyn4j.game2d.collision.manifold.ManifoldPoint;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.Constraint;
 import org.dyn4j.game2d.dynamics.Fixture;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Represents a {@link Contact} constraint for each {@link Body} pair.  
@@ -51,7 +51,7 @@ public class ContactConstraint extends Constraint {
 	protected Contact[] contacts;
 	
 	/** The penetration normal */
-	protected Vector normal;
+	protected Vector2 normal;
 	
 	/** The coefficient of friction */
 	protected double friction;
@@ -135,9 +135,9 @@ public class ContactConstraint extends Constraint {
 	
 	/**
 	 * Returns the collision normal.
-	 * @return {@link Vector} the collision normal
+	 * @return {@link Vector2} the collision normal
 	 */
-	public Vector getNormal() {
+	public Vector2 getNormal() {
 		return this.normal;
 	}
 	

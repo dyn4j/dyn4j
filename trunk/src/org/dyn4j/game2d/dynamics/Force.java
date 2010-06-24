@@ -24,7 +24,7 @@
  */
 package org.dyn4j.game2d.dynamics;
 
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Represents a force.
@@ -32,13 +32,13 @@ import org.dyn4j.game2d.geometry.Vector;
  */
 public class Force {
 	/** The force to apply */
-	protected Vector force;
+	protected Vector2 force;
 	
 	/**
 	 * Default constructor.
 	 */
 	public Force() {
-		this.force = new Vector();
+		this.force = new Vector2();
 	}
 	
 	/**
@@ -47,14 +47,14 @@ public class Force {
 	 * @param y the y component
 	 */
 	public Force(double x, double y) {
-		this.force = new Vector(x, y);
+		this.force = new Vector2(x, y);
 	}
 	
 	/**
-	 * Creates a new {@link Force} using the given {@link Vector}.
-	 * @param force the force {@link Vector}
+	 * Creates a new {@link Force} using the given {@link Vector2}.
+	 * @param force the force {@link Vector2}
 	 */
-	public Force(Vector force) {
+	public Force(Vector2 force) {
 		if (force == null) throw new NullPointerException("The force vector cannot be null.");
 		this.force = force;
 	}
@@ -78,10 +78,10 @@ public class Force {
 	}
 	
 	/**
-	 * Sets this {@link Force} to the given force {@link Vector}.
-	 * @param force the force {@link Vector}
+	 * Sets this {@link Force} to the given force {@link Vector2}.
+	 * @param force the force {@link Vector2}
 	 */
-	public void set(Vector force) {
+	public void set(Vector2 force) {
 		if (force == null) throw new NullPointerException("Cannot set this force vector to a null vector.");
 		this.force.set(force);
 	}
@@ -115,9 +115,9 @@ public class Force {
 	
 	/**
 	 * Returns the force vector.
-	 * @return {@link Vector}
+	 * @return {@link Vector2}
 	 */
-	public Vector getForce() {
+	public Vector2 getForce() {
 		return this.force;
 	}
 }

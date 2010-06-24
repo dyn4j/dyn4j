@@ -37,9 +37,9 @@ public class Geometry {
 	/**
 	 * Returns the centroid of the given points by performing an average.
 	 * @param points the list of points
-	 * @return {@link Vector} the centroid
+	 * @return {@link Vector2} the centroid
 	 */
-	public static final Vector getAverageCenter(List<Vector> points) {
+	public static final Vector2 getAverageCenter(List<Vector2> points) {
 		// check for null list
 		if (points == null) throw new NullPointerException("The points list cannot be null.");
 		// check for empty list
@@ -51,20 +51,20 @@ public class Geometry {
 		double x = 0;
 		double y = 0;
 		for (int i = 0; i < size; i++) {
-			Vector point = points.get(i);
+			Vector2 point = points.get(i);
 			x += point.x;
 			y += point.y;
 		}
-		return new Vector(x / (double) size, y / (double) size);
+		return new Vector2(x / (double) size, y / (double) size);
 	}
 	
 	/**
 	 * Returns the centroid of the given points by performing an average.
 	 * @see #getAverageCenter(List)
 	 * @param points the array of points
-	 * @return {@link Vector} the centroid
+	 * @return {@link Vector2} the centroid
 	 */
-	public static final Vector getAverageCenter(Vector... points) {
+	public static final Vector2 getAverageCenter(Vector2... points) {
 		// check for null array
 		if (points == null) throw new NullPointerException("The points array cannot be null.");
 		// check for a list of one point
@@ -73,11 +73,11 @@ public class Geometry {
 		double x = 0;
 		double y = 0;
 		for (int i = 0; i < size; i++) {
-			Vector point = points[i];
+			Vector2 point = points[i];
 			x += point.x;
 			y += point.y;
 		}
-		return new Vector(x / (double) size, y / (double) size);
+		return new Vector2(x / (double) size, y / (double) size);
 	}
 	
 	/**
@@ -98,9 +98,9 @@ public class Geometry {
 	 * 1 / (6 * A) * &sum;(p<sub>i</sub> + p<sub>i + 1</sub>) * (x<sub>i</sub> * y<sub>i + 1</sub> - x<sub>i + 1</sub> * y<sub>i</sub>)
 	 * </pre>
 	 * @param points the {@link Polygon} points
-	 * @return {@link Vector} the area weighted centroid
+	 * @return {@link Vector2} the area weighted centroid
 	 */
-	public static final Vector getAreaWeightedCenter(List<Vector> points) {
+	public static final Vector2 getAreaWeightedCenter(List<Vector2> points) {
 		// check for null list
 		if (points == null) throw new NullPointerException("The points list cannot be null.");
 		// check for empty list
@@ -109,13 +109,13 @@ public class Geometry {
 		int size = points.size();
 		if (size == 1) return points.get(0).copy();
 		// otherwise perform the computation
-		Vector center = new Vector();
+		Vector2 center = new Vector2();
 		double area = 0.0;
 		// loop through the vertices
 		for (int i = 0; i < size; i++) {
 			// get two verticies
-			Vector p1 = points.get(i);
-			Vector p2 = i + 1 < size ? points.get(i + 1) : points.get(0);
+			Vector2 p1 = points.get(i);
+			Vector2 p2 = i + 1 < size ? points.get(i + 1) : points.get(0);
 			// perform the cross product (yi * x(i+1) - y(i+1) * xi)
 			double d = p1.cross(p2);
 			// multiply by half
@@ -130,7 +130,7 @@ public class Geometry {
 			center.add(p1.sum(p2).multiply(INV_3).multiply(triangleArea));
 		}
 		// finish the centroid calculation by dividing by the total area
-		center.divide(area);
+		center.multiply(1.0 / area);
 		// return the center
 		return center;
 	}
@@ -139,22 +139,22 @@ public class Geometry {
 	 * Returns the area weighted centroid for the given points.
 	 * @see #getAreaWeightedCenter(List)
 	 * @param points the {@link Polygon} points
-	 * @return {@link Vector} the area weighted centroid
+	 * @return {@link Vector2} the area weighted centroid
 	 */
-	public static final Vector getAreaWeightedCenter(Vector... points) {
+	public static final Vector2 getAreaWeightedCenter(Vector2... points) {
 		// check for null array
 		if (points == null) throw new NullPointerException("The points array cannot be null.");
 		// check for array of one point
 		int size = points.length;
 		if (size == 1) return points[0].copy();
 		// otherwise perform the computation
-		Vector center = new Vector();
+		Vector2 center = new Vector2();
 		double area = 0.0;
 		// loop through the vertices
 		for (int i = 0; i < size; i++) {
 			// get two verticies
-			Vector p1 = points[i];
-			Vector p2 = i + 1 < size ? points[i + 1] : points[0];
+			Vector2 p1 = points[i];
+			Vector2 p2 = i + 1 < size ? points[i + 1] : points[0];
 			// perform the cross product (yi * x(i+1) - y(i+1) * xi)
 			double d = p1.cross(p2);
 			// multiply by half
@@ -169,7 +169,7 @@ public class Geometry {
 			center.add(p1.sum(p2).multiply(INV_3).multiply(triangleArea));
 		}
 		// finish the centroid calculation by dividing by the total area
-		center.divide(area);
+		center.multiply(1.0 / area);
 		// return the center
 		return center;
 	}
@@ -204,10 +204,10 @@ public class Geometry {
 	 * @return {@link Polygon}
 	 */
 	public static final Polygon createUnitCirclePolygon(int count, double radius, double theta) {
-		Vector[] verts = new Vector[count];
+		Vector2[] verts = new Vector2[count];
 		double angle = 2.0 * Math.PI / count;
 		for (int i = count - 1; i >= 0; i--) {
-			verts[i] = new Vector(Math.cos(angle * i + theta) * radius, Math.sin(angle * i + theta) * radius);
+			verts[i] = new Vector2(Math.cos(angle * i + theta) * radius, Math.sin(angle * i + theta) * radius);
 		}
 		return new Polygon(verts);
 	}

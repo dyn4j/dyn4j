@@ -31,7 +31,7 @@ import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Transformable;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Test {@link Collidable} class for junit test cases.
@@ -105,7 +105,7 @@ public class CollidableTest implements Collidable, Transformable {
 	 * @see org.dyn4j.game2d.geometry.Transformable#rotate(double, org.dyn4j.game2d.geometry.Vector)
 	 */
 	@Override
-	public void rotate(double theta, Vector point) {
+	public void rotate(double theta, Vector2 point) {
 		this.transform.rotate(theta, point.x, point.y);
 	}
 	
@@ -129,7 +129,7 @@ public class CollidableTest implements Collidable, Transformable {
 	 * @see org.dyn4j.game2d.geometry.Transformable#translate(org.dyn4j.game2d.geometry.Vector)
 	 */
 	@Override
-	public void translate(Vector vector) {
+	public void translate(Vector2 vector) {
 		this.transform.translate(vector);
 	}
 }

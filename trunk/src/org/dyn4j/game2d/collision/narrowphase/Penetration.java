@@ -26,7 +26,7 @@ package org.dyn4j.game2d.collision.narrowphase;
 
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Shape;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Represents a {@link Penetration} of one {@link Convex} {@link Shape} into another.
@@ -37,7 +37,7 @@ import org.dyn4j.game2d.geometry.Vector;
  */
 public class Penetration {
 	/** The normalized axis of projection */
-	protected Vector normal;
+	protected Vector2 normal;
 	
 	/** The penetration amount on this axis */
 	protected double depth;
@@ -52,7 +52,7 @@ public class Penetration {
 	 * @param normal the penetration normal from {@link Convex}1 to {@link Convex}2
 	 * @param depth the penetration depth
 	 */
-	public Penetration(Vector normal, double depth) {
+	public Penetration(Vector2 normal, double depth) {
 		this.normal = normal;
 		this.depth = depth;
 	}
@@ -79,9 +79,9 @@ public class Penetration {
 	
 	/**
 	 * Returns the penetration normal.
-	 * @return {@link Vector}
+	 * @return {@link Vector2}
 	 */
-	public Vector getNormal() {
+	public Vector2 getNormal() {
 		return this.normal;
 	}
 	
@@ -99,7 +99,7 @@ public class Penetration {
 	 * Must be normalized.
 	 * @param normal the penetration normal
 	 */
-	public void setNormal(Vector normal) {
+	public void setNormal(Vector2 normal) {
 		this.normal = normal;
 	}
 	

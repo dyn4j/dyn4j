@@ -24,7 +24,7 @@
  */
 package org.dyn4j.game2d.dynamics;
 
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Represents a torque; a {@link Force} applied at a point on a {@link Body}.
@@ -32,14 +32,14 @@ import org.dyn4j.game2d.geometry.Vector;
  */
 public class Torque extends Force {
 	/** The point where the {@link Force} is applied in world coordinates */
-	protected Vector point;
+	protected Vector2 point;
 	
 	/**
 	 * Default constructor.
 	 */
 	public Torque() {
 		super();
-		this.point = new Vector();
+		this.point = new Vector2();
 	}
 	
 	/**
@@ -52,7 +52,7 @@ public class Torque extends Force {
 	 */
 	public Torque(double fx, double fy, double px, double py) {
 		super(fx, fy);
-		this.point = new Vector(px, py);
+		this.point = new Vector2(px, py);
 	}
 	
 	/**
@@ -61,7 +61,7 @@ public class Torque extends Force {
 	 * @param force the force
 	 * @param point the world space application point
 	 */
-	public Torque(Vector force, Vector point) {
+	public Torque(Vector2 force, Vector2 point) {
 		super(force);
 		if (point == null) throw new NullPointerException("The torque application point cannot be null.");
 		this.point = point;
@@ -94,7 +94,7 @@ public class Torque extends Force {
 	 * @param force the force vector
 	 * @param point the world space application point
 	 */
-	public void set(Vector force, Vector point) {
+	public void set(Vector2 force, Vector2 point) {
 		if (force == null) throw new NullPointerException("Cannot set this torque's force vector to a null vector.");
 		if (point == null) throw new NullPointerException("Cannot set this torque's application point to a null point.");
 		this.force.set(force);
@@ -134,9 +134,9 @@ public class Torque extends Force {
 	
 	/**
 	 * Returns this {@link Torque}'s application point.
-	 * @return {@link Vector}
+	 * @return {@link Vector2}
 	 */
-	public Vector getPoint() {
+	public Vector2 getPoint() {
 		return point;
 	}
 }

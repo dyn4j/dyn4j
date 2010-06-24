@@ -38,9 +38,9 @@ public class PolygonTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createNotEnoughPoints() {
-		new Polygon(new Vector[] {
-			new Vector(), 
-			new Vector()
+		new Polygon(new Vector2[] {
+			new Vector2(), 
+			new Vector2()
 		});
 	}
 	
@@ -49,10 +49,10 @@ public class PolygonTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createNotCCW() {
-		new Polygon(new Vector[] {
-			new Vector(), 
-			new Vector(2.0, 2.0), 
-			new Vector(1.0, 0.0)
+		new Polygon(new Vector2[] {
+			new Vector2(), 
+			new Vector2(2.0, 2.0), 
+			new Vector2(1.0, 0.0)
 		});
 	}
 	
@@ -61,10 +61,10 @@ public class PolygonTest {
 	 */
 	@Test
 	public void createCCW() {
-		new Polygon(new Vector[] {
-			new Vector(0.5, 0.5),
-			new Vector(-0.3, -0.5),
-			new Vector(1.0, -0.3)
+		new Polygon(new Vector2[] {
+			new Vector2(0.5, 0.5),
+			new Vector2(-0.3, -0.5),
+			new Vector2(1.0, -0.3)
 		});
 	}
 	
@@ -73,11 +73,11 @@ public class PolygonTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createCoincident() {
-		new Polygon(new Vector[] {
-			new Vector(),
-			new Vector(2.0, 2.0),
-			new Vector(2.0, 2.0),
-			new Vector(1.0, 0.0)
+		new Polygon(new Vector2[] {
+			new Vector2(),
+			new Vector2(2.0, 2.0),
+			new Vector2(2.0, 2.0),
+			new Vector2(1.0, 0.0)
 		});
 	}
 	
@@ -86,12 +86,32 @@ public class PolygonTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createNonConvex() {
-		new Polygon(new Vector[] {
-			new Vector(1.0, 1.0),
-			new Vector(-1.0, 1.0),
-			new Vector(-0.5, 0.0),
-			new Vector(-1.0, -1.0),
-			new Vector(1.0, -1.0)
+		new Polygon(new Vector2[] {
+			new Vector2(1.0, 1.0),
+			new Vector2(-1.0, 1.0),
+			new Vector2(-0.5, 0.0),
+			new Vector2(-1.0, -1.0),
+			new Vector2(1.0, -1.0)
+		});
+	}
+	
+	/**
+	 * Tests null point array.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createNullPoints() {
+		new Polygon(null);
+	}
+	
+	/**
+	 * Tests an array with null points
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createNullPoint() {
+		new Polygon(new Vector2[] {
+			new Vector2(),
+			null,
+			new Vector2(0, 2)
 		});
 	}
 	
@@ -100,10 +120,10 @@ public class PolygonTest {
 	 */
 	@Test
 	public void createSuccess() {
-		new Polygon(new Vector[] {
-			new Vector(0.0, 1.0),
-			new Vector(-2.0, -2.0),
-			new Vector(1.0, -2.0)
+		new Polygon(new Vector2[] {
+			new Vector2(0.0, 1.0),
+			new Vector2(-2.0, -2.0),
+			new Vector2(1.0, -2.0)
 		});
 	}
 	
@@ -112,15 +132,15 @@ public class PolygonTest {
 	 */
 	@Test
 	public void contains() {
-		Vector[] vertices = new Vector[] {
-			new Vector(0.0, 1.0),
-			new Vector(-1.0, 0.0),
-			new Vector(1.0, 0.0)
+		Vector2[] vertices = new Vector2[] {
+			new Vector2(0.0, 1.0),
+			new Vector2(-1.0, 0.0),
+			new Vector2(1.0, 0.0)
 		};
 		Polygon p = new Polygon(vertices);
 		
 		Transform t = new Transform();
-		Vector pt = new Vector(2.0, 4.0);
+		Vector2 pt = new Vector2(2.0, 4.0);
 		
 		// shouldn't be in the polygon
 		TestCase.assertTrue(!p.contains(pt, t));
@@ -142,15 +162,15 @@ public class PolygonTest {
 	 */
 	@Test
 	public void project() {
-		Vector[] vertices = new Vector[] {
-				new Vector(0.0, 1.0),
-				new Vector(-1.0, 0.0),
-				new Vector(1.0, 0.0)
+		Vector2[] vertices = new Vector2[] {
+				new Vector2(0.0, 1.0),
+				new Vector2(-1.0, 0.0),
+				new Vector2(1.0, 0.0)
 			};
 		Polygon p = new Polygon(vertices);
 		Transform t = new Transform();
-		Vector x = new Vector(1.0, 0.0);
-		Vector y = new Vector(0.0, 1.0);
+		Vector2 x = new Vector2(1.0, 0.0);
+		Vector2 y = new Vector2(0.0, 1.0);
 		
 		t.translate(1.0, 0.5);
 		
@@ -173,14 +193,14 @@ public class PolygonTest {
 	 */
 	@Test
 	public void getFarthest() {
-		Vector[] vertices = new Vector[] {
-				new Vector(0.0, 1.0),
-				new Vector(-1.0, -1.0),
-				new Vector(1.0, -1.0)
+		Vector2[] vertices = new Vector2[] {
+				new Vector2(0.0, 1.0),
+				new Vector2(-1.0, -1.0),
+				new Vector2(1.0, -1.0)
 			};
 		Polygon p = new Polygon(vertices);
 		Transform t = new Transform();
-		Vector y = new Vector(0.0, -1.0);
+		Vector2 y = new Vector2(0.0, -1.0);
 		
 		Edge f = p.getFarthestFeature(y, t);
 		// should always get an edge
@@ -192,7 +212,7 @@ public class PolygonTest {
 		TestCase.assertEquals( 1.000, f.vertex2.point.x, 1.0e-3);
 		TestCase.assertEquals(-1.000, f.vertex2.point.y, 1.0e-3);
 		
-		Vector pt = p.getFarthestPoint(y, t);
+		Vector2 pt = p.getFarthestPoint(y, t);
 		
 		TestCase.assertEquals(-1.000, pt.x, 1.0e-3);
 		TestCase.assertEquals(-1.000, pt.y, 1.0e-3);
@@ -211,27 +231,27 @@ public class PolygonTest {
 	 */
 	@Test
 	public void getAxes() {
-		Vector[] vertices = new Vector[] {
-				new Vector(0.0, 1.0),
-				new Vector(-1.0, -1.0),
-				new Vector(1.0, -1.0)
+		Vector2[] vertices = new Vector2[] {
+				new Vector2(0.0, 1.0),
+				new Vector2(-1.0, -1.0),
+				new Vector2(1.0, -1.0)
 			};
 		Polygon p = new Polygon(vertices);
 		Transform t = new Transform();
 		
-		Vector[] axes = p.getAxes(null, t);
+		Vector2[] axes = p.getAxes(null, t);
 		TestCase.assertNotNull(axes);
 		TestCase.assertEquals(3, axes.length);
 		
 		// test passing some focal points
-		Vector pt = new Vector(-3.0, 2.0);
-		axes = p.getAxes(new Vector[] {pt}, t);
+		Vector2 pt = new Vector2(-3.0, 2.0);
+		axes = p.getAxes(new Vector2[] {pt}, t);
 		TestCase.assertEquals(4, axes.length);
 		
 		// make sure the axes are perpendicular to the edges
-		Vector ab = p.vertices[0].to(p.vertices[1]);
-		Vector bc = p.vertices[1].to(p.vertices[2]);
-		Vector ca = p.vertices[2].to(p.vertices[0]);
+		Vector2 ab = p.vertices[0].to(p.vertices[1]);
+		Vector2 bc = p.vertices[1].to(p.vertices[2]);
+		Vector2 ca = p.vertices[2].to(p.vertices[0]);
 		
 		TestCase.assertEquals(0.000, ab.dot(axes[0]), 1.0e-3);
 		TestCase.assertEquals(0.000, bc.dot(axes[1]), 1.0e-3);
@@ -246,15 +266,15 @@ public class PolygonTest {
 	 */
 	@Test
 	public void getFoci() {
-		Vector[] vertices = new Vector[] {
-				new Vector(0.0, 1.0),
-				new Vector(-1.0, -1.0),
-				new Vector(1.0, -1.0)
+		Vector2[] vertices = new Vector2[] {
+				new Vector2(0.0, 1.0),
+				new Vector2(-1.0, -1.0),
+				new Vector2(1.0, -1.0)
 			};
 		Polygon p = new Polygon(vertices);
 		Transform t = new Transform();
 		// should return none
-		Vector[] foci = p.getFoci(t);
+		Vector2[] foci = p.getFoci(t);
 		TestCase.assertNull(foci);
 	}
 	
@@ -263,10 +283,10 @@ public class PolygonTest {
 	 */
 	@Test
 	public void rotate() {
-		Vector[] vertices = new Vector[] {
-				new Vector(0.0, 1.0),
-				new Vector(-1.0, -1.0),
-				new Vector(1.0, -1.0)
+		Vector2[] vertices = new Vector2[] {
+				new Vector2(0.0, 1.0),
+				new Vector2(-1.0, -1.0),
+				new Vector2(1.0, -1.0)
 			};
 		Polygon p = new Polygon(vertices);
 		
@@ -288,10 +308,10 @@ public class PolygonTest {
 	 */
 	@Test
 	public void translate() {
-		Vector[] vertices = new Vector[] {
-				new Vector(0.0, 1.0),
-				new Vector(-1.0, -1.0),
-				new Vector(1.0, -1.0)
+		Vector2[] vertices = new Vector2[] {
+				new Vector2(0.0, 1.0),
+				new Vector2(-1.0, -1.0),
+				new Vector2(1.0, -1.0)
 			};
 		Polygon p = new Polygon(vertices);
 		

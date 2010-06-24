@@ -32,7 +32,7 @@ import org.dyn4j.game2d.dynamics.Step;
 import org.dyn4j.game2d.geometry.Interval;
 import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Transform;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Represents an impulse based rigid {@link Body} physics collision resolver.
@@ -217,24 +217,28 @@ public class ContactConstraintSolver {
 			double invI2 = m2.getInverseInertia();
 			
 			// get the transformed centers of mass
-			Vector c1 = t1.getTransformed(m1.getCenter());
-			Vector c2 = t2.getTransformed(m2.getCenter());
+			Vector2 c1 = t1.getTransformed(m1.getCenter());
+			Vector2 c2 = t2.getTransformed(m2.getCenter());
 			
 			// get the contacts
 			Contact[] contacts = contactConstraint.contacts;
 			int cSize = contacts.length;
 			
 			// get the penetration axis
-			Vector N = contactConstraint.normal;
+			Vector2 N = contactConstraint.normal;
 			// get the tangent vector
-			Vector T = N.cross(1.0);
+			Vector2 T = N.cross(1.0);
 			
 			// loop through the contact points
 			for (int j = 0; j < cSize; j++) {
 				Contact contact = contacts[j];
+				
+				// is the contact enabled?
+				if (!contact.isEnabled()) continue;
+				
 				// get ra and rb
-				Vector r1 = c1.to(contact.p);
-				Vector r2 = c2.to(contact.p);
+				Vector2 r1 = c1.to(contact.p);
+				Vector2 r2 = c2.to(contact.p);
 				contact.r1 = r1;
 				contact.r2 = r2;
 				
@@ -259,9 +263,9 @@ public class ContactConstraintSolver {
 				contact.vb = 0.0;
 				
 				// find the relative velocity
-				Vector lv1 = r1.cross(b1.getAngularVelocity()).add(b1.getVelocity());
-				Vector lv2 = r2.cross(b2.getAngularVelocity()).add(b2.getVelocity());
-				Vector rv = lv1.subtract(lv2);
+				Vector2 lv1 = r1.cross(b1.getAngularVelocity()).add(b1.getVelocity());
+				Vector2 lv2 = r2.cross(b2.getAngularVelocity()).add(b2.getVelocity());
+				Vector2 rv = lv1.subtract(lv2);
 				
 				// project the relative velocity onto the penetration normal
 				double rvn = N.dot(rv);
@@ -299,18 +303,22 @@ public class ContactConstraintSolver {
 			double invI2 = m2.getInverseInertia();
 			
 			// get the penetration axis
-			Vector N = cc.normal;
+			Vector2 N = cc.normal;
 			// get the tangent vector
-			Vector T = N.cross(1.0);
+			Vector2 T = N.cross(1.0);
 			
 			for (int j = 0; j < cc.getContacts().length; j++) {
 				Contact contact = cc.getContacts()[j];
+				
+				// is the contact enabled?
+				if (!contact.isEnabled()) continue;
+				
 				// scale the accumulated impulses by the delta time ratio
 				contact.jn *= ratio;
 				contact.jt *= ratio;
 				
 				// apply accumulated impulses to warm start the solver
-				Vector J = N.product(contact.jn);
+				Vector2 J = N.product(contact.jn);
 				J.add(T.product(contact.jt));
 				b1.getVelocity().add(J.product(invM1));
 				b1.setAngularVelocity(b1.getAngularVelocity() + invI1 * contact.r1.cross(J));
@@ -345,20 +353,24 @@ public class ContactConstraintSolver {
 			int cSize = contacts.length;
 			
 			// get the penetration axis and tangent
-			Vector N = contactConstraint.normal;
-			Vector T = N.cross(1.0);
+			Vector2 N = contactConstraint.normal;
+			Vector2 T = N.cross(1.0);
 
 			// loop through the contact points
 			for (int k = 0; k < cSize; k++) {
 				Contact contact = contacts[k];
+				
+				// is the contact enabled?
+				if (!contact.isEnabled()) continue;
+				
 				// get ra and rb
-				Vector r1 = contact.r1;
-				Vector r2 = contact.r2;
+				Vector2 r1 = contact.r1;
+				Vector2 r2 = contact.r2;
 				
 				// get the relative velocity
-				Vector lv1 = r1.cross(b1.getAngularVelocity()).add(b1.getVelocity());
-				Vector lv2 = r2.cross(b2.getAngularVelocity()).add(b2.getVelocity());
-				Vector rv = lv1.subtract(lv2);
+				Vector2 lv1 = r1.cross(b1.getAngularVelocity()).add(b1.getVelocity());
+				Vector2 lv2 = r2.cross(b2.getAngularVelocity()).add(b2.getVelocity());
+				Vector2 rv = lv1.subtract(lv2);
 				
 				// project the relative velocity onto the penetration normal
 				double rvn = N.dot(rv);
@@ -372,7 +384,7 @@ public class ContactConstraintSolver {
 				j = contact.jn - j0;
 				
 				// only update the bodies after processing all the contacts
-				Vector J = N.product(j);
+				Vector2 J = N.product(j);
 				b1.getVelocity().add(J.product(invM1));
 				b1.setAngularVelocity(b1.getAngularVelocity() + invI1 * r1.cross(J));
 				b2.getVelocity().subtract(J.product(invM2));
@@ -384,14 +396,18 @@ public class ContactConstraintSolver {
 			// the contacts twice
 			for (int k = 0; k < cSize; k++) {
 				Contact contact = contacts[k];
+				
+				// is the contact enabled?
+				if (!contact.isEnabled()) continue;
+				
 				// get ra and rb
-				Vector r1 = contact.r1;
-				Vector r2 = contact.r2;
+				Vector2 r1 = contact.r1;
+				Vector2 r2 = contact.r2;
 				
 				// get the relative velocity
-				Vector lv1 = r1.cross(b1.getAngularVelocity()).add(b1.getVelocity());
-				Vector lv2 = r2.cross(b2.getAngularVelocity()).add(b2.getVelocity());
-				Vector rv = lv1.subtract(lv2);
+				Vector2 lv1 = r1.cross(b1.getAngularVelocity()).add(b1.getVelocity());
+				Vector2 lv2 = r2.cross(b2.getAngularVelocity()).add(b2.getVelocity());
+				Vector2 rv = lv1.subtract(lv2);
 				
 				// project the relative velocity onto the tangent normal
 				double rvt = T.dot(rv);
@@ -406,7 +422,7 @@ public class ContactConstraintSolver {
 				jt = contact.jt - Jt0;
 				
 				// apply to the bodies immediately
-				Vector J = T.product(jt);
+				Vector2 J = T.product(jt);
 				b1.getVelocity().add(J.product(invM1));
 				b1.setAngularVelocity(b1.getAngularVelocity() + invI1 * r1.cross(J));
 				b2.getVelocity().subtract(J.product(invM2));
@@ -452,7 +468,7 @@ public class ContactConstraintSolver {
 			int cSize = contacts.length;
 			
 			// get the penetration axis
-			Vector N = contactConstraint.normal;
+			Vector2 N = contactConstraint.normal;
 			
 			// could be 1 or 0 if one object has infinite mass
 			double invMass1 = mass1 * m1.getInverseMass();
@@ -464,20 +480,24 @@ public class ContactConstraintSolver {
 			// solve normal constraints
 			for (int k = 0; k < cSize; k++) {
 				Contact contact = contacts[k];
+				
+				// is the contact enabled?
+				if (!contact.isEnabled()) continue;
+				
 				// get the world centers of mass
-				Vector c1 = t1.getTransformed(m1.getCenter());
-				Vector c2 = t2.getTransformed(m2.getCenter());
+				Vector2 c1 = t1.getTransformed(m1.getCenter());
+				Vector2 c2 = t2.getTransformed(m2.getCenter());
 
 				// get r1 and r2
-				Vector r1 = contact.p1.difference(m1.getCenter());
+				Vector2 r1 = contact.p1.difference(m1.getCenter());
 				t1.transformR(r1);
-				Vector r2 = contact.p2.difference(m2.getCenter());
+				Vector2 r2 = contact.p2.difference(m2.getCenter());
 				t2.transformR(r2);
 				
 				// get the world contact points
-				Vector p1 = c1.sum(r1);
-				Vector p2 = c2.sum(r2);
-				Vector dp = p1.subtract(p2);
+				Vector2 p1 = c1.sum(r1);
+				Vector2 p2 = c2.sum(r2);
+				Vector2 dp = p1.subtract(p2);
 
 				// estimate the current penetration
 				double penetration = dp.dot(N) - contact.depth;
@@ -496,7 +516,7 @@ public class ContactConstraintSolver {
 				contact.jp = Math.max(jp0 + jp, 0.0);
 				jp = contact.jp - jp0;
 
-				Vector J = N.product(jp);
+				Vector2 J = N.product(jp);
 
 				// translate and rotate the objects
 				b1.translate(J.product(invMass1));

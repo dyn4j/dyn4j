@@ -79,21 +79,21 @@ public class RectangleTest {
 	public void getAxes() {
 		Rectangle r = new Rectangle(1.0, 1.0);
 		Transform t = new Transform();
-		Vector[] axes = r.getAxes(null, t);
+		Vector2[] axes = r.getAxes(null, t);
 		
 		// make sure there is only two
 		TestCase.assertEquals(2, axes.length);
 		
 		// make sure the axes are perpendicular to the edges
-		Vector ab = r.vertices[0].to(r.vertices[1]);
-		Vector ad = r.vertices[0].to(r.vertices[3]);
+		Vector2 ab = r.vertices[0].to(r.vertices[1]);
+		Vector2 ad = r.vertices[0].to(r.vertices[3]);
 		
 		TestCase.assertEquals(0.000, ab.dot(axes[1]), 1.0e-3);
 		TestCase.assertEquals(0.000, ad.dot(axes[0]), 1.0e-3);
 		
 		// test a focal point
-		Vector pt = new Vector(2.0, -1.0);
-		axes = r.getAxes(new Vector[] {pt}, t);
+		Vector2 pt = new Vector2(2.0, -1.0);
+		axes = r.getAxes(new Vector2[] {pt}, t);
 		
 		// make sure there are 4 more axes
 		TestCase.assertEquals(3, axes.length);
@@ -109,7 +109,7 @@ public class RectangleTest {
 		Rectangle r = new Rectangle(1.0, 2.0);
 		Transform t = new Transform();
 		
-		Vector pt = new Vector(2.0, 0.5);
+		Vector2 pt = new Vector2(2.0, 0.5);
 		
 		TestCase.assertTrue(!r.contains(pt, t));
 		
@@ -134,7 +134,7 @@ public class RectangleTest {
 		Rectangle r = new Rectangle(2.0, 1.0);
 		Transform t = new Transform();
 		
-		Vector axis = new Vector(1.0, 0.0);
+		Vector2 axis = new Vector2(1.0, 0.0);
 		
 		Interval i = r.project(axis, t);
 		

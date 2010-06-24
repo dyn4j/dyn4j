@@ -29,7 +29,7 @@ import org.dyn4j.game2d.geometry.Interval;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Transformable;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Represents a {@link Bounds} object that is rectangular.
@@ -44,10 +44,10 @@ import org.dyn4j.game2d.geometry.Vector;
  */
 public class RectangularBounds extends AbstractBounds implements Bounds, Transformable {
 	/** The x-axis */
-	protected static final Vector X_AXIS = new Vector(1.0, 0.0);
+	protected static final Vector2 X_AXIS = new Vector2(1.0, 0.0);
 	
 	/** The y-axis */
-	protected static final Vector Y_AXIS = new Vector(0.0, 1.0);
+	protected static final Vector2 Y_AXIS = new Vector2(0.0, 1.0);
 	
 	/** The bounding rectangle */
 	protected Rectangle bounds;

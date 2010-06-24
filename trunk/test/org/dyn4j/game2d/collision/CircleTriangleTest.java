@@ -42,7 +42,7 @@ import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Shape;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Triangle;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -64,9 +64,9 @@ public class CircleTriangleTest extends AbstractTest {
 	public void setup() {
 		this.circ = new Circle(1.0);
 		this.tri = new Triangle(
-				new Vector(0.5, 0.5),
-				new Vector(-0.3, -0.5),
-				new Vector(1.0, -0.3));
+				new Vector2(0.5, 0.5),
+				new Vector2(-0.3, -0.5),
+				new Vector2(1.0, -0.3));
 	}
 	
 	/**
@@ -170,7 +170,7 @@ public class CircleTriangleTest extends AbstractTest {
 		Transform t1 = new Transform();
 		Transform t2 = new Transform();
 		
-		Vector n = null;
+		Vector2 n = null;
 		
 		// test containment
 		TestCase.assertTrue(this.sat.detect(circ, t1, tri, t2, p));
@@ -229,7 +229,7 @@ public class CircleTriangleTest extends AbstractTest {
 		Transform t1 = new Transform();
 		Transform t2 = new Transform();
 		
-		Vector n = null;
+		Vector2 n = null;
 		
 		// test containment
 		TestCase.assertTrue(this.gjk.detect(circ, t1, tri, t2, p));
@@ -289,7 +289,7 @@ public class CircleTriangleTest extends AbstractTest {
 		Transform t1 = new Transform();
 		Transform t2 = new Transform();
 		
-		Vector n, p1, p2;
+		Vector2 n, p1, p2;
 		
 		// test containment
 		TestCase.assertFalse(this.gjk.distance(circ, t1, tri, t2, s));
@@ -367,7 +367,7 @@ public class CircleTriangleTest extends AbstractTest {
 		Transform t2 = new Transform();
 		
 		ManifoldPoint mp = null;
-		Vector p1 = null;
+		Vector2 p1 = null;
 		
 		// test containment gjk
 		this.gjk.detect(circ, t1, tri, t2, p);
