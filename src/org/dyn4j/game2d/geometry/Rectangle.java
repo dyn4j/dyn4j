@@ -51,18 +51,18 @@ public class Rectangle extends Polygon implements Shape, Transformable {
 		if (width <= 0.0) throw new IllegalArgumentException("A rectangle must have a positive non-zero width.");
 		if (height <= 0.0) throw new IllegalArgumentException("A rectangle must have a positive non-zero height.");
 		// set the vertices
-		this.vertices = new Vector[] {
-			new Vector(-width / 2.0, -height / 2.0),
-			new Vector( width / 2.0, -height / 2.0),
-			new Vector( width / 2.0,  height / 2.0),
-			new Vector(-width / 2.0,  height / 2.0)	
+		this.vertices = new Vector2[] {
+			new Vector2(-width / 2.0, -height / 2.0),
+			new Vector2( width / 2.0, -height / 2.0),
+			new Vector2( width / 2.0,  height / 2.0),
+			new Vector2(-width / 2.0,  height / 2.0)	
 		};
 		// set the normals
-		this.normals = new Vector[4];
-		this.normals[0] = new Vector(0.0, -1.0);
-		this.normals[1] = new Vector(1.0, 0.0);
-		this.normals[2] = new Vector(0.0, 1.0);
-		this.normals[3] = new Vector(-1.0, 0.0);
+		this.normals = new Vector2[4];
+		this.normals[0] = new Vector2(0.0, -1.0);
+		this.normals[1] = new Vector2(1.0, 0.0);
+		this.normals[2] = new Vector2(0.0, 1.0);
+		this.normals[3] = new Vector2(-1.0, 0.0);
 		// use the average method for the centroid
 		this.center = Geometry.getAverageCenter(this.vertices);
 		// set the width and height
@@ -109,11 +109,11 @@ public class Rectangle extends Polygon implements Shape, Transformable {
 	 * @see org.dyn4j.game2d.geometry.Polygon#getAxes(java.util.List, org.dyn4j.game2d.geometry.Transform)
 	 */
 	@Override
-	public Vector[] getAxes(Vector[] foci, Transform transform) {
+	public Vector2[] getAxes(Vector2[] foci, Transform transform) {
 		// get the number of foci
 		int fociSize = foci != null ? foci.length : 0;
 		// create an array to hold the axes
-		Vector[] axes = new Vector[2 + fociSize];
+		Vector2[] axes = new Vector2[2 + fociSize];
 		int n = 0;
 		// return the normals to the surfaces, since this is a 
 		// rectangle we only have two axes to test against
@@ -122,14 +122,14 @@ public class Rectangle extends Polygon implements Shape, Transformable {
 		// get the closest point to each focus
 		for (int i = 0; i < fociSize; i++) {
 			// get the current focus
-			Vector f = foci[i];
+			Vector2 f = foci[i];
 			// create a place for the closest point
-			Vector closest = null;
+			Vector2 closest = null;
 			double d = Double.MAX_VALUE;
 			// find the minimum distance vertex
 			for (int j = 0; j < 4; j++) {
 				// get the vertex
-				Vector p = this.vertices[j];
+				Vector2 p = this.vertices[j];
 				// transform it into world space
 				p = transform.getTransformed(p);
 				// get the squared distance to the focus
@@ -153,22 +153,22 @@ public class Rectangle extends Polygon implements Shape, Transformable {
 	 * @see org.dyn4j.game2d.geometry.Polygon#contains(org.dyn4j.game2d.geometry.Vector, org.dyn4j.game2d.geometry.Transform)
 	 */
 	@Override
-	public boolean contains(Vector point, Transform transform) {
+	public boolean contains(Vector2 point, Transform transform) {
 		// put the point in local coordinates
-		Vector p = transform.getInverseTransformed(point);
+		Vector2 p = transform.getInverseTransformed(point);
 		// get the center and vertices
-		Vector c = this.center;
-		Vector p1 = this.vertices[0];
-		Vector p2 = this.vertices[1];
-		Vector p4 = this.vertices[3];
+		Vector2 c = this.center;
+		Vector2 p1 = this.vertices[0];
+		Vector2 p2 = this.vertices[1];
+		Vector2 p4 = this.vertices[3];
 		// get the width and height squared
 		double widthSquared = p1.distanceSquared(p2);
 		double heightSquared = p1.distanceSquared(p4);
 		// i could call the polygon one instead of this method, but im not sure which is faster
-		Vector projectAxis0 = p1.to(p2);
-		Vector projectAxis1 = p1.to(p4);
+		Vector2 projectAxis0 = p1.to(p2);
+		Vector2 projectAxis1 = p1.to(p4);
 		// create a vector from the centroid to the point
-		Vector toPoint = c.to(p);
+		Vector2 toPoint = c.to(p);
 		// find the projection of this vector onto the vector from the
 		// centroid to the edge
 		if (toPoint.project(projectAxis0).getMagnitudeSquared() <= (widthSquared / 4.0)) {
@@ -190,12 +190,12 @@ public class Rectangle extends Polygon implements Shape, Transformable {
 	 * @see org.dyn4j.game2d.geometry.Polygon#project(org.dyn4j.game2d.geometry.Vector, org.dyn4j.game2d.geometry.Transform)
 	 */
 	@Override
-	public Interval project(Vector axis, Transform transform) {
+	public Interval project(Vector2 axis, Transform transform) {
 		// get the center and vertices
-		Vector center = transform.getTransformed(this.center);
+		Vector2 center = transform.getTransformed(this.center);
 		// create the project axes
-		Vector projectAxis0 = transform.getTransformedR(this.normals[1]);
-		Vector projectAxis1 = transform.getTransformedR(this.normals[2]);
+		Vector2 projectAxis0 = transform.getTransformedR(this.normals[1]);
+		Vector2 projectAxis1 = transform.getTransformedR(this.normals[2]);
 		// project the shape on the axis
 		double c = center.dot(axis);
 		double e = (this.width * 0.5) * Math.abs(projectAxis0.dot(axis)) + (this.height * 0.5) * Math.abs(projectAxis1.dot(axis));

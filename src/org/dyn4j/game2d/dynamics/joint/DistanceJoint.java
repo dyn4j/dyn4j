@@ -30,7 +30,7 @@ import org.dyn4j.game2d.dynamics.Step;
 import org.dyn4j.game2d.geometry.Interval;
 import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Transform;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Represents a fixed length distance joint.
@@ -47,10 +47,10 @@ public class DistanceJoint extends Joint {
 	public static final Joint.Type TYPE = new Joint.Type("Distance");
 	
 	/** The local anchor point on the first {@link Body} */
-	protected Vector localAnchor1;
+	protected Vector2 localAnchor1;
 	
 	/** The local anchor point on the second {@link Body} */
-	protected Vector localAnchor2;
+	protected Vector2 localAnchor2;
 	
 	/** The oscillation frequency in hz */
 	protected double frequency;
@@ -65,7 +65,7 @@ public class DistanceJoint extends Joint {
 	protected double invK;
 	
 	/** The normal */
-	protected Vector n;
+	protected Vector2 n;
 	
 	/** The bias for adding work to the constraint (simulating a spring) */
 	protected double bias;
@@ -87,7 +87,7 @@ public class DistanceJoint extends Joint {
 	 * @param anchor1 in world coordinates
 	 * @param anchor2 in world coordinates
 	 */
-	public DistanceJoint(Body b1, Body b2, Vector anchor1, Vector anchor2) {
+	public DistanceJoint(Body b1, Body b2, Vector2 anchor1, Vector2 anchor2) {
 		this(b1, b2, false, anchor1, anchor2);
 	}
 	
@@ -104,7 +104,7 @@ public class DistanceJoint extends Joint {
 	 * @param frequency the spring frequency in hz; must be greater than zero
 	 * @param dampingRatio the damping ratio; in the range [0, 1]
 	 */
-	public DistanceJoint(Body b1, Body b2, Vector anchor1, Vector anchor2, double frequency, double dampingRatio) {
+	public DistanceJoint(Body b1, Body b2, Vector2 anchor1, Vector2 anchor2, double frequency, double dampingRatio) {
 		this(b1, b2, false, anchor1, anchor2, frequency, dampingRatio);
 	}
 	
@@ -118,7 +118,7 @@ public class DistanceJoint extends Joint {
 	 * @param anchor1 in world coordinates
 	 * @param anchor2 in world coordinates
 	 */
-	public DistanceJoint(Body b1, Body b2, boolean collisionAllowed, Vector anchor1, Vector anchor2) {
+	public DistanceJoint(Body b1, Body b2, boolean collisionAllowed, Vector2 anchor1, Vector2 anchor2) {
 		super(b1, b2, collisionAllowed);
 		if (anchor1 == null || anchor2 == null) throw new NullPointerException("Neither anchor point can be null.");
 		this.localAnchor1 = b1.getLocalPoint(anchor1);
@@ -140,7 +140,7 @@ public class DistanceJoint extends Joint {
 	 * @param frequency the spring frequency in hz; must be greater than zero
 	 * @param dampingRatio the damping ratio; in the range [0, 1]
 	 */
-	public DistanceJoint(Body b1, Body b2, boolean collisionAllowed, Vector anchor1, Vector anchor2, double frequency, double dampingRatio) {
+	public DistanceJoint(Body b1, Body b2, boolean collisionAllowed, Vector2 anchor1, Vector2 anchor2, double frequency, double dampingRatio) {
 		super(b1, b2, collisionAllowed);
 		// verify the anchor points
 		if (anchor1 == null || anchor2 == null) throw new NullPointerException("Neither anchor point can be null.");
@@ -167,10 +167,6 @@ public class DistanceJoint extends Joint {
 		.append(this.frequency).append("|")
 		.append(this.dampingRatio).append("|")
 		.append(this.distance).append("|")
-		.append(this.invK).append("|")
-		.append(this.n).append("|")
-		.append(this.bias).append("|")
-		.append(this.gamma).append("|")
 		.append(this.impulse).append("]");
 		return sb.toString();
 	}
@@ -195,8 +191,8 @@ public class DistanceJoint extends Joint {
 		double invI2 = m2.getInverseInertia();
 		
 		// compute the normal
-		Vector r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
-		Vector r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
+		Vector2 r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
+		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
 		this.n = r1.sum(this.body1.getWorldCenter()).subtract(r2.sum(this.body2.getWorldCenter()));
 		
 		// get the current length
@@ -206,7 +202,7 @@ public class DistanceJoint extends Joint {
 			this.n.zero();
 		} else {
 			// normalize it
-			this.n.divide(length);
+			this.n.multiply(1.0 / length);
 		}
 		
 		// compute K inverse
@@ -245,7 +241,7 @@ public class DistanceJoint extends Joint {
 		
 		// warm start
 		impulse *= step.getDeltaTimeRatio();
-		Vector J = n.product(impulse);
+		Vector2 J = n.product(impulse);
 		body1.getVelocity().add(J.product(invM1));
 		body1.setAngularVelocity(body1.getAngularVelocity() + invI1 * r1.cross(J));
 		body2.getVelocity().subtract(J.product(invM2));
@@ -268,12 +264,12 @@ public class DistanceJoint extends Joint {
 		double invI2 = m2.getInverseInertia();
 		
 		// compute r1 and r2
-		Vector r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
-		Vector r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
+		Vector2 r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
+		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
 		
 		// compute the relative velocity
-		Vector v1 = body1.getVelocity().sum(r1.cross(body1.getAngularVelocity()));
-		Vector v2 = body2.getVelocity().sum(r2.cross(body2.getAngularVelocity()));
+		Vector2 v1 = body1.getVelocity().sum(r1.cross(body1.getAngularVelocity()));
+		Vector2 v2 = body2.getVelocity().sum(r2.cross(body2.getAngularVelocity()));
 		
 		// compute Jv
 		double Jv = n.dot(v1.difference(v2));
@@ -283,7 +279,7 @@ public class DistanceJoint extends Joint {
 		this.impulse += j;
 		
 		// apply the impulse
-		Vector J = n.product(j);
+		Vector2 J = n.product(j);
 		body1.getVelocity().add(J.product(invM1));
 		body1.setAngularVelocity(body1.getAngularVelocity() + invI1 * r1.cross(J));
 		body2.getVelocity().subtract(J.product(invM2));
@@ -316,12 +312,12 @@ public class DistanceJoint extends Joint {
 		double invI1 = m1.getInverseInertia();
 		double invI2 = m2.getInverseInertia();
 		
-		Vector c1 = body1.getWorldCenter();
-		Vector c2 = body2.getWorldCenter();
+		Vector2 c1 = body1.getWorldCenter();
+		Vector2 c2 = body2.getWorldCenter();
 		
 		// recompute n since it may have changed after integration
-		Vector r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
-		Vector r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
+		Vector2 r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
+		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
 		n = r1.sum(body1.getWorldCenter()).subtract(r2.sum(body2.getWorldCenter()));
 		
 		// solve the position constraint
@@ -331,7 +327,7 @@ public class DistanceJoint extends Joint {
 		
 		double impulse = -this.invK * C;
 		
-		Vector J = n.product(impulse);
+		Vector2 J = n.product(impulse);
 		
 		// translate and rotate the objects
 		body1.translate(J.product(invM1));
@@ -354,14 +350,14 @@ public class DistanceJoint extends Joint {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.dynamics.joint.Joint#getAnchor1()
 	 */
-	public Vector getAnchor1() {
+	public Vector2 getAnchor1() {
 		return body1.getWorldPoint(this.localAnchor1);
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.dynamics.joint.Joint#getAnchor2()
 	 */
-	public Vector getAnchor2() {
+	public Vector2 getAnchor2() {
 		return body2.getWorldPoint(this.localAnchor2);
 	}
 	
@@ -369,7 +365,7 @@ public class DistanceJoint extends Joint {
 	 * @see org.dyn4j.game2d.dynamics.joint.Joint#getReactionForce(double)
 	 */
 	@Override
-	public Vector getReactionForce(double invdt) {
+	public Vector2 getReactionForce(double invdt) {
 		return this.n.product(this.impulse * invdt);
 	}
 	
@@ -411,6 +407,8 @@ public class DistanceJoint extends Joint {
 	 * @param distance the distance in meters
 	 */
 	public void setDistance(double distance) {
+		// make sure the distance is greater than zero
+		if (distance <= 0.0) throw new IllegalArgumentException("The distance must be greater than zero.");
 		// check if the value changed
 		if (this.distance != distance) {
 			// wake up both bodies

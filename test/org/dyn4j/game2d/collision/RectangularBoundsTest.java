@@ -32,7 +32,7 @@ import org.dyn4j.game2d.geometry.Polygon;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Segment;
 import org.dyn4j.game2d.geometry.Triangle;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -180,9 +180,9 @@ public class RectangularBoundsTest {
 	public void isOutsideTriangle() {
 		// create some shapes
 		Triangle t = new Triangle(
-				new Vector( 0.0,  0.5),
-				new Vector(-0.5, -0.5),
-				new Vector( 0.5, -0.5)
+				new Vector2( 0.0,  0.5),
+				new Vector2(-0.5, -0.5),
+				new Vector2( 0.5, -0.5)
 			);
 		CollidableTest ct = new CollidableTest(t);
 		
@@ -223,7 +223,7 @@ public class RectangularBoundsTest {
 	@Test
 	public void isOutsideSegment() {
 		// create some shapes
-		Segment s = new Segment(new Vector(0.5, -0.5), new Vector(-0.5, 0.5));
+		Segment s = new Segment(new Vector2(0.5, -0.5), new Vector2(-0.5, 0.5));
 		CollidableTest ct = new CollidableTest(s);
 		
 		// should be in

@@ -30,10 +30,10 @@ package org.dyn4j.game2d.geometry;
  */
 public abstract class Wound extends AbstractShape implements Shape, Transformable {
 	/** The array of vertices */
-	protected Vector[] vertices;
+	protected Vector2[] vertices;
 	
 	/** The edge normals */
-	protected Vector[] normals;
+	protected Vector2[] normals;
 	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
@@ -56,17 +56,17 @@ public abstract class Wound extends AbstractShape implements Shape, Transformabl
 
 	/**
 	 * Returns the array of vertices in local coordinates.
-	 * @return {@link Vector}[]
+	 * @return {@link Vector2}[]
 	 */
-	public Vector[] getVertices() {
+	public Vector2[] getVertices() {
 		return this.vertices;
 	}
 	
 	/**
 	 * Returns the array of edge normals in local coordinates.
-	 * @return {@link Vector}[]
+	 * @return {@link Vector2}[]
 	 */
-	public Vector[] getNormals() {
+	public Vector2[] getNormals() {
 		return this.normals;
 	}
 }

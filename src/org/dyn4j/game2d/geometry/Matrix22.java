@@ -28,7 +28,7 @@ package org.dyn4j.game2d.geometry;
  * Represents a 2x2 Matrix.
  * @author William Bittle
  */
-public class Matrix {
+public class Matrix22 {
 	/** The element at 0,0 */
 	public double m00;
 	
@@ -44,7 +44,7 @@ public class Matrix {
 	/**
 	 * Default constructor.
 	 */
-	public Matrix() {}
+	public Matrix22() {}
 	
 	/**
 	 * Full constructor.
@@ -53,7 +53,7 @@ public class Matrix {
 	 * @param m10 the element at 1,0
 	 * @param m11 the element at 1,1
 	 */
-	public Matrix(double m00, double m01, double m10, double m11) {
+	public Matrix22(double m00, double m01, double m10, double m11) {
 		this.m00 = m00;
 		this.m01 = m01;
 		this.m10 = m10;
@@ -64,11 +64,10 @@ public class Matrix {
 	 * Full constructor.
 	 * <p>
 	 * The given array should be in the same order as the 
-	 * {@link #Matrix(double, double, double, double)} constructor
-	 * (m00, m01, m10, m11).
+	 * {@link #Matrix22(double, double, double, double)} constructor.
 	 * @param values the values array
 	 */
-	public Matrix(double[] values) {
+	public Matrix22(double[] values) {
 		if (values == null) throw new NullPointerException("The values array cannot be null.");
 		if (values.length != 4) throw new IndexOutOfBoundsException("The values array must be of length 4.");
 		this.m00 = values[0];
@@ -79,9 +78,9 @@ public class Matrix {
 	
 	/**
 	 * Copy constructor.
-	 * @param matrix the {@link Matrix} to copy
+	 * @param matrix the {@link Matrix22} to copy
 	 */
-	public Matrix(Matrix matrix) {
+	public Matrix22(Matrix22 matrix) {
 		this.m00 = matrix.m00; this.m01 = matrix.m01;
 		this.m10 = matrix.m10; this.m11 = matrix.m11;
 	}
@@ -93,8 +92,8 @@ public class Matrix {
 	public boolean equals(Object obj) {
 		if (obj == null) return false;
 		if (obj == this) return true;
-		if (obj instanceof Matrix) {
-			Matrix other = (Matrix) obj;
+		if (obj instanceof Matrix22) {
+			Matrix22 other = (Matrix22) obj;
 			if (other.m00 == this.m00
 			 && other.m01 == this.m01
 			 && other.m10 == this.m10
@@ -119,15 +118,15 @@ public class Matrix {
 	}
 	
 	/**
-	 * Adds the given {@link Matrix} to this {@link Matrix}
-	 * returning this {@link Matrix}.
+	 * Adds the given {@link Matrix22} to this {@link Matrix22}
+	 * returning this {@link Matrix22}.
 	 * <pre>
 	 * this = this + m
 	 * </pre>
-	 * @param matrix the {@link Matrix} to add
-	 * @return {@link Matrix} this matrix
+	 * @param matrix the {@link Matrix22} to add
+	 * @return {@link Matrix22} this matrix
 	 */
-	public Matrix add(Matrix matrix) {
+	public Matrix22 add(Matrix22 matrix) {
 		this.m00 += matrix.m00;
 		this.m01 += matrix.m01;
 		this.m10 += matrix.m10;
@@ -136,17 +135,17 @@ public class Matrix {
 	}
 	
 	/**
-	 * Returns a new {@link Matrix} that is the sum of this {@link Matrix}
-	 * and the given {@link Matrix}.
+	 * Returns a new {@link Matrix22} that is the sum of this {@link Matrix22}
+	 * and the given {@link Matrix22}.
 	 * <pre>
 	 * r = this + m
 	 * </pre>
-	 * @param matrix the {@link Matrix} to add
-	 * @return {@link Matrix} a new matrix containing the result
+	 * @param matrix the {@link Matrix22} to add
+	 * @return {@link Matrix22} a new matrix containing the result
 	 */
-	public Matrix sum(Matrix matrix) {
+	public Matrix22 sum(Matrix22 matrix) {
 		// make a copy of this matrix
-		Matrix rm = new Matrix(this);
+		Matrix22 rm = new Matrix22(this);
 		// perform the addition
 		rm.m00 += matrix.m00;
 		rm.m01 += matrix.m01;
@@ -157,15 +156,15 @@ public class Matrix {
 	}
 	
 	/**
-	 * Subtracts the given {@link Matrix} from this {@link Matrix}
-	 * returning this {@link Matrix}.
+	 * Subtracts the given {@link Matrix22} from this {@link Matrix22}
+	 * returning this {@link Matrix22}.
 	 * <pre>
 	 * this = this - m
 	 * </pre>
-	 * @param matrix the {@link Matrix} to subtract
-	 * @return {@link Matrix} this matrix
+	 * @param matrix the {@link Matrix22} to subtract
+	 * @return {@link Matrix22} this matrix
 	 */
-	public Matrix subtract(Matrix matrix) {
+	public Matrix22 subtract(Matrix22 matrix) {
 		this.m00 -= matrix.m00;
 		this.m01 -= matrix.m01;
 		this.m10 -= matrix.m10;
@@ -174,18 +173,18 @@ public class Matrix {
 	}
 	
 	/**
-	 * Returns a new {@link Matrix} that is the difference of this {@link Matrix}
-	 * and the given {@link Matrix}.
+	 * Returns a new {@link Matrix22} that is the difference of this {@link Matrix22}
+	 * and the given {@link Matrix22}.
 	 * <pre>
 	 * r = this - m
 	 * </pre>
-	 * @param matrix the {@link Matrix} to subtract
-	 * @return {@link Matrix} a new matrix containing the result
+	 * @param matrix the {@link Matrix22} to subtract
+	 * @return {@link Matrix22} a new matrix containing the result
 	 */
-	public Matrix difference(Matrix matrix) {
+	public Matrix22 difference(Matrix22 matrix) {
 		// make a copy of this matrix
-		Matrix rm = new Matrix(this);
-		// perform the addition
+		Matrix22 rm = new Matrix22(this);
+		// perform the subtraction
 		rm.m00 -= matrix.m00;
 		rm.m01 -= matrix.m01;
 		rm.m10 -= matrix.m10;
@@ -195,15 +194,15 @@ public class Matrix {
 	}
 	
 	/**
-	 * Multiplies this {@link Matrix} by the given matrix {@link Matrix}
-	 * returning this {@link Matrix}.
+	 * Multiplies this {@link Matrix22} by the given matrix {@link Matrix22}
+	 * returning this {@link Matrix22}.
 	 * <pre>
 	 * this = this * m
 	 * </pre>
-	 * @param matrix the {@link Matrix} to subtract
-	 * @return {@link Matrix} this matrix
+	 * @param matrix the {@link Matrix22} to subtract
+	 * @return {@link Matrix22} this matrix
 	 */
-	public Matrix multiply(Matrix matrix) {
+	public Matrix22 multiply(Matrix22 matrix) {
 		double m00 = this.m00;
 		double m01 = this.m01;
 		double m10 = this.m10;
@@ -216,16 +215,16 @@ public class Matrix {
 	}
 	
 	/**
-	 * Returns a new {@link Matrix} that is the product of this {@link Matrix}
-	 * and the given {@link Matrix}.
+	 * Returns a new {@link Matrix22} that is the product of this {@link Matrix22}
+	 * and the given {@link Matrix22}.
 	 * <pre>
 	 * r = this * m
 	 * </pre>
-	 * @param matrix the {@link Matrix} to multiply
-	 * @return {@link Matrix} a new matrix containing the result
+	 * @param matrix the {@link Matrix22} to multiply
+	 * @return {@link Matrix22} a new matrix containing the result
 	 */
-	public Matrix product(Matrix matrix) {
-		Matrix rm = new Matrix();
+	public Matrix22 product(Matrix22 matrix) {
+		Matrix22 rm = new Matrix22();
 		rm.m00 = this.m00 * matrix.m00 + this.m01 * matrix.m10;
 		rm.m01 = this.m00 * matrix.m01 + this.m01 * matrix.m11;
 		rm.m10 = this.m10 * matrix.m00 + this.m11 * matrix.m10;
@@ -234,15 +233,15 @@ public class Matrix {
 	}
 	
 	/**
-	 * Multiplies this {@link Matrix} by the given {@link Vector} and
-	 * places the result in the given {@link Vector}.
+	 * Multiplies this {@link Matrix22} by the given {@link Vector2} and
+	 * places the result in the given {@link Vector2}.
 	 * <pre>
 	 * v = this * v
 	 * </pre>
-	 * @param vector the {@link Vector} to multiply
-	 * @return {@link Vector} the vector result
+	 * @param vector the {@link Vector2} to multiply
+	 * @return {@link Vector2} the vector result
 	 */
-	public Vector multiply(Vector vector) {
+	public Vector2 multiply(Vector2 vector) {
 		double x = vector.x;
 		double y = vector.y;
 		vector.x = this.m00 * x + this.m01 * y;
@@ -251,31 +250,31 @@ public class Matrix {
 	}
 	
 	/**
-	 * Multiplies this {@link Matrix} by the given {@link Vector} returning
-	 * the result in a new {@link Vector}.
+	 * Multiplies this {@link Matrix22} by the given {@link Vector2} returning
+	 * the result in a new {@link Vector2}.
 	 * <pre>
 	 * r = this * v
 	 * </pre>
-	 * @param vector the {@link Vector} to multiply
-	 * @return {@link Vector} the vector result
+	 * @param vector the {@link Vector2} to multiply
+	 * @return {@link Vector2} the vector result
 	 */
-	public Vector product(Vector vector) {
-		Vector r = new Vector();
+	public Vector2 product(Vector2 vector) {
+		Vector2 r = new Vector2();
 		r.x = this.m00 * vector.x + this.m01 * vector.y;
 		r.y = this.m10 * vector.x + this.m11 * vector.y;
 		return r;
 	}
 	
 	/**
-	 * Multiplies the given {@link Vector} by this {@link Matrix} and
-	 * places the result in the given {@link Vector}.
+	 * Multiplies the given {@link Vector2} by this {@link Matrix22} and
+	 * places the result in the given {@link Vector2}.
 	 * <pre>
 	 * v = v<sup>T</sup> * this
 	 * </pre>
-	 * @param vector the {@link Vector} to multiply
-	 * @return {@link Vector} the vector result
+	 * @param vector the {@link Vector2} to multiply
+	 * @return {@link Vector2} the vector result
 	 */
-	public Vector multiplyT(Vector vector) {
+	public Vector2 multiplyT(Vector2 vector) {
 		double x = vector.x;
 		double y = vector.y;
 		vector.x = this.m00 * x + this.m10 * y;
@@ -284,31 +283,31 @@ public class Matrix {
 	}
 	
 	/**
-	 * Multiplies the given {@link Vector} by this {@link Matrix} returning
-	 * the result in a new {@link Vector}.
+	 * Multiplies the given {@link Vector2} by this {@link Matrix22} returning
+	 * the result in a new {@link Vector2}.
 	 * <pre>
 	 * r = v<sup>T</sup> * this
 	 * </pre>
-	 * @param vector the {@link Vector} to multiply
-	 * @return {@link Vector} the vector result
+	 * @param vector the {@link Vector2} to multiply
+	 * @return {@link Vector2} the vector result
 	 */
-	public Vector productT(Vector vector) {
-		Vector r = new Vector();
+	public Vector2 productT(Vector2 vector) {
+		Vector2 r = new Vector2();
 		r.x = this.m00 * vector.x + this.m10 * vector.y;
 		r.y = this.m01 * vector.x + this.m11 * vector.y;
 		return r;
 	}
 	
 	/**
-	 * Multiplies this {@link Matrix} by the given scalar and places
-	 * the result in this {@link Matrix}.
+	 * Multiplies this {@link Matrix22} by the given scalar and places
+	 * the result in this {@link Matrix22}.
 	 * <pre>
 	 * this = this * scalar
 	 * </pre>
 	 * @param scalar the scalar to multiply by
-	 * @return {@link Matrix} this matrix
+	 * @return {@link Matrix22} this matrix
 	 */
-	public Matrix multiply(double scalar) {
+	public Matrix22 multiply(double scalar) {
 		this.m00 *= scalar;
 		this.m01 *= scalar;
 		this.m10 *= scalar;
@@ -317,17 +316,17 @@ public class Matrix {
 	}
 	
 	/**
-	 * Multiplies this {@link Matrix} by the given scalar returning a
-	 * new {@link Matrix} containing the result.
+	 * Multiplies this {@link Matrix22} by the given scalar returning a
+	 * new {@link Matrix22} containing the result.
 	 * <pre>
 	 * r = this * scalar
 	 * </pre>
 	 * @param scalar the scalar to multiply by
-	 * @return {@link Matrix} a new matrix containing the result
+	 * @return {@link Matrix22} a new matrix containing the result
 	 */
-	public Matrix product(double scalar) {
+	public Matrix22 product(double scalar) {
 		// make a copy of this matrix
-		Matrix rm = new Matrix(this);
+		Matrix22 rm = new Matrix22(this);
 		// multiply by the scalar
 		rm.m00 *= scalar;
 		rm.m01 *= scalar;
@@ -338,62 +337,20 @@ public class Matrix {
 	}
 	
 	/**
-	 * Divides this {@link Matrix} by the given scalar and places
-	 * the result in this {@link Matrix}.
-	 * <pre>
-	 * this = this / scalar
-	 * </pre>
-	 * @param scalar the scalar to divide by
-	 * @return {@link Matrix} this matrix
+	 * Sets this {@link Matrix22} to an identity {@link Matrix22}.
+	 * @return {@link Matrix22} this matrix
 	 */
-	public Matrix divide(double scalar) {
-		// compute the inverse of the scalar once
-		double inv = 1.0 / scalar;
-		this.m00 *= inv;
-		this.m01 *= inv;
-		this.m10 *= inv;
-		this.m11 *= inv;
-		return this;
-	}
-	
-	/**
-	 * Divides this {@link Matrix} by the given scalar returning a
-	 * new {@link Matrix} containing the result.
-	 * <pre>
-	 * r = this / scalar
-	 * </pre>
-	 * @param scalar the scalar to divide by
-	 * @return {@link Matrix} a new matrix containing the result
-	 */
-	public Matrix quotient(double scalar) {
-		// make a copy of this matrix
-		Matrix rm = new Matrix(this);
-		// compute the inverse of the scalar once
-		double inv = 1.0 / scalar;
-		// multiply by the scalar
-		rm.m00 *= inv;
-		rm.m01 *= inv;
-		rm.m10 *= inv;
-		rm.m11 *= inv;
-		// return the new matrix
-		return rm;
-	}
-	
-	/**
-	 * Sets this {@link Matrix} to an identity {@link Matrix}.
-	 * @return {@link Matrix} this matrix
-	 */
-	public Matrix identity() {
+	public Matrix22 identity() {
 		this.m00 = 1; this.m01 = 0;
 		this.m10 = 0; this.m11 = 1;
 		return this;
 	}
 	
 	/**
-	 * Sets this {@link Matrix} to the transpose of this {@link Matrix}.
-	 * @return {@link Matrix} this matrix
+	 * Sets this {@link Matrix22} to the transpose of this {@link Matrix22}.
+	 * @return {@link Matrix22} this matrix
 	 */
-	public Matrix transpose() {
+	public Matrix22 transpose() {
 		double m = this.m01;
 		this.m01 = this.m10;
 		this.m10 = m;
@@ -401,17 +358,17 @@ public class Matrix {
 	}
 	
 	/**
-	 * Returns the the transpose of this {@link Matrix} in a new {@link Matrix}.
-	 * @return {@link Matrix} a new matrix contianing the transpose
+	 * Returns the the transpose of this {@link Matrix22} in a new {@link Matrix22}.
+	 * @return {@link Matrix22} a new matrix contianing the transpose
 	 */
-	public Matrix getTranspose() {
-		Matrix rm = new Matrix(this);
+	public Matrix22 getTranspose() {
+		Matrix22 rm = new Matrix22(this);
 		rm.transpose();
 		return rm;
 	}
 	
 	/**
-	 * Returns the determinant of this {@link Matrix}.
+	 * Returns the determinant of this {@link Matrix22}.
 	 * @return double
 	 */
 	public double determinant() {
@@ -419,20 +376,21 @@ public class Matrix {
 	}
 	
 	/**
-	 * Performs the inverse of this {@link Matrix} and places the
-	 * result in this {@link Matrix}.
-	 * @return {@link Matrix} this matrix
+	 * Performs the inverse of this {@link Matrix22} and places the
+	 * result in this {@link Matrix22}.
+	 * @return {@link Matrix22} this matrix
 	 */
-	public Matrix invert() {
+	public Matrix22 invert() {
 		// get the determinant
 		double det = this.determinant();
 		// check for zero determinant
-		if (det == 0.0) throw new ArithmeticException();
+		if (det != 0.0) {
+			det = 1.0 / det;
+		}
 		double a = this.m00;
 		double b = this.m01;
 		double c = this.m10;
 		double d = this.m11;
-		det = 1.0 / det;
 		this.m00 =  det * d;
 		this.m01 = -det * b;
 		this.m10 = -det * c;
@@ -441,16 +399,17 @@ public class Matrix {
 	}
 	
 	/**
-	 * Returns a new {@link Matrix} containing the inverse of this {@link Matrix}.
-	 * @return {@link Matrix} a new matrix containing the result
+	 * Returns a new {@link Matrix22} containing the inverse of this {@link Matrix22}.
+	 * @return {@link Matrix22} a new matrix containing the result
 	 */
-	public Matrix getInverse() {
+	public Matrix22 getInverse() {
 		// get the determinant
 		double det = this.determinant();
 		// check for zero determinant
-		if (det == 0.0) throw new ArithmeticException();
-		Matrix rm = new Matrix();
-		det = 1.0 / det;
+		if (det != 0.0) {
+			det = 1.0 / det;
+		}
+		Matrix22 rm = new Matrix22();
 		rm.m00 =  det * this.m11;
 		rm.m01 = -det * this.m01;
 		rm.m10 = -det * this.m10;
@@ -465,16 +424,17 @@ public class Matrix {
 	 * Multiply by A<sup>-1</sup> on both sides
 	 * x = A<sup>-1</sup>b
 	 * </pre>
-	 * @param b the b {@link Vector}
-	 * @return {@link Vector} the x vector
+	 * @param b the b {@link Vector2}
+	 * @return {@link Vector2} the x vector
 	 */
-	public Vector solve(Vector b) {
+	public Vector2 solve(Vector2 b) {
 		// get the determinant
 		double det = this.determinant();
 		// check for zero determinant
-		if (det == 0.0) throw new ArithmeticException();
-		det = 1.0 / det;
-		Vector r = new Vector();
+		if (det != 0.0) {
+			det = 1.0 / det;
+		}
+		Vector2 r = new Vector2();
 		r.x = det * (this.m11 * b.x - this.m01 * b.y);
 		r.y = det * (this.m00 * b.y - this.m10 * b.x);
 		return r;

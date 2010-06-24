@@ -38,7 +38,7 @@ public class SegmentTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createCoincident() {
-		new Segment(new Vector(), new Vector());
+		new Segment(new Vector2(), new Vector2());
 	}
 	
 	/**
@@ -47,8 +47,8 @@ public class SegmentTest {
 	@Test
 	public void creatSuccess() {
 		Segment s = new Segment(
-			new Vector(0.0, 1.0),
-			new Vector(1.0, 2.0)
+			new Vector2(0.0, 1.0),
+			new Vector2(1.0, 2.0)
 		);
 		
 		TestCase.assertEquals(0.500, s.center.x, 1.0e-3);
@@ -61,8 +61,8 @@ public class SegmentTest {
 	@Test
 	public void getLength() {
 		Segment s = new Segment(
-			new Vector(0.0, 1.0),
-			new Vector(1.5, 3.0)
+			new Vector2(0.0, 1.0),
+			new Vector2(1.5, 3.0)
 		);
 		
 		TestCase.assertEquals(2.500, s.getLength(), 1.0e-3);
@@ -74,19 +74,19 @@ public class SegmentTest {
 	@Test
 	public void getLocation() {
 		// test invalid line
-		double loc = Segment.getLocation(new Vector(1.0, 1.0), new Vector(), new Vector());
+		double loc = Segment.getLocation(new Vector2(1.0, 1.0), new Vector2(), new Vector2());
 		TestCase.assertEquals(0.000, loc, 1.0e-3);
 		
 		// test valid line/on line
-		loc = Segment.getLocation(new Vector(1.0, 1.0), new Vector(), new Vector(2.0, 2.0));
+		loc = Segment.getLocation(new Vector2(1.0, 1.0), new Vector2(), new Vector2(2.0, 2.0));
 		TestCase.assertEquals(0.000, loc, 1.0e-3);
 		
 		// test valid line/left-above line
-		loc = Segment.getLocation(new Vector(1.0, 1.0), new Vector(), new Vector(1.0, 0.5));
+		loc = Segment.getLocation(new Vector2(1.0, 1.0), new Vector2(), new Vector2(1.0, 0.5));
 		TestCase.assertTrue(loc > 0);
 		
 		// test valid line/right-below line
-		loc = Segment.getLocation(new Vector(1.0, 1.0), new Vector(), new Vector(1.0, 2.0));
+		loc = Segment.getLocation(new Vector2(1.0, 1.0), new Vector2(), new Vector2(1.0, 2.0));
 		TestCase.assertTrue(loc < 0);
 	}
 	
@@ -95,35 +95,35 @@ public class SegmentTest {
 	 */
 	@Test
 	public void getPointClosest() {
-		Vector pt = new Vector(1.0, -1.0);
+		Vector2 pt = new Vector2(1.0, -1.0);
 		
 		// test invalid line/segment
-		Vector p = Segment.getPointOnLineClosestToPoint(pt, new Vector(1.0, 1.0), new Vector(1.0, 1.0));
+		Vector2 p = Segment.getPointOnLineClosestToPoint(pt, new Vector2(1.0, 1.0), new Vector2(1.0, 1.0));
 		TestCase.assertEquals(1.000, p.x, 1.0e-3);
 		TestCase.assertEquals(1.000, p.y, 1.0e-3);
 		
-		p = Segment.getPointOnSegmentClosestToPoint(pt, new Vector(1.0, 1.0), new Vector(1.0, 1.0));
+		p = Segment.getPointOnSegmentClosestToPoint(pt, new Vector2(1.0, 1.0), new Vector2(1.0, 1.0));
 		TestCase.assertEquals(1.000, p.x, 1.0e-3);
 		TestCase.assertEquals(1.000, p.y, 1.0e-3);
 		
 		// test valid line
-		p = Segment.getPointOnLineClosestToPoint(pt, new Vector(), new Vector(5.0, 5.0));
+		p = Segment.getPointOnLineClosestToPoint(pt, new Vector2(), new Vector2(5.0, 5.0));
 		// since 0,0 is perp to pt
 		TestCase.assertEquals(0.000, p.x, 1.0e-3);
 		TestCase.assertEquals(0.000, p.y, 1.0e-3);
 		
-		p = Segment.getPointOnLineClosestToPoint(pt, new Vector(), new Vector(2.5, 5.0));
+		p = Segment.getPointOnLineClosestToPoint(pt, new Vector2(), new Vector2(2.5, 5.0));
 		TestCase.assertEquals(-0.200, p.x, 1.0e-3);
 		TestCase.assertEquals(-0.400, p.y, 1.0e-3);
 		
 		// test valid segment
-		p = Segment.getPointOnSegmentClosestToPoint(pt, new Vector(-1.0, -1.0), new Vector(1.0, 1.0));
+		p = Segment.getPointOnSegmentClosestToPoint(pt, new Vector2(-1.0, -1.0), new Vector2(1.0, 1.0));
 		// since 0,0 is perp to pt
 		TestCase.assertEquals(0.000, p.x, 1.0e-3);
 		TestCase.assertEquals(0.000, p.y, 1.0e-3);
 		
 		// test closest is one of the segment points
-		p = Segment.getPointOnSegmentClosestToPoint(pt, new Vector(), new Vector(2.5, 5.0));
+		p = Segment.getPointOnSegmentClosestToPoint(pt, new Vector2(), new Vector2(2.5, 5.0));
 		TestCase.assertEquals(0.000, p.x, 1.0e-3);
 		TestCase.assertEquals(0.000, p.y, 1.0e-3);
 	}
@@ -134,16 +134,16 @@ public class SegmentTest {
 	@Test
 	public void getAxes() {
 		Segment s = new Segment(
-			new Vector(0.0, 1.0),
-			new Vector(1.5, 3.0)
+			new Vector2(0.0, 1.0),
+			new Vector2(1.5, 3.0)
 		);
 		Transform t = new Transform();
 		
-		Vector[] axes = s.getAxes(null, t);
+		Vector2[] axes = s.getAxes(null, t);
 		
 		TestCase.assertEquals(2, axes.length);
 		
-		Vector seg = s.vertices[0].to(s.vertices[1]);
+		Vector2 seg = s.vertices[0].to(s.vertices[1]);
 		// one should be the line itself and the other should be the perp
 		TestCase.assertEquals(0.000, seg.cross(axes[1]), 1.0e-3);
 		TestCase.assertEquals(0.000, seg.dot(axes[0]), 1.0e-3);
@@ -160,14 +160,14 @@ public class SegmentTest {
 		TestCase.assertEquals(0.000, seg.dot(axes[0]), 1.0e-3);
 		
 		// test for some foci
-		Vector f = new Vector(2.0, -2.0);
+		Vector2 f = new Vector2(2.0, -2.0);
 		t.identity();
 		
-		axes = s.getAxes(new Vector[] {f}, t);
+		axes = s.getAxes(new Vector2[] {f}, t);
 		
 		TestCase.assertEquals(3, axes.length);
 		
-		Vector v1 = s.vertices[0].to(f);
+		Vector2 v1 = s.vertices[0].to(f);
 		
 		TestCase.assertEquals(v1.x, axes[2].x, 1.0e-3);
 		TestCase.assertEquals(v1.y, axes[2].y, 1.0e-3);
@@ -179,12 +179,12 @@ public class SegmentTest {
 	@Test
 	public void getFoci() {
 		Segment s = new Segment(
-			new Vector(0.0, 1.0),
-			new Vector(1.5, 3.0)
+			new Vector2(0.0, 1.0),
+			new Vector2(1.5, 3.0)
 		);
 		Transform t = new Transform();
 		
-		Vector[] foci = s.getFoci(t);
+		Vector2[] foci = s.getFoci(t);
 		TestCase.assertNull(foci);
 	}
 	
@@ -194,13 +194,13 @@ public class SegmentTest {
 	@Test
 	public void contains() {
 		Segment s = new Segment(
-			new Vector(0.0, 1.0),
-			new Vector(1.5, 3.0)
+			new Vector2(0.0, 1.0),
+			new Vector2(1.5, 3.0)
 		);
 		Transform t = new Transform();
 		
-		TestCase.assertFalse(s.contains(new Vector(2.0, 2.0), t));
-		TestCase.assertTrue(s.contains(new Vector(0.75, 2.0), t));
+		TestCase.assertFalse(s.contains(new Vector2(2.0, 2.0), t));
+		TestCase.assertTrue(s.contains(new Vector2(0.75, 2.0), t));
 	}
 	
 	/**
@@ -209,14 +209,14 @@ public class SegmentTest {
 	@Test
 	public void containsRadius() {
 		Segment s = new Segment(
-				new Vector(1.0, 1.0),
-				new Vector(-1.0, -1.0)
+				new Vector2(1.0, 1.0),
+				new Vector2(-1.0, -1.0)
 			);
 			Transform t = new Transform();
 			
-			TestCase.assertFalse(s.contains(new Vector(2.0, 2.0), t, 0.1));
-			TestCase.assertTrue(s.contains(new Vector(1.05, 1.05), t, 0.1));
-			TestCase.assertTrue(s.contains(new Vector(0.505, 0.5), t, 0.1));
+			TestCase.assertFalse(s.contains(new Vector2(2.0, 2.0), t, 0.1));
+			TestCase.assertTrue(s.contains(new Vector2(1.05, 1.05), t, 0.1));
+			TestCase.assertTrue(s.contains(new Vector2(0.505, 0.5), t, 0.1));
 	}
 	
 	/**
@@ -225,11 +225,11 @@ public class SegmentTest {
 	@Test
 	public void project() {
 		Segment s = new Segment(
-			new Vector(0.0, 1.0),
-			new Vector(1.5, 3.0)
+			new Vector2(0.0, 1.0),
+			new Vector2(1.5, 3.0)
 		);
 		Transform t = new Transform();
-		Vector n = new Vector(1.0, 0.0);
+		Vector2 n = new Vector2(1.0, 0.0);
 		
 		Interval i = s.project(n, t);
 		
@@ -264,11 +264,11 @@ public class SegmentTest {
 	@Test
 	public void getFarthest() {
 		Segment s = new Segment(
-			new Vector(0.0, 1.0),
-			new Vector(1.5, 3.0)
+			new Vector2(0.0, 1.0),
+			new Vector2(1.5, 3.0)
 		);
 		Transform t = new Transform();
-		Vector n = new Vector(1.0, 0.0);
+		Vector2 n = new Vector2(1.0, 0.0);
 		
 		Edge f = s.getFarthestFeature(n, t);
 		TestCase.assertTrue(f.isEdge());
@@ -280,7 +280,7 @@ public class SegmentTest {
 		TestCase.assertEquals(1.500, f.vertex2.point.x, 1.0e-3);
 		TestCase.assertEquals(3.000, f.vertex2.point.y, 1.0e-3);
 		
-		Vector p = s.getFarthestPoint(n, t);
+		Vector2 p = s.getFarthestPoint(n, t);
 		TestCase.assertEquals(1.500, p.x, 1.0e-3);
 		TestCase.assertEquals(3.000, p.y, 1.0e-3);
 		
@@ -299,8 +299,8 @@ public class SegmentTest {
 	@Test
 	public void rotate() {
 		Segment s = new Segment(
-			new Vector(0.0, 0.0),
-			new Vector(1.0, 1.0)
+			new Vector2(0.0, 0.0),
+			new Vector2(1.0, 1.0)
 		);
 		s.rotate(Math.toRadians(45), 0, 0);
 		
@@ -317,8 +317,8 @@ public class SegmentTest {
 	@Test
 	public void translate() {
 		Segment s = new Segment(
-			new Vector(0.0, 0.0),
-			new Vector(1.0, 1.0)
+			new Vector2(0.0, 0.0),
+			new Vector2(1.0, 1.0)
 		);
 		s.translate(2.0, -1.0);
 		

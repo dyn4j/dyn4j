@@ -44,18 +44,18 @@ public interface Convex extends Shape, Transformable {
 	 * The returned axes are not normalized.
 	 * @param foci the world space points representing foci of curved {@link Shape}s; can be null
 	 * @param transform the local to world space {@link Transform} of this {@link Convex} {@link Shape}
-	 * @return {@link Vector}[]
+	 * @return {@link Vector2}[]
 	 */
-	public abstract Vector[] getAxes(Vector[] foci, Transform transform);
+	public abstract Vector2[] getAxes(Vector2[] foci, Transform transform);
 	
 	/**
 	 * Returns an array of world space foci points for circular curved edges.
 	 * <p>
 	 * This method returns null if the {@link Shape} has zero curved edges.
 	 * @param transform the local to world space {@link Transform} of this {@link Convex} {@link Shape}
-	 * @return {@link Vector}[]
+	 * @return {@link Vector2}[]
 	 */
-	public abstract Vector[] getFoci(Transform transform);
+	public abstract Vector2[] getFoci(Transform transform);
 	
 	/**
 	 * Returns the feature farthest in the direction of n.
@@ -63,17 +63,17 @@ public interface Convex extends Shape, Transformable {
 	 * @param transform the local to world space {@link Transform} of this {@link Convex} {@link Shape}
 	 * @return {@link Feature}
 	 */
-	public abstract Feature getFarthestFeature(Vector n, Transform transform);
+	public abstract Feature getFarthestFeature(Vector2 n, Transform transform);
 	
 	/**
 	 * Returns the point farthest in the direction of n.  If two points are 
-	 * equally distant along the given {@link Vector} the first one in the vertex 
+	 * equally distant along the given {@link Vector2} the first one in the vertex 
 	 * list is used.
 	 * <p>
 	 * The returned point is in world space.
 	 * @param n the direction
 	 * @param transform the local to world space {@link Transform} of this {@link Convex} {@link Shape}
-	 * @return {@link Vector}
+	 * @return {@link Vector2}
 	 */
-	public abstract Vector getFarthestPoint(Vector n, Transform transform);
+	public abstract Vector2 getFarthestPoint(Vector2 n, Transform transform);
 }

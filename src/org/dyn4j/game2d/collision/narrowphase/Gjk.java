@@ -33,7 +33,7 @@ import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Segment;
 import org.dyn4j.game2d.geometry.Shape;
 import org.dyn4j.game2d.geometry.Transform;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Implementation of the {@link Gjk} algorithm.
@@ -102,7 +102,7 @@ import org.dyn4j.game2d.geometry.Vector;
  * The last method to discuss is the method, check.  This method can be implemented in
  * any fashion, however, if the simplex is stored in a way that we always know what point
  * was added last, many optimizations can be done.  For these optimizations please refer
- * to the source documentation on {@link Gjk#checkSimplex(List, Vector)}.
+ * to the source documentation on {@link Gjk#checkSimplex(List, Vector2)}.
  * <p>
  * Once {@link Gjk} has found that the two {@link Collidable}s are penetrating it will exit 
  * and hand off the resulting simplex to a {@link MinkowskiPenetrationSolver}.
@@ -116,7 +116,7 @@ import org.dyn4j.game2d.geometry.Vector;
  */
 public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetector {
 	/** The origin point */
-	protected static final Vector ORIGIN = new Vector();
+	protected static final Vector2 ORIGIN = new Vector2();
 	
 	/** The default {@link Gjk} maximum iterations */
 	public static final int DEFAULT_GJK_MAX_ITERATIONS = 100;
@@ -158,14 +158,14 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 			return super.detect((Circle) convex1, transform1, (Circle) convex2, transform2, penetration);
 		}
 		// define the simplex
-		List<Vector> simplex = new ArrayList<Vector>(3);
+		List<Vector2> simplex = new ArrayList<Vector2>(3);
 		// create a Minkowski sum
 		MinkowskiSum ms = new MinkowskiSum(convex1, transform1, convex2, transform2);
 		// transform into world space if transform is not null
-		Vector c1 = transform1.getTransformed(convex1.getCenter());
-		Vector c2 = transform2.getTransformed(convex2.getCenter());
+		Vector2 c1 = transform1.getTransformed(convex1.getCenter());
+		Vector2 c2 = transform2.getTransformed(convex2.getCenter());
 		// choose some search direction
-		Vector d = c1.to(c2);
+		Vector2 d = c1.to(c2);
 		// check for a zero direction vector
 		if (d.isZero()) d.set(1.0, 0.0);
 		// add the first point
@@ -208,14 +208,14 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 			return super.detect((Circle) convex1, transform1, (Circle) convex2, transform2);
 		}
 		// define the simplex
-		List<Vector> simplex = new ArrayList<Vector>(3);
+		List<Vector2> simplex = new ArrayList<Vector2>(3);
 		// create a Minkowski sum
 		MinkowskiSum ms = new MinkowskiSum(convex1, transform1, convex2, transform2);
 		// transform into world space if transform is not null
-		Vector c1 = transform1.getTransformed(convex1.getCenter());
-		Vector c2 = transform2.getTransformed(convex2.getCenter());
+		Vector2 c1 = transform1.getTransformed(convex1.getCenter());
+		Vector2 c2 = transform2.getTransformed(convex2.getCenter());
 		// choose some search direction
-		Vector d = c1.to(c2);
+		Vector2 d = c1.to(c2);
 		// check for a zero direction vector
 		if (d.isZero()) d.set(1.0, 0.0);
 		// add the first point
@@ -259,23 +259,23 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 	 * @param direction the search direction
 	 * @return boolean true if the simplex contains the origin
 	 */
-	protected boolean checkSimplex(List<Vector> simplex, Vector direction) {
+	protected boolean checkSimplex(List<Vector2> simplex, Vector2 direction) {
 		// this method should never be supplied anything other than 2 or 3 points for the simplex
 		// get the last point added (a)
-		Vector a = simplex.get(simplex.size() - 1);
+		Vector2 a = simplex.get(simplex.size() - 1);
 		// this is the same as a.to(ORIGIN);
-		Vector ao = a.getNegative();
+		Vector2 ao = a.getNegative();
 		// check to see what type of simplex we have
 		if (simplex.size() == 3) {
 			// then we have a triangle
-			Vector b = simplex.get(1);
-			Vector c = simplex.get(0);
+			Vector2 b = simplex.get(1);
+			Vector2 c = simplex.get(0);
 			// get the edges
-			Vector ab = a.to(b);
-			Vector ac = a.to(c);
+			Vector2 ab = a.to(b);
+			Vector2 ac = a.to(c);
 			// get the edge normals
-			Vector abPerp = Vector.tripleProduct(ac, ab, ab);
-			Vector acPerp = Vector.tripleProduct(ab, ac, ac);
+			Vector2 abPerp = Vector2.tripleProduct(ac, ab, ab);
+			Vector2 acPerp = Vector2.tripleProduct(ab, ac, ac);
 			// see where the origin is at
 			if (acPerp.dot(ao) > 0) {
 				// the origin lies on the right side of A->C
@@ -307,13 +307,13 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 			}
 		} else {
 			// get the b point
-			Vector b = simplex.get(0);
-			Vector ab = a.to(b);
+			Vector2 b = simplex.get(0);
+			Vector2 ab = a.to(b);
 			// otherwise we have 2 points (line segment)
 			// because of the condition for the gjk loop to continue the origin 
 			// must lie in between A and B, so keep both points in the simplex and
 			// set the direction to the perp of the line segment towards the origin
-			direction.set(Vector.tripleProduct(ab, ao, ab));
+			direction.set(Vector2.tripleProduct(ab, ao, ab));
 			// check for degenerate cases where the origin lies on the segment
 			// created by a -> b which will yield a zero edge normal
 			if (direction.isZero()) {
@@ -347,10 +347,10 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 		MinkowskiSum.Point b = new MinkowskiSum.Point();
 		MinkowskiSum.Point c = new MinkowskiSum.Point();
 		// transform into world space if transform is not null
-		Vector c1 = transform1.getTransformed(convex1.getCenter());
-		Vector c2 = transform2.getTransformed(convex2.getCenter());
+		Vector2 c1 = transform1.getTransformed(convex1.getCenter());
+		Vector2 c2 = transform2.getTransformed(convex2.getCenter());
 		// choose some search direction
-		Vector d = c1.to(c2);
+		Vector2 d = c1.to(c2);
 		// check for a zero direction vector
 		// a zero direction vector indicates that the center's are coincident
 		// which guarantees that the convex shapes are overlapping
@@ -475,11 +475,11 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 	 * @param s the {@link Separation} object to populate
 	 */
 	protected void findClosestPoints(MinkowskiSum.Point a, MinkowskiSum.Point b, Separation s) {
-		Vector p1 = new Vector();
-		Vector p2 = new Vector();
+		Vector2 p1 = new Vector2();
+		Vector2 p2 = new Vector2();
 		
 		// find lambda1 and lambda2
-		Vector l = a.p.to(b.p);
+		Vector2 l = a.p.to(b.p);
 		
 		// check if a and b are the same point
 		if (l.isZero()) {
@@ -528,7 +528,7 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 	 * If the origin lies on the same side of all the points then we
 	 * know that the origin is in the triangle.
 	 * <pre> sign(location(origin, a, b)) == sign(location(origin, b, c)) == sign(location(origin, c, a))</pre>
-	 * The {@link Segment#getLocation(Vector, Vector, Vector)} method 
+	 * The {@link Segment#getLocation(Vector2, Vector2, Vector2)} method 
 	 * can be simplified because we are using the origin as the search point:
 	 * <pre> = (b.x - a.x) * (origin.y - a.y) - (origin.x - a.x) * (b.y - a.y)
 	 * = (b.x - a.x) * (-a.y) - (-a.x) * (b.y - a.y)
@@ -541,7 +541,7 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 	 * @param c the thrid point
 	 * @return boolean
 	 */
-	protected boolean containsOrigin(Vector a, Vector b, Vector c) {
+	protected boolean containsOrigin(Vector2 a, Vector2 b, Vector2 c) {
 		double sa = a.cross(b);
 		double sb = b.cross(c);
 		double sc = c.cross(a);

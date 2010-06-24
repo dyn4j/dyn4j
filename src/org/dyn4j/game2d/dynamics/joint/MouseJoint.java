@@ -27,9 +27,9 @@ package org.dyn4j.game2d.dynamics.joint;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.Step;
 import org.dyn4j.game2d.geometry.Mass;
-import org.dyn4j.game2d.geometry.Matrix;
+import org.dyn4j.game2d.geometry.Matrix22;
 import org.dyn4j.game2d.geometry.Transform;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Represents a joint attached to a body and the mouse.
@@ -40,10 +40,10 @@ public class MouseJoint extends Joint {
 	public static final Joint.Type TYPE = new Joint.Type("Mouse");
 	
 	/** The world space target point */
-	protected Vector target;
+	protected Vector2 target;
 	
 	/** The local anchor point for the body */
-	protected Vector anchor;
+	protected Vector2 anchor;
 	
 	/** The oscillation frequency in hz */
 	protected double frequency;
@@ -54,17 +54,17 @@ public class MouseJoint extends Joint {
 	/** The maximum force this constraint can apply */
 	protected double maxForce;
 	
-	/** The constraint mass (Kinv = (J * Minv * Jtrans)inv) */
-	protected Matrix invK;
+	/** The constraint mass; K = J * Minv * Jtrans */
+	protected Matrix22 K;
 	
 	/** The bias for adding work to the constraint (simulating a spring) */
-	protected Vector bias;
+	protected Vector2 bias;
 	
 	/** The damping portion of the constraint */
 	protected double gamma;
 	
 	/** The impulse applied to the body to satisfy the constraint */
-	protected Vector impulse;
+	protected Vector2 impulse;
 	
 	/**
 	 * Full constructor.
@@ -74,7 +74,7 @@ public class MouseJoint extends Joint {
 	 * @param dampingRatio the damping ratio
 	 * @param maxForce the maximum force this constraint can apply in newtons
 	 */
-	public MouseJoint(Body body, Vector target, double frequency, double dampingRatio, double maxForce) {
+	public MouseJoint(Body body, Vector2 target, double frequency, double dampingRatio, double maxForce) {
 		super(body, body, false);
 		// check fora  null target
 		if (target == null) throw new NullPointerException("The target point cannot be null.");
@@ -82,12 +82,33 @@ public class MouseJoint extends Joint {
 		if (frequency <= 0) throw new IllegalArgumentException("The frequency must be greater than zero.");
 		// verify the damping ratio
 		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException("The damping ratio must be between 0 and 1 inclusive.");
+		// verity the max force
+		if (maxForce < 0.0) throw new IllegalArgumentException("The max force must be zero or greater.");
 		this.target = target;
 		this.anchor = body.getLocalPoint(target);
 		this.frequency = frequency;
 		this.dampingRatio = dampingRatio;
 		this.maxForce = maxForce;
-		this.impulse = new Vector();
+		// initialize
+		this.K = new Matrix22();
+		this.impulse = new Vector2();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.dynamics.joint.Joint#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("MOUSE_JOINT[")
+		.append(super.toString()).append("|")
+		.append(this.target).append("|")
+		.append(this.anchor).append("|")
+		.append(this.frequency).append("|")
+		.append(this.dampingRatio).append("|")
+		.append(this.maxForce).append("|")
+		.append(this.impulse).append("]");
+		return sb.toString();
 	}
 	
 	/* (non-Javadoc)
@@ -121,29 +142,21 @@ public class MouseJoint extends Joint {
 		}
 		
 		// compute the r vector
-		Vector r = transform.getTransformedR(body.getLocalCenter().to(this.anchor));
+		Vector2 r = transform.getTransformedR(body.getLocalCenter().to(this.anchor));
 		
 		// compute the bias = ERP where ERP = hk / (hk + d)
 		this.bias = body.getWorldCenter().add(r).difference(this.target);
 		this.bias.multiply(dt * k * this.gamma);
 		
 		// compute the K inverse matrix
-		Matrix K1 = new Matrix();
-		K1.m00 = invM;	K1.m01 = 0.0;
-		K1.m10 = 0.0;	K1.m11 = invM;
-
-		Matrix K2 = new Matrix();
-		K2.m00 =  invI * r.y * r.y;	K2.m01 = -invI * r.x * r.y;
-		K2.m10 = -invI * r.x * r.y;	K2.m11 =  invI * r.x * r.x;
-
-		Matrix K = new Matrix(K1);
-		K.add(K2);
+		this.K.m00 = invM + r.y * r.y * invI;
+		this.K.m01 = -invI * r.x * r.y; 
+		this.K.m10 = this.K.m01;
+		this.K.m11 = invM + r.x * r.x * invI;
 		
 		// apply the spring
-		K.m00 += this.gamma;
-		K.m11 += this.gamma;
-		
-		this.invK = K.invert();
+		this.K.m00 += this.gamma;
+		this.K.m11 += this.gamma;
 		
 		// warm start
 		this.impulse.multiply(step.getDeltaTimeRatio());
@@ -165,19 +178,19 @@ public class MouseJoint extends Joint {
 		double invI = mass.getInverseInertia();
 		
 		// compute r
-		Vector r = transform.getTransformedR(body.getLocalCenter().to(this.anchor));
+		Vector2 r = transform.getTransformedR(body.getLocalCenter().to(this.anchor));
 
 		// Cdot = v + cross(w, r)
-		Vector C = r.cross(body.getAngularVelocity()).add(body.getVelocity());
+		Vector2 C = r.cross(body.getAngularVelocity()).add(body.getVelocity());
 		// compute Jv + b
-		Vector jvb = C;
+		Vector2 jvb = C;
 		jvb.add(this.bias);
 		jvb.add(this.impulse.product(this.gamma));
 		jvb.negate();
-		Vector J = invK.multiply(jvb);
+		Vector2 J = this.K.solve(jvb);
 		
 		// clamp using the maximum force
-		Vector oldImpulse = this.impulse;
+		Vector2 oldImpulse = this.impulse;
 		this.impulse.add(J);
 		double maxImpulse = step.getDeltaTime() * this.maxForce;
 		if (this.impulse.getMagnitudeSquared() > maxImpulse * maxImpulse) {
@@ -202,7 +215,7 @@ public class MouseJoint extends Joint {
 	 * @see org.dyn4j.game2d.dynamics.joint.Joint#getAnchor1()
 	 */
 	@Override
-	public Vector getAnchor1() {
+	public Vector2 getAnchor1() {
 		return this.target;
 	}
 	
@@ -210,7 +223,7 @@ public class MouseJoint extends Joint {
 	 * @see org.dyn4j.game2d.dynamics.joint.Joint#getAnchor2()
 	 */
 	@Override
-	public Vector getAnchor2() {
+	public Vector2 getAnchor2() {
 		return this.body2.getWorldPoint(this.anchor);
 	}
 	
@@ -218,7 +231,7 @@ public class MouseJoint extends Joint {
 	 * @see org.dyn4j.game2d.dynamics.joint.Joint#getReactionForce(double)
 	 */
 	@Override
-	public Vector getReactionForce(double invdt) {
+	public Vector2 getReactionForce(double invdt) {
 		return this.impulse.product(invdt);
 	}
 	
@@ -234,7 +247,9 @@ public class MouseJoint extends Joint {
 	 * Returns the target point in world coordinates.
 	 * @param target the target point
 	 */
-	public void setTarget(Vector target) {
+	public void setTarget(Vector2 target) {
+		// make sure the target is non null
+		if (target == null) throw new NullPointerException("The target point cannot be null.");
 		// see if its different
 		if (!this.target.equals(target)) {
 			// wake up the body
@@ -246,9 +261,9 @@ public class MouseJoint extends Joint {
 	
 	/**
 	 * Returns the target point in world coordinates
-	 * @return {@link Vector}
+	 * @return {@link Vector2}
 	 */
-	public Vector getTarget() {
+	public Vector2 getTarget() {
 		return this.target;
 	}
 	
@@ -265,6 +280,8 @@ public class MouseJoint extends Joint {
 	 * @param maxForce the maximum force in newtons
 	 */
 	public void setMaxForce(double maxForce) {
+		// make sure the max force is non negative
+		if (maxForce < 0.0) throw new IllegalArgumentException("The maximum force must be zero or greater.");
 		// see if the value is different
 		if (this.maxForce != maxForce) {
 			// wake up the body

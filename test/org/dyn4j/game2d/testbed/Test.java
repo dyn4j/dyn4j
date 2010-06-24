@@ -43,12 +43,13 @@ import org.dyn4j.game2d.dynamics.joint.DistanceJoint;
 import org.dyn4j.game2d.dynamics.joint.Joint;
 import org.dyn4j.game2d.dynamics.joint.MouseJoint;
 import org.dyn4j.game2d.dynamics.joint.RevoluteJoint;
+import org.dyn4j.game2d.dynamics.joint.WeldJoint;
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Interval;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Shape;
 import org.dyn4j.game2d.geometry.Transform;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 import org.dyn4j.game2d.geometry.Wound;
 
 /**
@@ -66,7 +67,7 @@ public abstract class Test {
 	protected double scale;
 	
 	/** The view port offset (x, y) */
-	protected Vector offset;
+	protected Vector2 offset;
 	
 	/** The bounds object */
 	protected Rectangle bounds;
@@ -98,7 +99,7 @@ public abstract class Test {
 		// initialize the scale
 		this.scale = 0.0;
 		// initialize the offset
-		this.offset = new Vector();
+		this.offset = new Vector2();
 		// initialize the display size
 		this.size = new Dimension();
 	}
@@ -210,8 +211,8 @@ public abstract class Test {
 			// draw all the normals for every convex on each shape
 			for (int i = 0; i < size; i++) {
 				Body b = this.world.getBody(i);
-				Vector center = b.getWorldCenter();
-				Vector v = b.getVelocity();
+				Vector2 center = b.getWorldCenter();
+				Vector2 v = b.getVelocity();
 				// draw the velocity vector
 				this.renderVector(g, v, center, scale);
 			}
@@ -229,13 +230,13 @@ public abstract class Test {
 			int cSize = contacts.size();
 			for (int i = 0; i < cSize; i++) {
 				ContactPoint cp = contacts.get(i);
-				Vector c = cp.getPoint();
+				Vector2 c = cp.getPoint();
 				
 				// draw the contact pairs
 				if (draw.drawContactPairs()) {
 					// get the centers of the convex shapes
-					Vector c1 = cp.getBody1().getTransform().getTransformed(cp.getFixture1().getShape().getCenter());
-					Vector c2 = cp.getBody2().getTransform().getTransformed(cp.getFixture2().getShape().getCenter());
+					Vector2 c1 = cp.getBody1().getTransform().getTransformed(cp.getFixture1().getShape().getCenter());
+					Vector2 c2 = cp.getBody2().getTransform().getTransformed(cp.getFixture2().getShape().getCenter());
 					// draw a line between them
 					g.setColor(Color.YELLOW);
 					g.drawLine((int) Math.ceil(c1.x * scale),
@@ -258,8 +259,8 @@ public abstract class Test {
 				if (cp instanceof SolvedContactPoint) {
 					g.setColor(Color.BLUE);
 					SolvedContactPoint scp = (SolvedContactPoint) cp;
-					Vector n = scp.getNormal();
-					Vector t = n.cross(1.0);
+					Vector2 n = scp.getNormal();
+					Vector2 t = n.cross(1.0);
 					double j = scp.getNormalImpulse();
 					double jt = scp.getTangentialImpulse();
 					
@@ -295,6 +296,8 @@ public abstract class Test {
 					this.render(g, (RevoluteJoint) joint);
 				} else if (joint instanceof MouseJoint) {
 					this.render(g, (MouseJoint) joint);
+				} else if (joint instanceof WeldJoint) {
+					this.render(g, (WeldJoint) joint);
 				}
 			}
 		}
@@ -323,8 +326,8 @@ public abstract class Test {
 	 * @param joint the {@link DistanceJoint} to render
 	 */
 	private void render(Graphics2D g, DistanceJoint joint) {
-		Vector v1 = joint.getAnchor1();
-		Vector v2 = joint.getAnchor2();
+		Vector2 v1 = joint.getAnchor1();
+		Vector2 v2 = joint.getAnchor2();
 		// set the color to be mostly transparent
 		g.setColor(new Color(0, 0, 0, 64));
 		// check for spring distance joint
@@ -341,33 +344,33 @@ public abstract class Test {
 			// progresses
 			int loops = (int) Math.ceil((joint.getDistance() - offset * 2.0) / h);
 			// get the vector between the two points
-			Vector n = v1.to(v2);
+			Vector2 n = v1.to(v2);
 			// normalize it to get the current distance
 			double x = n.normalize();
 			// get the tangent to the normal
-			Vector t = n.getRightHandOrthogonalVector();
+			Vector2 t = n.getRightHandOrthogonalVector();
 			// compute the distance between each loop along the normal
 			double d = (x - offset * 2.0) / (loops - 1);
 			// draw a line straight down using the offset
-			Vector d1 = n.product(offset).add(v1);
+			Vector2 d1 = n.product(offset).add(v1);
 			g.drawLine((int) Math.ceil(v1.x * scale),
 					   (int) Math.ceil(v1.y * scale), 
 					   (int) Math.ceil(d1.x * scale),
 					   (int) Math.ceil(d1.y * scale));
 			// draw the first loop (half loop)
-			Vector ct = t.product(w * 0.5);
-			Vector cn = n.product(d * 0.5);
-			Vector first = ct.sum(cn).add(d1);
+			Vector2 ct = t.product(w * 0.5);
+			Vector2 cn = n.product(d * 0.5);
+			Vector2 first = ct.sum(cn).add(d1);
 			g.drawLine((int) Math.ceil(d1.x * scale),
 					   (int) Math.ceil(d1.y * scale), 
 					   (int) Math.ceil(first.x * scale),
 					   (int) Math.ceil(first.y * scale));
 			// draw the middle loops
-			Vector prev = first;
+			Vector2 prev = first;
 			for (int i = 1; i < loops - 1; i++) {
 				ct = t.product(w * 0.5 * ((i + 1) % 2 == 1 ? 1.0 : -1.0));
 				cn = n.product(d * (i + 0.5) + offset);
-				Vector p2 = ct.sum(cn).add(v1);
+				Vector2 p2 = ct.sum(cn).add(v1);
 				// draw the line
 				g.drawLine((int) Math.ceil(prev.x * scale),
 						   (int) Math.ceil(prev.y * scale), 
@@ -376,7 +379,7 @@ public abstract class Test {
 				prev = p2;
 			}
 			// draw the final loop (half loop)
-			Vector d2 = n.product(-offset).add(v2);
+			Vector2 d2 = n.product(-offset).add(v2);
 			g.drawLine((int) Math.ceil(prev.x * scale),
 					   (int) Math.ceil(prev.y * scale), 
 					   (int) Math.ceil(d2.x * scale),
@@ -405,7 +408,7 @@ public abstract class Test {
 	 * @param joint the {@link RevoluteJoint} to render
 	 */
 	private void render(Graphics2D g, RevoluteJoint joint) {
-		Vector anchor = joint.getAnchor1();
+		Vector2 anchor = joint.getAnchor1();
 		g.setColor(Color.LIGHT_GRAY);
 		g.fillOval((int) Math.ceil((anchor.x - 0.025) * scale),
 				   (int) Math.ceil((anchor.y - 0.025) * scale), 
@@ -426,13 +429,13 @@ public abstract class Test {
 	private void render(Graphics2D g, MouseJoint joint) {
 		g.setColor(Color.BLACK);
 		// draw the anchor point
-		Vector anchor = joint.getAnchor2();
+		Vector2 anchor = joint.getAnchor2();
 		g.fillRect((int) Math.ceil((anchor.x - 0.025) * scale),
 				   (int) Math.ceil((anchor.y - 0.025) * scale), 
 				   (int) Math.ceil(0.05 * scale),
 				   (int) Math.ceil(0.05 * scale));
 		// draw the target point
-		Vector target = joint.getTarget();
+		Vector2 target = joint.getTarget();
 		g.fillRect((int) Math.ceil((target.x - 0.025) * scale),
 				   (int) Math.ceil((target.y - 0.025) * scale), 
 				   (int) Math.ceil(0.05 * scale),
@@ -452,6 +455,25 @@ public abstract class Test {
 				   (int) Math.ceil(anchor.y * scale), 
 				   (int) Math.ceil(target.x * scale),
 				   (int) Math.ceil(target.y * scale));
+	}
+	
+	/**
+	 * Renders a {@link WeldJoint} to the given graphics object.
+	 * @param g the graphics object to render to
+	 * @param joint the {@link WeldJoint} to render
+	 */
+	private void render(Graphics2D g, WeldJoint joint) {
+		// draw an x at the anchor point
+		Vector2 anchor = joint.getAnchor1();
+		g.setColor(Color.DARK_GRAY);
+		g.drawLine((int) Math.ceil((anchor.x - 0.025) * scale),
+				   (int) Math.ceil((anchor.y - 0.025) * scale), 
+				   (int) Math.ceil((anchor.x + 0.025) * scale),
+				   (int) Math.ceil((anchor.y + 0.025) * scale));
+		g.drawLine((int) Math.ceil((anchor.x - 0.025) * scale),
+				   (int) Math.ceil((anchor.y + 0.025) * scale), 
+				   (int) Math.ceil((anchor.x + 0.025) * scale),
+				   (int) Math.ceil((anchor.y - 0.025) * scale));
 	}
 	
 	/**
@@ -492,10 +514,10 @@ public abstract class Test {
 	 * Converts the screen coordinate to world space.
 	 * @param x screen x
 	 * @param y screen y
-	 * @return {@link Vector}
+	 * @return {@link Vector2}
 	 */
-	public Vector screenToWorld(double x, double y) {
-		Vector v = new Vector();
+	public Vector2 screenToWorld(double x, double y) {
+		Vector2 v = new Vector2();
 		v.x = (x - this.size.width / 2.0) / this.scale - this.offset.x;
 		v.y = -((y - this.size.height / 2.0) / this.scale + this.offset.y);
 		return v;
@@ -556,16 +578,16 @@ public abstract class Test {
 		// make sure the shape is of type wound
 		if (c instanceof Wound) {
 			Wound shape = (Wound) c;
-			Vector[] vertices = shape.getVertices();
-			Vector[] normals = shape.getNormals();
+			Vector2[] vertices = shape.getVertices();
+			Vector2[] normals = shape.getNormals();
 			int size = normals.length;
 			// render all the normals
 			for (int i = 0; i < size; i++) {
-				Vector p1 = t.getTransformed(vertices[i]);
-				Vector p2 = t.getTransformed(vertices[(i + 1 == size) ? 0 : i + 1]);
-				Vector n = t.getTransformedR(normals[i]);
+				Vector2 p1 = t.getTransformed(vertices[i]);
+				Vector2 p2 = t.getTransformed(vertices[(i + 1 == size) ? 0 : i + 1]);
+				Vector2 n = t.getTransformedR(normals[i]);
 				// find the mid point between p1 and p2
-				Vector mid = p1.to(p2).multiply(0.5).add(p1);
+				Vector2 mid = p1.to(p2).multiply(0.5).add(p1);
 				// draw a line from the mid point along n
 				g.drawLine(
 						(int) Math.ceil(mid.x * s),
@@ -583,7 +605,7 @@ public abstract class Test {
 	 * @param s the start position to render the vector from
 	 * @param scale the scaling factor from world space to screen space
 	 */
-	private void renderVector(Graphics2D g, Vector v, Vector s, double scale) {
+	private void renderVector(Graphics2D g, Vector2 v, Vector2 s, double scale) {
 		g.drawLine(
 				(int) Math.ceil(s.x * scale),
 				(int) Math.ceil(s.y * scale),

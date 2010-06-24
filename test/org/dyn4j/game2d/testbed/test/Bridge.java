@@ -31,7 +31,7 @@ import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.dynamics.joint.RevoluteJoint;
 import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Rectangle;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Entity;
 import org.dyn4j.game2d.testbed.Test;
@@ -115,7 +115,7 @@ public class Bridge extends Test {
 			this.world.add(link);
 			
 			// define the anchor point
-			Vector anchor = new Vector(-x + w * i, y);
+			Vector2 anchor = new Vector2(-x + w * i, y);
 			
 			// create a joint from the previous body to this body
 			RevoluteJoint joint = new RevoluteJoint(previous, link, anchor);
@@ -125,7 +125,7 @@ public class Bridge extends Test {
 		}
 		
 		// define the anchor point
-		Vector anchor = new Vector(-x + w * LENGTH, y);
+		Vector2 anchor = new Vector2(-x + w * LENGTH, y);
 		
 		// create a joint from the previous body to this body
 		RevoluteJoint joint = new RevoluteJoint(previous, floor, anchor);

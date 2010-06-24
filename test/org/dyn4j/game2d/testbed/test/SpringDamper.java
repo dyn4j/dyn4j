@@ -33,7 +33,7 @@ import org.dyn4j.game2d.dynamics.joint.Joint;
 import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Rectangle;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Entity;
 import org.dyn4j.game2d.testbed.Test;
@@ -131,9 +131,9 @@ public class SpringDamper extends Test {
 		this.world.add(wheel2);
 		
 		// create a  fixed distance joint between the wheels
-		Vector p1 = wheel1.getWorldCenter().copy();
-		Vector p2 = wheel2.getWorldCenter().copy();
-		Vector p3 = body.getWorldCenter().copy();
+		Vector2 p1 = wheel1.getWorldCenter().copy();
+		Vector2 p2 = wheel2.getWorldCenter().copy();
+		Vector2 p3 = body.getWorldCenter().copy();
 		
 		// join them
 		Joint j1 = new DistanceJoint(body, wheel1, true, p3, p1);
@@ -142,11 +142,11 @@ public class SpringDamper extends Test {
 		this.world.add(j2);
 		
 		// create a spring joint for the rear wheel
-		Joint j3 = new DistanceJoint(body, wheel1, true, new Vector(-1.0, 4.0), p1, 8.0, 0.4);
+		Joint j3 = new DistanceJoint(body, wheel1, true, new Vector2(-1.0, 4.0), p1, 8.0, 0.4);
 		this.world.add(j3);
 		
 		// create a spring joint for the front wheel
-		Joint j4 = new DistanceJoint(body, wheel2, true, new Vector(1.0, 4.0), p2, 8.0, 0.4);
+		Joint j4 = new DistanceJoint(body, wheel2, true, new Vector2(1.0, 4.0), p2, 8.0, 0.4);
 		this.world.add(j4);
 	}
 	

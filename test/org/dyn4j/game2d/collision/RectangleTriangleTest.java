@@ -42,7 +42,7 @@ import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Shape;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Triangle;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -64,9 +64,9 @@ public class RectangleTriangleTest extends AbstractTest {
 	public void setup() {
 		this.rect = new Rectangle(1.0, 1.0);
 		this.tri = new Triangle(
-				new Vector(0.45, -0.12),
-				new Vector(-0.45, 0.38),
-				new Vector(-0.15, -0.22));
+				new Vector2(0.45, -0.12),
+				new Vector2(-0.45, 0.38),
+				new Vector2(-0.15, -0.22));
 	}
 	
 	/**
@@ -170,7 +170,7 @@ public class RectangleTriangleTest extends AbstractTest {
 		Transform t1 = new Transform();
 		Transform t2 = new Transform();
 		
-		Vector n = null;
+		Vector2 n = null;
 		
 		// test containment
 		TestCase.assertTrue(this.sat.detect(rect, t1, tri, t2, p));
@@ -229,7 +229,7 @@ public class RectangleTriangleTest extends AbstractTest {
 		Transform t1 = new Transform();
 		Transform t2 = new Transform();
 		
-		Vector n = null;
+		Vector2 n = null;
 		
 		// test containment
 		TestCase.assertTrue(this.gjk.detect(rect, t1, tri, t2, p));
@@ -289,7 +289,7 @@ public class RectangleTriangleTest extends AbstractTest {
 		Transform t1 = new Transform();
 		Transform t2 = new Transform();
 		
-		Vector n, p1, p2;
+		Vector2 n, p1, p2;
 		
 		// test containment
 		TestCase.assertFalse(this.gjk.distance(rect, t1, tri, t2, s));
@@ -367,7 +367,7 @@ public class RectangleTriangleTest extends AbstractTest {
 		Transform t2 = new Transform();
 		
 		ManifoldPoint mp1, mp2;
-		Vector p1, p2;
+		Vector2 p1, p2;
 		
 		// test containment gjk
 		this.gjk.detect(rect, t1, tri, t2, p);

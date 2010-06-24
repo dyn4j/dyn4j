@@ -32,9 +32,8 @@ import org.dyn4j.game2d.dynamics.joint.Joint;
 import org.dyn4j.game2d.dynamics.joint.RevoluteJoint;
 import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Mass;
-import org.dyn4j.game2d.geometry.Polygon;
 import org.dyn4j.game2d.geometry.Rectangle;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Entity;
 import org.dyn4j.game2d.testbed.Test;
@@ -64,7 +63,7 @@ public class Motor extends Test {
 		this.home();
 		
 		// set the bounds
-		this.bounds = new Rectangle(16.0, 15.0);
+		this.bounds = new Rectangle(150.0, 15.0);
 		
 		// create the world
 		Bounds bounds = new RectangularBounds(this.bounds);
@@ -84,75 +83,101 @@ public class Motor extends Test {
 	 */
 	@Override
 	protected void setup() {
+		// create some shapes
+		// the floor rect
+		Rectangle floorRect = new Rectangle(50.0, 1.0);
+		// the wheel base frame rect
+		Rectangle frameRect = new Rectangle(5.0, 0.25);
+		// the body rect
+		Rectangle bodyRect  = new Rectangle(5.2, 0.5);
+		// tail gate rectangles
+		Rectangle tgRect1   = new Rectangle(0.25, 0.5);
+		Rectangle tgRect2   = new Rectangle(0.25, 0.5);
+		// payload rectangle
+		Rectangle pRect     = new Rectangle(0.25, 0.25);
+		// the slope rect
+		Rectangle slopeRect = new Rectangle(10.0, 0.2);
+		// the wheel circle
+		Circle wheelCircle  = new Circle(0.5);
+		
+		// create the fixtures for the bodies
+		Fixture floorFixture  = new Fixture(floorRect); floorFixture.setFriction(0.5);
+		Fixture wheelFixture1 = new Fixture(wheelCircle); wheelFixture1.setFriction(0.5);
+		Fixture wheelFixture2 = new Fixture(wheelCircle); wheelFixture2.setFriction(0.5);
+		
 		// create the floor
-		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
-		floor.addFixture(new Fixture(floorRect));
+		floor.addFixture(floorFixture);
 		floor.setMassFromShapes(Mass.Type.INFINITE);
-		// move the floor down a bit
-		floor.translate(0.0, -4.0);
-		this.world.add(floor);
+		floor.translate(-2.0, -4.0);
 		
-		/*
-		 * Make this configuration
-		 * +------------------------+
-		 * |                        |
-		 * | .                    . |
-		 * +-|--------------------|-+
-		 *   0                    0
-		 */
-		
-		// create a reusable rectangle
-		Rectangle frameRect = new Rectangle(3.0, 0.175);
-		Rectangle bodyRect = new Rectangle(3.2, 0.5);
-		bodyRect.translate(0.0, 0.0875 + 0.25);
-		Polygon cabinPoly = new Polygon(new Vector[] {
-				new Vector(1.25, 0.0),
-				new Vector(0.25, 0.35),
-				new Vector(-0.5, 0.35),
-				new Vector(-0.75, 0.0)
-		});
-		cabinPoly.translate(-0.25, 0.0875 + 0.5);
-		
-		// create a reusable circle
-		Circle c = new Circle(0.35);
-		
-		Fixture fc1 = new Fixture(c);
-		fc1.setDensity(2.0);
-		
-		Fixture fc2 = new Fixture(c);
-		fc2.setDensity(1.0);
-		fc2.setFriction(0.1);
-		
+		// create the car frame and body
 		Entity body = new Entity();
 		body.addFixture(new Fixture(frameRect));
+		// locally transform the body fixture
+		bodyRect.translate(0.0, 0.5);
 		body.addFixture(new Fixture(bodyRect));
-		body.addFixture(new Fixture(cabinPoly));
+		// locally transform the first tail gate rect1 fixture
+		tgRect1.translate(2.4, 1.0);
+		body.addFixture(new Fixture(tgRect1));
+		// locally transform the first tail gate rect2 fixture
+		tgRect2.translate(-2.4, 1.0);
+		body.addFixture(new Fixture(tgRect2));
 		body.setMassFromShapes();
-		body.translate(-3.0, -3.1);
+		body.translate(-23.0, -3.0);
 		
+		// add some payload bodies
+		double x, y;
+		for (int i = 0; i < 8; i++) {
+			x = -24.0 + 0.25 * i;
+			for (int j = 0; j < 3; j++) {
+				y = -2.0 + 0.25 * j;
+				Entity payload1 = new Entity();
+				payload1.addFixture(new Fixture(pRect));
+				payload1.setMassFromShapes();
+				payload1.translate(x, y);
+				this.world.add(payload1);
+			}
+		}
+		
+		// create the slope to go up
+		Entity slope = new Entity();
+		slope.addFixture(new Fixture(slopeRect));
+		slope.setMassFromShapes(Mass.Type.INFINITE);
+		slope.translate(0.0, -3.0);
+		slope.rotate(Math.toRadians(10), slope.getWorldCenter());
+		
+		// create the first wheel
 		Entity wheel1 = new Entity();
-		wheel1.addFixture(fc1);
+		wheel1.addFixture(wheelFixture1);
 		wheel1.setMassFromShapes();
-		wheel1.translate(-4.0, -3.1);
+		wheel1.translate(-25.0, -3.0);
 		
+		// create the second wheel
 		Entity wheel2 = new Entity();
-		wheel2.addFixture(fc2);
+		wheel2.addFixture(wheelFixture2);
 		wheel2.setMassFromShapes();
-		wheel2.translate(-2.0, -3.1);
+		wheel2.translate(-21.0, -3.0);
 		
+		// add the bodies to the world
+		this.world.add(floor);
+		this.world.add(slope);
 		this.world.add(body);
 		this.world.add(wheel1);
 		this.world.add(wheel2);
 		
-		// create a  fixed distance joint between the wheels
-		Vector p1 = wheel1.getWorldCenter().copy();
-		Vector p2 = wheel2.getWorldCenter().copy();
+		// create a revolute joint between the wheels and the frame
+		Vector2 p1 = wheel1.getWorldCenter().copy();
+		Vector2 p2 = wheel2.getWorldCenter().copy();
 		
-		// join them
+		// the rear wheel is just a normal revolute joint
 		Joint j1 = new RevoluteJoint(wheel1, body, false, p1);
+		
+		// the front wheel is a motorized revolute joint
+		Joint j2 = new RevoluteJoint(wheel2, body, false, p2, true, -1.0 * Math.PI, 1000.0);
+		
+		// add the joints to the world
 		this.world.add(j1);
-		Joint j2 = new RevoluteJoint(wheel2, body, false, p2, true, -2.0 * Math.PI, 100.0);
 		this.world.add(j2);
 	}
 	
@@ -162,7 +187,7 @@ public class Motor extends Test {
 	@Override
 	public void home() {
 		// set the scale
-		this.scale = 64.0;
+		this.scale = 16.0;
 		// set the camera offset
 		this.offset.set(0.0, 2.0);
 	}

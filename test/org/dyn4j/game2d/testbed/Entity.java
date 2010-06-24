@@ -40,7 +40,7 @@ import org.dyn4j.game2d.geometry.Polygon;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Segment;
 import org.dyn4j.game2d.geometry.Transform;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Represents a game entity.
@@ -124,11 +124,11 @@ public class Entity extends Body {
 	public void render(Graphics2D graphics, double scale) {
 		Draw draw = Draw.getInstance();
 		// get the center of mass
-		Vector center = this.mass.getCenter();
+		Vector2 center = this.mass.getCenter();
 		// get the transform
 		Transform tx = this.transform;
 		// get the world center
-		Vector wCenter = tx.getTransformed(center);
+		Vector2 wCenter = tx.getTransformed(center);
 		
 		int size = this.getShapeCount();
 		// draw the shapes
@@ -181,8 +181,8 @@ public class Entity extends Body {
 		if (c instanceof Polygon) {
 			Polygon p = (Polygon) c;
 			for (int i = 0; i < p.getVertices().length; i++) {
-				Vector p1 = p.getVertices()[i];
-				Vector p2 = i + 1 == p.getVertices().length ? p.getVertices()[0] : p.getVertices()[i + 1];
+				Vector2 p1 = p.getVertices()[i];
+				Vector2 p2 = i + 1 == p.getVertices().length ? p.getVertices()[0] : p.getVertices()[i + 1];
 				p1 = t.getTransformed(p1);
 				p2 = t.getTransformed(p2);
 				g.drawLine(
@@ -193,11 +193,11 @@ public class Entity extends Body {
 			}
 		} else if (c instanceof Circle) {
 			Circle cir = (Circle) c;
-			Vector center = cir.getCenter();
+			Vector2 center = cir.getCenter();
 			// transform the center into world coordinates
 			center = t.getTransformed(center);
 			double r = cir.getRadius() * s;
-			Vector e = cir.getCenter().sum(cir.getRadius(), 0.0);
+			Vector2 e = cir.getCenter().sum(cir.getRadius(), 0.0);
 			t.transform(e);
 			// draw the oval
 			g.drawOval(
@@ -213,8 +213,8 @@ public class Entity extends Body {
 					(int) Math.ceil(e.y * s));
 		} else if (c instanceof Segment) {
 			Segment seg = (Segment) c;
-			Vector p1 = t.getTransformed(seg.getPoint1());
-			Vector p2 = t.getTransformed(seg.getPoint2());
+			Vector2 p1 = t.getTransformed(seg.getPoint1());
+			Vector2 p2 = t.getTransformed(seg.getPoint2());
 			g.drawLine(
 					(int) Math.ceil(p1.x * s),
 					(int) Math.ceil(p1.y * s),
@@ -232,7 +232,7 @@ public class Entity extends Body {
 	 */
 	private void renderFill(Graphics2D g, Convex c, Transform t, double scale) {
 		// get the transformed center
-		Vector ce = t.getTransformed(c.getCenter());
+		Vector2 ce = t.getTransformed(c.getCenter());
 		
 		// check for arbitrary polygon
 		if (c instanceof Polygon) {
@@ -241,7 +241,7 @@ public class Entity extends Body {
 			// cast to polygon
 			Polygon p = (Polygon) c;
 			for (int i = 0; i < p.getVertices().length; i++) {
-				Vector p1 = p.getVertices()[i];
+				Vector2 p1 = p.getVertices()[i];
 				p1 = t.getTransformed(p1);
 				poly.addPoint((int) Math.ceil(p1.x * scale), (int) Math.ceil(p1.y * scale));
 			}
@@ -264,8 +264,8 @@ public class Entity extends Body {
 		// check for segment
 		if (c instanceof Segment) {
 			Segment seg = (Segment) c;
-			Vector p1 = t.getTransformed(seg.getPoint1());
-			Vector p2 = t.getTransformed(seg.getPoint2());
+			Vector2 p1 = t.getTransformed(seg.getPoint1());
+			Vector2 p2 = t.getTransformed(seg.getPoint2());
 			g.drawLine(
 					(int) Math.ceil(p1.x * scale),
 					(int) Math.ceil(p1.y * scale),
@@ -286,7 +286,7 @@ public class Entity extends Body {
 	 */
 	@SuppressWarnings("unused")
 	private void renderImage(Graphics2D g, Convex c, Transform t, double scale) {
-		Vector ce = t.getTransformed(c.getCenter());
+		Vector2 ce = t.getTransformed(c.getCenter());
 		
 		// get the rotation and use an affine transform to rotate the subsequent graphics
 		double rotation = t.getRotation();

@@ -28,7 +28,7 @@ import org.dyn4j.game2d.collision.Collidable;
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Interval;
 import org.dyn4j.game2d.geometry.Transform;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Abstract implementation of a {@link BroadphaseDetector} providing AABB
@@ -36,11 +36,11 @@ import org.dyn4j.game2d.geometry.Vector;
  * @author William Bittle
  */
 public abstract class AbstractAABBDetector implements BroadphaseDetector {
-	/** Constant for the x-axis {@link Vector} */
-	protected static final Vector X_AXIS = new Vector(1, 0);
+	/** Constant for the x-axis {@link Vector2} */
+	protected static final Vector2 X_AXIS = new Vector2(1, 0);
 	
-	/** Constant for the y-axis {@link Vector} */
-	protected static final Vector Y_AXIS = new Vector(0, 1);
+	/** Constant for the y-axis {@link Vector2} */
+	protected static final Vector2 Y_AXIS = new Vector2(0, 1);
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.game2d.collision.Collidable, org.dyn4j.game2d.collision.Collidable)

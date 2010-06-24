@@ -57,8 +57,8 @@ public class ContactConstraintId {
 	public ContactConstraintId(Body body1, Fixture fixture1, Body body2, Fixture fixture2) {
 		this.body1Id = body1.getId();
 		this.body2Id = body2.getId();
-		this.fixture1Id = fixture1.getShape().getId();
-		this.fixture2Id = fixture2.getShape().getId();
+		this.fixture1Id = fixture1.getId();
+		this.fixture2Id = fixture2.getId();
 	}
 	
 	/* (non-Javadoc)

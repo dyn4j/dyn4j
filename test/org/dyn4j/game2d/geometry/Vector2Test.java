@@ -29,38 +29,38 @@ import junit.framework.TestCase;
 import org.junit.Test;
 
 /**
- * Test case for the {@link Vector} class.
+ * Test case for the {@link Vector2} class.
  * @author William Bittle
  */
-public class VectorTest {
+public class Vector2Test {
 	/**
 	 * Tests the create methods.
 	 */
 	@Test
 	public void create() {
-		Vector v1 = new Vector();
+		Vector2 v1 = new Vector2();
 		// should default to zero
 		TestCase.assertEquals(0.0, v1.x);
 		TestCase.assertEquals(0.0, v1.y);
 		
-		Vector v2 = new Vector(1.0, 2.0);
+		Vector2 v2 = new Vector2(1.0, 2.0);
 		TestCase.assertEquals(1.0, v2.x);
 		TestCase.assertEquals(2.0, v2.y);
 		
-		Vector v3 = new Vector(v2);
+		Vector2 v3 = new Vector2(v2);
 		TestCase.assertFalse(v3 == v2);
 		TestCase.assertEquals(1.0, v3.x);
 		TestCase.assertEquals(2.0, v3.y);
 		
-		Vector v4 = new Vector(0.0, 1.0, 2.0, 3.0);
+		Vector2 v4 = new Vector2(0.0, 1.0, 2.0, 3.0);
 		TestCase.assertEquals(2.0, v4.x);
 		TestCase.assertEquals(2.0, v4.y);
 		
-		Vector v5 = new Vector(v2, v1);
+		Vector2 v5 = new Vector2(v2, v1);
 		TestCase.assertEquals(-1.0, v5.x);
 		TestCase.assertEquals(-2.0, v5.y);
 		
-		Vector v6 = Vector.create(1.0, Math.toRadians(90));
+		Vector2 v6 = Vector2.create(1.0, Math.toRadians(90));
 		TestCase.assertEquals( 0.000, v6.x, 1.0e-3);
 		TestCase.assertEquals( 1.000, v6.y, 1.0e-3);
 	}
@@ -70,8 +70,8 @@ public class VectorTest {
 	 */
 	@Test
 	public void copy() {
-		Vector v = new Vector(1.0, 3.0);
-		Vector vc = v.copy();
+		Vector2 v = new Vector2(1.0, 3.0);
+		Vector2 vc = v.copy();
 		
 		TestCase.assertFalse(v == vc);
 		TestCase.assertEquals(v.x, vc.x);
@@ -83,17 +83,17 @@ public class VectorTest {
 	 */
 	@Test
 	public void distance() {
-		Vector v = new Vector();
+		Vector2 v = new Vector2();
 		
 		TestCase.assertEquals(4.000, v.distanceSquared(2.0, 0.0), 1.0e-3);
 		TestCase.assertEquals(5.000, v.distanceSquared(2.0, -1.0), 1.0e-3);
 		TestCase.assertEquals(2.000, v.distance(2.0, 0.0), 1.0e-3);
 		TestCase.assertEquals(5.000, v.distance(3.0, 4.0), 1.0e-3);
 		
-		TestCase.assertEquals(4.000, v.distanceSquared(new Vector(2.0, 0.0)), 1.0e-3);
-		TestCase.assertEquals(5.000, v.distanceSquared(new Vector(2.0, -1.0)), 1.0e-3);
-		TestCase.assertEquals(2.000, v.distance(new Vector(2.0, 0.0)), 1.0e-3);
-		TestCase.assertEquals(5.000, v.distance(new Vector(3.0, 4.0)), 1.0e-3);
+		TestCase.assertEquals(4.000, v.distanceSquared(new Vector2(2.0, 0.0)), 1.0e-3);
+		TestCase.assertEquals(5.000, v.distanceSquared(new Vector2(2.0, -1.0)), 1.0e-3);
+		TestCase.assertEquals(2.000, v.distance(new Vector2(2.0, 0.0)), 1.0e-3);
+		TestCase.assertEquals(5.000, v.distance(new Vector2(3.0, 4.0)), 1.0e-3);
 	}
 	
 	/**
@@ -101,10 +101,10 @@ public class VectorTest {
 	 */
 	@Test
 	public void tripleProduct() {
-		Vector v1 = new Vector(1.0, 1.0);
-		Vector v2 = new Vector(1.0, -1.0);
+		Vector2 v1 = new Vector2(1.0, 1.0);
+		Vector2 v2 = new Vector2(1.0, -1.0);
 		
-		Vector r = Vector.tripleProduct(v1, v2, v2);
+		Vector2 r = Vector2.tripleProduct(v1, v2, v2);
 		
 		// the below would be -1.0 if the vectors were normalized
 		TestCase.assertEquals(-2.000, r.x, 1.0e-3);
@@ -116,11 +116,11 @@ public class VectorTest {
 	 */
 	@Test
 	public void equals() {
-		Vector v = new Vector(1.0, 2.0);
+		Vector2 v = new Vector2(1.0, 2.0);
 		
 		TestCase.assertTrue(v.equals(v));
 		TestCase.assertTrue(v.equals(v.copy()));
-		TestCase.assertTrue(v.equals(new Vector(1.0, 2.0)));
+		TestCase.assertTrue(v.equals(new Vector2(1.0, 2.0)));
 		TestCase.assertTrue(v.equals(1.0, 2.0));
 		
 		TestCase.assertFalse(v.equals(v.copy().set(2.0, 1.0)));
@@ -132,9 +132,9 @@ public class VectorTest {
 	 */
 	@Test
 	public void set() {
-		Vector v = new Vector();
+		Vector2 v = new Vector2();
 		
-		Vector v2 = new Vector(1.0, -3.0);
+		Vector2 v2 = new Vector2(1.0, -3.0);
 		v.set(v2);
 		
 		TestCase.assertFalse(v == v2);
@@ -159,10 +159,10 @@ public class VectorTest {
 	 */
 	@Test
 	public void get() {
-		Vector v = new Vector(3.0, 4.0);
+		Vector2 v = new Vector2(3.0, 4.0);
 		
-		Vector x = v.getXComponent();
-		Vector y = v.getYComponent();
+		Vector2 x = v.getXComponent();
+		Vector2 y = v.getYComponent();
 		
 		TestCase.assertEquals(3.0, x.x);
 		TestCase.assertEquals(0.0, x.y);
@@ -173,7 +173,7 @@ public class VectorTest {
 		TestCase.assertEquals(25.000, v.getMagnitudeSquared(), 1.0e-3);
 		TestCase.assertEquals(53.130, Math.toDegrees(v.getDirection()), 1.0e-3);
 		
-		Vector v2 = new Vector(-4.0, 3.0);
+		Vector2 v2 = new Vector2(-4.0, 3.0);
 		TestCase.assertEquals(90.000, Math.toDegrees(v.getAngleBetween(v2)), 1.0e-3);
 		
 		v2 = v.getLeftHandOrthogonalVector();
@@ -198,10 +198,10 @@ public class VectorTest {
 	 */
 	@Test
 	public void add() {
-		Vector v1 = new Vector(1.0, 2.0);
-		Vector v2 = new Vector(-2.0, 1.0);
+		Vector2 v1 = new Vector2(1.0, 2.0);
+		Vector2 v2 = new Vector2(-2.0, 1.0);
 		
-		Vector v3 = v1.sum(v2);
+		Vector2 v3 = v1.sum(v2);
 		TestCase.assertEquals(-1.0, v3.x);
 		TestCase.assertEquals( 3.0, v3.y);
 		
@@ -223,10 +223,10 @@ public class VectorTest {
 	 */
 	@Test
 	public void subtract() {
-		Vector v1 = new Vector(1.0, 2.0);
-		Vector v2 = new Vector(-2.0, 1.0);
+		Vector2 v1 = new Vector2(1.0, 2.0);
+		Vector2 v2 = new Vector2(-2.0, 1.0);
 		
-		Vector v3 = v1.difference(v2);
+		Vector2 v3 = v1.difference(v2);
 		TestCase.assertEquals( 3.0, v3.x);
 		TestCase.assertEquals( 1.0, v3.y);
 		
@@ -248,10 +248,10 @@ public class VectorTest {
 	 */
 	@Test
 	public void to() {
-		Vector p1 = new Vector(1.0, 1.0);
-		Vector p2 = new Vector(0.0, 1.0);
+		Vector2 p1 = new Vector2(1.0, 1.0);
+		Vector2 p2 = new Vector2(0.0, 1.0);
 		
-		Vector r = p1.to(p2);
+		Vector2 r = p1.to(p2);
 		
 		TestCase.assertEquals(-1.0, r.x);
 		TestCase.assertEquals( 0.0, r.y);
@@ -267,9 +267,9 @@ public class VectorTest {
 	 */
 	@Test
 	public void multiply() {
-		Vector v1 = new Vector(2.0, 1.0);
+		Vector2 v1 = new Vector2(2.0, 1.0);
 		
-		Vector r = v1.product(-1.5);
+		Vector2 r = v1.product(-1.5);
 		TestCase.assertEquals(-3.0, r.x);
 		TestCase.assertEquals(-1.5, r.y);
 		
@@ -279,28 +279,12 @@ public class VectorTest {
 	}
 	
 	/**
-	 * Tests the divide and quotient methods.
-	 */
-	@Test
-	public void divide() {
-		Vector v1 = new Vector(2.0, 1.0);
-		
-		Vector r = v1.quotient(-0.5);
-		TestCase.assertEquals(-4.0, r.x);
-		TestCase.assertEquals(-2.0, r.y);
-		
-		v1.divide(-0.5);
-		TestCase.assertEquals(-4.0, v1.x);
-		TestCase.assertEquals(-2.0, v1.y);
-	}
-	
-	/**
 	 * Tests the dot method.
 	 */
 	@Test
 	public void dot() {
-		Vector v1 = new Vector(1.0, 1.0);
-		Vector v2 = new Vector(0.0, 1.0);
+		Vector2 v1 = new Vector2(1.0, 1.0);
+		Vector2 v2 = new Vector2(0.0, 1.0);
 		
 		TestCase.assertEquals(1.0, v1.dot(v2));
 		// test a perpendicular vector
@@ -318,8 +302,8 @@ public class VectorTest {
 	 */
 	@Test
 	public void cross() {
-		Vector v1 = new Vector(1.0, 1.0);
-		Vector v2 = new Vector(0.0, 1.0);
+		Vector2 v1 = new Vector2(1.0, 1.0);
+		Vector2 v2 = new Vector2(0.0, 1.0);
 		
 		TestCase.assertEquals(0.0, v1.cross(v1));
 		TestCase.assertEquals(1.0, v1.cross(v2));
@@ -329,7 +313,7 @@ public class VectorTest {
 		TestCase.assertEquals(1.0, v1.cross(0.0, 1.0));
 		TestCase.assertEquals(2.0, v1.cross(-1.0, 1.0));
 		
-		Vector r = v1.cross(3.0);
+		Vector2 r = v1.cross(3.0);
 		
 		TestCase.assertEquals(-3.0, r.x);
 		TestCase.assertEquals( 3.0, r.y);
@@ -340,8 +324,8 @@ public class VectorTest {
 	 */
 	@Test
 	public void isOrthogonal() {
-		Vector v1 = new Vector(1.0, 1.0);
-		Vector v2 = new Vector(0.0, 1.0);
+		Vector2 v1 = new Vector2(1.0, 1.0);
+		Vector2 v2 = new Vector2(0.0, 1.0);
 		
 		TestCase.assertFalse(v1.isOrthogonal(v2));
 		TestCase.assertTrue(v1.isOrthogonal(v1.getLeftHandOrthogonalVector()));
@@ -359,7 +343,7 @@ public class VectorTest {
 	 */
 	@Test
 	public void isZero() {
-		Vector v = new Vector();
+		Vector2 v = new Vector2();
 		
 		TestCase.assertTrue(v.isZero());
 		
@@ -378,7 +362,7 @@ public class VectorTest {
 	 */
 	@Test
 	public void negate() {
-		Vector v = new Vector(1.0, -6.0);
+		Vector2 v = new Vector2(1.0, -6.0);
 		
 		v.negate();
 		TestCase.assertEquals(-1.0, v.x);
@@ -390,7 +374,7 @@ public class VectorTest {
 	 */
 	@Test
 	public void zero() {
-		Vector v = new Vector(1.0, -2.0);
+		Vector2 v = new Vector2(1.0, -2.0);
 		
 		v.zero();
 		TestCase.assertEquals( 0.0, v.x);
@@ -402,7 +386,7 @@ public class VectorTest {
 	 */
 	@Test
 	public void rotate() {
-		Vector v = new Vector(2.0, 1.0);
+		Vector2 v = new Vector2(2.0, 1.0);
 		
 		v.rotate(Math.toRadians(90));
 		TestCase.assertEquals(-1.000, v.x, 1.0e-3);
@@ -418,10 +402,10 @@ public class VectorTest {
 	 */
 	@Test
 	public void project() {
-		Vector v1 = new Vector(1.0, 1.0);
-		Vector v2 = new Vector(0.5, 1.0);
+		Vector2 v1 = new Vector2(1.0, 1.0);
+		Vector2 v2 = new Vector2(0.5, 1.0);
 		
-		Vector r = v1.project(v2);
+		Vector2 r = v1.project(v2);
 		
 		TestCase.assertEquals( 0.600, r.x, 1.0e-3);
 		TestCase.assertEquals( 1.200, r.y, 1.0e-3);
@@ -432,7 +416,7 @@ public class VectorTest {
 	 */
 	@Test
 	public void left() {
-		Vector v = new Vector(11.0, 2.5);
+		Vector2 v = new Vector2(11.0, 2.5);
 		v.left();
 		
 		TestCase.assertEquals( 2.5, v.x);
@@ -444,7 +428,7 @@ public class VectorTest {
 	 */
 	@Test
 	public void right() {
-		Vector v = new Vector(11.0, 2.5);
+		Vector2 v = new Vector2(11.0, 2.5);
 		v.right();
 		
 		TestCase.assertEquals( -2.5, v.x);
@@ -456,7 +440,7 @@ public class VectorTest {
 	 */
 	@Test
 	public void normalize() {
-		Vector v = new Vector(3.0, 4.0);
+		Vector2 v = new Vector2(3.0, 4.0);
 		v.normalize();
 		
 		TestCase.assertEquals( 3.0 / 5.0, v.x, 1.0e-3);

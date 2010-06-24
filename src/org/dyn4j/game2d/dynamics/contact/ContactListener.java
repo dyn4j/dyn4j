@@ -39,24 +39,6 @@ import org.dyn4j.game2d.dynamics.World;
  */
 public interface ContactListener {
 	/**
-	 * Called when a two fixtures begin to overlap generating a contact point.
-	 * @param point the contact point that was added
-	 */
-	public abstract void begin(ContactPoint point);
-	
-	/**
-	 * Called when a two {@link Fixture}s begin to separate.
-	 * @param point the contact point that was removed
-	 */
-	public abstract void end(ContactPoint point);
-	
-	/**
-	 * Called when two {@link Fixture}s remain in contact.
-	 * @param point the persisted contact point
-	 */
-	public abstract void persist(PersistedContactPoint point);
-	
-	/**
 	 * Called when a contact has been sensed between two {@link Body}s,
 	 * where one or both {@link Body}s are sensors.
 	 * @param point the contact point that was sensed
@@ -64,10 +46,32 @@ public interface ContactListener {
 	public abstract void sensed(SensedContactPoint point);
 	
 	/**
+	 * Called when a two fixtures begin to overlap generating a contact point.
+	 * @param point the contact point that was added
+	 * @return boolean true if the contact should remain enabled
+	 */
+	public abstract boolean begin(ContactPoint point);
+	
+	/**
+	 * Called when a two {@link Fixture}s begin to separate.
+	 * @param point the contact point that was removed
+	 * @return boolean true if the contact should remain enabled
+	 */
+	public abstract boolean end(ContactPoint point);
+	
+	/**
+	 * Called when two {@link Fixture}s remain in contact.
+	 * @param point the persisted contact point
+	 * @return boolean true if the contact should remain enabled
+	 */
+	public abstract boolean persist(PersistedContactPoint point);
+	
+	/**
 	 * Called before the contact constraints are solved.
 	 * @param point the contact point
+	 * @return boolean true if the contact should remain enabled
 	 */
-	public abstract void preSolve(ContactPoint point);
+	public abstract boolean preSolve(ContactPoint point);
 	
 	/**
 	 * Called after a contact has been solved.

@@ -40,7 +40,7 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	 * @param point1 the first point
 	 * @param point2 the second point
 	 */
-	public Segment(Vector point1, Vector point2) {
+	public Segment(Vector2 point1, Vector2 point2) {
 		super();
 		// make sure either point is not null
 		if (point1 == null || point2 == null) throw new NullPointerException("Both point1 and point2 cannot be null.");
@@ -49,11 +49,11 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 			throw new IllegalArgumentException("A line segment must have two different vertices.");
 		}
 		// assign the verices
-		this.vertices = new Vector[2];
+		this.vertices = new Vector2[2];
 		this.vertices[0] = point1;
 		this.vertices[1] = point2;
 		// create the normals
-		this.normals = new Vector[2];
+		this.normals = new Vector2[2];
 		this.normals[0] = point1.to(point2).right();
 		this.normals[0].normalize();
 		this.normals[1] = point1.to(point2).left();
@@ -84,17 +84,17 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	
 	/**
 	 * Returns point1 in local coordinates.
-	 * @return {@link Vector}
+	 * @return {@link Vector2}
 	 */
-	public Vector getPoint1() {
+	public Vector2 getPoint1() {
 		return this.vertices[0];
 	}
 	
 	/**
 	 * Returns point2 in local coordinates.
-	 * @return {@link Vector}
+	 * @return {@link Vector2}
 	 */
-	public Vector getPoint2() {
+	public Vector2 getPoint2() {
 		return this.vertices[1];
 	}
 	
@@ -124,7 +124,7 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	 * @param linePoint2 the second point of the line
 	 * @return double
 	 */
-	public static double getLocation(Vector point, Vector linePoint1, Vector linePoint2) {
+	public static double getLocation(Vector2 point, Vector2 linePoint1, Vector2 linePoint2) {
 		return (linePoint2.x - linePoint1.x) * (point.y - linePoint1.y) -
 			  (point.x - linePoint1.x) * (linePoint2.y - linePoint1.y);
 	}
@@ -139,17 +139,17 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	 * P<sub>closest</sub> = V<sub>point</sub>.project(V<sub>line</sub>)
 	 * </pre>
 	 * Assumes all points are in world space.
-	 * @see Vector#project(Vector)
+	 * @see Vector2#project(Vector2)
 	 * @param point the point
 	 * @param linePoint1 the first point of the line
 	 * @param linePoint2 the second point of the line
-	 * @return {@link Vector}
+	 * @return {@link Vector2}
 	 */
-	public static Vector getPointOnLineClosestToPoint(Vector point, Vector linePoint1, Vector linePoint2) {
+	public static Vector2 getPointOnLineClosestToPoint(Vector2 point, Vector2 linePoint1, Vector2 linePoint2) {
 		// create a vector from the point to the first line point
-		Vector p1ToP = point.difference(linePoint1);
+		Vector2 p1ToP = point.difference(linePoint1);
 		// create a vector representing the line
-	    Vector line = linePoint2.difference(linePoint1);
+	    Vector2 line = linePoint2.difference(linePoint1);
 	    // get the length squared of the line
 	    double ab2 = line.dot(line);
 	    // check ab2 for zero (linePoint1 == linePoint2)
@@ -170,17 +170,17 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	 * end points will be returned.
 	 * <p>
 	 * Assumes all points are in world space.
-	 * @see Segment#getPointOnLineClosestToPoint(Vector, Vector, Vector)
+	 * @see Segment#getPointOnLineClosestToPoint(Vector2, Vector2, Vector2)
 	 * @param point the point
 	 * @param linePoint1 the first point of the line
 	 * @param linePoint2 the second point of the line
-	 * @return {@link Vector}
+	 * @return {@link Vector2}
 	 */
-	public static Vector getPointOnSegmentClosestToPoint(Vector point, Vector linePoint1, Vector linePoint2) {
+	public static Vector2 getPointOnSegmentClosestToPoint(Vector2 point, Vector2 linePoint1, Vector2 linePoint2) {
 		// create a vector from the point to the first line point
-		Vector p1ToP = point.difference(linePoint1);
+		Vector2 p1ToP = point.difference(linePoint1);
 		// create a vector representing the line
-	    Vector line = linePoint2.difference(linePoint1);
+	    Vector2 line = linePoint2.difference(linePoint1);
 	    // get the length squared of the line
 	    double ab2 = line.dot(line);
 	    // get the projection of AP on AB
@@ -199,24 +199,24 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	 * @see org.dyn4j.game2d.geometry.Convex#getAxes(java.util.List, org.dyn4j.game2d.geometry.Transform)
 	 */
 	@Override
-	public Vector[] getAxes(Vector[] foci, Transform transform) {
+	public Vector2[] getAxes(Vector2[] foci, Transform transform) {
 		// get the number of foci
 		int size = foci != null ? foci.length : 0;
 		// create an array to hold the axes
-		Vector[] axes = new Vector[2 + size];
+		Vector2[] axes = new Vector2[2 + size];
 		int n = 0;
 		// get the vertices
-		Vector p1 = transform.getTransformed(this.vertices[0]);
-		Vector p2 = transform.getTransformed(this.vertices[1]);
+		Vector2 p1 = transform.getTransformed(this.vertices[0]);
+		Vector2 p2 = transform.getTransformed(this.vertices[1]);
 		// get the edge that makes this segment
-		Vector line = p1.to(p2);
+		Vector2 line = p1.to(p2);
 		// use both the edge and its normal
 		axes[n++] = line.getLeftHandOrthogonalVector();
 		axes[n++] = line;
 		// add the voronoi region axes if point is supplied
 		for (int i = 0; i < size; i++) {
 			// get the focal point
-			Vector f = foci[i];
+			Vector2 f = foci[i];
 			// find the closest point
 			if (p1.distanceSquared(f) < p2.distanceSquared(f)) {
 				axes[n++] = p1.to(f);
@@ -232,7 +232,7 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	 * @see org.dyn4j.game2d.geometry.Convex#getFoci(org.dyn4j.game2d.geometry.Transform)
 	 */
 	@Override
-	public Vector[] getFoci(Transform transform) {
+	public Vector2[] getFoci(Transform transform) {
 		return null;
 	}
 
@@ -240,12 +240,12 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	 * @see org.dyn4j.game2d.geometry.Shape#contains(org.dyn4j.game2d.geometry.Vector, org.dyn4j.game2d.geometry.Transform)
 	 */
 	@Override
-	public boolean contains(Vector point, Transform transform) {
+	public boolean contains(Vector2 point, Transform transform) {
 		// put the point in local coordinates
-		Vector p = transform.getInverseTransformed(point);
+		Vector2 p = transform.getInverseTransformed(point);
 		// create a reference to the end points
-		Vector p1 = this.vertices[0];
-		Vector p2 = this.vertices[1];
+		Vector2 p1 = this.vertices[0];
+		Vector2 p2 = this.vertices[1];
 		// get the location of the given point relative to this segment
 		double value = Segment.getLocation(p, p1, p2);
 		// see if the point is on the line created by this line segment
@@ -279,13 +279,13 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	 * @param radius the expansion radius; in the range [0, &infin;]
 	 * @return boolean
 	 */
-	public boolean contains(Vector point, Transform transform, double radius) {
+	public boolean contains(Vector2 point, Transform transform, double radius) {
 		// if the radius is zero or less then perform the normal procedure
 		if (radius <= 0) {
 			return contains(point, transform);
 		} else {
 			// put the point in local coordinates
-			Vector p = transform.getInverseTransformed(point);
+			Vector2 p = transform.getInverseTransformed(point);
 			// otherwise act like the segment is two circles and a rectangle
 			if (this.vertices[0].distanceSquared(p) <= radius * radius) {
 				return true;
@@ -293,9 +293,9 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 				return true;
 			} else {
 				// see if the point is in the rectangle portion
-				Vector l = this.vertices[0].to(this.vertices[1]);
-				Vector p1 = this.vertices[0].to(p);
-				Vector p2 = this.vertices[1].to(p);
+				Vector2 l = this.vertices[0].to(this.vertices[1]);
+				Vector2 p1 = this.vertices[0].to(p);
+				Vector2 p2 = this.vertices[1].to(p);
 				if (l.dot(p1) > 0 && -l.dot(p2) > 0) {
 					double dist = p1.project(l.getRightHandOrthogonalVector()).getMagnitudeSquared();
 					if (dist <= radius * radius) {
@@ -311,11 +311,11 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	 * @see org.dyn4j.game2d.geometry.Shape#project(org.dyn4j.game2d.geometry.Vector, org.dyn4j.game2d.geometry.Transform)
 	 */
 	@Override
-	public Interval project(Vector n, Transform transform) {
+	public Interval project(Vector2 n, Transform transform) {
 		double v = 0.0;
 		// get the vertices
-		Vector p1 = transform.getTransformed(this.vertices[0]);
-		Vector p2 = transform.getTransformed(this.vertices[1]);
+		Vector2 p1 = transform.getTransformed(this.vertices[0]);
+		Vector2 p2 = transform.getTransformed(this.vertices[1]);
 		// project the first
     	double min = n.dot(p1);
     	double max = min;
@@ -334,14 +334,14 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	 * @see org.dyn4j.game2d.geometry.Convex#getFurthestPoint(org.dyn4j.game2d.geometry.Vector, org.dyn4j.game2d.geometry.Transform)
 	 */
 	@Override
-	public Vector getFarthestPoint(Vector n, Transform transform) {
+	public Vector2 getFarthestPoint(Vector2 n, Transform transform) {
 		// get the vertices and the center
-		Vector p1 = transform.getTransformed(this.vertices[0]);
-		Vector p2 = transform.getTransformed(this.vertices[1]);
-		Vector c = transform.getTransformed(this.center);
+		Vector2 p1 = transform.getTransformed(this.vertices[0]);
+		Vector2 p2 = transform.getTransformed(this.vertices[1]);
+		Vector2 c = transform.getTransformed(this.center);
 		// create vectors from the center to each vertex
-		Vector v1 = c.to(p1);
-		Vector v2 = c.to(p2);
+		Vector2 v1 = c.to(p1);
+		Vector2 v2 = c.to(p2);
 		// project them onto the vector
 		double dot1 = n.dot(v1);
 		double dot2 = n.dot(v2);
@@ -362,16 +362,16 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	 * @return {@link Edge}
 	 */
 	@Override
-	public Edge getFarthestFeature(Vector n, Transform transform) {
+	public Edge getFarthestFeature(Vector2 n, Transform transform) {
 		// the farthest feature for a line is always the line itself
-		Vector max = null;
+		Vector2 max = null;
 		// get the vertices and the center
-		Vector p1 = transform.getTransformed(this.vertices[0]);
-		Vector p2 = transform.getTransformed(this.vertices[1]);
-		Vector c = transform.getTransformed(this.center);
+		Vector2 p1 = transform.getTransformed(this.vertices[0]);
+		Vector2 p2 = transform.getTransformed(this.vertices[1]);
+		Vector2 c = transform.getTransformed(this.center);
 		// create vectors from the center to each vertex
-		Vector v1 = c.to(p1);
-		Vector v2 = c.to(p2);
+		Vector2 v1 = c.to(p1);
+		Vector2 v2 = c.to(p2);
 		// project them onto the vector
 		double dot1 = n.dot(v1);
 		double dot2 = n.dot(v2);

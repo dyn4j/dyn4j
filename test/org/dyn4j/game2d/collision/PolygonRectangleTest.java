@@ -43,7 +43,7 @@ import org.dyn4j.game2d.geometry.Polygon;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Shape;
 import org.dyn4j.game2d.geometry.Transform;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -168,7 +168,7 @@ public class PolygonRectangleTest extends AbstractTest {
 		Transform t1 = new Transform();
 		Transform t2 = new Transform();
 		
-		Vector n = null;
+		Vector2 n = null;
 		
 		// test containment
 		TestCase.assertTrue(this.sat.detect(poly, t1, rect, t2, p));
@@ -227,7 +227,7 @@ public class PolygonRectangleTest extends AbstractTest {
 		Transform t1 = new Transform();
 		Transform t2 = new Transform();
 		
-		Vector n = null;
+		Vector2 n = null;
 		
 		// test containment
 		TestCase.assertTrue(this.gjk.detect(poly, t1, rect, t2, p));
@@ -287,7 +287,7 @@ public class PolygonRectangleTest extends AbstractTest {
 		Transform t1 = new Transform();
 		Transform t2 = new Transform();
 		
-		Vector n, p1, p2;
+		Vector2 n, p1, p2;
 		
 		// test containment
 		TestCase.assertFalse(this.gjk.distance(poly, t1, rect, t2, s));
@@ -365,7 +365,7 @@ public class PolygonRectangleTest extends AbstractTest {
 		Transform t2 = new Transform();
 		
 		ManifoldPoint mp1, mp2;
-		Vector p1, p2;
+		Vector2 p1, p2;
 		
 		// test containment gjk
 		this.gjk.detect(poly, t1, rect, t2, p);

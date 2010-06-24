@@ -26,22 +26,13 @@ package org.dyn4j.game2d.dynamics.contact;
 
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.Fixture;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Represents a contact point and used to report events via the {@link ContactListener}.
  * @author William Bittle
  */
 public class ContactPoint {
-	/** The world space contact point */
-	protected Vector point;
-	
-	/** The world space contact normal */
-	protected Vector normal;
-	
-	/** The penetration depth */
-	protected double depth;
-	
 	/** The first {@link Body} in contact */
 	protected Body body1;
 	
@@ -54,28 +45,42 @@ public class ContactPoint {
 	/** The second {@link Body}'s {@link Fixture} */
 	protected Fixture fixture2;
 	
+	/** Whether this contact point is enabled or not */
+	protected boolean enabled;
+	
+	/** The world space contact point */
+	protected Vector2 point;
+	
+	/** The world space contact normal */
+	protected Vector2 normal;
+	
+	/** The penetration depth */
+	protected double depth;
+	
 	/** Default constructor */
 	public ContactPoint() {}
 	
 	/**
 	 * Full constructor.
-	 * @param point the world space contact point
-	 * @param normal the world space contact normal
-	 * @param depth the penetration depth
 	 * @param body1 the first {@link Body} in contact
 	 * @param fixture1 the first {@link Body}'s {@link Fixture}
 	 * @param body2 the second {@link Body} in contact
 	 * @param fixture2 the second {@link Body}'s {@link Fixture}
+	 * @param enabled true if this contact point is enabled
+	 * @param point the world space contact point
+	 * @param normal the world space contact normal
+	 * @param depth the penetration depth
 	 */
-	public ContactPoint(Vector point, Vector normal, double depth,
-			Body body1, Fixture fixture1, Body body2, Fixture fixture2) {
-		this.point = point;
-		this.normal = normal;
-		this.depth = depth;
+	public ContactPoint(Body body1, Fixture fixture1, Body body2, Fixture fixture2,
+			boolean enabled, Vector2 point, Vector2 normal, double depth) {
 		this.body1 = body1;
 		this.fixture1 = fixture1;
 		this.body2 = body2;
 		this.fixture2 = fixture2;
+		this.enabled = enabled;
+		this.point = point;
+		this.normal = normal;
+		this.depth = depth;
 	}
 	
 	/**
@@ -85,13 +90,14 @@ public class ContactPoint {
 	public ContactPoint(ContactPoint contactPoint) {
 		if (contactPoint == null) throw new NullPointerException("Cannot copy a null contact point.");
 		// shallow copy all the fields
+		this.body1 = contactPoint.body1;
+		this.fixture1 = contactPoint.fixture1;
+		this.body2 = contactPoint.body2;
+		this.fixture2 = contactPoint.fixture2;
+		this.enabled = contactPoint.enabled;
 		this.point = contactPoint.point;
 		this.normal = contactPoint.normal;
 		this.depth = contactPoint.depth;
-		this.body1 = contactPoint.body1;
-		this.body2 = contactPoint.body2;
-		this.fixture1 = contactPoint.fixture1;
-		this.fixture2 = contactPoint.fixture2;
 	}
 	
 	/* (non-Javadoc)
@@ -101,29 +107,38 @@ public class ContactPoint {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("CONTACT_POINT[")
+		.append(this.body1).append("|")
+		.append(this.fixture1).append("|")
+		.append(this.body2).append("|")
+		.append(this.fixture2).append("|")
+		.append(this.enabled).append("|")
 		.append(this.point).append("|")
 		.append(this.normal).append("|")
-		.append(this.depth).append("|")
-		.append(this.body1).append("|")
-		.append(this.body2).append("|")
-		.append(this.fixture1).append("|")
-		.append(this.fixture2).append("]");
+		.append(this.depth).append("]");
 		return sb.toString();
 	}
 	
 	/**
-	 * Returns the contact point.
-	 * @return {@link Vector}
+	 * Returns true if this contact point is enabled.
+	 * @return boolean
 	 */
-	public Vector getPoint() {
+	public boolean isEnabled() {
+		return enabled;
+	}
+	
+	/**
+	 * Returns the contact point.
+	 * @return {@link Vector2}
+	 */
+	public Vector2 getPoint() {
 		return point;
 	}
 	
 	/**
 	 * Returns the normal.
-	 * @return {@link Vector}
+	 * @return {@link Vector2}
 	 */
-	public Vector getNormal() {
+	public Vector2 getNormal() {
 		return normal;
 	}
 	

@@ -34,7 +34,7 @@ import org.dyn4j.game2d.geometry.Edge;
 import org.dyn4j.game2d.geometry.Feature;
 import org.dyn4j.game2d.geometry.Shape;
 import org.dyn4j.game2d.geometry.Transform;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 import org.dyn4j.game2d.geometry.Vertex;
 
 /**
@@ -55,7 +55,7 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 		manifold.clear();
 		
 		// get the penetration normal
-		Vector n = penetration.getNormal();
+		Vector2 n = penetration.getNormal();
 		
 		// get the reference feature for the first convex shape
 		Feature feature1 = convex1.getFarthestFeature(n, transform1);
@@ -101,7 +101,7 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 //		}
 		
 		// create the reference edge vector
-		Vector refev = reference.getEdge();
+		Vector2 refev = reference.getEdge();
 		// normalize it
 		refev.normalize();
 		
@@ -125,7 +125,7 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 		
 		// we need to change the normal to the reference edge's normal
 		// since they may not have been the same
-		Vector frontNormal = refev.cross(1.0);
+		Vector2 frontNormal = refev.cross(1.0);
 		// also get the maximum point's depth
 		double frontOffset = frontNormal.dot(reference.getMaximum().getPoint());
 		
@@ -136,7 +136,7 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 		// test if the clip points are behind the reference edge
 		for (int i = 0; i < clip2.size(); i++) {
 			Vertex vertex = clip2.get(i);
-			Vector point = vertex.getPoint();
+			Vector2 point = vertex.getPoint();
 			double depth = frontNormal.dot(point) - frontOffset;
 			// make sure the point is behind the front normal
 			if (depth >= 0.0) {
@@ -158,13 +158,13 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 	 * @param v2 the second vertex of the segment to be clipped
 	 * @param n the clipping plane/line
 	 * @param offset the offset of the end point of the segment to be clipped
-	 * @return List&lt;{@link Vector}&gt; the clipped segment
+	 * @return List&lt;{@link Vector2}&gt; the clipped segment
 	 */
-	protected List<Vertex> clip(Vertex v1, Vertex v2, Vector n, double offset) {
+	protected List<Vertex> clip(Vertex v1, Vertex v2, Vector2 n, double offset) {
 		List<Vertex> points = new ArrayList<Vertex>(2);
-		Vector p1 = v1.getPoint();
-		Vector p2 = v2.getPoint();
-		Vector e = p1.to(p2);
+		Vector2 p1 = v1.getPoint();
+		Vector2 p2 = v2.getPoint();
+		Vector2 e = p1.to(p2);
 		
 		// calculate the distance between the end points of the edge and the clip line
 		double d1 = n.dot(p1) - offset;

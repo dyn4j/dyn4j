@@ -46,7 +46,7 @@ public class Mass {
 		/* (non-Javadoc)
 		 * @see org.dyn4j.game2d.geometry.Mass#getCenter()
 		 */
-		public Vector getCenter() {
+		public Vector2 getCenter() {
 			// make sure they cannot modify the default mass's
 			// center of mass
 			return super.getCenter().copy();
@@ -82,7 +82,7 @@ public class Mass {
 	private Mass.Type previousType;
 	
 	/** The center of mass */
-	private Vector center;
+	private Vector2 center;
 	
 	/** The mass in kg */
 	private double mass;
@@ -104,7 +104,7 @@ public class Mass {
 	private Mass() {
 		this.type = Mass.Type.INFINITE;
 		this.previousType = this.type;
-		this.center = new Vector();
+		this.center = new Vector2();
 		this.mass = 0.0;
 		this.inertia = 0.0;
 		this.invMass = 0.0;
@@ -117,7 +117,7 @@ public class Mass {
 	 * @param mass mass in kg
 	 * @param inertia inertia tensor in kg &middot; m<sup>2</sup>
 	 */
-	private Mass(Vector center, double mass, double inertia) {
+	private Mass(Vector2 center, double mass, double inertia) {
 		this.type = Mass.Type.NORMAL;
 		this.previousType = this.type;
 		this.center = center.copy();
@@ -183,7 +183,7 @@ public class Mass {
 	 * @param inertia the inertia tensor kg &middot; m<sup>2</sup>; must be zero or greater
 	 * @return {@link Mass} the mass object
 	 */
-	public static Mass create(Vector center, double mass, double inertia) {
+	public static Mass create(Vector2 center, double mass, double inertia) {
 		// verify the passed in values
 		if (center == null) throw new NullPointerException("The center point cannot be null.");
 		if (mass <= 0.0) throw new IllegalArgumentException("The mass must be greater than zero.");
@@ -213,7 +213,7 @@ public class Mass {
 		if (masses == null || masses.size() == 0) {
 			throw new IllegalArgumentException("The masses list must not be null and contain at least one element.");
 		}
-		Vector c = new Vector();
+		Vector2 c = new Vector2();
 		double m = 0.0;
 		double I = 0.0;
 		// get the length of the masses array
@@ -227,7 +227,7 @@ public class Mass {
 			m += mass.mass;
 		}
 		// compute the center by dividing by the total mass
-		c.divide(m);
+		c.multiply(1.0 / m);
 		// after obtaining the new center of mass we need
 		// to compute the interia tensor about the center
 		// using the parallel axis theorem:
@@ -288,9 +288,9 @@ public class Mass {
 	
 	/**
 	 * Returns the center of mass.
-	 * @return {@link Vector}
+	 * @return {@link Vector2}
 	 */
-	public Vector getCenter() {
+	public Vector2 getCenter() {
 		return center;
 	}
 	

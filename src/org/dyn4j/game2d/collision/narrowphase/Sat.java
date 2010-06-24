@@ -29,7 +29,7 @@ import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Interval;
 import org.dyn4j.game2d.geometry.Shape;
 import org.dyn4j.game2d.geometry.Transform;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Implementation of the Separating Axis Theorem (SAT) for penetration detection.
@@ -38,12 +38,12 @@ import org.dyn4j.game2d.geometry.Vector;
  * for which the projection of the objects does not overlap.&quot;
  * <p>
  * Get all the separating axes for the first {@link Shape}, which are given by retrieving the normal (
- * or perpendicular {@link Vector}) of each edge of the {@link Shape}.  Project both {@link Shape}s onto 
+ * or perpendicular {@link Vector2}) of each edge of the {@link Shape}.  Project both {@link Shape}s onto 
  * each axis, if any projection does not overlap, then there is no collision.<br />
  * If none of the above axes fail, then do the same process on the second {@link Shape}.<br />
  * If both of the above do not fail then there is a collision.
  * <p>
- * If there is a collision, one can obtain the penetration {@link Vector} and depth from scaling the axis
+ * If there is a collision, one can obtain the penetration {@link Vector2} and depth from scaling the axis
  * by the projection overlap.
  * @author William Bittle
  */
@@ -59,23 +59,23 @@ public class Sat extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 			return super.detect((Circle) convex1, transform1, (Circle) convex2, transform2, penetration);
 		}
 		
-		Vector n = null;
+		Vector2 n = null;
 		double overlap = Double.MAX_VALUE;
 		
 		// get the foci from both shapes, the foci are used to test any
 		// voronoi regions of the other shape
-		Vector[] foci1 = convex1.getFoci(transform1);
-		Vector[] foci2 = convex2.getFoci(transform2);
+		Vector2[] foci1 = convex1.getFoci(transform1);
+		Vector2[] foci2 = convex2.getFoci(transform2);
 		
 		// get the vector arrays for the separating axes tests
-		Vector[] axes1 = convex1.getAxes(foci2, transform1);
-		Vector[] axes2 = convex2.getAxes(foci1, transform2);
+		Vector2[] axes1 = convex1.getAxes(foci2, transform1);
+		Vector2[] axes2 = convex2.getAxes(foci1, transform2);
 		
 		// loop through shape1 axes
 		if (axes1 != null) {
 			int size = axes1.length;
 			for (int i = 0; i < size; i++) {
-				Vector axis = axes1[i];
+				Vector2 axis = axes1[i];
 				// check for the zero vector
 				if (!axis.isZero()) {
 					// normalize the vector first so we can get an accurate penetration depth
@@ -122,7 +122,7 @@ public class Sat extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 		if (axes2 != null) {
 			int size = axes2.length;
 			for (int i = 0; i < size; i++) {
-				Vector axis = axes2[i];
+				Vector2 axis = axes2[i];
 				// check for the zero vector
 				if (!axis.isZero()) {
 					// normalize the vector first so we can get an accurate penetration depth
@@ -165,9 +165,9 @@ public class Sat extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 		}
 		
 		// make sure the vector is pointing from shape1 to shape2
-		Vector c1 = transform1.getTransformed(convex1.getCenter());
-		Vector c2 = transform2.getTransformed(convex2.getCenter());
-		Vector cToc = c1.to(c2);
+		Vector2 c1 = transform1.getTransformed(convex1.getCenter());
+		Vector2 c2 = transform2.getTransformed(convex2.getCenter());
+		Vector2 cToc = c1.to(c2);
 		if (cToc.dot(n) < 0) {
 			// negate the normal if its not
 			n.negate();
@@ -193,18 +193,18 @@ public class Sat extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 
 		// get the foci from both shapes, the foci are used to test any
 		// voronoi regions of the other shape
-		Vector[] foci1 = convex1.getFoci(transform1);
-		Vector[] foci2 = convex2.getFoci(transform2);
+		Vector2[] foci1 = convex1.getFoci(transform1);
+		Vector2[] foci2 = convex2.getFoci(transform2);
 		
 		// get the vector arrays for the separating axes tests
-		Vector[] axes1 = convex1.getAxes(foci2, transform1);
-		Vector[] axes2 = convex2.getAxes(foci1, transform2);
+		Vector2[] axes1 = convex1.getAxes(foci2, transform1);
+		Vector2[] axes2 = convex2.getAxes(foci1, transform2);
 
 		// loop through shape1 axes
 		if (axes1 != null) {
 			int size = axes1.length;
 			for (int i = 0; i < size; i++) {
-				Vector axis = axes1[i];
+				Vector2 axis = axes1[i];
 				// check for the zero vector
 				if (!axis.isZero()) {
 					// normalize the vector first so we can get an accurate penetration depth
@@ -226,7 +226,7 @@ public class Sat extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 		if (axes2 != null) {
 			int size = axes2.length;
 			for (int i = 0; i < size; i++) {
-				Vector axis = axes2[i];
+				Vector2 axis = axes2[i];
 				// check for the zero vector
 				if (!axis.isZero()) {
 					// normalize the vector first so we can get an accurate penetration depth

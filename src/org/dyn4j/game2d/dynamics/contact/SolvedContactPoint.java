@@ -26,7 +26,7 @@ package org.dyn4j.game2d.dynamics.contact;
 
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.Fixture;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Represents a solved contact point.
@@ -45,20 +45,21 @@ public class SolvedContactPoint extends ContactPoint {
 	
 	/**
 	 * Full constructor.
-	 * @param point the world space contact point
-	 * @param normal the world space contact normal
-	 * @param depth the penetration depth
 	 * @param body1 the first {@link Body} in contact
 	 * @param fixture1 the first {@link Body}'s {@link Fixture}
 	 * @param body2 the second {@link Body} in contact
 	 * @param fixture2 the second {@link Body}'s {@link Fixture}
+	 * @param enabled true if this contact is enabled
+	 * @param point the world space contact point
+	 * @param normal the world space contact normal
+	 * @param depth the penetration depth
 	 * @param normalImpulse the accumulated normal impulse
 	 * @param tangentialImpulse the accumulated tangential impulse
 	 */
-	public SolvedContactPoint(Vector point, Vector normal, double depth,
-			Body body1, Fixture fixture1, Body body2, Fixture fixture2,
+	public SolvedContactPoint(Body body1, Fixture fixture1, Body body2, Fixture fixture2, 
+			boolean enabled, Vector2 point, Vector2 normal, double depth,
 			double normalImpulse, double tangentialImpulse) {
-		super(point, normal, depth, body1, fixture1, body2, fixture2);
+		super(body1, fixture1, body2, fixture2, enabled, point, normal, depth);
 		this.normalImpulse = normalImpulse;
 		this.tangentialImpulse = tangentialImpulse;
 	}
@@ -70,15 +71,16 @@ public class SolvedContactPoint extends ContactPoint {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("SOLVED_CONTACT_POINT[")
+		.append(this.body1).append("|")
+		.append(this.fixture1).append("|")
+		.append(this.body2).append("|")
+		.append(this.fixture2).append("|")
+		.append(this.enabled).append("|")
 		.append(this.point).append("|")
 		.append(this.normal).append("|")
 		.append(this.depth).append("|")
 		.append(this.normalImpulse).append("|")
-		.append(this.tangentialImpulse).append("|")
-		.append(this.body1).append("|")
-		.append(this.body2).append("|")
-		.append(this.fixture1).append("|")
-		.append(this.fixture2).append("]");
+		.append(this.tangentialImpulse).append("]");
 		return sb.toString();
 	}
 	

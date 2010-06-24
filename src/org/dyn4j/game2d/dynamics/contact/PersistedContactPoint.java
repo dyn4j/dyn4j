@@ -26,7 +26,7 @@ package org.dyn4j.game2d.dynamics.contact;
 
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.Fixture;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Represents a persisted contact point.
@@ -35,10 +35,10 @@ import org.dyn4j.game2d.geometry.Vector;
  */
 public class PersistedContactPoint extends ContactPoint {
 	/** The previous contact point */
-	protected Vector oldPoint;
+	protected Vector2 oldPoint;
 	
 	/** The previous contact normal */
-	protected Vector oldNormal;
+	protected Vector2 oldNormal;
 	
 	/** The previous penetration depth */
 	protected double oldDepth;
@@ -48,21 +48,22 @@ public class PersistedContactPoint extends ContactPoint {
 	
 	/**
 	 * Full constructor.
+	 * @param body1 the first {@link Body} in contact
+	 * @param fixture1 the first {@link Body}'s {@link Fixture}
+	 * @param body2 the second {@link Body} in contact
+	 * @param fixture2 the second {@link Body}'s {@link Fixture}
+	 * @param enabled true if this contact is enabled
 	 * @param point the world space contact point
 	 * @param normal the world space contact normal
 	 * @param depth the penetration depth
 	 * @param oldPoint the previous world space contact point
 	 * @param oldNormal the previous world space contact normal
 	 * @param oldDepth the previous penetration depth
-	 * @param body1 the first {@link Body} in contact
-	 * @param fixture1 the first {@link Body}'s {@link Fixture}
-	 * @param body2 the second {@link Body} in contact
-	 * @param fixture2 the second {@link Body}'s {@link Fixture}
 	 */
-	public PersistedContactPoint(Vector point, Vector normal, double depth,
-			Vector oldPoint, Vector oldNormal, double oldDepth,
-			Body body1, Fixture fixture1, Body body2, Fixture fixture2) {
-		super(point, normal, depth, body1, fixture1, body2, fixture2);
+	public PersistedContactPoint(Body body1, Fixture fixture1, Body body2, Fixture fixture2, 
+			boolean enabled, Vector2 point, Vector2 normal, double depth,
+			Vector2 oldPoint, Vector2 oldNormal, double oldDepth) {
+		super(body1, fixture1, body2, fixture2, enabled, point, normal, depth);
 		this.oldPoint = oldPoint;
 		this.oldNormal = oldNormal;
 		this.oldDepth = oldDepth;
@@ -86,32 +87,33 @@ public class PersistedContactPoint extends ContactPoint {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("PERSISTED_CONTACT_POINT[")
+		.append(this.body1).append("|")
+		.append(this.fixture1).append("|")
+		.append(this.body2).append("|")
+		.append(this.fixture2).append("|")
+		.append(this.enabled).append("|")
 		.append(this.point).append("|")
 		.append(this.normal).append("|")
 		.append(this.depth).append("|")
 		.append(this.oldPoint).append("|")
 		.append(this.oldNormal).append("|")
-		.append(this.oldDepth).append("|")
-		.append(this.body1).append("|")
-		.append(this.body2).append("|")
-		.append(this.fixture1).append("|")
-		.append(this.fixture2).append("]");
+		.append(this.oldDepth).append("]");
 		return sb.toString();
 	}
 	
 	/**
 	 * Returns the old contact point.
-	 * @return {@link Vector}
+	 * @return {@link Vector2}
 	 */
-	public Vector getOldPoint() {
+	public Vector2 getOldPoint() {
 		return oldPoint;
 	}
 	
 	/**
 	 * Returns the old contact normal.
-	 * @return {@link Vector}
+	 * @return {@link Vector2}
 	 */
-	public Vector getOldNormal() {
+	public Vector2 getOldNormal() {
 		return oldNormal;
 	}
 	

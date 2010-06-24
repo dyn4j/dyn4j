@@ -31,7 +31,7 @@ import org.dyn4j.game2d.dynamics.contact.ContactConstraint;
 import org.dyn4j.game2d.dynamics.contact.ContactConstraintSolver;
 import org.dyn4j.game2d.dynamics.joint.Joint;
 import org.dyn4j.game2d.geometry.Interval;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Used to solve the contact constraints and joints for a group of interconnected bodies.
@@ -108,7 +108,7 @@ public class Island {
 	 * @param gravity the gravity vector
 	 * @param step the {@link Step}
 	 */
-	public void solve(Vector gravity, Step step) {
+	public void solve(Vector2 gravity, Step step) {
 		// get the settings
 		Settings settings = Settings.getInstance();
 		// the number of solver iterations
@@ -186,7 +186,7 @@ public class Island {
 			if (body.isStatic()) continue;
 			
 			// compute the translation and rotation for this time step
-			Vector translation = body.velocity.product(step.dt);
+			Vector2 translation = body.velocity.product(step.dt);
 			double rotation = body.angularVelocity * step.dt;
 			
 			// make sure the translation is not over the maximum

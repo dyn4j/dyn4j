@@ -154,9 +154,9 @@ public interface Shape extends Transformable {
 	
 	/**
 	 * Returns the center/centroid of the {@link Shape} in local coordinates.
-	 * @return {@link Vector}
+	 * @return {@link Vector2}
 	 */
-	public abstract Vector getCenter();
+	public abstract Vector2 getCenter();
 	
 	/**
 	 * Returns the user data.
@@ -177,13 +177,13 @@ public interface Shape extends Transformable {
 	public abstract void rotate(double theta);
 	
 	/**
-	 * Returns the {@link Interval} of this {@link Shape} projected onto the given {@link Vector} 
+	 * Returns the {@link Interval} of this {@link Shape} projected onto the given {@link Vector2} 
 	 * given the {@link Transform}.
-	 * @param n {@link Vector} to project onto
+	 * @param n {@link Vector2} to project onto
 	 * @param transform {@link Transform} for this {@link Shape}
 	 * @return {@link Interval}
 	 */
-	public abstract Interval project(Vector n, Transform transform);
+	public abstract Interval project(Vector2 n, Transform transform);
 
 	/**
 	 * Returns true if the given point is inside this {@link Shape}.
@@ -196,7 +196,7 @@ public interface Shape extends Transformable {
 	 * @param transform {@link Transform} for this {@link Shape}
 	 * @return boolean
 	 */
-	public abstract boolean contains(Vector point, Transform transform);
+	public abstract boolean contains(Vector2 point, Transform transform);
 	
 	/**
 	 * Creates a {@link Mass} object using the geometric properties of

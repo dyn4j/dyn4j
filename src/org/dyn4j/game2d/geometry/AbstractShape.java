@@ -35,7 +35,7 @@ public abstract class AbstractShape implements Shape, Transformable {
 	protected String id = UUID.randomUUID().toString();
 	
 	/** The center of this {@link Shape} */
-	protected Vector center;
+	protected Vector2 center;
 	
 	/** Custom user data object */
 	protected Object userData;
@@ -72,7 +72,7 @@ public abstract class AbstractShape implements Shape, Transformable {
 	 * @see org.dyn4j.game2d.geometry.Shape#getCenter()
 	 */
 	@Override
-	public Vector getCenter() {
+	public Vector2 getCenter() {
 		return this.center;
 	}
 	
@@ -104,7 +104,7 @@ public abstract class AbstractShape implements Shape, Transformable {
 	 * @see org.dyn4j.game2d.geometry.Transformable#rotate(double, org.dyn4j.game2d.geometry.Vector)
 	 */
 	@Override
-	public void rotate(double theta, Vector point) {
+	public void rotate(double theta, Vector2 point) {
 		this.rotate(theta, point.x, point.y);
 	}
 	
@@ -132,7 +132,7 @@ public abstract class AbstractShape implements Shape, Transformable {
 	 * @see org.dyn4j.game2d.geometry.Transformable#translate(org.dyn4j.game2d.geometry.Vector)
 	 */
 	@Override
-	public void translate(Vector vector) {
+	public void translate(Vector2 vector) {
 		this.translate(vector.x, vector.y);
 	}
 }

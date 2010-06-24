@@ -39,25 +39,25 @@ public class ContactAdapter implements ContactListener {
 	 * @see org.dyn4j.game2d.dynamics.contact.ContactListener#begin(org.dyn4j.game2d.dynamics.contact.ContactPoint)
 	 */
 	@Override
-	public void begin(ContactPoint point) {}
+	public boolean begin(ContactPoint point) { return true; }
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.dynamics.contact.ContactListener#end(org.dyn4j.game2d.dynamics.contact.ContactPoint)
 	 */
 	@Override
-	public void end(ContactPoint point) {}
+	public boolean end(ContactPoint point) { return true; }
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.dynamics.contact.ContactListener#persist(org.dyn4j.game2d.dynamics.contact.PersistedContactPoint)
 	 */
 	@Override
-	public void persist(PersistedContactPoint point) {}
+	public boolean persist(PersistedContactPoint point) { return true; }
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.dynamics.contact.ContactListener#preSolve(org.dyn4j.game2d.dynamics.contact.ContactPoint)
 	 */
 	@Override
-	public void preSolve(ContactPoint point) {}
+	public boolean preSolve(ContactPoint point) { return true; }
 
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.dynamics.contact.ContactListener#postSolve(org.dyn4j.game2d.dynamics.contact.SolvedContactPoint)

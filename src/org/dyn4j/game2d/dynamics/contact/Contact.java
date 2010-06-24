@@ -26,7 +26,7 @@ package org.dyn4j.game2d.dynamics.contact;
 
 import org.dyn4j.game2d.collision.manifold.ManifoldPointId;
 import org.dyn4j.game2d.dynamics.Body;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Represents a contact point between two {@link Body} objects.
@@ -34,25 +34,28 @@ import org.dyn4j.game2d.geometry.Vector;
  */
 public class Contact {
 	/** The manifold point id for warm starting */
-	protected ManifoldPointId id = null;
+	protected ManifoldPointId id;
+	
+	/** Whether the contact is enabled or not */
+	protected boolean enabled;
 	
 	/** The contact point in world space */
-	protected Vector p = null;
+	protected Vector2 p;
 	
 	/** The contact penetration depth */
-	protected double depth = 0.0;
+	protected double depth;
 	
 	/** The contact point in {@link Body}1 space */
-	protected Vector p1 = null;
+	protected Vector2 p1;
 	
 	/** The contact point in {@link Body}2 space */
-	protected Vector p2 = null;
+	protected Vector2 p2;
 	
-	/** The {@link Vector} from the center of {@link Body}1 to the contact point */
-	protected Vector r1 = null;
+	/** The {@link Vector2} from the center of {@link Body}1 to the contact point */
+	protected Vector2 r1;
 	
-	/** The {@link Vector} from the center of {@link Body}2 to the contact point */
-	protected Vector r2 = null;
+	/** The {@link Vector2} from the center of {@link Body}2 to the contact point */
+	protected Vector2 r2;
 	
 	/** The accumulated normal impulse */
 	protected double jn;
@@ -83,8 +86,9 @@ public class Contact {
 	 * @param p1 the collision point in {@link Body}1's local space
 	 * @param p2 the collision point in {@link Body}2's local space
 	 */
-	public Contact(ManifoldPointId id, Vector point, double depth, Vector p1, Vector p2) {
+	public Contact(ManifoldPointId id, Vector2 point, double depth, Vector2 p1, Vector2 p2) {
 		this.id = id;
+		this.enabled = true;
 		this.p = point;
 		this.depth = depth;
 		this.p1 = p1;
@@ -99,6 +103,7 @@ public class Contact {
 		StringBuilder sb = new StringBuilder();
 		sb.append("CONTACT[")
 		.append(this.id).append("|")
+		.append(this.enabled).append("|")
 		.append(this.p).append("|")
 		.append(this.p1).append("|")
 		.append(this.p2).append("|")
@@ -116,10 +121,18 @@ public class Contact {
 	}
 	
 	/**
-	 * Returns the world space collision point.
-	 * @return {@link Vector} the collision point in world space
+	 * Returns true if this contact is enabled.
+	 * @return boolean
 	 */
-	public Vector getPoint() {
+	public boolean isEnabled() {
+		return enabled;
+	}
+	
+	/**
+	 * Returns the world space collision point.
+	 * @return {@link Vector2} the collision point in world space
+	 */
+	public Vector2 getPoint() {
 		return this.p;
 	}
 	

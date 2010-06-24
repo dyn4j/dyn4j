@@ -29,16 +29,16 @@ import junit.framework.TestCase;
 import org.junit.Test;
 
 /**
- * Test cases for the {@link Matrix} class.
+ * Test cases for the {@link Matrix22} class.
  * @author William Bittle
  */
-public class MatrixTest {
+public class Matrix22Test {
 	/**
 	 * Test the creation method passing four doubles.
 	 */
 	@Test
 	public void createFull() {
-		Matrix m = new Matrix(1.0, 2.0, 
+		Matrix22 m = new Matrix22(1.0, 2.0, 
 				             -3.0, 8.0);
 		TestCase.assertEquals(1.0, m.m00);
 		TestCase.assertEquals(2.0, m.m01);
@@ -51,7 +51,7 @@ public class MatrixTest {
 	 */
 	@Test
 	public void createFullArray() {
-		Matrix m = new Matrix(new double[] {1.0, 2.0, 
+		Matrix22 m = new Matrix22(new double[] {1.0, 2.0, 
 				                           -3.0, 8.0});
 		TestCase.assertEquals(1.0, m.m00);
 		TestCase.assertEquals(2.0, m.m01);
@@ -64,12 +64,12 @@ public class MatrixTest {
 	 */
 	@Test
 	public void copy() {
-		Matrix m1 = new Matrix();
+		Matrix22 m1 = new Matrix22();
 		m1.m00 = 0; m1.m01 = 2;
 		m1.m10 = 1; m1.m11 = 3;
 		
 		// make a copy
-		Matrix m2 = new Matrix(m1);
+		Matrix22 m2 = new Matrix22(m1);
 		// test the values
 		TestCase.assertEquals(m1.m00, m2.m00);
 		TestCase.assertEquals(m1.m01, m2.m01);
@@ -82,9 +82,9 @@ public class MatrixTest {
 	 */
 	@Test
 	public void add() {
-		Matrix m1 = new Matrix(0.0, 2.0, 
+		Matrix22 m1 = new Matrix22(0.0, 2.0, 
 				               3.5, 1.2);
-		Matrix m2 = new Matrix(1.3, 0.3, 
+		Matrix22 m2 = new Matrix22(1.3, 0.3, 
 				               0.0, 4.5);
 		m1.add(m2);
 		// test the values
@@ -99,11 +99,11 @@ public class MatrixTest {
 	 */
 	@Test
 	public void sum() {
-		Matrix m1 = new Matrix(0.0, 2.0, 
+		Matrix22 m1 = new Matrix22(0.0, 2.0, 
 				               3.5, 1.2);
-		Matrix m2 = new Matrix(1.3, 0.3, 
+		Matrix22 m2 = new Matrix22(1.3, 0.3, 
 				               0.0, 4.5);
-		Matrix m3 = m1.sum(m2);
+		Matrix22 m3 = m1.sum(m2);
 		// test the values
 		TestCase.assertEquals(1.3, m3.m00);
 		TestCase.assertEquals(2.3, m3.m01);
@@ -118,9 +118,9 @@ public class MatrixTest {
 	 */
 	@Test
 	public void subtract() {
-		Matrix m1 = new Matrix(0.0, 2.0, 
+		Matrix22 m1 = new Matrix22(0.0, 2.0, 
 				               3.5, 1.2);
-		Matrix m2 = new Matrix(1.3, 0.3, 
+		Matrix22 m2 = new Matrix22(1.3, 0.3, 
 				               0.0, 4.5);
 		m1.subtract(m2);
 		// test the values
@@ -135,11 +135,11 @@ public class MatrixTest {
 	 */
 	@Test
 	public void difference() {
-		Matrix m1 = new Matrix(0.0, 2.0, 
+		Matrix22 m1 = new Matrix22(0.0, 2.0, 
 				               3.5, 1.2);
-		Matrix m2 = new Matrix(1.3, 0.3, 
+		Matrix22 m2 = new Matrix22(1.3, 0.3, 
 				               0.0, 4.5);
-		Matrix m3 = m1.difference(m2);
+		Matrix22 m3 = m1.difference(m2);
 		// test the values
 		TestCase.assertEquals(-1.3, m3.m00);
 		TestCase.assertEquals(1.7, m3.m01);
@@ -154,9 +154,9 @@ public class MatrixTest {
 	 */
 	@Test
 	public void multiplyMatrix() {
-		Matrix m1 = new Matrix(1.0, 2.0, 
+		Matrix22 m1 = new Matrix22(1.0, 2.0, 
 				               3.0, 4.0);
-		Matrix m2 = new Matrix(4.0, 3.0, 
+		Matrix22 m2 = new Matrix22(4.0, 3.0, 
 				               2.0, 1.0);
 		m1.multiply(m2);
 		TestCase.assertEquals(8.0, m1.m00);
@@ -170,11 +170,11 @@ public class MatrixTest {
 	 */
 	@Test
 	public void productMatrix() {
-		Matrix m1 = new Matrix(1.0, 2.0, 
+		Matrix22 m1 = new Matrix22(1.0, 2.0, 
 				               3.0, 4.0);
-		Matrix m2 = new Matrix(4.0, 3.0, 
+		Matrix22 m2 = new Matrix22(4.0, 3.0, 
 				               2.0, 1.0);
-		Matrix m3 = m1.product(m2);
+		Matrix22 m3 = m1.product(m2);
 		TestCase.assertEquals(8.0, m3.m00);
 		TestCase.assertEquals(5.0, m3.m01);
 		TestCase.assertEquals(20.0, m3.m10);
@@ -188,9 +188,9 @@ public class MatrixTest {
 	 */
 	@Test
 	public void multiplyVector() {
-		Matrix m1 = new Matrix(1.0, 2.0, 
+		Matrix22 m1 = new Matrix22(1.0, 2.0, 
 	                           3.0, 4.0);
-		Vector v1 = new Vector(1.0, -1.0);
+		Vector2 v1 = new Vector2(1.0, -1.0);
 		m1.multiply(v1);
 		TestCase.assertEquals(-1.0, v1.x);
 		TestCase.assertEquals(-1.0, v1.y);
@@ -201,10 +201,10 @@ public class MatrixTest {
 	 */
 	@Test
 	public void productVector() {
-		Matrix m1 = new Matrix(1.0, 2.0, 
+		Matrix22 m1 = new Matrix22(1.0, 2.0, 
 	                           3.0, 4.0);
-		Vector v1 = new Vector(1.0, -1.0);
-		Vector v2 = m1.product(v1);
+		Vector2 v1 = new Vector2(1.0, -1.0);
+		Vector2 v2 = m1.product(v1);
 		TestCase.assertEquals(-1.0, v2.x);
 		TestCase.assertEquals(-1.0, v2.y);
 		// make sure we didnt modify the first vector
@@ -216,9 +216,9 @@ public class MatrixTest {
 	 */
 	@Test
 	public void multiplyVectorT() {
-		Matrix m1 = new Matrix(1.0, 2.0, 
+		Matrix22 m1 = new Matrix22(1.0, 2.0, 
 	                           3.0, 4.0);
-		Vector v1 = new Vector(1.0, -1.0);
+		Vector2 v1 = new Vector2(1.0, -1.0);
 		m1.multiplyT(v1);
 		TestCase.assertEquals(-2.0, v1.x);
 		TestCase.assertEquals(-2.0, v1.y);
@@ -229,10 +229,10 @@ public class MatrixTest {
 	 */
 	@Test
 	public void productVectorT() {
-		Matrix m1 = new Matrix(1.0, 2.0, 
+		Matrix22 m1 = new Matrix22(1.0, 2.0, 
 	                           3.0, 4.0);
-		Vector v1 = new Vector(1.0, -1.0);
-		Vector v2 = m1.productT(v1);
+		Vector2 v1 = new Vector2(1.0, -1.0);
+		Vector2 v2 = m1.productT(v1);
 		TestCase.assertEquals(-2.0, v2.x);
 		TestCase.assertEquals(-2.0, v2.y);
 		// make sure we didnt modify the first vector
@@ -244,7 +244,7 @@ public class MatrixTest {
 	 */
 	@Test
 	public void multiplyScalar() {
-		Matrix m1 = new Matrix(1.0, 2.0, 
+		Matrix22 m1 = new Matrix22(1.0, 2.0, 
 	                           3.0, 4.0);
 		m1.multiply(2.0);
 		TestCase.assertEquals(2.0, m1.m00);
@@ -258,43 +258,13 @@ public class MatrixTest {
 	 */
 	@Test
 	public void productScalar() {
-		Matrix m1 = new Matrix(1.0, 2.0, 
+		Matrix22 m1 = new Matrix22(1.0, 2.0, 
                 3.0, 4.0);
-		Matrix m2 = m1.product(2.0);
+		Matrix22 m2 = m1.product(2.0);
 		TestCase.assertEquals(2.0, m2.m00);
 		TestCase.assertEquals(4.0, m2.m01);
 		TestCase.assertEquals(6.0, m2.m10);
 		TestCase.assertEquals(8.0, m2.m11);
-		// make sure we didnt modify the first matrix
-		TestCase.assertFalse(m1.equals(m2));
-	}
-
-	/** 
-	 * Tests the divide by a scalar method.
-	 */
-	@Test
-	public void divide() {
-		Matrix m1 = new Matrix(1.0, 2.0, 
-	                           3.0, 4.0);
-		m1.divide(2.0);
-		TestCase.assertEquals(0.5, m1.m00);
-		TestCase.assertEquals(1.0, m1.m01);
-		TestCase.assertEquals(1.5, m1.m10);
-		TestCase.assertEquals(2.0, m1.m11);
-	}
-
-	/** 
-	 * Tests the quotient by a scalar method.
-	 */
-	@Test
-	public void quotient() {
-		Matrix m1 = new Matrix(1.0, 2.0, 
-                               3.0, 4.0);
-		Matrix m2 = m1.quotient(2.0);
-		TestCase.assertEquals(0.5, m2.m00);
-		TestCase.assertEquals(1.0, m2.m01);
-		TestCase.assertEquals(1.5, m2.m10);
-		TestCase.assertEquals(2.0, m2.m11);
 		// make sure we didnt modify the first matrix
 		TestCase.assertFalse(m1.equals(m2));
 	}
@@ -304,7 +274,7 @@ public class MatrixTest {
 	 */
 	@Test
 	public void identity() {
-		Matrix m1 = new Matrix(1.0, 2.0, 
+		Matrix22 m1 = new Matrix22(1.0, 2.0, 
                                3.0, 4.0);
 		m1.identity();
 		TestCase.assertEquals(1.0, m1.m00);
@@ -318,7 +288,7 @@ public class MatrixTest {
 	 */
 	@Test
 	public void transpose() {
-		Matrix m1 = new Matrix(1.0, 2.0, 
+		Matrix22 m1 = new Matrix22(1.0, 2.0, 
                                3.0, 4.0);
 		m1.transpose();
 		TestCase.assertEquals(1.0, m1.m00);
@@ -332,9 +302,9 @@ public class MatrixTest {
 	 */
 	@Test
 	public void getTranspose() {
-		Matrix m1 = new Matrix(1.0, 2.0, 
+		Matrix22 m1 = new Matrix22(1.0, 2.0, 
                                3.0, 4.0);
-		Matrix m2 = m1.getTranspose();
+		Matrix22 m2 = m1.getTranspose();
 		TestCase.assertEquals(1.0, m2.m00);
 		TestCase.assertEquals(3.0, m2.m01);
 		TestCase.assertEquals(2.0, m2.m10);
@@ -348,7 +318,7 @@ public class MatrixTest {
 	 */
 	@Test
 	public void determinant() {
-		Matrix m1 = new Matrix(1.0, 2.0, 
+		Matrix22 m1 = new Matrix22(1.0, 2.0, 
                                3.0, 4.0);
 		double det = m1.determinant();
 		TestCase.assertEquals(-2.0, det);
@@ -359,7 +329,7 @@ public class MatrixTest {
 	 */
 	@Test
 	public void invert() {
-		Matrix m1 = new Matrix(1.0, 2.0, 
+		Matrix22 m1 = new Matrix22(1.0, 2.0, 
                                3.0, 4.0);
 		m1.invert();
 		TestCase.assertEquals(-2.0, m1.m00);
@@ -373,9 +343,9 @@ public class MatrixTest {
 	 */
 	@Test
 	public void getInverse() {
-		Matrix m1 = new Matrix(1.0, 2.0, 
+		Matrix22 m1 = new Matrix22(1.0, 2.0, 
                                3.0, 4.0);
-		Matrix m2 = m1.getInverse();
+		Matrix22 m2 = m1.getInverse();
 		TestCase.assertEquals(-2.0, m2.m00);
 		TestCase.assertEquals(1.0, m2.m01);
 		TestCase.assertEquals(1.5, m2.m10);
@@ -389,10 +359,10 @@ public class MatrixTest {
 	 */
 	@Test
 	public void solve() {
-		Matrix A = new Matrix(3.0, -1.0, 
+		Matrix22 A = new Matrix22(3.0, -1.0, 
                 			 -1.0, -1.0);
-		Vector b = new Vector(2.0, 6.0);
-		Vector x = A.solve(b);
+		Vector2 b = new Vector2(2.0, 6.0);
+		Vector2 x = A.solve(b);
 		TestCase.assertEquals(-1.0, x.x);
 		TestCase.assertEquals(-5.0, x.y);
 	}

@@ -30,7 +30,7 @@ package org.dyn4j.game2d.geometry;
  */
 public class Vertex extends Feature {
 	/** The vertex or point */
-	protected Vector point;
+	protected Vector2 point;
 	
 	/** The index in the  */
 	protected int index;
@@ -41,7 +41,7 @@ public class Vertex extends Feature {
 	 * Assumes the given point is not indexed.
 	 * @param point the vertex point
 	 */
-	public Vertex(Vector point) {
+	public Vertex(Vector2 point) {
 		this(point, Feature.NOT_INDEXED);
 	}
 	
@@ -50,7 +50,7 @@ public class Vertex extends Feature {
 	 * @param point the vertex point
 	 * @param index the index 
 	 */
-	public Vertex(Vector point, int index) {
+	public Vertex(Vector2 point, int index) {
 		super(Feature.Type.VERTEX);
 		this.point = point;
 		this.index = index;
@@ -70,9 +70,9 @@ public class Vertex extends Feature {
 	
 	/**
 	 * Returns the point.
-	 * @return {@link Vector}
+	 * @return {@link Vector2}
 	 */
-	public Vector getPoint() {
+	public Vector2 getPoint() {
 		return this.point;
 	}
 	

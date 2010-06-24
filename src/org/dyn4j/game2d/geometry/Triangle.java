@@ -43,8 +43,8 @@ public class Triangle extends Polygon implements Convex, Shape, Transformable {
 	 * @param point2 the second point
 	 * @param point3 the third point
 	 */
-	public Triangle(Vector point1, Vector point2, Vector point3) {
-		super(new Vector[] {point1, point2, point3});
+	public Triangle(Vector2 point1, Vector2 point2, Vector2 point3) {
+		super(new Vector2[] {point1, point2, point3});
 	}
 	
 	/* (non-Javadoc)
@@ -73,7 +73,7 @@ public class Triangle extends Polygon implements Convex, Shape, Transformable {
 	 * N &middot; (P - A) = 0
 	 * </pre>
 	 * Where A is any point on the plane. <br />
-	 * Create two axes ({@link Vector}s), we will choose V<sub>ab</sub> and V<sub>ac</sub>.
+	 * Create two axes ({@link Vector2}s), we will choose V<sub>ab</sub> and V<sub>ac</sub>.
 	 * <pre>
 	 * V<sub>ac</sub> = C - A
 	 * V<sub>ab</sub> = B - A
@@ -129,20 +129,20 @@ public class Triangle extends Polygon implements Convex, Shape, Transformable {
 	 * @return boolean
 	 */
 	@Override
-	public boolean contains(Vector point, Transform transform) {
+	public boolean contains(Vector2 point, Transform transform) {
 		double u, v;
 		// put the point in local coordinates
-		Vector p = transform.getInverseTransformed(point);
+		Vector2 p = transform.getInverseTransformed(point);
 		// get the vertices
-		Vector p1 = this.vertices[0];
-		Vector p2 = this.vertices[1];
-		Vector p3 = this.vertices[2];
+		Vector2 p1 = this.vertices[0];
+		Vector2 p2 = this.vertices[1];
+		Vector2 p3 = this.vertices[2];
 		// create a vector representing edge ab
-		Vector ab = p1.to(p2);
+		Vector2 ab = p1.to(p2);
 		// create a vector representing edge ac
-		Vector ac = p1.to(p3);
+		Vector2 ac = p1.to(p3);
 		// create a vector from a to the point
-		Vector pa = p1.to(p);
+		Vector2 pa = p1.to(p);
 		
 		double dot00 = ac.dot(ac);
 		double dot01 = ac.dot(ab);

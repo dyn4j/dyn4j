@@ -64,7 +64,7 @@ public class CircleTest {
 	public void contains() {
 		Circle c = new Circle(2.0);
 		Transform t = new Transform();
-		Vector p = new Vector(2.0, 4.0);
+		Vector2 p = new Vector2(2.0, 4.0);
 		
 		// shouldn't be in the circle
 		TestCase.assertTrue(!c.contains(p, t));
@@ -88,8 +88,8 @@ public class CircleTest {
 	public void project() {
 		Circle c = new Circle(1.5);
 		Transform t = new Transform();
-		Vector x = new Vector(1.0, 0.0);
-		Vector y = new Vector(0.0, 1.0);
+		Vector2 x = new Vector2(1.0, 0.0);
+		Vector2 y = new Vector2(0.0, 1.0);
 		
 		t.translate(1.0, 0.5);
 		
@@ -114,14 +114,14 @@ public class CircleTest {
 	public void getFarthest() {
 		Circle c = new Circle(1.5);
 		Transform t = new Transform();
-		Vector y = new Vector(0.0, -1.0);
+		Vector2 y = new Vector2(0.0, -1.0);
 		
 		Vertex f = c.getFarthestFeature(y, t);
 		TestCase.assertTrue(f.isVertex());
 		TestCase.assertEquals( 0.000, f.point.x, 1.0e-3);
 		TestCase.assertEquals(-1.500, f.point.y, 1.0e-3);
 		
-		Vector p = c.getFarthestPoint(y, t);
+		Vector2 p = c.getFarthestPoint(y, t);
 		TestCase.assertEquals( 0.000, p.x, 1.0e-3);
 		TestCase.assertEquals(-1.500, p.y, 1.0e-3);
 		
@@ -146,7 +146,7 @@ public class CircleTest {
 		Circle c = new Circle(1.5);
 		Transform t = new Transform();
 		// a cicle has infinite axes so it should be null
-		Vector[] axes = c.getAxes(null, t);
+		Vector2[] axes = c.getAxes(null, t);
 		TestCase.assertNull(axes);
 	}
 	
@@ -158,7 +158,7 @@ public class CircleTest {
 		Circle c = new Circle(1.5);
 		Transform t = new Transform();
 		// should only return one
-		Vector[] foci = c.getFoci(t);
+		Vector2[] foci = c.getFoci(t);
 		TestCase.assertEquals(1, foci.length);
 	}
 	

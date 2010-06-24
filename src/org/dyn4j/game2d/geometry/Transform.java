@@ -61,7 +61,7 @@ public class Transform implements Transformable {
 		 * @see org.dyn4j.game2d.geometry.Transform#rotate(double, org.dyn4j.game2d.geometry.Vector)
 		 */
 		@Override
-		public void rotate(double theta, Vector point) {
+		public void rotate(double theta, Vector2 point) {
 			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
 		}
 		
@@ -77,7 +77,7 @@ public class Transform implements Transformable {
 		 * @see org.dyn4j.game2d.geometry.Transform#translate(org.dyn4j.game2d.geometry.Vector)
 		 */
 		@Override
-		public void translate(Vector vector) {
+		public void translate(Vector2 vector) {
 			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
 		}
 	};
@@ -170,7 +170,7 @@ public class Transform implements Transformable {
 	 * @see org.dyn4j.game2d.geometry.Transformable#rotate(double, org.dyn4j.game2d.geometry.Vector)
 	 */
 	@Override
-	public void rotate(double theta, Vector point) {
+	public void rotate(double theta, Vector2 point) {
 		this.rotate(theta, point.x, point.y);
 	}
 	
@@ -187,7 +187,7 @@ public class Transform implements Transformable {
 	 * @see org.dyn4j.game2d.geometry.Transformable#translate(org.dyn4j.game2d.geometry.Vector)
 	 */
 	@Override
-	public void translate(Vector vector) {
+	public void translate(Vector2 vector) {
 		this.translate(vector.x, vector.y);
 	}
 	
@@ -211,12 +211,12 @@ public class Transform implements Transformable {
 	}
 	
 	/**
-	 * Transforms the given {@link Vector} and returns a new {@link Vector} containing the result.
-	 * @param vector the {@link Vector} to transform
-	 * @return {@link Vector}
+	 * Transforms the given {@link Vector2} and returns a new {@link Vector2} containing the result.
+	 * @param vector the {@link Vector2} to transform
+	 * @return {@link Vector2}
 	 */
-	public Vector getTransformed(Vector vector) {
-		Vector tv = new Vector();
+	public Vector2 getTransformed(Vector2 vector) {
+		Vector2 tv = new Vector2();
 		double x = vector.x;
 		double y = vector.y;
 		tv.x = this.m00 * x + this.m01 * y + this.x;
@@ -225,11 +225,11 @@ public class Transform implements Transformable {
 	}
 	
 	/**
-	 * Transforms the given {@link Vector} and returns the result in dest.
-	 * @param vector the {@link Vector} to transform
-	 * @param destination the {@link Vector} containing the result
+	 * Transforms the given {@link Vector2} and returns the result in dest.
+	 * @param vector the {@link Vector2} to transform
+	 * @param destination the {@link Vector2} containing the result
 	 */
-	public void getTransformed(Vector vector, Vector destination) {
+	public void getTransformed(Vector2 vector, Vector2 destination) {
 		double x = vector.x;
 		double y = vector.y;
 		destination.x = this.m00 * x + this.m01 * y + this.x;
@@ -237,10 +237,10 @@ public class Transform implements Transformable {
 	}
 	
 	/**
-	 * Transforms the given {@link Vector} and places the result in the given {@link Vector}.
-	 * @param vector the {@link Vector} to transform
+	 * Transforms the given {@link Vector2} and places the result in the given {@link Vector2}.
+	 * @param vector the {@link Vector2} to transform
 	 */
-	public void transform(Vector vector) {
+	public void transform(Vector2 vector) {
 		double x = vector.x;
 		double y = vector.y;
 		vector.x = this.m00 * x + this.m01 * y + this.x;
@@ -248,12 +248,12 @@ public class Transform implements Transformable {
 	}
 
 	/**
-	 * Inverse transforms the given {@link Vector} and returns a new {@link Vector} containing the result.
-	 * @param vector the {@link Vector} to transform
-	 * @return {@link Vector}
+	 * Inverse transforms the given {@link Vector2} and returns a new {@link Vector2} containing the result.
+	 * @param vector the {@link Vector2} to transform
+	 * @return {@link Vector2}
 	 */
-	public Vector getInverseTransformed(Vector vector) {
-		Vector tv = new Vector();
+	public Vector2 getInverseTransformed(Vector2 vector) {
+		Vector2 tv = new Vector2();
 		double tx = vector.x - this.x;
 		double ty = vector.y - this.y;
 		tv.x = this.m00 * tx + this.m10 * ty;
@@ -262,11 +262,11 @@ public class Transform implements Transformable {
 	}
 	
 	/**
-	 * Inverse transforms the given {@link Vector} and returns the result in the destination {@link Vector}.
-	 * @param vector the {@link Vector} to transform
-	 * @param destination the {@link Vector} containing the result
+	 * Inverse transforms the given {@link Vector2} and returns the result in the destination {@link Vector2}.
+	 * @param vector the {@link Vector2} to transform
+	 * @param destination the {@link Vector2} containing the result
 	 */
-	public void getInverseTransformed(Vector vector, Vector destination) {
+	public void getInverseTransformed(Vector2 vector, Vector2 destination) {
 		double tx = vector.x - this.x;
 		double ty = vector.y - this.y;
 		destination.x = this.m00 * tx + this.m10 * ty;
@@ -274,10 +274,10 @@ public class Transform implements Transformable {
 	}
 	
 	/**
-	 * Inverse transforms the given {@link Vector} and places the result in the given {@link Vector}.
-	 * @param vector the {@link Vector} to transform
+	 * Inverse transforms the given {@link Vector2} and places the result in the given {@link Vector2}.
+	 * @param vector the {@link Vector2} to transform
 	 */
-	public void inverseTransform(Vector vector) {
+	public void inverseTransform(Vector2 vector) {
 		double x = vector.x - this.x;
 		double y = vector.y - this.y;
 		vector.x = this.m00 * x + this.m10 * y;
@@ -285,13 +285,13 @@ public class Transform implements Transformable {
 	}
 
 	/**
-	 * Transforms the given {@link Vector} only by the rotation and returns
-	 * a new {@link Vector} containing the result.
-	 * @param vector the {@link Vector} to transform
-	 * @return {@link Vector}
+	 * Transforms the given {@link Vector2} only by the rotation and returns
+	 * a new {@link Vector2} containing the result.
+	 * @param vector the {@link Vector2} to transform
+	 * @return {@link Vector2}
 	 */
-	public Vector getTransformedR(Vector vector) {
-		Vector v = new Vector();
+	public Vector2 getTransformedR(Vector2 vector) {
+		Vector2 v = new Vector2();
 		double x = vector.x;
 		double y = vector.y;
 		v.x = this.m00 * x + this.m01 * y;
@@ -300,12 +300,12 @@ public class Transform implements Transformable {
 	}
 	
 	/**
-	 * Transforms the given {@link Vector} only by the rotation and returns the result in the
-	 * destination {@link Vector}.
-	 * @param vector the {@link Vector} to transform
-	 * @param destination the {@link Vector} containing the result
+	 * Transforms the given {@link Vector2} only by the rotation and returns the result in the
+	 * destination {@link Vector2}.
+	 * @param vector the {@link Vector2} to transform
+	 * @param destination the {@link Vector2} containing the result
 	 */
-	public void transformR(Vector vector, Vector destination) {
+	public void transformR(Vector2 vector, Vector2 destination) {
 		double x = vector.x;
 		double y = vector.y;
 		destination.x = this.m00 * x + this.m01 * y;
@@ -313,11 +313,11 @@ public class Transform implements Transformable {
 	}
 
 	/**
-	 * Transforms the given {@link Vector} only by the rotation and returns the
-	 * result in the given {@link Vector}.
-	 * @param vector the {@link Vector} to transform
+	 * Transforms the given {@link Vector2} only by the rotation and returns the
+	 * result in the given {@link Vector2}.
+	 * @param vector the {@link Vector2} to transform
 	 */
-	public void transformR(Vector vector) {
+	public void transformR(Vector2 vector) {
 		double x = vector.x;
 		double y = vector.y;
 		vector.x = this.m00 * x + this.m01 * y;
@@ -341,11 +341,11 @@ public class Transform implements Transformable {
 	}
 	
 	/**
-	 * Returns the translation {@link Vector}.
-	 * @return {@link Vector}
+	 * Returns the translation {@link Vector2}.
+	 * @return {@link Vector2}
 	 */
-	public Vector getTranslation() {
-		return new Vector(this.x, this.y);
+	public Vector2 getTranslation() {
+		return new Vector2(this.x, this.y);
 	}
 	
 	/**

@@ -56,7 +56,7 @@ import org.dyn4j.game2d.dynamics.joint.JointEdge;
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Transform;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Manages the logic of collision detection, resolution, and reporting.
@@ -64,16 +64,16 @@ import org.dyn4j.game2d.geometry.Vector;
  */
 public class World {
 	/** Earths gravity constant */
-	public static final Vector EARTH_GRAVITY = new Vector(0.0, -9.8);
+	public static final Vector2 EARTH_GRAVITY = new Vector2(0.0, -9.8);
 	
 	/** Zero gravity constant */
-	public static final Vector ZERO_GRAVITY = new Vector(0.0, 0.0);
+	public static final Vector2 ZERO_GRAVITY = new Vector2(0.0, 0.0);
 
 	/** The {@link Step} used by the dynamics calculations */
 	protected Step step;
 	
 	/** The world gravity vector */
-	protected Vector gravity;
+	protected Vector2 gravity;
 	
 	/** The world {@link Bounds} */
 	protected Bounds bounds;
@@ -313,8 +313,8 @@ public class World {
 				if (!body1.isActive() || !body2.isActive()) continue;
 				// one body must be dynamic
 				if (!body1.isDynamic() && !body2.isDynamic()) continue;
-				// check for connected pairs who are not allowed to collide
-				if (body1.isConnectedNoCollision(body2)) continue;
+				// check for connected pairs who's collision is not allowed
+				if (body1.isConnected(body2, false)) continue;
 				
 				// notify of the broadphase collision
 				if (!this.collisionListener.collision(body1, body2)) {
@@ -544,124 +544,138 @@ public class World {
 	/**
 	 * Removes the given {@link Body} from the {@link World}.
 	 * @param body the {@link Body} to remove
+	 * @return boolean true if the body was removed
 	 */
-	public void remove(Body body) {
+	public boolean remove(Body body) {
 		// check for null joint
-		if (body == null) return;
+		if (body == null) return false;
 		// remove the body from the list
-		this.bodies.remove(body);
+		boolean removed = this.bodies.remove(body);
 		
-		// wake up any bodies connected to this body by a joint
-		int jsize = body.joints.size();
-		for (int i = 0; i < jsize; i++) {
-			// get the joint edge
-			JointEdge jointEdge = body.joints.get(i);
-			// get the joint
-			Joint joint = jointEdge.getJoint();
-			// get the other body
-			Body other = jointEdge.getOther();
-			// wake up the other body
-			other.setAsleep(false);
-			// remove the contact edge from the other body
-			Iterator<JointEdge> iterator = other.joints.iterator();
-			while (iterator.hasNext()) {
+		// only remove joints and contacts if the body was removed
+		if (removed) {
+			// wake up any bodies connected to this body by a joint
+			// and destroy the joints
+			int jsize = body.joints.size();
+			for (int i = 0; i < jsize; i++) {
 				// get the joint edge
-				JointEdge otherJointEdge = iterator.next();
+				JointEdge jointEdge = body.joints.get(i);
 				// get the joint
-				Joint otherJoint = otherJointEdge.getJoint();
-				if (otherJoint == joint) {
-					// remove the joint edge
-					iterator.remove();
-					// since they are the same contact constraint object
-					// we only need to notify of this bodies destroyed contacts
+				Joint joint = jointEdge.getJoint();
+				// get the other body
+				Body other = jointEdge.getOther();
+				// wake up the other body
+				other.setAsleep(false);
+				// remove the contact edge from the other body
+				Iterator<JointEdge> iterator = other.joints.iterator();
+				while (iterator.hasNext()) {
+					// get the joint edge
+					JointEdge otherJointEdge = iterator.next();
+					// get the joint
+					Joint otherJoint = otherJointEdge.getJoint();
+					if (otherJoint == joint) {
+						// remove the joint edge
+						iterator.remove();
+						// since they are the same contact constraint object
+						// we only need to notify of this bodies destroyed contacts
+					}
 				}
+				// notify of the destroyed joint
+				this.destructionListener.destroyed(joint);
 			}
-			// notify of the destroyed joint
-			this.destructionListener.destroyed(joint);
-		}
-		
-		// remove any contacts this body had with any other body
-		int csize = body.contacts.size();
-		for (int i = 0; i < csize; i++) {
-			// get the contact edge
-			ContactEdge contactEdge = body.contacts.get(i);
-			// get the contact constraint
-			ContactConstraint contactConstraint = contactEdge.getContactConstraint();
-			// get the other body
-			Body other = contactEdge.getOther();
-			// wake up the other body
-			other.setAsleep(false);
-			// remove the contact edge connected from the other body
-			// to this body
-			Iterator<ContactEdge> iterator = other.contacts.iterator();
-			while (iterator.hasNext()) {
-				ContactEdge ceOther = iterator.next();
+			
+			// remove any contacts this body had with any other body
+			int csize = body.contacts.size();
+			for (int i = 0; i < csize; i++) {
+				// get the contact edge
+				ContactEdge contactEdge = body.contacts.get(i);
 				// get the contact constraint
-				ContactConstraint ccOther = ceOther.getContactConstraint();
-				// check if the contact constraint is the same
-				if (ccOther == contactConstraint) {
-					// remove the contact edge
-					iterator.remove();
-					// since they are the same contact constraint object
-					// we only need to notify of this bodies destroyed contacts
+				ContactConstraint contactConstraint = contactEdge.getContactConstraint();
+				// get the other body
+				Body other = contactEdge.getOther();
+				// wake up the other body
+				other.setAsleep(false);
+				// remove the contact edge connected from the other body
+				// to this body
+				Iterator<ContactEdge> iterator = other.contacts.iterator();
+				while (iterator.hasNext()) {
+					ContactEdge ceOther = iterator.next();
+					// get the contact constraint
+					ContactConstraint ccOther = ceOther.getContactConstraint();
+					// check if the contact constraint is the same
+					if (ccOther == contactConstraint) {
+						// remove the contact edge
+						iterator.remove();
+						// since they are the same contact constraint object
+						// we only need to notify of this bodies destroyed contacts
+					}
 				}
-			}
-			// remove the contact constraint from the contact manager
-			this.contactManager.remove(contactConstraint);
-			// loop over the contact points
-			int size = contactConstraint.getContacts().length;
-			for (int j = 0; j < size; j++) {
-				// get the contact
-				Contact contact = contactConstraint.getContacts()[j];
-				// create a contact point for notification
-				ContactPoint contactPoint = new ContactPoint(
-													contact.getPoint(), 
-													contactConstraint.getNormal(), 
-													contact.getDepth(), 
+				// remove the contact constraint from the contact manager
+				this.contactManager.remove(contactConstraint);
+				// loop over the contact points
+				int size = contactConstraint.getContacts().length;
+				for (int j = 0; j < size; j++) {
+					// get the contact
+					Contact contact = contactConstraint.getContacts()[j];
+					// create a contact point for notification
+					ContactPoint contactPoint = new ContactPoint(
 													contactConstraint.getBody1(), 
 													contactConstraint.getFixture1(), 
 													contactConstraint.getBody2(), 
-													contactConstraint.getFixture2());
-				// call the destruction listener
-				this.destructionListener.destroyed(contactPoint);
+													contactConstraint.getFixture2(),
+													contact.isEnabled(),
+													contact.getPoint(), 
+													contactConstraint.getNormal(), 
+													contact.getDepth());
+					// call the destruction listener
+					this.destructionListener.destroyed(contactPoint);
+				}
 			}
 		}
+		
+		return removed;
 	}
 	
 	/**
 	 * Removes the given {@link Joint} from the {@link World}.
 	 * @param joint the {@link Joint} to remove
+	 * @return boolean true if the {@link Joint} was removed
 	 */
-	public void remove(Joint joint) {
+	public boolean remove(Joint joint) {
 		// check for null joint
-		if (joint == null) return;
+		if (joint == null) return false;
 		// remove the joint from the joint list
-		this.joints.remove(joint);
+		boolean removed = this.joints.remove(joint);
 		
-		// remove the joint edges from body1
-		Iterator<JointEdge> iterator = joint.getBody1().joints.iterator();
-		while (iterator.hasNext()) {
-			// see if this is the edge we want to remove
-			JointEdge jointEdge = iterator.next();
-			if (jointEdge.getJoint() == joint) {
-				// then remove this joint edge
-				iterator.remove();
+		// see if the given joint was removed
+		if (removed) {
+			// remove the joint edges from body1
+			Iterator<JointEdge> iterator = joint.getBody1().joints.iterator();
+			while (iterator.hasNext()) {
+				// see if this is the edge we want to remove
+				JointEdge jointEdge = iterator.next();
+				if (jointEdge.getJoint() == joint) {
+					// then remove this joint edge
+					iterator.remove();
+				}
 			}
-		}
-		// remove the joint edges from body2
-		iterator = joint.getBody2().joints.iterator();
-		while (iterator.hasNext()) {
-			// see if this is the edge we want to remove
-			JointEdge jointEdge = iterator.next();
-			if (jointEdge.getJoint() == joint) {
-				// then remove this joint edge
-				iterator.remove();
+			// remove the joint edges from body2
+			iterator = joint.getBody2().joints.iterator();
+			while (iterator.hasNext()) {
+				// see if this is the edge we want to remove
+				JointEdge jointEdge = iterator.next();
+				if (jointEdge.getJoint() == joint) {
+					// then remove this joint edge
+					iterator.remove();
+				}
 			}
+			
+			// finally wake both bodies
+			joint.getBody1().setAsleep(false);
+			joint.getBody2().setAsleep(false);
 		}
 		
-		// finally wake both bodies
-		joint.getBody1().setAsleep(false);
-		joint.getBody2().setAsleep(false);
+		return removed;
 	}
 	
 	/**
@@ -725,16 +739,16 @@ public class World {
 	 * A NullPointerException is thrown if the given gravity vector is null.
 	 * @param gravity the gravity in meters/second<sup>2</sup>
 	 */
-	public void setGravity(Vector gravity) {
+	public void setGravity(Vector2 gravity) {
 		if (gravity == null) throw new NullPointerException("The gravity vector cannot be null.");
 		this.gravity = gravity;
 	}
 	
 	/**
 	 * Returns the gravity.
-	 * @return {@link Vector} the gravity in meters/second<sup>2</sup>
+	 * @return {@link Vector2} the gravity in meters/second<sup>2</sup>
 	 */
-	public Vector getGravity() {
+	public Vector2 getGravity() {
 		return this.gravity;
 	}
 

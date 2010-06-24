@@ -41,7 +41,7 @@ import org.dyn4j.game2d.collision.narrowphase.Separation;
 import org.dyn4j.game2d.geometry.Shape;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Triangle;
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -62,13 +62,13 @@ public class TriangleTriangleTest extends AbstractTest {
 	@Before
 	public void setup() {
 		this.tri1 = new Triangle(
-						new Vector(1.29, 0.25),
-						new Vector(-0.71, 0.65),
-						new Vector(-0.59, -0.85));
+						new Vector2(1.29, 0.25),
+						new Vector2(-0.71, 0.65),
+						new Vector2(-0.59, -0.85));
 		this.tri2 = new Triangle(
-						new Vector(0.45, -0.12),
-						new Vector(-0.45, 0.38),
-						new Vector(-0.15, -0.22));
+						new Vector2(0.45, -0.12),
+						new Vector2(-0.45, 0.38),
+						new Vector2(-0.15, -0.22));
 	}
 	
 	/**
@@ -172,7 +172,7 @@ public class TriangleTriangleTest extends AbstractTest {
 		Transform t1 = new Transform();
 		Transform t2 = new Transform();
 		
-		Vector n = null;
+		Vector2 n = null;
 		
 		// test containment
 		TestCase.assertTrue(this.sat.detect(tri1, t1, tri2, t2, p));
@@ -231,7 +231,7 @@ public class TriangleTriangleTest extends AbstractTest {
 		Transform t1 = new Transform();
 		Transform t2 = new Transform();
 		
-		Vector n = null;
+		Vector2 n = null;
 		
 		// test containment
 		TestCase.assertTrue(this.gjk.detect(tri1, t1, tri2, t2, p));
@@ -291,7 +291,7 @@ public class TriangleTriangleTest extends AbstractTest {
 		Transform t1 = new Transform();
 		Transform t2 = new Transform();
 		
-		Vector n, p1, p2;
+		Vector2 n, p1, p2;
 		
 		// test containment
 		TestCase.assertFalse(this.gjk.distance(tri1, t1, tri2, t2, s));
@@ -369,7 +369,7 @@ public class TriangleTriangleTest extends AbstractTest {
 		Transform t2 = new Transform();
 		
 		ManifoldPoint mp1, mp2;
-		Vector p1, p2;
+		Vector2 p1, p2;
 		
 		// test containment gjk
 		this.gjk.detect(tri1, t1, tri2, t2, p);
@@ -458,7 +458,7 @@ public class TriangleTriangleTest extends AbstractTest {
 		Transform t1 = new Transform();
 		Transform t2 = new Transform();
 		
-		Vector p1, p2;
+		Vector2 p1, p2;
 		
 		t2.translate(1.578125, 0.6875);
 		

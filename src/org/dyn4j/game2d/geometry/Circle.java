@@ -46,7 +46,7 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 	 */
 	public Circle(double radius) {
 		if (radius <= 0.0) throw new IllegalArgumentException("The radius must be greater than zero.");
-		this.center = new Vector();
+		this.center = new Vector2();
 		this.radius = radius;
 	}
 	
@@ -80,9 +80,9 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 	 * @see org.dyn4j.game2d.geometry.Shape#contains(org.dyn4j.game2d.geometry.Vector, org.dyn4j.game2d.geometry.Transform)
 	 */
 	@Override
-	public boolean contains(Vector point, Transform transform) {
+	public boolean contains(Vector2 point, Transform transform) {
 		// transform the center
-		Vector v = transform.getTransformed(this.center);
+		Vector2 v = transform.getTransformed(this.center);
 		// get the transformed radius squared
 		double radiusSquared = this.radius * this.radius;
 		// create a vector from the center to the given point
@@ -97,9 +97,9 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 	 * @see org.dyn4j.game2d.geometry.Shape#project(org.dyn4j.game2d.geometry.Vector, org.dyn4j.game2d.geometry.Transform)
 	 */
 	@Override
-	public Interval project(Vector axis, Transform transform) {
+	public Interval project(Vector2 axis, Transform transform) {
 		// if the transform is not null then transform the center
-		Vector center = transform.getTransformed(this.center);
+		Vector2 center = transform.getTransformed(this.center);
 		// project the center onto the given axis
 		double c = center.dot(axis);
 		// the interval is defined by the radius
@@ -115,9 +115,9 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 	 * @return {@link Vertex}
 	 */
 	@Override
-	public Vertex getFarthestFeature(Vector n, Transform transform) {
+	public Vertex getFarthestFeature(Vector2 n, Transform transform) {
 		// obtain the farthest point along the given vector
-		Vector farthest = this.getFarthestPoint(n, transform);
+		Vector2 farthest = this.getFarthestPoint(n, transform);
 		// for a circle the farthest feature along a vector will always be a vertex
 		return new Vertex(farthest);
 	}
@@ -126,11 +126,11 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 	 * @see org.dyn4j.game2d.geometry.Convex#getFarthestPoint(org.dyn4j.game2d.geometry.Vector, org.dyn4j.game2d.geometry.Transform)
 	 */
 	@Override
-	public Vector getFarthestPoint(Vector n, Transform transform) {
+	public Vector2 getFarthestPoint(Vector2 n, Transform transform) {
 		// make sure the axis is normalized
-		Vector nAxis = n.getNormalized();
+		Vector2 nAxis = n.getNormalized();
 		// get the transformed center
-		Vector center = transform.getTransformed(this.center);
+		Vector2 center = transform.getTransformed(this.center);
 		// add the radius along the vector to the center to get the farthest point
 		center.add(this.radius * nAxis.x, this.radius * nAxis.y);
 		// return the new point
@@ -141,7 +141,7 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 	 * @see org.dyn4j.game2d.geometry.Convex#getAxes(java.util.List, org.dyn4j.game2d.geometry.Transform)
 	 */
 	@Override
-	public Vector[] getAxes(Vector[] foci, Transform transform) {
+	public Vector2[] getAxes(Vector2[] foci, Transform transform) {
 		// a circle has infinite separating axes and zero voronoi regions
 		// therefore we return null
 		return null;
@@ -151,8 +151,8 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 	 * @see org.dyn4j.game2d.geometry.Convex#getFoci(org.dyn4j.game2d.geometry.Transform)
 	 */
 	@Override
-	public Vector[] getFoci(Transform transform) {
-		Vector[] foci = new Vector[1];
+	public Vector2[] getFoci(Transform transform) {
+		Vector2[] foci = new Vector2[1];
 		// a circle only has one focus
 		foci[0] = transform.getTransformed(this.center);
 		return foci;

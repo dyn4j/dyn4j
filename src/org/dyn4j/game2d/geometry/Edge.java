@@ -36,9 +36,9 @@ public class Edge extends Feature {
 	protected Vertex vertex2;
 	
 	/** The edge vector */
-	protected Vector edge;
+	protected Vector2 edge;
 	
-	/** The vertex of maximum projection along a {@link Vector} */
+	/** The vertex of maximum projection along a {@link Vector2} */
 	protected Vertex max;
 	
 	/** The index of the edge on the shape */
@@ -52,7 +52,7 @@ public class Edge extends Feature {
 	 * @param max the maximum point
 	 * @param index the index of the edge
 	 */
-	public Edge(Vertex vertex1, Vertex vertex2, Vertex max, Vector edge, int index) {
+	public Edge(Vertex vertex1, Vertex vertex2, Vertex max, Vector2 edge, int index) {
 		super(Feature.Type.EDGE);
 		this.vertex1 = vertex1;
 		this.vertex2 = vertex2;
@@ -94,9 +94,9 @@ public class Edge extends Feature {
 	
 	/**
 	 * Returns the vector representing this edge.
-	 * @return {@link Vector}
+	 * @return {@link Vector2}
 	 */
-	public Vector getEdge() {
+	public Vector2 getEdge() {
 		return this.edge;
 	}
 	

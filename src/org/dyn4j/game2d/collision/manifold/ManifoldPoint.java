@@ -24,7 +24,7 @@
  */
 package org.dyn4j.game2d.collision.manifold;
 
-import org.dyn4j.game2d.geometry.Vector;
+import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Represents a collision point.
@@ -35,7 +35,7 @@ public class ManifoldPoint {
 	protected ManifoldPointId id;
 	
 	/** The point in world coordinates */
-	protected Vector point;
+	protected Vector2 point;
 	
 	/** The penetration depth */
 	protected double depth;
@@ -51,7 +51,7 @@ public class ManifoldPoint {
 	 * @param point the manifold point in world coordinates
 	 * @param depth the penetration depth
 	 */
-	public ManifoldPoint(ManifoldPointId id, Vector point, double depth) {
+	public ManifoldPoint(ManifoldPointId id, Vector2 point, double depth) {
 		this.id = id;
 		this.point = point;
 		this.depth = depth;
@@ -80,9 +80,9 @@ public class ManifoldPoint {
 	
 	/**
 	 * Returns the point.
-	 * @return {@link Vector} the point in world coordinates
+	 * @return {@link Vector2} the point in world coordinates
 	 */
-	public Vector getPoint() {
+	public Vector2 getPoint() {
 		return this.point;
 	}
 	
