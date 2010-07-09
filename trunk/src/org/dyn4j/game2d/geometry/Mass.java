@@ -35,31 +35,6 @@ import org.dyn4j.game2d.dynamics.Body;
  * @author William Bittle
  */
 public class Mass {
-	/** 
-	 * The mass used when a mass object cannot be created.
-	 * <p>
-	 * This mass object is immutable.  The {@link #getCenter()} method returns
-	 * a copy of this mass object's center.  The {@link #setType(Type)} method
-	 * throws an UnsupportedOperationException.
-	 */
-	public static final Mass UNDEFINED = new Mass() {
-		/* (non-Javadoc)
-		 * @see org.dyn4j.game2d.geometry.Mass#getCenter()
-		 */
-		public Vector2 getCenter() {
-			// make sure they cannot modify the default mass's
-			// center of mass
-			return super.getCenter().copy();
-		}
-		
-		/* (non-Javadoc)
-		 * @see org.dyn4j.game2d.geometry.Mass#setType(org.dyn4j.game2d.geometry.Mass.Type)
-		 */
-		public void setType(Type type) {
-			throw new UnsupportedOperationException("Cannot modify the Mass.Type of the UNDEFINED mass.");
-		}
-	};
-	
 	/**
 	 * Enumeration for special mass types.
 	 * @author William Bittle
@@ -76,34 +51,30 @@ public class Mass {
 	}
 	
 	/** The mass type */
-	private Mass.Type type;
-
-	/** The previous mass type */
-	private Mass.Type previousType;
+	protected Mass.Type type;
 	
 	/** The center of mass */
-	private Vector2 center;
+	protected Vector2 center;
 	
 	/** The mass in kg */
-	private double mass;
+	protected double mass;
 	
 	/** The inertia tensor in kg &middot; m<sup>2</sup> */
-	private double inertia;
+	protected double inertia;
 	
 	/** The inverse mass */
-	private double invMass;
+	protected double invMass;
 		
 	/** The inverse inertia tensor */
-	private double invInertia;
+	protected double invInertia;
 	
 	/**
 	 * Default constructor.
 	 * <p>
 	 * Creates an infinite mass centered at the origin.
 	 */
-	private Mass() {
+	public Mass() {
 		this.type = Mass.Type.INFINITE;
-		this.previousType = this.type;
 		this.center = new Vector2();
 		this.mass = 0.0;
 		this.inertia = 0.0;
@@ -117,9 +88,8 @@ public class Mass {
 	 * @param mass mass in kg
 	 * @param inertia inertia tensor in kg &middot; m<sup>2</sup>
 	 */
-	private Mass(Vector2 center, double mass, double inertia) {
+	public Mass(Vector2 center, double mass, double inertia) {
 		this.type = Mass.Type.NORMAL;
-		this.previousType = this.type;
 		this.center = center.copy();
 		this.mass = mass;
 		this.inertia = inertia;
@@ -141,10 +111,9 @@ public class Mass {
 	 * Performs a deep copy.
 	 * @param mass the {@link Mass} to copy
 	 */
-	private Mass(Mass mass) {
+	public Mass(Mass mass) {
 		super();
 		this.type = mass.type;
-		this.previousType = mass.previousType;
 		this.center = mass.center.copy();
 		this.mass = mass.mass;
 		this.inertia = mass.inertia;
@@ -159,9 +128,10 @@ public class Mass {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("MASS[")
-		.append(center).append("|")
-		.append(mass).append("|")
-		.append(inertia).append("]");
+		.append(this.type).append("|")
+		.append(this.center).append("|")
+		.append(this.mass).append("|")
+		.append(this.inertia).append("]");
 		return sb.toString();
 	}
 	
@@ -257,24 +227,11 @@ public class Mass {
 	}
 	
 	/**
-	 * Returns the previous mass type.
-	 * <p>
-	 * The previous mass type can be used to recall the previous
-	 * type of this mass object if the mass type was changed temporarily
-	 * for some reason.
-	 * @return {@link Mass.Type}
-	 */
-	public Mass.Type getPreviousType() {
-		return this.previousType;
-	}
-	
-	/**
 	 * Sets the mass type.
 	 * @param type the mass type
 	 */
 	public void setType(Mass.Type type) {
 		if (type == null) throw new NullPointerException("The mass type cannot be null.");
-		this.previousType = this.type;
 		this.type = type;
 	}
 	

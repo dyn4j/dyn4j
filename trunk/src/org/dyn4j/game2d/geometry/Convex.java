@@ -41,7 +41,7 @@ public interface Convex extends Shape, Transformable {
 	 * <p>
 	 * The points in the foci array are assumed to be in world space.
 	 * <p>
-	 * The returned axes are not normalized.
+	 * The returned axes are normalized.
 	 * @param foci the world space points representing foci of curved {@link Shape}s; can be null
 	 * @param transform the local to world space {@link Transform} of this {@link Convex} {@link Shape}
 	 * @return {@link Vector2}[]

@@ -143,7 +143,7 @@ public class Body implements Collidable, Transformable {
 	public Body() {
 		// the majority of bodies will contain one fixture/shape
 		this.fixtures = new ArrayList<Fixture>(1);
-		this.mass = Mass.UNDEFINED;
+		this.mass = new Mass();
 		this.id = UUID.randomUUID().toString();
 		this.transform = new Transform();
 		this.velocity = new Vector2();
@@ -204,8 +204,8 @@ public class Body implements Collidable, Transformable {
 	/**
 	 * Adds a {@link Fixture} to this {@link Body}.
 	 * <p>
-	 * After adding or removing fixtures make sure to call the {@link #setMassFromShapes()}
-	 * or {@link #setMassFromShapes(Mass.Type)} method to compute the new total
+	 * After adding or removing fixtures make sure to call the {@link #setMass()}
+	 * or {@link #setMass(Mass.Type)} method to compute the new total
 	 * {@link Mass}.
 	 * @param fixture the {@link Fixture}
 	 * @return {@link Body} this body
@@ -222,8 +222,8 @@ public class Body implements Collidable, Transformable {
 	/**
 	 * Removes the given {@link Fixture} from the {@link Body}.
 	 * <p>
-	 * After adding or removing fixtures make sure to call the {@link #setMassFromShapes()}
-	 * or {@link #setMassFromShapes(Mass.Type)} method to compute the new total
+	 * After adding or removing fixtures make sure to call the {@link #setMass()}
+	 * or {@link #setMass(Mass.Type)} method to compute the new total
 	 * {@link Mass}.
 	 * @param fixture the {@link Fixture}
 	 * @return boolean true if the {@link Fixture} was removed from this {@link Body}
@@ -262,32 +262,32 @@ public class Body implements Collidable, Transformable {
 	}
 	
 	/**
-	 * This method should be called after shape modification
+	 * This method should be called after fixture modification
 	 * is complete.
 	 * <p>
 	 * This method will calculate a total mass for the body 
-	 * given the masses of the shapes.
+	 * given the masses of the fixtures.
 	 * @return {@link Body} this body
-	 * @see #setMassFromShapes(Mass.Type)
+	 * @see #setMass(Mass.Type)
 	 * @see #addFixture(Fixture)
 	 * @see #removeFixture(Fixture)
 	 * @see #removeFixture(int)
 	 */
-	public Body setMassFromShapes() {
-		return this.setMassFromShapes(Mass.Type.NORMAL);
+	public Body setMass() {
+		return this.setMass(Mass.Type.NORMAL);
 	}
 	
 	/**
-	 * This method should be called after shape modification
+	 * This method should be called after fixture modification
 	 * is complete.
 	 * <p>
 	 * This method will calculate a total mass for the body 
-	 * given the masses of the shapes.
+	 * given the masses of the fixtures.
 	 * <p>
 	 * A {@link Mass.Type} can be used to create special mass
 	 * types.
 	 * <p>
-	 * If this method is called before any shapes are added the
+	 * If this method is called before any fixtures are added the
 	 * mass is set to Mass.UNDEFINED.
 	 * @param type the {@link Mass.Type}; can be null
 	 * @return {@link Body} this body
@@ -295,13 +295,13 @@ public class Body implements Collidable, Transformable {
 	 * @see #removeFixture(Fixture)
 	 * @see #removeFixture(int)
 	 */
-	public Body setMassFromShapes(Mass.Type type) {
+	public Body setMass(Mass.Type type) {
 		// get the size
 		int size = this.fixtures.size();
 		// check the size
 		if (size == 0) {
 			// set the mass to an infinite point mass at (0, 0)
-			this.setMass(Mass.UNDEFINED);
+			this.mass = new Mass();
 			// ignore the passed in type
 		} else if (size == 1) {
 			// then just use the mass for the first shape
@@ -341,7 +341,6 @@ public class Body implements Collidable, Transformable {
 	public Body setMass(Mass mass) {
 		// make sure the mass is not null
 		if (mass == null) throw new NullPointerException("The mass cannot be null.");
-		if (mass == Mass.UNDEFINED) throw new IllegalArgumentException("Cannot set the mass to Mass.UNDEFINED.");
 		// set the mass
 		this.mass = mass;
 		// return this body to facilitate chaining
@@ -383,21 +382,16 @@ public class Body implements Collidable, Transformable {
 		// return this body to facilitate chaining
 		return this;
 	}
-
+	
 	/**
-	 * Applies the given force to this {@link Body} at the
-	 * given point (torque).
-	 * @param force the force
-	 * @param point the application point in world coordinates
+	 * Applies the given torque about the center of this {@link Body}.
+	 * @param torque the torque about the center
 	 * @return {@link Body} this body
 	 */
-	public Body apply(Vector2 force, Vector2 point) {
-		// check for null
-		if (force == null) throw new NullPointerException("Cannot apply a torque with a null force.");
-		if (point == null) throw new NullPointerException("Cannot apply a torque with a null application point.");
+	public Body apply(double torque) {
 		// apply the torque
-		this.apply(new Torque(force, point));
-		// return this body to facilitate chaining
+		this.apply(new Torque(torque));
+		// return this body
 		return this;
 	}
 	
@@ -411,6 +405,32 @@ public class Body implements Collidable, Transformable {
 		if (torque == null) throw new NullPointerException("Cannot apply a null torque.");
 		// add the torque to the list
 		this.torques.add(torque);
+		// return this body to facilitate chaining
+		return this;
+	}
+
+	/**
+	 * Applies the given force to this {@link Body} at the
+	 * given point (torque).
+	 * @param force the force
+	 * @param point the application point in world coordinates
+	 * @return {@link Body} this body
+	 */
+	public Body apply(Vector2 force, Vector2 point) {
+		// check for null
+		if (force == null) throw new NullPointerException("Cannot apply a torque with a null force.");
+		if (point == null) throw new NullPointerException("Cannot apply a torque with a null application point.");
+		// apply the force
+		this.apply(new Force(force));
+		// compute the moment r
+		Vector2 r = this.getWorldCenter().to(point);
+		// check for the zero vector
+		if (!r.isZero()) {
+			// find the torque about the given point
+			double tao = r.cross(force);
+			// apply the torque
+			this.apply(new Torque(tao));
+		}
 		// return this body to facilitate chaining
 		return this;
 	}
@@ -446,7 +466,7 @@ public class Body implements Collidable, Transformable {
 	/**
 	 * Accumulates the forces and torques.
 	 */
-	public void accumulate() {
+	protected void accumulate() {
 		// set the current force to zero
 		this.force.zero();
 		// get the number of forces
@@ -511,21 +531,12 @@ public class Body implements Collidable, Transformable {
 	 * Sets the {@link Body} to allow or disallow sleeping.
 	 * @param flag true if the {@link Body} is allowed to sleep
 	 */
-	public void setSleep(boolean flag) {
+	public void setCanSleep(boolean flag) {
 		// see if the body can already sleep
-		if (this.canSleep()) {
-			// if it can and the user doesn't want it to then
-			// remove the state, otherwise do nothing
-			if (!flag) {
-				this.state ^= Body.SLEEP;
-				this.setAsleep(false);
-			}
+		if (flag) {
+			this.state |= Body.SLEEP;
 		} else {
-			// if it cannot sleep and the user does want it to
-			// then add it to the state, otherwise do nothing
-			if (flag) {
-				this.state |= Body.SLEEP;
-			}
+			this.state &= ~Body.SLEEP;
 		}
 	}
 	
@@ -578,7 +589,7 @@ public class Body implements Collidable, Transformable {
 	 * Once a body is asleep the sleep time is reset to zero.
 	 * @return double
 	 */
-	public double getSleepTime() {
+	protected double getSleepTime() {
 		return this.sleepTime;
 	}
 	
@@ -849,6 +860,26 @@ public class Body implements Collidable, Transformable {
 	}
 	
 	/**
+	 * Returns a new vector in local coordinates of this body given
+	 * a vector in world coordinates.
+	 * @param worldVector a world space vector
+	 * @return {@link Vector2} local space vector
+	 */
+	public Vector2 getLocalVector(Vector2 worldVector) {
+		return this.transform.getInverseTransformedR(worldVector);
+	}
+	
+	/**
+	 * Returns a new vector in world coordinates given a vector in the
+	 * local coordinates of this {@link Body}.
+	 * @param localVector a vector in the local coordinates of this {@link Body}
+	 * @return {@link Vector2} world space vector
+	 */
+	public Vector2 getWorldVector(Vector2 localVector) {
+		return this.transform.getTransformedR(localVector);
+	}
+	
+	/**
 	 * Returns the velocity {@link Vector2}.
 	 * @return {@link Vector2}
 	 */
@@ -858,6 +889,9 @@ public class Body implements Collidable, Transformable {
 	
 	/**
 	 * Sets the velocity {@link Vector2}.
+	 * <p>
+	 * Call the {@link #setAsleep(boolean)} method to wake up the {@link Body}
+	 * if the {@link Body} is asleep and the velocity is not zero.
 	 * @param velocity the velocity
 	 */
 	public void setVelocity(Vector2 velocity) {
@@ -875,6 +909,9 @@ public class Body implements Collidable, Transformable {
 
 	/**
 	 * Sets the angular velocity.
+	 * <p>
+	 * Call the {@link #setAsleep(boolean)} method to wake up the {@link Body}
+	 * if the {@link Body} is asleep and the velocity is not zero.
 	 * @param angularVelocity the angular velocity
 	 */
 	public void setAngularVelocity(double angularVelocity) {
@@ -929,5 +966,32 @@ public class Body implements Collidable, Transformable {
 	public void setAngularDamping(double angularDamping) {
 		if (angularDamping <= 0) throw new IllegalArgumentException("The angular damping must be greater than or equal to zero.");
 		this.angularDamping = angularDamping;
+	}
+	
+	/**
+	 * Returns the list of connected {@link Body}s.
+	 * <p>
+	 * Contains {@link Body}s connected by both contacts and
+	 * {@link Joint}s.
+	 * @return List&lt;{@link Body}&gt;
+	 */
+	public List<Body> getConnnectedBodies() {
+		int jsize = this.joints.size();
+		int csize = this.contacts.size();
+		int capacity = jsize + csize;
+		// create a list of the correct capacity
+		List<Body> bodies = new ArrayList<Body>(capacity);
+		// add all the contact bodies
+		for (int i = 0; i < csize; i++) {
+			ContactEdge ce = this.contacts.get(i);
+			bodies.add(ce.getOther());
+		}
+		// add all the joint bodies
+		for (int i = 0; i < jsize; i++) {
+			JointEdge je = this.joints.get(i);
+			bodies.add(je.getOther());
+		}
+		// return the connected bodies
+		return bodies;
 	}
 }

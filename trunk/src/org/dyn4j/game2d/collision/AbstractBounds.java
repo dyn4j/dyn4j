@@ -36,6 +36,24 @@ public abstract class AbstractBounds implements Bounds, Transformable {
 	/** The {@link Bounds} {@link Transform} */
 	protected Transform transform;
 	
+	/**
+	 * Default constructor.
+	 * <p>
+	 * Creates a new transform.
+	 */
+	public AbstractBounds() {
+		this.transform = new Transform();
+	}
+	
+	/**
+	 * Full constructor.
+	 * @param transform the transform for the bounds
+	 */
+	public AbstractBounds(Transform transform) {
+		if (transform == null) throw new NullPointerException("Bounds objects cannot have null transforms.");
+		this.transform = transform;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.collision.Bounds#getTransform()
 	 */

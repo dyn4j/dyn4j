@@ -44,7 +44,7 @@ public interface Filter {
 		 * @see java.lang.Object#toString()
 		 */
 		public String toString() {
-			return "FILTER[default]";
+			return "DEFAULT_FILTER[]";
 		}
 	};
 	

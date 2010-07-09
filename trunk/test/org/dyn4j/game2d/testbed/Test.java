@@ -41,7 +41,9 @@ import org.dyn4j.game2d.dynamics.contact.ContactPoint;
 import org.dyn4j.game2d.dynamics.contact.SolvedContactPoint;
 import org.dyn4j.game2d.dynamics.joint.DistanceJoint;
 import org.dyn4j.game2d.dynamics.joint.Joint;
+import org.dyn4j.game2d.dynamics.joint.LineJoint;
 import org.dyn4j.game2d.dynamics.joint.MouseJoint;
+import org.dyn4j.game2d.dynamics.joint.PrismaticJoint;
 import org.dyn4j.game2d.dynamics.joint.RevoluteJoint;
 import org.dyn4j.game2d.dynamics.joint.WeldJoint;
 import org.dyn4j.game2d.geometry.Convex;
@@ -59,9 +61,9 @@ import org.dyn4j.game2d.geometry.Wound;
  * and starting the driver again.
  * @author William Bittle
  */
-public abstract class Test {
-	/** The test name */
-	protected String name;
+public abstract class Test implements Comparable<Test> {
+	/** The test key */
+	protected String key;
 	
 	/** A scaling factor from world space to device/screen space */
 	protected double scale;
@@ -82,15 +84,30 @@ public abstract class Test {
 	 * Returns the test name.
 	 * @return String the test name
 	 */
-	public String getName() {
-		return this.name;
-	}
+	public abstract String getName();
 	
 	/**
 	 * Returns the description of the test
 	 * @return String the description of the test
 	 */
 	public abstract String getDescription();
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
+	@Override
+	public int compareTo(Test o) {
+		// sort by name
+		return this.getName().compareTo(o.getName());
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return this.getName();
+	}
 	
 	/**
 	 * Initializes the {@link Test}.
@@ -298,6 +315,10 @@ public abstract class Test {
 					this.render(g, (MouseJoint) joint);
 				} else if (joint instanceof WeldJoint) {
 					this.render(g, (WeldJoint) joint);
+				} else if (joint instanceof LineJoint) {
+					this.render(g, (LineJoint) joint);
+				} else if (joint instanceof PrismaticJoint) {
+					this.render(g, (PrismaticJoint) joint);
 				}
 			}
 		}
@@ -474,6 +495,83 @@ public abstract class Test {
 				   (int) Math.ceil((anchor.y + 0.025) * scale), 
 				   (int) Math.ceil((anchor.x + 0.025) * scale),
 				   (int) Math.ceil((anchor.y - 0.025) * scale));
+	}
+	
+	/**
+	 * Renders a {@link LineJoint} to the given graphics object.
+	 * @param g the graphics object to render to
+	 * @param joint the {@link LineJoint} to render
+	 */
+	private void render(Graphics2D g, LineJoint joint) {
+		// draw an x at the anchor point
+		Vector2 anchor = joint.getAnchor1();
+		g.setColor(Color.LIGHT_GRAY);
+		g.fillOval((int) Math.ceil((anchor.x - 0.025) * scale),
+				   (int) Math.ceil((anchor.y - 0.025) * scale), 
+				   (int) Math.ceil(0.05 * scale),
+				   (int) Math.ceil(0.05 * scale));
+		g.setColor(Color.DARK_GRAY);
+		g.drawOval((int) Math.ceil((anchor.x - 0.025) * scale),
+				   (int) Math.ceil((anchor.y - 0.025) * scale), 
+				   (int) Math.ceil(0.05 * scale),
+				   (int) Math.ceil(0.05 * scale));
+		Body b1 = joint.getBody1();
+		Body b2 = joint.getBody2();
+		Vector2 c1 = b1.getWorldCenter();
+		Vector2 c2 = b2.getWorldCenter();
+		// draw a line from the anchor to each center
+		g.drawLine((int) Math.ceil(anchor.x * scale),
+				   (int) Math.ceil(anchor.y * scale), 
+				   (int) Math.ceil(c1.x * scale),
+				   (int) Math.ceil(c1.y * scale));
+		g.drawLine((int) Math.ceil(anchor.x * scale),
+				   (int) Math.ceil(anchor.y * scale), 
+				   (int) Math.ceil(c2.x * scale),
+				   (int) Math.ceil(c2.y * scale));
+	}
+
+	/**
+	 * Renders a {@link PrismaticJoint} to the given graphics object.
+	 * @param g the graphics object to render to
+	 * @param joint the {@link PrismaticJoint} to render
+	 */
+	private void render(Graphics2D g, PrismaticJoint joint) {
+		// the length scale factor
+		final double lf = 0.75;
+		// the "piston" width
+		final double w = 0.10;
+		
+		double hw = w * 0.5;
+		Body b1 = joint.getBody1();
+		Body b2 = joint.getBody2();
+		Vector2 c1 = b1.getWorldCenter();
+		Vector2 c2 = b2.getWorldCenter();
+		Vector2 n = c1.to(c2);
+		double l = n.normalize();
+		
+		Stroke stroke = g.getStroke();
+		g.setStroke(new BasicStroke((float)(w * 0.50 * scale), BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER));
+		
+		// draw a line from body1's center to the anchor
+		// set the color to be mostly transparent
+		g.setColor(new Color(0, 0, 0, 64));
+		g.drawLine((int) Math.ceil(c1.x * scale),
+				   (int) Math.ceil(c1.y * scale), 
+				   (int) Math.ceil((c1.x + n.x * l * lf) * scale),
+				   (int) Math.ceil((c1.y + n.y * l * lf) * scale));
+		
+		g.setStroke(stroke);
+		
+		// draw two lines slightly offset
+		Vector2 t = n.cross(1.0);
+		g.drawLine((int) Math.ceil((c2.x + t.x * hw) * scale),
+				   (int) Math.ceil((c2.y + t.y * hw) * scale), 
+				   (int) Math.ceil((c2.x - n.x * l * lf + t.x * hw) * scale),
+				   (int) Math.ceil((c2.y - n.y * l * lf + t.y * hw) * scale));
+		g.drawLine((int) Math.ceil((c2.x - t.x * hw) * scale),
+				   (int) Math.ceil((c2.y - t.y * hw) * scale), 
+				   (int) Math.ceil((c2.x - n.x * l * lf - t.x * hw) * scale),
+				   (int) Math.ceil((c2.y - n.y * l * lf - t.y * hw) * scale));
 	}
 	
 	/**

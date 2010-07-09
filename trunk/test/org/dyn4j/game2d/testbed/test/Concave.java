@@ -40,6 +40,14 @@ import org.dyn4j.game2d.testbed.Test;
  */
 public class Concave extends Test {
 	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.testbed.Test#getName()
+	 */
+	@Override
+	public String getName() {
+		return "Concave";
+	}
+	
+	/* (non-Javadoc)
 	 * @see test.Test#getDescription()
 	 */
 	@Override
@@ -89,7 +97,7 @@ public class Concave extends Test {
 		Rectangle floorShape = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
 		floor.addFixture(new Fixture(floorShape));
-		floor.setMassFromShapes(Mass.Type.INFINITE);
+		floor.setMass(Mass.Type.INFINITE);
 		this.world.add(floor);
 		
 		// create the concave object
@@ -115,7 +123,7 @@ public class Concave extends Test {
 		concave.addFixture(new Fixture(top));
 		concave.addFixture(new Fixture(left));
 		concave.addFixture(new Fixture(right));
-		concave.setMassFromShapes();
+		concave.setMass();
 		concave.translate(0.0, 4.0);
 		this.world.add(concave);
 		
@@ -123,7 +131,7 @@ public class Concave extends Test {
 		Rectangle smallShape = new Rectangle(0.5, 0.5);
 		Entity small = new Entity();
 		small.addFixture(new Fixture(smallShape));
-		small.setMassFromShapes();
+		small.setMass();
 		small.translate(0.0, 1.0);
 		this.world.add(small);
 	}

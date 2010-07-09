@@ -142,5 +142,10 @@ public class TransformTest {
 		vt = t.getTransformedR(v);
 		TestCase.assertEquals(0.906, vt.x, 1.0e-3);
 		TestCase.assertEquals(0.422, vt.y, 1.0e-3);
+		
+		// test inverse rotation transformation
+		vt = t.getInverseTransformedR(v);
+		vt = t.getTransformedR(vt);
+		TestCase.assertTrue(vt.equals(v));
 	}
 }

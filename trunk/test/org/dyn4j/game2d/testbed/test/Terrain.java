@@ -46,6 +46,14 @@ import org.dyn4j.game2d.testbed.Test;
  */
 public class Terrain extends Test {
 	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.testbed.Test#getName()
+	 */
+	@Override
+	public String getName() {
+		return "Terrain";
+	}
+	
+	/* (non-Javadoc)
 	 * @see test.Test#getDescription()
 	 */
 	@Override
@@ -99,7 +107,7 @@ public class Terrain extends Test {
 		terrain.addFixture(new Fixture(s3));
 		terrain.addFixture(new Fixture(s4));
 		terrain.addFixture(new Fixture(s5));
-		terrain.setMassFromShapes(Mass.Type.INFINITE);
+		terrain.setMass(Mass.Type.INFINITE);
 		terrain.translate(0.0, -2.0);
 		this.world.add(terrain);
 		
@@ -110,7 +118,7 @@ public class Terrain extends Test {
 				new Vector2(0.5, -0.5));
 		Entity triangle = new Entity();
 		triangle.addFixture(new Fixture(triShape));
-		triangle.setMassFromShapes();
+		triangle.setMass();
 		triangle.translate(0.0, 2.0);
 		// test having a velocity
 		triangle.getVelocity().set(5.0, 0.0);
@@ -120,7 +128,7 @@ public class Terrain extends Test {
 		Circle cirShape = new Circle(0.5);
 		Entity circle = new Entity();
 		circle.addFixture(new Fixture(cirShape));
-		circle.setMassFromShapes();
+		circle.setMass();
 		circle.translate(2.0, 2.0);
 		// test adding some force
 		circle.apply(new Vector2(-100.0, 0.0));
@@ -132,7 +140,7 @@ public class Terrain extends Test {
 		Rectangle rectShape = new Rectangle(2.0, 0.1);
 		Entity rectangle = new Entity();
 		rectangle.addFixture(new Fixture(rectShape));
-		rectangle.setMassFromShapes();
+		rectangle.setMass();
 		rectangle.translate(0.0, 3.0);
 		rectangle.rotate(Math.toRadians(10.0));
 		this.world.add(rectangle);
@@ -141,7 +149,7 @@ public class Terrain extends Test {
 		Segment segShape = new Segment(new Vector2(0.5, 0.0), new Vector2(-0.5, 0.0));
 		Entity segment = new Entity();
 		segment.addFixture(new Fixture(segShape));
-		segment.setMassFromShapes();
+		segment.setMass();
 		segment.translate(-5.0, 4.0);
 		this.world.add(segment);
 		
@@ -149,7 +157,7 @@ public class Terrain extends Test {
 		Polygon polyShape = Geometry.createUnitCirclePolygon(10, 1.0);
 		Entity polygon = new Entity();
 		polygon.addFixture(new Fixture(polyShape));
-		polygon.setMassFromShapes();
+		polygon.setMass();
 		polygon.translate(-2.0, 5.0);
 		// set the angular velocity
 		polygon.setAngularVelocity(Math.toRadians(20.0));

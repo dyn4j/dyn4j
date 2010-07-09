@@ -323,7 +323,50 @@ public class Transform implements Transformable {
 		vector.x = this.m00 * x + this.m01 * y;
 		vector.y = this.m10 * x + this.m11 * y;
 	}
+	
+	/**
+	 * Inverse transforms the given {@link Vector2} only by the rotation and returns
+	 * a new {@link Vector2} containing the result.
+	 * @param vector the {@link Vector2} to transform
+	 * @return {@link Vector2}
+	 */
+	public Vector2 getInverseTransformedR(Vector2 vector) {
+		Vector2 v = new Vector2();
+		double x = vector.x;
+		double y = vector.y;
+		// since the transpose of a rotation matrix is the inverse
+		v.x = this.m00 * x + this.m10 * y;
+		v.y = this.m01 * x + this.m11 * y;
+		return v;
+	}
+	
+	/**
+	 * Transforms the given {@link Vector2} only by the rotation and returns the result in the
+	 * destination {@link Vector2}.
+	 * @param vector the {@link Vector2} to transform
+	 * @param destination the {@link Vector2} containing the result
+	 */
+	public void inverseTransformR(Vector2 vector, Vector2 destination) {
+		double x = vector.x;
+		double y = vector.y;
+		// since the transpose of a rotation matrix is the inverse
+		destination.x = this.m00 * x + this.m10 * y;
+		destination.y = this.m01 * x + this.m11 * y;
+	}
 
+	/**
+	 * Transforms the given {@link Vector2} only by the rotation and returns the
+	 * result in the given {@link Vector2}.
+	 * @param vector the {@link Vector2} to transform
+	 */
+	public void inverseTransformR(Vector2 vector) {
+		double x = vector.x;
+		double y = vector.y;
+		// since the transpose of a rotation matrix is the inverse
+		vector.x = this.m00 * x + this.m10 * y;
+		vector.y = this.m01 * x + this.m11 * y;
+	}
+	
 	/**
 	 * Returns the x translation.
 	 * @return double

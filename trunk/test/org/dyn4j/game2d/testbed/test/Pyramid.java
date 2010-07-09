@@ -43,6 +43,14 @@ public class Pyramid extends Test {
 	private static final int HEIGHT = 15;
 	
 	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.testbed.Test#getName()
+	 */
+	@Override
+	public String getName() {
+		return "Pyramid";
+	}
+	
+	/* (non-Javadoc)
 	 * @see test.Test#getDescription()
 	 */
 	@Override
@@ -87,7 +95,7 @@ public class Pyramid extends Test {
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
 		floor.addFixture(new Fixture(floorRect));
-		floor.setMassFromShapes(Mass.Type.INFINITE);
+		floor.setMass(Mass.Type.INFINITE);
 		this.world.add(floor);
 		
 		// create the rows
@@ -122,7 +130,7 @@ public class Pyramid extends Test {
 				// create a body
 				Entity e = new Entity();
 				e.addFixture(fixture);
-				e.setMassFromShapes();
+				e.setMass();
 				// move it to the right position
 				e.translate(x, y);
 				// add it to the world

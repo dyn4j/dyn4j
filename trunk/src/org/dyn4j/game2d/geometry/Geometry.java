@@ -175,6 +175,58 @@ public class Geometry {
 	}
 	
 	/**
+	 * Returns a new {@link Circle} with the given radius.
+	 * @param radius the radius in meters
+	 * @return {@link Circle}
+	 */
+	public static final Circle createCircle(double radius) {
+		return new Circle(radius);
+	}
+	
+	/**
+	 * Returns a new {@link Polygon} with the given vertices.
+	 * <p>
+	 * This method makes a copy of both the array and the vertices within the array to 
+	 * create the new {@link Polygon}.
+	 * @param vertices the array of vertices
+	 * @return {@link Polygon}
+	 */
+	public static final Polygon createPolygon(Vector2[] vertices) {
+		// check the vertices array
+		if (vertices == null) throw new NullPointerException("The vertices array cannot be null.");
+		// loop over the points an copy them
+		int size = vertices.length;
+		Vector2[] verts = new Vector2[size];
+		for (int i = 0; i < size; i++) {
+			Vector2 vertex = vertices[i];
+			// check for null points
+			if (vertex != null) {
+				verts[i] = vertex.copy();
+			} else {
+				throw new NullPointerException("A polygon cannot contain null points.");
+			}
+		}
+		return new Polygon(verts);
+	}
+	
+	/**
+	 * Returns a new {@link Polygon} with the given vertices centered at the origin.
+	 * <p>
+	 * This method makes a copy of both the array and the vertices within the array to 
+	 * create the new {@link Polygon}.
+	 * <p>
+	 * This method translates the {@link Polygon} vertices so that the center is at the origin.
+	 * @param vertices the array of vertices
+	 * @return {@link Polygon}
+	 */
+	public static final Polygon createPolygonAtOrigin(Vector2[] vertices) {
+		Polygon polygon = Geometry.createPolygon(vertices);
+		Vector2 center = polygon.getCenter();
+		polygon.translate(-center.x, -center.y);
+		return polygon;
+	}
+	
+	/**
 	 * Returns a new {@link Polygon} object with vertexCount points, where the
 	 * points are evenly distributed around the unit circle.
 	 * <p>
@@ -182,7 +234,7 @@ public class Geometry {
 	 * (the origin) to each vertex.
 	 * @see #createUnitCirclePolygon(int, double, double)
 	 * @param count the number of vertices
-	 * @param radius the radius from the center to each vertex
+	 * @param radius the radius from the center to each vertex in meters
 	 * @return {@link Polygon}
 	 */
 	public static final Polygon createUnitCirclePolygon(int count, double radius) {
@@ -199,16 +251,185 @@ public class Geometry {
 	 * The theta parameter is a vertex angle offset used to rotate all the vertices
 	 * by the given amount.
 	 * @param count the number of vertices
-	 * @param radius the radius from the center to each vertex
-	 * @param theta the vertex angle offset
+	 * @param radius the radius from the center to each vertex in meters
+	 * @param theta the vertex angle offset in radians
 	 * @return {@link Polygon}
 	 */
 	public static final Polygon createUnitCirclePolygon(int count, double radius, double theta) {
+		// check the count
+		if (count < 3) throw new IllegalArgumentException("The number of vertices must be greater than 2.");
+		// check the radius
+		if (radius <= 0.0) throw new IllegalArgumentException("The radius must be greater than zero.");
 		Vector2[] verts = new Vector2[count];
 		double angle = 2.0 * Math.PI / count;
 		for (int i = count - 1; i >= 0; i--) {
 			verts[i] = new Vector2(Math.cos(angle * i + theta) * radius, Math.sin(angle * i + theta) * radius);
 		}
 		return new Polygon(verts);
+	}
+	
+	/**
+	 * Creates a new {@link Rectangle} with the given size.
+	 * @param size the size in meters
+	 * @return {@link Rectangle}
+	 */
+	public static final Rectangle createSquare(double size) {
+		// check the size
+		if (size <= 0.0) throw new IllegalArgumentException("The size must be greater than zero.");
+		return new Rectangle(size, size);
+	}
+	
+	/**
+	 * Creates a new {@link Rectangle} with the given width and height.
+	 * @param width the width in meters
+	 * @param height the height in meters
+	 * @return {@link Rectangle}
+	 */
+	public static final Rectangle createRectangle(double width, double height) {
+		return new Rectangle(width, height);
+	}
+	
+	/**
+	 * Creates a new {@link Triangle} with the given points.
+	 * <p>
+	 * This method makes a copy of the given points to create the {@link Triangle}.
+	 * @param p1 the first point
+	 * @param p2 the second point
+	 * @param p3 the third point
+	 * @return {@link Triangle}
+	 */
+	public static final Triangle createTriangle(Vector2 p1, Vector2 p2, Vector2 p3) {
+		if (p1 == null || p2 == null || p3 == null) throw new NullPointerException("A triangle cannot contain a null point.");
+		return new Triangle(p1.copy(), p2.copy(), p3.copy());
+	}
+	
+	/**
+	 * Creates a new {@link Triangle} with the given points.
+	 * <p>
+	 * This method makes a copy of the given points to create the {@link Triangle}.
+	 * <p>
+	 * This method translates the {@link Triangle} points so that the center is at the origin.
+	 * @param p1 the first point
+	 * @param p2 the second point
+	 * @param p3 the third point
+	 * @return {@link Triangle}
+	 */
+	public static final Triangle createTriangleAtOrigin(Vector2 p1, Vector2 p2, Vector2 p3) {
+		Triangle triangle = Geometry.createTriangle(p1, p2, p3);
+		Vector2 center = triangle.getCenter();
+		triangle.translate(-center.x, -center.y);
+		return triangle;
+	}
+	
+	/**
+	 * Creates a right {@link Triangle} with the center at the origin.
+	 * @param width the width of the base in meters
+	 * @param height the height in meters
+	 * @return {@link Triangle}
+	 */
+	public static final Triangle createRightTriangle(double width, double height) {
+		// check the width
+		if (width <= 0.0) throw new IllegalArgumentException("The width must be greater than zero.");
+		// check the height
+		if (height <= 0.0) throw new IllegalArgumentException("The width must be greater than zero.");
+		Vector2 top = new Vector2(0.0, height);
+		Vector2 left = new Vector2(0.0, 0.0);
+		Vector2 right = new Vector2(width, 0.0);
+		Triangle triangle = new Triangle(top, left, right);
+		Vector2 center = triangle.getCenter();
+		triangle.translate(-center.x, -center.y);
+		return triangle;
+	}
+	
+	/**
+	 * Creates an equilateral {@link Triangle} with the center at the origin.
+	 * @param height the height of the triangle in meters
+	 * @return {@link Triangle}
+	 */
+	public static final Triangle createEquilateralTriangle(double height) {
+		// check the size
+		if (height <= 0.0) throw new IllegalArgumentException("The size must be greater than zero.");
+		// compute a where height = a * sqrt(3) / 2.0 (a is the width of the base
+		double a = 2.0 * height / Math.sqrt(3.0);
+		// create the triangle
+		return Geometry.createIsoscelesTriangle(a, height);
+	}
+	
+	/**
+	 * Creates an isosceles {@link Triangle} with the center at the origin.
+	 * @param width the width of the base in meters
+	 * @param height the height in meters
+	 * @return {@link Triangle}
+	 */
+	public static final Triangle createIsoscelesTriangle(double width, double height) {
+		// check the width
+		if (width <= 0.0) throw new IllegalArgumentException("The width must be greater than zero.");
+		// check the height
+		if (height <= 0.0) throw new IllegalArgumentException("The width must be greater than zero.");
+		Vector2 top = new Vector2(0.0, height);
+		Vector2 left = new Vector2(-width / 2.0, 0.0);
+		Vector2 right = new Vector2(width / 2.0, 0.0);
+		// create the triangle
+		Triangle triangle = new Triangle(top, left, right);
+		Vector2 center = triangle.getCenter();
+		triangle.translate(-center.x, -center.y);
+		return triangle;
+	}
+	
+	/**
+	 * Creates a new {@link Segment} with the given points.
+	 * <p>
+	 * This method makes a copy of the given points to create the {@link Segment}.
+	 * @param p1 the first point
+	 * @param p2 the second point
+	 * @return {@link Segment}
+	 */
+	public static final Segment createSegment(Vector2 p1, Vector2 p2) {
+		if (p1 == null || p2 == null) throw new NullPointerException("A segment cannot contain a null point.");
+		return new Segment(p1.copy(), p2.copy());
+	}
+	
+	/**
+	 * Creates a new {@link Segment} with the given points.
+	 * <p>
+	 * This method makes a copy of the given points to create the {@link Segment}.
+	 * <p>
+	 * This method translates the {@link Segment} vertices so that the center is at the origin.
+	 * @param p1 the first point
+	 * @param p2 the second point
+	 * @return {@link Segment}
+	 */
+	public static final Segment createSegmentAtOrigin(Vector2 p1, Vector2 p2) {
+		Segment segment = Geometry.createSegment(p1, p2);
+		Vector2 center = segment.getCenter();
+		segment.translate(-center.x, -center.y);
+		return segment;
+	}
+	
+	/**
+	 * Creates a new {@link Segment} from the origin to the given end point
+	 * <p>
+	 * This method makes a copy of the given point to create the {@link Segment}.
+	 * @param end the end point
+	 * @return {@link Segment}
+	 */
+	public static final Segment createSegment(Vector2 end) {
+		return Geometry.createSegment(new Vector2(), end);
+	}
+	
+	/**
+	 * Creates a new {@link Segment} with the given length with the center
+	 * at the origin.
+	 * <p>
+	 * The segment created is a horizontal segment.
+	 * @param length the length of the segment in meters
+	 * @return {@link Segment}
+	 */
+	public static final Segment createSegment(double length) {
+		// check the length
+		if (length <= 0.0) throw new IllegalArgumentException("The length must be greater than zero.");
+		Vector2 start = new Vector2(-length / 2.0, 0.0);
+		Vector2 end = new Vector2(length / 2.0, 0.0);
+		return new Segment(start, end);
 	}
 }

@@ -41,6 +41,14 @@ import org.dyn4j.game2d.testbed.Test;
  */
 public class Filter extends Test {
 	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.testbed.Test#getName()
+	 */
+	@Override
+	public String getName() {
+		return "Filter";
+	}
+	
+	/* (non-Javadoc)
 	 * @see test.Test#getDescription()
 	 */
 	@Override
@@ -87,7 +95,7 @@ public class Filter extends Test {
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
 		floor.addFixture(new Fixture(floorRect));
-		floor.setMassFromShapes(Mass.Type.INFINITE);
+		floor.setMass(Mass.Type.INFINITE);
 		this.world.add(floor);
 		
 		// create some filters (collide with all & in category 1 by default)
@@ -103,7 +111,7 @@ public class Filter extends Test {
 		
 		Entity left = new Entity();
 		left.addFixture(f1);
-		left.setMassFromShapes();
+		left.setMass();
 		left.translate(0.0, 2.0);
 		left.getVelocity().set(-5.0, 0.0);
 		
@@ -117,7 +125,7 @@ public class Filter extends Test {
 		
 		Entity right1 = new Entity();
 		right1.addFixture(f2);
-		right1.setMassFromShapes();
+		right1.setMass();
 		right1.translate(-2.0, 2.0);
 		
 		this.world.add(right1);
@@ -130,7 +138,7 @@ public class Filter extends Test {
 		
 		Entity right2 = new Entity();
 		right2.addFixture(f3);
-		right2.setMassFromShapes();
+		right2.setMass();
 		right2.translate(-4.0, 2.0);
 		
 		this.world.add(right2);

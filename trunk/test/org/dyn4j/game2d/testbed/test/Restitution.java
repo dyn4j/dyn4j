@@ -41,6 +41,14 @@ import org.dyn4j.game2d.testbed.Test;
  */
 public class Restitution extends Test {
 	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.testbed.Test#getName()
+	 */
+	@Override
+	public String getName() {
+		return "Restitution";
+	}
+	
+	/* (non-Javadoc)
 	 * @see test.Test#getDescription()
 	 */
 	@Override
@@ -84,7 +92,7 @@ public class Restitution extends Test {
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
 		floor.addFixture(new Fixture(floorRect));
-		floor.setMassFromShapes(Mass.Type.INFINITE);
+		floor.setMass(Mass.Type.INFINITE);
 		// move the floor up a bit
 		floor.translate(0.0, -4.0);
 		this.world.add(floor);
@@ -106,7 +114,7 @@ public class Restitution extends Test {
 			
 			Entity e = new Entity();
 			e.addFixture(f);
-			e.setMassFromShapes();
+			e.setMass();
 			e.translate(x, y);
 			x += r + r + 0.25;
 			this.world.add(e);

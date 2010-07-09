@@ -42,6 +42,14 @@ import org.dyn4j.game2d.testbed.Test;
  */
 public class Sensor extends Test {
 	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.testbed.Test#getName()
+	 */
+	@Override
+	public String getName() {
+		return "Sensor";
+	}
+	
+	/* (non-Javadoc)
 	 * @see test.Test#getDescription()
 	 */
 	@Override
@@ -91,7 +99,7 @@ public class Sensor extends Test {
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
 		floor.addFixture(new Fixture(floorRect));
-		floor.setMassFromShapes(Mass.Type.INFINITE);
+		floor.setMass(Mass.Type.INFINITE);
 		this.world.add(floor);
 		
 		// create a sensor object
@@ -107,7 +115,7 @@ public class Sensor extends Test {
 		// create the object
 		Entity sensor = new Entity();
 		sensor.addFixture(fixture);
-		sensor.setMassFromShapes();
+		sensor.setMass();
 		sensor.translate(0.0, 4.0);
 		this.world.add(sensor);
 	}

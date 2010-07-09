@@ -174,14 +174,14 @@ public class PolygonPolygonTest extends AbstractTest {
 		TestCase.assertTrue(this.sat.detect(poly1, t1, poly2, t2));
 		n = p.getNormal();
 		TestCase.assertEquals(1.265, p.getDepth(), 1.0e-3);
-		TestCase.assertEquals(-0.809, n.x, 1.0e-3);
+		TestCase.assertEquals(0.809, n.x, 1.0e-3);
 		TestCase.assertEquals(-0.587, n.y, 1.0e-3);
 		// try reversing the shapes
 		TestCase.assertTrue(this.sat.detect(poly2, t2, poly1, t1, p));
 		TestCase.assertTrue(this.sat.detect(poly2, t2, poly1, t1));
 		n = p.getNormal();
 		TestCase.assertEquals(1.265, p.getDepth(), 1.0e-3);
-		TestCase.assertEquals(0.809, n.x, 1.0e-3);
+		TestCase.assertEquals(-0.809, n.x, 1.0e-3);
 		TestCase.assertEquals(0.587, n.y, 1.0e-3);
 		
 		// test overlap

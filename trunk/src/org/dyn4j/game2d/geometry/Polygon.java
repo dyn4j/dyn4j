@@ -137,7 +137,7 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 			// create references to the current points
 			Vector2 v = this.normals[i];
 			// transform it into world space and add it to the list
-			axes[n++] = transform.getTransformedR(v);;
+			axes[n++] = transform.getTransformedR(v);
 		}
 		// loop over the focal points and find the closest
 		// points on the polygon to the focal points
@@ -164,7 +164,11 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 			}
 			// once we have found the closest point create 
 			// a vector from the focal point to the point
-			axes[n++] = f.to(closest);
+			Vector2 axis = f.to(closest);
+			// normalize it
+			axis.normalize();
+			// add it to the array
+			axes[n++] = axis;
 		}
 		// return all the axes
 		return axes;

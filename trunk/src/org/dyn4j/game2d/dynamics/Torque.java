@@ -24,47 +24,20 @@
  */
 package org.dyn4j.game2d.dynamics;
 
-import org.dyn4j.game2d.geometry.Vector2;
-
 /**
- * Represents a torque; a {@link Force} applied at a point on a {@link Body}.
+ * Represents a torque about the z-axis.
  * @author William Bittle
  */
-public class Torque extends Force {
+public class Torque {
 	/** The point where the {@link Force} is applied in world coordinates */
-	protected Vector2 point;
+	protected double torque;
 	
 	/**
-	 * Default constructor.
+	 * Creates a {@link Torque} using specified torque value.
+	 * @param torque the torque
 	 */
-	public Torque() {
-		super();
-		this.point = new Vector2();
-	}
-	
-	/**
-	 * Creates a {@link Torque} using the force components 
-	 * and world point coordinates.
-	 * @param fx the x component of the force
-	 * @param fy the y component of the force
-	 * @param px the world space x coordinate of the world space application point
-	 * @param py the world space y coordinate of the world space application point
-	 */
-	public Torque(double fx, double fy, double px, double py) {
-		super(fx, fy);
-		this.point = new Vector2(px, py);
-	}
-	
-	/**
-	 * Creates a {@link Torque} using the given force and world
-	 * space point.
-	 * @param force the force
-	 * @param point the world space application point
-	 */
-	public Torque(Vector2 force, Vector2 point) {
-		super(force);
-		if (point == null) throw new NullPointerException("The torque application point cannot be null.");
-		this.point = point;
+	public Torque(double torque) {
+		this.torque = torque;
 	}
 	
 	/**
@@ -73,32 +46,15 @@ public class Torque extends Force {
 	 */
 	public Torque(Torque torque) {
 		if (torque == null) throw new NullPointerException("Cannot copy a null torque.");
-		this.force = torque.force.copy();
-		this.point = torque.point.copy();
+		this.torque = torque.torque;
 	}
 	
 	/**
-	 * Sets this {@link Torque} to the given force a the given point.
-	 * @param fx the x component of the force
-	 * @param fy the y component of the force
-	 * @param px the x coordinate of the world space application point
-	 * @param py the y coordinate of the world space application point
+	 * Sets this {@link Torque} to the given torque value.
+	 * @param torque the torque
 	 */
-	public void set(double fx, double fy, double px, double py) {
-		this.force.set(fx, fy);
-		this.point.set(px, py);
-	}
-	
-	/**
-	 * Sets this {@link Torque} to the given force at the given point.
-	 * @param force the force vector
-	 * @param point the world space application point
-	 */
-	public void set(Vector2 force, Vector2 point) {
-		if (force == null) throw new NullPointerException("Cannot set this torque's force vector to a null vector.");
-		if (point == null) throw new NullPointerException("Cannot set this torque's application point to a null point.");
-		this.force.set(force);
-		this.point.set(point);
+	public void set(double torque) {
+		this.torque = torque;
 	}
 	
 	/**
@@ -107,8 +63,7 @@ public class Torque extends Force {
 	 */
 	public void set(Torque torque) {
 		if (torque == null) throw new NullPointerException("Cannot set this torque to a null torque.");
-		this.force.set(torque.force);
-		this.point.set(torque.point);
+		this.torque = torque.torque;
 	}
 	
 	/**
@@ -116,8 +71,7 @@ public class Torque extends Force {
 	 * @param body the {@link Body} to apply the {@link Torque} to
 	 */
 	public void apply(Body body) {
-		super.apply(body);
-		body.torque += this.point.difference(body.getWorldCenter()).cross(this.force);
+		body.torque += this.torque;
 	}
 	
 	/* (non-Javadoc)
@@ -126,17 +80,15 @@ public class Torque extends Force {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("TORQUE[")
-		.append(this.force).append("|")
-		.append(this.point).append("]");
+		sb.append("TORQUE[").append(this.torque).append("]");
 		return sb.toString();
 	}
 	
 	/**
-	 * Returns this {@link Torque}'s application point.
-	 * @return {@link Vector2}
+	 * Returns the torque value.
+	 * @return double
 	 */
-	public Vector2 getPoint() {
-		return point;
+	public double getTorque() {
+		return this.torque;
 	}
 }

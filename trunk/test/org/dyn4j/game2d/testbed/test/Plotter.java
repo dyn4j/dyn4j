@@ -87,6 +87,14 @@ public class Plotter extends Test {
 	private static final double r = 0.01;
 	
 	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.testbed.Test#getName()
+	 */
+	@Override
+	public String getName() {
+		return "Plotter";
+	}
+	
+	/* (non-Javadoc)
 	 * @see test.Test#getDescription()
 	 */
 	@Override
@@ -191,7 +199,7 @@ public class Plotter extends Test {
 			e.addFixture(new Fixture(s));
 		}
 		// set the mass to infinite
-		e.setMassFromShapes(Mass.Type.INFINITE);
+		e.setMass(Mass.Type.INFINITE);
 		// return the entity
 		return e;
 	}
