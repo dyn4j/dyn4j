@@ -38,8 +38,7 @@ public interface Bounds extends Transformable {
 	 * The default bounds object.
 	 * <p>
 	 * This bounds object will always return false from the {@link #isOutside(Collidable)}
-	 * method and returns a new identity transform from the {@link #getTransform()}
-	 * method.
+	 * method and returns null for the {@link #getTransform()} method.
 	 * <p>
 	 * Take care in using this bounds object since overflow can happen.
 	 */
@@ -48,31 +47,41 @@ public interface Bounds extends Transformable {
 		 * @see org.dyn4j.game2d.geometry.Transformable#translate(org.dyn4j.game2d.geometry.Vector)
 		 */
 		@Override
-		public void translate(Vector2 vector) {}
+		public void translate(Vector2 vector) {
+			throw new UnsupportedOperationException("Cannot modify the Bounds.UNBOUNDED object.");
+		}
 		
 		/* (non-Javadoc)
 		 * @see org.dyn4j.game2d.geometry.Transformable#translate(double, double)
 		 */
 		@Override
-		public void translate(double x, double y) {}
+		public void translate(double x, double y) {
+			throw new UnsupportedOperationException("Cannot modify the Bounds.UNBOUNDED object.");
+		}
 		
 		/* (non-Javadoc)
 		 * @see org.dyn4j.game2d.geometry.Transformable#rotate(double, double, double)
 		 */
 		@Override
-		public void rotate(double theta, double x, double y) {}
+		public void rotate(double theta, double x, double y) {
+			throw new UnsupportedOperationException("Cannot modify the Bounds.UNBOUNDED object.");
+		}
 		
 		/* (non-Javadoc)
 		 * @see org.dyn4j.game2d.geometry.Transformable#rotate(double, org.dyn4j.game2d.geometry.Vector)
 		 */
 		@Override
-		public void rotate(double theta, Vector2 point) {}
+		public void rotate(double theta, Vector2 point) {
+			throw new UnsupportedOperationException("Cannot modify the Bounds.UNBOUNDED object.");
+		}
 		
 		/* (non-Javadoc)
 		 * @see org.dyn4j.game2d.geometry.Transformable#rotate(double)
 		 */
 		@Override
-		public void rotate(double theta) {}
+		public void rotate(double theta) {
+			throw new UnsupportedOperationException("Cannot modify the Bounds.UNBOUNDED object.");
+		}
 		
 		/* (non-Javadoc)
 		 * @see org.dyn4j.game2d.collision.Bounds#isOutside(org.dyn4j.game2d.collision.Collidable)
@@ -87,7 +96,7 @@ public interface Bounds extends Transformable {
 		 */
 		@Override
 		public Transform getTransform() {
-			return new Transform();
+			return null;
 		}
 	};
 	

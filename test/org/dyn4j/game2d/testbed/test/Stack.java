@@ -43,6 +43,14 @@ public class Stack extends Test {
 	private static final int SIZE = 10;
 	
 	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.testbed.Test#getName()
+	 */
+	@Override
+	public String getName() {
+		return "Stack";
+	}
+	
+	/* (non-Javadoc)
 	 * @see test.Test#getDescription()
 	 */
 	@Override
@@ -88,7 +96,7 @@ public class Stack extends Test {
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
 		floor.addFixture(new Fixture(floorRect));
-		floor.setMassFromShapes(Mass.Type.INFINITE);
+		floor.setMass(Mass.Type.INFINITE);
 		this.world.add(floor);
 		
 		// create the stack
@@ -107,7 +115,7 @@ public class Stack extends Test {
 		for (int i = 0; i < SIZE; i++) {
 			Entity e = new Entity();
 			e.addFixture(new Fixture(rect));
-			e.setMassFromShapes();
+			e.setMass();
 			e.translate(0.0, y);
 			this.world.add(e);
 			// increment y

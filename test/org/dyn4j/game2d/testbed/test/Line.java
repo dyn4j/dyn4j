@@ -24,33 +24,29 @@
  */
 package org.dyn4j.game2d.testbed.test;
 
-import java.awt.event.KeyEvent;
-
-import org.codezealot.game.input.Input;
-import org.codezealot.game.input.Keyboard;
-import org.codezealot.game.input.Mouse;
-import org.codezealot.game.input.Input.Hold;
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.dynamics.World;
+import org.dyn4j.game2d.dynamics.joint.LineJoint;
 import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Rectangle;
+import org.dyn4j.game2d.geometry.Vector2;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Entity;
 import org.dyn4j.game2d.testbed.Test;
 
 /**
- * Tests bodies being put to sleep.
+ * Tests the line joint.
  * @author William Bittle
  */
-public class Sleep extends Test {
+public class Line extends Test {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.testbed.Test#getName()
 	 */
 	@Override
 	public String getName() {
-		return "Sleep";
+		return "Line";
 	}
 	
 	/* (non-Javadoc)
@@ -58,9 +54,7 @@ public class Sleep extends Test {
 	 */
 	@Override
 	public String getDescription() {
-		return "Tests bodies being put to sleep. This test ensures that bodies are " +
-			   "put to sleep when they come to rest.  Bodies are put to sleep after " +
-			   "they are at rest for the configured sleep time";
+		return "Tests a line joint.";
 	}
 	
 	/* (non-Javadoc)
@@ -100,35 +94,44 @@ public class Sleep extends Test {
 		Entity floor = new Entity();
 		floor.addFixture(new Fixture(floorRect));
 		floor.setMass(Mass.Type.INFINITE);
+		// move the floor down a bit
+		floor.translate(0.0, -4.0);
 		this.world.add(floor);
 		
-		// create the stack
+		/*
+		 * Make this configuration
+		 * +-----+
+		 * |     |
+		 * |     |
+		 * |     |
+		 * +--.--+
+		 * |     |
+		 * |     |
+		 * |     |
+		 * +-----+
+		 */
 		
-		Rectangle rect = new Rectangle(1.0, 1.0);
+		// create a reusable rectangle
+		Rectangle r = new Rectangle(0.5, 1.0);
 		
-		Entity box1 = new Entity();
-		box1.addFixture(new Fixture(rect));
-		box1.setMass();
-		box1.translate(0.0, 1.0);
-		this.world.add(box1);
+		Entity top = new Entity();
+		top.addFixture(new Fixture(r));
+		top.setMass();
+		top.translate(0.0, -1.5);
+		top.getVelocity().set(2.0, 0.0);
 		
-		Entity box2 = new Entity();
-		box2.addFixture(new Fixture(rect));
-		box2.setMass();
-		box2.translate(0.0, 2.0);
-		this.world.add(box2);
-
-		Entity box3 = new Entity();
-		box3.addFixture(new Fixture(rect));
-		box3.setMass();
-		box3.translate(0.0, 3.0);
-		this.world.add(box3);
+		Entity bot = new Entity();
+		bot.addFixture(new Fixture(r));
+		bot.setMass();
+		bot.translate(0.0, -0.5);
 		
-		Entity box4 = new Entity();
-		box4.addFixture(new Fixture(rect));
-		box4.setMass();
-		box4.translate(0.0, 4.0);
-		this.world.add(box4);
+		this.world.add(top);
+		this.world.add(bot);
+		
+		LineJoint joint = new LineJoint(bot, top, new Vector2(0.0, 2.0), new Vector2(0.0, 1.0));
+		joint.setCollisionAllowed(true);
+		
+		this.world.add(joint);
 	}
 	
 	/* (non-Javadoc)
@@ -139,40 +142,6 @@ public class Sleep extends Test {
 		// set the scale
 		this.scale = 64.0;
 		// set the camera offset
-		this.offset.set(0.0, -2.0);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.Test#initializeInput(org.codezealot.game.input.Keyboard, org.codezealot.game.input.Mouse)
-	 */
-	@Override
-	public void initializeInput(Keyboard keyboard, Mouse mouse) {
-		super.initializeInput(keyboard, mouse);
-		// register to listen for the enter key
-		keyboard.add(new Input(KeyEvent.VK_ENTER, Hold.NO_HOLD));
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.Test#poll(org.codezealot.game.input.Keyboard, org.codezealot.game.input.Mouse)
-	 */
-	@Override
-	public void poll(Keyboard keyboard, Mouse mouse) {
-		super.poll(keyboard, mouse);
-		
-		// check for the enter key
-		if (keyboard.isPressed(KeyEvent.VK_ENTER)) {
-			// check the size of the list
-			if (this.world.getBodyCount() > 1) {
-				this.world.remove(this.world.getBody(1));
-			}
-		}
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.Test#getControls()
-	 */
-	@Override
-	public String[][] getControls() {
-		return new String[][] {{"Enter", "Removes a body from the world"}};
+		this.offset.set(0.0, 2.0);
 	}
 }

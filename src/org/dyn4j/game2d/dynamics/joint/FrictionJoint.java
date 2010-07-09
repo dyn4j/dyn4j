@@ -70,55 +70,19 @@ public class FrictionJoint extends Joint {
 	protected double angularImpulse;
 	
 	/**
-	 * Optional constructor.
+	 * Minimal constructor.
 	 * @param b1 the first {@link Body}
 	 * @param b2 the second {@link Body}
 	 * @param anchor the anchor point in world coordinates
 	 */
 	public FrictionJoint(Body b1, Body b2, Vector2 anchor) {
-		this(b1, b2, false, anchor);
-	}
-	
-	/**
-	 * Optional constructor.
-	 * <p>
-	 * Creates a revolute joint between the given {@link Body}s using the given
-	 * world space anchor point.
-	 * @param b1 the first {@link Body}
-	 * @param b2 the second {@link Body}
-	 * @param collisionAllowed whether collision between the joined {@link Body}s is allowed
-	 * @param anchor the anchor point in world coordinates
-	 */
-	public FrictionJoint(Body b1, Body b2, boolean collisionAllowed, Vector2 anchor) {
-		this(b1, b2, collisionAllowed, anchor, 0.0, 0.0);
-	}
-	
-	/**
-	 * Full constructor.
-	 * <p>
-	 * Creates a revolute joint between the given {@link Body}s using the given
-	 * world space anchor point.
-	 * <p>
-	 * Allows a motor to be built into the joint by setting the target motor speed.
-	 * @param b1 the first {@link Body}
-	 * @param b2 the second {@link Body}
-	 * @param collisionAllowed whether collision between the joined {@link Body}s is allowed
-	 * @param anchor the anchor point in world coordinates
-	 * @param maxForce the maximum force the constraint can apply in newtons
-	 * @param maxTorque the maximum torque the constraint can apply in newton-meters
-	 */
-	public FrictionJoint(Body b1, Body b2, boolean collisionAllowed, Vector2 anchor, double maxForce, double maxTorque) {
-		super(b1, b2, collisionAllowed);
+		// default no collision allowed
+		super(b1, b2, false);
 		// verify the anchor point is non null
 		if (anchor == null) throw new NullPointerException("The anchor point cannot be null.");
-		// verify the max force is greater than or equal to zero
-		if (maxForce < 0.0) throw new IllegalArgumentException("The maximum force must be greater than or equal to zero.");
-		// verify the max torque is greater than or equal to zero
-		if (maxTorque < 0.0) throw new IllegalArgumentException("The maximum torque must be greater than or equal to zero.");
+		// put the anchor in local space
 		this.localAnchor1 = b1.getLocalPoint(anchor);
 		this.localAnchor2 = b2.getLocalPoint(anchor);
-		this.maxForce = maxForce;
-		this.maxTorque = maxTorque;
 		// initialize
 		this.K = new Matrix22();
 		this.linearImpulse = new Vector2();

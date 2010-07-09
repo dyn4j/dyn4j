@@ -58,7 +58,6 @@ public class RectangularBounds extends AbstractBounds implements Bounds, Transfo
 	 */
 	public RectangularBounds(Rectangle bounds) {
 		if (bounds == null) throw new NullPointerException("The bounds rectangle cannot be null.");
-		this.transform = new Transform();
 		this.bounds = bounds;
 	}
 	
@@ -68,7 +67,7 @@ public class RectangularBounds extends AbstractBounds implements Bounds, Transfo
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("BOUNDS[").append(bounds).append("]");
+		sb.append("RECTANGULAR_BOUNDS[").append(this.bounds).append("]");
 		return sb.toString();
 	}
 	

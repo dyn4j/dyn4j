@@ -156,6 +156,8 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	private Body selected = null;
 	/** The old position for picking capability */
 	private Vector2 vOld = null;
+	/** The saved state of the body under control */
+	private DirectControl.State controlState = null;
 	
 	/**
 	 * Full constructor.
@@ -532,7 +534,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		// render the label
 		this.testLabel.render(g, x, y + spacing);
 		// render the value
-		AttributedString testString = new AttributedString(this.test.name);
+		AttributedString testString = new AttributedString(this.test.getName());
 		Text test = new Text(testString);
 		test.generate();
 		test.render(g, x + padding, y + spacing);
@@ -541,7 +543,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		// render the label
 		this.zoomLabel.render(g, x, y + spacing * 2);
 		// render the value
-		AttributedString zoomString = new AttributedString(String.valueOf(this.test.getZoom()));
+		AttributedString zoomString = new AttributedString(this.test.getZoom() + " px/m");
 		Text zoom = new Text(zoomString);
 		zoom.generate();
 		zoom.render(g, x + padding, y + spacing * 2);
@@ -925,7 +927,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 							// selected item
 							this.selected = b;
 							// control the body
-							this.test.world.control(this.selected);
+							this.controlState = DirectControl.control(b);
 							// break from the loop
 							break;
 						} else {
@@ -938,7 +940,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 									// selected item
 									this.selected = b;
 									// control the body
-									this.test.world.control(this.selected);
+									this.controlState = DirectControl.control(b);
 									// break from the loop
 									break;
 								}
@@ -955,10 +957,11 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		} else if (this.selected != null) {
 			// once the mouse button is no longer held down
 			// release the body
-			this.test.world.relinquish(this.selected);
+			DirectControl.release(this.selected, this.controlState);
 			// then set the selected shape and old point to null
 			this.selected = null;
 			this.vOld = null;
+			this.controlState = null;
 		}
 		
 		// see if we should check the mouse movement
@@ -1011,7 +1014,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 			Fixture bombFixture = new Fixture(bombShape);
 			Entity bomb = new Entity();
 			bomb.addFixture(bombFixture);
-			bomb.setMassFromShapes();
+			bomb.setMass();
 			// set the elasticity
 			bombFixture.setRestitution(0.3);
 			// launch from the left

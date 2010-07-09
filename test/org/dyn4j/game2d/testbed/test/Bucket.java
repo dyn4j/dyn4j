@@ -44,7 +44,15 @@ import org.dyn4j.game2d.testbed.Test;
 public class Bucket extends Test {
 	/** The number of bodies */
 	private static final int SIZE = 200;
-
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.testbed.Test#getName()
+	 */
+	@Override
+	public String getName() {
+		return "Bucket";
+	}
+	
 	/* (non-Javadoc)
 	 * @see test.Test#getDescription()
 	 */
@@ -101,7 +109,7 @@ public class Bucket extends Test {
 		bucket.addFixture(new Fixture(bottom));
 		bucket.addFixture(new Fixture(left));
 		bucket.addFixture(new Fixture(right));
-		bucket.setMassFromShapes(Mass.Type.INFINITE);
+		bucket.setMass(Mass.Type.INFINITE);
 		this.world.add(bucket);
 		
 		// temp variables
@@ -130,7 +138,7 @@ public class Bucket extends Test {
 				f.setDensity(0.1);
 				e.addFixture(f);
 			}
-			e.setMassFromShapes();
+			e.setMass();
 			e.translate(x, y);
 			this.world.add(e);
 		}

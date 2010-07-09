@@ -46,6 +46,14 @@ public class Bridge extends Test {
 	private static final int LENGTH = 24;
 	
 	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.testbed.Test#getName()
+	 */
+	@Override
+	public String getName() {
+		return "Bridge";
+	}
+	
+	/* (non-Javadoc)
 	 * @see test.Test#getDescription()
 	 */
 	@Override
@@ -90,7 +98,7 @@ public class Bridge extends Test {
 		Rectangle floorRect = new Rectangle(40.0, 1.0);
 		Entity floor = new Entity();
 		floor.addFixture(new Fixture(floorRect));
-		floor.setMassFromShapes(Mass.Type.INFINITE);
+		floor.setMass(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
 		this.world.add(floor);
@@ -110,7 +118,7 @@ public class Bridge extends Test {
 			// create a chain link
 			Entity link = new Entity();
 			link.addFixture(f);
-			link.setMassFromShapes();
+			link.setMass();
 			link.translate(-x + w * (i + 0.5), y);
 			this.world.add(link);
 			

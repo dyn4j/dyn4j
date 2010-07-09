@@ -36,10 +36,11 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Represents a fixed length distance joint.
  * <p>
  * Given the two world space anchor points a distance is computed and used
- * to constraint the attached {@link Body}s.
+ * to constrain the attached {@link Body}s.
  * <p>
  * This joint doubles as a spring/damping distance joint where the length can
- * change but is constantly approaching the target distance.
+ * change but is constantly approaching the target distance.  Enable the
+ * spring/damper by setting the frequency to a value greater than zero.
  * @author William Bittle
  */
 public class DistanceJoint extends Joint {
@@ -77,7 +78,7 @@ public class DistanceJoint extends Joint {
 	protected double impulse;
 	
 	/**
-	 * Optional constructor.
+	 * Minimal constructor.
 	 * <p>
 	 * Creates a fixed distance {@link Joint} where the joined 
 	 * {@link Body}s do not participate in collision detection and
@@ -88,71 +89,14 @@ public class DistanceJoint extends Joint {
 	 * @param anchor2 in world coordinates
 	 */
 	public DistanceJoint(Body b1, Body b2, Vector2 anchor1, Vector2 anchor2) {
-		this(b1, b2, false, anchor1, anchor2);
-	}
-	
-	/**
-	 * Optional constructor.
-	 * <p>
-	 * Creates a spring/damper distance {@link Joint} where the joined 
-	 * {@link Body}s do not participate in collision detection and
-	 * resolution.
-	 * @param b1 the first {@link Body}
-	 * @param b2 the second {@link Body}
-	 * @param anchor1 in world coordinates
-	 * @param anchor2 in world coordinates
-	 * @param frequency the spring frequency in hz; must be greater than zero
-	 * @param dampingRatio the damping ratio; in the range [0, 1]
-	 */
-	public DistanceJoint(Body b1, Body b2, Vector2 anchor1, Vector2 anchor2, double frequency, double dampingRatio) {
-		this(b1, b2, false, anchor1, anchor2, frequency, dampingRatio);
-	}
-	
-	/**
-	 * Full constructor.
-	 * <p>
-	 * Creates a fixed distance joint.
-	 * @param b1 the first {@link Body}
-	 * @param b2 the second {@link Body}
-	 * @param collisionAllowed true if collision between the two {@link Body}s is allowed
-	 * @param anchor1 in world coordinates
-	 * @param anchor2 in world coordinates
-	 */
-	public DistanceJoint(Body b1, Body b2, boolean collisionAllowed, Vector2 anchor1, Vector2 anchor2) {
-		super(b1, b2, collisionAllowed);
-		if (anchor1 == null || anchor2 == null) throw new NullPointerException("Neither anchor point can be null.");
-		this.localAnchor1 = b1.getLocalPoint(anchor1);
-		this.localAnchor2 = b2.getLocalPoint(anchor2);
-		this.distance = anchor1.distance(anchor2);
-		this.frequency = 0.0;
-		this.dampingRatio = 0.0;
-	}
-	
-	/**
-	 * Full constructor.
-	 * <p>
-	 * Creates a spring/damper distance joint.
-	 * @param b1 the first {@link Body}
-	 * @param b2 the second {@link Body}
-	 * @param collisionAllowed true if collision between the two {@link Body}s is allowed
-	 * @param anchor1 in world coordinates
-	 * @param anchor2 in world coordinates
-	 * @param frequency the spring frequency in hz; must be greater than zero
-	 * @param dampingRatio the damping ratio; in the range [0, 1]
-	 */
-	public DistanceJoint(Body b1, Body b2, boolean collisionAllowed, Vector2 anchor1, Vector2 anchor2, double frequency, double dampingRatio) {
-		super(b1, b2, collisionAllowed);
+		super(b1, b2, false);
 		// verify the anchor points
 		if (anchor1 == null || anchor2 == null) throw new NullPointerException("Neither anchor point can be null.");
-		// verify the frequency
-		if (frequency <= 0) throw new IllegalArgumentException("The frequency must be greater than zero.");
-		// verify the damping ratio
-		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException("The damping ratio must be between 0 and 1 inclusive.");
+		// get the local anchor points
 		this.localAnchor1 = b1.getLocalPoint(anchor1);
 		this.localAnchor2 = b2.getLocalPoint(anchor2);
+		// compute the initial distance
 		this.distance = anchor1.distance(anchor2);
-		this.frequency = frequency;
-		this.dampingRatio = dampingRatio;
 	}
 	
 	/* (non-Javadoc)
@@ -433,7 +377,7 @@ public class DistanceJoint extends Joint {
 	 */
 	public void setDampingRatio(double dampingRatio) {
 		// make sure its within range
-		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException("The damping ratio must be between 0 and 1.");
+		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException("The damping ratio must be between 0 and 1 inclusive.");
 		// is it different than the current value
 		if (this.dampingRatio != dampingRatio) {
 			// wake up both bodies
@@ -458,7 +402,7 @@ public class DistanceJoint extends Joint {
 	 */
 	public void setFrequency(double frequency) {
 		// check for valid value
-		if (frequency <= 0) throw new IllegalArgumentException("The frequency must be greater than zero.");
+		if (frequency <= 0) throw new IllegalArgumentException("The frequency must be greater than or equal to zero.");
 		// is it different than the current value
 		if (this.frequency != frequency) {
 			// wake up both bodies

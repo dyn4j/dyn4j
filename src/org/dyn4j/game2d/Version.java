@@ -33,7 +33,7 @@ public final class Version {
 	public static final int MAJOR = 0;
 	
 	/** The minor version number; minor enhancements, major bug fixes, etc. */
-	public static final int MINOR = 9;
+	public static final int MINOR = 10;
 	
 	/** The revision number; minor bug fixes */
 	public static final int REVISION = 0;

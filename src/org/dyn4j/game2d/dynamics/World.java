@@ -54,7 +54,6 @@ import org.dyn4j.game2d.dynamics.contact.SensedContactPoint;
 import org.dyn4j.game2d.dynamics.joint.Joint;
 import org.dyn4j.game2d.dynamics.joint.JointEdge;
 import org.dyn4j.game2d.geometry.Convex;
-import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Vector2;
 
@@ -68,7 +67,7 @@ public class World {
 	
 	/** Zero gravity constant */
 	public static final Vector2 ZERO_GRAVITY = new Vector2(0.0, 0.0);
-
+		
 	/** The {@link Step} used by the dynamics calculations */
 	protected Step step;
 	
@@ -512,10 +511,7 @@ public class World {
 	public void add(Body body) {
 		// check for null body
 		if (body == null) throw new NullPointerException("Cannot add a null body to the world.");
-		// make sure its setup
-		if (body.mass == Mass.UNDEFINED) {
-			throw new NullPointerException("The body mass is not set.  Call the setMassFromShapes or setMass method before adding the body to the world.");
-		}
+		// add it to the world
 		this.bodies.add(body);
 	}
 	
@@ -676,59 +672,6 @@ public class World {
 		}
 		
 		return removed;
-	}
-	
-	/**
-	 * Wakes up any {@link Body}s attached by {@link Joint}s and any 
-	 * {@link Body}s that are currently in contact with the given 
-	 * {@link Body} and sets the {@link Mass} of the given {@link Body}
-	 * to infinite.
-	 * <p>
-	 * This method is used to directly control a {@link Body} by
-	 * translation and rotation instead of velocity/force.
-	 * @param body the {@link Body} to control
-	 */
-	public void control(Body body) {
-		// check for null body
-		if (body == null) throw new NullPointerException("Cannot control a null body.");
-		// wake up all attached bodies
-		int jSize = body.joints.size();
-		for (int i = 0; i < jSize; i++) {
-			JointEdge jointEdge = body.joints.get(i);
-			jointEdge.getOther().setAsleep(false);
-		}
-		// wake up bodies in contact
-		int cSize = body.contacts.size();
-		for (int i = 0; i < cSize; i++) {
-			ContactEdge contactEdge = body.contacts.get(i);
-			contactEdge.getOther().setAsleep(false);
-		}
-		// save the original mass
-		Mass mass = body.getMass();
-		// set the mass to infinite
-		mass.setType(Mass.Type.INFINITE);
-		// make sure this body is awake
-		body.setAsleep(false);
-		body.setSleep(false);
-		// stop any movement
-		body.angularVelocity = 0.0;
-		body.velocity.zero();
-	}
-	
-	/**
-	 * Releases control of the given {@link Body}.
-	 * @param body the {@link Body} to release control of
-	 */
-	public void relinquish(Body body) {
-		if (body == null) throw new NullPointerException("Cannot release control of a null body.");
-		// awaken the body and make sure its not frozen
-		body.setAsleep(false);
-		body.setActive(true);
-		// get the body's mass
-		Mass mass = body.getMass();
-		// set the mass type back to the previous type
-		mass.setType(mass.getPreviousType());
-		body.setSleep(true);
 	}
 	
 	/**

@@ -71,6 +71,21 @@ public abstract class Joint extends Constraint {
 		}
 	}
 	
+	/**
+	 * Enumeration for the limit states a joint can have.
+	 * @author William Bittle
+	 */
+	public static enum LimitState {
+		/** The state if the upper and lower limits are equal within the angular tolerance */
+		EQUAL,
+		/** The state if the joint has reached or passed the lower limit */
+		AT_LOWER,
+		/** The state if the joint has reached or passed the upper limit */
+		AT_UPPER,
+		/** The state if the joint limits are disabled or if the joint is between the limits */
+		INACTIVE;
+	}
+	
 	/** Whether the pair of bodies joined together can collide with each other */
 	protected boolean collisionAllowed;
 	

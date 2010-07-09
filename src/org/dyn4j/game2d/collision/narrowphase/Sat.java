@@ -78,8 +78,6 @@ public class Sat extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 				Vector2 axis = axes1[i];
 				// check for the zero vector
 				if (!axis.isZero()) {
-					// normalize the vector first so we can get an accurate penetration depth
-					axis.normalize();
 					// project both shapes onto the axis
 	        		Interval intervalA = convex1.project(axis, transform1);
 		            Interval intervalB = convex2.project(axis, transform2);
@@ -125,8 +123,6 @@ public class Sat extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 				Vector2 axis = axes2[i];
 				// check for the zero vector
 				if (!axis.isZero()) {
-					// normalize the vector first so we can get an accurate penetration depth
-					axis.normalize();
 					// project both shapes onto the axis
 	        		Interval intervalA = convex1.project(axis, transform1);
 		            Interval intervalB = convex2.project(axis, transform2);
@@ -207,8 +203,6 @@ public class Sat extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 				Vector2 axis = axes1[i];
 				// check for the zero vector
 				if (!axis.isZero()) {
-					// normalize the vector first so we can get an accurate penetration depth
-					axis.normalize();
 					// project both shapes onto the axis
 	        		Interval intervalA = convex1.project(axis, transform1);
 		            Interval intervalB = convex2.project(axis, transform2);
@@ -229,8 +223,6 @@ public class Sat extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 				Vector2 axis = axes2[i];
 				// check for the zero vector
 				if (!axis.isZero()) {
-					// normalize the vector first so we can get an accurate penetration depth
-					axis.normalize();
 					// project both shapes onto the axis
 	        		Interval intervalA = convex1.project(axis, transform1);
 		            Interval intervalB = convex2.project(axis, transform2);

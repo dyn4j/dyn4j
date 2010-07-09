@@ -76,7 +76,7 @@ public class MouseJoint extends Joint {
 	 */
 	public MouseJoint(Body body, Vector2 target, double frequency, double dampingRatio, double maxForce) {
 		super(body, body, false);
-		// check fora  null target
+		// check for a null target
 		if (target == null) throw new NullPointerException("The target point cannot be null.");
 		// verify the frequency
 		if (frequency <= 0) throw new IllegalArgumentException("The frequency must be greater than zero.");

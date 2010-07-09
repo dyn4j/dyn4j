@@ -168,6 +168,7 @@ public class SegmentTest {
 		TestCase.assertEquals(3, axes.length);
 		
 		Vector2 v1 = s.vertices[0].to(f);
+		v1.normalize();
 		
 		TestCase.assertEquals(v1.x, axes[2].x, 1.0e-3);
 		TestCase.assertEquals(v1.y, axes[2].y, 1.0e-3);

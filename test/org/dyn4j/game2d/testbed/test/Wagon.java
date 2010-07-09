@@ -42,6 +42,14 @@ import org.dyn4j.game2d.testbed.Test;
  */
 public class Wagon extends Test {
 	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.testbed.Test#getName()
+	 */
+	@Override
+	public String getName() {
+		return "Wagon";
+	}
+	
+	/* (non-Javadoc)
 	 * @see test.Test#getDescription()
 	 */
 	@Override
@@ -85,13 +93,13 @@ public class Wagon extends Test {
 		Rectangle floorRect = new Rectangle(20.0, 1.0);
 		Entity floor = new Entity();
 		floor.addFixture(new Fixture(floorRect));
-		floor.setMassFromShapes(Mass.Type.INFINITE);
+		floor.setMass(Mass.Type.INFINITE);
 		
 		// create some slopes
 		Rectangle slope1Rect = new Rectangle(9.0, 0.5);
 		Entity slope1 = new Entity();
 		slope1.addFixture(new Fixture(slope1Rect));
-		slope1.setMassFromShapes(Mass.Type.INFINITE);
+		slope1.setMass(Mass.Type.INFINITE);
 		slope1.translate(-3.0, 7.0);
 		slope1.rotate(Math.toRadians(-20), slope1.getWorldCenter());
 		this.world.add(slope1);
@@ -99,7 +107,7 @@ public class Wagon extends Test {
 		Rectangle slope2Rect = new Rectangle(7.0, 0.5);
 		Entity slope2 = new Entity();
 		slope2.addFixture(new Fixture(slope2Rect));
-		slope2.setMassFromShapes(Mass.Type.INFINITE);
+		slope2.setMass(Mass.Type.INFINITE);
 		slope2.translate(3.0, 4.0);
 		slope2.rotate(Math.toRadians(20), slope2.getWorldCenter());
 		this.world.add(slope2);
@@ -107,7 +115,7 @@ public class Wagon extends Test {
 		Rectangle slope3Rect = new Rectangle(3.0, 0.2);
 		Entity slope3 = new Entity();
 		slope3.addFixture(new Fixture(slope3Rect));
-		slope3.setMassFromShapes(Mass.Type.INFINITE);
+		slope3.setMass(Mass.Type.INFINITE);
 		slope3.translate(5.0, 0.8);
 		slope3.rotate(Math.toRadians(30), slope3.getWorldCenter());
 		this.world.add(slope3);
@@ -115,7 +123,7 @@ public class Wagon extends Test {
 		Rectangle slope4Rect = new Rectangle(3.0, 0.2);
 		Entity slope4 = new Entity();
 		slope4.addFixture(new Fixture(slope4Rect));
-		slope4.setMassFromShapes(Mass.Type.INFINITE);
+		slope4.setMass(Mass.Type.INFINITE);
 		slope4.translate(-5.0, 0.8);
 		slope4.rotate(Math.toRadians(-30), slope4.getWorldCenter());
 		this.world.add(slope4);
@@ -128,23 +136,19 @@ public class Wagon extends Test {
 		
 		Entity wheel1 = new Entity();
 		wheel1.addFixture(new Fixture(circle));
-		wheel1.setMassFromShapes();
+		wheel1.setMass();
 		wheel1.translate(-1.5, 7.5);
 		this.world.add(wheel1);
 		
 		Entity wheel2 = new Entity();
 		wheel2.addFixture(new Fixture(circle));
-		wheel2.setMassFromShapes();
+		wheel2.setMass();
 		wheel2.translate(-2.9, 8.0);
 		this.world.add(wheel2);
 		
 		// create a distance joint between them
-		DistanceJoint j1 = new DistanceJoint(wheel1,
-											 wheel2,
-				                             true,
-				                             wheel1.getWorldCenter().copy(),
-				                             wheel2.getWorldCenter().copy());
-		
+		DistanceJoint j1 = new DistanceJoint(wheel1, wheel2, wheel1.getWorldCenter().copy(), wheel2.getWorldCenter().copy());
+		j1.setCollisionAllowed(true);
 		this.world.add(j1);
 	}
 	

@@ -46,6 +46,14 @@ public class Funnel extends Test {
 	private static final int SIZE = 200;
 	
 	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.testbed.Test#getName()
+	 */
+	@Override
+	public String getName() {
+		return "Funnel";
+	}
+	
+	/* (non-Javadoc)
 	 * @see test.Test#getDescription()
 	 */
 	@Override
@@ -94,14 +102,14 @@ public class Funnel extends Test {
 		Rectangle floorShape = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
 		floor.addFixture(new Fixture(floorShape));
-		floor.setMassFromShapes(Mass.Type.INFINITE);
+		floor.setMass(Mass.Type.INFINITE);
 		this.world.add(floor);
 		
 		// create the funnel sides
 		Rectangle leftShape = new Rectangle(1.0, 7.0);
 		Entity left = new Entity();
 		left.addFixture(new Fixture(leftShape));
-		left.setMassFromShapes(Mass.Type.INFINITE);
+		left.setMass(Mass.Type.INFINITE);
 		left.translate(-8.0, 8.0);
 		left.rotateAboutCenter(Math.toRadians(30.0));
 		this.world.add(left);
@@ -109,7 +117,7 @@ public class Funnel extends Test {
 		Rectangle rightShape = new Rectangle(1.0, 7.0);
 		Entity right = new Entity();
 		right.addFixture(new Fixture(rightShape));
-		right.setMassFromShapes(Mass.Type.INFINITE);
+		right.setMass(Mass.Type.INFINITE);
 		right.translate(8.0, 8.0);
 		right.rotateAboutCenter(-Math.toRadians(30.0));
 		this.world.add(right);
@@ -140,7 +148,7 @@ public class Funnel extends Test {
 				f.setDensity(0.1);
 				e.addFixture(f);
 			}
-			e.setMassFromShapes();
+			e.setMass();
 			e.translate(x, y);
 			this.world.add(e);
 		}

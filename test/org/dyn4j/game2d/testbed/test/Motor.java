@@ -28,7 +28,6 @@ import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.dynamics.World;
-import org.dyn4j.game2d.dynamics.joint.Joint;
 import org.dyn4j.game2d.dynamics.joint.RevoluteJoint;
 import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Mass;
@@ -43,6 +42,14 @@ import org.dyn4j.game2d.testbed.Test;
  * @author William Bittle
  */
 public class Motor extends Test {
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.testbed.Test#getName()
+	 */
+	@Override
+	public String getName() {
+		return "Motor";
+	}
+	
 	/* (non-Javadoc)
 	 * @see test.Test#getDescription()
 	 */
@@ -108,7 +115,7 @@ public class Motor extends Test {
 		// create the floor
 		Entity floor = new Entity();
 		floor.addFixture(floorFixture);
-		floor.setMassFromShapes(Mass.Type.INFINITE);
+		floor.setMass(Mass.Type.INFINITE);
 		floor.translate(-2.0, -4.0);
 		
 		// create the car frame and body
@@ -123,7 +130,7 @@ public class Motor extends Test {
 		// locally transform the first tail gate rect2 fixture
 		tgRect2.translate(-2.4, 1.0);
 		body.addFixture(new Fixture(tgRect2));
-		body.setMassFromShapes();
+		body.setMass();
 		body.translate(-23.0, -3.0);
 		
 		// add some payload bodies
@@ -134,7 +141,7 @@ public class Motor extends Test {
 				y = -2.0 + 0.25 * j;
 				Entity payload1 = new Entity();
 				payload1.addFixture(new Fixture(pRect));
-				payload1.setMassFromShapes();
+				payload1.setMass();
 				payload1.translate(x, y);
 				this.world.add(payload1);
 			}
@@ -143,20 +150,20 @@ public class Motor extends Test {
 		// create the slope to go up
 		Entity slope = new Entity();
 		slope.addFixture(new Fixture(slopeRect));
-		slope.setMassFromShapes(Mass.Type.INFINITE);
+		slope.setMass(Mass.Type.INFINITE);
 		slope.translate(0.0, -3.0);
 		slope.rotate(Math.toRadians(10), slope.getWorldCenter());
 		
 		// create the first wheel
 		Entity wheel1 = new Entity();
 		wheel1.addFixture(wheelFixture1);
-		wheel1.setMassFromShapes();
+		wheel1.setMass();
 		wheel1.translate(-25.0, -3.0);
 		
 		// create the second wheel
 		Entity wheel2 = new Entity();
 		wheel2.addFixture(wheelFixture2);
-		wheel2.setMassFromShapes();
+		wheel2.setMass();
 		wheel2.translate(-21.0, -3.0);
 		
 		// add the bodies to the world
@@ -171,10 +178,13 @@ public class Motor extends Test {
 		Vector2 p2 = wheel2.getWorldCenter().copy();
 		
 		// the rear wheel is just a normal revolute joint
-		Joint j1 = new RevoluteJoint(wheel1, body, false, p1);
+		RevoluteJoint j1 = new RevoluteJoint(wheel1, body, p1);
 		
 		// the front wheel is a motorized revolute joint
-		Joint j2 = new RevoluteJoint(wheel2, body, false, p2, true, -1.0 * Math.PI, 1000.0);
+		RevoluteJoint j2 = new RevoluteJoint(wheel2, body, p2);
+		j2.setMotorSpeed(-1.0 * Math.PI);
+		j2.setMaxMotorTorque(1000.0);
+		j2.setMotorEnabled(true);
 		
 		// add the joints to the world
 		this.world.add(j1);

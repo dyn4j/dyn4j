@@ -42,6 +42,14 @@ import org.dyn4j.game2d.testbed.Test;
  */
 public class Seesaw extends Test {
 	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.testbed.Test#getName()
+	 */
+	@Override
+	public String getName() {
+		return "Seesaw";
+	}
+	
+	/* (non-Javadoc)
 	 * @see test.Test#getDescription()
 	 */
 	@Override
@@ -87,7 +95,7 @@ public class Seesaw extends Test {
 		Rectangle floorShape = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
 		floor.addFixture(new Fixture(floorShape));
-		floor.setMassFromShapes(Mass.Type.INFINITE);
+		floor.setMass(Mass.Type.INFINITE);
 		this.world.add(floor);
 		
 		// create the pivot
@@ -97,7 +105,7 @@ public class Seesaw extends Test {
 				new Vector2(1.0, 0.0));
 		Entity pivot = new Entity();
 		pivot.addFixture(new Fixture(pivotShape));
-		pivot.setMassFromShapes(Mass.Type.INFINITE);
+		pivot.setMass(Mass.Type.INFINITE);
 		pivot.translate(0.0, 0.5);
 		this.world.add(pivot);
 		
@@ -105,7 +113,7 @@ public class Seesaw extends Test {
 		Rectangle plankShape = new Rectangle(10.0, 0.2);
 		Entity plank = new Entity();
 		plank.addFixture(new Fixture(plankShape));
-		plank.setMassFromShapes();
+		plank.setMass();
 		plank.translate(0.0, 1.5);
 		this.world.add(plank);
 		
@@ -115,7 +123,7 @@ public class Seesaw extends Test {
 		// create a box on the left side
 		Entity lBox = new Entity();
 		lBox.addFixture(new Fixture(box));
-		lBox.setMassFromShapes();
+		lBox.setMass();
 		lBox.translate(-4.0, 2.5);
 		this.world.add(lBox);
 		
@@ -127,7 +135,7 @@ public class Seesaw extends Test {
 		// create a box on the right side
 		Entity rBox = new Entity();
 		rBox.addFixture(boxFixture);
-		rBox.setMassFromShapes();
+		rBox.setMass();
 		rBox.translate(4.0, 5.7);
 		this.world.add(rBox);
 	}

@@ -143,7 +143,11 @@ public class Rectangle extends Polygon implements Shape, Transformable {
 			}
 			// once we have found the closest point create 
 			// a vector from the focal point to the point
-			axes[n++] = f.to(closest);
+			Vector2 axis = f.to(closest);
+			// normalize the axis
+			axis.normalize();
+			// add it to the array
+			axes[n++] = axis;
 		}
 		// return all the axes
 		return axes;

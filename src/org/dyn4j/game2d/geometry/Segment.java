@@ -208,21 +208,24 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 		// get the vertices
 		Vector2 p1 = transform.getTransformed(this.vertices[0]);
 		Vector2 p2 = transform.getTransformed(this.vertices[1]);
-		// get the edge that makes this segment
-		Vector2 line = p1.to(p2);
 		// use both the edge and its normal
-		axes[n++] = line.getLeftHandOrthogonalVector();
-		axes[n++] = line;
+		axes[n++] = transform.getTransformedR(this.normals[1]);
+		axes[n++] = transform.getTransformedR(this.normals[0].getLeftHandOrthogonalVector());
+		Vector2 axis;
 		// add the voronoi region axes if point is supplied
 		for (int i = 0; i < size; i++) {
 			// get the focal point
 			Vector2 f = foci[i];
 			// find the closest point
 			if (p1.distanceSquared(f) < p2.distanceSquared(f)) {
-				axes[n++] = p1.to(f);
+				axis = p1.to(f);
 			} else {
-				axes[n++] = p2.to(f);
+				axis = p2.to(f);
 			}
+			// normalize the axis
+			axis.normalize();
+			// add the axis to the array
+			axes[n++] = axis;
 		}
 		// return all the axes
 		return axes;

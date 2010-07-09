@@ -45,6 +45,14 @@ public class Chain extends Test {
 	private static final int LENGTH = 22;
 	
 	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.testbed.Test#getName()
+	 */
+	@Override
+	public String getName() {
+		return "Chain";
+	}
+	
+	/* (non-Javadoc)
 	 * @see test.Test#getDescription()
 	 */
 	@Override
@@ -88,7 +96,7 @@ public class Chain extends Test {
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
 		floor.addFixture(new Fixture(floorRect));
-		floor.setMassFromShapes(Mass.Type.INFINITE);
+		floor.setMass(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
 		this.world.add(floor);
@@ -116,7 +124,7 @@ public class Chain extends Test {
 			// create a chain link
 			Entity link = new Entity();
 			link.addFixture(new Fixture(r));
-			link.setMassFromShapes();
+			link.setMass();
 			link.translate(x, y);
 			this.world.add(link);
 			

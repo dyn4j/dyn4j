@@ -42,6 +42,14 @@ import org.dyn4j.game2d.testbed.Test;
  */
 public class Weld extends Test {
 	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.testbed.Test#getName()
+	 */
+	@Override
+	public String getName() {
+		return "Weld";
+	}
+	
+	/* (non-Javadoc)
 	 * @see test.Test#getDescription()
 	 */
 	@Override
@@ -85,7 +93,7 @@ public class Weld extends Test {
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
 		floor.addFixture(new Fixture(floorRect));
-		floor.setMassFromShapes(Mass.Type.INFINITE);
+		floor.setMass(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
 		this.world.add(floor);
@@ -108,13 +116,13 @@ public class Weld extends Test {
 		
 		Entity top = new Entity();
 		top.addFixture(new Fixture(r));
-		top.setMassFromShapes();
+		top.setMass();
 		top.translate(0.0, -1.5);
 		top.getVelocity().set(2.0, 0.0);
 		
 		Entity bot = new Entity();
 		bot.addFixture(new Fixture(r));
-		bot.setMassFromShapes();
+		bot.setMass();
 		bot.translate(0.0, -0.5);
 		
 		this.world.add(top);

@@ -36,12 +36,9 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
@@ -117,7 +114,7 @@ public class ControlPanel extends JFrame {
 		};
 	
 	/** Map of available test to run */
-	private Map<String, Test> tests;
+	private List<Test> tests;
 	
 	/** The current test */
 	private Test test;
@@ -163,13 +160,18 @@ public class ControlPanel extends JFrame {
 		super("Test Bed Control Panel");
 		
 		// load the help icon
-		helpIcon = new ImageIcon(this.getClass().getResource("/help.gif"), "Hover for help");
+		this.helpIcon = new ImageIcon(this.getClass().getResource("/help.gif"), "Hover for help");
 		
-		// initialize the map
-		this.tests = new HashMap<String, Test>();
+		// initialize the list of tests
+		this.tests = new ArrayList<Test>();
+		Test defaultTest = null;
+		
+		// get the default test
+		String defaultTestKey = TESTS_BUNDLE.getString("default.test");
 		// read in all the tests
 		Enumeration<String> keys = TESTS_BUNDLE.getKeys();
-		// loop through the keys (test names)
+		
+		// loop through the keys
 		while (keys.hasMoreElements()) {
 			// get the key
 			String key = keys.nextElement();
@@ -184,10 +186,12 @@ public class ControlPanel extends JFrame {
 				Test test = (Test) clazz.newInstance();
 				// initialize the test
 				test.initialize();
-				// set the test name
-				test.name = key;
 				// add it to the test map
-				this.tests.put(key, test);
+				this.tests.add(test);
+				// is this test the default test?
+				if (defaultTestKey.equals(key)) {
+					defaultTest = test;
+				}
 			} catch (ClassNotFoundException e) {
 				// log the exception but ignore it
 				LOGGER.throwing("TestBed", "constructor", e);
@@ -206,18 +210,18 @@ public class ControlPanel extends JFrame {
 		if (this.tests.size() == 0) {
 			throw new ConfigurationException("At least one test must be configured in the tests.properties file.");
 		}
-		// default to the test named default
-		String defaultTest = TESTS_BUNDLE.getString("default.test");
-		// attempt to find the test
-		Test test = this.tests.get(defaultTest);
+		
+		// sort the tests
+		Collections.sort(this.tests);
+		
 		// verify the test was found
-		if (test != null) {
-			this.setTest(test);
+		if (defaultTest != null) {
+			this.setTest(defaultTest);
 		} else {
-			// otherwise set it to the first test
-			Test[] tests = new Test[this.tests.size()];
-			this.tests.values().toArray(tests);
-			this.setTest(tests[0]);
+			// otherwise randomize the initial test
+			int size = this.tests.size();
+			int index = (int) Math.floor(Math.random() * (size - 1));
+			this.setTest(this.tests.get(index));
 		}
 		
 		// create the GUI
@@ -231,20 +235,6 @@ public class ControlPanel extends JFrame {
 	private void setTest(Test test) {
 		// set the new test
 		this.test = test;
-	}
-	
-	/**
-	 * Sets the current test.
-	 * @param testName the test to run
-	 */
-	private void setTest(String testName) {
-		// get the test
-		Test test = this.tests.get(testName);
-		// verify its not null
-		if (test != null) {
-			// set the test
-			this.setTest(test);
-		}
 	}
 	
 	/**
@@ -417,21 +407,14 @@ public class ControlPanel extends JFrame {
 				0, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		// get the test list
-		Collection<String> keySet = tests.keySet();
-		List<String> keys = new ArrayList<String>();
-		for (String key : keySet) {
-			keys.add(key);
-		}
-		Collections.sort(keys);
 		// create a combo box for the test selection
-		cmbTests = new JComboBox(keys.toArray());
+		cmbTests = new JComboBox(this.tests.toArray());
 		// set the selected item
-		cmbTests.setSelectedItem(test.getName());
+		cmbTests.setSelectedItem(this.test);
 		// add it to the panel
 		pnlTest.add(cmbTests, new GridBagConstraints(
 				1, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
+				GridBagConstraints.VERTICAL, insets, 0, 0));
 		// create a button to save the setting
 		JButton btnT = new JButton("Run");
 		// add a listener to it to save the setting
@@ -439,7 +422,7 @@ public class ControlPanel extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// set the selected test
-				setTest((String) cmbTests.getSelectedItem());
+				setTest((Test) cmbTests.getSelectedItem());
 				// remove all the controls
 				pnlTestControls.removeAll();
 				// update the test specific controls panel
@@ -467,11 +450,9 @@ public class ControlPanel extends JFrame {
 		cmbTests.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String tName = ((String) ((JComboBox) e.getSource()).getSelectedItem());
-				// find the respective test
-				Test t = tests.get(tName);
+				Test test = ((Test) ((JComboBox) e.getSource()).getSelectedItem());
 				// set the description
-				panTestDescription.setText(t.getDescription());
+				panTestDescription.setText(test.getDescription());
 			}
 		});
 		// add the label to the panel
@@ -1283,7 +1264,7 @@ public class ControlPanel extends JFrame {
 				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		JSpinner spnAngular = new JSpinner(new SpinnerNumberModel(Math.toDegrees(settings.getMaxLinearCorrection()), 0.0, 90.0, 1.0));
+		JSpinner spnAngular = new JSpinner(new SpinnerNumberModel(Math.toDegrees(settings.getMaxAngularCorrection()), 0.0, 90.0, 1.0));
 		spnAngular.setEditor(new JSpinner.NumberEditor(spnAngular, "0.0"));
 		((JSpinner.DefaultEditor)spnAngular.getEditor()).getTextField().setColumns(4);
 		spnAngular.addChangeListener(new ChangeListener() {
@@ -1292,7 +1273,7 @@ public class ControlPanel extends JFrame {
 				JSpinner spnr = (JSpinner) e.getSource();
 				double ang = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
 				Settings settings = Settings.getInstance();
-				settings.setMaxLinearCorrection(Math.toRadians(ang));
+				settings.setMaxAngularCorrection(Math.toRadians(ang));
 			}
 		});
 		pnlConstraint.add(spnAngular, new GridBagConstraints(
