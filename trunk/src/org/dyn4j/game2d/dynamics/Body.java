@@ -202,6 +202,23 @@ public class Body implements Collidable, Transformable {
 	}
 	
 	/**
+	 * Creates a {@link Fixture} for the specified {@link Convex} {@link Shape},
+	 * adds it to the {@link Body}, and returns it for configuration.
+	 * @param convex the {@link Convex} {@link Shape} to add to the {@link Body}
+	 * @return {@link Fixture} the fixture created using the given {@link Shape} and added to the {@link Body}
+	 */
+	public Fixture addFixture(Convex convex) {
+		// make sure the convex shape is not null
+		if (convex == null) throw new NullPointerException("The convex shape cannot be null.");
+		// create the fixture
+		Fixture fixture = new Fixture(convex);
+		// add the fixture to the body
+		this.fixtures.add(fixture);
+		// return the fixture so the caller can configure it
+		return fixture;
+	}
+	
+	/**
 	 * Adds a {@link Fixture} to this {@link Body}.
 	 * <p>
 	 * After adding or removing fixtures make sure to call the {@link #setMass()}
@@ -365,6 +382,8 @@ public class Body implements Collidable, Transformable {
 		if (force == null) throw new NullPointerException("Cannot apply a null force.");
 		// apply the force
 		this.apply(new Force(force));
+		// wake up the body
+		this.setAsleep(false);
 		// return this body to facilitate chaining
 		return this;
 	}
@@ -379,6 +398,8 @@ public class Body implements Collidable, Transformable {
 		if (force == null) throw new NullPointerException("Cannot apply a null force.");
 		// add the force to the list
 		this.forces.add(force);
+		// wake up the body
+		this.setAsleep(false);
 		// return this body to facilitate chaining
 		return this;
 	}
@@ -391,6 +412,8 @@ public class Body implements Collidable, Transformable {
 	public Body apply(double torque) {
 		// apply the torque
 		this.apply(new Torque(torque));
+		// wake up the body
+		this.setAsleep(false);
 		// return this body
 		return this;
 	}
@@ -405,6 +428,8 @@ public class Body implements Collidable, Transformable {
 		if (torque == null) throw new NullPointerException("Cannot apply a null torque.");
 		// add the torque to the list
 		this.torques.add(torque);
+		// wake up the body
+		this.setAsleep(false);
 		// return this body to facilitate chaining
 		return this;
 	}
@@ -431,6 +456,8 @@ public class Body implements Collidable, Transformable {
 			// apply the torque
 			this.apply(new Torque(tao));
 		}
+		// wake up the body
+		this.setAsleep(false);
 		// return this body to facilitate chaining
 		return this;
 	}
@@ -478,8 +505,6 @@ public class Body implements Collidable, Transformable {
 				Force force = this.forces.get(i);
 				force.apply(this);
 			}
-			// wake the body up
-			this.setAsleep(false);
 			// remove the forces from the accumulator
 			this.forces.clear();
 		}
@@ -494,8 +519,6 @@ public class Body implements Collidable, Transformable {
 				Torque torque = this.torques.get(i);
 				torque.apply(this);
 			}
-			// wake the body up
-			this.setAsleep(false);
 			// remove the torques from the accumulator
 			this.torques.clear();
 		}
@@ -672,7 +695,7 @@ public class Body implements Collidable, Transformable {
 	
 	/**
 	 * Returns true if the given {@link Body} is connected to this
-	 * {@link Body} given the collision flag.
+	 * {@link Body} given the collision flag via a {@link Joint}.
 	 * <p>
 	 * If the given collision flag is true, this method will return true
 	 * only if collision is allowed between the two joined {@link Body}s.
@@ -919,7 +942,7 @@ public class Body implements Collidable, Transformable {
 	}
 	
 	/**
-	 * Return the force {@link Vector2}.
+	 * Returns the force {@link Vector2}.
 	 * @return {@link Vector2}
 	 */
 	public Vector2 getForce() {
@@ -969,7 +992,7 @@ public class Body implements Collidable, Transformable {
 	}
 	
 	/**
-	 * Returns the list of connected {@link Body}s.
+	 * Returns a list of connected {@link Body}s.
 	 * <p>
 	 * Contains {@link Body}s connected by both contacts and
 	 * {@link Joint}s.

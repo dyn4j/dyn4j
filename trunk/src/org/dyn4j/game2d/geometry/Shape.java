@@ -24,8 +24,6 @@
  */
 package org.dyn4j.game2d.geometry;
 
-
-
 /**
  * Represents a geometric {@link Shape}.
  * <p>
