@@ -47,7 +47,7 @@ public class Mass {
 		/** Indicates that the mass's rate of rotation should not change */
 		FIXED_ANGULAR_VELOCITY,
 		/** Indicates that the mass's rate of translation should not change */
-		FIXED_VELOCITY,
+		FIXED_LINEAR_VELOCITY,
 	}
 	
 	/** The mass type */
@@ -256,7 +256,7 @@ public class Mass {
 	 * @return double
 	 */
 	public double getMass() {
-		if (this.type == Mass.Type.INFINITE || this.type == Mass.Type.FIXED_VELOCITY) {
+		if (this.type == Mass.Type.INFINITE || this.type == Mass.Type.FIXED_LINEAR_VELOCITY) {
 			return 0.0;
 		} else {
 			return mass;
@@ -280,7 +280,7 @@ public class Mass {
 	 * @return double
 	 */
 	public double getInverseMass() {
-		if (this.type == Mass.Type.INFINITE || this.type == Mass.Type.FIXED_VELOCITY) {
+		if (this.type == Mass.Type.INFINITE || this.type == Mass.Type.FIXED_LINEAR_VELOCITY) {
 			return 0.0;
 		} else {
 			return invMass;

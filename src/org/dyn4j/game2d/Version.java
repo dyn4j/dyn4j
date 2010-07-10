@@ -30,10 +30,10 @@ package org.dyn4j.game2d;
  */
 public final class Version {
 	/** The major version number; API changes, major enhancements, etc. */
-	public static final int MAJOR = 0;
+	public static final int MAJOR = 1;
 	
 	/** The minor version number; minor enhancements, major bug fixes, etc. */
-	public static final int MINOR = 10;
+	public static final int MINOR = 0;
 	
 	/** The revision number; minor bug fixes */
 	public static final int REVISION = 0;
