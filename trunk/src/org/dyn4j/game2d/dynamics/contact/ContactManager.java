@@ -48,9 +48,6 @@ public class ContactManager {
 	/** The current list of contact constraints */
 	protected List<ContactConstraint> list;
 	
-	/** The list of sensed contacts for notification */
-	protected List<SensedContactPoint> sensed;
-	
 	/** The contact listener */
 	protected ContactListener listener;
 	
@@ -62,7 +59,6 @@ public class ContactManager {
 		if (listener == null) throw new NullPointerException("The contact listener cannot be null.");
 		this.map = new HashMap<ContactConstraintId, ContactConstraint>();
 		this.list = new ArrayList<ContactConstraint>();
-		this.sensed = new ArrayList<SensedContactPoint>();
 		this.listener = listener;
 	}
 
@@ -86,19 +82,10 @@ public class ContactManager {
 	}
 	
 	/**
-	 * Adds a sensed contact to the contact manager.
-	 * @param sensedContact the sensed contact
-	 */
-	public void add(SensedContactPoint sensedContact) {
-		this.sensed.add(sensedContact);
-	}
-	
-	/**
 	 * Clears the list of {@link ContactConstraint}s.
 	 */
 	public void clear() {
 		this.list.clear();
-		this.sensed.clear();
 	}
 	
 	/**
@@ -136,6 +123,36 @@ public class ContactManager {
 			ContactConstraint newContactConstraint = this.list.get(i);
 			// define the old contact constraint
 			ContactConstraint oldContactConstraint = null;
+			
+			// check if this contact constraint is a sensor
+			if (newContactConstraint.isSensor()) {
+				// notify of the sensed contacts
+				Contact[] contacts = newContactConstraint.contacts;
+				int psize = contacts.length;
+				for (int j = 0; j < psize; j++) {
+					// get the contact
+					Contact contact = contacts[j];
+					// notify of the sensed contact
+					ContactPoint point = new ContactPoint();
+					point.body1 = newContactConstraint.getBody1();
+					point.body2 = newContactConstraint.getBody2();
+					point.fixture1 = newContactConstraint.fixture1;
+					point.fixture2 = newContactConstraint.fixture2;
+					point.normal = newContactConstraint.normal;
+					point.depth = contact.depth;
+					point.point = contact.p;
+					point.enabled = false;
+					// call the listener method
+					this.listener.sensed(point);
+				}
+				// we don't need to perform any warm starting for
+				// sensed contacts so continue to the next contact constraint
+				
+				// since sensed contact constraints are never added to the new
+				// map, they will not be warm starting if the fixtures ever
+				// change from sensors to normal fixtures
+				continue;
+			}
 			
 			// get the old contact constraint
 			// doing a remove here will ensure that the remaining contact
@@ -282,10 +299,6 @@ public class ContactManager {
 	
 	/**
 	 * Called before the contact constraints are solved.
-	 * <p>
-	 * This method notifies of both sensed and normal contacts.
-	 * <p>
-	 * Sensed contacts are not solved.
 	 */
 	public void preSolveNotify() {
 		// loop through the list of contacts that were solved
@@ -293,12 +306,14 @@ public class ContactManager {
 		for (int i = 0; i < size; i++) {
 			// get the contact constraint
 			ContactConstraint contactConstraint = this.list.get(i);
+			// sensed contacts are not solved
+			if (contactConstraint.isSensor()) continue;
 			// loop over the contacts
 			int rsize = contactConstraint.contacts.length;
 			for (int j = 0; j < rsize; j++) {
 				// get the contact
 				Contact contact = contactConstraint.contacts[j];
-				// set the contact point values
+				// notify of the contact that will be solved
 				ContactPoint point = new ContactPoint();
 				point.normal = contactConstraint.normal;
 				point.point = contact.p;
@@ -311,13 +326,6 @@ public class ContactManager {
 				contact.enabled = this.listener.preSolve(point);
 			}
 		}
-		
-		// notify of sensed contacts
-		size = this.sensed.size();
-		for (int i = 0; i < size; i++) {
-			// notify of the sensed contact
-			this.listener.sensed(this.sensed.get(i));
-		}
 	}
 	
 	/**
@@ -329,6 +337,8 @@ public class ContactManager {
 		for (int i = 0; i < size; i++) {
 			// get the contact constraint
 			ContactConstraint contactConstraint = this.list.get(i);
+			// sensed contacts are not solved
+			if (contactConstraint.isSensor()) continue;
 			// loop over the contacts
 			int rsize = contactConstraint.contacts.length;
 			for (int j = 0; j < rsize; j++) {

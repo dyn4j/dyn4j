@@ -34,7 +34,6 @@ import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.dynamics.contact.ContactListener;
 import org.dyn4j.game2d.dynamics.contact.ContactPoint;
 import org.dyn4j.game2d.dynamics.contact.PersistedContactPoint;
-import org.dyn4j.game2d.dynamics.contact.SensedContactPoint;
 import org.dyn4j.game2d.dynamics.contact.SolvedContactPoint;
 import org.dyn4j.game2d.geometry.Vector2;
 
@@ -65,9 +64,9 @@ public class ContactCounter implements ContactListener, StepListener {
 	 * @see org.dyn4j.game2d.dynamics.contact.ContactListener#sensed(org.dyn4j.game2d.dynamics.contact.SensedContactPoint)
 	 */
 	@Override
-	public void sensed(SensedContactPoint p) {
+	public void sensed(ContactPoint p) {
 		this.sensed++;
-		this.contacts.add(new ContactPoint(p));
+		this.contacts.add(p);
 	}
 	
 	/* (non-Javadoc)

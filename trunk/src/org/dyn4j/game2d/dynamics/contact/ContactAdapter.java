@@ -33,7 +33,7 @@ public class ContactAdapter implements ContactListener {
 	 * @see org.dyn4j.game2d.dynamics.contact.ContactListener#sensed(org.dyn4j.game2d.dynamics.contact.SensedContactPoint)
 	 */
 	@Override
-	public void sensed(SensedContactPoint point) {}
+	public void sensed(ContactPoint point) {}
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.dynamics.contact.ContactListener#begin(org.dyn4j.game2d.dynamics.contact.ContactPoint)

@@ -34,22 +34,6 @@ import junit.framework.TestCase;
  */
 public class UnitConversionTest {
 	/**
-	 * Tests the inch to meter and meter to inch conversions.
-	 */
-	@Test
-	public void inchMeter() {
-		// test the static values
-		TestCase.assertEquals(1.000, UnitConversion.INCH_TO_METER * UnitConversion.METER_TO_INCH);
-		
-		// test a normal value
-		double m = 2.5;
-		double i = UnitConversion.metersToInches(m);
-		double r = UnitConversion.inchesToMeters(i);
-		
-		TestCase.assertEquals(m, r, 1.0e-9);
-	}
-	
-	/**
 	 * Tests the foot to meter and meter to foot conversions.
 	 */
 	@Test
@@ -61,22 +45,6 @@ public class UnitConversionTest {
 		double m = 2.5;
 		double f = UnitConversion.metersToFeet(m);
 		double r = UnitConversion.feetToMeters(f);
-		
-		TestCase.assertEquals(m, r, 1.0e-9);
-	}
-	
-	/**
-	 * Tests the yard to meter and meter to yard conversions.
-	 */
-	@Test
-	public void yardMeter() {
-		// test the static values
-		TestCase.assertEquals(1.000, UnitConversion.YARD_TO_METER * UnitConversion.METER_TO_YARD);
-		
-		// test a normal value
-		double m = 2.5;
-		double y = UnitConversion.metersToYards(m);
-		double r = UnitConversion.yardsToMeters(y);
 		
 		TestCase.assertEquals(m, r, 1.0e-9);
 	}
@@ -111,6 +79,19 @@ public class UnitConversionTest {
 		double r = UnitConversion.kilogramsToPounds(k);
 		
 		TestCase.assertEquals(p, r, 1.0e-9);
+	}
+	
+	/**
+	 * Tests the meters per second to feet per second (and reverse) conversions.
+	 */
+	@Test
+	public void mpsToFps() {
+		// test a normal value
+		double fps = 2.5;
+		double mps = UnitConversion.metersPerSecondToFeetPerSecond(fps);
+		double r   = UnitConversion.feetPerSecondToMetersPerSecond(mps);
+		
+		TestCase.assertEquals(fps, r, 1.0e-9);
 	}
 	
 	/**

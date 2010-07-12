@@ -29,7 +29,11 @@ import java.util.List;
 import java.util.UUID;
 
 import org.dyn4j.game2d.collision.Collidable;
+import org.dyn4j.game2d.dynamics.contact.Contact;
+import org.dyn4j.game2d.dynamics.contact.ContactConstraint;
 import org.dyn4j.game2d.dynamics.contact.ContactEdge;
+import org.dyn4j.game2d.dynamics.contact.ContactListener;
+import org.dyn4j.game2d.dynamics.contact.ContactPoint;
 import org.dyn4j.game2d.dynamics.joint.Joint;
 import org.dyn4j.game2d.dynamics.joint.JointEdge;
 import org.dyn4j.game2d.geometry.Convex;
@@ -992,29 +996,117 @@ public class Body implements Collidable, Transformable {
 	}
 	
 	/**
-	 * Returns a list of connected {@link Body}s.
-	 * <p>
-	 * Contains {@link Body}s connected by both contacts and
-	 * {@link Joint}s.
+	 * Returns a list of {@link Body}s connected
+	 * by {@link Joint}s.
 	 * @return List&lt;{@link Body}&gt;
 	 */
-	public List<Body> getConnnectedBodies() {
-		int jsize = this.joints.size();
-		int csize = this.contacts.size();
-		int capacity = jsize + csize;
+	public List<Body> getJoinedBodies() {
+		int size = this.joints.size();
 		// create a list of the correct capacity
-		List<Body> bodies = new ArrayList<Body>(capacity);
-		// add all the contact bodies
-		for (int i = 0; i < csize; i++) {
-			ContactEdge ce = this.contacts.get(i);
-			bodies.add(ce.getOther());
-		}
+		List<Body> bodies = new ArrayList<Body>(size);
 		// add all the joint bodies
-		for (int i = 0; i < jsize; i++) {
+		for (int i = 0; i < size; i++) {
 			JointEdge je = this.joints.get(i);
 			bodies.add(je.getOther());
 		}
 		// return the connected bodies
 		return bodies;
+	}
+
+	/**
+	 * Returns a list of {@link Joint}s that this 
+	 * {@link Body} is connected with.
+	 * @return List&lt;{@link Joint}&gt;
+	 */
+	public List<Joint> getJoints() {
+		int size = this.joints.size();
+		// create a list of the correct capacity
+		List<Joint> joints = new ArrayList<Joint>(size);
+		// add all the joints
+		for (int i = 0; i < size; i++) {
+			JointEdge je = this.joints.get(i);
+			joints.add(je.getJoint());
+		}
+		// return the connected joints
+		return joints;
+	}
+	
+	/**
+	 * Returns a list of {@link Body}s that are in
+	 * contact with this {@link Body}.
+	 * <p>
+	 * Passing a value of true results in a list containing only
+	 * the sensed contacts for this body.  Passing a value of false
+	 * results in a list containing only normal contacts.
+	 * <p>
+	 * Calling this method from any of the {@link CollisionListener} methods
+	 * may produce incorrect results.
+	 * @param sensed true for only sensed contacts; false for only normal contacts
+	 * @return List&lt;{@link Body}&gt;
+	 */
+	public List<Body> getInContactBodies(boolean sensed) {
+		int size = this.contacts.size();
+		// create a list of the correct capacity
+		List<Body> bodies = new ArrayList<Body>(size);
+		// add all the contact bodies
+		for (int i = 0; i < size; i++) {
+			ContactEdge ce = this.contacts.get(i);
+			// check for sensor contact
+			ContactConstraint constraint = ce.getContactConstraint();
+			if (sensed == constraint.isSensor()) {
+				// add it to the list
+				bodies.add(ce.getOther());
+			}
+		}
+		// return the connected bodies
+		return bodies;
+	}
+	
+	/**
+	 * Returns a list of {@link ContactPoint}s 
+	 * <p>
+	 * Passing a value of true results in a list containing only
+	 * the sensed contacts for this body.  Passing a value of false
+	 * results in a list containing only normal contacts.
+	 * <p>
+	 * Calling this method from any of the {@link CollisionListener} methods
+	 * may produce incorrect results.
+	 * <p>
+	 * Modifying the {@link ContactPoint}s returned is not advised.  Use the
+	 * {@link ContactListener} methods instead.
+	 * @param sensed true for only sensed contacts; false for only normal contacts
+	 * @return List&lt;{@link ContactPoint}&gt;
+	 */
+	public List<ContactPoint> getContacts(boolean sensed) {
+		int size = this.contacts.size();
+		// create a list to store the contacts (worst case initial capacity)
+		List<ContactPoint> contactPoints = new ArrayList<ContactPoint>(size * 2);
+		// add all the contact points
+		for (int i = 0; i < size; i++) {
+			ContactEdge ce = this.contacts.get(i);
+			// check for sensor contact
+			ContactConstraint constraint = ce.getContactConstraint();
+			if (sensed == constraint.isSensor()) {
+				// loop over the contacts
+				Contact[] contacts = constraint.getContacts();
+				int csize = contacts.length;
+				for (int j = 0; j < csize; j++) {
+					// get the contact
+					Contact contact = contacts[j];
+					// create the contact point
+					ContactPoint contactPoint = new ContactPoint(
+							constraint.body1, constraint.getFixture1(),
+							constraint.body2, constraint.getFixture2(),
+							contact.isEnabled(),
+							contact.getPoint(),
+							constraint.getNormal(),
+							contact.getDepth());
+					// add the point
+					contactPoints.add(contactPoint);
+				}
+			}
+		}
+		// return the connected bodies
+		return contactPoints;
 	}
 }

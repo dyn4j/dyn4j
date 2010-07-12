@@ -43,7 +43,7 @@ public interface ContactListener {
 	 * where one or both {@link Body}s are sensors.
 	 * @param point the contact point that was sensed
 	 */
-	public abstract void sensed(SensedContactPoint point);
+	public abstract void sensed(ContactPoint point);
 	
 	/**
 	 * Called when a two fixtures begin to overlap generating a contact point.
