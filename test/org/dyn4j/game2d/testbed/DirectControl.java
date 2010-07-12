@@ -42,9 +42,16 @@ public class DirectControl {
 		// create a saved state
 		DirectControl.State state = new DirectControl.State();
 		
-		// wake up all attached bodies
-		List<Body> bodies = body.getConnnectedBodies();
+		// wake up all the connected bodies (by non-sensed contact)
+		List<Body> bodies = body.getInContactBodies(false);
 		int size = bodies.size();
+		for (int i = 0; i < size; i++) {
+			Body b = bodies.get(i);
+			b.setAsleep(false);
+		}
+		// wake up all the connected bodies (by joints)
+		bodies = body.getJoinedBodies();
+		size = bodies.size();
 		for (int i = 0; i < size; i++) {
 			Body b = bodies.get(i);
 			b.setAsleep(false);

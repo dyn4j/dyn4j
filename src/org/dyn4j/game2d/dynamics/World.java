@@ -38,7 +38,6 @@ import org.dyn4j.game2d.collision.broadphase.BroadphasePair;
 import org.dyn4j.game2d.collision.broadphase.Sap;
 import org.dyn4j.game2d.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.game2d.collision.manifold.Manifold;
-import org.dyn4j.game2d.collision.manifold.ManifoldPoint;
 import org.dyn4j.game2d.collision.manifold.ManifoldSolver;
 import org.dyn4j.game2d.collision.narrowphase.Gjk;
 import org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector;
@@ -50,7 +49,6 @@ import org.dyn4j.game2d.dynamics.contact.ContactEdge;
 import org.dyn4j.game2d.dynamics.contact.ContactListener;
 import org.dyn4j.game2d.dynamics.contact.ContactManager;
 import org.dyn4j.game2d.dynamics.contact.ContactPoint;
-import org.dyn4j.game2d.dynamics.contact.SensedContactPoint;
 import org.dyn4j.game2d.dynamics.joint.Joint;
 import org.dyn4j.game2d.dynamics.joint.JointEdge;
 import org.dyn4j.game2d.geometry.Convex;
@@ -362,42 +360,21 @@ public class World {
 									// if the collision listener returned false then skip this collision
 									continue;
 								}
-								// get the manifold points
-								List<ManifoldPoint> points = manifold.getPoints();
-								// a valid manifold was found
-								int mSize = points.size();
-								// don't add sensor manifolds to the contact constraints list
-								if (!fixture1.isSensor() && !fixture2.isSensor()) {
-									// compute the friction and restitution
-									double friction = this.coefficientMixer.mixFriction(fixture1.getFriction(), fixture2.getFriction());
-									double restitution = this.coefficientMixer.mixRestitution(fixture1.getRestitution(), fixture2.getRestitution());
-									// create a contact constraint
-									ContactConstraint contactConstraint = new ContactConstraint(body1, fixture1, body2, fixture2, manifold, friction, restitution);
-									// add a contact edge to both bodies
-									ContactEdge contactEdge1 = new ContactEdge(body2, contactConstraint);
-									ContactEdge contactEdge2 = new ContactEdge(body1, contactConstraint);
-									body1.contacts.add(contactEdge1);
-									body2.contacts.add(contactEdge2);
-									// add the contact constraint to the contact manager
-									this.contactManager.add(contactConstraint);
-								} else {
-									// add the sensed contacts to the contact manager
-									for (int l = 0; l < mSize; l++) {
-										// get the manifold point
-										ManifoldPoint manifoldPoint = points.get(l);
-										// create the sensed contact
-										SensedContactPoint point = new SensedContactPoint(
-																			manifoldPoint.getPoint(),
-																			manifold.getNormal(),
-																			manifoldPoint.getDepth(),
-																			body1,
-																			fixture1,
-																			body2,
-																			fixture2);
-										// add the sensed contact
-										this.contactManager.add(point);
-									}
-								}
+								// compute the friction and restitution
+								double friction = this.coefficientMixer.mixFriction(fixture1.getFriction(), fixture2.getFriction());
+								double restitution = this.coefficientMixer.mixRestitution(fixture1.getRestitution(), fixture2.getRestitution());
+								// create a contact constraint
+								ContactConstraint contactConstraint = new ContactConstraint(body1, fixture1, 
+										                                                    body2, fixture2, 
+										                                                    manifold, 
+										                                                    friction, restitution);
+								// add a contact edge to both bodies
+								ContactEdge contactEdge1 = new ContactEdge(body2, contactConstraint);
+								ContactEdge contactEdge2 = new ContactEdge(body1, contactConstraint);
+								body1.contacts.add(contactEdge1);
+								body2.contacts.add(contactEdge2);
+								// add the contact constraint to the contact manager
+								this.contactManager.add(contactConstraint);
 							}
 						}
 					}
@@ -443,6 +420,8 @@ public class World {
 					ContactEdge contactEdge = body.contacts.get(j);
 					// get the contact constraint
 					ContactConstraint contactConstraint = contactEdge.getContactConstraint();
+					// skip sensor contacts
+					if (contactConstraint.isSensor()) continue;
 					// get the other body
 					Body other = contactEdge.getOther();
 					// check if the contact constraint has already been added to an island

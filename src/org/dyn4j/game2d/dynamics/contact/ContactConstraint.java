@@ -58,6 +58,9 @@ public class ContactConstraint extends Constraint {
 	
 	/** The coefficient of restitution */
 	protected double restitution;
+
+	/** Whether the contact is a sensor contact or not */
+	protected boolean sensor;
 	
 	/**
 	 * Full constructor.
@@ -69,7 +72,8 @@ public class ContactConstraint extends Constraint {
 	 * @param friction the contact's coefficient of friction
 	 * @param restitution the contact's coefficient of restitution
 	 */
-	public ContactConstraint(Body body1, Fixture fixture1, Body body2, Fixture fixture2, Manifold manifold, double friction, double restitution) {
+	public ContactConstraint(Body body1, Fixture fixture1, Body body2, Fixture fixture2,
+			Manifold manifold, double friction, double restitution) {
 		super(body1, body2);
 		// set the involved convex shapes
 		this.fixture1 = fixture1;
@@ -100,6 +104,9 @@ public class ContactConstraint extends Constraint {
 		// set the coefficients
 		this.friction = friction;
 		this.restitution = restitution;
+		// set the sensor flag (if either fixture is a sensor then the
+		// contact constraint between the fixtures is a sensor)
+		this.sensor = fixture1.isSensor() || fixture2.isSensor();
 		// default to false
 		this.onIsland = false;
 	}
@@ -116,7 +123,8 @@ public class ContactConstraint extends Constraint {
 		.append(this.fixture2).append("|")
 		.append(this.normal).append("|")
 		.append(this.friction).append("|")
-		.append(this.restitution).append("|{");
+		.append(this.restitution).append("|")
+		.append(this.sensor).append("|{");
 		int size = contacts.length;
 		for (int i = 0; i < size; i++) {
 			sb.append(contacts[i]);
@@ -130,7 +138,7 @@ public class ContactConstraint extends Constraint {
 	 * @return {@link ContactConstraintId}
 	 */
 	public ContactConstraintId getId() {
-		return id;
+		return this.id;
 	}
 	
 	/**
@@ -186,7 +194,7 @@ public class ContactConstraint extends Constraint {
 	 * @return double
 	 */
 	public double getFriction() {
-		return friction;
+		return this.friction;
 	}
 	
 	/**
@@ -194,6 +202,14 @@ public class ContactConstraint extends Constraint {
 	 * @return double
 	 */
 	public double getRestitution() {
-		return restitution;
+		return this.restitution;
+	}
+	
+	/**
+	 * Returns true if this {@link ContactConstraint} is a sensor.
+	 * @return boolean
+	 */
+	public boolean isSensor() {
+		return this.sensor;
 	}
 }
