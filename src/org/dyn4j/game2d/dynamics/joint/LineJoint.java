@@ -120,8 +120,12 @@ public class LineJoint extends Joint {
 	 */
 	public LineJoint(Body b1, Body b2, Vector2 anchor, Vector2 axis) {
 		super(b1, b2, false);
+		// verify the bodies are not the same instance
+		if (b1 == b2) throw new IllegalArgumentException("Cannot create a line joint between the same body instance.");
 		// check for a null anchor
 		if (anchor == null) throw new NullPointerException("The anchor point cannot be null.");
+		// check for a null axis
+		if (axis == null) throw new NullPointerException("The axis cannot be null.");
 		// set the anchor point
 		this.localAnchor1 = b1.getLocalPoint(anchor);
 		this.localAnchor2 = b2.getLocalPoint(anchor);
@@ -151,7 +155,15 @@ public class LineJoint extends Joint {
 		.append(this.localAnchor2).append("|")
 		.append(this.xAxis).append("|")
 		.append(this.yAxis).append("|")
-		.append(this.impulse).append("]");
+		.append(this.motorEnabled).append("|")
+		.append(this.motorSpeed).append("|")
+		.append(this.maxMotorForce).append("|")
+		.append(this.limitEnabled).append("|")
+		.append(this.lowerLimit).append("|")
+		.append(this.upperLimit).append("|")
+		.append(this.limitState).append("|")
+		.append(this.impulse).append("|")
+		.append(this.motorImpulse).append("]");
 		return sb.toString();
 	}
 	
@@ -674,6 +686,8 @@ public class LineJoint extends Joint {
 	 * @param maxMotorForce the maximum force in newtons
 	 */
 	public void setMaxMotorForce(double maxMotorForce) {
+		// make sure its greater than or equal to zero
+		if (maxMotorForce < 0.0) throw new IllegalArgumentException("The maximum motor force must be greater than or equal to zero.");
 		// is the value different that the current value?
 		if (this.maxMotorForce != maxMotorForce) {
 			// wake up the joined bodies

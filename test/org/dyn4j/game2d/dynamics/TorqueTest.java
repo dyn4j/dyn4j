@@ -24,78 +24,72 @@
  */
 package org.dyn4j.game2d.dynamics;
 
+import junit.framework.TestCase;
+
+import org.junit.Test;
+
 /**
- * Represents a torque about the z-axis.
+ * Class used to test the {@link Torque} class.
  * @author William Bittle
  */
-public class Torque {
-	/** The point where the {@link Force} is applied in world coordinates */
-	protected double torque;
-	
+public class TorqueTest {
 	/**
-	 * Default constructor.
+	 * Tests successful creation.
 	 */
-	public Torque() {
-		this.torque = 0.0;
+	@Test
+	public void createSuccess() {
+		Torque t = new Torque();
+		t = new Torque(0.2);
+		TestCase.assertEquals(0.2, t.torque);
+		
+		t = new Torque(-3.5);
+		TestCase.assertEquals(-3.5, t.torque);
+		
+		Torque t2 = new Torque(t);
+		TestCase.assertEquals(-3.5, t2.torque);
 	}
 	
 	/**
-	 * Creates a {@link Torque} using specified torque value.
-	 * @param torque the torque
+	 * Tests the set methods successfully.
 	 */
-	public Torque(double torque) {
-		this.torque = torque;
+	@Test
+	public void setSuccess() {
+		Torque t = new Torque();
+		t.set(0.32);
+		TestCase.assertEquals(0.32, t.torque);
+		
+		Torque t2 = new Torque(3.42);
+		t.set(t2);
+		TestCase.assertEquals(3.42, t.torque);
 	}
 	
 	/**
-	 * Copy constructor.
-	 * @param torque the {@link Torque} to copy
+	 * Tests creation using a null torque.
 	 */
-	public Torque(Torque torque) {
-		if (torque == null) throw new NullPointerException("Cannot copy a null torque.");
-		this.torque = torque.torque;
+	@Test(expected = NullPointerException.class)
+	public void createNullTorque() {
+		new Torque(null);
 	}
 	
 	/**
-	 * Sets this {@link Torque} to the given torque value.
-	 * @param torque the torque
+	 * Tests setting the torque using a null torque.
 	 */
-	public void set(double torque) {
-		this.torque = torque;
+	@Test(expected = NullPointerException.class)
+	public void setNullTorque() {
+		Torque t = new Torque();
+		t.set(null);
 	}
 	
 	/**
-	 * Sets this {@link Torque} to the given {@link Torque}.
-	 * @param torque the {@link Torque} to copy
+	 * Tests the apply method.
 	 */
-	public void set(Torque torque) {
-		if (torque == null) throw new NullPointerException("Cannot set this torque to a null torque.");
-		this.torque = torque.torque;
-	}
-	
-	/**
-	 * Applies this {@link Torque} to the given {@link Body}.
-	 * @param body the {@link Body} to apply the {@link Torque} to
-	 */
-	public void apply(Body body) {
-		body.torque += this.torque;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.dynamics.Force#toString()
-	 */
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("TORQUE[").append(this.torque).append("]");
-		return sb.toString();
-	}
-	
-	/**
-	 * Returns the torque value.
-	 * @return double
-	 */
-	public double getTorque() {
-		return this.torque;
+	@Test
+	public void apply() {
+		Body b = new Body();
+		Torque t = new Torque(-0.2);
+		
+		t.apply(b);
+		
+		TestCase.assertEquals(-0.2, b.torque);
 	}
 }

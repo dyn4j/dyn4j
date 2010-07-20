@@ -94,6 +94,8 @@ public class RevoluteJoint extends Joint {
 	public RevoluteJoint(Body b1, Body b2, Vector2 anchor) {
 		// default to no collision allowed between the bodies
 		super(b1, b2, false);
+		// verify the bodies are not the same instance
+		if (b1 == b2) throw new IllegalArgumentException("Cannot create a revolute joint between the same body instance.");
 		// make sure the anchor point is not null
 		if (anchor == null) throw new NullPointerException("The anchor point cannot be null.");
 		// get the local space points
@@ -508,6 +510,8 @@ public class RevoluteJoint extends Joint {
 	 * @param maxMotorTorque the maximum motor torque in newton-meters
 	 */
 	public void setMaxMotorTorque(double maxMotorTorque) {
+		// make sure its positive
+		if (maxMotorTorque < 0.0) throw new IllegalArgumentException("The maximum motor torque must be greater than zero.");
 		// see if the maximum is different than the current
 		if (this.maxMotorTorque != maxMotorTorque) {
 			// wake up the bodies

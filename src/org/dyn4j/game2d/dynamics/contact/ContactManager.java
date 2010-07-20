@@ -48,20 +48,15 @@ public class ContactManager {
 	/** The current list of contact constraints */
 	protected List<ContactConstraint> list;
 	
-	/** The contact listener */
-	protected ContactListener listener;
-	
 	/**
-	 * Full constructor.
-	 * @param listener the {@link ContactListener}
+	 * Default constructor.
 	 */
-	public ContactManager(ContactListener listener) {
-		if (listener == null) throw new NullPointerException("The contact listener cannot be null.");
+	public ContactManager()  {
+		// initialize the members
 		this.map = new HashMap<ContactConstraintId, ContactConstraint>();
 		this.list = new ArrayList<ContactConstraint>();
-		this.listener = listener;
 	}
-
+	
 	/**
 	 * Adds a {@link ContactConstraint} to the contact manager.
 	 * @param contactConstraint the {@link ContactConstraint}
@@ -97,13 +92,19 @@ public class ContactManager {
 	}
 	
 	/**
-	 * Warm start the {@link ContactConstraint}s using the previous {@link ContactConstraint}s
-	 * accumulated impulses.
+	 * Updates the contact manager with new contacts, warm starting, and notifying of contact
+	 * events.
 	 * <p>
-	 * This method will notify using the {@link ContactListener} of any added, persisted, or
-	 * removed {@link Contact}s.
+	 * Warm starts the {@link ContactConstraint}s using the previous {@link ContactConstraint}s
+	 * accumulated impulses if available given their {@link ManifoldPointId}s.
+	 * <p>
+	 * This method will notify using the {@link ContactListener} of any contact events excluding
+	 * the {@link ContactListener#preSolve(ContactPoint)} and {@link ContactListener#postSolve(SolvedContactPoint)}
+	 * methods.
+	 * @see ContactListener
+	 * @param listener the {@link ContactListener} to use for event notification
 	 */
-	public void warm() {
+	public void updateContacts(ContactListener listener) {
 		// check the given list
 		if (this.list.isEmpty()) {
 			return;
@@ -143,7 +144,7 @@ public class ContactManager {
 					point.point = contact.p;
 					point.enabled = false;
 					// call the listener method
-					this.listener.sensed(point);
+					listener.sensed(point);
 				}
 				// we don't need to perform any warm starting for
 				// sensed contacts so continue to the next contact constraint
@@ -197,7 +198,7 @@ public class ContactManager {
 							point.oldPoint = oldContact.p;
 							point.oldDepth = oldContact.depth;
 							// call the listener and set the enabled flag to the result
-							newContact.enabled = this.listener.persist(point);
+							newContact.enabled = listener.persist(point);
 							// flag that the contact was persisted
 							persisted[k] = true;
 							found = true;
@@ -217,7 +218,7 @@ public class ContactManager {
 						point.fixture1 = newContactConstraint.getFixture1();
 						point.fixture2 = newContactConstraint.getFixture2();
 						// call the listener and set the enabled flag to the result
-						newContact.enabled = this.listener.begin(point);
+						newContact.enabled = listener.begin(point);
 					}
 				}
 				
@@ -240,7 +241,7 @@ public class ContactManager {
 						point.fixture1 = newContactConstraint.getFixture1();
 						point.fixture2 = newContactConstraint.getFixture2();
 						// call the listener and set the enabled flag to the result
-						contact.enabled = this.listener.end(point);
+						contact.enabled = listener.end(point);
 					}
 				}
 			} else {
@@ -261,7 +262,7 @@ public class ContactManager {
 					point.fixture1 = newContactConstraint.getFixture1();
 					point.fixture2 = newContactConstraint.getFixture2();
 					// call the listener and set the enabled flag to the result
-					contact.enabled = this.listener.begin(point);
+					contact.enabled = listener.begin(point);
 				}
 			}
 			// add the contact constraint to the map
@@ -289,7 +290,7 @@ public class ContactManager {
 					point.fixture1 = contactConstraint.getFixture1();
 					point.fixture2 = contactConstraint.getFixture2();
 					// call the listener and set the enabled flag to the result
-					contact.enabled = this.listener.end(point);
+					contact.enabled = listener.end(point);
 				}
 			}
 		}
@@ -299,8 +300,9 @@ public class ContactManager {
 	
 	/**
 	 * Called before the contact constraints are solved.
+	 * @param listener the {@link ContactListener} to use for event notification
 	 */
-	public void preSolveNotify() {
+	public void preSolveNotify(ContactListener listener) {
 		// loop through the list of contacts that were solved
 		int size = this.list.size();
 		for (int i = 0; i < size; i++) {
@@ -323,15 +325,16 @@ public class ContactManager {
 				point.fixture1 = contactConstraint.getFixture1();
 				point.fixture2 = contactConstraint.getFixture2();
 				// call the listener and set the enabled flag to the result
-				contact.enabled = this.listener.preSolve(point);
+				contact.enabled = listener.preSolve(point);
 			}
 		}
 	}
 	
 	/**
 	 * Called after the contact constraints have been solved.
+	 * @param listener the {@link ContactListener} to use for event notification
 	 */
-	public void postSolveNotify() {
+	public void postSolveNotify(ContactListener listener) {
 		// loop through the list of contacts that were solved
 		int size = this.list.size();
 		for (int i = 0; i < size; i++) {
@@ -357,25 +360,8 @@ public class ContactManager {
 				point.normalImpulse = contact.jn;
 				point.tangentialImpulse = contact.jt;
 				// notify of them being solved
-				this.listener.postSolve(point);
+				listener.postSolve(point);
 			}
 		}
-	}
-	
-	/**
-	 * Sets the {@link ContactListener}.
-	 * @param listener the {@link ContactListener}
-	 */
-	public void setContactListener(ContactListener listener) {
-		if (listener == null) throw new NullPointerException("The contact listener cannot be null.");
-		this.listener = listener;
-	}
-	
-	/**
-	 * Returns the {@link ContactListener}.
-	 * @return {@link ContactListener}
-	 */
-	public ContactListener getContactListener() {
-		return this.listener;
 	}
 }

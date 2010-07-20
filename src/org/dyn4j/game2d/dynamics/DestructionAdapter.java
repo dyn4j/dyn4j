@@ -46,4 +46,10 @@ public class DestructionAdapter implements DestructionListener {
 	 */
 	@Override
 	public void destroyed(Joint joint) {}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.dynamics.DestructionListener#destroyed(org.dyn4j.game2d.dynamics.Body)
+	 */
+	@Override
+	public void destroyed(Body body) {}
 }

@@ -90,6 +90,9 @@ public class World {
 	/** The {@link ContactManager} */
 	protected ContactManager contactManager;
 
+	/** The {@link ContactListener} */
+	protected ContactListener contactListener;
+	
 	/** The {@link BoundsListener} */
 	protected BoundsListener boundsListener;
 	
@@ -131,7 +134,9 @@ public class World {
 	 * @param bounds the bounds of the {@link World}
 	 */
 	public World(Bounds bounds) {
+		// check for null bounds
 		if (bounds == null) throw new NullPointerException("The bounds cannot be null.  Use the Bounds.UNBOUNDED object to have no bounds.");
+		// initialize all the classes with default values
 		this.step = new Step();
 		this.gravity = World.EARTH_GRAVITY;
 		this.bounds = bounds;
@@ -140,7 +145,8 @@ public class World {
 		this.manifoldSolver = new ClippingManifoldSolver();
 		// create empty listeners
 		this.collisionListener = new CollisionAdapter();
-		this.contactManager = new ContactManager(new ContactAdapter());
+		this.contactManager = new ContactManager();
+		this.contactListener = new ContactAdapter();
 		this.boundsListener = new BoundsAdapter();
 		this.destructionListener = new DestructionAdapter();
 		this.stepListener = new StepAdapter();
@@ -230,6 +236,8 @@ public class World {
 	 * @param elapsedTime the elapsed time for each step
 	 */
 	public void step(int steps, double elapsedTime) {
+		// make sure the number of steps is greather than zero
+		if (steps <= 0) return;
 		// make sure the update time is greater than zero
 		if (elapsedTime <= 0.0) return;
 		// perform the steps
@@ -383,10 +391,10 @@ public class World {
 		}
 		
 		// warm start the contact constraints
-		this.contactManager.warm();
+		this.contactManager.updateContacts(this.contactListener);
 		
 		// notify of all the contacts that will be solved and all the sensed contacts
-		this.contactManager.preSolveNotify();
+		this.contactManager.preSolveNotify(this.contactListener);
 		
 		// perform a depth first search of the contact graph
 		// to create islands for constraint solving
@@ -477,7 +485,7 @@ public class World {
 		}
 		
 		// notify of the all solved contacts
-		this.contactManager.postSolveNotify();
+		this.contactManager.postSolveNotify(this.contactListener);
 		
 		// notify the step listener
 		this.stepListener.end(this.step, this);
@@ -490,6 +498,8 @@ public class World {
 	public void add(Body body) {
 		// check for null body
 		if (body == null) throw new NullPointerException("Cannot add a null body to the world.");
+		// dont allow adding it twice
+		if (this.bodies.contains(body)) throw new IllegalArgumentException("Cannot add the same body more than once.");
 		// add it to the world
 		this.bodies.add(body);
 	}
@@ -501,6 +511,8 @@ public class World {
 	public void add(Joint joint) {
 		// check for null joint
 		if (joint == null) throw new NullPointerException("Cannot add a null joint to the world.");
+		// dont allow adding it twice
+		if (this.joints.contains(joint)) throw new IllegalArgumentException("Cannot add the same joint more than once.");
 		// add the joint to the joint list
 		this.joints.add(joint);
 		// get the associated bodies
@@ -522,7 +534,7 @@ public class World {
 	 * @return boolean true if the body was removed
 	 */
 	public boolean remove(Body body) {
-		// check for null joint
+		// check for null body
 		if (body == null) return false;
 		// remove the body from the list
 		boolean removed = this.bodies.remove(body);
@@ -530,40 +542,48 @@ public class World {
 		// only remove joints and contacts if the body was removed
 		if (removed) {
 			// wake up any bodies connected to this body by a joint
-			// and destroy the joints
-			int jsize = body.joints.size();
-			for (int i = 0; i < jsize; i++) {
+			// and destroy the joints and remove the edges
+			Iterator<JointEdge> aIterator = body.joints.iterator();
+			while (aIterator.hasNext()) {
 				// get the joint edge
-				JointEdge jointEdge = body.joints.get(i);
+				JointEdge jointEdge = aIterator.next();
+				// remove the joint edge from the given body
+				aIterator.remove();
 				// get the joint
 				Joint joint = jointEdge.getJoint();
 				// get the other body
 				Body other = jointEdge.getOther();
 				// wake up the other body
 				other.setAsleep(false);
-				// remove the contact edge from the other body
-				Iterator<JointEdge> iterator = other.joints.iterator();
-				while (iterator.hasNext()) {
+				// remove the joint edge from the other body
+				Iterator<JointEdge> bIterator = other.joints.iterator();
+				while (bIterator.hasNext()) {
 					// get the joint edge
-					JointEdge otherJointEdge = iterator.next();
+					JointEdge otherJointEdge = bIterator.next();
 					// get the joint
 					Joint otherJoint = otherJointEdge.getJoint();
+					// are the joints the same object reference
 					if (otherJoint == joint) {
 						// remove the joint edge
-						iterator.remove();
-						// since they are the same contact constraint object
-						// we only need to notify of this bodies destroyed contacts
+						bIterator.remove();
+						// we can break from the loop since there should
+						// not be more than one contact edge per joint per body
+						break;
 					}
 				}
 				// notify of the destroyed joint
 				this.destructionListener.destroyed(joint);
+				// remove the joint from the world
+				this.joints.remove(joint);
 			}
 			
 			// remove any contacts this body had with any other body
-			int csize = body.contacts.size();
-			for (int i = 0; i < csize; i++) {
+			Iterator<ContactEdge> acIterator = body.contacts.iterator();
+			while (acIterator.hasNext()) {
 				// get the contact edge
-				ContactEdge contactEdge = body.contacts.get(i);
+				ContactEdge contactEdge = acIterator.next();
+				// remove the contact edge from the given body
+				acIterator.remove();
 				// get the contact constraint
 				ContactConstraint contactConstraint = contactEdge.getContactConstraint();
 				// get the other body
@@ -574,24 +594,26 @@ public class World {
 				// to this body
 				Iterator<ContactEdge> iterator = other.contacts.iterator();
 				while (iterator.hasNext()) {
-					ContactEdge ceOther = iterator.next();
+					ContactEdge otherContactEdge = iterator.next();
 					// get the contact constraint
-					ContactConstraint ccOther = ceOther.getContactConstraint();
-					// check if the contact constraint is the same
-					if (ccOther == contactConstraint) {
+					ContactConstraint otherContactConstraint = otherContactEdge.getContactConstraint();
+					// check if the contact constraint is the same reference
+					if (otherContactConstraint == contactConstraint) {
 						// remove the contact edge
 						iterator.remove();
-						// since they are the same contact constraint object
-						// we only need to notify of this bodies destroyed contacts
+						// break from the loop since there should only be
+						// one contact edge per body pair
+						break;
 					}
 				}
 				// remove the contact constraint from the contact manager
 				this.contactManager.remove(contactConstraint);
 				// loop over the contact points
-				int size = contactConstraint.getContacts().length;
+				Contact[] contacts = contactConstraint.getContacts();
+				int size = contacts.length;
 				for (int j = 0; j < size; j++) {
 					// get the contact
-					Contact contact = contactConstraint.getContacts()[j];
+					Contact contact = contacts[j];
 					// create a contact point for notification
 					ContactPoint contactPoint = new ContactPoint(
 													contactConstraint.getBody1(), 
@@ -622,32 +644,42 @@ public class World {
 		// remove the joint from the joint list
 		boolean removed = this.joints.remove(joint);
 		
+		// get the involved bodies
+		Body body1 = joint.getBody1();
+		Body body2 = joint.getBody2();
+		
 		// see if the given joint was removed
 		if (removed) {
 			// remove the joint edges from body1
-			Iterator<JointEdge> iterator = joint.getBody1().joints.iterator();
+			Iterator<JointEdge> iterator = body1.joints.iterator();
 			while (iterator.hasNext()) {
 				// see if this is the edge we want to remove
 				JointEdge jointEdge = iterator.next();
 				if (jointEdge.getJoint() == joint) {
 					// then remove this joint edge
 					iterator.remove();
+					// joints should only have one joint edge
+					// per body
+					break;
 				}
 			}
 			// remove the joint edges from body2
-			iterator = joint.getBody2().joints.iterator();
+			iterator = body2.joints.iterator();
 			while (iterator.hasNext()) {
 				// see if this is the edge we want to remove
 				JointEdge jointEdge = iterator.next();
 				if (jointEdge.getJoint() == joint) {
 					// then remove this joint edge
 					iterator.remove();
+					// joints should only have one joint edge
+					// per body
+					break;
 				}
 			}
 			
 			// finally wake both bodies
-			joint.getBody1().setAsleep(false);
-			joint.getBody2().setAsleep(false);
+			body1.setAsleep(false);
+			body2.setAsleep(false);
 		}
 		
 		return removed;
@@ -715,7 +747,7 @@ public class World {
 	 */
 	public void setContactListener(ContactListener contactListener) {
 		if (contactListener == null) throw new NullPointerException("The contact listener cannot be null.  Create an instance of the ContactAdapter class to set it to the default.");
-		this.contactManager.setContactListener(contactListener);
+		this.contactListener = contactListener;
 	}
 	
 	/**
@@ -723,7 +755,7 @@ public class World {
 	 * @return {@link ContactListener} the contact listener
 	 */
 	public ContactListener getContactListener() {
-		return this.contactManager.getContactListener();
+		return this.contactListener;
 	}
 	
 	/**
@@ -852,11 +884,107 @@ public class World {
 	}
 	
 	/**
-	 * Clears the joints and bodies from the world.
+	 * Returns the {@link ContactManager}.
+	 * @return {@link ContactManager}
 	 */
-	public void clear() {
+	public ContactManager getContactManager() {
+		return contactManager;
+	}
+	
+	/**
+	 * Sets the {@link ContactManager}.
+	 * @param contactManager the contact manager
+	 */
+	public void setContactManager(ContactManager contactManager) {
+		// make sure the contact manager is not null
+		if (contactManager == null) throw new NullPointerException("The contact manager cannot be null.");
+		this.contactManager = contactManager;
+	}
+
+	/**
+	 * Clears the joints and bodies from the world.
+	 * <p>
+	 * This method will clear the joints and contacts from all {@link Body}s.
+	 * @param notify true if destruction of joints and contacts should be notified of by the {@link DestructionListener}
+	 */
+	public void clear(boolean notify) {
+		// loop over the bodies and clear the
+		// joints and contacts
+		int bsize = this.bodies.size();
+		for (int i = 0; i < bsize; i++) {
+			// get the body
+			Body body = this.bodies.get(i);
+			// clear the joint edges
+			body.joints.clear();
+			// do we need to notify?
+			if (notify) {
+				// notify of all the destroyed contacts
+				Iterator<ContactEdge> aIterator = body.contacts.iterator();
+				while (aIterator.hasNext()) {
+					// get the contact edge
+					ContactEdge contactEdge = aIterator.next();
+					// get the other body involved
+					Body other = contactEdge.getOther();
+					// get the contact constraint
+					ContactConstraint contactConstraint = contactEdge.getContactConstraint();
+					// find the other contact edge
+					Iterator<ContactEdge> bIterator = other.contacts.iterator();
+					while (bIterator.hasNext()) {
+						// get the contact edge
+						ContactEdge otherContactEdge = bIterator.next();
+						// get the contact constraint on the edge
+						ContactConstraint otherContactConstraint = otherContactEdge.getContactConstraint();
+						// are the constraints the same object reference
+						if (otherContactConstraint == contactConstraint) {
+							// if so then remove it
+							bIterator.remove();
+							// there should only be one contact edge
+							// for each body-body pair
+							break;
+						}
+					}
+					// notify of all the contacts on the contact constraint
+					Contact[] contacts = contactConstraint.getContacts();
+					int csize = contacts.length;
+					for (int j = 0; j < csize; j++) {
+						Contact contact = contacts[j];
+						// create a contact point for notification
+						ContactPoint contactPoint = new ContactPoint(
+														contactConstraint.getBody1(), 
+														contactConstraint.getFixture1(), 
+														contactConstraint.getBody2(), 
+														contactConstraint.getFixture2(),
+														contact.isEnabled(),
+														contact.getPoint(), 
+														contactConstraint.getNormal(), 
+														contact.getDepth());
+						// call the destruction listener
+						this.destructionListener.destroyed(contactPoint);
+					}
+				}
+			}
+			// clear all the contacts
+			body.contacts.clear();
+			// notify of the destroyed body
+			this.destructionListener.destroyed(body);
+		}
+		// do we need to notify?
+		if (notify) {
+			// notify of all the destroyed joints
+			int jsize = this.joints.size();
+			for (int i = 0; i < jsize; i++) {
+				// get the joint
+				Joint joint = this.joints.get(i);
+				// call the destruction listener
+				this.destructionListener.destroyed(joint);
+			}
+		}
+		// clear all the joints
 		this.joints.clear();
+		// clear all the bodies
 		this.bodies.clear();
+		// clear the contact manager of cached contacts
+		this.contactManager.reset();
 	}
 	
 	/**

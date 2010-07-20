@@ -151,7 +151,7 @@ public class Island {
 		}
 		
 		// set the contact constraints
-		this.contactConstraintSolver.setup(contactConstraints);
+		this.contactConstraintSolver.setup(this.contactConstraints);
 		
 		// initialize the constraints
 		this.contactConstraintSolver.initializeConstraints(step);

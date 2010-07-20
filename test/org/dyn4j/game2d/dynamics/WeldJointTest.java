@@ -24,78 +24,52 @@
  */
 package org.dyn4j.game2d.dynamics;
 
+import org.dyn4j.game2d.dynamics.joint.WeldJoint;
+import org.dyn4j.game2d.geometry.Vector2;
+import org.junit.Before;
+import org.junit.Test;
+
 /**
- * Represents a torque about the z-axis.
+ * Used to test the {@link WeldJoint} class.
  * @author William Bittle
  */
-public class Torque {
-	/** The point where the {@link Force} is applied in world coordinates */
-	protected double torque;
+public class WeldJointTest {
+	/** The first body used for testing */
+	private Body b1;
+	
+	/** The second body used for testing */
+	private Body b2;
 	
 	/**
-	 * Default constructor.
+	 * Sets up the test.
 	 */
-	public Torque() {
-		this.torque = 0.0;
+	@Before
+	public void setup() {
+		this.b1 = new Body();
+		this.b2 = new Body();
 	}
 	
 	/**
-	 * Creates a {@link Torque} using specified torque value.
-	 * @param torque the torque
+	 * Tests the successful creation case.
 	 */
-	public Torque(double torque) {
-		this.torque = torque;
+	@Test
+	public void createSuccess() {
+		new WeldJoint(b1, b2, new Vector2());
 	}
 	
 	/**
-	 * Copy constructor.
-	 * @param torque the {@link Torque} to copy
+	 * Tests the create method passing a null anchor.
 	 */
-	public Torque(Torque torque) {
-		if (torque == null) throw new NullPointerException("Cannot copy a null torque.");
-		this.torque = torque.torque;
+	@Test(expected = NullPointerException.class)
+	public void createNullAnchor() {
+		new WeldJoint(b1, b2, null);
 	}
 	
 	/**
-	 * Sets this {@link Torque} to the given torque value.
-	 * @param torque the torque
+	 * Tests the create method passing the same body.
 	 */
-	public void set(double torque) {
-		this.torque = torque;
-	}
-	
-	/**
-	 * Sets this {@link Torque} to the given {@link Torque}.
-	 * @param torque the {@link Torque} to copy
-	 */
-	public void set(Torque torque) {
-		if (torque == null) throw new NullPointerException("Cannot set this torque to a null torque.");
-		this.torque = torque.torque;
-	}
-	
-	/**
-	 * Applies this {@link Torque} to the given {@link Body}.
-	 * @param body the {@link Body} to apply the {@link Torque} to
-	 */
-	public void apply(Body body) {
-		body.torque += this.torque;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.dynamics.Force#toString()
-	 */
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("TORQUE[").append(this.torque).append("]");
-		return sb.toString();
-	}
-	
-	/**
-	 * Returns the torque value.
-	 * @return double
-	 */
-	public double getTorque() {
-		return this.torque;
+	@Test(expected = IllegalArgumentException.class)
+	public void createSameBody() {
+		new WeldJoint(b1, b1, new Vector2());
 	}
 }

@@ -144,4 +144,43 @@ public class MassTest {
 		TestCase.assertEquals( 5.500, m.getMass(), 1.0e-3);
 		TestCase.assertEquals(16.656, m.getInertia(), 1.0e-3);
 	}
+	
+	/**
+	 * Tests setting the type of mass.
+	 */
+	@Test
+	public void setType() {
+		Circle c = Geometry.createCircle(2.0);
+		Mass mi = c.createMass(1.0);
+		
+		// setting the type should not alter the
+		// mass values
+		mi.setType(Mass.Type.INFINITE);
+		TestCase.assertTrue(mi.isInfinite());
+		TestCase.assertFalse(0.0 == mi.mass);
+		TestCase.assertFalse(0.0 == mi.invMass);
+		TestCase.assertFalse(0.0 == mi.inertia);
+		TestCase.assertFalse(0.0 == mi.invInertia);
+		// the get methods should return 0
+		TestCase.assertEquals(0.0, mi.getMass());
+		TestCase.assertEquals(0.0, mi.getInverseMass());
+		TestCase.assertEquals(0.0, mi.getInertia());
+		TestCase.assertEquals(0.0, mi.getInverseInertia());
+		
+		mi.setType(Mass.Type.FIXED_ANGULAR_VELOCITY);
+		TestCase.assertFalse(0.0 == mi.mass);
+		TestCase.assertFalse(0.0 == mi.invMass);
+		TestCase.assertFalse(0.0 == mi.inertia);
+		TestCase.assertFalse(0.0 == mi.invInertia);
+		TestCase.assertEquals(0.0, mi.getInertia());
+		TestCase.assertEquals(0.0, mi.getInverseInertia());
+		
+		mi.setType(Mass.Type.FIXED_LINEAR_VELOCITY);
+		TestCase.assertFalse(0.0 == mi.mass);
+		TestCase.assertFalse(0.0 == mi.invMass);
+		TestCase.assertFalse(0.0 == mi.inertia);
+		TestCase.assertFalse(0.0 == mi.invInertia);
+		TestCase.assertEquals(0.0, mi.getMass());
+		TestCase.assertEquals(0.0, mi.getInverseMass());
+	}
 }
