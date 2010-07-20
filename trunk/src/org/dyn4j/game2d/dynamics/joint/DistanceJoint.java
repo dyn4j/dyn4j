@@ -90,7 +90,9 @@ public class DistanceJoint extends Joint {
 	 */
 	public DistanceJoint(Body b1, Body b2, Vector2 anchor1, Vector2 anchor2) {
 		super(b1, b2, false);
-		// verify the anchor points
+		// verify the bodies are not the same instance
+		if (b1 == b2) throw new IllegalArgumentException("Cannot create a distance joint between the same body instance.");
+		// verify the anchor points are not null
 		if (anchor1 == null || anchor2 == null) throw new NullPointerException("Neither anchor point can be null.");
 		// get the local anchor points
 		this.localAnchor1 = b1.getLocalPoint(anchor1);
@@ -334,8 +336,8 @@ public class DistanceJoint extends Joint {
 	 * with damping.
 	 * @return boolean
 	 */
-	public boolean hasDamper() {
-		return this.dampingRatio > 0.0;
+	public boolean isSpringDamper() {
+		return this.frequency > 0.0 && this.dampingRatio > 0.0;
 	}
 	
 	/**
@@ -352,7 +354,7 @@ public class DistanceJoint extends Joint {
 	 */
 	public void setDistance(double distance) {
 		// make sure the distance is greater than zero
-		if (distance <= 0.0) throw new IllegalArgumentException("The distance must be greater than zero.");
+		if (distance < 0.0) throw new IllegalArgumentException("The distance must be greater than or equal to zero.");
 		// check if the value changed
 		if (this.distance != distance) {
 			// wake up both bodies
@@ -398,11 +400,11 @@ public class DistanceJoint extends Joint {
 	
 	/**
 	 * Sets the spring frequency.
-	 * @param frequency the spring frequency in hz; must be greater than zero
+	 * @param frequency the spring frequency in hz; must be greater than or equal to zero
 	 */
 	public void setFrequency(double frequency) {
 		// check for valid value
-		if (frequency <= 0) throw new IllegalArgumentException("The frequency must be greater than or equal to zero.");
+		if (frequency < 0) throw new IllegalArgumentException("The frequency must be greater than or equal to zero.");
 		// is it different than the current value
 		if (this.frequency != frequency) {
 			// wake up both bodies

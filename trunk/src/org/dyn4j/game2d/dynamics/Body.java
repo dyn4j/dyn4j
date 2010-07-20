@@ -275,7 +275,7 @@ public class Body implements Collidable, Transformable {
 		// get the number of fixtures
 		int size = this.fixtures.size();
 		// check the size
-		if (size > 0) {
+		if (size > 0 && index < size) {
 			return this.fixtures.remove(index);
 		}
 		// otherwise return null
@@ -373,7 +373,7 @@ public class Body implements Collidable, Transformable {
 	 * @return {@link Mass}
 	 */
 	public Mass getMass() {
-		return mass;
+		return this.mass;
 	}
 	
 	/**
@@ -385,7 +385,7 @@ public class Body implements Collidable, Transformable {
 		// check for null
 		if (force == null) throw new NullPointerException("Cannot apply a null force.");
 		// apply the force
-		this.apply(new Force(force));
+		this.forces.add(new Force(force));
 		// wake up the body
 		this.setAsleep(false);
 		// return this body to facilitate chaining
@@ -415,7 +415,7 @@ public class Body implements Collidable, Transformable {
 	 */
 	public Body apply(double torque) {
 		// apply the torque
-		this.apply(new Torque(torque));
+		this.torques.add(new Torque(torque));
 		// wake up the body
 		this.setAsleep(false);
 		// return this body
@@ -450,7 +450,7 @@ public class Body implements Collidable, Transformable {
 		if (force == null) throw new NullPointerException("Cannot apply a torque with a null force.");
 		if (point == null) throw new NullPointerException("Cannot apply a torque with a null application point.");
 		// apply the force
-		this.apply(new Force(force));
+		this.forces.add(new Force(force));
 		// compute the moment r
 		Vector2 r = this.getWorldCenter().to(point);
 		// check for the zero vector
@@ -458,7 +458,7 @@ public class Body implements Collidable, Transformable {
 			// find the torque about the given point
 			double tao = r.cross(force);
 			// apply the torque
-			this.apply(new Torque(tao));
+			this.torques.add(new Torque(tao));
 		}
 		// wake up the body
 		this.setAsleep(false);
@@ -974,7 +974,7 @@ public class Body implements Collidable, Transformable {
 	 * @param linearDamping the linear damping
 	 */
 	public void setLinearDamping(double linearDamping) {
-		if (linearDamping <= 0) throw new IllegalArgumentException("The linear damping must be greater than or equal to zero.");
+		if (linearDamping < 0) throw new IllegalArgumentException("The linear damping must be greater than or equal to zero.");
 		this.linearDamping = linearDamping;
 	}
 	
@@ -991,7 +991,7 @@ public class Body implements Collidable, Transformable {
 	 * @param angularDamping the angular damping
 	 */
 	public void setAngularDamping(double angularDamping) {
-		if (angularDamping <= 0) throw new IllegalArgumentException("The angular damping must be greater than or equal to zero.");
+		if (angularDamping < 0) throw new IllegalArgumentException("The angular damping must be greater than or equal to zero.");
 		this.angularDamping = angularDamping;
 	}
 	

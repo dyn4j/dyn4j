@@ -36,9 +36,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Represents a friction joint.
  * <p>
  * A friction joint is a constraint that drives both linear
- * and angular velocities to zero.  Its very similar to the
- * {@link RevoluteJoint} coupled with a motor given a target 
- * angular velocity of zero.
+ * and angular velocities to zero.
  * @author William Bittle
  */
 public class FrictionJoint extends Joint {
@@ -78,6 +76,8 @@ public class FrictionJoint extends Joint {
 	public FrictionJoint(Body b1, Body b2, Vector2 anchor) {
 		// default no collision allowed
 		super(b1, b2, false);
+		// verify the bodies are not the same instance
+		if (b1 == b2) throw new IllegalArgumentException("Cannot create a friction joint between the same body instance.");
 		// verify the anchor point is non null
 		if (anchor == null) throw new NullPointerException("The anchor point cannot be null.");
 		// put the anchor in local space

@@ -42,7 +42,7 @@ import org.dyn4j.game2d.testbed.Test;
  */
 public class Chain extends Test {
 	/** The length of the chain in number of bodies */
-	private static final int LENGTH = 22;
+	private static final int LENGTH = 25;
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.testbed.Test#getName()
@@ -117,7 +117,7 @@ public class Chain extends Test {
 		
 		Entity previous = floor;
 		
-		final double overlap = 0.020;
+		final double overlap = 0.030;
 		double x = 0.0;
 		double y = 3.0;
 		for (int i = 0; i < LENGTH; i++) {

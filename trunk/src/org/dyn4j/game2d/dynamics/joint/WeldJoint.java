@@ -66,6 +66,8 @@ public class WeldJoint extends Joint {
 	 */
 	public WeldJoint(Body b1, Body b2, Vector2 anchor) {
 		super(b1, b2, false);
+		// verify the bodies are not the same instance
+		if (b1 == b2) throw new IllegalArgumentException("Cannot create a weld joint between the same body instance.");
 		// check for a null anchor
 		if (anchor == null) throw new NullPointerException("The anchor point cannot be null.");
 		// set the anchor point

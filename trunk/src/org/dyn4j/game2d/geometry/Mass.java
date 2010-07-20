@@ -135,6 +135,24 @@ public class Mass {
 		return sb.toString();
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object other) {
+		if (other == null) return false;
+		if (other instanceof Mass) {
+			Mass o = (Mass) other;
+			if (this.type == o.type
+			 && this.mass == o.mass
+			 && this.inertia == o.inertia
+			 && this.center.equals(o.center)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	/**
 	 * Creates a deep copy of the given {@link Mass}.
 	 * @param mass the {@link Mass} to copy

@@ -30,21 +30,29 @@ import org.dyn4j.game2d.dynamics.joint.Joint;
 
 /**
  * Listens for implicit destruction events.
- * <p>
- * NOTE: The {@link ContactPoint} objects passed by this listener will be
- * reused per call.
  * @author William Bittle
  */
 public interface DestructionListener {
 	/**
 	 * Called when implicit destruction of a {@link Joint} has occurred.
+	 * @see World#remove(Body)
+	 * @see World#clear(boolean)
 	 * @param joint the {@link Joint} that was destroyed
 	 */
 	public void destroyed(Joint joint);
 	
 	/**
 	 * Called when implicit destruction of a {@link ContactConstraint} has occurred.
-	 * @param contactPoint the {@link ContactPoint} that was removed
+	 * @see World#remove(Body)
+	 * @see World#clear(boolean)
+	 * @param contactPoint the {@link ContactPoint} that was destroyed
 	 */
 	public void destroyed(ContactPoint contactPoint);
+	
+	/**
+	 * Called when implicit destruction of a {@link Body} has occurred.
+	 * @see World#clear(boolean)
+	 * @param body the {@link Body} that was destroyed
+	 */
+	public void destroyed(Body body);
 }
