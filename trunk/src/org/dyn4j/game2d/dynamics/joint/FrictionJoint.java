@@ -37,6 +37,9 @@ import org.dyn4j.game2d.geometry.Vector2;
  * <p>
  * A friction joint is a constraint that drives both linear
  * and angular velocities to zero.
+ * <p>
+ * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
+ * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
  */
 public class FrictionJoint extends Joint {

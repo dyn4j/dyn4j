@@ -41,6 +41,9 @@ import org.dyn4j.game2d.geometry.Vector2;
  * This joint doubles as a spring/damping distance joint where the length can
  * change but is constantly approaching the target distance.  Enable the
  * spring/damper by setting the frequency to a value greater than zero.
+ * <p>
+ * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
+ * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
  */
 public class DistanceJoint extends Joint {

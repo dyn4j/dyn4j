@@ -37,6 +37,9 @@ import org.dyn4j.game2d.geometry.Vector3;
  * Represents a weld joint.
  * <p>
  * A weld joint joins two {@link Body}s together as if they were one {@link Body}.
+ * <p>
+ * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
+ * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
  */
 public class WeldJoint extends Joint {

@@ -649,8 +649,10 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		
 		// render the frames per second
 		this.fpsLabel.render(g, x, y);
+		// get the fps in integer form
+		int iFps = (int) Math.floor(this.fps.getFps());
 		// render the value
-		AttributedString fpsString = new AttributedString(String.valueOf(this.fps.getFps()));
+		AttributedString fpsString = new AttributedString(String.valueOf(iFps));
 		Text fps = new Text(fpsString);
 		fps.generate();
 		fps.render(g, x + padding, y);

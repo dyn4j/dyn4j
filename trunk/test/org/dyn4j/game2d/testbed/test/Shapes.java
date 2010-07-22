@@ -183,6 +183,24 @@ public class Shapes extends Test {
 		capsule.setMass();
 		capsule.translate(0.0, 4.0);
 		this.world.add(capsule);
+		
+		Entity issTri = new Entity();
+		issTri.addFixture(Geometry.createIsoscelesTriangle(1.0, 3.0));
+		issTri.setMass();
+		issTri.translate(2.0, 3.0);
+		this.world.add(issTri);
+		
+		Entity equTri = new Entity();
+		equTri.addFixture(Geometry.createEquilateralTriangle(2.0));
+		equTri.setMass();
+		equTri.translate(3.0, 3.0);
+		this.world.add(equTri);
+		
+		Entity rightTri = new Entity();
+		rightTri.addFixture(Geometry.createRightTriangle(2.0, 1.0));
+		rightTri.setMass();
+		rightTri.translate(4.0, 3.0);
+		this.world.add(rightTri);
 	}
 	
 	/* (non-Javadoc)

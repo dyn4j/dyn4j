@@ -29,6 +29,9 @@ package org.dyn4j.game2d.collision;
  * <p>
  * By default the {@link CategoryFilter} will be set to category 1 and
  * have a mask of all category bits.
+ * <p>
+ * Basically the filter from <a href="http://www.box2d.org">Box2d</a>.
+ * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
  */
 public class CategoryFilter implements Filter {
