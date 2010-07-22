@@ -57,6 +57,9 @@ import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Manages the logic of collision detection, resolution, and reporting.
+ * <p>
+ * Employs the same {@link Island} solving technique as <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
+ * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
  */
 public class World {

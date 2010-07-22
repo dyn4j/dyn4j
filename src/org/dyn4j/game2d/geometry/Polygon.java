@@ -277,25 +277,24 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 	 */
 	@Override
 	public Edge getFarthestFeature(Vector2 n, Transform transform) {
+		// transform the normal into local space
+		Vector2 localn = transform.getInverseTransformedR(n);
 		Vector2 maximum = new Vector2();
 		double max = -Double.MAX_VALUE;
 		int index = 0;
 		// create a reference to the center
-		Vector2 c = transform.getTransformed(this.center);
+		Vector2 c = this.center;
 		// find the vertex on the polygon that is further along on the penetration axis
 		int count = this.vertices.length;
-		Vector2 temp = new Vector2();
 		for (int i = 0; i < count; i++) {
-			// get the vertex
-			transform.getTransformed(this.vertices[i], temp);
 			// create a vector from the center to the point
-			Vector2 v = c.to(temp);
+			Vector2 v = c.to(this.vertices[i]);
 			// get the scalar projection of v onto axis
-			double projection = n.dot(v);
+			double projection = localn.dot(v);
 			// keep the maximum projection point
 			if (projection > max) {
 				// set the max point
-				maximum.set(temp);
+				maximum.set(this.vertices[i]);
 				// set the new maximum
 				max = projection;
 				// save the index
@@ -307,11 +306,13 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		// see which edge is most perpendicular
 		int l = index + 1 == count ? 0 : index + 1;
 		int r = index - 1 < 0 ? count - 1 : index - 1;
-		Vector2 leftN = transform.getTransformedR(this.normals[index == 0 ? count - 1 : index - 1]);
-		Vector2 rightN = transform.getTransformedR(this.normals[index]);
-		// is the left or right edge more perpendicular?
+		Vector2 leftN = this.normals[index == 0 ? count - 1 : index - 1];
+		Vector2 rightN = this.normals[index];
+		// create the maximum point for the feature (transform the maximum into world space)
+		transform.transform(maximum);
 		Vertex vm = new Vertex(maximum, index);
-		if (leftN.dot(n) < rightN.dot(n)) {
+		// is the left or right edge more perpendicular?
+		if (leftN.dot(localn) < rightN.dot(localn)) {
 			Vector2 left = transform.getTransformed(this.vertices[l]);
 			Vertex vl = new Vertex(left, l);
 			// make sure the edge is the right winding
@@ -329,32 +330,31 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 	 */
 	@Override
 	public Vector2 getFarthestPoint(Vector2 n, Transform transform) {
-		Vector2 temp = new Vector2();
+		// transform the normal into local space
+		Vector2 localn = transform.getInverseTransformedR(n);
 		Vector2 point = new Vector2();
-		// get the transformed center
-		Vector2 c = transform.getTransformed(this.center);
+		Vector2 c = this.center;
 		// set the farthest point to the first one
-		transform.getTransformed(this.vertices[0], temp);
-		point.set(temp);
+		point.set(this.vertices[0]);
 		// set the projection amount
-		double max = n.dot(c.to(point));
+		double max = localn.dot(c.to(point));
 		// loop through the rest of the vertices to find a further point along the axis
 		int size = this.vertices.length;
 		for (int i = 1; i < size; i++) {
-			// get the next vertex
-			transform.getTransformed(this.vertices[i], temp);
 			// create a vector from the center to the vertex
-			Vector2 v = c.to(temp);
+			Vector2 v = c.to(this.vertices[i]);
 			// project the vector onto the axis
-			double projection = n.dot(v);
+			double projection = localn.dot(v);
 			// check to see if the projection is greater than the last
 			if (projection > max) {
 				// otherwise this point is the farthest so far so clear the array and add it
-				point.set(temp);
+				point.set(this.vertices[i]);
 				// set the new maximum
 				max = projection;
 			}
 		}
+		// transform the point into world space
+		transform.transform(point);
 		return point;
 	}
 	

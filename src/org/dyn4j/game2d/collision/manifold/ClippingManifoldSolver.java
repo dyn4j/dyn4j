@@ -43,6 +43,9 @@ import org.dyn4j.game2d.geometry.Vertex;
  * <p>
  * A {@link NarrowphaseDetector} should return a penetration normal and depth when two {@link Convex} {@link Shape}s are
  * intersecting.  The penetration normal should always point from the first {@link Shape} to the second.
+ * <p>
+ * Derived from the open source project <a href="http://www.box2d.org">Box2d</a>.
+ * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
  */
 public class ClippingManifoldSolver implements ManifoldSolver {

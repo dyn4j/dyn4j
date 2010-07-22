@@ -38,6 +38,9 @@ import org.dyn4j.game2d.geometry.Vector3;
  * Represents a prismatic joint.
  * <p>
  * A line joint constrains motion between two {@link Body}s to a line.
+ * <p>
+ * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
+ * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
  */
 public class PrismaticJoint extends Joint {

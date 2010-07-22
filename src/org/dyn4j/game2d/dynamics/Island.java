@@ -35,6 +35,9 @@ import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Used to solve the contact constraints and joints for a group of interconnected bodies.
+ * <p>
+ * Nearly identitcal to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
+ * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
  */
 public class Island {

@@ -103,6 +103,15 @@ public class Entity extends Body {
 	}
 	
 	/**
+	 * Full constructor.
+	 * @param color the color to use for this body
+	 */
+	public Entity(Color color) {
+		this.color = color;
+		this.alpha = color.getAlpha();
+	}
+	
+	/**
 	 * Initializes the entity.
 	 */
 	private void initialize() {
@@ -329,5 +338,13 @@ public class Entity extends Body {
 		
 		// restore the old transform
 		g.setTransform(old);
+	}
+	
+	/**
+	 * Returns this entity's color.
+	 * @return Color
+	 */
+	public Color getColor() {
+		return color;
 	}
 }

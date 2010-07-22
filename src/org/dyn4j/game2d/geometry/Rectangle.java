@@ -58,11 +58,12 @@ public class Rectangle extends Polygon implements Shape, Transformable {
 			new Vector2(-width / 2.0,  height / 2.0)	
 		};
 		// set the normals
-		this.normals = new Vector2[4];
-		this.normals[0] = new Vector2(0.0, -1.0);
-		this.normals[1] = new Vector2(1.0, 0.0);
-		this.normals[2] = new Vector2(0.0, 1.0);
-		this.normals[3] = new Vector2(-1.0, 0.0);
+		this.normals = new Vector2[] {
+			new Vector2(0.0, -1.0),
+			new Vector2(1.0, 0.0),
+			new Vector2(0.0, 1.0),
+			new Vector2(-1.0, 0.0)
+		};
 		// use the average method for the centroid
 		this.center = Geometry.getAverageCenter(this.vertices);
 		// set the width and height
@@ -122,28 +123,28 @@ public class Rectangle extends Polygon implements Shape, Transformable {
 		// get the closest point to each focus
 		for (int i = 0; i < fociSize; i++) {
 			// get the current focus
-			Vector2 f = foci[i];
+			Vector2 focus = foci[i];
 			// create a place for the closest point
 			Vector2 closest = null;
 			double d = Double.MAX_VALUE;
 			// find the minimum distance vertex
 			for (int j = 0; j < 4; j++) {
 				// get the vertex
-				Vector2 p = this.vertices[j];
+				Vector2 vertex = this.vertices[j];
 				// transform it into world space
-				p = transform.getTransformed(p);
+				vertex = transform.getTransformed(vertex);
 				// get the squared distance to the focus
-				double dt = f.distanceSquared(p);
+				double dt = focus.distanceSquared(vertex);
 				// compare with the last distance
 				if (dt < d) {
 					// if its closer then save it
-					closest = p;
+					closest = vertex;
 					d = dt;
 				}
 			}
 			// once we have found the closest point create 
 			// a vector from the focal point to the point
-			Vector2 axis = f.to(closest);
+			Vector2 axis = focus.to(closest);
 			// normalize the axis
 			axis.normalize();
 			// add it to the array
