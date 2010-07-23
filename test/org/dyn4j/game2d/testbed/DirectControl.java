@@ -10,12 +10,16 @@ import org.dyn4j.game2d.geometry.Mass;
  * Class used to control a body directly by translation
  * and rotation using the mouse.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class DirectControl {
 	/**
 	 * Class containing the state that must be restored when
 	 * the controled body is released.
 	 * @author William Bittle
+	 * @version 1.0.3
+	 * @since 1.0.0
 	 */
 	public static class State {
 		/** Whether the body is allowed to sleep or not */

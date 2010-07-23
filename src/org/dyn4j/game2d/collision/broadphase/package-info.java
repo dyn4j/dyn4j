@@ -34,6 +34,9 @@
  * {@link BroadphaseDetector}s are not expected to be accurate, but are expected to be
  * conservative.  Meaning, its acceptable for a {@link BroadphaseDetector} to return false
  * positives.
+ * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 package org.dyn4j.game2d.collision.broadphase;
 

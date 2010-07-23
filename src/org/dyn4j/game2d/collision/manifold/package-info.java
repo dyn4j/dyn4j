@@ -41,6 +41,9 @@
  * {@link Penetration}.
  * <p>
  * Only one implementation of the {@link ManifoldSolver} is provided: {@link ClippingManifoldSolver}.
+ * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 package org.dyn4j.game2d.collision.manifold;
 

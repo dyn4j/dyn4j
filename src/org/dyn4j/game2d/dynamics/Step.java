@@ -27,6 +27,8 @@ package org.dyn4j.game2d.dynamics;
 /**
  * Represents a time {@link Step} of the dynamics system.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Step {
 	/** The last elapsed time */

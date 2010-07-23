@@ -26,7 +26,11 @@ package org.dyn4j.game2d.geometry;
 
 /**
  * Represents a 2x2 Matrix.
+ * <p>
+ * Used to solve 2x2 systems of equations.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Matrix22 {
 	/** The element at 0,0 */

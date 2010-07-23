@@ -37,6 +37,8 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests a triangular stack of boxes.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Pyramid extends Test {
 	/** The height of the pyramid */

@@ -30,6 +30,8 @@ package org.dyn4j.game2d.geometry;
  * A {@link Convex} {@link Shape} is a {@link Shape} that given a line, the line will only 
  * intersect at most 2 non-coincident non-colinear edges.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public interface Convex extends Shape, Transformable {
 	/**

@@ -32,6 +32,8 @@ import org.dyn4j.game2d.geometry.Transformable;
 /**
  * Represents an object that can collide with other objects.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public interface Collidable extends Transformable {
 	/**

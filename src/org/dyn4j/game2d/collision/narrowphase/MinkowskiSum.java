@@ -34,6 +34,8 @@ import org.dyn4j.game2d.geometry.Vector2;
  * <p>
  * This class is used by the {@link Gjk} and {@link Epa} classes.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class MinkowskiSum {
 	/** The first {@link Convex} */
@@ -51,7 +53,8 @@ public class MinkowskiSum {
 	/**
 	 * Represents a point in the {@link MinkowskiSum}.
 	 * @author William Bittle
-	 * @version $Revision: 489 $
+	 * @version 1.0.3
+	 * @since 1.0.0
 	 */
 	public static class Point {
 		/** The support point in the first {@link Convex} {@link Shape} */

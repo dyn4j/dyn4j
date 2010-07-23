@@ -49,11 +49,15 @@ import org.junit.Test;
 /**
  * Contains the test cases for the {@link World} class.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.2
  */
 public class WorldTest {
 	/**
 	 * Step listener for testing.
 	 * @author William Bittle
+	 * @version 1.0.2
+	 * @since 1.0.2
 	 */
 	public class WTStepListener implements StepListener {
 		/** The number of steps performed */
@@ -67,6 +71,8 @@ public class WorldTest {
 	/**
 	 * Destruction listener for testing.
 	 * @author William Bittle
+	 * @version 1.0.2
+	 * @since 1.0.2
 	 */
 	public class WTDestructionListener implements DestructionListener {
 		/** The number of times called */
@@ -82,7 +88,8 @@ public class WorldTest {
 	/**
 	 * Contact manager for testing.
 	 * @author William Bittle
-	 *
+	 * @version 1.0.2
+	 * @since 1.0.2
 	 */
 	public class WTContactManager extends ContactManager {
 		/**

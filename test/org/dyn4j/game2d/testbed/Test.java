@@ -60,6 +60,8 @@ import org.dyn4j.game2d.geometry.Wound;
  * Using the {@link TestBed} class one can switch test without stopping
  * and starting the driver again.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public abstract class Test implements Comparable<Test> {
 	/** The test key */

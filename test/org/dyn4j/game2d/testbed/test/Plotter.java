@@ -60,6 +60,8 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests shape collisions by plotting shapes, points, vectors, etc.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Plotter extends Test {
 	/** The first entity */

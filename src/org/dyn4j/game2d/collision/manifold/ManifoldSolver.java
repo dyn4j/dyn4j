@@ -32,6 +32,8 @@ import org.dyn4j.game2d.geometry.Transform;
 /**
  * Finds a contact {@link Manifold} for two given {@link Shape}s.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public interface ManifoldSolver {
 	/**

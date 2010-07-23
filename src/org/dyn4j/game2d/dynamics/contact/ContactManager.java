@@ -40,6 +40,8 @@ import org.dyn4j.game2d.dynamics.Settings;
  * This class performs the {@link ContactConstraint} warm starting and manages contact
  * listening.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class ContactManager {
 	/** Map for fast look up of  {@link ContactConstraint}s */
@@ -50,6 +52,7 @@ public class ContactManager {
 	
 	/**
 	 * Default constructor.
+	 * @since 1.0.2
 	 */
 	public ContactManager()  {
 		// initialize the members
@@ -103,6 +106,7 @@ public class ContactManager {
 	 * methods.
 	 * @see ContactListener
 	 * @param listener the {@link ContactListener} to use for event notification
+	 * @since 1.0.2
 	 */
 	public void updateContacts(ContactListener listener) {
 		// check the given list

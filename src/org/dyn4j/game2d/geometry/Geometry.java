@@ -29,6 +29,8 @@ import java.util.List;
 /**
  * Contains static methods to perform standard geometric operations.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Geometry {
 	/** The value of 1/3 */

@@ -45,6 +45,9 @@
  * The {@link Gjk} {@link NarrowphaseDetector} also has another method to return the {@link Separation}
  * between to {@link Convex} {@link Shape}s.  The {@link Separation} represents the vector of
  * minimum distance from one {@link Convex} {@link Shape} to the other.
+ * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 package org.dyn4j.game2d.collision.narrowphase;
 

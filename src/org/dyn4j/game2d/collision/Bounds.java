@@ -32,6 +32,8 @@ import org.dyn4j.game2d.geometry.Vector2;
 /**
  * Represents the {@link Bounds} of the simulation/world.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public interface Bounds extends Transformable {
 	/** 

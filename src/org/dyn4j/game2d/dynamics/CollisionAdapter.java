@@ -33,6 +33,8 @@ import org.dyn4j.game2d.collision.narrowphase.Penetration;
  * This class can be used to implement only the methods desired instead of all
  * the methods contained in the {@link CollisionListener} interface.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class CollisionAdapter implements CollisionListener {
 	/* (non-Javadoc)

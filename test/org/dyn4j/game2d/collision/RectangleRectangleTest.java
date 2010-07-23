@@ -48,6 +48,8 @@ import org.junit.Test;
 /**
  * Test case for {@link Rectangle} - {@link Rectangle} collision detection.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class RectangleRectangleTest extends AbstractTest {
 	

@@ -27,6 +27,8 @@ package org.dyn4j.game2d.geometry;
 /**
  * Represents an object that is {@link Transformable}.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public interface Transformable {
 	/**

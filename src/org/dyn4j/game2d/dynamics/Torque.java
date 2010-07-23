@@ -27,6 +27,8 @@ package org.dyn4j.game2d.dynamics;
 /**
  * Represents a torque about the z-axis.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Torque {
 	/** The point where the {@link Force} is applied in world coordinates */
@@ -34,6 +36,7 @@ public class Torque {
 	
 	/**
 	 * Default constructor.
+	 * @since 1.0.2
 	 */
 	public Torque() {
 		this.torque = 0.0;

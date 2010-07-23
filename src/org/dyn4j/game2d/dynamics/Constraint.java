@@ -27,6 +27,8 @@ package org.dyn4j.game2d.dynamics;
 /**
  * Represents some physical constraint between a pair of {@link Body}s.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public abstract class Constraint {
 	/** The first {@link Body} */

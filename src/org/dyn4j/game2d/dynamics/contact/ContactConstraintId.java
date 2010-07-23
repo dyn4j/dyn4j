@@ -33,6 +33,8 @@ import org.dyn4j.game2d.geometry.Shape;
  * Represents and id for a contact constraint between two {@link Convex}
  * {@link Shape}s on two {@link Body}s.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class ContactConstraintId {
 	/** The first {@link Body}'s id */

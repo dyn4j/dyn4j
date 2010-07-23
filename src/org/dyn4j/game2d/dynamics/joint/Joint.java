@@ -32,6 +32,8 @@ import org.dyn4j.game2d.geometry.Vector2;
 /**
  * Represents constrained motion between two {@link Body}s.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public abstract class Joint extends Constraint {
 	/**
@@ -41,6 +43,8 @@ public abstract class Joint extends Constraint {
 	 * change therefore the comparison of joint 
 	 * types only does a reference comparison.
 	 * @author William Bittle
+	 * @version 1.0.3
+	 * @since 1.0.0
 	 */
 	public static class Type {
 		/** The type name */
@@ -74,6 +78,8 @@ public abstract class Joint extends Constraint {
 	/**
 	 * Enumeration for the limit states a joint can have.
 	 * @author William Bittle
+	 * @version 1.0.3
+	 * @since 1.0.0
 	 */
 	public static enum LimitState {
 		/** The state if the upper and lower limits are equal within the angular tolerance */

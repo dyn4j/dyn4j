@@ -31,6 +31,8 @@ import org.junit.Test;
 /**
  * Test case for the {@link Interval} class.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class IntervalTest {
 	/**

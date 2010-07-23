@@ -39,6 +39,8 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests a seesaw type configuration.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Seesaw extends Test {
 	/* (non-Javadoc)

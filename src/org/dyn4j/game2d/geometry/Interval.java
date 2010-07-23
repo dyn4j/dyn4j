@@ -27,6 +27,8 @@ package org.dyn4j.game2d.geometry;
 /**
  * Represents a numeric {@link Interval}.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Interval {
 	/** The minimum value */

@@ -45,6 +45,8 @@ import org.dyn4j.game2d.geometry.Vector2;
 /**
  * Represents a game entity.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Entity extends Body {
 	/** class level logger */
@@ -105,6 +107,7 @@ public class Entity extends Body {
 	/**
 	 * Full constructor.
 	 * @param color the color to use for this body
+	 * @since 1.0.3
 	 */
 	public Entity(Color color) {
 		this.color = color;
@@ -343,6 +346,7 @@ public class Entity extends Body {
 	/**
 	 * Returns this entity's color.
 	 * @return Color
+	 * @since 1.0.3
 	 */
 	public Color getColor() {
 		return color;

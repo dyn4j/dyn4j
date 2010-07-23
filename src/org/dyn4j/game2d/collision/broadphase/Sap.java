@@ -77,6 +77,8 @@ import org.dyn4j.game2d.geometry.Transform;
  * However, allowing this causes more work for the {@link NarrowphaseDetector}s whose
  * algorithms are more complex.  These situations should be avoided for maximum performance.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Sap extends AbstractAABBDetector implements BroadphaseDetector {
 	/**

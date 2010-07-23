@@ -31,6 +31,8 @@ import org.junit.Test;
 /**
  * Test cases for the {@link Matrix22} class.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Matrix22Test {
 	/**

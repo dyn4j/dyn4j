@@ -29,6 +29,8 @@ import org.dyn4j.game2d.dynamics.Body;
 /**
  * Represents a link from one {@link Body} to another over a {@link Joint}.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class JointEdge {
 	/** The linked body */

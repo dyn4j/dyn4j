@@ -33,6 +33,8 @@ import org.dyn4j.game2d.geometry.Vector2;
  * <p>
  * Contains fast, shape type specific methods for collision detection.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public abstract class AbstractNarrowphaseDetector implements NarrowphaseDetector {
 	/**

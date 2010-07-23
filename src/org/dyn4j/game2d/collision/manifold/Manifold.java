@@ -36,6 +36,8 @@ import org.dyn4j.game2d.geometry.Vector2;
  * <p>
  * All {@link ManifoldPoint}s are in world space.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Manifold {
 	/** The {@link ManifoldPoint} in world space */

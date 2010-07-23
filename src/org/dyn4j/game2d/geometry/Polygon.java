@@ -24,8 +24,6 @@
  */
 package org.dyn4j.game2d.geometry;
 
-
-
 /**
  * Represents a {@link Convex} {@link Polygon}.
  * <p>
@@ -34,6 +32,8 @@ package org.dyn4j.game2d.geometry;
  * <p>
  * A polygon must also not have coincident vertices.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Polygon extends Wound implements Convex, Shape, Transformable {
 	/** The polygon {@link Shape.Type}  */

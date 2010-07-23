@@ -47,6 +47,8 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests the destruction of a joint and a body.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.3
  */
 public class Destructible extends Test {
 	/** The floor body */

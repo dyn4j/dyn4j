@@ -37,6 +37,9 @@
  * <p>
  * The {@link ContactListener} can be used to receive notifications of add, remove, persisted,
  * and solved events.
+ * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 package org.dyn4j.game2d.dynamics.contact;
 

@@ -36,6 +36,8 @@ import org.dyn4j.game2d.geometry.Vector2;
 /**
  * Represents a {@link Contact} constraint for each {@link Body} pair.  
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class ContactConstraint extends Constraint {
 	/** The unique contact id */
@@ -208,6 +210,7 @@ public class ContactConstraint extends Constraint {
 	/**
 	 * Returns true if this {@link ContactConstraint} is a sensor.
 	 * @return boolean
+	 * @since 1.0.1
 	 */
 	public boolean isSensor() {
 		return this.sensor;

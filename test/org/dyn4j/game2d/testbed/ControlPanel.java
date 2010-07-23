@@ -77,6 +77,8 @@ import org.dyn4j.game2d.dynamics.Settings;
 /**
  * The JFrame that controls the TestBed.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class ControlPanel extends JFrame {
 	/** the version id */
@@ -1365,6 +1367,8 @@ public class ControlPanel extends JFrame {
 	/**
 	 * Number model that performs multiplication/division instead of addition/subtraction
 	 * @author William Bittle
+	 * @version 1.0.3
+	 * @since 1.0.0
 	 */
 	private class MultiplicativeSpinnerNumberModel extends AbstractSpinnerModel {
 		/** The serializable id */
@@ -1459,6 +1463,8 @@ public class ControlPanel extends JFrame {
 	/**
 	 * Spinner editor for the {@link MultiplicativeSpinnerNumberModel}.
 	 * @author William Bittle
+	 * @version 1.0.3
+	 * @since 1.0.0
 	 */
 	private class MultiplicativeSpinnerModelEditor extends JFormattedTextField implements ChangeListener, PropertyChangeListener {
 		/** The serializable id */

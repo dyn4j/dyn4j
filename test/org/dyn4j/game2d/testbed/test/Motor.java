@@ -40,6 +40,8 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests the a motorized revolute joint.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Motor extends Test {
 	/* (non-Javadoc)

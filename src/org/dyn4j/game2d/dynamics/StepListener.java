@@ -27,6 +27,8 @@ package org.dyn4j.game2d.dynamics;
 /**
  * Listener notified before and after a simulation step by the {@link World}.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public interface StepListener {
 	/**

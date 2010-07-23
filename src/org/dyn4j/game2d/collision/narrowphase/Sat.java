@@ -46,6 +46,8 @@ import org.dyn4j.game2d.geometry.Vector2;
  * If there is a collision, one can obtain the penetration {@link Vector2} and depth from scaling the axis
  * by the projection overlap.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Sat extends AbstractNarrowphaseDetector implements NarrowphaseDetector {
 	/* (non-Javadoc)

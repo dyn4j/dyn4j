@@ -44,6 +44,8 @@ import org.junit.Test;
 /**
  * Used to test the {@link ContactManager} class.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.2
  */
 public class ContactManagerTest {
 	/** The contact manager */
@@ -55,6 +57,8 @@ public class ContactManagerTest {
 	/**
 	 * Contact listener class for testing.
 	 * @author William Bittle
+	 * @version 1.0.3
+	 * @since 1.0.2
 	 */
 	public class CMTContactListener implements ContactListener {
 		/** The number of contacts added */

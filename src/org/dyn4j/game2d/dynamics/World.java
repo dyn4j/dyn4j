@@ -61,6 +61,8 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Employs the same {@link Island} solving technique as <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class World {
 	/** Earths gravity constant */
@@ -889,6 +891,7 @@ public class World {
 	/**
 	 * Returns the {@link ContactManager}.
 	 * @return {@link ContactManager}
+	 * @since 1.0.2
 	 */
 	public ContactManager getContactManager() {
 		return contactManager;
@@ -897,18 +900,30 @@ public class World {
 	/**
 	 * Sets the {@link ContactManager}.
 	 * @param contactManager the contact manager
+	 * @since 1.0.2
 	 */
 	public void setContactManager(ContactManager contactManager) {
 		// make sure the contact manager is not null
 		if (contactManager == null) throw new NullPointerException("The contact manager cannot be null.");
 		this.contactManager = contactManager;
 	}
-
+	
+	/**
+	 * Clears the joints and bodies from the world.
+	 * <p>
+	 * This method does not notify of destroyed objects.
+	 * @see #clear(boolean)
+	 */
+	public void clear() {
+		this.clear(false);
+	}
+	
 	/**
 	 * Clears the joints and bodies from the world.
 	 * <p>
 	 * This method will clear the joints and contacts from all {@link Body}s.
 	 * @param notify true if destruction of joints and contacts should be notified of by the {@link DestructionListener}
+	 * @since 1.0.2
 	 */
 	public void clear(boolean notify) {
 		// loop over the bodies and clear the

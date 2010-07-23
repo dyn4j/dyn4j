@@ -27,6 +27,8 @@ package org.dyn4j.game2d.geometry;
 /**
  * Represents a point on the edge of a {@link Shape}.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Vertex extends Feature {
 	/** The vertex or point */

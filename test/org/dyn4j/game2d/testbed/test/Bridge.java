@@ -40,6 +40,8 @@ import org.dyn4j.game2d.testbed.Test;
  * Tests a number of revolute joints linked in a chain suspended
  * by two points on either end to create a bridge.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Bridge extends Test {
 	/** The length of the chain in number of bodies */

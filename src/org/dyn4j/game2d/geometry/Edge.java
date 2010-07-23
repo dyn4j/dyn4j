@@ -27,6 +27,8 @@ package org.dyn4j.game2d.geometry;
 /**
  * Represents an edge feature of a {@link Shape}.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Edge extends Feature {
 	/** The first vertex of the edge */

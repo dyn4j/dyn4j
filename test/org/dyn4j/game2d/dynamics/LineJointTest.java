@@ -32,6 +32,8 @@ import org.junit.Test;
 /**
  * Used to test the {@link LineJoint} class.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.2
  */
 public class LineJointTest {
 	/** The first body used for testing */

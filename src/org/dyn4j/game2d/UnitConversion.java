@@ -30,6 +30,8 @@ package org.dyn4j.game2d;
  * Dyn4j by default uses meters-kilograms-seconds (MKS) units.  This class can be used
  * to convert to and from MKS.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class UnitConversion {
 	/** 1 foot = {@value #FOOT_TO_METER} meters */

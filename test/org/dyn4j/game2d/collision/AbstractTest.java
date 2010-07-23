@@ -36,6 +36,8 @@ import org.dyn4j.game2d.collision.narrowphase.Sat;
 /**
  * Abstract test for all shape - shape test classes.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public abstract class AbstractTest {
 	/** Abstract AABB detector */

@@ -36,6 +36,8 @@ package org.dyn4j.game2d.geometry;
  * class method <code>is</code> only performs a reference comparison. When creating the type make 
  * sure to pass the super type {@link Shape.Type}.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public interface Shape extends Transformable {	
 	/**
@@ -55,6 +57,8 @@ public interface Shape extends Transformable {
 	 * </pre>
 	 * will return true.
 	 * @author William Bittle
+	 * @version 1.0.3
+	 * @since 1.0.0
 	 */
 	public class Type {
 		/** The parent shape type */

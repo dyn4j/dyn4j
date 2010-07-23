@@ -32,6 +32,8 @@ import org.junit.Test;
 /**
  * Class used to test the {@link Force} class.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.2
  */
 public class ForceTest {
 	/**

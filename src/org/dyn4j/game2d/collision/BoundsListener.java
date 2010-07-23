@@ -27,6 +27,8 @@ package org.dyn4j.game2d.collision;
 /**
  * Represents an object that is notified when a {@link Collidable} goes out of {@link Bounds}.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public interface BoundsListener {
 	/**

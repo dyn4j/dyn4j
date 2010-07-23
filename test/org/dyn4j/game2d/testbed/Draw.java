@@ -27,6 +27,8 @@ package org.dyn4j.game2d.testbed;
 /**
  * Settings singleton for drawing.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Draw {
 	/** Whether to draw centers of mass or not */

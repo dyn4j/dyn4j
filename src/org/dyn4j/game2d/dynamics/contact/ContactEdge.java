@@ -29,6 +29,8 @@ import org.dyn4j.game2d.dynamics.Body;
 /**
  * Represents a contact edge connecting two bodies.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class ContactEdge {
 	/** The connected body */
