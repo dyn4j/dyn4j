@@ -36,6 +36,8 @@ import org.dyn4j.game2d.dynamics.World;
  * <p>
  * {@link Body} objects can be removed from the {@link World} from any of these methods.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public interface ContactListener {
 	/**

@@ -31,6 +31,8 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link UnitConversion} class.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.1
  */
 public class UnitConversionTest {
 	/**

@@ -33,11 +33,15 @@ import org.dyn4j.game2d.dynamics.Body;
  * <p>
  * Stores the center of mass, area, mass, and inertia tensor.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Mass {
 	/**
 	 * Enumeration for special mass types.
 	 * @author William Bittle
+	 * @version 1.0.3
+	 * @since 1.0.0
 	 */
 	public static enum Type {
 		/** Indicates a normal mass */

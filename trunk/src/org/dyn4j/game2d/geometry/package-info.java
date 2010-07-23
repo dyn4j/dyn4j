@@ -24,6 +24,9 @@
  */
 
 /**
- * This package contains geometric objects used by the collision detection package. 
+ * This package contains geometric objects used by the collision detection package.
+ * @author William Bittle 
+ * @version 1.0.3
+ * @since 1.0.0
  */
 package org.dyn4j.game2d.geometry;

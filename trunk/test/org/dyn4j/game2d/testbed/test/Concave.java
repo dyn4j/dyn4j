@@ -37,6 +37,8 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests multi-shape bodies with concavity.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Concave extends Test {
 	/* (non-Javadoc)

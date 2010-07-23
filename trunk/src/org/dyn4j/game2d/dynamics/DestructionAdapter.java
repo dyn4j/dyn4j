@@ -33,6 +33,8 @@ import org.dyn4j.game2d.dynamics.joint.Joint;
  * This class can be used to implement only the methods desired instead of all
  * the methods contained in the {@link DestructionListener} interface.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class DestructionAdapter implements DestructionListener {
 	/* (non-Javadoc)

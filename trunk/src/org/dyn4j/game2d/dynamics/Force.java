@@ -29,6 +29,8 @@ import org.dyn4j.game2d.geometry.Vector2;
 /**
  * Represents a force.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Force {
 	/** The force to apply */

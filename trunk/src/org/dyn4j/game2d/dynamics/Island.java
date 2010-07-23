@@ -39,6 +39,8 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Nearly identitcal to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Island {
 	/** The {@link ContactConstraintSolver} */

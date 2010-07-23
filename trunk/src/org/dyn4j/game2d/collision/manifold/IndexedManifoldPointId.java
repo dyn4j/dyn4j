@@ -27,6 +27,8 @@ package org.dyn4j.game2d.collision.manifold;
 /**
  * Represents a {@link ManifoldPointId} that uses indexing.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class IndexedManifoldPointId implements ManifoldPointId {
 	/** The reference edge index */

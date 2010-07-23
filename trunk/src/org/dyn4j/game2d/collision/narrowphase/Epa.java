@@ -56,6 +56,8 @@ import org.dyn4j.game2d.geometry.Vector2;
  * {@link Epa} will terminate in a finite number of iterations if the two shapes are {@link Polygon}s.
  * If either shape has curved surfaces the algorithm requires an expected accuracy epsilon.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Epa implements MinkowskiPenetrationSolver {
 	/** The default {@link Epa} maximum iterations */
@@ -73,7 +75,8 @@ public class Epa implements MinkowskiPenetrationSolver {
 	/**
 	 * Represents an {@link Edge} of the simplex.
 	 * @author William Bittle
-	 * @version $Revision: 484 $
+	 * @version 1.0.3
+	 * @since 1.0.0
 	 */
 	protected class Edge {
 		/** The distance from the origin to the edge along n */

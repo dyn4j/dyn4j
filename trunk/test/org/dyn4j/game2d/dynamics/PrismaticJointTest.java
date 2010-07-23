@@ -32,6 +32,8 @@ import org.junit.Test;
 /**
  * Used to test the {@link PrismaticJoint} class.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.2
  */
 public class PrismaticJointTest {
 	/** The first body used for testing */

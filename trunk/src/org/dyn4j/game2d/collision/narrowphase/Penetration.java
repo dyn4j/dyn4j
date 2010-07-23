@@ -34,6 +34,8 @@ import org.dyn4j.game2d.geometry.Vector2;
  * The penetration axis should always be normalized and point from {@link Convex}1
  * to {@link Convex}2.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Penetration {
 	/** The normalized axis of projection */

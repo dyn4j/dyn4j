@@ -32,6 +32,8 @@ import org.junit.Test;
 /**
  * Used to test the {@link MouseJoint} class.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.2
  */
 public class MouseJointTest {
 	/** The body used for testing */

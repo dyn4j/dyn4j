@@ -32,6 +32,8 @@ import org.junit.Test;
 /**
  * Tests the methods of the {@link Fixture} class.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class FixtureTest {
 	/** The {@link Fixture} object to test */

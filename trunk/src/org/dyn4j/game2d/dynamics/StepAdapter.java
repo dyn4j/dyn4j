@@ -27,6 +27,8 @@ package org.dyn4j.game2d.dynamics;
 /**
  * Convience class for implementing the {@link StepListener} interface.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class StepAdapter implements StepListener {
 	/* (non-Javadoc)

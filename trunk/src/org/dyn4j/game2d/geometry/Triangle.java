@@ -32,6 +32,8 @@ package org.dyn4j.game2d.geometry;
  * This class is provided to enhance performance of some of the methods contained in
  * the {@link Convex} and {@link Shape} interfaces.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Triangle extends Polygon implements Convex, Shape, Transformable {
 	/** The triangle {@link Shape.Type} */

@@ -34,6 +34,8 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Abstract implementation of a {@link BroadphaseDetector} providing AABB
  * (Axis Aligned Bounding Box) detection methods.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public abstract class AbstractAABBDetector implements BroadphaseDetector {
 	/** Constant for the x-axis {@link Vector2} */

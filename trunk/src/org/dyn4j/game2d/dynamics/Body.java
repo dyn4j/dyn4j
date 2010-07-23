@@ -70,6 +70,8 @@ import org.dyn4j.game2d.geometry.Vector2;
  * A {@link Body} that is a sensor will not be handled in the collision
  * resolution but is handled in collision detection.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Body implements Collidable, Transformable {
 	/** The default linear damping; value = {@value #DEFAULT_LINEAR_DAMPING} */
@@ -999,6 +1001,7 @@ public class Body implements Collidable, Transformable {
 	 * Returns a list of {@link Body}s connected
 	 * by {@link Joint}s.
 	 * @return List&lt;{@link Body}&gt;
+	 * @since 1.0.1
 	 */
 	public List<Body> getJoinedBodies() {
 		int size = this.joints.size();
@@ -1017,6 +1020,7 @@ public class Body implements Collidable, Transformable {
 	 * Returns a list of {@link Joint}s that this 
 	 * {@link Body} is connected with.
 	 * @return List&lt;{@link Joint}&gt;
+	 * @since 1.0.1
 	 */
 	public List<Joint> getJoints() {
 		int size = this.joints.size();
@@ -1043,6 +1047,7 @@ public class Body implements Collidable, Transformable {
 	 * may produce incorrect results.
 	 * @param sensed true for only sensed contacts; false for only normal contacts
 	 * @return List&lt;{@link Body}&gt;
+	 * @since 1.0.1
 	 */
 	public List<Body> getInContactBodies(boolean sensed) {
 		int size = this.contacts.size();
@@ -1076,6 +1081,7 @@ public class Body implements Collidable, Transformable {
 	 * {@link ContactListener} methods instead.
 	 * @param sensed true for only sensed contacts; false for only normal contacts
 	 * @return List&lt;{@link ContactPoint}&gt;
+	 * @since 1.0.1
 	 */
 	public List<ContactPoint> getContacts(boolean sensed) {
 		int size = this.contacts.size();

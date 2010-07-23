@@ -27,6 +27,8 @@ package org.dyn4j.game2d.collision;
 /**
  * Interface representing a filter for collision detection.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public interface Filter {
 	/** The default filter which always returns true */

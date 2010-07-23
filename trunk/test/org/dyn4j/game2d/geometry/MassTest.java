@@ -41,6 +41,8 @@ import org.junit.Test;
 /**
  * Tests the methods of the {@link Mass} class.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class MassTest {
 	/**
@@ -147,6 +149,7 @@ public class MassTest {
 	
 	/**
 	 * Tests setting the type of mass.
+	 * @since 1.0.2
 	 */
 	@Test
 	public void setType() {

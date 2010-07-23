@@ -27,6 +27,8 @@ package org.dyn4j.game2d;
 /**
  * The version of the engine.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public final class Version {
 	/** The major version number; API changes, major enhancements, etc. */

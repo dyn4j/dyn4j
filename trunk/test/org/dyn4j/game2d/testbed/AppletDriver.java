@@ -38,6 +38,8 @@ import org.codezealot.game.render.G2dSurface;
 /**
  * The applet driver where the core creation is done.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class AppletDriver extends AppletLoader<G2dSurface> {
 	/** the version id */

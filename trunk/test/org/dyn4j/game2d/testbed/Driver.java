@@ -42,6 +42,8 @@ import org.dyn4j.game2d.Version;
  * Entry point class where setup of the game core is done when
  * running in application mode.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Driver {
 	/** the class logger */

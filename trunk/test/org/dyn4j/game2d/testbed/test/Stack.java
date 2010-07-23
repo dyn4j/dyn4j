@@ -37,6 +37,8 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests a stack of boxes.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Stack extends Test {
 	/** The size of the stack in number of bodies */

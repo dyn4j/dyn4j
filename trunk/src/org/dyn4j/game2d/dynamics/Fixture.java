@@ -34,6 +34,8 @@ import org.dyn4j.game2d.geometry.Shape;
 /**
  * Represents a part of a {@link Body}.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Fixture {
 	/** The default coefficient of friction; value = {@value #DEFAULT_FRICTION} */

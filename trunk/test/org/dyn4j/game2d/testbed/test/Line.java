@@ -39,6 +39,8 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests the line joint.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Line extends Test {
 	/* (non-Javadoc)

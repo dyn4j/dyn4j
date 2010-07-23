@@ -5,6 +5,8 @@ package org.dyn4j.game2d.testbed;
  * <p>
  * The percentages are updated every second.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Usage {
 	/** One second in nanoseconds */

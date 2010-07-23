@@ -30,6 +30,8 @@ package org.dyn4j.game2d.geometry;
  * <p>
  * This class does not handle curved edges.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public abstract class Feature {
 	/**

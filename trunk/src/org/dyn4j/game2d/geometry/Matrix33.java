@@ -26,7 +26,11 @@ package org.dyn4j.game2d.geometry;
 
 /**
  * Represents a 3x3 Matrix.
+ * <p>
+ * Used to solve 3x3 systems of equations.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Matrix33 {
 	/** The element at 0,0 */

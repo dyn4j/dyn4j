@@ -49,6 +49,8 @@ import java.util.List;
  * <p>
  * The {@link #generate()} method honors '\n' characters as new lines.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Text {
 	/** The new line character = {@value #NEW_LINE_CHARACTER} */
@@ -64,7 +66,8 @@ public class Text {
 	 * Enumeration to represent the 3 different alignments
 	 * when rendering text to an image or graphics object.
 	 * @author William Bittle
-	 * @version $Revision: 484 $
+	 * @version 1.0.3
+	 * @since 1.0.0
 	 */
 	public static enum Alignment {
 		/** Text align left */

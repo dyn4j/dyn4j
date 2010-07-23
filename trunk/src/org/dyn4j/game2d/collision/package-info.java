@@ -59,6 +59,9 @@
  * {@link BroadphaseDetector}: {@link Sap}<br />
  * {@link NarrowphaseDetector}: {@link Gjk} and {@link Sat}<br />
  * {@link ManifoldSolver}: {@link ClippingManifoldSolver}
+ * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 package org.dyn4j.game2d.collision;
 

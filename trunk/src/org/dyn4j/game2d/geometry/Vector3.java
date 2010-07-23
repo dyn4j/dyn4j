@@ -26,8 +26,12 @@ package org.dyn4j.game2d.geometry;
 
 /**
  * This class represents a {@link Vector3} in 3D space.
+ * <p>
+ * Used to solve 3x3 systems of equations.
  * @see Vector2
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Vector3 {
 	/** The magnitude of the x component of this {@link Vector3} */

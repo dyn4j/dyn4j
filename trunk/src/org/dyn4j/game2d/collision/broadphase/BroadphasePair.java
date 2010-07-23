@@ -32,6 +32,8 @@ import org.dyn4j.game2d.geometry.Convex;
  * colliding in the {@link BroadphaseDetector}.
  * @author William Bittle
  * @param <E> the object type; intended to be of type {@link Collidable} or {@link Convex}
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class BroadphasePair<E> {
 	/** The first object */

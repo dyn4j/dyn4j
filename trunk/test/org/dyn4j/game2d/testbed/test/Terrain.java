@@ -43,6 +43,8 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests a floor/terrain created by a set of line segments.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Terrain extends Test {
 	/* (non-Javadoc)

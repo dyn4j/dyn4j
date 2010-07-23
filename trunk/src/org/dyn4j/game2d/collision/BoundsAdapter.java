@@ -30,6 +30,8 @@ package org.dyn4j.game2d.collision;
  * This class can be used to implement only the methods desired instead of all
  * the methods contained in the {@link BoundsListener} interface.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class BoundsAdapter implements BoundsListener {
 	/* (non-Javadoc)

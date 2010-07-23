@@ -39,6 +39,8 @@ import org.junit.Test;
 /**
  * Test case for the {@link RectangularBounds} class.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class RectangularBoundsTest {
 	/** The {@link Bounds} to test with */

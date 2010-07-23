@@ -32,6 +32,8 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Represents a persisted contact point.
  * @author William Bittle
  * @see ContactPoint
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class PersistedContactPoint extends ContactPoint {
 	/** The previous contact point */

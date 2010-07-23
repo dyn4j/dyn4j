@@ -41,6 +41,8 @@ import org.dyn4j.game2d.geometry.Vector2;
  * is considered to be inside, if they are not overlapping, the {@link Collidable} is considered
  * outside.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class RectangularBounds extends AbstractBounds implements Bounds, Transformable {
 	/** The x-axis */

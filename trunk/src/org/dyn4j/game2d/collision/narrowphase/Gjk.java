@@ -113,6 +113,8 @@ import org.dyn4j.game2d.geometry.Vector2;
  * {@link Shape}s.  Refer to {@link Gjk#distance(Convex, Transform, Convex, Transform, Separation)}
  * for details on the implementation.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetector {
 	/** The origin point */
@@ -538,7 +540,7 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 	 * = a.cross(b)</pre>
 	 * @param a the first point
 	 * @param b the second point
-	 * @param c the thrid point
+	 * @param c the third point
 	 * @return boolean
 	 */
 	protected boolean containsOrigin(Vector2 a, Vector2 b, Vector2 c) {

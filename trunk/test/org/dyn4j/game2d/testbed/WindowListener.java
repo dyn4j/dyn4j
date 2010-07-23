@@ -36,6 +36,8 @@ import org.codezealot.game.core.Core;
  * Upon the window regaining focus the core will stay paused.<br />
  * Upon the window being closed the core will be shutdown.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class WindowListener extends WindowAdapter {
 	/** The reference to the core */

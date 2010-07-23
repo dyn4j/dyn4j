@@ -40,6 +40,8 @@ import org.dyn4j.game2d.geometry.Transform;
  * {@link Shape}s.  Doing so allows for faster and simpler code.  Concave objects can also
  * be supported by performing a convex decomposition.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public interface NarrowphaseDetector {
 	/**

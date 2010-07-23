@@ -27,6 +27,8 @@ package org.dyn4j.game2d.dynamics;
 /**
  * Interface used to customize the way friction and restitution values are mixed.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public interface CoefficientMixer {
 	/** The default dynamics mixer */

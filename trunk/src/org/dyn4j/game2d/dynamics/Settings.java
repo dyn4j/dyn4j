@@ -32,6 +32,8 @@ import org.dyn4j.game2d.dynamics.contact.ContactConstraintSolver;
  * Attempting to set any setting to a value outside the range in effects sets
  * the setting to the min or max of the range.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Settings {
 	/** The default step frequency of the dynamics engine; in seconds */

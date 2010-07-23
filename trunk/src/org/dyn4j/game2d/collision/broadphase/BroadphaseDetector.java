@@ -39,6 +39,8 @@ import org.dyn4j.game2d.geometry.Transform;
  * possibly intersect.  These algorithms are used to filter out collision pairs in the interest 
  * of sending less pairs to the {@link NarrowphaseDetector}.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public interface BroadphaseDetector {
 	/**

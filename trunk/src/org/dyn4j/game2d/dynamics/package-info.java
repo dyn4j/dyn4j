@@ -57,6 +57,9 @@
  * supplied.  Most applications will use this one to one relationship.  However, if the {@link Body}
  * requires more {@link Convex} {@link Shape}s to be added you can use the 
  * <code>Body.addShape(Convex, Mass)</code> method.
+ * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 package org.dyn4j.game2d.dynamics;
 

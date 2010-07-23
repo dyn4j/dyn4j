@@ -31,6 +31,8 @@ import org.dyn4j.game2d.dynamics.joint.Joint;
 /**
  * Listens for implicit destruction events.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public interface DestructionListener {
 	/**
@@ -53,6 +55,7 @@ public interface DestructionListener {
 	 * Called when implicit destruction of a {@link Body} has occurred.
 	 * @see World#clear(boolean)
 	 * @param body the {@link Body} that was destroyed
+	 * @since 1.0.2
 	 */
 	public void destroyed(Body body);
 }

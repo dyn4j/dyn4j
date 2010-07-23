@@ -39,6 +39,8 @@ package org.dyn4j.game2d.geometry;
  * </pre>
  * This can decrease the number of temporary vectors.
  * @author William Bittle
+ * @version 1.0.3
+ * @since 1.0.0
  */
 public class Vector2 {
 	/** The magnitude of the x component of this {@link Vector2} */
