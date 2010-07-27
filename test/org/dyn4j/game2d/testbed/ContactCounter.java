@@ -164,6 +164,14 @@ public class ContactCounter implements ContactListener, StepListener {
 	}
 	
 	/**
+	 * Returns the number of sensed contacts.
+	 * @return int the number of sensed contacts
+	 */
+	public int getSensed() {
+		return sensed;
+	}
+	
+	/**
 	 * Returns the number of solved contacts.
 	 * <p>
 	 * This is also the number of total contacts.
