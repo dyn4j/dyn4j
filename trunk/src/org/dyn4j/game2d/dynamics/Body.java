@@ -61,7 +61,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * when they come to rest for a certain amount of time.  Applying any force,
  * torque, or impulse will wake the {@link Body}.
  * <p>
- * A {@link Body} becomes frozen when the {@link Body} has left the boundary of
+ * A {@link Body} becomes inactive when the {@link Body} has left the boundary of
  * the world.
  * <p>
  * A {@link Body} is dynamic if either its inertia or mass is greater than zero.

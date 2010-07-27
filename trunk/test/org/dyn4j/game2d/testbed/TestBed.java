@@ -109,6 +109,8 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	private Text cPersistedLabel;
 	/** The label for the number of removed contacts */
 	private Text cRemovedLabel;
+	/** The label for the number of sensed contacts */
+	private Text cSensedLabel;
 	/** The label for the frame rate */
 	private Text fpsLabel;
 	/** The label indicating paused state */
@@ -305,6 +307,10 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		AttributedString cRemovedString = new AttributedString("Removed:");
 		this.cRemovedLabel = new Text(cRemovedString);
 		this.cRemovedLabel.generate();
+		
+		AttributedString cSensedString = new AttributedString("Sensed:");
+		this.cSensedLabel = new Text(cSensedString);
+		this.cSensedLabel.generate();
 		
 		// text for frames per second
 		AttributedString fpsString = new AttributedString("FPS:");
@@ -600,6 +606,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		this.cAddedLabel.render(g, x, y + spacing * 2);
 		this.cPersistedLabel.render(g, x, y + spacing * 3);
 		this.cRemovedLabel.render(g, x, y + spacing * 4);
+		this.cSensedLabel.render(g, x, y + spacing * 5);
 		
 		// get the contact counter
 		ContactCounter cc = (ContactCounter) this.test.getWorld().getContactListener();
@@ -608,6 +615,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		int added = cc.getAdded();
 		int persisted = cc.getPersisted();
 		int removed = cc.getRemoved();
+		int sensed = cc.getSensed();
 		
 		// create the texts
 		AttributedString ctString = new AttributedString(String.valueOf(total));
@@ -626,11 +634,16 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		Text cr = new Text(crString);
 		cr.generate();
 		
+		AttributedString csString = new AttributedString(String.valueOf(sensed));
+		Text cs = new Text(csString);
+		cs.generate();
+		
 		// render the values
 		ct.render(g, x + padding - ct.getWidth(), y + spacing);
 		ca.render(g, x + padding - ca.getWidth(), y + spacing * 2);
 		cp.render(g, x + padding - cp.getWidth(), y + spacing * 3);
 		cr.render(g, x + padding - cr.getWidth(), y + spacing * 4);
+		cs.render(g, x + padding - cs.getWidth(), y + spacing * 5);
 	}
 	
 	/**
