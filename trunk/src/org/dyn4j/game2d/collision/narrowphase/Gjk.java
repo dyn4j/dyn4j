@@ -113,7 +113,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * {@link Shape}s.  Refer to {@link Gjk#distance(Convex, Transform, Convex, Transform, Separation)}
  * for details on the implementation.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetector {
@@ -172,6 +172,10 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 		if (d.isZero()) d.set(1.0, 0.0);
 		// add the first point
 		simplex.add(ms.support(d));
+		// is the support point past the origin along d?
+		if (simplex.get(0).dot(d) <= 0.0) {
+			return false;
+		}
 		// negate the search direction
 		d.negate();
 		// start the loop
@@ -179,7 +183,7 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 			// always add another point to the simplex at the beginning of the loop
 			simplex.add(ms.support(d));
 			// make sure that the last point we added was past the origin
-			if (simplex.get(simplex.size() - 1).dot(d) <= 0) {
+			if (simplex.get(simplex.size() - 1).dot(d) <= 0.0) {
 				// a is not past the origin so therefore the shapes do not intersect
 				// here we treat the origin on the line as no intersection
 				// immediately return with null indicating no penetration
@@ -222,6 +226,10 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 		if (d.isZero()) d.set(1.0, 0.0);
 		// add the first point
 		simplex.add(ms.support(d));
+		// is the support point past the origin along d?
+		if (simplex.get(0).dot(d) <= 0.0) {
+			return false;
+		}
 		// negate the search direction
 		d.negate();
 		// start the loop
@@ -229,7 +237,7 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 			// always add another point to the simplex at the beginning of the loop
 			simplex.add(ms.support(d));
 			// make sure that the last point we added was past the origin
-			if (simplex.get(simplex.size() - 1).dot(d) <= 0) {
+			if (simplex.get(simplex.size() - 1).dot(d) <= 0.0) {
 				// a is not past the origin so therefore the shapes do not intersect
 				// here we treat the origin on the line as no intersection
 				// immediately return with null indicating no penetration
@@ -279,7 +287,8 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 			Vector2 abPerp = Vector2.tripleProduct(ac, ab, ab);
 			Vector2 acPerp = Vector2.tripleProduct(ab, ac, ac);
 			// see where the origin is at
-			if (acPerp.dot(ao) > 0) {
+			double acLocation = acPerp.dot(ao);
+			if (acLocation >= 0.0) {
 				// the origin lies on the right side of A->C
 				// because of the condition for the gjk loop to continue the origin 
 				// must lie between A and C so remove B and set the
@@ -291,8 +300,9 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 				// calculating ac's normal using b is more robust
 				direction.set(acPerp);
 			} else {
+				double abLocation = abPerp.dot(ao);
 				// the origin lies on the left side of A->C
-				if (abPerp.dot(ao) <= 0) {
+				if (abLocation < 0.0) {
 					// the origin lies on the right side of A->B and therefore in the
 					// triangle, we have an intersection
 					return true;

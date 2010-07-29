@@ -47,7 +47,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests the destruction of a joint and a body.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.1.0
  * @since 1.0.3
  */
 public class Destructible extends Test {
@@ -190,11 +190,8 @@ public class Destructible extends Test {
 		// setup the camera
 		this.home();
 		
-		// set the bounds
-		this.bounds = new Rectangle(16.0, 15.0);
-		
 		// create the world
-		Bounds bounds = new RectangularBounds(this.bounds);
+		Bounds bounds = new RectangularBounds(Geometry.createRectangle(16.0, 15.0));
 		this.world = new World(bounds);
 		
 		// setup the contact counter
@@ -219,19 +216,6 @@ public class Destructible extends Test {
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
 		this.world.add(floor);
-		
-		/*
-		 * Make this configuration
-		 * +-----+
-		 * |     |
-		 * |     |
-		 * |     |
-		 * +--.--+
-		 * |     |
-		 * |     |
-		 * |     |
-		 * +-----+
-		 */
 		
 		// create a reusable rectangle
 		Rectangle r = new Rectangle(0.5, 1.0);
@@ -276,7 +260,7 @@ public class Destructible extends Test {
 	public void reset() {
 		// call the super method
 		super.reset();
-		// reset the destructor flag
+		// reset the destructor flags
 		this.destructor.reset();
 	}
 	

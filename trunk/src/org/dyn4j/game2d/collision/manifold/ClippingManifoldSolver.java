@@ -47,7 +47,7 @@ import org.dyn4j.game2d.geometry.Vertex;
  * Derived from the open source project <a href="http://www.box2d.org">Box2d</a>.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class ClippingManifoldSolver implements ManifoldSolver {
@@ -90,27 +90,26 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 		Edge incident = (Edge) feature2;
 		
 		// choose the reference and incident edges
-//		boolean flipped = false;
-//		Edge reference, incident;
-//		// which edge is more perpendicular?
-//		Vector e1 = fe1.getEdge();
-//		Vector e2 = fe2.getEdge();
-//		if (Math.abs(e1.dot(n)) > Math.abs(e2.dot(n))) {
-//			// shape2's edge is more perpendicular
-//			reference = fe2;
-//			incident = fe1;
-//			flipped = true;
-//		} else {
-//			reference = fe1;
-//			incident = fe2;
-//		}
+		boolean flipped = false;
+		// which edge is more perpendicular?
+		Vector2 e1 = reference.getEdge();
+		Vector2 e2 = incident.getEdge();
+		if (Math.abs(e1.dot(n)) > Math.abs(e2.dot(n))) {
+			// shape2's edge is more perpendicular
+			// so swap the reference and incident edges
+			Edge e = reference;
+			reference = incident;
+			incident = e;
+			// flag that the features flipped
+			flipped = true;
+		}
 		
 		// create the reference edge vector
 		Vector2 refev = reference.getEdge();
 		// normalize it
 		refev.normalize();
 		
-		// compute the offestes of the reference edge points along the reference edge
+		// compute the offsets of the reference edge points along the reference edge
 		double offset1 = -refev.dot(reference.getVertex1().getPoint());
 		double offset2 = refev.dot(reference.getVertex2().getPoint());
 		
@@ -135,8 +134,7 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 		double frontOffset = frontNormal.dot(reference.getMaximum().getPoint());
 		
 		// set the normal
-//		m.normal = flipped ? frontNormal.getNegative() : frontNormal;
-		manifold.normal = frontNormal;
+		manifold.normal = flipped ? frontNormal.getNegative() : frontNormal;
 		
 		// test if the clip points are behind the reference edge
 		for (int i = 0; i < clip2.size(); i++) {
@@ -146,13 +144,15 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 			// make sure the point is behind the front normal
 			if (depth >= 0.0) {
 				// create an id for the manifold point
-				IndexedManifoldPointId id = new IndexedManifoldPointId(reference.getIndex(), incident.getIndex(), vertex.getIndex(), false /* flipped */);
+				IndexedManifoldPointId id = new IndexedManifoldPointId(reference.getIndex(), incident.getIndex(), vertex.getIndex(), flipped);
 				// create the manifold point
 				ManifoldPoint mp = new ManifoldPoint(id, point, depth);
 				// add it to the list
 				manifold.points.add(mp);
 			}
 		}
+		// make sure we didn't clip all the points
+		if (manifold.points.size() == 0) return false;
 		// return the clipped points
 		return true;
 	}

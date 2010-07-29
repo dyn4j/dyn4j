@@ -31,12 +31,13 @@ import org.dyn4j.game2d.collision.manifold.ManifoldPoint;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.Constraint;
 import org.dyn4j.game2d.dynamics.Fixture;
+import org.dyn4j.game2d.geometry.Matrix22;
 import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Represents a {@link Contact} constraint for each {@link Body} pair.  
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class ContactConstraint extends Constraint {
@@ -55,6 +56,9 @@ public class ContactConstraint extends Constraint {
 	/** The penetration normal */
 	protected Vector2 normal;
 	
+	/** The tangent of the normal */
+	protected Vector2 tangent;
+	
 	/** The coefficient of friction */
 	protected double friction;
 	
@@ -63,6 +67,12 @@ public class ContactConstraint extends Constraint {
 
 	/** Whether the contact is a sensor contact or not */
 	protected boolean sensor;
+	
+	/** The K matrix for block solving a contact pair */
+	protected Matrix22 K;
+	
+	/** The inverse of the {@link #K} matrix */
+	protected Matrix22 invK;
 	
 	/**
 	 * Full constructor.
@@ -103,6 +113,8 @@ public class ContactConstraint extends Constraint {
 		}
 		// set the normal
 		this.normal = manifold.getNormal();
+		// set the tangent
+		this.tangent = this.normal.cross(1.0);
 		// set the coefficients
 		this.friction = friction;
 		this.restitution = restitution;
@@ -124,6 +136,7 @@ public class ContactConstraint extends Constraint {
 		.append(this.fixture1).append("|")
 		.append(this.fixture2).append("|")
 		.append(this.normal).append("|")
+		.append(this.tangent).append("|")
 		.append(this.friction).append("|")
 		.append(this.restitution).append("|")
 		.append(this.sensor).append("|{");
@@ -149,6 +162,14 @@ public class ContactConstraint extends Constraint {
 	 */
 	public Vector2 getNormal() {
 		return this.normal;
+	}
+	
+	/**
+	 * Returns the collision tangent.
+	 * @return {@link Vector2} the collision tangent
+	 */
+	public Vector2 getTangent() {
+		return this.tangent;
 	}
 	
 	/**

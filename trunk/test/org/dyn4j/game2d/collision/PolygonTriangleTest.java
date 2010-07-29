@@ -50,7 +50,7 @@ import org.junit.Test;
 /**
  * Test case for {@link Polygon} - {@link Triangle} collision detection.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class PolygonTriangleTest extends AbstractTest {
@@ -412,12 +412,12 @@ public class PolygonTriangleTest extends AbstractTest {
 		mp2 = m.getPoints().get(1);
 		p1 = mp1.getPoint();
 		p2 = mp2.getPoint();
-		TestCase.assertEquals(0.400, p1.x, 1.0e-3);
-		TestCase.assertEquals(0.000, p1.y, 1.0e-3);
-		TestCase.assertEquals(0.234, mp1.getDepth(), 1.0e-3);
-		TestCase.assertEquals(-0.087, p2.x, 1.0e-3);
-		TestCase.assertEquals(-0.670, p2.y, 1.0e-3);
-		TestCase.assertEquals(0.272, mp2.getDepth(), 1.0e-3);
+		TestCase.assertEquals(-0.300, p1.x, 1.0e-3);
+		TestCase.assertEquals(-0.500, p1.y, 1.0e-3);
+		TestCase.assertEquals(0.272, mp1.getDepth(), 1.0e-3);
+		TestCase.assertEquals(0.210, p2.x, 1.0e-3);
+		TestCase.assertEquals(0.137, p2.y, 1.0e-3);
+		TestCase.assertEquals(0.234, mp2.getDepth(), 1.0e-3);
 		
 		// test overlap sat
 		this.sat.detect(poly, t1, tri, t2, p);
@@ -441,11 +441,11 @@ public class PolygonTriangleTest extends AbstractTest {
 		mp2 = m.getPoints().get(1);
 		p1 = mp1.getPoint();
 		p2 = mp2.getPoint();
-		TestCase.assertEquals(0.400, p1.x, 1.0e-3);
-		TestCase.assertEquals(0.000, p1.y, 1.0e-3);
-		TestCase.assertEquals(0.234, mp1.getDepth(), 1.0e-3);
-		TestCase.assertEquals(-0.087, p2.x, 1.0e-3);
-		TestCase.assertEquals(-0.670, p2.y, 1.0e-3);
-		TestCase.assertEquals(0.272, mp2.getDepth(), 1.0e-3);
+		TestCase.assertEquals(-0.300, p1.x, 1.0e-3);
+		TestCase.assertEquals(-0.500, p1.y, 1.0e-3);
+		TestCase.assertEquals(0.272, mp1.getDepth(), 1.0e-3);
+		TestCase.assertEquals(0.210, p2.x, 1.0e-3);
+		TestCase.assertEquals(0.137, p2.y, 1.0e-3);
+		TestCase.assertEquals(0.234, mp2.getDepth(), 1.0e-3);
 	}
 }

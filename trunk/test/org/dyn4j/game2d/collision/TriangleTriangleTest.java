@@ -48,7 +48,7 @@ import org.junit.Test;
 /**
  * Test case for {@link Triangle} - {@link Triangle} collision detection.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class TriangleTriangleTest extends AbstractTest {
@@ -413,12 +413,12 @@ public class TriangleTriangleTest extends AbstractTest {
 		mp2 = m.getPoints().get(1);
 		p1 = mp1.getPoint();
 		p2 = mp2.getPoint();
-		TestCase.assertEquals(-0.194, p1.x, 1.0e-3);
-		TestCase.assertEquals(0.546, p1.y, 1.0e-3);
-		TestCase.assertEquals(0.270, mp1.getDepth(), 1.0e-3);
-		TestCase.assertEquals(0.443, p2.x, 1.0e-3);
-		TestCase.assertEquals(0.419, p2.y, 1.0e-3);
-		TestCase.assertEquals(0.039, mp2.getDepth(), 1.0e-3);
+		TestCase.assertEquals(-0.150, p1.x, 1.0e-3);
+		TestCase.assertEquals(0.280, p1.y, 1.0e-3);
+		TestCase.assertEquals(0.252, mp1.getDepth(), 1.0e-3);
+		TestCase.assertEquals(0.450, p2.x, 1.0e-3);
+		TestCase.assertEquals(0.380, p2.y, 1.0e-3);
+		TestCase.assertEquals(0.037, mp2.getDepth(), 1.0e-3);
 		
 		// test overlap sat
 		this.sat.detect(tri1, t1, tri2, t2, p);
@@ -442,12 +442,12 @@ public class TriangleTriangleTest extends AbstractTest {
 		mp2 = m.getPoints().get(1);
 		p1 = mp1.getPoint();
 		p2 = mp2.getPoint();
-		TestCase.assertEquals(-0.194, p1.x, 1.0e-3);
-		TestCase.assertEquals(0.546, p1.y, 1.0e-3);
-		TestCase.assertEquals(0.270, mp1.getDepth(), 1.0e-3);
-		TestCase.assertEquals(0.443, p2.x, 1.0e-3);
-		TestCase.assertEquals(0.419, p2.y, 1.0e-3);
-		TestCase.assertEquals(0.039, mp2.getDepth(), 1.0e-3);
+		TestCase.assertEquals(-0.150, p1.x, 1.0e-3);
+		TestCase.assertEquals(0.280, p1.y, 1.0e-3);
+		TestCase.assertEquals(0.252, mp1.getDepth(), 1.0e-3);
+		TestCase.assertEquals(0.450, p2.x, 1.0e-3);
+		TestCase.assertEquals(0.380, p2.y, 1.0e-3);
+		TestCase.assertEquals(0.037, mp2.getDepth(), 1.0e-3);
 	}
 	
 	/**
@@ -473,5 +473,40 @@ public class TriangleTriangleTest extends AbstractTest {
 		TestCase.assertFalse(Double.isNaN(p1.y));
 		TestCase.assertFalse(Double.isNaN(p2.x));
 		TestCase.assertFalse(Double.isNaN(p2.y));
+	}
+	
+	/**
+	 * Test case specific to a bug found where two triangles are found
+	 * to be penetrating yet the depth is zero.
+	 * @since 1.1.0
+	 */
+	@Test
+	public void falsePenetration1() {
+		// this config would generate a penetration object with zero depth
+		Triangle t1 = new Triangle(
+				new Vector2(-0.5877852522924732, -0.8090169943749473),
+				new Vector2(-0.30901699437494756, -0.9510565162951535),
+				new Vector2(3.592757177872429E-17, -2.470020559787295E-17));
+		Triangle t2 = new Triangle(
+				new Vector2(-0.9510565162951536, -0.3090169943749473),
+				new Vector2(-0.8090169943749475, -0.587785252292473),
+				new Vector2(3.592757177872429E-17, -2.470020559787295E-17));
+		Penetration p = new Penetration();
+		Transform tx = new Transform();
+		tx.translate(-2.5, -2.5752222222222203);
+		boolean collided = this.gjk.detect(t1, tx, t2, tx, p);
+		TestCase.assertFalse(collided);
+		
+		Triangle t3 = new Triangle(
+				new Vector2(-0.30901699437494756, -0.9510565162951535),
+				new Vector2(-1.8369701987210297E-16, -1.0),
+				new Vector2(3.592757177872429E-17, -2.470020559787295E-17));
+		Triangle t4 = new Triangle(
+				new Vector2(-1.8369701987210297E-16, -1.0),
+				new Vector2(0.30901699437494723, -0.9510565162951536),
+				new Vector2(3.592757177872429E-17, -2.470020559787295E-17));
+		
+		collided = this.gjk.detect(t3, tx, t4, tx, p);
+		TestCase.assertFalse(collided);
 	}
 }

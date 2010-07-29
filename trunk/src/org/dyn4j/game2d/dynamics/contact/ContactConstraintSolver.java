@@ -31,6 +31,7 @@ import org.dyn4j.game2d.dynamics.Settings;
 import org.dyn4j.game2d.dynamics.Step;
 import org.dyn4j.game2d.geometry.Interval;
 import org.dyn4j.game2d.geometry.Mass;
+import org.dyn4j.game2d.geometry.Matrix22;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Vector2;
 
@@ -42,7 +43,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * facilitate stable stacking of rigid {@link Body}s.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class ContactConstraintSolver {
@@ -91,7 +92,7 @@ public class ContactConstraintSolver {
 			// get the penetration axis
 			Vector2 N = contactConstraint.normal;
 			// get the tangent vector
-			Vector2 T = N.cross(1.0);
+			Vector2 T = contactConstraint.tangent;
 			
 			// loop through the contact points
 			for (int j = 0; j < cSize; j++) {
@@ -139,6 +140,51 @@ public class ContactConstraintSolver {
 					contact.vb += -contactConstraint.restitution * rvn; 
 				}
 			}
+			
+			// does this contact have 2 points?
+			if (cSize == 2) {
+				// setup the block solver
+				Contact contact1 = contacts[0];
+				Contact contact2 = contacts[1];
+				
+				// both contacts must be enabled
+				if (contact1.isEnabled() && contact2.isEnabled()) {
+					double rn1A = contact1.r1.cross(N);
+					double rn1B = contact1.r2.cross(N);
+					double rn2A = contact2.r1.cross(N);
+					double rn2B = contact2.r2.cross(N);
+					
+					// compute the K matrix for the constraints
+					Matrix22 K = new Matrix22();
+					K.m00 = invM1 + invM2 + invI1 * rn1A * rn1A + invI2 * rn1B * rn1B;
+					K.m01 = invM1 + invM2 + invI1 * rn1A * rn2A + invI2 * rn1B * rn2B;
+					K.m10 = K.m01;
+					K.m11 = invM1 + invM2 + invI1 * rn2A * rn2A + invI2 * rn2B * rn2B;
+					
+					// check the condition number of the matrix
+					final double maxCondition = 100.0;
+					if (K.m00 * K.m00 < maxCondition * K.determinant()) {
+						// if the condition number is below the max then we can
+						// assume that we can invert K
+						contactConstraint.K = K;
+						contactConstraint.invK = K.getInverse();
+					} else {
+						// otherwise the matrix is ill conditioned
+						
+						// it looks like this will only be the case if the points are the
+						// close to being the same point.  If they were the same point
+						// then the constraints would be redundant
+						// just choose one of the points as the point to solve
+						
+						// let's choose the deepest point
+						if (contact1.depth > contact2.depth) {
+							contactConstraint.contacts = new Contact[] {contact1};
+						} else {
+							contactConstraint.contacts = new Contact[] {contact2};
+						}
+					}
+				}
+			}
 		}
 	}
 	
@@ -150,13 +196,16 @@ public class ContactConstraintSolver {
 		// pre divide for performance
 		double ratio = 1.0 / step.getDeltaTimeRatio();
 		
+		// get the size
+		int size = this.contactConstraints.size();
+		
 		// we have to perform a separate loop to warm start
-		for (int i = 0; i < this.contactConstraints.size(); i++) {
-			ContactConstraint cc = this.contactConstraints.get(i);
+		for (int i = 0; i < size; i++) {
+			ContactConstraint contactConstraint = this.contactConstraints.get(i);
 			
 			// get the bodies
-			Body b1 = cc.getBody1();
-			Body b2 = cc.getBody2();
+			Body b1 = contactConstraint.getBody1();
+			Body b2 = contactConstraint.getBody2();
 			// get the body masses
 			Mass m1 = b1.getMass();
 			Mass m2 = b2.getMass();
@@ -167,12 +216,16 @@ public class ContactConstraintSolver {
 			double invI2 = m2.getInverseInertia();
 			
 			// get the penetration axis
-			Vector2 N = cc.normal;
+			Vector2 N = contactConstraint.normal;
 			// get the tangent vector
-			Vector2 T = N.cross(1.0);
+			Vector2 T = contactConstraint.tangent;
 			
-			for (int j = 0; j < cc.getContacts().length; j++) {
-				Contact contact = cc.getContacts()[j];
+			// get the contacts and contact size
+			Contact[] contacts = contactConstraint.getContacts();
+			int cSize = contacts.length;
+			
+			for (int j = 0; j < cSize; j++) {
+				Contact contact = contacts[j];
 				
 				// is the contact enabled?
 				if (!contact.isEnabled()) continue;
@@ -218,46 +271,9 @@ public class ContactConstraintSolver {
 			
 			// get the penetration axis and tangent
 			Vector2 N = contactConstraint.normal;
-			Vector2 T = N.cross(1.0);
-
-			// loop through the contact points
-			for (int k = 0; k < cSize; k++) {
-				Contact contact = contacts[k];
-				
-				// is the contact enabled?
-				if (!contact.isEnabled()) continue;
-				
-				// get ra and rb
-				Vector2 r1 = contact.r1;
-				Vector2 r2 = contact.r2;
-				
-				// get the relative velocity
-				Vector2 lv1 = r1.cross(b1.getAngularVelocity()).add(b1.getVelocity());
-				Vector2 lv2 = r2.cross(b2.getAngularVelocity()).add(b2.getVelocity());
-				Vector2 rv = lv1.subtract(lv2);
-				
-				// project the relative velocity onto the penetration normal
-				double rvn = N.dot(rv);
-				
-				// calculate the impulse using the velocity bias
-				double j = -contact.massN * (rvn - contact.vb);
-				
-				// clamp the accumulated impulse
-				double j0 = contact.jn;
-				contact.jn = Math.max(j0 + j, 0.0);
-				j = contact.jn - j0;
-				
-				// only update the bodies after processing all the contacts
-				Vector2 J = N.product(j);
-				b1.getVelocity().add(J.product(invM1));
-				b1.setAngularVelocity(b1.getAngularVelocity() + invI1 * r1.cross(J));
-				b2.getVelocity().subtract(J.product(invM2));
-				b2.setAngularVelocity(b2.getAngularVelocity() - invI2 * r2.cross(J));
-			}
+			Vector2 T = contactConstraint.tangent;
 			
 			// evaluate friction impulse
-			// since this requires the jn to be computed we must loop through
-			// the contacts twice
 			for (int k = 0; k < cSize; k++) {
 				Contact contact = contacts[k];
 				
@@ -291,6 +307,256 @@ public class ContactConstraintSolver {
 				b1.setAngularVelocity(b1.getAngularVelocity() + invI1 * r1.cross(J));
 				b2.getVelocity().subtract(J.product(invM2));
 				b2.setAngularVelocity(b2.getAngularVelocity() - invI2 * r2.cross(J));
+			}
+			
+			// evalutate the normal impulse
+			
+			// check the number of contacts to solve
+			if (cSize == 1) {
+				// if its one then solve the one contact
+				Contact contact = contacts[0];
+				
+				// is the contact enabled?
+				if (!contact.isEnabled()) continue;
+				
+				// get ra and rb
+				Vector2 r1 = contact.r1;
+				Vector2 r2 = contact.r2;
+				
+				// get the relative velocity
+				Vector2 lv1 = r1.cross(b1.getAngularVelocity()).add(b1.getVelocity());
+				Vector2 lv2 = r2.cross(b2.getAngularVelocity()).add(b2.getVelocity());
+				Vector2 rv = lv1.subtract(lv2);
+				
+				// project the relative velocity onto the penetration normal
+				double rvn = N.dot(rv);
+				
+				// calculate the impulse using the velocity bias
+				double j = -contact.massN * (rvn - contact.vb);
+				
+				// clamp the accumulated impulse
+				double j0 = contact.jn;
+				contact.jn = Math.max(j0 + j, 0.0);
+				j = contact.jn - j0;
+				
+				// only update the bodies after processing all the contacts
+				Vector2 J = N.product(j);
+				b1.getVelocity().add(J.product(invM1));
+				b1.setAngularVelocity(b1.getAngularVelocity() + invI1 * r1.cross(J));
+				b2.getVelocity().subtract(J.product(invM2));
+				b2.setAngularVelocity(b2.getAngularVelocity() - invI2 * r2.cross(J));
+			} else {
+				// if its 2 then solve the contacts simultaneously using a mini-LCP
+				
+				// Block solver developed by Erin Cato and Dirk Gregorius (see Box2d).
+				// Build the mini LCP for this contact patch
+				//
+				// vn = A * x + b, vn >= 0, x >= 0 and vn_i * x_i = 0 with i = 1..2
+				//
+				// A = J * W * JT and J = ( -n, -r1 x n, n, r2 x n )
+				// b = vn_0 - velocityBias
+				//
+				// The system is solved using the "Total enumeration method" (s. Murty). The complementary constraint vn_i * x_i
+				// implies that we must have in any solution either vn_i = 0 or x_i = 0. So for the 2D contact problem the cases
+				// vn1 = 0 and vn2 = 0, x1 = 0 and x2 = 0, x1 = 0 and vn2 = 0, x2 = 0 and vn1 = 0 need to be tested. The first valid
+				// solution that satisfies the problem is chosen.
+				// 
+				// In order to account for the accumulated impulse 'a' (because of the iterative nature of the solver which only requires
+				// that the accumulated impulse is clamped and not the incremental impulse) we change the impulse variable (x_i).
+				//
+				// Substitute:
+				// 
+				// x = x' - a
+				// 
+				// Plug into above equation:
+				//
+				// vn = A * x + b
+				//    = A * (x' - a) + b
+				//    = A * x' + b - A * a
+				//    = A * x' + b'
+				// b' = b - A * a;
+				
+				Contact contact1 = contacts[0];
+				Contact contact2 = contacts[1];
+				
+				Vector2 r11 = contact1.r1;
+				Vector2 r21 = contact1.r2;
+				Vector2 r12 = contact2.r1;
+				Vector2 r22 = contact2.r2;
+				
+				Vector2 v1 = b1.getVelocity();
+				Vector2 v2 = b2.getVelocity();
+				double av1 = b1.getAngularVelocity();
+				double av2 = b2.getAngularVelocity();
+				
+				// create a vector containing the current accumulated impulses
+				Vector2 a = new Vector2(contact1.jn, contact2.jn);
+				
+				// get the relative velocity at both contacts
+//				Vector2 lv11 = contact1.r1.cross(b1.getAngularVelocity()).add(b1.getVelocity());
+//				Vector2 lv21 = contact1.r2.cross(b2.getAngularVelocity()).add(b2.getVelocity());
+//				Vector2 rv1 = lv11.subtract(lv21);
+				// inline the computation
+				Vector2 rv1 = new Vector2();
+				rv1.x = -r11.y * av1 + v1.x + r21.y * av2 - v2.x;
+				rv1.y =  r11.x * av1 + v1.y - r21.x * av2 - v2.y;
+				
+//				Vector2 lv12 = contact2.r1.cross(b1.getAngularVelocity()).add(b1.getVelocity());
+//				Vector2 lv22 = contact2.r2.cross(b2.getAngularVelocity()).add(b2.getVelocity());
+//				Vector2 rv2 = lv12.subtract(lv22);
+				// inline the computation
+				Vector2 rv2 = new Vector2();
+				rv2.x = -r12.y * av1 + v1.x + r22.y * av2 - v2.x;
+				rv2.y =  r12.x * av1 + v1.y - r22.x * av2 - v2.y; 
+				
+				// compute the relative velocities along the collision normal
+				double rvn1 = N.dot(rv1);
+				double rvn2 = N.dot(rv2);
+				
+				// create the b vector
+				Vector2 b = new Vector2();
+				b.x = rvn1 - contact1.vb;
+				b.y = rvn2 - contact2.vb;
+				b.subtract(contactConstraint.K.product(a));
+				
+				for (;;) {
+					//
+					// Case 1: vn = 0
+					//
+					// 0 = A * x' + b'
+					//
+					// Solve for x':
+					//
+					// x' = - inv(A) * b'
+					//
+					Vector2 x = contactConstraint.invK.product(b).negate();
+
+					if (x.x >= 0.0f && x.y >= 0.0f)
+					{
+						// find the incremental impulse
+						Vector2 d = x.difference(a);
+
+						// apply the incremental impulse
+						Vector2 J1 = N.product(d.x);
+						Vector2 J2 = N.product(d.y);
+						
+//						b1.getVelocity().add(J1.sum(J2).product(invM1));
+//						b1.setAngularVelocity(b1.getAngularVelocity() + invI1 * (contact1.r1.cross(J1) + contact2.r1.cross(J2)));
+//						b2.getVelocity().subtract(J1.sum(J2).product(invM2));
+//						b2.setAngularVelocity(b2.getAngularVelocity() - invI2 * (contact1.r2.cross(J1) + contact2.r2.cross(J2)));
+						v1.add(J1.sum(J2).multiply(invM1));
+						b1.setAngularVelocity(av1 + invI1 * (r11.cross(J1) + r12.cross(J2)));
+						v2.subtract(J1.sum(J2).multiply(invM2));
+						b2.setAngularVelocity(av2 - invI2 * (r21.cross(J1) + r22.cross(J2)));
+
+						// set the new accumulated impulse
+						contact1.jn = x.x;
+						contact2.jn = x.y;
+						
+						break;
+					}
+
+					//
+					// Case 2: vn1 = 0 and x2 = 0
+					//
+					//   0 = a11 * x1' + a12 * 0 + b1' 
+					// vn2 = a21 * x1' + a22 * 0 + b2'
+					//
+					
+					x.x = -contact1.massN * b.x;
+					x.y = 0.0;
+					rvn1 = 0.0;
+					rvn2 = contactConstraint.K.m10 * x.x + b.y;
+
+					if (x.x >= 0.0f && rvn2 >= 0.0f)
+					{
+						// find the incremental impulse
+						Vector2 d = x.difference(a);
+
+						// apply the incremental impulse
+						Vector2 J1 = N.product(d.x);
+						Vector2 J2 = N.product(d.y);
+						
+						v1.add(J1.sum(J2).multiply(invM1));
+						b1.setAngularVelocity(av1 + invI1 * (r11.cross(J1) + r12.cross(J2)));
+						v2.subtract(J1.sum(J2).multiply(invM2));
+						b2.setAngularVelocity(av2 - invI2 * (r21.cross(J1) + r22.cross(J2)));
+						
+						// set the new incremental impulse
+						contact1.jn = x.x;
+						contact2.jn = x.y;
+						
+						break;
+					}
+
+
+					//
+					// Case 3: vn2 = 0 and x1 = 0
+					//
+					// vn1 = a11 * 0 + a12 * x2' + b1' 
+					//   0 = a21 * 0 + a22 * x2' + b2'
+					//
+					
+					x.x = 0.0;
+					x.y = -contact2.massN * b.y;
+					rvn1 = contactConstraint.K.m01 * x.y + b.x;
+					rvn2 = 0.0;
+
+					if (x.y >= 0.0f && rvn1 >= 0.0f)
+					{
+						// find the incremental impulse
+						Vector2 d = x.difference(a);
+
+						// apply the incremental impulse
+						Vector2 J1 = N.product(d.x);
+						Vector2 J2 = N.product(d.y);
+						
+						v1.add(J1.sum(J2).multiply(invM1));
+						b1.setAngularVelocity(av1 + invI1 * (r11.cross(J1) + r12.cross(J2)));
+						v2.subtract(J1.sum(J2).multiply(invM2));
+						b2.setAngularVelocity(av2 - invI2 * (r21.cross(J1) + r22.cross(J2)));
+						
+						// set the new incremental impulse
+						contact1.jn = x.x;
+						contact2.jn = x.y;
+						
+						break;
+					}
+
+					//
+					// Case 4: x1 = 0 and x2 = 0
+					// 
+					// vn1 = b1
+					// vn2 = b2;
+					x.x = 0.0f;
+					x.y = 0.0f;
+					rvn1 = b.x;
+					rvn2 = b.y;
+
+					if (rvn1 >= 0.0f && rvn2 >= 0.0f )
+					{
+						// find the incremental impulse
+						Vector2 d = x.difference(a);
+
+						// apply the incremental impulse
+						Vector2 J1 = N.product(d.x);
+						Vector2 J2 = N.product(d.y);
+						
+						v1.add(J1.sum(J2).multiply(invM1));
+						b1.setAngularVelocity(av1 + invI1 * (r11.cross(J1) + r12.cross(J2)));
+						v2.subtract(J1.sum(J2).multiply(invM2));
+						b2.setAngularVelocity(av2 - invI2 * (r21.cross(J1) + r22.cross(J2)));
+						
+						// set the new incremental impulse
+						contact1.jn = x.x;
+						contact2.jn = x.y;
+						
+						break;
+					}
+					
+					// No solution, give up. This is hit sometimes, but it doesn't seem to matter.
+					break;
+				}
 			}
 		}
 	}
@@ -384,10 +650,10 @@ public class ContactConstraintSolver {
 
 				// translate and rotate the objects
 				b1.translate(J.product(invMass1));
-				b1.rotate(invI1 * r1.cross(J), c1);
+				b1.rotate(invI1 * r1.cross(J), c1.x, c1.y);
 				
 				b2.translate(J.product(-invMass2));
-				b2.rotate(-invI2 * r2.cross(J), c2);
+				b2.rotate(-invI2 * r2.cross(J), c2.x, c2.y);
 			}
 		}
 		// check if the minimum separation between all objects is still

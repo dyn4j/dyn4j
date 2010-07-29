@@ -50,7 +50,7 @@ import org.junit.Test;
 /**
  * Test case for {@link Polygon} - {@link Rectangle} collision detection.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class PolygonRectangleTest extends AbstractTest {
@@ -395,12 +395,12 @@ public class PolygonRectangleTest extends AbstractTest {
 		mp2 = m.getPoints().get(1);
 		p1 = mp1.getPoint();
 		p2 = mp2.getPoint();
-		TestCase.assertEquals(-0.500, p1.x, 1.0e-3);
-		TestCase.assertEquals(-0.500, p1.y, 1.0e-3);
-		TestCase.assertEquals(0.110, mp1.getDepth(), 1.0e-3);
-		TestCase.assertEquals(-0.500, p2.x, 1.0e-3);
-		TestCase.assertEquals(0.363, p2.y, 1.0e-3);
-		TestCase.assertEquals(0.618, mp2.getDepth(), 1.0e-3);
+		TestCase.assertEquals(0.000, p1.x, 1.0e-3);
+		TestCase.assertEquals(0.000, p1.y, 1.0e-3);
+		TestCase.assertEquals(0.500, mp1.getDepth(), 1.0e-3);
+		TestCase.assertEquals(-0.363, p2.x, 1.0e-3);
+		TestCase.assertEquals(-0.500, p2.y, 1.0e-3);
+		TestCase.assertEquals(0.136, mp2.getDepth(), 1.0e-3);
 		// try reversing the shapes
 		this.gjk.detect(rect, t2, poly, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, rect, t2, poly, t1, m));
@@ -424,12 +424,12 @@ public class PolygonRectangleTest extends AbstractTest {
 		mp2 = m.getPoints().get(1);
 		p1 = mp1.getPoint();
 		p2 = mp2.getPoint();
-		TestCase.assertEquals(-0.500, p1.x, 1.0e-3);
-		TestCase.assertEquals(-0.500, p1.y, 1.0e-3);
-		TestCase.assertEquals(0.110, mp1.getDepth(), 1.0e-3);
-		TestCase.assertEquals(-0.500, p2.x, 1.0e-3);
-		TestCase.assertEquals(0.363, p2.y, 1.0e-3);
-		TestCase.assertEquals(0.618, mp2.getDepth(), 1.0e-3);
+		TestCase.assertEquals(0.000, p1.x, 1.0e-3);
+		TestCase.assertEquals(0.000, p1.y, 1.0e-3);
+		TestCase.assertEquals(0.500, mp1.getDepth(), 1.0e-3);
+		TestCase.assertEquals(-0.363, p2.x, 1.0e-3);
+		TestCase.assertEquals(-0.500, p2.y, 1.0e-3);
+		TestCase.assertEquals(0.136, mp2.getDepth(), 1.0e-3);
 		// try reversing the shapes
 		this.sat.detect(rect, t2, poly, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, rect, t2, poly, t1, m));

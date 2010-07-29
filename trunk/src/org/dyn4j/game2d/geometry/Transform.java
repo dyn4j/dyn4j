@@ -29,7 +29,7 @@ package org.dyn4j.game2d.geometry;
  * <p>
  * Supported operations are rotation and translation.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class Transform implements Transformable {
@@ -202,6 +202,20 @@ public class Transform implements Transformable {
 		t.m00 = this.m00; t.m01 = this.m01; t.x = this.x;
 		t.m10 = this.m10; t.m11 = this.m11; t.y = this.y;
 		return t;
+	}
+	
+	/**
+	 * Sets this transform to the given transform.
+	 * @param transform the transform to copy
+	 * @since 1.1.0
+	 */
+	public void set(Transform transform) {
+		this.m00 = transform.m00;
+		this.m01 = transform.m01;
+		this.m10 = transform.m10;
+		this.m11 = transform.m11;
+		this.x = transform.x;
+		this.y = transform.y;
 	}
 	
 	/**

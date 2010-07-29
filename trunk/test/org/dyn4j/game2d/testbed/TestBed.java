@@ -60,7 +60,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Container for the tests.
  * @author William Bittle
  * @param <E> the container type
- * @version 1.0.3
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {

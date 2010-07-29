@@ -61,7 +61,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Employs the same {@link Island} solving technique as <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class World {
@@ -360,7 +360,12 @@ public class World {
 						}
 						// test the two convex shapes
 						if (this.narrowphaseDetector.detect(convex1, transform1, convex2, transform2, penetration)) {
-							// notify of the narrowphase collision
+							// check for zero penetration
+							if (penetration.getDepth() == 0.0) {
+								// this should only happen if numerical error occurs
+								continue;
+							}
+							// notify of the narrow-phase collision
 							if (!this.collisionListener.collision(body1, fixture1, body2, fixture2, penetration)) {
 								// if the collision listener returned false then skip this collision
 								continue;
@@ -368,6 +373,11 @@ public class World {
 							// if there is penetration then find a contact manifold
 							// using the filled in penetration object
 							if (this.manifoldSolver.getManifold(penetration, convex1, transform1, convex2, transform2, manifold)) {
+								// check for zero points
+								if (manifold.getPoints().size() == 0) {
+									// this should only happen if numerical error occurs
+									continue;
+								}
 								// notify of the manifold solving result
 								if (!this.collisionListener.collision(body1, fixture1, body2, fixture2, manifold)) {
 									// if the collision listener returned false then skip this collision

@@ -43,7 +43,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests circle and polygon shapes in collision deteciton and resolution.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class Shapes extends Test {
@@ -75,11 +75,8 @@ public class Shapes extends Test {
 		// setup the camera
 		this.home();
 		
-		// set the bounds
-		this.bounds = new Rectangle(16.0, 15.0);
-		
 		// create the world
-		Bounds bounds = new RectangularBounds(this.bounds);
+		Bounds bounds = new RectangularBounds(Geometry.createRectangle(16.0, 15.0));
 		this.world = new World(bounds);
 		
 		// setup the contact counter

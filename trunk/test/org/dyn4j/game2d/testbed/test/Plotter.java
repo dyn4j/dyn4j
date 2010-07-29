@@ -32,8 +32,6 @@ import java.util.List;
 import org.codezealot.game.input.Input;
 import org.codezealot.game.input.Keyboard;
 import org.codezealot.game.input.Mouse;
-import org.dyn4j.game2d.collision.Bounds;
-import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.game2d.collision.manifold.Manifold;
 import org.dyn4j.game2d.collision.manifold.ManifoldPoint;
@@ -60,7 +58,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests shape collisions by plotting shapes, points, vectors, etc.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class Plotter extends Test {
@@ -115,12 +113,8 @@ public class Plotter extends Test {
 		// set the camera position and zoom
 		this.home();
 		
-		// set the bounds
-		this.bounds = new Rectangle(16.0, 15.0);
-		
 		// create the world
-		Bounds bounds = new RectangularBounds(this.bounds);
-		this.world = new World(bounds);
+		this.world = new World();
 		
 		// setup the contact counter
 		ContactCounter cc = new ContactCounter();

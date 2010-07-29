@@ -34,6 +34,8 @@ import java.util.List;
 
 import org.codezealot.game.input.Keyboard;
 import org.codezealot.game.input.Mouse;
+import org.dyn4j.game2d.collision.Bounds;
+import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.Step;
 import org.dyn4j.game2d.dynamics.World;
@@ -60,7 +62,7 @@ import org.dyn4j.game2d.geometry.Wound;
  * Using the {@link TestBed} class one can switch test without stopping
  * and starting the driver again.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.1.0
  * @since 1.0.0
  */
 public abstract class Test implements Comparable<Test> {
@@ -72,9 +74,6 @@ public abstract class Test implements Comparable<Test> {
 	
 	/** The view port offset (x, y) */
 	protected Vector2 offset;
-	
-	/** The bounds object */
-	protected Rectangle bounds;
 	
 	/** The physics world */
 	protected World world;
@@ -150,7 +149,6 @@ public abstract class Test implements Comparable<Test> {
 	 * Releases the resources used by this test.
 	 */
 	public void release() {
-		this.bounds = null;
 		this.world = null;
 	}
 	
@@ -227,7 +225,7 @@ public abstract class Test implements Comparable<Test> {
 		if (draw.drawVelocityVectors()) {
 			// set the color
 			g.setColor(Color.MAGENTA);
-			// draw all the normals for every convex on each shape
+			// draw the velocity for each body
 			for (int i = 0; i < size; i++) {
 				Body b = this.world.getBody(i);
 				Vector2 center = b.getWorldCenter();
@@ -329,12 +327,36 @@ public abstract class Test implements Comparable<Test> {
 		if (draw.drawBounds()) {
 			// draw the bounds
 			g.setColor(Color.CYAN);
-			double x = this.bounds.getVertices()[0].x;
-			double y = this.bounds.getVertices()[0].y;
-			g.drawRect((int) Math.ceil(x * this.scale),
-					   (int) Math.ceil(y * this.scale),
-					   (int) Math.ceil(this.bounds.getWidth() * this.scale),
-					   (int) Math.ceil(this.bounds.getHeight() * this.scale));
+			// get the bounds object
+			Bounds bounds = this.world.getBounds();
+			// check the type
+			if (bounds instanceof RectangularBounds) {
+				RectangularBounds rb = (RectangularBounds) bounds;
+				// draw the bounds
+				
+				// get the bounding rectangle
+				Rectangle r = rb.getBounds();
+				Transform t = rb.getTransform();
+				
+				Vector2[] vertices = r.getVertices();
+				
+				// do a color fill of the object
+				java.awt.Polygon poly = new java.awt.Polygon();
+				int l = vertices.length;
+				// create a vector to reuse
+				Vector2 v = new Vector2();
+				for (int i = 0; i < l; i++) {
+					// get the point
+					v.set(vertices[i]);
+					// put it in world coordinates
+					t.transform(v);
+					// add it to the polygon
+					poly.addPoint((int) Math.ceil(v.x * scale), (int) Math.ceil(v.y * scale));
+				}
+
+				// fill the shape			
+				g.draw(poly);
+			}
 		}
 		
 		// finally draw any test specific stuff
@@ -681,13 +703,25 @@ public abstract class Test implements Comparable<Test> {
 			Vector2[] vertices = shape.getVertices();
 			Vector2[] normals = shape.getNormals();
 			int size = normals.length;
+			// create some reusable vectors
+			Vector2 p1 = new Vector2();
+			Vector2 p2 = new Vector2();
+			Vector2 n = new Vector2();
+			Vector2 mid = new Vector2();
 			// render all the normals
 			for (int i = 0; i < size; i++) {
-				Vector2 p1 = t.getTransformed(vertices[i]);
-				Vector2 p2 = t.getTransformed(vertices[(i + 1 == size) ? 0 : i + 1]);
-				Vector2 n = t.getTransformedR(normals[i]);
+				// get the points and the normal
+				p1.set(vertices[i]);
+				p2.set(vertices[(i + 1 == size) ? 0 : i + 1]);
+				n.set(normals[i]);
+				
+				// transform the vectors into world space
+				t.transform(p1);
+				t.transform(p2);
+				t.transformR(n);
+				
 				// find the mid point between p1 and p2
-				Vector2 mid = p1.to(p2).multiply(0.5).add(p1);
+				mid.set(p2).subtract(p1).multiply(0.5).add(p1);
 				// draw a line from the mid point along n
 				g.drawLine(
 						(int) Math.ceil(mid.x * s),

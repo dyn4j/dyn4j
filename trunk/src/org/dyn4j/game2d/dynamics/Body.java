@@ -70,7 +70,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * A {@link Body} that is a sensor will not be handled in the collision
  * resolution but is handled in collision detection.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class Body implements Collidable, Transformable {
@@ -177,13 +177,13 @@ public class Body implements Collidable, Transformable {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("BODY[").append(id).append("|{");
+		sb.append("BODY[").append(id).append("|FIXTURES[");
 		// append all the shapes
 		int size = this.fixtures.size();
 		for (int i = 0; i < size; i++) {
 			sb.append(this.fixtures.get(i));
 		}
-		sb.append("}|").append(this.transform).append("]")
+		sb.append("]|TRANSFORM[").append(this.transform).append("]")
 		.append("|").append(this.mass)
 		.append("|").append(this.velocity)
 		.append("|").append(this.angularVelocity)
@@ -805,6 +805,16 @@ public class Body implements Collidable, Transformable {
 	 */
 	public Transform getTransform() {
 		return this.transform;
+	}
+	
+	/**
+	 * Sets this {@link Body}'s transform.
+	 * @param transform the transform
+	 * @since 1.1.0
+	 */
+	public void setTransform(Transform transform) {
+		if (transform == null) throw new NullPointerException("A body cannot have a null transform.");
+		this.transform = transform;
 	}
 	
 	/**
