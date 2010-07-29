@@ -45,7 +45,7 @@ import org.dyn4j.game2d.geometry.Vector2;
 /**
  * Represents a game entity.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class Entity extends Body {
@@ -191,18 +191,25 @@ public class Entity extends Body {
 	 */
 	private void renderConvex(Graphics2D g, Convex c, Transform t, double s) {
 		if (c instanceof Polygon) {
+			// do a color draw of the object
+			java.awt.Polygon poly = new java.awt.Polygon();
+			// cast to polygon
 			Polygon p = (Polygon) c;
-			for (int i = 0; i < p.getVertices().length; i++) {
-				Vector2 p1 = p.getVertices()[i];
-				Vector2 p2 = i + 1 == p.getVertices().length ? p.getVertices()[0] : p.getVertices()[i + 1];
-				p1 = t.getTransformed(p1);
-				p2 = t.getTransformed(p2);
-				g.drawLine(
-						(int) Math.ceil(p1.x * s),
-						(int) Math.ceil(p1.y * s),
-						(int) Math.ceil(p2.x * s),
-						(int) Math.ceil(p2.y * s));
+			Vector2[] vertices = p.getVertices();
+			int size = vertices.length;
+			// create a vector to reuse
+			Vector2 v = new Vector2();
+			for (int i = 0; i < size; i++) {
+				// get the point
+				v.set(vertices[i]);
+				// put it in world coordinates
+				t.transform(v);
+				// add it to the polygon
+				poly.addPoint((int) Math.ceil(v.x * s), (int) Math.ceil(v.y * s));
 			}
+
+			// draw the shape			
+			g.draw(poly);
 		} else if (c instanceof Circle) {
 			Circle cir = (Circle) c;
 			Vector2 center = cir.getCenter();
@@ -252,10 +259,17 @@ public class Entity extends Body {
 			java.awt.Polygon poly = new java.awt.Polygon();
 			// cast to polygon
 			Polygon p = (Polygon) c;
-			for (int i = 0; i < p.getVertices().length; i++) {
-				Vector2 p1 = p.getVertices()[i];
-				p1 = t.getTransformed(p1);
-				poly.addPoint((int) Math.ceil(p1.x * scale), (int) Math.ceil(p1.y * scale));
+			Vector2[] vertices = p.getVertices();
+			int size = vertices.length;
+			// create a vector to reuse
+			Vector2 v = new Vector2();
+			for (int i = 0; i < size; i++) {
+				// get the point
+				v.set(vertices[i]);
+				// put it in world coordinates
+				t.transform(v);
+				// add it to the polygon
+				poly.addPoint((int) Math.ceil(v.x * scale), (int) Math.ceil(v.y * scale));
 			}
 
 			// fill the shape			

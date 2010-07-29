@@ -29,6 +29,7 @@ import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.dynamics.joint.RevoluteJoint;
+import org.dyn4j.game2d.geometry.Geometry;
 import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Vector2;
@@ -39,7 +40,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests a number of revolute joints linked in a chain.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class Chain extends Test {
@@ -73,11 +74,8 @@ public class Chain extends Test {
 		// setup the camera
 		this.home();
 		
-		// set the bounds
-		this.bounds = new Rectangle(30.0, 10.0);
-		
 		// create the world
-		Bounds bounds = new RectangularBounds(this.bounds);
+		Bounds bounds = new RectangularBounds(Geometry.createRectangle(30.0, 10.0));
 		this.world = new World(bounds);
 		
 		// setup the contact counter

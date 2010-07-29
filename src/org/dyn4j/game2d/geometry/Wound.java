@@ -27,7 +27,7 @@ package org.dyn4j.game2d.geometry;
 /**
  * Represents an object that is defined by vertices, and has counter-clockwise winding.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.1.0
  * @since 1.0.0
  */
 public abstract class Wound extends AbstractShape implements Shape, Transformable {
@@ -44,15 +44,15 @@ public abstract class Wound extends AbstractShape implements Shape, Transformabl
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(super.toString()).append("|");
-		sb.append("{");
+		sb.append("VERTICES[");
 		for (int i = 0; i < vertices.length; i++) {
 			sb.append(vertices[i]);
 		}
-		sb.append("}|{");
+		sb.append("]|NORMALS[");
 		for (int i = 0; i < normals.length; i++) {
 			sb.append(normals[i]);
 		}
-		sb.append("}");
+		sb.append("]");
 		return sb.toString();
 	}
 

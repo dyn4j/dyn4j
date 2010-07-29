@@ -29,6 +29,7 @@ import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.Fixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.dynamics.joint.LineJoint;
+import org.dyn4j.game2d.geometry.Geometry;
 import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Vector2;
@@ -39,7 +40,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests the line joint.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class Line extends Test {
@@ -70,11 +71,8 @@ public class Line extends Test {
 		// setup the camera
 		this.home();
 		
-		// set the bounds
-		this.bounds = new Rectangle(16.0, 15.0);
-		
 		// create the world
-		Bounds bounds = new RectangularBounds(this.bounds);
+		Bounds bounds = new RectangularBounds(Geometry.createRectangle(16.0, 15.0));
 		this.world = new World(bounds);
 		
 		// setup the contact counter
@@ -99,19 +97,6 @@ public class Line extends Test {
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
 		this.world.add(floor);
-		
-		/*
-		 * Make this configuration
-		 * +-----+
-		 * |     |
-		 * |     |
-		 * |     |
-		 * +--.--+
-		 * |     |
-		 * |     |
-		 * |     |
-		 * +-----+
-		 */
 		
 		// create a reusable rectangle
 		Rectangle r = new Rectangle(0.5, 1.0);

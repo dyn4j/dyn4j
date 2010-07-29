@@ -39,7 +39,7 @@ package org.dyn4j.game2d.geometry;
  * </pre>
  * This can decrease the number of temporary vectors.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class Vector2 {
@@ -120,7 +120,7 @@ public class Vector2 {
 	 * @return double
 	 */
 	public double distance(double x, double y) {
-		return Math.sqrt((this.x - x) * (this.x - x) + (this.y - y) * (this.y - y));
+		return Math.hypot(x, y);
 	}
 	
 	/**
@@ -129,7 +129,7 @@ public class Vector2 {
 	 * @return double
 	 */
 	public double distance(Vector2 point) {
-		return Math.sqrt((this.x - point.x) * (this.x - point.x) + (this.y - point.y) * (this.y - point.y));
+		return Math.hypot(this.x - point.x, this.y - point.y);
 	}
 	
 	/**

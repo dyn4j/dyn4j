@@ -32,7 +32,7 @@ package org.dyn4j.game2d.geometry;
  * <p>
  * A polygon must also not have coincident vertices.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class Polygon extends Wound implements Convex, Shape, Transformable {
@@ -285,16 +285,22 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		// create a reference to the center
 		Vector2 c = this.center;
 		// find the vertex on the polygon that is further along on the penetration axis
+		// create a reusable vector
+		Vector2 v = new Vector2();
 		int count = this.vertices.length;
 		for (int i = 0; i < count; i++) {
+			// get the current vertex
+			Vector2 p = this.vertices[i];
 			// create a vector from the center to the point
-			Vector2 v = c.to(this.vertices[i]);
+			// manually inline c.to(p) call
+			v.x = p.x - c.x;
+			v.y = p.y - c.y;
 			// get the scalar projection of v onto axis
 			double projection = localn.dot(v);
 			// keep the maximum projection point
 			if (projection > max) {
 				// set the max point
-				maximum.set(this.vertices[i]);
+				maximum.set(p);
 				// set the new maximum
 				max = projection;
 				// save the index
@@ -336,19 +342,28 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		Vector2 c = this.center;
 		// set the farthest point to the first one
 		point.set(this.vertices[0]);
-		// set the projection amount
-		double max = localn.dot(c.to(point));
+		// create a temp vector
+		Vector2 v = new Vector2();
+		// prime the projection amount
+		// manually inline c.to(point) call
+		v.x = point.x - c.x;
+		v.y = point.y - c.y;
+		double max = localn.dot(v);
 		// loop through the rest of the vertices to find a further point along the axis
 		int size = this.vertices.length;
 		for (int i = 1; i < size; i++) {
+			// get the current vertex
+			Vector2 p = this.vertices[i];
 			// create a vector from the center to the vertex
-			Vector2 v = c.to(this.vertices[i]);
+			// manullay inline c.to(p) call
+			v.x = p.x - c.x;
+			v.y = p.y - c.y;
 			// project the vector onto the axis
 			double projection = localn.dot(v);
 			// check to see if the projection is greater than the last
 			if (projection > max) {
 				// otherwise this point is the farthest so far so clear the array and add it
-				point.set(this.vertices[i]);
+				point.set(p);
 				// set the new maximum
 				max = projection;
 			}

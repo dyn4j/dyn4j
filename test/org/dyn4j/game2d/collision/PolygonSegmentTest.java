@@ -50,7 +50,7 @@ import org.junit.Test;
 /**
  * Test case for {@link Polygon} - {@link Segment} collision detection.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class PolygonSegmentTest extends AbstractTest {
@@ -402,9 +402,9 @@ public class PolygonSegmentTest extends AbstractTest {
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
 		p1 = mp.getPoint();
-		TestCase.assertEquals(0.000, p1.x, 1.0e-3);
+		TestCase.assertEquals(-0.500, p1.x, 1.0e-3);
 		TestCase.assertEquals(0.000, p1.y, 1.0e-3);
-		TestCase.assertEquals(0.353, mp.getDepth(), 1.0e-3);
+		TestCase.assertEquals(0.404, mp.getDepth(), 1.0e-3);
 		
 		// test overlap sat
 		this.sat.detect(poly, t1, seg, t2, p);
@@ -421,9 +421,9 @@ public class PolygonSegmentTest extends AbstractTest {
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
 		p1 = mp.getPoint();
-		TestCase.assertEquals(0.000, p1.x, 1.0e-3);
+		TestCase.assertEquals(-0.500, p1.x, 1.0e-3);
 		TestCase.assertEquals(0.000, p1.y, 1.0e-3);
-		TestCase.assertEquals(0.353, mp.getDepth(), 1.0e-3);
+		TestCase.assertEquals(0.404, mp.getDepth(), 1.0e-3);
 	}
 	
 	/**
@@ -458,12 +458,12 @@ public class PolygonSegmentTest extends AbstractTest {
 		mp2 = m.getPoints().get(1);
 		p1 = mp1.getPoint();
 		p2 = mp2.getPoint();
-		TestCase.assertEquals(-0.648, p1.x, 1.0e-3);
-		TestCase.assertEquals(-0.437, p1.y, 1.0e-3);
-		TestCase.assertEquals(0.267, mp1.getDepth(), 1.0e-3);
-		TestCase.assertEquals(-0.963, p2.x, 1.0e-3);
-		TestCase.assertEquals(-0.752, p2.y, 1.0e-3);
-		TestCase.assertEquals(0.337, mp2.getDepth(), 1.0e-3);
+		TestCase.assertEquals(-0.690, p1.x, 1.0e-3);
+		TestCase.assertEquals(-0.951, p1.y, 1.0e-3);
+		TestCase.assertEquals(0.333, mp1.getDepth(), 1.0e-3);
+		TestCase.assertEquals(-0.456, p2.x, 1.0e-3);
+		TestCase.assertEquals(-0.628, p2.y, 1.0e-3);
+		TestCase.assertEquals(0.270, mp2.getDepth(), 1.0e-3);
 		// try to reverse the shapes
 		TestCase.assertTrue(this.sat.detect(seg, t2, poly, t1, p));
 		TestCase.assertTrue(this.cmfs.getManifold(p, seg, t2, poly, t1, m));
@@ -485,12 +485,12 @@ public class PolygonSegmentTest extends AbstractTest {
 		mp2 = m.getPoints().get(1);
 		p1 = mp1.getPoint();
 		p2 = mp2.getPoint();
-		TestCase.assertEquals(-0.648, p1.x, 1.0e-3);
-		TestCase.assertEquals(-0.437, p1.y, 1.0e-3);
-		TestCase.assertEquals(0.267, mp1.getDepth(), 1.0e-3);
-		TestCase.assertEquals(-0.963, p2.x, 1.0e-3);
-		TestCase.assertEquals(-0.752, p2.y, 1.0e-3);
-		TestCase.assertEquals(0.337, mp2.getDepth(), 1.0e-3);
+		TestCase.assertEquals(-0.690, p1.x, 1.0e-3);
+		TestCase.assertEquals(-0.951, p1.y, 1.0e-3);
+		TestCase.assertEquals(0.333, mp1.getDepth(), 1.0e-3);
+		TestCase.assertEquals(-0.456, p2.x, 1.0e-3);
+		TestCase.assertEquals(-0.628, p2.y, 1.0e-3);
+		TestCase.assertEquals(0.270, mp2.getDepth(), 1.0e-3);
 		// try to reverse the shapes
 		TestCase.assertTrue(this.gjk.detect(seg, t2, poly, t1, p));
 		TestCase.assertTrue(this.cmfs.getManifold(p, seg, t2, poly, t1, m));
@@ -504,5 +504,42 @@ public class PolygonSegmentTest extends AbstractTest {
 		TestCase.assertEquals(-0.456, p2.x, 1.0e-3);
 		TestCase.assertEquals(-0.628, p2.y, 1.0e-3);
 		TestCase.assertEquals(0.270, mp2.getDepth(), 1.0e-3);
+	}
+	
+	/**
+	 * Tests a case where the manifold solver would find the wrong
+	 * contact points when a thin object intersected a polygon.
+	 * @since 1.1.0
+	 */
+	@Test
+	public void testBadPoints1() {
+		Polygon p = Geometry.createUnitCirclePolygon(5, 1.0);
+		Segment s = new Segment(new Vector2(-0.5, 0.0), new Vector2(0.5, 0.0));
+		
+		Transform t1 = new Transform();
+		Transform t2 = new Transform();
+
+		// polygon
+		// [1.0 0.0 | 1.3671875]
+		// [0.0 1.0 | 0.8828125]
+		
+		// segment
+		// [1.0 0.0 | 0.171875]
+		// [0.0 1.0 | 1.0     ]
+		
+		t1.translate(1.3671875, 0.8828125);
+		t2.translate(0.171875, 1.0);
+		
+		Penetration penetration = new Penetration();
+		TestCase.assertTrue(this.gjk.detect(s, t2, p, t1, penetration));
+		
+		Manifold manifold = new Manifold();
+		TestCase.assertTrue(this.cmfs.getManifold(penetration, s, t2, p, t1, manifold));
+		
+		ManifoldPoint mp1 = manifold.getPoints().get(0);
+		Vector2 p1 = mp1.getPoint();
+		TestCase.assertEquals(0.671, p1.x, 1.0e-3);
+		TestCase.assertEquals(1.000, p1.y, 1.0e-3);
+		TestCase.assertEquals(0.113, mp1.getDepth(), 1.0e-3);
 	}
 }

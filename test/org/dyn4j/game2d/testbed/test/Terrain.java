@@ -43,7 +43,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests a floor/terrain created by a set of line segments.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class Terrain extends Test {
@@ -76,11 +76,8 @@ public class Terrain extends Test {
 		// setup the camera
 		this.home();
 		
-		// set the bounds
-		this.bounds = new Rectangle(16.0, 15.0);
-		
 		// create the world
-		Bounds bounds = new RectangularBounds(this.bounds);
+		Bounds bounds = new RectangularBounds(Geometry.createRectangle(16.0, 15.0));
 		this.world = new World(bounds);
 		
 		// setup the contact counter

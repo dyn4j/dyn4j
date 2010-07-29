@@ -49,7 +49,7 @@ import org.junit.Test;
 /**
  * Test case for {@link Segment} - {@link Triangle} collision detection.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class SegmentTriangleTest extends AbstractTest {
@@ -395,9 +395,9 @@ public class SegmentTriangleTest extends AbstractTest {
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
 		p1 = mp.getPoint();
-		TestCase.assertEquals(-0.040, p1.x, 1.0e-3);
-		TestCase.assertEquals(-0.139, p1.y, 1.0e-3);
-		TestCase.assertEquals(0.056, mp.getDepth(), 1.0e-3);
+		TestCase.assertEquals(0.000, p1.x, 1.0e-3);
+		TestCase.assertEquals(-0.100, p1.y, 1.0e-3);
+		TestCase.assertEquals(0.053, mp.getDepth(), 1.0e-3);
 		// try reversing the shapes
 		this.gjk.detect(tri, t2, seg, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, tri, t2, seg, t1, m));
@@ -414,9 +414,9 @@ public class SegmentTriangleTest extends AbstractTest {
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
 		p1 = mp.getPoint();
-		TestCase.assertEquals(-0.040, p1.x, 1.0e-3);
-		TestCase.assertEquals(-0.139, p1.y, 1.0e-3);
-		TestCase.assertEquals(0.056, mp.getDepth(), 1.0e-3);
+		TestCase.assertEquals(0.000, p1.x, 1.0e-3);
+		TestCase.assertEquals(-0.100, p1.y, 1.0e-3);
+		TestCase.assertEquals(0.053, mp.getDepth(), 1.0e-3);
 		// try reversing the shapes
 		this.sat.detect(tri, t2, seg, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, tri, t2, seg, t1, m));

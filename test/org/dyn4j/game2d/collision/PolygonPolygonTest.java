@@ -49,7 +49,7 @@ import org.junit.Test;
 /**
  * Test case for {@link Polygon} - {@link Polygon} collision detection.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class PolygonPolygonTest extends AbstractTest {
@@ -394,12 +394,12 @@ public class PolygonPolygonTest extends AbstractTest {
 		mp2 = m.getPoints().get(1);
 		p1 = mp1.getPoint();
 		p2 = mp2.getPoint();
-		TestCase.assertEquals(-0.5, p1.x, 1.0e-3);
-		TestCase.assertEquals(0.0, p1.y, 1.0e-3);
-		TestCase.assertEquals(0.404, mp1.getDepth(), 1.0e-3);
-		TestCase.assertEquals(-0.352, p2.x, 1.0e-3);
-		TestCase.assertEquals(0.255, p2.y, 1.0e-3);
-		TestCase.assertEquals(0.435, mp2.getDepth(), 1.0e-3);
+		TestCase.assertEquals(0.000, p1.x, 1.0e-3);
+		TestCase.assertEquals(0.000, p1.y, 1.0e-3);
+		TestCase.assertEquals(0.433, mp1.getDepth(), 1.0e-3);
+		TestCase.assertEquals(-0.147, p2.x, 1.0e-3);
+		TestCase.assertEquals(-0.203, p2.y, 1.0e-3);
+		TestCase.assertEquals(0.406, mp2.getDepth(), 1.0e-3);
 		// try reversing the shapes
 		this.gjk.detect(poly2, t2, poly1, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, poly2, t2, poly1, t1, m));
@@ -423,12 +423,12 @@ public class PolygonPolygonTest extends AbstractTest {
 		mp2 = m.getPoints().get(1);
 		p1 = mp1.getPoint();
 		p2 = mp2.getPoint();
-		TestCase.assertEquals(-0.5, p1.x, 1.0e-3);
-		TestCase.assertEquals(0.0, p1.y, 1.0e-3);
-		TestCase.assertEquals(0.404, mp1.getDepth(), 1.0e-3);
-		TestCase.assertEquals(-0.352, p2.x, 1.0e-3);
-		TestCase.assertEquals(0.255, p2.y, 1.0e-3);
-		TestCase.assertEquals(0.435, mp2.getDepth(), 1.0e-3);
+		TestCase.assertEquals(0.000, p1.x, 1.0e-3);
+		TestCase.assertEquals(0.000, p1.y, 1.0e-3);
+		TestCase.assertEquals(0.433, mp1.getDepth(), 1.0e-3);
+		TestCase.assertEquals(-0.147, p2.x, 1.0e-3);
+		TestCase.assertEquals(-0.203, p2.y, 1.0e-3);
+		TestCase.assertEquals(0.406, mp2.getDepth(), 1.0e-3);
 		// try reversing the shapes
 		this.sat.detect(poly2, t2, poly1, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, poly2, t2, poly1, t1, m));

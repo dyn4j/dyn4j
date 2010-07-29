@@ -40,7 +40,7 @@ import org.dyn4j.game2d.geometry.Vector2;
 /**
  * Class to count the number of added, removed, and persisted contacts.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class ContactCounter implements ContactListener, StepListener {
@@ -166,6 +166,7 @@ public class ContactCounter implements ContactListener, StepListener {
 	/**
 	 * Returns the number of sensed contacts.
 	 * @return int the number of sensed contacts
+	 * @since 1.1.0
 	 */
 	public int getSensed() {
 		return sensed;
