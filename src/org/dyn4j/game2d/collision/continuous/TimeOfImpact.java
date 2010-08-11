@@ -22,42 +22,38 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.game2d;
+package org.dyn4j.game2d.collision.continuous;
+
+import org.dyn4j.game2d.collision.Collidable;
+import org.dyn4j.game2d.collision.narrowphase.Separation;
 
 /**
- * The version of the engine.
+ * Represents the time of impact information between two {@link Swept}
+ * {@link Collidable}s.
  * @author William Bittle
  * @version 1.2.0
- * @since 1.0.0
+ * @since 1.2.0
  */
-public final class Version {
-	/** The major version number; API changes, major enhancements, etc. */
-	public static final int MAJOR = 1;
+public class TimeOfImpact {
+	/** The time of impact in the range [0, 1] */
+	protected double toi;
 	
-	/** The minor version number; minor enhancements, major bug fixes, etc. */
-	public static final int MINOR = 2;
-	
-	/** The revision number; minor bug fixes */
-	public static final int REVISION = 0;
+	/** The separation at the time of impact */
+	protected Separation separation;
 	
 	/**
-	 * Hide the constructor.
+	 * Returns the time of impact in the range [0, 1].
+	 * @return double
 	 */
-	private Version() {}
-	
-	/**
-	 * Returns the version as a string.
-	 * @return String
-	 */
-	public static String getVersion() {
-		return MAJOR + "." + MINOR + "." + REVISION;
+	public double getToi() {
+		return toi;
 	}
 	
 	/**
-	 * Main class to print the version to the console.
-	 * @param args command line arguments (none accepted)
+	 * Returns the separation at the time of impact.
+	 * @return {@link Separation}
 	 */
-	public static final void main(String[] args) {
-		System.out.println("dyn4j v" + Version.getVersion());
+	public Separation getSeparation() {
+		return separation;
 	}
 }

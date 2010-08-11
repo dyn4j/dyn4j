@@ -315,8 +315,8 @@ public class CircleTriangleTest extends AbstractTest {
 		TestCase.assertEquals(0.752, n.y, 1.0e-3);
 		TestCase.assertEquals(-0.341, p1.x, 1.0e-3);
 		TestCase.assertEquals(0.752, p1.y, 1.0e-3);
-		TestCase.assertEquals(-0.3, p2.x);
-		TestCase.assertEquals(0.8, p2.y);
+		TestCase.assertEquals(-0.3, p2.x, 1.0e-3);
+		TestCase.assertEquals(0.8, p2.y, 1.0e-3);
 		// try reversing the shapes
 		TestCase.assertTrue(this.gjk.distance(tri, t2, circ, t1, s));
 		n = s.getNormal();
@@ -325,8 +325,8 @@ public class CircleTriangleTest extends AbstractTest {
 		TestCase.assertEquals(0.063, s.getDistance(), 1.0e-3);
 		TestCase.assertEquals(-0.658, n.x, 1.0e-3);
 		TestCase.assertEquals(-0.752, n.y, 1.0e-3);
-		TestCase.assertEquals(-0.3, p1.x);
-		TestCase.assertEquals(0.8, p1.y);
+		TestCase.assertEquals(-0.3, p1.x, 1.0e-3);
+		TestCase.assertEquals(0.8, p1.y, 1.0e-3);
 		TestCase.assertEquals(-0.341, p2.x, 1.0e-3);
 		TestCase.assertEquals(0.752, p2.y, 1.0e-3);
 		
@@ -341,8 +341,8 @@ public class CircleTriangleTest extends AbstractTest {
 		TestCase.assertEquals(0.425, n.y, 1.0e-3);
 		TestCase.assertEquals(-1.095, p1.x, 1.0e-3);
 		TestCase.assertEquals(0.425, p1.y, 1.0e-3);
-		TestCase.assertEquals(-0.3, p2.x);
-		TestCase.assertEquals(0.8, p2.y);
+		TestCase.assertEquals(-0.3, p2.x, 1.0e-3);
+		TestCase.assertEquals(0.8, p2.y, 1.0e-3);
 		// try reversing the shapes
 		TestCase.assertTrue(this.gjk.distance(tri, t2, circ, t1, s));
 		n = s.getNormal();
@@ -351,8 +351,8 @@ public class CircleTriangleTest extends AbstractTest {
 		TestCase.assertEquals(0.878, s.getDistance(), 1.0e-3);
 		TestCase.assertEquals(-0.904, n.x, 1.0e-3);
 		TestCase.assertEquals(-0.425, n.y, 1.0e-3);
-		TestCase.assertEquals(-0.3, p1.x);
-		TestCase.assertEquals(0.8, p1.y);
+		TestCase.assertEquals(-0.3, p1.x, 1.0e-3);
+		TestCase.assertEquals(0.8, p1.y, 1.0e-3);
 		TestCase.assertEquals(-1.095, p2.x, 1.0e-3);
 		TestCase.assertEquals(0.425, p2.y, 1.0e-3);
 	}

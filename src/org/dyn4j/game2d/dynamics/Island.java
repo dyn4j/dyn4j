@@ -39,7 +39,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Nearly identitcal to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.2.0
  * @since 1.0.0
  */
 public class Island {
@@ -227,13 +227,13 @@ public class Island {
 		}
 		
 		// see if sleep is enabled
-		if (settings.canSleep()) {
+		if (settings.isAutoSleepingEnabled()) {
 			double minSleepTime = Double.MAX_VALUE;
 			// check for sleep-able bodies
 			for (int i = 0; i < size; i++) {
 				Body body = this.bodies.get(i);
 				// see if the body is allowed to sleep
-				if (body.canSleep()) {
+				if (body.isAutoSleepingEnabled()) {
 					// just skip static bodies
 					if (body.isStatic()) continue;
 					// check the linear and angular velocity

@@ -45,6 +45,7 @@ import org.codezealot.game.render.Container;
 import org.codezealot.game.render.G2dSurface;
 import org.dyn4j.game2d.Version;
 import org.dyn4j.game2d.collision.broadphase.Sap;
+import org.dyn4j.game2d.collision.continuous.ConservativeAdvancement;
 import org.dyn4j.game2d.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.game2d.collision.narrowphase.Gjk;
 import org.dyn4j.game2d.collision.narrowphase.Sat;
@@ -60,7 +61,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Container for the tests.
  * @author William Bittle
  * @param <E> the container type
- * @version 1.1.0
+ * @version 1.2.0
  * @since 1.0.0
  */
 public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
@@ -1104,6 +1105,16 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 			// if it has then set it
 			if ("Clip".equals(this.settingsFrame.getMSAlgorithm())) {
 				this.test.world.setManifoldSolver(new ClippingManifoldSolver());
+			}
+		}
+		
+		// set the selected time of impact detector
+		String toiAlgo = this.test.world.getTimeOfImpactDetector().getClass() == ConservativeAdvancement.class ? "CA" : "";
+		// make sure the algorithm setting has changed
+		if (!this.settingsFrame.getTOIAlgorithm().equals(toiAlgo)) {
+			// if it has then set it
+			if ("CA".equals(this.settingsFrame.getTOIAlgorithm())) {
+				this.test.world.setTimeOfImpactDetector(new ConservativeAdvancement());
 			}
 		}
 

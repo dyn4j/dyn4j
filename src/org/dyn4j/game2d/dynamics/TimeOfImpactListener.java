@@ -22,42 +22,38 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.game2d;
+package org.dyn4j.game2d.dynamics;
 
 /**
- * The version of the engine.
+ * Interface to listen for TOI events.
  * @author William Bittle
  * @version 1.2.0
- * @since 1.0.0
+ * @since 1.2.0
  */
-public final class Version {
-	/** The major version number; API changes, major enhancements, etc. */
-	public static final int MAJOR = 1;
-	
-	/** The minor version number; minor enhancements, major bug fixes, etc. */
-	public static final int MINOR = 2;
-	
-	/** The revision number; minor bug fixes */
-	public static final int REVISION = 0;
+public interface TimeOfImpactListener {
+	/**
+	 * Called when a time of impact has been detected between a dynamic
+	 * {@link Body} and a kinematic/static {@link Body}.
+	 * <p>
+	 * Returning true from this method indicates that the collision of these
+	 * two {@link Body}s should be processed.
+	 * @param dynamic the dynamic {@link Body}
+	 * @param other the other {@link Body}
+	 * @param toi the time of impact between the two {@link Body}s
+	 * @return boolean true if the collision should be handled
+	 */
+	public abstract boolean dynamic(Body dynamic, Body other, double toi);
 	
 	/**
-	 * Hide the constructor.
+	 * Called when a time of impact has been detected between a bullet
+	 * {@link Body} and another {@link Body}.
+	 * <p>
+	 * Returning true from this method indicates that the collision of these
+	 * two {@link Body}s should be processed.
+	 * @param bullet the bullet {@link Body}
+	 * @param other the other {@link Body}
+	 * @param toi the time of impact between the two {@link Body}s
+	 * @return boolean true if the collision should be handled
 	 */
-	private Version() {}
-	
-	/**
-	 * Returns the version as a string.
-	 * @return String
-	 */
-	public static String getVersion() {
-		return MAJOR + "." + MINOR + "." + REVISION;
-	}
-	
-	/**
-	 * Main class to print the version to the console.
-	 * @param args command line arguments (none accepted)
-	 */
-	public static final void main(String[] args) {
-		System.out.println("dyn4j v" + Version.getVersion());
-	}
+	public abstract boolean bullet(Body bullet, Body other, double toi);
 }

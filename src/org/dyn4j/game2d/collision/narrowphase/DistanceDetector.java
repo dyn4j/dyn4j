@@ -22,42 +22,29 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.game2d;
+package org.dyn4j.game2d.collision.narrowphase;
+
+import org.dyn4j.game2d.geometry.Convex;
+import org.dyn4j.game2d.geometry.Shape;
+import org.dyn4j.game2d.geometry.Transform;
 
 /**
- * The version of the engine.
+ * Interface representing an algorithm to detect the distance between two convex shapes.
  * @author William Bittle
  * @version 1.2.0
- * @since 1.0.0
+ * @since 1.2.0
  */
-public final class Version {
-	/** The major version number; API changes, major enhancements, etc. */
-	public static final int MAJOR = 1;
-	
-	/** The minor version number; minor enhancements, major bug fixes, etc. */
-	public static final int MINOR = 2;
-	
-	/** The revision number; minor bug fixes */
-	public static final int REVISION = 0;
-	
+public interface DistanceDetector {
 	/**
-	 * Hide the constructor.
+	 * Returns true if the two shapes are separated and fills the given
+	 * {@link Separation} object with the minimum distance vector, distance,
+	 * and closest points.
+	 * @param convex1 the first {@link Shape}
+	 * @param transform1 the first {@link Shape}'s {@link Transform}
+	 * @param convex2 the second {@link Shape}
+	 * @param transform2 the second {@link Shape}'s {@link Transform}
+	 * @param separation the {@link Separation} object to fill
+	 * @return boolean
 	 */
-	private Version() {}
-	
-	/**
-	 * Returns the version as a string.
-	 * @return String
-	 */
-	public static String getVersion() {
-		return MAJOR + "." + MINOR + "." + REVISION;
-	}
-	
-	/**
-	 * Main class to print the version to the console.
-	 * @param args command line arguments (none accepted)
-	 */
-	public static final void main(String[] args) {
-		System.out.println("dyn4j v" + Version.getVersion());
-	}
+	public boolean distance(Convex convex1, Transform transform1, Convex convex2, Transform transform2, Separation separation);
 }
