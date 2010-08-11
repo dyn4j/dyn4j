@@ -31,6 +31,8 @@ import org.dyn4j.game2d.collision.BoundsListener;
 import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.game2d.collision.broadphase.Sap;
+import org.dyn4j.game2d.collision.continuous.ConservativeAdvancement;
+import org.dyn4j.game2d.collision.continuous.TimeOfImpactDetector;
 import org.dyn4j.game2d.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.game2d.collision.manifold.ManifoldSolver;
 import org.dyn4j.game2d.collision.narrowphase.Gjk;
@@ -49,7 +51,7 @@ import org.junit.Test;
 /**
  * Contains the test cases for the {@link World} class.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.2.0
  * @since 1.0.2
  */
 public class WorldTest {
@@ -502,6 +504,29 @@ public class WorldTest {
 	}
 	
 	/**
+	 * Tests the set time of impact listener method.
+	 * @since 1.2.0
+	 */
+	@Test
+	public void setTimeOfImpactListener() {
+		World w = new World();
+		TimeOfImpactListener toil = new TimeOfImpactAdapter();
+		w.setTimeOfImpactListener(toil);
+		
+		TestCase.assertSame(toil, w.getTimeOfImpactListener());
+	}
+	
+	/**
+	 * Tests the set time of impact listener method passing a null value.
+	 * @since 1.2.0
+	 */
+	@Test(expected = NullPointerException.class)
+	public void setNullTimeOfImpactListener() {
+		World w = new World();
+		w.setTimeOfImpactListener(null);
+	}
+	
+	/**
 	 * Tests the set destruction listener method.
 	 */
 	@Test
@@ -646,6 +671,29 @@ public class WorldTest {
 	public void setNullManifoldSolver() {
 		World w = new World();
 		w.setManifoldSolver(null);
+	}
+	
+	/**
+	 * Tests the set manifold solver method.
+	 * @since 1.2.0
+	 */
+	@Test
+	public void setTimeOfImpactDetector() {
+		World w = new World();
+		TimeOfImpactDetector toid = new ConservativeAdvancement();
+		w.setTimeOfImpactDetector(toid);
+		
+		TestCase.assertSame(toid, w.getTimeOfImpactDetector());
+	}
+	
+	/**
+	 * Tests the set manifold solver method passing a null value.
+	 * @since 1.2.0
+	 */
+	@Test(expected = NullPointerException.class)
+	public void setNullTimeOfImpactDetector() {
+		World w = new World();
+		w.setTimeOfImpactDetector(null);
 	}
 	
 	/**

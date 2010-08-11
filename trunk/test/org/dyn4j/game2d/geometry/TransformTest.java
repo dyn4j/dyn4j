@@ -150,4 +150,118 @@ public class TransformTest {
 		vt = t.getTransformedR(vt);
 		TestCase.assertTrue(vt.equals(v));
 	}
+	
+	/**
+	 * Tests the setTransform method.
+	 */
+	@Test
+	public void setTransform() {
+		Transform tx = new Transform();
+		tx.rotate(Math.toRadians(30));
+		tx.translate(2.0, 0.5);
+		Transform tx2 = new Transform();
+		tx2.set(tx);
+		
+		// shouldnt be the same object reference
+		TestCase.assertNotSame(tx2, tx);
+		
+		// should be the same transformation
+		TestCase.assertEquals(tx.m00, tx2.m00);
+		TestCase.assertEquals(tx.m01, tx2.m01);
+		TestCase.assertEquals(tx.m10, tx2.m10);
+		TestCase.assertEquals(tx.m11, tx2.m11);
+		TestCase.assertEquals(tx.x, tx2.x);
+		TestCase.assertEquals(tx.y, tx2.y);
+	}
+	
+	/**
+	 * Tests the setTranslation methods.
+	 */
+	@Test
+	public void setTranslation() {
+		Transform tx = new Transform();
+		tx.translate(1.0, 2.0);
+		tx.rotate(Math.toRadians(45));
+		tx.setTranslation(0.0, 0.0);
+		
+		TestCase.assertEquals(0.0, tx.x);
+		TestCase.assertEquals(0.0, tx.y);
+		TestCase.assertEquals(Math.toRadians(45.000), tx.getRotation(), 1.0e-3);
+		
+		tx.setTranslationX(2.0);
+		TestCase.assertEquals(2.0, tx.x);
+		TestCase.assertEquals(0.0, tx.y);
+		TestCase.assertEquals(Math.toRadians(45.000), tx.getRotation(), 1.0e-3);
+		
+		tx.setTranslationY(3.0);
+		TestCase.assertEquals(2.0, tx.x);
+		TestCase.assertEquals(3.0, tx.y);
+		TestCase.assertEquals(Math.toRadians(45.000), tx.getRotation(), 1.0e-3);
+	}
+	
+	/**
+	 * Tests the setRotation method.
+	 */
+	@Test
+	public void setRotation() {
+		Transform tx = new Transform();
+		tx.translate(1.0, 0.0);
+		tx.rotate(Math.toRadians(45.0));
+		
+		tx.setRotation(0.0);
+		TestCase.assertEquals(0.000, tx.getRotation(), 1.0e-3);
+		TestCase.assertEquals(1.0, tx.x);
+		TestCase.assertEquals(0.0, tx.y);
+	}
+	
+	/**
+	 * Tests the linear interpolation methods.
+	 */
+	@Test
+	public void lerp() {
+		Vector2 p = new Vector2();
+		
+		Transform start = new Transform();
+		start.translate(1.0, 0.0);
+		start.rotate(Math.toRadians(45));
+		
+		Transform end = new Transform();
+		end.set(start);
+		end.translate(3.0, 2.0);
+		end.rotate(Math.toRadians(20));
+		
+		Vector2 s = start.getTransformed(p);
+		Vector2 e = end.getTransformed(p);
+		
+		final double alpha = 0.5;
+		
+		start.lerp(end, alpha);
+		
+		Vector2 m = start.getTransformed(p);
+		
+		// this test only works this way for the mid point
+		// otherwise we would have to replicate the lerp method
+		TestCase.assertEquals((s.x + e.x) * alpha, m.x);
+		TestCase.assertEquals((s.y + e.y) * alpha, m.y);
+		
+		// test opposing sign angles
+		start.identity();
+		start.rotate(Math.toRadians(174.0));
+		
+		end.identity();
+		end.rotate(Math.toRadians(-168));
+		
+		Transform l = start.lerped(end, alpha);
+		TestCase.assertEquals(-3.089, l.getRotation(), 1.0e-3);
+		
+		// test opposing sign angles
+		start.identity();
+		start.rotate(Math.toRadians(354.0));
+		
+		end.identity();
+		end.rotate(Math.toRadians(2.0));
+		
+		l = start.lerped(end, alpha);
+		TestCase.assertEquals(-0.034, l.getRotation(), 1.0e-3);
+	}
 }

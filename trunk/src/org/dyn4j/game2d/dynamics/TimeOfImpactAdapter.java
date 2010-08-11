@@ -22,42 +22,27 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.game2d;
+package org.dyn4j.game2d.dynamics;
 
 /**
- * The version of the engine.
+ * Convience class for implementing the {@link TimeOfImpactListener} interface.
+ * <p>
+ * This class can be used to implement only the methods desired instead of all
+ * the methods contained in the {@link TimeOfImpactListener} interface.
  * @author William Bittle
  * @version 1.2.0
- * @since 1.0.0
+ * @since 1.2.0
  */
-public final class Version {
-	/** The major version number; API changes, major enhancements, etc. */
-	public static final int MAJOR = 1;
-	
-	/** The minor version number; minor enhancements, major bug fixes, etc. */
-	public static final int MINOR = 2;
-	
-	/** The revision number; minor bug fixes */
-	public static final int REVISION = 0;
-	
-	/**
-	 * Hide the constructor.
+public class TimeOfImpactAdapter implements TimeOfImpactListener {
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.dynamics.TimeOfImpactListener#dynamic(org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.dynamics.Body, double)
 	 */
-	private Version() {}
+	@Override
+	public boolean dynamic(Body dynamic, Body other, double toi) { return true; }
 	
-	/**
-	 * Returns the version as a string.
-	 * @return String
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.dynamics.TimeOfImpactListener#bullet(org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.dynamics.Body, double)
 	 */
-	public static String getVersion() {
-		return MAJOR + "." + MINOR + "." + REVISION;
-	}
-	
-	/**
-	 * Main class to print the version to the console.
-	 * @param args command line arguments (none accepted)
-	 */
-	public static final void main(String[] args) {
-		System.out.println("dyn4j v" + Version.getVersion());
-	}
+	@Override
+	public boolean bullet(Body bullet, Body other, double toi) { return true; }
 }

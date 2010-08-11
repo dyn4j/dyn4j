@@ -47,7 +47,7 @@ import org.junit.Test;
 /**
  * Class to test the {@link Body} class.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.2.0
  * @since 1.0.2
  */
 public class BodyTest {
@@ -407,15 +407,16 @@ public class BodyTest {
 	@Test
 	public void sleeping() {
 		Body b = new Body();
-		b.setCanSleep(true);
-		TestCase.assertTrue(b.canSleep());
-		b.setCanSleep(false);
-		TestCase.assertFalse(b.canSleep());
+		b.setAutoSleepingEnabled(true);
+		TestCase.assertTrue(b.isAutoSleepingEnabled());
+		b.setAutoSleepingEnabled(false);
+		TestCase.assertFalse(b.isAutoSleepingEnabled());
 		
 		b.setAsleep(false);
 		TestCase.assertFalse(b.isAsleep());
 		
-		b.setCanSleep(true);
+		// test that we can sleep the body even if the
+		// auto sleep is not enabled.
 		b.velocity.x = -0.5;
 		b.velocity.y = 1.0;
 		b.angularVelocity = 3.2;

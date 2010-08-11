@@ -29,10 +29,13 @@ package org.dyn4j.game2d.geometry;
  * <p>
  * Supported operations are rotation and translation.
  * @author William Bittle
- * @version 1.1.0
+ * @version 1.2.0
  * @since 1.0.0
  */
 public class Transform implements Transformable {
+	/** Two times PI */
+	private static final double TWO_PI = Math.PI * 2.0;
+	
 	/**
 	 * An immutable identity transform.
 	 */
@@ -390,6 +393,15 @@ public class Transform implements Transformable {
 	public double getTranslationX() {
 		return this.x;
 	}
+	
+	/**
+	 * Sets the translation along the x axis.
+	 * @param x the translation along the x axis
+	 * @since 1.2.0
+	 */
+	public void setTranslationX(double x) {
+		this.x = x;
+	}
 
 	/**
 	 * Returns the x translation.
@@ -400,11 +412,40 @@ public class Transform implements Transformable {
 	}
 	
 	/**
+	 * Sets the translation along the y axis.
+	 * @param y the translation along the y axis
+	 * @since 1.2.0
+	 */
+	public void setTranslationY(double y) {
+		this.y = y;
+	}
+	
+	/**
 	 * Returns the translation {@link Vector2}.
 	 * @return {@link Vector2}
 	 */
 	public Vector2 getTranslation() {
 		return new Vector2(this.x, this.y);
+	}
+	
+	/**
+	 * Sets the translation.
+	 * @param x the translation along the x axis
+	 * @param y the translation along the y axis
+	 * @since 1.2.0
+	 */
+	public void setTranslation(double x, double y) {
+		this.x = x;
+		this.y = y;
+	}
+	
+	/**
+	 * Sets the translation.
+	 * @param translation the translation along both axes
+	 * @since 1.2.0
+	 */
+	public void setTranslation(Vector2 translation) {
+		this.setTranslation(translation.x, translation.y);
 	}
 	
 	/**
@@ -427,6 +468,21 @@ public class Transform implements Transformable {
 	}
 	
 	/**
+	 * Sets the rotation and returns the previous
+	 * rotation.
+	 * @param theta the angle in radians
+	 * @since 1.2.0
+	 */
+	public void setRotation(double theta) {
+		// get the current rotation
+		double r = this.getRotation();
+		// get rid of the current rotation
+		this.rotate(-r);
+		// rotate the given amount
+		this.rotate(theta);
+	}
+	
+	/**
 	 * Returns a new {@link Transform} including only the
 	 * rotation of this {@link Transform}.
 	 * @return {@link Transform}
@@ -435,5 +491,142 @@ public class Transform implements Transformable {
 		Transform t = new Transform();
 		t.rotate(this.getRotation());
 		return t;
+	}
+	
+	/**
+	 * Interpolates this transform linearly by alpha towards the given end transform.
+	 * <p>
+	 * Interpolating from one angle to another can have two results depending on the
+	 * direction of the rotation.  If a rotation was from 30 to 200 the rotation could
+	 * be 170 or -190.  This interpolation method will always choose the smallest
+	 * rotation (regardless of sign) as the rotation direction.
+	 * @param end the end transform
+	 * @param alpha the amount to interpolate
+	 * @since 1.2.0
+	 */
+	public void lerp(Transform end, double alpha) {
+		// interpolate the position
+		double x = (1.0 - alpha) * this.x + alpha * end.x;
+		double y = (1.0 - alpha) * this.y + alpha * end.y;
+		
+		// compute the angle
+		// get the start and end rotations
+		// its key that these methods use atan2 because
+		// it ensures that the angles are always within
+		// the range -pi < theta < pi therefore no
+		// normalization has to be done
+		double rs = this.getRotation();
+		double re = end.getRotation();
+		// make sure we use the smallest rotation
+		// as described in the comments above, there
+		// are two possible rotations depending on the
+		// direction, we always choose the smaller
+		double diff = re - rs;
+		if (diff < -Math.PI) diff += TWO_PI;
+		if (diff > Math.PI) diff -= TWO_PI;
+		// interpolate
+		// its ok if this method produces an angle
+		// outside the range of -pi < theta < pi
+		// since the rotate method uses sin and cos
+		// which are not bounded
+		double a = diff * alpha + rs;
+		
+		// set this transform to the interpolated transform
+		this.identity();
+		this.rotate(a);
+		this.translate(x, y);
+	}
+	
+	/**
+	 * Interpolates linearly by alpha towards the given end transform placing
+	 * the result in the given transform.
+	 * <p>
+	 * Interpolating from one angle to another can have two results depending on the
+	 * direction of the rotation.  If a rotation was from 30 to 200 the rotation could
+	 * be 170 or -190.  This interpolation method will always choose the smallest
+	 * rotation (regardless of sign) as the rotation direction.
+	 * @param end the end transform
+	 * @param alpha the amount to interpolate
+	 * @param result the transform to place the result
+	 * @since 1.2.0
+	 */
+	public void lerp(Transform end, double alpha, Transform result) {
+		// interpolate the position
+		double x = (1.0 - alpha) * this.x + alpha * end.x;
+		double y = (1.0 - alpha) * this.y + alpha * end.y;
+		
+		// compute the angle
+		// get the start and end rotations
+		// its key that these methods use atan2 because
+		// it ensures that the angles are always within
+		// the range -pi < theta < pi therefore no
+		// normalization has to be done
+		double rs = this.getRotation();
+		double re = end.getRotation();
+		// make sure we use the smallest rotation
+		// as described in the comments above, there
+		// are two possible rotations depending on the
+		// direction, we always choose the smaller
+		double diff = re - rs;
+		if (diff < -Math.PI) diff += TWO_PI;
+		if (diff > Math.PI) diff -= TWO_PI;
+		// interpolate
+		// its ok if this method produces an angle
+		// outside the range of -pi < theta < pi
+		// since the rotate method uses sin and cos
+		// which are not bounded
+		double a = diff * alpha + rs;
+		
+		// set the result transform to the interpolated transform
+		result.identity();
+		result.rotate(a);
+		result.translate(x, y);
+	}
+	
+	/**
+	 * Interpolates linearly by alpha towards the given end transform returning
+	 * a new transform containing the result.
+	 * <p>
+	 * Interpolating from one angle to another can have two results depending on the
+	 * direction of the rotation.  If a rotation was from 30 to 200 the rotation could
+	 * be 170 or -190.  This interpolation method will always choose the smallest
+	 * rotation (regardless of sign) as the rotation direction.
+	 * @param end the end transform
+	 * @param alpha the amount to interpolate
+	 * @return {@link Transform} the resulting transform
+	 * @since 1.2.0
+	 */
+	public Transform lerped(Transform end, double alpha) {
+		// interpolate the position
+		double x = (1.0 - alpha) * this.x + alpha * end.x;
+		double y = (1.0 - alpha) * this.y + alpha * end.y;
+		
+		// compute the angle
+		// get the start and end rotations
+		// its key that these methods use atan2 because
+		// it ensures that the angles are always within
+		// the range -pi < theta < pi therefore no
+		// normalization has to be done
+		double rs = this.getRotation();
+		double re = end.getRotation();
+		// make sure we use the smallest rotation
+		// as described in the comments above, there
+		// are two possible rotations depending on the
+		// direction, we always choose the smaller
+		double diff = re - rs;
+		if (diff < -Math.PI) diff += TWO_PI;
+		if (diff > Math.PI) diff -= TWO_PI;
+		// interpolate
+		// its ok if this method produces an angle
+		// outside the range of -pi < theta < pi
+		// since the rotate method uses sin and cos
+		// which are not bounded
+		double a = diff * alpha + rs;
+		
+		// create the interpolated transform
+		Transform tx = new Transform();
+		tx.rotate(a);
+		tx.translate(x, y);
+		return tx;
 	}
 }

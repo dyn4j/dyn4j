@@ -36,12 +36,16 @@ import org.dyn4j.game2d.collision.Filter;
 import org.dyn4j.game2d.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.game2d.collision.broadphase.BroadphasePair;
 import org.dyn4j.game2d.collision.broadphase.Sap;
+import org.dyn4j.game2d.collision.continuous.ConservativeAdvancement;
+import org.dyn4j.game2d.collision.continuous.TimeOfImpact;
+import org.dyn4j.game2d.collision.continuous.TimeOfImpactDetector;
 import org.dyn4j.game2d.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.game2d.collision.manifold.Manifold;
 import org.dyn4j.game2d.collision.manifold.ManifoldSolver;
 import org.dyn4j.game2d.collision.narrowphase.Gjk;
 import org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.game2d.collision.narrowphase.Penetration;
+import org.dyn4j.game2d.collision.narrowphase.Separation;
 import org.dyn4j.game2d.dynamics.contact.Contact;
 import org.dyn4j.game2d.dynamics.contact.ContactAdapter;
 import org.dyn4j.game2d.dynamics.contact.ContactConstraint;
@@ -61,7 +65,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Employs the same {@link Island} solving technique as <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 1.1.0
+ * @version 1.2.0
  * @since 1.0.0
  */
 public class World {
@@ -89,6 +93,9 @@ public class World {
 	/** The {@link ManifoldSolver} */
 	protected ManifoldSolver manifoldSolver;
 	
+	/** The {@link TimeOfImpactDetector} */
+	protected TimeOfImpactDetector timeOfImpactDetector;
+	
 	/** The {@link CollisionListener} */
 	protected CollisionListener collisionListener;
 	
@@ -97,6 +104,9 @@ public class World {
 
 	/** The {@link ContactListener} */
 	protected ContactListener contactListener;
+	
+	/** The {@link TimeOfImpactListener} */
+	protected TimeOfImpactListener timeOfImpactListener;
 	
 	/** The {@link BoundsListener} */
 	protected BoundsListener boundsListener;
@@ -148,10 +158,12 @@ public class World {
 		this.broadphaseDetector = new Sap();
 		this.narrowphaseDetector = new Gjk();
 		this.manifoldSolver = new ClippingManifoldSolver();
+		this.timeOfImpactDetector = new ConservativeAdvancement();
 		// create empty listeners
 		this.collisionListener = new CollisionAdapter();
 		this.contactManager = new ContactManager();
 		this.contactListener = new ContactAdapter();
+		this.timeOfImpactListener = new TimeOfImpactAdapter();
 		this.boundsListener = new BoundsAdapter();
 		this.destructionListener = new DestructionAdapter();
 		this.stepListener = new StepAdapter();
@@ -279,6 +291,7 @@ public class World {
 		// test for out of bounds objects
 		// clear the body contacts
 		// clear the island flag
+		// save the current transform for CCD
 		for (int i = 0; i < size; i++) {
 			Body body = this.bodies.get(i);
 			// skip if already not active
@@ -294,6 +307,8 @@ public class World {
 			body.contacts.clear();
 			// remove the island flag
 			body.setOnIsland(false);
+			// save the current transform into the previous transform
+			body.transform0.set(body.transform);
 		}
 		
 		// clear the joint island flags
@@ -502,8 +517,121 @@ public class World {
 		// notify of the all solved contacts
 		this.contactManager.postSolveNotify(this.contactListener);
 		
+		// solve time of impact
+		this.solveTOI();
+		
 		// notify the step listener
 		this.stepListener.end(this.step, this);
+	}
+	
+	/**
+	 * Solves the time of impact for all bodies.
+	 * @since 1.2.0
+	 */
+	protected void solveTOI() {
+		// get the settings
+		Settings settings = Settings.getInstance();
+		// make sure time of impact solving is enabled
+		if (!settings.isContinuousCollisionDetectionEnabled()) return;
+		
+		// get the linear tolerance (allowed penetration)
+		double tol = settings.getLinearTolerance();
+		
+		// TODO i think we need to advance all bodies by the smallest
+		// toi and continue doing this until all body toi's are solved
+		
+		int size = this.bodies.size();
+		// loop over all the bodies and find the minimum TOI for each
+		// dynamic body
+		for (int i = 0; i < size; i++) {
+			// get the body
+			Body b1 = this.bodies.get(i);
+			
+			// we don't process kinematic or static bodies except with
+			// dynamic bodies (in other words b1 must always be a dynamic
+			// body)
+			if (b1.isKinematic() || b1.isStatic()) continue;
+			
+			// don't bother with bodies that did not have their
+			// positions integrated, if they were not added to an island then
+			// that means they didn't move
+			
+			// we can also check for sleeping bodies and skip those since
+			// they will only be asleep after being stationary for a set
+			// time period
+			if (!b1.isOnIsland() || b1.isAsleep()) continue;
+
+			// setup the initial time bounds [0, 1]
+			double t1 = 0.0;
+			double t2 = 1.0;
+			TimeOfImpact minToi = null;
+			
+			// loop over all the other bodies to find the minimum TOI
+			for (int j = 0; j < size; j++) {
+				// get the other body
+				Body b2 = this.bodies.get(j);
+				
+				// skip this test if they are the same body
+				if (b1 == b2) continue;
+				
+				// make sure the other body is active
+				if (!b2.isActive()) continue;
+				
+				// skip other dynamic bodies; we only do TOI for
+				// dynamic vs. static/kinematic unless its a bullet
+				if (b2.isDynamic() && !b1.isBullet()) continue;
+				
+				// check for connected pairs who's collision is not allowed
+				if (b1.isConnected(b2, false)) continue;
+				
+				// compute the time of impact between the two bodies
+				TimeOfImpact toi = new TimeOfImpact();
+				if (this.timeOfImpactDetector.getTimeOfImpact(b1, b2, t1, t2, toi)) {
+					// get the time of impact
+					double t = toi.getToi();
+					// check if the time of impact is less than
+					// the current time of impact
+					if (t < t2) {
+						// TODO see if these fixtures can collide according to the filter
+						// TODO test for sensor fixtures
+						if (this.timeOfImpactListener.dynamic(b1, b2, t)) {
+							// set the new upper bound
+							t2 = t;
+							minToi = toi;
+						}
+					}
+				} else {
+					// if the bodies are intersecting or do not intersect
+					// within the range of motion then skip this body
+					// and move to the next
+					continue;
+				}
+			}
+			
+			// make sure the time of impact is not null
+			// we also can get some performance benefit if we don't do anything
+			// for times of impact that are 1.0 which means they are already
+			// colliding
+			if (minToi != null && minToi.getToi() != 1.0) {
+				// get the time of impact info
+				double t = minToi.getToi();
+				Separation s = minToi.getSeparation();
+				// compute the distance to translate
+				double d = s.getDistance() + tol;
+				Vector2 n = s.getNormal();
+				
+				// move the dynamic body to the time of impact
+				b1.transform0.lerp(b1.transform, t, b1.transform);
+				
+				// move the body along the separating axis the given distance plus
+				// the allowed penetration to place the objects in collision
+				// this will allow the discrete collision detection to find the
+				// collision and solve it normally
+				b1.translate(n.x * d, n.y * d);
+				
+				// this method does not conserve time
+			}
+		}
 	}
 	
 	/**
@@ -774,6 +902,23 @@ public class World {
 	}
 	
 	/**
+	 * Returns the time of impact listener.
+	 * @return {@link TimeOfImpactListener} the time of impact listener
+	 */
+	public TimeOfImpactListener getTimeOfImpactListener() {
+		return this.timeOfImpactListener;
+	}
+	
+	/**
+	 * Sets the {@link TimeOfImpactListener}.
+	 * @param timeOfImpactListener the time of impact listener
+	 */
+	public void setTimeOfImpactListener(TimeOfImpactListener timeOfImpactListener) {
+		if (timeOfImpactListener == null) throw new NullPointerException("The time of impact listener cannot be null.");
+		this.timeOfImpactListener = timeOfImpactListener;
+	}
+	
+	/**
 	 * Sets the {@link DestructionListener}.
 	 * @param destructionListener the {@link DestructionListener}
 	 */
@@ -862,6 +1007,23 @@ public class World {
 	 */
 	public ManifoldSolver getManifoldSolver() {
 		return this.manifoldSolver;
+	}
+	
+	/**
+	 * Sets the time of impact detector.
+	 * @param timeOfImpactDetector the time of impact detector
+	 */
+	public void setTimeOfImpactDetector(TimeOfImpactDetector timeOfImpactDetector) {
+		if (timeOfImpactDetector == null) throw new NullPointerException("The time of impact solver cannot be null.");
+		this.timeOfImpactDetector = timeOfImpactDetector;
+	}
+	
+	/**
+	 * Returns the time of impact detector.
+	 * @return {@link TimeOfImpactDetector} the time of impact detector
+	 */
+	public TimeOfImpactDetector getTimeOfImpactDetector() {
+		return this.timeOfImpactDetector;
 	}
 	
 	/**

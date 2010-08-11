@@ -22,42 +22,41 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.game2d;
+package org.dyn4j.game2d.collision.continuous;
+
+import org.dyn4j.game2d.collision.Collidable;
 
 /**
- * The version of the engine.
+ * Interface representing a time of impact algorithm.
  * @author William Bittle
  * @version 1.2.0
- * @since 1.0.0
+ * @since 1.2.0
  */
-public final class Version {
-	/** The major version number; API changes, major enhancements, etc. */
-	public static final int MAJOR = 1;
-	
-	/** The minor version number; minor enhancements, major bug fixes, etc. */
-	public static final int MINOR = 2;
-	
-	/** The revision number; minor bug fixes */
-	public static final int REVISION = 0;
+public interface TimeOfImpactDetector {
+	/**
+	 * Returns true if the given {@link Swept} {@link Collidable}s have a time of impact within
+	 * the range [0, 1].
+	 * <p>
+	 * This method places the result of the time of impact in the toi input parameter.
+	 * @see #getTimeOfImpact(Swept, Swept, double, double, TimeOfImpact)
+	 * @param swept1 the first {@link Swept} {@link Collidable}
+	 * @param swept2 the second {@link Swept} {@link Collidable}
+	 * @param toi the time of impact information
+	 * @return boolean true if the two have a time of impact within the given range
+	 */
+	public boolean getTimeOfImpact(Swept swept1, Swept swept2, TimeOfImpact toi);
 	
 	/**
-	 * Hide the constructor.
+	 * Returns true if the given {@link Swept} {@link Collidable}s have a time of impact within
+	 * the given range.
+	 * <p>
+	 * This method places the result of the time of impact in the toi input parameter.
+	 * @param swept1 the first {@link Swept} {@link Collidable}
+	 * @param swept2 the second {@link Swept} {@link Collidable}
+	 * @param t1 the time lower bound; must be greater than or equal zero
+	 * @param t2 the time upper bound; must be less than or equal to one
+	 * @param toi the time of impact information
+	 * @return boolean true if the two have a time of impact within the given range
 	 */
-	private Version() {}
-	
-	/**
-	 * Returns the version as a string.
-	 * @return String
-	 */
-	public static String getVersion() {
-		return MAJOR + "." + MINOR + "." + REVISION;
-	}
-	
-	/**
-	 * Main class to print the version to the console.
-	 * @param args command line arguments (none accepted)
-	 */
-	public static final void main(String[] args) {
-		System.out.println("dyn4j v" + Version.getVersion());
-	}
+	public boolean getTimeOfImpact(Swept swept1, Swept swept2, double t1, double t2, TimeOfImpact toi);
 }

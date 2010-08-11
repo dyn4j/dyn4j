@@ -32,7 +32,7 @@ import org.junit.Test;
 /**
  * Tests the methods of the {@link Settings} class.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.2.0
  * @since 1.0.0
  */
 public class SettingsTest {
@@ -135,10 +135,10 @@ public class SettingsTest {
 	public void setSleep() {
 		Settings s = Settings.getInstance();
 		s.reset();
-		s.setSleep(false);
-		TestCase.assertFalse(s.canSleep());
-		s.setSleep(true);
-		TestCase.assertTrue(s.canSleep());
+		s.setAutoSleepingEnabled(false);
+		TestCase.assertFalse(s.isAutoSleepingEnabled());
+		s.setAutoSleepingEnabled(true);
+		TestCase.assertTrue(s.isAutoSleepingEnabled());
 	}
 	
 	/**
@@ -389,5 +389,17 @@ public class SettingsTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setNegativeBaumgarte() {
 		settings.setBaumgarte(-0.3);
+	}
+	
+	/**
+	 * Tests the set continuous collision detection enabled flag.
+	 * @since 1.2.0
+	 */
+	@Test
+	public void setContinuousCollisionDetectionEnabled() {
+		settings.setContinuousCollisionDetectionEnabled(true);
+		TestCase.assertTrue(settings.isContinuousCollisionDetectionEnabled());
+		settings.setContinuousCollisionDetectionEnabled(false);
+		TestCase.assertFalse(settings.isContinuousCollisionDetectionEnabled());
 	}
 }

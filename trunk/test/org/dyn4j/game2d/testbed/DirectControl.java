@@ -10,7 +10,7 @@ import org.dyn4j.game2d.geometry.Mass;
  * Class used to control a body directly by translation
  * and rotation using the mouse.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.2.0
  * @since 1.0.0
  */
 public class DirectControl {
@@ -18,12 +18,12 @@ public class DirectControl {
 	 * Class containing the state that must be restored when
 	 * the controled body is released.
 	 * @author William Bittle
-	 * @version 1.0.3
+	 * @version 1.2.0
 	 * @since 1.0.0
 	 */
 	public static class State {
-		/** Whether the body is allowed to sleep or not */
-		public boolean canSleep;
+		/** Whether the body can be automatically put to sleep */
+		public boolean autoSleepingEnabled;
 		
 		/** The mass type */
 		public Mass.Type massType;
@@ -64,13 +64,13 @@ public class DirectControl {
 		// save the mass type
 		state.massType = body.getMass().getType();
 		// save the sleep state
-		state.canSleep = body.canSleep();
+		state.autoSleepingEnabled = body.isAutoSleepingEnabled();
 		
 		// set the mass to infinite
 		body.getMass().setType(Mass.Type.INFINITE);
 		// make sure this body is awake
 		body.setAsleep(false);
-		body.setCanSleep(false);
+		body.setAutoSleepingEnabled(false);
 		// stop any movement
 		body.setAngularVelocity(0.0);
 		body.getVelocity().zero();
@@ -100,6 +100,6 @@ public class DirectControl {
 		Mass mass = body.getMass();
 		// set the mass type back to the previous type
 		mass.setType(state.massType);
-		body.setCanSleep(state.canSleep);
+		body.setAutoSleepingEnabled(state.autoSleepingEnabled);
 	}
 }

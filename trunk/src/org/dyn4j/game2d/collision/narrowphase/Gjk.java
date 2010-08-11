@@ -113,10 +113,10 @@ import org.dyn4j.game2d.geometry.Vector2;
  * {@link Shape}s.  Refer to {@link Gjk#distance(Convex, Transform, Convex, Transform, Separation)}
  * for details on the implementation.
  * @author William Bittle
- * @version 1.1.0
+ * @version 1.2.0
  * @since 1.0.0
  */
-public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetector {
+public class Gjk implements NarrowphaseDetector, DistanceDetector {
 	/** The origin point */
 	protected static final Vector2 ORIGIN = new Vector2();
 	
@@ -157,7 +157,7 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 		// check for circles
 		if (convex1.isType(Circle.TYPE) && convex2.isType(Circle.TYPE)) {
 			// if its a circle - circle collision use the faster method
-			return super.detect((Circle) convex1, transform1, (Circle) convex2, transform2, penetration);
+			return CircleCircleDetector.detect((Circle) convex1, transform1, (Circle) convex2, transform2, penetration);
 		}
 		// define the simplex
 		List<Vector2> simplex = new ArrayList<Vector2>(3);
@@ -211,7 +211,7 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 		// check for circles
 		if (convex1.isType(Circle.TYPE) && convex2.isType(Circle.TYPE)) {
 			// if its a circle - circle collision use the faster method
-			return super.detect((Circle) convex1, transform1, (Circle) convex2, transform2);
+			return CircleCircleDetector.detect((Circle) convex1, transform1, (Circle) convex2, transform2);
 		}
 		// define the simplex
 		List<Vector2> simplex = new ArrayList<Vector2>(3);
@@ -336,21 +336,14 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 		return false;
 	}
 	
-	/**
-	 * Returns true if the two shapes are separated and fills the given
-	 * {@link Separation} object with the minimum distance vector.
-	 * @param convex1 the first {@link Shape}
-	 * @param transform1 the first {@link Shape}'s {@link Transform}
-	 * @param convex2 the second {@link Shape}
-	 * @param transform2 the second {@link Shape}'s {@link Transform}
-	 * @param separation the {@link Separation} object to fill
-	 * @return boolean
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.collision.narrowphase.DistanceDetector#distance(org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.geometry.Transform, org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.geometry.Transform, org.dyn4j.game2d.collision.narrowphase.Separation)
 	 */
 	public boolean distance(Convex convex1, Transform transform1, Convex convex2, Transform transform2, Separation separation) {
 		// check for circles
 		if (convex1.isType(Circle.TYPE) && convex2.isType(Circle.TYPE)) {
 			// if its a circle - circle collision use the faster method
-			return super.distance((Circle) convex1, transform1, (Circle) convex2, transform2, separation);
+			return CircleCircleDetector.distance((Circle) convex1, transform1, (Circle) convex2, transform2, separation);
 		}
 		// create a Minkowski sum
 		MinkowskiSum ms = new MinkowskiSum(convex1, transform1, convex2, transform2);
@@ -373,10 +366,10 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 		d.negate();
 		// get a second support point
 		ms.support(d, b);
-		// start the loop
+		// find the point on the simplex (segment) closest to the origin
+		// and use that as the new search direction
+		d = Segment.getPointOnSegmentClosestToPoint(ORIGIN, b.p, a.p);
 		for (int i = 0; i < this.gjkMaxIterations; i++) {
-			// find the point on the simplex (segment) closest to the origin
-			d = Segment.getPointOnSegmentClosestToPoint(ORIGIN, b.p, a.p);
 			// the vector from the point we found to the origin is the new search direction
 			d.negate().normalize();
 			// check if d is zero
@@ -407,15 +400,20 @@ public class Gjk extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 				return true;
 			}
 			
-			// find the point of a and b that is closest to the origin
-			// and replace the one that is not the closest with the
-			// point we just found
-			if (a.p.getMagnitudeSquared() < b.p.getMagnitudeSquared()) {
+			// get the closest point on each segment to the origin
+			Vector2 p1 = Segment.getPointOnSegmentClosestToPoint(ORIGIN, a.p, c.p);
+			Vector2 p2 = Segment.getPointOnSegmentClosestToPoint(ORIGIN, c.p, b.p);
+			
+			// test which point is closer and replace the one that is farthest
+			// with the new point c and set the new search direction
+			if (p1.getMagnitudeSquared() < p2.getMagnitudeSquared()) {
 				// a was closest so replace b with c
 				b.set(c);
+				d = p1;
 			} else {
 				// b was closest so replace a with c
 				a.set(c);
+				d = p2;
 			}
 		}
 		// if we made it here then we know that we hit the maximum number of iterations

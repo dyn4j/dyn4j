@@ -70,6 +70,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.dyn4j.game2d.collision.broadphase.BroadphaseDetector;
+import org.dyn4j.game2d.collision.continuous.TimeOfImpactDetector;
 import org.dyn4j.game2d.collision.manifold.ManifoldSolver;
 import org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.game2d.dynamics.Settings;
@@ -77,7 +78,7 @@ import org.dyn4j.game2d.dynamics.Settings;
 /**
  * The JFrame that controls the TestBed.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.2.0
  * @since 1.0.0
  */
 public class ControlPanel extends JFrame {
@@ -142,6 +143,9 @@ public class ControlPanel extends JFrame {
 	/** The combo box for selecting a manifold solving algorithm */
 	private JComboBox cmbMSAlgo = null;
 	
+	/** The combo box for selecting a continuous collision detection algorithm */
+	private JComboBox cmbTOIAlgo = null;
+	
 	/** The selected broad-phase collision detection algorithm */
 	private String selectedBPCDAlgo = "Sap";
 	
@@ -150,6 +154,9 @@ public class ControlPanel extends JFrame {
 	
 	/** The selected manifold solving algorithm */
 	private String selectedMSAlgo = "Clip";
+	
+	/** The selected manifold solving algorithm */
+	private String selectedTOIAlgo = "CA";
 	
 	/** The image icon to show for help */
 	private Icon helpIcon = null;
@@ -272,6 +279,14 @@ public class ControlPanel extends JFrame {
 	}
 	
 	/**
+	 * Returns the current {@link TimeOfImpactDetector} name.
+	 * @return String the current {@link TimeOfImpactDetector} name
+	 */
+	public String getTOIAlgorithm() {
+		return this.selectedTOIAlgo;
+	}
+	
+	/**
 	 * Creates the GUI for all configuration.
 	 */
 	private void createGUI() {
@@ -305,7 +320,7 @@ public class ControlPanel extends JFrame {
 		this.add(tabs, BorderLayout.CENTER);
 		
 		// set the preferred width
-		this.setPreferredSize(new Dimension(450, 650));
+		this.setPreferredSize(new Dimension(450, 710));
 		
 		// pack the layout
 		this.pack();
@@ -554,7 +569,7 @@ public class ControlPanel extends JFrame {
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// draw contact forces
-		JLabel lblContactForces = new JLabel("Contact Forces");
+		JLabel lblContactForces = new JLabel("Contact Impulses");
 		pnlDraw.add(lblContactForces, new GridBagConstraints(
 				0, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
@@ -572,29 +587,10 @@ public class ControlPanel extends JFrame {
 				1, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		// draw contact pairs
-		JLabel lblContactPairs = new JLabel("Contact Pairs");
-		pnlDraw.add(lblContactPairs, new GridBagConstraints(
-				0, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		JCheckBox chkContactPairs = new JCheckBox();
-		chkContactPairs.setSelected(draw.drawContactPairs());
-		chkContactPairs.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// toggle the checkbox
-				Draw draw = Draw.getInstance();
-				draw.setDrawContactPairs(!draw.drawContactPairs());
-			}
-		});
-		pnlDraw.add(chkContactPairs, new GridBagConstraints(
-				1, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		
 		// draw friction forces
-		JLabel lblFrictionForces = new JLabel("Friction Forces");
+		JLabel lblFrictionForces = new JLabel("Friction Impulses");
 		pnlDraw.add(lblFrictionForces, new GridBagConstraints(
-				0, 5, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				0, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkFrictionForces = new JCheckBox();
 		chkFrictionForces.setSelected(draw.drawFrictionForces());
@@ -607,6 +603,25 @@ public class ControlPanel extends JFrame {
 			}
 		});
 		pnlDraw.add(chkFrictionForces, new GridBagConstraints(
+				1, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		
+		// draw contact pairs
+		JLabel lblContactPairs = new JLabel("Contact Pairs");
+		pnlDraw.add(lblContactPairs, new GridBagConstraints(
+				0, 5, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JCheckBox chkContactPairs = new JCheckBox();
+		chkContactPairs.setSelected(draw.drawContactPairs());
+		chkContactPairs.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// toggle the checkbox
+				Draw draw = Draw.getInstance();
+				draw.setDrawContactPairs(!draw.drawContactPairs());
+			}
+		});
+		pnlDraw.add(chkContactPairs, new GridBagConstraints(
 				1, 5, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
@@ -816,7 +831,7 @@ public class ControlPanel extends JFrame {
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// manifold
-		JLabel lblMSAlgo = new JLabel("Manifold Solver", this.helpIcon, JLabel.LEFT);
+		JLabel lblMSAlgo = new JLabel("Manifold Solving Algorithm", this.helpIcon, JLabel.LEFT);
 		lblMSAlgo.setToolTipText("Specifies the algorithm used to create collision manifolds.");
 		pnlGeneral.add(lblMSAlgo, new GridBagConstraints(
 				0, 2, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
@@ -843,10 +858,39 @@ public class ControlPanel extends JFrame {
 				2, 2, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
+		// continuous collision detection
+		JLabel lblTOIAlgo = new JLabel("Time Of Impact Detection Algorithm", this.helpIcon, JLabel.LEFT);
+		lblTOIAlgo.setToolTipText("Specifies the time of impact algorithm used for continuous collision detection.");
+		pnlGeneral.add(lblTOIAlgo, new GridBagConstraints(
+				0, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		
+		// create the drop down
+		cmbTOIAlgo = new JComboBox(new String[] {"CA"});
+		cmbTOIAlgo.setSelectedItem(this.selectedTOIAlgo);
+		// add it to the panel
+		pnlGeneral.add(cmbTOIAlgo, new GridBagConstraints(
+				1, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		// create the button to save the setting
+		JButton btnTOIAlgo = new JButton("Set");
+		btnTOIAlgo.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// set the selected item
+				selectedTOIAlgo = (String) cmbTOIAlgo.getSelectedItem();
+			}
+		});
+		// add the button to the panel
+		pnlGeneral.add(btnTOIAlgo, new GridBagConstraints(
+				2, 3, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		
+		// step frequency
 		JLabel lblStep = new JLabel("Step Fequency", this.helpIcon, JLabel.LEFT);
 		lblStep.setToolTipText("Specifies the number of updates the dynamics engine will attempt to perform per second.");
 		pnlGeneral.add(lblStep, new GridBagConstraints(
-				0, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				0, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		JSpinner spnStep = new JSpinner(new SpinnerNumberModel(1.0 / settings.getStepFrequency(), 30.0, 999.0, 5.0));
@@ -863,19 +907,19 @@ public class ControlPanel extends JFrame {
 		});
 		// add the spinner to the layout
 		pnlGeneral.add(spnStep, new GridBagConstraints(
-				1, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, 
+				1, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		// create the unit label
 		JLabel lblStepUnit = new JLabel("<html>second<sup>-1</sup></html>");
 		pnlGeneral.add(lblStepUnit, new GridBagConstraints(
-				2, 3, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
+				2, 4, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// max velocity
 		JLabel lblMaxV = new JLabel("Maximum Translation", this.helpIcon, JLabel.LEFT);
 		lblMaxV.setToolTipText("Specifies the maximum translation a body can have in one time step.");
 		pnlGeneral.add(lblMaxV, new GridBagConstraints(
-				0, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				0, 5, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		JSpinner spnMaxV = new JSpinner(new SpinnerNumberModel(settings.getMaxTranslation(), 0.0, 10.0, 0.1));
@@ -892,19 +936,19 @@ public class ControlPanel extends JFrame {
 		});
 		// add the spinner to the layout
 		pnlGeneral.add(spnMaxV, new GridBagConstraints(
-				1, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, 
+				1, 5, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		// create the unit label
 		JLabel lblMaxVUnit = new JLabel("meters");
 		pnlGeneral.add(lblMaxVUnit, new GridBagConstraints(
-				2, 4, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
+				2, 5, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// max angular velocity
 		JLabel lblMaxAv = new JLabel("Maximum Rotation", this.helpIcon, JLabel.LEFT);
 		lblMaxAv.setToolTipText("Specifies the maximum rotation a body can have in one time step.");
 		pnlGeneral.add(lblMaxAv, new GridBagConstraints(
-				0, 5, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
+				0, 6, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		JSpinner spnMaxAv = new JSpinner(new SpinnerNumberModel(Math.toDegrees(settings.getMaxRotation()), 0.0, 3600.0, 1.0));
@@ -921,12 +965,12 @@ public class ControlPanel extends JFrame {
 		});
 		// add the spinner to the layout
 		pnlGeneral.add(spnMaxAv, new GridBagConstraints(
-				1, 5, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_END, 
+				1, 6, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_END, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		// create the unit label
 		JLabel lblMaxAvUnit = new JLabel("degrees");
 		pnlGeneral.add(lblMaxAvUnit, new GridBagConstraints(
-				2, 5, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, 
+				2, 6, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// add the panel to the overall panel
@@ -944,18 +988,18 @@ public class ControlPanel extends JFrame {
 		pnlSleep.setLayout(new GridBagLayout());
 		
 		JLabel lblAllowSleep = new JLabel("Allow bodies to sleep?", this.helpIcon, JLabel.LEFT);
-		lblAllowSleep.setToolTipText("Sleeping allows the physics system to save cycles by avoiding unnecessary work.");
+		lblAllowSleep.setToolTipText("Sleeping allows the physics system to save cycles by avoiding unnecessary work for bodies who are not in motion.");
 		pnlSleep.add(lblAllowSleep, new GridBagConstraints(
 				0, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		JCheckBox chkAllowSleep = new JCheckBox();
-		chkAllowSleep.setSelected(settings.canSleep());
+		chkAllowSleep.setSelected(settings.isAutoSleepingEnabled());
 		chkAllowSleep.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				Settings settings = Settings.getInstance();
-				settings.setSleep(!settings.canSleep());
+				settings.setAutoSleepingEnabled(!settings.isAutoSleepingEnabled());
 			}
 		});
 		// add the checkbox to the panel
@@ -1311,7 +1355,50 @@ public class ControlPanel extends JFrame {
 		
 		// add the sleep panel to the over all panel
 		panel.add(pnlConstraint);
-
+		
+		//////////////////////////////////////////////////
+		// CCD group
+		//////////////////////////////////////////////////
+		
+		// create the constraint panel
+		JPanel pnlCCD = new JPanel();
+		// create the sleep panel border
+		pnlCCD.setBorder(new TitledBorder("Continuous Collision Detection"));
+		// set the layout
+		pnlCCD.setLayout(new GridBagLayout());
+		
+		JLabel lblCCDEnabled = new JLabel("Enabled", this.helpIcon, JLabel.LEFT);
+		lblCCDEnabled.setToolTipText("If enabled, tests dynamic bodies for tunneling.");
+		pnlCCD.add(lblCCDEnabled, new GridBagConstraints(
+				0, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JCheckBox chkCCDEnabled = new JCheckBox();
+		chkCCDEnabled.setSelected(settings.isContinuousCollisionDetectionEnabled());
+		chkCCDEnabled.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Settings settings = Settings.getInstance();
+				settings.setContinuousCollisionDetectionEnabled(!settings.isContinuousCollisionDetectionEnabled());
+			}
+		});
+		pnlCCD.add(chkCCDEnabled, new GridBagConstraints(
+				1, 0, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		
+		// add the CCD panel to the over all panel
+		panel.add(pnlCCD);
+		
+		// this button is for grabbing the size of the window when
+		// the number of things change
+//		JButton btnSize = new JButton("Get Size");
+//		btnSize.addActionListener(new ActionListener() {
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				System.out.println(getSize());
+//			}
+//		});
+//		panel.add(btnSize);
+		
 		return panel;
 	}
 	

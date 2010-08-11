@@ -46,10 +46,10 @@ import org.dyn4j.game2d.geometry.Vector2;
  * If there is a collision, one can obtain the penetration {@link Vector2} and depth from scaling the axis
  * by the projection overlap.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.2.0
  * @since 1.0.0
  */
-public class Sat extends AbstractNarrowphaseDetector implements NarrowphaseDetector {
+public class Sat implements NarrowphaseDetector {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector#detect(org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.geometry.Transform, org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.geometry.Transform, org.dyn4j.game2d.collision.narrowphase.Penetration)
 	 */
@@ -58,7 +58,7 @@ public class Sat extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 		// check for circles
 		if (convex1.isType(Circle.TYPE) && convex2.isType(Circle.TYPE)) {
 			// if its a circle - circle collision use the faster method
-			return super.detect((Circle) convex1, transform1, (Circle) convex2, transform2, penetration);
+			return CircleCircleDetector.detect((Circle) convex1, transform1, (Circle) convex2, transform2, penetration);
 		}
 		
 		Vector2 n = null;
@@ -186,7 +186,7 @@ public class Sat extends AbstractNarrowphaseDetector implements NarrowphaseDetec
 		// check for circles
 		if (convex1.isType(Circle.TYPE) && convex2.isType(Circle.TYPE)) {
 			// if its a circle - circle collision use the faster method
-			return super.detect((Circle) convex1, transform1, (Circle) convex2, transform2);
+			return CircleCircleDetector.detect((Circle) convex1, transform1, (Circle) convex2, transform2);
 		}
 
 		// get the foci from both shapes, the foci are used to test any

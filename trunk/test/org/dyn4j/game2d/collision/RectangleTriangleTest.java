@@ -447,4 +447,42 @@ public class RectangleTriangleTest extends AbstractTest {
 		TestCase.assertEquals(-0.220, p2.y, 1.0e-3);
 		TestCase.assertEquals(0.150, mp2.getDepth(), 1.0e-3);
 	}
+	
+	/**
+	 * This failure case is used to test the fix implemented.
+	 * <p>
+	 * The shapes, positions, and orientations in this test
+	 * caused the GJK implementation to oscillate between 
+	 * two different simplexes until the maximum iteration 
+	 * count was hit returning an incorrect separation.
+	 */
+	@Test
+	public void distanceFail1() {
+		Rectangle r = new Rectangle(10.0, 0.2);
+		Triangle t = new Triangle(
+				new Vector2(0.0, 0.5),
+				new Vector2(-1.0, 0.0),
+				new Vector2(1.0, 0.0));
+		
+		Transform txr = new Transform();
+		txr.rotate(0.10866660409637111939);
+		txr.translate(-0.010447620194083662, 1.107709398935564);
+		
+		Transform txt = new Transform();
+		txt.translate(0.0, 0.5);
+		
+		Separation s = new Separation();
+		this.gjk.distance(r, txr, t, txt, s);
+		
+		Vector2 n = s.getNormal();
+		Vector2 p1 = s.getPoint1();
+		Vector2 p2 = s.getPoint2();
+		TestCase.assertEquals(0.008, s.getDistance(), 1.0e-3);
+		TestCase.assertEquals(0.108, n.x, 1.0e-3);
+		TestCase.assertEquals(-0.994, n.y, 1.0e-3);
+		TestCase.assertEquals(0.000, p1.x, 1.0e-3);
+		TestCase.assertEquals(1.008, p1.y, 1.0e-3);
+		TestCase.assertEquals(0.000, p2.x, 1.0e-3);
+		TestCase.assertEquals(1.000, p2.y, 1.0e-3);
+	}
 }

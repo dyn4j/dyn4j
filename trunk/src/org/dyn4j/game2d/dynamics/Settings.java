@@ -32,7 +32,7 @@ import org.dyn4j.game2d.dynamics.contact.ContactConstraintSolver;
  * Attempting to set any setting to a value outside the range in effects sets
  * the setting to the min or max of the range.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.2.0
  * @since 1.0.0
  */
 public class Settings {
@@ -93,8 +93,8 @@ public class Settings {
 	/** The squared value of {@link #maxRotation} */
 	private double maxRotationSquared = Settings.DEFAULT_MAX_ROTATION * Settings.DEFAULT_MAX_ROTATION;
 	
-	/** Whether on an engine level {@link Body}s can sleep */
-	private boolean sleep = true;
+	/** Whether on an engine level {@link Body}s are automatically put to sleep */
+	private boolean autoSleepingEnabled = true;
 	
 	/** The maximum velocity before a {@link Body} is considered to sleep */
 	private double sleepVelocity = Settings.DEFAULT_SLEEP_VELOCITY;
@@ -155,7 +155,10 @@ public class Settings {
 	
 	/** The baumgarte factor */
 	private double baumgarte = Settings.DEFAULT_BAUMGARTE;
-
+	
+	/** The continuous collision detection flag */
+	private boolean continuousCollisionDetectionEnabled = true;
+	
 	/** The settings singleton instance */
 	private static final Settings instance = new Settings();
 	
@@ -180,7 +183,7 @@ public class Settings {
 		.append(this.stepFequency).append("|")
 		.append(this.maxTranslation).append("|")
 		.append(this.maxRotation).append("|")
-		.append(this.sleep).append("|")
+		.append(this.autoSleepingEnabled).append("|")
 		.append(this.sleepVelocity).append("|")
 		.append(this.sleepAngularVelocity).append("|")
 		.append(this.sleepTime).append("|")
@@ -192,7 +195,8 @@ public class Settings {
 		.append(this.angularTolerance).append("|")
 		.append(this.maxLinearCorrection).append("|")
 		.append(this.maxAngularCorrection).append("|")
-		.append(this.baumgarte).append("]");
+		.append(this.baumgarte).append("|")
+		.append(this.continuousCollisionDetectionEnabled).append("]");
 		return sb.toString();
 	}
 	
@@ -205,7 +209,7 @@ public class Settings {
 		this.maxTranslationSquared = Settings.DEFAULT_MAX_TRANSLATION * Settings.DEFAULT_MAX_TRANSLATION;
 		this.maxRotation = Settings.DEFAULT_MAX_ROTATION;
 		this.maxRotationSquared = Settings.DEFAULT_MAX_ROTATION * Settings.DEFAULT_MAX_ROTATION;
-		this.sleep = true;
+		this.autoSleepingEnabled = true;
 		this.sleepVelocity = Settings.DEFAULT_SLEEP_VELOCITY;
 		this.sleepVelocitySquared = Settings.DEFAULT_SLEEP_VELOCITY * Settings.DEFAULT_SLEEP_VELOCITY;
 		this.sleepAngularVelocity = Settings.DEFAULT_SLEEP_ANGULAR_VELOCITY;
@@ -224,6 +228,7 @@ public class Settings {
 		this.angularTolerance = Settings.DEFAULT_ANGULAR_TOLERANCE;
 		this.angularToleranceSquared = Settings.DEFAULT_ANGULAR_TOLERANCE * Settings.DEFAULT_ANGULAR_TOLERANCE;
 		this.baumgarte = Settings.DEFAULT_BAUMGARTE;
+		this.continuousCollisionDetectionEnabled = true;
 	}
 	
 	/**
@@ -314,19 +319,19 @@ public class Settings {
 	}
 
 	/**
-	 * Returns true if the engine allows sleeping {@link Body}s.
-	 * @return boolean true if allowed
+	 * Returns true if the engine automatically puts {@link Body}s to sleep.
+	 * @return boolean
 	 */
-	public boolean canSleep() {
-		return this.sleep;
+	public boolean isAutoSleepingEnabled() {
+		return this.autoSleepingEnabled;
 	}
 	
 	/**
-	 * Sets whether the engine allows sleeping {@link Body}s.
-	 * @param flag true if allowed
+	 * Sets whether the engine automatically puts {@link Body}s to sleep.
+	 * @param flag true if {@link Body}s should be put to sleep automatically
 	 */
-	public void setSleep(boolean flag) {
-		this.sleep = flag;
+	public void setAutoSleepingEnabled(boolean flag) {
+		this.autoSleepingEnabled = flag;
 	}
 	
 	/**
@@ -686,5 +691,23 @@ public class Settings {
 	public void setBaumgarte(double baumgarte) {
 		if (baumgarte < 0) throw new IllegalArgumentException("The baumgarte factor cannot be negative.");
 		this.baumgarte = baumgarte;
+	}
+	
+	/**
+	 * Returns true if continuous collision detection is enabled.
+	 * @return boolean
+	 * @since 1.2.0
+	 */
+	public boolean isContinuousCollisionDetectionEnabled() {
+		return this.continuousCollisionDetectionEnabled;
+	}
+	
+	/**
+	 * Sets the continuous collision detection enabled flag.
+	 * @param flag true if continuous collision detection should be enabled
+	 * @since 1.2.0
+	 */
+	public void setContinuousCollisionDetectionEnabled(boolean flag) {
+		this.continuousCollisionDetectionEnabled = flag;
 	}
 }

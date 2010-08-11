@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.dyn4j.game2d.collision.Collidable;
+import org.dyn4j.game2d.collision.continuous.Swept;
 import org.dyn4j.game2d.dynamics.contact.Contact;
 import org.dyn4j.game2d.dynamics.contact.ContactConstraint;
 import org.dyn4j.game2d.dynamics.contact.ContactEdge;
@@ -70,18 +71,18 @@ import org.dyn4j.game2d.geometry.Vector2;
  * A {@link Body} that is a sensor will not be handled in the collision
  * resolution but is handled in collision detection.
  * @author William Bittle
- * @version 1.1.0
+ * @version 1.2.0
  * @since 1.0.0
  */
-public class Body implements Collidable, Transformable {
+public class Body implements Swept, Collidable, Transformable {
 	/** The default linear damping; value = {@value #DEFAULT_LINEAR_DAMPING} */
 	public static final double DEFAULT_LINEAR_DAMPING = 0.0;
 	
 	/** The default angular damping; value = {@value #DEFAULT_ANGULAR_DAMPING} */
 	public static final double DEFAULT_ANGULAR_DAMPING 	= 0.01;
 	
-	/** The state flag for allowing sleeping */
-	protected static final int SLEEP = 1;
+	/** The state flag for allowing automatic sleeping */
+	protected static final int AUTO_SLEEP = 1;
 	
 	/** The state flag for the {@link Body} being asleep */
 	protected static final int ASLEEP = 2;
@@ -92,8 +93,14 @@ public class Body implements Collidable, Transformable {
 	/** The state flag indicating the {@link Body} has been added to an {@link Island} */
 	protected static final int ISLAND = 8;
 	
+	/** The state flag indicating the {@link Body} is a really fast object and requires CCD */
+	protected static final int BULLET = 16;
+	
 	/** The {@link Body}'s unique identifier */
 	protected String id;
+	
+	/** The beginning transform for CCD */
+	protected Transform transform0;
 	
 	/** The current {@link Transform} */
 	protected Transform transform;
@@ -151,6 +158,7 @@ public class Body implements Collidable, Transformable {
 		this.fixtures = new ArrayList<Fixture>(1);
 		this.mass = new Mass();
 		this.id = UUID.randomUUID().toString();
+		this.transform0 = new Transform();
 		this.transform = new Transform();
 		this.velocity = new Vector2();
 		this.angularVelocity = 0.0;
@@ -161,7 +169,7 @@ public class Body implements Collidable, Transformable {
 		// initialize the state
 		this.state = 0;
 		// allow sleeping
-		this.state |= Body.SLEEP;
+		this.state |= Body.AUTO_SLEEP;
 		// start off active
 		this.state |= Body.ACTIVE;
 		this.sleepTime = 0.0;
@@ -183,7 +191,8 @@ public class Body implements Collidable, Transformable {
 		for (int i = 0; i < size; i++) {
 			sb.append(this.fixtures.get(i));
 		}
-		sb.append("]|TRANSFORM[").append(this.transform).append("]")
+		sb.append("]|TRANSFORM_0[").append(this.transform0).append("]")
+		.append("|TRANSFORM[").append(this.transform).append("]")
 		.append("|").append(this.mass)
 		.append("|").append(this.velocity)
 		.append("|").append(this.angularVelocity)
@@ -380,6 +389,8 @@ public class Body implements Collidable, Transformable {
 	
 	/**
 	 * Applies the given force to this {@link Body}.
+	 * <p>
+	 * This method will wake-up the body if its sleeping.
 	 * @param force the force
 	 * @return {@link Body} this body
 	 */
@@ -395,7 +406,9 @@ public class Body implements Collidable, Transformable {
 	}
 	
 	/**
-	 * Applies the given {@link Force} to this {@link Body}
+	 * Applies the given {@link Force} to this {@link Body}.
+	 * <p>
+	 * This method will wake-up the body if its sleeping.
 	 * @param force the force
 	 * @return {@link Body} this body
 	 */
@@ -412,6 +425,8 @@ public class Body implements Collidable, Transformable {
 	
 	/**
 	 * Applies the given torque about the center of this {@link Body}.
+	 * <p>
+	 * This method will wake-up the body if its sleeping.
 	 * @param torque the torque about the center
 	 * @return {@link Body} this body
 	 */
@@ -426,6 +441,8 @@ public class Body implements Collidable, Transformable {
 	
 	/**
 	 * Applies the given {@link Torque} to this {@link Body}.
+	 * <p>
+	 * This method will wake-up the body if its sleeping.
 	 * @param torque the torque
 	 * @return {@link Body} this body
 	 */
@@ -443,6 +460,8 @@ public class Body implements Collidable, Transformable {
 	/**
 	 * Applies the given force to this {@link Body} at the
 	 * given point (torque).
+	 * <p>
+	 * This method will wake-up the body if its sleeping.
 	 * @param force the force
 	 * @param point the application point in world coordinates
 	 * @return {@link Body} this body
@@ -557,24 +576,26 @@ public class Body implements Collidable, Transformable {
 	}
 	
 	/**
-	 * Sets the {@link Body} to allow or disallow sleeping.
+	 * Sets the {@link Body} to allow or disallow automatic sleeping.
 	 * @param flag true if the {@link Body} is allowed to sleep
+	 * @since 1.2.0
 	 */
-	public void setCanSleep(boolean flag) {
+	public void setAutoSleepingEnabled(boolean flag) {
 		// see if the body can already sleep
 		if (flag) {
-			this.state |= Body.SLEEP;
+			this.state |= Body.AUTO_SLEEP;
 		} else {
-			this.state &= ~Body.SLEEP;
+			this.state &= ~Body.AUTO_SLEEP;
 		}
 	}
 	
 	/**
 	 * Returns true if this {@link Body} is allowed to sleep.
 	 * @return boolean
+	 * @since 1.2.0
 	 */
-	public boolean canSleep() {
-		return (this.state & Body.SLEEP) == Body.SLEEP;
+	public boolean isAutoSleepingEnabled() {
+		return (this.state & Body.AUTO_SLEEP) == Body.AUTO_SLEEP;
 	}
 	
 	/**
@@ -591,16 +612,13 @@ public class Body implements Collidable, Transformable {
 	 */
 	public void setAsleep(boolean flag) {
 		if (flag) {
-			// make sure this body is allowed to sleep
-			if (this.canSleep()) {
-				this.state |= Body.ASLEEP;
-				this.velocity.zero();
-				this.angularVelocity = 0.0;
-				this.clearForce();
-				this.clearTorque();
-				this.forces.clear();
-				this.torques.clear();
-			}
+			this.state |= Body.ASLEEP;
+			this.velocity.zero();
+			this.angularVelocity = 0.0;
+			this.clearForce();
+			this.clearTorque();
+			this.forces.clear();
+			this.torques.clear();
 		} else {
 			// check if the body is asleep
 			if ((this.state & Body.ASLEEP) == Body.ASLEEP) {
@@ -675,6 +693,36 @@ public class Body implements Collidable, Transformable {
 	}
 	
 	/**
+	 * Returns true if this {@link Body} is a bullet.
+	 * @see #setBullet(boolean)
+	 * @return boolean
+	 * @since 1.2.0
+	 */
+	public boolean isBullet() {
+		return (this.state & Body.BULLET) == Body.BULLET;
+	}
+	
+	/**
+	 * Sets the bullet flag for this {@link Body}.
+	 * <p>
+	 * A bullet is a very fast moving body that requires
+	 * continuous collision detection with <b>all</b> other
+	 * {@link Body}s to ensure that no collisions are missed.
+	 * <p>
+	 * All dynamic {@link Body}s are checked using CCD against static
+	 * and kinematic {@link Body}s whether this flag is true or false.
+	 * @param flag true if this {@link Body} is a bullet
+	 * @since 1.2.0
+	 */
+	public void setBullet(boolean flag) {
+		if (flag) {
+			this.state |= Body.BULLET;
+		} else {
+			this.state &= ~Body.BULLET;
+		}
+	}
+	
+	/**
 	 * Returns true if the given {@link Body} is connected
 	 * to this {@link Body} by a {@link Joint}.
 	 * @param body the suspect connected body
@@ -732,6 +780,32 @@ public class Body implements Collidable, Transformable {
 			}
 		}
 		// not found, so return false
+		return false;
+	}
+	
+	/**
+	 * Returns true if the given {@link Body} is in collision with this {@link Body}.
+	 * @param body the {@link Body} to test
+	 * @return boolean true if the given {@link Body} is in collision with this {@link Body}
+	 * @since 1.2.0
+	 */
+	public boolean isInContact(Body body) {
+		// check for a null body
+		if (body == null) return false;
+		// get the number of contacts
+		int size = this.contacts.size();
+		// check for zero contacts
+		if (size == 0) return false;
+		// loop over the contacts
+		for (int i = 0; i < size; i++) {
+			ContactEdge ce = this.contacts.get(i);
+			// is the other body equal to the given body?
+			if (ce.getOther() == body) {
+				// if so then return true
+				return true;
+			}
+		}
+		// if we get here then we know no contact exists
 		return false;
 	}
 	
@@ -807,6 +881,22 @@ public class Body implements Collidable, Transformable {
 		return this.transform;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.collision.continuous.Swept#getInitialTransform()
+	 */
+	@Override
+	public Transform getInitialTransform() {
+		return this.transform0;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.collision.continuous.Swept#getFinalTransform()
+	 */
+	@Override
+	public Transform getFinalTransform() {
+		return this.transform;
+	}
+	
 	/**
 	 * Sets this {@link Body}'s transform.
 	 * @param transform the transform
@@ -814,7 +904,8 @@ public class Body implements Collidable, Transformable {
 	 */
 	public void setTransform(Transform transform) {
 		if (transform == null) throw new NullPointerException("A body cannot have a null transform.");
-		this.transform = transform;
+		this.transform.set(transform);
+		this.transform0.set(transform);
 	}
 	
 	/**
@@ -923,7 +1014,7 @@ public class Body implements Collidable, Transformable {
 	 * @return {@link Vector2}
 	 */
 	public Vector2 getVelocity() {
-		return velocity;
+		return this.velocity;
 	}
 	
 	/**
@@ -943,7 +1034,7 @@ public class Body implements Collidable, Transformable {
 	 * @return double
 	 */
 	public double getAngularVelocity() {
-		return angularVelocity;
+		return this.angularVelocity;
 	}
 
 	/**
