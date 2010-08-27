@@ -46,6 +46,7 @@ import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Geometry;
 import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Polygon;
+import org.dyn4j.game2d.geometry.Ray;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Segment;
 import org.dyn4j.game2d.geometry.Transform;
@@ -58,7 +59,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests shape collisions by plotting shapes, points, vectors, etc.
  * @author William Bittle
- * @version 1.1.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Plotter extends Test {
@@ -139,8 +140,8 @@ public class Plotter extends Test {
 			this.e2List[i] = this.getEntity(i);
 		}
 		// default to the first set
-		this.e1 = this.e1List[1];
-		this.e2 = this.e2List[3];
+		this.e1 = this.e1List[4];
+		this.e2 = this.e2List[5];
 		// add them to the world
 		this.world.add(this.e1);
 		this.world.add(this.e2);
@@ -355,6 +356,24 @@ public class Plotter extends Test {
 		double sy = (y1 + y2) / 2.0;
 		// render the vector with a magnitude of 1m
 		this.renderVector(g, sx, sy, x, y, l);
+	}
+	
+	/**
+	 * Renders the given ray to the given graphics object.
+	 * @param g the graphics object to render to
+	 * @param ray the ray to render
+	 * @since 2.0.0
+	 */
+	protected void renderRay(Graphics2D g, Ray ray) {
+		// get the ray attributes (world coordinates)
+		Vector2 s = ray.getStart();
+		Vector2 d = ray.getDirection();
+		
+		// draw the line from the start to the end, along d, l distance
+		g.drawLine((int) Math.ceil(s.x * scale), 
+				   (int) Math.ceil(s.y * scale), 
+				   (int) Math.ceil(s.x * scale + d.x * 10000.0), 
+				   (int) Math.ceil(s.y * scale + d.y * 10000.0));
 	}
 	
 	/**

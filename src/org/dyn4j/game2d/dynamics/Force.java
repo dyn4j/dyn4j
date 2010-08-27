@@ -29,7 +29,7 @@ import org.dyn4j.game2d.geometry.Vector2;
 /**
  * Represents a force.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Force {
@@ -103,6 +103,20 @@ public class Force {
 	 */
 	public void apply(Body body) {
 		body.force.add(this.force);
+	}
+	
+	/**
+	 * Returns true if this force should be removed.
+	 * <p>
+	 * Implement this method to create {@link Force} objects
+	 * that are not cleared each iteration by the {@link World}.
+	 * <p>
+	 * The default implementation always returns true.
+	 * @return boolean true if this force should be removed
+	 * @since 2.0.0
+	 */
+	public boolean isComplete() {
+		return true;
 	}
 	
 	/* (non-Javadoc)

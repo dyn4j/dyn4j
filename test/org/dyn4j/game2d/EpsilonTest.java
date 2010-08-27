@@ -24,40 +24,27 @@
  */
 package org.dyn4j.game2d;
 
+import junit.framework.TestCase;
+
+import org.junit.Test;
+
 /**
- * The version of the engine.
+ * Test case for the {@link Epsilon} class.
  * @author William Bittle
  * @version 2.0.0
- * @since 1.0.0
+ * @since 2.0.0
  */
-public final class Version {
-	/** The major version number; API changes, major enhancements, etc. */
-	public static final int MAJOR = 2;
-	
-	/** The minor version number; minor enhancements, major bug fixes, etc. */
-	public static final int MINOR = 0;
-	
-	/** The revision number; minor bug fixes */
-	public static final int REVISION = 0;
-	
+public class EpsilonTest {
 	/**
-	 * Hide the constructor.
+	 * Tests the machine epsilon computation.
 	 */
-	private Version() {}
-	
-	/**
-	 * Returns the version as a string.
-	 * @return String
-	 */
-	public static String getVersion() {
-		return MAJOR + "." + MINOR + "." + REVISION;
-	}
-	
-	/**
-	 * Main class to print the version to the console.
-	 * @param args command line arguments (none accepted)
-	 */
-	public static final void main(String[] args) {
-		System.out.println("dyn4j v" + Version.getVersion());
+	@Test
+	public void compute() {
+		// ensure that the static variable is set
+		TestCase.assertFalse(Epsilon.E == 0.0);
+		// ensure the compute method returns in a
+		// finite number of iterations
+		Epsilon.compute();
+		TestCase.assertTrue(true);
 	}
 }

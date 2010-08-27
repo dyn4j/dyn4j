@@ -49,7 +49,7 @@ import org.junit.Test;
 /**
  * Test case for {@link Circle} - {@link Rectangle} collision detection.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class CircleRectangleTest extends AbstractTest {
@@ -234,32 +234,32 @@ public class CircleRectangleTest extends AbstractTest {
 		TestCase.assertTrue(this.gjk.detect(circ, t1, rect, t2, p));
 		TestCase.assertTrue(this.gjk.detect(circ, t1, rect, t2));
 		n = p.getNormal();
-		TestCase.assertEquals(1.5, p.getDepth(), 1.0e-8);
-		TestCase.assertEquals(0.0, n.x, 1.0e-10);
-		TestCase.assertEquals(1.0, n.y, 1.0e-10);
+		TestCase.assertEquals(1.5, p.getDepth(), 1.0e-4);
+		TestCase.assertEquals(1.0, n.x, 1.0e-4);
+		TestCase.assertEquals(0.0, n.y, 1.0e-4);
 		// try reversing the shapes
 		TestCase.assertTrue(this.gjk.detect(rect, t2, circ, t1, p));
 		TestCase.assertTrue(this.gjk.detect(rect, t2, circ, t1));
 		n = p.getNormal();
-		TestCase.assertEquals(1.5, p.getDepth(), 1.0e-10);
-		TestCase.assertEquals(1.0, n.x, 1.0e-10);
-		TestCase.assertEquals(0.0, n.y, 1.0e-10);
+		TestCase.assertEquals(1.5, p.getDepth(), 1.0e-4);
+		TestCase.assertEquals(-1.0, n.x, 1.0e-4);
+		TestCase.assertEquals(0.0, n.y, 1.0e-4);
 		
 		// test overlap
 		t1.translate(-1.0, 0.0);
 		TestCase.assertTrue(this.gjk.detect(circ, t1, rect, t2, p));
 		TestCase.assertTrue(this.gjk.detect(circ, t1, rect, t2));
 		n = p.getNormal();
-		TestCase.assertEquals(0.5, p.getDepth(), 1.0e-10);
-		TestCase.assertEquals(1.0, n.x, 1.0e-10);
-		TestCase.assertEquals(0.0, n.y, 1.0e-10);
+		TestCase.assertEquals(0.5, p.getDepth(), 1.0e-4);
+		TestCase.assertEquals(1.0, n.x, 1.0e-4);
+		TestCase.assertEquals(0.0, n.y, 1.0e-4);
 		// try reversing the shapes
 		TestCase.assertTrue(this.gjk.detect(rect, t2, circ, t1, p));
 		TestCase.assertTrue(this.gjk.detect(rect, t2, circ, t1));
 		n = p.getNormal();
-		TestCase.assertEquals(0.5, p.getDepth(), 1.0e-10);
-		TestCase.assertEquals(-1.0, n.x, 1.0e-10);
-		TestCase.assertEquals(0.0, n.y, 1.0e-10);
+		TestCase.assertEquals(0.5, p.getDepth(), 1.0e-4);
+		TestCase.assertEquals(-1.0, n.x, 1.0e-4);
+		TestCase.assertEquals(0.0, n.y, 1.0e-4);
 		
 		// test AABB overlap
 		t2.translate(0.0, 1.4);
@@ -394,17 +394,17 @@ public class CircleRectangleTest extends AbstractTest {
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
 		p1 = mp.getPoint();
-		TestCase.assertEquals(0.0, p1.x, 1.0e-10);
-		TestCase.assertEquals(0.0, p1.y, 1.0e-10);
-		TestCase.assertEquals(0.5, mp.getDepth(), 1.0e-10);
+		TestCase.assertEquals(0.0, p1.x, 1.0e-4);
+		TestCase.assertEquals(0.0, p1.y, 1.0e-4);
+		TestCase.assertEquals(0.5, mp.getDepth(), 1.0e-4);
 		// try reversing the shapes
 		TestCase.assertTrue(this.cmfs.getManifold(p, rect, t2, circ, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
 		p1 = mp.getPoint();
-		TestCase.assertEquals(0.0, p1.x, 1.0e-10);
-		TestCase.assertEquals(0.0, p1.y, 1.0e-10);
-		TestCase.assertEquals(0.5, mp.getDepth(), 1.0e-10);
+		TestCase.assertEquals(0.0, p1.x, 1.0e-4);
+		TestCase.assertEquals(0.0, p1.y, 1.0e-4);
+		TestCase.assertEquals(0.5, mp.getDepth(), 1.0e-4);
 		
 		// test overlap sat
 		this.sat.detect(circ, t1, rect, t2, p);

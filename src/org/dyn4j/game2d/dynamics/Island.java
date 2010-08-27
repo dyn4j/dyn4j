@@ -27,6 +27,7 @@ package org.dyn4j.game2d.dynamics;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.dyn4j.game2d.Epsilon;
 import org.dyn4j.game2d.dynamics.contact.ContactConstraint;
 import org.dyn4j.game2d.dynamics.contact.ContactConstraintSolver;
 import org.dyn4j.game2d.dynamics.joint.Joint;
@@ -39,7 +40,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Nearly identitcal to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 1.2.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Island {
@@ -133,7 +134,7 @@ public class Island {
 		for (int i = 0; i < size; i++) {
 			Body body = this.bodies.get(i);
 			// check if the body has infinite mass and infinite inertia
-			if (body.isStatic()) continue;
+			if (!body.isDynamic()) continue;
 			// accumulate the forces and torques
 			body.accumulate();
 			// get the mass properties
@@ -142,10 +143,18 @@ public class Island {
 			// integrate force and torque to modify the velocity and
 			// angular velocity (sympletic euler)
 			// v1 = v0 + (f / m) + g) * dt
-			body.velocity.x += (body.force.x * invM + gravity.x) * step.dt;
-			body.velocity.y += (body.force.y * invM + gravity.y) * step.dt;
+			if (invM >= Epsilon.E) {
+				// only perform this step if the body does not have
+				// a fixed linear velocity
+				body.velocity.x += (body.force.x * invM + gravity.x) * step.dt;
+				body.velocity.y += (body.force.y * invM + gravity.y) * step.dt;
+			}
 			// av1 = av0 + (t / I) * dt
-			body.angularVelocity += step.dt * invI * body.torque;
+			if (invI >= Epsilon.E) {
+				// only perform this step if the body does not have
+				// a fixed angular velocity
+				body.angularVelocity += step.dt * invI * body.torque;
+			}
 			// apply damping
 			double linear = 1.0 - step.dt * body.linearDamping;
 			double angular = 1.0 - step.dt * body.angularDamping;

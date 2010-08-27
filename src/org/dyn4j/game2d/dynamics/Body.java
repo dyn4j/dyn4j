@@ -25,6 +25,7 @@
 package org.dyn4j.game2d.dynamics;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -526,12 +527,15 @@ public class Body implements Swept, Collidable, Transformable {
 		// check if the size is greater than zero
 		if (size > 0) {
 			// apply all the forces
-			for (int i = 0; i < size; i++) {
-				Force force = this.forces.get(i);
+			Iterator<Force> it = this.forces.iterator();
+			while(it.hasNext()) {
+				Force force = it.next();
 				force.apply(this);
+				// see if we should remove the force
+				if (force.isComplete()) {
+					it.remove();
+				}
 			}
-			// remove the forces from the accumulator
-			this.forces.clear();
 		}
 		// set the current torque to zero
 		this.torque = 0.0;
@@ -540,12 +544,15 @@ public class Body implements Swept, Collidable, Transformable {
 		// check the size
 		if (size > 0) {
 			// apply all the torques
-			for (int i = 0; i < size; i++) {
-				Torque torque = this.torques.get(i);
+			Iterator<Torque> it = this.torques.iterator();
+			while(it.hasNext()) {
+				Torque torque = it.next();
 				torque.apply(this);
+				// see if we should remove the torque
+				if (torque.isComplete()) {
+					it.remove();
+				}
 			}
-			// remove the torques from the accumulator
-			this.torques.clear();
 		}
 	}
 	

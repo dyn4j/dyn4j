@@ -56,6 +56,7 @@ import org.dyn4j.game2d.dynamics.contact.ContactPoint;
 import org.dyn4j.game2d.dynamics.joint.Joint;
 import org.dyn4j.game2d.dynamics.joint.JointEdge;
 import org.dyn4j.game2d.geometry.Convex;
+import org.dyn4j.game2d.geometry.Ray;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Vector2;
 
@@ -65,7 +66,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Employs the same {@link Island} solving technique as <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 1.2.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class World {
@@ -622,6 +623,13 @@ public class World {
 				
 				// move the dynamic body to the time of impact
 				b1.transform0.lerp(b1.transform, t, b1.transform);
+				// TODO there is a problem here, both bodies will need to be updated in some cases
+				// therefore we must interpolate all bodies to the min toi and continue
+				// until all are solved
+				
+				// TODO another option might be to iterate until we find that the bodies overlap
+				// at a TOI then have a position solver solve for the correct collision point
+				// instead of trying to find the TOI at which they are just about to penetrate
 				
 				// move the body along the separating axis the given distance plus
 				// the allowed penetration to place the objects in collision
@@ -632,6 +640,17 @@ public class World {
 				// this method does not conserve time
 			}
 		}
+	}
+	
+	/**
+	 * 
+	 * @param ray
+	 */
+	// TODO finish this method
+	public void raycast(Ray ray) {
+		// this method should accept the ray and perform a raycast on all shapes finding what shapes the ray intersects.
+		// allow an option to only return the body who is intersected first or all
+		// we can use the maxLength parameter to iteratively cull subsequent bodies
 	}
 	
 	/**

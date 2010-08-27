@@ -24,6 +24,9 @@
  */
 package org.dyn4j.game2d.geometry;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import junit.framework.TestCase;
 
 import org.junit.Test;
@@ -31,7 +34,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Geometry} class.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class GeometryTest {
@@ -58,6 +61,33 @@ public class GeometryTest {
 	}
 	
 	/**
+	 * Tests the getAverageCenter method passing a null array.
+	 * @since 2.0.0
+	 */
+	@Test(expected = NullPointerException.class)
+	public void getAverageCenterNullArray() {
+		Geometry.getAverageCenter((Vector2[]) null);
+	}
+	
+	/**
+	 * Tests the getAverageCenter method passing a null list.
+	 * @since 2.0.0
+	 */
+	@Test(expected = NullPointerException.class)
+	public void getAverageCenterNullList() {
+		Geometry.getAverageCenter((List<Vector2>) null);
+	}
+	
+	/**
+	 * Tests the getAverageCenter method passing an empty list.
+	 * @since 2.0.0
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void getAverageCenterEmptyList() {
+		Geometry.getAverageCenter(new ArrayList<Vector2>());
+	}
+	
+	/**
 	 * Tests the getAreaWeightedCenter method.
 	 */
 	@Test
@@ -76,6 +106,71 @@ public class GeometryTest {
 		// note the x is closer to the "real" center of the object
 		TestCase.assertEquals(-0.318, c.x, 1.0e-3);
 		TestCase.assertEquals( 0.527, c.y, 1.0e-3);
+	}
+
+	/**
+	 * Tests the getAreaWeightedCenter method passing a null array.
+	 * @since 2.0.0
+	 */
+	@Test(expected = NullPointerException.class)
+	public void getAreaWeightedCenterNullArray() {
+		Geometry.getAreaWeightedCenter((Vector2[]) null);
+	}
+	
+	/**
+	 * Tests the getAreaWeightedCenter method passing a null list.
+	 * @since 2.0.0
+	 */
+	@Test(expected = NullPointerException.class)
+	public void getAreaWeightedCenterNullList() {
+		Geometry.getAreaWeightedCenter((List<Vector2>) null);
+	}
+	
+	/**
+	 * Tests the getAreaWeightedCenter method passing an empty list.
+	 * @since 2.0.0
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void getAreaWeightedCenterEmptyList() {
+		Geometry.getAreaWeightedCenter(new ArrayList<Vector2>());
+	}
+	
+	/**
+	 * Tests the getAreaWeightedCenter method passing a list of
+	 * points who are all the same yielding zero area.
+	 * @since 2.0.0
+	 */
+	@Test
+	public void getAreaWeightedCenterZeroAreaList() {
+		List<Vector2> points = new ArrayList<Vector2>();
+		points.add(new Vector2(2.0, 1.0));
+		points.add(new Vector2(2.0, 1.0));
+		points.add(new Vector2(2.0, 1.0));
+		points.add(new Vector2(2.0, 1.0));
+		
+		Vector2 c = Geometry.getAreaWeightedCenter(points);
+		
+		TestCase.assertEquals(2.000, c.x, 1.0e-3);
+		TestCase.assertEquals(1.000, c.y, 1.0e-3);
+	}
+	
+	/**
+	 * Tests the getAreaWeightedCenter method passing a list of
+	 * points who are all the same yielding zero area.
+	 * @since 2.0.0
+	 */
+	@Test
+	public void getAreaWeightedCenterZeroAreaArray() {
+		Vector2[] points = new Vector2[4];
+		points[0] = new Vector2(2.0, 1.0);
+		points[1] = new Vector2(2.0, 1.0);
+		points[2] = new Vector2(2.0, 1.0);
+		points[3] = new Vector2(2.0, 1.0);
+		
+		Vector2 c = Geometry.getAreaWeightedCenter(points);
+		
+		TestCase.assertEquals(2.000, c.x, 1.0e-3);
+		TestCase.assertEquals(1.000, c.y, 1.0e-3);
 	}
 	
 	/**

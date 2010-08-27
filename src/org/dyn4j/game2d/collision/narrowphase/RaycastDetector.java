@@ -22,42 +22,34 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.game2d;
+package org.dyn4j.game2d.collision.narrowphase;
+
+import org.dyn4j.game2d.geometry.Convex;
+import org.dyn4j.game2d.geometry.Ray;
+import org.dyn4j.game2d.geometry.Shape;
+import org.dyn4j.game2d.geometry.Transform;
 
 /**
- * The version of the engine.
+ * Represents an algorithm for determining whether a {@link Ray} and a {@link Convex}
+ * {@link Shape} intersect, given the ray's maximum length and the convex shape's
+ * transform.
  * @author William Bittle
  * @version 2.0.0
- * @since 1.0.0
+ * @since 2.0.0
  */
-public final class Version {
-	/** The major version number; API changes, major enhancements, etc. */
-	public static final int MAJOR = 2;
-	
-	/** The minor version number; minor enhancements, major bug fixes, etc. */
-	public static final int MINOR = 0;
-	
-	/** The revision number; minor bug fixes */
-	public static final int REVISION = 0;
-	
+public interface RaycastDetector {
 	/**
-	 * Hide the constructor.
+	 * Performs a ray cast given a {@link Ray} and a {@link Convex} {@link Shape} returning
+	 * true if the ray passes through the convex shape.
+	 * <p>
+	 * The raycast parameter is used to stored the results of the raycast upon a successful
+	 * or true return.
+	 * @param ray the {@link Ray}
+	 * @param maxLength the maximum length of the ray; 0 for infinite length
+	 * @param convex the {@link Convex} {@link Shape}
+	 * @param t the {@link Convex} {@link Shape}'s {@link Transform}
+	 * @param raycast the ray cast result
+	 * @return boolean true if the {@link Ray} passes through the {@link Convex} {@link Shape}
 	 */
-	private Version() {}
-	
-	/**
-	 * Returns the version as a string.
-	 * @return String
-	 */
-	public static String getVersion() {
-		return MAJOR + "." + MINOR + "." + REVISION;
-	}
-	
-	/**
-	 * Main class to print the version to the console.
-	 * @param args command line arguments (none accepted)
-	 */
-	public static final void main(String[] args) {
-		System.out.println("dyn4j v" + Version.getVersion());
-	}
+	public abstract boolean raycast(Ray ray, double maxLength, Convex convex, Transform t, Raycast raycast);
 }

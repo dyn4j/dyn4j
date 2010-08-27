@@ -24,24 +24,20 @@
  */
 package org.dyn4j.game2d.collision.narrowphase;
 
-import java.awt.Shape;
-
 import org.dyn4j.game2d.geometry.Circle;
-import org.dyn4j.game2d.geometry.Convex;
+import org.dyn4j.game2d.geometry.Ray;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Vector2;
 
 /**
- * Class devoted to {@link Circle}-{@link Circle} collision and distance detection.
+ * Class devoted to improving performance of {@link Circle} detection queries.
  * <p>
- * This methods are can be called from the {@link NarrowphaseDetector}s
- * and {@link DistanceDetector}s to perform high performance checks if
- * both {@link Convex} {@link Shape}s are {@link Circle}s.
+ * Renamed from CircleCircleDetector
  * @author William Bittle
- * @version 1.2.0
- * @since 1.2.0
+ * @version 2.0.0
+ * @since 2.0.0
  */
-public class CircleCircleDetector {
+public class CircleDetector {
 	/**
 	 * Fast method for determining a collision between two {@link Circle}s.
 	 * <p>
@@ -140,5 +136,108 @@ public class CircleCircleDetector {
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * Performs a ray cast against the given circle.
+	 * @param ray the {@link Ray}
+	 * @param maxLength the maximum ray length
+	 * @param circle the {@link Circle}
+	 * @param transform the {@link Circle}'s {@link Transform}
+	 * @param raycast the {@link Raycast} result
+	 * @return boolean true if the ray intersects the circle
+	 * @since 2.0.0
+	 */
+	public static boolean raycast(Ray ray, double maxLength, Circle circle, Transform transform, Raycast raycast) {
+		// solve the problem algebraically
+		Vector2 s = ray.getStart();
+		Vector2 d = ray.getDirection();
+		Vector2 ce = transform.getTransformed(circle.getCenter());
+		double r = circle.getRadius();
+		
+		// make sure the start of the ray is not contained in the circle
+		if (circle.contains(s, transform)) return false;
+		
+		// any point on a ray can be found by the parametric equation:
+		// P = tD + S
+		// any point on a circle can be found by:
+		// (x - h)^2 + (y - k)^2 = r^2 where h and k are the x and y center coordinates
+		// substituting the first equation into the second yields a quadratic equation:
+		// |D|^2t^2 + 2D.dot(S - C)t + (S - C)^2 - r^2 = 0
+		// using the quadratic equation we can solve for t where
+		// a = |D|^2
+		// b = 2D.dot(S - C)
+		// c = (S - C)^2 - r^2
+		Vector2 sMinusC = s.difference(ce);
+		
+		// mag(d)^2
+		double a = d.dot(d);
+		// 2d.dot(s - c)
+		double b = 2 * d.dot(sMinusC);
+		// (s - c)^2 - r^2
+		double c = sMinusC.dot(sMinusC) - r * r;
+		
+		// precompute
+		double inv2a = 1.0 / (2.0 * a);
+		double b24ac = b * b - 4 * a * c;
+		// check for negative inside the sqrt
+		if (b24ac < 0.0) {
+			// if the computation inside the sqrt is
+			// negative then this indicates that the
+			// ray is parallel to the circle
+			return false;
+		}
+		double sqrt = Math.sqrt(b24ac);
+		// compute the two values of t
+		double t0 = (-b + sqrt) * inv2a;
+		double t1 = (-b - sqrt) * inv2a;
+		
+		// find the correct t
+		// t cannot be negative since this would make the point
+		// in the opposite direction of the ray's direction
+		double t = 0.0;
+		// check for negative value
+		if (t0 < 0.0) {
+			// check for negative value
+			if (t1 < 0.0) {
+				// return the ray does not intersect the circle
+				return false;
+			} else {
+				// t1 is the answer
+				t = t1;
+			}
+		} else {
+			// check for negative value
+			if (t1 < 0.0) {
+				// t0 is the answer
+				t = t0;
+			} else if (t0 < t1) {
+				// t0 is the answer
+				t = t0;
+			} else {
+				// t1 is the answer
+				t = t1;
+			}
+		}
+		
+		// check the value of t
+		if (maxLength > 0.0 && t > maxLength) {
+			// if the smallest non-negative t is larger
+			// than the maximum length then return false
+			return false;
+		}
+		
+		// compute the hit point
+		Vector2 p = d.product(t).add(s);
+		// compute the normal
+		Vector2 n = ce.to(p); n.normalize();
+		
+		// populate the raycast result
+		raycast.point = p;
+		raycast.normal = n;
+		raycast.distance = t;
+		
+		// return success
+		return true;
 	}
 }

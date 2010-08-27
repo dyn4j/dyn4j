@@ -24,6 +24,7 @@
  */
 package org.dyn4j.game2d.dynamics.joint;
 
+import org.dyn4j.game2d.Epsilon;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.Settings;
 import org.dyn4j.game2d.dynamics.Step;
@@ -44,7 +45,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class LineJoint extends Joint {
@@ -215,7 +216,7 @@ public class LineJoint extends Joint {
 		
 		// compute the motor mass
 		this.motorMass = this.K.m11;
-		if (this.motorMass != 0.0) {
+		if (Math.abs(this.motorMass) >= Epsilon.E) {
 			this.motorMass = 1.0 / this.motorMass;
 		}
 		
@@ -364,7 +365,7 @@ public class LineJoint extends Joint {
 			// solve for the corrected impulse
 			double f2_1 = -Cdt - (this.impulse.y - f1.y) * this.K.m01;
 			double f2r;
-			if (this.K.m00 != 0.0) {
+			if (Math.abs(this.K.m00) >= Epsilon.E) {
 				f2r = f2_1 / this.K.m00 + f1.x;
 			} else {
 				f2r = f1.x;
@@ -401,7 +402,7 @@ public class LineJoint extends Joint {
 			double f2r;
 			// the linear constraint without the limits has a
 			// scalar mass equal to the 0,0 element of the K matrix
-			if (this.K.m00 != 0.0) {
+			if (Math.abs(this.K.m00) >= Epsilon.E) {
 				f2r = -Cdt / this.K.m00;
 			} else {
 				f2r = 0.0;
@@ -510,7 +511,7 @@ public class LineJoint extends Joint {
 		} else {
 			// otherwise only solve the linear constraint
 			double mass = invM1 + invM2 + this.s1 * this.s1 * invI1 + this.s2 * this.s2 * invI2;
-			if (mass != 0.0) {
+			if (Math.abs(mass) >= Epsilon.E) {
 				mass = 1.0 / mass;
 			}
 			

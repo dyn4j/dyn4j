@@ -32,7 +32,7 @@ package org.dyn4j.game2d.geometry;
  * <p>
  * A polygon must also not have coincident vertices.
  * @author William Bittle
- * @version 1.1.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Polygon extends Wound implements Convex, Shape, Transformable {
@@ -80,7 +80,7 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 			}
 		}
 		// check for CCW
-		if (area < 0) {
+		if (area < 0.0) {
 			throw new IllegalArgumentException("A polygon must have Counter-Clockwise vertex winding.");
 		}
 		// set the vertices
@@ -413,7 +413,7 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		double I = 0.0;
 		int n = this.vertices.length;
 		// calculate inverse three once
-		double inv3 = 1.0 / 3.0;
+		final double inv3 = 1.0 / 3.0;
 		// loop through the vertices
 		for (int i = 0; i < n; i++) {
 			// get two vertices
@@ -442,6 +442,6 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		center.multiply(1.0 / area);
 		// finish the inertia tensor by dividing by the total area and multiplying by d / 6
 		I *= (density / 6.0);
-		return Mass.create(center, m, I);
+		return new Mass(center, m, I);
 	}
 }

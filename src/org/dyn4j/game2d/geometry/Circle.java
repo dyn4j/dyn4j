@@ -29,7 +29,7 @@ package org.dyn4j.game2d.geometry;
  * <p>
  * A {@link Circle}'s radius must be larger than zero.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Circle extends AbstractShape implements Convex, Shape, Transformable {
@@ -175,8 +175,8 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 		// compute the mass
 		double mass = density * Math.PI * radius * radius;
 		// compute the inertia tensor
-		double inertia = mass * radius * radius / 2.0;
+		double inertia = mass * radius * radius * 0.5;
 		// use the center supplied to the circle
-		return Mass.create(this.center, mass, inertia);
+		return new Mass(this.center, mass, inertia);
 	}
 }

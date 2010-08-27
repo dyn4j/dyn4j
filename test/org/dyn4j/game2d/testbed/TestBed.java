@@ -61,7 +61,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Container for the tests.
  * @author William Bittle
  * @param <E> the container type
- * @version 1.2.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
@@ -470,6 +470,9 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		
 		// always show the paused box on top of everything
 		if (this.isPaused()) {
+			// show a black translucent screen over everything
+			g.setColor(new Color(0, 0, 0, 100));
+			g.fillRect(0, 0, width, height);
 			// show the paused label in the top left corner
 			this.renderPaused(g, 0, 0, 100, 20);
 		}

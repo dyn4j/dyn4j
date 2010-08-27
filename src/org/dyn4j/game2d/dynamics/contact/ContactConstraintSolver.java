@@ -43,7 +43,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * facilitate stable stacking of rigid {@link Body}s.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 1.1.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class ContactConstraintSolver {
@@ -122,7 +122,12 @@ public class ContactConstraintSolver {
 				// this is done to force heavy objects from sinking into lighter objects
 				double massE = mass1 * invM1 + mass2 * invM2;
 				massE += mass1 * invI1 * r1CrossN * r1CrossN + mass2 * invI2 * r2CrossN * r2CrossN;
-				contact.massE = 1.0 / massE;
+				// TODO change this to the new method in box2d
+				if (massE != 0.0) {
+					contact.massE = 1.0 / massE;
+				} else {
+					contact.massE = 0.0;
+				}
 				
 				// set the velocity bias
 				contact.vb = 0.0;

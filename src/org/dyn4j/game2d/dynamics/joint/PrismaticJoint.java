@@ -24,6 +24,7 @@
  */
 package org.dyn4j.game2d.dynamics.joint;
 
+import org.dyn4j.game2d.Epsilon;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.Settings;
 import org.dyn4j.game2d.dynamics.Step;
@@ -42,7 +43,7 @@ import org.dyn4j.game2d.geometry.Vector3;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class PrismaticJoint extends Joint {
@@ -226,7 +227,7 @@ public class PrismaticJoint extends Joint {
 		
 		// compute the motor mass
 		this.motorMass = this.K.m22;
-		if (this.motorMass != 0.0) {
+		if (Math.abs(this.motorMass) >= Epsilon.E) {
 			this.motorMass = 1.0 / this.motorMass;
 		}
 		

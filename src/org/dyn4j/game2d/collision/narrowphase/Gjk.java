@@ -27,9 +27,11 @@ package org.dyn4j.game2d.collision.narrowphase;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.dyn4j.game2d.Epsilon;
 import org.dyn4j.game2d.collision.Collidable;
 import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Convex;
+import org.dyn4j.game2d.geometry.Ray;
 import org.dyn4j.game2d.geometry.Segment;
 import org.dyn4j.game2d.geometry.Shape;
 import org.dyn4j.game2d.geometry.Transform;
@@ -113,18 +115,18 @@ import org.dyn4j.game2d.geometry.Vector2;
  * {@link Shape}s.  Refer to {@link Gjk#distance(Convex, Transform, Convex, Transform, Separation)}
  * for details on the implementation.
  * @author William Bittle
- * @version 1.2.0
+ * @version 2.0.0
  * @since 1.0.0
  */
-public class Gjk implements NarrowphaseDetector, DistanceDetector {
+public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetector {
 	/** The origin point */
 	protected static final Vector2 ORIGIN = new Vector2();
 	
 	/** The default {@link Gjk} maximum iterations */
 	public static final int DEFAULT_GJK_MAX_ITERATIONS = 100;
 	
-	/** The default {@link Gjk} distance epsilon in meters */
-	public static final double DEFAULT_GJK_DISTANCE_EPSILON = 1.0e-9;
+	/** The default {@link Gjk} distance epsilon in meters; near 1E-8 */
+	public static final double DEFAULT_GJK_DISTANCE_EPSILON = Math.sqrt(Epsilon.E);
 	
 	/** The penetration solver; defaults to {@link Epa} */
 	protected MinkowskiPenetrationSolver minkowskiPenetrationSolver = new Epa();
@@ -157,7 +159,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector {
 		// check for circles
 		if (convex1.isType(Circle.TYPE) && convex2.isType(Circle.TYPE)) {
 			// if its a circle - circle collision use the faster method
-			return CircleCircleDetector.detect((Circle) convex1, transform1, (Circle) convex2, transform2, penetration);
+			return CircleDetector.detect((Circle) convex1, transform1, (Circle) convex2, transform2, penetration);
 		}
 		// define the simplex
 		List<Vector2> simplex = new ArrayList<Vector2>(3);
@@ -211,7 +213,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector {
 		// check for circles
 		if (convex1.isType(Circle.TYPE) && convex2.isType(Circle.TYPE)) {
 			// if its a circle - circle collision use the faster method
-			return CircleCircleDetector.detect((Circle) convex1, transform1, (Circle) convex2, transform2);
+			return CircleDetector.detect((Circle) convex1, transform1, (Circle) convex2, transform2);
 		}
 		// define the simplex
 		List<Vector2> simplex = new ArrayList<Vector2>(3);
@@ -343,7 +345,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector {
 		// check for circles
 		if (convex1.isType(Circle.TYPE) && convex2.isType(Circle.TYPE)) {
 			// if its a circle - circle collision use the faster method
-			return CircleCircleDetector.distance((Circle) convex1, transform1, (Circle) convex2, transform2, separation);
+			return CircleDetector.distance((Circle) convex1, transform1, (Circle) convex2, transform2, separation);
 		}
 		// create a Minkowski sum
 		MinkowskiSum ms = new MinkowskiSum(convex1, transform1, convex2, transform2);
@@ -557,6 +559,142 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector {
 		double sc = c.cross(a);
 		// this is sufficient (we do not need to test sb * sc)
 		return (sa * sb  > 0 && sa * sc > 0);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.collision.narrowphase.RaycastDetector#raycast(org.dyn4j.game2d.geometry.Ray, double, org.dyn4j.game2d.geometry.Convex, org.dyn4j.game2d.geometry.Transform, org.dyn4j.game2d.collision.narrowphase.Raycast)
+	 */
+	public boolean raycast(Ray ray, double maxLength, Convex convex, Transform transform, Raycast raycast) {
+		// check for circle
+		if (convex.isType(Circle.TYPE)) {
+			// if the convex is a circle then use the more efficient method
+			return CircleDetector.raycast(ray, maxLength, (Circle) convex, transform, raycast);
+		}
+		
+		// otherwise proceed with GJK raycast
+		double lambda = 0;
+		
+		// do we need to check against the max length?
+		boolean lengthCheck = maxLength > 0;
+		
+		// create the holders for the simplex
+		Vector2 a = null;
+		Vector2 b = null;
+		
+		// get the start point of the ray
+		Vector2 start = ray.getStart();
+		// x is the current closest point on the ray
+		Vector2 x = start;
+		// r is the ray direction
+		Vector2 r = ray.getDirection();
+		// n is the normal at the hit point
+		Vector2 n = new Vector2();
+		
+		// is the start point contained in the convex?
+		if (convex.contains(start, transform)) {
+			// return false if the start of the ray is inside the convex
+			return false;
+		}
+		
+		// get an arbitrary point within the convex shape
+		// we can use the center point
+		Vector2 c = transform.getTransformed(convex.getCenter());
+		// the center to the start point
+		Vector2 d = c.to(x);
+		
+		// define an epsilon to compare the distance with
+		double epsilonSqrd = this.gjkDistanceEpsilon * this.gjkDistanceEpsilon;
+		double distanceSqrd = Double.MAX_VALUE;
+		int iterations = 0;
+		// loop until we have found the correct distance
+		while (distanceSqrd > epsilonSqrd) {
+			// get a point on the edge of the convex in the direction of d
+			Vector2 p = convex.getFarthestPoint(d, transform);
+			// get the vector from the current closest point to the edge point
+			Vector2 w = p.to(x);
+			// is the current point on the ray to the new point
+			// in the same direction as d?
+			double dDotW = d.dot(w);
+			if (dDotW > 0.0) {
+				// is the ray direction in the same direction as d?
+				double dDotR = d.dot(r);
+				if (dDotR >= 0.0) {
+					// immediately return false since this indicates that the
+					// ray is moving in the opposite direction
+					return false;
+				} else {
+					// otherwise compute the new closest point on the
+					// ray to the edge point
+					lambda = lambda - dDotW / dDotR;
+					// check if l is larger than the length
+					if (lengthCheck && lambda > maxLength) {
+						// then return false
+						return false;
+					}
+					x = r.product(lambda).add(start);
+					// set d as the best normal we have so far
+					// d will be normalized when the loop terminates
+					n.set(d);
+				}
+			}
+			// now reduce the simplex to two points such that we keep the
+			// two points that form a segment that is closest to x
+			if (a != null) {
+				if (b != null) {
+					// reduce the set to two points
+					// get the closest point on each segment to the origin
+					Vector2 p1 = Segment.getPointOnSegmentClosestToPoint(x, a, p);
+					Vector2 p2 = Segment.getPointOnSegmentClosestToPoint(x, p, b);
+					
+					// test which point is closer and replace the one that is farthest
+					// with the new point p and set the new search direction
+					if (p1.distanceSquared(x) < p2.distanceSquared(x)) {
+						// a was closest so replace b with p
+						b.set(p);
+						// update the distance
+						distanceSqrd = p1.distanceSquared(x);
+					} else {
+						// b was closest so replace a with p
+						a.set(p);
+						// update the distance
+						distanceSqrd = p2.distanceSquared(x);
+					}
+					// get the new search direction
+					Vector2 ab = a.to(b);
+					Vector2 ax = a.to(x);
+					d = Vector2.tripleProduct(ab, ax, ab);
+				} else {
+					// b is null so just set b
+					b = p;
+					// get the new search direction
+					Vector2 ab = a.to(b);
+					Vector2 ax = a.to(x);
+					d = Vector2.tripleProduct(ab, ax, ab);
+				}
+			} else {
+				// both a and b are null so just set a and use -d as the
+				// new direction
+				a = p;
+				d.negate();
+			}
+			
+			// check for the maximum number of iterations
+			if (iterations == this.gjkMaxIterations) {
+				// use the current values as the best known values
+				break;
+			}
+			
+			// increment the number of iterations
+			iterations++;
+		}
+		
+		// set the raycast result values
+		raycast.point = x;
+		raycast.normal = n; n.normalize();
+		raycast.distance = lambda;
+		
+		// return true to indicate that we were successful
+		return true;
 	}
 	
 	/**

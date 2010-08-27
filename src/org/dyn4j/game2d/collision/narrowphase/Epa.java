@@ -26,6 +26,7 @@ package org.dyn4j.game2d.collision.narrowphase;
 
 import java.util.List;
 
+import org.dyn4j.game2d.Epsilon;
 import org.dyn4j.game2d.geometry.Polygon;
 import org.dyn4j.game2d.geometry.Vector2;
 
@@ -56,15 +57,15 @@ import org.dyn4j.game2d.geometry.Vector2;
  * {@link Epa} will terminate in a finite number of iterations if the two shapes are {@link Polygon}s.
  * If either shape has curved surfaces the algorithm requires an expected accuracy epsilon.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Epa implements MinkowskiPenetrationSolver {
 	/** The default {@link Epa} maximum iterations */
 	public static final int DEFAULT_EPA_MAX_ITERATIONS = 100;
 
-	/** The default {@link Epa} distance epsilon in meters */
-	public static final double DEFAULT_EPA_DISTANCE_EPSILON = 1.0e-9;
+	/** The default {@link Epa} distance epsilon in meters; near 1E-8 */
+	public static final double DEFAULT_EPA_DISTANCE_EPSILON = Math.sqrt(Epsilon.E);
 	
 	/** The maximum number of {@link Epa} iterations */
 	protected int epaMaxIterations = Epa.DEFAULT_EPA_MAX_ITERATIONS;

@@ -24,12 +24,14 @@
  */
 package org.dyn4j.game2d.geometry;
 
+import org.dyn4j.game2d.Epsilon;
+
 /**
  * Represents a 3x3 Matrix.
  * <p>
  * Used to solve 3x3 systems of equations.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Matrix33 {
@@ -418,62 +420,6 @@ public class Matrix33 {
 	}
 	
 	/**
-	 * Divides this {@link Matrix33} by the given scalar and places
-	 * the result in this {@link Matrix33}.
-	 * <pre>
-	 * this = this / scalar
-	 * </pre>
-	 * @param scalar the scalar to divide by
-	 * @return {@link Matrix33} this matrix
-	 */
-	public Matrix33 divide(double scalar) {
-		// check for zero scalar
-		if (scalar == 0.0) throw new ArithmeticException("Cannot divide by zero.");
-		// compute the inverse of the scalar once
-		double inv = 1.0 / scalar;
-		this.m00 *= inv;
-		this.m01 *= inv;
-		this.m02 *= inv;
-		this.m10 *= inv;
-		this.m11 *= inv;
-		this.m12 *= inv;
-		this.m20 *= inv;
-		this.m21 *= inv;
-		this.m22 *= inv;
-		return this;
-	}
-	
-	/**
-	 * Divides this {@link Matrix33} by the given scalar returning a
-	 * new {@link Matrix33} containing the result.
-	 * <pre>
-	 * r = this / scalar
-	 * </pre>
-	 * @param scalar the scalar to divide by
-	 * @return {@link Matrix33} a new matrix containing the result
-	 */
-	public Matrix33 quotient(double scalar) {
-		// check for zero scalar
-		if (scalar == 0.0) throw new ArithmeticException("Cannot divide by zero.");
-		// make a copy of this matrix
-		Matrix33 rm = new Matrix33(this);
-		// compute the inverse of the scalar once
-		double inv = 1.0 / scalar;
-		// multiply by the scalar
-		rm.m00 *= inv;
-		rm.m01 *= inv;
-		rm.m02 *= inv;
-		rm.m10 *= inv;
-		rm.m11 *= inv;
-		rm.m12 *= inv;
-		rm.m20 *= inv;
-		rm.m21 *= inv;
-		rm.m22 *= inv;
-		// return the new matrix
-		return rm;
-	}
-	
-	/**
 	 * Sets this {@link Matrix33} to an identity {@link Matrix33}.
 	 * @return {@link Matrix33} this matrix
 	 */
@@ -533,7 +479,7 @@ public class Matrix33 {
 		// get the determinant
 		double det = this.determinant();
 		// check for zero determinant
-		if (det != 0.0) {
+		if (Math.abs(det) >= Epsilon.E) {
 			det = 1.0 / det;
 		}
 		
@@ -568,7 +514,7 @@ public class Matrix33 {
 		// get the determinant
 		double det = this.determinant();
 		// check for zero determinant
-		if (det != 0.0) {
+		if (Math.abs(det) >= Epsilon.E) {
 			det = 1.0 / det;
 		}
 		
@@ -604,7 +550,7 @@ public class Matrix33 {
 		// get the determinant
 		double det = this.determinant();
 		// check for zero determinant
-		if (det != 0.0) {
+		if (Math.abs(det) >= Epsilon.E) {
 			det = 1.0 / det;
 		}
 		Vector3 r = new Vector3();
@@ -642,7 +588,7 @@ public class Matrix33 {
 		// get the 2D determinant
 		double det = this.m00 * this.m11 - this.m01 * this.m10;
 		// check for zero determinant
-		if (det != 0.0) {
+		if (Math.abs(det) >= Epsilon.E) {
 			det = 1.0 / det;
 		}
 		Vector2 r = new Vector2();

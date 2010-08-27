@@ -31,7 +31,7 @@ import org.dyn4j.game2d.collision.narrowphase.Separation;
  * Represents the time of impact information between two {@link Swept}
  * {@link Collidable}s.
  * @author William Bittle
- * @version 1.2.0
+ * @version 2.0.0
  * @since 1.2.0
  */
 public class TimeOfImpact {
@@ -42,11 +42,46 @@ public class TimeOfImpact {
 	protected Separation separation;
 	
 	/**
+	 * Default constructor.
+	 */
+	public TimeOfImpact() {}
+	
+	/**
+	 * Full constructor.
+	 * @param toi the time of impact; in the range [0, 1]
+	 * @param separation the separation at the time of impact
+	 */
+	public TimeOfImpact(double toi, Separation separation) {
+		this.toi = toi;
+		this.separation = separation;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("TIME_OF_IMPACT[")
+		.append(this.toi).append("|")
+		.append(this.separation).append("]");
+		return sb.toString();
+	}
+	
+	/**
 	 * Returns the time of impact in the range [0, 1].
 	 * @return double
 	 */
 	public double getToi() {
-		return toi;
+		return this.toi;
+	}
+	
+	/**
+	 * Sets the time of impact.
+	 * @param toi the time of impact in the range [0, 1]
+	 */
+	public void setToi(double toi) {
+		this.toi = toi;
 	}
 	
 	/**
@@ -54,6 +89,14 @@ public class TimeOfImpact {
 	 * @return {@link Separation}
 	 */
 	public Separation getSeparation() {
-		return separation;
+		return this.separation;
+	}
+	
+	/**
+	 * Sets the separation at the time of impact.
+	 * @param separation the separation
+	 */
+	public void setSeparation(Separation separation) {
+		this.separation = separation;
 	}
 }

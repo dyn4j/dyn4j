@@ -24,6 +24,7 @@
  */
 package org.dyn4j.game2d.dynamics.joint;
 
+import org.dyn4j.game2d.Epsilon;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.Step;
 import org.dyn4j.game2d.geometry.Interval;
@@ -41,7 +42,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class FrictionJoint extends Joint {
@@ -138,7 +139,7 @@ public class FrictionJoint extends Joint {
 		
 		// compute the angular mass
 		this.angularMass = invI1 + invI2;
-		if (this.angularMass != 0.0) {
+		if (this.angularMass >= Epsilon.E) {
 			this.angularMass = 1.0 / this.angularMass;
 		}
 		

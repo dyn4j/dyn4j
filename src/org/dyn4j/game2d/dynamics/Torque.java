@@ -27,7 +27,7 @@ package org.dyn4j.game2d.dynamics;
 /**
  * Represents a torque about the z-axis.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Torque {
@@ -82,6 +82,20 @@ public class Torque {
 	 */
 	public void apply(Body body) {
 		body.torque += this.torque;
+	}
+
+	/**
+	 * Returns true if this torque should be removed.
+	 * <p>
+	 * Implement this method to create {@link Torque} objects
+	 * that are not cleared each iteration by the {@link World}.
+	 * <p>
+	 * The default implementation always returns true.
+	 * @return boolean true if this torque should be removed
+	 * @since 2.0.0
+	 */
+	public boolean isComplete() {
+		return true;
 	}
 	
 	/* (non-Javadoc)

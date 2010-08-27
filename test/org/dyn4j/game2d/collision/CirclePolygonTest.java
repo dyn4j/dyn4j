@@ -50,7 +50,7 @@ import org.junit.Test;
 /**
  * Test case for {@link Circle} - {@link Polygon} collision detection.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class CirclePolygonTest extends AbstractTest {
@@ -236,15 +236,15 @@ public class CirclePolygonTest extends AbstractTest {
 		TestCase.assertTrue(this.gjk.detect(circ, t1, poly, t2));
 		n = p.getNormal();
 		TestCase.assertEquals(1.433, p.getDepth(), 1.0e-3);
-		TestCase.assertEquals(0.0, n.x, 1.0e-8);
-		TestCase.assertEquals(-1.0, n.y, 1.0e-8);
+		TestCase.assertEquals(-0.866, n.x, 1.0e-3);
+		TestCase.assertEquals(0.499, n.y, 1.0e-3);
 		// try reversing the shapes
 		TestCase.assertTrue(this.gjk.detect(poly, t2, circ, t1, p));
 		TestCase.assertTrue(this.gjk.detect(poly, t2, circ, t1));
 		n = p.getNormal();
 		TestCase.assertEquals(1.433, p.getDepth(), 1.0e-3);
-		TestCase.assertEquals(0.0, n.x, 1.0e-8);
-		TestCase.assertEquals(1.0, n.y, 1.0e-8);
+		TestCase.assertEquals(0.866, n.x, 1.0e-3);
+		TestCase.assertEquals(-0.499, n.y, 1.0e-3);
 		
 		// test overlap
 		t1.translate(-1.0, 0.0);

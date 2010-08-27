@@ -49,7 +49,7 @@ import org.junit.Test;
 /**
  * Test case for {@link Circle} - {@link Segment} collision detection.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class CircleSegmentTest extends AbstractTest {
@@ -394,17 +394,17 @@ public class CircleSegmentTest extends AbstractTest {
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
 		p1 = mp.getPoint();
-		TestCase.assertEquals(0.0, p1.x, 1.0e-9);
+		TestCase.assertEquals(0.0, p1.x, 1.0e-4);
 		TestCase.assertEquals(0.0, p1.y, 1.0e-4);
-		TestCase.assertEquals(0.5, mp.getDepth(), 1.0e-8);
+		TestCase.assertEquals(0.5, mp.getDepth(), 1.0e-4);
 		// try reversing the shapes
 		TestCase.assertTrue(this.cmfs.getManifold(p, seg, t2, circ, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
 		p1 = mp.getPoint();
-		TestCase.assertEquals(0.0, p1.x, 1.0e-9);
+		TestCase.assertEquals(0.0, p1.x, 1.0e-4);
 		TestCase.assertEquals(0.0, p1.y, 1.0e-4);
-		TestCase.assertEquals(0.5, mp.getDepth(), 1.0e-8);
+		TestCase.assertEquals(0.5, mp.getDepth(), 1.0e-4);
 		
 		// test overlap sat
 		this.sat.detect(circ, t1, seg, t2, p);
