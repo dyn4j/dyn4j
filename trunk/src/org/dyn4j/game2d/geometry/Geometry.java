@@ -26,15 +26,20 @@ package org.dyn4j.game2d.geometry;
 
 import java.util.List;
 
+import org.dyn4j.game2d.Epsilon;
+
 /**
  * Contains static methods to perform standard geometric operations.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Geometry {
 	/** The value of 1/3 */
 	private static final double INV_3 = 1.0 / 3.0;
+	
+	/** The value of the inverse of the square root of 3; 1/sqrt(3) */
+	private static final double INV_SQRT_3 = 1.0 / Math.sqrt(3.0);
 	
 	/**
 	 * Returns the centroid of the given points by performing an average.
@@ -131,6 +136,12 @@ public class Geometry {
 			// we will divide by the total area later
 			center.add(p1.sum(p2).multiply(INV_3).multiply(triangleArea));
 		}
+		// check for zero area
+		if (Math.abs(area) < Epsilon.E) {
+			// zero area can only happen if all the points are the same point
+			// in which case just return a copy of the first
+			return points.get(0).copy();
+		}
 		// finish the centroid calculation by dividing by the total area
 		center.multiply(1.0 / area);
 		// return the center
@@ -169,6 +180,12 @@ public class Geometry {
 			// = (x1 + x2) * (yi * x(i+1) - y(i+1) * xi) / 3
 			// we will divide by the total area later
 			center.add(p1.sum(p2).multiply(INV_3).multiply(triangleArea));
+		}
+		// check for zero area
+		if (Math.abs(area) < Epsilon.E) {
+			// zero area can only happen if all the points are the same point
+			// in which case just return a copy of the first
+			return points[0].copy();
 		}
 		// finish the centroid calculation by dividing by the total area
 		center.multiply(1.0 / area);
@@ -352,7 +369,7 @@ public class Geometry {
 		// check the size
 		if (height <= 0.0) throw new IllegalArgumentException("The size must be greater than zero.");
 		// compute a where height = a * sqrt(3) / 2.0 (a is the width of the base
-		double a = 2.0 * height / Math.sqrt(3.0);
+		double a = 2.0 * height * INV_SQRT_3;
 		// create the triangle
 		return Geometry.createIsoscelesTriangle(a, height);
 	}
@@ -369,8 +386,8 @@ public class Geometry {
 		// check the height
 		if (height <= 0.0) throw new IllegalArgumentException("The width must be greater than zero.");
 		Vector2 top = new Vector2(0.0, height);
-		Vector2 left = new Vector2(-width / 2.0, 0.0);
-		Vector2 right = new Vector2(width / 2.0, 0.0);
+		Vector2 left = new Vector2(-width * 0.5, 0.0);
+		Vector2 right = new Vector2(width * 0.5, 0.0);
 		// create the triangle
 		Triangle triangle = new Triangle(top, left, right);
 		Vector2 center = triangle.getCenter();
@@ -430,8 +447,8 @@ public class Geometry {
 	public static final Segment createSegment(double length) {
 		// check the length
 		if (length <= 0.0) throw new IllegalArgumentException("The length must be greater than zero.");
-		Vector2 start = new Vector2(-length / 2.0, 0.0);
-		Vector2 end = new Vector2(length / 2.0, 0.0);
+		Vector2 start = new Vector2(-length * 0.5, 0.0);
+		Vector2 end = new Vector2(length * 0.5, 0.0);
 		return new Segment(start, end);
 	}
 }

@@ -24,6 +24,8 @@
  */
 package org.dyn4j.game2d.geometry;
 
+import org.dyn4j.game2d.Epsilon;
+
 /**
  * This class represents a {@link Vector2} in 2D space.
  * <p>
@@ -39,7 +41,7 @@ package org.dyn4j.game2d.geometry;
  * </pre>
  * This can decrease the number of temporary vectors.
  * @author William Bittle
- * @version 1.1.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Vector2 {
@@ -289,13 +291,13 @@ public class Vector2 {
 	 */
 	public Vector2 setMagnitude(double magnitude) {
 		// check the given magnitude
-		if (magnitude == 0.0) {
+		if (Math.abs(magnitude) < Epsilon.E) {
 			this.x = 0.0;
 			this.y = 0.0;
 			return this;
 		}
 		// is this vector a zero vector?
-		if (this.x == 0.0 && this.y == 0.0) {
+		if (this.isZero()) {
 			return this;
 		}
 		// get the magnitude
@@ -515,7 +517,7 @@ public class Vector2 {
 	 * @return boolean
 	 */
 	public boolean isOrthogonal(Vector2 vector) {
-		return (this.x * vector.x + this.y * vector.y) == 0.0 ? true : false;
+		return Math.abs(this.x * vector.x + this.y * vector.y) < Epsilon.E ? true : false;
 	}
 	
 	/**
@@ -529,7 +531,7 @@ public class Vector2 {
 	 * @return boolean
 	 */
 	public boolean isOrthogonal(double x, double y) {
-		return (this.x * x + this.y * y) == 0.0 ? true : false;
+		return Math.abs(this.x * x + this.y * y) < Epsilon.E ? true : false;
 	}
 	
 	/**
@@ -537,9 +539,9 @@ public class Vector2 {
 	 * @return boolean
 	 */
 	public boolean isZero() {
-		return this.x == 0.0 && this.y == 0.0;
+		return (this.x * this.x + this.y * this.y) < Epsilon.E;
 	}
-
+	
 	/** 
 	 * Negates this {@link Vector2}.
 	 * @return {@link Vector2} this vector
@@ -617,7 +619,7 @@ public class Vector2 {
 	public Vector2 project(Vector2 vector) {
 		double dotProd = this.dot(vector);
 		double denominator = vector.dot(vector);
-		if (denominator == 0.0) return new Vector2();
+		if (denominator < Epsilon.E) return new Vector2();
 		denominator = dotProd / denominator;
 		return new Vector2(denominator * vector.x, denominator * vector.y);		
 	}
@@ -680,7 +682,7 @@ public class Vector2 {
 	 */
 	public Vector2 getNormalized() {
 		double magnitude = this.getMagnitude();
-		if (magnitude == 0.0) return new Vector2();
+		if (magnitude < Epsilon.E) return new Vector2();
 		magnitude = 1.0 / magnitude;
 		return new Vector2(this.x * magnitude, this.y * magnitude);
 	}
@@ -694,7 +696,7 @@ public class Vector2 {
 	 */
 	public double normalize() {
 		double magnitude = this.getMagnitude();
-		if (magnitude == 0.0) return 0;
+		if (magnitude < Epsilon.E) return 0;
 		double m = 1.0 / magnitude;
 		this.x *= m;
 		this.y *= m;

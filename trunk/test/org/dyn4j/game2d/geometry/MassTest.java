@@ -41,7 +41,7 @@ import org.junit.Test;
 /**
  * Tests the methods of the {@link Mass} class.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class MassTest {
@@ -52,7 +52,7 @@ public class MassTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createNegativeMass() {
-		Mass.create(new Vector2(), -1.0, 1.0);
+		new Mass(new Vector2(), -1.0, 1.0);
 	}
 	
 	/**
@@ -62,7 +62,18 @@ public class MassTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createNegativeInertia() {
-		Mass.create(new Vector2(), 1.0, -1.0);
+		new Mass(new Vector2(), 1.0, -1.0);
+	}
+	
+	/**
+	 * Test the create method.
+	 * <p>
+	 * Should throw an exception because the center is null.
+	 * @since 2.0.0
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createNullCenter() {
+		new Mass(null, 1.0, 1.0);
 	}
 	
 	/**
@@ -70,10 +81,80 @@ public class MassTest {
 	 */
 	@Test
 	public void createSuccess() {
-		Mass m = Mass.create(new Vector2(), 1.0, 1.0);
+		Mass m = new Mass(new Vector2(), 1.0, 1.0);
 		TestCase.assertTrue(m.getCenter().equals(new Vector2()));
 		TestCase.assertEquals(m.getMass(), 1.0);
 		TestCase.assertEquals(m.getInertia(), 1.0);
+	}
+	
+	/**
+	 * Test the create infinite method.
+	 * @since 2.0.0
+	 */
+	@Test
+	public void createInfinite() {
+		Mass m = new Mass(new Vector2(), 0, 0);
+		TestCase.assertTrue(m.isInfinite());
+		TestCase.assertTrue(m.getCenter().equals(new Vector2()));
+		TestCase.assertEquals(m.getMass(), 0.0);
+		TestCase.assertEquals(m.getInertia(), 0.0);
+	}
+
+	/**
+	 * Test the create fixed linear velocity method.
+	 * @since 2.0.0
+	 */
+	@Test
+	public void createFixedLinearVelocity() {
+		Mass m = new Mass(new Vector2(), 0, 1.0);
+		TestCase.assertFalse(m.isInfinite());
+		TestCase.assertEquals(Mass.Type.FIXED_LINEAR_VELOCITY, m.getType());
+		TestCase.assertTrue(m.getCenter().equals(new Vector2()));
+		TestCase.assertEquals(m.getMass(), 0.0);
+		TestCase.assertEquals(m.getInertia(), 1.0);
+	}
+	
+	/**
+	 * Test the create fixed angular velocity method.
+	 * @since 2.0.0
+	 */
+	@Test
+	public void createFixedAngularVelocity() {
+		Mass m = new Mass(new Vector2(), 1.0, 0.0);
+		TestCase.assertFalse(m.isInfinite());
+		TestCase.assertEquals(Mass.Type.FIXED_ANGULAR_VELOCITY, m.getType());
+		TestCase.assertTrue(m.getCenter().equals(new Vector2()));
+		TestCase.assertEquals(m.getMass(), 1.0);
+		TestCase.assertEquals(m.getInertia(), 0.0);
+	}
+	
+	/**
+	 * Test the create method.
+	 * <p>
+	 * Should throw an exception because the mass to copy is null.
+	 * @since 2.0.0
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createCopyNull() {
+		new Mass(null);
+	}
+	
+	/**
+	 * Test the create method.
+	 * @since 2.0.0
+	 */
+	@Test
+	public void createCopy() {
+		Mass m = new Mass(new Vector2(1.0, 0.0), 2.0, 1.0);
+		Mass m2 = new Mass(m);
+		
+		TestCase.assertNotSame(m, m2);
+		TestCase.assertNotSame(m.center, m2.center);
+		TestCase.assertEquals(m.center.x, m2.center.x);
+		TestCase.assertEquals(m.center.y, m2.center.y);
+		TestCase.assertEquals(m.getMass(), m2.getMass());
+		TestCase.assertEquals(m.getInertia(), m2.getInertia());
+		TestCase.assertEquals(m.getType(), m2.getType());
 	}
 	
 	/**
@@ -128,12 +209,15 @@ public class MassTest {
 	
 	/**
 	 * Test the create method accepting an array of {@link Mass} objects.
+	 * <p>
+	 * Renamed from createArray
+	 * @since 2.0.0
 	 */
 	@Test
-	public void createArray() {
-		Mass m1 = Mass.create(new Vector2( 1.0,  1.0), 3.00, 1.00);
-		Mass m2 = Mass.create(new Vector2(-1.0,  0.0), 0.50, 0.02);
-		Mass m3 = Mass.create(new Vector2( 1.0, -2.0), 2.00, 3.00);
+	public void createList() {
+		Mass m1 = new Mass(new Vector2( 1.0,  1.0), 3.00, 1.00);
+		Mass m2 = new Mass(new Vector2(-1.0,  0.0), 0.50, 0.02);
+		Mass m3 = new Mass(new Vector2( 1.0, -2.0), 2.00, 3.00);
 		List<Mass> masses = new ArrayList<Mass>();
 		masses.add(m1);
 		masses.add(m2);
@@ -145,6 +229,75 @@ public class MassTest {
 		TestCase.assertEquals(-0.181, c.y, 1.0e-3);
 		TestCase.assertEquals( 5.500, m.getMass(), 1.0e-3);
 		TestCase.assertEquals(16.656, m.getInertia(), 1.0e-3);
+	}
+	
+	/**
+	 * Test the create method accepting an array of infinite {@link Mass} objects.
+	 * @since 2.0.0
+	 */
+	@Test
+	public void createListInfinite() {
+		Mass m1 = new Mass();
+		Mass m2 = new Mass();
+		Mass m3 = new Mass();
+		List<Mass> masses = new ArrayList<Mass>();
+		masses.add(m1);
+		masses.add(m2);
+		masses.add(m3);
+		Mass m = Mass.create(masses);
+		
+		Vector2 c = m.getCenter();	
+		TestCase.assertTrue(m.isInfinite());
+		TestCase.assertEquals(0.000, c.x, 1.0e-3);
+		TestCase.assertEquals(0.000, c.y, 1.0e-3);
+		TestCase.assertEquals(0.000, m.getMass(), 1.0e-3);
+		TestCase.assertEquals(0.000, m.getInertia(), 1.0e-3);
+	}
+	
+	/**
+	 * Test the create method accepting a list of one mass.
+	 * @since 2.0.0
+	 */
+	@Test
+	public void createListOneElement() {
+		Mass m1 = new Mass(new Vector2(), 1.0, 2.0);
+		List<Mass> masses = new ArrayList<Mass>();
+		masses.add(m1);
+		Mass m = Mass.create(masses);
+		
+		Vector2 c = m.getCenter();	
+		TestCase.assertFalse(m.isInfinite());
+		TestCase.assertNotSame(m1, m);
+		TestCase.assertEquals(0.000, c.x, 1.0e-3);
+		TestCase.assertEquals(0.000, c.y, 1.0e-3);
+		TestCase.assertEquals(1.000, m.getMass(), 1.0e-3);
+		TestCase.assertEquals(2.000, m.getInertia(), 1.0e-3);
+	}
+	
+	/**
+	 * Test the create method accepting a list of one null mass.
+	 * @since 2.0.0
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createListOneNullElement() {
+		List<Mass> masses = new ArrayList<Mass>();
+		masses.add(null);
+		Mass.create(masses);
+	}
+	
+	/**
+	 * Test the create method accepting a list masses where 1 is null.
+	 * @since 2.0.0
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createListNullElement() {
+		Mass m1 = new Mass(new Vector2(), 1.0, 2.0);
+		Mass m2 = new Mass(new Vector2(), 2.0, 7.0);
+		List<Mass> masses = new ArrayList<Mass>();
+		masses.add(m1);
+		masses.add(null);
+		masses.add(m2);
+		Mass.create(masses);
 	}
 	
 	/**

@@ -25,39 +25,29 @@
 package org.dyn4j.game2d;
 
 /**
- * The version of the engine.
+ * Class containing an approximation of machine epsilon.
  * @author William Bittle
  * @version 2.0.0
- * @since 1.0.0
+ * @since 2.0.0
  */
-public final class Version {
-	/** The major version number; API changes, major enhancements, etc. */
-	public static final int MAJOR = 2;
-	
-	/** The minor version number; minor enhancements, major bug fixes, etc. */
-	public static final int MINOR = 0;
-	
-	/** The revision number; minor bug fixes */
-	public static final int REVISION = 0;
+public class Epsilon {
+	/** The double precision floating point machine epsilon approximation */
+	public static final double E = Epsilon.compute();
 	
 	/**
-	 * Hide the constructor.
+	 * Hidden default constructor.
 	 */
-	private Version() {}
+	private Epsilon() {}
 	
 	/**
-	 * Returns the version as a string.
-	 * @return String
+	 * Computes an approximation of machine epsilon.
+	 * @return double
 	 */
-	public static String getVersion() {
-		return MAJOR + "." + MINOR + "." + REVISION;
-	}
-	
-	/**
-	 * Main class to print the version to the console.
-	 * @param args command line arguments (none accepted)
-	 */
-	public static final void main(String[] args) {
-		System.out.println("dyn4j v" + Version.getVersion());
+	public static final double compute() {
+		double e = 0.5;
+		while (1.0 + e > 1.0) {
+			e *= 0.5;
+		}
+		return e;
 	}
 }

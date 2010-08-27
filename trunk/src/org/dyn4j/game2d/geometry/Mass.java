@@ -26,6 +26,7 @@ package org.dyn4j.game2d.geometry;
 
 import java.util.List;
 
+import org.dyn4j.game2d.Epsilon;
 import org.dyn4j.game2d.dynamics.Body;
 
 /**
@@ -33,7 +34,7 @@ import org.dyn4j.game2d.dynamics.Body;
  * <p>
  * Stores the center of mass, area, mass, and inertia tensor.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Mass {
@@ -93,19 +94,32 @@ public class Mass {
 	 * @param inertia inertia tensor in kg &middot; m<sup>2</sup>
 	 */
 	public Mass(Vector2 center, double mass, double inertia) {
+		// validate the input
+		if (center == null) throw new NullPointerException("The center point cannot be null.");
+		if (mass < 0.0) throw new IllegalArgumentException("The mass must be greater than or equal to zero.");
+		if (inertia < 0.0) throw new IllegalArgumentException("The inertia tensor must be greater than or equal to zero.");
+		// create the mass
 		this.type = Mass.Type.NORMAL;
 		this.center = center.copy();
 		this.mass = mass;
 		this.inertia = inertia;
-		if (mass > 0) {
+		// set the inverse mass
+		if (mass > Epsilon.E) {
 			this.invMass = 1.0 / mass;
 		} else {
 			this.invMass = 0.0;
+			this.type = Mass.Type.FIXED_LINEAR_VELOCITY;
 		}
-		if (inertia > 0) {
+		// set the inverse inertia
+		if (inertia > Epsilon.E) {
 			this.invInertia = 1.0 / inertia;
 		} else {
 			this.invInertia = 0.0;
+			this.type = Mass.Type.FIXED_ANGULAR_VELOCITY;
+		}
+		// check if both the mass and inertia are zero
+		if (mass < Epsilon.E && inertia < Epsilon.E) {
+			this.type = Mass.Type.INFINITE;
 		}
 	}
 	
@@ -116,7 +130,9 @@ public class Mass {
 	 * @param mass the {@link Mass} to copy
 	 */
 	public Mass(Mass mass) {
-		super();
+		// validate the input
+		if (mass == null) throw new NullPointerException("Cannot copy a null mass.");
+		// setup the mass
 		this.type = mass.type;
 		this.center = mass.center.copy();
 		this.mass = mass.mass;
@@ -158,33 +174,6 @@ public class Mass {
 	}
 	
 	/**
-	 * Creates a deep copy of the given {@link Mass}.
-	 * @param mass the {@link Mass} to copy
-	 * @return {@link Mass} the copy
-	 */
-	public static Mass create(Mass mass) {
-		if (mass == null) throw new NullPointerException("Cannot create a copy of a null mass.");
-		return new Mass(mass);
-	}
-	
-	/**
-	 * Creates a {@link Mass} object for the given center
-	 * of mass, mass, and inertia tensor.
-	 * @param center the center of mass in local coordinates
-	 * @param mass the mass in kg; must be zero or greater
-	 * @param inertia the inertia tensor kg &middot; m<sup>2</sup>; must be zero or greater
-	 * @return {@link Mass} the mass object
-	 */
-	public static Mass create(Vector2 center, double mass, double inertia) {
-		// verify the passed in values
-		if (center == null) throw new NullPointerException("The center point cannot be null.");
-		if (mass <= 0.0) throw new IllegalArgumentException("The mass must be greater than zero.");
-		if (inertia <= 0.0) throw new IllegalArgumentException("The inertia tensor must be greater than zero.");
-		// create the mass if validation passed
-		return new Mass(center, mass, inertia);
-	}
-	
-	/**
 	 * Creates a {@link Mass} object from the given array of masses.
 	 * <p>
 	 * Uses the Parallel Axis Theorem to obtain the inertia tensor about
@@ -203,23 +192,43 @@ public class Mass {
 	public static Mass create(List<Mass> masses) {
 		// check the list for null or empty
 		if (masses == null || masses.size() == 0) {
-			throw new IllegalArgumentException("The masses list must not be null and contain at least one element.");
+			throw new IllegalArgumentException("The masses list must not be null and contain at least one non-null element.");
 		}
+		// get the length of the masses array
+		int size = masses.size();
+		
+		// check for a list of one
+		if (size == 1) {
+			// check for null item
+			Mass m = masses.get(0);
+			if (m != null) {
+				return new Mass(masses.get(0));
+			} else {
+				throw new NullPointerException("The masses list must contain at least one non-null element.");
+			}
+		}
+		
+		// initialize the new mass values
 		Vector2 c = new Vector2();
 		double m = 0.0;
 		double I = 0.0;
-		// get the length of the masses array
-		int size = masses.size();
+		
 		// loop over the masses
 		for (int i = 0; i < size; i++) {
 			Mass mass = masses.get(i);
+			// check for null mass
+			if (mass == null) throw new NullPointerException("The masses list cannot contain null elements.");
 			// add the center's up (weighting them by their respective mass)
 			c.add(mass.center.product(mass.mass));
 			// sum the masses
 			m += mass.mass;
 		}
-		// compute the center by dividing by the total mass
-		c.multiply(1.0 / m);
+		// the mass will never be negative but could be zero
+		// if all the masses are infinite
+		if (m > 0.0) {
+			// compute the center by dividing by the total mass
+			c.multiply(1.0 / m);
+		}
 		// after obtaining the new center of mass we need
 		// to compute the interia tensor about the center
 		// using the parallel axis theorem:

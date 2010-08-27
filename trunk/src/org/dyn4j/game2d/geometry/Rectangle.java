@@ -29,7 +29,7 @@ package org.dyn4j.game2d.geometry;
  * <p>
  * A {@link Rectangle} cannot have a width or height of zero.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Rectangle extends Polygon implements Shape, Transformable {
@@ -54,10 +54,10 @@ public class Rectangle extends Polygon implements Shape, Transformable {
 		if (height <= 0.0) throw new IllegalArgumentException("A rectangle must have a positive non-zero height.");
 		// set the vertices
 		this.vertices = new Vector2[] {
-			new Vector2(-width / 2.0, -height / 2.0),
-			new Vector2( width / 2.0, -height / 2.0),
-			new Vector2( width / 2.0,  height / 2.0),
-			new Vector2(-width / 2.0,  height / 2.0)	
+			new Vector2(-width * 0.5, -height * 0.5),
+			new Vector2( width * 0.5, -height * 0.5),
+			new Vector2( width * 0.5,  height * 0.5),
+			new Vector2(-width * 0.5,  height * 0.5)	
 		};
 		// set the normals
 		this.normals = new Vector2[] {
@@ -178,11 +178,11 @@ public class Rectangle extends Polygon implements Shape, Transformable {
 		Vector2 toPoint = c.to(p);
 		// find the projection of this vector onto the vector from the
 		// centroid to the edge
-		if (toPoint.project(projectAxis0).getMagnitudeSquared() <= (widthSquared / 4.0)) {
+		if (toPoint.project(projectAxis0).getMagnitudeSquared() <= (widthSquared * 0.25)) {
 			// if the projection of the v vector onto the x separating axis is
 			// smaller than the half width then we know that the point is within the
 			// x bounds of the rectangle
-			if (toPoint.project(projectAxis1).getMagnitudeSquared() <= (heightSquared / 4.0)) {
+			if (toPoint.project(projectAxis1).getMagnitudeSquared() <= (heightSquared * 0.25)) {
 				// if the projection of the v vector onto the y separating axis is 
 				// smaller than the half height then we know that the point is within
 				// the y bounds of the rectangle
@@ -230,6 +230,6 @@ public class Rectangle extends Polygon implements Shape, Transformable {
 		// since we know that a rectangle has only four points that are
 		// evenly distributed we can feel safe using the averaging method 
 		// for the centroid
-		return Mass.create(this.center, mass, inertia);
+		return new Mass(this.center, mass, inertia);
 	}
 }

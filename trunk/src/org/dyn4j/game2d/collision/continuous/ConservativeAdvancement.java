@@ -42,11 +42,12 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Uses a combination of the secant method and bisection for root finding.
  * @author William Bittle
  * @see <a href="http://www.box2d.org">Box2d</a>
- * @version 1.2.0
+ * @version 2.0.0
  * @since 1.2.0
  */
 public class ConservativeAdvancement implements TimeOfImpactDetector {
 	/** The default tolerance */
+	// TODO change this tolerance to Epsilon.E something
 	public static final double DEFAULT_TOLERANCE = 1.0e-3;
 	
 	/** The distance detector */
@@ -136,7 +137,7 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 			Vector2 n2 = s2.getNormal();
 			// the normals should be opposite one another if a collision was missed
 			if (n1.dot(n2) > 0.0) {
-				// if the distance 
+				// TODO i think we need an extra condition here to check for rotation collision
 				return false;
 			}
 		}
@@ -150,7 +151,7 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 		double a2 = t2;
 		// set the distance bounds
 		double sep1 = s1.getDistance();
-		double sep2 = -s2.getDistance();
+		double sep2 = s2 != null ? -s2.getDistance() : 0.0;
 		// count the number of iterations
 		int iterations = 0;
 		for (;;) {
@@ -158,11 +159,21 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 			double t;
 			if ((iterations & 1) == 1) {
 				// Secant rule to improve convergence.
+				// TODO check for zero denominator
 				t = a1 + (0.0 - sep1) * (a2 - a1) / (sep2 - sep1);
 			} else {
 				// Bisection to guarantee progress.
 				t = 0.5f * (a1 + a2);
 			}
+			
+			// have we reached the maximum number of iterations?
+			if (iterations == this.maxIterations) {
+				return false;
+			}
+			
+			// increment the number of iterations before
+			// we reach any termination condition
+			iterations++;
 			
 			// get the separation at the new time
 			Separation ns = this.getSeparation(swept1, swept2, t);
@@ -216,14 +227,6 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 				a2 = t;
 				sep2 = s;
 			}
-			
-			// have we reached the maximum number of iterations?
-			if (iterations == this.maxIterations) {
-				return false;
-			}
-			
-			// increment the number of iterations
-			iterations++;
 		}
 		
 		// once we get here we have a toi calculated within a given tolerance

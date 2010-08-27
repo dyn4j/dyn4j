@@ -24,6 +24,7 @@
  */
 package org.dyn4j.game2d.dynamics.joint;
 
+import org.dyn4j.game2d.Epsilon;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.Step;
 import org.dyn4j.game2d.geometry.Mass;
@@ -37,7 +38,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class MouseJoint extends Joint {
@@ -142,7 +143,7 @@ public class MouseJoint extends Joint {
 		// compute gamma = CMF = 1 / (hk + d)
 		this.gamma = dt * (d + dt * k);
 		// check for zero before inverting
-		if (this.gamma != 0.0) {
+		if (this.gamma >= Epsilon.E) {
 			this.gamma = 1.0 / this.gamma;
 		}
 		

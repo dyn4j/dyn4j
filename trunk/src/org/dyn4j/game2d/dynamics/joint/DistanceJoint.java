@@ -24,6 +24,7 @@
  */
 package org.dyn4j.game2d.dynamics.joint;
 
+import org.dyn4j.game2d.Epsilon;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.Settings;
 import org.dyn4j.game2d.dynamics.Step;
@@ -45,7 +46,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class DistanceJoint extends Joint {
@@ -163,7 +164,7 @@ public class DistanceJoint extends Joint {
 		invMass += invM2 + invI2 * cr2n * cr2n;
 		
 		// check for zero before inverting
-		this.invK = invMass == 0.0 ? 0.0 : 1.0 / invMass;
+		this.invK = Math.abs(invMass) < Epsilon.E ? 0.0 : 1.0 / invMass;
 		
 		// see if we need to compute spring damping
 		if (this.frequency > 0.0) {
@@ -180,14 +181,14 @@ public class DistanceJoint extends Joint {
 			// compute gamma = CMF = 1 / (hk + d)
 			this.gamma = dt * (d + dt * k);
 			// check for zero before inverting
-			this.gamma = this.gamma == 0.0 ? 0.0 : 1.0 / this.gamma;			
+			this.gamma = Math.abs(this.gamma) < Epsilon.E ? 0.0 : 1.0 / this.gamma;			
 			// compute the bias = x * ERP where ERP = hk / (hk + d)
 			this.bias = x * dt * k * this.gamma;
 			
 			// compute the effective mass			
 			this.invK = invMass + this.gamma;
 			// check for zero before inverting
-			this.invK = this.invK == 0.0 ? 0.0 : 1.0 / this.invK;
+			this.invK = Math.abs(this.invK) < Epsilon.E ? 0.0 : 1.0 / this.invK;
 		}
 		
 		// warm start

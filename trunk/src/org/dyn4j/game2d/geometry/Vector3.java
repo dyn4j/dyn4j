@@ -24,13 +24,15 @@
  */
 package org.dyn4j.game2d.geometry;
 
+import org.dyn4j.game2d.Epsilon;
+
 /**
  * This class represents a {@link Vector3} in 3D space.
  * <p>
  * Used to solve 3x3 systems of equations.
  * @see Vector2
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Vector3 {
@@ -307,14 +309,14 @@ public class Vector3 {
 	 */
 	public Vector3 setMagnitude(double magnitude) {
 		// check the given magnitude
-		if (magnitude == 0.0) {
+		if (Math.abs(magnitude) < Epsilon.E) {
 			this.x = 0.0;
 			this.y = 0.0;
 			this.z = 0.0;
 			return this;
 		}
 		// is this vector a zero vector?
-		if (this.x == 0.0 && this.y == 0.0 && this.z == 0.0) {
+		if (this.isZero()) {
 			return this;
 		}
 		// get the magnitude
@@ -521,7 +523,7 @@ public class Vector3 {
 	 * @return boolean
 	 */
 	public boolean isOrthogonal(Vector3 vector) {
-		return (this.x * vector.x + this.y * vector.y + this.z * vector.z) == 0.0 ? true : false;
+		return Math.abs(this.x * vector.x + this.y * vector.y + this.z * vector.z) < Epsilon.E ? true : false;
 	}
 	
 	/**
@@ -536,7 +538,7 @@ public class Vector3 {
 	 * @return boolean
 	 */
 	public boolean isOrthogonal(double x, double y, double z) {
-		return (this.x * x + this.y * y + this.z * z) == 0.0 ? true : false;
+		return Math.abs(this.x * x + this.y * y + this.z * z) < Epsilon.E ? true : false;
 	}
 	
 	/**
@@ -544,7 +546,7 @@ public class Vector3 {
 	 * @return boolean
 	 */
 	public boolean isZero() {
-		return this.x == 0.0 && this.y == 0.0 && this.z == 0.0;
+		return (this.x * this.x + this.y * this.y + this.z * this.z) < Epsilon.E;
 	}
 
 	/** 
@@ -587,7 +589,7 @@ public class Vector3 {
 	public Vector3 project(Vector3 vector) {
 		double dotProd = this.dot(vector);
 		double denominator = vector.dot(vector);
-		if (denominator == 0.0) return new Vector3();
+		if (denominator < Epsilon.E) return new Vector3();
 		denominator = dotProd / denominator;
 		return new Vector3(denominator * vector.x, denominator * vector.y, denominator * vector.z);		
 	}
@@ -600,7 +602,7 @@ public class Vector3 {
 	 */
 	public Vector3 getNormalized() {
 		double magnitude = this.getMagnitude();
-		if (magnitude == 0.0) return new Vector3();
+		if (magnitude < Epsilon.E) return new Vector3();
 		magnitude = 1.0 / magnitude;
 		return new Vector3(this.x * magnitude, this.y * magnitude, this.z * magnitude);
 	}
@@ -614,7 +616,7 @@ public class Vector3 {
 	 */
 	public double normalize() {
 		double magnitude = this.getMagnitude();
-		if (magnitude == 0.0) return 0;
+		if (magnitude < Epsilon.E) return 0;
 		double m = 1.0 / magnitude;
 		this.x *= m;
 		this.y *= m;

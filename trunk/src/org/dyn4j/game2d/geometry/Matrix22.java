@@ -24,12 +24,14 @@
  */
 package org.dyn4j.game2d.geometry;
 
+import org.dyn4j.game2d.Epsilon;
+
 /**
  * Represents a 2x2 Matrix.
  * <p>
  * Used to solve 2x2 systems of equations.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Matrix22 {
@@ -388,7 +390,7 @@ public class Matrix22 {
 		// get the determinant
 		double det = this.determinant();
 		// check for zero determinant
-		if (det != 0.0) {
+		if (Math.abs(det) >= Epsilon.E) {
 			det = 1.0 / det;
 		}
 		double a = this.m00;
@@ -410,7 +412,7 @@ public class Matrix22 {
 		// get the determinant
 		double det = this.determinant();
 		// check for zero determinant
-		if (det != 0.0) {
+		if (Math.abs(det) >= Epsilon.E) {
 			det = 1.0 / det;
 		}
 		Matrix22 rm = new Matrix22();
@@ -435,7 +437,7 @@ public class Matrix22 {
 		// get the determinant
 		double det = this.determinant();
 		// check for zero determinant
-		if (det != 0.0) {
+		if (Math.abs(det) >= Epsilon.E) {
 			det = 1.0 / det;
 		}
 		Vector2 r = new Vector2();

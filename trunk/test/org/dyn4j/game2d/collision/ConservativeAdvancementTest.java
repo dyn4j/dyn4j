@@ -33,14 +33,16 @@ import org.dyn4j.game2d.collision.narrowphase.Gjk;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Geometry;
+import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Transform;
+import org.dyn4j.game2d.geometry.Vector2;
 import org.junit.Before;
 import org.junit.Test;
 
 /**
  * Test class for the {@link ConservativeAdvancement} class.
  * @author William Bittle
- * @version 1.2.0
+ * @version 2.0.0
  * @since 1.2.0
  */
 public class ConservativeAdvancementTest {
@@ -208,10 +210,10 @@ public class ConservativeAdvancementTest {
 		// test the final transform the body should be at before the collision
 		Transform tx1 = b1.getInitialTransform().lerped(b1.getFinalTransform(), toi.getToi());
 		TestCase.assertEquals(1.319, tx1.getTranslationX(), 1.0e-3);
-		TestCase.assertEquals(1.498, tx1.getTranslationY(), 1.0e-3);
+		TestCase.assertEquals(1.500, tx1.getTranslationY(), 1.0e-3);
 		Transform tx2 = b2.getInitialTransform().lerped(b2.getFinalTransform(), toi.getToi());
 		TestCase.assertEquals(1.670, tx2.getTranslationX(), 1.0e-3);
-		TestCase.assertEquals(1.498, tx2.getTranslationY(), 1.0e-3);
+		TestCase.assertEquals(1.500, tx2.getTranslationY(), 1.0e-3);
 	}
 	
 	/**
@@ -249,10 +251,10 @@ public class ConservativeAdvancementTest {
 		// test the final transform the body should be at before the collision
 		Transform tx1 = b1.getInitialTransform().lerped(b1.getFinalTransform(), toi.getToi());
 		TestCase.assertEquals(0.799, tx1.getTranslationX(), 1.0e-3);
-		TestCase.assertEquals(1.498, tx1.getTranslationY(), 1.0e-3);
+		TestCase.assertEquals(1.500, tx1.getTranslationY(), 1.0e-3);
 		Transform tx2 = b2.getInitialTransform().lerped(b2.getFinalTransform(), toi.getToi());
 		TestCase.assertEquals(1.000, tx2.getTranslationX(), 1.0e-3);
-		TestCase.assertEquals(1.448, tx2.getTranslationY(), 1.0e-3);
+		TestCase.assertEquals(1.449, tx2.getTranslationY(), 1.0e-3);
 	}
 	
 	/**
@@ -439,5 +441,146 @@ public class ConservativeAdvancementTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setLessThanTenMaxIterations() {
 		this.detector.setMaxIterations(9);
+	}
+	
+	/**
+	 * Tests a body rotating very fast against a
+	 * static body.
+	 */
+	@Test
+	public void fastRotationAgainstStatic() {
+		// translate the one body
+		this.b1.removeFixture(0);
+		this.b1.addFixture(Geometry.createRectangle(2.0, 0.2));
+		this.b1.translate(0.5, 0.0);
+		this.b1.rotateAboutCenter(Math.toRadians(-40));
+		// the velocity downward should not be enough to make this body
+		// pass through the larger body
+//		this.b1.getVelocity().set(0.0, -20.0);
+		// set the rotation to very fast
+		this.b1.setAngularVelocity(Math.toRadians(60.0 * 80.0));
+		
+		this.b2.removeFixture(0);
+		this.b2.addFixture(Geometry.createRectangle(10.0, 0.5));
+		this.b2.translate(-5.0, 0.0);
+		
+		// perform one iteration
+		this.world.step(1);
+		
+//		Transform tx1 = b1.getTransform();
+//		Transform tx2 = b2.getTransform();
+//		Rectangle r1 = (Rectangle) b1.getFixture(0).getShape();
+//		Rectangle r2 = (Rectangle) b2.getFixture(0).getShape();
+//		for (int i = 0; i < 4; i++) {
+//			Vector2 v1 = tx1.getTransformed(r1.getVertices()[i]);
+//			Vector2 v2 = tx2.getTransformed(r2.getVertices()[i]);
+//			
+//			System.out.printf("Vertices: %s \t %s \n", v1, v2);
+//		}
+		
+		// detect the time of impact
+		TimeOfImpact toi = new TimeOfImpact();
+		this.detector.getTimeOfImpact(this.b1, this.b2, 0.0, 1.0, toi);
+	}
+	
+	/**
+	 * Tests a body rotating very fast against a
+	 * another body rotating very fast.
+	 */
+	@Test
+	public void fastRotationAgainstFastRotation() {
+		// translate the one body
+		this.b1.removeFixture(0);
+		this.b1.addFixture(Geometry.createRectangle(2.0, 0.2));
+		this.b1.translate(0.5, 0.0);
+		this.b1.rotateAboutCenter(Math.toRadians(-40));
+		// the velocity downward should not be enough to make this body
+		// pass through the larger body
+//		this.b1.getVelocity().set(0.0, -20.0);
+		// set the rotation to very fast
+		this.b1.setAngularVelocity(Math.toRadians(60.0 * 80.0));
+		
+		this.b2.removeFixture(0);
+		this.b2.addFixture(Geometry.createRectangle(10.0, 0.5));
+		this.b2.translate(-5.0, 0.0);
+		this.b2.rotateAboutCenter(Math.toRadians(-20));
+		this.b2.setAngularVelocity(Math.toRadians(60.0 * 60.0));
+		
+		// perform one iteration
+		this.world.step(1);
+		
+//		Transform tx1 = b1.getTransform();
+//		Transform tx2 = b2.getTransform();
+//		Rectangle r1 = (Rectangle) b1.getFixture(0).getShape();
+//		Rectangle r2 = (Rectangle) b2.getFixture(0).getShape();
+//		for (int i = 0; i < 4; i++) {
+//			Vector2 v1 = tx1.getTransformed(r1.getVertices()[i]);
+//			Vector2 v2 = tx2.getTransformed(r2.getVertices()[i]);
+//			
+//			System.out.printf("Vertices: %s \t %s \n", v1, v2);
+//		}
+		
+		// detect the time of impact
+		TimeOfImpact toi = new TimeOfImpact();
+		this.detector.getTimeOfImpact(this.b1, this.b2, 0.0, 1.0, toi);
+	}
+	
+	/**
+	 * Tests a body rotating very fast against a
+	 * another body rotating very fast where no collision
+	 * occurs.
+	 */
+	@Test
+	public void fastRotationAgainstFastRotationNoCollision() {
+		// translate the one body
+		this.b1.removeFixture(0);
+		this.b1.addFixture(Geometry.createRectangle(2.0, 0.2));
+		this.b1.translate(0.5, 0.0);
+		this.b1.rotateAboutCenter(Math.toRadians(-40));
+		// the velocity downward should not be enough to make this body
+		// pass through the larger body
+//		this.b1.getVelocity().set(0.0, -20.0);
+		// set the rotation to very fast
+		this.b1.setAngularVelocity(Math.toRadians(60.0 * 80.0));
+		
+		this.b2.removeFixture(0);
+		this.b2.addFixture(Geometry.createRectangle(10.0, 0.5));
+		this.b2.translate(-5.0, 0.0);
+		this.b2.rotateAboutCenter(Math.toRadians(-50));
+		this.b2.setAngularVelocity(Math.toRadians(60.0 * 60.0));
+		
+		Transform tx1 = b1.getTransform();
+		Transform tx2 = b2.getTransform();
+		System.out.println(tx1);
+		System.out.println(tx2);
+		
+		// perform one iteration
+		this.world.step(1);
+		
+		System.out.println(tx1 + " " + tx1.getRotation());
+		System.out.println(tx2 + " " + tx2.getRotation());
+		
+//		Rectangle r1 = (Rectangle) b1.getFixture(0).getShape();
+//		Rectangle r2 = (Rectangle) b2.getFixture(0).getShape();
+//		for (int i = 0; i < 4; i++) {
+//			Vector2 v1 = tx1.getTransformed(r1.getVertices()[i]);
+//			Vector2 v2 = tx2.getTransformed(r2.getVertices()[i]);
+//			
+//			System.out.printf("Vertices: %s \t %s \n", v1, v2);
+//		}
+		
+		// detect the time of impact
+		TimeOfImpact toi = new TimeOfImpact();
+		this.detector.getTimeOfImpact(this.b1, this.b2, 0.0, 1.0, toi);
+		
+		Transform tx10 = b1.getInitialTransform();
+		Transform tx20 = b2.getInitialTransform();
+		
+		Transform tx1f = tx10.lerped(tx1, toi.getToi());
+		Transform tx2f = tx20.lerped(tx2, toi.getToi());
+		System.out.println(tx1f + " " + tx1f.getRotation());
+		System.out.println(tx2f + " " + tx2f.getRotation());
+		
+		System.out.println(toi);
 	}
 }
