@@ -680,8 +680,10 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			
 			// check for the maximum number of iterations
 			if (iterations == this.gjkMaxIterations) {
-				// use the current values as the best known values
-				break;
+				// we have hit the maximum number of iterations and
+				// still are not close enough to the ray, in this case
+				// just exit returning false
+				return false;
 			}
 			
 			// increment the number of iterations

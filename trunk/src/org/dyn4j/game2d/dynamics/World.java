@@ -45,6 +45,8 @@ import org.dyn4j.game2d.collision.manifold.ManifoldSolver;
 import org.dyn4j.game2d.collision.narrowphase.Gjk;
 import org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.game2d.collision.narrowphase.Penetration;
+import org.dyn4j.game2d.collision.narrowphase.Raycast;
+import org.dyn4j.game2d.collision.narrowphase.RaycastDetector;
 import org.dyn4j.game2d.collision.narrowphase.Separation;
 import org.dyn4j.game2d.dynamics.contact.Contact;
 import org.dyn4j.game2d.dynamics.contact.ContactAdapter;
@@ -97,6 +99,9 @@ public class World {
 	/** The {@link TimeOfImpactDetector} */
 	protected TimeOfImpactDetector timeOfImpactDetector;
 	
+	/** The {@link RaycastDetector} */
+	protected RaycastDetector raycastDetector;
+	
 	/** The {@link CollisionListener} */
 	protected CollisionListener collisionListener;
 	
@@ -108,6 +113,9 @@ public class World {
 	
 	/** The {@link TimeOfImpactListener} */
 	protected TimeOfImpactListener timeOfImpactListener;
+	
+	/** The {@link RaycastListener} */
+	protected RaycastListener raycastListener;
 	
 	/** The {@link BoundsListener} */
 	protected BoundsListener boundsListener;
@@ -160,11 +168,13 @@ public class World {
 		this.narrowphaseDetector = new Gjk();
 		this.manifoldSolver = new ClippingManifoldSolver();
 		this.timeOfImpactDetector = new ConservativeAdvancement();
+		this.raycastDetector = new Gjk();
 		// create empty listeners
 		this.collisionListener = new CollisionAdapter();
 		this.contactManager = new ContactManager();
 		this.contactListener = new ContactAdapter();
 		this.timeOfImpactListener = new TimeOfImpactAdapter();
+		this.raycastListener = new RaycastAdapter();
 		this.boundsListener = new BoundsAdapter();
 		this.destructionListener = new DestructionAdapter();
 		this.stepListener = new StepAdapter();
@@ -627,10 +637,6 @@ public class World {
 				// therefore we must interpolate all bodies to the min toi and continue
 				// until all are solved
 				
-				// TODO another option might be to iterate until we find that the bodies overlap
-				// at a TOI then have a position solver solve for the correct collision point
-				// instead of trying to find the TOI at which they are just about to penetrate
-				
 				// move the body along the separating axis the given distance plus
 				// the allowed penetration to place the objects in collision
 				// this will allow the discrete collision detection to find the
@@ -643,14 +649,134 @@ public class World {
 	}
 	
 	/**
-	 * 
-	 * @param ray
+	 * Performs a raycast against all the {@link Body}s in the {@link World}.
+	 * @param ray the {@link Ray}
+	 * @param maxLength the maximum length of the ray; 0 for infinite length
+	 * @param ignoreSensors true if sensor {@link Fixture}s should be ignored
+	 * @param all true if all intersected {@link Body}s should be returned; false if only the closest {@link Body} should be returned
+	 * @param results a list to contain the results of the raycast
+	 * @return boolean true if at least one {@link Body} was intersected by the given {@link Ray}
+	 * @since 2.0.0
 	 */
-	// TODO finish this method
-	public void raycast(Ray ray) {
-		// this method should accept the ray and perform a raycast on all shapes finding what shapes the ray intersects.
-		// allow an option to only return the body who is intersected first or all
-		// we can use the maxLength parameter to iteratively cull subsequent bodies
+	public boolean raycast(Ray ray, double maxLength, boolean ignoreSensors, boolean all, List<RaycastResult> results) {
+		// TODO what if we sorted the list of squared distances from the body COM to the start point ASC then tested iteratively
+		boolean found = false;
+		
+		double max = 0.0;
+		if (maxLength > 0.0) {
+			max = maxLength;
+		}
+		// create a raycast result
+		RaycastResult result = new RaycastResult();
+		// if we are only looking for the minimum then go ahead
+		// and add the result to the list
+		if (!all) {
+			results.add(result);
+		}
+		// loop over the list of bodies testing each one 
+		int size = this.bodies.size();
+		for (int i = 0; i < size; i++) {
+			// get a body to test
+			Body body = this.bodies.get(i);
+			// does the ray intersect the body?
+			if (raycast(ray, body, max, ignoreSensors, result)) {
+				// if so, then call the listener to ask what to do
+				RaycastListener.Return ret = this.raycastListener.detected(ray, result);
+				// check the return type
+				if (ret == RaycastListener.Return.CONTINUE) {
+					// check if we are raycasting for all the objects
+					// or only the closest
+					if (!all) {
+						// we are only looking for the closest so
+						// set the new maximum
+						max = result.raycast.getDistance();
+					} else {
+						// add this result to the results
+						results.add(result);
+						// create a new result for the next iteration
+						result = new RaycastResult();
+					}
+					// set the found flag
+					found = true;
+				} else if (ret == RaycastListener.Return.CONTINUE_IGNORE) {
+					// ignore this result and use it for the next iteration
+					continue;
+				} else if (ret == RaycastListener.Return.STOP) {
+					// add this result to the results but stop the raycast
+					results.add(result);
+					// set the found flag
+					found = true;
+					break;
+				} else if (ret == RaycastListener.Return.STOP_IGNORE) {
+					// ignore this result and stop the raycast
+					break;
+				}
+			}
+		}
+		
+		return found;
+	}
+	
+	/**
+	 * Performs a raycast against the given {@link Body} and returns true
+	 * if the ray intersects the body.
+	 * @param ray the {@link Ray} to cast
+	 * @param body the {@link Body} to test
+	 * @param maxLength the maximum length of the ray; 0 for infinite length
+	 * @param ignoreSensors whether or not to ignore sensor {@link Fixture}s
+	 * @param result the raycast result
+	 * @return boolean true if the {@link Ray} intersects the {@link Body}
+	 * @since 2.0.0
+	 */
+	public boolean raycast(Ray ray, Body body, double maxLength, boolean ignoreSensors, RaycastResult result) {
+		// make sure the ray is not null
+		if (ray == null) return false;
+		// make sure the body is not null
+		if (body == null) return false;
+		// get the number of fixtures
+		int size = body.getFixtureCount();
+		// get the body transform
+		Transform transform = body.getTransform();
+		// set the maximum length
+		double max = 0.0;
+		if (maxLength > 0.0) {
+			max = maxLength;
+		}
+		// create a raycast object to store the result
+		Raycast raycast = new Raycast();
+		// loop over the fixtures finding the closest one
+		boolean found = false;
+		for (int i = 0; i < size; i++) {
+			// get the fixture
+			Fixture fixture = body.getFixture(i);
+			// check for sensor
+			if (ignoreSensors && fixture.sensor) {
+				// skip this fixture
+				continue;
+			}
+			// get the convex shape
+			Convex convex = fixture.shape;
+			// perform the raycast
+			if (this.raycastDetector.raycast(ray, max, convex, transform, raycast)) {
+				// if the raycast detected a collision then set the new
+				// maximum distance
+				max = raycast.getDistance();
+				// assign the fixture
+				result.fixture = fixture;
+				// the last raycast will always be the minimum raycast
+				// flag that we did get a successful raycast
+				found = true;
+			}
+		}
+		
+		// we only want to populate the
+		// result object if a result was found
+		if (found) {
+			result.body = body;
+			result.raycast = raycast;
+		}
+		
+		return found;
 	}
 	
 	/**
@@ -938,6 +1064,25 @@ public class World {
 	}
 	
 	/**
+	 * Sets the raycast listener.
+	 * @param raycastListener the raycast listener
+	 * @since 2.0.0
+	 */
+	public void setRaycastListener(RaycastListener raycastListener) {
+		if (raycastListener == null) throw new NullPointerException("The raycast listener cannot be null.");
+		this.raycastListener = raycastListener;
+	}
+	
+	/**
+	 * Returns the raycast listener.
+	 * @return {@link RaycastListener}
+	 * @since 2.0.0
+	 */
+	public RaycastListener getRaycastListener() {
+		return this.raycastListener;
+	}
+	
+	/**
 	 * Sets the {@link DestructionListener}.
 	 * @param destructionListener the {@link DestructionListener}
 	 */
@@ -1031,6 +1176,7 @@ public class World {
 	/**
 	 * Sets the time of impact detector.
 	 * @param timeOfImpactDetector the time of impact detector
+	 * @since 1.2.0
 	 */
 	public void setTimeOfImpactDetector(TimeOfImpactDetector timeOfImpactDetector) {
 		if (timeOfImpactDetector == null) throw new NullPointerException("The time of impact solver cannot be null.");
@@ -1040,9 +1186,29 @@ public class World {
 	/**
 	 * Returns the time of impact detector.
 	 * @return {@link TimeOfImpactDetector} the time of impact detector
+	 * @since 1.2.0
 	 */
 	public TimeOfImpactDetector getTimeOfImpactDetector() {
 		return this.timeOfImpactDetector;
+	}
+	
+	/**
+	 * Sets the raycast detector.
+	 * @param raycastDetector the raycast detector
+	 * @since 2.0.0
+	 */
+	public void setRaycastDetector(RaycastDetector raycastDetector) {
+		if (raycastDetector == null) throw new NullPointerException("The raycast detector cannot be null.");
+		this.raycastDetector = raycastDetector;
+	}
+	
+	/**
+	 * Returns the raycast detector.
+	 * @return {@link RaycastDetector} the raycast detector
+	 * @since 2.0.0
+	 */
+	public RaycastDetector getRaycastDetector() {
+		return this.raycastDetector;
 	}
 	
 	/**

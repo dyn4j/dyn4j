@@ -31,7 +31,7 @@ import org.dyn4j.game2d.geometry.Vector2;
 /**
  * Represents a contact point between two {@link Body} objects.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Contact {
@@ -74,9 +74,6 @@ public class Contact {
 	/** The mass tangent */
 	protected double massT;
 	
-	/** The equalized mass */
-	protected double massE;
-	
 	/** The velocity bias */
 	protected double vb;
 	
@@ -117,7 +114,6 @@ public class Contact {
 		.append(this.jp).append("|")
 		.append(this.massN).append("|")
 		.append(this.massT).append("|")
-		.append(this.massE).append("|")
 		.append(this.vb).append("]");
 		return sb.toString();
 	}
