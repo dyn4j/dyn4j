@@ -51,7 +51,7 @@ import org.junit.Test;
 /**
  * Contains the test cases for the {@link World} class.
  * @author William Bittle
- * @version 1.2.0
+ * @version 2.0.0
  * @since 1.0.2
  */
 public class WorldTest {
@@ -127,6 +127,10 @@ public class WorldTest {
 		TestCase.assertNotNull(w.narrowphaseDetector);
 		TestCase.assertNotNull(w.step);
 		TestCase.assertNotNull(w.stepListener);
+		TestCase.assertNotNull(w.raycastDetector);
+		TestCase.assertNotNull(w.raycastListener);
+		TestCase.assertNotNull(w.timeOfImpactDetector);
+		TestCase.assertNotNull(w.timeOfImpactListener);
 	}
 	
 	/**
@@ -527,6 +531,26 @@ public class WorldTest {
 	}
 	
 	/**
+	 * Tests the set raycast listener method.
+	 * @since 2.0.0
+	 */
+	@Test
+	public void setRaycastListener() {
+		World w = new World();
+		w.setRaycastListener(new RaycastAdapter());
+	}
+	
+	/**
+	 * Tests the set raycast listener method passing a null value.
+	 * @since 2.0.0
+	 */
+	@Test(expected = NullPointerException.class)
+	public void setNullRaycastListener() {
+		World w = new World();
+		w.setRaycastListener(null);
+	}
+	
+	/**
 	 * Tests the set destruction listener method.
 	 */
 	@Test
@@ -674,7 +698,7 @@ public class WorldTest {
 	}
 	
 	/**
-	 * Tests the set manifold solver method.
+	 * Tests the set time of impact detector method.
 	 * @since 1.2.0
 	 */
 	@Test
@@ -687,13 +711,33 @@ public class WorldTest {
 	}
 	
 	/**
-	 * Tests the set manifold solver method passing a null value.
+	 * Tests the set time of impact detector method passing a null value.
 	 * @since 1.2.0
 	 */
 	@Test(expected = NullPointerException.class)
 	public void setNullTimeOfImpactDetector() {
 		World w = new World();
 		w.setTimeOfImpactDetector(null);
+	}
+	
+	/**
+	 * Tests the set raycast detector method.
+	 * @since 2.0.0
+	 */
+	@Test
+	public void setRaycastDetector() {
+		World w = new World();
+		w.setRaycastDetector(new Gjk());
+	}
+	
+	/**
+	 * Tests the set raycast detector method passing a null value.
+	 * @since 2.0.0
+	 */
+	@Test(expected = NullPointerException.class)
+	public void setNullRaycastDetector() {
+		World w = new World();
+		w.setRaycastDetector(null);
 	}
 	
 	/**

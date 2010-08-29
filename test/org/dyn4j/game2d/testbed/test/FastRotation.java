@@ -42,7 +42,16 @@ import org.dyn4j.game2d.testbed.Test;
  * @since 1.2.0
  */
 public class FastRotation extends Test {
+	/**
+	 * Test time of impact listener.
+	 * @author William Bittle
+	 * @version 2.0.0
+	 * @since 2.0.0
+	 */
 	private class ToiListener extends TimeOfImpactAdapter {
+		/* (non-Javadoc)
+		 * @see org.dyn4j.game2d.dynamics.TimeOfImpactAdapter#bullet(org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.dynamics.Body, double)
+		 */
 		@Override
 		public boolean bullet(Body bullet, Body other, double toi) {
 			bullet.getVelocity().zero();
@@ -54,11 +63,15 @@ public class FastRotation extends Test {
 			return true;
 		}
 		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.game2d.dynamics.TimeOfImpactAdapter#dynamic(org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.dynamics.Body, double)
+		 */
 		@Override
 		public boolean dynamic(Body dynamic, Body other, double toi) {
 			return this.bullet(dynamic, other, toi);
 		}
 	}
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.testbed.Test#getName()
 	 */

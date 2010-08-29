@@ -41,7 +41,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests the distance joint in a Newton's Cradle configuration.
  * @author William Bittle
- * @version 1.1.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class NewtonsCradle extends Test {
@@ -112,7 +112,7 @@ public class NewtonsCradle extends Test {
 			
 			Entity ball = new Entity();
 			ball.addFixture(fixture);
-			ball.setMass();
+			ball.setMass(Mass.Type.FIXED_ANGULAR_VELOCITY);
 			ball.setLinearDamping(0.1);
 			ball.translate(x, y);
 			e = ball;

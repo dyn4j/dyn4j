@@ -26,6 +26,7 @@ package org.dyn4j.game2d.dynamics.contact;
 
 import java.util.List;
 
+import org.dyn4j.game2d.Epsilon;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.Settings;
 import org.dyn4j.game2d.dynamics.Step;
@@ -74,8 +75,6 @@ public class ContactConstraintSolver {
 			Mass m1 = b1.getMass();
 			Mass m2 = b2.getMass();
 			
-			double mass1 = m1.getMass();
-			double mass2 = m2.getMass();
 			double invM1 = m1.getInverseMass();
 			double invM2 = m2.getInverseMass();
 			double invI1 = m1.getInverseInertia();
@@ -116,18 +115,6 @@ public class ContactConstraintSolver {
 				double r1CrossT = r1.cross(T);
 				double r2CrossT = r2.cross(T);
 				contact.massT = 1.0 / (invM1 + invM2 + invI1 * r1CrossT * r1CrossT + invI2 * r2CrossT * r2CrossT);
-
-				// pre calculate the equalized mass
-				// the equalized mass is the average of the mass of the two objects
-				// this is done to force heavy objects from sinking into lighter objects
-				double massE = mass1 * invM1 + mass2 * invM2;
-				massE += mass1 * invI1 * r1CrossN * r1CrossN + mass2 * invI2 * r2CrossN * r2CrossN;
-				// TODO change this to the new method in box2d
-				if (massE != 0.0) {
-					contact.massE = 1.0 / massE;
-				} else {
-					contact.massE = 0.0;
-				}
 				
 				// set the velocity bias
 				contact.vb = 0.0;
@@ -644,8 +631,15 @@ public class ContactConstraintSolver {
 				double cp = baumgarte * Interval.clamp(penetration + allowedPenetration, -maxLinearCorrection, 0.0);
 
 				// compute the position impulse
-				double jp = -contact.massE * cp;
-
+				double rn1 = r1.cross(N);
+				double rn2 = r2.cross(N);
+				double K = invMass1 + invMass2 + invI1 * rn1 * rn1 + invI2 * rn2 * rn2;
+				
+				double jp = 0.0;
+				if (K > Epsilon.E) {
+					jp = -cp / K;
+				}
+				
 				// clamp the accumulated position impulse
 				double jp0 = contact.jp;
 				contact.jp = Math.max(jp0 + jp, 0.0);

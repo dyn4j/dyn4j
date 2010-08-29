@@ -33,9 +33,7 @@ import org.dyn4j.game2d.collision.narrowphase.Gjk;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Geometry;
-import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Transform;
-import org.dyn4j.game2d.geometry.Vector2;
 import org.junit.Before;
 import org.junit.Test;
 
