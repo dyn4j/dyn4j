@@ -570,6 +570,11 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			// if the convex is a circle then use the more efficient method
 			return CircleDetector.raycast(ray, maxLength, (Circle) convex, transform, raycast);
 		}
+		// check for segment
+		if (convex.isType(Segment.TYPE)) {
+			// if the convex is a segment then use the more efficient method
+			return SegmentDetector.raycast(ray, maxLength, (Segment) convex, transform, raycast);
+		}
 		
 		// otherwise proceed with GJK raycast
 		double lambda = 0;

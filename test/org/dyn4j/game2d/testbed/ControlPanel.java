@@ -104,16 +104,18 @@ public class ControlPanel extends JFrame {
 		{"Home or h", "Centers the camera"},
 		{"c", "Opens the Test Bed Control Panel"},
 		{"r", "Resets the current test"},
-		{"Space", "Toggles step mode"},
-		{"s", "Performs 1 step when in step mode"},
-		{"Left Mouse Button", "Click and hold to create a MouseJoint with a shape."},
-		{"Right Mouse Button", "Click and hold to select a shape."},
-		{"Move Mouse", "Move to translate the selected shape."},
-		{"z", "Hold to rotate the selected shape."},
-		{"o", "Outputs all the bodies current state to std out."},
-		{"b", "Launches a bomb from the left side."},
-		{"i", "Increases the metrics update rate."},
-		{"d", "Decreases the metrics update rate."}
+		{"Space", "Toggles stepping modes [Continuous|Manual|Timed]"},
+		{"m", "Performs 1 step when in Manual mode"},
+		{"t", "Decreases the time in between steps in Timed mode"},
+		{"T", "Increases the time in between steps in Timed mode"},
+		{"Left Mouse Button", "Click and hold to create a MouseJoint with a shape"},
+		{"Right Mouse Button", "Click and hold to select a shape"},
+		{"Move Mouse", "Move to translate the selected shape"},
+		{"z", "Hold to rotate the selected shape"},
+		{"o", "Outputs all the bodies current state to std out"},
+		{"b", "Launches a bomb from the left side"},
+		{"i", "Increases the metrics update rate"},
+		{"d", "Decreases the metrics update rate"}
 		};
 	
 	/** Map of available test to run */

@@ -59,6 +59,15 @@ public class Raycast extends Test {
 	/** The render radius of the points */
 	private static final double r = 0.01;
 	
+	/** The ray for the raycast test */
+	private Ray ray;
+	
+	/** The ray length; initially zero for an infinite length */
+	private double length = 0.0;
+	
+	/** Whether to get all results or just the closest */
+	private boolean all = false;
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.testbed.Test#getName()
 	 */
@@ -85,6 +94,11 @@ public class Raycast extends Test {
 		
 		// set the camera position and zoom
 		this.home();
+		
+		// create the ray
+		Vector2 s = new Vector2();
+		Vector2 d = new Vector2(Math.sqrt(3) * 0.5, 0.5);
+		this.ray = new Ray(s, d);
 		
 		// create the world
 		this.world = new World();
@@ -183,33 +197,30 @@ public class Raycast extends Test {
 	 */
 	@Override
 	protected void renderAfter(Graphics2D g) {
-		// create the ray
-		Vector2 s = new Vector2();
-		Vector2 d = new Vector2(2.0, 1.0); d.normalize();
-		final Ray ray = new Ray(s, d);
-		
 		// create the list for the results
 		List<RaycastResult> results = new ArrayList<RaycastResult>();
 		
 		// render the ray
 		g.setColor(Color.RED);
-		this.renderRay(g, ray);
+		this.renderRay(g, this.ray, this.length);
 		
 		g.setColor(Color.GREEN);
 		// perform a raycast
-		if (this.world.raycast(ray, 0.0, false, false, results)) {
-			// shouldn't happen, but for good measure
-			if (results.size() == 0) return;
-			// should always contain just one result
-			RaycastResult result = results.get(0);
-			org.dyn4j.game2d.collision.narrowphase.Raycast raycast = result.getRaycast();
-			
-			// draw the normal and point
-			Vector2 point = raycast.getPoint();
-			Vector2 normal = raycast.getNormal();
-			
-			this.renderPoint(g, point.x, point.y, r);
-			this.renderVector(g, point.x, point.y, normal.x, normal.y, 1.0);
+		if (this.world.raycast(this.ray, this.length, false, this.all, results)) {
+			int size = results.size();
+			// loop over the results
+			for (int i = 0; i < size; i++) {
+				// should always contain just one result
+				RaycastResult result = results.get(i);
+				org.dyn4j.game2d.collision.narrowphase.Raycast raycast = result.getRaycast();
+				
+				// draw the normal and point
+				Vector2 point = raycast.getPoint();
+				Vector2 normal = raycast.getNormal();
+				
+				this.renderPoint(g, point.x, point.y, r);
+				this.renderVector(g, point.x, point.y, normal.x, normal.y, 1.0);
+			}
 		}
 	}
 	
@@ -294,18 +305,21 @@ public class Raycast extends Test {
 	 * Renders the given ray to the given graphics object.
 	 * @param g the graphics object to render to
 	 * @param ray the ray to render
+	 * @param length the ray length; 0 for infinite length
 	 * @since 2.0.0
 	 */
-	protected void renderRay(Graphics2D g, Ray ray) {
+	protected void renderRay(Graphics2D g, Ray ray, double length) {
 		// get the ray attributes (world coordinates)
 		Vector2 s = ray.getStart();
 		Vector2 d = ray.getDirection();
 		
+		double l = length > 0.0 ? length * scale : 10000.0;
+		
 		// draw the line from the start to the end, along d, l distance
 		g.drawLine((int) Math.ceil(s.x * scale), 
 				   (int) Math.ceil(s.y * scale), 
-				   (int) Math.ceil(s.x * scale + d.x * 10000.0), 
-				   (int) Math.ceil(s.y * scale + d.y * 10000.0));
+				   (int) Math.ceil(s.x * scale + d.x * l), 
+				   (int) Math.ceil(s.y * scale + d.y * l));
 	}
 	
 	/**
@@ -406,9 +420,12 @@ public class Raycast extends Test {
 	@Override
 	public String[][] getControls() {
 		return new String[][] {
-				{"1", "Cycle the shape type for the first body."},
-				{"2", "Cycle the shape type for the second body."},
-				{"f", "Flips the order of the shapes in manifold generation."}};
+				{"d", "Decrease the angle from the positive x-axis by 2 degrees."},
+				{"D", "Increase the angle from the positive x-axis by 2 degrees."},
+				{"l", "Decrease the length of the ray by 0.25m."},
+				{"L", "Increase the lenght of the ray by 0.25m."},
+				{"i", "Make the ray's length infinite."},
+				{"a", "Toggles all or closest results."}};
 	}
 	
 	/* (non-Javadoc)
@@ -418,10 +435,54 @@ public class Raycast extends Test {
 	public void initializeInput(Keyboard keyboard, Mouse mouse) {
 		super.initializeInput(keyboard, mouse);
 		
-		// setup the 1 and 2 keys
-		keyboard.add(new Input(KeyEvent.VK_1, Input.Hold.NO_HOLD));
-		keyboard.add(new Input(KeyEvent.VK_2, Input.Hold.NO_HOLD));
-		keyboard.add(new Input(KeyEvent.VK_F, Input.Hold.NO_HOLD));
+		// shift is already setup by the testbed
+		
+		// setup the a and l
+		
+		keyboard.add(new Input(KeyEvent.VK_D, Input.Hold.NO_HOLD));
+		keyboard.add(new Input(KeyEvent.VK_L, Input.Hold.NO_HOLD));
+		keyboard.add(new Input(KeyEvent.VK_I, Input.Hold.NO_HOLD));
+		keyboard.add(new Input(KeyEvent.VK_A, Input.Hold.NO_HOLD));
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.testbed.Test#poll(org.codezealot.game.input.Keyboard, org.codezealot.game.input.Mouse)
+	 */
+	@Override
+	public void poll(Keyboard keyboard, Mouse mouse) {
+		super.poll(keyboard, mouse);
+		
+		// look for the a key
+		if (keyboard.isPressed(KeyEvent.VK_D)) {
+			// look for the shift key
+			if (keyboard.isPressed(KeyEvent.VK_SHIFT)) {
+				this.ray.getDirection().rotate(Math.toRadians(2.0));
+			} else {
+				this.ray.getDirection().rotate(Math.toRadians(-2.0));
+			}
+		}
+		
+		// look for the l key
+		if (keyboard.isPressed(KeyEvent.VK_L)) {
+			// look for the shift key
+			if (keyboard.isPressed(KeyEvent.VK_SHIFT)) {
+				this.length += 0.25;
+			} else {
+				if (this.length != 0.0) {
+					this.length -= 0.25;
+				}
+			}
+		}
+		
+		// look for the i key
+		if (keyboard.isPressed(KeyEvent.VK_I)) {
+			this.length = 0.0;
+		}
+		
+		// look for the a key
+		if (keyboard.isPressed(KeyEvent.VK_A)) {
+			this.all = !this.all;
+		}
 	}
 	
 	/* (non-Javadoc)

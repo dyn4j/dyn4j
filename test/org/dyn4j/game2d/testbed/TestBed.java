@@ -68,6 +68,21 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	/** The class logger */
 	private static final Logger LOGGER = Logger.getLogger(TestBed.class.getName());
 	
+	/**
+	 * The stepping modes.
+	 * @author William Bittle
+	 * @version 2.0.0
+	 * @since 2.0.0
+	 */
+	private static enum StepMode {
+		/** Continuous mode */
+		CONTINUOUS,
+		/** Manual stepping mode */
+		MANUAL,
+		/** Timed stepping mode */
+		TIMED
+	}
+	
 	/** The text color */
 	private static final Color TEXT_COLOR = Color.GRAY;
 	
@@ -81,8 +96,14 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	private ControlPanel settingsFrame;
 
 	/** Flag indicating step mode */
-	private boolean stepMode = false;
-		
+	private StepMode mode = StepMode.CONTINUOUS;
+	
+	/** The wait time in seconds between steps in timed stepping mode */
+	private double tModeInterval = 0.5;
+	
+	/** The total elapsed time in nanoseconds for timed stepping mode */
+	private double tModeElapsed = 0.0;
+	
 	// text labels
 	/** The label for the control panel key */
 	private Text controlsLabel;
@@ -98,8 +119,10 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	private Text modeLabel;
 	/** The label for continuous mode */
 	private Text continuousModeLabel;
-	/** The label for step mode */
-	private Text stepModeLabel;
+	/** The label for manual mode */
+	private Text manualModeLabel;
+	/** The label for timed mode */
+	private Text timedModeLabel;
 	/** The label for the contacts table */
 	private Text contactLabel;
 	/** The label for the total number of contacts */
@@ -202,6 +225,9 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		this.mouse.clear();
 		
 		// listen for some keys
+		// shift may be used by a number of keys
+		this.keyboard.add(new Input(KeyEvent.VK_SHIFT, Hold.HOLD));
+		
 		// exit
 		this.keyboard.add(new Input(KeyEvent.VK_ESCAPE, Hold.NO_HOLD));
 		this.keyboard.add(new Input(KeyEvent.VK_E, Hold.NO_HOLD));
@@ -226,8 +252,10 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		this.keyboard.add(new Input(KeyEvent.VK_C, Hold.NO_HOLD));
 		// mode toggle
 		this.keyboard.add(new Input(KeyEvent.VK_SPACE, Hold.NO_HOLD));
-		// perform step in step mode
-		this.keyboard.add(new Input(KeyEvent.VK_S, Hold.NO_HOLD));
+		// perform manual step in step mode
+		this.keyboard.add(new Input(KeyEvent.VK_M, Hold.NO_HOLD));
+		// increase/decrease (T/t) time interval in timed mode
+		this.keyboard.add(new Input(KeyEvent.VK_T, Hold.NO_HOLD));
 		// output the state of all the objects on the scene
 		this.keyboard.add(new Input(KeyEvent.VK_O, Hold.NO_HOLD));
 		// button to hold to pick a shape using the mouse joint
@@ -238,9 +266,8 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		this.keyboard.add(new Input(KeyEvent.VK_Z));
 		// key to launch a bomb
 		this.keyboard.add(new Input(KeyEvent.VK_B, Hold.NO_HOLD));
-		// key to increas/decrease the metrics update rate
-		this.keyboard.add(new Input(KeyEvent.VK_I, Hold.NO_HOLD));
-		this.keyboard.add(new Input(KeyEvent.VK_D, Hold.NO_HOLD));
+		// key to increase/decrease (U/u) the metrics update rate
+		this.keyboard.add(new Input(KeyEvent.VK_U, Hold.NO_HOLD));
 		
 		// initialize the keys for the test
 		this.test.initializeInput(this.keyboard, this.mouse);
@@ -284,9 +311,13 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		this.continuousModeLabel = new Text(cModeString);
 		this.continuousModeLabel.generate();
 		
-		AttributedString sModeString = new AttributedString("Step");
-		this.stepModeLabel = new Text(sModeString);
-		this.stepModeLabel.generate();
+		AttributedString sModeString = new AttributedString("Manual");
+		this.manualModeLabel = new Text(sModeString);
+		this.manualModeLabel.generate();
+		
+		AttributedString tModeString = new AttributedString("Timed");
+		this.timedModeLabel = new Text(tModeString);
+		this.timedModeLabel.generate();
 		
 		// text for contacts
 		AttributedString contactsString = new AttributedString("Contact Information");
@@ -572,8 +603,10 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		// render the label
 		this.modeLabel.render(g, x, y + spacing * 4);
 		// render the value
-		if (this.stepMode) {
-			this.stepModeLabel.render(g, x + padding, y + spacing * 4);
+		if (this.mode == StepMode.MANUAL) {
+			this.manualModeLabel.render(g, x + padding, y + spacing * 4);
+		} else if (this.mode == StepMode.TIMED) {
+			this.timedModeLabel.render(g, x + padding, y + spacing * 4);
 		} else {
 			this.continuousModeLabel.render(g, x + padding, y + spacing * 4);
 		}
@@ -589,7 +622,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	}
 	
 	/**
-	 * Renders the contace information to the given graphics object at the
+	 * Renders the contact information to the given graphics object at the
 	 * given screen coordinates.
 	 * @param g the graphics object to render to
 	 * @param x the x coordinate
@@ -845,12 +878,30 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		
 		// check for the space bar
 		if (this.keyboard.isPressed(KeyEvent.VK_SPACE)) {
-			this.stepMode = !this.stepMode;
+			if (this.mode == StepMode.CONTINUOUS) {
+				this.mode = StepMode.MANUAL;
+			} else if (this.mode == StepMode.MANUAL) {
+				this.mode = StepMode.TIMED;
+			} else {
+				this.mode = StepMode.CONTINUOUS;
+			}
 		}
 		
-		// check for the s key
-		if (this.keyboard.isPressed(KeyEvent.VK_S) && this.stepMode) {
+		// check for the m key
+		if (this.mode == StepMode.MANUAL && this.keyboard.isPressed(KeyEvent.VK_M)) {
 			this.test.world.step(1);
+		}
+		
+		// check for the t key
+		if (this.mode == StepMode.TIMED && this.keyboard.isPressed(KeyEvent.VK_T)) {
+			if (this.keyboard.isPressed(KeyEvent.VK_SHIFT)) {
+				this.tModeInterval += 0.1;
+			} else {
+				// make sure we dont make the interval zero
+				if (this.tModeInterval > 0.1) {
+					this.tModeInterval -= 0.1;
+				}
+			}
 		}
 		
 		// look for the o key
@@ -1045,14 +1096,13 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 			this.test.world.add(bomb);
 		}
 		
-		// check the i key
-		if (this.keyboard.isPressed(KeyEvent.VK_I)) {
-			this.usage.setRefreshRate(this.usage.getRefreshRate() / 2);
-		}
-		
-		// check the d key
-		if (this.keyboard.isPressed(KeyEvent.VK_D)) {
-			this.usage.setRefreshRate(this.usage.getRefreshRate() * 2);
+		// check the u key
+		if (this.keyboard.isPressed(KeyEvent.VK_U)) {
+			if (this.keyboard.isPressed(KeyEvent.VK_SHIFT)) {
+				this.usage.setRefreshRate(this.usage.getRefreshRate() / 2);
+			} else {
+				this.usage.setRefreshRate(this.usage.getRefreshRate() * 2);
+			}
 		}
 		
 		// call the test poll method
@@ -1121,10 +1171,27 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 			}
 		}
 
-		// convert the nanosecond elapsed time to elapsed time in seconds
-		double dt = (double)elapsedTime / 1.0e9;
-		// update the test
-		this.test.update(this.isPaused(), this.stepMode, dt);
+		// make sure we are not paused
+		if (!this.isPaused()) {
+			if (this.mode == StepMode.CONTINUOUS) {
+				// convert the nanosecond elapsed time to elapsed time in seconds
+				double dt = (double)elapsedTime / 1.0e9;
+				// update the test
+				this.test.world.update(dt);
+			} else if (this.mode == StepMode.MANUAL) {
+				// do nothing since its controlled by the user
+			} else {
+				// increment the elapsed time
+				this.tModeElapsed += elapsedTime;
+				// wait until the time to advance the standard amount
+				// get the interval in nano seconds
+				double nano = this.tModeInterval * 1.0e9;
+				if (this.tModeElapsed >= nano) {
+					this.test.world.step(1);
+					this.tModeElapsed = 0.0;
+				}
+			}
+		}
 		
 		this.usage.setUpdate(this.timer.getCurrentTime() - startTime);
 	}
