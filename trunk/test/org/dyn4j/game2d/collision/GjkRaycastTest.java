@@ -275,4 +275,49 @@ public class GjkRaycastTest {
 		ray.setStart(t.getTransformed(c.getCenter()));
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 	}
+	
+	/**
+	 * Tests the raycast method using a parallel segment.
+	 */
+	@Test
+	public void raycastParallelSegment() {
+		Vector2 d = new Vector2(1.0, 0.0); d.normalize();
+		Ray ray = new Ray(d);
+		Gjk gjk = new Gjk();
+		Convex c = Geometry.createSegment(1.0);
+		Transform t = new Transform();
+		t.translate(2.0, 0.0);
+		Raycast raycast = new Raycast();
+		
+		// successful test
+		boolean collision = gjk.raycast(ray, 0.0, c, t, raycast);
+		
+		TestCase.assertTrue(collision);
+		
+		Vector2 point = raycast.getPoint();
+		Vector2 normal = raycast.getNormal();
+		
+		TestCase.assertEquals(1.500, point.x, 1.0e-3);
+		TestCase.assertEquals(0.000, point.y, 1.0e-3);
+		TestCase.assertEquals(-1.000, normal.x, 1.0e-3);
+		TestCase.assertEquals(0.000, normal.y, 1.0e-3);
+		TestCase.assertEquals(1.500, raycast.getDistance(), 1.0e-3);
+		raycast.clear();
+		
+		// length test
+		TestCase.assertFalse(gjk.raycast(ray, 1.4, c, t, raycast));
+		TestCase.assertTrue(gjk.raycast(ray, 2.0, c, t, raycast));
+		
+		// opposite direction test
+		ray.getDirection().negate();
+		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
+		
+		// non-intersection case
+		ray.setStart(new Vector2(0.0, 1.0));
+		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
+		
+		// start at center case (or any point within the convex shape)
+		ray.setStart(t.getTransformed(c.getCenter()));
+		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
+	}
 }
