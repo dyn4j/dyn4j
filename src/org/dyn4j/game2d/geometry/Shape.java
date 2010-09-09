@@ -36,7 +36,7 @@ package org.dyn4j.game2d.geometry;
  * class method <code>is</code> only performs a reference comparison. When creating the type make 
  * sure to pass the super type {@link Shape.Type}.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public interface Shape extends Transformable {	
@@ -159,6 +159,13 @@ public interface Shape extends Transformable {
 	 * @return {@link Vector2}
 	 */
 	public abstract Vector2 getCenter();
+	
+	/**
+	 * Returns the maximum radius of the shape from the center.
+	 * @return double
+	 * @since 2.0.0
+	 */
+	public abstract double getRadius();
 	
 	/**
 	 * Returns the user data.

@@ -36,8 +36,8 @@ public class RaycastResult {
 	/** The {@link Body} detected */
 	protected Body body;
 	
-	/** The {@link Fixture} of the {@link Body} detected */
-	protected Fixture fixture;
+	/** The {@link BodyFixture} of the {@link Body} detected */
+	protected BodyFixture fixture;
 	
 	/** The {@link Raycast} result information */
 	protected Raycast raycast;
@@ -59,18 +59,18 @@ public class RaycastResult {
 	}
 	
 	/**
-	 * Returns the {@link Fixture} of the {@link Body} detected.
-	 * @return {@link Fixture}
+	 * Returns the {@link BodyFixture} of the {@link Body} detected.
+	 * @return {@link BodyFixture}
 	 */
-	public Fixture getFixture() {
+	public BodyFixture getFixture() {
 		return fixture;
 	}
 	
 	/**
-	 * Sets the {@link Fixture} of the {@link Body} detected.
+	 * Sets the {@link BodyFixture} of the {@link Body} detected.
 	 * @param fixture the fixture of the body detected
 	 */
-	public void setFixture(Fixture fixture) {
+	public void setFixture(BodyFixture fixture) {
 		this.fixture = fixture;
 	}
 	

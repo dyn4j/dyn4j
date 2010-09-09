@@ -32,7 +32,7 @@ import org.codezealot.game.input.Mouse;
 import org.codezealot.game.input.Input.Hold;
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
-import org.dyn4j.game2d.dynamics.Fixture;
+import org.dyn4j.game2d.dynamics.BodyFixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Geometry;
 import org.dyn4j.game2d.geometry.Mass;
@@ -44,7 +44,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests bodies being put to sleep.
  * @author William Bittle
- * @version 1.1.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Sleep extends Test {
@@ -98,7 +98,7 @@ public class Sleep extends Test {
 		// create the floor
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
-		floor.addFixture(new Fixture(floorRect));
+		floor.addFixture(new BodyFixture(floorRect));
 		floor.setMass(Mass.Type.INFINITE);
 		this.world.add(floor);
 		
@@ -107,25 +107,25 @@ public class Sleep extends Test {
 		Rectangle rect = new Rectangle(1.0, 1.0);
 		
 		Entity box1 = new Entity();
-		box1.addFixture(new Fixture(rect));
+		box1.addFixture(new BodyFixture(rect));
 		box1.setMass();
 		box1.translate(0.0, 1.0);
 		this.world.add(box1);
 		
 		Entity box2 = new Entity();
-		box2.addFixture(new Fixture(rect));
+		box2.addFixture(new BodyFixture(rect));
 		box2.setMass();
 		box2.translate(0.0, 2.0);
 		this.world.add(box2);
 
 		Entity box3 = new Entity();
-		box3.addFixture(new Fixture(rect));
+		box3.addFixture(new BodyFixture(rect));
 		box3.setMass();
 		box3.translate(0.0, 3.0);
 		this.world.add(box3);
 		
 		Entity box4 = new Entity();
-		box4.addFixture(new Fixture(rect));
+		box4.addFixture(new BodyFixture(rect));
 		box4.setMass();
 		box4.translate(0.0, 4.0);
 		this.world.add(box4);

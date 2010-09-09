@@ -33,7 +33,7 @@ import org.junit.Test;
 /**
  * Tests the methods of the {@link ContactConstraintId} class.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class ContactConstraintIdTest {
@@ -46,9 +46,9 @@ public class ContactConstraintIdTest {
 		Body b2 = new Body();
 		Body b3 = new Body();
 		
-		Fixture f1 = new Fixture(new Rectangle(1.0, 1.0));
-		Fixture f2 = new Fixture(new Rectangle(2.0, 2.0));
-		Fixture f3 = new Fixture(new Rectangle(3.0, 3.0));
+		BodyFixture f1 = new BodyFixture(new Rectangle(1.0, 1.0));
+		BodyFixture f2 = new BodyFixture(new Rectangle(2.0, 2.0));
+		BodyFixture f3 = new BodyFixture(new Rectangle(3.0, 3.0));
 		
 		// since im just testing the id's im not going to fully setup the bodies
 		

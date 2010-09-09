@@ -26,7 +26,7 @@ package org.dyn4j.game2d.testbed.test;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
-import org.dyn4j.game2d.dynamics.Fixture;
+import org.dyn4j.game2d.dynamics.BodyFixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.dynamics.joint.RevoluteJoint;
 import org.dyn4j.game2d.geometry.Circle;
@@ -41,7 +41,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests the a motorized revolute joint.
  * @author William Bittle
- * @version 1.1.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Motor extends Test {
@@ -108,9 +108,9 @@ public class Motor extends Test {
 		Circle wheelCircle  = new Circle(0.5);
 		
 		// create the fixtures for the bodies
-		Fixture floorFixture  = new Fixture(floorRect); floorFixture.setFriction(0.5);
-		Fixture wheelFixture1 = new Fixture(wheelCircle); wheelFixture1.setFriction(0.5);
-		Fixture wheelFixture2 = new Fixture(wheelCircle); wheelFixture2.setFriction(0.5);
+		BodyFixture floorFixture  = new BodyFixture(floorRect); floorFixture.setFriction(0.5);
+		BodyFixture wheelFixture1 = new BodyFixture(wheelCircle); wheelFixture1.setFriction(0.5);
+		BodyFixture wheelFixture2 = new BodyFixture(wheelCircle); wheelFixture2.setFriction(0.5);
 		
 		// create the floor
 		Entity floor = new Entity();
@@ -120,16 +120,16 @@ public class Motor extends Test {
 		
 		// create the car frame and body
 		Entity body = new Entity();
-		body.addFixture(new Fixture(frameRect));
+		body.addFixture(new BodyFixture(frameRect));
 		// locally transform the body fixture
 		bodyRect.translate(0.0, 0.5);
-		body.addFixture(new Fixture(bodyRect));
+		body.addFixture(new BodyFixture(bodyRect));
 		// locally transform the first tail gate rect1 fixture
 		tgRect1.translate(2.4, 1.0);
-		body.addFixture(new Fixture(tgRect1));
+		body.addFixture(new BodyFixture(tgRect1));
 		// locally transform the first tail gate rect2 fixture
 		tgRect2.translate(-2.4, 1.0);
-		body.addFixture(new Fixture(tgRect2));
+		body.addFixture(new BodyFixture(tgRect2));
 		body.setMass();
 		body.translate(-23.0, -3.0);
 		
@@ -140,7 +140,7 @@ public class Motor extends Test {
 			for (int j = 0; j < 3; j++) {
 				y = -2.0 + 0.25 * j;
 				Entity payload1 = new Entity();
-				payload1.addFixture(new Fixture(pRect));
+				payload1.addFixture(new BodyFixture(pRect));
 				payload1.setMass();
 				payload1.translate(x, y);
 				this.world.add(payload1);
@@ -149,7 +149,7 @@ public class Motor extends Test {
 		
 		// create the slope to go up
 		Entity slope = new Entity();
-		slope.addFixture(new Fixture(slopeRect));
+		slope.addFixture(new BodyFixture(slopeRect));
 		slope.setMass(Mass.Type.INFINITE);
 		slope.translate(0.0, -3.0);
 		slope.rotate(Math.toRadians(10), slope.getWorldCenter());

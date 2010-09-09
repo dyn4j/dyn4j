@@ -34,7 +34,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * <p>
  * This class is used by the {@link Gjk} and {@link Epa} classes.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class MinkowskiSum {
@@ -53,7 +53,7 @@ public class MinkowskiSum {
 	/**
 	 * Represents a point in the {@link MinkowskiSum}.
 	 * @author William Bittle
-	 * @version 1.0.3
+	 * @version 2.0.0
 	 * @since 1.0.0
 	 */
 	public static class Point {
@@ -106,9 +106,9 @@ public class MinkowskiSum {
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
 			sb.append("MINKOWSKI_POINT[")
+			.append(p).append("|")
 			.append(p1).append("|")
-			.append(p2).append("|")
-			.append(p).append("]");
+			.append(p2).append("]");
 			return sb.toString();
 		}
 	}

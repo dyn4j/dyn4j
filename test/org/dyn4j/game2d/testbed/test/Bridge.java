@@ -26,7 +26,7 @@ package org.dyn4j.game2d.testbed.test;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
-import org.dyn4j.game2d.dynamics.Fixture;
+import org.dyn4j.game2d.dynamics.BodyFixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.dynamics.joint.RevoluteJoint;
 import org.dyn4j.game2d.geometry.Geometry;
@@ -41,7 +41,7 @@ import org.dyn4j.game2d.testbed.Test;
  * Tests a number of revolute joints linked in a chain suspended
  * by two points on either end to create a bridge.
  * @author William Bittle
- * @version 1.1.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Bridge extends Test {
@@ -97,7 +97,7 @@ public class Bridge extends Test {
 		// create the floor
 		Rectangle floorRect = new Rectangle(40.0, 1.0);
 		Entity floor = new Entity();
-		floor.addFixture(new Fixture(floorRect));
+		floor.addFixture(new BodyFixture(floorRect));
 		floor.setMass(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
@@ -107,7 +107,7 @@ public class Bridge extends Test {
 		final double h = 0.25;
 		final double w = 1.0;
 		Rectangle r = new Rectangle(w, h);
-		Fixture f = new Fixture(r);
+		BodyFixture f = new BodyFixture(r);
 		f.setDensity(20.0);
 		
 		Entity previous = floor;

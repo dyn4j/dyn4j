@@ -44,13 +44,14 @@ import org.codezealot.game.input.Input.Hold;
 import org.codezealot.game.render.Container;
 import org.codezealot.game.render.G2dSurface;
 import org.dyn4j.game2d.Version;
+import org.dyn4j.game2d.collision.Fixture;
 import org.dyn4j.game2d.collision.broadphase.Sap;
 import org.dyn4j.game2d.collision.continuous.ConservativeAdvancement;
 import org.dyn4j.game2d.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.game2d.collision.narrowphase.Gjk;
 import org.dyn4j.game2d.collision.narrowphase.Sat;
 import org.dyn4j.game2d.dynamics.Body;
-import org.dyn4j.game2d.dynamics.Fixture;
+import org.dyn4j.game2d.dynamics.BodyFixture;
 import org.dyn4j.game2d.dynamics.joint.MouseJoint;
 import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Convex;
@@ -928,10 +929,11 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 					Body b = this.test.world.getBody(i);
 					// dont bother trying to attach to static bodies
 					if (b.isStatic()) continue;
-					int cSize = b.getShapeCount();
+					int cSize = b.getFixtureCount();
 					// loop over the shapes in the body
 					for (int j = 0; j < cSize; j++) {
-						Convex c = b.getShape(j);
+						Fixture f = b.getFixture(j);
+						Convex c = f.getShape();
 						// see if the point is contained in it
 						if (c.contains(v, b.getTransform())) {
 							// once we find the body, create a mouse joint
@@ -988,10 +990,11 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 				int bSize = this.test.world.getBodyCount();
 				for (int i = 0; i < bSize; i++) {
 					Body b = this.test.world.getBody(i);
-					int cSize = b.getShapeCount();
+					int cSize = b.getFixtureCount();
 					// loop over the shapes in the body
 					for (int j = 0; j < cSize; j++) {
-						Convex c = b.getShape(j);
+						Fixture f = b.getFixture(j);
+						Convex c = f.getShape();
 						// see if the point is contained in it
 						if (c.contains(v, b.getTransform())) {
 							// if it is then set the body as the current
@@ -1082,7 +1085,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		if (this.keyboard.isPressed(KeyEvent.VK_B)) {
 			// launch a bomb
 			Circle bombShape = new Circle(0.25);
-			Fixture bombFixture = new Fixture(bombShape);
+			BodyFixture bombFixture = new BodyFixture(bombShape);
 			Entity bomb = new Entity();
 			bomb.addFixture(bombFixture);
 			bomb.setMass();

@@ -35,7 +35,7 @@ import org.dyn4j.game2d.geometry.Shape;
 /**
  * Interface to listen for collision events.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public interface CollisionListener {
@@ -56,13 +56,13 @@ public interface CollisionListener {
 	 * Modification of the {@link Penetration} object is allowed and will be used to generate the contact
 	 * manifold in the {@link ManifoldSolver}.
 	 * @param body1 the first {@link Body}
-	 * @param fixture1 the first {@link Body}'s {@link Fixture}
+	 * @param fixture1 the first {@link Body}'s {@link BodyFixture}
 	 * @param body2 the second {@link Body}
-	 * @param fixture2 the second {@link Body}'s {@link Fixture}
+	 * @param fixture2 the second {@link Body}'s {@link BodyFixture}
 	 * @param penetration the {@link Penetration} between the {@link Shape}s
 	 * @return boolean true if processing should continue for this collision
 	 */
-	public abstract boolean collision(Body body1, Fixture fixture1, Body body2, Fixture fixture2, Penetration penetration);
+	public abstract boolean collision(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2, Penetration penetration);
 	
 	/**
 	 * Called when two {@link Body}s are colliding and a contact {@link Manifold} has been found.
@@ -72,11 +72,11 @@ public interface CollisionListener {
 	 * <p>
 	 * Modification of the {@link Manifold} object is allowed.  The {@link Manifold} is used to create contact constraints.
 	 * @param body1 the first {@link Body}
-	 * @param fixture1 the first {@link Body}'s {@link Fixture}
+	 * @param fixture1 the first {@link Body}'s {@link BodyFixture}
 	 * @param body2 the second {@link Body}
-	 * @param fixture2 the second {@link Body}'s {@link Fixture}
+	 * @param fixture2 the second {@link Body}'s {@link BodyFixture}
 	 * @param manifold the contact {@link Manifold} for the collision
 	 * @return boolean true if processing should continue for this collision
 	 */
-	public abstract boolean collision(Body body1, Fixture fixture1, Body body2, Fixture fixture2, Manifold manifold);
+	public abstract boolean collision(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2, Manifold manifold);
 }

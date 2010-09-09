@@ -22,23 +22,20 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.game2d.dynamics;
-
-import org.dyn4j.game2d.collision.continuous.TimeOfImpact;
 
 /**
- * Convenience class for implementing the {@link TimeOfImpactListener} interface.
+ * Sub package of the Collision package handling continuous collision detection.
  * <p>
- * This class can be used to implement only the methods desired instead of all
- * the methods contained in the {@link TimeOfImpactListener} interface.
+ * {@link ConservativeAdvancement} is currently the only implementation of CCD.
+ * <p>
+ * A {@link TimeOfImpactDetector} should accept a pair of {@link Swept} {@link Collidable}s
+ * and return a {@link TimeOfImpact} between them if a collision was missed within the time
+ * step.
  * @author William Bittle
  * @version 2.0.0
- * @since 1.2.0
+ * @since 2.0.0
  */
-public class TimeOfImpactAdapter implements TimeOfImpactListener {
-	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.dynamics.TimeOfImpactListener#collision(org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.collision.continuous.TimeOfImpact)
-	 */
-	@Override
-	public boolean collision(Body body1, Body body2, TimeOfImpact toi) { return true; }
-}
+package org.dyn4j.game2d.collision.continuous;
+
+import org.dyn4j.game2d.collision.Collidable;
+

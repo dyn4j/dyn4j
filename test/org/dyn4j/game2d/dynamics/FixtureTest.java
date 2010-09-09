@@ -24,27 +24,28 @@
  */
 package org.dyn4j.game2d.dynamics;
 
+import org.dyn4j.game2d.collision.Fixture;
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Geometry;
 import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Tests the methods of the {@link Fixture} class.
+ * Tests the methods of the {@link BodyFixture} and {@link Fixture} classes.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class FixtureTest {
-	/** The {@link Fixture} object to test */
-	private Fixture fixture;
+	/** The {@link BodyFixture} object to test */
+	private BodyFixture fixture;
 	
 	/**
 	 * Sets up the test.
 	 */
 	@Before
 	public void setup() {
-		fixture = new Fixture(Geometry.createUnitCirclePolygon(5, 0.5));
+		fixture = new BodyFixture(Geometry.createUnitCirclePolygon(5, 0.5));
 	}
 	
 	/**
@@ -52,7 +53,7 @@ public class FixtureTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createNullShape() {
-		new Fixture(null);
+		new BodyFixture(null);
 	}
 	
 	/**
@@ -61,7 +62,7 @@ public class FixtureTest {
 	@Test
 	public void createSuccess() {
 		Convex convex = Geometry.createUnitCirclePolygon(5, 0.5);
-		new Fixture(convex);
+		new BodyFixture(convex);
 	}
 	
 	/**

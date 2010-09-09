@@ -24,6 +24,10 @@
  */
 package org.dyn4j.game2d.collision.continuous;
 
+import org.dyn4j.game2d.Epsilon;
+import org.dyn4j.game2d.collision.Collidable;
+import org.dyn4j.game2d.collision.Filter;
+import org.dyn4j.game2d.collision.Fixture;
 import org.dyn4j.game2d.collision.narrowphase.DistanceDetector;
 import org.dyn4j.game2d.collision.narrowphase.Gjk;
 import org.dyn4j.game2d.collision.narrowphase.Separation;
@@ -37,38 +41,60 @@ import org.dyn4j.game2d.geometry.Vector2;
  * This method assumes that translation and rotation are linear and computes the
  * time of impact within a given tolerance.
  * <p>
- * This method is based of the one found in <a href="http://www.box2d.org">Box2d</a>.
- * <p>
- * Uses a combination of the secant method and bisection for root finding.
+ * This method is based of the one found in <a href="http://bulletphysics.org">Bullet</a>.
  * @author William Bittle
- * @see <a href="http://www.box2d.org">Box2d</a>
+ * @see <a href="http://bulletphysics.org">Bullet</a>
  * @version 2.0.0
  * @since 1.2.0
  */
 public class ConservativeAdvancement implements TimeOfImpactDetector {
-	/** The default tolerance */
-	// TODO change this tolerance to Epsilon.E something
-	public static final double DEFAULT_TOLERANCE = 1.0e-3;
+	/**
+	 * Class used to store the minimum separation and the closest
+	 * fixtures for the separation.
+	 * @author William Bittle
+	 * @version 2.0.0
+	 * @since 2.0.0
+	 */
+	protected static class MinimumSeparation {
+		/** The minimum {@link Separation} */
+		public Separation separation;
+		
+		/** The closest {@link Fixture} on the first {@link Swept} {@link Collidable} */
+		public Fixture fixture1;
+		
+		/** The closest {@link Fixture} on the second {@link Swept} {@link Collidable} */
+		public Fixture fixture2;
+	}
+	
+	/** The default distance epsilon; around 1e-6 */
+	public static final double DEFAULT_DISTANCE_EPSILON = Math.cbrt(Epsilon.E);
+	
+	/** The default maximum number of iterations */
+	public static final int DEFAULT_MAX_ITERATIONS = 30;
 	
 	/** The distance detector */
-	protected DistanceDetector distanceDetector;
+	protected DistanceDetector distanceDetector = new Gjk();
 	
 	/** The tolerance */
-	protected double tolerance = ConservativeAdvancement.DEFAULT_TOLERANCE;
-	
-	/** The tolerance squared */
-	protected double toleranceSquared = ConservativeAdvancement.DEFAULT_TOLERANCE * ConservativeAdvancement.DEFAULT_TOLERANCE;
+	protected double distanceEpsilon = ConservativeAdvancement.DEFAULT_DISTANCE_EPSILON;
 	
 	/** The maximum number of iterations of the root finder */
-	protected int maxIterations = 30;
+	protected int maxIterations = ConservativeAdvancement.DEFAULT_MAX_ITERATIONS;
 	
 	/**
 	 * Default constructor.
 	 * <p>
 	 * Uses the {@link Gjk} as the {@link DistanceDetector}.
 	 */
-	public ConservativeAdvancement() {
-		this.distanceDetector = new Gjk();
+	public ConservativeAdvancement() {}
+	
+	/**
+	 * Optional constructor.
+	 * @param distanceDetector the distance detector
+	 */
+	public ConservativeAdvancement(DistanceDetector distanceDetector) {
+		if (distanceDetector == null) throw new NullPointerException("The distance detector cannot be null.");
+		this.distanceDetector = distanceDetector;
 	}
 	
 	/* (non-Javadoc)
@@ -83,166 +109,167 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 	 * @see org.dyn4j.game2d.collision.continuous.TimeOfImpactDetector#getTimeOfImpact(org.dyn4j.game2d.collision.continuous.Swept, org.dyn4j.game2d.collision.continuous.Swept, double, double, org.dyn4j.game2d.collision.continuous.TimeOfImpact)
 	 */
 	public boolean getTimeOfImpact(Swept swept1, Swept swept2, double t1, double t2, TimeOfImpact toi) {
-		// get the distance of the initial configuration
-		Separation s1 = this.getSeparation(swept1, swept2, t1);
+		// count the number of iterations
+		int iterations = 0;
 		
-		// check for overlap
-		if (s1 == null) {
-			// if the bodies overlap in the beginning configuration
-			// then they were already handled by the static collision
-			// detector
+		// check for separation at the beginning of the interval
+		MinimumSeparation distance = new MinimumSeparation();
+		boolean separated = this.getSeparation(swept1, swept2, t1, distance);
+		// if they are not separated then there is nothing to do
+		if (!separated) {
+			return false;
+		}
+		// get the separation object
+		Separation separation = distance.separation;
+		// get the distance
+		double d = separation.getDistance();
+		// check if the distance is less than the tolerance
+		if (d < this.distanceEpsilon) {
+			// fill up the toi
+			toi.toi = 0.0;
+			toi.separation = separation;
+			toi.fixture1 = distance.fixture1;
+			toi.fixture2 = distance.fixture2;
+			return true;
+		}
+		// get the separation normal
+		Vector2 n = separation.getNormal();
+		
+		// get the transforms
+		Transform ti1 = swept1.getInitialTransform();
+		Transform tf1 = swept1.getFinalTransform();
+		Transform ti2 = swept2.getInitialTransform();
+		Transform tf2 = swept2.getFinalTransform();
+		
+		// get this timestep's velocities
+		Vector2 v1 = this.getLinearVelocity(ti1, tf1);
+		Vector2 v2 = this.getLinearVelocity(ti2, tf2);
+		double  a1 = this.getAngularVelocity(ti1, tf1);
+		double  a2 = this.getAngularVelocity(ti2, tf2);
+		
+		// get the rotation disc radius for the swept object
+		double rmax1 = swept1.getRotationDiscRadius();
+		double rmax2 = swept2.getRotationDiscRadius();
+		
+		// compute the relative linear velocity
+		Vector2 rv = v1.difference(v2);
+		// compute the relative linear velocity magnitude
+		double rvl = rv.getMagnitude();		
+		// compute the maximum rotational velocity
+		double amax = rmax1 * Math.abs(a1) + rmax2 * Math.abs(a2);
+		
+		// check if the bodies are moving relative to one another
+		if (rvl + amax == 0.0) {
 			return false;
 		}
 		
-		// check the distance
-		if (s1.getDistance() < this.tolerance) {
-			// if the distance between the bodies is less
-			// than the target given some tolerance we can
-			// stop and pass this along to the position solver
-			
-			// we are done return the toi info
-			toi.toi = 0.0;
-			toi.separation = s1;
-			return true;
-		}
+		// set the initial time
+		double l = t1;
+		// set the previous time
+		double l0 = l;
 		
-		// get the distance of the final configuration
-		Separation s2 = this.getSeparation(swept1, swept2, t2);
-		
-//		// check for overlap
-//		if (s2 == null) {
-//			// if the bodies overlap in the end configuration
-//			// then we can immediately return because this collision
-//			// will be detected normally by the static collision detector
-//			return false;
-//		}
-		
-//		// check the distance
-//		if (s2 != null && s2.getDistance() < this.tolerance) {
-//			// if the distance between the bodies is less
-//			// than the target given some tolerance we can
-//			// stop and pass this along to the position solver
-//			
-//			// we are done return the toi info
-//			toi.toi = 1.0;
-//			toi.separation = s2;
-//			return true;
-//		}
-		
-		// get the first separation normal
-		Vector2 n1 = s1.getNormal();
-		// were the bodies separated in the end configuration?
-		if (s2 != null) {
-			// if so then get the end configuration normal
-			Vector2 n2 = s2.getNormal();
-			// the normals should be opposite one another if a collision was missed
-			if (n1.dot(n2) > 0.0) {
-				// TODO i think we need an extra condition here to check for rotation collision
+		// loop until the distance is less than the tolerance
+		while (d > this.distanceEpsilon) {
+			// project the relative max velocity along the separation normal
+			double rvDotN = rv.dot(n);
+			// compute the max relative velocity
+			double drel = rvDotN + amax;
+			// is the relative velocity along the normal and the maximum
+			// rotation velocity less than epsilon
+			if (drel <= Epsilon.E) {
 				return false;
-			}
-		}
-		// if they are in collision at the end of the time step then
-		// we must iteratively find the time of impact
-		
-		// find the root
-		double dist = Double.MAX_VALUE;
-		// set the time bounds
-		double a1 = t1;
-		double a2 = t2;
-		// set the distance bounds
-		double sep1 = s1.getDistance();
-		double sep2 = s2 != null ? -s2.getDistance() : 0.0;
-		// count the number of iterations
-		int iterations = 0;
-		for (;;) {
-			// Use a mix of the secant rule and bisection.
-			double t;
-			if ((iterations & 1) == 1) {
-				// Secant rule to improve convergence.
-				// TODO check for zero denominator
-				t = a1 + (0.0 - sep1) * (a2 - a1) / (sep2 - sep1);
 			} else {
-				// Bisection to guarantee progress.
-				t = 0.5f * (a1 + a2);
+				// compute the time to advance
+				double dt = d / drel;
+				// advance the time
+				l += dt;
+				// if l drops below the minimum time
+				if (l < t1) {
+					return false;
+				}
+				// if l goes above the maximum time
+				if (l > t2) {
+					return false;
+				}
+				// if l doesn't change significantly
+				if (l <= l0) {
+					return false;
+				}
+				// set the last time
+				l0 = l;
 			}
 			
-			// have we reached the maximum number of iterations?
+			// increment the number of iterations
+			iterations++;
+			// check if we have reach the maximum number of iterations
 			if (iterations == this.maxIterations) {
 				return false;
 			}
 			
-			// increment the number of iterations before
-			// we reach any termination condition
-			iterations++;
-			
-			// get the separation at the new time
-			Separation ns = this.getSeparation(swept1, swept2, t);
-			
-			// if the separation is null then we know that the bodies are
-			// overlapping here.  This doesn't mean we are done however.  We
-			// need to continue to find when they first begin to overlap
-			if (ns == null) {
-				// if they are overlapping, make this time the new
-				// upper bound
-				a2 = t;
-				continue;
+			// find closest points
+			separated = this.getSeparation(swept1, swept2, l, distance);
+			// check for intersection
+			if (!separated) {
+				// the shapes are intersecting.  This should
+				// not happen because of the conservative nature
+				// of the algorithm, however because of numerical
+				// error it will. Subtract epsilon from the toi
+				// to back-up a bit
+				l -= Epsilon.E;
+				// compute a new separation
+				separated = this.getSeparation(swept1, swept2, l, distance);
+				// are they still penetrating
+				if (!separated) {
+					// if so then just quit
+					return false;
+				}
 			}
 			
-			// otherwise get the distance and normal
-			double s = ns.getDistance();
-			Vector2 n = ns.getNormal();
-			
-			// are we close enough to the solution given the tolerance?
-			if (s < this.tolerance) {
-				// if so then the current time is the time of impact
-				// and the current separation is the best fit separation
-				toi.toi = t;
-				toi.separation = ns;
-				// break from the loop, we are done
-				break;
-			}
-			
-			// check for convergence
-			if (Math.abs(dist - s) < this.toleranceSquared) {
-				// this condition is hit when we are converging but not to zero
-				// the previous check should catch convergence to zero
-				return false;
-			} else {
-				dist = s;
-			}
-			
-			// where relative to the collision point is the separation?
-			double sig = Math.signum(n.dot(n1));
-			// if they are perp then just use 1.0
-			if (sig == 0.0) sig = 1.0;
-			
-			s *= sig;
-			
-			// make sure we continue to bracket the root/refine the time interval
-//			if (s * sig > 0.0) {
-			if (s > 0.0) {
-				a1 = t;
-				sep1 = s;
-			} else {
-				a2 = t;
-				sep2 = s;
-			}
+			// set the new normal and distance
+			separation = distance.separation;
+			n = separation.getNormal();
+			d = separation.getDistance();
 		}
 		
-		// once we get here we have a toi calculated within a given tolerance
-		// where the bodies are in collision
+		// fill up the separation object
+		toi.toi = l;
+		toi.separation = distance.separation;
+		toi.fixture1 = distance.fixture1;
+		toi.fixture2 = distance.fixture2;
+		
 		return true;
 	}
 	
 	/**
-	 * Returns the separation object containing the smallest distance between the two
-	 * swept colliables.
-	 * @param swept1 the first swept colliable
-	 * @param swept2 the second swept collidable
-	 * @param t the time in the range [0, 1] that should be tested
-	 * @return {@link Separation} the minimum separation
+	 * Returns the linear velocity given the start and end {@link Transform}s.
+	 * @param txi the initial {@link Transform}
+	 * @param txf the final {@link Transform}
+	 * @return {@link Vector2} the linear velocity
 	 */
-	protected Separation getSeparation(Swept swept1, Swept swept2, double t) {
+	protected Vector2 getLinearVelocity(Transform txi, Transform txf) {
+		return txf.getTranslation().subtract(txi.getTranslation());
+	}
+	
+	/**
+	 * Returns the angular velocity given the start and end {@link Transform}s.
+	 * @param txi the initial {@link Transform}
+	 * @param txf the final {@link Transform}
+	 * @return double the angular velocity
+	 */
+	protected double getAngularVelocity(Transform txi, Transform txf) {
+		return txf.getRotation() - txi.getRotation(); 
+	}
+	
+	/**
+	 * Returns the separation object containing the smallest distance between the two
+	 * {@link Swept} {@link Collidable}s.
+	 * @param swept1 the first {@link Swept} {@link Collidable}
+	 * @param swept2 the second {@link Swept} {@link Collidable}
+	 * @param t the time in the range [0, 1] that should be tested
+	 * @param distance the distance output in separation cases
+	 * @return boolean true if the {@link Swept} {@link Collidable}s are separated
+	 */
+	protected boolean getSeparation(Swept swept1, Swept swept2, double t, MinimumSeparation distance) {
 		// get the initial transforms
 		Transform it1 = swept1.getInitialTransform();
 		Transform it2 = swept2.getInitialTransform();
@@ -254,33 +281,48 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 		Transform txa = it1.lerped(ft1, t);
 		Transform txb = it2.lerped(ft2, t);
 		
-		int f1size = swept1.getShapeCount();
-		int f2size = swept2.getShapeCount();
+		int f1size = swept1.getFixtureCount();
+		int f2size = swept2.getFixtureCount();
 		boolean separated = true;
 		
-		Separation separation = null;
+		// keep track of the minimum distance fixtures
+		// and separation objects
+		Separation minSeparation = null;
+		Fixture minFixture1 = null;
+		Fixture minFixture2 = null;
 		double minDistance = Double.MAX_VALUE;
+		boolean found = false;
 		
 		// loop over each shape of the first object
 		for (int k = 0; k < f1size; k++) {
 			// get the shape
-			Convex s1 = swept1.getShape(k);
+			Fixture fixture1 = swept1.getFixture(k);
+			Filter filter1 = fixture1.getFilter();
+			Convex convex1 = fixture1.getShape();
 			// compare the distance to every shape of
 			// the second object
 			for (int l = 0; l < f2size; l++) {
 				// get the shape
-				Convex s2 = swept2.getShape(l);
+				Fixture fixture2 = swept2.getFixture(l);
+				Filter filter2 = fixture2.getFilter();
+				Convex convex2 = fixture2.getShape();
+				
+				// test the filter
+				if (!filter1.isAllowed(filter2)) {
+					// if the collision is not allowed then continue
+					continue;
+				}
 				
 				// get the distance using the initial transforms
 				Separation temp = new Separation();
-				separated = this.distanceDetector.distance(s1, txa, s2, txb, temp);
+				separated = this.distanceDetector.distance(convex1, txa, convex2, txb, temp);
 				
 				// are they separated?
 				if (!separated) {
 					// if there exists a pair of shapes that
 					// are not separated, then we can conclude
 					// that the bodies are not separated
-					return null;
+					return false;
 				}
 				
 				// get the distance
@@ -289,14 +331,25 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 				// compare the distance
 				if (dist < minDistance) {
 					// keep only the minimum
-					separation = temp;
+					minSeparation = temp;
 					minDistance = dist;
+					minFixture1 = fixture1;
+					minFixture2 = fixture2;
+					found = true;
 				}
 			}
 		}
 		
+		// check if a separation was found
+		if (!found) return false;
+		
+		// fill up the distance object
+		distance.separation = minSeparation;
+		distance.fixture1 = minFixture1;
+		distance.fixture2 = minFixture2;
+		
 		// return the minimum separation
-		return separation;
+		return true;
 	}
 	
 	/**
@@ -317,38 +370,28 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 	}
 	
 	/**
-	 * Returns the tolerance used to determine when a sufficient solution
+	 * Returns the distance epsilon used to determine when a sufficient solution
 	 * has been found.
-	 * @return double the tolerance
+	 * @return double the distance epsilon
 	 */
-	public double getTolerance() {
-		return this.tolerance;
+	public double getDistanceEpsilon() {
+		return this.distanceEpsilon;
 	}
 	
 	/**
-	 * Returns the tolerance squared.
-	 * @see #getTolerance()
-	 * @return double the tolerance squared
-	 */
-	public double getToleranceSquared() {
-		return this.toleranceSquared;
-	}
-	
-	/**
-	 * Sets the tolerance used to determine when a sufficient solution
+	 * Sets the distance epsilon used to determine when a sufficient solution
 	 * has been found.
-	 * @param tolerance the tolerance; in the range (0, 1]
+	 * @param distanceEpsilon the distance epsilon; must be greater than zero
 	 */
-	public void setTolerance(double tolerance) {
-		if (tolerance <= 0.0 || tolerance > 1.0) throw new IllegalArgumentException("The tolerance must be in the range (0, 1].");
-		this.tolerance = tolerance;
-		this.toleranceSquared = tolerance * tolerance;
+	public void setDistanceEpsilon(double distanceEpsilon) {
+		if (distanceEpsilon <= 0.0) throw new IllegalArgumentException("The tolerance must be greater than zero.");
+		this.distanceEpsilon = distanceEpsilon;
 	}
 	
 	/**
 	 * Returns the maximum number of iterations that will be
 	 * performed by the root finder.
-	 * @return the maximum number of interations the root finder will perform
+	 * @return the maximum number of iterations the root finder will perform
 	 */
 	public int getMaxIterations() {
 		return maxIterations;
@@ -360,10 +403,10 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 	 * <p>
 	 * Lower values increase performance yet decrease accuracy whereas
 	 * higher values decrease performance and increase accuracy.
-	 * @param maxIterations the maximum number of iterations in the range [10, &infin;]
+	 * @param maxIterations the maximum number of iterations in the range [5, &infin;]
 	 */
 	public void setMaxIterations(int maxIterations) {
-		if (maxIterations < 10) throw new IllegalArgumentException("The root finder must have a minimum of 10 iterations.");
+		if (maxIterations < 5) throw new IllegalArgumentException("The root finder must have a minimum of 5 iterations.");
 		this.maxIterations = maxIterations;
 	}
 }

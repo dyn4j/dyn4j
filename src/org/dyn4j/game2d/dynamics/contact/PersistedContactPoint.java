@@ -25,14 +25,14 @@
 package org.dyn4j.game2d.dynamics.contact;
 
 import org.dyn4j.game2d.dynamics.Body;
-import org.dyn4j.game2d.dynamics.Fixture;
+import org.dyn4j.game2d.dynamics.BodyFixture;
 import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Represents a persisted contact point.
  * @author William Bittle
  * @see ContactPoint
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class PersistedContactPoint extends ContactPoint {
@@ -51,9 +51,9 @@ public class PersistedContactPoint extends ContactPoint {
 	/**
 	 * Full constructor.
 	 * @param body1 the first {@link Body} in contact
-	 * @param fixture1 the first {@link Body}'s {@link Fixture}
+	 * @param fixture1 the first {@link Body}'s {@link BodyFixture}
 	 * @param body2 the second {@link Body} in contact
-	 * @param fixture2 the second {@link Body}'s {@link Fixture}
+	 * @param fixture2 the second {@link Body}'s {@link BodyFixture}
 	 * @param enabled true if this contact is enabled
 	 * @param point the world space contact point
 	 * @param normal the world space contact normal
@@ -62,7 +62,7 @@ public class PersistedContactPoint extends ContactPoint {
 	 * @param oldNormal the previous world space contact normal
 	 * @param oldDepth the previous penetration depth
 	 */
-	public PersistedContactPoint(Body body1, Fixture fixture1, Body body2, Fixture fixture2, 
+	public PersistedContactPoint(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2, 
 			boolean enabled, Vector2 point, Vector2 normal, double depth,
 			Vector2 oldPoint, Vector2 oldNormal, double oldDepth) {
 		super(body1, fixture1, body2, fixture2, enabled, point, normal, depth);

@@ -27,7 +27,7 @@ package org.dyn4j.game2d.dynamics;
 /**
  * Interface used to customize the way friction and restitution values are mixed.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public interface CoefficientMixer {
@@ -51,17 +51,17 @@ public interface CoefficientMixer {
 	};
 	
 	/**
-	 * Method used to mix the coefficients of friction of two {@link Fixture}s.
-	 * @param friction1 the coefficient of friction for the first {@link Fixture}
-	 * @param friction2 the coefficient of friction for the second {@link Fixture}
+	 * Method used to mix the coefficients of friction of two {@link BodyFixture}s.
+	 * @param friction1 the coefficient of friction for the first {@link BodyFixture}
+	 * @param friction2 the coefficient of friction for the second {@link BodyFixture}
 	 * @return double
 	 */
 	public abstract double mixFriction(double friction1, double friction2);
 	
 	/**
-	 * Method used to mix the coefficients of restitution of two {@link Fixture}s.
-	 * @param restitution1 the coefficient of restitution for the first {@link Fixture}
-	 * @param restitution2 the coefficient of restitution for the second {@link Fixture}
+	 * Method used to mix the coefficients of restitution of two {@link BodyFixture}s.
+	 * @param restitution1 the coefficient of restitution for the first {@link BodyFixture}
+	 * @param restitution2 the coefficient of restitution for the second {@link BodyFixture}
 	 * @return double
 	 */
 	public abstract double mixRestitution(double restitution1, double restitution2);

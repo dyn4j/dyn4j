@@ -26,7 +26,7 @@ package org.dyn4j.game2d.testbed.test;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
-import org.dyn4j.game2d.dynamics.Fixture;
+import org.dyn4j.game2d.dynamics.BodyFixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Geometry;
 import org.dyn4j.game2d.geometry.Mass;
@@ -40,7 +40,7 @@ import org.dyn4j.game2d.testbed.Test;
  * Tests the handling of very fast bodies and the prevention of
  * tunneling.
  * @author William Bittle
- * @version 1.2.0
+ * @version 2.0.0
  * @since 1.2.0
  */
 public class Bullet extends Test {
@@ -92,7 +92,7 @@ public class Bullet extends Test {
 		// create the floor
 		Rectangle floorRect = new Rectangle(40.0, 0.5);
 		Entity floor = new Entity();
-		floor.addFixture(new Fixture(floorRect));
+		floor.addFixture(new BodyFixture(floorRect));
 		floor.setMass(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
@@ -103,13 +103,15 @@ public class Bullet extends Test {
 		// the floor
 		Polygon fastShape = Geometry.createUnitCirclePolygon(7, 0.2);
 		Entity fast = new Entity();
-		Fixture f = fast.addFixture(fastShape);
+		BodyFixture f = fast.addFixture(fastShape);
 		f.setFriction(0.2);
 		f.setRestitution(0.5);
 		fast.setMass();
 		fast.translate(0.0, 1.0);
 		fast.getVelocity().set(0.0, -120.0);
 		this.world.add(fast);
+		
+		// TODO test is bullet flag is set
 	}
 	
 	/* (non-Javadoc)

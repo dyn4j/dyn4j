@@ -27,7 +27,7 @@ package org.dyn4j.game2d.collision;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dyn4j.game2d.dynamics.Fixture;
+import org.dyn4j.game2d.dynamics.BodyFixture;
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Transformable;
@@ -36,21 +36,21 @@ import org.dyn4j.game2d.geometry.Vector2;
 /**
  * Test {@link Collidable} class for junit test cases.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class CollidableTest implements Collidable, Transformable {
-	/** The {@link Fixture}s list */
-	protected List<Fixture> fixtures;
+	/** The {@link BodyFixture}s list */
+	protected List<BodyFixture> fixtures;
 	
 	/** The {@link Transform} */
 	protected Transform transform;
 	
 	/**
 	 * Full constructor.
-	 * @param fixtures the {@link Fixture}s list
+	 * @param fixtures the {@link BodyFixture}s list
 	 */
-	public CollidableTest(List<Fixture> fixtures) {
+	public CollidableTest(List<BodyFixture> fixtures) {
 		this.fixtures = fixtures;
 		this.transform = new Transform();
 	}
@@ -58,32 +58,32 @@ public class CollidableTest implements Collidable, Transformable {
 	/**
 	 * Optional constructor.
 	 * <p>
-	 * Uses default {@link Fixture} settings.
+	 * Uses default {@link BodyFixture} settings.
 	 * @param shape the shape to use
 	 */
 	public CollidableTest(Convex shape) {
-		this.fixtures = new ArrayList<Fixture>();
-		this.fixtures.add(new Fixture(shape));
+		this.fixtures = new ArrayList<BodyFixture>();
+		this.fixtures.add(new BodyFixture(shape));
 		this.transform = new Transform();
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.collision.Collidable#getShape(int)
+	 * @see org.dyn4j.game2d.collision.Collidable#getFixture(int)
 	 */
 	@Override
-	public Convex getShape(int index) {
+	public Fixture getFixture(int index) {
 		int size = this.fixtures.size();
 		if (size > 0 && index < size) {
-			return this.fixtures.get(index).getShape();
+			return this.fixtures.get(index);
 		}
 		throw new ArrayIndexOutOfBoundsException();
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.collision.Collidable#getShapeCount()
+	 * @see org.dyn4j.game2d.collision.Collidable#getFixtureCount()
 	 */
 	@Override
-	public int getShapeCount() {
+	public int getFixtureCount() {
 		return this.fixtures.size();
 	}
 

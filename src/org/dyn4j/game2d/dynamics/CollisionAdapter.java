@@ -28,12 +28,12 @@ import org.dyn4j.game2d.collision.manifold.Manifold;
 import org.dyn4j.game2d.collision.narrowphase.Penetration;
 
 /**
- * Convience class for implementing the {@link CollisionListener} interface.
+ * Convenience class for implementing the {@link CollisionListener} interface.
  * <p>
  * This class can be used to implement only the methods desired instead of all
  * the methods contained in the {@link CollisionListener} interface.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class CollisionAdapter implements CollisionListener {
@@ -47,11 +47,11 @@ public class CollisionAdapter implements CollisionListener {
 	 * @see org.dyn4j.game2d.dynamics.CollisionListener#collision(org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.dynamics.Fixture, org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.dynamics.Fixture, org.dyn4j.game2d.collision.manifold.Manifold)
 	 */
 	@Override
-	public boolean collision(Body body1, Fixture fixture1, Body body2, Fixture fixture2, Manifold manifold) { return true; }
+	public boolean collision(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2, Manifold manifold) { return true; }
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.dynamics.CollisionListener#collision(org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.dynamics.Fixture, org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.dynamics.Fixture, org.dyn4j.game2d.collision.narrowphase.Penetration)
 	 */
 	@Override
-	public boolean collision(Body body1, Fixture fixture1, Body body2, Fixture fixture2, Penetration penetration) { return true; }
+	public boolean collision(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2, Penetration penetration) { return true; }
 }

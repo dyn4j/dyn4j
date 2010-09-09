@@ -72,7 +72,7 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 			area += p1.cross(p2);
 			// check for coincident vertices
 			if (p1.equals(p2)) {
-				throw new IllegalArgumentException("A polygon must not have any coincident vertices.");
+				throw new IllegalArgumentException("A polygon cannot not have coincident vertices.");
 			}
 			// check for convexity
 			if (p0.to(p1).cross(p1.to(p2)) < 0) {
@@ -99,6 +99,15 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		}
 		// perform the area weighted center to otain the center
 		this.center = Geometry.getAreaWeightedCenter(this.vertices);
+		// find the maximum radius from the center
+		double r2 = 0.0;
+		for (int i = 0; i < size; i++) {
+			double r2t = this.center.distanceSquared(vertices[i]);
+			// keep the largest
+			r2 = Math.max(r2, r2t);
+		}
+		// set the radius
+		this.radius = Math.sqrt(r2);
 	}
 	
 	/* (non-Javadoc)

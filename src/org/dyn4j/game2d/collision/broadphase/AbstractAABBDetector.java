@@ -25,6 +25,7 @@
 package org.dyn4j.game2d.collision.broadphase;
 
 import org.dyn4j.game2d.collision.Collidable;
+import org.dyn4j.game2d.collision.Fixture;
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Interval;
 import org.dyn4j.game2d.geometry.Transform;
@@ -34,7 +35,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Abstract implementation of a {@link BroadphaseDetector} providing AABB
  * (Axis Aligned Bounding Box) detection methods.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public abstract class AbstractAABBDetector implements BroadphaseDetector {
@@ -49,8 +50,8 @@ public abstract class AbstractAABBDetector implements BroadphaseDetector {
 	 */
 	@Override
 	public boolean detect(Collidable collidable1, Collidable collidable2) {
-		int size1 = collidable1.getShapeCount();
-		int size2 = collidable2.getShapeCount();
+		int size1 = collidable1.getFixtureCount();
+		int size2 = collidable2.getFixtureCount();
 		
 		// see if either collidable has zero fixtures
 		if (size1 == 0 || size2 == 0) {
@@ -61,24 +62,29 @@ public abstract class AbstractAABBDetector implements BroadphaseDetector {
 		Transform transform1 = collidable1.getTransform();
 		Transform transform2 = collidable2.getTransform();
 		
+		Fixture fixture;
 		Convex convex;
 		
 		// project all the shapes of collidable1
-		convex = collidable1.getShape(0);
+		fixture = collidable1.getFixture(0);
+		convex = fixture.getShape();
 		Interval x1 = convex.project(Sap.X_AXIS, transform1);
 		Interval y1 = convex.project(Sap.Y_AXIS, transform1);
 		for (int i = 1; i < size1; i++) {
-			convex = collidable1.getShape(i);
+			fixture = collidable1.getFixture(i);
+			convex = fixture.getShape();
 			x1.union(convex.project(Sap.X_AXIS, transform1));
 			y1.union(convex.project(Sap.Y_AXIS, transform1));
 		}
 		
 		// project all the shapes of collidable2
-		convex = collidable2.getShape(0);
+		fixture = collidable2.getFixture(0);
+		convex = fixture.getShape();
 		Interval x2 = convex.project(Sap.X_AXIS, transform2);
 		Interval y2 = convex.project(Sap.Y_AXIS, transform2);
 		for (int i = 1; i < size2; i++) {
-			convex = collidable2.getShape(i);
+			fixture = collidable2.getFixture(i);
+			convex = fixture.getShape();
 			x2.union(convex.project(Sap.X_AXIS, transform2));
 			y2.union(convex.project(Sap.Y_AXIS, transform2));
 		}

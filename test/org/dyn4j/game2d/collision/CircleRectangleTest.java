@@ -298,10 +298,17 @@ public class CircleRectangleTest extends AbstractTest {
 		TestCase.assertFalse(this.gjk.distance(rect, t2, circ, t1, s));
 		
 		// test overlap
-		t1.translate(-1.0, 0.0);
+		t1.translate(-0.9, 0.0);
 		TestCase.assertFalse(this.gjk.distance(circ, t1, rect, t2, s));
 		// try reversing the shapes
 		TestCase.assertFalse(this.gjk.distance(rect, t2, circ, t1, s));
+		
+		t1.translate(-0.1, 0.0);
+		TestCase.assertTrue(this.gjk.distance(circ, t1, rect, t2, s));
+		TestCase.assertEquals(0.000, s.getDistance(), 1e-3);
+		// try reversing the shapes
+		TestCase.assertTrue(this.gjk.distance(rect, t2, circ, t1, s));
+		TestCase.assertEquals(0.000, s.getDistance(), 1e-3);
 		
 		// test AABB overlap
 		t2.translate(0.0, 1.4);

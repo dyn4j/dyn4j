@@ -26,7 +26,7 @@ package org.dyn4j.game2d.testbed.test;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
-import org.dyn4j.game2d.dynamics.Fixture;
+import org.dyn4j.game2d.dynamics.BodyFixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Geometry;
@@ -43,7 +43,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests a floor/terrain created by a set of line segments.
  * @author William Bittle
- * @version 1.1.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Terrain extends Test {
@@ -101,11 +101,11 @@ public class Terrain extends Test {
 		Segment s4 = new Segment(new Vector2(-2.0, 3.0), new Vector2(-4.0, 0.0));
 		Segment s5 = new Segment(new Vector2(-4.0, 0.0), new Vector2(-6.0, 1.0));
 		Entity terrain = new Entity();
-		terrain.addFixture(new Fixture(s1));
-		terrain.addFixture(new Fixture(s2));
-		terrain.addFixture(new Fixture(s3));
-		terrain.addFixture(new Fixture(s4));
-		terrain.addFixture(new Fixture(s5));
+		terrain.addFixture(new BodyFixture(s1));
+		terrain.addFixture(new BodyFixture(s2));
+		terrain.addFixture(new BodyFixture(s3));
+		terrain.addFixture(new BodyFixture(s4));
+		terrain.addFixture(new BodyFixture(s5));
 		terrain.setMass(Mass.Type.INFINITE);
 		terrain.translate(0.0, -2.0);
 		this.world.add(terrain);
@@ -116,7 +116,7 @@ public class Terrain extends Test {
 				new Vector2(-0.5, -0.5), 
 				new Vector2(0.5, -0.5));
 		Entity triangle = new Entity();
-		triangle.addFixture(new Fixture(triShape));
+		triangle.addFixture(new BodyFixture(triShape));
 		triangle.setMass();
 		triangle.translate(0.0, 2.0);
 		// test having a velocity
@@ -126,7 +126,7 @@ public class Terrain extends Test {
 		// create a circle
 		Circle cirShape = new Circle(0.5);
 		Entity circle = new Entity();
-		circle.addFixture(new Fixture(cirShape));
+		circle.addFixture(new BodyFixture(cirShape));
 		circle.setMass();
 		circle.translate(2.0, 2.0);
 		// test adding some force
@@ -138,7 +138,7 @@ public class Terrain extends Test {
 		// try a thin rectangle
 		Rectangle rectShape = new Rectangle(2.0, 0.1);
 		Entity rectangle = new Entity();
-		rectangle.addFixture(new Fixture(rectShape));
+		rectangle.addFixture(new BodyFixture(rectShape));
 		rectangle.setMass();
 		rectangle.translate(0.0, 3.0);
 		rectangle.rotate(Math.toRadians(10.0));
@@ -147,7 +147,7 @@ public class Terrain extends Test {
 		// try a segment (shouldn't work)
 		Segment segShape = new Segment(new Vector2(0.5, 0.0), new Vector2(-0.5, 0.0));
 		Entity segment = new Entity();
-		segment.addFixture(new Fixture(segShape));
+		segment.addFixture(new BodyFixture(segShape));
 		segment.setMass();
 		segment.translate(-5.0, 4.0);
 		this.world.add(segment);
@@ -155,7 +155,7 @@ public class Terrain extends Test {
 		// try a polygon with lots of vertices
 		Polygon polyShape = Geometry.createUnitCirclePolygon(10, 1.0);
 		Entity polygon = new Entity();
-		polygon.addFixture(new Fixture(polyShape));
+		polygon.addFixture(new BodyFixture(polyShape));
 		polygon.setMass();
 		polygon.translate(-2.0, 5.0);
 		// set the angular velocity

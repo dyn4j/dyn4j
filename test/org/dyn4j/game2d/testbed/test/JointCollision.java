@@ -26,7 +26,7 @@ package org.dyn4j.game2d.testbed.test;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
-import org.dyn4j.game2d.dynamics.Fixture;
+import org.dyn4j.game2d.dynamics.BodyFixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.dynamics.joint.DistanceJoint;
 import org.dyn4j.game2d.geometry.Geometry;
@@ -40,7 +40,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests the distance joint in a Newton's Cradle configuration.
  * @author William Bittle
- * @version 1.1.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class JointCollision extends Test {
@@ -92,7 +92,7 @@ public class JointCollision extends Test {
 		// create the floor
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
-		floor.addFixture(new Fixture(floorRect));
+		floor.addFixture(new BodyFixture(floorRect));
 		floor.setMass(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
@@ -117,12 +117,12 @@ public class JointCollision extends Test {
 		Rectangle r = new Rectangle(0.5, 1.0);
 		
 		Entity obj1 = new Entity();
-		obj1.addFixture(new Fixture(r));
+		obj1.addFixture(new BodyFixture(r));
 		obj1.setMass();
 		obj1.translate(2.0, 3.6);
 		
 		Entity obj2 = new Entity();
-		obj2.addFixture(new Fixture(r));
+		obj2.addFixture(new BodyFixture(r));
 		obj2.setMass();
 		obj2.translate(2.0, 2.4);
 		
@@ -141,12 +141,12 @@ public class JointCollision extends Test {
 		this.world.add(j1);
 		
 		Entity obj3 = new Entity();
-		obj3.addFixture(new Fixture(r));
+		obj3.addFixture(new BodyFixture(r));
 		obj3.setMass();
 		obj3.translate(-2.0, 3.6);
 		
 		Entity obj4 = new Entity();
-		obj4.addFixture(new Fixture(r));
+		obj4.addFixture(new BodyFixture(r));
 		obj4.setMass();
 		obj4.translate(-2.0, 2.4);
 		

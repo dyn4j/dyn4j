@@ -72,7 +72,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * A {@link Body} that is a sensor will not be handled in the collision
  * resolution but is handled in collision detection.
  * @author William Bittle
- * @version 1.2.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Body implements Swept, Collidable, Transformable {
@@ -106,8 +106,11 @@ public class Body implements Swept, Collidable, Transformable {
 	/** The current {@link Transform} */
 	protected Transform transform;
 
-	/** The {@link Fixture}s list */
-	protected List<Fixture> fixtures;
+	/** The {@link BodyFixture}s list */
+	protected List<BodyFixture> fixtures;
+	
+	/** The the rotation disk radius */
+	protected double radius;
 	
 	/** The user data associated to this {@link Body} */
 	protected Object userData;
@@ -156,7 +159,8 @@ public class Body implements Swept, Collidable, Transformable {
 	 */
 	public Body() {
 		// the majority of bodies will contain one fixture/shape
-		this.fixtures = new ArrayList<Fixture>(1);
+		this.fixtures = new ArrayList<BodyFixture>(1);
+		this.radius = 0.0;
 		this.mass = new Mass();
 		this.id = UUID.randomUUID().toString();
 		this.transform0 = new Transform();
@@ -192,7 +196,8 @@ public class Body implements Swept, Collidable, Transformable {
 		for (int i = 0; i < size; i++) {
 			sb.append(this.fixtures.get(i));
 		}
-		sb.append("]|TRANSFORM_0[").append(this.transform0).append("]")
+		sb.append("]|").append(this.radius)
+		.append("|TRANSFORM_0[").append(this.transform0).append("]")
 		.append("|TRANSFORM[").append(this.transform).append("]")
 		.append("|").append(this.mass)
 		.append("|").append(this.velocity)
@@ -218,16 +223,16 @@ public class Body implements Swept, Collidable, Transformable {
 	}
 	
 	/**
-	 * Creates a {@link Fixture} for the specified {@link Convex} {@link Shape},
+	 * Creates a {@link BodyFixture} for the specified {@link Convex} {@link Shape},
 	 * adds it to the {@link Body}, and returns it for configuration.
 	 * @param convex the {@link Convex} {@link Shape} to add to the {@link Body}
-	 * @return {@link Fixture} the fixture created using the given {@link Shape} and added to the {@link Body}
+	 * @return {@link BodyFixture} the fixture created using the given {@link Shape} and added to the {@link Body}
 	 */
-	public Fixture addFixture(Convex convex) {
+	public BodyFixture addFixture(Convex convex) {
 		// make sure the convex shape is not null
 		if (convex == null) throw new NullPointerException("The convex shape cannot be null.");
 		// create the fixture
-		Fixture fixture = new Fixture(convex);
+		BodyFixture fixture = new BodyFixture(convex);
 		// add the fixture to the body
 		this.fixtures.add(fixture);
 		// return the fixture so the caller can configure it
@@ -235,15 +240,15 @@ public class Body implements Swept, Collidable, Transformable {
 	}
 	
 	/**
-	 * Adds a {@link Fixture} to this {@link Body}.
+	 * Adds a {@link BodyFixture} to this {@link Body}.
 	 * <p>
 	 * After adding or removing fixtures make sure to call the {@link #setMass()}
 	 * or {@link #setMass(Mass.Type)} method to compute the new total
 	 * {@link Mass}.
-	 * @param fixture the {@link Fixture}
+	 * @param fixture the {@link BodyFixture}
 	 * @return {@link Body} this body
 	 */
-	public Body addFixture(Fixture fixture) {
+	public Body addFixture(BodyFixture fixture) {
 		// make sure neither is null
 		if (fixture == null) throw new NullPointerException("The fixture cannot be null.");
 		// add the shape and mass to the respective lists
@@ -253,15 +258,15 @@ public class Body implements Swept, Collidable, Transformable {
 	}
 
 	/**
-	 * Removes the given {@link Fixture} from the {@link Body}.
+	 * Removes the given {@link BodyFixture} from the {@link Body}.
 	 * <p>
 	 * After adding or removing fixtures make sure to call the {@link #setMass()}
 	 * or {@link #setMass(Mass.Type)} method to compute the new total
 	 * {@link Mass}.
-	 * @param fixture the {@link Fixture}
-	 * @return boolean true if the {@link Fixture} was removed from this {@link Body}
+	 * @param fixture the {@link BodyFixture}
+	 * @return boolean true if the {@link BodyFixture} was removed from this {@link Body}
 	 */
-	public boolean removeFixture(Fixture fixture) {
+	public boolean removeFixture(BodyFixture fixture) {
 		// make sure the passed in fixture is not null
 		if (fixture == null) return false;
 		// get the number of fixtures
@@ -274,14 +279,14 @@ public class Body implements Swept, Collidable, Transformable {
 	}
 	
 	/**
-	 * Removes the {@link Fixture} at the given index.
+	 * Removes the {@link BodyFixture} at the given index.
 	 * <p>
 	 * Returns null if the index is less than zero or if there
-	 * are zero {@link Fixture}s on this body.
+	 * are zero {@link BodyFixture}s on this body.
 	 * @param index the index
-	 * @return {@link Fixture} the fixture removed
+	 * @return {@link BodyFixture} the fixture removed
 	 */
-	public Fixture removeFixture(int index) {
+	public BodyFixture removeFixture(int index) {
 		// check the index
 		if (index < 0) return null;
 		// get the number of fixtures
@@ -302,8 +307,8 @@ public class Body implements Swept, Collidable, Transformable {
 	 * given the masses of the fixtures.
 	 * @return {@link Body} this body
 	 * @see #setMass(Mass.Type)
-	 * @see #addFixture(Fixture)
-	 * @see #removeFixture(Fixture)
+	 * @see #addFixture(BodyFixture)
+	 * @see #removeFixture(BodyFixture)
 	 * @see #removeFixture(int)
 	 */
 	public Body setMass() {
@@ -324,8 +329,8 @@ public class Body implements Swept, Collidable, Transformable {
 	 * mass is set to Mass.UNDEFINED.
 	 * @param type the {@link Mass.Type}; can be null
 	 * @return {@link Body} this body
-	 * @see #addFixture(Fixture)
-	 * @see #removeFixture(Fixture)
+	 * @see #addFixture(BodyFixture)
+	 * @see #removeFixture(BodyFixture)
 	 * @see #removeFixture(int)
 	 */
 	public Body setMass(Mass.Type type) {
@@ -359,6 +364,8 @@ public class Body implements Swept, Collidable, Transformable {
 				this.mass.setType(type);
 			}
 		}
+		// compute the rotation disc radius
+		this.setRotationDiscRadius();
 		// return this body to facilitate chaining
 		return this;
 	}
@@ -376,8 +383,43 @@ public class Body implements Swept, Collidable, Transformable {
 		if (mass == null) throw new NullPointerException("The mass cannot be null.");
 		// set the mass
 		this.mass = mass;
+		// compute the rotation disc radius
+		this.setRotationDiscRadius();
 		// return this body to facilitate chaining
 		return this;
+	}
+	
+	/**
+	 * Computes the rotation disc for this {@link Body}.
+	 * <p>
+	 * This method requires that the center of mass be
+	 * computed first.
+	 * @since 2.0.0
+	 */
+	protected void setRotationDiscRadius() {
+		double r = 0.0;
+		// get the number of fixtures
+		int size = this.fixtures.size();
+		// check for zero fixtures
+		if (size == 0) return;
+		// get the body's center of mass
+		Vector2 c = this.mass.getCenter();
+		// loop over the fixtures
+		for (int i = 0; i < size; i++) {
+			// get the fixture and convex
+			BodyFixture fixture = this.fixtures.get(i);
+			Convex convex = fixture.getShape();
+			// get the convex's center and radius
+			Vector2 cc = convex.getCenter();
+			double cr = convex.getRadius();
+			// get the distance from the convex's center
+			// to the center of mass
+			double d = c.distance(cc);
+			// keep the maximum
+			r = Math.max(r, d + cr);
+		}
+		// return the max
+		this.radius = r;
 	}
 	
 	/**
@@ -864,20 +906,18 @@ public class Body implements Swept, Collidable, Transformable {
 	public void translate(Vector2 vector) {
 		this.transform.translate(vector);
 	}
-	
+
 	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.collision.Collidable#getShape(int)
+	 * @see org.dyn4j.game2d.collision.Collidable#getFixture(int)
 	 */
-	@Override
-	public Convex getShape(int index) {
-		return this.fixtures.get(index).getShape();
+	public BodyFixture getFixture(int index) {
+		return this.fixtures.get(index);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.collision.Collidable#getShapeCount()
+	 * @see org.dyn4j.game2d.collision.Collidable#getFixtureCount()
 	 */
-	@Override
-	public int getShapeCount() {
+	public int getFixtureCount() {
 		return this.fixtures.size();
 	}
 	
@@ -904,6 +944,13 @@ public class Body implements Swept, Collidable, Transformable {
 		return this.transform;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.collision.continuous.Swept#getRotationDiscRadius()
+	 */
+	public double getRotationDiscRadius() {
+		return this.radius;
+	}
+	
 	/**
 	 * Sets this {@link Body}'s transform.
 	 * @param transform the transform
@@ -913,27 +960,6 @@ public class Body implements Swept, Collidable, Transformable {
 		if (transform == null) throw new NullPointerException("A body cannot have a null transform.");
 		this.transform.set(transform);
 		this.transform0.set(transform);
-	}
-	
-	/**
-	 * Returns the {@link Fixture} at the given index.
-	 * @param index the index
-	 * @return {@link Fixture}
-	 */
-	public Fixture getFixture(int index) {
-		return this.fixtures.get(index);
-	}
-	
-	/**
-	 * Returns the number of {@link Fixture}s on this {@link Body}.
-	 * <p>
-	 * This method returns the same value as {@link #getShapeCount()}
-	 * since there is a one-to-one relationship between a shape and
-	 * a fixture.
-	 * @return int
-	 */
-	public int getFixtureCount() {
-		return this.fixtures.size();
 	}
 	
 	/**

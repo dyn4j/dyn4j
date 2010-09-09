@@ -41,7 +41,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * is considered to be inside, if they are not overlapping, the {@link Collidable} is considered
  * outside.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class RectangularBounds extends AbstractBounds implements Bounds, Transformable {
@@ -80,22 +80,25 @@ public class RectangularBounds extends AbstractBounds implements Bounds, Transfo
 	public boolean isOutside(Collidable collidable) {
 		// project the collidable on the x and y axes
 		Transform transform = collidable.getTransform();
-		int size = collidable.getShapeCount();
+		int size = collidable.getFixtureCount();
 		
 		// check for zero fixtures
 		if (size == 0) {
 			return true;
 		}
 		
+		Fixture fixture;
 		Convex convex;
 		
 		// perform the projection the first time to create an interval
-		convex = collidable.getShape(0);
+		fixture = collidable.getFixture(0);
+		convex = fixture.getShape();
 		Interval x = convex.project(RectangularBounds.X_AXIS, transform);
 		Interval y = convex.project(RectangularBounds.Y_AXIS, transform);
 		// loop through the rest, union the resulting intervals
 		for (int i = 1; i < size; i++) {
-			convex = collidable.getShape(i);
+			fixture = collidable.getFixture(i);
+			convex = fixture.getShape();
 			x.union(convex.project(RectangularBounds.X_AXIS, transform));
 			y.union(convex.project(RectangularBounds.Y_AXIS, transform));
 		}

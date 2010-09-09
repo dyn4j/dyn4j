@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.dyn4j.game2d.collision.Collidable;
+import org.dyn4j.game2d.collision.Fixture;
 import org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Interval;
@@ -77,7 +78,7 @@ import org.dyn4j.game2d.geometry.Transform;
  * However, allowing this causes more work for the {@link NarrowphaseDetector}s whose
  * algorithms are more complex.  These situations should be avoided for maximum performance.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Sap extends AbstractAABBDetector implements BroadphaseDetector {
@@ -134,20 +135,23 @@ public class Sap extends AbstractAABBDetector implements BroadphaseDetector {
 		for (int i = 0; i < size; i++) {
 			E collidable = collidables.get(i);
 			Transform transform = collidable.getTransform();
-			int sSize = collidable.getShapeCount();
+			int fSize = collidable.getFixtureCount();
 			
+			Fixture fixture;
 			Convex convex;
 			
 			// check the size
-			if (sSize > 0) {
+			if (fSize > 0) {
 				// prime the intervals
-				convex = collidable.getShape(0);
+				fixture = collidable.getFixture(0);
+				convex = fixture.getShape();
 				Interval x = convex.project(AbstractAABBDetector.X_AXIS, transform);
 				Interval y = convex.project(AbstractAABBDetector.Y_AXIS, transform);
 				
 				// loop over the remaining shapes
-				for (int j = 1; j < sSize; j++) {
-					convex = collidable.getShape(j);
+				for (int j = 1; j < fSize; j++) {
+					fixture = collidable.getFixture(j);
+					convex = fixture.getShape();
 					x.union(convex.project(AbstractAABBDetector.X_AXIS, transform));
 					y.union(convex.project(AbstractAABBDetector.Y_AXIS, transform));
 				}

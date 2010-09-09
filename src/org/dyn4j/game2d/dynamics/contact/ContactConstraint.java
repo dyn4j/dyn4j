@@ -30,25 +30,25 @@ import org.dyn4j.game2d.collision.manifold.Manifold;
 import org.dyn4j.game2d.collision.manifold.ManifoldPoint;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.Constraint;
-import org.dyn4j.game2d.dynamics.Fixture;
+import org.dyn4j.game2d.dynamics.BodyFixture;
 import org.dyn4j.game2d.geometry.Matrix22;
 import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Represents a {@link Contact} constraint for each {@link Body} pair.  
  * @author William Bittle
- * @version 1.1.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class ContactConstraint extends Constraint {
 	/** The unique contact id */
 	protected ContactConstraintId id;
 	
-	/** The first {@link Body}'s {@link Fixture} */
-	protected Fixture fixture1;
+	/** The first {@link Body}'s {@link BodyFixture} */
+	protected BodyFixture fixture1;
 	
-	/** The second {@link Body}'s {@link Fixture} */
-	protected Fixture fixture2;
+	/** The second {@link Body}'s {@link BodyFixture} */
+	protected BodyFixture fixture2;
 	
 	/** The {@link Contact}s */
 	protected Contact[] contacts;
@@ -77,14 +77,14 @@ public class ContactConstraint extends Constraint {
 	/**
 	 * Full constructor.
 	 * @param body1 the first {@link Body}
-	 * @param fixture1 the first {@link Body}'s {@link Fixture}
+	 * @param fixture1 the first {@link Body}'s {@link BodyFixture}
 	 * @param body2 the second {@link Body}
-	 * @param fixture2 the second {@link Body}'s {@link Fixture}
+	 * @param fixture2 the second {@link Body}'s {@link BodyFixture}
 	 * @param manifold the contact {@link Manifold}
 	 * @param friction the contact's coefficient of friction
 	 * @param restitution the contact's coefficient of restitution
 	 */
-	public ContactConstraint(Body body1, Fixture fixture1, Body body2, Fixture fixture2,
+	public ContactConstraint(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2,
 			Manifold manifold, double friction, double restitution) {
 		super(body1, body2);
 		// set the involved convex shapes
@@ -189,10 +189,10 @@ public class ContactConstraint extends Constraint {
 	}
 	
 	/**
-	 * Returns the first {@link Body}'s {@link Fixture}.
-	 * @return {@link Fixture} the first {@link Body}'s {@link Fixture}
+	 * Returns the first {@link Body}'s {@link BodyFixture}.
+	 * @return {@link BodyFixture} the first {@link Body}'s {@link BodyFixture}
 	 */
-	public Fixture getFixture1() {
+	public BodyFixture getFixture1() {
 		return this.fixture1;
 	}
 	
@@ -205,10 +205,10 @@ public class ContactConstraint extends Constraint {
 	}
 	
 	/**
-	 * Returns the second {@link Body}'s {@link Fixture}.
-	 * @return {@link Fixture} the second {@link Body}'s {@link Fixture}
+	 * Returns the second {@link Body}'s {@link BodyFixture}.
+	 * @return {@link BodyFixture} the second {@link Body}'s {@link BodyFixture}
 	 */
-	public Fixture getFixture2() {
+	public BodyFixture getFixture2() {
 		return this.fixture2;
 	}
 	

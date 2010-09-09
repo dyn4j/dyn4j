@@ -47,7 +47,7 @@ import org.junit.Test;
 /**
  * Class to test the {@link Body} class.
  * @author William Bittle
- * @version 1.2.0
+ * @version 2.0.0
  * @since 1.0.2
  */
 public class BodyTest {
@@ -86,7 +86,7 @@ public class BodyTest {
 	@Test(expected = NullPointerException.class)
 	public void addNullFixture() {
 		Body b = new Body();
-		b.addFixture((Fixture)null);
+		b.addFixture((BodyFixture)null);
 	}
 	
 	/**
@@ -95,7 +95,7 @@ public class BodyTest {
 	@Test
 	public void removeFixtureFound() {
 		Body b = new Body();
-		Fixture f = b.addFixture(Geometry.createCircle(1.0));
+		BodyFixture f = b.addFixture(Geometry.createCircle(1.0));
 		
 		// test removing the fixture
 		boolean success = b.removeFixture(f);
@@ -103,7 +103,7 @@ public class BodyTest {
 		TestCase.assertTrue(success);
 		
 		b.addFixture(f);
-		Fixture f2 = b.addFixture(Geometry.createSquare(0.5));
+		BodyFixture f2 = b.addFixture(Geometry.createSquare(0.5));
 		success = b.removeFixture(f);
 		TestCase.assertEquals(1, b.fixtures.size());
 		TestCase.assertTrue(f2 == b.fixtures.get(0));
@@ -130,7 +130,7 @@ public class BodyTest {
 		TestCase.assertFalse(success);
 		
 		// test index with empty fixture list
-		Fixture f = b.removeFixture(0);
+		BodyFixture f = b.removeFixture(0);
 		TestCase.assertNull(f);
 		
 		// test negative index
@@ -143,7 +143,7 @@ public class BodyTest {
 		
 		// test not found fixture
 		b.addFixture(Geometry.createCircle(1.0));
-		success = b.removeFixture(new Fixture(Geometry.createRightTriangle(0.5, 0.3)));
+		success = b.removeFixture(new BodyFixture(Geometry.createRightTriangle(0.5, 0.3)));
 		TestCase.assertFalse(success);
 		
 		// test index larger than size
@@ -171,7 +171,7 @@ public class BodyTest {
 		
 		// test setting with one fixture
 		// it should not be infinite
-		Fixture f1 = b.addFixture(Geometry.createUnitCirclePolygon(5, 0.5));
+		BodyFixture f1 = b.addFixture(Geometry.createUnitCirclePolygon(5, 0.5));
 		b.setMass();
 		TestCase.assertNotNull(b.mass);
 		TestCase.assertFalse(b.mass.isInfinite());
@@ -179,7 +179,7 @@ public class BodyTest {
 		// test setting with multiple fixtures
 		// it should not be infinite and should not be
 		// equal to either shapes mass
-		Fixture f2 = b.addFixture(Geometry.createIsoscelesTriangle(1.0, 1.0));
+		BodyFixture f2 = b.addFixture(Geometry.createIsoscelesTriangle(1.0, 1.0));
 		b.setMass();
 		TestCase.assertNotNull(b.mass);
 		TestCase.assertFalse(b.mass.isInfinite());
@@ -608,9 +608,9 @@ public class BodyTest {
 		Convex c2 = Geometry.createEquilateralTriangle(0.5);
 		
 		Body b1 = new Body();
-		Fixture f1 = b1.addFixture(c1);
+		BodyFixture f1 = b1.addFixture(c1);
 		Body b2 = new Body();
-		Fixture f2 = b2.addFixture(c2);
+		BodyFixture f2 = b2.addFixture(c2);
 		
 		List<Body> bodies = b1.getInContactBodies(false);
 		TestCase.assertNotNull(bodies);
@@ -642,7 +642,7 @@ public class BodyTest {
 		b1.contacts.clear();
 		b2.contacts.clear();
 		
-		f1.sensor = true;
+		f1.setSensor(true);
 		cc = new ContactConstraint(b1, f1, b2, f2, m, 0.4, 0.2);
 		ce1 = new ContactEdge(b2, cc);
 		ce2 = new ContactEdge(b1, cc);
@@ -668,9 +668,9 @@ public class BodyTest {
 		Convex c2 = Geometry.createEquilateralTriangle(0.5);
 		
 		Body b1 = new Body();
-		Fixture f1 = b1.addFixture(c1);
+		BodyFixture f1 = b1.addFixture(c1);
 		Body b2 = new Body();
-		Fixture f2 = b2.addFixture(c2);
+		BodyFixture f2 = b2.addFixture(c2);
 		
 		List<ContactPoint> contacts = b1.getContacts(false);
 		TestCase.assertNotNull(contacts);
@@ -701,7 +701,7 @@ public class BodyTest {
 		b1.contacts.clear();
 		b2.contacts.clear();
 		
-		f1.sensor = true;
+		f1.setSensor(true);
 		cc = new ContactConstraint(b1, f1, b2, f2, m, 0.4, 0.2);
 		ce1 = new ContactEdge(b2, cc);
 		ce2 = new ContactEdge(b1, cc);
@@ -715,5 +715,24 @@ public class BodyTest {
 		contacts = b1.getContacts(true);
 		TestCase.assertNotNull(contacts);
 		TestCase.assertFalse(contacts.isEmpty());
+	}
+	
+	/**
+	 * Tests the setRotationDiscRadius method.
+	 * @since 2.0.0
+	 */
+	@Test
+	public void setRotationDiscRadius() {
+		Body b = new Body();
+		BodyFixture f = b.addFixture(Geometry.createCircle(2.0));
+		f.getShape().translate(-2.0, 1.0);
+		b.addFixture(Geometry.createSquare(1.0));
+		f = b.addFixture(Geometry.createUnitCirclePolygon(5, 1.0));
+		f.getShape().translate(1.0, -3.0);
+		b.setMass();
+		
+		double rdr = b.getRotationDiscRadius();
+		
+		TestCase.assertEquals(5.129, rdr, 1.0e-3);
 	}
 }
