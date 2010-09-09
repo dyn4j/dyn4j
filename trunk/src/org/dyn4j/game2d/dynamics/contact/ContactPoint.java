@@ -25,13 +25,13 @@
 package org.dyn4j.game2d.dynamics.contact;
 
 import org.dyn4j.game2d.dynamics.Body;
-import org.dyn4j.game2d.dynamics.Fixture;
+import org.dyn4j.game2d.dynamics.BodyFixture;
 import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Represents a contact point and used to report events via the {@link ContactListener}.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class ContactPoint {
@@ -41,11 +41,11 @@ public class ContactPoint {
 	/** The second {@link Body} in contact */
 	protected Body body2;
 	
-	/** The first {@link Body}'s {@link Fixture} */
-	protected Fixture fixture1;
+	/** The first {@link Body}'s {@link BodyFixture} */
+	protected BodyFixture fixture1;
 	
-	/** The second {@link Body}'s {@link Fixture} */
-	protected Fixture fixture2;
+	/** The second {@link Body}'s {@link BodyFixture} */
+	protected BodyFixture fixture2;
 	
 	/** Whether this contact point is enabled or not */
 	protected boolean enabled;
@@ -65,15 +65,15 @@ public class ContactPoint {
 	/**
 	 * Full constructor.
 	 * @param body1 the first {@link Body} in contact
-	 * @param fixture1 the first {@link Body}'s {@link Fixture}
+	 * @param fixture1 the first {@link Body}'s {@link BodyFixture}
 	 * @param body2 the second {@link Body} in contact
-	 * @param fixture2 the second {@link Body}'s {@link Fixture}
+	 * @param fixture2 the second {@link Body}'s {@link BodyFixture}
 	 * @param enabled true if this contact point is enabled
 	 * @param point the world space contact point
 	 * @param normal the world space contact normal
 	 * @param depth the penetration depth
 	 */
-	public ContactPoint(Body body1, Fixture fixture1, Body body2, Fixture fixture2,
+	public ContactPoint(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2,
 			boolean enabled, Vector2 point, Vector2 normal, double depth) {
 		this.body1 = body1;
 		this.fixture1 = fixture1;
@@ -169,18 +169,18 @@ public class ContactPoint {
 	}
 	
 	/**
-	 * Returns the first {@link Body}'s {@link Fixture}.
-	 * @return {@link Fixture}
+	 * Returns the first {@link Body}'s {@link BodyFixture}.
+	 * @return {@link BodyFixture}
 	 */
-	public Fixture getFixture1() {
+	public BodyFixture getFixture1() {
 		return fixture1;
 	}
 	
 	/**
-	 * Returns the second {@link Body}'s {@link Fixture}.
-	 * @return {@link Fixture}
+	 * Returns the second {@link Body}'s {@link BodyFixture}.
+	 * @return {@link BodyFixture}
 	 */
-	public Fixture getFixture2() {
+	public BodyFixture getFixture2() {
 		return fixture2;
 	}
 }

@@ -44,7 +44,7 @@ import org.junit.Test;
 /**
  * Used to test the {@link ContactManager} class.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.2
  */
 public class ContactManagerTest {
@@ -118,16 +118,16 @@ public class ContactManagerTest {
 		Convex c4 = Geometry.createSquare(1.2);
 		
 		Body b1 = new Body();
-		Fixture f1 = b1.addFixture(c1);
+		BodyFixture f1 = b1.addFixture(c1);
 		
 		Body b2 = new Body();
-		Fixture f2 = b2.addFixture(c2);
+		BodyFixture f2 = b2.addFixture(c2);
 		
 		Body b3 = new Body();
-		Fixture f3 = b3.addFixture(c3);
+		BodyFixture f3 = b3.addFixture(c3);
 		
 		Body b4 = new Body();
-		Fixture f4 = b4.addFixture(c4);
+		BodyFixture f4 = b4.addFixture(c4);
 		f4.setSensor(true);
 		
 		// get contacts

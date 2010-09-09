@@ -36,9 +36,6 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 	/** The circle {@link Shape.Type} */
 	public static final Shape.Type TYPE = new Shape.Type("Circle");
 	
-	/** The radius of the {@link Circle} */
-	protected double radius;
-
 	/**
 	 * Full constructor.
 	 * @param radius the radius
@@ -68,14 +65,6 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 		return sb.toString();
 	}
 	
-	/**
-	 * Returns the radius.
-	 * @return double
-	 */
-	public double getRadius() {
-		return this.radius;
-	}
-
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.geometry.Shape#contains(org.dyn4j.game2d.geometry.Vector, org.dyn4j.game2d.geometry.Transform)
 	 */

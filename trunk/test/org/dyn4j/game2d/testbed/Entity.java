@@ -33,6 +33,7 @@ import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 
+import org.dyn4j.game2d.collision.Fixture;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Convex;
@@ -45,7 +46,7 @@ import org.dyn4j.game2d.geometry.Vector2;
 /**
  * Represents a game entity.
  * @author William Bittle
- * @version 1.1.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Entity extends Body {
@@ -142,10 +143,11 @@ public class Entity extends Body {
 		// get the world center
 		Vector2 wCenter = tx.getTransformed(center);
 		
-		int size = this.getShapeCount();
+		int size = this.getFixtureCount();
 		// draw the shapes
 		for (int i = 0; i < size; i++) {
-			Convex c = this.getShape(i);
+			Fixture f = this.getFixture(i);
+			Convex c = f.getShape();
 			// check if we should render fill color
 			if (draw.drawFill()) {
 				// set the color

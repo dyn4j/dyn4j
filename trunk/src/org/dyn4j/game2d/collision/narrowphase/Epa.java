@@ -62,16 +62,16 @@ import org.dyn4j.game2d.geometry.Vector2;
  */
 public class Epa implements MinkowskiPenetrationSolver {
 	/** The default {@link Epa} maximum iterations */
-	public static final int DEFAULT_EPA_MAX_ITERATIONS = 100;
+	public static final int DEFAULT_MAX_ITERATIONS = 100;
 
 	/** The default {@link Epa} distance epsilon in meters; near 1E-8 */
-	public static final double DEFAULT_EPA_DISTANCE_EPSILON = Math.sqrt(Epsilon.E);
+	public static final double DEFAULT_DISTANCE_EPSILON = Math.sqrt(Epsilon.E);
 	
 	/** The maximum number of {@link Epa} iterations */
-	protected int epaMaxIterations = Epa.DEFAULT_EPA_MAX_ITERATIONS;
+	protected int maxIterations = Epa.DEFAULT_MAX_ITERATIONS;
 
 	/** The {@link Epa} distance epsilon in meters */
-	protected double epaDistanceEpsilon = Epa.DEFAULT_EPA_DISTANCE_EPSILON;
+	protected double distanceEpsilon = Epa.DEFAULT_DISTANCE_EPSILON;
 	
 	/**
 	 * Represents an {@link Edge} of the simplex.
@@ -124,7 +124,7 @@ public class Epa implements MinkowskiPenetrationSolver {
 		// the current closest edge
 		Edge edge = null;
 		// start the loop
-		for (int i = 0; i < this.epaMaxIterations; i++) {
+		for (int i = 0; i < this.maxIterations; i++) {
 			// get the closest edge to the origin
 			edge = this.findClosestEdge(simplex, winding);
 			// get a new support point in the direction of the edge normal
@@ -132,7 +132,7 @@ public class Epa implements MinkowskiPenetrationSolver {
 			
 			// see if the new point is significantly past the edge
 			double projection = point.dot(edge.n);
-			if ((projection - edge.distance) < this.epaDistanceEpsilon) {
+			if ((projection - edge.distance) < this.distanceEpsilon) {
 				// then the new point we just made is not far enough
 				// in the direction of n so we can stop now and
 				// return n as the direction and the projection
@@ -237,40 +237,40 @@ public class Epa implements MinkowskiPenetrationSolver {
 	/**
 	 * Returns the maximum number of EPA iterations.
 	 * @return int the maximum number of EPA iterations
-	 * @see #setEpaMaxIterations(int)
+	 * @see #setMaxIterations(int)
 	 */
-	public int getEpaMaxIterations() {
-		return epaMaxIterations;
+	public int getMaxIterations() {
+		return maxIterations;
 	}
 
 	/**
 	 * Sets the maximum number of EPA iterations.
 	 * <p>
 	 * Valid values are in the range [5, &infin;].
-	 * @param epaMaxIterations the maximum number of EPA iterations
+	 * @param maxIterations the maximum number of EPA iterations
 	 */
-	public void setEpaMaxIterations(int epaMaxIterations) {
-		if (epaMaxIterations < 5) throw new IllegalArgumentException("The EPA penetration depth algorithm requires 5 or more iterations.");
-		this.epaMaxIterations = epaMaxIterations;
+	public void setMaxIterations(int maxIterations) {
+		if (maxIterations < 5) throw new IllegalArgumentException("The EPA penetration depth algorithm requires 5 or more iterations.");
+		this.maxIterations = maxIterations;
 	}
 
 	/**
 	 * Returns the EPA distance epsilon.
 	 * @return double the EPA distance epsilon
-	 * @see #setEpaDistanceEpsilon(double)
+	 * @see #setDistanceEpsilon(double)
 	 */
-	public double getEpaDistanceEpsilon() {
-		return epaDistanceEpsilon;
+	public double getDistanceEpsilon() {
+		return distanceEpsilon;
 	}
 
 	/**
 	 * The minimum distance between two iterations of the EPA algorithm.
 	 * <p>
 	 * Valid values are in the range (0, &infin;].
-	 * @param epaDistanceEpsilon the EPA distance epsilon
+	 * @param distanceEpsilon the EPA distance epsilon
 	 */
-	public void setEpaDistanceEpsilon(double epaDistanceEpsilon) {
-		if (epaDistanceEpsilon <= 0) throw new IllegalArgumentException("The EPA distance epsilon must be larger than zero.");
-		this.epaDistanceEpsilon = epaDistanceEpsilon;
+	public void setDistanceEpsilon(double distanceEpsilon) {
+		if (distanceEpsilon <= 0) throw new IllegalArgumentException("The EPA distance epsilon must be larger than zero.");
+		this.distanceEpsilon = distanceEpsilon;
 	}
 }

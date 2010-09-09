@@ -29,7 +29,7 @@ import java.awt.Color;
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.Body;
-import org.dyn4j.game2d.dynamics.Fixture;
+import org.dyn4j.game2d.dynamics.BodyFixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.dynamics.contact.ContactPoint;
 import org.dyn4j.game2d.dynamics.joint.WeldJoint;
@@ -47,7 +47,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests the destruction of a joint and a body.
  * @author William Bittle
- * @version 1.1.0
+ * @version 2.0.0
  * @since 1.0.3
  */
 public class Destructible extends Test {
@@ -211,7 +211,7 @@ public class Destructible extends Test {
 		// create the floor
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
-		floor.addFixture(new Fixture(floorRect));
+		floor.addFixture(new BodyFixture(floorRect));
 		floor.setMass(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
@@ -221,13 +221,13 @@ public class Destructible extends Test {
 		Rectangle r = new Rectangle(0.5, 1.0);
 		
 		Entity top = new Entity();
-		top.addFixture(new Fixture(r));
+		top.addFixture(new BodyFixture(r));
 		top.setMass();
 		top.translate(0.0, -1.5);
 		top.getVelocity().set(2.0, 0.0);
 		
 		Entity bot = new Entity();
-		bot.addFixture(new Fixture(r));
+		bot.addFixture(new BodyFixture(r));
 		bot.setMass();
 		bot.translate(0.0, -0.5);
 		

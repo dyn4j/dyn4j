@@ -28,7 +28,7 @@ import java.util.Random;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
-import org.dyn4j.game2d.dynamics.Fixture;
+import org.dyn4j.game2d.dynamics.BodyFixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Geometry;
@@ -41,7 +41,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests lots of random shapes (and sizes) moving through a funnel.
  * @author William Bittle
- * @version 1.1.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Funnel extends Test {
@@ -101,14 +101,14 @@ public class Funnel extends Test {
 		// create the floor
 		Rectangle floorShape = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
-		floor.addFixture(new Fixture(floorShape));
+		floor.addFixture(new BodyFixture(floorShape));
 		floor.setMass(Mass.Type.INFINITE);
 		this.world.add(floor);
 		
 		// create the funnel sides
 		Rectangle leftShape = new Rectangle(1.0, 7.0);
 		Entity left = new Entity();
-		left.addFixture(new Fixture(leftShape));
+		left.addFixture(new BodyFixture(leftShape));
 		left.setMass(Mass.Type.INFINITE);
 		left.translate(-8.0, 8.0);
 		left.rotateAboutCenter(Math.toRadians(30.0));
@@ -116,7 +116,7 @@ public class Funnel extends Test {
 		
 		Rectangle rightShape = new Rectangle(1.0, 7.0);
 		Entity right = new Entity();
-		right.addFixture(new Fixture(rightShape));
+		right.addFixture(new BodyFixture(rightShape));
 		right.setMass(Mass.Type.INFINITE);
 		right.translate(8.0, 8.0);
 		right.rotateAboutCenter(-Math.toRadians(30.0));
@@ -139,12 +139,12 @@ public class Funnel extends Test {
 			Entity e = new Entity();
 			if (t == 0) {
 				Rectangle r = new Rectangle(s, s);
-				Fixture f = new Fixture(r);
+				BodyFixture f = new BodyFixture(r);
 				f.setDensity(0.1);
 				e.addFixture(f);
 			} else {
 				Circle c = new Circle(s * 0.5);
-				Fixture f = new Fixture(c);
+				BodyFixture f = new BodyFixture(c);
 				f.setDensity(0.1);
 				e.addFixture(f);
 			}

@@ -35,6 +35,7 @@ import java.util.List;
 import org.codezealot.game.input.Keyboard;
 import org.codezealot.game.input.Mouse;
 import org.dyn4j.game2d.collision.Bounds;
+import org.dyn4j.game2d.collision.Fixture;
 import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.Step;
@@ -62,7 +63,7 @@ import org.dyn4j.game2d.geometry.Wound;
  * Using the {@link TestBed} class one can switch test without stopping
  * and starting the driver again.
  * @author William Bittle
- * @version 1.1.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public abstract class Test implements Comparable<Test> {
@@ -212,10 +213,11 @@ public abstract class Test implements Comparable<Test> {
 			for (int i = 0; i < size; i++) {
 				Body b = this.world.getBody(i);
 				Transform t = b.getTransform();
-				int cSize = b.getShapeCount();
+				int cSize = b.getFixtureCount();
 				// loop over the convex shapes again
 				for (int j = 0; j < cSize; j++) {
-					Convex c = b.getShape(j);
+					Fixture f = b.getFixture(j);
+					Convex c = f.getShape();
 					// render the normals
 					this.renderNormals(g, c, t, this.scale);
 				}

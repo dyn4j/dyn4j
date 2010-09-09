@@ -33,7 +33,7 @@ import java.util.List;
 import org.codezealot.game.input.Input;
 import org.codezealot.game.input.Keyboard;
 import org.codezealot.game.input.Mouse;
-import org.dyn4j.game2d.dynamics.Fixture;
+import org.dyn4j.game2d.dynamics.BodyFixture;
 import org.dyn4j.game2d.dynamics.RaycastResult;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Circle;
@@ -126,7 +126,7 @@ public class Raycast extends Test {
 				new Vector2(-0.5, -0.5), 
 				new Vector2(0.5, -0.5));
 		Entity triangle = new Entity();
-		triangle.addFixture(new Fixture(triShape));
+		triangle.addFixture(new BodyFixture(triShape));
 		triangle.setMass(Mass.Type.INFINITE);
 		triangle.translate(-0.90625, 2.40625);
 		this.world.add(triangle);
@@ -134,7 +134,7 @@ public class Raycast extends Test {
 		// create a circle
 		Circle cirShape = new Circle(0.5);
 		Entity circle = new Entity();
-		circle.addFixture(new Fixture(cirShape));
+		circle.addFixture(new BodyFixture(cirShape));
 		circle.setMass(Mass.Type.INFINITE);
 		circle.translate(2.421875, 3.5);
 		this.world.add(circle);
@@ -142,7 +142,7 @@ public class Raycast extends Test {
 		// create a line segment
 		Segment segShape = new Segment(new Vector2(0.5, 0.5), new Vector2(-0.5, -0.5));
 		Entity segment1 = new Entity();
-		segment1.addFixture(new Fixture(segShape));
+		segment1.addFixture(new BodyFixture(segShape));
 		segment1.setMass(Mass.Type.INFINITE);
 		segment1.translate(4.53125, 3.34375);
 		this.world.add(segment1);
@@ -150,7 +150,7 @@ public class Raycast extends Test {
 		// try a rectangle
 		Rectangle rectShape = new Rectangle(1.0, 1.0);
 		Entity rectangle = new Entity();
-		rectangle.addFixture(new Fixture(rectShape));
+		rectangle.addFixture(new BodyFixture(rectShape));
 		rectangle.setMass(Mass.Type.INFINITE);
 		rectangle.translate(1.65625, 2.21875);
 		this.world.add(rectangle);
@@ -158,17 +158,17 @@ public class Raycast extends Test {
 		// try a polygon with lots of vertices
 		Polygon polyShape = Geometry.createUnitCirclePolygon(10, 1.0);
 		Entity polygon = new Entity();
-		polygon.addFixture(new Fixture(polyShape));
+		polygon.addFixture(new BodyFixture(polyShape));
 		polygon.setMass(Mass.Type.INFINITE);
 		polygon.translate(0.28125, 4.765625);
 		this.world.add(polygon);
 		
 		// try a compound object (Capsule)
 		Circle c1 = new Circle(0.5);
-		Fixture c1Fixture = new Fixture(c1);
+		BodyFixture c1Fixture = new BodyFixture(c1);
 		c1Fixture.setDensity(0.5);
 		Circle c2 = new Circle(0.5);
-		Fixture c2Fixture = new Fixture(c2);
+		BodyFixture c2Fixture = new BodyFixture(c2);
 		c2Fixture.setDensity(0.5);
 		Rectangle rm = new Rectangle(2.0, 1.0);
 		// translate the circles in local coordinates
@@ -177,7 +177,7 @@ public class Raycast extends Test {
 		Entity capsule = new Entity();
 		capsule.addFixture(c1Fixture);
 		capsule.addFixture(c2Fixture);
-		capsule.addFixture(new Fixture(rm));
+		capsule.addFixture(new BodyFixture(rm));
 		capsule.setMass(Mass.Type.INFINITE);
 		capsule.translate(4.890625, 5.328125);
 		this.world.add(capsule);

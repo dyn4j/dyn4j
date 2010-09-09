@@ -371,12 +371,12 @@ public class World {
 				int b1Size = body1.getFixtureCount();
 				int b2Size = body2.getFixtureCount();
 				for (int j = 0; j < b1Size; j++) {
-					Fixture fixture1 = body1.getFixture(j);
+					BodyFixture fixture1 = body1.getFixture(j);
 					Filter filter1 = fixture1.getFilter();
 					Convex convex1 = fixture1.getShape();
 					// test against each fixture of body 2
 					for (int k = 0; k < b2Size; k++) {
-						Fixture fixture2 = body2.getFixture(k);
+						BodyFixture fixture2 = body2.getFixture(k);
 						Filter filter2 = fixture2.getFilter();
 						Convex convex2 = fixture2.getShape();
 						// test the filter
@@ -533,6 +533,10 @@ public class World {
 		
 		// notify the step listener
 		this.stepListener.end(this.step, this);
+		
+		// TODO at this time, the contacts are old, i should do contact solving here
+		// this creates a problem if anything about the shapes are changed before the
+		// next time step
 	}
 	
 	/**
@@ -545,23 +549,19 @@ public class World {
 		// make sure time of impact solving is enabled
 		if (!settings.isContinuousCollisionDetectionEnabled()) return;
 		
-		// get the linear tolerance (allowed penetration)
-		double tol = settings.getLinearTolerance();
-		
-		// TODO i think we need to advance all bodies by the smallest
-		// toi and continue doing this until all body toi's are solved
-		
+		// get the number of bodies
 		int size = this.bodies.size();
+		
 		// loop over all the bodies and find the minimum TOI for each
 		// dynamic body
 		for (int i = 0; i < size; i++) {
 			// get the body
-			Body b1 = this.bodies.get(i);
+			Body body = this.bodies.get(i);
 			
 			// we don't process kinematic or static bodies except with
 			// dynamic bodies (in other words b1 must always be a dynamic
 			// body)
-			if (b1.isKinematic() || b1.isStatic()) continue;
+			if (body.isKinematic() || body.isStatic()) continue;
 			
 			// don't bother with bodies that did not have their
 			// positions integrated, if they were not added to an island then
@@ -570,81 +570,105 @@ public class World {
 			// we can also check for sleeping bodies and skip those since
 			// they will only be asleep after being stationary for a set
 			// time period
-			if (!b1.isOnIsland() || b1.isAsleep()) continue;
+			if (!body.isOnIsland() || body.isAsleep()) continue;
 
-			// setup the initial time bounds [0, 1]
-			double t1 = 0.0;
-			double t2 = 1.0;
-			TimeOfImpact minToi = null;
+			// solve for time of impact
+			this.solveTOI(body);
+		}
+	}
+	
+	/**
+	 * Solves the time of impact for the given {@link Body}.
+	 * @param body the {@link Body}
+	 * @since 2.0.0
+	 */
+	protected void solveTOI(Body body) {
+		Settings settings = Settings.getInstance();
+		double tol = settings.getLinearTolerance();
+		int size = this.bodies.size();
+		
+		// setup the initial time bounds [0, 1]
+		double t1 = 0.0;
+		double t2 = 1.0;
+		
+		// save the minimum time of impact and body
+		TimeOfImpact minToi = null;
+		Body minBody = null;
+		
+		// loop over all the other bodies to find the minimum TOI
+		for (int j = 0; j < size; j++) {
+			// get the other body
+			Body b2 = this.bodies.get(j);
 			
-			// loop over all the other bodies to find the minimum TOI
-			for (int j = 0; j < size; j++) {
-				// get the other body
-				Body b2 = this.bodies.get(j);
-				
-				// skip this test if they are the same body
-				if (b1 == b2) continue;
-				
-				// make sure the other body is active
-				if (!b2.isActive()) continue;
-				
-				// skip other dynamic bodies; we only do TOI for
-				// dynamic vs. static/kinematic unless its a bullet
-				if (b2.isDynamic() && !b1.isBullet()) continue;
-				
-				// check for connected pairs who's collision is not allowed
-				if (b1.isConnected(b2, false)) continue;
-				
-				// compute the time of impact between the two bodies
-				TimeOfImpact toi = new TimeOfImpact();
-				if (this.timeOfImpactDetector.getTimeOfImpact(b1, b2, t1, t2, toi)) {
-					// get the time of impact
-					double t = toi.getToi();
-					// check if the time of impact is less than
-					// the current time of impact
-					if (t < t2) {
-						// TODO see if these fixtures can collide according to the filter
-						// TODO test for sensor fixtures
-						if (this.timeOfImpactListener.dynamic(b1, b2, t)) {
-							// set the new upper bound
-							t2 = t;
-							minToi = toi;
-						}
+			// make sure the other body is active
+			if (!b2.isActive()) continue;
+			
+			// skip other dynamic bodies; we only do TOI for
+			// dynamic vs. static/kinematic unless its a bullet
+			if (b2.isDynamic() && !body.isBullet()) continue;
+			
+			// check for connected pairs who's collision is not allowed
+			if (body.isConnected(b2, false)) continue;
+			
+			// check for bodies already in collision
+			if (body.isInContact(b2)) continue;
+			
+			// skip this test if they are the same body
+			if (body == b2) continue;
+			
+			// compute the time of impact between the two bodies
+			TimeOfImpact toi = new TimeOfImpact();
+			if (this.timeOfImpactDetector.getTimeOfImpact(body, b2, t1, t2, toi)) {
+				// get the time of impact
+				double t = toi.getToi();
+				// check if the time of impact is less than
+				// the current time of impact
+				if (t < t2) {
+					// if it is then ask the listener if we should use this collision
+					if (this.timeOfImpactListener.collision(body, b2, toi)) {
+						// set the new upper bound
+						t2 = t;
+						// save the minimum toi and body
+						minToi = toi;
+						minBody = b2;
 					}
-				} else {
-					// if the bodies are intersecting or do not intersect
-					// within the range of motion then skip this body
-					// and move to the next
-					continue;
 				}
 			}
-			
-			// make sure the time of impact is not null
-			// we also can get some performance benefit if we don't do anything
-			// for times of impact that are 1.0 which means they are already
-			// colliding
-			if (minToi != null && minToi.getToi() != 1.0) {
-				// get the time of impact info
-				double t = minToi.getToi();
-				Separation s = minToi.getSeparation();
-				// compute the distance to translate
-				double d = s.getDistance() + tol;
-				Vector2 n = s.getNormal();
-				
-				// move the dynamic body to the time of impact
-				b1.transform0.lerp(b1.transform, t, b1.transform);
-				// TODO there is a problem here, both bodies will need to be updated in some cases
-				// therefore we must interpolate all bodies to the min toi and continue
-				// until all are solved
-				
-				// move the body along the separating axis the given distance plus
-				// the allowed penetration to place the objects in collision
-				// this will allow the discrete collision detection to find the
-				// collision and solve it normally
-				b1.translate(n.x * d, n.y * d);
-				
-				// this method does not conserve time
+			// if the bodies are intersecting or do not intersect
+			// within the range of motion then skip this body
+			// and move to the next
+		}
+		
+		// make sure the time of impact is not null
+		if (minToi != null) {
+			// get the time of impact info
+			double t = minToi.getToi();
+			Separation s = minToi.getSeparation();
+			if (s == null) {
+				// TODO remove me
+				System.out.println("null separation");
+				return;
 			}
+			// compute the distance to translate
+			double d = s.getDistance() + tol;
+			Vector2 n = s.getNormal();
+			
+			// move the dynamic body to the time of impact
+			body.transform0.lerp(body.transform, t, body.transform);
+			// check if the other body is dynamic
+			if (minBody.isDynamic()) {
+				// if the other body is dynamic then interpolate its transform
+				minBody.transform0.lerp(minBody.transform, t, minBody.transform);
+			}
+			
+			// move the body along the separating axis the given distance plus
+			// the allowed penetration to place the objects in collision
+			// this will allow the discrete collision detection to find the
+			// collision and solve it normally
+			// TODO for rotating bodies this wont work/isnt right
+			body.translate(n.x * d, n.y * d);
+			
+			// this method does not conserve time
 		}
 	}
 	
@@ -652,14 +676,13 @@ public class World {
 	 * Performs a raycast against all the {@link Body}s in the {@link World}.
 	 * @param ray the {@link Ray}
 	 * @param maxLength the maximum length of the ray; 0 for infinite length
-	 * @param ignoreSensors true if sensor {@link Fixture}s should be ignored
+	 * @param ignoreSensors true if sensor {@link BodyFixture}s should be ignored
 	 * @param all true if all intersected {@link Body}s should be returned; false if only the closest {@link Body} should be returned
 	 * @param results a list to contain the results of the raycast
 	 * @return boolean true if at least one {@link Body} was intersected by the given {@link Ray}
 	 * @since 2.0.0
 	 */
 	public boolean raycast(Ray ray, double maxLength, boolean ignoreSensors, boolean all, List<RaycastResult> results) {
-		// TODO what if we sorted the list of squared distances from the body COM to the start point ASC then tested iteratively
 		boolean found = false;
 		
 		double max = 0.0;
@@ -723,7 +746,7 @@ public class World {
 	 * @param ray the {@link Ray} to cast
 	 * @param body the {@link Body} to test
 	 * @param maxLength the maximum length of the ray; 0 for infinite length
-	 * @param ignoreSensors whether or not to ignore sensor {@link Fixture}s
+	 * @param ignoreSensors whether or not to ignore sensor {@link BodyFixture}s
 	 * @param result the raycast result
 	 * @return boolean true if the {@link Ray} intersects the {@link Body}
 	 * @since 2.0.0
@@ -748,14 +771,14 @@ public class World {
 		boolean found = false;
 		for (int i = 0; i < size; i++) {
 			// get the fixture
-			Fixture fixture = body.getFixture(i);
+			BodyFixture fixture = body.getFixture(i);
 			// check for sensor
-			if (ignoreSensors && fixture.sensor) {
+			if (ignoreSensors && fixture.isSensor()) {
 				// skip this fixture
 				continue;
 			}
 			// get the convex shape
-			Convex convex = fixture.shape;
+			Convex convex = fixture.getShape();
 			// perform the raycast
 			if (this.raycastDetector.raycast(ray, max, convex, transform, raycast)) {
 				// if the raycast detected a collision then set the new

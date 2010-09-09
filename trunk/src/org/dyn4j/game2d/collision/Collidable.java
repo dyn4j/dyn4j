@@ -24,31 +24,35 @@
  */
 package org.dyn4j.game2d.collision;
 
-import org.dyn4j.game2d.geometry.Convex;
-import org.dyn4j.game2d.geometry.Shape;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Transformable;
 
 /**
  * Represents an object that can collide with other objects.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public interface Collidable extends Transformable {
 	/**
-	 * Returns the {@link Convex} {@link Shape} at the given index.
-	 * @param index the index of the {@link Convex} {@link Shape}
-	 * @return {@link Convex}
+	 * Returns the {@link Fixture} at the given index.
+	 * <p>
+	 * Renamed from getShape(int).
+	 * @param index the index of the {@link Fixture}
+	 * @return {@link Fixture}
+	 * @since 2.0.0
 	 */
-	public abstract Convex getShape(int index);
+	public abstract Fixture getFixture(int index);
 	
 	/**
-	 * Returns the number of {@link Convex} {@link Shape}s attached
+	 * Returns the number of {@link Fixture}s attached
 	 * to this {@link Collidable} object.
+	 * <p>
+	 * Renamed from getShapeCount.
 	 * @return int
+	 * @since 2.0.0
 	 */
-	public abstract int getShapeCount();
+	public abstract int getFixtureCount();
 	
 	/**
 	 * Returns the {@link Transform} of the object.

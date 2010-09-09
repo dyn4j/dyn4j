@@ -24,36 +24,27 @@
  */
 package org.dyn4j.game2d.dynamics;
 
+import org.dyn4j.game2d.collision.continuous.TimeOfImpact;
+
 /**
- * Interface to listen for TOI events.
+ * Interface to listen for time of impact events.
  * @author William Bittle
- * @version 1.2.0
+ * @version 2.0.0
  * @since 1.2.0
  */
 public interface TimeOfImpactListener {
 	/**
-	 * Called when a time of impact has been detected between a dynamic
-	 * {@link Body} and a kinematic/static {@link Body}.
+	 * Called when a time of impact has been detected between two bodies.
 	 * <p>
 	 * Returning true from this method indicates that the collision of these
 	 * two {@link Body}s should be processed.
-	 * @param dynamic the dynamic {@link Body}
-	 * @param other the other {@link Body}
-	 * @param toi the time of impact between the two {@link Body}s
-	 * @return boolean true if the collision should be handled
-	 */
-	public abstract boolean dynamic(Body dynamic, Body other, double toi);
-	
-	/**
-	 * Called when a time of impact has been detected between a bullet
-	 * {@link Body} and another {@link Body}.
 	 * <p>
-	 * Returning true from this method indicates that the collision of these
-	 * two {@link Body}s should be processed.
-	 * @param bullet the bullet {@link Body}
-	 * @param other the other {@link Body}
-	 * @param toi the time of impact between the two {@link Body}s
+	 * The values of the <code>toi</code> parameter can be changed in this method.
+	 * @param body1 the first {@link Body}
+	 * @param body2 the second {@link Body}
+	 * @param toi the {@link TimeOfImpact}
 	 * @return boolean true if the collision should be handled
+	 * @since 2.0.0
 	 */
-	public abstract boolean bullet(Body bullet, Body other, double toi);
+	public abstract boolean collision(Body body1, Body body2, TimeOfImpact toi);
 }

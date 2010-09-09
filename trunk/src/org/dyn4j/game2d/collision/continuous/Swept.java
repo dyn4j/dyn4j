@@ -47,4 +47,11 @@ public interface Swept extends Collidable {
 	 * @return {@link Transform} the final transform
 	 */
 	public abstract Transform getFinalTransform();
+	
+	/**
+	 * Returns the maximum radius of the disk that the
+	 * {@link Collidable} creates if rotated 360 degrees.
+	 * @return double the maximum radius of the rotation disk
+	 */
+	public abstract double getRotationDiscRadius();
 }

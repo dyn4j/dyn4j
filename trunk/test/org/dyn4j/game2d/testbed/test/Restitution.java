@@ -26,7 +26,7 @@ package org.dyn4j.game2d.testbed.test;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
-import org.dyn4j.game2d.dynamics.Fixture;
+import org.dyn4j.game2d.dynamics.BodyFixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Geometry;
@@ -39,7 +39,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests the distance joint in a Newton's Cradle configuration.
  * @author William Bittle
- * @version 1.1.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Restitution extends Test {
@@ -91,7 +91,7 @@ public class Restitution extends Test {
 		// create the floor
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
-		floor.addFixture(new Fixture(floorRect));
+		floor.addFixture(new BodyFixture(floorRect));
 		floor.setMass(Mass.Type.INFINITE);
 		// move the floor up a bit
 		floor.translate(0.0, -4.0);
@@ -109,7 +109,7 @@ public class Restitution extends Test {
 		for (int i = 0; i < count; i++) {
 			Circle c = new Circle(r);
 			
-			Fixture f = new Fixture(c);
+			BodyFixture f = new BodyFixture(c);
 			f.setRestitution(min + increment * i);
 			
 			Entity e = new Entity();

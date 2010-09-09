@@ -28,7 +28,7 @@ import java.util.Random;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
-import org.dyn4j.game2d.dynamics.Fixture;
+import org.dyn4j.game2d.dynamics.BodyFixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Geometry;
@@ -41,7 +41,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests lots of random shapes (and sizes) in a big bucket.
  * @author William Bittle
- * @version 1.1.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Bucket extends Test {
@@ -106,9 +106,9 @@ public class Bucket extends Test {
 		right.translate(7.5, 7.0);
 		
 		Entity bucket = new Entity();
-		bucket.addFixture(new Fixture(bottom));
-		bucket.addFixture(new Fixture(left));
-		bucket.addFixture(new Fixture(right));
+		bucket.addFixture(new BodyFixture(bottom));
+		bucket.addFixture(new BodyFixture(left));
+		bucket.addFixture(new BodyFixture(right));
 		bucket.setMass(Mass.Type.INFINITE);
 		this.world.add(bucket);
 		
@@ -129,12 +129,12 @@ public class Bucket extends Test {
 			Entity e = new Entity();
 			if (t == 0) {
 				Rectangle r = new Rectangle(s, s);
-				Fixture f = new Fixture(r);
+				BodyFixture f = new BodyFixture(r);
 				f.setDensity(0.1);
 				e.addFixture(f);
 			} else {
 				Circle c = new Circle(s * 0.5);
-				Fixture f = new Fixture(c);
+				BodyFixture f = new BodyFixture(c);
 				f.setDensity(0.1);
 				e.addFixture(f);
 			}

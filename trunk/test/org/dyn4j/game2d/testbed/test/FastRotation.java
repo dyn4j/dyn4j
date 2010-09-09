@@ -26,6 +26,7 @@ package org.dyn4j.game2d.testbed.test;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
+import org.dyn4j.game2d.collision.continuous.TimeOfImpact;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.TimeOfImpactAdapter;
 import org.dyn4j.game2d.dynamics.World;
@@ -50,25 +51,17 @@ public class FastRotation extends Test {
 	 */
 	private class ToiListener extends TimeOfImpactAdapter {
 		/* (non-Javadoc)
-		 * @see org.dyn4j.game2d.dynamics.TimeOfImpactAdapter#bullet(org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.dynamics.Body, double)
+		 * @see org.dyn4j.game2d.dynamics.TimeOfImpactAdapter#collision(org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.collision.continuous.TimeOfImpact)
 		 */
 		@Override
-		public boolean bullet(Body bullet, Body other, double toi) {
-			bullet.getVelocity().zero();
-			bullet.setAngularVelocity(0);
+		public boolean collision(Body body1, Body body2, TimeOfImpact toi) {
+			body1.getVelocity().zero();
+			body1.setAngularVelocity(0);
 			
-			other.getVelocity().zero();
-			other.setAngularVelocity(0);
+			body2.getVelocity().zero();
+			body2.setAngularVelocity(0);
 			
 			return true;
-		}
-		
-		/* (non-Javadoc)
-		 * @see org.dyn4j.game2d.dynamics.TimeOfImpactAdapter#dynamic(org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.dynamics.Body, double)
-		 */
-		@Override
-		public boolean dynamic(Body dynamic, Body other, double toi) {
-			return this.bullet(dynamic, other, toi);
 		}
 	}
 	

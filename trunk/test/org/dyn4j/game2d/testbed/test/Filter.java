@@ -27,7 +27,7 @@ package org.dyn4j.game2d.testbed.test;
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.CategoryFilter;
 import org.dyn4j.game2d.collision.RectangularBounds;
-import org.dyn4j.game2d.dynamics.Fixture;
+import org.dyn4j.game2d.dynamics.BodyFixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Geometry;
 import org.dyn4j.game2d.geometry.Mass;
@@ -39,7 +39,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests body filtering.
  * @author William Bittle
- * @version 1.1.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Filter extends Test {
@@ -94,7 +94,7 @@ public class Filter extends Test {
 		// as the other body then the body will collide with everything
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
-		floor.addFixture(new Fixture(floorRect));
+		floor.addFixture(new BodyFixture(floorRect));
 		floor.setMass(Mass.Type.INFINITE);
 		this.world.add(floor);
 		
@@ -106,7 +106,7 @@ public class Filter extends Test {
 		// create a left traveling object
 		Rectangle r1 = new Rectangle(1.0, 1.0);
 		
-		Fixture f1 = new Fixture(r1);
+		BodyFixture f1 = new BodyFixture(r1);
 		f1.setFilter(filter);
 		
 		Entity left = new Entity();
@@ -120,7 +120,7 @@ public class Filter extends Test {
 		// create a right traveling object
 		Rectangle r2 = new Rectangle(1.0, 1.0);
 		
-		Fixture f2 = new Fixture(r2);
+		BodyFixture f2 = new BodyFixture(r2);
 		f2.setFilter(filter2);
 		
 		Entity right1 = new Entity();
@@ -133,7 +133,7 @@ public class Filter extends Test {
 		// create a second right traveling object
 		Rectangle r3 = new Rectangle(1.0, 1.0);
 		
-		Fixture f3 = new Fixture(r3);
+		BodyFixture f3 = new BodyFixture(r3);
 		f3.setFilter(filter);
 		
 		Entity right2 = new Entity();

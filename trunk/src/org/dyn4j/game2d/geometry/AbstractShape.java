@@ -29,7 +29,7 @@ import java.util.UUID;
 /**
  * Base implementation of the {@link Shape} interface.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public abstract class AbstractShape implements Shape, Transformable {
@@ -38,6 +38,9 @@ public abstract class AbstractShape implements Shape, Transformable {
 	
 	/** The center of this {@link Shape} */
 	protected Vector2 center;
+	
+	/** The maximum radius */
+	protected double radius;
 	
 	/** Custom user data object */
 	protected Object userData;
@@ -76,6 +79,14 @@ public abstract class AbstractShape implements Shape, Transformable {
 	@Override
 	public Vector2 getCenter() {
 		return this.center;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.geometry.Shape#getRadius()
+	 */
+	@Override
+	public double getRadius() {
+		return this.radius;
 	}
 	
 	/* (non-Javadoc)

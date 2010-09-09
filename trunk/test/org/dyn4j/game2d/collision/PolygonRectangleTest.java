@@ -38,6 +38,7 @@ import org.dyn4j.game2d.collision.narrowphase.Gjk;
 import org.dyn4j.game2d.collision.narrowphase.Penetration;
 import org.dyn4j.game2d.collision.narrowphase.Sat;
 import org.dyn4j.game2d.collision.narrowphase.Separation;
+import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Geometry;
 import org.dyn4j.game2d.geometry.Polygon;
 import org.dyn4j.game2d.geometry.Rectangle;
@@ -50,7 +51,7 @@ import org.junit.Test;
 /**
  * Test case for {@link Polygon} - {@link Rectangle} collision detection.
  * @author William Bittle
- * @version 1.1.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class PolygonRectangleTest extends AbstractTest {
@@ -444,5 +445,29 @@ public class PolygonRectangleTest extends AbstractTest {
 		TestCase.assertEquals(-0.363, p2.x, 1.0e-3);
 		TestCase.assertEquals(-0.500, p2.y, 1.0e-3);
 		TestCase.assertEquals(0.136, mp2.getDepth(), 1.0e-3);
+	}
+	
+	/**
+	 * Test for a fix to the GJK distance algorithm
+	 * for near zero distance queries.
+	 * @since 2.0.0
+	 */
+	@Test
+	public void nearZeroDistance1() {
+		Convex c1 = Geometry.createUnitCirclePolygon(5, 0.1);
+		Convex c2 = Geometry.createRectangle(20.0, 0.5);
+		
+		Transform t1 = new Transform();
+		Transform t2 = new Transform();
+		
+		t1.translate(0.0, 0.34510565162951545);
+		
+		Separation s = new Separation();
+		boolean separated = this.gjk.distance(c1, t1, c2, t2, s);
+		
+		// make sure its considered separated
+		TestCase.assertTrue(separated);
+		// make sure the distance is zero or greater
+		TestCase.assertTrue(s.getDistance() >= 0.0);
 	}
 }

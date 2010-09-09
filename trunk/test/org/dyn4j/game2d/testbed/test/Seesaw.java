@@ -26,7 +26,7 @@ package org.dyn4j.game2d.testbed.test;
 
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
-import org.dyn4j.game2d.dynamics.Fixture;
+import org.dyn4j.game2d.dynamics.BodyFixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Geometry;
 import org.dyn4j.game2d.geometry.Mass;
@@ -40,7 +40,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests a seesaw type configuration.
  * @author William Bittle
- * @version 1.1.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Seesaw extends Test {
@@ -94,7 +94,7 @@ public class Seesaw extends Test {
 		// create the floor
 		Rectangle floorShape = new Rectangle(15.0, 1.0);
 		Entity floor = new Entity();
-		floor.addFixture(new Fixture(floorShape));
+		floor.addFixture(new BodyFixture(floorShape));
 		floor.setMass(Mass.Type.INFINITE);
 		this.world.add(floor);
 		
@@ -104,7 +104,7 @@ public class Seesaw extends Test {
 				new Vector2(-1.0, 0.0),
 				new Vector2(1.0, 0.0));
 		Entity pivot = new Entity();
-		pivot.addFixture(new Fixture(pivotShape));
+		pivot.addFixture(new BodyFixture(pivotShape));
 		pivot.setMass(Mass.Type.INFINITE);
 		pivot.translate(0.0, 0.5);
 		this.world.add(pivot);
@@ -112,7 +112,7 @@ public class Seesaw extends Test {
 		// create the plank
 		Rectangle plankShape = new Rectangle(10.0, 0.2);
 		Entity plank = new Entity();
-		plank.addFixture(new Fixture(plankShape));
+		plank.addFixture(new BodyFixture(plankShape));
 		plank.setMass();
 		plank.translate(0.0, 1.5);
 		this.world.add(plank);
@@ -122,14 +122,14 @@ public class Seesaw extends Test {
 		
 		// create a box on the left side
 		Entity lBox = new Entity();
-		lBox.addFixture(new Fixture(box));
+		lBox.addFixture(new BodyFixture(box));
 		lBox.setMass();
 		lBox.translate(-4.0, 2.5);
 		this.world.add(lBox);
 		
 		box = new Rectangle(1.0, 1.0);
 		
-		Fixture boxFixture = new Fixture(box);
+		BodyFixture boxFixture = new BodyFixture(box);
 		boxFixture.setDensity(3.0);
 		
 		// create a box on the right side

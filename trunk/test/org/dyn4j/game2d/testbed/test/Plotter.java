@@ -39,7 +39,7 @@ import org.dyn4j.game2d.collision.narrowphase.Gjk;
 import org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.game2d.collision.narrowphase.Penetration;
 import org.dyn4j.game2d.collision.narrowphase.Separation;
-import org.dyn4j.game2d.dynamics.Fixture;
+import org.dyn4j.game2d.dynamics.BodyFixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Convex;
@@ -157,43 +157,43 @@ public class Plotter extends Test {
 		// which shape to make?
 		if (index == 0) {
 			Circle c = new Circle(1.0);
-			e.addFixture(new Fixture(c));
+			e.addFixture(new BodyFixture(c));
 		} else if (index == 1) {
 			Circle c = new Circle(0.5);
-			e.addFixture(new Fixture(c));
+			e.addFixture(new BodyFixture(c));
 		} else if (index == 2) {
 			Polygon p = Geometry.createUnitCirclePolygon(6, 0.5);
-			e.addFixture(new Fixture(p));
+			e.addFixture(new BodyFixture(p));
 		} else if (index == 3) {
 			Polygon p = Geometry.createUnitCirclePolygon(5, 1.0);
-			e.addFixture(new Fixture(p));
+			e.addFixture(new BodyFixture(p));
 		} else if (index == 4) {
 			Rectangle r = new Rectangle(1.0, 1.0);
-			e.addFixture(new Fixture(r));
+			e.addFixture(new BodyFixture(r));
 		} else if (index == 5) {
 			Rectangle r = new Rectangle(0.5, 0.5);
-			e.addFixture(new Fixture(r));
+			e.addFixture(new BodyFixture(r));
 		} else if (index == 6) {
 			Triangle t = new Triangle(new Vector2(0.45, -0.12), new Vector2(-0.45, 0.38), new Vector2(-0.15, -0.22));
-			e.addFixture(new Fixture(t));
+			e.addFixture(new BodyFixture(t));
 		} else if (index == 7) {
 			Triangle t = new Triangle(new Vector2(1.29, 0.25), new Vector2(-0.71, 0.65), new Vector2(-0.59, -0.85));
-			e.addFixture(new Fixture(t));
+			e.addFixture(new BodyFixture(t));
 		} else if (index == 8) {
 			Triangle t = new Triangle(new Vector2(0.5, 0.5), new Vector2(-0.3, -0.5), new Vector2(1.0, -0.3));
-			e.addFixture(new Fixture(t));
+			e.addFixture(new BodyFixture(t));
 		} else if (index == 9) {	
 			Segment s = new Segment(new Vector2(-0.5, 0.0), new Vector2(0.5, 0.0));
-			e.addFixture(new Fixture(s));
+			e.addFixture(new BodyFixture(s));
 		} else if (index == 10) {
 			Segment s = new Segment(new Vector2(0.1, -0.3), new Vector2(-0.8, 0.2));
-			e.addFixture(new Fixture(s));
+			e.addFixture(new BodyFixture(s));
 		} else if (index == 11) {
 			Segment s = new Segment(new Vector2(-0.3, -0.3), new Vector2(0.2, 0.3));
-			e.addFixture(new Fixture(s));
+			e.addFixture(new BodyFixture(s));
 		} else {
 			Segment s = new Segment(new Vector2(-0.3, 0.2), new Vector2(0.0, -0.1));
-			e.addFixture(new Fixture(s));
+			e.addFixture(new BodyFixture(s));
 		}
 		// set the mass to infinite
 		e.setMass(Mass.Type.INFINITE);
@@ -220,14 +220,14 @@ public class Plotter extends Test {
 		Convex c1, c2;
 		Transform t1, t2;
 		if (this.flip) {
-			c1 = e2.getShape(0);
+			c1 = e2.getFixture(0).getShape();
 			t1 = e2.getTransform();
-			c2 = e1.getShape(0);
+			c2 = e1.getFixture(0).getShape();
 			t2 = e1.getTransform();
 		} else {
-			c1 = e1.getShape(0);
+			c1 = e1.getFixture(0).getShape();
 			t1 = e1.getTransform();
-			c2 = e2.getShape(0);
+			c2 = e2.getFixture(0).getShape();
 			t2 = e2.getTransform();
 		}
 		

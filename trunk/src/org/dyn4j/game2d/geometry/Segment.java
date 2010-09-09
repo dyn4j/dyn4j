@@ -66,6 +66,8 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 		this.center = Geometry.getAverageCenter(this.vertices);
 		// compute the length
 		this.length = point1.distance(point2);
+		// compute the radius
+		this.radius = this.length * 0.5;
 	}
 	
 	/* (non-Javadoc)

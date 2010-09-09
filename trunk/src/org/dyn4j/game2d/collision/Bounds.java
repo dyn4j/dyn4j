@@ -24,7 +24,7 @@
  */
 package org.dyn4j.game2d.collision;
 
-import org.dyn4j.game2d.dynamics.Fixture;
+import org.dyn4j.game2d.dynamics.BodyFixture;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Transformable;
 import org.dyn4j.game2d.geometry.Vector2;
@@ -32,7 +32,7 @@ import org.dyn4j.game2d.geometry.Vector2;
 /**
  * Represents the {@link Bounds} of the simulation/world.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public interface Bounds extends Transformable {
@@ -111,7 +111,7 @@ public interface Bounds extends Transformable {
 	/**
 	 * Returns true if the given {@link Collidable} is outside the bounds.
 	 * <p>
-	 * If the {@link Collidable} contains zero {@link Fixture}s then 
+	 * If the {@link Collidable} contains zero {@link BodyFixture}s then 
 	 * {@link Collidable} is considered to be outside the bounds.
 	 * @param collidable the {@link Collidable} to test
 	 * @return boolean true if outside the bounds

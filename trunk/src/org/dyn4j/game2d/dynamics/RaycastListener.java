@@ -51,7 +51,7 @@ public interface RaycastListener {
 	}
 	
 	/**
-	 * Called when a {@link Fixture} of a {@link Body} is intersected by a {@link Ray}.
+	 * Called when a {@link BodyFixture} of a {@link Body} is intersected by a {@link Ray}.
 	 * <p>
 	 * This method is called from the {@link World#raycast(Ray, double, boolean, boolean, java.util.List)}
 	 * method and the return will affect how this method continues.

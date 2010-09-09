@@ -68,6 +68,8 @@ public class Rectangle extends Polygon implements Shape, Transformable {
 		};
 		// use the average method for the centroid
 		this.center = Geometry.getAverageCenter(this.vertices);
+		// compute the max radius
+		this.radius = this.center.distance(this.vertices[0]);
 		// set the width and height
 		this.width = width;
 		this.height = height;

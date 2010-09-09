@@ -33,12 +33,16 @@ import org.dyn4j.game2d.collision.narrowphase.Gjk;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Geometry;
+import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Transform;
 import org.junit.Before;
 import org.junit.Test;
 
 /**
  * Test class for the {@link ConservativeAdvancement} class.
+ * <p>
+ * All bodies in this test must be infinite mass so that the
+ * World class doesn't solve their TOI when a step is performed.
  * @author William Bittle
  * @version 2.0.0
  * @since 1.2.0
@@ -244,15 +248,15 @@ public class ConservativeAdvancementTest {
 		this.detector.getTimeOfImpact(this.b1, this.b2, 0.0, 1.0, toi);
 
 		// test the TOI
-		TestCase.assertEquals(0.399, toi.getToi(), 1.0e-3);
+		TestCase.assertEquals(0.400, toi.getToi(), 1.0e-3);
 		
 		// test the final transform the body should be at before the collision
 		Transform tx1 = b1.getInitialTransform().lerped(b1.getFinalTransform(), toi.getToi());
-		TestCase.assertEquals(0.799, tx1.getTranslationX(), 1.0e-3);
+		TestCase.assertEquals(0.800, tx1.getTranslationX(), 1.0e-3);
 		TestCase.assertEquals(1.500, tx1.getTranslationY(), 1.0e-3);
 		Transform tx2 = b2.getInitialTransform().lerped(b2.getFinalTransform(), toi.getToi());
 		TestCase.assertEquals(1.000, tx2.getTranslationX(), 1.0e-3);
-		TestCase.assertEquals(1.449, tx2.getTranslationY(), 1.0e-3);
+		TestCase.assertEquals(1.450, tx2.getTranslationY(), 1.0e-3);
 	}
 	
 	/**
@@ -309,7 +313,6 @@ public class ConservativeAdvancementTest {
 		// detect the time of impact
 		TimeOfImpact toi = new TimeOfImpact();
 		boolean collide = this.detector.getTimeOfImpact(this.b1, this.b2, 0.0, 1.0, toi);
-
 		TestCase.assertFalse(collide);
 	}
 	
@@ -371,13 +374,11 @@ public class ConservativeAdvancementTest {
 	 */
 	@Test
 	public void setTolerance() {
-		this.detector.setTolerance(0.3);
-		TestCase.assertEquals(0.3, this.detector.getTolerance());
-		TestCase.assertEquals(0.3 * 0.3, this.detector.getToleranceSquared());
+		this.detector.setDistanceEpsilon(0.3);
+		TestCase.assertEquals(0.3, this.detector.getDistanceEpsilon());
 		
-		this.detector.setTolerance(0.000002);
-		TestCase.assertEquals(0.000002, this.detector.getTolerance());
-		TestCase.assertEquals(0.000002 * 0.000002, this.detector.getToleranceSquared());
+		this.detector.setDistanceEpsilon(0.000002);
+		TestCase.assertEquals(0.000002, this.detector.getDistanceEpsilon());
 	}
 	
 	/**
@@ -385,7 +386,7 @@ public class ConservativeAdvancementTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setZeroTolerance() {
-		this.detector.setTolerance(0);
+		this.detector.setDistanceEpsilon(0);
 	}
 	
 	/**
@@ -393,16 +394,7 @@ public class ConservativeAdvancementTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setNegativeTolerance() {
-		this.detector.setTolerance(-0.00003);
-	}
-	
-	/**
-	 * Tests the set tolerance method passing a value greater
-	 * than one.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setGreaterThanOneTolerance() {
-		this.detector.setTolerance(4);
+		this.detector.setDistanceEpsilon(-0.00003);
 	}
 	
 	/**
@@ -434,29 +426,27 @@ public class ConservativeAdvancementTest {
 	}
 	
 	/**
-	 * Tests the set max iterations method passing a value less than 10.
+	 * Tests the set max iterations method passing a value less than 5.
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setLessThanTenMaxIterations() {
-		this.detector.setMaxIterations(9);
+		this.detector.setMaxIterations(4);
 	}
 	
 	/**
-	 * Tests a body rotating very fast against a
-	 * static body.
+	 * Tests a body rotating very fast against a static body.
 	 */
 	@Test
 	public void fastRotationAgainstStatic() {
 		// translate the one body
 		this.b1.removeFixture(0);
 		this.b1.addFixture(Geometry.createRectangle(2.0, 0.2));
+		// need to use the set mass method to compute the rotation disc radius
+		this.b1.setMass(Mass.Type.INFINITE);
 		this.b1.translate(0.5, 0.0);
 		this.b1.rotateAboutCenter(Math.toRadians(-40));
-		// the velocity downward should not be enough to make this body
-		// pass through the larger body
-//		this.b1.getVelocity().set(0.0, -20.0);
 		// set the rotation to very fast
-		this.b1.setAngularVelocity(Math.toRadians(60.0 * 80.0));
+		this.b1.setAngularVelocity(60.0 * Math.toRadians(80.0));
 		
 		this.b2.removeFixture(0);
 		this.b2.addFixture(Geometry.createRectangle(10.0, 0.5));
@@ -465,20 +455,21 @@ public class ConservativeAdvancementTest {
 		// perform one iteration
 		this.world.step(1);
 		
-//		Transform tx1 = b1.getTransform();
-//		Transform tx2 = b2.getTransform();
-//		Rectangle r1 = (Rectangle) b1.getFixture(0).getShape();
-//		Rectangle r2 = (Rectangle) b2.getFixture(0).getShape();
-//		for (int i = 0; i < 4; i++) {
-//			Vector2 v1 = tx1.getTransformed(r1.getVertices()[i]);
-//			Vector2 v2 = tx2.getTransformed(r2.getVertices()[i]);
-//			
-//			System.out.printf("Vertices: %s \t %s \n", v1, v2);
-//		}
-		
 		// detect the time of impact
 		TimeOfImpact toi = new TimeOfImpact();
-		this.detector.getTimeOfImpact(this.b1, this.b2, 0.0, 1.0, toi);
+		boolean missed = this.detector.getTimeOfImpact(this.b1, this.b2, 0.0, 1.0, toi);
+		
+		// get the final transform given the time of impact
+		Transform tx10 = b1.getInitialTransform();
+		Transform tx1 = b1.getTransform();
+		Transform tx1f = tx10.lerped(tx1, toi.getToi());
+		
+		// make sure a collision was missed and detected by the toi detector
+		TestCase.assertTrue(missed);
+		// make sure the time of impact is small in this case
+		TestCase.assertEquals(0.039, toi.getToi(), 1.0e-3);
+		// the rotation shouldn't be much more than -40
+		TestCase.assertEquals(-0.643, tx1f.getRotation(), 1.0e-3);
 	}
 	
 	/**
@@ -490,37 +481,43 @@ public class ConservativeAdvancementTest {
 		// translate the one body
 		this.b1.removeFixture(0);
 		this.b1.addFixture(Geometry.createRectangle(2.0, 0.2));
+		// need to use the set mass method to compute the rotation disc radius
+		this.b1.setMass(Mass.Type.INFINITE);
 		this.b1.translate(0.5, 0.0);
 		this.b1.rotateAboutCenter(Math.toRadians(-40));
-		// the velocity downward should not be enough to make this body
-		// pass through the larger body
-//		this.b1.getVelocity().set(0.0, -20.0);
 		// set the rotation to very fast
-		this.b1.setAngularVelocity(Math.toRadians(60.0 * 80.0));
+		this.b1.setAngularVelocity(60.0 * Math.toRadians(80.0));
 		
 		this.b2.removeFixture(0);
 		this.b2.addFixture(Geometry.createRectangle(10.0, 0.5));
+		// need to use the set mass method to compute the rotation disc radius
+		this.b2.setMass(Mass.Type.INFINITE);
 		this.b2.translate(-5.0, 0.0);
 		this.b2.rotateAboutCenter(Math.toRadians(-20));
-		this.b2.setAngularVelocity(Math.toRadians(60.0 * 60.0));
+		this.b2.setAngularVelocity(60.0 * Math.toRadians(60.0));
 		
 		// perform one iteration
 		this.world.step(1);
 		
-//		Transform tx1 = b1.getTransform();
-//		Transform tx2 = b2.getTransform();
-//		Rectangle r1 = (Rectangle) b1.getFixture(0).getShape();
-//		Rectangle r2 = (Rectangle) b2.getFixture(0).getShape();
-//		for (int i = 0; i < 4; i++) {
-//			Vector2 v1 = tx1.getTransformed(r1.getVertices()[i]);
-//			Vector2 v2 = tx2.getTransformed(r2.getVertices()[i]);
-//			
-//			System.out.printf("Vertices: %s \t %s \n", v1, v2);
-//		}
-		
 		// detect the time of impact
 		TimeOfImpact toi = new TimeOfImpact();
-		this.detector.getTimeOfImpact(this.b1, this.b2, 0.0, 1.0, toi);
+		boolean missed = this.detector.getTimeOfImpact(this.b1, this.b2, 0.0, 1.0, toi);
+		
+		// interpolate the final transforms
+		Transform tx1 = b1.getTransform();
+		Transform tx2 = b2.getTransform();
+		Transform tx10 = b1.getInitialTransform();
+		Transform tx20 = b2.getInitialTransform();
+		Transform tx1f = tx10.lerped(tx1, toi.getToi());
+		Transform tx2f = tx20.lerped(tx2, toi.getToi());
+		
+		// a collision should have been missed but detected by the toi detector
+		TestCase.assertTrue(missed);
+		// make sure the time of impact is small in this case
+		TestCase.assertEquals(0.293, toi.getToi(), 1.0e-3);
+		// the rotation shouldn't be much more than -40
+		TestCase.assertEquals(-0.288, tx1f.getRotation(), 1.0e-3);
+		TestCase.assertEquals(-0.041, tx2f.getRotation(), 1.0e-3);
 	}
 	
 	/**
@@ -535,50 +532,27 @@ public class ConservativeAdvancementTest {
 		this.b1.addFixture(Geometry.createRectangle(2.0, 0.2));
 		this.b1.translate(0.5, 0.0);
 		this.b1.rotateAboutCenter(Math.toRadians(-40));
-		// the velocity downward should not be enough to make this body
-		// pass through the larger body
-//		this.b1.getVelocity().set(0.0, -20.0);
+		// need to use the set mass method to compute the rotation disc radius
+		this.b2.setMass(Mass.Type.INFINITE);
 		// set the rotation to very fast
 		this.b1.setAngularVelocity(Math.toRadians(60.0 * 80.0));
 		
 		this.b2.removeFixture(0);
 		this.b2.addFixture(Geometry.createRectangle(10.0, 0.5));
+		// need to use the set mass method to compute the rotation disc radius
+		this.b2.setMass(Mass.Type.INFINITE);
 		this.b2.translate(-5.0, 0.0);
 		this.b2.rotateAboutCenter(Math.toRadians(-50));
 		this.b2.setAngularVelocity(Math.toRadians(60.0 * 60.0));
 		
-		Transform tx1 = b1.getTransform();
-		Transform tx2 = b2.getTransform();
-		System.out.println(tx1);
-		System.out.println(tx2);
-		
 		// perform one iteration
 		this.world.step(1);
 		
-		System.out.println(tx1 + " " + tx1.getRotation());
-		System.out.println(tx2 + " " + tx2.getRotation());
-		
-//		Rectangle r1 = (Rectangle) b1.getFixture(0).getShape();
-//		Rectangle r2 = (Rectangle) b2.getFixture(0).getShape();
-//		for (int i = 0; i < 4; i++) {
-//			Vector2 v1 = tx1.getTransformed(r1.getVertices()[i]);
-//			Vector2 v2 = tx2.getTransformed(r2.getVertices()[i]);
-//			
-//			System.out.printf("Vertices: %s \t %s \n", v1, v2);
-//		}
-		
 		// detect the time of impact
 		TimeOfImpact toi = new TimeOfImpact();
-		this.detector.getTimeOfImpact(this.b1, this.b2, 0.0, 1.0, toi);
+		boolean missed = this.detector.getTimeOfImpact(this.b1, this.b2, 0.0, 1.0, toi);
 		
-		Transform tx10 = b1.getInitialTransform();
-		Transform tx20 = b2.getInitialTransform();
-		
-		Transform tx1f = tx10.lerped(tx1, toi.getToi());
-		Transform tx2f = tx20.lerped(tx2, toi.getToi());
-		System.out.println(tx1f + " " + tx1f.getRotation());
-		System.out.println(tx2f + " " + tx2f.getRotation());
-		
-		System.out.println(toi);
+		// no collision should have been detected
+		TestCase.assertFalse(missed);
 	}
 }

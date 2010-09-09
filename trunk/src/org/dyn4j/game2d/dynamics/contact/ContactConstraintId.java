@@ -25,7 +25,7 @@
 package org.dyn4j.game2d.dynamics.contact;
 
 import org.dyn4j.game2d.dynamics.Body;
-import org.dyn4j.game2d.dynamics.Fixture;
+import org.dyn4j.game2d.dynamics.BodyFixture;
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Shape;
 
@@ -33,7 +33,7 @@ import org.dyn4j.game2d.geometry.Shape;
  * Represents and id for a contact constraint between two {@link Convex}
  * {@link Shape}s on two {@link Body}s.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class ContactConstraintId {
@@ -52,11 +52,11 @@ public class ContactConstraintId {
 	/**
 	 * Full constructor.
 	 * @param body1 the first {@link Body}
-	 * @param fixture1 the first {@link Body}'s {@link Fixture}
+	 * @param fixture1 the first {@link Body}'s {@link BodyFixture}
 	 * @param body2 the second {@link Body}
-	 * @param fixture2 the second {@link Body}'s {@link Fixture}
+	 * @param fixture2 the second {@link Body}'s {@link BodyFixture}
 	 */
-	public ContactConstraintId(Body body1, Fixture fixture1, Body body2, Fixture fixture2) {
+	public ContactConstraintId(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2) {
 		this.body1Id = body1.getId();
 		this.body2Id = body2.getId();
 		this.fixture1Id = fixture1.getId();

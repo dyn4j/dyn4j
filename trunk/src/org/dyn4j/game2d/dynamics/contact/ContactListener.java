@@ -25,7 +25,7 @@
 package org.dyn4j.game2d.dynamics.contact;
 
 import org.dyn4j.game2d.dynamics.Body;
-import org.dyn4j.game2d.dynamics.Fixture;
+import org.dyn4j.game2d.dynamics.BodyFixture;
 import org.dyn4j.game2d.dynamics.World;
 
 /**
@@ -36,7 +36,7 @@ import org.dyn4j.game2d.dynamics.World;
  * <p>
  * {@link Body} objects can be removed from the {@link World} from any of these methods.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public interface ContactListener {
@@ -55,14 +55,14 @@ public interface ContactListener {
 	public abstract boolean begin(ContactPoint point);
 	
 	/**
-	 * Called when a two {@link Fixture}s begin to separate.
+	 * Called when a two {@link BodyFixture}s begin to separate.
 	 * @param point the contact point that was removed
 	 * @return boolean true if the contact should remain enabled
 	 */
 	public abstract boolean end(ContactPoint point);
 	
 	/**
-	 * Called when two {@link Fixture}s remain in contact.
+	 * Called when two {@link BodyFixture}s remain in contact.
 	 * @param point the persisted contact point
 	 * @return boolean true if the contact should remain enabled
 	 */

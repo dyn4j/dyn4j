@@ -123,19 +123,19 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	protected static final Vector2 ORIGIN = new Vector2();
 	
 	/** The default {@link Gjk} maximum iterations */
-	public static final int DEFAULT_GJK_MAX_ITERATIONS = 100;
+	public static final int DEFAULT_MAX_ITERATIONS = 100;
 	
 	/** The default {@link Gjk} distance epsilon in meters; near 1E-8 */
-	public static final double DEFAULT_GJK_DISTANCE_EPSILON = Math.sqrt(Epsilon.E);
+	public static final double DEFAULT_DISTANCE_EPSILON = Math.sqrt(Epsilon.E);
 	
 	/** The penetration solver; defaults to {@link Epa} */
 	protected MinkowskiPenetrationSolver minkowskiPenetrationSolver = new Epa();
 	
 	/** The maximum number of {@link Gjk} iterations */
-	protected int gjkMaxIterations = Gjk.DEFAULT_GJK_MAX_ITERATIONS;
+	protected int maxIterations = Gjk.DEFAULT_MAX_ITERATIONS;
 	
 	/** The {@link Gjk} distance epsilon in meters */
-	protected double gjkDistanceEpsilon = Gjk.DEFAULT_GJK_DISTANCE_EPSILON;
+	protected double distanceEpsilon = Gjk.DEFAULT_DISTANCE_EPSILON;
 	
 	/**
 	 * Default constructor.
@@ -371,7 +371,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 		// find the point on the simplex (segment) closest to the origin
 		// and use that as the new search direction
 		d = Segment.getPointOnSegmentClosestToPoint(ORIGIN, b.p, a.p);
-		for (int i = 0; i < this.gjkMaxIterations; i++) {
+		for (int i = 0; i < this.maxIterations; i++) {
 			// the vector from the point we found to the origin is the new search direction
 			d.negate().normalize();
 			// check if d is zero
@@ -391,7 +391,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			
 			// see if the new point is far enough along d
 			double projection = c.p.dot(d);
-			if ((projection - a.p.dot(d)) < this.gjkDistanceEpsilon) {
+			if ((projection - a.p.dot(d)) < this.distanceEpsilon) {
 				// then the new point we just made is not far enough
 				// in the direction of n so we can stop now
 				separation.normal = d;
@@ -405,6 +405,23 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			// get the closest point on each segment to the origin
 			Vector2 p1 = Segment.getPointOnSegmentClosestToPoint(ORIGIN, a.p, c.p);
 			Vector2 p2 = Segment.getPointOnSegmentClosestToPoint(ORIGIN, c.p, b.p);
+			
+			// check if the origin lies close enough to either edge
+			if (p1.isZero()) {
+				// if so then we have a separation (although its
+				// nearly zero separation)
+				separation.distance = p1.normalize();
+				separation.normal = d;
+				this.findClosestPoints(a, c, separation);
+				return true;
+			} else if (p2.isZero()) {
+				// if so then we have a separation (although its
+				// nearly zero separation)
+				separation.distance = p2.normalize();
+				separation.normal = d;
+				this.findClosestPoints(c, b, separation);
+				return true;
+			}
 			
 			// test which point is closer and replace the one that is farthest
 			// with the new point c and set the new search direction
@@ -608,7 +625,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 		Vector2 d = c.to(x);
 		
 		// define an epsilon to compare the distance with
-		double epsilonSqrd = this.gjkDistanceEpsilon * this.gjkDistanceEpsilon;
+		double epsilonSqrd = this.distanceEpsilon * this.distanceEpsilon;
 		double distanceSqrd = Double.MAX_VALUE;
 		int iterations = 0;
 		// loop until we have found the correct distance
@@ -684,7 +701,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			}
 			
 			// check for the maximum number of iterations
-			if (iterations == this.gjkMaxIterations) {
+			if (iterations == this.maxIterations) {
 				// we have hit the maximum number of iterations and
 				// still are not close enough to the ray, in this case
 				// just exit returning false
@@ -708,10 +725,10 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * Returns the maximum number of iterations the {@link Gjk} algorithm will perform when
 	 * computing the distance between two separated bodies.
 	 * @return int the number of {@link Gjk} distance iterations
-	 * @see #setGjkMaxIterations(int)
+	 * @see #setMaxIterations(int)
 	 */
-	public int getGjkMaxIterations() {
-		return gjkMaxIterations;
+	public int getMaxIterations() {
+		return maxIterations;
 	}
 
 	/**
@@ -719,31 +736,31 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * computing the distance between two separated bodies.
 	 * <p>
 	 * Valid values are in the range [5, &infin;].
-	 * @param gjkMaxIterations the maximum number of {@link Gjk} iterations
+	 * @param maxIterations the maximum number of {@link Gjk} iterations
 	 */
-	public void setGjkMaxIterations(int gjkMaxIterations) {
-		if (gjkMaxIterations < 5) throw new IllegalArgumentException("The GJK distance algorithm requires 5 or more iterations.");
-		this.gjkMaxIterations = gjkMaxIterations;
+	public void setMaxIterations(int maxIterations) {
+		if (maxIterations < 5) throw new IllegalArgumentException("The GJK distance algorithm requires 5 or more iterations.");
+		this.maxIterations = maxIterations;
 	}
 
 	/**
 	 * Returns the {@link Gjk} distance epsilon.
 	 * @return double the {@link Gjk} distance epsilon
-	 * @see #setGjkDistanceEpsilon(double)
+	 * @see #setDistanceEpsilon(double)
 	 */
-	public double getGjkDistanceEpsilon() {
-		return gjkDistanceEpsilon;
+	public double getDistanceEpsilon() {
+		return distanceEpsilon;
 	}
 
 	/**
 	 * The minimum distance between two iterations of the {@link Gjk} distance algorithm.
 	 * <p>
 	 * Valid values are in the range (0, &infin;].
-	 * @param gjkDistanceEpsilon the {@link Gjk} distance epsilon
+	 * @param distanceEpsilon the {@link Gjk} distance epsilon
 	 */
-	public void setGjkDistanceEpsilon(double gjkDistanceEpsilon) {
-		if (gjkDistanceEpsilon <= 0) throw new IllegalArgumentException("The GJK distance epsilon must be larger than zero.");
-		this.gjkDistanceEpsilon = gjkDistanceEpsilon;
+	public void setDistanceEpsilon(double distanceEpsilon) {
+		if (distanceEpsilon <= 0) throw new IllegalArgumentException("The GJK distance epsilon must be larger than zero.");
+		this.distanceEpsilon = distanceEpsilon;
 	}
 	
 	/**
