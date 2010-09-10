@@ -109,9 +109,8 @@ public class Bullet extends Test {
 		fast.setMass();
 		fast.translate(0.0, 1.0);
 		fast.getVelocity().set(0.0, -120.0);
+		fast.setBullet(true);
 		this.world.add(fast);
-		
-		// TODO test is bullet flag is set
 	}
 	
 	/* (non-Javadoc)

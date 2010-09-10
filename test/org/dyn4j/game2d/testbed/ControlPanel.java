@@ -78,7 +78,7 @@ import org.dyn4j.game2d.dynamics.Settings;
 /**
  * The JFrame that controls the TestBed.
  * @author William Bittle
- * @version 1.2.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class ControlPanel extends JFrame {
@@ -114,8 +114,8 @@ public class ControlPanel extends JFrame {
 		{"z", "Hold to rotate the selected shape"},
 		{"o", "Outputs all the bodies current state to std out"},
 		{"b", "Launches a bomb from the left side"},
-		{"i", "Increases the metrics update rate"},
-		{"d", "Decreases the metrics update rate"}
+		{"U", "Increases the metrics update rate"},
+		{"u", "Decreases the metrics update rate"}
 		};
 	
 	/** Map of available test to run */
@@ -722,10 +722,29 @@ public class ControlPanel extends JFrame {
 				1, 10, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
+		// draw rotation disc?
+		JLabel lblRotDisc = new JLabel("Rotation Disc");
+		pnlDraw.add(lblRotDisc, new GridBagConstraints(
+				0, 11, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JCheckBox chkRotDisc = new JCheckBox();
+		chkRotDisc.setSelected(draw.drawRotationDisc());
+		chkRotDisc.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// toggle the checkbox
+				Draw draw = Draw.getInstance();
+				draw.setDrawRotationDisc(!draw.drawRotationDisc());
+			}
+		});
+		pnlDraw.add(chkRotDisc, new GridBagConstraints(
+				1, 11, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		
 		// draw normals?
 		JLabel lblNormals = new JLabel("Edge Normals");
 		pnlDraw.add(lblNormals, new GridBagConstraints(
-				0, 11, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
+				0, 12, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkNormals = new JCheckBox();
 		chkNormals.setSelected(draw.drawNormals());
@@ -738,7 +757,7 @@ public class ControlPanel extends JFrame {
 			}
 		});
 		pnlDraw.add(chkNormals, new GridBagConstraints(
-				1, 11, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, 
+				1, 12, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		panel.add(pnlDraw);

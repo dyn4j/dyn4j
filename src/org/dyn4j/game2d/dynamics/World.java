@@ -47,7 +47,6 @@ import org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.game2d.collision.narrowphase.Penetration;
 import org.dyn4j.game2d.collision.narrowphase.Raycast;
 import org.dyn4j.game2d.collision.narrowphase.RaycastDetector;
-import org.dyn4j.game2d.collision.narrowphase.Separation;
 import org.dyn4j.game2d.dynamics.contact.Contact;
 import org.dyn4j.game2d.dynamics.contact.ContactAdapter;
 import org.dyn4j.game2d.dynamics.contact.ContactConstraint;
@@ -55,6 +54,7 @@ import org.dyn4j.game2d.dynamics.contact.ContactEdge;
 import org.dyn4j.game2d.dynamics.contact.ContactListener;
 import org.dyn4j.game2d.dynamics.contact.ContactManager;
 import org.dyn4j.game2d.dynamics.contact.ContactPoint;
+import org.dyn4j.game2d.dynamics.contact.TimeOfImpactSolver;
 import org.dyn4j.game2d.dynamics.joint.Joint;
 import org.dyn4j.game2d.dynamics.joint.JointEdge;
 import org.dyn4j.game2d.geometry.Convex;
@@ -129,6 +129,9 @@ public class World {
 	/** The {@link CoefficientMixer} */
 	protected CoefficientMixer coefficientMixer;
 	
+	/** The {@link TimeOfImpactSolver} */
+	protected TimeOfImpactSolver timeOfImpactSolver;
+	
 	/** The {@link Body} list */
 	protected List<Body> bodies;
 	
@@ -179,6 +182,7 @@ public class World {
 		this.destructionListener = new DestructionAdapter();
 		this.stepListener = new StepAdapter();
 		this.coefficientMixer = CoefficientMixer.DEFAULT_MIXER;
+		this.timeOfImpactSolver = new TimeOfImpactSolver();
 		this.bodies = new ArrayList<Body>();
 		this.joints = new ArrayList<Joint>();
 		this.island = new Island();
@@ -540,7 +544,26 @@ public class World {
 	}
 	
 	/**
-	 * Solves the time of impact for all bodies.
+	 * Solves the time of impact for all the {@link Body}s in this {@link World}.
+	 * <p>
+	 * This method solves for the time of impact for each {@link Body} iteratively
+	 * and pairwise.
+	 * <p>
+	 * The cases considered are:
+	 * <ul>
+	 * <li>Dynamic vs. Static</li>
+	 * <li>Dynamic vs. Bullet</li>
+	 * <li>Bullet  vs. Static</li>
+	 * </ul>
+	 * <p>
+	 * Cases skipped (including the converse of the above):
+	 * <ul>
+	 * <li>Inactive, asleep, or non-moving bodies</li>
+	 * <li>Bodies connected via a joint (with the collision flag as false)</li>
+	 * <li>Bodies already in contact</li>
+	 * <li>Fixtures whose filters return false</li>
+	 * <li>Sensor fixtures</li>
+	 * </ul>
 	 * @since 1.2.0
 	 */
 	protected void solveTOI() {
@@ -579,12 +602,20 @@ public class World {
 	
 	/**
 	 * Solves the time of impact for the given {@link Body}.
+	 * <p>
+	 * This method will find the first {@link Body} that the given {@link Body}
+	 * collides with unless ignored via the {@link TimeOfImpactListener}.
+	 * <p>
+	 * After the first {@link Body} is found the two {@link Body}s are interpolated
+	 * to the time of impact.
+	 * <p>
+	 * Then the {@link Body}s are position solved using the {@link TimeOfImpactSolver}
+	 * to force the {@link Body}s into collision.  This causes the discrete collision
+	 * detector to detect the collision on the next time step.
 	 * @param body the {@link Body}
 	 * @since 2.0.0
 	 */
 	protected void solveTOI(Body body) {
-		Settings settings = Settings.getInstance();
-		double tol = settings.getLinearTolerance();
 		int size = this.bodies.size();
 		
 		// setup the initial time bounds [0, 1]
@@ -643,33 +674,46 @@ public class World {
 		if (minToi != null) {
 			// get the time of impact info
 			double t = minToi.getToi();
-			Separation s = minToi.getSeparation();
-			if (s == null) {
-				// TODO remove me
-				System.out.println("null separation");
-				return;
-			}
-			// compute the distance to translate
-			double d = s.getDistance() + tol;
-			Vector2 n = s.getNormal();
 			
 			// move the dynamic body to the time of impact
 			body.transform0.lerp(body.transform, t, body.transform);
 			// check if the other body is dynamic
 			if (minBody.isDynamic()) {
-				// if the other body is dynamic then interpolate its transform
+				// if the other body is dynamic then interpolate its transform also
 				minBody.transform0.lerp(minBody.transform, t, minBody.transform);
 			}
+			// this should bring the bodies within d distance from one another
+			// we need to move the bodies more so that they are in collision
+			// so that on the next time step they are solved by the discrete
+			// collision detector
 			
-			// move the body along the separating axis the given distance plus
-			// the allowed penetration to place the objects in collision
-			// this will allow the discrete collision detection to find the
-			// collision and solve it normally
-			// TODO for rotating bodies this wont work/isnt right
-			body.translate(n.x * d, n.y * d);
+			// performs position correction on the body/bodies so that they are
+			// in collision and will be detected in the next time step
+			this.timeOfImpactSolver.solve(body, minBody, minToi);
 			
 			// this method does not conserve time
 		}
+	}
+	
+	/**
+	 * Performs a raycast against all the {@link Body}s in the {@link World}.
+	 * <p>
+	 * Alternative method to the {@link #raycast(Ray, double, boolean, boolean, List)} method.
+	 * @param start the start point
+	 * @param end the end point
+	 * @param ignoreSensors true if sensor {@link BodyFixture}s should be ignored
+	 * @param all true if all intersected {@link Body}s should be returned; false if only the closest {@link Body} should be returned
+	 * @param results a list to contain the results of the raycast
+	 * @return boolean true if at least one {@link Body} was intersected by the {@link Ray}
+	 * @since 2.0.0
+	 */
+	public boolean raycast(Vector2 start, Vector2 end, boolean ignoreSensors, boolean all, List<RaycastResult> results) {
+		// create the ray and obtain the maximum length
+		Vector2 d = start.to(end);
+		double maxLength = d.normalize();
+		Ray ray = new Ray(start, d);
+		// call the raycast method
+		return this.raycast(ray, maxLength, ignoreSensors, all, results);
 	}
 	
 	/**
@@ -738,6 +782,26 @@ public class World {
 		}
 		
 		return found;
+	}
+	
+	/**
+	 * Performs a raycast against the given {@link Body} and returns true
+	 * if the ray intersects the body.
+	 * @param start the start point
+	 * @param end the end point
+	 * @param body the {@link Body} to test
+	 * @param ignoreSensors whether or not to ignore sensor {@link BodyFixture}s
+	 * @param result the raycast result
+	 * @return boolean true if the {@link Ray} intersects the {@link Body}
+	 * @since 2.0.0
+	 */
+	public boolean raycast(Vector2 start, Vector2 end, Body body, boolean ignoreSensors, RaycastResult result) {
+		// create the ray and obtain the maximum length
+		Vector2 d = start.to(end);
+		double maxLength = d.normalize();
+		Ray ray = new Ray(start, d);
+		// call the raycast method
+		return this.raycast(ray, body, maxLength, ignoreSensors, result);
 	}
 	
 	/**
@@ -1286,6 +1350,25 @@ public class World {
 		// make sure the contact manager is not null
 		if (contactManager == null) throw new NullPointerException("The contact manager cannot be null.");
 		this.contactManager = contactManager;
+	}
+	
+	/**
+	 * Returns the {@link TimeOfImpactSolver}.
+	 * @return {@link TimeOfImpactSolver}
+	 * @since 2.0.0
+	 */
+	public TimeOfImpactSolver getTimeOfImpactSolver() {
+		return this.timeOfImpactSolver;
+	}
+	
+	/**
+	 * Sets the {@link TimeOfImpactSolver}.
+	 * @param timeOfImpactSolver the time of impact solver
+	 * @since 2.0.0
+	 */
+	public void setTimeOfImpactSolver(TimeOfImpactSolver timeOfImpactSolver) {
+		if (timeOfImpactSolver == null) throw new NullPointerException("The time of impact solver cannot be null.");
+		this.timeOfImpactSolver = timeOfImpactSolver;
 	}
 	
 	/**

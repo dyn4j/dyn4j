@@ -182,6 +182,18 @@ public class Entity extends Body {
 					(int) Math.ceil(0.125 * scale),
 					(int) Math.ceil(0.125 * scale));
 		}
+		
+		if (draw.drawRotationDisc()) {
+			// draw the rotation disc
+			graphics.setColor(Color.PINK);
+			// get the radius
+			double r = this.getRotationDiscRadius();
+			graphics.drawOval(
+					(int) Math.ceil((wCenter.x - r) * scale),
+					(int) Math.ceil((wCenter.y - r) * scale),
+					(int) Math.ceil(r * 2.0 * scale),
+					(int) Math.ceil(r * 2.0 * scale));
+		}
 	}
 	
 	/**
