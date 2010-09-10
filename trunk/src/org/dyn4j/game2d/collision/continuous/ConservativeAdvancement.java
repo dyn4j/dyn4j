@@ -297,6 +297,8 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 		for (int k = 0; k < f1size; k++) {
 			// get the shape
 			Fixture fixture1 = swept1.getFixture(k);
+			// ignore sensor fixtures
+			if (fixture1.isSensor()) continue;
 			Filter filter1 = fixture1.getFilter();
 			Convex convex1 = fixture1.getShape();
 			// compare the distance to every shape of
@@ -304,6 +306,8 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 			for (int l = 0; l < f2size; l++) {
 				// get the shape
 				Fixture fixture2 = swept2.getFixture(l);
+				// ignore sensor fixtures
+				if (fixture2.isSensor()) continue;
 				Filter filter2 = fixture2.getFilter();
 				Convex convex2 = fixture2.getShape();
 				

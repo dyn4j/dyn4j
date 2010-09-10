@@ -38,6 +38,7 @@ import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.Fixture;
 import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.Body;
+import org.dyn4j.game2d.dynamics.Settings;
 import org.dyn4j.game2d.dynamics.Step;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.dynamics.contact.ContactPoint;
@@ -182,6 +183,8 @@ public abstract class Test implements Comparable<Test> {
 	public void render(Graphics2D g, double width, double height) {
 		// immediately update the display size
 		this.size.setSize(width, height);
+		// get the settings
+		Settings settings = Settings.getInstance();
 		// get the draw flags singleton instance
 		Draw draw = Draw.getInstance();
 		// create the world to screen transform
@@ -227,14 +230,27 @@ public abstract class Test implements Comparable<Test> {
 		if (draw.drawVelocityVectors()) {
 			// set the color
 			g.setColor(Color.MAGENTA);
-			// draw the velocity for each body
+			// draw the velocities
 			for (int i = 0; i < size; i++) {
 				Body b = this.world.getBody(i);
 				Vector2 center = b.getWorldCenter();
 				Vector2 v = b.getVelocity();
-				// draw the velocity vector
+				double av = b.getAngularVelocity();
+				
+				// draw the linear velocity for each body
 				this.renderVector(g, v, center, scale);
+				
+				// draw the angular velocity for each body
+				double max = settings.getMaxRotation() / settings.getStepFrequency();
+				double rot = av / max * 720.0;
+				g.drawArc((int) Math.ceil((center.x - 0.125) * scale),
+						  (int) Math.ceil((center.y - 0.125) * scale),
+						  (int) Math.ceil(0.25 * scale),
+						  (int) Math.ceil(0.25 * scale),
+						  (int) Math.ceil(0.0),
+						  (int) Math.ceil(rot));
 			}
+			
 		}
 		
 		// see if the user wanted any contact information drawn

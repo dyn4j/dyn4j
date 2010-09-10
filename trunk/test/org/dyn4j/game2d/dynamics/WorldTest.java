@@ -41,6 +41,7 @@ import org.dyn4j.game2d.dynamics.contact.ContactAdapter;
 import org.dyn4j.game2d.dynamics.contact.ContactListener;
 import org.dyn4j.game2d.dynamics.contact.ContactManager;
 import org.dyn4j.game2d.dynamics.contact.ContactPoint;
+import org.dyn4j.game2d.dynamics.contact.TimeOfImpactSolver;
 import org.dyn4j.game2d.dynamics.joint.DistanceJoint;
 import org.dyn4j.game2d.dynamics.joint.Joint;
 import org.dyn4j.game2d.geometry.Convex;
@@ -764,6 +765,27 @@ public class WorldTest {
 	public void setNullCoefficientMixer() {
 		World w = new World();
 		w.setCoefficientMixer(null);
+	}
+	
+	/**
+	 * Tests the set time of impact solver method.
+	 */
+	@Test
+	public void setTimeOfImpactSolver() {
+		World w = new World();
+		TimeOfImpactSolver tois = new TimeOfImpactSolver();
+		w.setTimeOfImpactSolver(tois);
+		
+		TestCase.assertSame(tois, w.getTimeOfImpactSolver());
+	}
+	
+	/**
+	 * Tests the set time of impact solver method.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void setNullTimeOfImpactSolver() {
+		World w = new World();
+		w.setTimeOfImpactSolver(null);
 	}
 	
 	/**

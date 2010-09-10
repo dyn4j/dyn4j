@@ -27,7 +27,7 @@ package org.dyn4j.game2d.testbed;
 /**
  * Settings singleton for drawing.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Draw {
@@ -66,6 +66,9 @@ public class Draw {
 	
 	/** Whether to draw edge normals */
 	private boolean normals = false;
+	
+	/** Whether to draw body rotation discs or not */
+	private boolean rotationDisc = false;
 	
 	/** The singleton instance */
 	private static final Draw instance = new Draw();
@@ -268,5 +271,23 @@ public class Draw {
 	 */
 	public synchronized void setDrawNormals(boolean flag) {
 		this.normals = flag;
+	}
+	
+	/**
+	 * Returns true if body rotation discs should be drawn.
+	 * @return boolean
+	 * @since 2.0.0
+	 */
+	public boolean drawRotationDisc() {
+		return this.rotationDisc;
+	}
+	
+	/**
+	 * Sets whether body rotation discs should be drawn.
+	 * @param flag true if body rotation discs should be drawn
+	 * @since 2.0.0
+	 */
+	public synchronized void setDrawRotationDisc(boolean flag) {
+		this.rotationDisc = flag;
 	}
 }
