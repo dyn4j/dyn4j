@@ -28,7 +28,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import org.dyn4j.game2d.DaemonThreadFactory;
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.BoundsAdapter;
 import org.dyn4j.game2d.collision.BoundsListener;
@@ -68,7 +71,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Employs the same {@link Island} solving technique as <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.1.0
  * @since 1.0.0
  */
 public class World {
@@ -143,6 +146,15 @@ public class World {
 	
 	/** The accumulated time */
 	protected double time;
+	
+	/** The executor managing the thread pool and task assignment */
+	protected ExecutorService executor;
+	
+	/** The object lock for multithreading */
+	protected Object lock;
+	
+	/** The number of complete tasks */
+	protected int complete;
 	
 	/**
 	 * Default constructor.
@@ -296,6 +308,29 @@ public class World {
 		// notify the step listener
 		this.stepListener.begin(this.step, this);
 		
+		Settings settings = Settings.getInstance();
+		
+		// check for multithreading
+		boolean multithreading = settings.isMultithreadingEnabled();
+		// compute the task count
+		int taskCount = Settings.NUMBER_OF_CPUS * settings.getLoadFactor();
+		if (multithreading) {
+			// is the executor setup?
+			if (this.executor == null) {
+				// if not then set it up
+				this.executor = Executors.newFixedThreadPool(Settings.NUMBER_OF_CPUS * 2, new DaemonThreadFactory("CollisionThread"));
+				this.lock = new Object();
+				this.complete = 0;
+			}
+		} else {
+			if (this.executor != null) {
+				// if its not enable then we can release the resources
+				this.executor.shutdown();
+				this.executor = null;
+				this.lock = null;
+			}
+		}
+		
 		// clear the old contact list (does NOT clear the contact map
 		// which is used to warm start)
 		this.contactManager.clear();
@@ -341,93 +376,128 @@ public class World {
 			List<BroadphasePair<Body>> pairs = this.broadphaseDetector.detect(this.bodies);
 			int pSize = pairs.size();		
 			
-			// using the broad-phase results, test for narrow-phase
-			for (int i = 0; i < pSize; i++) {
-				BroadphasePair<Body> pair = pairs.get(i);
-				
-				// get the bodies
-				Body body1 = pair.getObject1();
-				Body body2 = pair.getObject2();
-				
-				// inactive objects don't have collision detection/response
-				if (!body1.isActive() || !body2.isActive()) continue;
-				// one body must be dynamic
-				if (!body1.isDynamic() && !body2.isDynamic()) continue;
-				// check for connected pairs who's collision is not allowed
-				if (body1.isConnected(body2, false)) continue;
-				
-				// notify of the broadphase collision
-				if (!this.collisionListener.collision(body1, body2)) {
-					// if the collision listener returned false then skip this collision
-					continue;
+			// check for multithreading enabled and compute the load
+			int load = pSize / taskCount;
+			// also make sure the load is greater than zero
+			if (multithreading && load != 0) {
+				// partition the work among the tasks
+				int start = 0, end;
+				for (int i = 0; i < taskCount; i++) {
+					// compute the end index
+					end = start + load;
+					// make sure the end index is not out of bounds
+					if (end >= pSize) {
+						end = pSize - 1;
+					}
+					// create a task
+					CollisionDetectionTask task = new CollisionDetectionTask(pairs, start, end);
+					// execute the task
+					this.executor.execute(task);
+					// compute the new start index
+					start = end + 1;
 				}
-	
-				// get their transforms
-				Transform transform1 = body1.transform;
-				Transform transform2 = body2.transform;
 				
-				// create a reusable penetration object
-				Penetration penetration = new Penetration();
-				// create a reusable manifold object
-				Manifold manifold = new Manifold();
-				
-				// loop through the fixtures of body 1
-				int b1Size = body1.getFixtureCount();
-				int b2Size = body2.getFixtureCount();
-				for (int j = 0; j < b1Size; j++) {
-					BodyFixture fixture1 = body1.getFixture(j);
-					Filter filter1 = fixture1.getFilter();
-					Convex convex1 = fixture1.getShape();
-					// test against each fixture of body 2
-					for (int k = 0; k < b2Size; k++) {
-						BodyFixture fixture2 = body2.getFixture(k);
-						Filter filter2 = fixture2.getFilter();
-						Convex convex2 = fixture2.getShape();
-						// test the filter
-						if (!filter1.isAllowed(filter2)) {
-							// if the collision is not allowed then continue
-							continue;
-						}
-						// test the two convex shapes
-						if (this.narrowphaseDetector.detect(convex1, transform1, convex2, transform2, penetration)) {
-							// check for zero penetration
-							if (penetration.getDepth() == 0.0) {
-								// this should only happen if numerical error occurs
+				// obtain the lock
+				synchronized (this.lock) {
+					// check if all the tasks have completed
+					while (this.complete < taskCount) {
+						try {
+							// if not then wait for notification
+							this.lock.wait();
+						} catch (InterruptedException e1) {}
+					}
+				}
+				// finally set complete to zero
+				this.complete = 0;
+			} else {
+				// using the broad-phase results, test for narrow-phase
+				for (int i = 0; i < pSize; i++) {
+					BroadphasePair<Body> pair = pairs.get(i);
+					
+					// get the bodies
+					Body body1 = pair.getObject1();
+					Body body2 = pair.getObject2();
+					
+					// inactive objects don't have collision detection/response
+					if (!body1.isActive() || !body2.isActive()) continue;
+					// one body must be dynamic
+					if (!body1.isDynamic() && !body2.isDynamic()) continue;
+					// check for connected pairs who's collision is not allowed
+					if (body1.isConnected(body2, false)) continue;
+					
+					// notify of the broadphase collision
+					if (!this.collisionListener.collision(body1, body2)) {
+						// if the collision listener returned false then skip this collision
+						continue;
+					}
+		
+					// get their transforms
+					Transform transform1 = body1.transform;
+					Transform transform2 = body2.transform;
+					
+					// create a reusable penetration object
+					Penetration penetration = new Penetration();
+					// create a reusable manifold object
+					Manifold manifold = new Manifold();
+					
+					// loop through the fixtures of body 1
+					int b1Size = body1.getFixtureCount();
+					int b2Size = body2.getFixtureCount();
+					for (int j = 0; j < b1Size; j++) {
+						BodyFixture fixture1 = body1.getFixture(j);
+						Filter filter1 = fixture1.getFilter();
+						Convex convex1 = fixture1.getShape();
+						// test against each fixture of body 2
+						for (int k = 0; k < b2Size; k++) {
+							BodyFixture fixture2 = body2.getFixture(k);
+							Filter filter2 = fixture2.getFilter();
+							Convex convex2 = fixture2.getShape();
+							// test the filter
+							if (!filter1.isAllowed(filter2)) {
+								// if the collision is not allowed then continue
 								continue;
 							}
-							// notify of the narrow-phase collision
-							if (!this.collisionListener.collision(body1, fixture1, body2, fixture2, penetration)) {
-								// if the collision listener returned false then skip this collision
-								continue;
-							}
-							// if there is penetration then find a contact manifold
-							// using the filled in penetration object
-							if (this.manifoldSolver.getManifold(penetration, convex1, transform1, convex2, transform2, manifold)) {
-								// check for zero points
-								if (manifold.getPoints().size() == 0) {
+							// test the two convex shapes
+							if (this.narrowphaseDetector.detect(convex1, transform1, convex2, transform2, penetration)) {
+								// check for zero penetration
+								if (penetration.getDepth() == 0.0) {
 									// this should only happen if numerical error occurs
 									continue;
 								}
-								// notify of the manifold solving result
-								if (!this.collisionListener.collision(body1, fixture1, body2, fixture2, manifold)) {
+								// notify of the narrow-phase collision
+								if (!this.collisionListener.collision(body1, fixture1, body2, fixture2, penetration)) {
 									// if the collision listener returned false then skip this collision
 									continue;
 								}
-								// compute the friction and restitution
-								double friction = this.coefficientMixer.mixFriction(fixture1.getFriction(), fixture2.getFriction());
-								double restitution = this.coefficientMixer.mixRestitution(fixture1.getRestitution(), fixture2.getRestitution());
-								// create a contact constraint
-								ContactConstraint contactConstraint = new ContactConstraint(body1, fixture1, 
-										                                                    body2, fixture2, 
-										                                                    manifold, 
-										                                                    friction, restitution);
-								// add a contact edge to both bodies
-								ContactEdge contactEdge1 = new ContactEdge(body2, contactConstraint);
-								ContactEdge contactEdge2 = new ContactEdge(body1, contactConstraint);
-								body1.contacts.add(contactEdge1);
-								body2.contacts.add(contactEdge2);
-								// add the contact constraint to the contact manager
-								this.contactManager.add(contactConstraint);
+								// if there is penetration then find a contact manifold
+								// using the filled in penetration object
+								if (this.manifoldSolver.getManifold(penetration, convex1, transform1, convex2, transform2, manifold)) {
+									// check for zero points
+									if (manifold.getPoints().size() == 0) {
+										// this should only happen if numerical error occurs
+										continue;
+									}
+									// notify of the manifold solving result
+									if (!this.collisionListener.collision(body1, fixture1, body2, fixture2, manifold)) {
+										// if the collision listener returned false then skip this collision
+										continue;
+									}
+									// compute the friction and restitution
+									double friction = this.coefficientMixer.mixFriction(fixture1.getFriction(), fixture2.getFriction());
+									double restitution = this.coefficientMixer.mixRestitution(fixture1.getRestitution(), fixture2.getRestitution());
+									// create a contact constraint
+									ContactConstraint contactConstraint = new ContactConstraint(body1, fixture1, 
+											                                                    body2, fixture2, 
+											                                                    manifold, 
+											                                                    friction, restitution);
+									// add a contact edge to both bodies
+									ContactEdge contactEdge1 = new ContactEdge(body2, contactConstraint);
+									ContactEdge contactEdge2 = new ContactEdge(body1, contactConstraint);
+									body1.contacts.add(contactEdge1);
+									body2.contacts.add(contactEdge2);
+									// add the contact constraint to the contact manager
+									this.contactManager.add(contactConstraint);
+								}
 							}
 						}
 					}
@@ -441,6 +511,12 @@ public class World {
 		// notify of all the contacts that will be solved and all the sensed contacts
 		this.contactManager.preSolveNotify(this.contactListener);
 		
+		// count the number of islands
+		List<Island> islands = null;
+		if (multithreading) {
+			islands = new ArrayList<Island>();
+		}
+		
 		// perform a depth first search of the contact graph
 		// to create islands for constraint solving
 		Stack<Body> stack = new Stack<Body>();
@@ -450,6 +526,14 @@ public class World {
 			Body seed = this.bodies.get(i);
 			// skip if asleep, in active, static, or already on an island
 			if (seed.isOnIsland() || seed.isAsleep() || !seed.isActive() || seed.isStatic()) continue;
+			
+			// set the island to the reusable island
+			Island island = this.island;
+			// check for multithreading
+			if (multithreading) {
+				// if its enabled then we need to use a new island each iteration
+				island = new Island();
+			}
 			
 			island.clear();
 			stack.clear();
@@ -517,8 +601,14 @@ public class World {
 				}
 			}
 			
-			// solve the island
-			island.solve(this.gravity, this.step);
+			// check for multithreading
+			if (multithreading) {
+				// if so then save the island for solving later
+				islands.add(island);
+			} else {
+				// solve the island
+				island.solve(this.gravity, this.step);
+			}
 			
 			// allow static bodies to participate in other islands
 			for (int j = 0; j < size; j++) {
@@ -526,6 +616,54 @@ public class World {
 				if (body.isStatic()) {
 					body.setOnIsland(false);
 				}
+			}
+		}
+		
+		// check for multithreading
+		if (multithreading) {
+			// get the number of islands to solve
+			int iSize = islands.size();
+			// partition the work load
+			int load = iSize / taskCount;
+			// check if the load is zero
+			if (load == 0) {
+				// then just solve sequentially
+				for (int i = 0; i < iSize; i++) {
+					// get the island
+					Island island = islands.get(i);
+					// solve it
+					island.solve(gravity, step);
+				}
+			} else {
+				// partition the work among the tasks
+				int start = 0, end;
+				for (int i = 0; i < taskCount; i++) {
+					// compute the end index
+					end = start + load;
+					// make sure the end index isn't over the bounds
+					if (end >= iSize) {
+						// set it to the last index
+						end = iSize - 1;
+					}
+					// create the task and start it
+					IslandSolveTask task = new IslandSolveTask(islands, start, end);
+					executor.execute(task);
+					// compute the new start index
+					start = end + 1;
+				}
+				
+				// wait for all the tasks to finish
+				synchronized (this.lock) {
+					// check if all the tasks are done
+					while (this.complete < taskCount) {
+						try {
+							// if not then wait until notified
+							this.lock.wait();
+						} catch (InterruptedException e1) {}
+					}
+				}
+				// set the number of complete tasks to zero
+				this.complete = 0;
 			}
 		}
 		
@@ -1509,5 +1647,191 @@ public class World {
 	 */
 	public Step getStep() {
 		return this.step;
+	}
+	
+	/**
+	 * Runnable task for multithreaded collision detection.
+	 * @author William Bittle
+	 * @version 2.1.0
+	 * @since 2.1.0
+	 */
+	private class CollisionDetectionTask implements Runnable {
+		/** The list of all the pairs of possible collisions */
+		private List<BroadphasePair<Body>> bodies = null;
+		
+		/** The starting index of this object's work load */
+		private int start;
+		
+		/** The ending index of this object's work load */
+		private int end;
+		
+		/**
+		 * Full constructor.
+		 * @param bodies the list of all the bodies
+		 * @param start the start index for this work unit
+		 * @param end the end index for this work unit
+		 */
+		public CollisionDetectionTask(List<BroadphasePair<Body>> bodies, int start, int end) {
+			this.bodies = bodies;
+			this.start = start;
+			this.end = end;
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.lang.Runnable#run()
+		 */
+		@Override
+		public void run() {
+			// all the workers read from the same list
+			for (int i = start; i <= end; i++) {
+				BroadphasePair<Body> pair = bodies.get(i);
+				// get the bodies
+				Body body1 = pair.getObject1();
+				Body body2 = pair.getObject2();
+				
+				// inactive objects don't have collision detection/response
+				if (!body1.isActive() || !body2.isActive()) continue;
+				// one body must be dynamic
+				if (!body1.isDynamic() && !body2.isDynamic()) continue;
+				// check for connected pairs who's collision is not allowed
+				if (body1.isConnected(body2, false)) continue;
+				
+				// notify of the broadphase collision
+				if (!collisionListener.collision(body1, body2)) {
+					// if the collision listener returned false then skip this collision
+					continue;
+				}
+	
+				// get their transforms
+				Transform transform1 = body1.transform;
+				Transform transform2 = body2.transform;
+				
+				// create a reusable penetration object
+				Penetration penetration = new Penetration();
+				// create a reusable manifold object
+				Manifold manifold = new Manifold();
+				
+				// loop through the fixtures of body 1
+				int b1Size = body1.getFixtureCount();
+				int b2Size = body2.getFixtureCount();
+				for (int j = 0; j < b1Size; j++) {
+					BodyFixture fixture1 = body1.getFixture(j);
+					Filter filter1 = fixture1.getFilter();
+					Convex convex1 = fixture1.getShape();
+					// test against each fixture of body 2
+					for (int k = 0; k < b2Size; k++) {
+						BodyFixture fixture2 = body2.getFixture(k);
+						Filter filter2 = fixture2.getFilter();
+						Convex convex2 = fixture2.getShape();
+						// test the filter
+						if (!filter1.isAllowed(filter2)) {
+							// if the collision is not allowed then continue
+							continue;
+						}
+						// test the two convex shapes
+						if (narrowphaseDetector.detect(convex1, transform1, convex2, transform2, penetration)) {
+							// check for zero penetration
+							if (penetration.getDepth() == 0.0) {
+								// this should only happen if numerical error occurs
+								continue;
+							}
+							// notify of the narrow-phase collision
+							if (!collisionListener.collision(body1, fixture1, body2, fixture2, penetration)) {
+								// if the collision listener returned false then skip this collision
+								continue;
+							}
+							// if there is penetration then find a contact manifold
+							// using the filled in penetration object
+							if (manifoldSolver.getManifold(penetration, convex1, transform1, convex2, transform2, manifold)) {
+								// check for zero points
+								if (manifold.getPoints().size() == 0) {
+									// this should only happen if numerical error occurs
+									continue;
+								}
+								// notify of the manifold solving result
+								if (!collisionListener.collision(body1, fixture1, body2, fixture2, manifold)) {
+									// if the collision listener returned false then skip this collision
+									continue;
+								}
+								// compute the friction and restitution
+								double friction = coefficientMixer.mixFriction(fixture1.getFriction(), fixture2.getFriction());
+								double restitution = coefficientMixer.mixRestitution(fixture1.getRestitution(), fixture2.getRestitution());
+								// create a contact constraint
+								ContactConstraint contactConstraint = new ContactConstraint(body1, fixture1, 
+										                                                    body2, fixture2, 
+										                                                    manifold, 
+										                                                    friction, restitution);
+								// add a contact edge to both bodies
+								ContactEdge contactEdge1 = new ContactEdge(body2, contactConstraint);
+								ContactEdge contactEdge2 = new ContactEdge(body1, contactConstraint);
+								// make sure we obtain the locks on the body first
+								synchronized (body1) {
+									body1.contacts.add(contactEdge1);
+								}
+								synchronized (body1) {
+									body2.contacts.add(contactEdge2);
+								}
+								// add the contact constraint to the contact manager
+								synchronized (contactManager) {
+									contactManager.add(contactConstraint);
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			// notify that we are done
+			synchronized (lock) {
+				complete++;
+				lock.notify();
+			}
+		}
+	}
+	
+	/**
+	 * Runnable task for multithreaded collision solving.
+	 * @author William Bittle
+	 * @version 2.1.0
+	 * @since 2.1.0
+	 */
+	private class IslandSolveTask implements Runnable {
+		/** The list of all the islands */
+		private List<Island> islands;
+
+		/** The starting index of this object's work load */
+		private int start;
+		
+		/** The ending index of this object's work load */
+		private int end;
+		
+		/**
+		 * Full constructor.
+		 * @param islands the list of all the islands
+		 * @param start the start index for this work unit
+		 * @param end the end index for this work unit
+		 */
+		private IslandSolveTask(List<Island> islands, int start, int end) {
+			this.islands = islands;
+			this.start = start;
+			this.end = end;
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.lang.Runnable#run()
+		 */
+		@Override
+		public void run() {
+			// all the workers read from the same list
+			for (int i = start; i <= end; i++) {
+				Island island = islands.get(i);
+				island.solve(gravity, step);
+			}
+			
+			synchronized (lock) {
+				complete++;
+				lock.notify();
+			}
+		}
 	}
 }

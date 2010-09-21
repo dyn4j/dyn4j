@@ -154,16 +154,9 @@ public class Matrix33 {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("[").append(this.m00)
-		.append(" ").append(this.m01)
-		.append(" ").append(this.m02)
-		.append(" ").append(this.m10)
-		.append(" ").append(this.m11)
-		.append(" ").append(this.m12)
-		.append(" ").append(this.m20)
-		.append(" ").append(this.m21)
-		.append(" ").append(this.m22)
-		.append("]");
+		sb.append("[").append(this.m00).append(" ").append(this.m01).append(" ").append(this.m02).append("][")
+		.append(this.m10).append(" ").append(this.m11).append(" ").append(this.m12).append("][")
+		.append(this.m20).append(" ").append(this.m21).append(" ").append(this.m22).append("]");
 		return sb.toString();
 	}
 	

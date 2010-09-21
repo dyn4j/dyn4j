@@ -24,40 +24,37 @@
  */
 package org.dyn4j.game2d;
 
+import java.util.concurrent.ThreadFactory;
+
 /**
- * The version of the engine.
+ * Thread factory that creates daemon threads instead of user threads.
  * @author William Bittle
  * @version 2.1.0
- * @since 1.0.0
+ * @since 2.1.0
  */
-public final class Version {
-	/** The major version number; API changes, major enhancements, etc. */
-	public static final int MAJOR = 2;
+public class DaemonThreadFactory implements ThreadFactory {
+	/** The name prefix for each thread created */
+	protected String prefix;
 	
-	/** The minor version number; minor enhancements, major bug fixes, etc. */
-	public static final int MINOR = 1;
-	
-	/** The revision number; minor bug fixes */
-	public static final int REVISION = 0;
+	/** The thread number */
+	protected long number;
 	
 	/**
-	 * Hide the constructor.
+	 * Full constructor.
+	 * @param prefix the thread name prefix
 	 */
-	private Version() {}
-	
-	/**
-	 * Returns the version as a string.
-	 * @return String
-	 */
-	public static String getVersion() {
-		return MAJOR + "." + MINOR + "." + REVISION;
+	public DaemonThreadFactory(String prefix) {
+		this.prefix = prefix;
+		this.number = 0;
 	}
 	
-	/**
-	 * Main class to print the version to the console.
-	 * @param args command line arguments (none accepted)
+	/* (non-Javadoc)
+	 * @see java.util.concurrent.ThreadFactory#newThread(java.lang.Runnable)
 	 */
-	public static final void main(String[] args) {
-		System.out.println("dyn4j v" + Version.getVersion());
+	@Override
+	public Thread newThread(Runnable r) {
+		Thread thread = new Thread(r, this.prefix + "-" + this.number++);
+		thread.setDaemon(true);
+		return thread;
 	}
 }

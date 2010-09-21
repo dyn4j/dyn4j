@@ -64,7 +64,7 @@ import org.dyn4j.game2d.geometry.Wound;
  * Using the {@link TestBed} class one can switch test without stopping
  * and starting the driver again.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.1.0
  * @since 1.0.0
  */
 public abstract class Test implements Comparable<Test> {
@@ -211,7 +211,7 @@ public abstract class Test implements Comparable<Test> {
 		// check if we should render normals
 		if (draw.drawNormals()) {
 			// set the color
-			g.setColor(Color.RED);
+			g.setColor(draw.getNormalsColor());
 			// draw all the normals for every convex on each shape
 			for (int i = 0; i < size; i++) {
 				Body b = this.world.getBody(i);
@@ -229,7 +229,7 @@ public abstract class Test implements Comparable<Test> {
 
 		if (draw.drawVelocityVectors()) {
 			// set the color
-			g.setColor(Color.MAGENTA);
+			g.setColor(draw.getVelocityColor());
 			// draw the velocities
 			for (int i = 0; i < size; i++) {
 				Body b = this.world.getBody(i);
@@ -242,7 +242,7 @@ public abstract class Test implements Comparable<Test> {
 				
 				// draw the angular velocity for each body
 				double max = settings.getMaxRotation() / settings.getStepFrequency();
-				double rot = av / max * 720.0;
+				double rot = -av / max * 720.0;
 				g.drawArc((int) Math.ceil((center.x - 0.125) * scale),
 						  (int) Math.ceil((center.y - 0.125) * scale),
 						  (int) Math.ceil(0.25 * scale),
@@ -273,7 +273,7 @@ public abstract class Test implements Comparable<Test> {
 					Vector2 c1 = cp.getBody1().getTransform().getTransformed(cp.getFixture1().getShape().getCenter());
 					Vector2 c2 = cp.getBody2().getTransform().getTransformed(cp.getFixture2().getShape().getCenter());
 					// draw a line between them
-					g.setColor(Color.YELLOW);
+					g.setColor(draw.getContactPairsColor());
 					g.drawLine((int) Math.ceil(c1.x * scale),
 							   (int) Math.ceil(c1.y * scale), 
 							   (int) Math.ceil(c2.x * scale),
@@ -282,7 +282,7 @@ public abstract class Test implements Comparable<Test> {
 				
 				// draw the contact
 				if (draw.drawContacts()) {
-					g.setColor(Color.ORANGE);
+					g.setColor(draw.getContactColor());
 					// draw the contact as a square
 					g.fillRect((int) Math.ceil((c.x - 0.025) * scale),
 							   (int) Math.ceil((c.y - 0.025) * scale), 
@@ -292,7 +292,7 @@ public abstract class Test implements Comparable<Test> {
 				
 				// check if the contact is a solved contact
 				if (cp instanceof SolvedContactPoint) {
-					g.setColor(Color.BLUE);
+					g.setColor(draw.getContactForcesColor());
 					SolvedContactPoint scp = (SolvedContactPoint) cp;
 					Vector2 n = scp.getNormal();
 					Vector2 t = n.cross(1.0);
@@ -307,6 +307,7 @@ public abstract class Test implements Comparable<Test> {
 								   (int) Math.ceil((c.y + n.y * j) * scale));
 					}
 					
+					g.setColor(draw.getFrictionForcesColor());
 					// draw the friction forces
 					if (draw.drawFrictionForces()) {
 						g.drawLine((int) Math.ceil(c.x * scale),
@@ -344,7 +345,7 @@ public abstract class Test implements Comparable<Test> {
 		// draw the bounds
 		if (draw.drawBounds()) {
 			// draw the bounds
-			g.setColor(Color.CYAN);
+			g.setColor(draw.getBoundsColor());
 			// get the bounds object
 			Bounds bounds = this.world.getBounds();
 			// check the type

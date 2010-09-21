@@ -116,10 +116,8 @@ public class Matrix22 {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("[").append(this.m00)
-		.append(" ").append(this.m01)
-		.append(" ").append(this.m10)
-		.append(" ").append(this.m11).append("]");
+		sb.append("[").append(this.m00).append(" ").append(this.m01).append("][")
+		.append(this.m10).append(" ").append(this.m11).append("]");
 		return sb.toString();
 	}
 	

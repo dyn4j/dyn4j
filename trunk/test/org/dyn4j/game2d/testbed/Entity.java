@@ -46,7 +46,7 @@ import org.dyn4j.game2d.geometry.Vector2;
 /**
  * Represents a game entity.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.1.0
  * @since 1.0.0
  */
 public class Entity extends Body {
@@ -175,7 +175,7 @@ public class Entity extends Body {
 		
 		if (draw.drawCenter()) {
 			// draw the center of mass
-			graphics.setColor(Color.GREEN);
+			graphics.setColor(draw.getCenterColor());
 			graphics.drawOval(
 					(int) Math.ceil((wCenter.x - 0.0625) * scale),
 					(int) Math.ceil((wCenter.y - 0.0625) * scale),
@@ -185,7 +185,7 @@ public class Entity extends Body {
 		
 		if (draw.drawRotationDisc()) {
 			// draw the rotation disc
-			graphics.setColor(Color.PINK);
+			graphics.setColor(draw.getRotationDiscColor());
 			// get the radius
 			double r = this.getRotationDiscRadius();
 			graphics.drawOval(
