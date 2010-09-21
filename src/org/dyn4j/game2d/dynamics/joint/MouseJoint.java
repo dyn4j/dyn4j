@@ -38,7 +38,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.1.0
  * @since 1.0.0
  */
 public class MouseJoint extends Joint {
@@ -196,7 +196,7 @@ public class MouseJoint extends Joint {
 		Vector2 J = this.K.solve(jvb);
 		
 		// clamp using the maximum force
-		Vector2 oldImpulse = this.impulse;
+		Vector2 oldImpulse = this.impulse.copy();
 		this.impulse.add(J);
 		double maxImpulse = step.getDeltaTime() * this.maxForce;
 		if (this.impulse.getMagnitudeSquared() > maxImpulse * maxImpulse) {

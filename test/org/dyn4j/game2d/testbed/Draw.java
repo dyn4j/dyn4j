@@ -24,36 +24,59 @@
  */
 package org.dyn4j.game2d.testbed;
 
+import java.awt.Color;
+
 /**
  * Settings singleton for drawing.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.1.0
  * @since 1.0.0
  */
 public class Draw {
 	/** Whether to draw centers of mass or not */
 	private boolean center = false;
 	
+	/** The color used when rendering the center */
+	private Color centerColor = Color.GREEN;
+	
 	/** Whether to draw velocity vectors or not */
 	private boolean velocity = false;
+	
+	/** The color used when rendering velocity vectors */
+	private Color velocityColor = Color.MAGENTA;
 	
 	/** Whether to draw contacts or not */
 	private boolean contacts = false;
 	
+	/** The color used when rendering contact points */
+	private Color contactColor = Color.ORANGE;
+	
 	/** Whether to draw contact forces or not */
 	private boolean contactForces = false;
+	
+	/** The color used when rendering contact forces */
+	private Color contactForcesColor = Color.BLUE;
 	
 	/** Whether to draw contact pairs or not */
 	private boolean contactPairs = false;
 	
+	/** The color used when rendering contact pairs */
+	private Color contactPairsColor = Color.YELLOW;
+	
 	/** Whether to draw contact friction forces or not */
 	private boolean frictionForces = false;
+	
+	/** The color used when rendering friction forces */
+	private Color frictionForcesColor = Color.BLUE;
 	
 	/** Whether to draw joints or not */
 	private boolean joints = true;
 	
 	/** Whether to draw the bounds or not */
 	private boolean bounds = false;
+	
+	/** The color used when rendering the bounds */
+	private Color boundsColor = Color.CYAN;
 	
 	/** Whether to draw the metrics panel or not */
 	private boolean panel = true;
@@ -67,11 +90,23 @@ public class Draw {
 	/** Whether to draw edge normals */
 	private boolean normals = false;
 	
+	/** The color used when rendering normals */
+	private Color normalsColor = Color.RED;
+	
 	/** Whether to draw body rotation discs or not */
 	private boolean rotationDisc = false;
 	
+	/** The color used when rendering rotation discs */
+	private Color rotationDiscColor = Color.PINK;
+	
 	/** The singleton instance */
 	private static final Draw instance = new Draw();
+	
+	/**
+	 * Hidden default constructor.
+	 * @since 2.1.0
+	 */
+	private Draw() {}
 	
 	/**
 	 * Returns the singleton instance.
@@ -289,5 +324,167 @@ public class Draw {
 	 */
 	public synchronized void setDrawRotationDisc(boolean flag) {
 		this.rotationDisc = flag;
+	}
+	
+	/**
+	 * Returns the color used when drawing the center of mass.
+	 * @return Color
+	 * @since 2.1.0
+	 */
+	public Color getCenterColor() {
+		return centerColor;
+	}
+	
+	/**
+	 * Sets the color to use when drawing the center of mass.
+	 * @param centerColor the color
+	 * @since 2.1.0
+	 */
+	public synchronized void setCenterColor(Color centerColor) {
+		this.centerColor = centerColor;
+	}
+	
+	/**
+	 * Returns the color used when drawing velocity vectors.
+	 * @return Color
+	 * @since 2.1.0
+	 */
+	public Color getVelocityColor() {
+		return velocityColor;
+	}
+	
+	/**
+	 * Sets the color used when drawing velocity vectors.
+	 * @param velocityColor the color
+	 * @since 2.1.0
+	 */
+	public synchronized void setVelocityColor(Color velocityColor) {
+		this.velocityColor = velocityColor;
+	}
+	
+	/**
+	 * Returns the color used when drawing contact points.
+	 * @return Color
+	 * @since 2.1.0
+	 */
+	public Color getContactColor() {
+		return contactColor;
+	}
+	
+	/**
+	 * Sets the color used when drawing contact points.
+	 * @param contactColor the color
+	 * @since 2.1.0
+	 */
+	public synchronized void setContactColor(Color contactColor) {
+		this.contactColor = contactColor;
+	}
+	
+	/**
+	 * Returns the color used when drawing contact normal forces.
+	 * @return Color
+	 * @since 2.1.0
+	 */
+	public Color getContactForcesColor() {
+		return contactForcesColor;
+	}
+	
+	/**
+	 * Sets the color used when drawing contact normal forces.
+	 * @param contactForcesColor the color
+	 * @since 2.1.0
+	 */
+	public synchronized void setContactForcesColor(Color contactForcesColor) {
+		this.contactForcesColor = contactForcesColor;
+	}
+	
+	/**
+	 * Returns the color used when drawing contact pairs.
+	 * @return Color
+	 * @since 2.1.0
+	 */
+	public Color getContactPairsColor() {
+		return contactPairsColor;
+	}
+	
+	/**
+	 * Sets the color used when drawing contact pairs.
+	 * @param contactPairsColor the color
+	 * @since 2.1.0
+	 */
+	public synchronized void setContactPairsColor(Color contactPairsColor) {
+		this.contactPairsColor = contactPairsColor;
+	}
+	
+	/**
+	 * Returns the color used when drawing contact friction forces.
+	 * @return Color
+	 * @since 2.1.0
+	 */
+	public Color getFrictionForcesColor() {
+		return frictionForcesColor;
+	}
+	
+	/**
+	 * Sets the color used when drawing contact friction forces.
+	 * @param frictionForcesColor the color
+	 * @since 2.1.0
+	 */
+	public synchronized void setFrictionForcesColor(Color frictionForcesColor) {
+		this.frictionForcesColor = frictionForcesColor;
+	}
+	
+	/**
+	 * Returns the color used when drawing the bounds.
+	 * @return Color
+	 * @since 2.1.0
+	 */
+	public Color getBoundsColor() {
+		return boundsColor;
+	}
+	
+	/**
+	 * Sets the color used when drawing the bounds.
+	 * @param boundsColor the color
+	 * @since 2.1.0
+	 */
+	public synchronized void setBoundsColor(Color boundsColor) {
+		this.boundsColor = boundsColor;
+	}
+	
+	/**
+	 * Returns the color used when drawing surface normals.
+	 * @return Color
+	 * @since 2.1.0
+	 */
+	public Color getNormalsColor() {
+		return normalsColor;
+	}
+	
+	/**
+	 * Sets the color used when drawing surface normals.
+	 * @param normalsColor the color
+	 * @since 2.1.0
+	 */
+	public synchronized void setNormalsColor(Color normalsColor) {
+		this.normalsColor = normalsColor;
+	}
+	
+	/**
+	 * Returns the color used when drawing rotation discs.
+	 * @return Color
+	 * @since 2.1.0
+	 */
+	public Color getRotationDiscColor() {
+		return rotationDiscColor;
+	}
+	
+	/**
+	 * Sets the color used when drawing rotation discs.
+	 * @param rotationDiscColor the color
+	 * @since 2.1.0
+	 */
+	public synchronized void setRotationDiscColor(Color rotationDiscColor) {
+		this.rotationDiscColor = rotationDiscColor;
 	}
 }

@@ -32,10 +32,13 @@ import org.dyn4j.game2d.dynamics.contact.ContactConstraintSolver;
  * Attempting to set any setting to a value outside the range in effects sets
  * the setting to the min or max of the range.
  * @author William Bittle
- * @version 1.2.0
+ * @version 2.1.0
  * @since 1.0.0
  */
 public class Settings {
+	/** The number of CPUs available */
+	public static final int NUMBER_OF_CPUS = Runtime.getRuntime().availableProcessors();
+	
 	/** The default step frequency of the dynamics engine; in seconds */
 	public static final double DEFAULT_STEP_FREQUENCY = 1.0 / 60.0;
 	
@@ -77,6 +80,9 @@ public class Settings {
 	
 	/** The default baumgarte */
 	public static final double DEFAULT_BAUMGARTE = 0.2;
+	
+	/** The default load factor for multithreaded tasks */
+	public static final int DEFAULT_LOAD_FACTOR = 4;
 
 	/** The step frequency of the dynamics engine */
 	private double stepFequency = Settings.DEFAULT_STEP_FREQUENCY;
@@ -159,6 +165,12 @@ public class Settings {
 	/** The continuous collision detection flag */
 	private boolean continuousCollisionDetectionEnabled = true;
 	
+	/** Whether multithreading is enabled or not */
+	private boolean multithreadingEnabled = true;
+	
+	/** The load factor for each task; higher = less load, lower = more load */
+	private int loadFactor = Settings.DEFAULT_LOAD_FACTOR;
+	
 	/** The settings singleton instance */
 	private static final Settings instance = new Settings();
 	
@@ -196,7 +208,10 @@ public class Settings {
 		.append(this.maxLinearCorrection).append("|")
 		.append(this.maxAngularCorrection).append("|")
 		.append(this.baumgarte).append("|")
-		.append(this.continuousCollisionDetectionEnabled).append("]");
+		.append(this.continuousCollisionDetectionEnabled).append("|")
+		.append(this.multithreadingEnabled).append("|")
+		.append(this.loadFactor)
+		.append("]");
 		return sb.toString();
 	}
 	
@@ -229,6 +244,8 @@ public class Settings {
 		this.angularToleranceSquared = Settings.DEFAULT_ANGULAR_TOLERANCE * Settings.DEFAULT_ANGULAR_TOLERANCE;
 		this.baumgarte = Settings.DEFAULT_BAUMGARTE;
 		this.continuousCollisionDetectionEnabled = true;
+		this.multithreadingEnabled = true;
+		this.loadFactor = Settings.DEFAULT_LOAD_FACTOR;
 	}
 	
 	/**
@@ -709,5 +726,44 @@ public class Settings {
 	 */
 	public void setContinuousCollisionDetectionEnabled(boolean flag) {
 		this.continuousCollisionDetectionEnabled = flag;
+	}
+	
+	/**
+	 * Returns true if multithreading is enabled.
+	 * @return boolean
+	 * @since 2.1.0
+	 */
+	public boolean isMultithreadingEnabled() {
+		return this.multithreadingEnabled;
+	}
+	
+	/**
+	 * Sets the multithreading enabled flag.
+	 * @param flag true if multithreading should be enabled
+	 * @since 2.1.0
+	 */
+	public void setMultithreadingEnabled(boolean flag) {
+		this.multithreadingEnabled = flag;
+	}
+	
+	/**
+	 * Returns the multithreading load factor.
+	 * @return int the load factor
+	 * @since 2.1.0
+	 */
+	public int getLoadFactor() {
+		return this.loadFactor;
+	}
+	
+	/**
+	 * Sets the multithreading load factor.
+	 * <p>
+	 * Higher values decrease the load per task and increase the number of tasks whereas
+	 * lower values increase the load per task and decrease the number of tasks.
+	 * @param loadFactor the load factor
+	 * @since 2.1.0
+	 */
+	public void setLoadFactor(int loadFactor) {
+		this.loadFactor = loadFactor;
 	}
 }

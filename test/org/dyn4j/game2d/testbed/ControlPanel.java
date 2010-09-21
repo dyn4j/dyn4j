@@ -26,9 +26,11 @@ package org.dyn4j.game2d.testbed;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -53,11 +55,13 @@ import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.ListCellRenderer;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -78,7 +82,7 @@ import org.dyn4j.game2d.dynamics.Settings;
 /**
  * The JFrame that controls the TestBed.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.1.0
  * @since 1.0.0
  */
 public class ControlPanel extends JFrame {
@@ -117,6 +121,23 @@ public class ControlPanel extends JFrame {
 		{"U", "Increases the metrics update rate"},
 		{"u", "Decreases the metrics update rate"}
 		};
+	
+	/** A static listing of all colors */
+	private static final Color[] COLORS = new Color[] {
+		Color.BLACK,
+		Color.DARK_GRAY,
+		Color.GRAY,
+		Color.LIGHT_GRAY,
+		Color.WHITE,
+		Color.CYAN,
+		Color.BLUE,
+		Color.YELLOW,
+		Color.GREEN,
+		Color.MAGENTA,
+		Color.ORANGE,
+		Color.RED,
+		Color.PINK
+	};
 	
 	/** Map of available test to run */
 	private List<Test> tests;
@@ -322,7 +343,7 @@ public class ControlPanel extends JFrame {
 		this.add(tabs, BorderLayout.CENTER);
 		
 		// set the preferred width
-		this.setPreferredSize(new Dimension(450, 710));
+		this.setPreferredSize(new Dimension(450, 759));
 		
 		// pack the layout
 		this.pack();
@@ -421,7 +442,7 @@ public class ControlPanel extends JFrame {
 		pnlTest.setLayout(new GridBagLayout());
 
 		JLabel lblTest = new JLabel("Tests", this.helpIcon, JLabel.LEFT);
-		lblTest.setToolTipText("After selecting a test and clicking Run, check the controls tab for any test specific controls.");
+		lblTest.setToolTipText("<html>After selecting a test and clicking Run,<br />check the controls tab for any test specific controls.</html>");
 		pnlTest.add(lblTest, new GridBagConstraints(
 				0, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
@@ -518,6 +539,7 @@ public class ControlPanel extends JFrame {
 		pnlDraw.add(lblCenter, new GridBagConstraints(
 				0, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
+		// add the check box
 		JCheckBox chkCenter = new JCheckBox();
 		chkCenter.setSelected(draw.drawCenter());
 		chkCenter.addActionListener(new ActionListener() {
@@ -530,6 +552,26 @@ public class ControlPanel extends JFrame {
 		});
 		pnlDraw.add(chkCenter, new GridBagConstraints(
 				1, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		// add the drop down for color selection
+		JComboBox cmbCenter = new JComboBox(COLORS);
+		// set the initial value
+		cmbCenter.setSelectedItem(draw.getCenterColor());
+		// set the custom renderer
+		cmbCenter.setRenderer(new ColorListCellRenderer());
+		// add a listener for the selection
+		cmbCenter.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// get the selected color
+				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				// set the new color
+				Draw draw = Draw.getInstance();
+				draw.setCenterColor(color);
+			}
+		});
+		pnlDraw.add(cmbCenter, new GridBagConstraints(
+				2, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// draw velocity vectors
@@ -550,6 +592,26 @@ public class ControlPanel extends JFrame {
 		pnlDraw.add(chkVelocity, new GridBagConstraints(
 				1, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
+		// add the drop down for color selection
+		JComboBox cmbVelocity = new JComboBox(COLORS);
+		// set the initial value
+		cmbVelocity.setSelectedItem(draw.getVelocityColor());
+		// set the custom renderer
+		cmbVelocity.setRenderer(new ColorListCellRenderer());
+		// add a listener for the selection
+		cmbVelocity.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// get the selected color
+				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				// set the new color
+				Draw draw = Draw.getInstance();
+				draw.setVelocityColor(color);
+			}
+		});
+		pnlDraw.add(cmbVelocity, new GridBagConstraints(
+				2, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// draw contact points
 		JLabel lblContacts = new JLabel("Contact Points");
@@ -568,6 +630,26 @@ public class ControlPanel extends JFrame {
 		});
 		pnlDraw.add(chkContacts, new GridBagConstraints(
 				1, 2, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		// add the drop down for color selection
+		JComboBox cmbContact = new JComboBox(COLORS);
+		// set the initial value
+		cmbContact.setSelectedItem(draw.getContactColor());
+		// set the custom renderer
+		cmbContact.setRenderer(new ColorListCellRenderer());
+		// add a listener for the selection
+		cmbContact.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// get the selected color
+				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				// set the new color
+				Draw draw = Draw.getInstance();
+				draw.setContactColor(color);
+			}
+		});
+		pnlDraw.add(cmbContact, new GridBagConstraints(
+				2, 2, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// draw contact forces
@@ -588,6 +670,26 @@ public class ControlPanel extends JFrame {
 		pnlDraw.add(chkContactForces, new GridBagConstraints(
 				1, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
+		// add the drop down for color selection
+		JComboBox cmbContactForces = new JComboBox(COLORS);
+		// set the initial value
+		cmbContactForces.setSelectedItem(draw.getContactForcesColor());
+		// set the custom renderer
+		cmbContactForces.setRenderer(new ColorListCellRenderer());
+		// add a listener for the selection
+		cmbContactForces.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// get the selected color
+				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				// set the new color
+				Draw draw = Draw.getInstance();
+				draw.setContactForcesColor(color);
+			}
+		});
+		pnlDraw.add(cmbContactForces, new GridBagConstraints(
+				2, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// draw friction forces
 		JLabel lblFrictionForces = new JLabel("Friction Impulses");
@@ -607,6 +709,26 @@ public class ControlPanel extends JFrame {
 		pnlDraw.add(chkFrictionForces, new GridBagConstraints(
 				1, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
+		// add the drop down for color selection
+		JComboBox cmbFrictionForces = new JComboBox(COLORS);
+		// set the initial value
+		cmbFrictionForces.setSelectedItem(draw.getFrictionForcesColor());
+		// set the custom renderer
+		cmbFrictionForces.setRenderer(new ColorListCellRenderer());
+		// add a listener for the selection
+		cmbFrictionForces.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// get the selected color
+				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				// set the new color
+				Draw draw = Draw.getInstance();
+				draw.setFrictionForcesColor(color);
+			}
+		});
+		pnlDraw.add(cmbFrictionForces, new GridBagConstraints(
+				2, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// draw contact pairs
 		JLabel lblContactPairs = new JLabel("Contact Pairs");
@@ -625,6 +747,26 @@ public class ControlPanel extends JFrame {
 		});
 		pnlDraw.add(chkContactPairs, new GridBagConstraints(
 				1, 5, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		// add the drop down for color selection
+		JComboBox cmbContactPairs = new JComboBox(COLORS);
+		// set the initial value
+		cmbContactPairs.setSelectedItem(draw.getContactPairsColor());
+		// set the custom renderer
+		cmbContactPairs.setRenderer(new ColorListCellRenderer());
+		// add a listener for the selection
+		cmbContactPairs.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// get the selected color
+				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				// set the new color
+				Draw draw = Draw.getInstance();
+				draw.setContactPairsColor(color);
+			}
+		});
+		pnlDraw.add(cmbContactPairs, new GridBagConstraints(
+				2, 5, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// draw joints
@@ -663,6 +805,26 @@ public class ControlPanel extends JFrame {
 		});
 		pnlDraw.add(chkBounds, new GridBagConstraints(
 				1, 7, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		// add the drop down for color selection
+		JComboBox cmbBounds = new JComboBox(COLORS);
+		// set the initial value
+		cmbBounds.setSelectedItem(draw.getBoundsColor());
+		// set the custom renderer
+		cmbBounds.setRenderer(new ColorListCellRenderer());
+		// add a listener for the selection
+		cmbBounds.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// get the selected color
+				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				// set the new color
+				Draw draw = Draw.getInstance();
+				draw.setBoundsColor(color);
+			}
+		});
+		pnlDraw.add(cmbBounds, new GridBagConstraints(
+				2, 7, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// draw text
@@ -740,6 +902,26 @@ public class ControlPanel extends JFrame {
 		pnlDraw.add(chkRotDisc, new GridBagConstraints(
 				1, 11, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
+		// add the drop down for color selection
+		JComboBox cmbRotDisc = new JComboBox(COLORS);
+		// set the initial value
+		cmbRotDisc.setSelectedItem(draw.getRotationDiscColor());
+		// set the custom renderer
+		cmbRotDisc.setRenderer(new ColorListCellRenderer());
+		// add a listener for the selection
+		cmbRotDisc.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// get the selected color
+				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				// set the new color
+				Draw draw = Draw.getInstance();
+				draw.setRotationDiscColor(color);
+			}
+		});
+		pnlDraw.add(cmbRotDisc, new GridBagConstraints(
+				2, 11, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// draw normals?
 		JLabel lblNormals = new JLabel("Edge Normals");
@@ -757,7 +939,27 @@ public class ControlPanel extends JFrame {
 			}
 		});
 		pnlDraw.add(chkNormals, new GridBagConstraints(
-				1, 12, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, 
+				1, 12, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		// add the drop down for color selection
+		JComboBox cmbNormals = new JComboBox(COLORS);
+		// set the initial value
+		cmbNormals.setSelectedItem(draw.getNormalsColor());
+		// set the custom renderer
+		cmbNormals.setRenderer(new ColorListCellRenderer());
+		// add a listener for the selection
+		cmbNormals.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// get the selected color
+				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				// set the new color
+				Draw draw = Draw.getInstance();
+				draw.setNormalsColor(color);
+			}
+		});
+		pnlDraw.add(cmbNormals, new GridBagConstraints(
+				2, 12, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		panel.add(pnlDraw);
@@ -785,6 +987,9 @@ public class ControlPanel extends JFrame {
 		// create some insets for all the panels
 		Insets insets = new Insets(2, 2, 2, 2);
 		
+		// set the width of the first column
+		int w1 = 220;
+		
 		//////////////////////////////////////////////////
 		// general group
 		//////////////////////////////////////////////////
@@ -797,7 +1002,8 @@ public class ControlPanel extends JFrame {
 		
 		// broad-phase
 		JLabel lblBPCDAlgo = new JLabel("Broad-phase Collision Detection Algorithm", this.helpIcon, JLabel.LEFT);
-		lblBPCDAlgo.setToolTipText("Specifies the algorithm used to handle broad-phase collision detection.");
+		lblBPCDAlgo.setPreferredSize(new Dimension(w1, 20));
+		lblBPCDAlgo.setToolTipText("<html>Specifies the algorithm used to handle<br />broad-phase collision detection.</html>");
 		pnlGeneral.add(lblBPCDAlgo, new GridBagConstraints(
 				0, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
@@ -820,12 +1026,12 @@ public class ControlPanel extends JFrame {
 		});
 		// add the button to the panel
 		pnlGeneral.add(btnBPCDAlgo, new GridBagConstraints(
-				2, 0, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
+				2, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// narrow-phase
 		JLabel lblCDAlgo = new JLabel("Narrow-phase Collision Detection Algorithm", this.helpIcon, JLabel.LEFT);
-		lblCDAlgo.setToolTipText("Specifies the algorithm used to handle narrow-phase collision detection.");
+		lblCDAlgo.setToolTipText("<html>Specifies the algorithm used to handle<br />narrow-phase collision detection.</html>");
 		pnlGeneral.add(lblCDAlgo, new GridBagConstraints(
 				0, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
@@ -848,12 +1054,12 @@ public class ControlPanel extends JFrame {
 		});
 		// add the button to the panel
 		pnlGeneral.add(btnCDAlgo, new GridBagConstraints(
-				2, 1, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
+				2, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// manifold
 		JLabel lblMSAlgo = new JLabel("Manifold Solving Algorithm", this.helpIcon, JLabel.LEFT);
-		lblMSAlgo.setToolTipText("Specifies the algorithm used to create collision manifolds.");
+		lblMSAlgo.setToolTipText("<html>Specifies the algorithm used to create<br />collision manifolds.</html>");
 		pnlGeneral.add(lblMSAlgo, new GridBagConstraints(
 				0, 2, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
@@ -876,12 +1082,12 @@ public class ControlPanel extends JFrame {
 		});
 		// add the button to the panel
 		pnlGeneral.add(btnMSAlgo, new GridBagConstraints(
-				2, 2, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
+				2, 2, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// continuous collision detection
 		JLabel lblTOIAlgo = new JLabel("Time Of Impact Detection Algorithm", this.helpIcon, JLabel.LEFT);
-		lblTOIAlgo.setToolTipText("Specifies the time of impact algorithm used for continuous collision detection.");
+		lblTOIAlgo.setToolTipText("<html>Specifies the time of impact algorithm used<br />for continuous collision detection.</html>");
 		pnlGeneral.add(lblTOIAlgo, new GridBagConstraints(
 				0, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
@@ -904,19 +1110,20 @@ public class ControlPanel extends JFrame {
 		});
 		// add the button to the panel
 		pnlGeneral.add(btnTOIAlgo, new GridBagConstraints(
-				2, 3, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
+				2, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// step frequency
 		JLabel lblStep = new JLabel("Step Fequency", this.helpIcon, JLabel.LEFT);
-		lblStep.setToolTipText("Specifies the number of updates the dynamics engine will attempt to perform per second.");
+		lblStep.setToolTipText("<html>Specifies the number of updates the dynamics<br />engine will attempt to perform per second.</html>");
 		pnlGeneral.add(lblStep, new GridBagConstraints(
 				0, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		JSpinner spnStep = new JSpinner(new SpinnerNumberModel(1.0 / settings.getStepFrequency(), 30.0, 999.0, 5.0));
+		JSpinner spnStep = new JSpinner(new SpinnerNumberModel(1.0 / settings.getStepFrequency(), 30, 995, 5));
 		spnStep.setEditor(new JSpinner.NumberEditor(spnStep, "0"));
 		((JSpinner.DefaultEditor)spnStep.getEditor()).getTextField().setColumns(3);
+		((JSpinner.DefaultEditor)spnStep.getEditor()).getTextField().setEditable(false);
 		spnStep.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -933,12 +1140,12 @@ public class ControlPanel extends JFrame {
 		// create the unit label
 		JLabel lblStepUnit = new JLabel("<html>second<sup>-1</sup></html>");
 		pnlGeneral.add(lblStepUnit, new GridBagConstraints(
-				2, 4, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
+				2, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// max velocity
 		JLabel lblMaxV = new JLabel("Maximum Translation", this.helpIcon, JLabel.LEFT);
-		lblMaxV.setToolTipText("Specifies the maximum translation a body can have in one time step.");
+		lblMaxV.setToolTipText("<html>Specifies the maximum translation a body can<br />have in one time step.</html>");
 		pnlGeneral.add(lblMaxV, new GridBagConstraints(
 				0, 5, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
@@ -962,19 +1169,19 @@ public class ControlPanel extends JFrame {
 		// create the unit label
 		JLabel lblMaxVUnit = new JLabel("meters");
 		pnlGeneral.add(lblMaxVUnit, new GridBagConstraints(
-				2, 5, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
+				2, 5, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// max angular velocity
 		JLabel lblMaxAv = new JLabel("Maximum Rotation", this.helpIcon, JLabel.LEFT);
-		lblMaxAv.setToolTipText("Specifies the maximum rotation a body can have in one time step.");
+		lblMaxAv.setToolTipText("<html>Specifies the maximum rotation a body can<br />have in one time step.</html>");
 		pnlGeneral.add(lblMaxAv, new GridBagConstraints(
-				0, 6, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
+				0, 6, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		JSpinner spnMaxAv = new JSpinner(new SpinnerNumberModel(Math.toDegrees(settings.getMaxRotation()), 0.0, 3600.0, 1.0));
-		spnMaxAv.setEditor(new JSpinner.NumberEditor(spnMaxAv, "0.0"));
-		((JSpinner.DefaultEditor)spnMaxAv.getEditor()).getTextField().setColumns(4);
+		JSpinner spnMaxAv = new JSpinner(new SpinnerNumberModel(Math.toDegrees(settings.getMaxRotation()), 0, 360, 1));
+		spnMaxAv.setEditor(new JSpinner.NumberEditor(spnMaxAv, "0"));
+		((JSpinner.DefaultEditor)spnMaxAv.getEditor()).getTextField().setColumns(3);
 		spnMaxAv.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -986,12 +1193,33 @@ public class ControlPanel extends JFrame {
 		});
 		// add the spinner to the layout
 		pnlGeneral.add(spnMaxAv, new GridBagConstraints(
-				1, 6, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_END, 
+				1, 6, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		// create the unit label
 		JLabel lblMaxAvUnit = new JLabel("degrees");
 		pnlGeneral.add(lblMaxAvUnit, new GridBagConstraints(
-				2, 6, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, 
+				2, 6, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		
+		JLabel lblCCDEnabled = new JLabel("Continuous Collision Detection", this.helpIcon, JLabel.LEFT);
+		lblCCDEnabled.setToolTipText("If enabled, tests dynamic bodies for tunneling.");
+		pnlGeneral.add(lblCCDEnabled, new GridBagConstraints(
+				0, 7, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JCheckBox chkCCDEnabled = new JCheckBox();
+		chkCCDEnabled.setSelected(settings.isContinuousCollisionDetectionEnabled());
+		chkCCDEnabled.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Settings settings = Settings.getInstance();
+				settings.setContinuousCollisionDetectionEnabled(!settings.isContinuousCollisionDetectionEnabled());
+			}
+		});
+		pnlGeneral.add(chkCCDEnabled, new GridBagConstraints(
+				1, 7, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_END, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		pnlGeneral.add(new JLabel(), new GridBagConstraints(
+				2, 7, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// add the panel to the overall panel
@@ -1009,7 +1237,8 @@ public class ControlPanel extends JFrame {
 		pnlSleep.setLayout(new GridBagLayout());
 		
 		JLabel lblAllowSleep = new JLabel("Allow bodies to sleep?", this.helpIcon, JLabel.LEFT);
-		lblAllowSleep.setToolTipText("Sleeping allows the physics system to save cycles by avoiding unnecessary work for bodies who are not in motion.");
+		lblAllowSleep.setPreferredSize(new Dimension(w1, 20));
+		lblAllowSleep.setToolTipText("<html>Sleeping allows the physics system to save cycles by<br />avoiding unnecessary work for bodies who are not in motion.</html>");
 		pnlSleep.add(lblAllowSleep, new GridBagConstraints(
 				0, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
@@ -1030,7 +1259,7 @@ public class ControlPanel extends JFrame {
 		
 		// sleep time
 		JLabel lblSleepTime = new JLabel("Sleep time", this.helpIcon, JLabel.LEFT);
-		lblSleepTime.setToolTipText("Specifies the required amount of time a body must be at rest before being put to sleep.");
+		lblSleepTime.setToolTipText("<html>Specifies the required amount of time a body<br />must be at rest before being put to sleep.</html>");
 		// add the label to the layout
 		pnlSleep.add(lblSleepTime, new GridBagConstraints(
 				0, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
@@ -1060,7 +1289,7 @@ public class ControlPanel extends JFrame {
 		
 		// sleep max velocity
 		JLabel lblSleepMaxV = new JLabel("Maximum velocity", this.helpIcon, JLabel.LEFT);
-		lblSleepMaxV.setToolTipText("Specifies the maximum velocity used to determine whether a body is at rest or not.");
+		lblSleepMaxV.setToolTipText("<html>Specifies the maximum velocity used<br />to determine whether a body is at rest.</html>");
 		// add the label to the layout
 		pnlSleep.add(lblSleepMaxV, new GridBagConstraints(
 				0, 2, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
@@ -1068,7 +1297,7 @@ public class ControlPanel extends JFrame {
 		// create the spinner
 		JSpinner spnSleepMaxV = new JSpinner(new SpinnerNumberModel(settings.getSleepVelocity(), 0.0, 9.99, 0.01));
 		spnSleepMaxV.setEditor(new JSpinner.NumberEditor(spnSleepMaxV, "0.00"));
-		((JSpinner.DefaultEditor)spnSleepMaxV.getEditor()).getTextField().setColumns(5);
+		((JSpinner.DefaultEditor)spnSleepMaxV.getEditor()).getTextField().setColumns(4);
 		spnSleepMaxV.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -1090,13 +1319,13 @@ public class ControlPanel extends JFrame {
 		
 		// sleep max av
 		JLabel lblSleepMaxAv = new JLabel("Maximum angular velocity", this.helpIcon, JLabel.LEFT);
-		lblSleepMaxAv.setToolTipText("Specifies the maximum angular velocity used to determine whether a body is at rest or not.");
+		lblSleepMaxAv.setToolTipText("<html>Specifies the maximum angular velocity used<br />to determine whether a body is at rest.</html>");
 		// add the label to the layout
 		pnlSleep.add(lblSleepMaxAv, new GridBagConstraints(
 				0, 3, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		// create the spinner
-		JSpinner spnSleepMaxAv = new JSpinner(new SpinnerNumberModel(Math.toDegrees(settings.getSleepAngularVelocity()), 0.0, 999.9, 0.5));
+		JSpinner spnSleepMaxAv = new JSpinner(new SpinnerNumberModel(Math.toDegrees(settings.getSleepAngularVelocity()), 0.0, 360.0, 0.1));
 		spnSleepMaxAv.setEditor(new JSpinner.NumberEditor(spnSleepMaxAv, "0.0"));
 		((JSpinner.DefaultEditor)spnSleepMaxAv.getEditor()).getTextField().setColumns(5);
 		spnSleepMaxAv.addChangeListener(new ChangeListener() {
@@ -1136,7 +1365,8 @@ public class ControlPanel extends JFrame {
 		
 		// velocity constraint solver iterations
 		JLabel lblVelIter = new JLabel("Velocity Iterations", this.helpIcon, JLabel.LEFT);
-		lblVelIter.setToolTipText("Specifies the accuracy of the velocity contraint solver.  Increasing this value increases the accuracy but lowers performance.");
+		lblVelIter.setPreferredSize(new Dimension(w1, 20));
+		lblVelIter.setToolTipText("<html>Specifies the accuracy of the velocity contraint solver.<br />Increasing this value increases the accuracy but lowers performance.</html>");
 		pnlConstraint.add(lblVelIter, new GridBagConstraints(
 				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
@@ -1161,7 +1391,7 @@ public class ControlPanel extends JFrame {
 		// position constraint solver iterations
 		y++;
 		JLabel lblPosIter = new JLabel("Position Iterations", this.helpIcon, JLabel.LEFT);
-		lblPosIter.setToolTipText("Specifies the accuracy of the position contraint solver.  Increasing this value increases the accuracy but lowers performance.");
+		lblPosIter.setToolTipText("<html>Specifies the accuracy of the position contraint solver.<br />Increasing this value increases the accuracy but lowers performance.</html>");
 		pnlConstraint.add(lblPosIter, new GridBagConstraints(
 				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
@@ -1186,8 +1416,10 @@ public class ControlPanel extends JFrame {
 		// warm start distance
 		y++;
 		JLabel lblWarm = new JLabel("Warm start distance", this.helpIcon, JLabel.LEFT);
-		lblWarm.setToolTipText("Specifies the distance between two iteration's contact points to determine whether to warm start or not.  " +
-				"Set this value to to zero to turn off warm starting.  Warm starting provides better performance and accuracy.");
+		lblWarm.setToolTipText("<html>Specifies the distance between two iteration's contact points<br />" +
+				               "to determine whether to warm start.  Set this value to to zero to<br />" +
+				               "turn off warm starting.  Warm starting provides better<br />" +
+				               "performance and accuracy.</html>");
 		pnlConstraint.add(lblWarm, new GridBagConstraints(
 				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
@@ -1214,7 +1446,7 @@ public class ControlPanel extends JFrame {
 		// restitution velocity
 		y++;
 		JLabel lblRest = new JLabel("Restitution velocity", this.helpIcon, JLabel.LEFT);
-		lblRest.setToolTipText("Specifies at what relative velocity objects should bounce or attempt to come to rest.");
+		lblRest.setToolTipText("<html>Specifies at what relative velocity objects should<br />bounce or attempt to come to rest.</html>");
 		pnlConstraint.add(lblRest, new GridBagConstraints(
 				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
@@ -1242,12 +1474,12 @@ public class ControlPanel extends JFrame {
 		// linear tolerance
 		y++;
 		JLabel lblLinTol = new JLabel("Linear tolerance", this.helpIcon, JLabel.LEFT);
-		lblLinTol.setToolTipText("Specifies the linear tolerance. This setting is used to control jitter.");
+		lblLinTol.setToolTipText("<html>Specifies the linear tolerance. This setting is<br />used to control jitter.</html>");
 		pnlConstraint.add(lblLinTol, new GridBagConstraints(
 				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		JSpinner spnLinTol = new JSpinner(new SpinnerNumberModel(settings.getLinearTolerance(), 0.000, 9.995, 0.005));
+		JSpinner spnLinTol = new JSpinner(new SpinnerNumberModel(settings.getLinearTolerance(), 0.000, 9.999, 0.001));
 		spnLinTol.setEditor(new JSpinner.NumberEditor(spnLinTol, "0.000"));
 		((JSpinner.DefaultEditor)spnLinTol.getEditor()).getTextField().setColumns(5);
 		spnLinTol.addChangeListener(new ChangeListener() {
@@ -1270,12 +1502,12 @@ public class ControlPanel extends JFrame {
 		// angular tolerance
 		y++;
 		JLabel lblAngTol = new JLabel("Angular tolerance", this.helpIcon, JLabel.LEFT);
-		lblAngTol.setToolTipText("Specifies the angular tolerance. This setting is used to control jitter.");
+		lblAngTol.setToolTipText("<html>Specifies the angular tolerance. This setting is<br />used to control jitter.</html>");
 		pnlConstraint.add(lblAngTol, new GridBagConstraints(
 				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		JSpinner spnAngTol = new JSpinner(new SpinnerNumberModel(Math.toDegrees(settings.getAngularTolerance()), 0.0, 90.0, 1.0));
+		JSpinner spnAngTol = new JSpinner(new SpinnerNumberModel(Math.toDegrees(settings.getAngularTolerance()), 0.0, 90.0, 0.1));
 		spnAngTol.setEditor(new JSpinner.NumberEditor(spnAngTol, "0.0"));
 		((JSpinner.DefaultEditor)spnAngTol.getEditor()).getTextField().setColumns(4);
 		spnAngTol.addChangeListener(new ChangeListener() {
@@ -1298,12 +1530,12 @@ public class ControlPanel extends JFrame {
 		// linear correction
 		y++;
 		JLabel lblLinear = new JLabel("Maximum linear correction", this.helpIcon, JLabel.LEFT);
-		lblLinear.setToolTipText("Specifies the maximum amount of linear correction to perform in position solving.  This is used to avoid large position corrections.");
+		lblLinear.setToolTipText("<html>Specifies the maximum amount of linear correction<br />to perform in position solving.  This is used<br />to avoid large position corrections.</html>");
 		pnlConstraint.add(lblLinear, new GridBagConstraints(
 				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		JSpinner spnLinear = new JSpinner(new SpinnerNumberModel(settings.getMaxLinearCorrection(), 0.0, 1.0, 0.05));
+		JSpinner spnLinear = new JSpinner(new SpinnerNumberModel(settings.getMaxLinearCorrection(), 0.0, 1.0, 0.01));
 		spnLinear.setEditor(new JSpinner.NumberEditor(spnLinear, "0.00"));
 		((JSpinner.DefaultEditor)spnLinear.getEditor()).getTextField().setColumns(4);
 		spnLinear.addChangeListener(new ChangeListener() {
@@ -1326,12 +1558,12 @@ public class ControlPanel extends JFrame {
 		// angular correction
 		y++;
 		JLabel lblAngular = new JLabel("Maximum angular correction", this.helpIcon, JLabel.LEFT);
-		lblAngular.setToolTipText("Specifies the maximum amount of angular correction to perform in position solving.  This is used to avoid large position corrections.");
+		lblAngular.setToolTipText("<html>Specifies the maximum amount of angular correction<br />to perform in position solving.  This is used<br />to avoid large position corrections.</html>");
 		pnlConstraint.add(lblAngular, new GridBagConstraints(
 				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		JSpinner spnAngular = new JSpinner(new SpinnerNumberModel(Math.toDegrees(settings.getMaxAngularCorrection()), 0.0, 90.0, 1.0));
+		JSpinner spnAngular = new JSpinner(new SpinnerNumberModel(Math.toDegrees(settings.getMaxAngularCorrection()), 0.0, 90.0, 0.1));
 		spnAngular.setEditor(new JSpinner.NumberEditor(spnAngular, "0.0"));
 		((JSpinner.DefaultEditor)spnAngular.getEditor()).getTextField().setColumns(4);
 		spnAngular.addChangeListener(new ChangeListener() {
@@ -1354,11 +1586,11 @@ public class ControlPanel extends JFrame {
 		// baumgarte
 		y++;
 		JLabel lblBaum = new JLabel("Baumgarte", this.helpIcon, JLabel.LEFT);
-		lblBaum.setToolTipText("Specifies the rate at which the position constraints are solved.");
+		lblBaum.setToolTipText("<html>Specifies the rate at which the position<br />constraints are solved.</html>");
 		pnlConstraint.add(lblBaum, new GridBagConstraints(
 				0, y, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
-		JSpinner spnBaum = new JSpinner(new SpinnerNumberModel(settings.getBaumgarte(), 0.0, 1.0, 0.05));
+		JSpinner spnBaum = new JSpinner(new SpinnerNumberModel(settings.getBaumgarte(), 0.0, 1.0, 0.01));
 		spnBaum.setEditor(new JSpinner.NumberEditor(spnBaum, "0.00"));
 		((JSpinner.DefaultEditor)spnBaum.getEditor()).getTextField().setColumns(4);
 		spnBaum.addChangeListener(new ChangeListener() {
@@ -1378,36 +1610,70 @@ public class ControlPanel extends JFrame {
 		panel.add(pnlConstraint);
 		
 		//////////////////////////////////////////////////
-		// CCD group
+		// Multithreading group
 		//////////////////////////////////////////////////
 		
-		// create the constraint panel
-		JPanel pnlCCD = new JPanel();
+		// create the panel
+		JPanel pnlmt = new JPanel();
 		// create the sleep panel border
-		pnlCCD.setBorder(new TitledBorder("Continuous Collision Detection"));
+		pnlmt.setBorder(new TitledBorder("Multithreading"));
 		// set the layout
-		pnlCCD.setLayout(new GridBagLayout());
+		pnlmt.setLayout(new GridBagLayout());
 		
-		JLabel lblCCDEnabled = new JLabel("Enabled", this.helpIcon, JLabel.LEFT);
-		lblCCDEnabled.setToolTipText("If enabled, tests dynamic bodies for tunneling.");
-		pnlCCD.add(lblCCDEnabled, new GridBagConstraints(
-				0, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+		y = 0;
+		
+		// enabled checkbox
+		JLabel lblMtEnabled = new JLabel("Enabled", this.helpIcon, JLabel.LEFT);
+		lblMtEnabled.setPreferredSize(new Dimension(w1, 20));
+		lblMtEnabled.setToolTipText("<html>Enabling may increase performance on<br />multiprocessor and multicore systems.</html>");
+		pnlmt.add(lblMtEnabled, new GridBagConstraints(
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
-		JCheckBox chkCCDEnabled = new JCheckBox();
-		chkCCDEnabled.setSelected(settings.isContinuousCollisionDetectionEnabled());
-		chkCCDEnabled.addActionListener(new ActionListener() {
+		JCheckBox chkMtEnabled = new JCheckBox();
+		chkMtEnabled.setSelected(settings.isMultithreadingEnabled());
+		chkMtEnabled.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				Settings settings = Settings.getInstance();
-				settings.setContinuousCollisionDetectionEnabled(!settings.isContinuousCollisionDetectionEnabled());
+				settings.setMultithreadingEnabled(!settings.isMultithreadingEnabled());
 			}
 		});
-		pnlCCD.add(chkCCDEnabled, new GridBagConstraints(
-				1, 0, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, 
+		pnlmt.add(chkMtEnabled, new GridBagConstraints(
+				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		
+		// load factor spinner
+		y++;
+		JLabel lblMtLoadFactor = new JLabel("Load Factor", this.helpIcon, JLabel.LEFT);
+		lblMtLoadFactor.setToolTipText("<html>A higher value will create more tasks where each task<br />" +
+				                       "performs a smaller percentage of work.  A lower value will<br />" +
+				                       "create less tasks where each task performs a larger percentage<br />" +
+				                       "of work.</html>");
+		pnlmt.add(lblMtLoadFactor, new GridBagConstraints(
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JSpinner spnLoadFactor = new JSpinner(new MultiplicativeSpinnerNumberModel(settings.getLoadFactor(), 1.0, 256.0, 2.0));
+		((JSpinner.DefaultEditor)spnLoadFactor.getEditor()).getTextField().setColumns(5);
+		spnLoadFactor.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				JSpinner spnr = (JSpinner) e.getSource();
+				double load = ((MultiplicativeSpinnerNumberModel) spnr.getModel()).getValue();
+				Settings settings = Settings.getInstance();
+				settings.setLoadFactor((int)load);
+			}
+		});
+		pnlmt.add(spnLoadFactor, new GridBagConstraints(
+				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		// create an empty third column to line up all the columns
+		JLabel lblExtra = new JLabel("");
+		pnlmt.add(lblExtra, new GridBagConstraints(
+				2, y, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// add the CCD panel to the over all panel
-		panel.add(pnlCCD);
+		panel.add(pnlmt);
 		
 		// this button is for grabbing the size of the window when
 		// the number of things change
@@ -1469,6 +1735,47 @@ public class ControlPanel extends JFrame {
 			sf.setVisible(true);
 		} catch (ConfigurationException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Custom cell renderer for the colors tab.
+	 * @author William Bittle
+	 * @version 2.1.0
+	 * @since 2.1.0
+	 */
+	private class ColorListCellRenderer extends JPanel implements ListCellRenderer {
+		/** The serializable id */
+		private static final long serialVersionUID = -1423848677893410295L;
+		
+		/** The label that shows the color */
+		private JLabel label = new JLabel();
+		
+		/**
+		 * Default constructor.
+		 */
+		public ColorListCellRenderer() {
+			Dimension size = new Dimension(30, 20);
+			this.setPreferredSize(size);
+		    GridLayout gl = new GridLayout(1, 1);
+		    gl.setHgap(0);
+		    gl.setVgap(0);
+		    this.setLayout(gl);
+		    this.add(label);
+		    
+		    label.setSize(size);
+		    label.setPreferredSize(size);
+		    label.setOpaque(true);
+		}
+		
+		/* (non-Javadoc)
+		 * @see javax.swing.ListCellRenderer#getListCellRendererComponent(javax.swing.JList, java.lang.Object, int, boolean, boolean)
+		 */
+		@Override
+		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+	        Color color = (Color) value;
+	        label.setBackground(color);
+	        return this;
 		}
 	}
 	
@@ -1590,6 +1897,8 @@ public class ControlPanel extends JFrame {
             // get the current value
             this.model = (MultiplicativeSpinnerNumberModel)(spinner.getModel());
             this.setValue(this.model.getValue());
+            this.setEditable(false);
+            this.setColumns(4);
             
             // add this as a change listener
             spinner.addChangeListener(this);

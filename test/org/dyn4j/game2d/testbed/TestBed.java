@@ -25,6 +25,7 @@
 package org.dyn4j.game2d.testbed;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -62,7 +63,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Container for the tests.
  * @author William Bittle
  * @param <E> the container type
- * @version 2.0.0
+ * @version 2.1.0
  * @since 1.0.0
  */
 public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
@@ -735,20 +736,34 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		this.usedMemoryLabel.render(g, x + barWidth + 10, y + spacing * 2);
 		this.freeMemoryLabel.render(g, x + barWidth + 10, y + spacing * 3);
 		
+		barWidth = 180;
 		// show the time usage bar
 		this.timeUsageLabel.render(g, x, y + spacing * 4);
 		double renderW = this.usage.getRenderTimePercentage() * barWidth;
 		double updateW = this.usage.getUpdateTimePercentage() * barWidth;
 		// since input polling time is so low, just consider it part of the system time
 		double systemW = (this.usage.getSystemTimePercentage() + this.usage.getInputTimePercentage()) * barWidth;
+		// save the original font
+		Font font = g.getFont();
+		// create a smaller font for the percentages
+		Font f = new Font("arial", Font.PLAIN, 9);
+		g.setFont(f);
+		// render the boxes
 		g.setColor(new Color(222, 48, 12));
 		g.fillRect(x, y + spacing * 5, (int) Math.ceil(renderW), 12);
+		g.setColor(Color.WHITE);
+		g.drawString(Math.round(this.usage.getRenderTimePercentage() * 100) + "%", x + 3, (int) Math.ceil(y + spacing * 5.5) + 2);
 		g.setColor(new Color(222, 117, 0));
 		g.fillRect(x + (int) Math.ceil(renderW), y + spacing * 5, (int) Math.ceil(updateW), 12);
+		g.setColor(Color.WHITE);
+		g.drawString(Math.round(this.usage.getUpdateTimePercentage() * 100) + "%", x + (int) Math.ceil(renderW) + 3, (int) Math.ceil(y + spacing * 5.5) + 2);
 		g.setColor(new Color(20, 134, 222));
 		g.fillRect(x + (int) Math.ceil(renderW) + (int) Math.ceil(updateW), y + spacing * 5, (int) Math.ceil(systemW), 12);
+		g.setColor(Color.WHITE);
+		g.drawString(Math.round(this.usage.getSystemTimePercentage() * 100) + "%", x + (int) Math.ceil(renderW) + (int) Math.ceil(updateW) + 3, (int) Math.ceil(y + spacing * 5.5) + 2);
 		g.setColor(Color.BLACK);
 		g.drawRect(x, y + spacing * 5, (int) Math.ceil(barWidth) + 1, 12);
+		g.setFont(font);
 	}
 	
 	/**
@@ -882,6 +897,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 			if (this.mode == StepMode.CONTINUOUS) {
 				this.mode = StepMode.MANUAL;
 			} else if (this.mode == StepMode.MANUAL) {
+				this.tModeElapsed = 0.0;
 				this.mode = StepMode.TIMED;
 			} else {
 				this.mode = StepMode.CONTINUOUS;
