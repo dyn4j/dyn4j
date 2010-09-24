@@ -48,6 +48,7 @@ import org.dyn4j.game2d.dynamics.joint.Joint;
 import org.dyn4j.game2d.dynamics.joint.LineJoint;
 import org.dyn4j.game2d.dynamics.joint.MouseJoint;
 import org.dyn4j.game2d.dynamics.joint.PrismaticJoint;
+import org.dyn4j.game2d.dynamics.joint.PulleyJoint;
 import org.dyn4j.game2d.dynamics.joint.RevoluteJoint;
 import org.dyn4j.game2d.dynamics.joint.WeldJoint;
 import org.dyn4j.game2d.geometry.Convex;
@@ -338,6 +339,8 @@ public abstract class Test implements Comparable<Test> {
 					this.render(g, (LineJoint) joint);
 				} else if (joint instanceof PrismaticJoint) {
 					this.render(g, (PrismaticJoint) joint);
+				} else if (joint instanceof PulleyJoint) {
+					this.render(g, (PulleyJoint) joint);
 				}
 			}
 		}
@@ -615,6 +618,45 @@ public abstract class Test implements Comparable<Test> {
 				   (int) Math.ceil((c2.y - t.y * hw) * scale), 
 				   (int) Math.ceil((c2.x - n.x * l * lf - t.x * hw) * scale),
 				   (int) Math.ceil((c2.y - n.y * l * lf - t.y * hw) * scale));
+	}
+	
+	/**
+	 * Renders a {@link PulleyJoint} to the given graphics object.
+	 * @param g the graphics object to render to
+	 * @param joint the {@link PulleyJoint} to render
+	 * @since 2.2.0
+	 */
+	private void render(Graphics2D g, PulleyJoint joint) {
+		// set the color to be mostly transparent
+		g.setColor(new Color(0, 0, 0, 64));
+		// save the old stroke
+		Stroke stroke = g.getStroke();
+		// set the stroke to have rounded edges and caps
+		g.setStroke(new BasicStroke((float)(0.1 * scale), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+		
+		// draw 3 lines connecting the bodies via the pulleys
+		int[] xPoints = new int[4];
+		int[] yPoints = new int[4];
+		
+		Vector2 p1 = joint.getAnchor1();
+		Vector2 p2 = joint.getPulleyAnchor1();
+		Vector2 p3 = joint.getPulleyAnchor2();
+		Vector2 p4 = joint.getAnchor2();
+		
+		xPoints[0] = (int) Math.ceil(p1.x * scale);
+		xPoints[1] = (int) Math.ceil(p2.x * scale);
+		xPoints[2] = (int) Math.ceil(p3.x * scale);
+		xPoints[3] = (int) Math.ceil(p4.x * scale);
+		
+		yPoints[0] = (int) Math.ceil(p1.y * scale);
+		yPoints[1] = (int) Math.ceil(p2.y * scale);
+		yPoints[2] = (int) Math.ceil(p3.y * scale);
+		yPoints[3] = (int) Math.ceil(p4.y * scale);
+		
+		g.drawPolyline(xPoints, yPoints, 4);
+		
+		// set the old stroke back
+		g.setStroke(stroke);
 	}
 	
 	/**

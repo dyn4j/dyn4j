@@ -45,7 +45,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.1.0
  * @since 1.0.0
  */
 public class LineJoint extends Joint {
@@ -119,26 +119,26 @@ public class LineJoint extends Joint {
 	
 	/**
 	 * Optional constructor.
-	 * @param b1 the first {@link Body}
-	 * @param b2 the second {@link Body}
+	 * @param body1 the first {@link Body}
+	 * @param body2 the second {@link Body}
 	 * @param anchor the anchor point in world coordinates
 	 * @param axis the axis of allowed motion
 	 */
-	public LineJoint(Body b1, Body b2, Vector2 anchor, Vector2 axis) {
-		super(b1, b2, false);
+	public LineJoint(Body body1, Body body2, Vector2 anchor, Vector2 axis) {
+		super(body1, body2, false);
 		// verify the bodies are not the same instance
-		if (b1 == b2) throw new IllegalArgumentException("Cannot create a line joint between the same body instance.");
+		if (body1 == body2) throw new IllegalArgumentException("Cannot create a line joint between the same body instance.");
 		// check for a null anchor
 		if (anchor == null) throw new NullPointerException("The anchor point cannot be null.");
 		// check for a null axis
 		if (axis == null) throw new NullPointerException("The axis cannot be null.");
 		// set the anchor point
-		this.localAnchor1 = b1.getLocalPoint(anchor);
-		this.localAnchor2 = b2.getLocalPoint(anchor);
+		this.localAnchor1 = body1.getLocalPoint(anchor);
+		this.localAnchor2 = body2.getLocalPoint(anchor);
 		// make sure the axis is normalized
 		Vector2 n = axis.getNormalized();
 		// get the axis in local coordinates
-		this.xAxis = b2.getLocalVector(n);
+		this.xAxis = body2.getLocalVector(n);
 		// get the perpendicular axis
 		this.yAxis = this.xAxis.cross(1.0);
 		// initialize

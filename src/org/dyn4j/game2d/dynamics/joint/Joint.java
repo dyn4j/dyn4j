@@ -32,7 +32,7 @@ import org.dyn4j.game2d.geometry.Vector2;
 /**
  * Represents constrained motion between two {@link Body}s.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.1.0
  * @since 1.0.0
  */
 public abstract class Joint extends Constraint {
@@ -103,21 +103,21 @@ public abstract class Joint extends Constraint {
 	 * <p>
 	 * Assumes that the joined bodies do not participate 
 	 * in collision detection and resolution.
-	 * @param b1 the first {@link Body}
-	 * @param b2 the second {@link Body}
+	 * @param body1 the first {@link Body}
+	 * @param body2 the second {@link Body}
 	 */
-	public Joint(Body b1, Body b2) {
-		this(b1, b2, false);
+	public Joint(Body body1, Body body2) {
+		this(body1, body2, false);
 	}
 	
 	/**
 	 * Full constructor.
-	 * @param b1 the first {@link Body}
-	 * @param b2 the second {@link Body}
+	 * @param body1 the first {@link Body}
+	 * @param body2 the second {@link Body}
 	 * @param collisionAllowed true if the joined {@link Body}s can take part in collision detection
 	 */
-	public Joint(Body b1, Body b2, boolean collisionAllowed) {
-		super(b1, b2);
+	public Joint(Body body1, Body body2, boolean collisionAllowed) {
+		super(body1, body2);
 		this.collisionAllowed = collisionAllowed;
 	}
 	
