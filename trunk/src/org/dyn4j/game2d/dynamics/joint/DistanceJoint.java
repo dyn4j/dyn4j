@@ -46,7 +46,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.1.0
  * @since 1.0.0
  */
 public class DistanceJoint extends Joint {
@@ -89,20 +89,20 @@ public class DistanceJoint extends Joint {
 	 * Creates a fixed distance {@link Joint} where the joined 
 	 * {@link Body}s do not participate in collision detection and
 	 * resolution.
-	 * @param b1 the first {@link Body}
-	 * @param b2 the second {@link Body}
+	 * @param body1 the first {@link Body}
+	 * @param body2 the second {@link Body}
 	 * @param anchor1 in world coordinates
 	 * @param anchor2 in world coordinates
 	 */
-	public DistanceJoint(Body b1, Body b2, Vector2 anchor1, Vector2 anchor2) {
-		super(b1, b2, false);
+	public DistanceJoint(Body body1, Body body2, Vector2 anchor1, Vector2 anchor2) {
+		super(body1, body2, false);
 		// verify the bodies are not the same instance
-		if (b1 == b2) throw new IllegalArgumentException("Cannot create a distance joint between the same body instance.");
+		if (body1 == body2) throw new IllegalArgumentException("Cannot create a distance joint between the same body instance.");
 		// verify the anchor points are not null
 		if (anchor1 == null || anchor2 == null) throw new NullPointerException("Neither anchor point can be null.");
 		// get the local anchor points
-		this.localAnchor1 = b1.getLocalPoint(anchor1);
-		this.localAnchor2 = b2.getLocalPoint(anchor2);
+		this.localAnchor1 = body1.getLocalPoint(anchor1);
+		this.localAnchor2 = body2.getLocalPoint(anchor2);
 		// compute the initial distance
 		this.distance = anchor1.distance(anchor2);
 	}

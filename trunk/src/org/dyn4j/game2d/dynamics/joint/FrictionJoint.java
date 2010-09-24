@@ -42,7 +42,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.1.0
  * @since 1.0.0
  */
 public class FrictionJoint extends Joint {
@@ -75,20 +75,20 @@ public class FrictionJoint extends Joint {
 	
 	/**
 	 * Minimal constructor.
-	 * @param b1 the first {@link Body}
-	 * @param b2 the second {@link Body}
+	 * @param body1 the first {@link Body}
+	 * @param body2 the second {@link Body}
 	 * @param anchor the anchor point in world coordinates
 	 */
-	public FrictionJoint(Body b1, Body b2, Vector2 anchor) {
+	public FrictionJoint(Body body1, Body body2, Vector2 anchor) {
 		// default no collision allowed
-		super(b1, b2, false);
+		super(body1, body2, false);
 		// verify the bodies are not the same instance
-		if (b1 == b2) throw new IllegalArgumentException("Cannot create a friction joint between the same body instance.");
+		if (body1 == body2) throw new IllegalArgumentException("Cannot create a friction joint between the same body instance.");
 		// verify the anchor point is non null
 		if (anchor == null) throw new NullPointerException("The anchor point cannot be null.");
 		// put the anchor in local space
-		this.localAnchor1 = b1.getLocalPoint(anchor);
-		this.localAnchor2 = b2.getLocalPoint(anchor);
+		this.localAnchor1 = body1.getLocalPoint(anchor);
+		this.localAnchor2 = body2.getLocalPoint(anchor);
 		// initialize
 		this.K = new Matrix22();
 		this.linearImpulse = new Vector2();
