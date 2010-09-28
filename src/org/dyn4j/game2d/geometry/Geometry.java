@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, William Bittle
+ * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,7 @@
  */
 package org.dyn4j.game2d.geometry;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.dyn4j.game2d.Epsilon;
@@ -31,7 +32,7 @@ import org.dyn4j.game2d.Epsilon;
 /**
  * Contains static methods to perform standard geometric operations.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.0
  * @since 1.0.0
  */
 public class Geometry {
@@ -40,6 +41,113 @@ public class Geometry {
 	
 	/** The value of the inverse of the square root of 3; 1/sqrt(3) */
 	private static final double INV_SQRT_3 = 1.0 / Math.sqrt(3.0);
+	
+	/**
+	 * Returns the winding, Clockwise or Counter-Clockwise, for the given
+	 * list of points of a polygon.
+	 * <p>
+	 * This method determines the winding by computing a signed "area".
+	 * @param points the points of a polygon
+	 * @return double negative for Clockwise winding; positive for Counter-Clockwise winding
+	 * @since 2.2.0
+	 */
+	public static final double getWinding(List<Vector2> points) {
+		// check for a null list
+		if (points == null) throw new NullPointerException("The list of points cannot be null.");
+		// get the size
+		int size = points.size();
+		// the size must be larger than 1
+		if (size < 2) throw new IllegalArgumentException("The list must contain at least 2 non-null points.");
+		// determine the winding by computing a signed "area"
+		double area = 0.0;
+		for (int i = 0; i < size; i++) {
+			// get the current point and the next point
+			Vector2 p1 = points.get(i);
+			Vector2 p2 = points.get(i + 1 == size ? 0 : i + 1);
+			// check for null
+			if (p1 == null || p2 == null) throw new NullPointerException("The list of points cannot contain null points.");
+			// add the signed area
+			area += p1.cross(p2);
+		}
+		// return the area
+		return area;
+	}
+	
+	/**
+	 * Returns the winding, Clockwise or Counter-Clockwise, for the given
+	 * array of points of a polygon.
+	 * @param points the points of a polygon
+	 * @return double negative for Clockwise winding; positive for Counter-Clockwise winding
+	 * @since 2.2.0
+	 */
+	public static final double getWinding(Vector2[] points) {
+		// check for a null list
+		if (points == null) throw new NullPointerException("The array of points cannot be null.");
+		// get the size
+		int size = points.length;
+		// the size must be larger than 1
+		if (size < 2) throw new IllegalArgumentException("The array must contain at least 2 non-null points.");
+		// determine the winding by computing a signed "area"
+		double area = 0.0;
+		for (int i = 0; i < size; i++) {
+			// get the current point and the next point
+			Vector2 p1 = points[i];
+			Vector2 p2 = points[i + 1 == size ? 0 : i + 1];
+			// check for null
+			if (p1 == null || p2 == null) throw new NullPointerException("The array of points cannot contain null points.");
+			// add the signed area
+			area += p1.cross(p2);
+		}
+		// return the area
+		return area;
+	}
+	
+	/**
+	 * Reverses the order of the polygon points within the given array.
+	 * <p>
+	 * This method performs a simple array reverse.
+	 * @param points the polygon points
+	 * @since 2.2.0
+	 */
+	public static final void reverseWinding(Vector2[] points) {
+		// check for a null list
+		if (points == null) throw new NullPointerException("The array of points cannot be null.");
+		// get the length
+		int size = points.length;
+		// check for a length of 1
+		if (size == 1) return;
+		// otherwise perform the swapping loop
+		int i = 0;
+		int j = size - 1;
+		Vector2 temp = null;
+		while (j > i) {
+			// swap
+			temp = points[j];
+			points[j] = points[i];
+			points[i] = temp;
+			// increment
+			j--;
+			i++;
+		}
+	}
+	
+	/**
+	 * Reverses the order of the polygon points within the given list.
+	 * <p>
+	 * This method performs a simple list reverse.
+	 * @param points the polygon points
+	 * @since 2.2.0
+	 */
+	public static final void reverseWinding(List<Vector2> points) {
+		// check for a null list
+		if (points == null) throw new NullPointerException("The array of points cannot be null.");
+		// get the length
+		int size = points.size();
+		// check for a length of 1
+		if (size == 1) return;
+		// otherwise reverse the list
+		Collections.reverse(points);
+	}
 	
 	/**
 	 * Returns the centroid of the given points by performing an average.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, William Bittle
+ * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -65,7 +65,7 @@ import org.dyn4j.game2d.geometry.Wound;
  * Using the {@link TestBed} class one can switch test without stopping
  * and starting the driver again.
  * @author William Bittle
- * @version 2.1.0
+ * @version 2.2.0
  * @since 1.0.0
  */
 public abstract class Test implements Comparable<Test> {
@@ -157,6 +157,9 @@ public abstract class Test implements Comparable<Test> {
 	
 	/**
 	 * Initializes any inputs specific to the test.
+	 * <p>
+	 * This method is called each time a test is selected and run
+	 * from the TestBed.
 	 * @param keyboard the keyboard to add inputs to listen for
 	 * @param mouse the mouse to add inputs to listen for
 	 */
@@ -682,16 +685,17 @@ public abstract class Test implements Comparable<Test> {
 	/**
 	 * Updates the {@link Test} given the delta time
 	 * in seconds.
-	 * @param paused whether the simulation is paused
-	 * @param step whether the simulation is in step mode or continuous mode
+	 * <p>
+	 * This method assumes the step mode is continuous and the TestBed is not paused.
 	 * @param dt the delta time in seconds
 	 */
-	public void update(boolean paused, boolean step, double dt) {
-		if (!paused && !step) {
-			// update the world
-			this.world.update(dt);
-		}
-	}
+	public void update(double dt) {}
+	
+	/**
+	 * Updates the {@link Test} given the number of steps to perform.
+	 * @param steps the number of steps to perform
+	 */
+	public void update(int steps) {}
 	
 	/**
 	 * Converts the screen coordinate to world space.
