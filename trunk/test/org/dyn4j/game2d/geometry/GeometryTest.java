@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, William Bittle
+ * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -25,6 +25,7 @@
 package org.dyn4j.game2d.geometry;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -34,7 +35,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Geometry} class.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.0
  * @since 1.0.0
  */
 public class GeometryTest {
@@ -631,5 +632,121 @@ public class GeometryTest {
 		Vector2 center = s.getCenter();
 		TestCase.assertEquals(0.000, center.x, 1.0e-3);
 		TestCase.assertEquals(0.000, center.y, 1.0e-3);
+	}
+	
+	/**
+	 * Tests the getWinding method passing a list.
+	 */
+	@Test
+	public void getWindingList() {
+		List<Vector2> points = new ArrayList<Vector2>();
+		points.add(new Vector2(-1.0, -1.0));
+		points.add(new Vector2(1.0, -1.0));
+		points.add(new Vector2(1.0, 1.0));
+		points.add(new Vector2(-1.0, 1.0));
+		TestCase.assertTrue(Geometry.getWinding(points) > 0);
+		
+		Collections.reverse(points);
+		TestCase.assertTrue(Geometry.getWinding(points) < 0);
+	}
+	
+	/**
+	 * Tests the getWinding method passing a null list.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void getWindingNullList() {
+		Geometry.getWinding((List<Vector2>)null);
+	}
+	
+	/**
+	 * Tests the getWinding method passing a list with 1 point.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void getWindingListLessThan2Points() {
+		List<Vector2> points = new ArrayList<Vector2>();
+		points.add(new Vector2());
+		Geometry.getWinding(points);
+	}
+	
+	/**
+	 * Tests the getWinding method passing a list that contains a null point.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void getWindingListNullPoint() {
+		List<Vector2> points = new ArrayList<Vector2>();
+		points.add(new Vector2());
+		points.add(null);
+		points.add(null);
+		Geometry.getWinding(points);
+	}
+	
+	/**
+	 * Tests the getWinding method passing a valid array.
+	 */
+	@Test
+	public void getWindingArray() {
+		Vector2[] points = new Vector2[4];
+		points[0] = new Vector2(-1.0, -1.0);
+		points[1] = new Vector2(1.0, -1.0);
+		points[2] = new Vector2(1.0, 1.0);
+		points[3] = new Vector2(-1.0, 1.0);
+		TestCase.assertTrue(Geometry.getWinding(points) > 0);
+		
+		// reverse the array
+		Vector2 p = points[0];
+		points[0] = points[3];
+		points[3] = p;
+		p = points[1];
+		points[1] = points[2];
+		points[2] = p;
+		
+		TestCase.assertTrue(Geometry.getWinding(points) < 0);
+	}
+	
+	/**
+	 * Tests the getWinding method passing a null array.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void getWindingNullArray() {
+		Geometry.getWinding((Vector2[])null);
+	}
+	
+	/**
+	 * Tests the getWinding method passing an array with less than two points.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void getWindingArrayLessThan2Points() {
+		Vector2[] points = new Vector2[1];
+		points[0] = new Vector2(-1.0, -1.0);
+		Geometry.getWinding(points);
+	}
+	
+	/**
+	 * Tests the getWinding method passing an array containing null points.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void getWindingArrayNullPoint() {
+		Vector2[] points = new Vector2[4];
+		points[0] = new Vector2(-1.0, -1.0);
+		points[1] = null;
+		points[2] = null;
+		points[3] = null;
+		Geometry.getWinding(points);
+	}
+	
+	/**
+	 * Tests the reverse winding method passing a null list.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void reverseWindingNullList() {
+		Geometry.reverseWinding((List<Vector2>) null);
+	}
+	
+	/**
+	 * Tests the reverse winding method passing a null array.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void reverseWindingNullArray() {
+		Geometry.reverseWinding((Vector2[]) null);
 	}
 }

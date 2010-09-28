@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, William Bittle
+ * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -63,7 +63,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Container for the tests.
  * @author William Bittle
  * @param <E> the container type
- * @version 2.1.0
+ * @version 2.2.0
  * @since 1.0.0
  */
 public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
@@ -806,6 +806,10 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	public void poll() {
 		long startTime = this.timer.getCurrentTime();
 		super.poll();
+		
+		// allow the current test to override the default functionality
+		this.test.poll(this.keyboard, this.mouse);
+		
 		// check the escape key
 		if (this.keyboard.isPressed(KeyEvent.VK_ESCAPE) || this.keyboard.isPressed(KeyEvent.VK_E)) {
 			// only exit if its not applet mode
@@ -907,6 +911,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		// check for the m key
 		if (this.mode == StepMode.MANUAL && this.keyboard.isPressed(KeyEvent.VK_M)) {
 			this.test.world.step(1);
+			this.test.update(1);
 		}
 		
 		// check for the t key
@@ -1124,9 +1129,6 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 			}
 		}
 		
-		// call the test poll method
-		this.test.poll(this.keyboard, this.mouse);
-		
 		this.usage.setInput(this.timer.getCurrentTime() - startTime);
 	}
 	
@@ -1197,6 +1199,8 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 				double dt = (double)elapsedTime / 1.0e9;
 				// update the test
 				this.test.world.update(dt);
+				// update the test
+				this.test.update(dt);
 			} else if (this.mode == StepMode.MANUAL) {
 				// do nothing since its controlled by the user
 			} else {
@@ -1207,6 +1211,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 				double nano = this.tModeInterval * 1.0e9;
 				if (this.tModeElapsed >= nano) {
 					this.test.world.step(1);
+					this.test.update(1);
 					this.tModeElapsed = 0.0;
 				}
 			}

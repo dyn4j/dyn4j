@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, William Bittle
+ * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -279,6 +279,46 @@ public class Plotter extends Test {
 				this.renderVector(g, p1.x, p1.y, n.x, n.y, s.getDistance());
 			}
 		}
+		
+		g.setColor(Color.GREEN);
+		this.renderLine(g, 0.0, 0.0, 0.25, 0.5);
+		this.renderLine(g, 0.25, 0.5, -0.1, 0.9);
+		this.renderLine(g, -0.1, 0.9, 0.5, 1.25);
+		this.renderLine(g, 0.5, 1.25, 1.5, 1.0);
+		this.renderLine(g, 1.5, 1.0, 2.0, 1.75);
+		this.renderLine(g, 2.0, 1.75, 1.5, 2.25);
+		this.renderLine(g, 1.5, 2.25, 0.5, 2.35);
+		this.renderLine(g, 0.5, 2.35, -1.0, 2.0);
+		this.renderLine(g, -1.0, 2.0, -1.25, 0.5);
+		this.renderLine(g, -1.25, 0.5, -1.6, 0.75);
+		this.renderLine(g, -1.6, 0.75, -1.5, 0.25);
+		this.renderLine(g, -1.5, 0.25, -1.15, 0.0);
+		this.renderLine(g, -1.15, 0.0, -1.35, -0.15);
+		this.renderLine(g, -1.35, -0.15, -1.85, 0.25);
+		this.renderLine(g, -1.85, 0.25, -1.65, 1.0);
+		this.renderLine(g, -1.65, 1.0, -1.25, 0.9);
+		this.renderLine(g, -1.25, 0.9, -1.35, 1.4);
+		this.renderLine(g, -1.35, 1.4, -1.55, 1.5);
+		this.renderLine(g, -1.55, 1.5, -2.0, 1.1);
+		this.renderLine(g, -2.0, 1.1, -2.2, 0.15);
+		this.renderLine(g, -2.2, 0.15, -2.0, -0.45);
+		this.renderLine(g, -2.0, -0.45, -1.35, -0.55);
+		this.renderLine(g, -1.35, -0.55, -0.85, -0.25);
+		this.renderLine(g, -0.85, -0.25, -0.15, -0.6);
+		this.renderLine(g, -0.15, -0.6, 1.35, -0.5);
+		this.renderLine(g, 1.35, -0.5, 1.0, 0.1);
+		this.renderLine(g, 1.0, 0.1, 1.5, 0.15);
+		this.renderLine(g, 1.5, 0.15, 1.25, 0.4);
+		this.renderLine(g, 1.25, 0.4, 0.6, 0.35);
+		this.renderLine(g, 0.6, 0.35, 0.5, -0.15);
+		this.renderLine(g, 0.5, -0.15, -0.95, 0.0);
+		this.renderLine(g, -0.95, 0.0, -0.85, 1.1);
+		this.renderLine(g, -0.85, 1.1, 0.1, 1.8);
+		this.renderLine(g, 0.1, 1.8, 1.0, 1.75);
+		this.renderLine(g, 1.0, 1.75, 0.75, 1.45);
+		this.renderLine(g, 0.75, 1.45, 0.0, 1.35);
+		this.renderLine(g, 0.0, 1.35, -0.5, 1.0);
+		this.renderLine(g, -0.5, 1.0, 0.0, 0.0);
 	}
 	
 	/**

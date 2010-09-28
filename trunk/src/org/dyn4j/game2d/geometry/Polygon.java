@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, William Bittle
+ * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -64,6 +64,7 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		}
 		// check for convex
 		double area = 0.0;
+		double sign = 0.0;
 		for (int i = 0; i < size; i++) {
 			Vector2 p0 = (i - 1 < 0) ? vertices[size - 1] : vertices[i - 1];
 			Vector2 p1 = vertices[i];
@@ -75,9 +76,11 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 				throw new IllegalArgumentException("A polygon cannot not have coincident vertices.");
 			}
 			// check for convexity
-			if (p0.to(p1).cross(p1.to(p2)) < 0) {
+			double cross = Math.signum(p0.to(p1).cross(p1.to(p2)));
+			if (sign != 0.0 && cross != sign) {
 				throw new IllegalArgumentException("A polygon must be convex.");
 			}
+			sign = cross;
 		}
 		// check for CCW
 		if (area < 0.0) {
