@@ -38,12 +38,13 @@ import org.codezealot.game.input.Keyboard;
 import org.codezealot.game.input.Mouse;
 import org.codezealot.game.input.Input.Hold;
 import org.dyn4j.game2d.dynamics.World;
-import org.dyn4j.game2d.geometry.Convex;
-import org.dyn4j.game2d.geometry.Polygon;
 import org.dyn4j.game2d.geometry.Ray;
 import org.dyn4j.game2d.geometry.Vector2;
-import org.dyn4j.game2d.geometry.decompose.EarClipping;
-import org.dyn4j.game2d.geometry.decompose.Monotone;
+import org.dyn4j.game2d.geometry.hull.DivideAndConquer;
+import org.dyn4j.game2d.geometry.hull.GiftWrap;
+import org.dyn4j.game2d.geometry.hull.GrahamScan;
+import org.dyn4j.game2d.geometry.hull.HullGenerator;
+import org.dyn4j.game2d.geometry.hull.MonotoneChain;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Test;
 
@@ -53,43 +54,33 @@ import org.dyn4j.game2d.testbed.Test;
  * @version 2.2.0
  * @since 2.2.0
  */
-public class Decompose extends Test {
-	/** The elapsed time since the last update */
-	private double elapsedTime;
-	
-	/** The first simple polygon to decompose */
+public class Hull extends Test {
+	/** The convex hull of the points */
 	private Vector2[] vertices;
 	
 	/** The current list of points added by the user */
 	private List<Vector2> points;
 	
-	/** The first polygon decomposition result */
-	private List<Convex> triangles;
+	/** The list of hull generation algorithms */
+	private HullGenerator[] generators = new HullGenerator[] {
+		new GiftWrap(),
+		new DivideAndConquer(),
+		new GrahamScan(),
+		new MonotoneChain()
+	};
 	
-	/** The time interval between showing the decomposition */
-	private double interval = 0.75;
-	
-	/** The index of the shape to render to */
-	private int toIndex = 0;
-	
-	/** The mouse to show the current position */
-	private Mouse mouse;
+	/** The current hull generator being used */
+	private int currentGenerator = 0;
 	
 	/** The radius of points drawn */
 	private static final double r = 0.025;
-	
-	/** True if an error occurred in tesselation */
-	private boolean error = false;
-	
-	/** The error message when an error occurs */
-	private String errorMessage = "Invalid Polygon";
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.testbed.Test#getName()
 	 */
 	@Override
 	public String getName() {
-		return "Decompose";
+		return "Hull";
 	}
 	
 	/* (non-Javadoc)
@@ -97,7 +88,7 @@ public class Decompose extends Test {
 	 */
 	@Override
 	public String getDescription() {
-		return "Tests the decomposition methods.";
+		return "Tests the convex hull generation algorithms.";
 	}
 	
 	/* (non-Javadoc)
@@ -149,118 +140,30 @@ public class Decompose extends Test {
 	@Override
 	protected void renderAfter(Graphics2D g) {
 		if (this.vertices != null) {
-			int size = this.vertices.length;
-			
-			// render the total polygon
-			g.setColor(Color.GREEN);
-			for (int i = 0; i < size; i++) {
+			g.setColor(Color.BLUE);
+			int vSize = this.vertices.length;
+			// draw the convex hull
+			for (int i = 0; i < vSize; i++) {
 				Vector2 p1 = this.vertices[i];
-				Vector2 p2 = this.vertices[i + 1 == size ? 0 : i + 1];
+				Vector2 p2 = this.vertices[i + 1 == vSize ? 0 : i + 1];
 				this.renderLine(g, p1.x, p1.y, p2.x, p2.y);
 			}
-			
-			// render the convex decomposition depending on the time
-			g.setColor(Color.BLUE);
-			for (int i = 0; i < this.toIndex; i++) {
-				Convex convex = this.triangles.get(i);
-				if (convex instanceof Polygon) {
-					Polygon poly = (Polygon) convex;
-					Vector2[] vertices = poly.getVertices();
-					int vSize = vertices.length;
-					for (int j = 0; j < vSize; j++) {
-						Vector2 p1 = vertices[j];
-						Vector2 p2 = vertices[(j + 1) == vSize ? 0 : j + 1];
-						this.renderLine(g, p1.x, p1.y, p2.x, p2.y);
-					}
-				}
-			}
-			
-			// always render the points
-			g.setColor(Color.GREEN);
-			for (int i = 0; i < size; i++) {
-				Vector2 p = this.vertices[i];
-				this.renderPoint(g, p.x, p.y, r);
-			}
-		} else {
-			int size = this.points.size();
-			if (this.error) {
-				g.setColor(Color.RED);
-			} else {
-				g.setColor(Color.GREEN);
-			}
-			
-			// get the mouse location
-			Point point = this.mouse.getRelativeLocation();
-			// convert to world coordinates
-			Vector2 v = this.screenToWorld(point.x, point.y);
-			
-			// only render lines if there is more than one point
-			if (size > 1) {
-				// draw the current list of points
-				for (int i = 0; i < size - 1; i++) {
-					Vector2 p1 = this.points.get(i);
-					Vector2 p2 = this.points.get(i + 1);
-					this.renderLine(g, p1.x, p1.y, p2.x, p2.y);
-				}
-			}
-			
-			// always render the points
-			for (int i = 0; i < size; i++) {
-				Vector2 p = this.points.get(i);
-				this.renderPoint(g, p.x, p.y, r);
-			}
-			
-			if (size > 0 && !this.error) {
-				// draw a line from the last point to the current mouse point
-				Vector2 l = this.points.get(size - 1);
-				this.renderLine(g, l.x, l.y, v.x, v.y);
-			}
-			
-			if (!this.error) {
-				// draw the mouse point
-				this.renderPoint(g, v.x, v.y, r);
-			}
-			
-			// show the error message if needed
-			if (this.error) {
-				Vector2 p = this.screenToWorld(5.0, 15.0);
-				AffineTransform at = g.getTransform();
-				g.transform(AffineTransform.getScaleInstance(1, -1));
-				g.drawString(this.errorMessage, (int) (p.x * scale), (int) (-p.y * scale));
-				g.setTransform(at);
-			}
 		}
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.testbed.Test#update(double)
-	 */
-	@Override
-	public void update(double dt) {
-		// call the super method
-		super.update(dt);
-		// only update when the user wants the shape tesselated
-		if (this.vertices != null) {
-			// compute the number of convex shapes to draw
-			this.elapsedTime += dt;
-			if (this.elapsedTime >= interval) {
-				if ((this.toIndex + 1) > this.triangles.size()) {
-					this.toIndex = 0;
-				} else {
-					this.toIndex++;
-				}
-				this.elapsedTime = this.elapsedTime - interval;
-			}
+		
+		// draw the points
+		g.setColor(Color.GREEN);
+		int pSize = this.points.size();
+		for (int i = 0; i < pSize; i++) {
+			Vector2 p = this.points.get(i);
+			this.renderPoint(g, p.x, p.y, r);
 		}
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.testbed.Test#update(int)
-	 */
-	@Override
-	public void update(int steps) {
-		// update by the interval
-		this.update(this.interval);
+		
+		g.setColor(Color.BLACK);
+		Vector2 p = this.screenToWorld(5.0, 15.0);
+		AffineTransform at = g.getTransform();
+		g.transform(AffineTransform.getScaleInstance(1, -1));
+		g.drawString(this.generators[this.currentGenerator].getClass().getSimpleName(), (int) (p.x * scale), (int) (-p.y * scale));
+		g.setTransform(at);
 	}
 	
 	/**
@@ -456,9 +359,10 @@ public class Decompose extends Test {
 	@Override
 	public String[][] getControls() {
 		return new String[][] {
-				{"Left Mouse Button", "Add a point to the polygon list."},
-				{"Right Mouse Button", "Clear the current polygon point list."},
-				{"t", "Closes the polygon and tesselates."}};
+				{"Left Mouse Button", "Add a point to the point list."},
+				{"Right Mouse Button", "Clear the current point list."},
+				{"h", "Creates a convex hull from the current point cloud."},
+				{"Enter", "Prints the points and hull to the console."}};
 	}
 	
 	/* (non-Javadoc)
@@ -469,8 +373,13 @@ public class Decompose extends Test {
 		super.initializeInput(keyboard, mouse);
 		// the keys above are already registered by the TestBed
 		
-		// we need to store the mouse so we know its location
-		this.mouse = mouse;
+		// key to build the hull
+		keyboard.add(new Input(KeyEvent.VK_H, Input.Hold.NO_HOLD));
+		// key to cycle the algorithms
+		keyboard.add(new Input(KeyEvent.VK_1, Input.Hold.NO_HOLD));
+		// key to print the points and hull
+		keyboard.add(new Input(KeyEvent.VK_ENTER,Input.Hold.NO_HOLD));
+		
 		// we also need to override the TestBed's registration of the left mouse button
 		// so that we don't allow holding of the button
 		mouse.remove(MouseEvent.BUTTON1);
@@ -486,40 +395,55 @@ public class Decompose extends Test {
 	public void poll(Keyboard keyboard, Mouse mouse) {
 		super.poll(keyboard, mouse);
 		
-		// look for the t key
-		if (keyboard.isPressed(KeyEvent.VK_T)) {
-			// only tesselate polys with 4 or more vertices
-			if (this.points.size() > 3) {
+		// look for the h key
+		if (keyboard.isPressed(KeyEvent.VK_H)) {
+			// create a convex hull
+			if (this.points.size() > 0) {
 				// place the points into the array
-				this.vertices = new Vector2[this.points.size()];
-				this.points.toArray(this.vertices);
-				// perform the tesselation
-				EarClipping ec = new EarClipping();
-				try {
-//					this.triangles = ec.decompose(this.vertices);
-					Monotone m = new Monotone();
-					this.triangles = m.decomposeMonotoneY(this.vertices);
-				} catch (Exception e) {
-					// if we get an exception color the thing red
-					// and flag that its in error so that the next
-					// click of the mouse clears the polygon points
-					this.error = true;
-					this.vertices = null;
-					this.triangles = null;
+				Vector2[] cloud = new Vector2[this.points.size()];
+				this.points.toArray(cloud);
+				// get the current hull generation algorithm
+				HullGenerator hg = this.generators[this.currentGenerator];
+				// generate the hull
+				this.vertices = hg.generate(cloud);
+			}
+		}
+		
+		// look for the 1 key
+		if (keyboard.isPressed(KeyEvent.VK_1)) {
+			if (this.currentGenerator == this.generators.length - 1) {
+				this.currentGenerator = 0;
+			} else {
+				this.currentGenerator++;
+			}
+		}
+		
+		// check for the enter key
+		if (keyboard.isPressed(KeyEvent.VK_ENTER)) {
+			// print the point cloud
+			int pSize = this.points.size();
+			System.out.print("Points[");
+			for (int i = 0; i < pSize; i++) {
+				System.out.print(this.points.get(i));
+			}
+			System.out.println("]");
+			// print the hull if its been created
+			if (this.vertices != null) {
+				System.out.print("Hull[");
+				int vSize = this.vertices.length;
+				for (int i = 0; i < vSize; i++) {
+					System.out.print(this.vertices[i]);
 				}
+				System.out.println("]");
 			}
 		}
 		
 		// look for the left mouse button
 		if (mouse.isPressed(MouseEvent.BUTTON1)) {
-			if (this.vertices != null || this.error) {
-				// stop the tesselation animation and start a new poly
+			if (this.vertices != null) {
+				// clear and start over
 				this.vertices = null;
 				this.points.clear();
-				this.elapsedTime = 0;
-				this.toIndex = 0;
-				this.triangles = null;
-				this.error = false;
 			} else {
 				// add the point to the list of points
 				Point p = mouse.getRelativeLocation();
@@ -533,10 +457,6 @@ public class Decompose extends Test {
 		if (mouse.isPressed(MouseEvent.BUTTON3)) {
 			this.vertices = null;
 			this.points.clear();
-			this.elapsedTime = 0;
-			this.toIndex = 0;
-			this.triangles = null;
-			this.error = false;
 		}
 	}
 	
