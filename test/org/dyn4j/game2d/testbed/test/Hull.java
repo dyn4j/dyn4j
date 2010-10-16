@@ -162,7 +162,7 @@ public class Hull extends Test {
 		Vector2 p = this.screenToWorld(5.0, 15.0);
 		AffineTransform at = g.getTransform();
 		g.transform(AffineTransform.getScaleInstance(1, -1));
-		g.drawString(this.generators[this.currentGenerator].getClass().getSimpleName(), (int) (p.x * scale), (int) (-p.y * scale));
+		g.drawString("(" + (this.currentGenerator + 1) + " of " + this.generators.length + ") " + this.generators[this.currentGenerator].getClass().getSimpleName(), (int) (p.x * scale), (int) (-p.y * scale));
 		g.setTransform(at);
 	}
 	
@@ -362,6 +362,7 @@ public class Hull extends Test {
 				{"Left Mouse Button", "Add a point to the point list."},
 				{"Right Mouse Button", "Clear the current point list."},
 				{"h", "Creates a convex hull from the current point cloud."},
+				{"1", "Cycles through the available algorithms."},
 				{"Enter", "Prints the points and hull to the console."}};
 	}
 	
