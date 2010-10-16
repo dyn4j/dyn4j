@@ -106,7 +106,7 @@ public class EarClipping implements Decomposer {
 		// get the number of points
 		int size = points.length;
 		// check the size
-		if (size < 4) throw new IllegalArgumentException("The polygon must have 4 more vertices.");
+		if (size < 4) throw new IllegalArgumentException("The polygon must have 4 or more vertices.");
 		
 		// create the result list
 		List<Convex> triangles = new ArrayList<Convex>(size - 2);
@@ -176,7 +176,7 @@ public class EarClipping implements Decomposer {
 		// stop when we only have 3 vertices left
 		for (;n > 3;) {
 			// is the node an ear node?
-			if (node.ear && !node.reflex) {
+			if (node.ear) {
 				// create a triangle from this ear
 				triangles.add(new Triangle(node.point, node.next.point, node.prev.point));
 				// get the previous and next nodes
@@ -249,11 +249,16 @@ public class EarClipping implements Decomposer {
 	 * <p>
 	 * A vertex is an ear vertex if the triangle created by the adjacent vertices
 	 * of the given vertex does not contain any other vertices within it.
+	 * <p>
+	 * A reflex vertex cannot be an ear.
 	 * @param vertex the vertex to test for ear-ness
 	 * @param n the number of vertices
 	 * @return boolean true if the given vertex is considered an ear vertex
 	 */
 	protected boolean isEar(Vertex vertex, int n) {
+		// reflex vertices cannot be ears
+		if (vertex.reflex) return false;
+		
 		boolean ear = true;
 		// get the triangle created by this point and its adjacent vertices
 		Vector2 a = vertex.point;

@@ -30,8 +30,16 @@ import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 
 import org.codezealot.game.input.Input;
 import org.codezealot.game.input.Keyboard;
@@ -42,8 +50,9 @@ import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Polygon;
 import org.dyn4j.game2d.geometry.Ray;
 import org.dyn4j.game2d.geometry.Vector2;
+import org.dyn4j.game2d.geometry.decompose.Decomposer;
 import org.dyn4j.game2d.geometry.decompose.EarClipping;
-import org.dyn4j.game2d.geometry.decompose.Monotone;
+import org.dyn4j.game2d.geometry.decompose.SweepLine;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Test;
 
@@ -57,6 +66,15 @@ public class Decompose extends Test {
 	/** The elapsed time since the last update */
 	private double elapsedTime;
 	
+	/** The list of decomposition algorithms */
+	private Decomposer[] algorithms = new Decomposer[] {
+		new EarClipping(),
+		new SweepLine()
+	};
+	
+	/** The current algorithm's index */
+	private int currentAlgorithm = 0;
+	
 	/** The first simple polygon to decompose */
 	private Vector2[] vertices;
 	
@@ -67,10 +85,13 @@ public class Decompose extends Test {
 	private List<Convex> triangles;
 	
 	/** The time interval between showing the decomposition */
-	private double interval = 0.75;
+	private double interval = 0.10;
 	
 	/** The index of the shape to render to */
 	private int toIndex = 0;
+	
+	/** Flag indicating the animation is complete */
+	private boolean done = false;
 	
 	/** The mouse to show the current position */
 	private Mouse mouse;
@@ -80,9 +101,6 @@ public class Decompose extends Test {
 	
 	/** True if an error occurred in tesselation */
 	private boolean error = false;
-	
-	/** The error message when an error occurs */
-	private String errorMessage = "Invalid Polygon";
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.testbed.Test#getName()
@@ -97,7 +115,13 @@ public class Decompose extends Test {
 	 */
 	@Override
 	public String getDescription() {
-		return "Tests the decomposition methods.";
+		return "Tests the decomposition methods.  Files loaded via the 'f' key should" +
+			   "be normal text files with the first line containing the number of points" +
+			   "in the polygon.  The remaining lines should be a listing of the x and y" +
+		       "values separated by a space.  For example:\n\n5\n1.0 1.0\n0.5 1.2\n-0.5 2.0" +
+		       "\n-0.7 -0.1\n0.0 -0.3\n\nThe time taken to show the triangles is not respective" +
+		       "of the alorithms complexity.  The animation is used to verify that triangles are" +
+		       "correct.";
 	}
 	
 	/* (non-Javadoc)
@@ -220,16 +244,14 @@ public class Decompose extends Test {
 				// draw the mouse point
 				this.renderPoint(g, v.x, v.y, r);
 			}
-			
-			// show the error message if needed
-			if (this.error) {
-				Vector2 p = this.screenToWorld(5.0, 15.0);
-				AffineTransform at = g.getTransform();
-				g.transform(AffineTransform.getScaleInstance(1, -1));
-				g.drawString(this.errorMessage, (int) (p.x * scale), (int) (-p.y * scale));
-				g.setTransform(at);
-			}
 		}
+		
+		g.setColor(Color.BLACK);
+		Vector2 p = this.screenToWorld(5.0, 15.0);
+		AffineTransform at = g.getTransform();
+		g.transform(AffineTransform.getScaleInstance(1, -1));
+		g.drawString("(" + (this.currentAlgorithm + 1) + " of " + this.algorithms.length + ") " + this.algorithms[this.currentAlgorithm].getClass().getSimpleName(), (int) (p.x * scale), (int) (-p.y * scale));
+		g.setTransform(at);
 	}
 	
 	/* (non-Javadoc)
@@ -240,12 +262,12 @@ public class Decompose extends Test {
 		// call the super method
 		super.update(dt);
 		// only update when the user wants the shape tesselated
-		if (this.vertices != null) {
+		if (this.vertices != null && !this.done) {
 			// compute the number of convex shapes to draw
 			this.elapsedTime += dt;
 			if (this.elapsedTime >= interval) {
 				if ((this.toIndex + 1) > this.triangles.size()) {
-					this.toIndex = 0;
+					this.done = true;
 				} else {
 					this.toIndex++;
 				}
@@ -458,7 +480,10 @@ public class Decompose extends Test {
 		return new String[][] {
 				{"Left Mouse Button", "Add a point to the polygon list."},
 				{"Right Mouse Button", "Clear the current polygon point list."},
-				{"t", "Closes the polygon and tesselates."}};
+				{"t", "Closes the polygon and tesselates."},
+				{"1", "Cycles through the available algorithms."},
+				{"f", "Opens the file chooser to choose an input file."},
+				{"Enter", "Prints the points to the console."}};
 	}
 	
 	/* (non-Javadoc)
@@ -467,7 +492,13 @@ public class Decompose extends Test {
 	@Override
 	public void initializeInput(Keyboard keyboard, Mouse mouse) {
 		super.initializeInput(keyboard, mouse);
-		// the keys above are already registered by the TestBed
+		
+		keyboard.add(new Input(KeyEvent.VK_1, Input.Hold.NO_HOLD));
+		keyboard.add(new Input(KeyEvent.VK_F, Input.Hold.NO_HOLD));
+		// key to print the points
+		keyboard.add(new Input(KeyEvent.VK_ENTER,Input.Hold.NO_HOLD));
+		
+		// t is already registered for listening
 		
 		// we need to store the mouse so we know its location
 		this.mouse = mouse;
@@ -486,6 +517,16 @@ public class Decompose extends Test {
 	public void poll(Keyboard keyboard, Mouse mouse) {
 		super.poll(keyboard, mouse);
 		
+		// look for the 1 key
+		if (keyboard.isPressed(KeyEvent.VK_1)) {
+			// cycle the current algorithm
+			if (this.currentAlgorithm + 1 == this.algorithms.length) {
+				this.currentAlgorithm = 0;
+			} else {
+				this.currentAlgorithm++;
+			}
+		}
+		
 		// look for the t key
 		if (keyboard.isPressed(KeyEvent.VK_T)) {
 			// only tesselate polys with 4 or more vertices
@@ -494,15 +535,18 @@ public class Decompose extends Test {
 				this.vertices = new Vector2[this.points.size()];
 				this.points.toArray(this.vertices);
 				// perform the tesselation
-				EarClipping ec = new EarClipping();
+				Decomposer d = this.algorithms[this.currentAlgorithm];
 				try {
-//					this.triangles = ec.decompose(this.vertices);
-					Monotone m = new Monotone();
-					this.triangles = m.decomposeMonotoneY(this.vertices);
+					this.triangles = d.decompose(this.vertices);
+					this.elapsedTime = 0;
+					this.toIndex = 0;
+					this.error = false;
+					this.done = false;
 				} catch (Exception e) {
 					// if we get an exception color the thing red
 					// and flag that its in error so that the next
 					// click of the mouse clears the polygon points
+					JOptionPane.showMessageDialog(null, "An error occurred durring the decomposition of the given polygon.\n" + e.toString());
 					this.error = true;
 					this.vertices = null;
 					this.triangles = null;
@@ -520,6 +564,7 @@ public class Decompose extends Test {
 				this.toIndex = 0;
 				this.triangles = null;
 				this.error = false;
+				this.done = false;
 			} else {
 				// add the point to the list of points
 				Point p = mouse.getRelativeLocation();
@@ -537,6 +582,51 @@ public class Decompose extends Test {
 			this.toIndex = 0;
 			this.triangles = null;
 			this.error = false;
+			this.done = false;
+		}
+		
+		if (keyboard.isPressed(KeyEvent.VK_F)) {
+			// show the open file dialog
+			JFileChooser fileChooser = new JFileChooser();
+			// the default is one item, files only
+			int returnValue = fileChooser.showOpenDialog(null);
+			
+			if (returnValue == JFileChooser.APPROVE_OPTION) {
+				// load up the file
+				Vector2[] points = this.load(fileChooser.getSelectedFile());
+				// check if the points array is null
+				if (points != null) {
+					// the file was loaded successfully
+					// clear the current point list
+					this.points.clear();
+					// add all the points to the list
+					for (int i = 0; i < points.length; i++) {
+						Vector2 p = points[i];
+						this.points.add(p);
+					}
+					this.vertices = null;
+					this.elapsedTime = 0;
+					this.toIndex = 0;
+					this.triangles = null;
+					this.error = false;
+					this.done = false;
+				} else {
+					JOptionPane.showMessageDialog(null, "An error occurred loading the selected file.  Please check the format.\nExamine the Console for details.");
+				}
+			} else if (returnValue == JFileChooser.ERROR_OPTION) {
+				JOptionPane.showMessageDialog(null, "An unexpected error occurred when reading the file.  Please try again.\nExamine the Console for details.");
+			}
+		}
+		
+		// check for the enter key
+		if (keyboard.isPressed(KeyEvent.VK_ENTER)) {
+			// print the points
+			int pSize = this.points.size();
+			System.out.print("Points[");
+			for (int i = 0; i < pSize; i++) {
+				System.out.print(this.points.get(i));
+			}
+			System.out.println("]");
 		}
 	}
 	
@@ -546,8 +636,62 @@ public class Decompose extends Test {
 	@Override
 	public void home() {
 		// set the scale
-		this.scale = 128.0;
+		this.scale = 64.0;
 		// set the offset
 		this.offset.zero();
+	}
+	
+	/**
+	 * Loads the given resource from the file system and attempts to
+	 * interpret the contents.
+	 * <p>
+	 * If any exception occurs, null is returned.
+	 * @param file the file to load
+	 * @return {@link Vector2}[] the points in the file
+	 */
+	private Vector2[] load(File file) {
+		if (file == null) return null;
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(file));
+			
+			String line;
+			int i = 0;
+			Vector2[] points = null;
+			try {
+				while ((line = br.readLine()) != null) {
+					if (line.isEmpty()) continue;
+					if (line.startsWith("#")) continue;
+					if (i == 0) {
+						// the first line contains the number of vertices
+						int size = Integer.parseInt(line.trim());
+						points = new Vector2[size];
+					} else {
+						// otherwise its a line containing a point
+						String[] xy = line.split("\\s");
+						double x = Double.parseDouble(xy[0].trim());
+						double y = Double.parseDouble(xy[1].trim());
+						Vector2 p = new Vector2(x, y);
+						points[i - 1] = p;
+					}
+					i++;
+				}
+				
+				return points;
+			} catch (IOException e) {
+				// just show the error on the console
+				e.printStackTrace();
+			} catch (NumberFormatException e) {
+				// just show the error on the console
+				e.printStackTrace();
+			} catch (ArrayIndexOutOfBoundsException e) {
+				// just show the error on the console
+				e.printStackTrace();
+			}
+		} catch (FileNotFoundException e) {
+			// just show the error on the console
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
 }
