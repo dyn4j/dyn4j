@@ -348,6 +348,8 @@ public class DoublyConnectedEdgeList {
 	
 	/**
 	 * Adds two half edges to this DCEL object given the vertices to connect.
+	 * <p>
+	 * This method assumes that no crossing edges will be added.
 	 * @param v1 the first vertex
 	 * @param v2 the second vertex
 	 */
@@ -360,8 +362,14 @@ public class DoublyConnectedEdgeList {
 		HalfEdge left = new HalfEdge();
 		HalfEdge right = new HalfEdge();
 		
-		HalfEdge prev1 = v1.leaving.twin.next.twin;
-		HalfEdge prev2 = v2.leaving.twin.next.twin;
+		// we need to obtain the previous edge for both vertices
+		// but they must be on the same face.  We can use v1's leaving
+		// edge's face here since we know that v1 has not been used in the
+		// creation of an edge yet.  This is because of the downward
+		// y sweeping that the SweepLine class uses.
+		
+		HalfEdge prev1 = this.getPreviousEdge(v1, v1.leaving.face);
+		HalfEdge prev2 = this.getPreviousEdge(v2, v1.leaving.face);
 		
 		face.edge = left;
 		v1.leaving.face.edge = right;
@@ -389,6 +397,37 @@ public class DoublyConnectedEdgeList {
 		this.edges.add(left);
 		this.edges.add(right);
 		this.faces.add(face);
+	}
+	
+	/**
+	 * Walks around the given face and finds the previous edge
+	 * for the given vertex.
+	 * <p>
+	 * This method assumes that the given vertex will be on the given face.
+	 * @param vertex the vertex to find the previous edge for
+	 * @param face the face the edge should lie on
+	 * @return {@link HalfEdge} the previous edge
+	 */
+	protected HalfEdge getPreviousEdge(Vertex vertex, Face face) {
+		// find the vertex on the given face and return the
+		// edge that points to it
+		HalfEdge twin = vertex.leaving.twin;
+		HalfEdge edge = vertex.leaving.twin.next.twin;
+		// look at all the edges that have their
+		// destination as this vertex
+		while (edge != twin) {
+			// we can't use the getPrevious method on the leaving
+			// edge since this doesn't give us the right previous edge
+			// in all cases.  The real criteria is to find the edge that
+			// has this vertex as the destination and has the same face
+			// as the given face
+			if (edge.face == face) {
+				return edge;
+			}
+			edge = edge.next.twin;
+		}
+		// if we get here then its the last edge
+		return edge;
 	}
 	
 	/**

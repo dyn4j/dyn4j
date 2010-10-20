@@ -546,10 +546,12 @@ public class Decompose extends Test {
 					// if we get an exception color the thing red
 					// and flag that its in error so that the next
 					// click of the mouse clears the polygon points
-					JOptionPane.showMessageDialog(null, "An error occurred durring the decomposition of the given polygon.\n" + e.toString());
+					JOptionPane.showMessageDialog(null, "An error occurred durring the decomposition of the given polygon.\nExamine the Console for details.");
 					this.error = true;
 					this.vertices = null;
 					this.triangles = null;
+					// print the error to the console
+					e.printStackTrace();
 				}
 			}
 		}
