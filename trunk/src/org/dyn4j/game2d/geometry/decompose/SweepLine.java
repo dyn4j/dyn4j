@@ -28,10 +28,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
 
-import org.dyn4j.game2d.BinaryTree;
+import org.dyn4j.game2d.BinarySearchTree;
 import org.dyn4j.game2d.Epsilon;
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Geometry;
+import org.dyn4j.game2d.geometry.Segment;
 import org.dyn4j.game2d.geometry.Vector2;
 
 /**
@@ -128,7 +129,16 @@ public class SweepLine implements Decomposer {
 		 * @return boolean true if this {@link Vertex} is to the left of the given {@link Edge}
 		 */
 		public boolean isLeft(Edge edge) {
+			// attempt the simple comparison first
 			if (this.point.x < edge.getMinX()) {
+				return true;
+			} else if (this.point.x > edge.getMaxX()) {
+				return false;
+			}
+			// its in between the min and max x so we need to 
+			// do a side of line test
+			double location = Segment.getLocation(this.point, edge.v0.point, edge.v1.point);
+			if (location < 0.0) {
 				return true;
 			} else {
 				return false;
@@ -190,6 +200,8 @@ public class SweepLine implements Decomposer {
 		 */
 		@Override
 		public int compareTo(Edge o) {
+			// check for reference equality first
+			if (this == o) return 0;
 			// first sort by the minimum x value
 			double value = this.getMinX() - o.getMinX();
 			if (Math.abs(value) < Epsilon.E) {
@@ -208,11 +220,27 @@ public class SweepLine implements Decomposer {
 		}
 		
 		/**
+		 * Returns the maximum x value of this edge.
+		 * @return double
+		 */
+		public double getMaxX() {
+			return Math.max(v0.point.x, v1.point.x);
+		}
+		
+		/**
 		 * Returns the minimum y value of this edge.
 		 * @return double
 		 */
 		public double getMinY() {
 			return Math.min(v0.point.y, v1.point.y);
+		}
+		
+		/**
+		 * Returns the maximum y value of this edge.
+		 * @return double
+		 */
+		public double getMaxY() {
+			return Math.max(v0.point.y, v1.point.y);
 		}
 		
 		/**
@@ -248,13 +276,13 @@ public class SweepLine implements Decomposer {
 	}
 	
 	/**
-	 * Class to extend the {@link BinaryTree} to add a method for
+	 * Class to extend the {@link BinarySearchTree} to add a method for
 	 * finding the {@link Edge} closest to a given {@link Vertex}.
 	 * @author William Bittle
 	 * @version 2.2.0
 	 * @since 2.2.0
 	 */
-	protected static class EdgeBinaryTree extends BinaryTree<Edge> {
+	protected static class EdgeBinaryTree extends BinarySearchTree<Edge> {
 		/**
 		 * Performs a search to find the right most {@link Edge}
 		 * who is left of the given {@link Vertex}.
@@ -267,9 +295,9 @@ public class SweepLine implements Decomposer {
 			// check for a null root node
 			if (this.root == null) return null;
 			// set the current node to the root
-			BinaryTreeNode<Edge> node = this.root;
+			Node<Edge> node = this.root;
 			// initialize the best edge to the root
-			BinaryTreeNode<Edge> best = node;
+			Node<Edge> best = node;
 			// loop until the current node is null
 			while (node != null) {
 				// get the left edge
