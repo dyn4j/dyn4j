@@ -749,4 +749,46 @@ public class GeometryTest {
 	public void reverseWindingNullArray() {
 		Geometry.reverseWinding((Vector2[]) null);
 	}
+	
+	/**
+	 * Tests the cleanse list method.
+	 */
+	@Test
+	public void cleanseList() {
+		List<Vector2> points = new ArrayList<Vector2>();
+		points.add(new Vector2(1.0, 0.0));
+		points.add(new Vector2(1.0, 0.0));
+		points.add(new Vector2(0.5, -0.5));
+		points.add(new Vector2(0.0, -0.5));
+		points.add(new Vector2(-0.5, -0.5));
+		points.add(new Vector2(-2.0, -0.5));
+		points.add(new Vector2(2.1, 0.5));
+		points.add(new Vector2(1.0, 0.0));
+		
+		List<Vector2> result = Geometry.cleanse(points);
+		
+		TestCase.assertTrue(Geometry.getWinding(result) > 0.0);
+		TestCase.assertEquals(4, result.size());
+	}
+	
+	/**
+	 * Tests the cleanse array method.
+	 */
+	@Test
+	public void cleanseArray() {
+		Vector2[] points = new Vector2[8];
+		points[0] = new Vector2(1.0, 0.0);
+		points[1] = new Vector2(1.0, 0.0);
+		points[2] = new Vector2(0.5, -0.5);
+		points[3] = new Vector2(0.0, -0.5);
+		points[4] = new Vector2(-0.5, -0.5);
+		points[5] = new Vector2(-2.0, -0.5);
+		points[6] = new Vector2(2.1, 0.5);
+		points[7] = new Vector2(1.0, 0.0);
+		
+		Vector2[] result = Geometry.cleanse(points);
+		
+		TestCase.assertTrue(Geometry.getWinding(result) > 0.0);
+		TestCase.assertEquals(4, result.length);
+	}
 }

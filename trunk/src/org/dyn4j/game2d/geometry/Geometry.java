@@ -24,6 +24,8 @@
  */
 package org.dyn4j.game2d.geometry;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -558,5 +560,89 @@ public class Geometry {
 		Vector2 start = new Vector2(-length * 0.5, 0.0);
 		Vector2 end = new Vector2(length * 0.5, 0.0);
 		return new Segment(start, end);
+	}
+	
+	/**
+	 * Returns a new list containing the 'cleansed' version of the given listing of polygon points.
+	 * <p>
+	 * This method ensures the polygon has CCW winding, removes colinear vertices, removes coincident vertices.
+	 * @param points the list polygon points
+	 * @return List&lt;{@link Vector2}&gt;
+	 */
+	public static final List<Vector2> cleanse(List<Vector2> points) {
+		// get the size of the points list
+		int size = points.size();
+		// create a result list
+		List<Vector2> result = new ArrayList<Vector2>(size);
+		
+		double winding = 0.0;
+		
+		// loop over the points
+		for (int i = 0; i < size; i++) {
+			// get the current point
+			Vector2 point = points.get(i);
+			
+			// get the adjacent points
+			Vector2 prev = points.get(i - 1 < 0 ? size - 1 : i - 1);
+			Vector2 next = points.get(i + 1 == size ? 0 : i + 1);
+			
+			// is this point equal to the next?
+			Vector2 diff = point.difference(next);
+			if (diff.isZero()) {
+				// then skip this point
+				continue;
+			}
+			
+			// create the edge vectors
+			Vector2 prevToPoint = prev.to(point);
+			Vector2 pointToNext = point.to(next);
+			
+			// check if the previous point is equal to this point
+			
+			// since the next point is not equal to this point
+			// if this is true we still need to add the point because
+			// it is the last of a string of coincident vertices
+			if (!prevToPoint.isZero()) {
+				// compute the cross product
+				double cross = prevToPoint.cross(pointToNext);
+				
+				// if the cross product is near zero then point is a colinear point
+				if (Math.abs(cross) <= Epsilon.E) {
+					continue;
+				}
+			}
+			
+			// sum the current signed area
+			winding += point.cross(next);
+			
+			// otherwise the point is valid
+			result.add(point);
+		}
+		
+		// check the winding
+		if (winding < 0.0) {
+			Geometry.reverseWinding(result);
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Returns a new array containing the 'cleansed' version of the given array of polygon points.
+	 * <p>
+	 * This method ensures the polygon has CCW winding, removes colinear vertices, removes coincident vertices.
+	 * @param points the list polygon points
+	 * @return {@link Vector2}[]
+	 */
+	public static Vector2[] cleanse(Vector2[] points) {
+		// create a list from the array
+		List<Vector2> pointList = Arrays.asList(points);
+		// cleanse the list
+		List<Vector2> resultList = Geometry.cleanse(pointList);
+		// convert it back to an array
+		Vector2[] result = new Vector2[resultList.size()];
+		resultList.toArray(result);
+		// return the result
+		return result;
 	}
 }
