@@ -31,7 +31,7 @@ import java.util.Stack;
 import org.dyn4j.game2d.BinarySearchTree.TreeIterator.Direction;
 
 /**
- * Represents an unblanced Binary Search Tree.
+ * Represents an unbalanced Binary Search Tree.
  * <p>
  * This class cannot store null values and duplicates can have unexpected behavior.
  * @author William Bittle
@@ -39,7 +39,7 @@ import org.dyn4j.game2d.BinarySearchTree.TreeIterator.Direction;
  * @since 2.2.0
  * @param <E> Comparable
  */
-public class BinarySearchTree<E extends Comparable<E>> {
+public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	/**
 	 * Node class for a {@link BinarySearchTree}.
 	 * @author William Bittle
@@ -741,6 +741,15 @@ public class BinarySearchTree<E extends Comparable<E>> {
 		}
 		// if we get here the node was not found
 		return false;
+	}
+	
+	/**
+	 * Returns the in-order (ascending) iterator.
+	 * @return Iterator&lt;E&gt;
+	 */
+	@Override
+	public Iterator<E> iterator() {
+		return this.inOrderIterator();
 	}
 	
 	/**

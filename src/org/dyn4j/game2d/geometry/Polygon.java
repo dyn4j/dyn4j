@@ -24,6 +24,8 @@
  */
 package org.dyn4j.game2d.geometry;
 
+import org.dyn4j.game2d.Epsilon;
+
 /**
  * Represents a {@link Convex} {@link Polygon}.
  * <p>
@@ -75,10 +77,13 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 			if (p1.equals(p2)) {
 				throw new IllegalArgumentException("A polygon cannot not have coincident vertices.");
 			}
-			// check for convexity
 			double cross = Math.signum(p0.to(p1).cross(p1.to(p2)));
-			if (sign != 0.0 && cross != sign) {
-				throw new IllegalArgumentException("A polygon must be convex.");
+			// check for colinear points (for now its allowed)
+			if (Math.abs(cross) > Epsilon.E) {
+				// check for convexity
+				if (sign != 0.0 && cross != sign) {
+					throw new IllegalArgumentException("A polygon must be convex.");
+				}
 			}
 			sign = cross;
 		}

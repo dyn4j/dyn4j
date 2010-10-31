@@ -50,6 +50,7 @@ import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Polygon;
 import org.dyn4j.game2d.geometry.Ray;
 import org.dyn4j.game2d.geometry.Vector2;
+import org.dyn4j.game2d.geometry.decompose.Bayazit;
 import org.dyn4j.game2d.geometry.decompose.Decomposer;
 import org.dyn4j.game2d.geometry.decompose.EarClipping;
 import org.dyn4j.game2d.geometry.decompose.SweepLine;
@@ -69,7 +70,8 @@ public class Decompose extends Test {
 	/** The list of decomposition algorithms */
 	private Decomposer[] algorithms = new Decomposer[] {
 		new EarClipping(),
-		new SweepLine()
+		new SweepLine(),
+		new Bayazit()
 	};
 	
 	/** The current algorithm's index */
@@ -246,11 +248,17 @@ public class Decompose extends Test {
 			}
 		}
 		
+		// get the number of convexes created
+		int n = 0;
+		if (this.triangles != null) {
+			n = this.triangles.size();
+		}
+		
 		g.setColor(Color.BLACK);
 		Vector2 p = this.screenToWorld(5.0, 15.0);
 		AffineTransform at = g.getTransform();
 		g.transform(AffineTransform.getScaleInstance(1, -1));
-		g.drawString("(" + (this.currentAlgorithm + 1) + " of " + this.algorithms.length + ") " + this.algorithms[this.currentAlgorithm].getClass().getSimpleName(), (int) (p.x * scale), (int) (-p.y * scale));
+		g.drawString("(" + (this.currentAlgorithm + 1) + " of " + this.algorithms.length + ") " + this.algorithms[this.currentAlgorithm].getClass().getSimpleName() + " : " + n, (int) (p.x * scale), (int) (-p.y * scale));
 		g.setTransform(at);
 	}
 	
@@ -525,6 +533,12 @@ public class Decompose extends Test {
 			} else {
 				this.currentAlgorithm++;
 			}
+			this.elapsedTime = 0;
+			this.toIndex = 0;
+			this.vertices = null;
+			this.triangles = null;
+			this.error = false;
+			this.done = false;
 		}
 		
 		// look for the t key
