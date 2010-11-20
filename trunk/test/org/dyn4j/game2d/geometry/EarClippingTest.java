@@ -108,7 +108,7 @@ public class EarClippingTest {
 		// decompose the poly
 		List<Convex> result = this.algo.decompose(vertices);
 		
-		// the result should have n - 2 convex shapes
-		TestCase.assertEquals(8, result.size());
+		// the result should have less than or equal to n - 2 convex shapes
+		TestCase.assertTrue(result.size() <= 8);
 	}
 }
