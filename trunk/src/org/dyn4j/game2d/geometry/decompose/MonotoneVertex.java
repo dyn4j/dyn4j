@@ -24,23 +24,22 @@
  */
 package org.dyn4j.game2d.geometry.decompose;
 
-import org.dyn4j.game2d.geometry.Vector2;
-
 /**
  * Represents a vertex of a monotone polygon.
  * @author William Bittle
  * @version 2.2.0
  * @since 2.2.0
+ * @param <E> the vertex data type
  */
-public class MonotoneVertex {
-	/** The vertex point */
-	protected Vector2 point;
+public class MonotoneVertex<E> {
+	/** The vertex data */
+	protected E data;
 	
 	/** The next vertex in CCW winding */
-	protected MonotoneVertex next;
+	protected MonotoneVertex<E> next;
 	
 	/** The prev vertex in CCW winding */
-	protected MonotoneVertex prev;
+	protected MonotoneVertex<E> prev;
 	
 	/** The monotone chain indicator */
 	protected MonotoneChain.Type chain;
@@ -52,7 +51,7 @@ public class MonotoneVertex {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("MONOTONE_VERTEX[")
-		.append(this.point).append("|")
+		.append(this.data).append("|")
 		.append(this.chain)
 		.append("]");
 		return sb.toString();
@@ -63,31 +62,31 @@ public class MonotoneVertex {
 	 * @param vertex the vertex to test
 	 * @return boolean
 	 */
-	public boolean isAdjacent(MonotoneVertex vertex) {
+	public boolean isAdjacent(MonotoneVertex<E> vertex) {
 		return vertex == prev || vertex == next;
 	}
 	
 	/**
-	 * Returns the point for this vertex.
-	 * @return {@link Vector2}
+	 * Returns the vertex data.
+	 * @return E
 	 */
-	public Vector2 getPoint() {
-		return point;
+	public E getData() {
+		return this.data;
 	}
 	
 	/**
-	 * Sets the point for this vertex.
-	 * @param point the point
+	 * Sets the data for this vertex.
+	 * @param data the vertex data
 	 */
-	public void setPoint(Vector2 point) {
-		this.point = point;
+	public void setData(E data) {
+		this.data = data;
 	}
 	
 	/**
 	 * Returns the next vertex in CCW winding order.
 	 * @return {@link MonotoneVertex}
 	 */
-	public MonotoneVertex getNext() {
+	public MonotoneVertex<E> getNext() {
 		return next;
 	}
 	
@@ -95,7 +94,7 @@ public class MonotoneVertex {
 	 * Sets the next vertex in CCW winding order.
 	 * @param next the next vertex
 	 */
-	public void setNext(MonotoneVertex next) {
+	public void setNext(MonotoneVertex<E> next) {
 		this.next = next;
 	}
 	
@@ -103,7 +102,7 @@ public class MonotoneVertex {
 	 * Returns the previous vertex in CCW winding order.
 	 * @return {@link MonotoneVertex}
 	 */
-	public MonotoneVertex getPrev() {
+	public MonotoneVertex<E> getPrev() {
 		return prev;
 	}
 	
@@ -111,7 +110,7 @@ public class MonotoneVertex {
 	 * Sets the previous vertex in CCW winding order.
 	 * @param prev the previous vertex
 	 */
-	public void setPrev(MonotoneVertex prev) {
+	public void setPrev(MonotoneVertex<E> prev) {
 		this.prev = prev;
 	}
 	

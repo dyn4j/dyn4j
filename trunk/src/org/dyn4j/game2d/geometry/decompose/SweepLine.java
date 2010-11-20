@@ -24,7 +24,6 @@
  */
 package org.dyn4j.game2d.geometry.decompose;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
 
@@ -41,6 +40,11 @@ import org.dyn4j.game2d.geometry.Vector2;
  * <p>
  * This algorithm is O(n log n) complexity in the y-monotone decomposition phase and O(n) in the
  * triangulation phase yielding a total complexity of O(n log n).
+ * <p>
+ * After triangulation, the Hertel-Mehlhorn algorithm is used to reduce the number of convex
+ * pieces.  This is performed in O(n) time.
+ * <p>
+ * This algorithm total complexity is O(n log n).
  * @author William Bittle
  * @version 2.2.0
  * @since 2.2.0
@@ -92,7 +96,7 @@ public class SweepLine implements Decomposer {
 		protected Edge right;
 		
 		/** The reference to the vertex in the DCEL */
-		public DoublyConnectedEdgeList.Vertex dcelReference;
+		protected DoublyConnectedEdgeList.Vertex dcelReference;
 		
 		/* (non-Javadoc)
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
@@ -329,9 +333,6 @@ public class SweepLine implements Decomposer {
 		// check the size
 		if (size < 4) throw new IllegalArgumentException("The polygon must have 4 or more vertices.");
 		
-		// create the result list
-		List<Convex> triangles = new ArrayList<Convex>(size - 2);
-		
 		// get the winding order
 		double winding = Geometry.getWinding(points);
 		
@@ -365,17 +366,24 @@ public class SweepLine implements Decomposer {
 			}
 		}
 		
-		// decompose the DCEL into y-monotone pieces
-		MonotonePolygon[] polygons = dcel.decompose();
+		// the DCEL now contains a valid y-monotone polygon decomposition
+		// next we need to triangulate all the y-monotone polygons
+		List<MonotonePolygon<DoublyConnectedEdgeList.Vertex>> polygons = dcel.getYMonotonePolygons();
 		
-		// loop over each y-monotone polygon and decompose it
-		int pSize = polygons.length;
-		for (int i = 0; i < pSize; i++) {
-			triangles.addAll(polygons[i].decompose());
+		// triangulate each monotone polygon
+		int ympSize = polygons.size();
+		for (int i = 0; i < ympSize; i++) {
+			dcel.triangulateMonotoneY(polygons.get(i));
 		}
 		
-		// return the triangles
-		return triangles;
+		// the DCEL now contains a valid triangulation
+		// next we perform the Hertel-Mehlhorn algorithm to
+		// remove unnecessary edges
+		dcel.hertelMehlhorn();
+		
+		// the DCEL now contains a valid convex decompostion
+		// convert the dcel into a list of convex shapes
+		return dcel.getConvexDecomposition();
 	}
 	
 	/**

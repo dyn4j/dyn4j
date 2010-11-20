@@ -25,6 +25,26 @@
 
 /**
  * This package contains algorithms to decompose polygons into {@link Convex} pieces.
+ * <p>
+ * Three implementations of the {@link Decomposer} interface are provided: {@link Bayazit},
+ * {@link EarClipping}, and {@link SweepLine}.
+ * <p>
+ * The {@link Bayazit} algorithm is O(nr) and finds a non-optimal convex decomposition.
+ * <p>
+ * The {@link EarClipping} algorithm is O(n<sup>2</sup>) and finds a valid triangulation, then uses
+ * the Hertel-Mehlhorn algorithm to combine triangles into convex pieces.  This is also an non-optimal
+ * decomposition.
+ * <p>
+ * The {@link SweepLine} algorithm is O(n log n) and, like {@link EarClipping}, finds a valid triangulation,
+ * then uses the Hertel-Mehlhorn algorithm to combine triangles into convex pieces.  This is also a
+ * non-optimal decomposition.
+ * <p>
+ * In general the algorithms will generate different decompositions.  If used for pre-processing just
+ * choose the best result, for runtime generation, the {@link Bayazit} may be slower but will generally
+ * produce a better decomposition.
+ * <p>
+ * A "better" decomposition is one that contains fewer convex pieces and the convex pieces that are created
+ * are of better quality for simulation.
  * @author William Bittle 
  * @version 2.2.0
  * @since 2.2.0
