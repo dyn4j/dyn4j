@@ -24,12 +24,10 @@
  */
 package org.dyn4j.game2d.geometry.decompose;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Geometry;
-import org.dyn4j.game2d.geometry.Triangle;
 import org.dyn4j.game2d.geometry.Vector2;
 
 /**
@@ -47,9 +45,10 @@ import org.dyn4j.game2d.geometry.Vector2;
  * <p>
  * The polygon to decompose must be 4 or more vertices.
  * <p>
- * This algorithm will always return N - 2 {@link Triangle}s where N is the number of points.
+ * This algorithm creates a valid triangulation (N - 2) triangles, then employs the Hertel-Mehlhorn
+ * algorithm to reduce the number of convex pieces.
  * <p>
- * This algorithm's order is O(n<sup>2</sup>).
+ * This algorithm is O(n<sup>2</sup>).
  * @author William Bittle
  * @version 2.2.0
  * @since 2.2.0
@@ -61,21 +60,24 @@ public class EarClipping implements Decomposer {
 	 * @version 2.2.0
 	 * @since 2.2.0
 	 */
-	protected class Vertex {
+	public class Vertex {
 		/** The vertex point */
-		public Vector2 point;
+		protected Vector2 point;
 		
 		/** The previous vertex */
-		public Vertex prev;
+		protected Vertex prev;
 		
 		/** The next vertex */
-		public Vertex next;
+		protected Vertex next;
 		
 		/** Whether this vertex is an ear vertex */
-		public boolean ear;
+		protected boolean ear;
 		
 		/** Whether this vertex is a reflex vertex */
-		public boolean reflex;
+		protected boolean reflex;
+		
+		/** The DCEL vertex reference */
+		protected DoublyConnectedEdgeList.Vertex reference;
 		
 		/**
 		 * Default constructor.
@@ -108,9 +110,6 @@ public class EarClipping implements Decomposer {
 		// check the size
 		if (size < 4) throw new IllegalArgumentException("The polygon must have 4 or more vertices.");
 		
-		// create the result list
-		List<Convex> triangles = new ArrayList<Convex>(size - 2);
-		
 		// get the winding order
 		double winding = Geometry.getWinding(points);
 		
@@ -118,6 +117,9 @@ public class EarClipping implements Decomposer {
 		if (winding < 0.0) {
 			Geometry.reverseWinding(points);
 		}
+		
+		// create a DCEL to store the decomposition
+		DoublyConnectedEdgeList dcel = new DoublyConnectedEdgeList(points);
 		
 		// create a doubly link list for the vertices
 		Vertex root = new Vertex();
@@ -152,6 +154,8 @@ public class EarClipping implements Decomposer {
 			if (prev != null) {
 				prev.next = curr;
 			}
+			// set the current point's reference vertex
+			curr.reference = dcel.vertices.get(i);
 			// set the new previous to the current
 			prev = curr;
 			// create a new vertex for the current node
@@ -177,8 +181,8 @@ public class EarClipping implements Decomposer {
 		for (;n > 3;) {
 			// is the node an ear node?
 			if (node.ear) {
-				// create a triangle from this ear
-				triangles.add(new Triangle(node.point, node.next.point, node.prev.point));
+				// create a diagonal for this ear
+				dcel.addHalfEdges(node.next.reference, node.prev.reference);
 				// get the previous and next nodes
 				Vertex pNode = node.prev;
 				Vertex nNode = node.next;
@@ -208,14 +212,15 @@ public class EarClipping implements Decomposer {
 			node = node.next;
 		}
 		
-		// lastly output the last triangle
-		Vector2 a = node.point;
-		Vector2 b = node.next.point;
-		Vector2 c = node.next.next.point;
+		// lastly, add the last diagonal
+		dcel.addHalfEdges(node.next.reference, node.prev.reference);
 		
-		triangles.add(new Triangle(a, b, c));
+		// perform the Hertel-Mehlhorn algorithm to reduce the number
+		// of convex pieces
+		dcel.hertelMehlhorn();
 		
-		return triangles;
+		// return the convex pieces
+		return dcel.getConvexDecomposition();
 	}
 	
 	/**
