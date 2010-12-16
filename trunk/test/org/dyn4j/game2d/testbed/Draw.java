@@ -29,7 +29,7 @@ import java.awt.Color;
 /**
  * Settings singleton for drawing.
  * @author William Bittle
- * @version 2.1.0
+ * @version 2.2.1
  * @since 1.0.0
  */
 public class Draw {
@@ -98,6 +98,15 @@ public class Draw {
 	
 	/** The color used when rendering rotation discs */
 	private Color rotationDiscColor = Color.PINK;
+	
+	/** Whether to blur the metrics panel using a convolve-op */
+	private boolean panelBlurred = false;
+	
+	/** Whether to use anti-aliasing */
+	private boolean antiAliased = false;
+	
+	/** Whether to use text anti-aliasing */
+	private boolean textAntiAliased = false;
 	
 	/** The singleton instance */
 	private static final Draw instance = new Draw();
@@ -486,5 +495,59 @@ public class Draw {
 	 */
 	public synchronized void setRotationDiscColor(Color rotationDiscColor) {
 		this.rotationDiscColor = rotationDiscColor;
+	}
+	
+	/**
+	 * Returns true if the metrics panel background should be blurred.
+	 * @return boolean
+	 * @since 2.2.1
+	 */
+	public boolean isPanelBlurred() {
+		return panelBlurred;
+	}
+	
+	/**
+	 * Sets whether the background of the metrics panel should be blurred or not.
+	 * @param flag true if the metrics panel's background should be blurred
+	 * @since 2.2.1
+	 */
+	public synchronized void setPanelBlurred(boolean flag) {
+		this.panelBlurred = flag;
+	}
+	
+	/**
+	 * Returns true if anti-aliasing should be used.
+	 * @return boolean
+	 * @since 2.2.1
+	 */
+	public boolean isAntiAliased() {
+		return this.antiAliased;
+	}
+	
+	/**
+	 * Sets whether anti-aliasing should be used.
+	 * @param flag true if anti-aliasing should be used
+	 * @since 2.2.1
+	 */
+	public void setAntiAliased(boolean flag) {
+		this.antiAliased = flag;
+	}
+
+	/**
+	 * Returns true if text anti-aliasing should be used.
+	 * @return boolean
+	 * @since 2.2.1
+	 */
+	public boolean isTextAntiAliased() {
+		return this.textAntiAliased;
+	}
+	
+	/**
+	 * Sets whether text anti-aliasing should be used.
+	 * @param flag true if text anti-aliasing should be used
+	 * @since 2.2.1
+	 */
+	public void setTextAntiAliased(boolean flag) {
+		this.textAntiAliased = flag;
 	}
 }

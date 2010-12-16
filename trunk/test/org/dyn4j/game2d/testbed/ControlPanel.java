@@ -36,6 +36,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,6 +45,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
+import javax.imageio.ImageIO;
 import javax.naming.ConfigurationException;
 import javax.swing.AbstractSpinnerModel;
 import javax.swing.BoxLayout;
@@ -82,7 +84,7 @@ import org.dyn4j.game2d.dynamics.Settings;
 /**
  * The JFrame that controls the TestBed.
  * @author William Bittle
- * @version 2.1.0
+ * @version 2.2.1
  * @since 1.0.0
  */
 public class ControlPanel extends JFrame {
@@ -190,6 +192,13 @@ public class ControlPanel extends JFrame {
 	 */
 	public ControlPanel() throws ConfigurationException {
 		super("Test Bed Control Panel");
+		
+		try {
+			// attempt to load the image icon
+			this.setIconImage(ImageIO.read(this.getClass().getResource("/icon.png")));
+		} catch (IOException e1) {
+			LOGGER.finest("Icon image 'icon.png' not found.");
+		}
 		
 		// load the help icon
 		this.helpIcon = new ImageIcon(this.getClass().getResource("/help.gif"), "Hover for help");
@@ -525,6 +534,8 @@ public class ControlPanel extends JFrame {
 		// get the drawing settings instance
 		Draw draw = Draw.getInstance();
 		
+		int y = 0;
+		
 		//////////////////////////////////////////////////
 		// drawing options group
 		//////////////////////////////////////////////////
@@ -534,10 +545,50 @@ public class ControlPanel extends JFrame {
 		pnlDraw.setBorder(new TitledBorder("Drawing Options"));
 		pnlDraw.setLayout(new GridBagLayout());
 
+		// fill shapes?
+		JLabel lblFill = new JLabel("Shape Fill");
+		pnlDraw.add(lblFill, new GridBagConstraints(
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JCheckBox chkFill = new JCheckBox();
+		chkFill.setSelected(draw.drawFill());
+		chkFill.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// toggle the checkbox
+				Draw draw = Draw.getInstance();
+				draw.setDrawFill(!draw.drawFill());
+			}
+		});
+		pnlDraw.add(chkFill, new GridBagConstraints(
+				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		y++;
+		
+		// draw outlines?
+		JLabel lblOutline = new JLabel("Shape Outlines");
+		pnlDraw.add(lblOutline, new GridBagConstraints(
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JCheckBox chkOutline = new JCheckBox();
+		chkOutline.setSelected(draw.drawOutline());
+		chkOutline.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// toggle the checkbox
+				Draw draw = Draw.getInstance();
+				draw.setDrawOutline(!draw.drawOutline());
+			}
+		});
+		pnlDraw.add(chkOutline, new GridBagConstraints(
+				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		y++;
+		
 		// draw centers of mass
 		JLabel lblCenter = new JLabel("Center of Mass");
 		pnlDraw.add(lblCenter, new GridBagConstraints(
-				0, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		// add the check box
 		JCheckBox chkCenter = new JCheckBox();
@@ -551,7 +602,7 @@ public class ControlPanel extends JFrame {
 			}
 		});
 		pnlDraw.add(chkCenter, new GridBagConstraints(
-				1, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		// add the drop down for color selection
 		JComboBox cmbCenter = new JComboBox(COLORS);
@@ -571,362 +622,14 @@ public class ControlPanel extends JFrame {
 			}
 		});
 		pnlDraw.add(cmbCenter, new GridBagConstraints(
-				2, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				2, y, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
-		
-		// draw velocity vectors
-		JLabel lblVelocity = new JLabel("Velocity Vector");
-		pnlDraw.add(lblVelocity, new GridBagConstraints(
-				0, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		JCheckBox chkVelocity = new JCheckBox();
-		chkVelocity.setSelected(draw.drawVelocityVectors());
-		chkVelocity.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// toggle the checkbox
-				Draw draw = Draw.getInstance();
-				draw.setDrawVelocityVectors(!draw.drawVelocityVectors());
-			}
-		});
-		pnlDraw.add(chkVelocity, new GridBagConstraints(
-				1, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		// add the drop down for color selection
-		JComboBox cmbVelocity = new JComboBox(COLORS);
-		// set the initial value
-		cmbVelocity.setSelectedItem(draw.getVelocityColor());
-		// set the custom renderer
-		cmbVelocity.setRenderer(new ColorListCellRenderer());
-		// add a listener for the selection
-		cmbVelocity.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// get the selected color
-				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
-				// set the new color
-				Draw draw = Draw.getInstance();
-				draw.setVelocityColor(color);
-			}
-		});
-		pnlDraw.add(cmbVelocity, new GridBagConstraints(
-				2, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		
-		// draw contact points
-		JLabel lblContacts = new JLabel("Contact Points");
-		pnlDraw.add(lblContacts, new GridBagConstraints(
-				0, 2, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		JCheckBox chkContacts = new JCheckBox();
-		chkContacts.setSelected(draw.drawContacts());
-		chkContacts.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// toggle the checkbox
-				Draw draw = Draw.getInstance();
-				draw.setDrawContacts(!draw.drawContacts());
-			}
-		});
-		pnlDraw.add(chkContacts, new GridBagConstraints(
-				1, 2, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		// add the drop down for color selection
-		JComboBox cmbContact = new JComboBox(COLORS);
-		// set the initial value
-		cmbContact.setSelectedItem(draw.getContactColor());
-		// set the custom renderer
-		cmbContact.setRenderer(new ColorListCellRenderer());
-		// add a listener for the selection
-		cmbContact.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// get the selected color
-				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
-				// set the new color
-				Draw draw = Draw.getInstance();
-				draw.setContactColor(color);
-			}
-		});
-		pnlDraw.add(cmbContact, new GridBagConstraints(
-				2, 2, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		
-		// draw contact forces
-		JLabel lblContactForces = new JLabel("Contact Impulses");
-		pnlDraw.add(lblContactForces, new GridBagConstraints(
-				0, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		JCheckBox chkContactForces = new JCheckBox();
-		chkContactForces.setSelected(draw.drawContactForces());
-		chkContactForces.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// toggle the checkbox
-				Draw draw = Draw.getInstance();
-				draw.setDrawContactForces(!draw.drawContactForces());
-			}
-		});
-		pnlDraw.add(chkContactForces, new GridBagConstraints(
-				1, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		// add the drop down for color selection
-		JComboBox cmbContactForces = new JComboBox(COLORS);
-		// set the initial value
-		cmbContactForces.setSelectedItem(draw.getContactForcesColor());
-		// set the custom renderer
-		cmbContactForces.setRenderer(new ColorListCellRenderer());
-		// add a listener for the selection
-		cmbContactForces.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// get the selected color
-				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
-				// set the new color
-				Draw draw = Draw.getInstance();
-				draw.setContactForcesColor(color);
-			}
-		});
-		pnlDraw.add(cmbContactForces, new GridBagConstraints(
-				2, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		
-		// draw friction forces
-		JLabel lblFrictionForces = new JLabel("Friction Impulses");
-		pnlDraw.add(lblFrictionForces, new GridBagConstraints(
-				0, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		JCheckBox chkFrictionForces = new JCheckBox();
-		chkFrictionForces.setSelected(draw.drawFrictionForces());
-		chkFrictionForces.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// toggle the checkbox
-				Draw draw = Draw.getInstance();
-				draw.setDrawFrictionForces(!draw.drawFrictionForces());
-			}
-		});
-		pnlDraw.add(chkFrictionForces, new GridBagConstraints(
-				1, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		// add the drop down for color selection
-		JComboBox cmbFrictionForces = new JComboBox(COLORS);
-		// set the initial value
-		cmbFrictionForces.setSelectedItem(draw.getFrictionForcesColor());
-		// set the custom renderer
-		cmbFrictionForces.setRenderer(new ColorListCellRenderer());
-		// add a listener for the selection
-		cmbFrictionForces.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// get the selected color
-				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
-				// set the new color
-				Draw draw = Draw.getInstance();
-				draw.setFrictionForcesColor(color);
-			}
-		});
-		pnlDraw.add(cmbFrictionForces, new GridBagConstraints(
-				2, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		
-		// draw contact pairs
-		JLabel lblContactPairs = new JLabel("Contact Pairs");
-		pnlDraw.add(lblContactPairs, new GridBagConstraints(
-				0, 5, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		JCheckBox chkContactPairs = new JCheckBox();
-		chkContactPairs.setSelected(draw.drawContactPairs());
-		chkContactPairs.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// toggle the checkbox
-				Draw draw = Draw.getInstance();
-				draw.setDrawContactPairs(!draw.drawContactPairs());
-			}
-		});
-		pnlDraw.add(chkContactPairs, new GridBagConstraints(
-				1, 5, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		// add the drop down for color selection
-		JComboBox cmbContactPairs = new JComboBox(COLORS);
-		// set the initial value
-		cmbContactPairs.setSelectedItem(draw.getContactPairsColor());
-		// set the custom renderer
-		cmbContactPairs.setRenderer(new ColorListCellRenderer());
-		// add a listener for the selection
-		cmbContactPairs.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// get the selected color
-				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
-				// set the new color
-				Draw draw = Draw.getInstance();
-				draw.setContactPairsColor(color);
-			}
-		});
-		pnlDraw.add(cmbContactPairs, new GridBagConstraints(
-				2, 5, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		
-		// draw joints
-		JLabel lblJoints = new JLabel("Joints");
-		pnlDraw.add(lblJoints, new GridBagConstraints(
-				0, 6, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		JCheckBox chkJoints = new JCheckBox();
-		chkJoints.setSelected(draw.drawJoints());
-		chkJoints.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// toggle the checkbox
-				Draw draw = Draw.getInstance();
-				draw.setDrawJoints(!draw.drawJoints());
-			}
-		});
-		pnlDraw.add(chkJoints, new GridBagConstraints(
-				1, 6, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		
-		// draw world bounds
-		JLabel lblBounds = new JLabel("World Bounds");
-		pnlDraw.add(lblBounds, new GridBagConstraints(
-				0, 7, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		JCheckBox chkBounds = new JCheckBox();
-		chkBounds.setSelected(draw.drawBounds());
-		chkBounds.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// toggle the checkbox
-				Draw draw = Draw.getInstance();
-				draw.setDrawBounds(!draw.drawBounds());
-			}
-		});
-		pnlDraw.add(chkBounds, new GridBagConstraints(
-				1, 7, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		// add the drop down for color selection
-		JComboBox cmbBounds = new JComboBox(COLORS);
-		// set the initial value
-		cmbBounds.setSelectedItem(draw.getBoundsColor());
-		// set the custom renderer
-		cmbBounds.setRenderer(new ColorListCellRenderer());
-		// add a listener for the selection
-		cmbBounds.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// get the selected color
-				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
-				// set the new color
-				Draw draw = Draw.getInstance();
-				draw.setBoundsColor(color);
-			}
-		});
-		pnlDraw.add(cmbBounds, new GridBagConstraints(
-				2, 7, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		
-		// draw text
-		JLabel lblText = new JLabel("Information Panel");
-		pnlDraw.add(lblText, new GridBagConstraints(
-				0, 8, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		JCheckBox chkText = new JCheckBox();
-		chkText.setSelected(draw.drawPanel());
-		chkText.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// toggle the checkbox
-				Draw draw = Draw.getInstance();
-				draw.setDrawPanel(!draw.drawPanel());
-			}
-		});
-		pnlDraw.add(chkText, new GridBagConstraints(
-				1, 8, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-
-		// fill shapes?
-		JLabel lblFill = new JLabel("Shape Fill");
-		pnlDraw.add(lblFill, new GridBagConstraints(
-				0, 9, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		JCheckBox chkFill = new JCheckBox();
-		chkFill.setSelected(draw.drawFill());
-		chkFill.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// toggle the checkbox
-				Draw draw = Draw.getInstance();
-				draw.setDrawFill(!draw.drawFill());
-			}
-		});
-		pnlDraw.add(chkFill, new GridBagConstraints(
-				1, 9, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		
-		// draw outlines?
-		JLabel lblOutline = new JLabel("Shape Outlines");
-		pnlDraw.add(lblOutline, new GridBagConstraints(
-				0, 10, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		JCheckBox chkOutline = new JCheckBox();
-		chkOutline.setSelected(draw.drawOutline());
-		chkOutline.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// toggle the checkbox
-				Draw draw = Draw.getInstance();
-				draw.setDrawOutline(!draw.drawOutline());
-			}
-		});
-		pnlDraw.add(chkOutline, new GridBagConstraints(
-				1, 10, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		
-		// draw rotation disc?
-		JLabel lblRotDisc = new JLabel("Rotation Disc");
-		pnlDraw.add(lblRotDisc, new GridBagConstraints(
-				0, 11, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		JCheckBox chkRotDisc = new JCheckBox();
-		chkRotDisc.setSelected(draw.drawRotationDisc());
-		chkRotDisc.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// toggle the checkbox
-				Draw draw = Draw.getInstance();
-				draw.setDrawRotationDisc(!draw.drawRotationDisc());
-			}
-		});
-		pnlDraw.add(chkRotDisc, new GridBagConstraints(
-				1, 11, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		// add the drop down for color selection
-		JComboBox cmbRotDisc = new JComboBox(COLORS);
-		// set the initial value
-		cmbRotDisc.setSelectedItem(draw.getRotationDiscColor());
-		// set the custom renderer
-		cmbRotDisc.setRenderer(new ColorListCellRenderer());
-		// add a listener for the selection
-		cmbRotDisc.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// get the selected color
-				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
-				// set the new color
-				Draw draw = Draw.getInstance();
-				draw.setRotationDiscColor(color);
-			}
-		});
-		pnlDraw.add(cmbRotDisc, new GridBagConstraints(
-				2, 11, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
+		y++;
 		
 		// draw normals?
 		JLabel lblNormals = new JLabel("Edge Normals");
 		pnlDraw.add(lblNormals, new GridBagConstraints(
-				0, 12, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkNormals = new JCheckBox();
 		chkNormals.setSelected(draw.drawNormals());
@@ -939,7 +642,7 @@ public class ControlPanel extends JFrame {
 			}
 		});
 		pnlDraw.add(chkNormals, new GridBagConstraints(
-				1, 12, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
+				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		// add the drop down for color selection
 		JComboBox cmbNormals = new JComboBox(COLORS);
@@ -959,8 +662,389 @@ public class ControlPanel extends JFrame {
 			}
 		});
 		pnlDraw.add(cmbNormals, new GridBagConstraints(
-				2, 12, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, 
+				2, y, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
+		y++;
+		
+		// draw rotation disc?
+		JLabel lblRotDisc = new JLabel("Rotation Disc");
+		pnlDraw.add(lblRotDisc, new GridBagConstraints(
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JCheckBox chkRotDisc = new JCheckBox();
+		chkRotDisc.setSelected(draw.drawRotationDisc());
+		chkRotDisc.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// toggle the checkbox
+				Draw draw = Draw.getInstance();
+				draw.setDrawRotationDisc(!draw.drawRotationDisc());
+			}
+		});
+		pnlDraw.add(chkRotDisc, new GridBagConstraints(
+				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		// add the drop down for color selection
+		JComboBox cmbRotDisc = new JComboBox(COLORS);
+		// set the initial value
+		cmbRotDisc.setSelectedItem(draw.getRotationDiscColor());
+		// set the custom renderer
+		cmbRotDisc.setRenderer(new ColorListCellRenderer());
+		// add a listener for the selection
+		cmbRotDisc.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// get the selected color
+				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				// set the new color
+				Draw draw = Draw.getInstance();
+				draw.setRotationDiscColor(color);
+			}
+		});
+		pnlDraw.add(cmbRotDisc, new GridBagConstraints(
+				2, y, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		y++;
+		
+		// draw velocity vectors
+		JLabel lblVelocity = new JLabel("Velocity Vector");
+		pnlDraw.add(lblVelocity, new GridBagConstraints(
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JCheckBox chkVelocity = new JCheckBox();
+		chkVelocity.setSelected(draw.drawVelocityVectors());
+		chkVelocity.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// toggle the checkbox
+				Draw draw = Draw.getInstance();
+				draw.setDrawVelocityVectors(!draw.drawVelocityVectors());
+			}
+		});
+		pnlDraw.add(chkVelocity, new GridBagConstraints(
+				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		// add the drop down for color selection
+		JComboBox cmbVelocity = new JComboBox(COLORS);
+		// set the initial value
+		cmbVelocity.setSelectedItem(draw.getVelocityColor());
+		// set the custom renderer
+		cmbVelocity.setRenderer(new ColorListCellRenderer());
+		// add a listener for the selection
+		cmbVelocity.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// get the selected color
+				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				// set the new color
+				Draw draw = Draw.getInstance();
+				draw.setVelocityColor(color);
+			}
+		});
+		pnlDraw.add(cmbVelocity, new GridBagConstraints(
+				2, y, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		y++;
+		
+		// draw contact pairs
+		JLabel lblContactPairs = new JLabel("Contact Pairs");
+		pnlDraw.add(lblContactPairs, new GridBagConstraints(
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JCheckBox chkContactPairs = new JCheckBox();
+		chkContactPairs.setSelected(draw.drawContactPairs());
+		chkContactPairs.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// toggle the checkbox
+				Draw draw = Draw.getInstance();
+				draw.setDrawContactPairs(!draw.drawContactPairs());
+			}
+		});
+		pnlDraw.add(chkContactPairs, new GridBagConstraints(
+				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		// add the drop down for color selection
+		JComboBox cmbContactPairs = new JComboBox(COLORS);
+		// set the initial value
+		cmbContactPairs.setSelectedItem(draw.getContactPairsColor());
+		// set the custom renderer
+		cmbContactPairs.setRenderer(new ColorListCellRenderer());
+		// add a listener for the selection
+		cmbContactPairs.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// get the selected color
+				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				// set the new color
+				Draw draw = Draw.getInstance();
+				draw.setContactPairsColor(color);
+			}
+		});
+		pnlDraw.add(cmbContactPairs, new GridBagConstraints(
+				2, y, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		y++;
+		
+		// draw contact points
+		JLabel lblContacts = new JLabel("Contact Points");
+		pnlDraw.add(lblContacts, new GridBagConstraints(
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JCheckBox chkContacts = new JCheckBox();
+		chkContacts.setSelected(draw.drawContacts());
+		chkContacts.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// toggle the checkbox
+				Draw draw = Draw.getInstance();
+				draw.setDrawContacts(!draw.drawContacts());
+			}
+		});
+		pnlDraw.add(chkContacts, new GridBagConstraints(
+				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		// add the drop down for color selection
+		JComboBox cmbContact = new JComboBox(COLORS);
+		// set the initial value
+		cmbContact.setSelectedItem(draw.getContactColor());
+		// set the custom renderer
+		cmbContact.setRenderer(new ColorListCellRenderer());
+		// add a listener for the selection
+		cmbContact.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// get the selected color
+				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				// set the new color
+				Draw draw = Draw.getInstance();
+				draw.setContactColor(color);
+			}
+		});
+		pnlDraw.add(cmbContact, new GridBagConstraints(
+				2, y, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		y++;
+		
+		// draw contact forces
+		JLabel lblContactForces = new JLabel("Contact Impulses");
+		pnlDraw.add(lblContactForces, new GridBagConstraints(
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JCheckBox chkContactForces = new JCheckBox();
+		chkContactForces.setSelected(draw.drawContactForces());
+		chkContactForces.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// toggle the checkbox
+				Draw draw = Draw.getInstance();
+				draw.setDrawContactForces(!draw.drawContactForces());
+			}
+		});
+		pnlDraw.add(chkContactForces, new GridBagConstraints(
+				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		// add the drop down for color selection
+		JComboBox cmbContactForces = new JComboBox(COLORS);
+		// set the initial value
+		cmbContactForces.setSelectedItem(draw.getContactForcesColor());
+		// set the custom renderer
+		cmbContactForces.setRenderer(new ColorListCellRenderer());
+		// add a listener for the selection
+		cmbContactForces.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// get the selected color
+				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				// set the new color
+				Draw draw = Draw.getInstance();
+				draw.setContactForcesColor(color);
+			}
+		});
+		pnlDraw.add(cmbContactForces, new GridBagConstraints(
+				2, y, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		y++;
+		
+		// draw friction forces
+		JLabel lblFrictionForces = new JLabel("Friction Impulses");
+		pnlDraw.add(lblFrictionForces, new GridBagConstraints(
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JCheckBox chkFrictionForces = new JCheckBox();
+		chkFrictionForces.setSelected(draw.drawFrictionForces());
+		chkFrictionForces.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// toggle the checkbox
+				Draw draw = Draw.getInstance();
+				draw.setDrawFrictionForces(!draw.drawFrictionForces());
+			}
+		});
+		pnlDraw.add(chkFrictionForces, new GridBagConstraints(
+				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		// add the drop down for color selection
+		JComboBox cmbFrictionForces = new JComboBox(COLORS);
+		// set the initial value
+		cmbFrictionForces.setSelectedItem(draw.getFrictionForcesColor());
+		// set the custom renderer
+		cmbFrictionForces.setRenderer(new ColorListCellRenderer());
+		// add a listener for the selection
+		cmbFrictionForces.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// get the selected color
+				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				// set the new color
+				Draw draw = Draw.getInstance();
+				draw.setFrictionForcesColor(color);
+			}
+		});
+		pnlDraw.add(cmbFrictionForces, new GridBagConstraints(
+				2, y, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		y++;
+		
+		// draw world bounds
+		JLabel lblBounds = new JLabel("World Bounds");
+		pnlDraw.add(lblBounds, new GridBagConstraints(
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JCheckBox chkBounds = new JCheckBox();
+		chkBounds.setSelected(draw.drawBounds());
+		chkBounds.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// toggle the checkbox
+				Draw draw = Draw.getInstance();
+				draw.setDrawBounds(!draw.drawBounds());
+			}
+		});
+		pnlDraw.add(chkBounds, new GridBagConstraints(
+				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		// add the drop down for color selection
+		JComboBox cmbBounds = new JComboBox(COLORS);
+		// set the initial value
+		cmbBounds.setSelectedItem(draw.getBoundsColor());
+		// set the custom renderer
+		cmbBounds.setRenderer(new ColorListCellRenderer());
+		// add a listener for the selection
+		cmbBounds.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// get the selected color
+				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				// set the new color
+				Draw draw = Draw.getInstance();
+				draw.setBoundsColor(color);
+			}
+		});
+		pnlDraw.add(cmbBounds, new GridBagConstraints(
+				2, y, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		y++;
+		
+		// draw joints
+		JLabel lblJoints = new JLabel("Joints");
+		pnlDraw.add(lblJoints, new GridBagConstraints(
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JCheckBox chkJoints = new JCheckBox();
+		chkJoints.setSelected(draw.drawJoints());
+		chkJoints.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// toggle the checkbox
+				Draw draw = Draw.getInstance();
+				draw.setDrawJoints(!draw.drawJoints());
+			}
+		});
+		pnlDraw.add(chkJoints, new GridBagConstraints(
+				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		y++;
+		
+		// draw text
+		JLabel lblText = new JLabel("Information Panel");
+		pnlDraw.add(lblText, new GridBagConstraints(
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JCheckBox chkText = new JCheckBox();
+		chkText.setSelected(draw.drawPanel());
+		chkText.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// toggle the checkbox
+				Draw draw = Draw.getInstance();
+				draw.setDrawPanel(!draw.drawPanel());
+			}
+		});
+		pnlDraw.add(chkText, new GridBagConstraints(
+				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		y++;
+		
+		// draw text
+		JLabel lblBlur = new JLabel("Information Panel Blur");
+		pnlDraw.add(lblBlur, new GridBagConstraints(
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JCheckBox chkBlur = new JCheckBox();
+		chkBlur.setSelected(draw.isPanelBlurred());
+		chkBlur.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// toggle the checkbox
+				Draw draw = Draw.getInstance();
+				draw.setPanelBlurred(!draw.isPanelBlurred());
+			}
+		});
+		pnlDraw.add(chkBlur, new GridBagConstraints(
+				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		y++;
+		
+		// anti-aliasing
+		JLabel lblAnti = new JLabel("Anti-Aliasing");
+		pnlDraw.add(lblAnti, new GridBagConstraints(
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JCheckBox chkAnti = new JCheckBox();
+		chkAnti.setSelected(draw.isAntiAliased());
+		chkAnti.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// toggle the checkbox
+				Draw draw = Draw.getInstance();
+				draw.setAntiAliased(!draw.isAntiAliased());
+			}
+		});
+		pnlDraw.add(chkAnti, new GridBagConstraints(
+				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		y++;
+		
+		// text anti-aliasing
+		JLabel lblTextAnti = new JLabel("Text Anti-Aliasing");
+		pnlDraw.add(lblTextAnti, new GridBagConstraints(
+				0, y, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JCheckBox chkTextAnti = new JCheckBox();
+		chkTextAnti.setSelected(draw.isTextAntiAliased());
+		chkTextAnti.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// toggle the checkbox
+				Draw draw = Draw.getInstance();
+				draw.setTextAntiAliased(!draw.isTextAntiAliased());
+			}
+		});
+		pnlDraw.add(chkTextAnti, new GridBagConstraints(
+				1, y, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		y++;
 		
 		panel.add(pnlDraw);
 		
