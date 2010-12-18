@@ -50,7 +50,6 @@ import org.dyn4j.game2d.dynamics.joint.MouseJoint;
 import org.dyn4j.game2d.dynamics.joint.PrismaticJoint;
 import org.dyn4j.game2d.dynamics.joint.PulleyJoint;
 import org.dyn4j.game2d.dynamics.joint.RevoluteJoint;
-import org.dyn4j.game2d.dynamics.joint.RopeJoint;
 import org.dyn4j.game2d.dynamics.joint.WeldJoint;
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Interval;
@@ -345,8 +344,6 @@ public abstract class Test implements Comparable<Test> {
 					this.render(g, (PrismaticJoint) joint);
 				} else if (joint instanceof PulleyJoint) {
 					this.render(g, (PulleyJoint) joint);
-				} else if (joint instanceof RopeJoint) {
-					this.render(g, (RopeJoint) joint);
 				}
 			}
 		}
@@ -662,28 +659,6 @@ public abstract class Test implements Comparable<Test> {
 		g.drawPolyline(xPoints, yPoints, 4);
 		
 		// set the old stroke back
-		g.setStroke(stroke);
-	}
-	
-	/**
-	 * Renders a {@link RopeJoint} to the given graphics object.
-	 * @param g the graphics object to render to
-	 * @param joint the {@link RopeJoint} to render
-	 */
-	private void render(Graphics2D g, RopeJoint joint) {
-		Vector2 v1 = joint.getAnchor1();
-		Vector2 v2 = joint.getAnchor2();
-		// set the color to be mostly transparent
-		g.setColor(new Color(0, 0, 0, 64));
-		
-		// save the original stroke
-		Stroke stroke = g.getStroke();
-		g.setStroke(new BasicStroke((float)(0.1 * scale), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-		g.drawLine((int) Math.ceil(v1.x * scale),
-				   (int) Math.ceil(v1.y * scale), 
-				   (int) Math.ceil(v2.x * scale),
-				   (int) Math.ceil(v2.y * scale));
-		// set back the original stroke
 		g.setStroke(stroke);
 	}
 	

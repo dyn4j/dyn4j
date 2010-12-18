@@ -35,8 +35,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,7 +60,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests the decomposition of a simple polygon.
  * @author William Bittle
- * @version 2.2.1
+ * @version 2.2.0
  * @since 2.2.0
  */
 public class Decompose extends Test {
@@ -78,12 +76,6 @@ public class Decompose extends Test {
 	
 	/** The current algorithm's index */
 	private int currentAlgorithm = 0;
-	
-	/** The list of premade polygons */
-	private Vector2[][] polygons = new Vector2[4][];
-	
-	/** The current premade polygon in use */
-	private int currentPolgyon = 0;
 	
 	/** The first simple polygon to decompose */
 	private Vector2[] vertices;
@@ -112,21 +104,6 @@ public class Decompose extends Test {
 	/** True if an error occurred in tesselation */
 	private boolean error = false;
 	
-	/**
-	 * Default constructor.
-	 */
-	public Decompose() {
-		for (int i = 0; i < 4; i++) {
-			// load the polygon dat files
-			URL url = this.getClass().getResource("/polygon" + (i + 1) + ".dat");
-			try {
-				this.polygons[i] = this.load(new File(url.toURI()));
-			} catch (URISyntaxException e) {
-				this.polygons[i] = null;
-			}
-		}
-	}
-	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.testbed.Test#getName()
 	 */
@@ -144,9 +121,8 @@ public class Decompose extends Test {
 			   "be normal text files with the first line containing the number of points" +
 			   "in the polygon.  The remaining lines should be a listing of the x and y" +
 		       "values separated by a space.  For example:\n\n5\n1.0 1.0\n0.5 1.2\n-0.5 2.0" +
-		       "\n-0.7 -0.1\n0.0 -0.3\n\n  The # character can be used for comments to describe the file" +
-		       "and are ignored when the file is read.  The time taken to show the decomposition is not respective" +
-		       "of the alorithms complexity.  The animation is used to verify that decomposition is" +
+		       "\n-0.7 -0.1\n0.0 -0.3\n\nThe time taken to show the triangles is not respective" +
+		       "of the alorithms complexity.  The animation is used to verify that triangles are" +
 		       "correct.";
 	}
 	
@@ -514,10 +490,8 @@ public class Decompose extends Test {
 				{"Right Mouse Button", "Clear the current polygon point list."},
 				{"t", "Closes the polygon and tesselates."},
 				{"1", "Cycles through the available algorithms."},
-				{"2", "Cycles through some test polygons."},
 				{"f", "Opens the file chooser to choose an input file."},
-				{"Enter", "Prints the points to the console."},
-				{"g", "Generates code to create polygons."}};
+				{"Enter", "Prints the points to the console."}};
 	}
 	
 	/* (non-Javadoc)
@@ -528,9 +502,7 @@ public class Decompose extends Test {
 		super.initializeInput(keyboard, mouse);
 		
 		keyboard.add(new Input(KeyEvent.VK_1, Input.Hold.NO_HOLD));
-		keyboard.add(new Input(KeyEvent.VK_2, Input.Hold.NO_HOLD));
 		keyboard.add(new Input(KeyEvent.VK_F, Input.Hold.NO_HOLD));
-		keyboard.add(new Input(KeyEvent.VK_G, Input.Hold.NO_HOLD));
 		// key to print the points
 		keyboard.add(new Input(KeyEvent.VK_ENTER,Input.Hold.NO_HOLD));
 		
@@ -671,58 +643,6 @@ public class Decompose extends Test {
 				System.out.print(this.points.get(i));
 			}
 			System.out.println("]");
-		}
-		
-		// check for the 2 key
-		if (keyboard.isPressed(KeyEvent.VK_2)) {
-			// get the polygon requested
-			Vector2[] points = this.polygons[this.currentPolgyon++];
-			// increment the current polygon
-			if (this.currentPolgyon == 4) {
-				this.currentPolgyon = 0;
-			}
-			// make sure its not null
-			if (points != null) {
-				// the file was loaded successfully
-				// clear the current point list
-				this.points.clear();
-				// add all the points to the list
-				for (int i = 0; i < points.length; i++) {
-					Vector2 p = points[i];
-					this.points.add(p);
-				}
-				this.vertices = null;
-				this.elapsedTime = 0;
-				this.toIndex = 0;
-				this.triangles = null;
-				this.error = false;
-				this.done = false;
-			}
-		}
-		
-		// check for the g key
-		if (keyboard.isPressed(KeyEvent.VK_G)) {
-			// output the current tesselation in code
-			if (this.triangles != null && this.triangles.size() > 0) {
-				System.out.println("List<Convex> polygons = new ArrayList<Convex>();");
-				int i = 0;
-				for (Convex c : this.triangles) {
-					Polygon p = (Polygon) c;
-					System.out.print("Polygon p" + i + " = new Polygon(new Vector2[] {");
-					int j = 0;
-					for (Vector2 v : p.getVertices()) {
-						if (j == 0) {
-							System.out.print("new Vector2(" + v.x + ", " + v.y + ")");
-						} else {
-							System.out.print(", new Vector2(" + v.x + ", " + v.y + ")");
-						}
-						j++;
-					}
-					System.out.println("});");
-					System.out.println("polygons.add(p" + i + ");");
-					i++;
-				}
-			}
 		}
 	}
 	

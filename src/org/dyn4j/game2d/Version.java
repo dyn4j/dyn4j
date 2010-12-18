@@ -27,7 +27,7 @@ package org.dyn4j.game2d;
 /**
  * The version of the engine.
  * @author William Bittle
- * @version 2.2.1
+ * @version 2.2.0
  * @since 1.0.0
  */
 public final class Version {
@@ -38,7 +38,7 @@ public final class Version {
 	public static final int MINOR = 2;
 	
 	/** The revision number; minor bug fixes */
-	public static final int REVISION = 1;
+	public static final int REVISION = 0;
 	
 	/**
 	 * Hide the constructor.

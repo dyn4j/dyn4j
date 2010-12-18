@@ -29,15 +29,9 @@ import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Shape;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
-import java.awt.image.BufferedImage;
-import java.awt.image.ConvolveOp;
-import java.awt.image.Kernel;
 import java.text.AttributedString;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -69,7 +63,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Container for the tests.
  * @author William Bittle
  * @param <E> the container type
- * @version 2.2.1
+ * @version 2.2.0
  * @since 1.0.0
  */
 public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
@@ -114,75 +108,73 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	
 	// text labels
 	/** The label for the control panel key */
-	private SimpleText controlsLabel = new SimpleText("Press 'c' to open the Test Bed Control Panel.");
+	private Text controlsLabel;
 	/** The label for the version */
-	private SimpleText versionLabel = new SimpleText("Version:");
-	/** The value of the dyn4j version */
-	private SimpleText versionValue = new SimpleText("v" + Version.getVersion());
+	private Text versionLabel;
 	/** The label for the current test */
-	private SimpleText testLabel = new SimpleText("Test:");
+	private Text testLabel;
 	/** The label for the current zoom */
-	private SimpleText zoomLabel = new SimpleText("Scale:");
+	private Text zoomLabel;
 	/** The label for the current number of bodies */
-	private SimpleText bodyCountLabel = new SimpleText("Bodies:");
+	private Text bodyCountLabel;
 	/** The label for the current simulation mode */
-	private SimpleText modeLabel = new SimpleText("Mode:");
+	private Text modeLabel;
 	/** The label for continuous mode */
-	private SimpleText continuousModeLabel = new SimpleText("Continuous");
+	private Text continuousModeLabel;
 	/** The label for manual mode */
-	private SimpleText manualModeLabel = new SimpleText("Manual");
+	private Text manualModeLabel;
 	/** The label for timed mode */
-	private SimpleText timedModeLabel = new SimpleText("Timed");
+	private Text timedModeLabel;
 	/** The label for the contacts table */
-	private SimpleText contactLabel = new SimpleText("Contact Information");
+	private Text contactLabel;
 	/** The label for the total number of contacts */
-	private SimpleText cTotalLabel = new SimpleText("Total:");
+	private Text cTotalLabel;
 	/** The label for the number of added contacts */
-	private SimpleText cAddedLabel = new SimpleText("Added:");
+	private Text cAddedLabel;
 	/** The label for the number of persisted contacts */
-	private SimpleText cPersistedLabel = new SimpleText("Persisted:");
+	private Text cPersistedLabel;
 	/** The label for the number of removed contacts */
-	private SimpleText cRemovedLabel = new SimpleText("Removed:");
+	private Text cRemovedLabel;
 	/** The label for the number of sensed contacts */
-	private SimpleText cSensedLabel = new SimpleText("Sensed:");
+	private Text cSensedLabel;
 	/** The label for the frame rate */
-	private SimpleText fpsLabel = new SimpleText("FPS:");
+	private Text fpsLabel;
 	/** The label indicating paused state */
-	private SimpleText pausedLabel = new SimpleText("Paused");
+	private Text pausedLabel;
 	/** The label for memory usage */
-	private SimpleText memoryLabel = new SimpleText("Memory");
+	private Text memoryLabel;
 	/** The label for used memory */
-	private SimpleText usedMemoryLabel = new SimpleText("Used");
+	private Text usedMemoryLabel;
 	/** The label for free memory */
-	private SimpleText freeMemoryLabel = new SimpleText("Free");
+	private Text freeMemoryLabel;
 	/** The label for total memory */
-	private SimpleText totalMemoryLabel = new SimpleText("Total");
+	private Text totalMemoryLabel;
 	/** The label for time usage */
-	private SimpleText timeUsageLabel;
+	private Text timeUsageLabel;
 	/** The label for the jre version */
-	private SimpleText jreVersionLabel = new SimpleText("JRE Version:");
+	private Text jreVersionLabel;
 	/** The label for the jre mode */
-	private SimpleText jreModeLabel = new SimpleText("JRE Mode:");
+	private Text jreModeLabel;
 	/** The label for the operating system name */
-	private SimpleText osNameLabel = new SimpleText("OS Name:");
+	private Text osNameLabel;
 	/** The label for the architecture name */
-	private SimpleText osArchitectureLabel = new SimpleText("Architecture:");
+	private Text osArchitectureLabel;
 	/** The label for the data model name */
-	private SimpleText osDataModelLabel = new SimpleText("Data Model:");
+	private Text osDataModelLabel;
 	/** The label for the number of processors */
-	private SimpleText processorCountLabel = new SimpleText("Processors:");
+	private Text processorCountLabel;
 	/** The label for the jre version */
-	private SimpleText jreVersionValue = new SimpleText(System.getProperty("java.runtime.version"));
+	private Text jreVersionValue;
 	/** The label for the jre mode */
-	private SimpleText jreModeValue = new SimpleText(System.getProperty("java.vm.info"));
+	private Text jreModeValue;
 	/** The label for the operating system name */
-	private SimpleText osNameValue = new SimpleText(System.getProperty("os.name"));
+	private Text osNameValue;
 	/** The label for the architecture name */
-	private SimpleText osArchitectureValue = new SimpleText(System.getProperty("os.arch"));
+	private Text osArchitectureValue;
 	/** The label for the data model name */
-	private SimpleText osDataModelValue = new SimpleText(System.getProperty("sun.arch.data.model"));
+	private Text osDataModelValue;
 	/** The label for the number of processors */
-	private SimpleText processorCountValue = new SimpleText(String.valueOf(Runtime.getRuntime().availableProcessors()));
+	private Text processorCountValue;
 	
 	// picking using left click
 	/** The mouse joint created when picking shapes */
@@ -195,9 +187,6 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	private Vector2 vOld = null;
 	/** The saved state of the body under control */
 	private DirectControl.State controlState = null;
-	
-	/** The blur image for the metrics panel */
-	private BufferedImage blur = null;
 	
 	/**
 	 * Full constructor.
@@ -290,11 +279,154 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	 * Sets up text images.
 	 */
 	private void initText() {
+		// text for the control panel
+		AttributedString controlsString = new AttributedString("Press 'c' to open the Test Bed Control Panel.");
+		this.controlsLabel = new Text(controlsString);
+		this.controlsLabel.generate();
+		
+		// text for the current test
+		AttributedString versionString = new AttributedString("Version:");
+		this.versionLabel = new Text(versionString);
+		this.versionLabel.generate();
+		
+		// text for the current test
+		AttributedString testString = new AttributedString("Test:");
+		this.testLabel = new Text(testString);
+		this.testLabel.generate();
+		
+		// text for the current zoom
+		AttributedString zoomString = new AttributedString("Scale:");
+		this.zoomLabel = new Text(zoomString);
+		this.zoomLabel.generate();
+		
+		// text for the number of bodies
+		AttributedString bodiesString = new AttributedString("Bodies:");
+		this.bodyCountLabel = new Text(bodiesString);
+		this.bodyCountLabel.generate();
+		
+		// text for the simulation mode
+		AttributedString modeLabelString = new AttributedString("Mode:");
+		this.modeLabel = new Text(modeLabelString);
+		this.modeLabel.generate();
+		
+		AttributedString cModeString = new AttributedString("Continuous");
+		this.continuousModeLabel = new Text(cModeString);
+		this.continuousModeLabel.generate();
+		
+		AttributedString sModeString = new AttributedString("Manual");
+		this.manualModeLabel = new Text(sModeString);
+		this.manualModeLabel.generate();
+		
+		AttributedString tModeString = new AttributedString("Timed");
+		this.timedModeLabel = new Text(tModeString);
+		this.timedModeLabel.generate();
+		
+		// text for contacts
+		AttributedString contactsString = new AttributedString("Contact Information");
+		this.contactLabel = new Text(contactsString);
+		this.contactLabel.generate();
+		
+		AttributedString cTotalString = new AttributedString("Total:");
+		this.cTotalLabel = new Text(cTotalString);
+		this.cTotalLabel.generate();
+		
+		AttributedString cAddedString = new AttributedString("Added:");
+		this.cAddedLabel = new Text(cAddedString);
+		this.cAddedLabel.generate();
+		
+		AttributedString cPersistedString = new AttributedString("Persisted:");
+		this.cPersistedLabel = new Text(cPersistedString);
+		this.cPersistedLabel.generate();
+		
+		AttributedString cRemovedString = new AttributedString("Removed:");
+		this.cRemovedLabel = new Text(cRemovedString);
+		this.cRemovedLabel.generate();
+		
+		AttributedString cSensedString = new AttributedString("Sensed:");
+		this.cSensedLabel = new Text(cSensedString);
+		this.cSensedLabel.generate();
+		
+		// text for frames per second
+		AttributedString fpsString = new AttributedString("FPS:");
+		this.fpsLabel = new Text(fpsString);
+		this.fpsLabel.generate();
+		
+		AttributedString pausedString = new AttributedString("Paused");
+		this.pausedLabel = new Text(pausedString);
+		this.pausedLabel.generate();
+		
+		AttributedString memString = new AttributedString("Memory:");
+		this.memoryLabel = new Text(memString);
+		this.memoryLabel.generate();
+		
+		AttributedString umemString = new AttributedString("Used");
+		this.usedMemoryLabel = new Text(umemString);
+		this.usedMemoryLabel.generate();
+		
+		AttributedString fmemString = new AttributedString("Free");
+		this.freeMemoryLabel = new Text(fmemString);
+		this.freeMemoryLabel.generate();
+		
+		AttributedString tmemString = new AttributedString("Total");
+		this.totalMemoryLabel = new Text(tmemString);
+		this.totalMemoryLabel.generate();
+		
 		AttributedString timeString = new AttributedString("Time ( Render | Update | System )");
 		timeString.addAttribute(TextAttribute.FOREGROUND, new Color(222, 48, 12), 7, 13);
 		timeString.addAttribute(TextAttribute.FOREGROUND, new Color(222, 117, 0), 16, 22);
 		timeString.addAttribute(TextAttribute.FOREGROUND, new Color(20, 134, 222), 25, 31);
-		this.timeUsageLabel = new SimpleText(timeString);
+		this.timeUsageLabel = new Text(timeString);
+		this.timeUsageLabel.generate();
+		
+		AttributedString jreVersionString = new AttributedString("JRE Version:");
+		this.jreVersionLabel = new Text(jreVersionString);
+		this.jreVersionLabel.generate();
+		
+		AttributedString jreModeString = new AttributedString("JRE Mode:");
+		this.jreModeLabel = new Text(jreModeString);
+		this.jreModeLabel.generate();
+		
+		AttributedString osNameString = new AttributedString("OS Name:");
+		this.osNameLabel = new Text(osNameString);
+		this.osNameLabel.generate();
+		
+		AttributedString osArchitectureString = new AttributedString("Architecture:");
+		this.osArchitectureLabel = new Text(osArchitectureString);
+		this.osArchitectureLabel.generate();
+		
+		AttributedString osDataModelString = new AttributedString("Data Model:");
+		this.osDataModelLabel = new Text(osDataModelString);
+		this.osDataModelLabel.generate();
+		
+		AttributedString processorCountString = new AttributedString("Processors:");
+		this.processorCountLabel = new Text(processorCountString);
+		this.processorCountLabel.generate();
+		
+		String jreVersion = System.getProperty("java.runtime.version"); // the jre version
+		String jreMode = System.getProperty("java.vm.info"); // mixed mode or interpreted
+		String osArchitecture = System.getProperty("os.arch"); // x86, amd64, etc.
+		String osDataModel = System.getProperty("sun.arch.data.model"); // 32 or 64 bit
+		String osName = System.getProperty("os.name"); // os name
+		// get the number of processors
+		int processors = Runtime.getRuntime().availableProcessors();
+		
+		this.jreVersionValue = new Text(new AttributedString(jreVersion));
+		this.jreVersionValue.generate();
+		
+		this.jreModeValue = new Text(new AttributedString(jreMode));
+		this.jreModeValue.generate();
+		
+		this.osNameValue = new Text(new AttributedString(osName));
+		this.osNameValue.generate();
+		
+		this.osArchitectureValue = new Text(new AttributedString(osArchitecture));
+		this.osArchitectureValue.generate();
+		
+		this.osDataModelValue = new Text(new AttributedString(osDataModel));
+		this.osDataModelValue.generate();
+		
+		this.processorCountValue = new Text(new AttributedString(String.valueOf(processors)));
+		this.processorCountValue.generate();
 	}
 	
 	/* (non-Javadoc)
@@ -304,123 +436,34 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	public void render(Graphics2D g) {
 		// get the current time
 		long startTime = this.timer.getCurrentTime();
-
-		// get the draw singleton
-		Draw draw = Draw.getInstance();
+		super.render(g);
 		
 		// get the rendering width and height
 		int width = this.renderer.getDisplaySize().width;
 		int height = this.renderer.getDisplaySize().height;
 		
-		// see if we should anti-alias the text
-		if (draw.isTextAntiAliased()) {
-			// turn it on
-			g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-		}
+		// set the background color to white
+		g.setBackground(Color.WHITE);
+		g.setClip(0, 0, width, height);
 		
-		// determine if we need to do the convolve-op
-		if (draw.isPanelBlurred() && draw.drawPanel()) {
-			// check if the cached blur surface is null
-			if (blur == null) {
-				// if so create it
-				blur = g.getDeviceConfiguration().createCompatibleImage(width, height);
-			}
-			// get the graphics object to paint to
-			Graphics2D bg = blur.createGraphics();
-			
-			// to perform the convolve op we need to draw to the buffered image instead
-			// of the graphics object
-			
-			// call the super method
-			super.render(bg);
-			
-			// see if we should anti-alias the text
-			if (draw.isTextAntiAliased()) {
-				// turn it on
-				bg.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-			}
-			
-			// see if we should anti-alias
-			if (draw.isAntiAliased()) {
-				// turn it on
-				bg.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-			}
-			
-			// set the background color to white
-			bg.setBackground(Color.WHITE);
-			bg.setClip(0, 0, width, height);
-			
-			// paint the background
-			bg.clearRect(0, 0, width, height);
-			
-			// paint the test
-			this.test.render(bg, width, height);
-			
-			// render the controls label top center
-			this.renderControls(bg, (int) Math.ceil((width - this.controlsLabel.getWidth(bg)) / 2.0), 5);
-			
-			// we don't need that anymore
-			bg.dispose();
-			
-			// save the current clip
-			Shape clip = g.getClip();
-			// set the clip to above the metrics panel
-			g.setClip(new Rectangle(0, 0, width, height - 110));
-			// copy that clip
-			g.drawImage(blur, 0, 0, null);
-			// set the clip to only the metrics panel
-			g.setClip(new Rectangle(0, height - 110, width, 110));
-			
-			// setup the blur 5x5 kernel matrix
-			float[] blurMatrix = new float[] {0.04f, 0.04f, 0.04f, 0.04f, 0.04f,
-											  0.04f, 0.04f, 0.04f, 0.04f, 0.04f,
-											  0.04f, 0.04f, 0.04f, 0.04f, 0.04f,
-											  0.04f, 0.04f, 0.04f, 0.04f, 0.04f,
-											  0.04f, 0.04f, 0.04f, 0.04f, 0.04f};
-			
-			// create the blur convolve op
-			ConvolveOp op = new ConvolveOp(new Kernel(5, 5, blurMatrix));
-			
-			// draw the metrics panel with the convolve op
-			g.drawImage(blur, op, 0, 0);
-			// set the color to a partially transparent black
-			g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.8f));
-			// shade the metrics panel (for the background)
-			g.fillRect(0, height - 110, width, 110);
-			// set the original clip back
-			g.setClip(clip);
-		} else {
-			super.render(g);
-			
-			// see if we should anti-alias
-			if (draw.isAntiAliased()) {
-				// turn anti-aliasing on
-				g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-			}
-			
-			// set the background color to white
-			g.setBackground(Color.WHITE);
-			g.setClip(0, 0, width, height);
-			
-			// paint the background
-			g.clearRect(0, 0, width, height);
-			
-			// paint the test
-			this.test.render(g, width, height);
-			
-			// render the controls label top center
-			this.renderControls(g, (int) Math.ceil((width - this.controlsLabel.getWidth(g)) / 2.0), 5);
-			
-			if (draw.drawPanel()) {
-				// draw the translucent background
-				g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.8f));
-				g.fillRect(0, height - 110, width, 110);
-			}
-			
-		}
+		// paint the background
+		g.clearRect(0, 0, width, height);
+		
+		// paint the test
+		this.test.render(g, width, height);
+		
+		// get the draw singleton
+		Draw draw = Draw.getInstance();
+		
+		// render the controls label top center
+		this.renderControls(g, (int) Math.ceil((width - this.controlsLabel.getWidth()) / 2.0), 5);
 		
 		// make sure we should draw the metrics panel
 		if (draw.drawPanel()) {
+			// draw the translucent background
+			g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.8f));
+			g.fillRect(0, height - 110, width, 110);
+			
 			// draw the gradient top
 			g.setPaint(new GradientPaint(0, height - 110, new Color(0.5f, 0.5f, 0.5f, 0.5f), 0, height - 101, new Color(0.0f, 0.0f, 0.0f, 0.5f)));
 			g.fillRect(0, height - 110, width, 10);
@@ -487,8 +530,8 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		// set the paused text color to white
 		g.setColor(Color.WHITE);
 		// get the text metrics
-		double tw = this.pausedLabel.getWidth(g);
-		double th = this.pausedLabel.getHeight(g);
+		double tw = this.pausedLabel.getWidth();
+		double th = this.pausedLabel.getHeight();
 		
 		// render the text in the center of the given rect
 		this.pausedLabel.render(g, x + (int) Math.ceil((w - tw) / 2.0), y + (int) Math.ceil((h - th) / 2.0));
@@ -527,26 +570,35 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		// render the label
 		this.versionLabel.render(g, x, y);
 		// render the value
-		this.versionValue.render(g, x + padding, y);
+		AttributedString versionString = new AttributedString("v" + Version.getVersion());
+		Text version = new Text(versionString);
+		version.generate();
+		version.render(g, x + padding, y);
 		
 		// render the label
 		this.testLabel.render(g, x, y + spacing);
 		// render the value
-		SimpleText testName = new SimpleText(this.test.getName());
-		testName.render(g, x + padding, y + spacing);
+		AttributedString testString = new AttributedString(this.test.getName());
+		Text test = new Text(testString);
+		test.generate();
+		test.render(g, x + padding, y + spacing);
 
 		// show the zoom
 		// render the label
 		this.zoomLabel.render(g, x, y + spacing * 2);
 		// render the value
-		SimpleText zoom = new SimpleText(this.test.getZoom() + " px/m");
+		AttributedString zoomString = new AttributedString(this.test.getZoom() + " px/m");
+		Text zoom = new Text(zoomString);
+		zoom.generate();
 		zoom.render(g, x + padding, y + spacing * 2);
 		
 		// show the number of bodies
 		// render the label
 		this.bodyCountLabel.render(g, x, y + spacing * 3);
 		// render the value
-		SimpleText bodies = new SimpleText(String.valueOf(this.test.getWorld().getBodyCount()));
+		AttributedString bodiesString = new AttributedString(String.valueOf(this.test.getWorld().getBodyCount()));
+		Text bodies = new Text(bodiesString);
+		bodies.generate();
 		bodies.render(g, x + padding, y + spacing * 3);
 		
 		// show the mode
@@ -565,8 +617,10 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		Vector2 pos = this.test.screenToWorld(loc.x, loc.y);
 		DecimalFormat df = new DecimalFormat("0.000");
 		// show the current x,y of the mouse
-		SimpleText mousePosition = new SimpleText("( " + df.format(pos.x) + ", " + df.format(pos.y) + " )");
-		mousePosition.render(g, x, y + spacing * 5);
+		AttributedString mouseString = new AttributedString("( " + df.format(pos.x) + ", " + df.format(pos.y) + " )");
+		Text mousePos = new Text(mouseString);
+		mousePos.generate();
+		mousePos.render(g, x, y + spacing * 5);
 	}
 	
 	/**
@@ -603,18 +657,32 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		int sensed = cc.getSensed();
 		
 		// create the texts
-		SimpleText ct = new SimpleText(String.valueOf(total));
-		SimpleText ca = new SimpleText(String.valueOf(added));
-		SimpleText cp = new SimpleText(String.valueOf(persisted));
-		SimpleText cr = new SimpleText(String.valueOf(removed));
-		SimpleText cs = new SimpleText(String.valueOf(sensed));
+		AttributedString ctString = new AttributedString(String.valueOf(total));
+		Text ct = new Text(ctString);
+		ct.generate();
+		
+		AttributedString caString = new AttributedString(String.valueOf(added));
+		Text ca = new Text(caString);
+		ca.generate();
+		
+		AttributedString cpString = new AttributedString(String.valueOf(persisted));
+		Text cp = new Text(cpString);
+		cp.generate();
+		
+		AttributedString crString = new AttributedString(String.valueOf(removed));
+		Text cr = new Text(crString);
+		cr.generate();
+		
+		AttributedString csString = new AttributedString(String.valueOf(sensed));
+		Text cs = new Text(csString);
+		cs.generate();
 		
 		// render the values
-		ct.render(g, x + padding - ct.getWidth(g), y + spacing);
-		ca.render(g, x + padding - ca.getWidth(g), y + spacing * 2);
-		cp.render(g, x + padding - cp.getWidth(g), y + spacing * 3);
-		cr.render(g, x + padding - cr.getWidth(g), y + spacing * 4);
-		cs.render(g, x + padding - cs.getWidth(g), y + spacing * 5);
+		ct.render(g, x + padding - ct.getWidth(), y + spacing);
+		ca.render(g, x + padding - ca.getWidth(), y + spacing * 2);
+		cp.render(g, x + padding - cp.getWidth(), y + spacing * 3);
+		cr.render(g, x + padding - cr.getWidth(), y + spacing * 4);
+		cs.render(g, x + padding - cs.getWidth(), y + spacing * 5);
 	}
 	
 	/**
@@ -637,7 +705,9 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		// get the fps in integer form
 		int iFps = (int) Math.floor(this.fps.getFps());
 		// render the value
-		SimpleText fps = new SimpleText(String.valueOf(iFps));
+		AttributedString fpsString = new AttributedString(String.valueOf(iFps));
+		Text fps = new Text(fpsString);
+		fps.generate();
 		fps.render(g, x + padding, y);
 		
 		// show the total memory usage
@@ -646,8 +716,10 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		NumberFormat nf = NumberFormat.getNumberInstance();
 		nf.setMaximumFractionDigits(2);
 		nf.setMinimumFractionDigits(2);
-		SimpleText total = new SimpleText(nf.format(this.usage.getTotalMemory() / 1024.0 / 1024.0) + "M");
-		total.render(g, x + padding, y + spacing);
+		AttributedString tot = new AttributedString(nf.format(this.usage.getTotalMemory() / 1024.0 / 1024.0) + "M");
+		Text tota = new Text(tot);
+		tota.generate();
+		tota.render(g, x + padding, y + spacing);
 		this.totalMemoryLabel.render(g, x + barWidth + 10, y + spacing);
 		
 		// show the used/free memory bars
