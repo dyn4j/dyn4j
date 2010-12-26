@@ -800,10 +800,6 @@ public class DoublyConnectedEdgeList {
 			// see if removing this edge creates a reflex vertex at the end points
 			HalfEdge e = this.edges.get(i);
 			
-			// verifcation (neither case should be true for interior edges)
-			if (e.face == e.twin.face) System.out.println("Edges have the same face.");
-			if (e.face == null || e.twin.face == null) System.out.println("An edge has a null face.");
-			
 			// test the first end point
 			Vertex v1 = e.origin;
 			Vertex v0 = e.getPrevious().origin;

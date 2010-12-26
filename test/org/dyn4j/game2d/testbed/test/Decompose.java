@@ -35,8 +35,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -118,12 +118,8 @@ public class Decompose extends Test {
 	public Decompose() {
 		for (int i = 0; i < 4; i++) {
 			// load the polygon dat files
-			URL url = this.getClass().getResource("/polygon" + (i + 1) + ".dat");
-			try {
-				this.polygons[i] = this.load(new File(url.toURI()));
-			} catch (URISyntaxException e) {
-				this.polygons[i] = null;
-			}
+			InputStream stream = this.getClass().getResourceAsStream("/polygon" + (i + 1) + ".dat");
+			this.polygons[i] = this.load(stream);
 		}
 	}
 	
@@ -630,35 +626,40 @@ public class Decompose extends Test {
 		}
 		
 		if (keyboard.isPressed(KeyEvent.VK_F)) {
-			// show the open file dialog
-			JFileChooser fileChooser = new JFileChooser();
-			// the default is one item, files only
-			int returnValue = fileChooser.showOpenDialog(null);
-			
-			if (returnValue == JFileChooser.APPROVE_OPTION) {
-				// load up the file
-				Vector2[] points = this.load(fileChooser.getSelectedFile());
-				// check if the points array is null
-				if (points != null) {
-					// the file was loaded successfully
-					// clear the current point list
-					this.points.clear();
-					// add all the points to the list
-					for (int i = 0; i < points.length; i++) {
-						Vector2 p = points[i];
-						this.points.add(p);
+			try{
+				// show the open file dialog
+				JFileChooser fileChooser = new JFileChooser();
+				// the default is one item, files only
+				int returnValue = fileChooser.showOpenDialog(null);
+				
+				if (returnValue == JFileChooser.APPROVE_OPTION) {
+					// load up the file
+					Vector2[] points = this.load(fileChooser.getSelectedFile());
+					// check if the points array is null
+					if (points != null) {
+						// the file was loaded successfully
+						// clear the current point list
+						this.points.clear();
+						// add all the points to the list
+						for (int i = 0; i < points.length; i++) {
+							Vector2 p = points[i];
+							this.points.add(p);
+						}
+						this.vertices = null;
+						this.elapsedTime = 0;
+						this.toIndex = 0;
+						this.triangles = null;
+						this.error = false;
+						this.done = false;
+					} else {
+						JOptionPane.showMessageDialog(null, "An error occurred loading the selected file.  Please check the format.\nExamine the Console for details.");
 					}
-					this.vertices = null;
-					this.elapsedTime = 0;
-					this.toIndex = 0;
-					this.triangles = null;
-					this.error = false;
-					this.done = false;
-				} else {
-					JOptionPane.showMessageDialog(null, "An error occurred loading the selected file.  Please check the format.\nExamine the Console for details.");
+				} else if (returnValue == JFileChooser.ERROR_OPTION) {
+					JOptionPane.showMessageDialog(null, "An unexpected error occurred when reading the file.  Please try again.\nExamine the Console for details.");
 				}
-			} else if (returnValue == JFileChooser.ERROR_OPTION) {
-				JOptionPane.showMessageDialog(null, "An unexpected error occurred when reading the file.  Please try again.\nExamine the Console for details.");
+			} catch (Exception e) {
+				// an error occurred
+				JOptionPane.showMessageDialog(null, "An error occurred when attempting to access the local file system.  Please check the security permissions.");
 			}
 		}
 		
@@ -749,45 +750,70 @@ public class Decompose extends Test {
 		if (file == null) return null;
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(file));
-			
-			String line;
-			int i = 0;
-			Vector2[] points = null;
-			try {
-				while ((line = br.readLine()) != null) {
-					if (line.isEmpty()) continue;
-					if (line.startsWith("#")) continue;
-					if (i == 0) {
-						// the first line contains the number of vertices
-						int size = Integer.parseInt(line.trim());
-						points = new Vector2[size];
-					} else {
-						// otherwise its a line containing a point
-						String[] xy = line.split("\\s");
-						double x = Double.parseDouble(xy[0].trim());
-						double y = Double.parseDouble(xy[1].trim());
-						Vector2 p = new Vector2(x, y);
-						points[i - 1] = p;
-					}
-					i++;
-				}
-				
-				return points;
-			} catch (IOException e) {
-				// just show the error on the console
-				e.printStackTrace();
-			} catch (NumberFormatException e) {
-				// just show the error on the console
-				e.printStackTrace();
-			} catch (ArrayIndexOutOfBoundsException e) {
-				// just show the error on the console
-				e.printStackTrace();
-			}
+			return parse(br);
 		} catch (FileNotFoundException e) {
 			// just show the error on the console
 			e.printStackTrace();
 		}
 		
+		return null;
+	}
+	
+	/**
+	 * Loads the given resource from the file system and attempts to
+	 * interpret the contents.
+	 * <p>
+	 * If any exception occurs, null is returned.
+	 * @param stream the stream to load
+	 * @return {@link Vector2}[] the points in the file
+	 */
+	private Vector2[] load(InputStream stream) {
+		if (stream == null) return null;
+		BufferedReader br = new BufferedReader(new InputStreamReader(stream));
+		return parse(br);
+	}
+	
+	/**
+	 * Parses the contents of the buffered reader.
+	 * <p>
+	 * If any exception occurs, null is returned.
+	 * @param reader the buffered reader to read from
+	 * @return {@link Vector2}[] the points
+	 */
+	private Vector2[] parse(BufferedReader reader) {
+		String line;
+		int i = 0;
+		Vector2[] points = null;
+		try {
+			while ((line = reader.readLine()) != null) {
+				if (line.isEmpty()) continue;
+				if (line.startsWith("#")) continue;
+				if (i == 0) {
+					// the first line contains the number of vertices
+					int size = Integer.parseInt(line.trim());
+					points = new Vector2[size];
+				} else {
+					// otherwise its a line containing a point
+					String[] xy = line.split("\\s");
+					double x = Double.parseDouble(xy[0].trim());
+					double y = Double.parseDouble(xy[1].trim());
+					Vector2 p = new Vector2(x, y);
+					points[i - 1] = p;
+				}
+				i++;
+			}
+			
+			return points;
+		} catch (IOException e) {
+			// just show the error on the console
+			e.printStackTrace();
+		} catch (NumberFormatException e) {
+			// just show the error on the console
+			e.printStackTrace();
+		} catch (ArrayIndexOutOfBoundsException e) {
+			// just show the error on the console
+			e.printStackTrace();
+		}
 		return null;
 	}
 }
