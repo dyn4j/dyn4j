@@ -325,9 +325,14 @@ public class World {
 		} else {
 			if (this.executor != null) {
 				// if its not enable then we can release the resources
-				this.executor.shutdown();
-				this.executor = null;
-				this.lock = null;
+				try {
+					this.executor.shutdown();
+					this.executor = null;
+					this.lock = null;
+				} catch (SecurityException e) {
+					// just print the stack trace
+					e.printStackTrace();
+				}
 			}
 		}
 		

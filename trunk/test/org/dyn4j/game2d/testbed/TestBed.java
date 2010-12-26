@@ -172,15 +172,15 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	/** The label for the number of processors */
 	private SimpleText processorCountLabel = new SimpleText("Processors:");
 	/** The label for the jre version */
-	private SimpleText jreVersionValue = new SimpleText(System.getProperty("java.runtime.version"));
+	private SimpleText jreVersionValue;
 	/** The label for the jre mode */
-	private SimpleText jreModeValue = new SimpleText(System.getProperty("java.vm.info"));
+	private SimpleText jreModeValue;
 	/** The label for the operating system name */
-	private SimpleText osNameValue = new SimpleText(System.getProperty("os.name"));
+	private SimpleText osNameValue;
 	/** The label for the architecture name */
-	private SimpleText osArchitectureValue = new SimpleText(System.getProperty("os.arch"));
+	private SimpleText osArchitectureValue;
 	/** The label for the data model name */
-	private SimpleText osDataModelValue = new SimpleText(System.getProperty("sun.arch.data.model"));
+	private SimpleText osDataModelValue;
 	/** The label for the number of processors */
 	private SimpleText processorCountValue = new SimpleText(String.valueOf(Runtime.getRuntime().availableProcessors()));
 	
@@ -295,6 +295,20 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		timeString.addAttribute(TextAttribute.FOREGROUND, new Color(222, 117, 0), 16, 22);
 		timeString.addAttribute(TextAttribute.FOREGROUND, new Color(20, 134, 222), 25, 31);
 		this.timeUsageLabel = new SimpleText(timeString);
+		
+		try {
+			jreVersionValue = new SimpleText(System.getProperty("java.runtime.version"));
+			jreModeValue = new SimpleText(System.getProperty("java.vm.info"));
+			osNameValue = new SimpleText(System.getProperty("os.name"));
+			osArchitectureValue = new SimpleText(System.getProperty("os.arch"));
+			osDataModelValue = new SimpleText(System.getProperty("sun.arch.data.model"));
+		} catch (SecurityException e) {
+			jreVersionValue = new SimpleText("Unknown");
+			jreModeValue = new SimpleText("Unknown");
+			osNameValue = new SimpleText("Unknown");
+			osArchitectureValue = new SimpleText("Unknown");
+			osDataModelValue = new SimpleText("Unknown");
+		}
 	}
 	
 	/* (non-Javadoc)
