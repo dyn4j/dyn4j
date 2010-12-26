@@ -64,7 +64,7 @@ public class WeldJoint extends Joint {
 	protected Vector3 impulse;
 	
 	/**
-	 * Optional constructor.
+	 * Minimal constructor.
 	 * @param body1 the first {@link Body}
 	 * @param body2 the second {@link Body}
 	 * @param anchor the anchor point in world coordinates

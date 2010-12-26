@@ -82,7 +82,7 @@ public abstract class Joint extends Constraint {
 	 * @since 1.0.0
 	 */
 	public static enum LimitState {
-		/** The state if the upper and lower limits are equal within the angular tolerance */
+		/** The state if the upper and lower limits are equal within tolerance */
 		EQUAL,
 		/** The state if the joint has reached or passed the lower limit */
 		AT_LOWER,

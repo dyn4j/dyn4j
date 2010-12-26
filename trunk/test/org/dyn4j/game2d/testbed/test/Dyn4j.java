@@ -101,18 +101,31 @@ public class Dyn4j extends Test {
 		
 		// D
 		Entity d = new Entity();
-		Polygon d1 = new Polygon(new Vector2[] {new Vector2(0.0, 0.984375),
-		                                        new Vector2(-0.015625, -0.984375),
-		                                        new Vector2(0.390625, -0.890625),
-		                                        new Vector2(0.671875, -0.65625),
-		                                        new Vector2(0.921875, -0.15625),
-		                                        new Vector2(0.96875, 0.375),
-		                                        new Vector2(0.703125, 0.8125),
-		                                        new Vector2(0.25, 0.984375)});
+		Polygon d1 = new Polygon(new Vector2[] {new Vector2(-0.703125, 0.859375),
+				                                new Vector2(-0.828125, 0.625), 
+				                                new Vector2(-0.875, 0.25), 
+				                                new Vector2(-0.625, 0.0625), 
+				                                new Vector2(-0.359375, 0.046875), 
+				                                new Vector2(-0.1875, 0.1875)});
+		Polygon d2 = new Polygon(new Vector2[] {new Vector2(0.0, -0.0), 
+				                                new Vector2(-0.015625, 1.625), 
+				                                new Vector2(-0.171875, 1.640625), 
+				                                new Vector2(-0.171875, 0.671875)});
+		Polygon d3 = new Polygon(new Vector2[] {new Vector2(0.0, -0.0), 
+				                                new Vector2(-0.1875, 0.1875), 
+				                                new Vector2(-0.21875, 0.0)});
+		Polygon d4 = new Polygon(new Vector2[] {new Vector2(0.0, -0.0), 
+				                                new Vector2(-0.171875, 0.671875), 
+				                                new Vector2(-0.375, 0.84375), 
+				                                new Vector2(-0.703125, 0.859375), 
+				                                new Vector2(-0.1875, 0.1875)});
 		d.addFixture(d1);
+		d.addFixture(d2);
+		d.addFixture(d3);
+		d.addFixture(d4);
 		d.setMass();
 		d.translate(d.getWorldCenter().getNegative());
-		d.translate(-2.3, 4.0);
+		d.translate(-2.3, 1.0);
 		this.world.add(d);
 		
 		// Y
@@ -121,20 +134,35 @@ public class Dyn4j extends Test {
 				                                new Vector2(0.703125, 0.28125),
 				                                new Vector2(0.4375, 0.265625),
 				                                new Vector2(0.8125, -0.484375)});
-		Polygon y2 = new Polygon(new Vector2[] {new Vector2(0.53125, -1.390625),
-				                                new Vector2(1.703125, 0.296875),
+		// i manually split this polygon so that the bottom portion of the 'y' sinks
+		// below the floor
+//		Polygon y2 = new Polygon(new Vector2[] {new Vector2(0.53125, -1.390625),
+//				                                new Vector2(1.703125, 0.296875),
+//				                                new Vector2(1.421875, 0.3125),
+//				                                new Vector2(1.015625, -0.34375)});
+		Polygon y2 = new Polygon(new Vector2[] {new Vector2(1.703125, 0.296875),
 				                                new Vector2(1.421875, 0.3125),
-				                                new Vector2(1.015625, -0.34375)});
-		Polygon y3 = new Polygon(new Vector2[] {new Vector2(1.015625, -0.34375),
+				                                new Vector2(1.015625, -0.34375),
+				                                new Vector2(1.1171875, -0.546875)});
+		Polygon y3 = new Polygon(new Vector2[] {new Vector2(1.1171875, -0.546875),
+				                                new Vector2(1.015625, -0.34375),
+				                                new Vector2(0.53125, -1.390625)});
+		Polygon y4 = new Polygon(new Vector2[] {new Vector2(1.015625, -0.34375),
 				                                new Vector2(0.8125, -0.484375),
 				                                new Vector2(0.25, -1.1875),
 				                                new Vector2(0.53125, -1.390625)});
 		y.addFixture(y1);
 		y.addFixture(y2);
-		y.addFixture(y3);
+		// set the bottom two pieces of the y to sensors
+		// so that those collisions are not resolved thereby making
+		// them sink through the floor
+		BodyFixture bfy3 = y.addFixture(y3);
+		bfy3.setSensor(true);
+		BodyFixture bfy4 = y.addFixture(y4);
+		bfy4.setSensor(true);
 		y.setMass();
 		y.translate(y.getWorldCenter().getNegative());
-		y.translate(-1.3, 4.0);
+		y.translate(-1.3, 1.0);
 		this.world.add(y);
 		
 		// N
@@ -177,7 +205,7 @@ public class Dyn4j extends Test {
 		n.addFixture(n7);
 		n.setMass();
 		n.translate(n.getWorldCenter().getNegative());
-		n.translate(-0.0, 4.0);
+		n.translate(-0.0, 1.0);
 		this.world.add(n);
 		
 		// 4
@@ -194,7 +222,7 @@ public class Dyn4j extends Test {
 		four.addFixture(four2);
 		four.setMass();
 		four.translate(four.getWorldCenter().getNegative());
-		four.translate(1.0, 5.0);
+		four.translate(1.0, 2.0);
 		this.world.add(four);
 		
 		// J
@@ -229,7 +257,7 @@ public class Dyn4j extends Test {
 		j.addFixture(j5);
 		j.setMass();
 		j.translate(j.getWorldCenter().getNegative());
-		j.translate(1.5, 3.5);
+		j.translate(1.5, 0.5);
 		this.world.add(j);
 	}
 	
