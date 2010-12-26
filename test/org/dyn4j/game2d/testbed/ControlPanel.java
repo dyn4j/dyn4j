@@ -27,6 +27,7 @@ package org.dyn4j.game2d.testbed;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -37,6 +38,8 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,6 +62,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
@@ -74,7 +78,10 @@ import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 
+import org.dyn4j.game2d.Version;
 import org.dyn4j.game2d.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.game2d.collision.continuous.TimeOfImpactDetector;
 import org.dyn4j.game2d.collision.manifold.ManifoldSolver;
@@ -329,25 +336,31 @@ public class ControlPanel extends JFrame {
 		JTabbedPane tabs = new JTabbedPane();
 		tabs.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-		// create the container for the control listing tab
+		// create the panel for the controls listing tab
 		this.pnlControls = this.createControlsPanel();
-		// create a tab from the panel
+		// create a tab for the panel
 		tabs.addTab(" Controls ", null, this.pnlControls, "View the list of controls.");
 		
-		// create a container for the tests selection tab
+		// create a panel for the tests selection tab
 		JPanel pnlTest = this.createSelectTestPanel();
-		// create the tab from the panel
+		// create the tab for the panel
 		tabs.addTab(" Tests ", null, pnlTest, "Select the test to run.");
 		
-		// create a container for the tests selection tab
+		// create a panel for the drawing options tab
 		JPanel pnlDraw = this.createDrawingOptionsPanel();
-		// create the tab from the panel
+		// create the tab for the panel
 		tabs.addTab(" Drawing Options ", null, pnlDraw, "Select drawing options.");
 
+		// create a panel for the simulation settings tab
 		JPanel pnlSettings = this.createSimulationSettingsPanel();
-		// create a tab from the panel
+		// create a tab for the panel
 		tabs.addTab(" Simulation Settings ", null, pnlSettings, "Set simulation settings.");
-
+		
+		// create a panel for the about tab
+		JPanel pnlAbout = this.createAboutPanel();
+		// create a tab for the panel
+		tabs.addTab(" About ", null, pnlAbout, "About the dyn4j test bed.");
+		
 		// add the tabs to the frame
 		this.add(tabs, BorderLayout.CENTER);
 		
@@ -1769,6 +1782,85 @@ public class ControlPanel extends JFrame {
 //			}
 //		});
 //		panel.add(btnSize);
+		
+		return panel;
+	}
+	
+	/**
+	 * Creates the About tab panel.
+	 * @return JPanel the panel for the About tab
+	 */
+	private JPanel createAboutPanel() {
+		// create a container for the settings tab
+		JPanel panel = new JPanel();
+		// create a border
+		Border border = new EmptyBorder(5, 5, 5, 5);
+		
+		// set the layout
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		panel.setBorder(border);
+		
+		JPanel pnlAbout = new JPanel();
+		BoxLayout bl = new BoxLayout(pnlAbout, BoxLayout.Y_AXIS);
+		pnlAbout.setLayout(bl);
+		
+		// add the logo to the top
+		JLabel icon = new JLabel();
+		icon.setIcon(new ImageIcon(this.getClass().getResource("/icon.png")));
+		icon.setAlignmentX(CENTER_ALIGNMENT);
+		pnlAbout.add(icon);
+		
+		// add the label for the version
+		JLabel version = new JLabel("Version: " + Version.getVersion());
+		version.setAlignmentX(CENTER_ALIGNMENT);
+		pnlAbout.add(version);
+		
+		// add the about text section with clickable links
+		JTextPane text = new JTextPane();
+		text.setEditable(false);
+		try {
+			text.setPage(this.getClass().getResource("/description.html"));
+		} catch (IOException e) {
+			// if the file is not found then just set the text to empty
+			text.setText("");
+		}
+		// add a hyperlink listener to open links in the default browser
+		text.addHyperlinkListener(new HyperlinkListener() {
+			@Override
+			public void hyperlinkUpdate(HyperlinkEvent e) {
+				// make sure the hyperlink event is a "onclick"
+				if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+					// make sure accessing the desktop is supported
+					if (Desktop.isDesktopSupported()) {
+						// get the current desktop
+						Desktop desktop = Desktop.getDesktop();
+						// make sure that browsing is supported
+						if (desktop.isSupported(Desktop.Action.BROWSE)) {
+							// if so then attempt to load the page
+							// in the default browser
+							try {
+								URI uri = e.getURL().toURI();
+								desktop.browse(uri);
+							} catch (URISyntaxException ex) {
+								// this shouldn't happen
+								LOGGER.warning("A link in the description.html is not correct: " + e.getURL());
+							} catch (IOException ex) {
+								// this shouldn't happen either since
+								// most desktops have a default program to
+								// open urls
+								LOGGER.warning("Cannot navigate to link since a default program is not set or does not exist.");
+							}
+						}
+					}
+				}
+			}
+		});
+		// wrap the text pane in a scroll pane just in case
+		JScrollPane scroller = new JScrollPane(text);
+		
+		pnlAbout.add(scroller);
+		
+		panel.add(pnlAbout);
 		
 		return panel;
 	}
