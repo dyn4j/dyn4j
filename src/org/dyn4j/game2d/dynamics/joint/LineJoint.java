@@ -118,7 +118,7 @@ public class LineJoint extends Joint {
 	protected double a2;
 	
 	/**
-	 * Optional constructor.
+	 * Minimal constructor.
 	 * @param body1 the first {@link Body}
 	 * @param body2 the second {@link Body}
 	 * @param anchor the anchor point in world coordinates

@@ -88,6 +88,8 @@ public class RopeJoint extends Joint {
 		if (body1 == body2) throw new IllegalArgumentException("Cannot create a distance joint between the same body instance.");
 		// verify the anchor points are not null
 		if (anchor1 == null || anchor2 == null) throw new NullPointerException("Neither anchor point can be null.");
+		// verify the max distance is greater than zero
+		if (maxDistance <= Epsilon.E) throw new IllegalArgumentException("A near zero max distance is not allowed.  Use a revolute joint instead.");
 		// get the local anchor points
 		this.localAnchor1 = body1.getLocalPoint(anchor1);
 		this.localAnchor2 = body2.getLocalPoint(anchor2);
@@ -164,7 +166,9 @@ public class RopeJoint extends Joint {
 			body2.getVelocity().subtract(J.product(invM2));
 			body2.setAngularVelocity(body2.getAngularVelocity() - invI2 * r2.cross(J));
 		} else {
+			// set the joint state to inactive
 			this.state = Joint.LimitState.INACTIVE;
+			// clear the impulse
 			this.impulse = 0.0;
 		}
 	}
@@ -174,6 +178,7 @@ public class RopeJoint extends Joint {
 	 */
 	@Override
 	public void solveVelocityConstraints(Step step) {
+		// check if the constraint need to be applied
 		if (this.state == Joint.LimitState.AT_UPPER) {
 			Transform t1 = body1.getTransform();
 			Transform t2 = body2.getTransform();
@@ -214,6 +219,7 @@ public class RopeJoint extends Joint {
 	 */
 	@Override
 	public boolean solvePositionConstraints() {
+		// check if the constraint need to be applied
 		if (this.state == Joint.LimitState.AT_UPPER) {
 			// get the current settings
 			Settings settings = Settings.getInstance();
@@ -256,6 +262,7 @@ public class RopeJoint extends Joint {
 			
 			return Math.abs(C) < linearTolerance;
 		} else {
+			// if not then just return true that the position constriant is satisfied
 			return true;
 		}
 	}
@@ -308,7 +315,7 @@ public class RopeJoint extends Joint {
 	
 	/**
 	 * Sets the max distance between the two constrained {@link Body}s in meters.
-	 * @param distance the distance in meters
+	 * @param maxDistance the maximum distance in meters
 	 */
 	public void setMaxDistance(double maxDistance) {
 		// make sure the distance is greater than zero
