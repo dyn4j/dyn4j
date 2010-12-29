@@ -43,7 +43,7 @@ import org.dyn4j.game2d.geometry.Vector3;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.1.0
+ * @version 2.2.2
  * @since 1.0.0
  */
 public class PrismaticJoint extends Joint {
@@ -827,5 +827,28 @@ public class PrismaticJoint extends Joint {
 		// set the values
 		this.lowerLimit = lowerLimit;
 		this.upperLimit = upperLimit;
+	}
+	
+	/**
+	 * Sets the upper and lower limits and enables the limits.
+	 * <p>
+	 * The lower limit must be less than or equal to the upper limit.
+	 * @param lowerLimit the lower limit in meters
+	 * @param upperLimit the upper limit in meters
+	 * @since 2.2.2
+	 */
+	public void setLimitsEnabled(double lowerLimit, double upperLimit) {
+		if (lowerLimit > upperLimit) throw new IllegalArgumentException("The lower limit cannot be greater than the upper limit.");
+		// did a value change
+		if (lowerLimit != this.lowerLimit || upperLimit != this.upperLimit) {
+			// wake up the bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+		}
+		// set the values
+		this.lowerLimit = lowerLimit;
+		this.upperLimit = upperLimit;
+		// enable the limits
+		this.limitEnabled = true;
 	}
 }

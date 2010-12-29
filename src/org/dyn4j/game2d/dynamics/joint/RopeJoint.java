@@ -34,15 +34,22 @@ import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Vector2;
 
 /**
- * Represents a max length distance joint.
+ * Represents a maximum/minimum length distance joint.
  * <p>
- * Given the two world space anchor points and a max distance, the {@link Body}s are
- * not allowed to separate past the max distance.
+ * Given the two world space anchor points, the {@link Body}s are not allowed to 
+ * separate past the maximum distance and not allowed to approach past the 
+ * minimum distance.
+ * <p>
+ * NOTE: The respective {@link #setMaximumDistance(double)}, {@link #setMaximumEnabled(boolean)},
+ * {@link #setMinimumDistance(double)}, {@link #setMinimumEnabled(boolean)}, 
+ * {@link #setMinimumMaximum(double, double)}, and {@link #setMinimumMaximumEnabled(double, double)},
+ * methods must be called to setup the maximum and minimum limits, otherwise no
+ * constraint is met and the bodies can move freely.
  * <p>
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.2.1
+ * @version 2.2.2
  * @since 2.2.1
  */
 public class RopeJoint extends Joint {
@@ -55,8 +62,17 @@ public class RopeJoint extends Joint {
 	/** The local anchor point on the second {@link Body} */
 	protected Vector2 localAnchor2;
 	
-	/** The computed distance between the two world space anchor points */
-	protected double maxDistance;
+	/** The maximum distance between the two world space anchor points */
+	protected double maximumDistance;
+	
+	/** The minimum distance between the two world space anchor points */
+	protected double minimumDistance;
+	
+	/** Whether the maximum distance is enabled */
+	protected boolean maximumEnabled;
+	
+	/** Whether the minimum distance is enabled */
+	protected boolean minimumEnabled;
 	
 	/** The effective mass of the two body system (Kinv = J * Minv * Jtrans) */
 	protected double invK;
@@ -64,8 +80,8 @@ public class RopeJoint extends Joint {
 	/** The normal */
 	protected Vector2 n;
 	
-	/** The current state of the joint */
-	protected Joint.LimitState state;
+	/** The current state of the joint limits */
+	protected Joint.LimitState limitState;
 	
 	/** The accumulated impulse from the previous time step */
 	protected double impulse;
@@ -73,28 +89,28 @@ public class RopeJoint extends Joint {
 	/**
 	 * Minimal constructor.
 	 * <p>
-	 * Creates a max distance {@link Joint} where the joined 
-	 * {@link Body}s do not participate in collision detection and
-	 * resolution.
+	 * Creates a rope joint with neither limit enabled.  Use the setXXX methods
+	 * to set limits and enable them.
 	 * @param body1 the first {@link Body}
 	 * @param body2 the second {@link Body}
 	 * @param anchor1 in world coordinates
 	 * @param anchor2 in world coordinates
-	 * @param maxDistance the maximum distance the {@link Body}s can be separated
 	 */
-	public RopeJoint(Body body1, Body body2, Vector2 anchor1, Vector2 anchor2, double maxDistance) {
+	public RopeJoint(Body body1, Body body2, Vector2 anchor1, Vector2 anchor2) {
 		super(body1, body2, false);
 		// verify the bodies are not the same instance
 		if (body1 == body2) throw new IllegalArgumentException("Cannot create a distance joint between the same body instance.");
 		// verify the anchor points are not null
 		if (anchor1 == null || anchor2 == null) throw new NullPointerException("Neither anchor point can be null.");
-		// verify the max distance is greater than zero
-		if (maxDistance <= Epsilon.E) throw new IllegalArgumentException("A near zero max distance is not allowed.  Use a revolute joint instead.");
 		// get the local anchor points
 		this.localAnchor1 = body1.getLocalPoint(anchor1);
 		this.localAnchor2 = body2.getLocalPoint(anchor2);
-		// set the max distance
-		this.maxDistance = maxDistance;
+		// default to no limits initially
+		this.maximumEnabled = false;
+		this.minimumEnabled = false;
+		// default the limits
+		this.maximumDistance = Double.MAX_VALUE;
+		this.minimumDistance = -Double.MAX_VALUE;
 	}
 	
 	/* (non-Javadoc)
@@ -106,7 +122,11 @@ public class RopeJoint extends Joint {
 		.append(super.toString()).append("|")
 		.append(this.localAnchor1).append("|")
 		.append(this.localAnchor2).append("|")
-		.append(this.maxDistance).append("|")
+		.append(this.maximumDistance).append("|")
+		.append(this.maximumEnabled).append("|")
+		.append(this.minimumDistance).append("|")
+		.append(this.minimumEnabled).append("|")
+		.append(this.limitState).append("|")
 		.append(this.impulse).append("]");
 		return sb.toString();
 	}
@@ -145,10 +165,54 @@ public class RopeJoint extends Joint {
 			this.n.multiply(1.0 / length);
 		}
 		
+		// check if both limits are enabled
+		// and get the current state of the limits
+		if (this.maximumEnabled && this.minimumEnabled) {
+			// if both are enabled check if they are equal
+			if (Math.abs(this.maximumDistance - this.minimumDistance) < 2.0 * linearTolerance) {
+				// if so then set the state to equal
+				this.limitState = Joint.LimitState.EQUAL;
+			} else {
+				// make sure we have valid settings
+				if (this.maximumDistance > this.minimumDistance) {
+					// check against the max and min distances
+					if (length > this.maximumDistance) {
+						// set the state to at upper
+						this.limitState = Joint.LimitState.AT_UPPER;
+					} else if (length < this.minimumDistance) {
+						// set the state to at lower
+						this.limitState = Joint.LimitState.AT_LOWER;
+					} else {
+						// set the state to inactive
+						this.limitState = Joint.LimitState.INACTIVE;
+					}
+				}
+			}
+		} else if (this.maximumEnabled) {
+			// check the maximum against the current length
+			if (length > this.maximumDistance) {
+				// set the state to at upper
+				this.limitState = Joint.LimitState.AT_UPPER;
+			} else {
+				// no constraint needed at this time
+				this.limitState = Joint.LimitState.INACTIVE;
+			}
+		} else if (this.minimumEnabled) {
+			// check the minimum against the current length
+			if (length < this.minimumDistance) {
+				// set the state to at lower
+				this.limitState = Joint.LimitState.AT_LOWER;
+			} else {
+				// no constraint needed at this time
+				this.limitState = Joint.LimitState.INACTIVE;
+			}
+		} else {
+			// neither is enabled so no constraint needed at this time
+			this.limitState = Joint.LimitState.INACTIVE;
+		}
+		
 		// check the length to see if we need to apply the constraint
-		if (length > this.maxDistance) {
-			this.state = Joint.LimitState.AT_UPPER;
-			
+		if (this.limitState != Joint.LimitState.INACTIVE) {
 			// compute K inverse
 			double cr1n = r1.cross(this.n);
 			double cr2n = r2.cross(this.n);
@@ -166,8 +230,6 @@ public class RopeJoint extends Joint {
 			body2.getVelocity().subtract(J.product(invM2));
 			body2.setAngularVelocity(body2.getAngularVelocity() - invI2 * r2.cross(J));
 		} else {
-			// set the joint state to inactive
-			this.state = Joint.LimitState.INACTIVE;
 			// clear the impulse
 			this.impulse = 0.0;
 		}
@@ -179,7 +241,7 @@ public class RopeJoint extends Joint {
 	@Override
 	public void solveVelocityConstraints(Step step) {
 		// check if the constraint need to be applied
-		if (this.state == Joint.LimitState.AT_UPPER) {
+		if (this.limitState != Joint.LimitState.INACTIVE) {
 			Transform t1 = body1.getTransform();
 			Transform t2 = body2.getTransform();
 			Mass m1 = body1.getMass();
@@ -220,7 +282,15 @@ public class RopeJoint extends Joint {
 	@Override
 	public boolean solvePositionConstraints() {
 		// check if the constraint need to be applied
-		if (this.state == Joint.LimitState.AT_UPPER) {
+		if (this.limitState != Joint.LimitState.INACTIVE) {
+			// if the limits are equal it doesn't matter if we
+			// use the maximum or minimum setting
+			double targetDistance = this.maximumDistance;
+			// determine the target distance
+			if (this.limitState == Joint.LimitState.AT_LOWER) {
+				// use the minimum distance as the target
+				targetDistance = this.minimumDistance;
+			}
 			// get the current settings
 			Settings settings = Settings.getInstance();
 			double linearTolerance = settings.getLinearTolerance();
@@ -246,7 +316,7 @@ public class RopeJoint extends Joint {
 			
 			// solve the position constraint
 			double l = n.normalize();
-			double C = l - this.maxDistance;
+			double C = l - targetDistance;
 			C = Interval.clamp(C, -maxLinearCorrection, maxLinearCorrection);
 			
 			double impulse = -this.invK * C;
@@ -262,7 +332,7 @@ public class RopeJoint extends Joint {
 			
 			return Math.abs(C) < linearTolerance;
 		} else {
-			// if not then just return true that the position constriant is satisfied
+			// if not then just return true that the position constraint is satisfied
 			return true;
 		}
 	}
@@ -306,27 +376,123 @@ public class RopeJoint extends Joint {
 	}
 	
 	/**
-	 * Returns the max distance between the two constrained {@link Body}s in meters.
+	 * Returns the maximum distance between the two constrained {@link Body}s in meters.
 	 * @return double
 	 */
-	public double getMaxDistance() {
-		return this.maxDistance;
+	public double getMaximumDistance() {
+		return this.maximumDistance;
 	}
 	
 	/**
-	 * Sets the max distance between the two constrained {@link Body}s in meters.
-	 * @param maxDistance the maximum distance in meters
+	 * Sets the maximum distance between the two constrained {@link Body}s in meters.
+	 * @param maximumDistance the maximum distance in meters
 	 */
-	public void setMaxDistance(double maxDistance) {
+	public void setMaximumDistance(double maximumDistance) {
 		// make sure the distance is greater than zero
-		if (maxDistance < 0.0) throw new IllegalArgumentException("The max distance must be greater than or equal to zero.");
+		if (maximumDistance < 0.0) throw new IllegalArgumentException("The max distance must be greater than or equal to zero.");
+		// make sure the minimum is less than or equal to the maximum
+		if (maximumDistance < this.minimumDistance) throw new IllegalArgumentException("The maximum distance must be greater than or equal to the current minimum distance.");
 		// check if the value changed
-		if (this.maxDistance != maxDistance) {
+		if (this.maximumDistance != maximumDistance) {
 			// wake up both bodies
 			this.body1.setAsleep(false);
 			this.body2.setAsleep(false);
 			// set the new target distance
-			this.maxDistance = maxDistance;
+			this.maximumDistance = maximumDistance;
+		}
+	}
+	
+	/**
+	 * Sets whether the maximum distance limit is enabled.
+	 * @param flag true if the maximum distance limit should be enforced
+	 */
+	public void setMaximumEnabled(boolean flag) {
+		// check if the value changed
+		if (this.maximumEnabled != flag) {
+			// wake up both bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+			// set the flag
+			this.maximumEnabled = flag;
+		}
+	}
+	
+	/**
+	 * Returns the minimum distance between the two constrained {@link Body}s in meters.
+	 * @return double
+	 */
+	public double getMinimumDistance() {
+		return this.minimumDistance;
+	}
+	
+	/**
+	 * Sets the minimum distance between the two constrained {@link Body}s in meters.
+	 * @param minimumDistance the minimum distance in meters
+	 */
+	public void setMinimumDistance(double minimumDistance) {
+		// make sure the distance is greater than zero
+		if (minimumDistance < 0.0) throw new IllegalArgumentException("The minimum distance must be greater than or equal to zero.");
+		// make sure the minimum is less than or equal to the maximum
+		if (minimumDistance > this.maximumDistance) throw new IllegalArgumentException("The minimum distance must be less than or equal to the current maximum distance.");
+		// check if the value changed
+		if (this.minimumDistance != minimumDistance) {
+			// wake up both bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+			// set the new target distance
+			this.minimumDistance = minimumDistance;
+		}
+	}
+
+	/**
+	 * Sets whether the minimum distance limit is enabled.
+	 * @param flag true if the minimum distance limit should be enforced
+	 */
+	public void setMinimumEnabled(boolean flag) {
+		// check if the value changed
+		if (this.minimumEnabled != flag) {
+			// wake up both bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+			// set the flag
+			this.minimumEnabled = flag;
+		}
+	}
+	
+	/**
+	 * Sets both the maximum and minimum limit distances.
+	 * @param minimumDistance the minimum distance in meters
+	 * @param maximumDistance the maximum distance in meters
+	 */
+	public void setMinimumMaximum(double minimumDistance, double maximumDistance) {
+		// check the values
+		if (maximumDistance >= minimumDistance) {
+			// wake up the bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+			// set the limits
+			this.maximumDistance = maximumDistance;
+			this.minimumDistance = minimumDistance;
+		}
+	}
+
+	/**
+	 * Sets both the maximum and minimum limit distances and enables both.
+	 * @param minimumDistance the minimum distance in meters
+	 * @param maximumDistance the maximum distance in meters
+	 */
+	public void setMinimumMaximumEnabled(double minimumDistance, double maximumDistance) {
+		// check the values
+		if (maximumDistance >= minimumDistance) {
+			// wake up the bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+			// set the limits
+			this.maximumDistance = maximumDistance;
+			this.minimumDistance = minimumDistance;
+			// enable the limits
+			this.maximumEnabled = true;
+			this.minimumEnabled = true;
 		}
 	}
 }

@@ -24,58 +24,64 @@
  */
 
 /**
- * Package containing classes to detect collisions between {@link Convex} {@link Shape}s.
+ * Package containing classes to detect collisions between 
+ * {@link org.dyn4j.game2d.geometry.Convex} {@link org.dyn4j.game2d.geometry.Shape}s.
  * <p>
  * Collision detection can be an expensive process.  To avoid unnecessary processing
  * a two phase approach to collision detection is used.  First a inaccurate, yet
- * conservative algorithm is used to detect possible collision pairs.  This process is
+ * conservative, algorithm is used to detect possible collision pairs.  This process is
  * called the broad-phase.  Next, after obtaining all the possible collision pairs, each
  * pair is tested using an accurate algorithm.  This is called the narrow-phase.
  * <p>
  * <b>Broad-phase</b>
  * <p>
- * The {@link BroadphaseDetector}s will determine whether two {@link Convex} {@link Shape}s
- * can possibly penetrate, returning only valid {@link BroadphasePair}s, which should then 
- * be sent to a {@link NarrowphaseDetector}.
+ * The {@link org.dyn4j.game2d.collision.broadphase.BroadphaseDetector}s will determine whether 
+ * two {@link org.dyn4j.game2d.geometry.Convex} {@link org.dyn4j.game2d.geometry.Shape}s can possibly 
+ * penetrate, returning only valid {@link org.dyn4j.game2d.collision.broadphase.BroadphasePair}s, which 
+ * should then be sent to a {@link org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector}.
  * <p>
  * <b>Narrow-phase</b>
  * <p>
- * The {@link NarrowphaseDetector}s will determine whether two {@link Convex} {@link Shape}s 
- * penetrate and returning the {@link Penetration}.
+ * The {@link org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector}s will determine whether two 
+ * {@link org.dyn4j.game2d.geometry.Convex} {@link org.dyn4j.game2d.geometry.Shape}s penetrate and 
+ * return a {@link org.dyn4j.game2d.collision.narrowphase.Penetration} or null.
  * <p>
- * A {@link Penetration} object represents the minimum distance along some vector required 
- * to push the {@link Shape}s out of the penetration.
+ * A {@link org.dyn4j.game2d.collision.narrowphase.Penetration} object represents the minimum distance 
+ * along some vector required to push the {@link org.dyn4j.game2d.geometry.Shape}s out of the penetration.
  * <p>
  * <b>Manifold Generation</b>
  * <p>
- * Once a {@link Penetration} object is obtained, it should be sent off to a 
- * {@link ManifoldSolver}.  A {@link ManifoldSolver} will use the {@link Penetration} object
- * and the given {@link Convex} {@link Shape}s to create a collision {@link Manifold}.
+ * Once a {@link org.dyn4j.game2d.collision.narrowphase.Penetration} object is obtained, it should be passed
+ * to a {@link org.dyn4j.game2d.collision.manifold.ManifoldSolver}.  A 
+ * {@link org.dyn4j.game2d.collision.manifold.ManifoldSolver} will use the 
+ * {@link org.dyn4j.game2d.collision.narrowphase.Penetration} object and the given 
+ * {@link org.dyn4j.game2d.geometry.Convex} {@link org.dyn4j.game2d.geometry.Shape}s to create a collision 
+ * {@link org.dyn4j.game2d.collision.manifold.Manifold}.
  * <p>
- * A collision {@link Manifold} represents the collision points between the two {@link Convex}
- * {@link Shape}s.
+ * A collision {@link org.dyn4j.game2d.collision.manifold.Manifold} represents the collision points between 
+ * the two {@link org.dyn4j.game2d.geometry.Convex} {@link org.dyn4j.game2d.geometry.Shape}s.
  * <p>
  * The following is a list of implementations of the above interfaces:
- * {@link BroadphaseDetector}: {@link Sap}<br />
- * {@link NarrowphaseDetector}: {@link Gjk} and {@link Sat}<br />
- * {@link ManifoldSolver}: {@link ClippingManifoldSolver}
+ * <ul>
+ * <li>{@link org.dyn4j.game2d.collision.broadphase.BroadphaseDetector}s
+ * 	<ul>
+ * 	<li>{@link org.dyn4j.game2d.collision.broadphase.Sap}</li>
+ * 	</ul>
+ * </li>
+ * <li>{@link org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector}
+ * 	<ul>
+ * 	<li>{@link org.dyn4j.game2d.collision.narrowphase.Gjk}</li>
+ * 	<li>{@link org.dyn4j.game2d.collision.narrowphase.Sat}</li>
+ * 	</ul>
+ * </li>
+ * <li>{@link org.dyn4j.game2d.collision.manifold.ManifoldSolver}
+ * 	<ul>
+ * 	<li>{@link org.dyn4j.game2d.collision.manifold.ClippingManifoldSolver}</li>
+ * 	</ul>
+ * </li>
+ * </ul>
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.2.2
  * @since 1.0.0
  */
 package org.dyn4j.game2d.collision;
-
-import org.dyn4j.game2d.collision.broadphase.BroadphaseDetector;
-import org.dyn4j.game2d.collision.broadphase.BroadphasePair;
-import org.dyn4j.game2d.collision.broadphase.Sap;
-import org.dyn4j.game2d.collision.manifold.ClippingManifoldSolver;
-import org.dyn4j.game2d.collision.manifold.Manifold;
-import org.dyn4j.game2d.collision.manifold.ManifoldSolver;
-import org.dyn4j.game2d.collision.narrowphase.Gjk;
-import org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector;
-import org.dyn4j.game2d.collision.narrowphase.Penetration;
-import org.dyn4j.game2d.collision.narrowphase.Sat;
-import org.dyn4j.game2d.geometry.Convex;
-import org.dyn4j.game2d.geometry.Shape;
-
-;

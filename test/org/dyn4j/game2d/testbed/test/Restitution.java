@@ -37,9 +37,9 @@ import org.dyn4j.game2d.testbed.Entity;
 import org.dyn4j.game2d.testbed.Test;
 
 /**
- * Tests the distance joint in a Newton's Cradle configuration.
+ * Tests a number of bodies with different coefficients of restitution.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.2
  * @since 1.0.0
  */
 public class Restitution extends Test {

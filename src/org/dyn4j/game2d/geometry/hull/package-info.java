@@ -25,8 +25,18 @@
 
 /**
  * This package contains algorithms used to create convex hull of point clouds.
+ * <p>
+ * Currently supported algorithms:
+ * <ul>
+ * <li>{@link org.dyn4j.game2d.geometry.hull.GiftWrap}</li>
+ * <li>{@link org.dyn4j.game2d.geometry.hull.GrahamScan}</li>
+ * <li>{@link org.dyn4j.game2d.geometry.hull.MonotoneChain}</li>
+ * <li>{@link org.dyn4j.game2d.geometry.hull.DivideAndConquer}</li>
+ * </ul>
+ * All algorithms should produce identical hulls.  Some may be faster than others but consume more
+ * memory.  These classes are intended to be used as a pre-processing step or at runtime.
  * @author William Bittle 
- * @version 2.2.0
+ * @version 2.2.2
  * @since 2.2.0
  */
 package org.dyn4j.game2d.geometry.hull;

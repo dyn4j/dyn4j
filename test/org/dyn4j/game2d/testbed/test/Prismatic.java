@@ -40,7 +40,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests the prismatic joint.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.2
  * @since 1.0.0
  */
 public class Prismatic extends Test {
@@ -129,6 +129,7 @@ public class Prismatic extends Test {
 		this.world.add(bot);
 		
 		PrismaticJoint joint = new PrismaticJoint(bot, top, new Vector2(0.0, 2.0), new Vector2(0.0, 1.0));
+		joint.setLimitsEnabled(0.5, 1.5);
 		joint.setCollisionAllowed(true);
 		
 		this.world.add(joint);

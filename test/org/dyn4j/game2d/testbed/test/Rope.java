@@ -38,9 +38,9 @@ import org.dyn4j.game2d.testbed.Entity;
 import org.dyn4j.game2d.testbed.Test;
 
 /**
- * Tests the distance joint in a Newton's Cradle configuration.
+ * Tests the rope joint.
  * @author William Bittle
- * @version 2.2.1
+ * @version 2.2.2
  * @since 2.2.1
  */
 public class Rope extends Test {
@@ -136,7 +136,10 @@ public class Rope extends Test {
 		p2.add(0.0, 0.4);
 		
 		// join them
-		RopeJoint j1 = new RopeJoint(obj1, obj2, p1, p2, 3.0);
+		RopeJoint j1 = new RopeJoint(obj1, obj2, p1, p2);
+		// VERY IMPORTANT FOR THIS JOINT
+		// set and enable the limits
+		j1.setMinimumMaximumEnabled(0.5, 1.5);
 		j1.setCollisionAllowed(true);
 		this.world.add(j1);
 	}
