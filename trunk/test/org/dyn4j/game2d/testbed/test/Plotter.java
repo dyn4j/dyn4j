@@ -57,9 +57,9 @@ import org.dyn4j.game2d.testbed.Entity;
 import org.dyn4j.game2d.testbed.Test;
 
 /**
- * Tests shape collisions by plotting shapes, points, vectors, etc.
+ * Test used to plot shapes, points, vectors, etc for debugging.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.2
  * @since 1.0.0
  */
 public class Plotter extends Test {
@@ -474,9 +474,10 @@ public class Plotter extends Test {
 	@Override
 	public String[][] getControls() {
 		return new String[][] {
-				{"1", "Cycle the shape type for the first body."},
-				{"2", "Cycle the shape type for the second body."},
-				{"f", "Flips the order of the shapes in manifold generation."}};
+				{"<html>Cycle 1<sup>st</sup> Shape</html>", "<html>Cycle through the list of test shapes for the first body.</html>", "<html><span style='color: blue;'>1</span></html>"},
+				{"<html>Cycle 2<sup>nd</sup> Shape</html>", "<html>Cycle through the list of test shapes for the second body.</html>", "<html><span style='color: blue;'>2</span></html>"},
+				{"Reverse Order", "<html>Reverses the order in manifold generation.</html>", "<html><span style='color: blue;'>f</span></html>"}
+		};
 	}
 	
 	/* (non-Javadoc)

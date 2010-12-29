@@ -27,8 +27,30 @@
  * Sub package of the Dynamics package handling joints.
  * <p>
  * Joints are solved using an iterative constraint based approach in the same manner as contacts.
+ * <p>
+ * All joints, with exception of the {@link org.dyn4j.game2d.dynamics.joint.MouseJoint} joint a pair
+ * of {@link org.dyn4j.game2d.dynamics.Body}s.
+ * <p>
+ * Current listing of joints:
+ * <ul>
+ * <li>{@link org.dyn4j.game2d.dynamics.joint.DistanceJoint} for fixed length distance and spring/damper</li>
+ * <li>{@link org.dyn4j.game2d.dynamics.joint.RopeJoint} for min/max distance</li>
+ * <li>{@link org.dyn4j.game2d.dynamics.joint.RevoluteJoint} for only allowing relative rotation with or
+ * without a motor</li>
+ * <li>{@link org.dyn4j.game2d.dynamics.joint.PrismaticJoint} for only allowing relative linear motion
+ * along an axis with or without a motor and limits</li>
+ * <li>{@link org.dyn4j.game2d.dynamics.joint.LineJoint} for only allowing relative linear motion along an
+ * axis with or without a motor and limits, along with allowing rotation about a pivot point</li>
+ * <li>{@link org.dyn4j.game2d.dynamics.joint.FrictionJoint} for applying friction, air resistance, joint
+ * friction, etc</li>
+ * <li>{@link org.dyn4j.game2d.dynamics.joint.WeldJoint} for connecting two bodies together completely</li>
+ * <li>{@link org.dyn4j.game2d.dynamics.joint.PulleyJoint} for creating a pulley with or without block-and-
+ * tackle</li>
+ * <li>{@link org.dyn4j.game2d.dynamics.joint.MouseJoint} specifically to connect a distance joint with
+ * spring/damper to one body</li>
+ * </ul>
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.2.2
  * @since 1.0.0
  */
 package org.dyn4j.game2d.dynamics.joint;

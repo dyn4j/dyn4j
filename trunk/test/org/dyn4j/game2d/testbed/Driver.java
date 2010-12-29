@@ -44,7 +44,7 @@ import org.dyn4j.game2d.Version;
  * Entry point class where setup of the game core is done when
  * running in application mode.
  * @author William Bittle
- * @version 2.2.1
+ * @version 2.2.2
  * @since 1.0.0
  */
 public class Driver {
@@ -81,7 +81,7 @@ public class Driver {
 			// create the rendering surface
 			G2dSurface surface = new G2dSurface();
 			// create the container for the surface
-			Application<G2dSurface> app = new Application<G2dSurface>(surface, "org.dyn4j.game2d - v" + Version.getVersion() + " - TestBed", mode, null, false);
+			Application<G2dSurface> app = new Application<G2dSurface>(surface, "dyn4j v" + Version.getVersion() + " TestBed", mode, null, false);
 			// set the container in the core
 			G2dCore<Application<G2dSurface>> core = new TestBed<Application<G2dSurface>>(app);
 			app.setLocationByPlatform(true);

@@ -49,9 +49,9 @@ import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Test;
 
 /**
- * Tests the decomposition of a simple polygon.
+ * Tests the generation of a convex hull given a point set.
  * @author William Bittle
- * @version 2.2.0
+ * @version 2.2.2
  * @since 2.2.0
  */
 public class Hull extends Test {
@@ -359,11 +359,12 @@ public class Hull extends Test {
 	@Override
 	public String[][] getControls() {
 		return new String[][] {
-				{"Left Mouse Button", "Add a point to the point list."},
-				{"Right Mouse Button", "Clear the current point list."},
-				{"h", "Creates a convex hull from the current point cloud."},
-				{"1", "Cycles through the available algorithms."},
-				{"Enter", "Prints the points and hull to the console."}};
+				{"Add Point", "<html>Adds a point to the point list.</html>", "<html><span style='color: blue;'>Left Mouse Button</span></html>"},
+				{"Clear Points", "Clears the current list of points.", "<html><span style='color: blue;'>Right Mouse Button</span></html>"},
+				{"Create Hull", "Creates a convex hull from the current point cloud.", "<html><span style='color: blue;'>h</span></html>"},
+				{"Change Algorithm", "Cycles through the available algorithms.", "<html><span style='color: blue;'>1</span></html>"},
+				{"Print Points", "Prints the current list of points to std out.", "<html><span style='color: blue;'>Enter</span></html>"}
+		};
 	}
 	
 	/* (non-Javadoc)
