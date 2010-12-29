@@ -28,22 +28,23 @@
  * <p>
  * Contacts are solved using an iterative constraint based approach.
  * <p>
- * The {@link org.dyn4j.game2d.dynamics.World} object will determine all collisions between the 
- * {@link org.dyn4j.game2d.dynamics.Body}s and will turn each 
- * {@link org.dyn4j.game2d.collision.manifold.Manifold} into a 
- * {@link org.dyn4j.game2d.dynamics.contact.ContactConstraint}.  Once all the 
- * {@link org.dyn4j.game2d.dynamics.contact.ContactConstraint}s have been gathered the 
- * {@link org.dyn4j.game2d.dynamics.World} object will perform a depth first search on the 
- * {@link org.dyn4j.game2d.dynamics.contact.ContactConstraint} graph to yield 
- * {@link org.dyn4j.game2d.dynamics.Island}s.  The {@link org.dyn4j.game2d.dynamics.Island}s will 
- * use the {@link org.dyn4j.game2d.dynamics.contact.ContactManager} to warm start the 
- * {@link org.dyn4j.game2d.dynamics.contact.ContactConstraint}s and then use the 
- * {@link org.dyn4j.game2d.dynamics.contact.ContactConstraintSolver} to solve them.
+ * The {@link World} object will determine all collisions between the {@link Body}s and 
+ * will turn each {@link Manifold} into a {@link ContactConstraint}.  Once all the 
+ * {@link ContactConstraint}s have been gathered the {@link World} object will perform a 
+ * depth first search on the {@link ContactConstraint} graph to yield {@link Island}s. 
+ * The {@link Island}s will use the {@link ContactManager} to warm start the 
+ * {@link ContactConstraint}s and then use the {@link ContactConstraintSolver} to solve them.
  * <p>
- * The {@link org.dyn4j.game2d.dynamics.contact.ContactListener} can be used to receive 
- * notifications of add (begin), remove (end), persisted, sensed, and pre/post solve events.
+ * The {@link ContactListener} can be used to receive notifications of add, remove, persisted,
+ * and solved events.
  * @author William Bittle
- * @version 2.2.2
+ * @version 1.0.3
  * @since 1.0.0
  */
 package org.dyn4j.game2d.dynamics.contact;
+
+import org.dyn4j.game2d.collision.manifold.Manifold;
+import org.dyn4j.game2d.dynamics.Body;
+import org.dyn4j.game2d.dynamics.Island;
+import org.dyn4j.game2d.dynamics.World;
+

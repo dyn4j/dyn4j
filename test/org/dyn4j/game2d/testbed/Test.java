@@ -66,7 +66,7 @@ import org.dyn4j.game2d.geometry.Wound;
  * Using the {@link TestBed} class one can switch test without stopping
  * and starting the driver again.
  * @author William Bittle
- * @version 2.2.2
+ * @version 2.2.0
  * @since 1.0.0
  */
 public abstract class Test implements Comparable<Test> {
@@ -172,14 +172,6 @@ public abstract class Test implements Comparable<Test> {
 	 */
 	public String[][] getControls() { return new String[][] {}; }
 
-	/**
-	 * Returns true if this test has specific controls.
-	 * @return boolean
-	 */
-	public boolean hasSpecificControls() {
-		return this.getControls().length > 0;
-	}
-	
 	/**
 	 * Performs any input polling required.
 	 * @param keyboard the keyboard input

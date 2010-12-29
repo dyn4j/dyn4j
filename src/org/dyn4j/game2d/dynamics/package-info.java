@@ -27,51 +27,47 @@
  * Package containing the dynamics engine.
  * <p>
  * The dynamics engine is an impulse based rigid body physics simulator.  The simulation
- * by default uses SI (m/kg/s) units.  This can be changed, but all settings within the
- * {@link org.dyn4j.game2d.dynamics.Settings} singleton must be set to the new units.  Instead
- * its recommended to use the {@link org.dyn4j.game2d.UnitConversion} class to convert all
- * values to MKS.
+ * uses SI (m/kg/s) units.
  * <p>
  * A constraint based approach is used to solving contacts and joints.
  * <p>
- * Create a {@link org.dyn4j.game2d.dynamics.World} object to gain access the dynamics engine.  Create 
- * {@link org.dyn4j.game2d.dynamics.Body}s and add them to the {@link org.dyn4j.game2d.dynamics.World}.  
- * Add the {@link org.dyn4j.game2d.dynamics.World#update(double)} method to your game loop (notice the 
- * {@link org.dyn4j.game2d.dynamics.World#update(double)} method requires the elapsed time to 
+ * Create a {@link World} object to gain access the dynamics engine.  Create {@link Body}s
+ * and add them to the {@link World} and add the {@link World#update(double)} method to your
+ * game loop (notice the {@link World#update(double)} method requires the elapsed time to 
  * be in seconds).
  * <p>
- * Upon creating a {@link org.dyn4j.game2d.dynamics.World} a {@link org.dyn4j.game2d.collision.Bounds} 
- * object must be supplied.  The {@link org.dyn4j.game2d.collision.Bounds} will determine when 
- * {@link org.dyn4j.game2d.dynamics.Body}s go out of bounds and freeze them.  Using the 
- * {@link org.dyn4j.game2d.dynamics.World#World()} constructor will create a world that uses no bounds.  
- * More specifically it uses the {@link org.dyn4j.game2d.collision.Bounds#UNBOUNDED} class.
+ * Upon creating a {@link World} a {@link Bounds} object must be supplied.  The {@link Bounds}
+ * will determine when {@link Body}s go out of bounds and freeze them.
  * <p>
- * A {@link org.dyn4j.game2d.dynamics.World} object also contains a number listeners that can be used to 
- * respond to events that happen within the world, contact for instance.
- * <ul>
- * <li>{@link org.dyn4j.game2d.collision.BoundsListener} for responding to out of bounds bodies</li>
- * <li>{@link org.dyn4j.game2d.dynamics.DestructionListener} for responding to bodies and joints that are 
- * implicitly destroyed by some other action</li>
- * <li>{@link org.dyn4j.game2d.dynamics.StepListener} for performing logic at the end/beginning of a time 
- * step</li>
- * <li>{@link org.dyn4j.game2d.dynamics.CollisionListener} for responding to collision detection events</li>
- * <li>{@link org.dyn4j.game2d.dynamics.contact.ContactListener} for responding to contact events</li>
- * <li>{@link org.dyn4j.game2d.dynamics.RaycastListener} for responding to raycast events</li>
- * <li>{@link org.dyn4j.game2d.dynamics.TimeOfImpactListener} for responding to time of impact events</li>
- * </ul>
- * Please read the respective documentation on each listener.  Certain operations on the 
- * {@link org.dyn4j.game2d.dynamics.World} object are not allowed.
+ * A {@link World} object also contains a few listeners:<br />
+ * {@link BoundsListener}: notified when a {@link Body} is out of bounds.<br />
+ * {@link DestructionListener}: notified of events when a {@link Body} is removed from the {@link World}.<br />
+ * {@link ContactListener}: notified of events involving {@link ContactConstraint}s.<br />
  * <p>
- * The gravity of the {@link org.dyn4j.game2d.dynamics.World} object can be changed, and can be in any 
- * direction.
+ * The gravity of the {@link World} object can be changed, and can be in any direction.
  * <p>
- * The dynamics engine requires some configuration, the defaults should cover most applications, that can 
- * be changed using the {@link org.dyn4j.game2d.dynamics.Settings} singleton.  Any setting can be changed 
- * at runtime so that no source code modification is needed.  Refer to the source of 
- * {@link org.dyn4j.game2d.dynamics.Settings} and the TestBed for details on what each individual 
- * setting controls.
+ * Since the engine uses SI units the visual representation will need to be scaled.
+ * <p>
+ * The dynamics engine requires some configuration, the defaults should cover most applications,
+ * that can be changed using the {@link Settings} singleton.  Any setting can be changed at runtime
+ * so that no source code modification is needed.  Refer to the source of {@link Settings} and the TestBed
+ * for details on what each individual setting controls.
+ * <p>
+ * When {@link Body}s are created at least one {@link Convex} {@link Shape} and {@link Mass} must be
+ * supplied.  Most applications will use this one to one relationship.  However, if the {@link Body}
+ * requires more {@link Convex} {@link Shape}s to be added you can use the 
+ * <code>Body.addShape(Convex, Mass)</code> method.
  * @author William Bittle
- * @version 2.2.2
+ * @version 1.0.3
  * @since 1.0.0
  */
 package org.dyn4j.game2d.dynamics;
+
+import org.dyn4j.game2d.collision.Bounds;
+import org.dyn4j.game2d.collision.BoundsListener;
+import org.dyn4j.game2d.dynamics.contact.ContactConstraint;
+import org.dyn4j.game2d.dynamics.contact.ContactListener;
+import org.dyn4j.game2d.geometry.Convex;
+import org.dyn4j.game2d.geometry.Shape;
+import org.dyn4j.game2d.geometry.Mass;
+

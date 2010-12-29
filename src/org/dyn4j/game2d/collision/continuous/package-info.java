@@ -26,17 +26,16 @@
 /**
  * Sub package of the Collision package handling continuous collision detection.
  * <p>
- * {@link org.dyn4j.game2d.collision.continuous.ConservativeAdvancement} is currently the only 
- * implementation of CCD.
+ * {@link ConservativeAdvancement} is currently the only implementation of CCD.
  * <p>
- * A {@link org.dyn4j.game2d.collision.continuous.TimeOfImpactDetector} should accept a pair of 
- * {@link org.dyn4j.game2d.collision.continuous.Swept} {@link org.dyn4j.game2d.collision.Collidable}s 
- * and return a {@link org.dyn4j.game2d.collision.continuous.TimeOfImpact} between them if a collision 
- * was missed within the time step.
- * <p>
- * CCD is a very computationally intensive process and should be used with caution.
+ * A {@link TimeOfImpactDetector} should accept a pair of {@link Swept} {@link Collidable}s
+ * and return a {@link TimeOfImpact} between them if a collision was missed within the time
+ * step.
  * @author William Bittle
- * @version 2.2.2
+ * @version 2.0.0
  * @since 2.0.0
  */
 package org.dyn4j.game2d.collision.continuous;
+
+import org.dyn4j.game2d.collision.Collidable;
+

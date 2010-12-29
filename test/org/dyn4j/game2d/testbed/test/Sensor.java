@@ -40,7 +40,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests body sensor flagging.
  * @author William Bittle
- * @version 2.2.2
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Sensor extends Test {
@@ -60,8 +60,7 @@ public class Sensor extends Test {
 		return "Tests body sensor flagging.  This test is used to show that broad-phase and "
 		+ "narrow-phase collision detection picked up the collision but allowed it to "
 		+ "continue through the object as if it didn't.  Contacts points are still retrieved "
-		+ "to show that the collision was found.\n\nTurn on drawing of contact points to see"
-		+ "that contacts are still detected.";
+		+ "to show that the collision was found.";
 	}
 	
 	/* (non-Javadoc)

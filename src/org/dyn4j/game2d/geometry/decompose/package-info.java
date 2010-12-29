@@ -24,34 +24,31 @@
  */
 
 /**
- * This package contains algorithms to decompose polygons into 
- * {@link org.dyn4j.game2d.geometry.Convex} pieces.
+ * This package contains algorithms to decompose polygons into {@link Convex} pieces.
  * <p>
- * Three implementations of the {@link org.dyn4j.game2d.geometry.decompose.Decomposer} 
- * interface are provided: {@link org.dyn4j.game2d.geometry.decompose.Bayazit}, 
- * {@link org.dyn4j.game2d.geometry.decompose.EarClipping}, and 
- * {@link org.dyn4j.game2d.geometry.decompose.SweepLine}.
+ * Three implementations of the {@link Decomposer} interface are provided: {@link Bayazit},
+ * {@link EarClipping}, and {@link SweepLine}.
  * <p>
- * The {@link org.dyn4j.game2d.geometry.decompose.Bayazit} algorithm is O(nr) and finds a non-optimal 
- * convex decomposition.
+ * The {@link Bayazit} algorithm is O(nr) and finds a non-optimal convex decomposition.
  * <p>
- * The {@link org.dyn4j.game2d.geometry.decompose.EarClipping} algorithm is O(n<sup>2</sup>) and finds 
- * a valid triangulation, then uses the Hertel-Mehlhorn algorithm to combine triangles into convex pieces.  
- * This is also an non-optimal decomposition.
+ * The {@link EarClipping} algorithm is O(n<sup>2</sup>) and finds a valid triangulation, then uses
+ * the Hertel-Mehlhorn algorithm to combine triangles into convex pieces.  This is also an non-optimal
+ * decomposition.
  * <p>
- * The {@link org.dyn4j.game2d.geometry.decompose.SweepLine} algorithm is O(n log n) and, like 
- * {@link org.dyn4j.game2d.geometry.decompose.EarClipping}, finds a valid triangulation,
+ * The {@link SweepLine} algorithm is O(n log n) and, like {@link EarClipping}, finds a valid triangulation,
  * then uses the Hertel-Mehlhorn algorithm to combine triangles into convex pieces.  This is also a
  * non-optimal decomposition.
  * <p>
  * In general the algorithms will generate different decompositions.  If used for pre-processing just
- * choose the best result, for runtime generation, the {@link org.dyn4j.game2d.geometry.decompose.Bayazit} 
- * may be slower but will generally produce a better decomposition.
+ * choose the best result, for runtime generation, the {@link Bayazit} may be slower but will generally
+ * produce a better decomposition.
  * <p>
  * A "better" decomposition is one that contains fewer convex pieces and the convex pieces that are created
  * are of better quality for simulation.
  * @author William Bittle 
- * @version 2.2.2
+ * @version 2.2.0
  * @since 2.2.0
  */
 package org.dyn4j.game2d.geometry.decompose;
+
+import org.dyn4j.game2d.geometry.Convex;

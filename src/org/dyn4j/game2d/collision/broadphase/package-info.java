@@ -24,20 +24,21 @@
  */
 
 /**
- * Sub package of the Collision package handling broad-phase collision detection.
+ * Sub package of the Collision package handling broadphase collision detection.
  * <p>
- * Currently only one broad-phase collision detection algorithm is implemented: 
- * {@link org.dyn4j.game2d.collision.broadphase.Sap}.
+ * Currently only one broad-phase collision detection algorithm is implemented; {@link Sap}.
  * <p>
- * A {@link org.dyn4j.game2d.collision.broadphase.BroadphaseDetector} should accept a list of 
- * {@link org.dyn4j.game2d.collision.Collidable}s and return those pairs who may be penetrating in a
- * list of {@link org.dyn4j.game2d.collision.broadphase.BroadphasePair}s.
+ * A {@link BroadphaseDetector} should accept a list of {@link Collidable}s and return those
+ * pairs who may be penetrating.
  * <p>
- * {@link org.dyn4j.game2d.collision.broadphase.BroadphaseDetector}s are not expected to be accurate, 
- * but are expected to be conservative.  Meaning, its acceptable for a 
- * {@link org.dyn4j.game2d.collision.broadphase.BroadphaseDetector} to return false positives.
+ * {@link BroadphaseDetector}s are not expected to be accurate, but are expected to be
+ * conservative.  Meaning, its acceptable for a {@link BroadphaseDetector} to return false
+ * positives.
  * @author William Bittle
- * @version 2.2.2
+ * @version 1.0.3
  * @since 1.0.0
  */
 package org.dyn4j.game2d.collision.broadphase;
+
+import org.dyn4j.game2d.collision.Collidable;
+

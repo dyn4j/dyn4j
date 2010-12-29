@@ -27,7 +27,6 @@ package org.dyn4j.game2d.testbed;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -70,8 +69,6 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.ListCellRenderer;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.Spring;
-import javax.swing.SpringLayout;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.Border;
@@ -94,7 +91,7 @@ import org.dyn4j.game2d.dynamics.Settings;
 /**
  * The JFrame that controls the TestBed.
  * @author William Bittle
- * @version 2.2.2
+ * @version 2.2.1
  * @since 1.0.0
  */
 public class ControlPanel extends JFrame {
@@ -107,39 +104,32 @@ public class ControlPanel extends JFrame {
 	/** Resource bundle containing the tests to load */
 	private static ResourceBundle TESTS_BUNDLE = ResourceBundle.getBundle("org.dyn4j.game2d.testbed.tests");
 	
-	/** The simulation controls for all tests */
-	private static final String[][] SIMULATION_CONTROLS = new String[][] {
-		// title, tooltip, value
-		{"Exit Simulation", "Exits and closes the Test Bed and control panel.", "<html><span style='color: blue;'>Esc</span> or <span style='color: blue;'>e</span></html>"},
-		{"Pause Simualtion", "Pauses the current simulation.", "<html><span style='color: blue;'>Pause/Break</span> or <span style='color: blue;'>p</span></html>"},
-		{"Reset Simulation", "Resets the current simulation.", "<html><span style='color: blue;'>r</span></html>"},
-		{"Opens Control Panel", "Opens the control panel (what you are using now).", "<html><span style='color: blue;'>c</span></html>"},
-		{"Switch Simulation Mode", "<html>Toggles between Continuous, Manual, and Timed<br/>simulation modes.</html>", "<html><span style='color: blue;'>Space</span></html>"},
-		{"Perform Simulation Step", "<html>Performs one simulation step (only when in Manual mode).</html>", "<html><span style='color: blue;'>m</span></html>"},
-		{"Change Step Interval", "<html>Decreases/Increases the time interval between<br />simulation steps (only when in Timed mode).</html>", "<html><span style='color: blue;'>t</span> / <span style='color: blue;'>T</span></html>"},
-		{"Change Update Rate", "<html>Decreases/Increases the metrics update rate.</html>", "<html><span style='color: blue;'>u</span> / <span style='color: blue;'>U</span></html>"},
-		{"Log Bodies", "Outputs all bodies to std out.", "<html><span style='color: blue;'>o</span></html>"}
-	};
-	
-	/** The camera controls for all tests */
-	private static final String[][] CAMERA_CONTROLS = new String[][] {
-		{"Pan Left", "Moves the camera left.", "<html><span style='color: blue;'>&larr;</span></html>"},
-		{"Pan Right", "Moves the camera right.", "<html><span style='color: blue;'>&rarr;</span></html>"},
-		{"Pan Up", "Moves the camera up.", "<html><span style='color: blue;'>&uarr;</span></html>"},
-		{"Pan Down", "Moves the camera down.", "<html><span style='color: blue;'>&darr;</span></html>"},
-		{"Zoom in", "Zooms in by a factor of 2.", "<html><span style='color: blue;'>+</span> or <span style='color: blue;'>Mouse Wheel Up</span></html>"},
-		{"Zoom out", "Zooms out by a factor of 2.", "<html><span style='color: blue;'>-</span> or <span style='color: blue;'>Mouse Wheel Down</span></html>"},
-		{"Center", "Resets the camera to the initial position.", "<html><span style='color: blue;'>Home</span> or <span style='color: blue;'>h</span></html>"}
-	};
-	
-	/** The body controls for all tests */
-	private static final String[][] BODY_CONTROLS = new String[][] {
-		{"<html>Select Body<sup>1</sup></html>", "<html>Creates a MouseJoint between the mouse and the selected<br />body and uses the joint to translate/rotate the body.</html>", "<html><span style='color: blue;'>Left Mouse Button</span></html>"},
-		{"<html>Select Body<sup>2</sup></html>", "<html>Sets the selected body's mass to infinite and is<br />moved around by direct translation/rotation.</html>", "<html><span style='color: blue;'>Right Mouse Button</span></html>"},
-		{"Move Body", "<html>Depending on the selection method, the body<br />is moved to follow the mouse.</html>", "<html><span style='color: blue;'>Move Mouse</span></html>"},
-		{"Rotate Body", "<html>Hold to rotate the body about its center of mass.<br />This is only applicable using selection method 2.</html>", "<html><span style='color: blue;'>z</span></html>"},
-		{"Launch Bomb", "Launches a body from the left.", "<html><span style='color: blue;'>b</span></html>"}
-	};
+	/** The controls for all tests */
+	private static final String[][] CONTROLS = new String[][] {
+		{"Esc or e", "Exits simulation"},
+		{"Pause/Break or p", "Pauses simulation"},
+		{"+ or Mouse Wheel Up", "Zooms in"},
+		{"- or Mouse Wheel Down", "Zooms out"},
+		{"Left", "Pans left"},
+		{"Right", "Pans right"},
+		{"Up", "Pans up"},
+		{"Down", "Pans down"},
+		{"Home or h", "Centers the camera"},
+		{"c", "Opens the Test Bed Control Panel"},
+		{"r", "Resets the current test"},
+		{"Space", "Toggles stepping modes [Continuous|Manual|Timed]"},
+		{"m", "Performs 1 step when in Manual mode"},
+		{"t", "Decreases the time in between steps in Timed mode"},
+		{"T", "Increases the time in between steps in Timed mode"},
+		{"Left Mouse Button", "Click and hold to create a MouseJoint with a shape"},
+		{"Right Mouse Button", "Click and hold to select a shape"},
+		{"Move Mouse", "Move to translate the selected shape"},
+		{"z", "Hold to rotate the selected shape"},
+		{"o", "Outputs all the bodies current state to std out"},
+		{"b", "Launches a bomb from the left side"},
+		{"U", "Increases the metrics update rate"},
+		{"u", "Decreases the metrics update rate"}
+		};
 	
 	/** A static listing of all colors */
 	private static final Color[] COLORS = new Color[] {
@@ -172,9 +162,6 @@ public class ControlPanel extends JFrame {
 	
 	/** The combo box for selecting a test */
 	private JComboBox cmbTests = null;
-	
-	/** The label for showing if a test has specific controls */
-	private JLabel panTestSpecificControls = null;
 	
 	/** The description field for the selected test */
 	private JTextPane panTestDescription = null;
@@ -211,7 +198,7 @@ public class ControlPanel extends JFrame {
 	 * @throws ConfigurationException if the tests.properties is missing or not configured
 	 */
 	public ControlPanel() throws ConfigurationException {
-		super("dyn4j v" + Version.getVersion() + " TestBed Control Panel");
+		super("Test Bed Control Panel");
 		
 		try {
 			// attempt to load the image icon
@@ -399,84 +386,53 @@ public class ControlPanel extends JFrame {
 		panel.setBorder(border);
 
 		// create some insets for all the panels
-		Insets insets = new Insets(0, 6, 0, 4);
+		Insets insets = new Insets(2, 2, 2, 2);
 		
 		//////////////////////////////////////////////////
 		// controls group
 		//////////////////////////////////////////////////
 		
-		Dimension labelSize = new Dimension(150, 15);
+		// create the panel
+		JPanel pnlControls = new JPanel();
+		pnlControls.setBorder(new TitledBorder("Controls"));
+		pnlControls.setLayout(new GridBagLayout());
 		
-		// create the simulation group
-		JPanel pnlSimulation = new JPanel();
-		pnlSimulation.setBorder(new CompoundBorder(new TitledBorder(" Simulation "), new EmptyBorder(insets)));
-		pnlSimulation.setLayout(new SpringLayout());
-		
-		for (String[] control : SIMULATION_CONTROLS) {
-			JLabel label = new JLabel(control[0], this.helpIcon, JLabel.LEFT);
-			label.setToolTipText(control[1]);
-			label.setPreferredSize(labelSize);
-			label.setMaximumSize(labelSize);
-			JLabel value = new JLabel(control[2]);
-			pnlSimulation.add(label);
-			pnlSimulation.add(value);
+		int size = CONTROLS.length;
+		int row = 0;
+		// create all the labels for the standard controls
+		for (String[] control : CONTROLS) {
+			// create the labels
+			JLabel lblKey = new JLabel(control[0]); // key
+			JLabel lblDes = new JLabel(control[1]); // description
+			
+			// add them to the panel
+			pnlControls.add(lblKey, new GridBagConstraints(
+					0, row, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+					GridBagConstraints.NONE, insets, 0, 0));
+			pnlControls.add(lblDes, new GridBagConstraints(
+					1, row, 1, 1, 1, (row + 1 == size ? 1 : 0), GridBagConstraints.FIRST_LINE_START, 
+					GridBagConstraints.NONE, insets, 0, 0));
+			row++;
 		}
 		
-		makeCompactGrid(pnlSimulation, 9, 2, 0, 0, 4, 4);
-		
-		panel.add(pnlSimulation);
-		
-		// create the camera group
-		JPanel pnlCamera = new JPanel();
-		pnlCamera.setBorder(new CompoundBorder(new TitledBorder(" Camera "), new EmptyBorder(insets)));
-		pnlCamera.setLayout(new SpringLayout());
-		
-		for (String[] control : CAMERA_CONTROLS) {
-			JLabel label = new JLabel(control[0], this.helpIcon, JLabel.LEFT);
-			label.setToolTipText(control[1]);
-			label.setPreferredSize(labelSize);
-			label.setMaximumSize(labelSize);
-			JLabel value = new JLabel(control[2]);
-			pnlCamera.add(label);
-			pnlCamera.add(value);
-		}
-		
-		makeCompactGrid(pnlCamera, 7, 2, 0, 0, 4, 4);
-		
-		panel.add(pnlCamera);
-		
-		// create the camera group
-		JPanel pnlBodies = new JPanel();
-		pnlBodies.setBorder(new CompoundBorder(new TitledBorder(" Body "), new EmptyBorder(insets)));
-		pnlBodies.setLayout(new SpringLayout());
-		
-		for (String[] control : BODY_CONTROLS) {
-			JLabel label = new JLabel(control[0], this.helpIcon, JLabel.LEFT);
-			label.setToolTipText(control[1]);
-			label.setPreferredSize(labelSize);
-			label.setMaximumSize(labelSize);
-			JLabel value = new JLabel(control[2]);
-			pnlBodies.add(label);
-			pnlBodies.add(value);
-		}
-		
-		makeCompactGrid(pnlBodies, 5, 2, 0, 0, 4, 4);
-		
-		panel.add(pnlBodies);
+		panel.add(pnlControls);
 		
 		//////////////////////////////////////////////////
 		// test controls group
 		//////////////////////////////////////////////////
 		// create the panel
 		this.pnlTestControls = new JPanel();
-		this.pnlTestControls.setBorder(new CompoundBorder(new TitledBorder(" Test Specific Controls "), new EmptyBorder(insets)));
+		this.pnlTestControls.setBorder(new TitledBorder("Test Specific Controls"));
+		this.pnlTestControls.setLayout(new GridBagLayout());
 		
-		// add the controls to it
-		this.addTestControls(this.pnlTestControls, this.test.getControls());
-		
+		// check for controls
+		if (this.test.getControls().length > 0) {
+			// add the controls to it
+			this.addTestControls(this.pnlTestControls, this.test.getControls());
+		}
 		// add it to the panel
 		panel.add(this.pnlTestControls);
-		
+
 		// return the panel
 		return panel;
 	}
@@ -510,7 +466,7 @@ public class ControlPanel extends JFrame {
 		JLabel lblTest = new JLabel("Tests", this.helpIcon, JLabel.LEFT);
 		lblTest.setToolTipText("<html>After selecting a test and clicking Run,<br />check the controls tab for any test specific controls.</html>");
 		pnlTest.add(lblTest, new GridBagConstraints(
-				0, 0, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
+				0, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// create a combo box for the test selection
@@ -531,27 +487,21 @@ public class ControlPanel extends JFrame {
 				setTest((Test) cmbTests.getSelectedItem());
 				// remove all the controls
 				pnlTestControls.removeAll();
-				// add all the new ones
-				addTestControls(pnlTestControls, test.getControls());
+				// update the test specific controls panel
+				if (test.getControls().length > 0) {
+					// add all the new ones
+					addTestControls(pnlTestControls, test.getControls());
+				}
 			}
 		});
 		// add the button to the panel
 		pnlTest.add(btnT, new GridBagConstraints(
-				2, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		this.panTestSpecificControls = new JLabel();
-		if (this.test.hasSpecificControls()) {
-			this.panTestSpecificControls.setText("* Has specific controls");
-		} else {
-			this.panTestSpecificControls.setText("");
-		}
-		pnlTest.add(panTestSpecificControls, new GridBagConstraints(
-				3, 0, 1, 1, 1, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
+				2, 0, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
 		JLabel lblDesc = new JLabel("Test description:");
 		pnlTest.add(lblDesc, new GridBagConstraints(
-				0, 1, 4, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
+				0, 1, 3, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		// create a description field
 		panTestDescription = new JTextPane();
@@ -565,18 +515,11 @@ public class ControlPanel extends JFrame {
 				Test test = ((Test) ((JComboBox) e.getSource()).getSelectedItem());
 				// set the description
 				panTestDescription.setText(test.getDescription());
-				
-				// set the text for specific controls
-				if (test.hasSpecificControls()) {
-					panTestSpecificControls.setText("* Has specific controls");
-				} else {
-					panTestSpecificControls.setText("");
-				}
 			}
 		});
 		// add the label to the panel
 		pnlTest.add(panTestDescription, new GridBagConstraints(
-				0, 2, 4, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, 
+				0, 2, 3, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.BOTH, insets, 0, 0));
 		
 		panel.add(pnlTest);
@@ -616,10 +559,9 @@ public class ControlPanel extends JFrame {
 		pnlDraw.setLayout(new GridBagLayout());
 
 		// fill shapes?
-		JLabel lblFill = new JLabel("Shape Fill", this.helpIcon, JLabel.LEFT);
-		lblFill.setToolTipText("Toggles filling of shapes.");
+		JLabel lblFill = new JLabel("Shape Fill");
 		pnlDraw.add(lblFill, new GridBagConstraints(
-				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkFill = new JCheckBox();
 		chkFill.setSelected(draw.drawFill());
@@ -637,10 +579,9 @@ public class ControlPanel extends JFrame {
 		y++;
 		
 		// draw outlines?
-		JLabel lblOutline = new JLabel("Shape Outlines", this.helpIcon, JLabel.LEFT);
-		lblOutline.setToolTipText("Toggles drawing of shape outlines.");
+		JLabel lblOutline = new JLabel("Shape Outlines");
 		pnlDraw.add(lblOutline, new GridBagConstraints(
-				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkOutline = new JCheckBox();
 		chkOutline.setSelected(draw.drawOutline());
@@ -658,10 +599,9 @@ public class ControlPanel extends JFrame {
 		y++;
 		
 		// draw centers of mass
-		JLabel lblCenter = new JLabel("Center of Mass", this.helpIcon, JLabel.LEFT);
-		lblCenter.setToolTipText("Toggles drawing of the center of mass as a circle.");
+		JLabel lblCenter = new JLabel("Center of Mass");
 		pnlDraw.add(lblCenter, new GridBagConstraints(
-				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		// add the check box
 		JCheckBox chkCenter = new JCheckBox();
@@ -700,10 +640,9 @@ public class ControlPanel extends JFrame {
 		y++;
 		
 		// draw normals?
-		JLabel lblNormals = new JLabel("Edge Normals", this.helpIcon, JLabel.LEFT);
-		lblNormals.setToolTipText("Toggles drawing of polygon edge normals.");
+		JLabel lblNormals = new JLabel("Edge Normals");
 		pnlDraw.add(lblNormals, new GridBagConstraints(
-				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkNormals = new JCheckBox();
 		chkNormals.setSelected(draw.drawNormals());
@@ -741,10 +680,9 @@ public class ControlPanel extends JFrame {
 		y++;
 		
 		// draw rotation disc?
-		JLabel lblRotDisc = new JLabel("Rotation Disc", this.helpIcon, JLabel.LEFT);
-		lblRotDisc.setToolTipText("<html>Toggles drawing of the circle that contains the entire shape<br />rotated 360 degress.</html>");
+		JLabel lblRotDisc = new JLabel("Rotation Disc");
 		pnlDraw.add(lblRotDisc, new GridBagConstraints(
-				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkRotDisc = new JCheckBox();
 		chkRotDisc.setSelected(draw.drawRotationDisc());
@@ -782,10 +720,9 @@ public class ControlPanel extends JFrame {
 		y++;
 		
 		// draw velocity vectors
-		JLabel lblVelocity = new JLabel("Velocity Vector", this.helpIcon, JLabel.LEFT);
-		lblVelocity.setToolTipText("Toggles drawing of the velocity vector.");
+		JLabel lblVelocity = new JLabel("Velocity Vector");
 		pnlDraw.add(lblVelocity, new GridBagConstraints(
-				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkVelocity = new JCheckBox();
 		chkVelocity.setSelected(draw.drawVelocityVectors());
@@ -823,10 +760,9 @@ public class ControlPanel extends JFrame {
 		y++;
 		
 		// draw contact pairs
-		JLabel lblContactPairs = new JLabel("Contact Pairs", this.helpIcon, JLabel.LEFT);
-		lblContactPairs.setToolTipText("Toggles drawing of lines connecting pairs of bodies in contact.");
+		JLabel lblContactPairs = new JLabel("Contact Pairs");
 		pnlDraw.add(lblContactPairs, new GridBagConstraints(
-				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkContactPairs = new JCheckBox();
 		chkContactPairs.setSelected(draw.drawContactPairs());
@@ -864,10 +800,9 @@ public class ControlPanel extends JFrame {
 		y++;
 		
 		// draw contact points
-		JLabel lblContacts = new JLabel("Contact Points", this.helpIcon, JLabel.LEFT);
-		lblContacts.setToolTipText("Toggles drawing of the contact points.");
+		JLabel lblContacts = new JLabel("Contact Points");
 		pnlDraw.add(lblContacts, new GridBagConstraints(
-				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkContacts = new JCheckBox();
 		chkContacts.setSelected(draw.drawContacts());
@@ -905,10 +840,9 @@ public class ControlPanel extends JFrame {
 		y++;
 		
 		// draw contact forces
-		JLabel lblContactForces = new JLabel("Contact Impulses", this.helpIcon, JLabel.LEFT);
-		lblContactForces.setToolTipText("Toggles drawing of contact point impulses.");
+		JLabel lblContactForces = new JLabel("Contact Impulses");
 		pnlDraw.add(lblContactForces, new GridBagConstraints(
-				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkContactForces = new JCheckBox();
 		chkContactForces.setSelected(draw.drawContactForces());
@@ -946,10 +880,9 @@ public class ControlPanel extends JFrame {
 		y++;
 		
 		// draw friction forces
-		JLabel lblFrictionForces = new JLabel("Friction Impulses", this.helpIcon, JLabel.LEFT);
-		lblFrictionForces.setToolTipText("Toggles drawing of friction impulses.");
+		JLabel lblFrictionForces = new JLabel("Friction Impulses");
 		pnlDraw.add(lblFrictionForces, new GridBagConstraints(
-				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkFrictionForces = new JCheckBox();
 		chkFrictionForces.setSelected(draw.drawFrictionForces());
@@ -987,10 +920,9 @@ public class ControlPanel extends JFrame {
 		y++;
 		
 		// draw world bounds
-		JLabel lblBounds = new JLabel("World Bounds", this.helpIcon, JLabel.LEFT);
-		lblBounds.setToolTipText("Toggles drawing of the world bounds.");
+		JLabel lblBounds = new JLabel("World Bounds");
 		pnlDraw.add(lblBounds, new GridBagConstraints(
-				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkBounds = new JCheckBox();
 		chkBounds.setSelected(draw.drawBounds());
@@ -1028,10 +960,9 @@ public class ControlPanel extends JFrame {
 		y++;
 		
 		// draw joints
-		JLabel lblJoints = new JLabel("Joints", this.helpIcon, JLabel.LEFT);
-		lblJoints.setToolTipText("Toggles drawing of joints.");
+		JLabel lblJoints = new JLabel("Joints");
 		pnlDraw.add(lblJoints, new GridBagConstraints(
-				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkJoints = new JCheckBox();
 		chkJoints.setSelected(draw.drawJoints());
@@ -1049,10 +980,9 @@ public class ControlPanel extends JFrame {
 		y++;
 		
 		// draw text
-		JLabel lblText = new JLabel("Information Panel", this.helpIcon, JLabel.LEFT);
-		lblText.setToolTipText("<html>Toggles drawing of the information panel which shows FPS,<br />memory usage, etc.</html>");
+		JLabel lblText = new JLabel("Information Panel");
 		pnlDraw.add(lblText, new GridBagConstraints(
-				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkText = new JCheckBox();
 		chkText.setSelected(draw.drawPanel());
@@ -1070,10 +1000,9 @@ public class ControlPanel extends JFrame {
 		y++;
 		
 		// draw text
-		JLabel lblBlur = new JLabel("Information Panel Blur", this.helpIcon, JLabel.LEFT);
-		lblBlur.setToolTipText("<html>Toggles blurring of the information panel background.  This is done<br />in software it seems, therefore its really slow.</html>");
+		JLabel lblBlur = new JLabel("Information Panel Blur");
 		pnlDraw.add(lblBlur, new GridBagConstraints(
-				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkBlur = new JCheckBox();
 		chkBlur.setSelected(draw.isPanelBlurred());
@@ -1091,10 +1020,9 @@ public class ControlPanel extends JFrame {
 		y++;
 		
 		// anti-aliasing
-		JLabel lblAnti = new JLabel("Anti-Aliasing", this.helpIcon, JLabel.LEFT);
-		lblAnti.setToolTipText("<html>Toggles the use of anti-aliasing.  This is a general<br />setting and enables text anti-aliasing.</html>");
+		JLabel lblAnti = new JLabel("Anti-Aliasing");
 		pnlDraw.add(lblAnti, new GridBagConstraints(
-				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
+				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkAnti = new JCheckBox();
 		chkAnti.setSelected(draw.isAntiAliased());
@@ -1112,10 +1040,9 @@ public class ControlPanel extends JFrame {
 		y++;
 		
 		// text anti-aliasing
-		JLabel lblTextAnti = new JLabel("Text Anti-Aliasing", this.helpIcon, JLabel.LEFT);
-		lblTextAnti.setToolTipText("Toggles the use of text anti-aliasing only.");
+		JLabel lblTextAnti = new JLabel("Text Anti-Aliasing");
 		pnlDraw.add(lblTextAnti, new GridBagConstraints(
-				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
+				0, y, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkTextAnti = new JCheckBox();
 		chkTextAnti.setSelected(draw.isTextAntiAliased());
@@ -1128,14 +1055,7 @@ public class ControlPanel extends JFrame {
 			}
 		});
 		pnlDraw.add(chkTextAnti, new GridBagConstraints(
-				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		y++;
-		
-		// add a blank label to fill in the rest of the space
-		JLabel blank = new JLabel();
-		pnlDraw.add(blank, new GridBagConstraints(
-				0, y, 3, 1, 0, 1, GridBagConstraints.ABOVE_BASELINE_LEADING, 
+				1, y, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		y++;
 		
@@ -1891,7 +1811,7 @@ public class ControlPanel extends JFrame {
 		pnlAbout.add(icon);
 		
 		// add the label for the version
-		JLabel version = new JLabel("Version: " + Version.getVersion() + "TestBed");
+		JLabel version = new JLabel("Version: " + Version.getVersion());
 		version.setAlignmentX(CENTER_ALIGNMENT);
 		pnlAbout.add(version);
 		
@@ -1952,26 +1872,23 @@ public class ControlPanel extends JFrame {
 	 */
 	private void addTestControls(JPanel panel, String[][] controls) {
 		// create some insets for all the labels
-		Dimension size = new Dimension(150, 15);
-		
-		if (controls.length > 0) {
-			panel.setLayout(new SpringLayout());
+		Insets insets = new Insets(2, 2, 2, 2);
+
+		int size = controls.length;
+		int row = 0;
+		for (String[] control : controls) {
+			// create the labels
+			JLabel lblKey = new JLabel(control[0]); // key
+			JLabel lblDes = new JLabel(control[1]); // description
 			
-			for (String[] control : controls) {
-				JLabel label = new JLabel(control[0], this.helpIcon, JLabel.LEFT);
-				label.setToolTipText(control[1]);
-				label.setPreferredSize(size);
-				label.setMaximumSize(size);
-				JLabel value = new JLabel(control[2]);
-				panel.add(label);
-				panel.add(value);
-			}
-			
-			makeCompactGrid(panel, controls.length, 2, 0, 0, 4, 4);
-		} else {
-			panel.setLayout(new GridBagLayout());
-			panel.setMaximumSize(null);
-			panel.setPreferredSize(null);
+			// add them to the panel
+			panel.add(lblKey, new GridBagConstraints(
+					0, row, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+					GridBagConstraints.NONE, insets, 0, 0));
+			panel.add(lblDes, new GridBagConstraints(
+					1, row, 1, 1, 1, (row + 1 == size ? 1 : 0), GridBagConstraints.FIRST_LINE_START, 
+					GridBagConstraints.NONE, insets, 0, 0));
+			row++;
 		}
 	}
 	
@@ -2196,87 +2113,4 @@ public class ControlPanel extends JFrame {
         	}
         }
     }
-	
-    /**
-     * Method copied from the SpringLayout guide on Oracle's website from the
-     * SprintUtilities class.
-     * @param parent the component to layout
-     * @param rows number of rows
-     * @param cols number of columns
-     * @param initialX x location to start the grid at
-     * @param initialY y location to start the grid at
-     * @param xPad x padding between cells
-     * @param yPad y padding between cells
-     */
-    public static void makeCompactGrid(Container parent,
-                                       int rows, int cols,
-                                       int initialX, int initialY,
-                                       int xPad, int yPad) {
-        SpringLayout layout;
-        try {
-            layout = (SpringLayout)parent.getLayout();
-        } catch (ClassCastException exc) {
-            System.err.println("The first argument to makeCompactGrid must use SpringLayout.");
-            return;
-        }
-
-        //Align all cells in each column and make them the same width.
-        Spring x = Spring.constant(initialX);
-        for (int c = 0; c < cols; c++) {
-            Spring width = Spring.constant(0);
-            for (int r = 0; r < rows; r++) {
-                width = Spring.max(width,
-                                   getConstraintsForCell(r, c, parent, cols).
-                                       getWidth());
-            }
-            for (int r = 0; r < rows; r++) {
-                SpringLayout.Constraints constraints =
-                        getConstraintsForCell(r, c, parent, cols);
-                constraints.setX(x);
-                constraints.setWidth(width);
-            }
-            x = Spring.sum(x, Spring.sum(width, Spring.constant(xPad)));
-        }
-
-        //Align all cells in each row and make them the same height.
-        Spring y = Spring.constant(initialY);
-        for (int r = 0; r < rows; r++) {
-            Spring height = Spring.constant(0);
-            for (int c = 0; c < cols; c++) {
-                height = Spring.max(height,
-                                    getConstraintsForCell(r, c, parent, cols).
-                                        getHeight());
-            }
-            for (int c = 0; c < cols; c++) {
-                SpringLayout.Constraints constraints =
-                        getConstraintsForCell(r, c, parent, cols);
-                constraints.setY(y);
-                constraints.setHeight(height);
-            }
-            y = Spring.sum(y, Spring.sum(height, Spring.constant(yPad)));
-        }
-
-        //Set the parent's size.
-        SpringLayout.Constraints pCons = layout.getConstraints(parent);
-        pCons.setConstraint(SpringLayout.SOUTH, y);
-        pCons.setConstraint(SpringLayout.EAST, x);
-    }
-    
-    /**
-     * Method used by the {@link #makeCompactGrid(Container, int, int, int, int, int, int)}
-     * method.
-     * @param row the row
-     * @param col the column
-     * @param parent the parent
-     * @param cols the number of columns
-     * @return SpringLayout.Constraints
-     */
-    private static SpringLayout.Constraints getConstraintsForCell(
-            int row, int col,
-            Container parent,
-            int cols) {
-		SpringLayout layout = (SpringLayout) parent.getLayout();
-		Component c = parent.getComponent(row * cols + col);
-		return layout.getConstraints(c);
-	}
 }

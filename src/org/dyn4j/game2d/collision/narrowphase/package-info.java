@@ -26,35 +26,31 @@
 /**
  * Sub package of the Collision package handling narrow-phase collision detection.
  * <p>
- * Narrow-phase collision detection is used to determine if two {@link org.dyn4j.game2d.geometry.Convex} 
- * {@link org.dyn4j.game2d.geometry.Shape}s penetrate, and if so, compute the vector of minimum magnitude 
- * able to push the {@link org.dyn4j.game2d.geometry.Convex} {@link org.dyn4j.game2d.geometry.Shape}s out 
- * of penetration.
+ * Narrow-phase collision detection is used to determine if two {@link Convex} {@link Shape}s 
+ * penetrate, and if so, compute the vector of minimum magnitude able to push the {@link Convex} 
+ * {@link Shape}s out of penetration.
  * <p>
- * The {@link org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector}s can only perform on 
- * {@link org.dyn4j.game2d.geometry.Convex} {@link org.dyn4j.game2d.geometry.Shape}s.  This allows for fast 
- * and simple algorithms.
+ * The {@link NarrowphaseDetector}s can only perform on {@link Convex} {@link Shape}s.  This
+ * allows for fast and simple algorithms.
  * <p>
- * Even though the {@link org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector}s are fast, performance 
- * can be improved substantially if a {@link org.dyn4j.game2d.collision.broadphase.BroadphaseDetector} is 
- * used to eliminate obvious non-penetrating pairs.
+ * Even though the {@link NarrowphaseDetector}s are fast, performance can be improved substantially
+ * if a broad-phase collision detection algorithm is used to eliminate obvious non-penetrating
+ * pairs.
  * <p>
- * {@link org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector}s return 
- * {@link org.dyn4j.game2d.collision.narrowphase.Penetration} objects representing the vector of minimum 
- * magnitude able to push the {@link org.dyn4j.game2d.geometry.Convex} 
- * {@link org.dyn4j.game2d.geometry.Shape}s out of penetration.
+ * {@link NarrowphaseDetector}s return {@link Penetration} objects representing the vector of
+ * minimum magnitude able to push the {@link Convex} {@link Shape}s out of penetration.
  * <p>
- * There are two {@link org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector} implementations provided: 
- * {@link org.dyn4j.game2d.collision.narrowphase.Sat} and {@link org.dyn4j.game2d.collision.narrowphase.Gjk}.
+ * There are two {@link NarrowphaseDetector} implementations provided: {@link Sat} and {@link Gjk}.
  * <p>
- * The {@link org.dyn4j.game2d.collision.narrowphase.Gjk} 
- * {@link org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector} also has another method to return 
- * the {@link org.dyn4j.game2d.collision.narrowphase.Separation} between to 
- * {@link org.dyn4j.game2d.geometry.Convex} {@link org.dyn4j.game2d.geometry.Shape}s.  The 
- * {@link org.dyn4j.game2d.collision.narrowphase.Separation} represents the vector of minimum distance from 
- * one {@link org.dyn4j.game2d.geometry.Convex} {@link org.dyn4j.game2d.geometry.Shape} to the other.
+ * The {@link Gjk} {@link NarrowphaseDetector} also has another method to return the {@link Separation}
+ * between to {@link Convex} {@link Shape}s.  The {@link Separation} represents the vector of
+ * minimum distance from one {@link Convex} {@link Shape} to the other.
  * @author William Bittle
- * @version 2.2.2
+ * @version 1.0.3
  * @since 1.0.0
  */
 package org.dyn4j.game2d.collision.narrowphase;
+
+import org.dyn4j.game2d.geometry.Convex;
+import org.dyn4j.game2d.geometry.Shape;
+

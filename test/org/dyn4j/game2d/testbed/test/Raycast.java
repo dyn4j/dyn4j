@@ -52,7 +52,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests the {@link World}'s raycast methods.
  * @author William Bittle
- * @version 2.2.2
+ * @version 2.0.0
  * @since 2.0.0
  */
 public class Raycast extends Test {
@@ -420,11 +420,12 @@ public class Raycast extends Test {
 	@Override
 	public String[][] getControls() {
 		return new String[][] {
-				{"Change Angle", "Decrease/Increase the angle from the positive x-axis by 2 degrees.", "<html><span style='color: blue;'>d</span> / <span style='color: blue;'>D</span></html>"},
-				{"Change Length", "Decrease/Increase the length of the ray by 0.25m.", "<html><span style='color: blue;'>l</span> / <span style='color: blue;'>L</span></html>"},
-				{"Toggle Infinite", "Makes the ray's length infinite.", "<html><span style='color: blue;'>i</span></html>"},
-				{"Toggle All", "Toggles between all results or the closest result.", "<html><span style='color: blue;'>a</span></html>"}
-		};
+				{"d", "Decrease the angle from the positive x-axis by 2 degrees."},
+				{"D", "Increase the angle from the positive x-axis by 2 degrees."},
+				{"l", "Decrease the length of the ray by 0.25m."},
+				{"L", "Increase the lenght of the ray by 0.25m."},
+				{"i", "Make the ray's length infinite."},
+				{"a", "Toggles all or closest results."}};
 	}
 	
 	/* (non-Javadoc)

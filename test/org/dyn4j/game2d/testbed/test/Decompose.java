@@ -60,9 +60,9 @@ import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Test;
 
 /**
- * Tests the decomposition of a simple polygon without holes.
+ * Tests the decomposition of a simple polygon.
  * @author William Bittle
- * @version 2.2.2
+ * @version 2.2.1
  * @since 2.2.0
  */
 public class Decompose extends Test {
@@ -506,15 +506,14 @@ public class Decompose extends Test {
 	@Override
 	public String[][] getControls() {
 		return new String[][] {
-				{"Add Point", "<html>Adds a point to the point list.  The list should form a<br />non-intersecting simple polygon.</html>", "<html><span style='color: blue;'>Left Mouse Button</span></html>"},
-				{"Clear Points", "Clears the current list of points.", "<html><span style='color: blue;'>Right Mouse Button</span></html>"},
-				{"Decompose Polygon", "<html>Closes the polygon by attaching the first and last<br />points, then decomposes the polygon</html>.", "<html><span style='color: blue;'>d</span></html>"},
-				{"Change Algorithm", "<html>Cycles through the available decomposition algorithms.</html>.", "<html><span style='color: blue;'>1</span></html>"},
-				{"Change Polygon", "<html>Cycles through the sample simple polygons.</html>.", "<html><span style='color: blue;'>2</span></html>"},
-				{"Load Polygon", "<html>Loads a text file containing a formatted listing of<br />points.  See test description.</html>.", "<html><span style='color: blue;'>f</span></html>"},
-				{"Print Points", "<html>Prints the current list of points to std out.</html>.", "<html><span style='color: blue;'>Enter</span></html>"},
-				{"Generate Code", "<html>Generates code for the decomposed polygon.</html>.", "<html><span style='color: blue;'>g</span></html>"}
-		};
+				{"Left Mouse Button", "Add a point to the polygon list."},
+				{"Right Mouse Button", "Clear the current polygon point list."},
+				{"t", "Closes the polygon and tesselates."},
+				{"1", "Cycles through the available algorithms."},
+				{"2", "Cycles through some test polygons."},
+				{"f", "Opens the file chooser to choose an input file."},
+				{"Enter", "Prints the points to the console."},
+				{"g", "Generates code to create polygons."}};
 	}
 	
 	/* (non-Javadoc)
@@ -526,11 +525,12 @@ public class Decompose extends Test {
 		
 		keyboard.add(new Input(KeyEvent.VK_1, Input.Hold.NO_HOLD));
 		keyboard.add(new Input(KeyEvent.VK_2, Input.Hold.NO_HOLD));
-		keyboard.add(new Input(KeyEvent.VK_D, Input.Hold.NO_HOLD));
 		keyboard.add(new Input(KeyEvent.VK_F, Input.Hold.NO_HOLD));
 		keyboard.add(new Input(KeyEvent.VK_G, Input.Hold.NO_HOLD));
 		// key to print the points
 		keyboard.add(new Input(KeyEvent.VK_ENTER,Input.Hold.NO_HOLD));
+		
+		// t is already registered for listening
 		
 		// we need to store the mouse so we know its location
 		this.mouse = mouse;
@@ -566,7 +566,7 @@ public class Decompose extends Test {
 		}
 		
 		// look for the t key
-		if (keyboard.isPressed(KeyEvent.VK_D)) {
+		if (keyboard.isPressed(KeyEvent.VK_T)) {
 			// only tesselate polys with 4 or more vertices
 			if (this.points.size() > 3) {
 				// place the points into the array

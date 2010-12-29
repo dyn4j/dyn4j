@@ -44,7 +44,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests bodies being put to sleep.
  * @author William Bittle
- * @version 2.2.2
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class Sleep extends Test {
@@ -173,8 +173,6 @@ public class Sleep extends Test {
 	 */
 	@Override
 	public String[][] getControls() {
-		return new String[][] {
-				{"Remove Body", "Removes a body from the world.", "<html><span style='color: blue;'>Enter</span></html>"},
-		};
+		return new String[][] {{"Enter", "Removes a body from the world"}};
 	}
 }

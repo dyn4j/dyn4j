@@ -26,27 +26,27 @@
 /**
  * Sub package of the Collision package handling contact manifold generation.
  * <p>
- * Once a penetration vector and depth have been found between two 
- * {@link org.dyn4j.game2d.collision.Collidable}s, the next step is to find where the collision occurred.
+ * Once a penetration vector and depth have been found between two {@link Collidable}s,
+ * the next step is to find where the collision occurred.
  * <p>
- * A contact {@link org.dyn4j.game2d.collision.manifold.Manifold} is an object representing the surface 
- * where the two {@link org.dyn4j.game2d.collision.Collidable}s are colliding.
+ * A contact {@link Manifold} is an object representing the surface where the two 
+ * {@link Collidable}s are colliding.
  * <p>
- * {@link org.dyn4j.game2d.collision.manifold.Manifold}s have been designed to represent two types of 
- * surfaces: edge and point.
+ * {@link Manifold}s have been designed to represent two types of surfaces: edge and point.
  * <p>
- * A {@link org.dyn4j.game2d.collision.manifold.Manifold} contains a number of 
- * {@link org.dyn4j.game2d.collision.manifold.ManifoldPoint}s who represent the surface. For 2D this will 
- * either be 1 or 2 points.
+ * A {@link Manifold} contains a number of {@link ManifoldPoint}s who represent the surface.
+ * For 2D this will either be 1 or 2 points.
  * <p>
- * A {@link org.dyn4j.game2d.collision.manifold.ManifoldSolver} is used to obtain a collision 
- * {@link org.dyn4j.game2d.collision.manifold.Manifold} from a 
- * {@link org.dyn4j.game2d.collision.narrowphase.Penetration} object.
+ * A {@link ManifoldSolver} is used to obtain a collision {@link Manifold} from a 
+ * {@link Penetration}.
  * <p>
- * Only one implementation of the {@link org.dyn4j.game2d.collision.manifold.ManifoldSolver} is provided: 
- * {@link org.dyn4j.game2d.collision.manifold.ClippingManifoldSolver}.
+ * Only one implementation of the {@link ManifoldSolver} is provided: {@link ClippingManifoldSolver}.
  * @author William Bittle
- * @version 2.2.2
+ * @version 1.0.3
  * @since 1.0.0
  */
 package org.dyn4j.game2d.collision.manifold;
+
+import org.dyn4j.game2d.collision.Collidable;
+import org.dyn4j.game2d.collision.narrowphase.Penetration;
+

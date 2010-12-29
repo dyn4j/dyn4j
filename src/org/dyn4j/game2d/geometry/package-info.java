@@ -25,34 +25,8 @@
 
 /**
  * This package contains geometric objects used by the collision detection package.
- * <p>
- * Includes many classes used by all portions of the library primarily for representing geometric objects.
- * <p>
- * The {@link org.dyn4j.game2d.geometry.Convex} interface and subclasses and
- * {@link org.dyn4j.game2d.geometry.Vector2} class are the main focus for this package.
- * <p>
- * All concrete implementations of the {@link org.dyn4j.game2d.geometry.Convex} interface are available for 
- * use in the collision detection system and by extension the dynamics system.
- * <p>
- * Current supported convex shapes:
- * <ul>
- * <li>{@link org.dyn4j.game2d.geometry.Circle}</li>
- * <li>{@link org.dyn4j.game2d.geometry.Polygon} both concrete class and base class for 
- * {@link org.dyn4j.game2d.geometry.Rectangle} and {@link org.dyn4j.game2d.geometry.Triangle}</li>
- * <li>{@link org.dyn4j.game2d.geometry.Rectangle} polygon with more efficient methods than its base class
- * </li>
- * <li>{@link org.dyn4j.game2d.geometry.Triangle} polygon with more efficient methods than its base class</li>
- * <li>{@link org.dyn4j.game2d.geometry.Segment} special case shape; take care when using this class</li>
- * </ul>
- * To add more {@link org.dyn4j.game2d.geometry.Convex} {@link org.dyn4j.game2d.geometry.Shape}s extend the
- * {@link org.dyn4j.game2d.geometry.AbstractShape} class.
- * <p>
- * All shapes can be constructed using their respective constructors or via the 
- * {@link org.dyn4j.game2d.geometry.Geometry} class.  This class gives other options that make generating
- * specific types of shapes easier and safer.  It's recommended to use the methods contained in this class
- * instead of the shape constructors.
  * @author William Bittle 
- * @version 2.2.2
+ * @version 1.0.3
  * @since 1.0.0
  */
 package org.dyn4j.game2d.geometry;

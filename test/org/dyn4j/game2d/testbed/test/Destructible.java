@@ -31,7 +31,6 @@ import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.BodyFixture;
 import org.dyn4j.game2d.dynamics.World;
-import org.dyn4j.game2d.dynamics.contact.ContactListener;
 import org.dyn4j.game2d.dynamics.contact.ContactPoint;
 import org.dyn4j.game2d.dynamics.joint.WeldJoint;
 import org.dyn4j.game2d.geometry.Convex;
@@ -48,7 +47,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests the destruction of a joint and a body.
  * @author William Bittle
- * @version 2.2.2
+ * @version 2.0.0
  * @since 1.0.3
  */
 public class Destructible extends Test {
@@ -72,8 +71,7 @@ public class Destructible extends Test {
 	
 	/**
 	 * Extends the contact counter to implement the destruction
-	 * of a joint when a contact is encountered.  Normally you would just
-	 * extend the {@link ContactListener} interface.
+	 * of a joint when a contact is encountered.
 	 * @author William Bittle
 	 */
 	public class Destructor extends ContactCounter {
