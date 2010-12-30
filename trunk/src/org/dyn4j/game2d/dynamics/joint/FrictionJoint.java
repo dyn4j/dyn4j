@@ -151,7 +151,7 @@ public class FrictionJoint extends Joint {
 		this.body1.getVelocity().add(this.linearImpulse.product(invM1));
 		this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * (r1.cross(this.linearImpulse) + this.angularImpulse));
 		this.body2.getVelocity().subtract(this.linearImpulse.product(invM2));
-		this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * (r2.cross(this.linearImpulse) - this.angularImpulse));
+		this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * (r2.cross(this.linearImpulse) + this.angularImpulse));
 	}
 	
 	/* (non-Javadoc)
