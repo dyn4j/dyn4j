@@ -39,10 +39,15 @@ import org.dyn4j.game2d.geometry.Vector3;
 /**
  * Represents a pivot joint.
  * <p>
+ * The limits that a revolute joint can place on the bodies are world space limits, not 
+ * relative angle limits (although the limits are relative to the initial angle of the 
+ * bodies given at joint creation time).  Therefore its recommended to only use the limits 
+ * when one body is fixed.
+ * <p>
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.1.0
+ * @version 2.2.2
  * @since 1.0.0
  */
 public class RevoluteJoint extends Joint {
@@ -232,7 +237,7 @@ public class RevoluteJoint extends Joint {
 		this.body1.getVelocity().add(impulse.product(invM1));
 		this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * (r1.cross(impulse) + this.motorImpulse + this.impulse.z));
 		this.body2.getVelocity().subtract(impulse.product(invM2));
-		this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * (r2.cross(impulse) - this.motorImpulse - this.impulse.z));
+		this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * (r2.cross(impulse) + this.motorImpulse + this.impulse.z));
 	}
 	
 	/* (non-Javadoc)
@@ -294,7 +299,7 @@ public class RevoluteJoint extends Joint {
 			} else if (this.limitState == Joint.LimitState.AT_LOWER) {
 				// if its at the lower limit then clamp the rotational impulse
 				// and solve the point-to-point constraint alone
-				double newImpulse = this.impulse.z - impulse3.z;
+				double newImpulse = this.impulse.z + impulse3.z;
 				if (newImpulse < 0.0) {
 					Vector2 reduced = this.K.solve22(Jvb2.negate());
 					impulse3.x = reduced.x;
@@ -307,7 +312,7 @@ public class RevoluteJoint extends Joint {
 			} else if (this.limitState == Joint.LimitState.AT_UPPER) {
 				// if its at the upper limit then clamp the rotational impulse
 				// and solve the point-to-point constraint alone
-				double newImpulse = this.impulse.z - impulse3.z;
+				double newImpulse = this.impulse.z + impulse3.z;
 				if (newImpulse > 0.0) {
 					Vector2 reduced = this.K.solve22(Jvb2.negate());
 					impulse3.x = reduced.x;
@@ -324,7 +329,7 @@ public class RevoluteJoint extends Joint {
 			this.body1.getVelocity().add(impulse.product(invM1));
 			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * (r1.cross(impulse) + impulse3.z));
 			this.body2.getVelocity().subtract(impulse.product(invM2));
-			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * (r2.cross(impulse) - impulse3.z));
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * (r2.cross(impulse) + impulse3.z));
 		} else {
 			// solve the point-to-point constraint
 			Vector2 impulse = this.K.solve22(Jvb2.negate());

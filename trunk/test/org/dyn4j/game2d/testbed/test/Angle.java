@@ -29,9 +29,11 @@ import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.BodyFixture;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.dynamics.joint.AngleJoint;
+import org.dyn4j.game2d.dynamics.joint.RevoluteJoint;
 import org.dyn4j.game2d.geometry.Geometry;
 import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Rectangle;
+import org.dyn4j.game2d.geometry.Vector2;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Entity;
 import org.dyn4j.game2d.testbed.Test;
@@ -117,19 +119,22 @@ public class Angle extends Test {
 		
 		Entity obj1 = new Entity();
 		obj1.addFixture(new BodyFixture(r));
-		obj1.setMass();
-		obj1.translate(2.0, 3.6);
+		obj1.setMass(Mass.Type.INFINITE);
+		obj1.translate(0.0, 0.6);
 		
 		Entity obj2 = new Entity();
 		obj2.addFixture(new BodyFixture(r));
 		obj2.setMass();
-		obj2.translate(2.0, 2.4);
+		obj2.translate(0.0, -0.6);
 		
 		this.world.add(obj1);
 		this.world.add(obj2);
 		
+		RevoluteJoint rj = new RevoluteJoint(obj1, obj2, new Vector2(0.0, 0.0));
+		this.world.add(rj);
+		
 		AngleJoint j1 = new AngleJoint(obj1, obj2);
-		j1.setCollisionAllowed(true);
+		j1.setMinimumMaximumEnabled(Math.toRadians(-30), Math.toRadians(30));
 		
 		this.world.add(j1);
 	}
