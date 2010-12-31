@@ -32,7 +32,7 @@ import org.dyn4j.game2d.dynamics.contact.ContactConstraintSolver;
  * Attempting to set any setting to a value outside the range in effects sets
  * the setting to the min or max of the range.
  * @author William Bittle
- * @version 2.1.0
+ * @version 2.2.2
  * @since 1.0.0
  */
 public class Settings {
@@ -166,7 +166,7 @@ public class Settings {
 	private boolean continuousCollisionDetectionEnabled = true;
 	
 	/** Whether multithreading is enabled or not */
-	private boolean multithreadingEnabled = true;
+	private boolean multithreadingEnabled = false;
 	
 	/** The load factor for each task; higher = less load, lower = more load */
 	private int loadFactor = Settings.DEFAULT_LOAD_FACTOR;
