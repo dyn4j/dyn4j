@@ -42,9 +42,10 @@ import org.dyn4j.game2d.geometry.Vector2;
  * <p>
  * NOTE: The respective {@link #setMaximumDistance(double)}, {@link #setMaximumEnabled(boolean)},
  * {@link #setMinimumDistance(double)}, {@link #setMinimumEnabled(boolean)}, 
- * {@link #setMinimumMaximum(double, double)}, and {@link #setMinimumMaximumEnabled(double, double)},
- * methods must be called to setup the maximum and minimum limits, otherwise no
- * constraint is met and the bodies can move freely.
+ * {@link #setMinimumMaximum(double, double)}, {@link #setMinimumMaximumEnabled(double, double)},
+ * {@link #setMinimumMaximum(double)}, {@link #setMinimumMaximumEnabled(double)}, and
+ * {@link #setMinimumMaximumEnabled(boolean)} methods must be called to setup the maximum 
+ * and minimum limits, otherwise this joint acts like a {@link DistanceJoint}.
  * <p>
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
@@ -89,8 +90,9 @@ public class RopeJoint extends Joint {
 	/**
 	 * Minimal constructor.
 	 * <p>
-	 * Creates a rope joint with neither limit enabled.  Use the setXXX methods
-	 * to set limits and enable them.
+	 * Creates a rope joint between the two bodies that acts like a distance
+	 * joint.  To disable/enable the limits use the {@link #setMaximumEnabled(boolean)},
+	 * {@link #setMinimumEnabled(boolean)}, and 
 	 * @param body1 the first {@link Body}
 	 * @param body2 the second {@link Body}
 	 * @param anchor1 in world coordinates
@@ -105,12 +107,13 @@ public class RopeJoint extends Joint {
 		// get the local anchor points
 		this.localAnchor1 = body1.getLocalPoint(anchor1);
 		this.localAnchor2 = body2.getLocalPoint(anchor2);
-		// default to no limits initially
-		this.maximumEnabled = false;
-		this.minimumEnabled = false;
+		// default to act like a fixed length distance joint
+		this.maximumEnabled = true;
+		this.minimumEnabled = true;
 		// default the limits
-		this.maximumDistance = Double.MAX_VALUE;
-		this.minimumDistance = -Double.MAX_VALUE;
+		double distance = anchor1.distance(anchor2);
+		this.maximumDistance = distance;
+		this.minimumDistance = distance;
 	}
 	
 	/* (non-Javadoc)
@@ -465,15 +468,18 @@ public class RopeJoint extends Joint {
 	 * @param maximumDistance the maximum distance in meters
 	 */
 	public void setMinimumMaximum(double minimumDistance, double maximumDistance) {
-		// check the values
-		if (maximumDistance >= minimumDistance) {
-			// wake up the bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// set the limits
-			this.maximumDistance = maximumDistance;
-			this.minimumDistance = minimumDistance;
-		}
+		// make sure the minimum distance is greater than zero
+		if (minimumDistance < 0.0) throw new IllegalArgumentException("The minimum distance must be greater than or equal to zero.");
+		// make sure the maximum distance is greater than zero
+		if (maximumDistance < 0.0) throw new IllegalArgumentException("The maximum distance must be greater than or equal to zero.");
+		// make sure the min < max
+		if (minimumDistance > maximumDistance) throw new IllegalArgumentException("The minimum distance must be less than the maximum distance.");
+		// wake up the bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
+		// set the limits
+		this.maximumDistance = maximumDistance;
+		this.minimumDistance = minimumDistance;
 	}
 
 	/**
@@ -482,17 +488,54 @@ public class RopeJoint extends Joint {
 	 * @param maximumDistance the maximum distance in meters
 	 */
 	public void setMinimumMaximumEnabled(double minimumDistance, double maximumDistance) {
-		// check the values
-		if (maximumDistance >= minimumDistance) {
-			// wake up the bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// set the limits
-			this.maximumDistance = maximumDistance;
-			this.minimumDistance = minimumDistance;
-			// enable the limits
-			this.maximumEnabled = true;
-			this.minimumEnabled = true;
-		}
+		// set the values
+		this.setMinimumMaximum(minimumDistance, maximumDistance);
+		// enable the limits
+		this.maximumEnabled = true;
+		this.minimumEnabled = true;
+	}
+	
+	/**
+	 * Enables or disables both the maximum and minimum limits.
+	 * @param flag true if both limits should be enabled
+	 * @since 2.2.2
+	 */
+	public void setMinimumMaximumEnabled(boolean flag) {
+		this.maximumEnabled = flag;
+		this.minimumEnabled = flag;
+	}
+	
+	/**
+	 * Sets both the maximum and minimum limit distances to the given distance.
+	 * <p>
+	 * This makes the joint a fixed length joint.
+	 * @param distance the desired distance between the bodies
+	 * @since 2.2.2
+	 */
+	public void setMinimumMaximum(double distance) {
+		// make sure the distance is greater than zero
+		if (distance < 0.0) throw new IllegalArgumentException("The distance must be greater than or equal to zero.");
+		// wake up the bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
+		// set the limits
+		this.maximumDistance = distance;
+		this.minimumDistance = distance;
+	}
+	
+	/**
+	 * Sets both the maximum and minimum limit distances to the given distance and
+	 * enables both.
+	 * <p>
+	 * This makes the joint a fixed length joint.
+	 * @param distance the desired distance between the bodies
+	 * @since 2.2.2
+	 */
+	public void setMinimumMaximumEnabled(double distance) {
+		// set the values
+		this.setMinimumMaximum(distance);
+		// enable the limits
+		this.maximumEnabled = true;
+		this.minimumEnabled = true;
 	}
 }

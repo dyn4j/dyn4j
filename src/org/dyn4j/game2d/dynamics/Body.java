@@ -72,7 +72,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * A {@link Body} that is a sensor will not be handled in the collision
  * resolution but is handled in collision detection.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.2
  * @since 1.0.0
  */
 public class Body implements Swept, Collidable, Transformable {
@@ -803,7 +803,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 * If the given collision flag is true, this method will return true
 	 * only if collision is allowed between the two joined {@link Body}s.
 	 * <p>
-	 * If the given collision flage is false, this method will return true
+	 * If the given collision flag is false, this method will return true
 	 * only if collision is <b>NOT</b> allowed between the two joined {@link Body}s.
 	 * @param body the suspect connected body
 	 * @param collisionAllowed the collision allowed flag
@@ -816,6 +816,7 @@ public class Body implements Swept, Collidable, Transformable {
 		// check the size
 		if (size == 0) return false;
 		// loop over all the joints
+		boolean flag = false;
 		for (int i = 0; i < size; i++) {
 			JointEdge je = this.joints.get(i);
 			// testing object references should be sufficient
@@ -823,10 +824,17 @@ public class Body implements Swept, Collidable, Transformable {
 				// get the joint
 				Joint joint = je.getJoint();
 				// check if collision is allowed
-				if (joint.isCollisionAllowed() == collisionAllowed) {
-					return true;
-				}
+				
+				// we do an or here to find if there is at least one
+				// joint joining the two bodies that allows collision
+				flag |= joint.isCollisionAllowed();
 			}
+		}
+		// if at least one joint between the two bodies allow collision
+		// then flag will be true, check this against the desired flag
+		// passed in
+		if (flag == collisionAllowed) {
+			return true;
 		}
 		// not found, so return false
 		return false;
@@ -906,7 +914,21 @@ public class Body implements Swept, Collidable, Transformable {
 	public void translate(Vector2 vector) {
 		this.transform.translate(vector);
 	}
-
+	/**
+	 * Translates the body to the origin.
+	 * <p>
+	 * This method is useful if bodies have a number of fixtures and the center of mass
+	 * is not at the origin.  This method will reposition the body so that the center of
+	 * mass is at the origin.
+	 * @since 2.2.2
+	 */
+	public void translateToOrigin() {
+		// get the world space center of mass
+		Vector2 wc = this.transform.getTransformed(this.mass.getCenter());
+		// translate the body negative that much to put it at the origin
+		this.transform.translate(-wc.x, -wc.y);
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.collision.Collidable#getFixture(int)
 	 */
