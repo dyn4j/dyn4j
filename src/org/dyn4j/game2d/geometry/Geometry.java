@@ -34,7 +34,7 @@ import org.dyn4j.game2d.Epsilon;
 /**
  * Contains static methods to perform standard geometric operations.
  * @author William Bittle
- * @version 2.2.0
+ * @version 2.2.2
  * @since 1.0.0
  */
 public class Geometry {
@@ -398,7 +398,7 @@ public class Geometry {
 	}
 	
 	/**
-	 * Creates a new {@link Rectangle} with the given size.
+	 * Creates a new {@link Rectangle} with the given size centered at the origin.
 	 * @param size the size in meters
 	 * @return {@link Rectangle}
 	 */
@@ -409,7 +409,7 @@ public class Geometry {
 	}
 	
 	/**
-	 * Creates a new {@link Rectangle} with the given width and height.
+	 * Creates a new {@link Rectangle} with the given width and height centered at the origin.
 	 * @param width the width in meters
 	 * @param height the height in meters
 	 * @return {@link Rectangle}
@@ -433,11 +433,9 @@ public class Geometry {
 	}
 	
 	/**
-	 * Creates a new {@link Triangle} with the given points.
+	 * Creates a new {@link Triangle} with the given points centered at the origin.
 	 * <p>
 	 * This method makes a copy of the given points to create the {@link Triangle}.
-	 * <p>
-	 * This method translates the {@link Triangle} points so that the center is at the origin.
 	 * @param p1 the first point
 	 * @param p2 the second point
 	 * @param p3 the third point
@@ -565,7 +563,7 @@ public class Geometry {
 	/**
 	 * Returns a new list containing the 'cleansed' version of the given listing of polygon points.
 	 * <p>
-	 * This method ensures the polygon has CCW winding, removes colinear vertices, removes coincident vertices.
+	 * This method ensures the polygon has CCW winding, removes colinear vertices, and removes coincident vertices.
 	 * @param points the list polygon points
 	 * @return List&lt;{@link Vector2}&gt;
 	 */
@@ -630,7 +628,7 @@ public class Geometry {
 	/**
 	 * Returns a new array containing the 'cleansed' version of the given array of polygon points.
 	 * <p>
-	 * This method ensures the polygon has CCW winding, removes colinear vertices, removes coincident vertices.
+	 * This method ensures the polygon has CCW winding, removes colinear vertices, and removes coincident vertices.
 	 * @param points the list polygon points
 	 * @return {@link Vector2}[]
 	 */
