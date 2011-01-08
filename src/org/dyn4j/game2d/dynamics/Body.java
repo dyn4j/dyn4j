@@ -816,24 +816,29 @@ public class Body implements Swept, Collidable, Transformable {
 		// check the size
 		if (size == 0) return false;
 		// loop over all the joints
-		boolean flag = false;
+		boolean allowed = false;
+		boolean connected = false;
 		for (int i = 0; i < size; i++) {
 			JointEdge je = this.joints.get(i);
 			// testing object references should be sufficient
 			if (je.getOther() == body) {
 				// get the joint
 				Joint joint = je.getJoint();
+				// set that they are connected
+				connected = true;
 				// check if collision is allowed
-				
 				// we do an or here to find if there is at least one
 				// joint joining the two bodies that allows collision
-				flag |= joint.isCollisionAllowed();
+				allowed |= joint.isCollisionAllowed();
 			}
 		}
+		// if they are not connected at all we can ignore the collision
+		// allowed flag passed in and return false
+		if (!connected) return false;
 		// if at least one joint between the two bodies allow collision
-		// then flag will be true, check this against the desired flag
-		// passed in
-		if (flag == collisionAllowed) {
+		// then the allowed variable will be true, check this against 
+		// the desired flag passed in
+		if (allowed == collisionAllowed) {
 			return true;
 		}
 		// not found, so return false
