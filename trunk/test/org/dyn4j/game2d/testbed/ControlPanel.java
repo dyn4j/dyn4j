@@ -1891,7 +1891,7 @@ public class ControlPanel extends JFrame {
 		pnlAbout.add(icon);
 		
 		// add the label for the version
-		JLabel version = new JLabel("Version: " + Version.getVersion() + "TestBed");
+		JLabel version = new JLabel("Version: " + Version.getVersion() + " TestBed");
 		version.setAlignmentX(CENTER_ALIGNMENT);
 		pnlAbout.add(version);
 		
