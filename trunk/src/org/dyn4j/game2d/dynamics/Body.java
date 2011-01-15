@@ -805,6 +805,9 @@ public class Body implements Swept, Collidable, Transformable {
 	 * <p>
 	 * If the given collision flag is false, this method will return true
 	 * only if collision is <b>NOT</b> allowed between the two joined {@link Body}s.
+	 * <p>
+	 * If the {@link Body}s are connected by more than one joint, if any allows
+	 * collision, then the bodies are considered connected AND allowing collision.
 	 * @param body the suspect connected body
 	 * @param collisionAllowed the collision allowed flag
 	 * @return boolean

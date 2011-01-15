@@ -101,7 +101,7 @@ public class RopeJoint extends Joint {
 	public RopeJoint(Body body1, Body body2, Vector2 anchor1, Vector2 anchor2) {
 		super(body1, body2, false);
 		// verify the bodies are not the same instance
-		if (body1 == body2) throw new IllegalArgumentException("Cannot create a distance joint between the same body instance.");
+		if (body1 == body2) throw new IllegalArgumentException("Cannot create a rope joint between the same body instance.");
 		// verify the anchor points are not null
 		if (anchor1 == null || anchor2 == null) throw new NullPointerException("Neither anchor point can be null.");
 		// get the local anchor points
