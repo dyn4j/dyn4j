@@ -322,12 +322,12 @@ public class Body implements Swept, Collidable, Transformable {
 	 * This method will calculate a total mass for the body 
 	 * given the masses of the fixtures.
 	 * <p>
-	 * A {@link Mass.Type} can be used to create special mass
+	 * A {@link org.dyn4j.game2d.geometry.Mass.Type} can be used to create special mass
 	 * types.
 	 * <p>
 	 * If this method is called before any fixtures are added the
 	 * mass is set to Mass.UNDEFINED.
-	 * @param type the {@link Mass.Type}; can be null
+	 * @param type the {@link org.dyn4j.game2d.geometry.Mass.Type}; can be null
 	 * @return {@link Body} this body
 	 * @see #addFixture(BodyFixture)
 	 * @see #removeFixture(BodyFixture)
