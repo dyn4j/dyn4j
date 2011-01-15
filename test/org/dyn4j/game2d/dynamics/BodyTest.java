@@ -35,12 +35,15 @@ import org.dyn4j.game2d.collision.narrowphase.Sat;
 import org.dyn4j.game2d.dynamics.contact.ContactConstraint;
 import org.dyn4j.game2d.dynamics.contact.ContactEdge;
 import org.dyn4j.game2d.dynamics.contact.ContactPoint;
+import org.dyn4j.game2d.dynamics.joint.AngleJoint;
 import org.dyn4j.game2d.dynamics.joint.DistanceJoint;
 import org.dyn4j.game2d.dynamics.joint.Joint;
 import org.dyn4j.game2d.dynamics.joint.JointEdge;
+import org.dyn4j.game2d.dynamics.joint.RevoluteJoint;
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Geometry;
 import org.dyn4j.game2d.geometry.Mass;
+import org.dyn4j.game2d.geometry.Polygon;
 import org.dyn4j.game2d.geometry.Vector2;
 import org.junit.Test;
 
@@ -501,6 +504,40 @@ public class BodyTest {
 	}
 	
 	/**
+	 * Tests a case where two or more joints are connecting
+	 * two bodies one of which allows collision and another
+	 * does not.
+	 * @since 2.2.2
+	 */
+	@Test
+	public void isConnectedTwoOrMoreJoints() {
+		Body b1 = new Body();
+		Body b2 = new Body();
+		
+		RevoluteJoint rj = new RevoluteJoint(b1, b2, new Vector2());
+		JointEdge je11 = new JointEdge(b2, rj);
+		JointEdge je12 = new JointEdge(b1, rj);
+		
+		AngleJoint aj = new AngleJoint(b1, b2);
+		JointEdge je21 = new JointEdge(b2, aj);
+		JointEdge je22 = new JointEdge(b1, aj);
+		
+		b1.joints.add(je11);
+		b1.joints.add(je21);
+		
+		b2.joints.add(je12);
+		b2.joints.add(je22);
+		
+		// test both with no collision
+		TestCase.assertTrue(b1.isConnected(b2, false));
+		
+		// set one joint to allow collision
+		aj.setCollisionAllowed(true);
+		
+		TestCase.assertTrue(b1.isConnected(b2, true));
+	}
+	
+	/**
 	 * Tests the set velocity method passing a null value.
 	 */
 	@Test(expected = NullPointerException.class)
@@ -734,5 +771,47 @@ public class BodyTest {
 		double rdr = b.getRotationDiscRadius();
 		
 		TestCase.assertEquals(5.129, rdr, 1.0e-3);
+	}
+	
+
+	/**
+	 * Tests the setRotationDiscRadius method.
+	 * @since 2.2.2
+	 */
+	@Test
+	public void translateToOrigin() {
+		Body b = new Body();
+		
+		// the 4 from the dyn4j logo testbed test
+		Polygon four1 = new Polygon(new Vector2[] {
+				            new Vector2(0.859375, 1.828125),
+			                new Vector2(-0.21875, 0.8125),
+			                new Vector2(0.8125, 0.8125)});
+		Polygon four2 = new Polygon(new Vector2[] {
+					        new Vector2(0.8125, 0.8125),
+			                new Vector2(0.828125, 0.046875),
+			                new Vector2(1.125, 0.046875),
+			                new Vector2(1.125, 1.828125),
+			                new Vector2(0.859375, 1.828125)});
+		
+		// add the shapes to the body
+		b.addFixture(four1);
+		b.addFixture(four2);
+		
+		// setup the body
+		b.setMass();
+		
+		// make sure the center of mass is not at the origin
+		Vector2 p = b.getWorldCenter();
+		TestCase.assertTrue(p.x > 1e-6 || p.x < -1e-6);
+		TestCase.assertTrue(p.y > 1e-6 || p.y < -1e-6);
+		
+		// perform the method we are try to test
+		b.translateToOrigin();
+		
+		// make sure it worked
+		p = b.getWorldCenter();
+		TestCase.assertEquals(p.x, 0.0, 1e-6);
+		TestCase.assertEquals(p.y, 0.0, 1e-6);
 	}
 }
