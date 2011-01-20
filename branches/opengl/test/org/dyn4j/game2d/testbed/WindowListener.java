@@ -85,5 +85,7 @@ public class WindowListener extends WindowAdapter {
 		}
 		// release the core
 		this.core = null;
+		// exit the JVM
+		System.exit(0);
 	}
 }

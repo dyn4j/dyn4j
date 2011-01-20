@@ -24,59 +24,86 @@
  */
 package org.dyn4j.game2d.testbed;
 
-import java.awt.Color;
-
 /**
  * Settings singleton for drawing.
+ * <p>
+ * Colors are represented by float arrays of size 4.
  * @author William Bittle
- * @version 2.2.1
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class Draw {
+	/** Black color */
+	public static final float[] BLACK = new float[] {0.0f, 0.0f, 0.0f, 1.0f};
+	/** Dark grey color */
+	public static final float[] DARK_GREY = new float[] {0.2f, 0.2f, 0.2f, 1.0f};
+	/** Grey color */
+	public static final float[] GREY = new float[] {0.5f, 0.5f, 0.5f, 1.0f};
+	/** Light grey color */
+	public static final float[] LIGHT_GREY = new float[] {0.8f, 0.8f, 0.8f, 1.0f};
+	/** White color */
+	public static final float[] WHITE = new float[] {1.0f, 1.0f, 1.0f, 1.0f};
+	/** Cyan color */
+	public static final float[] CYAN = new float[] {0.0f, 1.0f, 1.0f, 1.0f};
+	/** Blue color */
+	public static final float[] BLUE = new float[] {0.0f, 0.0f, 1.0f, 1.0f};
+	/** Yellow color */
+	public static final float[] YELLOW = new float[] {1.0f, 1.0f, 0.0f, 1.0f};
+	/** Green color */
+	public static final float[] GREEN = new float[] {0.0f, 1.0f, 0.0f, 1.0f};
+	/** Magenta color */
+	public static final float[] MAGENTA = new float[] {1.0f, 0.0f, 1.0f, 1.0f};
+	/** Orange color */
+	public static final float[] ORANGE = new float[] {1.0f, 0.6f, 0.0f, 1.0f};
+	/** Red color */
+	public static final float[] RED = new float[] {1.0f, 0.0f, 0.0f, 1.0f};
+	/** Pink color */
+	public static final float[] PINK = new float[] {1.0f, 0.8f, 0.8f, 1.0f};
+	
 	/** Whether to draw centers of mass or not */
-	private boolean center = false;
+	private boolean center = true;
 	
 	/** The color used when rendering the center */
-	private Color centerColor = Color.GREEN;
+	private float[] centerColor = Draw.GREEN;
 	
 	/** Whether to draw velocity vectors or not */
-	private boolean velocity = false;
+	private boolean velocity = true;
 	
 	/** The color used when rendering velocity vectors */
-	private Color velocityColor = Color.MAGENTA;
+	private float[] velocityColor = Draw.MAGENTA;
 	
 	/** Whether to draw contacts or not */
-	private boolean contacts = false;
+	private boolean contacts = true;
 	
 	/** The color used when rendering contact points */
-	private Color contactColor = Color.ORANGE;
+	private float[] contactColor = Draw.ORANGE;
 	
-	/** Whether to draw contact forces or not */
-	private boolean contactForces = false;
+	/** Whether to draw contact impulses or not */
+	private boolean contactImpulses = true;
 	
 	/** The color used when rendering contact forces */
-	private Color contactForcesColor = Color.BLUE;
+	private float[] contactImpulsesColor = Draw.BLUE;
 	
 	/** Whether to draw contact pairs or not */
-	private boolean contactPairs = false;
+	private boolean contactPairs = true;
 	
 	/** The color used when rendering contact pairs */
-	private Color contactPairsColor = Color.YELLOW;
+	private float[] contactPairsColor = Draw.YELLOW;
 	
 	/** Whether to draw contact friction forces or not */
-	private boolean frictionForces = false;
+	private boolean frictionImpulses = true;
 	
 	/** The color used when rendering friction forces */
-	private Color frictionForcesColor = Color.BLUE;
+	private float[] frictionImpulsesColor = Draw.BLUE;
 	
 	/** Whether to draw joints or not */
 	private boolean joints = true;
 	
 	/** Whether to draw the bounds or not */
-	private boolean bounds = false;
+	private boolean bounds = true;
 	
 	/** The color used when rendering the bounds */
-	private Color boundsColor = Color.CYAN;
+	private float[] boundsColor = Draw.CYAN;
 	
 	/** Whether to draw the metrics panel or not */
 	private boolean panel = true;
@@ -88,16 +115,16 @@ public class Draw {
 	private boolean outline = true;
 	
 	/** Whether to draw edge normals */
-	private boolean normals = false;
+	private boolean normals = true;
 	
 	/** The color used when rendering normals */
-	private Color normalsColor = Color.RED;
+	private float[] normalsColor = Draw.RED;
 	
 	/** Whether to draw body rotation discs or not */
-	private boolean rotationDisc = false;
+	private boolean rotationDisc = true;
 	
 	/** The color used when rendering rotation discs */
-	private Color rotationDiscColor = Color.PINK;
+	private float[] rotationDiscColor = Draw.PINK;
 	
 	/** Whether to blur the metrics panel using a convolve-op */
 	private boolean panelBlurred = false;
@@ -142,10 +169,10 @@ public class Draw {
 	}
 
 	/**
-	 * Returns true if velocity vectors shoudl be drawn.
+	 * Returns true if velocity vectors should be drawn.
 	 * @return boolean
 	 */
-	public boolean drawVelocityVectors() {
+	public boolean drawVelocity() {
 		return velocity;
 	}
 
@@ -153,7 +180,7 @@ public class Draw {
 	 * Sets whether the velocity vectors should be drawn.
 	 * @param flag true if velocity vectors should be drawn
 	 */
-	public synchronized void setDrawVelocityVectors(boolean flag) {
+	public synchronized void setDrawVelocity(boolean flag) {
 		this.velocity = flag;
 	}
 
@@ -174,11 +201,11 @@ public class Draw {
 	}
 	
 	/**
-	 * Returns true if contact forces should be drawn.
+	 * Returns true if contact impulses should be drawn.
 	 * @return boolean
 	 */
-	public boolean drawContactForces() {
-		return this.contactForces;
+	public boolean drawContactImpulses() {
+		return this.contactImpulses;
 	}
 	
 	/**
@@ -198,27 +225,27 @@ public class Draw {
 	}
 
 	/**
-	 * Sets whether contact forces should be drawn.
-	 * @param flag true if contact forces should be drawn
+	 * Sets whether contact impulses should be drawn.
+	 * @param flag true if contact impulses should be drawn
 	 */
-	public synchronized void setDrawContactForces(boolean flag) {
-		this.contactForces = flag;
+	public synchronized void setDrawContactImpulses(boolean flag) {
+		this.contactImpulses = flag;
 	}
 	
 	/**
-	 * Returns true if friction forces should be drawn.
+	 * Returns true if friction impulses should be drawn.
 	 * @return boolean
 	 */
-	public boolean drawFrictionForces() {
-		return this.frictionForces;
+	public boolean drawFrictionImpulses() {
+		return this.frictionImpulses;
 	}
 	
 	/**
-	 * Sets whether friction forces should be drawn.
-	 * @param flag true if friction forces should be drawn
+	 * Sets whether friction impulses should be drawn.
+	 * @param flag true if friction impulses should be drawn
 	 */
-	public synchronized void setDrawFrictionForces(boolean flag) {
-		this.frictionForces = flag;
+	public synchronized void setDrawFrictionImpulses(boolean flag) {
+		this.frictionImpulses = flag;
 	}
 	
 	/**
@@ -337,164 +364,209 @@ public class Draw {
 	
 	/**
 	 * Returns the color used when drawing the center of mass.
-	 * @return Color
-	 * @since 2.1.0
+	 * @return float[]
+	 * @since 2.2.3
 	 */
-	public Color getCenterColor() {
+	public float[] getCenterColor() {
 		return centerColor;
 	}
 	
 	/**
 	 * Sets the color to use when drawing the center of mass.
-	 * @param centerColor the color
-	 * @since 2.1.0
+	 * @param color the color
+	 * @since 2.2.3
 	 */
-	public synchronized void setCenterColor(Color centerColor) {
-		this.centerColor = centerColor;
+	public synchronized void setCenterColor(float[] color) {
+		// check for null
+		if (color == null) throw new NullPointerException("The center color cannot be null.");
+		// check the size
+		if (color.length != 4) throw new IndexOutOfBoundsException("Colors must be arrays of 4 elements.");
+		// set the value
+		this.centerColor = color;
 	}
 	
 	/**
 	 * Returns the color used when drawing velocity vectors.
-	 * @return Color
-	 * @since 2.1.0
+	 * @return float[]
+	 * @since 2.2.3
 	 */
-	public Color getVelocityColor() {
+	public float[] getVelocityColor() {
 		return velocityColor;
 	}
 	
 	/**
 	 * Sets the color used when drawing velocity vectors.
-	 * @param velocityColor the color
-	 * @since 2.1.0
+	 * @param color the color
+	 * @since 2.2.3
 	 */
-	public synchronized void setVelocityColor(Color velocityColor) {
-		this.velocityColor = velocityColor;
+	public synchronized void setVelocityColor(float[] color) {
+		// check for null
+		if (color == null) throw new NullPointerException("The velocity color cannot be null.");
+		// check the size
+		if (color.length != 4) throw new IndexOutOfBoundsException("Colors must be arrays of 4 elements.");
+		// set the value
+		this.velocityColor = color;
 	}
 	
 	/**
 	 * Returns the color used when drawing contact points.
-	 * @return Color
-	 * @since 2.1.0
+	 * @return float[]
+	 * @since 2.2.3
 	 */
-	public Color getContactColor() {
+	public float[] getContactColor() {
 		return contactColor;
 	}
 	
 	/**
 	 * Sets the color used when drawing contact points.
-	 * @param contactColor the color
-	 * @since 2.1.0
+	 * @param color the color
+	 * @since 2.2.3
 	 */
-	public synchronized void setContactColor(Color contactColor) {
-		this.contactColor = contactColor;
+	public synchronized void setContactColor(float[] color) {
+		// check for null
+		if (color == null) throw new NullPointerException("The contact point color cannot be null.");
+		// check the size
+		if (color.length != 4) throw new IndexOutOfBoundsException("Colors must be arrays of 4 elements.");
+		// set the value
+		this.contactColor = color;
 	}
 	
 	/**
 	 * Returns the color used when drawing contact normal forces.
-	 * @return Color
-	 * @since 2.1.0
+	 * @return float[]
+	 * @since 2.2.3
 	 */
-	public Color getContactForcesColor() {
-		return contactForcesColor;
+	public float[] getContactImpulsesColor() {
+		return contactImpulsesColor;
 	}
 	
 	/**
 	 * Sets the color used when drawing contact normal forces.
-	 * @param contactForcesColor the color
-	 * @since 2.1.0
+	 * @param color the color
+	 * @since 2.2.3
 	 */
-	public synchronized void setContactForcesColor(Color contactForcesColor) {
-		this.contactForcesColor = contactForcesColor;
+	public synchronized void setContactImpulsesColor(float[] color) {
+		// check for null
+		if (color == null) throw new NullPointerException("The contact forces color cannot be null.");
+		// check the size
+		if (color.length != 4) throw new IndexOutOfBoundsException("Colors must be arrays of 4 elements.");
+		// set the value
+		this.contactImpulsesColor = color;
 	}
 	
 	/**
 	 * Returns the color used when drawing contact pairs.
-	 * @return Color
-	 * @since 2.1.0
+	 * @return float[]
+	 * @since 2.2.3
 	 */
-	public Color getContactPairsColor() {
+	public float[] getContactPairsColor() {
 		return contactPairsColor;
 	}
 	
 	/**
 	 * Sets the color used when drawing contact pairs.
-	 * @param contactPairsColor the color
-	 * @since 2.1.0
+	 * @param color the color
+	 * @since 2.2.3
 	 */
-	public synchronized void setContactPairsColor(Color contactPairsColor) {
-		this.contactPairsColor = contactPairsColor;
+	public synchronized void setContactPairsColor(float[] color) {
+		// check for null
+		if (color == null) throw new NullPointerException("The contact pair color cannot be null.");
+		// check the size
+		if (color.length != 4) throw new IndexOutOfBoundsException("Colors must be arrays of 4 elements.");
+		// set the value
+		this.contactPairsColor = color;
 	}
 	
 	/**
 	 * Returns the color used when drawing contact friction forces.
-	 * @return Color
-	 * @since 2.1.0
+	 * @return float[]
+	 * @since 2.2.3
 	 */
-	public Color getFrictionForcesColor() {
-		return frictionForcesColor;
+	public float[] getFrictionImpulsesColor() {
+		return frictionImpulsesColor;
 	}
 	
 	/**
 	 * Sets the color used when drawing contact friction forces.
-	 * @param frictionForcesColor the color
-	 * @since 2.1.0
+	 * @param color the color
+	 * @since 2.2.3
 	 */
-	public synchronized void setFrictionForcesColor(Color frictionForcesColor) {
-		this.frictionForcesColor = frictionForcesColor;
+	public synchronized void setFrictionImpulsesColor(float[] color) {
+		// check for null
+		if (color == null) throw new NullPointerException("The friction forces color cannot be null.");
+		// check the size
+		if (color.length != 4) throw new IndexOutOfBoundsException("Colors must be arrays of 4 elements.");
+		// set the value
+		this.frictionImpulsesColor = color;
 	}
 	
 	/**
 	 * Returns the color used when drawing the bounds.
-	 * @return Color
-	 * @since 2.1.0
+	 * @return float[]
+	 * @since 2.2.3
 	 */
-	public Color getBoundsColor() {
+	public float[] getBoundsColor() {
 		return boundsColor;
 	}
 	
 	/**
 	 * Sets the color used when drawing the bounds.
-	 * @param boundsColor the color
-	 * @since 2.1.0
+	 * @param color the color
+	 * @since 2.2.3
 	 */
-	public synchronized void setBoundsColor(Color boundsColor) {
-		this.boundsColor = boundsColor;
+	public synchronized void setBoundsColor(float[] color) {
+		// check for null
+		if (color == null) throw new NullPointerException("The bounds color cannot be null.");
+		// check the size
+		if (color.length != 4) throw new IndexOutOfBoundsException("Colors must be arrays of 4 elements.");
+		// set the value
+		this.boundsColor = color;
 	}
 	
 	/**
 	 * Returns the color used when drawing surface normals.
-	 * @return Color
-	 * @since 2.1.0
+	 * @return float[]
+	 * @since 2.2.3
 	 */
-	public Color getNormalsColor() {
+	public float[] getNormalsColor() {
 		return normalsColor;
 	}
 	
 	/**
 	 * Sets the color used when drawing surface normals.
-	 * @param normalsColor the color
-	 * @since 2.1.0
+	 * @param color the color
+	 * @since 2.2.3
 	 */
-	public synchronized void setNormalsColor(Color normalsColor) {
-		this.normalsColor = normalsColor;
+	public synchronized void setNormalsColor(float[] color) {
+		// check for null
+		if (color == null) throw new NullPointerException("The normals color cannot be null.");
+		// check the size
+		if (color.length != 4) throw new IndexOutOfBoundsException("Colors must be arrays of 4 elements.");
+		// set the value
+		this.normalsColor = color;
 	}
 	
 	/**
 	 * Returns the color used when drawing rotation discs.
-	 * @return Color
-	 * @since 2.1.0
+	 * @return float[]
+	 * @since 2.2.3
 	 */
-	public Color getRotationDiscColor() {
+	public float[] getRotationDiscColor() {
 		return rotationDiscColor;
 	}
 	
 	/**
 	 * Sets the color used when drawing rotation discs.
-	 * @param rotationDiscColor the color
-	 * @since 2.1.0
+	 * @param color the color
+	 * @since 2.2.3
 	 */
-	public synchronized void setRotationDiscColor(Color rotationDiscColor) {
-		this.rotationDiscColor = rotationDiscColor;
+	public synchronized void setRotationDiscColor(float[] color) {
+		// check for null
+		if (color == null) throw new NullPointerException("The rotation disc color cannot be null.");
+		// check the size
+		if (color.length != 4) throw new IndexOutOfBoundsException("Colors must be arrays of 4 elements.");
+		// set the value
+		this.rotationDiscColor = color;
 	}
 	
 	/**

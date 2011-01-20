@@ -24,21 +24,20 @@
  */
 package org.dyn4j.game2d.testbed.test;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import org.codezealot.game.input.Input;
 import org.codezealot.game.input.Keyboard;
 import org.codezealot.game.input.Mouse;
 import org.codezealot.game.input.Input.Hold;
 import org.dyn4j.game2d.dynamics.World;
-import org.dyn4j.game2d.geometry.Ray;
 import org.dyn4j.game2d.geometry.Vector2;
 import org.dyn4j.game2d.geometry.hull.DivideAndConquer;
 import org.dyn4j.game2d.geometry.hull.GiftWrap;
@@ -46,7 +45,10 @@ import org.dyn4j.game2d.geometry.hull.GrahamScan;
 import org.dyn4j.game2d.geometry.hull.HullGenerator;
 import org.dyn4j.game2d.geometry.hull.MonotoneChain;
 import org.dyn4j.game2d.testbed.ContactCounter;
+import org.dyn4j.game2d.testbed.GLHelper;
 import org.dyn4j.game2d.testbed.Test;
+
+import com.jogamp.opengl.util.gl2.GLUT;
 
 /**
  * Tests the generation of a convex hull given a point set.
@@ -126,231 +128,154 @@ public class Hull extends Test {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.testbed.Test#renderBefore(java.awt.Graphics2D)
+	 * @see org.dyn4j.game2d.testbed.Test#renderBefore(javax.media.opengl.GL2)
 	 */
 	@Override
-	protected void renderBefore(Graphics2D g) {
+	protected void renderBefore(GL2 gl) {
 		// render the axes
-		this.renderAxes(g, Color.DARK_GRAY, 1.0, 10.0, Color.DARK_GRAY, 0.1, 4.0, Color.GRAY);
+		this.renderAxes(gl, new float[] { 0.3f, 0.3f, 0.3f, 1.0f }, 
+				1.0, 0.25, new float[] { 0.3f, 0.3f, 0.3f, 1.0f }, 
+				0.1, 0.125, new float[] { 0.5f, 0.5f, 0.5f, 1.0f });
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.testbed.Test#renderAfter(java.awt.Graphics2D)
+	 * @see org.dyn4j.game2d.testbed.Test#renderAfter(javax.media.opengl.GL2)
 	 */
 	@Override
-	protected void renderAfter(Graphics2D g) {
+	protected void renderAfter(GL2 gl) {
 		if (this.vertices != null) {
-			g.setColor(Color.BLUE);
+			gl.glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
 			int vSize = this.vertices.length;
 			// draw the convex hull
+			gl.glBegin(GL.GL_LINES);
 			for (int i = 0; i < vSize; i++) {
 				Vector2 p1 = this.vertices[i];
 				Vector2 p2 = this.vertices[i + 1 == vSize ? 0 : i + 1];
-				this.renderLine(g, p1.x, p1.y, p2.x, p2.y);
+				gl.glVertex2d(p1.x, p1.y);
+				gl.glVertex2d(p2.x, p2.y);
 			}
+			gl.glEnd();
 		}
 		
 		// draw the points
-		g.setColor(Color.GREEN);
+		gl.glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
 		int pSize = this.points.size();
 		for (int i = 0; i < pSize; i++) {
 			Vector2 p = this.points.get(i);
-			this.renderPoint(g, p.x, p.y, r);
+			GLHelper.fillRectangle(gl, p.x, p.y, r, r);
 		}
 		
-		g.setColor(Color.BLACK);
-		Vector2 p = this.screenToWorld(5.0, 15.0);
-		AffineTransform at = g.getTransform();
-		g.transform(AffineTransform.getScaleInstance(1, -1));
-		g.drawString("(" + (this.currentGenerator + 1) + " of " + this.generators.length + ") " + this.generators[this.currentGenerator].getClass().getSimpleName(), (int) (p.x * scale), (int) (-p.y * scale));
-		g.setTransform(at);
-	}
-	
-	/**
-	 * Renders the given point.
-	 * @param g the graphics object to render to
-	 * @param x the x coordinate
-	 * @param y the y coordinate
-	 * @param r the radius of the point
-	 */
-	protected void renderPoint(Graphics2D g, double x, double y, double r) {
-		g.fillOval(
-				(int) Math.ceil((x - r) * scale), 
-				(int) Math.ceil((y - r) * scale),
-				(int) Math.ceil((r + r) * scale), 
-				(int) Math.ceil((r + r) * scale));
-	}
-	
-	/**
-	 * Renders a line from the given x1,y1 coordinates to x2,y2 coordinates.
-	 * @param g the graphics object to render to
-	 * @param x1 the first x coordinate
-	 * @param y1 the first y coordinate
-	 * @param x2 the second x coordinate
-	 * @param y2 the second y coordinate
-	 */
-	protected void renderLine(Graphics2D g, double x1, double y1, double x2, double y2) {
-		g.drawLine(
-				(int) Math.ceil(x1 * scale),
-				(int) Math.ceil(y1 * scale),
-				(int) Math.ceil(x2 * scale),
-				(int) Math.ceil(y2 * scale));
-	}
-	
-	/**
-	 * Renders the given vector from the origin along the x and y components
-	 * for the given magnitude.
-	 * @param g the graphics object to render to
-	 * @param x the x component
-	 * @param y the y component
-	 * @param magnitude the magnitude
-	 */
-	protected void renderVector(Graphics2D g, double x, double y, double magnitude) {
-		g.drawLine(0, 0, (int) Math.ceil(x * magnitude * scale), (int) Math.ceil(y * magnitude * scale));
-	}
-	
-	/**
-	 * Renders the given vector (x, y) from the start point (sx, sy) given the magnitude.
-	 * <p>
-	 * This method assumes that the vector components are components of a normalized vector.
-	 * @param g the graphics object to render to
-	 * @param sx the start x coordinate
-	 * @param sy the start y coordinate
-	 * @param x the x component of the vector
-	 * @param y the y component of the vector
-	 * @param magnitude the magnitude of the vector
-	 */
-	protected void renderVector(Graphics2D g, double sx, double sy, double x, double y, double magnitude) {
-		this.renderLine(g, sx, sy, sx + x * magnitude, sy + y * magnitude);
-	}
-	
-	/**
-	 * Renders the given normal (x, y) from the center of the given line.
-	 * @param g the graphics object to render to
-	 * @param x1 the x coordinate of the first line point
-	 * @param y1 the y coordinate of the first line point
-	 * @param x2 the x coordinate of the second line point
-	 * @param y2 the y coordinate of the second line point
-	 * @param x the x component of the normal
-	 * @param y the y component of the normal
-	 * @param l the length
-	 */
-	protected void renderNormal(Graphics2D g, double x1, double y1, double x2, double y2, double x, double y, double l) {
-		// compute the start point
-		double sx = (x1 + x2) / 2.0;
-		double sy = (y1 + y2) / 2.0;
-		// render the vector with a magnitude of 1m
-		this.renderVector(g, sx, sy, x, y, l);
-	}
-	
-	/**
-	 * Renders the given ray to the given graphics object.
-	 * @param g the graphics object to render to
-	 * @param ray the ray to render
-	 * @since 2.0.0
-	 */
-	protected void renderRay(Graphics2D g, Ray ray) {
-		// get the ray attributes (world coordinates)
-		Vector2 s = ray.getStart();
-		Vector2 d = ray.getDirection();
+		gl.glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 		
-		// draw the line from the start to the end, along d, l distance
-		g.drawLine((int) Math.ceil(s.x * scale), 
-				   (int) Math.ceil(s.y * scale), 
-				   (int) Math.ceil(s.x * scale + d.x * 10000.0), 
-				   (int) Math.ceil(s.y * scale + d.y * 10000.0));
+		gl.glPushMatrix();
+		gl.glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+		gl.glLoadIdentity();
+		gl.glRasterPos2d(-this.size.width / 2.0 + 115.0, this.size.height / 2.0 - 15.0);
+		GLUT glut = new GLUT();
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "(" + (this.currentGenerator + 1) + " of " + this.generators.length + ") " + this.generators[this.currentGenerator].getClass().getSimpleName());
+		gl.glPopMatrix();
 	}
 	
 	/**
 	 * Renders the x and y axis with minor and major ticks.
-	 * @param g the graphics object to render to
-	 * @param lineColor the color of the axes
+	 * @param gl the OpenGL graphics context
+	 * @param lineColor the color of the axes; RGBA
 	 * @param majorTickScale the major tick scale in meters
 	 * @param majorTickWidth the major tick width in pixels
-	 * @param majorTickColor the major tick color
+	 * @param majorTickColor the major tick color; RGBA
 	 * @param minorTickScale the minor tick scale in meters
 	 * @param minorTickWidth the minor tick width in pixels
-	 * @param minorTickColor the minor tick color
+	 * @param minorTickColor the minor tick color; RGBA
 	 */
-	protected void renderAxes(Graphics2D g, Color lineColor,
-			double majorTickScale, double majorTickWidth, Color majorTickColor,
-			double minorTickScale, double minorTickWidth, Color minorTickColor) {
+	protected void renderAxes(GL2 gl, float[] lineColor,
+			double majorTickScale, double majorTickWidth, float[] majorTickColor,
+			double minorTickScale, double minorTickWidth, float[] minorTickColor) {
 		// set the line color
-		g.setColor(lineColor);
+		gl.glColor4fv(lineColor, 0);
 		
 		// get the current width and height
 		double width = this.size.width;
 		double height = this.size.height;
 		
 		// render the y axis
-		g.drawLine(0,  (int) Math.ceil(height / 2.0 - this.offset.y * this.scale),
-				   0, -(int) Math.ceil(height / 2.0 + this.offset.y * this.scale));
-		// render the x axis
-		g.drawLine( (int) Math.ceil(width / 2.0 - this.offset.x * this.scale), 0,
-				   -(int) Math.ceil(width / 2.0 + this.offset.x * this.scale), 0);
+		gl.glBegin(GL.GL_LINES);
+			gl.glVertex2d(0.0,  height / 2.0 - this.offset.y);
+			gl.glVertex2d(0.0, -height / 2.0 + this.offset.y);
+			
+			gl.glVertex2d( width / 2.0 - this.offset.x, 0.0);
+			gl.glVertex2d(-width / 2.0 + this.offset.x, 0.0);
+		gl.glEnd();
 		
 		// compute the major tick offset
-		int mao = (int) Math.ceil(majorTickWidth / 2.0);
+		double mao = majorTickWidth / 2.0;
 		// compute the minor tick offset
-		int mio = (int) Math.ceil(minorTickWidth / 2.0);
+		double mio = minorTickWidth / 2.0;
 		
 		// render the y tick marks
 		// compute the number of major ticks on the y axis
-		int yMajorTicks= (int) Math.ceil(height / 2.0 / (majorTickScale * this.scale)) + 1;
+		int yMajorTicks= (int) Math.ceil(height / 2.0 / majorTickScale) + 1;
 		// compute the y axis offset
 		int yoffset = -(int) Math.floor(this.offset.y / majorTickScale);
+		
+		gl.glBegin(GL.GL_LINES);
 		for (int i = (-yMajorTicks + yoffset); i < (yMajorTicks + yoffset); i++) {
 			// set the color
-			g.setColor(majorTickColor);
+			gl.glColor4fv(majorTickColor, 0);
 			// compute the major tick y
-			int yma = (int) Math.ceil(majorTickScale * this.scale * i);
+			double yma = majorTickScale * i;
 			// skip drawing the major tick at zero
+			
 			if (i != 0) {
 				// draw the +y ticks
-				g.drawLine(-mao, yma, mao, yma);
+				gl.glVertex2d(-mao, yma);
+				gl.glVertex2d( mao, yma);
 			}
 			
 			// render the minor y tick marks
 			// set the color
-			g.setColor(minorTickColor);
+			gl.glColor4fv(minorTickColor, 0);
 			// compute the number of minor ticks
 			int minorTicks = (int) Math.ceil(majorTickScale / minorTickScale);
 			for (int j = 1; j < minorTicks; j++) {
 				// compute the major tick y
-				int ymi = (int) Math.ceil(majorTickScale * this.scale * i - minorTickScale * this.scale * j);
+				double ymi = majorTickScale * i - minorTickScale * j;
 				// draw the +y ticks
-				g.drawLine(-mio, ymi, mio, ymi);
+				gl.glVertex2d(-mio, ymi);
+				gl.glVertex2d( mio, ymi);
 			}
 		}
 		
 		// render the x tick marks
 		// compute the number of major ticks on the x axis
-		int xMajorTicks= (int) Math.ceil(width / 2.0 / (majorTickScale * this.scale)) + 1;
+		int xMajorTicks= (int) Math.ceil(width / 2.0 / majorTickScale) + 1;
 		// compute the x axis offset
 		int xoffset = -(int) Math.floor(this.offset.x / majorTickScale);
 		for (int i = (-xMajorTicks + xoffset); i < (xMajorTicks + xoffset); i++) {
 			// set the color
-			g.setColor(majorTickColor);
+			gl.glColor4fv(majorTickColor, 0);
 			// compute the major tick x
-			int xma = (int) Math.ceil(majorTickScale * this.scale * i);
+			double xma = majorTickScale * i;
 			// skip drawing the major tick at zero
 			if (i != 0) {
 				// draw the major ticks
-				g.drawLine(xma, mao, xma, -mao);
+				gl.glVertex2d(xma,  mao);
+				gl.glVertex2d(xma, -mao);
 			}
 			
 			// render the minor x tick marks
 			// set the color
-			g.setColor(minorTickColor);
+			gl.glColor4fv(minorTickColor, 0);
 			// compute the number of minor ticks
 			int minorTicks = (int) Math.ceil(majorTickScale / minorTickScale);
 			for (int j = 1; j < minorTicks; j++) {
 				// compute the major tick x
-				int xmi = (int) Math.ceil(majorTickScale * this.scale * i - minorTickScale * this.scale * j);
+				double xmi = majorTickScale * i - minorTickScale * j;
 				// draw the minor ticks
-				g.drawLine(xmi, mio, xmi, -mio);
+				gl.glVertex2d(xmi,  mio);
+				gl.glVertex2d(xmi, -mio);
 			}
 		}
+		gl.glEnd();
 	}
 	
 	/* (non-Javadoc)

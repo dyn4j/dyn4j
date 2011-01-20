@@ -26,30 +26,27 @@ package org.dyn4j.game2d.testbed;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Shape;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
 import java.awt.image.BufferedImage;
-import java.awt.image.ConvolveOp;
-import java.awt.image.Kernel;
 import java.text.AttributedString;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.logging.Logger;
 
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+import javax.media.opengl.GLAutoDrawable;
 import javax.naming.ConfigurationException;
 
-import org.codezealot.game.core.G2dCore;
+import org.codezealot.game.core.JoglCore;
 import org.codezealot.game.input.Input;
 import org.codezealot.game.input.Input.Hold;
 import org.codezealot.game.render.Container;
-import org.codezealot.game.render.G2dSurface;
+import org.codezealot.game.render.JoglSurface;
 import org.dyn4j.game2d.Version;
 import org.dyn4j.game2d.collision.Fixture;
 import org.dyn4j.game2d.collision.broadphase.Sap;
@@ -65,6 +62,8 @@ import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Segment;
 import org.dyn4j.game2d.geometry.Vector2;
 
+import com.jogamp.opengl.util.gl2.GLUT;
+
 /**
  * Container for the tests.
  * @author William Bittle
@@ -72,7 +71,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * @version 2.2.1
  * @since 1.0.0
  */
-public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
+public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 	/** The class logger */
 	private static final Logger LOGGER = Logger.getLogger(TestBed.class.getName());
 	
@@ -206,29 +205,7 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 	public TestBed(E container) {
 		super(container);
 	}
-
-	/* (non-Javadoc)
-	 * @see org.codezealot.game.core.G2dCore#initialize()
-	 */
-	@Override
-	protected void initialize() {
-		super.initialize();
-		// create the simulation settings frame
-		try {
-			this.settingsFrame = new ControlPanel();
-			// set the current test
-			this.test = this.settingsFrame.getTest();
-		} catch (ConfigurationException e) {
-			LOGGER.severe("An error occurred when attempting to configure the TestBed.");
-			LOGGER.throwing("TestBed", "initialize", e);
-		}
-		
-		// initialize the inputs to listen for
-		this.initializeInputs();
-		// initialize the text images
-		this.initText();
-	}
-
+	
 	/**
 	 * Sets up listening for various inputs.
 	 */
@@ -311,11 +288,99 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		}
 	}
 	
+	int texId, fboId;
+	
 	/* (non-Javadoc)
-	 * @see org.codezealot.game.core.G2dCore#render(java.awt.Graphics2D)
+	 * @see org.codezealot.game.core.JoglCore#init(javax.media.opengl.GLAutoDrawable)
 	 */
 	@Override
-	public void render(Graphics2D g) {
+	public void init(GLAutoDrawable glDrawable) {
+		super.init(glDrawable);
+		
+		// create the simulation settings frame
+		try {
+			this.settingsFrame = new ControlPanel();
+			// set the current test
+			this.test = this.settingsFrame.getTest();
+		} catch (ConfigurationException e) {
+			LOGGER.severe("An error occurred when attempting to configure the TestBed.");
+			LOGGER.throwing("TestBed", "initialize", e);
+		}
+		
+		// initialize the inputs to listen for
+		this.initializeInputs();
+		// initialize the text images
+		this.initText();
+		
+		int width = this.renderer.getDisplaySize().width;
+		int height = this.renderer.getDisplaySize().height;
+		
+		// get the OpenGL context
+		GL2 gl = glDrawable.getGL().getGL2();
+		
+		// set the matrix mode to projection
+		gl.glMatrixMode(GL2.GL_PROJECTION);
+		// initialize the matrix
+		gl.glLoadIdentity();
+		// set the view to a 2D view
+		gl.glOrtho(-width / 2.0, width / 2.0, -height / 2.0, height / 2.0, 0, 1);
+		
+		// switch to the model view matrix
+		gl.glMatrixMode(GL2.GL_MODELVIEW);
+		// initialize the matrix
+		gl.glLoadIdentity();
+		
+		// set the shading model to smooth
+//		gl.glShadeModel(GL2.GL_SMOOTH);
+		
+		// set the clear color to white
+		gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		
+		// disable depth testing since we are working in 2D
+		gl.glDisable(GL.GL_DEPTH_TEST);
+		
+		// enable blending for translucency
+		gl.glEnable(GL.GL_BLEND);
+		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+		
+		gl.glEnable(GL.GL_TEXTURE_2D);
+		
+		// get a texture object
+		int[] ids = new int[1];
+		gl.glGenTextures(1, ids, 0);
+		texId = ids[0];
+		
+		// bind the texture to set it up
+		gl.glBindTexture(GL.GL_TEXTURE_2D, texId);
+		gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
+		gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR);
+		gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA8, width, height, 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, null);
+		// switch back to the default texture
+		gl.glBindTexture(GL.GL_TEXTURE_2D, 0);
+		
+		// create a frame buffer object (FBO)
+		gl.glGenFramebuffers(1, ids, 0);
+		fboId = ids[0];
+		
+		// bind the FBO to set it up
+		gl.glBindFramebuffer(GL.GL_FRAMEBUFFER, fboId);
+		// attach the texture to the FBO
+		gl.glFramebufferTexture2D(GL.GL_FRAMEBUFFER, GL.GL_COLOR_ATTACHMENT0, GL.GL_TEXTURE_2D, texId, 0);
+		// check the FBO status
+		int status = gl.glCheckFramebufferStatus(GL.GL_FRAMEBUFFER);
+		if (status != GL.GL_FRAMEBUFFER_COMPLETE) System.out.println("no go");
+		// switch back to the default frame buffer
+		gl.glBindFramebuffer(GL.GL_FRAMEBUFFER, 0);
+		
+		// ignore the primary color source
+		gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_DECAL);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.codezealot.game.core.Core#render(java.lang.Object)
+	 */
+	@Override
+	public void render(GL2 gl) {
 		// get the current time
 		long startTime = this.timer.getCurrentTime();
 
@@ -326,201 +391,266 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 		int width = this.renderer.getDisplaySize().width;
 		int height = this.renderer.getDisplaySize().height;
 		
-		// see if we should anti-alias the text
-		if (draw.isTextAntiAliased()) {
-			// turn it on
-			g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+		// check for anti-aliasing
+		if (draw.isAntiAliased()) {
+			gl.glEnable(GL.GL_LINE_SMOOTH);
+			gl.glEnable(GL2.GL_POLYGON_SMOOTH);
+			gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST);
+			gl.glHint(GL2.GL_POLYGON_SMOOTH_HINT, GL.GL_NICEST);
+		} else {
+			gl.glDisable(GL.GL_LINE_SMOOTH);
+			gl.glDisable(GL2.GL_POLYGON_SMOOTH);
+			gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_FASTEST);
+			gl.glHint(GL2.GL_POLYGON_SMOOTH_HINT, GL.GL_FASTEST);
 		}
 		
+		// make sure glsl is supported
+//		if (gl.hasGLSL()) {
+//
+//		}
+		
+		// switch to draw to the FBO
+		gl.glBindFramebuffer(GL.GL_FRAMEBUFFER, fboId);
+		gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		
+//		gl.glClear(GL.GL_COLOR_BUFFER_BIT);
+		// draw everything
+		
+		// see if we should anti-alias the text
+//		if (draw.isTextAntiAliased()) {
+//			// turn it on
+//			g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+//		}
+		
 		// determine if we need to do the convolve-op
-		if (draw.isPanelBlurred() && draw.drawPanel()) {
-			// check if the cached blur surface is null
-			if (blur == null) {
-				// if so create it
-				blur = g.getDeviceConfiguration().createCompatibleImage(width, height);
-			}
-			// get the graphics object to paint to
-			Graphics2D bg = blur.createGraphics();
-			
-			// to perform the convolve op we need to draw to the buffered image instead
-			// of the graphics object
-			
-			// call the super method
-			super.render(bg);
-			
-			// see if we should anti-alias the text
-			if (draw.isTextAntiAliased()) {
-				// turn it on
-				bg.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-			}
+//		if (draw.isPanelBlurred() && draw.drawPanel()) {
+//			// check if the cached blur surface is null
+//			if (blur == null) {
+//				// if so create it
+//				blur = g.getDeviceConfiguration().createCompatibleImage(width, height);
+//			}
+//			// get the graphics object to paint to
+//			Graphics2D bg = blur.createGraphics();
+//			
+//			// to perform the convolve op we need to draw to the buffered image instead
+//			// of the graphics object
+//			
+//			// call the super method
+//			super.render(bg);
+//			
+//			// see if we should anti-alias the text
+//			if (draw.isTextAntiAliased()) {
+//				// turn it on
+//				bg.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+//			}
+//			
+//			// see if we should anti-alias
+//			if (draw.isAntiAliased()) {
+//				// turn it on
+//				bg.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+//			}
+//			
+//			// set the background color to white
+//			bg.setBackground(Color.WHITE);
+//			bg.setClip(0, 0, width, height);
+//			
+//			// paint the background
+//			bg.clearRect(0, 0, width, height);
+//			
+//			// paint the test
+//			this.test.render(bg, width, height);
+//			
+//			// render the controls label top center
+//			this.renderControls(bg, (int) Math.ceil((width - this.controlsLabel.getWidth(bg)) / 2.0), 5);
+//			
+//			// we don't need that anymore
+//			bg.dispose();
+//			
+//			// save the current clip
+//			Shape clip = g.getClip();
+//			// set the clip to above the metrics panel
+//			g.setClip(new Rectangle(0, 0, width, height - 110));
+//			// copy that clip
+//			g.drawImage(blur, 0, 0, null);
+//			// set the clip to only the metrics panel
+//			g.setClip(new Rectangle(0, height - 110, width, 110));
+//			
+//			// setup the blur 5x5 kernel matrix
+//			float[] blurMatrix = new float[] {0.04f, 0.04f, 0.04f, 0.04f, 0.04f,
+//											  0.04f, 0.04f, 0.04f, 0.04f, 0.04f,
+//											  0.04f, 0.04f, 0.04f, 0.04f, 0.04f,
+//											  0.04f, 0.04f, 0.04f, 0.04f, 0.04f,
+//											  0.04f, 0.04f, 0.04f, 0.04f, 0.04f};
+//			
+//			// create the blur convolve op
+//			ConvolveOp op = new ConvolveOp(new Kernel(5, 5, blurMatrix));
+//			
+//			// draw the metrics panel with the convolve op
+//			g.drawImage(blur, op, 0, 0);
+//			// set the color to a partially transparent black
+//			g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.8f));
+//			// shade the metrics panel (for the background)
+//			g.fillRect(0, height - 110, width, 110);
+//			// set the original clip back
+//			g.setClip(clip);
+//		} else {
+			super.render(gl);
 			
 			// see if we should anti-alias
-			if (draw.isAntiAliased()) {
-				// turn it on
-				bg.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-			}
+//			if (draw.isAntiAliased()) {
+//				// turn anti-aliasing on
+//				g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+//			}
 			
-			// set the background color to white
-			bg.setBackground(Color.WHITE);
-			bg.setClip(0, 0, width, height);
-			
-			// paint the background
-			bg.clearRect(0, 0, width, height);
+			// clear the screen
+			gl.glClear(GL.GL_COLOR_BUFFER_BIT);
+			gl.glLoadIdentity();
 			
 			// paint the test
-			this.test.render(bg, width, height);
+			this.test.render(gl, width, height);
+			
+			gl.glPushMatrix();
+			gl.glLoadIdentity();
+			
+			gl.glColor3f(0.0f, 0.0f, 0.0f);
+			GLUT glut = new GLUT();
+			gl.glRasterPos2d(-9, 8);
+			glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, String.valueOf(this.fps.getFps()));
+			
+			gl.glPopMatrix();
 			
 			// render the controls label top center
-			this.renderControls(bg, (int) Math.ceil((width - this.controlsLabel.getWidth(bg)) / 2.0), 5);
-			
-			// we don't need that anymore
-			bg.dispose();
-			
-			// save the current clip
-			Shape clip = g.getClip();
-			// set the clip to above the metrics panel
-			g.setClip(new Rectangle(0, 0, width, height - 110));
-			// copy that clip
-			g.drawImage(blur, 0, 0, null);
-			// set the clip to only the metrics panel
-			g.setClip(new Rectangle(0, height - 110, width, 110));
-			
-			// setup the blur 5x5 kernel matrix
-			float[] blurMatrix = new float[] {0.04f, 0.04f, 0.04f, 0.04f, 0.04f,
-											  0.04f, 0.04f, 0.04f, 0.04f, 0.04f,
-											  0.04f, 0.04f, 0.04f, 0.04f, 0.04f,
-											  0.04f, 0.04f, 0.04f, 0.04f, 0.04f,
-											  0.04f, 0.04f, 0.04f, 0.04f, 0.04f};
-			
-			// create the blur convolve op
-			ConvolveOp op = new ConvolveOp(new Kernel(5, 5, blurMatrix));
-			
-			// draw the metrics panel with the convolve op
-			g.drawImage(blur, op, 0, 0);
-			// set the color to a partially transparent black
-			g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.8f));
-			// shade the metrics panel (for the background)
-			g.fillRect(0, height - 110, width, 110);
-			// set the original clip back
-			g.setClip(clip);
-		} else {
-			super.render(g);
-			
-			// see if we should anti-alias
-			if (draw.isAntiAliased()) {
-				// turn anti-aliasing on
-				g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-			}
-			
-			// set the background color to white
-			g.setBackground(Color.WHITE);
-			g.setClip(0, 0, width, height);
-			
-			// paint the background
-			g.clearRect(0, 0, width, height);
-			
-			// paint the test
-			this.test.render(g, width, height);
-			
-			// render the controls label top center
-			this.renderControls(g, (int) Math.ceil((width - this.controlsLabel.getWidth(g)) / 2.0), 5);
+//			this.renderControls(gl, (int) Math.ceil((width - this.controlsLabel.getWidth(gl)) / 2.0), 5);
 			
 			if (draw.drawPanel()) {
 				// draw the translucent background
-				g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.8f));
-				g.fillRect(0, height - 110, width, 110);
+				gl.glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
+				gl.glBegin(GL2.GL_QUADS);
+					gl.glVertex2d(-width / 2.0, -height / 2.0 + 110);
+					gl.glVertex2d(-width / 2.0, -height / 2.0);
+					gl.glVertex2d( width / 2.0, -height / 2.0);
+					gl.glVertex2d( width / 2.0, -height / 2.0 + 110);
+				gl.glEnd();
 			}
 			
-		}
+//		}
 		
 		// make sure we should draw the metrics panel
-		if (draw.drawPanel()) {
-			// draw the gradient top
-			g.setPaint(new GradientPaint(0, height - 110, new Color(0.5f, 0.5f, 0.5f, 0.5f), 0, height - 101, new Color(0.0f, 0.0f, 0.0f, 0.5f)));
-			g.fillRect(0, height - 110, width, 10);
-			
-			// draw the small box around the test info
-			g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.2f));
-			g.fillRect(2, height - 98, 150, 95);
-			g.setColor(Color.BLACK);
-			g.drawRect(2, height - 98, 150, 95);
-			// render the general test information
-			this.renderTestInformation(g, 7, height - 95);
-			
-			// draw the small box around the contact info
-			g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.2f));
-			g.fillRect(155, height - 98, 120, 95);
-			g.setColor(Color.BLACK);
-			g.drawRect(155, height - 98, 120, 95);
-			// render the contact information
-			this.renderContactInformation(g, 159, height - 95);
-			
-			// draw the small box around the performance info
-			g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.2f));
-			g.fillRect(278, height - 98, 200, 95);
-			g.setColor(Color.BLACK);
-			g.drawRect(278, height - 98, 200, 95);
-			// render the performance information
-			this.renderPerformanceInformation(g, 282, height - 95);
-			
-			// draw the small box around the system info
-			g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.2f));
-			g.fillRect(481, height - 98, 200, 95);
-			g.setColor(Color.BLACK);
-			g.drawRect(481, height - 98, 200, 95);
-			// render the system information
-			this.renderSystemInformation(g, 485, height - 95);
-		}
+//		if (draw.drawPanel()) {
+//			// draw the gradient top
+//			g.setPaint(new GradientPaint(0, height - 110, new Color(0.5f, 0.5f, 0.5f, 0.5f), 0, height - 101, new Color(0.0f, 0.0f, 0.0f, 0.5f)));
+//			g.fillRect(0, height - 110, width, 10);
+//			
+//			// draw the small box around the test info
+//			g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.2f));
+//			g.fillRect(2, height - 98, 150, 95);
+//			g.setColor(Color.BLACK);
+//			g.drawRect(2, height - 98, 150, 95);
+//			// render the general test information
+//			this.renderTestInformation(g, 7, height - 95);
+//			
+//			// draw the small box around the contact info
+//			g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.2f));
+//			g.fillRect(155, height - 98, 120, 95);
+//			g.setColor(Color.BLACK);
+//			g.drawRect(155, height - 98, 120, 95);
+//			// render the contact information
+//			this.renderContactInformation(g, 159, height - 95);
+//			
+//			// draw the small box around the performance info
+//			g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.2f));
+//			g.fillRect(278, height - 98, 200, 95);
+//			g.setColor(Color.BLACK);
+//			g.drawRect(278, height - 98, 200, 95);
+//			// render the performance information
+//			this.renderPerformanceInformation(g, 282, height - 95);
+//			
+//			// draw the small box around the system info
+//			g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.2f));
+//			g.fillRect(481, height - 98, 200, 95);
+//			g.setColor(Color.BLACK);
+//			g.drawRect(481, height - 98, 200, 95);
+//			// render the system information
+//			this.renderSystemInformation(g, 485, height - 95);
+//		}
 		
 		// always show the paused box on top of everything
 		if (this.isPaused()) {
 			// show a black translucent screen over everything
-			g.setColor(new Color(0, 0, 0, 100));
-			g.fillRect(0, 0, width, height);
+			gl.glColor4f(0.0f, 0.0f, 0.0f, 0.3f);
+			GLHelper.fillRectangle(gl, 0, 0, width, height);
 			// show the paused label in the top left corner
-			this.renderPaused(g, 0, 0, 100, 20);
+			this.renderPaused(gl, width, height);
 		}
+		
+		// un bind the fbo
+		gl.glBindFramebuffer(GL.GL_FRAMEBUFFER, 0);
+		
+		gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		gl.glClear(GL.GL_COLOR_BUFFER_BIT);
+		
+		// set the texture to render
+		gl.glBindTexture(GL.GL_TEXTURE_2D, texId);
+		
+		// draw the texture to a 2d quad
+		gl.glBegin(GL2.GL_QUADS);
+			gl.glTexCoord2d(1, 0);
+			gl.glVertex2d(width/2.0, -height/2.0);
+			gl.glTexCoord2d(0, 0);
+			gl.glVertex2d(-width/2.0, -height/2.0);
+			gl.glTexCoord2d(0, 1);
+			gl.glVertex2d(-width/2.0, height/2.0);
+			gl.glTexCoord2d(1, 1);
+			gl.glVertex2d(width/2.0, height/2.0);
+		gl.glEnd();
+		
+		gl.glBindTexture(GL.GL_TEXTURE_2D, 0);
+		// switch back to the default texture
 		
 		this.usage.setRender(this.timer.getCurrentTime() - startTime);
 	}
 	
 	/**
-	 * Renders the paused label to the given graphics object at the
-	 * given screen coordinates.
-	 * @param g the graphics object to render to
-	 * @param x the x coordinate
-	 * @param y the y coordinate
+	 * Renders the paused label.
+	 * @param gl the OpenGL graphics context
 	 * @param w the width of the bounding rectangle
 	 * @param h the height of the bounding rectangle
 	 */
-	private void renderPaused(Graphics2D g, int x, int y, int w, int h) {
-		g.setColor(new Color(1.0f, 0.0f, 0.0f, 0.7f));
-		// render a red background behind the text
-		g.fillRect(x, y, w, h);
-		
-		// set the paused text color to white
-		g.setColor(Color.WHITE);
-		// get the text metrics
-		double tw = this.pausedLabel.getWidth(g);
-		double th = this.pausedLabel.getHeight(g);
-		
-		// render the text in the center of the given rect
-		this.pausedLabel.render(g, x + (int) Math.ceil((w - tw) / 2.0), y + (int) Math.ceil((h - th) / 2.0));
+	private void renderPaused(GL2 gl, double w, double h) {
+		// save the current matrix
+		gl.glPushMatrix();
+		// reset the current matrix
+		gl.glLoadIdentity();
+		// set the color to red
+		gl.glColor4f(1.0f, 0.0f, 0.0f, 0.7f);
+		// fill a red rectangle to show the paused label
+		GLHelper.fillRectangle(gl, -w / 2.0 + 50.0, h / 2.0 - 12, 100, 24);
+		// set the color to white
+		gl.glColor4f(1.0f, 1.0f, 1.0f, 0.7f);
+		// set the raster for the text
+		gl.glRasterPos2d(-w / 2.0 + 25.0, h / 2.0 - 15.0);
+		// draw the text
+		GLUT glut = new GLUT();
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_12, "Paused");
+		// reset to the old matrix
+		gl.glPopMatrix();
 	}
 	
 	/**
 	 * Renders the controls label to the given graphics object at the
 	 * given screen coordinates.
-	 * @param g the graphics object to render to
+	 * @param gl the OpenGL graphics context
 	 * @param x the x coordinate
 	 * @param y the y coordinate
 	 */
-	private void renderControls(Graphics2D g, int x, int y) {
+	private void renderControls(GL2 gl, int x, int y) {
 		// set the text color
-		g.setColor(Color.BLACK);
+//		g.setColor(Color.BLACK);
+		gl.glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 		
 		//width - w - 5, height - h - 5
-		controlsLabel.render(g, x, y);
+//		controlsLabel.render(g, x, y);
+		//"Press 'c' to open the Test Bed Control Panel."
 	}
 	
 	/**
@@ -757,7 +887,9 @@ public class TestBed<E extends Container<G2dSurface>> extends G2dCore<E> {
 			// only exit if its not applet mode
 			if (this.renderer.getMode() == Container.Mode.APPLICATION) {
 				// exit the game
-				this.shutdown();	
+				this.shutdown();
+				// exit the JVM
+				System.exit(0);
 			}
 		}
 		

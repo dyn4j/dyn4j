@@ -32,12 +32,14 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
+import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLProfile;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import org.codezealot.game.core.G2dCore;
+import org.codezealot.game.core.JoglCore;
 import org.codezealot.game.render.Application;
-import org.codezealot.game.render.G2dSurface;
+import org.codezealot.game.render.JoglSurface;
 import org.dyn4j.game2d.Version;
 
 /**
@@ -79,11 +81,16 @@ public class Driver {
 			// get a display mode from it
 			DisplayMode mode = Application.getDisplayMode(size);
 			// create the rendering surface
-			G2dSurface surface = new G2dSurface();
+			GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL2));
+			caps.setDoubleBuffered(true);
+			caps.setHardwareAccelerated(true);
+			caps.setNumSamples(2);
+			caps.setSampleBuffers(true);
+			JoglSurface surface = new JoglSurface(caps);
 			// create the container for the surface
-			Application<G2dSurface> app = new Application<G2dSurface>(surface, "dyn4j v" + Version.getVersion() + " TestBed", mode, null, false);
+			Application<JoglSurface> app = new Application<JoglSurface>(surface, "dyn4j v" + Version.getVersion() + " TestBed", mode, null, false);
 			// set the container in the core
-			G2dCore<Application<G2dSurface>> core = new TestBed<Application<G2dSurface>>(app);
+			JoglCore<Application<JoglSurface>> core = new TestBed<Application<JoglSurface>>(app);
 			app.setLocationByPlatform(true);
 			
 			try {

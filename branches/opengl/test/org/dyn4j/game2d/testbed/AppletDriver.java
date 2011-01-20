@@ -28,12 +28,14 @@ import java.awt.Dimension;
 import java.io.IOException;
 import java.util.logging.LogManager;
 
+import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLProfile;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import org.codezealot.game.core.AppletLoader;
 import org.codezealot.game.render.Applet;
-import org.codezealot.game.render.G2dSurface;
+import org.codezealot.game.render.JoglSurface;
 
 /**
  * The applet driver where the core creation is done.
@@ -41,7 +43,7 @@ import org.codezealot.game.render.G2dSurface;
  * @version 1.0.3
  * @since 1.0.0
  */
-public class AppletDriver extends AppletLoader<G2dSurface> {
+public class AppletDriver extends AppletLoader<JoglSurface> {
 	/** the version id */
 	private static final long serialVersionUID = 7803602971018002468L;
 
@@ -80,13 +82,18 @@ public class AppletDriver extends AppletLoader<G2dSurface> {
 		// create the size of the applet
 		Dimension size = new Dimension(800, 600);
 		// create the rendering surface
-		G2dSurface surface = new G2dSurface();
+		GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL2));
+		caps.setDoubleBuffered(true);
+		caps.setHardwareAccelerated(true);
+		caps.setNumSamples(2);
+		caps.setSampleBuffers(true);
+		JoglSurface surface = new JoglSurface(caps);
 		surface.setFocusable(true);
 		surface.setFocusTraversalKeysEnabled(true);
 		// create the container for the surface
-		Applet<G2dSurface> applet = new Applet<G2dSurface>(this, surface, size);
+		Applet<JoglSurface> applet = new Applet<JoglSurface>(this, surface, size);
 		// create the core and set its rendering container
-		this.core = new TestBed<Applet<G2dSurface>>(applet);
+		this.core = new TestBed<Applet<JoglSurface>>(applet);
 		// start the core
 		this.core.start();
 		

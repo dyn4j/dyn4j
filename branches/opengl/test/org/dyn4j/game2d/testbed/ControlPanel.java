@@ -142,20 +142,20 @@ public class ControlPanel extends JFrame {
 	};
 	
 	/** A static listing of all colors */
-	private static final Color[] COLORS = new Color[] {
-		Color.BLACK,
-		Color.DARK_GRAY,
-		Color.GRAY,
-		Color.LIGHT_GRAY,
-		Color.WHITE,
-		Color.CYAN,
-		Color.BLUE,
-		Color.YELLOW,
-		Color.GREEN,
-		Color.MAGENTA,
-		Color.ORANGE,
-		Color.RED,
-		Color.PINK
+	private static final float[][] COLORS = new float[][] {
+		Draw.BLACK,
+		Draw.DARK_GREY,
+		Draw.GREY,
+		Draw.LIGHT_GREY,
+		Draw.WHITE,
+		Draw.CYAN,
+		Draw.BLUE,
+		Draw.YELLOW,
+		Draw.GREEN,
+		Draw.MAGENTA,
+		Draw.ORANGE,
+		Draw.RED,
+		Draw.PINK
 	};
 	
 	/** Map of available test to run */
@@ -688,7 +688,7 @@ public class ControlPanel extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// get the selected color
-				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				float[] color = (float[])((JComboBox) e.getSource()).getSelectedItem();
 				// set the new color
 				Draw draw = Draw.getInstance();
 				draw.setCenterColor(color);
@@ -729,7 +729,7 @@ public class ControlPanel extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// get the selected color
-				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				float[] color = (float[])((JComboBox) e.getSource()).getSelectedItem();
 				// set the new color
 				Draw draw = Draw.getInstance();
 				draw.setNormalsColor(color);
@@ -770,7 +770,7 @@ public class ControlPanel extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// get the selected color
-				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				float[] color = (float[])((JComboBox) e.getSource()).getSelectedItem();
 				// set the new color
 				Draw draw = Draw.getInstance();
 				draw.setRotationDiscColor(color);
@@ -788,13 +788,13 @@ public class ControlPanel extends JFrame {
 				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkVelocity = new JCheckBox();
-		chkVelocity.setSelected(draw.drawVelocityVectors());
+		chkVelocity.setSelected(draw.drawVelocity());
 		chkVelocity.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// toggle the checkbox
 				Draw draw = Draw.getInstance();
-				draw.setDrawVelocityVectors(!draw.drawVelocityVectors());
+				draw.setDrawVelocity(!draw.drawVelocity());
 			}
 		});
 		pnlDraw.add(chkVelocity, new GridBagConstraints(
@@ -811,7 +811,7 @@ public class ControlPanel extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// get the selected color
-				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				float[] color = (float[])((JComboBox) e.getSource()).getSelectedItem();
 				// set the new color
 				Draw draw = Draw.getInstance();
 				draw.setVelocityColor(color);
@@ -852,7 +852,7 @@ public class ControlPanel extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// get the selected color
-				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				float[] color = (float[])((JComboBox) e.getSource()).getSelectedItem();
 				// set the new color
 				Draw draw = Draw.getInstance();
 				draw.setContactPairsColor(color);
@@ -893,7 +893,7 @@ public class ControlPanel extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// get the selected color
-				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				float[] color = (float[])((JComboBox) e.getSource()).getSelectedItem();
 				// set the new color
 				Draw draw = Draw.getInstance();
 				draw.setContactColor(color);
@@ -911,13 +911,13 @@ public class ControlPanel extends JFrame {
 				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkContactForces = new JCheckBox();
-		chkContactForces.setSelected(draw.drawContactForces());
+		chkContactForces.setSelected(draw.drawContactImpulses());
 		chkContactForces.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// toggle the checkbox
 				Draw draw = Draw.getInstance();
-				draw.setDrawContactForces(!draw.drawContactForces());
+				draw.setDrawContactImpulses(!draw.drawContactImpulses());
 			}
 		});
 		pnlDraw.add(chkContactForces, new GridBagConstraints(
@@ -926,7 +926,7 @@ public class ControlPanel extends JFrame {
 		// add the drop down for color selection
 		JComboBox cmbContactForces = new JComboBox(COLORS);
 		// set the initial value
-		cmbContactForces.setSelectedItem(draw.getContactForcesColor());
+		cmbContactForces.setSelectedItem(draw.getContactImpulsesColor());
 		// set the custom renderer
 		cmbContactForces.setRenderer(new ColorListCellRenderer());
 		// add a listener for the selection
@@ -934,10 +934,10 @@ public class ControlPanel extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// get the selected color
-				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				float[] color = (float[])((JComboBox) e.getSource()).getSelectedItem();
 				// set the new color
 				Draw draw = Draw.getInstance();
-				draw.setContactForcesColor(color);
+				draw.setContactImpulsesColor(color);
 			}
 		});
 		pnlDraw.add(cmbContactForces, new GridBagConstraints(
@@ -952,13 +952,13 @@ public class ControlPanel extends JFrame {
 				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkFrictionForces = new JCheckBox();
-		chkFrictionForces.setSelected(draw.drawFrictionForces());
+		chkFrictionForces.setSelected(draw.drawFrictionImpulses());
 		chkFrictionForces.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// toggle the checkbox
 				Draw draw = Draw.getInstance();
-				draw.setDrawFrictionForces(!draw.drawFrictionForces());
+				draw.setDrawFrictionImpulses(!draw.drawFrictionImpulses());
 			}
 		});
 		pnlDraw.add(chkFrictionForces, new GridBagConstraints(
@@ -967,7 +967,7 @@ public class ControlPanel extends JFrame {
 		// add the drop down for color selection
 		JComboBox cmbFrictionForces = new JComboBox(COLORS);
 		// set the initial value
-		cmbFrictionForces.setSelectedItem(draw.getFrictionForcesColor());
+		cmbFrictionForces.setSelectedItem(draw.getFrictionImpulsesColor());
 		// set the custom renderer
 		cmbFrictionForces.setRenderer(new ColorListCellRenderer());
 		// add a listener for the selection
@@ -975,10 +975,10 @@ public class ControlPanel extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// get the selected color
-				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				float[] color = (float[])((JComboBox) e.getSource()).getSelectedItem();
 				// set the new color
 				Draw draw = Draw.getInstance();
-				draw.setFrictionForcesColor(color);
+				draw.setFrictionImpulsesColor(color);
 			}
 		});
 		pnlDraw.add(cmbFrictionForces, new GridBagConstraints(
@@ -1016,7 +1016,7 @@ public class ControlPanel extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// get the selected color
-				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				float[] color = (float[])((JComboBox) e.getSource()).getSelectedItem();
 				// set the new color
 				Draw draw = Draw.getInstance();
 				draw.setBoundsColor(color);
@@ -2032,8 +2032,8 @@ public class ControlPanel extends JFrame {
 		 */
 		@Override
 		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-	        Color color = (Color) value;
-	        label.setBackground(color);
+	        float[] color = (float[]) value;
+	        label.setBackground(new Color(color[0], color[1], color[2]));
 	        return this;
 		}
 	}

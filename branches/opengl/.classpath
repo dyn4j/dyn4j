@@ -4,6 +4,9 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="lib/org.codezealot.game.jar"/>
+	<classpathentry kind="lib" path="lib/gluegen-rt.jar"/>
+	<classpathentry kind="lib" path="lib/jogl.all.jar"/>
+	<classpathentry kind="lib" path="lib/nativewindow.all.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.codezealot.game"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

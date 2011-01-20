@@ -24,7 +24,6 @@
  */
 package org.dyn4j.game2d.testbed;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
@@ -32,6 +31,8 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import org.dyn4j.game2d.collision.Fixture;
 import org.dyn4j.game2d.dynamics.Body;
@@ -40,8 +41,10 @@ import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Polygon;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Segment;
+import org.dyn4j.game2d.geometry.Shape;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Vector2;
+import org.dyn4j.game2d.geometry.Wound;
 
 /**
  * Represents a game entity.
@@ -53,14 +56,14 @@ public class Entity extends Body {
 	/** class level logger */
 	private static final Logger LOGGER = Logger.getLogger(Entity.class.getName());
 	
-	/** Used to determine the brightness of the colors used; in the range [0, 255] */
-	private static final int COLOR_BRIGHTNESS = 191;
-	
 	/** Fill color for frozen bodies */
-	private static final Color FROZEN_COLOR = new Color(255, 255, 200, 255);
+	private static final float[] FROZEN_COLOR = new float[] { 1.0f, 1.0f, 200.0f / 255.0f };
 	
 	/** Fill color for asleep bodies */
-	private static final Color ASLEEP_COLOR = new Color(200, 200, 255, 255);
+	private static final float[] ASLEEP_COLOR = new float[] { 200.0f / 255.0f, 200.0f / 255.0f, 1.0f };
+	
+	/** The length of an edge normal */
+	private static final double NORMAL_LENGTH = 0.1;
 	
 	/** image of a wooden box used to render on rectangles */
 	private static BufferedImage r_img = null;
@@ -84,10 +87,7 @@ public class Entity extends Body {
 	}
 	
 	/** The random fill color */
-	private Color color = null;
-	
-	/** The alpha value */
-	private int alpha = 0;
+	private float[] color = new float[] {0.0f, 0.0f, 0.0f, 0.0f};
 	
 	/**
 	 * Optional constructor.
@@ -101,47 +101,52 @@ public class Entity extends Body {
 	 * @param alpha the alpha value used for the colors
 	 */
 	public Entity(int alpha) {
-		this.alpha = alpha;
-		this.initialize();
+		this.initialize(alpha);
 	}
 	
 	/**
 	 * Full constructor.
-	 * @param color the color to use for this body
-	 * @since 1.0.3
+	 * @param red the red component; in the range [0.0, 1.0]
+	 * @param green the green component; in the range [0.0, 1.0]
+	 * @param blue the blue component; in the range [0.0, 1.0]
+	 * @param alpha the alpha component; in the range [0.0, 1.0]
 	 */
-	public Entity(Color color) {
-		this.color = color;
-		this.alpha = color.getAlpha();
+	public Entity(float red, float green, float blue, float alpha) {
+		this.color[0] = red;
+		this.color[1] = green;
+		this.color[2] = blue;
+		this.color[3] = alpha;
 	}
 	
 	/**
 	 * Initializes the entity.
+	 * @param alpha the alpha component
 	 */
-	private void initialize() {
-		int offset = Entity.COLOR_BRIGHTNESS - (255 - this.alpha) / 2;
-		int range = 255 - offset;
+	private void initialize(int alpha) {
 		// create a random (pastel) fill color
-		this.color = new Color((int)(Math.random() * (range) + offset),
-							   (int)(Math.random() * (range) + offset),
-							   (int)(Math.random() * (range) + offset),
-							   this.alpha);
+		this.color[0] = (float)Math.random() * 0.5f + 0.5f;
+		this.color[1] = (float)Math.random() * 0.5f + 0.5f;
+		this.color[2] = (float)Math.random() * 0.5f + 0.5f;
+		this.color[3] = alpha;
 	}
 	
 	/**
 	 * Renders the body to the given graphics object using the given
 	 * world to device/screen space transform.
-	 * @param graphics the graphics object to render to
-	 * @param scale the scale amount
+	 * @param gl the OpenGL graphics context
 	 */
-	public void render(Graphics2D graphics, double scale) {
+	public void render(GL2 gl) {
 		Draw draw = Draw.getInstance();
-		// get the center of mass
-		Vector2 center = this.mass.getCenter();
+		
 		// get the transform
 		Transform tx = this.transform;
-		// get the world center
-		Vector2 wCenter = tx.getTransformed(center);
+		
+		// save the current matrix
+		gl.glPushMatrix();
+		// translate in the x-y plane
+		gl.glTranslated(tx.getTranslationX(), tx.getTranslationY(), 0);
+		// rotate about the z axis
+		gl.glRotated(Math.toDegrees(tx.getRotation()), 0, 0, 1);
 		
 		int size = this.getFixtureCount();
 		// draw the shapes
@@ -151,166 +156,227 @@ public class Entity extends Body {
 			// check if we should render fill color
 			if (draw.drawFill()) {
 				// set the color
-				graphics.setColor(this.color);
-				// if the body is asleep set the render color to blue
-				if (this.isAsleep()) graphics.setColor(Entity.ASLEEP_COLOR);
-				// if the body is inactive set the render color to yellow
-				if (!this.isActive()) graphics.setColor(Entity.FROZEN_COLOR);
-				// render the fill color
-				this.renderFill(graphics, c, tx, scale);
+				gl.glColor4fv(color, 0);
+				// check for asleep
+				if (this.isAsleep())
+					gl.glColor4f(Entity.ASLEEP_COLOR[0], 
+							     Entity.ASLEEP_COLOR[1], 
+							     Entity.ASLEEP_COLOR[2], 
+							     color[3]); // use the desired color's alpha setting
+				// check for inactive
+				if (!this.isActive())
+					gl.glColor4f(Entity.FROZEN_COLOR[0], 
+						         Entity.FROZEN_COLOR[1], 
+						         Entity.FROZEN_COLOR[2], 
+						         color[3]); // use the desired color's alpha setting
+				
+				// fill the shape
+				this.fillShape(gl, c);
 			}
 			
 			// check if we should render outlines
 			if (draw.drawOutline()) {
+				// all the outline colors are multiplied by 0.8f to make them
+				// slightly darker than the fill color
+				
 				// set the color
-				graphics.setColor(this.color.darker());
-				// if the body is asleep set the render color to blue
-				if (this.isAsleep()) graphics.setColor(Entity.ASLEEP_COLOR.darker());
-				// if the body is frozen set the render color to yellow
-				if (!this.isActive()) graphics.setColor(Entity.FROZEN_COLOR.darker());
-				// render the convex shape
-				this.renderConvex(graphics, c, tx, scale);
+				gl.glColor4f(color[0] * 0.8f, color[1] * 0.8f, color[2] * 0.8f, color[3]);
+				// check for asleep
+				if (this.isAsleep())
+					gl.glColor4f(Entity.ASLEEP_COLOR[0] * 0.8f, 
+							     Entity.ASLEEP_COLOR[1] * 0.8f, 
+							     Entity.ASLEEP_COLOR[2] * 0.8f, 
+							     color[3]); // use the desired color's alpha setting
+				// check for inactive
+				if (!this.isActive())
+					gl.glColor4f(Entity.FROZEN_COLOR[0] * 0.8f, 
+						         Entity.FROZEN_COLOR[1] * 0.8f, 
+						         Entity.FROZEN_COLOR[2] * 0.8f, 
+						         color[3]); // use the desired color's alpha setting
+				
+				// draw the shape
+				this.drawShape(gl, c);
+			}
+			
+			// check if we should draw edge normals
+			if (draw.drawNormals()) {
+				// is the current shape a wound shape?
+				if (c instanceof Wound) {
+					// if so then set the color
+					float[] color = draw.getNormalsColor();
+					gl.glColor4fv(color, 0);
+					// render the normals
+					this.renderNormals(gl, (Wound)c);
+				}
 			}
 		}
 		
-		if (draw.drawCenter()) {
-			// draw the center of mass
-			graphics.setColor(draw.getCenterColor());
-			graphics.drawOval(
-					(int) Math.ceil((wCenter.x - 0.0625) * scale),
-					(int) Math.ceil((wCenter.y - 0.0625) * scale),
-					(int) Math.ceil(0.125 * scale),
-					(int) Math.ceil(0.125 * scale));
-		}
-		
+		// remove the rotation
+		gl.glPopMatrix();
+		gl.glPushMatrix();
+		// translate in the x-y plane
+		gl.glTranslated(tx.getTranslationX(), tx.getTranslationY(), 0);
+
+		// check if we should draw the rotation disc
 		if (draw.drawRotationDisc()) {
-			// draw the rotation disc
-			graphics.setColor(draw.getRotationDiscColor());
+			Vector2 c = this.mass.getCenter();
+			// set the color
+			float[] color = draw.getRotationDiscColor();
+			gl.glColor4fv(color, 0);
 			// get the radius
 			double r = this.getRotationDiscRadius();
-			graphics.drawOval(
-					(int) Math.ceil((wCenter.x - r) * scale),
-					(int) Math.ceil((wCenter.y - r) * scale),
-					(int) Math.ceil(r * 2.0 * scale),
-					(int) Math.ceil(r * 2.0 * scale));
+			
+			// draw a circle
+			GLHelper.renderCircle(gl, c.x, c.y, r, 20);
 		}
+		
+		// check if we should draw velocity vectors
+		if (draw.drawVelocity()) {
+			// set the color
+			float[] color = draw.getVelocityColor();
+			gl.glColor4fv(color, 0);
+			// draw the velocities
+				Vector2 c = this.getLocalCenter();
+				Vector2 v = this.getVelocity();
+				double av = this.getAngularVelocity();
+				
+				// draw the linear velocity for each body
+				gl.glBegin(GL.GL_LINES);
+					gl.glVertex2d(c.x, c.y);
+					gl.glVertex2d(c.x + v.x, c.y + v.y);
+				gl.glEnd();
+				
+				// draw an arc
+				GLHelper.renderArc(gl, c.x, c.y, 0.125, 0, av, 20);
+		}
+		
+		// check if we should draw center points
+		if (draw.drawCenter()) {
+			// get the center of mass
+			Vector2 c = this.mass.getCenter();
+			// set the color
+			float[] color = draw.getCenterColor();
+			gl.glColor4fv(color, 0);
+			// draw a circle a tenth of the size of the rotation disc
+			GLHelper.renderCircle(gl, c.x, c.y, this.getRotationDiscRadius() * 0.1, 20);
+		}
+		
+		// restore the previous matrix
+		gl.glPopMatrix();
 	}
 	
 	/**
-	 * Renders any convex object.
-	 * @param g the graphics object to render to
+	 * Renders an outline of the given convex object.
+	 * @param gl the OpenGL graphics context
 	 * @param c the convex object to render
-	 * @param t the convex object's transform
-	 * @param s the scale
 	 */
-	private void renderConvex(Graphics2D g, Convex c, Transform t, double s) {
-		if (c instanceof Polygon) {
-			// do a color draw of the object
-			java.awt.Polygon poly = new java.awt.Polygon();
-			// cast to polygon
+	private void drawShape(GL2 gl, Convex c) {
+		// check for polygon
+		if (c.isType(Polygon.TYPE)) {
+			// cast and get the data
 			Polygon p = (Polygon) c;
 			Vector2[] vertices = p.getVertices();
 			int size = vertices.length;
-			// create a vector to reuse
-			Vector2 v = new Vector2();
+			
+			// render each vertex in a line loop
+			Vector2 v;
+			gl.glBegin(GL.GL_LINE_LOOP);
 			for (int i = 0; i < size; i++) {
-				// get the point
-				v.set(vertices[i]);
-				// put it in world coordinates
-				t.transform(v);
-				// add it to the polygon
-				poly.addPoint((int) Math.ceil(v.x * s), (int) Math.ceil(v.y * s));
+				v = vertices[i];
+				gl.glVertex2d(v.x, v.y);
 			}
-
-			// draw the shape			
-			g.draw(poly);
-		} else if (c instanceof Circle) {
-			Circle cir = (Circle) c;
-			Vector2 center = cir.getCenter();
-			// transform the center into world coordinates
-			center = t.getTransformed(center);
-			double r = cir.getRadius() * s;
-			Vector2 e = cir.getCenter().sum(cir.getRadius(), 0.0);
-			t.transform(e);
-			// draw the oval
-			g.drawOval(
-					(int) Math.ceil(center.x * s - r),
-					(int) Math.ceil(center.y * s - r),
-					(int) Math.ceil(r + r),
-					(int) Math.ceil(r + r));
-			// draw a line through the circle to show rotation effects
-			g.drawLine(
-					(int) Math.ceil(center.x * s),
-					(int) Math.ceil(center.y * s),
-					(int) Math.ceil(e.x * s),
-					(int) Math.ceil(e.y * s));
+			gl.glEnd();
+		// check for circle
+		} else if (c.isType(Circle.TYPE)) {
+			// cast and get data
+			Circle circle = (Circle) c;
+			double radius = circle.getRadius();
+			Vector2 cc = circle.getCenter();
+			
+			// render a line loop using the stored sin and cos tables
+			GLHelper.renderCircle(gl, cc.x, cc.y, radius, 20);
+			
+			// render a line from the center to the extent to show rotation
+			Vector2 e = circle.getCenter().sum(radius, 0.0);
+			gl.glBegin(GL.GL_LINES);
+				gl.glVertex2d(cc.x, cc.y);
+				gl.glVertex2d(e.x, e.y);
+			gl.glEnd();
 		} else if (c instanceof Segment) {
 			Segment seg = (Segment) c;
-			Vector2 p1 = t.getTransformed(seg.getPoint1());
-			Vector2 p2 = t.getTransformed(seg.getPoint2());
-			g.drawLine(
-					(int) Math.ceil(p1.x * s),
-					(int) Math.ceil(p1.y * s),
-					(int) Math.ceil(p2.x * s),
-					(int) Math.ceil(p2.y * s));
+			Vector2 p1 = seg.getPoint1();
+			Vector2 p2 = seg.getPoint2();
+			
+			gl.glBegin(GL.GL_LINES);
+				gl.glVertex2d(p1.x, p1.y);
+				gl.glVertex2d(p2.x, p2.y);
+			gl.glEnd();
 		}
 	}
 	
 	/**
-	 * Renders a fill color for the given convex object
-	 * @param g the graphics object to render to
-	 * @param c the convex object to render on top of
-	 * @param t the transform of the convex object
-	 * @param scale the world to screen space scale factor
+	 * Renders a fill color for the given convex object.
+	 * @param gl the OpenGL graphics context
+	 * @param c the convex object to render
 	 */
-	private void renderFill(Graphics2D g, Convex c, Transform t, double scale) {
-		// get the transformed center
-		Vector2 ce = t.getTransformed(c.getCenter());
-		
-		// check for arbitrary polygon
-		if (c instanceof Polygon) {
-			// do a color fill of the object
-			java.awt.Polygon poly = new java.awt.Polygon();
-			// cast to polygon
+	private void fillShape(GL2 gl, Convex c) {
+		// check for polygon
+		if (c.isType(Polygon.TYPE)) {
+			// cast and get data
 			Polygon p = (Polygon) c;
 			Vector2[] vertices = p.getVertices();
 			int size = vertices.length;
-			// create a vector to reuse
-			Vector2 v = new Vector2();
-			for (int i = 0; i < size; i++) {
-				// get the point
-				v.set(vertices[i]);
-				// put it in world coordinates
-				t.transform(v);
-				// add it to the polygon
-				poly.addPoint((int) Math.ceil(v.x * scale), (int) Math.ceil(v.y * scale));
-			}
-
-			// fill the shape			
-			g.fill(poly);
-		}
-
-		// check for circle
-		if (c instanceof Circle) {
-			Circle cir = (Circle) c;
-			double r = cir.getRadius() * scale;
 			
-			g.fillOval((int) Math.ceil(ce.x * scale - r),
-					   (int) Math.ceil(ce.y * scale - r),
-					   (int) Math.ceil(r * 2.0),
-					   (int) Math.ceil(r * 2.0));
+			// fill a polygon bound by vertices
+			Vector2 v;
+			gl.glBegin(GL2.GL_POLYGON);
+			for (int i = 0; i < size; i++) {
+				v = vertices[i];
+				gl.glVertex2d(v.x, v.y);
+			}
+			gl.glEnd();
+		// check for circle
+		} else if (c.isType(Circle.TYPE)) {
+			// cast and get data
+			Circle circle = (Circle) c;
+			double radius = circle.getRadius();
+			Vector2 cc = circle.getCenter();
+			
+			// use a triangle fan about the unit circle
+			GLHelper.fillCircle(gl, cc.x, cc.y, radius, 20);
 		}
+		// nothing to do for segment
+	}
+	
+	/**
+	 * Renders the edge normals of the given {@link Wound} {@link Shape}.
+	 * @param gl the OpenGL graphics context
+	 * @param w the {@link Wound} {@link Shape} to render normals
+	 */
+	private void renderNormals(GL2 gl, Wound w) {
+		// get the data
+		Vector2[] vertices = w.getVertices();
+		Vector2[] normals = w.getNormals();
+		int size = normals.length;
 		
-		// check for segment
-		if (c instanceof Segment) {
-			Segment seg = (Segment) c;
-			Vector2 p1 = t.getTransformed(seg.getPoint1());
-			Vector2 p2 = t.getTransformed(seg.getPoint2());
-			g.drawLine(
-					(int) Math.ceil(p1.x * scale),
-					(int) Math.ceil(p1.y * scale),
-					(int) Math.ceil(p2.x * scale),
-					(int) Math.ceil(p2.y * scale));
+		// declare some place holders
+		Vector2 p1, p2, n;
+		Vector2 mid = new Vector2();
+					
+		// render all the normals
+		for (int i = 0; i < size; i++) {
+			// get the points and the normal
+			p1 = vertices[i];
+			p2 = vertices[(i + 1 == size) ? 0 : i + 1];
+			n = normals[i];
+			
+			// find the mid point between p1 and p2
+			mid.set(p2).subtract(p1).multiply(0.5).add(p1);
+			
+			gl.glBegin(GL.GL_LINES);
+				gl.glVertex2d(mid.x, mid.y);
+				gl.glVertex2d(mid.x + n.x * NORMAL_LENGTH, mid.y + n.y * NORMAL_LENGTH);
+			gl.glEnd();
 		}
 	}
 	
@@ -376,7 +442,7 @@ public class Entity extends Body {
 	 * @return Color
 	 * @since 1.0.3
 	 */
-	public Color getColor() {
-		return color;
+	public float[] getColor() {
+		return this.color;
 	}
 }

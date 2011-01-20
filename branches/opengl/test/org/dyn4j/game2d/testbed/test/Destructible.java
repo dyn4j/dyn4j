@@ -24,8 +24,6 @@
  */
 package org.dyn4j.game2d.testbed.test;
 
-import java.awt.Color;
-
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.Body;
@@ -117,7 +115,7 @@ public class Destructible extends Test {
 					// make the test body into triangles
 					
 					// make the new bodies the same color
-					Color color = test.getColor();
+					float[] color = test.getColor();
 					
 					// get the velocity
 					Vector2 v = test.getVelocity().copy();
@@ -136,7 +134,7 @@ public class Destructible extends Test {
 						Vector2 p1 = vertices[i];
 						Vector2 p2 = vertices[i + 1 == size ? 0 : i + 1];
 						// create a body for the triangle
-						Entity b = new Entity(color);
+						Entity b = new Entity(color[0], color[1], color[2], color[3]);
 						b.addFixture(Geometry.createTriangle(p1, p2, center));
 						b.setMass();
 						// copy over the transform
