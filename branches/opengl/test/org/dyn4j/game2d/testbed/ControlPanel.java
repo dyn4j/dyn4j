@@ -1132,6 +1132,27 @@ public class ControlPanel extends JFrame {
 				GridBagConstraints.NONE, insets, 0, 0));
 		y++;
 		
+		// vertical sync
+		JLabel lblVertSync = new JLabel("Vertical Sync", this.helpIcon, JLabel.LEFT);
+		lblVertSync.setToolTipText("Toggles vertical sync.  Rendering occurs only at the\ndisplay refresh rate, typically 60hz.");
+		pnlDraw.add(lblVertSync, new GridBagConstraints(
+				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		JCheckBox chkVertSync = new JCheckBox();
+		chkVertSync.setSelected(draw.isVerticalSyncEnabled());
+		chkVertSync.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// toggle the checkbox
+				Draw draw = Draw.getInstance();
+				draw.setVerticalSyncEnabled(!draw.isVerticalSyncEnabled());
+			}
+		});
+		pnlDraw.add(chkVertSync, new GridBagConstraints(
+				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
+				GridBagConstraints.NONE, insets, 0, 0));
+		y++;
+		
 		// add a blank label to fill in the rest of the space
 		JLabel blank = new JLabel();
 		pnlDraw.add(blank, new GridBagConstraints(

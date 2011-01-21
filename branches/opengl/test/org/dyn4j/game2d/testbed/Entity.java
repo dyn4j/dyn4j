@@ -211,11 +211,6 @@ public class Entity extends Body {
 			}
 		}
 		
-		// remove the rotation
-		gl.glPopMatrix();
-		gl.glPushMatrix();
-		// translate in the x-y plane
-		gl.glTranslated(tx.getTranslationX(), tx.getTranslationY(), 0);
 
 		// check if we should draw the rotation disc
 		if (draw.drawRotationDisc()) {
@@ -230,13 +225,27 @@ public class Entity extends Body {
 			GLHelper.renderCircle(gl, c.x, c.y, r, 20);
 		}
 		
+		// check if we should draw center points
+		if (draw.drawCenter()) {
+			// get the center of mass
+			Vector2 c = this.mass.getCenter();
+			// set the color
+			float[] color = draw.getCenterColor();
+			gl.glColor4fv(color, 0);
+			// draw a circle a tenth of the size of the rotation disc
+			GLHelper.renderCircle(gl, c.x, c.y, this.getRotationDiscRadius() * 0.1, 20);
+		}
+		
+		// restore the original transformation
+		gl.glPopMatrix();
+		
 		// check if we should draw velocity vectors
 		if (draw.drawVelocity()) {
 			// set the color
 			float[] color = draw.getVelocityColor();
 			gl.glColor4fv(color, 0);
 			// draw the velocities
-				Vector2 c = this.getLocalCenter();
+				Vector2 c = this.getWorldCenter();
 				Vector2 v = this.getVelocity();
 				double av = this.getAngularVelocity();
 				
@@ -249,20 +258,6 @@ public class Entity extends Body {
 				// draw an arc
 				GLHelper.renderArc(gl, c.x, c.y, 0.125, 0, av, 20);
 		}
-		
-		// check if we should draw center points
-		if (draw.drawCenter()) {
-			// get the center of mass
-			Vector2 c = this.mass.getCenter();
-			// set the color
-			float[] color = draw.getCenterColor();
-			gl.glColor4fv(color, 0);
-			// draw a circle a tenth of the size of the rotation disc
-			GLHelper.renderCircle(gl, c.x, c.y, this.getRotationDiscRadius() * 0.1, 20);
-		}
-		
-		// restore the previous matrix
-		gl.glPopMatrix();
 	}
 	
 	/**

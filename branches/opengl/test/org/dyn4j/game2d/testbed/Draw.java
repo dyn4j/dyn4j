@@ -135,6 +135,9 @@ public class Draw {
 	/** Whether to use text anti-aliasing */
 	private boolean textAntiAliased = false;
 	
+	/** Whether vertical sync is enabled */
+	private boolean verticalSyncEnabled = false;
+	
 	/** The singleton instance */
 	private static final Draw instance = new Draw();
 	
@@ -621,5 +624,23 @@ public class Draw {
 	 */
 	public void setTextAntiAliased(boolean flag) {
 		this.textAntiAliased = flag;
+	}
+	
+	/**
+	 * Returns true if vertical sync is enabled.
+	 * @return boolean
+	 * @since 2.2.3
+	 */
+	public boolean isVerticalSyncEnabled() {
+		return this.verticalSyncEnabled;
+	}
+	
+	/**
+	 * Sets whether vertical sync is enabled or not.
+	 * @param flag true if vertical sync should be enabled
+	 * @since 2.2.3
+	 */
+	public void setVerticalSyncEnabled(boolean flag) {
+		this.verticalSyncEnabled = flag;
 	}
 }

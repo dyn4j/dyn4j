@@ -39,6 +39,7 @@ import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 import javax.media.opengl.GLAutoDrawable;
 import javax.naming.ConfigurationException;
 
@@ -288,7 +289,7 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 		}
 	}
 	
-	int texId, fboId;
+	int texId, fboId, pBlur, vsBlurId, fsBlurId;
 	
 	/* (non-Javadoc)
 	 * @see org.codezealot.game.core.JoglCore#init(javax.media.opengl.GLAutoDrawable)
@@ -374,7 +375,94 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 		
 		// ignore the primary color source
 		gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_DECAL);
+		
+		// set the swap interval to as fast as possible
+		gl.setSwapInterval(0);
+		
+		// create the shaders
+		vsBlurId = gl.glCreateShader(GL2.GL_VERTEX_SHADER);
+		fsBlurId = gl.glCreateShader(GL2.GL_FRAGMENT_SHADER);
+		
+		// load the shader programs from the file system
+		Shader vsBlur = Shader.load("/shaders/blur.vs");
+		Shader fsBlur = Shader.load("/shaders/blur.fs");
+		
+		// set the source for the shaders
+		gl.glShaderSource(vsBlurId, vsBlur.source.length, vsBlur.source, vsBlur.lengths, 0);
+		gl.glShaderSource(fsBlurId, fsBlur.source.length, fsBlur.source, fsBlur.lengths, 0);
+		
+		// compile the shaders
+		gl.glCompileShader(vsBlurId);
+		gl.glCompileShader(fsBlurId);
+		
+		// create the program
+		pBlur = gl.glCreateProgram();
+		
+		// attach the shaders to the programs
+		gl.glAttachShader(pBlur, vsBlurId);
+		gl.glAttachShader(pBlur, fsBlurId);
+		
+		// link the program
+		gl.glLinkProgram(pBlur);
+		
+		// validate the programs
+		gl.glValidateProgram(pBlur);
+		
+		this.checkProgram(gl, pBlur);
+		this.checkShader(gl, vsBlurId);
+		this.checkShader(gl, fsBlurId);
+		System.out.println(gl.glGetError());
 	}
+	
+    private void checkProgram(GL2 gl, int handle) {
+        
+        int[] buffer = new int[1];
+        
+        // check link status
+        gl.glGetProgramiv(handle, GL2.GL_LINK_STATUS, buffer, 0);
+        if(buffer[0] == GL.GL_FALSE) // 1 or 0
+        	System.out.println("error linking program");
+        
+        // validate program
+        gl.glValidateProgram(handle);
+        gl.glGetProgramiv(handle, GL2.GL_VALIDATE_STATUS, buffer, 0);
+        if(buffer[0] == GL.GL_FALSE)
+        	System.out.println("program validation reports error");
+        
+        // dump log
+        gl.glGetProgramiv(handle, GL2.GL_INFO_LOG_LENGTH, buffer, 0);
+        byte[] log = new byte[buffer[0]];
+        gl.glGetInfoLogARB(handle, buffer[0], buffer, 0, log, 0);
+        
+        if(log[0] != 0) // 0 if empty
+        	System.out.println("linker info log:\n"+new String(log));
+    }
+
+    private void checkShader(GL2 gl, int handle) {
+        
+        boolean error = false;
+        
+        // check compile state
+        int[] buffer = new int[1];
+        gl.glGetShaderiv(handle, GL2.GL_COMPILE_STATUS, buffer, 0);
+        if(buffer[0] == GL.GL_FALSE) {
+//            getLog().warning("error compiling shader:\n"+getName());
+            error = true;
+        }
+        
+        // log info log
+        gl.glGetShaderiv(handle, GL2.GL_INFO_LOG_LENGTH, buffer, 0);
+        byte[] log = new byte[buffer[0]];
+        gl.glGetInfoLogARB(handle, buffer[0], buffer, 0, log, 0);
+        
+        if(log[0] != 0 && !error)  {// 0 if empty
+            error = true; // TODO setup exception level
+//            getLog().warning("compiler info log:\n"+new String(log, 0, log.length-1));
+        }
+        
+        if(error)
+        	System.out.println("error: " + new String(log, 0, log.length-1));
+    }
 	
 	/* (non-Javadoc)
 	 * @see org.codezealot.game.core.Core#render(java.lang.Object)
@@ -404,103 +492,22 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 			gl.glHint(GL2.GL_POLYGON_SMOOTH_HINT, GL.GL_FASTEST);
 		}
 		
-		// make sure glsl is supported
-//		if (gl.hasGLSL()) {
-//
-//		}
+		// check for vertical sync
+		if (draw.isVerticalSyncEnabled()) {
+			if (gl.getSwapInterval() == 0) {
+				gl.setSwapInterval(1);
+			}
+		} else {
+			if (gl.getSwapInterval() == 1) {
+				gl.setSwapInterval(0);
+			}
+		}
 		
 		// switch to draw to the FBO
 		gl.glBindFramebuffer(GL.GL_FRAMEBUFFER, fboId);
 		gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		
-//		gl.glClear(GL.GL_COLOR_BUFFER_BIT);
-		// draw everything
-		
-		// see if we should anti-alias the text
-//		if (draw.isTextAntiAliased()) {
-//			// turn it on
-//			g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-//		}
-		
-		// determine if we need to do the convolve-op
-//		if (draw.isPanelBlurred() && draw.drawPanel()) {
-//			// check if the cached blur surface is null
-//			if (blur == null) {
-//				// if so create it
-//				blur = g.getDeviceConfiguration().createCompatibleImage(width, height);
-//			}
-//			// get the graphics object to paint to
-//			Graphics2D bg = blur.createGraphics();
-//			
-//			// to perform the convolve op we need to draw to the buffered image instead
-//			// of the graphics object
-//			
-//			// call the super method
-//			super.render(bg);
-//			
-//			// see if we should anti-alias the text
-//			if (draw.isTextAntiAliased()) {
-//				// turn it on
-//				bg.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-//			}
-//			
-//			// see if we should anti-alias
-//			if (draw.isAntiAliased()) {
-//				// turn it on
-//				bg.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-//			}
-//			
-//			// set the background color to white
-//			bg.setBackground(Color.WHITE);
-//			bg.setClip(0, 0, width, height);
-//			
-//			// paint the background
-//			bg.clearRect(0, 0, width, height);
-//			
-//			// paint the test
-//			this.test.render(bg, width, height);
-//			
-//			// render the controls label top center
-//			this.renderControls(bg, (int) Math.ceil((width - this.controlsLabel.getWidth(bg)) / 2.0), 5);
-//			
-//			// we don't need that anymore
-//			bg.dispose();
-//			
-//			// save the current clip
-//			Shape clip = g.getClip();
-//			// set the clip to above the metrics panel
-//			g.setClip(new Rectangle(0, 0, width, height - 110));
-//			// copy that clip
-//			g.drawImage(blur, 0, 0, null);
-//			// set the clip to only the metrics panel
-//			g.setClip(new Rectangle(0, height - 110, width, 110));
-//			
-//			// setup the blur 5x5 kernel matrix
-//			float[] blurMatrix = new float[] {0.04f, 0.04f, 0.04f, 0.04f, 0.04f,
-//											  0.04f, 0.04f, 0.04f, 0.04f, 0.04f,
-//											  0.04f, 0.04f, 0.04f, 0.04f, 0.04f,
-//											  0.04f, 0.04f, 0.04f, 0.04f, 0.04f,
-//											  0.04f, 0.04f, 0.04f, 0.04f, 0.04f};
-//			
-//			// create the blur convolve op
-//			ConvolveOp op = new ConvolveOp(new Kernel(5, 5, blurMatrix));
-//			
-//			// draw the metrics panel with the convolve op
-//			g.drawImage(blur, op, 0, 0);
-//			// set the color to a partially transparent black
-//			g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.8f));
-//			// shade the metrics panel (for the background)
-//			g.fillRect(0, height - 110, width, 110);
-//			// set the original clip back
-//			g.setClip(clip);
-//		} else {
 			super.render(gl);
-			
-			// see if we should anti-alias
-//			if (draw.isAntiAliased()) {
-//				// turn anti-aliasing on
-//				g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-//			}
 			
 			// clear the screen
 			gl.glClear(GL.GL_COLOR_BUFFER_BIT);
@@ -592,6 +599,13 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 		// set the texture to render
 		gl.glBindTexture(GL.GL_TEXTURE_2D, texId);
 		
+		// pass the texture to the shader
+		gl.glUseProgram(pBlur);
+		// the second parameter is not the texture id its the texture ordinal
+		gl.glUniform1i(0, 0);
+		gl.glUniform1f(1, width);
+		gl.glUniform1f(2, height);
+		
 		// draw the texture to a 2d quad
 		gl.glBegin(GL2.GL_QUADS);
 			gl.glTexCoord2d(1, 0);
@@ -604,8 +618,9 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 			gl.glVertex2d(width/2.0, height/2.0);
 		gl.glEnd();
 		
-		gl.glBindTexture(GL.GL_TEXTURE_2D, 0);
 		// switch back to the default texture
+		gl.glBindTexture(GL.GL_TEXTURE_2D, 0);
+		gl.glUseProgram(0);
 		
 		this.usage.setRender(this.timer.getCurrentTime() - startTime);
 	}
