@@ -7,6 +7,5 @@
 	<classpathentry kind="lib" path="lib/gluegen-rt.jar"/>
 	<classpathentry kind="lib" path="lib/jogl.all.jar"/>
 	<classpathentry kind="lib" path="lib/nativewindow.all.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.codezealot.game"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -25,28 +25,24 @@
 package org.dyn4j.game2d.testbed;
 
 import java.awt.Dimension;
-import java.io.IOException;
-import java.util.logging.LogManager;
+import java.awt.FlowLayout;
 
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLProfile;
+import javax.swing.JApplet;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import org.codezealot.game.core.AppletLoader;
-import org.codezealot.game.render.Applet;
-import org.codezealot.game.render.JoglSurface;
-
 /**
- * The applet driver where the core creation is done.
+ * Class used as the entry point for running the TestBed as an Applet.
  * @author William Bittle
  * @version 1.0.3
  * @since 1.0.0
  */
-public class AppletDriver extends AppletLoader<JoglSurface> {
-	/** the version id */
+public class AppletDriver extends JApplet {
+	/** The version id */
 	private static final long serialVersionUID = 7803602971018002468L;
-
+	
 	/* (non-Javadoc)
 	 * @see java.applet.Applet#start()
 	 */
@@ -54,18 +50,9 @@ public class AppletDriver extends AppletLoader<JoglSurface> {
 	public void start() {
 		super.start();
 		// this method is called every time they hit the page
-		
-		// setup logging
-		LogManager manager = LogManager.getLogManager();
-	    try {
-			manager.readConfiguration(AppletDriver.class.getResourceAsStream("/logging.properties"));
-		} catch (SecurityException e) {
-			System.err.println(e);
-		} catch (IOException e) {
-			System.err.println(e);
-		}
 	    
 	    // set the look and feel to the system look and feel
+		// this is needed since the user can have the control panel come up
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (ClassNotFoundException e) {
@@ -81,23 +68,25 @@ public class AppletDriver extends AppletLoader<JoglSurface> {
 		this.setFocusable(true);
 		// create the size of the applet
 		Dimension size = new Dimension(800, 600);
-		// create the rendering surface
+		
+		// setup OpenGL capabilities
 		GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL2));
 		caps.setDoubleBuffered(true);
 		caps.setHardwareAccelerated(true);
 		caps.setNumSamples(2);
 		caps.setSampleBuffers(true);
-		JoglSurface surface = new JoglSurface(caps);
-		surface.setFocusable(true);
-		surface.setFocusTraversalKeysEnabled(true);
-		// create the container for the surface
-		Applet<JoglSurface> applet = new Applet<JoglSurface>(this, surface, size);
-		// create the core and set its rendering container
-		this.core = new TestBed<Applet<JoglSurface>>(applet);
-		// start the core
-		this.core.start();
 		
+		// create the testbed
+		TestBed testbed = new TestBed(caps, this, size, TestBed.Mode.APPLET);
+		
+		// set the layout of the frame
+		this.setLayout(new FlowLayout());
+		// add the testbed to the frame
+		this.add(testbed);
+		
+		// make sure the applet is visible
 		if (this.isVisible()) {
+			// request focus away from the browser so that keys work
 			this.requestFocus();
 		}
 	}

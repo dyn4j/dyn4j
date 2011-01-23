@@ -3,6 +3,7 @@ float kernel[9];
 uniform sampler2D colorMap;
 uniform float width;
 uniform float height;
+uniform float yOffset;
 
 float step_w = 1.0/width;
 float step_h = 1.0/height;
@@ -31,7 +32,7 @@ void main(void)
    kernel[6] = 1.0/16.0;   	kernel[7] = 2.0/16.0;	kernel[8] = 1.0/16.0;
    
    
-   if(gl_TexCoord[0].t<0.3)
+   if(gl_TexCoord[0].t<yOffset)
    {
 	   for( i=0; i<9; i++ )
 	   {
@@ -39,13 +40,9 @@ void main(void)
 			sum += tmp * kernel[i];
 	   }
    }
-   else if (gl_TexCoord[0].t>0.305)
-   {
-		sum = texture2D(colorMap, gl_TexCoord[0].xy);
-   }
    else
    {
-   		sum = vec4(0.0, 0.0, 0.0, 1.0);
+		sum = texture2D(colorMap, gl_TexCoord[0].xy);
    }
 
    gl_FragColor = sum;

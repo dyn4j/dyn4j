@@ -24,91 +24,85 @@
  */
 package org.dyn4j.game2d.testbed;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.DisplayMode;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLProfile;
+import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import org.codezealot.game.core.JoglCore;
-import org.codezealot.game.render.Application;
-import org.codezealot.game.render.JoglSurface;
 import org.dyn4j.game2d.Version;
 
 /**
- * Entry point class where setup of the game core is done when
- * running in application mode.
+ * Class used as the entry point for running the TestBed as a desktop application.
  * @author William Bittle
- * @version 2.2.2
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class Driver {
-	/** the class logger */
-	private static final Logger LOGGER = Logger.getLogger("org.dyn4j.game2d.Driver");
-	
 	/**
 	 * The main method; uses zero arguments in the args array.
 	 * @param args the command line arguments
 	 */
 	public static final void main(String[] args) {
+	    // set the look and feel to the system look and feel
 		try {
-			// setup logging
-			LogManager manager = LogManager.getLogManager();
-		    manager.readConfiguration(Driver.class.getResourceAsStream("/logging.properties"));
-		    
-		    // set the look and feel to the system look and feel
-			try {
-				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			} catch (ClassNotFoundException e) {
-				LOGGER.throwing(Application.class.getName(), "setLookAndFeel", e);
-			} catch (InstantiationException e) {
-				LOGGER.throwing(Application.class.getName(), "setLookAndFeel", e);
-			} catch (IllegalAccessException e) {
-				LOGGER.throwing(Application.class.getName(), "setLookAndFeel", e);
-			} catch (UnsupportedLookAndFeelException e) {
-				LOGGER.throwing(Application.class.getName(), "setLookAndFeel", e);
-			}
-		    
-			// create the size of the window
-			Dimension size = new Dimension(800, 600);
-			// get a display mode from it
-			DisplayMode mode = Application.getDisplayMode(size);
-			// create the rendering surface
-			GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL2));
-			caps.setDoubleBuffered(true);
-			caps.setHardwareAccelerated(true);
-			caps.setNumSamples(2);
-			caps.setSampleBuffers(true);
-			JoglSurface surface = new JoglSurface(caps);
-			// create the container for the surface
-			Application<JoglSurface> app = new Application<JoglSurface>(surface, "dyn4j v" + Version.getVersion() + " TestBed", mode, null, false);
-			// set the container in the core
-			JoglCore<Application<JoglSurface>> core = new TestBed<Application<JoglSurface>>(app);
-			app.setLocationByPlatform(true);
-			
-			try {
-				// attempt to load the image icon
-				app.setIconImage(ImageIO.read(Driver.class.getResource("/icon.png")));
-			} catch (IOException e1) {
-				LOGGER.finest("Icon image 'icon.png' not found.");
-			}
-			
-			// setup the window listener
-			WindowListener listener = new WindowListener(core);
-			// add the window listener to the container
-			app.addWindowListener(listener);
-			// start the core
-			core.start();
-		} catch (Exception e) {
-			// log any exceptions we get
-			LOGGER.log(Level.SEVERE, "", e);
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (UnsupportedLookAndFeelException e) {
+			e.printStackTrace();
 		}
+	    
+		// create the size of the window
+		Dimension size = new Dimension(800, 600);
+		
+		// create a JFrame to put the TestBed into
+		JFrame window = new JFrame("dyn4j v" + Version.getVersion() + " TestBed");
+		
+		// attempt to set the icon
+		try {
+			// attempt to load the image icon
+			window.setIconImage(ImageIO.read(Driver.class.getResource("/icon.png")));
+		} catch (IOException e1) {
+			System.err.println("Icon image 'icon.png' not found.");
+		}
+		
+		// setup OpenGL capabilities
+		GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL2));
+		caps.setDoubleBuffered(true);
+		caps.setHardwareAccelerated(true);
+		caps.setNumSamples(2);
+		caps.setSampleBuffers(true);
+		
+		// create the testbed
+		TestBed testbed = new TestBed(caps, window, size, TestBed.Mode.APPLICATION);
+		
+		// set the layout of the frame
+		window.getContentPane().setLayout(new BorderLayout());
+		// add the testbed to the frame
+		window.getContentPane().add(testbed);
+		
+		window.pack();
+		window.setResizable(false);
+		// move from (0, 0) since this hides some of the window frame
+		window.setLocation(10, 10);
+		
+		// show the window
+		window.setVisible(true);
+		
+		// setting this property will call the dispose methods on the GLCanvas
+		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		// finally start the testbed
+		testbed.start();
 	}
 }

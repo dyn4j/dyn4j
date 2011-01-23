@@ -25,29 +25,26 @@
 package org.dyn4j.game2d.testbed;
 
 import java.awt.Color;
+import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.awt.font.TextAttribute;
-import java.awt.image.BufferedImage;
-import java.text.AttributedString;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
-import javax.media.opengl.GL3;
 import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLEventListener;
+import javax.media.opengl.awt.GLCanvas;
 import javax.naming.ConfigurationException;
 
-import org.codezealot.game.core.JoglCore;
-import org.codezealot.game.input.Input;
-import org.codezealot.game.input.Input.Hold;
-import org.codezealot.game.render.Container;
-import org.codezealot.game.render.JoglSurface;
 import org.dyn4j.game2d.Version;
 import org.dyn4j.game2d.collision.Fixture;
 import org.dyn4j.game2d.collision.broadphase.Sap;
@@ -62,19 +59,37 @@ import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Segment;
 import org.dyn4j.game2d.geometry.Vector2;
+import org.dyn4j.game2d.testbed.input.Input;
+import org.dyn4j.game2d.testbed.input.Keyboard;
+import org.dyn4j.game2d.testbed.input.Mouse;
+import org.dyn4j.game2d.testbed.input.Input.Hold;
 
+import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.gl2.GLUT;
+import com.jogamp.opengl.util.glsl.ShaderUtil;
 
 /**
  * Container for the tests.
  * @author William Bittle
- * @param <E> the container type
- * @version 2.2.1
+ * @version 2.2.3
  * @since 1.0.0
  */
-public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
-	/** The class logger */
-	private static final Logger LOGGER = Logger.getLogger(TestBed.class.getName());
+public class TestBed extends GLCanvas implements GLEventListener {
+	/** The UID */
+	private static final long serialVersionUID = -3159660619562196286L;
+
+	/**
+	 * The container modes.
+	 * @author William Bittle
+	 * @version 2.2.3
+	 * @since 2.2.3
+	 */
+	public static enum Mode {
+		/** The TestBed is running in an applet */
+		APPLET,
+		/** The TestBed is running in a desktop application */
+		APPLICATION
+	}
 	
 	/**
 	 * The stepping modes.
@@ -82,7 +97,7 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 	 * @version 2.0.0
 	 * @since 2.0.0
 	 */
-	private static enum StepMode {
+	public static enum StepMode {
 		/** Continuous mode */
 		CONTINUOUS,
 		/** Manual stepping mode */
@@ -91,8 +106,37 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 		TIMED
 	}
 	
-	/** The text color */
-	private static final Color TEXT_COLOR = Color.GRAY;
+	/** The text color (grey) */
+	public static final float[] TEXT_COLOR = new float[] {0.5f, 0.5f, 0.5f, 1.0f};
+	
+	// State data
+	
+	/** The mode application or applet */
+	protected TestBed.Mode mode;
+	
+	/** The desired rendering surface size */
+	protected Dimension size;
+	
+	/** The keyboard to accept and store key events */
+	protected Keyboard keyboard;
+	
+	/** The mouse to accept and store mouse events */
+	protected Mouse mouse;
+	
+	/** The FPS monitor */
+	protected Fps fps;
+	
+	/** The timer for measuring execution duration */
+	protected Timer timer;
+	
+	/** The JOGL automatic animator */
+	protected Animator animator;
+	
+	/** Whether the TestBed is paused or not */
+	private boolean paused = false;
+	
+	/** The paused flag lock object */
+	private Object pauseLock = new Object();
 	
 	/** The time usage object */
 	private Usage usage = new Usage();
@@ -104,7 +148,7 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 	private ControlPanel settingsFrame;
 
 	/** Flag indicating step mode */
-	private StepMode mode = StepMode.CONTINUOUS;
+	private StepMode stepMode = StepMode.CONTINUOUS;
 	
 	/** The wait time in seconds between steps in timed stepping mode */
 	private double tModeInterval = 0.5;
@@ -112,11 +156,32 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 	/** The total elapsed time in nanoseconds for timed stepping mode */
 	private double tModeElapsed = 0.0;
 	
-	// text labels
+	// OpenGL data
+	
+	/** The id of the texture that the FBO will render to */
+	private int texId;
+	
+	/** The FBO id for rendering to a different target */
+	private int fboId;
+	
+	/** The id of the blur shader program */
+	private int pBlurId;
+	
+	/** The id of the blur vertex shader */
+	private int vsBlurId;
+	
+	/** The id of the blur fragment shader */
+	private int fsBlurId;
+	
+	/** Whether to use the shader or not */
+	private boolean shaderProgramValid = false;
+	
+	// Texts
+	
 	/** The label for the control panel key */
-	private SimpleText controlsLabel = new SimpleText("Press 'c' to open the Test Bed Control Panel.");
+	private static final String CONTROLS_LABEL = "Press 'c' to open the Test Bed Control Panel.";
 	/** The label for the version */
-	private SimpleText versionLabel = new SimpleText("Version:");
+	private static final String VERSION_LABEL = "Version:";
 	/** The value of the dyn4j version */
 	private SimpleText versionValue = new SimpleText("v" + Version.getVersion());
 	/** The label for the current test */
@@ -171,46 +236,106 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 	private SimpleText osDataModelLabel = new SimpleText("Data Model:");
 	/** The label for the number of processors */
 	private SimpleText processorCountLabel = new SimpleText("Processors:");
-	/** The label for the jre version */
-	private SimpleText jreVersionValue;
-	/** The label for the jre mode */
-	private SimpleText jreModeValue;
-	/** The label for the operating system name */
-	private SimpleText osNameValue;
-	/** The label for the architecture name */
-	private SimpleText osArchitectureValue;
-	/** The label for the data model name */
-	private SimpleText osDataModelValue;
-	/** The label for the number of processors */
-	private SimpleText processorCountValue = new SimpleText(String.valueOf(Runtime.getRuntime().availableProcessors()));
 	
-	// picking using left click
+	/** The label for the jre version */
+	private static final String JRE_VERSION = TestBed.getJreVersion();
+	
+	/** The label for the jre mode */
+	private static final String JRE_MODE = TestBed.getJreMode();
+	
+	/** The label for the operating system name */
+	private static final String OS_NAME = TestBed.getOsName();
+	
+	/** The label for the architecture name */
+	private static final String OS_ARCHITECTURE = TestBed.getOsArchitecture();
+	
+	/** The label for the data model name */
+	private static final String OS_DATA_MODEL = TestBed.getOsDataModel();
+	
+	/** The label for the number of processors */
+	private static final String processorCount = String.valueOf(Runtime.getRuntime().availableProcessors());
+	
+	// Picking using left click
+	
 	/** The mouse joint created when picking shapes */
 	private MouseJoint mouseJoint = null;
 	
-	// picking using right click
+	// Picking using right click
+	
 	/** The selected {@link Body} for picking capability */
 	private Body selected = null;
+	
 	/** The old position for picking capability */
 	private Vector2 vOld = null;
+	
 	/** The saved state of the body under control */
 	private DirectControl.State controlState = null;
 	
-	/** The blur image for the metrics panel */
-	private BufferedImage blur = null;
-	
 	/**
 	 * Full constructor.
-	 * @param container the rendering container
+	 * @param capabilities the desired OpenGL capabilities; null to use a default set
+	 * @param size the desired size of the rendering area
+	 * @param mode the mode; either application or applet
 	 */
-	public TestBed(E container) {
-		super(container);
+	public TestBed(GLCapabilities capabilities, Container container, Dimension size, TestBed.Mode mode) {
+		// pass the capabilities down
+		super(capabilities);
+		
+		if (size == null) throw new NullPointerException("The desired size cannot be null.");
+		if (mode == null) throw new NullPointerException("The mode cannot be null.");
+		
+		// set the size and mode
+		this.size = size;
+		this.mode = mode;
+		
+		// set the size
+		this.setPreferredSize(size);
+		this.setMinimumSize(size);
+		
+		// create the keyboard and mouse mappings
+		this.keyboard = new Keyboard();
+		this.mouse = new Mouse();
+		
+		// add the listeners
+		container.addKeyListener(this.keyboard);
+		container.addMouseListener(this.mouse);
+		container.addMouseMotionListener(this.mouse);
+		container.addMouseWheelListener(this.mouse);
+		this.addKeyListener(this.keyboard);
+		this.addMouseListener(this.mouse);
+		this.addMouseMotionListener(this.mouse);
+		this.addMouseWheelListener(this.mouse);
+		
+		// dont allow the canvas to repaint itself
+		this.setIgnoreRepaint(true);
+		
+		// initialize the fps monitor
+		this.fps = new Fps();
+		
+		// initialize the timer
+		this.timer = new Timer();
+		
+		// add this class as the event listener
+		this.addGLEventListener(this);
+		
+		try {
+			// create the simulation settings frame
+			this.settingsFrame = new ControlPanel();
+			// set the current test
+			this.test = this.settingsFrame.getTest();
+		} catch (ConfigurationException e) {
+			System.err.println("An error occurred when attempting to configure the TestBed.");
+			e.printStackTrace();
+		}
+
+		// add all the keys
+		this.initializeInputs();
 	}
 	
 	/**
 	 * Sets up listening for various inputs.
 	 */
-	private void initializeInputs() {
+	protected void initializeInputs() {
 		// make sure the input mappings are clear
 		this.keyboard.clear();
 		this.mouse.clear();
@@ -264,57 +389,70 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 		this.test.initializeInput(this.keyboard, this.mouse);
 	}
 	
+//	/**
+//	 * Sets up text images.
+//	 */
+//	private void initText() {
+//		AttributedString timeString = new AttributedString("Time ( Render | Update | System )");
+//		timeString.addAttribute(TextAttribute.FOREGROUND, new Color(222, 48, 12), 7, 13);
+//		timeString.addAttribute(TextAttribute.FOREGROUND, new Color(222, 117, 0), 16, 22);
+//		timeString.addAttribute(TextAttribute.FOREGROUND, new Color(20, 134, 222), 25, 31);
+//		this.timeUsageLabel = new SimpleText(timeString);
+//		
+//		try {
+//			jreVersionValue = new SimpleText(System.getProperty("java.runtime.version"));
+//			jreModeValue = new SimpleText(System.getProperty("java.vm.info"));
+//			osNameValue = new SimpleText(System.getProperty("os.name"));
+//			osArchitectureValue = new SimpleText(System.getProperty("os.arch"));
+//			osDataModelValue = new SimpleText(System.getProperty("sun.arch.data.model"));
+//		} catch (SecurityException e) {
+//			jreVersionValue = new SimpleText("Unknown");
+//			jreModeValue = new SimpleText("Unknown");
+//			osNameValue = new SimpleText("Unknown");
+//			osArchitectureValue = new SimpleText("Unknown");
+//			osDataModelValue = new SimpleText("Unknown");
+//		}
+//	}
+	
 	/**
-	 * Sets up text images.
+	 * Starts automatic rendering of this TestBed.
 	 */
-	private void initText() {
-		AttributedString timeString = new AttributedString("Time ( Render | Update | System )");
-		timeString.addAttribute(TextAttribute.FOREGROUND, new Color(222, 48, 12), 7, 13);
-		timeString.addAttribute(TextAttribute.FOREGROUND, new Color(222, 117, 0), 16, 22);
-		timeString.addAttribute(TextAttribute.FOREGROUND, new Color(20, 134, 222), 25, 31);
-		this.timeUsageLabel = new SimpleText(timeString);
-		
-		try {
-			jreVersionValue = new SimpleText(System.getProperty("java.runtime.version"));
-			jreModeValue = new SimpleText(System.getProperty("java.vm.info"));
-			osNameValue = new SimpleText(System.getProperty("os.name"));
-			osArchitectureValue = new SimpleText(System.getProperty("os.arch"));
-			osDataModelValue = new SimpleText(System.getProperty("sun.arch.data.model"));
-		} catch (SecurityException e) {
-			jreVersionValue = new SimpleText("Unknown");
-			jreModeValue = new SimpleText("Unknown");
-			osNameValue = new SimpleText("Unknown");
-			osArchitectureValue = new SimpleText("Unknown");
-			osDataModelValue = new SimpleText("Unknown");
+	public void start() {
+		// begin the render loop
+		this.animator = new Animator(this);
+		// start the animator
+		this.animator.start();
+		// reset the timer; this is to make sure that the system doesn't explode
+		// out of control at first (since the first elapsed time will be huge)
+		this.timer.reset();
+	}
+	
+	/**
+	 * Returns true if this TestBed is paused.
+	 * @return boolean
+	 */
+	public boolean isPaused() {
+		return this.paused;
+	}
+	
+	/**
+	 * Pauses or unpauses this TestBed.
+	 * @param flag true if the TestBed should be paused
+	 */
+	public void setPaused(boolean flag) {
+		// obtain the lock on the paused variable
+		synchronized (this.pauseLock) {
+			this.paused = flag;
 		}
 	}
 	
-	int texId, fboId, pBlur, vsBlurId, fsBlurId;
-	
 	/* (non-Javadoc)
-	 * @see org.codezealot.game.core.JoglCore#init(javax.media.opengl.GLAutoDrawable)
+	 * @see javax.media.opengl.GLEventListener#init(javax.media.opengl.GLAutoDrawable)
 	 */
 	@Override
 	public void init(GLAutoDrawable glDrawable) {
-		super.init(glDrawable);
-		
-		// create the simulation settings frame
-		try {
-			this.settingsFrame = new ControlPanel();
-			// set the current test
-			this.test = this.settingsFrame.getTest();
-		} catch (ConfigurationException e) {
-			LOGGER.severe("An error occurred when attempting to configure the TestBed.");
-			LOGGER.throwing("TestBed", "initialize", e);
-		}
-		
-		// initialize the inputs to listen for
-		this.initializeInputs();
-		// initialize the text images
-		this.initText();
-		
-		int width = this.renderer.getDisplaySize().width;
-		int height = this.renderer.getDisplaySize().height;
+		int width = this.size.width;
+		int height = this.size.height;
 		
 		// get the OpenGL context
 		GL2 gl = glDrawable.getGL().getGL2();
@@ -331,9 +469,6 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 		// initialize the matrix
 		gl.glLoadIdentity();
 		
-		// set the shading model to smooth
-//		gl.glShadeModel(GL2.GL_SMOOTH);
-		
 		// set the clear color to white
 		gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		
@@ -344,6 +479,7 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 		gl.glEnable(GL.GL_BLEND);
 		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 		
+		// enable texturing
 		gl.glEnable(GL.GL_TEXTURE_2D);
 		
 		// get a texture object
@@ -379,96 +515,113 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 		// set the swap interval to as fast as possible
 		gl.setSwapInterval(0);
 		
-		// create the shaders
-		vsBlurId = gl.glCreateShader(GL2.GL_VERTEX_SHADER);
-		fsBlurId = gl.glCreateShader(GL2.GL_FRAGMENT_SHADER);
-		
-		// load the shader programs from the file system
-		Shader vsBlur = Shader.load("/shaders/blur.vs");
-		Shader fsBlur = Shader.load("/shaders/blur.fs");
-		
-		// set the source for the shaders
-		gl.glShaderSource(vsBlurId, vsBlur.source.length, vsBlur.source, vsBlur.lengths, 0);
-		gl.glShaderSource(fsBlurId, fsBlur.source.length, fsBlur.source, fsBlur.lengths, 0);
-		
-		// compile the shaders
-		gl.glCompileShader(vsBlurId);
-		gl.glCompileShader(fsBlurId);
-		
-		// create the program
-		pBlur = gl.glCreateProgram();
-		
-		// attach the shaders to the programs
-		gl.glAttachShader(pBlur, vsBlurId);
-		gl.glAttachShader(pBlur, fsBlurId);
-		
-		// link the program
-		gl.glLinkProgram(pBlur);
-		
-		// validate the programs
-		gl.glValidateProgram(pBlur);
-		
-		this.checkProgram(gl, pBlur);
-		this.checkShader(gl, vsBlurId);
-		this.checkShader(gl, fsBlurId);
-		System.out.println(gl.glGetError());
+		// make sure a shader compiler is available
+		if (ShaderUtil.isShaderCompilerAvailable(gl)) {
+			// load the shader programs from the file system
+			// we do this first so that we know whether to create them or not
+			Shader vsBlur, fsBlur;
+			try {
+				vsBlur = Shader.load("/shaders/blur.vs");
+				fsBlur = Shader.load("/shaders/blur.fs");
+				
+				// create the shaders
+				vsBlurId = gl.glCreateShader(GL2.GL_VERTEX_SHADER);
+				fsBlurId = gl.glCreateShader(GL2.GL_FRAGMENT_SHADER);
+				
+				// set the source for the shaders
+				gl.glShaderSource(vsBlurId, vsBlur.source.length, vsBlur.source, vsBlur.lengths, 0);
+				gl.glShaderSource(fsBlurId, fsBlur.source.length, fsBlur.source, fsBlur.lengths, 0);
+				
+				// compile the shaders
+				gl.glCompileShader(vsBlurId);
+				gl.glCompileShader(fsBlurId);
+				
+				// create the program
+				pBlurId = gl.glCreateProgram();
+				
+				// attach the shaders to the programs
+				gl.glAttachShader(pBlurId, vsBlurId);
+				gl.glAttachShader(pBlurId, fsBlurId);
+				
+				// link the program
+				gl.glLinkProgram(pBlurId);
+				
+				// validate the programs
+				gl.glValidateProgram(pBlurId);
+				
+				// verify the shader program can be used
+				if (ShaderUtil.isProgramValid(gl, pBlurId, System.out)
+				 && ShaderUtil.isShaderStatusValid(gl, vsBlurId, GL2.GL_COMPILE_STATUS, System.out)
+				 && ShaderUtil.isShaderStatusValid(gl, fsBlurId, GL2.GL_COMPILE_STATUS, System.out)) {
+					// we are good to use the shader
+					shaderProgramValid = true;
+				}
+			} catch (FileNotFoundException e) {
+				System.err.println("File not found in classpath");
+				e.printStackTrace();
+			} catch (IOException e) {
+				System.err.println("");
+				e.printStackTrace();
+			}
+		}
 	}
 	
-    private void checkProgram(GL2 gl, int handle) {
-        
-        int[] buffer = new int[1];
-        
-        // check link status
-        gl.glGetProgramiv(handle, GL2.GL_LINK_STATUS, buffer, 0);
-        if(buffer[0] == GL.GL_FALSE) // 1 or 0
-        	System.out.println("error linking program");
-        
-        // validate program
-        gl.glValidateProgram(handle);
-        gl.glGetProgramiv(handle, GL2.GL_VALIDATE_STATUS, buffer, 0);
-        if(buffer[0] == GL.GL_FALSE)
-        	System.out.println("program validation reports error");
-        
-        // dump log
-        gl.glGetProgramiv(handle, GL2.GL_INFO_LOG_LENGTH, buffer, 0);
-        byte[] log = new byte[buffer[0]];
-        gl.glGetInfoLogARB(handle, buffer[0], buffer, 0, log, 0);
-        
-        if(log[0] != 0) // 0 if empty
-        	System.out.println("linker info log:\n"+new String(log));
+    /* (non-Javadoc)
+     * @see javax.media.opengl.GLEventListener#dispose(javax.media.opengl.GLAutoDrawable)
+     */
+    @Override
+    public void dispose(GLAutoDrawable glDrawable) {
+    	// dispose of any resources
+    	GL2 gl = glDrawable.getGL().getGL2();
+    	
+    	// create an array of ids to pass to the delete functions
+    	int[] ids = new int[] { fboId, texId };
+    	
+    	// delete the FBO (if this is the current draw target glBindFramebuffer is called
+    	// using the default target implicitly)
+    	gl.glDeleteFramebuffers(1, ids, 0);
+    	
+    	// delete the texture that the FBO was rendering into
+    	gl.glDeleteTextures(1, ids, 1);
+    	
+    	// detach the shaders from the shader program
+    	gl.glDetachShader(pBlurId, vsBlurId);
+    	gl.glDetachShader(pBlurId, fsBlurId);
+    	
+    	// delete the shaders
+    	gl.glDeleteShader(vsBlurId);
+    	gl.glDeleteShader(fsBlurId);
+    	
+    	// delete the shader program
+    	gl.glDeleteProgram(pBlurId);
     }
-
-    private void checkShader(GL2 gl, int handle) {
-        
-        boolean error = false;
-        
-        // check compile state
-        int[] buffer = new int[1];
-        gl.glGetShaderiv(handle, GL2.GL_COMPILE_STATUS, buffer, 0);
-        if(buffer[0] == GL.GL_FALSE) {
-//            getLog().warning("error compiling shader:\n"+getName());
-            error = true;
-        }
-        
-        // log info log
-        gl.glGetShaderiv(handle, GL2.GL_INFO_LOG_LENGTH, buffer, 0);
-        byte[] log = new byte[buffer[0]];
-        gl.glGetInfoLogARB(handle, buffer[0], buffer, 0, log, 0);
-        
-        if(log[0] != 0 && !error)  {// 0 if empty
-            error = true; // TODO setup exception level
-//            getLog().warning("compiler info log:\n"+new String(log, 0, log.length-1));
-        }
-        
-        if(error)
-        	System.out.println("error: " + new String(log, 0, log.length-1));
-    }
-	
-	/* (non-Javadoc)
-	 * @see org.codezealot.game.core.Core#render(java.lang.Object)
-	 */
+    
+    /* (non-Javadoc)
+     * @see javax.media.opengl.GLEventListener#display(javax.media.opengl.GLAutoDrawable)
+     */
 	@Override
-	public void render(GL2 gl) {
+	public void display(GLAutoDrawable glDrawable) {
+		// perform other operations at the start of the loop
+		{
+			// poll for input
+			this.poll();
+			
+			// get the elapsed time
+			long currentTime = this.timer.getCurrentTime();
+			long elapsedTime = this.timer.getElapsedTime(currentTime);
+			
+			// update the TestBed
+			this.update(elapsedTime);
+			
+			// update the timer
+			this.timer.update(currentTime);
+			
+			// update the fps
+			this.fps.update(elapsedTime);
+		}
+		
+		// draw the scene
+		
 		// get the current time
 		long startTime = this.timer.getCurrentTime();
 
@@ -476,8 +629,12 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 		Draw draw = Draw.getInstance();
 		
 		// get the rendering width and height
-		int width = this.renderer.getDisplaySize().width;
-		int height = this.renderer.getDisplaySize().height;
+		int width = this.size.width;
+		int height = this.size.height;
+		
+		GL2 gl = glDrawable.getGL().getGL2();
+		
+		// perform initial setup given the control panel draw settings
 		
 		// check for anti-aliasing
 		if (draw.isAntiAliased()) {
@@ -503,42 +660,111 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 			}
 		}
 		
-		// switch to draw to the FBO
-		gl.glBindFramebuffer(GL.GL_FRAMEBUFFER, fboId);
-		gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		// see if we need to blur the panel
+		if (draw.isPanelBlurred() && this.shaderProgramValid) {
+			// if so, then we need to render to an off screen buffer
+			// first then render that off screen buffer to the screen
+			// applying a blur using a shader program
+			
+			// switch to draw to the FBO
+			gl.glBindFramebuffer(GL.GL_FRAMEBUFFER, fboId);
+			// set the clear color
+			gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		}
 		
-			super.render(gl);
-			
-			// clear the screen
-			gl.glClear(GL.GL_COLOR_BUFFER_BIT);
-			gl.glLoadIdentity();
-			
-			// paint the test
+		// begin drawing
+		
+		// clear the screen
+		gl.glClear(GL.GL_COLOR_BUFFER_BIT);
+		// switch to the model view matrix
+		gl.glMatrixMode(GL2.GL_MODELVIEW);
+		// initialize the matrix (0,0) is in the center of the window
+		gl.glLoadIdentity();
+		
+		// check for a null test
+		if (this.test != null) {
+			// render the test
 			this.test.render(gl, width, height);
+		}
+		
+		// see if we need to blur the panel
+		if (draw.isPanelBlurred() && this.shaderProgramValid) {
+			// unbind the off screen buffer by telling OpenGL to use
+			// the default buffer
+			gl.glBindFramebuffer(GL.GL_FRAMEBUFFER, 0);
 			
-			gl.glPushMatrix();
-			gl.glLoadIdentity();
+			// set the clear color
+			gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+			// clear the buffer
+			gl.glClear(GL.GL_COLOR_BUFFER_BIT);
 			
-			gl.glColor3f(0.0f, 0.0f, 0.0f);
-			GLUT glut = new GLUT();
-			gl.glRasterPos2d(-9, 8);
-			glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, String.valueOf(this.fps.getFps()));
+			// set the texture to the off screen buffer we have
+			// been rendering to
+			gl.glBindTexture(GL.GL_TEXTURE_2D, texId);
 			
-			gl.glPopMatrix();
+			// tell OpenGL to use our shader program instead of the default
+			gl.glUseProgram(pBlurId);
+			// pass the parameters to the shader program
+			// NOTE: for sampler objects you pass the texture ordinal, not the id
+			gl.glUniform1i(0, 0);
+			// pass in the width and height of the texture
+			gl.glUniform1f(1, width);
+			gl.glUniform1f(2, height);
+			// pass in the yOffset, any y value above this number is blurred
+			gl.glUniform1f(3, 0.3f);
 			
-			// render the controls label top center
+			// draw the texture to a 2d quad
+			gl.glBegin(GL2.GL_QUADS);
+				gl.glTexCoord2d(1, 0);
+				gl.glVertex2d(width/2.0, -height/2.0);
+				gl.glTexCoord2d(0, 0);
+				gl.glVertex2d(-width/2.0, -height/2.0);
+				gl.glTexCoord2d(0, 1);
+				gl.glVertex2d(-width/2.0, height/2.0);
+				gl.glTexCoord2d(1, 1);
+				gl.glVertex2d(width/2.0, height/2.0);
+			gl.glEnd();
+			
+			// switch back to the default texture
+			gl.glBindTexture(GL.GL_TEXTURE_2D, 0);
+			// tell OpenGL to use the default shader program
+			gl.glUseProgram(0);
+		}
+		
+		// render the paused overlay if the simulation is paused
+		if (this.isPaused()) {
+			// show a black translucent screen over everything
+			gl.glColor4f(0.0f, 0.0f, 0.0f, 0.3f);
+			GLHelper.fillRectangle(gl, 0, 0, width, height);
+			// show the paused label in the top left corner
+			this.renderPaused(gl, width, height);
+		}
+		
+		// render the HUD panel
+		
+//		gl.glPushMatrix();
+//		gl.glLoadIdentity();
+//		
+//		gl.glColor3f(0.0f, 0.0f, 0.0f);
+//		GLUT glut = new GLUT();
+//		gl.glRasterPos2d(-9, 8);
+//		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, String.valueOf(this.fps.getFps()));
+//		
+//		gl.glPopMatrix();
+		
+		// render the controls label top center
 //			this.renderControls(gl, (int) Math.ceil((width - this.controlsLabel.getWidth(gl)) / 2.0), 5);
-			
-			if (draw.drawPanel()) {
-				// draw the translucent background
-				gl.glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
-				gl.glBegin(GL2.GL_QUADS);
-					gl.glVertex2d(-width / 2.0, -height / 2.0 + 110);
-					gl.glVertex2d(-width / 2.0, -height / 2.0);
-					gl.glVertex2d( width / 2.0, -height / 2.0);
-					gl.glVertex2d( width / 2.0, -height / 2.0 + 110);
-				gl.glEnd();
-			}
+		
+		if (draw.drawPanel()) {
+			// draw the translucent background
+			gl.glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
+			gl.glBegin(GL2.GL_QUADS);
+				gl.glVertex2d(-width / 2.0, -height / 2.0 + 110);
+				gl.glVertex2d(-width / 2.0, -height / 2.0);
+				gl.glVertex2d( width / 2.0, -height / 2.0);
+				gl.glVertex2d( width / 2.0, -height / 2.0 + 110);
+			gl.glEnd();
+		}
 			
 //		}
 		
@@ -581,48 +807,15 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 //			this.renderSystemInformation(g, 485, height - 95);
 //		}
 		
-		// always show the paused box on top of everything
-		if (this.isPaused()) {
-			// show a black translucent screen over everything
-			gl.glColor4f(0.0f, 0.0f, 0.0f, 0.3f);
-			GLHelper.fillRectangle(gl, 0, 0, width, height);
-			// show the paused label in the top left corner
-			this.renderPaused(gl, width, height);
-		}
-		
-		// un bind the fbo
-		gl.glBindFramebuffer(GL.GL_FRAMEBUFFER, 0);
-		
-		gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		gl.glClear(GL.GL_COLOR_BUFFER_BIT);
-		
-		// set the texture to render
-		gl.glBindTexture(GL.GL_TEXTURE_2D, texId);
-		
-		// pass the texture to the shader
-		gl.glUseProgram(pBlur);
-		// the second parameter is not the texture id its the texture ordinal
-		gl.glUniform1i(0, 0);
-		gl.glUniform1f(1, width);
-		gl.glUniform1f(2, height);
-		
-		// draw the texture to a 2d quad
-		gl.glBegin(GL2.GL_QUADS);
-			gl.glTexCoord2d(1, 0);
-			gl.glVertex2d(width/2.0, -height/2.0);
-			gl.glTexCoord2d(0, 0);
-			gl.glVertex2d(-width/2.0, -height/2.0);
-			gl.glTexCoord2d(0, 1);
-			gl.glVertex2d(-width/2.0, height/2.0);
-			gl.glTexCoord2d(1, 1);
-			gl.glVertex2d(width/2.0, height/2.0);
-		gl.glEnd();
-		
-		// switch back to the default texture
-		gl.glBindTexture(GL.GL_TEXTURE_2D, 0);
-		gl.glUseProgram(0);
-		
 		this.usage.setRender(this.timer.getCurrentTime() - startTime);
+	}
+	
+	/* (non-Javadoc)
+	 * @see javax.media.opengl.GLEventListener#reshape(javax.media.opengl.GLAutoDrawable, int, int, int, int)
+	 */
+	@Override
+	public void reshape(GLAutoDrawable glDrawable, int x, int y, int width, int height) {
+		// do nothing since the window is not resizeable
 	}
 	
 	/**
@@ -681,10 +874,10 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 		final int spacing = 15;
 		
 		// set the text color
-		g.setColor(TEXT_COLOR);
+//		g.setColor(TEXT_COLOR);
 		
 		// render the label
-		this.versionLabel.render(g, x, y);
+//		this.versionLabel.render(g, x, y);
 		// render the value
 		this.versionValue.render(g, x + padding, y);
 		
@@ -712,9 +905,9 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 		// render the label
 		this.modeLabel.render(g, x, y + spacing * 4);
 		// render the value
-		if (this.mode == StepMode.MANUAL) {
+		if (this.stepMode == StepMode.MANUAL) {
 			this.manualModeLabel.render(g, x + padding, y + spacing * 4);
-		} else if (this.mode == StepMode.TIMED) {
+		} else if (this.stepMode == StepMode.TIMED) {
 			this.timedModeLabel.render(g, x + padding, y + spacing * 4);
 		} else {
 			this.continuousModeLabel.render(g, x + padding, y + spacing * 4);
@@ -741,7 +934,7 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 		final int spacing = 15;
 		
 		// set the text color
-		g.setColor(TEXT_COLOR);
+//		g.setColor(TEXT_COLOR);
 		// render the contact header
 		this.contactLabel.render(g, x, y);
 		
@@ -789,7 +982,7 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 		final int spacing = 15;
 		
 		// set the text color
-		g.setColor(TEXT_COLOR);
+//		g.setColor(TEXT_COLOR);
 		
 		// render the frames per second
 		this.fpsLabel.render(g, x, y);
@@ -819,7 +1012,7 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 		g.drawRect(x, y + spacing * 3, (int) Math.ceil(barWidth) + 1, 12);
 		
 		// render the used/free labels
-		g.setColor(TEXT_COLOR);
+//		g.setColor(TEXT_COLOR);
 		this.usedMemoryLabel.render(g, x + barWidth + 10, y + spacing * 2);
 		this.freeMemoryLabel.render(g, x + barWidth + 10, y + spacing * 3);
 		
@@ -865,34 +1058,32 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 		final int spacing = 15;
 		
 		// set the text color
-		g.setColor(TEXT_COLOR);
+//		g.setColor(TEXT_COLOR);
 		
-		this.jreVersionLabel.render(g, x, y);
-		this.jreVersionValue.render(g, x + padding, y);
-		
-		this.jreModeLabel.render(g, x, y + spacing);
-		this.jreModeValue.render(g, x + padding, y + spacing);
-		
-		this.osNameLabel.render(g, x, y + spacing * 2);
-		this.osNameValue.render(g, x + padding, y + spacing * 2);
-		
-		this.osArchitectureLabel.render(g, x, y + spacing * 3);
-		this.osArchitectureValue.render(g, x + padding, y + spacing * 3);
-		
-		this.osDataModelLabel.render(g, x, y + spacing * 4);
-		this.osDataModelValue.render(g, x + padding, y + spacing * 4);
-		
-		this.processorCountLabel.render(g, x, y + spacing * 5);
-		this.processorCountValue.render(g, x + padding, y + spacing * 5);
+//		this.jreVersionLabel.render(g, x, y);
+//		this.jreVersionValue.render(g, x + padding, y);
+//		
+//		this.jreModeLabel.render(g, x, y + spacing);
+//		this.jreModeValue.render(g, x + padding, y + spacing);
+//		
+//		this.osNameLabel.render(g, x, y + spacing * 2);
+//		this.osNameValue.render(g, x + padding, y + spacing * 2);
+//		
+//		this.osArchitectureLabel.render(g, x, y + spacing * 3);
+//		this.osArchitectureValue.render(g, x + padding, y + spacing * 3);
+//		
+//		this.osDataModelLabel.render(g, x, y + spacing * 4);
+//		this.osDataModelValue.render(g, x + padding, y + spacing * 4);
+//		
+//		this.processorCountLabel.render(g, x, y + spacing * 5);
+//		this.processorCountValue.render(g, x + padding, y + spacing * 5);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.codezealot.game.core.Core#poll()
+	/**
+	 * Polls the keyboard and mouse for input.
 	 */
-	@Override
-	public void poll() {
+	protected void poll() {
 		long startTime = this.timer.getCurrentTime();
-		super.poll();
 		
 		// allow the current test to override the default functionality
 		this.test.poll(this.keyboard, this.mouse);
@@ -900,22 +1091,15 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 		// check the escape key
 		if (this.keyboard.isPressed(KeyEvent.VK_ESCAPE) || this.keyboard.isPressed(KeyEvent.VK_E)) {
 			// only exit if its not applet mode
-			if (this.renderer.getMode() == Container.Mode.APPLICATION) {
-				// exit the game
-				this.shutdown();
-				// exit the JVM
-				System.exit(0);
+			if (this.mode == Mode.APPLICATION) {
+				// TODO finish
 			}
 		}
 		
 		// check the space key
 		if (this.keyboard.isPressed(KeyEvent.VK_PAUSE) || this.keyboard.isPressed(KeyEvent.VK_P)) {
 			// pause or unpause
-			if (this.isPaused()) {
-				this.resume();
-			} else {
-				this.pause();
-			}
+			this.setPaused(!this.isPaused());
 		}
 		
 		// check the + key
@@ -987,24 +1171,24 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 		
 		// check for the space bar
 		if (this.keyboard.isPressed(KeyEvent.VK_SPACE)) {
-			if (this.mode == StepMode.CONTINUOUS) {
-				this.mode = StepMode.MANUAL;
-			} else if (this.mode == StepMode.MANUAL) {
+			if (this.stepMode == StepMode.CONTINUOUS) {
+				this.stepMode = StepMode.MANUAL;
+			} else if (this.stepMode == StepMode.MANUAL) {
 				this.tModeElapsed = 0.0;
-				this.mode = StepMode.TIMED;
+				this.stepMode = StepMode.TIMED;
 			} else {
-				this.mode = StepMode.CONTINUOUS;
+				this.stepMode = StepMode.CONTINUOUS;
 			}
 		}
 		
 		// check for the m key
-		if (this.mode == StepMode.MANUAL && this.keyboard.isPressed(KeyEvent.VK_M)) {
+		if (this.stepMode == StepMode.MANUAL && this.keyboard.isPressed(KeyEvent.VK_M)) {
 			this.test.world.step(1);
 			this.test.update(1);
 		}
 		
 		// check for the t key
-		if (this.mode == StepMode.TIMED && this.keyboard.isPressed(KeyEvent.VK_T)) {
+		if (this.stepMode == StepMode.TIMED && this.keyboard.isPressed(KeyEvent.VK_T)) {
 			if (this.keyboard.isPressed(KeyEvent.VK_SHIFT)) {
 				this.tModeInterval += 0.1;
 			} else {
@@ -1221,15 +1405,13 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 		this.usage.setInput(this.timer.getCurrentTime() - startTime);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.codezealot.game.core.Core#update(long)
+	/**
+	 * Updates the TestBed given an elapsed time in nanoseconds.
+	 * @param elapsedTime the elapsed time in nanoseconds
 	 */
-	@Override
-	public void update(long elapsedTime) {
+	protected void update(long elapsedTime) {
 		this.usage.update(elapsedTime);
 		long startTime = this.timer.getCurrentTime();
-		
-		super.update(elapsedTime);
 
 		// set the selected test if its changed
 		if (!this.test.equals(this.settingsFrame.getTest())) {
@@ -1283,14 +1465,14 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 
 		// make sure we are not paused
 		if (!this.isPaused()) {
-			if (this.mode == StepMode.CONTINUOUS) {
+			if (this.stepMode == StepMode.CONTINUOUS) {
 				// convert the nanosecond elapsed time to elapsed time in seconds
 				double dt = (double)elapsedTime / 1.0e9;
 				// update the test
 				this.test.world.update(dt);
 				// update the test
 				this.test.update(dt);
-			} else if (this.mode == StepMode.MANUAL) {
+			} else if (this.stepMode == StepMode.MANUAL) {
 				// do nothing since its controlled by the user
 			} else {
 				// increment the elapsed time
@@ -1309,14 +1491,73 @@ public class TestBed<E extends Container<JoglSurface>> extends JoglCore<E> {
 		this.usage.setUpdate(this.timer.getCurrentTime() - startTime);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.codezealot.game.core.Core#shutdownSubsystems()
+	/**
+	 * Returns the system property for the java runtime version.
+	 * <p>
+	 * Returns the string "Unknown" if a security exception is thrown.
+	 * @return String
 	 */
-	@Override
-	protected synchronized void shutdownSubsystems() {
-		// dispose of the settings frame
-		this.settingsFrame.dispose();
-		// always call the super method here
-		super.shutdownSubsystems();
+	private static final String getJreVersion() {
+		try {
+			return System.getProperty("java.runtime.version");
+		} catch (SecurityException e) {
+			return "Unknown";
+		}
+	}
+	
+	/**
+	 * Returns the system property for the JRE mode.
+	 * <p>
+	 * Returns the string "Unknown" if a security exception is thrown.
+	 * @return String
+	 */
+	private static final String getJreMode() {
+		try {
+			return System.getProperty("java.vm.info");
+		} catch (SecurityException e) {
+			return "Unknown";
+		}
+	}
+	
+	/**
+	 * Returns the system property for the operating system name.
+	 * <p>
+	 * Returns the string "Unknown" if a security exception is thrown.
+	 * @return String
+	 */
+	private static final String getOsName() {
+		try {
+			return System.getProperty("os.name");
+		} catch (SecurityException e) {
+			return "Unknown";
+		}
+	}
+	
+	/**
+	 * Returns the system property for the operating system architecture.
+	 * <p>
+	 * Returns the string "Unknown" if a security exception is thrown.
+	 * @return String
+	 */
+	private static final String getOsArchitecture() {
+		try {
+			return System.getProperty("os.arch");
+		} catch (SecurityException e) {
+			return "Unknown";
+		}
+	}
+	
+	/**
+	 * Returns the system property for the operating system data model.
+	 * <p>
+	 * Returns the string "Unknown" if a security exception is thrown.
+	 * @return String
+	 */
+	private static final String getOsDataModel() {
+		try {
+			return System.getProperty("sun.arch.data.model");
+		} catch (SecurityException e) {
+			return "Unknown";
+		}
 	}
 }

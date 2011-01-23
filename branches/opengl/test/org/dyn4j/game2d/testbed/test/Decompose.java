@@ -42,10 +42,6 @@ import javax.media.opengl.GL2;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
-import org.codezealot.game.input.Input;
-import org.codezealot.game.input.Keyboard;
-import org.codezealot.game.input.Mouse;
-import org.codezealot.game.input.Input.Hold;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Polygon;
@@ -57,6 +53,10 @@ import org.dyn4j.game2d.geometry.decompose.SweepLine;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.GLHelper;
 import org.dyn4j.game2d.testbed.Test;
+import org.dyn4j.game2d.testbed.input.Input;
+import org.dyn4j.game2d.testbed.input.Keyboard;
+import org.dyn4j.game2d.testbed.input.Mouse;
+import org.dyn4j.game2d.testbed.input.Input.Hold;
 
 import com.jogamp.opengl.util.gl2.GLUT;
 

@@ -30,9 +30,6 @@ import java.util.List;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
-import org.codezealot.game.input.Input;
-import org.codezealot.game.input.Keyboard;
-import org.codezealot.game.input.Mouse;
 import org.dyn4j.game2d.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.game2d.collision.manifold.Manifold;
 import org.dyn4j.game2d.collision.manifold.ManifoldPoint;
@@ -56,6 +53,9 @@ import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Entity;
 import org.dyn4j.game2d.testbed.GLHelper;
 import org.dyn4j.game2d.testbed.Test;
+import org.dyn4j.game2d.testbed.input.Input;
+import org.dyn4j.game2d.testbed.input.Keyboard;
+import org.dyn4j.game2d.testbed.input.Mouse;
 
 /**
  * Test used to plot shapes, points, vectors, etc for debugging.

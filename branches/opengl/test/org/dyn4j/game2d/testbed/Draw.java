@@ -127,7 +127,7 @@ public class Draw {
 	private float[] rotationDiscColor = Draw.PINK;
 	
 	/** Whether to blur the metrics panel using a convolve-op */
-	private boolean panelBlurred = false;
+	private boolean panelBlurred = true;
 	
 	/** Whether to use anti-aliasing */
 	private boolean antiAliased = false;

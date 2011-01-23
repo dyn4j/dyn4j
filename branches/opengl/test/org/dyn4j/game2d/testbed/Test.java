@@ -30,8 +30,6 @@ import java.util.List;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
-import org.codezealot.game.input.Keyboard;
-import org.codezealot.game.input.Mouse;
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.Body;
@@ -52,6 +50,8 @@ import org.dyn4j.game2d.geometry.Interval;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Vector2;
+import org.dyn4j.game2d.testbed.input.Keyboard;
+import org.dyn4j.game2d.testbed.input.Mouse;
 
 /**
  * Represents a test.
