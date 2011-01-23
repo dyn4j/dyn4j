@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,8 +24,8 @@
  */
 package org.dyn4j.game2d.testbed;
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
@@ -80,24 +80,25 @@ public class Driver {
 		GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL2));
 		caps.setDoubleBuffered(true);
 		caps.setHardwareAccelerated(true);
-		caps.setNumSamples(2);
-		caps.setSampleBuffers(true);
 		
 		// create the testbed
 		TestBed testbed = new TestBed(caps, window, size, TestBed.Mode.APPLICATION);
 		
 		// set the layout of the frame
-		window.getContentPane().setLayout(new BorderLayout());
+		window.getContentPane().setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
 		// add the testbed to the frame
 		window.getContentPane().add(testbed);
 		
+		// set the size of the content pane to be same size as the GLCanvas
+		window.getContentPane().setPreferredSize(size);
+		// size everything
 		window.pack();
-		window.setResizable(false);
 		// move from (0, 0) since this hides some of the window frame
 		window.setLocation(10, 10);
 		
 		// show the window
 		window.setVisible(true);
+		window.setResizable(false);
 		
 		// setting this property will call the dispose methods on the GLCanvas
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

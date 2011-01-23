@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -63,7 +63,7 @@ import com.jogamp.opengl.util.gl2.GLUT;
 /**
  * Tests the decomposition of a simple polygon without holes.
  * @author William Bittle
- * @version 2.2.2
+ * @version 2.2.3
  * @since 2.2.0
  */
 public class Decompose extends Test {
@@ -292,7 +292,7 @@ public class Decompose extends Test {
 		gl.glPushMatrix();
 		gl.glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 		gl.glLoadIdentity();
-		gl.glRasterPos2d(-this.size.width / 2.0 + 115.0, this.size.height / 2.0 - 15.0);
+		gl.glRasterPos2d(-this.size.width / 2.0 + 5.0, this.size.height / 2.0 - 15.0);
 		GLUT glut = new GLUT();
 		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "(" + (this.currentAlgorithm + 1) + " of " + this.algorithms.length + ") " + this.algorithms[this.currentAlgorithm].getClass().getSimpleName() + " : " + n);
 		gl.glPopMatrix();

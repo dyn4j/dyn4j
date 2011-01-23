@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -59,7 +59,7 @@ import org.dyn4j.game2d.testbed.input.Mouse;
  * Using the {@link TestBed} class one can switch test without stopping
  * and starting the driver again.
  * @author William Bittle
- * @version 2.2.2
+ * @version 2.2.3
  * @since 1.0.0
  */
 public abstract class Test implements Comparable<Test> {
@@ -664,8 +664,8 @@ public abstract class Test implements Comparable<Test> {
 	 */
 	public Vector2 screenToWorld(double x, double y) {
 		Vector2 v = new Vector2();
-		v.x = (x - this.size.width / 2.0) / this.scale - this.offset.x;
-		v.y = -((y - this.size.height / 2.0) / this.scale + this.offset.y);
+		v.x = (x - this.size.width * 0.5) / this.scale - this.offset.x;
+		v.y = -((y - this.size.height * 0.5) / this.scale + this.offset.y);
 		return v;
 	}
 	

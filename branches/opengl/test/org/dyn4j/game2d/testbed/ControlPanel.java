@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -94,7 +94,7 @@ import org.dyn4j.game2d.dynamics.Settings;
 /**
  * The JFrame that controls the TestBed.
  * @author William Bittle
- * @version 2.2.2
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class ControlPanel extends JFrame {
@@ -1071,7 +1071,7 @@ public class ControlPanel extends JFrame {
 		
 		// draw text
 		JLabel lblBlur = new JLabel("Information Panel Blur", this.helpIcon, JLabel.LEFT);
-		lblBlur.setToolTipText("<html>Toggles blurring of the information panel background.  This is done<br />in software it seems, therefore its really slow.</html>");
+		lblBlur.setToolTipText("<html>Toggles blurring of the information panel background.</html>");
 		pnlDraw.add(lblBlur, new GridBagConstraints(
 				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
 				GridBagConstraints.NONE, insets, 0, 0));
@@ -1092,7 +1092,7 @@ public class ControlPanel extends JFrame {
 		
 		// anti-aliasing
 		JLabel lblAnti = new JLabel("Anti-Aliasing", this.helpIcon, JLabel.LEFT);
-		lblAnti.setToolTipText("<html>Toggles the use of anti-aliasing.  This is a general<br />setting and enables text anti-aliasing.</html>");
+		lblAnti.setToolTipText("<html>Toggles the use of anti-aliasing.</html>");
 		pnlDraw.add(lblAnti, new GridBagConstraints(
 				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
 				GridBagConstraints.NONE, insets, 0, 0));
@@ -1111,30 +1111,9 @@ public class ControlPanel extends JFrame {
 				GridBagConstraints.NONE, insets, 0, 0));
 		y++;
 		
-		// text anti-aliasing
-		JLabel lblTextAnti = new JLabel("Text Anti-Aliasing", this.helpIcon, JLabel.LEFT);
-		lblTextAnti.setToolTipText("Toggles the use of text anti-aliasing only.");
-		pnlDraw.add(lblTextAnti, new GridBagConstraints(
-				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		JCheckBox chkTextAnti = new JCheckBox();
-		chkTextAnti.setSelected(draw.isTextAntiAliased());
-		chkTextAnti.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// toggle the checkbox
-				Draw draw = Draw.getInstance();
-				draw.setTextAntiAliased(!draw.isTextAntiAliased());
-			}
-		});
-		pnlDraw.add(chkTextAnti, new GridBagConstraints(
-				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
-				GridBagConstraints.NONE, insets, 0, 0));
-		y++;
-		
 		// vertical sync
 		JLabel lblVertSync = new JLabel("Vertical Sync", this.helpIcon, JLabel.LEFT);
-		lblVertSync.setToolTipText("Toggles vertical sync.  Rendering occurs only at the\ndisplay refresh rate, typically 60hz.");
+		lblVertSync.setToolTipText("<html>Toggles vertical sync.  Rendering occurs only at the<br />display refresh rate, typically 60hz.  Not all<br />cards/drivers support changing of this setting.</html>");
 		pnlDraw.add(lblVertSync, new GridBagConstraints(
 				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
 				GridBagConstraints.NONE, insets, 0, 0));

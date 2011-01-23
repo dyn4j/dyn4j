@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -61,37 +61,37 @@ public class Draw {
 	public static final float[] PINK = new float[] {1.0f, 0.8f, 0.8f, 1.0f};
 	
 	/** Whether to draw centers of mass or not */
-	private boolean center = true;
+	private boolean center = false;
 	
 	/** The color used when rendering the center */
 	private float[] centerColor = Draw.GREEN;
 	
 	/** Whether to draw velocity vectors or not */
-	private boolean velocity = true;
+	private boolean velocity = false;
 	
 	/** The color used when rendering velocity vectors */
 	private float[] velocityColor = Draw.MAGENTA;
 	
 	/** Whether to draw contacts or not */
-	private boolean contacts = true;
+	private boolean contacts = false;
 	
 	/** The color used when rendering contact points */
 	private float[] contactColor = Draw.ORANGE;
 	
 	/** Whether to draw contact impulses or not */
-	private boolean contactImpulses = true;
+	private boolean contactImpulses = false;
 	
 	/** The color used when rendering contact forces */
 	private float[] contactImpulsesColor = Draw.BLUE;
 	
 	/** Whether to draw contact pairs or not */
-	private boolean contactPairs = true;
+	private boolean contactPairs = false;
 	
 	/** The color used when rendering contact pairs */
 	private float[] contactPairsColor = Draw.YELLOW;
 	
 	/** Whether to draw contact friction forces or not */
-	private boolean frictionImpulses = true;
+	private boolean frictionImpulses = false;
 	
 	/** The color used when rendering friction forces */
 	private float[] frictionImpulsesColor = Draw.BLUE;
@@ -100,7 +100,7 @@ public class Draw {
 	private boolean joints = true;
 	
 	/** Whether to draw the bounds or not */
-	private boolean bounds = true;
+	private boolean bounds = false;
 	
 	/** The color used when rendering the bounds */
 	private float[] boundsColor = Draw.CYAN;
@@ -115,13 +115,13 @@ public class Draw {
 	private boolean outline = true;
 	
 	/** Whether to draw edge normals */
-	private boolean normals = true;
+	private boolean normals = false;
 	
 	/** The color used when rendering normals */
 	private float[] normalsColor = Draw.RED;
 	
 	/** Whether to draw body rotation discs or not */
-	private boolean rotationDisc = true;
+	private boolean rotationDisc = false;
 	
 	/** The color used when rendering rotation discs */
 	private float[] rotationDiscColor = Draw.PINK;
@@ -131,9 +131,6 @@ public class Draw {
 	
 	/** Whether to use anti-aliasing */
 	private boolean antiAliased = false;
-	
-	/** Whether to use text anti-aliasing */
-	private boolean textAntiAliased = false;
 	
 	/** Whether vertical sync is enabled */
 	private boolean verticalSyncEnabled = false;
@@ -606,24 +603,6 @@ public class Draw {
 	 */
 	public void setAntiAliased(boolean flag) {
 		this.antiAliased = flag;
-	}
-
-	/**
-	 * Returns true if text anti-aliasing should be used.
-	 * @return boolean
-	 * @since 2.2.1
-	 */
-	public boolean isTextAntiAliased() {
-		return this.textAntiAliased;
-	}
-	
-	/**
-	 * Sets whether text anti-aliasing should be used.
-	 * @param flag true if text anti-aliasing should be used
-	 * @since 2.2.1
-	 */
-	public void setTextAntiAliased(boolean flag) {
-		this.textAntiAliased = flag;
 	}
 	
 	/**

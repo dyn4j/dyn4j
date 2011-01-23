@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, William Bittle
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,7 +10,7 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of William Bittle nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
@@ -32,7 +32,8 @@ package org.dyn4j.game2d.testbed;
  * <p>
  * Before the first fps calculation the fps is -1.
  * @author William Bittle
- * @version $Revision: 356 $
+ * @version 2.2.3
+ * @since 2.2.3
  */
 public class Fps {
 	/** One second in nano seconds */

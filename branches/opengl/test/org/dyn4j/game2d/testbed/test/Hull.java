@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -53,7 +53,7 @@ import com.jogamp.opengl.util.gl2.GLUT;
 /**
  * Tests the generation of a convex hull given a point set.
  * @author William Bittle
- * @version 2.2.2
+ * @version 2.2.3
  * @since 2.2.0
  */
 public class Hull extends Test {
@@ -170,7 +170,7 @@ public class Hull extends Test {
 		gl.glPushMatrix();
 		gl.glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 		gl.glLoadIdentity();
-		gl.glRasterPos2d(-this.size.width / 2.0 + 115.0, this.size.height / 2.0 - 15.0);
+		gl.glRasterPos2d(-this.size.width / 2.0 + 5, this.size.height / 2.0 - 15.0);
 		GLUT glut = new GLUT();
 		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "(" + (this.currentGenerator + 1) + " of " + this.generators.length + ") " + this.generators[this.currentGenerator].getClass().getSimpleName());
 		gl.glPopMatrix();
@@ -393,7 +393,7 @@ public class Hull extends Test {
 	@Override
 	public void home() {
 		// set the scale
-		this.scale = 128.0;
+		this.scale = 64.0;
 		// set the offset
 		this.offset.zero();
 	}

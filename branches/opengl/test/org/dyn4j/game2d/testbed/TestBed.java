@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,11 +24,8 @@
  */
 package org.dyn4j.game2d.testbed;
 
-import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -44,6 +41,7 @@ import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.awt.GLCanvas;
 import javax.naming.ConfigurationException;
+import javax.swing.JFrame;
 
 import org.dyn4j.game2d.Version;
 import org.dyn4j.game2d.collision.Fixture;
@@ -60,9 +58,9 @@ import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Segment;
 import org.dyn4j.game2d.geometry.Vector2;
 import org.dyn4j.game2d.testbed.input.Input;
+import org.dyn4j.game2d.testbed.input.Input.Hold;
 import org.dyn4j.game2d.testbed.input.Keyboard;
 import org.dyn4j.game2d.testbed.input.Mouse;
-import org.dyn4j.game2d.testbed.input.Input.Hold;
 
 import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.gl2.GLUT;
@@ -105,32 +103,46 @@ public class TestBed extends GLCanvas implements GLEventListener {
 		/** Timed stepping mode */
 		TIMED
 	}
+
+	// HUD parameters
 	
-	/** The text color (grey) */
-	public static final float[] TEXT_COLOR = new float[] {0.5f, 0.5f, 0.5f, 1.0f};
+	/** The HUD text color (grey) */
+	private static final float[] HUD_TEXT_COLOR = new float[] {0.5f, 0.5f, 0.5f, 1.0f};
+	
+	/** The HUD height */
+	private static final double HUD_HEIGHT = 110.0;
+	
+	/** The HUD padding */
+	private static final double HUD_PADDING = 7.0;
+	
+	/** The HUD line spacing */
+	private static final double HUD_SPACING = (HUD_HEIGHT - HUD_PADDING * 4) / 6;
 	
 	// State data
 	
+	/** The Swing/AWT container for this GLCanvas */
+	private Container container;
+	
 	/** The mode application or applet */
-	protected TestBed.Mode mode;
+	private TestBed.Mode mode;
 	
 	/** The desired rendering surface size */
-	protected Dimension size;
+	private Dimension size;
 	
 	/** The keyboard to accept and store key events */
-	protected Keyboard keyboard;
+	private Keyboard keyboard;
 	
 	/** The mouse to accept and store mouse events */
-	protected Mouse mouse;
+	private Mouse mouse;
 	
 	/** The FPS monitor */
-	protected Fps fps;
+	private Fps fps;
 	
 	/** The timer for measuring execution duration */
-	protected Timer timer;
+	private Timer timer;
 	
 	/** The JOGL automatic animator */
-	protected Animator animator;
+	private Animator animator;
 	
 	/** Whether the TestBed is paused or not */
 	private boolean paused = false;
@@ -158,6 +170,9 @@ public class TestBed extends GLCanvas implements GLEventListener {
 	
 	// OpenGL data
 	
+	/** The GLUT object for drawing strings */
+	private GLUT glut = new GLUT();
+	
 	/** The id of the texture that the FBO will render to */
 	private int texId;
 	
@@ -176,66 +191,7 @@ public class TestBed extends GLCanvas implements GLEventListener {
 	/** Whether to use the shader or not */
 	private boolean shaderProgramValid = false;
 	
-	// Texts
-	
-	/** The label for the control panel key */
-	private static final String CONTROLS_LABEL = "Press 'c' to open the Test Bed Control Panel.";
-	/** The label for the version */
-	private static final String VERSION_LABEL = "Version:";
-	/** The value of the dyn4j version */
-	private SimpleText versionValue = new SimpleText("v" + Version.getVersion());
-	/** The label for the current test */
-	private SimpleText testLabel = new SimpleText("Test:");
-	/** The label for the current zoom */
-	private SimpleText zoomLabel = new SimpleText("Scale:");
-	/** The label for the current number of bodies */
-	private SimpleText bodyCountLabel = new SimpleText("Bodies:");
-	/** The label for the current simulation mode */
-	private SimpleText modeLabel = new SimpleText("Mode:");
-	/** The label for continuous mode */
-	private SimpleText continuousModeLabel = new SimpleText("Continuous");
-	/** The label for manual mode */
-	private SimpleText manualModeLabel = new SimpleText("Manual");
-	/** The label for timed mode */
-	private SimpleText timedModeLabel = new SimpleText("Timed");
-	/** The label for the contacts table */
-	private SimpleText contactLabel = new SimpleText("Contact Information");
-	/** The label for the total number of contacts */
-	private SimpleText cTotalLabel = new SimpleText("Total:");
-	/** The label for the number of added contacts */
-	private SimpleText cAddedLabel = new SimpleText("Added:");
-	/** The label for the number of persisted contacts */
-	private SimpleText cPersistedLabel = new SimpleText("Persisted:");
-	/** The label for the number of removed contacts */
-	private SimpleText cRemovedLabel = new SimpleText("Removed:");
-	/** The label for the number of sensed contacts */
-	private SimpleText cSensedLabel = new SimpleText("Sensed:");
-	/** The label for the frame rate */
-	private SimpleText fpsLabel = new SimpleText("FPS:");
-	/** The label indicating paused state */
-	private SimpleText pausedLabel = new SimpleText("Paused");
-	/** The label for memory usage */
-	private SimpleText memoryLabel = new SimpleText("Memory");
-	/** The label for used memory */
-	private SimpleText usedMemoryLabel = new SimpleText("Used");
-	/** The label for free memory */
-	private SimpleText freeMemoryLabel = new SimpleText("Free");
-	/** The label for total memory */
-	private SimpleText totalMemoryLabel = new SimpleText("Total");
-	/** The label for time usage */
-	private SimpleText timeUsageLabel;
-	/** The label for the jre version */
-	private SimpleText jreVersionLabel = new SimpleText("JRE Version:");
-	/** The label for the jre mode */
-	private SimpleText jreModeLabel = new SimpleText("JRE Mode:");
-	/** The label for the operating system name */
-	private SimpleText osNameLabel = new SimpleText("OS Name:");
-	/** The label for the architecture name */
-	private SimpleText osArchitectureLabel = new SimpleText("Architecture:");
-	/** The label for the data model name */
-	private SimpleText osDataModelLabel = new SimpleText("Data Model:");
-	/** The label for the number of processors */
-	private SimpleText processorCountLabel = new SimpleText("Processors:");
+	// System information
 	
 	/** The label for the jre version */
 	private static final String JRE_VERSION = TestBed.getJreVersion();
@@ -253,7 +209,7 @@ public class TestBed extends GLCanvas implements GLEventListener {
 	private static final String OS_DATA_MODEL = TestBed.getOsDataModel();
 	
 	/** The label for the number of processors */
-	private static final String processorCount = String.valueOf(Runtime.getRuntime().availableProcessors());
+	private static final String PROCESSOR_COUNT = String.valueOf(Runtime.getRuntime().availableProcessors());
 	
 	// Picking using left click
 	
@@ -274,6 +230,7 @@ public class TestBed extends GLCanvas implements GLEventListener {
 	/**
 	 * Full constructor.
 	 * @param capabilities the desired OpenGL capabilities; null to use a default set
+	 * @param container the container that this TestBed is being added to
 	 * @param size the desired size of the rendering area
 	 * @param mode the mode; either application or applet
 	 */
@@ -281,16 +238,19 @@ public class TestBed extends GLCanvas implements GLEventListener {
 		// pass the capabilities down
 		super(capabilities);
 		
+		if (container == null) throw new NullPointerException("The container cannot be null.");
 		if (size == null) throw new NullPointerException("The desired size cannot be null.");
 		if (mode == null) throw new NullPointerException("The mode cannot be null.");
 		
 		// set the size and mode
 		this.size = size;
 		this.mode = mode;
+		this.container = container;
 		
 		// set the size
 		this.setPreferredSize(size);
 		this.setMinimumSize(size);
+		this.setMaximumSize(size);
 		
 		// create the keyboard and mouse mappings
 		this.keyboard = new Keyboard();
@@ -479,9 +439,6 @@ public class TestBed extends GLCanvas implements GLEventListener {
 		gl.glEnable(GL.GL_BLEND);
 		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 		
-		// enable texturing
-		gl.glEnable(GL.GL_TEXTURE_2D);
-		
 		// get a texture object
 		int[] ids = new int[1];
 		gl.glGenTextures(1, ids, 0);
@@ -505,7 +462,10 @@ public class TestBed extends GLCanvas implements GLEventListener {
 		gl.glFramebufferTexture2D(GL.GL_FRAMEBUFFER, GL.GL_COLOR_ATTACHMENT0, GL.GL_TEXTURE_2D, texId, 0);
 		// check the FBO status
 		int status = gl.glCheckFramebufferStatus(GL.GL_FRAMEBUFFER);
-		if (status != GL.GL_FRAMEBUFFER_COMPLETE) System.out.println("no go");
+		boolean useFrameBuffer = false;
+		if (status == GL.GL_FRAMEBUFFER_COMPLETE) {
+			useFrameBuffer = true;
+		}
 		// switch back to the default frame buffer
 		gl.glBindFramebuffer(GL.GL_FRAMEBUFFER, 0);
 		
@@ -515,8 +475,9 @@ public class TestBed extends GLCanvas implements GLEventListener {
 		// set the swap interval to as fast as possible
 		gl.setSwapInterval(0);
 		
-		// make sure a shader compiler is available
-		if (ShaderUtil.isShaderCompilerAvailable(gl)) {
+		// make sure a shader compiler is available and make sure that
+		// we were able to setup a framebuffer to write to
+		if (useFrameBuffer && ShaderUtil.isShaderCompilerAvailable(gl)) {
 			// load the shader programs from the file system
 			// we do this first so that we know whether to create them or not
 			Shader vsBlur, fsBlur;
@@ -557,10 +518,10 @@ public class TestBed extends GLCanvas implements GLEventListener {
 					shaderProgramValid = true;
 				}
 			} catch (FileNotFoundException e) {
-				System.err.println("File not found in classpath");
+				System.err.println("File not found in classpath:");
 				e.printStackTrace();
 			} catch (IOException e) {
-				System.err.println("");
+				System.err.println("An error occurred when reading a file:");
 				e.printStackTrace();
 			}
 		}
@@ -661,7 +622,7 @@ public class TestBed extends GLCanvas implements GLEventListener {
 		}
 		
 		// see if we need to blur the panel
-		if (draw.isPanelBlurred() && this.shaderProgramValid) {
+		if (draw.drawPanel() && draw.isPanelBlurred() && this.shaderProgramValid) {
 			// if so, then we need to render to an off screen buffer
 			// first then render that off screen buffer to the screen
 			// applying a blur using a shader program
@@ -688,7 +649,7 @@ public class TestBed extends GLCanvas implements GLEventListener {
 		}
 		
 		// see if we need to blur the panel
-		if (draw.isPanelBlurred() && this.shaderProgramValid) {
+		if (draw.drawPanel() && draw.isPanelBlurred() && this.shaderProgramValid) {
 			// unbind the off screen buffer by telling OpenGL to use
 			// the default buffer
 			gl.glBindFramebuffer(GL.GL_FRAMEBUFFER, 0);
@@ -711,18 +672,18 @@ public class TestBed extends GLCanvas implements GLEventListener {
 			gl.glUniform1f(1, width);
 			gl.glUniform1f(2, height);
 			// pass in the yOffset, any y value above this number is blurred
-			gl.glUniform1f(3, 0.3f);
+			gl.glUniform1f(3, 110.0f / height);
 			
 			// draw the texture to a 2d quad
 			gl.glBegin(GL2.GL_QUADS);
 				gl.glTexCoord2d(1, 0);
-				gl.glVertex2d(width/2.0, -height/2.0);
+				gl.glVertex2d(width * 0.5, -height * 0.5);
 				gl.glTexCoord2d(0, 0);
-				gl.glVertex2d(-width/2.0, -height/2.0);
+				gl.glVertex2d(-width * 0.5, -height * 0.5);
 				gl.glTexCoord2d(0, 1);
-				gl.glVertex2d(-width/2.0, height/2.0);
+				gl.glVertex2d(-width * 0.5, height * 0.5);
 				gl.glTexCoord2d(1, 1);
-				gl.glVertex2d(width/2.0, height/2.0);
+				gl.glVertex2d(width * 0.5, height * 0.5);
 			gl.glEnd();
 			
 			// switch back to the default texture
@@ -737,75 +698,105 @@ public class TestBed extends GLCanvas implements GLEventListener {
 			gl.glColor4f(0.0f, 0.0f, 0.0f, 0.3f);
 			GLHelper.fillRectangle(gl, 0, 0, width, height);
 			// show the paused label in the top left corner
-			this.renderPaused(gl, width, height);
+			this.renderPaused(gl, glut, width, height);
 		}
+		
+		// render the open control panel text
+		
+		this.renderControls(gl, glut, -width * 0.5 + 300, height * 0.5 - 15.0);
 		
 		// render the HUD panel
 		
-//		gl.glPushMatrix();
-//		gl.glLoadIdentity();
-//		
-//		gl.glColor3f(0.0f, 0.0f, 0.0f);
-//		GLUT glut = new GLUT();
-//		gl.glRasterPos2d(-9, 8);
-//		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, String.valueOf(this.fps.getFps()));
-//		
-//		gl.glPopMatrix();
-		
-		// render the controls label top center
-//			this.renderControls(gl, (int) Math.ceil((width - this.controlsLabel.getWidth(gl)) / 2.0), 5);
-		
 		if (draw.drawPanel()) {
-			// draw the translucent background
-			gl.glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
-			gl.glBegin(GL2.GL_QUADS);
-				gl.glVertex2d(-width / 2.0, -height / 2.0 + 110);
-				gl.glVertex2d(-width / 2.0, -height / 2.0);
-				gl.glVertex2d( width / 2.0, -height / 2.0);
-				gl.glVertex2d( width / 2.0, -height / 2.0 + 110);
-			gl.glEnd();
-		}
+			gl.glPushMatrix();
+			gl.glLoadIdentity();
+			gl.glTranslated(-width * 0.5, -height * 0.5 + HUD_HEIGHT, 0.0);
 			
-//		}
-		
-		// make sure we should draw the metrics panel
-//		if (draw.drawPanel()) {
-//			// draw the gradient top
-//			g.setPaint(new GradientPaint(0, height - 110, new Color(0.5f, 0.5f, 0.5f, 0.5f), 0, height - 101, new Color(0.0f, 0.0f, 0.0f, 0.5f)));
-//			g.fillRect(0, height - 110, width, 10);
-//			
-//			// draw the small box around the test info
-//			g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.2f));
-//			g.fillRect(2, height - 98, 150, 95);
-//			g.setColor(Color.BLACK);
-//			g.drawRect(2, height - 98, 150, 95);
-//			// render the general test information
-//			this.renderTestInformation(g, 7, height - 95);
-//			
-//			// draw the small box around the contact info
-//			g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.2f));
-//			g.fillRect(155, height - 98, 120, 95);
-//			g.setColor(Color.BLACK);
-//			g.drawRect(155, height - 98, 120, 95);
-//			// render the contact information
-//			this.renderContactInformation(g, 159, height - 95);
-//			
-//			// draw the small box around the performance info
-//			g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.2f));
-//			g.fillRect(278, height - 98, 200, 95);
-//			g.setColor(Color.BLACK);
-//			g.drawRect(278, height - 98, 200, 95);
-//			// render the performance information
-//			this.renderPerformanceInformation(g, 282, height - 95);
-//			
-//			// draw the small box around the system info
-//			g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.2f));
-//			g.fillRect(481, height - 98, 200, 95);
-//			g.setColor(Color.BLACK);
-//			g.drawRect(481, height - 98, 200, 95);
-//			// render the system information
-//			this.renderSystemInformation(g, 485, height - 95);
-//		}
+			// draw the translucent backgrounds
+			gl.glBegin(GL2.GL_QUADS);
+				// the overall background
+				gl.glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
+				gl.glVertex2d(0.0, 0.0);
+				gl.glVertex2d(0.0, -HUD_HEIGHT);
+				gl.glVertex2d(width, -HUD_HEIGHT);
+				gl.glVertex2d(width, 0.0);
+				
+				gl.glColor4f(0.0f, 0.0f, 0.0f, 0.3f);
+				// the information background (w = 150)
+				gl.glVertex2d(HUD_PADDING, -HUD_PADDING);
+				gl.glVertex2d(HUD_PADDING + 150.0, -HUD_PADDING);
+				gl.glVertex2d(HUD_PADDING + 150.0, -HUD_HEIGHT + HUD_PADDING);
+				gl.glVertex2d(HUD_PADDING, -HUD_HEIGHT + HUD_PADDING);
+				// the contact background (w = 120)
+				gl.glVertex2d(2 * HUD_PADDING + 150.0, -HUD_PADDING);
+				gl.glVertex2d(2 * HUD_PADDING + 270.0, -HUD_PADDING);
+				gl.glVertex2d(2 * HUD_PADDING + 270.0, -HUD_HEIGHT + HUD_PADDING);
+				gl.glVertex2d(2 * HUD_PADDING + 150.0, -HUD_HEIGHT + HUD_PADDING);
+				// the performance background (w = 180)
+				gl.glVertex2d(3 * HUD_PADDING + 270.0, -HUD_PADDING);
+				gl.glVertex2d(3 * HUD_PADDING + 450.0, -HUD_PADDING);
+				gl.glVertex2d(3 * HUD_PADDING + 450.0, -HUD_HEIGHT + HUD_PADDING);
+				gl.glVertex2d(3 * HUD_PADDING + 270.0, -HUD_HEIGHT + HUD_PADDING);
+				// the system info background (w = 200)
+				gl.glVertex2d(4 * HUD_PADDING + 450.0, -HUD_PADDING);
+				gl.glVertex2d(4 * HUD_PADDING + 650.0, -HUD_PADDING);
+				gl.glVertex2d(4 * HUD_PADDING + 650.0, -HUD_HEIGHT + HUD_PADDING);
+				gl.glVertex2d(4 * HUD_PADDING + 450.0, -HUD_HEIGHT + HUD_PADDING);
+			gl.glEnd();
+			
+			// draw the borders
+			// save the line width
+			float[] lw = new float[1];
+			gl.glGetFloatv(GL.GL_LINE_WIDTH, lw, 0);
+			// make it wider
+			gl.glLineWidth(2.0f);
+			gl.glColor4f(0.5f, 0.5f, 0.5f, 0.3f);
+			// the information border (w = 150)
+			gl.glBegin(GL2.GL_LINE_LOOP);
+				gl.glVertex2d(HUD_PADDING, -HUD_PADDING);
+				gl.glVertex2d(HUD_PADDING + 150.0, -HUD_PADDING);
+				gl.glVertex2d(HUD_PADDING + 150.0, -HUD_HEIGHT + HUD_PADDING);
+				gl.glVertex2d(HUD_PADDING, -HUD_HEIGHT + HUD_PADDING);
+			gl.glEnd();
+			// the contact background (w = 120)
+			gl.glBegin(GL2.GL_LINE_LOOP);
+				gl.glVertex2d(2 * HUD_PADDING + 150.0, -HUD_PADDING);
+				gl.glVertex2d(2 * HUD_PADDING + 270.0, -HUD_PADDING);
+				gl.glVertex2d(2 * HUD_PADDING + 270.0, -HUD_HEIGHT + HUD_PADDING);
+				gl.glVertex2d(2 * HUD_PADDING + 150.0, -HUD_HEIGHT + HUD_PADDING);
+			gl.glEnd();
+			// the performance background (w = 180)
+			gl.glBegin(GL2.GL_LINE_LOOP);
+				gl.glVertex2d(3 * HUD_PADDING + 270.0, -HUD_PADDING);
+				gl.glVertex2d(3 * HUD_PADDING + 450.0, -HUD_PADDING);
+				gl.glVertex2d(3 * HUD_PADDING + 450.0, -HUD_HEIGHT + HUD_PADDING);
+				gl.glVertex2d(3 * HUD_PADDING + 270.0, -HUD_HEIGHT + HUD_PADDING);
+			gl.glEnd();
+			// the system info background (w = 200)
+			gl.glBegin(GL2.GL_LINE_LOOP);
+				gl.glVertex2d(4 * HUD_PADDING + 450.0, -HUD_PADDING);
+				gl.glVertex2d(4 * HUD_PADDING + 650.0, -HUD_PADDING);
+				gl.glVertex2d(4 * HUD_PADDING + 650.0, -HUD_HEIGHT + HUD_PADDING);
+				gl.glVertex2d(4 * HUD_PADDING + 450.0, -HUD_HEIGHT + HUD_PADDING);
+			gl.glEnd();
+			// reset the line width
+			gl.glLineWidth(lw[0]);
+			
+			// draw the test information
+			this.renderTestInformation(gl, glut, 2 * HUD_PADDING, -2 * HUD_PADDING);
+			
+			// draw the contact information
+			this.renderContactInformation(gl, glut, 3 * HUD_PADDING + 150.0, -2 * HUD_PADDING);
+			
+			// draw the contact information
+			this.renderPerformanceInformation(gl, glut, 4 * HUD_PADDING + 270.0, -2 * HUD_PADDING);
+			
+			// draw the system information
+			this.renderSystemInformation(gl, glut, 5 * HUD_PADDING + 450.0, -2 * HUD_PADDING);
+			
+			// restore the previous matrix
+			gl.glPopMatrix();
+		}
 		
 		this.usage.setRender(this.timer.getCurrentTime() - startTime);
 	}
@@ -819,12 +810,14 @@ public class TestBed extends GLCanvas implements GLEventListener {
 	}
 	
 	/**
-	 * Renders the paused label.
+	 * Renders the paused label in the top left corner along with a transparent black
+	 * overlay over the entire window.
 	 * @param gl the OpenGL graphics context
+	 * @param glut the GLUT for drawing strings
 	 * @param w the width of the bounding rectangle
 	 * @param h the height of the bounding rectangle
 	 */
-	private void renderPaused(GL2 gl, double w, double h) {
+	private void renderPaused(GL2 gl, GLUT glut, double w, double h) {
 		// save the current matrix
 		gl.glPushMatrix();
 		// reset the current matrix
@@ -838,112 +831,133 @@ public class TestBed extends GLCanvas implements GLEventListener {
 		// set the raster for the text
 		gl.glRasterPos2d(-w / 2.0 + 25.0, h / 2.0 - 15.0);
 		// draw the text
-		GLUT glut = new GLUT();
 		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_12, "Paused");
 		// reset to the old matrix
 		gl.glPopMatrix();
 	}
 	
 	/**
-	 * Renders the controls label to the given graphics object at the
-	 * given screen coordinates.
+	 * Renders the controls label at the given coordinates.
 	 * @param gl the OpenGL graphics context
+	 * @param glut the GLUT for drawing strings
 	 * @param x the x coordinate
 	 * @param y the y coordinate
 	 */
-	private void renderControls(GL2 gl, int x, int y) {
+	private void renderControls(GL2 gl, GLUT glut, double x, double y) {
 		// set the text color
-//		g.setColor(Color.BLACK);
 		gl.glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 		
-		//width - w - 5, height - h - 5
-//		controlsLabel.render(g, x, y);
-		//"Press 'c' to open the Test Bed Control Panel."
+		// save the current matrix
+		gl.glPushMatrix();
+		// reset the current matrix
+		gl.glLoadIdentity();
+		// set the render position
+		gl.glRasterPos2d(x, y);
+		
+		// render the text
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Press 'c' to open the Test Bed Control Panel.");
+		
+		// restore the original matrix
+		gl.glPopMatrix();
 	}
 	
 	/**
-	 * Renders the test information to the given graphics object at the
-	 * given screen coordinates.
-	 * @param g the graphics object to render to
+	 * Renders the test information at the given coordinates.
+	 * @param gl the OpenGL graphics context
+	 * @param glut the GLUT for drawing strings
 	 * @param x the x coordinate
 	 * @param y the y coordinate
 	 */
-	private void renderTestInformation(Graphics2D g, int x, int y) {
+	private void renderTestInformation(GL2 gl, GLUT glut, double x, double y) {
 		// set the padding/spacing of the text lines and values
 		final int padding = 55;
-		final int spacing = 15;
 		
 		// set the text color
-//		g.setColor(TEXT_COLOR);
+		gl.glColor4fv(HUD_TEXT_COLOR, 0);
 		
-		// render the label
-//		this.versionLabel.render(g, x, y);
-		// render the value
-		this.versionValue.render(g, x + padding, y);
+		// save the current matrix
+		gl.glPushMatrix();
 		
-		// render the label
-		this.testLabel.render(g, x, y + spacing);
+		y -= HUD_SPACING * 0.7;
+		// render the version
+		gl.glRasterPos2d(x, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Version:");
 		// render the value
-		SimpleText testName = new SimpleText(this.test.getName());
-		testName.render(g, x + padding, y + spacing);
-
-		// show the zoom
-		// render the label
-		this.zoomLabel.render(g, x, y + spacing * 2);
-		// render the value
-		SimpleText zoom = new SimpleText(this.test.getZoom() + " px/m");
-		zoom.render(g, x + padding, y + spacing * 2);
+		gl.glRasterPos2d(x + padding, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, Version.getVersion());
 		
-		// show the number of bodies
-		// render the label
-		this.bodyCountLabel.render(g, x, y + spacing * 3);
+		y -= HUD_SPACING;
+		// render the test name
+		gl.glRasterPos2d(x, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Test:");
 		// render the value
-		SimpleText bodies = new SimpleText(String.valueOf(this.test.getWorld().getBodyCount()));
-		bodies.render(g, x + padding, y + spacing * 3);
+		gl.glRasterPos2d(x + padding, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, this.test.getName());
 		
-		// show the mode
-		// render the label
-		this.modeLabel.render(g, x, y + spacing * 4);
+		y -= HUD_SPACING;
+		// render the zoom
+		gl.glRasterPos2d(x, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Scale:");
 		// render the value
+		gl.glRasterPos2d(x + padding, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, this.test.getZoom() + " px/m");
+		
+		y -= HUD_SPACING;
+		// render the number of bodies
+		gl.glRasterPos2d(x, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Bodies:");
+		// render the value
+		gl.glRasterPos2d(x + padding, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, String.valueOf(this.test.getWorld().getBodyCount()));
+		
+		y -= HUD_SPACING;
+		// render the mode
+		gl.glRasterPos2d(x, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Mode:");
+		// render the value
+		gl.glRasterPos2d(x + padding, y);
 		if (this.stepMode == StepMode.MANUAL) {
-			this.manualModeLabel.render(g, x + padding, y + spacing * 4);
+			glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Manual");
 		} else if (this.stepMode == StepMode.TIMED) {
-			this.timedModeLabel.render(g, x + padding, y + spacing * 4);
+			glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Timed");
 		} else {
-			this.continuousModeLabel.render(g, x + padding, y + spacing * 4);
+			glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Continuous");
 		}
 		
 		Point loc = this.mouse.getRelativeLocation();
 		Vector2 pos = this.test.screenToWorld(loc.x, loc.y);
 		DecimalFormat df = new DecimalFormat("0.000");
-		// show the current x,y of the mouse
-		SimpleText mousePosition = new SimpleText("( " + df.format(pos.x) + ", " + df.format(pos.y) + " )");
-		mousePosition.render(g, x, y + spacing * 5);
+		
+		y -= HUD_SPACING;
+		// render the mouse world position
+		gl.glRasterPos2d(x, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "( " + df.format(pos.x) + ", " + df.format(pos.y) + " )");
+		
+		// restore the original matrix
+		gl.glPopMatrix();
 	}
 	
 	/**
-	 * Renders the contact information to the given graphics object at the
-	 * given screen coordinates.
-	 * @param g the graphics object to render to
+	 * Renders the contact information at the given coordinates.
+	 * @param gl the OpenGL graphics context
+	 * @param glut the GLUT for drawing strings
 	 * @param x the x coordinate
 	 * @param y the y coordinate
 	 */
-	private void renderContactInformation(Graphics2D g, int x, int y) {
+	private void renderContactInformation(GL2 gl, GLUT glut, double x, double y) {
 		// set the padding/spacing of the text lines and values
-		final int padding = 105;
-		final int spacing = 15;
+		final int padding = 70;
 		
 		// set the text color
-//		g.setColor(TEXT_COLOR);
-		// render the contact header
-		this.contactLabel.render(g, x, y);
+		gl.glColor4fv(HUD_TEXT_COLOR, 0);
 		
-		// render the various labels
-		this.cTotalLabel.render(g, x, y + spacing);
-		this.cAddedLabel.render(g, x, y + spacing * 2);
-		this.cPersistedLabel.render(g, x, y + spacing * 3);
-		this.cRemovedLabel.render(g, x, y + spacing * 4);
-		this.cSensedLabel.render(g, x, y + spacing * 5);
+		// save the current matrix
+		gl.glPushMatrix();
+		
+		y -= HUD_SPACING * 0.7;
+		// render the version
+		gl.glRasterPos2d(x, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Contacts");
 		
 		// get the contact counter
 		ContactCounter cc = (ContactCounter) this.test.getWorld().getContactListener();
@@ -954,129 +968,258 @@ public class TestBed extends GLCanvas implements GLEventListener {
 		int removed = cc.getRemoved();
 		int sensed = cc.getSensed();
 		
-		// create the texts
-		SimpleText ct = new SimpleText(String.valueOf(total));
-		SimpleText ca = new SimpleText(String.valueOf(added));
-		SimpleText cp = new SimpleText(String.valueOf(persisted));
-		SimpleText cr = new SimpleText(String.valueOf(removed));
-		SimpleText cs = new SimpleText(String.valueOf(sensed));
+		y -= HUD_SPACING;
+		// render the version
+		gl.glRasterPos2d(x, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Total:");
+		// render the value
+		gl.glRasterPos2d(x + padding, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, String.valueOf(total));
 		
-		// render the values
-		ct.render(g, x + padding - ct.getWidth(g), y + spacing);
-		ca.render(g, x + padding - ca.getWidth(g), y + spacing * 2);
-		cp.render(g, x + padding - cp.getWidth(g), y + spacing * 3);
-		cr.render(g, x + padding - cr.getWidth(g), y + spacing * 4);
-		cs.render(g, x + padding - cs.getWidth(g), y + spacing * 5);
+		y -= HUD_SPACING;
+		// render the version
+		gl.glRasterPos2d(x, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Added:");
+		// render the value
+		gl.glRasterPos2d(x + padding, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, String.valueOf(added));
+		
+		y -= HUD_SPACING;
+		// render the version
+		gl.glRasterPos2d(x, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Persisted:");
+		// render the value
+		gl.glRasterPos2d(x + padding, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, String.valueOf(persisted));
+		
+		y -= HUD_SPACING;
+		// render the version
+		gl.glRasterPos2d(x, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Removed:");
+		// render the value
+		gl.glRasterPos2d(x + padding, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, String.valueOf(removed));
+		
+		y -= HUD_SPACING;
+		// render the version
+		gl.glRasterPos2d(x, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Sensed:");
+		// render the value
+		gl.glRasterPos2d(x + padding, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, String.valueOf(sensed));
+		
+		// restore the original matrix
+		gl.glPopMatrix();
 	}
 	
 	/**
-	 * Renders the performance information to the given graphics object at the
-	 * given screen coordinates.
-	 * @param g the graphics object to render to
+	 * Renders the performance information at the given coordinates.
+	 * @param gl the OpenGL graphics context
+	 * @param glut the GLUT for drawing strings
 	 * @param x the x coordinate
 	 * @param y the y coordinate
 	 */
-	private void renderPerformanceInformation(Graphics2D g, int x, int y) {
+	private void renderPerformanceInformation(GL2 gl, GLUT glut, double x, double y) {
 		// set the padding/spacing of the text lines and values
-		final int padding = 55;
-		final int spacing = 15;
+		final int padding = 80;
+		final double ufBarWidth = 130.0;
+		final double ptBarWidth = 160.0;
 		
 		// set the text color
-//		g.setColor(TEXT_COLOR);
+		gl.glColor4fv(HUD_TEXT_COLOR, 0);
 		
+		// save the current matrix
+		gl.glPushMatrix();
+		
+		y -= HUD_SPACING * 0.7;
 		// render the frames per second
-		this.fpsLabel.render(g, x, y);
-		// get the fps in integer form
-		int iFps = (int) Math.floor(this.fps.getFps());
+		gl.glRasterPos2d(x, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Frames/Second:");
 		// render the value
-		SimpleText fps = new SimpleText(String.valueOf(iFps));
-		fps.render(g, x + padding, y);
+		gl.glRasterPos2d(x + padding, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, String.valueOf((int) Math.floor(this.fps.getFps())));
 		
+		y -= HUD_SPACING;
 		// show the total memory usage
-		double barWidth = 100;
-		this.memoryLabel.render(g, x, y + spacing);
+		gl.glRasterPos2d(x, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Memory:");
+		// render the value
 		NumberFormat nf = NumberFormat.getNumberInstance();
 		nf.setMaximumFractionDigits(2);
 		nf.setMinimumFractionDigits(2);
-		SimpleText total = new SimpleText(nf.format(this.usage.getTotalMemory() / 1024.0 / 1024.0) + "M");
-		total.render(g, x + padding, y + spacing);
-		this.totalMemoryLabel.render(g, x + barWidth + 10, y + spacing);
+		gl.glRasterPos2d(x + padding, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, nf.format(this.usage.getTotalMemory() / 1024.0 / 1024.0) + " MB");
+		gl.glRasterPos2d(x + padding + 55, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Total");
 		
-		// show the used/free memory bars
-		g.setColor(new Color(255, 152, 63));
-		g.fillRect(x, y + spacing * 2, (int) Math.ceil(this.usage.getUsedMemoryPercentage() * barWidth), 12);
-		g.setColor(new Color(129, 186, 4));
-		g.fillRect(x, y + spacing * 3, (int) Math.ceil(this.usage.getFreeMemoryPercentage() * barWidth), 12);
-		g.setColor(Color.BLACK);
-		g.drawRect(x, y + spacing * 2, (int) Math.ceil(barWidth) + 1, 12);
-		g.drawRect(x, y + spacing * 3, (int) Math.ceil(barWidth) + 1, 12);
+		y -= HUD_SPACING * 0.5;
+		// render the used/free bars
+		gl.glColor4f(1.0f, 0.6f, 0.2f, 0.8f);
+		gl.glBegin(GL2.GL_QUADS);
+			gl.glVertex2d(x, y);
+			gl.glVertex2d(x + this.usage.getUsedMemoryPercentage() * ufBarWidth, y);
+			gl.glVertex2d(x + this.usage.getUsedMemoryPercentage() * ufBarWidth, y - 10);
+			gl.glVertex2d(x, y - 10);
+		gl.glEnd();
+		gl.glColor4f(0.0f, 0.0f, 0.0f, 0.9f);
+		gl.glBegin(GL2.GL_LINE_LOOP);
+			gl.glVertex2d(x, y);
+			gl.glVertex2d(x + ufBarWidth, y);
+			gl.glVertex2d(x + ufBarWidth, y - 10);
+			gl.glVertex2d(x, y - 10);
+		gl.glEnd();
+		y -= HUD_SPACING * 0.5;
+		gl.glColor4fv(HUD_TEXT_COLOR, 0);
+		gl.glRasterPos2d(x + padding + 55, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Used");
 		
-		// render the used/free labels
-//		g.setColor(TEXT_COLOR);
-		this.usedMemoryLabel.render(g, x + barWidth + 10, y + spacing * 2);
-		this.freeMemoryLabel.render(g, x + barWidth + 10, y + spacing * 3);
+		y -= HUD_SPACING * 0.5;
+		gl.glColor4f(0.5f, 0.7f, 0.0f, 0.8f);
+		gl.glBegin(GL2.GL_QUADS);
+			gl.glVertex2d(x, y);
+			gl.glVertex2d(x + this.usage.getFreeMemoryPercentage() * ufBarWidth, y);
+			gl.glVertex2d(x + this.usage.getFreeMemoryPercentage() * ufBarWidth, y - 10);
+			gl.glVertex2d(x, y - 10);
+		gl.glEnd();
+		gl.glColor4f(0.0f, 0.0f, 0.0f, 0.9f);
+		gl.glBegin(GL2.GL_LINE_LOOP);
+			gl.glVertex2d(x, y);
+			gl.glVertex2d(x + ufBarWidth, y);
+			gl.glVertex2d(x + ufBarWidth, y - 10);
+			gl.glVertex2d(x, y - 10);
+		gl.glEnd();
+		y -= HUD_SPACING * 0.5;
+		gl.glColor4fv(HUD_TEXT_COLOR, 0);
+		gl.glRasterPos2d(x + padding + 55, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Free");
 		
-		barWidth = 180;
+		// render the % time
+		y -= HUD_SPACING;
+		
+		// render the colored labels
+		gl.glRasterPos2d(x, y); glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Time (");
+		gl.glColor4f(0.9f, 0.2f, 0.0f, 1.0f); gl.glRasterPos2d(x + 28, y);  glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Render");
+		gl.glColor4fv(HUD_TEXT_COLOR, 0);     gl.glRasterPos2d(x + 62, y);  glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "|");
+		gl.glColor4f(0.9f, 0.5f, 0.0f, 1.0f); gl.glRasterPos2d(x + 66, y);  glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Update");
+		gl.glColor4fv(HUD_TEXT_COLOR, 0);     gl.glRasterPos2d(x + 100, y); glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "|");
+		gl.glColor4f(0.0f, 0.5f, 0.9f, 1.0f); gl.glRasterPos2d(x + 104, y); glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "System");
+		gl.glColor4fv(HUD_TEXT_COLOR, 0);     gl.glRasterPos2d(x + 140, y); glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, ")");
+		
 		// show the time usage bar
-		this.timeUsageLabel.render(g, x, y + spacing * 4);
-		double renderW = this.usage.getRenderTimePercentage() * barWidth;
-		double updateW = this.usage.getUpdateTimePercentage() * barWidth;
+		y -= HUD_SPACING * 0.5;
+		// get the widths depending on the percentage of time
+		double renderW = this.usage.getRenderTimePercentage() * ptBarWidth;
+		double updateW = this.usage.getUpdateTimePercentage() * ptBarWidth;
 		// since input polling time is so low, just consider it part of the system time
-		double systemW = (this.usage.getSystemTimePercentage() + this.usage.getInputTimePercentage()) * barWidth;
-		// save the original font
-		Font font = g.getFont();
-		// create a smaller font for the percentages
-		Font f = new Font("arial", Font.PLAIN, 9);
-		g.setFont(f);
-		// render the boxes
-		g.setColor(new Color(222, 48, 12));
-		g.fillRect(x, y + spacing * 5, (int) Math.ceil(renderW), 12);
-		g.setColor(Color.WHITE);
-		g.drawString(Math.round(this.usage.getRenderTimePercentage() * 100) + "%", x + 3, (int) Math.ceil(y + spacing * 5.5) + 2);
-		g.setColor(new Color(222, 117, 0));
-		g.fillRect(x + (int) Math.ceil(renderW), y + spacing * 5, (int) Math.ceil(updateW), 12);
-		g.setColor(Color.WHITE);
-		g.drawString(Math.round(this.usage.getUpdateTimePercentage() * 100) + "%", x + (int) Math.ceil(renderW) + 3, (int) Math.ceil(y + spacing * 5.5) + 2);
-		g.setColor(new Color(20, 134, 222));
-		g.fillRect(x + (int) Math.ceil(renderW) + (int) Math.ceil(updateW), y + spacing * 5, (int) Math.ceil(systemW), 12);
-		g.setColor(Color.WHITE);
-		g.drawString(Math.round(this.usage.getSystemTimePercentage() * 100) + "%", x + (int) Math.ceil(renderW) + (int) Math.ceil(updateW) + 3, (int) Math.ceil(y + spacing * 5.5) + 2);
-		g.setColor(Color.BLACK);
-		g.drawRect(x, y + spacing * 5, (int) Math.ceil(barWidth) + 1, 12);
-		g.setFont(font);
+		double systemW = (this.usage.getSystemTimePercentage() + this.usage.getInputTimePercentage()) * ptBarWidth;
+		// draw the bars
+		gl.glBegin(GL2.GL_QUADS);
+			gl.glColor4f(0.9f, 0.2f, 0.0f, 0.8f);
+			gl.glVertex2d(x, y);
+			gl.glVertex2d(x + renderW, y);
+			gl.glVertex2d(x + renderW, y - 10);
+			gl.glVertex2d(x, y - 10);
+			gl.glColor4f(0.9f, 0.5f, 0.0f, 0.8f);
+			gl.glVertex2d(x + renderW, y);
+			gl.glVertex2d(x + renderW + updateW, y);
+			gl.glVertex2d(x + renderW + updateW, y - 10);
+			gl.glVertex2d(x + renderW, y - 10);
+			gl.glColor4f(0.0f, 0.5f, 0.9f, 0.8f);
+			gl.glVertex2d(x + renderW + updateW, y);
+			gl.glVertex2d(x + renderW + updateW + systemW, y);
+			gl.glVertex2d(x + renderW + updateW + systemW, y - 10);
+			gl.glVertex2d(x + renderW + updateW, y - 10);
+		gl.glEnd();
+		// draw the outline
+		gl.glColor4f(0.0f, 0.0f, 0.0f, 0.9f);
+		gl.glBegin(GL2.GL_LINE_LOOP);
+			gl.glVertex2d(x, y);
+			gl.glVertex2d(x + ptBarWidth, y);
+			gl.glVertex2d(x + ptBarWidth, y - 10);
+			gl.glVertex2d(x, y - 10);
+		gl.glEnd();
+		
+		// draw the percentages
+		y -= HUD_SPACING * 0.5;
+		gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+		gl.glRasterPos2d(x + 2, y - 2);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, Math.round(this.usage.getRenderTimePercentage() * 100) + "%");
+		gl.glRasterPos2d(x + renderW + 2, y - 2);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, Math.round(this.usage.getUpdateTimePercentage() * 100) + "%");
+		gl.glRasterPos2d(x + ptBarWidth - 25, y - 2);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, Math.round(this.usage.getSystemTimePercentage() * 100) + "%");
+		
+		// restore the original matrix
+		gl.glPopMatrix();
 	}
 	
 	/**
-	 * Renders some system information.
-	 * @param g the graphics object to render to
+	 * Renders some system information at the given coordinates.
+	 * @param gl the OpenGL graphics context
+	 * @param glut the GLUT for drawing strings
 	 * @param x the x coordinate
 	 * @param y the y coordinate
 	 */
-	private void renderSystemInformation(Graphics2D g, int x, int y) {
+	private void renderSystemInformation(GL2 gl, GLUT glut, double x, double y) {
 		// set the padding/spacing of the text lines and values
 		final int padding = 80;
-		final int spacing = 15;
-		
+
 		// set the text color
-//		g.setColor(TEXT_COLOR);
+		gl.glColor4fv(HUD_TEXT_COLOR, 0);
 		
-//		this.jreVersionLabel.render(g, x, y);
-//		this.jreVersionValue.render(g, x + padding, y);
-//		
-//		this.jreModeLabel.render(g, x, y + spacing);
-//		this.jreModeValue.render(g, x + padding, y + spacing);
-//		
-//		this.osNameLabel.render(g, x, y + spacing * 2);
-//		this.osNameValue.render(g, x + padding, y + spacing * 2);
-//		
-//		this.osArchitectureLabel.render(g, x, y + spacing * 3);
-//		this.osArchitectureValue.render(g, x + padding, y + spacing * 3);
-//		
-//		this.osDataModelLabel.render(g, x, y + spacing * 4);
-//		this.osDataModelValue.render(g, x + padding, y + spacing * 4);
-//		
-//		this.processorCountLabel.render(g, x, y + spacing * 5);
-//		this.processorCountValue.render(g, x + padding, y + spacing * 5);
+		// save the current matrix
+		gl.glPushMatrix();
+		
+		y -= HUD_SPACING * 0.7;
+		// render the frames per second
+		gl.glRasterPos2d(x, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "JRE Version:");
+		// render the value
+		gl.glRasterPos2d(x + padding, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, TestBed.JRE_VERSION);
+		
+		y -= HUD_SPACING;
+		// render the frames per second
+		gl.glRasterPos2d(x, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "JRE Mode:");
+		// render the value
+		gl.glRasterPos2d(x + padding, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, TestBed.JRE_MODE);
+		
+		y -= HUD_SPACING;
+		// render the frames per second
+		gl.glRasterPos2d(x, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "OS Name:");
+		// render the value
+		gl.glRasterPos2d(x + padding, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, TestBed.OS_NAME);
+		
+		y -= HUD_SPACING;
+		// render the frames per second
+		gl.glRasterPos2d(x, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Architecture:");
+		// render the value
+		gl.glRasterPos2d(x + padding, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, TestBed.OS_ARCHITECTURE);
+		
+		y -= HUD_SPACING;
+		// render the frames per second
+		gl.glRasterPos2d(x, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Data Model:");
+		// render the value
+		gl.glRasterPos2d(x + padding, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, TestBed.OS_DATA_MODEL);
+		
+		y -= HUD_SPACING;
+		// render the frames per second
+		gl.glRasterPos2d(x, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Processors:");
+		// render the value
+		gl.glRasterPos2d(x + padding, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, TestBed.PROCESSOR_COUNT);
+		
+		// restore the original matrix
+		gl.glPopMatrix();
 	}
 	
 	/**
@@ -1092,7 +1235,23 @@ public class TestBed extends GLCanvas implements GLEventListener {
 		if (this.keyboard.isPressed(KeyEvent.VK_ESCAPE) || this.keyboard.isPressed(KeyEvent.VK_E)) {
 			// only exit if its not applet mode
 			if (this.mode == Mode.APPLICATION) {
-				// TODO finish
+				// we have to stop the animator in another thread so that
+				// it blocks until its stopped
+				Thread t = new Thread() {
+					public void run() {
+						// stop the animator
+						animator.stop();
+						JFrame frame = (JFrame)container;
+						// hide the frame
+						frame.setVisible(false);
+						// dispose of resources (so the dispose method
+						// on the GLEventListener is called)
+						frame.dispose();
+						// finally exit the JVM
+						System.exit(0);
+					}
+				};
+				t.start();
 			}
 		}
 		
