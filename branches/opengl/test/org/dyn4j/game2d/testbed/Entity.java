@@ -24,13 +24,6 @@
  */
 package org.dyn4j.game2d.testbed;
 
-import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.util.logging.Logger;
-
-import javax.imageio.ImageIO;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
@@ -39,7 +32,6 @@ import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.geometry.Circle;
 import org.dyn4j.game2d.geometry.Convex;
 import org.dyn4j.game2d.geometry.Polygon;
-import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Segment;
 import org.dyn4j.game2d.geometry.Shape;
 import org.dyn4j.game2d.geometry.Transform;
@@ -53,9 +45,6 @@ import org.dyn4j.game2d.geometry.Wound;
  * @since 1.0.0
  */
 public class Entity extends Body {
-	/** class level logger */
-	private static final Logger LOGGER = Logger.getLogger(Entity.class.getName());
-	
 	/** Fill color for frozen bodies */
 	private static final float[] FROZEN_COLOR = new float[] { 1.0f, 1.0f, 200.0f / 255.0f };
 	
@@ -65,27 +54,6 @@ public class Entity extends Body {
 	/** The length of an edge normal */
 	private static final double NORMAL_LENGTH = 0.1;
 	
-	/** image of a wooden box used to render on rectangles */
-	private static BufferedImage r_img = null;
-	
-	/** image of a basketball used to render on circles */
-	private static BufferedImage c_img = null;
-	
-	/**
-	 * Static initializer to read in image files.
-	 */
-	static {
-		try {
-			// load the wood box image once
-			r_img = ImageIO.read(Entity.class.getResource("/wood.jpg"));
-			// load the basketball image once
-			c_img = ImageIO.read(Entity.class.getResource("/bb.png"));
-		} catch (IOException e) {
-			// just log the exception
-			LOGGER.throwing(Entity.class.getName(), "static", e);
-		}
-	}
-	
 	/** The random fill color */
 	private float[] color = new float[] {0.0f, 0.0f, 0.0f, 0.0f};
 	
@@ -93,14 +61,14 @@ public class Entity extends Body {
 	 * Optional constructor.
 	 */
 	public Entity() {
-		this(255);
+		this(1.0f);
 	}
 	
 	/**
 	 * Full constructor.
-	 * @param alpha the alpha value used for the colors
+	 * @param alpha the alpha value used for the colors; in the range [0.0, 1.0]
 	 */
-	public Entity(int alpha) {
+	public Entity(float alpha) {
 		this.initialize(alpha);
 	}
 	
@@ -122,7 +90,7 @@ public class Entity extends Body {
 	 * Initializes the entity.
 	 * @param alpha the alpha component
 	 */
-	private void initialize(int alpha) {
+	private void initialize(float alpha) {
 		// create a random (pastel) fill color
 		this.color[0] = (float)Math.random() * 0.5f + 0.5f;
 		this.color[1] = (float)Math.random() * 0.5f + 0.5f;
@@ -373,63 +341,6 @@ public class Entity extends Body {
 				gl.glVertex2d(mid.x + n.x * NORMAL_LENGTH, mid.y + n.y * NORMAL_LENGTH);
 			gl.glEnd();
 		}
-	}
-	
-	/**
-	 * Renders an image for given convex object.
-	 * <p>
-	 * This method is never used, however, its here to help illustrate how to map an image
-	 * to shapes of different types.
-	 * @param g the graphics object to render to
-	 * @param c the convex object to render on top of
-	 * @param t the transform of the convex object
-	 * @param scale the world to screen space scale factor
-	 */
-	@SuppressWarnings("unused")
-	private void renderImage(Graphics2D g, Convex c, Transform t, double scale) {
-		Vector2 ce = t.getTransformed(c.getCenter());
-		
-		// get the rotation and use an affine transform to rotate the subsequent graphics
-		double rotation = t.getRotation();
-		AffineTransform at = AffineTransform.getRotateInstance(rotation, ce.x * scale, ce.y * scale);
-		// save the old transform
-		AffineTransform old = g.getTransform();
-		// apply the rotation transform
-		g.transform(at);
-		
-		// check for rectangle
-		if (c instanceof Rectangle && r_img != null) {
-			Rectangle r = (Rectangle) c;
-			double w = r.getWidth() * scale;
-			double h = r.getHeight() * scale;
-			
-			// draw the image
-			g.drawImage(
-					r_img,
-					(int) Math.ceil(ce.x * scale - w / 2.0),
-					(int) Math.ceil(ce.y * scale - h / 2.0),
-					(int) Math.ceil(w),
-					(int) Math.ceil(h),
-					null);
-		}
-		
-		// check for circle
-		if (c instanceof Circle && c_img != null) {
-			Circle cir = (Circle) c;
-			double r = cir.getRadius() * scale;
-
-			// draw the image
-			g.drawImage(
-					c_img,
-					(int) Math.ceil(ce.x * scale - r),
-					(int) Math.ceil(ce.y * scale - r),
-					(int) Math.ceil(r * 2.0),
-					(int) Math.ceil(r * 2.0),
-					null);
-		}
-		
-		// restore the old transform
-		g.setTransform(old);
 	}
 	
 	/**

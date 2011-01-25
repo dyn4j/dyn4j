@@ -154,7 +154,7 @@ public class Plotter extends Test {
 	 * @return {@link Entity}
 	 */
 	public Entity getEntity(int index) {
-		Entity e = new Entity(128);
+		Entity e = new Entity(0.5f);
 		// which shape to make?
 		if (index == 0) {
 			Circle c = new Circle(1.0);
@@ -300,7 +300,6 @@ public class Plotter extends Test {
 				GLHelper.fillRectangle(gl, p2.x, p2.y, r, r);
 				
 				gl.glBegin(GL.GL_LINES);
-					gl.glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
 					gl.glVertex2d(p1.x, p1.y);
 					gl.glVertex2d(p1.x + n.x * s.getDistance(), p1.y + n.y * s.getDistance());
 				gl.glEnd();

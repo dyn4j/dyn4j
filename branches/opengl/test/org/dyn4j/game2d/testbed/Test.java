@@ -367,7 +367,7 @@ public abstract class Test implements Comparable<Test> {
 		Vector2 v1 = joint.getAnchor1();
 		Vector2 v2 = joint.getAnchor2();
 		// set the color to be mostly transparent
-		gl.glColor4f(0.5f, 0.5f, 0.5f, 0.25f);
+		gl.glColor4f(0.0f, 0.0f, 0.0f, 0.3f);
 		// check for spring distance joint
 		if (joint.isSpring()) {
 			// draw a spring
@@ -551,7 +551,7 @@ public abstract class Test implements Comparable<Test> {
 		Vector2 t = n.product(w * 0.25).left();
 		
 		// set the color to be mostly transparent
-		gl.glColor4f(0.0f, 0.0f, 0.0f, 0.2f);
+		gl.glColor4f(0.0f, 0.0f, 0.0f, 0.3f);
 		// draw the inner piston
 		gl.glBegin(GL2.GL_QUADS);
 			gl.glVertex2d(c1.x - t.x, c1.y - t.y);
@@ -579,7 +579,7 @@ public abstract class Test implements Comparable<Test> {
 	 */
 	private void render(GL2 gl, PulleyJoint joint) {
 		// set the color to be mostly transparent
-		gl.glColor4f(0.0f, 0.0f, 0.0f, 0.2f);
+		gl.glColor4f(0.0f, 0.0f, 0.0f, 0.3f);
 		
 		Vector2 p1 = joint.getAnchor1();
 		Vector2 p2 = joint.getPulleyAnchor1();
@@ -603,7 +603,7 @@ public abstract class Test implements Comparable<Test> {
 		Vector2 v1 = joint.getAnchor1();
 		Vector2 v2 = joint.getAnchor2();
 		// set the color to be mostly transparent
-		gl.glColor4f(0.0f, 0.0f, 0.0f, 0.2f);
+		gl.glColor4f(0.0f, 0.0f, 0.0f, 0.3f);
 		
 		// emulate a line stroke of arbitrary width without cap/join
 		// get the tangent vector

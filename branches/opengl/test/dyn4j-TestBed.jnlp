@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jnlp spec="1.0+" codebase="http://www.dyn4j.org/TestBed/latest/">
+	<information>
+		<title>dyn4j Test Bed</title>
+		<vendor>dyn4j</vendor>
+		<homepage href="http://www.dyn4j.org" />
+		<description>Test application for the dyn4j collision detection and physics library.</description>
+	</information>
+	<offline-allowed/>
+	<security>
+		<all-permissions/>
+	</security>
+	<resources>
+		<j2se version="1.6+" />
+		<jar href="dyn4j.jar"/>
+		<jar href="dyn4j-TestBed.jar" main="true" />
+		<extension name="JOGL" href="http://jogamp.org/deployment/webstart/jogl-all-awt.jnlp" />
+	</resources>
+	<application-desc main-class="org.dyn4j.game2d.testbed.Driver" width="800" height="600" />
+</jnlp>

@@ -825,11 +825,11 @@ public class TestBed extends GLCanvas implements GLEventListener {
 		// set the color to red
 		gl.glColor4f(1.0f, 0.0f, 0.0f, 0.7f);
 		// fill a red rectangle to show the paused label
-		GLHelper.fillRectangle(gl, -w / 2.0 + 50.0, h / 2.0 - 12, 100, 24);
+		GLHelper.fillRectangle(gl, w / 2.0 - 50.0, h / 2.0 - 12, 100, 24);
 		// set the color to white
-		gl.glColor4f(1.0f, 1.0f, 1.0f, 0.7f);
+		gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 		// set the raster for the text
-		gl.glRasterPos2d(-w / 2.0 + 25.0, h / 2.0 - 15.0);
+		gl.glRasterPos2d(w / 2.0 - 70.0, h / 2.0 - 15.0);
 		// draw the text
 		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_12, "Paused");
 		// reset to the old matrix

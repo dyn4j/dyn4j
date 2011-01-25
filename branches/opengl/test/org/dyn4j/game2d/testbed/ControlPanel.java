@@ -47,7 +47,6 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 import javax.naming.ConfigurationException;
@@ -100,9 +99,6 @@ import org.dyn4j.game2d.dynamics.Settings;
 public class ControlPanel extends JFrame {
 	/** the version id */
 	private static final long serialVersionUID = -461371622259288105L;
-	
-	/** The class logger */
-	private static final Logger LOGGER = Logger.getLogger(ControlPanel.class.getName());
 	
 	/** Resource bundle containing the tests to load */
 	private static ResourceBundle TESTS_BUNDLE = ResourceBundle.getBundle("org.dyn4j.game2d.testbed.tests");
@@ -217,7 +213,7 @@ public class ControlPanel extends JFrame {
 			// attempt to load the image icon
 			this.setIconImage(ImageIO.read(this.getClass().getResource("/icon.png")));
 		} catch (IOException e1) {
-			LOGGER.finest("Icon image 'icon.png' not found.");
+			System.err.println("Icon image 'icon.png' not found.");
 		}
 		
 		// load the help icon
@@ -255,16 +251,16 @@ public class ControlPanel extends JFrame {
 				}
 			} catch (ClassNotFoundException e) {
 				// log the exception but ignore it
-				LOGGER.throwing("TestBed", "constructor", e);
+				e.printStackTrace();
 			} catch (ClassCastException e) {
 				// log the exception but ignore it
-				LOGGER.throwing("TestBed", "constructor", e);
+				e.printStackTrace();
 			} catch (IllegalAccessException e) {
 				// log the exception but ignore it
-				LOGGER.throwing("TestBed", "constructor", e);
+				e.printStackTrace();
 			} catch (InstantiationException e) {
 				// log the exception but ignore it
-				LOGGER.throwing("TestBed", "constructor", e);
+				e.printStackTrace();
 			}
 		}
 		// make sure the map has at least one test
@@ -1923,12 +1919,12 @@ public class ControlPanel extends JFrame {
 								desktop.browse(uri);
 							} catch (URISyntaxException ex) {
 								// this shouldn't happen
-								LOGGER.warning("A link in the description.html is not correct: " + e.getURL());
+								System.err.println("A link in the description.html is not correct: " + e.getURL());
 							} catch (IOException ex) {
 								// this shouldn't happen either since
 								// most desktops have a default program to
 								// open urls
-								LOGGER.warning("Cannot navigate to link since a default program is not set or does not exist.");
+								System.err.println("Cannot navigate to link since a default program is not set or does not exist.");
 							}
 						}
 					}

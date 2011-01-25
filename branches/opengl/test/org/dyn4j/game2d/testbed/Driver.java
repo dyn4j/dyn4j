@@ -24,8 +24,8 @@
  */
 package org.dyn4j.game2d.testbed;
 
+import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
@@ -85,20 +85,18 @@ public class Driver {
 		TestBed testbed = new TestBed(caps, window, size, TestBed.Mode.APPLICATION);
 		
 		// set the layout of the frame
-		window.getContentPane().setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
+		Container contentPane = window.getContentPane();
 		// add the testbed to the frame
-		window.getContentPane().add(testbed);
-		
-		// set the size of the content pane to be same size as the GLCanvas
-		window.getContentPane().setPreferredSize(size);
+		contentPane.add(testbed);
+		window.setResizable(false);
 		// size everything
 		window.pack();
+		
 		// move from (0, 0) since this hides some of the window frame
 		window.setLocation(10, 10);
 		
 		// show the window
 		window.setVisible(true);
-		window.setResizable(false);
 		
 		// setting this property will call the dispose methods on the GLCanvas
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
