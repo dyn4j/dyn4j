@@ -1,12 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jnlp spec="1.0+" codebase="http://www.dyn4j.org/TestBed/latest/">
+<!DOCTYPE jnlp SYSTEM "http://java.sun.com/dtd/JNLP-1.5.dtd">
+<jnlp spec="1.5+" codebase="http://www.dyn4j.org/TestBed/latest/" version="2.2.2">
 	<information>
-		<title>dyn4j Test Bed</title>
+		<title>dyn4j TestBed</title>
 		<vendor>dyn4j</vendor>
-		<homepage href="http://www.dyn4j.org" />
+		<homepage href="http://www.dyn4j.org/" />
 		<description>Test application for the dyn4j collision detection and physics library.</description>
+		<description kind="short">Test application for the dyn4j collision detection and physics library.</description>
+		<description kind="one-line">Application for testing the dyn4j project.</description>
+		<description kind="tooltip">dyn4j TestBed</description>
+		<icon href="icon32x32.png" width="32" height="32" />
+		<icon href="icon64x64.png" width="64" height="64" />
+		<offline-allowed/>
+		<shortcut online="false">
+			<desktop />
+			<menu submenu="dyn4j" />
+	    </shortcut>
 	</information>
-	<offline-allowed/>
 	<security>
 		<all-permissions/>
 	</security>
@@ -16,5 +26,5 @@
 		<jar href="dyn4j-TestBed.jar" main="true" />
 		<extension name="JOGL" href="http://jogamp.org/deployment/webstart/jogl-all-awt.jnlp" />
 	</resources>
-	<application-desc main-class="org.dyn4j.game2d.testbed.Driver" width="800" height="600" />
+	<application-desc main-class="org.dyn4j.game2d.testbed.Driver" />
 </jnlp>
