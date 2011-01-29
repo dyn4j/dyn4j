@@ -1,5 +1,5 @@
 #summary This page is intended to help you get started using dyn4j.
-#labels Featured,Phase-Deploy
+#labels Featured,Phase-Deploy,Documentation-User
 
 You can post any questions on the <a href="http://forum.dyn4j.org/" target="_blank">forums</a>, but please read this page first before posting.
 
