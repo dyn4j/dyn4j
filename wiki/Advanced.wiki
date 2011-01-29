@@ -1,0 +1,180 @@
+#summary Advanced Topics.
+#labels Documentation-User
+
+After reading through the GettingStarted page and getting your project integrated with dyn4j, its time to hit some of the more advanced topics to achieve better control over the collision detection and physics pipelines.
+
+=Ids=
+Each Shape, Fixture/!BodyFixture, and Body are given random UUIDs upon creation.  These ids are used to refer to the objects stored in maps, comparisons, etc.  Currently the ids are read only as to ensure that each is unique.  This may change in a future release.
+
+=Shapes=
+Both shape and body classes implement the Transformable interface.  The shape class's implementation directly modifies the internal state of the shape.  This is mainly used to locally transform the shape.  The body class's implementation modifies the body's transform.
+
+  * Shapes can be reused in other bodies but remember that if you transform a shape directly it will be transformed for all bodies you add it to.  Its recommended to avoid this practice.
+
+All shapes also have a getRadius method.  This method returns the maximum radius of the shape (the rotation disc radius).
+
+=Convex Hulls=
+Convex hull algorithms are in the geometry.hull package and are used to generate convex shapes from point sets.  They find the minimum convex hull for all the points within the set.
+
+=Convex Decomposition=
+As stated in the GettingStarted page, all shapes are convex.  To create concave bodies you must decompose the concave bodies into convex pieces.  To help with this process some convex decomposition algorithms are provided.  These algorithms operate on simple polygons *without* holes.
+
+Convex decomposition algorithms are in the geometry.decompose package and are used to decompose a simple polygon without holes into a list of convex shapes.  The algorithms provided are not optimal but have acceptable complexity.
+
+Three algorithms are offered generally producing different results.  If you are using these for offline processing, use each one to obtain the smallest decomposition.
+
+=Fixtures & !BodyFixtures=
+Fixture is base class for !BodyFixture.  !BodyFixtures are the only Fixtures allowed to be added to a Body.  The Fixture base class is present to allow users to use the collision detection system without the dynamics engine.
+
+There is a one to one relationship between a Convex Shape and a !BodyFixture.  A Convex Shape must be contained in a !BodyFixture to be added to a Body.  The !BodyFixture class allows shapes to have different dynamics settings.
+
+Each !BodyFixture has its own density, friction and restitution coefficients, and collision Filter.  !BodyFixtures can also be flagged as "sensors."
+
+A sensor is a !BodyFixture who will detect collisions but whose collisions will not be resolved.
+
+Filters can be used to only allow certain !BodyFixtures to collide with other !BodyFixtures.
+
+=Collision Filtering=
+Collision filtering is used to only allow a category of bodies to collide with another category.
+
+Collision filtering is achieved by the Filter interface and the member on the Fixture/!BodyFixture class.  There are two Filter implementations provided, the Filter.DEFAULT_FILTER and the !CategoryFilter (just like Box2D's collision filter, int category + mask).  You can also create your own filter classes to perform more advanced collision filtering by implementing the Filter interface.
+  * Collision filtering can be tricky; the collision filters can be called in either order filter1.isAllowed(filter2) or filter2.isAllowed(filter1).  This can cause some confusion.  Another problem is if the Filters compared are not the same filter class type.  The !CategoryFilter is conservative and will return true if the class types are not the same.  Because of this, if you choose to make your own filter implementation class, make sure all Fixture/!BodyFixture objects are given an instance of that same class.
+  * The Filter.DEFAULT_FILTER class always returns true and is set by default on every Fixture/!BodyFixture created.
+  * The Filter on a Fixture/!BodyFixture cannot be null.  Use the Filter.DEFAULT_FILTER instead.
+
+=Segment vs. Segment=
+If you ran the !TestBed and took a look at the Terrain test you may notice that Segment vs. Segment collision "doesn't work".  This is by design and is not intended to work.  Segments are a special case and provided with out Segment vs. Segment collision resolution.
+
+The Segment class lives in the geometry package and extends the Convex interface.  Because of this it can be used in collision detection *and in the physics pipeline*.  This class represents a infinitely thin segment.  Because of this, Segment vs. Segment _collision resolution_ does not work however, _collision detection_ does work.
+
+<h2>New Shape Types</h2>
+If you choose to create your own shape classes you must implement the Convex interface for the new shapes to be usable by the collision detection and physics pipelines.  The getAxes and getFoci methods are used to support SAT, the getFarthestPoint is used by GJK, and the getFarthestFeature is used by the Manifold Solver.
+
+New shapes are required to have a final static member named TYPE that is set to an instance of Shape.Type.  The new class should implement/override the getType method and return the static instance.
+
+The Shape.Type class also accepts a parent Shape.Type.  This is used to emulate the hierarchical structure of the classes.  For example, a Rectangle is a polygon, so we define its type as:
+
+[code="java"]
+public static final Shape.Type TYPE = new Shape.Type(Polygon.TYPE);
+[/code]
+<h2>Shape Editing</h2>
+Through the life of a body it may need to change its shape(s).  For instance, two bodies collide and one body who has two shapes should break into two bodies each with one shape.  Situations where the shapes of a body need to change is called shape editing.
+
+To edit the shapes of a body simply call the addFixture and removeFixture methods on the body.
+
+After any editing has been performed make sure to update the body's mass via one of the setMass methods to reflect the changes.
+
+It is generally discouraged that shapes themselves be modified after being added to a body.  Doing so may have unexpected or inaccurate results.
+<h2>Bodies</h2>
+The Body class can be extended or can be contained in another object or can be completely separate.
+<ul>
+	<li>The Body class can be extended, be careful when overriding methods; make sure you call the super method.</li>
+	<li>The Body class can be contained in another class</li>
+	<li>The Body class can be completely separate by using the userData member variable for association.</li>
+</ul>
+All three methods are acceptable and intended for use.
+
+The Body class also contains methods to apply linear and angular damping.  This can be useful to simulate fluid resistance and also to reduce the total energy in the system.
+
+For initial placement of bodies, use the translateToOrigin method.  This will translate the body to the origin making it easier to initially place bodies before starting the simulation.
+<h2>Body State</h2>
+The life time of a body is usually very long.  Over that span the body's state may change.
+
+A body becomes "asleep" when the physics engine has determined that it is not moving.  The body is still tested for collisions but is excluded from the physics pipeline to save time.  Sleeping of a body only occurs when the body's linear and angular velocity are below a threshold set in the Settings singleton.  Sleeping can be controlled on a body by body basis or globally using the Settings class.
+
+A body becomes "inactive" when the collision detection system detects that the entire body is outside the bounds of the world.  The body no longer participates in collision detection or physics.
+<h2>Force and Torque</h2>
+When applying forces and torques to a body they are queued in an accumulator.  When a simulation step is performed the forces and torques are applied to the bodies and placed in the force and torque member variables.  This is done so that the previous simulation step's force and torque values can be queried.
+
+The Force and Torque classes also feature an isComplete method that can be overridden by sub classes.  This allows a force to be created that may or may not be removed at the end of a world step given the return of the isComplete method.
+<h2>Event Listening</h2>
+The World class contains a number of event listeners used to receive notifications when an event occurs.  These are talked about in the following paragraphs.
+<blockquote>NEVER modify/remove/add bodies or joints during a call to World.update(long).  This can cause unexpected results and runtime errors.  If you are listening for events, save the events for later processing.  After the World.update(long) method returns you should respond to the queued events.
+
+There is one exception.  If you listen for the Step events, you can respond to events at this time.</blockquote>
+<h3>Out of Bounds Event</h3>
+As described above, when a body goes out of bounds it is set to inactive.  To receive a notification of this event extend the BoundsAdapter class or implement the BoundsListener interface and set it in the World object using the setBoundsListener method.
+<h3>Implicit Destruction Event</h3>
+When a call to the World.remove(Body) or World.remove(Joint) is made some joints and contacts may be destroyed.  You can receive notification of these events by extending the DestructionAdapter class or by implementing the DestructionListener interface.  Just like the BoundsListener the DestructionListener is set via the world object.
+<h3>Step Event</h3>
+When a call to the World.update(long) is made a simulation step is not always taken.  A better simulation results if the steps taken are the same elapsed time.  The StepAdapter class and StepListener interface are provided so that you know when a simulation step is performed.  There are two events to listen for: begin and end.
+
+As stated above, you may use this event to perform updates on bodies/shapes and the world for any other queued events that happened the previous time step.
+<h3>Collision Event</h3>
+When bodies are detected as colliding the CollisionListener set on the World object is notified. There are three events that can be called:
+<ul>
+	<li>Broadphase - Called when two bodies are found to be in collision by the Broadphase</li>
+	<li>Narrowphase - Called when two bodies are found to be in collision by the Narrowphase</li>
+	<li>Manifold - Called when a contact manifold is found between two bodies</li>
+</ul>
+Each of the the events should return a boolean result.  The returned boolean indicates whether the collision processing should continue.  Therefore the CollisionAdapter will always return true for all three methods.
+<h3>Contact Event</h3>
+When bodies come into contact the physics engine must resolve that contact.  The ContactAdapter class and ContactListener interface are used to receive contact events.  The contact events include:
+<ul>
+	<li>Begin - A contact was created between two bodies</li>
+	<li>Persist - A contact is still active between two bodies</li>
+	<li>End - A contact no longer exists between two bodies</li>
+	<li>Sensed - A contact exists between a sensor body and another body</li>
+	<li>PreSolve- Called for all contacts that will be resolved</li>
+	<li>PostSovle - A contact between two bodies was resolved</li>
+</ul>
+Some of the events above should return a boolean result.  The returned boolean indicates whether the processing of that contact should continue.  Therefore the ContactAdapter will always return true for all the methods.
+<h3>Ray Cast Event</h3>
+When a ray cast is performed using the World.raycast methods (that do NOT accept a body, these methods are used to perform a ray cast against all the bodies in the World) a ray cast event is triggered.  Notification of this event is by the RaycastListener interface and RaycastAdapter class.
+
+There is only one event, however given the return value of the notification, the World will proceed differently:
+<ul>
+	<li>STOP - Return this enum to indicate that the ray cast should stop</li>
+	<li>STOP_IGNORE - Return this enum to indicate that the ray cast should stop and that this result should be ignored (not added to the results list)</li>
+	<li>CONTINUE - Return this enum to indicate that the ray cast should continue</li>
+	<li>CONTINUE_IGNORE - Return this enum to indicate that the ray cast should continue but ignore this result (not added to the results list)</li>
+</ul>
+<h3>Time Of Impact Events</h3>
+If continuous collision detection is disabled its possible that bodies traveling fast may pass through other objects within one time step.  If CCD is enabled, detection of these situations will generate a time of impact event.
+
+The single time of impact event can be listened for via the TimeOfImpactListener interface or the TimeOfImpactAdapter class.  Returning a true value indicates that the event should be handled, returning false indicates that the event should be ignored.
+
+Each event has specific information that can be useful for games.  Check the Javadocs for more information.
+<h2>Collision Detection</h2>
+The collision detection system is a three tier architecture:
+
+Broadphase ? Narrowphase ? Manifold Solver
+
+The broadphase collision detector is a O(n<sup>2</sup>) detector that determines possible collision pairs.  After obtaining all the possible collision pairs, the pairs are passed to the narrowphase collision detector.  The narrowphase detector tests each shape of the first body against each shape of the second body.  If any combination of shapes collide, the result is passed to the Manifold Solver.  The manifold solver will determine the points on the shapes that will be used for the physics pipeline.
+<h3>Narrowphase</h3>
+Two implementations of the NarrowphaseDetector interface are provided: SAT and GJK.  The GJK algorithm is used by default.
+<h3>Using Collision Detection Only</h3>
+The collision detection system can be used without the physics pipeline.  Create a class that implements the Collidable interface, then perform the process outlined above in your own World class.
+<h3>Static Queries</h3>
+The Collision detector also allow for static collision detection queries.  Just pass the respective values to the detect methods.  In addition to this, you can use the faster boolean result methods if you don't plan to use the extra information provided by the standard detect methods.
+<h2>Continuous Collision Detection (CCD)</h2>
+Continuous collision detection is aimed at solving the "tunneling" problem.  Tunneling occurs when a fast moving object starts on one side of another object and after one time step is on the other side of that object.  This happens when bodies are fast or thin.
+
+The implementation used in dyn4j is called Conservative Advancement.  This method is used in Bullet, Box2d and a number of other physics engines.  The implementation in dyn4j computes the exact time of impact within a specified tolerance.
+
+After detection of a missed collision, the bodies are linearly interpolated to the time of impact.  Next the closest points on the bodies are solved so that the bodies begin to overlap.  This causes the discrete collision detection to catch the collision in the next time step.  Time is not conserved.
+<h2>World</h2>
+The World class is the manager for the collision detection and physics systems.  All listeners, bodies, joints, etc. are set using the World object.
+<h3>Gravity</h3>
+The World class will allow you to set the gravity of the world as a vector.  This means you could create gravity in any direction (or none at all).
+<h3>Coefficient Mixer</h3>
+The CoefficientMixer class can be used to override the standard friction and restitution mixing routines.  As stated above, each Fixture instance can have its own friction and restitution values.  Because of this, these values must be combined so that the contact solver can solve collision accurately.
+<h2>Settings</h2>
+The Settings class contained in the org.dyn4j.game2d.dynamics package is the class used to configure the physics pipeline.  The class is a singleton object and is not thread safe.
+
+You can use this object to set physics settings at any time.  The Settings object is defaulted to the settings that worked best for all the tests in the TestBed.
+<h2>Units</h2>
+The default units are Meter, Kilogram, Seconds or MKS.  It is possible to use another measurement system, however, all the default settings in the Settings object and other classes will need to be adjusted.  If possible, always use MKS, when thats not an option use the UnitConversion class to convert any values to MKS or from MKS.
+<h2>Epsilon</h2>
+An inherent side effect of finite precision floating point arithmetic is numerical error.  Another problem to deal with is the lack of exact representation of all values.  These two problems cause many algorithms and logic to use an epsilon comparison instead of comparisons between 0.
+
+The Epsilon class attempts to approximate the machine epsilon for a double precision floating point number.  This epsilon is the smallest floating point number such that x + epsilon &ne; x.  This value is used in a number of algorithms within dyn4j and can be used in game code as well.
+<blockquote>
+dyn4j actually uses larger values than epsilon in some cases to improve performance and stability.
+</blockquote>
+<h2> Multi-threading Support</h2>
+In general the dyn4j project classes are not thread safe, however, internally there is some very simple multi-threading support.  In the Settings class you can set if multi-threading is enabled and also set the load factor.
+
+The load factor determines the number of tasks to create.  The number of threads created is equal to 2 * the number of CPUs.
+
+In practice it's up the application to determine if this is useful or not.  The multi-threading ideal scenario involves many bodies and many contacts.
