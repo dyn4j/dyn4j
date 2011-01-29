@@ -1,5 +1,5 @@
 #summary Describes the various Joints.
-#labels Documentation-User
+#labels Documentation-User,Featured
 
 <wiki:toc max_depth="1" />
 
