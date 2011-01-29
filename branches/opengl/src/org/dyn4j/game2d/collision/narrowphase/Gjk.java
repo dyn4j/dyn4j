@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -73,7 +73,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * <pre>
  * (farthest point in direction D in A) - (farthest point in direction -D in B)
  * </pre>
- * Using this we can obtain a point which are on the edge of the {@link MinkowskiSum} shape in
+ * Using this we can obtain a point which is on the edge of the {@link MinkowskiSum} shape in
  * any direction.  Next we need a way to iteratively create these points so that we enclose the
  * origin.
  * <p>
@@ -111,11 +111,11 @@ import org.dyn4j.game2d.geometry.Vector2;
  * <p>
  * {@link Gjk}'s default {@link MinkowskiPenetrationSolver} is {@link Epa}.
  * <p>
- * {@link Gjk} original intent was to find the minimum distance between two {@link Convex}
+ * {@link Gjk}'s original intent was to find the minimum distance between two {@link Convex}
  * {@link Shape}s.  Refer to {@link Gjk#distance(Convex, Transform, Convex, Transform, Separation)}
  * for details on the implementation.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetector {
@@ -145,6 +145,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	/**
 	 * Optional constructor.
 	 * @param minkowskiPenetrationSolver the {@link MinkowskiPenetrationSolver} to use
+	 * @throws NullPointerException if minkowskiPenetrationSolver is null
 	 */
 	public Gjk(MinkowskiPenetrationSolver minkowskiPenetrationSolver) {
 		if (minkowskiPenetrationSolver == null) throw new NullPointerException("The MinkowskiPenetrationSolver cannot be null.");
@@ -737,6 +738,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * <p>
 	 * Valid values are in the range [5, &infin;].
 	 * @param maxIterations the maximum number of {@link Gjk} iterations
+	 * @throws IllegalArgumentException if maxIterations is less than 5
 	 */
 	public void setMaxIterations(int maxIterations) {
 		if (maxIterations < 5) throw new IllegalArgumentException("The GJK distance algorithm requires 5 or more iterations.");
@@ -757,6 +759,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * <p>
 	 * Valid values are in the range (0, &infin;].
 	 * @param distanceEpsilon the {@link Gjk} distance epsilon
+	 * @throws IllegalArgumentException if distanceEpsilon is less than or equal to zero
 	 */
 	public void setDistanceEpsilon(double distanceEpsilon) {
 		if (distanceEpsilon <= 0) throw new IllegalArgumentException("The GJK distance epsilon must be larger than zero.");
@@ -776,6 +779,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * Sets the {@link MinkowskiPenetrationSolver} used to obtain the 
 	 * penetration vector and depth.
 	 * @param minkowskiPenetrationSolver the {@link MinkowskiPenetrationSolver}
+	 * @throws NullPointerException if minkowskiPenetrationSolver is null
 	 */
 	public void setMinkowskiPenetrationSolver(MinkowskiPenetrationSolver minkowskiPenetrationSolver) {
 		if (minkowskiPenetrationSolver == null) throw new NullPointerException("The MinkowskiPenetrationSolver cannot be null.");

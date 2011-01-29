@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import org.dyn4j.game2d.geometry.Shape;
 /**
  * Represents a part of a {@link Collidable}.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.3
  * @since 2.0.0
  */
 public class Fixture {
@@ -55,6 +55,7 @@ public class Fixture {
 	/**
 	 * Minimal constructor.
 	 * @param shape the {@link Convex} {@link Shape} for this fixture
+	 * @throws NullPointerException if shape is null
 	 */
 	public Fixture(Convex shape) {
 		if (shape == null) throw new NullPointerException("The shape cannot be null.");
@@ -107,8 +108,12 @@ public class Fixture {
 	/**
 	 * Sets the collision filter for this fixture.
 	 * @param filter the collision filter
+	 * @throws NullPointerException if filter is null; Use {@link Filter#DEFAULT_FILTER} instead
 	 */
 	public void setFilter(Filter filter) {
+		// check if the given filter is null
+		if (filter == null) throw new NullPointerException("Cannot set a null filter.  Use the Filter.DEFAULT_FILTER instead.");
+		// use the given filter
 		this.filter = filter;
 	}
 	

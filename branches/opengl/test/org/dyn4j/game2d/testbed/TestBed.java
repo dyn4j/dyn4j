@@ -75,7 +75,7 @@ import com.jogamp.opengl.util.glsl.ShaderUtil;
 public class TestBed extends GLCanvas implements GLEventListener {
 	/** The UID */
 	private static final long serialVersionUID = -3159660619562196286L;
-
+	
 	/**
 	 * The container modes.
 	 * @author William Bittle
@@ -1658,7 +1658,11 @@ public class TestBed extends GLCanvas implements GLEventListener {
 	 */
 	private static final String getJreVersion() {
 		try {
-			return System.getProperty("java.runtime.version");
+			String value = System.getProperty("java.runtime.version");
+			if (value == null) {
+				value = "Unknown";
+			}
+			return value;
 		} catch (SecurityException e) {
 			return "Unknown";
 		}
@@ -1672,7 +1676,11 @@ public class TestBed extends GLCanvas implements GLEventListener {
 	 */
 	private static final String getJreMode() {
 		try {
-			return System.getProperty("java.vm.info");
+			String value = System.getProperty("java.vm.info");
+			if (value == null) {
+				value = "Unknown";
+			}
+			return value;
 		} catch (SecurityException e) {
 			return "Unknown";
 		}
@@ -1686,7 +1694,11 @@ public class TestBed extends GLCanvas implements GLEventListener {
 	 */
 	private static final String getOsName() {
 		try {
-			return System.getProperty("os.name");
+			String value = System.getProperty("os.name");
+			if (value == null) {
+				value = "Unknown";
+			}
+			return value;
 		} catch (SecurityException e) {
 			return "Unknown";
 		}
@@ -1700,7 +1712,11 @@ public class TestBed extends GLCanvas implements GLEventListener {
 	 */
 	private static final String getOsArchitecture() {
 		try {
-			return System.getProperty("os.arch");
+			String value = System.getProperty("os.arch");
+			if (value == null) {
+				value = "Unknown";
+			}
+			return value;
 		} catch (SecurityException e) {
 			return "Unknown";
 		}
@@ -1714,7 +1730,12 @@ public class TestBed extends GLCanvas implements GLEventListener {
 	 */
 	private static final String getOsDataModel() {
 		try {
-			return System.getProperty("sun.arch.data.model");
+			String value = System.getProperty("sun.arch.data.model");
+			// check if the property was found
+			if (value == null) {
+				value = "Unknown";
+			}
+			return value;
 		} catch (SecurityException e) {
 			return "Unknown";
 		}

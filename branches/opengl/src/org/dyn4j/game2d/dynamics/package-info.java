@@ -43,8 +43,7 @@
  * Upon creating a {@link org.dyn4j.game2d.dynamics.World} a {@link org.dyn4j.game2d.collision.Bounds} 
  * object must be supplied.  The {@link org.dyn4j.game2d.collision.Bounds} will determine when 
  * {@link org.dyn4j.game2d.dynamics.Body}s go out of bounds and freeze them.  Using the 
- * {@link org.dyn4j.game2d.dynamics.World#World()} constructor will create a world that uses no bounds.  
- * More specifically it uses the {@link org.dyn4j.game2d.collision.Bounds#UNBOUNDED} class.
+ * {@link org.dyn4j.game2d.dynamics.World#World()} constructor will create a world that uses no bounds.
  * <p>
  * A {@link org.dyn4j.game2d.dynamics.World} object also contains a number listeners that can be used to 
  * respond to events that happen within the world, contact for instance.
@@ -71,7 +70,7 @@
  * {@link org.dyn4j.game2d.dynamics.Settings} and the TestBed for details on what each individual 
  * setting controls.
  * @author William Bittle
- * @version 2.2.2
+ * @version 2.2.3
  * @since 1.0.0
  */
 package org.dyn4j.game2d.dynamics;

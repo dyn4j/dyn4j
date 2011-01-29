@@ -89,6 +89,7 @@ import org.dyn4j.game2d.collision.continuous.TimeOfImpactDetector;
 import org.dyn4j.game2d.collision.manifold.ManifoldSolver;
 import org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.game2d.dynamics.Settings;
+import org.dyn4j.game2d.dynamics.Settings.ContinuousDetectionMode;
 
 /**
  * The JFrame that controls the TestBed.
@@ -186,6 +187,9 @@ public class ControlPanel extends JFrame {
 	
 	/** The combo box for selecting a continuous collision detection algorithm */
 	private JComboBox cmbTOIAlgo = null;
+	
+	/** The combo box for setting the continuous collision detection mode */
+	private JComboBox cmbCCDMode = null;
 	
 	/** The selected broad-phase collision detection algorithm */
 	private String selectedBPCDAlgo = "Sap";
@@ -1264,7 +1268,6 @@ public class ControlPanel extends JFrame {
 		pnlGeneral.add(lblTOIAlgo, new GridBagConstraints(
 				0, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
-		
 		// create the drop down
 		cmbTOIAlgo = new JComboBox(new String[] {"CA"});
 		cmbTOIAlgo.setSelectedItem(this.selectedTOIAlgo);
@@ -1374,26 +1377,57 @@ public class ControlPanel extends JFrame {
 				2, 6, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
+		// CCD mode
 		JLabel lblCCDEnabled = new JLabel("Continuous Collision Detection", this.helpIcon, JLabel.LEFT);
-		lblCCDEnabled.setToolTipText("If enabled, tests dynamic bodies for tunneling.");
+		lblCCDEnabled.setToolTipText("<html>If enabled, tests dynamic bodies for tunneling.<br />The None setting disables CCD completely.<br />The Bullets setting only checks bullets for tunneling.<br />The All setting checks all dynamic bodies for tunneling.</html>");
 		pnlGeneral.add(lblCCDEnabled, new GridBagConstraints(
 				0, 7, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
-		JCheckBox chkCCDEnabled = new JCheckBox();
-		chkCCDEnabled.setSelected(settings.isContinuousCollisionDetectionEnabled());
-		chkCCDEnabled.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				Settings settings = Settings.getInstance();
-				settings.setContinuousCollisionDetectionEnabled(!settings.isContinuousCollisionDetectionEnabled());
-			}
-		});
-		pnlGeneral.add(chkCCDEnabled, new GridBagConstraints(
+		// create the drop down
+		cmbCCDMode = new JComboBox(new String[] {"None", "Bullets", "All"});
+		cmbCCDMode.setSelectedItem("All");
+		// add it to the panel
+		pnlGeneral.add(cmbCCDMode, new GridBagConstraints(
 				1, 7, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_END, 
 				GridBagConstraints.NONE, insets, 0, 0));
-		pnlGeneral.add(new JLabel(), new GridBagConstraints(
+		// create the button to save the setting
+		JButton btnCCDMode = new JButton("Set");
+		btnCCDMode.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// set the selected item
+				String value = (String) cmbCCDMode.getSelectedItem();
+				// get the settings instance
+				Settings settings = Settings.getInstance();
+				// set the value
+				if ("All".equals(value)) {
+					settings.setContinuousDetectionMode(ContinuousDetectionMode.ALL);
+				} else if ("Bullets".equals(value)) {
+					settings.setContinuousDetectionMode(ContinuousDetectionMode.BULLETS_ONLY);
+				} else {
+					settings.setContinuousDetectionMode(ContinuousDetectionMode.NONE);
+				}
+			}
+		});
+		// add the button to the panel
+		pnlGeneral.add(btnCCDMode, new GridBagConstraints(
 				2, 7, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
+//		JCheckBox chkCCDEnabled = new JCheckBox();
+//		chkCCDEnabled.setSelected(true);
+//		chkCCDEnabled.addActionListener(new ActionListener() {
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				Settings settings = Settings.getInstance();
+//				settings.setContinuousCollisionDetectionEnabled(!settings.isContinuousCollisionDetectionEnabled());
+//			}
+//		});
+//		pnlGeneral.add(chkCCDEnabled, new GridBagConstraints(
+//				1, 7, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_END, 
+//				GridBagConstraints.NONE, insets, 0, 0));
+//		pnlGeneral.add(new JLabel(), new GridBagConstraints(
+//				2, 7, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, 
+//				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// add the panel to the overall panel
 		panel.add(pnlGeneral);

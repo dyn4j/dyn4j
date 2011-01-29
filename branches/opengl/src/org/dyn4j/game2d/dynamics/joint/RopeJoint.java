@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -50,7 +50,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.2.2
+ * @version 2.2.3
  * @since 2.2.1
  */
 public class RopeJoint extends Joint {
@@ -90,13 +90,13 @@ public class RopeJoint extends Joint {
 	/**
 	 * Minimal constructor.
 	 * <p>
-	 * Creates a rope joint between the two bodies that acts like a distance
-	 * joint.  To disable/enable the limits use the {@link #setMaximumEnabled(boolean)},
-	 * {@link #setMinimumEnabled(boolean)}, and 
+	 * Creates a rope joint between the two bodies that acts like a distance joint.
 	 * @param body1 the first {@link Body}
 	 * @param body2 the second {@link Body}
 	 * @param anchor1 in world coordinates
 	 * @param anchor2 in world coordinates
+	 * @throws NullPointerException if body1, body2, anchor1, or anchor2 is null
+	 * @throws IllegalArgumentException if body1 == body2
 	 */
 	public RopeJoint(Body body1, Body body2, Vector2 anchor1, Vector2 anchor2) {
 		super(body1, body2, false);
@@ -388,21 +388,19 @@ public class RopeJoint extends Joint {
 	
 	/**
 	 * Sets the maximum distance between the two constrained {@link Body}s in meters.
-	 * @param maximumDistance the maximum distance in meters
+	 * @param maximumDistance the maximum distance in meters; must be greater than or equal to zero
+	 * @throws IllegalArgumentException if maximumDistance is less than zero or less than the current minimum
 	 */
 	public void setMaximumDistance(double maximumDistance) {
 		// make sure the distance is greater than zero
 		if (maximumDistance < 0.0) throw new IllegalArgumentException("The max distance must be greater than or equal to zero.");
 		// make sure the minimum is less than or equal to the maximum
 		if (maximumDistance < this.minimumDistance) throw new IllegalArgumentException("The maximum distance must be greater than or equal to the current minimum distance.");
-		// check if the value changed
-		if (this.maximumDistance != maximumDistance) {
-			// wake up both bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// set the new target distance
-			this.maximumDistance = maximumDistance;
-		}
+		// wake up both bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
+		// set the new target distance
+		this.maximumDistance = maximumDistance;
 	}
 	
 	/**
@@ -410,14 +408,11 @@ public class RopeJoint extends Joint {
 	 * @param flag true if the maximum distance limit should be enforced
 	 */
 	public void setMaximumEnabled(boolean flag) {
-		// check if the value changed
-		if (this.maximumEnabled != flag) {
-			// wake up both bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// set the flag
-			this.maximumEnabled = flag;
-		}
+		// wake up both bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
+		// set the flag
+		this.maximumEnabled = flag;
 	}
 	
 	/**
@@ -430,21 +425,19 @@ public class RopeJoint extends Joint {
 	
 	/**
 	 * Sets the minimum distance between the two constrained {@link Body}s in meters.
-	 * @param minimumDistance the minimum distance in meters
+	 * @param minimumDistance the minimum distance in meters; must be greater than or equal to zero
+	 * @throws IllegalArgumentException if minimumDistance is less than zero or greater than the current maximum
 	 */
 	public void setMinimumDistance(double minimumDistance) {
 		// make sure the distance is greater than zero
 		if (minimumDistance < 0.0) throw new IllegalArgumentException("The minimum distance must be greater than or equal to zero.");
 		// make sure the minimum is less than or equal to the maximum
 		if (minimumDistance > this.maximumDistance) throw new IllegalArgumentException("The minimum distance must be less than or equal to the current maximum distance.");
-		// check if the value changed
-		if (this.minimumDistance != minimumDistance) {
-			// wake up both bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// set the new target distance
-			this.minimumDistance = minimumDistance;
-		}
+		// wake up both bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
+		// set the new target distance
+		this.minimumDistance = minimumDistance;
 	}
 
 	/**
@@ -452,20 +445,18 @@ public class RopeJoint extends Joint {
 	 * @param flag true if the minimum distance limit should be enforced
 	 */
 	public void setMinimumEnabled(boolean flag) {
-		// check if the value changed
-		if (this.minimumEnabled != flag) {
-			// wake up both bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// set the flag
-			this.minimumEnabled = flag;
-		}
+		// wake up both bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
+		// set the flag
+		this.minimumEnabled = flag;
 	}
 	
 	/**
 	 * Sets both the maximum and minimum limit distances.
-	 * @param minimumDistance the minimum distance in meters
-	 * @param maximumDistance the maximum distance in meters
+	 * @param minimumDistance the minimum distance in meters; must be greater than or equal to zero
+	 * @param maximumDistance the maximum distance in meters; must be greater than or equal to zero
+	 * @throws IllegalArgumentException if minimumDistance is less than zero, maximumDistance is less than zero, or minimumDistance is greater than maximumDistance
 	 */
 	public void setMinimumMaximum(double minimumDistance, double maximumDistance) {
 		// make sure the minimum distance is greater than zero
@@ -484,8 +475,9 @@ public class RopeJoint extends Joint {
 
 	/**
 	 * Sets both the maximum and minimum limit distances and enables both.
-	 * @param minimumDistance the minimum distance in meters
-	 * @param maximumDistance the maximum distance in meters
+	 * @param minimumDistance the minimum distance in meters; must be greater than or equal to zero
+	 * @param maximumDistance the maximum distance in meters; must be greater than or equal to zero
+	 * @throws IllegalArgumentException if minimumDistance is less than zero, maximumDistance is less than zero, or minimumDistance is greater than maximumDistance
 	 */
 	public void setMinimumMaximumEnabled(double minimumDistance, double maximumDistance) {
 		// set the values
@@ -510,6 +502,7 @@ public class RopeJoint extends Joint {
 	 * <p>
 	 * This makes the joint a fixed length joint.
 	 * @param distance the desired distance between the bodies
+	 * @throws IllegalArgumentException if distance is less than zero
 	 * @since 2.2.2
 	 */
 	public void setMinimumMaximum(double distance) {
@@ -529,6 +522,7 @@ public class RopeJoint extends Joint {
 	 * <p>
 	 * This makes the joint a fixed length joint.
 	 * @param distance the desired distance between the bodies
+	 * @throws IllegalArgumentException if distance is less than zero
 	 * @since 2.2.2
 	 */
 	public void setMinimumMaximumEnabled(double distance) {

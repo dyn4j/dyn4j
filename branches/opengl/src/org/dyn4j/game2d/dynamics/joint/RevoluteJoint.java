@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -47,7 +47,7 @@ import org.dyn4j.game2d.geometry.Vector3;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.2.2
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class RevoluteJoint extends Joint {
@@ -101,6 +101,8 @@ public class RevoluteJoint extends Joint {
 	 * @param body1 the first {@link Body}
 	 * @param body2 the second {@link Body}
 	 * @param anchor the anchor point in world coordinates
+	 * @throws NullPointerException if body1, body2 or anchor is null
+	 * @throws IllegalArgumentException if body1 == body2
 	 */
 	public RevoluteJoint(Body body1, Body body2, Vector2 anchor) {
 		// default to no collision allowed between the bodies
@@ -498,14 +500,11 @@ public class RevoluteJoint extends Joint {
 	 * @param flag true if the motor should be enabled
 	 */
 	public void setMotorEnabled(boolean flag) {
-		// did the state change?
-		if (flag != this.motorEnabled) {
-			// wake up the associated bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// set the flag
-			this.motorEnabled = flag;
-		}
+		// wake up the associated bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
+		// set the flag
+		this.motorEnabled = flag;
 	}
 	
 	/**
@@ -518,19 +517,17 @@ public class RevoluteJoint extends Joint {
 	
 	/**
 	 * Sets the maximum torque this motor will apply in newton-meters.
-	 * @param maxMotorTorque the maximum motor torque in newton-meters
+	 * @param maxMotorTorque the maximum motor torque in newton-meters; must be greater than or equal to zero
+	 * @throws IllegalArgumentException if maxMotorTorque is less than zero
 	 */
 	public void setMaxMotorTorque(double maxMotorTorque) {
 		// make sure its positive
-		if (maxMotorTorque < 0.0) throw new IllegalArgumentException("The maximum motor torque must be greater than zero.");
-		// see if the maximum is different than the current
-		if (this.maxMotorTorque != maxMotorTorque) {
-			// wake up the bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// set the max
-			this.maxMotorTorque = maxMotorTorque;
-		}
+		if (maxMotorTorque < 0.0) throw new IllegalArgumentException("The maximum motor torque must be greater than or equal to zero.");
+		// wake up the bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
+		// set the max
+		this.maxMotorTorque = maxMotorTorque;
 	}
 	
 	/**
@@ -546,14 +543,11 @@ public class RevoluteJoint extends Joint {
 	 * @param motorSpeed the motor speed desired in radians/second
 	 */
 	public void setMotorSpeed(double motorSpeed) {
-		// check if the given motor speed is different than the current
-		if (this.motorSpeed != motorSpeed) {
-			// if so, then wake up the bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// set the motor speed
-			this.motorSpeed = motorSpeed;
-		}
+		// if so, then wake up the bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
+		// set the motor speed
+		this.motorSpeed = motorSpeed;
 	}
 	
 	/**
@@ -577,14 +571,11 @@ public class RevoluteJoint extends Joint {
 	 * @param flag true if the limit should be enabled
 	 */
 	public void setLimitEnabled(boolean flag) {
-		// check if the value is different
-		if (this.limitEnabled != flag) {
-			// wake up both bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// set the new value
-			this.limitEnabled = flag;
-		}
+		// wake up both bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
+		// set the new value
+		this.limitEnabled = flag;
 	}
 	
 	/**
@@ -600,17 +591,15 @@ public class RevoluteJoint extends Joint {
 	 * <p>
 	 * Must be greater than or equal to the lower rotational limit.
 	 * @param upperLimit the upper rotational limit in radians
+	 * @throws IllegalArgumentException if upperLimit is less than the current lower limit
 	 */
 	public void setUpperLimit(double upperLimit) {
 		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException("The upper limit cannot be less than the lower limit.");
-		// is the value different
-		if (upperLimit != this.upperLimit) {
-			// wake up the bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// set the new value
-			this.upperLimit = upperLimit;
-		}
+		// wake up the bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
+		// set the new value
+		this.upperLimit = upperLimit;
 	}
 	
 	/**
@@ -626,17 +615,15 @@ public class RevoluteJoint extends Joint {
 	 * <p>
 	 * Must be less than or equal to the upper rotational limit.
 	 * @param lowerLimit the lower rotational limit in radians
+	 * @throws IllegalArgumentException if lowerLimit is greater than the current upper limit
 	 */
 	public void setLowerLimit(double lowerLimit) {
 		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException("The lower limit cannot be greater than the upper limit.");
-		// is the value different
-		if (lowerLimit != this.lowerLimit) {
-			// wake up the bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// set the new value
-			this.lowerLimit = lowerLimit;
-		}
+		// wake up the bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
+		// set the new value
+		this.lowerLimit = lowerLimit;
 	}
 	
 	/**
@@ -645,15 +632,13 @@ public class RevoluteJoint extends Joint {
 	 * The lower limit must be less than or equal to the upper limit.
 	 * @param lowerLimit the lower limit in radians
 	 * @param upperLimit the upper limit in radians
+	 * @throws IllegalArgumentException if the lowerLimit is greater than upperLimit
 	 */
 	public void setLimits(double lowerLimit, double upperLimit) {
 		if (lowerLimit > upperLimit) throw new IllegalArgumentException("The lower limit cannot be greater than the upper limit.");
-		// did a value change
-		if (lowerLimit != this.lowerLimit || upperLimit != this.upperLimit) {
-			// wake up the bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-		}
+		// wake up the bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
 		// set the values
 		this.lowerLimit = lowerLimit;
 		this.upperLimit = upperLimit;

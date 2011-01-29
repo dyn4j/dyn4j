@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,7 +40,7 @@ import org.dyn4j.game2d.dynamics.Settings;
  * This class performs the {@link ContactConstraint} warm starting and manages contact
  * listening.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class ContactManager {
@@ -95,8 +95,8 @@ public class ContactManager {
 	}
 	
 	/**
-	 * Updates the contact manager with new contacts, warm starting, and notifying of contact
-	 * events.
+	 * Updates the contact manager with the new contacts, performs warm starting, and notifies 
+	 * of any contact events.
 	 * <p>
 	 * Warm starts the {@link ContactConstraint}s using the previous {@link ContactConstraint}s
 	 * accumulated impulses if available given their {@link ManifoldPointId}s.

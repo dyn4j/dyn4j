@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ package org.dyn4j.game2d.collision;
  * Basically the filter from <a href="http://www.box2d.org">Box2d</a>.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class CategoryFilter implements Filter {
@@ -64,8 +64,16 @@ public class CategoryFilter implements Filter {
 		this.mask = mask;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.collision.Filter#canCollide(org.dyn4j.game2d.collision.Collidable)
+	/**
+	 * Returns true if the given {@link Filter} and this {@link Filter}
+	 * allow the objects to interact.
+	 * <p>
+	 * If the given {@link Filter} is not the same type as this {@link Filter}
+	 * then a value of true is returned.
+	 * <p>
+	 * If the given {@link Filter} is null, a value of true is returned.
+	 * @param filter the other {@link Filter}
+	 * @return boolean
 	 */
 	@Override
 	public boolean isAllowed(Filter filter) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -44,8 +44,10 @@ import org.dyn4j.game2d.geometry.Vector2;
  * are world space limits not relative angle limits (although the limits are relative to 
  * the initial angle of the bodies given at joint creation time).  Therefore its recommended 
  * to only use the limits when one body is fixed.
+ * <p>
+ * Defaults the min and max angles to the current angle (allowing no angular movement).
  * @author William Bittle
- * @version 2.2.2
+ * @version 2.2.3
  * @since 2.2.2
  */
 public class AngleJoint extends Joint {
@@ -77,6 +79,8 @@ public class AngleJoint extends Joint {
 	 * Minimal constructor.
 	 * @param body1 the first {@link Body}
 	 * @param body2 the second {@link Body}
+	 * @throws NullPointerException if body1 or body2 is null
+	 * @throws IllegalArgumentException if body1 == body2
 	 */
 	public AngleJoint(Body body1, Body body2) {
 		// default no collision allowed
@@ -317,14 +321,11 @@ public class AngleJoint extends Joint {
 	 * @param flag true if the angle limits should be enforced
 	 */
 	public void setLimitEnabled(boolean flag) {
-		// check if the value changed
-		if (this.limitEnabled != flag) {
-			// wake up both bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// set the flag
-			this.limitEnabled = flag;
-		}
+		// wake up both bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
+		// set the flag
+		this.limitEnabled = flag;
 	}
 	
 	/**
@@ -338,18 +339,16 @@ public class AngleJoint extends Joint {
 	/**
 	 * Sets the maximum angle between the two constrained {@link Body}s in radians.
 	 * @param maximumAngle the maximum angle in radians
+	 * @throws IllegalArgumentException if maximumAngle is less than the current minimum
 	 */
 	public void setMaximumAngle(double maximumAngle) {
 		// make sure the minimum is less than or equal to the maximum
 		if (maximumAngle < this.minimumAngle) throw new IllegalArgumentException("The maximum angle must be greater than or equal to the current minimum angle.");
-		// check if the value changed
-		if (this.maximumAngle != maximumAngle) {
-			// wake up both bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// set the new target angle
-			this.maximumAngle = maximumAngle;
-		}
+		// wake up both bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
+		// set the new target angle
+		this.maximumAngle = maximumAngle;
 	}
 	
 	/**
@@ -363,24 +362,23 @@ public class AngleJoint extends Joint {
 	/**
 	 * Sets the minimum angle between the two constrained {@link Body}s in radians.
 	 * @param minimumAngle the minimum angle in radians
+	 * @throws IllegalArgumentException if minimumAngle is greater than the current maximum
 	 */
 	public void setMinimumAngle(double minimumAngle) {
 		// make sure the minimum is less than or equal to the maximum
 		if (minimumAngle > this.maximumAngle) throw new IllegalArgumentException("The minimum angle must be less than or equal to the current maximum angle.");
-		// check if the value changed
-		if (this.minimumAngle != minimumAngle) {
-			// wake up both bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// set the new target angle
-			this.minimumAngle = minimumAngle;
-		}
+		// wake up both bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
+		// set the new target angle
+		this.minimumAngle = minimumAngle;
 	}
 	
 	/**
 	 * Sets both the maximum and minimum limit angles.
 	 * @param minimumAngle the minimum angle in radians
 	 * @param maximumAngle the maximum angle in radians
+	 * @throws IllegalArgumentException if minimumAngle is greater than maximumAngle
 	 */
 	public void setMinimumMaximum(double minimumAngle, double maximumAngle) {
 		// make sure the min < max
@@ -397,6 +395,7 @@ public class AngleJoint extends Joint {
 	 * Sets both the maximum and minimum limit angles and enables the limits.
 	 * @param minimumAngle the minimum angle in radians
 	 * @param maximumAngle the maximum angle in radians
+	 * @throws IllegalArgumentException if minimumAngle is greater than maximumAngle
 	 */
 	public void setMinimumMaximumEnabled(double minimumAngle, double maximumAngle) {
 		// set the values

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,18 +24,41 @@
  */
 package org.dyn4j.game2d.dynamics;
 
-import org.dyn4j.game2d.dynamics.contact.ContactConstraintSolver;
-
 /**
  * Responsible for housing all of the dynamics engine's settings.
- * <p>
- * Attempting to set any setting to a value outside the range in effects sets
- * the setting to the min or max of the range.
  * @author William Bittle
- * @version 2.2.2
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class Settings {
+	/**
+	 * Enumeration of Continuous Collision Detection modes.
+	 * @author William Bittle
+	 * @version 2.2.3
+	 * @since 2.2.3
+	 */
+	public static enum ContinuousDetectionMode {
+		/** CCD is not performed at all */
+		NONE,
+		/** 
+		 * CCD is only performed on the following pairs:
+		 * <ul>
+		 * <li>Bullet vs. Dynamic</li>
+		 * <li>Bullet vs. Static</li>
+		 * </ul>
+		 */
+		BULLETS_ONLY,
+		/** 
+		 * CCD is performed on the following pairs:
+		 * <ul>
+		 * <li>Dynamic vs. Static</li>
+		 * <li>Bullet vs. Static</li>
+		 * <li>Bullet vs. Dynamic</li>
+		 * </ul> 
+		 */
+		ALL
+	}
+	
 	/** The number of CPUs available */
 	public static final int NUMBER_OF_CPUS = Runtime.getRuntime().availableProcessors();
 	
@@ -163,7 +186,7 @@ public class Settings {
 	private double baumgarte = Settings.DEFAULT_BAUMGARTE;
 	
 	/** The continuous collision detection flag */
-	private boolean continuousCollisionDetectionEnabled = true;
+	private ContinuousDetectionMode continuousDetectionMode = ContinuousDetectionMode.ALL;
 	
 	/** Whether multithreading is enabled or not */
 	private boolean multithreadingEnabled = false;
@@ -208,7 +231,7 @@ public class Settings {
 		.append(this.maxLinearCorrection).append("|")
 		.append(this.maxAngularCorrection).append("|")
 		.append(this.baumgarte).append("|")
-		.append(this.continuousCollisionDetectionEnabled).append("|")
+		.append(this.continuousDetectionMode).append("|")
 		.append(this.multithreadingEnabled).append("|")
 		.append(this.loadFactor)
 		.append("]");
@@ -243,7 +266,7 @@ public class Settings {
 		this.angularTolerance = Settings.DEFAULT_ANGULAR_TOLERANCE;
 		this.angularToleranceSquared = Settings.DEFAULT_ANGULAR_TOLERANCE * Settings.DEFAULT_ANGULAR_TOLERANCE;
 		this.baumgarte = Settings.DEFAULT_BAUMGARTE;
-		this.continuousCollisionDetectionEnabled = true;
+		this.continuousDetectionMode = ContinuousDetectionMode.ALL;
 		this.multithreadingEnabled = true;
 		this.loadFactor = Settings.DEFAULT_LOAD_FACTOR;
 	}
@@ -267,6 +290,7 @@ public class Settings {
 	 * <p>
 	 * Valid values are in the range [30, &infin;] seconds<sup>-1</sup>
 	 * @param stepFrequency the step frequency
+	 * @throws IllegalArgumentException if stepFrequency is less than 30
 	 */
 	public void setStepFrequency(double stepFrequency) {
 		if (stepFrequency < 30.0) throw new IllegalArgumentException("The step frequency must be 30.0 hz or greater.");
@@ -297,6 +321,7 @@ public class Settings {
 	 * <p>
 	 * Valid values are in the range [0, &infin;] meters
 	 * @param maxTranslation the maximum translation
+	 * @throws IllegalArgumentException if maxTranslation is less than zero
 	 */
 	public void setMaxTranslation(double maxTranslation) {
 		if (maxTranslation < 0) throw new IllegalArgumentException("The max translation cannot be negative.");
@@ -328,6 +353,7 @@ public class Settings {
 	 * <p>
 	 * Valid values are in the range [0, &infin;] radians
 	 * @param maxRotation the maximum rotation
+	 * @throws IllegalArgumentException if maxRotation is less than zero
 	 */
 	public void setMaxRotation(double maxRotation) {
 		if (maxRotation < 0) throw new IllegalArgumentException("The max rotation cannot be negative.");
@@ -378,6 +404,7 @@ public class Settings {
 	 * <p>
 	 * Valid values are in the range [0, &infin;] meters/second
 	 * @param sleepVelocity the sleep velocity
+	 * @throws IllegalArgumentException if sleepVelocity is less than zero
 	 */
 	public void setSleepVelocity(double sleepVelocity) {
 		if (sleepVelocity < 0) throw new IllegalArgumentException("The sleep velocity cannot be negative.");
@@ -412,6 +439,7 @@ public class Settings {
 	 * <p>
 	 * Valid values are in the range [0, &infin;] radians/second
 	 * @param sleepAngularVelocity the sleep angular velocity
+	 * @throws IllegalArgumentException if sleepAngularVelocity is less than zero
 	 */
 	public void setSleepAngularVelocity(double sleepAngularVelocity) {
 		if (sleepAngularVelocity < 0) throw new IllegalArgumentException("The sleep angular velocity cannot be negative.");
@@ -436,6 +464,7 @@ public class Settings {
 	 * <p>
 	 * Valid values are in the range [0, &infin;] seconds
 	 * @param sleepTime the sleep time
+	 * @throws IllegalArgumentException if sleepTime is less than zero
 	 */
 	public void setSleepTime(double sleepTime) {
 		if (sleepTime < 0) throw new IllegalArgumentException("The sleep time cannot be negative.");
@@ -457,6 +486,7 @@ public class Settings {
 	 * <p>
 	 * Valid values are in the range [5, &infin;]
 	 * @param velocityConstraintSolverIterations the number of iterations used to solve velocity constraints
+	 * @throws IllegalArgumentException if velocityConstraintSolverIterations is less than 5
 	 */
 	public void setVelocityConstraintSolverIterations(int velocityConstraintSolverIterations) {
 		if (velocityConstraintSolverIterations < 5) throw new IllegalArgumentException("The minimum number of iterations is 5.");
@@ -478,6 +508,7 @@ public class Settings {
 	 * <p>
 	 * Valid values are in the range [5, &infin;]
 	 * @param positionConstraintSolverIterations the number of iterations used to solve position constraints
+	 * @throws IllegalArgumentException if positionConstraintSolverIterations is less than 5
 	 */
 	public void setPositionConstraintSolverIterations(int positionConstraintSolverIterations) {
 		if (positionConstraintSolverIterations < 5) throw new IllegalArgumentException("The minimum number of iterations is 5.");
@@ -508,10 +539,11 @@ public class Settings {
 	 * <p>
 	 * The maximum distance from one point to another to consider the points to be the
 	 * same.  This distance is used to determine if the points can carry over another
-	 * points accumulated impulses to be used for warm starting the {@link ContactConstraintSolver}.
+	 * point's accumulated impulses to be used for warm starting the constraint solver.
 	 * <p>
 	 * Valid values are in the range [0, &infin;] meters
 	 * @param warmStartDistance the warm start distance
+	 * @throws IllegalArgumentException if warmStartDistance is less than zero
 	 */
 	public void setWarmStartDistance(double warmStartDistance) {
 		if (warmStartDistance < 0) throw new IllegalArgumentException("The warm start distance cannot be negative.");
@@ -546,6 +578,7 @@ public class Settings {
 	 * <p>
 	 * Valid values are in the range [0, &infin;] meters/second
 	 * @param restitutionVelocity the restitution velocity
+	 * @throws IllegalArgumentException if restitutionVelocity is less than zero
 	 */
 	public void setRestitutionVelocity(double restitutionVelocity) {
 		if (restitutionVelocity < 0) throw new IllegalArgumentException("The restitution velocity cannot be negative.");
@@ -579,6 +612,7 @@ public class Settings {
 	 * <p>
 	 * Valid values are in the range (0, &infin;] meters
 	 * @param linearTolerance the linear tolerance
+	 * @throws IllegalArgumentException if linearTolerance is less than zero
 	 */
 	public void setLinearTolerance(double linearTolerance) {
 		if (linearTolerance < 0) throw new IllegalArgumentException("The linear tolerance cannot be negative.");
@@ -612,6 +646,7 @@ public class Settings {
 	 * <p>
 	 * Valid values are in the range (0, &infin;] radians
 	 * @param angularTolerance the angular tolerance
+	 * @throws IllegalArgumentException if angularTolerance is less than zero
 	 */
 	public void setAngularTolerance(double angularTolerance) {
 		if (angularTolerance < 0) throw new IllegalArgumentException("The angular tolerance cannot be negative.");
@@ -648,6 +683,7 @@ public class Settings {
 	 * <p>
 	 * Valid values are in the range (0, &infin;] meters
 	 * @param maxLinearCorrection the maximum linear correction
+	 * @throws IllegalArgumentException if maxLinearCorrection is less than zero
 	 */
 	public void setMaxLinearCorrection(double maxLinearCorrection) {
 		if (maxLinearCorrection < 0) throw new IllegalArgumentException("The maximum linear correction cannot be negative.");
@@ -681,6 +717,7 @@ public class Settings {
 	 * <p>
 	 * Valid values are in the range [0, &infin;] radians
 	 * @param maxAngularCorrection the maximum angular correction
+	 * @throws IllegalArgumentException if maxAngularCorrection is less than zero
 	 */
 	public void setMaxAngularCorrection(double maxAngularCorrection) {
 		if (maxAngularCorrection < 0) throw new IllegalArgumentException("The maximum angular correction cannot be negative.");
@@ -704,6 +741,7 @@ public class Settings {
 	 * <p>
 	 * Valid values are in the range [0, &infin;].
 	 * @param baumgarte the baumgarte factor
+	 * @throws IllegalArgumentException if baumgarte is less than zero
 	 */
 	public void setBaumgarte(double baumgarte) {
 		if (baumgarte < 0) throw new IllegalArgumentException("The baumgarte factor cannot be negative.");
@@ -711,21 +749,25 @@ public class Settings {
 	}
 	
 	/**
-	 * Returns true if continuous collision detection is enabled.
-	 * @return boolean
-	 * @since 1.2.0
+	 * Returns the continuous collision detection mode.
+	 * @return {@link ContinuousDetectionMode}
+	 * @since 2.2.3
 	 */
-	public boolean isContinuousCollisionDetectionEnabled() {
-		return this.continuousCollisionDetectionEnabled;
+	public ContinuousDetectionMode getContinuousDetectionMode() {
+		return this.continuousDetectionMode;
 	}
 	
 	/**
-	 * Sets the continuous collision detection enabled flag.
-	 * @param flag true if continuous collision detection should be enabled
-	 * @since 1.2.0
+	 * Sets the continuous collision detection mode.
+	 * @param mode the CCD mode
+	 * @throws NullPointerException if mode is null
+	 * @since 2.2.3
 	 */
-	public void setContinuousCollisionDetectionEnabled(boolean flag) {
-		this.continuousCollisionDetectionEnabled = flag;
+	public void setContinuousDetectionMode(ContinuousDetectionMode mode) {
+		// make sure its not null
+		if (mode == null) throw new NullPointerException("The continuous collision detection mode cannot be null.");
+		// set the mode
+		this.continuousDetectionMode = mode;
 	}
 	
 	/**
@@ -760,10 +802,21 @@ public class Settings {
 	 * <p>
 	 * Higher values decrease the load per task and increase the number of tasks whereas
 	 * lower values increase the load per task and decrease the number of tasks.
-	 * @param loadFactor the load factor
+	 * @param loadFactor the load factor in the sequence 2<sup>1</sup>, 2<sup>2</sup>, ... , 2<sup>n</sup>
+	 * @throws IllegalArgumentException if loadFactor is not a power of two integer greater than zero
 	 * @since 2.1.0
 	 */
 	public void setLoadFactor(int loadFactor) {
-		this.loadFactor = loadFactor;
+		// check for greater than zero
+		if (loadFactor > 0) {
+			// check for power of 2
+			if ((loadFactor & (loadFactor - 1)) == 0) {
+				this.loadFactor = loadFactor;
+			} else {
+				throw new IllegalArgumentException("The load factor must be a power of two.");
+			}
+		} else {
+			throw new IllegalArgumentException("The load factor must be greater than zero.");
+		}
 	}
 }

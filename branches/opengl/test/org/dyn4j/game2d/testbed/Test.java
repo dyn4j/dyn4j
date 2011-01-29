@@ -457,7 +457,7 @@ public abstract class Test implements Comparable<Test> {
 	 */
 	private void render(GL2 gl, MouseJoint joint) {
 		// set the color
-		gl.glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+		gl.glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
 		// draw the anchor point
 		Vector2 anchor = joint.getAnchor2();
 		GLHelper.fillRectangle(gl, anchor.x, anchor.y, 0.05, 0.05);
@@ -474,7 +474,7 @@ public abstract class Test implements Comparable<Test> {
 		red *= 1.10;
 		red = Interval.clamp(red, 0.0, 1.0);
 		// set the color
-		gl.glColor4f((float)red, 0.0f, 0.0f, 0.5f);
+		gl.glColor4f((float)red, 0.0f, 0.0f, 0.8f);
 		gl.glBegin(GL.GL_LINES);
 			gl.glVertex2d(anchor.x, anchor.y);
 			gl.glVertex2d(target.x, target.y);
