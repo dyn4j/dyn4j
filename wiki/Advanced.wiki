@@ -1,5 +1,5 @@
 #summary Advanced Topics.
-#labels Documentation-User
+#labels Documentation-User,Featured
 
 After reading through the GettingStarted page and getting your project integrated with dyn4j, its time to hit some of the more advanced topics to achieve better control over the collision detection and physics pipelines.
 
