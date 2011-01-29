@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.dyn4j.game2d.Epsilon;
  * <p>
  * Used to solve 2x2 systems of equations.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class Matrix22 {
@@ -72,6 +72,8 @@ public class Matrix22 {
 	 * The given array should be in the same order as the 
 	 * {@link #Matrix22(double, double, double, double)} constructor.
 	 * @param values the values array
+	 * @throws NullPointerException if values is null
+	 * @throws IllegalArgumentException if values is not of length 4
 	 */
 	public Matrix22(double[] values) {
 		if (values == null) throw new NullPointerException("The values array cannot be null.");

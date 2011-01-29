@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,7 +29,7 @@ import org.dyn4j.game2d.geometry.Vector2;
 /**
  * Represents an algorithm used to create a convex hull of a given point set.
  * @author William Bittle
- * @version 2.2.0
+ * @version 2.2.3
  * @since 2.2.0
  */
 public interface HullGenerator {
@@ -37,6 +37,7 @@ public interface HullGenerator {
 	 * Returns the points of the convex hull generated from the given point set.
 	 * @param points the point set
 	 * @return {@link Vector2}[] the convex hull vertices
+	 * @throws NullPointerException if points is null or contains null points
 	 */
-	public abstract Vector2[] generate(Vector2[] points);
+	public abstract Vector2[] generate(Vector2... points);
 }

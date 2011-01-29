@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ package org.dyn4j.game2d.geometry;
  * This class is provided to enhance performance of some of the methods contained in
  * the {@link Convex} and {@link Shape} interfaces.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class Triangle extends Polygon implements Convex, Shape, Transformable {
@@ -44,9 +44,11 @@ public class Triangle extends Polygon implements Convex, Shape, Transformable {
 	 * @param point1 the first point
 	 * @param point2 the second point
 	 * @param point3 the third point
+	 * @throws NullPointerException if point1, point2, or point3 is null
+	 * @throws IllegalArgumentException if point1, point2, and point3 contain coincident points or has clockwise winding
 	 */
 	public Triangle(Vector2 point1, Vector2 point2, Vector2 point3) {
-		super(new Vector2[] {point1, point2, point3});
+		super(point1, point2, point3);
 	}
 	
 	/* (non-Javadoc)
