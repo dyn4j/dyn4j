@@ -83,8 +83,6 @@ This will also compute what is called the rotation disc radius.  This is used in
 
 Finally add the body to the world by calling the World.add(Body) method.
 
-
-
 ==Creating Joints==
 A Joint represents a connection between two bodies that limit motion.  A connection might be a frame of a car connecting two wheels or a spring connecting a wheel to a car frame.
   * To connect two bodies with a Joint the bodies must already be created and added to the world.
@@ -92,6 +90,8 @@ A Joint represents a connection between two bodies that limit motion.  A connec
 All Joint classes are contained in the org.dyn4j.game2d.dynamics.joint package.  Each joint class may have a different constructor depending on the type.
 
 Once the joint is created it can be added to the world by calling the World.add(Joint) method.
+
+See the [Joints Joints] page for more details about each joint.
 
 ==General Creation Tips==
 The BodyFixture, Body, Joint, and World classes, among others, typically only have minimal constructors.  This allows for less confusion in the source.
