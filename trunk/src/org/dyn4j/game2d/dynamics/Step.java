@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -25,9 +25,10 @@
 package org.dyn4j.game2d.dynamics;
 
 /**
- * Represents a time {@link Step} of the dynamics system.
+ * Contains the current and previous time step information
+ * used to update the {@link World}.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class Step {

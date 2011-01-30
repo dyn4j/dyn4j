@@ -27,7 +27,7 @@ package org.dyn4j.game2d.geometry;
 import org.dyn4j.game2d.Epsilon;
 
 /**
- * This class represents a {@link Vector2} in 2D space.
+ * This class represents a vector in 2D space.
  * <p>
  * The operations {@link Vector2#setMagnitude(double)}, {@link Vector2#getNormalized()},
  * {@link Vector2#project(Vector2)}, and {@link Vector2#normalize()} require the {@link Vector2}
@@ -41,7 +41,7 @@ import org.dyn4j.game2d.Epsilon;
  * </pre>
  * This can decrease the number of temporary vectors.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class Vector2 {

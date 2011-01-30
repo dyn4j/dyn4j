@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -47,7 +47,6 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 import javax.naming.ConfigurationException;
@@ -90,19 +89,17 @@ import org.dyn4j.game2d.collision.continuous.TimeOfImpactDetector;
 import org.dyn4j.game2d.collision.manifold.ManifoldSolver;
 import org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.game2d.dynamics.Settings;
+import org.dyn4j.game2d.dynamics.Settings.ContinuousDetectionMode;
 
 /**
  * The JFrame that controls the TestBed.
  * @author William Bittle
- * @version 2.2.2
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class ControlPanel extends JFrame {
 	/** the version id */
 	private static final long serialVersionUID = -461371622259288105L;
-	
-	/** The class logger */
-	private static final Logger LOGGER = Logger.getLogger(ControlPanel.class.getName());
 	
 	/** Resource bundle containing the tests to load */
 	private static ResourceBundle TESTS_BUNDLE = ResourceBundle.getBundle("org.dyn4j.game2d.testbed.tests");
@@ -142,20 +139,20 @@ public class ControlPanel extends JFrame {
 	};
 	
 	/** A static listing of all colors */
-	private static final Color[] COLORS = new Color[] {
-		Color.BLACK,
-		Color.DARK_GRAY,
-		Color.GRAY,
-		Color.LIGHT_GRAY,
-		Color.WHITE,
-		Color.CYAN,
-		Color.BLUE,
-		Color.YELLOW,
-		Color.GREEN,
-		Color.MAGENTA,
-		Color.ORANGE,
-		Color.RED,
-		Color.PINK
+	private static final float[][] COLORS = new float[][] {
+		Draw.BLACK,
+		Draw.DARK_GREY,
+		Draw.GREY,
+		Draw.LIGHT_GREY,
+		Draw.WHITE,
+		Draw.CYAN,
+		Draw.BLUE,
+		Draw.YELLOW,
+		Draw.GREEN,
+		Draw.MAGENTA,
+		Draw.ORANGE,
+		Draw.RED,
+		Draw.PINK
 	};
 	
 	/** Map of available test to run */
@@ -191,6 +188,9 @@ public class ControlPanel extends JFrame {
 	/** The combo box for selecting a continuous collision detection algorithm */
 	private JComboBox cmbTOIAlgo = null;
 	
+	/** The combo box for setting the continuous collision detection mode */
+	private JComboBox cmbCCDMode = null;
+	
 	/** The selected broad-phase collision detection algorithm */
 	private String selectedBPCDAlgo = "Sap";
 	
@@ -217,7 +217,7 @@ public class ControlPanel extends JFrame {
 			// attempt to load the image icon
 			this.setIconImage(ImageIO.read(this.getClass().getResource("/icon.png")));
 		} catch (IOException e1) {
-			LOGGER.finest("Icon image 'icon.png' not found.");
+			System.err.println("Icon image 'icon.png' not found.");
 		}
 		
 		// load the help icon
@@ -255,16 +255,16 @@ public class ControlPanel extends JFrame {
 				}
 			} catch (ClassNotFoundException e) {
 				// log the exception but ignore it
-				LOGGER.throwing("TestBed", "constructor", e);
+				e.printStackTrace();
 			} catch (ClassCastException e) {
 				// log the exception but ignore it
-				LOGGER.throwing("TestBed", "constructor", e);
+				e.printStackTrace();
 			} catch (IllegalAccessException e) {
 				// log the exception but ignore it
-				LOGGER.throwing("TestBed", "constructor", e);
+				e.printStackTrace();
 			} catch (InstantiationException e) {
 				// log the exception but ignore it
-				LOGGER.throwing("TestBed", "constructor", e);
+				e.printStackTrace();
 			}
 		}
 		// make sure the map has at least one test
@@ -688,7 +688,7 @@ public class ControlPanel extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// get the selected color
-				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				float[] color = (float[])((JComboBox) e.getSource()).getSelectedItem();
 				// set the new color
 				Draw draw = Draw.getInstance();
 				draw.setCenterColor(color);
@@ -729,7 +729,7 @@ public class ControlPanel extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// get the selected color
-				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				float[] color = (float[])((JComboBox) e.getSource()).getSelectedItem();
 				// set the new color
 				Draw draw = Draw.getInstance();
 				draw.setNormalsColor(color);
@@ -770,7 +770,7 @@ public class ControlPanel extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// get the selected color
-				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				float[] color = (float[])((JComboBox) e.getSource()).getSelectedItem();
 				// set the new color
 				Draw draw = Draw.getInstance();
 				draw.setRotationDiscColor(color);
@@ -788,13 +788,13 @@ public class ControlPanel extends JFrame {
 				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkVelocity = new JCheckBox();
-		chkVelocity.setSelected(draw.drawVelocityVectors());
+		chkVelocity.setSelected(draw.drawVelocity());
 		chkVelocity.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// toggle the checkbox
 				Draw draw = Draw.getInstance();
-				draw.setDrawVelocityVectors(!draw.drawVelocityVectors());
+				draw.setDrawVelocity(!draw.drawVelocity());
 			}
 		});
 		pnlDraw.add(chkVelocity, new GridBagConstraints(
@@ -811,7 +811,7 @@ public class ControlPanel extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// get the selected color
-				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				float[] color = (float[])((JComboBox) e.getSource()).getSelectedItem();
 				// set the new color
 				Draw draw = Draw.getInstance();
 				draw.setVelocityColor(color);
@@ -852,7 +852,7 @@ public class ControlPanel extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// get the selected color
-				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				float[] color = (float[])((JComboBox) e.getSource()).getSelectedItem();
 				// set the new color
 				Draw draw = Draw.getInstance();
 				draw.setContactPairsColor(color);
@@ -893,7 +893,7 @@ public class ControlPanel extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// get the selected color
-				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				float[] color = (float[])((JComboBox) e.getSource()).getSelectedItem();
 				// set the new color
 				Draw draw = Draw.getInstance();
 				draw.setContactColor(color);
@@ -911,13 +911,13 @@ public class ControlPanel extends JFrame {
 				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkContactForces = new JCheckBox();
-		chkContactForces.setSelected(draw.drawContactForces());
+		chkContactForces.setSelected(draw.drawContactImpulses());
 		chkContactForces.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// toggle the checkbox
 				Draw draw = Draw.getInstance();
-				draw.setDrawContactForces(!draw.drawContactForces());
+				draw.setDrawContactImpulses(!draw.drawContactImpulses());
 			}
 		});
 		pnlDraw.add(chkContactForces, new GridBagConstraints(
@@ -926,7 +926,7 @@ public class ControlPanel extends JFrame {
 		// add the drop down for color selection
 		JComboBox cmbContactForces = new JComboBox(COLORS);
 		// set the initial value
-		cmbContactForces.setSelectedItem(draw.getContactForcesColor());
+		cmbContactForces.setSelectedItem(draw.getContactImpulsesColor());
 		// set the custom renderer
 		cmbContactForces.setRenderer(new ColorListCellRenderer());
 		// add a listener for the selection
@@ -934,10 +934,10 @@ public class ControlPanel extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// get the selected color
-				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				float[] color = (float[])((JComboBox) e.getSource()).getSelectedItem();
 				// set the new color
 				Draw draw = Draw.getInstance();
-				draw.setContactForcesColor(color);
+				draw.setContactImpulsesColor(color);
 			}
 		});
 		pnlDraw.add(cmbContactForces, new GridBagConstraints(
@@ -952,13 +952,13 @@ public class ControlPanel extends JFrame {
 				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		JCheckBox chkFrictionForces = new JCheckBox();
-		chkFrictionForces.setSelected(draw.drawFrictionForces());
+		chkFrictionForces.setSelected(draw.drawFrictionImpulses());
 		chkFrictionForces.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// toggle the checkbox
 				Draw draw = Draw.getInstance();
-				draw.setDrawFrictionForces(!draw.drawFrictionForces());
+				draw.setDrawFrictionImpulses(!draw.drawFrictionImpulses());
 			}
 		});
 		pnlDraw.add(chkFrictionForces, new GridBagConstraints(
@@ -967,7 +967,7 @@ public class ControlPanel extends JFrame {
 		// add the drop down for color selection
 		JComboBox cmbFrictionForces = new JComboBox(COLORS);
 		// set the initial value
-		cmbFrictionForces.setSelectedItem(draw.getFrictionForcesColor());
+		cmbFrictionForces.setSelectedItem(draw.getFrictionImpulsesColor());
 		// set the custom renderer
 		cmbFrictionForces.setRenderer(new ColorListCellRenderer());
 		// add a listener for the selection
@@ -975,10 +975,10 @@ public class ControlPanel extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// get the selected color
-				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				float[] color = (float[])((JComboBox) e.getSource()).getSelectedItem();
 				// set the new color
 				Draw draw = Draw.getInstance();
-				draw.setFrictionForcesColor(color);
+				draw.setFrictionImpulsesColor(color);
 			}
 		});
 		pnlDraw.add(cmbFrictionForces, new GridBagConstraints(
@@ -1016,7 +1016,7 @@ public class ControlPanel extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// get the selected color
-				Color color = (Color)((JComboBox) e.getSource()).getSelectedItem();
+				float[] color = (float[])((JComboBox) e.getSource()).getSelectedItem();
 				// set the new color
 				Draw draw = Draw.getInstance();
 				draw.setBoundsColor(color);
@@ -1071,7 +1071,7 @@ public class ControlPanel extends JFrame {
 		
 		// draw text
 		JLabel lblBlur = new JLabel("Information Panel Blur", this.helpIcon, JLabel.LEFT);
-		lblBlur.setToolTipText("<html>Toggles blurring of the information panel background.  This is done<br />in software it seems, therefore its really slow.</html>");
+		lblBlur.setToolTipText("<html>Toggles blurring of the information panel background.</html>");
 		pnlDraw.add(lblBlur, new GridBagConstraints(
 				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
 				GridBagConstraints.NONE, insets, 0, 0));
@@ -1092,7 +1092,7 @@ public class ControlPanel extends JFrame {
 		
 		// anti-aliasing
 		JLabel lblAnti = new JLabel("Anti-Aliasing", this.helpIcon, JLabel.LEFT);
-		lblAnti.setToolTipText("<html>Toggles the use of anti-aliasing.  This is a general<br />setting and enables text anti-aliasing.</html>");
+		lblAnti.setToolTipText("<html>Toggles the use of anti-aliasing.</html>");
 		pnlDraw.add(lblAnti, new GridBagConstraints(
 				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
 				GridBagConstraints.NONE, insets, 0, 0));
@@ -1111,23 +1111,23 @@ public class ControlPanel extends JFrame {
 				GridBagConstraints.NONE, insets, 0, 0));
 		y++;
 		
-		// text anti-aliasing
-		JLabel lblTextAnti = new JLabel("Text Anti-Aliasing", this.helpIcon, JLabel.LEFT);
-		lblTextAnti.setToolTipText("Toggles the use of text anti-aliasing only.");
-		pnlDraw.add(lblTextAnti, new GridBagConstraints(
+		// vertical sync
+		JLabel lblVertSync = new JLabel("Vertical Sync", this.helpIcon, JLabel.LEFT);
+		lblVertSync.setToolTipText("<html>Toggles vertical sync.  Rendering occurs only at the<br />display refresh rate, typically 60hz.  Not all<br />cards/drivers support changing of this setting.</html>");
+		pnlDraw.add(lblVertSync, new GridBagConstraints(
 				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 
 				GridBagConstraints.NONE, insets, 0, 0));
-		JCheckBox chkTextAnti = new JCheckBox();
-		chkTextAnti.setSelected(draw.isTextAntiAliased());
-		chkTextAnti.addActionListener(new ActionListener() {
+		JCheckBox chkVertSync = new JCheckBox();
+		chkVertSync.setSelected(draw.isVerticalSyncEnabled());
+		chkVertSync.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// toggle the checkbox
 				Draw draw = Draw.getInstance();
-				draw.setTextAntiAliased(!draw.isTextAntiAliased());
+				draw.setVerticalSyncEnabled(!draw.isVerticalSyncEnabled());
 			}
 		});
-		pnlDraw.add(chkTextAnti, new GridBagConstraints(
+		pnlDraw.add(chkVertSync, new GridBagConstraints(
 				1, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		y++;
@@ -1268,7 +1268,6 @@ public class ControlPanel extends JFrame {
 		pnlGeneral.add(lblTOIAlgo, new GridBagConstraints(
 				0, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
-		
 		// create the drop down
 		cmbTOIAlgo = new JComboBox(new String[] {"CA"});
 		cmbTOIAlgo.setSelectedItem(this.selectedTOIAlgo);
@@ -1378,26 +1377,57 @@ public class ControlPanel extends JFrame {
 				2, 6, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
+		// CCD mode
 		JLabel lblCCDEnabled = new JLabel("Continuous Collision Detection", this.helpIcon, JLabel.LEFT);
-		lblCCDEnabled.setToolTipText("If enabled, tests dynamic bodies for tunneling.");
+		lblCCDEnabled.setToolTipText("<html>If enabled, tests dynamic bodies for tunneling.<br />The None setting disables CCD completely.<br />The Bullets setting only checks bullets for tunneling.<br />The All setting checks all dynamic bodies for tunneling.</html>");
 		pnlGeneral.add(lblCCDEnabled, new GridBagConstraints(
 				0, 7, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
-		JCheckBox chkCCDEnabled = new JCheckBox();
-		chkCCDEnabled.setSelected(settings.isContinuousCollisionDetectionEnabled());
-		chkCCDEnabled.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				Settings settings = Settings.getInstance();
-				settings.setContinuousCollisionDetectionEnabled(!settings.isContinuousCollisionDetectionEnabled());
-			}
-		});
-		pnlGeneral.add(chkCCDEnabled, new GridBagConstraints(
+		// create the drop down
+		cmbCCDMode = new JComboBox(new String[] {"None", "Bullets", "All"});
+		cmbCCDMode.setSelectedItem("All");
+		// add it to the panel
+		pnlGeneral.add(cmbCCDMode, new GridBagConstraints(
 				1, 7, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_END, 
 				GridBagConstraints.NONE, insets, 0, 0));
-		pnlGeneral.add(new JLabel(), new GridBagConstraints(
+		// create the button to save the setting
+		JButton btnCCDMode = new JButton("Set");
+		btnCCDMode.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// set the selected item
+				String value = (String) cmbCCDMode.getSelectedItem();
+				// get the settings instance
+				Settings settings = Settings.getInstance();
+				// set the value
+				if ("All".equals(value)) {
+					settings.setContinuousDetectionMode(ContinuousDetectionMode.ALL);
+				} else if ("Bullets".equals(value)) {
+					settings.setContinuousDetectionMode(ContinuousDetectionMode.BULLETS_ONLY);
+				} else {
+					settings.setContinuousDetectionMode(ContinuousDetectionMode.NONE);
+				}
+			}
+		});
+		// add the button to the panel
+		pnlGeneral.add(btnCCDMode, new GridBagConstraints(
 				2, 7, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
+//		JCheckBox chkCCDEnabled = new JCheckBox();
+//		chkCCDEnabled.setSelected(true);
+//		chkCCDEnabled.addActionListener(new ActionListener() {
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				Settings settings = Settings.getInstance();
+//				settings.setContinuousCollisionDetectionEnabled(!settings.isContinuousCollisionDetectionEnabled());
+//			}
+//		});
+//		pnlGeneral.add(chkCCDEnabled, new GridBagConstraints(
+//				1, 7, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_END, 
+//				GridBagConstraints.NONE, insets, 0, 0));
+//		pnlGeneral.add(new JLabel(), new GridBagConstraints(
+//				2, 7, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, 
+//				GridBagConstraints.NONE, insets, 0, 0));
 		
 		// add the panel to the overall panel
 		panel.add(pnlGeneral);
@@ -1923,12 +1953,12 @@ public class ControlPanel extends JFrame {
 								desktop.browse(uri);
 							} catch (URISyntaxException ex) {
 								// this shouldn't happen
-								LOGGER.warning("A link in the description.html is not correct: " + e.getURL());
+								System.err.println("A link in the description.html is not correct: " + e.getURL());
 							} catch (IOException ex) {
 								// this shouldn't happen either since
 								// most desktops have a default program to
 								// open urls
-								LOGGER.warning("Cannot navigate to link since a default program is not set or does not exist.");
+								System.err.println("Cannot navigate to link since a default program is not set or does not exist.");
 							}
 						}
 					}
@@ -2032,8 +2062,8 @@ public class ControlPanel extends JFrame {
 		 */
 		@Override
 		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-	        Color color = (Color) value;
-	        label.setBackground(color);
+	        float[] color = (float[]) value;
+	        label.setBackground(new Color(color[0], color[1], color[2]));
 	        return this;
 		}
 	}

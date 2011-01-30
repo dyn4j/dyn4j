@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -35,7 +35,7 @@ import org.dyn4j.game2d.BinarySearchTree.TreeIterator.Direction;
  * <p>
  * This class cannot store null values and duplicates can have unexpected behavior.
  * @author William Bittle
- * @version 2.2.0
+ * @version 2.2.3
  * @since 2.2.0
  * @param <E> Comparable
  */
@@ -74,6 +74,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 		 * @param parent the parent node
 		 * @param left the left node
 		 * @param right the right node
+		 * @throws NullPointerException if comparable is null
 		 */
 		protected Node(T comparable, Node<T> parent, Node<T> left, Node<T> right) {
 			if (comparable == null) throw new NullPointerException("Cannot create a node with a null comparable.");
@@ -217,6 +218,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 		 * Full constructor.
 		 * @param node the root node of the subtree to traverse
 		 * @param direction the direction of the traversal
+		 * @throws NullPointerException if node or direction is null
 		 */
 		public TreeIterator(BinarySearchTree.Node<T> node, Direction direction) {
 			// check for null

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -41,7 +41,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * is considered to be inside, if they are not overlapping, the {@link Collidable} is considered
  * outside.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class RectangularBounds extends AbstractBounds implements Bounds, Transformable {
@@ -57,6 +57,7 @@ public class RectangularBounds extends AbstractBounds implements Bounds, Transfo
 	/**
 	 * Creates a new bounds object.
 	 * @param bounds the rectangular bounds
+	 * @throws NullPointerException if bounds is null
 	 */
 	public RectangularBounds(Rectangle bounds) {
 		if (bounds == null) throw new NullPointerException("The bounds rectangle cannot be null.");
@@ -118,6 +119,7 @@ public class RectangularBounds extends AbstractBounds implements Bounds, Transfo
 	/**
 	 * Sets the bounds.
 	 * @param bounds the bounds
+	 * @throws NullPointerException if bounds is null
 	 */
 	public void setBounds(Rectangle bounds) {
 		if (bounds == null) throw new NullPointerException("The bounds rectangle cannot be null.");

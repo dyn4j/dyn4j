@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -30,7 +30,7 @@ import org.dyn4j.game2d.geometry.Transform;
 /**
  * Represents a {@link Collidable} that can take part in continuous collision detection.
  * @author William Bittle
- * @version 1.2.0
+ * @version 2.2.3
  * @since 1.2.0
  */
 public interface Swept extends Collidable {
@@ -44,6 +44,9 @@ public interface Swept extends Collidable {
 	/**
 	 * Returns the final transformation.  This is the
 	 * transformation after integration.
+	 * <p>
+	 * This method may return the same transform as
+	 * the {@link #getTransform()} method.
 	 * @return {@link Transform} the final transform
 	 */
 	public abstract Transform getFinalTransform();

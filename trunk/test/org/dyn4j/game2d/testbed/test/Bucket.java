@@ -101,16 +101,24 @@ public class Bucket extends Test {
 		Rectangle bottom = new Rectangle(15.0, 1.0);
 		Rectangle left = new Rectangle(1.0, 15.0);
 		Rectangle right = new Rectangle(1.0, 15.0);
-		// translate in local coordinates the left and right sides
-		left.translate(-7.5, 7.0);
-		right.translate(7.5, 7.0);
 		
-		Entity bucket = new Entity();
-		bucket.addFixture(new BodyFixture(bottom));
-		bucket.addFixture(new BodyFixture(left));
-		bucket.addFixture(new BodyFixture(right));
-		bucket.setMass(Mass.Type.INFINITE);
-		this.world.add(bucket);
+		Entity bucketBottom = new Entity();
+		bucketBottom.addFixture(bottom);
+		bucketBottom.setMass(Mass.Type.INFINITE);
+		
+		Entity bucketLeft = new Entity();
+		bucketLeft.addFixture(left);
+		bucketLeft.setMass(Mass.Type.INFINITE);
+		bucketLeft.translate(-7.5, 7.0);
+		
+		Entity bucketRight = new Entity();
+		bucketRight.addFixture(right);
+		bucketRight.setMass(Mass.Type.INFINITE);
+		bucketRight.translate(7.5, 7.0);
+		
+		this.world.add(bucketBottom);
+		this.world.add(bucketLeft);
+		this.world.add(bucketRight);
 		
 		// temp variables
 		Random random = new Random();

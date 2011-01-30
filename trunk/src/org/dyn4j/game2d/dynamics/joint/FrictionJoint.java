@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -42,7 +42,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.1.0
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class FrictionJoint extends Joint {
@@ -78,6 +78,8 @@ public class FrictionJoint extends Joint {
 	 * @param body1 the first {@link Body}
 	 * @param body2 the second {@link Body}
 	 * @param anchor the anchor point in world coordinates
+	 * @throws NullPointerException if body1, body2, or anchor is null
+	 * @throws IllegalArgumentException if body1 == body2
 	 */
 	public FrictionJoint(Body body1, Body body2, Vector2 anchor) {
 		// default no collision allowed
@@ -264,19 +266,17 @@ public class FrictionJoint extends Joint {
 	
 	/**
 	 * Sets the maximum torque this constraint will apply in newton-meters.
-	 * @param maxTorque the maximum torque in newton-meters
+	 * @param maxTorque the maximum torque in newton-meters; in the range [0, &infin;]
+	 * @throws IllegalArgumentException if maxTorque is less than zero
 	 */
 	public void setMaxTorque(double maxTorque) {
 		// make sure its greater than or equal to zero
 		if (maxTorque < 0.0) throw new IllegalArgumentException("The maximum torque must be greater than or equal to zero.");
-		// see if the maximum is different than the current
-		if (this.maxTorque != maxTorque) {
-			// wake up the bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// set the max
-			this.maxTorque = maxTorque;
-		}
+		// wake up the bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
+		// set the max
+		this.maxTorque = maxTorque;
 	}
 
 	/**
@@ -289,18 +289,16 @@ public class FrictionJoint extends Joint {
 	
 	/**
 	 * Sets the maximum force this constraint will apply in newtons.
-	 * @param maxForce the maximum force in newtons
+	 * @param maxForce the maximum force in newtons; in the range [0, &infin;]
+	 * @throws IllegalArgumentException if maxForce is less than zero
 	 */
 	public void setMaxForce(double maxForce) {
 		// make sure its greater than or equal to zero
 		if (maxForce < 0.0) throw new IllegalArgumentException("The maximum force must be greater than or equal to zero.");
-		// see if the maximum is different than the current
-		if (this.maxForce != maxForce) {
-			// wake up the bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// set the max
-			this.maxForce = maxForce;
-		}
+		// wake up the bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
+		// set the max
+		this.maxForce = maxForce;
 	}
 }

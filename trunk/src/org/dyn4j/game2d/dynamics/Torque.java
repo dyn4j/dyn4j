@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,7 +27,7 @@ package org.dyn4j.game2d.dynamics;
 /**
  * Represents a torque about the z-axis.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class Torque {
@@ -53,6 +53,7 @@ public class Torque {
 	/**
 	 * Copy constructor.
 	 * @param torque the {@link Torque} to copy
+	 * @throws NullPointerException if torque is null
 	 */
 	public Torque(Torque torque) {
 		if (torque == null) throw new NullPointerException("Cannot copy a null torque.");
@@ -70,6 +71,7 @@ public class Torque {
 	/**
 	 * Sets this {@link Torque} to the given {@link Torque}.
 	 * @param torque the {@link Torque} to copy
+	 * @throws NullPointerException if torque is null
 	 */
 	public void set(Torque torque) {
 		if (torque == null) throw new NullPointerException("Cannot set this torque to a null torque.");

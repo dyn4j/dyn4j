@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -50,6 +50,7 @@ import org.dyn4j.game2d.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.game2d.collision.narrowphase.Penetration;
 import org.dyn4j.game2d.collision.narrowphase.Raycast;
 import org.dyn4j.game2d.collision.narrowphase.RaycastDetector;
+import org.dyn4j.game2d.dynamics.Settings.ContinuousDetectionMode;
 import org.dyn4j.game2d.dynamics.contact.Contact;
 import org.dyn4j.game2d.dynamics.contact.ContactAdapter;
 import org.dyn4j.game2d.dynamics.contact.ContactConstraint;
@@ -71,7 +72,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Employs the same {@link Island} solving technique as <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.1.0
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class World {
@@ -162,7 +163,7 @@ public class World {
 	 * Builds a simulation {@link World} without bounds.
 	 */
 	public World() {
-		this(Bounds.UNBOUNDED);
+		this(null);
 	}
 	
 	/**
@@ -170,11 +171,9 @@ public class World {
 	 * <p>
 	 * Defaults to using {@link #EARTH_GRAVITY}, {@link Sap} broad-phase,
 	 * {@link Gjk} narrow-phase, and {@link ClippingManifoldSolver}.
-	 * @param bounds the bounds of the {@link World}
+	 * @param bounds the bounds of the {@link World}; can be null
 	 */
 	public World(Bounds bounds) {
-		// check for null bounds
-		if (bounds == null) throw new NullPointerException("The bounds cannot be null.  Use the Bounds.UNBOUNDED object to have no bounds.");
 		// initialize all the classes with default values
 		this.step = new Step();
 		this.gravity = World.EARTH_GRAVITY;
@@ -209,12 +208,12 @@ public class World {
 	 * to listen for when a step is actually performed.  In addition, this method will
 	 * return true if a step was performed.
 	 * <p>
-	 * Alternatively you can call the {@link #update(double)} method to use a variable
+	 * Alternatively you can call the {@link #updatev(double)} method to use a variable
 	 * time step.
 	 * <p>
 	 * This method immediately returns if the given elapsedTime is less than or equal to
 	 * zero.
-	 * @see #update(double)
+	 * @see #updatev(double)
 	 * @param elapsedTime the elapsed time in seconds
 	 * @return boolean true if the {@link World} performed a simulation step
 	 */
@@ -272,7 +271,7 @@ public class World {
 	}
 	
 	/**
-	 * Performs the given number of simulation steps using the given step frequency.
+	 * Performs the given number of simulation steps using the given elapsed time for each step.
 	 * <p>
 	 * This method immediately returns if the given elapsedTime is less than or equal to
 	 * zero.
@@ -309,6 +308,8 @@ public class World {
 		this.stepListener.begin(this.step, this);
 		
 		Settings settings = Settings.getInstance();
+		// check for CCD
+		ContinuousDetectionMode continuousDetectionMode = settings.getContinuousDetectionMode();
 		
 		// check for multithreading
 		boolean multithreading = settings.isMultithreadingEnabled();
@@ -351,19 +352,26 @@ public class World {
 			Body body = this.bodies.get(i);
 			// skip if already not active
 			if (!body.isActive()) continue;
-			// check if the body is out of bounds
-			if (this.bounds.isOutside(body)) {
-				// set the body to inactive
-				body.setActive(false);
-				// if so, notify via the listener
-				this.boundsListener.outside(body);
+			// check if bounds have been set
+			if (this.bounds != null) {
+				// check if the body is out of bounds
+				if (this.bounds.isOutside(body)) {
+					// set the body to inactive
+					body.setActive(false);
+					// if so, notify via the listener
+					this.boundsListener.outside(body);
+				}
 			}
 			// clear all the old contacts
 			body.contacts.clear();
 			// remove the island flag
 			body.setOnIsland(false);
-			// save the current transform into the previous transform
-			body.transform0.set(body.transform);
+			// we only need to save the old transform for CCD so don't
+			// bother if its completely disabled
+			if (continuousDetectionMode != ContinuousDetectionMode.NONE) {
+				// save the current transform into the previous transform
+				body.transform0.set(body.transform);
+			}
 		}
 		
 		// clear the joint island flags
@@ -675,13 +683,16 @@ public class World {
 		// notify of the all solved contacts
 		this.contactManager.postSolveNotify(this.contactListener);
 		
-		// solve time of impact
-		this.solveTOI();
+		// make sure CCD is enabled
+		if (continuousDetectionMode != ContinuousDetectionMode.NONE) {
+			// solve time of impact
+			this.solveTOI(continuousDetectionMode);
+		}
 		
 		// notify the step listener
 		this.stepListener.end(this.step, this);
 		
-		// TODO at this time, the contacts are old, i should do contact solving here
+		// at this time, the contacts are old, i should do contact solving here
 		// this creates a problem if anything about the shapes are changed before the
 		// next time step
 	}
@@ -692,31 +703,26 @@ public class World {
 	 * This method solves for the time of impact for each {@link Body} iteratively
 	 * and pairwise.
 	 * <p>
-	 * The cases considered are:
-	 * <ul>
-	 * <li>Dynamic vs. Static</li>
-	 * <li>Dynamic vs. Bullet</li>
-	 * <li>Bullet  vs. Static</li>
-	 * </ul>
+	 * The cases considered are dependent on the current collision detection mode.
 	 * <p>
 	 * Cases skipped (including the converse of the above):
 	 * <ul>
 	 * <li>Inactive, asleep, or non-moving bodies</li>
-	 * <li>Bodies connected via a joint (with the collision flag as false)</li>
+	 * <li>Bodies connected via a joint with the collision flag set to false</li>
 	 * <li>Bodies already in contact</li>
 	 * <li>Fixtures whose filters return false</li>
 	 * <li>Sensor fixtures</li>
 	 * </ul>
+	 * @param mode the continuous collision detection mode
+	 * @see Settings.ContinuousDetectionMode
 	 * @since 1.2.0
 	 */
-	protected void solveTOI() {
-		// get the settings
-		Settings settings = Settings.getInstance();
-		// make sure time of impact solving is enabled
-		if (!settings.isContinuousCollisionDetectionEnabled()) return;
-		
+	protected void solveTOI(ContinuousDetectionMode mode) {
 		// get the number of bodies
 		int size = this.bodies.size();
+		
+		// check the CCD mode
+		boolean bulletsOnly = mode == ContinuousDetectionMode.BULLETS_ONLY;
 		
 		// loop over all the bodies and find the minimum TOI for each
 		// dynamic body
@@ -724,6 +730,12 @@ public class World {
 			// get the body
 			Body body = this.bodies.get(i);
 			
+			// if we are only doing CCD on bullets only, then check
+			// to make sure that the current body is a bullet
+			if (bulletsOnly && !body.isBullet()) continue;
+			
+			// otherwise we process all dynamic bodies
+				
 			// we don't process kinematic or static bodies except with
 			// dynamic bodies (in other words b1 must always be a dynamic
 			// body)
@@ -1012,6 +1024,8 @@ public class World {
 	/**
 	 * Adds a {@link Body} to the {@link World}.
 	 * @param body the {@link Body} to add
+	 * @throws NullPointerException if body is null
+	 * @throws IllegalArgumentException if body has already been added to this world
 	 */
 	public void add(Body body) {
 		// check for null body
@@ -1025,6 +1039,8 @@ public class World {
 	/**
 	 * Adds a {@link Joint} to the {@link World}.
 	 * @param joint the {@link Joint} to add
+	 * @throws NullPointerException if joint is null
+	 * @throws IllegalArgumentException if joint has already been added to this world
 	 */
 	public void add(Joint joint) {
 		// check for null joint
@@ -1207,9 +1223,8 @@ public class World {
 	 * Sets the gravity.
 	 * <p>
 	 * Setting the gravity vector to the zero vector eliminates gravity.
-	 * <p>
-	 * A NullPointerException is thrown if the given gravity vector is null.
 	 * @param gravity the gravity in meters/second<sup>2</sup>
+	 * @throws NullPointerException if gravity is null
 	 */
 	public void setGravity(Vector2 gravity) {
 		if (gravity == null) throw new NullPointerException("The gravity vector cannot be null.");
@@ -1226,11 +1241,9 @@ public class World {
 
 	/**
 	 * Sets the bounds of the {@link World}.
-	 * @param bounds the bounds
+	 * @param bounds the bounds; can be null
 	 */
 	public void setBounds(Bounds bounds) {
-		// check for null bounds
-		if (bounds == null) throw new NullPointerException("The bounds cannot be null.  To creat an unbounded world use the Bounds.UNBOUNDED static member.");
 		this.bounds = bounds;
 	}
 	
@@ -1245,6 +1258,7 @@ public class World {
 	/**
 	 * Sets the bounds listener.
 	 * @param boundsListener the bounds listener
+	 * @throws NullPointerException if boundsListener is null
 	 */
 	public void setBoundsListener(BoundsListener boundsListener) {
 		if (boundsListener == null) throw new NullPointerException("The bounds listener cannot be null.  Create an instance of the BoundsAdapter class to set it to the default.");
@@ -1262,6 +1276,7 @@ public class World {
 	/**
 	 * Sets the {@link ContactListener}.
 	 * @param contactListener the contact listener
+	 * @throws NullPointerException if contactListener is null
 	 */
 	public void setContactListener(ContactListener contactListener) {
 		if (contactListener == null) throw new NullPointerException("The contact listener cannot be null.  Create an instance of the ContactAdapter class to set it to the default.");
@@ -1287,19 +1302,21 @@ public class World {
 	/**
 	 * Sets the {@link TimeOfImpactListener}.
 	 * @param timeOfImpactListener the time of impact listener
+	 * @throws NullPointerException if timeOfImpactListener is null
 	 */
 	public void setTimeOfImpactListener(TimeOfImpactListener timeOfImpactListener) {
-		if (timeOfImpactListener == null) throw new NullPointerException("The time of impact listener cannot be null.");
+		if (timeOfImpactListener == null) throw new NullPointerException("The time of impact listener cannot be null.  Create an instance of the TimeOfImpactAdapter class to set it to the default.");
 		this.timeOfImpactListener = timeOfImpactListener;
 	}
 	
 	/**
 	 * Sets the raycast listener.
 	 * @param raycastListener the raycast listener
+	 * @throws NullPointerException if raycastListener is null
 	 * @since 2.0.0
 	 */
 	public void setRaycastListener(RaycastListener raycastListener) {
-		if (raycastListener == null) throw new NullPointerException("The raycast listener cannot be null.");
+		if (raycastListener == null) throw new NullPointerException("The raycast listener cannot be null.  Create an instance of the RaycastAdapter class to set it to the default.");
 		this.raycastListener = raycastListener;
 	}
 	
@@ -1315,6 +1332,7 @@ public class World {
 	/**
 	 * Sets the {@link DestructionListener}.
 	 * @param destructionListener the {@link DestructionListener}
+	 * @throws NullPointerException if destructionListener is null
 	 */
 	public void setDestructionListener(DestructionListener destructionListener) {
 		if (destructionListener == null) throw new NullPointerException("The destruction listener cannot be null.  Create an instance of the DestructionAdapter class to set it to the default.");
@@ -1332,6 +1350,7 @@ public class World {
 	/**
 	 * Sets the {@link StepListener}.
 	 * @param stepListener the {@link StepListener}
+	 * @throws NullPointerException if stepListener is null
 	 */
 	public void setStepListener(StepListener stepListener) {
 		if (stepListener == null) throw new NullPointerException("The step listener cannot be null.  Create an instance of the StepAdapter class to set it to the default.");
@@ -1352,6 +1371,7 @@ public class World {
 	 * If the given detector is null then the default {@link Sap}
 	 * {@link BroadphaseDetector} is set as the current broad phase.
 	 * @param broadphaseDetector the broad-phase collision detection algorithm
+	 * @throws NullPointerException if broadphaseDetector is null
 	 */
 	public void setBroadphaseDetector(BroadphaseDetector broadphaseDetector) {
 		if (broadphaseDetector == null) throw new NullPointerException("The broadphase detector cannot be null.");
@@ -1372,6 +1392,7 @@ public class World {
 	 * If the given detector is null then the default {@link Gjk}
 	 * {@link NarrowphaseDetector} is set as the current narrow phase.
 	 * @param narrowphaseDetector the narrow-phase collision detection algorithm
+	 * @throws NullPointerException if narrowphaseDetector is null
 	 */
 	public void setNarrowphaseDetector(NarrowphaseDetector narrowphaseDetector) {
 		if (narrowphaseDetector == null) throw new NullPointerException("The narrowphase detector cannot be null.");
@@ -1389,6 +1410,7 @@ public class World {
 	/**
 	 * Sets the manifold solver.
 	 * @param manifoldSolver the manifold solver
+	 * @throws NullPointerException if manifoldSolver is null
 	 */
 	public void setManifoldSolver(ManifoldSolver manifoldSolver) {
 		if (manifoldSolver == null) throw new NullPointerException("The manifold solver cannot be null.");
@@ -1406,6 +1428,7 @@ public class World {
 	/**
 	 * Sets the time of impact detector.
 	 * @param timeOfImpactDetector the time of impact detector
+	 * @throws NullPointerException if timeOfImpactDetector is null
 	 * @since 1.2.0
 	 */
 	public void setTimeOfImpactDetector(TimeOfImpactDetector timeOfImpactDetector) {
@@ -1425,6 +1448,7 @@ public class World {
 	/**
 	 * Sets the raycast detector.
 	 * @param raycastDetector the raycast detector
+	 * @throws NullPointerException if raycastDetector is null
 	 * @since 2.0.0
 	 */
 	public void setRaycastDetector(RaycastDetector raycastDetector) {
@@ -1444,6 +1468,7 @@ public class World {
 	/**
 	 * Sets the collision listener.
 	 * @param collisionListener the collision listener
+	 * @throws NullPointerException if collisionListener is null
 	 */
 	public void setCollisionListener(CollisionListener collisionListener) {
 		if (collisionListener == null) throw new NullPointerException("The collision listener cannot be null.  Create an instance of the CollisionAdapter class to set it to the default.");
@@ -1469,9 +1494,10 @@ public class World {
 	/**
 	 * Sets the {@link CoefficientMixer}.
 	 * @param coefficientMixer the coefficient mixer
+	 * @throws NullPointerException if coefficientMixer is null
 	 */
 	public void setCoefficientMixer(CoefficientMixer coefficientMixer) {
-		if (coefficientMixer == null) throw new NullPointerException("The coefficient mixer cannot be null.");
+		if (coefficientMixer == null) throw new NullPointerException("The coefficient mixer cannot be null.  Set it to CoefficientMixer.DEFAULT_MIXER to set it to the defaut.");
 		this.coefficientMixer = coefficientMixer;
 	}
 	
@@ -1487,6 +1513,7 @@ public class World {
 	/**
 	 * Sets the {@link ContactManager}.
 	 * @param contactManager the contact manager
+	 * @throws NullPointerException if contactManager is null
 	 * @since 1.0.2
 	 */
 	public void setContactManager(ContactManager contactManager) {
@@ -1507,6 +1534,7 @@ public class World {
 	/**
 	 * Sets the {@link TimeOfImpactSolver}.
 	 * @param timeOfImpactSolver the time of impact solver
+	 * @throws NullPointerException if timeOfImpactSolver is null
 	 * @since 2.0.0
 	 */
 	public void setTimeOfImpactSolver(TimeOfImpactSolver timeOfImpactSolver) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -46,7 +46,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * <p>
  * This algorithm total complexity is O(n log n).
  * @author William Bittle
- * @version 2.2.0
+ * @version 2.2.3
  * @since 2.2.0
  */
 public class SweepLine implements Decomposer {
@@ -325,7 +325,7 @@ public class SweepLine implements Decomposer {
 	 * @see org.dyn4j.game2d.geometry.decompose.Decomposer#decompose(org.dyn4j.game2d.geometry.Vector2[])
 	 */
 	@Override
-	public List<Convex> decompose(Vector2[] points) {
+	public List<Convex> decompose(Vector2... points) {
 		// check for a null list
 		if (points == null) throw new NullPointerException("Cannot decompose a null array of points.");
 		// get the number of points

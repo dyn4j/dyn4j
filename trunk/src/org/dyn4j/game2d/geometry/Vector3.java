@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,12 +27,12 @@ package org.dyn4j.game2d.geometry;
 import org.dyn4j.game2d.Epsilon;
 
 /**
- * This class represents a {@link Vector3} in 3D space.
+ * This class represents a vector in 3D space.
  * <p>
  * Used to solve 3x3 systems of equations.
  * @see Vector2
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class Vector3 {

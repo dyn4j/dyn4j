@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,7 +29,7 @@ import org.dyn4j.game2d.Epsilon;
 /**
  * Represents a line {@link Segment}.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class Segment extends Wound implements Convex, Shape, Transformable {
@@ -43,6 +43,8 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	 * Full constructor.
 	 * @param point1 the first point
 	 * @param point2 the second point
+	 * @throws NullPointerException if point1 or point2 is null
+	 * @throws IllegalArgumentException if point1 == point2
 	 */
 	public Segment(Vector2 point1, Vector2 point2) {
 		super();

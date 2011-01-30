@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,7 +29,7 @@ import org.dyn4j.game2d.geometry.Vector2;
 /**
  * Represents a force.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class Force {
@@ -55,6 +55,7 @@ public class Force {
 	/**
 	 * Creates a new {@link Force} using the given {@link Vector2}.
 	 * @param force the force {@link Vector2}
+	 * @throws NullPointerException if force is null
 	 */
 	public Force(Vector2 force) {
 		if (force == null) throw new NullPointerException("The force vector cannot be null.");
@@ -64,6 +65,7 @@ public class Force {
 	/**
 	 * Copy constructor.
 	 * @param force the {@link Force} to copy
+	 * @throws NullPointerException if force is null
 	 */
 	public Force(Force force) {
 		if (force == null) throw new NullPointerException("Cannot copy a null force.");
@@ -82,6 +84,7 @@ public class Force {
 	/**
 	 * Sets this {@link Force} to the given force {@link Vector2}.
 	 * @param force the force {@link Vector2}
+	 * @throws NullPointerException if force is null
 	 */
 	public void set(Vector2 force) {
 		if (force == null) throw new NullPointerException("Cannot set this force vector to a null vector.");
@@ -91,6 +94,7 @@ public class Force {
 	/**
 	 * Sets this {@link Force} to the given {@link Force}.
 	 * @param force the {@link Force} to copy
+	 * @throws NullPointerException if force is null
 	 */
 	public void set(Force force) {
 		if (force == null) throw new NullPointerException("Cannot set this force to a null force.");

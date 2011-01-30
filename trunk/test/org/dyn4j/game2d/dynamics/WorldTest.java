@@ -52,7 +52,7 @@ import org.junit.Test;
 /**
  * Contains the test cases for the {@link World} class.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.3
  * @since 1.0.2
  */
 public class WorldTest {
@@ -132,15 +132,6 @@ public class WorldTest {
 		TestCase.assertNotNull(w.raycastListener);
 		TestCase.assertNotNull(w.timeOfImpactDetector);
 		TestCase.assertNotNull(w.timeOfImpactListener);
-	}
-	
-	/**
-	 * Tests the failed creation of a world object because
-	 * of a null bounds object.
-	 */
-	@Test(expected = NullPointerException.class)
-	public void createNullBounds() {
-		new World(null);
 	}
 	
 	/**
@@ -455,15 +446,6 @@ public class WorldTest {
 		w.setBounds(rb);
 		
 		TestCase.assertSame(rb, w.getBounds());
-	}
-	
-	/**
-	 * Tests the set bounds method passing a null value.
-	 */
-	@Test(expected = NullPointerException.class)
-	public void setNullBounds() {
-		World w = new World();
-		w.setBounds(null);
 	}
 	
 	/**

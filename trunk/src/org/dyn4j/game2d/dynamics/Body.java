@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -48,19 +48,22 @@ import org.dyn4j.game2d.geometry.Vector2;
 /**
  * Represents some physical {@link Body}.
  * <p>
- * A {@link Body} requires that at least one {@link Shape} represent it, but 
- * allows any number of {@link Shape}s.  The {@link Shape} list can be used 
- * to create convex or concave {@link Body}s.
+ * A {@link Body} requires that at least one {@link BodyFixture} represent it, but 
+ * allows any number of {@link BodyFixture}s.  When a {@link Body} is created there
+ * are no {@link BodyFixture}s attached.  Concave {@link Body}s can be created
+ * by attaching multiple {@link Convex} {@link BodyFixture}s.
  * <p>
- * The {@link Mass} should be the {@link Mass} of all the {@link Shape}s in the 
- * geometry list.  See {@link Mass} for methods to create {@link Mass} objects 
- * from {@link Shape}s.
+ * Use the {@link #setMass()} or {@link #setMass(org.dyn4j.game2d.geometry.Mass.Type)}
+ * methods to set the mass of the entire {@link Body} given the currently attached
+ * {@link BodyFixture}s.  The {@link #setMass(Mass)} method can be used to set
+ * the mass directly.  Use the {@link #setMassType(org.dyn4j.game2d.geometry.Mass.Type)}
+ * method to toggle the mass type between the special types.
  * <p>
  * The coefficient of friction and restitution and linear and angular damping
  * are all defaulted but can be changed via the accessor and mutator methods.
  * <p>
- * By default {@link Body}s are allowed to sleep. {@link Body}s are put to sleep
- * when they come to rest for a certain amount of time.  Applying any force,
+ * By default {@link Body}s are allowed to be put to sleep automatically. {@link Body}s are 
+ * put to sleep when they come to rest for a certain amount of time.  Applying any force,
  * torque, or impulse will wake the {@link Body}.
  * <p>
  * A {@link Body} becomes inactive when the {@link Body} has left the boundary of
@@ -71,8 +74,12 @@ import org.dyn4j.game2d.geometry.Vector2;
  * <p>
  * A {@link Body} that is a sensor will not be handled in the collision
  * resolution but is handled in collision detection.
+ * <p>
+ * A {@link Body} flagged as a Bullet will be check for tunneling depending on the CCD
+ * setting in the {@link Settings} singleton.  Use this if the body is a fast moving
+ * body, but be careful as this will incur a performance hit.
  * @author William Bittle
- * @version 2.2.2
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class Body implements Swept, Collidable, Transformable {
@@ -223,10 +230,15 @@ public class Body implements Swept, Collidable, Transformable {
 	}
 	
 	/**
-	 * Creates a {@link BodyFixture} for the specified {@link Convex} {@link Shape},
+	 * Creates a {@link BodyFixture} for the given {@link Convex} {@link Shape},
 	 * adds it to the {@link Body}, and returns it for configuration.
+	 * <p>
+	 * After adding or removing fixtures make sure to call the {@link #setMass()}
+	 * or {@link #setMass(Mass.Type)} method to compute the new total
+	 * {@link Mass} for the body.
 	 * @param convex the {@link Convex} {@link Shape} to add to the {@link Body}
 	 * @return {@link BodyFixture} the fixture created using the given {@link Shape} and added to the {@link Body}
+	 * @throws NullPointerException if convex is null
 	 */
 	public BodyFixture addFixture(Convex convex) {
 		// make sure the convex shape is not null
@@ -240,13 +252,14 @@ public class Body implements Swept, Collidable, Transformable {
 	}
 	
 	/**
-	 * Adds a {@link BodyFixture} to this {@link Body}.
+	 * Adds the given {@link BodyFixture} to this {@link Body}.
 	 * <p>
 	 * After adding or removing fixtures make sure to call the {@link #setMass()}
 	 * or {@link #setMass(Mass.Type)} method to compute the new total
-	 * {@link Mass}.
+	 * {@link Mass} for the body.
 	 * @param fixture the {@link BodyFixture}
 	 * @return {@link Body} this body
+	 * @throws NullPointerException if fixture is null
 	 */
 	public Body addFixture(BodyFixture fixture) {
 		// make sure neither is null
@@ -262,7 +275,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 * <p>
 	 * After adding or removing fixtures make sure to call the {@link #setMass()}
 	 * or {@link #setMass(Mass.Type)} method to compute the new total
-	 * {@link Mass}.
+	 * {@link Mass} for the body.
 	 * @param fixture the {@link BodyFixture}
 	 * @return boolean true if the {@link BodyFixture} was removed from this {@link Body}
 	 */
@@ -281,22 +294,15 @@ public class Body implements Swept, Collidable, Transformable {
 	/**
 	 * Removes the {@link BodyFixture} at the given index.
 	 * <p>
-	 * Returns null if the index is less than zero or if there
-	 * are zero {@link BodyFixture}s on this body.
+	 * After adding or removing fixtures make sure to call the {@link #setMass()}
+	 * or {@link #setMass(Mass.Type)} method to compute the new total
+	 * {@link Mass} for the body.
 	 * @param index the index
 	 * @return {@link BodyFixture} the fixture removed
+	 * @throws IndexOutOfBoundsException if index is out of bounds
 	 */
 	public BodyFixture removeFixture(int index) {
-		// check the index
-		if (index < 0) return null;
-		// get the number of fixtures
-		int size = this.fixtures.size();
-		// check the size
-		if (size > 0 && index < size) {
-			return this.fixtures.remove(index);
-		}
-		// otherwise return null
-		return null;
+		return this.fixtures.remove(index);
 	}
 	
 	/**
@@ -325,15 +331,19 @@ public class Body implements Swept, Collidable, Transformable {
 	 * A {@link org.dyn4j.game2d.geometry.Mass.Type} can be used to create special mass
 	 * types.
 	 * <p>
-	 * If this method is called before any fixtures are added the
-	 * mass is set to Mass.UNDEFINED.
-	 * @param type the {@link org.dyn4j.game2d.geometry.Mass.Type}; can be null
+	 * If this method is called before any fixtures are added, the
+	 * mass is set to a new {@link Mass} object with infinite mass despite
+	 * the given type passed in.
+	 * @param type the {@link org.dyn4j.game2d.geometry.Mass.Type}
 	 * @return {@link Body} this body
+	 * @throws NullPointerException if type is null
 	 * @see #addFixture(BodyFixture)
 	 * @see #removeFixture(BodyFixture)
 	 * @see #removeFixture(int)
 	 */
 	public Body setMass(Mass.Type type) {
+		// check for null
+		if (type == null) throw new NullPointerException("The specified mass type cannot be null.");
 		// get the size
 		int size = this.fixtures.size();
 		// check the size
@@ -344,11 +354,8 @@ public class Body implements Swept, Collidable, Transformable {
 		} else if (size == 1) {
 			// then just use the mass for the first shape
 			this.mass = this.fixtures.get(0).createMass();
-			// make sure the type is not null
-			if (type != null) {
-				// set the type
-				this.mass.setType(type);
-			}
+			// set the type
+			this.mass.setType(type);
 		} else {
 			// create a list of mass objects
 			List<Mass> masses = new ArrayList<Mass>();
@@ -358,11 +365,8 @@ public class Body implements Swept, Collidable, Transformable {
 				masses.add(mass);
 			}
 			this.mass = Mass.create(masses);
-			// make sure the type is not null
-			if (type != null) {
-				// set the type
-				this.mass.setType(type);
-			}
+			// set the type
+			this.mass.setType(type);
 		}
 		// compute the rotation disc radius
 		this.setRotationDiscRadius();
@@ -373,10 +377,10 @@ public class Body implements Swept, Collidable, Transformable {
 	/**
 	 * Sets this {@link Body}'s mass information.
 	 * <p>
-	 * This method can be used to set the mass of the body
-	 * to a mass other than the total mass of the shapes.
+	 * This method can be used to set the mass of the body explicitly.
 	 * @param mass the new {@link Mass}
 	 * @return {@link Body} this body
+	 * @throws NullPointerException if mass is null
 	 */
 	public Body setMass(Mass mass) {
 		// make sure the mass is not null
@@ -386,6 +390,40 @@ public class Body implements Swept, Collidable, Transformable {
 		// compute the rotation disc radius
 		this.setRotationDiscRadius();
 		// return this body to facilitate chaining
+		return this;
+	}
+	
+	/**
+	 * Sets the {@link org.dyn4j.game2d.geometry.Mass.Type} of this {@link Body}.
+	 * <p>
+	 * This method does not compute/recompute the mass of the body but solely
+	 * sets the mass type to one of the special types.
+	 * <p>
+	 * If the mass of this body has not been set previously by one of the {@link #setMass()}
+	 * methods, then this method will compute the mass.
+	 * <p>
+	 * Since its possible to create a {@link Mass} object with zero mass and/or
+	 * zero inertia (<code>Mass m = new Mass(new Vector2(), 0, 0);</code> for example), setting the type 
+	 * to something other than Mass.Type.INFINITE can have undefined results.  In this case its 
+	 * best to use the {@link #setMass(org.dyn4j.game2d.geometry.Mass.Type)} methods to recompute 
+	 * the mass.
+	 * @param type the desired type
+	 * @return {@link Body} this body
+	 * @throws NullPointerException if type is null
+	 * @since 2.2.3
+	 */
+	public Body setMassType(Mass.Type type) {
+		// check for null type
+		if (type == null) throw new NullPointerException("The mass type cannot be null.");
+		// make sure the current mass is not null
+		if (this.mass == null) {
+			// if its null then just compute it for the first time
+			this.setMass(type);
+		} else {
+			// otherwise just set the type
+			this.mass.setType(type);
+		}
+		// return this body
 		return this;
 	}
 	
@@ -436,6 +474,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 * This method will wake-up the body if its sleeping.
 	 * @param force the force
 	 * @return {@link Body} this body
+	 * @throws NullPointerException if force is null
 	 */
 	public Body apply(Vector2 force) {
 		// check for null
@@ -454,6 +493,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 * This method will wake-up the body if its sleeping.
 	 * @param force the force
 	 * @return {@link Body} this body
+	 * @throws NullPointerException if force is null
 	 */
 	public Body apply(Force force) {
 		// check for null
@@ -488,6 +528,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 * This method will wake-up the body if its sleeping.
 	 * @param torque the torque
 	 * @return {@link Body} this body
+	 * @throws NullPointerException if torque is null
 	 */
 	public Body apply(Torque torque) {
 		// check for null
@@ -508,6 +549,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 * @param force the force
 	 * @param point the application point in world coordinates
 	 * @return {@link Body} this body
+	 * @throws NullPointerException if force or point is null
 	 */
 	public Body apply(Vector2 force, Vector2 point) {
 		// check for null
@@ -639,7 +681,8 @@ public class Body implements Swept, Collidable, Transformable {
 	}
 	
 	/**
-	 * Returns true if this {@link Body} is allowed to sleep.
+	 * Returns true if this {@link Body} is allowed to be 
+	 * put to sleep automatically.
 	 * @return boolean
 	 * @since 1.2.0
 	 */
@@ -757,9 +800,6 @@ public class Body implements Swept, Collidable, Transformable {
 	 * A bullet is a very fast moving body that requires
 	 * continuous collision detection with <b>all</b> other
 	 * {@link Body}s to ensure that no collisions are missed.
-	 * <p>
-	 * All dynamic {@link Body}s are checked using CCD against static
-	 * and kinematic {@link Body}s whether this flag is true or false.
 	 * @param flag true if this {@link Body} is a bullet
 	 * @since 1.2.0
 	 */
@@ -774,6 +814,8 @@ public class Body implements Swept, Collidable, Transformable {
 	/**
 	 * Returns true if the given {@link Body} is connected
 	 * to this {@link Body} by a {@link Joint}.
+	 * <p>
+	 * Returns false if the given body is null.
 	 * @param body the suspect connected body
 	 * @return boolean
 	 */
@@ -798,7 +840,7 @@ public class Body implements Swept, Collidable, Transformable {
 	
 	/**
 	 * Returns true if the given {@link Body} is connected to this
-	 * {@link Body} given the collision flag via a {@link Joint}.
+	 * {@link Body}, given the collision flag, via a {@link Joint}.
 	 * <p>
 	 * If the given collision flag is true, this method will return true
 	 * only if collision is allowed between the two joined {@link Body}s.
@@ -808,6 +850,8 @@ public class Body implements Swept, Collidable, Transformable {
 	 * <p>
 	 * If the {@link Body}s are connected by more than one joint, if any allows
 	 * collision, then the bodies are considered connected AND allowing collision.
+	 * <p>
+	 * Returns false if the given body is null.
 	 * @param body the suspect connected body
 	 * @param collisionAllowed the collision allowed flag
 	 * @return boolean
@@ -850,6 +894,8 @@ public class Body implements Swept, Collidable, Transformable {
 	
 	/**
 	 * Returns true if the given {@link Body} is in collision with this {@link Body}.
+	 * <p>
+	 * Returns false if the given body is null.
 	 * @param body the {@link Body} to test
 	 * @return boolean true if the given {@link Body} is in collision with this {@link Body}
 	 * @since 1.2.0
@@ -984,6 +1030,7 @@ public class Body implements Swept, Collidable, Transformable {
 	/**
 	 * Sets this {@link Body}'s transform.
 	 * @param transform the transform
+	 * @throws NullPointerException if transform is null
 	 * @since 1.1.0
 	 */
 	public void setTransform(Transform transform) {
@@ -1086,6 +1133,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 * Call the {@link #setAsleep(boolean)} method to wake up the {@link Body}
 	 * if the {@link Body} is asleep and the velocity is not zero.
 	 * @param velocity the velocity
+	 * @throws NullPointerException if velocity is null
 	 */
 	public void setVelocity(Vector2 velocity) {
 		if (velocity == null) throw new NullPointerException("The velocity vector cannot be null.");
@@ -1138,6 +1186,7 @@ public class Body implements Swept, Collidable, Transformable {
 	/**
 	 * Sets the linear damping.
 	 * @param linearDamping the linear damping
+	 * @throws IllegalArgumentException if linearDamping is less than zero
 	 */
 	public void setLinearDamping(double linearDamping) {
 		if (linearDamping < 0) throw new IllegalArgumentException("The linear damping must be greater than or equal to zero.");
@@ -1155,6 +1204,7 @@ public class Body implements Swept, Collidable, Transformable {
 	/**
 	 * Sets the angular damping.
 	 * @param angularDamping the angular damping
+	 * @throws IllegalArgumentException if angularDamping is less than zero
 	 */
 	public void setAngularDamping(double angularDamping) {
 		if (angularDamping < 0) throw new IllegalArgumentException("The angular damping must be greater than or equal to zero.");

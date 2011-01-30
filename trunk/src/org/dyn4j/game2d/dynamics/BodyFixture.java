@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ import org.dyn4j.game2d.geometry.Shape;
 /**
  * Represents a part of a {@link Body}.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.3
  * @since 2.0.0
  */
 public class BodyFixture extends Fixture {
@@ -87,6 +87,7 @@ public class BodyFixture extends Fixture {
 	/**
 	 * Sets the density of this shape in kg/m<sup>2</sup>.
 	 * @param density the density in kg/m<sup>2</sup>
+	 * @throws IllegalArgumentException if density is less than or equal to zero
 	 */
 	public void setDensity(double density) {
 		if (density <= 0) throw new IllegalArgumentException("The density must be greater than 0.");
@@ -112,6 +113,7 @@ public class BodyFixture extends Fixture {
 	/**
 	 * Sets the coefficient of friction.
 	 * @param friction the coefficient of friction; must be greater than zero
+	 * @throws IllegalArgumentException if friction is less than zero
 	 */
 	public void setFriction(double friction) {
 		if (friction < 0) throw new IllegalArgumentException("The coefficient of friction cannot be negative.");
@@ -129,6 +131,7 @@ public class BodyFixture extends Fixture {
 	/**
 	 * Sets the coefficient of restitution.
 	 * @param restitution the coefficient of restitution; must be greater than zero
+	 * @throws IllegalArgumentException if restitution is less than zero
 	 */
 	public void setRestitution(double restitution) {
 		if (restitution < 0) throw new IllegalArgumentException("The coefficient of restitution cannot be negative.");
