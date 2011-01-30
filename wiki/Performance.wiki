@@ -51,7 +51,7 @@ In addition, GJK uses EPA to obtain a penetration vector and depth.  EPA uses a 
 =Collision Resolution=
 The collision resolution system has a number of properties to configure to get the right balance of speed and accuracy for your application.
   * Decrease the number of velocity or position solving iterations using the Settings.setPositionConstraintSolverIterations(int) and Settings.setVelocityConstraintSolverIterations(int).  The minimum value is 5 with a default of 10 for both settings.
-  * Implement a new CoefficientMixer than the default.  The default performs a Math.sqrt() in the friction mixing method.  Instead, for example, you could use an averaging method.
+  * Implement a new !CoefficientMixer than the default.  The default performs a Math.sqrt() in the friction mixing method.  Instead, for example, you could use an averaging method.
 
 =Raycasting=
 Raycasting, like CCD, can be very computationally expensive.  In general try to raycast against specific Bodies instead of the entire World.
