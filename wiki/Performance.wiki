@@ -10,7 +10,7 @@ Generally the default settings should give a good balance between speed and accu
 
 =Continuous Collision Detection (CCD)=
 Continuous collision detection is a very computationally expensive process and should only be used if needed.
-  * Disable CCD completely using the Settings class and ContinuousDetection.NONE
+  * Disable CCD completely using the Settings class and !ContinuousDetection.NONE
   * Enable CCD for bullets only.  You must flag which Bodies will need to be detected for tunneling by using the Body.setBullet(boolean) method.
   * Configure the current !ConservativeAdvancement algorithm via the setMaxIterations(int) method.  The minimum is 5 with the default being 30.
   * Configure the current !ConservativeAdvancement algorithm via the setDistanceEpsilon(double) method. The minimum is 0.0 and the default is 1E-6.  The closer the value is to zero determines how accurate and how slow the algorithm will be.
@@ -34,7 +34,7 @@ In addition to leaving this setting enabled:
 Using the World.update(double) method forces that the World only update at a given frequency defined in the Settings singleton.  You can decrease this value to a minimum of 30, the default is 60, to have the entire engine update less often, leaving more time for your application to perform other tasks.
 
 =Collision Detection=
-Implement the CollisionListener and ContactListener interfaces to catch collisions/contacts that you don't want/need processed.  This will save time in the pipline.
+Implement the !CollisionListener and !ContactListener interfaces to catch collisions/contacts that you don't want/need processed.  This will save time in the pipline.
 
 If your World is totally enclosed or its unlikely that Bodies will leave the Bounds, set the Bounds on the World object to null.  This will disable Bounds checking.
 
