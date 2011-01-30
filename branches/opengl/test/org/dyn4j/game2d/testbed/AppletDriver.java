@@ -25,7 +25,6 @@
 package org.dyn4j.game2d.testbed;
 
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLProfile;
@@ -77,8 +76,6 @@ public class AppletDriver extends JApplet {
 		// create the testbed
 		TestBed testbed = new TestBed(caps, this, size, TestBed.Mode.APPLET);
 		
-		// set the layout of the frame
-		this.setLayout(new FlowLayout());
 		// add the testbed to the frame
 		this.add(testbed);
 		
@@ -87,5 +84,7 @@ public class AppletDriver extends JApplet {
 			// request focus away from the browser so that keys work
 			this.requestFocus();
 		}
+		
+		testbed.start();
 	}
 }
