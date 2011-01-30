@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ import org.dyn4j.game2d.geometry.Vector2;
 /**
  * Represents constrained motion between two {@link Body}s.
  * @author William Bittle
- * @version 2.1.0
+ * @version 2.2.3
  * @since 1.0.0
  */
 public abstract class Joint extends Constraint {
@@ -105,6 +105,7 @@ public abstract class Joint extends Constraint {
 	 * in collision detection and resolution.
 	 * @param body1 the first {@link Body}
 	 * @param body2 the second {@link Body}
+	 * @throws NullPointerException if body1 or body2 is null
 	 */
 	public Joint(Body body1, Body body2) {
 		this(body1, body2, false);
@@ -115,6 +116,7 @@ public abstract class Joint extends Constraint {
 	 * @param body1 the first {@link Body}
 	 * @param body2 the second {@link Body}
 	 * @param collisionAllowed true if the joined {@link Body}s can take part in collision detection
+	 * @throws NullPointerException if body1 or body2 is null
 	 */
 	public Joint(Body body1, Body body2, boolean collisionAllowed) {
 		super(body1, body2);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -38,7 +38,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.1.0
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class MouseJoint extends Joint {
@@ -79,6 +79,8 @@ public class MouseJoint extends Joint {
 	 * @param frequency the oscillation frequency in hz
 	 * @param dampingRatio the damping ratio
 	 * @param maxForce the maximum force this constraint can apply in newtons
+	 * @throws NullPointerException if body or target is null
+	 * @throws IllegalArgumentException if frequency is less than or equal to zero, or if dampingRatio is less than zero or greater than one, or if maxForce is less than zero
 	 */
 	public MouseJoint(Body body, Vector2 target, double frequency, double dampingRatio, double maxForce) {
 		super(body, body, false);
@@ -252,17 +254,15 @@ public class MouseJoint extends Joint {
 	/**
 	 * Returns the target point in world coordinates.
 	 * @param target the target point
+	 * @throws NullPointerException if target is null
 	 */
 	public void setTarget(Vector2 target) {
 		// make sure the target is non null
 		if (target == null) throw new NullPointerException("The target point cannot be null.");
-		// see if its different
-		if (!this.target.equals(target)) {
-			// wake up the body
-			this.body2.setAsleep(false);
-			// set the new target
-			this.target = target;
-		}
+		// wake up the body
+		this.body2.setAsleep(false);
+		// set the new target
+		this.target = target;
 	}
 	
 	/**
@@ -283,18 +283,16 @@ public class MouseJoint extends Joint {
 	
 	/**
 	 * Sets the maximum force this constraint will apply in newtons.
-	 * @param maxForce the maximum force in newtons
+	 * @param maxForce the maximum force in newtons; in the range [0, &infin;]
+	 * @throws IllegalArgumentException if maxForce less than zero
 	 */
 	public void setMaxForce(double maxForce) {
 		// make sure the max force is non negative
 		if (maxForce < 0.0) throw new IllegalArgumentException("The maximum force must be zero or greater.");
-		// see if the value is different
-		if (this.maxForce != maxForce) {
-			// wake up the body
-			this.body2.setAsleep(false);
-			// set the new max force
-			this.maxForce = maxForce;
-		}
+		// wake up the body
+		this.body2.setAsleep(false);
+		// set the new max force
+		this.maxForce = maxForce;
 	}
 
 	/**
@@ -308,17 +306,15 @@ public class MouseJoint extends Joint {
 	/**
 	 * Sets the damping ratio.
 	 * @param dampingRatio the damping ratio; in the range [0, 1]
+	 * @throws IllegalArgumentException if dampingRation is less than zero or greater than one
 	 */
 	public void setDampingRatio(double dampingRatio) {
 		// make sure its within range
 		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException("The damping ratio must be between 0 and 1.");
-		// is it different than the current value
-		if (this.dampingRatio != dampingRatio) {
-			// wake up the body
-			this.body2.setAsleep(false);
-			// set the new value
-			this.dampingRatio = dampingRatio;
-		}
+		// wake up the body
+		this.body2.setAsleep(false);
+		// set the new value
+		this.dampingRatio = dampingRatio;
 	}
 	
 	/**
@@ -332,16 +328,14 @@ public class MouseJoint extends Joint {
 	/**
 	 * Sets the spring frequency.
 	 * @param frequency the spring frequency in hz; must be greater than zero
+	 * @throws IllegalArgumentException if frequency is less than or equal to zero
 	 */
 	public void setFrequency(double frequency) {
 		// check for valid value
 		if (frequency <= 0) throw new IllegalArgumentException("The frequency must be greater than zero.");
-		// is it different than the current value
-		if (this.frequency != frequency) {
-			// wake the body
-			this.body2.setAsleep(false);
-			// set the new value
-			this.frequency = frequency;
-		}
+		// wake the body
+		this.body2.setAsleep(false);
+		// set the new value
+		this.frequency = frequency;
 	}
 }

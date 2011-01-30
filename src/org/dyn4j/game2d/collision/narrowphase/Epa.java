@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -36,7 +36,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * <p>
  * {@link Epa} expands the given simplex in the direction of the origin until it cannot
  * be expanded any further.  {@link Gjk} guarantees that the simplex points are on the
- * edge of the Minkowski sum and create a convex polytope.
+ * edge of the Minkowski sum which creates a convex polytope.
  * <p> 
  * Expansion is achieved by breaking edges of the simplex.  Find the edge on the simplex
  * closest to the origin.  Then use that edge's normal to find another support point (using 
@@ -57,7 +57,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * {@link Epa} will terminate in a finite number of iterations if the two shapes are {@link Polygon}s.
  * If either shape has curved surfaces the algorithm requires an expected accuracy epsilon.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class Epa implements MinkowskiPenetrationSolver {
@@ -248,6 +248,7 @@ public class Epa implements MinkowskiPenetrationSolver {
 	 * <p>
 	 * Valid values are in the range [5, &infin;].
 	 * @param maxIterations the maximum number of EPA iterations
+	 * @throws IllegalArgumentException if maxIterations is less than 5
 	 */
 	public void setMaxIterations(int maxIterations) {
 		if (maxIterations < 5) throw new IllegalArgumentException("The EPA penetration depth algorithm requires 5 or more iterations.");
@@ -268,6 +269,7 @@ public class Epa implements MinkowskiPenetrationSolver {
 	 * <p>
 	 * Valid values are in the range (0, &infin;].
 	 * @param distanceEpsilon the EPA distance epsilon
+	 * @throws IllegalArgumentException if distanceEpsilon is less than or equal to zero
 	 */
 	public void setDistanceEpsilon(double distanceEpsilon) {
 		if (distanceEpsilon <= 0) throw new IllegalArgumentException("The EPA distance epsilon must be larger than zero.");

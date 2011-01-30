@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,7 +29,7 @@ package org.dyn4j.game2d.geometry;
  * <p>
  * A {@link Rectangle} cannot have a width or height of zero.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class Rectangle extends Polygon implements Shape, Transformable {
@@ -48,6 +48,7 @@ public class Rectangle extends Polygon implements Shape, Transformable {
 	 * The center of the {@link Rectangle} is (0, 0).
 	 * @param width the width
 	 * @param height the height
+	 * @throws IllegalArgumentException if width or height is less than or equal to zero
 	 */
 	public Rectangle(double width, double height) {
 		if (width <= 0.0) throw new IllegalArgumentException("A rectangle must have a positive non-zero width.");

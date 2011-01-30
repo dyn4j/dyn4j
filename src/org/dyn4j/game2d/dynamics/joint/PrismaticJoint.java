@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -43,7 +43,7 @@ import org.dyn4j.game2d.geometry.Vector3;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.2.2
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class PrismaticJoint extends Joint {
@@ -124,6 +124,8 @@ public class PrismaticJoint extends Joint {
 	 * @param body2 the second {@link Body}
 	 * @param anchor the anchor point in world coordinates
 	 * @param axis the axis of allowed motion
+	 * @throws NullPointerException if body1, body2, anchor or axis is null
+	 * @throws IllegalArgumentException if body1 == body2
 	 */
 	public PrismaticJoint(Body body1, Body body2, Vector2 anchor, Vector2 axis) {
 		super(body1, body2, false);
@@ -668,14 +670,11 @@ public class PrismaticJoint extends Joint {
 	 * @param motorEnabled true if the motor should be enabled
 	 */
 	public void setMotorEnabled(boolean motorEnabled) {
-		// is the value different that the current value?
-		if (this.motorEnabled != motorEnabled) {
-			// wake up the joined bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// set the new value
-			this.motorEnabled = motorEnabled;
-		}
+		// wake up the joined bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
+		// set the new value
+		this.motorEnabled = motorEnabled;
 	}
 	
 	/**
@@ -691,14 +690,11 @@ public class PrismaticJoint extends Joint {
 	 * @param motorSpeed the target motor speed in meters / second
 	 */
 	public void setMotorSpeed(double motorSpeed) {
-		// is the value different that the current value?
-		if (this.motorSpeed != motorSpeed) {
-			// wake up the joined bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// set the new value
-			this.motorSpeed = motorSpeed;
-		}
+		// wake up the joined bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
+		// set the new value
+		this.motorSpeed = motorSpeed;
 	}
 	
 	/**
@@ -713,19 +709,17 @@ public class PrismaticJoint extends Joint {
 	/**
 	 * Sets the maximum force the motor can apply to the joint
 	 * to achieve the target speed.
-	 * @param maxMotorForce the maximum force in newtons
+	 * @param maxMotorForce the maximum force in newtons; must be greater than zero
+	 * @throws IllegalArgumentException if maxMotorForce is less than zero
 	 */
 	public void setMaxMotorForce(double maxMotorForce) {
 		// make sure its greater than or equal to zero
 		if (maxMotorForce < 0.0) throw new IllegalArgumentException("The maximum motor force must be greater than or equal to zero.");
-		// is the value different that the current value?
-		if (this.maxMotorForce != maxMotorForce) {
-			// wake up the joined bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// set the new value
-			this.maxMotorForce = maxMotorForce;
-		}
+		// wake up the joined bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
+		// set the new value
+		this.maxMotorForce = maxMotorForce;
 	}
 	
 	/**
@@ -749,14 +743,11 @@ public class PrismaticJoint extends Joint {
 	 * @param limitEnabled true if the limit should be enabled.
 	 */
 	public void setLimitEnabled(boolean limitEnabled) {
-		// is the value different that the current value?
-		if (this.limitEnabled != limitEnabled) {
-			// wake up the joined bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// set the new value
-			this.limitEnabled = limitEnabled;
-		}
+		// wake up the joined bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
+		// set the new value
+		this.limitEnabled = limitEnabled;
 	}
 	
 	/**
@@ -770,18 +761,16 @@ public class PrismaticJoint extends Joint {
 	/**
 	 * Sets the lower limit.
 	 * @param lowerLimit the lower limit in meters
+	 * @throws IllegalArgumentException if lowerLimit is greater than the current upper limit
 	 */
 	public void setLowerLimit(double lowerLimit) {
 		// check for valid value
 		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException("The lower limit cannot be greater than the upper limit."); 
-		// is the value different?
-		if (this.lowerLimit != lowerLimit) {
-			// wake up the joined bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// set the new value
-			this.lowerLimit = lowerLimit;
-		}
+		// wake up the joined bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
+		// set the new value
+		this.lowerLimit = lowerLimit;
 	}
 	
 	/**
@@ -795,18 +784,16 @@ public class PrismaticJoint extends Joint {
 	/**
 	 * Sets the upper limit.
 	 * @param upperLimit the upper limit in meters
+	 * @throws IllegalArgumentException if upperLimit is less than the current lower limit
 	 */
 	public void setUpperLimit(double upperLimit) {
 		// check for valid value
 		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException("The upper limit cannot be less than the lower limit."); 
-		// is the value different?
-		if (this.upperLimit != upperLimit) {
-			// wake up the joined bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// set the new value
-			this.upperLimit = upperLimit;
-		}
+		// wake up the joined bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
+		// set the new value
+		this.upperLimit = upperLimit;
 	}
 	
 	/**
@@ -815,15 +802,13 @@ public class PrismaticJoint extends Joint {
 	 * The lower limit must be less than or equal to the upper limit.
 	 * @param lowerLimit the lower limit in meters
 	 * @param upperLimit the upper limit in meters
+	 * @throws IllegalArgumentException if lowerLimit is greater than upperLimit
 	 */
 	public void setLimits(double lowerLimit, double upperLimit) {
 		if (lowerLimit > upperLimit) throw new IllegalArgumentException("The lower limit cannot be greater than the upper limit.");
-		// did a value change
-		if (lowerLimit != this.lowerLimit || upperLimit != this.upperLimit) {
-			// wake up the bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-		}
+		// wake up the bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
 		// set the values
 		this.lowerLimit = lowerLimit;
 		this.upperLimit = upperLimit;
@@ -835,16 +820,14 @@ public class PrismaticJoint extends Joint {
 	 * The lower limit must be less than or equal to the upper limit.
 	 * @param lowerLimit the lower limit in meters
 	 * @param upperLimit the upper limit in meters
+	 * @throws IllegalArgumentException if lowerLimit is greater than upperLimit
 	 * @since 2.2.2
 	 */
 	public void setLimitsEnabled(double lowerLimit, double upperLimit) {
 		if (lowerLimit > upperLimit) throw new IllegalArgumentException("The lower limit cannot be greater than the upper limit.");
-		// did a value change
-		if (lowerLimit != this.lowerLimit || upperLimit != this.upperLimit) {
-			// wake up the bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-		}
+		// wake up the bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
 		// set the values
 		this.lowerLimit = lowerLimit;
 		this.upperLimit = upperLimit;

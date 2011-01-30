@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,7 +27,7 @@ package org.dyn4j.game2d.geometry;
 /**
  * Represents a ray.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.3
  * @since 2.0.0
  */
 public class Ray {
@@ -49,6 +49,8 @@ public class Ray {
 	 * Creates a ray from the given start point in the given direction.
 	 * @param start the start point
 	 * @param direction the direction; must be normalized
+	 * @throws NullPointerException if start or direction is null
+	 * @throws IllegalArgumentException if direction is the zero vector
 	 */
 	public Ray(Vector2 start, Vector2 direction) {
 		if (start == null) throw new NullPointerException("The start point cannot be null.");
@@ -69,6 +71,7 @@ public class Ray {
 	/**
 	 * Sets the start point.
 	 * @param start the start point
+	 * @throws NullPointerException if start is null
 	 */
 	public void setStart(Vector2 start) {
 		if (start == null) throw new NullPointerException("The start point cannot be null.");
@@ -87,6 +90,8 @@ public class Ray {
 	/**
 	 * Sets the direction.
 	 * @param direction the direction; should be normalized
+	 * @throws NullPointerException if direction is null
+	 * @throws IllegalArgumentException if direction is the zero vector
 	 */
 	public void setDirection(Vector2 direction) {
 		if (direction == null) throw new NullPointerException("The direction cannot be null.");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -50,7 +50,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * <p>
  * This algorithm is O(n<sup>2</sup>).
  * @author William Bittle
- * @version 2.2.0
+ * @version 2.2.3
  * @since 2.2.0
  */
 public class EarClipping implements Decomposer {
@@ -99,10 +99,10 @@ public class EarClipping implements Decomposer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.geometry.decompostion.Decomposer#decompose(org.dyn4j.game2d.geometry.Vector2[])
+	 * @see org.dyn4j.game2d.geometry.decompose.Decomposer#decompose(org.dyn4j.game2d.geometry.Vector2[])
 	 */
 	@Override
-	public List<Convex> decompose(Vector2[] points) {
+	public List<Convex> decompose(Vector2... points) {
 		// check for null array
 		if (points == null) throw new NullPointerException("Cannot decompose a null array of points.");
 		// get the number of points

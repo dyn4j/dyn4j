@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,81 +27,14 @@ package org.dyn4j.game2d.collision;
 import org.dyn4j.game2d.dynamics.BodyFixture;
 import org.dyn4j.game2d.geometry.Transform;
 import org.dyn4j.game2d.geometry.Transformable;
-import org.dyn4j.game2d.geometry.Vector2;
 
 /**
  * Represents the {@link Bounds} of the simulation/world.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.3
  * @since 1.0.0
  */
 public interface Bounds extends Transformable {
-	/** 
-	 * The default bounds object.
-	 * <p>
-	 * This bounds object will always return false from the {@link #isOutside(Collidable)}
-	 * method and returns null for the {@link #getTransform()} method.
-	 * <p>
-	 * Take care in using this bounds object since overflow can happen.
-	 */
-	public static final Bounds UNBOUNDED = new Bounds() {
-		/* (non-Javadoc)
-		 * @see org.dyn4j.game2d.geometry.Transformable#translate(org.dyn4j.game2d.geometry.Vector)
-		 */
-		@Override
-		public void translate(Vector2 vector) {
-			throw new UnsupportedOperationException("Cannot modify the Bounds.UNBOUNDED object.");
-		}
-		
-		/* (non-Javadoc)
-		 * @see org.dyn4j.game2d.geometry.Transformable#translate(double, double)
-		 */
-		@Override
-		public void translate(double x, double y) {
-			throw new UnsupportedOperationException("Cannot modify the Bounds.UNBOUNDED object.");
-		}
-		
-		/* (non-Javadoc)
-		 * @see org.dyn4j.game2d.geometry.Transformable#rotate(double, double, double)
-		 */
-		@Override
-		public void rotate(double theta, double x, double y) {
-			throw new UnsupportedOperationException("Cannot modify the Bounds.UNBOUNDED object.");
-		}
-		
-		/* (non-Javadoc)
-		 * @see org.dyn4j.game2d.geometry.Transformable#rotate(double, org.dyn4j.game2d.geometry.Vector)
-		 */
-		@Override
-		public void rotate(double theta, Vector2 point) {
-			throw new UnsupportedOperationException("Cannot modify the Bounds.UNBOUNDED object.");
-		}
-		
-		/* (non-Javadoc)
-		 * @see org.dyn4j.game2d.geometry.Transformable#rotate(double)
-		 */
-		@Override
-		public void rotate(double theta) {
-			throw new UnsupportedOperationException("Cannot modify the Bounds.UNBOUNDED object.");
-		}
-		
-		/* (non-Javadoc)
-		 * @see org.dyn4j.game2d.collision.Bounds#isOutside(org.dyn4j.game2d.collision.Collidable)
-		 */
-		@Override
-		public boolean isOutside(Collidable collidable) {
-			return false;
-		}
-		
-		/* (non-Javadoc)
-		 * @see org.dyn4j.game2d.collision.Bounds#getTransform()
-		 */
-		@Override
-		public Transform getTransform() {
-			return null;
-		}
-	};
-	
 	/**
 	 * Returns the {@link Bounds} {@link Transform}.
 	 * @return {@link Transform}

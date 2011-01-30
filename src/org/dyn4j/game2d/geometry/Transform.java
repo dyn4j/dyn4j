@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,7 +29,7 @@ package org.dyn4j.game2d.geometry;
  * <p>
  * Supported operations are rotation and translation.
  * @author William Bittle
- * @version 1.2.0
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class Transform implements Transformable {
@@ -38,6 +38,9 @@ public class Transform implements Transformable {
 	
 	/**
 	 * An immutable identity transform.
+	 * <p>
+	 * Calling any mutator methods on this instance will result in
+	 * <code>UnsupportedOperationException</code>s.
 	 */
 	public static final Transform IDENTITY = new Transform() {
 		/* (non-Javadoc)

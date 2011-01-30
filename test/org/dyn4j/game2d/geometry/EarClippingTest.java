@@ -46,7 +46,7 @@ public class EarClippingTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void nullArray() {
-		this.algo.decompose(null);
+		this.algo.decompose((Vector2[])null);
 	}
 	
 	/**

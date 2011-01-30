@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -41,10 +41,10 @@ import org.dyn4j.game2d.geometry.Vector2;
  * This method assumes that translation and rotation are linear and computes the
  * time of impact within a given tolerance.
  * <p>
- * This method is based of the one found in <a href="http://bulletphysics.org">Bullet</a>.
+ * This method is based on the one found in <a href="http://bulletphysics.org">Bullet</a>.
  * @author William Bittle
  * @see <a href="http://bulletphysics.org">Bullet</a>
- * @version 2.0.0
+ * @version 2.2.3
  * @since 1.2.0
  */
 public class ConservativeAdvancement implements TimeOfImpactDetector {
@@ -84,16 +84,17 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 	/**
 	 * Default constructor.
 	 * <p>
-	 * Uses the {@link Gjk} as the {@link DistanceDetector}.
+	 * Uses {@link Gjk} as the {@link DistanceDetector}.
 	 */
 	public ConservativeAdvancement() {}
 	
 	/**
 	 * Optional constructor.
 	 * @param distanceDetector the distance detector
+	 * @throws NullPointerException if distanceDetector is null
 	 */
 	public ConservativeAdvancement(DistanceDetector distanceDetector) {
-		if (distanceDetector == null) throw new NullPointerException("The distance detector cannot be null.");
+		if (distanceDetector == null) throw new NullPointerException("The distance detector cannot null.");
 		this.distanceDetector = distanceDetector;
 	}
 	
@@ -367,9 +368,10 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 	/**
 	 * Sets the {@link DistanceDetector} to be used.
 	 * @param distanceDetector the distance detector
+	 * @throws NullPointerException if distanceDetector is null
 	 */
 	public void setDistanceDetector(DistanceDetector distanceDetector) {
-		if (distanceDetector == null) throw new NullPointerException("The distance detector cannot be null.");
+		if (distanceDetector == null) throw new NullPointerException("The distance detector cannot null.");
 		this.distanceDetector = distanceDetector;
 	}
 	
@@ -386,6 +388,7 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 	 * Sets the distance epsilon used to determine when a sufficient solution
 	 * has been found.
 	 * @param distanceEpsilon the distance epsilon; must be greater than zero
+	 * @throws IllegalArgumentException if distanceEpsilon is less than or equal to zero
 	 */
 	public void setDistanceEpsilon(double distanceEpsilon) {
 		if (distanceEpsilon <= 0.0) throw new IllegalArgumentException("The tolerance must be greater than zero.");
@@ -408,6 +411,7 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 	 * Lower values increase performance yet decrease accuracy whereas
 	 * higher values decrease performance and increase accuracy.
 	 * @param maxIterations the maximum number of iterations in the range [5, &infin;]
+	 * @throws IllegalArgumentException if maxIterations is less than 5
 	 */
 	public void setMaxIterations(int maxIterations) {
 		if (maxIterations < 5) throw new IllegalArgumentException("The root finder must have a minimum of 5 iterations.");

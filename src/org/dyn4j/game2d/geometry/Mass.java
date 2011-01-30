@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,9 +32,9 @@ import org.dyn4j.game2d.dynamics.Body;
 /**
  * Represents {@link Mass} data for a {@link Body}.
  * <p>
- * Stores the center of mass, area, mass, and inertia tensor.
+ * Stores the center of mass, mass, and inertia tensor.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class Mass {
@@ -92,6 +92,8 @@ public class Mass {
 	 * @param center center of {@link Mass} in local coordinates
 	 * @param mass mass in kg
 	 * @param inertia inertia tensor in kg &middot; m<sup>2</sup>
+	 * @throws NullPointerException if center is null
+	 * @throws IllegalArgumentException if mass or inertia is less than zero
 	 */
 	public Mass(Vector2 center, double mass, double inertia) {
 		// validate the input
@@ -128,6 +130,7 @@ public class Mass {
 	 * <p>
 	 * Performs a deep copy.
 	 * @param mass the {@link Mass} to copy
+	 * @throws NullPointerException if mass is null
 	 */
 	public Mass(Mass mass) {
 		// validate the input
@@ -188,11 +191,16 @@ public class Mass {
 	 * list is infinite.
 	 * @param masses the list of {@link Mass} objects to combine
 	 * @return {@link Mass} the combined {@link Mass}
+	 * @throws NullPointerException if masses is null or contains null elements
+	 * @throws IllegalArgumentException if masses is empty
 	 */
 	public static Mass create(List<Mass> masses) {
 		// check the list for null or empty
-		if (masses == null || masses.size() == 0) {
-			throw new IllegalArgumentException("The masses list must not be null and contain at least one non-null element.");
+		if (masses == null) {
+			throw new NullPointerException("The masses list cannot be null.");
+		}
+		if (masses.size() == 0) {
+			throw new IllegalArgumentException("The masses list must contain at least one non-null element.");
 		}
 		// get the length of the masses array
 		int size = masses.size();
@@ -260,6 +268,7 @@ public class Mass {
 	/**
 	 * Sets the mass type.
 	 * @param type the mass type
+	 * @throws NullPointerException if type is null
 	 */
 	public void setType(Mass.Type type) {
 		if (type == null) throw new NullPointerException("The mass type cannot be null.");

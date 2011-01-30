@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -35,7 +35,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Geometry} class.
  * @author William Bittle
- * @version 2.2.0
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class GeometryTest {
@@ -609,24 +609,56 @@ public class GeometryTest {
 	 * Tests the creation of a segment passing a zero length.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void createSegmentZeroLength() {
-		Geometry.createSegment(0.0);
+	public void createHorizontalSegmentZeroLength() {
+		Geometry.createHorizontalSegment(0.0);
 	}
 
 	/**
 	 * Tests the creation of a segment passing a negative length.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void createSegmentNegativeLength() {
-		Geometry.createSegment(-1.0);
+	public void createHorizontalSegmentNegativeLength() {
+		Geometry.createHorizontalSegment(-1.0);
 	}
 	
 	/**
 	 * Tests the successful creation of a segment given a length.
 	 */
 	@Test
-	public void createSegmentLength() {
-		Segment s = Geometry.createSegment(5.0);
+	public void createHorizontalSegmentLength() {
+		Segment s = Geometry.createHorizontalSegment(5.0);
+		
+		// test that the center is the origin
+		Vector2 center = s.getCenter();
+		TestCase.assertEquals(0.000, center.x, 1.0e-3);
+		TestCase.assertEquals(0.000, center.y, 1.0e-3);
+	}
+	
+	/**
+	 * Tests the creation of a segment passing a zero length.
+	 * @since 2.2.3
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createVerticalSegmentZeroLength() {
+		Geometry.createVerticalSegment(0.0);
+	}
+
+	/**
+	 * Tests the creation of a segment passing a negative length.
+	 * @since 2.2.3
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createVerticalSegmentNegativeLength() {
+		Geometry.createVerticalSegment(-1.0);
+	}
+	
+	/**
+	 * Tests the successful creation of a segment given a length.
+	 * @since 2.2.3
+	 */
+	@Test
+	public void createVerticalSegmentLength() {
+		Segment s = Geometry.createVerticalSegment(5.0);
 		
 		// test that the center is the origin
 		Vector2 center = s.getCenter();
@@ -748,6 +780,51 @@ public class GeometryTest {
 	@Test(expected = NullPointerException.class)
 	public void reverseWindingNullArray() {
 		Geometry.reverseWinding((Vector2[]) null);
+	}
+	
+	/**
+	 * Tests the cleanse method passing a null list.
+	 * @since 2.2.3
+	 */
+	@Test(expected = NullPointerException.class)
+	public void cleanseNullList() {
+		Geometry.cleanse((List<Vector2>)null);
+	}
+	
+	/**
+	 * Tests the cleanse method passing a null array.
+	 * @since 2.2.3
+	 */
+	@Test(expected = NullPointerException.class)
+	public void cleanseNullArray() {
+		Geometry.cleanse((List<Vector2>)null);
+	}
+	
+	/**
+	 * Tests the cleanse method passing a null list.
+	 * @since 2.2.3
+	 */
+	@Test(expected = NullPointerException.class)
+	public void cleanseListWithNullElements() {
+		List<Vector2> list = new ArrayList<Vector2>();
+		list.add(new Vector2());
+		list.add(null);
+		list.add(new Vector2());
+		list.add(new Vector2());
+		Geometry.cleanse(list);
+	}
+	
+	/**
+	 * Tests the cleanse method passing a null array.
+	 * @since 2.2.3
+	 */
+	@Test(expected = NullPointerException.class)
+	public void cleanseArrayWithNullElements() {
+		Vector2[] array = new Vector2[5];
+		array[0] = new Vector2();
+		array[3] = new Vector2();
+		array[4] = new Vector2();
+		Geometry.cleanse(array);
 	}
 	
 	/**

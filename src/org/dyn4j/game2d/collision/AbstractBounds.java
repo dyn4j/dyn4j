@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.dyn4j.game2d.geometry.Vector2;
 /**
  * Abstract implementation of the {@link Bounds} interface.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.2.3
  * @since 1.0.0
  */
 public abstract class AbstractBounds implements Bounds, Transformable {
@@ -50,9 +50,11 @@ public abstract class AbstractBounds implements Bounds, Transformable {
 	/**
 	 * Full constructor.
 	 * @param transform the transform for the bounds
+	 * @throws NullPointerException if transform is null
 	 */
 	public AbstractBounds(Transform transform) {
-		if (transform == null) throw new NullPointerException("Bounds objects cannot have null transforms.");
+		// check for a null transform
+		if (transform == null) throw new NullPointerException("Cannot set the transform to null.");
 		this.transform = transform;
 	}
 	

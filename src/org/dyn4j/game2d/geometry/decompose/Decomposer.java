@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Represents an algorithm to decompose a given list of points representing
  * a polygon into a list of convex pieces.
  * @author William Bittle
- * @version 2.2.0
+ * @version 2.2.3
  * @since 2.2.0
  */
 public interface Decomposer {
@@ -41,6 +41,8 @@ public interface Decomposer {
 	 * Performs the decomposition on the given list of polygon points returning a list of convex shapes.
 	 * @param points the list of points
 	 * @return List&lt;{@link Convex}&gt;
+	 * @throws NullPointerException if points is null or contains null points
+	 * @throws IllegalArgumentException if points contains less than 4 points
 	 */
-	public List<Convex> decompose(Vector2[] points);
+	public List<Convex> decompose(Vector2... points);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -41,7 +41,7 @@ import org.dyn4j.game2d.geometry.Vector3;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.1.0
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class WeldJoint extends Joint {
@@ -68,6 +68,8 @@ public class WeldJoint extends Joint {
 	 * @param body1 the first {@link Body}
 	 * @param body2 the second {@link Body}
 	 * @param anchor the anchor point in world coordinates
+	 * @throws NullPointerException if body1, body2, or anchor is null
+	 * @throws IllegalArgumentException if body1 == body2
 	 */
 	public WeldJoint(Body body1, Body body2, Vector2 anchor) {
 		super(body1, body2, false);

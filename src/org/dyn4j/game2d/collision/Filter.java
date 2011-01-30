@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,7 +27,7 @@ package org.dyn4j.game2d.collision;
 /**
  * Interface representing a filter for collision detection.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.2.3
  * @since 1.0.0
  */
 public interface Filter {
@@ -55,7 +55,10 @@ public interface Filter {
 	 * allow the objects to interact.
 	 * <p>
 	 * If the given {@link Filter} is not the same type as this {@link Filter}
-	 * true is returned.
+	 * its up to the implementing class to specify the behavior.
+	 * <p>
+	 * In addition, if the given {@link Filter} is null its up to the implementing 
+	 * class to specify the behavior.
 	 * @param filter the other {@link Filter}
 	 * @return boolean
 	 */

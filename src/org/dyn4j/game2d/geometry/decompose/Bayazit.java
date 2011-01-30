@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -41,7 +41,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * This algorithm is a O(nr) complexity algorithm where n is the number of input vertices and r is the number of
  * output convex polygons.  This algorithm can achieve optimal decompositions, however this is not guaranteed.
  * @author William Bittle
- * @version 2.2.0
+ * @version 2.2.3
  * @since 2.2.0
  */
 public class Bayazit implements Decomposer {
@@ -49,7 +49,7 @@ public class Bayazit implements Decomposer {
 	 * @see org.dyn4j.game2d.geometry.decompose.Decomposer#decompose(org.dyn4j.game2d.geometry.Vector2[])
 	 */
 	@Override
-	public List<Convex> decompose(Vector2[] points) {
+	public List<Convex> decompose(Vector2... points) {
 		// check for null array
 		if (points == null) throw new NullPointerException("Cannot decompose a null array of points.");
 		// get the number of points

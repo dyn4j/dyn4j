@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,10 +26,6 @@ package org.dyn4j.game2d.testbed.test;
 
 import java.awt.event.KeyEvent;
 
-import org.codezealot.game.input.Input;
-import org.codezealot.game.input.Keyboard;
-import org.codezealot.game.input.Mouse;
-import org.codezealot.game.input.Input.Hold;
 import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.BodyFixture;
@@ -40,11 +36,15 @@ import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.testbed.ContactCounter;
 import org.dyn4j.game2d.testbed.Entity;
 import org.dyn4j.game2d.testbed.Test;
+import org.dyn4j.game2d.testbed.input.Input;
+import org.dyn4j.game2d.testbed.input.Keyboard;
+import org.dyn4j.game2d.testbed.input.Mouse;
+import org.dyn4j.game2d.testbed.input.Input.Hold;
 
 /**
  * Tests bodies being put to sleep.
  * @author William Bittle
- * @version 2.2.2
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class Sleep extends Test {

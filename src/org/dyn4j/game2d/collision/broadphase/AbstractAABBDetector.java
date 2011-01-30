@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -35,7 +35,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Abstract implementation of a {@link BroadphaseDetector} providing AABB
  * (Axis Aligned Bounding Box) detection methods.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.3
  * @since 1.0.0
  */
 public abstract class AbstractAABBDetector implements BroadphaseDetector {
@@ -68,25 +68,25 @@ public abstract class AbstractAABBDetector implements BroadphaseDetector {
 		// project all the shapes of collidable1
 		fixture = collidable1.getFixture(0);
 		convex = fixture.getShape();
-		Interval x1 = convex.project(Sap.X_AXIS, transform1);
-		Interval y1 = convex.project(Sap.Y_AXIS, transform1);
+		Interval x1 = convex.project(AbstractAABBDetector.X_AXIS, transform1);
+		Interval y1 = convex.project(AbstractAABBDetector.Y_AXIS, transform1);
 		for (int i = 1; i < size1; i++) {
 			fixture = collidable1.getFixture(i);
 			convex = fixture.getShape();
-			x1.union(convex.project(Sap.X_AXIS, transform1));
-			y1.union(convex.project(Sap.Y_AXIS, transform1));
+			x1.union(convex.project(AbstractAABBDetector.X_AXIS, transform1));
+			y1.union(convex.project(AbstractAABBDetector.Y_AXIS, transform1));
 		}
 		
 		// project all the shapes of collidable2
 		fixture = collidable2.getFixture(0);
 		convex = fixture.getShape();
-		Interval x2 = convex.project(Sap.X_AXIS, transform2);
-		Interval y2 = convex.project(Sap.Y_AXIS, transform2);
+		Interval x2 = convex.project(AbstractAABBDetector.X_AXIS, transform2);
+		Interval y2 = convex.project(AbstractAABBDetector.Y_AXIS, transform2);
 		for (int i = 1; i < size2; i++) {
 			fixture = collidable2.getFixture(i);
 			convex = fixture.getShape();
-			x2.union(convex.project(Sap.X_AXIS, transform2));
-			y2.union(convex.project(Sap.Y_AXIS, transform2));
+			x2.union(convex.project(AbstractAABBDetector.X_AXIS, transform2));
+			y2.union(convex.project(AbstractAABBDetector.Y_AXIS, transform2));
 		}
 		
 		// if both sets of intervals overlap then we have a possible intersection
@@ -103,10 +103,10 @@ public abstract class AbstractAABBDetector implements BroadphaseDetector {
 	@Override
 	public boolean detect(Convex convex1, Transform transform1, Convex convex2, Transform transform2) {
 		// project both convex shapes onto the x and y axes
-		Interval x1 = convex1.project(Sap.X_AXIS, transform1);
-		Interval x2 = convex2.project(Sap.X_AXIS, transform2);
-		Interval y1 = convex1.project(Sap.Y_AXIS, transform1);
-		Interval y2 = convex2.project(Sap.Y_AXIS, transform2);
+		Interval x1 = convex1.project(AbstractAABBDetector.X_AXIS, transform1);
+		Interval x2 = convex2.project(AbstractAABBDetector.X_AXIS, transform2);
+		Interval y1 = convex1.project(AbstractAABBDetector.Y_AXIS, transform1);
+		Interval y2 = convex2.project(AbstractAABBDetector.Y_AXIS, transform2);
 		
 		// if both sets of intervals overlap then we have a possible intersection
 		if (x1.overlaps(x2) && y1.overlaps(y2)) {

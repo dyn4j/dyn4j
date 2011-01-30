@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -44,7 +44,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.1.0
+ * @version 2.2.3
  * @since 2.1.0
  */
 public class PulleyJoint extends Joint {
@@ -127,6 +127,8 @@ public class PulleyJoint extends Joint {
 	 * @param pulleyAnchor2 the second pulley anchor point
 	 * @param bodyAnchor1 the first {@link Body}'s anchor point
 	 * @param bodyAnchor2 the second {@link Body}'s anchor point
+	 * @throws NullPointerException if body1, body2, pulleyAnchor1, pulleyAnchor2, bodyAnchor1, or bodyAnchor2 is null
+	 * @throws IllegalArgumentException if body1 == body2
 	 */
 	public PulleyJoint(Body body1, Body body2, Vector2 pulleyAnchor1, Vector2 pulleyAnchor2, Vector2 bodyAnchor1, Vector2 bodyAnchor2) {
 		super(body1, body2, false);
@@ -595,6 +597,7 @@ public class PulleyJoint extends Joint {
 	 * <p>
 	 * This method calculates the maximum length for both pulley axes. 
 	 * @param minLength the minimum length; must be zero or greater
+	 * @throws IllegalArgumentException if minLength is less than zero
 	 * @see #set(double, double)
 	 */
 	public void setMinLength(double minLength) {
@@ -621,6 +624,7 @@ public class PulleyJoint extends Joint {
 	 * <p>
 	 * This method recomputes the maximum lengths.
 	 * @param ratio the ratio; must be greater than zero
+	 * @throws IllegalArgumentException if ratio is less than or equal to zero
 	 * @see #set(double, double)
 	 */
 	public void setRatio(double ratio) {
@@ -637,6 +641,7 @@ public class PulleyJoint extends Joint {
 	 * Sets both the ratio and the minimum length.
 	 * @param ratio the ratio; must be greater than zero
 	 * @param minLength the minimum length; must be zero or greater
+	 * @throws IllegalArgumentException if ratio is less than or equal to zero or minLength is less than zero
 	 * @see #setMinLength(double)
 	 * @see #setRatio(double)
 	 */

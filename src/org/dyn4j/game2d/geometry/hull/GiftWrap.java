@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -41,7 +41,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * <p>
  * If the input point array has a size of 1 or 2 the input point array is returned.
  * @author William Bittle
- * @version 2.2.0
+ * @version 2.2.3
  * @since 2.2.0
  */
 public class GiftWrap implements HullGenerator {
@@ -49,7 +49,7 @@ public class GiftWrap implements HullGenerator {
 	 * @see org.dyn4j.game2d.geometry.hull.HullGenerator#generate(org.dyn4j.game2d.geometry.Vector2[])
 	 */
 	@Override
-	public Vector2[] generate(Vector2[] points) {
+	public Vector2[] generate(Vector2... points) {
 		// check for null array
 		if (points == null) throw new NullPointerException("Cannot generate a convex hull from a null point array.");
 		// get the size

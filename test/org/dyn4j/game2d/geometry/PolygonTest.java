@@ -102,7 +102,7 @@ public class PolygonTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createNullPoints() {
-		new Polygon(null);
+		new Polygon((Vector2[])null);
 	}
 	
 	/**

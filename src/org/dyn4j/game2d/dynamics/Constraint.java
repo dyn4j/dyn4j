@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,7 +27,7 @@ package org.dyn4j.game2d.dynamics;
 /**
  * Represents some physical constraint between a pair of {@link Body}s.
  * @author William Bittle
- * @version 1.0.3
+ * @version 2.2.3
  * @since 1.0.0
  */
 public abstract class Constraint {
@@ -44,6 +44,7 @@ public abstract class Constraint {
 	 * Full constructor.
 	 * @param body1 the first participating {@link Body}
 	 * @param body2 the second participating {@link Body}
+	 * @throws NullPointerException if body1 or body2 is null
 	 */
 	public Constraint(Body body1, Body body2) {
 		// the bodies cannot be null
@@ -84,16 +85,20 @@ public abstract class Constraint {
 	/**
 	 * Sets the first {@link Body}.
 	 * @param body1 the first {@link Body}
+	 * @throws NullPointerException if body1 is null
 	 */
 	public void setBody1(Body body1) {
+		if (body1 == null) throw new NullPointerException("Body1 cannot be null.");
 		this.body1 = body1;
 	}
 	
 	/**
 	 * Sets the second {@link Body}.
 	 * @param body2 the second {@link Body}
+	 * @throws NullPointerException if body2 is null
 	 */
 	public void setBody2(Body body2) {
+		if (body2 == null) throw new NullPointerException("Body2 cannot be null.");
 		this.body2 = body2;
 	}
 

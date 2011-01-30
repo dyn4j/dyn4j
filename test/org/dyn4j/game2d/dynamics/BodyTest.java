@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -50,7 +50,7 @@ import org.junit.Test;
 /**
  * Class to test the {@link Body} class.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.3
  * @since 1.0.2
  */
 public class BodyTest {
@@ -132,26 +132,47 @@ public class BodyTest {
 		boolean success = b.removeFixture(null);
 		TestCase.assertFalse(success);
 		
-		// test index with empty fixture list
-		BodyFixture f = b.removeFixture(0);
-		TestCase.assertNull(f);
-		
-		// test negative index
-		f = b.removeFixture(-2);
-		TestCase.assertNull(f);
-		
-		// test positive index with null fixture list
-		f = b.removeFixture(3);
-		TestCase.assertNull(f);
-		
 		// test not found fixture
 		b.addFixture(Geometry.createCircle(1.0));
 		success = b.removeFixture(new BodyFixture(Geometry.createRightTriangle(0.5, 0.3)));
 		TestCase.assertFalse(success);
+	}
+	
+	/**
+	 * Tests receiving index out of bounds exceptions.
+	 * @since 2.2.3
+	 */
+	@Test(expected = IndexOutOfBoundsException.class)
+	public void removeFixtureIndexOutOfBounds1() {
+		Body b = new Body();
+		// test index with empty fixture list
+		b.removeFixture(0);
+	}
+	
+	/**
+	 * Tests receiving index out of bounds exceptions.
+	 * @since 2.2.3
+	 */
+	@Test(expected = IndexOutOfBoundsException.class)
+	public void removeFixtureIndexOutOfBounds2() {
+		Body b = new Body();
+		b.addFixture(Geometry.createCircle(1.0));
 		
-		// test index larger than size
-		f = b.removeFixture(4);
-		TestCase.assertNull(f);
+		// test negative index
+		b.removeFixture(-2);
+	}
+	
+	/**
+	 * Tests receiving index out of bounds exceptions.
+	 * @since 2.2.3
+	 */
+	@Test(expected = IndexOutOfBoundsException.class)
+	public void removeFixtureIndexOutOfBounds3() {
+		Body b = new Body();
+		b.addFixture(Geometry.createCircle(1.0));
+		
+		// test positive index with null fixture list
+		b.removeFixture(3);
 	}
 	
 	/**
@@ -214,6 +235,30 @@ public class BodyTest {
 		Mass mass = new Mass(f2.getShape().getCenter(), 2.3, 20.3);
 		b.setMass(mass);
 		TestCase.assertSame(mass, b.mass);
+		
+		// test only setting the type
+		b.setMassType(Mass.Type.INFINITE);
+		// make sure the mass was not recomputed
+		TestCase.assertSame(mass, b.mass);
+		// make sure the type was successfully set
+		TestCase.assertEquals(Mass.Type.INFINITE, b.mass.getType());
+		// set it back to normal
+		b.setMassType(Mass.Type.NORMAL);
+		// make sure the mass values are still present
+		TestCase.assertEquals(2.3, b.mass.getMass());
+		TestCase.assertEquals(20.3, b.mass.getInertia());
+	}
+	
+	/**
+	 * Tests setting the mass type.
+	 * @since 2.2.3
+	 */
+	public void setMassType() {
+		Body b = new Body();
+		// should auto generate it
+		b.setMassType(Mass.Type.NORMAL);
+		// should generate another and should default to normal
+		b.setMassType(null);
 	}
 	
 	/**

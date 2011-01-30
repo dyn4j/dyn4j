@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,12 +31,12 @@ package org.dyn4j.game2d.geometry;
  * be used instead of directly transforming the {@link Shape}.  Doing so will allow reuse of
  * the same {@link Shape} object in multiple places, where only the {@link Transform} differs.
  * <p>
- * If a class extends this class they must contain a since static final member called TYPE that
+ * If a class extends this class they must contain a single static final member called TYPE that
  * specifies the type of shape.  The member must be static and final because the {@link Shape.Type}
  * class method <code>is</code> only performs a reference comparison. When creating the type make 
  * sure to pass the super type {@link Shape.Type}.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.3
  * @since 1.0.0
  */
 public interface Shape extends Transformable {	
@@ -57,7 +57,7 @@ public interface Shape extends Transformable {
 	 * </pre>
 	 * will return true.
 	 * @author William Bittle
-	 * @version 1.0.3
+	 * @version 2.2.3
 	 * @since 1.0.0
 	 */
 	public class Type {

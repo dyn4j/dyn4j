@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -39,14 +39,14 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Given the two world space anchor points a distance is computed and used
  * to constrain the attached {@link Body}s.
  * <p>
- * This joint doubles as a spring/damping distance joint where the length can
+ * This joint doubles as a spring/damper distance joint where the length can
  * change but is constantly approaching the target distance.  Enable the
  * spring/damper by setting the frequency to a value greater than zero.
  * <p>
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.1.0
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class DistanceJoint extends Joint {
@@ -93,6 +93,8 @@ public class DistanceJoint extends Joint {
 	 * @param body2 the second {@link Body}
 	 * @param anchor1 in world coordinates
 	 * @param anchor2 in world coordinates
+	 * @throws NullPointerException if body1, body2, anchor1, or anchor2 is null
+	 * @throws IllegalArgumentException if body1 == body2
 	 */
 	public DistanceJoint(Body body1, Body body2, Vector2 anchor1, Vector2 anchor2) {
 		super(body1, body2, false);
@@ -357,18 +359,16 @@ public class DistanceJoint extends Joint {
 	/**
 	 * Sets the rest distance between the two constrained {@link Body}s in meters.
 	 * @param distance the distance in meters
+	 * @throws IllegalArgumentException if distance is less than zero
 	 */
 	public void setDistance(double distance) {
 		// make sure the distance is greater than zero
 		if (distance < 0.0) throw new IllegalArgumentException("The distance must be greater than or equal to zero.");
-		// check if the value changed
-		if (this.distance != distance) {
-			// wake up both bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// set the new target distance
-			this.distance = distance;
-		}
+		// wake up both bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
+		// set the new target distance
+		this.distance = distance;
 	}
 	
 	/**
@@ -382,18 +382,16 @@ public class DistanceJoint extends Joint {
 	/**
 	 * Sets the damping ratio.
 	 * @param dampingRatio the damping ratio; in the range [0, 1]
+	 * @throws IllegalArgumentException if damping ration is less than zero or greater than 1
 	 */
 	public void setDampingRatio(double dampingRatio) {
 		// make sure its within range
 		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException("The damping ratio must be between 0 and 1 inclusive.");
-		// is it different than the current value
-		if (this.dampingRatio != dampingRatio) {
-			// wake up both bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// set the new value
-			this.dampingRatio = dampingRatio;
-		}
+		// wake up both bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
+		// set the new value
+		this.dampingRatio = dampingRatio;
 	}
 	
 	/**
@@ -407,17 +405,15 @@ public class DistanceJoint extends Joint {
 	/**
 	 * Sets the spring frequency.
 	 * @param frequency the spring frequency in hz; must be greater than or equal to zero
+	 * @throws IllegalArgumentException if frequency is less than zero
 	 */
 	public void setFrequency(double frequency) {
 		// check for valid value
 		if (frequency < 0) throw new IllegalArgumentException("The frequency must be greater than or equal to zero.");
-		// is it different than the current value
-		if (this.frequency != frequency) {
-			// wake up both bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// set the new value
-			this.frequency = frequency;
-		}
+		// wake up both bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
+		// set the new value
+		this.frequency = frequency;
 	}
 }

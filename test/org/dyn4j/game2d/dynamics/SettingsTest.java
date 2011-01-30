@@ -26,13 +26,14 @@ package org.dyn4j.game2d.dynamics;
 
 import junit.framework.TestCase;
 
+import org.dyn4j.game2d.dynamics.Settings.ContinuousDetectionMode;
 import org.junit.Before;
 import org.junit.Test;
 
 /**
  * Tests the methods of the {@link Settings} class.
  * @author William Bittle
- * @version 1.2.0
+ * @version 2.2.3
  * @since 1.0.0
  */
 public class SettingsTest {
@@ -392,14 +393,60 @@ public class SettingsTest {
 	}
 	
 	/**
-	 * Tests the set continuous collision detection enabled flag.
-	 * @since 1.2.0
+	 * Tests the set continuous collision detection mode.
+	 * @since 2.2.3
 	 */
 	@Test
-	public void setContinuousCollisionDetectionEnabled() {
-		settings.setContinuousCollisionDetectionEnabled(true);
-		TestCase.assertTrue(settings.isContinuousCollisionDetectionEnabled());
-		settings.setContinuousCollisionDetectionEnabled(false);
-		TestCase.assertFalse(settings.isContinuousCollisionDetectionEnabled());
+	public void setContinuousDetectionMode() {
+		settings.setContinuousDetectionMode(ContinuousDetectionMode.ALL);
+		TestCase.assertEquals(ContinuousDetectionMode.ALL, settings.getContinuousDetectionMode());
+		settings.setContinuousDetectionMode(ContinuousDetectionMode.NONE);
+		TestCase.assertEquals(ContinuousDetectionMode.NONE, settings.getContinuousDetectionMode());
+	}
+	
+	/**
+	 * Tests setting the multithreading enabled flag.
+	 */
+	@Test
+	public void setMultithreading() {
+		settings.setMultithreadingEnabled(false);
+		TestCase.assertFalse(settings.isMultithreadingEnabled());
+		settings.setMultithreadingEnabled(true);
+		TestCase.assertTrue(settings.isMultithreadingEnabled());
+	}
+	
+	/**
+	 * Tests setting a valid load factor.
+	 */
+	@Test
+	public void setValidLoadFactor() {
+		settings.setLoadFactor(8);
+		TestCase.assertEquals(8, settings.getLoadFactor());
+		settings.setLoadFactor(16);
+		TestCase.assertEquals(16, settings.getLoadFactor());
+	}
+	
+	/**
+	 * Tests setting a zero load factor.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setZeroLoadFactor() {
+		settings.setLoadFactor(0);
+	}
+	
+	/**
+	 * Tests setting a negative load factor.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNegativeLoadFactor() {
+		settings.setLoadFactor(-4);
+	}
+	
+	/**
+	 * Tests setting a non power of two load factor.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNonPowerOfTwoLoadFactor() {
+		settings.setLoadFactor(5);
 	}
 }
