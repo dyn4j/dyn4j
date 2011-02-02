@@ -32,6 +32,9 @@ An inherent side effect of finite precision floating point arithmetic is numeric
 The Epsilon class attempts to approximate the machine epsilon for a double precision floating point number.  This epsilon is the smallest floating point number such that x + epsilon &ne; x.  This value is used in a number of algorithms within dyn4j and can be used in game code as well via the Epsilon.E property.
   * dyn4j actually uses larger values than epsilon in some cases to improve performance and stability.
 
+==Rotations==
+Like Java rotations are specified in Radians.  The Math.toRadians and Math.toDegrees methods can be used to convert to and from the different units.
+
 =Shapes=
 Both the Shape and Body classes implement the Transformable interface.  The Shape class's implementation directly modifies the internal state of the shape.  This is mainly used to locally transform the Shape.  The Body class's implementation modifies the Body's Transform.
 
