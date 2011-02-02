@@ -144,7 +144,7 @@ Most of these exceptions are obvious or documented indirectly in the source and 
 =Extra Help=
 Finally if you need extra help you can look at the following resources:
   * <a href="http://code.google.com/p/dyn4j/w/list">Wiki</a> - for other topics about the library
-  * <a href="http://code.google.com/p/dyn4j/source/browse/">TestBed</a> application - for examples using the library
+  * <a href="http://code.google.com/p/dyn4j/source/browse/">!TestBed</a> application - for examples using the library
   * <a href="http://code.google.com/p/dyn4j/source/browse/">JUnit tests</a> - for more examples using the library
   * <a href="http://docs.dyn4j.org">Javadocs</a> - for more documentation about specific methods/classes
 
