@@ -58,7 +58,7 @@ Raycasting, like CCD, can be very computationally expensive.  In general try to 
 
 In addition to this use the all, maxLength, and ignoreSensors parameters to decrease the number of Body/Shapes that must be checked.
 
-Implement the !RaycastListener to stop raycasting when you have found the result you are looking for.
+Implement the !RaycastListener to ignore Bodies and !BodyFixtures that don't need to be tested.
 
 =Bodies=
 Avoid over use of the Body.getJoinedBodies(), Body.getJoints(), Body.getInContactBodies(), and Body.getContacts() methods since all of these methods create new lists for every invocation to return the information.
