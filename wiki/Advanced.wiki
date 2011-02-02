@@ -240,15 +240,11 @@ Some of the events above should return a boolean result.  The returned boolean i
 The !ContactAdapter, which is the default, will always return true for all the methods.
 
 ==Ray Cast Event==
-When a ray cast is performed using the World.raycast methods (the ones that do NOT accept a body) a ray cast event is triggered.
+When a ray cast is performed using the World.raycast methods two ray cast events may be triggered.
 
 Notification of this event is by the !RaycastListener interface and !RaycastAdapter class.
 
-There is only one event, however given the return value of the notification, the raycast will proceed differently:
-  * STOP - Return this enum to indicate that the ray cast should stop
-  * STOP_IGNORE - Return this enum to indicate that the ray cast should stop and that this result should be ignored (not added to the results list)
-  * CONTINUE - Return this enum to indicate that the ray cast should continue
-  * CONTINUE_IGNORE - Return this enum to indicate that the ray cast should continue but ignore this result (not added to the results list)
+There are two events, one for each Body and one for each !BodyFixture on each Body.  Each event returns a boolean value indicating that the World should or should not raycast the Body or !BodyFixture.  Implement these methods to ignore certain Bodies or !BodyFixtures.
 
 ==Time Of Impact Events==
 If continuous collision detection (CCD) is disabled its possible that bodies traveling fast may pass through other objects within one time step.  If CCD is enabled, detection of these situations will generate time of impact events.
