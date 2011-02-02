@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,15 +24,18 @@
  */
 package org.dyn4j.game2d.dynamics;
 
+import org.dyn4j.game2d.Epsilon;
 import org.dyn4j.game2d.collision.narrowphase.Raycast;
 
 /**
  * Represents the result of a raycast.
+ * <p>
+ * Implements the Comparable interface to allow for sorting by the distance.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.4
  * @since 2.0.0
  */
-public class RaycastResult {
+public class RaycastResult implements Comparable<RaycastResult> {
 	/** The {@link Body} detected */
 	protected Body body;
 	
@@ -41,6 +44,21 @@ public class RaycastResult {
 	
 	/** The {@link Raycast} result information */
 	protected Raycast raycast;
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
+	@Override
+	public int compareTo(RaycastResult o) {
+		double value = this.raycast.getDistance() - o.raycast.getDistance();
+		if (value > Epsilon.E) {
+			return 1;
+		} else if (value < Epsilon.E) {
+			return -1;
+		} else {
+			return 0;
+		}
+	}
 	
 	/**
 	 * Returns the {@link Body} detected.

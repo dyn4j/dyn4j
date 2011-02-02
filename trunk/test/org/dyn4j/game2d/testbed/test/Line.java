@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,7 +40,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests the line joint.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.4
  * @since 1.0.0
  */
 public class Line extends Test {
@@ -117,6 +117,12 @@ public class Line extends Test {
 		
 		LineJoint joint = new LineJoint(bot, top, new Vector2(0.0, 2.0), new Vector2(0.0, 1.0));
 		joint.setCollisionAllowed(true);
+		// set the limits and enable them
+		joint.setLimitsEnabled(0.5, 1.5);
+		// or you could do
+//		joint.setLowerLimit(0.5);
+//		joint.setUpperLimit(1.5);
+//		joint.setLimitEnabled(true);
 		
 		this.world.add(joint);
 	}
