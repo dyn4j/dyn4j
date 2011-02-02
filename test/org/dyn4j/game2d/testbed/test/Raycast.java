@@ -26,12 +26,15 @@ package org.dyn4j.game2d.testbed.test;
 
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
+import org.dyn4j.game2d.dynamics.Body;
 import org.dyn4j.game2d.dynamics.BodyFixture;
+import org.dyn4j.game2d.dynamics.RaycastAdapter;
 import org.dyn4j.game2d.dynamics.RaycastResult;
 import org.dyn4j.game2d.dynamics.World;
 import org.dyn4j.game2d.geometry.Circle;
@@ -54,7 +57,7 @@ import org.dyn4j.game2d.testbed.input.Mouse;
 /**
  * Tests the {@link World}'s raycast methods.
  * @author William Bittle
- * @version 2.2.3
+ * @version 2.2.4
  * @since 2.0.0
  */
 public class Raycast extends Test {
@@ -70,6 +73,60 @@ public class Raycast extends Test {
 	/** Whether to get all results or just the closest */
 	private boolean all = false;
 	
+	/** The circle shape for ignoring in the listener */
+	private Entity circle;
+	
+	/**
+	 * Custom Raycast listener.
+	 * @author William Bittle
+	 * @since 2.2.4
+	 * @version 2.2.4
+	 */
+	private class CustomRaycastListener extends RaycastAdapter {
+		/* (non-Javadoc)
+		 * @see org.dyn4j.game2d.dynamics.RaycastAdapter#allow(org.dyn4j.game2d.geometry.Ray, org.dyn4j.game2d.dynamics.Body)
+		 */
+		@Override
+		public boolean allow(Ray ray, Body body) {
+			// save time by not testing bodies that don't need to be tested
+			
+			// for example: check if the body is the circle
+			if (body == circle) {
+				// continue but ignore this one
+				return false;
+			}
+			
+			// or you could filter the static bodies
+			// if (body.isStatic)
+			// or if you have some userData
+			// if (body.getUserData()...)
+			// or if you extended the Body class
+			// if (((Entity)body).getColor()[0] == 1.0)
+			// etc, to only test bodies that need to be tested
+			
+			// otherwise just continue
+			return true;
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.game2d.dynamics.RaycastAdapter#allow(org.dyn4j.game2d.geometry.Ray, org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.dynamics.BodyFixture)
+		 */
+		@Override
+		public boolean allow(Ray ray, Body body, BodyFixture fixture) {
+			
+			// you can use this method to filter the fixtures of a body
+			// for example: filtering if its restitution is < 0.5
+			// if (fixture.getResititution() < 0.5)
+			// or if you have some userData
+			// if (fixture.getUserData()...)
+			// or you could filter on shape type
+			// if (fixture.getShape().getType() == Polygon.TYPE)
+			// etc, to only test fixtures that need to be tested
+			
+			return true;
+		}
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.testbed.Test#getName()
 	 */
@@ -83,7 +140,10 @@ public class Raycast extends Test {
 	 */
 	@Override
 	public String getDescription() {
-		return "Tests the raycast methods of the World class.";
+		return "Tests the raycast methods of the World class." +
+			   "\n\nOne of the Cicles in this test should not be" +
+			   "raycast because of the custom raycast listener that" +
+			   "ignores it.";
 	}
 	
 	/* (non-Javadoc)
@@ -109,6 +169,8 @@ public class Raycast extends Test {
 		ContactCounter cc = new ContactCounter();
 		this.world.setContactListener(cc);
 		this.world.setStepListener(cc);
+		// setup the custom raycast listener
+		this.world.setRaycastListener(new CustomRaycastListener());
 		
 		// turn off gravity
 		this.world.setGravity(new Vector2());
@@ -140,6 +202,9 @@ public class Raycast extends Test {
 		circle.setMass(Mass.Type.INFINITE);
 		circle.translate(2.421875, 3.5);
 		this.world.add(circle);
+		
+		// save the circle shape so we can ignore it later
+		this.circle = circle;
 		
 		// create a line segment
 		Segment segShape = new Segment(new Vector2(0.5, 0.5), new Vector2(-0.5, -0.5));
@@ -183,6 +248,14 @@ public class Raycast extends Test {
 		capsule.setMass(Mass.Type.INFINITE);
 		capsule.translate(4.890625, 5.328125);
 		this.world.add(capsule);
+		
+		// create another circle that isnt ignored
+		Circle cirShape2 = new Circle(0.25);
+		Entity circle2 = new Entity();
+		circle2.addFixture(new BodyFixture(cirShape2));
+		circle2.setMass(Mass.Type.INFINITE);
+		circle2.translate(-2.421875, 3.5);
+		this.world.add(circle2);
 	}
 	
 	/* (non-Javadoc)
@@ -211,7 +284,19 @@ public class Raycast extends Test {
 		gl.glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
 		// perform a raycast
 		if (this.world.raycast(this.ray, this.length, false, this.all, results)) {
+			// get the number of results
 			int size = results.size();
+			// check the size
+			if (size > 1) {
+				// then lets sort
+				Collections.sort(results);
+				
+				// there is no real reason to do this here but real applications
+				// can use this to order the results so that logic can be performed
+				// on each body as the distance increase (a bullet passing through
+				// a number of bodies may slow down and damage each body less and
+				// less for example)
+			}
 			// loop over the results
 			for (int i = 0; i < size; i++) {
 				// should always contain just one result

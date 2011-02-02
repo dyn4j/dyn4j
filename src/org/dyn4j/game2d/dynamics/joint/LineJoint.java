@@ -45,7 +45,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.2.3
+ * @version 2.2.4
  * @since 1.0.0
  */
 public class LineJoint extends Joint {
@@ -788,5 +788,22 @@ public class LineJoint extends Joint {
 		// set the values
 		this.lowerLimit = lowerLimit;
 		this.upperLimit = upperLimit;
+	}
+	
+	/**
+	 * Sets the upper and lower limits and enables the limit.
+	 * <p>
+	 * The lower limit must be less than or equal to the upper limit.
+	 * @param lowerLimit the lower limit in meters
+	 * @param upperLimit the upper limit in meters
+	 * @throws IllegalArgumentException if lowerLimit is greater than upperLimit
+	 * @since 2.2.4
+	 */
+	public void setLimitsEnabled(double lowerLimit, double upperLimit) {
+		// attempt to set the limits
+		this.setLimits(lowerLimit, upperLimit);
+		// if that works then enable the limits (the bodies have already
+		// been awakened
+		this.limitEnabled = true;
 	}
 }

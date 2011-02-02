@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,15 +29,19 @@ import org.dyn4j.game2d.geometry.Ray;
 /**
  * Default implementation of the {@link RaycastListener} interface
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.4
  * @since 2.0.0
  */
 public class RaycastAdapter implements RaycastListener {
 	/* (non-Javadoc)
-	 * @see org.dyn4j.game2d.dynamics.RaycastListener#detected(org.dyn4j.game2d.geometry.Ray, org.dyn4j.game2d.dynamics.RaycastResult)
+	 * @see org.dyn4j.game2d.dynamics.RaycastListener#allow(org.dyn4j.game2d.geometry.Ray, org.dyn4j.game2d.dynamics.Body)
 	 */
 	@Override
-	public RaycastListener.Return detected(Ray ray, RaycastResult result) {
-		return RaycastListener.Return.CONTINUE;
-	}
+	public boolean allow(Ray ray, Body body) { return true; }
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.game2d.dynamics.RaycastListener#allow(org.dyn4j.game2d.geometry.Ray, org.dyn4j.game2d.dynamics.Body, org.dyn4j.game2d.dynamics.BodyFixture)
+	 */
+	@Override
+	public boolean allow(Ray ray, Body body, BodyFixture fixture) { return true; }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,36 +29,32 @@ import org.dyn4j.game2d.geometry.Ray;
 /**
  * Interface for listening for raycast events.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.4
  * @since 2.0.0
  */
 public interface RaycastListener {
 	/**
-	 * Enumeration for controlling the raycast method in the {@link World} class.
-	 * @author William Bittle
-	 * @version 2.0.0
-	 * @since 2.0.0
+	 * Called before a {@link Body} is tested against the {@link Ray}.  This method will be
+	 * called for every body in the {@link World}.
+	 * <p>
+	 * Use this method to filter the raycasting based on the {@link Body}.
+	 * @param ray the {@link Ray}
+	 * @param body the {@link Body} to be tested
+	 * @return boolean true if the {@link Body} should be included in the raycast
+	 * @since 2.2.4
 	 */
-	public static enum Return {
-		/** Used to stop the raycast completely */
-		STOP,
-		/** Used to stop the raycast completely and ignore the last raycast */
-		STOP_IGNORE,
-		/** Used to keep the current raycast and continue */
-		CONTINUE,
-		/** Used to ignore the current raycast and continue */
-		CONTINUE_IGNORE
-	}
+	public abstract boolean allow(Ray ray, Body body);
 	
 	/**
 	 * Called when a {@link BodyFixture} of a {@link Body} is intersected by a {@link Ray}.
+	 * This method will be called for every fixture on each {@link Body}.
 	 * <p>
-	 * This method is called from the {@link World#raycast(Ray, double, boolean, boolean, java.util.List)}
-	 * method and the return will affect how this method continues.
+	 * Use this method to filter the raycasting based on the {@link BodyFixture}.
 	 * @param ray the {@link Ray}
-	 * @param result the raycast result
-	 * @return {@link RaycastListener.Return}
-	 * @see RaycastListener.Return
+	 * @param body the {@link Body}
+	 * @param fixture the {@link BodyFixture} to be tested
+	 * @return boolean true if the {@link BodyFixture} should be included in the raycast
+	 * @since 2.2.4
 	 */
-	public abstract RaycastListener.Return detected(Ray ray, RaycastResult result);
+	public abstract boolean allow(Ray ray, Body body, BodyFixture fixture);
 }

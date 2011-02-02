@@ -72,7 +72,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Employs the same {@link Island} solving technique as <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.2.3
+ * @version 2.2.4
  * @since 1.0.0
  */
 public class World {
@@ -183,7 +183,7 @@ public class World {
 		this.manifoldSolver = new ClippingManifoldSolver();
 		this.timeOfImpactDetector = new ConservativeAdvancement();
 		this.raycastDetector = new Gjk();
-		// create empty listeners
+		// create default listeners
 		this.collisionListener = new CollisionAdapter();
 		this.contactManager = new ContactManager();
 		this.contactListener = new ContactAdapter();
@@ -853,13 +853,23 @@ public class World {
 	/**
 	 * Performs a raycast against all the {@link Body}s in the {@link World}.
 	 * <p>
-	 * Alternative method to the {@link #raycast(Ray, double, boolean, boolean, List)} method.
+	 * The given {@link RaycastResult} list, results, will be filled with the raycast results
+	 * if the given ray intersected any bodies.
+	 * <p>
+	 * The {@link RaycastResult} class implements the Comparable interface to allow sorting by
+	 * distance from the ray's origin.
+	 * <p>
+	 * If the all flag is false, the results list will only contain the closest result (if any).
 	 * @param start the start point
 	 * @param end the end point
 	 * @param ignoreSensors true if sensor {@link BodyFixture}s should be ignored
 	 * @param all true if all intersected {@link Body}s should be returned; false if only the closest {@link Body} should be returned
 	 * @param results a list to contain the results of the raycast
 	 * @return boolean true if at least one {@link Body} was intersected by the {@link Ray}
+	 * @throws NullPointerException if start, end, or results is null
+	 * @see #raycast(Ray, double, boolean, boolean, List)
+	 * @see RaycastListener#allow(Ray, Body)
+	 * @see RaycastListener#allow(Ray, Body, BodyFixture)
 	 * @since 2.0.0
 	 */
 	public boolean raycast(Vector2 start, Vector2 end, boolean ignoreSensors, boolean all, List<RaycastResult> results) {
@@ -873,17 +883,31 @@ public class World {
 	
 	/**
 	 * Performs a raycast against all the {@link Body}s in the {@link World}.
+	 * <p>
+	 * The given {@link RaycastResult} list, results, will be filled with the raycast results
+	 * if the given ray intersected any bodies.
+	 * <p>
+	 * The {@link RaycastResult} class implements the Comparable interface to allow sorting by
+	 * distance from the ray's origin.
+	 * <p>
+	 * If the all flag is false, the results list will only contain the closest result (if any).
+	 * <p>
+	 * Pass 0 into the maxLength field to specify an infinite length {@link Ray}.
 	 * @param ray the {@link Ray}
 	 * @param maxLength the maximum length of the ray; 0 for infinite length
 	 * @param ignoreSensors true if sensor {@link BodyFixture}s should be ignored
 	 * @param all true if all intersected {@link Body}s should be returned; false if only the closest {@link Body} should be returned
 	 * @param results a list to contain the results of the raycast
 	 * @return boolean true if at least one {@link Body} was intersected by the given {@link Ray}
+	 * @throws NullPointerException if ray or results is null
+	 * @see #raycast(Vector2, Vector2, boolean, boolean, List)
+	 * @see RaycastListener#allow(Ray, Body)
+	 * @see RaycastListener#allow(Ray, Body, BodyFixture)
 	 * @since 2.0.0
 	 */
 	public boolean raycast(Ray ray, double maxLength, boolean ignoreSensors, boolean all, List<RaycastResult> results) {
 		boolean found = false;
-		
+		// check for the desired length
 		double max = 0.0;
 		if (maxLength > 0.0) {
 			max = maxLength;
@@ -900,39 +924,25 @@ public class World {
 		for (int i = 0; i < size; i++) {
 			// get a body to test
 			Body body = this.bodies.get(i);
+			// see if we should test this body
+			if (!this.raycastListener.allow(ray, body)) continue;
+			// otherwise test the body
 			// does the ray intersect the body?
 			if (raycast(ray, body, max, ignoreSensors, result)) {
-				// if so, then call the listener to ask what to do
-				RaycastListener.Return ret = this.raycastListener.detected(ray, result);
-				// check the return type
-				if (ret == RaycastListener.Return.CONTINUE) {
-					// check if we are raycasting for all the objects
-					// or only the closest
-					if (!all) {
-						// we are only looking for the closest so
-						// set the new maximum
-						max = result.raycast.getDistance();
-					} else {
-						// add this result to the results
-						results.add(result);
-						// create a new result for the next iteration
-						result = new RaycastResult();
-					}
-					// set the found flag
-					found = true;
-				} else if (ret == RaycastListener.Return.CONTINUE_IGNORE) {
-					// ignore this result and use it for the next iteration
-					continue;
-				} else if (ret == RaycastListener.Return.STOP) {
-					// add this result to the results but stop the raycast
+				// check if we are raycasting for all the objects
+				// or only the closest
+				if (!all) {
+					// we are only looking for the closest so
+					// set the new maximum
+					max = result.raycast.getDistance();
+				} else {
+					// add this result to the results
 					results.add(result);
-					// set the found flag
-					found = true;
-					break;
-				} else if (ret == RaycastListener.Return.STOP_IGNORE) {
-					// ignore this result and stop the raycast
-					break;
+					// create a new result for the next iteration
+					result = new RaycastResult();
 				}
+				// set the found flag
+				found = true;
 			}
 		}
 		
@@ -942,12 +952,18 @@ public class World {
 	/**
 	 * Performs a raycast against the given {@link Body} and returns true
 	 * if the ray intersects the body.
+	 * <p>
+	 * The given {@link RaycastResult} object, result, will be filled with the raycast result
+	 * if the given ray intersected the given body. 
 	 * @param start the start point
 	 * @param end the end point
 	 * @param body the {@link Body} to test
 	 * @param ignoreSensors whether or not to ignore sensor {@link BodyFixture}s
 	 * @param result the raycast result
 	 * @return boolean true if the {@link Ray} intersects the {@link Body}
+	 * @throws NullPointerException if start, end, body, or result is null
+	 * @see #raycast(Ray, Body, double, boolean, RaycastResult)
+	 * @see RaycastListener#allow(Ray, Body, BodyFixture)
 	 * @since 2.0.0
 	 */
 	public boolean raycast(Vector2 start, Vector2 end, Body body, boolean ignoreSensors, RaycastResult result) {
@@ -962,19 +978,23 @@ public class World {
 	/**
 	 * Performs a raycast against the given {@link Body} and returns true
 	 * if the ray intersects the body.
+	 * <p>
+	 * The given {@link RaycastResult} object, result, will be filled with the raycast result
+	 * if the given ray intersected the given body.
+	 * <p>
+	 * Pass 0 into the maxLength field to specify an infinite length {@link Ray}.
 	 * @param ray the {@link Ray} to cast
 	 * @param body the {@link Body} to test
 	 * @param maxLength the maximum length of the ray; 0 for infinite length
 	 * @param ignoreSensors whether or not to ignore sensor {@link BodyFixture}s
 	 * @param result the raycast result
 	 * @return boolean true if the {@link Ray} intersects the {@link Body}
+	 * @throws NullPointerException if ray, body, or result is null
+	 * @see #raycast(Vector2, Vector2, Body, boolean, RaycastResult)
+	 * @see RaycastListener#allow(Ray, Body, BodyFixture)
 	 * @since 2.0.0
 	 */
 	public boolean raycast(Ray ray, Body body, double maxLength, boolean ignoreSensors, RaycastResult result) {
-		// make sure the ray is not null
-		if (ray == null) return false;
-		// make sure the body is not null
-		if (body == null) return false;
 		// get the number of fixtures
 		int size = body.getFixtureCount();
 		// get the body transform
@@ -996,6 +1016,8 @@ public class World {
 				// skip this fixture
 				continue;
 			}
+			// notify the listener to see if we should test this fixture
+			if (!this.raycastListener.allow(ray, body, fixture)) continue;
 			// get the convex shape
 			Convex convex = fixture.getShape();
 			// perform the raycast
