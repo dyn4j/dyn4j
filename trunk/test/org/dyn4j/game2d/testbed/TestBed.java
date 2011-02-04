@@ -69,7 +69,7 @@ import com.jogamp.opengl.util.glsl.ShaderUtil;
 /**
  * Container for the tests.
  * @author William Bittle
- * @version 2.2.3
+ * @version 2.2.4
  * @since 1.0.0
  */
 public class TestBed extends GLCanvas implements GLEventListener {
@@ -349,31 +349,6 @@ public class TestBed extends GLCanvas implements GLEventListener {
 		this.test.initializeInput(this.keyboard, this.mouse);
 	}
 	
-//	/**
-//	 * Sets up text images.
-//	 */
-//	private void initText() {
-//		AttributedString timeString = new AttributedString("Time ( Render | Update | System )");
-//		timeString.addAttribute(TextAttribute.FOREGROUND, new Color(222, 48, 12), 7, 13);
-//		timeString.addAttribute(TextAttribute.FOREGROUND, new Color(222, 117, 0), 16, 22);
-//		timeString.addAttribute(TextAttribute.FOREGROUND, new Color(20, 134, 222), 25, 31);
-//		this.timeUsageLabel = new SimpleText(timeString);
-//		
-//		try {
-//			jreVersionValue = new SimpleText(System.getProperty("java.runtime.version"));
-//			jreModeValue = new SimpleText(System.getProperty("java.vm.info"));
-//			osNameValue = new SimpleText(System.getProperty("os.name"));
-//			osArchitectureValue = new SimpleText(System.getProperty("os.arch"));
-//			osDataModelValue = new SimpleText(System.getProperty("sun.arch.data.model"));
-//		} catch (SecurityException e) {
-//			jreVersionValue = new SimpleText("Unknown");
-//			jreModeValue = new SimpleText("Unknown");
-//			osNameValue = new SimpleText("Unknown");
-//			osArchitectureValue = new SimpleText("Unknown");
-//			osDataModelValue = new SimpleText("Unknown");
-//		}
-//	}
-	
 	/**
 	 * Starts automatic rendering of this TestBed.
 	 */
@@ -385,6 +360,14 @@ public class TestBed extends GLCanvas implements GLEventListener {
 		// reset the timer; this is to make sure that the system doesn't explode
 		// out of control at first (since the first elapsed time will be huge)
 		this.timer.reset();
+	}
+	
+	/**
+	 * Stops automatic rendering of this TestBed.
+	 */
+	public void stop() {
+		// stop the animator
+		this.animator.stop();
 	}
 	
 	/**

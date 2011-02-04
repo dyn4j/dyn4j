@@ -35,19 +35,21 @@ import javax.swing.UnsupportedLookAndFeelException;
 /**
  * Class used as the entry point for running the TestBed as an Applet.
  * @author William Bittle
- * @version 2.2.3
+ * @version 2.2.4
  * @since 1.0.0
  */
 public class AppletDriver extends JApplet {
 	/** The version id */
 	private static final long serialVersionUID = 7803602971018002468L;
 	
+	/** The TestBed application */
+	protected TestBed testBed;
+	
 	/* (non-Javadoc)
-	 * @see java.applet.Applet#start()
+	 * @see java.applet.Applet#init()
 	 */
 	@Override
-	public void start() {
-		super.start();
+	public void init() {
 		// this method is called every time they hit the page
 	    
 	    // set the look and feel to the system look and feel
@@ -74,17 +76,33 @@ public class AppletDriver extends JApplet {
 		caps.setHardwareAccelerated(true);
 		
 		// create the testbed
-		TestBed testbed = new TestBed(caps, this, size, TestBed.Mode.APPLET);
+		this.testBed = new TestBed(caps, this, size, TestBed.Mode.APPLET);
 		
 		// add the testbed to the frame
-		this.add(testbed);
+		this.add(this.testBed);
 		
 		// make sure the applet is visible
 		if (this.isVisible()) {
 			// request focus away from the browser so that keys work
 			this.requestFocus();
 		}
-		
-		testbed.start();
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.applet.Applet#start()
+	 */
+	@Override
+	public void start() {
+		// start the animator
+		this.testBed.start();
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.applet.Applet#stop()
+	 */
+	@Override
+	public void stop() {
+		// stop the animator
+		this.testBed.stop();
 	}
 }
