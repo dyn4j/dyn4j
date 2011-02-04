@@ -141,6 +141,11 @@ For example, adding a null Body to the World object throws a !NullPointerExcepti
 
 Most of these exceptions are obvious or documented indirectly in the source and Javadocs (using text like "in the range of [0, 1]") or by @throws javadoc documentation.
 
+=Examples=
+For examples see the [ExampleListing Example Listing] wiki page for two starter applications ExampleGraphics2D and ExampleJOGL depending on which rendering engine you will use (renders are not limited to these two, the dyn4j project itself is not dependent on any).
+
+In addition, a listing of the !TestBed tests, what they do, what they show, and their class names is given.  Use these as examples on how to use all functionality.
+
 =Extra Help=
 Finally if you need extra help you can look at the following resources:
   * <a href="http://code.google.com/p/dyn4j/w/list">Wiki</a> - for other topics about the library
