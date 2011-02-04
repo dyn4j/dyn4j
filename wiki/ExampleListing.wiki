@@ -1,7 +1,7 @@
 #summary Listing of examples.
 #labels Featured,Documentation-User
 
-A simple listing of classes in the !TestBed that show the usage of the dyn4j project.
+A simple listing of classes in the /test directory that show the usage of the dyn4j project.
 
 ==Example Applications==
 Getting started examples (under 500 lines of code each) contained in the test/org.dyn4j.game2d.examples package.
