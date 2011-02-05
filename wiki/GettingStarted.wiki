@@ -10,7 +10,7 @@ Download the latest dyn4j.jar from the <a href="http://code.google.com/p/dyn4j/d
 
 Typically you will only need to download the dyn4j-vX.X.X.jar since the javadocs are available online <a href="http://docs.dyn4j.org">here</a> and you can browse the source of the !TestBed project <a href="http://code.google.com/p/dyn4j/source/browse/">here</a>.
 
-All binaries builds posted on the download page are compiled under Java 1.6 and have no dependencies.  This excludes the !TestBed application which is dependent on <a href="http://jogamp.org/jogl/www/">JOGL</a>.
+All binaries builds posted on the download page are compiled under Java 1.6 and have no dependencies.  This excludes the !TestBed application which is dependent on <a href="http://www.jogamp.org/">JOGL</a>.
 
 If you intent on building the source from the repository here are few tips:
   * The trunk branch is the development branch and will contain the latest code but may be unstable.
@@ -46,6 +46,8 @@ To setup your scene:
   # Create your Bodies and add them to the World
   # Create your Joints and add them to the World
   # Call the World.update(double) method in your game loop
+
+Take a look at the examples provided in the examples package in the test folder: ExampleGraphics2D and ExampleJOGL for a starting point.
 
 ==Creating The World==
 The World class is in the dynamics package.  To create the World object for your game you only need to pass it a Bounds object.  The Bounds object controls the maximum bounds of the scene.  If an Body travels (fully) outside the Bounds the state of the Body will be set to "inactive" and will no longer be interacting with the World or other Bodies.
