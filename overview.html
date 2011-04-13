@@ -2,15 +2,25 @@
 <head></head>
 <body>
 	<p>
-	A 100% Java collision detection and physics engine for use in games. Designed to be fast, stable, and extensible taking much from a C++ project called Box2d. I would like to emphasize that this project is not a port of Box2d, however it does use concepts and in some ways look and function in a similar way.
+	A 100% Java collision detection and physics engine for use in games.  Designed to be fast, stable, and 
+	extensible taking much from a C++ project called Box2d.  I would like to emphasize that this project is 
+	not a port of Box2d, however it does use concepts and in some ways look and function in a similar way.
 	<br /><br />
-	The project started as a pet project for game development and quickly grew into a fully functional physics engine. The main focus during development was learning techniques used to solve collision detection and physical modeling problems. As a result, the project contains significant documentation and is heavily commented.
+	The project started as a pet project for game development and quickly grew into a fully functional 
+	physics engine.  The main focus during development was learning techniques used to solve collision 
+	detection and physical modeling problems.  As a result, the project contains significant documentation 
+	and is heavily commented.
 	<br /><br />
-	The intention of releasing this project to open source is to allow other developers solving the same problems to have a clear and understandable reference.
+	The intention of releasing this project to open source is to allow other developers solving the same 
+	problems to have a clear and understandable reference.
 	<br /><br />
-	Currently the project only supports 2D but has plans for 3D support in the future. The project supports both Convex and non-Convex shapes (through composition) and features two collision detection algorithm implementations: SAT and GJK. The dynamics solver is Box2d's Sequential Impulse (SI) solver.
+	Currently the project only supports 2D but has plans for 3D support in the future.  The project supports 
+	both Convex and non-Convex shapes (through composition) and features two collision detection algorithm 
+	implementations: SAT and GJK.  The dynamics solver is Box2d's Sequential Impulse (SI) solver.
 	<br /><br />
-	This library has no dependencies. To run or compile the JUnit tests in the test directory will require JUnit 4 or greater. To run or compile the TestBed, another jar in the lib directory is provided. You can find the latest version of that jar at <a href="http://www.codezealot.org/projects/game/">http://www.codezealot.org/projects/game/</a>.
+	This library has no dependencies but does require Java 1.6+.  To run or compile the JUnit tests in the test 
+	directory will require JUnit 4 or greater.  To run or compile the TestBed, <a href="http://www.jogamp.org/">JOGL</a> 
+	is required (versions before 2.2.3 do not have this dependency since Java2D was used for rendering).
 	</p>
 </body>
 </html>
