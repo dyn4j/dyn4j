@@ -349,13 +349,13 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 		// get the vertices and the center
 		Vector2 p1 = transform.getTransformed(this.vertices[0]);
 		Vector2 p2 = transform.getTransformed(this.vertices[1]);
-		Vector2 c = transform.getTransformed(this.center);
-		// create vectors from the center to each vertex
-		Vector2 v1 = c.to(p1);
-		Vector2 v2 = c.to(p2);
+//		Vector2 c = transform.getTransformed(this.center);
+//		// create vectors from the center to each vertex
+//		Vector2 v1 = c.to(p1);
+//		Vector2 v2 = c.to(p2);
 		// project them onto the vector
-		double dot1 = n.dot(v1);
-		double dot2 = n.dot(v2);
+		double dot1 = n.dot(p1);
+		double dot2 = n.dot(p2);
 		// find the greatest projection
 		if (dot1 >= dot2) {
 			return p1;
@@ -376,16 +376,12 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	public Edge getFarthestFeature(Vector2 n, Transform transform) {
 		// the farthest feature for a line is always the line itself
 		Vector2 max = null;
-		// get the vertices and the center
+		// get the vertices
 		Vector2 p1 = transform.getTransformed(this.vertices[0]);
 		Vector2 p2 = transform.getTransformed(this.vertices[1]);
-		Vector2 c = transform.getTransformed(this.center);
-		// create vectors from the center to each vertex
-		Vector2 v1 = c.to(p1);
-		Vector2 v2 = c.to(p2);
 		// project them onto the vector
-		double dot1 = n.dot(v1);
-		double dot2 = n.dot(v2);
+		double dot1 = n.dot(p1);
+		double dot2 = n.dot(p2);
 		// find the greatest projection
 		int index = 0;
 		if (dot1 >= dot2) {

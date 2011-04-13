@@ -69,9 +69,6 @@ public class ExampleGraphics2D extends JFrame {
 	/** The conversion factor from nano to base */
 	public static final double NANO_TO_BASE = 1.0e9;
 	
-	/** The default update rate will be 60 times a second */
-	public static final double UPDATE_RATE = NANO_TO_BASE / 60;
-	
 	/**
 	 * Custom Body class to add drawing functionality.
 	 * @author William Bittle
@@ -103,7 +100,7 @@ public class ExampleGraphics2D extends JFrame {
 			// save the original transform
 			AffineTransform ot = g.getTransform();
 			
-			// transform the coordinate system to local coordinates
+			// transform the coordinate system from world coordinates to local coordinates
 			AffineTransform lt = new AffineTransform();
 			lt.translate(this.transform.getTranslationX() * SCALE, this.transform.getTranslationY() * SCALE);
 			lt.rotate(this.transform.getRotation());
@@ -174,9 +171,6 @@ public class ExampleGraphics2D extends JFrame {
 	/** Wether the example is stopped or not */
 	protected boolean stopped;
 	
-	/** The accumulated time in nanoseconds */
-	protected long time;
-	
 	/** The time stamp for the last iteration */
 	protected long last;
 	
@@ -222,9 +216,6 @@ public class ExampleGraphics2D extends JFrame {
 		
 		// make sure we are not stopped
 		this.stopped = false;
-		
-		// initialize to zero
-		this.time = 0;
 		
 		// setup the world
 		this.initializeWorld();
@@ -407,20 +398,12 @@ public class ExampleGraphics2D extends JFrame {
         long time = System.nanoTime();
         // get the elapsed time from the last iteration
         long diff = time - this.last;
-        // accumulate the time
-        this.time += diff;
         // set the last time
         this.last = time;
-        
-        // update 60 times a second
-        if (this.time >= UPDATE_RATE) {
-        	// convert from nanoseconds to seconds
-        	double elapsedTime = this.time / NANO_TO_BASE;
-	        // update the world with the elapsed time
-	        this.world.update(elapsedTime);
-	        // set the time accumulator to zero
-	        this.time = 0;
-        }
+    	// convert from nanoseconds to seconds
+    	double elapsedTime = (double)diff / NANO_TO_BASE;
+        // update the world with the elapsed time
+        this.world.update(elapsedTime);
 	}
 
 	/**
