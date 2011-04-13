@@ -69,9 +69,6 @@ public class ExampleJOGL extends JFrame implements GLEventListener {
 	/** The conversion factor from nano to base */
 	public static final double NANO_TO_BASE = 1.0e9;
 	
-	/** The default update rate will be 60 times a second */
-	public static final double UPDATE_RATE = NANO_TO_BASE / 60;
-	
 	/**
 	 * Custom Body class to add drawing functionality.
 	 * @author William Bittle
@@ -96,14 +93,14 @@ public class ExampleJOGL extends JFrame implements GLEventListener {
 		/**
 		 * Draws the body.
 		 * <p>
-		 * Only coded for polygons and circles.
+		 * Only coded for polygons.
 		 * @param gl the OpenGL graphics context
 		 */
 		public void render(GL2 gl) {
 			// save the original transform
 			gl.glPushMatrix();
 			
-			// transform the coordinate system to local coordinates			
+			// transform the coordinate system from world coordinates to local coordinates	
 			gl.glTranslated(this.transform.getTranslationX(), this.transform.getTranslationY(), 0.0);
 			// rotate about the z-axis
 			gl.glRotated(Math.toDegrees(this.transform.getRotation()), 0.0, 0.0, 1.0);
@@ -138,8 +135,8 @@ public class ExampleJOGL extends JFrame implements GLEventListener {
 					}
 					gl.glEnd();
 				}
-				// circles you have do something a little more for and im lazy
-				// in this example, see the GLHelper class in the TestBed
+				// circles you have do something a little more work and im lazy
+				// in this example; see the GLHelper class in the TestBed
 			}
 			
 			// set the original transform
@@ -155,9 +152,6 @@ public class ExampleJOGL extends JFrame implements GLEventListener {
 	
 	/** The dynamics engine */
 	protected World world;
-	
-	/** The accumulated time in nanoseconds */
-	protected long time;
 	
 	/** The time stamp for the last iteration */
 	protected long last;
@@ -196,9 +190,6 @@ public class ExampleJOGL extends JFrame implements GLEventListener {
 		
 		// size everything
 		this.pack();
-		
-		// initialize to zero
-		this.time = 0;
 		
 		// setup the world
 		this.initializeWorld();
@@ -366,20 +357,12 @@ public class ExampleJOGL extends JFrame implements GLEventListener {
         long time = System.nanoTime();
         // get the elapsed time from the last iteration
         long diff = time - this.last;
-        // accumulate the time
-        this.time += diff;
         // set the last time
         this.last = time;
-        
-        // update 60 times a second
-        if (this.time >= UPDATE_RATE) {
-        	// convert from nanoseconds to seconds
-        	double elapsedTime = this.time / NANO_TO_BASE;
-	        // update the world with the elapsed time
-	        this.world.update(elapsedTime);
-	        // set the time accumulator to zero
-	        this.time = 0;
-        }
+    	// convert from nanoseconds to seconds
+    	double elapsedTime = (double)diff / NANO_TO_BASE;
+        // update the world with the elapsed time
+        this.world.update(elapsedTime);
 	}
 
 	/**

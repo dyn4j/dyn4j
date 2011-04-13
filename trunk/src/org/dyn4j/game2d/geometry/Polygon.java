@@ -301,25 +301,17 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		Vector2 maximum = new Vector2();
 		double max = -Double.MAX_VALUE;
 		int index = 0;
-		// create a reference to the center
-		Vector2 c = this.center;
 		// find the vertex on the polygon that is further along on the penetration axis
-		// create a reusable vector
-		Vector2 v = new Vector2();
 		int count = this.vertices.length;
 		for (int i = 0; i < count; i++) {
 			// get the current vertex
-			Vector2 p = this.vertices[i];
-			// create a vector from the center to the point
-			// manually inline c.to(p) call
-			v.x = p.x - c.x;
-			v.y = p.y - c.y;
+			Vector2 v = this.vertices[i];
 			// get the scalar projection of v onto axis
 			double projection = localn.dot(v);
 			// keep the maximum projection point
 			if (projection > max) {
 				// set the max point
-				maximum.set(p);
+				maximum.set(v);
 				// set the new maximum
 				max = projection;
 				// save the index
@@ -358,31 +350,21 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		// transform the normal into local space
 		Vector2 localn = transform.getInverseTransformedR(n);
 		Vector2 point = new Vector2();
-		Vector2 c = this.center;
 		// set the farthest point to the first one
 		point.set(this.vertices[0]);
-		// create a temp vector
-		Vector2 v = new Vector2();
 		// prime the projection amount
-		// manually inline c.to(point) call
-		v.x = point.x - c.x;
-		v.y = point.y - c.y;
-		double max = localn.dot(v);
+		double max = localn.dot(this.vertices[0]);
 		// loop through the rest of the vertices to find a further point along the axis
 		int size = this.vertices.length;
 		for (int i = 1; i < size; i++) {
 			// get the current vertex
-			Vector2 p = this.vertices[i];
-			// create a vector from the center to the vertex
-			// manullay inline c.to(p) call
-			v.x = p.x - c.x;
-			v.y = p.y - c.y;
-			// project the vector onto the axis
+			Vector2 v = this.vertices[i];
+			// project the vertex onto the axis
 			double projection = localn.dot(v);
 			// check to see if the projection is greater than the last
 			if (projection > max) {
 				// otherwise this point is the farthest so far so clear the array and add it
-				point.set(p);
+				point.set(v);
 				// set the new maximum
 				max = projection;
 			}
