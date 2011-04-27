@@ -43,7 +43,7 @@ import org.dyn4j.game2d.geometry.Vector3;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.2.3
+ * @version 2.2.4
  * @since 1.0.0
  */
 public class PrismaticJoint extends Joint {
@@ -833,5 +833,14 @@ public class PrismaticJoint extends Joint {
 		this.upperLimit = upperLimit;
 		// enable the limits
 		this.limitEnabled = true;
+	}
+	
+	/**
+	 * Returns the axis in which the joint is allowed move along in world coordinates.
+	 * @return {@link Vector2}
+	 * @since 2.2.4
+	 */
+	public Vector2 getAxis() {
+		return this.body2.getWorldVector(this.xAxis);
 	}
 }

@@ -41,7 +41,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests the a motorized revolute joint.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.4
  * @since 1.0.0
  */
 public class Motor extends Test {
@@ -178,11 +178,12 @@ public class Motor extends Test {
 		Vector2 p2 = wheel2.getWorldCenter().copy();
 		
 		// the rear wheel is just a normal revolute joint
-		RevoluteJoint j1 = new RevoluteJoint(wheel1, body, p1);
+		RevoluteJoint j1 = new RevoluteJoint(body, wheel1, p1);
 		
 		// the front wheel is a motorized revolute joint
-		RevoluteJoint j2 = new RevoluteJoint(wheel2, body, p2);
-		j2.setMotorSpeed(-1.0 * Math.PI);
+		RevoluteJoint j2 = new RevoluteJoint(body, wheel2, p2);
+		j2.setMotorSpeed(Math.PI);
+		// make sure we also specify the maximum motor torque since it defaults to zero
 		j2.setMaxMotorTorque(1000.0);
 		j2.setMotorEnabled(true);
 		
