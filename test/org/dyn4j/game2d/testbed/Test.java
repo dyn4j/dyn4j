@@ -39,13 +39,13 @@ import org.dyn4j.game2d.dynamics.contact.ContactPoint;
 import org.dyn4j.game2d.dynamics.contact.SolvedContactPoint;
 import org.dyn4j.game2d.dynamics.joint.DistanceJoint;
 import org.dyn4j.game2d.dynamics.joint.Joint;
-import org.dyn4j.game2d.dynamics.joint.LineJoint;
 import org.dyn4j.game2d.dynamics.joint.MouseJoint;
 import org.dyn4j.game2d.dynamics.joint.PrismaticJoint;
 import org.dyn4j.game2d.dynamics.joint.PulleyJoint;
 import org.dyn4j.game2d.dynamics.joint.RevoluteJoint;
 import org.dyn4j.game2d.dynamics.joint.RopeJoint;
 import org.dyn4j.game2d.dynamics.joint.WeldJoint;
+import org.dyn4j.game2d.dynamics.joint.WheelJoint;
 import org.dyn4j.game2d.geometry.Interval;
 import org.dyn4j.game2d.geometry.Rectangle;
 import org.dyn4j.game2d.geometry.Transform;
@@ -59,7 +59,7 @@ import org.dyn4j.game2d.testbed.input.Mouse;
  * Using the {@link TestBed} class one can switch test without stopping
  * and starting the driver again.
  * @author William Bittle
- * @version 2.2.3
+ * @version 2.2.4
  * @since 1.0.0
  */
 public abstract class Test implements Comparable<Test> {
@@ -296,8 +296,8 @@ public abstract class Test implements Comparable<Test> {
 					this.render(gl, (MouseJoint) joint);
 				} else if (joint instanceof WeldJoint) {
 					this.render(gl, (WeldJoint) joint);
-				} else if (joint instanceof LineJoint) {
-					this.render(gl, (LineJoint) joint);
+				} else if (joint instanceof WheelJoint) {
+					this.render(gl, (WheelJoint) joint);
 				} else if (joint instanceof PrismaticJoint) {
 					this.render(gl, (PrismaticJoint) joint);
 				} else if (joint instanceof PulleyJoint) {
@@ -501,11 +501,11 @@ public abstract class Test implements Comparable<Test> {
 	}
 	
 	/**
-	 * Renders a {@link LineJoint} to the given graphics object.
+	 * Renders a {@link WheelJoint} to the given graphics object.
 	 * @param gl the OpenGL graphics context
-	 * @param joint the {@link LineJoint} to render
+	 * @param joint the {@link WheelJoint} to render
 	 */
-	private void render(GL2 gl, LineJoint joint) {
+	private void render(GL2 gl, WheelJoint joint) {
 		// draw an x at the anchor point
 		Vector2 anchor = joint.getAnchor1();
 		// draw a circle at the rotation anchor point
@@ -513,18 +513,6 @@ public abstract class Test implements Comparable<Test> {
 		GLHelper.fillCircle(gl, anchor.x, anchor.y, 0.025, 10);
 		gl.glColor4f(0.3f, 0.3f, 0.3f, 1.0f);
 		GLHelper.renderCircle(gl, anchor.x, anchor.y, 0.025, 10);
-		// draw a line to each center
-		Body b1 = joint.getBody1();
-		Body b2 = joint.getBody2();
-		Vector2 c1 = b1.getWorldCenter();
-		Vector2 c2 = b2.getWorldCenter();
-		// draw a line from the anchor to each center
-		gl.glBegin(GL.GL_LINES);
-			gl.glVertex2d(anchor.x, anchor.y);
-			gl.glVertex2d(c1.x, c1.y);
-			gl.glVertex2d(anchor.x, anchor.y);
-			gl.glVertex2d(c2.x, c2.y);
-		gl.glEnd();
 	}
 
 	/**

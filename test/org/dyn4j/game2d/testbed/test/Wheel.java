@@ -28,7 +28,7 @@ import org.dyn4j.game2d.collision.Bounds;
 import org.dyn4j.game2d.collision.RectangularBounds;
 import org.dyn4j.game2d.dynamics.BodyFixture;
 import org.dyn4j.game2d.dynamics.World;
-import org.dyn4j.game2d.dynamics.joint.LineJoint;
+import org.dyn4j.game2d.dynamics.joint.WheelJoint;
 import org.dyn4j.game2d.geometry.Geometry;
 import org.dyn4j.game2d.geometry.Mass;
 import org.dyn4j.game2d.geometry.Rectangle;
@@ -38,18 +38,18 @@ import org.dyn4j.game2d.testbed.Entity;
 import org.dyn4j.game2d.testbed.Test;
 
 /**
- * Tests the line joint.
+ * Tests the wheel joint.
  * @author William Bittle
  * @version 2.2.4
- * @since 1.0.0
+ * @since 2.2.4
  */
-public class Line extends Test {
+public class Wheel extends Test {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.game2d.testbed.Test#getName()
 	 */
 	@Override
 	public String getName() {
-		return "Line";
+		return "Wheel";
 	}
 	
 	/* (non-Javadoc)
@@ -57,7 +57,7 @@ public class Line extends Test {
 	 */
 	@Override
 	public String getDescription() {
-		return "Tests a line joint.";
+		return "Tests a couple of wheel joints in a car configuration.";
 	}
 	
 	/* (non-Javadoc)
@@ -99,32 +99,48 @@ public class Line extends Test {
 		this.world.add(floor);
 		
 		// create a reusable rectangle
-		Rectangle r = new Rectangle(0.5, 1.0);
+		Rectangle r = new Rectangle(3.0, 0.5);
 		
-		Entity top = new Entity();
-		top.addFixture(new BodyFixture(r));
-		top.setMass();
-		top.translate(0.0, -1.5);
-		top.getVelocity().set(2.0, 0.0);
+		Entity frame = new Entity();
+		frame.addFixture(new BodyFixture(r));
+		frame.setMass();
+		frame.translate(-3.0, 4.25);
 		
-		Entity bot = new Entity();
-		bot.addFixture(new BodyFixture(r));
-		bot.setMass();
-		bot.translate(0.0, -0.5);
+		Entity wheelr = new Entity();
+		wheelr.addFixture(Geometry.createCircle(0.25));
+		wheelr.setMass();
+		wheelr.translate(-4.0, 3.6);
 		
-		this.world.add(top);
-		this.world.add(bot);
+		Entity wheelf = new Entity();
+		wheelf.addFixture(Geometry.createCircle(0.25));
+		wheelf.setMass();
+		wheelf.translate(-2.0, 3.6);
 		
-		LineJoint joint = new LineJoint(bot, top, new Vector2(0.0, 2.0), new Vector2(0.0, 1.0));
-		joint.setCollisionAllowed(true);
-		// set the limits and enable them
-		joint.setLimitsEnabled(0.5, 1.5);
-		// or you could do
-//		joint.setLowerLimit(0.5);
-//		joint.setUpperLimit(1.5);
-//		joint.setLimitEnabled(true);
+		this.world.add(frame);
+		this.world.add(wheelr);
+		this.world.add(wheelf);
 		
-		this.world.add(joint);
+		WheelJoint j1 = new WheelJoint(frame, wheelr, wheelr.getWorldCenter(), new Vector2(0.0, 1.0));
+		j1.setCollisionAllowed(true);
+		// setup a spring
+		j1.setFrequency(8.0);
+		j1.setDampingRatio(0.4);
+		// give the car rear-wheel-drive
+		j1.setMotorEnabled(true);
+		// set the speed to -180 degrees per second
+		j1.setMotorSpeed(Math.PI);
+		// don't forget to set the maximum torque
+		j1.setMaxMotorTorque(1000);
+		
+		WheelJoint j2 = new WheelJoint(frame, wheelf, wheelf.getWorldCenter(), new Vector2(0.0, 1.0));
+		j2.setCollisionAllowed(true);
+		// setup a spring
+		j2.setFrequency(8.0);
+		j2.setDampingRatio(0.4);
+		
+		// add the joints to the world
+		this.world.add(j1);
+		this.world.add(j2);
 	}
 	
 	/* (non-Javadoc)

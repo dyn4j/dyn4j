@@ -47,7 +47,9 @@ import org.dyn4j.game2d.geometry.Vector2;
  * @author William Bittle
  * @version 2.2.4
  * @since 1.0.0
+ * @deprecated As of version 2.2.4 replaced with {@link WheelJoint}
  */
+@Deprecated
 public class LineJoint extends Joint {
 	/** The joint type */
 	public static final Joint.Type TYPE = new Joint.Type("Line");
