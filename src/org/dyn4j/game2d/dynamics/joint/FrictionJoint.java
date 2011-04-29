@@ -42,7 +42,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.2.3
+ * @version 2.2.4
  * @since 1.0.0
  */
 public class FrictionJoint extends Joint {
@@ -141,7 +141,7 @@ public class FrictionJoint extends Joint {
 		
 		// compute the angular mass
 		this.angularMass = invI1 + invI2;
-		if (this.angularMass >= Epsilon.E) {
+		if (this.angularMass > Epsilon.E) {
 			this.angularMass = 1.0 / this.angularMass;
 		}
 		

@@ -229,7 +229,7 @@ public class PrismaticJoint extends Joint {
 		
 		// compute the motor mass
 		this.motorMass = this.K.m22;
-		if (Math.abs(this.motorMass) >= Epsilon.E) {
+		if (Math.abs(this.motorMass) > Epsilon.E) {
 			this.motorMass = 1.0 / this.motorMass;
 		}
 		

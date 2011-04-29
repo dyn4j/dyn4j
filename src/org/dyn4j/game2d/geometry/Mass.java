@@ -34,7 +34,7 @@ import org.dyn4j.game2d.dynamics.Body;
  * <p>
  * Stores the center of mass, mass, and inertia tensor.
  * @author William Bittle
- * @version 2.2.3
+ * @version 2.2.4
  * @since 1.0.0
  */
 public class Mass {
@@ -120,7 +120,7 @@ public class Mass {
 			this.type = Mass.Type.FIXED_ANGULAR_VELOCITY;
 		}
 		// check if both the mass and inertia are zero
-		if (mass < Epsilon.E && inertia < Epsilon.E) {
+		if (mass <= Epsilon.E && inertia <= Epsilon.E) {
 			this.type = Mass.Type.INFINITE;
 		}
 	}

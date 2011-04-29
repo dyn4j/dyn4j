@@ -34,7 +34,7 @@ import org.dyn4j.game2d.testbed.input.Input.Hold;
 /**
  * Represents a keyboard input device.
  * @author William Bittle
- * @version 2.2.3
+ * @version 2.2.4
  * @since 2.2.3
  */
 public class Keyboard implements KeyListener {
@@ -141,7 +141,11 @@ public class Keyboard implements KeyListener {
 		int keyCode = e.getKeyCode();
 		synchronized (this.keys) {
 			if (this.keys.containsKey(keyCode)) {
-				this.keys.get(keyCode).release();
+				if (keyCode == KeyEvent.VK_SHIFT) {
+					this.keys.get(keyCode).reset();
+				} else {
+					this.keys.get(keyCode).release();
+				}
 			}
 		}
 		e.consume();

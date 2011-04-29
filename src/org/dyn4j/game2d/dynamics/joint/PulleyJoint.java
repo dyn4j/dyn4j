@@ -44,7 +44,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.2.3
+ * @version 2.2.4
  * @since 2.1.0
  */
 public class PulleyJoint extends Joint {
@@ -223,13 +223,13 @@ public class PulleyJoint extends Joint {
 		double l2 = this.n2.normalize();
 		
 		// check for near zero length
-		if (l1 < Epsilon.E) {
+		if (l1 <= Epsilon.E) {
 			// zero out the axis
 			this.n1.zero();
 		}
 		
 		// check for near zero length		
-		if (l2 < Epsilon.E) {
+		if (l2 <= Epsilon.E) {
 			// zero out the axis
 			this.n2.zero();
 		}
@@ -435,11 +435,11 @@ public class PulleyJoint extends Joint {
 		double l2 = this.n2.normalize();
 		
 		// make sure the length is not near zero
-		if (l1 < Epsilon.E) {
+		if (l1 <= Epsilon.E) {
 			this.n1.zero();
 		}
 		// make sure the length is not near zero
-		if (l2 < Epsilon.E) {
+		if (l2 <= Epsilon.E) {
 			this.n2.zero();
 		}
 		

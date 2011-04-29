@@ -115,7 +115,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * {@link Shape}s.  Refer to {@link Gjk#distance(Convex, Transform, Convex, Transform, Separation)}
  * for details on the implementation.
  * @author William Bittle
- * @version 2.2.3
+ * @version 2.2.4
  * @since 1.0.0
  */
 public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetector {
@@ -407,15 +407,19 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			Vector2 p1 = Segment.getPointOnSegmentClosestToPoint(ORIGIN, a.p, c.p);
 			Vector2 p2 = Segment.getPointOnSegmentClosestToPoint(ORIGIN, c.p, b.p);
 			
+			// get the distance to the origin
+			double p1Mag = p1.getMagnitudeSquared();
+			double p2Mag = p2.getMagnitudeSquared();
+			
 			// check if the origin lies close enough to either edge
-			if (p1.isZero()) {
+			if (p1Mag <= Epsilon.E) {
 				// if so then we have a separation (although its
 				// nearly zero separation)
 				separation.distance = p1.normalize();
 				separation.normal = d;
 				this.findClosestPoints(a, c, separation);
 				return true;
-			} else if (p2.isZero()) {
+			} else if (p2Mag <= Epsilon.E) {
 				// if so then we have a separation (although its
 				// nearly zero separation)
 				separation.distance = p2.normalize();
@@ -426,7 +430,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			
 			// test which point is closer and replace the one that is farthest
 			// with the new point c and set the new search direction
-			if (p1.getMagnitudeSquared() < p2.getMagnitudeSquared()) {
+			if (p1Mag < p2Mag) {
 				// a was closest so replace b with c
 				b.set(c);
 				d = p1;

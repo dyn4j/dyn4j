@@ -46,7 +46,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * <p>
  * This algorithm total complexity is O(n log n).
  * @author William Bittle
- * @version 2.2.3
+ * @version 2.2.4
  * @since 2.2.0
  */
 public class SweepLine implements Decomposer {
@@ -107,7 +107,7 @@ public class SweepLine implements Decomposer {
 			Vector2 p = this.point;
 			Vector2 q = other.point;
 			double diff = q.y - p.y;
-			if (Math.abs(diff) < Epsilon.E) {
+			if (Math.abs(diff) <= Epsilon.E) {
 				// if the difference is near equal then compare the x values
 				return (int) Math.signum(p.x - q.x);
 			} else {
@@ -208,7 +208,7 @@ public class SweepLine implements Decomposer {
 			if (this == o) return 0;
 			// first sort by the minimum x value
 			double value = this.getMinX() - o.getMinX();
-			if (Math.abs(value) < Epsilon.E) {
+			if (Math.abs(value) <= Epsilon.E) {
 				// if they are near zero sort by the minimum y
 				value = o.getMinY() - this.getMinY();
 			}
@@ -262,7 +262,7 @@ public class SweepLine implements Decomposer {
 			double diff = v0.point.y - v1.point.y;
 			// check if the points have nearly the
 			// same x value
-			if (Math.abs(diff) < Epsilon.E) {
+			if (Math.abs(diff) <= Epsilon.E) {
 				// if they do, is the vector of the
 				// two points to the right or to the left
 				if (v0.point.x < v1.point.x) {
@@ -509,6 +509,9 @@ public class SweepLine implements Decomposer {
 		Vector2 v1 = point0.to(point);
 		Vector2 v2 = point.to(point1);
 		
+		// check for coincident points
+		if (v1.isZero() || v2.isZero()) throw new IllegalArgumentException("The polygon cannot have coincident vertices.");
+		
 		// get the angle between the two edges (we assume CCW winding)
 		double cross = v1.cross(v2);
 		
@@ -563,7 +566,7 @@ public class SweepLine implements Decomposer {
 	 */
 	protected boolean isBelow(Vector2 p, Vector2 q) {
 		double diff = p.y - q.y;
-		if (Math.abs(diff) < Epsilon.E) {
+		if (Math.abs(diff) <= Epsilon.E) {
 			if (p.x > q.x) {
 				return true;
 			} else {

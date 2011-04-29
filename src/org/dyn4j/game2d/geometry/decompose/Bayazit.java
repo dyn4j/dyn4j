@@ -41,7 +41,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * This algorithm is a O(nr) complexity algorithm where n is the number of input vertices and r is the number of
  * output convex polygons.  This algorithm can achieve optimal decompositions, however this is not guaranteed.
  * @author William Bittle
- * @version 2.2.3
+ * @version 2.2.4
  * @since 2.2.0
  */
 public class Bayazit implements Decomposer {
@@ -372,7 +372,7 @@ public class Bayazit implements Decomposer {
 		double det = s1.cross(s2);
 		
 		// make sure the matrix isn't singular (the lines could be parallel)
-		if (Math.abs(det) < Epsilon.E) {
+		if (Math.abs(det) <= Epsilon.E) {
 			// return false since there is no way that the segments could be intersecting
 			return false;
 		} else {

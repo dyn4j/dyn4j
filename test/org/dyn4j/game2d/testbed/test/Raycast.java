@@ -70,6 +70,9 @@ public class Raycast extends Test {
 	/** The ray length; initially zero for an infinite length */
 	private double length = 0.0;
 	
+	/** Whether the ray is infinite length or not */
+	private boolean infinite = true;
+	
 	/** Whether to get all results or just the closest */
 	private boolean all = false;
 	
@@ -329,7 +332,7 @@ public class Raycast extends Test {
 		Vector2 s = ray.getStart();
 		Vector2 d = ray.getDirection();
 		
-		double l = length > 0.0 ? length * scale : 10000.0;
+		double l = length > 0.0 ? length : 10000.0;
 		
 		// draw the line from the start to the end, along d, l distance
 		gl.glBegin(GL.GL_LINES);
@@ -489,11 +492,17 @@ public class Raycast extends Test {
 		
 		// look for the l key
 		if (keyboard.isPressed(KeyEvent.VK_L)) {
+			// is it currently infinite?
+			if (this.infinite) {
+				this.infinite = false;
+				// give the ray an initial length
+				this.length = 0.25;
+			}
 			// look for the shift key
 			if (keyboard.isPressed(KeyEvent.VK_SHIFT)) {
 				this.length += 0.25;
 			} else {
-				if (this.length != 0.0) {
+				if (this.length != 0.25) {
 					this.length -= 0.25;
 				}
 			}
@@ -501,6 +510,7 @@ public class Raycast extends Test {
 		
 		// look for the i key
 		if (keyboard.isPressed(KeyEvent.VK_I)) {
+			this.infinite = true;
 			this.length = 0.0;
 		}
 		

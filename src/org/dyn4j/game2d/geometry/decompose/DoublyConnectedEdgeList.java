@@ -51,7 +51,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * can be achieved since the indexing of the {@link #vertices} list is the same as the source {@link Vector2}[].
  * No check is performed to ensure that a pair of {@link HalfEdge}s are added that already exist.
  * @author William Bittle
- * @version 2.2.0
+ * @version 2.2.4
  * @since 2.2.0
  */
 public class DoublyConnectedEdgeList {
@@ -622,7 +622,7 @@ public class DoublyConnectedEdgeList {
 				Vector2 q = max.data.point;
 				// compare the y values
 				double diff = p.y - q.y;
-				if (Math.abs(diff) < Epsilon.E) {
+				if (Math.abs(diff) <= Epsilon.E) {
 					// if they are near zero then
 					// compare the x values
 					diff = p.x - q.x;

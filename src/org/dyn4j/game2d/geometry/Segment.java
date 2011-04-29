@@ -29,7 +29,7 @@ import org.dyn4j.game2d.Epsilon;
 /**
  * Represents a line {@link Segment}.
  * @author William Bittle
- * @version 2.2.3
+ * @version 2.2.4
  * @since 1.0.0
  */
 public class Segment extends Wound implements Convex, Shape, Transformable {
@@ -161,7 +161,7 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	    // get the length squared of the line
 	    double ab2 = line.dot(line);
 	    // check ab2 for zero (linePoint1 == linePoint2)
-	    if (ab2 < Epsilon.E) return linePoint1.copy();
+	    if (ab2 <= Epsilon.E) return linePoint1.copy();
 	    // get the projection of AP on AB
 	    double ap_ab = p1ToP.dot(line);
 	    // get the position from the first line point to the projection
@@ -194,7 +194,7 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	    // get the projection of AP on AB
 	    double ap_ab = p1ToP.dot(line);
 	    // check ab2 for zero (linePoint1 == linePoint2)
-	    if (ab2 < Epsilon.E) return linePoint1.copy();
+	    if (ab2 <= Epsilon.E) return linePoint1.copy();
 	    // get the position from the first line point to the projection
 	    double t = ap_ab / ab2;
 	    // make sure t is in between 0.0 and 1.0
@@ -260,7 +260,7 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 		// get the location of the given point relative to this segment
 		double value = Segment.getLocation(p, p1, p2);
 		// see if the point is on the line created by this line segment
-		if (Math.abs(value) < Epsilon.E) {
+		if (Math.abs(value) <= Epsilon.E) {
 			double distSqrd = p1.distanceSquared(p2);
 			if (p.distanceSquared(p1) <= distSqrd
 			 && p.distanceSquared(p2) <= distSqrd) {

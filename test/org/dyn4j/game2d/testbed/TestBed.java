@@ -465,8 +465,8 @@ public class TestBed extends GLCanvas implements GLEventListener {
 			// we do this first so that we know whether to create them or not
 			Shader vsBlur, fsBlur;
 			try {
-				vsBlur = Shader.load("/shaders/blur.vs");
-				fsBlur = Shader.load("/shaders/blur.fs");
+				vsBlur = Shader.load("/org/dyn4j/game2d/testbed/shaders/blur.vs");
+				fsBlur = Shader.load("/org/dyn4j/game2d/testbed/shaders/blur.fs");
 				
 				// create the shaders
 				vsBlurId = gl.glCreateShader(GL2.GL_VERTEX_SHADER);
