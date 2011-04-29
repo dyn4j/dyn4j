@@ -50,7 +50,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.2.3
+ * @version 2.2.4
  * @since 2.2.1
  */
 public class RopeJoint extends Joint {
@@ -223,7 +223,7 @@ public class RopeJoint extends Joint {
 			invMass += invM2 + invI2 * cr2n * cr2n;
 			
 			// check for zero before inverting
-			this.invK = Math.abs(invMass) < Epsilon.E ? 0.0 : 1.0 / invMass;
+			this.invK = Math.abs(invMass) <= Epsilon.E ? 0.0 : 1.0 / invMass;
 			
 			// warm start
 			impulse *= step.getDeltaTimeRatio();

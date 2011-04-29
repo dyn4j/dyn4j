@@ -40,7 +40,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * Nearly identitcal to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.4
  * @since 1.0.0
  */
 public class Island {
@@ -143,14 +143,14 @@ public class Island {
 			// integrate force and torque to modify the velocity and
 			// angular velocity (sympletic euler)
 			// v1 = v0 + (f / m) + g) * dt
-			if (invM >= Epsilon.E) {
+			if (invM > Epsilon.E) {
 				// only perform this step if the body does not have
 				// a fixed linear velocity
 				body.velocity.x += (body.force.x * invM + gravity.x) * step.dt;
 				body.velocity.y += (body.force.y * invM + gravity.y) * step.dt;
 			}
 			// av1 = av0 + (t / I) * dt
-			if (invI >= Epsilon.E) {
+			if (invI > Epsilon.E) {
 				// only perform this step if the body does not have
 				// a fixed angular velocity
 				body.angularVelocity += step.dt * invI * body.torque;

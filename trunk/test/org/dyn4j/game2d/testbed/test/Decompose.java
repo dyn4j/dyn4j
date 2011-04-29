@@ -63,7 +63,7 @@ import com.jogamp.opengl.util.gl2.GLUT;
 /**
  * Tests the decomposition of a simple polygon without holes.
  * @author William Bittle
- * @version 2.2.3
+ * @version 2.2.4
  * @since 2.2.0
  */
 public class Decompose extends Test {
@@ -80,8 +80,20 @@ public class Decompose extends Test {
 	/** The current algorithm's index */
 	private int currentAlgorithm = 0;
 	
+	/** The array of premade polygon data file names */
+	private String[] dataFiles = new String[] {
+		"/org/dyn4j/game2d/testbed/data/polygon1.dat",
+		"/org/dyn4j/game2d/testbed/data/polygon2.dat",
+		"/org/dyn4j/game2d/testbed/data/polygon3.dat",
+		"/org/dyn4j/game2d/testbed/data/polygon4.dat",
+		"/org/dyn4j/game2d/testbed/data/bird.dat",
+		"/org/dyn4j/game2d/testbed/data/tank.dat",
+		"/org/dyn4j/game2d/testbed/data/nazca_monkey.dat",
+		"/org/dyn4j/game2d/testbed/data/nazca_heron.dat"
+	};
+	
 	/** The list of premade polygons */
-	private Vector2[][] polygons = new Vector2[4][];
+	private Vector2[][] polygons;
 	
 	/** The current premade polygon in use */
 	private int currentPolgyon = 0;
@@ -117,9 +129,12 @@ public class Decompose extends Test {
 	 * Default constructor.
 	 */
 	public Decompose() {
-		for (int i = 0; i < 4; i++) {
+		int size = this.dataFiles.length;
+		// create the array for the vertices
+		this.polygons = new Vector2[size][];
+		for (int i = 0; i < size; i++) {
 			// load the polygon dat files
-			InputStream stream = this.getClass().getResourceAsStream("/polygon" + (i + 1) + ".dat");
+			InputStream stream = this.getClass().getResourceAsStream(this.dataFiles[i]);
 			this.polygons[i] = this.load(stream);
 		}
 	}
@@ -610,7 +625,7 @@ public class Decompose extends Test {
 			// get the polygon requested
 			Vector2[] points = this.polygons[this.currentPolgyon++];
 			// increment the current polygon
-			if (this.currentPolgyon == 4) {
+			if (this.currentPolgyon == this.polygons.length) {
 				this.currentPolgyon = 0;
 			}
 			// make sure its not null
@@ -651,7 +666,6 @@ public class Decompose extends Test {
 						j++;
 					}
 					System.out.println("});");
-					System.out.println("polygons.add(p" + i + ");");
 					i++;
 				}
 			}

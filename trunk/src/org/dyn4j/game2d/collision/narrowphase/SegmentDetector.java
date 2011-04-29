@@ -33,7 +33,7 @@ import org.dyn4j.game2d.geometry.Vector2;
 /**
  * Class devoted to improving performance of {@link Segment} detection queries.
  * @author William Bittle
- * @version 2.0.0
+ * @version 2.2.4
  * @since 2.0.0
  */
 public class SegmentDetector {
@@ -86,7 +86,7 @@ public class SegmentDetector {
 		double den = d1.cross(d0);
 		
 		// check for zero denominator
-		if (Math.abs(den) < Epsilon.E) {
+		if (Math.abs(den) <= Epsilon.E) {
 			// they are parallel but could be overlapping
 			
 			// since they are parallel d0 is the direction for both the

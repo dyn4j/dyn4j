@@ -34,7 +34,7 @@ import org.dyn4j.game2d.Epsilon;
 /**
  * Contains static methods to perform standard geometric operations.
  * @author William Bittle
- * @version 2.2.3
+ * @version 2.2.4
  * @since 1.0.0
  */
 public class Geometry {
@@ -285,7 +285,7 @@ public class Geometry {
 			center.add(p1.sum(p2).multiply(INV_3).multiply(triangleArea));
 		}
 		// check for zero area
-		if (Math.abs(area) < Epsilon.E) {
+		if (Math.abs(area) <= Epsilon.E) {
 			// zero area can only happen if all the points are the same point
 			// in which case just return a copy of the first
 			return points.get(0).copy();
@@ -342,7 +342,7 @@ public class Geometry {
 			center.add(p1.sum(p2).multiply(INV_3).multiply(triangleArea));
 		}
 		// check for zero area
-		if (Math.abs(area) < Epsilon.E) {
+		if (Math.abs(area) <= Epsilon.E) {
 			// zero area can only happen if all the points are the same point
 			// in which case just return a copy of the first
 			return points[0].copy();

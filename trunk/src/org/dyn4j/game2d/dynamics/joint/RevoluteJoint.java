@@ -47,7 +47,7 @@ import org.dyn4j.game2d.geometry.Vector3;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.2.3
+ * @version 2.2.4
  * @since 1.0.0
  */
 public class RevoluteJoint extends Joint {
@@ -120,6 +120,8 @@ public class RevoluteJoint extends Joint {
 		this.limitState = Joint.LimitState.INACTIVE;
 		this.impulse = new Vector3();
 		this.K = new Matrix33();
+		this.motorEnabled = false;
+		this.limitEnabled = false;
 	}
 	
 	/* (non-Javadoc)
@@ -189,7 +191,7 @@ public class RevoluteJoint extends Joint {
 		
 		// compute the motor mass
 		this.motorMass = invI1 + invI2;
-		if (this.motorMass >= Epsilon.E) {
+		if (this.motorMass > Epsilon.E) {
 			this.motorMass = 1.0 / this.motorMass;
 		}
 		

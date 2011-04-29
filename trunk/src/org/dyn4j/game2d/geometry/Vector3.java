@@ -32,7 +32,7 @@ import org.dyn4j.game2d.Epsilon;
  * Used to solve 3x3 systems of equations.
  * @see Vector2
  * @author William Bittle
- * @version 2.2.3
+ * @version 2.2.4
  * @since 1.0.0
  */
 public class Vector3 {
@@ -309,7 +309,7 @@ public class Vector3 {
 	 */
 	public Vector3 setMagnitude(double magnitude) {
 		// check the given magnitude
-		if (Math.abs(magnitude) < Epsilon.E) {
+		if (Math.abs(magnitude) <= Epsilon.E) {
 			this.x = 0.0;
 			this.y = 0.0;
 			this.z = 0.0;
@@ -523,7 +523,7 @@ public class Vector3 {
 	 * @return boolean
 	 */
 	public boolean isOrthogonal(Vector3 vector) {
-		return Math.abs(this.x * vector.x + this.y * vector.y + this.z * vector.z) < Epsilon.E ? true : false;
+		return Math.abs(this.x * vector.x + this.y * vector.y + this.z * vector.z) <= Epsilon.E ? true : false;
 	}
 	
 	/**
@@ -538,7 +538,7 @@ public class Vector3 {
 	 * @return boolean
 	 */
 	public boolean isOrthogonal(double x, double y, double z) {
-		return Math.abs(this.x * x + this.y * y + this.z * z) < Epsilon.E ? true : false;
+		return Math.abs(this.x * x + this.y * y + this.z * z) <= Epsilon.E ? true : false;
 	}
 	
 	/**
@@ -546,7 +546,7 @@ public class Vector3 {
 	 * @return boolean
 	 */
 	public boolean isZero() {
-		return (this.x * this.x + this.y * this.y + this.z * this.z) < Epsilon.E;
+		return Math.abs(this.x) <= Epsilon.E && Math.abs(this.y) <= Epsilon.E && Math.abs(this.z) <= Epsilon.E;
 	}
 
 	/** 
@@ -589,7 +589,7 @@ public class Vector3 {
 	public Vector3 project(Vector3 vector) {
 		double dotProd = this.dot(vector);
 		double denominator = vector.dot(vector);
-		if (denominator < Epsilon.E) return new Vector3();
+		if (denominator <= Epsilon.E) return new Vector3();
 		denominator = dotProd / denominator;
 		return new Vector3(denominator * vector.x, denominator * vector.y, denominator * vector.z);		
 	}
@@ -602,7 +602,7 @@ public class Vector3 {
 	 */
 	public Vector3 getNormalized() {
 		double magnitude = this.getMagnitude();
-		if (magnitude < Epsilon.E) return new Vector3();
+		if (magnitude <= Epsilon.E) return new Vector3();
 		magnitude = 1.0 / magnitude;
 		return new Vector3(this.x * magnitude, this.y * magnitude, this.z * magnitude);
 	}
@@ -616,7 +616,7 @@ public class Vector3 {
 	 */
 	public double normalize() {
 		double magnitude = this.getMagnitude();
-		if (magnitude < Epsilon.E) return 0;
+		if (magnitude <= Epsilon.E) return 0;
 		double m = 1.0 / magnitude;
 		this.x *= m;
 		this.y *= m;

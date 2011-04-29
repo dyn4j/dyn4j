@@ -220,7 +220,7 @@ public class WheelJoint extends Joint {
 			this.s2 = r2.sum(d).cross(this.perp);
 			this.invK = invM1 + invM2 + this.s1 * this.s1 * invI1 + this.s2 * this.s2 * invI2;
 			// make sure we don't divide by zero
-			if (this.invK >= Epsilon.E) {
+			if (this.invK > Epsilon.E) {
 				this.invK = 1.0 / this.invK;
 			}
 		}
@@ -234,7 +234,7 @@ public class WheelJoint extends Joint {
 			this.a2 = r2.sum(d).cross(this.axis);
 			double invMass = invM1 + invM2 + this.a1 * this.a1 * invI1 + this.a2 * this.a2 * invI2;
 			// make sure we don't divide by zero
-			if (invMass >= Epsilon.E) {
+			if (invMass > Epsilon.E) {
 				// invert the spring mass
 				this.springMass = 1.0 / invMass;
 				// compute the current spring extension (we are solving for zero here)
@@ -251,14 +251,14 @@ public class WheelJoint extends Joint {
 				// compute gamma = CMF = 1 / (hk + d)
 				this.gamma = dt * (dc + dt * k);
 				// check for zero before inverting
-				this.gamma = Math.abs(this.gamma) < Epsilon.E ? 0.0 : 1.0 / this.gamma;			
+				this.gamma = Math.abs(this.gamma) <= Epsilon.E ? 0.0 : 1.0 / this.gamma;			
 				// compute the bias = x * ERP where ERP = hk / (hk + d)
 				this.bias = c * dt * k * this.gamma;
 				
 				// compute the effective mass			
 				this.springMass = invMass + this.gamma;
 				// check for zero before inverting
-				this.springMass = Math.abs(this.springMass) < Epsilon.E ? 0.0 : 1.0 / this.springMass;
+				this.springMass = Math.abs(this.springMass) <= Epsilon.E ? 0.0 : 1.0 / this.springMass;
 			}
 		} else {
 			// don't include the spring constraint
@@ -270,7 +270,7 @@ public class WheelJoint extends Joint {
 		if (this.motorEnabled) {
 			// compute the motor mass
 			this.motorMass = invI1 + invI2;
-			if (Math.abs(this.motorMass) >= Epsilon.E) {
+			if (Math.abs(this.motorMass) > Epsilon.E) {
 				this.motorMass = 1.0 / this.motorMass;
 			}
 		} else {
@@ -417,7 +417,7 @@ public class WheelJoint extends Joint {
 		double impulse = 0.0;
 		
 		// make sure k is not zero
-		if (k >= Epsilon.E) {
+		if (k > Epsilon.E) {
 			impulse = -Cx / k;
 		} else {
 			impulse = 0.0;

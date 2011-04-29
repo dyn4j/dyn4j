@@ -28,18 +28,18 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.game2d.geometry.decompose.EarClipping;
+import org.dyn4j.game2d.geometry.decompose.SweepLine;
 import org.junit.Test;
 
 /**
- * Test case for the {@link EarClipping} class.
+ * Test case for the {@link SweepLine} class.
  * @author William Bittle
  * @version 2.2.4
- * @since 2.2.0
+ * @since 2.2.4
  */
-public class EarClippingTest extends AbstractDecomposeTest {
-	/** The ear clipping algorithm */
-	private EarClipping algo = new EarClipping();
+public class SweepLineTest extends AbstractDecomposeTest {
+	/** The sweep line algorithm */
+	private SweepLine algo = new SweepLine();
 	
 	/**
 	 * Tests passing a null array.
@@ -88,8 +88,7 @@ public class EarClippingTest extends AbstractDecomposeTest {
 	}
 	
 	/**
-	 * Tests the ear clipping implementation against a 10 vertex
-	 * non-convex polygon.
+	 * Tests the implementation against a 10 vertex non-convex polygon.
 	 */
 	@Test
 	public void success1() {
@@ -113,11 +112,11 @@ public class EarClippingTest extends AbstractDecomposeTest {
 	}
 	
 	/**
-	 * Tests the ear clipping implementation against the 1st polygon data file.
+	 * Tests the implementation against the 1st polygon data file.
 	 */
 	@Test
 	public void success2() {
-		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/game2d/testbed/data/polygon1.dat"));
+		Vector2[] vertices = this.load(SweepLineTest.class.getResourceAsStream("/org/dyn4j/game2d/testbed/data/polygon1.dat"));
 		
 		// decompose the poly
 		List<Convex> result = this.algo.decompose(vertices);
@@ -127,11 +126,11 @@ public class EarClippingTest extends AbstractDecomposeTest {
 	}
 	
 	/**
-	 * Tests the ear clipping implementation against the 2nd polygon data file.
+	 * Tests the implementation against the 2nd polygon data file.
 	 */
 	@Test
 	public void success3() {
-		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/game2d/testbed/data/polygon2.dat"));
+		Vector2[] vertices = this.load(SweepLineTest.class.getResourceAsStream("/org/dyn4j/game2d/testbed/data/polygon2.dat"));
 		
 		// decompose the poly
 		List<Convex> result = this.algo.decompose(vertices);
@@ -141,11 +140,11 @@ public class EarClippingTest extends AbstractDecomposeTest {
 	}
 	
 	/**
-	 * Tests the ear clipping implementation against the 3rd polygon data file.
+	 * Tests the implementation against the 3rd polygon data file.
 	 */
 	@Test
 	public void success4() {
-		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/game2d/testbed/data/polygon3.dat"));
+		Vector2[] vertices = this.load(SweepLineTest.class.getResourceAsStream("/org/dyn4j/game2d/testbed/data/polygon3.dat"));
 		
 		// decompose the poly
 		List<Convex> result = this.algo.decompose(vertices);
@@ -155,11 +154,11 @@ public class EarClippingTest extends AbstractDecomposeTest {
 	}
 	
 	/**
-	 * Tests the ear clipping implementation against the 4th polygon data file.
+	 * Tests the implementation against the 4th polygon data file.
 	 */
 	@Test
 	public void success5() {
-		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/game2d/testbed/data/polygon4.dat"));
+		Vector2[] vertices = this.load(SweepLineTest.class.getResourceAsStream("/org/dyn4j/game2d/testbed/data/polygon4.dat"));
 		
 		// decompose the poly
 		List<Convex> result = this.algo.decompose(vertices);

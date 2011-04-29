@@ -31,7 +31,7 @@ import org.dyn4j.game2d.Epsilon;
  * <p>
  * Used to solve 3x3 systems of equations.
  * @author William Bittle
- * @version 2.2.3
+ * @version 2.2.4
  * @since 1.0.0
  */
 public class Matrix33 {
@@ -474,7 +474,7 @@ public class Matrix33 {
 		// get the determinant
 		double det = this.determinant();
 		// check for zero determinant
-		if (Math.abs(det) >= Epsilon.E) {
+		if (Math.abs(det) > Epsilon.E) {
 			det = 1.0 / det;
 		}
 		
@@ -509,7 +509,7 @@ public class Matrix33 {
 		// get the determinant
 		double det = this.determinant();
 		// check for zero determinant
-		if (Math.abs(det) >= Epsilon.E) {
+		if (Math.abs(det) > Epsilon.E) {
 			det = 1.0 / det;
 		}
 		
@@ -545,7 +545,7 @@ public class Matrix33 {
 		// get the determinant
 		double det = this.determinant();
 		// check for zero determinant
-		if (Math.abs(det) >= Epsilon.E) {
+		if (Math.abs(det) > Epsilon.E) {
 			det = 1.0 / det;
 		}
 		Vector3 r = new Vector3();
@@ -583,7 +583,7 @@ public class Matrix33 {
 		// get the 2D determinant
 		double det = this.m00 * this.m11 - this.m01 * this.m10;
 		// check for zero determinant
-		if (Math.abs(det) >= Epsilon.E) {
+		if (Math.abs(det) > Epsilon.E) {
 			det = 1.0 / det;
 		}
 		Vector2 r = new Vector2();

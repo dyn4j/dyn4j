@@ -47,7 +47,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * <p>
  * Defaults the min and max angles to the current angle (allowing no angular movement).
  * @author William Bittle
- * @version 2.2.3
+ * @version 2.2.4
  * @since 2.2.2
  */
 public class AngleJoint extends Joint {
@@ -131,7 +131,7 @@ public class AngleJoint extends Joint {
 		
 		// compute the angular mass
 		this.invK = invI1 + invI2;
-		if (this.invK >= Epsilon.E) {
+		if (this.invK > Epsilon.E) {
 			this.invK = 1.0 / this.invK;
 		}
 		
