@@ -166,7 +166,7 @@ public class DistanceJoint extends Joint {
 		invMass += invM2 + invI2 * cr2n * cr2n;
 		
 		// check for zero before inverting
-		this.invK = Math.abs(invMass) <= Epsilon.E ? 0.0 : 1.0 / invMass;
+		this.invK = invMass <= Epsilon.E ? 0.0 : 1.0 / invMass;
 		
 		// see if we need to compute spring damping
 		if (this.frequency > 0.0) {
@@ -183,18 +183,19 @@ public class DistanceJoint extends Joint {
 			// compute gamma = CMF = 1 / (hk + d)
 			this.gamma = dt * (d + dt * k);
 			// check for zero before inverting
-			this.gamma = Math.abs(this.gamma) <= Epsilon.E ? 0.0 : 1.0 / this.gamma;			
+			this.gamma = this.gamma <= Epsilon.E ? 0.0 : 1.0 / this.gamma;			
 			// compute the bias = x * ERP where ERP = hk / (hk + d)
 			this.bias = x * dt * k * this.gamma;
 			
 			// compute the effective mass			
 			this.invK = invMass + this.gamma;
 			// check for zero before inverting
-			this.invK = Math.abs(this.invK) <= Epsilon.E ? 0.0 : 1.0 / this.invK;
+			this.invK = this.invK <= Epsilon.E ? 0.0 : 1.0 / this.invK;
 		}
 		
 		// warm start
 		impulse *= step.getDeltaTimeRatio();
+		
 		Vector2 J = n.product(impulse);
 		body1.getVelocity().add(J.product(invM1));
 		body1.setAngularVelocity(body1.getAngularVelocity() + invI1 * r1.cross(J));
@@ -387,9 +388,6 @@ public class DistanceJoint extends Joint {
 	public void setDampingRatio(double dampingRatio) {
 		// make sure its within range
 		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException("The damping ratio must be between 0 and 1 inclusive.");
-		// wake up both bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
 		// set the new value
 		this.dampingRatio = dampingRatio;
 	}
@@ -410,9 +408,6 @@ public class DistanceJoint extends Joint {
 	public void setFrequency(double frequency) {
 		// check for valid value
 		if (frequency < 0) throw new IllegalArgumentException("The frequency must be greater than or equal to zero.");
-		// wake up both bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
 		// set the new value
 		this.frequency = frequency;
 	}

@@ -34,7 +34,7 @@ import org.junit.Test;
 /**
  * Used to test the {@link PulleyJoint} class.
  * @author William Bittle
- * @version 2.1.0
+ * @version 2.2.4
  * @since 2.1.0
  */
 public class PulleyJointTest {
@@ -128,26 +128,5 @@ public class PulleyJointTest {
 	public void setRatioZero() {
 		PulleyJoint pj = new PulleyJoint(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
 		pj.setRatio(0.0);
-	}
-	
-	/**
-	 * Tests the setMinLength method.
-	 */
-	@Test
-	public void setMinLength() {
-		PulleyJoint pj = new PulleyJoint(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
-		pj.setMinLength(2.0);
-		TestCase.assertEquals(2.0, pj.getMinLength());
-		// zero should be ok too
-		pj.setMinLength(0.0);
-	}
-	
-	/**
-	 * Tests the setMinLength method passing a negative value.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setMinLengthNegative() {
-		PulleyJoint pj = new PulleyJoint(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
-		pj.setMinLength(-2.0);
 	}
 }

@@ -289,8 +289,6 @@ public class MouseJoint extends Joint {
 	public void setMaxForce(double maxForce) {
 		// make sure the max force is non negative
 		if (maxForce < 0.0) throw new IllegalArgumentException("The maximum force must be zero or greater.");
-		// wake up the body
-		this.body2.setAsleep(false);
 		// set the new max force
 		this.maxForce = maxForce;
 	}
@@ -311,8 +309,6 @@ public class MouseJoint extends Joint {
 	public void setDampingRatio(double dampingRatio) {
 		// make sure its within range
 		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException("The damping ratio must be between 0 and 1.");
-		// wake up the body
-		this.body2.setAsleep(false);
 		// set the new value
 		this.dampingRatio = dampingRatio;
 	}
@@ -333,8 +329,6 @@ public class MouseJoint extends Joint {
 	public void setFrequency(double frequency) {
 		// check for valid value
 		if (frequency <= 0) throw new IllegalArgumentException("The frequency must be greater than zero.");
-		// wake the body
-		this.body2.setAsleep(false);
 		// set the new value
 		this.frequency = frequency;
 	}

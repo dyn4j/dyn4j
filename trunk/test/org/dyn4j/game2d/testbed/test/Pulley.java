@@ -40,7 +40,7 @@ import org.dyn4j.game2d.testbed.Test;
 /**
  * Tests the pulley joint.
  * @author William Bittle
- * @version 2.1.0
+ * @version 2.2.4
  * @since 2.1.0
  */
 public class Pulley extends Test {
@@ -132,8 +132,6 @@ public class Pulley extends Test {
 		PulleyJoint pulleyJoint = new PulleyJoint(obj1, obj2, pulleyAnchor1, pulleyAnchor2, bodyAnchor1, bodyAnchor2);
 		// emulate a block-and-tackle
 		pulleyJoint.setRatio(2.0);
-		// make it so that the minimum length on either side of the pulley is 1
-		pulleyJoint.setMinLength(1.0);
 		// allow them to collide
 		pulleyJoint.setCollisionAllowed(true);
 		

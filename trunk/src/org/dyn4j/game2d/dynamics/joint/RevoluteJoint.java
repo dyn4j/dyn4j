@@ -409,9 +409,34 @@ public class RevoluteJoint extends Joint {
 		Vector2 p1 = this.body1.getWorldCenter().add(r1);
 		Vector2 p2 = this.body2.getWorldCenter().add(r2);
 		Vector2 p = p1.difference(p2);
-		
 		linearError = p.getMagnitude();
 
+		// Handle large detachment.
+        final double k_allowedStretch = 10.0f * linearTolerance;
+        if (p.getMagnitudeSquared() > k_allowedStretch * k_allowedStretch)
+        {
+                // Use a particle solution (no rotation).
+                Vector2 u = p.copy(); u.normalize();
+                double m = invM1 + invM2;
+                if (m > Epsilon.E)
+                {
+                        m = 1.0 / m;
+                }
+                
+                Vector2 impulse = p.multiply(-m);//m * (-C);
+//                const float32 k_beta = 0.5f;
+                final double k_beta = 0.5;
+//                b1->m_sweep.c -= k_beta * invMass1 * impulse;
+//                b2->m_sweep.c += k_beta * invMass2 * impulse;
+                this.body1.translate(impulse.product(invM1 * k_beta));
+        		this.body2.translate(impulse.product(-invM2 * k_beta));
+                
+//                C = b2->m_sweep.c + r2 - b1->m_sweep.c - r1;
+        		p1 = this.body1.getWorldCenter().add(r1);
+        		p2 = this.body2.getWorldCenter().add(r2);
+        		p = p1.difference(p2);
+        }
+		
 		// compute the K matrix
 		Matrix22 K = new Matrix22();
 		K.m00 = invM1 + invM2 + r1.y * r1.y * invI1 + r2.y * r2.y * invI2;
@@ -486,7 +511,7 @@ public class RevoluteJoint extends Joint {
 	 * @return double
 	 */
 	public double getJointAngle() {
-		return this.body2.getTransform().getRotation() - this.body1.getTransform().getRotation();
+		return this.body1.getTransform().getRotation() - this.body2.getTransform().getRotation() - this.referenceAngle;
 	}
 	
 	/**
@@ -525,9 +550,6 @@ public class RevoluteJoint extends Joint {
 	public void setMaxMotorTorque(double maxMotorTorque) {
 		// make sure its positive
 		if (maxMotorTorque < 0.0) throw new IllegalArgumentException("The maximum motor torque must be greater than or equal to zero.");
-		// wake up the bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
 		// set the max
 		this.maxMotorTorque = maxMotorTorque;
 	}
@@ -537,7 +559,7 @@ public class RevoluteJoint extends Joint {
 	 * @return double
 	 */
 	public double getMotorSpeed() {
-		return motorSpeed;
+		return this.motorSpeed;
 	}
 	
 	/**
@@ -545,9 +567,12 @@ public class RevoluteJoint extends Joint {
 	 * @param motorSpeed the motor speed desired in radians/second
 	 */
 	public void setMotorSpeed(double motorSpeed) {
-		// if so, then wake up the bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
+		// only wake the bodies if the motor is enabled
+		if (this.motorEnabled) {
+			// if so, then wake up the bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+		}
 		// set the motor speed
 		this.motorSpeed = motorSpeed;
 	}
@@ -565,7 +590,7 @@ public class RevoluteJoint extends Joint {
 	 * @return boolean
 	 */
 	public boolean isLimitEnabled() {
-		return limitEnabled;
+		return this.limitEnabled;
 	}
 	
 	/**
@@ -573,11 +598,16 @@ public class RevoluteJoint extends Joint {
 	 * @param flag true if the limit should be enabled
 	 */
 	public void setLimitEnabled(boolean flag) {
-		// wake up both bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
-		// set the new value
-		this.limitEnabled = flag;
+		// check if its changing
+		if (this.limitEnabled != flag) {
+			// wake up both bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+			// set the new value
+			this.limitEnabled = flag;
+			// clear the accumulated limit impulse
+			this.impulse.z = 0.0;
+		}
 	}
 	
 	/**
@@ -585,7 +615,7 @@ public class RevoluteJoint extends Joint {
 	 * @return double
 	 */
 	public double getUpperLimit() {
-		return upperLimit;
+		return this.upperLimit;
 	}
 	
 	/**
@@ -597,9 +627,12 @@ public class RevoluteJoint extends Joint {
 	 */
 	public void setUpperLimit(double upperLimit) {
 		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException("The upper limit cannot be less than the lower limit.");
-		// wake up the bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
+		// only wake the bodies if the motor is enabled and the limit has changed
+		if (this.limitEnabled && upperLimit != this.upperLimit) {
+			// wake up the bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+		}
 		// set the new value
 		this.upperLimit = upperLimit;
 	}
@@ -609,7 +642,7 @@ public class RevoluteJoint extends Joint {
 	 * @return double
 	 */
 	public double getLowerLimit() {
-		return lowerLimit;
+		return this.lowerLimit;
 	}
 	
 	/**
@@ -621,9 +654,12 @@ public class RevoluteJoint extends Joint {
 	 */
 	public void setLowerLimit(double lowerLimit) {
 		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException("The lower limit cannot be greater than the upper limit.");
-		// wake up the bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
+		// only wake the bodies if the motor is enabled and the limit has changed
+		if (this.limitEnabled && lowerLimit != this.lowerLimit) {
+			// wake up the bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+		}
 		// set the new value
 		this.lowerLimit = lowerLimit;
 	}
@@ -638,9 +674,12 @@ public class RevoluteJoint extends Joint {
 	 */
 	public void setLimits(double lowerLimit, double upperLimit) {
 		if (lowerLimit > upperLimit) throw new IllegalArgumentException("The lower limit cannot be greater than the upper limit.");
-		// wake up the bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
+		// only wake the bodies if the motor is enabled and one of the limits has changed
+		if (this.limitEnabled && (lowerLimit != this.lowerLimit || upperLimit != this.upperLimit)) {
+			// wake up the bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+		}
 		// set the values
 		this.lowerLimit = lowerLimit;
 		this.upperLimit = upperLimit;

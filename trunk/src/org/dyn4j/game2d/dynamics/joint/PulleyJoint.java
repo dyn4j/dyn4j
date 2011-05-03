@@ -72,17 +72,8 @@ public class PulleyJoint extends Joint {
 	/** The original length of the second side of the pulley */
 	protected final double length2;
 	
-	/** The minimum length from a pulley anchor to a {@link Body} anchor */
-	protected double minLength;
-	
 	/** The total length of the pulley system */
 	protected double length;
-	
-	/** The computed maximum length from the first pulley anchor to the first {@link Body} anchor */
-	protected double maxLength1;
-	
-	/** The computed maximum length from the second pulley anchor to the second {@link Body} anchor */
-	protected double maxLength2;
 	
 	/** The normal from the first pulley anchor to the first {@link Body} anchor */
 	protected Vector2 n1;
@@ -90,32 +81,11 @@ public class PulleyJoint extends Joint {
 	/** The normal from the second pulley anchor to the second {@link Body} anchor */
 	protected Vector2 n2;
 	
-	/** The limit state for the pulley */
-	protected Joint.LimitState state;
-	
-	/** The state for the first {@link Body}'s maximum length limit */
-	protected Joint.LimitState limitState1;
-	
-	/** The state for the second {@link Body}'s maximum length limit */
-	protected Joint.LimitState limitState2;
-	
 	/** The effective mass of the two body system (Kinv = J * Minv * Jtrans) */
 	protected double invK;
 	
-	/** The effective mass of the first {@link Body}'s maximum length limit */
-	protected double limitInvK1;
-	
-	/** The effective mass of the second {@link Body}'s maximum length limit */
-	protected double limitInvK2;
-	
 	/** The accumulated impulse from the previous time step */
 	protected double impulse;
-	
-	/** The accumulated limit impulse for the first {@link Body}'s limit */
-	protected double limitImpulse1;
-	
-	/** The accumulated limit impulse for the second {@link Body}'s limit */
-	protected double limitImpulse2;
 	
 	/**
 	 * Minimal constructor.
@@ -146,21 +116,14 @@ public class PulleyJoint extends Joint {
 		this.localAnchor2 = body2.getLocalPoint(bodyAnchor2);
 		// default the ratio and minimum length
 		this.ratio = 1.0;
-		this.minLength = 0.0;
 		// compute the lengths
 		this.length1 = bodyAnchor1.distance(pulleyAnchor1);
 		this.length2 = bodyAnchor2.distance(pulleyAnchor2);
 		// compute the lengths
 		// length = l1 + ratio * l2
 		this.length = this.length1 + this.length2;
-		// maxL1 = length - ratio * minLength
-		this.maxLength1 = this.length;
-		// maxL2 = (length - minLength) / ratio
-		this.maxLength2 = this.length;
 		// initialize the other fields
 		this.impulse = 0.0;
-		this.limitImpulse1 = 0.0;
-		this.limitImpulse2 = 0.0;
 	}
 	
 	/* (non-Javadoc)
@@ -177,16 +140,8 @@ public class PulleyJoint extends Joint {
 		.append(this.ratio).append("|")
 		.append(this.length1).append("|")
 		.append(this.length2).append("|")
-		.append(this.minLength).append("|")
 		.append(this.length).append("|")
-		.append(this.maxLength1).append("|")
-		.append(this.maxLength2).append("|")
-		.append(this.state).append("|")
-		.append(this.limitState1).append("|")
-		.append(this.limitState2).append("|")
-		.append(this.impulse).append("|")
-		.append(this.limitImpulse1).append("|")
-		.append(this.limitImpulse2).append("]");
+		.append(this.impulse).append("]");
 		return sb.toString();
 	}
 	
@@ -195,6 +150,7 @@ public class PulleyJoint extends Joint {
 	 */
 	@Override
 	public void initializeConstraints(Step step) {
+		double linearTolerance = Settings.getInstance().getLinearTolerance();
 		Transform t1 = body1.getTransform();
 		Transform t2 = body2.getTransform();
 		Mass m1 = body1.getMass();
@@ -223,90 +179,38 @@ public class PulleyJoint extends Joint {
 		double l2 = this.n2.normalize();
 		
 		// check for near zero length
-		if (l1 <= Epsilon.E) {
+		if (l1 <= 10.0 * linearTolerance) {
 			// zero out the axis
 			this.n1.zero();
 		}
 		
 		// check for near zero length		
-		if (l2 <= Epsilon.E) {
+		if (l2 <= 10.0 * linearTolerance) {
 			// zero out the axis
 			this.n2.zero();
-		}
-		
-		// compute the position constraint to determine
-		// if we need to solve the velocity constraint
-		double C = this.length - l1 - this.ratio * l2;
-		if (C > 0.0) {
-			// if its greater than zero this indicates that
-			// the current total length is less than the desired
-			// total length, therefore we don't need to apply
-			// any impulse to solve the constraint
-			this.state = Joint.LimitState.INACTIVE;
-			this.impulse = 0.0;
-		} else {
-			// otherwise we need to apply some impulses to 
-			// satisfy the constraint
-			this.state = null;
-		}
-		
-		// check the lengths against the maximum lengths
-		// to see if we need to apply limit constraint impulses
-		if (l1 < this.maxLength1) {
-			// we don't need to apply any limit constraint
-			// impulses if the current length is less than
-			// the maximum
-			this.limitState1 = Joint.LimitState.INACTIVE;
-			this.limitImpulse1 = 0.0;
-		} else {
-			this.limitState1 = null;
-		}
-		// check the other length
-		if (l2 < this.maxLength2) {
-			// we don't need to apply any limit constraint
-			// impulses if the current length is less than
-			// the maximum
-			this.limitState2 = Joint.LimitState.INACTIVE;
-			this.limitImpulse2 = 0.0;
-		} else {
-			this.limitState2 = null;
 		}
 		
 		// compute the inverse effective masses (K matrix, in this case its a scalar) for the constraints
 		double r1CrossN1 = r1.cross(this.n1);
 		double r2CrossN2 = r2.cross(this.n2);
-		this.limitInvK1 = invM1 + invI1 * r1CrossN1 * r1CrossN1;
-		this.limitInvK2 = invM2 + invI2 * r2CrossN2 * r2CrossN2;
-		this.invK = this.limitInvK1 + this.ratio * this.ratio * this.limitInvK2;
+		double pm1 = invM1 + invI1 * r1CrossN1 * r1CrossN1;
+		double pm2 = invM2 + invI2 * r2CrossN2 * r2CrossN2;
+		this.invK = pm1 + this.ratio * this.ratio * pm2;
 		// make sure we can invert it
 		if (this.invK > Epsilon.E) {
 			this.invK = 1.0 / this.invK;
 		} else {
 			this.invK = 0.0;
 		}
-		// make sure we can invert it
-		if (this.limitInvK1 > Epsilon.E) {
-			this.limitInvK1 = 1.0 / this.limitInvK1;
-		} else {
-			this.limitInvK1 = 0.0;
-		}
-		// make sure we can invert it
-		if (this.limitInvK2 > Epsilon.E) {
-			this.limitInvK2 = 1.0 / this.limitInvK2;
-		} else {
-			this.limitInvK2 = 0.0;
-		}
 		
 		// warm start the constraints taking
 		// variable time steps into account
 		double dtRatio = step.getDeltaTimeRatio();
 		this.impulse *= dtRatio;
-		this.limitImpulse1 *= dtRatio;
-		this.limitImpulse2 *= dtRatio;
 		
 		// compute the impulse along the axes
-		Vector2 J1 = this.n1.product(-this.impulse - this.limitImpulse1);
-		Vector2 J2 = this.n2.product(-this.ratio * this.impulse - this.limitImpulse2);
+		Vector2 J1 = this.n1.product(-this.impulse);
+		Vector2 J2 = this.n2.product(-this.ratio * this.impulse);
 		
 		// apply the impulse
 		this.body1.getVelocity().add(J1.product(invM1));
@@ -338,64 +242,21 @@ public class PulleyJoint extends Joint {
 		Vector2 v1 = this.body1.getVelocity().sum(r1.cross(this.body1.getAngularVelocity()));
 		Vector2 v2 = this.body2.getVelocity().sum(r2.cross(this.body2.getAngularVelocity()));
 		
-		// check if we need to apply an impulse to the system
-		if (this.state != Joint.LimitState.INACTIVE) {
-			// compute Jv + b
-			double C = -this.n1.dot(v1) - this.ratio * this.n2.dot(v2);
-			// compute the impulse
-			double impulse = this.invK * (-C);
-			
-			// clamp the impulse
-			double oldImpulse = this.impulse;
-			this.impulse = Math.max(0.0, this.impulse + impulse);
-			impulse = this.impulse - oldImpulse;
-			
-			// compute the impulse along each axis
-			Vector2 J1 = this.n1.product(-impulse);
-			Vector2 J2 = this.n2.product(-impulse * this.ratio);
-			
-			// apply the impulse
-			this.body1.getVelocity().add(J1.product(invM1));
-			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J1));
-			this.body2.getVelocity().add(J2.product(invM2));
-			this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * r2.cross(J2));
-		}
+		// compute Jv + b
+		double C = -this.n1.dot(v1) - this.ratio * this.n2.dot(v2);
+		// compute the impulse
+		double impulse = this.invK * (-C);
+		this.impulse += impulse;
 		
-		// check for the limit on body1
-		if (this.limitState1 != Joint.LimitState.INACTIVE) {
-			// compute Jv + b
-			double C = -this.n1.dot(v1);
-			// compute the impulse
-			double impulse = -this.limitInvK1 * C;
-			
-			// clamp the impulse
-			double oldImpulse = this.limitImpulse1;
-			this.limitImpulse1 = Math.max(0.0, this.limitImpulse1 + impulse);
-			impulse = this.limitImpulse1 - oldImpulse;
-			
-			// apply the impulse
-			Vector2 J1 = this.n1.product(-impulse);
-			this.body1.getVelocity().add(J1.product(invM1));
-			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J1));
-		}
+		// compute the impulse along each axis
+		Vector2 J1 = this.n1.product(-impulse);
+		Vector2 J2 = this.n2.product(-impulse * this.ratio);
 		
-		// check for the limit on body2
-		if (this.limitState2 != Joint.LimitState.INACTIVE) {
-			// compute Jv + b
-			double C = -this.n2.dot(v2);
-			// compute the impulse
-			double impulse = -this.limitInvK2 * C;
-			
-			// clamp the impulse
-			double oldImpulse = this.limitImpulse2;
-			this.limitImpulse2 = Math.max(0.0, this.limitImpulse2 + impulse);
-			impulse = this.limitImpulse2 - oldImpulse;
-			
-			// apply the impulse
-			Vector2 J2 = this.n2.product(-impulse);
-			this.body2.getVelocity().add(J2.product(invM2));
-			this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * r2.cross(J2));
-		}
+		// apply the impulse
+		this.body1.getVelocity().add(J1.product(invM1));
+		this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J1));
+		this.body2.getVelocity().add(J2.product(invM2));
+		this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * r2.cross(J2));
 	}
 	
 	/* (non-Javadoc)
@@ -435,71 +296,47 @@ public class PulleyJoint extends Joint {
 		double l2 = this.n2.normalize();
 		
 		// make sure the length is not near zero
-		if (l1 <= Epsilon.E) {
+		if (l1 <= 10.0 * linearTolerance) {
 			this.n1.zero();
 		}
 		// make sure the length is not near zero
-		if (l2 <= Epsilon.E) {
+		if (l2 <= 10.0 * linearTolerance) {
 			this.n2.zero();
 		}
 		
 		double linearError = 0.0;
 		
-		// check the position constraint
-		if (this.state != Joint.LimitState.INACTIVE) {
-			// compute the constraint error
-			double C = this.length - l1 - this.ratio * l2;
-			linearError = Math.max(linearError, -C);
-			
-			// clamp the error
-			C = Interval.clamp(C + linearTolerance, -maxLinearCorrection, 0.0);
-			double impulse = -this.invK * C;
-			
-			// compute the impulse along the axes
-			Vector2 J1 = this.n1.product(-impulse);
-			Vector2 J2 = this.n2.product(-this.ratio * impulse);
-			
-			// apply the impulse
-			this.body1.translate(J1.x * invM1, J1.y * invM1);
-			this.body1.rotateAboutCenter(r1.cross(J1) * invI1);
-			this.body2.translate(J2.x * invM2, J2.y * invM2);
-			this.body2.rotateAboutCenter(r2.cross(J2) * invI2);
+		// recompute K
+		double r1CrossN1 = r1.cross(this.n1);
+		double r2CrossN2 = r2.cross(this.n2);
+		double pm1 = invM1 + invI1 * r1CrossN1 * r1CrossN1;
+		double pm2 = invM2 + invI2 * r2CrossN2 * r2CrossN2;
+		this.invK = pm1 + this.ratio * this.ratio * pm2;
+		// make sure we can invert it
+		if (this.invK > Epsilon.E) {
+			this.invK = 1.0 / this.invK;
+		} else {
+			this.invK = 0.0;
 		}
 		
-		// check the limit position constraint of the first body
-		if (this.limitState1 != Joint.LimitState.INACTIVE) {
-			// compute the constraint error
-			double C = this.maxLength1 - l1;
-			// save the max error
-			linearError = Math.max(linearError, -C);
-			
-			// clamp the error
-			C = Interval.clamp(C + linearTolerance, -maxLinearCorrection, 0.0);
-			double impulse = -this.limitInvK1 * C;
-			
-			// apply the impulse
-			Vector2 J = this.n1.product(-impulse);
-			this.body1.translate(J.x * invM1, J.y * invM1);
-			this.body1.rotateAboutCenter(r1.cross(J) * invI1);
-		}
+		// compute the constraint error
+		double C = this.length - l1 - this.ratio * l2;
+		linearError = Math.abs(C);
 		
-		// check the limit position constraint of the first body
-		if (this.limitState2 != Joint.LimitState.INACTIVE) {
-			// compute the constraint error
-			double C = this.maxLength2 - l2;
-			// save the max error
-			linearError = Math.max(linearError, -C);
-			
-			// clamp the error
-			C = Interval.clamp(C + linearTolerance, -maxLinearCorrection, 0.0);
-			double impulse = -this.limitInvK2 * C;
-			
-			// apply the impulse
-			Vector2 J = this.n2.product(-impulse);
-			this.body2.translate(J.x * invM2, J.y * invM2);
-			this.body2.rotateAboutCenter(r2.cross(J) * invI2);
-		}
-
+		// clamp the error
+		C = Interval.clamp(C + linearTolerance, -maxLinearCorrection, maxLinearCorrection);
+		double impulse = -this.invK * C;
+		
+		// compute the impulse along the axes
+		Vector2 J1 = this.n1.product(-impulse);
+		Vector2 J2 = this.n2.product(-this.ratio * impulse);
+		
+		// apply the impulse
+		this.body1.translate(J1.x * invM1, J1.y * invM1);
+		this.body1.rotateAboutCenter(r1.cross(J1) * invI1);
+		this.body2.translate(J2.x * invM2, J2.y * invM2);
+		this.body2.rotateAboutCenter(r2.cross(J2) * invI2);
+		
 		return linearError < linearTolerance;
 	}
 	
@@ -582,33 +419,6 @@ public class PulleyJoint extends Joint {
 	}
 	
 	/**
-	 * Returns the minimum length.
-	 * @return double
-	 * @see #setMinLength(double)
-	 */
-	public double getMinLength() {
-		return this.minLength;
-	}
-	
-	/**
-	 * Sets the minimum length.
-	 * <p>
-	 * This method is dependent on the current ratio.
-	 * <p>
-	 * This method calculates the maximum length for both pulley axes. 
-	 * @param minLength the minimum length; must be zero or greater
-	 * @throws IllegalArgumentException if minLength is less than zero
-	 * @see #set(double, double)
-	 */
-	public void setMinLength(double minLength) {
-		if (minLength < 0.0) throw new IllegalArgumentException("The minimum pulley length cannot be negative.");
-		this.minLength = minLength;
-		// recompute the maximum lengths
-		this.maxLength1 = this.length - this.ratio * this.minLength;
-		this.maxLength2 = (this.length - this.minLength) / this.ratio;
-	}
-	
-	/**
 	 * Returns the pulley ratio.
 	 * @return double
 	 */
@@ -622,41 +432,21 @@ public class PulleyJoint extends Joint {
 	 * The ratio value is used to simulate a block-and-tackle.  A ratio of 1.0 is the default
 	 * and indicates that the pulley is not a block-and-tackle.
 	 * <p>
-	 * This method recomputes the maximum lengths.
+	 * This method recomputes the total length of the pulley system.
 	 * @param ratio the ratio; must be greater than zero
 	 * @throws IllegalArgumentException if ratio is less than or equal to zero
-	 * @see #set(double, double)
 	 */
 	public void setRatio(double ratio) {
 		if (ratio <= 0.0) throw new IllegalArgumentException("The pulley ratio must be greater than zero.");
-		this.ratio = ratio;
-		// compute the new length
-		this.length = this.length1 + this.ratio * this.length2;
-		// compute the new maximum lengths
-		this.maxLength1 = this.length - this.ratio * this.minLength;
-		this.maxLength2 = (this.length - this.minLength) / this.ratio;
-	}
-	
-	/**
-	 * Sets both the ratio and the minimum length.
-	 * @param ratio the ratio; must be greater than zero
-	 * @param minLength the minimum length; must be zero or greater
-	 * @throws IllegalArgumentException if ratio is less than or equal to zero or minLength is less than zero
-	 * @see #setMinLength(double)
-	 * @see #setRatio(double)
-	 */
-	public void set(double ratio, double minLength) {
-		// check the ratio
-		if (ratio <= 0.0) throw new IllegalArgumentException("The pulley ratio must be greater than zero.");
-		// check the minimum length
-		if (minLength < 0.0) throw new IllegalArgumentException("The minimum pulley length cannot be negative.");
-		// set the new values
-		this.ratio = ratio;
-		this.minLength = minLength;
-		// compute the new length
-		this.length = this.length1 + this.ratio * this.length2;
-		// compute the new maximum lengths
-		this.maxLength1 = this.length - this.ratio * this.minLength;
-		this.maxLength2 = (this.length - this.minLength) / this.ratio;
+		// make sure the ratio changed
+		if (ratio != this.ratio) {
+			// set the new ratio
+			this.ratio = ratio;
+			// compute the new length
+			this.length = this.length1 + this.ratio * this.length2;
+			// wake up both bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+		}
 	}
 }

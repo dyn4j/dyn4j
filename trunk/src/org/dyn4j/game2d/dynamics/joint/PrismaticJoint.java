@@ -221,6 +221,8 @@ public class PrismaticJoint extends Joint {
 		
 		this.K.m10 = this.K.m01;
 		this.K.m11 = invI1 + invI2;
+		// handle prismatic constraint between two fixed rotation bodies
+		if (this.K.m11 <= Epsilon.E) this.K.m11 = 1.0;
 		this.K.m12 = this.a1 * invI1 + this.a2 * invI2;
 		
 		this.K.m20 = this.K.m02;
@@ -518,6 +520,8 @@ public class PrismaticJoint extends Joint {
 			
 			this.K.m10 = this.K.m01;
 			this.K.m11 = invI1 + invI2;
+			// handle prismatic constraint between two fixed rotation bodies
+			if (this.K.m11 <= Epsilon.E) this.K.m11 = 1.0;
 			this.K.m12 = this.a1 * invI1 + this.a2 * invI2;
 			
 			this.K.m20 = this.K.m02;
@@ -534,6 +538,8 @@ public class PrismaticJoint extends Joint {
 			
 			this.K.m10 = this.K.m01;
 			this.K.m11 = invI1 + invI2;
+			// handle prismatic constraint between two fixed rotation bodies
+			if (this.K.m11 <= Epsilon.E) this.K.m11 = 1.0;
 			this.K.m12 = 0.0;
 			
 			this.K.m20 = 0.0;
@@ -690,9 +696,12 @@ public class PrismaticJoint extends Joint {
 	 * @param motorSpeed the target motor speed in meters / second
 	 */
 	public void setMotorSpeed(double motorSpeed) {
-		// wake up the joined bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
+		// only wake up the bodies if the motor is currently enabled
+		if (this.motorEnabled) {
+			// wake up the joined bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+		}
 		// set the new value
 		this.motorSpeed = motorSpeed;
 	}
@@ -715,19 +724,17 @@ public class PrismaticJoint extends Joint {
 	public void setMaxMotorForce(double maxMotorForce) {
 		// make sure its greater than or equal to zero
 		if (maxMotorForce < 0.0) throw new IllegalArgumentException("The maximum motor force must be greater than or equal to zero.");
-		// wake up the joined bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
 		// set the new value
 		this.maxMotorForce = maxMotorForce;
 	}
 	
 	/**
 	 * Returns the applied motor force.
+	 * @param invdt the inverse delta time
 	 * @return double
 	 */
-	public double getMotorForce() {
-		return this.motorImpulse;
+	public double getMotorForce(double invdt) {
+		return this.motorImpulse * invdt;
 	}
 	
 	/**
@@ -765,10 +772,15 @@ public class PrismaticJoint extends Joint {
 	 */
 	public void setLowerLimit(double lowerLimit) {
 		// check for valid value
-		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException("The lower limit cannot be greater than the upper limit."); 
-		// wake up the joined bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
+		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException("The lower limit cannot be greater than the upper limit.");
+		// make sure the limits are enabled and that the limit has changed
+		if (this.limitEnabled && lowerLimit != this.lowerLimit) {
+			// wake up the joined bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+			// reset the limit impulse
+			this.impulse.z = 0.0;
+		}
 		// set the new value
 		this.lowerLimit = lowerLimit;
 	}
@@ -788,10 +800,15 @@ public class PrismaticJoint extends Joint {
 	 */
 	public void setUpperLimit(double upperLimit) {
 		// check for valid value
-		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException("The upper limit cannot be less than the lower limit."); 
-		// wake up the joined bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
+		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException("The upper limit cannot be less than the lower limit.");
+		// make sure the limits are enabled and that the limit has changed
+		if (this.limitEnabled && upperLimit != this.upperLimit) {
+			// wake up the joined bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+			// reset the limit impulse
+			this.impulse.z = 0.0;
+		}
 		// set the new value
 		this.upperLimit = upperLimit;
 	}
@@ -806,12 +823,17 @@ public class PrismaticJoint extends Joint {
 	 */
 	public void setLimits(double lowerLimit, double upperLimit) {
 		if (lowerLimit > upperLimit) throw new IllegalArgumentException("The lower limit cannot be greater than the upper limit.");
-		// wake up the bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
-		// set the values
-		this.lowerLimit = lowerLimit;
-		this.upperLimit = upperLimit;
+		// make sure the limits are enabled and that the limit has changed
+		if (this.limitEnabled && upperLimit != this.upperLimit && lowerLimit != this.lowerLimit) {
+			// wake up the bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+			// set the values
+			this.lowerLimit = lowerLimit;
+			this.upperLimit = upperLimit;
+			// reset the limit impulse
+			this.impulse.z = 0.0;
+		}
 	}
 	
 	/**
