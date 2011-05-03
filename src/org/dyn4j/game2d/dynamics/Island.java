@@ -178,13 +178,13 @@ public class Island {
 
 		// solve the velocity constraints
 		for (int i = 0; i < velocitySolverIterations; i++) {
-			this.contactConstraintSolver.solveVelocityContraints();
-			
 			// solve the joint velocity constraints
 			for (int j = 0; j < jSize; j++) {
 				Joint joint = this.joints.get(j);
 				joint.solveVelocityConstraints(step);
 			}
+			
+			this.contactConstraintSolver.solveVelocityContraints();
 		}
 		
 		// the max settings
@@ -222,15 +222,17 @@ public class Island {
 		
 		// solve the position constraints
 		for (int i = 0; i < positionSolverIterations; i++) {
-			boolean solved = this.contactConstraintSolver.solvePositionContraints();
+			boolean contactsSolved = this.contactConstraintSolver.solvePositionContraints();
 			
 			// solve the joint position constraints
+			boolean jointsSolved = true;
 			for (int j = 0; j < jSize; j++) {
 				Joint joint = this.joints.get(j);
-				solved = solved && joint.solvePositionConstraints();
+				boolean jointSolved = joint.solvePositionConstraints();
+				jointsSolved = jointsSolved && jointSolved;
 			}
 			
-			if (solved) {
+			if (contactsSolved && jointsSolved) {
 				break;
 			}
 		}

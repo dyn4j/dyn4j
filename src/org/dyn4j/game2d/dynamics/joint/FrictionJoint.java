@@ -272,9 +272,6 @@ public class FrictionJoint extends Joint {
 	public void setMaxTorque(double maxTorque) {
 		// make sure its greater than or equal to zero
 		if (maxTorque < 0.0) throw new IllegalArgumentException("The maximum torque must be greater than or equal to zero.");
-		// wake up the bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
 		// set the max
 		this.maxTorque = maxTorque;
 	}
@@ -295,9 +292,6 @@ public class FrictionJoint extends Joint {
 	public void setMaxForce(double maxForce) {
 		// make sure its greater than or equal to zero
 		if (maxForce < 0.0) throw new IllegalArgumentException("The maximum force must be greater than or equal to zero.");
-		// wake up the bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
 		// set the max
 		this.maxForce = maxForce;
 	}

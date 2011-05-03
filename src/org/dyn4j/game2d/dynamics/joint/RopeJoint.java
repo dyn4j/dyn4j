@@ -143,10 +143,10 @@ public class RopeJoint extends Joint {
 		Settings settings = Settings.getInstance();
 		double linearTolerance = settings.getLinearTolerance();
 		
-		Transform t1 = body1.getTransform();
-		Transform t2 = body2.getTransform();
-		Mass m1 = body1.getMass();
-		Mass m2 = body2.getMass();
+		Transform t1 = this.body1.getTransform();
+		Transform t2 = this.body2.getTransform();
+		Mass m1 = this.body1.getMass();
+		Mass m2 = this.body2.getMass();
 		
 		double invM1 = m1.getInverseMass();
 		double invM2 = m2.getInverseMass();
@@ -223,15 +223,16 @@ public class RopeJoint extends Joint {
 			invMass += invM2 + invI2 * cr2n * cr2n;
 			
 			// check for zero before inverting
-			this.invK = Math.abs(invMass) <= Epsilon.E ? 0.0 : 1.0 / invMass;
+			this.invK = invMass <= Epsilon.E ? 0.0 : 1.0 / invMass;
 			
 			// warm start
-			impulse *= step.getDeltaTimeRatio();
-			Vector2 J = n.product(impulse);
-			body1.getVelocity().add(J.product(invM1));
-			body1.setAngularVelocity(body1.getAngularVelocity() + invI1 * r1.cross(J));
-			body2.getVelocity().subtract(J.product(invM2));
-			body2.setAngularVelocity(body2.getAngularVelocity() - invI2 * r2.cross(J));
+			this.impulse *= step.getDeltaTimeRatio();
+			
+			Vector2 J = this.n.product(this.impulse);
+			this.body1.getVelocity().add(J.product(invM1));
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J));
+			this.body2.getVelocity().subtract(J.product(invM2));
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * r2.cross(J));
 		} else {
 			// clear the impulse
 			this.impulse = 0.0;
@@ -245,10 +246,10 @@ public class RopeJoint extends Joint {
 	public void solveVelocityConstraints(Step step) {
 		// check if the constraint need to be applied
 		if (this.limitState != Joint.LimitState.INACTIVE) {
-			Transform t1 = body1.getTransform();
-			Transform t2 = body2.getTransform();
-			Mass m1 = body1.getMass();
-			Mass m2 = body2.getMass();
+			Transform t1 = this.body1.getTransform();
+			Transform t2 = this.body2.getTransform();
+			Mass m1 = this.body1.getMass();
+			Mass m2 = this.body2.getMass();
 			
 			double invM1 = m1.getInverseMass();
 			double invM2 = m2.getInverseMass();
@@ -260,22 +261,22 @@ public class RopeJoint extends Joint {
 			Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
 			
 			// compute the relative velocity
-			Vector2 v1 = body1.getVelocity().sum(r1.cross(body1.getAngularVelocity()));
-			Vector2 v2 = body2.getVelocity().sum(r2.cross(body2.getAngularVelocity()));
+			Vector2 v1 = this.body1.getVelocity().sum(r1.cross(this.body1.getAngularVelocity()));
+			Vector2 v2 = this.body2.getVelocity().sum(r2.cross(this.body2.getAngularVelocity()));
 			
 			// compute Jv
-			double Jv = n.dot(v1.difference(v2));
+			double Jv = this.n.dot(v1.difference(v2));
 			
 			// compute lambda (the magnitude of the impulse)
 			double j = -this.invK * (Jv);
 			this.impulse += j;
 			
 			// apply the impulse
-			Vector2 J = n.product(j);
-			body1.getVelocity().add(J.product(invM1));
-			body1.setAngularVelocity(body1.getAngularVelocity() + invI1 * r1.cross(J));
-			body2.getVelocity().subtract(J.product(invM2));
-			body2.setAngularVelocity(body2.getAngularVelocity() - invI2 * r2.cross(J));
+			Vector2 J = this.n.product(j);
+			this.body1.getVelocity().add(J.product(invM1));
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J));
+			this.body2.getVelocity().subtract(J.product(invM2));
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * r2.cross(J));
 		}
 	}
 	
@@ -299,39 +300,39 @@ public class RopeJoint extends Joint {
 			double linearTolerance = settings.getLinearTolerance();
 			double maxLinearCorrection = settings.getMaxLinearCorrection();
 			
-			Transform t1 = body1.getTransform();
-			Transform t2 = body2.getTransform();
-			Mass m1 = body1.getMass();
-			Mass m2 = body2.getMass();
+			Transform t1 = this.body1.getTransform();
+			Transform t2 = this.body2.getTransform();
+			Mass m1 = this.body1.getMass();
+			Mass m2 = this.body2.getMass();
 			
 			double invM1 = m1.getInverseMass();
 			double invM2 = m2.getInverseMass();
 			double invI1 = m1.getInverseInertia();
 			double invI2 = m2.getInverseInertia();
 			
-			Vector2 c1 = body1.getWorldCenter();
-			Vector2 c2 = body2.getWorldCenter();
+			Vector2 c1 = this.body1.getWorldCenter();
+			Vector2 c2 = this.body2.getWorldCenter();
 			
 			// recompute n since it may have changed after integration
 			Vector2 r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
 			Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
-			n = r1.sum(body1.getWorldCenter()).subtract(r2.sum(body2.getWorldCenter()));
+			this.n = r1.sum(this.body1.getWorldCenter()).subtract(r2.sum(this.body2.getWorldCenter()));
 			
 			// solve the position constraint
-			double l = n.normalize();
+			double l = this.n.normalize();
 			double C = l - targetDistance;
 			C = Interval.clamp(C, -maxLinearCorrection, maxLinearCorrection);
 			
 			double impulse = -this.invK * C;
 			
-			Vector2 J = n.product(impulse);
+			Vector2 J = this.n.product(impulse);
 			
 			// translate and rotate the objects
-			body1.translate(J.product(invM1));
-			body1.rotate(invI1 * r1.cross(J), c1);
+			this.body1.translate(J.product(invM1));
+			this.body1.rotate(invI1 * r1.cross(J), c1);
 			
-			body2.translate(J.product(-invM2));
-			body2.rotate(-invI2 * r2.cross(J), c2);
+			this.body2.translate(J.product(-invM2));
+			this.body2.rotate(-invI2 * r2.cross(J), c2);
 			
 			return Math.abs(C) < linearTolerance;
 		} else {
@@ -396,9 +397,12 @@ public class RopeJoint extends Joint {
 		if (maximumDistance < 0.0) throw new IllegalArgumentException("The max distance must be greater than or equal to zero.");
 		// make sure the minimum is less than or equal to the maximum
 		if (maximumDistance < this.minimumDistance) throw new IllegalArgumentException("The maximum distance must be greater than or equal to the current minimum distance.");
-		// wake up both bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
+		// make sure its changed and enabled before waking the bodies
+		if (this.maximumEnabled && maximumDistance != this.maximumDistance) {
+			// wake up both bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+		}
 		// set the new target distance
 		this.maximumDistance = maximumDistance;
 	}
@@ -433,9 +437,12 @@ public class RopeJoint extends Joint {
 		if (minimumDistance < 0.0) throw new IllegalArgumentException("The minimum distance must be greater than or equal to zero.");
 		// make sure the minimum is less than or equal to the maximum
 		if (minimumDistance > this.maximumDistance) throw new IllegalArgumentException("The minimum distance must be less than or equal to the current maximum distance.");
-		// wake up both bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
+		// make sure its changed and enabled before waking the bodies
+		if (this.minimumEnabled && minimumDistance != this.minimumDistance) {
+			// wake up both bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+		}
 		// set the new target distance
 		this.minimumDistance = minimumDistance;
 	}
@@ -465,9 +472,12 @@ public class RopeJoint extends Joint {
 		if (maximumDistance < 0.0) throw new IllegalArgumentException("The maximum distance must be greater than or equal to zero.");
 		// make sure the min < max
 		if (minimumDistance > maximumDistance) throw new IllegalArgumentException("The minimum distance must be less than the maximum distance.");
-		// wake up the bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
+		// make sure one of the limits is enabled and has changed before waking the bodies
+		if ((this.minimumEnabled && minimumDistance != this.minimumDistance) || (this.maximumEnabled && maximumDistance != this.maximumDistance)) {
+			// wake up the bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+		}
 		// set the limits
 		this.maximumDistance = maximumDistance;
 		this.minimumDistance = minimumDistance;
@@ -480,11 +490,11 @@ public class RopeJoint extends Joint {
 	 * @throws IllegalArgumentException if minimumDistance is less than zero, maximumDistance is less than zero, or minimumDistance is greater than maximumDistance
 	 */
 	public void setMinimumMaximumEnabled(double minimumDistance, double maximumDistance) {
-		// set the values
-		this.setMinimumMaximum(minimumDistance, maximumDistance);
 		// enable the limits
 		this.maximumEnabled = true;
 		this.minimumEnabled = true;
+		// set the values
+		this.setMinimumMaximum(minimumDistance, maximumDistance);
 	}
 	
 	/**
@@ -495,6 +505,9 @@ public class RopeJoint extends Joint {
 	public void setMinimumMaximumEnabled(boolean flag) {
 		this.maximumEnabled = flag;
 		this.minimumEnabled = flag;
+		// wake up the bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
 	}
 	
 	/**
@@ -508,9 +521,12 @@ public class RopeJoint extends Joint {
 	public void setMinimumMaximum(double distance) {
 		// make sure the distance is greater than zero
 		if (distance < 0.0) throw new IllegalArgumentException("The distance must be greater than or equal to zero.");
-		// wake up the bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
+		// make sure one of the limits is enabled and has changed before waking the bodies
+		if ((this.minimumEnabled && distance != this.minimumDistance) || (this.maximumEnabled && distance != this.maximumDistance)) {
+			// wake up the bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+		}
 		// set the limits
 		this.maximumDistance = distance;
 		this.minimumDistance = distance;
@@ -526,10 +542,10 @@ public class RopeJoint extends Joint {
 	 * @since 2.2.2
 	 */
 	public void setMinimumMaximumEnabled(double distance) {
-		// set the values
-		this.setMinimumMaximum(distance);
 		// enable the limits
 		this.maximumEnabled = true;
 		this.minimumEnabled = true;
+		// set the values
+		this.setMinimumMaximum(distance);
 	}
 }
