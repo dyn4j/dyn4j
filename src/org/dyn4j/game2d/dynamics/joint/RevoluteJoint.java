@@ -411,30 +411,29 @@ public class RevoluteJoint extends Joint {
 		Vector2 p = p1.difference(p2);
 		linearError = p.getMagnitude();
 
-		// Handle large detachment.
-        final double k_allowedStretch = 10.0f * linearTolerance;
-        if (p.getMagnitudeSquared() > k_allowedStretch * k_allowedStretch)
-        {
-                // Use a particle solution (no rotation).
-                Vector2 u = p.copy(); u.normalize();
-                double m = invM1 + invM2;
-                if (m > Epsilon.E)
-                {
-                        m = 1.0 / m;
-                }
-                
-                Vector2 impulse = p.multiply(-m);//m * (-C);
-//                const float32 k_beta = 0.5f;
-                final double k_beta = 0.5;
-//                b1->m_sweep.c -= k_beta * invMass1 * impulse;
-//                b2->m_sweep.c += k_beta * invMass2 * impulse;
-                this.body1.translate(impulse.product(invM1 * k_beta));
-        		this.body2.translate(impulse.product(-invM2 * k_beta));
-                
-//                C = b2->m_sweep.c + r2 - b1->m_sweep.c - r1;
-        		p1 = this.body1.getWorldCenter().add(r1);
-        		p2 = this.body2.getWorldCenter().add(r2);
-        		p = p1.difference(p2);
+		// handle large separation
+        final double large = 10.0 * linearTolerance;
+        // is the joint separation enough?
+        if (p.getMagnitudeSquared() > large * large) {
+        	// solve the separation of the joint ignoring rotation
+        	double m = invM1 + invM2;
+        	// invert if non-zero
+        	if (m > Epsilon.E) {
+        		m = 1.0 / m;
+        	}
+        	
+        	// solve for the impulse
+        	Vector2 impulse = p.multiply(-m);
+        	// scale by a half (don't bring them all the way together)
+        	final double scale = 0.5;
+        	// apply the impulse
+        	this.body1.translate(impulse.product(invM1 * scale));
+        	this.body2.translate(impulse.product(-invM2 * scale));
+        	
+        	// recompute the separation vector
+        	p1 = this.body1.getWorldCenter().add(r1);
+        	p2 = this.body2.getWorldCenter().add(r2);
+        	p = p1.difference(p2);
         }
 		
 		// compute the K matrix
