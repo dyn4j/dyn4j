@@ -116,6 +116,9 @@ public class Decompose extends Test {
 	/** Flag indicating the animation is complete */
 	private boolean done = false;
 	
+	/** Flag indicating the points list is being populated by the user's mouse */
+	private boolean user = false;
+	
 	/** The mouse to show the current position */
 	private Mouse mouse;
 	
@@ -124,6 +127,9 @@ public class Decompose extends Test {
 	
 	/** True if an error occurred in tesselation */
 	private boolean error = false;
+		
+	/** The GLUT library used for text rendering */
+	private GLUT glut = new GLUT();
 	
 	/**
 	 * Default constructor.
@@ -193,7 +199,26 @@ public class Decompose extends Test {
 	 */
 	@Override
 	protected void setup() {
-		this.points = new ArrayList<Vector2>();
+		// use the first poly to start
+		Vector2[] points = this.polygons[this.currentPolgyon];
+		// make sure its not null
+		if (points != null) {
+			// the file was loaded successfully
+			// clear the current point list
+			this.points = new ArrayList<Vector2>();
+			// add all the points to the list
+			for (int i = 0; i < points.length; i++) {
+				Vector2 p = points[i];
+				this.points.add(p);
+			}
+			this.vertices = null;
+			this.elapsedTime = 0;
+			this.toIndex = 0;
+			this.triangles = null;
+			this.error = false;
+			this.done = false;
+			this.user = false;
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -308,9 +333,18 @@ public class Decompose extends Test {
 		gl.glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 		gl.glLoadIdentity();
 		gl.glRasterPos2d(-this.size.width / 2.0 + 5.0, this.size.height / 2.0 - 15.0);
-		GLUT glut = new GLUT();
-		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "(" + (this.currentAlgorithm + 1) + " of " + this.algorithms.length + ") " + this.algorithms[this.currentAlgorithm].getClass().getSimpleName() + " : " + n);
+		this.glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "(" + (this.currentAlgorithm + 1) + " of " + this.algorithms.length + ") " + this.algorithms[this.currentAlgorithm].getClass().getSimpleName() + " : " + n);
 		gl.glPopMatrix();
+		
+		// see if the user is using one of the pre-made data files
+		if (!this.user) {
+			gl.glPushMatrix();
+			gl.glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+			gl.glLoadIdentity();
+			gl.glRasterPos2d(-this.size.width / 2.0 + 5.0, this.size.height / 2.0 - 30.0);
+			this.glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Current File: " + this.getFileNameFromPath(this.dataFiles[this.currentPolgyon]));
+			gl.glPopMatrix();
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -511,7 +545,7 @@ public class Decompose extends Test {
 			this.done = false;
 		}
 		
-		// look for the t key
+		// look for the d key
 		if (keyboard.isPressed(KeyEvent.VK_D)) {
 			// only tesselate polys with 4 or more vertices
 			if (this.points.size() > 3) {
@@ -542,22 +576,13 @@ public class Decompose extends Test {
 		
 		// look for the left mouse button
 		if (mouse.isPressed(MouseEvent.BUTTON1)) {
-			if (this.vertices != null || this.error) {
-				// stop the tesselation animation and start a new poly
-				this.vertices = null;
-				this.points.clear();
-				this.elapsedTime = 0;
-				this.toIndex = 0;
-				this.triangles = null;
-				this.error = false;
-				this.done = false;
-			} else {
-				// add the point to the list of points
-				Point p = mouse.getRelativeLocation();
-				// convert to world coordinates
-				Vector2 v = this.screenToWorld(p.x, p.y);
-				this.points.add(v);
-			}
+			// set the user flag
+			this.user = true;
+			// add the point to the list of points
+			Point p = mouse.getRelativeLocation();
+			// convert to world coordinates
+			Vector2 v = this.screenToWorld(p.x, p.y);
+			this.points.add(v);
 		}
 		
 		// look for the right mouse button
@@ -569,6 +594,7 @@ public class Decompose extends Test {
 			this.triangles = null;
 			this.error = false;
 			this.done = false;
+			this.user = true;
 		}
 		
 		if (keyboard.isPressed(KeyEvent.VK_F)) {
@@ -597,6 +623,7 @@ public class Decompose extends Test {
 						this.triangles = null;
 						this.error = false;
 						this.done = false;
+						this.user = true;
 					} else {
 						JOptionPane.showMessageDialog(null, "An error occurred loading the selected file.  Please check the format.\nExamine the Console for details.");
 					}
@@ -622,12 +649,14 @@ public class Decompose extends Test {
 		
 		// check for the 2 key
 		if (keyboard.isPressed(KeyEvent.VK_2)) {
-			// get the polygon requested
-			Vector2[] points = this.polygons[this.currentPolgyon++];
 			// increment the current polygon
+			this.currentPolgyon++;
+			// make sure its not more than the length
 			if (this.currentPolgyon == this.polygons.length) {
 				this.currentPolgyon = 0;
 			}
+			// get the polygon requested
+			Vector2[] points = this.polygons[this.currentPolgyon];
 			// make sure its not null
 			if (points != null) {
 				// the file was loaded successfully
@@ -644,6 +673,7 @@ public class Decompose extends Test {
 				this.triangles = null;
 				this.error = false;
 				this.done = false;
+				this.user = false;
 			}
 		}
 		
@@ -760,5 +790,18 @@ public class Decompose extends Test {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	/**
+	 * Returns the file name for the given path.
+	 * @param path the path to the file
+	 * @return String the file name without the path
+	 * @since 2.2.4
+	 */
+	private String getFileNameFromPath(String path) {
+		String[] parts = path.split("/");
+		String name = parts[parts.length - 1];
+		name = name.replace(".dat", "");
+		return name;
 	}
 }
