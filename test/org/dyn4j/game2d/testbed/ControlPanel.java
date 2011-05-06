@@ -1091,7 +1091,7 @@ public class ControlPanel extends JFrame {
 		y++;
 		
 		// anti-aliasing
-		JLabel lblAnti = new JLabel("Anti-Aliasing", this.helpIcon, JLabel.LEFT);
+		JLabel lblAnti = new JLabel("Anti-Aliasing (MSAA 2x)", this.helpIcon, JLabel.LEFT);
 		lblAnti.setToolTipText("<html>Toggles the use of anti-aliasing.</html>");
 		pnlDraw.add(lblAnti, new GridBagConstraints(
 				0, y, 1, 1, 0, 0, GridBagConstraints.ABOVE_BASELINE_LEADING, 

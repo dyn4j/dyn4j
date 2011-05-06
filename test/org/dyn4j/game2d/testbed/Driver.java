@@ -79,6 +79,8 @@ public class Driver {
 		// setup OpenGL capabilities
 		GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL2));
 		caps.setDoubleBuffered(true);
+		caps.setSampleBuffers(true);
+		caps.setNumSamples(2);
 		caps.setHardwareAccelerated(true);
 		
 		// create the testbed

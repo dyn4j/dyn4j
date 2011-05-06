@@ -174,19 +174,25 @@ public class TestBed extends GLCanvas implements GLEventListener {
 	private GLUT glut = new GLUT();
 	
 	/** The id of the texture that the FBO will render to */
-	private int texId;
+	private int textureId;
 	
 	/** The FBO id for rendering to a different target */
-	private int fboId;
+	private int frameBufferId;
+	
+	/** The render buffer id for the color components (for Multisampling) */
+	private int colorRenderBufferId;
+	
+	/** The render buffer id for the depth components (for Multisampling) */
+	private int depthRenderBufferId;
 	
 	/** The id of the blur shader program */
-	private int pBlurId;
+	private int blurShaderProgramId;
 	
 	/** The id of the blur vertex shader */
-	private int vsBlurId;
+	private int blurVertexShaderId;
 	
 	/** The id of the blur fragment shader */
-	private int fsBlurId;
+	private int blurFragmentShaderId;
 	
 	/** Whether to use the shader or not */
 	private boolean shaderProgramValid = false;
@@ -425,10 +431,10 @@ public class TestBed extends GLCanvas implements GLEventListener {
 		// get a texture object
 		int[] ids = new int[1];
 		gl.glGenTextures(1, ids, 0);
-		texId = ids[0];
+		this.textureId = ids[0];
 		
 		// bind the texture to set it up
-		gl.glBindTexture(GL.GL_TEXTURE_2D, texId);
+		gl.glBindTexture(GL.GL_TEXTURE_2D, this.textureId);
 		gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
 		gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR);
 		gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA8, width, height, 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, null);
@@ -437,12 +443,35 @@ public class TestBed extends GLCanvas implements GLEventListener {
 		
 		// create a frame buffer object (FBO)
 		gl.glGenFramebuffers(1, ids, 0);
-		fboId = ids[0];
+		this.frameBufferId = ids[0];
 		
 		// bind the FBO to set it up
-		gl.glBindFramebuffer(GL.GL_FRAMEBUFFER, fboId);
+		gl.glBindFramebuffer(GL.GL_FRAMEBUFFER, this.frameBufferId);
 		// attach the texture to the FBO
-		gl.glFramebufferTexture2D(GL.GL_FRAMEBUFFER, GL.GL_COLOR_ATTACHMENT0, GL.GL_TEXTURE_2D, texId, 0);
+		gl.glFramebufferTexture2D(GL.GL_FRAMEBUFFER, GL.GL_COLOR_ATTACHMENT0, GL.GL_TEXTURE_2D, this.textureId, 0);
+		
+		{
+			// setup multisampling
+			
+			// create the multisampling buffer
+			gl.glGenRenderbuffers(1, ids, 0);
+			this.colorRenderBufferId = ids[0];
+			gl.glBindRenderbuffer(GL.GL_RENDERBUFFER, this.colorRenderBufferId);
+			gl.glRenderbufferStorageMultisample(GL.GL_RENDERBUFFER, 2, GL.GL_RGBA8, width, height);
+			
+			// create the depth multisampling buffer
+			gl.glGenRenderbuffers(1, ids, 0);
+			this.depthRenderBufferId = ids[0];
+			gl.glBindRenderbuffer(GL.GL_RENDERBUFFER, this.depthRenderBufferId);
+			gl.glRenderbufferStorageMultisample(GL.GL_RENDERBUFFER, 2, GL2.GL_DEPTH_COMPONENT, width, height);
+			
+			// attach the buffers to the frame buffer
+			gl.glFramebufferRenderbuffer(GL.GL_FRAMEBUFFER, GL2.GL_COLOR_ATTACHMENT1, GL.GL_RENDERBUFFER, this.colorRenderBufferId);
+			gl.glFramebufferRenderbuffer(GL.GL_FRAMEBUFFER, GL.GL_DEPTH_ATTACHMENT, GL.GL_RENDERBUFFER, this.depthRenderBufferId);
+			
+			gl.glBindRenderbuffer(GL.GL_RENDERBUFFER, 0);
+		}
+		
 		// check the FBO status
 		int status = gl.glCheckFramebufferStatus(GL.GL_FRAMEBUFFER);
 		boolean useFrameBuffer = false;
@@ -469,36 +498,36 @@ public class TestBed extends GLCanvas implements GLEventListener {
 				fsBlur = Shader.load("/org/dyn4j/game2d/testbed/shaders/blur.fs");
 				
 				// create the shaders
-				vsBlurId = gl.glCreateShader(GL2.GL_VERTEX_SHADER);
-				fsBlurId = gl.glCreateShader(GL2.GL_FRAGMENT_SHADER);
+				this.blurVertexShaderId = gl.glCreateShader(GL2.GL_VERTEX_SHADER);
+				this.blurFragmentShaderId = gl.glCreateShader(GL2.GL_FRAGMENT_SHADER);
 				
 				// set the source for the shaders
-				gl.glShaderSource(vsBlurId, vsBlur.source.length, vsBlur.source, vsBlur.lengths, 0);
-				gl.glShaderSource(fsBlurId, fsBlur.source.length, fsBlur.source, fsBlur.lengths, 0);
+				gl.glShaderSource(this.blurVertexShaderId, vsBlur.source.length, vsBlur.source, vsBlur.lengths, 0);
+				gl.glShaderSource(this.blurFragmentShaderId, fsBlur.source.length, fsBlur.source, fsBlur.lengths, 0);
 				
 				// compile the shaders
-				gl.glCompileShader(vsBlurId);
-				gl.glCompileShader(fsBlurId);
+				gl.glCompileShader(this.blurVertexShaderId);
+				gl.glCompileShader(this.blurFragmentShaderId);
 				
 				// create the program
-				pBlurId = gl.glCreateProgram();
+				this.blurShaderProgramId = gl.glCreateProgram();
 				
 				// attach the shaders to the programs
-				gl.glAttachShader(pBlurId, vsBlurId);
-				gl.glAttachShader(pBlurId, fsBlurId);
+				gl.glAttachShader(this.blurShaderProgramId, this.blurVertexShaderId);
+				gl.glAttachShader(this.blurShaderProgramId, this.blurFragmentShaderId);
 				
 				// link the program
-				gl.glLinkProgram(pBlurId);
+				gl.glLinkProgram(this.blurShaderProgramId);
 				
 				// validate the programs
-				gl.glValidateProgram(pBlurId);
+				gl.glValidateProgram(this.blurShaderProgramId);
 				
 				// verify the shader program can be used
-				if (ShaderUtil.isProgramValid(gl, pBlurId, System.out)
-				 && ShaderUtil.isShaderStatusValid(gl, vsBlurId, GL2.GL_COMPILE_STATUS, System.out)
-				 && ShaderUtil.isShaderStatusValid(gl, fsBlurId, GL2.GL_COMPILE_STATUS, System.out)) {
+				if (ShaderUtil.isProgramValid(gl, this.blurShaderProgramId, System.out)
+				 && ShaderUtil.isShaderStatusValid(gl, this.blurVertexShaderId, GL2.GL_COMPILE_STATUS, System.out)
+				 && ShaderUtil.isShaderStatusValid(gl, this.blurFragmentShaderId, GL2.GL_COMPILE_STATUS, System.out)) {
 					// we are good to use the shader
-					shaderProgramValid = true;
+					this.shaderProgramValid = true;
 				}
 			} catch (FileNotFoundException e) {
 				System.err.println("File not found in classpath:");
@@ -519,25 +548,31 @@ public class TestBed extends GLCanvas implements GLEventListener {
     	GL2 gl = glDrawable.getGL().getGL2();
     	
     	// create an array of ids to pass to the delete functions
-    	int[] ids = new int[] { fboId, texId };
+    	int[] ids = new int[] { this.colorRenderBufferId,
+    							this.depthRenderBufferId,
+    							this.frameBufferId,
+    							this.textureId };
+    	
+    	// delete the render buffers for the MSAA 2x
+    	gl.glDeleteRenderbuffers(2, ids, 0);
     	
     	// delete the FBO (if this is the current draw target glBindFramebuffer is called
     	// using the default target implicitly)
-    	gl.glDeleteFramebuffers(1, ids, 0);
+    	gl.glDeleteFramebuffers(1, ids, 2);
     	
     	// delete the texture that the FBO was rendering into
-    	gl.glDeleteTextures(1, ids, 1);
+    	gl.glDeleteTextures(1, ids, 3);
     	
     	// detach the shaders from the shader program
-    	gl.glDetachShader(pBlurId, vsBlurId);
-    	gl.glDetachShader(pBlurId, fsBlurId);
+    	gl.glDetachShader(this.blurShaderProgramId, this.blurVertexShaderId);
+    	gl.glDetachShader(this.blurShaderProgramId, this.blurFragmentShaderId);
     	
     	// delete the shaders
-    	gl.glDeleteShader(vsBlurId);
-    	gl.glDeleteShader(fsBlurId);
+    	gl.glDeleteShader(this.blurVertexShaderId);
+    	gl.glDeleteShader(this.blurFragmentShaderId);
     	
     	// delete the shader program
-    	gl.glDeleteProgram(pBlurId);
+    	gl.glDeleteProgram(this.blurShaderProgramId);
     }
     
     /* (non-Javadoc)
@@ -582,15 +617,9 @@ public class TestBed extends GLCanvas implements GLEventListener {
 		
 		// check for anti-aliasing
 		if (draw.isAntiAliased()) {
-			gl.glEnable(GL.GL_LINE_SMOOTH);
-			gl.glEnable(GL2.GL_POLYGON_SMOOTH);
-			gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST);
-			gl.glHint(GL2.GL_POLYGON_SMOOTH_HINT, GL.GL_NICEST);
+			gl.glEnable(GL.GL_MULTISAMPLE);
 		} else {
-			gl.glDisable(GL.GL_LINE_SMOOTH);
-			gl.glDisable(GL2.GL_POLYGON_SMOOTH);
-			gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_FASTEST);
-			gl.glHint(GL2.GL_POLYGON_SMOOTH_HINT, GL.GL_FASTEST);
+			gl.glDisable(GL.GL_MULTISAMPLE);
 		}
 		
 		// check for vertical sync
@@ -611,7 +640,7 @@ public class TestBed extends GLCanvas implements GLEventListener {
 			// applying a blur using a shader program
 			
 			// switch to draw to the FBO
-			gl.glBindFramebuffer(GL.GL_FRAMEBUFFER, fboId);
+			gl.glBindFramebuffer(GL.GL_FRAMEBUFFER, frameBufferId);
 			// set the clear color
 			gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		}
@@ -644,10 +673,10 @@ public class TestBed extends GLCanvas implements GLEventListener {
 			
 			// set the texture to the off screen buffer we have
 			// been rendering to
-			gl.glBindTexture(GL.GL_TEXTURE_2D, texId);
+			gl.glBindTexture(GL.GL_TEXTURE_2D, textureId);
 			
 			// tell OpenGL to use our shader program instead of the default
-			gl.glUseProgram(pBlurId);
+			gl.glUseProgram(blurShaderProgramId);
 			// pass the parameters to the shader program
 			// NOTE: for sampler objects you pass the texture ordinal, not the id
 			gl.glUniform1i(0, 0);
