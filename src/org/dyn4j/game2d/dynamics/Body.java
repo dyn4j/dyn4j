@@ -79,7 +79,7 @@ import org.dyn4j.game2d.geometry.Vector2;
  * setting in the {@link Settings} singleton.  Use this if the body is a fast moving
  * body, but be careful as this will incur a performance hit.
  * @author William Bittle
- * @version 2.2.3
+ * @version 2.2.4
  * @since 1.0.0
  */
 public class Body implements Swept, Collidable, Transformable {
@@ -155,6 +155,9 @@ public class Body implements Swept, Collidable, Transformable {
 	/** The {@link Body}'s angular damping */
 	protected double angularDamping;
 	
+	/** The per body gravity scale factor */
+	protected double gravityScale;
+	
 	/** The {@link Body}'s contacts */
 	protected List<ContactEdge> contacts;
 	
@@ -187,6 +190,7 @@ public class Body implements Swept, Collidable, Transformable {
 		this.sleepTime = 0.0;
 		this.linearDamping = Body.DEFAULT_LINEAR_DAMPING;
 		this.angularDamping = Body.DEFAULT_ANGULAR_DAMPING;
+		this.gravityScale = 1.0;
 		this.contacts = new ArrayList<ContactEdge>();
 		this.joints = new ArrayList<JointEdge>();
 	}
@@ -224,6 +228,7 @@ public class Body implements Swept, Collidable, Transformable {
 		sb.append("}|").append(this.state)
 		.append("|").append(this.linearDamping)
 		.append("|").append(this.angularDamping)
+		.append("|").append(this.gravityScale)
 		.append("|").append(this.sleepTime);
 		sb.append("]");
 		return sb.toString();
@@ -1209,6 +1214,24 @@ public class Body implements Swept, Collidable, Transformable {
 	public void setAngularDamping(double angularDamping) {
 		if (angularDamping < 0) throw new IllegalArgumentException("The angular damping must be greater than or equal to zero.");
 		this.angularDamping = angularDamping;
+	}
+	
+	/**
+	 * Returns the gravity scale.
+	 * @return double
+	 * @since 2.2.4
+	 */
+	public double getGravityScale() {
+		return this.gravityScale;
+	}
+	
+	/**
+	 * Sets the gravity scale.
+	 * @param scale the gravity scale for this body
+	 * @since 2.2.4
+	 */
+	public void setGravityScale(double scale) {
+		this.gravityScale = scale;
 	}
 	
 	/**

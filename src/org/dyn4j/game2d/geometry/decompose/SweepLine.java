@@ -288,6 +288,13 @@ public class SweepLine implements Decomposer {
 	 */
 	protected static class EdgeBinaryTree extends BinarySearchTree<Edge> {
 		/**
+		 * Default constructor.
+		 */
+		public EdgeBinaryTree() {
+			super(true);
+		}
+		
+		/**
 		 * Performs a search to find the right most {@link Edge}
 		 * who is left of the given {@link Vertex}.
 		 * <p>
@@ -299,25 +306,25 @@ public class SweepLine implements Decomposer {
 			// check for a null root node
 			if (this.root == null) return null;
 			// set the current node to the root
-			Node<Edge> node = this.root;
+			Node node = this.root;
 			// initialize the best edge to the root
-			Node<Edge> best = node;
+			Node best = node;
 			// loop until the current node is null
 			while (node != null) {
 				// get the left edge
-				Edge edge = node.getComparable();
+				Edge edge = node.comparable;
 				if (vertex.isLeft(edge)) {
 					// if e is left of the current edge then go left in the tree
-					node = node.getLeft();
+					node = node.left;
 				} else {
 					// otherwise e is right of the current edge so go right
 					// and save the current edge as the best
 					best = node;
-					node = node.getRight();
+					node = node.right;
 				}
 			}
 			// return the best node's comparable (edge)
-			return best.getComparable();
+			return best.comparable;
 		}
 	}
 	
