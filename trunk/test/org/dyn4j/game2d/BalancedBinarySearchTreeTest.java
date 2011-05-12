@@ -37,7 +37,10 @@ import org.junit.Test;
  * @version 2.2.0
  * @since 2.2.0
  */
-public class BinarySearchTreeTest {
+public class BalancedBinarySearchTreeTest {
+	/** The golden ratio for testing the height of a balanced binary tree */
+	private static final double GOLDEN_RATIO = (1.0 + Math.sqrt(5.0)) / 2.0;
+	
 	/** The binary tree */
 	private BinarySearchTree<Integer> tree;
 	
@@ -46,7 +49,7 @@ public class BinarySearchTreeTest {
 	 */
 	@Before
 	public void setup() {
-		tree = new BinarySearchTree<Integer>();
+		tree = new BinarySearchTree<Integer>(true);
 		tree.insert(10);
 		tree.insert(3);
 		tree.insert(-3);
@@ -63,13 +66,25 @@ public class BinarySearchTreeTest {
 	}
 	
 	/**
+	 * Returns the height limit of a balanced binary tree of the given size.
+	 * @param size the size of the tree
+	 * @return the height limit
+	 */
+	private static final double getHeightLimit(int size) {
+		return Math.log((size + 2.0) - 1.0) / Math.log(GOLDEN_RATIO);
+	}
+	
+	/**
 	 * Tests the insert methods.
 	 */
 	@Test
 	public void insert() {
+		// after setup the tree should be balanced
+		double hl = getHeightLimit(tree.size());
+		TestCase.assertTrue(tree.getHeight() < hl);
+		
 		TestCase.assertFalse(tree.contains(5));
 		TestCase.assertTrue(tree.insert(5));
-		
 		TestCase.assertTrue(tree.contains(5));
 		
 		BinarySearchTree<Integer> t2 = new BinarySearchTree<Integer>();
@@ -88,6 +103,9 @@ public class BinarySearchTreeTest {
 		TestCase.assertTrue(tree.contains(8));
 		TestCase.assertTrue(tree.contains(16));
 		TestCase.assertTrue(tree.contains(15));
+		
+		hl = getHeightLimit(tree.size());
+		TestCase.assertTrue(tree.getHeight() < hl);
 	}
 	
 	/**
@@ -111,27 +129,32 @@ public class BinarySearchTreeTest {
 		TestCase.assertFalse(tree.contains(-4));
 		TestCase.assertEquals(size - 1, tree.size());
 		
-		BinarySearchTree<Integer>.Node node = tree.get(0);
+		BinarySearchTree<Integer>.Node node = tree.get(10);
 		tree.removeMinimum(node);
-		TestCase.assertFalse(tree.contains(0));
+		TestCase.assertFalse(tree.contains(4));
 		TestCase.assertEquals(size - 2, tree.size());
 		
 		tree.removeMaximum();
 		TestCase.assertFalse(tree.contains(19));
 		TestCase.assertEquals(size - 3, tree.size());
 		
-		node = tree.get(3);
+		node = tree.get(0);
 		tree.removeMaximum(node);
-		TestCase.assertFalse(tree.contains(9));
+		TestCase.assertFalse(tree.contains(2));
 		TestCase.assertEquals(size - 4, tree.size());
 		
-		tree.removeSubtree(3);
-		TestCase.assertFalse(tree.contains(3));
-		TestCase.assertFalse(tree.contains(4));
-		TestCase.assertFalse(tree.contains(6));
+		double hl = getHeightLimit(tree.size());
+		TestCase.assertTrue(tree.getHeight() < hl);
+		
+		tree.removeSubtree(0);
+		TestCase.assertFalse(tree.contains(0));
 		TestCase.assertFalse(tree.contains(-1));
-		TestCase.assertFalse(tree.contains(-4));
-		TestCase.assertEquals(tree.size(), 2);
+		TestCase.assertFalse(tree.contains(1));
+		TestCase.assertFalse(tree.contains(2));
+		TestCase.assertEquals(tree.size(), 5);
+		
+		hl = getHeightLimit(tree.size());
+		TestCase.assertTrue(tree.getHeight() < hl);
 	}
 	
 	/**
@@ -150,10 +173,10 @@ public class BinarySearchTreeTest {
 	 */
 	@Test
 	public void getDepth() {
-		TestCase.assertEquals(6, tree.getHeight());
+		TestCase.assertEquals(4, tree.getHeight());
 		
 		BinarySearchTree<Integer>.Node node = tree.get(-3);
-		TestCase.assertEquals(4, tree.getHeight(node));
+		TestCase.assertEquals(2, tree.getHeight(node));
 	}
 	
 	/**
@@ -163,11 +186,11 @@ public class BinarySearchTreeTest {
 	public void getMinimum() {
 		TestCase.assertEquals(-4, (int) tree.getMinimum());
 		
-		BinarySearchTree<Integer>.Node node = tree.get(4);
+		BinarySearchTree<Integer>.Node node = tree.get(10);
 		TestCase.assertEquals(4, (int) tree.getMinimum(node).comparable);
 		
-		node = tree.get(0);
-		TestCase.assertEquals(-1, (int) tree.getMinimum(node).comparable);
+		node = tree.get(1);
+		TestCase.assertEquals(1, (int) tree.getMinimum(node).comparable);
 	}
 	
 	/**
@@ -178,10 +201,10 @@ public class BinarySearchTreeTest {
 		TestCase.assertEquals(19, (int) tree.getMaximum());
 		
 		BinarySearchTree<Integer>.Node node = tree.get(-3);
-		TestCase.assertEquals(2, (int) tree.getMaximum(node).comparable);
+		TestCase.assertEquals(-1, (int) tree.getMaximum(node).comparable);
 		
-		node = tree.get(11);
-		TestCase.assertEquals(19, (int) tree.getMaximum(node).comparable);
+		node = tree.get(6);
+		TestCase.assertEquals(9, (int) tree.getMaximum(node).comparable);
 	}
 	
 	/**
@@ -241,7 +264,7 @@ public class BinarySearchTreeTest {
 		TestCase.assertEquals(13, tree.size());
 		
 		BinarySearchTree<Integer>.Node node = tree.get(-3);
-		TestCase.assertEquals(6, tree.size(node));
+		TestCase.assertEquals(3, tree.size(node));
 	}
 	
 	/**
@@ -269,17 +292,5 @@ public class BinarySearchTreeTest {
 			}
 			last = i;
 		}
-	}
-	
-	/**
-	 * Tests the conversion from not self balancing to self balancing.
-	 */
-	@Test
-	public void balance() {
-		TestCase.assertEquals(6, tree.getHeight());
-		
-		tree.setSelfBalancing(true);
-		
-		TestCase.assertEquals(4, tree.getHeight());
 	}
 }

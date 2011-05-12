@@ -146,8 +146,8 @@ public class Island {
 			if (invM > Epsilon.E) {
 				// only perform this step if the body does not have
 				// a fixed linear velocity
-				body.velocity.x += (body.force.x * invM + gravity.x) * step.dt;
-				body.velocity.y += (body.force.y * invM + gravity.y) * step.dt;
+				body.velocity.x += (body.force.x * invM + gravity.x * body.gravityScale) * step.dt;
+				body.velocity.y += (body.force.y * invM + gravity.y * body.gravityScale) * step.dt;
 			}
 			// av1 = av0 + (t / I) * dt
 			if (invI > Epsilon.E) {
