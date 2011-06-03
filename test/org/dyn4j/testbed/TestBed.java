@@ -181,8 +181,11 @@ public class TestBed extends GLCanvas implements GLEventListener {
 	/** The id of the texture that the FBO will render to */
 	private int textureId;
 	
-	/** The FBO id for rendering to a different target */
+	/** The FBO id for rendering to a multisampled target */
 	private int frameBufferId;
+	
+	/** The FBO id for blitting the multisampled target to a tex 2D target */
+	private int frameBufferTexId;
 	
 	/** The render buffer id for the color components (for Multisampling) */
 	private int colorRenderBufferId;
@@ -408,6 +411,10 @@ public class TestBed extends GLCanvas implements GLEventListener {
 		int width = this.size.width;
 		int height = this.size.height;
 		
+		int[] ids = new int[2];
+		boolean useFrameBuffer = true;
+		int status;
+		
 		// get the OpenGL context
 		GL2 gl = glDrawable.getGL().getGL2();
 		
@@ -434,7 +441,6 @@ public class TestBed extends GLCanvas implements GLEventListener {
 		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 		
 		// get a texture object
-		int[] ids = new int[1];
 		gl.glGenTextures(1, ids, 0);
 		this.textureId = ids[0];
 		
@@ -447,13 +453,24 @@ public class TestBed extends GLCanvas implements GLEventListener {
 		gl.glBindTexture(GL.GL_TEXTURE_2D, 0);
 		
 		// create a frame buffer object (FBO)
-		gl.glGenFramebuffers(1, ids, 0);
+		gl.glGenFramebuffers(2, ids, 0);
 		this.frameBufferId = ids[0];
+		this.frameBufferTexId = ids[1];
 		
-		// bind the FBO to set it up
-		gl.glBindFramebuffer(GL.GL_FRAMEBUFFER, this.frameBufferId);
+		// bind the texture FBO
+		gl.glBindFramebuffer(GL.GL_FRAMEBUFFER, this.frameBufferTexId);
 		// attach the texture to the FBO
 		gl.glFramebufferTexture2D(GL.GL_FRAMEBUFFER, GL.GL_COLOR_ATTACHMENT0, GL.GL_TEXTURE_2D, this.textureId, 0);
+		
+		// check the FBO status
+		status = gl.glCheckFramebufferStatus(GL.GL_FRAMEBUFFER);
+		if (status != GL.GL_FRAMEBUFFER_COMPLETE) {
+			System.out.println("Texture frame buffer not created: " + FBObject.getStatusString(status) + " status: " + status);
+			useFrameBuffer = false;
+		}
+		
+		// bind the multisample FBO
+		gl.glBindFramebuffer(GL.GL_FRAMEBUFFER, this.frameBufferId);
 		
 		{
 			// setup multisampling
@@ -471,25 +488,23 @@ public class TestBed extends GLCanvas implements GLEventListener {
 			gl.glRenderbufferStorageMultisample(GL.GL_RENDERBUFFER, 2, GL2.GL_DEPTH_COMPONENT, width, height);
 			
 			// attach the buffers to the frame buffer
-			gl.glFramebufferRenderbuffer(GL.GL_FRAMEBUFFER, GL2.GL_COLOR_ATTACHMENT1, GL.GL_RENDERBUFFER, this.colorRenderBufferId);
+			gl.glFramebufferRenderbuffer(GL.GL_FRAMEBUFFER, GL2.GL_COLOR_ATTACHMENT0, GL.GL_RENDERBUFFER, this.colorRenderBufferId);
 			gl.glFramebufferRenderbuffer(GL.GL_FRAMEBUFFER, GL.GL_DEPTH_ATTACHMENT, GL.GL_RENDERBUFFER, this.depthRenderBufferId);
 			
 			gl.glBindRenderbuffer(GL.GL_RENDERBUFFER, 0);
 		}
 		
 		// check the FBO status
-		int status = gl.glCheckFramebufferStatus(GL.GL_FRAMEBUFFER);
-		boolean useFrameBuffer = false;
-		if (status == GL.GL_FRAMEBUFFER_COMPLETE) {
-			useFrameBuffer = true;
-		} else {
-			System.out.println(FBObject.getStatusString(status));
+		status = gl.glCheckFramebufferStatus(GL.GL_FRAMEBUFFER);
+		if (status != GL.GL_FRAMEBUFFER_COMPLETE) {
+			System.out.println("Multisample frame buffer not created: " + FBObject.getStatusString(status) + " status: " + status);
+			useFrameBuffer = false;
 		}
 		
 		// switch back to the default frame buffer
 		gl.glBindFramebuffer(GL.GL_FRAMEBUFFER, 0);
 		
-		// ignore the primary color source
+		// ignore the primary color source (the current color)
 		gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_DECAL);
 		
 		// set the swap interval to as fast as possible
@@ -559,17 +574,18 @@ public class TestBed extends GLCanvas implements GLEventListener {
     	int[] ids = new int[] { this.colorRenderBufferId,
     							this.depthRenderBufferId,
     							this.frameBufferId,
+    							this.frameBufferTexId,
     							this.textureId };
     	
     	// delete the render buffers for the MSAA 2x
     	gl.glDeleteRenderbuffers(2, ids, 0);
     	
-    	// delete the FBO (if this is the current draw target glBindFramebuffer is called
+    	// delete the FBOs (if this is the current draw target glBindFramebuffer is called
     	// using the default target implicitly)
-    	gl.glDeleteFramebuffers(1, ids, 2);
+    	gl.glDeleteFramebuffers(2, ids, 2);
     	
     	// delete the texture that the FBO was rendering into
-    	gl.glDeleteTextures(1, ids, 3);
+    	gl.glDeleteTextures(1, ids, 4);
     	
     	// detach the shaders from the shader program
     	gl.glDetachShader(this.blurShaderProgramId, this.blurVertexShaderId);
@@ -648,7 +664,7 @@ public class TestBed extends GLCanvas implements GLEventListener {
 			// applying a blur using a shader program
 			
 			// switch to draw to the FBO
-			gl.glBindFramebuffer(GL.GL_FRAMEBUFFER, frameBufferId);
+			gl.glBindFramebuffer(GL.GL_FRAMEBUFFER, this.frameBufferId);
 			// set the clear color
 			gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		}
@@ -666,6 +682,16 @@ public class TestBed extends GLCanvas implements GLEventListener {
 		if (this.test != null) {
 			// render the test
 			this.test.render(gl, width, height);
+		}
+		
+		// we only need to perform this step if the panel is blurred
+		if (draw.drawPanel() && draw.isPanelBlurred() && this.shaderProgramValid) {
+			// blit the frame buffer to the tex frame buffer
+			gl.glBindFramebuffer(GL2.GL_READ_FRAMEBUFFER, this.frameBufferId);
+			gl.glBindFramebuffer(GL2.GL_DRAW_FRAMEBUFFER, this.frameBufferTexId);
+			gl.glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL.GL_COLOR_BUFFER_BIT, GL.GL_NEAREST);
+			gl.glBindFramebuffer(GL2.GL_READ_FRAMEBUFFER, 0);
+			gl.glBindFramebuffer(GL2.GL_DRAW_FRAMEBUFFER, 0);
 		}
 		
 		// see if we need to blur the panel

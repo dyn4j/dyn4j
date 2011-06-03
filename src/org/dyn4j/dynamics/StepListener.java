@@ -24,10 +24,13 @@
  */
 package org.dyn4j.dynamics;
 
+import org.dyn4j.collision.broadphase.BroadphaseDetector;
+import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
+
 /**
  * Listener notified before and after a simulation step by the {@link World}.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.0.0
  * @since 1.0.0
  */
 public interface StepListener {
@@ -37,6 +40,35 @@ public interface StepListener {
 	 * @param world the simulation {@link World}
 	 */
 	public void begin(Step step, World world);
+	
+	/**
+	 * Called after contacts and joints have been solved but <b>before</b> new contact points 
+	 * have been found and before the broadphase has been updated.
+	 * <p>
+	 * This method is intended to be used so that the {@link World#setUpdateRequired(boolean)}
+	 * method does not have to be called, therefore saving time in the {@link World#update(double)}
+	 * and {@link World#updatev(double)} methods.
+	 * <p>
+	 * Raycasts at this time can be incorrect since the broadphase is out of date.
+	 * Use the {@link World#getBroadphaseDetector()} method to get access to the 
+	 * {@link BroadphaseDetector#update(org.dyn4j.collision.Collidable)} method.  
+	 * Call this on all bodies to update the broadphase only.
+	 * <p>
+	 * The {@link BroadphaseDetector#detect(org.dyn4j.geometry.AABB)} also relies on the
+	 * broadphase being up to date.  Use the {@link World#getBroadphaseDetector()} method
+	 * to get access to the {@link BroadphaseDetector#update(org.dyn4j.collision.Collidable)}
+	 * method.  Call this on all bodies to update the broadphase only.
+	 * <p>
+	 * Using the {@link BroadphaseDetector#detect(org.dyn4j.collision.Collidable, org.dyn4j.collision.Collidable)},
+	 * {@link BroadphaseDetector#detect(org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform, org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform)},
+	 * {@link NarrowphaseDetector#detect(org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform, org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform)},
+	 * or {@link NarrowphaseDetector#detect(org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform, org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform, org.dyn4j.collision.narrowphase.Penetration)}
+	 * method is guaranteed to be accurate.
+	 * @param step the step information
+	 * @param world the simulation {@link World}
+	 * @since 3.0.0
+	 */
+	public void preDetect(Step step, World world);
 	
 	/**
 	 * Called after a simulation step has been performed.
