@@ -16,13 +16,6 @@ Continuous collision detection is a very computationally expensive process and s
   * Configure the current !ConservativeAdvancement algorithm via the setDistanceEpsilon(double) method. The minimum is 0.0 and the default is 1E-6.  The closer the value is to zero determines how accurate and how slow the algorithm will be.
   * Keep the number of bullet Bodies to a minimum.
 
-=Enable Multithreading=
-Simple multithreading has been implemented inside the World class to handle the ideal cases.  You can enable this setting via the Settings.setMultithreadingEnabled(boolean) method.
-
-Because when using this as your event listeners will need to be thread safe.
-
-In addition you can configure how the load is split via the Settings.setLoadFactor(int).  This value must be a multiple of 2.
-
 =Auto Sleeping=
 Auto sleeping is enabled by default, leave this setting on if at all possible.
 
@@ -38,6 +31,18 @@ Implement the !CollisionListener and !ContactListener interfaces to catch collis
 
 If your World is totally enclosed or its unlikely that Bodies will leave the Bounds, set the Bounds on the World object to null.  This will disable Bounds checking.
 
+==Broadphase==
+The TestBed application shows little performance difference between the various broadphase detectors.  The !DynamicAABBTree class is the default and by far has the best Raycast performance, stick with this one if your application is raycast heavy.
+
+The !SapTree class is next in line with better raycast performance than the other Sap implementations but not as good as the !DynamicAABBTree class.  However, !SapTree class does have better collision detection performance than all the others.  Using this broadphase may provide better performance if your application is light on raycasts.
+
+If you don't use raycasts at all either the !SapTree or !SapIncremental is probably the best choice.
+
+The !SapBruteForce class is an implementation of the old Sap broadphase using the new !BroadphaseDetector interface and will have similar performance.
+
+All the !BroadphaseDetectors use a AABBs to test for collisions.  They also use an AABB expansion value to create larger AABBs than the close fitting ones.  This expansion value is configurable and larger values allow for less updates to the broadphase when a Body moves or rotates.  However, the larger the AABB becomes, the more collision pairs are generated.  Use this to customize the trade-off.
+
+==Narrowphase==
 In general, for the !TestBed the SAT algorithm performs faster than GJK.
 
 If you are using GJK you can configure a number of properties to improve performance sacrificing accuracy:
