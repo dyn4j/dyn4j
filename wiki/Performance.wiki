@@ -26,13 +26,17 @@ In addition to leaving this setting enabled:
 =World Updates=
 Using the World.update(double) method forces that the World only update at a given frequency defined in the Settings singleton.  You can decrease this value to a minimum of 30, the default is 60, to have the entire engine update less often, leaving more time for your application to perform other tasks.
 
+Use the World.setUpdateRequired method sparingly since this method performs collision detection with all bodies in the world.
+
+See the section in [Advanced] for more detail about the collision detection and physics pipeline.
+
 =Collision Detection=
 Implement the !CollisionListener and !ContactListener interfaces to catch collisions/contacts that you don't want/need processed.  This will save time in the pipline.
 
 If your World is totally enclosed or its unlikely that Bodies will leave the Bounds, set the Bounds on the World object to null.  This will disable Bounds checking.
 
 ==Broadphase==
-The TestBed application shows little performance difference between the various broadphase detectors.  The !DynamicAABBTree class is the default and by far has the best Raycast performance, stick with this one if your application is raycast heavy.
+The !TestBed application shows little performance difference between the various broadphase detectors.  The !DynamicAABBTree class is the default and by far has the best Raycast performance, stick with this one if your application is raycast heavy.
 
 The !SapTree class is next in line with better raycast performance than the other Sap implementations but not as good as the !DynamicAABBTree class.  However, !SapTree class does have better collision detection performance than all the others.  Using this broadphase may provide better performance if your application is light on raycasts.
 
