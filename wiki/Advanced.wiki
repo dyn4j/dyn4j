@@ -81,6 +81,8 @@ public class Rectangle extends Polygon {
 =Bodies=
 The Body class contains methods to apply linear and angular damping.  This can be useful to simulate fluid/air resistance and also to reduce the total energy in the system.
 
+Use the setGravityScale method to apply less or more gravity to individual bodies (the default is 1.0).
+
 For initial placement of Bodies, use the translateToOrigin method.  This will translate the Body's center of mass to the origin making it easier to initially place Bodies before starting the simulation.
 
 ==Integration With Game Objects==
