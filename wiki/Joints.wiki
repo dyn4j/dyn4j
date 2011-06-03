@@ -24,10 +24,12 @@ The !WeldJoint class represents a joint that "welds" two bodies together.  This 
 
 This joint requires one world space anchor point which is used as the weld point.
 
-=Line Joint=
+=Line Joint (Deprecated)=
 The !LineJoint class represents a joint that allows bodies to translate freely along an axis and rotate freely about a pivot point.  This joint is identical to the !PrismaticJoint except allows rotation about the pivot point.  Like the !RevoluteJoint and !PrismaticJoints, this joint allows for motors and limits.  The motor will drive the linear motion along the axis toward the given speed and the limits will limit the linear motion along the axis.
 
 This joint requires one world space anchor point which is used as the pivot point and a world space axis used as the allowed translation axis.
+
+*This joint has been deprecated and replaced with the !WheelJoint class.*
 
 =Prismatic Joint=
 The !PrismaticJoint class represents a joint that allows bodies to translate freely along an axis.  This joint is identical to the !LineJoint except does not allow rotation about the pivot point.  Like the !RevoluteJoint and !LineJoints, this joint allows for motors and limits.  The motor will drive the linear motion along the axis toward the given speed and the limits will limit the linear motion along the axis.
@@ -56,3 +58,8 @@ The !AngleJoint class represents a joint connecting two bodies limiting their an
   * The angular limits are <b>world space</b> angle limits relative to the initial angle between the two bodies.  Its recommended that one of the bodies be fixed when using angular limits.
 
 This joint only requires that the two joined bodies be given, initially defaulting to equal limits.
+
+=Wheel Joint=
+The !WheelJoint class represents a joint connecting two bodies where the bodies are allowed to rotate about the given anchor point and translate about the given axis.  The translation portion of the allowed motion has an optional spring damper.  This creates an ideal joint for vehicles.
+
+This joint requires a world space anchor point (the pivot point) and a world space (normalized) axis for the allowed translation.
