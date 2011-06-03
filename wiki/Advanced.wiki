@@ -150,24 +150,30 @@ The World class is the manager for the collision detection and physics systems. 
 
 In addition some configurable properties of note are:
 
-==Gravity==
+==Gravity & Gravity Scale==
 The World class will allow you to set the gravity of the world as a vector.  This means you could create gravity in any direction (or none at all).
+
+As stated in the Body section, each Body has a gravityScale member that scales the gravity value for the respective Body.
 
 ==Coefficient Mixer==
 As stated above, each !BodyFixture instance can have its own friction and restitution values.  Because of this, these values must be combined so that the contact solver can solve collision.
 
-The CoefficientMixer class can be used to override the standard friction and restitution mixing routines.
+The !CoefficientMixer class can be used to override the standard friction and restitution mixing routines.
 
 =Collision Detection=
 The collision detection system is a three tier architecture:
 
-Broadphase -&gt; Narrowphase -&gt; Manifold Solver
+Broadphase -> Narrowphase -> Manifold Solver
 
 The broadphase collision detector is a O(n<sup>2</sup>) detector that determines possible collision pairs.  After obtaining all the possible collision pairs, the pairs are passed to the narrowphase collision detector.  These algorithms should be fast and inaccurate yet conservative.
 
-The narrowphase detector tests each Shape of the first Body against each Shape of the second Body.  If any combination of Shapes collide, the result is passed to the Manifold Solver.
+The narrowphase detector tests each Shape of the first Body against each Shape of the second Body.  If any combination of Shapes collide, the result is passed to the !ManifoldSolver.
 
 The manifold solver will determine the points on the Shapes that will be used for the physics pipeline.
+
+==Broadphase==
+Four implementations of the !BroadphaseDetector interface are provided:
+!SapBruteForce, !SapIncremental, !SapTree, and !DynamicAABBTree.  !DynamicAABBTree is used by default.
 
 ==Narrowphase==
 Two implementations of the !NarrowphaseDetector interface are provided: SAT and GJK.  The GJK algorithm is used by default.
@@ -191,24 +197,55 @@ After detection of a missed collision, the bodies are linearly interpolated to t
 
 This process is performed at the end of each time step.
 
-=Event Listening=
+=Collision Detection & Physics Pipeline=
+The collision detection and physics pipeline is structured as shown in the following flowcharts.  Its important to know the order in which operations occur and when to expect up-to-date or old information.
+
+[http://www.dyn4j.org/wiki/World.update.png]
+
+And the detect method:
+
+[http://www.dyn4j.org/wiki/World.detect.png]
+
+The listener classes that are discussed in the next section are shown in green.  These are intended to notify the user of specific actions happening in the pipeline and allow the user to respond.
+
+*Excluding the !StepListener.begin and !StepListener.end methods, all listener methods should not modify/add/remove bodies, joints, or the world.  Doing so can cause runtime exceptions or cause unexpected behavior.  If you need to respond to a particular event, store the necessary information and respond in the !StepListener.begin or !StepListener.end methods or after the World.update method has returned.*
+
+One last important concept here is the World.setUpdateRequired method.  Examining the flowchart reveals that new contacts are found immediately after the previous contacts have been solved.  This allows the user to have the most up-to-date information about contacts, colliding bodies, etc.  This also enables accurate Raycasting and Broadphase tests.
+
+However, because of this design, if a Body is modified in anyway that would change the contacts (like adding/removing a !BodyFixture) the World needs to perform collision detection again.  To have the World perform collision detection again, call the World.setUpdateRequired(true) method.  It is up to the user of the World class to perform this step.  Unexpected behavior may occur if this is omitted, but only for that time step.  Upon the next time step everything will be updated (given nothing else has been changed).
+
+The following is a list of actions that require the setUpdateRequired method to be called:
+  * If a Body has been added or removed from the World
+  * If a Body has been translated or rotated
+  * If a Body's state has been manually changed via the Body.setActive(boolean) method
+  * If a !BodyFixture has been added or removed from a Body
+  * If a !BodyFixture's sensor flag has been manually changed via the !BodyFixture.setSensor(boolean) method
+  * If a !BodyFixture's filter has been manually changed via the !BodyFixture.setFilter(boolean) method
+  * If a !BodyFixture's restitution or friction coefficient has changed
+  * If a !BodyFixture's Shape has been translated or rotated
+  * If a !BodyFixture's Shape has been changed (vertices, radius, etc.)
+  * If a Body's type has changed to or from Static (this is caused by the using setMassType(Mass.INFINITE/Mass.NORMAL) method)
+  * If a Joint has been added or removed from the World in which the joined bodies should not be allowed to collide.
+  * If the World's !CoefficientMixer has been changed
+
+==Event Listening==
 The World class contains a number of event listeners used to receive notifications when an event occurs.
   * *NEVER modify/remove/add Bodies or Joints during a call to World.update(double)*.  This can cause unexpected results and runtime errors.  If you are listening for events, save the events for later processing.  After the World.update(double) method returns you should respond to the queued events.
   * If you have multithreading enabled make sure that your listener implementations are thread safe.
 
 There is one exception.  If you listen for the Step events, you can respond to events at this time.
 
-==Out of Bounds Event==
+===Out of Bounds Event===
 As described above, when a Body goes out of bounds it is set to inactive.
 
 To receive a notification of this event extend the !BoundsAdapter class or implement the !BoundsListener interface and set it in the World object using the setBoundsListener method.
 
-==Implicit Destruction Event==
+===Implicit Destruction Event===
 When a call to the World.remove(Body) or World.remove(Joint) is made some joints and contacts may be destroyed.
 
 You can receive notification of these events by extending the !DestructionAdapter class or by implementing the !DestructionListener interface.  Just like the !BoundsListener the !DestructionListener is set via the world object.
 
-==Step Event==
+===Step Event===
 When a call to the World.update(double) is made a simulation step is not always taken.  A better simulation results if the steps taken are the same elapsed time.
 
 The !StepAdapter class and !StepListener interface are provided so that you know when a simulation step is performed.  There are two events to listen for: begin and end.
@@ -217,7 +254,7 @@ The !StepAdapter class and !StepListener interface are provided so that you know
 
 As stated above, you may use this event to perform updates on Bodies/Joints and the World for any queued events that happened during the time step.
 
-==Collision Event==
+===Collision Event===
 When Bodies are detected as colliding by the various phases the !CollisionListener set on the World object is notified.
 
 There are three events that can be called:
@@ -229,7 +266,7 @@ Each of the the events should return a boolean result.  The returned boolean ind
 
 The !CollisionAdapter, which is the default, will always return true for all three methods.
 
-==Contact Event==
+===Contact Event===
 When Bodies come into contact the physics engine must resolve that contact.  The !ContactAdapter class and !ContactListener interface are used to receive contact events.  
 
 The contact events include:
@@ -244,14 +281,14 @@ Some of the events above should return a boolean result.  The returned boolean i
 
 The !ContactAdapter, which is the default, will always return true for all the methods.
 
-==Ray Cast Event==
+===Ray Cast Event===
 When a ray cast is performed using the World.raycast methods two ray cast events may be triggered.
 
 Notification of this event is by the !RaycastListener interface and !RaycastAdapter class.
 
 There are two events, one for each Body and one for each !BodyFixture on each Body.  Each event returns a boolean value indicating that the World should or should not raycast the Body or !BodyFixture.  Implement these methods to ignore certain Bodies or !BodyFixtures.
 
-==Time Of Impact Events==
+===Time Of Impact Events===
 If continuous collision detection (CCD) is disabled its possible that bodies traveling fast may pass through other objects within one time step.  If CCD is enabled, detection of these situations will generate time of impact events.
 
 The single time of impact event can be listened for via the !TimeOfImpactListener interface or the !TimeOfImpactAdapter class.  
