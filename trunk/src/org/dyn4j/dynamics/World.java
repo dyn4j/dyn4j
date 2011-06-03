@@ -442,6 +442,9 @@ public class World {
 			this.solveTOI(continuousDetectionMode);
 		}
 		
+		// notify the step listener
+		this.stepListener.preDetect(this.step, this);
+		
 		// after all has been updated find new contacts
 		// this done so that the user has the latest contacts
 		// the broadphase has the latest AABBs, etc.
