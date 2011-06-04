@@ -38,12 +38,6 @@ public class StepAdapter implements StepListener {
 	public void begin(Step step, World world) {}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.StepListener#preDetect(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.World)
-	 */
-	@Override
-	public void preDetect(Step step, World world) {}
-	
-	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.StepListener#end(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.World)
 	 */
 	@Override

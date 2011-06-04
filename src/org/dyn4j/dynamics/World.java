@@ -442,13 +442,11 @@ public class World {
 			this.solveTOI(continuousDetectionMode);
 		}
 		
-		// notify the step listener
-		this.stepListener.preDetect(this.step, this);
-		
 		// after all has been updated find new contacts
 		// this done so that the user has the latest contacts
 		// the broadphase has the latest AABBs, etc.
 		this.detect();
+		
 		// set the update required flag to false
 		this.updateRequired = false;
 		
@@ -482,12 +480,13 @@ public class World {
 		
 		// test for out of bounds objects
 		// clear the body contacts
-		// clear the island flag
-		// save the current transform for CCD
+		// update the broadphase
 		for (int i = 0; i < size; i++) {
 			Body body = this.bodies.get(i);
 			// skip if already not active
 			if (!body.isActive()) continue;
+			// clear all the old contacts
+			body.contacts.clear();
 			// check if bounds have been set
 			if (this.bounds != null) {
 				// check if the body is out of bounds
@@ -498,8 +497,6 @@ public class World {
 					this.boundsListener.outside(body);
 				}
 			}
-			// clear all the old contacts
-			body.contacts.clear();
 			// update the broadphase with the new position/orientation
 			this.broadphaseDetector.update(body);
 		}
