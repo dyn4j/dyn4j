@@ -40,7 +40,7 @@ import org.dyn4j.dynamics.Settings;
  * This class performs the {@link ContactConstraint} warm starting and manages contact
  * listening.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.0.0
  * @since 1.0.0
  */
 public class ContactManager {
@@ -109,20 +109,26 @@ public class ContactManager {
 	 * @since 1.0.2
 	 */
 	public void updateContacts(ContactListener listener) {
-		// check the given list
-		if (this.list.isEmpty()) {
-			return;
-		}
-
+		// get the size of the list
+		int size = this.list.size();
+		
 		// get the warm start distance from the settings
 		double warmStartDistanceSquared = Settings.getInstance().getWarmStartDistanceSquared();
 		
 		// create a new map for the new contacts constraints
-		Map<ContactConstraintId, ContactConstraint> newMap = new HashMap<ContactConstraintId, ContactConstraint>(this.list.size() * 2);
+		Map<ContactConstraintId, ContactConstraint> newMap = null;
+		
+		// check if any new contact constraints were found
+		if (size > 0) {
+			// if so then create a new map to contain the new contacts
+			newMap = new HashMap<ContactConstraintId, ContactConstraint>(size * 2);
+		} else {
+			// otherwise set the new map to the old map
+			newMap = new HashMap<ContactConstraintId, ContactConstraint>();
+		}
 		
 		// loop over the new contact constraints
 		// and attempt to persist contacts
-		int size = this.list.size();
 		for (int i = 0; i < size; i++) {
 			// get the new contact constraint
 			ContactConstraint newContactConstraint = this.list.get(i);

@@ -1008,11 +1008,11 @@ public class TestBed extends GLCanvas implements GLEventListener {
 		// get the contact counter
 		ContactCounter cc = (ContactCounter) this.test.getWorld().getContactListener();
 		// get the numbers
-		int total = cc.getSolved();
 		int added = cc.getAdded();
 		int persisted = cc.getPersisted();
 		int removed = cc.getRemoved();
 		int sensed = cc.getSensed();
+		int total = added + persisted + sensed;
 		
 		y -= HUD_SPACING;
 		// render the version
