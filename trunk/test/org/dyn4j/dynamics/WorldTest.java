@@ -82,8 +82,6 @@ public class WorldTest {
 		@Override
 		public void begin(Step step, World world) {}
 		@Override
-		public void preDetect(Step step, World world) {}
-		@Override
 		public void end(Step step, World world) { steps++; }
 	}
 	
