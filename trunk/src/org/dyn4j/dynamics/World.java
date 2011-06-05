@@ -1167,14 +1167,20 @@ public class World {
 	/**
 	 * Sets the update required flag.
 	 * <p>
-	 * Set this flag to true if any of the following has been changed:
+	 * Set this flag to true if any of the following conditions have been met:
 	 * <ul>
-	 * 	<li>A body has been translated or rotated</li>
-	 * 	<li>A body had a fixture added or removed</li>
-	 * 	<li>A body's fixture's shape has been changed (translated/rotated/changed vertices/etc)</li>
-	 * 	<li>A body's type has changed to/from Active/Inactive or Static/Dynamic</li>
-	 * 	<li>A Joint has been added to the world and the joint doesn't allow collision between the joined bodies</li>
-	 * 	<li>A body has been added to the world</li>
+	 * 	<li>If a Body has been added or removed from the World</li>
+	 * 	<li>If a Body has been translated or rotated</li>
+	 * 	<li>If a Body's state has been manually changed via the Body.setActive(boolean) method</li>
+	 * 	<li>If a BodyFixture has been added or removed from a Body</li>
+	 * 	<li>If a BodyFixture's sensor flag has been manually changed via the BodyFixture.setSensor(boolean) method</li>
+	 * 	<li>If a BodyFixture's filter has been manually changed via the BodyFixture.setFilter(boolean) method</li>
+	 * 	<li>If a BodyFixture's restitution or friction coefficient has changed</li>
+	 * 	<li>If a BodyFixture's Shape has been translated or rotated</li>
+	 * 	<li>If a BodyFixture's Shape has been changed (vertices, radius, etc.)</li>
+	 * 	<li>If a Body's type has changed to or from Static (this is caused by the using setMassType(Mass.INFINITE/Mass.NORMAL) method)</li>
+	 * 	<li>If a Joint has been added or removed from the World in which the joined bodies should not be allowed to collide</li>
+	 * 	<li>If the World's CoefficientMixer has been changed</li>
 	 * </ul>
 	 * @param flag the flag
 	 */
