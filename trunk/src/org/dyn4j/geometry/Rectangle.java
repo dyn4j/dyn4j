@@ -29,7 +29,7 @@ package org.dyn4j.geometry;
  * <p>
  * A {@link Rectangle} cannot have a width or height of zero.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class Rectangle extends Polygon implements Shape, Transformable {
@@ -130,10 +130,10 @@ public class Rectangle extends Polygon implements Shape, Transformable {
 			// get the current focus
 			Vector2 focus = foci[i];
 			// create a place for the closest point
-			Vector2 closest = null;
-			double d = Double.MAX_VALUE;
+			Vector2 closest = transform.getTransformed(this.vertices[0]);
+			double d = focus.distanceSquared(closest);
 			// find the minimum distance vertex
-			for (int j = 0; j < 4; j++) {
+			for (int j = 1; j < 4; j++) {
 				// get the vertex
 				Vector2 vertex = this.vertices[j];
 				// transform it into world space

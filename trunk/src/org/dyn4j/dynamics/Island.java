@@ -40,7 +40,7 @@ import org.dyn4j.geometry.Vector2;
  * Nearly identitcal to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class Island {
@@ -221,6 +221,7 @@ public class Island {
 		}
 		
 		// solve the position constraints
+		boolean positionConstraintsSolved = false;
 		for (int i = 0; i < positionSolverIterations; i++) {
 			boolean contactsSolved = this.contactConstraintSolver.solvePositionContraints();
 			
@@ -233,6 +234,7 @@ public class Island {
 			}
 			
 			if (contactsSolved && jointsSolved) {
+				positionConstraintsSolved = true;
 				break;
 			}
 		}
@@ -264,7 +266,7 @@ public class Island {
 			}
 			
 			// check the min sleep time
-			if (minSleepTime >= sleepTime) {
+			if (minSleepTime >= sleepTime && positionConstraintsSolved) {
 				for (int i = 0; i < size; i++) {
 					Body body = this.bodies.get(i);
 					body.setAsleep(true);

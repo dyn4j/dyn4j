@@ -33,7 +33,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Transform} object.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class TransformTest {
@@ -265,5 +265,131 @@ public class TransformTest {
 		
 		l = start.lerped(end, alpha);
 		TestCase.assertEquals(-0.034, l.getRotation(), 1.0e-3);
+	}
+	
+	/**
+	 * Tests the getValues method.
+	 * @since 3.0.1
+	 */
+	@Test
+	public void values() {
+		Transform t = new Transform();
+		t.translate(2.0, -1.0);
+		
+		double[] values = t.getValues();
+		TestCase.assertEquals(1.0, values[0]);
+		TestCase.assertEquals(0.0, values[1]);
+		TestCase.assertEquals(2.0, values[2]);
+		TestCase.assertEquals(0.0, values[3]);
+		TestCase.assertEquals(1.0, values[4]);
+		TestCase.assertEquals(-1.0, values[5]);
+	}
+	
+	/**
+	 * Tests the identity's rotate method to ensure no mutation.
+	 * @since 3.0.1
+	 */
+	@Test(expected = UnsupportedOperationException.class)
+	public void identityRotate1() {
+		Transform.IDENTITY.rotate(Math.toRadians(30));
+	}
+	
+	/**
+	 * Tests the identity's rotate method to ensure no mutation.
+	 * @since 3.0.1
+	 */
+	@Test(expected = UnsupportedOperationException.class)
+	public void identityRotate2() {
+		Transform.IDENTITY.rotate(Math.toRadians(30), new Vector2());
+	}
+
+	/**
+	 * Tests the identity's rotate method to ensure no mutation.
+	 * @since 3.0.1
+	 */
+	@Test(expected = UnsupportedOperationException.class)
+	public void identityRotate3() {
+		Transform.IDENTITY.rotate(Math.toRadians(30), 2, 3);
+	}
+	
+	/**
+	 * Tests the identity's lerp method to ensure no mutation.
+	 * @since 3.0.1
+	 */
+	@Test(expected = UnsupportedOperationException.class)
+	public void identityLerp() {
+		Transform.IDENTITY.lerp(new Transform(), 0.5);
+	}
+	
+	/**
+	 * Tests the identity's set method to ensure no mutation.
+	 * @since 3.0.1
+	 */
+	@Test(expected = UnsupportedOperationException.class)
+	public void identitySet() {
+		Transform.IDENTITY.set(new Transform());
+	}
+	
+	/**
+	 * Tests the identity's setRotation method to ensure no mutation.
+	 * @since 3.0.1
+	 */
+	@Test(expected = UnsupportedOperationException.class)
+	public void identitySetRotation() {
+		Transform.IDENTITY.setRotation(Math.toRadians(20));
+	}
+
+	/**
+	 * Tests the identity's setTranslation method to ensure no mutation.
+	 * @since 3.0.1
+	 */
+	@Test(expected = UnsupportedOperationException.class)
+	public void identitySetTranslation1() {
+		Transform.IDENTITY.setTranslation(new Vector2());
+	}
+	
+	/**
+	 * Tests the identity's setTranslation method to ensure no mutation.
+	 * @since 3.0.1
+	 */
+	@Test(expected = UnsupportedOperationException.class)
+	public void identitySetTranslation2() {
+		Transform.IDENTITY.setTranslation(3, 2);
+	}
+	
+	/**
+	 * Tests the identity's setTranslationX method to ensure no mutation.
+	 * @since 3.0.1
+	 */
+	@Test(expected = UnsupportedOperationException.class)
+	public void identitySetTranslationX() {
+		Transform.IDENTITY.setTranslationX(3);
+	}
+	
+	/**
+	 * Tests the identity's setTranslationX method to ensure no mutation.
+	 * @since 3.0.1
+	 */
+	@Test(expected = UnsupportedOperationException.class)
+	public void identitySetTranslationY() {
+		Transform.IDENTITY.setTranslationY(3);
+	}
+
+	/**
+	 * Tests the identity's translate method to ensure no mutation.
+	 * @since 3.0.1
+	 */
+	@Test(expected = UnsupportedOperationException.class)
+	public void identityTranslate1() {
+		Transform.IDENTITY.translate(new Vector2());
+	}
+	
+	/**
+	 * Tests the identity's translate method to ensure no mutation.
+	 * @since 3.0.1
+	 */
+	@Test(expected = UnsupportedOperationException.class)
+	public void identityTranslate2() {
+		Transform.IDENTITY.translate(2, 3);
 	}
 }

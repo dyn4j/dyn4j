@@ -94,7 +94,7 @@ import org.dyn4j.dynamics.Settings.ContinuousDetectionMode;
 /**
  * The JFrame that controls the TestBed.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class ControlPanel extends JFrame {
@@ -378,7 +378,7 @@ public class ControlPanel extends JFrame {
 		this.add(tabs, BorderLayout.CENTER);
 		
 		// set the preferred width
-		this.setPreferredSize(new Dimension(450, 685));
+		this.setPreferredSize(new Dimension(450, 750));
 		
 		// pack the layout
 		this.pack();

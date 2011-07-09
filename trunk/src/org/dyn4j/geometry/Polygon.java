@@ -34,7 +34,7 @@ import org.dyn4j.Epsilon;
  * <p>
  * A polygon cannot have coincident vertices.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class Polygon extends Wound implements Convex, Shape, Transformable {
@@ -164,10 +164,10 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 			// get the current focus
 			Vector2 f = foci[i];
 			// create a place for the closest point
-			Vector2 closest = null;
-			double d = Double.MAX_VALUE;
+			Vector2 closest = transform.getTransformed(this.vertices[0]);
+			double d = f.distanceSquared(closest);
 			// find the minimum distance vertex
-			for (int j = 0; j < size; j++) {
+			for (int j = 1; j < size; j++) {
 				// get the vertex
 				Vector2 p = this.vertices[j];
 				// transform it into world space

@@ -24,12 +24,9 @@
  */
 package org.dyn4j.collision;
 
-import org.dyn4j.geometry.Convex;
-import org.dyn4j.geometry.Interval;
+import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Rectangle;
-import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Transformable;
-import org.dyn4j.geometry.Vector2;
 
 /**
  * Represents a {@link Bounds} object that is rectangular.
@@ -41,16 +38,10 @@ import org.dyn4j.geometry.Vector2;
  * is considered to be inside, if they are not overlapping, the {@link Collidable} is considered
  * outside.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class RectangularBounds extends AbstractBounds implements Bounds, Transformable {
-	/** The x-axis */
-	protected static final Vector2 X_AXIS = new Vector2(1.0, 0.0);
-	
-	/** The y-axis */
-	protected static final Vector2 Y_AXIS = new Vector2(0.0, 1.0);
-	
 	/** The bounding rectangle */
 	protected Rectangle bounds;
 	
@@ -79,37 +70,11 @@ public class RectangularBounds extends AbstractBounds implements Bounds, Transfo
 	 */
 	@Override
 	public boolean isOutside(Collidable collidable) {
-		// project the collidable on the x and y axes
-		Transform transform = collidable.getTransform();
-		int size = collidable.getFixtureCount();
-		
-		// check for zero fixtures
-		if (size == 0) {
-			return true;
-		}
-		
-		Fixture fixture;
-		Convex convex;
-		
-		// perform the projection the first time to create an interval
-		fixture = collidable.getFixture(0);
-		convex = fixture.getShape();
-		Interval x = convex.project(RectangularBounds.X_AXIS, transform);
-		Interval y = convex.project(RectangularBounds.Y_AXIS, transform);
-		// loop through the rest, union the resulting intervals
-		for (int i = 1; i < size; i++) {
-			fixture = collidable.getFixture(i);
-			convex = fixture.getShape();
-			x.union(convex.project(RectangularBounds.X_AXIS, transform));
-			y.union(convex.project(RectangularBounds.Y_AXIS, transform));
-		}
-		
-		// project the bounds
-		Interval bx = this.bounds.project(RectangularBounds.X_AXIS, this.transform);
-		Interval by = this.bounds.project(RectangularBounds.Y_AXIS, this.transform);
+		AABB aabbBounds = this.bounds.createAABB(this.transform);
+		AABB aabb = collidable.createAABB();
 		
 		// test the projections for overlap
-		if (x.overlaps(bx) && y.overlaps(by)) {
+		if (aabbBounds.overlaps(aabb)) {
 			return false;
 		}
 		

@@ -32,7 +32,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Vector2} class.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class Vector2Test {
@@ -62,6 +62,10 @@ public class Vector2Test {
 		Vector2 v5 = new Vector2(v2, v1);
 		TestCase.assertEquals(-1.0, v5.x);
 		TestCase.assertEquals(-2.0, v5.y);
+		
+		Vector2 v7 = new Vector2(Math.toRadians(30.0));
+		TestCase.assertEquals(1.000, v7.getMagnitude(), 1.0E-4);
+		TestCase.assertEquals(30.000, Math.toDegrees(v7.getDirection()), 1.0E-4);
 		
 		Vector2 v6 = Vector2.create(1.0, Math.toRadians(90));
 		TestCase.assertEquals( 0.000, v6.x, 1.0e-3);
