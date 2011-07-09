@@ -29,7 +29,7 @@ package org.dyn4j.testbed;
  * <p>
  * Colors are represented by float arrays of size 4.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class Draw {
@@ -118,7 +118,7 @@ public class Draw {
 	private boolean aabbs = false;
 	
 	/** The color used when rendering AABBs */
-	private float[] aabbColor = Draw.GREY;
+	private float[] aabbColor = Draw.LIGHT_GREY;
 	
 	/** Whether to draw edge normals */
 	private boolean normals = false;

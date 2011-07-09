@@ -27,7 +27,7 @@ package org.dyn4j.geometry;
 /**
  * Represents an axis aligned bounding box.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 3.0.0
  */
 public class AABB {
@@ -65,7 +65,25 @@ public class AABB {
 	 */
 	@Override
 	public String toString() {
-		return "(" + this.min.x + ", " + this.min.y + ") to (" + this.max.x + ", " + this.max.y + ")";
+		return "AABB[(" + this.min.x + ", " + this.min.y + ")|(" + this.max.x + ", " + this.max.y + ")]";
+	}
+	
+	/**
+	 * Returns the width of this {@link AABB}.
+	 * @return double
+	 * @since 3.0.1
+	 */
+	public double getWidth() {
+		return this.max.x - this.min.x;
+	}
+	
+	/**
+	 * Returns the height of this {@link AABB}.
+	 * @return double
+	 * @since 3.0.1
+	 */
+	public double getHeight() {
+		return this.max.y - this.min.y;
 	}
 	
 	/**

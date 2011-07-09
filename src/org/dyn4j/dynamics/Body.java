@@ -80,7 +80,7 @@ import org.dyn4j.geometry.Vector2;
  * setting in the {@link Settings} singleton.  Use this if the body is a fast moving
  * body, but be careful as this will incur a performance hit.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class Body implements Swept, Collidable, Transformable {
@@ -1154,6 +1154,21 @@ public class Body implements Swept, Collidable, Transformable {
 	 */
 	public Vector2 getVelocity() {
 		return this.velocity;
+	}
+	
+	/**
+	 * Returns the velocity of this body at the given point on the body.
+	 * @param point the point
+	 * @return {@link Vector2}
+	 * @since 3.0.1
+	 */
+	public Vector2 getVelocity(Vector2 point) {
+		// get the world space center point
+		Vector2 c = this.getWorldCenter();
+		// compute the r vector from the center of mass to the point
+		Vector2 r = c.to(point);
+		// compute the velocity
+		return r.cross(this.angularVelocity).add(this.velocity);
 	}
 	
 	/**

@@ -41,7 +41,7 @@ import org.dyn4j.Epsilon;
  * </pre>
  * This can decrease the number of temporary vectors.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class Vector2 {
@@ -101,6 +101,16 @@ public class Vector2 {
 		this.y = p2.y - p1.y;
 	}
 
+	/**
+	 * Creates a unit length vector in the given direction.
+	 * @param direction the direction in radians
+	 * @since 3.0.1
+	 */
+	public Vector2(double direction) {
+		this.x = Math.cos(direction);
+		this.y = Math.sin(direction);
+	}
+	
 	/**
 	 * Returns a new {@link Vector2} given the magnitude and direction.
 	 * @param magnitude the magnitude of the {@link Vector2}

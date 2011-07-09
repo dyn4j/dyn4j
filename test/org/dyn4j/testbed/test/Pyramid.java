@@ -38,11 +38,11 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests a triangular stack of boxes.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class Pyramid extends Test {
-	/** The height of the pyramid */
+	/** The height of the pyramid # of Bodies = h(h+1)/2 */
 	private static final int HEIGHT = 15;
 	
 	/* (non-Javadoc)

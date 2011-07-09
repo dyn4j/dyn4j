@@ -29,7 +29,7 @@ package org.dyn4j.geometry;
  * <p>
  * Supported operations are rotation and translation.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class Transform implements Transformable {
@@ -86,6 +86,55 @@ public class Transform implements Transformable {
 		 */
 		@Override
 		public void translate(Vector2 vector) {
+			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.geometry.Transform#set(org.dyn4j.geometry.Transform)
+		 */
+		public void set(Transform transform) {
+			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.geometry.Transform#setTranslation(double, double)
+		 */
+		public void setTranslation(double x, double y) {
+			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.geometry.Transform#setTranslationX(double)
+		 */
+		public void setTranslationX(double x) {
+			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.geometry.Transform#setTranslationY(double)
+		 */
+		public void setTranslationY(double y) {
+			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.geometry.Transform#setTranslation(org.dyn4j.geometry.Vector2)
+		 */
+		public void setTranslation(Vector2 translation) {
+			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.geometry.Transform#setRotation(double)
+		 */
+		public void setRotation(double theta) {
+			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.geometry.Transform#lerp(org.dyn4j.geometry.Transform, double)
+		 */
+		public void lerp(Transform end, double alpha) {
 			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
 		}
 	};
@@ -494,6 +543,18 @@ public class Transform implements Transformable {
 		Transform t = new Transform();
 		t.rotate(this.getRotation());
 		return t;
+	}
+	
+	/**
+	 * Returns the values stored in this transform.
+	 * <p>
+	 * The values are in the order of 00, 01, x, 10, 11, y.
+	 * @return double[]
+	 * @since 3.0.1
+	 */
+	public double[] getValues() {
+		return new double[] {this.m00, this.m01, this.x,
+				             this.m10, this.m11, this.y};
 	}
 	
 	/**

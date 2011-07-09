@@ -54,7 +54,7 @@ import org.junit.Test;
 /**
  * Class to test the {@link Body} class.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.0.1
  * @since 1.0.2
  */
 public class BodyTest {
@@ -862,5 +862,28 @@ public class BodyTest {
 		p = b.getWorldCenter();
 		TestCase.assertEquals(p.x, 0.0, 1e-6);
 		TestCase.assertEquals(p.y, 0.0, 1e-6);
+	}
+	
+	/**
+	 * Tests the getVelocity at a given point on the body method.
+	 * @since 3.0.1
+	 */
+	@Test
+	public void velocityAtPoint() {
+		Body b = new Body();
+		b.velocity.set(5.0, 4.0);
+		b.angularVelocity = Math.PI;
+		b.addFixture(Geometry.createEquilateralTriangle(2.0));
+		BodyFixture bf = b.addFixture(Geometry.createUnitCirclePolygon(5, 1.0));
+		bf.getShape().translate(-1.0, 1.0);
+		b.setMass();
+		b.translateToOrigin();
+		
+		Vector2 p = new Vector2(-2.0, 1.0);
+		
+		Vector2 vp = b.getVelocity(p);
+		
+		TestCase.assertEquals( 1.858, vp.x, 1.0E-3);
+		TestCase.assertEquals(-2.283, vp.y, 1.0E-3);
 	}
 }

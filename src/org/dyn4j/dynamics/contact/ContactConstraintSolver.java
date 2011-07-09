@@ -44,7 +44,7 @@ import org.dyn4j.geometry.Vector2;
  * facilitate stable stacking of rigid {@link Body}s.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class ContactConstraintSolver {
@@ -154,7 +154,7 @@ public class ContactConstraintSolver {
 					K.m11 = invM1 + invM2 + invI1 * rn2A * rn2A + invI2 * rn2B * rn2B;
 					
 					// check the condition number of the matrix
-					final double maxCondition = 100.0;
+					final double maxCondition = 1000.0;
 					if (K.m00 * K.m00 < maxCondition * K.determinant()) {
 						// if the condition number is below the max then we can
 						// assume that we can invert K
@@ -358,14 +358,19 @@ public class ContactConstraintSolver {
 				//
 				// Substitute:
 				// 
-				// x = x' - a
+				// x = a + d
 				// 
-				// Plug into above equation:
+				// a := old total impulse
+				// x := new total impulse
+				// d := incremental impulse
 				//
-				// vn = A * x + b
-				//    = A * (x' - a) + b
-				//    = A * x' + b - A * a
-				//    = A * x' + b'
+				// For the current iteration we extend the formula for the incremental impulse
+				// to compute the new total impulse:
+				//
+				// vn = A * d + b
+				//    = A * (x - a) + b
+				//    = A * x + b - A * a
+				//    = A * x + b'
 				// b' = b - A * a;
 				
 				Contact contact1 = contacts[0];
@@ -415,11 +420,11 @@ public class ContactConstraintSolver {
 					//
 					// Case 1: vn = 0
 					//
-					// 0 = A * x' + b'
+					// 0 = A * x + b'
 					//
-					// Solve for x':
+					// Solve for x:
 					//
-					// x' = - inv(A) * b'
+					// x = - inv(A) * b'
 					//
 					Vector2 x = contactConstraint.invK.product(b).negate();
 
@@ -451,8 +456,8 @@ public class ContactConstraintSolver {
 					//
 					// Case 2: vn1 = 0 and x2 = 0
 					//
-					//   0 = a11 * x1' + a12 * 0 + b1' 
-					// vn2 = a21 * x1' + a22 * 0 + b2'
+					//   0 = a11 * x1 + a12 * 0 + b1' 
+					// vn2 = a21 * x1 + a22 * 0 + b2'
 					//
 					
 					x.x = -contact1.massN * b.x;
@@ -485,8 +490,8 @@ public class ContactConstraintSolver {
 					//
 					// Case 3: vn2 = 0 and x1 = 0
 					//
-					// vn1 = a11 * 0 + a12 * x2' + b1' 
-					//   0 = a21 * 0 + a22 * x2' + b2'
+					// vn1 = a11 * 0 + a12 * x2 + b1' 
+					//   0 = a21 * 0 + a22 * x2 + b2'
 					//
 					
 					x.x = 0.0;
@@ -658,6 +663,6 @@ public class ContactConstraintSolver {
 		// check if the minimum separation between all objects is still
 		// greater than or equal to allowed penetration plus half of allowed penetration
 		// since we cannot expect it to be above allowed penetration alone
-		return minSeparation >= -1.5 * allowedPenetration;
+		return minSeparation >= -3.0 * allowedPenetration;
 	}
 }

@@ -41,10 +41,13 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests the a motorized revolute joint.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class Motor extends Test {
+	/** The car body */
+	private Entity carBody = null;
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.testbed.Test#getName()
 	 */
@@ -132,6 +135,7 @@ public class Motor extends Test {
 		body.addFixture(new BodyFixture(tgRect2));
 		body.setMass();
 		body.translate(-23.0, -3.0);
+		carBody = body;
 		
 		// add some payload bodies
 		double x, y;
@@ -177,8 +181,12 @@ public class Motor extends Test {
 		Vector2 p1 = wheel1.getWorldCenter().copy();
 		Vector2 p2 = wheel2.getWorldCenter().copy();
 		
-		// the rear wheel is just a normal revolute joint
+		// the rear wheel is a motorized revolute joint
 		RevoluteJoint j1 = new RevoluteJoint(body, wheel1, p1);
+		j1.setMotorSpeed(Math.PI);
+		// make sure we also specify the maximum motor torque since it defaults to zero
+		j1.setMaxMotorTorque(1000.0);
+		j1.setMotorEnabled(true);
 		
 		// the front wheel is a motorized revolute joint
 		RevoluteJoint j2 = new RevoluteJoint(body, wheel2, p2);
@@ -193,13 +201,24 @@ public class Motor extends Test {
 	}
 	
 	/* (non-Javadoc)
+	 * @see org.dyn4j.testbed.Test#update(double)
+	 */
+	@Override
+	public void update(double dt) {
+		// update the world
+		super.update(dt);
+		// after the world has been updated
+		// update the camera location
+		Vector2 pos = this.carBody.getWorldCenter();
+		this.offset.set(-pos.x, -pos.y);
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.Test#home()
 	 */
 	@Override
 	public void home() {
 		// set the scale
-		this.scale = 16.0;
-		// set the camera offset
-		this.offset.set(0.0, 2.0);
+		this.scale = 64.0;
 	}
 }
