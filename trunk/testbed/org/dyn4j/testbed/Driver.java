@@ -90,7 +90,6 @@ public class Driver {
 		Container contentPane = window.getContentPane();
 		// add the testbed to the frame
 		contentPane.add(testbed);
-		window.setResizable(false);
 		// size everything
 		window.pack();
 		

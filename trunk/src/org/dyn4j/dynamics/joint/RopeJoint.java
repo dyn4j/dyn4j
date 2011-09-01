@@ -420,6 +420,14 @@ public class RopeJoint extends Joint {
 	}
 	
 	/**
+	 * Returns true if the maximum limit is enabled.
+	 * @return boolean true if the maximum limit is enabled
+	 */
+	public boolean isMaximumEnabled() {
+		return this.maximumEnabled;
+	}
+	
+	/**
 	 * Returns the minimum distance between the two constrained {@link Body}s in meters.
 	 * @return double
 	 */
@@ -457,6 +465,14 @@ public class RopeJoint extends Joint {
 		this.body2.setAsleep(false);
 		// set the flag
 		this.minimumEnabled = flag;
+	}
+
+	/**
+	 * Returns true if the minimum limit is enabled.
+	 * @return boolean true if the minimum limit is enabled
+	 */
+	public boolean isMinimumEnabled() {
+		return this.minimumEnabled;
 	}
 	
 	/**

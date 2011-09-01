@@ -329,6 +329,15 @@ public class AngleJoint extends Joint {
 	}
 	
 	/**
+	 * Returns true if the limit is enabled.
+	 * @return boolean true if the limit is enabled
+	 * @since 3.0.1
+	 */
+	public boolean isLimitEnabled() {
+		return this.limitEnabled;
+	}
+	
+	/**
 	 * Returns the maximum angle between the two constrained {@link Body}s in radians.
 	 * @return double
 	 */

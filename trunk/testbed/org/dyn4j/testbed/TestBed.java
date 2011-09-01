@@ -742,7 +742,12 @@ public class TestBed extends GLCanvas implements GLEventListener {
 		if (this.isPaused()) {
 			// show a black translucent screen over everything
 			gl.glColor4f(0.0f, 0.0f, 0.0f, 0.3f);
-			GLHelper.fillRectangle(gl, 0, 0, width, height);
+			// dont draw over the panel
+			if (draw.drawPanel()) {
+				GLHelper.fillRectangle(gl, 0, HUD_HEIGHT / 2.0, width, height - HUD_HEIGHT);
+			} else {
+				GLHelper.fillRectangle(gl, 0, 0, width, height);
+			}
 			// show the paused label in the top left corner
 			this.renderPaused(gl, glut, width, height);
 		}
@@ -852,7 +857,45 @@ public class TestBed extends GLCanvas implements GLEventListener {
 	 */
 	@Override
 	public void reshape(GLAutoDrawable glDrawable, int x, int y, int width, int height) {
-		// do nothing since the window is not resizeable
+		// get the OpenGL context
+		GL2 gl = glDrawable.getGL().getGL2();
+		
+		// resize the ortho view
+		
+		// set the matrix mode to projection
+		gl.glMatrixMode(GL2.GL_PROJECTION);
+		// initialize the matrix
+		gl.glLoadIdentity();
+		// set the view to a 2D view
+		gl.glOrtho(-width / 2.0, width / 2.0, -height / 2.0, height / 2.0, 0, 1);
+		
+		// switch to the model view matrix
+		gl.glMatrixMode(GL2.GL_MODELVIEW);
+		// initialize the matrix
+		gl.glLoadIdentity();
+		
+		// resize the texture for the FBO
+		
+		// bind the texture to set it up
+		gl.glBindTexture(GL.GL_TEXTURE_2D, this.textureId);
+		gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
+		gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR);
+		gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA8, width, height, 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, null);
+		// switch back to the default texture
+		gl.glBindTexture(GL.GL_TEXTURE_2D, 0);
+		
+		// resize the render buffers for Multisampling
+		{
+			// create the multisampling buffer
+			gl.glBindRenderbuffer(GL.GL_RENDERBUFFER, this.colorRenderBufferId);
+			gl.glRenderbufferStorageMultisample(GL.GL_RENDERBUFFER, 2, GL.GL_RGBA8, width, height);
+			// create the depth multisampling buffer
+			gl.glBindRenderbuffer(GL.GL_RENDERBUFFER, this.depthRenderBufferId);
+			gl.glRenderbufferStorageMultisample(GL.GL_RENDERBUFFER, 2, GL2.GL_DEPTH_COMPONENT, width, height);
+		}
+		
+		// set the size
+		this.size.setSize(width, height);
 	}
 	
 	/**
