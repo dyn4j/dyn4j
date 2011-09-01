@@ -374,7 +374,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 		d = Segment.getPointOnSegmentClosestToPoint(ORIGIN, b.p, a.p);
 		for (int i = 0; i < this.maxIterations; i++) {
 			// the vector from the point we found to the origin is the new search direction
-			d.negate().normalize();
+			d.negate();
 			// check if d is zero
 			if (d.isZero()) {
 				// if the closest point is the origin then the shapes are not separated
@@ -395,8 +395,11 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			if ((projection - a.p.dot(d)) < this.distanceEpsilon) {
 				// then the new point we just made is not far enough
 				// in the direction of n so we can stop now
+				// normalize d
+				d.normalize();
 				separation.normal = d;
-				separation.distance = -projection;
+				// compute the real distance
+				separation.distance = -c.p.dot(d);
 				// get the closest points
 				this.findClosestPoints(a, b, separation);
 				// return true to indicate separation
@@ -415,6 +418,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			if (p1Mag <= Epsilon.E) {
 				// if so then we have a separation (although its
 				// nearly zero separation)
+				d.normalize();
 				separation.distance = p1.normalize();
 				separation.normal = d;
 				this.findClosestPoints(a, c, separation);
@@ -422,6 +426,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			} else if (p2Mag <= Epsilon.E) {
 				// if so then we have a separation (although its
 				// nearly zero separation)
+				d.normalize();
 				separation.distance = p2.normalize();
 				separation.normal = d;
 				this.findClosestPoints(c, b, separation);
@@ -442,6 +447,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 		}
 		// if we made it here then we know that we hit the maximum number of iterations
 		// this is really a catch all termination case
+		d.normalize();
 		separation.normal = d;
 		separation.distance = -c.p.dot(d);
 		// get the closest points
