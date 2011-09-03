@@ -76,17 +76,32 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 	
 	// mass controls
 	
+	/** The local center label */
+	private JLabel lblCenter;
+	
 	/** The mass label */
 	private JLabel lblMass;
 	
 	/** The inertia label */
 	private JLabel lblInertia;
 	
+	/** The local center of mass x text field */
+	private JFormattedTextField txtX;
+
+	/** The local center of mass y text field */
+	private JFormattedTextField txtY;
+	
 	/** The mass text box */
 	private JFormattedTextField txtMass;
 	
 	/** The inertia text box */
 	private JFormattedTextField txtInertia;
+	
+	/** The label for the explicit mass check box */
+	private JLabel lblMassExplicit;
+	
+	/** The check box to manually set the mass */
+	private JCheckBox chkMassExplicit;
 	
 	// mass type controls
 	
@@ -298,21 +313,124 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 			showMass = new Mass(mass);
 			showMass.setType(Mass.Type.NORMAL);
 		}
+		
+		this.lblMassExplicit = new JLabel("Manual", Icons.INFO, JLabel.LEFT);
+		this.lblMassExplicit.setToolTipText("Allows the mass to be set instead of calculated from the fixtures.");
+		this.chkMassExplicit = new JCheckBox();
+		this.chkMassExplicit.setSelected(body.isMassExplicit());
+		this.chkMassExplicit.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (chkMassExplicit.isSelected()) {
+					body.setMassExplicit(true);
+					// enable the controls
+					txtX.setEditable(true);
+					txtY.setEditable(true);
+					txtMass.setEditable(true);
+					txtInertia.setEditable(true);
+				} else {
+					body.setMassExplicit(false);
+					// recompute the mass
+					body.setMass(body.getMass().getType());
+					// set the new values after computing the mass
+					Mass m = body.getMass();
+					txtX.setValue(m.getCenter().x);
+					txtY.setValue(m.getCenter().y);
+					txtMass.setValue(m.getMass());
+					txtInertia.setValue(m.getInertia());
+					// disable the controls
+					txtX.setEditable(false);
+					txtY.setEditable(false);
+					txtMass.setEditable(false);
+					txtInertia.setEditable(false);
+				}
+			}
+		});
+		
+		this.lblCenter = new JLabel("Local Center", Icons.INFO, JLabel.LEFT);
+		this.lblCenter.setToolTipText("<html>The <b>local</b> center of mass of the body.</html>");
+		JLabel lblX = new JLabel("x");
+		JLabel lblY = new JLabel("y");
+		
+		this.txtX = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtX.addFocusListener(new SelectTextFocusListener(this.txtX));
+		this.txtX.setValue(showMass.getCenter().x);
+		this.txtX.setEditable(body.isMassExplicit());
+		this.txtX.addPropertyChangeListener("value", new PropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				if (chkMassExplicit.isSelected()) {
+					Number number = (Number)txtX.getValue();
+					Mass cm = body.getMass();
+					// create a new mass using the new x value
+					Mass nm = new Mass(new Vector2(number.doubleValue(), cm.getCenter().y), cm.getMass(), cm.getInertia());
+					nm.setType(((MassTypeItem)cmbMassType.getSelectedItem()).type);
+					body.setMass(nm);
+				}
+			}
+		});
+		
+		this.txtY = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtY.addFocusListener(new SelectTextFocusListener(this.txtY));
+		this.txtY.setValue(showMass.getCenter().y);
+		this.txtY.setEditable(body.isMassExplicit());
+		this.txtY.addPropertyChangeListener("value", new PropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				if (chkMassExplicit.isSelected()) {
+					Number number = (Number)txtY.getValue();
+					Mass cm = body.getMass();
+					// create a new mass using the new y value
+					Mass nm = new Mass(new Vector2(cm.getCenter().x, number.doubleValue()), cm.getMass(), cm.getInertia());
+					nm.setType(((MassTypeItem)cmbMassType.getSelectedItem()).type);
+					body.setMass(nm);
+				}
+			}
+		});
+		
 		this.lblMass = new JLabel("Mass", Icons.INFO, JLabel.LEFT);
 		this.lblMass.setToolTipText("<html>The total mass of the body in Kilograms/Meter<sup>2</sup>.<br />" +
-				"Specifies the body's resistance to change in its velocity.</html>");
+				"Specifies the body's resistance to change in its velocity.<br />" +
+				"The mass is computed automatically from the fixtures attached to this body.</html>");
 		this.txtMass = new JFormattedTextField(new DecimalFormat("0.000"));
 		this.txtMass.addFocusListener(new SelectTextFocusListener(this.txtMass));
 		this.txtMass.setValue(showMass.getMass());
-		this.txtMass.setEditable(false);
+		this.txtMass.setEditable(body.isMassExplicit());
+		this.txtMass.addPropertyChangeListener("value", new PropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				if (chkMassExplicit.isSelected()) {
+					Number number = (Number)txtMass.getValue();
+					Mass cm = body.getMass();
+					// create a new mass using the new mass value
+					Mass nm = new Mass(cm.getCenter(), number.doubleValue(), cm.getInertia());
+					nm.setType(((MassTypeItem)cmbMassType.getSelectedItem()).type);
+					body.setMass(nm);
+				}
+			}
+		});
 		
 		this.lblInertia = new JLabel("Inertia", Icons.INFO, JLabel.LEFT);
 		this.lblInertia.setToolTipText("<html>The inertia tensor of the body in Kilogram-Meters<sup>2</sup>.<br />" +
-				"Specifies the body's resistance to change in its angular velocity.</html>");
+				"Specifies the body's resistance to change in its angular velocity.<br />" +
+				"The inertia is computed automatically from the fixtures attached to this body.</html>");
 		this.txtInertia = new JFormattedTextField(new DecimalFormat("0.000"));
 		this.txtInertia.addFocusListener(new SelectTextFocusListener(this.txtInertia));
 		this.txtInertia.setValue(showMass.getInertia());
-		this.txtInertia.setEditable(false);
+		this.txtInertia.setEditable(body.isMassExplicit());
+		this.txtInertia.addPropertyChangeListener("value", new PropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				if (chkMassExplicit.isSelected()) {
+					Number number = (Number)txtInertia.getValue();
+					Mass cm = body.getMass();
+					// create a new mass using the new inertia value
+					Mass nm = new Mass(cm.getCenter(), cm.getMass(), number.doubleValue());
+					nm.setType(((MassTypeItem)cmbMassType.getSelectedItem()).type);
+					body.setMass(nm);
+				}
+			}
+		});
 		
 		// linear damping
 		this.lblLinearDamping = new JLabel("Linear Damping", Icons.INFO, JLabel.LEFT);
@@ -525,16 +643,33 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 		layout.setHorizontalGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblMassType)
+						.addComponent(this.lblMassExplicit)
+						.addComponent(this.lblCenter)
 						.addComponent(this.lblMass)
 						.addComponent(this.lblInertia))
 				.addGroup(layout.createParallelGroup()
 						.addComponent(this.cmbMassType)
+						.addComponent(this.chkMassExplicit)
+						.addGroup(layout.createSequentialGroup()
+								.addComponent(this.txtX)
+								.addComponent(lblX)
+								.addComponent(this.txtY)
+								.addComponent(lblY))
 						.addComponent(this.txtMass)
 						.addComponent(this.txtInertia)));
 		layout.setVerticalGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblMassType)
-						.addComponent(this.cmbMassType))
+						.addComponent(this.cmbMassType, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(this.lblMassExplicit)
+						.addComponent(this.chkMassExplicit))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(this.lblCenter)
+						.addComponent(this.txtX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblX)
+						.addComponent(this.txtY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblY))
 				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblMass)
 						.addComponent(this.txtMass, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))

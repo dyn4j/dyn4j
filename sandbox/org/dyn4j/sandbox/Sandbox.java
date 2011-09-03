@@ -198,8 +198,8 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	private MoveWorldAction moveWorldAction = new MoveWorldAction();
 	
 	// TODO add convex decomposition
-	// TODO add ability to change mass
 	// TODO add ability to save/load state of the world
+	// TODO add preview capabilities to fixture creation
 	
 	/**
 	 * Default constructor.
@@ -737,10 +737,12 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 			if (ApplicationSettings.isStenciled()) {
 				// stenciling requires a larger radius
 				RenderUtilities.outlineShapes(gl, body, 6, SELECTED_COLOR, this.renderState);
+				gl.glColor4fv(body.getFillColor(), 0);
+				body.fill(gl);
 			} else {
 				RenderUtilities.outlineShapes(gl, body, 4, SELECTED_COLOR, this.renderState);
+				body.render(gl);
 			}
-			body.render(gl);
 		}
 		
 		if (this.editBodyAction.isActive()) {
@@ -760,6 +762,8 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 				RenderUtilities.outlineShape(gl, convex, body.getTransform(), 4, SELECTED_COLOR);
 				gl.glPushMatrix();
 				RenderUtilities.applyTransform(gl, body.getTransform());
+				gl.glColor4fv(body.getFillColor(), 0);
+				RenderUtilities.fillShape(gl, convex);
 				gl.glColor4fv(body.getOutlineColor(), 0);
 				RenderUtilities.drawShape(gl, convex, false);
 				gl.glPopMatrix();
@@ -851,7 +855,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 				// get the body
 				SandboxBody body = this.selectBodyAction.getObject();
 				// get the fixture
-				BodyFixture fixture = this.getContainingFixture(body, pw);
+				BodyFixture fixture = this.getFixtureAtPoint(body, pw);
 				// make sure the click was inside the same body
 				if (fixture == null) {
 					// otherwise de-select the body
@@ -862,7 +866,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 				// get the body
 				SandboxBody body = this.editBodyAction.getObject();
 				// get the fixture
-				BodyFixture fixture = this.getContainingFixture(body, pw);
+				BodyFixture fixture = this.getFixtureAtPoint(body, pw);
 				// see if a fixture was clicked
 				if (fixture != null) {
 					// start the select fixture action
@@ -939,7 +943,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 					this.moveFixtureAction.update(lpw);
 				} else {
 					// get the current fixture that the mouse is on
-					BodyFixture fixture = this.getContainingFixture(body, pw);
+					BodyFixture fixture = this.getFixtureAtPoint(body, pw);
 					// see if a fixture was clicked
 					if (fixture != null) {
 						// start the select fixture action
@@ -1021,7 +1025,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 					this.rotateFixtureAction.update(lpw);
 				} else {
 					// get the current fixture that the mouse is on
-					BodyFixture fixture = this.getContainingFixture(body, pw);
+					BodyFixture fixture = this.getFixtureAtPoint(body, pw);
 					// see if a fixture was clicked
 					if (fixture != null) {
 						// start the select fixture action
@@ -1116,10 +1120,20 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	 * @param point the world space point
 	 * @return {@link SandboxBody}
 	 */
-	public SandboxBody getBodyAtPoint(Vector2 point) {
+	private SandboxBody getBodyAtPoint(Vector2 point) {
 		int bSize = this.world.getBodyCount();
+		// check if there is already a selected body
+		if (this.selectBodyAction.isActive()) {
+			// if so, then check that body first
+			SandboxBody body = this.selectBodyAction.getObject();
+			if (this.contains(body, point)) {
+				return body;
+			}
+		}
+		// if the selected body doesnt contain the point
+		// then check the other bodies in the world
 		// loop over all the bodies in the world
-		for (int i = 0; i < bSize; i++) {
+		for (int i = bSize - 1; i >= 0; i--) {
 			Body body = this.world.getBody(i);
 			// does the body contain the point
 			if (contains(body, point)) {
@@ -1135,11 +1149,11 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	 * @param body the body
 	 * @return boolean
 	 */
-	public boolean contains(Body body, Vector2 point) {
+	private boolean contains(Body body, Vector2 point) {
 		Transform transform = body.getTransform();
 		int fSize = body.getFixtureCount();
 		// loop over the body fixtures
-		for (int j = 0; j < fSize; j++) {
+		for (int j = fSize - 1; j >= 0; j--) {
 			BodyFixture bodyFixture = body.getFixture(j);
 			Convex convex = bodyFixture.getShape();
 			if (convex.contains(point, transform)) {
@@ -1157,11 +1171,21 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	 * @param body the body
 	 * @return BodyFixture
 	 */
-	public BodyFixture getContainingFixture(Body body, Vector2 point) {
+	private BodyFixture getFixtureAtPoint(Body body, Vector2 point) {
 		Transform transform = body.getTransform();
 		int fSize = body.getFixtureCount();
+		// check if a fixture is already selected
+		if (this.selectFixtureAction.isActive()) {
+			// if so, then check the selected fixture first
+			BodyFixture bodyFixture = this.selectFixtureAction.getObject();
+			Convex convex = bodyFixture.getShape();
+			if (convex.contains(point, transform)) {
+				return bodyFixture;
+			}
+		}
+		// otherwise check the other fixtures on the body
 		// loop over the body fixtures
-		for (int j = 0; j < fSize; j++) {
+		for (int j = fSize - 1; j >= 0; j--) {
 			BodyFixture bodyFixture = body.getFixture(j);
 			Convex convex = bodyFixture.getShape();
 			if (convex.contains(point, transform)) {
@@ -1181,7 +1205,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	 * @param scale the screen to world scale factor
 	 * @return Vector2 the world point
 	 */
-	public Vector2 screenToWorld(Point p, Dimension size, Vector2 offset, double scale) {
+	private Vector2 screenToWorld(Point p, Dimension size, Vector2 offset, double scale) {
 		Vector2 v = new Vector2();
 		double x = p.x;
 		double y = p.y;

@@ -10,6 +10,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JTabbedPane;
 
+import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.panels.BodyPanel;
@@ -58,9 +59,21 @@ public class EditBodyDialog extends JDialog implements ActionListener {
 		this.body.setBullet(body.isBullet());
 		this.body.setGravityScale(body.getGravityScale());
 		this.body.setLinearDamping(body.getLinearDamping());
-		this.body.setMass(new Mass(body.getMass()));
 		this.body.setName(body.getName());
 		this.body.setVelocity(body.getVelocity().copy());
+		this.body.setMassExplicit(body.isMassExplicit());
+		
+		// add the fixtures to the body copy
+		// its possible that the mass will be reset here on
+		// each fixture add in the future, so set the mass to
+		// the mass of the body after this
+		int fSize = body.getFixtureCount();
+		for (int i = 0; i < fSize; i++) {
+			BodyFixture bf = body.getFixture(i);
+			this.body.addFixture(bf);
+		}
+		
+		this.body.setMass(new Mass(body.getMass()));
 		
 		Container container = this.getContentPane();
 		
@@ -159,6 +172,7 @@ public class EditBodyDialog extends JDialog implements ActionListener {
 			body.setMass(new Mass(bodyChanges.getMass()));
 			body.setName(bodyChanges.getName());
 			body.setVelocity(bodyChanges.getVelocity().copy());
+			body.setMassExplicit(bodyChanges.isMassExplicit());
 			
 			// apply the transform
 			body.getTransform().identity();

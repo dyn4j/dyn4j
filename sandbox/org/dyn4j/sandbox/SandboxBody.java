@@ -28,6 +28,9 @@ public class SandboxBody extends Body {
 	/** The body fill color */
 	protected float[] fillColor = ColorUtilities.convertColor(new Color(196, 213, 150));
 	
+	/** True if the user has overridden the calculated mass */
+	protected boolean massExplicit = false;
+	
 	/**
 	 * Renders the body normally.
 	 * <p>
@@ -157,6 +160,22 @@ public class SandboxBody extends Body {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	/**
+	 * Returns true if the mass of this body has been explicitly set.
+	 * @return boolean
+	 */
+	public boolean isMassExplicit() {
+		return this.massExplicit;
+	}
+	
+	/**
+	 * Sets the mass explicit flag.
+	 * @param flag true if the mass has been set explicitly
+	 */
+	public void setMassExplicit(boolean flag) {
+		this.massExplicit = flag;
 	}
 	
 	/* (non-Javadoc)

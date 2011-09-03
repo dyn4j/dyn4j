@@ -181,9 +181,12 @@ public class EditFixtureDialog extends JDialog implements ActionListener {
 			fixture.setRestitution(newFixture.getRestitution());
 			fixture.setSensor(newFixture.isSensor());
 			fixture.setDensity(newFixture.getDensity());
-			// recompute the mass
-			// we must do this if the density or position of the fixture has changed
-			body.setMass(body.getMass().getType());
+			// check if the mass is set explicitly or not
+			if (!body.isMassExplicit()) {
+				// recompute the mass
+				// we must do this if the density or position of the fixture has changed
+				body.setMass(body.getMass().getType());
+			}
 		}
 	}
 }

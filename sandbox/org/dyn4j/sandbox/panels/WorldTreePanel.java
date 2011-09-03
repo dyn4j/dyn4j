@@ -794,8 +794,11 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 					// add the fixture to the body
 					synchronized (this.world) {
 						body.addFixture(fixture);
-						// reset the mass using the type it was before
-						body.setMass(body.getMass().getType());
+						// check if the mass is set explicitly or not
+						if (!body.isMassExplicit()) {
+							// reset the mass using the type it was before
+							body.setMass(body.getMass().getType());
+						}
 					}
 					// add the node to the tree
 					DefaultMutableTreeNode fixtureNode = new DefaultMutableTreeNode(fixture);
@@ -836,8 +839,11 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 					synchronized (this.world) {
 						// remove the fixture
 						body.removeFixture(fixture);
-						// reset the mass using the type it was before
-						body.setMass(body.getMass().getType());
+						// check if the mass is set explicitly or not
+						if (!body.isMassExplicit()) {
+							// reset the mass using the type it was before
+							body.setMass(body.getMass().getType());
+						}
 					}
 					// remove the node from the tree
 					this.model.removeNodeFromParent(node);
