@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to capture translation and rotation.
@@ -108,22 +109,16 @@ public class TransformPanel extends JPanel implements InputPanel {
 		
 		if (header == null) header = new JLabel();
 		
-		this.lblT = new JLabel("Translation");
+		this.lblT = new JLabel("Translation", Icons.INFO, JLabel.LEFT);
+		this.lblT.setToolTipText("The translation along the x and y axes in Meters.");
 		this.lblX = new JLabel("x");
 		this.lblY = new JLabel("y");
-		this.lblR = new JLabel("Rotation");
-		
-		this.lblX.setToolTipText("The translation along the x axis in Meters.");
-		this.lblY.setToolTipText("The translation along the y axis in Meters.");
-		this.lblR.setToolTipText("The rotation in Degrees.");
+		this.lblR = new JLabel("Rotation", Icons.INFO, JLabel.LEFT);
+		this.lblR.setToolTipText("The rotate about the center in Degrees.");
 		
 		this.txtX = new JFormattedTextField(new DecimalFormat("0.000"));
 		this.txtY = new JFormattedTextField(new DecimalFormat("0.000"));
 		this.txtR = new JFormattedTextField(new DecimalFormat("0.000"));
-		
-		this.txtX.setToolTipText("The translation along the x axis in Meters.");
-		this.txtY.setToolTipText("The translation along the y axis in Meters.");
-		this.txtR.setToolTipText("The rotation in Degrees.");
 		
 		this.txtX.setColumns(7);
 		this.txtY.setColumns(7);

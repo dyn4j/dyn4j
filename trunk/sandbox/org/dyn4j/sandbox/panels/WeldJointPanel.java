@@ -19,6 +19,7 @@ import org.dyn4j.dynamics.joint.WeldJoint;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to create or edit an weld joint.
@@ -86,13 +87,16 @@ public class WeldJointPanel extends JointPanel implements InputPanel, ActionList
 		this.txtName.setColumns(15);
 		this.chkCollision.setSelected(collision);
 		
-		this.lblBody1 = new JLabel("Body 1");
-		this.lblBody2 = new JLabel("Body 2");
+		this.lblBody1 = new JLabel("Body 1", Icons.INFO, JLabel.LEFT);
+		this.lblBody2 = new JLabel("Body 2", Icons.INFO, JLabel.LEFT);
+		this.lblBody1.setToolTipText("The first body participating in the joint.");
+		this.lblBody2.setToolTipText("The second body participating in the joint.");
+		
 		this.cmbBody1 = new JComboBox(bodies);
 		this.cmbBody2 = new JComboBox(bodies);
 		
-		this.lblAnchor = new JLabel("Anchor");
-		this.lblAnchor.setToolTipText("The anchor point to restrict rotation.");
+		this.lblAnchor = new JLabel("Anchor", Icons.INFO, JLabel.LEFT);
+		this.lblAnchor.setToolTipText("The anchor point to restrict rotation and translation.");
 		
 		this.lblX1 = new JLabel("x");
 		this.lblY1 = new JLabel("y");

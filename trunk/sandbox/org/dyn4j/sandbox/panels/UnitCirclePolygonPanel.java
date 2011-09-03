@@ -15,6 +15,7 @@ import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to create a unit circle polygon shape.
@@ -48,8 +49,10 @@ public class UnitCirclePolygonPanel extends ShapePanel implements InputPanel {
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
 		
-		JLabel lblRadius = new JLabel("Radius");
-		JLabel lblCount = new JLabel("Point Count");
+		JLabel lblRadius = new JLabel("Radius", Icons.INFO, JLabel.LEFT);
+		lblRadius.setToolTipText("The radius of the circle that the polygon will fit inside of in Meters.");
+		JLabel lblCount = new JLabel("Point Count", Icons.INFO, JLabel.LEFT);
+		lblCount.setToolTipText("The number of points to create.");
 		
 		JFormattedTextField txtRadius = new JFormattedTextField(new DecimalFormat("0.000"));
 		JFormattedTextField txtCount = new JFormattedTextField(NumberFormat.getIntegerInstance());

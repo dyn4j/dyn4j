@@ -68,7 +68,7 @@ public class AddJointDialog extends JDialog implements ActionListener {
 	 * @param bodies the list of bodies
 	 * @param clazz the joint class
 	 */
-	public AddJointDialog(Window owner, SandboxBody[] bodies, Class<? extends Joint> clazz) {
+	private AddJointDialog(Window owner, SandboxBody[] bodies, Class<? extends Joint> clazz) {
 		super(owner, ModalityType.APPLICATION_MODAL);
 		
 		SandboxBody b1 = bodies[0];

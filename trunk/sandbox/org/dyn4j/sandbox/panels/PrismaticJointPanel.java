@@ -20,6 +20,7 @@ import org.dyn4j.dynamics.joint.PrismaticJoint;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to create or edit an prismatic joint.
@@ -149,15 +150,18 @@ public class PrismaticJointPanel extends JointPanel implements InputPanel, Actio
 		this.txtName.setColumns(15);
 		this.chkCollision.setSelected(collision);
 		
-		this.lblBody1 = new JLabel("Body 1");
-		this.lblBody2 = new JLabel("Body 2");
+		this.lblBody1 = new JLabel("Body 1", Icons.INFO, JLabel.LEFT);
+		this.lblBody2 = new JLabel("Body 2", Icons.INFO, JLabel.LEFT);
+		this.lblBody1.setToolTipText("The first body participating in the joint.");
+		this.lblBody2.setToolTipText("The second body participating in the joint.");
+		
 		this.cmbBody1 = new JComboBox(bodies);
 		this.cmbBody2 = new JComboBox(bodies);
 		
-		this.lblAnchor = new JLabel("Anchor");
+		this.lblAnchor = new JLabel("Anchor", Icons.INFO, JLabel.LEFT);
 		this.lblAnchor.setToolTipText("The anchor point to restrict rotation.");
 		
-		this.lblAxis = new JLabel("Axis");
+		this.lblAxis = new JLabel("Axis", Icons.INFO, JLabel.LEFT);
 		this.lblAxis.setToolTipText("The allowed motion axis.");
 		
 		this.lblX1 = new JLabel("x");
@@ -191,37 +195,35 @@ public class PrismaticJointPanel extends JointPanel implements InputPanel, Actio
 		this.btnUseCenter2.setActionCommand("use-com2");
 		this.btnUseCenter2.addActionListener(this);
 		
-		this.lblLimitEnabled = new JLabel("Limits Enabled");
+		this.lblLimitEnabled = new JLabel("Limits Enabled", Icons.INFO, JLabel.LEFT);
+		this.lblLimitEnabled.setToolTipText("Check to enable the limits for this joint.");
 		this.chkLimitEnabled = new JCheckBox();
 		
-		this.lblUpperLimit = new JLabel("Upper Limit");
+		this.lblUpperLimit = new JLabel("Upper Limit", Icons.INFO, JLabel.LEFT);
 		this.lblUpperLimit.setToolTipText("The upper limit of the joint in Meters.");
 		this.txtUpperLimit = new JFormattedTextField(new DecimalFormat("0.000"));
 		this.txtUpperLimit.addFocusListener(new SelectTextFocusListener(this.txtUpperLimit));
-		this.txtUpperLimit.setToolTipText("The upper limit of the joint in Meters.");
 		this.txtUpperLimit.setColumns(8);
 		
-		this.lblLowerLimit = new JLabel("Lower Limit");
+		this.lblLowerLimit = new JLabel("Lower Limit", Icons.INFO, JLabel.LEFT);
 		this.lblLowerLimit.setToolTipText("The lower limit of the joint in Meters.");
 		this.txtLowerLimit = new JFormattedTextField(new DecimalFormat("0.000"));
 		this.txtLowerLimit.addFocusListener(new SelectTextFocusListener(this.txtLowerLimit));
-		this.txtLowerLimit.setToolTipText("The lower limit of the joint in Meters.");
 		this.txtLowerLimit.setColumns(8);
 		
-		this.lblMotorEnabled = new JLabel("Motor Enabled");
+		this.lblMotorEnabled = new JLabel("Motor Enabled", Icons.INFO, JLabel.LEFT);
+		this.lblMotorEnabled.setToolTipText("Check to enable the linear motor for this joint.");
 		this.chkMotorEnabled = new JCheckBox();
 		
-		this.lblMotorSpeed = new JLabel("Motor Speed");
+		this.lblMotorSpeed = new JLabel("Motor Speed", Icons.INFO, JLabel.LEFT);
 		this.lblMotorSpeed.setToolTipText("The motor speed in Meters/Second.");
 		this.txtMotorSpeed = new JFormattedTextField(new DecimalFormat("0.000"));
 		this.txtMotorSpeed.addFocusListener(new SelectTextFocusListener(this.txtMotorSpeed));
-		this.txtMotorSpeed.setToolTipText("The motor speed in Meters/Second.");
 		
-		this.lblMaxMotorForce = new JLabel("Maximum Motor Force");
+		this.lblMaxMotorForce = new JLabel("Maximum Motor Force", Icons.INFO, JLabel.LEFT);
 		this.lblMaxMotorForce.setToolTipText("The maximum force the motor can apply in Newtons.");
 		this.txtMaxMotorForce = new JFormattedTextField(new DecimalFormat("0.000"));
 		this.txtMaxMotorForce.addFocusListener(new SelectTextFocusListener(this.txtMaxMotorForce));
-		this.txtMaxMotorForce.setToolTipText("The maximum force the motor can apply in Newtons.");
 		
 		// set defaults
 

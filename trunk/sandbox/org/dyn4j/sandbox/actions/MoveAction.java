@@ -3,17 +3,17 @@ package org.dyn4j.sandbox.actions;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Action to store information about rotating a body.
+ * Action to store information about moving (translating) an object.
  * @author William Bittle
  * @version 1.0.0
  * @since 1.0.0
  */
-public class RotateBodyAction extends Action {
-	/** The begin position of the rotation */
+public class MoveAction extends Action {
+	/** The begin position of the translation */
 	private Vector2 beginPosition;
 	
 	/**
-	 * Begins the rotate action with the specified begin position in world coordinates.
+	 * Begins the move action with the specified begin position in world coordinates.
 	 * @param mousePosition the begin position in world coordinates
 	 */
 	public synchronized void begin(Vector2 mousePosition) {
@@ -33,7 +33,7 @@ public class RotateBodyAction extends Action {
 	}
 	
 	/**
-	 * Ends the rotate body action.
+	 * Ends the move action.
 	 */
 	public synchronized void end() {
 		this.active = false;
@@ -41,7 +41,7 @@ public class RotateBodyAction extends Action {
 	}
 	
 	/**
-	 * Returns the begin position of the rotate body action in world coordinates.
+	 * Returns the begin position of the move action in world coordinates.
 	 * <p>
 	 * Returns null if the action is inactive.
 	 * @return Vector2

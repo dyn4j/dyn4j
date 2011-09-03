@@ -49,7 +49,7 @@ public class AddBodyDialog extends JDialog implements ActionListener {
 	 * @param owner the dialog owner
 	 * @param title the dialog title
 	 */
-	public AddBodyDialog(Window owner, String title) {
+	private AddBodyDialog(Window owner, String title) {
 		super(owner, title, ModalityType.APPLICATION_MODAL);
 		
 		body = new SandboxBody();

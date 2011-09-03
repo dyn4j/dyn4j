@@ -14,6 +14,7 @@ import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Triangle;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to create an equilateral triangle shape.
@@ -41,7 +42,8 @@ public class EquilateralTrianglePanel extends ShapePanel implements InputPanel {
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
 		
-		JLabel lblHeight = new JLabel("Height");
+		JLabel lblHeight = new JLabel("Height", Icons.INFO, JLabel.LEFT);
+		lblHeight.setToolTipText("The height of the equilateral triangle.");
 		JFormattedTextField txtHeight = new JFormattedTextField(new DecimalFormat("0.000"));
 		txtHeight.setValue(DEFAULT_HEIGHT);
 		

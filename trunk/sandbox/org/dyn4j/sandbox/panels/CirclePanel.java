@@ -13,6 +13,7 @@ import javax.swing.JOptionPane;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to create a circle shape.
@@ -40,7 +41,8 @@ public class CirclePanel extends ShapePanel implements InputPanel {
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
 		
-		JLabel lblRadius = new JLabel("Radius");
+		JLabel lblRadius = new JLabel("Radius", Icons.INFO, JLabel.LEFT);
+		lblRadius.setToolTipText("The radius of the circle in Meters.");
 		JFormattedTextField txtRadius = new JFormattedTextField(new DecimalFormat("0.000"));
 		txtRadius.setValue(DEFAULT_RADIUS);
 		

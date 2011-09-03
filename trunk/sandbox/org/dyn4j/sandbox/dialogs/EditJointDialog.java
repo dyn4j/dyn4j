@@ -61,7 +61,7 @@ public class EditJointDialog extends JDialog implements ActionListener {
 	 * @param owner the dialog owner
 	 * @param joint the joint
 	 */
-	public EditJointDialog(Window owner, Joint joint) {
+	private EditJointDialog(Window owner, Joint joint) {
 		super(owner, ModalityType.APPLICATION_MODAL);
 		
 		SandboxBody b1 = (SandboxBody)joint.getBody1();

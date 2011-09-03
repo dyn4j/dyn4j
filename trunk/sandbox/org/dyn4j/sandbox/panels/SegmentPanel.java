@@ -13,6 +13,7 @@ import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to create a segment shape.
@@ -46,8 +47,10 @@ public class SegmentPanel extends ShapePanel implements InputPanel {
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
 		
-		JLabel lblStart = new JLabel("Start");
-		JLabel lblEnd = new JLabel("End");
+		JLabel lblStart = new JLabel("Start", Icons.INFO, JLabel.LEFT);
+		lblStart.setToolTipText("The start point of the line segment.");
+		JLabel lblEnd = new JLabel("End", Icons.INFO, JLabel.LEFT);
+		lblEnd.setToolTipText("The end point of the line segment.");
 		JLabel lblSX = new JLabel("x");
 		JLabel lblSY = new JLabel("y");
 		JLabel lblEX = new JLabel("x");

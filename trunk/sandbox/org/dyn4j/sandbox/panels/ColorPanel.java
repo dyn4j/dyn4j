@@ -11,6 +11,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.dyn4j.sandbox.controls.JSliderWithTextField;
+import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Customer color editor.
@@ -68,13 +69,17 @@ public class ColorPanel extends JPanel {
 	public ColorPanel(Color initialColor, boolean showAlpha) {
 		this.color = initialColor;
 		
-		// TODO allow the color to be chosen/canceled
-		
 		// setup the labels
-		this.lblRed = new JLabel("Red");
-		this.lblGreen = new JLabel("Green");
-		this.lblBlue = new JLabel("Blue");
-		this.lblAlpha = new JLabel("Alpha");
+		this.lblRed = new JLabel("Red", Icons.INFO, JLabel.LEFT);
+		this.lblGreen = new JLabel("Green", Icons.INFO, JLabel.LEFT);
+		this.lblBlue = new JLabel("Blue", Icons.INFO, JLabel.LEFT);
+		this.lblAlpha = new JLabel("Alpha", Icons.INFO, JLabel.LEFT);
+		
+		this.lblRed.setToolTipText("The red component of the color.");
+		this.lblGreen.setToolTipText("The green component of the color.");
+		this.lblBlue.setToolTipText("The blue component of the color.");
+		this.lblAlpha.setToolTipText("The alpha (transparency) component of the color.");
+		
 		this.lblAlpha.setVisible(showAlpha);
 		
 		// setup the color sliders

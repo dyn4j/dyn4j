@@ -17,6 +17,7 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
 import org.dyn4j.Version;
+import org.dyn4j.sandbox.Sandbox;
 import org.dyn4j.sandbox.utilities.Icons;
 
 /**
@@ -48,7 +49,10 @@ public class AboutDialog extends JDialog {
 		// add the logo to the top
 		JLabel icon = new JLabel();
 		icon.setIcon(Icons.SANDBOX_128);
-		icon.setText("<html>Sandbox - A testing application for dyn4j<br />Sandbox is using dyn4j v" + Version.getVersion() + "</html>");
+		icon.setText(
+				"<html>Sandbox - A testing application for dyn4j<br />" +
+				"Sandbox v" + Sandbox.VERSION + "<br />" +
+				"dyn4j v" + Version.getVersion() + "</html>");
 		
 		// add the about text section with clickable links
 		JTextPane text = new JTextPane();

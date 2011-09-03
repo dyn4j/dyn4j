@@ -20,6 +20,7 @@ import org.dyn4j.dynamics.joint.WheelJoint;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to create or edit an wheel joint.
@@ -142,15 +143,18 @@ public class WheelJointPanel extends JointPanel implements InputPanel, ActionLis
 		this.txtName.setColumns(15);
 		this.chkCollision.setSelected(collision);
 		
-		this.lblBody1 = new JLabel("Body 1");
-		this.lblBody2 = new JLabel("Body 2");
+		this.lblBody1 = new JLabel("Body 1", Icons.INFO, JLabel.LEFT);
+		this.lblBody2 = new JLabel("Body 2", Icons.INFO, JLabel.LEFT);
+		this.lblBody1.setToolTipText("The first body participating in the joint.");
+		this.lblBody2.setToolTipText("The second body participating in the joint.");
+		
 		this.cmbBody1 = new JComboBox(bodies);
 		this.cmbBody2 = new JComboBox(bodies);
 		
-		this.lblAnchor = new JLabel("Anchor");
-		this.lblAnchor.setToolTipText("The anchor point to restrict rotation.");
+		this.lblAnchor = new JLabel("Anchor", Icons.INFO, JLabel.LEFT);
+		this.lblAnchor.setToolTipText("The anchor point to restrict translation.");
 		
-		this.lblAxis = new JLabel("Axis");
+		this.lblAxis = new JLabel("Axis", Icons.INFO, JLabel.LEFT);
 		this.lblAxis.setToolTipText("The allowed motion axis.");
 		
 		this.lblX1 = new JLabel("x");
@@ -184,32 +188,29 @@ public class WheelJointPanel extends JointPanel implements InputPanel, ActionLis
 		this.btnUseCenter2.setActionCommand("use-com2");
 		this.btnUseCenter2.addActionListener(this);
 		
-		this.lblFrequency = new JLabel("Frequency");
-		this.lblFrequency.setToolTipText("Determines how fast the spring should oscillate in hertz.\nSet to zero to disable.");
+		this.lblFrequency = new JLabel("Frequency", Icons.INFO, JLabel.LEFT);
+		this.lblFrequency.setToolTipText("<html>Determines how fast the spring should oscillate in hertz (Seconds<sup>-1</sup>).</html>");
 		this.txtFrequency = new JFormattedTextField(new DecimalFormat("0.000"));
 		this.txtFrequency.addFocusListener(new SelectTextFocusListener(this.txtFrequency));
-		this.txtFrequency.setToolTipText("Determines how fast the spring should oscillate in hertz.\nSet to zero to disable.");
 		
-		this.lblRatio = new JLabel("Ratio");
+		this.lblRatio = new JLabel("Ratio", Icons.INFO, JLabel.LEFT);
 		this.lblRatio.setToolTipText("Determines how fast the spring is dampened from 0.0 to 1.0.");
 		this.txtRatio = new JFormattedTextField(new DecimalFormat("0.000"));
 		this.txtRatio.addFocusListener(new SelectTextFocusListener(this.txtRatio));
-		this.txtRatio.setToolTipText("Determines how fast the spring is dampened from 0.0 to 1.0.");
 		
-		this.lblMotorEnabled = new JLabel("Motor Enabled");
+		this.lblMotorEnabled = new JLabel("Motor Enabled", Icons.INFO, JLabel.LEFT);
+		this.lblMotorEnabled.setToolTipText("Check to enable the angular motor.");
 		this.chkMotorEnabled = new JCheckBox();
 		
-		this.lblMotorSpeed = new JLabel("Motor Speed");
+		this.lblMotorSpeed = new JLabel("Motor Speed", Icons.INFO, JLabel.LEFT);
 		this.lblMotorSpeed.setToolTipText("The motor speed in Degrees/Second.");
 		this.txtMotorSpeed = new JFormattedTextField(new DecimalFormat("0.000"));
 		this.txtMotorSpeed.addFocusListener(new SelectTextFocusListener(this.txtMotorSpeed));
-		this.txtMotorSpeed.setToolTipText("The motor speed in Degrees/Second.");
 		
-		this.lblMaxMotorTorque = new JLabel("Maximum Motor Torque");
+		this.lblMaxMotorTorque = new JLabel("Maximum Motor Torque", Icons.INFO, JLabel.LEFT);
 		this.lblMaxMotorTorque.setToolTipText("The maximum torque the motor can apply in Newton-Meters.");
 		this.txtMaxMotorTorque = new JFormattedTextField(new DecimalFormat("0.000"));
 		this.txtMaxMotorTorque.addFocusListener(new SelectTextFocusListener(this.txtMaxMotorTorque));
-		this.txtMaxMotorTorque.setToolTipText("The maximum torque the motor can apply in Newton-Meters.");
 		
 		// set defaults
 

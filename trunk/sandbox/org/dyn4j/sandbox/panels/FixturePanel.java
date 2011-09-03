@@ -1,5 +1,7 @@
 package org.dyn4j.sandbox.panels;
 
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.Window;
 import java.beans.PropertyChangeEvent;
@@ -14,6 +16,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -29,6 +32,7 @@ import org.dyn4j.collision.Filter;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.sandbox.controls.JSliderWithTextField;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to edit a fixture.
@@ -130,6 +134,9 @@ public class FixturePanel extends WindowSpawningPanel implements InputPanel {
 	
 	// filter
 	
+	/** The filter panel */
+	private JPanel pnlFilter;
+	
 	/** The filter label */
 	private JLabel lblFilter;
 	
@@ -177,7 +184,8 @@ public class FixturePanel extends WindowSpawningPanel implements InputPanel {
 		// see if the name is already populated
 		String name = (String)fixture.getUserData();
 		
-		this.lblName = new JLabel("Name");
+		this.lblName = new JLabel("Name", Icons.INFO, JLabel.LEFT);
+		this.lblName.setToolTipText("The name of the fixture.");
 		this.txtName = new JTextField(name);
 		this.txtName.addFocusListener(new SelectTextFocusListener(this.txtName));
 		this.txtName.getDocument().addDocumentListener(new DocumentListener() {
@@ -200,10 +208,9 @@ public class FixturePanel extends WindowSpawningPanel implements InputPanel {
 			}
 		});
 		
-		this.lblDensity = new JLabel("Density");
-		this.lblDensity.setToolTipText("<html>The density in Kilograms/Meter<sup>2</sup></html>");
+		this.lblDensity = new JLabel("Density", Icons.INFO, JLabel.LEFT);
+		this.lblDensity.setToolTipText("<html>The density in Kilograms/Meter<sup>2</sup>.</html>");
 		this.txtDensity = new JFormattedTextField(new DecimalFormat("0.00"));
-		this.txtDensity.setToolTipText("<html>The density in Kilograms/Meter<sup>2</sup></html>");
 		this.txtDensity.setValue(fixture.getDensity());
 		this.txtDensity.setColumns(4);
 		this.txtDensity.setMaximumSize(this.txtDensity.getPreferredSize());
@@ -222,16 +229,12 @@ public class FixturePanel extends WindowSpawningPanel implements InputPanel {
 			}
 		});
 		
-		this.lblRestitution = new JLabel("Restitution");
+		this.lblRestitution = new JLabel("Restitution", Icons.INFO, JLabel.LEFT);
 		this.lblRestitution.setToolTipText(
 				"<html>The restitution value determines the amount of energy retained after a collision." +
-				"<br />Valid values are between 0 to infinity." +
-				"<br />Larger values will decrease the amount of lost energy.</html>");
+				"<br />Valid values are between 0 and infinity." +
+				"<br />Larger values will increase the energy retained.</html>");
 		this.sldRestitution = new JSliderWithTextField(0, 100, (int)(fixture.getRestitution() * 100.0), 0.01, new DecimalFormat("0.00"));
-		this.sldRestitution.setToolTipText(
-				"<html>The restitution value determines the amount of energy retained after a collision." +
-				"<br />Valid values are between 0 to infinity." +
-				"<br />Larger values will decrease the amount of lost energy.</html>");
 		this.sldRestitution.setColumns(4);
 		this.sldRestitution.addChangeListener(new ChangeListener() {
 			@Override
@@ -242,18 +245,13 @@ public class FixturePanel extends WindowSpawningPanel implements InputPanel {
 			}
 		});
 		
-		this.lblFriction = new JLabel("Friction");
+		this.lblFriction = new JLabel("Friction", Icons.INFO, JLabel.LEFT);
 		this.lblFriction.setToolTipText(
 				"<html>The friction coefficient determines the roughness of a fixture's surface." +
 				"<br />This allows bodies sliding across this fixture to slow down." +
-				"<br />Valid values are between 0 to infinity." +
+				"<br />Valid values are between 0 and infinity." +
 				"<br />Larger values will increase the rate at which bodies are slowed.</html>");
 		this.sldFriction = new JSliderWithTextField(0, 100, (int)(fixture.getRestitution() * 100.0), 0.01, new DecimalFormat("0.00"));
-		this.sldFriction.setToolTipText(
-				"<html>The friction coefficient determines the roughness of a fixture's surface." +
-				"<br />This allows bodies sliding across this fixture to slow down." +
-				"<br />Valid values are between 0 to infinity." +
-				"<br />Larger values will increase the rate at which bodies are slowed.</html>");
 		this.sldFriction.setColumns(4);
 		this.sldFriction.addChangeListener(new ChangeListener() {
 			@Override
@@ -264,21 +262,22 @@ public class FixturePanel extends WindowSpawningPanel implements InputPanel {
 			}
 		});
 		
-		this.lblFilter = new JLabel("Filter");
-		this.lblFilter.setToolTipText("The filter allows certain groups of fixtures to collide or not collide.");
+		this.lblFilter = new JLabel("Filter", Icons.INFO, JLabel.LEFT);
+		this.lblFilter.setToolTipText("Filters allow certain groups of fixtures to collide or not collide.");
 		this.rdoDefaultFilter = new JRadioButton("Default");
-		this.rdoDefaultFilter.setToolTipText("The default filter allows this fixture to collide with all other fixtures.");
 		this.rdoCategoryFilter = new JRadioButton("Category");
-		this.lblCategories = new JLabel("Groups");
-		this.lblMasks = new JLabel("Masks");
+		this.lblCategories = new JLabel("Member Groups", Icons.INFO, JLabel.LEFT);
+		this.lblCategories.setToolTipText("Select the groups that this fixture will be a part of.");
+		this.lblMasks = new JLabel("Collision Groups", Icons.INFO, JLabel.LEFT);
+		this.lblMasks.setToolTipText("Select the groups that this fixture can collide with.");
 		this.lstCategories = new JList(CATEGORIES);
 		this.lstMasks = new JList(CATEGORIES);
 		
 		this.scrCategories = new JScrollPane(this.lstCategories);
 		this.scrMasks = new JScrollPane(this.lstMasks);
 		
-		this.scrCategories.setPreferredSize(new Dimension(150, 200));
-		this.scrMasks.setPreferredSize(new Dimension(150, 200));
+		this.scrCategories.setPreferredSize(new Dimension(150, 100));
+		this.scrMasks.setPreferredSize(new Dimension(150, 100));
 		this.scrCategories.setMinimumSize(this.scrCategories.getPreferredSize());
 		this.scrMasks.setMinimumSize(this.scrMasks.getPreferredSize());
 		
@@ -286,34 +285,21 @@ public class FixturePanel extends WindowSpawningPanel implements InputPanel {
 			@Override
 			public void stateChanged(ChangeEvent event) {
 				JRadioButton radio = (JRadioButton)event.getSource();
+				CardLayout cl = (CardLayout)pnlFilter.getLayout();
 				if (radio.isSelected()) {
-					lblCategories.setVisible(true);
-					scrCategories.setVisible(true);
-					lblMasks.setVisible(true);
-					scrMasks.setVisible(true);
+					cl.show(pnlFilter, "Category");
 				} else {
-					lblCategories.setVisible(false);
-					scrCategories.setVisible(false);
-					lblMasks.setVisible(false);
-					scrMasks.setVisible(false);
+					cl.show(pnlFilter, "Default");
 				}
 			}
 		});
 		if (fixture.getFilter() == Filter.DEFAULT_FILTER) {
 			this.rdoDefaultFilter.setSelected(true);
-			lblCategories.setVisible(false);
-			scrCategories.setVisible(false);
-			lblMasks.setVisible(false);
-			scrMasks.setVisible(false);
 			
 			this.lstCategories.setSelectedIndex(0);
 			this.lstMasks.setSelectedIndex(0);
 		} else {
 			this.rdoCategoryFilter.setSelected(true);
-			lblCategories.setVisible(true);
-			scrCategories.setVisible(true);
-			lblMasks.setVisible(true);
-			scrMasks.setVisible(true);
 			
 			// set the default selected groups
 			CategoryFilter filter = (CategoryFilter)fixture.getFilter();
@@ -361,10 +347,11 @@ public class FixturePanel extends WindowSpawningPanel implements InputPanel {
 			}
 		});
 		
-		this.lblSensor = new JLabel("Is Sensor");
-		this.lblSensor.setToolTipText("A sensor fixture is a fixture that will be detected during collision but not resolved.");
+		this.lblSensor = new JLabel("Sensor", Icons.INFO, JLabel.LEFT);
+		this.lblSensor.setToolTipText(
+				"<html>A sensor fixture is a fixture that will be detected during collision but not resolved.<br />" +
+				"This is useful for knowing when a collision occurs but doing something different than resolving it.</html>");
 		this.chkSensor = new JCheckBox();
-		this.chkSensor.setToolTipText("A sensor fixture is a fixture that will be detected during collision but not resolved.");
 		this.chkSensor.setSelected(fixture.isSensor());
 		this.chkSensor.addChangeListener(new ChangeListener() {
 			@Override
@@ -374,10 +361,44 @@ public class FixturePanel extends WindowSpawningPanel implements InputPanel {
 			}
 		});
 		
-		GroupLayout layout = new GroupLayout(this);
+		JLabel lblDefault = new JLabel();
+		lblDefault.setText("<html>The default filter allows the fixture to<br />collidle with all other fixtures.</html>");
+		
+		this.pnlFilter = new JPanel(new CardLayout());
+		// create the card layout for the categories/default filter area
+		JPanel pnlDefaultFilter = new JPanel();
+		pnlDefaultFilter.setLayout(new BorderLayout());
+		pnlDefaultFilter.add(lblDefault, BorderLayout.PAGE_START);
+		JPanel pnlCategoryFilter = new JPanel();
+		
+		this.pnlFilter.add(pnlDefaultFilter, "Default");
+		this.pnlFilter.add(pnlCategoryFilter, "Category");
+		
+		GroupLayout layout = new GroupLayout(pnlCategoryFilter);
 		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
-		layout.setHonorsVisibility(true);
+		pnlCategoryFilter.setLayout(layout);
+		
+		layout.setHorizontalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup()
+						.addComponent(this.lblCategories)
+						.addComponent(this.scrCategories))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(this.lblMasks)
+						.addComponent(this.scrMasks)));
+		layout.setVerticalGroup(layout.createParallelGroup()
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(this.lblCategories)
+						.addComponent(this.scrCategories, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(this.lblMasks)
+						.addComponent(this.scrMasks, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
+		
+		// set the main layout
+		
+		layout = new GroupLayout(this);
+		layout.setAutoCreateContainerGaps(true);
+		layout.setAutoCreateGaps(true);
 		this.setLayout(layout);
 		
 		layout.setHorizontalGroup(
@@ -397,16 +418,7 @@ public class FixturePanel extends WindowSpawningPanel implements InputPanel {
 								layout.createSequentialGroup()
 								.addComponent(this.rdoDefaultFilter)
 								.addComponent(this.rdoCategoryFilter))
-						.addGroup(
-								layout.createSequentialGroup()
-								.addGroup(
-										layout.createParallelGroup()
-										.addComponent(this.lblCategories)
-										.addComponent(scrCategories))
-								.addGroup(
-										layout.createParallelGroup()
-										.addComponent(this.lblMasks)
-										.addComponent(scrMasks)))
+						.addComponent(this.pnlFilter)
 						.addComponent(this.chkSensor)
 						.addComponent(this.txtDensity)
 						.addComponent(this.sldFriction)
@@ -421,18 +433,11 @@ public class FixturePanel extends WindowSpawningPanel implements InputPanel {
 				.addGroup(
 						layout.createParallelGroup()
 						.addComponent(this.lblFilter)
-						.addComponent(this.rdoDefaultFilter, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-						.addComponent(this.rdoCategoryFilter, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(
-						layout.createParallelGroup()
-						.addGroup(
-								layout.createSequentialGroup()
-								.addComponent(this.lblCategories)
-								.addComponent(scrCategories, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-						.addGroup(
-								layout.createSequentialGroup()
-								.addComponent(this.lblMasks)
-								.addComponent(scrMasks, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
+						.addGroup(layout.createSequentialGroup()
+								.addGroup(layout.createParallelGroup()
+										.addComponent(this.rdoDefaultFilter, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+										.addComponent(this.rdoCategoryFilter, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+								.addComponent(this.pnlFilter)))
 				.addGroup(
 						layout.createParallelGroup()
 						.addComponent(this.lblSensor)

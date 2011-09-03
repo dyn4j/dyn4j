@@ -44,7 +44,7 @@ public class EditBodyDialog extends JDialog implements ActionListener {
 	 * @param title the dialog title
 	 * @param body the body to edit
 	 */
-	public EditBodyDialog(Window owner, String title, SandboxBody body) {
+	private EditBodyDialog(Window owner, String title, SandboxBody body) {
 		super(owner, title, ModalityType.APPLICATION_MODAL);
 		
 		this.body = new SandboxBody();

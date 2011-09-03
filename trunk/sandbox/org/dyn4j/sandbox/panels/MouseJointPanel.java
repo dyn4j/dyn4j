@@ -19,6 +19,7 @@ import org.dyn4j.dynamics.joint.MouseJoint;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to create or edit an mouse joint.
@@ -114,14 +115,17 @@ public class MouseJointPanel extends JointPanel implements InputPanel, ActionLis
 		this.txtName.setText(name);
 		this.txtName.setColumns(15);
 		
-		this.lblBody = new JLabel("Body");
+		this.lblBody = new JLabel("Body", Icons.INFO, JLabel.LEFT);
+		this.lblBody.setToolTipText("The body participating in the joint.");
 		this.cmbBody = new JComboBox(bodies);
 		
-		this.lblAnchor = new JLabel("Anchor");
+		this.lblAnchor = new JLabel("Anchor", Icons.INFO, JLabel.LEFT);
 		this.lblAnchor.setToolTipText("The anchor point on the body.");
 		
-		this.lblTarget = new JLabel("Target");
-		this.lblTarget.setToolTipText("The target point.");
+		this.lblTarget = new JLabel("Target", Icons.INFO, JLabel.LEFT);
+		this.lblTarget.setToolTipText(
+				"<html>The target point." +
+				"<br />The point that the anchor point will attempt to approach.</html>");
 		
 		this.lblX1 = new JLabel("x");
 		this.lblX2 = new JLabel("x");
@@ -149,24 +153,21 @@ public class MouseJointPanel extends JointPanel implements InputPanel, ActionLis
 		this.btnUseCenter.setActionCommand("use-com");
 		this.btnUseCenter.addActionListener(this);
 		
-		this.lblMaxForce = new JLabel("Maximum Force");
+		this.lblMaxForce = new JLabel("Maximum Force", Icons.INFO, JLabel.LEFT);
 		this.lblMaxForce.setToolTipText("The maximum force the joint can apply in Newtons.");
 		this.txtMaxForce = new JFormattedTextField(new DecimalFormat("0.000"));
 		this.txtMaxForce.addFocusListener(new SelectTextFocusListener(this.txtMaxForce));
 		this.txtMaxForce.setColumns(8);
-		this.txtMaxForce.setToolTipText("The maximum force the joint can apply in Newtons.");
 		
-		this.lblFrequency = new JLabel("Frequency");
-		this.lblFrequency.setToolTipText("Determines how fast the spring should oscillate in hertz.\nSet to zero to disable.");
+		this.lblFrequency = new JLabel("Frequency", Icons.INFO, JLabel.LEFT);
+		this.lblFrequency.setToolTipText("<html>Determines how fast the spring should oscillate in hertz (Seconds<sup>-1</sup>).</html>");
 		this.txtFrequency = new JFormattedTextField(new DecimalFormat("0.000"));
 		this.txtFrequency.addFocusListener(new SelectTextFocusListener(this.txtFrequency));
-		this.txtFrequency.setToolTipText("Determines how fast the spring should oscillate in hertz.\nSet to zero to disable.");
 		
-		this.lblRatio = new JLabel("Ratio");
+		this.lblRatio = new JLabel("Ratio", Icons.INFO, JLabel.LEFT);
 		this.lblRatio.setToolTipText("Determines how fast the spring is dampened from 0.0 to 1.0.");
 		this.txtRatio = new JFormattedTextField(new DecimalFormat("0.000"));
 		this.txtRatio.addFocusListener(new SelectTextFocusListener(this.txtRatio));
-		this.txtRatio.setToolTipText("Determines how fast the spring is dampened from 0.0 to 1.0.");
 		
 		// set defaults
 		
