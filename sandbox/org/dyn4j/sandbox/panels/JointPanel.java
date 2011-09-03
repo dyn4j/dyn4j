@@ -8,6 +8,7 @@ import javax.swing.JTextField;
 
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to create or modify a joint.
@@ -37,11 +38,12 @@ public abstract class JointPanel extends JPanel implements InputPanel {
 	 * Creates the name and collision enabled fields and labels.
 	 */
 	protected JointPanel() {
-		this.lblName = new JLabel("Name");
+		this.lblName = new JLabel("Name", Icons.INFO, JLabel.LEFT);
+		this.lblName.setToolTipText("The name of the joint.");
 		this.txtName = new JTextField("");
 		this.txtName.addFocusListener(new SelectTextFocusListener(this.txtName));
 		
-		this.lblCollision = new JLabel("Collision Enabled");
+		this.lblCollision = new JLabel("Collision Enabled", Icons.INFO, JLabel.LEFT);
 		this.lblCollision.setToolTipText("Check to allow collision between the joined bodies.");
 		this.chkCollision = new JCheckBox();
 	}

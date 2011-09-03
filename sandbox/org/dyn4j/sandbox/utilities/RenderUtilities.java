@@ -1118,7 +1118,7 @@ public final class RenderUtilities {
 		double d = (double)w / scale;
 		
 		// draw a line downward
-		gl.glColor4f(0.5f, 0.5f, 0.5f, 1.0f);
+		gl.glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 		gl.glBegin(GL.GL_LINES);
 			gl.glVertex2i(x + o, y - h - o);
 			gl.glVertex2i(x + o, y);
@@ -1173,21 +1173,24 @@ public final class RenderUtilities {
 		double scale = state.scale;
 		// get the center point
 		Vector2 c = body.getWorldCenter();
+		Vector2 o = state.offset;
 		// compute the screen coordinates
-		int x = (int)Math.floor(c.x * scale);
-		int y = (int)Math.floor(c.y * scale) - 36 / 2 - padding;
+		int x = (int)Math.floor((c.x + o.x) * scale);
+		int y = (int)Math.floor((c.y + o.y) * scale) - 12 - padding;
 		// fill a partially transparent block for the label
+		gl.glColor4f(0.0f, 0.0f, 0.0f, 0.4f);
+		RenderUtilities.fillRectangleFromTopLeft(gl, x, y + padding + 10, 100 + padding * 2, 32 + padding);
 		gl.glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
-		RenderUtilities.fillRectangleFromTopLeft(gl, x - padding, y + padding + 16, 100 + padding, 36 + padding);
-		gl.glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-		RenderUtilities.drawRectangleFromTopLeft(gl, x - padding, y + padding + 16, 100 + padding, 36 + padding, false);
+		RenderUtilities.drawRectangleFromTopLeft(gl, x, y + padding + 10, 100 + padding * 2, 32 + padding, false);
+		// draw separating line
+		RenderUtilities.drawLineSegment(gl, x + padding * 0.5, y - 3, x + 100 + padding, y - 3, false);
 		// set the raster position for the text
 		gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 		// draw the body name
-		gl.glRasterPos2i(x, y);
-		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, body.getName());
+		gl.glRasterPos2i(x + padding, y);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_12, body.getName());
 		// draw the center point
-		gl.glRasterPos2d(x, y - 14);
+		gl.glRasterPos2d(x + padding, y - 16);
 		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, RenderUtilities.formatVector2(c));
 	}
 	

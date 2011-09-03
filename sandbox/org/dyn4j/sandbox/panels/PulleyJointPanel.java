@@ -17,6 +17,7 @@ import org.dyn4j.dynamics.joint.PulleyJoint;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to create or edit an pulley joint.
@@ -96,19 +97,22 @@ public class PulleyJointPanel extends JointPanel implements InputPanel, ActionLi
 		this.txtName.setColumns(15);
 		this.chkCollision.setSelected(collision);
 		
-		JLabel lblBody1 = new JLabel("Body 1");
-		JLabel lblBody2 = new JLabel("Body 2");
+		JLabel lblBody1 = new JLabel("Body 1", Icons.INFO, JLabel.LEFT);
+		JLabel lblBody2 = new JLabel("Body 2", Icons.INFO, JLabel.LEFT);
+		lblBody1.setToolTipText("The first body participating in the joint.");
+		lblBody2.setToolTipText("The second body participating in the joint.");
+		
 		this.cmbBody1 = new JComboBox(bodies);
 		this.cmbBody2 = new JComboBox(bodies);
 		
-		JLabel lblPulleyAnchor1 = new JLabel("Pulley Anchor 1");
+		JLabel lblPulleyAnchor1 = new JLabel("Pulley Anchor 1", Icons.INFO, JLabel.LEFT);
 		lblPulleyAnchor1.setToolTipText("The anchor point for the first pulley.");
-		JLabel lblPulleyAnchor2 = new JLabel("Pulley Anchor 2");
+		JLabel lblPulleyAnchor2 = new JLabel("Pulley Anchor 2", Icons.INFO, JLabel.LEFT);
 		lblPulleyAnchor2.setToolTipText("The anchor point on the second pulley.");
 		
-		JLabel lblBodyAnchor1 = new JLabel("Body Anchor 1");
+		JLabel lblBodyAnchor1 = new JLabel("Body Anchor 1", Icons.INFO, JLabel.LEFT);
 		lblBodyAnchor1.setToolTipText("The anchor point on the first body.");
-		JLabel lblBodyAnchor2 = new JLabel("Body Anchor 2");
+		JLabel lblBodyAnchor2 = new JLabel("Body Anchor 2", Icons.INFO, JLabel.LEFT);
 		lblBodyAnchor2.setToolTipText("The anchor point on the second body.");
 		
 		JLabel lblPX1 = new JLabel("x");
@@ -162,11 +166,10 @@ public class PulleyJointPanel extends JointPanel implements InputPanel, ActionLi
 		this.btnUseCenter2.setActionCommand("use-com2");
 		this.btnUseCenter2.addActionListener(this);
 		
-		JLabel lblRatio = new JLabel("Ratio");
+		JLabel lblRatio = new JLabel("Ratio", Icons.INFO, JLabel.LEFT);
 		lblRatio.setToolTipText("Determines the pulley ratio between the two bodies.");
 		this.txtRatio = new JFormattedTextField(new DecimalFormat("0.000"));
 		this.txtRatio.addFocusListener(new SelectTextFocusListener(this.txtRatio));
-		this.txtRatio.setToolTipText("Determines the pulley ratio between the two bodies.");
 		
 		// set defaults
 		

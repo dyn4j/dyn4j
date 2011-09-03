@@ -54,7 +54,7 @@ public class AddFixtureDialog extends JDialog implements ActionListener {
 	 * @param title the dialog title
 	 * @param shapePanel the shape panel
 	 */
-	public AddFixtureDialog(Window owner, Image icon, String title, ShapePanel shapePanel) {
+	private AddFixtureDialog(Window owner, Image icon, String title, ShapePanel shapePanel) {
 		super(owner, title, ModalityType.APPLICATION_MODAL);
 		
 		if (icon != null) {

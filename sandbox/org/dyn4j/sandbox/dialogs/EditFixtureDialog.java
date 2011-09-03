@@ -49,7 +49,7 @@ public class EditFixtureDialog extends JDialog implements ActionListener {
 	 * @param title the dialog title
 	 * @param fixture the fixture being edited
 	 */
-	public EditFixtureDialog(Window owner, Image icon, String title, BodyFixture fixture) {
+	private EditFixtureDialog(Window owner, Image icon, String title, BodyFixture fixture) {
 		super(owner, title, ModalityType.APPLICATION_MODAL);
 		
 		if (icon != null) {
@@ -180,15 +180,10 @@ public class EditFixtureDialog extends JDialog implements ActionListener {
 			fixture.setFriction(newFixture.getFriction());
 			fixture.setRestitution(newFixture.getRestitution());
 			fixture.setSensor(newFixture.isSensor());
-			
-			// return the true to indicate that the fixture has been updated
-			// if the density changes then we need to recompute the mass of the body
-			if (fixture.getDensity() != newFixture.getDensity()) {
-				// set the new density
-				fixture.setDensity(newFixture.getDensity());
-				// recompute the mass
-				body.setMass(body.getMass().getType());
-			}
+			fixture.setDensity(newFixture.getDensity());
+			// recompute the mass
+			// we must do this if the density or position of the fixture has changed
+			body.setMass(body.getMass().getType());
 		}
 	}
 }

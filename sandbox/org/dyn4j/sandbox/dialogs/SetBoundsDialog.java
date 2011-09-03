@@ -43,7 +43,7 @@ public class SetBoundsDialog extends JDialog implements ActionListener {
 	 * @param owner the dialog owner
 	 * @param bounds the current bounds object
 	 */
-	public SetBoundsDialog(Window owner, RectangularBounds bounds) {
+	private SetBoundsDialog(Window owner, RectangularBounds bounds) {
 		super(owner, "Set Bounds", ModalityType.APPLICATION_MODAL);
 		
 		this.setIconImage(Icons.SET_BOUNDS.getImage());

@@ -13,6 +13,7 @@ import javax.swing.JOptionPane;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to create a rectangle shape.
@@ -62,8 +63,10 @@ public class RectanglePanel extends ShapePanel implements InputPanel {
 			this.height = rectangle.getHeight();
 		}
 		
-		JLabel lblWidth = new JLabel("Width");
-		JLabel lblHeight = new JLabel("Height");
+		JLabel lblWidth = new JLabel("Width", Icons.INFO, JLabel.LEFT);
+		lblWidth.setToolTipText("The width of the rectangle.");
+		JLabel lblHeight = new JLabel("Height", Icons.INFO, JLabel.LEFT);
+		lblHeight.setToolTipText("The height of the rectangle.");
 		JFormattedTextField txtWidth = new JFormattedTextField(new DecimalFormat("0.000"));
 		JFormattedTextField txtHeight = new JFormattedTextField(new DecimalFormat("0.000"));
 		txtWidth.setValue(this.width);

@@ -13,6 +13,7 @@ import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLEventListener;
+import javax.media.opengl.GLException;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.swing.Box;
@@ -36,10 +37,10 @@ import org.dyn4j.dynamics.joint.MouseJoint;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.sandbox.actions.MoveBodyAction;
+import org.dyn4j.sandbox.actions.MoveAction;
 import org.dyn4j.sandbox.actions.MoveWorldAction;
-import org.dyn4j.sandbox.actions.RotateBodyAction;
-import org.dyn4j.sandbox.actions.SelectBodyAction;
+import org.dyn4j.sandbox.actions.RotateAction;
+import org.dyn4j.sandbox.actions.SelectAction;
 import org.dyn4j.sandbox.dialogs.AboutDialog;
 import org.dyn4j.sandbox.events.BodyActionEvent;
 import org.dyn4j.sandbox.input.Keyboard;
@@ -68,6 +69,9 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	
 	/** The color for selected bodies/fixtures */
 	private static final float[] SELECTED_COLOR = new float[] {0.5f, 0.5f, 1.0f, 1.0f};
+	
+	/** The sandbox version */
+	public static final String VERSION = "1.0.0";
 	
 	/** The canvas to draw to */
 	private GLCanvas canvas;
@@ -160,33 +164,61 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	
 	// Actions performed on the OpenGL canvas
 	
+	// Actions performed on bodies
+	
 	/** The select body action */
-	private SelectBodyAction selectBodyAction = new SelectBodyAction();
+	private SelectAction<SandboxBody> selectBodyAction = new SelectAction<SandboxBody>();
 	
 	/** The move body action */
-	private MoveBodyAction moveBodyAction = new MoveBodyAction();
+	private MoveAction moveBodyAction = new MoveAction();
 	
 	/** The joint used to move bodies when the simulation is running */
 	private MouseJoint selectedBodyJoint;
 	
 	/** The rotate body action */
-	private RotateBodyAction rotateBodyAction = new RotateBodyAction();
+	private RotateAction rotateBodyAction = new RotateAction();
+	
+	// Actions performed on fixtures
+	
+	/** The edit body action (used to move and rotate fixtures) */
+	private SelectAction<SandboxBody> editBodyAction = new SelectAction<SandboxBody>();
+	
+	/** The select fixture action */
+	private SelectAction<BodyFixture> selectFixtureAction = new SelectAction<BodyFixture>();
+	
+	/** The move fixture action */
+	private MoveAction moveFixtureAction = new MoveAction();
+	
+	/** The rotate fixture action */
+	private RotateAction rotateFixtureAction = new RotateAction();
+	
+	// Actions performed on the world
 	
 	/** The move world action */
 	private MoveWorldAction moveWorldAction = new MoveWorldAction();
 	
-	//private EditBodyAction editBodyAction;
-	//private RemoveBodyAction removeBodyAction;
-	//private SelectFixtureAction selectFixtureAction;
-	//private MoveFixtureAction moveFixtureAction;
-	//private RotateFixtureAction rotateFixtureAction;
-	//private RemoveFixtureAction removeFixtureAction;
+	// TODO add convex decomposition
+	// TODO add ability to change mass
+	// TODO add ability to save/load state of the world
 	
 	/**
 	 * Default constructor.
 	 */
 	public Sandbox() {
-		super("Sandbox - dyn4j v" + Version.getVersion());
+		super("Sandbox v" + VERSION + " - dyn4j v" + Version.getVersion());
+		
+		// set the look and feel to the system look and feel
+//		try {
+//			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+//		} catch (ClassNotFoundException e) {
+//			e.printStackTrace();
+//		} catch (InstantiationException e) {
+//			e.printStackTrace();
+//		} catch (IllegalAccessException e) {
+//			e.printStackTrace();
+//		} catch (UnsupportedLookAndFeelException e) {
+//			e.printStackTrace();
+//		}
 		
 		// create the world
 		this.world = new World();
@@ -345,8 +377,8 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		this.setIconImage(Icons.SANDBOX_48.getImage());
 		
 		// setup OpenGL capabilities
-		if (!GLProfile.isGL2Available()) {
-			// TODO not good
+		if (!GLProfile.isGL3Available()) {
+			throw new GLException("OpenGL 3.0 or higher is required");
 		}
 		GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL2));
 		caps.setDoubleBuffered(true);
@@ -447,8 +479,16 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 			// check if it was this body
 			BodyActionEvent bae = (BodyActionEvent)event;
 			SandboxBody body = bae.getBody();
-			if (body == this.selectBodyAction.getBody()) {
+			// check the select body action
+			if (body == this.selectBodyAction.getObject()) {
+				// if the body is selected then end the action
 				this.selectBodyAction.end();
+			}
+			// check the edit body action
+			if (body == this.editBodyAction.getObject()) {
+				// end all the edit body actions
+				this.editBodyAction.end();
+				this.selectFixtureAction.end();
 			}
 		}
 		// Sandbox events
@@ -666,22 +706,14 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		
 		// draw selected stuff
 		
-		if (this.selectBodyAction.isActive()) {
-			SandboxBody body = this.selectBodyAction.getBody();
-			
-			if (ApplicationSettings.isStenciled()) {
-				// stenciling requires a larger radius
-				RenderUtilities.outlineShapes(gl, body, 6, SELECTED_COLOR, this.renderState);
-			} else {
-				RenderUtilities.outlineShapes(gl, body, 4, SELECTED_COLOR, this.renderState);
-			}
-		}
-		
-		synchronized (world) {
+		synchronized (this.world) {
 			// render all the bodies in the world
 			int bSize = this.world.getBodyCount();
 			for (int i = 0; i < bSize; i++) {
 				SandboxBody body = (SandboxBody)this.world.getBody(i);
+				// dont draw the selected body
+				if (body == this.selectBodyAction.getObject()) continue;
+				if (body == this.editBodyAction.getObject()) continue;
 				if (ApplicationSettings.isStenciled()) {
 					RenderUtilities.outlineBody(gl, body, this.renderState, true);
 				} else {
@@ -693,9 +725,50 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 			int jSize = this.world.getJointCount();
 			for (int i = 0; i < jSize; i++) {
 				Joint joint = this.world.getJoint(i);
-				
+				// dont draw the mouse joint used during simulation since its drawn again
+				if (joint == this.selectedBodyJoint) continue;
+				// otherwise draw the joint normally
 				RenderUtilities.drawJoint(gl, joint, this.renderState);
 			}
+		}
+		
+		if (this.selectBodyAction.isActive()) {
+			SandboxBody body = this.selectBodyAction.getObject();
+			if (ApplicationSettings.isStenciled()) {
+				// stenciling requires a larger radius
+				RenderUtilities.outlineShapes(gl, body, 6, SELECTED_COLOR, this.renderState);
+			} else {
+				RenderUtilities.outlineShapes(gl, body, 4, SELECTED_COLOR, this.renderState);
+			}
+			body.render(gl);
+		}
+		
+		if (this.editBodyAction.isActive()) {
+			SandboxBody body = this.editBodyAction.getObject();
+			// overlay everything but this shape
+			gl.glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+			gl.glPushMatrix();
+			gl.glLoadIdentity();
+			RenderUtilities.fillRectangleFromTopLeft(gl, -size.width * 0.5, size.height * 0.5, size.width, size.height);
+			gl.glPopMatrix();
+			// redraw the shape on top of the overlay
+			body.render(gl);
+			// see if a fixture is selected
+			if (this.selectFixtureAction.isActive()) {
+				BodyFixture bf = this.selectFixtureAction.getObject();
+				Convex convex = bf.getShape();
+				RenderUtilities.outlineShape(gl, convex, body.getTransform(), 4, SELECTED_COLOR);
+				gl.glPushMatrix();
+				RenderUtilities.applyTransform(gl, body.getTransform());
+				gl.glColor4fv(body.getOutlineColor(), 0);
+				RenderUtilities.drawShape(gl, convex, false);
+				gl.glPopMatrix();
+			}
+		}
+		
+		// draw the mouse joint last always
+		if (this.selectedBodyJoint != null) {
+			RenderUtilities.drawMouseJoint(gl, this.selectedBodyJoint, this.renderState);
 		}
 		
 		gl.glPopMatrix();
@@ -704,20 +777,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		
 		gl.glPushMatrix();
 		gl.glLoadIdentity();
-		
-		// draw labels
-		
-		if (ApplicationSettings.isLabeled()) {
-			synchronized (world) {
-				gl.glColor3f(0.0f, 0.0f, 0.0f);
-				// render all the bodies in the world
-				int bSize = this.world.getBodyCount();
-				for (int i = 0; i < bSize; i++) {
-					SandboxBody body = (SandboxBody)this.world.getBody(i);
-					RenderUtilities.drawLabel(gl, glut, body, this.renderState, 5);
-				}
-			}
-		}
 		
 		// draw origin label
 		
@@ -729,12 +788,26 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 			gl.glRasterPos2d(2 + ox, -12 + oy);
 			this.glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Origin");
 		}
+
+		// draw labels over the origin label
+		
+		if (ApplicationSettings.isLabeled() && !this.editBodyAction.isActive()) {
+			synchronized (world) {
+				gl.glColor3f(0.0f, 0.0f, 0.0f);
+				// render all the bodies in the world
+				int bSize = this.world.getBodyCount();
+				for (int i = 0; i < bSize; i++) {
+					SandboxBody body = (SandboxBody)this.world.getBody(i);
+					RenderUtilities.drawLabel(gl, glut, body, this.renderState, 5);
+				}
+			}
+		}
 		
 		// draw HUD like stuff
 		
 		// translate (0, 0) to the bottom left corner
 		gl.glTranslated(-size.getWidth() * 0.5, -size.getHeight() * 0.5, 0.0);
-		RenderUtilities.drawPixelScale(gl, this.glut, 5, 25, 3, 100, 20, this.renderState);
+		RenderUtilities.drawPixelScale(gl, this.glut, 5, 18, 3, 100, 15, this.renderState);
 		
 		gl.glPopMatrix();
 	}
@@ -776,23 +849,40 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 			// check if a body is already clicked
 			if (this.selectBodyAction.isActive()) {
 				// get the body
-				SandboxBody body = this.selectBodyAction.getBody();
+				SandboxBody body = this.selectBodyAction.getObject();
 				// get the fixture
 				BodyFixture fixture = this.getContainingFixture(body, pw);
 				// make sure the click was inside the same body
-				if (fixture != null) {
-					// TODO start the select fixture action
-				} else {
+				if (fixture == null) {
 					// otherwise de-select the body
 					this.selectBodyAction.end();
+					this.editBodyAction.end();
+				}
+			} else if (this.editBodyAction.isActive()) {
+				// get the body
+				SandboxBody body = this.editBodyAction.getObject();
+				// get the fixture
+				BodyFixture fixture = this.getContainingFixture(body, pw);
+				// see if a fixture was clicked
+				if (fixture != null) {
+					// start the select fixture action
+					this.selectFixtureAction.begin(fixture);
+				} else {
+					// end the edit body action
+					this.editBodyAction.end();
+					this.selectFixtureAction.end();
 				}
 			} else {
-				// otherwise see if a body is being selected
-				SandboxBody body = this.getBodyAtPoint(pw);
-				// check for null
-				if (body != null) {
-					// begin the select body action
-					this.selectBodyAction.begin(body);
+				// dont allow selection of any kind unless its mouse button 1 (creates
+				// a mouse joint if running) or the simulation is paused
+				if (this.mouse.wasClicked(MouseEvent.BUTTON1) || this.isPaused()) {
+					// otherwise see if a body is being selected
+					SandboxBody body = this.getBodyAtPoint(pw);
+					// check for null
+					if (body != null) {
+						// begin the select body action
+						this.selectBodyAction.begin(body);
+					}
 				}
 			}
 		}
@@ -802,7 +892,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 			// check if a body is already selected
 			if (this.selectBodyAction.isActive() && this.moveBodyAction.isActive()) {
 				// get the body
-				SandboxBody body = this.selectBodyAction.getBody();
+				SandboxBody body = this.selectBodyAction.getObject();
 				// check if the world is running
 				if (this.isPaused()) {
 					// get the difference
@@ -832,6 +922,35 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 				this.offset.add(tx);
 				// update the new mouse position
 				this.moveWorldAction.update(pwt);
+			} else if (this.editBodyAction.isActive()) {
+				// get the body
+				SandboxBody body = this.editBodyAction.getObject();
+				// see if the move fixture action is active
+				if (this.selectFixtureAction.isActive() && this.moveFixtureAction.isActive()) {
+					// get the fixture
+					BodyFixture bf = this.selectFixtureAction.getObject();
+					// get the local pw
+					Vector2 lpw = body.getTransform().getInverseTransformed(pw);
+					// get the difference
+					Vector2 tx = lpw.difference(this.moveFixtureAction.getBeginPosition());
+					// move the body with the mouse
+					bf.getShape().translate(tx);
+					// update the action
+					this.moveFixtureAction.update(lpw);
+				} else {
+					// get the current fixture that the mouse is on
+					BodyFixture fixture = this.getContainingFixture(body, pw);
+					// see if a fixture was clicked
+					if (fixture != null) {
+						// start the select fixture action
+						this.selectFixtureAction.begin(fixture);
+						this.moveFixtureAction.begin(body.getTransform().getInverseTransformed(pw));
+					} else {
+						// end the edit body action
+						this.editBodyAction.end();
+						this.selectFixtureAction.end();
+					}
+				}
 			} else {
 				// otherwise see if a body is being selected
 				SandboxBody body = this.getBodyAtPoint(pw);
@@ -841,9 +960,28 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 					this.selectBodyAction.begin(body);
 					// begin the move body action
 					this.moveBodyAction.begin(pw);
+					this.editBodyAction.end();
 				} else {
 					// then assume the user wants to move the world
 					this.moveWorldAction.begin(this.offset.copy(), pw, this);
+				}
+			}
+		}
+		
+		// the mouse button 1 was double clicked
+		if (this.mouse.wasDoubleClicked(MouseEvent.BUTTON1)) {
+			// dont allow editing during simulation
+			if (this.isPaused()) {
+				SandboxBody body = this.getBodyAtPoint(pw);
+				// check for null
+				if (body != null) {
+					// end the body selection action
+					this.selectBodyAction.end();
+					// begin the edit body action
+					this.editBodyAction.begin(body);
+				} else {
+					// then assume the user is done editing fixtures on the body
+					this.editBodyAction.end();
 				}
 			}
 		}
@@ -853,7 +991,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 			// check if a body is already selected
 			if (this.selectBodyAction.isActive() && this.rotateBodyAction.isActive()) {
 				// get the body
-				SandboxBody body = this.selectBodyAction.getBody();
+				SandboxBody body = this.selectBodyAction.getObject();
 				// get the rotation
 				Vector2 c = body.getWorldCenter();
 				Vector2 v1 = c.to(this.rotateBodyAction.getBeginPosition());
@@ -863,15 +1001,50 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 				body.rotate(theta, c);
 				// update the action
 				this.rotateBodyAction.update(pw);
+			} else if (this.editBodyAction.isActive()) {
+				// get the body
+				SandboxBody body = this.editBodyAction.getObject();
+				// see if the move fixture action is active
+				if (this.selectFixtureAction.isActive() && this.rotateFixtureAction.isActive()) {
+					// get the fixture
+					BodyFixture bf = this.selectFixtureAction.getObject();
+					Convex convex = bf.getShape();
+					Vector2 c = convex.getCenter();
+					Vector2 lpw = body.getTransform().getInverseTransformed(pw);
+					// get the rotation
+					Vector2 v1 = c.to(this.rotateFixtureAction.getBeginPosition());
+					Vector2 v2 = c.to(lpw);
+					double theta = v1.getAngleBetween(v2);
+					// rotate the fixture about the local center
+					bf.getShape().rotate(theta, convex.getCenter());
+					// update the action
+					this.rotateFixtureAction.update(lpw);
+				} else {
+					// get the current fixture that the mouse is on
+					BodyFixture fixture = this.getContainingFixture(body, pw);
+					// see if a fixture was clicked
+					if (fixture != null) {
+						// start the select fixture action
+						this.selectFixtureAction.begin(fixture);
+						this.rotateFixtureAction.begin(body.getTransform().getInverseTransformed(pw));
+					} else {
+						// end the edit body action
+						this.editBodyAction.end();
+						this.selectFixtureAction.end();
+					}
+				}
 			} else {
-				// otherwise see if a body is being selected
-				SandboxBody body = this.getBodyAtPoint(pw);
-				// check for null
-				if (body != null) {
-					// begin the select body action
-					this.selectBodyAction.begin(body);
-					// begin the move body action
-					this.rotateBodyAction.begin(pw);
+				// dont allow rotating while simulating
+				if (this.isPaused()) {
+					// otherwise see if a body is being selected
+					SandboxBody body = this.getBodyAtPoint(pw);
+					// check for null
+					if (body != null) {
+						// begin the select body action
+						this.selectBodyAction.begin(body);
+						// begin the move body action
+						this.rotateBodyAction.begin(pw);
+					}
 				}
 			}
 		}
@@ -889,20 +1062,28 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 					this.selectedBodyJoint = null;
 				}
 			}
+			if (this.moveFixtureAction.isActive()) {
+				SandboxBody body = this.editBodyAction.getObject();
+				// recompute the mass if the position changes
+				body.setMass(body.getMass().getType());
+				this.moveFixtureAction.end();
+			}
 			if (this.moveWorldAction.isActive()) {
 				// end the action
 				this.moveWorldAction.end(this);
 			}
 		}
 		
-		// check if the mouse button 1 was released
+		// check if the mouse button 3 was released
 		if (this.mouse.wasReleased(MouseEvent.BUTTON3)) {
 			if (this.rotateBodyAction.isActive()) {
 				// end the action
 				this.rotateBodyAction.end();
 			}
+			if (this.rotateFixtureAction.isActive()) {
+				this.rotateFixtureAction.end();
+			}
 		}
-		
 		
 		this.mouse.clear();
 	}

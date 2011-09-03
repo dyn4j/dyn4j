@@ -267,13 +267,13 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 		this.popJointFolder.add(mnuAddAngleJoint);
 		this.popJointFolder.add(mnuAddDistanceJoint);
 		this.popJointFolder.add(mnuAddFrictionJoint);
+		this.popJointFolder.add(mnuAddMouseJoint);
 		this.popJointFolder.add(mnuAddPrismaticJoint);
 		this.popJointFolder.add(mnuAddPulleyJoint);
 		this.popJointFolder.add(mnuAddRevoluteJoint);
 		this.popJointFolder.add(mnuAddRopeJoint);
 		this.popJointFolder.add(mnuAddWeldJoint);
 		this.popJointFolder.add(mnuAddWheelJoint);
-		this.popJointFolder.add(mnuAddMouseJoint);
 		
 		// create the body node popup menu
 		

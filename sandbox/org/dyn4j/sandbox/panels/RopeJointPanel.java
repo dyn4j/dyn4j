@@ -20,6 +20,7 @@ import org.dyn4j.dynamics.joint.RopeJoint;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to create or edit an rope joint.
@@ -133,15 +134,18 @@ public class RopeJointPanel extends JointPanel implements InputPanel, ActionList
 		this.txtName.setColumns(15);
 		this.chkCollision.setSelected(collision);
 		
-		this.lblBody1 = new JLabel("Body 1");
-		this.lblBody2 = new JLabel("Body 2");
+		this.lblBody1 = new JLabel("Body 1", Icons.INFO, JLabel.LEFT);
+		this.lblBody2 = new JLabel("Body 2", Icons.INFO, JLabel.LEFT);
+		this.lblBody1.setToolTipText("The first body participating in the joint.");
+		this.lblBody2.setToolTipText("The second body participating in the joint.");
+		
 		this.cmbBody1 = new JComboBox(bodies);
 		this.cmbBody2 = new JComboBox(bodies);
 		
-		this.lblAnchor1 = new JLabel("Anchor 1");
+		this.lblAnchor1 = new JLabel("Anchor 1", Icons.INFO, JLabel.LEFT);
 		this.lblAnchor1.setToolTipText("The anchor point on the first body.");
 		
-		this.lblAnchor2 = new JLabel("Anchor 2");
+		this.lblAnchor2 = new JLabel("Anchor 2", Icons.INFO, JLabel.LEFT);
 		this.lblAnchor2.setToolTipText("The anchor point on the second body.");
 		
 		this.lblX1 = new JLabel("x");
@@ -175,23 +179,25 @@ public class RopeJointPanel extends JointPanel implements InputPanel, ActionList
 		this.btnUseCenter2.setActionCommand("use-com2");
 		this.btnUseCenter2.addActionListener(this);
 		
-		this.lblLowerLimitEnabled = new JLabel("Lower Limit Enabled");
+		this.lblLowerLimitEnabled = new JLabel("Lower Limit Enabled", Icons.INFO, JLabel.LEFT);
+		this.lblLowerLimitEnabled.setToolTipText("Check to enable the lower limit.");
 		this.chkLowerLimitEnabled = new JCheckBox();
-		this.lblLowerLimit = new JLabel("Lower Limit");
+		
+		this.lblLowerLimit = new JLabel("Lower Limit", Icons.INFO, JLabel.LEFT);
 		this.lblLowerLimit.setToolTipText("The lower limit in Meters.");
 		this.txtLowerLimit = new JFormattedTextField(new DecimalFormat("0.000"));
 		this.txtLowerLimit.addFocusListener(new SelectTextFocusListener(this.txtLowerLimit));
 		this.txtLowerLimit.setColumns(7);
-		this.txtLowerLimit.setToolTipText("The lower limit in Meters.");
 		
-		this.lblUpperLimitEnabled = new JLabel("Upper Limit Enabled");
+		this.lblUpperLimitEnabled = new JLabel("Upper Limit Enabled", Icons.INFO, JLabel.LEFT);
+		this.lblUpperLimitEnabled.setToolTipText("Check to enable the upper limit.");
 		this.chkUpperLimitEnabled = new JCheckBox();
-		this.lblUpperLimit = new JLabel("Upper Limit");
+		
+		this.lblUpperLimit = new JLabel("Upper Limit", Icons.INFO, JLabel.LEFT);
 		this.lblUpperLimit.setToolTipText("The upper limit in Meters.");
 		this.txtUpperLimit = new JFormattedTextField(new DecimalFormat("0.000"));
 		this.txtUpperLimit.addFocusListener(new SelectTextFocusListener(this.txtUpperLimit));
 		this.txtUpperLimit.setColumns(7);
-		this.txtUpperLimit.setToolTipText("The upper limit in Meters.");
 		
 		// set defaults
 		

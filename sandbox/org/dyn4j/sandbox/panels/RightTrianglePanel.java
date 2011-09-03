@@ -14,6 +14,7 @@ import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Triangle;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to create a right triangle shape.
@@ -47,8 +48,10 @@ public class RightTrianglePanel extends ShapePanel implements InputPanel {
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
 		
-		JLabel lblWidth = new JLabel("Width");
-		JLabel lblHeight = new JLabel("Height");
+		JLabel lblWidth = new JLabel("Width", Icons.INFO, JLabel.LEFT);
+		lblWidth.setToolTipText("The width of the base of the right triangle.");
+		JLabel lblHeight = new JLabel("Height", Icons.INFO, JLabel.LEFT);
+		lblHeight.setToolTipText("The height of the vertical side of the right triangle.");
 		JFormattedTextField txtWidth = new JFormattedTextField(new DecimalFormat("0.000"));
 		JFormattedTextField txtHeight = new JFormattedTextField(new DecimalFormat("0.000"));
 		txtWidth.setValue(DEFAULT_WIDTH);

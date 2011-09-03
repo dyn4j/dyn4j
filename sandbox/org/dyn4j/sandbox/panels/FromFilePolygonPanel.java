@@ -32,6 +32,7 @@ import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to create a polygon from a file.
@@ -59,16 +60,19 @@ public class FromFilePolygonPanel extends ShapePanel implements InputPanel, Acti
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
 		
-		JLabel lblFile = new JLabel("File");
+		JLabel lblFile = new JLabel("File", Icons.INFO, JLabel.LEFT);
+		lblFile.setToolTipText("The file to load containing the points of the polygon.");
 		
 		this.txtFile = new JTextField();
 		this.txtFile.setEditable(false);
 		
 		JButton btnBrowse = new JButton("Browse");
+		btnBrowse.setToolTipText("Browse the file system for a file.");
 		btnBrowse.setActionCommand("browse");
 		btnBrowse.addActionListener(this);
 		
 		JButton btnGenerate = new JButton("Generate Sample File");
+		btnGenerate.setToolTipText("Shows a sample polygon file.");
 		btnGenerate.setActionCommand("generate");
 		btnGenerate.addActionListener(this);
 		

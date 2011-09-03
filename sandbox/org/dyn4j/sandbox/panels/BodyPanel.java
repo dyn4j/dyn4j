@@ -1,22 +1,23 @@
 package org.dyn4j.sandbox.panels;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Window;
-import java.awt.Dialog.ModalityType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
 
-import javax.swing.ButtonGroup;
+import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JDialog;
+import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
-import javax.swing.JRadioButton;
+import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -27,8 +28,10 @@ import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.controls.JSliderWithTextField;
+import org.dyn4j.sandbox.dialogs.ColorDialog;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
 import org.dyn4j.sandbox.utilities.ColorUtilities;
+import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel for editing a Body.
@@ -65,22 +68,33 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 	/** The fill color change button */
 	private JButton btnFillColor;
 	
+	/** The sample text for the color panel */
+	private JLabel lblSample;
+	
+	/** A panel to show the selected colors */
+	private JPanel pnlColor;
+	
+	// mass controls
+	
+	/** The mass label */
+	private JLabel lblMass;
+	
+	/** The inertia label */
+	private JLabel lblInertia;
+	
+	/** The mass text box */
+	private JFormattedTextField txtMass;
+	
+	/** The inertia text box */
+	private JFormattedTextField txtInertia;
+	
 	// mass type controls
 	
 	/** The mass type label */
 	private JLabel lblMassType;
 	
-	/** The normal mass type radio button */
-	private JRadioButton rdoNormal;
-	
-	/** The infinite mass type radio button */
-	private JRadioButton rdoInfinite;
-	
-	/** The fixed linear velocity mass type radio button */
-	private JRadioButton rdoFixedLinearVelocity;
-	
-	/** The fixed angular velocity mass type radio button */
-	private JRadioButton rdoFixedAngularVelocity;
+	/** The mass type combo box */
+	private JComboBox cmbMassType;
 	
 	// damping controls
 	
@@ -172,7 +186,8 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 		Color initialFillColor = ColorUtilities.convertColor(body.getFillColor());
 		
 		// get the other properties
-		Mass.Type massType = body.getMass().getType();
+		Mass mass = body.getMass();
+		Mass.Type massType = mass.getType();
 		double linearDamping = body.getLinearDamping();
 		double angularDamping = body.getAngularDamping();
 		Vector2 velocity = body.getVelocity().copy();
@@ -184,11 +199,9 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 		boolean bullet = body.isBullet();
 		String name = body.getName();
 		
-		GroupLayout layout = new GroupLayout(this);
-		this.setLayout(layout);
-		
 		// name
-		this.lblName = new JLabel("Name");
+		this.lblName = new JLabel("Name", Icons.INFO, JLabel.LEFT);
+		this.lblName.setToolTipText("The name of the body.");
 		this.txtName = new JTextField(name);
 		
 		this.txtName.addFocusListener(new SelectTextFocusListener(this.txtName));
@@ -205,143 +218,106 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 			public void changedUpdate(DocumentEvent event) {}
 		});
 		
+		// the color panel
+		this.lblSample = new JLabel("Sample");
+		this.lblSample.setForeground(ColorUtilities.getForegroundColorFromBackgroundColor(initialFillColor));
+		this.lblSample.setHorizontalAlignment(JLabel.CENTER);
+		this.pnlColor = new JPanel();
+		this.pnlColor.setBackground(initialFillColor);
+		this.pnlColor.setBorder(BorderFactory.createLineBorder(initialOutlineColor, 4));
+		this.pnlColor.setPreferredSize(new Dimension(150, 50));
+		this.pnlColor.setLayout(new BorderLayout());
+		this.pnlColor.add(this.lblSample, BorderLayout.CENTER);
+		
 		// outline color
-		this.lblOutlineColor = new JLabel("Outline Color");
+		this.lblOutlineColor = new JLabel("Outline Color", Icons.INFO, JLabel.LEFT);
+		this.lblOutlineColor.setToolTipText("The color used when drawing an outline of this body.");
 		this.btnOutlineColor = new JButton("Select");
-		this.btnOutlineColor.setBackground(initialOutlineColor);
-		this.btnOutlineColor.setForeground(ColorUtilities.getForegroundColorFromBackgroundColor(initialOutlineColor));
 		this.btnOutlineColor.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
 				Color c = ColorUtilities.convertColor(body.getOutlineColor());
-				
-				ColorPanel cep = new ColorPanel(c, false);
-				JDialog dialog = new JDialog(getParentWindow(), "Choose an outline color", ModalityType.APPLICATION_MODAL);
-				dialog.add(cep);
-				dialog.pack();
-				dialog.setVisible(true);
-				
-				// get the new color
-				Color nc = cep.getColor();
-				
+				Color nc = ColorDialog.show(getParentWindow(), c, false);
 				if (nc != null) {
+					// set the outline color
 					float[] color = ColorUtilities.convertColor(nc);
 					body.setOutlineColor(color);
-					ColorUtilities.convertColor(nc, color);
-					JButton btn = (JButton)event.getSource();
+					// set the outline color of the color panel
+					// dont copy alpha values
 					Color dc = new Color(nc.getRed(), nc.getGreen(), nc.getBlue());
-					btn.setBackground(dc);
-					Color tc = ColorUtilities.getForegroundColorFromBackgroundColor(dc);
-					btn.setForeground(tc);
+					pnlColor.setBorder(BorderFactory.createLineBorder(dc, 4));
+					// set the foreground color of the label
+					lblSample.setForeground(ColorUtilities.getForegroundColorFromBackgroundColor(dc));
 				}
 			}
 		});
 		
 		// fill color
-		this.lblFillColor = new JLabel("Fill Color");
+		this.lblFillColor = new JLabel("Fill Color", Icons.INFO, JLabel.LEFT);
+		this.lblFillColor.setToolTipText("The color used when filling this body.");
 		this.btnFillColor = new JButton("Select");
-		this.btnFillColor.setBackground(initialFillColor);
-		this.btnFillColor.setForeground(ColorUtilities.getForegroundColorFromBackgroundColor(initialFillColor));
 		this.btnFillColor.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
 				Color c = ColorUtilities.convertColor(body.getFillColor());
-				
-				ColorPanel cep = new ColorPanel(c, false);
-				JDialog dialog = new JDialog(getParentWindow(), "Choose a fill color", ModalityType.APPLICATION_MODAL);
-				dialog.add(cep);
-				dialog.pack();
-				dialog.setVisible(true);
-				
-				// get the new color
-				Color nc = cep.getColor();
-				
+				Color nc = ColorDialog.show(getParentWindow(), c, false);
 				if (nc != null) {
+					// set the body fill color
 					float[] color = ColorUtilities.convertColor(nc);
 					body.setFillColor(color);
-					ColorUtilities.convertColor(nc, color);
-					JButton btn = (JButton)event.getSource();
+					// set the fill color of the color panel
+					// dont copy alpha values
 					Color dc = new Color(nc.getRed(), nc.getGreen(), nc.getBlue());
-					btn.setBackground(dc);
-					Color tc = ColorUtilities.getForegroundColorFromBackgroundColor(dc);
-					btn.setForeground(tc);
+					pnlColor.setBackground(dc);
+					// set the foreground color of the label
+					lblSample.setForeground(ColorUtilities.getForegroundColorFromBackgroundColor(dc));
 				}
 			}
 		});
 		
 		// mass type
-		this.lblMassType = new JLabel("Mass Type");
-		this.rdoNormal = new JRadioButton("Normal");
-		this.rdoInfinite = new JRadioButton("Infinite");
-		this.rdoInfinite.setToolTipText("<html>Neither the linear or angular velocity can change due to<br />due to interaction with other bodies.</html>");
-		this.rdoFixedLinearVelocity = new JRadioButton("Fixed Linear Velocity");
-		this.rdoFixedLinearVelocity.setToolTipText("<html>The body's linear velocity will not be changed.<br />The body's angular velocity can change.</html>");
-		this.rdoFixedAngularVelocity = new JRadioButton("Fixed Angular Velocity");
-		this.rdoFixedAngularVelocity.setToolTipText("<html>The body's angular velocity will not be changed.<br />The body's linear velocity can change.</html>");
-		
-		this.rdoNormal.setActionCommand(Mass.Type.NORMAL.toString());
-		this.rdoInfinite.setActionCommand(Mass.Type.INFINITE.toString());
-		this.rdoFixedLinearVelocity.setActionCommand(Mass.Type.FIXED_LINEAR_VELOCITY.toString());
-		this.rdoFixedAngularVelocity.setActionCommand(Mass.Type.FIXED_ANGULAR_VELOCITY.toString());
-		
-		if (massType == Mass.Type.NORMAL) {
-			this.rdoNormal.setSelected(true);
-		} else if (massType == Mass.Type.INFINITE) {
-			this.rdoInfinite.setSelected(true);
-		} else if (massType == Mass.Type.FIXED_LINEAR_VELOCITY) {
-			this.rdoFixedLinearVelocity.setSelected(true);
-		} else if (massType == Mass.Type.FIXED_ANGULAR_VELOCITY) {
-			this.rdoFixedAngularVelocity.setSelected(true);
-		} 
-		
-		ButtonGroup bgMassType = new ButtonGroup();
-		bgMassType.add(this.rdoNormal);
-		bgMassType.add(this.rdoInfinite);
-		bgMassType.add(this.rdoFixedLinearVelocity);
-		bgMassType.add(this.rdoFixedAngularVelocity);
-		
-		this.rdoNormal.addActionListener(new ActionListener() {
+		this.lblMassType = new JLabel("Mass Type", Icons.INFO, JLabel.LEFT);
+		this.lblMassType.setToolTipText(
+				"<html>Normal: The body's linear and angular velocity will be affected by interactions with other bodies.<br />" +
+				"Infinite: The body's linear and angular velocity are not affected by interactions.<br />" +
+				"Fixed Linear Velocity: The body's linear velocity remains unaffected.<br />" +
+				"Fixed Angular Velocity: The body's angular velocity remains unaffected.</html>");
+		this.cmbMassType = new JComboBox(ITEMS);
+		this.cmbMassType.setSelectedItem(this.getMassTypeItem(massType));
+		this.cmbMassType.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent event) {
-				JRadioButton radio = (JRadioButton)event.getSource();
-				if (radio.isSelected()) {
-					body.setMassType(Mass.Type.NORMAL);
-				}
+			public void actionPerformed(ActionEvent e) {
+				MassTypeItem type = (MassTypeItem)cmbMassType.getSelectedItem();
+				body.setMassType(type.type);
 			}
 		});
-		this.rdoInfinite.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				JRadioButton radio = (JRadioButton)event.getSource();
-				if (radio.isSelected()) {
-					body.setMassType(Mass.Type.INFINITE);
-				}
-			}
-		});
-		this.rdoFixedLinearVelocity.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				JRadioButton radio = (JRadioButton)event.getSource();
-				if (radio.isSelected()) {
-					body.setMassType(Mass.Type.FIXED_LINEAR_VELOCITY);
-				}
-			}
-		});
-		this.rdoFixedAngularVelocity.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				JRadioButton radio = (JRadioButton)event.getSource();
-				if (radio.isSelected()) {
-					body.setMassType(Mass.Type.FIXED_ANGULAR_VELOCITY);
-				}
-			}
-		});
+		
+		// mass
+		Mass showMass = mass;
+		if (mass.getType() != Mass.Type.NORMAL) {
+			showMass = new Mass(mass);
+			showMass.setType(Mass.Type.NORMAL);
+		}
+		this.lblMass = new JLabel("Mass", Icons.INFO, JLabel.LEFT);
+		this.lblMass.setToolTipText("<html>The total mass of the body in Kilograms/Meter<sup>2</sup>.<br />" +
+				"Specifies the body's resistance to change in its velocity.</html>");
+		this.txtMass = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtMass.addFocusListener(new SelectTextFocusListener(this.txtMass));
+		this.txtMass.setValue(showMass.getMass());
+		this.txtMass.setEditable(false);
+		
+		this.lblInertia = new JLabel("Inertia", Icons.INFO, JLabel.LEFT);
+		this.lblInertia.setToolTipText("<html>The inertia tensor of the body in Kilogram-Meters<sup>2</sup>.<br />" +
+				"Specifies the body's resistance to change in its angular velocity.</html>");
+		this.txtInertia = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtInertia.addFocusListener(new SelectTextFocusListener(this.txtInertia));
+		this.txtInertia.setValue(showMass.getInertia());
+		this.txtInertia.setEditable(false);
 		
 		// linear damping
-		this.lblLinearDamping = new JLabel("Linear Damping");
+		this.lblLinearDamping = new JLabel("Linear Damping", Icons.INFO, JLabel.LEFT);
 		this.lblLinearDamping.setToolTipText("<html>Specifies a drag like coefficient for linear motion.<br />Valid values are between 0 and 1 inclusive.</html>");
 		this.sldLinearDamping = new JSliderWithTextField(0, 100, (int)(linearDamping * 100.0), 0.01, new DecimalFormat("0.00"));
-		this.sldLinearDamping.setToolTipText("<html>Specifies a drag like coefficient for linear motion.<br />Valid values are between 0 and 1 inclusive.</html>");
 		this.sldLinearDamping.setColumns(4);
 		this.sldLinearDamping.addChangeListener(new ChangeListener() {
 			@Override
@@ -353,10 +329,9 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 		});
 		
 		// angular damping
-		this.lblAngularDamping = new JLabel("Angular Damping");
+		this.lblAngularDamping = new JLabel("Angular Damping", Icons.INFO, JLabel.LEFT);
 		this.lblAngularDamping.setToolTipText("<html>Specifies a drag like coefficient for angular motion.<br />Valid values are between 0 and 1 inclusive.</html>");
 		this.sldAngularDamping = new JSliderWithTextField(0, 100, (int)(angularDamping * 100.0), 0.01, new DecimalFormat("0.00"));
-		this.sldAngularDamping.setToolTipText("<html>Specifies a drag like coefficient for angular motion.<br />Valid values are between 0 and 1 inclusive.</html>");
 		this.sldAngularDamping.setColumns(4);
 		this.sldAngularDamping.addChangeListener(new ChangeListener() {
 			@Override
@@ -368,12 +343,10 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 		});
 		
 		// initial velocity
-		this.lblVelocity = new JLabel("Velocity");
-		this.lblVelocity.setToolTipText("The linear velocity in Meters/Second");
+		this.lblVelocity = new JLabel("Velocity", Icons.INFO, JLabel.LEFT);
+		this.lblVelocity.setToolTipText("The linear velocity in Meters/Second.");
 		this.lblVelocityX = new JLabel("x");
-		this.lblVelocityX.setToolTipText("The x component of the linear velocity in Meters/Second");
 		this.lblVelocityY = new JLabel("y");
-		this.lblVelocityY.setToolTipText("The y component of the linear velocity in Meters/Second");
 		this.txtVelocityX = new JFormattedTextField(new DecimalFormat("##0.000"));
 		this.txtVelocityY = new JFormattedTextField(new DecimalFormat("##0.000"));
 		this.txtVelocityX.setValue(velocity.x);
@@ -384,8 +357,6 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 		this.txtVelocityY.setMaximumSize(this.txtVelocityY.getPreferredSize());
 		this.txtVelocityX.addFocusListener(new SelectTextFocusListener(this.txtVelocityX));
 		this.txtVelocityY.addFocusListener(new SelectTextFocusListener(this.txtVelocityY));
-		this.txtVelocityX.setToolTipText("The x component of the linear velocity in Meters/Second");
-		this.txtVelocityY.setToolTipText("The y component of the linear velocity in Meters/Second");
 		
 		this.txtVelocityX.addPropertyChangeListener("value", new PropertyChangeListener() {
 			@Override
@@ -403,10 +374,9 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 		});
 		
 		// initial anuglar velocity
-		this.lblAngularVelocity = new JLabel("Angular Velocity");
-		this.lblAngularVelocity.setToolTipText("The angular velocity in Degrees/Second");
+		this.lblAngularVelocity = new JLabel("Angular Velocity", Icons.INFO, JLabel.LEFT);
+		this.lblAngularVelocity.setToolTipText("The angular velocity in Degrees/Second.");
 		this.txtAngularVelocity = new JFormattedTextField(new DecimalFormat("##0.000"));
-		this.txtAngularVelocity.setToolTipText("The angular velocity in Degrees/Second");
 		this.txtAngularVelocity.setValue(Math.toDegrees(angularVelocity));
 		this.txtAngularVelocity.setColumns(7);
 		this.txtAngularVelocity.setMaximumSize(this.txtAngularVelocity.getPreferredSize());
@@ -420,10 +390,9 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 		});
 		
 		// gravity scale
-		this.lblGravityScale = new JLabel("Gravity Scale");
+		this.lblGravityScale = new JLabel("Gravity Scale", Icons.INFO, JLabel.LEFT);
 		this.lblGravityScale.setToolTipText("<html>A scalar to apply less or more gravity to a specific body.<br />Valid values are zero or greater.</html>");
 		this.sldGravityScale = new JSliderWithTextField(0, 1000, (int)(gravityScale * 100.0), 0.01, new DecimalFormat("#0.00"));
-		this.sldGravityScale.setToolTipText("<html>A scalar to apply less or more gravity to a specific body.<br />Valid values are zero or greater.</html>");
 		this.sldGravityScale.setColumns(4);
 		this.sldGravityScale.addChangeListener(new ChangeListener() {
 			@Override
@@ -435,13 +404,15 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 		});
 		
 		// initial state (Active/asleep)
-		this.lblState = new JLabel("State");
+		this.lblState = new JLabel("State", Icons.INFO, JLabel.LEFT);
+		this.lblState.setToolTipText(
+				"<html>The current state of the body.<br />" +
+				"Inactive: The body does not participate in the world.<br />" +
+				"Asleep: The body has come to rest and only participates when awoken by another body or joint.</html>");
 		this.chkInactive = new JCheckBox("Inactive");
 		this.chkAsleep = new JCheckBox("Asleep");
 		this.chkInactive.setSelected(inactive);
 		this.chkAsleep.setSelected(asleep);
-		this.chkInactive.setToolTipText("An inactive body doesn't participate in world.");
-		this.chkAsleep.setToolTipText("<html>An asleep body has come to rest and only participates in<br />the world when awoken by another body or joint.</html>");
 		
 		this.chkInactive.addActionListener(new ActionListener() {
 			@Override
@@ -468,10 +439,11 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 		});
 		
 		// allow auto sleep
-		this.lblAllowAutoSleep = new JLabel("Allow Auto-Sleeping");
-		this.lblAllowAutoSleep.setToolTipText("<html>Auto-sleeping allows the World to identify bodies who have come to rest and<br />skip steps with those bodies to provide better performance.</html>");
+		this.lblAllowAutoSleep = new JLabel("Allow Auto-Sleeping", Icons.INFO, JLabel.LEFT);
+		this.lblAllowAutoSleep.setToolTipText(
+				"<html>Auto-sleeping allows the World to identify bodies who have come to rest and<br />" +
+				"skip steps with those bodies to provide better performance by putting them to sleep.</html>");
 		this.chkAllowAutoSleep = new JCheckBox();
-		this.chkAllowAutoSleep.setToolTipText("<html>Auto-sleeping allows the World to identify bodies who have come to rest and<br />skip steps with those bodies to provide better performance.</html>");
 		this.chkAllowAutoSleep.setSelected(autoSleep);
 		
 		this.chkAllowAutoSleep.addActionListener(new ActionListener() {
@@ -487,10 +459,9 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 		});
 		
 		// is bullet
-		this.lblBullet = new JLabel("Bullet");
+		this.lblBullet = new JLabel("Bullet", Icons.INFO, JLabel.LEFT);
 		this.lblBullet.setToolTipText("A body flagged as a bullet require more processing, but can avoid tunneling.");
 		this.chkBullet = new JCheckBox();
-		this.chkBullet.setToolTipText("A body flagged as a bullet require more processing, but can avoid tunneling.");
 		this.chkBullet.setSelected(bullet);
 		
 		this.chkBullet.addActionListener(new ActionListener() {
@@ -505,117 +476,170 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 			}
 		});
 		
+		GroupLayout layout;
+		
+		// setup the general section
+		JPanel pnlGeneral = new JPanel();
+		pnlGeneral.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General "));
+		
+		layout = new GroupLayout(pnlGeneral);
+		pnlGeneral.setLayout(layout);
 		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
-		layout.setHorizontalGroup(
-				layout.createSequentialGroup()
-				.addGroup(
-						layout.createParallelGroup()
+		
+		layout.setHorizontalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblName)
 						.addComponent(this.lblOutlineColor)
-						.addComponent(this.lblFillColor)
+						.addComponent(this.lblFillColor))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(this.txtName)
+						.addGroup(layout.createSequentialGroup()
+								.addGroup(layout.createParallelGroup()
+										.addComponent(this.btnOutlineColor)
+										.addComponent(this.btnFillColor))
+								.addComponent(this.pnlColor, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))));
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup()
+						.addComponent(this.lblName)
+						.addComponent(this.txtName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addGroup(layout.createParallelGroup()
+						.addGroup(layout.createSequentialGroup()
+								.addGroup(layout.createParallelGroup()
+										.addComponent(this.lblOutlineColor)
+										.addComponent(this.btnOutlineColor, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+								.addGroup(layout.createParallelGroup()
+										.addComponent(this.lblFillColor)
+										.addComponent(this.btnFillColor, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
+						.addComponent(this.pnlColor, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
+		
+		// setup the mass section
+		JPanel pnlMass = new JPanel();
+		pnlMass.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Mass "));
+		
+		layout = new GroupLayout(pnlMass);
+		pnlMass.setLayout(layout);
+		layout.setAutoCreateContainerGaps(true);
+		layout.setAutoCreateGaps(true);
+		
+		layout.setHorizontalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblMassType)
+						.addComponent(this.lblMass)
+						.addComponent(this.lblInertia))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(this.cmbMassType)
+						.addComponent(this.txtMass)
+						.addComponent(this.txtInertia)));
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup()
+						.addComponent(this.lblMassType)
+						.addComponent(this.cmbMassType))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(this.lblMass)
+						.addComponent(this.txtMass, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(this.lblInertia)
+						.addComponent(this.txtInertia, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
+		
+		// setup the state section
+		JPanel pnlProperties = new JPanel();
+		pnlProperties.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Properties "));
+		
+		layout = new GroupLayout(pnlProperties);
+		pnlProperties.setLayout(layout);
+		layout.setAutoCreateContainerGaps(true);
+		layout.setAutoCreateGaps(true);
+		
+		layout.setHorizontalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblVelocity)
 						.addComponent(this.lblAngularVelocity)
 						.addComponent(this.lblLinearDamping)
 						.addComponent(this.lblAngularDamping)
 						.addComponent(this.lblGravityScale)
-						.addComponent(this.lblState)
-						.addComponent(this.lblAllowAutoSleep)
-						.addComponent(this.lblBullet))
-				.addGroup(
-						layout.createParallelGroup()
-						.addComponent(this.txtName)
-						.addComponent(this.btnOutlineColor)
-						.addComponent(this.btnFillColor)
-						.addComponent(this.rdoNormal)
-						.addComponent(this.rdoInfinite)
-						.addComponent(this.rdoFixedLinearVelocity)
-						.addComponent(this.rdoFixedAngularVelocity)
-						.addGroup(
-								layout.createSequentialGroup()
+						.addComponent(this.lblState))
+				.addGroup(layout.createParallelGroup()
+						.addGroup(layout.createSequentialGroup()
 								.addComponent(this.txtVelocityX)
-								.addComponent(this.lblVelocityX))
-						.addGroup(
-								layout.createSequentialGroup()
+								.addComponent(this.lblVelocityX)
 								.addComponent(this.txtVelocityY)
 								.addComponent(this.lblVelocityY))
 						.addComponent(this.txtAngularVelocity)
 						.addComponent(this.sldLinearDamping)
 						.addComponent(this.sldAngularDamping)
 						.addComponent(this.sldGravityScale)
-						.addComponent(this.chkInactive)
-						.addComponent(this.chkAsleep)
-						.addComponent(this.chkAllowAutoSleep)
-						.addComponent(this.chkBullet)));
-		
-		layout.setVerticalGroup(
-				layout.createSequentialGroup()
-				.addGroup(
-						layout.createParallelGroup()
-						.addComponent(this.lblName)
-						.addComponent(this.txtName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(
-						layout.createParallelGroup()
-						.addComponent(this.lblOutlineColor)
-						.addComponent(this.btnOutlineColor, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(
-						layout.createParallelGroup()
-						.addComponent(this.lblFillColor)
-						.addComponent(this.btnFillColor, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(
-						layout.createParallelGroup()
-						.addComponent(this.lblMassType)
-						.addGroup(
-								layout.createSequentialGroup()
-								.addComponent(this.rdoNormal, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-								.addComponent(this.rdoInfinite, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-								.addComponent(this.rdoFixedLinearVelocity, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-								.addComponent(this.rdoFixedAngularVelocity, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
-				.addGroup(
-						layout.createParallelGroup()
+						.addGroup(layout.createSequentialGroup()
+								.addComponent(this.chkInactive)
+								.addComponent(this.chkAsleep))));
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblVelocity)
-						.addGroup(
-								layout.createSequentialGroup()
-								.addGroup(
-										layout.createParallelGroup()
+						.addGroup(layout.createSequentialGroup()
+								.addGroup(layout.createParallelGroup()
 										.addComponent(this.txtVelocityX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-										.addComponent(this.lblVelocityX))
-								.addGroup(
-										layout.createParallelGroup()
+										.addComponent(this.lblVelocityX)
 										.addComponent(this.txtVelocityY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 										.addComponent(this.lblVelocityY))))
-				.addGroup(
-						layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblAngularVelocity)
 						.addComponent(this.txtAngularVelocity, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(
-						layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblLinearDamping)
 						.addComponent(this.sldLinearDamping, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(
-						layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblAngularDamping)
 						.addComponent(this.sldAngularDamping, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(
-						layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblGravityScale)
 						.addComponent(this.sldGravityScale, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(
-						layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblState)
-						.addGroup(
-								layout.createSequentialGroup()
-								.addComponent(this.chkInactive, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-								.addComponent(this.chkAsleep, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
-				.addGroup(
-						layout.createParallelGroup()
+						.addComponent(this.chkInactive, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(this.chkAsleep, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
+		
+		// setup the flags section
+		JPanel pnlFlags = new JPanel();
+		pnlFlags.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Flags "));
+		
+		layout = new GroupLayout(pnlFlags);
+		pnlFlags.setLayout(layout);
+		layout.setAutoCreateContainerGaps(true);
+		layout.setAutoCreateGaps(true);
+		
+		layout.setHorizontalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup()
+						.addComponent(this.lblAllowAutoSleep)
+						.addComponent(this.lblBullet))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(this.chkAllowAutoSleep)
+						.addComponent(this.chkBullet)));
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblAllowAutoSleep)
 						.addComponent(this.chkAllowAutoSleep, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(
-						layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblBullet)
 						.addComponent(this.chkBullet, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
+		
+		// setup the sections
+		
+		layout = new GroupLayout(this);
+		this.setLayout(layout);
+		
+		layout.setAutoCreateContainerGaps(true);
+		layout.setAutoCreateGaps(true);
+		
+		layout.setHorizontalGroup(layout.createParallelGroup()
+				.addComponent(pnlGeneral)
+				.addComponent(pnlMass)
+				.addComponent(pnlProperties)
+				.addComponent(pnlFlags, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addComponent(pnlGeneral)
+				.addComponent(pnlMass)
+				.addComponent(pnlProperties)
+				.addComponent(pnlFlags));
 	}
 	
 	/* (non-Javadoc)
@@ -631,4 +655,70 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 	 */
 	@Override
 	public void showInvalidInputMessage(Window owner) {}
+	
+	/** The normal mass type option */
+	private static final MassTypeItem NORMAL = new MassTypeItem("Normal", Mass.Type.NORMAL);
+	
+	/** The infinite mass type option */
+	private static final MassTypeItem INFINITE = new MassTypeItem("Infinite", Mass.Type.INFINITE);
+	
+	/** The fixed linear velocity option */
+	private static final MassTypeItem FIXED_LINEAR_VELOCITY = new MassTypeItem("Fixed Linear Velocity", Mass.Type.FIXED_LINEAR_VELOCITY);
+	
+	/** The fixed angular velocity option */
+	private static final MassTypeItem FIXED_ANGULAR_VELOCITY = new MassTypeItem("Fixed Angular Velocity", Mass.Type.FIXED_ANGULAR_VELOCITY);
+	
+	/** The list of mass type items for the mass type drop down */
+	private static final MassTypeItem[] ITEMS = new MassTypeItem[] {
+		NORMAL,
+		INFINITE,
+		FIXED_LINEAR_VELOCITY,
+		FIXED_ANGULAR_VELOCITY
+	};
+	
+	/**
+	 * Returns the mass type item for the given mass type.
+	 * @param type the mass type
+	 * @return MassTypeItem null if the mass type is not found
+	 */
+	private MassTypeItem getMassTypeItem(Mass.Type type) {
+		for (MassTypeItem item : ITEMS) {
+			if (item.type == type) {
+				return item;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * List item class to store a name for a Mass.Type.
+	 * @author William Bittle
+	 * @version 1.0.0
+	 * @since 1.0.0
+	 */
+	private static final class MassTypeItem {
+		/** The display name */
+		public String name;
+		
+		/** The mass type */
+		public Mass.Type type;
+		
+		/**
+		 * Full constructor.
+		 * @param name the display name of the mass type
+		 * @param type the mass type
+		 */
+		public MassTypeItem(String name, Mass.Type type) {
+			this.name = name;
+			this.type = type;
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			return name;
+		}
+	}
 }

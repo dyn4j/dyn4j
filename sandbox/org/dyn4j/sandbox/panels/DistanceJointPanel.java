@@ -22,6 +22,7 @@ import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to create or edit an distance joint.
@@ -134,15 +135,18 @@ public class DistanceJointPanel extends JointPanel implements InputPanel, Action
 		this.txtName.setColumns(15);
 		this.chkCollision.setSelected(collision);
 		
-		this.lblBody1 = new JLabel("Body 1");
-		this.lblBody2 = new JLabel("Body 2");
+		this.lblBody1 = new JLabel("Body 1", Icons.INFO, JLabel.LEFT);
+		this.lblBody2 = new JLabel("Body 2", Icons.INFO, JLabel.LEFT);
+		this.lblBody1.setToolTipText("The first body participating in the joint.");
+		this.lblBody2.setToolTipText("The second body participating in the joint.");
+		
 		this.cmbBody1 = new JComboBox(bodies);
 		this.cmbBody2 = new JComboBox(bodies);
 		
-		this.lblAnchor1 = new JLabel("Anchor 1");
+		this.lblAnchor1 = new JLabel("Anchor 1", Icons.INFO, JLabel.LEFT);
 		this.lblAnchor1.setToolTipText("The anchor point on the first body.");
 		
-		this.lblAnchor2 = new JLabel("Anchor 2");
+		this.lblAnchor2 = new JLabel("Anchor 2", Icons.INFO, JLabel.LEFT);
 		this.lblAnchor2.setToolTipText("The anchor point on the second body.");
 		
 		this.lblX1 = new JLabel("x");
@@ -180,7 +184,8 @@ public class DistanceJointPanel extends JointPanel implements InputPanel, Action
 		this.btnUseCenter2.setActionCommand("use-com2");
 		this.btnUseCenter2.addActionListener(this);
 		
-		this.lblRestDistance = new JLabel("Rest Distance");
+		this.lblRestDistance = new JLabel("Rest Distance", Icons.INFO, JLabel.LEFT);
+		this.lblRestDistance.setToolTipText("The rest distance between the two anchor points.");
 		this.txtRestDistance = new JFormattedTextField(new DecimalFormat("0.000"));
 		this.txtRestDistance.addFocusListener(new SelectTextFocusListener(this.txtRestDistance));
 		this.txtRestDistance.setColumns(8);
@@ -193,17 +198,17 @@ public class DistanceJointPanel extends JointPanel implements InputPanel, Action
 		this.btnResetRestDistance.setActionCommand("reset-rest-distance");
 		this.btnResetRestDistance.addActionListener(this);
 		
-		this.lblFrequency = new JLabel("Frequency");
-		this.lblFrequency.setToolTipText("Determines how fast the spring should oscillate in hertz.\nSet to zero to disable.");
+		this.lblFrequency = new JLabel("Frequency", Icons.INFO, JLabel.LEFT);
+		this.lblFrequency.setToolTipText(
+				"<html>Determines how fast the spring should oscillate in hertz (Seconds<sup>-1</sup>).<br />" +
+				"Set to zero to disable the spring/damper and make it a fixed distance joint.</html>");
 		this.txtFrequency = new JFormattedTextField(new DecimalFormat("0.000"));
 		this.txtFrequency.addFocusListener(new SelectTextFocusListener(this.txtFrequency));
-		this.txtFrequency.setToolTipText("Determines how fast the spring should oscillate in hertz.\nSet to zero to disable.");
 		
-		this.lblRatio = new JLabel("Ratio");
+		this.lblRatio = new JLabel("Ratio", Icons.INFO, JLabel.LEFT);
 		this.lblRatio.setToolTipText("Determines how fast the spring is dampened from 0.0 to 1.0.");
 		this.txtRatio = new JFormattedTextField(new DecimalFormat("0.000"));
 		this.txtRatio.addFocusListener(new SelectTextFocusListener(this.txtRatio));
-		this.txtRatio.setToolTipText("Determines how fast the spring is dampened from 0.0 to 1.0.");
 		
 		// set defaults
 		
