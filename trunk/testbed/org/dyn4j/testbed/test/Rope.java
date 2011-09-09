@@ -40,7 +40,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests the rope joint.
  * @author William Bittle
- * @version 2.2.2
+ * @version 3.0.1
  * @since 2.2.1
  */
 public class Rope extends Test {
@@ -139,7 +139,7 @@ public class Rope extends Test {
 		RopeJoint j1 = new RopeJoint(obj1, obj2, p1, p2);
 		// VERY IMPORTANT FOR THIS JOINT
 		// set and enable the limits
-		j1.setMinimumMaximumEnabled(0.5, 1.5);
+		j1.setLimitsEnabled(0.5, 1.5);
 		j1.setCollisionAllowed(true);
 		this.world.add(j1);
 	}

@@ -127,7 +127,7 @@ public class RevoluteJointPanel extends JointPanel implements InputPanel, Action
 		double ul = joint.getUpperLimit();
 		double ll = joint.getLowerLimit();
 		double ms = joint.getMotorSpeed();
-		double mt = joint.getMaxMotorTorque();
+		double mt = joint.getMaximumMotorTorque();
 		
 		// set the super classes defaults
 		this.txtName.setText(name);
@@ -404,7 +404,7 @@ public class RevoluteJointPanel extends JointPanel implements InputPanel, Action
 			rj.setLimits(
 					Math.toRadians(this.getDoubleValue(this.txtLowerLimit)), 
 					Math.toRadians(this.getDoubleValue(this.txtUpperLimit)));
-			rj.setMaxMotorTorque(this.getDoubleValue(this.txtMaxMotorTorque));
+			rj.setMaximumMotorTorque(this.getDoubleValue(this.txtMaxMotorTorque));
 			rj.setMotorEnabled(this.chkMotorEnabled.isSelected());
 			rj.setMotorSpeed(Math.toRadians(this.getDoubleValue(this.txtMotorSpeed)));
 		}
@@ -433,7 +433,7 @@ public class RevoluteJointPanel extends JointPanel implements InputPanel, Action
 		rj.setLimits(
 				Math.toRadians(this.getDoubleValue(this.txtLowerLimit)),
 				Math.toRadians(this.getDoubleValue(this.txtUpperLimit)));
-		rj.setMaxMotorTorque(this.getDoubleValue(this.txtMaxMotorTorque));
+		rj.setMaximumMotorTorque(this.getDoubleValue(this.txtMaxMotorTorque));
 		rj.setMotorEnabled(this.chkMotorEnabled.isSelected());
 		rj.setMotorSpeed(Math.toRadians(this.getDoubleValue(this.txtMotorSpeed)));
 		

@@ -19,9 +19,6 @@ import org.dyn4j.sandbox.utilities.RenderUtilities;
  * @since 1.0.0
  */
 public class SandboxBody extends Body {
-	/** The body name */
-	protected String name;
-	
 	/** The body outline color */
 	protected float[] outlineColor = ColorUtilities.convertColor(new Color(113, 149, 70));
 	
@@ -151,7 +148,7 @@ public class SandboxBody extends Body {
 	 * @return String
 	 */
 	public String getName() {
-		return name;
+		return (String)this.getUserData();
 	}
 	
 	/**
@@ -159,7 +156,7 @@ public class SandboxBody extends Body {
 	 * @param name the name
 	 */
 	public void setName(String name) {
-		this.name = name;
+		this.setUserData(name);
 	}
 	
 	/**
@@ -183,6 +180,6 @@ public class SandboxBody extends Body {
 	 */
 	@Override
 	public String toString() {
-		return this.name;
+		return (String)this.getUserData();
 	}
 }

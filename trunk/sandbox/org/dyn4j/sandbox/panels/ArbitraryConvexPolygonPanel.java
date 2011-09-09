@@ -1,13 +1,17 @@
 package org.dyn4j.sandbox.panels;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
@@ -33,7 +37,7 @@ import org.dyn4j.sandbox.utilities.UIUtilities;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class ArbitraryPolygonPanel extends ShapePanel implements InputPanel, ActionListener {
+public class ArbitraryConvexPolygonPanel extends ConvexShapePanel implements InputPanel, ActionListener {
 	/** The version id */
 	private static final long serialVersionUID = 7259833235547997274L;
 
@@ -57,11 +61,14 @@ public class ArbitraryPolygonPanel extends ShapePanel implements InputPanel, Act
 	
 	/** The text label for the polygon help */
 	private JTextPane lblText;
+
+	/** Panel used to preview the current shape */
+	private ShapePreviewPanel pnlPreview;
 	
 	/**
 	 * Default constructor.
 	 */
-	public ArbitraryPolygonPanel() {
+	public ArbitraryConvexPolygonPanel() {
 		this.pnlPanel = new JPanel();
 		
 		this.lblText = new JTextPane();
@@ -76,18 +83,6 @@ public class ArbitraryPolygonPanel extends ShapePanel implements InputPanel, Act
 		
 		this.scrPane = new JScrollPane(this.pnlPanel);
 		
-		GroupLayout layout = new GroupLayout(this);
-		this.setLayout(layout);
-		
-		layout.setAutoCreateContainerGaps(true);
-		layout.setAutoCreateGaps(true);
-		layout.setHorizontalGroup(layout.createParallelGroup()
-				.addComponent(this.lblText)
-				.addComponent(this.scrPane));
-		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addComponent(this.lblText)
-				.addComponent(this.scrPane));
-		
 		Vector2[] points = DEFAULT_POLYGON.getVertices();
 		for (int i = 0; i < DEFAULT_COUNT; i++) {
 			Vector2 p = points[i];
@@ -95,6 +90,24 @@ public class ArbitraryPolygonPanel extends ShapePanel implements InputPanel, Act
 			panel.addActionListener(this);
 			this.pointPanels.add(panel);
 		}
+		
+		this.pnlPreview = new ShapePreviewPanel(new Dimension(150, 150), this.getPoints());
+		this.pnlPreview.setBackground(Color.WHITE);
+		this.pnlPreview.setBorder(BorderFactory.createEtchedBorder());
+		
+		GroupLayout layout = new GroupLayout(this);
+		this.setLayout(layout);
+		
+		layout.setAutoCreateContainerGaps(true);
+		layout.setAutoCreateGaps(true);
+		layout.setHorizontalGroup(layout.createParallelGroup()
+				.addComponent(this.lblText)
+				.addComponent(this.scrPane)
+				.addComponent(this.pnlPreview));
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addComponent(this.lblText)
+				.addComponent(this.scrPane)
+				.addComponent(this.pnlPreview));
 		
 		this.createLayout();
 	}
@@ -137,6 +150,9 @@ public class ArbitraryPolygonPanel extends ShapePanel implements InputPanel, Act
 		layout.setVerticalGroup(vGroup);
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	 */
 	@Override
 	public void actionPerformed(ActionEvent event) {
 		// find the point panel issuing the event
@@ -151,11 +167,16 @@ public class ArbitraryPolygonPanel extends ShapePanel implements InputPanel, Act
 				this.pointPanels.add(index + 1, panel);
 				// redo the layout
 				this.createLayout();
+				pnlPreview.setPoints(this.getPoints());
 			} else if ("remove".equals(event.getActionCommand())) {
 				// remove the point panel from the list
 				this.pointPanels.remove(index);
 				// redo the layout
 				this.createLayout();
+				pnlPreview.setPoints(this.getPoints());
+			} else if ("changed".equals(event.getActionCommand())) {
+				// a value has changed
+				pnlPreview.setPoints(this.getPoints());
 			}
 		}
 	}
@@ -225,7 +246,7 @@ public class ArbitraryPolygonPanel extends ShapePanel implements InputPanel, Act
 	 * @version 1.0.0
 	 * @since 1.0.0
 	 */
-	private static class PointPanel extends JPanel implements ActionListener {
+	private static class PointPanel extends JPanel implements ActionListener, PropertyChangeListener {
 		/** The version id */
 		private static final long serialVersionUID = 5446710351912720509L;
 		
@@ -265,6 +286,9 @@ public class ArbitraryPolygonPanel extends ShapePanel implements InputPanel, Act
 			
 			this.txtX.setValue(x);
 			this.txtY.setValue(y);
+			
+			this.txtX.addPropertyChangeListener("value", this);
+			this.txtY.addPropertyChangeListener("value", this);
 			
 			this.btnAdd = new JButton();
 			this.btnAdd.setIcon(Icons.ADD);
@@ -320,6 +344,19 @@ public class ArbitraryPolygonPanel extends ShapePanel implements InputPanel, Act
 			// forward the event to the listeners on this class
 			for (ActionListener listener : listeners) {
 				listener.actionPerformed(e);
+			}
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+		 */
+		@Override
+		public void propertyChange(PropertyChangeEvent e) {
+			ActionListener[] listeners = this.getListeners(ActionListener.class);
+			ActionEvent event = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "changed");
+			// forward the event to the listeners on this class
+			for (ActionListener listener : listeners) {
+				listener.actionPerformed(event);
 			}
 		}
 		

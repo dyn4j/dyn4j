@@ -41,7 +41,7 @@ import org.dyn4j.geometry.Vector3;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class WeldJoint extends Joint {
@@ -274,5 +274,32 @@ public class WeldJoint extends Joint {
 	@Override
 	public double getReactionTorque(double invdt) {
 		return this.impulse.z * invdt;
+	}
+	
+	/**
+	 * Returns the reference angle.
+	 * <p>
+	 * The reference angle is the angle calculated when the joint was created from the
+	 * two joined bodies.  The reference angle is the angular difference between the
+	 * bodies.
+	 * @return double
+	 * @since 3.0.1
+	 */
+	public double getReferenceAngle() {
+		return this.referenceAngle;
+	}
+	
+	/**
+	 * Sets the reference angle.
+	 * <p>
+	 * This method can be used to set the reference angle to override the computed
+	 * reference angle from the constructor.  This is useful in recreating the joint
+	 * from a current state.
+	 * @param angle the reference angle
+	 * @see #getReferenceAngle()
+	 * @since 3.0.1
+	 */
+	public void setReferenceAngle(double angle) {
+		this.referenceAngle = angle;
 	}
 }

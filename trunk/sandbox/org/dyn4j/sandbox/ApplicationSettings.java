@@ -14,7 +14,10 @@ public class ApplicationSettings {
 	private static boolean stenciled = false;
 	
 	/** True if labels should be shown for bodies */
-	private static boolean labeled = false;
+	private static boolean bodyLabeled = false;
+	
+	/** True if labels should be shown for fixtures */
+	private static boolean fixtureLabeled = false;
 	
 	/** True if anti-aliasing should be used (2X MSAA) */
 	private static boolean antiAliasing = false;
@@ -61,16 +64,32 @@ public class ApplicationSettings {
 	 * Returns true if body labels should be shown.
 	 * @return boolean
 	 */
-	public static synchronized boolean isLabeled() {
-		return labeled;
+	public static synchronized boolean isBodyLabeled() {
+		return bodyLabeled;
 	}
 	
 	/**
 	 * Sets the body labels flag.
 	 * @param flag true if body labels should be shown
 	 */
-	public static synchronized void setLabeled(boolean flag) {
-		labeled = flag;
+	public static synchronized void setBodyLabeled(boolean flag) {
+		bodyLabeled = flag;
+	}
+
+	/**
+	 * Returns true if body labels should be shown.
+	 * @return boolean
+	 */
+	public static synchronized boolean isFixtureLabeled() {
+		return fixtureLabeled;
+	}
+	
+	/**
+	 * Sets the body labels flag.
+	 * @param flag true if body labels should be shown
+	 */
+	public static synchronized void setFixtureLabeled(boolean flag) {
+		fixtureLabeled = flag;
 	}
 	
 	/**

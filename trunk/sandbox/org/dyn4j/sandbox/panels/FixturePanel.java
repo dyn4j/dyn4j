@@ -437,7 +437,7 @@ public class FixturePanel extends WindowSpawningPanel implements InputPanel {
 								.addGroup(layout.createParallelGroup()
 										.addComponent(this.rdoDefaultFilter, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 										.addComponent(this.rdoCategoryFilter, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-								.addComponent(this.pnlFilter)))
+								.addComponent(this.pnlFilter, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
 				.addGroup(
 						layout.createParallelGroup()
 						.addComponent(this.lblSensor)

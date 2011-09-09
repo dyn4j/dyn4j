@@ -40,7 +40,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests the wheel joint.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 3.0.0
  */
 public class Wheel extends Test {
@@ -130,7 +130,7 @@ public class Wheel extends Test {
 		// set the speed to -180 degrees per second
 		j1.setMotorSpeed(Math.PI);
 		// don't forget to set the maximum torque
-		j1.setMaxMotorTorque(1000);
+		j1.setMaximumMotorTorque(1000);
 		
 		WheelJoint j2 = new WheelJoint(frame, wheelf, wheelf.getWorldCenter(), new Vector2(0.0, 1.0));
 		j2.setCollisionAllowed(true);

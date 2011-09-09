@@ -33,7 +33,7 @@ import org.junit.Test;
 /**
  * Used to test the {@link MouseJoint} class.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.0.1
  * @since 1.0.2
  */
 public class MouseJointTest {
@@ -129,9 +129,9 @@ public class MouseJointTest {
 	@Test
 	public void setMaxForce() {
 		MouseJoint mj = new MouseJoint(b, new Vector2(), 4.0, 0.4, 10.0);
-		mj.setMaxForce(0.0);
-		mj.setMaxForce(10.0);
-		mj.setMaxForce(2548.0);
+		mj.setMaximumForce(0.0);
+		mj.setMaximumForce(10.0);
+		mj.setMaximumForce(2548.0);
 	}
 	
 	/**
@@ -140,7 +140,7 @@ public class MouseJointTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setNegativeMaxForce() {
 		MouseJoint mj = new MouseJoint(b, new Vector2(), 4.0, 0.4, 10.0);
-		mj.setMaxForce(-2.0);
+		mj.setMaximumForce(-2.0);
 	}
 	
 	/**

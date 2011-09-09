@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JMenuItem;
@@ -49,8 +50,9 @@ import org.dyn4j.geometry.Shape;
 import org.dyn4j.sandbox.NullBounds;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.dialogs.AddBodyDialog;
-import org.dyn4j.sandbox.dialogs.AddFixtureDialog;
+import org.dyn4j.sandbox.dialogs.AddConvexFixtureDialog;
 import org.dyn4j.sandbox.dialogs.AddJointDialog;
+import org.dyn4j.sandbox.dialogs.AddNonConvexFixtureDialog;
 import org.dyn4j.sandbox.dialogs.EditBodyDialog;
 import org.dyn4j.sandbox.dialogs.EditFixtureDialog;
 import org.dyn4j.sandbox.dialogs.EditJointDialog;
@@ -264,9 +266,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 		mnuAddWheelJoint.addActionListener(this);
 		mnuAddMouseJoint.addActionListener(this);
 		
-		this.popJointFolder.add(mnuAddAngleJoint);
 		this.popJointFolder.add(mnuAddDistanceJoint);
-		this.popJointFolder.add(mnuAddFrictionJoint);
 		this.popJointFolder.add(mnuAddMouseJoint);
 		this.popJointFolder.add(mnuAddPrismaticJoint);
 		this.popJointFolder.add(mnuAddPulleyJoint);
@@ -274,6 +274,9 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 		this.popJointFolder.add(mnuAddRopeJoint);
 		this.popJointFolder.add(mnuAddWeldJoint);
 		this.popJointFolder.add(mnuAddWheelJoint);
+		this.popJointFolder.addSeparator();
+		this.popJointFolder.add(mnuAddAngleJoint);
+		this.popJointFolder.add(mnuAddFrictionJoint);
 		
 		// create the body node popup menu
 		
@@ -284,8 +287,9 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 		JMenuItem mnuRemoveBody = new JMenuItem("Remove");
 		JMenuItem mnuAddCircle = new JMenuItem("Add Circle Fixture");
 		JMenuItem mnuAddRectangle = new JMenuItem("Add Rectangle Fixture");
-		JMenuItem mnuAddPolygon = new JMenuItem("Add Polygon Fixture");
+		JMenuItem mnuAddPolygon = new JMenuItem("Add Convex Polygon Fixture");
 		JMenuItem mnuAddSegment = new JMenuItem("Add Segment Fixture");
+		JMenuItem mnuAddDecompose = new JMenuItem("Add Non-Convex Polygon Fixtures");
 		
 		mnuEditBody.setIcon(Icons.EDIT_BODY);
 		mnuRemoveBody.setIcon(Icons.REMOVE_BODY);
@@ -293,6 +297,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 		mnuAddRectangle.setIcon(Icons.ADD_RECTANGLE);
 		mnuAddPolygon.setIcon(Icons.ADD_POLYGON);
 		mnuAddSegment.setIcon(Icons.ADD_SEGMENT);
+		mnuAddDecompose.setIcon(Icons.DECOMPOSE);
 		
 		mnuEditBody.setActionCommand("editBody");
 		mnuRemoveBody.setActionCommand("removeBody");
@@ -300,6 +305,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 		mnuAddRectangle.setActionCommand("addRectangleFixture");
 		mnuAddPolygon.setActionCommand("addPolygonFixture");
 		mnuAddSegment.setActionCommand("addSegmentFixture");
+		mnuAddDecompose.setActionCommand("addDecompose");
 		
 		mnuEditBody.addActionListener(this);
 		mnuRemoveBody.addActionListener(this);
@@ -307,6 +313,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 		mnuAddRectangle.addActionListener(this);
 		mnuAddPolygon.addActionListener(this);
 		mnuAddSegment.addActionListener(this);
+		mnuAddDecompose.addActionListener(this);
 		
 		this.popBody.add(mnuEditBody);
 		this.popBody.add(mnuRemoveBody);
@@ -315,6 +322,8 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 		this.popBody.add(mnuAddRectangle);
 		this.popBody.add(mnuAddPolygon);
 		this.popBody.add(mnuAddSegment);
+		this.popBody.addSeparator();
+		this.popBody.add(mnuAddDecompose);
 		
 		// create the fixture node popup menu
 		
@@ -547,7 +556,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 		} else if ("addSegmentFixture".equals(command)) {
 			this.addFixtureAction(Icons.ADD_SEGMENT.getImage(), new SegmentPanel());
 		} else if ("addPolygonFixture".equals(command)) {
-			this.addFixtureAction(Icons.ADD_POLYGON.getImage(), new PolygonPanel());
+			this.addFixtureAction(Icons.ADD_POLYGON.getImage(), new ConvexPolygonPanel());
 		} else if ("editFixture".equals(command)) {
 			this.editFixtureAction();
 		} else if ("removeFixture".equals(command)) {
@@ -576,6 +585,8 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 			this.editJointAction();
 		} else if ("removeJoint".equals(command)) {
 			this.removeJointAction();
+		} else if ("addDecompose".equals(command)) {
+			this.addDecomposablePolygonAction();
 		}
 	}
 	
@@ -636,7 +647,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 	 */
 	private void clearAllAction() {
 		// make sure they are sure
-		int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want to remove all bodies and joints?");
+		int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want to remove all bodies and joints?", "Clear Bodies and Joints", JOptionPane.YES_NO_CANCEL_OPTION);
 		// check the user's choice
 		if (choice == JOptionPane.YES_OPTION) {
 			// remove it all from the world
@@ -753,7 +764,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 				// get the body from the node
 				SandboxBody body = (SandboxBody)node.getUserObject();
 				// make sure they are sure
-				int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want to remove " + body.getName() + "?");
+				int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want to remove " + body.getName() + "?", "Remove Body", JOptionPane.YES_NO_CANCEL_OPTION);
 				// check the user's choice
 				if (choice == JOptionPane.YES_OPTION) {
 					// remove the body from the world
@@ -776,7 +787,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 	 * @param icon the icon image
 	 * @param shapePanel the shape panel
 	 */
-	private void addFixtureAction(Image icon, ShapePanel shapePanel) {
+	private void addFixtureAction(Image icon, ConvexShapePanel shapePanel) {
 		// the current selection should have the body to add the fixture to
 		TreePath path = this.tree.getSelectionPath();
 		// make sure that something is selected
@@ -788,7 +799,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 				// get the body from the node
 				SandboxBody body = (SandboxBody)node.getUserObject();
 				// create the fixture by showing the dialogs (don't show the local transform panel if its the first fixture)
-				BodyFixture fixture = AddFixtureDialog.show(this.parent, icon, "Add New Fixture", shapePanel);
+				BodyFixture fixture = AddConvexFixtureDialog.show(this.parent, icon, "Add New Fixture", shapePanel);
 				// make sure the user didnt cancel the operation
 				if (fixture != null) {
 					// add the fixture to the body
@@ -832,7 +843,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 				// get the fixture from the node
 				BodyFixture fixture = (BodyFixture)node.getUserObject();
 				// make sure they are sure
-				int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want to remove " + fixture.getUserData() + " from " + body.getName() + "?");
+				int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want to remove " + fixture.getUserData() + " from " + body.getName() + "?", "Remove Fixture", JOptionPane.YES_NO_CANCEL_OPTION);
 				// check the user's choice
 				if (choice == JOptionPane.YES_OPTION) {
 					// remove the body from the world
@@ -957,7 +968,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 				// get the joint from the node
 				Joint joint = (Joint)node.getUserObject();
 				// make sure they are sure
-				int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want to remove " + joint.getUserData() + "?");
+				int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want to remove " + joint.getUserData() + "?", "Remove Joint", JOptionPane.YES_NO_CANCEL_OPTION);
 				// check the user's choice
 				if (choice == JOptionPane.YES_OPTION) {
 					// remove the joint from the world
@@ -970,6 +981,51 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Shows a decompose dialog.
+	 * <p>
+	 * Adds a fixtures for each shape from the decomposed polygon if the user clicks add.
+	 */
+	private void addDecomposablePolygonAction() {
+		// the current selection should have the body to add the fixture to
+		TreePath path = this.tree.getSelectionPath();
+		// make sure that something is selected
+		if (path != null) {
+			// get the currently selected node
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
+			// make sure the selected node is a body
+			if (node.getUserObject() instanceof SandboxBody) {
+				// get the body from the node
+				SandboxBody body = (SandboxBody)node.getUserObject();
+				// show a dialog to create the fixtures
+				List<BodyFixture> fixtures = AddNonConvexFixtureDialog.show(this.getParentWindow(), Icons.DECOMPOSE.getImage(), "Add Non-Convex Polygon Fixtures");
+				// make sure the user didnt cancel the operation
+				if (fixtures != null) {
+					// add the fixture to the body
+					synchronized (this.world) {
+						// add all the fixtures
+						for (BodyFixture fixture : fixtures) {
+							body.addFixture(fixture);
+						}
+						// check if the mass is set explicitly or not
+						if (!body.isMassExplicit()) {
+							// reset the mass using the type it was before
+							body.setMass(body.getMass().getType());
+						}
+					}
+					for (BodyFixture fixture : fixtures) {
+						// add the node to the tree
+						DefaultMutableTreeNode fixtureNode = new DefaultMutableTreeNode(fixture);
+						this.model.insertNodeInto(fixtureNode, node, node.getChildCount());
+					}
+					// expand the path to the new node
+					this.tree.expandPath(path);
+				}
+			}
+		}
+		
 	}
 	
 	/**

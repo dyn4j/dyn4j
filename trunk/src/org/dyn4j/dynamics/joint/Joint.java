@@ -24,6 +24,8 @@
  */
 package org.dyn4j.dynamics.joint;
 
+import java.util.UUID;
+
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Constraint;
 import org.dyn4j.dynamics.Step;
@@ -32,7 +34,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents constrained motion between two {@link Body}s.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.0.1
  * @since 1.0.0
  */
 public abstract class Joint extends Constraint {
@@ -91,6 +93,9 @@ public abstract class Joint extends Constraint {
 		/** The state if the joint limits are disabled or if the joint is between the limits */
 		INACTIVE;
 	}
+	
+	/** The joint's unique identifier */
+	protected String id = UUID.randomUUID().toString();
 	
 	/** Whether the pair of bodies joined together can collide with each other */
 	protected boolean collisionAllowed;
@@ -186,6 +191,15 @@ public abstract class Joint extends Constraint {
 	 * @return double
 	 */
 	public abstract double getReactionTorque(double invdt);
+	
+	/**
+	 * Returns the unique identifier for this joint instance.
+	 * @return String
+	 * @since 3.0.1
+	 */
+	public String getId() {
+		return this.id;
+	}
 	
 	/**
 	 * Returns true if this {@link Joint} is active.

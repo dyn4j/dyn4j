@@ -6,6 +6,8 @@ import java.awt.Image;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
@@ -16,10 +18,10 @@ import javax.swing.JTextPane;
 
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Convex;
+import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.panels.FixturePanel;
-import org.dyn4j.sandbox.panels.ShapePanel;
+import org.dyn4j.sandbox.panels.NonConvexPolygonPanel;
 import org.dyn4j.sandbox.panels.TransformPanel;
 
 /**
@@ -28,22 +30,22 @@ import org.dyn4j.sandbox.panels.TransformPanel;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class AddFixtureDialog extends JDialog implements ActionListener {
+public class AddNonConvexFixtureDialog extends JDialog implements ActionListener {
 	/** The version id */
 	private static final long serialVersionUID = -1809110047704548125L;
-
+	
 	/** The dialog canceled flag */
 	private boolean canceled = true;
-	
-	/** The shape config panel */
-	private ShapePanel pnlShape;
-	
+
 	/** The fixture config panel */
 	private FixturePanel pnlFixture;
 	
 	/** The transform config panel */
 	private TransformPanel pnlTransform;
 	
+	/** The non-convex polygon panel */
+	private NonConvexPolygonPanel pnlPolygon;
+
 	/** The fixture used during configuration */
 	private BodyFixture fixture;
 	
@@ -52,19 +54,15 @@ public class AddFixtureDialog extends JDialog implements ActionListener {
 	 * @param owner the dialog owner
 	 * @param icon the icon image
 	 * @param title the dialog title
-	 * @param shapePanel the shape panel
 	 */
-	private AddFixtureDialog(Window owner, Image icon, String title, ShapePanel shapePanel) {
+	private AddNonConvexFixtureDialog(Window owner, Image icon, String title) {
 		super(owner, title, ModalityType.APPLICATION_MODAL);
 		
 		if (icon != null) {
 			this.setIconImage(icon);
 		}
 		
-		this.pnlShape = shapePanel;
-		
-		fixture = new BodyFixture(this.pnlShape.getDefaultShape());
-		fixture.setUserData("Fixture");
+		this.pnlPolygon = new NonConvexPolygonPanel();
 		
 		Container container = this.getContentPane();
 		
@@ -84,12 +82,15 @@ public class AddFixtureDialog extends JDialog implements ActionListener {
 		lblText.setEditable(false);
 		lblText.setPreferredSize(new Dimension(350, 120));
 		
+		// have to create it with an arbitrary shape
+		this.fixture = new BodyFixture(Geometry.createCircle(1.0));
+		this.fixture.setUserData("Fixture" + AddConvexFixtureDialog.N);
+		this.pnlFixture = new FixturePanel(this, this.fixture);
+		this.pnlTransform = new TransformPanel(lblText);
+		
 		JTabbedPane tabs = new JTabbedPane();
 		
-		pnlFixture = new FixturePanel(this, this.fixture);
-		pnlTransform = new TransformPanel(lblText);
-		
-		tabs.addTab("Shape", this.pnlShape);
+		tabs.addTab("Shape", this.pnlPolygon);
 		tabs.addTab("Fixture", this.pnlFixture);
 		tabs.addTab("Local Transform", this.pnlTransform);
 		
@@ -132,7 +133,7 @@ public class AddFixtureDialog extends JDialog implements ActionListener {
 			this.canceled = true;
 		} else {
 			// check the shape panel's input
-			if (this.pnlShape.isValidInput()) {
+			if (this.pnlPolygon.isValidInput()) {
 				// check the fixture input
 				if (this.pnlFixture.isValidInput()) {
 					// check the transform input
@@ -148,56 +149,68 @@ public class AddFixtureDialog extends JDialog implements ActionListener {
 				}
 			} else {
 				// if its not valid then show an error message
-				this.pnlShape.showInvalidInputMessage(this);
+				this.pnlPolygon.showInvalidInputMessage(this);
 			}
 		}
 	}
 	
 	/**
-	 * Shows an add new fixture dialog and returns the new fixture if the user clicked the add button.
+	 * Shows a decomposition dialog.
 	 * <p>
 	 * Returns null if the user canceled or closed the dialog.
 	 * @param owner the dialog owner
 	 * @param icon the icon image
 	 * @param title the dialog title
-	 * @param shapePanel the shape panel to use
-	 * @return {@link SandboxBody}
+	 * @return List&lt;BodyFixture&gt;
 	 */
-	public static final BodyFixture show(Window owner, Image icon, String title, ShapePanel shapePanel) {
-		AddFixtureDialog dialog = new AddFixtureDialog(owner, icon, title, shapePanel);
+	public static final List<BodyFixture> show(Window owner, Image icon, String title) {
+		AddNonConvexFixtureDialog dialog = new AddNonConvexFixtureDialog(owner, icon, title);
 		dialog.setVisible(true);
 		// control returns to this method when the dialog is closed
 		
 		// check the canceled flag
 		if (!dialog.canceled) {
-			// get the fixture
-			BodyFixture fixture = dialog.fixture;
+			// get the list of convex shapes
+			List<Convex> shapes = dialog.pnlPolygon.getShapes();
 			
-			// get the shape
-			Convex convex = dialog.pnlShape.getShape();
+			// get the general fixture (properties will be copied into all fixtures created)
+			BodyFixture fixture = dialog.fixture;
 			
 			// apply any local transform
 			Vector2 tx = dialog.pnlTransform.getTranslation();
 			double a = dialog.pnlTransform.getRotation();
-			if (!tx.isZero()) {
-				convex.translate(tx);
-			}
-			if (a != 0.0) {
-				convex.rotate(a);
+			
+			List<BodyFixture> fixtures = new ArrayList<BodyFixture>(shapes.size());
+			int i = 1;
+			// create a fixture for each shape
+			for (Convex convex : shapes) {
+				BodyFixture bf = new BodyFixture(convex);
+				
+				// apply the local transform
+				if (!tx.isZero()) {
+					convex.translate(tx);
+				}
+				if (a != 0.0) {
+					convex.rotate(a);
+				}
+				
+				bf.setDensity(fixture.getDensity());
+				bf.setFilter(fixture.getFilter());
+				bf.setFriction(fixture.getFriction());
+				bf.setRestitution(fixture.getRestitution());
+				bf.setSensor(fixture.isSensor());
+				bf.setUserData(fixture.getUserData() + "_" + i);
+				
+				fixtures.add(bf);
+				i++;
 			}
 			
-			// create the fixture so we can set the shape
-			BodyFixture newFixture = new BodyFixture(convex);
-			// copy the other properties over
-			newFixture.setUserData(fixture.getUserData());
-			newFixture.setDensity(fixture.getDensity());
-			newFixture.setFilter(fixture.getFilter());
-			newFixture.setFriction(fixture.getFriction());
-			newFixture.setRestitution(fixture.getRestitution());
-			newFixture.setSensor(fixture.isSensor());
+			// increment the fixture number
+			synchronized (AddConvexFixtureDialog.class) {
+				AddConvexFixtureDialog.N++;
+			}
 			
-			// return the body
-			return newFixture;
+			return fixtures;
 		}
 		
 		// if it was canceled then return null

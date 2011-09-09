@@ -33,7 +33,7 @@ import org.junit.Test;
 /**
  * Used to test the {@link PrismaticJoint} class.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.0.1
  * @since 1.0.2
  */
 public class PrismaticJointTest {
@@ -90,9 +90,9 @@ public class PrismaticJointTest {
 	@Test
 	public void setMaxForce() {
 		PrismaticJoint pj = new PrismaticJoint(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
-		pj.setMaxMotorForce(0.0);
-		pj.setMaxMotorForce(10.0);
-		pj.setMaxMotorForce(2548.0);
+		pj.setMaximumMotorForce(0.0);
+		pj.setMaximumMotorForce(10.0);
+		pj.setMaximumMotorForce(2548.0);
 	}
 	
 	/**
@@ -101,7 +101,7 @@ public class PrismaticJointTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setNegativeMaxForce() {
 		PrismaticJoint pj = new PrismaticJoint(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
-		pj.setMaxMotorForce(-2.0);
+		pj.setMaximumMotorForce(-2.0);
 	}
 	
 	/**

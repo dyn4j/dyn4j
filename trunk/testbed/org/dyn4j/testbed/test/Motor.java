@@ -185,14 +185,14 @@ public class Motor extends Test {
 		RevoluteJoint j1 = new RevoluteJoint(body, wheel1, p1);
 		j1.setMotorSpeed(Math.PI);
 		// make sure we also specify the maximum motor torque since it defaults to zero
-		j1.setMaxMotorTorque(1000.0);
+		j1.setMaximumMotorTorque(1000.0);
 		j1.setMotorEnabled(true);
 		
 		// the front wheel is a motorized revolute joint
 		RevoluteJoint j2 = new RevoluteJoint(body, wheel2, p2);
 		j2.setMotorSpeed(Math.PI);
 		// make sure we also specify the maximum motor torque since it defaults to zero
-		j2.setMaxMotorTorque(1000.0);
+		j2.setMaximumMotorTorque(1000.0);
 		j2.setMotorEnabled(true);
 		
 		// add the joints to the world

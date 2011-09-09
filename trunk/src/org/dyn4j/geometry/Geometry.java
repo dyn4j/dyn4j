@@ -34,7 +34,7 @@ import org.dyn4j.Epsilon;
 /**
  * Contains static methods to perform standard geometric operations.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class Geometry {
@@ -518,14 +518,32 @@ public class Geometry {
 	 * @throws IllegalArgumentException if width or height is less than or equal to zero
 	 */
 	public static final Triangle createRightTriangle(double width, double height) {
+		return Geometry.createRightTriangle(width, height, false);
+	}
+	
+	/**
+	 * Creates a right {@link Triangle} with the center at the origin.
+	 * @param width the width of the base in meters
+	 * @param height the height in meters
+	 * @param mirror true if the triangle should be mirrored along the y-axis
+	 * @return {@link Triangle}
+	 * @throws IllegalArgumentException if width or height is less than or equal to zero
+	 */
+	public static final Triangle createRightTriangle(double width, double height, boolean mirror) {
 		// check the width
 		if (width <= 0.0) throw new IllegalArgumentException("The width must be greater than zero.");
 		// check the height
 		if (height <= 0.0) throw new IllegalArgumentException("The width must be greater than zero.");
 		Vector2 top = new Vector2(0.0, height);
 		Vector2 left = new Vector2(0.0, 0.0);
-		Vector2 right = new Vector2(width, 0.0);
-		Triangle triangle = new Triangle(top, left, right);
+		Vector2 right = new Vector2(mirror ? -width : width, 0.0);
+		Triangle triangle;
+		if (mirror) {
+			// make sure it has anti-clockwise winding
+			triangle = new Triangle(top, right, left);
+		} else {
+			triangle = new Triangle(top, left, right);
+		}
 		Vector2 center = triangle.getCenter();
 		triangle.translate(-center.x, -center.y);
 		return triangle;

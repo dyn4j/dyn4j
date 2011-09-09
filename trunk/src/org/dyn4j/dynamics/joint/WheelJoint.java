@@ -42,7 +42,7 @@ import org.dyn4j.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 3.0.0
  */
 public class WheelJoint extends Joint {
@@ -62,7 +62,7 @@ public class WheelJoint extends Joint {
 	protected double motorSpeed;
 	
 	/** The maximum torque the motor can apply in newton-meters */
-	protected double maxMotorTorque;
+	protected double maximumMotorTorque;
 	
 	/** The oscillation frequency in hz */
 	protected double frequency;
@@ -159,7 +159,7 @@ public class WheelJoint extends Joint {
 		this.bias = 0.0;
 		// no motor
 		this.motorEnabled = false;
-		this.maxMotorTorque = 0.0;
+		this.maximumMotorTorque = 0.0;
 		this.motorSpeed = 0.0;
 	}
 	
@@ -177,7 +177,7 @@ public class WheelJoint extends Joint {
 		.append(this.yAxis).append("|")
 		.append(this.motorEnabled).append("|")
 		.append(this.motorSpeed).append("|")
-		.append(this.maxMotorTorque).append("|")
+		.append(this.maximumMotorTorque).append("|")
 		.append(this.frequency).append("|")
 		.append(this.dampingRatio).append("|")
 		.append(this.impulse).append("|")
@@ -348,7 +348,7 @@ public class WheelJoint extends Joint {
 			double impulse = this.motorMass * (-Cdt);
 			// clamp the impulse between the max torque
 			double oldImpulse = this.motorImpulse;
-			double maxImpulse = this.maxMotorTorque * step.getDeltaTime();
+			double maxImpulse = this.maximumMotorTorque * step.getDeltaTime();
 			this.motorImpulse = Interval.clamp(this.motorImpulse + impulse, -maxImpulse, maxImpulse);
 			impulse = this.motorImpulse - oldImpulse;
 			
@@ -617,24 +617,24 @@ public class WheelJoint extends Joint {
 	 * to achieve the target speed.
 	 * @return double
 	 */
-	public double getMaxMotorTorque() {
-		return this.maxMotorTorque;
+	public double getMaximumMotorTorque() {
+		return this.maximumMotorTorque;
 	}
 	
 	/**
 	 * Sets the maximum torque the motor can apply to the joint
 	 * to achieve the target speed.
-	 * @param maxMotorTorque the maximum torque in newtons-meters; in the range [0, &infin;]
+	 * @param maximumMotorTorque the maximum torque in newtons-meters; in the range [0, &infin;]
 	 * @throws IllegalArgumentException if maxMotorTorque is less than zero
 	 */
-	public void setMaxMotorTorque(double maxMotorTorque) {
+	public void setMaximumMotorTorque(double maximumMotorTorque) {
 		// make sure its greater than or equal to zero
-		if (maxMotorTorque < 0.0) throw new IllegalArgumentException("The maximum motor torque must be greater than or equal to zero.");
+		if (maximumMotorTorque < 0.0) throw new IllegalArgumentException("The maximum motor torque must be greater than or equal to zero.");
 		// wake up the joined bodies
 		this.body1.setAsleep(false);
 		this.body2.setAsleep(false);
 		// set the new value
-		this.maxMotorTorque = maxMotorTorque;
+		this.maximumMotorTorque = maximumMotorTorque;
 	}
 	
 	/**

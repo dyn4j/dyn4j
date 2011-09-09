@@ -73,8 +73,8 @@ public class AngleJointPanel extends JointPanel implements InputPanel {
 		SandboxBody b1 = (SandboxBody)joint.getBody1();
 		SandboxBody b2 = (SandboxBody)joint.getBody2();
 		boolean limitEnabled = joint.isLimitEnabled();
-		double minimum = joint.getMinimumAngle();
-		double maximum = joint.getMaximumAngle();
+		double lower = joint.getLowerLimit();
+		double upper = joint.getUpperLimit();
 		
 		// set the super classes defaults
 		this.txtName.setText(name);
@@ -97,17 +97,17 @@ public class AngleJointPanel extends JointPanel implements InputPanel {
 		this.chkLimitEnabled = new JCheckBox();
 		this.chkLimitEnabled.setSelected(limitEnabled);
 		
-		this.lblMinimum = new JLabel("Minimum Angle", Icons.INFO, JLabel.LEFT);
-		this.lblMinimum.setToolTipText("The minimum angle in Degrees.");
+		this.lblMinimum = new JLabel("Lower Limit", Icons.INFO, JLabel.LEFT);
+		this.lblMinimum.setToolTipText("The lower limit in Degrees.");
 		this.txtMinimum = new JFormattedTextField(new DecimalFormat("0.000"));
 		this.txtMinimum.addFocusListener(new SelectTextFocusListener(this.txtMinimum));
-		this.txtMinimum.setValue(Math.toDegrees(minimum));
+		this.txtMinimum.setValue(Math.toDegrees(lower));
 		
-		this.lblMaximum = new JLabel("Maximum Angle", Icons.INFO, JLabel.LEFT);
-		this.lblMaximum.setToolTipText("The maximum angle in Degrees.");
+		this.lblMaximum = new JLabel("Upper Limit", Icons.INFO, JLabel.LEFT);
+		this.lblMaximum.setToolTipText("The upper limit in Degrees.");
 		this.txtMaximum = new JFormattedTextField(new DecimalFormat("0.000"));
 		this.txtMaximum.addFocusListener(new SelectTextFocusListener(this.txtMaximum));
-		this.txtMaximum.setValue(Math.toDegrees(maximum));
+		this.txtMaximum.setValue(Math.toDegrees(upper));
 		
 		if (edit) {
 			this.cmbBody1.setEnabled(false);
@@ -227,7 +227,7 @@ public class AngleJointPanel extends JointPanel implements InputPanel {
 			Number min = (Number)this.txtMinimum.getValue();
 			Number max = (Number)this.txtMaximum.getValue();
 			
-			aj.setMinimumMaximum(min.doubleValue(), max.doubleValue());
+			aj.setLimits(min.doubleValue(), max.doubleValue());
 		}
 	}
 	
@@ -247,7 +247,7 @@ public class AngleJointPanel extends JointPanel implements InputPanel {
 		aj.setUserData(this.txtName.getText());
 		aj.setCollisionAllowed(this.chkCollision.isSelected());
 		aj.setLimitEnabled(this.chkLimitEnabled.isSelected());
-		aj.setMinimumMaximum(min.doubleValue(), max.doubleValue());
+		aj.setLimits(min.doubleValue(), max.doubleValue());
 		return aj;
 	}
 	

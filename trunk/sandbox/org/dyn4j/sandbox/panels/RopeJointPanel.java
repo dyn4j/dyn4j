@@ -124,10 +124,10 @@ public class RopeJointPanel extends JointPanel implements InputPanel, ActionList
 		SandboxBody b2 = (SandboxBody)joint.getBody2();
 		Vector2 a1 = joint.getAnchor1();
 		Vector2 a2 = joint.getAnchor2();
-		boolean ule = joint.isMaximumEnabled();
-		boolean lle = joint.isMinimumEnabled();
-		double ul = joint.getMaximumDistance();
-		double ll = joint.getMinimumDistance();
+		boolean ule = joint.isUpperLimitEnabled();
+		boolean lle = joint.isLowerLimitEnabled();
+		double ul = joint.getUpperLimit();
+		double ll = joint.getLowerLimit();
 		
 		// set the super classes defaults
 		this.txtName.setText(name);
@@ -384,9 +384,9 @@ public class RopeJointPanel extends JointPanel implements InputPanel, ActionList
 			rj.setUserData(this.txtName.getText());
 			rj.setCollisionAllowed(this.chkCollision.isSelected());
 			// set the properties that can change
-			rj.setMinimumEnabled(this.chkLowerLimitEnabled.isSelected());
-			rj.setMaximumEnabled(this.chkUpperLimitEnabled.isSelected());
-			rj.setMinimumMaximum(
+			rj.setLowerLimitEnabled(this.chkLowerLimitEnabled.isSelected());
+			rj.setUpperLimitEnabled(this.chkUpperLimitEnabled.isSelected());
+			rj.setLimits(
 					this.getDoubleValue(this.txtLowerLimit),
 					this.getDoubleValue(this.txtUpperLimit));
 		}
@@ -414,9 +414,9 @@ public class RopeJointPanel extends JointPanel implements InputPanel, ActionList
 		rj.setUserData(this.txtName.getText());
 		rj.setCollisionAllowed(this.chkCollision.isSelected());
 		// set the other properties
-		rj.setMinimumEnabled(this.chkLowerLimitEnabled.isSelected());
-		rj.setMaximumEnabled(this.chkUpperLimitEnabled.isSelected());
-		rj.setMinimumMaximum(
+		rj.setLowerLimitEnabled(this.chkLowerLimitEnabled.isSelected());
+		rj.setUpperLimitEnabled(this.chkUpperLimitEnabled.isSelected());
+		rj.setLimits(
 				this.getDoubleValue(this.txtLowerLimit),
 				this.getDoubleValue(this.txtUpperLimit));
 		

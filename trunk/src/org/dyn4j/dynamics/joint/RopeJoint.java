@@ -40,17 +40,17 @@ import org.dyn4j.geometry.Vector2;
  * separate past the maximum distance and not allowed to approach past the 
  * minimum distance.
  * <p>
- * NOTE: The respective {@link #setMaximumDistance(double)}, {@link #setMaximumEnabled(boolean)},
- * {@link #setMinimumDistance(double)}, {@link #setMinimumEnabled(boolean)}, 
- * {@link #setMinimumMaximum(double, double)}, {@link #setMinimumMaximumEnabled(double, double)},
- * {@link #setMinimumMaximum(double)}, {@link #setMinimumMaximumEnabled(double)}, and
- * {@link #setMinimumMaximumEnabled(boolean)} methods must be called to setup the maximum 
+ * NOTE: The respective {@link #setLimits(double)}, {@link #setLimits(double, double)},
+ * {@link #setLimitsEnabled(boolean)}, {@link #setLimitsEnabled(double)}, 
+ * {@link #setLimitsEnabled(double, double)}, {@link #setLowerLimit(double)},
+ * {@link #setLowerLimitEnabled(boolean)}, {@link #setUpperLimit(double)}, and
+ * {@link #setUpperLimitEnabled(boolean)} methods must be called to setup the maximum 
  * and minimum limits, otherwise this joint acts like a {@link DistanceJoint}.
  * <p>
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 2.2.1
  */
 public class RopeJoint extends Joint {
@@ -64,16 +64,16 @@ public class RopeJoint extends Joint {
 	protected Vector2 localAnchor2;
 	
 	/** The maximum distance between the two world space anchor points */
-	protected double maximumDistance;
+	protected double upperLimit;
 	
 	/** The minimum distance between the two world space anchor points */
-	protected double minimumDistance;
+	protected double lowerLimit;
 	
 	/** Whether the maximum distance is enabled */
-	protected boolean maximumEnabled;
+	protected boolean upperLimitEnabled;
 	
 	/** Whether the minimum distance is enabled */
-	protected boolean minimumEnabled;
+	protected boolean lowerLimitEnabled;
 	
 	/** The effective mass of the two body system (Kinv = J * Minv * Jtrans) */
 	protected double invK;
@@ -108,12 +108,12 @@ public class RopeJoint extends Joint {
 		this.localAnchor1 = body1.getLocalPoint(anchor1);
 		this.localAnchor2 = body2.getLocalPoint(anchor2);
 		// default to act like a fixed length distance joint
-		this.maximumEnabled = true;
-		this.minimumEnabled = true;
+		this.upperLimitEnabled = true;
+		this.lowerLimitEnabled = true;
 		// default the limits
 		double distance = anchor1.distance(anchor2);
-		this.maximumDistance = distance;
-		this.minimumDistance = distance;
+		this.upperLimit = distance;
+		this.lowerLimit = distance;
 	}
 	
 	/* (non-Javadoc)
@@ -125,10 +125,10 @@ public class RopeJoint extends Joint {
 		.append(super.toString()).append("|")
 		.append(this.localAnchor1).append("|")
 		.append(this.localAnchor2).append("|")
-		.append(this.maximumDistance).append("|")
-		.append(this.maximumEnabled).append("|")
-		.append(this.minimumDistance).append("|")
-		.append(this.minimumEnabled).append("|")
+		.append(this.upperLimit).append("|")
+		.append(this.upperLimitEnabled).append("|")
+		.append(this.lowerLimit).append("|")
+		.append(this.lowerLimitEnabled).append("|")
 		.append(this.limitState).append("|")
 		.append(this.impulse).append("]");
 		return sb.toString();
@@ -170,19 +170,19 @@ public class RopeJoint extends Joint {
 		
 		// check if both limits are enabled
 		// and get the current state of the limits
-		if (this.maximumEnabled && this.minimumEnabled) {
+		if (this.upperLimitEnabled && this.lowerLimitEnabled) {
 			// if both are enabled check if they are equal
-			if (Math.abs(this.maximumDistance - this.minimumDistance) < 2.0 * linearTolerance) {
+			if (Math.abs(this.upperLimit - this.lowerLimit) < 2.0 * linearTolerance) {
 				// if so then set the state to equal
 				this.limitState = Joint.LimitState.EQUAL;
 			} else {
 				// make sure we have valid settings
-				if (this.maximumDistance > this.minimumDistance) {
+				if (this.upperLimit > this.lowerLimit) {
 					// check against the max and min distances
-					if (length > this.maximumDistance) {
+					if (length > this.upperLimit) {
 						// set the state to at upper
 						this.limitState = Joint.LimitState.AT_UPPER;
-					} else if (length < this.minimumDistance) {
+					} else if (length < this.lowerLimit) {
 						// set the state to at lower
 						this.limitState = Joint.LimitState.AT_LOWER;
 					} else {
@@ -191,18 +191,18 @@ public class RopeJoint extends Joint {
 					}
 				}
 			}
-		} else if (this.maximumEnabled) {
+		} else if (this.upperLimitEnabled) {
 			// check the maximum against the current length
-			if (length > this.maximumDistance) {
+			if (length > this.upperLimit) {
 				// set the state to at upper
 				this.limitState = Joint.LimitState.AT_UPPER;
 			} else {
 				// no constraint needed at this time
 				this.limitState = Joint.LimitState.INACTIVE;
 			}
-		} else if (this.minimumEnabled) {
+		} else if (this.lowerLimitEnabled) {
 			// check the minimum against the current length
-			if (length < this.minimumDistance) {
+			if (length < this.lowerLimit) {
 				// set the state to at lower
 				this.limitState = Joint.LimitState.AT_LOWER;
 			} else {
@@ -289,11 +289,11 @@ public class RopeJoint extends Joint {
 		if (this.limitState != Joint.LimitState.INACTIVE) {
 			// if the limits are equal it doesn't matter if we
 			// use the maximum or minimum setting
-			double targetDistance = this.maximumDistance;
+			double targetDistance = this.upperLimit;
 			// determine the target distance
 			if (this.limitState == Joint.LimitState.AT_LOWER) {
 				// use the minimum distance as the target
-				targetDistance = this.minimumDistance;
+				targetDistance = this.lowerLimit;
 			}
 			// get the current settings
 			Settings settings = Settings.getInstance();
@@ -380,188 +380,188 @@ public class RopeJoint extends Joint {
 	}
 	
 	/**
-	 * Returns the maximum distance between the two constrained {@link Body}s in meters.
+	 * Returns the upper limit in meters.
 	 * @return double
 	 */
-	public double getMaximumDistance() {
-		return this.maximumDistance;
+	public double getUpperLimit() {
+		return this.upperLimit;
 	}
 	
 	/**
-	 * Sets the maximum distance between the two constrained {@link Body}s in meters.
-	 * @param maximumDistance the maximum distance in meters; must be greater than or equal to zero
-	 * @throws IllegalArgumentException if maximumDistance is less than zero or less than the current minimum
+	 * Sets the upper limit in meters.
+	 * @param upperLimit the upper limit in meters; must be greater than or equal to zero
+	 * @throws IllegalArgumentException if upperLimit is less than zero or less than the current lower limit
 	 */
-	public void setMaximumDistance(double maximumDistance) {
+	public void setUpperLimit(double upperLimit) {
 		// make sure the distance is greater than zero
-		if (maximumDistance < 0.0) throw new IllegalArgumentException("The max distance must be greater than or equal to zero.");
+		if (upperLimit < 0.0) throw new IllegalArgumentException("The upper limit must be greater than or equal to zero.");
 		// make sure the minimum is less than or equal to the maximum
-		if (maximumDistance < this.minimumDistance) throw new IllegalArgumentException("The maximum distance must be greater than or equal to the current minimum distance.");
+		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException("The upper limit must be greater than or equal to the current lower limit.");
 		// make sure its changed and enabled before waking the bodies
-		if (this.maximumEnabled && maximumDistance != this.maximumDistance) {
+		if (this.upperLimitEnabled && upperLimit != this.upperLimit) {
 			// wake up both bodies
 			this.body1.setAsleep(false);
 			this.body2.setAsleep(false);
 		}
 		// set the new target distance
-		this.maximumDistance = maximumDistance;
+		this.upperLimit = upperLimit;
 	}
 	
 	/**
-	 * Sets whether the maximum distance limit is enabled.
-	 * @param flag true if the maximum distance limit should be enforced
+	 * Sets whether the upper limit is enabled.
+	 * @param flag true if the upper limit should be enabled
 	 */
-	public void setMaximumEnabled(boolean flag) {
+	public void setUpperLimitEnabled(boolean flag) {
 		// wake up both bodies
 		this.body1.setAsleep(false);
 		this.body2.setAsleep(false);
 		// set the flag
-		this.maximumEnabled = flag;
+		this.upperLimitEnabled = flag;
 	}
 	
 	/**
-	 * Returns true if the maximum limit is enabled.
-	 * @return boolean true if the maximum limit is enabled
+	 * Returns true if the upper limit is enabled.
+	 * @return boolean true if the upper limit is enabled
 	 */
-	public boolean isMaximumEnabled() {
-		return this.maximumEnabled;
+	public boolean isUpperLimitEnabled() {
+		return this.upperLimitEnabled;
 	}
 	
 	/**
-	 * Returns the minimum distance between the two constrained {@link Body}s in meters.
+	 * Returns the lower limit in meters.
 	 * @return double
 	 */
-	public double getMinimumDistance() {
-		return this.minimumDistance;
+	public double getLowerLimit() {
+		return this.lowerLimit;
 	}
 	
 	/**
-	 * Sets the minimum distance between the two constrained {@link Body}s in meters.
-	 * @param minimumDistance the minimum distance in meters; must be greater than or equal to zero
-	 * @throws IllegalArgumentException if minimumDistance is less than zero or greater than the current maximum
+	 * Sets the lower limit in meters.
+	 * @param lowerLimit the lower limit in meters; must be greater than or equal to zero
+	 * @throws IllegalArgumentException if lowerLimit is less than zero or greater than the current upper limit
 	 */
-	public void setMinimumDistance(double minimumDistance) {
+	public void setLowerLimit(double lowerLimit) {
 		// make sure the distance is greater than zero
-		if (minimumDistance < 0.0) throw new IllegalArgumentException("The minimum distance must be greater than or equal to zero.");
+		if (lowerLimit < 0.0) throw new IllegalArgumentException("The lower limit must be greater than or equal to zero.");
 		// make sure the minimum is less than or equal to the maximum
-		if (minimumDistance > this.maximumDistance) throw new IllegalArgumentException("The minimum distance must be less than or equal to the current maximum distance.");
+		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException("The lower limit must be less than or equal to the current upper limit.");
 		// make sure its changed and enabled before waking the bodies
-		if (this.minimumEnabled && minimumDistance != this.minimumDistance) {
+		if (this.lowerLimitEnabled && lowerLimit != this.lowerLimit) {
 			// wake up both bodies
 			this.body1.setAsleep(false);
 			this.body2.setAsleep(false);
 		}
 		// set the new target distance
-		this.minimumDistance = minimumDistance;
+		this.lowerLimit = lowerLimit;
 	}
 
 	/**
-	 * Sets whether the minimum distance limit is enabled.
-	 * @param flag true if the minimum distance limit should be enforced
+	 * Sets whether the lower limit is enabled.
+	 * @param flag true if the lower limit should be enabled
 	 */
-	public void setMinimumEnabled(boolean flag) {
+	public void setLowerLimitEnabled(boolean flag) {
 		// wake up both bodies
 		this.body1.setAsleep(false);
 		this.body2.setAsleep(false);
 		// set the flag
-		this.minimumEnabled = flag;
+		this.lowerLimitEnabled = flag;
 	}
 
 	/**
-	 * Returns true if the minimum limit is enabled.
-	 * @return boolean true if the minimum limit is enabled
+	 * Returns true if the lower limit is enabled.
+	 * @return boolean true if the lower limit is enabled
 	 */
-	public boolean isMinimumEnabled() {
-		return this.minimumEnabled;
+	public boolean isLowerLimitEnabled() {
+		return this.lowerLimitEnabled;
 	}
 	
 	/**
-	 * Sets both the maximum and minimum limit distances.
-	 * @param minimumDistance the minimum distance in meters; must be greater than or equal to zero
-	 * @param maximumDistance the maximum distance in meters; must be greater than or equal to zero
-	 * @throws IllegalArgumentException if minimumDistance is less than zero, maximumDistance is less than zero, or minimumDistance is greater than maximumDistance
+	 * Sets both the lower and upper limits.
+	 * @param lowerLimit the lower limit in meters; must be greater than or equal to zero
+	 * @param upperLimit the upper limit in meters; must be greater than or equal to zero
+	 * @throws IllegalArgumentException if lowerLimit is less than zero, upperLimit is less than zero, or lowerLimit is greater than upperLimit
 	 */
-	public void setMinimumMaximum(double minimumDistance, double maximumDistance) {
+	public void setLimits(double lowerLimit, double upperLimit) {
 		// make sure the minimum distance is greater than zero
-		if (minimumDistance < 0.0) throw new IllegalArgumentException("The minimum distance must be greater than or equal to zero.");
+		if (lowerLimit < 0.0) throw new IllegalArgumentException("The minimum distance must be greater than or equal to zero.");
 		// make sure the maximum distance is greater than zero
-		if (maximumDistance < 0.0) throw new IllegalArgumentException("The maximum distance must be greater than or equal to zero.");
+		if (upperLimit < 0.0) throw new IllegalArgumentException("The maximum distance must be greater than or equal to zero.");
 		// make sure the min < max
-		if (minimumDistance > maximumDistance) throw new IllegalArgumentException("The minimum distance must be less than the maximum distance.");
+		if (lowerLimit > upperLimit) throw new IllegalArgumentException("The minimum distance must be less than the maximum distance.");
 		// make sure one of the limits is enabled and has changed before waking the bodies
-		if ((this.minimumEnabled && minimumDistance != this.minimumDistance) || (this.maximumEnabled && maximumDistance != this.maximumDistance)) {
+		if ((this.lowerLimitEnabled && lowerLimit != this.lowerLimit) || (this.upperLimitEnabled && upperLimit != this.upperLimit)) {
 			// wake up the bodies
 			this.body1.setAsleep(false);
 			this.body2.setAsleep(false);
 		}
 		// set the limits
-		this.maximumDistance = maximumDistance;
-		this.minimumDistance = minimumDistance;
+		this.upperLimit = upperLimit;
+		this.lowerLimit = lowerLimit;
 	}
 
 	/**
-	 * Sets both the maximum and minimum limit distances and enables both.
-	 * @param minimumDistance the minimum distance in meters; must be greater than or equal to zero
-	 * @param maximumDistance the maximum distance in meters; must be greater than or equal to zero
-	 * @throws IllegalArgumentException if minimumDistance is less than zero, maximumDistance is less than zero, or minimumDistance is greater than maximumDistance
+	 * Sets both the lower and upper limits and enables both.
+	 * @param lowerLimit the lower limit in meters; must be greater than or equal to zero
+	 * @param upperLimit the upper limit in meters; must be greater than or equal to zero
+	 * @throws IllegalArgumentException if lowerLimit is less than zero, upperLimit is less than zero, or lowerLimit is greater than upperLimit
 	 */
-	public void setMinimumMaximumEnabled(double minimumDistance, double maximumDistance) {
+	public void setLimitsEnabled(double lowerLimit, double upperLimit) {
 		// enable the limits
-		this.maximumEnabled = true;
-		this.minimumEnabled = true;
+		this.upperLimitEnabled = true;
+		this.lowerLimitEnabled = true;
 		// set the values
-		this.setMinimumMaximum(minimumDistance, maximumDistance);
+		this.setLimits(lowerLimit, upperLimit);
 	}
 	
 	/**
-	 * Enables or disables both the maximum and minimum limits.
+	 * Enables or disables both the lower and upper limits.
 	 * @param flag true if both limits should be enabled
 	 * @since 2.2.2
 	 */
-	public void setMinimumMaximumEnabled(boolean flag) {
-		this.maximumEnabled = flag;
-		this.minimumEnabled = flag;
+	public void setLimitsEnabled(boolean flag) {
+		this.upperLimitEnabled = flag;
+		this.lowerLimitEnabled = flag;
 		// wake up the bodies
 		this.body1.setAsleep(false);
 		this.body2.setAsleep(false);
 	}
 	
 	/**
-	 * Sets both the maximum and minimum limit distances to the given distance.
+	 * Sets both the lower and upper limits to the given limit.
 	 * <p>
 	 * This makes the joint a fixed length joint.
-	 * @param distance the desired distance between the bodies
-	 * @throws IllegalArgumentException if distance is less than zero
+	 * @param limit the desired limit
+	 * @throws IllegalArgumentException if limit is less than zero
 	 * @since 2.2.2
 	 */
-	public void setMinimumMaximum(double distance) {
+	public void setLimits(double limit) {
 		// make sure the distance is greater than zero
-		if (distance < 0.0) throw new IllegalArgumentException("The distance must be greater than or equal to zero.");
+		if (limit < 0.0) throw new IllegalArgumentException("The distance must be greater than or equal to zero.");
 		// make sure one of the limits is enabled and has changed before waking the bodies
-		if ((this.minimumEnabled && distance != this.minimumDistance) || (this.maximumEnabled && distance != this.maximumDistance)) {
+		if ((this.lowerLimitEnabled && limit != this.lowerLimit) || (this.upperLimitEnabled && limit != this.upperLimit)) {
 			// wake up the bodies
 			this.body1.setAsleep(false);
 			this.body2.setAsleep(false);
 		}
 		// set the limits
-		this.maximumDistance = distance;
-		this.minimumDistance = distance;
+		this.upperLimit = limit;
+		this.lowerLimit = limit;
 	}
 	
 	/**
-	 * Sets both the maximum and minimum limit distances to the given distance and
+	 * Sets both the lower and upper limits to the given limit and
 	 * enables both.
 	 * <p>
 	 * This makes the joint a fixed length joint.
-	 * @param distance the desired distance between the bodies
-	 * @throws IllegalArgumentException if distance is less than zero
+	 * @param limit the desired limit
+	 * @throws IllegalArgumentException if limit is less than zero
 	 * @since 2.2.2
 	 */
-	public void setMinimumMaximumEnabled(double distance) {
+	public void setLimitsEnabled(double limit) {
 		// enable the limits
-		this.maximumEnabled = true;
-		this.minimumEnabled = true;
+		this.upperLimitEnabled = true;
+		this.lowerLimitEnabled = true;
 		// set the values
-		this.setMinimumMaximum(distance);
+		this.setLimits(limit);
 	}
 }

@@ -38,7 +38,7 @@ import org.dyn4j.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class MouseJoint extends Joint {
@@ -58,7 +58,7 @@ public class MouseJoint extends Joint {
 	protected double dampingRatio;
 	
 	/** The maximum force this constraint can apply */
-	protected double maxForce;
+	protected double maximumForce;
 	
 	/** The constraint mass; K = J * Minv * Jtrans */
 	protected Matrix22 K;
@@ -96,7 +96,7 @@ public class MouseJoint extends Joint {
 		this.anchor = body.getLocalPoint(target);
 		this.frequency = frequency;
 		this.dampingRatio = dampingRatio;
-		this.maxForce = maxForce;
+		this.maximumForce = maxForce;
 		// initialize
 		this.K = new Matrix22();
 		this.impulse = new Vector2();
@@ -114,7 +114,7 @@ public class MouseJoint extends Joint {
 		.append(this.anchor).append("|")
 		.append(this.frequency).append("|")
 		.append(this.dampingRatio).append("|")
-		.append(this.maxForce).append("|")
+		.append(this.maximumForce).append("|")
 		.append(this.impulse).append("]");
 		return sb.toString();
 	}
@@ -200,7 +200,7 @@ public class MouseJoint extends Joint {
 		// clamp using the maximum force
 		Vector2 oldImpulse = this.impulse.copy();
 		this.impulse.add(J);
-		double maxImpulse = step.getDeltaTime() * this.maxForce;
+		double maxImpulse = step.getDeltaTime() * this.maximumForce;
 		if (this.impulse.getMagnitudeSquared() > maxImpulse * maxImpulse) {
 			this.impulse.normalize();
 			this.impulse.multiply(maxImpulse);
@@ -277,20 +277,20 @@ public class MouseJoint extends Joint {
 	 * Returns the maximum force this constraint will apply in newtons.
 	 * @return double
 	 */
-	public double getMaxForce() {
-		return this.maxForce;
+	public double getMaximumForce() {
+		return this.maximumForce;
 	}
 	
 	/**
 	 * Sets the maximum force this constraint will apply in newtons.
-	 * @param maxForce the maximum force in newtons; in the range [0, &infin;]
+	 * @param maximumForce the maximum force in newtons; in the range [0, &infin;]
 	 * @throws IllegalArgumentException if maxForce less than zero
 	 */
-	public void setMaxForce(double maxForce) {
+	public void setMaximumForce(double maximumForce) {
 		// make sure the max force is non negative
-		if (maxForce < 0.0) throw new IllegalArgumentException("The maximum force must be zero or greater.");
+		if (maximumForce < 0.0) throw new IllegalArgumentException("The maximum force must be zero or greater.");
 		// set the new max force
-		this.maxForce = maxForce;
+		this.maximumForce = maximumForce;
 	}
 
 	/**

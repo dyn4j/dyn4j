@@ -36,7 +36,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Bayazit} class.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 3.0.0
  */
 public class BayazitTest extends AbstractDecomposeTest {
@@ -118,7 +118,7 @@ public class BayazitTest extends AbstractDecomposeTest {
 	 */
 	@Test
 	public void success2() {
-		Vector2[] vertices = this.load(BayazitTest.class.getResourceAsStream("/org/dyn4j/testbed/data/polygon1.dat"));
+		Vector2[] vertices = this.load(BayazitTest.class.getResourceAsStream("/org/dyn4j/data/polygon1.dat"));
 		
 		// decompose the poly
 		List<Convex> result = this.algo.decompose(vertices);
@@ -132,7 +132,7 @@ public class BayazitTest extends AbstractDecomposeTest {
 	 */
 	@Test
 	public void success3() {
-		Vector2[] vertices = this.load(BayazitTest.class.getResourceAsStream("/org/dyn4j/testbed/data/polygon2.dat"));
+		Vector2[] vertices = this.load(BayazitTest.class.getResourceAsStream("/org/dyn4j/data/polygon2.dat"));
 		
 		// decompose the poly
 		List<Convex> result = this.algo.decompose(vertices);
@@ -146,7 +146,7 @@ public class BayazitTest extends AbstractDecomposeTest {
 	 */
 	@Test
 	public void success4() {
-		Vector2[] vertices = this.load(BayazitTest.class.getResourceAsStream("/org/dyn4j/testbed/data/polygon3.dat"));
+		Vector2[] vertices = this.load(BayazitTest.class.getResourceAsStream("/org/dyn4j/data/polygon3.dat"));
 		
 		// decompose the poly
 		List<Convex> result = this.algo.decompose(vertices);
@@ -160,7 +160,7 @@ public class BayazitTest extends AbstractDecomposeTest {
 	 */
 	@Test
 	public void success5() {
-		Vector2[] vertices = this.load(BayazitTest.class.getResourceAsStream("/org/dyn4j/testbed/data/polygon4.dat"));
+		Vector2[] vertices = this.load(BayazitTest.class.getResourceAsStream("/org/dyn4j/data/polygon4.dat"));
 		
 		// decompose the poly
 		List<Convex> result = this.algo.decompose(vertices);
@@ -174,7 +174,7 @@ public class BayazitTest extends AbstractDecomposeTest {
 	 */
 	@Test
 	public void successBird() {
-		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/testbed/data/bird.dat"));
+		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/data/bird.dat"));
 		
 		// decompose the poly
 		List<Convex> result = this.algo.decompose(vertices);
@@ -188,7 +188,7 @@ public class BayazitTest extends AbstractDecomposeTest {
 	 */
 	@Test
 	public void successTank() {
-		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/testbed/data/tank.dat"));
+		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/data/tank.dat"));
 		
 		// decompose the poly
 		List<Convex> result = this.algo.decompose(vertices);
@@ -202,7 +202,7 @@ public class BayazitTest extends AbstractDecomposeTest {
 	 */
 	@Test
 	public void successNazcaMonkey() {
-		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/testbed/data/nazca_monkey.dat"));
+		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/data/nazca_monkey.dat"));
 		
 		// decompose the poly
 		List<Convex> result = this.algo.decompose(vertices);
@@ -216,7 +216,7 @@ public class BayazitTest extends AbstractDecomposeTest {
 	 */
 	@Test
 	public void successNazcaHeron() {
-		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/testbed/data/nazca_heron.dat"));
+		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/data/nazca_heron.dat"));
 		
 		// decompose the poly
 		List<Convex> result = this.algo.decompose(vertices);

@@ -1,15 +1,19 @@
 package org.dyn4j.sandbox.panels;
 
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Window;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
 
+import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 
 import org.dyn4j.geometry.Convex;
+import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
@@ -21,7 +25,7 @@ import org.dyn4j.sandbox.utilities.Icons;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class SegmentPanel extends ShapePanel implements InputPanel {
+public class SegmentPanel extends ConvexShapePanel implements InputPanel {
 	/** The version id */
 	private static final long serialVersionUID = 9034797908902106167L;
 
@@ -39,6 +43,9 @@ public class SegmentPanel extends ShapePanel implements InputPanel {
 	
 	/** The end point */
 	private Vector2 end = DEFAULT_END.copy();
+
+	/** Panel used to preview the current shape */
+	private ShapePreviewPanel pnlPreview;
 	
 	/**
 	 * Default constructor.
@@ -72,6 +79,12 @@ public class SegmentPanel extends ShapePanel implements InputPanel {
 			public void propertyChange(PropertyChangeEvent event) {
 				Number number = (Number)event.getNewValue();
 				start.x = number.doubleValue();
+				try {
+					pnlPreview.setShape(Geometry.createSegment(start, end));
+				} catch (IllegalArgumentException ex) {
+					// clear the shape since its not valid anymore
+					pnlPreview.setShape(null);
+				}
 			}
 		});
 		txtSY.addFocusListener(new SelectTextFocusListener(txtSY));
@@ -80,6 +93,12 @@ public class SegmentPanel extends ShapePanel implements InputPanel {
 			public void propertyChange(PropertyChangeEvent event) {
 				Number number = (Number)event.getNewValue();
 				start.y = number.doubleValue();
+				try {
+					pnlPreview.setShape(Geometry.createSegment(start, end));
+				} catch (IllegalArgumentException ex) {
+					// clear the shape since its not valid anymore
+					pnlPreview.setShape(null);
+				}
 			}
 		});
 		
@@ -89,6 +108,12 @@ public class SegmentPanel extends ShapePanel implements InputPanel {
 			public void propertyChange(PropertyChangeEvent event) {
 				Number number = (Number)event.getNewValue();
 				end.x = number.doubleValue();
+				try {
+					pnlPreview.setShape(Geometry.createSegment(start, end));
+				} catch (IllegalArgumentException ex) {
+					// clear the shape since its not valid anymore
+					pnlPreview.setShape(null);
+				}
 			}
 		});
 		txtEY.addFocusListener(new SelectTextFocusListener(txtEY));
@@ -97,8 +122,20 @@ public class SegmentPanel extends ShapePanel implements InputPanel {
 			public void propertyChange(PropertyChangeEvent event) {
 				Number number = (Number)event.getNewValue();
 				end.y = number.doubleValue();
+				try {
+					pnlPreview.setShape(Geometry.createSegment(start, end));
+				} catch (IllegalArgumentException ex) {
+					// clear the shape since its not valid anymore
+					pnlPreview.setShape(null);
+				}
 			}
 		});
+		
+		JLabel lblPreview = new JLabel("Preview", Icons.INFO, JLabel.LEFT);
+		lblPreview.setToolTipText("Shows a preview of the current shape.");
+		this.pnlPreview = new ShapePreviewPanel(new Dimension(150, 150), Geometry.createSegment(this.start, this.end));
+		this.pnlPreview.setBackground(Color.WHITE);
+		this.pnlPreview.setBorder(BorderFactory.createEtchedBorder());
 		
 		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
@@ -106,7 +143,8 @@ public class SegmentPanel extends ShapePanel implements InputPanel {
 				layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup()
 						.addComponent(lblStart)
-						.addComponent(lblEnd))
+						.addComponent(lblEnd)
+						.addComponent(lblPreview))
 				.addGroup(layout.createParallelGroup()
 						.addGroup(layout.createSequentialGroup()
 								.addComponent(txtSX)
@@ -119,7 +157,8 @@ public class SegmentPanel extends ShapePanel implements InputPanel {
 								.addComponent(lblEX))
 						.addGroup(layout.createSequentialGroup()
 								.addComponent(txtEY)
-								.addComponent(lblEY))));
+								.addComponent(lblEY))
+						.addComponent(this.pnlPreview, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
 		layout.setVerticalGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup()
 						.addComponent(lblStart)
@@ -136,7 +175,10 @@ public class SegmentPanel extends ShapePanel implements InputPanel {
 								.addComponent(txtEY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 						.addGroup(layout.createSequentialGroup()
 								.addComponent(lblEX)
-								.addComponent(lblEY))));
+								.addComponent(lblEY)))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(lblPreview)
+						.addComponent(this.pnlPreview, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
 	}
 	
 	/* (non-Javadoc)

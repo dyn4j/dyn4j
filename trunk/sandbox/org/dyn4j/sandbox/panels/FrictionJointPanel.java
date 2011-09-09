@@ -86,8 +86,8 @@ public class FrictionJointPanel extends JointPanel implements InputPanel {
 		SandboxBody b1 = (SandboxBody)joint.getBody1();
 		SandboxBody b2 = (SandboxBody)joint.getBody2();
 		Vector2 a1 = joint.getAnchor1();
-		double mf = joint.getMaxForce();
-		double mt = joint.getMaxTorque();
+		double mf = joint.getMaximumForce();
+		double mt = joint.getMaximumTorque();
 		
 		// set the super classes defaults
 		this.txtName.setText(name);
@@ -242,8 +242,8 @@ public class FrictionJointPanel extends JointPanel implements InputPanel {
 			fj.setUserData(this.txtName.getText());
 			fj.setCollisionAllowed(this.chkCollision.isSelected());
 			// set the properties that can change
-			fj.setMaxForce(this.getDoubleValue(this.txtMaxForce));
-			fj.setMaxTorque(this.getDoubleValue(this.txtMaxTorque));
+			fj.setMaximumForce(this.getDoubleValue(this.txtMaxForce));
+			fj.setMaximumTorque(this.getDoubleValue(this.txtMaxTorque));
 		}
 	}
 	
@@ -266,8 +266,8 @@ public class FrictionJointPanel extends JointPanel implements InputPanel {
 		fj.setUserData(this.txtName.getText());
 		fj.setCollisionAllowed(this.chkCollision.isSelected());
 		// set the other properties
-		fj.setMaxForce(this.getDoubleValue(this.txtMaxForce));
-		fj.setMaxTorque(this.getDoubleValue(this.txtMaxTorque));
+		fj.setMaximumForce(this.getDoubleValue(this.txtMaxForce));
+		fj.setMaximumTorque(this.getDoubleValue(this.txtMaxTorque));
 		
 		return fj;
 	}
