@@ -43,7 +43,7 @@ import org.dyn4j.geometry.Vector3;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class PrismaticJoint extends Joint {
@@ -63,7 +63,7 @@ public class PrismaticJoint extends Joint {
 	protected double motorSpeed;
 	
 	/** The maximum force the motor can apply in newtons */
-	protected double maxMotorForce;
+	protected double maximumMotorForce;
 	
 	/** Whether the limit is enabled or not */
 	protected boolean limitEnabled;
@@ -168,7 +168,7 @@ public class PrismaticJoint extends Joint {
 		.append(this.yAxis).append("|")
 		.append(this.motorEnabled).append("|")
 		.append(this.motorSpeed).append("|")
-		.append(this.maxMotorForce).append("|")
+		.append(this.maximumMotorForce).append("|")
 		.append(this.referenceAngle).append("|")
 		.append(this.limitEnabled).append("|")
 		.append(this.lowerLimit).append("|")
@@ -337,7 +337,7 @@ public class PrismaticJoint extends Joint {
 			double impulse = this.motorMass * (this.motorSpeed - Cdt);
 			// clamp the impulse between the max force
 			double oldImpulse = this.motorImpulse;
-			double maxImpulse = this.maxMotorForce * step.getDeltaTime();
+			double maxImpulse = this.maximumMotorForce * step.getDeltaTime();
 			this.motorImpulse = Interval.clamp(this.motorImpulse + impulse, -maxImpulse, maxImpulse);
 			impulse = this.motorImpulse - oldImpulse;
 			
@@ -711,21 +711,21 @@ public class PrismaticJoint extends Joint {
 	 * to achieve the target speed.
 	 * @return double
 	 */
-	public double getMaxMotorForce() {
-		return maxMotorForce;
+	public double getMaximumMotorForce() {
+		return maximumMotorForce;
 	}
 	
 	/**
 	 * Sets the maximum force the motor can apply to the joint
 	 * to achieve the target speed.
-	 * @param maxMotorForce the maximum force in newtons; must be greater than zero
+	 * @param maximumMotorForce the maximum force in newtons; must be greater than zero
 	 * @throws IllegalArgumentException if maxMotorForce is less than zero
 	 */
-	public void setMaxMotorForce(double maxMotorForce) {
+	public void setMaximumMotorForce(double maximumMotorForce) {
 		// make sure its greater than or equal to zero
-		if (maxMotorForce < 0.0) throw new IllegalArgumentException("The maximum motor force must be greater than or equal to zero.");
+		if (maximumMotorForce < 0.0) throw new IllegalArgumentException("The maximum motor force must be greater than or equal to zero.");
 		// set the new value
-		this.maxMotorForce = maxMotorForce;
+		this.maximumMotorForce = maximumMotorForce;
 	}
 	
 	/**
@@ -864,5 +864,32 @@ public class PrismaticJoint extends Joint {
 	 */
 	public Vector2 getAxis() {
 		return this.body2.getWorldVector(this.xAxis);
+	}
+	
+	/**
+	 * Returns the reference angle.
+	 * <p>
+	 * The reference angle is the angle calculated when the joint was created from the
+	 * two joined bodies.  The reference angle is the angular difference between the
+	 * bodies.
+	 * @return double
+	 * @since 3.0.1
+	 */
+	public double getReferenceAngle() {
+		return this.referenceAngle;
+	}
+	
+	/**
+	 * Sets the reference angle.
+	 * <p>
+	 * This method can be used to set the reference angle to override the computed
+	 * reference angle from the constructor.  This is useful in recreating the joint
+	 * from a current state.
+	 * @param angle the reference angle
+	 * @see #getReferenceAngle()
+	 * @since 3.0.1
+	 */
+	public void setReferenceAngle(double angle) {
+		this.referenceAngle = angle;
 	}
 }

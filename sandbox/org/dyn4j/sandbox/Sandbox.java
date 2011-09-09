@@ -7,6 +7,9 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
@@ -20,7 +23,9 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
@@ -46,6 +51,8 @@ import org.dyn4j.sandbox.events.BodyActionEvent;
 import org.dyn4j.sandbox.input.Keyboard;
 import org.dyn4j.sandbox.input.Mouse;
 import org.dyn4j.sandbox.panels.WorldTreePanel;
+import org.dyn4j.sandbox.persist.XmlFormatter;
+import org.dyn4j.sandbox.persist.XmlGenerator;
 import org.dyn4j.sandbox.utilities.Fps;
 import org.dyn4j.sandbox.utilities.Icons;
 import org.dyn4j.sandbox.utilities.RenderState;
@@ -117,7 +124,10 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	/** The world tree control */
 	private WorldTreePanel pnlWorld;
 	
-	// Start/Stop/FPS toolbar
+	// Simulation toolbar
+	
+	/** The button to save the state of the simulation */
+	private JButton btnSave;
 	
 	/** The start button for the simulation */
 	private JButton btnStart;
@@ -136,8 +146,11 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	/** The stencil toggle button */
 	private JToggleButton tglStencil;
 	
-	/** The show labels toggle button */
-	private JToggleButton tglLabels;
+	/** The show body labels toggle button */
+	private JToggleButton tglBodyLabels;
+	
+	/** The show fixture labels toggle button */
+	private JToggleButton tglFixtureLabels;
 	
 	/** The anti-aliasing toggle button */
 	private JToggleButton tglAntiAliasing;
@@ -197,9 +210,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	/** The move world action */
 	private MoveWorldAction moveWorldAction = new MoveWorldAction();
 	
-	// TODO add convex decomposition
 	// TODO add ability to save/load state of the world
-	// TODO add preview capabilities to fixture creation
 	
 	/**
 	 * Default constructor.
@@ -236,10 +247,18 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		this.pnlWorld.setMinimumSize(size);
 		this.pnlWorld.addActionListener(this);
 		
-		// create the start/stop/fps tool bar
+		// create the simulation tool bar
 		
-		JToolBar barStartStop = new JToolBar("Simulation", JToolBar.HORIZONTAL);
-		barStartStop.setRollover(true);
+		JToolBar barSimulation = new JToolBar("Simulation", JToolBar.HORIZONTAL);
+		barSimulation.setRollover(true);
+		
+		this.btnSave = new JButton("Save");
+		this.btnSave.addActionListener(this);
+		this.btnSave.setActionCommand("save");
+		this.btnSave.setToolTipText("Save Simulation State");
+		
+		barSimulation.add(this.btnSave);
+		barSimulation.addSeparator();
 		
 		this.btnStart = new JButton(Icons.START);
 		this.btnStart.addActionListener(this);
@@ -254,8 +273,8 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		this.btnStart.setEnabled(true);
 		this.btnStop.setEnabled(false);
 		
-		barStartStop.add(this.btnStart);
-		barStartStop.add(this.btnStop);
+		barSimulation.add(this.btnStart);
+		barSimulation.add(this.btnStop);
 		
 		this.lblFps = new JTextField();
 		this.lblFps.setMaximumSize(new Dimension(70, Short.MAX_VALUE));
@@ -265,8 +284,8 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		this.lblFps.setToolTipText("Mouse Location (World Coordinates)");
 		this.lblFps.setToolTipText("Frames / Second");
 		
-		barStartStop.addSeparator();
-		barStartStop.add(this.lblFps);
+		barSimulation.addSeparator();
+		barSimulation.add(this.lblFps);
 		
 		// create the settings toolbar
 		
@@ -285,11 +304,17 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		this.tglStencil.addActionListener(this);
 		this.tglStencil.setSelected(ApplicationSettings.isStenciled());
 		
-		this.tglLabels = new JToggleButton(Icons.LABEL);
-		this.tglLabels.setToolTipText("Enable/Disable Body Labels");
-		this.tglLabels.setActionCommand("label");
-		this.tglLabels.addActionListener(this);
-		this.tglLabels.setSelected(ApplicationSettings.isLabeled());
+		this.tglBodyLabels = new JToggleButton(Icons.BODY_LABEL);
+		this.tglBodyLabels.setToolTipText("Enable/Disable Body Labels");
+		this.tglBodyLabels.setActionCommand("bodyLabel");
+		this.tglBodyLabels.addActionListener(this);
+		this.tglBodyLabels.setSelected(ApplicationSettings.isBodyLabeled());
+		
+		this.tglFixtureLabels = new JToggleButton(Icons.FIXTURE_LABEL);
+		this.tglFixtureLabels.setToolTipText("Enable/Disable Fixture Labels");
+		this.tglFixtureLabels.setActionCommand("fixtureLabel");
+		this.tglFixtureLabels.addActionListener(this);
+		this.tglFixtureLabels.setSelected(ApplicationSettings.isFixtureLabeled());
 		
 		this.tglAntiAliasing = new JToggleButton(Icons.AA);
 		this.tglAntiAliasing.setToolTipText("Enable/Disable Anti-Aliasing");
@@ -326,7 +351,8 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		
 		barSettings.add(this.tglRandomColor);
 		barSettings.add(this.tglStencil);
-		barSettings.add(this.tglLabels);
+		barSettings.add(this.tglBodyLabels);
+		barSettings.add(this.tglFixtureLabels);
 		barSettings.add(this.tglAntiAliasing);
 		barSettings.add(this.tglVerticalSync);
 		barSettings.add(this.tglOriginLabel);
@@ -364,11 +390,12 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		
 		JPanel pnlToolBar = new JPanel();
 		pnlToolBar.setLayout(new BoxLayout(pnlToolBar, BoxLayout.X_AXIS));
-		pnlToolBar.add(barStartStop);
+		pnlToolBar.add(barSimulation);
 		pnlToolBar.add(barSettings);
 		pnlToolBar.add(Box.createHorizontalGlue());
 		pnlToolBar.add(barMouseLocation);
 		pnlToolBar.add(barAbout);
+		pnlToolBar.setMaximumSize(pnlToolBar.getPreferredSize());
 		
 		// make sure tooltips show up on top of the heavy weight canvas
 		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
@@ -492,7 +519,14 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 			}
 		}
 		// Sandbox events
-		if ("start".equals(command)) {
+		if ("save".equals(command)) {
+			try {
+				this.saveSimulationState();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else if ("start".equals(command)) {
 			if (isPaused()) {
 				// disable the world editor
 				this.pnlWorld.setEnabled(false);
@@ -514,8 +548,10 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 			ApplicationSettings.setColorRandom(!ApplicationSettings.isColorRandom());
 		} else if ("stencil".equals(command)) {
 			ApplicationSettings.setStenciled(!ApplicationSettings.isStenciled());
-		} else if ("label".equals(command)) {
-			ApplicationSettings.setLabeled(!ApplicationSettings.isLabeled());
+		} else if ("bodyLabel".equals(command)) {
+			ApplicationSettings.setBodyLabeled(!ApplicationSettings.isBodyLabeled());
+		} else if ("fixtureLabel".equals(command)) {
+			ApplicationSettings.setFixtureLabeled(!ApplicationSettings.isFixtureLabeled());
 		} else if ("aa".equals(command)) {
 			ApplicationSettings.setAntiAliasingEnabled(!ApplicationSettings.isAntiAliasingEnabled());
 		} else if ("vertical-sync".equals(command)) {
@@ -794,15 +830,16 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		}
 
 		// draw labels over the origin label
-		
-		if (ApplicationSettings.isLabeled() && !this.editBodyAction.isActive()) {
+		boolean bodyLabels = ApplicationSettings.isBodyLabeled();
+		boolean fixtureLabels = ApplicationSettings.isFixtureLabeled();
+		if ((bodyLabels || fixtureLabels) && !this.editBodyAction.isActive()) {
 			synchronized (world) {
 				gl.glColor3f(0.0f, 0.0f, 0.0f);
 				// render all the bodies in the world
 				int bSize = this.world.getBodyCount();
 				for (int i = 0; i < bSize; i++) {
 					SandboxBody body = (SandboxBody)this.world.getBody(i);
-					RenderUtilities.drawLabel(gl, glut, body, this.renderState, 5);
+					RenderUtilities.drawLabels(gl, glut, body, this.renderState, 5, bodyLabels, fixtureLabels);
 				}
 			}
 		}
@@ -1216,6 +1253,57 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		v.x = (x - w * 0.5) / scale - ox;
 		v.y = -((y - h * 0.5) / scale + oy);
 		return v;
+	}
+	
+	/**
+	 * Saves the current simulation state to an xml file.
+	 * @throws IOException thrown if an IO error occurs
+	 */
+	private void saveSimulationState() throws IOException {
+		String xml = "";
+		synchronized (this.world) {
+			xml = XmlGenerator.toXml(this.world);
+		}
+		XmlFormatter formatter = new XmlFormatter(2);
+		xml = formatter.format(xml);
+		
+		JFileChooser fileBrowser = new JFileChooser();
+		fileBrowser.setMultiSelectionEnabled(false);
+		int option = fileBrowser.showSaveDialog(this);
+		// check the option
+		if (option == JFileChooser.APPROVE_OPTION) {
+			File file = fileBrowser.getSelectedFile();
+			if (file.isFile()) {
+				// see if its a new one or it already exists
+				if (file.exists()) {
+					// overwrite the file
+					FileWriter fw = new FileWriter(file);
+					fw.write(xml);
+					fw.close();
+					JOptionPane.showMessageDialog(this, "File saved successfully!", "File Saved", JOptionPane.INFORMATION_MESSAGE);
+				} else {
+					// create a new file
+					if (file.createNewFile()) {
+						FileWriter fw = new FileWriter(file);
+						fw.write(xml);
+						fw.close();
+						JOptionPane.showMessageDialog(this, "File saved successfully!", "File Saved", JOptionPane.INFORMATION_MESSAGE);
+					}
+				}
+			} else {
+				// its a directory, so save it inside the dir
+				// using the default name
+				String path = file.getPath();
+				File newFile = new File(path);
+				if (newFile.createNewFile()) {
+					FileWriter fw = new FileWriter(file);
+					fw.write(xml);
+					fw.close();
+					JOptionPane.showMessageDialog(this, "File saved successfully!", "File Saved", JOptionPane.INFORMATION_MESSAGE);
+				}
+				
+			}
+		}
 	}
 	
 	/**

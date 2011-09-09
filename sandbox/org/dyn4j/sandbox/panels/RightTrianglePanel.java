@@ -1,11 +1,17 @@
 package org.dyn4j.sandbox.panels;
 
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
 
+import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
+import javax.swing.JCheckBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -22,7 +28,7 @@ import org.dyn4j.sandbox.utilities.Icons;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class RightTrianglePanel extends ShapePanel implements InputPanel {
+public class RightTrianglePanel extends ConvexShapePanel implements InputPanel {
 	/** The version id */
 	private static final long serialVersionUID = -885888985126355874L;
 
@@ -41,6 +47,12 @@ public class RightTrianglePanel extends ShapePanel implements InputPanel {
 	/** The height of the rectangle */
 	private double height = DEFAULT_HEIGHT;
 	
+	/** True if the triangle is mirrored about the y-axis */
+	private boolean mirror = false;
+	
+	/** Panel used to preview the current shape */
+	private ShapePreviewPanel pnlPreview;
+	
 	/**
 	 * Default constructor.
 	 */
@@ -50,8 +62,13 @@ public class RightTrianglePanel extends ShapePanel implements InputPanel {
 		
 		JLabel lblWidth = new JLabel("Width", Icons.INFO, JLabel.LEFT);
 		lblWidth.setToolTipText("The width of the base of the right triangle.");
+		
 		JLabel lblHeight = new JLabel("Height", Icons.INFO, JLabel.LEFT);
 		lblHeight.setToolTipText("The height of the vertical side of the right triangle.");
+		
+		JLabel lblMirror = new JLabel("Mirror", Icons.INFO, JLabel.LEFT);
+		lblMirror.setToolTipText("Check to mirror the right triangle about the y-axis.");
+		
 		JFormattedTextField txtWidth = new JFormattedTextField(new DecimalFormat("0.000"));
 		JFormattedTextField txtHeight = new JFormattedTextField(new DecimalFormat("0.000"));
 		txtWidth.setValue(DEFAULT_WIDTH);
@@ -63,6 +80,12 @@ public class RightTrianglePanel extends ShapePanel implements InputPanel {
 			public void propertyChange(PropertyChangeEvent event) {
 				Number number = (Number)event.getNewValue();
 				width = number.doubleValue();
+				try {
+					pnlPreview.setShape(Geometry.createRightTriangle(width, height, mirror));
+				} catch (IllegalArgumentException e) {
+					// clear the shape since its not valid anymore
+					pnlPreview.setShape(null);
+				}
 			}
 		});
 		txtHeight.addFocusListener(new SelectTextFocusListener(txtHeight));
@@ -71,31 +94,62 @@ public class RightTrianglePanel extends ShapePanel implements InputPanel {
 			public void propertyChange(PropertyChangeEvent event) {
 				Number number = (Number)event.getNewValue();
 				height = number.doubleValue();
+				try {
+					pnlPreview.setShape(Geometry.createRightTriangle(width, height, mirror));
+				} catch (IllegalArgumentException e) {
+					// clear the shape since its not valid anymore
+					pnlPreview.setShape(null);
+				}
 			}
 		});
 		
+		JCheckBox chkMirror = new JCheckBox();
+		chkMirror.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JCheckBox chk = (JCheckBox)e.getSource();
+				mirror = chk.isSelected();
+				try {
+					pnlPreview.setShape(Geometry.createRightTriangle(width, height, mirror));
+				} catch (IllegalArgumentException ex) {
+					// clear the shape since its not valid anymore
+					pnlPreview.setShape(null);
+				}
+			}
+		});
+		
+		JLabel lblPreview = new JLabel("Preview", Icons.INFO, JLabel.LEFT);
+		lblPreview.setToolTipText("Shows a preview of the current shape.");
+		this.pnlPreview = new ShapePreviewPanel(new Dimension(150, 150), Geometry.createRightTriangle(this.width, this.height, this.mirror));
+		this.pnlPreview.setBackground(Color.WHITE);
+		this.pnlPreview.setBorder(BorderFactory.createEtchedBorder());
+		
 		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
-		layout.setHorizontalGroup(
-				layout.createSequentialGroup()
-				.addGroup(
-						layout.createParallelGroup()
+		layout.setHorizontalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup()
 						.addComponent(lblWidth)
-						.addComponent(lblHeight))
-				.addGroup(
-						layout.createParallelGroup()
+						.addComponent(lblHeight)
+						.addComponent(lblMirror)
+						.addComponent(lblPreview))
+				.addGroup(layout.createParallelGroup()
 						.addComponent(txtWidth)
-						.addComponent(txtHeight)));
-		layout.setVerticalGroup(
-				layout.createSequentialGroup()
-				.addGroup(
-						layout.createParallelGroup()
+						.addComponent(txtHeight)
+						.addComponent(chkMirror)
+						.addComponent(this.pnlPreview, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup()
 						.addComponent(lblWidth)
 						.addComponent(txtWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(
-						layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup()
 						.addComponent(lblHeight)
-						.addComponent(txtHeight, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
+						.addComponent(txtHeight, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(lblMirror)
+						.addComponent(chkMirror, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(lblPreview)
+						.addComponent(this.pnlPreview, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
 	}
 	
 	/* (non-Javadoc)
@@ -111,7 +165,7 @@ public class RightTrianglePanel extends ShapePanel implements InputPanel {
 	 */
 	@Override
 	public Convex getShape() {
-		return Geometry.createRightTriangle(this.width, this.height);
+		return Geometry.createRightTriangle(this.width, this.height, this.mirror);
 	}
 	
 	/* (non-Javadoc)

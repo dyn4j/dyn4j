@@ -44,7 +44,7 @@ import org.dyn4j.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 2.1.0
  */
 public class PulleyJoint extends Joint {
@@ -397,8 +397,24 @@ public class PulleyJoint extends Joint {
 	}
 	
 	/**
+	 * Returns the total length of the pulley.
+	 * <p>
+	 * Typically this is computed when the joint is created by adding the distance from the
+	 * first body anchor to the first pulley anchor with the distance from the second body anchor
+	 * to the second pulley anchor.
+	 * @since 3.0.1
+	 * @return double
+	 */
+	public double getLength() {
+		return this.length;
+	}
+	
+	/**
 	 * Returns the current length from the first pulley anchor point to the
 	 * anchor point on the first {@link Body}.
+	 * <p>
+	 * This is used, in conjunction with length2, to compute the total length
+	 * when the ratio is changed.
 	 * @return double
 	 */
 	public double getLength1() {

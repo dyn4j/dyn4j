@@ -47,7 +47,7 @@ import org.dyn4j.geometry.Vector3;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class RevoluteJoint extends Joint {
@@ -67,7 +67,7 @@ public class RevoluteJoint extends Joint {
 	protected double motorSpeed;
 	
 	/** The maximum torque the motor can apply */
-	protected double maxMotorTorque;
+	protected double maximumMotorTorque;
 	
 	/** Whether the {@link Joint} limits are enabled or not */
 	protected boolean limitEnabled;
@@ -136,7 +136,7 @@ public class RevoluteJoint extends Joint {
 		.append(this.localAnchor2).append("|")
 		.append(this.motorEnabled).append("|")
 		.append(this.motorSpeed).append("|")
-		.append(this.maxMotorTorque).append("|")
+		.append(this.maximumMotorTorque).append("|")
 		.append(this.limitEnabled).append("|")
 		.append(this.lowerLimit).append("|")
 		.append(this.upperLimit).append("|")
@@ -268,7 +268,7 @@ public class RevoluteJoint extends Joint {
 			double impulse = this.motorMass * -C;
 			// clamp the impulse between the maximum torque
 			double oldImpulse = this.motorImpulse;
-			double maxImpulse = this.maxMotorTorque * step.getDeltaTime();
+			double maxImpulse = this.maximumMotorTorque * step.getDeltaTime();
 			this.motorImpulse = Interval.clamp(this.motorImpulse + impulse, -maxImpulse, maxImpulse);
 			// get the impulse we need to apply to the bodies
 			impulse = this.motorImpulse - oldImpulse;
@@ -537,20 +537,20 @@ public class RevoluteJoint extends Joint {
 	 * Returns the maximum torque this motor will apply in newton-meters.
 	 * @return double
 	 */
-	public double getMaxMotorTorque() {
-		return this.maxMotorTorque;
+	public double getMaximumMotorTorque() {
+		return this.maximumMotorTorque;
 	}
 	
 	/**
 	 * Sets the maximum torque this motor will apply in newton-meters.
-	 * @param maxMotorTorque the maximum motor torque in newton-meters; must be greater than or equal to zero
+	 * @param maximumMotorTorque the maximum motor torque in newton-meters; must be greater than or equal to zero
 	 * @throws IllegalArgumentException if maxMotorTorque is less than zero
 	 */
-	public void setMaxMotorTorque(double maxMotorTorque) {
+	public void setMaximumMotorTorque(double maximumMotorTorque) {
 		// make sure its positive
-		if (maxMotorTorque < 0.0) throw new IllegalArgumentException("The maximum motor torque must be greater than or equal to zero.");
+		if (maximumMotorTorque < 0.0) throw new IllegalArgumentException("The maximum motor torque must be greater than or equal to zero.");
 		// set the max
-		this.maxMotorTorque = maxMotorTorque;
+		this.maximumMotorTorque = maximumMotorTorque;
 	}
 	
 	/**
@@ -682,5 +682,32 @@ public class RevoluteJoint extends Joint {
 		// set the values
 		this.lowerLimit = lowerLimit;
 		this.upperLimit = upperLimit;
+	}
+	
+	/**
+	 * Returns the reference angle.
+	 * <p>
+	 * The reference angle is the angle calculated when the joint was created from the
+	 * two joined bodies.  The reference angle is the angular difference between the
+	 * bodies.
+	 * @return double
+	 * @since 3.0.1
+	 */
+	public double getReferenceAngle() {
+		return this.referenceAngle;
+	}
+	
+	/**
+	 * Sets the reference angle.
+	 * <p>
+	 * This method can be used to set the reference angle to override the computed
+	 * reference angle from the constructor.  This is useful in recreating the joint
+	 * from a current state.
+	 * @param angle the reference angle
+	 * @see #getReferenceAngle()
+	 * @since 3.0.1
+	 */
+	public void setReferenceAngle(double angle) {
+		this.referenceAngle = angle;
 	}
 }

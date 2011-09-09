@@ -1,12 +1,10 @@
 package org.dyn4j.sandbox.panels;
 
-import java.awt.Component;
-import java.awt.Container;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -18,20 +16,16 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.sandbox.dialogs.SamplePolygonFileDialog;
 import org.dyn4j.sandbox.utilities.Icons;
 
 /**
@@ -40,7 +34,7 @@ import org.dyn4j.sandbox.utilities.Icons;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class FromFilePolygonPanel extends ShapePanel implements InputPanel, ActionListener {
+public class FromFileConvexPolygonPanel extends ConvexShapePanel implements InputPanel, ActionListener {
 	/** The version id */
 	private static final long serialVersionUID = 6390926955631356349L;
 	
@@ -52,11 +46,14 @@ public class FromFilePolygonPanel extends ShapePanel implements InputPanel, Acti
 	
 	/** The text field to show the selected file path */
 	private JTextField txtFile;
+
+	/** Panel used to preview the current shape */
+	private ShapePreviewPanel pnlPreview;
 	
 	/**
 	 * Default constructor.
 	 */
-	public FromFilePolygonPanel() {
+	public FromFileConvexPolygonPanel() {
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
 		
@@ -71,28 +68,38 @@ public class FromFilePolygonPanel extends ShapePanel implements InputPanel, Acti
 		btnBrowse.setActionCommand("browse");
 		btnBrowse.addActionListener(this);
 		
-		JButton btnGenerate = new JButton("Generate Sample File");
+		JButton btnGenerate = new JButton("View Sample File");
 		btnGenerate.setToolTipText("Shows a sample polygon file.");
 		btnGenerate.setActionCommand("generate");
 		btnGenerate.addActionListener(this);
 		
+		JLabel lblPreview = new JLabel("Preview", Icons.INFO, JLabel.LEFT);
+		lblPreview.setToolTipText("Shows a preview of the current shape.");
+		this.pnlPreview = new ShapePreviewPanel(new Dimension(150, 150), (Vector2[])null);
+		this.pnlPreview.setBackground(Color.WHITE);
+		this.pnlPreview.setBorder(BorderFactory.createEtchedBorder());
+		
 		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
-		layout.setHorizontalGroup(
-				layout.createParallelGroup()
-				.addGroup(
-					layout.createSequentialGroup()
-					.addComponent(lblFile)
-					.addComponent(this.txtFile)
-					.addComponent(btnBrowse))
-				.addComponent(btnGenerate));
+		layout.setHorizontalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup()
+						.addComponent(lblFile)
+						.addComponent(lblPreview))
+				.addGroup(layout.createParallelGroup()
+						.addGroup(layout.createSequentialGroup()
+								.addComponent(this.txtFile)
+								.addComponent(btnBrowse))
+						.addComponent(this.pnlPreview, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(btnGenerate)));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(
-						layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup()
 						.addComponent(lblFile)
 						.addComponent(this.txtFile, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(btnBrowse, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addComponent(btnGenerate));
+				.addGroup(layout.createParallelGroup()
+						.addComponent(lblPreview)
+						.addComponent(this.pnlPreview, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addComponent(btnGenerate, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE));
 	}
 	
 	/* (non-Javadoc)
@@ -127,15 +134,22 @@ public class FromFilePolygonPanel extends ShapePanel implements InputPanel, Acti
 					Vector2[] vertices = new Vector2[points.size()];
 					points.toArray(vertices);
 					
-					this.polygon = new Polygon(vertices);
-					// show a success message
-					JOptionPane.showMessageDialog(this, "File loaded successfully.  " + vertices.length + " points.", "Notice", JOptionPane.INFORMATION_MESSAGE);
+					try {
+						this.polygon = Geometry.createPolygon(vertices);
+					} catch (IllegalArgumentException e) {
+						// the polygon is not valid
+						JOptionPane.showMessageDialog(this, "The file contains a polygon that does not meet the requirements.", "Notice", JOptionPane.INFORMATION_MESSAGE);
+						// set the current polygon to null
+						this.polygon = null;
+					}
+					// set the preview panel to the new points
+					this.pnlPreview.setPoints(vertices);
 					// set the text of the text field to the file path
 					this.txtFile.setText(file.getAbsolutePath());
 				} catch (NumberFormatException e) {
 					// file data incorrect
 					JOptionPane.showMessageDialog(this, "The flie is not the right format.  Non-numeric characters " +
-							"cannot exist exception oin comment(#) lines.", "Notice", JOptionPane.ERROR_MESSAGE);
+							"cannot exist exception on comment(#) lines.", "Notice", JOptionPane.ERROR_MESSAGE);
 				} catch (IllegalArgumentException e) {
 					// file data incorrect
 					JOptionPane.showMessageDialog(this, "The file does not contain a valid polygon.  A valid polygon must be convex, " +
@@ -153,8 +167,7 @@ public class FromFilePolygonPanel extends ShapePanel implements InputPanel, Acti
 				}
 			}
 		} else {
-			SampleFileDialog dialog = new SampleFileDialog(this);
-			dialog.setVisible(true);
+			SamplePolygonFileDialog.show(this);
 		}
 	}
 	
@@ -191,139 +204,7 @@ public class FromFilePolygonPanel extends ShapePanel implements InputPanel, Acti
 	@Override
 	public void showInvalidInputMessage(Window owner) {
 		if (!this.isValidInput()) {
-			JOptionPane.showMessageDialog(this, "You must specify a file containing points for a polygon.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(this, "You must specify a file containing valid points for a polygon.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}
-	}
-	
-	/**
-	 * Dialog used to display a sample polygon file.
-	 * @author William Bittle
-	 * @version 1.0.0
-	 * @since 1.0.0
-	 */
-	private class SampleFileDialog extends JDialog implements MouseListener, ActionListener {
-		/** The version id */
-		private static final long serialVersionUID = 7413682412938169769L;
-
-		/** The copy/select popup menu */
-		private JPopupMenu copyMenu;
-		
-		/** The text area containing the text */
-		private JTextArea txtFile;
-		
-		/**
-		 * Full constructor.
-		 * @param parent the component displaying this dialog
-		 */
-		public SampleFileDialog(Component parent) {
-			super(JOptionPane.getFrameForComponent(parent), "Sample Polygon File", ModalityType.APPLICATION_MODAL);
-			
-			this.txtFile = new JTextArea();
-			this.txtFile.setText(
-					"# Sample convex polygon with counter-clockwise winding and no coincident vertices\n" +
-					"# the # character must be the first character on the line to be flagged as a comment\n" +
-					"\n" +
-					"# Any number of blank lines can exist\n" +
-					"\n" +
-					"# You can use any whitespace character to separate the x and y values (space, tab, multiple spaces, etc)\n" +
-					"1.0 -5.0\n" +
-					"2.0\t2.0\n" +
-					"\n" +
-					"1.0     5.0\n");
-			this.txtFile.setEditable(false);
-			this.txtFile.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-			this.txtFile.addMouseListener(this);
-			
-			JScrollPane scroller = new JScrollPane(this.txtFile);
-			
-			Container container = this.getContentPane();
-			GroupLayout layout = new GroupLayout(container);
-			container.setLayout(layout);
-			
-			layout.setAutoCreateContainerGaps(true);
-			layout.setAutoCreateGaps(true);
-			layout.setHorizontalGroup(layout.createSequentialGroup()
-					.addComponent(scroller));
-			layout.setVerticalGroup(layout.createSequentialGroup()
-					.addComponent(scroller));
-			
-			this.pack();
-			
-			// right click copy menu
-			
-			this.copyMenu = new JPopupMenu();
-			
-			JMenuItem mnuCopy = new JMenuItem("Copy");
-			mnuCopy.setActionCommand("copy");
-			mnuCopy.addActionListener(this);
-			
-			JMenuItem mnuSelectAll = new JMenuItem("Select All");
-			mnuSelectAll.setActionCommand("selectall");
-			mnuSelectAll.addActionListener(this);
-			
-			this.copyMenu.add(mnuCopy);
-			this.copyMenu.add(mnuSelectAll);
-		}
-		
-		/**
-		 * Shows the popup menu wherever the user clicked if the user clicked
-		 * the popup trigger mouse key.
-		 * @param event the mouse event
-		 */
-		private void showPopup(MouseEvent event) {
-			if (event.isPopupTrigger()) {
-				this.copyMenu.show(this.txtFile, event.getX(), event.getY());
-			}
-		}
-		
-		/* (non-Javadoc)
-		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-		 */
-		@Override
-		public void actionPerformed(ActionEvent event) {
-			if ("copy".equals(event.getActionCommand())) {
-				// copy the selected text into the clipboard
-				this.txtFile.copy();
-			} else {
-				// select all
-				this.txtFile.selectAll();
-			}
-		}
-		
-		/* (non-Javadoc)
-		 * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
-		 */
-		@Override
-		public void mousePressed(MouseEvent e) {
-			this.showPopup(e);
-		}
-		
-		/* (non-Javadoc)
-		 * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
-		 */
-		@Override
-		public void mouseReleased(MouseEvent e) {
-			this.showPopup(e);
-		}
-		
-		// mouse events not used
-		
-		/* (non-Javadoc)
-		 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
-		 */
-		@Override
-		public void mouseClicked(MouseEvent e) {}
-		
-		/* (non-Javadoc)
-		 * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
-		 */
-		@Override
-		public void mouseEntered(MouseEvent e) {}
-		
-		/* (non-Javadoc)
-		 * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
-		 */
-		@Override
-		public void mouseExited(MouseEvent e) {}
 	}
 }

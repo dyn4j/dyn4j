@@ -41,7 +41,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Geometry} class.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class GeometryTest {
@@ -419,6 +419,49 @@ public class GeometryTest {
 	@Test
 	public void createRightTriangle() {
 		Triangle t = Geometry.createRightTriangle(1.0, 2.0);
+		
+		// test that the center is the origin
+		Vector2 center = t.getCenter();
+		TestCase.assertEquals(0.000, center.x, 1.0e-3);
+		TestCase.assertEquals(0.000, center.y, 1.0e-3);
+		
+		// get the vertices
+		Vector2 v1 = t.vertices[0];
+		Vector2 v2 = t.vertices[1];
+		Vector2 v3 = t.vertices[2];
+		
+		// create the edges
+		Vector2 e1 = v1.to(v2);
+		Vector2 e2 = v2.to(v3);
+		Vector2 e3 = v3.to(v1);
+		
+		// one of the follow dot products must be zero
+		// indicating a 90 degree angle
+		if (e1.dot(e2) < 0.00001 && e1.dot(e2) > -0.00001) {
+			TestCase.assertTrue(true);
+			return;
+		}
+		
+		if (e2.dot(e3) < 0.00001 && e2.dot(e3) > -0.00001) {
+			TestCase.assertTrue(true);
+			return;
+		}
+		
+		if (e3.dot(e1) < 0.00001 && e3.dot(e1) > -0.00001) {
+			TestCase.assertTrue(true);
+			return;
+		}
+		
+		// if we get here we didn't find a 90 degree angle
+		TestCase.assertFalse(true);
+	}
+	
+	/**
+	 * Tests the successful creation of a right angle triangle.
+	 */
+	@Test
+	public void createRightTriangleMirror() {
+		Triangle t = Geometry.createRightTriangle(1.0, 2.0, true);
 		
 		// test that the center is the origin
 		Vector2 center = t.getCenter();

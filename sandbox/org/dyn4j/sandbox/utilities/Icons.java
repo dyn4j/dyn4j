@@ -64,8 +64,11 @@ public class Icons {
 	/** Stencil icon */
 	public static final ImageIcon STENCIL = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/stencil-icon.png");
 	
-	/** Labels icon */
-	public static final ImageIcon LABEL = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/label-icon.png");
+	/** Body label icon */
+	public static final ImageIcon BODY_LABEL = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/body-label-icon.png");
+	
+	/** Fixture label icon */
+	public static final ImageIcon FIXTURE_LABEL = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/fixture-label-icon.png");
 	
 	/** Anti-Aliasing icon */
 	public static final ImageIcon AA = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/aa-icon.png");
@@ -143,6 +146,9 @@ public class Icons {
 	
 	/** Wheel joint icon */
 	public static final ImageIcon WHEEL_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/wheel-joint-icon.png");
+
+	/** Decompose icon */
+	public static final ImageIcon DECOMPOSE = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/decompose-icon.png");
 	
 	// create icons
 	

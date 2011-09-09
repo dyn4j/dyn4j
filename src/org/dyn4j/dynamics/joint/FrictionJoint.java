@@ -42,7 +42,7 @@ import org.dyn4j.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class FrictionJoint extends Joint {
@@ -56,10 +56,10 @@ public class FrictionJoint extends Joint {
 	protected Vector2 localAnchor2;
 	
 	/** The maximum force the constraint can apply */
-	protected double maxForce;
+	protected double maximumForce;
 	
 	/** The maximum torque the constraint can apply */
-	protected double maxTorque;
+	protected double maximumTorque;
 	
 	/** The pivot mass; K = J * Minv * Jtrans */
 	protected Matrix22 K;
@@ -107,8 +107,8 @@ public class FrictionJoint extends Joint {
 		.append(super.toString()).append("|")
 		.append(this.localAnchor1).append("|")
 		.append(this.localAnchor2).append("|")
-		.append(this.maxForce).append("|")
-		.append(this.maxTorque).append("|")
+		.append(this.maximumForce).append("|")
+		.append(this.maximumTorque).append("|")
 		.append(this.linearImpulse).append("|")
 		.append(this.angularImpulse).append("]");
 		return sb.toString();
@@ -180,7 +180,7 @@ public class FrictionJoint extends Joint {
 			double impulse = this.angularMass * -C;
 			// clamp the impulse between the maximum torque
 			double oldImpulse = this.angularImpulse;
-			double maxImpulse = this.maxTorque * step.getDeltaTime();
+			double maxImpulse = this.maximumTorque * step.getDeltaTime();
 			this.angularImpulse = Interval.clamp(this.angularImpulse + impulse, -maxImpulse, maxImpulse);
 			// get the impulse we need to apply to the bodies
 			impulse = this.angularImpulse - oldImpulse;
@@ -203,7 +203,7 @@ public class FrictionJoint extends Joint {
 		// clamp by the maxforce
 		Vector2 oldImpulse = this.linearImpulse;
 		this.linearImpulse.add(impulse);
-		double maxImpulse = this.maxForce * step.getDeltaTime();
+		double maxImpulse = this.maximumForce * step.getDeltaTime();
 		if (this.linearImpulse.getMagnitudeSquared() > maxImpulse * maxImpulse) {
 			this.linearImpulse.normalize();
 			this.linearImpulse.multiply(maxImpulse);
@@ -260,39 +260,39 @@ public class FrictionJoint extends Joint {
 	 * Returns the maximum torque this constraint will apply in newton-meters.
 	 * @return double
 	 */
-	public double getMaxTorque() {
-		return this.maxTorque;
+	public double getMaximumTorque() {
+		return this.maximumTorque;
 	}
 	
 	/**
 	 * Sets the maximum torque this constraint will apply in newton-meters.
-	 * @param maxTorque the maximum torque in newton-meters; in the range [0, &infin;]
+	 * @param maximumTorque the maximum torque in newton-meters; in the range [0, &infin;]
 	 * @throws IllegalArgumentException if maxTorque is less than zero
 	 */
-	public void setMaxTorque(double maxTorque) {
+	public void setMaximumTorque(double maximumTorque) {
 		// make sure its greater than or equal to zero
-		if (maxTorque < 0.0) throw new IllegalArgumentException("The maximum torque must be greater than or equal to zero.");
+		if (maximumTorque < 0.0) throw new IllegalArgumentException("The maximum torque must be greater than or equal to zero.");
 		// set the max
-		this.maxTorque = maxTorque;
+		this.maximumTorque = maximumTorque;
 	}
 
 	/**
 	 * Returns the maximum force this constraint will apply in newtons.
 	 * @return double
 	 */
-	public double getMaxForce() {
-		return this.maxForce;
+	public double getMaximumForce() {
+		return this.maximumForce;
 	}
 	
 	/**
 	 * Sets the maximum force this constraint will apply in newtons.
-	 * @param maxForce the maximum force in newtons; in the range [0, &infin;]
+	 * @param maximumForce the maximum force in newtons; in the range [0, &infin;]
 	 * @throws IllegalArgumentException if maxForce is less than zero
 	 */
-	public void setMaxForce(double maxForce) {
+	public void setMaximumForce(double maximumForce) {
 		// make sure its greater than or equal to zero
-		if (maxForce < 0.0) throw new IllegalArgumentException("The maximum force must be greater than or equal to zero.");
+		if (maximumForce < 0.0) throw new IllegalArgumentException("The maximum force must be greater than or equal to zero.");
 		// set the max
-		this.maxForce = maxForce;
+		this.maximumForce = maximumForce;
 	}
 }

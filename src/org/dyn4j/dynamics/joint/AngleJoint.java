@@ -47,18 +47,18 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * Defaults the min and max angles to the current angle (allowing no angular movement).
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 2.2.2
  */
 public class AngleJoint extends Joint {
 	/** The joint type */
 	public static final Joint.Type TYPE = new Joint.Type("Angle");
 	
-	/** The minimum angle */
-	protected double minimumAngle;
+	/** The lower limit */
+	protected double lowerLimit;
 	
-	/** The maximum angle */
-	protected double maximumAngle;
+	/** The upper limit */
+	protected double upperLimit;
 	
 	/** Whether the limits are enabled */
 	protected boolean limitEnabled;
@@ -92,8 +92,8 @@ public class AngleJoint extends Joint {
 		// compute the reference angle
 		this.referenceAngle = body1.getTransform().getRotation() - body2.getTransform().getRotation();
 		// set both limits
-		this.maximumAngle = this.referenceAngle;
-		this.minimumAngle = this.referenceAngle;
+		this.upperLimit = this.referenceAngle;
+		this.lowerLimit = this.referenceAngle;
 		// set enabled
 		this.limitEnabled = true;
 		// default the limit state
@@ -108,8 +108,8 @@ public class AngleJoint extends Joint {
 		StringBuilder sb = new StringBuilder();
 		sb.append("ANGLE_JOINT[")
 		.append(super.toString()).append("|")
-		.append(this.minimumAngle).append("|")
-		.append(this.maximumAngle).append("|")
+		.append(this.lowerLimit).append("|")
+		.append(this.upperLimit).append("|")
 		.append(this.limitEnabled).append("|")
 		.append(this.referenceAngle).append("|")
 		.append(this.impulse).append("]");
@@ -141,21 +141,21 @@ public class AngleJoint extends Joint {
 		// check if the limits are enabled
 		if (this.limitEnabled) {
 			// if they are enabled check if they are equal
-			if (Math.abs(this.maximumAngle - this.minimumAngle) < 2.0 * angularTolerance) {
+			if (Math.abs(this.upperLimit - this.lowerLimit) < 2.0 * angularTolerance) {
 				// if so then set the state to equal
 				this.limitState = Joint.LimitState.EQUAL;
 			} else {
 				// make sure we have valid settings
-				if (this.maximumAngle > this.minimumAngle) {
+				if (this.upperLimit > this.lowerLimit) {
 					// check against the max and min distances
-					if (angle >= this.maximumAngle) {
+					if (angle >= this.upperLimit) {
 						// is the limit already at the upper limit
 						if (this.limitState != Joint.LimitState.AT_UPPER) {
 							this.impulse = 0;
 						}
 						// set the state to at upper
 						this.limitState = Joint.LimitState.AT_UPPER;
-					} else if (angle <= this.minimumAngle) {
+					} else if (angle <= this.lowerLimit) {
 						// is the limit already at the lower limit
 						if (this.limitState != Joint.LimitState.AT_LOWER) {
 							this.impulse = 0;
@@ -249,18 +249,18 @@ public class AngleJoint extends Joint {
 			if (this.limitState == Joint.LimitState.EQUAL) {
 				// if the limits are equal then clamp the impulse to maintain
 				// the constraint between the maximum
-				double j = Interval.clamp(angle - this.minimumAngle, -maxAngularCorrection, maxAngularCorrection);
+				double j = Interval.clamp(angle - this.lowerLimit, -maxAngularCorrection, maxAngularCorrection);
 				impulse = -j * this.invK;
 				angularError = Math.abs(j);
 			} else if (this.limitState == Joint.LimitState.AT_LOWER) {
 				// if the joint is at the lower limit then clamp only the lower value
-				double j = angle - this.minimumAngle;
+				double j = angle - this.lowerLimit;
 				angularError = -j;
 				j = Interval.clamp(j + angularTolerance, -maxAngularCorrection, 0.0);
 				impulse = -j * this.invK;
 			} else if (this.limitState == Joint.LimitState.AT_UPPER) {
 				// if the joint is at the upper limit then clamp only the upper value
-				double j = angle - this.maximumAngle;
+				double j = angle - this.upperLimit;
 				angularError = j;
 				j = Interval.clamp(j - angularTolerance, 0.0, maxAngularCorrection);
 				impulse = -j * this.invK;
@@ -338,103 +338,129 @@ public class AngleJoint extends Joint {
 	}
 	
 	/**
-	 * Returns the maximum angle between the two constrained {@link Body}s in radians.
+	 * Returns the upper limit in radians.
 	 * @return double
 	 */
-	public double getMaximumAngle() {
-		return this.maximumAngle;
+	public double getUpperLimit() {
+		return this.upperLimit;
 	}
 	
 	/**
-	 * Sets the maximum angle between the two constrained {@link Body}s in radians.
-	 * @param maximumAngle the maximum angle in radians
-	 * @throws IllegalArgumentException if maximumAngle is less than the current minimum
+	 * Sets the upper limit in radians.
+	 * @param upperLimit the upper limit in radians
+	 * @throws IllegalArgumentException if upperLimit is less than the current lower limit
 	 */
-	public void setMaximumAngle(double maximumAngle) {
+	public void setUpperLimit(double upperLimit) {
 		// make sure the minimum is less than or equal to the maximum
-		if (maximumAngle < this.minimumAngle) throw new IllegalArgumentException("The maximum angle must be greater than or equal to the current minimum angle.");
+		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException("The upper limit must be greater than or equal to the current lower limit.");
 		// wake up both bodies
 		this.body1.setAsleep(false);
 		this.body2.setAsleep(false);
 		// set the new target angle
-		this.maximumAngle = maximumAngle;
+		this.upperLimit = upperLimit;
 	}
 	
 	/**
-	 * Returns the minimum angle between the two constrained {@link Body}s in radians.
+	 * Returns the lower limit in radians.
 	 * @return double
 	 */
-	public double getMinimumAngle() {
-		return this.minimumAngle;
+	public double getLowerLimit() {
+		return this.lowerLimit;
 	}
 	
 	/**
-	 * Sets the minimum angle between the two constrained {@link Body}s in radians.
-	 * @param minimumAngle the minimum angle in radians
-	 * @throws IllegalArgumentException if minimumAngle is greater than the current maximum
+	 * Sets the lower limit in radians.
+	 * @param lowerLimit the lower limit in radians
+	 * @throws IllegalArgumentException if lowerLimit is greater than the current upper limit
 	 */
-	public void setMinimumAngle(double minimumAngle) {
+	public void setLowerLimit(double lowerLimit) {
 		// make sure the minimum is less than or equal to the maximum
-		if (minimumAngle > this.maximumAngle) throw new IllegalArgumentException("The minimum angle must be less than or equal to the current maximum angle.");
+		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException("The lower limit must be less than or equal to the current upper limit.");
 		// wake up both bodies
 		this.body1.setAsleep(false);
 		this.body2.setAsleep(false);
 		// set the new target angle
-		this.minimumAngle = minimumAngle;
+		this.lowerLimit = lowerLimit;
 	}
 	
 	/**
-	 * Sets both the maximum and minimum limit angles.
-	 * @param minimumAngle the minimum angle in radians
-	 * @param maximumAngle the maximum angle in radians
-	 * @throws IllegalArgumentException if minimumAngle is greater than maximumAngle
+	 * Sets both the lower and upper limits.
+	 * @param lowerLimit the lower limit in radians
+	 * @param upperLimit the upper limit in radians
+	 * @throws IllegalArgumentException if lowerLimit is greater than upperLimit
 	 */
-	public void setMinimumMaximum(double minimumAngle, double maximumAngle) {
+	public void setLimits(double lowerLimit, double upperLimit) {
 		// make sure the min < max
-		if (minimumAngle > maximumAngle) throw new IllegalArgumentException("The minimum angle must be smaller than the maximum angle.");
+		if (lowerLimit > upperLimit) throw new IllegalArgumentException("The lower limit must be smaller than the upper limit.");
 		// wake up the bodies
 		this.body1.setAsleep(false);
 		this.body2.setAsleep(false);
 		// set the limits
-		this.maximumAngle = maximumAngle;
-		this.minimumAngle = minimumAngle;
+		this.upperLimit = upperLimit;
+		this.lowerLimit = lowerLimit;
 	}
 
 	/**
-	 * Sets both the maximum and minimum limit angles and enables the limits.
-	 * @param minimumAngle the minimum angle in radians
-	 * @param maximumAngle the maximum angle in radians
-	 * @throws IllegalArgumentException if minimumAngle is greater than maximumAngle
+	 * Sets both the lower and upper limits and enables them.
+	 * @param lowerLimit the lower limit in radians
+	 * @param upperLimit the upper limit in radians
+	 * @throws IllegalArgumentException if lowerLimit is greater than upperLimit
 	 */
-	public void setMinimumMaximumEnabled(double minimumAngle, double maximumAngle) {
+	public void setLimitsEnabled(double lowerLimit, double upperLimit) {
 		// set the values
-		this.setMinimumMaximum(minimumAngle, maximumAngle);
+		this.setLimits(lowerLimit, upperLimit);
 		// enable the limits
 		this.limitEnabled = true;
 	}
 	
 	/**
-	 * Sets both the maximum and minimum limit angles to the given angle.
-	 * @param angle the desired angle between the bodies
+	 * Sets both the lower and upper limits to the given limit.
+	 * @param limit the desired limit
 	 */
-	public void setMinimumMaximum(double angle) {
+	public void setLimits(double limit) {
 		// wake up the bodies
 		this.body1.setAsleep(false);
 		this.body2.setAsleep(false);
 		// set the limits
-		this.maximumAngle = angle;
-		this.minimumAngle = angle;
+		this.upperLimit = limit;
+		this.lowerLimit = limit;
 	}
 	
 	/**
-	 * Sets both the maximum and minimum limit angles to the given angle and
-	 * enables the limits.
-	 * @param angle the desired angle between the bodies
+	 * Sets both the lower and upper limits to the given limit and enables them.
+	 * @param limit the desired limit
 	 */
-	public void setMinimumMaximumEnabled(double angle) {
+	public void setLimitsEnabled(double limit) {
 		// set the values
-		this.setMinimumMaximum(angle);
+		this.setLimits(limit);
 		// enable the limits
 		this.limitEnabled = true;
+	}
+	
+	/**
+	 * Returns the reference angle.
+	 * <p>
+	 * The reference angle is the angle calculated when the joint was created from the
+	 * two joined bodies.  The reference angle is the angular difference between the
+	 * bodies.
+	 * @return double
+	 * @since 3.0.1
+	 */
+	public double getReferenceAngle() {
+		return this.referenceAngle;
+	}
+	
+	/**
+	 * Sets the reference angle.
+	 * <p>
+	 * This method can be used to set the reference angle to override the computed
+	 * reference angle from the constructor.  This is useful in recreating the joint
+	 * from a current state.
+	 * @param angle the reference angle
+	 * @see #getReferenceAngle()
+	 * @since 3.0.1
+	 */
+	public void setReferenceAngle(double angle) {
+		this.referenceAngle = angle;
 	}
 }

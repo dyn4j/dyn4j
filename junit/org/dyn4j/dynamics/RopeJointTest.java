@@ -34,7 +34,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link RopeJoint} class.
  * @author William Bittle
- * @version 2.2.2
+ * @version 3.0.1
  * @since 2.2.2
  */
 public class RopeJointTest {
@@ -93,9 +93,9 @@ public class RopeJointTest {
 	@Test
 	public void setMaximum() {
 		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
-		rj.setMaximumDistance(10);
+		rj.setUpperLimit(10);
 		
-		TestCase.assertEquals(10.0, rj.getMaximumDistance());
+		TestCase.assertEquals(10.0, rj.getUpperLimit());
 	}
 	
 	/**
@@ -104,7 +104,7 @@ public class RopeJointTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setMaximumFail1() {
 		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
-		rj.setMaximumDistance(-10);
+		rj.setUpperLimit(-10);
 	}
 
 	/**
@@ -113,8 +113,8 @@ public class RopeJointTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setMaximumFail2() {
 		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
-		rj.setMinimumDistance(2);
-		rj.setMaximumDistance(1);
+		rj.setLowerLimit(2);
+		rj.setUpperLimit(1);
 	}
 	
 	/**
@@ -123,10 +123,10 @@ public class RopeJointTest {
 	@Test
 	public void setMinimum() {
 		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
-		rj.setMaximumDistance(10);
-		rj.setMinimumDistance(2);
+		rj.setUpperLimit(10);
+		rj.setLowerLimit(2);
 		
-		TestCase.assertEquals(2.0, rj.getMinimumDistance());
+		TestCase.assertEquals(2.0, rj.getLowerLimit());
 	}
 	
 	/**
@@ -135,7 +135,7 @@ public class RopeJointTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setMinimumFail1() {
 		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
-		rj.setMaximumDistance(-3);
+		rj.setUpperLimit(-3);
 	}
 	
 	/**
@@ -144,8 +144,8 @@ public class RopeJointTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setMinimumFail2() {
 		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
-		rj.setMaximumDistance(1);
-		rj.setMinimumDistance(2);
+		rj.setUpperLimit(1);
+		rj.setLowerLimit(2);
 	}
 	
 	/**
@@ -154,10 +154,10 @@ public class RopeJointTest {
 	@Test
 	public void setMinAndMax() {
 		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
-		rj.setMinimumMaximum(7, 10);
+		rj.setLimits(7, 10);
 		
-		TestCase.assertEquals(7.0, rj.getMinimumDistance());
-		TestCase.assertEquals(10.0, rj.getMaximumDistance());
+		TestCase.assertEquals(7.0, rj.getLowerLimit());
+		TestCase.assertEquals(10.0, rj.getUpperLimit());
 	}
 	
 	/**
@@ -166,7 +166,7 @@ public class RopeJointTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setMinAndMaxFail1() {
 		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
-		rj.setMinimumMaximum(7, -10);
+		rj.setLimits(7, -10);
 	}
 	
 	/**
@@ -175,7 +175,7 @@ public class RopeJointTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setMinAndMaxFail2() {
 		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
-		rj.setMinimumMaximum(-7, 10);
+		rj.setLimits(-7, 10);
 	}
 	
 	/**
@@ -184,7 +184,7 @@ public class RopeJointTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setMinAndMaxFail3() {
 		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
-		rj.setMinimumMaximum(-7, -10);
+		rj.setLimits(-7, -10);
 	}
 	
 	/**
@@ -193,7 +193,7 @@ public class RopeJointTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setMinAndMaxFail4() {
 		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
-		rj.setMinimumMaximum(10, 7);
+		rj.setLimits(10, 7);
 	}
 	
 	/**
@@ -202,10 +202,10 @@ public class RopeJointTest {
 	@Test
 	public void setMinMax() {
 		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
-		rj.setMinimumMaximum(10);
+		rj.setLimits(10);
 		
-		TestCase.assertEquals(10.0, rj.getMinimumDistance());
-		TestCase.assertEquals(10.0, rj.getMaximumDistance());
+		TestCase.assertEquals(10.0, rj.getLowerLimit());
+		TestCase.assertEquals(10.0, rj.getUpperLimit());
 	}
 	
 	/**
@@ -214,6 +214,6 @@ public class RopeJointTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setMinMaxFail1() {
 		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
-		rj.setMinimumMaximum(-10);
+		rj.setLimits(-10);
 	}
 }

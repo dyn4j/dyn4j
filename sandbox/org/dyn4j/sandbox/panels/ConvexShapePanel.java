@@ -10,7 +10,7 @@ import org.dyn4j.geometry.Convex;
  * @version 1.0.0
  * @since 1.0.0
  */
-public abstract class ShapePanel extends JPanel implements InputPanel {
+public abstract class ConvexShapePanel extends JPanel implements InputPanel {
 	/** The version id */
 	private static final long serialVersionUID = -2123887648523056197L;
 

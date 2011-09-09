@@ -41,7 +41,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests the angle joint.
  * @author William Bittle
- * @version 2.2.2
+ * @version 3.0.1
  * @since 2.2.2
  */
 public class Angle extends Test {
@@ -134,7 +134,7 @@ public class Angle extends Test {
 		this.world.add(rj);
 		
 		AngleJoint j1 = new AngleJoint(obj1, obj2);
-		j1.setMinimumMaximumEnabled(Math.toRadians(-30), Math.toRadians(30));
+		j1.setLimitsEnabled(Math.toRadians(-30), Math.toRadians(30));
 		
 		this.world.add(j1);
 	}

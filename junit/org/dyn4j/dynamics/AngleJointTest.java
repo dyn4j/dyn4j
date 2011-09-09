@@ -33,7 +33,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link AngleJoint} class.
  * @author William Bittle
- * @version 2.2.2
+ * @version 3.0.1
  * @since 2.2.2
  */
 public class AngleJointTest {
@@ -76,9 +76,9 @@ public class AngleJointTest {
 	@Test
 	public void setMaximum() {
 		AngleJoint aj = new AngleJoint(new Body(), new Body());
-		aj.setMaximumAngle(Math.toRadians(10));
+		aj.setUpperLimit(Math.toRadians(10));
 		
-		TestCase.assertEquals(Math.toRadians(10), aj.getMaximumAngle(), 1e-6);
+		TestCase.assertEquals(Math.toRadians(10), aj.getUpperLimit(), 1e-6);
 	}
 	
 	/**
@@ -87,7 +87,7 @@ public class AngleJointTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setMaximumFail() {
 		AngleJoint aj = new AngleJoint(new Body(), new Body());
-		aj.setMaximumAngle(Math.toRadians(-10));
+		aj.setUpperLimit(Math.toRadians(-10));
 	}
 	
 	/**
@@ -96,9 +96,9 @@ public class AngleJointTest {
 	@Test
 	public void setMinimum() {
 		AngleJoint aj = new AngleJoint(new Body(), new Body());
-		aj.setMinimumAngle(Math.toRadians(-10));
+		aj.setLowerLimit(Math.toRadians(-10));
 		
-		TestCase.assertEquals(Math.toRadians(-10), aj.getMinimumAngle(), 1e-6);
+		TestCase.assertEquals(Math.toRadians(-10), aj.getLowerLimit(), 1e-6);
 	}
 	
 	/**
@@ -107,7 +107,7 @@ public class AngleJointTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setMinimumFail() {
 		AngleJoint aj = new AngleJoint(new Body(), new Body());
-		aj.setMinimumAngle(Math.toRadians(10));
+		aj.setLowerLimit(Math.toRadians(10));
 	}
 	
 	/**
@@ -116,10 +116,10 @@ public class AngleJointTest {
 	@Test
 	public void setMinAndMax() {
 		AngleJoint aj = new AngleJoint(new Body(), new Body());
-		aj.setMinimumMaximum(Math.toRadians(-30), Math.toRadians(20));
+		aj.setLimits(Math.toRadians(-30), Math.toRadians(20));
 		
-		TestCase.assertEquals(Math.toRadians(-30), aj.getMinimumAngle(), 1e-6);
-		TestCase.assertEquals(Math.toRadians(20), aj.getMaximumAngle(), 1e-6);
+		TestCase.assertEquals(Math.toRadians(-30), aj.getLowerLimit(), 1e-6);
+		TestCase.assertEquals(Math.toRadians(20), aj.getUpperLimit(), 1e-6);
 	}
 	
 	/**
@@ -128,7 +128,7 @@ public class AngleJointTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setMinAndMaxFail() {
 		AngleJoint aj = new AngleJoint(new Body(), new Body());
-		aj.setMinimumMaximum(Math.toRadians(30), Math.toRadians(20));
+		aj.setLimits(Math.toRadians(30), Math.toRadians(20));
 	}
 	
 	/**
@@ -137,9 +137,9 @@ public class AngleJointTest {
 	@Test
 	public void setMinMax() {
 		AngleJoint aj = new AngleJoint(new Body(), new Body());
-		aj.setMinimumMaximum(Math.toRadians(30));
+		aj.setLimits(Math.toRadians(30));
 		
-		TestCase.assertEquals(Math.toRadians(30), aj.getMinimumAngle(), 1e-6);
-		TestCase.assertEquals(Math.toRadians(30), aj.getMaximumAngle(), 1e-6);
+		TestCase.assertEquals(Math.toRadians(30), aj.getLowerLimit(), 1e-6);
+		TestCase.assertEquals(Math.toRadians(30), aj.getUpperLimit(), 1e-6);
 	}
 }

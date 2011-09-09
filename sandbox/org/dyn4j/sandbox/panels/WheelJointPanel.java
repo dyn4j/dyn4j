@@ -136,7 +136,7 @@ public class WheelJointPanel extends JointPanel implements InputPanel, ActionLis
 		double f = joint.getFrequency();
 		double r = joint.getDampingRatio();
 		double ms = joint.getMotorSpeed();
-		double mt = joint.getMaxMotorTorque();
+		double mt = joint.getMaximumMotorTorque();
 		
 		// set the super classes defaults
 		this.txtName.setText(name);
@@ -429,7 +429,7 @@ public class WheelJointPanel extends JointPanel implements InputPanel, ActionLis
 			// set the properties that can change
 			wj.setFrequency(this.getDoubleValue(this.txtFrequency));
 			wj.setDampingRatio(this.getDoubleValue(this.txtRatio));
-			wj.setMaxMotorTorque(this.getDoubleValue(this.txtMaxMotorTorque));
+			wj.setMaximumMotorTorque(this.getDoubleValue(this.txtMaxMotorTorque));
 			wj.setMotorEnabled(this.chkMotorEnabled.isSelected());
 			wj.setMotorSpeed(Math.toRadians(this.getDoubleValue(this.txtMotorSpeed)));
 		}
@@ -459,7 +459,7 @@ public class WheelJointPanel extends JointPanel implements InputPanel, ActionLis
 		// set the other properties
 		wj.setFrequency(this.getDoubleValue(this.txtFrequency));
 		wj.setDampingRatio(this.getDoubleValue(this.txtRatio));
-		wj.setMaxMotorTorque(this.getDoubleValue(this.txtMaxMotorTorque));
+		wj.setMaximumMotorTorque(this.getDoubleValue(this.txtMaxMotorTorque));
 		wj.setMotorEnabled(this.chkMotorEnabled.isSelected());
 		wj.setMotorSpeed(Math.toRadians(this.getDoubleValue(this.txtMotorSpeed)));
 		

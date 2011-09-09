@@ -33,7 +33,7 @@ import org.junit.Test;
 /**
  * Used to test the {@link FrictionJoint} class.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.0.1
  * @since 1.0.2
  */
 public class FrictionJointTest {
@@ -82,9 +82,9 @@ public class FrictionJointTest {
 	@Test
 	public void setMaxTorque() {
 		FrictionJoint fj = new FrictionJoint(b1, b2, new Vector2());
-		fj.setMaxTorque(0.0);
-		fj.setMaxTorque(10.0);
-		fj.setMaxTorque(2548.0);
+		fj.setMaximumTorque(0.0);
+		fj.setMaximumTorque(10.0);
+		fj.setMaximumTorque(2548.0);
 	}
 	
 	/**
@@ -93,7 +93,7 @@ public class FrictionJointTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setNegativeMaxTorque() {
 		FrictionJoint fj = new FrictionJoint(b1, b2, new Vector2());
-		fj.setMaxTorque(-2.0);
+		fj.setMaximumTorque(-2.0);
 	}
 	
 	/**
@@ -102,9 +102,9 @@ public class FrictionJointTest {
 	@Test
 	public void setMaxForce() {
 		FrictionJoint fj = new FrictionJoint(b1, b2, new Vector2());
-		fj.setMaxForce(0.0);
-		fj.setMaxForce(10.0);
-		fj.setMaxForce(2548.0);
+		fj.setMaximumForce(0.0);
+		fj.setMaximumForce(10.0);
+		fj.setMaximumForce(2548.0);
 	}
 	
 	/**
@@ -113,6 +113,6 @@ public class FrictionJointTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setNegativeMaxForce() {
 		FrictionJoint fj = new FrictionJoint(b1, b2, new Vector2());
-		fj.setMaxForce(-2.0);
+		fj.setMaximumForce(-2.0);
 	}
 }

@@ -60,7 +60,7 @@ import org.dyn4j.testbed.input.Mouse;
  * Using the {@link TestBed} class one can switch test without stopping
  * and starting the driver again.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 1.0.0
  */
 public abstract class Test implements Comparable<Test> {
@@ -508,7 +508,7 @@ public abstract class Test implements Comparable<Test> {
 		// make the line color a function of stress (black to red)
 		Step step = this.world.getStep();
 		double invdt = step.getInverseDeltaTime();
-		double maxForce = joint.getMaxForce();
+		double maxForce = joint.getMaximumForce();
 		double force = joint.getReactionForce(invdt).getMagnitude();
 		double red = force / maxForce;
 		red *= 1.10;

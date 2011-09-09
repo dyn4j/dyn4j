@@ -63,6 +63,9 @@ public final class RenderUtilities {
 	/** The decimal format for showing a point location */
 	private static final DecimalFormat POINT_DECIMAL_FORMAT = new DecimalFormat("0.0000");
 	
+	/** The decimal format for showing pixels/meter */
+	private static final DecimalFormat SCALE_DECIMAL_FORMAT = new DecimalFormat("0");
+	
 	/** Text height constant */
 	private static final int TEXT_HEIGHT = 7;
 	
@@ -952,7 +955,7 @@ public final class RenderUtilities {
 		// make the line color a function of stress (black to red)
 		// get the inverse delta time
 		double invdt = state.invDt;
-		double maxForce = joint.getMaxForce();
+		double maxForce = joint.getMaximumForce();
 		double force = joint.getReactionForce(invdt).getMagnitude();
 		double red = force / maxForce;
 		red *= 1.10;
@@ -1140,7 +1143,7 @@ public final class RenderUtilities {
 		// show the number of pixels per meter
 		gl.glColor3f (0.0f, 0.0f, 0.0f);
 		gl.glRasterPos2i(x + 2 * o + 8, y + 4);
-		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, scale + " pixels / 1 m");
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, SCALE_DECIMAL_FORMAT.format(scale) + " pixels / 1 m");
 		
 		// show the number of meters per scale
 		gl.glRasterPos2i(x + 2 * o + 8, y - 2 * o - 12);
@@ -1167,31 +1170,49 @@ public final class RenderUtilities {
 	 * @param body the body
 	 * @param state the rendering state
 	 * @param padding the padding for the label background
+	 * @param bodyLabel true if the body label should be drawn
+	 * @param fixtureLabels true if fixture labels should be drawn
 	 */
-	public static final void drawLabel(GL2 gl, GLUT glut, SandboxBody body, RenderState state, int padding) {
+	public static final void drawLabels(GL2 gl, GLUT glut, SandboxBody body, RenderState state, int padding, boolean bodyLabel, boolean fixtureLabels) {
 		// get the scale
 		double scale = state.scale;
 		// get the center point
 		Vector2 c = body.getWorldCenter();
 		Vector2 o = state.offset;
-		// compute the screen coordinates
-		int x = (int)Math.floor((c.x + o.x) * scale);
-		int y = (int)Math.floor((c.y + o.y) * scale) - 12 - padding;
-		// fill a partially transparent block for the label
-		gl.glColor4f(0.0f, 0.0f, 0.0f, 0.4f);
-		RenderUtilities.fillRectangleFromTopLeft(gl, x, y + padding + 10, 100 + padding * 2, 32 + padding);
-		gl.glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
-		RenderUtilities.drawRectangleFromTopLeft(gl, x, y + padding + 10, 100 + padding * 2, 32 + padding, false);
-		// draw separating line
-		RenderUtilities.drawLineSegment(gl, x + padding * 0.5, y - 3, x + 100 + padding, y - 3, false);
-		// set the raster position for the text
-		gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-		// draw the body name
-		gl.glRasterPos2i(x + padding, y);
-		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_12, body.getName());
-		// draw the center point
-		gl.glRasterPos2d(x + padding, y - 16);
-		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, RenderUtilities.formatVector2(c));
+		
+		gl.glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
+		
+		int x, y;
+		
+		if (bodyLabel) {
+			// compute the screen coordinates
+			x = (int)Math.floor((c.x + o.x) * scale);
+			y = (int)Math.floor((c.y + o.y) * scale) - 12;
+			// draw the body name
+			gl.glRasterPos2i(x, y);
+			glut.glutBitmapString(GLUT.BITMAP_HELVETICA_12, body.getName());
+			// draw the center point
+			gl.glRasterPos2d(x, y - 16);
+			glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, RenderUtilities.formatVector2(c));
+		}
+		
+		if (fixtureLabels) {
+			Transform tx = body.getTransform();
+			int fSize = body.getFixtureCount();
+			for (int i = 0; i < fSize; i++) {
+				BodyFixture bf = body.getFixture(i);
+				Vector2 lc = bf.getShape().getCenter();
+				Vector2 wc = tx.getTransformed(lc);
+				x = (int)Math.floor((wc.x + o.x) * scale);
+				y = (int)Math.floor((wc.y + o.y) * scale) - 12;
+				// draw the fixture name
+				gl.glRasterPos2i(x, y);
+				glut.glutBitmapString(GLUT.BITMAP_HELVETICA_12, (String)bf.getUserData());
+				// draw the center point
+				gl.glRasterPos2d(x, y - 16);
+				glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, RenderUtilities.formatVector2(wc));
+			}
+		}
 	}
 	
 	/**

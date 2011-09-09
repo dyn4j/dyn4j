@@ -107,7 +107,7 @@ public class MouseJointPanel extends JointPanel implements InputPanel, ActionLis
 		// anchor2 stores the anchor point
 		Vector2 a = joint.getAnchor2();
 		Vector2 t = joint.getTarget();
-		double mf = joint.getMaxForce();
+		double mf = joint.getMaximumForce();
 		double f = joint.getFrequency();
 		double r = joint.getDampingRatio();
 		
@@ -319,7 +319,7 @@ public class MouseJointPanel extends JointPanel implements InputPanel, ActionLis
 			mj.setTarget(target);
 			mj.setDampingRatio(this.getDoubleValue(this.txtRatio));
 			mj.setFrequency(this.getDoubleValue(this.txtFrequency));
-			mj.setMaxForce(this.getDoubleValue(this.txtMaxForce));
+			mj.setMaximumForce(this.getDoubleValue(this.txtMaxForce));
 		}
 	}
 	

@@ -33,7 +33,7 @@ import org.junit.Test;
 /**
  * Used to test the {@link RevoluteJoint} class.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.0.1
  * @since 1.0.2
  */
 public class RevoluteJointTest {
@@ -82,9 +82,9 @@ public class RevoluteJointTest {
 	@Test
 	public void setMaxMotorTorque() {
 		RevoluteJoint rj = new RevoluteJoint(b1, b2, new Vector2());
-		rj.setMaxMotorTorque(0.0);
-		rj.setMaxMotorTorque(4.0);
-		rj.setMaxMotorTorque(1000.0);
+		rj.setMaximumMotorTorque(0.0);
+		rj.setMaximumMotorTorque(4.0);
+		rj.setMaximumMotorTorque(1000.0);
 	}
 	
 	/**
@@ -93,7 +93,7 @@ public class RevoluteJointTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setNegativeMaxMotorTorque() {
 		RevoluteJoint rj = new RevoluteJoint(b1, b2, new Vector2());
-		rj.setMaxMotorTorque(-2.0);
+		rj.setMaximumMotorTorque(-2.0);
 	}
 	
 	/**

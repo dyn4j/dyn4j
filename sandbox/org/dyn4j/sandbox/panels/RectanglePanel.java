@@ -1,16 +1,20 @@
 package org.dyn4j.sandbox.panels;
 
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Window;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
 
+import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import org.dyn4j.geometry.Convex;
+import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
 import org.dyn4j.sandbox.utilities.Icons;
@@ -21,7 +25,7 @@ import org.dyn4j.sandbox.utilities.Icons;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class RectanglePanel extends ShapePanel implements InputPanel {
+public class RectanglePanel extends ConvexShapePanel implements InputPanel {
 	/** The version id */
 	private static final long serialVersionUID = 3354693723172871704L;
 
@@ -39,6 +43,9 @@ public class RectanglePanel extends ShapePanel implements InputPanel {
 	
 	/** The height of the rectangle */
 	private double height;
+
+	/** Panel used to preview the current shape */
+	private ShapePreviewPanel pnlPreview;
 	
 	/**
 	 * Default constructor.
@@ -78,6 +85,12 @@ public class RectanglePanel extends ShapePanel implements InputPanel {
 			public void propertyChange(PropertyChangeEvent event) {
 				Number number = (Number)event.getNewValue();
 				width = number.doubleValue();
+				try {
+					pnlPreview.setShape(Geometry.createRectangle(width, height));
+				} catch (IllegalArgumentException ex) {
+					// clear the shape since its not valid anymore
+					pnlPreview.setShape(null);
+				}
 			}
 		});
 		txtHeight.addFocusListener(new SelectTextFocusListener(txtHeight));
@@ -86,31 +99,42 @@ public class RectanglePanel extends ShapePanel implements InputPanel {
 			public void propertyChange(PropertyChangeEvent event) {
 				Number number = (Number)event.getNewValue();
 				height = number.doubleValue();
+				try {
+					pnlPreview.setShape(Geometry.createRectangle(width, height));
+				} catch (IllegalArgumentException ex) {
+					// clear the shape since its not valid anymore
+					pnlPreview.setShape(null);
+				}
 			}
 		});
 		
+		JLabel lblPreview = new JLabel("Preview", Icons.INFO, JLabel.LEFT);
+		lblPreview.setToolTipText("Shows a preview of the current shape.");
+		this.pnlPreview = new ShapePreviewPanel(new Dimension(150, 150), Geometry.createRectangle(this.width, this.height));
+		this.pnlPreview.setBackground(Color.WHITE);
+		this.pnlPreview.setBorder(BorderFactory.createEtchedBorder());
+		
 		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
-		layout.setHorizontalGroup(
-				layout.createSequentialGroup()
-				.addGroup(
-						layout.createParallelGroup()
+		layout.setHorizontalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup()
 						.addComponent(lblWidth)
-						.addComponent(lblHeight))
-				.addGroup(
-						layout.createParallelGroup()
+						.addComponent(lblHeight)
+						.addComponent(lblPreview))
+				.addGroup(layout.createParallelGroup()
 						.addComponent(txtWidth)
-						.addComponent(txtHeight)));
-		layout.setVerticalGroup(
-				layout.createSequentialGroup()
-				.addGroup(
-						layout.createParallelGroup()
+						.addComponent(txtHeight)
+						.addComponent(this.pnlPreview, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup()
 						.addComponent(lblWidth)
 						.addComponent(txtWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(
-						layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup()
 						.addComponent(lblHeight)
-						.addComponent(txtHeight, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
+						.addComponent(txtHeight, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(lblPreview)
+						.addComponent(this.pnlPreview, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
 	}
 	
 	/* (non-Javadoc)

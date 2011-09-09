@@ -143,7 +143,7 @@ public class PrismaticJointPanel extends JointPanel implements InputPanel, Actio
 		double ul = joint.getUpperLimit();
 		double ll = joint.getLowerLimit();
 		double ms = joint.getMotorSpeed();
-		double mf = joint.getMaxMotorForce();
+		double mf = joint.getMaximumMotorForce();
 		
 		// set the super classes defaults
 		this.txtName.setText(name);
@@ -450,7 +450,7 @@ public class PrismaticJointPanel extends JointPanel implements InputPanel, Actio
 			// set the properties that can change
 			pj.setLimitEnabled(this.chkLimitEnabled.isSelected());
 			pj.setLimits(this.getDoubleValue(this.txtLowerLimit), this.getDoubleValue(this.txtUpperLimit));
-			pj.setMaxMotorForce(this.getDoubleValue(this.txtMaxMotorForce));
+			pj.setMaximumMotorForce(this.getDoubleValue(this.txtMaxMotorForce));
 			pj.setMotorEnabled(this.chkMotorEnabled.isSelected());
 			pj.setMotorSpeed(this.getDoubleValue(this.txtMotorSpeed));
 		}
@@ -480,7 +480,7 @@ public class PrismaticJointPanel extends JointPanel implements InputPanel, Actio
 		// set the other properties
 		pj.setLimitEnabled(this.chkLimitEnabled.isSelected());
 		pj.setLimits(this.getDoubleValue(this.txtLowerLimit), this.getDoubleValue(this.txtUpperLimit));
-		pj.setMaxMotorForce(this.getDoubleValue(this.txtMaxMotorForce));
+		pj.setMaximumMotorForce(this.getDoubleValue(this.txtMaxMotorForce));
 		pj.setMotorEnabled(this.chkMotorEnabled.isSelected());
 		pj.setMotorSpeed(this.getDoubleValue(this.txtMotorSpeed));
 		

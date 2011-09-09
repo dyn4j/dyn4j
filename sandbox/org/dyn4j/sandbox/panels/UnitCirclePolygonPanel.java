@@ -1,11 +1,14 @@
 package org.dyn4j.sandbox.panels;
 
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Window;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
@@ -23,7 +26,7 @@ import org.dyn4j.sandbox.utilities.Icons;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class UnitCirclePolygonPanel extends ShapePanel implements InputPanel {
+public class UnitCirclePolygonPanel extends ConvexShapePanel implements InputPanel {
 	/** the version id */
 	private static final long serialVersionUID = -3651067811878657243L;
 
@@ -41,6 +44,9 @@ public class UnitCirclePolygonPanel extends ShapePanel implements InputPanel {
 	
 	/** The point count */
 	private int count = DEFAULT_COUNT;
+
+	/** Panel used to preview the current shape */
+	private ShapePreviewPanel pnlPreview;
 	
 	/**
 	 * Default constructor.
@@ -66,6 +72,12 @@ public class UnitCirclePolygonPanel extends ShapePanel implements InputPanel {
 			public void propertyChange(PropertyChangeEvent event) {
 				Number number = (Number)event.getNewValue();
 				radius = number.doubleValue();
+				try {
+					pnlPreview.setShape(Geometry.createUnitCirclePolygon(count, radius));
+				} catch (IllegalArgumentException e) {
+					// clear the shape since its not valid anymore
+					pnlPreview.setShape(null);
+				}
 			}
 		});
 		
@@ -75,8 +87,20 @@ public class UnitCirclePolygonPanel extends ShapePanel implements InputPanel {
 			public void propertyChange(PropertyChangeEvent event) {
 				Number number = (Number)event.getNewValue();
 				count = number.intValue();
+				try {
+					pnlPreview.setShape(Geometry.createUnitCirclePolygon(count, radius));
+				} catch (IllegalArgumentException e) {
+					// clear the shape since its not valid anymore
+					pnlPreview.setShape(null);
+				}
 			}
 		});
+		
+		JLabel lblPreview = new JLabel("Preview", Icons.INFO, JLabel.LEFT);
+		lblPreview.setToolTipText("Shows a preview of the current shape.");
+		this.pnlPreview = new ShapePreviewPanel(new Dimension(150, 150), Geometry.createUnitCirclePolygon(this.count, this.radius));
+		this.pnlPreview.setBackground(Color.WHITE);
+		this.pnlPreview.setBorder(BorderFactory.createEtchedBorder());
 		
 		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
@@ -84,10 +108,12 @@ public class UnitCirclePolygonPanel extends ShapePanel implements InputPanel {
 				layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup()
 						.addComponent(lblCount)
-						.addComponent(lblRadius))
+						.addComponent(lblRadius)
+						.addComponent(lblPreview))
 				.addGroup(layout.createParallelGroup()
 						.addComponent(txtCount)
-						.addComponent(txtRadius)));
+						.addComponent(txtRadius)
+						.addComponent(this.pnlPreview, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
 		layout.setVerticalGroup(
 				layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup()
@@ -95,7 +121,10 @@ public class UnitCirclePolygonPanel extends ShapePanel implements InputPanel {
 						.addComponent(txtCount, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 				.addGroup(layout.createParallelGroup()
 						.addComponent(lblRadius)
-						.addComponent(txtRadius, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
+						.addComponent(txtRadius, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(lblPreview)
+						.addComponent(this.pnlPreview, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
 	}
 	
 	/* (non-Javadoc)

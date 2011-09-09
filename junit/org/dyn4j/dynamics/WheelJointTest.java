@@ -36,7 +36,7 @@ import org.junit.Test;
 /**
  * Used to test the {@link WheelJoint} class.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 3.0.0
  */
 public class WheelJointTest {
@@ -93,9 +93,9 @@ public class WheelJointTest {
 	@Test
 	public void setMaxMotorTorque() {
 		WheelJoint lj = new WheelJoint(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
-		lj.setMaxMotorTorque(0.0);
-		lj.setMaxMotorTorque(10.0);
-		lj.setMaxMotorTorque(2548.0);
+		lj.setMaximumMotorTorque(0.0);
+		lj.setMaximumMotorTorque(10.0);
+		lj.setMaximumMotorTorque(2548.0);
 	}
 	
 	/**
@@ -104,7 +104,7 @@ public class WheelJointTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setNegativeMaxMotorTorque() {
 		WheelJoint lj = new WheelJoint(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
-		lj.setMaxMotorTorque(-2.0);
+		lj.setMaximumMotorTorque(-2.0);
 	}
 	
 	/**

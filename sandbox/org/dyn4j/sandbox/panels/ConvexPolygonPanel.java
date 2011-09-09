@@ -16,7 +16,7 @@ import org.dyn4j.geometry.Convex;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class PolygonPanel extends ShapePanel implements InputPanel {
+public class ConvexPolygonPanel extends ConvexShapePanel implements InputPanel {
 	/** The version id */
 	private static final long serialVersionUID = -6622003790931052412L;
 	
@@ -35,10 +35,10 @@ public class PolygonPanel extends ShapePanel implements InputPanel {
 	private UnitCirclePolygonPanel pnlUnitCirclePolygon;
 	
 	/** The arbitrary polygon panel */
-	private ArbitraryPolygonPanel pnlArbitraryPolygon;
+	private ArbitraryConvexPolygonPanel pnlArbitraryPolygon;
 	
 	/** The from file polygon panel */
-	private FromFilePolygonPanel pnlFromFilePolygon;
+	private FromFileConvexPolygonPanel pnlFromFilePolygon;
 	
 	// polygon radio buttons
 	
@@ -63,13 +63,13 @@ public class PolygonPanel extends ShapePanel implements InputPanel {
 	/**
 	 * Default constructor.
 	 */
-	public PolygonPanel() {
+	public ConvexPolygonPanel() {
 		this.pnlRightTriangle = new RightTrianglePanel();
 		this.pnlIsoscelesTriangle = new IsoscelesTrianglePanel();
 		this.pnlEquilateralTriangle = new EquilateralTrianglePanel();
 		this.pnlUnitCirclePolygon = new UnitCirclePolygonPanel();
-		this.pnlArbitraryPolygon = new ArbitraryPolygonPanel();
-		this.pnlFromFilePolygon = new FromFilePolygonPanel();
+		this.pnlArbitraryPolygon = new ArbitraryConvexPolygonPanel();
+		this.pnlFromFilePolygon = new FromFileConvexPolygonPanel();
 		
 		this.rdoRightTriangle = new JRadioButton("Right Triangle");
 		this.rdoIsoscelesTriangle = new JRadioButton("Isosceles Triangle");
@@ -157,8 +157,8 @@ public class PolygonPanel extends ShapePanel implements InputPanel {
 		bg.add(this.rdoIsoscelesTriangle);
 		bg.add(this.rdoEquilateralTriangle);
 		bg.add(this.rdoUnitCircle);
-		bg.add(this.rdoArbitrary);
 		bg.add(this.rdoFromFile);
+		bg.add(this.rdoArbitrary);
 		
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
@@ -172,29 +172,29 @@ public class PolygonPanel extends ShapePanel implements InputPanel {
 				.addComponent(this.rdoIsoscelesTriangle)
 				.addComponent(this.rdoEquilateralTriangle)
 				.addComponent(this.rdoUnitCircle)
-				.addComponent(this.rdoArbitrary)
 				.addComponent(this.rdoFromFile)
+				.addComponent(this.rdoArbitrary)
 				
 				.addComponent(this.pnlRightTriangle)
 				.addComponent(this.pnlIsoscelesTriangle)
 				.addComponent(this.pnlEquilateralTriangle)
 				.addComponent(this.pnlUnitCirclePolygon)
-				.addComponent(this.pnlArbitraryPolygon)
-				.addComponent(this.pnlFromFilePolygon));
+				.addComponent(this.pnlFromFilePolygon)
+				.addComponent(this.pnlArbitraryPolygon));
 		layout.setVerticalGroup(layout.createSequentialGroup()
 				.addComponent(this.rdoRightTriangle)
 				.addComponent(this.rdoIsoscelesTriangle)
 				.addComponent(this.rdoEquilateralTriangle)
 				.addComponent(this.rdoUnitCircle)
-				.addComponent(this.rdoArbitrary)
 				.addComponent(this.rdoFromFile)
+				.addComponent(this.rdoArbitrary)
 				
 				.addComponent(this.pnlRightTriangle)
 				.addComponent(this.pnlIsoscelesTriangle)
 				.addComponent(this.pnlEquilateralTriangle)
 				.addComponent(this.pnlUnitCirclePolygon)
-				.addComponent(this.pnlArbitraryPolygon)
-				.addComponent(this.pnlFromFilePolygon));
+				.addComponent(this.pnlFromFilePolygon)
+				.addComponent(this.pnlArbitraryPolygon));
 	}
 	
 	/* (non-Javadoc)
