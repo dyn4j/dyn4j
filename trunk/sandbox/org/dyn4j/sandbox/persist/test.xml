@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <World xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:noNamespaceSchemaLocation="http://www.dyn4j.org/Sandbox/sandbox.xsd">
+    <Bounds>
+    	<Rectangle Id="">
+    		<LocalCenter x="0.0" y="0.0" />
+    		<Width>1.0</Width>
+    		<Height>1.0</Height>
+    		<LocalRotation>0.0</LocalRotation>
+    	</Rectangle>
+    	<Transform>
+    		<Translation x="0.0" y="0.0" />
+    		<Rotation>0.0</Rotation>
+    	</Transform>
+    </Bounds>
 	<Bodies>
 		<Body Id="" Name="">
 			<Fixtures>
@@ -25,6 +37,7 @@
 				<Type>NORMAL</Type>
 				<Mass>1.0</Mass>
 				<Inertia>1.0</Inertia>
+				<Explicit>false</Explicit>
 			</Mass>
 			<Velocity x="0.0" y="0.0" />
 			<AngularVelocity>0.0</AngularVelocity>
@@ -40,10 +53,10 @@
 		<Body Name="" Id="">
 			<Fixtures>
 				<Fixture Name="" Id="">
-					<Shape Id="" xsi:type="Rectangle">
-						<LocalCenter x="0.0" y="0.0" />
-						<Width>1.0</Width>
-						<Height>1.0</Height>
+					<Shape Id="" xsi:type="Segment">
+						<LocalCenter x="0.0" y="0.0"/>
+						<Vertex x="0.0" y="0.0"/>
+						<Vertex x="0.0" y="0.0"/>
 					</Shape>
 					<Filter xsi:type="CategoryFilter">
 						<PartOfGroups>
@@ -68,6 +81,7 @@
 				<Type>NORMAL</Type>
 				<Mass>1.0</Mass>
 				<Inertia>1.0</Inertia>
+				<Explicit>false</Explicit>
 			</Mass>
 			<Velocity x="0.0" y="0.0" />
 			<AngularVelocity>0.0</AngularVelocity>

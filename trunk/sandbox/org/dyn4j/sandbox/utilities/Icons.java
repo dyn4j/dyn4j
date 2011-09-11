@@ -97,6 +97,13 @@ public class Icons {
 	/** Info icon */
 	public static final ImageIcon INFO = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/info-icon.png");
 	
+	/** Save icon */
+	public static final ImageIcon SAVE = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/save-icon.png");
+	
+	/** Open icon */
+	public static final ImageIcon OPEN = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/open-icon.png");
+	
+	
 	// normal icons
 
 	/** Bounds icon */

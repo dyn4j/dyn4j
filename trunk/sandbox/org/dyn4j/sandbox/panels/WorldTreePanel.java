@@ -170,6 +170,61 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 	}
 	
 	/**
+	 * Sets the world of this world tree panel.
+	 * <p>
+	 * This method will create the nodes for all objects.
+	 * @param world the world
+	 */
+	public void setWorld(World world) {
+		this.world = world;
+		
+		// reset everything
+		this.bounds.setUserObject(new NullBounds());
+		this.bodyFolder.removeAllChildren();
+		this.jointFolder.removeAllChildren();
+		
+		// set the bounds
+		if (world.getBounds() != null) {
+			this.bounds.setUserObject(world.getBounds());
+		}
+		
+		// add all the bodies
+		int bSize = world.getBodyCount();
+		for (int i = 0; i < bSize; i++) {
+			SandboxBody body = (SandboxBody)world.getBody(i);
+			// add the body node
+			DefaultMutableTreeNode bodyNode = new DefaultMutableTreeNode(body);
+			// insert into the tree
+			this.model.insertNodeInto(bodyNode, this.bodyFolder, this.bodyFolder.getChildCount());
+			// expand the path to the new node
+			this.tree.expandPath(new TreePath(bodyNode.getPath()).getParentPath());
+			
+			// add all the fixture nodes
+			int fSize = body.getFixtureCount();
+			for (int j = 0; j < fSize; j++) {
+				BodyFixture fixture = body.getFixture(j);
+				// add the node to the tree
+				DefaultMutableTreeNode fixtureNode = new DefaultMutableTreeNode(fixture);
+				this.model.insertNodeInto(fixtureNode, bodyNode, bodyNode.getChildCount());
+				// expand the path to the new node
+				this.tree.expandPath(new TreePath(fixtureNode.getPath()).getParentPath());
+			}
+		}
+		
+		// add all the joints
+		int jSize = world.getJointCount();
+		for (int i = 0; i < jSize; i++) {
+			Joint joint = world.getJoint(i);
+			// add the joint node
+			DefaultMutableTreeNode jointNode = new DefaultMutableTreeNode(joint);
+			// insert into the tree
+			this.model.insertNodeInto(jointNode, this.jointFolder, this.jointFolder.getChildCount());
+			// expand the path to the new node
+			this.tree.expandPath(new TreePath(jointNode.getPath()).getParentPath());
+		}
+	}
+	
+	/**
 	 * Creates the context menus for the different item types.
 	 */
 	private void createContextMenus() {

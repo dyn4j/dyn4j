@@ -25,6 +25,9 @@ import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -32,6 +35,7 @@ import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.ToolTipManager;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.dyn4j.Version;
 import org.dyn4j.dynamics.Body;
@@ -53,10 +57,12 @@ import org.dyn4j.sandbox.input.Mouse;
 import org.dyn4j.sandbox.panels.WorldTreePanel;
 import org.dyn4j.sandbox.persist.XmlFormatter;
 import org.dyn4j.sandbox.persist.XmlGenerator;
+import org.dyn4j.sandbox.persist.XmlReader;
 import org.dyn4j.sandbox.utilities.Fps;
 import org.dyn4j.sandbox.utilities.Icons;
 import org.dyn4j.sandbox.utilities.RenderState;
 import org.dyn4j.sandbox.utilities.RenderUtilities;
+import org.xml.sax.SAXException;
 
 import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.gl2.GLUT;
@@ -119,15 +125,28 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	/** The rendering state */
 	private RenderState renderState;
 	
+	/** The last path the user chose from either the load or save dialog */
+	private File directory;
+	
 	// controls
+	
+	// The menu bar
+	
+	/** The main menu bar */
+	private JMenuBar barMenu;
+	
+	/** The save menu item */
+	private JMenuItem mnuSave;
+	
+	/** The open menu item */
+	private JMenuItem mnuOpen;
+	
+	// The world tree panel
 	
 	/** The world tree control */
 	private WorldTreePanel pnlWorld;
 	
 	// Simulation toolbar
-	
-	/** The button to save the state of the simulation */
-	private JButton btnSave;
 	
 	/** The start button for the simulation */
 	private JButton btnStart;
@@ -210,8 +229,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	/** The move world action */
 	private MoveWorldAction moveWorldAction = new MoveWorldAction();
 	
-	// TODO add ability to save/load state of the world
-	
 	/**
 	 * Default constructor.
 	 */
@@ -247,18 +264,33 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		this.pnlWorld.setMinimumSize(size);
 		this.pnlWorld.addActionListener(this);
 		
+		// create the main menu bar
+		
+		this.barMenu = new JMenuBar();
+		
+		JMenu mnuFile = new JMenu(" File ");
+		
+		this.mnuSave = new JMenuItem(" Save Simulation ");
+		this.mnuSave.setIcon(Icons.SAVE);
+		this.mnuSave.setActionCommand("save");
+		this.mnuSave.addActionListener(this);
+		
+		this.mnuOpen = new JMenuItem(" Open Simulation ");
+		this.mnuOpen.setIcon(Icons.OPEN);
+		this.mnuOpen.setActionCommand("open");
+		this.mnuOpen.addActionListener(this);
+		
+		mnuFile.add(this.mnuOpen);
+		mnuFile.add(this.mnuSave);
+		
+		this.barMenu.add(mnuFile);
+				
+		this.setJMenuBar(this.barMenu);
+		
 		// create the simulation tool bar
 		
 		JToolBar barSimulation = new JToolBar("Simulation", JToolBar.HORIZONTAL);
 		barSimulation.setRollover(true);
-		
-		this.btnSave = new JButton("Save");
-		this.btnSave.addActionListener(this);
-		this.btnSave.setActionCommand("save");
-		this.btnSave.setToolTipText("Save Simulation State");
-		
-		barSimulation.add(this.btnSave);
-		barSimulation.addSeparator();
 		
 		this.btnStart = new JButton(Icons.START);
 		this.btnStart.addActionListener(this);
@@ -521,10 +553,23 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		// Sandbox events
 		if ("save".equals(command)) {
 			try {
-				this.saveSimulationState();
+				this.saveSimulationAction();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				JOptionPane.showMessageDialog(
+						this,
+						"An Error occured when trying to save the simulation:\n" + e.getMessage(),
+						"Error Saving Simulation",
+						JOptionPane.ERROR_MESSAGE);
+			}
+		} else if ("open".equals(command)) {
+			try {
+				this.openSimulationAction();
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(
+						this,
+						"An Error occured when trying to open the selected simulation file:\n" + e.getMessage(),
+						"Error Opening Simulation",
+						JOptionPane.ERROR_MESSAGE);
 			}
 		} else if ("start".equals(command)) {
 			if (isPaused()) {
@@ -532,6 +577,8 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 				this.pnlWorld.setEnabled(false);
 				this.btnStart.setEnabled(false);
 				this.btnStop.setEnabled(true);
+				this.mnuSave.setEnabled(false);
+				this.mnuOpen.setEnabled(false);
 				// end the select body action
 				this.selectBodyAction.end();
 				setPaused(false);
@@ -542,6 +589,8 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 				this.pnlWorld.setEnabled(true);
 				this.btnStart.setEnabled(true);
 				this.btnStop.setEnabled(false);
+				this.mnuSave.setEnabled(true);
+				this.mnuOpen.setEnabled(true);
 				setPaused(true);
 			}
 		} else if ("color".equals(command)) {
@@ -1259,7 +1308,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	 * Saves the current simulation state to an xml file.
 	 * @throws IOException thrown if an IO error occurs
 	 */
-	private void saveSimulationState() throws IOException {
+	private void saveSimulationAction() throws IOException {
 		String xml = "";
 		synchronized (this.world) {
 			xml = XmlGenerator.toXml(this.world);
@@ -1267,13 +1316,44 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		XmlFormatter formatter = new XmlFormatter(2);
 		xml = formatter.format(xml);
 		
-		JFileChooser fileBrowser = new JFileChooser();
+		// create a class to show a "are you sure" message when over writing an existing file
+		JFileChooser fileBrowser = new JFileChooser() {
+			/** The version id */
+			private static final long serialVersionUID = 1L;
+
+			/* (non-Javadoc)
+			 * @see javax.swing.JFileChooser#approveSelection()
+			 */
+			@Override
+			public void approveSelection() {
+				if (getDialogType() == SAVE_DIALOG) {
+					File selectedFile = getSelectedFile();
+					if ((selectedFile != null) && selectedFile.exists()) {
+						int response = JOptionPane.showConfirmDialog(
+										this,
+										"The file " + selectedFile.getName() + " already exists. Do you want to replace the existing file?",
+										"Ovewrite file",
+										JOptionPane.YES_NO_OPTION,
+										JOptionPane.WARNING_MESSAGE);
+						if (response != JOptionPane.YES_OPTION)
+							return;
+					}
+				}
+
+				super.approveSelection();
+			}
+		};
 		fileBrowser.setMultiSelectionEnabled(false);
+		if (this.directory != null) {
+			fileBrowser.setCurrentDirectory(this.directory);
+		}
+		fileBrowser.setSelectedFile(new File("simulation.xml"));
 		int option = fileBrowser.showSaveDialog(this);
 		// check the option
 		if (option == JFileChooser.APPROVE_OPTION) {
 			File file = fileBrowser.getSelectedFile();
 			if (file.isFile()) {
+				this.directory = file.getParentFile();
 				// see if its a new one or it already exists
 				if (file.exists()) {
 					// overwrite the file
@@ -1291,6 +1371,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 					}
 				}
 			} else {
+				this.directory = file;
 				// its a directory, so save it inside the dir
 				// using the default name
 				String path = file.getPath();
@@ -1302,6 +1383,35 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 					JOptionPane.showMessageDialog(this, "File saved successfully!", "File Saved", JOptionPane.INFORMATION_MESSAGE);
 				}
 				
+			}
+		}
+	}
+	
+	/**
+	 * Attempts to open and load the simulation state from the user selected file.
+	 * @throws ParserConfigurationException thrown if an error occurs in configuring the SAX parser
+	 * @throws SAXException thrown if any parsing error is encountered
+	 * @throws IOException thrown if an IO error occurs  
+	 */
+	private void openSimulationAction() throws ParserConfigurationException, SAXException, IOException {
+		JFileChooser fileBrowser = new JFileChooser();
+		fileBrowser.setMultiSelectionEnabled(false);
+		if (this.directory != null) {
+			fileBrowser.setCurrentDirectory(this.directory);
+		}
+		int option = fileBrowser.showOpenDialog(this);
+		// check the option
+		if (option == JFileChooser.APPROVE_OPTION) {
+			File file = fileBrowser.getSelectedFile();
+			// make sure it exists and its a file
+			if (file.exists() && file.isFile()) {
+				this.directory = file.getParentFile();
+				// read the file into a stream
+				synchronized (this.world) {
+					XmlReader.fromXml(file, this.world);					
+				}
+				// update the world tree
+				this.pnlWorld.setWorld(this.world);
 			}
 		}
 	}
