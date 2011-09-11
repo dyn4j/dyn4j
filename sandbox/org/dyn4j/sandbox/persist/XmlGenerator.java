@@ -2,7 +2,7 @@ package org.dyn4j.sandbox.persist;
 
 import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.collision.Filter;
-import org.dyn4j.dynamics.Body;
+import org.dyn4j.collision.RectangularBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.joint.AngleJoint;
@@ -25,6 +25,7 @@ import org.dyn4j.geometry.Shape;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.sandbox.SandboxBody;
 
 /**
  * Class used to export the world to xml.
@@ -42,13 +43,28 @@ public class XmlGenerator {
 		StringBuilder sb = new StringBuilder();
 		
 		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-		sb.append("<World xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">");
+		sb.append("<World xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://www.dyn4j.org/Sandbox/sandbox.xsd\">");
+		
+		// bounds
+		if (world.getBounds() instanceof RectangularBounds) {
+			RectangularBounds bounds = (RectangularBounds)world.getBounds();
+			Rectangle r = bounds.getBounds();
+			sb.append("<Bounds>");
+			sb.append("<Rectangle Id=\"").append(r.getId()).append("\">")
+			.append(XmlGenerator.toXml(r.getCenter(), "LocalCenter"))
+			.append("<Width>").append(r.getWidth()).append("</Width>")
+			.append("<Height>").append(r.getHeight()).append("</Height>")
+			.append("<LocalRotation>").append(r.getRotation()).append("</LocalRotation>")
+			.append("</Rectangle>");
+			sb.append(XmlGenerator.toXml(bounds.getTransform()));
+			sb.append("</Bounds>");
+		}
 		
 		// bodies
 		sb.append("<Bodies>");
 		int bSize = world.getBodyCount();
 		for (int i = 0; i < bSize; i++) {
-			Body body = world.getBody(i);
+			SandboxBody body = (SandboxBody)world.getBody(i);
 			sb.append(XmlGenerator.toXml(body));
 		}
 		sb.append("</Bodies>");
@@ -128,7 +144,8 @@ public class XmlGenerator {
 			sb.append("Rectangle\">")
 			.append(c)
 			.append("<Width>").append(r.getWidth()).append("</Width>")
-			.append("<Height>").append(r.getHeight()).append("</Height>");
+			.append("<Height>").append(r.getHeight()).append("</Height>")
+			.append("<LocalRotation>").append(r.getRotation()).append("</LocalRotation>");
 		} else if (shape instanceof Triangle) {
 			Triangle t = (Triangle)shape;
 			Vector2[] vs = t.getVertices();
@@ -242,9 +259,10 @@ public class XmlGenerator {
 	/**
 	 * Returns the xml for the given mass object.
 	 * @param mass the mass
+	 * @param explicit true if the mass was set explicitly
 	 * @return String
 	 */
-	private static final String toXml(Mass mass) {
+	private static final String toXml(Mass mass, boolean explicit) {
 		StringBuilder sb = new StringBuilder();
 		
 		// create a temporary mass from the passed in one and change the mass type
@@ -258,6 +276,7 @@ public class XmlGenerator {
 		.append("<Type>").append(mass.getType()).append("</Type>")
 		.append("<Mass>").append(m.getMass()).append("</Mass>")
 		.append("<Inertia>").append(m.getInertia()).append("</Inertia>")
+		.append("<Explicit>").append(explicit).append("</Explicit>")
 		.append("</Mass>");
 		
 		return sb.toString();
@@ -268,7 +287,7 @@ public class XmlGenerator {
 	 * @param body the body
 	 * @return String
 	 */
-	private static final String toXml(Body body) {
+	private static final String toXml(SandboxBody body) {
 		StringBuilder sb = new StringBuilder();
 		
 		sb.append("<Body Id=\"")
@@ -290,7 +309,7 @@ public class XmlGenerator {
 		sb.append(XmlGenerator.toXml(body.getTransform()));
 		
 		// output mass
-		sb.append(XmlGenerator.toXml(body.getMass()));
+		sb.append(XmlGenerator.toXml(body.getMass(), body.isMassExplicit()));
 		
 		sb.append(XmlGenerator.toXml(body.getVelocity(), "Velocity"));
 		sb.append("<AngularVelocity>").append(body.getAngularVelocity()).append("</AngularVelocity>");

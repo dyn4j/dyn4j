@@ -1,0 +1,3 @@
+add ability to save force and torque accumulators and add ability to apply forces/torques to bodies
+add ability to clear the body/joint folders (with respective message on the body folder action)
+add reset world option to menu bar (maybe by auto saving every click of the start button?)

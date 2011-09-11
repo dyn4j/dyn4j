@@ -53,6 +53,7 @@
 							</xs:restriction>
 						</xs:simpleType>
 					</xs:element>
+					<xs:element name="LocalRotation" type="xs:decimal" maxOccurs="1" minOccurs="1" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -97,131 +98,131 @@
 	</xs:complexType>
 	
 	<xs:complexType name="All">
-		<xs:attribute name="Value" type="xs:integer" fixed="2147483648" />
+		<xs:attribute name="Value" type="xs:integer" fixed="2147483648" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group1">
-		<xs:attribute name="Value" type="xs:integer" fixed="1" />
+		<xs:attribute name="Value" type="xs:integer" fixed="1" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group2">
-		<xs:attribute name="Value" type="xs:integer" fixed="2" />
+		<xs:attribute name="Value" type="xs:integer" fixed="2" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group3">
-		<xs:attribute name="Value" type="xs:integer" fixed="4" />
+		<xs:attribute name="Value" type="xs:integer" fixed="4" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group4">
-		<xs:attribute name="Value" type="xs:integer" fixed="8" />
+		<xs:attribute name="Value" type="xs:integer" fixed="8" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group5">
-		<xs:attribute name="Value" type="xs:integer" fixed="16" />
+		<xs:attribute name="Value" type="xs:integer" fixed="16" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group6">
-		<xs:attribute name="Value" type="xs:integer" fixed="32" />
+		<xs:attribute name="Value" type="xs:integer" fixed="32" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group7">
-		<xs:attribute name="Value" type="xs:integer" fixed="64" />
+		<xs:attribute name="Value" type="xs:integer" fixed="64" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group8">
-		<xs:attribute name="Value" type="xs:integer" fixed="128" />
+		<xs:attribute name="Value" type="xs:integer" fixed="128" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group9">
-		<xs:attribute name="Value" type="xs:integer" fixed="256" />
+		<xs:attribute name="Value" type="xs:integer" fixed="256" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group10">
-		<xs:attribute name="Value" type="xs:integer" fixed="512" />
+		<xs:attribute name="Value" type="xs:integer" fixed="512" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group11">
-		<xs:attribute name="Value" type="xs:integer" fixed="1024" />
+		<xs:attribute name="Value" type="xs:integer" fixed="1024" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group12">
-		<xs:attribute name="Value" type="xs:integer" fixed="2048" />
+		<xs:attribute name="Value" type="xs:integer" fixed="2048" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group13">
-		<xs:attribute name="Value" type="xs:integer" fixed="4096" />
+		<xs:attribute name="Value" type="xs:integer" fixed="4096" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group14">
-		<xs:attribute name="Value" type="xs:integer" fixed="8192" />
+		<xs:attribute name="Value" type="xs:integer" fixed="8192" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group15">
-		<xs:attribute name="Value" type="xs:integer" fixed="16384" />
+		<xs:attribute name="Value" type="xs:integer" fixed="16384" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group16">
-		<xs:attribute name="Value" type="xs:integer" fixed="32768" />
+		<xs:attribute name="Value" type="xs:integer" fixed="32768" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group17">
-		<xs:attribute name="Value" type="xs:integer" fixed="65536" />
+		<xs:attribute name="Value" type="xs:integer" fixed="65536" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group18">
-		<xs:attribute name="Value" type="xs:integer" fixed="131072" />
+		<xs:attribute name="Value" type="xs:integer" fixed="131072" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group19">
-		<xs:attribute name="Value" type="xs:integer" fixed="262144" />
+		<xs:attribute name="Value" type="xs:integer" fixed="262144" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group20">
-		<xs:attribute name="Value" type="xs:integer" fixed="524288" />
+		<xs:attribute name="Value" type="xs:integer" fixed="524288" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group21">
-		<xs:attribute name="Value" type="xs:integer" fixed="1048576" />
+		<xs:attribute name="Value" type="xs:integer" fixed="1048576" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group22">
-		<xs:attribute name="Value" type="xs:integer" fixed="2097152" />
+		<xs:attribute name="Value" type="xs:integer" fixed="2097152" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group23">
-		<xs:attribute name="Value" type="xs:integer" fixed="4194304" />
+		<xs:attribute name="Value" type="xs:integer" fixed="4194304" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group24">
-		<xs:attribute name="Value" type="xs:integer" fixed="8388608" />
+		<xs:attribute name="Value" type="xs:integer" fixed="8388608" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group25">
-		<xs:attribute name="Value" type="xs:integer" fixed="16777216" />
+		<xs:attribute name="Value" type="xs:integer" fixed="16777216" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group26">
-		<xs:attribute name="Value" type="xs:integer" fixed="33554432" />
+		<xs:attribute name="Value" type="xs:integer" fixed="33554432" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group27">
-		<xs:attribute name="Value" type="xs:integer" fixed="67108864" />
+		<xs:attribute name="Value" type="xs:integer" fixed="67108864" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group28">
-		<xs:attribute name="Value" type="xs:integer" fixed="134217728" />
+		<xs:attribute name="Value" type="xs:integer" fixed="134217728" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group29">
-		<xs:attribute name="Value" type="xs:integer" fixed="268435456" />
+		<xs:attribute name="Value" type="xs:integer" fixed="268435456" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group30">
-		<xs:attribute name="Value" type="xs:integer" fixed="536870912" />
+		<xs:attribute name="Value" type="xs:integer" fixed="536870912" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group31">
-		<xs:attribute name="Value" type="xs:integer" fixed="1073741824" />
+		<xs:attribute name="Value" type="xs:integer" fixed="1073741824" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Categories">
@@ -330,6 +331,7 @@
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:element>
+			<xs:element name="Explicit" type="xs:boolean" maxOccurs="1" minOccurs="1" />
 		</xs:sequence>
 	</xs:complexType>
 	
@@ -643,12 +645,20 @@
 			<xs:element name="Joint" type="Joint" maxOccurs="unbounded" minOccurs="0" />
 		</xs:sequence>
 	</xs:complexType>
+	
+	<xs:complexType name="Bounds">
+		<xs:sequence>
+			<xs:element name="Rectangle" type="Rectangle" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Transform" type="Transform" maxOccurs="1" minOccurs="1" />
+		</xs:sequence>
+	</xs:complexType>
 
 	<xs:complexType name="World">
-		<xs:all>
-			<xs:element name="Bodies" type="Bodies" />
-			<xs:element name="Joints" type="Joints" />
-		</xs:all>
+		<xs:sequence>
+			<xs:element name="Bounds" type="Bounds" maxOccurs="1" minOccurs="0" />
+			<xs:element name="Bodies" type="Bodies" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Joints" type="Joints" maxOccurs="1" minOccurs="1" />
+		</xs:sequence>
 	</xs:complexType>
 	
 	<xs:element name="World" type="World" />
