@@ -142,6 +142,7 @@ public class AddBodyDialog extends JDialog implements ActionListener {
 	 */
 	public static final SandboxBody show(Window owner, String title) {
 		AddBodyDialog dialog = new AddBodyDialog(owner, title);
+		dialog.setLocationRelativeTo(owner);
 		dialog.setIconImage(Icons.ADD_BODY.getImage());
 		dialog.setVisible(true);
 		// control returns to this method when the dialog is closed

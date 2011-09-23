@@ -19,11 +19,17 @@ import org.dyn4j.geometry.Wound;
  * <p>
  * Use the {@link #setPoints(Vector2[])} method to draw a preview of a polygon
  * that is not valid.
+ * <p>
+ * Use the {@link #setDecomposition(List)} method to draw a preview of a decomposed
+ * simple polygon.
+ * <p>
+ * Use the {@link #setHull(Convex, Vector2[])} method to draw a convex shape along with
+ * its point cloud.
  * @author William Bittle
  * @version 1.0.0
  * @since 1.0.0
  */
-public class ShapePreviewPanel extends JPanel {
+public class PreviewPanel extends JPanel {
 	/** The version id */
 	private static final long serialVersionUID = 8800065059450605097L;
 
@@ -45,6 +51,9 @@ public class ShapePreviewPanel extends JPanel {
 	/** The points of the polygon to draw */
 	private Vector2[] points;
 	
+	/** The points of the convex hull */
+	private Vector2[] pointCloud;
+	
 	/** The list of convex shapes of a decomposition */
 	private List<Convex> decomposition;
 	
@@ -52,11 +61,12 @@ public class ShapePreviewPanel extends JPanel {
 	 * Minimal constructor.
 	 * @param size the size
 	 */
-	public ShapePreviewPanel(Dimension size) {
+	public PreviewPanel(Dimension size) {
 		this.size = size;
 		this.convex = null;
 		this.points = null;
 		this.decomposition = null;
+		this.pointCloud = null;
 		
 		this.setPreferredSize(size);
 		this.setMinimumSize(size);
@@ -68,11 +78,12 @@ public class ShapePreviewPanel extends JPanel {
 	 * @param size the size of the preview panel
 	 * @param initialPoints the initial points; can be null
 	 */
-	public ShapePreviewPanel(Dimension size, Vector2[] initialPoints) {
+	public PreviewPanel(Dimension size, Vector2[] initialPoints) {
 		this.size = size;
 		this.points = initialPoints;
 		this.convex = null;
 		this.decomposition = null;
+		this.pointCloud = null;
 		
 		this.setPreferredSize(size);
 		this.setMinimumSize(size);
@@ -84,17 +95,36 @@ public class ShapePreviewPanel extends JPanel {
 	 * @param size the size of the preview panel
 	 * @param initialShape the initial shape; can be null
 	 */
-	public ShapePreviewPanel(Dimension size, Convex initialShape) {
+	public PreviewPanel(Dimension size, Convex initialShape) {
 		this.size = size;
 		this.convex = initialShape;
 		this.points = null;
 		this.decomposition = null;
+		this.pointCloud = null;
 		
 		this.setPreferredSize(size);
 		this.setMinimumSize(size);
 		this.setMaximumSize(size);
 	}
+	
+	/**
+	 * Full constructor.
+	 * @param size the size of the preview panel
+	 * @param initialShape the initial shape; can be null
+	 * @param initialPoints the initial points; can be null
+	 */
+	public PreviewPanel(Dimension size, Convex initialShape, Vector2[] initialPoints) {
+		this.size = size;
+		this.points = null;
+		this.convex = initialShape;
+		this.decomposition = null;
+		this.pointCloud = initialPoints;
 		
+		this.setPreferredSize(size);
+		this.setMinimumSize(size);
+		this.setMaximumSize(size);
+	}
+	
 	/**
 	 * Sets the current shape to render.
 	 * @param shape the shape
@@ -107,7 +137,7 @@ public class ShapePreviewPanel extends JPanel {
 	}
 	
 	/**
-	 * Sets the current poitns to render.
+	 * Sets the current points to render.
 	 * @param points the points
 	 */
 	public void setPoints(Vector2[] points) {
@@ -125,6 +155,18 @@ public class ShapePreviewPanel extends JPanel {
 		this.points = null;
 		this.convex = null;
 		this.decomposition = decomposition;
+		this.repaint();
+	}
+	
+	/**
+	 * Sets the current shape and points to render.
+	 * @param shape the shape
+	 * @param points the points
+	 */
+	public void setHull(Convex shape, Vector2[] points) {
+		this.pointCloud = points;
+		this.convex = shape;
+		this.decomposition = null;
 		this.repaint();
 	}
 	
@@ -261,8 +303,33 @@ public class ShapePreviewPanel extends JPanel {
 			}
 		}
 		
+		// draw the point cloud
+		if (this.pointCloud != null) {
+			Vector2[] vs = this.pointCloud;
+			double m = Math.max(Math.abs(vs[0].x), Math.abs(vs[0].y));
+			// find the largest coordinate to properly scale
+			for (int i = 1; i < vs.length; i++) {
+				Vector2 v = vs[i];
+				double t = Math.max(Math.abs(v.x), Math.abs(v.y));
+				if (m < t) {
+					m = t;
+				}
+			}
+			// compute the scale to fit the shape within the size
+			s = maxSize / m;
+			// find the largest coordinate to properly scale
+			for (int i = 0; i < vs.length; i++) {
+				Vector2 p = vs[i];
+				g2d.fillOval(
+						(int)Math.floor(p.x * s) - 1,
+						(int)Math.floor(p.y * s) - 1,
+						3,
+						3);
+			}
+		}
+		
 		// draw the origin point
-		g2d.fillOval(-1, 1, 3, 3);
+		g2d.drawOval(-2, -2, 5, 5);
 		g2d.scale(1.0, -1.0);
 		
 //		g2d.drawString("(0, 0)", 5, 5);

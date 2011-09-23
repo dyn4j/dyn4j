@@ -10,6 +10,11 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
@@ -30,6 +35,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
@@ -128,6 +134,9 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	/** The last path the user chose from either the load or save dialog */
 	private File directory;
 	
+	/** The map to store snapshots of the simulation */
+	private Map<String, String> snapshots = new HashMap<String, String>();
+	
 	// controls
 	
 	// The menu bar
@@ -135,11 +144,11 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	/** The main menu bar */
 	private JMenuBar barMenu;
 	
-	/** The save menu item */
-	private JMenuItem mnuSave;
+	/** The file menu */
+	private JMenu mnuFile;
 	
-	/** The open menu item */
-	private JMenuItem mnuOpen;
+	/** The snapshot menu */
+	private JMenu mnuSnapshot;
 	
 	// The world tree panel
 	
@@ -235,6 +244,10 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	public Sandbox() {
 		super("Sandbox v" + VERSION + " - dyn4j v" + Version.getVersion());
 		
+		// make sure tooltips and menus show up on top of the heavy weight canvas
+		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
+		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
+		
 		// set the look and feel to the system look and feel
 //		try {
 //			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -268,22 +281,41 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		
 		this.barMenu = new JMenuBar();
 		
-		JMenu mnuFile = new JMenu(" File ");
+		// file menu
+		this.mnuFile = new JMenu(" File ");
 		
-		this.mnuSave = new JMenuItem(" Save Simulation ");
-		this.mnuSave.setIcon(Icons.SAVE);
-		this.mnuSave.setActionCommand("save");
-		this.mnuSave.addActionListener(this);
+		JMenuItem mnuSave = new JMenuItem(" Save Simulation ");
+		mnuSave.setIcon(Icons.SAVE);
+		mnuSave.setActionCommand("save");
+		mnuSave.addActionListener(this);
 		
-		this.mnuOpen = new JMenuItem(" Open Simulation ");
-		this.mnuOpen.setIcon(Icons.OPEN);
-		this.mnuOpen.setActionCommand("open");
-		this.mnuOpen.addActionListener(this);
+		JMenuItem mnuOpen = new JMenuItem(" Open Simulation ");
+		mnuOpen.setIcon(Icons.OPEN);
+		mnuOpen.setActionCommand("open");
+		mnuOpen.addActionListener(this);
 		
-		mnuFile.add(this.mnuOpen);
-		mnuFile.add(this.mnuSave);
+		this.mnuFile.add(mnuOpen);
+		this.mnuFile.add(mnuSave);
 		
-		this.barMenu.add(mnuFile);
+		// snapshot menu
+		this.mnuSnapshot = new JMenu("Snapshot");
+		
+		JMenuItem mnuTakeSnapshot = new JMenuItem("Take Snapshot");
+		mnuTakeSnapshot.setActionCommand("snapshotTake");
+		mnuTakeSnapshot.addActionListener(this);
+		mnuTakeSnapshot.setIcon(Icons.SNAPSHOT_TAKE);
+		
+		JMenuItem mnuClearSnapshots = new JMenuItem("Clear Snapshots");
+		mnuClearSnapshots.setActionCommand("snapshotClearAll");
+		mnuClearSnapshots.addActionListener(this);
+		mnuClearSnapshots.setIcon(Icons.SNAPSHOT_REMOVE);
+		
+		this.mnuSnapshot.add(mnuTakeSnapshot);
+		this.mnuSnapshot.add(mnuClearSnapshots);
+		this.mnuSnapshot.addSeparator();
+		
+		this.barMenu.add(this.mnuFile);
+		this.barMenu.add(this.mnuSnapshot);
 				
 		this.setJMenuBar(this.barMenu);
 		
@@ -428,10 +460,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		pnlToolBar.add(barMouseLocation);
 		pnlToolBar.add(barAbout);
 		pnlToolBar.setMaximumSize(pnlToolBar.getPreferredSize());
-		
-		// make sure tooltips show up on top of the heavy weight canvas
-		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
-		
+				
 		// attempt to set the icon
 		this.setIconImage(Icons.SANDBOX_48.getImage());
 		
@@ -533,21 +562,16 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		// World tree panel events
 		if ("clear-all".equals(command)) {
 			// clear the current selection
-			this.selectBodyAction.end();
+			this.endAllActions();
 		} else if ("remove-body".equals(command)) {
 			// check if it was this body
 			BodyActionEvent bae = (BodyActionEvent)event;
 			SandboxBody body = bae.getBody();
-			// check the select body action
-			if (body == this.selectBodyAction.getObject()) {
-				// if the body is selected then end the action
-				this.selectBodyAction.end();
-			}
-			// check the edit body action
-			if (body == this.editBodyAction.getObject()) {
-				// end all the edit body actions
-				this.editBodyAction.end();
-				this.selectFixtureAction.end();
+			// check the select/edit body actions
+			if (body == this.selectBodyAction.getObject()
+			 || body == this.editBodyAction.getObject()) {
+				// if the body is selected or being edited then end the actions
+				this.endAllActions();
 			}
 		}
 		// Sandbox events
@@ -564,33 +588,41 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		} else if ("open".equals(command)) {
 			try {
 				this.openSimulationAction();
+				// stop all actions
+				this.endAllActions();
 			} catch (Exception e) {
 				JOptionPane.showMessageDialog(
 						this,
-						"An Error occured when trying to open the selected simulation file:\n" + e.getMessage(),
+						"An Error occured when trying to open the selected simulation file:\n" + e,
 						"Error Opening Simulation",
 						JOptionPane.ERROR_MESSAGE);
 			}
 		} else if ("start".equals(command)) {
 			if (isPaused()) {
+				// stop all actions
+				this.endAllActions();
+				// take a snapshot of the current simulation
+				this.takeSnapshot(true);
 				// disable the world editor
 				this.pnlWorld.setEnabled(false);
 				this.btnStart.setEnabled(false);
 				this.btnStop.setEnabled(true);
-				this.mnuSave.setEnabled(false);
-				this.mnuOpen.setEnabled(false);
-				// end the select body action
-				this.selectBodyAction.end();
+				this.mnuFile.setEnabled(false);
+				this.mnuSnapshot.setEnabled(false);
 				setPaused(false);
 			}
 		} else if ("stop".equals(command)) {
 			if (!isPaused()) {
+				// stop all actions
+				this.endAllActions();
+				// clear the mouse joint
+				this.selectedBodyJoint = null;
 				// enable the world editor
 				this.pnlWorld.setEnabled(true);
 				this.btnStart.setEnabled(true);
 				this.btnStop.setEnabled(false);
-				this.mnuSave.setEnabled(true);
-				this.mnuOpen.setEnabled(true);
+				this.mnuFile.setEnabled(true);
+				this.mnuSnapshot.setEnabled(true);
 				setPaused(true);
 			}
 		} else if ("color".equals(command)) {
@@ -615,6 +647,41 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 			AboutDialog.show(this);
 		} else if ("to-origin".equals(command)) {
 			this.offset.zero();
+		} else if ("snapshotTake".equals(command)) {
+			this.takeSnapshot(false);
+		} else if ("snapshotClearAll".equals(command)) {
+			// make sure they are sure
+			int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want to clear all snapshots?", "Clear Snapshots", JOptionPane.YES_NO_CANCEL_OPTION);
+			// check the user's choice
+			if (choice == JOptionPane.YES_OPTION) {
+				// remove the entries from the map
+				this.snapshots.clear();
+				// remove all components after the third one
+				while (this.mnuSnapshot.getItemCount() > 3) {
+					this.mnuSnapshot.remove(3);
+				}
+			}
+		} else if ("snapshotRestore".equals(command)) {
+			JMenuItem item = (JMenuItem)event.getSource();
+			String key = item.getText();
+			
+			// make sure they are sure
+			int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want load the '" + key + "' snapshot?\n" +
+					"The current simulation will be lost.", "Load Snapshot", JOptionPane.YES_NO_CANCEL_OPTION);
+			// check the user's choice
+			if (choice == JOptionPane.YES_OPTION) {
+				try {
+					this.restoreSnapshot(key);
+					// stop all actions
+					this.endAllActions();
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(
+							this,
+							"An Error occured when trying to restore the snapshot '" + key + "':\n" + e,
+							"Error Restoring Snapshot",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
 		}
 	}
 	
@@ -1412,8 +1479,67 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 				}
 				// update the world tree
 				this.pnlWorld.setWorld(this.world);
+				// remove the current selection
+				
 			}
 		}
+	}
+	
+	/**
+	 * Saves a snapshot of the simulation.
+	 * @param auto true if the snapshot is an automatic snapshot
+	 */
+	private void takeSnapshot(boolean auto) {
+		// get the xml for the current simulation
+		String xml = "";
+		synchronized (this.world) {
+			xml = XmlGenerator.toXml(this.world);
+		}
+		// save it in the snapshot map using the timestamp as the key
+		Date date = new Date();
+		DateFormat df = new SimpleDateFormat("hh:mm:ss:SSS aa");
+		String key = df.format(date);
+		if (auto) {
+			key = key + " (Automatic)";
+		}
+		// add it to the map
+		this.snapshots.put(key, xml);
+		
+		JMenuItem mnuShot = new JMenuItem(key);
+		mnuShot.setActionCommand("snapshotRestore");
+		mnuShot.addActionListener(this);
+		mnuShot.setIcon(Icons.SNAPSHOT);
+		this.mnuSnapshot.add(mnuShot);
+	}
+	
+	/**
+	 * Restores the given snapshot.
+	 * @param snapshot the snapshot key
+	 * @throws ParserConfigurationException thrown if an error occurs in configuring the SAX parser
+	 * @throws SAXException thrown if any parsing error is encountered
+	 * @throws IOException thrown if an IO error occurs  
+	 */
+	private void restoreSnapshot(String snapshot) throws ParserConfigurationException, SAXException, IOException {
+		String xml = this.snapshots.get(snapshot);
+		// read the file into a stream
+		synchronized (this.world) {
+			XmlReader.fromXml(xml, this.world);
+		}
+		// update the world tree
+		this.pnlWorld.setWorld(this.world);
+	}
+	
+	/**
+	 * Ends all actions (excluding the moveWorldAction).
+	 */
+	private void endAllActions() {
+		this.selectBodyAction.end();
+		this.editBodyAction.end();
+		this.selectFixtureAction.end();
+		this.moveBodyAction.end();
+		this.rotateBodyAction.end();
+		this.moveFixtureAction.end();
+		this.rotateFixtureAction.end();
 	}
 	
 	/**

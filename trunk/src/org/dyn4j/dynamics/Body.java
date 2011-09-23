@@ -84,6 +84,9 @@ import org.dyn4j.geometry.Vector2;
  * @since 1.0.0
  */
 public class Body implements Swept, Collidable, Transformable {
+	/** Number of fixtures typically added to a {@link Body} */
+	private static final int TYPICAL_FIXTURE_COUNT = 1;
+	
 	/** The default linear damping; value = {@value #DEFAULT_LINEAR_DAMPING} */
 	public static final double DEFAULT_LINEAR_DAMPING = 0.0;
 	
@@ -170,7 +173,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 */
 	public Body() {
 		// the majority of bodies will contain one fixture/shape
-		this.fixtures = new ArrayList<BodyFixture>(1);
+		this.fixtures = new ArrayList<BodyFixture>(Body.TYPICAL_FIXTURE_COUNT);
 		this.radius = 0.0;
 		this.mass = new Mass();
 		this.id = UUID.randomUUID().toString();
@@ -312,6 +315,24 @@ public class Body implements Swept, Collidable, Transformable {
 	}
 	
 	/**
+	 * Removes all fixtures from this body and returns them.
+	 * <p>
+	 * After adding or removing fixtures make sure to call the {@link #setMass()}
+	 * or {@link #setMass(Mass.Type)} method to compute the new total
+	 * {@link Mass} for the body.
+	 * @return List&lt;{@link BodyFixture}&gt;
+	 * @since 3.0.1
+	 */
+	public List<BodyFixture> removeAllFixtures() {
+		// return the current list
+		List<BodyFixture> fixtures = this.fixtures;
+		// create a new list to replace the current list
+		this.fixtures = new ArrayList<BodyFixture>(Body.TYPICAL_FIXTURE_COUNT);
+		// return the current list
+		return fixtures;
+	}
+	
+	/**
 	 * This method should be called after fixture modification
 	 * is complete.
 	 * <p>
@@ -339,7 +360,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 * <p>
 	 * If this method is called before any fixtures are added, the
 	 * mass is set to a new {@link Mass} object with infinite mass despite
-	 * the given type passed in.
+	 * the mass type passed in.
 	 * @param type the {@link org.dyn4j.geometry.Mass.Type}
 	 * @return {@link Body} this body
 	 * @throws NullPointerException if type is null
@@ -587,8 +608,11 @@ public class Body implements Swept, Collidable, Transformable {
 	
 	/**
 	 * Clears the forces stored in the force accumulator.
+	 * <p>
+	 * Renamed from clearForces (3.0.0 and below).
+	 * @since 3.0.1
 	 */
-	public void clearForces() {
+	public void clearAccumulatedForce() {
 		this.forces.clear();
 	}
 	
@@ -601,8 +625,11 @@ public class Body implements Swept, Collidable, Transformable {
 	
 	/**
 	 * Clears the torques stored in the torque accumulator.
+	 * <p>
+	 * Renamed from clearTorques (3.0.0 and below).
+	 * @since 3.0.1
 	 */
-	public void clearTorques() {
+	public void clearAccumulatedTorque() {
 		this.torques.clear();
 	}
 	
@@ -1204,19 +1231,48 @@ public class Body implements Swept, Collidable, Transformable {
 	}
 	
 	/**
-	 * Returns the force {@link Vector2}.
+	 * Returns the force applied in the last iteration.
 	 * @return {@link Vector2}
 	 */
 	public Vector2 getForce() {
 		return this.force;
 	}
-
+	
 	/**
-	 * Returns the torque.
+	 * Returns the total force currently stored in the force accumulator.
+	 * @return {@link Vector2}
+	 * @since 3.0.1
+	 */
+	public Vector2 getAccumulatedForce() {
+		int fSize = this.forces.size();
+		Vector2 force = new Vector2();
+		for (int i = 0; i < fSize; i++) {
+			Vector2 tf = this.forces.get(i).force;
+			force.add(tf);
+		}
+		return force;
+	}
+	
+	/**
+	 * Returns the torque applied in the last iteration.
 	 * @return double
 	 */
 	public double getTorque() {
 		return this.torque;
+	}
+
+	/**
+	 * Returns the total torque currently stored in the torque accumulator.
+	 * @return double
+	 * @since 3.0.1
+	 */
+	public double getAccumulatedTorque() {
+		int tSize = this.torques.size();
+		double torque = 0.0;
+		for (int i = 0; i < tSize; i++) {
+			torque += this.torques.get(i).torque;
+		}
+		return torque;
 	}
 	
 	/**

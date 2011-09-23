@@ -70,7 +70,7 @@ import org.dyn4j.geometry.Vector2;
  * Employs the same {@link Island} solving technique as <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class World {
@@ -1520,23 +1520,28 @@ public class World {
 	}
 	
 	/**
-	 * Clears the joints and bodies from the world.
+	 * Removes all the joints and bodies from the world.
 	 * <p>
-	 * This method does not notify of destroyed objects.
-	 * @see #clear(boolean)
+	 * This method does <b>not</b> notify of destroyed objects.
+	 * <p>
+	 * Renamed from clear (3.0.0 and below).
+	 * @see #removeAll(boolean)
+	 * @since 3.0.1
 	 */
-	public void clear() {
-		this.clear(false);
+	public void removeAll() {
+		this.removeAll(false);
 	}
 	
 	/**
-	 * Clears the joints and bodies from the world.
+	 * Removes all the joints and bodies from the world.
 	 * <p>
-	 * This method will clear the joints and contacts from all {@link Body}s.
+	 * This method will remove the joints and contacts from all {@link Body}s.
+	 * <p>
+	 * Renamed from clear (3.0.0 to 1.0.2).
 	 * @param notify true if destruction of joints and contacts should be notified of by the {@link DestructionListener}
-	 * @since 1.0.2
+	 * @since 3.0.1
 	 */
-	public void clear(boolean notify) {
+	public void removeAll(boolean notify) {
 		// loop over the bodies and clear the
 		// joints and contacts
 		int bsize = this.bodies.size();
@@ -1616,6 +1621,97 @@ public class World {
 		this.bodies.clear();
 		// clear the contact manager of cached contacts
 		this.contactManager.reset();
+	}
+	
+	/**
+	 * This is a convenience method for the {@link #removeAll()} method since all joints will be removed
+	 * when all bodies are removed.
+	 * <p>
+	 * This method does not notify of the destroyed contacts, joints, etc.
+	 * @see #removeAllBodies(boolean)
+	 * @since 3.0.1
+	 */
+	public void removeAllBodies() {
+		this.removeAll();
+	}
+	
+	/**
+	 * This is a convenience method for the {@link #removeAll(boolean)} method since all joints will be removed
+	 * when all bodies are removed.
+	 * @param notify true if destruction of joints and contacts should be notified of by the {@link DestructionListener}
+	 * @since 3.0.1
+	 */
+	public void removeAllBodies(boolean notify) {
+		this.removeAll(notify);
+	}
+	
+	/**
+	 * Removes all {@link Joint}s from this {@link World}.
+	 * <p>
+	 * This method does not notify of the joints removed.
+	 * @see #removeAllJoints(boolean)
+	 * @since 3.0.1
+	 */
+	public void removeAllJoints() {
+		this.removeAllJoints(false);
+	}
+	
+	/**
+	 * Removes all {@link Joint}s from this {@link World}.
+	 * @param notify true if destruction of joints should be notified of by the {@link DestructionListener}
+	 * @since 3.0.1
+	 */
+	public void removeAllJoints(boolean notify) {
+		// get the number of joints
+		int jSize = this.joints.size();
+		// remove all the joints
+		for (int i = 0; i < jSize; i++) {
+			// remove the joint from the joint list
+			Joint joint = this.joints.get(i);
+			
+			// get the involved bodies
+			Body body1 = joint.getBody1();
+			Body body2 = joint.getBody2();
+			
+			// remove the joint edges from body1
+			Iterator<JointEdge> iterator = body1.joints.iterator();
+			while (iterator.hasNext()) {
+				// see if this is the edge we want to remove
+				JointEdge jointEdge = iterator.next();
+				if (jointEdge.getJoint() == joint) {
+					// then remove this joint edge
+					iterator.remove();
+					// joints should only have one joint edge
+					// per body
+					break;
+				}
+			}
+			// remove the joint edges from body2
+			iterator = body2.joints.iterator();
+			while (iterator.hasNext()) {
+				// see if this is the edge we want to remove
+				JointEdge jointEdge = iterator.next();
+				if (jointEdge.getJoint() == joint) {
+					// then remove this joint edge
+					iterator.remove();
+					// joints should only have one joint edge
+					// per body
+					break;
+				}
+			}
+			
+			// finally wake both bodies
+			body1.setAsleep(false);
+			body2.setAsleep(false);
+			
+			// notify of the destruction if required
+			if (notify) {
+				this.destructionListener.destroyed(joint);
+			}
+		}
+		
+		// remove all the joints from the joint list
+		this.joints.clear();
 	}
 	
 	/**

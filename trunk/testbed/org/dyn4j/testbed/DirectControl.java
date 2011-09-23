@@ -34,7 +34,7 @@ import org.dyn4j.geometry.Mass;
  * Class used to control a body directly by translation
  * and rotation using the mouse.
  * @author William Bittle
- * @version 1.2.0
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class DirectControl {
@@ -99,8 +99,8 @@ public class DirectControl {
 		body.setAngularVelocity(0.0);
 		body.getVelocity().zero();
 		// clear the accumulators
-		body.clearForces();
-		body.clearTorques();
+		body.clearAccumulatedForce();
+		body.clearAccumulatedTorque();
 		// clear the forces and torques
 		body.clearForce();
 		body.clearTorque();

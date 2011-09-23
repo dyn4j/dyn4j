@@ -35,22 +35,13 @@ public class SamplePolygonFileDialog extends JDialog implements MouseListener, A
 	/**
 	 * Full constructor.
 	 * @param parent the component displaying this dialog
+	 * @param contents the file contents
 	 */
-	private SamplePolygonFileDialog(Component parent) {
+	private SamplePolygonFileDialog(Component parent, String contents) {
 		super(JOptionPane.getFrameForComponent(parent), "Sample Polygon File", ModalityType.APPLICATION_MODAL);
 		
 		this.txtFile = new JTextArea();
-		this.txtFile.setText(
-				"# Sample convex polygon with counter-clockwise winding and no coincident vertices\n" +
-				"# the # character must be the first character on the line to be flagged as a comment\n" +
-				"\n" +
-				"# Any number of blank lines can exist\n" +
-				"\n" +
-				"# You can use any whitespace character to separate the x and y values (space, tab, multiple spaces, etc)\n" +
-				"1.0 -5.0\n" +
-				"2.0\t2.0\n" +
-				"\n" +
-				"1.0     5.0\n");
+		this.txtFile.setText(contents);
 		this.txtFile.setEditable(false);
 		this.txtFile.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		this.txtFile.addMouseListener(this);
@@ -150,9 +141,10 @@ public class SamplePolygonFileDialog extends JDialog implements MouseListener, A
 	/**
 	 * Shows a new dialog.
 	 * @param parent the component who is showing this dialog
+	 * @param contents the file contents
 	 */
-	public static final void show(Component parent) {
-		SamplePolygonFileDialog dialog = new SamplePolygonFileDialog(parent);
+	public static final void show(Component parent, String contents) {
+		SamplePolygonFileDialog dialog = new SamplePolygonFileDialog(parent, contents);
 		dialog.setVisible(true);
 	}
 }

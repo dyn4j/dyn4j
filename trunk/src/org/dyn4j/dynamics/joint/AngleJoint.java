@@ -28,6 +28,7 @@ import org.dyn4j.Epsilon;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.Step;
+import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Vector2;
@@ -39,11 +40,6 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * NOTE: The {@link #getAnchor1()} and {@link #getAnchor2()} methods return
  * null references since this joint does not require any anchor points at creation.
- * <p>
- * Like the {@link RevoluteJoint}, the limits that an angle joint places on the bodies
- * are world space limits not relative angle limits (although the limits are relative to 
- * the initial angle of the bodies given at joint creation time).  Therefore its recommended 
- * to only use the limits when one body is fixed.
  * <p>
  * Defaults the min and max angles to the current angle (allowing no angular movement).
  * @author William Bittle
@@ -136,7 +132,17 @@ public class AngleJoint extends Joint {
 		}
 		
 		// compute the current angle
-		double angle = this.body1.getTransform().getRotation() - this.body2.getTransform().getRotation() - this.referenceAngle;
+		
+		// this causes problems: when the one of the bodies is rotated, the other
+		// body compensates by rotating the greater distance instead of the shorter
+//		double angle = this.body1.getTransform().getRotation() - this.body2.getTransform().getRotation() - this.referenceAngle;
+		
+		// we can fix it by always taking the smaller rotation
+		double rr = this.body1.getTransform().getRotation() - this.body2.getTransform().getRotation();
+		if (rr < -Math.PI) rr += Geometry.TWO_PI;
+		if (rr > Math.PI) rr -= Geometry.TWO_PI;
+		// then apply the reference angle
+		double angle = rr - this.referenceAngle;
 		
 		// check if the limits are enabled
 		if (this.limitEnabled) {

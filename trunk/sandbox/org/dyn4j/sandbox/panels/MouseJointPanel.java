@@ -164,7 +164,7 @@ public class MouseJointPanel extends JointPanel implements InputPanel, ActionLis
 		this.txtFrequency = new JFormattedTextField(new DecimalFormat("0.000"));
 		this.txtFrequency.addFocusListener(new SelectTextFocusListener(this.txtFrequency));
 		
-		this.lblRatio = new JLabel("Ratio", Icons.INFO, JLabel.LEFT);
+		this.lblRatio = new JLabel("Damping Ratio", Icons.INFO, JLabel.LEFT);
 		this.lblRatio.setToolTipText("Determines how fast the spring is dampened from 0.0 to 1.0.");
 		this.txtRatio = new JFormattedTextField(new DecimalFormat("0.000"));
 		this.txtRatio.addFocusListener(new SelectTextFocusListener(this.txtRatio));

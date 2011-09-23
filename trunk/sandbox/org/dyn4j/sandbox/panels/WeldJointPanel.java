@@ -66,6 +66,20 @@ public class WeldJointPanel extends JointPanel implements InputPanel, ActionList
 	/** The button to set anchor2 to body2's center of mass */
 	private JButton btnUseCenter2;
 	
+	// frequency and damping ratio
+
+	/** The frequency label */
+	private JLabel lblFrequency;
+	
+	/** The ratio label */
+	private JLabel lblRatio;
+	
+	/** The frequency text field */
+	private JFormattedTextField txtFrequency;
+	
+	/** The ratio text field */
+	private JFormattedTextField txtRatio;
+	
 	/**
 	 * Full constructor.
 	 * @param joint the original joint; null if creating
@@ -81,6 +95,8 @@ public class WeldJointPanel extends JointPanel implements InputPanel, ActionList
 		SandboxBody b1 = (SandboxBody)joint.getBody1();
 		SandboxBody b2 = (SandboxBody)joint.getBody2();
 		Vector2 an = joint.getAnchor1();
+		double f = joint.getFrequency();
+		double r = joint.getDampingRatio();
 		
 		// set the super classes defaults
 		this.txtName.setText(name);
@@ -119,6 +135,18 @@ public class WeldJointPanel extends JointPanel implements InputPanel, ActionList
 		this.btnUseCenter2.setActionCommand("use-com2");
 		this.btnUseCenter2.addActionListener(this);
 		
+		this.lblFrequency = new JLabel("Frequency", Icons.INFO, JLabel.LEFT);
+		this.lblFrequency.setToolTipText(
+				"<html>Determines how fast the spring should oscillate in hertz (Seconds<sup>-1</sup>).<br />" +
+				"Set to zero to disable the spring/damper and make it a fixed joint.</html>");
+		this.txtFrequency = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtFrequency.addFocusListener(new SelectTextFocusListener(this.txtFrequency));
+		
+		this.lblRatio = new JLabel("Damping Ratio", Icons.INFO, JLabel.LEFT);
+		this.lblRatio.setToolTipText("Determines how fast the spring is dampened from 0.0 to 1.0.");
+		this.txtRatio = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtRatio.addFocusListener(new SelectTextFocusListener(this.txtRatio));
+		
 		// set defaults
 
 		this.cmbBody1.setSelectedItem(b1);
@@ -126,6 +154,9 @@ public class WeldJointPanel extends JointPanel implements InputPanel, ActionList
 		
 		this.txtX1.setValue(an.x);
 		this.txtY1.setValue(an.y);
+		
+		this.txtFrequency.setValue(f);
+		this.txtRatio.setValue(r);
 		
 		// setup edit mode if necessary
 		
@@ -197,6 +228,32 @@ public class WeldJointPanel extends JointPanel implements InputPanel, ActionList
 						.addComponent(this.txtY1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(this.lblY1)));
 		
+		// setup the spring/damper secion
+		
+		JPanel pnlSpringDamper = new JPanel();
+		pnlSpringDamper.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Spring/Damper "));
+		
+		layout = new GroupLayout(pnlSpringDamper);
+		pnlSpringDamper.setLayout(layout);
+		
+		layout.setAutoCreateContainerGaps(true);
+		layout.setAutoCreateGaps(true);
+		
+		layout.setHorizontalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup()
+						.addComponent(this.lblFrequency)
+						.addComponent(this.lblRatio))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(this.txtFrequency)
+						.addComponent(this.txtRatio)));
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup()
+						.addComponent(this.lblFrequency)
+						.addComponent(this.txtFrequency, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(this.lblRatio)
+						.addComponent(this.txtRatio, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
+		
 		// setup the layout of the sections
 		
 		layout = new GroupLayout(this);
@@ -206,9 +263,11 @@ public class WeldJointPanel extends JointPanel implements InputPanel, ActionList
 		layout.setAutoCreateGaps(true);
 		
 		layout.setHorizontalGroup(layout.createParallelGroup()
-				.addComponent(pnlGeneral));
+				.addComponent(pnlGeneral)
+				.addComponent(pnlSpringDamper));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addComponent(pnlGeneral));
+				.addComponent(pnlGeneral)
+				.addComponent(pnlSpringDamper));
 	}
 
 	/* (non-Javadoc)
@@ -217,7 +276,8 @@ public class WeldJointPanel extends JointPanel implements InputPanel, ActionList
 	@Override
 	public String getDescription() {
 		return "A weld joint fixes two to move and rotate as one body.  This has the same effect as adding another fixture to " +
-				"a body.  A weld joint is a better choice than a new fixture if the bodies plan to separate.";
+				"a body.  A weld joint is a better choice than a new fixture if the bodies plan to separate.  The weld joint also " +
+				"allows a rotational spring/damper at the anchor point.";
 	}
 	
 	/* (non-Javadoc)
@@ -246,6 +306,9 @@ public class WeldJointPanel extends JointPanel implements InputPanel, ActionList
 			// set the super class properties
 			wj.setUserData(this.txtName.getText());
 			wj.setCollisionAllowed(this.chkCollision.isSelected());
+			
+			wj.setFrequency(this.getDoubleValue(this.txtFrequency));
+			wj.setDampingRatio(this.getDoubleValue(this.txtRatio));
 		}
 	}
 	
@@ -268,6 +331,9 @@ public class WeldJointPanel extends JointPanel implements InputPanel, ActionList
 		wj.setUserData(this.txtName.getText());
 		wj.setCollisionAllowed(this.chkCollision.isSelected());
 		
+		wj.setFrequency(this.getDoubleValue(this.txtFrequency));
+		wj.setDampingRatio(this.getDoubleValue(this.txtRatio));
+		
 		return wj;
 	}
 	
@@ -285,6 +351,16 @@ public class WeldJointPanel extends JointPanel implements InputPanel, ActionList
 		if (this.cmbBody1.getSelectedItem() == this.cmbBody2.getSelectedItem()) {
 			return false;
 		}
+		// check the damping ratio
+		double dr = this.getDoubleValue(this.txtRatio);
+		if (dr < 0.0 || dr > 1.0) {
+			return false;
+		}
+		// check the frequency
+		double f = this.getDoubleValue(this.txtFrequency);
+		if (f < 0.0) {
+			return false;
+		}
 		return true;
 	}
 	
@@ -300,6 +376,16 @@ public class WeldJointPanel extends JointPanel implements InputPanel, ActionList
 		// they can't be the same body
 		if (this.cmbBody1.getSelectedItem() == this.cmbBody2.getSelectedItem()) {
 			JOptionPane.showMessageDialog(owner, "You must select two different bodies.", "Notice", JOptionPane.ERROR_MESSAGE);
+		}
+		// check the damping ratio
+		double dr = this.getDoubleValue(this.txtRatio);
+		if (dr < 0.0 || dr > 1.0) {
+			JOptionPane.showMessageDialog(owner, "The damping ratio must be between 0 and 1 inclusive.", "Notice", JOptionPane.ERROR_MESSAGE);
+		}
+		// check the frequency
+		double f = this.getDoubleValue(this.txtFrequency);
+		if (f < 0.0) {
+			JOptionPane.showMessageDialog(owner, "The frequency must be greater than or equal to zero.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

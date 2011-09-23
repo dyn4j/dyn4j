@@ -42,10 +42,10 @@ public class FromFileNonConvexPolygonPanel extends NonConvexShapePanel implement
 	private JTextField txtFile;
 
 	/** Panel used to preview the current shape */
-	private ShapePreviewPanel pnlPreview;
+	private PreviewPanel pnlPreview;
 
 	/** The decomposotion algorithm */
-	protected Decomposer decomposer = null;
+	private Decomposer decomposer = null;
 
 	/** The decomposed polygon */
 	private List<Convex> decomposition;
@@ -78,7 +78,7 @@ public class FromFileNonConvexPolygonPanel extends NonConvexShapePanel implement
 		
 		JLabel lblPreview = new JLabel("Preview", Icons.INFO, JLabel.LEFT);
 		lblPreview.setToolTipText("Shows a preview of the current shape.");
-		this.pnlPreview = new ShapePreviewPanel(new Dimension(150, 150));
+		this.pnlPreview = new PreviewPanel(new Dimension(150, 150));
 		this.pnlPreview.setBackground(Color.WHITE);
 		this.pnlPreview.setBorder(BorderFactory.createEtchedBorder());
 		
@@ -164,7 +164,20 @@ public class FromFileNonConvexPolygonPanel extends NonConvexShapePanel implement
 				}
 			}
 		} else {
-			SamplePolygonFileDialog.show(this);
+			SamplePolygonFileDialog.show(
+					this,
+					"# Sample non-convex simple polygon (without holes and crossed edges)\n" +
+					"# the # character must be the first character on the line to be flagged as a comment\n" +
+					"\n" +
+					"# Any number of blank lines can exist\n" +
+					"\n" +
+					"# You can use any whitespace character to separate the x and y values (space, tab, multiple spaces)\n" +
+					"-0.5 -0.5\n" +
+					"0.5\t-0.5\n" +
+					"\n" +
+					"0.5     0.5\n" +
+					"0.0   0.0\n" +
+					"-0.5\t0.5\n");
 		}
 	}
 

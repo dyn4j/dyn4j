@@ -24,17 +24,21 @@
  */
 package org.dyn4j.geometry.hull;
 
+import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Vector2;
 
 /**
  * Represents an algorithm used to create a convex hull of a given point set.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.0.1
  * @since 2.2.0
  */
 public interface HullGenerator {
 	/**
 	 * Returns the points of the convex hull generated from the given point set.
+	 * <p>
+	 * The resulting point set may not have the correct winding.  Use the {@link Geometry#getWinding(Vector2...)}
+	 * and {@link Geometry#reverseWinding(Vector2...)} methods to get and set the winding direction.
 	 * @param points the point set
 	 * @return {@link Vector2}[] the convex hull vertices
 	 * @throws NullPointerException if points is null or contains null points

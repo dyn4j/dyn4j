@@ -288,6 +288,7 @@ public class AddJointDialog extends JDialog implements ActionListener {
 	 */
 	public static Joint show(Window owner, SandboxBody[] bodies, Class<? extends Joint> clazz) {
 		AddJointDialog dialog = new AddJointDialog(owner, bodies, clazz);
+		dialog.setLocationRelativeTo(owner);
 		dialog.setVisible(true);
 		
 		if (!dialog.canceled) {

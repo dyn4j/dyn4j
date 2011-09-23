@@ -38,6 +38,9 @@ import org.dyn4j.Epsilon;
  * @since 1.0.0
  */
 public class Geometry {
+	/** 2 * PI constant */
+	public static final double TWO_PI = 2.0 * Math.PI;
+	
 	/** The value of 1/3 */
 	private static final double INV_3 = 1.0 / 3.0;
 	
@@ -448,7 +451,7 @@ public class Geometry {
 		// check the radius
 		if (radius <= 0.0) throw new IllegalArgumentException("The radius must be greater than zero.");
 		Vector2[] verts = new Vector2[count];
-		double angle = 2.0 * Math.PI / count;
+		double angle = Geometry.TWO_PI / count;
 		for (int i = count - 1; i >= 0; i--) {
 			verts[i] = new Vector2(Math.cos(angle * i + theta) * radius, Math.sin(angle * i + theta) * radius);
 		}

@@ -27,6 +27,7 @@ package org.dyn4j.dynamics.joint;
 import org.dyn4j.Epsilon;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Step;
+import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Matrix22;
 import org.dyn4j.geometry.Transform;
@@ -134,7 +135,7 @@ public class MouseJoint extends Joint {
 		double invI = mass.getInverseInertia();
 		
 		// compute the natural frequency; f = w / (2 * pi) -> w = 2 * pi * f
-		double w = 2.0 * Math.PI * this.frequency;
+		double w = Geometry.TWO_PI * this.frequency;
 		// compute the damping coefficient; dRatio = d / (2 * m * w) -> d = 2 * m * w * dRatio
 		double d = 2.0 * m * this.dampingRatio * w;
 		// compute the spring constant; w = sqrt(k / m) -> k = m * w * w

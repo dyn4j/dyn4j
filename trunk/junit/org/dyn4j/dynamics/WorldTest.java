@@ -66,7 +66,7 @@ import org.junit.Test;
 /**
  * Contains the test cases for the {@link World} class.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 1.0.2
  */
 public class WorldTest {
@@ -827,7 +827,7 @@ public class WorldTest {
 		w.step(1);
 		
 		// call the clear method
-		w.clear(true);
+		w.removeAll(true);
 		
 		// verify that it cleared everything and made all the callbacks
 		TestCase.assertTrue(b1.contacts.isEmpty());

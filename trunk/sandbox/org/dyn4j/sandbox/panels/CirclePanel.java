@@ -39,7 +39,7 @@ public class CirclePanel extends ConvexShapePanel implements InputPanel {
 	private double radius = DEFAULT_RADIUS;
 
 	/** Panel used to preview the current shape */
-	private ShapePreviewPanel pnlPreview;
+	private PreviewPanel pnlPreview;
 	
 	/**
 	 * Default constructor.
@@ -70,7 +70,7 @@ public class CirclePanel extends ConvexShapePanel implements InputPanel {
 		
 		JLabel lblPreview = new JLabel("Preview", Icons.INFO, JLabel.LEFT);
 		lblPreview.setToolTipText("Shows a preview of the current shape.");
-		this.pnlPreview = new ShapePreviewPanel(new Dimension(150, 150), Geometry.createCircle(this.radius));
+		this.pnlPreview = new PreviewPanel(new Dimension(150, 150), Geometry.createCircle(this.radius));
 		this.pnlPreview.setBackground(Color.WHITE);
 		this.pnlPreview.setBorder(BorderFactory.createEtchedBorder());
 		

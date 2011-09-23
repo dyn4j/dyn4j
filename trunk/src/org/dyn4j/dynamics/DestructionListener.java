@@ -31,14 +31,14 @@ import org.dyn4j.dynamics.joint.Joint;
 /**
  * Listens for implicit destruction events.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.0.1
  * @since 1.0.0
  */
 public interface DestructionListener {
 	/**
 	 * Called when implicit destruction of a {@link Joint} has occurred.
 	 * @see World#remove(Body)
-	 * @see World#clear(boolean)
+	 * @see World#removeAll(boolean)
 	 * @param joint the {@link Joint} that was destroyed
 	 */
 	public void destroyed(Joint joint);
@@ -46,14 +46,14 @@ public interface DestructionListener {
 	/**
 	 * Called when implicit destruction of a {@link ContactConstraint} has occurred.
 	 * @see World#remove(Body)
-	 * @see World#clear(boolean)
+	 * @see World#removeAll(boolean)
 	 * @param contactPoint the {@link ContactPoint} that was destroyed
 	 */
 	public void destroyed(ContactPoint contactPoint);
 	
 	/**
 	 * Called when implicit destruction of a {@link Body} has occurred.
-	 * @see World#clear(boolean)
+	 * @see World#removeAll(boolean)
 	 * @param body the {@link Body} that was destroyed
 	 * @since 1.0.2
 	 */

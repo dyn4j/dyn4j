@@ -378,10 +378,10 @@ public class BodyTest {
 		b.clearTorque();
 		TestCase.assertEquals(0.0, b.torque);
 		
-		b.clearForces();
+		b.clearAccumulatedForce();
 		TestCase.assertTrue(b.forces.isEmpty());
 		
-		b.clearTorques();
+		b.clearAccumulatedTorque();
 		TestCase.assertTrue(b.torques.isEmpty());
 	}
 	

@@ -2,7 +2,6 @@ package org.dyn4j.sandbox.dialogs;
 
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.Image;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,11 +15,12 @@ import javax.swing.JTextPane;
 
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Convex;
+import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.sandbox.SandboxBody;
+import org.dyn4j.sandbox.panels.ConvexHullPolygonPanel;
 import org.dyn4j.sandbox.panels.FixturePanel;
-import org.dyn4j.sandbox.panels.ConvexShapePanel;
 import org.dyn4j.sandbox.panels.TransformPanel;
+import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Dialog to add a new fixture to an existing body.
@@ -28,46 +28,35 @@ import org.dyn4j.sandbox.panels.TransformPanel;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class AddConvexFixtureDialog extends JDialog implements ActionListener {
+public class AddConvexHullFixtureDialog extends JDialog implements ActionListener {
 	/** The version id */
-	private static final long serialVersionUID = -1809110047704548125L;
-
-	/** Used for automatic naming */
-	protected static int N = 1;
+	private static final long serialVersionUID = 1665773996550270370L;
 
 	/** The dialog canceled flag */
 	private boolean canceled = true;
-	
-	/** The shape config panel */
-	private ConvexShapePanel pnlShape;
-	
+
 	/** The fixture config panel */
 	private FixturePanel pnlFixture;
 	
 	/** The transform config panel */
 	private TransformPanel pnlTransform;
 	
+	/** The convex hull panel */
+	private ConvexHullPolygonPanel pnlPolygon;
+
 	/** The fixture used during configuration */
 	private BodyFixture fixture;
 	
 	/**
 	 * Full constructor.
 	 * @param owner the dialog owner
-	 * @param icon the icon image
-	 * @param title the dialog title
-	 * @param shapePanel the shape panel
 	 */
-	private AddConvexFixtureDialog(Window owner, Image icon, String title, ConvexShapePanel shapePanel) {
-		super(owner, title, ModalityType.APPLICATION_MODAL);
+	private AddConvexHullFixtureDialog(Window owner) {
+		super(owner, "Add Convex Hull Fixture", ModalityType.APPLICATION_MODAL);
 		
-		if (icon != null) {
-			this.setIconImage(icon);
-		}
+		this.setIconImage(Icons.ADD_CONVEX_HULL.getImage());
 		
-		this.pnlShape = shapePanel;
-		
-		fixture = new BodyFixture(this.pnlShape.getDefaultShape());
-		fixture.setUserData("Fixture" + N);
+		this.pnlPolygon = new ConvexHullPolygonPanel();
 		
 		Container container = this.getContentPane();
 		
@@ -87,12 +76,15 @@ public class AddConvexFixtureDialog extends JDialog implements ActionListener {
 		lblText.setEditable(false);
 		lblText.setPreferredSize(new Dimension(350, 120));
 		
+		// have to create it with an arbitrary shape
+		this.fixture = new BodyFixture(Geometry.createCircle(1.0));
+		this.fixture.setUserData("Fixture" + AddConvexFixtureDialog.N);
+		this.pnlFixture = new FixturePanel(this, this.fixture);
+		this.pnlTransform = new TransformPanel(lblText);
+		
 		JTabbedPane tabs = new JTabbedPane();
 		
-		pnlFixture = new FixturePanel(this, this.fixture);
-		pnlTransform = new TransformPanel(lblText);
-		
-		tabs.addTab("Shape", this.pnlShape);
+		tabs.addTab("Shape", this.pnlPolygon);
 		tabs.addTab("Fixture", this.pnlFixture);
 		tabs.addTab("Local Transform", this.pnlTransform);
 		
@@ -135,7 +127,7 @@ public class AddConvexFixtureDialog extends JDialog implements ActionListener {
 			this.canceled = true;
 		} else {
 			// check the shape panel's input
-			if (this.pnlShape.isValidInput()) {
+			if (this.pnlPolygon.isValidInput()) {
 				// check the fixture input
 				if (this.pnlFixture.isValidInput()) {
 					// check the transform input
@@ -151,34 +143,31 @@ public class AddConvexFixtureDialog extends JDialog implements ActionListener {
 				}
 			} else {
 				// if its not valid then show an error message
-				this.pnlShape.showInvalidInputMessage(this);
+				this.pnlPolygon.showInvalidInputMessage(this);
 			}
 		}
 	}
 	
 	/**
-	 * Shows an add new fixture dialog and returns the new fixture if the user clicked the add button.
+	 * Shows a convex hull dialog.
 	 * <p>
 	 * Returns null if the user canceled or closed the dialog.
 	 * @param owner the dialog owner
-	 * @param icon the icon image
-	 * @param title the dialog title
-	 * @param shapePanel the shape panel to use
-	 * @return {@link SandboxBody}
+	 * @return BodyFixture
 	 */
-	public static final BodyFixture show(Window owner, Image icon, String title, ConvexShapePanel shapePanel) {
-		AddConvexFixtureDialog dialog = new AddConvexFixtureDialog(owner, icon, title, shapePanel);
+	public static final BodyFixture show(Window owner) {
+		AddConvexHullFixtureDialog dialog = new AddConvexHullFixtureDialog(owner);
 		dialog.setLocationRelativeTo(owner);
 		dialog.setVisible(true);
 		// control returns to this method when the dialog is closed
 		
 		// check the canceled flag
 		if (!dialog.canceled) {
-			// get the fixture
-			BodyFixture fixture = dialog.fixture;
+			// get the list of convex shapes
+			Convex convex = dialog.pnlPolygon.getShape();
 			
-			// get the shape
-			Convex convex = dialog.pnlShape.getShape();
+			// get the general fixture (properties will be copied into all fixtures created)
+			BodyFixture fixture = dialog.fixture;
 			
 			// apply any local transform
 			Vector2 tx = dialog.pnlTransform.getTranslation();
@@ -202,10 +191,9 @@ public class AddConvexFixtureDialog extends JDialog implements ActionListener {
 			
 			// increment the fixture number
 			synchronized (AddConvexFixtureDialog.class) {
-				N++;
+				AddConvexFixtureDialog.N++;
 			}
 			
-			// return the body
 			return newFixture;
 		}
 		

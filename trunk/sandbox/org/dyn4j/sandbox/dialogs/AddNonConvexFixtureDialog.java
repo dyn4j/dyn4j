@@ -165,6 +165,7 @@ public class AddNonConvexFixtureDialog extends JDialog implements ActionListener
 	 */
 	public static final List<BodyFixture> show(Window owner, Image icon, String title) {
 		AddNonConvexFixtureDialog dialog = new AddNonConvexFixtureDialog(owner, icon, title);
+		dialog.setLocationRelativeTo(owner);
 		dialog.setVisible(true);
 		// control returns to this method when the dialog is closed
 		

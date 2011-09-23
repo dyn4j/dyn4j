@@ -28,6 +28,7 @@ import org.dyn4j.Epsilon;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.Step;
+import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Transform;
@@ -46,7 +47,7 @@ import org.dyn4j.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class DistanceJoint extends Joint {
@@ -174,7 +175,7 @@ public class DistanceJoint extends Joint {
 			// get the current compression/extension of the spring
 			double x = length - this.distance;
 			// compute the natural frequency; f = w / (2 * pi) -> w = 2 * pi * f
-			double w = 2.0 * Math.PI * this.frequency;
+			double w = Geometry.TWO_PI * this.frequency;
 			// compute the damping coefficient; dRatio = d / (2 * m * w) -> d = 2 * m * w * dRatio
 			double d = 2.0 * this.invK * this.dampingRatio * w;
 			// compute the spring constant; w = sqrt(k / m) -> k = m * w * w
@@ -188,9 +189,12 @@ public class DistanceJoint extends Joint {
 			this.bias = x * dt * k * this.gamma;
 			
 			// compute the effective mass			
-			this.invK = invMass + this.gamma;
+			invMass += this.gamma;
 			// check for zero before inverting
-			this.invK = this.invK <= Epsilon.E ? 0.0 : 1.0 / this.invK;
+			this.invK = invMass <= Epsilon.E ? 0.0 : 1.0 / invMass;
+		} else {
+			this.gamma = 0.0;
+			this.bias = 0.0;
 		}
 		
 		// warm start

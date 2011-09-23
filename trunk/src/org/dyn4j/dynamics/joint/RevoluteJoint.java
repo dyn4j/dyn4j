@@ -28,6 +28,7 @@ import org.dyn4j.Epsilon;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.Step;
+import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Matrix22;
@@ -204,7 +205,18 @@ public class RevoluteJoint extends Joint {
 		// check if the joint limit is enabled
 		if (this.limitEnabled) {
 			// set the current state of the joint limit
-			double angle = t1.getRotation() - t2.getRotation() - this.referenceAngle;
+			
+			// this causes problems: when the one of the bodies is rotated, the other
+			// body compensates by rotating the greater distance instead of the shorter
+//			double angle = t1.getRotation() - t2.getRotation() - this.referenceAngle;
+			
+			// we can fix it by always taking the smaller rotation
+			double rr = this.body1.getTransform().getRotation() - this.body2.getTransform().getRotation();
+			if (rr < -Math.PI) rr += Geometry.TWO_PI;
+			if (rr > Math.PI) rr -= Geometry.TWO_PI;
+			// then apply the reference angle
+			double angle = rr - this.referenceAngle;
+			
 			// see if the limits are close enough to be equal
 			if (Math.abs(this.upperLimit - this.lowerLimit) < 2.0 * angularTolerance) {
 				// if they are close enough then they are equal
