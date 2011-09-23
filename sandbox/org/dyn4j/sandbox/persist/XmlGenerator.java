@@ -313,6 +313,8 @@ public class XmlGenerator {
 		
 		sb.append(XmlGenerator.toXml(body.getVelocity(), "Velocity"));
 		sb.append("<AngularVelocity>").append(body.getAngularVelocity()).append("</AngularVelocity>");
+		sb.append(XmlGenerator.toXml(body.getAccumulatedForce(), "AccumulatedForce"));
+		sb.append("<AccumulatedTorque>").append(body.getAccumulatedTorque()).append("</AccumulatedTorque>");
 		sb.append("<AutoSleep>").append(body.isAutoSleepingEnabled()).append("</AutoSleep>");
 		sb.append("<Asleep>").append(body.isAsleep()).append("</Asleep>");
 		sb.append("<Active>").append(body.isActive()).append("</Active>");
@@ -411,6 +413,8 @@ public class XmlGenerator {
 			WeldJoint wj = (WeldJoint)joint;
 			sb.append(XmlGenerator.toXml(wj.getAnchor1(), "Anchor"));
 			sb.append("<ReferenceAngle>").append(wj.getReferenceAngle()).append("</ReferenceAngle>");
+			sb.append("<Frequency>").append(wj.getFrequency()).append("</Frequency>");
+			sb.append("<DampingRatio>").append(wj.getDampingRatio()).append("</DampingRatio>");
 		} else if (joint instanceof WheelJoint) {
 			WheelJoint wj = (WheelJoint)joint;
 			sb.append(XmlGenerator.toXml(wj.getAnchor1(), "Anchor"));

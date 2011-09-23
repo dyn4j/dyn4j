@@ -131,6 +131,7 @@ public class SetBoundsDialog extends JDialog implements ActionListener {
 	 */
 	public static final RectangularBounds show(Window owner, RectangularBounds bounds) {
 		SetBoundsDialog dialog = new SetBoundsDialog(owner, bounds);
+		dialog.setLocationRelativeTo(owner);
 		dialog.setVisible(true);
 		// control returns to this method when the dialog is closed
 		

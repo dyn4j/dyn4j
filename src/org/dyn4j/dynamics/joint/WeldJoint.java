@@ -24,9 +24,11 @@
  */
 package org.dyn4j.dynamics.joint;
 
+import org.dyn4j.Epsilon;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.Step;
+import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Matrix33;
 import org.dyn4j.geometry.Transform;
@@ -37,6 +39,9 @@ import org.dyn4j.geometry.Vector3;
  * Represents a weld joint.
  * <p>
  * A weld joint joins two {@link Body}s together as if they were one {@link Body}.
+ * <p>
+ * Using the {@link #setFrequency(double)} and {@link #setDampingRatio(double)} methods,
+ * the joint will have a rotational spring/damper about the anchor point. 
  * <p>
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
@@ -62,6 +67,18 @@ public class WeldJoint extends Joint {
 	
 	/** The accumulated impulse for warm starting */
 	protected Vector3 impulse;
+
+	/** The oscillation frequency in hz */
+	protected double frequency;
+	
+	/** The damping ratio */
+	protected double dampingRatio;
+
+	/** The bias for adding work to the constraint (simulating a spring) */
+	protected double bias;
+	
+	/** The damping portion of the constraint */
+	protected double gamma;
 	
 	/**
 	 * Minimal constructor.
@@ -85,6 +102,10 @@ public class WeldJoint extends Joint {
 		// initialize
 		this.K = new Matrix33();
 		this.impulse = new Vector3();
+		this.frequency = 0.0;
+		this.dampingRatio = 0.0;
+		this.gamma = 0.0;
+		this.bias = 0.0;
 	}
 	
 	/* (non-Javadoc)
@@ -98,6 +119,8 @@ public class WeldJoint extends Joint {
 		.append(this.localAnchor1).append("|")
 		.append(this.localAnchor2).append("|")
 		.append(this.referenceAngle).append("|")
+		.append(this.frequency).append("|")
+		.append(this.dampingRatio).append("|")
 		.append(this.impulse).append("]");
 		return sb.toString();
 	}
@@ -132,6 +155,47 @@ public class WeldJoint extends Joint {
 		this.K.m21 = this.K.m12;
 		this.K.m22 = invI1 + invI2;
 		
+		if (this.frequency > 0.0) {
+			double invI = invI1 + invI2;
+			double i = invI <= Epsilon.E ? 0.0 : 1.0 / invI;
+			
+			// compute the current angle between relative to the reference angle
+			
+			// this causes problems: when the one of the bodies is rotated, the other
+			// body compensates by rotating the greater distance instead of the shorter
+//			double r = t1.getRotation() - t2.getRotation() - this.referenceAngle;
+			
+			// we can fix it by always taking the shorter rotation
+			double rr = t1.getRotation() - t2.getRotation();
+			if (rr < -Math.PI) rr += Geometry.TWO_PI;
+			if (rr > Math.PI) rr -= Geometry.TWO_PI;
+			// then apply the reference angle
+			double r = rr - this.referenceAngle;
+			
+			double dt = step.getDeltaTime();
+			// compute the natural frequency; f = w / (2 * pi) -> w = 2 * pi * f
+			double w = Geometry.TWO_PI * this.frequency;
+			// compute the damping coefficient; dRatio = d / (2 * m * w) -> d = 2 * m * w * dRatio
+			double d = 2.0 * i * this.dampingRatio * w;
+			// compute the spring constant; w = sqrt(k / m) -> k = m * w * w
+			double k = i * w * w;
+			
+			// compute gamma = CMF = 1 / (hk + d)
+			this.gamma = dt * (d + dt * k);
+			// check for zero before inverting
+			this.gamma = this.gamma <= Epsilon.E ? 0.0 : 1.0 / this.gamma;			
+			// compute the bias = x * ERP where ERP = hk / (hk + d)
+			this.bias = r * dt * k * this.gamma;
+			
+			// compute the effective mass
+			invI += this.gamma;
+			// check for zero before inverting
+			this.K.m22 = invI <= Epsilon.E ? 0.0 : 1.0 / invI;
+		} else {
+			this.gamma = 0.0;
+			this.bias = 0.0;
+		}
+		
 		// account for variable time step
 		this.impulse.multiply(step.getDeltaTimeRatio());
 		
@@ -159,24 +223,48 @@ public class WeldJoint extends Joint {
 		double invI1 = m1.getInverseInertia();
 		double invI2 = m2.getInverseInertia();
 		
-		// solve the point-to-point and angle constraint		
 		Vector2 r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
 		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
 		
-		Vector2 v1 = this.body1.getVelocity().sum(r1.cross(this.body1.getAngularVelocity()));
-		Vector2 v2 = this.body2.getVelocity().sum(r2.cross(this.body2.getAngularVelocity()));
-		Vector2 anchorV = v1.subtract(v2);
-		Vector3 C = new Vector3(anchorV.x, anchorV.y, this.body1.getAngularVelocity() - this.body2.getAngularVelocity());
-		
-		Vector3 impulse = this.K.solve33(C.negate());
-		this.impulse.add(impulse);
-		
-		// apply the impulse
-		Vector2 imp = new Vector2(impulse.x, impulse.y);
-		this.body1.getVelocity().add(imp.product(invM1));
-		this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * (r1.cross(imp) + impulse.z));
-		this.body2.getVelocity().subtract(imp.product(invM2));
-		this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * (r2.cross(imp) + impulse.z));
+		if (this.frequency > 0.0) {
+			// get the relative angular velocity
+			double rav = this.body1.getAngularVelocity() - this.body2.getAngularVelocity();
+			// solve for the spring/damper impulse
+			double j2 = -this.K.m22 * (rav + this.bias + this.gamma * this.impulse.z);
+			this.impulse.z += j2;
+			
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * j2);
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * j2);
+			
+			// solve the point-to-point and angle constraint
+			Vector2 v1 = this.body1.getVelocity().sum(r1.cross(this.body1.getAngularVelocity()));
+			Vector2 v2 = this.body2.getVelocity().sum(r2.cross(this.body2.getAngularVelocity()));
+			Vector2 anchorV = v1.subtract(v2);
+			
+			Vector2 j1 = this.K.solve22(anchorV).negate();
+			this.impulse.x += j1.x;
+			this.impulse.y += j1.y;
+			
+			this.body1.getVelocity().add(j1.product(invM1));
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(j1));
+			this.body2.getVelocity().subtract(j1.product(invM2));
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * r2.cross(j1));
+		} else {
+			Vector2 v1 = this.body1.getVelocity().sum(r1.cross(this.body1.getAngularVelocity()));
+			Vector2 v2 = this.body2.getVelocity().sum(r2.cross(this.body2.getAngularVelocity()));
+			Vector2 anchorV = v1.subtract(v2);
+			Vector3 C = new Vector3(anchorV.x, anchorV.y, this.body1.getAngularVelocity() - this.body2.getAngularVelocity());
+			
+			Vector3 impulse = this.K.solve33(C.negate());
+			this.impulse.add(impulse);
+			
+			// apply the impulse
+			Vector2 imp = new Vector2(impulse.x, impulse.y);
+			this.body1.getVelocity().add(imp.product(invM1));
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * (r1.cross(imp) + impulse.z));
+			this.body2.getVelocity().subtract(imp.product(invM2));
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * (r2.cross(imp) + impulse.z));
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -222,15 +310,25 @@ public class WeldJoint extends Joint {
 		this.K.m21 = this.K.m12;
 		this.K.m22 = invI1 + invI2;
 		
-		Vector3 impulse = this.K.solve33(C.negate());
-
-		// translate and rotate the objects
-		Vector2 imp = new Vector2(impulse.x, impulse.y);
-		this.body1.translate(imp.product(invM1));
-		this.body1.rotateAboutCenter(invI1 * (r1.cross(imp) + impulse.z));
-		
-		this.body2.translate(imp.product(-invM2));
-		this.body2.rotateAboutCenter(-invI2 * (r2.cross(imp) + impulse.z));
+		if (this.frequency > 0.0) {
+			// only solve the linear constraint
+			angularError = 0.0;
+			Vector2 j = this.K.solve22(C1).negate();
+			
+			this.body1.translate(j.product(invM1));
+			this.body1.rotateAboutCenter(invI1 * r1.cross(j));
+			this.body2.translate(j.product(-invM2));
+			this.body2.rotateAboutCenter(-invI2 * r2.cross(j));
+		} else {
+			Vector3 impulse = this.K.solve33(C.negate());
+	
+			// translate and rotate the objects
+			Vector2 imp = new Vector2(impulse.x, impulse.y);
+			this.body1.translate(imp.product(invM1));
+			this.body1.rotateAboutCenter(invI1 * (r1.cross(imp) + impulse.z));
+			this.body2.translate(imp.product(-invM2));
+			this.body2.rotateAboutCenter(-invI2 * (r2.cross(imp) + impulse.z));
+		}
 		
 		return linearError <= linearTolerance && angularError <= angularTolerance;
 	}
@@ -274,6 +372,69 @@ public class WeldJoint extends Joint {
 	@Override
 	public double getReactionTorque(double invdt) {
 		return this.impulse.z * invdt;
+	}
+
+	/**
+	 * Returns true if this distance joint is a spring distance joint.
+	 * @return boolean
+	 * @since 3.0.1
+	 */
+	public boolean isSpring() {
+		return this.frequency > 0.0;
+	}
+	
+	/**
+	 * Returns true if this distance joint is a spring distance joint
+	 * with damping.
+	 * @return boolean
+	 * @since 3.0.1
+	 */
+	public boolean isSpringDamper() {
+		return this.frequency > 0.0 && this.dampingRatio > 0.0;
+	}
+	
+	/**
+	 * Returns the damping ratio.
+	 * @return double
+	 * @since 3.0.1
+	 */
+	public double getDampingRatio() {
+		return this.dampingRatio;
+	}
+	
+	/**
+	 * Sets the damping ratio.
+	 * @param dampingRatio the damping ratio; in the range [0, 1]
+	 * @throws IllegalArgumentException if damping ration is less than zero or greater than 1
+	 * @since 3.0.1
+	 */
+	public void setDampingRatio(double dampingRatio) {
+		// make sure its within range
+		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException("The damping ratio must be between 0 and 1 inclusive.");
+		// set the new value
+		this.dampingRatio = dampingRatio;
+	}
+	
+	/**
+	 * Returns the spring frequency.
+	 * @return double
+	 * @since 3.0.1
+	 */
+	public double getFrequency() {
+		return this.frequency;
+	}
+	
+	/**
+	 * Sets the spring frequency.
+	 * @param frequency the spring frequency in hz; must be greater than or equal to zero
+	 * @throws IllegalArgumentException if frequency is less than zero
+	 * @since 3.0.1
+	 */
+	public void setFrequency(double frequency) {
+		// check for valid value
+		if (frequency < 0) throw new IllegalArgumentException("The frequency must be greater than or equal to zero.");
+		// set the new value
+		this.frequency = frequency;
 	}
 	
 	/**

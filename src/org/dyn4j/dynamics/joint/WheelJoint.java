@@ -28,6 +28,7 @@ import org.dyn4j.Epsilon;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.Step;
+import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Transform;
@@ -242,7 +243,7 @@ public class WheelJoint extends Joint {
 				// get the delta time
 				double dt = step.getDeltaTime();
 				// compute the natural frequency; f = w / (2 * pi) -> w = 2 * pi * f
-				double w = 2.0 * Math.PI * this.frequency;
+				double w = Geometry.TWO_PI * this.frequency;
 				// compute the damping coefficient; dRatio = d / (2 * m * w) -> d = 2 * m * w * dRatio
 				double dc = 2.0 * this.springMass * this.dampingRatio * w;
 				// compute the spring constant; w = sqrt(k / m) -> k = m * w * w

@@ -132,7 +132,7 @@ public abstract class Test implements Comparable<Test> {
 	 */
 	public void reset() {
 		// clear all the bodies
-		this.world.clear(false);
+		this.world.removeAll(false);
 		// setup the test
 		this.setup();
 	}

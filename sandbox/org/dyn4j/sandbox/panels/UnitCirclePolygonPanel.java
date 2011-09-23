@@ -46,7 +46,7 @@ public class UnitCirclePolygonPanel extends ConvexShapePanel implements InputPan
 	private int count = DEFAULT_COUNT;
 
 	/** Panel used to preview the current shape */
-	private ShapePreviewPanel pnlPreview;
+	private PreviewPanel pnlPreview;
 	
 	/**
 	 * Default constructor.
@@ -98,7 +98,7 @@ public class UnitCirclePolygonPanel extends ConvexShapePanel implements InputPan
 		
 		JLabel lblPreview = new JLabel("Preview", Icons.INFO, JLabel.LEFT);
 		lblPreview.setToolTipText("Shows a preview of the current shape.");
-		this.pnlPreview = new ShapePreviewPanel(new Dimension(150, 150), Geometry.createUnitCirclePolygon(this.count, this.radius));
+		this.pnlPreview = new PreviewPanel(new Dimension(150, 150), Geometry.createUnitCirclePolygon(this.count, this.radius));
 		this.pnlPreview.setBackground(Color.WHITE);
 		this.pnlPreview.setBorder(BorderFactory.createEtchedBorder());
 		

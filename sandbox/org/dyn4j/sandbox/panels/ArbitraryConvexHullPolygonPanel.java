@@ -13,7 +13,6 @@ import javax.swing.GroupLayout;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
 import javax.swing.GroupLayout.ParallelGroup;
 import javax.swing.GroupLayout.SequentialGroup;
 
@@ -21,7 +20,7 @@ import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.sandbox.utilities.UIUtilities;
+import org.dyn4j.geometry.hull.HullGenerator;
 
 /**
  * Panel used to create a polygon using arbitrary points.
@@ -29,18 +28,24 @@ import org.dyn4j.sandbox.utilities.UIUtilities;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class ArbitraryConvexPolygonPanel extends ConvexShapePanel implements InputPanel, ActionListener {
+public class ArbitraryConvexHullPolygonPanel extends ConvexHullShapePanel implements InputPanel, ActionListener {
 	/** The version id */
 	private static final long serialVersionUID = 7259833235547997274L;
 
 	/** The default point count of the unit circle polygon */
-	private static final int DEFAULT_COUNT = 5;
-	
-	/** The default radius of the unit circle polygon */
-	private static final double DEFAULT_RADIUS = 0.5;
+	private static final int DEFAULT_COUNT = 8;
 	
 	/** The default polygon is just a unit circle polygon */
-	private static final Polygon DEFAULT_POLYGON = Geometry.createUnitCirclePolygon(DEFAULT_COUNT, DEFAULT_RADIUS);
+	private static final Vector2[] DEFAULT_POINT_CLOUD = new Vector2[] {
+		new Vector2(0.0, 1.0),
+		new Vector2(1.0, 1.0),
+		new Vector2(1.0, 0.0),
+		new Vector2(0.0, 0.0),
+		new Vector2(0.5, 2.0),
+		new Vector2(1.5, 2.0),
+		new Vector2(-1.0, 0.5),
+		new Vector2(-3.0, -0.5)
+	};
 	
 	/** The list of point panels */
 	private List<PointPanel> pointPanels = new ArrayList<PointPanel>();
@@ -51,31 +56,23 @@ public class ArbitraryConvexPolygonPanel extends ConvexShapePanel implements Inp
 	/** The scroll panel for the point panels */
 	private JScrollPane scrPane;
 	
-	/** The text label for the polygon help */
-	private JTextPane lblText;
-
 	/** Panel used to preview the current shape */
 	private PreviewPanel pnlPreview;
 	
+	/** The convex hull algorithm */
+	private HullGenerator hullGenerator = null;
+	
 	/**
-	 * Default constructor.
+	 * Full constructor.
+	 * @param hullGenerator the convex hull generation algorithm
 	 */
-	public ArbitraryConvexPolygonPanel() {
+	public ArbitraryConvexHullPolygonPanel(HullGenerator hullGenerator) {
 		this.pnlPanel = new JPanel();
 		
-		this.lblText = new JTextPane();
-		this.lblText.setBackground(null);
-		this.lblText.setFont(UIUtilities.getDefaultLabelFont());
-		this.lblText.setContentType("text");
-		this.lblText.setText(
-				"A polygon must have 3 or more vertices, counter-clockwise winding, " +
-				"must be convex, and cannot have coincident vertices.");
-		this.lblText.setEditable(false);
-		this.lblText.setPreferredSize(new Dimension(350, 50));
-		
+		this.hullGenerator = hullGenerator;
 		this.scrPane = new JScrollPane(this.pnlPanel);
 		
-		Vector2[] points = DEFAULT_POLYGON.getVertices();
+		Vector2[] points = DEFAULT_POINT_CLOUD;
 		for (int i = 0; i < DEFAULT_COUNT; i++) {
 			Vector2 p = points[i];
 			PointPanel panel = new PointPanel(p.x, p.y);
@@ -83,7 +80,7 @@ public class ArbitraryConvexPolygonPanel extends ConvexShapePanel implements Inp
 			this.pointPanels.add(panel);
 		}
 		
-		this.pnlPreview = new PreviewPanel(new Dimension(150, 150), this.getPoints());
+		this.pnlPreview = new PreviewPanel(new Dimension(150, 150), new Polygon(this.hullGenerator.generate(DEFAULT_POINT_CLOUD)), DEFAULT_POINT_CLOUD);
 		this.pnlPreview.setBackground(Color.WHITE);
 		this.pnlPreview.setBorder(BorderFactory.createEtchedBorder());
 		
@@ -93,11 +90,9 @@ public class ArbitraryConvexPolygonPanel extends ConvexShapePanel implements Inp
 		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
 		layout.setHorizontalGroup(layout.createParallelGroup()
-				.addComponent(this.lblText)
 				.addComponent(this.scrPane)
 				.addComponent(this.pnlPreview));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addComponent(this.lblText)
 				.addComponent(this.scrPane)
 				.addComponent(this.pnlPreview));
 		
@@ -159,36 +154,48 @@ public class ArbitraryConvexPolygonPanel extends ConvexShapePanel implements Inp
 				this.pointPanels.add(index + 1, panel);
 				// redo the layout
 				this.createLayout();
-				pnlPreview.setPoints(this.getPoints());
+				pnlPreview.setHull(this.getShape(), this.getPoints());
 			} else if ("remove".equals(event.getActionCommand())) {
 				// remove the point panel from the list
 				this.pointPanels.remove(index);
 				// redo the layout
 				this.createLayout();
-				pnlPreview.setPoints(this.getPoints());
+				pnlPreview.setHull(this.getShape(), this.getPoints());
 			} else if ("changed".equals(event.getActionCommand())) {
 				// a value has changed
-				pnlPreview.setPoints(this.getPoints());
+				pnlPreview.setHull(this.getShape(), this.getPoints());
 			}
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.sandbox.panels.ShapePanel#getDefaultShape()
+	/**
+	 * Returns the hull generator currently being used.
+	 * @return HullGenerator
 	 */
-	@Override
-	public Convex getDefaultShape() {
-		return DEFAULT_POLYGON;
+	public HullGenerator getHullGenerator() {
+		return this.hullGenerator;
 	}
 	
+	/**
+	 * Sets the hull generator currently being used.
+	 * @param hullGenerator the hull generator
+	 */
+	public void setHullGenerator(HullGenerator hullGenerator) {
+		this.hullGenerator = hullGenerator;
+	}
+
 	/* (non-Javadoc)
 	 * @see org.dyn4j.sandbox.panels.ShapePanel#getShape()
 	 */
 	@Override
 	public Convex getShape() {
-		Vector2[] points = this.getPoints();
-		Polygon polygon = new Polygon(points);
-		return polygon;
+		// get the vertices of the convex hull
+		Vector2[] vertices = this.hullGenerator.generate(this.getPoints());
+		// check the winding direction
+		if (Geometry.getWinding(vertices) < 0) {
+			Geometry.reverseWinding(vertices);
+		}
+		return new Polygon(vertices);
 	}
 	
 	/* (non-Javadoc)
@@ -196,9 +203,8 @@ public class ArbitraryConvexPolygonPanel extends ConvexShapePanel implements Inp
 	 */
 	@Override
 	public boolean isValidInput() {
-		Vector2[] points = this.getPoints();
 		try {
-			new Polygon(points);
+			this.getShape();
 			return true;
 		} catch (Exception e) {
 			return false;
@@ -210,9 +216,8 @@ public class ArbitraryConvexPolygonPanel extends ConvexShapePanel implements Inp
 	 */
 	@Override
 	public void showInvalidInputMessage(Window owner) {
-		Vector2[] points = this.getPoints();
 		try {
-			new Polygon(points);
+			this.getShape();
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(owner, e.getMessage(), "Notice", JOptionPane.ERROR_MESSAGE);
 		}

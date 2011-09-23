@@ -41,6 +41,8 @@
 			</Mass>
 			<Velocity x="0.0" y="0.0" />
 			<AngularVelocity>0.0</AngularVelocity>
+			<AccumulatedForce x="0.0" y="0.0" />
+			<AccumulatedTorque>0.0</AccumulatedTorque>
 			<AutoSleep>false</AutoSleep>
 			<Asleep>false</Asleep>
 			<Active>true</Active>
@@ -85,6 +87,8 @@
 			</Mass>
 			<Velocity x="0.0" y="0.0" />
 			<AngularVelocity>0.0</AngularVelocity>
+			<AccumulatedForce x="0.0" y="0.0" />
+			<AccumulatedTorque>0.0</AccumulatedTorque>
 			<AutoSleep>false</AutoSleep>
 			<Asleep>false</Asleep>
 			<Active>true</Active>
@@ -194,6 +198,8 @@
 			<CollisionAllowed>false</CollisionAllowed>
 			<Anchor x="0.0" y="0.0" />
 			<ReferenceAngle>0.0</ReferenceAngle>
+			<Frequency>0.0</Frequency>
+			<DampingRatio>0.0</DampingRatio>
 		</Joint>
 		
 		<Joint Name="" Id="" xsi:type="WheelJoint">

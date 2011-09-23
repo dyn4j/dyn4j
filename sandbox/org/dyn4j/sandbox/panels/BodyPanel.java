@@ -130,12 +130,6 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 	/** The velocity label */
 	private JLabel lblVelocity;
 	
-	/** The velocity x value label */
-	private JLabel lblVelocityX;
-	
-	/** The velocity y value label */
-	private JLabel lblVelocityY;
-	
 	/** The velocity x value text box */
 	private JFormattedTextField txtVelocityX;
 	
@@ -147,6 +141,23 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 	
 	/** The angular velocity text field */
 	private JFormattedTextField txtAngularVelocity;
+	
+	// force and torque controls
+	
+	/** The force label */
+	private JLabel lblForce;
+	
+	/** The force x text box */
+	private JFormattedTextField txtForceX;
+	
+	/** The force y text box */
+	private JFormattedTextField txtForceY;
+	
+	/** The torque label */
+	private JLabel lblTorque;
+	
+	/** The torque text box */
+	private JFormattedTextField txtTorque;
 	
 	// gravity scale controls
 	
@@ -213,6 +224,8 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 		boolean autoSleep = body.isAutoSleepingEnabled();
 		boolean bullet = body.isBullet();
 		String name = body.getName();
+		Vector2 force = body.getAccumulatedForce();
+		double torque = body.getAccumulatedTorque();
 		
 		// name
 		this.lblName = new JLabel("Name", Icons.INFO, JLabel.LEFT);
@@ -463,8 +476,8 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 		// initial velocity
 		this.lblVelocity = new JLabel("Velocity", Icons.INFO, JLabel.LEFT);
 		this.lblVelocity.setToolTipText("The linear velocity in Meters/Second.");
-		this.lblVelocityX = new JLabel("x");
-		this.lblVelocityY = new JLabel("y");
+		JLabel lblVelocityX = new JLabel("x");
+		JLabel lblVelocityY = new JLabel("y");
 		this.txtVelocityX = new JFormattedTextField(new DecimalFormat("##0.000"));
 		this.txtVelocityY = new JFormattedTextField(new DecimalFormat("##0.000"));
 		this.txtVelocityX.setValue(velocity.x);
@@ -506,6 +519,33 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 				body.setAngularVelocity(Math.toRadians(number.doubleValue()));
 			}
 		});
+		
+		// force and torque
+		JLabel lblForceX = new JLabel("x");
+		JLabel lblForceY = new JLabel("y");
+		this.lblForce = new JLabel("Accumulated Force", Icons.INFO, JLabel.LEFT);
+		this.lblForce.setToolTipText("<html>The total accumulated force.</html>");
+		
+		this.txtForceX = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtForceX.setValue(force.x);
+		this.txtForceX.setColumns(7);
+		this.txtForceX.setMaximumSize(this.txtForceX.getPreferredSize());
+		this.txtForceX.setEditable(false);
+		
+		this.txtForceY = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtForceY.setValue(force.y);
+		this.txtForceY.setColumns(7);
+		this.txtForceY.setMaximumSize(this.txtForceY.getPreferredSize());
+		this.txtForceY.setEditable(false);
+		
+		this.lblTorque = new JLabel("Accumulated Torque", Icons.INFO, JLabel.LEFT);
+		this.lblTorque.setToolTipText("<html>The total accumulated torque.</html>");
+		
+		this.txtTorque = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtTorque.setValue(torque);
+		this.txtTorque.setColumns(7);
+		this.txtTorque.setMaximumSize(this.txtTorque.getPreferredSize());
+		this.txtTorque.setEditable(false);
 		
 		// gravity scale
 		this.lblGravityScale = new JLabel("Gravity Scale", Icons.INFO, JLabel.LEFT);
@@ -690,6 +730,8 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblVelocity)
 						.addComponent(this.lblAngularVelocity)
+						.addComponent(this.lblForce)
+						.addComponent(this.lblTorque)
 						.addComponent(this.lblLinearDamping)
 						.addComponent(this.lblAngularDamping)
 						.addComponent(this.lblGravityScale)
@@ -697,10 +739,16 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 				.addGroup(layout.createParallelGroup()
 						.addGroup(layout.createSequentialGroup()
 								.addComponent(this.txtVelocityX)
-								.addComponent(this.lblVelocityX)
+								.addComponent(lblVelocityX)
 								.addComponent(this.txtVelocityY)
-								.addComponent(this.lblVelocityY))
+								.addComponent(lblVelocityY))
 						.addComponent(this.txtAngularVelocity)
+						.addGroup(layout.createSequentialGroup()
+								.addComponent(this.txtForceX)
+								.addComponent(lblForceX)
+								.addComponent(this.txtForceY)
+								.addComponent(lblForceY))
+						.addComponent(this.txtTorque)
 						.addComponent(this.sldLinearDamping)
 						.addComponent(this.sldAngularDamping)
 						.addComponent(this.sldGravityScale)
@@ -713,12 +761,23 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 						.addGroup(layout.createSequentialGroup()
 								.addGroup(layout.createParallelGroup()
 										.addComponent(this.txtVelocityX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-										.addComponent(this.lblVelocityX)
+										.addComponent(lblVelocityX)
 										.addComponent(this.txtVelocityY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-										.addComponent(this.lblVelocityY))))
+										.addComponent(lblVelocityY))))
 				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblAngularVelocity)
 						.addComponent(this.txtAngularVelocity, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(this.lblForce)
+						.addGroup(layout.createSequentialGroup()
+								.addGroup(layout.createParallelGroup()
+										.addComponent(this.txtForceX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+										.addComponent(lblForceX)
+										.addComponent(this.txtForceY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+										.addComponent(lblForceY))))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(this.lblTorque)
+						.addComponent(this.txtTorque, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblLinearDamping)
 						.addComponent(this.sldLinearDamping, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))

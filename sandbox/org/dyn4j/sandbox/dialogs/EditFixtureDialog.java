@@ -154,6 +154,7 @@ public class EditFixtureDialog extends JDialog implements ActionListener {
 	 */
 	public static final void show(Window owner, Image icon, String title, SandboxBody body, BodyFixture fixture) {
 		EditFixtureDialog dialog = new EditFixtureDialog(owner, icon, title, fixture);
+		dialog.setLocationRelativeTo(owner);
 		dialog.setVisible(true);
 		// control returns to this method when the dialog is closed
 		

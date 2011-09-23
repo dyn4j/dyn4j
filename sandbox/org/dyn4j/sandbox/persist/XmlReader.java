@@ -1,7 +1,9 @@
 package org.dyn4j.sandbox.persist;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +37,7 @@ import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
 import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -73,6 +76,9 @@ public class XmlReader extends DefaultHandler {
 	
 	/** Flag for the AngularVelocity tag */
 	private boolean angularVelocityFlag;
+	
+	/** Flag for the AccumulatedTorque tag */
+	private boolean accumulatedTorqueFlag;
 	
 	/** Flag for the AutoSleep tag */
 	private boolean autoSleepFlag;
@@ -242,6 +248,9 @@ public class XmlReader extends DefaultHandler {
 	
 	/** Storage for the AngularVelocity tag */
 	private double angularVelocity;
+	
+	/** Storage for the Accumulated Torque tag */
+	private double accumulatedTorque;
 	
 	/** Storage for the AutoSleep tag */
 	private boolean autoSleep;
@@ -431,21 +440,49 @@ public class XmlReader extends DefaultHandler {
 	 * @throws IOException thrown if an IO error occurs
 	 */
 	public static void fromXml(File file, World world) throws ParserConfigurationException, SAXException, IOException {
+		XmlReader.fromXml(new InputSource(new FileReader(file)), world);
+	}
+	
+	/**
+	 * Parses the given string and loads the bounds, bodies, and joints into the given world object.
+	 * <p>
+	 * The world object is cleared before loading.
+	 * @param xml the string containing the XML to read from
+	 * @param world the world object to modify
+	 * @throws ParserConfigurationException thrown if a SAX configuration error occurs
+	 * @throws SAXException thrown if a parsing error occurs
+	 * @throws IOException thrown if an IO error occurs
+	 */
+	public static void fromXml(String xml, World world) throws ParserConfigurationException, SAXException, IOException {
+		XmlReader.fromXml(new InputSource(new StringReader(xml)), world);
+	}
+	
+	/**
+	 * Parses the given input source and loads the bounds, bodies, and joints into the given world object.
+	 * <p>
+	 * The world object is cleared before loading.
+	 * @param source the source containing the XML
+	 * @param world the world object to modify
+	 * @throws ParserConfigurationException thrown if a SAX configuration error occurs
+	 * @throws SAXException thrown if a parsing error occurs
+	 * @throws IOException thrown if an IO error occurs
+	 */
+	private static void fromXml(InputSource source, World world) throws ParserConfigurationException, SAXException, IOException {
 		SAXParserFactory factory = SAXParserFactory.newInstance();
 		SAXParser parser = factory.newSAXParser();
 		
 		XmlReader reader = new XmlReader();
 		
-		parser.parse(file, reader);
+		parser.parse(source, reader);
 		
-		world.clear();
+		world.removeAll();
 		world.setBounds(reader.bounds);
 		for (SandboxBody body : reader.bodies) {
 			world.add(body);
 		}
 		for (Joint joint : reader.joints) {
 			world.add(joint);
-		}
+		}	
 	}
 
 	/* (non-Javadoc)
@@ -534,6 +571,12 @@ public class XmlReader extends DefaultHandler {
 			this.body.getVelocity().set(x, y);
 		} else if ("AngularVelocity".equalsIgnoreCase(qName)) {
 			this.angularVelocityFlag = true;
+		} else if ("AccumulatedForce".equalsIgnoreCase(qName)) {
+			double x = Double.parseDouble(attributes.getValue("x"));
+			double y = Double.parseDouble(attributes.getValue("y"));
+			this.body.apply(new Vector2(x, y));
+		} else if ("AccumulatedTorque".equalsIgnoreCase(qName)) {
+			this.accumulatedTorqueFlag = true;
 		} else if ("AutoSleep".equalsIgnoreCase(qName)) {
 			this.autoSleepFlag = true;
 		} else if ("Asleep".equalsIgnoreCase(qName)) {
@@ -658,6 +701,8 @@ public class XmlReader extends DefaultHandler {
 			this.massExplicit = Boolean.parseBoolean(s);
 		} else if (this.angularVelocityFlag) {
 			this.angularVelocity = Double.parseDouble(s);
+		} else if (this.accumulatedTorqueFlag) {
+			this.accumulatedTorque = Double.parseDouble(s);
 		} else if (this.autoSleepFlag) {
 			this.autoSleep = Boolean.parseBoolean(s);
 		} else if (this.asleepFlag) {
@@ -837,6 +882,9 @@ public class XmlReader extends DefaultHandler {
 		} else if ("AngularVelocity".equalsIgnoreCase(qName)) {
 			this.angularVelocityFlag = false;
 			this.body.setAngularVelocity(this.angularVelocity);
+		} else if ("AccumulatedTorque".equalsIgnoreCase(qName)) {
+			this.accumulatedTorqueFlag = false;
+			this.body.apply(this.accumulatedTorque);
 		} else if ("AutoSleep".equalsIgnoreCase(qName)) {
 			this.autoSleepFlag = false;
 			this.body.setAutoSleepingEnabled(this.autoSleep);
@@ -932,6 +980,8 @@ public class XmlReader extends DefaultHandler {
 				SandboxBody b2 = this.idMap.get(this.bodyId2);
 				WeldJoint wj = new WeldJoint(b1, b2, this.anchor);
 				wj.setReferenceAngle(this.referenceAngle);
+				wj.setFrequency(this.frequency);
+				wj.setDampingRatio(this.dampingRatio);
 				joint = wj;
 			} else if ("WheelJoint".equals(this.jointType)) {
 				SandboxBody b1 = this.idMap.get(this.bodyId1);

@@ -40,7 +40,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests the weld joint.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class Weld extends Test {

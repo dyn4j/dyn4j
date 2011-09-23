@@ -103,11 +103,22 @@ public class Icons {
 	/** Open icon */
 	public static final ImageIcon OPEN = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/open-icon.png");
 	
+	/** Force icon */
+	public static final ImageIcon FORCE = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/force-icon.png");
+	
+	/** Force at point icon */
+	public static final ImageIcon FORCE_AT_POINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/force-at-point-icon.png");
+	
+	/** Torque icon */
+	public static final ImageIcon TORQUE = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/torque-icon.png");
 	
 	// normal icons
 
 	/** Bounds icon */
 	public static final ImageIcon BOUNDS = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/bounds-icon.png");
+	
+	/** Snapshot icon */
+	public static final ImageIcon SNAPSHOT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/snapshot-icon.png");
 	
 	/** Body icon */
 	public static final ImageIcon BODY = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/body-icon.png");
@@ -154,10 +165,10 @@ public class Icons {
 	/** Wheel joint icon */
 	public static final ImageIcon WHEEL_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/wheel-joint-icon.png");
 
-	/** Decompose icon */
-	public static final ImageIcon DECOMPOSE = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/decompose-icon.png");
-	
 	// create icons
+
+	/** Take snapshot icon */
+	public static final ImageIcon SNAPSHOT_TAKE = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/snapshot-take-icon.png");
 	
 	/** Add body icon */
 	public static final ImageIcon ADD_BODY = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/add-body-icon.png");
@@ -173,6 +184,12 @@ public class Icons {
 	
 	/** Add segment icon */
 	public static final ImageIcon ADD_SEGMENT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/add-segment-icon.png");
+	
+	/** Add convex hull icon */
+	public static final ImageIcon ADD_CONVEX_HULL = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/add-hull-icon.png");
+	
+	/** Add non-convex polygon icon */
+	public static final ImageIcon ADD_NON_CONVEX_POLYGON = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/add-non-convex-icon.png");
 	
 	/** Add angle joint icon */
 	public static final ImageIcon ADD_ANGLE_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/add-angle-joint-icon.png");
@@ -255,6 +272,9 @@ public class Icons {
 	public static final ImageIcon EDIT_WHEEL_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/edit-wheel-joint-icon.png");
 	
 	// remove icons
+	
+	/** Remove snapshot icon */
+	public static final ImageIcon SNAPSHOT_REMOVE = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/snapshot-remove-icon.png");
 	
 	/** Unset bounds icon */
 	public static final ImageIcon UNSET_BOUNDS = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/unset-bounds-icon.png");

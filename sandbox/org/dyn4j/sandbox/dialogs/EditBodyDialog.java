@@ -63,6 +63,10 @@ public class EditBodyDialog extends JDialog implements ActionListener {
 		this.body.setVelocity(body.getVelocity().copy());
 		this.body.setMassExplicit(body.isMassExplicit());
 		
+		// copy over the force/torque
+		this.body.apply(body.getAccumulatedForce());
+		this.body.apply(body.getAccumulatedTorque());
+		
 		// add the fixtures to the body copy
 		// its possible that the mass will be reset here on
 		// each fixture add in the future, so set the mass to
@@ -150,6 +154,7 @@ public class EditBodyDialog extends JDialog implements ActionListener {
 	 */
 	public static final void show(Window owner, String title, SandboxBody body) {
 		EditBodyDialog dialog = new EditBodyDialog(owner, title, body);
+		dialog.setLocationRelativeTo(owner);
 		dialog.setIconImage(Icons.EDIT_BODY.getImage());
 		dialog.setVisible(true);
 		// control returns to this method when the dialog is closed

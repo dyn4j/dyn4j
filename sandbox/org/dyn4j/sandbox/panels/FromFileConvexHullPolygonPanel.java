@@ -22,9 +22,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 import org.dyn4j.geometry.Convex;
-import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.geometry.hull.HullGenerator;
 import org.dyn4j.sandbox.dialogs.SamplePolygonFileDialog;
 import org.dyn4j.sandbox.utilities.Icons;
 
@@ -34,31 +34,37 @@ import org.dyn4j.sandbox.utilities.Icons;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class FromFileConvexPolygonPanel extends ConvexShapePanel implements InputPanel, ActionListener {
+public class FromFileConvexHullPolygonPanel extends ConvexHullShapePanel implements InputPanel, ActionListener {
 	/** The version id */
-	private static final long serialVersionUID = 6390926955631356349L;
-	
-	/** The default polygon */
-	private static final Polygon DEFAULT_POLYGON = Geometry.createUnitCirclePolygon(5, 0.5);
+	private static final long serialVersionUID = -8005377092903516752L;
 	
 	/** The polygon read in */
 	private Polygon polygon;
+	
+	/** The point cloud read in */
+	private Vector2[] points;
 	
 	/** The text field to show the selected file path */
 	private JTextField txtFile;
 
 	/** Panel used to preview the current shape */
 	private PreviewPanel pnlPreview;
+
+	/** The convex hull algorithm */
+	private HullGenerator hullGenerator = null;
 	
 	/**
-	 * Default constructor.
+	 * Full constructor.
+	 * @param hullGenerator the convex hull generation algorithm
 	 */
-	public FromFileConvexPolygonPanel() {
+	public FromFileConvexHullPolygonPanel(HullGenerator hullGenerator) {
+		this.hullGenerator = hullGenerator;
+		
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
 		
 		JLabel lblFile = new JLabel("File", Icons.INFO, JLabel.LEFT);
-		lblFile.setToolTipText("The file to load containing the points of the polygon.");
+		lblFile.setToolTipText("The file to load containing a list of points.");
 		
 		this.txtFile = new JTextField();
 		this.txtFile.setEditable(false);
@@ -69,13 +75,13 @@ public class FromFileConvexPolygonPanel extends ConvexShapePanel implements Inpu
 		btnBrowse.addActionListener(this);
 		
 		JButton btnGenerate = new JButton("View Sample File");
-		btnGenerate.setToolTipText("Shows a sample polygon file.");
+		btnGenerate.setToolTipText("Shows a sample point cloud file.");
 		btnGenerate.setActionCommand("generate");
 		btnGenerate.addActionListener(this);
 		
 		JLabel lblPreview = new JLabel("Preview", Icons.INFO, JLabel.LEFT);
 		lblPreview.setToolTipText("Shows a preview of the current shape.");
-		this.pnlPreview = new PreviewPanel(new Dimension(150, 150), (Vector2[])null);
+		this.pnlPreview = new PreviewPanel(new Dimension(150, 150), null, null);
 		this.pnlPreview.setBackground(Color.WHITE);
 		this.pnlPreview.setBorder(BorderFactory.createEtchedBorder());
 		
@@ -131,19 +137,20 @@ public class FromFileConvexPolygonPanel extends ConvexShapePanel implements Inpu
 						}
 					}
 					// create the polygon
-					Vector2[] vertices = new Vector2[points.size()];
-					points.toArray(vertices);
+					this.points = new Vector2[points.size()];
+					points.toArray(this.points);
 					
 					try {
-						this.polygon = Geometry.createPolygon(vertices);
+						this.polygon = new Polygon(this.hullGenerator.generate(this.points));
 					} catch (IllegalArgumentException e) {
 						// the polygon is not valid
-						JOptionPane.showMessageDialog(this, "The file contains a polygon that does not meet the requirements.", "Notice", JOptionPane.INFORMATION_MESSAGE);
+						JOptionPane.showMessageDialog(this, "The file does not contain a valid point list (3 or more).", "Notice", JOptionPane.INFORMATION_MESSAGE);
 						// set the current polygon to null
 						this.polygon = null;
+						this.points = null;
 					}
 					// set the preview panel to the new points
-					this.pnlPreview.setPoints(vertices);
+					this.pnlPreview.setHull(this.polygon, this.points);
 					// set the text of the text field to the file path
 					this.txtFile.setText(file.getAbsolutePath());
 				} catch (NumberFormatException e) {
@@ -169,25 +176,39 @@ public class FromFileConvexPolygonPanel extends ConvexShapePanel implements Inpu
 		} else {
 			SamplePolygonFileDialog.show(
 					this,
-					"# Sample convex polygon with counter-clockwise winding and no coincident vertices\n" +
+					"# Sample point cloud from which a convex hull can be created\n" +
 					"# the # character must be the first character on the line to be flagged as a comment\n" +
 					"\n" +
 					"# Any number of blank lines can exist\n" +
 					"\n" +
 					"# You can use any whitespace character to separate the x and y values (space, tab, multiple spaces)\n" +
-					"1.0 -5.0\n" +
-					"2.0\t2.0\n" +
+					"0.0 1.0\n" +
+					"1.0\t1.0\n" +
 					"\n" +
-					"1.0     5.0\n");
+					"1.0     0.0\n" +
+					"0.0   0.0\n" +
+					"0.5\t 2.0\n" +
+					"1.5 2.0\n" +
+					"\n" +
+					"-1.0   0.5\n" +
+					"-3.0 -0.5\n");
 		}
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.sandbox.panels.ShapePanel#getDefaultShape()
+
+	/**
+	 * Returns the hull generator currently being used.
+	 * @return HullGenerator
 	 */
-	@Override
-	public Convex getDefaultShape() {
-		return DEFAULT_POLYGON;
+	public HullGenerator getHullGenerator() {
+		return this.hullGenerator;
+	}
+	
+	/**
+	 * Sets the hull generator currently being used.
+	 * @param hullGenerator the hull generator
+	 */
+	public void setHullGenerator(HullGenerator hullGenerator) {
+		this.hullGenerator = hullGenerator;
 	}
 	
 	/* (non-Javadoc)
@@ -215,7 +236,7 @@ public class FromFileConvexPolygonPanel extends ConvexShapePanel implements Inpu
 	@Override
 	public void showInvalidInputMessage(Window owner) {
 		if (!this.isValidInput()) {
-			JOptionPane.showMessageDialog(this, "You must specify a file containing valid points for a polygon.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(this, "You must specify a file containing a valid list of points for a convex hull.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

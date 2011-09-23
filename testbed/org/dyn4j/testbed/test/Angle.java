@@ -119,7 +119,7 @@ public class Angle extends Test {
 		
 		Entity obj1 = new Entity();
 		obj1.addFixture(new BodyFixture(r));
-		obj1.setMass(Mass.Type.INFINITE);
+		obj1.setMass();
 		obj1.translate(0.0, 0.6);
 		
 		Entity obj2 = new Entity();

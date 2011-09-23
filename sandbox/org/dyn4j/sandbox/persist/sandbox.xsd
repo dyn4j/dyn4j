@@ -348,6 +348,8 @@
 			<xs:element name="Mass" type="Mass" maxOccurs="1" minOccurs="1" />
 			<xs:element name="Velocity" type="Vector" maxOccurs="1" minOccurs="1" />
 			<xs:element name="AngularVelocity" type="xs:decimal" maxOccurs="1" minOccurs="1" />
+			<xs:element name="AccumulatedForce" type="Vector" maxOccurs="1" minOccurs="1" />
+			<xs:element name="AccumulatedTorque" type="xs:decimal" maxOccurs="1" minOccurs="1" />
 			<xs:element name="AutoSleep" type="xs:boolean" minOccurs="1" maxOccurs="1" />
 			<xs:element name="Asleep" type="xs:boolean" minOccurs="1" maxOccurs="1" />
 			<xs:element name="Active" type="xs:boolean" minOccurs="1" maxOccurs="1" />
@@ -600,6 +602,21 @@
 				<xs:sequence>
 					<xs:element name="Anchor" type="Vector" maxOccurs="1" minOccurs="1" />
 					<xs:element name="ReferenceAngle" type="xs:decimal" maxOccurs="1" minOccurs="1" />
+					<xs:element name="Frequency" maxOccurs="1" minOccurs="1">
+						<xs:simpleType>
+							<xs:restriction base="xs:decimal">
+								<xs:minInclusive value="0.0" />
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="DampingRatio" maxOccurs="1" minOccurs="1">
+						<xs:simpleType>
+							<xs:restriction base="xs:decimal">
+								<xs:minInclusive value="0.0" />
+								<xs:maxInclusive value="1.0" />
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>

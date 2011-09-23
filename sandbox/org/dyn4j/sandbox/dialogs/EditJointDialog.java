@@ -190,6 +190,7 @@ public class EditJointDialog extends JDialog implements ActionListener {
 	 */
 	public static void show(Window owner, Joint joint) {
 		EditJointDialog dialog = new EditJointDialog(owner, joint);
+		dialog.setLocationRelativeTo(owner);
 		dialog.setVisible(true);
 		
 		if (!dialog.canceled) {
