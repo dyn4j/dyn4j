@@ -19,6 +19,7 @@ import org.dyn4j.dynamics.joint.MouseJoint;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.utilities.ControlUtilities;
 import org.dyn4j.sandbox.utilities.Icons;
 
 /**
@@ -314,12 +315,12 @@ public class MouseJointPanel extends JointPanel implements InputPanel, ActionLis
 			mj.setUserData(this.txtName.getText());
 			// set the properties that can change
 			Vector2 target = new Vector2(
-					this.getDoubleValue(this.txtX2),
-					this.getDoubleValue(this.txtY2));
+					ControlUtilities.getDoubleValue(this.txtX2),
+					ControlUtilities.getDoubleValue(this.txtY2));
 			mj.setTarget(target);
-			mj.setDampingRatio(this.getDoubleValue(this.txtRatio));
-			mj.setFrequency(this.getDoubleValue(this.txtFrequency));
-			mj.setMaximumForce(this.getDoubleValue(this.txtMaxForce));
+			mj.setDampingRatio(ControlUtilities.getDoubleValue(this.txtRatio));
+			mj.setFrequency(ControlUtilities.getDoubleValue(this.txtFrequency));
+			mj.setMaximumForce(ControlUtilities.getDoubleValue(this.txtMaxForce));
 		}
 	}
 	
@@ -333,15 +334,15 @@ public class MouseJointPanel extends JointPanel implements InputPanel, ActionLis
 		
 		// get the anchor points
 		Vector2 a = new Vector2(
-				this.getDoubleValue(this.txtX1),
-				this.getDoubleValue(this.txtY1));
+				ControlUtilities.getDoubleValue(this.txtX1),
+				ControlUtilities.getDoubleValue(this.txtY1));
 		Vector2 t = new Vector2(
-				this.getDoubleValue(this.txtX2),
-				this.getDoubleValue(this.txtY2));
+				ControlUtilities.getDoubleValue(this.txtX2),
+				ControlUtilities.getDoubleValue(this.txtY2));
 		
-		double f = this.getDoubleValue(this.txtFrequency);
-		double d = this.getDoubleValue(this.txtRatio);
-		double mf = this.getDoubleValue(this.txtMaxForce);
+		double f = ControlUtilities.getDoubleValue(this.txtFrequency);
+		double d = ControlUtilities.getDoubleValue(this.txtRatio);
+		double mf = ControlUtilities.getDoubleValue(this.txtMaxForce);
 		
 		MouseJoint mj = new MouseJoint(body, a, f, d, mf);
 		// set the super class properties
@@ -362,16 +363,16 @@ public class MouseJointPanel extends JointPanel implements InputPanel, ActionLis
 			return false;
 		}
 		// the max force must be greater than zero
-		if (this.getDoubleValue(this.txtMaxForce) < 0.0) {
+		if (ControlUtilities.getDoubleValue(this.txtMaxForce) < 0.0) {
 			return false;
 		}
 		// check the damping ratio
-		double dr = this.getDoubleValue(this.txtRatio);
+		double dr = ControlUtilities.getDoubleValue(this.txtRatio);
 		if (dr < 0.0 || dr > 1.0) {
 			return false;
 		}
 		// check the frequency
-		double f = this.getDoubleValue(this.txtFrequency);
+		double f = ControlUtilities.getDoubleValue(this.txtFrequency);
 		if (f < 0.0) {
 			return false;
 		}
@@ -388,16 +389,16 @@ public class MouseJointPanel extends JointPanel implements InputPanel, ActionLis
 			JOptionPane.showMessageDialog(owner, "You must specify a name for the joint.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}
 		// the max force must be greater than zero
-		if (this.getDoubleValue(this.txtMaxForce) < 0.0) {
+		if (ControlUtilities.getDoubleValue(this.txtMaxForce) < 0.0) {
 			JOptionPane.showMessageDialog(owner, "The maximum force must be greater than or equal to zero.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}
 		// check the damping ratio
-		double dr = this.getDoubleValue(this.txtRatio);
+		double dr = ControlUtilities.getDoubleValue(this.txtRatio);
 		if (dr < 0.0 || dr > 1.0) {
 			JOptionPane.showMessageDialog(owner, "The damping ratio must be between 0 and 1 inclusive.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}
 		// check the frequency
-		double f = this.getDoubleValue(this.txtFrequency);
+		double f = ControlUtilities.getDoubleValue(this.txtFrequency);
 		if (f < 0.0) {
 			JOptionPane.showMessageDialog(owner, "The frequency must be greater than or equal to zero.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}

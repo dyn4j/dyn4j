@@ -25,7 +25,7 @@ import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.sandbox.dialogs.SamplePolygonFileDialog;
+import org.dyn4j.sandbox.dialogs.SampleFileDialog;
 import org.dyn4j.sandbox.utilities.Icons;
 
 /**
@@ -167,7 +167,7 @@ public class FromFileConvexPolygonPanel extends ConvexShapePanel implements Inpu
 				}
 			}
 		} else {
-			SamplePolygonFileDialog.show(
+			SampleFileDialog.show(
 					this,
 					"# Sample convex polygon with counter-clockwise winding and no coincident vertices\n" +
 					"# the # character must be the first character on the line to be flagged as a comment\n" +

@@ -20,6 +20,7 @@ import org.dyn4j.dynamics.joint.WheelJoint;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.utilities.ControlUtilities;
 import org.dyn4j.sandbox.utilities.Icons;
 
 /**
@@ -427,11 +428,11 @@ public class WheelJointPanel extends JointPanel implements InputPanel, ActionLis
 			wj.setUserData(this.txtName.getText());
 			wj.setCollisionAllowed(this.chkCollision.isSelected());
 			// set the properties that can change
-			wj.setFrequency(this.getDoubleValue(this.txtFrequency));
-			wj.setDampingRatio(this.getDoubleValue(this.txtRatio));
-			wj.setMaximumMotorTorque(this.getDoubleValue(this.txtMaxMotorTorque));
+			wj.setFrequency(ControlUtilities.getDoubleValue(this.txtFrequency));
+			wj.setDampingRatio(ControlUtilities.getDoubleValue(this.txtRatio));
+			wj.setMaximumMotorTorque(ControlUtilities.getDoubleValue(this.txtMaxMotorTorque));
 			wj.setMotorEnabled(this.chkMotorEnabled.isSelected());
-			wj.setMotorSpeed(Math.toRadians(this.getDoubleValue(this.txtMotorSpeed)));
+			wj.setMotorSpeed(Math.toRadians(ControlUtilities.getDoubleValue(this.txtMotorSpeed)));
 		}
 	}
 	
@@ -446,22 +447,22 @@ public class WheelJointPanel extends JointPanel implements InputPanel, ActionLis
 		
 		// get the anchor points
 		Vector2 an = new Vector2(
-				this.getDoubleValue(this.txtX1),
-				this.getDoubleValue(this.txtY1));
+				ControlUtilities.getDoubleValue(this.txtX1),
+				ControlUtilities.getDoubleValue(this.txtY1));
 		Vector2 ax = new Vector2(
-				this.getDoubleValue(this.txtX2),
-				this.getDoubleValue(this.txtY2));
+				ControlUtilities.getDoubleValue(this.txtX2),
+				ControlUtilities.getDoubleValue(this.txtY2));
 		
 		WheelJoint wj = new WheelJoint(body1, body2, an, ax);
 		// set the super class properties
 		wj.setUserData(this.txtName.getText());
 		wj.setCollisionAllowed(this.chkCollision.isSelected());
 		// set the other properties
-		wj.setFrequency(this.getDoubleValue(this.txtFrequency));
-		wj.setDampingRatio(this.getDoubleValue(this.txtRatio));
-		wj.setMaximumMotorTorque(this.getDoubleValue(this.txtMaxMotorTorque));
+		wj.setFrequency(ControlUtilities.getDoubleValue(this.txtFrequency));
+		wj.setDampingRatio(ControlUtilities.getDoubleValue(this.txtRatio));
+		wj.setMaximumMotorTorque(ControlUtilities.getDoubleValue(this.txtMaxMotorTorque));
 		wj.setMotorEnabled(this.chkMotorEnabled.isSelected());
-		wj.setMotorSpeed(Math.toRadians(this.getDoubleValue(this.txtMotorSpeed)));
+		wj.setMotorSpeed(Math.toRadians(ControlUtilities.getDoubleValue(this.txtMotorSpeed)));
 		
 		return wj;
 	}
@@ -481,17 +482,17 @@ public class WheelJointPanel extends JointPanel implements InputPanel, ActionLis
 			return false;
 		}
 		// check the damping ratio
-		double dr = this.getDoubleValue(this.txtRatio);
+		double dr = ControlUtilities.getDoubleValue(this.txtRatio);
 		if (dr < 0.0 || dr > 1.0) {
 			return false;
 		}
 		// check the frequency
-		double f = this.getDoubleValue(this.txtFrequency);
+		double f = ControlUtilities.getDoubleValue(this.txtFrequency);
 		if (f < 0.0) {
 			return false;
 		}
 		// check the maximum motor torque
-		if (this.getDoubleValue(this.txtMaxMotorTorque) < 0.0) {
+		if (ControlUtilities.getDoubleValue(this.txtMaxMotorTorque) < 0.0) {
 			return false;
 		}
 		return true;
@@ -511,17 +512,17 @@ public class WheelJointPanel extends JointPanel implements InputPanel, ActionLis
 			JOptionPane.showMessageDialog(owner, "You must select two different bodies.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}
 		// check the damping ratio
-		double dr = this.getDoubleValue(this.txtRatio);
+		double dr = ControlUtilities.getDoubleValue(this.txtRatio);
 		if (dr < 0.0 || dr > 1.0) {
 			JOptionPane.showMessageDialog(owner, "The damping ratio must be between 0 and 1 inclusive.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}
 		// check the frequency
-		double f = this.getDoubleValue(this.txtFrequency);
+		double f = ControlUtilities.getDoubleValue(this.txtFrequency);
 		if (f < 0.0) {
 			JOptionPane.showMessageDialog(owner, "The frequency must be greater than or equal to zero.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}
 		// check the maximum motor force
-		if (this.getDoubleValue(this.txtMaxMotorTorque) < 0.0) {
+		if (ControlUtilities.getDoubleValue(this.txtMaxMotorTorque) < 0.0) {
 			JOptionPane.showMessageDialog(owner, "The maximum motor torque must be greater than or equal to zero.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}
 	}

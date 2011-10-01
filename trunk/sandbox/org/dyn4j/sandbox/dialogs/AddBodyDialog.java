@@ -12,7 +12,7 @@ import javax.swing.JDialog;
 import javax.swing.JTabbedPane;
 
 import org.dyn4j.geometry.Mass;
-import org.dyn4j.sandbox.ApplicationSettings;
+import org.dyn4j.sandbox.Preferences;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.panels.BodyPanel;
 import org.dyn4j.sandbox.panels.TransformPanel;
@@ -54,11 +54,10 @@ public class AddBodyDialog extends JDialog implements ActionListener {
 		
 		body = new SandboxBody();
 		body.getMass().setType(Mass.Type.NORMAL);
-		body.setAutoSleepingEnabled(false);
 		body.setName("Body" + N);
 		
 		// check if we need to randomize colors
-		if (ApplicationSettings.isColorRandom()) {
+		if (Preferences.isBodyColorRandom()) {
 			Color fc = ColorUtilities.getRandomColor(0.5f, 1.0f);
 			Color oc = fc.darker();
 			body.setOutlineColor(ColorUtilities.convertColor(oc));

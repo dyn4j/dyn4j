@@ -110,6 +110,7 @@ public class AboutDialog extends JDialog {
 	public static final void show(Window owner) {
 		// create the dialog
 		AboutDialog dialog = new AboutDialog(owner);
+		dialog.setLocationRelativeTo(owner);
 		// show the dialog
 		dialog.setVisible(true);
 	}

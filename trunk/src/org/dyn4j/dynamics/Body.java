@@ -338,6 +338,8 @@ public class Body implements Swept, Collidable, Transformable {
 	 * <p>
 	 * This method will calculate a total mass for the body 
 	 * given the masses of the fixtures.
+	 * <p>
+	 * This method will always set this body's mass type to Normal.
 	 * @return {@link Body} this body
 	 * @see #setMass(Mass.Type)
 	 * @see #addFixture(BodyFixture)

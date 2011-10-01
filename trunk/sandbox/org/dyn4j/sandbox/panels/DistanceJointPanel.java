@@ -22,6 +22,7 @@ import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.utilities.ControlUtilities;
 import org.dyn4j.sandbox.utilities.Icons;
 
 /**
@@ -372,11 +373,11 @@ public class DistanceJointPanel extends JointPanel implements InputPanel, Action
 	private void computeRestDistance() {
 		// get the point values
 		Vector2 p1 = new Vector2(
-				this.getDoubleValue(this.txtX1),
-				this.getDoubleValue(this.txtY1));
+				ControlUtilities.getDoubleValue(this.txtX1),
+				ControlUtilities.getDoubleValue(this.txtY1));
 		Vector2 p2 = new Vector2(
-				this.getDoubleValue(this.txtX2),
-				this.getDoubleValue(this.txtY2));
+				ControlUtilities.getDoubleValue(this.txtX2),
+				ControlUtilities.getDoubleValue(this.txtY2));
 		
 		double d = p1.distance(p2);
 		this.txtRestDistance.setValue(d);
@@ -439,9 +440,9 @@ public class DistanceJointPanel extends JointPanel implements InputPanel, Action
 			dj.setUserData(this.txtName.getText());
 			dj.setCollisionAllowed(this.chkCollision.isSelected());
 			// set the properties that can change
-			dj.setDampingRatio(this.getDoubleValue(this.txtRatio));
-			dj.setFrequency(this.getDoubleValue(this.txtFrequency));
-			dj.setDistance(this.getDoubleValue(this.txtRestDistance));
+			dj.setDampingRatio(ControlUtilities.getDoubleValue(this.txtRatio));
+			dj.setFrequency(ControlUtilities.getDoubleValue(this.txtFrequency));
+			dj.setDistance(ControlUtilities.getDoubleValue(this.txtRestDistance));
 		}
 	}
 	
@@ -456,20 +457,20 @@ public class DistanceJointPanel extends JointPanel implements InputPanel, Action
 		
 		// get the anchor points
 		Vector2 a1 = new Vector2(
-				this.getDoubleValue(this.txtX1),
-				this.getDoubleValue(this.txtY1));
+				ControlUtilities.getDoubleValue(this.txtX1),
+				ControlUtilities.getDoubleValue(this.txtY1));
 		Vector2 a2 = new Vector2(
-				this.getDoubleValue(this.txtX2),
-				this.getDoubleValue(this.txtY2));
+				ControlUtilities.getDoubleValue(this.txtX2),
+				ControlUtilities.getDoubleValue(this.txtY2));
 		
 		DistanceJoint dj = new DistanceJoint(body1, body2, a1, a2);
 		// set the super class properties
 		dj.setUserData(this.txtName.getText());
 		dj.setCollisionAllowed(this.chkCollision.isSelected());
 		// set the other properties
-		dj.setDampingRatio(this.getDoubleValue(this.txtRatio));
-		dj.setFrequency(this.getDoubleValue(this.txtFrequency));
-		dj.setDistance(this.getDoubleValue(this.txtRestDistance));
+		dj.setDampingRatio(ControlUtilities.getDoubleValue(this.txtRatio));
+		dj.setFrequency(ControlUtilities.getDoubleValue(this.txtFrequency));
+		dj.setDistance(ControlUtilities.getDoubleValue(this.txtRestDistance));
 		
 		return dj;
 	}
@@ -489,16 +490,16 @@ public class DistanceJointPanel extends JointPanel implements InputPanel, Action
 			return false;
 		}
 		// the rest distance cannot be less than zero
-		if (this.getDoubleValue(this.txtRestDistance) < 0.0) {
+		if (ControlUtilities.getDoubleValue(this.txtRestDistance) < 0.0) {
 			return false;
 		}
 		// check the damping ratio
-		double dr = this.getDoubleValue(this.txtRatio);
+		double dr = ControlUtilities.getDoubleValue(this.txtRatio);
 		if (dr < 0.0 || dr > 1.0) {
 			return false;
 		}
 		// check the frequency
-		double f = this.getDoubleValue(this.txtFrequency);
+		double f = ControlUtilities.getDoubleValue(this.txtFrequency);
 		if (f < 0.0) {
 			return false;
 		}
@@ -519,16 +520,16 @@ public class DistanceJointPanel extends JointPanel implements InputPanel, Action
 			JOptionPane.showMessageDialog(owner, "You must select two different bodies.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}
 		// the rest distance cannot be less than zero
-		if (this.getDoubleValue(this.txtRestDistance) < 0.0) {
+		if (ControlUtilities.getDoubleValue(this.txtRestDistance) < 0.0) {
 			JOptionPane.showMessageDialog(owner, "The rest distance must be greater than or equal to zero.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}
 		// check the damping ratio
-		double dr = this.getDoubleValue(this.txtRatio);
+		double dr = ControlUtilities.getDoubleValue(this.txtRatio);
 		if (dr < 0.0 || dr > 1.0) {
 			JOptionPane.showMessageDialog(owner, "The damping ratio must be between 0 and 1 inclusive.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}
 		// check the frequency
-		double f = this.getDoubleValue(this.txtFrequency);
+		double f = ControlUtilities.getDoubleValue(this.txtFrequency);
 		if (f < 0.0) {
 			JOptionPane.showMessageDialog(owner, "The frequency must be greater than or equal to zero.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}

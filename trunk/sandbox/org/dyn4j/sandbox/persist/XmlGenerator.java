@@ -4,6 +4,7 @@ import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.collision.Filter;
 import org.dyn4j.collision.RectangularBounds;
 import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.joint.AngleJoint;
 import org.dyn4j.dynamics.joint.DistanceJoint;
@@ -26,6 +27,7 @@ import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
+import org.dyn4j.sandbox.utilities.SystemUtilities;
 
 /**
  * Class used to export the world to xml.
@@ -37,13 +39,35 @@ public class XmlGenerator {
 	/**
 	 * Returns the xml for the given world object.
 	 * @param world the world
+	 * @param settings the global settings
 	 * @return String
 	 */
-	public static final String toXml(World world) {
+	public static final String toXml(World world, Settings settings) {
 		StringBuilder sb = new StringBuilder();
 		
 		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-		sb.append("<World xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://www.dyn4j.org/Sandbox/sandbox.xsd\">");
+		sb.append("<Simulation xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://www.dyn4j.org/Sandbox/sandbox.xsd\">");
+		
+		// output the simulation name
+		sb.append("<Name>").append(world.getUserData()).append("</Name>");
+		
+		// output system properties
+		sb.append(XmlGenerator.toXml());
+		
+		// output settings
+		sb.append(XmlGenerator.toXml(settings));
+		
+		// output the world
+		sb.append("<World>");
+		
+		// algorithms
+		sb.append("<BroadphaseDetector>").append(world.getBroadphaseDetector().getClass().getSimpleName()).append("</BroadphaseDetector>");
+		sb.append("<NarrowphaseDetector>").append(world.getNarrowphaseDetector().getClass().getSimpleName()).append("</NarrowphaseDetector>");
+		sb.append("<ManifoldSolver>").append(world.getManifoldSolver().getClass().getSimpleName()).append("</ManifoldSolver>");
+		sb.append("<TimeOfImpactDetector>").append(world.getTimeOfImpactDetector().getClass().getSimpleName()).append("</TimeOfImpactDetector>");
+		
+		// gravity
+		sb.append(XmlGenerator.toXml(world.getGravity(), "Gravity"));
 		
 		// bounds
 		if (world.getBounds() instanceof RectangularBounds) {
@@ -79,6 +103,56 @@ public class XmlGenerator {
 		sb.append("</Joints>");
 		
 		sb.append("</World>");
+		sb.append("</Simulation>");
+		
+		return sb.toString();
+	}
+	
+	/**
+	 * Returns the xml for the current system.
+	 * @return String
+	 */
+	private static final String toXml() {
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append("<System>")
+		.append("<JavaVersion>").append(SystemUtilities.getJavaVersion()).append("</JavaVersion>")
+		.append("<JavaVendor>").append(SystemUtilities.getJavaVendor()).append("</JavaVendor>")
+		.append("<OperatingSystem>").append(SystemUtilities.getOperatingSystem()).append("</OperatingSystem>")
+		.append("<Architecture>").append(SystemUtilities.getArchitecture()).append("</Architecture>")
+		.append("<NumberOfCpus>").append(Runtime.getRuntime().availableProcessors()).append("</NumberOfCpus>")
+		.append("</System>");
+		
+		return sb.toString();
+	}
+	
+	/**
+	 * Returns the xml for the given settings instance.
+	 * @param settings the settings
+	 * @return String
+	 */
+	private static final String toXml(Settings settings) {
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append("<Settings>")
+		.append("<StepFrequency>").append(1.0 / settings.getStepFrequency()).append("</StepFrequency>")
+		.append("<MaximumTranslation>").append(settings.getMaxTranslation()).append("</MaximumTranslation>")
+		.append("<MaximumRotation>").append(Math.toDegrees(settings.getMaxRotation())).append("</MaximumRotation>")
+		.append("<ContinuousCollisionDetectionMode>").append(settings.getContinuousDetectionMode()).append("</ContinuousCollisionDetectionMode>")
+		.append("<AutoSleep>").append(settings.isAutoSleepingEnabled()).append("</AutoSleep>")
+		.append("<SleepTime>").append(settings.getSleepTime()).append("</SleepTime>")
+		.append("<SleepLinearVelocity>").append(settings.getSleepVelocity()).append("</SleepLinearVelocity>")
+		.append("<SleepAngularVelocity>").append(Math.toDegrees(settings.getSleepAngularVelocity())).append("</SleepAngularVelocity>")
+		.append("<VelocitySolverIterations>").append(settings.getVelocityConstraintSolverIterations()).append("</VelocitySolverIterations>")
+		.append("<PositionSolverIterations>").append(settings.getPositionConstraintSolverIterations()).append("</PositionSolverIterations>")
+		.append("<WarmStartDistance>").append(settings.getWarmStartDistance()).append("</WarmStartDistance>")
+		.append("<RestitutionVelocity>").append(settings.getRestitutionVelocity()).append("</RestitutionVelocity>")
+		.append("<LinearTolerance>").append(settings.getLinearTolerance()).append("</LinearTolerance>")
+		.append("<AngularTolerance>").append(Math.toDegrees(settings.getAngularTolerance())).append("</AngularTolerance>")
+		.append("<MaximumLinearCorrection>").append(settings.getMaxLinearCorrection()).append("</MaximumLinearCorrection>")
+		.append("<MaximumAngularCorrection>").append(Math.toDegrees(settings.getMaxAngularCorrection())).append("</MaximumAngularCorrection>")
+		.append("<Baumgarte>").append(settings.getBaumgarte()).append("</Baumgarte>")
+		.append("</Settings>");
 		
 		return sb.toString();
 	}
@@ -192,6 +266,7 @@ public class XmlGenerator {
 		if (filter == Filter.DEFAULT_FILTER) {
 			sb.append("DefaultFilter\" />");
 		} else if (filter instanceof CategoryFilter) {
+			sb.append("CategoryFilter\">");
 			CategoryFilter cf = (CategoryFilter)filter;
 			sb.append("<PartOfGroups>");
 			sb.append(XmlGenerator.toXml(cf.getCategory()));
@@ -283,6 +358,24 @@ public class XmlGenerator {
 	}
 	
 	/**
+	 * Returns the xml for the given color.
+	 * @param color the color
+	 * @param name the tag name
+	 * @return String
+	 */
+	private static final String toXml(float[] color, String name) {
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append("<").append(name)
+		.append(" r=\"").append(color[0])
+		.append("\" g=\"").append(color[1])
+		.append("\" b=\"").append(color[2])
+		.append("\" />");
+		
+		return sb.toString();
+	}
+	
+	/**
 	 * Returns the xml for the given body object.
 	 * @param body the body
 	 * @return String
@@ -295,6 +388,10 @@ public class XmlGenerator {
 		.append("\" Name=\"")
 		.append(body.getUserData())
 		.append("\">");
+		
+		// output colors
+		sb.append(XmlGenerator.toXml(body.getOutlineColor(), "OutlineColor"));
+		sb.append(XmlGenerator.toXml(body.getFillColor(), "FillColor"));
 		
 		// output fixtures
 		sb.append("<Fixtures>");

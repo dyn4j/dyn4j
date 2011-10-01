@@ -25,7 +25,7 @@ import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.geometry.decompose.Decomposer;
-import org.dyn4j.sandbox.dialogs.SamplePolygonFileDialog;
+import org.dyn4j.sandbox.dialogs.SampleFileDialog;
 import org.dyn4j.sandbox.utilities.Icons;
 
 /**
@@ -164,7 +164,7 @@ public class FromFileNonConvexPolygonPanel extends NonConvexShapePanel implement
 				}
 			}
 		} else {
-			SamplePolygonFileDialog.show(
+			SampleFileDialog.show(
 					this,
 					"# Sample non-convex simple polygon (without holes and crossed edges)\n" +
 					"# the # character must be the first character on the line to be flagged as a comment\n" +

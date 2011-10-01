@@ -5,6 +5,8 @@ import java.text.DecimalFormat;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
+import org.dyn4j.collision.Bounds;
+import org.dyn4j.collision.RectangularBounds;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.joint.AngleJoint;
@@ -608,6 +610,67 @@ public final class RenderUtilities {
 		}
 	}
 	
+	// Arc methods
+	
+	/**
+	 * Renders an arc at (cx, cy) with the given radius r using n number of lines.
+	 * @param gl the OpenGL graphics context
+	 * @param cx the center x coordinate
+	 * @param cy the center y coordinate
+	 * @param r the radius
+	 * @param sa the start angle
+	 * @param aa the arc angle
+	 */
+	public static final void drawArc(GL2 gl, double cx, double cy, double r, double sa, double aa) {
+		double t;
+
+		// start at sa 
+		double x = r;
+		double y = 0; 
+		
+		// start at the start angle
+		t = x;
+		x = Math.cos(sa) * x - Math.sin(sa) * y;
+		y = Math.sin(sa) * t + Math.cos(sa) * y;
+		
+		gl.glBegin(GL.GL_LINE_STRIP); 
+		for(int i = 0; i < N; i++) 
+		{ 
+			gl.glVertex2d(x + cx, y + cy);//output vertex 
+	        
+			//apply the rotation matrix
+			t = x;
+			x = COS * x - SIN * y;
+			y = SIN * t + COS * y;
+			
+			if (COS * i >= Math.abs(aa)) break;
+		} 
+		gl.glEnd();  
+	}
+	
+	// Point methods
+	
+	/**
+	 * Draws the given point.
+	 * @param gl the OpenGL context
+	 * @param p the point
+	 */
+	public static final void drawPoint(GL2 gl, Vector2 p) {
+		RenderUtilities.drawPoint(gl, p.x, p.y);
+	}
+	
+	/**
+	 * Draws the given point.
+	 * @param gl the OpenGL context
+	 * @param px the x coordinate of the point
+	 * @param py the y coordinate of the point
+	 */
+	public static final void drawPoint(GL2 gl, double px, double py) {
+		gl.glBegin(GL.GL_POINTS);
+			gl.glVertex2d(px, py);
+		gl.glEnd();
+	}
+	
 	// Vector methods
 	
 	/**
@@ -638,6 +701,26 @@ public final class RenderUtilities {
 	}
 	
 	// High-level methods
+	
+	/**
+	 * Draws the given bounds object.
+	 * @param gl the OpenGL context
+	 * @param b the bounds
+	 */
+	public static final void drawBounds(GL2 gl, Bounds b) {
+		if (b instanceof RectangularBounds) {
+			RectangularBounds rb = (RectangularBounds)b;
+			Rectangle r = rb.getBounds();
+			Transform t = rb.getTransform();
+			
+			RenderUtilities.pushTransform(gl);
+			RenderUtilities.applyTransform(gl, t);
+			RenderUtilities.drawRectangle(gl, r, false);
+			RenderUtilities.popTransform(gl);
+		} else {
+			// no rendering available
+		}
+	}
 	
 	/**
 	 * Draws the given shape.
@@ -682,23 +765,21 @@ public final class RenderUtilities {
 	 * Outlines the given shape using the given line width.
 	 * @param gl the OpenGL context
 	 * @param s the shape to outline
-	 * @param t the shape transform
 	 * @param w the line width
 	 * @param color the line color
 	 */
-	public static final void outlineShape(GL2 gl, Shape s, Transform t, float w, float[] color) {
+	public static final void outlineShape(GL2 gl, Shape s, float w, float[] color) {
 		float lw = RenderUtilities.getLineWidth(gl);
 		RenderUtilities.setLineWidth(gl, w);
-		RenderUtilities.pushTransform(gl);
-		RenderUtilities.applyTransform(gl, t);
 		if (color != null) gl.glColor4fv(color, 0);
 		RenderUtilities.drawShape(gl, s, true);
-		RenderUtilities.popTransform(gl);
 		RenderUtilities.setLineWidth(gl, lw);
 	}
 	
 	/**
 	 * Outlines each fixture of the body.
+	 * <p>
+	 * This method does <b>not</b> apply the body transform before rendering.
 	 * @param gl the OpenGL context
 	 * @param body the body to outline
 	 * @param w the line width
@@ -710,11 +791,6 @@ public final class RenderUtilities {
 		double scale = state.scale;
 		// set the line width
 		float lw = RenderUtilities.setLineWidth(gl, w);
-		// get the transform
-		Transform t = body.getTransform();
-		// apply the transform
-		RenderUtilities.pushTransform(gl);
-		RenderUtilities.applyTransform(gl, t);
 		// set the color
 		if (color != null) gl.glColor4fv(color, 0);
 		// compute the width expansion
@@ -747,66 +823,8 @@ public final class RenderUtilities {
 				}
 			}
 		}
-		// drop the transform
-		RenderUtilities.popTransform(gl);
 		// reset the line width
 		RenderUtilities.setLineWidth(gl, lw);
-	}
-	
-	/**
-	 * Draws an outline of the entire body (all fixtures combined) using the stencil buffer.
-	 * @param gl the OpenGL context
-	 * @param body the body
-	 * @param state the rendering state
-	 */
-	public static final void outlineBody(GL2 gl, SandboxBody body, RenderState state) {
-		RenderUtilities.outlineBody(gl, body, state, false);
-	}
-	
-	/**
-	 * Draws an outline of the entire body (all fixtures combined) using the stencil buffer.
-	 * <p>
-	 * Use the fill boolean to toggle filling of the body.
-	 * @param gl the OpenGL context
-	 * @param body the body
-	 * @param state the rendering state
-	 * @param fill true if the body should be filled
-	 */
-	public static final void outlineBody(GL2 gl, SandboxBody body, RenderState state, boolean fill) {
-		// clear the stencil
-	    gl.glClear(GL.GL_STENCIL_BUFFER_BIT);
-	    
-	    // disable color
-	    gl.glColorMask(false, false, false, false);
-	    // enable stencil testing
-	    gl.glEnable(GL.GL_STENCIL_TEST);
-	    
-	    // fill the body into the stencil buffer
-	    gl.glStencilFunc(GL.GL_ALWAYS, 1, -1);
-	    gl.glStencilOp(GL.GL_KEEP, GL.GL_KEEP, GL.GL_REPLACE);
-	    body.fill(gl);
-	    
-	    // draw the body into the stencil buffer only keeping the
-	    // overlapping portions
-	    gl.glStencilFunc(GL.GL_NOTEQUAL, 1, -1);
-	    gl.glStencilOp(GL.GL_KEEP, GL.GL_KEEP, GL.GL_REPLACE);
-	    // set the line width so we dont have to render the body 4 times
-	    float lw = RenderUtilities.setLineWidth(gl, 3.0f);
-	    // enable color to draw the outline
-	    gl.glColorMask(true, true, true, true);
-	    gl.glColor4fv(body.getOutlineColor(), 0);
-	    body.draw(gl);
-	    
-	    gl.glLineWidth(lw);
-	    
-	    // disable the stencil test
-	    gl.glDisable(GL.GL_STENCIL_TEST);
-	    
-	    // check if we need to fill the body too
-	    if (fill) {
-		    gl.glColor4fv(body.getFillColor(), 0);
-		    body.fill(gl);
-	    }
 	}
 	
 	/**

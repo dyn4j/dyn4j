@@ -17,6 +17,7 @@ import org.dyn4j.dynamics.joint.PulleyJoint;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.utilities.ControlUtilities;
 import org.dyn4j.sandbox.utilities.Icons;
 
 /**
@@ -338,7 +339,7 @@ public class PulleyJointPanel extends JointPanel implements InputPanel, ActionLi
 			pj.setUserData(this.txtName.getText());
 			pj.setCollisionAllowed(this.chkCollision.isSelected());
 			// set the properties that can change
-			pj.setRatio(this.getDoubleValue(this.txtRatio));
+			pj.setRatio(ControlUtilities.getDoubleValue(this.txtRatio));
 		}
 	}
 	
@@ -353,24 +354,24 @@ public class PulleyJointPanel extends JointPanel implements InputPanel, ActionLi
 		
 		// get the anchor points
 		Vector2 a1 = new Vector2(
-				this.getDoubleValue(this.txtBX1),
-				this.getDoubleValue(this.txtBY1));
+				ControlUtilities.getDoubleValue(this.txtBX1),
+				ControlUtilities.getDoubleValue(this.txtBY1));
 		Vector2 a2 = new Vector2(
-				this.getDoubleValue(this.txtBX2),
-				this.getDoubleValue(this.txtBY2));
+				ControlUtilities.getDoubleValue(this.txtBX2),
+				ControlUtilities.getDoubleValue(this.txtBY2));
 		Vector2 p1 = new Vector2(
-				this.getDoubleValue(this.txtPX1),
-				this.getDoubleValue(this.txtPY1));
+				ControlUtilities.getDoubleValue(this.txtPX1),
+				ControlUtilities.getDoubleValue(this.txtPY1));
 		Vector2 p2 = new Vector2(
-				this.getDoubleValue(this.txtPX2),
-				this.getDoubleValue(this.txtPY2));
+				ControlUtilities.getDoubleValue(this.txtPX2),
+				ControlUtilities.getDoubleValue(this.txtPY2));
 		
 		PulleyJoint pj = new PulleyJoint(body1, body2, p1, p2, a1, a2);
 		// set the super class properties
 		pj.setUserData(this.txtName.getText());
 		pj.setCollisionAllowed(this.chkCollision.isSelected());
 		// set the other properties
-		pj.setRatio(this.getDoubleValue(this.txtRatio));
+		pj.setRatio(ControlUtilities.getDoubleValue(this.txtRatio));
 		
 		return pj;
 	}

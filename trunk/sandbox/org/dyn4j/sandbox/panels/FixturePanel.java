@@ -281,6 +281,19 @@ public class FixturePanel extends WindowSpawningPanel implements InputPanel {
 		this.scrCategories.setMinimumSize(this.scrCategories.getPreferredSize());
 		this.scrMasks.setMinimumSize(this.scrMasks.getPreferredSize());
 		
+		JLabel lblDefault = new JLabel();
+		lblDefault.setText("<html>The default filter allows the fixture to<br />collidle with all other fixtures.</html>");
+		
+		this.pnlFilter = new JPanel(new CardLayout());
+		// create the card layout for the categories/default filter area
+		JPanel pnlDefaultFilter = new JPanel();
+		pnlDefaultFilter.setLayout(new BorderLayout());
+		pnlDefaultFilter.add(lblDefault, BorderLayout.PAGE_START);
+		JPanel pnlCategoryFilter = new JPanel();
+		
+		this.pnlFilter.add(pnlDefaultFilter, "Default");
+		this.pnlFilter.add(pnlCategoryFilter, "Category");
+		
 		this.rdoCategoryFilter.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent event) {
@@ -360,19 +373,6 @@ public class FixturePanel extends WindowSpawningPanel implements InputPanel {
 				bodyFixture.setSensor(check.isSelected());
 			}
 		});
-		
-		JLabel lblDefault = new JLabel();
-		lblDefault.setText("<html>The default filter allows the fixture to<br />collidle with all other fixtures.</html>");
-		
-		this.pnlFilter = new JPanel(new CardLayout());
-		// create the card layout for the categories/default filter area
-		JPanel pnlDefaultFilter = new JPanel();
-		pnlDefaultFilter.setLayout(new BorderLayout());
-		pnlDefaultFilter.add(lblDefault, BorderLayout.PAGE_START);
-		JPanel pnlCategoryFilter = new JPanel();
-		
-		this.pnlFilter.add(pnlDefaultFilter, "Default");
-		this.pnlFilter.add(pnlCategoryFilter, "Category");
 		
 		GroupLayout layout = new GroupLayout(pnlCategoryFilter);
 		layout.setAutoCreateContainerGaps(true);

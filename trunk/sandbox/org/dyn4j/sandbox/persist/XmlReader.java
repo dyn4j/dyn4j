@@ -16,7 +16,21 @@ import javax.xml.parsers.SAXParserFactory;
 import org.dyn4j.collision.Bounds;
 import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.collision.RectangularBounds;
+import org.dyn4j.collision.broadphase.BroadphaseDetector;
+import org.dyn4j.collision.broadphase.DynamicAABBTree;
+import org.dyn4j.collision.broadphase.SapBruteForce;
+import org.dyn4j.collision.broadphase.SapIncremental;
+import org.dyn4j.collision.broadphase.SapTree;
+import org.dyn4j.collision.continuous.ConservativeAdvancement;
+import org.dyn4j.collision.continuous.TimeOfImpactDetector;
+import org.dyn4j.collision.manifold.ClippingManifoldSolver;
+import org.dyn4j.collision.manifold.ManifoldSolver;
+import org.dyn4j.collision.narrowphase.Gjk;
+import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
+import org.dyn4j.collision.narrowphase.Sat;
+import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.joint.AngleJoint;
 import org.dyn4j.dynamics.joint.DistanceJoint;
@@ -48,75 +62,28 @@ import org.xml.sax.helpers.DefaultHandler;
  * @since 1.0.0
  */
 public class XmlReader extends DefaultHandler {
-	/** A list of tags that are expected to be skipped */
-	private static final String SKIP_TAGS = "World,Bounds,Rectangle,Bodies,Joints,Fixtures";
-	
 	// Flags; true if the tag is currently active; false otherwise
 	
-	// rectangle
+	/** The current tag name */
+	private String tagName;
 	
-	/** Flag for the Width tag */
-	private boolean widthFlag;
+	/** Flag used to determine whether tags were skipped */
+	private boolean handled = false;
 	
-	/** Flag for the Height tag */
-	private boolean heightFlag;
+	// system
 	
-	/** Flag for the LocalRotation tag */
-	private boolean localRotationFlag;
+	/** Flag for the System tag */
+	private boolean systemFlag;
+	
+	// settings
+	
+	/** Flag for the Settings tag */
+	private boolean settingsFlag;
 	
 	// transform
 	
 	/** Flag for the Transform tag */
 	private boolean transformFlag;
-	
-	/** Flag for the Rotation tag */
-	private boolean rotationFlag;
-	
-	// body
-	
-	/** Flag for the AngularVelocity tag */
-	private boolean angularVelocityFlag;
-	
-	/** Flag for the AccumulatedTorque tag */
-	private boolean accumulatedTorqueFlag;
-	
-	/** Flag for the AutoSleep tag */
-	private boolean autoSleepFlag;
-	
-	/** Flag for the Asleep tag */
-	private boolean asleepFlag;
-	
-	/** Flag for the Active tag */
-	private boolean activeFlag;
-	
-	/** Flag for the Bullet tag */
-	private boolean bulletFlag;
-	
-	/** Flag for the LinearDamping tag */
-	private boolean linearDampingFlag;
-	
-	/** Flag for the AngularDamping tag */
-	private boolean angularDampingFlag;
-	
-	/** Flag for the GravityScale tag */
-	private boolean gravityScaleFlag;
-	
-	/** Flag for the Sensor tag */
-	private boolean sensorFlag;
-	
-	/** Flag for the Density tag */
-	private boolean densityFlag;
-	
-	/** Flag for the Friction tag */
-	private boolean frictionFlag;
-	
-	/** Flag for the Restitution tag */
-	private boolean restitutionFlag;
-	
-	// shape
-	
-	/** Flag for the Radius tag */
-	private boolean radiusFlag;
 	
 	// filter
 	
@@ -131,79 +98,25 @@ public class XmlReader extends DefaultHandler {
 	/** Flag for the Mass tag */
 	private boolean massFlag;
 	
-	/** Flag for the Type tag under the Mass tag */
-	private boolean massTypeFlag;
-	
 	/** Flag for the Mass tag under the Mass tag */
 	private boolean massMassFlag;
 	
-	/** Flag for the Inertia tag */
-	private boolean massInertiaFlag;
-	
-	/** Flag for the Explicit tag */
-	private boolean massExplicitFlag;
-	
-	// joints
-	
-	/** Flag for the BodyId1 tag */
-	private boolean bodyId1Start;
-	
-	/** Flag for the BodyId2 tag */
-	private boolean bodyId2Start;
-	
-	/** Flag for the CollisionAllowed tag */
-	private boolean collisionAllowedStart;
-	
-	/** Flag for the UpperLimit tag */
-	private boolean upperLimitStart;
-	
-	/** Flag for the LowerLimit tag */
-	private boolean lowerLimitStart;
-	
-	/** Flag for the LimitEnabled tag */
-	private boolean limitEnabledStart;
-	
-	/** Flag for the ReferenceAngle tag */
-	private boolean referenceAngleStart;
-	
-	/** Flag for the Frequency tag */
-	private boolean frequencyStart;
-	
-	/** Flag for the DampingRatio tag */
-	private boolean dampingRatioStart;
-	
-	/** Flag for the Distance tag */
-	private boolean distanceStart;
-	
-	/** Flag for the MaximumForce tag */
-	private boolean maximumForceStart;
-	
-	/** Flag for the MaximumTorque tag */
-	private boolean maximumTorqueStart;
-	
-	/** Flag for the MotorSpeed tag */
-	private boolean motorSpeedStart;
-	
-	/** Flag for the MaximumMotorForce tag */
-	private boolean maximumMotorForceStart;
-	
-	/** Flag for the MotorEnabled tag */
-	private boolean motorEnabledStart;
-	
-	/** Flag for the Ratio tag */
-	private boolean ratioStart;
-	
-	/** Flag for the MaximumMotorTorque tag */
-	private boolean maximumMotorTorqueStart;
-	
-	/** Flag for the LowerLimitEnabled tag */
-	private boolean lowerLimitEnabledStart;
-	
-	/** Flag for the UpperLimitEnabled tag */
-	private boolean upperLimitEnabledStart;
-	
-	
 	// Data; storage for the final results and extra information
+	
+	/** Storage for the BroadphaseDetector tag */
+	private BroadphaseDetector<Body> broadphase;
+	
+	/** Storage for the NarrowphaseDetector tag */
+	private NarrowphaseDetector narrowphase;
+	
+	/** Storage for the ManifoldSolver tag */
+	private ManifoldSolver manifoldSolver;
+	
+	/** Storage for the TimeOfImpactDetector tag */
+	private TimeOfImpactDetector timeOfImpact;
+	
+	/** The Gravity tag */
+	private Vector2 gravity;
 	
 	/** The bounds object */
 	private Bounds bounds;
@@ -218,6 +131,11 @@ public class XmlReader extends DefaultHandler {
 	private Map<String, SandboxBody> idMap;
 	
 	// Tag Data; for temporary storage
+	
+	// world
+	
+	/** The world name */
+	private String worldName;
 	
 	/** Storage for the LocalCenter tag */
 	private Vector2 localCenter;
@@ -246,33 +164,6 @@ public class XmlReader extends DefaultHandler {
 	/** Storage for the Body tag */
 	private SandboxBody body;
 	
-	/** Storage for the AngularVelocity tag */
-	private double angularVelocity;
-	
-	/** Storage for the Accumulated Torque tag */
-	private double accumulatedTorque;
-	
-	/** Storage for the AutoSleep tag */
-	private boolean autoSleep;
-	
-	/** Storage for the Asleep tag */
-	private boolean asleep;
-	
-	/** Storage for the Active tag */
-	private boolean active;
-	
-	/** Storage for the Bullet tag */
-	private boolean bullet;
-	
-	/** Storage for the LinearDamping tag */
-	private double linearDamping;
-	
-	/** Storage for the AngularDamping tag */
-	private double angularDamping;
-	
-	/** Storage for the GravityScale tag */
-	private double gravityScale;
-
 	// fixture
 	
 	/** Storage for the fixture */
@@ -280,18 +171,6 @@ public class XmlReader extends DefaultHandler {
 	
 	/** Storage for the Name attribute on the Fixture tag */
 	private String fixtureName;
-	
-	/** Storage for the Sensor tag */
-	private boolean sensor;
-	
-	/** Storage for the Density tag */
-	private double density;
-	
-	/** Storage for the Friction tag */
-	private double friction;
-	
-	/** Storage for the Restitution tag */
-	private double restitution;
 	
 	// shape
 	
@@ -476,7 +355,20 @@ public class XmlReader extends DefaultHandler {
 		parser.parse(source, reader);
 		
 		world.removeAll();
-		world.setBounds(reader.bounds);
+		
+		// these can be null
+		if (reader.broadphase != null) world.setBroadphaseDetector(reader.broadphase);
+		if (reader.narrowphase != null) world.setNarrowphaseDetector(reader.narrowphase);
+		if (reader.manifoldSolver != null) world.setManifoldSolver(reader.manifoldSolver);
+		if (reader.timeOfImpact != null) world.setTimeOfImpactDetector(reader.timeOfImpact);
+		if (reader.gravity != null) world.setGravity(reader.gravity);
+		if (reader.bounds != null) world.setBounds(reader.bounds);
+		if (reader.worldName != null) {
+			world.setUserData(reader.worldName);
+		} else {
+			world.setUserData("World");
+		}
+		
 		for (SandboxBody body : reader.bodies) {
 			world.add(body);
 		}
@@ -490,48 +382,70 @@ public class XmlReader extends DefaultHandler {
 	 */
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-		if ("LocalCenter".equalsIgnoreCase(qName)) {
+		// set the tag name
+		this.tagName = qName;
+		this.handled = true;
+		// look for tags that have attributes
+		if ("System".equalsIgnoreCase(qName)) {
+			this.systemFlag = true;
+		} else if ("Gravity".equalsIgnoreCase(qName)) {
+			double x = Double.parseDouble(attributes.getValue("x"));
+			double y = Double.parseDouble(attributes.getValue("y"));
+			this.gravity = new Vector2(x, y);
+		} else if ("Settings".equalsIgnoreCase(qName)) {
+			this.settingsFlag = true;
+		} else if ("LocalCenter".equalsIgnoreCase(qName)) {
 			double x = Double.parseDouble(attributes.getValue("x"));
 			double y = Double.parseDouble(attributes.getValue("y"));
 			this.localCenter = new Vector2(x, y);
-		} else if ("Width".equalsIgnoreCase(qName)) {
-			this.widthFlag = true;
-		} else if ("Height".equalsIgnoreCase(qName)) {
-			this.heightFlag = true;
-		} else if ("LocalRotation".equalsIgnoreCase(qName)) {
-			this.localRotationFlag = true;
 		} else if ("Transform".equalsIgnoreCase(qName)) {
 			this.transformFlag = true;
 		} else if ("Translation".equalsIgnoreCase(qName) && this.transformFlag) {
 			double x = Double.parseDouble(attributes.getValue("x"));
 			double y = Double.parseDouble(attributes.getValue("y"));
 			this.translation = new Vector2(x, y);
-		} else if ("Rotation".equalsIgnoreCase(qName) && this.transformFlag) {
-			this.rotationFlag = true;
 		} else if ("Body".equalsIgnoreCase(qName)) {
 			this.body = new SandboxBody();
 			// save the old id for setting up joints
 			this.idMap.put(attributes.getValue("Id"), this.body);
 			// set the name
 			this.body.setName(attributes.getValue("Name"));
+		} else if ("Mass".equalsIgnoreCase(qName) && !this.massFlag) {
+			this.massFlag = true;
+		} else if ("Mass".equalsIgnoreCase(qName) && this.massFlag) {
+			this.massMassFlag = true;
+		} else if ("OutlineColor".equalsIgnoreCase(qName)) {
+			float[] color = new float[] {
+				Float.parseFloat(attributes.getValue("r")),
+				Float.parseFloat(attributes.getValue("g")),
+				Float.parseFloat(attributes.getValue("b")),
+				1.0f
+			};
+			this.body.setOutlineColor(color);
+		} else if ("FillColor".equalsIgnoreCase(qName)) {
+			float[] color = new float[] {
+				Float.parseFloat(attributes.getValue("r")),
+				Float.parseFloat(attributes.getValue("g")),
+				Float.parseFloat(attributes.getValue("b")),
+				1.0f
+			};
+			this.body.setFillColor(color);
 		} else if ("Fixture".equalsIgnoreCase(qName)) {
 			this.fixtureName = attributes.getValue("Name");
 		} else if ("Shape".equalsIgnoreCase(qName)) {
 			this.shapeType = attributes.getValue("xsi:type");
 			this.vertices.clear();
-		} else if ("Radius".equalsIgnoreCase(qName)) {
-			this.radiusFlag = true;
 		} else if ("Vertex".equalsIgnoreCase(qName)) {
 			this.vertices.add(new Vector2(
 					Double.parseDouble(attributes.getValue("x")),
 					Double.parseDouble(attributes.getValue("y"))));
 		} else if ("Filter".equalsIgnoreCase(qName)) {
 			String type = attributes.getValue("xsi:type");
-			if ("CategoryFilter".equals(type)) {
+			if ("CategoryFilter".equalsIgnoreCase(type)) {
 				this.category = 0;
 				this.mask = 0;
 				this.filter = new CategoryFilter();
-			} else if ("DefaultFilter".equals(type)) {
+			} else if ("DefaultFilter".equalsIgnoreCase(type)) {
 				// otherwise always use the default filter
 				this.filter = null;
 			} else {
@@ -541,73 +455,23 @@ public class XmlReader extends DefaultHandler {
 			this.partOfGroupsFlag = true;
 		} else if ("CollideWithGroups".equalsIgnoreCase(qName)) {
 			this.collideWithGroupsFlag = true;
-		} else if ("All".equals(qName) || qName.startsWith("Group")) {
+		} else if ("All".equalsIgnoreCase(qName) || qName.startsWith("Group")) {
 			if (this.partOfGroupsFlag) {
 				this.category |= Integer.parseInt(attributes.getValue("Value"));
 			} else if (this.collideWithGroupsFlag) {
 				this.mask |= Integer.parseInt(attributes.getValue("Value"));
 			}
-		} else if ("Sensor".equalsIgnoreCase(qName)) {
-			this.sensorFlag = true;
-		} else if ("Density".equalsIgnoreCase(qName)) {
-			this.densityFlag = true;
-		} else if ("Friction".equalsIgnoreCase(qName)) {
-			this.frictionFlag = true;
-		} else if ("Restitution".equalsIgnoreCase(qName)) {
-			this.restitutionFlag = true;
-		} else if ("Mass".equalsIgnoreCase(qName) && !this.massFlag) {
-			this.massFlag = true;
-		} else if ("Type".equalsIgnoreCase(qName) && this.massFlag) {
-			this.massTypeFlag = true;
-		} else if ("Mass".equalsIgnoreCase(qName) && this.massFlag) {
-			this.massMassFlag = true;
-		} else if ("Inertia".equalsIgnoreCase(qName) && this.massFlag) {
-			this.massInertiaFlag = true;
-		} else if ("Explicit".equalsIgnoreCase(qName) && this.massFlag) {
-			this.massExplicitFlag = true;
 		} else if ("Velocity".equalsIgnoreCase(qName)) {
 			double x = Double.parseDouble(attributes.getValue("x"));
 			double y = Double.parseDouble(attributes.getValue("y"));
 			this.body.getVelocity().set(x, y);
-		} else if ("AngularVelocity".equalsIgnoreCase(qName)) {
-			this.angularVelocityFlag = true;
 		} else if ("AccumulatedForce".equalsIgnoreCase(qName)) {
 			double x = Double.parseDouble(attributes.getValue("x"));
 			double y = Double.parseDouble(attributes.getValue("y"));
 			this.body.apply(new Vector2(x, y));
-		} else if ("AccumulatedTorque".equalsIgnoreCase(qName)) {
-			this.accumulatedTorqueFlag = true;
-		} else if ("AutoSleep".equalsIgnoreCase(qName)) {
-			this.autoSleepFlag = true;
-		} else if ("Asleep".equalsIgnoreCase(qName)) {
-			this.asleepFlag = true;
-		} else if ("Active".equalsIgnoreCase(qName)) {
-			this.activeFlag = true;
-		} else if ("Bullet".equalsIgnoreCase(qName)) {
-			this.bulletFlag = true;
-		} else if ("LinearDamping".equalsIgnoreCase(qName)) {
-			this.linearDampingFlag = true;
-		} else if ("AngularDamping".equalsIgnoreCase(qName)) {
-			this.angularDampingFlag = true;
-		} else if ("GravityScale".equalsIgnoreCase(qName)) {
-			this.gravityScaleFlag = true;
 		} else if ("Joint".equalsIgnoreCase(qName)) {
 			this.jointName = attributes.getValue("Name");
 			this.jointType = attributes.getValue("xsi:type");
-		} else if ("BodyId1".equalsIgnoreCase(qName)) {
-			this.bodyId1Start = true;
-		} else if ("BodyId2".equalsIgnoreCase(qName)) {
-			this.bodyId2Start = true;
-		} else if ("CollisionAllowed".equalsIgnoreCase(qName)) {
-			this.collisionAllowedStart = true;
-		} else if ("LowerLimit".equalsIgnoreCase(qName)) {
-			this.lowerLimitStart = true;
-		} else if ("UpperLimit".equalsIgnoreCase(qName)) {
-			this.upperLimitStart = true;
-		} else if ("LimitEnabled".equalsIgnoreCase(qName)) {
-			this.limitEnabledStart = true;
-		} else if ("ReferenceAngle".equalsIgnoreCase(qName)) {
-			this.referenceAngleStart = true;
 		} else if ("Anchor1".equalsIgnoreCase(qName) || "BodyAnchor1".equalsIgnoreCase(qName)) {
 			double x = Double.parseDouble(attributes.getValue("x"));
 			double y = Double.parseDouble(attributes.getValue("y"));
@@ -616,20 +480,10 @@ public class XmlReader extends DefaultHandler {
 			double x = Double.parseDouble(attributes.getValue("x"));
 			double y = Double.parseDouble(attributes.getValue("y"));
 			this.anchor2 = new Vector2(x, y);
-		} else if ("Frequency".equalsIgnoreCase(qName)) {
-			this.frequencyStart = true;
-		} else if ("DampingRatio".equalsIgnoreCase(qName)) {
-			this.dampingRatioStart = true;
-		} else if ("Distance".equalsIgnoreCase(qName)) {
-			this.distanceStart = true;
 		} else if ("Anchor".equalsIgnoreCase(qName)) {
 			double x = Double.parseDouble(attributes.getValue("x"));
 			double y = Double.parseDouble(attributes.getValue("y"));
 			this.anchor = new Vector2(x, y);
-		} else if ("MaximumForce".equalsIgnoreCase(qName)) {
-			this.maximumForceStart = true;
-		} else if ("MaximumTorque".equalsIgnoreCase(qName)) {
-			this.maximumTorqueStart = true;
 		} else if ("Target".equalsIgnoreCase(qName)) {
 			double x = Double.parseDouble(attributes.getValue("x"));
 			double y = Double.parseDouble(attributes.getValue("y"));
@@ -638,12 +492,6 @@ public class XmlReader extends DefaultHandler {
 			double x = Double.parseDouble(attributes.getValue("x"));
 			double y = Double.parseDouble(attributes.getValue("y"));
 			this.axis = new Vector2(x, y);
-		} else if ("MotorSpeed".equalsIgnoreCase(qName)) {
-			this.motorSpeedStart = true;
-		} else if ("MaximumMotorForce".equalsIgnoreCase(qName)) {
-			this.maximumMotorForceStart = true;
-		} else if ("MotorEnabled".equalsIgnoreCase(qName)) {
-			this.motorEnabledStart = true;
 		} else if ("PulleyAnchor1".equalsIgnoreCase(qName)) {
 			double x = Double.parseDouble(attributes.getValue("x"));
 			double y = Double.parseDouble(attributes.getValue("y"));
@@ -652,18 +500,8 @@ public class XmlReader extends DefaultHandler {
 			double x = Double.parseDouble(attributes.getValue("x"));
 			double y = Double.parseDouble(attributes.getValue("y"));
 			this.pulleyAnchor2 = new Vector2(x, y);
-		} else if ("Ratio".equalsIgnoreCase(qName)) {
-			this.ratioStart = true;
-		} else if ("MaximumMotorTorque".equalsIgnoreCase(qName)) {
-			this.maximumMotorTorqueStart = true;
-		} else if ("LowerLimitEnabled".equalsIgnoreCase(qName)) {
-			this.lowerLimitEnabledStart = true;
-		} else if ("UpperLimitEnabled".equalsIgnoreCase(qName)) {
-			this.upperLimitEnabledStart = true;
 		} else {
-			if (!SKIP_TAGS.contains(qName)) {
-				System.out.println("Tag \"" + qName + "\" skipped.");
-			}
+			this.handled = false;
 		}
 	}
 	
@@ -672,89 +510,174 @@ public class XmlReader extends DefaultHandler {
 	 */
 	@Override
 	public void characters(char[] ch, int start, int length) throws SAXException {
-		String s = new String(ch, start, length);
-		if (this.widthFlag) {
+		String s = new String(ch, start, length).trim();
+		if (s.isEmpty()) return;
+		boolean handled = true;
+		if ("Width".equalsIgnoreCase(this.tagName)) {
 			this.width = Double.parseDouble(s);
-		} else if (this.heightFlag) {
+		} else if ("Name".equalsIgnoreCase(this.tagName)) {
+			this.worldName = s;
+		} else if ("BroadphaseDetector".equalsIgnoreCase(this.tagName)) {
+			if (s.equalsIgnoreCase(SapBruteForce.class.getSimpleName())) {
+				this.broadphase = new SapBruteForce<Body>();
+			} else if (s.equalsIgnoreCase(SapIncremental.class.getSimpleName())) {
+				this.broadphase = new SapIncremental<Body>();
+			} else if (s.equalsIgnoreCase(SapTree.class.getSimpleName())) {
+				this.broadphase = new SapTree<Body>();
+			} else if (s.equalsIgnoreCase(DynamicAABBTree.class.getSimpleName())) { 
+				this.broadphase = new DynamicAABBTree<Body>();
+			} else {
+				throw new SAXException("Broadphase algorithm \"" + s + "\" unknown or not implemented.");
+			}
+		} else if ("NarrowphaseDetector".equalsIgnoreCase(this.tagName)) {
+			if (s.equalsIgnoreCase(Sat.class.getSimpleName())) {
+				this.narrowphase = new Sat();
+			} else if (s.equalsIgnoreCase(Gjk.class.getSimpleName())) {
+				this.narrowphase = new Gjk();
+			} else {
+				throw new SAXException("Narrowphase algorithm \"" + s + "\" unknown or not implemented.");
+			}
+		} else if ("ManifoldSolver".equalsIgnoreCase(this.tagName)) {
+			if (s.equalsIgnoreCase(ClippingManifoldSolver.class.getSimpleName())) {
+				this.manifoldSolver = new ClippingManifoldSolver();
+			} else {
+				throw new SAXException("Manifold solver algorithm \"" + s + "\" unknown or not implemented.");
+			}
+		} else if ("TimeOfImpactDetector".equalsIgnoreCase(this.tagName)) {
+			if (s.equalsIgnoreCase(ConservativeAdvancement.class.getSimpleName())) {
+				this.timeOfImpact = new ConservativeAdvancement();
+			} else {
+				throw new SAXException("Time of impact algorithm \"" + s + "\" unknown or not implemented.");
+			}
+		} else if ("Height".equalsIgnoreCase(this.tagName)) {
 			this.height = Double.parseDouble(s);
-		} else if (this.localRotationFlag) {
+		} else if ("LocalRotation".equalsIgnoreCase(this.tagName)) {
 			this.localRotation = Double.parseDouble(s);
-		} else if (this.rotationFlag) {
+		} else if ("Rotation".equalsIgnoreCase(this.tagName) && this.transformFlag) {
 			this.rotation = Double.parseDouble(s);
-		} else if (this.radiusFlag) {
+		} else if ("Radius".equalsIgnoreCase(this.tagName)) {
 			this.radius = Double.parseDouble(s);
-		} else if (this.sensorFlag) {
-			this.sensor = Boolean.parseBoolean(s);
-		} else if (this.densityFlag) {
-			this.density = Double.parseDouble(s);
-		} else if (this.frictionFlag) {
-			this.friction = Double.parseDouble(s);
-		} else if (this.restitutionFlag) {
-			this.restitution = Double.parseDouble(s);
-		} else if (this.massTypeFlag) {
+		} else if ("Sensor".equalsIgnoreCase(this.tagName)) {
+			this.fixture.setSensor(Boolean.parseBoolean(s));
+		} else if ("Density".equalsIgnoreCase(this.tagName)) {
+			this.fixture.setDensity(Double.parseDouble(s));
+		} else if ("Friction".equalsIgnoreCase(this.tagName)) {
+			this.fixture.setFriction(Double.parseDouble(s));
+		} else if ("Restitution".equalsIgnoreCase(this.tagName)) {
+			this.fixture.setRestitution(Double.parseDouble(s));
+		} else if ("Type".equalsIgnoreCase(this.tagName) && this.massFlag) {
 			this.massType = s;
-		} else if (this.massMassFlag) {
+		} else if ("Mass".equalsIgnoreCase(this.tagName) && this.massFlag && this.massMassFlag) {
 			this.massMass = Double.parseDouble(s);
-		} else if (this.massInertiaFlag) {
+		} else if ("Inertia".equalsIgnoreCase(this.tagName)) {
 			this.massInertia = Double.parseDouble(s);
-		} else if (this.massExplicitFlag) {
+		} else if ("Explicit".equalsIgnoreCase(this.tagName)) {
 			this.massExplicit = Boolean.parseBoolean(s);
-		} else if (this.angularVelocityFlag) {
-			this.angularVelocity = Double.parseDouble(s);
-		} else if (this.accumulatedTorqueFlag) {
-			this.accumulatedTorque = Double.parseDouble(s);
-		} else if (this.autoSleepFlag) {
-			this.autoSleep = Boolean.parseBoolean(s);
-		} else if (this.asleepFlag) {
-			this.asleep = Boolean.parseBoolean(s);
-		} else if (this.activeFlag) {
-			this.active = Boolean.parseBoolean(s);
-		} else if (this.bulletFlag) {
-			this.bullet = Boolean.parseBoolean(s);
-		} else if (this.linearDampingFlag) {
-			this.linearDamping = Double.parseDouble(s);
-		} else if (this.angularDampingFlag) {
-			this.angularDamping = Double.parseDouble(s);
-		} else if (this.gravityScaleFlag) {
-			this.gravityScale = Double.parseDouble(s);
-		} else if (this.bodyId1Start) {
+		} else if ("AngularVelocity".equalsIgnoreCase(this.tagName)) {
+			this.body.setAngularVelocity(Double.parseDouble(s));
+		} else if ("AccumulatedTorque".equalsIgnoreCase(this.tagName)) {
+			this.body.apply(Double.parseDouble(s));
+		} else if ("AutoSleep".equalsIgnoreCase(this.tagName) && !this.settingsFlag) {
+			this.body.setAutoSleepingEnabled(Boolean.parseBoolean(s));
+		} else if ("Asleep".equalsIgnoreCase(this.tagName)) {
+			this.body.setAsleep(Boolean.parseBoolean(s));
+		} else if ("Active".equalsIgnoreCase(this.tagName)) {
+			this.body.setActive(Boolean.parseBoolean(s));
+		} else if ("Bullet".equalsIgnoreCase(this.tagName)) {
+			this.body.setBullet(Boolean.parseBoolean(s));
+		} else if ("LinearDamping".equalsIgnoreCase(this.tagName)) {
+			this.body.setLinearDamping(Double.parseDouble(s));
+		} else if ("AngularDamping".equalsIgnoreCase(this.tagName)) {
+			this.body.setAngularDamping(Double.parseDouble(s));
+		} else if ("GravityScale".equalsIgnoreCase(this.tagName)) {
+			this.body.setGravityScale(Double.parseDouble(s));
+		} else if ("BodyId1".equalsIgnoreCase(this.tagName)) {
 			this.bodyId1 = s;
-		} else if (this.bodyId2Start) {
+		} else if ("BodyId2".equalsIgnoreCase(this.tagName)) {
 			this.bodyId2 = s;
-		} else if (this.collisionAllowedStart) {
+		} else if ("CollisionAllowed".equalsIgnoreCase(this.tagName)) {
 			this.collisionAllowed = Boolean.parseBoolean(s);
-		} else if (this.lowerLimitStart) {
+		} else if ("LowerLimit".equalsIgnoreCase(this.tagName)) {
 			this.lowerLimit = Double.parseDouble(s);
-		} else if (this.upperLimitStart) {
+		} else if ("UpperLimit".equalsIgnoreCase(this.tagName)) {
 			this.upperLimit = Double.parseDouble(s);
-		} else if (this.limitEnabledStart) {
+		} else if ("LimitEnabled".equalsIgnoreCase(this.tagName)) {
 			this.limitsEnabled = Boolean.parseBoolean(s);
-		} else if (this.referenceAngleStart) {
+		} else if ("ReferenceAngle".equalsIgnoreCase(this.tagName)) {
 			this.referenceAngle = Double.parseDouble(s);
-		} else if (this.frequencyStart) {
+		} else if ("Frequency".equalsIgnoreCase(this.tagName)) {
 			this.frequency = Double.parseDouble(s);
-		} else if (this.dampingRatioStart) {
+		} else if ("DampingRatio".equalsIgnoreCase(this.tagName)) {
 			this.dampingRatio = Double.parseDouble(s);
-		} else if (this.distanceStart) {
+		} else if ("Distance".equalsIgnoreCase(this.tagName)) {
 			this.distance = Double.parseDouble(s);
-		} else if (this.maximumForceStart) {
+		} else if ("MaximumForce".equalsIgnoreCase(this.tagName)) {
 			this.maximumForce = Double.parseDouble(s);
-		} else if (this.maximumTorqueStart) {
+		} else if ("MaximumTorque".equalsIgnoreCase(this.tagName)) {
 			this.maximumTorque = Double.parseDouble(s);
-		} else if (this.motorSpeedStart) {
+		} else if ("MotorSpeed".equalsIgnoreCase(this.tagName)) {
 			this.motorSpeed = Double.parseDouble(s);
-		} else if (this.motorEnabledStart) {
+		} else if ("MotorEnabled".equalsIgnoreCase(this.tagName)) {
 			this.motorEnabled = Boolean.parseBoolean(s);
-		} else if (this.ratioStart) {
+		} else if ("Ratio".equalsIgnoreCase(this.tagName)) {
 			this.ratio = Double.parseDouble(s);
-		} else if (this.maximumMotorTorqueStart) {
+		} else if ("MaximumMotorTorque".equalsIgnoreCase(this.tagName)) {
 			this.maximumMotorTorque = Double.parseDouble(s);
-		} else if (this.maximumMotorForceStart) {
+		} else if ("MaximumMotorForce".equalsIgnoreCase(this.tagName)) {
 			this.maximumMotorForce = Double.parseDouble(s);
-		} else if (this.lowerLimitEnabledStart) {
+		} else if ("LowerLimitEnabled".equalsIgnoreCase(this.tagName)) {
 			this.lowerLimitEnabled = Boolean.parseBoolean(s);
-		} else if (this.upperLimitEnabledStart) {
+		} else if ("UpperLimitEnabled".equalsIgnoreCase(this.tagName)) {
 			this.upperLimitEnabled = Boolean.parseBoolean(s);
+		} else if ("StepFrequency".equalsIgnoreCase(this.tagName)) {
+			Settings.getInstance().setStepFrequency(Double.parseDouble(s));
+		} else if ("MaximumTranslation".equalsIgnoreCase(this.tagName)) {
+			Settings.getInstance().setMaxTranslation(Double.parseDouble(s));
+		} else if ("MaximumRotation".equalsIgnoreCase(this.tagName)) {
+			Settings.getInstance().setMaxRotation(Math.toRadians(Double.parseDouble(s)));
+		} else if ("ContinuousCollisionDetectionMode".equalsIgnoreCase(this.tagName)) {
+			if (Settings.ContinuousDetectionMode.ALL.toString().equalsIgnoreCase(s)) {
+				Settings.getInstance().setContinuousDetectionMode(Settings.ContinuousDetectionMode.ALL);
+			} else if (Settings.ContinuousDetectionMode.BULLETS_ONLY.toString().equalsIgnoreCase(s)) {
+				Settings.getInstance().setContinuousDetectionMode(Settings.ContinuousDetectionMode.BULLETS_ONLY);
+			} else if (Settings.ContinuousDetectionMode.NONE.toString().equalsIgnoreCase(s)) {
+				Settings.getInstance().setContinuousDetectionMode(Settings.ContinuousDetectionMode.NONE);
+			} else {
+				throw new SAXException("Continuous collision detection mode '" + s + "' unknown.");
+			}
+		} else if ("AutoSleep".equalsIgnoreCase(this.tagName) && this.settingsFlag) {
+			Settings.getInstance().setAutoSleepingEnabled(Boolean.parseBoolean(s));
+		} else if ("SleepTime".equalsIgnoreCase(this.tagName)) {
+			Settings.getInstance().setSleepTime(Double.parseDouble(s));
+		} else if ("SleepLinearVelocity".equalsIgnoreCase(this.tagName)) {
+			Settings.getInstance().setSleepVelocity(Double.parseDouble(s));
+		} else if ("SleepAngularVelocity".equalsIgnoreCase(this.tagName)) {
+			Settings.getInstance().setSleepAngularVelocity(Math.toRadians(Double.parseDouble(s)));
+		} else if ("VelocitySolverIterations".equalsIgnoreCase(this.tagName)) {
+			Settings.getInstance().setVelocityConstraintSolverIterations(Integer.parseInt(s));
+		} else if ("PositionSolverIterations".equalsIgnoreCase(this.tagName)) {
+			 Settings.getInstance().setPositionConstraintSolverIterations(Integer.parseInt(s));
+		} else if ("WarmStartDistance".equalsIgnoreCase(this.tagName)) {
+			Settings.getInstance().setWarmStartDistance(Double.parseDouble(s));
+		} else if ("RestitutionVelocity".equalsIgnoreCase(this.tagName)) {
+			Settings.getInstance().setRestitutionVelocity(Double.parseDouble(s));
+		} else if ("LinearTolerance".equalsIgnoreCase(this.tagName)) {
+			Settings.getInstance().setLinearTolerance(Double.parseDouble(s));
+		} else if ("AngularTolerance".equalsIgnoreCase(this.tagName)) {
+			Settings.getInstance().setAngularTolerance(Math.toRadians(Double.parseDouble(s)));
+		} else if ("MaximumLinearCorrection".equalsIgnoreCase(this.tagName)) {
+			Settings.getInstance().setMaxLinearCorrection(Double.parseDouble(s));
+		} else if ("MaximumAngularCorrection".equalsIgnoreCase(this.tagName)) {
+			Settings.getInstance().setMaxAngularCorrection(Math.toRadians(Double.parseDouble(s)));
+		} else if ("Baumgarte".equalsIgnoreCase(this.tagName)) {
+			Settings.getInstance().setBaumgarte(Double.parseDouble(s));
+		} else {
+			handled = false;
+		}
+		
+		if (!handled && !this.handled && !this.systemFlag) {
+			// output unhandled tags excluding the system tags
+			System.out.println(this.tagName);
 		}
 	}
 	
@@ -763,31 +686,28 @@ public class XmlReader extends DefaultHandler {
 	 */
 	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXException {
-		if ("Bounds".equalsIgnoreCase(qName)) {
+		this.tagName = null;
+		if ("System".equalsIgnoreCase(qName)) {
+			this.systemFlag = false;
+		} else if ("Bounds".equalsIgnoreCase(qName)) {
 			Rectangle r = new Rectangle(this.width, this.height);
 			r.rotate(this.localRotation);
 			r.translate(this.localCenter);
 			this.bounds = new RectangularBounds(r);
 			this.bounds.rotate(this.rotation);
 			this.bounds.translate(this.translation);
-		} else if ("Width".equalsIgnoreCase(qName)) {
-			this.widthFlag = false;
-		} else if ("Height".equalsIgnoreCase(qName)) {
-			this.heightFlag = false;
-		} else if ("LocalRotation".equalsIgnoreCase(qName)) {
-			this.localRotationFlag = false;
+		} else if ("Settings".equalsIgnoreCase(qName)) {
+			this.settingsFlag = false;
 		} else if ("Transform".equalsIgnoreCase(qName)) {
 			this.transformFlag = false;
 			// check if we are parsing a body
 			if (this.body != null) {
 				// if so, then set the transform
 				Transform transform = new Transform();
-				transform.rotate(this.rotation);
-				transform.translate(this.translation);
+				transform.setRotation(this.rotation);
+				transform.setTranslation(this.translation);
 				this.body.setTransform(transform);
 			}
-		} else if ("Rotation".equalsIgnoreCase(qName) && this.transformFlag) {
-			this.rotationFlag = false;
 		} else if ("Body".equalsIgnoreCase(qName)) {
 			this.bodies.add(this.body);
 			this.body = null;
@@ -795,25 +715,25 @@ public class XmlReader extends DefaultHandler {
 			this.body.addFixture(this.fixture);
 		} else if ("Shape".equalsIgnoreCase(qName)) {
 			// figure out what to create
-			if ("Circle".equals(this.shapeType)) {
+			if ("Circle".equalsIgnoreCase(this.shapeType)) {
 				this.shape = Geometry.createCircle(this.radius);
 				this.shape.translate(this.localCenter);
-			} else if ("Rectangle".equals(this.shapeType)) {
+			} else if ("Rectangle".equalsIgnoreCase(this.shapeType)) {
 				this.shape = Geometry.createRectangle(this.width, this.height);
 				this.shape.rotate(this.localRotation);
 				this.shape.translate(this.localCenter);
-			} else if ("Triangle".equals(this.shapeType)) {
+			} else if ("Triangle".equalsIgnoreCase(this.shapeType)) {
 				this.shape = Geometry.createTriangle(
 						this.vertices.get(0),
 						this.vertices.get(1),
 						this.vertices.get(2));
 				// no translation required because the vertices handle that
-			} else if ("Polygon".equals(this.shapeType)) {
+			} else if ("Polygon".equalsIgnoreCase(this.shapeType)) {
 				Vector2[] verts = new Vector2[this.vertices.size()];
 				this.vertices.toArray(verts);
 				this.shape = Geometry.createPolygon(verts);
 				// no translation required because the vertices handle that
-			} else if ("Segment".equals(this.shapeType)) {
+			} else if ("Segment".equalsIgnoreCase(this.shapeType)) {
 				this.shape = Geometry.createSegment(
 						this.vertices.get(0),
 						this.vertices.get(1));
@@ -825,8 +745,6 @@ public class XmlReader extends DefaultHandler {
 			// create the fixture
 			this.fixture = new BodyFixture(this.shape);
 			this.fixture.setUserData(this.fixtureName);
-		} else if ("Radius".equalsIgnoreCase(qName)) {
-			this.radiusFlag = false;
 		} else if ("Filter".equalsIgnoreCase(qName)) {
 			if (this.filter != null) {
 				this.filter.setCategory(this.category);
@@ -837,29 +755,17 @@ public class XmlReader extends DefaultHandler {
 			this.partOfGroupsFlag = false;
 		} else if ("CollideWithGroups".equalsIgnoreCase(qName)) {
 			this.collideWithGroupsFlag = false;
-		} else if ("Sensor".equalsIgnoreCase(qName)) {
-			this.sensorFlag = false;
-			this.fixture.setSensor(this.sensor);
-		} else if ("Density".equalsIgnoreCase(qName)) {
-			this.densityFlag = false;
-			this.fixture.setDensity(this.density);
-		} else if ("Friction".equalsIgnoreCase(qName)) {
-			this.frictionFlag = false;
-			this.fixture.setFriction(this.friction);
-		} else if ("Restitution".equalsIgnoreCase(qName)) {
-			this.restitutionFlag = false;
-			this.fixture.setRestitution(this.restitution);
 		} else if ("Mass".equalsIgnoreCase(qName) && !this.massMassFlag) {
 			this.massFlag = false;
 			Mass mass = new Mass(this.localCenter, this.massMass, this.massInertia);
 			// set the type
-			if (Mass.Type.NORMAL.toString().equals(this.massType)) {
+			if (Mass.Type.NORMAL.toString().equalsIgnoreCase(this.massType)) {
 				mass.setType(Mass.Type.NORMAL);
-			} else if (Mass.Type.INFINITE.toString().equals(this.massType)) {
+			} else if (Mass.Type.INFINITE.toString().equalsIgnoreCase(this.massType)) {
 				mass.setType(Mass.Type.INFINITE);
-			} else if (Mass.Type.FIXED_LINEAR_VELOCITY.toString().equals(this.massType)) {
+			} else if (Mass.Type.FIXED_LINEAR_VELOCITY.toString().equalsIgnoreCase(this.massType)) {
 				mass.setType(Mass.Type.FIXED_LINEAR_VELOCITY);
-			} else if (Mass.Type.FIXED_ANGULAR_VELOCITY.toString().equals(this.massType)) {
+			} else if (Mass.Type.FIXED_ANGULAR_VELOCITY.toString().equalsIgnoreCase(this.massType)) {
 				mass.setType(Mass.Type.FIXED_ANGULAR_VELOCITY);
 			} else {
 				throw new SAXException("Mass type \"" + this.massType + "\" unknown or not implemented.");
@@ -871,45 +777,12 @@ public class XmlReader extends DefaultHandler {
 			this.massInertia = 0.0;
 			this.massMass = 0.0;
 			this.massType = null;
-		} else if ("Type".equalsIgnoreCase(qName) && this.massFlag) {
-			this.massTypeFlag = false;
-		} else if ("Mass".equalsIgnoreCase(qName) && this.massMassFlag) {
+		} else if ("Mass".equalsIgnoreCase(qName) && this.massFlag && this.massMassFlag) {
 			this.massMassFlag = false;
-		} else if ("Inertia".equalsIgnoreCase(qName) && this.massFlag) {
-			this.massInertiaFlag = false;
-		} else if ("Explicit".equalsIgnoreCase(qName) && this.massFlag) {
-			this.massExplicitFlag = false;
-		} else if ("AngularVelocity".equalsIgnoreCase(qName)) {
-			this.angularVelocityFlag = false;
-			this.body.setAngularVelocity(this.angularVelocity);
-		} else if ("AccumulatedTorque".equalsIgnoreCase(qName)) {
-			this.accumulatedTorqueFlag = false;
-			this.body.apply(this.accumulatedTorque);
-		} else if ("AutoSleep".equalsIgnoreCase(qName)) {
-			this.autoSleepFlag = false;
-			this.body.setAutoSleepingEnabled(this.autoSleep);
-		} else if ("Asleep".equalsIgnoreCase(qName)) {
-			this.asleepFlag = false;
-			this.body.setAsleep(this.asleep);
-		} else if ("Active".equalsIgnoreCase(qName)) {
-			this.activeFlag = false;
-			this.body.setActive(this.active);
-		} else if ("Bullet".equalsIgnoreCase(qName)) {
-			this.bulletFlag = false;
-			this.body.setBullet(this.bullet);
-		} else if ("LinearDamping".equalsIgnoreCase(qName)) {
-			this.linearDampingFlag = false;
-			this.body.setLinearDamping(this.linearDamping);
-		} else if ("AngularDamping".equalsIgnoreCase(qName)) {
-			this.angularDampingFlag = false;
-			this.body.setAngularDamping(this.angularDamping);
-		} else if ("GravityScale".equalsIgnoreCase(qName)) {
-			this.gravityScaleFlag = false;
-			this.body.setGravityScale(this.gravityScale);
 		} else if ("Joint".equalsIgnoreCase(qName)) {
 			Joint joint = null;
 			// create the joint given the type
-			if ("AngleJoint".equals(this.jointType)) {
+			if ("AngleJoint".equalsIgnoreCase(this.jointType)) {
 				SandboxBody b1 = this.idMap.get(this.bodyId1);
 				SandboxBody b2 = this.idMap.get(this.bodyId2);
 				AngleJoint aj = new AngleJoint(b1, b2);
@@ -917,7 +790,7 @@ public class XmlReader extends DefaultHandler {
 				aj.setLimitEnabled(this.limitsEnabled);
 				aj.setReferenceAngle(this.referenceAngle);
 				joint = aj;
-			} else if ("DistanceJoint".equals(this.jointType)) {
+			} else if ("DistanceJoint".equalsIgnoreCase(this.jointType)) {
 				SandboxBody b1 = this.idMap.get(this.bodyId1);
 				SandboxBody b2 = this.idMap.get(this.bodyId2);
 				DistanceJoint dj = new DistanceJoint(b1, b2, this.anchor1, this.anchor2);
@@ -927,19 +800,19 @@ public class XmlReader extends DefaultHandler {
 				// in a state in which it was compressed or stretched
 				dj.setDistance(this.distance);
 				joint = dj;
-			} else if ("FrictionJoint".equals(this.jointType)) {
+			} else if ("FrictionJoint".equalsIgnoreCase(this.jointType)) {
 				SandboxBody b1 = this.idMap.get(this.bodyId1);
 				SandboxBody b2 = this.idMap.get(this.bodyId2);
 				FrictionJoint fj = new FrictionJoint(b1, b2, this.anchor);
 				fj.setMaximumForce(this.maximumForce);
 				fj.setMaximumTorque(this.maximumTorque);
 				joint = fj;
-			} else if ("MouseJoint".equals(this.jointType)) {
+			} else if ("MouseJoint".equalsIgnoreCase(this.jointType)) {
 				SandboxBody b1 = this.idMap.get(this.bodyId1);
 				MouseJoint mj = new MouseJoint(b1, this.anchor, this.frequency, this.dampingRatio, this.maximumForce);
 				mj.setTarget(this.target);
 				joint = mj;
-			} else if ("PrismaticJoint".equals(this.jointType)) {
+			} else if ("PrismaticJoint".equalsIgnoreCase(this.jointType)) {
 				SandboxBody b1 = this.idMap.get(this.bodyId1);
 				SandboxBody b2 = this.idMap.get(this.bodyId2);
 				PrismaticJoint pj = new PrismaticJoint(b1, b2, this.anchor, this.axis);
@@ -956,7 +829,7 @@ public class XmlReader extends DefaultHandler {
 				PulleyJoint pj = new PulleyJoint(b1, b2, this.pulleyAnchor1, this.pulleyAnchor2, this.anchor1, this.anchor2);
 				pj.setRatio(this.ratio);
 				joint = pj;
-			} else if ("RevoluteJoint".equals(this.jointType)) {
+			} else if ("RevoluteJoint".equalsIgnoreCase(this.jointType)) {
 				SandboxBody b1 = this.idMap.get(this.bodyId1);
 				SandboxBody b2 = this.idMap.get(this.bodyId2);
 				RevoluteJoint rj = new RevoluteJoint(b1, b2, this.anchor);
@@ -967,7 +840,7 @@ public class XmlReader extends DefaultHandler {
 				rj.setMotorSpeed(this.motorSpeed);
 				rj.setReferenceAngle(this.referenceAngle);
 				joint = rj;
-			} else if ("RopeJoint".equals(this.jointType)) {
+			} else if ("RopeJoint".equalsIgnoreCase(this.jointType)) {
 				SandboxBody b1 = this.idMap.get(this.bodyId1);
 				SandboxBody b2 = this.idMap.get(this.bodyId2);
 				RopeJoint rj = new RopeJoint(b1, b2, this.anchor1, this.anchor2);
@@ -975,7 +848,7 @@ public class XmlReader extends DefaultHandler {
 				rj.setLowerLimitEnabled(this.lowerLimitEnabled);
 				rj.setUpperLimitEnabled(this.upperLimitEnabled);
 				joint = rj;
-			} else if ("WeldJoint".equals(this.jointType)) {
+			} else if ("WeldJoint".equalsIgnoreCase(this.jointType)) {
 				SandboxBody b1 = this.idMap.get(this.bodyId1);
 				SandboxBody b2 = this.idMap.get(this.bodyId2);
 				WeldJoint wj = new WeldJoint(b1, b2, this.anchor);
@@ -983,7 +856,7 @@ public class XmlReader extends DefaultHandler {
 				wj.setFrequency(this.frequency);
 				wj.setDampingRatio(this.dampingRatio);
 				joint = wj;
-			} else if ("WheelJoint".equals(this.jointType)) {
+			} else if ("WheelJoint".equalsIgnoreCase(this.jointType)) {
 				SandboxBody b1 = this.idMap.get(this.bodyId1);
 				SandboxBody b2 = this.idMap.get(this.bodyId2);
 				WheelJoint wj = new WheelJoint(b1, b2, this.anchor, this.axis);
@@ -1005,44 +878,6 @@ public class XmlReader extends DefaultHandler {
 			
 			this.jointName = null;
 			this.jointType = null;
-		} else if ("BodyId1".equalsIgnoreCase(qName)) {
-			this.bodyId1Start = false;
-		} else if ("BodyId2".equalsIgnoreCase(qName)) {
-			this.bodyId2Start = false;
-		} else if ("CollisionAllowed".equalsIgnoreCase(qName)) {
-			this.collisionAllowedStart = false;
-		} else if ("LowerLimit".equalsIgnoreCase(qName)) {
-			this.lowerLimitStart = false;
-		} else if ("UpperLimit".equalsIgnoreCase(qName)) {
-			this.upperLimitStart = false;
-		} else if ("LimitEnabled".equalsIgnoreCase(qName)) {
-			this.limitEnabledStart = false;
-		} else if ("ReferenceAngle".equalsIgnoreCase(qName)) {
-			this.referenceAngleStart = false;
-		} else if ("Frequency".equalsIgnoreCase(qName)) {
-			this.frequencyStart = false;
-		} else if ("DampingRatio".equalsIgnoreCase(qName)) {
-			this.dampingRatioStart = false;
-		} else if ("Distance".equalsIgnoreCase(qName)) {
-			this.distanceStart = false;
-		} else if ("MaximumForce".equalsIgnoreCase(qName)) {
-			this.maximumForceStart = false;
-		} else if ("MaximumTorque".equalsIgnoreCase(qName)) {
-			this.maximumTorqueStart = false;
-		} else if ("MotorSpeed".equalsIgnoreCase(qName)) {
-			this.motorSpeedStart = false;
-		} else if ("MaximumMotorForce".equalsIgnoreCase(qName)) {
-			this.maximumMotorForceStart = false;
-		} else if ("MotorEnabled".equalsIgnoreCase(qName)) {
-			this.motorEnabledStart = false;
-		} else if ("Ratio".equalsIgnoreCase(qName)) {
-			this.ratioStart = false;
-		} else if ("MaximumMotorTorque".equalsIgnoreCase(qName)) {
-			this.maximumMotorTorqueStart = false;
-		} else if ("LowerLimitEnabled".equalsIgnoreCase(qName)) {
-			this.lowerLimitEnabledStart = false;
-		} else if ("UpperLimitEnabled".equalsIgnoreCase(qName)) {
-			this.upperLimitEnabledStart = false;
 		}
 	}
 }

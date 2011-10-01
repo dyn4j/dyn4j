@@ -12,6 +12,7 @@ import javax.swing.JTabbedPane;
 
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Mass;
+import org.dyn4j.geometry.Transform;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.panels.BodyPanel;
 import org.dyn4j.sandbox.panels.TransformPanel;
@@ -49,19 +50,6 @@ public class EditBodyDialog extends JDialog implements ActionListener {
 		super(owner, title, ModalityType.APPLICATION_MODAL);
 		
 		this.body = new SandboxBody();
-		this.body.setOutlineColor(body.getOutlineColor());
-		this.body.setFillColor(body.getFillColor());
-		this.body.setActive(body.isActive());
-		this.body.setAngularDamping(body.getAngularDamping());
-		this.body.setAngularVelocity(body.getAngularVelocity());
-		this.body.setAsleep(body.isAsleep());
-		this.body.setAutoSleepingEnabled(body.isAutoSleepingEnabled());
-		this.body.setBullet(body.isBullet());
-		this.body.setGravityScale(body.getGravityScale());
-		this.body.setLinearDamping(body.getLinearDamping());
-		this.body.setName(body.getName());
-		this.body.setVelocity(body.getVelocity().copy());
-		this.body.setMassExplicit(body.isMassExplicit());
 		
 		// copy over the force/torque
 		this.body.apply(body.getAccumulatedForce());
@@ -78,6 +66,20 @@ public class EditBodyDialog extends JDialog implements ActionListener {
 		}
 		
 		this.body.setMass(new Mass(body.getMass()));
+		
+		this.body.setOutlineColor(body.getOutlineColor());
+		this.body.setFillColor(body.getFillColor());
+		this.body.setActive(body.isActive());
+		this.body.setAngularDamping(body.getAngularDamping());
+		this.body.setAngularVelocity(body.getAngularVelocity());
+		this.body.setAsleep(body.isAsleep());
+		this.body.setAutoSleepingEnabled(body.isAutoSleepingEnabled());
+		this.body.setBullet(body.isBullet());
+		this.body.setGravityScale(body.getGravityScale());
+		this.body.setLinearDamping(body.getLinearDamping());
+		this.body.setName(body.getName());
+		this.body.setVelocity(body.getVelocity().copy());
+		this.body.setMassExplicit(body.isMassExplicit());
 		
 		Container container = this.getContentPane();
 		
@@ -180,9 +182,10 @@ public class EditBodyDialog extends JDialog implements ActionListener {
 			body.setMassExplicit(bodyChanges.isMassExplicit());
 			
 			// apply the transform
-			body.getTransform().identity();
-			body.translate(dialog.pnlTransform.getTranslation());
-			body.rotateAboutCenter(dialog.pnlTransform.getRotation());
+			Transform transform = body.getTransform();
+			
+			transform.setRotation(dialog.pnlTransform.getRotation());
+			transform.setTranslation(dialog.pnlTransform.getTranslation());
 		}
 	}
 }

@@ -20,6 +20,7 @@ import org.dyn4j.dynamics.joint.PrismaticJoint;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.utilities.ControlUtilities;
 import org.dyn4j.sandbox.utilities.Icons;
 
 /**
@@ -449,10 +450,10 @@ public class PrismaticJointPanel extends JointPanel implements InputPanel, Actio
 			pj.setCollisionAllowed(this.chkCollision.isSelected());
 			// set the properties that can change
 			pj.setLimitEnabled(this.chkLimitEnabled.isSelected());
-			pj.setLimits(this.getDoubleValue(this.txtLowerLimit), this.getDoubleValue(this.txtUpperLimit));
-			pj.setMaximumMotorForce(this.getDoubleValue(this.txtMaxMotorForce));
+			pj.setLimits(ControlUtilities.getDoubleValue(this.txtLowerLimit), ControlUtilities.getDoubleValue(this.txtUpperLimit));
+			pj.setMaximumMotorForce(ControlUtilities.getDoubleValue(this.txtMaxMotorForce));
 			pj.setMotorEnabled(this.chkMotorEnabled.isSelected());
-			pj.setMotorSpeed(this.getDoubleValue(this.txtMotorSpeed));
+			pj.setMotorSpeed(ControlUtilities.getDoubleValue(this.txtMotorSpeed));
 		}
 	}
 	
@@ -467,11 +468,11 @@ public class PrismaticJointPanel extends JointPanel implements InputPanel, Actio
 		
 		// get the anchor points
 		Vector2 an = new Vector2(
-				this.getDoubleValue(this.txtX1),
-				this.getDoubleValue(this.txtY1));
+				ControlUtilities.getDoubleValue(this.txtX1),
+				ControlUtilities.getDoubleValue(this.txtY1));
 		Vector2 ax = new Vector2(
-				this.getDoubleValue(this.txtX2),
-				this.getDoubleValue(this.txtY2));
+				ControlUtilities.getDoubleValue(this.txtX2),
+				ControlUtilities.getDoubleValue(this.txtY2));
 		
 		PrismaticJoint pj = new PrismaticJoint(body1, body2, an, ax);
 		// set the super class properties
@@ -479,10 +480,10 @@ public class PrismaticJointPanel extends JointPanel implements InputPanel, Actio
 		pj.setCollisionAllowed(this.chkCollision.isSelected());
 		// set the other properties
 		pj.setLimitEnabled(this.chkLimitEnabled.isSelected());
-		pj.setLimits(this.getDoubleValue(this.txtLowerLimit), this.getDoubleValue(this.txtUpperLimit));
-		pj.setMaximumMotorForce(this.getDoubleValue(this.txtMaxMotorForce));
+		pj.setLimits(ControlUtilities.getDoubleValue(this.txtLowerLimit), ControlUtilities.getDoubleValue(this.txtUpperLimit));
+		pj.setMaximumMotorForce(ControlUtilities.getDoubleValue(this.txtMaxMotorForce));
 		pj.setMotorEnabled(this.chkMotorEnabled.isSelected());
-		pj.setMotorSpeed(this.getDoubleValue(this.txtMotorSpeed));
+		pj.setMotorSpeed(ControlUtilities.getDoubleValue(this.txtMotorSpeed));
 		
 		return pj;
 	}
@@ -502,11 +503,11 @@ public class PrismaticJointPanel extends JointPanel implements InputPanel, Actio
 			return false;
 		}
 		// check the limit
-		if (this.getDoubleValue(this.txtLowerLimit) > this.getDoubleValue(this.txtUpperLimit)) {
+		if (ControlUtilities.getDoubleValue(this.txtLowerLimit) > ControlUtilities.getDoubleValue(this.txtUpperLimit)) {
 			return false;
 		}
 		// check the maximum motor force
-		if (this.getDoubleValue(this.txtMaxMotorForce) < 0.0) {
+		if (ControlUtilities.getDoubleValue(this.txtMaxMotorForce) < 0.0) {
 			return false;
 		}
 		return true;
@@ -526,11 +527,11 @@ public class PrismaticJointPanel extends JointPanel implements InputPanel, Actio
 			JOptionPane.showMessageDialog(owner, "You must select two different bodies.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}
 		// check the limit
-		if (this.getDoubleValue(this.txtLowerLimit) > this.getDoubleValue(this.txtUpperLimit)) {
+		if (ControlUtilities.getDoubleValue(this.txtLowerLimit) > ControlUtilities.getDoubleValue(this.txtUpperLimit)) {
 			JOptionPane.showMessageDialog(owner, "The lower limit must be less than or equal to the upper limit.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}
 		// check the maximum motor force
-		if (this.getDoubleValue(this.txtMaxMotorForce) < 0.0) {
+		if (ControlUtilities.getDoubleValue(this.txtMaxMotorForce) < 0.0) {
 			JOptionPane.showMessageDialog(owner, "The maximum motor force must be greater than or equal to zero.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}
 	}

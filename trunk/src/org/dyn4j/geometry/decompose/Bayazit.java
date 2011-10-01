@@ -31,7 +31,6 @@ import java.util.List;
 import org.dyn4j.Epsilon;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
-import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Vector2;
 
@@ -41,7 +40,7 @@ import org.dyn4j.geometry.Vector2;
  * This algorithm is a O(nr) complexity algorithm where n is the number of input vertices and r is the number of
  * output convex polygons.  This algorithm can achieve optimal decompositions, however this is not guaranteed.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 2.2.0
  */
 public class Bayazit implements Decomposer {
@@ -247,7 +246,7 @@ public class Bayazit implements Decomposer {
 		// and is therefore convex, add it to the list of convex polygons
 		Vector2[] vertices = new Vector2[polygon.size()];
 		polygon.toArray(vertices);
-		polygons.add(new Polygon(vertices));
+		polygons.add(Geometry.createPolygon(vertices));
 	}
 	
 	/**

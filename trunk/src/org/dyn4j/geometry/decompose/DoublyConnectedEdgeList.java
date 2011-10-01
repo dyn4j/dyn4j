@@ -30,6 +30,7 @@ import java.util.Stack;
 
 import org.dyn4j.Epsilon;
 import org.dyn4j.geometry.Convex;
+import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Vector2;
 
@@ -51,7 +52,7 @@ import org.dyn4j.geometry.Vector2;
  * can be achieved since the indexing of the {@link #vertices} list is the same as the source {@link Vector2}[].
  * No check is performed to ensure that a pair of {@link HalfEdge}s are added that already exist.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 2.2.0
  */
 public class DoublyConnectedEdgeList {
@@ -558,7 +559,7 @@ public class DoublyConnectedEdgeList {
 				left = left.next;
 			}
 			
-			Polygon p = new Polygon(vertices);
+			Polygon p = Geometry.createPolygon(vertices);
 			convexes.add(p);
 		}
 		
