@@ -12,6 +12,19 @@
 		<xs:attribute name="y" type="xs:decimal" use="required" />
 	</xs:complexType>
 
+	<xs:simpleType name="ColorComponent">
+		<xs:restriction base="xs:decimal">
+			<xs:minInclusive value="0.0"></xs:minInclusive>
+			<xs:maxInclusive value="1.0"></xs:maxInclusive>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="Color">
+		<xs:attribute name="r" type="ColorComponent" use="required" />
+		<xs:attribute name="g" type="ColorComponent" use="required" />
+		<xs:attribute name="b" type="ColorComponent" use="required" />
+	</xs:complexType>
+
 	<xs:complexType name="Shape" abstract="true">
 		<xs:sequence>
 			<xs:element name="LocalCenter" type="Vector" maxOccurs="1" minOccurs="1" />
@@ -343,6 +356,8 @@
 	
 	<xs:complexType name="Body">
 		<xs:sequence>
+			<xs:element name="OutlineColor" type="Color" maxOccurs="1" minOccurs="0" />
+			<xs:element name="FillColor" type="Color" maxOccurs="1" minOccurs="0" />
 			<xs:element name="Fixtures" type="Fixtures" maxOccurs="1" minOccurs="0" />
 			<xs:element name="Transform" type="Transform" maxOccurs="1" minOccurs="1" />
 			<xs:element name="Mass" type="Mass" maxOccurs="1" minOccurs="1" />
@@ -670,13 +685,185 @@
 		</xs:sequence>
 	</xs:complexType>
 
+	<xs:simpleType name="BroadphaseDetector">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="SapBruteForce" />
+			<xs:enumeration value="SapIncremental" />
+			<xs:enumeration value="SapTree" />
+			<xs:enumeration value="DynamicAABBTree" />
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:simpleType name="NarrowphaseDetector">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Sat" />
+			<xs:enumeration value="Gjk" />
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:simpleType name="ManifoldSolver">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="ClippingManifoldSolver" />
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:simpleType name="TimeOfImpactDetector">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="ConservativeAdvancement" />
+		</xs:restriction>
+	</xs:simpleType>
+
 	<xs:complexType name="World">
 		<xs:sequence>
+			<xs:element name="BroadphaseDetector" type="BroadphaseDetector" maxOccurs="1" minOccurs="0" />
+			<xs:element name="NarrowphaseDetector" type="NarrowphaseDetector" maxOccurs="1" minOccurs="0" />
+			<xs:element name="ManifoldSolver" type="ManifoldSolver" maxOccurs="1" minOccurs="0" />
+			<xs:element name="TimeOfImpactDetector" type="TimeOfImpactDetector" maxOccurs="1" minOccurs="0" />
+			<xs:element name="Gravity" type="Vector" maxOccurs="1" minOccurs="0" />
 			<xs:element name="Bounds" type="Bounds" maxOccurs="1" minOccurs="0" />
 			<xs:element name="Bodies" type="Bodies" maxOccurs="1" minOccurs="1" />
 			<xs:element name="Joints" type="Joints" maxOccurs="1" minOccurs="1" />
 		</xs:sequence>
 	</xs:complexType>
 	
-	<xs:element name="World" type="World" />
+	<!-- Global dyn4j settings -->
+
+	<xs:complexType name="Settings">
+		<xs:sequence>
+			<xs:element name="StepFrequency" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:decimal">
+						<xs:minInclusive value="30.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="MaximumTranslation" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:decimal">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="MaximumRotation" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:decimal">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="ContinuousCollisionDetectionMode" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="NONE"></xs:enumeration>
+						<xs:enumeration value="BULLETS_ONLY"></xs:enumeration>
+						<xs:enumeration value="ALL"></xs:enumeration>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			
+			<!-- Sleep -->
+			<xs:element name="AutoSleep" type="xs:boolean" maxOccurs="1" minOccurs="1" />
+			<xs:element name="SleepTime" type="xs:decimal" maxOccurs="1" minOccurs="1" />
+			<xs:element name="SleepLinearVelocity" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:decimal">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="SleepAngularVelocity" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:decimal">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			
+			<!-- Constraint solver -->
+			<xs:element name="VelocitySolverIterations" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:positiveInteger">
+						<xs:minInclusive value="5" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="PositionSolverIterations" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:positiveInteger">
+						<xs:minInclusive value="5" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="WarmStartDistance" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:decimal">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="RestitutionVelocity" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:decimal">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="LinearTolerance" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:decimal">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="AngularTolerance" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:decimal">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="MaximumLinearCorrection" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:decimal">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="MaximumAngularCorrection" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:decimal">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Baumgarte" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:decimal">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="System">
+		<xs:sequence>
+			<xs:element name="JavaVersion" type="xs:string" maxOccurs="1" minOccurs="0" />
+			<xs:element name="JavaVendor" type="xs:string" maxOccurs="1" minOccurs="0" />
+			<xs:element name="OperatingSystem" type="xs:string" maxOccurs="1" minOccurs="0" />
+			<xs:element name="Architecture" type="xs:string" maxOccurs="1" minOccurs="0" />
+			<xs:element name="NumberOfCpus" type="xs:string" maxOccurs="1" minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="Simulation">
+		<xs:sequence>
+			<xs:element name="Name" type="xs:string" maxOccurs="1" minOccurs="1" />
+			<xs:element name="System" type="System" maxOccurs="1" minOccurs="0" />
+			<xs:element name="Settings" type="Settings" maxOccurs="1" minOccurs="1" />
+			<xs:element name="World" type="World" maxOccurs="1" minOccurs="1" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:element name="Simulation" type="Simulation"></xs:element>
 </xs:schema>

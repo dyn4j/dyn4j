@@ -61,6 +61,7 @@ import org.dyn4j.sandbox.dialogs.ApplyTorqueDialog;
 import org.dyn4j.sandbox.dialogs.EditBodyDialog;
 import org.dyn4j.sandbox.dialogs.EditFixtureDialog;
 import org.dyn4j.sandbox.dialogs.EditJointDialog;
+import org.dyn4j.sandbox.dialogs.EditWorldDialog;
 import org.dyn4j.sandbox.dialogs.SetBoundsDialog;
 import org.dyn4j.sandbox.events.BodyActionEvent;
 import org.dyn4j.sandbox.utilities.Icons;
@@ -182,6 +183,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 	 */
 	public void setWorld(World world) {
 		this.world = world;
+		this.root.setUserObject(world);
 		
 		// reset everything
 		this.bounds.setUserObject(new NullBounds());
@@ -240,12 +242,19 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 		
 		this.popWorld = new JPopupMenu();
 		
-		JMenuItem mnuClear = new JMenuItem("Remove All Bodies And Joints");
-		mnuClear.setActionCommand("clear-all");
-		mnuClear.addActionListener(this);
-		mnuClear.setIcon(Icons.REMOVE);
+		JMenuItem mnuEditWorld = new JMenuItem("Edit");
+		mnuEditWorld.setActionCommand("editWorld");
+		mnuEditWorld.addActionListener(this);
+		mnuEditWorld.setIcon(Icons.EDIT_WORLD);
 		
-		this.popWorld.add(mnuClear);
+		JMenuItem mnuClearWorld = new JMenuItem("Remove All Bodies And Joints");
+		mnuClearWorld.setActionCommand("clear-all");
+		mnuClearWorld.addActionListener(this);
+		mnuClearWorld.setIcon(Icons.REMOVE);
+		
+		this.popWorld.add(mnuEditWorld);
+		this.popWorld.addSeparator();
+		this.popWorld.add(mnuClearWorld);
 		
 		// create the bounds popup menu
 		
@@ -646,6 +655,8 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 		String command = event.getActionCommand();
 		if ("clear-all".equals(command)) {
 			this.clearAllAction();
+		} else if ("editWorld".equals(command)) {
+			this.editWorldAction();
 		} else if ("set-bounds".equals(command)) {
 			this.setBoundsAction();
 		} else if ("unset-bounds".equals(command)) {
@@ -788,6 +799,15 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 			
 			this.notifyActionListeners("clear-all");
 		}
+	}
+	
+	/**
+	 * Shows an edit world dialog.
+	 */
+	private void editWorldAction() {
+		EditWorldDialog.show(this.getParentWindow(), this.world);
+		
+		this.model.nodeChanged(this.root);
 	}
 	
 	/**
@@ -1451,7 +1471,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 			} else if (data instanceof World) {
 				World world = (World)data;
 				this.setIcon(Icons.WORLD);
-				this.setText("World [" + world.getBodyCount() + ", " + world.getJointCount() + "]");
+				this.setText(world.getUserData() + " [" + world.getBodyCount() + ", " + world.getJointCount() + "]");
 			} else if (data instanceof Joint) {
 				// set the text
 				this.setText((String)((Joint)data).getUserData());

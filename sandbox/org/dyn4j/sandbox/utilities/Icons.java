@@ -37,6 +37,12 @@ public class Icons {
 	/** Stop icon */
 	public static final ImageIcon STOP = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/stop-icon.png");
 	
+	/** Settings icon */
+	public static final ImageIcon SETTINGS = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/settings-icon.png");
+	
+	/** Preferences icon */
+	public static final ImageIcon PREFERENCES = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/preferences-icon.png");
+	
 	/** Running indicator icon */
 	public static final ImageIcon RUNNING = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/running-icon.png");
 	
@@ -45,6 +51,9 @@ public class Icons {
 	
 	/** World icon */
 	public static final ImageIcon WORLD = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/world-icon.png");
+	
+	/** New simulation icon */
+	public static final ImageIcon NEW_SIMULATION = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/new-simulation-icon.png");
 	
 	/** Generic add icon */
 	public static final ImageIcon ADD = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/add-icon.png");
@@ -76,6 +85,36 @@ public class Icons {
 	/** Vertical sync icon */
 	public static final ImageIcon SYNC = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/sync-icon.png");
 	
+	/** Scale icon */
+	public static final ImageIcon SCALE = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/scale-icon.png");
+	
+	/** Body center icon */
+	public static final ImageIcon BODY_CENTER = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/body-center-icon.png");
+	
+	/** Normal icon */
+	public static final ImageIcon NORMAL = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/normal-icon.png");
+	
+	/** Rotation disc icon */
+	public static final ImageIcon ROTATION_DISC = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/rotation-disc-icon.png");
+	
+	/** Velocity icon */
+	public static final ImageIcon VELOCITY = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/velocity-icon.png");
+
+	/** AABB icon */
+	public static final ImageIcon AABB = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/aabb-icon.png");
+
+	/** Contact pair icon */
+	public static final ImageIcon CONTACT_PAIR = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/contact-pair-icon.png");
+	
+	/** Contact icon */
+	public static final ImageIcon CONTACT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/contact-point-icon.png");
+	
+	/** Contact impulse icon */
+	public static final ImageIcon CONTACT_IMPULSE = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/contact-impulse-icon.png");
+
+	/** Friction impulse icon */
+	public static final ImageIcon FRICTION_IMPULSE = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/friction-impulse-icon.png");
+	
 	/** Zoom in icon */
 	public static final ImageIcon ZOOM_IN = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/zoom-in-icon.png");
 	
@@ -96,6 +135,9 @@ public class Icons {
 	
 	/** Info icon */
 	public static final ImageIcon INFO = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/info-icon.png");
+
+	/** Help icon */
+	public static final ImageIcon HELP = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/help-icon.png");
 	
 	/** Save icon */
 	public static final ImageIcon SAVE = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/save-icon.png");
@@ -223,6 +265,9 @@ public class Icons {
 	
 	// edit icons
 
+	/** Edit world icon */
+	public static final ImageIcon EDIT_WORLD = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/edit-world-icon.png");
+	
 	/** Set bounds icon */
 	public static final ImageIcon SET_BOUNDS = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/set-bounds-icon.png");
 	

@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.utilities.ControlUtilities;
 import org.dyn4j.sandbox.utilities.Icons;
 
 /**
@@ -74,23 +75,13 @@ public class ForcePanel extends JPanel implements InputPanel {
 	}
 	
 	/**
-	 * Returns the double value of the number stored in the given text field.
-	 * @param field the text field
-	 * @return double the double value
-	 */
-	protected double getDoubleValue(JFormattedTextField field) {
-		Number number = (Number)field.getValue();
-		return number.doubleValue();
-	}
-	
-	/**
 	 * Returns the force given by the user.
 	 * @return Vector2
 	 */
 	public Vector2 getForce() {
 		Vector2 f = new Vector2(
-				this.getDoubleValue(this.txtX),
-				this.getDoubleValue(this.txtY));
+				ControlUtilities.getDoubleValue(this.txtX),
+				ControlUtilities.getDoubleValue(this.txtY));
 		return f;
 	}
 	

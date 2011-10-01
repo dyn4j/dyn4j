@@ -22,7 +22,7 @@ import javax.swing.JTextArea;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class SamplePolygonFileDialog extends JDialog implements MouseListener, ActionListener {
+public class SampleFileDialog extends JDialog implements MouseListener, ActionListener {
 	/** The version id */
 	private static final long serialVersionUID = 7413682412938169769L;
 
@@ -37,8 +37,8 @@ public class SamplePolygonFileDialog extends JDialog implements MouseListener, A
 	 * @param parent the component displaying this dialog
 	 * @param contents the file contents
 	 */
-	private SamplePolygonFileDialog(Component parent, String contents) {
-		super(JOptionPane.getFrameForComponent(parent), "Sample Polygon File", ModalityType.APPLICATION_MODAL);
+	private SampleFileDialog(Component parent, String contents) {
+		super(JOptionPane.getFrameForComponent(parent), "Sample File", ModalityType.APPLICATION_MODAL);
 		
 		this.txtFile = new JTextArea();
 		this.txtFile.setText(contents);
@@ -144,7 +144,8 @@ public class SamplePolygonFileDialog extends JDialog implements MouseListener, A
 	 * @param contents the file contents
 	 */
 	public static final void show(Component parent, String contents) {
-		SamplePolygonFileDialog dialog = new SamplePolygonFileDialog(parent, contents);
+		SampleFileDialog dialog = new SampleFileDialog(parent, contents);
+		dialog.setLocationRelativeTo(parent);
 		dialog.setVisible(true);
 	}
 }

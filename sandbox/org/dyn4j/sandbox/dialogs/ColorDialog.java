@@ -101,6 +101,7 @@ public class ColorDialog extends JDialog implements ActionListener {
 	 */
 	public static final Color show(Window owner, Color initialColor, boolean alpha) {
 		ColorDialog dialog = new ColorDialog(owner, initialColor, alpha);
+		dialog.setLocationRelativeTo(owner);
 		dialog.setVisible(true);
 		
 		if (!dialog.canceled) {

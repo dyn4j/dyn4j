@@ -14,6 +14,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.media.opengl.GL;
@@ -24,6 +25,7 @@ import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLException;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
@@ -37,6 +39,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
@@ -46,9 +49,13 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.dyn4j.Version;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.World;
+import org.dyn4j.dynamics.contact.ContactPoint;
+import org.dyn4j.dynamics.contact.SolvedContactPoint;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.MouseJoint;
+import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
@@ -57,9 +64,15 @@ import org.dyn4j.sandbox.actions.MoveWorldAction;
 import org.dyn4j.sandbox.actions.RotateAction;
 import org.dyn4j.sandbox.actions.SelectAction;
 import org.dyn4j.sandbox.dialogs.AboutDialog;
+import org.dyn4j.sandbox.dialogs.ExceptionDialog;
+import org.dyn4j.sandbox.dialogs.PreferencesDialog;
+import org.dyn4j.sandbox.dialogs.SettingsDialog;
 import org.dyn4j.sandbox.events.BodyActionEvent;
 import org.dyn4j.sandbox.input.Keyboard;
 import org.dyn4j.sandbox.input.Mouse;
+import org.dyn4j.sandbox.panels.ContactPanel;
+import org.dyn4j.sandbox.panels.MemoryPanel;
+import org.dyn4j.sandbox.panels.SystemPanel;
 import org.dyn4j.sandbox.panels.WorldTreePanel;
 import org.dyn4j.sandbox.persist.XmlFormatter;
 import org.dyn4j.sandbox.persist.XmlGenerator;
@@ -85,9 +98,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 
 	/** The conversion factor from nano to base */
 	private static final double NANO_TO_BASE = 1.0e9;
-	
-	/** The color for selected bodies/fixtures */
-	private static final float[] SELECTED_COLOR = new float[] {0.5f, 0.5f, 1.0f, 1.0f};
 	
 	/** The sandbox version */
 	public static final String VERSION = "1.0.0";
@@ -134,6 +144,9 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	/** The last path the user chose from either the load or save dialog */
 	private File directory;
 	
+	/** The last file name opened or saved */
+	private String currentFileName;
+	
 	/** The map to store snapshots of the simulation */
 	private Map<String, String> snapshots = new HashMap<String, String>();
 	
@@ -150,10 +163,27 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	/** The snapshot menu */
 	private JMenu mnuSnapshot;
 	
+	/** The help menu */
+	private JMenu mnuHelp;
+	
+	/** The window menu */
+	private JMenu mnuWindow;
+	
 	// The world tree panel
 	
 	/** The world tree control */
 	private WorldTreePanel pnlWorld;
+	
+	// bottom left panels
+	
+	/** The panel to show the contacts */
+	private ContactPanel pnlContacts;
+	
+	/** The panel to show system information */
+	private SystemPanel pnlSystem;
+	
+	/** The panel to show memory usage */
+	private MemoryPanel pnlMemory;
 	
 	// Simulation toolbar
 	
@@ -163,10 +193,40 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	/** The stop button for the simulation */
 	private JButton btnStop;
 	
+	/** The settings button for the simulation */
+	private JButton btnSettings;
+	
 	/** Label to show the frames per second */
 	private JTextField lblFps;
 	
-	// Rendering toolbar
+	// Preferences toolbar
+	
+	/** The anti-aliasing toggle button */
+	private JToggleButton tglAntiAliasing;
+	
+	/** The vertical sync toggle button */
+	private JToggleButton tglVerticalSync;
+	
+	/** The label origin toggle button */
+	private JToggleButton tglOriginLabel;
+	
+	/** The bounds toggle button */
+	private JToggleButton tglBounds;
+	
+	/** The scale toggle button */
+	private JToggleButton tglScale;
+	
+	/** The contact pairs toggle button */
+	private JToggleButton tglContactPairs;
+	
+	/** The contact points toggle button */
+	private JToggleButton tglContactPoints;
+	
+	/** The contact impulses toggle button */
+	private JToggleButton tglContactImpulses;
+	
+	/** The friction impulses toggle button */
+	private JToggleButton tglFrictionImpulses;
 	
 	/** The random color toggle button */
 	private JToggleButton tglRandomColor;
@@ -180,14 +240,22 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	/** The show fixture labels toggle button */
 	private JToggleButton tglFixtureLabels;
 	
-	/** The anti-aliasing toggle button */
-	private JToggleButton tglAntiAliasing;
+	/** The body center toggle button */
+	private JToggleButton tglBodyCenter;
 	
-	/** The vertical sync toggle button */
-	private JToggleButton tglVerticalSync;
+	/** The body AABBs toggle button */
+	private JToggleButton tglBodyAABBs;
 	
-	/** The label origin toggle button */
-	private JToggleButton tglOriginLabel;
+	/** The body normals toggle button */
+	private JToggleButton tglBodyNormals;
+	
+	/** The body rotation disc toggle button */
+	private JToggleButton tglBodyRotationDiscs;
+	
+	/** The body velocities toggle button */
+	private JToggleButton tglBodyVelocities;
+	
+	// Camera toolbar
 	
 	/** The zoom in button */
 	private JButton btnZoomIn;
@@ -261,8 +329,19 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 //			e.printStackTrace();
 //		}
 		
+		ContactCounter counter = new ContactCounter();
+		
 		// create the world
 		this.world = new World();
+		this.world.setUserData("World");
+		this.world.setContactListener(counter);
+		this.world.setStepListener(counter);
+		
+		// create the contact panel
+		this.pnlContacts = new ContactPanel(counter);
+		this.pnlSystem = new SystemPanel();
+		this.pnlSystem.setPreferredSize(new Dimension(205, 100));
+		this.pnlMemory = new MemoryPanel();
 		
 		// create the keyboard and mouse
 		this.keyboard = new Keyboard();
@@ -271,7 +350,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		this.renderState = new RenderState();
 		
 		// create the world tree
-		Dimension size = new Dimension(200, 600);
+		Dimension size = new Dimension(220, 400);
 		this.pnlWorld = new WorldTreePanel(this, this.world);
 		this.pnlWorld.setPreferredSize(size);
 		this.pnlWorld.setMinimumSize(size);
@@ -284,6 +363,11 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		// file menu
 		this.mnuFile = new JMenu(" File ");
 		
+		JMenuItem mnuNew = new JMenuItem(" New Simulation ");
+		mnuNew.setIcon(Icons.NEW_SIMULATION);
+		mnuNew.setActionCommand("new");
+		mnuNew.addActionListener(this);
+		
 		JMenuItem mnuSave = new JMenuItem(" Save Simulation ");
 		mnuSave.setIcon(Icons.SAVE);
 		mnuSave.setActionCommand("save");
@@ -294,6 +378,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		mnuOpen.setActionCommand("open");
 		mnuOpen.addActionListener(this);
 		
+		this.mnuFile.add(mnuNew);
 		this.mnuFile.add(mnuOpen);
 		this.mnuFile.add(mnuSave);
 		
@@ -314,9 +399,31 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		this.mnuSnapshot.add(mnuClearSnapshots);
 		this.mnuSnapshot.addSeparator();
 		
+		// window menu
+		this.mnuWindow = new JMenu("Window");
+		
+		JMenuItem mnuPreferences = new JMenuItem("Preferences");
+		mnuPreferences.setIcon(Icons.PREFERENCES);
+		mnuPreferences.setActionCommand("preferences");
+		mnuPreferences.addActionListener(this);
+		
+		this.mnuWindow.add(mnuPreferences);
+		
+		// help menu
+		this.mnuHelp = new JMenu("Help");
+		
+		JMenuItem mnuAbout = new JMenuItem("About");
+		mnuAbout.setIcon(Icons.ABOUT);
+		mnuAbout.setActionCommand("about");
+		mnuAbout.addActionListener(this);
+		
+		this.mnuHelp.add(mnuAbout);
+
 		this.barMenu.add(this.mnuFile);
 		this.barMenu.add(this.mnuSnapshot);
-				
+		this.barMenu.add(this.mnuWindow);
+		this.barMenu.add(this.mnuHelp);
+		
 		this.setJMenuBar(this.barMenu);
 		
 		// create the simulation tool bar
@@ -340,6 +447,13 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		barSimulation.add(this.btnStart);
 		barSimulation.add(this.btnStop);
 		
+		this.btnSettings = new JButton(Icons.SETTINGS);
+		this.btnSettings.addActionListener(this);
+		this.btnSettings.setActionCommand("settings");
+		this.btnSettings.setToolTipText("Change Settings");
+		
+		barSimulation.add(this.btnSettings);
+		
 		this.lblFps = new JTextField();
 		this.lblFps.setMaximumSize(new Dimension(70, Short.MAX_VALUE));
 		this.lblFps.setHorizontalAlignment(JTextField.RIGHT);
@@ -351,52 +465,143 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		barSimulation.addSeparator();
 		barSimulation.add(this.lblFps);
 		
-		// create the settings toolbar
+		// create the preferences toolbar
 		
-		JToolBar barSettings = new JToolBar("Settings", JToolBar.HORIZONTAL);
-		barSettings.setRollover(true);
-		
-		this.tglRandomColor = new JToggleButton(Icons.COLOR);
-		this.tglRandomColor.setToolTipText("Enable/Disable Random Body Colors");
-		this.tglRandomColor.setActionCommand("color");
-		this.tglRandomColor.addActionListener(this);
-		this.tglRandomColor.setSelected(ApplicationSettings.isColorRandom());
-		
-		this.tglStencil = new JToggleButton(Icons.STENCIL);
-		this.tglStencil.setToolTipText("Enable/Disable Body Stenciling");
-		this.tglStencil.setActionCommand("stencil");
-		this.tglStencil.addActionListener(this);
-		this.tglStencil.setSelected(ApplicationSettings.isStenciled());
-		
-		this.tglBodyLabels = new JToggleButton(Icons.BODY_LABEL);
-		this.tglBodyLabels.setToolTipText("Enable/Disable Body Labels");
-		this.tglBodyLabels.setActionCommand("bodyLabel");
-		this.tglBodyLabels.addActionListener(this);
-		this.tglBodyLabels.setSelected(ApplicationSettings.isBodyLabeled());
-		
-		this.tglFixtureLabels = new JToggleButton(Icons.FIXTURE_LABEL);
-		this.tglFixtureLabels.setToolTipText("Enable/Disable Fixture Labels");
-		this.tglFixtureLabels.setActionCommand("fixtureLabel");
-		this.tglFixtureLabels.addActionListener(this);
-		this.tglFixtureLabels.setSelected(ApplicationSettings.isFixtureLabeled());
-		
+		JToolBar barPreferences = new JToolBar("Preferences", JToolBar.HORIZONTAL);
+		barPreferences.setRollover(true);
+
 		this.tglAntiAliasing = new JToggleButton(Icons.AA);
 		this.tglAntiAliasing.setToolTipText("Enable/Disable Anti-Aliasing");
 		this.tglAntiAliasing.setActionCommand("aa");
 		this.tglAntiAliasing.addActionListener(this);
-		this.tglAntiAliasing.setSelected(ApplicationSettings.isAntiAliasingEnabled());
+		this.tglAntiAliasing.setSelected(Preferences.isAntiAliasingEnabled());
 		
 		this.tglVerticalSync = new JToggleButton(Icons.SYNC);
 		this.tglVerticalSync.setToolTipText("Enable/Disable Vertical Sync");
 		this.tglVerticalSync.setActionCommand("vertical-sync");
 		this.tglVerticalSync.addActionListener(this);
-		this.tglVerticalSync.setSelected(ApplicationSettings.isVerticalSyncEnabled());
+		this.tglVerticalSync.setSelected(Preferences.isVerticalSyncEnabled());
 		
+		this.tglBounds = new JToggleButton(Icons.BOUNDS);
+		this.tglBounds.setToolTipText("Enable/Disable Bounds Rendering");
+		this.tglBounds.setActionCommand("bounds");
+		this.tglBounds.addActionListener(this);
+		this.tglBounds.setSelected(Preferences.isBoundsEnabled());
+
 		this.tglOriginLabel = new JToggleButton(Icons.ORIGIN);
-		this.tglOriginLabel.setToolTipText("Enable/Disable Origin Label");
+		this.tglOriginLabel.setToolTipText("Enable/Disable The Origin Label");
 		this.tglOriginLabel.setActionCommand("origin");
 		this.tglOriginLabel.addActionListener(this);
-		this.tglOriginLabel.setSelected(ApplicationSettings.isOriginLabeled());
+		this.tglOriginLabel.setSelected(Preferences.isOriginLabeled());
+		
+		this.tglScale = new JToggleButton(Icons.SCALE);
+		this.tglScale.setToolTipText("Enable/Disable Scale Rendering");
+		this.tglScale.setActionCommand("scale");
+		this.tglScale.addActionListener(this);
+		this.tglScale.setSelected(Preferences.isScaleEnabled());
+		
+		this.tglBodyCenter = new JToggleButton(Icons.BODY_CENTER);
+		this.tglBodyCenter.setToolTipText("Enable/Disable Body Center Rendering");
+		this.tglBodyCenter.setActionCommand("bodyCenter");
+		this.tglBodyCenter.addActionListener(this);
+		this.tglBodyCenter.setSelected(Preferences.isBodyCenterEnabled());
+		
+		this.tglRandomColor = new JToggleButton(Icons.COLOR);
+		this.tglRandomColor.setToolTipText("Enable/Disable Random Body Colors");
+		this.tglRandomColor.setActionCommand("color");
+		this.tglRandomColor.addActionListener(this);
+		this.tglRandomColor.setSelected(Preferences.isBodyColorRandom());
+		
+		this.tglStencil = new JToggleButton(Icons.STENCIL);
+		this.tglStencil.setToolTipText("Enable/Disable Body Stenciling");
+		this.tglStencil.setActionCommand("stencil");
+		this.tglStencil.addActionListener(this);
+		this.tglStencil.setSelected(Preferences.isBodyStenciled());
+		
+		this.tglBodyLabels = new JToggleButton(Icons.BODY_LABEL);
+		this.tglBodyLabels.setToolTipText("Enable/Disable Body Labels");
+		this.tglBodyLabels.setActionCommand("bodyLabel");
+		this.tglBodyLabels.addActionListener(this);
+		this.tglBodyLabels.setSelected(Preferences.isBodyLabeled());
+		
+		this.tglFixtureLabels = new JToggleButton(Icons.FIXTURE_LABEL);
+		this.tglFixtureLabels.setToolTipText("Enable/Disable Fixture Labels");
+		this.tglFixtureLabels.setActionCommand("fixtureLabel");
+		this.tglFixtureLabels.addActionListener(this);
+		this.tglFixtureLabels.setSelected(Preferences.isFixtureLabeled());
+		
+		this.tglContactPairs = new JToggleButton(Icons.CONTACT_PAIR);
+		this.tglContactPairs.setToolTipText("Enable/Disable Contact Pair Rendering");
+		this.tglContactPairs.setActionCommand("contactPair");
+		this.tglContactPairs.addActionListener(this);
+		this.tglContactPairs.setSelected(Preferences.isContactPairEnabled()); 
+		
+		this.tglContactPoints = new JToggleButton(Icons.CONTACT);
+		this.tglContactPoints.setToolTipText("Enable/Disable Contact Point Rendering");
+		this.tglContactPoints.setActionCommand("contactPoint");
+		this.tglContactPoints.addActionListener(this);
+		this.tglContactPoints.setSelected(Preferences.isContactPointEnabled()); 
+		
+		this.tglContactImpulses = new JToggleButton(Icons.CONTACT_IMPULSE);
+		this.tglContactImpulses.setToolTipText("Enable/Disable Contact Impulse Rendering");
+		this.tglContactImpulses.setActionCommand("contactImpulse");
+		this.tglContactImpulses.addActionListener(this);
+		this.tglContactImpulses.setSelected(Preferences.isContactImpulseEnabled());
+		
+		this.tglFrictionImpulses = new JToggleButton(Icons.FRICTION_IMPULSE);
+		this.tglFrictionImpulses.setToolTipText("Enable/Disable Contact Friction Impulse Rendering");
+		this.tglFrictionImpulses.setActionCommand("frictionImpulse");
+		this.tglFrictionImpulses.addActionListener(this);
+		this.tglFrictionImpulses.setSelected(Preferences.isFrictionImpulseEnabled()); 
+		
+		this.tglBodyAABBs = new JToggleButton(Icons.AABB);
+		this.tglBodyAABBs.setToolTipText("Enable/Disable Body Axis-Aligned Bounding Box Rendering");
+		this.tglBodyAABBs.setActionCommand("aabb");
+		this.tglBodyAABBs.addActionListener(this);
+		this.tglBodyAABBs.setSelected(Preferences.isBodyAABBEnabled());
+		
+		this.tglBodyNormals = new JToggleButton(Icons.NORMAL);
+		this.tglBodyNormals.setToolTipText("Enable/Disable Body Fixture Normal Rendering");
+		this.tglBodyNormals.setActionCommand("normals");
+		this.tglBodyNormals.addActionListener(this);
+		this.tglBodyNormals.setSelected(Preferences.isBodyNormalEnabled());
+		
+		this.tglBodyRotationDiscs = new JToggleButton(Icons.ROTATION_DISC);
+		this.tglBodyRotationDiscs.setToolTipText("Enable/Disable Body Rotation Disc Rendering");
+		this.tglBodyRotationDiscs.setActionCommand("rotationDisc");
+		this.tglBodyRotationDiscs.addActionListener(this);
+		this.tglBodyRotationDiscs.setSelected(Preferences.isBodyRotationDiscEnabled());
+		
+		this.tglBodyVelocities = new JToggleButton(Icons.VELOCITY);
+		this.tglBodyVelocities.setToolTipText("Enable/Disable Body Velocity Rendering");
+		this.tglBodyVelocities.setActionCommand("velocity");
+		this.tglBodyVelocities.addActionListener(this);
+		this.tglBodyVelocities.setSelected(Preferences.isBodyVelocityEnabled());
+		
+		// general
+		barPreferences.add(this.tglAntiAliasing);
+		barPreferences.add(this.tglVerticalSync);
+		barPreferences.add(this.tglOriginLabel);
+		barPreferences.add(this.tglScale);
+		barPreferences.add(this.tglBounds);
+		barPreferences.add(this.tglContactPairs);
+		barPreferences.add(this.tglContactPoints);
+		barPreferences.add(this.tglContactImpulses);
+		barPreferences.add(this.tglFrictionImpulses);
+		// body stuff
+		barPreferences.add(this.tglRandomColor);
+		barPreferences.add(this.tglStencil);
+		barPreferences.add(this.tglBodyLabels);
+		barPreferences.add(this.tglFixtureLabels);
+		barPreferences.add(this.tglBodyCenter);
+		barPreferences.add(this.tglBodyAABBs);
+		barPreferences.add(this.tglBodyNormals);
+		barPreferences.add(this.tglBodyRotationDiscs);
+		barPreferences.add(this.tglBodyVelocities);
+		
+		// create the camera tool bar
+		JToolBar barCamera = new JToolBar("Camera");
+		barCamera.setRollover(true);
 		
 		this.btnZoomIn = new JButton(Icons.ZOOM_IN);
 		this.btnZoomIn.setToolTipText("Zoom In");
@@ -413,16 +618,9 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		this.btnToOrigin.setActionCommand("to-origin");
 		this.btnToOrigin.addActionListener(this);
 		
-		barSettings.add(this.tglRandomColor);
-		barSettings.add(this.tglStencil);
-		barSettings.add(this.tglBodyLabels);
-		barSettings.add(this.tglFixtureLabels);
-		barSettings.add(this.tglAntiAliasing);
-		barSettings.add(this.tglVerticalSync);
-		barSettings.add(this.tglOriginLabel);
-		barSettings.add(this.btnZoomIn);
-		barSettings.add(this.btnZoomOut);
-		barSettings.add(this.btnToOrigin);
+		barCamera.add(this.btnZoomIn);
+		barCamera.add(this.btnZoomOut);
+		barCamera.add(this.btnToOrigin);
 		
 		// create the mouse location toolbar
 		
@@ -437,30 +635,22 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		
 		barMouseLocation.add(this.lblMouseLocation);
 		
-		// help toolbar
-		
-		JToolBar barAbout = new JToolBar("About", JToolBar.HORIZONTAL);
-		barAbout.setFloatable(true);
-		
-		JButton btnAbout = new JButton();
-		btnAbout.setIcon(Icons.ABOUT);
-		btnAbout.setToolTipText("About Sandbox");
-		btnAbout.setActionCommand("about");
-		btnAbout.addActionListener(this);
-		
-		barAbout.add(btnAbout);
-		
 		// add the toolbars to the layout
 		
 		JPanel pnlToolBar = new JPanel();
 		pnlToolBar.setLayout(new BoxLayout(pnlToolBar, BoxLayout.X_AXIS));
 		pnlToolBar.add(barSimulation);
-		pnlToolBar.add(barSettings);
+//		pnlToolBar.add(barPreferences);
+		pnlToolBar.add(barCamera);
 		pnlToolBar.add(Box.createHorizontalGlue());
 		pnlToolBar.add(barMouseLocation);
-		pnlToolBar.add(barAbout);
 		pnlToolBar.setMaximumSize(pnlToolBar.getPreferredSize());
-				
+		
+		JPanel pnlToolBar2 = new JPanel();
+		pnlToolBar2.setLayout(new BoxLayout(pnlToolBar2, BoxLayout.X_AXIS));
+		pnlToolBar2.add(barPreferences);
+		pnlToolBar2.setMaximumSize(pnlToolBar2.getPreferredSize());
+		
 		// attempt to set the icon
 		this.setIconImage(Icons.SANDBOX_48.getImage());
 		
@@ -500,8 +690,20 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		pnlTest.setLayout(new BorderLayout());
 		pnlTest.add(this.canvas);
 		
+		// create a tabbed pane below the world tree
+		JTabbedPane tabs = new JTabbedPane();
+		tabs.setBorder(BorderFactory.createEmptyBorder(7, 7, 7, 0));
+		tabs.addTab("Contacts", this.pnlContacts);
+		tabs.addTab("System", this.pnlSystem);
+		tabs.addTab("Memory", this.pnlMemory);
+		
+		JPanel pnlLeft = new JPanel();
+		pnlLeft.setLayout(new BoxLayout(pnlLeft, BoxLayout.Y_AXIS));
+		pnlLeft.add(this.pnlWorld);
+		pnlLeft.add(tabs);
+		
 		// add a split pane
-		JSplitPane pneSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, this.pnlWorld, pnlTest);
+		JSplitPane pneSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, pnlLeft, pnlTest);
 		
 		// setup the layout
 		Container container = this.getContentPane();
@@ -509,12 +711,13 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		GroupLayout layout = new GroupLayout(container);
 		container.setLayout(layout);
 		
-		layout.setAutoCreateGaps(true);
 		layout.setHorizontalGroup(layout.createParallelGroup()
 				.addComponent(pnlToolBar, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(pnlToolBar2, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 				.addComponent(pneSplit));
 		layout.setVerticalGroup(layout.createSequentialGroup()
 				.addComponent(pnlToolBar)
+				.addComponent(pnlToolBar2)
 				.addComponent(pneSplit));
 		
 		// size everything
@@ -575,15 +778,37 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 			}
 		}
 		// Sandbox events
-		if ("save".equals(command)) {
+		if ("new".equals(command)) {
+			// make sure they are sure
+			int choice = JOptionPane.showConfirmDialog(this,
+					"Starting a new simulation will reset the current simulation " +
+					"\nand settings and will clear the snapshot history." +
+					"\nDo you want to continue?", "New Simulation", JOptionPane.YES_NO_CANCEL_OPTION);
+			// check the user's choice
+			if (choice == JOptionPane.YES_OPTION) {
+				// clear the snapshots
+				this.clearAllSnapshots();
+				// clear the last file name
+				this.currentFileName = null;
+				// create a new contact counter
+				ContactCounter counter = new ContactCounter();
+				// create a new world object
+				this.world = new World();
+				this.world.setUserData("World");
+				this.world.setContactListener(counter);
+				this.world.setStepListener(counter);
+				// reset the world in the world panel
+				this.pnlWorld.setWorld(this.world);
+				// set the contact panel
+				this.pnlContacts.setContactCounter(counter);
+				// reset the global settings
+				Settings.getInstance().reset();
+			}
+		} else if ("save".equals(command)) {
 			try {
 				this.saveSimulationAction();
 			} catch (IOException e) {
-				JOptionPane.showMessageDialog(
-						this,
-						"An Error occured when trying to save the simulation:\n" + e.getMessage(),
-						"Error Saving Simulation",
-						JOptionPane.ERROR_MESSAGE);
+				ExceptionDialog.show(this, "Error Saving Simulation", "An error occured when trying to save the simulation:", e);
 			}
 		} else if ("open".equals(command)) {
 			try {
@@ -591,14 +816,22 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 				// stop all actions
 				this.endAllActions();
 			} catch (Exception e) {
-				JOptionPane.showMessageDialog(
-						this,
-						"An Error occured when trying to open the selected simulation file:\n" + e,
-						"Error Opening Simulation",
-						JOptionPane.ERROR_MESSAGE);
+				ExceptionDialog.show(this, "Error Opening Simulation", "An error occured when trying to open the selected simulation file:", e);
 			}
 		} else if ("start".equals(command)) {
 			if (isPaused()) {
+				// check for a floor/static body
+				if (!this.hasStaticBody() && !this.world.isEmpty()) {
+					// make sure they are sure
+					int choice = JOptionPane.showConfirmDialog(this,
+							"A static body (like a ground or floor body) does not exist in the current simulation." +
+							"\nThis will allow all bodies to fall indefinitely depending on the gravity." +
+							"\nDo you want to continue?", "Start Simulation", JOptionPane.YES_NO_CANCEL_OPTION);
+					// check the user's choice
+					if (choice != JOptionPane.YES_OPTION) {
+						return;
+					}
+				}
 				// stop all actions
 				this.endAllActions();
 				// take a snapshot of the current simulation
@@ -607,6 +840,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 				this.pnlWorld.setEnabled(false);
 				this.btnStart.setEnabled(false);
 				this.btnStop.setEnabled(true);
+				this.btnSettings.setEnabled(false);
 				this.mnuFile.setEnabled(false);
 				this.mnuSnapshot.setEnabled(false);
 				setPaused(false);
@@ -621,24 +855,50 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 				this.pnlWorld.setEnabled(true);
 				this.btnStart.setEnabled(true);
 				this.btnStop.setEnabled(false);
+				this.btnSettings.setEnabled(true);
 				this.mnuFile.setEnabled(true);
 				this.mnuSnapshot.setEnabled(true);
 				setPaused(true);
 			}
+		} else if ("settings".equals(command)) {
+			// show the settings dialog
+			SettingsDialog.show(this, Settings.getInstance());
 		} else if ("color".equals(command)) {
-			ApplicationSettings.setColorRandom(!ApplicationSettings.isColorRandom());
+			Preferences.setBodyColorRandom(!Preferences.isBodyColorRandom());
 		} else if ("stencil".equals(command)) {
-			ApplicationSettings.setStenciled(!ApplicationSettings.isStenciled());
+			Preferences.setBodyStenciled(!Preferences.isBodyStenciled());
 		} else if ("bodyLabel".equals(command)) {
-			ApplicationSettings.setBodyLabeled(!ApplicationSettings.isBodyLabeled());
+			Preferences.setBodyLabeled(!Preferences.isBodyLabeled());
 		} else if ("fixtureLabel".equals(command)) {
-			ApplicationSettings.setFixtureLabeled(!ApplicationSettings.isFixtureLabeled());
+			Preferences.setFixtureLabeled(!Preferences.isFixtureLabeled());
 		} else if ("aa".equals(command)) {
-			ApplicationSettings.setAntiAliasingEnabled(!ApplicationSettings.isAntiAliasingEnabled());
+			Preferences.setAntiAliasingEnabled(!Preferences.isAntiAliasingEnabled());
 		} else if ("vertical-sync".equals(command)) {
-			ApplicationSettings.setVerticalSyncEnabled(!ApplicationSettings.isVerticalSyncEnabled());
+			Preferences.setVerticalSyncEnabled(!Preferences.isVerticalSyncEnabled());
 		} else if ("origin".equals(command)) {
-			ApplicationSettings.setOriginLabeled(!ApplicationSettings.isOriginLabeled());
+			Preferences.setOriginLabeled(!Preferences.isOriginLabeled());
+		} else if ("bounds".equals(command)) {
+			Preferences.setBoundsEnabled(!Preferences.isBoundsEnabled());
+		} else if ("scale".equals(command)) {
+			Preferences.setScaleEnabled(!Preferences.isScaleEnabled());
+		} else if ("contactPair".equals(command)) {
+			Preferences.setContactPairEnabled(!Preferences.isContactPairEnabled());
+		} else if ("contactPoint".equals(command)) {
+			Preferences.setContactPointEnabled(!Preferences.isContactPointEnabled());
+		} else if ("contactImpulse".equals(command)) {
+			Preferences.setContactImpulseEnabled(!Preferences.isContactImpulseEnabled());
+		} else if ("frictingImpulse".equals(command)) {
+			Preferences.setFrictionImpulseEnabled(!Preferences.isFrictionImpulseEnabled());
+		} else if ("bodyCenter".equals(command)) {
+			Preferences.setBodyCenterEnabled(!Preferences.isBodyCenterEnabled());
+		} else if ("aabb".equals(command)) {
+			Preferences.setBodyAABBEnabled(!Preferences.isBodyAABBEnabled());
+		} else if ("normals".equals(command)) {
+			Preferences.setBodyNormalEnabled(!Preferences.isBodyNormalEnabled());
+		} else if ("rotationDisc".equals(command)) {
+			Preferences.setBodyRotationDiscEnabled(!Preferences.isBodyRotationDiscEnabled());
+		} else if ("velocity".equals(command)) {
+			Preferences.setBodyVelocityEnabled(!Preferences.isBodyVelocityEnabled());
 		} else if ("zoom-in".equals(command)) {
 			this.scale *= 0.5;
 		} else if ("zoom-out".equals(command)) {
@@ -654,12 +914,8 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 			int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want to clear all snapshots?", "Clear Snapshots", JOptionPane.YES_NO_CANCEL_OPTION);
 			// check the user's choice
 			if (choice == JOptionPane.YES_OPTION) {
-				// remove the entries from the map
-				this.snapshots.clear();
-				// remove all components after the third one
-				while (this.mnuSnapshot.getItemCount() > 3) {
-					this.mnuSnapshot.remove(3);
-				}
+				// clear the snapshots
+				this.clearAllSnapshots();
 			}
 		} else if ("snapshotRestore".equals(command)) {
 			JMenuItem item = (JMenuItem)event.getSource();
@@ -667,7 +923,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 			
 			// make sure they are sure
 			int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want load the '" + key + "' snapshot?\n" +
-					"The current simulation will be lost.", "Load Snapshot", JOptionPane.YES_NO_CANCEL_OPTION);
+					"The current simulation and settings will be lost.", "Load Snapshot", JOptionPane.YES_NO_CANCEL_OPTION);
 			// check the user's choice
 			if (choice == JOptionPane.YES_OPTION) {
 				try {
@@ -675,13 +931,30 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 					// stop all actions
 					this.endAllActions();
 				} catch (Exception e) {
-					JOptionPane.showMessageDialog(
-							this,
-							"An Error occured when trying to restore the snapshot '" + key + "':\n" + e,
-							"Error Restoring Snapshot",
-							JOptionPane.ERROR_MESSAGE);
+					ExceptionDialog.show(this, "Error Restoring Snapshot", "An error occured when trying to restore the snapshot '" + key + "':", e);
 				}
 			}
+		} else if ("preferences".equals(command)) {
+			PreferencesDialog.show(this);
+			// set the state of the toggle buttons on the preferences toolbar
+			this.tglAntiAliasing.setSelected(Preferences.isAntiAliasingEnabled());
+			this.tglBodyLabels.setSelected(Preferences.isBodyLabeled());
+			this.tglFixtureLabels.setSelected(Preferences.isFixtureLabeled());
+			this.tglOriginLabel.setSelected(Preferences.isOriginLabeled());
+			this.tglRandomColor.setSelected(Preferences.isBodyColorRandom());
+			this.tglStencil.setSelected(Preferences.isBodyStenciled());
+			this.tglVerticalSync.setSelected(Preferences.isVerticalSyncEnabled());
+			this.tglBounds.setSelected(Preferences.isBoundsEnabled());
+			this.tglScale.setSelected(Preferences.isScaleEnabled());
+			this.tglBodyCenter.setSelected(Preferences.isBodyCenterEnabled());
+			this.tglContactPairs.setSelected(Preferences.isContactPairEnabled());
+			this.tglContactPoints.setSelected(Preferences.isContactPointEnabled());
+			this.tglContactImpulses.setSelected(Preferences.isContactImpulseEnabled());
+			this.tglFrictionImpulses.setSelected(Preferences.isFrictionImpulseEnabled());
+			this.tglBodyAABBs.setSelected(Preferences.isBodyAABBEnabled());
+			this.tglBodyNormals.setSelected(Preferences.isBodyNormalEnabled());
+			this.tglBodyRotationDiscs.setSelected(Preferences.isBodyRotationDiscEnabled());
+			this.tglBodyVelocities.setSelected(Preferences.isBodyVelocityEnabled());
 		}
 	}
 	
@@ -739,14 +1012,14 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		GL2 gl = glDrawable.getGL().getGL2();
 
 		// turn on/off multi-sampling
-		if (ApplicationSettings.isAntiAliasingEnabled()) {
+		if (Preferences.isAntiAliasingEnabled()) {
 			gl.glEnable(GL.GL_MULTISAMPLE);
 		} else {
 			gl.glDisable(GL.GL_MULTISAMPLE);
 		}
 		
 		// turn on/off vertical sync
-		if (ApplicationSettings.isVerticalSyncEnabled()) {
+		if (Preferences.isVerticalSyncEnabled()) {
 			gl.setSwapInterval(1);
 		} else {
 			gl.setSwapInterval(0);
@@ -827,6 +1100,8 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		        // update the world with the elapsed time
 		        this.world.update(elapsedTime);
 			}
+	    	// update the contact panel
+	    	this.pnlContacts.update();
 		}
 		
 		// set the render state
@@ -840,6 +1115,8 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		
 		this.fps.update(diff);
 		this.lblFps.setText(this.fps.getFpsString());
+		
+		this.pnlMemory.update();
 	}
 	
 	/**
@@ -856,9 +1133,14 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		gl.glScaled(scale, scale, scale);
 		gl.glTranslated(offset.x, offset.y, 0.0);
 		
-		// draw selected stuff
-		
+		// draw all the bodies and the bounds
 		synchronized (this.world) {
+			// draw the bounds
+			if (Preferences.isBoundsEnabled()) {
+				gl.glColor4fv(Preferences.getBoundsColor(), 0);
+				RenderUtilities.drawBounds(gl, this.world.getBounds());
+			}
+			
 			// render all the bodies in the world
 			int bSize = this.world.getBodyCount();
 			for (int i = 0; i < bSize; i++) {
@@ -866,10 +1148,19 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 				// dont draw the selected body
 				if (body == this.selectBodyAction.getObject()) continue;
 				if (body == this.editBodyAction.getObject()) continue;
-				if (ApplicationSettings.isStenciled()) {
-					RenderUtilities.outlineBody(gl, body, this.renderState, true);
-				} else {
-					body.render(gl);
+				
+				this.renderBody(gl, body);
+			}
+			
+			// draw all AABBs so that they are on top of all shapes (except for the selected one)
+			if (Preferences.isBodyAABBEnabled()) {
+				for (int i = 0; i < bSize; i++) {
+					SandboxBody body = (SandboxBody)this.world.getBody(i);
+					// dont draw the selected body
+					if (body == this.selectBodyAction.getObject()) continue;
+					if (body == this.editBodyAction.getObject()) continue;
+					
+					this.renderAABB(gl, body);
 				}
 			}
 			
@@ -884,42 +1175,84 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 			}
 		}
 		
-		if (this.selectBodyAction.isActive()) {
-			SandboxBody body = this.selectBodyAction.getObject();
-			if (ApplicationSettings.isStenciled()) {
-				// stenciling requires a larger radius
-				RenderUtilities.outlineShapes(gl, body, 6, SELECTED_COLOR, this.renderState);
-				gl.glColor4fv(body.getFillColor(), 0);
-				body.fill(gl);
-			} else {
-				RenderUtilities.outlineShapes(gl, body, 4, SELECTED_COLOR, this.renderState);
-				body.render(gl);
+		// render contacts, contact impulses, friction impulses, and pairs
+		if (Preferences.isContactPairEnabled()
+		 || Preferences.isContactImpulseEnabled()
+		 || Preferences.isContactPointEnabled()
+		 || Preferences.isFrictionImpulseEnabled()) {
+			// get the contact counter
+			ContactCounter cc = (ContactCounter) this.world.getContactListener();
+			// get the contacts from the counter
+			List<ContactPoint> contacts = cc.getContacts();
+			
+			// loop over the contacts
+			int cSize = contacts.size();
+			for (int i = 0; i < cSize; i++) {
+				// draw the contacts
+				ContactPoint cp = contacts.get(i);
+				// get the world space contact point
+				Vector2 c = cp.getPoint();
+				// draw the contact pairs
+				if (Preferences.isContactPairEnabled()) {
+					// set the color
+					gl.glColor4fv(Preferences.getContactPairColor(), 0);
+					// get the world space points
+					Vector2 p1 = cp.getBody1().getTransform().getTransformed(cp.getFixture1().getShape().getCenter());
+					Vector2 p2 = cp.getBody2().getTransform().getTransformed(cp.getFixture2().getShape().getCenter());
+					// draw line between the shapes
+					RenderUtilities.drawLineSegment(gl, p1, p2, false);
+				}
+				
+				// draw the contact
+				if (Preferences.isContactPointEnabled()) {
+					// set the color
+					gl.glColor4fv(Preferences.getContactPointColor(), 0);
+					// draw the contact points
+					RenderUtilities.fillRectangleFromCenter(gl, c.x, c.y, 0.02, 0.02);
+				}
+				
+				// check if the contact is a solved contact
+				if (cp instanceof SolvedContactPoint) {
+					// get the solved contact point to show the impulses applied
+					SolvedContactPoint scp = (SolvedContactPoint) cp;
+					Vector2 n = scp.getNormal();
+					Vector2 t = n.cross(1.0);
+					double j = scp.getNormalImpulse();
+					double jt = scp.getTangentialImpulse();
+					
+					// draw the contact forces
+					if (Preferences.isContactImpulseEnabled()) {
+						// set the color
+						gl.glColor4fv(Preferences.getContactImpulseColor(), 0);
+						RenderUtilities.drawLineSegment(
+								gl, 
+								c.x, c.y, 
+								c.x + n.x * j, c.y + n.y * j,
+								false);
+					}
+					
+					// draw the friction forces
+					if (Preferences.isFrictionImpulseEnabled()) {
+						// set the color
+						gl.glColor4fv(Preferences.getFrictionImpulseColor(), 0);
+						RenderUtilities.drawLineSegment(
+								gl, 
+								c.x, c.y, 
+								c.x + t.x * jt, c.y + t.y * jt,
+								false);
+					}
+				}
 			}
 		}
 		
+		// the selected body is rendered by itself
+		if (this.selectBodyAction.isActive()) {
+			this.renderSelectedBody(gl, this.selectBodyAction.getObject());
+		}
+		
+		// the selected body is rendered by itself
 		if (this.editBodyAction.isActive()) {
-			SandboxBody body = this.editBodyAction.getObject();
-			// overlay everything but this shape
-			gl.glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
-			gl.glPushMatrix();
-			gl.glLoadIdentity();
-			RenderUtilities.fillRectangleFromTopLeft(gl, -size.width * 0.5, size.height * 0.5, size.width, size.height);
-			gl.glPopMatrix();
-			// redraw the shape on top of the overlay
-			body.render(gl);
-			// see if a fixture is selected
-			if (this.selectFixtureAction.isActive()) {
-				BodyFixture bf = this.selectFixtureAction.getObject();
-				Convex convex = bf.getShape();
-				RenderUtilities.outlineShape(gl, convex, body.getTransform(), 4, SELECTED_COLOR);
-				gl.glPushMatrix();
-				RenderUtilities.applyTransform(gl, body.getTransform());
-				gl.glColor4fv(body.getFillColor(), 0);
-				RenderUtilities.fillShape(gl, convex);
-				gl.glColor4fv(body.getOutlineColor(), 0);
-				RenderUtilities.drawShape(gl, convex, false);
-				gl.glPopMatrix();
-			}
+			this.renderEditingBody(gl, this.editBodyAction.getObject());
 		}
 		
 		// draw the mouse joint last always
@@ -936,7 +1269,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		
 		// draw origin label
 		
-		if (ApplicationSettings.isOriginLabeled()) {
+		if (Preferences.isOriginLabeled()) {
 			double ox = offset.x * scale;
 			double oy = offset.y * scale;
 			gl.glColor3f(0.0f, 0.0f, 0.0f);
@@ -946,8 +1279,8 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		}
 
 		// draw labels over the origin label
-		boolean bodyLabels = ApplicationSettings.isBodyLabeled();
-		boolean fixtureLabels = ApplicationSettings.isFixtureLabeled();
+		boolean bodyLabels = Preferences.isBodyLabeled();
+		boolean fixtureLabels = Preferences.isFixtureLabeled();
 		if ((bodyLabels || fixtureLabels) && !this.editBodyAction.isActive()) {
 			synchronized (world) {
 				gl.glColor3f(0.0f, 0.0f, 0.0f);
@@ -962,11 +1295,175 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		
 		// draw HUD like stuff
 		
-		// translate (0, 0) to the bottom left corner
-		gl.glTranslated(-size.getWidth() * 0.5, -size.getHeight() * 0.5, 0.0);
-		RenderUtilities.drawPixelScale(gl, this.glut, 5, 18, 3, 100, 15, this.renderState);
+		if (Preferences.isScaleEnabled()) {
+			// translate (0, 0) to the bottom left corner
+			gl.glTranslated(-size.getWidth() * 0.5, -size.getHeight() * 0.5, 0.0);
+			RenderUtilities.drawPixelScale(gl, this.glut, 5, 18, 3, 100, 15, this.renderState);
+		}
 		
 		gl.glPopMatrix();
+	}
+	
+	/**
+	 * Renders a body and related state normally.
+	 * @param gl the OpenGL context
+	 * @param body the body to render
+	 */
+	private void renderBody(GL2 gl, SandboxBody body) {
+		// apply the transform
+		RenderUtilities.pushTransform(gl);
+		RenderUtilities.applyTransform(gl, body.getTransform());
+		
+		// render the body
+		if (Preferences.isBodyStenciled()) {
+			body.stencil(gl);
+		} else {
+			body.render(gl);
+		}
+
+		// render any edge normals
+		if (Preferences.isBodyNormalEnabled()) {
+			body.renderNormals(gl);
+		}
+		
+		// render any edge normals
+		if (Preferences.isBodyRotationDiscEnabled()) {
+			body.renderRotationDisc(gl);
+		}
+		
+		// render the center of mass
+		if (Preferences.isBodyCenterEnabled()) {
+			body.renderCenter(gl);
+		}
+
+		RenderUtilities.popTransform(gl);
+		
+		// render the velocities
+		if (Preferences.isBodyVelocityEnabled()) {
+			body.renderVelocity(gl);
+		}
+	}
+	
+	/**
+	 * Renders a selected body and related state.
+	 * @param gl the OpenGL context
+	 * @param body the body to render
+	 */
+	private void renderSelectedBody(GL2 gl, SandboxBody body) {
+		this.renderAABB(gl, body);
+		
+		// apply the transform
+		RenderUtilities.pushTransform(gl);
+		RenderUtilities.applyTransform(gl, body.getTransform());
+		
+		// render the selected body
+		if (Preferences.isBodyStenciled()) {
+			// stenciling requires a larger radius
+			RenderUtilities.outlineShapes(gl, body, 6, Preferences.getSelectedColor(), this.renderState);
+			body.setFillColor(gl);
+			body.fill(gl);
+		} else {
+			RenderUtilities.outlineShapes(gl, body, 4, Preferences.getSelectedColor(), this.renderState);
+			body.render(gl);
+		}
+
+		// render any edge normals
+		if (Preferences.isBodyNormalEnabled()) {
+			body.renderNormals(gl);
+		}
+		
+		// render any edge normals
+		if (Preferences.isBodyRotationDiscEnabled()) {
+			body.renderRotationDisc(gl);
+		}
+		
+		// render the center of mass
+		if (Preferences.isBodyCenterEnabled()) {
+			body.renderCenter(gl);
+		}
+
+		RenderUtilities.popTransform(gl);
+		
+		// render the velocities
+		if (Preferences.isBodyVelocityEnabled()) {
+			body.renderVelocity(gl);
+		}
+	}
+	
+	/**
+	 * Renders an editing body and related state.
+	 * @param gl the OpenGL context
+	 * @param body the body to render
+	 */
+	private void renderEditingBody(GL2 gl, SandboxBody body) {
+		Dimension size = this.renderState.size;
+
+		// overlay everything but this shape
+		gl.glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+		gl.glPushMatrix();
+		gl.glLoadIdentity();
+		RenderUtilities.fillRectangleFromTopLeft(gl, -size.width * 0.5, size.height * 0.5, size.width, size.height);
+		gl.glPopMatrix();
+		
+		this.renderAABB(gl, body);
+		
+		// apply the transform
+		RenderUtilities.pushTransform(gl);
+		RenderUtilities.applyTransform(gl, body.getTransform());
+		
+		// redraw the shape on top of the overlay
+		body.render(gl);
+		
+		// see if a fixture is selected
+		if (this.selectFixtureAction.isActive()) {
+			// render the shape being selected only
+			BodyFixture bf = this.selectFixtureAction.getObject();
+			Convex convex = bf.getShape();
+			RenderUtilities.outlineShape(gl, convex, 4, Preferences.getSelectedColor());
+			gl.glColor4fv(body.getFillColor(), 0);
+			RenderUtilities.fillShape(gl, convex);
+			gl.glColor4fv(body.getOutlineColor(), 0);
+			RenderUtilities.drawShape(gl, convex, false);
+		}
+
+		// render any edge normals
+		if (Preferences.isBodyNormalEnabled()) {
+			body.renderNormals(gl);
+		}
+		
+		// render any edge normals
+		if (Preferences.isBodyRotationDiscEnabled()) {
+			body.renderRotationDisc(gl);
+		}
+		
+		// render the center of mass
+		if (Preferences.isBodyCenterEnabled()) {
+			body.renderCenter(gl);
+		}
+
+		RenderUtilities.popTransform(gl);
+
+		// render the velocities
+		if (Preferences.isBodyVelocityEnabled()) {
+			body.renderVelocity(gl);
+		}
+	}
+	
+	/**
+	 * Renders the AABB for the given body.
+	 * @param gl the OpenGL context
+	 * @param body the body
+	 */
+	private void renderAABB(GL2 gl, SandboxBody body) {
+		gl.glColor4fv(Preferences.getBodyAABBColor(), 0);
+		AABB aabb = this.world.getBroadphaseDetector().getAABB(body);
+		if (aabb != null) {
+			RenderUtilities.drawRectangleFromStartToEnd(
+					gl,
+					aabb.getMinX(), aabb.getMinY(),
+					aabb.getMaxX(), aabb.getMaxY(),
+					false);
+		}
 	}
 	
 	/**
@@ -1056,6 +1553,10 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 					Vector2 tx = pw.difference(this.moveBodyAction.getBeginPosition());
 					// move the body with the mouse
 					body.translate(tx);
+					// update the broadphase to update the AABB
+					// this is only done here to show a valid AABB to the user while they are editing
+					// the AABB is updated every frame so typically you wouldnt need to do this
+					this.world.getBroadphaseDetector().update(body);
 					// update the action
 					this.moveBodyAction.update(pw);
 				} else {
@@ -1092,6 +1593,12 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 					Vector2 tx = lpw.difference(this.moveFixtureAction.getBeginPosition());
 					// move the body with the mouse
 					bf.getShape().translate(tx);
+					// update the mass since the inertia, COM, and rotation disc may change
+					body.setMass(body.getMass().getType());
+					// update the broadphase to update the AABB
+					// this is only done here to show a valid AABB to the user while they are editing
+					// the AABB is updated every frame so typically you wouldnt need to do this
+					this.world.getBroadphaseDetector().update(body);
 					// update the action
 					this.moveFixtureAction.update(lpw);
 				} else {
@@ -1118,6 +1625,9 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 					// begin the move body action
 					this.moveBodyAction.begin(pw);
 					this.editBodyAction.end();
+					// set the body to awake and active
+					body.setAsleep(false);
+					body.setActive(true);
 				} else {
 					// then assume the user wants to move the world
 					this.moveWorldAction.begin(this.offset.copy(), pw, this);
@@ -1136,6 +1646,9 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 					this.selectBodyAction.end();
 					// begin the edit body action
 					this.editBodyAction.begin(body);
+					// set the body to awake and active
+					body.setAsleep(false);
+					body.setActive(true);
 				} else {
 					// then assume the user is done editing fixtures on the body
 					this.editBodyAction.end();
@@ -1156,6 +1669,10 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 				double theta = v1.getAngleBetween(v2);
 				// move the body with the mouse
 				body.rotate(theta, c);
+				// update the broadphase to update the AABB
+				// this is only done here to show a valid AABB to the user while they are editing
+				// the AABB is updated every frame so typically you wouldnt need to do this
+				this.world.getBroadphaseDetector().update(body);
 				// update the action
 				this.rotateBodyAction.update(pw);
 			} else if (this.editBodyAction.isActive()) {
@@ -1174,6 +1691,12 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 					double theta = v1.getAngleBetween(v2);
 					// rotate the fixture about the local center
 					bf.getShape().rotate(theta, convex.getCenter());
+					// update the mass since the inertia, COM, and rotation disc may change
+					body.setMass(body.getMass().getType());
+					// update the broadphase to update the AABB
+					// this is only done here to show a valid AABB to the user while they are editing
+					// the AABB is updated every frame so typically you wouldnt need to do this
+					this.world.getBroadphaseDetector().update(body);
 					// update the action
 					this.rotateFixtureAction.update(lpw);
 				} else {
@@ -1201,6 +1724,9 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 						this.selectBodyAction.begin(body);
 						// begin the move body action
 						this.rotateBodyAction.begin(pw);
+						// set the body to awake and active
+						body.setAsleep(false);
+						body.setActive(true);
 					}
 				}
 			}
@@ -1372,13 +1898,25 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	}
 	
 	/**
+	 * Clears all the saved snapshots.
+	 */
+	private void clearAllSnapshots() {
+		// remove the entries from the map
+		this.snapshots.clear();
+		// remove all components after the third one
+		while (this.mnuSnapshot.getItemCount() > 3) {
+			this.mnuSnapshot.remove(3);
+		}
+	}
+	
+	/**
 	 * Saves the current simulation state to an xml file.
 	 * @throws IOException thrown if an IO error occurs
 	 */
 	private void saveSimulationAction() throws IOException {
 		String xml = "";
 		synchronized (this.world) {
-			xml = XmlGenerator.toXml(this.world);
+			xml = XmlGenerator.toXml(this.world, Settings.getInstance());
 		}
 		XmlFormatter formatter = new XmlFormatter(2);
 		xml = formatter.format(xml);
@@ -1411,45 +1949,36 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 			}
 		};
 		fileBrowser.setMultiSelectionEnabled(false);
+		fileBrowser.setDialogTitle("Save Simulation");
 		if (this.directory != null) {
 			fileBrowser.setCurrentDirectory(this.directory);
 		}
-		fileBrowser.setSelectedFile(new File("simulation.xml"));
+		if (this.currentFileName != null) {
+			fileBrowser.setSelectedFile(new File(this.currentFileName));
+		} else {
+			fileBrowser.setSelectedFile(new File("simulation.xml"));
+		}
 		int option = fileBrowser.showSaveDialog(this);
 		// check the option
 		if (option == JFileChooser.APPROVE_OPTION) {
 			File file = fileBrowser.getSelectedFile();
-			if (file.isFile()) {
-				this.directory = file.getParentFile();
-				// see if its a new one or it already exists
-				if (file.exists()) {
-					// overwrite the file
-					FileWriter fw = new FileWriter(file);
-					fw.write(xml);
-					fw.close();
-					JOptionPane.showMessageDialog(this, "File saved successfully!", "File Saved", JOptionPane.INFORMATION_MESSAGE);
-				} else {
-					// create a new file
-					if (file.createNewFile()) {
-						FileWriter fw = new FileWriter(file);
-						fw.write(xml);
-						fw.close();
-						JOptionPane.showMessageDialog(this, "File saved successfully!", "File Saved", JOptionPane.INFORMATION_MESSAGE);
-					}
-				}
+			this.directory = file.getParentFile();
+			this.currentFileName = file.getName();
+			// see if its a new one or it already exists
+			if (file.exists()) {
+				// overwrite the file
+				FileWriter fw = new FileWriter(file);
+				fw.write(xml);
+				fw.close();
+				JOptionPane.showMessageDialog(this, "File saved successfully!", "File Saved", JOptionPane.INFORMATION_MESSAGE);
 			} else {
-				this.directory = file;
-				// its a directory, so save it inside the dir
-				// using the default name
-				String path = file.getPath();
-				File newFile = new File(path);
-				if (newFile.createNewFile()) {
+				// create a new file
+				if (file.createNewFile()) {
 					FileWriter fw = new FileWriter(file);
 					fw.write(xml);
 					fw.close();
 					JOptionPane.showMessageDialog(this, "File saved successfully!", "File Saved", JOptionPane.INFORMATION_MESSAGE);
 				}
-				
 			}
 		}
 	}
@@ -1462,6 +1991,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	 */
 	private void openSimulationAction() throws ParserConfigurationException, SAXException, IOException {
 		JFileChooser fileBrowser = new JFileChooser();
+		fileBrowser.setDialogTitle("Open Simulation");
 		fileBrowser.setMultiSelectionEnabled(false);
 		if (this.directory != null) {
 			fileBrowser.setCurrentDirectory(this.directory);
@@ -1469,18 +1999,31 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		int option = fileBrowser.showOpenDialog(this);
 		// check the option
 		if (option == JFileChooser.APPROVE_OPTION) {
+			// get the selected file
 			File file = fileBrowser.getSelectedFile();
 			// make sure it exists and its a file
 			if (file.exists() && file.isFile()) {
+				// if it exists and its a file then save the location
+				// and make sure they really want to open the file
 				this.directory = file.getParentFile();
-				// read the file into a stream
-				synchronized (this.world) {
-					XmlReader.fromXml(file, this.world);					
+				this.currentFileName = file.getName();
+				// make sure they are sure
+				option = JOptionPane.showConfirmDialog(this, "The current simulation, settings, and snapshots will be " +
+						"lost if a saved simulation is opened.\n" +
+						"Are you sure you want to continue?", "Open Simulation '" + file.getName() + "'", JOptionPane.YES_NO_CANCEL_OPTION);
+				// check the user's choice
+				if (option == JOptionPane.YES_OPTION) {
+					// read the file into a stream
+					synchronized (this.world) {
+						XmlReader.fromXml(file, this.world);					
+					}
+					// update the world tree
+					this.pnlWorld.setWorld(this.world);
+					// clear the snapshots
+					this.clearAllSnapshots();
 				}
-				// update the world tree
-				this.pnlWorld.setWorld(this.world);
-				// remove the current selection
-				
+			} else {
+				JOptionPane.showMessageDialog(this, "The selected item is not a file or doesn't exist.", "Invalid Selection", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
@@ -1493,7 +2036,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		// get the xml for the current simulation
 		String xml = "";
 		synchronized (this.world) {
-			xml = XmlGenerator.toXml(this.world);
+			xml = XmlGenerator.toXml(this.world, Settings.getInstance());
 		}
 		// save it in the snapshot map using the timestamp as the key
 		Date date = new Date();
@@ -1540,6 +2083,27 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		this.rotateBodyAction.end();
 		this.moveFixtureAction.end();
 		this.rotateFixtureAction.end();
+	}
+	
+	/**
+	 * Returns true if the world currently has a static body.
+	 * <p>
+	 * This is used as a simple check to issue a warning when the user
+	 * hasn't added a static body (like a floor body) to stop other bodies
+	 * from just falling indefinitely.
+	 * @return boolean
+	 */
+	private boolean hasStaticBody() {
+		synchronized (this.world) {
+			int bSize = this.world.getBodyCount();
+			for (int i = 0; i < bSize; i++) {
+				Body body = this.world.getBody(i);
+				if (body.isStatic()) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	/**

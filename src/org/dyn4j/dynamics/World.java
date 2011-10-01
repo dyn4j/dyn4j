@@ -140,6 +140,9 @@ public class World {
 	/** The {@link Joint} list */
 	protected List<Joint> joints;
 	
+	/** The application data associated */
+	protected Object userData;
+	
 	/** The reusable island */
 	protected Island island;
 	
@@ -304,6 +307,8 @@ public class World {
 		if (this.updateRequired) {
 			// if so then update the contacts
 			this.detect();
+			// notify that an update was performed
+			this.stepListener.updatePerformed(this.step, this);
 			// set the update required flag to false
 			this.updateRequired = false;
 		}
@@ -1715,6 +1720,22 @@ public class World {
 	}
 	
 	/**
+	 * Returns the application data associated with this {@link World}.
+	 * @return Object
+	 */
+	public Object getUserData() {
+		return this.userData;
+	}
+	
+	/**
+	 * Sets the application data associated with this {@link World}.
+	 * @param userData the application data
+	 */
+	public void setUserData(Object userData) {
+		this.userData = userData;
+	}
+	
+	/**
 	 * Returns the number of {@link Body} objects.
 	 * @return int the number of bodies
 	 */
@@ -1755,5 +1776,17 @@ public class World {
 	 */
 	public Step getStep() {
 		return this.step;
+	}
+	
+	/**
+	 * Returns true if this world doesn't contain any
+	 * bodies or joints.
+	 * @return boolean
+	 * @since 3.0.1
+	 */
+	public boolean isEmpty() {
+		int bSize = this.bodies.size();
+		int jSize = this.joints.size();
+		return bSize == 0 && jSize == 0;
 	}
 }

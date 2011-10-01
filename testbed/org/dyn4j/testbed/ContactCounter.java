@@ -40,7 +40,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Class to count the number of added, removed, and persisted contacts.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class ContactCounter implements ContactListener, StepListener {
@@ -125,6 +125,28 @@ public class ContactCounter implements ContactListener, StepListener {
 	 */
 	@Override
 	public void begin(Step step, World world) {
+		this.clear();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.StepListener#preUpdateContacts(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.World)
+	 */
+	@Override
+	public void updatePerformed(Step step, World world) {
+		this.clear();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.StepListener#end(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.World)
+	 */
+	@Override
+	public void end(Step step, World world) {}
+	
+	/**
+	 * Clears the state of the contact counter.
+	 * @since 3.0.1
+	 */
+	private void clear() {
 		// reset the values
 		this.sensed = 0;
 		this.added = 0;
@@ -134,12 +156,6 @@ public class ContactCounter implements ContactListener, StepListener {
 		this.contacts.clear();
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.StepListener#end(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.World)
-	 */
-	@Override
-	public void end(Step step, World world) {}
-
 	/**
 	 * Returns the number of new contacts.
 	 * @return int the number of new contacts

@@ -83,6 +83,8 @@ public class WorldTest {
 		public void begin(Step step, World world) {}
 		@Override
 		public void end(Step step, World world) { steps++; }
+		@Override
+		public void updatePerformed(Step step, World world) {}
 	}
 	
 	/**

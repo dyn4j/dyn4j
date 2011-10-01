@@ -19,6 +19,7 @@ import org.dyn4j.dynamics.joint.WeldJoint;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.utilities.ControlUtilities;
 import org.dyn4j.sandbox.utilities.Icons;
 
 /**
@@ -307,8 +308,8 @@ public class WeldJointPanel extends JointPanel implements InputPanel, ActionList
 			wj.setUserData(this.txtName.getText());
 			wj.setCollisionAllowed(this.chkCollision.isSelected());
 			
-			wj.setFrequency(this.getDoubleValue(this.txtFrequency));
-			wj.setDampingRatio(this.getDoubleValue(this.txtRatio));
+			wj.setFrequency(ControlUtilities.getDoubleValue(this.txtFrequency));
+			wj.setDampingRatio(ControlUtilities.getDoubleValue(this.txtRatio));
 		}
 	}
 	
@@ -323,16 +324,16 @@ public class WeldJointPanel extends JointPanel implements InputPanel, ActionList
 		
 		// get the anchor points
 		Vector2 a = new Vector2(
-				this.getDoubleValue(this.txtX1),
-				this.getDoubleValue(this.txtY1));
+				ControlUtilities.getDoubleValue(this.txtX1),
+				ControlUtilities.getDoubleValue(this.txtY1));
 		
 		WeldJoint wj = new WeldJoint(body1, body2, a);
 		// set the super class properties
 		wj.setUserData(this.txtName.getText());
 		wj.setCollisionAllowed(this.chkCollision.isSelected());
 		
-		wj.setFrequency(this.getDoubleValue(this.txtFrequency));
-		wj.setDampingRatio(this.getDoubleValue(this.txtRatio));
+		wj.setFrequency(ControlUtilities.getDoubleValue(this.txtFrequency));
+		wj.setDampingRatio(ControlUtilities.getDoubleValue(this.txtRatio));
 		
 		return wj;
 	}
@@ -352,12 +353,12 @@ public class WeldJointPanel extends JointPanel implements InputPanel, ActionList
 			return false;
 		}
 		// check the damping ratio
-		double dr = this.getDoubleValue(this.txtRatio);
+		double dr = ControlUtilities.getDoubleValue(this.txtRatio);
 		if (dr < 0.0 || dr > 1.0) {
 			return false;
 		}
 		// check the frequency
-		double f = this.getDoubleValue(this.txtFrequency);
+		double f = ControlUtilities.getDoubleValue(this.txtFrequency);
 		if (f < 0.0) {
 			return false;
 		}
@@ -378,12 +379,12 @@ public class WeldJointPanel extends JointPanel implements InputPanel, ActionList
 			JOptionPane.showMessageDialog(owner, "You must select two different bodies.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}
 		// check the damping ratio
-		double dr = this.getDoubleValue(this.txtRatio);
+		double dr = ControlUtilities.getDoubleValue(this.txtRatio);
 		if (dr < 0.0 || dr > 1.0) {
 			JOptionPane.showMessageDialog(owner, "The damping ratio must be between 0 and 1 inclusive.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}
 		// check the frequency
-		double f = this.getDoubleValue(this.txtFrequency);
+		double f = ControlUtilities.getDoubleValue(this.txtFrequency);
 		if (f < 0.0) {
 			JOptionPane.showMessageDialog(owner, "The frequency must be greater than or equal to zero.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}

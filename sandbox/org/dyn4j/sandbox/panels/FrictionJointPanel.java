@@ -16,6 +16,7 @@ import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.utilities.ControlUtilities;
 import org.dyn4j.sandbox.utilities.Icons;
 
 /**
@@ -242,8 +243,8 @@ public class FrictionJointPanel extends JointPanel implements InputPanel {
 			fj.setUserData(this.txtName.getText());
 			fj.setCollisionAllowed(this.chkCollision.isSelected());
 			// set the properties that can change
-			fj.setMaximumForce(this.getDoubleValue(this.txtMaxForce));
-			fj.setMaximumTorque(this.getDoubleValue(this.txtMaxTorque));
+			fj.setMaximumForce(ControlUtilities.getDoubleValue(this.txtMaxForce));
+			fj.setMaximumTorque(ControlUtilities.getDoubleValue(this.txtMaxTorque));
 		}
 	}
 	
@@ -258,16 +259,16 @@ public class FrictionJointPanel extends JointPanel implements InputPanel {
 		
 		// get the anchor points
 		Vector2 a = new Vector2(
-				this.getDoubleValue(this.txtX),
-				this.getDoubleValue(this.txtY));
+				ControlUtilities.getDoubleValue(this.txtX),
+				ControlUtilities.getDoubleValue(this.txtY));
 		
 		FrictionJoint fj = new FrictionJoint(body1, body2, a);
 		// set the super class properties
 		fj.setUserData(this.txtName.getText());
 		fj.setCollisionAllowed(this.chkCollision.isSelected());
 		// set the other properties
-		fj.setMaximumForce(this.getDoubleValue(this.txtMaxForce));
-		fj.setMaximumTorque(this.getDoubleValue(this.txtMaxTorque));
+		fj.setMaximumForce(ControlUtilities.getDoubleValue(this.txtMaxForce));
+		fj.setMaximumTorque(ControlUtilities.getDoubleValue(this.txtMaxTorque));
 		
 		return fj;
 	}
@@ -287,10 +288,10 @@ public class FrictionJointPanel extends JointPanel implements InputPanel {
 			return false;
 		}
 		// check the maximia
-		if (this.getDoubleValue(this.txtMaxForce) < 0.0) {
+		if (ControlUtilities.getDoubleValue(this.txtMaxForce) < 0.0) {
 			return false;
 		}
-		if (this.getDoubleValue(this.txtMaxTorque) < 0.0) {
+		if (ControlUtilities.getDoubleValue(this.txtMaxTorque) < 0.0) {
 			return false;
 		}
 		return true;
@@ -310,10 +311,10 @@ public class FrictionJointPanel extends JointPanel implements InputPanel {
 			JOptionPane.showMessageDialog(owner, "You must select two different bodies.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}
 		// check the maximia
-		if (this.getDoubleValue(this.txtMaxForce) < 0.0) {
+		if (ControlUtilities.getDoubleValue(this.txtMaxForce) < 0.0) {
 			JOptionPane.showMessageDialog(owner, "The maximum force must be greater than or equal to zero.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}
-		if (this.getDoubleValue(this.txtMaxTorque) < 0.0) {
+		if (ControlUtilities.getDoubleValue(this.txtMaxTorque) < 0.0) {
 			JOptionPane.showMessageDialog(owner, "The maximum torque must be greater than or equal to zero.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}
 	}

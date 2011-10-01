@@ -102,7 +102,7 @@ public class TransformPanel extends JPanel implements InputPanel {
 	 */
 	public TransformPanel(Vector2 tx, double rot, JComponent header) {
 		this.translation = tx.copy();
-		this.rotation = rot;
+		this.rotation = Math.toDegrees(rot);
 		
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
@@ -126,7 +126,7 @@ public class TransformPanel extends JPanel implements InputPanel {
 		
 		this.txtX.setValue(this.translation.x);
 		this.txtY.setValue(this.translation.y);
-		this.txtR.setValue(Math.toDegrees(this.rotation));
+		this.txtR.setValue(this.rotation);
 		
 		this.txtX.addFocusListener(new SelectTextFocusListener(this.txtX));
 		this.txtX.addPropertyChangeListener("value", new PropertyChangeListener() {

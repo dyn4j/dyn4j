@@ -20,6 +20,7 @@ import org.dyn4j.dynamics.joint.RevoluteJoint;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.utilities.ControlUtilities;
 import org.dyn4j.sandbox.utilities.Icons;
 
 /**
@@ -402,11 +403,11 @@ public class RevoluteJointPanel extends JointPanel implements InputPanel, Action
 			// set the properties that can change
 			rj.setLimitEnabled(this.chkLimitEnabled.isSelected());
 			rj.setLimits(
-					Math.toRadians(this.getDoubleValue(this.txtLowerLimit)), 
-					Math.toRadians(this.getDoubleValue(this.txtUpperLimit)));
-			rj.setMaximumMotorTorque(this.getDoubleValue(this.txtMaxMotorTorque));
+					Math.toRadians(ControlUtilities.getDoubleValue(this.txtLowerLimit)), 
+					Math.toRadians(ControlUtilities.getDoubleValue(this.txtUpperLimit)));
+			rj.setMaximumMotorTorque(ControlUtilities.getDoubleValue(this.txtMaxMotorTorque));
 			rj.setMotorEnabled(this.chkMotorEnabled.isSelected());
-			rj.setMotorSpeed(Math.toRadians(this.getDoubleValue(this.txtMotorSpeed)));
+			rj.setMotorSpeed(Math.toRadians(ControlUtilities.getDoubleValue(this.txtMotorSpeed)));
 		}
 	}
 	
@@ -421,8 +422,8 @@ public class RevoluteJointPanel extends JointPanel implements InputPanel, Action
 		
 		// get the anchor points
 		Vector2 a = new Vector2(
-				this.getDoubleValue(this.txtX1),
-				this.getDoubleValue(this.txtY1));
+				ControlUtilities.getDoubleValue(this.txtX1),
+				ControlUtilities.getDoubleValue(this.txtY1));
 		
 		RevoluteJoint rj = new RevoluteJoint(body1, body2, a);
 		// set the super class properties
@@ -431,11 +432,11 @@ public class RevoluteJointPanel extends JointPanel implements InputPanel, Action
 		// set the other properties
 		rj.setLimitEnabled(this.chkLimitEnabled.isSelected());
 		rj.setLimits(
-				Math.toRadians(this.getDoubleValue(this.txtLowerLimit)),
-				Math.toRadians(this.getDoubleValue(this.txtUpperLimit)));
-		rj.setMaximumMotorTorque(this.getDoubleValue(this.txtMaxMotorTorque));
+				Math.toRadians(ControlUtilities.getDoubleValue(this.txtLowerLimit)),
+				Math.toRadians(ControlUtilities.getDoubleValue(this.txtUpperLimit)));
+		rj.setMaximumMotorTorque(ControlUtilities.getDoubleValue(this.txtMaxMotorTorque));
 		rj.setMotorEnabled(this.chkMotorEnabled.isSelected());
-		rj.setMotorSpeed(Math.toRadians(this.getDoubleValue(this.txtMotorSpeed)));
+		rj.setMotorSpeed(Math.toRadians(ControlUtilities.getDoubleValue(this.txtMotorSpeed)));
 		
 		return rj;
 	}
@@ -455,11 +456,11 @@ public class RevoluteJointPanel extends JointPanel implements InputPanel, Action
 			return false;
 		}
 		// check the limit
-		if (this.getDoubleValue(this.txtLowerLimit) > this.getDoubleValue(this.txtUpperLimit)) {
+		if (ControlUtilities.getDoubleValue(this.txtLowerLimit) > ControlUtilities.getDoubleValue(this.txtUpperLimit)) {
 			return false;
 		}
 		// check the maximum motor torque
-		if (this.getDoubleValue(this.txtMaxMotorTorque) < 0.0) {
+		if (ControlUtilities.getDoubleValue(this.txtMaxMotorTorque) < 0.0) {
 			return false;
 		}
 		return true;
@@ -479,11 +480,11 @@ public class RevoluteJointPanel extends JointPanel implements InputPanel, Action
 			JOptionPane.showMessageDialog(owner, "You must select two different bodies.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}
 		// check the limit
-		if (this.getDoubleValue(this.txtLowerLimit) > this.getDoubleValue(this.txtUpperLimit)) {
+		if (ControlUtilities.getDoubleValue(this.txtLowerLimit) > ControlUtilities.getDoubleValue(this.txtUpperLimit)) {
 			JOptionPane.showMessageDialog(owner, "The lower limit must be less than or equal to the upper limit.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}
 		// check the maximum motor force
-		if (this.getDoubleValue(this.txtMaxMotorTorque) < 0.0) {
+		if (ControlUtilities.getDoubleValue(this.txtMaxMotorTorque) < 0.0) {
 			JOptionPane.showMessageDialog(owner, "The maximum motor torque must be greater than or equal to zero.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}
 	}

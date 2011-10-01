@@ -20,6 +20,7 @@ import org.dyn4j.dynamics.joint.RopeJoint;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.utilities.ControlUtilities;
 import org.dyn4j.sandbox.utilities.Icons;
 
 /**
@@ -387,8 +388,8 @@ public class RopeJointPanel extends JointPanel implements InputPanel, ActionList
 			rj.setLowerLimitEnabled(this.chkLowerLimitEnabled.isSelected());
 			rj.setUpperLimitEnabled(this.chkUpperLimitEnabled.isSelected());
 			rj.setLimits(
-					this.getDoubleValue(this.txtLowerLimit),
-					this.getDoubleValue(this.txtUpperLimit));
+					ControlUtilities.getDoubleValue(this.txtLowerLimit),
+					ControlUtilities.getDoubleValue(this.txtUpperLimit));
 		}
 	}
 	
@@ -403,11 +404,11 @@ public class RopeJointPanel extends JointPanel implements InputPanel, ActionList
 		
 		// get the anchor points
 		Vector2 a1 = new Vector2(
-				this.getDoubleValue(this.txtX1),
-				this.getDoubleValue(this.txtY1));
+				ControlUtilities.getDoubleValue(this.txtX1),
+				ControlUtilities.getDoubleValue(this.txtY1));
 		Vector2 a2 = new Vector2(
-				this.getDoubleValue(this.txtX2),
-				this.getDoubleValue(this.txtY2));
+				ControlUtilities.getDoubleValue(this.txtX2),
+				ControlUtilities.getDoubleValue(this.txtY2));
 		
 		RopeJoint rj = new RopeJoint(body1, body2, a1, a2);
 		// set the super class properties
@@ -417,8 +418,8 @@ public class RopeJointPanel extends JointPanel implements InputPanel, ActionList
 		rj.setLowerLimitEnabled(this.chkLowerLimitEnabled.isSelected());
 		rj.setUpperLimitEnabled(this.chkUpperLimitEnabled.isSelected());
 		rj.setLimits(
-				this.getDoubleValue(this.txtLowerLimit),
-				this.getDoubleValue(this.txtUpperLimit));
+				ControlUtilities.getDoubleValue(this.txtLowerLimit),
+				ControlUtilities.getDoubleValue(this.txtUpperLimit));
 		
 		return rj;
 	}
@@ -438,7 +439,7 @@ public class RopeJointPanel extends JointPanel implements InputPanel, ActionList
 			return false;
 		}
 		// the limits must be correct
-		if (this.getDoubleValue(this.txtLowerLimit) > this.getDoubleValue(this.txtUpperLimit)) {
+		if (ControlUtilities.getDoubleValue(this.txtLowerLimit) > ControlUtilities.getDoubleValue(this.txtUpperLimit)) {
 			return false;
 		}
 		return true;
@@ -458,7 +459,7 @@ public class RopeJointPanel extends JointPanel implements InputPanel, ActionList
 			JOptionPane.showMessageDialog(owner, "You must select two different bodies.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}
 		// the limits must be correct
-		if (this.getDoubleValue(this.txtLowerLimit) > this.getDoubleValue(this.txtUpperLimit)) {
+		if (ControlUtilities.getDoubleValue(this.txtLowerLimit) > ControlUtilities.getDoubleValue(this.txtUpperLimit)) {
 			JOptionPane.showMessageDialog(owner, "The upper limit must be greater than or equal to the lower limit.", "Notice", JOptionPane.ERROR_MESSAGE);
 		}
 	}

@@ -1,218 +1,244 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<World xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:noNamespaceSchemaLocation="http://www.dyn4j.org/Sandbox/sandbox.xsd">
-    <Bounds>
-    	<Rectangle Id="">
-    		<LocalCenter x="0.0" y="0.0" />
-    		<Width>1.0</Width>
-    		<Height>1.0</Height>
-    		<LocalRotation>0.0</LocalRotation>
-    	</Rectangle>
-    	<Transform>
-    		<Translation x="0.0" y="0.0" />
-    		<Rotation>0.0</Rotation>
-    	</Transform>
-    </Bounds>
-	<Bodies>
-		<Body Id="" Name="">
-			<Fixtures>
-				<Fixture Name="" Id="">
-					<Shape Id="" xsi:type="Circle">
-						<LocalCenter x="0.0" y="0.0" />
-						<Radius>1.0</Radius>
-					</Shape>
-					<Filter xsi:type="DefaultFilter" />
-					<Sensor>false</Sensor>
-					<Density>1.0</Density>
-					<Friction>0.0</Friction>
-					<Restitution>0.0</Restitution>
-				</Fixture>
-			</Fixtures>
-			<Transform>
-				<Translation x="0.0" y="0.0" />
-				<Rotation>0.0</Rotation>
-			</Transform>
-			<Mass>
-				<LocalCenter x="0.0" y="0.0" />
-				<Type>NORMAL</Type>
-				<Mass>1.0</Mass>
-				<Inertia>1.0</Inertia>
-				<Explicit>false</Explicit>
-			</Mass>
-			<Velocity x="0.0" y="0.0" />
-			<AngularVelocity>0.0</AngularVelocity>
-			<AccumulatedForce x="0.0" y="0.0" />
-			<AccumulatedTorque>0.0</AccumulatedTorque>
-			<AutoSleep>false</AutoSleep>
-			<Asleep>false</Asleep>
-			<Active>true</Active>
-			<Bullet>false</Bullet>
-			<LinearDamping>0.0</LinearDamping>
-			<AngularDamping>0.0</AngularDamping>
-			<GravityScale>1.0</GravityScale>
-		</Body>
-		
-		<Body Name="" Id="">
-			<Fixtures>
-				<Fixture Name="" Id="">
-					<Shape Id="" xsi:type="Segment">
-						<LocalCenter x="0.0" y="0.0"/>
-						<Vertex x="0.0" y="0.0"/>
-						<Vertex x="0.0" y="0.0"/>
-					</Shape>
-					<Filter xsi:type="CategoryFilter">
-						<PartOfGroups>
-							<All Value="2147483648" />
-						</PartOfGroups>
-						<CollideWithGroups>
-							<Group1 Value="1" />
-						</CollideWithGroups>
-					</Filter>
-					<Sensor>false</Sensor>
-					<Density>1.0</Density>
-					<Friction>0.0</Friction>
-					<Restitution>0.0</Restitution>
-				</Fixture>
-			</Fixtures>
-			<Transform>
-				<Translation x="0.0" y="0.0" />
-				<Rotation>0.0</Rotation>
-			</Transform>
-			<Mass>
-				<LocalCenter x="0.0" y="0.0" />
-				<Type>NORMAL</Type>
-				<Mass>1.0</Mass>
-				<Inertia>1.0</Inertia>
-				<Explicit>false</Explicit>
-			</Mass>
-			<Velocity x="0.0" y="0.0" />
-			<AngularVelocity>0.0</AngularVelocity>
-			<AccumulatedForce x="0.0" y="0.0" />
-			<AccumulatedTorque>0.0</AccumulatedTorque>
-			<AutoSleep>false</AutoSleep>
-			<Asleep>false</Asleep>
-			<Active>true</Active>
-			<Bullet>false</Bullet>
-			<LinearDamping>0.0</LinearDamping>
-			<AngularDamping>0.0</AngularDamping>
-			<GravityScale>1.0</GravityScale>
-		</Body>
-	</Bodies>
-	<Joints>
-		<Joint Name="" Id="" xsi:type="AngleJoint">
-			<BodyId1></BodyId1>
-			<BodyId2></BodyId2>
-			<CollisionAllowed>false</CollisionAllowed>
-			<LowerLimit>-0.23</LowerLimit>
-			<UpperLimit>0.23</UpperLimit>
-			<LimitEnabled>false</LimitEnabled>
-			<ReferenceAngle>0.32</ReferenceAngle>
-		</Joint>
-		
-		<Joint Id="" Name="" xsi:type="DistanceJoint">
-			<BodyId1></BodyId1>
-			<BodyId2></BodyId2>
-			<CollisionAllowed>false</CollisionAllowed>
-			<Anchor1 x="0.0" y="0.0" />
-			<Anchor2 x="0.0" y="0.0" />
-			<Frequency>1.0</Frequency>
-			<DampingRatio>1.0</DampingRatio>
-			<Distance>1.0</Distance>
-		</Joint>
-		
-		<Joint Name="" Id="" xsi:type="FrictionJoint">
-			<BodyId1></BodyId1>
-			<BodyId2></BodyId2>
-			<CollisionAllowed>false</CollisionAllowed>
-			<Anchor x="0.0" y="0.0" />
-			<MaximumForce>100.0</MaximumForce>
-			<MaximumTorque>1000.0</MaximumTorque>
-		</Joint>
-		
-		<Joint Name="" Id="" xsi:type="MouseJoint">
-			<BodyId1></BodyId1>
-			<BodyId2></BodyId2>
-			<CollisionAllowed>false</CollisionAllowed>
-			<Anchor x="0.0" y="0.0" />
-			<Target x="0.0" y="0.0" />
-			<Frequency>0.0</Frequency>
-			<DampingRatio>0.0</DampingRatio>
-			<MaximumForce>0.0</MaximumForce>
-		</Joint>
-		
-		<Joint Name="" Id="" xsi:type="PrismaticJoint">
-			<BodyId1></BodyId1>
-			<BodyId2></BodyId2>
-			<CollisionAllowed>false</CollisionAllowed>
-			<Anchor x="0.0" y="0.0" />
-			<Axis x="0.0" y="0.0" />
-			<LowerLimit>0.0</LowerLimit>
-			<UpperLimit>0.0</UpperLimit>
-			<LimitEnabled>false</LimitEnabled>
-			<MotorSpeed>0.0</MotorSpeed>
-			<MaximumMotorForce>0.0</MaximumMotorForce>
-			<MotorEnabled>false</MotorEnabled>
-			<ReferenceAngle>0.21</ReferenceAngle>
-		</Joint>
-		
-		<Joint Name="" Id="" xsi:type="PulleyJoint">
-			<BodyId1></BodyId1>
-			<BodyId2></BodyId2>
-			<CollisionAllowed>false</CollisionAllowed>
-			<PulleyAnchor1 x="0.0" y="0.0" />
-			<PulleyAnchor2 x="0.0" y="0.0" />
-			<BodyAnchor1 x="0.0" y="0.0" />
-			<BodyAnchor2 x="0.0" y="0.0" />
-			<Ratio>1.0</Ratio>
-		</Joint>
-		
-		<Joint Name="" Id="" xsi:type="RevoluteJoint">
-			<BodyId1></BodyId1>
-			<BodyId2></BodyId2>
-			<CollisionAllowed>false</CollisionAllowed>
-			<Anchor x="0.0" y="0.0" />
-			<LowerLimit>0.0</LowerLimit>
-			<UpperLimit>0.0</UpperLimit>
-			<LimitEnabled>false</LimitEnabled>
-			<MotorSpeed>0.0</MotorSpeed>
-			<MaximumMotorTorque>100.0</MaximumMotorTorque>
-			<MotorEnabled>false</MotorEnabled>
-			<ReferenceAngle>0.0</ReferenceAngle>
-		</Joint>
-		
-		<Joint Name="" Id="" xsi:type="RopeJoint">
-			<BodyId1></BodyId1>
-			<BodyId2></BodyId2>
-			<CollisionAllowed>false</CollisionAllowed>
-			<Anchor1 x="0.0" y="0.0" />
-			<Anchor2 x="0.0" y="0.0" />
-			<LowerLimit>0.0</LowerLimit>
-			<UpperLimit>0.0</UpperLimit>
-			<LowerLimitEnabled>false</LowerLimitEnabled>
-			<UpperLimitEnabled>false</UpperLimitEnabled>
-		</Joint>
-		
-		<Joint Name="" Id="" xsi:type="WeldJoint">
-			<BodyId1></BodyId1>
-			<BodyId2></BodyId2>
-			<CollisionAllowed>false</CollisionAllowed>
-			<Anchor x="0.0" y="0.0" />
-			<ReferenceAngle>0.0</ReferenceAngle>
-			<Frequency>0.0</Frequency>
-			<DampingRatio>0.0</DampingRatio>
-		</Joint>
-		
-		<Joint Name="" Id="" xsi:type="WheelJoint">
-			<BodyId1></BodyId1>
-			<BodyId2></BodyId2>
-			<CollisionAllowed>false</CollisionAllowed>
-			<Anchor x="0.0" y="0.0" />
-			<Axis x="0.0" y="0.0" />
-			<MotorSpeed>0.0</MotorSpeed>
-			<MaximumMotorTorque>0.0</MaximumMotorTorque>
-			<MotorEnabled>false</MotorEnabled>
-			<Frequency>0.0</Frequency>
-			<DampingRatio>0.0</DampingRatio>
-		</Joint>
-	</Joints>
-</World>
+<Simulation xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.dyn4j.org/Sandbox/sandbox.xsd">
+	<Name>Test</Name>
+    <Settings>
+    	<StepFrequency>60.0</StepFrequency>
+    	<MaximumTranslation>2.0</MaximumTranslation>
+    	<MaximumRotation>90.0</MaximumRotation>
+    	<ContinuousCollisionDetectionMode>ALL</ContinuousCollisionDetectionMode>
+    	<AutoSleep>true</AutoSleep>
+    	<SleepTime>0.5</SleepTime>
+    	<SleepLinearVelocity>0.01</SleepLinearVelocity>
+    	<SleepAngularVelocity>2.0</SleepAngularVelocity>
+    	<VelocitySolverIterations>10</VelocitySolverIterations>
+    	<PositionSolverIterations>10</PositionSolverIterations>
+    	<WarmStartDistance>0.01</WarmStartDistance>
+    	<RestitutionVelocity>1.0</RestitutionVelocity>
+    	<LinearTolerance>0.005</LinearTolerance>
+    	<AngularTolerance>2.0</AngularTolerance>
+    	<MaximumLinearCorrection>0.2</MaximumLinearCorrection>
+    	<MaximumAngularCorrection>8.0</MaximumAngularCorrection>
+    	<Baumgarte>0.2</Baumgarte>
+    </Settings>
+    <World>
+    	<BroadphaseDetector>DynamicAABBTree</BroadphaseDetector>
+    	<NarrowphaseDetector>Gjk</NarrowphaseDetector>
+    	<ManifoldSolver>ClippingManifoldSolver</ManifoldSolver>
+    	<TimeOfImpactDetector>ConservativeAdvancement</TimeOfImpactDetector>
+    	<Gravity x="0.0" y="0.0"/>
+	    <Bounds>
+	    	<Rectangle Id="">
+	    		<LocalCenter x="0.0" y="0.0" />
+	    		<Width>1.0</Width>
+	    		<Height>1.0</Height>
+	    		<LocalRotation>0.0</LocalRotation>
+	    	</Rectangle>
+	    	<Transform>
+	    		<Translation x="0.0" y="0.0" />
+	    		<Rotation>0.0</Rotation>
+	    	</Transform>
+	    </Bounds>
+		<Bodies>
+			<Body Id="" Name="">
+				<Fixtures>
+					<Fixture Name="" Id="">
+						<Shape Id="" xsi:type="Circle">
+							<LocalCenter x="0.0" y="0.0" />
+							<Radius>1.0</Radius>
+						</Shape>
+						<Filter xsi:type="DefaultFilter" />
+						<Sensor>false</Sensor>
+						<Density>1.0</Density>
+						<Friction>0.0</Friction>
+						<Restitution>0.0</Restitution>
+					</Fixture>
+				</Fixtures>
+				<Transform>
+					<Translation x="0.0" y="0.0" />
+					<Rotation>0.0</Rotation>
+				</Transform>
+				<Mass>
+					<LocalCenter x="0.0" y="0.0" />
+					<Type>NORMAL</Type>
+					<Mass>1.0</Mass>
+					<Inertia>1.0</Inertia>
+					<Explicit>false</Explicit>
+				</Mass>
+				<Velocity x="0.0" y="0.0" />
+				<AngularVelocity>0.0</AngularVelocity>
+				<AccumulatedForce x="0.0" y="0.0" />
+				<AccumulatedTorque>0.0</AccumulatedTorque>
+				<AutoSleep>false</AutoSleep>
+				<Asleep>false</Asleep>
+				<Active>true</Active>
+				<Bullet>false</Bullet>
+				<LinearDamping>0.0</LinearDamping>
+				<AngularDamping>0.0</AngularDamping>
+				<GravityScale>1.0</GravityScale>
+			</Body>
+			
+			<Body Name="" Id="">
+				<Fixtures>
+					<Fixture Name="" Id="">
+						<Shape Id="" xsi:type="Segment">
+							<LocalCenter x="0.0" y="0.0"/>
+							<Vertex x="0.0" y="0.0"/>
+							<Vertex x="0.0" y="0.0"/>
+						</Shape>
+						<Filter xsi:type="CategoryFilter">
+							<PartOfGroups>
+								<All Value="2147483648" />
+							</PartOfGroups>
+							<CollideWithGroups>
+								<Group1 Value="1" />
+							</CollideWithGroups>
+						</Filter>
+						<Sensor>false</Sensor>
+						<Density>1.0</Density>
+						<Friction>0.0</Friction>
+						<Restitution>0.0</Restitution>
+					</Fixture>
+				</Fixtures>
+				<Transform>
+					<Translation x="0.0" y="0.0" />
+					<Rotation>0.0</Rotation>
+				</Transform>
+				<Mass>
+					<LocalCenter x="0.0" y="0.0" />
+					<Type>NORMAL</Type>
+					<Mass>1.0</Mass>
+					<Inertia>1.0</Inertia>
+					<Explicit>false</Explicit>
+				</Mass>
+				<Velocity x="0.0" y="0.0" />
+				<AngularVelocity>0.0</AngularVelocity>
+				<AccumulatedForce x="0.0" y="0.0" />
+				<AccumulatedTorque>0.0</AccumulatedTorque>
+				<AutoSleep>false</AutoSleep>
+				<Asleep>false</Asleep>
+				<Active>true</Active>
+				<Bullet>false</Bullet>
+				<LinearDamping>0.0</LinearDamping>
+				<AngularDamping>0.0</AngularDamping>
+				<GravityScale>1.0</GravityScale>
+			</Body>
+		</Bodies>
+		<Joints>
+			<Joint Name="" Id="" xsi:type="AngleJoint">
+				<BodyId1></BodyId1>
+				<BodyId2></BodyId2>
+				<CollisionAllowed>false</CollisionAllowed>
+				<LowerLimit>-0.23</LowerLimit>
+				<UpperLimit>0.23</UpperLimit>
+				<LimitEnabled>false</LimitEnabled>
+				<ReferenceAngle>0.32</ReferenceAngle>
+			</Joint>
+			
+			<Joint Id="" Name="" xsi:type="DistanceJoint">
+				<BodyId1></BodyId1>
+				<BodyId2></BodyId2>
+				<CollisionAllowed>false</CollisionAllowed>
+				<Anchor1 x="0.0" y="0.0" />
+				<Anchor2 x="0.0" y="0.0" />
+				<Frequency>1.0</Frequency>
+				<DampingRatio>1.0</DampingRatio>
+				<Distance>1.0</Distance>
+			</Joint>
+			
+			<Joint Name="" Id="" xsi:type="FrictionJoint">
+				<BodyId1></BodyId1>
+				<BodyId2></BodyId2>
+				<CollisionAllowed>false</CollisionAllowed>
+				<Anchor x="0.0" y="0.0" />
+				<MaximumForce>100.0</MaximumForce>
+				<MaximumTorque>1000.0</MaximumTorque>
+			</Joint>
+			
+			<Joint Name="" Id="" xsi:type="MouseJoint">
+				<BodyId1></BodyId1>
+				<BodyId2></BodyId2>
+				<CollisionAllowed>false</CollisionAllowed>
+				<Anchor x="0.0" y="0.0" />
+				<Target x="0.0" y="0.0" />
+				<Frequency>0.0</Frequency>
+				<DampingRatio>0.0</DampingRatio>
+				<MaximumForce>0.0</MaximumForce>
+			</Joint>
+			
+			<Joint Name="" Id="" xsi:type="PrismaticJoint">
+				<BodyId1></BodyId1>
+				<BodyId2></BodyId2>
+				<CollisionAllowed>false</CollisionAllowed>
+				<Anchor x="0.0" y="0.0" />
+				<Axis x="0.0" y="0.0" />
+				<LowerLimit>0.0</LowerLimit>
+				<UpperLimit>0.0</UpperLimit>
+				<LimitEnabled>false</LimitEnabled>
+				<MotorSpeed>0.0</MotorSpeed>
+				<MaximumMotorForce>0.0</MaximumMotorForce>
+				<MotorEnabled>false</MotorEnabled>
+				<ReferenceAngle>0.21</ReferenceAngle>
+			</Joint>
+			
+			<Joint Name="" Id="" xsi:type="PulleyJoint">
+				<BodyId1></BodyId1>
+				<BodyId2></BodyId2>
+				<CollisionAllowed>false</CollisionAllowed>
+				<PulleyAnchor1 x="0.0" y="0.0" />
+				<PulleyAnchor2 x="0.0" y="0.0" />
+				<BodyAnchor1 x="0.0" y="0.0" />
+				<BodyAnchor2 x="0.0" y="0.0" />
+				<Ratio>1.0</Ratio>
+			</Joint>
+			
+			<Joint Name="" Id="" xsi:type="RevoluteJoint">
+				<BodyId1></BodyId1>
+				<BodyId2></BodyId2>
+				<CollisionAllowed>false</CollisionAllowed>
+				<Anchor x="0.0" y="0.0" />
+				<LowerLimit>0.0</LowerLimit>
+				<UpperLimit>0.0</UpperLimit>
+				<LimitEnabled>false</LimitEnabled>
+				<MotorSpeed>0.0</MotorSpeed>
+				<MaximumMotorTorque>100.0</MaximumMotorTorque>
+				<MotorEnabled>false</MotorEnabled>
+				<ReferenceAngle>0.0</ReferenceAngle>
+			</Joint>
+			
+			<Joint Name="" Id="" xsi:type="RopeJoint">
+				<BodyId1></BodyId1>
+				<BodyId2></BodyId2>
+				<CollisionAllowed>false</CollisionAllowed>
+				<Anchor1 x="0.0" y="0.0" />
+				<Anchor2 x="0.0" y="0.0" />
+				<LowerLimit>0.0</LowerLimit>
+				<UpperLimit>0.0</UpperLimit>
+				<LowerLimitEnabled>false</LowerLimitEnabled>
+				<UpperLimitEnabled>false</UpperLimitEnabled>
+			</Joint>
+			
+			<Joint Name="" Id="" xsi:type="WeldJoint">
+				<BodyId1></BodyId1>
+				<BodyId2></BodyId2>
+				<CollisionAllowed>false</CollisionAllowed>
+				<Anchor x="0.0" y="0.0" />
+				<ReferenceAngle>0.0</ReferenceAngle>
+				<Frequency>0.0</Frequency>
+				<DampingRatio>0.0</DampingRatio>
+			</Joint>
+			
+			<Joint Name="" Id="" xsi:type="WheelJoint">
+				<BodyId1></BodyId1>
+				<BodyId2></BodyId2>
+				<CollisionAllowed>false</CollisionAllowed>
+				<Anchor x="0.0" y="0.0" />
+				<Axis x="0.0" y="0.0" />
+				<MotorSpeed>0.0</MotorSpeed>
+				<MaximumMotorTorque>0.0</MaximumMotorTorque>
+				<MotorEnabled>false</MotorEnabled>
+				<Frequency>0.0</Frequency>
+				<DampingRatio>0.0</DampingRatio>
+			</Joint>
+		</Joints>
+	</World>
+</Simulation>

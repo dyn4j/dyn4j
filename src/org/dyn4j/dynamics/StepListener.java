@@ -27,7 +27,7 @@ package org.dyn4j.dynamics;
 /**
  * Listener notified before and after a simulation step by the {@link World}.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.1
  * @since 1.0.0
  */
 public interface StepListener {
@@ -37,6 +37,15 @@ public interface StepListener {
 	 * @param world the simulation {@link World}
 	 */
 	public void begin(Step step, World world);
+	
+	/**
+	 * Called after collision detection and contact updates have been performed due
+	 * to a call to the {@link World#setUpdateRequired(boolean)}.
+	 * @param step the step information
+	 * @param world the simulation {@link World}
+	 * @since 3.0.1
+	 */
+	public void updatePerformed(Step step, World world);
 	
 	/**
 	 * Called after a simulation step has been performed.

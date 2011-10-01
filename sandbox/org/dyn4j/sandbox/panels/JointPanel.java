@@ -1,7 +1,6 @@
 package org.dyn4j.sandbox.panels;
 
 import javax.swing.JCheckBox;
-import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -67,14 +66,4 @@ public abstract class JointPanel extends JPanel implements InputPanel {
 	 * @return String
 	 */
 	public abstract String getDescription();
-
-	/**
-	 * Returns the double value of the number stored in the given text field.
-	 * @param field the text field
-	 * @return double the double value
-	 */
-	protected double getDoubleValue(JFormattedTextField field) {
-		Number number = (Number)field.getValue();
-		return number.doubleValue();
-	}
 }
