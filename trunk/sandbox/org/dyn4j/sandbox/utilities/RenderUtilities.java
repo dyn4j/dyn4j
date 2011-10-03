@@ -29,6 +29,7 @@ import org.dyn4j.geometry.Shape;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.geometry.Wound;
+import org.dyn4j.sandbox.Camera;
 import org.dyn4j.sandbox.SandboxBody;
 
 import com.jogamp.opengl.util.gl2.GLUT;
@@ -784,11 +785,9 @@ public final class RenderUtilities {
 	 * @param body the body to outline
 	 * @param w the line width
 	 * @param color the line color
-	 * @param state the rendering state
+	 * @param scale the pixel to meter scale factor
 	 */
-	public static final void outlineShapes(GL2 gl, SandboxBody body, float w, float[] color, RenderState state) {
-		// get the scale
-		double scale = state.scale;
+	public static final void outlineShapes(GL2 gl, SandboxBody body, float w, float[] color, double scale) {
 		// set the line width
 		float lw = RenderUtilities.setLineWidth(gl, w);
 		// set the color
@@ -831,17 +830,17 @@ public final class RenderUtilities {
 	 * Draws the given joint.
 	 * @param gl the OpenGL context
 	 * @param joint the joint
-	 * @param state the rendering state
+	 * @param invdt the inverse delta time from the last world simulation step
 	 */
-	public static final void drawJoint(GL2 gl, Joint joint, RenderState state) {
+	public static final void drawJoint(GL2 gl, Joint joint, double invdt) {
 		if (joint instanceof AngleJoint) {
 			// no rendering available
 		} else if (joint instanceof DistanceJoint) {
-			RenderUtilities.drawDistanceJoint(gl, (DistanceJoint)joint, state);
+			RenderUtilities.drawDistanceJoint(gl, (DistanceJoint)joint);
 		} else if (joint instanceof FrictionJoint) {
 			// no rendering available
 		} else if (joint instanceof MouseJoint) {
-			RenderUtilities.drawMouseJoint(gl, (MouseJoint)joint, state);
+			RenderUtilities.drawMouseJoint(gl, (MouseJoint)joint, invdt);
 		} else if (joint instanceof PrismaticJoint) {
 			RenderUtilities.drawPrismaticJoint(gl, (PrismaticJoint)joint);
 		} else if (joint instanceof PulleyJoint) {
@@ -863,9 +862,8 @@ public final class RenderUtilities {
 	 * Draws the given distance joint.
 	 * @param gl the OpenGL context
 	 * @param joint the joint
-	 * @param state the rendering state
 	 */
-	public static final void drawDistanceJoint(GL2 gl, DistanceJoint joint, RenderState state) {
+	public static final void drawDistanceJoint(GL2 gl, DistanceJoint joint) {
 		// draw line from anchor point to anchor point
 		// get the anchor points
 		Vector2 v1 = joint.getAnchor1();
@@ -958,9 +956,9 @@ public final class RenderUtilities {
 	 * Renders a MouseJoint to the given graphics object.
 	 * @param gl the OpenGL graphics context
 	 * @param joint the joint
-	 * @param state the rendering state
+	 * @param invdt the inverse of the delta time of the last world step
 	 */
-	public static final void drawMouseJoint(GL2 gl, MouseJoint joint, RenderState state) {
+	public static final void drawMouseJoint(GL2 gl, MouseJoint joint, double invdt) {
 		// set the color
 		gl.glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
 		// draw the anchor point
@@ -972,7 +970,6 @@ public final class RenderUtilities {
 		// draw a line connecting them
 		// make the line color a function of stress (black to red)
 		// get the inverse delta time
-		double invdt = state.invDt;
 		double maxForce = joint.getMaximumForce();
 		double force = joint.getReactionForce(invdt).getMagnitude();
 		double red = force / maxForce;
@@ -1123,11 +1120,9 @@ public final class RenderUtilities {
 	 * @param lw the line width to use; even values may render poorly
 	 * @param w the width of the scale
 	 * @param h the height of the scale
-	 * @param state the rendering state
+	 * @param scale the pixel to meter scale factor
 	 */
-	public static final void drawPixelScale(GL2 gl, GLUT glut, int x, int y, int lw, int w, int h, RenderState state) {
-		// get the scale, height and width
-		double scale = state.scale;
+	public static final void drawPixelScale(GL2 gl, GLUT glut, int x, int y, int lw, int w, int h, double scale) {
 		// set the line width
 		float olw = RenderUtilities.setLineWidth(gl, lw);
 		
@@ -1186,17 +1181,17 @@ public final class RenderUtilities {
 	 * @param gl the OpenGL context
 	 * @param glut the helper to render text
 	 * @param body the body
-	 * @param state the rendering state
+	 * @param camera the camera
 	 * @param padding the padding for the label background
 	 * @param bodyLabel true if the body label should be drawn
 	 * @param fixtureLabels true if fixture labels should be drawn
 	 */
-	public static final void drawLabels(GL2 gl, GLUT glut, SandboxBody body, RenderState state, int padding, boolean bodyLabel, boolean fixtureLabels) {
+	public static final void drawLabels(GL2 gl, GLUT glut, SandboxBody body, Camera camera, int padding, boolean bodyLabel, boolean fixtureLabels) {
 		// get the scale
-		double scale = state.scale;
+		double scale = camera.getScale();
 		// get the center point
 		Vector2 c = body.getWorldCenter();
-		Vector2 o = state.offset;
+		Vector2 o = camera.getTranslation();
 		
 		gl.glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
 		

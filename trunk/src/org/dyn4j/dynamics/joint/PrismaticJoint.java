@@ -824,16 +824,16 @@ public class PrismaticJoint extends Joint {
 	public void setLimits(double lowerLimit, double upperLimit) {
 		if (lowerLimit > upperLimit) throw new IllegalArgumentException("The lower limit cannot be greater than the upper limit.");
 		// make sure the limits are enabled and that the limit has changed
-		if (this.limitEnabled && upperLimit != this.upperLimit && lowerLimit != this.lowerLimit) {
+		if (this.limitEnabled) {
 			// wake up the bodies
 			this.body1.setAsleep(false);
 			this.body2.setAsleep(false);
-			// set the values
-			this.lowerLimit = lowerLimit;
-			this.upperLimit = upperLimit;
 			// reset the limit impulse
 			this.impulse.z = 0.0;
 		}
+		// set the values
+		this.lowerLimit = lowerLimit;
+		this.upperLimit = upperLimit;
 	}
 	
 	/**

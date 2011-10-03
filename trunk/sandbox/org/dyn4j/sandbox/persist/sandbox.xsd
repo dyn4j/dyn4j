@@ -3,17 +3,17 @@
 	<xs:complexType name="Transform">
 		<xs:sequence>
 			<xs:element name="Translation" type="Vector" maxOccurs="1" minOccurs="1" />
-			<xs:element name="Rotation" type="xs:decimal" nillable="false" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Rotation" type="xs:double" nillable="false" maxOccurs="1" minOccurs="1" />
 		</xs:sequence>
 	</xs:complexType>
 	
 	<xs:complexType name="Vector">
-		<xs:attribute name="x" type="xs:decimal" use="required" />
-		<xs:attribute name="y" type="xs:decimal" use="required" />
+		<xs:attribute name="x" type="xs:double" use="required" />
+		<xs:attribute name="y" type="xs:double" use="required" />
 	</xs:complexType>
 
 	<xs:simpleType name="ColorComponent">
-		<xs:restriction base="xs:decimal">
+		<xs:restriction base="xs:double">
 			<xs:minInclusive value="0.0"></xs:minInclusive>
 			<xs:maxInclusive value="1.0"></xs:maxInclusive>
 		</xs:restriction>
@@ -38,7 +38,7 @@
 				<xs:sequence>
 					<xs:element name="Radius" maxOccurs="1" minOccurs="1">
 						<xs:simpleType>
-							<xs:restriction base="xs:decimal">
+							<xs:restriction base="xs:double">
 								<xs:minExclusive value="0.0" />
 							</xs:restriction>
 						</xs:simpleType>
@@ -54,19 +54,19 @@
 				<xs:sequence>
 					<xs:element name="Width" maxOccurs="1" minOccurs="1">
 						<xs:simpleType>
-							<xs:restriction base="xs:decimal">
+							<xs:restriction base="xs:double">
 								<xs:minExclusive value="0.0" />
 							</xs:restriction>
 						</xs:simpleType>
 					</xs:element>
 					<xs:element name="Height" maxOccurs="1" minOccurs="1">
 						<xs:simpleType>
-							<xs:restriction base="xs:decimal">
+							<xs:restriction base="xs:double">
 								<xs:minExclusive value="0.0" />
 							</xs:restriction>
 						</xs:simpleType>
 					</xs:element>
-					<xs:element name="LocalRotation" type="xs:decimal" maxOccurs="1" minOccurs="1" />
+					<xs:element name="LocalRotation" type="xs:double" maxOccurs="1" minOccurs="1" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -111,7 +111,7 @@
 	</xs:complexType>
 	
 	<xs:complexType name="All">
-		<xs:attribute name="Value" type="xs:integer" fixed="2147483648" use="required" />
+		<xs:attribute name="Value" type="xs:integer" fixed="2147483647" use="required" />
 	</xs:complexType>
 	
 	<xs:complexType name="Group1">
@@ -293,21 +293,21 @@
 			<xs:element name="Sensor" type="xs:boolean" maxOccurs="1" minOccurs="1" />
 			<xs:element name="Density" maxOccurs="1" minOccurs="1">
 				<xs:simpleType>
-					<xs:restriction base="xs:decimal">
+					<xs:restriction base="xs:double">
 						<xs:minInclusive value="0.0" />
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:element>
 			<xs:element name="Friction" maxOccurs="1" minOccurs="1">
 				<xs:simpleType>
-					<xs:restriction base="xs:decimal">
+					<xs:restriction base="xs:double">
 						<xs:minInclusive value="0.0" />
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:element>
 			<xs:element name="Restitution" maxOccurs="1" minOccurs="1">
 				<xs:simpleType>
-					<xs:restriction base="xs:decimal">
+					<xs:restriction base="xs:double">
 						<xs:minInclusive value="0.0" />
 					</xs:restriction>
 				</xs:simpleType>
@@ -332,14 +332,14 @@
 			</xs:element>
 			<xs:element name="Mass" maxOccurs="1" minOccurs="1">
 				<xs:simpleType>
-					<xs:restriction base="xs:decimal">
+					<xs:restriction base="xs:double">
 						<xs:minInclusive value="0.0" />
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:element>
 			<xs:element name="Inertia" maxOccurs="1" minOccurs="1">
 				<xs:simpleType>
-					<xs:restriction base="xs:decimal">
+					<xs:restriction base="xs:double">
 						<xs:minInclusive value="0.0" />
 					</xs:restriction>
 				</xs:simpleType>
@@ -362,16 +362,16 @@
 			<xs:element name="Transform" type="Transform" maxOccurs="1" minOccurs="1" />
 			<xs:element name="Mass" type="Mass" maxOccurs="1" minOccurs="1" />
 			<xs:element name="Velocity" type="Vector" maxOccurs="1" minOccurs="1" />
-			<xs:element name="AngularVelocity" type="xs:decimal" maxOccurs="1" minOccurs="1" />
+			<xs:element name="AngularVelocity" type="xs:double" maxOccurs="1" minOccurs="1" />
 			<xs:element name="AccumulatedForce" type="Vector" maxOccurs="1" minOccurs="1" />
-			<xs:element name="AccumulatedTorque" type="xs:decimal" maxOccurs="1" minOccurs="1" />
+			<xs:element name="AccumulatedTorque" type="xs:double" maxOccurs="1" minOccurs="1" />
 			<xs:element name="AutoSleep" type="xs:boolean" minOccurs="1" maxOccurs="1" />
 			<xs:element name="Asleep" type="xs:boolean" minOccurs="1" maxOccurs="1" />
 			<xs:element name="Active" type="xs:boolean" minOccurs="1" maxOccurs="1" />
 			<xs:element name="Bullet" type="xs:boolean" minOccurs="1" maxOccurs="1" />
 			<xs:element name="LinearDamping" maxOccurs="1" minOccurs="1">
 				<xs:simpleType>
-					<xs:restriction base="xs:decimal">
+					<xs:restriction base="xs:double">
 						<xs:minInclusive value="0.0" />
 						<xs:maxInclusive value="1.0" />
 					</xs:restriction>
@@ -379,7 +379,7 @@
 			</xs:element>
 			<xs:element name="AngularDamping" maxOccurs="1" minOccurs="1">
 				<xs:simpleType>
-					<xs:restriction base="xs:decimal">
+					<xs:restriction base="xs:double">
 						<xs:minInclusive value="0.0" />
 						<xs:maxInclusive value="1.0" />
 					</xs:restriction>
@@ -387,7 +387,7 @@
 			</xs:element>
 			<xs:element name="GravityScale" maxOccurs="1" minOccurs="1">
 				<xs:simpleType>
-					<xs:restriction base="xs:decimal">
+					<xs:restriction base="xs:double">
 						<xs:minInclusive value="0.0" />
 						<xs:maxInclusive value="1.0" />
 					</xs:restriction>
@@ -418,10 +418,10 @@
 		<xs:complexContent>
 			<xs:extension base="Joint">
 				<xs:sequence>
-					<xs:element name="LowerLimit" type="xs:decimal" maxOccurs="1" minOccurs="1" />
-					<xs:element name="UpperLimit" type="xs:decimal" maxOccurs="1" minOccurs="1" />
+					<xs:element name="LowerLimit" type="xs:double" maxOccurs="1" minOccurs="1" />
+					<xs:element name="UpperLimit" type="xs:double" maxOccurs="1" minOccurs="1" />
 					<xs:element name="LimitEnabled" type="xs:boolean" maxOccurs="1" minOccurs="1" />
-					<xs:element name="ReferenceAngle" type="xs:decimal" maxOccurs="1" minOccurs="1" />
+					<xs:element name="ReferenceAngle" type="xs:double" maxOccurs="1" minOccurs="1" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -435,14 +435,14 @@
 					<xs:element name="Anchor2" type="Vector" maxOccurs="1" minOccurs="1" />
 					<xs:element name="Frequency" maxOccurs="1" minOccurs="1">
 						<xs:simpleType>
-							<xs:restriction base="xs:decimal">
+							<xs:restriction base="xs:double">
 								<xs:minInclusive value="0.0" />
 							</xs:restriction>
 						</xs:simpleType>
 					</xs:element>
 					<xs:element name="DampingRatio" maxOccurs="1" minOccurs="1">
 						<xs:simpleType>
-							<xs:restriction base="xs:decimal">
+							<xs:restriction base="xs:double">
 								<xs:minInclusive value="0.0" />
 								<xs:maxInclusive value="1.0" />
 							</xs:restriction>
@@ -450,7 +450,7 @@
 					</xs:element>
 					<xs:element name="Distance" maxOccurs="1" minOccurs="1">
 						<xs:simpleType>
-							<xs:restriction base="xs:decimal">
+							<xs:restriction base="xs:double">
 								<xs:minInclusive value="0.0" />
 							</xs:restriction>
 						</xs:simpleType>
@@ -467,14 +467,14 @@
 					<xs:element name="Anchor" type="Vector" maxOccurs="1" minOccurs="1" />
 					<xs:element name="MaximumForce" maxOccurs="1" minOccurs="1">
 						<xs:simpleType>
-							<xs:restriction base="xs:decimal">
+							<xs:restriction base="xs:double">
 								<xs:minInclusive value="0.0" />
 							</xs:restriction>
 						</xs:simpleType>
 					</xs:element>
 					<xs:element name="MaximumTorque" maxOccurs="1" minOccurs="1">
 						<xs:simpleType>
-							<xs:restriction base="xs:decimal">
+							<xs:restriction base="xs:double">
 								<xs:minInclusive value="0.0" />
 							</xs:restriction>
 						</xs:simpleType>
@@ -492,14 +492,14 @@
 					<xs:element name="Target" type="Vector" maxOccurs="1" minOccurs="1" />
 					<xs:element name="Frequency" maxOccurs="1" minOccurs="1">
 						<xs:simpleType>
-							<xs:restriction base="xs:decimal">
+							<xs:restriction base="xs:double">
 								<xs:minInclusive value="0.0" />
 							</xs:restriction>
 						</xs:simpleType>
 					</xs:element>
 					<xs:element name="DampingRatio" maxOccurs="1" minOccurs="1">
 						<xs:simpleType>
-							<xs:restriction base="xs:decimal">
+							<xs:restriction base="xs:double">
 								<xs:minInclusive value="0.0" />
 								<xs:maxInclusive value="1.0" />
 							</xs:restriction>
@@ -507,7 +507,7 @@
 					</xs:element>
 					<xs:element name="MaximumForce" maxOccurs="1" minOccurs="1">
 						<xs:simpleType>
-							<xs:restriction base="xs:decimal">
+							<xs:restriction base="xs:double">
 								<xs:minInclusive value="0.0" />
 							</xs:restriction>
 						</xs:simpleType>
@@ -523,19 +523,19 @@
 				<xs:sequence>
 					<xs:element name="Anchor" type="Vector" maxOccurs="1" minOccurs="1" />
 					<xs:element name="Axis" type="Vector" maxOccurs="1" minOccurs="1" />
-					<xs:element name="LowerLimit" type="xs:decimal" maxOccurs="1" minOccurs="1" />
-					<xs:element name="UpperLimit" type="xs:decimal" maxOccurs="1" minOccurs="1" />
+					<xs:element name="LowerLimit" type="xs:double" maxOccurs="1" minOccurs="1" />
+					<xs:element name="UpperLimit" type="xs:double" maxOccurs="1" minOccurs="1" />
 					<xs:element name="LimitEnabled" type="xs:boolean" maxOccurs="1" minOccurs="1" />
-					<xs:element name="MotorSpeed" type="xs:decimal" maxOccurs="1" minOccurs="1" />
+					<xs:element name="MotorSpeed" type="xs:double" maxOccurs="1" minOccurs="1" />
 					<xs:element name="MaximumMotorForce" maxOccurs="1" minOccurs="1">
 						<xs:simpleType>
-							<xs:restriction base="xs:decimal">
+							<xs:restriction base="xs:double">
 								<xs:minInclusive value="0.0" />
 							</xs:restriction>
 						</xs:simpleType>
 					</xs:element>
 					<xs:element name="MotorEnabled" type="xs:boolean" maxOccurs="1" minOccurs="1" />
-					<xs:element name="ReferenceAngle" type="xs:decimal" maxOccurs="1" minOccurs="1" />
+					<xs:element name="ReferenceAngle" type="xs:double" maxOccurs="1" minOccurs="1" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -551,7 +551,7 @@
 					<xs:element name="BodyAnchor2" type="Vector" maxOccurs="1" minOccurs="1" />
 					<xs:element name="Ratio" maxOccurs="1" minOccurs="1">
 						<xs:simpleType>
-							<xs:restriction base="xs:decimal">
+							<xs:restriction base="xs:double">
 								<xs:minInclusive value="0.0" />
 							</xs:restriction>
 						</xs:simpleType>
@@ -566,19 +566,19 @@
 			<xs:extension base="Joint">
 				<xs:sequence>
 					<xs:element name="Anchor" type="Vector" maxOccurs="1" minOccurs="1" />
-					<xs:element name="LowerLimit" type="xs:decimal" maxOccurs="1" minOccurs="1" />
-					<xs:element name="UpperLimit" type="xs:decimal" maxOccurs="1" minOccurs="1" />
+					<xs:element name="LowerLimit" type="xs:double" maxOccurs="1" minOccurs="1" />
+					<xs:element name="UpperLimit" type="xs:double" maxOccurs="1" minOccurs="1" />
 					<xs:element name="LimitEnabled" type="xs:boolean" maxOccurs="1" minOccurs="1" />
-					<xs:element name="MotorSpeed" type="xs:decimal" maxOccurs="1" minOccurs="1" />
+					<xs:element name="MotorSpeed" type="xs:double" maxOccurs="1" minOccurs="1" />
 					<xs:element name="MaximumMotorTorque" maxOccurs="1" minOccurs="1">
 						<xs:simpleType>
-							<xs:restriction base="xs:decimal">
+							<xs:restriction base="xs:double">
 								<xs:minInclusive value="0.0" />
 							</xs:restriction>
 						</xs:simpleType>
 					</xs:element>
 					<xs:element name="MotorEnabled" type="xs:boolean" maxOccurs="1" minOccurs="1" />
-					<xs:element name="ReferenceAngle" type="xs:decimal" maxOccurs="1" minOccurs="1" />
+					<xs:element name="ReferenceAngle" type="xs:double" maxOccurs="1" minOccurs="1" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -592,14 +592,14 @@
 					<xs:element name="Anchor2" type="Vector" maxOccurs="1" minOccurs="1" />
 					<xs:element name="LowerLimit" maxOccurs="1" minOccurs="1">
 						<xs:simpleType>
-							<xs:restriction base="xs:decimal">
+							<xs:restriction base="xs:double">
 								<xs:minInclusive value="0.0" />
 							</xs:restriction>
 						</xs:simpleType>
 					</xs:element>
 					<xs:element name="UpperLimit" maxOccurs="1" minOccurs="1">
 						<xs:simpleType>
-							<xs:restriction base="xs:decimal">
+							<xs:restriction base="xs:double">
 								<xs:minInclusive value="0.0" />
 							</xs:restriction>
 						</xs:simpleType>
@@ -616,17 +616,17 @@
 			<xs:extension base="Joint">
 				<xs:sequence>
 					<xs:element name="Anchor" type="Vector" maxOccurs="1" minOccurs="1" />
-					<xs:element name="ReferenceAngle" type="xs:decimal" maxOccurs="1" minOccurs="1" />
+					<xs:element name="ReferenceAngle" type="xs:double" maxOccurs="1" minOccurs="1" />
 					<xs:element name="Frequency" maxOccurs="1" minOccurs="1">
 						<xs:simpleType>
-							<xs:restriction base="xs:decimal">
+							<xs:restriction base="xs:double">
 								<xs:minInclusive value="0.0" />
 							</xs:restriction>
 						</xs:simpleType>
 					</xs:element>
 					<xs:element name="DampingRatio" maxOccurs="1" minOccurs="1">
 						<xs:simpleType>
-							<xs:restriction base="xs:decimal">
+							<xs:restriction base="xs:double">
 								<xs:minInclusive value="0.0" />
 								<xs:maxInclusive value="1.0" />
 							</xs:restriction>
@@ -643,10 +643,10 @@
 				<xs:sequence>
 					<xs:element name="Anchor" type="Vector" maxOccurs="1" minOccurs="1" />
 					<xs:element name="Axis" type="Vector" maxOccurs="1" minOccurs="1" />
-					<xs:element name="MotorSpeed" type="xs:decimal" maxOccurs="1" minOccurs="1" />
+					<xs:element name="MotorSpeed" type="xs:double" maxOccurs="1" minOccurs="1" />
 					<xs:element name="MaximumMotorTorque" maxOccurs="1" minOccurs="1">
 						<xs:simpleType>
-							<xs:restriction base="xs:decimal">
+							<xs:restriction base="xs:double">
 								<xs:minInclusive value="0.0" />
 							</xs:restriction>
 						</xs:simpleType>
@@ -654,14 +654,14 @@
 					<xs:element name="MotorEnabled" type="xs:boolean" maxOccurs="1" minOccurs="1" />
 					<xs:element name="Frequency" maxOccurs="1" minOccurs="1">
 						<xs:simpleType>
-							<xs:restriction base="xs:decimal">
+							<xs:restriction base="xs:double">
 								<xs:minInclusive value="0.0" />
 							</xs:restriction>
 						</xs:simpleType>
 					</xs:element>
 					<xs:element name="DampingRatio" maxOccurs="1" minOccurs="1">
 						<xs:simpleType>
-							<xs:restriction base="xs:decimal">
+							<xs:restriction base="xs:double">
 								<xs:minInclusive value="0.0" />
 								<xs:maxInclusive value="1.0" />
 							</xs:restriction>
@@ -732,21 +732,21 @@
 		<xs:sequence>
 			<xs:element name="StepFrequency" maxOccurs="1" minOccurs="1">
 				<xs:simpleType>
-					<xs:restriction base="xs:decimal">
+					<xs:restriction base="xs:double">
 						<xs:minInclusive value="30.0" />
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:element>
 			<xs:element name="MaximumTranslation" maxOccurs="1" minOccurs="1">
 				<xs:simpleType>
-					<xs:restriction base="xs:decimal">
+					<xs:restriction base="xs:double">
 						<xs:minInclusive value="0.0" />
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:element>
 			<xs:element name="MaximumRotation" maxOccurs="1" minOccurs="1">
 				<xs:simpleType>
-					<xs:restriction base="xs:decimal">
+					<xs:restriction base="xs:double">
 						<xs:minInclusive value="0.0" />
 					</xs:restriction>
 				</xs:simpleType>
@@ -763,17 +763,17 @@
 			
 			<!-- Sleep -->
 			<xs:element name="AutoSleep" type="xs:boolean" maxOccurs="1" minOccurs="1" />
-			<xs:element name="SleepTime" type="xs:decimal" maxOccurs="1" minOccurs="1" />
+			<xs:element name="SleepTime" type="xs:double" maxOccurs="1" minOccurs="1" />
 			<xs:element name="SleepLinearVelocity" maxOccurs="1" minOccurs="1">
 				<xs:simpleType>
-					<xs:restriction base="xs:decimal">
+					<xs:restriction base="xs:double">
 						<xs:minInclusive value="0.0" />
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:element>
 			<xs:element name="SleepAngularVelocity" maxOccurs="1" minOccurs="1">
 				<xs:simpleType>
-					<xs:restriction base="xs:decimal">
+					<xs:restriction base="xs:double">
 						<xs:minInclusive value="0.0" />
 					</xs:restriction>
 				</xs:simpleType>
@@ -796,49 +796,49 @@
 			</xs:element>
 			<xs:element name="WarmStartDistance" maxOccurs="1" minOccurs="1">
 				<xs:simpleType>
-					<xs:restriction base="xs:decimal">
+					<xs:restriction base="xs:double">
 						<xs:minInclusive value="0.0" />
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:element>
 			<xs:element name="RestitutionVelocity" maxOccurs="1" minOccurs="1">
 				<xs:simpleType>
-					<xs:restriction base="xs:decimal">
+					<xs:restriction base="xs:double">
 						<xs:minInclusive value="0.0" />
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:element>
 			<xs:element name="LinearTolerance" maxOccurs="1" minOccurs="1">
 				<xs:simpleType>
-					<xs:restriction base="xs:decimal">
+					<xs:restriction base="xs:double">
 						<xs:minInclusive value="0.0" />
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:element>
 			<xs:element name="AngularTolerance" maxOccurs="1" minOccurs="1">
 				<xs:simpleType>
-					<xs:restriction base="xs:decimal">
+					<xs:restriction base="xs:double">
 						<xs:minInclusive value="0.0" />
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:element>
 			<xs:element name="MaximumLinearCorrection" maxOccurs="1" minOccurs="1">
 				<xs:simpleType>
-					<xs:restriction base="xs:decimal">
+					<xs:restriction base="xs:double">
 						<xs:minInclusive value="0.0" />
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:element>
 			<xs:element name="MaximumAngularCorrection" maxOccurs="1" minOccurs="1">
 				<xs:simpleType>
-					<xs:restriction base="xs:decimal">
+					<xs:restriction base="xs:double">
 						<xs:minInclusive value="0.0" />
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:element>
 			<xs:element name="Baumgarte" maxOccurs="1" minOccurs="1">
 				<xs:simpleType>
-					<xs:restriction base="xs:decimal">
+					<xs:restriction base="xs:double">
 						<xs:minInclusive value="0.0" />
 					</xs:restriction>
 				</xs:simpleType>
@@ -856,9 +856,17 @@
 		</xs:sequence>
 	</xs:complexType>
 	
+	<xs:complexType name="Camera">
+		<xs:sequence>
+			<xs:element name="Scale" type="xs:double" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Translation" type="Vector" maxOccurs="1" minOccurs="1" />
+		</xs:sequence>
+	</xs:complexType>
+	
 	<xs:complexType name="Simulation">
 		<xs:sequence>
 			<xs:element name="Name" type="xs:string" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Camera" type="Camera" maxOccurs="1" minOccurs="1" />
 			<xs:element name="System" type="System" maxOccurs="1" minOccurs="0" />
 			<xs:element name="Settings" type="Settings" maxOccurs="1" minOccurs="1" />
 			<xs:element name="World" type="World" maxOccurs="1" minOccurs="1" />

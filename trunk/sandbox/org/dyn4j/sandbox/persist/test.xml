@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Simulation xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.dyn4j.org/Sandbox/sandbox.xsd">
 	<Name>Test</Name>
+	<Camera>
+		<Scale>32</Scale>
+		<Translation x="0.0" y="0.0" />
+	</Camera>
     <Settings>
     	<StepFrequency>60.0</StepFrequency>
     	<MaximumTranslation>2.0</MaximumTranslation>
@@ -87,7 +91,7 @@
 						</Shape>
 						<Filter xsi:type="CategoryFilter">
 							<PartOfGroups>
-								<All Value="2147483648" />
+								<All Value="2147483647" />
 							</PartOfGroups>
 							<CollideWithGroups>
 								<Group1 Value="1" />

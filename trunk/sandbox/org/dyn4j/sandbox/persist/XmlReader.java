@@ -3,6 +3,7 @@ package org.dyn4j.sandbox.persist;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,6 +50,7 @@ import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.sandbox.Camera;
 import org.dyn4j.sandbox.SandboxBody;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -79,11 +81,6 @@ public class XmlReader extends DefaultHandler {
 	
 	/** Flag for the Settings tag */
 	private boolean settingsFlag;
-	
-	// transform
-	
-	/** Flag for the Transform tag */
-	private boolean transformFlag;
 	
 	// filter
 	
@@ -131,6 +128,9 @@ public class XmlReader extends DefaultHandler {
 	private Map<String, SandboxBody> idMap;
 	
 	// Tag Data; for temporary storage
+	
+	/** The camera */
+	private Camera camera;
 	
 	// world
 	
@@ -299,7 +299,9 @@ public class XmlReader extends DefaultHandler {
 	
 	/**
 	 * Hidden constructor.
-	 * @see #fromXml(File, World)
+	 * @see #fromXml(File, World, Camera)
+	 * @see #fromXml(InputStream, World, Camera)
+	 * @see #fromXml(String, World, Camera)
 	 */
 	private XmlReader() {
 		this.bodies = new ArrayList<SandboxBody>();
@@ -314,12 +316,13 @@ public class XmlReader extends DefaultHandler {
 	 * The world object is cleared before loading.
 	 * @param file the file to read from
 	 * @param world the world object to modify
+	 * @param camera the simulation camera
 	 * @throws ParserConfigurationException thrown if a SAX configuration error occurs
 	 * @throws SAXException thrown if a parsing error occurs
 	 * @throws IOException thrown if an IO error occurs
 	 */
-	public static void fromXml(File file, World world) throws ParserConfigurationException, SAXException, IOException {
-		XmlReader.fromXml(new InputSource(new FileReader(file)), world);
+	public static void fromXml(File file, World world, Camera camera) throws ParserConfigurationException, SAXException, IOException {
+		XmlReader.fromXml(new InputSource(new FileReader(file)), world, camera);
 	}
 	
 	/**
@@ -328,12 +331,28 @@ public class XmlReader extends DefaultHandler {
 	 * The world object is cleared before loading.
 	 * @param xml the string containing the XML to read from
 	 * @param world the world object to modify
+	 * @param camera the simulation camera
 	 * @throws ParserConfigurationException thrown if a SAX configuration error occurs
 	 * @throws SAXException thrown if a parsing error occurs
 	 * @throws IOException thrown if an IO error occurs
 	 */
-	public static void fromXml(String xml, World world) throws ParserConfigurationException, SAXException, IOException {
-		XmlReader.fromXml(new InputSource(new StringReader(xml)), world);
+	public static void fromXml(String xml, World world, Camera camera) throws ParserConfigurationException, SAXException, IOException {
+		XmlReader.fromXml(new InputSource(new StringReader(xml)), world, camera);
+	}
+	
+	/**
+	 * Parses the given input source and loads the bounds, bodies, and joints into the given world object.
+	 * <p>
+	 * The world object is cleared before loading.
+	 * @param stream the input stream containing the xml
+	 * @param world the world object to modify
+	 * @param camera the simulation camera
+	 * @throws ParserConfigurationException thrown if a SAX configuration error occurs
+	 * @throws SAXException thrown if a parsing error occurs
+	 * @throws IOException thrown if an IO error occurs
+	 */
+	public static void fromXml(InputStream stream, World world, Camera camera) throws ParserConfigurationException, SAXException, IOException {
+		XmlReader.fromXml(new InputSource(stream), world, camera);
 	}
 	
 	/**
@@ -342,11 +361,12 @@ public class XmlReader extends DefaultHandler {
 	 * The world object is cleared before loading.
 	 * @param source the source containing the XML
 	 * @param world the world object to modify
+	 * @param camera the simulation camera
 	 * @throws ParserConfigurationException thrown if a SAX configuration error occurs
 	 * @throws SAXException thrown if a parsing error occurs
 	 * @throws IOException thrown if an IO error occurs
 	 */
-	private static void fromXml(InputSource source, World world) throws ParserConfigurationException, SAXException, IOException {
+	private static void fromXml(InputSource source, World world, Camera camera) throws ParserConfigurationException, SAXException, IOException {
 		SAXParserFactory factory = SAXParserFactory.newInstance();
 		SAXParser parser = factory.newSAXParser();
 		
@@ -374,7 +394,13 @@ public class XmlReader extends DefaultHandler {
 		}
 		for (Joint joint : reader.joints) {
 			world.add(joint);
-		}	
+		}
+		
+		// set the camera
+		if (reader.camera != null) {
+			camera.setScale(reader.camera.getScale());
+			camera.setTranslation(reader.camera.getTranslation());
+		}
 	}
 
 	/* (non-Javadoc)
@@ -388,6 +414,8 @@ public class XmlReader extends DefaultHandler {
 		// look for tags that have attributes
 		if ("System".equalsIgnoreCase(qName)) {
 			this.systemFlag = true;
+		} else if ("Camera".equalsIgnoreCase(qName)) {
+			this.camera = new Camera(32, new Vector2());
 		} else if ("Gravity".equalsIgnoreCase(qName)) {
 			double x = Double.parseDouble(attributes.getValue("x"));
 			double y = Double.parseDouble(attributes.getValue("y"));
@@ -398,9 +426,7 @@ public class XmlReader extends DefaultHandler {
 			double x = Double.parseDouble(attributes.getValue("x"));
 			double y = Double.parseDouble(attributes.getValue("y"));
 			this.localCenter = new Vector2(x, y);
-		} else if ("Transform".equalsIgnoreCase(qName)) {
-			this.transformFlag = true;
-		} else if ("Translation".equalsIgnoreCase(qName) && this.transformFlag) {
+		} else if ("Translation".equalsIgnoreCase(qName)) {
 			double x = Double.parseDouble(attributes.getValue("x"));
 			double y = Double.parseDouble(attributes.getValue("y"));
 			this.translation = new Vector2(x, y);
@@ -517,6 +543,8 @@ public class XmlReader extends DefaultHandler {
 			this.width = Double.parseDouble(s);
 		} else if ("Name".equalsIgnoreCase(this.tagName)) {
 			this.worldName = s;
+		} else if ("Scale".equalsIgnoreCase(this.tagName)) {
+			this.camera.setScale(Double.parseDouble(s));
 		} else if ("BroadphaseDetector".equalsIgnoreCase(this.tagName)) {
 			if (s.equalsIgnoreCase(SapBruteForce.class.getSimpleName())) {
 				this.broadphase = new SapBruteForce<Body>();
@@ -553,7 +581,7 @@ public class XmlReader extends DefaultHandler {
 			this.height = Double.parseDouble(s);
 		} else if ("LocalRotation".equalsIgnoreCase(this.tagName)) {
 			this.localRotation = Double.parseDouble(s);
-		} else if ("Rotation".equalsIgnoreCase(this.tagName) && this.transformFlag) {
+		} else if ("Rotation".equalsIgnoreCase(this.tagName)) {
 			this.rotation = Double.parseDouble(s);
 		} else if ("Radius".equalsIgnoreCase(this.tagName)) {
 			this.radius = Double.parseDouble(s);
@@ -689,6 +717,11 @@ public class XmlReader extends DefaultHandler {
 		this.tagName = null;
 		if ("System".equalsIgnoreCase(qName)) {
 			this.systemFlag = false;
+		} else if ("Camera".equalsIgnoreCase(qName)) {
+			if (this.translation != null) {
+				this.camera.setTranslation(this.translation);
+			}
+			this.translation = null;
 		} else if ("Bounds".equalsIgnoreCase(qName)) {
 			Rectangle r = new Rectangle(this.width, this.height);
 			r.rotate(this.localRotation);
@@ -699,7 +732,6 @@ public class XmlReader extends DefaultHandler {
 		} else if ("Settings".equalsIgnoreCase(qName)) {
 			this.settingsFlag = false;
 		} else if ("Transform".equalsIgnoreCase(qName)) {
-			this.transformFlag = false;
 			// check if we are parsing a body
 			if (this.body != null) {
 				// if so, then set the transform
