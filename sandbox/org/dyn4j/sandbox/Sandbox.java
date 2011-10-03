@@ -10,6 +10,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -79,8 +80,8 @@ import org.dyn4j.sandbox.persist.XmlGenerator;
 import org.dyn4j.sandbox.persist.XmlReader;
 import org.dyn4j.sandbox.utilities.Fps;
 import org.dyn4j.sandbox.utilities.Icons;
-import org.dyn4j.sandbox.utilities.RenderState;
 import org.dyn4j.sandbox.utilities.RenderUtilities;
+import org.dyn4j.sandbox.utilities.ResourceUtilities;
 import org.xml.sax.SAXException;
 
 import com.jogamp.opengl.util.Animator;
@@ -123,11 +124,8 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	/** The paused flag */
 	private boolean paused = true;
 	
-	/** The scale factor */
-	private double scale = 32.0;
-	
-	/** The offset from the origin in world coordinates */
-	private Vector2 offset = new Vector2();
+	/** The camera settings */
+	private Camera camera;
 	
 	/** The keyboard to accept and store key events */
 	private Keyboard keyboard;
@@ -137,9 +135,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	
 	/** The frames per second monitor */
 	private Fps fps;
-	
-	/** The rendering state */
-	private RenderState renderState;
 	
 	/** The last path the user chose from either the load or save dialog */
 	private File directory;
@@ -162,6 +157,9 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	
 	/** The snapshot menu */
 	private JMenu mnuSnapshot;
+	
+	/** The tests menu */
+	private JMenu mnuTests;
 	
 	/** The help menu */
 	private JMenu mnuHelp;
@@ -310,7 +308,10 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	 * Default constructor.
 	 */
 	public Sandbox() {
-		super("Sandbox v" + VERSION + " - dyn4j v" + Version.getVersion());
+		super();
+		
+		// set the window title
+		this.setTitle(this.getWindowTitle());
 		
 		// make sure tooltips and menus show up on top of the heavy weight canvas
 		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
@@ -344,10 +345,10 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		this.pnlMemory = new MemoryPanel();
 		
 		// create the keyboard and mouse
+		this.camera = new Camera(32, new Vector2());
 		this.keyboard = new Keyboard();
 		this.mouse = new Mouse();
 		this.fps = new Fps();
-		this.renderState = new RenderState();
 		
 		// create the world tree
 		Dimension size = new Dimension(220, 400);
@@ -399,6 +400,10 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		this.mnuSnapshot.add(mnuClearSnapshots);
 		this.mnuSnapshot.addSeparator();
 		
+		// tests menu
+		this.mnuTests = new JMenu("Tests");
+		this.createTestMenuItems(this.mnuTests);
+		
 		// window menu
 		this.mnuWindow = new JMenu("Window");
 		
@@ -421,6 +426,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 
 		this.barMenu.add(this.mnuFile);
 		this.barMenu.add(this.mnuSnapshot);
+		this.barMenu.add(this.mnuTests);
 		this.barMenu.add(this.mnuWindow);
 		this.barMenu.add(this.mnuHelp);
 		
@@ -455,14 +461,12 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		barSimulation.add(this.btnSettings);
 		
 		this.lblFps = new JTextField();
-		this.lblFps.setMaximumSize(new Dimension(70, Short.MAX_VALUE));
+		this.lblFps.setMaximumSize(new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
 		this.lblFps.setHorizontalAlignment(JTextField.RIGHT);
 		this.lblFps.setColumns(7);
 		this.lblFps.setEditable(false);
-		this.lblFps.setToolTipText("Mouse Location (World Coordinates)");
 		this.lblFps.setToolTipText("Frames / Second");
 		
-		barSimulation.addSeparator();
 		barSimulation.add(this.lblFps);
 		
 		// create the preferences toolbar
@@ -640,7 +644,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		JPanel pnlToolBar = new JPanel();
 		pnlToolBar.setLayout(new BoxLayout(pnlToolBar, BoxLayout.X_AXIS));
 		pnlToolBar.add(barSimulation);
-//		pnlToolBar.add(barPreferences);
 		pnlToolBar.add(barCamera);
 		pnlToolBar.add(Box.createHorizontalGlue());
 		pnlToolBar.add(barMouseLocation);
@@ -803,6 +806,11 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 				this.pnlContacts.setContactCounter(counter);
 				// reset the global settings
 				Settings.getInstance().reset();
+				// reset the camera
+				this.camera.setScale(32.0);
+				this.camera.toOrigin();
+				// set the window title
+				this.setTitle(this.getWindowTitle());
 			}
 		} else if ("save".equals(command)) {
 			try {
@@ -843,6 +851,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 				this.btnSettings.setEnabled(false);
 				this.mnuFile.setEnabled(false);
 				this.mnuSnapshot.setEnabled(false);
+				this.mnuTests.setEnabled(false);
 				setPaused(false);
 			}
 		} else if ("stop".equals(command)) {
@@ -858,6 +867,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 				this.btnSettings.setEnabled(true);
 				this.mnuFile.setEnabled(true);
 				this.mnuSnapshot.setEnabled(true);
+				this.mnuTests.setEnabled(true);
 				setPaused(true);
 			}
 		} else if ("settings".equals(command)) {
@@ -900,13 +910,13 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		} else if ("velocity".equals(command)) {
 			Preferences.setBodyVelocityEnabled(!Preferences.isBodyVelocityEnabled());
 		} else if ("zoom-in".equals(command)) {
-			this.scale *= 0.5;
+			this.camera.zoomIn();
 		} else if ("zoom-out".equals(command)) {
-			this.scale *= 2.0;
+			this.camera.zoomOut();
 		} else if ("about".equals(command)) {
 			AboutDialog.show(this);
 		} else if ("to-origin".equals(command)) {
-			this.offset.zero();
+			this.camera.toOrigin();
 		} else if ("snapshotTake".equals(command)) {
 			this.takeSnapshot(false);
 		} else if ("snapshotClearAll".equals(command)) {
@@ -955,6 +965,17 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 			this.tglBodyNormals.setSelected(Preferences.isBodyNormalEnabled());
 			this.tglBodyRotationDiscs.setSelected(Preferences.isBodyRotationDiscEnabled());
 			this.tglBodyVelocities.setSelected(Preferences.isBodyVelocityEnabled());
+		} else if (command.startsWith("test+")) {
+			// load the test up
+			String name = command.substring(command.lastIndexOf("/") + 1, command.length() - 4);
+			String file = command.replace("test+", "");
+			try {
+				this.openTestAction(file, name);
+				// stop all actions
+				this.endAllActions();
+			} catch (Exception e) {
+				ExceptionDialog.show(this, "Error Opening Test", "An error occured when trying to open the selected test:", e);
+			}
 		}
 	}
 	
@@ -1104,15 +1125,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	    	this.pnlContacts.update();
 		}
 		
-		// set the render state
-		this.renderState.scale = scale;
-		synchronized (this.world) {
-			this.renderState.dt = this.world.getStep().getDeltaTime();
-			this.renderState.invDt = this.world.getStep().getInverseDeltaTime();
-		}
-		this.renderState.size = this.canvasSize;
-		this.renderState.offset = this.offset.copy();
-		
 		this.fps.update(diff);
 		this.lblFps.setText(this.fps.getFpsString());
 		
@@ -1124,9 +1136,9 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	 * @param gl the OpenGL surface
 	 */
 	private void render(GL2 gl) {
-		Dimension size = this.renderState.size;
-		Vector2 offset = this.renderState.offset;
-		double scale = this.renderState.scale;
+		Dimension size = this.canvasSize;
+		Vector2 offset = this.camera.getTranslation();
+		double scale = this.camera.getScale();
 		
 		// apply a scaling transformation
 		gl.glPushMatrix();
@@ -1171,7 +1183,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 				// dont draw the mouse joint used during simulation since its drawn again
 				if (joint == this.selectedBodyJoint) continue;
 				// otherwise draw the joint normally
-				RenderUtilities.drawJoint(gl, joint, this.renderState);
+				RenderUtilities.drawJoint(gl, joint, this.world.getStep().getInverseDeltaTime());
 			}
 		}
 		
@@ -1257,7 +1269,9 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		
 		// draw the mouse joint last always
 		if (this.selectedBodyJoint != null) {
-			RenderUtilities.drawMouseJoint(gl, this.selectedBodyJoint, this.renderState);
+			synchronized (this.world) {
+				RenderUtilities.drawMouseJoint(gl, this.selectedBodyJoint, this.world.getStep().getInverseDeltaTime());
+			}
 		}
 		
 		gl.glPopMatrix();
@@ -1282,13 +1296,13 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		boolean bodyLabels = Preferences.isBodyLabeled();
 		boolean fixtureLabels = Preferences.isFixtureLabeled();
 		if ((bodyLabels || fixtureLabels) && !this.editBodyAction.isActive()) {
-			synchronized (world) {
+			synchronized (this.world) {
 				gl.glColor3f(0.0f, 0.0f, 0.0f);
 				// render all the bodies in the world
 				int bSize = this.world.getBodyCount();
 				for (int i = 0; i < bSize; i++) {
 					SandboxBody body = (SandboxBody)this.world.getBody(i);
-					RenderUtilities.drawLabels(gl, glut, body, this.renderState, 5, bodyLabels, fixtureLabels);
+					RenderUtilities.drawLabels(gl, this.glut, body, this.camera, 5, bodyLabels, fixtureLabels);
 				}
 			}
 		}
@@ -1298,7 +1312,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		if (Preferences.isScaleEnabled()) {
 			// translate (0, 0) to the bottom left corner
 			gl.glTranslated(-size.getWidth() * 0.5, -size.getHeight() * 0.5, 0.0);
-			RenderUtilities.drawPixelScale(gl, this.glut, 5, 18, 3, 100, 15, this.renderState);
+			RenderUtilities.drawPixelScale(gl, this.glut, 5, 18, 3, 100, 15, this.camera.getScale());
 		}
 		
 		gl.glPopMatrix();
@@ -1350,7 +1364,10 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	 * @param body the body to render
 	 */
 	private void renderSelectedBody(GL2 gl, SandboxBody body) {
-		this.renderAABB(gl, body);
+		// render the aabb
+		if (Preferences.isBodyAABBEnabled()) {
+			this.renderAABB(gl, body);
+		}
 		
 		// apply the transform
 		RenderUtilities.pushTransform(gl);
@@ -1359,11 +1376,11 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		// render the selected body
 		if (Preferences.isBodyStenciled()) {
 			// stenciling requires a larger radius
-			RenderUtilities.outlineShapes(gl, body, 6, Preferences.getSelectedColor(), this.renderState);
+			RenderUtilities.outlineShapes(gl, body, 6, Preferences.getSelectedColor(), this.camera.getScale());
 			body.setFillColor(gl);
 			body.fill(gl);
 		} else {
-			RenderUtilities.outlineShapes(gl, body, 4, Preferences.getSelectedColor(), this.renderState);
+			RenderUtilities.outlineShapes(gl, body, 4, Preferences.getSelectedColor(), this.camera.getScale());
 			body.render(gl);
 		}
 
@@ -1396,7 +1413,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	 * @param body the body to render
 	 */
 	private void renderEditingBody(GL2 gl, SandboxBody body) {
-		Dimension size = this.renderState.size;
+		Dimension size = this.canvasSize;
 
 		// overlay everything but this shape
 		gl.glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
@@ -1405,7 +1422,10 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		RenderUtilities.fillRectangleFromTopLeft(gl, -size.width * 0.5, size.height * 0.5, size.width, size.height);
 		gl.glPopMatrix();
 		
-		this.renderAABB(gl, body);
+		// render the aabb
+		if (Preferences.isBodyAABBEnabled()) {
+			this.renderAABB(gl, body);
+		}
 		
 		// apply the transform
 		RenderUtilities.pushTransform(gl);
@@ -1470,9 +1490,9 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	 * Polls for input from the user.
 	 */
 	public void poll() {
-		Dimension size = this.renderState.size;
-		Vector2 offset = this.renderState.offset;
-		double scale = this.renderState.scale;
+		Dimension size = this.canvasSize;
+		Vector2 offset = this.camera.getTranslation();
+		double scale = this.camera.getScale();
 		
 		// see if the user has zoomed in or not
 		if (this.mouse.hasScrolled()) {
@@ -1480,9 +1500,9 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 			int scroll = this.mouse.getScrollAmount();
 			// zoom in or out
 			if (scroll < 0) {
-				this.scale *= 0.5;
+				this.camera.zoomIn();
 			} else {
-				this.scale *= 2.0;
+				this.camera.zoomOut();
 			}
 		}
 		
@@ -1577,7 +1597,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 				// compute the difference in the new position to get the offset
 				Vector2 tx = pwt.difference(this.moveWorldAction.getBeginPosition());
 				// apply it to the offset
-				this.offset.add(tx);
+				this.camera.translate(tx);
 				// update the new mouse position
 				this.moveWorldAction.update(pwt);
 			} else if (this.editBodyAction.isActive()) {
@@ -1630,7 +1650,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 					body.setActive(true);
 				} else {
 					// then assume the user wants to move the world
-					this.moveWorldAction.begin(this.offset.copy(), pw, this);
+					this.moveWorldAction.begin(offset.copy(), pw, this);
 				}
 			}
 		}
@@ -1793,6 +1813,14 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	}
 	
 	/**
+	 * Returns the window title containing the sandbox and dyn4j versions.
+	 * @return String
+	 */
+	private String getWindowTitle() {
+		return "Sandbox v" + VERSION + " - dyn4j v" + Version.getVersion();
+	}
+	
+	/**
 	 * Returns the first body in the world's body list to contain the given point.
 	 * <p>
 	 * If no body is found at the given point, null is returned.
@@ -1916,7 +1944,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	private void saveSimulationAction() throws IOException {
 		String xml = "";
 		synchronized (this.world) {
-			xml = XmlGenerator.toXml(this.world, Settings.getInstance());
+			xml = XmlGenerator.toXml(this.world, Settings.getInstance(), this.camera);
 		}
 		XmlFormatter formatter = new XmlFormatter(2);
 		xml = formatter.format(xml);
@@ -1970,6 +1998,8 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 				FileWriter fw = new FileWriter(file);
 				fw.write(xml);
 				fw.close();
+				// set the window title
+				this.setTitle(this.getWindowTitle() + " - " + this.world.getUserData());
 				JOptionPane.showMessageDialog(this, "File saved successfully!", "File Saved", JOptionPane.INFORMATION_MESSAGE);
 			} else {
 				// create a new file
@@ -1977,6 +2007,8 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 					FileWriter fw = new FileWriter(file);
 					fw.write(xml);
 					fw.close();
+					// set the window title
+					this.setTitle(this.getWindowTitle() + " - " + this.world.getUserData());
 					JOptionPane.showMessageDialog(this, "File saved successfully!", "File Saved", JOptionPane.INFORMATION_MESSAGE);
 				}
 			}
@@ -2015,16 +2047,49 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 				if (option == JOptionPane.YES_OPTION) {
 					// read the file into a stream
 					synchronized (this.world) {
-						XmlReader.fromXml(file, this.world);					
+						XmlReader.fromXml(file, this.world, this.camera);					
 					}
 					// update the world tree
 					this.pnlWorld.setWorld(this.world);
 					// clear the snapshots
 					this.clearAllSnapshots();
+					// set the window title
+					this.setTitle(this.getWindowTitle() + " - " + this.world.getUserData());
 				}
 			} else {
 				JOptionPane.showMessageDialog(this, "The selected item is not a file or doesn't exist.", "Invalid Selection", JOptionPane.ERROR_MESSAGE);
 			}
+		}
+	}
+
+	/**
+	 * Attempts to open and load the simulation state from the user selected test.
+	 * @param file the path of the test
+	 * @param name the name of the test
+	 * @throws ParserConfigurationException thrown if an error occurs in configuring the SAX parser
+	 * @throws SAXException thrown if any parsing error is encountered
+	 * @throws IOException thrown if an IO error occurs  
+	 */
+	private void openTestAction(String file, String name) throws ParserConfigurationException, SAXException, IOException {
+		// if it exists and its a file then save the location
+		// and make sure they really want to open the file
+		this.currentFileName = name + ".xml";
+		// make sure they are sure
+		int option = JOptionPane.showConfirmDialog(this, "The current simulation, settings, and snapshots will be " +
+				"lost if a test is opened.\n" +
+				"Are you sure you want to continue?", "Open Test '" + name + "'", JOptionPane.YES_NO_CANCEL_OPTION);
+		// check the user's choice
+		if (option == JOptionPane.YES_OPTION) {
+			// read the file into a stream
+			synchronized (this.world) {
+				XmlReader.fromXml(this.getClass().getResourceAsStream(file), this.world, this.camera);					
+			}
+			// update the world tree
+			this.pnlWorld.setWorld(this.world);
+			// clear the snapshots
+			this.clearAllSnapshots();
+			// set the window title
+			this.setTitle(this.getWindowTitle() + " - " + name);
 		}
 	}
 	
@@ -2036,7 +2101,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		// get the xml for the current simulation
 		String xml = "";
 		synchronized (this.world) {
-			xml = XmlGenerator.toXml(this.world, Settings.getInstance());
+			xml = XmlGenerator.toXml(this.world, Settings.getInstance(), this.camera);
 		}
 		// save it in the snapshot map using the timestamp as the key
 		Date date = new Date();
@@ -2066,10 +2131,13 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		String xml = this.snapshots.get(snapshot);
 		// read the file into a stream
 		synchronized (this.world) {
-			XmlReader.fromXml(xml, this.world);
+			// dont set the camera
+			XmlReader.fromXml(xml, this.world, new Camera());
 		}
 		// update the world tree
 		this.pnlWorld.setWorld(this.world);
+		// set the window title
+		this.setTitle(this.getWindowTitle() + " - " + this.world.getUserData());
 	}
 	
 	/**
@@ -2104,6 +2172,29 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * Creates the test menu items and attaches them to the
+	 * given menu.
+	 * @param menu the menu to attach the menu items
+	 */
+	private void createTestMenuItems(JMenu menu) {
+		try {
+			List<String> urls = ResourceUtilities.getResources("/org/dyn4j/sandbox/tests");
+			for (String url : urls) {
+				// parse the file name out of the path
+				String fn = url.substring(url.lastIndexOf("/") + 1, url.length() - 4);
+				JMenuItem mnuTest = new JMenuItem(fn);
+				mnuTest.setActionCommand("test+" + url);
+				mnuTest.addActionListener(this);
+				this.mnuTests.add(mnuTest);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**

@@ -26,6 +26,7 @@ import org.dyn4j.geometry.Shape;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.sandbox.Camera;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.utilities.SystemUtilities;
 
@@ -40,9 +41,10 @@ public class XmlGenerator {
 	 * Returns the xml for the given world object.
 	 * @param world the world
 	 * @param settings the global settings
+	 * @param camera the camera settings
 	 * @return String
 	 */
-	public static final String toXml(World world, Settings settings) {
+	public static final String toXml(World world, Settings settings, Camera camera) {
 		StringBuilder sb = new StringBuilder();
 		
 		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
@@ -50,6 +52,12 @@ public class XmlGenerator {
 		
 		// output the simulation name
 		sb.append("<Name>").append(world.getUserData()).append("</Name>");
+		
+		// output the camera information
+		sb.append("<Camera>");
+		sb.append("<Scale>").append(camera.getScale()).append("</Scale>");
+		sb.append(XmlGenerator.toXml(camera.getTranslation(), "Translation"));
+		sb.append("</Camera>");
 		
 		// output system properties
 		sb.append(XmlGenerator.toXml());
@@ -290,18 +298,19 @@ public class XmlGenerator {
 	private static final String toXml(int categories) {
 		StringBuilder sb = new StringBuilder();
 		
-		int mask = 1;
-		for (int i = 1; i < 31; i++) {
-			if ((categories & mask) == mask) {
-				// append the group
-				sb.append("<Group" + i + " Value=\"" + mask + "\" />");
-			}
-			mask *= 2;
-		}
-		
 		if ((categories & Integer.MAX_VALUE) == Integer.MAX_VALUE) {
-			// append the group
+			// if the categories is "all" then only output all
 			sb.append("<All" + " Value=\"" + Integer.MAX_VALUE + "\" />");
+		} else {
+			// otherwise output each category
+			int mask = 1;
+			for (int i = 1; i < 32; i++) {
+				if ((categories & mask) == mask) {
+					// append the group
+					sb.append("<Group" + i + " Value=\"" + mask + "\" />");
+				}
+				mask *= 2;
+			}
 		}
 		
 		return sb.toString();
