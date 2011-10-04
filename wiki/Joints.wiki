@@ -22,6 +22,8 @@ This joint requires one world space anchor point which is used as the pivot poin
 =Weld Joint=
 The !WeldJoint class represents a joint that "welds" two bodies together.  This can be used to fix two bodies together as one, then removed to simulate destructible bodies.  When bodies are joined by a !WeldJoint their motion is as if they were one larger body.
 
+Like the !DistanceJoint class you can add a spring-damper where at the anchor point.  This acts as a rotational spring damper instead of a linear spring damper.
+
 This joint requires one world space anchor point which is used as the weld point.
 
 =Line Joint (Deprecated)=
