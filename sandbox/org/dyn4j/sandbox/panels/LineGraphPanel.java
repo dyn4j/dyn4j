@@ -147,6 +147,7 @@ public class LineGraphPanel extends JPanel {
 	 * @param dataPointLimit the maximum number of datapoints
 	 */
 	public LineGraphPanel(double maxY, int dataPointLimit) {
+		super(true);
 		this.series = new ArrayList<Series>();
 		this.maxY = maxY;
 		this.dataPointLimit = dataPointLimit;
@@ -209,7 +210,6 @@ public class LineGraphPanel extends JPanel {
 	 */
 	public void addDataPoint(double value) {
 		this.series.get(0).addDataPoint(value);
-		this.repaint();
 	}
 	
 	/**
@@ -219,7 +219,6 @@ public class LineGraphPanel extends JPanel {
 	 */
 	public void addDataPoint(double value, int series) {
 		this.series.get(series).addDataPoint(value);
-		this.repaint();
 	}
 	
 	/**
