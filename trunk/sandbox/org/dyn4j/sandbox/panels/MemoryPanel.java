@@ -142,6 +142,7 @@ public class MemoryPanel extends JPanel {
 			this.pnlGraph.setMaximumValue(total + 3);
 			this.pnlGraph.addDataPoint(used, 0);
 			this.pnlGraph.addDataPoint(total, 1);
+			this.pnlGraph.repaint();
 			
 			this.lastUpdate = time;
 		}
