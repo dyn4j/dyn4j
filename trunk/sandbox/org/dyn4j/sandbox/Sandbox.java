@@ -10,13 +10,14 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
@@ -81,7 +82,6 @@ import org.dyn4j.sandbox.persist.XmlReader;
 import org.dyn4j.sandbox.utilities.Fps;
 import org.dyn4j.sandbox.utilities.Icons;
 import org.dyn4j.sandbox.utilities.RenderUtilities;
-import org.dyn4j.sandbox.utilities.ResourceUtilities;
 import org.xml.sax.SAXException;
 
 import com.jogamp.opengl.util.Animator;
@@ -658,7 +658,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		this.setIconImage(Icons.SANDBOX_48.getImage());
 		
 		// setup OpenGL capabilities
-		if (!GLProfile.isGL3Available()) {
+		if (!GLProfile.isAvailable(GLProfile.GL2)) {
 			throw new GLException("OpenGL 3.0 or higher is required");
 		}
 		GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL2));
@@ -2180,20 +2180,18 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	 * @param menu the menu to attach the menu items
 	 */
 	private void createTestMenuItems(JMenu menu) {
-		try {
-			List<String> urls = ResourceUtilities.getResources("/org/dyn4j/sandbox/tests");
-			for (String url : urls) {
-				// parse the file name out of the path
-				String fn = url.substring(url.lastIndexOf("/") + 1, url.length() - 4);
-				JMenuItem mnuTest = new JMenuItem(fn);
-				mnuTest.setActionCommand("test+" + url);
-				mnuTest.addActionListener(this);
-				this.mnuTests.add(mnuTest);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
+		// get the test listing file
+		ResourceBundle bundle = ResourceBundle.getBundle("org.dyn4j.sandbox.tests.list");
+		// read in all the tests
+		List<String> keys = Collections.list(bundle.getKeys());
+		// sort the keys
+		Collections.sort(keys);
+		// loop through the keys
+		for (String key : keys) {
+			JMenuItem mnuTest = new JMenuItem(key);
+			mnuTest.setActionCommand("test+" + bundle.getString(key));
+			mnuTest.addActionListener(this);
+			this.mnuTests.add(mnuTest);
 		}
 	}
 	

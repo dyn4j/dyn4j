@@ -20,7 +20,7 @@
 		<j2se version="1.6+" />
 		<jar href="dyn4j.jar"/>
 		<jar href="dyn4j-Sandbox.jar" main="true" />
-		<extension name="JOGL" href="http://jogamp.org/deployment/webstart/jogl-all-awt.jnlp" />
+		<extension name="JOGL" href="http://jogamp.org/deployment/jogamp-current/jogl-all-awt.jnlp" />
 	</resources>
 	<application-desc main-class="org.dyn4j.sandbox.Sandbox" />
 </jnlp>
