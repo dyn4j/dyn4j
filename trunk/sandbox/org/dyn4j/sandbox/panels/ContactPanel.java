@@ -40,6 +40,9 @@ public class ContactPanel extends JPanel {
 	
 	/** The text box to store the number of solved contacts */
 	private JFormattedTextField txtSolvedContacts;
+
+	/** The last time the panel was updated */
+	private long lastUpdate;
 	
 	/**
 	 * Full constructor.
@@ -117,6 +120,8 @@ public class ContactPanel extends JPanel {
 						.addComponent(this.txtSolvedContacts, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
 		
 		this.update();
+
+		this.lastUpdate = System.nanoTime();
 	}
 	
 	/**
@@ -136,18 +141,26 @@ public class ContactPanel extends JPanel {
 	 * Updates the text boxes with the new values from the contact counter.
 	 */
 	public void update() {
-		int added = this.counter.getAdded();
-		int persisted = this.counter.getPersisted();
-		int removed = this.counter.getRemoved();
-		int solved = this.counter.getSolved();
-		int sensed = this.counter.getSensed();
-		int total = added + persisted + sensed;
-		
-		this.txtTotalContacts.setValue(total);
-		this.txtAddedContacts.setValue(added);
-		this.txtPersistedContacts.setValue(persisted);
-		this.txtRemovedContacts.setValue(removed);
-		this.txtSolvedContacts.setValue(solved);
-		this.txtSensedContacts.setValue(sensed);
+		// check if its time to update
+		long time = System.nanoTime();
+		long diff = time - this.lastUpdate;
+		// update every second
+		if (diff > 1000000000) {
+			int added = this.counter.getAdded();
+			int persisted = this.counter.getPersisted();
+			int removed = this.counter.getRemoved();
+			int solved = this.counter.getSolved();
+			int sensed = this.counter.getSensed();
+			int total = added + persisted + sensed;
+			
+			this.txtTotalContacts.setValue(total);
+			this.txtAddedContacts.setValue(added);
+			this.txtPersistedContacts.setValue(persisted);
+			this.txtRemovedContacts.setValue(removed);
+			this.txtSolvedContacts.setValue(solved);
+			this.txtSensedContacts.setValue(sensed);
+
+			this.lastUpdate = time;
+		}
 	}
 }

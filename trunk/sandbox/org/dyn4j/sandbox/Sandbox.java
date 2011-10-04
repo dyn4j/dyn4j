@@ -45,6 +45,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -1116,19 +1117,34 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		if (!this.isPaused()) {
 	    	// convert from nanoseconds to seconds
 	    	double elapsedTime = (double)diff / NANO_TO_BASE;
+	    	// see if a step will be taken
+	    	boolean stepped = false;
 	    	// obtain the lock on the world object
 	    	synchronized (this.world) {
 		        // update the world with the elapsed time
-		        this.world.update(elapsedTime);
+		        stepped = this.world.update(elapsedTime);
 			}
-	    	// update the contact panel
-	    	this.pnlContacts.update();
+	    	// only update the contact panel if a step was taken
+	    	if (stepped) {
+	    		SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						// update the contact panel
+				    	pnlContacts.update();
+					}
+				});
+	    	}
 		}
 		
 		this.fps.update(diff);
-		this.lblFps.setText(this.fps.getFpsString());
 		
-		this.pnlMemory.update();
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				lblFps.setText(fps.getFpsString());
+				pnlMemory.update();
+			}
+		});
 	}
 	
 	/**
