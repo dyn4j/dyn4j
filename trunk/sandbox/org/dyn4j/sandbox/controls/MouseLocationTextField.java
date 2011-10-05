@@ -22,33 +22,68 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.sandbox.panels;
+package org.dyn4j.sandbox.controls;
 
-import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
-import org.dyn4j.geometry.Convex;
+import org.dyn4j.geometry.Vector2;
+import org.dyn4j.sandbox.utilities.RenderUtilities;
 
 /**
- * Abstract panel used to configure a shape.
+ * Custom JTextField that uses the EDT to set the text.
+ * <p>
+ * Using the custom method {@link #update(Vector2)}, a thread
+ * will be queued that will update the text box.
  * @author William Bittle
  * @version 1.0.0
  * @since 1.0.0
  */
-public abstract class ConvexShapePanel extends JPanel implements InputPanel {
+public class MouseLocationTextField extends JTextField {
 	/** The version id */
-	private static final long serialVersionUID = -2123887648523056197L;
+	private static final long serialVersionUID = -3862760227675450170L;
 
-	/**
-	 * Returns the currently configured shape.
-	 * <p>
-	 * If nothing has been set, the default shape is returned.
-	 * @return Convex
-	 */
-	public abstract Convex getShape();
+	/** The latest mouse position */
+	private Vector2 mousePosition = new Vector2();
+	
+	/** True if an update by the EDT is required */
+	private boolean updateRequired = false;
 	
 	/**
-	 * Returns the default shape for the panel.
-	 * @return Convex
+	 * Updates the mouse position.
+	 * @param mousePosition the new mouse position
 	 */
-	public abstract Convex getDefaultShape();
+	public void update(Vector2 mousePosition) {
+		// obtain the lock on the mouse position
+		synchronized (this.mousePosition) {
+			// set the new mouse position
+			this.mousePosition = mousePosition.copy();
+			// see if a EDT update thread has already been queued
+			if (!this.updateRequired) {
+				// set the update required flag
+				this.updateRequired = true;
+				// if it hasn't then queue one
+				this.updateEDT();
+			}
+		}
+	}
+	
+	/**
+	 * Updates the value of this text box on the EDT.
+	 */
+	private void updateEDT() {
+		// make sure the value of this text box is updated on the EDT
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				// obtain the lock on the mouse position
+				synchronized (mousePosition) {
+					// update the this text box with the new mouse position value
+					setText(RenderUtilities.formatVector2(mousePosition));
+					// set the update required to false
+					updateRequired = false;
+				}
+			}
+		});
+	}
 }
