@@ -1,3 +1,27 @@
+/*
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without modification, are permitted 
+ * provided that the following conditions are met:
+ * 
+ *   * Redistributions of source code must retain the above copyright notice, this list of conditions 
+ *     and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
+ *     and the following disclaimer in the documentation and/or other materials provided with the 
+ *     distribution.
+ *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *     promote products derived from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package org.dyn4j.sandbox;
 
 import java.awt.BorderLayout;
@@ -66,6 +90,7 @@ import org.dyn4j.sandbox.actions.MoveAction;
 import org.dyn4j.sandbox.actions.MoveWorldAction;
 import org.dyn4j.sandbox.actions.RotateAction;
 import org.dyn4j.sandbox.actions.SelectAction;
+import org.dyn4j.sandbox.controls.MouseLocationTextField;
 import org.dyn4j.sandbox.dialogs.AboutDialog;
 import org.dyn4j.sandbox.dialogs.ExceptionDialog;
 import org.dyn4j.sandbox.dialogs.PreferencesDialog;
@@ -268,7 +293,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	// Mouse location toolbar
 	
 	/** The mouse location label */
-	private JTextField lblMouseLocation;
+	private MouseLocationTextField lblMouseLocation;
 	
 	// Actions performed on the OpenGL canvas
 	
@@ -317,19 +342,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		// make sure tooltips and menus show up on top of the heavy weight canvas
 		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
-		
-		// set the look and feel to the system look and feel
-//		try {
-//			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-//		} catch (ClassNotFoundException e) {
-//			e.printStackTrace();
-//		} catch (InstantiationException e) {
-//			e.printStackTrace();
-//		} catch (IllegalAccessException e) {
-//			e.printStackTrace();
-//		} catch (UnsupportedLookAndFeelException e) {
-//			e.printStackTrace();
-//		}
 		
 		ContactCounter counter = new ContactCounter();
 		
@@ -632,7 +644,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		JToolBar barMouseLocation = new JToolBar("Mouse Location", JToolBar.HORIZONTAL);
 		barMouseLocation.setFloatable(true);
 		
-		this.lblMouseLocation = new JTextField();
+		this.lblMouseLocation = new MouseLocationTextField();
 		this.lblMouseLocation.setHorizontalAlignment(JTextField.RIGHT);
 		this.lblMouseLocation.setColumns(10);
 		this.lblMouseLocation.setEditable(false);
@@ -1126,25 +1138,19 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 			}
 	    	// only update the contact panel if a step was taken
 	    	if (stepped) {
-	    		SwingUtilities.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						// update the contact panel
-				    	pnlContacts.update();
-					}
-				});
+				// update the contact panel
+	    		// this will update the Swing components on the EDT internally
+		    	this.pnlContacts.update();
 	    	}
 		}
 		
-		this.fps.update(diff);
+		// update the fps text box
+		// this will update the Swing components on the EDT internally
+		this.updateFps(diff);
 		
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				lblFps.setText(fps.getFpsString());
-				pnlMemory.update();
-			}
-		});
+		// update the memory panel
+		// this will update the Swing components on the EDT internally
+		this.pnlMemory.update();
 	}
 	
 	/**
@@ -1531,7 +1537,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		
 		// update the mouse location
 		if (this.mouse.hasMoved()) {
-			this.lblMouseLocation.setText(RenderUtilities.formatVector2(pw));
+			this.lblMouseLocation.update(pw);
 		}
 		
 		// the mouse button 1 or 3 was clicked
@@ -2208,6 +2214,26 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 			mnuTest.setActionCommand("test+" + bundle.getString(key));
 			mnuTest.addActionListener(this);
 			this.mnuTests.add(mnuTest);
+		}
+	}
+	
+	/**
+	 * Updates the fps and attached text box.
+	 * @param diff the elapsed time in nanoseconds
+	 */
+	private void updateFps(long diff) {
+		// update the frames per second
+		boolean updated = this.fps.update(diff);
+		// if it was updated (since it only updates every second)
+		// then updated the text box
+		if (updated) {
+			// update the fps text box
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					lblFps.setText(fps.getFpsString());
+				}
+			});
 		}
 	}
 	

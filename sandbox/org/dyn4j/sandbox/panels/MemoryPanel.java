@@ -1,3 +1,27 @@
+/*
+ * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without modification, are permitted 
+ * provided that the following conditions are met:
+ * 
+ *   * Redistributions of source code must retain the above copyright notice, this list of conditions 
+ *     and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
+ *     and the following disclaimer in the documentation and/or other materials provided with the 
+ *     distribution.
+ *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *     promote products derived from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package org.dyn4j.sandbox.panels;
 
 import java.awt.Color;
@@ -10,6 +34,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 /**
  * Panel showing the memory information.
@@ -127,24 +152,35 @@ public class MemoryPanel extends JPanel {
 		long diff = time - this.lastUpdate;
 		// update only every second
 		if (diff > 1000000000) {
-			Runtime runtime = Runtime.getRuntime();
-			// convert to MB
-			double total = runtime.totalMemory() / 1000000.0;
-			double free = runtime.freeMemory() / 1000000.0;
-			double used = total - free;
-			
-			this.txtTotal.setValue(total);
-			this.txtFree.setValue(free);
-			this.txtFreePercent.setValue(free / total);
-			this.txtUsed.setValue(used);
-			this.txtUsedPercent.setValue(used / total);
-			
-			this.pnlGraph.setMaximumValue(total + 3);
-			this.pnlGraph.addDataPoint(used, 0);
-			this.pnlGraph.addDataPoint(total, 1);
-			this.pnlGraph.repaint();
-			
 			this.lastUpdate = time;
+			this.updateEDT();
 		}
+	}
+	
+	/**
+	 * Updates the chart and textboxes on the EDT thread.
+	 */
+	private void updateEDT() {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				Runtime runtime = Runtime.getRuntime();
+				// convert to MB
+				double total = runtime.totalMemory() / 1000000.0;
+				double free = runtime.freeMemory() / 1000000.0;
+				double used = total - free;
+				
+				txtTotal.setValue(total);
+				txtFree.setValue(free);
+				txtFreePercent.setValue(free / total);
+				txtUsed.setValue(used);
+				txtUsedPercent.setValue(used / total);
+				
+				pnlGraph.setMaximumValue(total + 3);
+				pnlGraph.addDataPoint(used, 0);
+				pnlGraph.addDataPoint(total, 1);
+				pnlGraph.repaint();
+			}
+		});
 	}
 }
