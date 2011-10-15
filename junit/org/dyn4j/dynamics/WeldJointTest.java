@@ -24,7 +24,8 @@
  */
 package org.dyn4j.dynamics;
 
-import org.dyn4j.dynamics.Body;
+import junit.framework.TestCase;
+
 import org.dyn4j.dynamics.joint.WeldJoint;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Before;
@@ -33,7 +34,7 @@ import org.junit.Test;
 /**
  * Used to test the {@link WeldJoint} class.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.0.2
  * @since 1.0.2
  */
 public class WeldJointTest {
@@ -74,5 +75,110 @@ public class WeldJointTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void createSameBody() {
 		new WeldJoint(b1, b1, new Vector2());
+	}
+	
+	/**
+	 * Tests the isSpring method.
+	 * @since 3.0.2
+	 */
+	@Test
+	public void isSpring() {
+		WeldJoint wj = new WeldJoint(b1, b2, new Vector2());
+		TestCase.assertFalse(wj.isSpring());
+		
+		wj.setFrequency(0.0);
+		TestCase.assertFalse(wj.isSpring());
+		
+		wj.setFrequency(1.0);
+		TestCase.assertTrue(wj.isSpring());
+		
+		wj.setFrequency(15.24);
+		TestCase.assertTrue(wj.isSpring());
+		
+		wj.setFrequency(0.0);
+		TestCase.assertFalse(wj.isSpring());
+	}
+
+	/**
+	 * Tests the isSpringDamper method.
+	 * @since 3.0.2
+	 */
+	@Test
+	public void isSpringDamper() {
+		WeldJoint wj = new WeldJoint(b1, b2, new Vector2());
+		TestCase.assertFalse(wj.isSpringDamper());
+		
+		wj.setFrequency(0.0);
+		TestCase.assertFalse(wj.isSpringDamper());
+		
+		wj.setFrequency(1.0);
+		TestCase.assertFalse(wj.isSpringDamper());
+		
+		wj.setFrequency(15.24);
+		TestCase.assertFalse(wj.isSpringDamper());
+		
+		wj.setDampingRatio(0.4);
+		TestCase.assertTrue(wj.isSpringDamper());
+		
+		wj.setDampingRatio(0.0);
+		TestCase.assertFalse(wj.isSpringDamper());
+		
+		wj.setDampingRatio(0.61);
+		wj.setFrequency(0.0);
+		TestCase.assertFalse(wj.isSpringDamper());
+	}
+	
+	/**
+	 * Tests valid damping ratio values.
+	 * @since 3.0.2
+	 */
+	@Test
+	public void setDampingRatio() {
+		WeldJoint wj = new WeldJoint(b1, b2, new Vector2());
+		wj.setDampingRatio(0.0);
+		wj.setDampingRatio(1.0);
+		wj.setDampingRatio(0.2);
+	}
+	
+	/**
+	 * Tests a negative damping ratio value.
+	 * @since 3.0.2
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNegativeDampingRatio() {
+		WeldJoint wj = new WeldJoint(b1, b2, new Vector2());
+		wj.setDampingRatio(-1.0);
+	}
+	
+	/**
+	 * Tests a greater than one damping ratio value.
+	 * @since 3.0.2
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setGreaterThan1DampingRatio() {
+		WeldJoint wj = new WeldJoint(b1, b2, new Vector2());
+		wj.setDampingRatio(2.0);
+	}
+	
+	/**
+	 * Tests valid frequency values.
+	 * @since 3.0.2
+	 */
+	@Test
+	public void setFrequency() {
+		WeldJoint wj = new WeldJoint(b1, b2, new Vector2());
+		wj.setFrequency(0.0);
+		wj.setFrequency(1.0);
+		wj.setFrequency(29.0);
+	}
+	
+	/**
+	 * Tests a negative frequency value.
+	 * @since 3.0.2
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNegativeFrequency() {
+		WeldJoint wj = new WeldJoint(b1, b2, new Vector2());
+		wj.setFrequency(-0.3);
 	}
 }

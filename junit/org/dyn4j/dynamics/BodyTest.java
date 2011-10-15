@@ -44,6 +44,7 @@ import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.JointEdge;
 import org.dyn4j.dynamics.joint.RevoluteJoint;
+import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
@@ -54,7 +55,7 @@ import org.junit.Test;
 /**
  * Class to test the {@link Body} class.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.0.2
  * @since 1.0.2
  */
 public class BodyTest {
@@ -75,6 +76,7 @@ public class BodyTest {
 		TestCase.assertNotNull(b.mass);
 		TestCase.assertNotNull(b.torques);
 		TestCase.assertNotNull(b.transform);
+		TestCase.assertNotNull(b.transform0);
 		TestCase.assertNotNull(b.velocity);
 	}
 	
@@ -177,6 +179,22 @@ public class BodyTest {
 		
 		// test positive index with null fixture list
 		b.removeFixture(3);
+	}
+	
+	/**
+	 * Tests the removal of all fixtures.
+	 * @since 3.0.2
+	 */
+	@Test
+	public void removeAllFixtures() {
+		Body b = new Body();
+		b.addFixture(Geometry.createCircle(1.0));
+		b.addFixture(Geometry.createRectangle(1.0, 0.5));
+		b.addFixture(Geometry.createSegment(new Vector2(1.0, -2.0)));
+		
+		TestCase.assertEquals(3, b.getFixtureCount());
+		b.removeAllFixtures();
+		TestCase.assertEquals(0, b.getFixtureCount());
 	}
 	
 	/**
@@ -885,5 +903,104 @@ public class BodyTest {
 		
 		TestCase.assertEquals( 1.858, vp.x, 1.0E-3);
 		TestCase.assertEquals(-2.283, vp.y, 1.0E-3);
+	}
+	
+	/**
+	 * Tests the create AABB method.
+	 * @since 3.0.2
+	 */
+	@Test
+	public void createAABB() {
+		Body b = new Body();
+		
+		// create an aabb from an empty body (no fixtures)
+		AABB aabb = b.createAABB();
+		TestCase.assertEquals(0.0, aabb.getMaxX());
+		TestCase.assertEquals(0.0, aabb.getMaxY());
+		TestCase.assertEquals(0.0, aabb.getMinX());
+		TestCase.assertEquals(0.0, aabb.getMinY());
+		
+		// create an aabb from just one fixture
+		b.addFixture(Geometry.createCircle(0.5));
+		aabb = b.createAABB();
+		TestCase.assertEquals(0.5, aabb.getMaxX());
+		TestCase.assertEquals(0.5, aabb.getMaxY());
+		TestCase.assertEquals(-0.5, aabb.getMinX());
+		TestCase.assertEquals(-0.5, aabb.getMinY());
+		
+		// create an aabb from more than one fixture
+		BodyFixture bf = b.addFixture(Geometry.createRectangle(1.0, 1.0));
+		bf.getShape().translate(-0.5, 0.0);
+		aabb = b.createAABB();
+		TestCase.assertEquals(0.5, aabb.getMaxX());
+		TestCase.assertEquals(0.5, aabb.getMaxY());
+		TestCase.assertEquals(-1.0, aabb.getMinX());
+		TestCase.assertEquals(-0.5, aabb.getMinY());
+	}
+	
+	/**
+	 * Tests the create get accumulated force method.
+	 * @since 3.0.2
+	 */
+	@Test
+	public void getAccumulatedForce() {
+		Body b = new Body();
+		
+		// no force applied yet
+		Vector2 f = b.getAccumulatedForce();
+		TestCase.assertEquals(0.0, f.x);
+		TestCase.assertEquals(0.0, f.y);
+		
+		// one force
+		b.apply(new Vector2(1.0, 0.0));
+		f = b.getAccumulatedForce();
+		TestCase.assertEquals(1.0, f.x);
+		TestCase.assertEquals(0.0, f.y);
+		
+		// two forces
+		b.apply(new Vector2(0.5, 2.0));
+		f = b.getAccumulatedForce();
+		TestCase.assertEquals(1.5, f.x);
+		TestCase.assertEquals(2.0, f.y);
+		
+		// two forces and a force at point
+		b.apply(new Vector2(0.5, 0.0), new Vector2(0.5, 0.0));
+		f = b.getAccumulatedForce();
+		TestCase.assertEquals(2.0, f.x);
+		TestCase.assertEquals(2.0, f.y);
+		
+		// just a torque shouldn't affect the force
+		b.apply(0.5);
+		f = b.getAccumulatedForce();
+		TestCase.assertEquals(2.0, f.x, 2.0);
+		TestCase.assertEquals(2.0, f.y, 2.0);
+	}
+	
+	/**
+	 * Tests the create get accumulated torque method.
+	 * @since 3.0.2
+	 */
+	@Test
+	public void getAccumulatedTorque() {
+		Body b = new Body();
+		
+		// no torque applied yet
+		double t = b.getAccumulatedTorque();
+		TestCase.assertEquals(0.0, t);
+		
+		// one torque
+		b.apply(0.5);
+		t = b.getAccumulatedTorque();
+		TestCase.assertEquals(0.5, t);
+		
+		// two torques
+		b.apply(0.5);
+		t = b.getAccumulatedTorque();
+		TestCase.assertEquals(1.0, t);
+		
+		// a force shouldn't affect the torque
+		b.apply(new Vector2(0.5, 0.0));
+		t = b.getAccumulatedTorque();
+		TestCase.assertEquals(1.0, t);
 	}
 }
