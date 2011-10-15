@@ -33,7 +33,7 @@ import org.junit.Test;
 /**
  * Test case for the AABB class.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.2
  * @since 3.0.0
  */
 public class AABBTest {
@@ -169,5 +169,27 @@ public class AABBTest {
 		AABB aabb4 = new AABB(-1.0, 0.25, 1.0, 0.75);
 		TestCase.assertTrue(aabb1.contains(aabb4));
 		TestCase.assertFalse(aabb4.contains(aabb1));
+	}
+	
+	/**
+	 * Tests the getWidth method.
+	 * @since 3.0.2
+	 */
+	@Test
+	public void getWidth() {
+		AABB aabb = new AABB(-2.0, 0.0, 1.0, 1.0);
+		
+		TestCase.assertEquals(3.0, aabb.getWidth());
+	}
+	
+	/**
+	 * Tests the getHeight method.
+	 * @since 3.0.2
+	 */
+	@Test
+	public void getHeight() {
+		AABB aabb = new AABB(-2.0, 0.0, 1.0, 1.0);
+		
+		TestCase.assertEquals(1.0, aabb.getHeight());
 	}
 }

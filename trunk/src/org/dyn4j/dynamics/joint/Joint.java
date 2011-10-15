@@ -34,7 +34,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents constrained motion between two {@link Body}s.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.0.2
  * @since 1.0.0
  */
 public abstract class Joint extends Constraint {
@@ -134,6 +134,7 @@ public abstract class Joint extends Constraint {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(super.toString()).append("|")
+		.append(this.id).append("|")
 		.append(this.collisionAllowed);
 		return sb.toString();
 	}
