@@ -34,7 +34,7 @@ import org.dyn4j.sandbox.utilities.SystemUtilities;
 /**
  * Panel showing the system information.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class SystemPanel extends JPanel {
@@ -83,19 +83,19 @@ public class SystemPanel extends JPanel {
 						.addComponent(valArchitecture)
 						.addComponent(valNumberOfCpus)));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblJavaVersion)
 						.addComponent(valJavaVersion, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblJavaVendor)
 						.addComponent(valJavaVendor, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblOperatingSystem)
 						.addComponent(valOperatingSystem, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblArchitecture)
 						.addComponent(valArchitecture, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblNumberOfCpus)
 						.addComponent(valNumberOfCpus, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
 	}

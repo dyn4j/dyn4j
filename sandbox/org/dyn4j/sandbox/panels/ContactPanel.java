@@ -38,7 +38,7 @@ import org.dyn4j.sandbox.utilities.Icons;
 /**
  * Panel to show the number of contacts and their respective types.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class ContactPanel extends JPanel {
@@ -125,22 +125,22 @@ public class ContactPanel extends JPanel {
 						.addComponent(this.txtRemovedContacts)
 						.addComponent(this.txtSolvedContacts)));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblTotalContacts)
 						.addComponent(this.txtTotalContacts, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblSensedContacts)
 						.addComponent(this.txtSensedContacts, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblAddedContacts)
 						.addComponent(this.txtAddedContacts, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblPersistedContacts)
 						.addComponent(this.txtPersistedContacts, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblRemovedContacts)
 						.addComponent(this.txtRemovedContacts, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblSolvedContacts)
 						.addComponent(this.txtSolvedContacts, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
 		

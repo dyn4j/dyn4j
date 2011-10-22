@@ -38,12 +38,12 @@ import org.dyn4j.geometry.Vector2;
  * Represents a revolute joint attached to a prismatic joint typically used
  * to simulate a vehicle's wheel and suspension.
  * <p>
- * This class replaced the hard to use {@link LineJoint} class.
+ * This class replaced the hard to use LineJoint class.
  * <p>
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.0.2
  * @since 3.0.0
  */
 public class WheelJoint extends Joint {

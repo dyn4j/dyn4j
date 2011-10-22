@@ -94,7 +94,7 @@ import org.dyn4j.dynamics.Settings.ContinuousDetectionMode;
 /**
  * The JFrame that controls the TestBed.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class ControlPanel extends JFrame {
@@ -2051,9 +2051,6 @@ public class ControlPanel extends JFrame {
 	 * @since 1.0.0
 	 */
 	private class MultiplicativeSpinnerNumberModel extends AbstractSpinnerModel {
-		/** The serializable id */
-		private static final long serialVersionUID = 2898451773505206196L;
-		
 		/** The current/initial value */
 		private double value;
 		

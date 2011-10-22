@@ -40,7 +40,7 @@ import org.dyn4j.sandbox.utilities.Icons;
 /**
  * Customer color editor.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class ColorPanel extends JPanel {
@@ -197,7 +197,6 @@ public class ColorPanel extends JPanel {
 		this.pnlPreview.setOpaque(true);
 		this.pnlPreview.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		this.pnlPreview.setMinimumSize(s1);
-		this.pnlPreview.setMaximumSize(s1);
 		this.pnlPreview.setPreferredSize(s1);
 		
 		// setup the layout

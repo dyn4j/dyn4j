@@ -47,7 +47,7 @@ import org.dyn4j.sandbox.panels.TransformPanel;
 /**
  * Dialog to create a new body with an initial fixture/shape.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class EditFixtureDialog extends JDialog implements ActionListener {
@@ -108,7 +108,7 @@ public class EditFixtureDialog extends JDialog implements ActionListener {
 		
 		JTabbedPane tabs = new JTabbedPane();
 		
-		this.pnlFixture = new FixturePanel(this, this.fixture);
+		this.pnlFixture = new FixturePanel(this.fixture);
 		this.pnlTransform = new TransformPanel(lblText);
 		
 		tabs.addTab("Fixture", this.pnlFixture);

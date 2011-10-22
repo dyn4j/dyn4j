@@ -29,7 +29,7 @@ import javax.swing.ImageIcon;
 /**
  * Class storing all the icons used by the application.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class Icons {
@@ -177,6 +177,9 @@ public class Icons {
 	
 	/** Torque icon */
 	public static final ImageIcon TORQUE = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/torque-icon.png");
+	
+	/** Check icon */
+	public static final ImageIcon CHECK = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/check-icon.png");
 	
 	// normal icons
 

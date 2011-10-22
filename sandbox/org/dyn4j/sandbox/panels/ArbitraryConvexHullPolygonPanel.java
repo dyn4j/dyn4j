@@ -24,7 +24,6 @@
  */
 package org.dyn4j.sandbox.panels;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -32,13 +31,12 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.ParallelGroup;
+import javax.swing.GroupLayout.SequentialGroup;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.GroupLayout.ParallelGroup;
-import javax.swing.GroupLayout.SequentialGroup;
 
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
@@ -49,7 +47,7 @@ import org.dyn4j.geometry.hull.HullGenerator;
 /**
  * Panel used to create a polygon using arbitrary points.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class ArbitraryConvexHullPolygonPanel extends ConvexHullShapePanel implements InputPanel, ActionListener {
@@ -104,14 +102,11 @@ public class ArbitraryConvexHullPolygonPanel extends ConvexHullShapePanel implem
 			this.pointPanels.add(panel);
 		}
 		
-		this.pnlPreview = new PreviewPanel(new Dimension(150, 150), new Polygon(this.hullGenerator.generate(DEFAULT_POINT_CLOUD)), DEFAULT_POINT_CLOUD);
-		this.pnlPreview.setBackground(Color.WHITE);
-		this.pnlPreview.setBorder(BorderFactory.createEtchedBorder());
+		this.pnlPreview = new PreviewPanel(new Dimension(250, 225), new Polygon(this.hullGenerator.generate(DEFAULT_POINT_CLOUD)), DEFAULT_POINT_CLOUD);
 		
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
 		
-		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
 		layout.setHorizontalGroup(layout.createParallelGroup()
 				.addComponent(this.scrPane)

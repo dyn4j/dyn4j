@@ -25,6 +25,7 @@
 package org.dyn4j.sandbox.dialogs;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -35,11 +36,12 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 
 import org.dyn4j.sandbox.panels.ColorPanel;
+import org.dyn4j.sandbox.utilities.ControlUtilities;
 
 /**
  * Dialog used to edit a color.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class ColorDialog extends JDialog implements ActionListener {
@@ -118,12 +120,13 @@ public class ColorDialog extends JDialog implements ActionListener {
 	/**
 	 * Shows a color dialog using the initial color and returns a new color if it was changed
 	 * and not canceled.
-	 * @param owner the dialog owner
+	 * @param parent the dialog owner
 	 * @param initialColor the initial color
 	 * @param alpha true if the alpha slider should be shown
 	 * @return Color null if the dialog was closed or canceled
 	 */
-	public static final Color show(Window owner, Color initialColor, boolean alpha) {
+	public static final Color show(Component parent, Color initialColor, boolean alpha) {
+		Window owner = ControlUtilities.getParentWindow(parent);
 		ColorDialog dialog = new ColorDialog(owner, initialColor, alpha);
 		dialog.setLocationRelativeTo(owner);
 		dialog.setVisible(true);

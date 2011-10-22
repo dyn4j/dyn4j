@@ -25,9 +25,13 @@
 package org.dyn4j.sandbox;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.GridLayout;
 import java.awt.Point;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -52,7 +56,6 @@ import javax.media.opengl.GLException;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -69,8 +72,11 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
+import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.dyn4j.Version;
@@ -127,7 +133,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	private static final double NANO_TO_BASE = 1.0e9;
 	
 	/** The sandbox version */
-	public static final String VERSION = "1.0.0";
+	public static final String VERSION = "1.0.1";
 	
 	/** The canvas to draw to */
 	private GLCanvas canvas;
@@ -192,6 +198,9 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	
 	/** The window menu */
 	private JMenu mnuWindow;
+	
+	/** The look and feel menu */
+	private JMenu mnuLookAndFeel;
 	
 	// The world tree panel
 	
@@ -365,7 +374,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		
 		// create the world tree
 		Dimension size = new Dimension(220, 400);
-		this.pnlWorld = new WorldTreePanel(this, this.world);
+		this.pnlWorld = new WorldTreePanel(this.world);
 		this.pnlWorld.setPreferredSize(size);
 		this.pnlWorld.setMinimumSize(size);
 		this.pnlWorld.addActionListener(this);
@@ -427,6 +436,11 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		
 		this.mnuWindow.add(mnuPreferences);
 		
+		// look and feel menu
+		this.mnuLookAndFeel = new JMenu("Look and Feel");
+		this.createLookAndFeelMenuItems(this.mnuLookAndFeel);
+		this.mnuWindow.add(this.mnuLookAndFeel);
+		
 		// help menu
 		this.mnuHelp = new JMenu("Help");
 		
@@ -436,7 +450,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		mnuAbout.addActionListener(this);
 		
 		this.mnuHelp.add(mnuAbout);
-
+		
 		this.barMenu.add(this.mnuFile);
 		this.barMenu.add(this.mnuSnapshot);
 		this.barMenu.add(this.mnuTests);
@@ -448,7 +462,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		// create the simulation tool bar
 		
 		JToolBar barSimulation = new JToolBar("Simulation", JToolBar.HORIZONTAL);
-		barSimulation.setRollover(true);
+		barSimulation.setFloatable(false);
 		
 		this.btnStart = new JButton(Icons.START);
 		this.btnStart.addActionListener(this);
@@ -481,12 +495,41 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		this.lblFps.setToolTipText("Frames / Second");
 		
 		barSimulation.add(this.lblFps);
+		barSimulation.addSeparator();
+
+		this.btnZoomIn = new JButton(Icons.ZOOM_IN);
+		this.btnZoomIn.setToolTipText("Zoom In");
+		this.btnZoomIn.setActionCommand("zoom-in");
+		this.btnZoomIn.addActionListener(this);
+		
+		this.btnZoomOut = new JButton(Icons.ZOOM_OUT);
+		this.btnZoomOut.setToolTipText("Zoom Out");
+		this.btnZoomOut.setActionCommand("zoom-out");
+		this.btnZoomOut.addActionListener(this);
+		
+		this.btnToOrigin = new JButton(Icons.TO_ORIGIN);
+		this.btnToOrigin.setToolTipText("Center the camera on the origin.");
+		this.btnToOrigin.setActionCommand("to-origin");
+		this.btnToOrigin.addActionListener(this);
+		
+		barSimulation.add(this.btnZoomIn);
+		barSimulation.add(this.btnZoomOut);
+		barSimulation.add(this.btnToOrigin);
+		barSimulation.addSeparator();
+		
+		this.lblMouseLocation = new MouseLocationTextField();
+		this.lblMouseLocation.setHorizontalAlignment(JTextField.RIGHT);
+		this.lblMouseLocation.setColumns(20);
+		this.lblMouseLocation.setEditable(false);
+		this.lblMouseLocation.setToolTipText("Mouse Location (World Coordinates)");
+		
+		barSimulation.add(this.lblMouseLocation);
 		
 		// create the preferences toolbar
 		
 		JToolBar barPreferences = new JToolBar("Preferences", JToolBar.HORIZONTAL);
-		barPreferences.setRollover(true);
-
+		barPreferences.setFloatable(false);
+		
 		this.tglAntiAliasing = new JToggleButton(Icons.AA);
 		this.tglAntiAliasing.setToolTipText("Enable/Disable Anti-Aliasing");
 		this.tglAntiAliasing.setActionCommand("aa");
@@ -616,56 +659,12 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		barPreferences.add(this.tglBodyRotationDiscs);
 		barPreferences.add(this.tglBodyVelocities);
 		
-		// create the camera tool bar
-		JToolBar barCamera = new JToolBar("Camera");
-		barCamera.setRollover(true);
-		
-		this.btnZoomIn = new JButton(Icons.ZOOM_IN);
-		this.btnZoomIn.setToolTipText("Zoom In");
-		this.btnZoomIn.setActionCommand("zoom-in");
-		this.btnZoomIn.addActionListener(this);
-		
-		this.btnZoomOut = new JButton(Icons.ZOOM_OUT);
-		this.btnZoomOut.setToolTipText("Zoom Out");
-		this.btnZoomOut.setActionCommand("zoom-out");
-		this.btnZoomOut.addActionListener(this);
-		
-		this.btnToOrigin = new JButton(Icons.TO_ORIGIN);
-		this.btnToOrigin.setToolTipText("Center the camera on the origin.");
-		this.btnToOrigin.setActionCommand("to-origin");
-		this.btnToOrigin.addActionListener(this);
-		
-		barCamera.add(this.btnZoomIn);
-		barCamera.add(this.btnZoomOut);
-		barCamera.add(this.btnToOrigin);
-		
-		// create the mouse location toolbar
-		
-		JToolBar barMouseLocation = new JToolBar("Mouse Location", JToolBar.HORIZONTAL);
-		barMouseLocation.setFloatable(true);
-		
-		this.lblMouseLocation = new MouseLocationTextField();
-		this.lblMouseLocation.setHorizontalAlignment(JTextField.RIGHT);
-		this.lblMouseLocation.setColumns(10);
-		this.lblMouseLocation.setEditable(false);
-		this.lblMouseLocation.setToolTipText("Mouse Location (World Coordinates)");
-		
-		barMouseLocation.add(this.lblMouseLocation);
-		
-		// add the toolbars to the layout
+		// add the toolbar to the layout
 		
 		JPanel pnlToolBar = new JPanel();
-		pnlToolBar.setLayout(new BoxLayout(pnlToolBar, BoxLayout.X_AXIS));
+		pnlToolBar.setLayout(new GridLayout(2, 1));
 		pnlToolBar.add(barSimulation);
-		pnlToolBar.add(barCamera);
-		pnlToolBar.add(Box.createHorizontalGlue());
-		pnlToolBar.add(barMouseLocation);
-		pnlToolBar.setMaximumSize(pnlToolBar.getPreferredSize());
-		
-		JPanel pnlToolBar2 = new JPanel();
-		pnlToolBar2.setLayout(new BoxLayout(pnlToolBar2, BoxLayout.X_AXIS));
-		pnlToolBar2.add(barPreferences);
-		pnlToolBar2.setMaximumSize(pnlToolBar2.getPreferredSize());
+		pnlToolBar.add(barPreferences);
 		
 		// attempt to set the icon
 		this.setIconImage(Icons.SANDBOX_48.getImage());
@@ -685,11 +684,11 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		
 		this.glut = new GLUT();
 		
-		this.canvasSize = new Dimension(600, 600);
+		this.canvasSize = new Dimension(800, 600);
 		// create a canvas to paint to 
 		this.canvas = new GLCanvas(caps);
 		this.canvas.setPreferredSize(this.canvasSize);
-		this.canvas.setMinimumSize(this.canvasSize);
+		this.canvas.setMinimumSize(new Dimension(600, 600));
 		this.canvas.setIgnoreRepaint(true);
 		// add this class as the gl event listener
 		this.canvas.addGLEventListener(this);
@@ -708,7 +707,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		
 		// create a tabbed pane below the world tree
 		JTabbedPane tabs = new JTabbedPane();
-		tabs.setBorder(BorderFactory.createEmptyBorder(7, 7, 7, 0));
+		tabs.setBorder(BorderFactory.createEmptyBorder(7, 0, 0, 0));
 		tabs.addTab("Contacts", this.pnlContacts);
 		tabs.addTab("System", this.pnlSystem);
 		tabs.addTab("Memory", this.pnlMemory);
@@ -729,11 +728,9 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		
 		layout.setHorizontalGroup(layout.createParallelGroup()
 				.addComponent(pnlToolBar, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-				.addComponent(pnlToolBar2, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 				.addComponent(pneSplit));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addComponent(pnlToolBar)
-				.addComponent(pnlToolBar2)
+				.addComponent(pnlToolBar, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 				.addComponent(pneSplit));
 		
 		// size everything
@@ -988,6 +985,41 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 				this.endAllActions();
 			} catch (Exception e) {
 				ExceptionDialog.show(this, "Error Opening Test", "An error occured when trying to open the selected test:", e);
+			}
+		} else if (command.startsWith("laf+")) {
+			// make sure they are sure
+			int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want to change the look and feel?\n" +
+					"This may resize the window.", "Switch Look and Feel", JOptionPane.YES_NO_CANCEL_OPTION);
+			// check the user's choice
+			if (choice == JOptionPane.YES_OPTION) {
+				// parse out the LAF class name
+				String className = command.replace("laf+", "");
+				try {
+					// attempt to set the look and feel
+					UIManager.setLookAndFeel(className);
+					// get the current windows open by this application
+					Window windows[] = Frame.getWindows();
+					// update the ui
+			        for(Window window : windows) {
+			            SwingUtilities.updateComponentTreeUI(window);
+			        }
+			        // we need to pack since certain look and feels may have different component
+			        // gaps which can cause stuff not to be shown
+			        this.pack();
+			        // find the item in the menu to set the current one
+			        for (Component component : this.mnuLookAndFeel.getPopupMenu().getComponents()) {
+			        	JMenuItem item = (JMenuItem)component;
+			        	// set the newly selected LAF to have a checked icon
+			        	// and the rest to have no icon
+			        	if (item.getActionCommand().equalsIgnoreCase(command)) {
+			        		item.setIcon(Icons.CHECK);
+			        	} else {
+			        		item.setIcon(null);
+			        	}
+			        }
+				} catch (Exception e) {
+					ExceptionDialog.show(this, "Error Switching Look and Feel", "An error occured when trying to switch the current look and feel:", e);
+				}
 			}
 		}
 	}
@@ -2213,7 +2245,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 			JMenuItem mnuTest = new JMenuItem(key);
 			mnuTest.setActionCommand("test+" + bundle.getString(key));
 			mnuTest.addActionListener(this);
-			this.mnuTests.add(mnuTest);
+			menu.add(mnuTest);
 		}
 	}
 	
@@ -2238,10 +2270,40 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	}
 	
 	/**
+	 * Adds menu items to the given menu for each look and feel
+	 * installed in the running vm.
+	 * @param menu the menu to add the items to
+	 */
+	private void createLookAndFeelMenuItems(JMenu menu) {
+		LookAndFeel current = UIManager.getLookAndFeel();
+		for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+			JMenuItem mnuLaF = new JMenuItem(info.getName());
+			if (current.getClass().getName().equals(info.getClassName())) {
+				mnuLaF.setIcon(Icons.CHECK);
+			}
+			mnuLaF.setActionCommand("laf+" + info.getClassName());
+			mnuLaF.addActionListener(this);
+			menu.add(mnuLaF);
+		}
+	}
+	
+	/**
 	 * The main method; uses zero arguments in the args array.
 	 * @param args the command line arguments
 	 */
 	public static final void main(String[] args) {
+		// attempt to use the nimbus look and feel
+		try {
+		    for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+		        if ("Nimbus".equals(info.getName())) {
+		            UIManager.setLookAndFeel(info.getClassName());
+		            break;
+		        }
+		    }
+		} catch (Exception e) {
+			// completely ignore the error and just use the default layout manager
+		}
+		
 	    new Sandbox();
 	}
 }

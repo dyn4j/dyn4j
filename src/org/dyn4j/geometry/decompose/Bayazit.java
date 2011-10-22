@@ -40,7 +40,7 @@ import org.dyn4j.geometry.Vector2;
  * This algorithm is a O(nr) complexity algorithm where n is the number of input vertices and r is the number of
  * output convex polygons.  This algorithm can achieve optimal decompositions, however this is not guaranteed.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.0.2
  * @since 2.2.0
  */
 public class Bayazit implements Decomposer {
@@ -244,6 +244,9 @@ public class Bayazit implements Decomposer {
 		
 		// if we get here, we know the given polygon has 0 reflex vertices
 		// and is therefore convex, add it to the list of convex polygons
+		if (polygon.size() < 3) {
+			throw new IllegalArgumentException("A simple polygon cannot have crossing edges.");
+		}
 		Vector2[] vertices = new Vector2[polygon.size()];
 		polygon.toArray(vertices);
 		polygons.add(Geometry.createPolygon(vertices));

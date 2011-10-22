@@ -26,6 +26,7 @@ package org.dyn4j.sandbox.panels;
 
 import java.text.DecimalFormat;
 
+import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
@@ -56,7 +57,7 @@ import org.dyn4j.sandbox.utilities.Icons;
 /**
  * Panel used to configure a world object.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class WorldPanel extends JPanel {
@@ -156,53 +157,79 @@ public class WorldPanel extends JPanel {
 		JLabel lblX = new JLabel("x");
 		JLabel lblY = new JLabel("y");
 		
-		GroupLayout layout = new GroupLayout(this);
-		this.setLayout(layout);
+		GroupLayout layout;
+		
+		JPanel pnlWorld = new JPanel();
+		pnlWorld.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " World "));
+		layout = new GroupLayout(pnlWorld);
+		pnlWorld.setLayout(layout);
 		
 		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
-		
 		layout.setHorizontalGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup()
 						.addComponent(lblName)
-						.addComponent(lblBroadphase)
-						.addComponent(lblNarrowphase)
-						.addComponent(lblManifoldSolver)
-						.addComponent(lblToiSolver)
 						.addComponent(lblGravity))
 				.addGroup(layout.createParallelGroup()
 						.addComponent(this.txtName)
-						.addComponent(this.cmbBroadphase)
-						.addComponent(this.cmbNarrowphase)
-						.addComponent(this.cmbManifoldSolver)
-						.addComponent(this.cmbToiDetector)
 						.addGroup(layout.createSequentialGroup()
 								.addComponent(this.txtGravityX)
 								.addComponent(lblX)
 								.addComponent(this.txtGravityY)
 								.addComponent(lblY))));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblName)
 						.addComponent(this.txtName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
-						.addComponent(lblBroadphase)
-						.addComponent(this.cmbBroadphase, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
-						.addComponent(lblNarrowphase)
-						.addComponent(this.cmbNarrowphase, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
-						.addComponent(lblManifoldSolver)
-						.addComponent(this.cmbManifoldSolver, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
-						.addComponent(lblToiSolver)
-						.addComponent(this.cmbToiDetector, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblGravity)
 						.addComponent(this.txtGravityX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(lblX)
 						.addComponent(this.txtGravityY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(lblY)));
+		
+		JPanel pnlAlgorithms = new JPanel();
+		pnlAlgorithms.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Algorithms "));
+		layout = new GroupLayout(pnlAlgorithms);
+		pnlAlgorithms.setLayout(layout);
+		
+		layout.setAutoCreateContainerGaps(true);
+		layout.setAutoCreateGaps(true);
+		layout.setHorizontalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup()
+						.addComponent(lblBroadphase)
+						.addComponent(lblNarrowphase)
+						.addComponent(lblManifoldSolver)
+						.addComponent(lblToiSolver))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(this.cmbBroadphase)
+						.addComponent(this.cmbNarrowphase)
+						.addComponent(this.cmbManifoldSolver)
+						.addComponent(this.cmbToiDetector)));
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(lblBroadphase)
+						.addComponent(this.cmbBroadphase, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(lblNarrowphase)
+						.addComponent(this.cmbNarrowphase, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(lblManifoldSolver)
+						.addComponent(this.cmbManifoldSolver, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(lblToiSolver)
+						.addComponent(this.cmbToiDetector, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
+		
+		layout = new GroupLayout(this);
+		this.setLayout(layout);
+		
+		layout.setAutoCreateGaps(true);
+		layout.setHorizontalGroup(layout.createParallelGroup()
+				.addComponent(pnlWorld)
+				.addComponent(pnlAlgorithms));
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addComponent(pnlWorld)
+				.addComponent(pnlAlgorithms));
 	}
 	
 	/**

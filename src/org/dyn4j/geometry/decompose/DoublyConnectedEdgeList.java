@@ -52,7 +52,7 @@ import org.dyn4j.geometry.Vector2;
  * can be achieved since the indexing of the {@link #vertices} list is the same as the source {@link Vector2}[].
  * No check is performed to ensure that a pair of {@link HalfEdge}s are added that already exist.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.0.2
  * @since 2.2.0
  */
 public class DoublyConnectedEdgeList {
@@ -557,6 +557,10 @@ public class DoublyConnectedEdgeList {
 			while (left != face.edge) {
 				vertices[j++] = left.origin.point;
 				left = left.next;
+			}
+			
+			if (vertices.length < 3) {
+				throw new IllegalArgumentException("A simple polygon cannot have crossing edges.");
 			}
 			
 			Polygon p = Geometry.createPolygon(vertices);
