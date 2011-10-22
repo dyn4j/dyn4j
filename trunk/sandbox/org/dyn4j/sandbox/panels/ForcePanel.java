@@ -40,7 +40,7 @@ import org.dyn4j.sandbox.utilities.Icons;
 /**
  * Panel used to apply a force to a body.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class ForcePanel extends JPanel implements InputPanel {
@@ -74,28 +74,30 @@ public class ForcePanel extends JPanel implements InputPanel {
 		this.txtX.setValue(0.0);
 		this.txtY.setValue(0.0);
 		
+		JLabel lblFiller = new JLabel();
+		
 		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
 		layout.setHorizontalGroup(
 				layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup()
-						.addComponent(lblForce))
-				.addGroup(layout.createParallelGroup()
-						.addGroup(layout.createSequentialGroup()
-								.addComponent(this.txtX)
-								.addComponent(lblX))
-						.addGroup(layout.createSequentialGroup()
-								.addComponent(this.txtY)
-								.addComponent(lblY))));
-		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
 						.addComponent(lblForce)
-						.addGroup(layout.createSequentialGroup()
-								.addComponent(this.txtX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-								.addComponent(this.txtY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-						.addGroup(layout.createSequentialGroup()
-								.addComponent(lblX)
-								.addComponent(lblY))));
+						.addComponent(lblFiller))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(this.txtX)
+						.addComponent(this.txtY))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(lblX)
+						.addComponent(lblY)));
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(lblForce)
+						.addComponent(this.txtX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblX))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(lblFiller)
+						.addComponent(this.txtY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblY)));
 	}
 	
 	/**

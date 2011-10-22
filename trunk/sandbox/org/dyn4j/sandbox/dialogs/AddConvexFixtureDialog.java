@@ -24,17 +24,19 @@
  */
 package org.dyn4j.sandbox.dialogs;
 
+import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Image;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
-import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextPane;
 
@@ -42,14 +44,15 @@ import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
-import org.dyn4j.sandbox.panels.FixturePanel;
+import org.dyn4j.sandbox.controls.BottomButtonPanel;
 import org.dyn4j.sandbox.panels.ConvexShapePanel;
+import org.dyn4j.sandbox.panels.FixturePanel;
 import org.dyn4j.sandbox.panels.TransformPanel;
 
 /**
  * Dialog to add a new fixture to an existing body.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class AddConvexFixtureDialog extends JDialog implements ActionListener {
@@ -90,13 +93,8 @@ public class AddConvexFixtureDialog extends JDialog implements ActionListener {
 		
 		this.pnlShape = shapePanel;
 		
-		fixture = new BodyFixture(this.pnlShape.getDefaultShape());
-		fixture.setUserData("Fixture" + N);
-		
-		Container container = this.getContentPane();
-		
-		GroupLayout layout = new GroupLayout(container);
-		container.setLayout(layout);
+		this.fixture = new BodyFixture(this.pnlShape.getDefaultShape());
+		this.fixture.setUserData("Fixture" + N);
 		
 		// create a text pane for the local transform tab
 		JTextPane lblText = new JTextPane();
@@ -113,9 +111,10 @@ public class AddConvexFixtureDialog extends JDialog implements ActionListener {
 		
 		JTabbedPane tabs = new JTabbedPane();
 		
-		pnlFixture = new FixturePanel(this, this.fixture);
-		pnlTransform = new TransformPanel(lblText);
+		this.pnlFixture = new FixturePanel(this.fixture);
+		this.pnlTransform = new TransformPanel(lblText);
 		
+		tabs.setBorder(BorderFactory.createEmptyBorder(7, 0, 0, 0));
 		tabs.addTab("Shape", this.pnlShape);
 		tabs.addTab("Fixture", this.pnlFixture);
 		tabs.addTab("Local Transform", this.pnlTransform);
@@ -127,21 +126,15 @@ public class AddConvexFixtureDialog extends JDialog implements ActionListener {
 		btnCancel.addActionListener(this);
 		btnAdd.addActionListener(this);
 		
-		layout.setAutoCreateContainerGaps(true);
-		layout.setAutoCreateGaps(true);
-		layout.setHorizontalGroup(
-				layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
-						.addComponent(tabs)
-						.addGroup(layout.createSequentialGroup()
-								.addComponent(btnCancel)
-								.addComponent(btnAdd))));
-		layout.setVerticalGroup(
-				layout.createSequentialGroup()
-				.addComponent(tabs)
-				.addGroup(layout.createParallelGroup()
-						.addComponent(btnCancel)
-						.addComponent(btnAdd)));
+		JPanel pnlButtons = new BottomButtonPanel();
+		pnlButtons.setLayout(new FlowLayout(FlowLayout.LEFT));
+		pnlButtons.add(btnCancel);
+		pnlButtons.add(btnAdd);
+
+		Container container = this.getContentPane();
+		container.setLayout(new BorderLayout());
+		container.add(tabs, BorderLayout.CENTER);
+		container.add(pnlButtons, BorderLayout.PAGE_END);
 		
 		this.pack();
 	}

@@ -30,6 +30,8 @@ import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
 
 import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.SequentialGroup;
+import javax.swing.GroupLayout.ParallelGroup;
 import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
@@ -43,7 +45,7 @@ import org.dyn4j.sandbox.utilities.Icons;
 /**
  * Panel used to capture translation and rotation.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class TransformPanel extends JPanel implements InputPanel {
@@ -131,7 +133,7 @@ public class TransformPanel extends JPanel implements InputPanel {
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
 		
-		if (header == null) header = new JLabel();
+		boolean headerSupplied = (header != null);
 		
 		this.lblT = new JLabel("Translation", Icons.INFO, JLabel.LEFT);
 		this.lblT.setToolTipText("The translation along the x and y axes in Meters.");
@@ -179,15 +181,20 @@ public class TransformPanel extends JPanel implements InputPanel {
 			}
 		});
 		
+		JLabel lblFiller = new JLabel();
+		
 		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
-		layout.setHorizontalGroup(
-				layout.createParallelGroup()
-				.addComponent(header)
-				.addGroup(
-						layout.createSequentialGroup()
+		
+		ParallelGroup pg = layout.createParallelGroup();
+		if (headerSupplied) {
+			pg.addComponent(header);
+		}
+		layout.setHorizontalGroup(pg
+				.addGroup(layout.createSequentialGroup()
 						.addGroup(layout.createParallelGroup()
 								.addComponent(this.lblT)
+								.addComponent(lblFiller)
 								.addComponent(this.lblR))
 						.addGroup(layout.createParallelGroup()
 								.addGroup(layout.createSequentialGroup()
@@ -197,20 +204,22 @@ public class TransformPanel extends JPanel implements InputPanel {
 										.addComponent(this.txtY)
 										.addComponent(this.lblY))
 								.addComponent(this.txtR))));
-		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addComponent(header)
-				.addGroup(layout.createParallelGroup()
+		
+		SequentialGroup sg = layout.createSequentialGroup();
+		if (headerSupplied) {
+			sg.addComponent(header);
+		}
+		layout.setVerticalGroup(sg
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblT)
-						.addGroup(layout.createSequentialGroup()
-								// dont allow vertical resizing
-								.addComponent(this.txtX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-								.addComponent(this.txtY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-						.addGroup(layout.createSequentialGroup()
-								.addComponent(this.lblX)
-								.addComponent(this.lblY)))
-				.addGroup(layout.createParallelGroup()
+						.addComponent(this.txtX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(this.lblX))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(lblFiller)
+						.addComponent(this.txtY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(this.lblY))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblR)
-						// dont allow vertical resizing
 						.addComponent(this.txtR, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
 	}
 	

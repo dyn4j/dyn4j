@@ -35,15 +35,16 @@ import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.JDialog;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import org.dyn4j.sandbox.utilities.ControlUtilities;
+
 /**
  * Dialog containing a sample file to show the formatting allowed.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class SampleFileDialog extends JDialog implements MouseListener, ActionListener {
@@ -62,7 +63,7 @@ public class SampleFileDialog extends JDialog implements MouseListener, ActionLi
 	 * @param contents the file contents
 	 */
 	private SampleFileDialog(Component parent, String contents) {
-		super(JOptionPane.getFrameForComponent(parent), "Sample File", ModalityType.APPLICATION_MODAL);
+		super(ControlUtilities.getParentWindow(parent), "Sample File", ModalityType.APPLICATION_MODAL);
 		
 		this.txtFile = new JTextArea();
 		this.txtFile.setText(contents);

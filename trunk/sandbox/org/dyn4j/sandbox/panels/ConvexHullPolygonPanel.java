@@ -29,7 +29,6 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
 import javax.swing.JComboBox;
@@ -51,7 +50,7 @@ import org.dyn4j.sandbox.utilities.Icons;
 /**
  * Panel used to create a fixture from a point cloud.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class ConvexHullPolygonPanel extends ConvexHullShapePanel implements InputPanel {
@@ -156,7 +155,6 @@ public class ConvexHullPolygonPanel extends ConvexHullShapePanel implements Inpu
 		bg.add(this.rdoArbitrary);
 		
 		this.pnlSource = new JPanel();
-		this.pnlSource.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Details "));
 		this.pnlSource.setLayout(new CardLayout());
 		this.pnlSource.add(this.pnlArbitraryPolygon, "arbitrary");
 		this.pnlSource.add(this.pnlFromFilePolygon, "fromFile");
@@ -180,10 +178,10 @@ public class ConvexHullPolygonPanel extends ConvexHullShapePanel implements Inpu
 										.addComponent(this.rdoArbitrary))))
 				.addComponent(this.pnlSource));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblAlgorithm)
 						.addComponent(this.cmbAlgorithms, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblSource)
 						.addComponent(this.rdoFromFile, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(this.rdoArbitrary, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))

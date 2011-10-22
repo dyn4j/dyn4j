@@ -61,10 +61,10 @@ import org.dyn4j.sandbox.utilities.Icons;
 /**
  * Panel used to edit a fixture.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
-public class FixturePanel extends WindowSpawningPanel implements InputPanel {
+public class FixturePanel extends JPanel implements InputPanel {
 	/** The version id */
 	private static final long serialVersionUID = 93686595772420446L;
 
@@ -198,11 +198,9 @@ public class FixturePanel extends WindowSpawningPanel implements InputPanel {
 	
 	/**
 	 * Full constructor.
-	 * @param parent the parent window, frame or dialog
 	 * @param fixture the fixture to edit
 	 */
-	public FixturePanel(Window parent, BodyFixture fixture) {
-		super(parent);
+	public FixturePanel(BodyFixture fixture) {
 		this.bodyFixture = fixture;
 		
 		// see if the name is already populated
@@ -275,7 +273,7 @@ public class FixturePanel extends WindowSpawningPanel implements InputPanel {
 				"<br />This allows bodies sliding across this fixture to slow down." +
 				"<br />Valid values are between 0 and infinity." +
 				"<br />Larger values will increase the rate at which bodies are slowed.</html>");
-		this.sldFriction = new JSliderWithTextField(0, 100, (int)(fixture.getRestitution() * 100.0), 0.01, new DecimalFormat("0.00"));
+		this.sldFriction = new JSliderWithTextField(0, 100, (int)(fixture.getFriction() * 100.0), 0.01, new DecimalFormat("0.00"));
 		this.sldFriction.setColumns(4);
 		this.sldFriction.addChangeListener(new ChangeListener() {
 			@Override
@@ -413,10 +411,10 @@ public class FixturePanel extends WindowSpawningPanel implements InputPanel {
 		layout.setVerticalGroup(layout.createParallelGroup()
 				.addGroup(layout.createSequentialGroup()
 						.addComponent(this.lblCategories)
-						.addComponent(this.scrCategories, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+						.addComponent(this.scrCategories))
 				.addGroup(layout.createSequentialGroup()
 						.addComponent(this.lblMasks)
-						.addComponent(this.scrMasks, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
+						.addComponent(this.scrMasks)));
 		
 		// set the main layout
 		
@@ -425,59 +423,48 @@ public class FixturePanel extends WindowSpawningPanel implements InputPanel {
 		layout.setAutoCreateGaps(true);
 		this.setLayout(layout);
 		
-		layout.setHorizontalGroup(
-				layout.createSequentialGroup()
-				.addGroup(
-						layout.createParallelGroup()
+		layout.setHorizontalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblName)
-						.addComponent(this.lblFilter)
 						.addComponent(this.lblSensor)
 						.addComponent(this.lblDensity)
 						.addComponent(this.lblFriction)
-						.addComponent(this.lblRestitution))
-				.addGroup(
-						layout.createParallelGroup()
+						.addComponent(this.lblRestitution)
+						.addComponent(this.lblFilter))
+				.addGroup(layout.createParallelGroup()
 						.addComponent(this.txtName)
-						.addGroup(
-								layout.createSequentialGroup()
-								.addComponent(this.rdoDefaultFilter)
-								.addComponent(this.rdoCategoryFilter))
-						.addComponent(this.pnlFilter)
 						.addComponent(this.chkSensor)
 						.addComponent(this.txtDensity)
 						.addComponent(this.sldFriction)
-						.addComponent(this.sldRestitution)));
+						.addComponent(this.sldRestitution)
+						.addGroup(layout.createSequentialGroup()
+								.addComponent(this.rdoDefaultFilter)
+								.addComponent(this.rdoCategoryFilter))
+						.addComponent(this.pnlFilter)));
 		
-		layout.setVerticalGroup(
-				layout.createSequentialGroup()
-				.addGroup(
-						layout.createParallelGroup()
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblName)
 						.addComponent(this.txtName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(
-						layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(this.lblSensor)
+						.addComponent(this.chkSensor, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(this.lblDensity)
+						.addComponent(this.txtDensity, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(this.lblFriction)
+						.addComponent(this.sldFriction, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(this.lblRestitution)
+						.addComponent(this.sldRestitution, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 						.addComponent(this.lblFilter)
 						.addGroup(layout.createSequentialGroup()
 								.addGroup(layout.createParallelGroup()
 										.addComponent(this.rdoDefaultFilter, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 										.addComponent(this.rdoCategoryFilter, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-								.addComponent(this.pnlFilter, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
-				.addGroup(
-						layout.createParallelGroup()
-						.addComponent(this.lblSensor)
-						.addComponent(this.chkSensor, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(
-						layout.createParallelGroup()
-						.addComponent(this.lblDensity)
-						.addComponent(this.txtDensity, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(
-						layout.createParallelGroup()
-						.addComponent(this.lblFriction)
-						.addComponent(this.sldFriction, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(
-						layout.createParallelGroup()
-						.addComponent(this.lblRestitution)
-						.addComponent(this.sldRestitution, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
+								.addComponent(this.pnlFilter))));
 	}
 	
 	/* (non-Javadoc)

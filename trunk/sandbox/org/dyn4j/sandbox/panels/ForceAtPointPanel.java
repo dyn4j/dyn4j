@@ -40,7 +40,7 @@ import org.dyn4j.sandbox.utilities.Icons;
 /**
  * Panel used to apply a force to a body.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class ForceAtPointPanel extends JPanel implements InputPanel {	
@@ -91,6 +91,11 @@ public class ForceAtPointPanel extends JPanel implements InputPanel {
 		this.txtFX.setValue(0.0);
 		this.txtFY.setValue(0.0);
 		
+		// create some dummy panels to create the layout we want
+		
+		JLabel lblFiller1 = new JLabel();
+		JLabel lblFiller2 = new JLabel();
+		
 		// setup the force at point panel
 		
 		GroupLayout layout = new GroupLayout(this);
@@ -101,7 +106,9 @@ public class ForceAtPointPanel extends JPanel implements InputPanel {
 		layout.setHorizontalGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup()
 						.addComponent(lblForce)
-						.addComponent(lblPoint))
+						.addComponent(lblFiller1)
+						.addComponent(lblPoint)
+						.addComponent(lblFiller2))
 				.addGroup(layout.createParallelGroup()
 						.addGroup(layout.createSequentialGroup()
 								.addComponent(this.txtFX)
@@ -116,24 +123,22 @@ public class ForceAtPointPanel extends JPanel implements InputPanel {
 								.addComponent(this.txtPY)
 								.addComponent(lblPY))));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblForce)
-						.addGroup(layout.createSequentialGroup()
-								.addGroup(layout.createParallelGroup()
-										.addComponent(this.txtFX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-										.addComponent(lblFX))
-								.addGroup(layout.createParallelGroup()
-										.addComponent(this.txtFY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-										.addComponent(lblFY))))
-				.addGroup(layout.createParallelGroup()
+						.addComponent(this.txtFX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblFX))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(lblFiller1)
+						.addComponent(this.txtFY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblFY))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblPoint)
-						.addGroup(layout.createSequentialGroup()
-								.addGroup(layout.createParallelGroup()
-										.addComponent(this.txtPX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-										.addComponent(lblPX))
-								.addGroup(layout.createParallelGroup()
-										.addComponent(this.txtPY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-										.addComponent(lblPY)))));
+						.addComponent(this.txtPX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblPX))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(lblFiller2)
+						.addComponent(this.txtPY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblPY)));
 	}
 	
 	/**

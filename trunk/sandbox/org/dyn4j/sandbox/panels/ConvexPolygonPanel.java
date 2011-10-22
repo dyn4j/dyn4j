@@ -24,10 +24,13 @@
  */
 package org.dyn4j.sandbox.panels;
 
+import java.awt.CardLayout;
+import java.awt.GridLayout;
 import java.awt.Window;
 
 import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
+import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -37,12 +40,15 @@ import org.dyn4j.geometry.Convex;
 /**
  * Panel used to create a polygon shape.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class ConvexPolygonPanel extends ConvexShapePanel implements InputPanel {
 	/** The version id */
 	private static final long serialVersionUID = -6622003790931052412L;
+	
+	/** panel to contain the hidden and shown polygon panels */
+	private JPanel pnlSource;
 	
 	// polygon panels
 	
@@ -102,13 +108,23 @@ public class ConvexPolygonPanel extends ConvexShapePanel implements InputPanel {
 		this.rdoArbitrary = new JRadioButton("Arbitrary Polygon");
 		this.rdoFromFile = new JRadioButton("From File");
 		
+		this.pnlSource = new JPanel();
+		this.pnlSource.setLayout(new CardLayout());
+		this.pnlSource.add(this.pnlRightTriangle, "rightTriangle");
+		this.pnlSource.add(this.pnlIsoscelesTriangle, "isoscelesTriangle");
+		this.pnlSource.add(this.pnlEquilateralTriangle, "equilateralTriangle");
+		this.pnlSource.add(this.pnlUnitCirclePolygon, "unitCirclePolygon");
+		this.pnlSource.add(this.pnlArbitraryPolygon, "arbitraryPolygon");
+		this.pnlSource.add(this.pnlFromFilePolygon, "fromFilePolygon");
+		
+		
 		this.rdoRightTriangle.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent event) {
-				if (rdoRightTriangle.isSelected()) {
-					pnlRightTriangle.setVisible(true);
-				} else {
-					pnlRightTriangle.setVisible(false);
+				JRadioButton radio = (JRadioButton)event.getSource();
+				CardLayout cl = (CardLayout)pnlSource.getLayout();
+				if (radio.isSelected()) {
+					cl.show(pnlSource, "rightTriangle");
 				}
 			}
 		});
@@ -116,10 +132,10 @@ public class ConvexPolygonPanel extends ConvexShapePanel implements InputPanel {
 		this.rdoIsoscelesTriangle.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent event) {
-				if (rdoIsoscelesTriangle.isSelected()) {
-					pnlIsoscelesTriangle.setVisible(true);
-				} else {
-					pnlIsoscelesTriangle.setVisible(false);
+				JRadioButton radio = (JRadioButton)event.getSource();
+				CardLayout cl = (CardLayout)pnlSource.getLayout();
+				if (radio.isSelected()) {
+					cl.show(pnlSource, "isoscelesTriangle");
 				}
 			}
 		});
@@ -127,10 +143,10 @@ public class ConvexPolygonPanel extends ConvexShapePanel implements InputPanel {
 		this.rdoEquilateralTriangle.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent event) {
-				if (rdoEquilateralTriangle.isSelected()) {
-					pnlEquilateralTriangle.setVisible(true);
-				} else {
-					pnlEquilateralTriangle.setVisible(false);
+				JRadioButton radio = (JRadioButton)event.getSource();
+				CardLayout cl = (CardLayout)pnlSource.getLayout();
+				if (radio.isSelected()) {
+					cl.show(pnlSource, "equilateralTriangle");
 				}
 			}
 		});
@@ -138,10 +154,10 @@ public class ConvexPolygonPanel extends ConvexShapePanel implements InputPanel {
 		this.rdoUnitCircle.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent event) {
-				if (rdoUnitCircle.isSelected()) {
-					pnlUnitCirclePolygon.setVisible(true);
-				} else {
-					pnlUnitCirclePolygon.setVisible(false);
+				JRadioButton radio = (JRadioButton)event.getSource();
+				CardLayout cl = (CardLayout)pnlSource.getLayout();
+				if (radio.isSelected()) {
+					cl.show(pnlSource, "unitCirclePolygon");
 				}
 			}
 		});
@@ -149,10 +165,10 @@ public class ConvexPolygonPanel extends ConvexShapePanel implements InputPanel {
 		this.rdoArbitrary.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent event) {
-				if (rdoArbitrary.isSelected()) {
-					pnlArbitraryPolygon.setVisible(true);
-				} else {
-					pnlArbitraryPolygon.setVisible(false);
+				JRadioButton radio = (JRadioButton)event.getSource();
+				CardLayout cl = (CardLayout)pnlSource.getLayout();
+				if (radio.isSelected()) {
+					cl.show(pnlSource, "arbitraryPolygon");
 				}
 			}
 		});
@@ -160,21 +176,17 @@ public class ConvexPolygonPanel extends ConvexShapePanel implements InputPanel {
 		this.rdoFromFile.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent event) {
-				if (rdoFromFile.isSelected()) {
-					pnlFromFilePolygon.setVisible(true);
-				} else {
-					pnlFromFilePolygon.setVisible(false);
+				JRadioButton radio = (JRadioButton)event.getSource();
+				CardLayout cl = (CardLayout)pnlSource.getLayout();
+				if (radio.isSelected()) {
+					cl.show(pnlSource, "fromFilePolygon");
 				}
 			}
 		});
 		
 		// set the unit circle one as the current one
 		this.rdoArbitrary.setSelected(true);
-		this.pnlRightTriangle.setVisible(false);
-		this.pnlIsoscelesTriangle.setVisible(false);
-		this.pnlEquilateralTriangle.setVisible(false);
-		this.pnlUnitCirclePolygon.setVisible(false);
-		this.pnlFromFilePolygon.setVisible(false);
+		((CardLayout) this.pnlSource.getLayout()).show(this.pnlSource, "arbitraryPolygon");
 		
 		ButtonGroup bg = new ButtonGroup();
 		bg.add(this.rdoRightTriangle);
@@ -184,6 +196,15 @@ public class ConvexPolygonPanel extends ConvexShapePanel implements InputPanel {
 		bg.add(this.rdoFromFile);
 		bg.add(this.rdoArbitrary);
 		
+		JPanel pnlRadio = new JPanel();
+		pnlRadio.setLayout(new GridLayout(3, 2));
+		pnlRadio.add(this.rdoRightTriangle);
+		pnlRadio.add(this.rdoUnitCircle);
+		pnlRadio.add(this.rdoIsoscelesTriangle);
+		pnlRadio.add(this.rdoFromFile);
+		pnlRadio.add(this.rdoEquilateralTriangle);
+		pnlRadio.add(this.rdoArbitrary);
+		
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
 		
@@ -192,33 +213,11 @@ public class ConvexPolygonPanel extends ConvexShapePanel implements InputPanel {
 		layout.setHonorsVisibility(true);
 		
 		layout.setHorizontalGroup(layout.createParallelGroup()
-				.addComponent(this.rdoRightTriangle)
-				.addComponent(this.rdoIsoscelesTriangle)
-				.addComponent(this.rdoEquilateralTriangle)
-				.addComponent(this.rdoUnitCircle)
-				.addComponent(this.rdoFromFile)
-				.addComponent(this.rdoArbitrary)
-				
-				.addComponent(this.pnlRightTriangle)
-				.addComponent(this.pnlIsoscelesTriangle)
-				.addComponent(this.pnlEquilateralTriangle)
-				.addComponent(this.pnlUnitCirclePolygon)
-				.addComponent(this.pnlFromFilePolygon)
-				.addComponent(this.pnlArbitraryPolygon));
+				.addComponent(pnlRadio)
+				.addComponent(this.pnlSource));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addComponent(this.rdoRightTriangle)
-				.addComponent(this.rdoIsoscelesTriangle)
-				.addComponent(this.rdoEquilateralTriangle)
-				.addComponent(this.rdoUnitCircle)
-				.addComponent(this.rdoFromFile)
-				.addComponent(this.rdoArbitrary)
-				
-				.addComponent(this.pnlRightTriangle)
-				.addComponent(this.pnlIsoscelesTriangle)
-				.addComponent(this.pnlEquilateralTriangle)
-				.addComponent(this.pnlUnitCirclePolygon)
-				.addComponent(this.pnlFromFilePolygon)
-				.addComponent(this.pnlArbitraryPolygon));
+				.addComponent(pnlRadio, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+				.addComponent(this.pnlSource));
 	}
 	
 	/* (non-Javadoc)

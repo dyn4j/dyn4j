@@ -24,7 +24,6 @@
  */
 package org.dyn4j.sandbox.panels;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -37,7 +36,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -55,7 +53,7 @@ import org.dyn4j.sandbox.utilities.Icons;
 /**
  * Panel used to create a polygon from a file.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class FromFileConvexHullPolygonPanel extends ConvexHullShapePanel implements InputPanel, ActionListener {
@@ -105,11 +103,8 @@ public class FromFileConvexHullPolygonPanel extends ConvexHullShapePanel impleme
 		
 		JLabel lblPreview = new JLabel("Preview", Icons.INFO, JLabel.LEFT);
 		lblPreview.setToolTipText("Shows a preview of the current shape.");
-		this.pnlPreview = new PreviewPanel(new Dimension(150, 150), null, null);
-		this.pnlPreview.setBackground(Color.WHITE);
-		this.pnlPreview.setBorder(BorderFactory.createEtchedBorder());
+		this.pnlPreview = new PreviewPanel(new Dimension(250, 225), null, null);
 		
-		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
 		layout.setHorizontalGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup()
@@ -119,16 +114,16 @@ public class FromFileConvexHullPolygonPanel extends ConvexHullShapePanel impleme
 						.addGroup(layout.createSequentialGroup()
 								.addComponent(this.txtFile)
 								.addComponent(btnBrowse))
-						.addComponent(this.pnlPreview, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(this.pnlPreview)
 						.addComponent(btnGenerate)));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblFile)
 						.addComponent(this.txtFile, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(btnBrowse, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 						.addComponent(lblPreview)
-						.addComponent(this.pnlPreview, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+						.addComponent(this.pnlPreview))
 				.addComponent(btnGenerate, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE));
 	}
 	

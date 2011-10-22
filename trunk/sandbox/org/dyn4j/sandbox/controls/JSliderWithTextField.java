@@ -24,12 +24,12 @@
  */
 package org.dyn4j.sandbox.controls;
 
-import java.awt.FlowLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import javax.swing.GroupLayout;
 import javax.swing.JFormattedTextField;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -43,7 +43,7 @@ import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
  * <p>
  * Changes from either the slider or text field will change the underlying value of this control.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class JSliderWithTextField extends JPanel implements PropertyChangeListener, ChangeListener {
@@ -93,7 +93,8 @@ public class JSliderWithTextField extends JPanel implements PropertyChangeListen
 	public JSliderWithTextField(int min, int max, int initialValue, double scale, NumberFormat format) {
 		this.min = min;
 		this.max = max;
-		this.setLayout(new FlowLayout(FlowLayout.LEFT));
+		GroupLayout layout = new GroupLayout(this);
+		this.setLayout(layout);
 		this.slider = new JSlider(JSlider.HORIZONTAL, min, max, initialValue);
 		this.slider.addChangeListener(this);
 		if (scale == 1.0) {
@@ -105,12 +106,16 @@ public class JSliderWithTextField extends JPanel implements PropertyChangeListen
 		}
 		this.textField.addPropertyChangeListener(this);
 		this.textField.addFocusListener(new SelectTextFocusListener(this.textField));
-		this.textField.setMaximumSize(this.textField.getPreferredSize());
 		this.format = format;
 		this.scale = scale;
 		this.invScale = 1.0 / scale;
-		this.add(this.slider);
-		this.add(this.textField);
+		layout.setAutoCreateGaps(true);
+		layout.setHorizontalGroup(layout.createSequentialGroup()
+				.addComponent(this.slider)
+				.addComponent(this.textField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE));
+		layout.setVerticalGroup(layout.createParallelGroup()
+				.addComponent(this.slider)
+				.addComponent(this.textField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE));
 	}
 	
 	/* (non-Javadoc)

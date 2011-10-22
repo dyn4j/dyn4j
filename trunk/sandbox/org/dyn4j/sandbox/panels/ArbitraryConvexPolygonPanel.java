@@ -24,7 +24,6 @@
  */
 package org.dyn4j.sandbox.panels;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -34,23 +33,22 @@ import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.ParallelGroup;
+import javax.swing.GroupLayout.SequentialGroup;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
-import javax.swing.GroupLayout.ParallelGroup;
-import javax.swing.GroupLayout.SequentialGroup;
 
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.sandbox.utilities.UIUtilities;
 
 /**
  * Panel used to create a polygon using arbitrary points.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class ArbitraryConvexPolygonPanel extends ConvexShapePanel implements InputPanel, ActionListener {
@@ -88,12 +86,11 @@ public class ArbitraryConvexPolygonPanel extends ConvexShapePanel implements Inp
 		this.pnlPanel = new JPanel();
 		
 		this.lblText = new JTextPane();
-		this.lblText.setBackground(null);
-		this.lblText.setFont(UIUtilities.getDefaultLabelFont());
-		this.lblText.setContentType("text");
+		this.lblText.setContentType("text/html");
+		this.lblText.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 		this.lblText.setText(
-				"A polygon must have 3 or more vertices, counter-clockwise winding, " +
-				"must be convex, and cannot have coincident vertices.");
+				"<html>A polygon must have 3 or more vertices, counter-clockwise winding, " +
+				"must be convex, and cannot have coincident vertices.</html>");
 		this.lblText.setEditable(false);
 		this.lblText.setPreferredSize(new Dimension(350, 50));
 		
@@ -107,14 +104,11 @@ public class ArbitraryConvexPolygonPanel extends ConvexShapePanel implements Inp
 			this.pointPanels.add(panel);
 		}
 		
-		this.pnlPreview = new PreviewPanel(new Dimension(150, 150), this.getPoints());
-		this.pnlPreview.setBackground(Color.WHITE);
-		this.pnlPreview.setBorder(BorderFactory.createEtchedBorder());
+		this.pnlPreview = new PreviewPanel(new Dimension(250, 225), this.getPoints());
 		
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
 		
-		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
 		layout.setHorizontalGroup(layout.createParallelGroup()
 				.addComponent(this.lblText)

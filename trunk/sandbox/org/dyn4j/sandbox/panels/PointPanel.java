@@ -42,7 +42,7 @@ import org.dyn4j.sandbox.utilities.Icons;
 /**
  * Panel used to input a point or vector.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class PointPanel extends JPanel implements ActionListener, PropertyChangeListener {
@@ -86,6 +86,9 @@ public class PointPanel extends JPanel implements ActionListener, PropertyChange
 		this.txtX.setValue(x);
 		this.txtY.setValue(y);
 		
+		this.txtX.setColumns(8);
+		this.txtY.setColumns(8);
+		
 		this.txtX.addPropertyChangeListener("value", this);
 		this.txtY.addPropertyChangeListener("value", this);
 		
@@ -108,14 +111,14 @@ public class PointPanel extends JPanel implements ActionListener, PropertyChange
 		layout.setHonorsVisibility(true);
 		
 		layout.setHorizontalGroup(layout.createSequentialGroup()
-				.addComponent(lblX)
+				.addComponent(lblX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 				.addComponent(this.txtX)
-				.addComponent(lblY)
+				.addComponent(lblY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 				.addComponent(this.txtY)
 				.addComponent(this.btnAdd, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 				.addComponent(this.btnRemove, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblX)
 						.addComponent(this.txtX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(lblY)

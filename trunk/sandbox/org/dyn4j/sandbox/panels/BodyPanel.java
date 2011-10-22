@@ -60,10 +60,10 @@ import org.dyn4j.sandbox.utilities.Icons;
 /**
  * Panel for editing a Body.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
-public class BodyPanel extends WindowSpawningPanel implements InputPanel {
+public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 	/** The version id */
 	private static final long serialVersionUID = -4580826229518550082L;
 	
@@ -218,11 +218,9 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 	
 	/**
 	 * Full constructor.
-	 * @param parent the parent window, frame or dialog 
 	 * @param body the body to edit
 	 */
-	public BodyPanel(Window parent, SandboxBody body) {
-		super(parent);
+	public BodyPanel(SandboxBody body) {
 		this.body = body;
 		this.initialize();
 	}
@@ -285,47 +283,15 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 		this.lblOutlineColor = new JLabel("Outline Color", Icons.INFO, JLabel.LEFT);
 		this.lblOutlineColor.setToolTipText("The color used when drawing an outline of this body.");
 		this.btnOutlineColor = new JButton("Select");
-		this.btnOutlineColor.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				Color c = ColorUtilities.convertColor(body.getOutlineColor());
-				Color nc = ColorDialog.show(getParentWindow(), c, false);
-				if (nc != null) {
-					// set the outline color
-					float[] color = ColorUtilities.convertColor(nc);
-					body.setOutlineColor(color);
-					// set the outline color of the color panel
-					// dont copy alpha values
-					Color dc = new Color(nc.getRed(), nc.getGreen(), nc.getBlue());
-					pnlColor.setBorder(BorderFactory.createLineBorder(dc, 4));
-					// set the foreground color of the label
-					lblSample.setForeground(ColorUtilities.getForegroundColorFromBackgroundColor(dc));
-				}
-			}
-		});
+		this.btnOutlineColor.setActionCommand("outlineColor");
+		this.btnOutlineColor.addActionListener(this);
 		
 		// fill color
 		this.lblFillColor = new JLabel("Fill Color", Icons.INFO, JLabel.LEFT);
 		this.lblFillColor.setToolTipText("The color used when filling this body.");
 		this.btnFillColor = new JButton("Select");
-		this.btnFillColor.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				Color c = ColorUtilities.convertColor(body.getFillColor());
-				Color nc = ColorDialog.show(getParentWindow(), c, false);
-				if (nc != null) {
-					// set the body fill color
-					float[] color = ColorUtilities.convertColor(nc);
-					body.setFillColor(color);
-					// set the fill color of the color panel
-					// dont copy alpha values
-					Color dc = new Color(nc.getRed(), nc.getGreen(), nc.getBlue());
-					pnlColor.setBackground(dc);
-					// set the foreground color of the label
-					lblSample.setForeground(ColorUtilities.getForegroundColorFromBackgroundColor(dc));
-				}
-			}
-		});
+		this.btnFillColor.setActionCommand("fillColor");
+		this.btnFillColor.addActionListener(this);
 		
 		// mass type
 		this.lblMassType = new JLabel("Mass Type", Icons.INFO, JLabel.LEFT);
@@ -680,20 +646,20 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 								.addGroup(layout.createParallelGroup()
 										.addComponent(this.btnOutlineColor)
 										.addComponent(this.btnFillColor))
-								.addComponent(this.pnlColor, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))));
+								.addComponent(this.pnlColor))));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblName)
 						.addComponent(this.txtName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 				.addGroup(layout.createParallelGroup()
 						.addGroup(layout.createSequentialGroup()
-								.addGroup(layout.createParallelGroup()
+								.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 										.addComponent(this.lblOutlineColor)
 										.addComponent(this.btnOutlineColor, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-								.addGroup(layout.createParallelGroup()
+								.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 										.addComponent(this.lblFillColor)
 										.addComponent(this.btnFillColor, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
-						.addComponent(this.pnlColor, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
+						.addComponent(this.pnlColor)));
 		
 		// setup the mass section
 		JPanel pnlMass = new JPanel();
@@ -722,22 +688,22 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 						.addComponent(this.txtMass)
 						.addComponent(this.txtInertia)));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblMassType)
 						.addComponent(this.cmbMassType, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblMassExplicit)
 						.addComponent(this.chkMassExplicit))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblCenter)
 						.addComponent(this.txtX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(lblX)
 						.addComponent(this.txtY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(lblY))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblMass)
 						.addComponent(this.txtMass, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblInertia)
 						.addComponent(this.txtInertia, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
 		
@@ -780,38 +746,34 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 								.addComponent(this.chkInactive)
 								.addComponent(this.chkAsleep))));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblVelocity)
-						.addGroup(layout.createSequentialGroup()
-								.addGroup(layout.createParallelGroup()
-										.addComponent(this.txtVelocityX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-										.addComponent(lblVelocityX)
-										.addComponent(this.txtVelocityY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-										.addComponent(lblVelocityY))))
-				.addGroup(layout.createParallelGroup()
+						.addComponent(this.txtVelocityX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblVelocityX)
+						.addComponent(this.txtVelocityY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblVelocityY))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblAngularVelocity)
 						.addComponent(this.txtAngularVelocity, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblForce)
-						.addGroup(layout.createSequentialGroup()
-								.addGroup(layout.createParallelGroup()
-										.addComponent(this.txtForceX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-										.addComponent(lblForceX)
-										.addComponent(this.txtForceY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-										.addComponent(lblForceY))))
-				.addGroup(layout.createParallelGroup()
+						.addComponent(this.txtForceX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblForceX)
+						.addComponent(this.txtForceY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblForceY))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblTorque)
 						.addComponent(this.txtTorque, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblLinearDamping)
 						.addComponent(this.sldLinearDamping, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblAngularDamping)
 						.addComponent(this.sldAngularDamping, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblGravityScale)
 						.addComponent(this.sldGravityScale, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblState)
 						.addComponent(this.chkInactive, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(this.chkAsleep, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
@@ -833,10 +795,10 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 						.addComponent(this.chkAllowAutoSleep)
 						.addComponent(this.chkBullet)));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblAllowAutoSleep)
 						.addComponent(this.chkAllowAutoSleep, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblBullet)
 						.addComponent(this.chkBullet, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
 		
@@ -847,7 +809,6 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 		
 		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
-		
 		layout.setHorizontalGroup(layout.createParallelGroup()
 				.addComponent(pnlGeneral)
 				.addComponent(pnlMass)
@@ -866,6 +827,46 @@ public class BodyPanel extends WindowSpawningPanel implements InputPanel {
 	@Override
 	public boolean isValidInput() {
 		return true;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	 */
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		String command = e.getActionCommand();
+		// check the commands
+		if (command.equalsIgnoreCase("outlineColor") || command.equalsIgnoreCase("fillColor")) {
+			// get the current color
+			Color c;
+			if (command.equalsIgnoreCase("outlineColor")) {
+				c = ColorUtilities.convertColor(this.body.getOutlineColor());
+			} else {
+				c = ColorUtilities.convertColor(this.body.getFillColor());
+			}
+			
+			// show the color selection dialog
+			Color nc = ColorDialog.show(this, c, false);
+			// make sure it wasnt canceled
+			if (nc != null) {
+				// get the color components
+				float[] color = ColorUtilities.convertColor(nc);
+				// dont copy alpha values
+				Color dc = new Color(nc.getRed(), nc.getGreen(), nc.getBlue());
+				// check for the action command
+				if (command.equalsIgnoreCase("outlineColor")) {
+					this.body.setOutlineColor(color);
+					// set the outline color of the color panel
+					this.pnlColor.setBorder(BorderFactory.createLineBorder(dc, 4));
+				} else {
+					this.body.setFillColor(color);
+					// set the fill color of the color panel
+					this.pnlColor.setBackground(dc);
+					// set the foreground color of the label
+					this.lblSample.setForeground(ColorUtilities.getForegroundColorFromBackgroundColor(dc));
+				}
+			}
+		}
 	}
 	
 	/* (non-Javadoc)

@@ -24,14 +24,12 @@
  */
 package org.dyn4j.sandbox.panels;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Window;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
 
-import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
@@ -46,7 +44,7 @@ import org.dyn4j.sandbox.utilities.Icons;
 /**
  * Panel used to create a segment shape.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class SegmentPanel extends ConvexShapePanel implements InputPanel {
@@ -157,17 +155,19 @@ public class SegmentPanel extends ConvexShapePanel implements InputPanel {
 		
 		JLabel lblPreview = new JLabel("Preview", Icons.INFO, JLabel.LEFT);
 		lblPreview.setToolTipText("Shows a preview of the current shape.");
-		this.pnlPreview = new PreviewPanel(new Dimension(150, 150), Geometry.createSegment(this.start, this.end));
-		this.pnlPreview.setBackground(Color.WHITE);
-		this.pnlPreview.setBorder(BorderFactory.createEtchedBorder());
+		this.pnlPreview = new PreviewPanel(new Dimension(250, 225), Geometry.createSegment(this.start, this.end));
+		
+		JLabel lblFiller1 = new JLabel();
+		JLabel lblFiller2 = new JLabel();
 		
 		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
-		layout.setHorizontalGroup(
-				layout.createSequentialGroup()
+		layout.setHorizontalGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup()
 						.addComponent(lblStart)
+						.addComponent(lblFiller1)
 						.addComponent(lblEnd)
+						.addComponent(lblFiller2)
 						.addComponent(lblPreview))
 				.addGroup(layout.createParallelGroup()
 						.addGroup(layout.createSequentialGroup()
@@ -182,27 +182,27 @@ public class SegmentPanel extends ConvexShapePanel implements InputPanel {
 						.addGroup(layout.createSequentialGroup()
 								.addComponent(txtEY)
 								.addComponent(lblEY))
-						.addComponent(this.pnlPreview, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
+						.addComponent(this.pnlPreview)));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblStart)
-						.addGroup(layout.createSequentialGroup()
-								.addComponent(txtSX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-								.addComponent(txtSY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-						.addGroup(layout.createSequentialGroup()
-								.addComponent(lblSX)
-								.addComponent(lblSY)))
-				.addGroup(layout.createParallelGroup()
+						.addComponent(txtSX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblSX))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(lblFiller1)
+						.addComponent(txtSY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblSY))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblEnd)
-						.addGroup(layout.createSequentialGroup()
-								.addComponent(txtEX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-								.addComponent(txtEY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-						.addGroup(layout.createSequentialGroup()
-								.addComponent(lblEX)
-								.addComponent(lblEY)))
-				.addGroup(layout.createParallelGroup()
+						.addComponent(txtEX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblEX))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(lblFiller2)
+						.addComponent(txtEY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblEY))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 						.addComponent(lblPreview)
-						.addComponent(this.pnlPreview, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
+						.addComponent(this.pnlPreview)));
 	}
 	
 	/* (non-Javadoc)

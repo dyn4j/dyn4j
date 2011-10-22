@@ -29,7 +29,7 @@ import java.awt.Color;
 /**
  * Utility class to handle colors for both OpenGL and Java.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class ColorUtilities {
@@ -128,5 +128,19 @@ public class ColorUtilities {
 		float b = (float)Math.random() * multiplier + offset;
 		
 		return new Color(r, g, b, alpha);
+	}
+	
+	/**
+	 * Returns a new color that is darker or lighter than the given color
+	 * by the given factor.
+	 * @param color the color to modify
+	 * @param factor 0.0 &le; factor &le; 1.0 darkens; 1.0 &lt; factor brightens
+	 * @return Color
+	 * @since 1.0.1
+	 */
+	public static final Color getColor(Color color, float factor) {
+		float[] hsb = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
+		hsb[2] = hsb[2] * factor;
+		return new Color(Color.HSBtoRGB(hsb[0], hsb[1], hsb[2] * factor));
 	}
 }

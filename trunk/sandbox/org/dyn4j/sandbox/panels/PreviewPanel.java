@@ -31,6 +31,7 @@ import java.awt.Graphics2D;
 import java.text.DecimalFormat;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
 import org.dyn4j.geometry.Circle;
@@ -50,7 +51,7 @@ import org.dyn4j.geometry.Wound;
  * Use the {@link #setHull(Convex, Vector2[])} method to draw a convex shape along with
  * its point cloud.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class PreviewPanel extends JPanel {
@@ -58,16 +59,13 @@ public class PreviewPanel extends JPanel {
 	private static final long serialVersionUID = 8800065059450605097L;
 
 	/** The padding between the edges of the panel and the shape in pixels */
-	private static final int PADDING = 5;
+	private static final int PADDING = 10;
 	
 	/** The padding at the top to show the scale */
 	private static final int TOP = 10;
 	
 	/** The format for the scale */
 	private static final DecimalFormat FORMAT = new DecimalFormat("0");
-	
-	/** The size of the panel */
-	private Dimension size;
 	
 	/** The convex shape to draw */
 	private Convex convex;
@@ -86,15 +84,11 @@ public class PreviewPanel extends JPanel {
 	 * @param size the size
 	 */
 	public PreviewPanel(Dimension size) {
-		this.size = size;
 		this.convex = null;
 		this.points = null;
 		this.decomposition = null;
 		this.pointCloud = null;
-		
-		this.setPreferredSize(size);
-		this.setMinimumSize(size);
-		this.setMaximumSize(size);
+		this.initialize(size);
 	}
 	
 	/**
@@ -103,15 +97,11 @@ public class PreviewPanel extends JPanel {
 	 * @param initialPoints the initial points; can be null
 	 */
 	public PreviewPanel(Dimension size, Vector2[] initialPoints) {
-		this.size = size;
 		this.points = initialPoints;
 		this.convex = null;
 		this.decomposition = null;
 		this.pointCloud = null;
-		
-		this.setPreferredSize(size);
-		this.setMinimumSize(size);
-		this.setMaximumSize(size);
+		this.initialize(size);
 	}
 	
 	/**
@@ -120,15 +110,11 @@ public class PreviewPanel extends JPanel {
 	 * @param initialShape the initial shape; can be null
 	 */
 	public PreviewPanel(Dimension size, Convex initialShape) {
-		this.size = size;
 		this.convex = initialShape;
 		this.points = null;
 		this.decomposition = null;
 		this.pointCloud = null;
-		
-		this.setPreferredSize(size);
-		this.setMinimumSize(size);
-		this.setMaximumSize(size);
+		this.initialize(size);
 	}
 	
 	/**
@@ -138,15 +124,23 @@ public class PreviewPanel extends JPanel {
 	 * @param initialPoints the initial points; can be null
 	 */
 	public PreviewPanel(Dimension size, Convex initialShape, Vector2[] initialPoints) {
-		this.size = size;
 		this.points = null;
 		this.convex = initialShape;
 		this.decomposition = null;
 		this.pointCloud = initialPoints;
-		
+		this.initialize(size);
+	}
+	
+	/**
+	 * Initializes the preview panel.
+	 * @param size the preferred size
+	 */
+	private void initialize(Dimension size) {
 		this.setPreferredSize(size);
 		this.setMinimumSize(size);
-		this.setMaximumSize(size);
+		
+		this.setBackground(Color.WHITE);
+		this.setBorder(BorderFactory.createLineBorder(this.getBackground().darker()));
 	}
 	
 	/**
@@ -201,8 +195,8 @@ public class PreviewPanel extends JPanel {
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		
-		int w = size.width;
-		int h = size.height;
+		int w = this.getSize().width;
+		int h = this.getSize().height;
 		
 		// the scale
 		double s = 0.0;

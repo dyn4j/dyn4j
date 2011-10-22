@@ -24,23 +24,26 @@
  */
 package org.dyn4j.sandbox.dialogs;
 
+import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.FlowLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.GroupLayout;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JTabbedPane;
+import javax.swing.JPanel;
 
+import org.dyn4j.sandbox.controls.BottomButtonPanel;
 import org.dyn4j.sandbox.panels.PreferencesPanel;
 import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Dialog used to configure the application preferences.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class PreferencesDialog extends JDialog implements ActionListener {
@@ -63,9 +66,7 @@ public class PreferencesDialog extends JDialog implements ActionListener {
 		this.setIconImage(Icons.PREFERENCES.getImage());
 		
 		this.pnlPreferences = new PreferencesPanel();
-		
-		JTabbedPane tabbedPane = new JTabbedPane();
-		tabbedPane.addTab("Preferences", this.pnlPreferences);
+		this.pnlPreferences.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
 		
 		JButton btnCancel = new JButton("Cancel");
 		JButton btnApply = new JButton("Apply");
@@ -74,26 +75,15 @@ public class PreferencesDialog extends JDialog implements ActionListener {
 		btnCancel.addActionListener(this);
 		btnApply.addActionListener(this);
 		
+		JPanel pnlButtons = new BottomButtonPanel();
+		pnlButtons.setLayout(new FlowLayout(FlowLayout.LEFT));
+		pnlButtons.add(btnCancel);
+		pnlButtons.add(btnApply);
+
 		Container container = this.getContentPane();
-		
-		GroupLayout layout = new GroupLayout(container);
-		container.setLayout(layout);
-		
-		layout.setAutoCreateContainerGaps(true);
-		layout.setAutoCreateGaps(true);
-		layout.setHorizontalGroup(
-				layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
-						.addComponent(tabbedPane)
-						.addGroup(layout.createSequentialGroup()
-								.addComponent(btnCancel)
-								.addComponent(btnApply))));
-		layout.setVerticalGroup(
-				layout.createSequentialGroup()
-				.addComponent(tabbedPane)
-				.addGroup(layout.createParallelGroup()
-						.addComponent(btnCancel)
-						.addComponent(btnApply)));
+		container.setLayout(new BorderLayout());
+		container.add(this.pnlPreferences, BorderLayout.CENTER);
+		container.add(pnlButtons, BorderLayout.PAGE_END);
 		
 		this.pack();
 	}

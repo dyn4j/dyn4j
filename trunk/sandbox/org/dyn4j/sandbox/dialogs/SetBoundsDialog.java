@@ -24,14 +24,17 @@
  */
 package org.dyn4j.sandbox.dialogs;
 
+import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.FlowLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.GroupLayout;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import org.dyn4j.collision.RectangularBounds;
@@ -39,6 +42,7 @@ import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.sandbox.controls.BottomButtonPanel;
 import org.dyn4j.sandbox.panels.RectanglePanel;
 import org.dyn4j.sandbox.panels.TransformPanel;
 import org.dyn4j.sandbox.utilities.Icons;
@@ -46,7 +50,7 @@ import org.dyn4j.sandbox.utilities.Icons;
 /**
  * Dialog to create a new body with an initial fixture/shape.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class SetBoundsDialog extends JDialog implements ActionListener {
@@ -72,11 +76,6 @@ public class SetBoundsDialog extends JDialog implements ActionListener {
 		
 		this.setIconImage(Icons.SET_BOUNDS.getImage());
 		
-		Container container = this.getContentPane();
-		
-		GroupLayout layout = new GroupLayout(container);
-		container.setLayout(layout);
-		
 		JTabbedPane tabs = new JTabbedPane();
 		
 		Rectangle r = new Rectangle(10.0, 10.0);
@@ -89,6 +88,7 @@ public class SetBoundsDialog extends JDialog implements ActionListener {
 		this.pnlRectangle = new RectanglePanel(r);
 		this.pnlTransform = new TransformPanel(t);
 		
+		tabs.setBorder(BorderFactory.createEmptyBorder(7, 0, 0, 0));
 		tabs.addTab("Bounds", this.pnlRectangle);
 		tabs.addTab("Transform", this.pnlTransform);
 		
@@ -99,21 +99,15 @@ public class SetBoundsDialog extends JDialog implements ActionListener {
 		btnCreate.addActionListener(this);
 		btnCancel.addActionListener(this);
 		
-		layout.setAutoCreateContainerGaps(true);
-		layout.setAutoCreateGaps(true);
-		layout.setHorizontalGroup(
-				layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
-						.addComponent(tabs)
-						.addGroup(layout.createSequentialGroup()
-								.addComponent(btnCancel)
-								.addComponent(btnCreate))));
-		layout.setVerticalGroup(
-				layout.createSequentialGroup()
-				.addComponent(tabs)
-				.addGroup(layout.createParallelGroup()
-						.addComponent(btnCancel)
-						.addComponent(btnCreate)));
+		JPanel pnlButtons = new BottomButtonPanel();
+		pnlButtons.setLayout(new FlowLayout(FlowLayout.LEFT));
+		pnlButtons.add(btnCancel);
+		pnlButtons.add(btnCreate);
+
+		Container container = this.getContentPane();
+		container.setLayout(new BorderLayout());
+		container.add(tabs, BorderLayout.CENTER);
+		container.add(pnlButtons, BorderLayout.PAGE_END);
 		
 		this.pack();
 	}

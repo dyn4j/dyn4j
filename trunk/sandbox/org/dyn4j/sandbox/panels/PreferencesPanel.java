@@ -31,11 +31,10 @@ import java.awt.event.MouseListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.GroupLayout.Alignment;
 import javax.swing.border.Border;
 
 import org.dyn4j.sandbox.Preferences;
@@ -46,7 +45,7 @@ import org.dyn4j.sandbox.utilities.Icons;
 /**
  * Panel used to configure the application preferences.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class PreferencesPanel extends JPanel implements MouseListener {
@@ -161,15 +160,12 @@ public class PreferencesPanel extends JPanel implements MouseListener {
 	/** The original border of the currently hovered over panel */
 	private Border originalBorder;
 	
-	/** The new border for the panel who is being hovered over */
-	private Border hoverBorder = BorderFactory.createLineBorder(Color.MAGENTA);
-	
 	/**
 	 * Default constructor.
 	 */
 	public PreferencesPanel() {
 		// create the size for the color panels
-		Dimension size = new Dimension(15, 15);
+		Dimension size = new Dimension(13, 13);
 		Dimension msize = new Dimension(200, 0);
 		
 		JLabel lblRandomColors = new JLabel("Random Body Colors", Icons.INFO, JLabel.LEFT);
@@ -543,7 +539,6 @@ public class PreferencesPanel extends JPanel implements MouseListener {
 		layout = new GroupLayout(this);
 		this.setLayout(layout);
 		
-		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
 		layout.setHorizontalGroup(layout.createParallelGroup()
 				.addComponent(pnlGeneral)
@@ -567,7 +562,10 @@ public class PreferencesPanel extends JPanel implements MouseListener {
 		JPanel panel = (JPanel)e.getSource();
 		// save the border
 		this.originalBorder = panel.getBorder();
-		panel.setBorder(this.hoverBorder);
+		// create a new border to show highlight
+		Border hoverBorder = BorderFactory.createLineBorder(Color.WHITE);
+		// set the border
+		panel.setBorder(hoverBorder);
 	}
 	
 	/* (non-Javadoc)
@@ -586,7 +584,7 @@ public class PreferencesPanel extends JPanel implements MouseListener {
 	@Override
 	public void mousePressed(MouseEvent e) {
 		JPanel panel = (JPanel)e.getSource();
-		Color color = ColorDialog.show(JOptionPane.getFrameForComponent(this), panel.getBackground(), false);
+		Color color = ColorDialog.show(this, panel.getBackground(), false);
 		if (color != null) {
 			panel.setBackground(color);
 		}

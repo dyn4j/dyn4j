@@ -24,7 +24,6 @@
  */
 package org.dyn4j.sandbox.panels;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -32,14 +31,14 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.ParallelGroup;
+import javax.swing.GroupLayout.SequentialGroup;
+import javax.swing.BorderFactory;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
-import javax.swing.GroupLayout.ParallelGroup;
-import javax.swing.GroupLayout.SequentialGroup;
 
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Vector2;
@@ -49,7 +48,7 @@ import org.dyn4j.sandbox.utilities.UIUtilities;
 /**
  * Panel used to create a non-convex polygon using arbitrary points.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class ArbitraryNonConvexPolygonPanel extends NonConvexShapePanel implements InputPanel, ActionListener {
@@ -92,10 +91,10 @@ public class ArbitraryNonConvexPolygonPanel extends NonConvexShapePanel implemen
 		this.pnlPanel = new JPanel();
 		
 		this.lblText = new JTextPane();
-		this.lblText.setBackground(null);
+		this.lblText.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 		this.lblText.setFont(UIUtilities.getDefaultLabelFont());
-		this.lblText.setContentType("text");
-		this.lblText.setText("A simple polygon without holes or crossing edges.");
+		this.lblText.setContentType("text/html");
+		this.lblText.setText("<html>A simple polygon without holes or crossing edges.</html>");
 		this.lblText.setEditable(false);
 		
 		this.scrPane = new JScrollPane(this.pnlPanel);
@@ -108,24 +107,21 @@ public class ArbitraryNonConvexPolygonPanel extends NonConvexShapePanel implemen
 			this.pointPanels.add(panel);
 		}
 		
-		this.pnlPreview = new PreviewPanel(new Dimension(150, 150));
+		this.pnlPreview = new PreviewPanel(new Dimension(250, 225));
 		this.pnlPreview.setDecomposition(this.decomposer.decompose(DEFAULT_POLYGON));
-		this.pnlPreview.setBackground(Color.WHITE);
-		this.pnlPreview.setBorder(BorderFactory.createEtchedBorder());
 		
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
 		
-		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
 		layout.setHorizontalGroup(layout.createParallelGroup()
 				.addComponent(this.lblText)
 				.addComponent(this.scrPane)
-				.addComponent(this.pnlPreview, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE));
+				.addComponent(this.pnlPreview));
 		layout.setVerticalGroup(layout.createSequentialGroup()
 				.addComponent(this.lblText, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 				.addComponent(this.scrPane, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
-				.addComponent(this.pnlPreview, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE));
+				.addComponent(this.pnlPreview));
 		
 		this.createLayout();
 	}
@@ -187,8 +183,10 @@ public class ArbitraryNonConvexPolygonPanel extends NonConvexShapePanel implemen
 				this.createLayout();
 				try {
 					// attempt to refresh the decomposition
-					pnlPreview.setDecomposition(this.decomposer.decompose(this.getPoints()));
-				} catch (Exception e) {}
+					this.pnlPreview.setDecomposition(this.decomposer.decompose(this.getPoints()));
+				} catch (Exception e) {
+					this.pnlPreview.setPoints(this.getPoints());
+				}
 			} else if ("remove".equals(event.getActionCommand())) {
 				// remove the point panel from the list
 				this.pointPanels.remove(index);
@@ -196,14 +194,18 @@ public class ArbitraryNonConvexPolygonPanel extends NonConvexShapePanel implemen
 				this.createLayout();
 				try {
 					// attempt to refresh the decomposition
-					pnlPreview.setDecomposition(this.decomposer.decompose(this.getPoints()));
-				} catch (Exception e) {}
+					this.pnlPreview.setDecomposition(this.decomposer.decompose(this.getPoints()));
+				} catch (Exception e) {
+					this.pnlPreview.setPoints(this.getPoints());
+				}
 			} else if ("changed".equals(event.getActionCommand())) {
 				// a value has changed
 				try {
 					// attempt to refresh the decomposition
-					pnlPreview.setDecomposition(this.decomposer.decompose(this.getPoints()));
-				} catch (Exception e) {}
+					this.pnlPreview.setDecomposition(this.decomposer.decompose(this.getPoints()));
+				} catch (Exception e) {
+					this.pnlPreview.setPoints(this.getPoints());
+				}
 			}
 		}
 	}
@@ -214,6 +216,13 @@ public class ArbitraryNonConvexPolygonPanel extends NonConvexShapePanel implemen
 	 */
 	public void setDecomposer(Decomposer decomposer) {
 		this.decomposer = decomposer;
+		// rerun the decomposition on the current point set
+		try {
+			// attempt to refresh the decomposition
+			this.pnlPreview.setDecomposition(this.decomposer.decompose(this.getPoints()));
+		} catch (Exception e) {
+			this.pnlPreview.setPoints(this.getPoints());
+		}
 	}
 	
 	/**
@@ -259,7 +268,11 @@ public class ArbitraryNonConvexPolygonPanel extends NonConvexShapePanel implemen
 		try {
 			this.decomposer.decompose(points);
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(owner, e.getMessage(), "Notice", JOptionPane.ERROR_MESSAGE);
+			String message = e.getMessage();
+			if (message == null || message.isEmpty()) {
+				message = "A simple polygon cannot have crossing edges.";
+			}
+			JOptionPane.showMessageDialog(owner, message, "Notice", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 	

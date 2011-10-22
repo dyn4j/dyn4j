@@ -29,7 +29,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Image;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -39,9 +38,11 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
@@ -88,15 +89,16 @@ import org.dyn4j.sandbox.dialogs.EditJointDialog;
 import org.dyn4j.sandbox.dialogs.EditWorldDialog;
 import org.dyn4j.sandbox.dialogs.SetBoundsDialog;
 import org.dyn4j.sandbox.events.BodyActionEvent;
+import org.dyn4j.sandbox.utilities.ControlUtilities;
 import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to display and manage the World object using a JTree interface.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
-public class WorldTreePanel extends WindowSpawningPanel implements MouseListener, ActionListener {
+public class WorldTreePanel extends JPanel implements MouseListener, ActionListener {
 	/** The version id */
 	private static final long serialVersionUID = 4557154805670204181L;
 	
@@ -149,11 +151,9 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 	 * Full constructor.
 	 * <p>
 	 * Creates a JTree inside a JPanel that is used to interact with the objects in the world.
-	 * @param parent the parent window
 	 * @param world the world
 	 */
-	public WorldTreePanel(Window parent, World world) {
-		super(parent);
+	public WorldTreePanel(World world) {
 		this.world = world;
 		
 		this.root = new DefaultMutableTreeNode(world, true);
@@ -567,6 +567,24 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 		if (e.isPopupTrigger()) this.showContextMenu(e);
 	}
 	
+	/* (non-Javadoc)
+	 * @see javax.swing.JPanel#updateUI()
+	 */
+	@Override
+	public void updateUI() {
+		super.updateUI();
+		// also update the context menus
+		if (this.popBody != null) SwingUtilities.updateComponentTreeUI(this.popBody);
+		if (this.popBodyFolder != null) SwingUtilities.updateComponentTreeUI(this.popBodyFolder);
+		if (this.popBounds != null) SwingUtilities.updateComponentTreeUI(this.popBounds);
+		if (this.popFixture != null) SwingUtilities.updateComponentTreeUI(this.popFixture);
+		if (this.popJoint != null) SwingUtilities.updateComponentTreeUI(this.popJoint);
+		if (this.popJointFolder != null) SwingUtilities.updateComponentTreeUI(this.popJointFolder);
+		if (this.popWorld != null) SwingUtilities.updateComponentTreeUI(this.popWorld);
+		// reset the cell renderer
+		if (this.tree != null) this.tree.setCellRenderer(new Renderer());
+	}
+	
 	/**
 	 * Shows a context menu at the location of the click inside the JTree.
 	 * @param event the event
@@ -807,7 +825,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 	 */
 	private void clearAllAction() {
 		// make sure they are sure
-		int choice = JOptionPane.showConfirmDialog(this.getParentWindow(), "Are you sure you want to remove all bodies and joints?", "Clear Bodies and Joints", JOptionPane.YES_NO_CANCEL_OPTION);
+		int choice = JOptionPane.showConfirmDialog(ControlUtilities.getParentWindow(this), "Are you sure you want to remove all bodies and joints?", "Clear Bodies and Joints", JOptionPane.YES_NO_CANCEL_OPTION);
 		// check the user's choice
 		if (choice == JOptionPane.YES_OPTION) {
 			// remove it all from the world
@@ -829,7 +847,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 	 * Shows an edit world dialog.
 	 */
 	private void editWorldAction() {
-		EditWorldDialog.show(this.getParentWindow(), this.world);
+		EditWorldDialog.show(ControlUtilities.getParentWindow(this), this.world);
 		
 		this.model.nodeChanged(this.root);
 	}
@@ -846,9 +864,9 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 		}
 		RectangularBounds b = null;
 		if (bounds instanceof NullBounds) {
-			b = SetBoundsDialog.show(this.getParentWindow(), null);
+			b = SetBoundsDialog.show(ControlUtilities.getParentWindow(this), null);
 		} else {
-			b = SetBoundsDialog.show(this.getParentWindow(), (RectangularBounds)bounds);
+			b = SetBoundsDialog.show(ControlUtilities.getParentWindow(this), (RectangularBounds)bounds);
 		}
 		if (b != null) {
 			synchronized (this.world) {
@@ -878,7 +896,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 	 */
 	private void addBodyAction() {
 		// create the body by showing the dialogs
-		SandboxBody body = AddBodyDialog.show(this.getParentWindow(), "Add New Body");
+		SandboxBody body = AddBodyDialog.show(ControlUtilities.getParentWindow(this), "Add New Body");
 		// make sure the user didn't cancel the operation
 		if (body != null) {
 			// add the body to the world
@@ -911,7 +929,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 				// get the body from the node
 				SandboxBody body = (SandboxBody)node.getUserObject();
 				// pass the body to the edit dialog
-				EditBodyDialog.show(this.getParentWindow(), "Edit Body", body);
+				EditBodyDialog.show(ControlUtilities.getParentWindow(this), "Edit Body", body);
 			}
 		}
 	}
@@ -933,7 +951,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 				// get the body from the node
 				SandboxBody body = (SandboxBody)node.getUserObject();
 				// make sure they are sure
-				int choice = JOptionPane.showConfirmDialog(this.getParentWindow(), "Are you sure you want to remove " + body.getName() + "?", "Remove Body", JOptionPane.YES_NO_CANCEL_OPTION);
+				int choice = JOptionPane.showConfirmDialog(ControlUtilities.getParentWindow(this), "Are you sure you want to remove " + body.getName() + "?", "Remove Body", JOptionPane.YES_NO_CANCEL_OPTION);
 				// check the user's choice
 				if (choice == JOptionPane.YES_OPTION) {
 					// remove the body from the world
@@ -968,7 +986,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 				// get the body from the node
 				SandboxBody body = (SandboxBody)node.getUserObject();
 				// create the fixture by showing the dialogs (don't show the local transform panel if its the first fixture)
-				BodyFixture fixture = AddConvexFixtureDialog.show(this.getParentWindow(), icon, "Add New Fixture", shapePanel);
+				BodyFixture fixture = AddConvexFixtureDialog.show(ControlUtilities.getParentWindow(this), icon, "Add New Fixture", shapePanel);
 				// make sure the user didnt cancel the operation
 				if (fixture != null) {
 					// add the fixture to the body
@@ -1007,7 +1025,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 				// get the body from the node
 				SandboxBody body = (SandboxBody)node.getUserObject();
 				// create the fixture by showing the dialogs (don't show the local transform panel if its the first fixture)
-				BodyFixture fixture = AddConvexHullFixtureDialog.show(this.getParentWindow());
+				BodyFixture fixture = AddConvexHullFixtureDialog.show(ControlUtilities.getParentWindow(this));
 				// make sure the user didnt cancel the operation
 				if (fixture != null) {
 					// add the fixture to the body
@@ -1050,7 +1068,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 				// get the fixture from the node
 				BodyFixture fixture = (BodyFixture)node.getUserObject();
 				// make sure they are sure
-				int choice = JOptionPane.showConfirmDialog(this.getParentWindow(), "Are you sure you want to remove " + fixture.getUserData() + " from " + body.getName() + "?", "Remove Fixture", JOptionPane.YES_NO_CANCEL_OPTION);
+				int choice = JOptionPane.showConfirmDialog(ControlUtilities.getParentWindow(this), "Are you sure you want to remove " + fixture.getUserData() + " from " + body.getName() + "?", "Remove Fixture", JOptionPane.YES_NO_CANCEL_OPTION);
 				// check the user's choice
 				if (choice == JOptionPane.YES_OPTION) {
 					// remove the body from the world
@@ -1087,7 +1105,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 				// get the body from the node
 				SandboxBody body = (SandboxBody)node.getUserObject();
 				// make sure they are sure
-				int choice = JOptionPane.showConfirmDialog(this.getParentWindow(), "Are you sure you want to remove all the fixtures from " + body.getName() + "?", "Remove All Fixtures", JOptionPane.YES_NO_CANCEL_OPTION);
+				int choice = JOptionPane.showConfirmDialog(ControlUtilities.getParentWindow(this), "Are you sure you want to remove all the fixtures from " + body.getName() + "?", "Remove All Fixtures", JOptionPane.YES_NO_CANCEL_OPTION);
 				// check the user's choice
 				if (choice == JOptionPane.YES_OPTION) {
 					// remove the body from the world
@@ -1139,7 +1157,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 					icon = Icons.EDIT_POLYGON.getImage();
 				}
 				// make sure they are sure
-				EditFixtureDialog.show(this.getParentWindow(), icon, "Edit Fixture", body, fixture);
+				EditFixtureDialog.show(ControlUtilities.getParentWindow(this), icon, "Edit Fixture", body, fixture);
 			}
 		}
 	}
@@ -1155,14 +1173,14 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 		SandboxBody[] bodies = this.getBodies();
 		// check the joint class type
 		if (bodies == null || bodies.length == 0 || (clazz != MouseJoint.class && bodies.length == 1)) {
-			JOptionPane.showMessageDialog(this.getParentWindow(),
+			JOptionPane.showMessageDialog(ControlUtilities.getParentWindow(this),
 					"The world must contain at least 1 body" +
 					"\nbefore a mouse joint can be added and" +
 					"\nat least 2 bodies for all other joints.", "Notice", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		
-		Joint joint = AddJointDialog.show(this.getParentWindow(), bodies, clazz);
+		Joint joint = AddJointDialog.show(ControlUtilities.getParentWindow(this), bodies, clazz);
 		if (joint != null) {
 			// add the joint to the world
 			synchronized (this.world) {
@@ -1192,7 +1210,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 				// get the joint from the node
 				Joint joint = (Joint)node.getUserObject();
 				// show the right dialog
-				EditJointDialog.show(this.getParentWindow(), joint);
+				EditJointDialog.show(ControlUtilities.getParentWindow(this), joint);
 			}
 		}
 	}
@@ -1214,7 +1232,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 				// get the joint from the node
 				Joint joint = (Joint)node.getUserObject();
 				// make sure they are sure
-				int choice = JOptionPane.showConfirmDialog(this.getParentWindow(), "Are you sure you want to remove " + joint.getUserData() + "?", "Remove Joint", JOptionPane.YES_NO_CANCEL_OPTION);
+				int choice = JOptionPane.showConfirmDialog(ControlUtilities.getParentWindow(this), "Are you sure you want to remove " + joint.getUserData() + "?", "Remove Joint", JOptionPane.YES_NO_CANCEL_OPTION);
 				// check the user's choice
 				if (choice == JOptionPane.YES_OPTION) {
 					// remove the joint from the world
@@ -1246,7 +1264,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 				// get the body from the node
 				SandboxBody body = (SandboxBody)node.getUserObject();
 				// show a dialog to create the fixtures
-				List<BodyFixture> fixtures = AddNonConvexFixtureDialog.show(this.getParentWindow(), Icons.ADD_NON_CONVEX_POLYGON.getImage(), "Add Non-Convex Polygon Fixtures");
+				List<BodyFixture> fixtures = AddNonConvexFixtureDialog.show(ControlUtilities.getParentWindow(this), Icons.ADD_NON_CONVEX_POLYGON.getImage(), "Add Non-Convex Polygon Fixtures");
 				// make sure the user didnt cancel the operation
 				if (fixtures != null) {
 					// add the fixture to the body
@@ -1288,7 +1306,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 				// get the body from the node
 				SandboxBody body = (SandboxBody)node.getUserObject();
 				// show the force input dialog
-				Vector2 f = ApplyForceDialog.show(this.getParentWindow());
+				Vector2 f = ApplyForceDialog.show(ControlUtilities.getParentWindow(this));
 				// make sure the user accepted the input
 				if (f != null) {
 					synchronized (this.world) {
@@ -1314,7 +1332,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 				// get the body from the node
 				SandboxBody body = (SandboxBody)node.getUserObject();
 				// show the torque input dialog
-				double torque = ApplyTorqueDialog.show(this.getParentWindow());
+				double torque = ApplyTorqueDialog.show(ControlUtilities.getParentWindow(this));
 				// check if it was cancelled
 				if (torque != 0.0) {
 					// apply it to the body
@@ -1341,7 +1359,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 				// get the body from the node
 				SandboxBody body = (SandboxBody)node.getUserObject();
 				// show the torque input dialog
-				Vector2[] forcePoint = ApplyForceAtPointDialog.show(this.getParentWindow());
+				Vector2[] forcePoint = ApplyForceAtPointDialog.show(ControlUtilities.getParentWindow(this));
 				// check if it was cancelled
 				if (forcePoint != null) {
 					// apply it to the body
@@ -1370,7 +1388,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 				// get the body from the node
 				SandboxBody body = (SandboxBody)node.getUserObject();
 				// make sure they are sure
-				int choice = JOptionPane.showConfirmDialog(this.getParentWindow(), "Are you sure you want to clear the force accumulator for " + body.getName() + "?", "Clear Force Accumulator", JOptionPane.YES_NO_CANCEL_OPTION);
+				int choice = JOptionPane.showConfirmDialog(ControlUtilities.getParentWindow(this), "Are you sure you want to clear the force accumulator for " + body.getName() + "?", "Clear Force Accumulator", JOptionPane.YES_NO_CANCEL_OPTION);
 				// check the user's choice
 				if (choice == JOptionPane.YES_OPTION) {
 					// clear only the force accumulator
@@ -1397,7 +1415,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 				// get the body from the node
 				SandboxBody body = (SandboxBody)node.getUserObject();
 				// make sure they are sure
-				int choice = JOptionPane.showConfirmDialog(this.getParentWindow(), "Are you sure you want to clear the torque accumulator for " + body.getName() + "?", "Clear Torque Accumulator", JOptionPane.YES_NO_CANCEL_OPTION);
+				int choice = JOptionPane.showConfirmDialog(ControlUtilities.getParentWindow(this), "Are you sure you want to clear the torque accumulator for " + body.getName() + "?", "Clear Torque Accumulator", JOptionPane.YES_NO_CANCEL_OPTION);
 				// check the user's choice
 				if (choice == JOptionPane.YES_OPTION) {
 					// clear only the force accumulator
@@ -1414,7 +1432,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 	 */
 	private void removeAllBodies() {
 		// make sure they are sure
-		int choice = JOptionPane.showConfirmDialog(this.getParentWindow(), "Are you sure you want to remove all bodies?\n(This will remove all joints as well)", "Remove All Bodies", JOptionPane.YES_NO_CANCEL_OPTION);
+		int choice = JOptionPane.showConfirmDialog(ControlUtilities.getParentWindow(this), "Are you sure you want to remove all bodies?\n(This will remove all joints as well)", "Remove All Bodies", JOptionPane.YES_NO_CANCEL_OPTION);
 		// check the user's choice
 		if (choice == JOptionPane.YES_OPTION) {
 			// clear only the force accumulator
@@ -1440,7 +1458,7 @@ public class WorldTreePanel extends WindowSpawningPanel implements MouseListener
 	 */
 	private void removeAllJoints() {
 		// make sure they are sure
-		int choice = JOptionPane.showConfirmDialog(this.getParentWindow(), "Are you sure you want to remove all joints?", "Remove All Joints", JOptionPane.YES_NO_CANCEL_OPTION);
+		int choice = JOptionPane.showConfirmDialog(ControlUtilities.getParentWindow(this), "Are you sure you want to remove all joints?", "Remove All Joints", JOptionPane.YES_NO_CANCEL_OPTION);
 		// check the user's choice
 		if (choice == JOptionPane.YES_OPTION) {
 			// clear only the force accumulator

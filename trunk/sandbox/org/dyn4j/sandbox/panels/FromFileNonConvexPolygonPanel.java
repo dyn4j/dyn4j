@@ -24,7 +24,6 @@
  */
 package org.dyn4j.sandbox.panels;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -37,7 +36,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -55,7 +53,7 @@ import org.dyn4j.sandbox.utilities.Icons;
 /**
  * Panel used to create a polygon from a file.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class FromFileNonConvexPolygonPanel extends NonConvexShapePanel implements InputPanel, ActionListener {
@@ -69,8 +67,11 @@ public class FromFileNonConvexPolygonPanel extends NonConvexShapePanel implement
 	private PreviewPanel pnlPreview;
 
 	/** The decomposotion algorithm */
-	private Decomposer decomposer = null;
+	private Decomposer decomposer;
 
+	/** The read-in vertices */
+	private Vector2[] vertices;
+	
 	/** The decomposed polygon */
 	private List<Convex> decomposition;
 	
@@ -102,11 +103,8 @@ public class FromFileNonConvexPolygonPanel extends NonConvexShapePanel implement
 		
 		JLabel lblPreview = new JLabel("Preview", Icons.INFO, JLabel.LEFT);
 		lblPreview.setToolTipText("Shows a preview of the current shape.");
-		this.pnlPreview = new PreviewPanel(new Dimension(150, 150));
-		this.pnlPreview.setBackground(Color.WHITE);
-		this.pnlPreview.setBorder(BorderFactory.createEtchedBorder());
+		this.pnlPreview = new PreviewPanel(new Dimension(250, 225));
 		
-		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
 		layout.setHorizontalGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup()
@@ -116,16 +114,16 @@ public class FromFileNonConvexPolygonPanel extends NonConvexShapePanel implement
 						.addGroup(layout.createSequentialGroup()
 								.addComponent(this.txtFile)
 								.addComponent(btnBrowse))
-						.addComponent(this.pnlPreview, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(this.pnlPreview)
 						.addComponent(btnGenerate)));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblFile)
 						.addComponent(this.txtFile, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(btnBrowse, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 						.addComponent(lblPreview)
-						.addComponent(this.pnlPreview, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+						.addComponent(this.pnlPreview))
 				.addComponent(btnGenerate, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE));
 	}
 	
@@ -158,11 +156,11 @@ public class FromFileNonConvexPolygonPanel extends NonConvexShapePanel implement
 						}
 					}
 					// create the polygon
-					Vector2[] vertices = new Vector2[points.size()];
-					points.toArray(vertices);
+					this.vertices = new Vector2[points.size()];
+					points.toArray(this.vertices);
 					
-					vertices = Geometry.cleanse(vertices);
-					this.decomposition = this.decomposer.decompose(vertices);
+					this.vertices = Geometry.cleanse(this.vertices);
+					this.decomposition = this.decomposer.decompose(this.vertices);
 					
 					// set the preview panel to the new points
 					this.pnlPreview.setDecomposition(this.decomposition);
@@ -174,17 +172,28 @@ public class FromFileNonConvexPolygonPanel extends NonConvexShapePanel implement
 							"cannot exist exception on comment(#) lines.", "Notice", JOptionPane.ERROR_MESSAGE);
 				} catch (IllegalArgumentException e) {
 					// the file didnt contain something correctly
-					JOptionPane.showMessageDialog(this, "The file does not contain a simple polygon without holes.", "Notice", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(this, "The file does not contain a simple polygon without holes and crossing edges.", "Notice", JOptionPane.ERROR_MESSAGE);
+					this.vertices = null;
 				} catch (ArrayIndexOutOfBoundsException e) {
 					// file format not correct
 					JOptionPane.showMessageDialog(this, "The file is not the right format.  Each line should contain two " +
 							"numbers separated by one or many whitespace characters.", "Notice", JOptionPane.ERROR_MESSAGE);
+					this.vertices = null;
 				} catch (FileNotFoundException e) {
 					// file not found
 					JOptionPane.showMessageDialog(this, "Could not find the specified file: " + file.getAbsolutePath(), "Notice", JOptionPane.ERROR_MESSAGE);
 				} catch (IOException e) {
 					// failure to read
 					JOptionPane.showMessageDialog(this, "An IO exception occurred while reading the file.", "Notice", JOptionPane.ERROR_MESSAGE);
+				} catch (Exception e) {
+					// some other failure
+					// get the message from the exception
+					String message = e.getMessage();
+					if (message == null || message.isEmpty()) {
+						message = "A simple polygon cannot have crossing edges.";
+					}
+					JOptionPane.showMessageDialog(this, message, "Notice", JOptionPane.ERROR_MESSAGE);
+					this.vertices = null;
 				}
 			}
 		} else {
@@ -211,6 +220,13 @@ public class FromFileNonConvexPolygonPanel extends NonConvexShapePanel implement
 	 */
 	public void setDecomposer(Decomposer decomposer) {
 		this.decomposer = decomposer;
+		// rerun the decomposition on the current point set
+		try {
+			// attempt to refresh the decomposition
+			this.decomposition = this.decomposer.decompose(this.vertices);
+			// show it in the preview panel
+			this.pnlPreview.setDecomposition(this.decomposition);
+		} catch (Exception e) {}
 	}
 	
 	/**

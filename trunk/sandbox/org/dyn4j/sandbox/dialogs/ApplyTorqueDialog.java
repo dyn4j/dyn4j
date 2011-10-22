@@ -24,22 +24,25 @@
  */
 package org.dyn4j.sandbox.dialogs;
 
+import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.FlowLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JPanel;
 
+import org.dyn4j.sandbox.controls.BottomButtonPanel;
 import org.dyn4j.sandbox.panels.TorquePanel;
 import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Dialog used to accept a torque input from the user.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class ApplyTorqueDialog extends JDialog implements ActionListener {
@@ -76,23 +79,15 @@ public class ApplyTorqueDialog extends JDialog implements ActionListener {
 		this.btnApply.setActionCommand("apply");
 		this.btnApply.addActionListener(this);
 		
+		JPanel pnlButtons = new BottomButtonPanel();
+		pnlButtons.setLayout(new FlowLayout(FlowLayout.LEFT));
+		pnlButtons.add(this.btnCancel);
+		pnlButtons.add(this.btnApply);
+
 		Container container = this.getContentPane();
-		GroupLayout layout = new GroupLayout(container);
-		container.setLayout(layout);
-		
-		layout.setAutoCreateContainerGaps(true);
-		layout.setAutoCreateGaps(true);
-		
-		layout.setHorizontalGroup(layout.createParallelGroup()
-				.addComponent(this.torquePanel)
-				.addGroup(layout.createSequentialGroup()
-						.addComponent(this.btnCancel)
-						.addComponent(this.btnApply)));
-		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addComponent(this.torquePanel)
-				.addGroup(layout.createParallelGroup()
-						.addComponent(this.btnCancel)
-						.addComponent(this.btnApply)));
+		container.setLayout(new BorderLayout());
+		container.add(this.torquePanel, BorderLayout.CENTER);
+		container.add(pnlButtons, BorderLayout.PAGE_END);
 		
 		this.pack();
 	}

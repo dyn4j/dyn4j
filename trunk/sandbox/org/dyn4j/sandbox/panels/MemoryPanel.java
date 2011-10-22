@@ -25,7 +25,6 @@
 package org.dyn4j.sandbox.panels;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.text.DecimalFormat;
 
 import javax.swing.BorderFactory;
@@ -39,18 +38,12 @@ import javax.swing.SwingUtilities;
 /**
  * Panel showing the memory information.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class MemoryPanel extends JPanel {
 	/** The version id */
 	private static final long serialVersionUID = 6078435493627945050L;
-	
-	/** The total graph width */
-	private static final int GRAPH_WIDTH = 200;
-	
-	/** The total graph height */
-	private static final int GRAPH_HEIGHT = 100;
 	
 	/** The text box for the total heap memory */
 	private JFormattedTextField txtTotal;
@@ -99,9 +92,7 @@ public class MemoryPanel extends JPanel {
 		this.txtFree.setEditable(false);
 		this.txtFreePercent.setEditable(false);
 		
-		Dimension size = new Dimension(GRAPH_WIDTH, GRAPH_HEIGHT);
 		this.pnlGraph = new LineGraphPanel(20);
-		this.pnlGraph.setStaticSize(size);
 		this.pnlGraph.addSeries(new Color(32, 171, 217));
 		this.pnlGraph.addSeries(new Color(241, 154, 42));
 		this.pnlGraph.setBorder(BorderFactory.createEtchedBorder());

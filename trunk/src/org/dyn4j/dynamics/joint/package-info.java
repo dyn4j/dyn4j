@@ -39,8 +39,6 @@
  * without a motor</li>
  * <li>{@link org.dyn4j.dynamics.joint.PrismaticJoint} for only allowing relative linear motion
  * along an axis with or without a motor and limits</li>
- * <li>{@link org.dyn4j.dynamics.joint.LineJoint} for only allowing relative linear motion along an
- * axis with or without a motor and limits, along with allowing rotation about a pivot point</li>
  * <li>{@link org.dyn4j.dynamics.joint.FrictionJoint} for applying friction, air resistance, joint
  * friction, etc</li>
  * <li>{@link org.dyn4j.dynamics.joint.WeldJoint} for connecting two bodies together completely</li>
@@ -48,6 +46,8 @@
  * tackle</li>
  * <li>{@link org.dyn4j.dynamics.joint.MouseJoint} specifically to connect a distance joint with
  * spring/damper to one body</li>
+ * <li>{@link org.dyn4j.dynamics.joint.WheelJoint} for connecting two bodies in a frame-wheel type
+ * configuration with linear spring/damper and angular motor</li>
  * </ul>
  * @author William Bittle
  * @version 2.2.2
