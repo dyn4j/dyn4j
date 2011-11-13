@@ -36,6 +36,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 
 import org.dyn4j.sandbox.Preferences;
 import org.dyn4j.sandbox.dialogs.ColorDialog;
@@ -376,7 +377,9 @@ public class PreferencesPanel extends JPanel implements MouseListener {
 		// create the general section
 		
 		JPanel pnlGeneral = new JPanel();
-		pnlGeneral.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General "));
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General ");
+		border.setTitlePosition(TitledBorder.TOP);
+		pnlGeneral.setBorder(border);
 		
 		layout = new GroupLayout(pnlGeneral);
 		pnlGeneral.setLayout(layout);
@@ -447,7 +450,9 @@ public class PreferencesPanel extends JPanel implements MouseListener {
 		// layout the body section
 		
 		JPanel pnlBody = new JPanel();
-		pnlBody.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Body "));
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Body ");
+		border.setTitlePosition(TitledBorder.TOP);
+		pnlBody.setBorder(border);
 		
 		layout = new GroupLayout(pnlBody);
 		pnlBody.setLayout(layout);

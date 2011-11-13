@@ -58,6 +58,9 @@ public class Icons {
 	/** Start/resume icon */
 	public static final ImageIcon START = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/start-icon.png");
 	
+	/** Step icon */
+	public static final ImageIcon STEP = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/step-icon.png");
+	
 	/** Stop icon */
 	public static final ImageIcon STOP = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/stop-icon.png");
 	

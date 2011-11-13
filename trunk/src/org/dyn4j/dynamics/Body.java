@@ -80,7 +80,7 @@ import org.dyn4j.geometry.Vector2;
  * setting in the {@link Settings} singleton.  Use this if the body is a fast moving
  * body, but be careful as this will incur a performance hit.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class Body implements Swept, Collidable, Transformable {
@@ -359,10 +359,6 @@ public class Body implements Swept, Collidable, Transformable {
 	 * <p>
 	 * A {@link org.dyn4j.geometry.Mass.Type} can be used to create special mass
 	 * types.
-	 * <p>
-	 * If this method is called before any fixtures are added, the
-	 * mass is set to a new {@link Mass} object with infinite mass despite
-	 * the mass type passed in.
 	 * @param type the {@link org.dyn4j.geometry.Mass.Type}
 	 * @return {@link Body} this body
 	 * @throws NullPointerException if type is null
@@ -379,12 +375,9 @@ public class Body implements Swept, Collidable, Transformable {
 		if (size == 0) {
 			// set the mass to an infinite point mass at (0, 0)
 			this.mass = new Mass();
-			// ignore the passed in type
 		} else if (size == 1) {
 			// then just use the mass for the first shape
 			this.mass = this.fixtures.get(0).createMass();
-			// set the type
-			this.mass.setType(type);
 		} else {
 			// create a list of mass objects
 			List<Mass> masses = new ArrayList<Mass>();
@@ -394,9 +387,9 @@ public class Body implements Swept, Collidable, Transformable {
 				masses.add(mass);
 			}
 			this.mass = Mass.create(masses);
-			// set the type
-			this.mass.setType(type);
 		}
+		// set the type
+		this.mass.setType(type);
 		// compute the rotation disc radius
 		this.setRotationDiscRadius();
 		// return this body to facilitate chaining
@@ -433,9 +426,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 * <p>
 	 * Since its possible to create a {@link Mass} object with zero mass and/or
 	 * zero inertia (<code>Mass m = new Mass(new Vector2(), 0, 0);</code> for example), setting the type 
-	 * to something other than Mass.Type.INFINITE can have undefined results.  In this case its 
-	 * best to use the {@link #setMass(org.dyn4j.geometry.Mass.Type)} methods to recompute 
-	 * the mass.
+	 * to something other than Mass.Type.INFINITE can have undefined results.
 	 * @param type the desired type
 	 * @return {@link Body} this body
 	 * @throws NullPointerException if type is null

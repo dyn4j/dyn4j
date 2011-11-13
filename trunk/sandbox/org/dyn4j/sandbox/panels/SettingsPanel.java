@@ -35,6 +35,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.border.TitledBorder;
 
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.Settings.ContinuousDetectionMode;
@@ -292,7 +293,9 @@ public class SettingsPanel extends JPanel implements InputPanel {
 		
 		// general section
 		JPanel pnlGeneral = new JPanel();
-		pnlGeneral.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General "));
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General ");
+		border.setTitlePosition(TitledBorder.TOP);
+		pnlGeneral.setBorder(border);
 		
 		GroupLayout layout = new GroupLayout(pnlGeneral);
 		pnlGeneral.setLayout(layout);
@@ -326,7 +329,9 @@ public class SettingsPanel extends JPanel implements InputPanel {
 		
 		// sleep section
 		JPanel pnlSleep = new JPanel();
-		pnlSleep.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Sleep "));
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Sleep ");
+		border.setTitlePosition(TitledBorder.TOP);
+		pnlSleep.setBorder(border);
 		
 		layout = new GroupLayout(pnlSleep);
 		pnlSleep.setLayout(layout);
@@ -360,7 +365,9 @@ public class SettingsPanel extends JPanel implements InputPanel {
 		
 		// solver section
 		JPanel pnlSolver = new JPanel();
-		pnlSolver.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Solver "));
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Solver ");
+		border.setTitlePosition(TitledBorder.TOP);
+		pnlSolver.setBorder(border);
 		
 		layout = new GroupLayout(pnlSolver);
 		pnlSolver.setLayout(layout);

@@ -38,6 +38,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.border.TitledBorder;
 
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.PrismaticJoint;
@@ -50,7 +51,7 @@ import org.dyn4j.sandbox.utilities.Icons;
 /**
  * Panel used to create or edit an prismatic joint.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class PrismaticJointPanel extends JointPanel implements InputPanel, ActionListener {
@@ -289,14 +290,15 @@ public class PrismaticJointPanel extends JointPanel implements InputPanel, Actio
 		// setup the general section
 		
 		JPanel pnlGeneral = new JPanel();
-		pnlGeneral.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General "));
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General ");
+		border.setTitlePosition(TitledBorder.TOP);
+		pnlGeneral.setBorder(border);
 		
 		layout = new GroupLayout(pnlGeneral);
 		pnlGeneral.setLayout(layout);
 		
 		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
-		
 		layout.setHorizontalGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblName)
@@ -328,27 +330,27 @@ public class PrismaticJointPanel extends JointPanel implements InputPanel, Actio
 										.addComponent(this.lblY1)
 										.addComponent(this.lblY2)))));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblName)
 						.addComponent(this.txtName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblCollision)
 						.addComponent(this.chkCollision, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblBody1)
 						.addComponent(this.cmbBody1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(this.btnUseCenter1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblBody2)
 						.addComponent(this.cmbBody2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(this.btnUseCenter2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblAnchor)
 						.addComponent(this.txtX1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(this.lblX1)
 						.addComponent(this.txtY1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(this.lblY1))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblAxis)
 						.addComponent(this.txtX2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(this.lblX2)
@@ -358,7 +360,9 @@ public class PrismaticJointPanel extends JointPanel implements InputPanel, Actio
 		// setup the limits section
 		
 		JPanel pnlLimits = new JPanel();
-		pnlLimits.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Limits "));
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Limits ");
+		border.setTitlePosition(TitledBorder.TOP);
+		pnlLimits.setBorder(border);
 		
 		layout = new GroupLayout(pnlLimits);
 		pnlLimits.setLayout(layout);
@@ -376,20 +380,22 @@ public class PrismaticJointPanel extends JointPanel implements InputPanel, Actio
 						.addComponent(this.txtUpperLimit)
 						.addComponent(this.txtLowerLimit)));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblLimitEnabled)
 						.addComponent(this.chkLimitEnabled))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblUpperLimit)
 						.addComponent(this.txtUpperLimit, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblLowerLimit)
 						.addComponent(this.txtLowerLimit, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
 		
 		// setup the motor section
 		
 		JPanel pnlMotor = new JPanel();
-		pnlMotor.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Motor "));
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Motor ");
+		border.setTitlePosition(TitledBorder.TOP);
+		pnlMotor.setBorder(border);
 		
 		layout = new GroupLayout(pnlMotor);
 		pnlMotor.setLayout(layout);
@@ -407,13 +413,13 @@ public class PrismaticJointPanel extends JointPanel implements InputPanel, Actio
 						.addComponent(this.txtMotorSpeed)
 						.addComponent(this.txtMaxMotorForce)));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblMotorEnabled)
 						.addComponent(this.chkMotorEnabled))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblMotorSpeed)
 						.addComponent(this.txtMotorSpeed, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblMaxMotorForce)
 						.addComponent(this.txtMaxMotorForce, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
 		

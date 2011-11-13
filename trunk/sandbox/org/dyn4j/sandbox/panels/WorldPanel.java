@@ -33,6 +33,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.border.TitledBorder;
 
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.collision.broadphase.DynamicAABBTree;
@@ -160,7 +161,9 @@ public class WorldPanel extends JPanel {
 		GroupLayout layout;
 		
 		JPanel pnlWorld = new JPanel();
-		pnlWorld.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " World "));
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " World ");
+		border.setTitlePosition(TitledBorder.TOP);
+		pnlWorld.setBorder(border);
 		layout = new GroupLayout(pnlWorld);
 		pnlWorld.setLayout(layout);
 		
@@ -189,7 +192,9 @@ public class WorldPanel extends JPanel {
 						.addComponent(lblY)));
 		
 		JPanel pnlAlgorithms = new JPanel();
-		pnlAlgorithms.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Algorithms "));
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Algorithms ");
+		border.setTitlePosition(TitledBorder.TOP);
+		pnlAlgorithms.setBorder(border);
 		layout = new GroupLayout(pnlAlgorithms);
 		pnlAlgorithms.setLayout(layout);
 		

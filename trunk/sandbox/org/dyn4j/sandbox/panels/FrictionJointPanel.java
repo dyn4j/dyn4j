@@ -34,6 +34,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.border.TitledBorder;
 
 import org.dyn4j.dynamics.joint.FrictionJoint;
 import org.dyn4j.dynamics.joint.Joint;
@@ -46,7 +47,7 @@ import org.dyn4j.sandbox.utilities.Icons;
 /**
  * Panel used to create or edit an friction joint.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class FrictionJointPanel extends JointPanel implements InputPanel {
@@ -179,23 +180,22 @@ public class FrictionJointPanel extends JointPanel implements InputPanel {
 		// setup the general section
 		
 		JPanel pnlGeneral = new JPanel();
-		pnlGeneral.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General "));
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General ");
+		border.setTitlePosition(TitledBorder.TOP);
+		pnlGeneral.setBorder(border);
 		
 		layout = new GroupLayout(pnlGeneral);
 		pnlGeneral.setLayout(layout);
 		
 		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
-		
 		layout.setHorizontalGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblName)
 						.addComponent(this.lblCollision)
 						.addComponent(this.lblBody1)
 						.addComponent(this.lblBody2)
-						.addComponent(this.lblAnchor)
-						.addComponent(this.lblMaxForce)
-						.addComponent(this.lblMaxTorque))
+						.addComponent(this.lblAnchor))
 				.addGroup(layout.createParallelGroup()
 						.addComponent(this.txtName)
 						.addComponent(this.chkCollision)
@@ -205,34 +205,55 @@ public class FrictionJointPanel extends JointPanel implements InputPanel {
 								.addComponent(this.txtX)
 								.addComponent(this.lblX)
 								.addComponent(this.txtY)
-								.addComponent(this.lblY))
-						.addComponent(this.txtMaxForce)
-						.addComponent(this.txtMaxTorque)));
+								.addComponent(this.lblY))));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblName)
 						.addComponent(this.txtName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblCollision)
 						.addComponent(this.chkCollision, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblBody1)
 						.addComponent(this.cmbBody1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblBody2)
 						.addComponent(this.cmbBody2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblAnchor)
 						.addComponent(this.txtX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(this.lblX)
 						.addComponent(this.txtY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-						.addComponent(this.lblY))
+						.addComponent(this.lblY)));
+		
+		// setup the maximums section
+		
+		JPanel pnlMaximums = new JPanel();
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Maximums ");
+		border.setTitlePosition(TitledBorder.TOP);
+		pnlMaximums.setBorder(border);
+		
+		layout = new GroupLayout(pnlMaximums);
+		pnlMaximums.setLayout(layout);
+		
+		layout.setAutoCreateContainerGaps(true);
+		layout.setAutoCreateGaps(true);
+		layout.setHorizontalGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblMaxForce)
-						.addComponent(this.txtMaxForce, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+						.addComponent(this.lblMaxTorque))
 				.addGroup(layout.createParallelGroup()
+						.addComponent(this.txtMaxForce)
+						.addComponent(this.txtMaxTorque)));
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(this.lblMaxForce)
+						.addComponent(this.txtMaxForce, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblMaxTorque)
 						.addComponent(this.txtMaxTorque, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
+		
+		// create the overall layout
 		
 		layout = new GroupLayout(this);
 		this.setLayout(layout);
@@ -241,9 +262,11 @@ public class FrictionJointPanel extends JointPanel implements InputPanel {
 		layout.setAutoCreateGaps(true);
 		
 		layout.setHorizontalGroup(layout.createParallelGroup()
-				.addComponent(pnlGeneral));
+				.addComponent(pnlGeneral)
+				.addComponent(pnlMaximums));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addComponent(pnlGeneral));
+				.addComponent(pnlGeneral)
+				.addComponent(pnlMaximums));
 	}
 	
 	/* (non-Javadoc)

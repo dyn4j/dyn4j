@@ -44,7 +44,7 @@ import org.junit.Test;
  * All bodies in this test must be infinite mass so that the
  * World class doesn't solve their TOI when a step is performed.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.0.2
  * @since 1.2.0
  */
 public class ConservativeAdvancementTest {
@@ -252,7 +252,7 @@ public class ConservativeAdvancementTest {
 		
 		// test the final transform the body should be at before the collision
 		Transform tx1 = b1.getInitialTransform().lerped(b1.getFinalTransform(), toi.getToi());
-		TestCase.assertEquals(0.800, tx1.getTranslationX(), 1.0e-3);
+		TestCase.assertEquals(0.798, tx1.getTranslationX(), 1.0e-3);
 		TestCase.assertEquals(1.500, tx1.getTranslationY(), 1.0e-3);
 		Transform tx2 = b2.getInitialTransform().lerped(b2.getFinalTransform(), toi.getToi());
 		TestCase.assertEquals(1.000, tx2.getTranslationX(), 1.0e-3);
@@ -467,9 +467,9 @@ public class ConservativeAdvancementTest {
 		// make sure a collision was missed and detected by the toi detector
 		TestCase.assertTrue(missed);
 		// make sure the time of impact is small in this case
-		TestCase.assertEquals(0.039, toi.getToi(), 1.0e-3);
+		TestCase.assertEquals(0.037, toi.getToi(), 1.0e-3);
 		// the rotation shouldn't be much more than -40
-		TestCase.assertEquals(-0.643, tx1f.getRotation(), 1.0e-3);
+		TestCase.assertEquals(-0.645, tx1f.getRotation(), 1.0e-3);
 	}
 	
 	/**
@@ -533,7 +533,7 @@ public class ConservativeAdvancementTest {
 		this.b1.translate(0.5, 0.0);
 		this.b1.rotateAboutCenter(Math.toRadians(-40));
 		// need to use the set mass method to compute the rotation disc radius
-		this.b2.setMass(Mass.Type.INFINITE);
+		this.b1.setMass(Mass.Type.INFINITE);
 		// set the rotation to very fast
 		this.b1.setAngularVelocity(Math.toRadians(60.0 * 80.0));
 		
@@ -542,7 +542,7 @@ public class ConservativeAdvancementTest {
 		// need to use the set mass method to compute the rotation disc radius
 		this.b2.setMass(Mass.Type.INFINITE);
 		this.b2.translate(-5.0, 0.0);
-		this.b2.rotateAboutCenter(Math.toRadians(-50));
+		this.b2.rotateAboutCenter(Math.toRadians(-80));
 		this.b2.setAngularVelocity(Math.toRadians(60.0 * 60.0));
 		
 		// perform one iteration

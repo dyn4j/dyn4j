@@ -35,6 +35,8 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -90,6 +92,7 @@ import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.MouseJoint;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
+import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.actions.MoveAction;
@@ -122,10 +125,10 @@ import com.jogamp.opengl.util.gl2.GLUT;
 /**
  * Main class for the Sandbox application.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
-public class Sandbox extends JFrame implements GLEventListener, ActionListener {
+public class Sandbox extends JFrame implements GLEventListener, ActionListener, WindowListener {
 	/** The version id */
 	private static final long serialVersionUID = -7050279589455803564L;
 
@@ -155,6 +158,9 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	
 	/** The paused flag */
 	private boolean paused = true;
+	
+	/** The number of steps to perform (single steps from the single step button) */
+	private int steps;
 	
 	/** The camera settings */
 	private Camera camera;
@@ -222,6 +228,9 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	
 	/** The start button for the simulation */
 	private JButton btnStart;
+	
+	/** The single step button for the simulation */
+	private JButton btnStep;
 	
 	/** The stop button for the simulation */
 	private JButton btnStop;
@@ -344,6 +353,9 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	 */
 	public Sandbox() {
 		super();
+		// let the methods in this class handle closing the window
+		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		this.addWindowListener(this);
 		
 		// set the window title
 		this.setTitle(this.getWindowTitle());
@@ -469,6 +481,11 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		this.btnStart.setActionCommand("start");
 		this.btnStart.setToolTipText("Start Simulation");
 		
+		this.btnStep = new JButton(Icons.STEP);
+		this.btnStep.addActionListener(this);
+		this.btnStep.setActionCommand("step");
+		this.btnStep.setToolTipText("Perform One Simulation Step");
+		
 		this.btnStop = new JButton(Icons.STOP);
 		this.btnStop.addActionListener(this);
 		this.btnStop.setActionCommand("stop");
@@ -478,6 +495,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		this.btnStop.setEnabled(false);
 		
 		barSimulation.add(this.btnStart);
+		barSimulation.add(this.btnStep);
 		barSimulation.add(this.btnStop);
 		
 		this.btnSettings = new JButton(Icons.SETTINGS);
@@ -742,9 +760,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		// show the window
 		this.setVisible(true);
 		
-		// setting this property will call the dispose methods on the GLCanvas
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
 		// initialize the last update time
 		this.last = System.nanoTime();
 		
@@ -768,6 +783,54 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	public void stop() {
 		this.animator.stop();
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.awt.event.WindowListener#windowActivated(java.awt.event.WindowEvent)
+	 */
+	@Override
+	public void windowActivated(WindowEvent e) {}
+	
+	/* (non-Javadoc)
+	 * @see java.awt.event.WindowListener#windowClosed(java.awt.event.WindowEvent)
+	 */
+	@Override
+	public void windowClosed(WindowEvent e) {}
+	
+	/* (non-Javadoc)
+	 * @see java.awt.event.WindowListener#windowClosing(java.awt.event.WindowEvent)
+	 */
+	@Override
+	public void windowClosing(WindowEvent e) {
+		int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want to exit without saving the current simulation?", "Exit without saving?", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+		if (choice == JOptionPane.YES_OPTION) {
+			this.dispose();
+			System.exit(0);
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.awt.event.WindowListener#windowDeactivated(java.awt.event.WindowEvent)
+	 */
+	@Override
+	public void windowDeactivated(WindowEvent e) {}
+	
+	/* (non-Javadoc)
+	 * @see java.awt.event.WindowListener#windowDeiconified(java.awt.event.WindowEvent)
+	 */
+	@Override
+	public void windowDeiconified(WindowEvent e) {}
+	
+	/* (non-Javadoc)
+	 * @see java.awt.event.WindowListener#windowIconified(java.awt.event.WindowEvent)
+	 */
+	@Override
+	public void windowIconified(WindowEvent e) {}
+	
+	/* (non-Javadoc)
+	 * @see java.awt.event.WindowListener#windowOpened(java.awt.event.WindowEvent)
+	 */
+	@Override
+	public void windowOpened(WindowEvent e) {}
 	
 	/* (non-Javadoc)
 	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
@@ -857,12 +920,18 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 				// disable the world editor
 				this.pnlWorld.setEnabled(false);
 				this.btnStart.setEnabled(false);
+				this.btnStep.setEnabled(false);
 				this.btnStop.setEnabled(true);
 				this.btnSettings.setEnabled(false);
 				this.mnuFile.setEnabled(false);
 				this.mnuSnapshot.setEnabled(false);
 				this.mnuTests.setEnabled(false);
 				setPaused(false);
+			}
+		} else if ("step".equals(command)) {
+			// immediately performs a simulation step
+			synchronized (this.btnStep) {
+				this.steps++;
 			}
 		} else if ("stop".equals(command)) {
 			if (!isPaused()) {
@@ -873,6 +942,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 				// enable the world editor
 				this.pnlWorld.setEnabled(true);
 				this.btnStart.setEnabled(true);
+				this.btnStep.setEnabled(true);
 				this.btnStop.setEnabled(false);
 				this.btnSettings.setEnabled(true);
 				this.mnuFile.setEnabled(true);
@@ -1157,6 +1227,13 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
         // set the last time
         this.last = time;
         
+        // get the number of single steps
+        int steps = 0;
+        synchronized (this.btnStep) {
+        	steps = this.steps;
+        	this.steps = 0;
+		}
+        
 		// check if the state is paused
 		if (!this.isPaused()) {
 	    	// convert from nanoseconds to seconds
@@ -1174,6 +1251,14 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 	    		// this will update the Swing components on the EDT internally
 		    	this.pnlContacts.update();
 	    	}
+		} else if (steps > 0) {
+			// if there are some steps to perform then do so
+			synchronized (this.world) {
+				this.world.step(steps);
+			}
+			// update the contact panel
+    		// this will update the Swing components on the EDT internally
+	    	this.pnlContacts.update();
 		}
 		
 		// update the fps text box
@@ -1917,7 +2002,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		for (int j = fSize - 1; j >= 0; j--) {
 			BodyFixture bodyFixture = body.getFixture(j);
 			Convex convex = bodyFixture.getShape();
-			if (convex.contains(point, transform)) {
+			if (contains(convex, transform, point)) {
 				// return the first body who contains a fixture
 				// that contains the given point
 				return true;
@@ -1940,7 +2025,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 			// if so, then check the selected fixture first
 			BodyFixture bodyFixture = this.selectFixtureAction.getObject();
 			Convex convex = bodyFixture.getShape();
-			if (convex.contains(point, transform)) {
+			if (contains(convex, transform, point)) {
 				return bodyFixture;
 			}
 		}
@@ -1949,13 +2034,30 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		for (int j = fSize - 1; j >= 0; j--) {
 			BodyFixture bodyFixture = body.getFixture(j);
 			Convex convex = bodyFixture.getShape();
-			if (convex.contains(point, transform)) {
+			if (contains(convex, transform, point)) {
 				// return the first body who contains a fixture
 				// that contains the given point
 				return bodyFixture;
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Returns true if the given convex shape contains the given point.
+	 * <p>
+	 * This method uses a radial expansion for segment shapes.
+	 * @param convex the convex point
+	 * @param transform the convex's transform
+	 * @param point the point
+	 * @return boolean
+	 */
+	private boolean contains(Convex convex, Transform transform, Vector2 point) {
+		if (convex instanceof Segment) {
+			Segment segment = (Segment)convex;
+			return segment.contains(point, transform, 0.1);
+		}
+		return convex.contains(point, transform);
 	}
 	
 	/**
@@ -2301,7 +2403,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener {
 		        }
 		    }
 		} catch (Exception e) {
-			// completely ignore the error and just use the default layout manager
+			// completely ignore the error and just use the default look and feel
 		}
 		
 	    new Sandbox();

@@ -205,10 +205,10 @@ public class BodyTest {
 		Body b = new Body();
 		
 		// test setting the mass with no fixtures
-		// this should create an infinite mass at the origin
 		b.setMass();
 		TestCase.assertNotNull(b.mass);
-		TestCase.assertTrue(b.mass.isInfinite());
+		// make sure its not infinite (the mass and inertia will still be zero however)
+		TestCase.assertTrue(!b.mass.isInfinite());
 		TestCase.assertTrue(b.mass.getCenter().isZero());
 		TestCase.assertEquals(0.0, b.mass.getMass());
 		TestCase.assertEquals(0.0, b.mass.getInverseMass());

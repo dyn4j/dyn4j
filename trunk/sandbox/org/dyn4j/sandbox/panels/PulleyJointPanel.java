@@ -29,12 +29,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 
+import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.border.TitledBorder;
 
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.PulleyJoint;
@@ -47,7 +50,7 @@ import org.dyn4j.sandbox.utilities.Icons;
 /**
  * Panel used to create or edit an pulley joint.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class PulleyJointPanel extends JointPanel implements InputPanel, ActionListener {
@@ -233,12 +236,18 @@ public class PulleyJointPanel extends JointPanel implements InputPanel, ActionLi
 		
 		// setup the sections
 		
-		GroupLayout layout = new GroupLayout(this);
-		this.setLayout(layout);
+		// setup the general section
+		
+		JPanel pnlGeneral = new JPanel();
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General ");
+		border.setTitlePosition(TitledBorder.TOP);
+		pnlGeneral.setBorder(border);
+		
+		GroupLayout layout = new GroupLayout(pnlGeneral);
+		pnlGeneral.setLayout(layout);
 		
 		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
-		
 		layout.setHorizontalGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblName)
@@ -248,8 +257,7 @@ public class PulleyJointPanel extends JointPanel implements InputPanel, ActionLi
 						.addComponent(lblBodyAnchor1)
 						.addComponent(lblBodyAnchor2)
 						.addComponent(lblPulleyAnchor1)
-						.addComponent(lblPulleyAnchor2)
-						.addComponent(lblRatio))
+						.addComponent(lblPulleyAnchor2))
 				.addGroup(layout.createParallelGroup()
 						.addComponent(this.txtName)
 						.addComponent(this.chkCollision)
@@ -279,50 +287,80 @@ public class PulleyJointPanel extends JointPanel implements InputPanel, ActionLi
 										.addComponent(lblBY1)
 										.addComponent(lblBY2)
 										.addComponent(lblPY1)
-										.addComponent(lblPY2)))
-						.addComponent(this.txtRatio)));
+										.addComponent(lblPY2)))));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblName)
 						.addComponent(this.txtName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblCollision)
 						.addComponent(this.chkCollision, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblBody1)
 						.addComponent(this.cmbBody1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(this.btnUseCenter1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblBody2)
 						.addComponent(this.cmbBody2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(this.btnUseCenter2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblBodyAnchor1)
 						.addComponent(this.txtBX1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(lblBX1)
 						.addComponent(this.txtBY1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(lblBY1))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblBodyAnchor2)
 						.addComponent(this.txtBX2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(lblBX2)
 						.addComponent(this.txtBY2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(lblBY2))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblPulleyAnchor1)
 						.addComponent(this.txtPX1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(lblPX1)
 						.addComponent(this.txtPY1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(lblPY1))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblPulleyAnchor2)
 						.addComponent(this.txtPX2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(lblPX2)
 						.addComponent(this.txtPY2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-						.addComponent(lblPY2))
-				.addGroup(layout.createParallelGroup()
+						.addComponent(lblPY2)));
+		
+		// setup the block and tackle section
+		
+		JPanel pnlBlockAndTackle = new JPanel();
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Block and Tackle ");
+		border.setTitlePosition(TitledBorder.TOP);
+		pnlBlockAndTackle.setBorder(border);
+		
+		layout = new GroupLayout(pnlBlockAndTackle);
+		pnlBlockAndTackle.setLayout(layout);
+				
+		layout.setAutoCreateContainerGaps(true);
+		layout.setAutoCreateGaps(true);
+		layout.setHorizontalGroup(layout.createSequentialGroup()
+				.addComponent(lblRatio)
+				.addComponent(this.txtRatio));
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblRatio)
 						.addComponent(this.txtRatio, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
+		
+		// setup the overall layout
+		
+		layout = new GroupLayout(this);
+		this.setLayout(layout);
+		
+		layout.setAutoCreateContainerGaps(true);
+		layout.setAutoCreateGaps(true);
+		layout.setHorizontalGroup(layout.createParallelGroup()
+				.addComponent(pnlGeneral)
+				.addComponent(pnlBlockAndTackle));
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addComponent(pnlGeneral)
+				.addComponent(pnlBlockAndTackle));
 	}
 	
 	/* (non-Javadoc)
