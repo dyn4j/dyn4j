@@ -35,6 +35,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.border.TitledBorder;
 
 import org.dyn4j.dynamics.joint.AngleJoint;
 import org.dyn4j.dynamics.joint.Joint;
@@ -45,7 +46,7 @@ import org.dyn4j.sandbox.utilities.Icons;
 /**
  * Panel used to create or edit an angle joint.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class AngleJointPanel extends JointPanel implements InputPanel {
@@ -145,7 +146,9 @@ public class AngleJointPanel extends JointPanel implements InputPanel {
 		// setup the general section
 		
 		JPanel pnlGeneral = new JPanel();
-		pnlGeneral.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General "));
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General ");
+		border.setTitlePosition(TitledBorder.TOP);
+		pnlGeneral.setBorder(border);
 		
 		layout = new GroupLayout(pnlGeneral);
 		pnlGeneral.setLayout(layout);
@@ -165,23 +168,25 @@ public class AngleJointPanel extends JointPanel implements InputPanel {
 						.addComponent(this.cmbBody1)
 						.addComponent(this.cmbBody2)));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblName)
 						.addComponent(this.txtName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblCollision)
 						.addComponent(this.chkCollision, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblBody1)
 						.addComponent(this.cmbBody1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblBody2)
 						.addComponent(this.cmbBody2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
 		
 		// setup the limits section
 		
 		JPanel pnlLimits = new JPanel();
-		pnlLimits.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Limits "));
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Limits ");
+		border.setTitlePosition(TitledBorder.TOP);
+		pnlLimits.setBorder(border);
 		
 		layout = new GroupLayout(pnlLimits);
 		pnlLimits.setLayout(layout);
@@ -199,13 +204,13 @@ public class AngleJointPanel extends JointPanel implements InputPanel {
 						.addComponent(this.txtMinimum)
 						.addComponent(this.txtMaximum)));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblLimitEnabled)
 						.addComponent(this.chkLimitEnabled))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblMinimum)
 						.addComponent(this.txtMinimum, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblMaximum)
 						.addComponent(this.txtMaximum, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
 		

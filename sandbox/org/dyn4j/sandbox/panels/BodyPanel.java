@@ -43,6 +43,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -333,7 +334,7 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 					txtInertia.setEditable(true);
 				} else {
 					body.setMassExplicit(false);
-					// recompute the mass
+					// recompute the mass and set the current mass type
 					body.setMass(body.getMass().getType());
 					// set the new values after computing the mass
 					Mass m = body.getMass();
@@ -628,7 +629,9 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		
 		// setup the general section
 		JPanel pnlGeneral = new JPanel();
-		pnlGeneral.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General "));
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General ");
+		border.setTitlePosition(TitledBorder.TOP);
+		pnlGeneral.setBorder(border);
 		
 		layout = new GroupLayout(pnlGeneral);
 		pnlGeneral.setLayout(layout);
@@ -663,7 +666,9 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		
 		// setup the mass section
 		JPanel pnlMass = new JPanel();
-		pnlMass.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Mass "));
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Mass ");
+		border.setTitlePosition(TitledBorder.TOP);
+		pnlMass.setBorder(border);
 		
 		layout = new GroupLayout(pnlMass);
 		pnlMass.setLayout(layout);
@@ -709,7 +714,9 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		
 		// setup the state section
 		JPanel pnlProperties = new JPanel();
-		pnlProperties.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Properties "));
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Properties ");
+		border.setTitlePosition(TitledBorder.TOP);
+		pnlProperties.setBorder(border);
 		
 		layout = new GroupLayout(pnlProperties);
 		pnlProperties.setLayout(layout);
@@ -780,7 +787,9 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		
 		// setup the flags section
 		JPanel pnlFlags = new JPanel();
-		pnlFlags.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Flags "));
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Flags ");
+		border.setTitlePosition(TitledBorder.TOP);
+		pnlFlags.setBorder(border);
 		
 		layout = new GroupLayout(pnlFlags);
 		pnlFlags.setLayout(layout);

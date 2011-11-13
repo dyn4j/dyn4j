@@ -1013,7 +1013,7 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 	 * <p>
 	 * If the user clicks the add button, the shape and fixture are created and added to the selected body.
 	 */
-	public void addHullFixtureAction() {
+	private void addHullFixtureAction() {
 		// the current selection should have the body to add the fixture to
 		TreePath path = this.tree.getSelectionPath();
 		// make sure that something is selected

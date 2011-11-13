@@ -34,14 +34,18 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import javax.imageio.ImageIO;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLEventListener;
+import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.naming.ConfigurationException;
 import javax.swing.JFrame;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import org.dyn4j.Version;
 import org.dyn4j.collision.Fixture;
@@ -74,7 +78,7 @@ import com.jogamp.opengl.util.glsl.ShaderUtil;
 /**
  * Container for the tests.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class TestBed extends GLCanvas implements GLEventListener {
@@ -1850,5 +1854,67 @@ public class TestBed extends GLCanvas implements GLEventListener {
 		} catch (SecurityException e) {
 			return "Unknown";
 		}
+	}
+	
+	/**
+	 * The main method; uses zero arguments in the args array.
+	 * @param args the command line arguments
+	 */
+	public static final void main(String[] args) {
+	    // set the look and feel to the system look and feel
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (UnsupportedLookAndFeelException e) {
+			e.printStackTrace();
+		}
+	    
+		// create the size of the window
+		Dimension size = new Dimension(800, 600);
+		
+		// create a JFrame to put the TestBed into
+		JFrame window = new JFrame("dyn4j v" + Version.getVersion() + " TestBed");
+		
+		// attempt to set the icon
+		try {
+			// attempt to load the image icon
+			window.setIconImage(ImageIO.read(TestBed.class.getResource("/icon.png")));
+		} catch (IOException e1) {
+			System.err.println("Icon image 'icon.png' not found.");
+		}
+		
+		// setup OpenGL capabilities
+		GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL2));
+		caps.setDoubleBuffered(true);
+		caps.setSampleBuffers(true);
+		caps.setNumSamples(2);
+		caps.setHardwareAccelerated(true);
+		
+		// create the testbed
+		TestBed testbed = new TestBed(caps, window, size, TestBed.Mode.APPLICATION);
+		
+		// set the layout of the frame
+		Container contentPane = window.getContentPane();
+		// add the testbed to the frame
+		contentPane.add(testbed);
+		// size everything
+		window.pack();
+		
+		// move from (0, 0) since this hides some of the window frame
+		window.setLocation(10, 10);
+		
+		// show the window
+		window.setVisible(true);
+		
+		// setting this property will call the dispose methods on the GLCanvas
+		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		// finally start the testbed
+		testbed.start();
 	}
 }

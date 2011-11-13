@@ -31,6 +31,7 @@ import org.dyn4j.collision.Fixture;
 import org.dyn4j.collision.narrowphase.DistanceDetector;
 import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.Separation;
+import org.dyn4j.dynamics.Settings;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
@@ -44,7 +45,7 @@ import org.dyn4j.geometry.Vector2;
  * This method is based on the one found in <a href="http://bulletphysics.org">Bullet</a>.
  * @author William Bittle
  * @see <a href="http://bulletphysics.org">Bullet</a>
- * @version 2.2.3
+ * @version 3.0.2
  * @since 1.2.0
  */
 public class ConservativeAdvancement implements TimeOfImpactDetector {
@@ -66,8 +67,8 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 		public Fixture fixture2;
 	}
 	
-	/** The default distance epsilon; around 1e-6 */
-	public static final double DEFAULT_DISTANCE_EPSILON = Math.cbrt(Epsilon.E);
+	/** The default distance epsilon; 0.5 * {@link Settings}.DEFAULT_LINEAR_TOLERANCE */
+	public static final double DEFAULT_DISTANCE_EPSILON = 0.5 * Settings.DEFAULT_LINEAR_TOLERANCE;
 	
 	/** The default maximum number of iterations */
 	public static final int DEFAULT_MAX_ITERATIONS = 30;
@@ -170,7 +171,7 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 		double l0 = l;
 		
 		// loop until the distance is less than the tolerance
-		while (d > this.distanceEpsilon) {
+		while (d > this.distanceEpsilon && iterations < this.maxIterations) {
 			// project the relative max velocity along the separation normal
 			double rvDotN = rv.dot(n);
 			// compute the max relative velocity
@@ -194,7 +195,9 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 				}
 				// if l doesn't change significantly
 				if (l <= l0) {
-					return false;
+					// l hasn't changed so just return with
+					// what we have now
+					break;
 				}
 				// set the last time
 				l0 = l;
@@ -202,34 +205,36 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 			
 			// increment the number of iterations
 			iterations++;
-			// check if we have reach the maximum number of iterations
-			if (iterations == this.maxIterations) {
-				return false;
-			}
 			
 			// find closest points
 			separated = this.getSeparation(swept1, swept2, l, distance);
+			d = distance.separation.getDistance();
 			// check for intersection
-			if (!separated) {
+			if (!separated || d <= Epsilon.E) {
 				// the shapes are intersecting.  This should
 				// not happen because of the conservative nature
 				// of the algorithm, however because of numerical
 				// error it will. Subtract epsilon from the toi
 				// to back-up a bit
-				l -= Epsilon.E;
-				// compute a new separation
-				separated = this.getSeparation(swept1, swept2, l, distance);
-				// are they still penetrating
-				if (!separated) {
-					// if so then just quit
-					return false;
+				if (!separated || d <= 0.5 * this.distanceEpsilon) {
+					// back up to half the distance epsilon
+					l -= 0.5 * this.distanceEpsilon / drel;
+					// compute a new separation
+					separated = this.getSeparation(swept1, swept2, l, distance);
+					// get the distance
+					d = distance.separation.getDistance();
+					// the separation here could still be close to zero if the
+					// objects are rotating very fast, in which case just assume
+					// this is as close as we can get
 				}
+				// break from the loop since we have detected the
+				// time of impact but had to fix the distance
+				break;
 			}
 			
 			// set the new normal and distance
-			separation = distance.separation;
-			n = separation.getNormal();
-			d = separation.getDistance();
+			n = distance.separation.getNormal();
+			d = distance.separation.getDistance();
 		}
 		
 		// fill up the separation object
@@ -258,7 +263,14 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 	 * @return double the angular velocity
 	 */
 	protected double getAngularVelocity(Transform txi, Transform txf) {
-		return txf.getRotation() - txi.getRotation(); 
+		double r = txf.getRotation() - txi.getRotation();
+		// this will always get the smallest rotation distance
+		if (r > Math.PI) {
+			r -= Math.PI;
+		} else if (r < -Math.PI) {
+			r += Math.PI;
+		}
+		return r;
 	}
 	
 	/**

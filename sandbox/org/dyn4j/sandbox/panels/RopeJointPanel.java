@@ -38,6 +38,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.border.TitledBorder;
 
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.RopeJoint;
@@ -50,7 +51,7 @@ import org.dyn4j.sandbox.utilities.Icons;
 /**
  * Panel used to create or edit an rope joint.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class RopeJointPanel extends JointPanel implements InputPanel, ActionListener {
@@ -259,14 +260,15 @@ public class RopeJointPanel extends JointPanel implements InputPanel, ActionList
 		GroupLayout layout;
 		
 		JPanel pnlGeneral = new JPanel();
-		pnlGeneral.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General "));
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General ");
+		border.setTitlePosition(TitledBorder.TOP);
+		pnlGeneral.setBorder(border);
 		
 		layout = new GroupLayout(pnlGeneral);
 		pnlGeneral.setLayout(layout);
 		
 		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
-		
 		layout.setHorizontalGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblName)
@@ -295,27 +297,27 @@ public class RopeJointPanel extends JointPanel implements InputPanel, ActionList
 								.addComponent(this.txtY2)
 								.addComponent(this.lblY2))));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblName)
 						.addComponent(this.txtName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblCollision)
 						.addComponent(this.chkCollision, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblBody1)
 						.addComponent(this.cmbBody1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(this.btnUseCenter1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblBody2)
 						.addComponent(this.cmbBody2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(this.btnUseCenter2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblAnchor1)
 						.addComponent(this.txtX1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(this.lblX1)
 						.addComponent(this.txtY1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(this.lblY1))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblAnchor2)
 						.addComponent(this.txtX2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(this.lblX2)
@@ -323,14 +325,15 @@ public class RopeJointPanel extends JointPanel implements InputPanel, ActionList
 						.addComponent(this.lblY2)));
 		
 		JPanel pnlLimits = new JPanel();
-		pnlLimits.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Limits "));
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Limits ");
+		border.setTitlePosition(TitledBorder.TOP);
+		pnlLimits.setBorder(border);
 		
 		layout = new GroupLayout(pnlLimits);
 		pnlLimits.setLayout(layout);
 		
 		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
-		
 		layout.setHorizontalGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblLowerLimitEnabled)
@@ -343,16 +346,16 @@ public class RopeJointPanel extends JointPanel implements InputPanel, ActionList
 						.addComponent(this.chkUpperLimitEnabled)
 						.addComponent(this.txtUpperLimit)));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblLowerLimitEnabled)
 						.addComponent(this.chkLowerLimitEnabled))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblLowerLimit)
 						.addComponent(this.txtLowerLimit, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblUpperLimitEnabled)
 						.addComponent(this.chkUpperLimitEnabled))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblUpperLimit)
 						.addComponent(this.txtUpperLimit, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
 		

@@ -37,6 +37,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.border.TitledBorder;
 
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.MouseJoint;
@@ -49,7 +50,7 @@ import org.dyn4j.sandbox.utilities.Icons;
 /**
  * Panel used to create or edit an mouse joint.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class MouseJointPanel extends JointPanel implements InputPanel, ActionListener {
@@ -226,23 +227,21 @@ public class MouseJointPanel extends JointPanel implements InputPanel, ActionLis
 		// setup the general section
 		
 		JPanel pnlGeneral = new JPanel();
-		pnlGeneral.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General "));
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General ");
+		border.setTitlePosition(TitledBorder.TOP);
+		pnlGeneral.setBorder(border);
 		
 		layout = new GroupLayout(pnlGeneral);
 		pnlGeneral.setLayout(layout);
 		
 		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
-		
 		layout.setHorizontalGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblName)
 						.addComponent(this.lblBody)
 						.addComponent(this.lblAnchor)
-						.addComponent(this.lblTarget)
-						.addComponent(this.lblFrequency)
-						.addComponent(this.lblRatio)
-						.addComponent(this.lblMaxForce))
+						.addComponent(this.lblTarget))
 				.addGroup(layout.createParallelGroup()
 						.addComponent(this.txtName)
 						.addGroup(layout.createSequentialGroup()
@@ -260,39 +259,61 @@ public class MouseJointPanel extends JointPanel implements InputPanel, ActionLis
 										.addComponent(this.txtY2))
 								.addGroup(layout.createParallelGroup()
 										.addComponent(this.lblY1)
-										.addComponent(this.lblY2)))
-						.addComponent(this.txtFrequency)
-						.addComponent(this.txtRatio)
-						.addComponent(this.txtMaxForce)));
+										.addComponent(this.lblY2)))));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblName)
 						.addComponent(this.txtName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblBody)
 						.addComponent(this.cmbBody, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(this.btnUseCenter, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblAnchor)
 						.addComponent(this.txtX1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(this.lblX1)
 						.addComponent(this.txtY1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(this.lblY1))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblTarget)
 						.addComponent(this.txtX2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(this.lblX2)
 						.addComponent(this.txtY2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-						.addComponent(this.lblY2))
+						.addComponent(this.lblY2)));
+
+		// setup the spring/damper section
+		
+		JPanel pnlSpringDamper = new JPanel();
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Spring/Damper ");
+		border.setTitlePosition(TitledBorder.TOP);
+		pnlSpringDamper.setBorder(border);
+		
+		layout = new GroupLayout(pnlSpringDamper);
+		pnlSpringDamper.setLayout(layout);
+		
+		layout.setAutoCreateContainerGaps(true);
+		layout.setAutoCreateGaps(true);
+		layout.setHorizontalGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblFrequency)
-						.addComponent(this.txtFrequency, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+						.addComponent(this.lblRatio)
+						.addComponent(this.lblMaxForce))
 				.addGroup(layout.createParallelGroup()
+						.addComponent(this.txtFrequency)
+						.addComponent(this.txtRatio)
+						.addComponent(this.txtMaxForce)));
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(this.lblFrequency)
+						.addComponent(this.txtFrequency, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblRatio)
 						.addComponent(this.txtRatio, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblMaxForce)
 						.addComponent(this.txtMaxForce, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
+		
+		// setup the overall layout
 		
 		layout = new GroupLayout(this);
 		this.setLayout(layout);
@@ -301,9 +322,11 @@ public class MouseJointPanel extends JointPanel implements InputPanel, ActionLis
 		layout.setAutoCreateGaps(true);
 		
 		layout.setHorizontalGroup(layout.createParallelGroup()
-				.addComponent(pnlGeneral));
+				.addComponent(pnlGeneral)
+				.addComponent(pnlSpringDamper));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addComponent(pnlGeneral));
+				.addComponent(pnlGeneral)
+				.addComponent(pnlSpringDamper));
 	}
 	
 	/* (non-Javadoc)
