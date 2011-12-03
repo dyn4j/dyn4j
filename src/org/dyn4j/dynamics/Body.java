@@ -467,14 +467,11 @@ public class Body implements Swept, Collidable, Transformable {
 			// get the fixture and convex
 			BodyFixture fixture = this.fixtures.get(i);
 			Convex convex = fixture.getShape();
-			// get the convex's center and radius
-			Vector2 cc = convex.getCenter();
-			double cr = convex.getRadius();
-			// get the distance from the convex's center
-			// to the center of mass
-			double d = c.distance(cc);
+			// get the convex's radius using the
+			// body's center of mass
+			double cr = convex.getRadius(c);
 			// keep the maximum
-			r = Math.max(r, d + cr);
+			r = Math.max(r, cr);
 		}
 		// return the max
 		this.radius = r;

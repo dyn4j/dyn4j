@@ -48,6 +48,14 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 	}
 	
 	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Shape#getRadius(org.dyn4j.geometry.Vector2)
+	 */
+	@Override
+	public double getRadius(Vector2 center) {
+		return this.radius + center.distance(this.center);
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Shape#getType()
 	 */
 	@Override
