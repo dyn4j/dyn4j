@@ -38,6 +38,7 @@ import javax.swing.JOptionPane;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Triangle;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
 import org.dyn4j.sandbox.utilities.Icons;
 
@@ -76,12 +77,12 @@ public class IsoscelesTrianglePanel extends ConvexShapePanel implements InputPan
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
 		
-		JLabel lblWidth = new JLabel("Width", Icons.INFO, JLabel.LEFT);
-		lblWidth.setToolTipText("The width of the base of the isosceles triangle.");
-		JLabel lblHeight = new JLabel("Height", Icons.INFO, JLabel.LEFT);
-		lblHeight.setToolTipText("The height of the isosceles triangle.");
-		JFormattedTextField txtWidth = new JFormattedTextField(new DecimalFormat("0.000"));
-		JFormattedTextField txtHeight = new JFormattedTextField(new DecimalFormat("0.000"));
+		JLabel lblWidth = new JLabel(Resources.getString("panel.isosceles.width"), Icons.INFO, JLabel.LEFT);
+		lblWidth.setToolTipText(Resources.getString("panel.isosceles.width.tooltip"));
+		JLabel lblHeight = new JLabel(Resources.getString("panel.isosceles.height"), Icons.INFO, JLabel.LEFT);
+		lblHeight.setToolTipText(Resources.getString("panel.isosceles.height.tooltip"));
+		JFormattedTextField txtWidth = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.isosceles.width.format")));
+		JFormattedTextField txtHeight = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.isosceles.height.format")));
 		txtWidth.setValue(DEFAULT_WIDTH);
 		txtHeight.setValue(DEFAULT_HEIGHT);
 		
@@ -114,8 +115,8 @@ public class IsoscelesTrianglePanel extends ConvexShapePanel implements InputPan
 			}
 		});
 		
-		JLabel lblPreview = new JLabel("Preview", Icons.INFO, JLabel.LEFT);
-		lblPreview.setToolTipText("Shows a preview of the current shape.");
+		JLabel lblPreview = new JLabel(Resources.getString("panel.preview"), Icons.INFO, JLabel.LEFT);
+		lblPreview.setToolTipText(Resources.getString("panel.preview.tooltip"));
 		this.pnlPreview = new PreviewPanel(new Dimension(250, 225), Geometry.createIsoscelesTriangle(this.width, this.height));
 		
 		layout.setAutoCreateGaps(true);
@@ -172,8 +173,8 @@ public class IsoscelesTrianglePanel extends ConvexShapePanel implements InputPan
 	 */
 	@Override
 	public void showInvalidInputMessage(Window owner) {
-		if (this.isValidInput()) {
-			JOptionPane.showMessageDialog(owner, "An isosceles triangle must have a width and height greater than zero.", "Notice", JOptionPane.ERROR_MESSAGE);
+		if (!this.isValidInput()) {
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.isosceles.invalid"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

@@ -41,6 +41,7 @@ import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.panels.FixturePanel;
 import org.dyn4j.sandbox.panels.TransformPanel;
 
@@ -70,11 +71,10 @@ public class EditFixtureDialog extends JDialog implements ActionListener {
 	 * Full constructor.
 	 * @param owner the dialog owner
 	 * @param icon the icon image
-	 * @param title the dialog title
 	 * @param fixture the fixture being edited
 	 */
-	private EditFixtureDialog(Window owner, Image icon, String title, BodyFixture fixture) {
-		super(owner, title, ModalityType.APPLICATION_MODAL);
+	private EditFixtureDialog(Window owner, Image icon, BodyFixture fixture) {
+		super(owner, Resources.getString("dialog.fixture.edit.title"), ModalityType.APPLICATION_MODAL);
 		
 		if (icon != null) {
 			this.setIconImage(icon);
@@ -98,11 +98,7 @@ public class EditFixtureDialog extends JDialog implements ActionListener {
 		JTextPane lblText = new JTextPane();
 		lblText = new JTextPane();
 		lblText.setContentType("text/html");
-		lblText.setText(
-				"<html>The local transform is used to move and rotate a fixture within " +
-				"body coordinates, i.e. relative to the body's center of mass.  Unlike " +
-				"the transform on the body, this transform is applied directly to the fixture's " +
-				"shape data and therefore not 'saved' directly.</html>");
+		lblText.setText(Resources.getString("label.transform.warning"));
 		lblText.setEditable(false);
 		lblText.setPreferredSize(new Dimension(350, 120));
 		
@@ -111,11 +107,11 @@ public class EditFixtureDialog extends JDialog implements ActionListener {
 		this.pnlFixture = new FixturePanel(this.fixture);
 		this.pnlTransform = new TransformPanel(lblText);
 		
-		tabs.addTab("Fixture", this.pnlFixture);
-		tabs.addTab("Local Transform", this.pnlTransform);
+		tabs.addTab(Resources.getString("dialog.fixture.tab.fixture"), this.pnlFixture);
+		tabs.addTab(Resources.getString("dialog.fixture.tab.transform"), this.pnlTransform);
 		
-		JButton btnCancel = new JButton("Cancel");
-		JButton btnCreate = new JButton("Save");
+		JButton btnCancel = new JButton(Resources.getString("button.cancel"));
+		JButton btnCreate = new JButton(Resources.getString("button.save"));
 		btnCreate.setActionCommand("save");
 		btnCancel.setActionCommand("cancel");
 		btnCreate.addActionListener(this);
@@ -172,12 +168,11 @@ public class EditFixtureDialog extends JDialog implements ActionListener {
 	 * Shows an Edit Fixture Dialog..
 	 * @param owner the dialog owner
 	 * @param icon the icon image
-	 * @param title the dialog title
 	 * @param body the body the fixture belongs to
 	 * @param fixture the fixture to edit
 	 */
-	public static final void show(Window owner, Image icon, String title, SandboxBody body, BodyFixture fixture) {
-		EditFixtureDialog dialog = new EditFixtureDialog(owner, icon, title, fixture);
+	public static final void show(Window owner, Image icon, SandboxBody body, BodyFixture fixture) {
+		EditFixtureDialog dialog = new EditFixtureDialog(owner, icon, fixture);
 		dialog.setLocationRelativeTo(owner);
 		dialog.setVisible(true);
 		// control returns to this method when the dialog is closed

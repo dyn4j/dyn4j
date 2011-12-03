@@ -26,6 +26,8 @@ package org.dyn4j.sandbox.utilities;
 
 import java.awt.Color;
 
+import org.dyn4j.sandbox.Resources;
+
 /**
  * Utility class to handle colors for both OpenGL and Java.
  * @author William Bittle
@@ -53,7 +55,7 @@ public class ColorUtilities {
 		} else if (color.length == 4) {
 			return new Color(color[0], color[1], color[2], color[3]);
 		} else {
-			throw new IllegalArgumentException("A color must have 3 or 4 components.");
+			throw new IllegalArgumentException(Resources.getString("exception.color.notEnoughComponents"));
 		}
 	}
 	

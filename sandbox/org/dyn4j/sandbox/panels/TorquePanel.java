@@ -26,12 +26,14 @@ package org.dyn4j.sandbox.panels;
 
 import java.awt.Window;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 
 import javax.swing.GroupLayout;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
 import org.dyn4j.sandbox.utilities.ControlUtilities;
 import org.dyn4j.sandbox.utilities.Icons;
@@ -53,10 +55,10 @@ public class TorquePanel extends JPanel implements InputPanel {
 	 * Default constructor.
 	 */
 	public TorquePanel() {
-		JLabel lblTorque = new JLabel("Torque", Icons.INFO, JLabel.LEFT);
-		lblTorque.setToolTipText("The torque to apply to the body in Newton-Meters.");
+		JLabel lblTorque = new JLabel(Resources.getString("panel.torque"), Icons.INFO, JLabel.LEFT);
+		lblTorque.setToolTipText(MessageFormat.format(Resources.getString("panel.torque.tooltip"), Resources.getString("unit.torque")));
 		
-		this.txtT = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtT = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.torque.format")));
 		this.txtT.addFocusListener(new SelectTextFocusListener(this.txtT));
 		this.txtT.setColumns(7);
 		this.txtT.setValue(0.0);

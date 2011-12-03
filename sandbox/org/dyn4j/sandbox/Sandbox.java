@@ -28,6 +28,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.Point;
@@ -40,8 +41,8 @@ import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -82,8 +83,10 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.dyn4j.Version;
+import org.dyn4j.collision.narrowphase.Raycast;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.RaycastResult;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.contact.ContactPoint;
@@ -105,6 +108,7 @@ import org.dyn4j.sandbox.dialogs.ExceptionDialog;
 import org.dyn4j.sandbox.dialogs.PreferencesDialog;
 import org.dyn4j.sandbox.dialogs.SettingsDialog;
 import org.dyn4j.sandbox.events.BodyActionEvent;
+import org.dyn4j.sandbox.events.RayActionEvent;
 import org.dyn4j.sandbox.input.Keyboard;
 import org.dyn4j.sandbox.input.Mouse;
 import org.dyn4j.sandbox.panels.ContactPanel;
@@ -120,7 +124,7 @@ import org.dyn4j.sandbox.utilities.RenderUtilities;
 import org.xml.sax.SAXException;
 
 import com.jogamp.opengl.util.Animator;
-import com.jogamp.opengl.util.gl2.GLUT;
+import com.jogamp.opengl.util.awt.TextRenderer;
 
 /**
  * Main class for the Sandbox application.
@@ -137,6 +141,20 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	
 	/** The sandbox version */
 	public static final String VERSION = "1.0.1";
+
+	/** The origin label (pulled into a local variable for fast rendering) */
+	private static final String ORIGIN_LABEL = Resources.getString("canvas.originLabel");
+	
+	/** The scale conversion label (pulled into a local variable for fast rendering) for values greater than 1 */
+	private static final String SCALE_CONVERSION_WHOLE = Resources.getString("canvas.scale.conversion.whole");
+	
+	/** The scale conversion label (pulled into a local variable for fast rendering) for values less than 1*/
+	private static final String SCALE_CONVERSION_FRACTION = Resources.getString("canvas.scale.conversion.fraction");
+	
+	/** The scale length (pulled into a local variable for fast rendering) */
+	private static final String SCALE_LENGTH = Resources.getString("canvas.scale.length");
+
+	// data
 	
 	/** The canvas to draw to */
 	private GLCanvas canvas;
@@ -147,11 +165,14 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	/** The OpenGL animator */
 	private Animator animator;
 	
-	/** The glut interface */
-	private GLUT glut;
+	/** The OpenGL text renderer (sans-serif, plain, 12) */
+	private TextRenderer textRenderer;
 	
 	/** The dynamics engine */
 	private World world;
+	
+	/** The list of rays cast against the world */
+	private List<SandboxRay> rays;
 	
 	/** The time stamp for the last iteration */
 	private long last;
@@ -353,6 +374,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	 */
 	public Sandbox() {
 		super();
+		
 		// let the methods in this class handle closing the window
 		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		this.addWindowListener(this);
@@ -368,9 +390,12 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		
 		// create the world
 		this.world = new World();
-		this.world.setUserData("World");
+		this.world.setUserData(Resources.getString("world.name.default"));
 		this.world.setContactListener(counter);
 		this.world.setStepListener(counter);
+		
+		// create the list of rays
+		this.rays = new ArrayList<SandboxRay>();
 		
 		// create the contact panel
 		this.pnlContacts = new ContactPanel(counter);
@@ -396,19 +421,19 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		this.barMenu = new JMenuBar();
 		
 		// file menu
-		this.mnuFile = new JMenu(" File ");
+		this.mnuFile = new JMenu(Resources.getString("menu.file"));
 		
-		JMenuItem mnuNew = new JMenuItem(" New Simulation ");
+		JMenuItem mnuNew = new JMenuItem(Resources.getString("menu.file.new"));
 		mnuNew.setIcon(Icons.NEW_SIMULATION);
 		mnuNew.setActionCommand("new");
 		mnuNew.addActionListener(this);
 		
-		JMenuItem mnuSave = new JMenuItem(" Save Simulation ");
+		JMenuItem mnuSave = new JMenuItem(Resources.getString("menu.file.save"));
 		mnuSave.setIcon(Icons.SAVE);
 		mnuSave.setActionCommand("save");
 		mnuSave.addActionListener(this);
 		
-		JMenuItem mnuOpen = new JMenuItem(" Open Simulation ");
+		JMenuItem mnuOpen = new JMenuItem(Resources.getString("menu.file.open"));
 		mnuOpen.setIcon(Icons.OPEN);
 		mnuOpen.setActionCommand("open");
 		mnuOpen.addActionListener(this);
@@ -418,14 +443,14 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		this.mnuFile.add(mnuSave);
 		
 		// snapshot menu
-		this.mnuSnapshot = new JMenu("Snapshot");
+		this.mnuSnapshot = new JMenu(Resources.getString("menu.snapshot"));
 		
-		JMenuItem mnuTakeSnapshot = new JMenuItem("Take Snapshot");
+		JMenuItem mnuTakeSnapshot = new JMenuItem(Resources.getString("menu.snapshot.take"));
 		mnuTakeSnapshot.setActionCommand("snapshotTake");
 		mnuTakeSnapshot.addActionListener(this);
 		mnuTakeSnapshot.setIcon(Icons.SNAPSHOT_TAKE);
 		
-		JMenuItem mnuClearSnapshots = new JMenuItem("Clear Snapshots");
+		JMenuItem mnuClearSnapshots = new JMenuItem(Resources.getString("menu.snapshot.clear"));
 		mnuClearSnapshots.setActionCommand("snapshotClearAll");
 		mnuClearSnapshots.addActionListener(this);
 		mnuClearSnapshots.setIcon(Icons.SNAPSHOT_REMOVE);
@@ -435,13 +460,13 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		this.mnuSnapshot.addSeparator();
 		
 		// tests menu
-		this.mnuTests = new JMenu("Tests");
+		this.mnuTests = new JMenu(Resources.getString("menu.tests"));
 		this.createTestMenuItems(this.mnuTests);
 		
 		// window menu
-		this.mnuWindow = new JMenu("Window");
+		this.mnuWindow = new JMenu(Resources.getString("menu.window"));
 		
-		JMenuItem mnuPreferences = new JMenuItem("Preferences");
+		JMenuItem mnuPreferences = new JMenuItem(Resources.getString("menu.window.preferences"));
 		mnuPreferences.setIcon(Icons.PREFERENCES);
 		mnuPreferences.setActionCommand("preferences");
 		mnuPreferences.addActionListener(this);
@@ -449,14 +474,14 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		this.mnuWindow.add(mnuPreferences);
 		
 		// look and feel menu
-		this.mnuLookAndFeel = new JMenu("Look and Feel");
+		this.mnuLookAndFeel = new JMenu(Resources.getString("menu.window.laf"));
 		this.createLookAndFeelMenuItems(this.mnuLookAndFeel);
 		this.mnuWindow.add(this.mnuLookAndFeel);
 		
 		// help menu
-		this.mnuHelp = new JMenu("Help");
+		this.mnuHelp = new JMenu(Resources.getString("menu.help"));
 		
-		JMenuItem mnuAbout = new JMenuItem("About");
+		JMenuItem mnuAbout = new JMenuItem(Resources.getString("menu.help.about"));
 		mnuAbout.setIcon(Icons.ABOUT);
 		mnuAbout.setActionCommand("about");
 		mnuAbout.addActionListener(this);
@@ -473,23 +498,23 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		
 		// create the simulation tool bar
 		
-		JToolBar barSimulation = new JToolBar("Simulation", JToolBar.HORIZONTAL);
+		JToolBar barSimulation = new JToolBar(Resources.getString("toolbar.simulation"), JToolBar.HORIZONTAL);
 		barSimulation.setFloatable(false);
 		
 		this.btnStart = new JButton(Icons.START);
 		this.btnStart.addActionListener(this);
 		this.btnStart.setActionCommand("start");
-		this.btnStart.setToolTipText("Start Simulation");
+		this.btnStart.setToolTipText(Resources.getString("toolbar.simulation.start"));
 		
 		this.btnStep = new JButton(Icons.STEP);
 		this.btnStep.addActionListener(this);
 		this.btnStep.setActionCommand("step");
-		this.btnStep.setToolTipText("Perform One Simulation Step");
+		this.btnStep.setToolTipText(Resources.getString("toolbar.simulation.step"));
 		
 		this.btnStop = new JButton(Icons.STOP);
 		this.btnStop.addActionListener(this);
 		this.btnStop.setActionCommand("stop");
-		this.btnStop.setToolTipText("Stop Simulation");
+		this.btnStop.setToolTipText(Resources.getString("toolbar.simulation.stop"));
 		
 		this.btnStart.setEnabled(true);
 		this.btnStop.setEnabled(false);
@@ -501,7 +526,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		this.btnSettings = new JButton(Icons.SETTINGS);
 		this.btnSettings.addActionListener(this);
 		this.btnSettings.setActionCommand("settings");
-		this.btnSettings.setToolTipText("Change Settings");
+		this.btnSettings.setToolTipText(Resources.getString("toolbar.simulation.settings"));
 		
 		barSimulation.add(this.btnSettings);
 		
@@ -510,23 +535,23 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		this.lblFps.setHorizontalAlignment(JTextField.RIGHT);
 		this.lblFps.setColumns(7);
 		this.lblFps.setEditable(false);
-		this.lblFps.setToolTipText("Frames / Second");
+		this.lblFps.setToolTipText(Resources.getString("toolbar.simulation.fps"));
 		
 		barSimulation.add(this.lblFps);
 		barSimulation.addSeparator();
 
 		this.btnZoomIn = new JButton(Icons.ZOOM_IN);
-		this.btnZoomIn.setToolTipText("Zoom In");
+		this.btnZoomIn.setToolTipText(Resources.getString("toolbar.simulation.zoomIn"));
 		this.btnZoomIn.setActionCommand("zoom-in");
 		this.btnZoomIn.addActionListener(this);
 		
 		this.btnZoomOut = new JButton(Icons.ZOOM_OUT);
-		this.btnZoomOut.setToolTipText("Zoom Out");
+		this.btnZoomOut.setToolTipText(Resources.getString("toolbar.simulation.zoomOut"));
 		this.btnZoomOut.setActionCommand("zoom-out");
 		this.btnZoomOut.addActionListener(this);
 		
 		this.btnToOrigin = new JButton(Icons.TO_ORIGIN);
-		this.btnToOrigin.setToolTipText("Center the camera on the origin.");
+		this.btnToOrigin.setToolTipText(Resources.getString("toolbar.simulation.toOrigin"));
 		this.btnToOrigin.setActionCommand("to-origin");
 		this.btnToOrigin.addActionListener(this);
 		
@@ -539,119 +564,119 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		this.lblMouseLocation.setHorizontalAlignment(JTextField.RIGHT);
 		this.lblMouseLocation.setColumns(20);
 		this.lblMouseLocation.setEditable(false);
-		this.lblMouseLocation.setToolTipText("Mouse Location (World Coordinates)");
+		this.lblMouseLocation.setToolTipText(Resources.getString("toolbar.simulation.mouseLocation"));
 		
 		barSimulation.add(this.lblMouseLocation);
 		
 		// create the preferences toolbar
 		
-		JToolBar barPreferences = new JToolBar("Preferences", JToolBar.HORIZONTAL);
+		JToolBar barPreferences = new JToolBar(Resources.getString("toolbar.preferences"), JToolBar.HORIZONTAL);
 		barPreferences.setFloatable(false);
 		
 		this.tglAntiAliasing = new JToggleButton(Icons.AA);
-		this.tglAntiAliasing.setToolTipText("Enable/Disable Anti-Aliasing");
+		this.tglAntiAliasing.setToolTipText(Resources.getString("toolbar.preferences.antialiasing"));
 		this.tglAntiAliasing.setActionCommand("aa");
 		this.tglAntiAliasing.addActionListener(this);
 		this.tglAntiAliasing.setSelected(Preferences.isAntiAliasingEnabled());
 		
 		this.tglVerticalSync = new JToggleButton(Icons.SYNC);
-		this.tglVerticalSync.setToolTipText("Enable/Disable Vertical Sync");
+		this.tglVerticalSync.setToolTipText(Resources.getString("toolbar.preferences.verticalSync"));
 		this.tglVerticalSync.setActionCommand("vertical-sync");
 		this.tglVerticalSync.addActionListener(this);
 		this.tglVerticalSync.setSelected(Preferences.isVerticalSyncEnabled());
 		
 		this.tglBounds = new JToggleButton(Icons.BOUNDS);
-		this.tglBounds.setToolTipText("Enable/Disable Bounds Rendering");
+		this.tglBounds.setToolTipText(Resources.getString("toolbar.preferences.worldBounds"));
 		this.tglBounds.setActionCommand("bounds");
 		this.tglBounds.addActionListener(this);
 		this.tglBounds.setSelected(Preferences.isBoundsEnabled());
 
 		this.tglOriginLabel = new JToggleButton(Icons.ORIGIN);
-		this.tglOriginLabel.setToolTipText("Enable/Disable The Origin Label");
+		this.tglOriginLabel.setToolTipText(Resources.getString("toolbar.preferences.originLabel"));
 		this.tglOriginLabel.setActionCommand("origin");
 		this.tglOriginLabel.addActionListener(this);
 		this.tglOriginLabel.setSelected(Preferences.isOriginLabeled());
 		
 		this.tglScale = new JToggleButton(Icons.SCALE);
-		this.tglScale.setToolTipText("Enable/Disable Scale Rendering");
+		this.tglScale.setToolTipText(Resources.getString("toolbar.preferences.scale"));
 		this.tglScale.setActionCommand("scale");
 		this.tglScale.addActionListener(this);
 		this.tglScale.setSelected(Preferences.isScaleEnabled());
 		
 		this.tglBodyCenter = new JToggleButton(Icons.BODY_CENTER);
-		this.tglBodyCenter.setToolTipText("Enable/Disable Body Center Rendering");
+		this.tglBodyCenter.setToolTipText(Resources.getString("toolbar.preferences.bodyCenters"));
 		this.tglBodyCenter.setActionCommand("bodyCenter");
 		this.tglBodyCenter.addActionListener(this);
 		this.tglBodyCenter.setSelected(Preferences.isBodyCenterEnabled());
 		
 		this.tglRandomColor = new JToggleButton(Icons.COLOR);
-		this.tglRandomColor.setToolTipText("Enable/Disable Random Body Colors");
+		this.tglRandomColor.setToolTipText(Resources.getString("toolbar.preferences.bodyColor"));
 		this.tglRandomColor.setActionCommand("color");
 		this.tglRandomColor.addActionListener(this);
 		this.tglRandomColor.setSelected(Preferences.isBodyColorRandom());
 		
 		this.tglStencil = new JToggleButton(Icons.STENCIL);
-		this.tglStencil.setToolTipText("Enable/Disable Body Stenciling");
+		this.tglStencil.setToolTipText(Resources.getString("toolbar.preferences.bodyStenciling"));
 		this.tglStencil.setActionCommand("stencil");
 		this.tglStencil.addActionListener(this);
 		this.tglStencil.setSelected(Preferences.isBodyStenciled());
 		
 		this.tglBodyLabels = new JToggleButton(Icons.BODY_LABEL);
-		this.tglBodyLabels.setToolTipText("Enable/Disable Body Labels");
+		this.tglBodyLabels.setToolTipText(Resources.getString("toolbar.preferences.bodyLabels"));
 		this.tglBodyLabels.setActionCommand("bodyLabel");
 		this.tglBodyLabels.addActionListener(this);
 		this.tglBodyLabels.setSelected(Preferences.isBodyLabeled());
 		
 		this.tglFixtureLabels = new JToggleButton(Icons.FIXTURE_LABEL);
-		this.tglFixtureLabels.setToolTipText("Enable/Disable Fixture Labels");
+		this.tglFixtureLabels.setToolTipText(Resources.getString("toolbar.preferences.fixtureLabels"));
 		this.tglFixtureLabels.setActionCommand("fixtureLabel");
 		this.tglFixtureLabels.addActionListener(this);
 		this.tglFixtureLabels.setSelected(Preferences.isFixtureLabeled());
 		
 		this.tglContactPairs = new JToggleButton(Icons.CONTACT_PAIR);
-		this.tglContactPairs.setToolTipText("Enable/Disable Contact Pair Rendering");
+		this.tglContactPairs.setToolTipText(Resources.getString("toolbar.preferences.contactPairs"));
 		this.tglContactPairs.setActionCommand("contactPair");
 		this.tglContactPairs.addActionListener(this);
 		this.tglContactPairs.setSelected(Preferences.isContactPairEnabled()); 
 		
 		this.tglContactPoints = new JToggleButton(Icons.CONTACT);
-		this.tglContactPoints.setToolTipText("Enable/Disable Contact Point Rendering");
+		this.tglContactPoints.setToolTipText(Resources.getString("toolbar.preferences.contactPoints"));
 		this.tglContactPoints.setActionCommand("contactPoint");
 		this.tglContactPoints.addActionListener(this);
 		this.tglContactPoints.setSelected(Preferences.isContactPointEnabled()); 
 		
 		this.tglContactImpulses = new JToggleButton(Icons.CONTACT_IMPULSE);
-		this.tglContactImpulses.setToolTipText("Enable/Disable Contact Impulse Rendering");
+		this.tglContactImpulses.setToolTipText(Resources.getString("toolbar.preferences.contactImpulses"));
 		this.tglContactImpulses.setActionCommand("contactImpulse");
 		this.tglContactImpulses.addActionListener(this);
 		this.tglContactImpulses.setSelected(Preferences.isContactImpulseEnabled());
 		
 		this.tglFrictionImpulses = new JToggleButton(Icons.FRICTION_IMPULSE);
-		this.tglFrictionImpulses.setToolTipText("Enable/Disable Contact Friction Impulse Rendering");
+		this.tglFrictionImpulses.setToolTipText(Resources.getString("toolbar.preferences.contactFrictionImpulses"));
 		this.tglFrictionImpulses.setActionCommand("frictionImpulse");
 		this.tglFrictionImpulses.addActionListener(this);
 		this.tglFrictionImpulses.setSelected(Preferences.isFrictionImpulseEnabled()); 
 		
 		this.tglBodyAABBs = new JToggleButton(Icons.AABB);
-		this.tglBodyAABBs.setToolTipText("Enable/Disable Body Axis-Aligned Bounding Box Rendering");
+		this.tglBodyAABBs.setToolTipText(Resources.getString("toolbar.preferences.bodyAABB"));
 		this.tglBodyAABBs.setActionCommand("aabb");
 		this.tglBodyAABBs.addActionListener(this);
 		this.tglBodyAABBs.setSelected(Preferences.isBodyAABBEnabled());
 		
 		this.tglBodyNormals = new JToggleButton(Icons.NORMAL);
-		this.tglBodyNormals.setToolTipText("Enable/Disable Body Fixture Normal Rendering");
+		this.tglBodyNormals.setToolTipText(Resources.getString("toolbar.preferences.fixtureNormals"));
 		this.tglBodyNormals.setActionCommand("normals");
 		this.tglBodyNormals.addActionListener(this);
 		this.tglBodyNormals.setSelected(Preferences.isBodyNormalEnabled());
 		
 		this.tglBodyRotationDiscs = new JToggleButton(Icons.ROTATION_DISC);
-		this.tglBodyRotationDiscs.setToolTipText("Enable/Disable Body Rotation Disc Rendering");
+		this.tglBodyRotationDiscs.setToolTipText(Resources.getString("toolbar.preferences.bodyRotationDisc"));
 		this.tglBodyRotationDiscs.setActionCommand("rotationDisc");
 		this.tglBodyRotationDiscs.addActionListener(this);
 		this.tglBodyRotationDiscs.setSelected(Preferences.isBodyRotationDiscEnabled());
 		
 		this.tglBodyVelocities = new JToggleButton(Icons.VELOCITY);
-		this.tglBodyVelocities.setToolTipText("Enable/Disable Body Velocity Rendering");
+		this.tglBodyVelocities.setToolTipText(Resources.getString("toolbar.preferences.bodyVelocity"));
 		this.tglBodyVelocities.setActionCommand("velocity");
 		this.tglBodyVelocities.addActionListener(this);
 		this.tglBodyVelocities.setSelected(Preferences.isBodyVelocityEnabled());
@@ -689,7 +714,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		
 		// setup OpenGL capabilities
 		if (!GLProfile.isAvailable(GLProfile.GL2)) {
-			throw new GLException("OpenGL 3.0 or higher is required");
+			throw new GLException(Resources.getString("exception.opengl.version"));
 		}
 		GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL2));
 		caps.setDoubleBuffered(true);
@@ -699,8 +724,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		caps.setSampleBuffers(true);
 		caps.setNumSamples(2);
 		caps.setHardwareAccelerated(true);
-		
-		this.glut = new GLUT();
 		
 		this.canvasSize = new Dimension(800, 600);
 		// create a canvas to paint to 
@@ -726,9 +749,9 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		// create a tabbed pane below the world tree
 		JTabbedPane tabs = new JTabbedPane();
 		tabs.setBorder(BorderFactory.createEmptyBorder(7, 0, 0, 0));
-		tabs.addTab("Contacts", this.pnlContacts);
-		tabs.addTab("System", this.pnlSystem);
-		tabs.addTab("Memory", this.pnlMemory);
+		tabs.addTab(Resources.getString("tab.contacts"), this.pnlContacts);
+		tabs.addTab(Resources.getString("tab.system"), this.pnlSystem);
+		tabs.addTab(Resources.getString("tab.memory"), this.pnlMemory);
 		
 		JPanel pnlLeft = new JPanel();
 		pnlLeft.setLayout(new BoxLayout(pnlLeft, BoxLayout.Y_AXIS));
@@ -801,7 +824,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	 */
 	@Override
 	public void windowClosing(WindowEvent e) {
-		int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want to exit without saving the current simulation?", "Exit without saving?", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+		int choice = JOptionPane.showConfirmDialog(this, Resources.getString("dialog.exit.text"), Resources.getString("dialog.exit.title"), JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
 		if (choice == JOptionPane.YES_OPTION) {
 			this.dispose();
 			System.exit(0);
@@ -852,14 +875,33 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				// if the body is selected or being edited then end the actions
 				this.endAllActions();
 			}
+		} else if ("add-ray".equals(command)) {
+			RayActionEvent rae = (RayActionEvent)event;
+			SandboxRay ray = rae.getRay();
+			// add the ray to the list
+			synchronized (this.rays) {
+				this.rays.add(ray);
+			}
+		} else if ("remove-ray".equals(command)) {
+			RayActionEvent rae = (RayActionEvent)event;
+			SandboxRay ray = rae.getRay();
+			// remove the ray from the list
+			synchronized (this.rays) {
+				this.rays.remove(ray);
+			}
+		} else if ("remove-all-rays".equals(command)) {
+			// remove them all
+			synchronized (this.rays) {
+				this.rays.clear();
+			}
 		}
 		// Sandbox events
 		if ("new".equals(command)) {
 			// make sure they are sure
-			int choice = JOptionPane.showConfirmDialog(this,
-					"Starting a new simulation will reset the current simulation " +
-					"\nand settings and will clear the snapshot history." +
-					"\nDo you want to continue?", "New Simulation", JOptionPane.YES_NO_CANCEL_OPTION);
+			int choice = JOptionPane.showConfirmDialog(this, 
+					Resources.getString("dialog.new.text"), 
+					Resources.getString("dialog.new.title"), 
+					JOptionPane.YES_NO_CANCEL_OPTION);
 			// check the user's choice
 			if (choice == JOptionPane.YES_OPTION) {
 				// clear the snapshots
@@ -874,7 +916,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				this.world.setContactListener(counter);
 				this.world.setStepListener(counter);
 				// reset the world in the world panel
-				this.pnlWorld.setWorld(this.world);
+				this.pnlWorld.setWorld(this.world, this.rays);
 				// set the contact panel
 				this.pnlContacts.setContactCounter(counter);
 				// reset the global settings
@@ -889,7 +931,10 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 			try {
 				this.saveSimulationAction();
 			} catch (IOException e) {
-				ExceptionDialog.show(this, "Error Saving Simulation", "An error occured when trying to save the simulation:", e);
+				ExceptionDialog.show(this, 
+						Resources.getString("dialog.save.error.title"), 
+						Resources.getString("dialog.save.error.text"), 
+						e);
 			}
 		} else if ("open".equals(command)) {
 			try {
@@ -897,17 +942,20 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				// stop all actions
 				this.endAllActions();
 			} catch (Exception e) {
-				ExceptionDialog.show(this, "Error Opening Simulation", "An error occured when trying to open the selected simulation file:", e);
+				ExceptionDialog.show(this, 
+						Resources.getString("dialog.open.error.title"), 
+						Resources.getString("dialog.open.error.text"), 
+						e);
 			}
 		} else if ("start".equals(command)) {
 			if (isPaused()) {
 				// check for a floor/static body
 				if (!this.hasStaticBody() && !this.world.isEmpty()) {
 					// make sure they are sure
-					int choice = JOptionPane.showConfirmDialog(this,
-							"A static body (like a ground or floor body) does not exist in the current simulation." +
-							"\nThis will allow all bodies to fall indefinitely depending on the gravity." +
-							"\nDo you want to continue?", "Start Simulation", JOptionPane.YES_NO_CANCEL_OPTION);
+					int choice = JOptionPane.showConfirmDialog(this, 
+							Resources.getString("dialog.start.warning.text"), 
+							Resources.getString("dialog.start.warning.title"), 
+							JOptionPane.YES_NO_CANCEL_OPTION);
 					// check the user's choice
 					if (choice != JOptionPane.YES_OPTION) {
 						return;
@@ -1001,7 +1049,10 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 			this.takeSnapshot(false);
 		} else if ("snapshotClearAll".equals(command)) {
 			// make sure they are sure
-			int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want to clear all snapshots?", "Clear Snapshots", JOptionPane.YES_NO_CANCEL_OPTION);
+			int choice = JOptionPane.showConfirmDialog(this, 
+					Resources.getString("dialog.snapshot.clear.text"), 
+					Resources.getString("dialog.snapshot.clear.title"), 
+					JOptionPane.YES_NO_CANCEL_OPTION);
 			// check the user's choice
 			if (choice == JOptionPane.YES_OPTION) {
 				// clear the snapshots
@@ -1012,8 +1063,10 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 			String key = item.getText();
 			
 			// make sure they are sure
-			int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want load the '" + key + "' snapshot?\n" +
-					"The current simulation and settings will be lost.", "Load Snapshot", JOptionPane.YES_NO_CANCEL_OPTION);
+			int choice = JOptionPane.showConfirmDialog(this, 
+					MessageFormat.format(Resources.getString("dialog.snapshot.load.text"), key), 
+					Resources.getString("dialog.snapshot.load.title"), 
+					JOptionPane.YES_NO_CANCEL_OPTION);
 			// check the user's choice
 			if (choice == JOptionPane.YES_OPTION) {
 				try {
@@ -1021,7 +1074,10 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 					// stop all actions
 					this.endAllActions();
 				} catch (Exception e) {
-					ExceptionDialog.show(this, "Error Restoring Snapshot", "An error occured when trying to restore the snapshot '" + key + "':", e);
+					ExceptionDialog.show(this, 
+							Resources.getString("dialog.snapshot.load.error.title"), 
+							MessageFormat.format(Resources.getString("dialog.snapshot.load.error.text"), key), 
+							e);
 				}
 			}
 		} else if ("preferences".equals(command)) {
@@ -1054,12 +1110,17 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				// stop all actions
 				this.endAllActions();
 			} catch (Exception e) {
-				ExceptionDialog.show(this, "Error Opening Test", "An error occured when trying to open the selected test:", e);
+				ExceptionDialog.show(this, 
+						Resources.getString("dialog.test.open.error.title"), 
+						Resources.getString("dialog.test.open.error.text"), 
+						e);
 			}
 		} else if (command.startsWith("laf+")) {
 			// make sure they are sure
-			int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want to change the look and feel?\n" +
-					"This may resize the window.", "Switch Look and Feel", JOptionPane.YES_NO_CANCEL_OPTION);
+			int choice = JOptionPane.showConfirmDialog(this, 
+					Resources.getString("dialog.laf.warning.text"), 
+					Resources.getString("dialog.laf.warning.title"), 
+					JOptionPane.YES_NO_CANCEL_OPTION);
 			// check the user's choice
 			if (choice == JOptionPane.YES_OPTION) {
 				// parse out the LAF class name
@@ -1088,7 +1149,10 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 			        	}
 			        }
 				} catch (Exception e) {
-					ExceptionDialog.show(this, "Error Switching Look and Feel", "An error occured when trying to switch the current look and feel:", e);
+					ExceptionDialog.show(this, 
+							Resources.getString("dialog.laf.error.title"), 
+							Resources.getString("dialog.laf.error.text"), 
+							e);
 				}
 			}
 		}
@@ -1137,6 +1201,9 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				
 		// set the swap interval to vertical-sync
 		gl.setSwapInterval(1);
+		
+		// create the text renderer
+		this.textRenderer = new TextRenderer(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
 	}
 	
 	/* (non-Javadoc)
@@ -1325,6 +1392,23 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				RenderUtilities.drawJoint(gl, joint, this.world.getStep().getInverseDeltaTime());
 			}
 		}
+
+		// the selected body is rendered by itself
+		if (this.selectBodyAction.isActive()) {
+			this.renderSelectedBody(gl, this.selectBodyAction.getObject());
+		}
+		
+		// the selected body is rendered by itself
+		if (this.editBodyAction.isActive()) {
+			this.renderEditingBody(gl, this.editBodyAction.getObject());
+		}
+		
+		// draw the mouse joint last always
+		if (this.selectedBodyJoint != null) {
+			synchronized (this.world) {
+				RenderUtilities.drawMouseJoint(gl, this.selectedBodyJoint, this.world.getStep().getInverseDeltaTime());
+			}
+		}
 		
 		// render contacts, contact impulses, friction impulses, and pairs
 		if (Preferences.isContactPairEnabled()
@@ -1396,20 +1480,56 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 			}
 		}
 		
-		// the selected body is rendered by itself
-		if (this.selectBodyAction.isActive()) {
-			this.renderSelectedBody(gl, this.selectBodyAction.getObject());
-		}
+		// draw rays & results
 		
-		// the selected body is rendered by itself
-		if (this.editBodyAction.isActive()) {
-			this.renderEditingBody(gl, this.editBodyAction.getObject());
-		}
-		
-		// draw the mouse joint last always
-		if (this.selectedBodyJoint != null) {
-			synchronized (this.world) {
-				RenderUtilities.drawMouseJoint(gl, this.selectedBodyJoint, this.world.getStep().getInverseDeltaTime());
+		synchronized (this.rays) {
+			List<RaycastResult> results = new ArrayList<RaycastResult>();
+			for (int i = 0; i < this.rays.size(); i++) {
+				SandboxRay ray = this.rays.get(i);
+				// draw the ray
+				// get the ray attributes (world coordinates)
+				Vector2 s = ray.getStart();
+				Vector2 d = ray.getDirectionVector();
+				
+				// compute the maximum length (this is the length required
+				// to show the ray extending past the screen always to emulate
+				// it having infinite length)
+				double x = size.getWidth() / scale * 0.5 - (s.x + offset.x);
+				double y = size.getHeight() / scale * 0.5 - (s.y + offset.y);
+				// we must use the square root to get an accurate length
+				double ml = Math.sqrt(x * x + y * y);
+				double l = ray.length > 0.0 ? ray.length : ml;
+				gl.glColor4f(1.0f, 0.0f, 0.0f, 0.8f);
+				// draw the line from the start to the end, along d, l distance
+				gl.glBegin(GL.GL_LINES);
+					gl.glVertex2d(s.x, s.y);
+					gl.glVertex2d(s.x + d.x * l, s.y + d.y * l);
+				gl.glEnd();
+				
+				// perform the raycast
+				if (this.world.raycast(ray, ray.length, ray.sensors, ray.all, results)) {
+					// draw the raycast results
+					// get the number of results
+					int rSize = results.size();
+					gl.glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
+					// loop over the results
+					for (int j = 0; j < rSize; j++) {
+						// should always contain at least one result
+						RaycastResult result = results.get(j);
+						Raycast raycast = result.getRaycast();
+						
+						// draw the normal and point
+						Vector2 point = raycast.getPoint();
+						Vector2 normal = raycast.getNormal();
+						
+						RenderUtilities.fillRectangleFromCenter(gl, point.x, point.y, 0.02, 0.02);
+						
+						gl.glBegin(GL.GL_LINES);
+							gl.glVertex2d(point.x, point.y);
+							gl.glVertex2d(point.x + normal.x, point.y + normal.y);
+						gl.glEnd();
+					}
+				}
 			}
 		}
 		
@@ -1425,10 +1545,14 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		if (Preferences.isOriginLabeled()) {
 			double ox = offset.x * scale;
 			double oy = offset.y * scale;
-			gl.glColor3f(0.0f, 0.0f, 0.0f);
+			
+			this.textRenderer.beginRendering(size.width, size.height);
+			this.textRenderer.setColor(0.0f, 0.0f, 0.0f, 0.8f);
+			this.textRenderer.draw(ORIGIN_LABEL, (int)Math.floor(ox) + size.width / 2 + 3, (int)Math.floor(oy) + size.height / 2 - 12);
+			this.textRenderer.endRendering();
+			
+			gl.glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
 			RenderUtilities.fillRectangleFromCenter(gl, ox, oy, 3, 3);
-			gl.glRasterPos2d(2 + ox, -12 + oy);
-			this.glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Origin");
 		}
 
 		// draw labels over the origin label
@@ -1436,13 +1560,46 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		boolean fixtureLabels = Preferences.isFixtureLabeled();
 		if ((bodyLabels || fixtureLabels) && !this.editBodyAction.isActive()) {
 			synchronized (this.world) {
-				gl.glColor3f(0.0f, 0.0f, 0.0f);
+				// begin rendering text
+				this.textRenderer.beginRendering(size.width, size.height);
+				// set the color
+				this.textRenderer.setColor(0.0f, 0.0f, 0.0f, 0.8f);
+				
 				// render all the bodies in the world
 				int bSize = this.world.getBodyCount();
 				for (int i = 0; i < bSize; i++) {
 					SandboxBody body = (SandboxBody)this.world.getBody(i);
-					RenderUtilities.drawLabels(gl, this.glut, body, this.camera, 5, bodyLabels, fixtureLabels);
+					// get the center point
+					Vector2 c = body.getWorldCenter();
+					
+					int x, y;
+					if (bodyLabels) {
+						// compute the screen coordinates
+						x = (int)Math.floor((c.x + offset.x) * scale) + size.width / 2 + 3;
+						y = (int)Math.floor((c.y + offset.y) * scale) + size.height / 2 - 12;
+						
+						this.textRenderer.draw(body.getName(), x, y);
+						this.textRenderer.draw(RenderUtilities.formatVector2(c), x, y - 16);
+					}
+					
+					if (fixtureLabels) {
+						Transform tx = body.getTransform();
+						int fSize = body.getFixtureCount();
+						for (int j = 0; j < fSize; j++) {
+							BodyFixture bf = body.getFixture(j);
+							Vector2 lc = bf.getShape().getCenter();
+							Vector2 wc = tx.getTransformed(lc);
+							
+							x = (int)Math.floor((wc.x + offset.x) * scale) + size.width / 2 + 3;
+							y = (int)Math.floor((wc.y + offset.y) * scale) + size.height / 2 - 12;
+							
+							this.textRenderer.draw((String)bf.getUserData(), x, y);
+							this.textRenderer.draw(RenderUtilities.formatVector2(wc), x, y - 16);
+						}
+					}
 				}
+				
+				this.textRenderer.endRendering();
 			}
 		}
 		
@@ -1450,8 +1607,62 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		
 		if (Preferences.isScaleEnabled()) {
 			// translate (0, 0) to the bottom left corner
+			gl.glPushMatrix();
+			gl.glLoadIdentity();
 			gl.glTranslated(-size.getWidth() * 0.5, -size.getHeight() * 0.5, 0.0);
-			RenderUtilities.drawPixelScale(gl, this.glut, 5, 18, 3, 100, 15, this.camera.getScale());
+			
+			final int x = 5;
+			final int y = 18;
+			// line width
+			final int lw = 3;
+			final int w = 100;
+			final int h = 15;
+			// text height
+			final int th = 7;
+			
+			// set the line width
+			float olw = RenderUtilities.setLineWidth(gl, lw);
+			
+			// compute the offset due to the line width
+			final int o = (lw - 1) / 2;
+			double d = (double)w / scale;
+			
+			// draw a line downward
+			gl.glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+			gl.glBegin(GL.GL_LINES);
+				gl.glVertex2i(x + o, y - h - o + th);
+				gl.glVertex2i(x + o, y);
+				
+				gl.glVertex2i(x + o, y - o);
+				gl.glVertex2i(x + w - o, y - o);
+				
+				gl.glVertex2i(x + w - o, y);
+				gl.glVertex2i(x + w - o, y - h - o + th);
+			gl.glEnd();
+			
+			// reset the line width back to what it was
+			RenderUtilities.setLineWidth(gl, olw);
+			
+			// show the bounding box for testing
+			//gl.glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+			//RenderUtilities.drawRectangleFromTopLeft(gl, x, y, w, h, false);
+			
+			gl.glPopMatrix();
+			
+			this.textRenderer.beginRendering(size.width, size.height);
+			this.textRenderer.setColor(0.0f, 0.0f, 0.0f, 1.0f);
+			
+			// show the number of pixels per meter
+			if (scale < 1.0) {
+				this.textRenderer.draw(MessageFormat.format(SCALE_CONVERSION_FRACTION, scale), x + (2 * o) + 8, y + 4);
+			} else {
+				this.textRenderer.draw(MessageFormat.format(SCALE_CONVERSION_WHOLE, scale), x + (2 * o) + 8, y + 4);
+			}
+			
+			// show the number of meters per scale
+			this.textRenderer.draw(MessageFormat.format(SCALE_LENGTH, d), x + (2 * o) + 8, y - (2 * o) - 12);
+			
+			this.textRenderer.endRendering();
 		}
 		
 		gl.glPopMatrix();
@@ -1468,9 +1679,16 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		RenderUtilities.applyTransform(gl, body.getTransform());
 		
 		// render the body
-		if (Preferences.isBodyStenciled()) {
-			body.stencil(gl);
+		// check for multiple fixtures
+		if (body.getFixtureCount() > 1) {
+			// check for stenciling
+			if (Preferences.isBodyStenciled()) {
+				body.stencil(gl);
+			} else {
+				body.render(gl);
+			}
 		} else {
+			// render normally
 			body.render(gl);
 		}
 
@@ -1512,12 +1730,19 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		RenderUtilities.pushTransform(gl);
 		RenderUtilities.applyTransform(gl, body.getTransform());
 		
-		// render the selected body
-		if (Preferences.isBodyStenciled()) {
-			// stenciling requires a larger radius
-			RenderUtilities.outlineShapes(gl, body, 6, Preferences.getSelectedColor(), this.camera.getScale());
-			body.setFillColor(gl);
-			body.fill(gl);
+		// render the body
+		// check for multiple fixtures
+		if (body.getFixtureCount() > 1) {
+			// check for stenciling
+			if (Preferences.isBodyStenciled()) {
+				// stenciling requires a larger radius
+				RenderUtilities.outlineShapes(gl, body, 6, Preferences.getSelectedColor(), this.camera.getScale());
+				body.setFillColor(gl);
+				body.fill(gl);
+			} else {
+				RenderUtilities.outlineShapes(gl, body, 4, Preferences.getSelectedColor(), this.camera.getScale());
+				body.render(gl);
+			}
 		} else {
 			RenderUtilities.outlineShapes(gl, body, 4, Preferences.getSelectedColor(), this.camera.getScale());
 			body.render(gl);
@@ -1956,7 +2181,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	 * @return String
 	 */
 	private String getWindowTitle() {
-		return "Sandbox v" + VERSION + " - dyn4j v" + Version.getVersion();
+		return MessageFormat.format(Resources.getString("title"), VERSION, Version.getVersion());
 	}
 	
 	/**
@@ -2100,7 +2325,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	private void saveSimulationAction() throws IOException {
 		String xml = "";
 		synchronized (this.world) {
-			xml = XmlGenerator.toXml(this.world, Settings.getInstance(), this.camera);
+			xml = XmlGenerator.toXml(this.world, this.rays, Settings.getInstance(), this.camera);
 		}
 		XmlFormatter formatter = new XmlFormatter(2);
 		xml = formatter.format(xml);
@@ -2120,8 +2345,8 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 					if ((selectedFile != null) && selectedFile.exists()) {
 						int response = JOptionPane.showConfirmDialog(
 										this,
-										"The file " + selectedFile.getName() + " already exists. Do you want to replace the existing file?",
-										"Ovewrite file",
+										MessageFormat.format(Resources.getString("dialog.save.warning.text"), selectedFile.getName()),
+										Resources.getString("dialog.save.warning.title"),
 										JOptionPane.YES_NO_OPTION,
 										JOptionPane.WARNING_MESSAGE);
 						if (response != JOptionPane.YES_OPTION)
@@ -2133,14 +2358,14 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 			}
 		};
 		fileBrowser.setMultiSelectionEnabled(false);
-		fileBrowser.setDialogTitle("Save Simulation");
+		fileBrowser.setDialogTitle(Resources.getString("dialog.save.title"));
 		if (this.directory != null) {
 			fileBrowser.setCurrentDirectory(this.directory);
 		}
 		if (this.currentFileName != null) {
 			fileBrowser.setSelectedFile(new File(this.currentFileName));
 		} else {
-			fileBrowser.setSelectedFile(new File("simulation.xml"));
+			fileBrowser.setSelectedFile(new File(Resources.getString("dialog.save.defaultFileName")));
 		}
 		int option = fileBrowser.showSaveDialog(this);
 		// check the option
@@ -2156,7 +2381,10 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				fw.close();
 				// set the window title
 				this.setTitle(this.getWindowTitle() + " - " + this.world.getUserData());
-				JOptionPane.showMessageDialog(this, "File saved successfully!", "File Saved", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(this, 
+						Resources.getString("dialog.save.success.text"), 
+						Resources.getString("dialog.save.success.title"), 
+						JOptionPane.INFORMATION_MESSAGE);
 			} else {
 				// create a new file
 				if (file.createNewFile()) {
@@ -2165,7 +2393,10 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 					fw.close();
 					// set the window title
 					this.setTitle(this.getWindowTitle() + " - " + this.world.getUserData());
-					JOptionPane.showMessageDialog(this, "File saved successfully!", "File Saved", JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(this, 
+							Resources.getString("dialog.save.success.text"), 
+							Resources.getString("dialog.save.success.title"), 
+							JOptionPane.INFORMATION_MESSAGE);
 				}
 			}
 		}
@@ -2179,7 +2410,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	 */
 	private void openSimulationAction() throws ParserConfigurationException, SAXException, IOException {
 		JFileChooser fileBrowser = new JFileChooser();
-		fileBrowser.setDialogTitle("Open Simulation");
+		fileBrowser.setDialogTitle(Resources.getString("dialog.open.title"));
 		fileBrowser.setMultiSelectionEnabled(false);
 		if (this.directory != null) {
 			fileBrowser.setCurrentDirectory(this.directory);
@@ -2196,24 +2427,28 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				this.directory = file.getParentFile();
 				this.currentFileName = file.getName();
 				// make sure they are sure
-				option = JOptionPane.showConfirmDialog(this, "The current simulation, settings, and snapshots will be " +
-						"lost if a saved simulation is opened.\n" +
-						"Are you sure you want to continue?", "Open Simulation '" + file.getName() + "'", JOptionPane.YES_NO_CANCEL_OPTION);
+				option = JOptionPane.showConfirmDialog(this, 
+						Resources.getString("dialog.open.warning.text"), 
+						MessageFormat.format(Resources.getString("dialog.open.warning.title"), file.getName()), 
+						JOptionPane.YES_NO_CANCEL_OPTION);
 				// check the user's choice
 				if (option == JOptionPane.YES_OPTION) {
 					// read the file into a stream
 					synchronized (this.world) {
-						XmlReader.fromXml(file, this.world, this.camera);					
+						XmlReader.fromXml(file, this.world, this.rays, this.camera);					
 					}
 					// update the world tree
-					this.pnlWorld.setWorld(this.world);
+					this.pnlWorld.setWorld(this.world, this.rays);
 					// clear the snapshots
 					this.clearAllSnapshots();
 					// set the window title
 					this.setTitle(this.getWindowTitle() + " - " + this.world.getUserData());
 				}
 			} else {
-				JOptionPane.showMessageDialog(this, "The selected item is not a file or doesn't exist.", "Invalid Selection", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(this, 
+						Resources.getString("dialog.open.selection.error.text"), 
+						Resources.getString("dialog.open.selection.error.title"), 
+						JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
@@ -2231,17 +2466,18 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		// and make sure they really want to open the file
 		this.currentFileName = name + ".xml";
 		// make sure they are sure
-		int option = JOptionPane.showConfirmDialog(this, "The current simulation, settings, and snapshots will be " +
-				"lost if a test is opened.\n" +
-				"Are you sure you want to continue?", "Open Test '" + name + "'", JOptionPane.YES_NO_CANCEL_OPTION);
+		int option = JOptionPane.showConfirmDialog(this, 
+				Resources.getString("dialog.test.open.warning.text"),
+				MessageFormat.format(Resources.getString("dialog.test.open.warning.title"), name), 
+				JOptionPane.YES_NO_CANCEL_OPTION);
 		// check the user's choice
 		if (option == JOptionPane.YES_OPTION) {
 			// read the file into a stream
 			synchronized (this.world) {
-				XmlReader.fromXml(this.getClass().getResourceAsStream(file), this.world, this.camera);					
+				XmlReader.fromXml(this.getClass().getResourceAsStream(file), this.world, this.rays, this.camera);					
 			}
 			// update the world tree
-			this.pnlWorld.setWorld(this.world);
+			this.pnlWorld.setWorld(this.world, this.rays);
 			// clear the snapshots
 			this.clearAllSnapshots();
 			// set the window title
@@ -2257,14 +2493,15 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		// get the xml for the current simulation
 		String xml = "";
 		synchronized (this.world) {
-			xml = XmlGenerator.toXml(this.world, Settings.getInstance(), this.camera);
+			xml = XmlGenerator.toXml(this.world, this.rays, Settings.getInstance(), this.camera);
 		}
 		// save it in the snapshot map using the timestamp as the key
 		Date date = new Date();
-		DateFormat df = new SimpleDateFormat("hh:mm:ss:SSS aa");
-		String key = df.format(date);
+		String key;
 		if (auto) {
-			key = key + " (Automatic)";
+			key = MessageFormat.format(Resources.getString("menu.snapshot.auto"), date);
+		} else {
+			key = MessageFormat.format(Resources.getString("menu.snapshot.manual"), date);
 		}
 		// add it to the map
 		this.snapshots.put(key, xml);
@@ -2288,10 +2525,10 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		// read the file into a stream
 		synchronized (this.world) {
 			// dont set the camera
-			XmlReader.fromXml(xml, this.world, new Camera());
+			XmlReader.fromXml(xml, this.world, this.rays, new Camera());
 		}
 		// update the world tree
-		this.pnlWorld.setWorld(this.world);
+		this.pnlWorld.setWorld(this.world, this.rays);
 		// set the window title
 		this.setTitle(this.getWindowTitle() + " - " + this.world.getUserData());
 	}

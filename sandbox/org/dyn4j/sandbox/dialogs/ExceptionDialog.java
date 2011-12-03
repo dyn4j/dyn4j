@@ -44,12 +44,13 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
 
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.utilities.ExceptionUtilities;
 
 /**
  * Dialog used to show exceptions.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class ExceptionDialog extends JDialog implements MouseListener, ActionListener {
@@ -78,7 +79,7 @@ public class ExceptionDialog extends JDialog implements MouseListener, ActionLis
 		
 		// add the logo to the top
 		JLabel lblMessage = new JLabel(message, UIManager.getIcon("OptionPane.errorIcon"), JLabel.LEFT);
-		JLabel lblStackTrace = new JLabel("Stack Trace:");
+		JLabel lblStackTrace = new JLabel(Resources.getString("dialog.exception.stacktrace"));
 		
 		// add the about text section with clickable links
 		this.txtStackTrace = new JTextArea();
@@ -93,7 +94,7 @@ public class ExceptionDialog extends JDialog implements MouseListener, ActionLis
 		// wrap the text pane in a scroll pane just in case
 		JScrollPane scroller = new JScrollPane(this.txtStackTrace);
 		
-		JButton btnOk = new JButton("OK");
+		JButton btnOk = new JButton(Resources.getString("button.ok"));
 		btnOk.setActionCommand("close");
 		btnOk.addActionListener(this);
 		
@@ -120,11 +121,11 @@ public class ExceptionDialog extends JDialog implements MouseListener, ActionLis
 		// right click copy menu
 		this.copyMenu = new JPopupMenu();
 		
-		JMenuItem mnuCopy = new JMenuItem("Copy");
+		JMenuItem mnuCopy = new JMenuItem(Resources.getString("menu.context.copy"));
 		mnuCopy.setActionCommand("copy");
 		mnuCopy.addActionListener(this);
 		
-		JMenuItem mnuSelectAll = new JMenuItem("Select All");
+		JMenuItem mnuSelectAll = new JMenuItem(Resources.getString("menu.context.selectAll"));
 		mnuSelectAll.setActionCommand("selectall");
 		mnuSelectAll.addActionListener(this);
 		

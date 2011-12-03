@@ -328,7 +328,7 @@ public class Vector2 {
 	/**
 	 * Returns the direction of this {@link Vector2}
 	 * as an angle in radians.
-	 * @return double angle in radians [-pi, pi]
+	 * @return double angle in radians [-&pi;, &pi;]
 	 */
 	public double getDirection() {
 		return Math.atan2(this.y, this.x);

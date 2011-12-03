@@ -37,6 +37,7 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 
 import org.dyn4j.dynamics.Settings;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.controls.BottomButtonPanel;
 import org.dyn4j.sandbox.panels.SettingsPanel;
 import org.dyn4j.sandbox.utilities.Icons;
@@ -63,15 +64,15 @@ public class SettingsDialog extends JDialog implements ActionListener {
 	 * @param settings the current dynamics settings
 	 */
 	private SettingsDialog(Window owner, Settings settings) {
-		super(owner, "Settings", ModalityType.APPLICATION_MODAL);
+		super(owner, Resources.getString("dialog.settings.title"), ModalityType.APPLICATION_MODAL);
 		
 		this.setIconImage(Icons.SETTINGS.getImage());
 		
 		this.pnlSettings = new SettingsPanel(settings);
 		this.pnlSettings.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
 		
-		JButton btnCancel = new JButton("Cancel");
-		JButton btnApply = new JButton("Apply");
+		JButton btnCancel = new JButton(Resources.getString("button.cancel"));
+		JButton btnApply = new JButton(Resources.getString("button.apply"));
 		btnCancel.setActionCommand("cancel");
 		btnApply.setActionCommand("apply");
 		btnCancel.addActionListener(this);

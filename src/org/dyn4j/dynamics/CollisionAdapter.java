@@ -26,6 +26,7 @@ package org.dyn4j.dynamics;
 
 import org.dyn4j.collision.manifold.Manifold;
 import org.dyn4j.collision.narrowphase.Penetration;
+import org.dyn4j.dynamics.contact.ContactConstraint;
 
 /**
  * Convenience class for implementing the {@link CollisionListener} interface.
@@ -33,7 +34,7 @@ import org.dyn4j.collision.narrowphase.Penetration;
  * This class can be used to implement only the methods desired instead of all
  * the methods contained in the {@link CollisionListener} interface.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class CollisionAdapter implements CollisionListener {
@@ -54,4 +55,10 @@ public class CollisionAdapter implements CollisionListener {
 	 */
 	@Override
 	public boolean collision(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2, Penetration penetration) { return true; }
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.CollisionListener#collision(org.dyn4j.dynamics.contact.ContactConstraint)
+	 */
+	@Override
+	public boolean collision(ContactConstraint contactConstraint) { return true; }
 }

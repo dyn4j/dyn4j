@@ -236,7 +236,10 @@ public class Icons {
 	
 	/** Wheel joint icon */
 	public static final ImageIcon WHEEL_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/wheel-joint-icon.png");
-
+	
+	/** Ray icon */
+	public static final ImageIcon RAY = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/ray-icon.png");
+	
 	// create icons
 
 	/** Take snapshot icon */
@@ -292,6 +295,9 @@ public class Icons {
 	
 	/** Add wheel joint icon */
 	public static final ImageIcon ADD_WHEEL_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/add-wheel-joint-icon.png");
+
+	/** Add ray icon */
+	public static final ImageIcon ADD_RAY = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/add-ray-icon.png");
 	
 	// edit icons
 
@@ -346,6 +352,9 @@ public class Icons {
 	/** Edit wheel joint icon */
 	public static final ImageIcon EDIT_WHEEL_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/edit-wheel-joint-icon.png");
 	
+	/** Edit ray icon */
+	public static final ImageIcon EDIT_RAY = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/edit-ray-icon.png");
+	
 	// remove icons
 	
 	/** Remove snapshot icon */
@@ -398,4 +407,7 @@ public class Icons {
 	
 	/** Remove wheel joint icon */
 	public static final ImageIcon REMOVE_WHEEL_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/remove-wheel-joint-icon.png");
+	
+	/** Remove ray icon */
+	public static final ImageIcon REMOVE_RAY = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/remove-ray-icon.png");
 }

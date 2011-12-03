@@ -759,18 +759,6 @@ public class Body implements Swept, Collidable, Transformable {
 	}
 	
 	/**
-	 * Increments the sleep time for the {@link Body}.
-	 * @param dt the increment
-	 */
-	protected void incrementSleepTime(double dt) {
-		// only increment the sleep time if the body is not
-		// already asleep
-		if (!this.isAsleep()) {
-			this.sleepTime += dt;
-		}
-	}
-	
-	/**
 	 * Returns true if this {@link Body} is active.
 	 * @return boolean
 	 */

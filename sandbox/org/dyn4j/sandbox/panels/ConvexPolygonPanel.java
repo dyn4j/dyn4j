@@ -36,6 +36,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.dyn4j.geometry.Convex;
+import org.dyn4j.sandbox.Resources;
 
 /**
  * Panel used to create a polygon shape.
@@ -101,12 +102,12 @@ public class ConvexPolygonPanel extends ConvexShapePanel implements InputPanel {
 		this.pnlArbitraryPolygon = new ArbitraryConvexPolygonPanel();
 		this.pnlFromFilePolygon = new FromFileConvexPolygonPanel();
 		
-		this.rdoRightTriangle = new JRadioButton("Right Triangle");
-		this.rdoIsoscelesTriangle = new JRadioButton("Isosceles Triangle");
-		this.rdoEquilateralTriangle = new JRadioButton("Equilateral Triangle");
-		this.rdoUnitCircle = new JRadioButton("Unit Circle Polygon");
-		this.rdoArbitrary = new JRadioButton("Arbitrary Polygon");
-		this.rdoFromFile = new JRadioButton("From File");
+		this.rdoRightTriangle = new JRadioButton(Resources.getString("panel.convex.triangle.right"));
+		this.rdoIsoscelesTriangle = new JRadioButton(Resources.getString("panel.convex.triangle.isosceles"));
+		this.rdoEquilateralTriangle = new JRadioButton(Resources.getString("panel.convex.triangle.equilateral"));
+		this.rdoUnitCircle = new JRadioButton(Resources.getString("panel.convex.polygon.unitCircle"));
+		this.rdoArbitrary = new JRadioButton(Resources.getString("panel.convex.polygon.arbitrary"));
+		this.rdoFromFile = new JRadioButton(Resources.getString("panel.convex.polygon.file"));
 		
 		this.pnlSource = new JPanel();
 		this.pnlSource.setLayout(new CardLayout());

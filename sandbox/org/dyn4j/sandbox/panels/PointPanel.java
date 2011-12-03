@@ -36,6 +36,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
 import org.dyn4j.sandbox.utilities.Icons;
 
@@ -74,11 +75,11 @@ public class PointPanel extends JPanel implements ActionListener, PropertyChange
 	 * @param y the initial y value
 	 */
 	public PointPanel(double x, double y) {
-		JLabel lblX = new JLabel("x");
-		JLabel lblY = new JLabel("y");
+		JLabel lblX = new JLabel(Resources.getString("x"));
+		JLabel lblY = new JLabel(Resources.getString("y"));
 		
-		this.txtX = new JFormattedTextField(new DecimalFormat("0.000"));
-		this.txtY = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtX = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.point.format")));
+		this.txtY = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.point.format")));
 		
 		this.txtX.addFocusListener(new SelectTextFocusListener(this.txtX));
 		this.txtY.addFocusListener(new SelectTextFocusListener(this.txtY));
@@ -94,13 +95,13 @@ public class PointPanel extends JPanel implements ActionListener, PropertyChange
 		
 		this.btnAdd = new JButton();
 		this.btnAdd.setIcon(Icons.ADD);
-		this.btnAdd.setToolTipText("Add a new point after this point.");
+		this.btnAdd.setToolTipText(Resources.getString("panel.point.add.tooltip"));
 		this.btnAdd.addActionListener(this);
 		this.btnAdd.setActionCommand("add");
 		
 		this.btnRemove = new JButton();
 		this.btnRemove.setIcon(Icons.REMOVE);
-		this.btnRemove.setToolTipText("Remove this point.");
+		this.btnRemove.setToolTipText(Resources.getString("panel.point.remove.tooltip"));
 		this.btnRemove.addActionListener(this);
 		this.btnRemove.setActionCommand("remove");
 		
@@ -111,18 +112,18 @@ public class PointPanel extends JPanel implements ActionListener, PropertyChange
 		layout.setHonorsVisibility(true);
 		
 		layout.setHorizontalGroup(layout.createSequentialGroup()
-				.addComponent(lblX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 				.addComponent(this.txtX)
-				.addComponent(lblY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+				.addComponent(lblX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 				.addComponent(this.txtY)
+				.addComponent(lblY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 				.addComponent(this.btnAdd, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 				.addComponent(this.btnRemove, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE));
 		layout.setVerticalGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
-						.addComponent(lblX)
 						.addComponent(this.txtX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-						.addComponent(lblY)
+						.addComponent(lblX)
 						.addComponent(this.txtY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblY)
 						.addComponent(this.btnAdd, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(this.btnRemove, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
 	}

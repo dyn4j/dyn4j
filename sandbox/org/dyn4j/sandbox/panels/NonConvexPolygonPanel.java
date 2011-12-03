@@ -44,6 +44,7 @@ import org.dyn4j.geometry.decompose.Bayazit;
 import org.dyn4j.geometry.decompose.Decomposer;
 import org.dyn4j.geometry.decompose.EarClipping;
 import org.dyn4j.geometry.decompose.SweepLine;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.controls.ComboItem;
 import org.dyn4j.sandbox.utilities.Icons;
 
@@ -58,13 +59,13 @@ public class NonConvexPolygonPanel extends NonConvexShapePanel implements InputP
 	private static final long serialVersionUID = -6622003790931052412L;
 
 	/** The bayazit algorithm item */
-	private static final ComboItem BAYAZIT = new ComboItem("Bayazit", new Bayazit());
+	private static final ComboItem BAYAZIT = new ComboItem(Resources.getString("panel.concave.polygon.algorithm.bayazit"), new Bayazit());
 	
 	/** The ear clipping algorithm item */
-	private static final ComboItem EAR_CLIPPING = new ComboItem("Ear Clipping", new EarClipping());
+	private static final ComboItem EAR_CLIPPING = new ComboItem(Resources.getString("panel.concave.polygon.algorithm.earClipping"), new EarClipping());
 	
 	/** The sweep line algorithm item */
-	private static final ComboItem SWEEP_LINE = new ComboItem("Sweep Line", new SweepLine());
+	private static final ComboItem SWEEP_LINE = new ComboItem(Resources.getString("panel.concave.polygon.algorithm.sweepLine"), new SweepLine());
 	
 	/** The array of algorithms */
 	private static final ComboItem[] ITEMS = new ComboItem[] {
@@ -104,10 +105,10 @@ public class NonConvexPolygonPanel extends NonConvexShapePanel implements InputP
 	 * Default constructor.
 	 */
 	public NonConvexPolygonPanel() {
-		JLabel lblAlgorithm = new JLabel("Algorithm", Icons.INFO, JLabel.LEFT);
-		lblAlgorithm.setToolTipText("The decomposition algorithm to use.");
-		JLabel lblSource = new JLabel("Source", Icons.INFO, JLabel.LEFT);
-		lblSource.setToolTipText("The source of the polygon points.");
+		JLabel lblAlgorithm = new JLabel(Resources.getString("panel.concave.polygon.algorithm"), Icons.INFO, JLabel.LEFT);
+		lblAlgorithm.setToolTipText(Resources.getString("panel.concave.polygon.algorithm.tooltip"));
+		JLabel lblSource = new JLabel(Resources.getString("panel.concave.polygon.source"), Icons.INFO, JLabel.LEFT);
+		lblSource.setToolTipText(Resources.getString("panel.concave.polygon.source.tooltip"));
 		
 		this.cmbAlgorithms = new JComboBox(ITEMS);
 		this.cmbAlgorithms.setSelectedItem(DEFAULT_ALGORITHM);
@@ -127,8 +128,8 @@ public class NonConvexPolygonPanel extends NonConvexShapePanel implements InputP
 		this.pnlArbitraryPolygon = new ArbitraryNonConvexPolygonPanel(decomposer);
 		this.pnlFromFilePolygon = new FromFileNonConvexPolygonPanel(decomposer);
 		
-		this.rdoArbitrary = new JRadioButton("Arbitrary Polygon");
-		this.rdoFromFile = new JRadioButton("From File");
+		this.rdoArbitrary = new JRadioButton(Resources.getString("panel.concave.polygon.source.arbitrary"));
+		this.rdoFromFile = new JRadioButton(Resources.getString("panel.concave.polygon.source.file"));
 		
 		// set arbitrary as the current one
 		this.rdoArbitrary.setSelected(true);

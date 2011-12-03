@@ -24,10 +24,12 @@
  */
 package org.dyn4j.sandbox.utilities;
 
+import org.dyn4j.sandbox.Resources;
+
 /**
  * Utility class used to get system related information.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class SystemUtilities {
@@ -39,7 +41,7 @@ public class SystemUtilities {
 		try{
 			return System.getProperty("java.version");
 		} catch (SecurityException e) {
-			return "Access Denied";
+			return Resources.getString("exception.security");
 		}
 	}
 	
@@ -51,7 +53,7 @@ public class SystemUtilities {
 		try{
 			return System.getProperty("java.vendor");
 		} catch (SecurityException e) {
-			return "Access Denied";
+			return Resources.getString("exception.security");
 		}
 	}
 	
@@ -63,7 +65,7 @@ public class SystemUtilities {
 		try{
 			return System.getProperty("os.name");
 		} catch (SecurityException e) {
-			return "Access Denied";
+			return Resources.getString("exception.security");
 		}
 	}
 	
@@ -75,7 +77,7 @@ public class SystemUtilities {
 		try{
 			return System.getProperty("os.arch");
 		} catch (SecurityException e) {
-			return "Access Denied";
+			return Resources.getString("exception.security");
 		}
 	}
 }

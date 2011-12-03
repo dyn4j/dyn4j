@@ -50,6 +50,7 @@ import org.dyn4j.collision.narrowphase.Sat;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.controls.ComboItem;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
 import org.dyn4j.sandbox.utilities.ControlUtilities;
@@ -67,26 +68,26 @@ public class WorldPanel extends JPanel {
 
 	/** The list of available broadphase algorithms */
 	private static final ComboItem[] BROADPHASE_ALGORITHMS = new ComboItem[] {
-		new ComboItem("Sweep And Prune - Brute Force", SapBruteForce.class),
-		new ComboItem("Sweep And Prune - Incremental", SapIncremental.class),
-		new ComboItem("Sweep And Prune - Tree", SapTree.class),
-		new ComboItem("Dynamic AABB Tree", DynamicAABBTree.class),
+		new ComboItem(Resources.getString("panel.world.broad.algorithm.sapBruteForce"), SapBruteForce.class),
+		new ComboItem(Resources.getString("panel.world.broad.algorithm.sapIncremental"), SapIncremental.class),
+		new ComboItem(Resources.getString("panel.world.broad.algorithm.sapTree"), SapTree.class),
+		new ComboItem(Resources.getString("panel.world.broad.algorithm.dynamicAABBTree"), DynamicAABBTree.class),
 	};
 	
 	/** The list of available narrowphase algorithms */
 	private static final ComboItem[] NARROWPHASE_ALGORITHMS = new ComboItem[] {
-		new ComboItem("Separating Axis Theorem", Sat.class),
-		new ComboItem("Gilbert-Johnson-Keerthi", Gjk.class)
+		new ComboItem(Resources.getString("panel.world.narrow.algorithm.sat"), Sat.class),
+		new ComboItem(Resources.getString("panel.world.narrow.algorithm.gjk"), Gjk.class)
 	};
 	
 	/** The list of available manifold solver algorithms */
 	private static final ComboItem[] MANIFOLD_SOLVER_ALGORITHMS = new ComboItem[] {
-		new ComboItem("Clipping Manifold Solver", ClippingManifoldSolver.class)
+		new ComboItem(Resources.getString("panel.world.manifold.algorithm.clip"), ClippingManifoldSolver.class)
 	};
 	
 	/** The list of available time of impact algorithms */
 	private static final ComboItem[] TIME_OF_IMPACT_ALGORITHMS = new ComboItem[] {
-		new ComboItem("Conservative Advancement", ConservativeAdvancement.class)
+		new ComboItem(Resources.getString("panel.world.toi.algorithm.conservativeAdvancement"), ConservativeAdvancement.class)
 	};
 	
 	/** The world name */
@@ -115,23 +116,23 @@ public class WorldPanel extends JPanel {
 	 * @param world the current world object
 	 */
 	public WorldPanel(World world) {
-		JLabel lblName = new JLabel("Name", Icons.INFO, JLabel.LEFT);
-		lblName.setToolTipText("The name of the world.");
+		JLabel lblName = new JLabel(Resources.getString("panel.world.name"), Icons.INFO, JLabel.LEFT);
+		lblName.setToolTipText(Resources.getString("panel.world.name.tooltip"));
 		this.txtName = new JTextField();
 		this.txtName.addFocusListener(new SelectTextFocusListener(this.txtName));
 		this.txtName.setText((String)world.getUserData());
 		
-		JLabel lblBroadphase = new JLabel("Broadphase", Icons.INFO, JLabel.LEFT);
-		lblBroadphase.setToolTipText("The algorithm used to test if two bodies could be colliding.");
+		JLabel lblBroadphase = new JLabel(Resources.getString("panel.world.broad.algorithm"), Icons.INFO, JLabel.LEFT);
+		lblBroadphase.setToolTipText(Resources.getString("panel.world.broad.algorithm.tooltip"));
 		
-		JLabel lblNarrowphase = new JLabel("Narrowphase", Icons.INFO, JLabel.LEFT);
-		lblNarrowphase.setToolTipText("The algorithm used to test if two bodies are colliding.");
+		JLabel lblNarrowphase = new JLabel(Resources.getString("panel.world.narrow.algorithm"), Icons.INFO, JLabel.LEFT);
+		lblNarrowphase.setToolTipText(Resources.getString("panel.world.narrow.algorithm.tooltip"));
 		
-		JLabel lblManifoldSolver = new JLabel("Manifold Solver", Icons.INFO, JLabel.LEFT);
-		lblManifoldSolver.setToolTipText("The algorithm used to obtain a collision manifold from a collision.");
+		JLabel lblManifoldSolver = new JLabel(Resources.getString("panel.world.manifold.algorithm"), Icons.INFO, JLabel.LEFT);
+		lblManifoldSolver.setToolTipText(Resources.getString("panel.world.manifold.algorithm.tooltip"));
 		
-		JLabel lblToiSolver = new JLabel("Time Of Impact Solver", Icons.INFO, JLabel.LEFT);
-		lblToiSolver.setToolTipText("The algorithm used to detect tunneling collisions.");
+		JLabel lblToiSolver = new JLabel(Resources.getString("panel.world.toi.algorithm"), Icons.INFO, JLabel.LEFT);
+		lblToiSolver.setToolTipText(Resources.getString("panel.world.toi.algorithm.tooltip"));
 		
 		this.cmbBroadphase = new JComboBox(BROADPHASE_ALGORITHMS);
 		this.cmbBroadphase.setSelectedItem(getItem(world.getBroadphaseDetector()));
@@ -142,11 +143,11 @@ public class WorldPanel extends JPanel {
 		this.cmbToiDetector = new JComboBox(TIME_OF_IMPACT_ALGORITHMS);
 		this.cmbToiDetector.setSelectedItem(getItem(world.getTimeOfImpactDetector()));
 		
-		JLabel lblGravity = new JLabel("Gravity", Icons.INFO, JLabel.LEFT);
-		lblGravity.setToolTipText("The gravity vector for the world.");
+		JLabel lblGravity = new JLabel(Resources.getString("panel.world.gravity"), Icons.INFO, JLabel.LEFT);
+		lblGravity.setToolTipText(Resources.getString("panel.world.gravity.tooltip"));
 		
-		this.txtGravityX = new JFormattedTextField(new DecimalFormat("0.000"));
-		this.txtGravityY = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtGravityX = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.world.gravity.format")));
+		this.txtGravityY = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.world.gravity.format")));
 		this.txtGravityX.addFocusListener(new SelectTextFocusListener(this.txtGravityX));
 		this.txtGravityY.addFocusListener(new SelectTextFocusListener(this.txtGravityY));
 		this.txtGravityX.setColumns(7);
@@ -155,13 +156,13 @@ public class WorldPanel extends JPanel {
 		this.txtGravityX.setValue(world.getGravity().x);
 		this.txtGravityY.setValue(world.getGravity().y);
 		
-		JLabel lblX = new JLabel("x");
-		JLabel lblY = new JLabel("y");
+		JLabel lblX = new JLabel(Resources.getString("x"));
+		JLabel lblY = new JLabel(Resources.getString("y"));
 		
 		GroupLayout layout;
 		
 		JPanel pnlWorld = new JPanel();
-		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " World ");
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.world.section.world"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlWorld.setBorder(border);
 		layout = new GroupLayout(pnlWorld);
@@ -192,7 +193,7 @@ public class WorldPanel extends JPanel {
 						.addComponent(lblY)));
 		
 		JPanel pnlAlgorithms = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Algorithms ");
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.world.section.algorithms"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlAlgorithms.setBorder(border);
 		layout = new GroupLayout(pnlAlgorithms);

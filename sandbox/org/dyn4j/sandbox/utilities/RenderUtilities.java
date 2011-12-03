@@ -24,7 +24,7 @@
  */
 package org.dyn4j.sandbox.utilities;
 
-import java.text.DecimalFormat;
+import java.text.MessageFormat;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
@@ -53,15 +53,13 @@ import org.dyn4j.geometry.Shape;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.geometry.Wound;
-import org.dyn4j.sandbox.Camera;
 import org.dyn4j.sandbox.SandboxBody;
-
-import com.jogamp.opengl.util.gl2.GLUT;
+import org.dyn4j.sandbox.Resources;
 
 /**
  * Utility class used to perform common rendering operations.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public final class RenderUtilities {
@@ -84,17 +82,6 @@ public final class RenderUtilities {
 	
 	/** The array to store one float value */
 	private static final float[] FLOAT_ARRAY_1 = new float[1];
-	
-	// for number display
-	
-	/** The decimal format for showing a point location */
-	private static final DecimalFormat POINT_DECIMAL_FORMAT = new DecimalFormat("0.0000");
-	
-	/** The decimal format for showing pixels/meter */
-	private static final DecimalFormat SCALE_DECIMAL_FORMAT = new DecimalFormat("0");
-	
-	/** Text height constant */
-	private static final int TEXT_HEIGHT = 7;
 	
 	// Basic methods
 	
@@ -1136,132 +1123,11 @@ public final class RenderUtilities {
 	}
 	
 	/**
-	 * Draws the pixel to meter scale similar to map applications.
-	 * @param gl the OpenGL context to render to
-	 * @param glut helper to render text
-	 * @param x the x position to place the scale
-	 * @param y the y position to place the scale
-	 * @param lw the line width to use; even values may render poorly
-	 * @param w the width of the scale
-	 * @param h the height of the scale
-	 * @param scale the pixel to meter scale factor
-	 */
-	public static final void drawPixelScale(GL2 gl, GLUT glut, int x, int y, int lw, int w, int h, double scale) {
-		// set the line width
-		float olw = RenderUtilities.setLineWidth(gl, lw);
-		
-		// account for text height
-		h -= TEXT_HEIGHT;
-		
-		// compute the offset due to the line width
-		final int o = (lw - 1) / 2;
-		double d = (double)w / scale;
-		
-		// draw a line downward
-		gl.glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-		gl.glBegin(GL.GL_LINES);
-			gl.glVertex2i(x + o, y - h - o);
-			gl.glVertex2i(x + o, y);
-			
-			gl.glVertex2i(x + o, y - o);
-			gl.glVertex2i(x + w - o, y - o);
-			
-			gl.glVertex2i(x + w - o, y);
-			gl.glVertex2i(x + w - o, y - h - o);
-		gl.glEnd();
-		
-		// reset the line width back to what it was
-		RenderUtilities.setLineWidth(gl, olw);
-		
-		// show the bounding box for testing
-//		gl.glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
-//		RenderUtilities.drawRectangleFromTopLeft(gl, x, y, w, h + TEXT_HEIGHT);
-		
-		// show the number of pixels per meter
-		gl.glColor3f (0.0f, 0.0f, 0.0f);
-		gl.glRasterPos2i(x + 2 * o + 8, y + 4);
-		if (scale < 1.0) {
-			glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, POINT_DECIMAL_FORMAT.format(scale) + " pixels / 1 m");
-		} else {
-			glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, SCALE_DECIMAL_FORMAT.format(scale) + " pixels / 1 m");
-		}
-		
-		// show the number of meters per scale
-		gl.glRasterPos2i(x + 2 * o + 8, y - 2 * o - 12);
-		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, d + " m");
-	}
-	
-	/**
-	 * Draws the point value to the given x,y location.
-	 * @param gl the OpenGL context
-	 * @param glut the helper to render text
-	 * @param x the x position to place the scale
-	 * @param y the y position to place the scale
-	 * @param p the point
-	 */
-	public static final void drawPointValues(GL2 gl, GLUT glut, double x, double y, Vector2 p) {
-		gl.glRasterPos2d(x, y);
-		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "(" + POINT_DECIMAL_FORMAT.format(p.x) + ", " + POINT_DECIMAL_FORMAT.format(p.y) + ")");
-	}
-	
-	/**
-	 * Draws a label for the given body showing the body name and center of mass.
-	 * @param gl the OpenGL context
-	 * @param glut the helper to render text
-	 * @param body the body
-	 * @param camera the camera
-	 * @param padding the padding for the label background
-	 * @param bodyLabel true if the body label should be drawn
-	 * @param fixtureLabels true if fixture labels should be drawn
-	 */
-	public static final void drawLabels(GL2 gl, GLUT glut, SandboxBody body, Camera camera, int padding, boolean bodyLabel, boolean fixtureLabels) {
-		// get the scale
-		double scale = camera.getScale();
-		// get the center point
-		Vector2 c = body.getWorldCenter();
-		Vector2 o = camera.getTranslation();
-		
-		gl.glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
-		
-		int x, y;
-		
-		if (bodyLabel) {
-			// compute the screen coordinates
-			x = (int)Math.floor((c.x + o.x) * scale);
-			y = (int)Math.floor((c.y + o.y) * scale) - 12;
-			// draw the body name
-			gl.glRasterPos2i(x, y);
-			glut.glutBitmapString(GLUT.BITMAP_HELVETICA_12, body.getName());
-			// draw the center point
-			gl.glRasterPos2d(x, y - 16);
-			glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, RenderUtilities.formatVector2(c));
-		}
-		
-		if (fixtureLabels) {
-			Transform tx = body.getTransform();
-			int fSize = body.getFixtureCount();
-			for (int i = 0; i < fSize; i++) {
-				BodyFixture bf = body.getFixture(i);
-				Vector2 lc = bf.getShape().getCenter();
-				Vector2 wc = tx.getTransformed(lc);
-				x = (int)Math.floor((wc.x + o.x) * scale);
-				y = (int)Math.floor((wc.y + o.y) * scale) - 12;
-				// draw the fixture name
-				gl.glRasterPos2i(x, y);
-				glut.glutBitmapString(GLUT.BITMAP_HELVETICA_12, (String)bf.getUserData());
-				// draw the center point
-				gl.glRasterPos2d(x, y - 16);
-				glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, RenderUtilities.formatVector2(wc));
-			}
-		}
-	}
-	
-	/**
 	 * Formats the given vector for output.
 	 * @param v the vector
 	 * @return String
 	 */
 	public static final String formatVector2(Vector2 v) {
-		return "(" + POINT_DECIMAL_FORMAT.format(v.x) + ", " + POINT_DECIMAL_FORMAT.format(v.y) + ")";
+		return MessageFormat.format(Resources.getString("canvas.vector.format"), v.x, v.y);
 	}
 }

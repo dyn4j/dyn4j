@@ -84,7 +84,7 @@ import org.dyn4j.geometry.Vector2;
  * However, allowing this causes more work for the {@link NarrowphaseDetector}s whose
  * algorithms are more complex.  These situations should be avoided for maximum performance.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.2
  * @since 1.0.0
  * @param <E> the {@link Collidable} type
  */
@@ -442,7 +442,7 @@ public class SapBruteForce<E extends Collidable> extends AbstractAABBDetector<E>
 		
 		// create an aabb from the ray
 		Vector2 s = ray.getStart();
-		Vector2 d = ray.getDirection();
+		Vector2 d = ray.getDirectionVector();
 		
 		// get the length
 		double l = length;

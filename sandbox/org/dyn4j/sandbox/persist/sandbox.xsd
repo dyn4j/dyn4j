@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0.1">
 	<xs:complexType name="Transform">
 		<xs:sequence>
 			<xs:element name="Translation" type="Vector" maxOccurs="1" minOccurs="1" />
@@ -853,6 +853,7 @@
 			<xs:element name="OperatingSystem" type="xs:string" maxOccurs="1" minOccurs="0" />
 			<xs:element name="Architecture" type="xs:string" maxOccurs="1" minOccurs="0" />
 			<xs:element name="NumberOfCpus" type="xs:string" maxOccurs="1" minOccurs="0" />
+			<xs:element name="Locale" type="xs:string" maxOccurs="1" minOccurs="0" />
 		</xs:sequence>
 	</xs:complexType>
 	
@@ -863,6 +864,29 @@
 		</xs:sequence>
 	</xs:complexType>
 	
+	<xs:complexType name="Ray">
+		<xs:sequence>
+			<xs:element name="Start" type="Vector" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Direction" type="xs:double" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Length" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="IgnoreSensors" type="xs:boolean" maxOccurs="1" minOccurs="1" />
+			<xs:element name="TestAll" type="xs:boolean" maxOccurs="1" minOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="Name" type="xs:string" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Rays">
+		<xs:sequence>
+			<xs:element name="Ray" type="Ray" maxOccurs="unbounded" minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+	
 	<xs:complexType name="Simulation">
 		<xs:sequence>
 			<xs:element name="Name" type="xs:string" maxOccurs="1" minOccurs="1" />
@@ -870,7 +894,9 @@
 			<xs:element name="System" type="System" maxOccurs="1" minOccurs="0" />
 			<xs:element name="Settings" type="Settings" maxOccurs="1" minOccurs="1" />
 			<xs:element name="World" type="World" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Rays" type="Rays" maxOccurs="1" minOccurs="1" />
 		</xs:sequence>
+		<xs:attribute name="version" type="xs:string" use="required" />
 	</xs:complexType>
 	
 	<xs:element name="Simulation" type="Simulation"></xs:element>

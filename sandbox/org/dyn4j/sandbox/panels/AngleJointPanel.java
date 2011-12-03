@@ -26,6 +26,7 @@ package org.dyn4j.sandbox.panels;
 
 import java.awt.Window;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
@@ -40,6 +41,7 @@ import javax.swing.border.TitledBorder;
 import org.dyn4j.dynamics.joint.AngleJoint;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.sandbox.SandboxBody;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
 import org.dyn4j.sandbox.utilities.Icons;
 
@@ -106,10 +108,10 @@ public class AngleJointPanel extends JointPanel implements InputPanel {
 		this.txtName.setColumns(15);
 		this.chkCollision.setSelected(collision);
 		
-		this.lblBody1 = new JLabel("Body 1", Icons.INFO, JLabel.LEFT);
-		this.lblBody2 = new JLabel("Body 2", Icons.INFO, JLabel.LEFT);
-		this.lblBody1.setToolTipText("The first body participating in the joint.");
-		this.lblBody2.setToolTipText("The second body participating in the joint.");
+		this.lblBody1 = new JLabel(Resources.getString("panel.joint.body1"), Icons.INFO, JLabel.LEFT);
+		this.lblBody2 = new JLabel(Resources.getString("panel.joint.body2"), Icons.INFO, JLabel.LEFT);
+		this.lblBody1.setToolTipText(Resources.getString("panel.joint.body1.tooltip"));
+		this.lblBody2.setToolTipText(Resources.getString("panel.joint.body2.tooltip"));
 		
 		this.cmbBody1 = new JComboBox(bodies);
 		this.cmbBody2 = new JComboBox(bodies);
@@ -117,20 +119,20 @@ public class AngleJointPanel extends JointPanel implements InputPanel {
 		this.cmbBody1.setSelectedItem(b1);
 		this.cmbBody2.setSelectedItem(b2);
 		
-		this.lblLimitEnabled = new JLabel("Limit Enabled", Icons.INFO, JLabel.LEFT);
-		this.lblLimitEnabled.setToolTipText("Check to enable the limits for this joint.");
+		this.lblLimitEnabled = new JLabel(Resources.getString("panel.joint.limitsEnabled"), Icons.INFO, JLabel.LEFT);
+		this.lblLimitEnabled.setToolTipText(Resources.getString("panel.joint.limitsEnabled.tooltip"));
 		this.chkLimitEnabled = new JCheckBox();
 		this.chkLimitEnabled.setSelected(limitEnabled);
 		
-		this.lblMinimum = new JLabel("Lower Limit", Icons.INFO, JLabel.LEFT);
-		this.lblMinimum.setToolTipText("The lower limit in Degrees.");
-		this.txtMinimum = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.lblMinimum = new JLabel(Resources.getString("panel.joint.lowerLimit"), Icons.INFO, JLabel.LEFT);
+		this.lblMinimum.setToolTipText(MessageFormat.format(Resources.getString("panel.joint.lowerLimit.tooltip"), Resources.getString("unit.rotation")));
+		this.txtMinimum = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.angle.lowerLimit.format")));
 		this.txtMinimum.addFocusListener(new SelectTextFocusListener(this.txtMinimum));
 		this.txtMinimum.setValue(Math.toDegrees(lower));
 		
-		this.lblMaximum = new JLabel("Upper Limit", Icons.INFO, JLabel.LEFT);
-		this.lblMaximum.setToolTipText("The upper limit in Degrees.");
-		this.txtMaximum = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.lblMaximum = new JLabel(Resources.getString("panel.joint.upperLimit"), Icons.INFO, JLabel.LEFT);
+		this.lblMaximum.setToolTipText(MessageFormat.format(Resources.getString("panel.joint.upperLimit.tooltip"), Resources.getString("unit.rotation")));
+		this.txtMaximum = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.angle.upperLimit.format")));
 		this.txtMaximum.addFocusListener(new SelectTextFocusListener(this.txtMaximum));
 		this.txtMaximum.setValue(Math.toDegrees(upper));
 		
@@ -146,7 +148,7 @@ public class AngleJointPanel extends JointPanel implements InputPanel {
 		// setup the general section
 		
 		JPanel pnlGeneral = new JPanel();
-		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General ");
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.section.general"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlGeneral.setBorder(border);
 		
@@ -184,7 +186,7 @@ public class AngleJointPanel extends JointPanel implements InputPanel {
 		// setup the limits section
 		
 		JPanel pnlLimits = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Limits ");
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.joint.section.limits"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlLimits.setBorder(border);
 		
@@ -227,16 +229,6 @@ public class AngleJointPanel extends JointPanel implements InputPanel {
 		layout.setVerticalGroup(layout.createSequentialGroup()
 				.addComponent(pnlGeneral)
 				.addComponent(pnlLimits));
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.sandbox.panels.JointPanel#getDescription()
-	 */
-	@Override
-	public String getDescription() {
-		return "An angle joint is used to limit the angle between two bodies.  " +
-			   "This joint is typically used with other joints and not by itself.  " +
-			   "If used by itself, its recomended that one of the joined bodies is static (has infinite mass).";
 	}
 	
 	/* (non-Javadoc)
@@ -305,11 +297,11 @@ public class AngleJointPanel extends JointPanel implements InputPanel {
 		// must have some name
 		String name = this.txtName.getText();
 		if (name == null || name.isEmpty()) {
-			JOptionPane.showMessageDialog(owner, "You must specify a name for the joint.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.missingName"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else {
 			// they can't be the same body
 			if (this.cmbBody1.getSelectedItem() == this.cmbBody2.getSelectedItem()) {
-				JOptionPane.showMessageDialog(owner, "You must select two different bodies.", "Notice", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.sameBody"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}

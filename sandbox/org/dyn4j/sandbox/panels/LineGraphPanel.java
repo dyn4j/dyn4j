@@ -39,7 +39,7 @@ import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
-import java.text.DecimalFormat;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,7 +50,7 @@ import javax.swing.JPanel;
 /**
  * Panel used to display a line graph of multiple data series with only vertical labels.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class LineGraphPanel extends JPanel {
@@ -133,6 +133,9 @@ public class LineGraphPanel extends JPanel {
 	/** The maximum number of data points */
 	private int dataPointLimit;
 	
+	/** The label format */
+	private String format;
+	
 	/** The number of horizontal labels */
 	private int verticalTicks = 3;
 	
@@ -160,21 +163,24 @@ public class LineGraphPanel extends JPanel {
 	/**
 	 * Minimal constructor.
 	 * @param maxY the maximum value of the y axis
+	 * @param format the label format
 	 */
-	public LineGraphPanel(double maxY) {
-		this(maxY, 20);
+	public LineGraphPanel(double maxY, String format) {
+		this(maxY, format, 20);
 	}
 	
 	/**
 	 * Full constructor.
 	 * @param maxY the maximum value of the y axis
+	 * @param format the label format
 	 * @param dataPointLimit the maximum number of datapoints
 	 */
-	public LineGraphPanel(double maxY, int dataPointLimit) {
+	public LineGraphPanel(double maxY, String format, int dataPointLimit) {
 		super(true);
 		this.series = new ArrayList<Series>();
 		this.maxY = maxY;
 		this.dataPointLimit = dataPointLimit;
+		this.format = format;
 	}
 	
 	/**
@@ -191,6 +197,14 @@ public class LineGraphPanel extends JPanel {
 	 */
 	public void setDataPointLimit(int limit) {
 		this.dataPointLimit = limit;
+	}
+	
+	/**
+	 * Sets the format for the graph lines.
+	 * @param format the format
+	 */
+	public void setFormat(String format) {
+		this.format = format;
 	}
 	
 	/**
@@ -402,7 +416,6 @@ public class LineGraphPanel extends JPanel {
 		g2d.setFont(this.font);
 		Stroke stroke = g2d.getStroke();
 		Stroke dashed = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, new float[] {1.0f}, 0.0f);
-		DecimalFormat df = new DecimalFormat("0");
 		int yi = (h - this.paddingBottom - this.paddingTop) / this.verticalTicks;
 		int y = h - this.paddingBottom - 1;
 		for (int i = 0; i <= this.verticalTicks; i++) {
@@ -410,7 +423,7 @@ public class LineGraphPanel extends JPanel {
 			g2d.setColor(this.axisColor);
 			g2d.setStroke(stroke);
 			g2d.drawLine(this.paddingLeft - 3, y, this.paddingLeft, y);
-			String text = df.format(value) + " MB";
+			String text = MessageFormat.format(this.format, value);
 			int fw = fm.stringWidth(text);
 			int fh = fm.getAscent() / 2 - 1;
 			g2d.drawString(text, this.paddingLeft - fw - 5, y + fh);

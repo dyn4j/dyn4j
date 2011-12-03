@@ -26,6 +26,7 @@ package org.dyn4j.sandbox.panels;
 
 import java.awt.Window;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
@@ -39,6 +40,7 @@ import javax.swing.border.TitledBorder;
 
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.Settings.ContinuousDetectionMode;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.controls.ComboItem;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
 import org.dyn4j.sandbox.utilities.ControlUtilities;
@@ -56,9 +58,9 @@ public class SettingsPanel extends JPanel implements InputPanel {
 	
 	/** The list of continuous collision detection modes */
 	private static final ComboItem[] CCD_MODES = new ComboItem[] {
-		new ComboItem("All", Settings.ContinuousDetectionMode.ALL),
-		new ComboItem("Bullets Only", Settings.ContinuousDetectionMode.BULLETS_ONLY),
-		new ComboItem("None", Settings.ContinuousDetectionMode.NONE)
+		new ComboItem(Resources.getString("ccd.mode.all"), Settings.ContinuousDetectionMode.ALL),
+		new ComboItem(Resources.getString("ccd.mode.bulletsOnly"), Settings.ContinuousDetectionMode.BULLETS_ONLY),
+		new ComboItem(Resources.getString("ccd.mode.none"), Settings.ContinuousDetectionMode.NONE)
 	};
 	
 	// general
@@ -126,165 +128,121 @@ public class SettingsPanel extends JPanel implements InputPanel {
 		
 		// general
 		
-		JLabel lblStepFrequency = new JLabel("Step Frequency", Icons.INFO, JLabel.LEFT);
-		lblStepFrequency.setToolTipText(
-				"<html>Specifies how many times the world is updated in one second." +
-				"<br />Larger values provide for a more accurate and stable simulation at the cost of performance." +
-				"<br />Must be 30 or greater.</html>");
-		this.txtStepFrequency = new JFormattedTextField(new DecimalFormat("0"));
+		JLabel lblStepFrequency = new JLabel(Resources.getString("panel.settings.frequency"), Icons.INFO, JLabel.LEFT);
+		lblStepFrequency.setToolTipText(MessageFormat.format(Resources.getString("panel.settings.frequency.tooltip"), Resources.getString("unit.time.singular")));
+		this.txtStepFrequency = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.frequency.format")));
 		this.txtStepFrequency.addFocusListener(new SelectTextFocusListener(this.txtStepFrequency));
 		this.txtStepFrequency.setColumns(5);
 		this.txtStepFrequency.setValue(1.0 / settings.getStepFrequency());
 		
-		JLabel lblMaxTranslation = new JLabel("Maximum Translation", Icons.INFO, JLabel.LEFT);
-		lblMaxTranslation.setToolTipText(
-				"<html>The maximum distance a body can travel within one time step in Meters." +
-				"<br />This helps avoid really fast bodies." +
-				"<br />Must be greater than or equal to zero.</html>");
-		this.txtMaxTranslation = new JFormattedTextField(new DecimalFormat("0.0"));
+		JLabel lblMaxTranslation = new JLabel(Resources.getString("panel.settings.maximumTranslation"), Icons.INFO, JLabel.LEFT);
+		lblMaxTranslation.setToolTipText(MessageFormat.format(Resources.getString("panel.settings.maximumTranslation.tooltip"), Resources.getString("unit.length")));
+		this.txtMaxTranslation = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.maximumTranslation.format")));
 		this.txtMaxTranslation.addFocusListener(new SelectTextFocusListener(this.txtMaxTranslation));
 		this.txtMaxTranslation.setColumns(5);
 		this.txtMaxTranslation.setValue(settings.getMaxTranslation());
 		
-		JLabel lblMaxRotation = new JLabel("Maximum Rotation", Icons.INFO, JLabel.LEFT);
-		lblMaxRotation.setToolTipText(
-				"<html>The maximum rotation a body can perform within one time step in Degrees." +
-				"<br />This helps avoid really fast spinning bodies." +
-				"<br />Must be greater than or equal to zero.</html>");
-		this.txtMaxRotation = new JFormattedTextField(new DecimalFormat("0"));
+		JLabel lblMaxRotation = new JLabel(Resources.getString("panel.settings.maximumRotation"), Icons.INFO, JLabel.LEFT);
+		lblMaxRotation.setToolTipText(MessageFormat.format(Resources.getString("panel.settings.maximumRotation.tooltip"), Resources.getString("unit.rotation")));
+		this.txtMaxRotation = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.maximumRotation.format")));
 		this.txtMaxRotation.addFocusListener(new SelectTextFocusListener(this.txtMaxRotation));
 		this.txtMaxRotation.setColumns(5);
 		this.txtMaxRotation.setValue(Math.toDegrees(settings.getMaxRotation()));
 		
-		JLabel lblCCDMode = new JLabel("Continuous Collision Detection Mode", Icons.INFO, JLabel.LEFT);
-		lblCCDMode.setToolTipText("<html>Determines the bodies that are checked for tunneling.</html>");
+		JLabel lblCCDMode = new JLabel(Resources.getString("panel.settings.ccd"), Icons.INFO, JLabel.LEFT);
+		lblCCDMode.setToolTipText(Resources.getString("panel.settings.ccd.tooltip"));
 		this.cmbCCDMode = new JComboBox(CCD_MODES);
 		this.cmbCCDMode.setSelectedItem(this.getItem(settings.getContinuousDetectionMode()));
 		
 		// sleep
 		
-		JLabel lblAutoSleep = new JLabel("Auto Sleeping Enabled", Icons.INFO, JLabel.LEFT);
-		lblAutoSleep.setToolTipText(
-				"<html>Determines whether bodies are automatically put to sleep when they come to rest." +
-				"<br />Putting bodies to sleep when they come to rest allows the dynamics solvers to " +
-				"<br />save time thereby increase performance.</html>");
+		JLabel lblAutoSleep = new JLabel(Resources.getString("panel.settings.autoSleeping"), Icons.INFO, JLabel.LEFT);
+		lblAutoSleep.setToolTipText(Resources.getString("panel.settings.autoSleeping.tooltip"));
 		this.chkAutoSleep = new JCheckBox();
 		this.chkAutoSleep.setSelected(settings.isAutoSleepingEnabled());
 		
-		JLabel lblSleepTime = new JLabel("Sleep Time", Icons.INFO, JLabel.LEFT);
-		lblSleepTime.setToolTipText(
-				"<html>The time, in Seconds, that a body must be at rest before being put to sleep." +
-				"<br />Must be greater than or equal to zero.</html>");
-		this.txtSleepTime = new JFormattedTextField(new DecimalFormat("0.0"));
+		JLabel lblSleepTime = new JLabel(Resources.getString("panel.settings.sleepTime"), Icons.INFO, JLabel.LEFT);
+		lblSleepTime.setToolTipText(MessageFormat.format(Resources.getString("panel.settings.sleepTime.tooltip"), Resources.getString("unit.time")));
+		this.txtSleepTime = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.sleepTime.format")));
 		this.txtSleepTime.addFocusListener(new SelectTextFocusListener(this.txtSleepTime));
 		this.txtSleepTime.setColumns(5);
 		this.txtSleepTime.setValue(settings.getSleepTime());
 		
-		JLabel lblSleepLinearVelocity = new JLabel("Sleep Linear Velocity", Icons.INFO, JLabel.LEFT);
-		lblSleepLinearVelocity.setToolTipText(
-				"<html>The maximum linear velocity a body can have before being flagged as 'at rest' in Meters/Second." +
-				"<br />Must be greater than or equal to zero.</html>");
-		this.txtSleepLinearVelocity = new JFormattedTextField(new DecimalFormat("0.00"));
+		JLabel lblSleepLinearVelocity = new JLabel(Resources.getString("panel.settings.sleepLinearVelocity"), Icons.INFO, JLabel.LEFT);
+		lblSleepLinearVelocity.setToolTipText(MessageFormat.format(Resources.getString("panel.settings.sleepLinearVelocity.tooltip"), Resources.getString("unit.velocity.linear")));
+		this.txtSleepLinearVelocity = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.sleepLinearVelocity.format")));
 		this.txtSleepLinearVelocity.addFocusListener(new SelectTextFocusListener(this.txtSleepLinearVelocity));
 		this.txtSleepLinearVelocity.setColumns(7);
 		this.txtSleepLinearVelocity.setValue(settings.getSleepVelocity());
 		
-		JLabel lblSleepAngularVelocity = new JLabel("Sleep Angular Velocity", Icons.INFO, JLabel.LEFT);
-		lblSleepAngularVelocity.setToolTipText(
-				"<html>The maximum angular velocity a body can have before being flagged as 'at rest' in Degrees/Second." +
-				"<br />Must be greater than or equal to zero.</html>");
-		this.txtSleepAngularVelocity = new JFormattedTextField(new DecimalFormat("0.0"));
+		JLabel lblSleepAngularVelocity = new JLabel(Resources.getString("panel.settings.sleepAngularVelocity"), Icons.INFO, JLabel.LEFT);
+		lblSleepAngularVelocity.setToolTipText(MessageFormat.format(Resources.getString("panel.settings.sleepAngularVelocity.tooltip"), Resources.getString("unit.velocity.angular")));
+		this.txtSleepAngularVelocity = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.sleepAngularVelocity.format")));
 		this.txtSleepAngularVelocity.addFocusListener(new SelectTextFocusListener(this.txtSleepAngularVelocity));
 		this.txtSleepAngularVelocity.setColumns(5);
 		this.txtSleepAngularVelocity.setValue(Math.toDegrees(settings.getSleepAngularVelocity()));
 		
 		// solver
 		
-		JLabel lblVelocityIterations = new JLabel("Velocity Iterations", Icons.INFO, JLabel.LEFT);
-		lblVelocityIterations.setToolTipText(
-				"<html>The number of solver iterations for velocity constraints." +
-				"<br />Larger values increase accuracy and stability but decrease performance." +
-				"<br />Must be greater than or equal to 5.</html>");
-		this.txtVelocityIterations = new JFormattedTextField(new DecimalFormat("0"));
+		JLabel lblVelocityIterations = new JLabel(Resources.getString("panel.settings.velocityIterations"), Icons.INFO, JLabel.LEFT);
+		lblVelocityIterations.setToolTipText(Resources.getString("panel.settings.velocityIterations.tooltip"));
+		this.txtVelocityIterations = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.velocityIterations.format")));
 		this.txtVelocityIterations.addFocusListener(new SelectTextFocusListener(this.txtVelocityIterations));
 		this.txtVelocityIterations.setColumns(3);
 		this.txtVelocityIterations.setValue(settings.getVelocityConstraintSolverIterations());
 		
-		JLabel lblPositionIterations = new JLabel("Position Iterations", Icons.INFO, JLabel.LEFT);
-		lblPositionIterations.setToolTipText(
-				"<html>The number of solver iterations for position constraints." +
-				"<br />Larger values increase accuracy and stability but decrease performance." +
-				"<br />Position constraints are used to combat drift in the velocity constraints." +
-				"<br />Must be greater than or equal to 5.</html>");
-		this.txtPositionIterations = new JFormattedTextField(new DecimalFormat("0"));
+		JLabel lblPositionIterations = new JLabel(Resources.getString("panel.settings.positionIterations"), Icons.INFO, JLabel.LEFT);
+		lblPositionIterations.setToolTipText(Resources.getString("panel.settings.positionIterations.tooltip"));
+		this.txtPositionIterations = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.positionIterations.format")));
 		this.txtPositionIterations.addFocusListener(new SelectTextFocusListener(this.txtPositionIterations));
 		this.txtPositionIterations.setColumns(3);
 		this.txtPositionIterations.setValue(settings.getPositionConstraintSolverIterations());
 		
-		JLabel lblWarmStartDistance = new JLabel("Warm Start Distance", Icons.INFO, JLabel.LEFT);
-		lblWarmStartDistance.setToolTipText(
-				"<html>The maximum distance between iterations that a contact can be warm started in Meters." +
-				"<br />Warm started contacts help improve performance and accuracy." +
-				"<br />Must be greater than or equal to zero.</html>");
-		this.txtWarmStartDistance = new JFormattedTextField(new DecimalFormat("0.00"));
+		JLabel lblWarmStartDistance = new JLabel(Resources.getString("panel.settings.warmStartDistance"), Icons.INFO, JLabel.LEFT);
+		lblWarmStartDistance.setToolTipText(MessageFormat.format(Resources.getString("panel.settings.warmStartDistance.tooltip"), Resources.getString("unit.length")));
+		this.txtWarmStartDistance = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.warmStartDistance.format")));
 		this.txtWarmStartDistance.addFocusListener(new SelectTextFocusListener(this.txtWarmStartDistance));
 		this.txtWarmStartDistance.setColumns(7);
 		this.txtWarmStartDistance.setValue(settings.getWarmStartDistance());
 		
-		JLabel lblRestitutionVelocity = new JLabel("Restitution Velocity", Icons.INFO, JLabel.LEFT);
-		lblRestitutionVelocity.setToolTipText(
-				"<html>The minimum <b>relative</b> velocity between bodies required to treat a collision as elastic in Meters/Second." +
-				"<br />Must be greater than or equal to zero.</html>");
-		this.txtRestitutionVelocity = new JFormattedTextField(new DecimalFormat("0.0"));
+		JLabel lblRestitutionVelocity = new JLabel(Resources.getString("panel.settings.restVelocity"), Icons.INFO, JLabel.LEFT);
+		lblRestitutionVelocity.setToolTipText(MessageFormat.format(Resources.getString("panel.settings.restVelocity.tooltip"), Resources.getString("unit.velocity.linear")));
+		this.txtRestitutionVelocity = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.restVelocity.format")));
 		this.txtRestitutionVelocity.addFocusListener(new SelectTextFocusListener(this.txtRestitutionVelocity));
 		this.txtRestitutionVelocity.setColumns(5);
 		this.txtRestitutionVelocity.setValue(settings.getRestitutionVelocity());
 		
-		JLabel lblLinearTolerance = new JLabel("Linear Tolerance", Icons.INFO, JLabel.LEFT);
-		lblLinearTolerance.setToolTipText(
-				"<html>The allowed penetration between bodies and the allowed separation of joints in Meters." +
-				"<br />This value should be small enough to not be seen but large enough to maintain stability." +
-				"<br />Must be greater than or equal to zero.</html>");
-		this.txtLinearTolerance = new JFormattedTextField(new DecimalFormat("0.000"));
+		JLabel lblLinearTolerance = new JLabel(Resources.getString("panel.settings.linearTolerance"), Icons.INFO, JLabel.LEFT);
+		lblLinearTolerance.setToolTipText(MessageFormat.format(Resources.getString("panel.settings.linearTolerance.tooltip"), Resources.getString("unit.length")));
+		this.txtLinearTolerance = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.linearTolerance.format")));
 		this.txtLinearTolerance.addFocusListener(new SelectTextFocusListener(this.txtLinearTolerance));
 		this.txtLinearTolerance.setColumns(7);
 		this.txtLinearTolerance.setValue(settings.getLinearTolerance());
 		
-		JLabel lblAngularTolerance = new JLabel("Angular Tolerance", Icons.INFO, JLabel.LEFT);
-		lblAngularTolerance.setToolTipText(
-				"<html>The allowed tolerance in angular joint limits in Degrees." +
-				"<br />This value should be small enough to not be seen but large enough to maintain stability." +
-				"<br />Must be greater than or equal to zero.</html>");
-		this.txtAngularTolerance = new JFormattedTextField(new DecimalFormat("0.0"));
+		JLabel lblAngularTolerance = new JLabel(Resources.getString("panel.settings.angularTolerance"), Icons.INFO, JLabel.LEFT);
+		lblAngularTolerance.setToolTipText(MessageFormat.format(Resources.getString("panel.settings.angularTolerance.tooltip"), Resources.getString("unit.rotation")));
+		this.txtAngularTolerance = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.angularTolerance.format")));
 		this.txtAngularTolerance.addFocusListener(new SelectTextFocusListener(this.txtAngularTolerance));
 		this.txtAngularTolerance.setColumns(5);
 		this.txtAngularTolerance.setValue(Math.toDegrees(settings.getAngularTolerance()));
 		
-		JLabel lblMaxLinearCorrection = new JLabel("Maximum Linear Correction", Icons.INFO, JLabel.LEFT);
-		lblMaxLinearCorrection.setToolTipText(
-				"<html>The maximum linear correction applied in one time step during the position" +
-				"<br />constraint solver to compensate for joint separation in Meters." +
-				"<br />Must be greater than or equal to zero.</html>");
-		this.txtMaxLinearCorrection = new JFormattedTextField(new DecimalFormat("0.00"));
+		JLabel lblMaxLinearCorrection = new JLabel(Resources.getString("panel.settings.maximumLinearCorrection"), Icons.INFO, JLabel.LEFT);
+		lblMaxLinearCorrection.setToolTipText(MessageFormat.format(Resources.getString("panel.settings.maximumLinearCorrection.tooltip"), Resources.getString("unit.length")));
+		this.txtMaxLinearCorrection = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.maximumLinearCorrection.format")));
 		this.txtMaxLinearCorrection.addFocusListener(new SelectTextFocusListener(this.txtMaxLinearCorrection));
 		this.txtMaxLinearCorrection.setColumns(5);
 		this.txtMaxLinearCorrection.setValue(settings.getMaxLinearCorrection());
 		
-		JLabel lblMaxAngularCorrection = new JLabel("Maximum Angular Correction", Icons.INFO, JLabel.LEFT);
-		lblMaxAngularCorrection.setToolTipText(
-				"<html>The maximum angular correction applied in one time step during the position" +
-				"<br />constraint solver to compensate for angular joint limit separation in Degrees." +
-				"<br />Must be greater than or equal to zero.</html>");
-		this.txtMaxAngularCorrection = new JFormattedTextField(new DecimalFormat("0.0"));
+		JLabel lblMaxAngularCorrection = new JLabel(Resources.getString("panel.settings.maximumAngularCorrection"), Icons.INFO, JLabel.LEFT);
+		lblMaxAngularCorrection.setToolTipText(MessageFormat.format(Resources.getString("panel.settings.maximumAngularCorrection.tooltip"), Resources.getString("unit.rotation")));
+		this.txtMaxAngularCorrection = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.maximumAngularCorrection.format")));
 		this.txtMaxAngularCorrection.addFocusListener(new SelectTextFocusListener(this.txtMaxAngularCorrection));
 		this.txtMaxAngularCorrection.setColumns(5);
 		this.txtMaxAngularCorrection.setValue(Math.toDegrees(settings.getMaxAngularCorrection()));
 		
-		JLabel lblBaumgarte = new JLabel("Baumgarte", Icons.INFO, JLabel.LEFT);
-		lblBaumgarte.setToolTipText(
-				"<html>Specifies the rate at which contact position constraints are solved." +
-				"<br />Must be greater than or equal to zero.</html>");
-		this.txtBaumgarte = new JFormattedTextField(new DecimalFormat("0.00"));
+		JLabel lblBaumgarte = new JLabel(Resources.getString("panel.settings.baumgarte"), Icons.INFO, JLabel.LEFT);
+		lblBaumgarte.setToolTipText(Resources.getString("panel.settings.baumgarte.tooltip"));
+		this.txtBaumgarte = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.baumgarte.format")));
 		this.txtBaumgarte.addFocusListener(new SelectTextFocusListener(this.txtBaumgarte));
 		this.txtBaumgarte.setColumns(5);
 		this.txtBaumgarte.setValue(settings.getBaumgarte());
@@ -293,7 +251,7 @@ public class SettingsPanel extends JPanel implements InputPanel {
 		
 		// general section
 		JPanel pnlGeneral = new JPanel();
-		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General ");
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.section.general"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlGeneral.setBorder(border);
 		
@@ -329,7 +287,7 @@ public class SettingsPanel extends JPanel implements InputPanel {
 		
 		// sleep section
 		JPanel pnlSleep = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Sleep ");
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.settings.section.sleep"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlSleep.setBorder(border);
 		
@@ -365,7 +323,7 @@ public class SettingsPanel extends JPanel implements InputPanel {
 		
 		// solver section
 		JPanel pnlSolver = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Solver ");
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.settings.section.solver"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlSolver.setBorder(border);
 		
@@ -529,35 +487,35 @@ public class SettingsPanel extends JPanel implements InputPanel {
 	@Override
 	public void showInvalidInputMessage(Window owner) {
 		if (ControlUtilities.getDoubleValue(this.txtStepFrequency) < 30.0) {
-			JOptionPane.showMessageDialog(owner, "The step frequency must be 30 or greater.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidFrequency"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getDoubleValue(this.txtMaxTranslation) < 0.0) {
-			JOptionPane.showMessageDialog(owner, "The maximum translation must be zero or greater.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidMaximumTranslation"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getDoubleValue(this.txtMaxRotation) < 0.0) {
-			JOptionPane.showMessageDialog(owner, "The maximum rotation must be zero or greater.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidMaximumRotation"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getDoubleValue(this.txtSleepTime) < 0.0) {
-			JOptionPane.showMessageDialog(owner, "The sleep time must be zero or greater.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidSleepTime"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getDoubleValue(this.txtSleepLinearVelocity) < 0.0) {
-			JOptionPane.showMessageDialog(owner, "The sleep linear velocity must be zero or greater.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidSleepLinearVelocity"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getDoubleValue(this.txtSleepAngularVelocity) < 0.0) {
-			JOptionPane.showMessageDialog(owner, "The sleep angular velocity must be zero or greater.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidSleepAngularVelocity"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getIntValue(this.txtVelocityIterations) < 5) {
-			JOptionPane.showMessageDialog(owner, "The velocity iterations must be 5 or greater.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidVelocityIterations"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getIntValue(this.txtPositionIterations) < 5) {
-			JOptionPane.showMessageDialog(owner, "The position iterations must be 5 or greater.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidPositionIterations"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getDoubleValue(this.txtWarmStartDistance) < 0.0) {
-			JOptionPane.showMessageDialog(owner, "The warm start distance must be zero or greater.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidWarmStartDistance"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getDoubleValue(this.txtRestitutionVelocity) < 0.0) {
-			JOptionPane.showMessageDialog(owner, "The restitution velocity must be zero or greater.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidRestVelocity"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getDoubleValue(this.txtLinearTolerance) < 0.0) {
-			JOptionPane.showMessageDialog(owner, "The linear tolerance must be zero or greater.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidLinearTolerance"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getDoubleValue(this.txtAngularTolerance) < 0.0) {
-			JOptionPane.showMessageDialog(owner, "The angular tolerance must be zero or greater.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidAngularTolerance"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getDoubleValue(this.txtMaxLinearCorrection) < 0.0) {
-			JOptionPane.showMessageDialog(owner, "The maximum linear correction must be zero or greater.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidLinearCorrection"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getDoubleValue(this.txtMaxAngularCorrection) < 0.0) {
-			JOptionPane.showMessageDialog(owner, "The maximum angular correction must be zero or greater.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidAngularCorrection"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getDoubleValue(this.txtBaumgarte) < 0.0) {
-			JOptionPane.showMessageDialog(owner, "The baumgarte must be zero or greater.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidBaumgarte"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 	

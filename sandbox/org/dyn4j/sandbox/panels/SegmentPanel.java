@@ -38,6 +38,7 @@ import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
 import org.dyn4j.sandbox.utilities.Icons;
 
@@ -76,19 +77,19 @@ public class SegmentPanel extends ConvexShapePanel implements InputPanel {
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
 		
-		JLabel lblStart = new JLabel("Start", Icons.INFO, JLabel.LEFT);
-		lblStart.setToolTipText("The start point of the line segment.");
-		JLabel lblEnd = new JLabel("End", Icons.INFO, JLabel.LEFT);
-		lblEnd.setToolTipText("The end point of the line segment.");
-		JLabel lblSX = new JLabel("x");
-		JLabel lblSY = new JLabel("y");
-		JLabel lblEX = new JLabel("x");
-		JLabel lblEY = new JLabel("y");
+		JLabel lblStart = new JLabel(Resources.getString("panel.segment.start"), Icons.INFO, JLabel.LEFT);
+		lblStart.setToolTipText(Resources.getString("panel.segment.start.tooltip"));
+		JLabel lblEnd = new JLabel(Resources.getString("panel.segment.end"), Icons.INFO, JLabel.LEFT);
+		lblEnd.setToolTipText(Resources.getString("panel.segment.end.tooltip"));
+		JLabel lblSX = new JLabel(Resources.getString("x"));
+		JLabel lblSY = new JLabel(Resources.getString("y"));
+		JLabel lblEX = new JLabel(Resources.getString("x"));
+		JLabel lblEY = new JLabel(Resources.getString("y"));
 		
-		JFormattedTextField txtSX = new JFormattedTextField(new DecimalFormat("0.000"));
-		JFormattedTextField txtSY = new JFormattedTextField(new DecimalFormat("0.000"));
-		JFormattedTextField txtEX = new JFormattedTextField(new DecimalFormat("0.000"));
-		JFormattedTextField txtEY = new JFormattedTextField(new DecimalFormat("0.000"));
+		JFormattedTextField txtSX = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.segment.point.format")));
+		JFormattedTextField txtSY = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.segment.point.format")));
+		JFormattedTextField txtEX = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.segment.point.format")));
+		JFormattedTextField txtEY = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.segment.point.format")));
 		
 		txtSX.setValue(DEFAULT_START.x);
 		txtSY.setValue(DEFAULT_START.y);
@@ -153,8 +154,8 @@ public class SegmentPanel extends ConvexShapePanel implements InputPanel {
 			}
 		});
 		
-		JLabel lblPreview = new JLabel("Preview", Icons.INFO, JLabel.LEFT);
-		lblPreview.setToolTipText("Shows a preview of the current shape.");
+		JLabel lblPreview = new JLabel(Resources.getString("panel.preview"), Icons.INFO, JLabel.LEFT);
+		lblPreview.setToolTipText(Resources.getString("panel.preview.tooltip"));
 		this.pnlPreview = new PreviewPanel(new Dimension(250, 225), Geometry.createSegment(this.start, this.end));
 		
 		JLabel lblFiller1 = new JLabel();

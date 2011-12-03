@@ -27,7 +27,7 @@ package org.dyn4j.geometry;
 /**
  * Represents a ray.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.0.2
  * @since 2.0.0
  */
 public class Ray {
@@ -39,10 +39,29 @@ public class Ray {
 	
 	/**
 	 * Creates a ray from the origin in the given direction.
+	 * @param direction the direction in radians
+	 * @since 3.0.2
+	 */
+	public Ray(double direction) {
+		this(new Vector2(direction));
+	}
+	
+	/**
+	 * Creates a ray from the origin in the given direction.
 	 * @param direction the direction; must be normalized
 	 */
 	public Ray(Vector2 direction) {
 		this(new Vector2(), direction);
+	}
+	
+	/**
+	 * Creates a ray from the given start point in the given direction.
+	 * @param start the start point
+	 * @param direction the direction in radians
+	 * @since 3.0.2
+	 */
+	public Ray(Vector2 start, double direction) {
+		this(start, new Vector2(direction));
 	}
 	
 	/**
@@ -79,11 +98,32 @@ public class Ray {
 	}
 	
 	/**
+	 * Returns the direction of this ray in radians.
+	 * @return double the direction in radians between [-&pi;, &pi]
+	 * @since 3.0.2
+	 */
+	public double getDirection() {
+		return this.direction.getDirection();
+	}
+	
+	/**
+	 * Sets the direction of this ray in radians.
+	 * @param direction the direction in radians
+	 * @since 3.0.2
+	 */
+	public void setDirection(double direction) {
+		this.direction = new Vector2(direction);
+	}
+	
+	/**
 	 * Returns the direction.
+	 * <p>
+	 * Renamed from <code>getDirection()</code>.
 	 * @see #setDirection(Vector2)
 	 * @return {@link Vector2}
+	 * @since 3.0.2
 	 */
-	public Vector2 getDirection() {
+	public Vector2 getDirectionVector() {
 		return direction;
 	}
 	

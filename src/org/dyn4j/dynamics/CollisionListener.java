@@ -29,13 +29,14 @@ import org.dyn4j.collision.manifold.Manifold;
 import org.dyn4j.collision.manifold.ManifoldSolver;
 import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.collision.narrowphase.Penetration;
+import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Shape;
 
 /**
  * Interface to listen for collision events.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.0.2
  * @since 1.0.0
  */
 public interface CollisionListener {
@@ -51,7 +52,7 @@ public interface CollisionListener {
 	 * Called when two {@link Body}s are colliding as determined by the {@link NarrowphaseDetector}.
 	 * <p>
 	 * {@link Body} objects can have many {@link Convex} {@link Shape}s that make up their geometry.  Because
-	 * of this this method may be called multiple times.
+	 * of this, this method may be called multiple times.
 	 * <p>
 	 * Modification of the {@link Penetration} object is allowed and will be used to generate the contact
 	 * manifold in the {@link ManifoldSolver}.
@@ -68,7 +69,7 @@ public interface CollisionListener {
 	 * Called when two {@link Body}s are colliding and a contact {@link Manifold} has been found.
 	 * <p>
 	 * {@link Body} objects can have many {@link Convex} {@link Shape}s that make up their geometry.  Because
-	 * of this this method may be called multiple times.
+	 * of this, this method may be called multiple times.
 	 * <p>
 	 * Modification of the {@link Manifold} object is allowed.  The {@link Manifold} is used to create contact constraints.
 	 * @param body1 the first {@link Body}
@@ -79,4 +80,21 @@ public interface CollisionListener {
 	 * @return boolean true if processing should continue for this collision
 	 */
 	public abstract boolean collision(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2, Manifold manifold);
+	
+	/**
+	 * Called after a {@link ContactConstraint} has been created for a collision.
+	 * <p>
+	 * {@link Body} objects can have many {@link Convex} {@link Shape}s that make up their geometry.  Because
+	 * of this, this method may be called multiple times.
+	 * <p>
+	 * Modification of the friction, restitution, and sensor flags is allowed.
+	 * <p>
+	 * This method is intended to be used to override the computed friction and restitution values or the sensor flag.
+	 * <p>
+	 * You can also set the tangent velocity to achieve conveyor belt effect.
+	 * @param contactConstraint the contact constraint
+	 * @return boolean true if processing should continue for this collision
+	 * @since 3.0.2
+	 */
+	public abstract boolean collision(ContactConstraint contactConstraint);
 }

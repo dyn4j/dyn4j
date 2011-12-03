@@ -31,6 +31,7 @@ import java.awt.FlowLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,6 +55,7 @@ import org.dyn4j.dynamics.joint.WeldJoint;
 import org.dyn4j.dynamics.joint.WheelJoint;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.controls.BottomButtonPanel;
 import org.dyn4j.sandbox.panels.AngleJointPanel;
 import org.dyn4j.sandbox.panels.DistanceJointPanel;
@@ -102,114 +104,123 @@ public class AddJointDialog extends JDialog implements ActionListener {
 			b2 = bodies[1];
 		}
 		
+		JTextPane pneInfo = new JTextPane();
+		pneInfo.setContentType("text/html");
+		pneInfo.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+		pneInfo.setPreferredSize(new Dimension(400, 200));
+		pneInfo.setEditable(false);
+		
 		if (clazz == AngleJoint.class) {
 			// create the joint
 			AngleJoint aj = new AngleJoint(b1, b2);
 			// set the name
-			aj.setUserData("AngleJoint" + this.getCounter(clazz));
+			aj.setUserData(MessageFormat.format(Resources.getString("dialog.joint.add.angle.name.default"), this.getCounter(clazz)));
 			// create the panel
 			this.pnlJoint = new AngleJointPanel(aj, bodies, false);
-			// set the icon and title
+			// set the icon and title and description
 			this.setIconImage(Icons.ADD_ANGLE_JOINT.getImage());
-			this.setTitle("Add New Angle Joint");
+			this.setTitle(Resources.getString("dialog.joint.add.angle.title"));
+			pneInfo.setText(Resources.getString("panel.joint.angle.description"));
 		} else if (clazz == DistanceJoint.class) {
 			// create the joint
 			DistanceJoint dj = new DistanceJoint(b1, b2, b1.getWorldCenter(), b2.getWorldCenter());
 			// set the name
-			dj.setUserData("DistanceJoint" + this.getCounter(clazz));
+			dj.setUserData(MessageFormat.format(Resources.getString("dialog.joint.add.distance.name.default"), this.getCounter(clazz)));
 			// create the panel
 			this.pnlJoint = new DistanceJointPanel(dj, bodies, false);
 			// set the icon and title
 			this.setIconImage(Icons.ADD_DISTANCE_JOINT.getImage());
-			this.setTitle("Add New Distance Joint");
+			this.setTitle(Resources.getString("dialog.joint.add.distance.title"));
+			pneInfo.setText(Resources.getString("panel.joint.distance.description"));
 		} else if (clazz == FrictionJoint.class) {
 			// create the joint
 			FrictionJoint fj = new FrictionJoint(b1, b2, b1.getWorldCenter());
 			// set the name
-			fj.setUserData("FrictionJoint" + this.getCounter(clazz));
+			fj.setUserData(MessageFormat.format(Resources.getString("dialog.joint.add.friction.name.default"), this.getCounter(clazz)));
 			// create the panel
 			this.pnlJoint = new FrictionJointPanel(fj, bodies, false);
 			// set the icon and title
 			this.setIconImage(Icons.ADD_FRICTION_JOINT.getImage());
-			this.setTitle("Add New Friction Joint");
+			this.setTitle(Resources.getString("dialog.joint.add.friction.title"));
+			pneInfo.setText(Resources.getString("panel.joint.friction.description"));
 		} else if (clazz == MouseJoint.class) {
 			// create the joint
 			MouseJoint mj = new MouseJoint(b1, b1.getWorldCenter(), 8.0, 0.3, 100.0);
 			// set the name
-			mj.setUserData("MouseJoint" + this.getCounter(clazz));
+			mj.setUserData(MessageFormat.format(Resources.getString("dialog.joint.add.mouse.name.default"), this.getCounter(clazz)));
 			// create the panel
 			this.pnlJoint = new MouseJointPanel(mj, bodies, false);
 			// set the icon and title
 			this.setIconImage(Icons.ADD_MOUSE_JOINT.getImage());
-			this.setTitle("Add New Mouse Joint");
+			this.setTitle(Resources.getString("dialog.joint.add.mouse.title"));
+			pneInfo.setText(Resources.getString("panel.joint.mouse.description"));
 		} else if (clazz == PrismaticJoint.class) {
 			// create the joint
 			PrismaticJoint pj = new PrismaticJoint(b1, b2, b1.getWorldCenter(), new Vector2(1.0, 0.0));
 			// set the name
-			pj.setUserData("PrismaticJoint" + this.getCounter(clazz));
+			pj.setUserData(MessageFormat.format(Resources.getString("dialog.joint.add.prismatic.name.default"), this.getCounter(clazz)));
 			// create the panel
 			this.pnlJoint = new PrismaticJointPanel(pj, bodies, false);
 			// set the icon and title
 			this.setIconImage(Icons.ADD_PRISMATIC_JOINT.getImage());
-			this.setTitle("Add New Prismatic Joint");
+			this.setTitle(Resources.getString("dialog.joint.add.prismatic.title"));
+			pneInfo.setText(Resources.getString("panel.joint.prismatic.description"));
 		} else if (clazz == PulleyJoint.class) {
 			// create the joint
 			PulleyJoint pj = new PulleyJoint(b1, b2, new Vector2(), new Vector2(), b1.getWorldCenter(), b2.getWorldCenter());
 			// set the name
-			pj.setUserData("PulleyJoint" + this.getCounter(clazz));
+			pj.setUserData(MessageFormat.format(Resources.getString("dialog.joint.add.pulley.name.default"), this.getCounter(clazz)));
 			// create the panel
 			this.pnlJoint = new PulleyJointPanel(pj, bodies, false);
 			// set the icon and title
 			this.setIconImage(Icons.ADD_PULLEY_JOINT.getImage());
-			this.setTitle("Add New Pulley Joint");
+			this.setTitle(Resources.getString("dialog.joint.add.pulley.title"));
+			pneInfo.setText(Resources.getString("panel.joint.pulley.description"));
 		} else if (clazz == RevoluteJoint.class) {
 			// create the joint
 			RevoluteJoint rj = new RevoluteJoint(b1, b2, b1.getWorldCenter());
 			// set the name
-			rj.setUserData("RevoluteJoint" + this.getCounter(clazz));
+			rj.setUserData(MessageFormat.format(Resources.getString("dialog.joint.add.revolute.name.default"), this.getCounter(clazz)));
 			// create the panel
 			this.pnlJoint = new RevoluteJointPanel(rj, bodies, false);
 			// set the icon and title
 			this.setIconImage(Icons.ADD_REVOLUTE_JOINT.getImage());
-			this.setTitle("Add New Revolute Joint");
+			this.setTitle(Resources.getString("dialog.joint.add.revolute.title"));
+			pneInfo.setText(Resources.getString("panel.joint.revolute.description"));
 		} else if (clazz == RopeJoint.class) {
 			// create the joint
 			RopeJoint rj = new RopeJoint(b1, b2, b1.getWorldCenter(), b2.getWorldCenter());
 			// set the name
-			rj.setUserData("RopeJoint" + this.getCounter(clazz));
+			rj.setUserData(MessageFormat.format(Resources.getString("dialog.joint.add.rope.name.default"), this.getCounter(clazz)));
 			// create the panel
 			this.pnlJoint = new RopeJointPanel(rj, bodies, false);
 			// set the icon and title
 			this.setIconImage(Icons.ADD_ROPE_JOINT.getImage());
-			this.setTitle("Add New Rope Joint");
+			this.setTitle(Resources.getString("dialog.joint.add.rope.title"));
+			pneInfo.setText(Resources.getString("panel.joint.rope.description"));
 		} else if (clazz == WeldJoint.class) {
 			// create the joint
 			WeldJoint wj = new WeldJoint(b1, b2, b1.getWorldCenter());
 			// set the name
-			wj.setUserData("WeldJoint" + this.getCounter(clazz));
+			wj.setUserData(MessageFormat.format(Resources.getString("dialog.joint.add.weld.name.default"), this.getCounter(clazz)));
 			// create the panel
 			this.pnlJoint = new WeldJointPanel(wj, bodies, false);
 			// set the icon and title
 			this.setIconImage(Icons.ADD_WELD_JOINT.getImage());
-			this.setTitle("Add New Weld Joint");
+			this.setTitle(Resources.getString("dialog.joint.add.weld.title"));
+			pneInfo.setText(Resources.getString("panel.joint.weld.description"));
 		} else if (clazz == WheelJoint.class) {
 			// create the joint
 			WheelJoint wj = new WheelJoint(b1, b2, b1.getWorldCenter(), new Vector2(0.0, 1.0));
 			// set the name
-			wj.setUserData("WheelJoint" + this.getCounter(clazz));
+			wj.setUserData(MessageFormat.format(Resources.getString("dialog.joint.add.wheel.name.default"), this.getCounter(clazz)));
 			// create the panel
 			this.pnlJoint = new WheelJointPanel(wj, bodies, false);
 			// set the icon and title
 			this.setIconImage(Icons.ADD_WHEEL_JOINT.getImage());
-			this.setTitle("Add New Wheel Joint");
+			this.setTitle(Resources.getString("dialog.joint.add.wheel.title"));
+			pneInfo.setText(Resources.getString("panel.joint.wheel.description"));
 		}
-		
-		JTextPane pneInfo = new JTextPane();
-		pneInfo.setContentType("text/html");
-		pneInfo.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
-		pneInfo.setText("<html>" + this.pnlJoint.getDescription() + "</html>");
-		pneInfo.setPreferredSize(new Dimension(400, 200));
-		pneInfo.setEditable(false);
 		
 		JPanel pnlInfo = new JPanel();
 		pnlInfo.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -218,11 +229,11 @@ public class AddJointDialog extends JDialog implements ActionListener {
 		
 		JTabbedPane tabbedPane = new JTabbedPane();
 		tabbedPane.setBorder(BorderFactory.createEmptyBorder(7, 0, 0, 0));
-		tabbedPane.addTab("Joint", this.pnlJoint);
-		tabbedPane.addTab("Information", pnlInfo);
+		tabbedPane.addTab(Resources.getString("dialog.joint.tab.joint"), this.pnlJoint);
+		tabbedPane.addTab(Resources.getString("dialog.joint.tab.information"), pnlInfo);
 		
-		JButton btnCancel = new JButton("Cancel");
-		JButton btnAdd = new JButton("Add");
+		JButton btnCancel = new JButton(Resources.getString("button.cancel"));
+		JButton btnAdd = new JButton(Resources.getString("button.add"));
 		btnCancel.setActionCommand("cancel");
 		btnAdd.setActionCommand("add");
 		btnCancel.addActionListener(this);

@@ -33,6 +33,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.text.MessageFormat;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -69,26 +70,32 @@ import org.dyn4j.dynamics.joint.WheelJoint;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Polygon;
+import org.dyn4j.geometry.Ray;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Shape;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.NullBounds;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.SandboxBody;
+import org.dyn4j.sandbox.SandboxRay;
 import org.dyn4j.sandbox.dialogs.AddBodyDialog;
 import org.dyn4j.sandbox.dialogs.AddConvexFixtureDialog;
 import org.dyn4j.sandbox.dialogs.AddConvexHullFixtureDialog;
 import org.dyn4j.sandbox.dialogs.AddJointDialog;
 import org.dyn4j.sandbox.dialogs.AddNonConvexFixtureDialog;
+import org.dyn4j.sandbox.dialogs.AddRayDialog;
 import org.dyn4j.sandbox.dialogs.ApplyForceAtPointDialog;
 import org.dyn4j.sandbox.dialogs.ApplyForceDialog;
 import org.dyn4j.sandbox.dialogs.ApplyTorqueDialog;
 import org.dyn4j.sandbox.dialogs.EditBodyDialog;
 import org.dyn4j.sandbox.dialogs.EditFixtureDialog;
 import org.dyn4j.sandbox.dialogs.EditJointDialog;
+import org.dyn4j.sandbox.dialogs.EditRayDialog;
 import org.dyn4j.sandbox.dialogs.EditWorldDialog;
 import org.dyn4j.sandbox.dialogs.SetBoundsDialog;
 import org.dyn4j.sandbox.events.BodyActionEvent;
+import org.dyn4j.sandbox.events.RayActionEvent;
 import org.dyn4j.sandbox.utilities.ControlUtilities;
 import org.dyn4j.sandbox.utilities.Icons;
 
@@ -122,6 +129,9 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 	
 	/** The JTree joint folder node */
 	private DefaultMutableTreeNode jointFolder;
+
+	/** The JTree ray folder node */
+	private DefaultMutableTreeNode rayFolder;
 	
 	/** The JTree model used to insert/remove/update nodes */
 	private DefaultTreeModel model;
@@ -138,6 +148,9 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 	/** The popup menu for the joint folder node */
 	private JPopupMenu popJointFolder;
 	
+	/** The popup menu for the ray folder node */
+	private JPopupMenu popRayFolder;
+	
 	/** The popup menu for body nodes */
 	private JPopupMenu popBody;
 	
@@ -146,6 +159,9 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 	
 	/** The popup menu for joint nodes */
 	private JPopupMenu popJoint;
+
+	/** The popup menu for ray nodes */
+	private JPopupMenu popRay;
 	
 	/**
 	 * Full constructor.
@@ -170,14 +186,19 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 		this.tree.expandPath(new TreePath(this.bounds).getParentPath());
 		
 		// folder to contain the bodies
-		this.bodyFolder = new DefaultMutableTreeNode("Bodies");
+		this.bodyFolder = new DefaultMutableTreeNode(Resources.getString("panel.tree.bodyFolder"));
 		this.model.insertNodeInto(this.bodyFolder, this.root, this.root.getChildCount());
 		this.tree.expandPath(new TreePath(this.bodyFolder.getPath()).getParentPath());
 		
 		// folder to contain the joints
-		this.jointFolder = new DefaultMutableTreeNode("Joints");
+		this.jointFolder = new DefaultMutableTreeNode(Resources.getString("panel.tree.jointFolder"));
 		this.model.insertNodeInto(this.jointFolder, this.root, this.root.getChildCount());
 		this.tree.expandPath(new TreePath(this.jointFolder.getPath()).getParentPath());
+		
+		// folder to contain the rays
+		this.rayFolder = new DefaultMutableTreeNode(Resources.getString("panel.tree.rayFolder"));
+		this.model.insertNodeInto(this.rayFolder, this.root, this.root.getChildCount());
+		this.tree.expandPath(new TreePath(this.rayFolder.getPath()).getParentPath());
 		
 		this.scroller = new JScrollPane(this.tree);
 		this.scroller.setBorder(BorderFactory.createLineBorder(Color.GRAY));
@@ -204,8 +225,9 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 	 * <p>
 	 * This method will create the nodes for all objects.
 	 * @param world the world
+	 * @param rays the list of rays
 	 */
-	public void setWorld(World world) {
+	public void setWorld(World world, List<SandboxRay> rays) {
 		this.world = world;
 		this.root.setUserObject(world);
 		
@@ -213,6 +235,7 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 		this.bounds.setUserObject(new NullBounds());
 		this.bodyFolder.removeAllChildren();
 		this.jointFolder.removeAllChildren();
+		this.rayFolder.removeAllChildren();
 		
 		// set the bounds
 		if (world.getBounds() != null) {
@@ -255,6 +278,18 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 			// expand the path to the new node
 			this.tree.expandPath(new TreePath(jointNode.getPath()).getParentPath());
 		}
+		
+		// add all the rays
+		int rSize = rays.size();
+		for (int i = 0; i < rSize; i++) {
+			SandboxRay ray = rays.get(i);
+			// add the ray node
+			DefaultMutableTreeNode rayNode = new DefaultMutableTreeNode(ray);
+			// insert into the tree
+			this.model.insertNodeInto(rayNode, this.rayFolder, this.rayFolder.getChildCount());
+			// expand the path to the new node
+			this.tree.expandPath(new TreePath(rayNode.getPath()).getParentPath());
+		}
 	}
 	
 	/**
@@ -266,12 +301,12 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 		
 		this.popWorld = new JPopupMenu();
 		
-		JMenuItem mnuEditWorld = new JMenuItem("Edit");
+		JMenuItem mnuEditWorld = new JMenuItem(Resources.getString("menu.context.world.edit"));
 		mnuEditWorld.setActionCommand("editWorld");
 		mnuEditWorld.addActionListener(this);
 		mnuEditWorld.setIcon(Icons.EDIT_WORLD);
 		
-		JMenuItem mnuClearWorld = new JMenuItem("Remove All Bodies And Joints");
+		JMenuItem mnuClearWorld = new JMenuItem(Resources.getString("menu.context.world.removeAll"));
 		mnuClearWorld.setActionCommand("clear-all");
 		mnuClearWorld.addActionListener(this);
 		mnuClearWorld.setIcon(Icons.REMOVE);
@@ -284,12 +319,12 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 		
 		this.popBounds = new JPopupMenu();
 		
-		JMenuItem mnuSetBounds = new JMenuItem("Set Bounds");
+		JMenuItem mnuSetBounds = new JMenuItem(Resources.getString("menu.context.bounds.set"));
 		mnuSetBounds.setActionCommand("set-bounds");
 		mnuSetBounds.addActionListener(this);
 		mnuSetBounds.setIcon(Icons.SET_BOUNDS);
 		
-		JMenuItem mnuUnsetBounds = new JMenuItem("Unset Bounds");
+		JMenuItem mnuUnsetBounds = new JMenuItem(Resources.getString("menu.context.bounds.unset"));
 		mnuUnsetBounds.setActionCommand("unset-bounds");
 		mnuUnsetBounds.addActionListener(this);
 		mnuUnsetBounds.setIcon(Icons.UNSET_BOUNDS);
@@ -301,8 +336,8 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 		
 		this.popBodyFolder = new JPopupMenu();
 		
-		JMenuItem mnuAddbody = new JMenuItem("Add Body");
-		JMenuItem mnuRemoveAllBodies = new JMenuItem("Remove All Bodies");
+		JMenuItem mnuAddbody = new JMenuItem(Resources.getString("menu.context.bodyFolder.addBody"));
+		JMenuItem mnuRemoveAllBodies = new JMenuItem(Resources.getString("menu.context.bodyFolder.removeAll"));
 		
 		mnuAddbody.setActionCommand("addBody");
 		mnuRemoveAllBodies.setActionCommand("removeAllBodies");
@@ -321,17 +356,17 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 		
 		this.popJointFolder = new JPopupMenu();
 		
-		JMenuItem mnuAddAngleJoint = new JMenuItem("Add Angle Joint");
-		JMenuItem mnuAddDistanceJoint = new JMenuItem("Add Distance Joint");
-		JMenuItem mnuAddFrictionJoint = new JMenuItem("Add Friction Joint");
-		JMenuItem mnuAddPrismaticJoint = new JMenuItem("Add Prismatic Joint");
-		JMenuItem mnuAddPulleyJoint = new JMenuItem("Add Pulley Joint");
-		JMenuItem mnuAddRevoluteJoint = new JMenuItem("Add Revolute Joint");
-		JMenuItem mnuAddRopeJoint = new JMenuItem("Add Rope Joint");
-		JMenuItem mnuAddWeldJoint = new JMenuItem("Add Weld Joint");
-		JMenuItem mnuAddWheelJoint = new JMenuItem("Add Wheel Joint");
-		JMenuItem mnuAddMouseJoint = new JMenuItem("Add Mouse Joint");
-		JMenuItem mnuRemoveAllJoints = new JMenuItem("Remove All Joints");
+		JMenuItem mnuAddAngleJoint = new JMenuItem(Resources.getString("menu.context.jointFolder.addAngleJoint"));
+		JMenuItem mnuAddDistanceJoint = new JMenuItem(Resources.getString("menu.context.jointFolder.addDistanceJoint"));
+		JMenuItem mnuAddFrictionJoint = new JMenuItem(Resources.getString("menu.context.jointFolder.addFrictionJoint"));
+		JMenuItem mnuAddPrismaticJoint = new JMenuItem(Resources.getString("menu.context.jointFolder.addPrismaticJoint"));
+		JMenuItem mnuAddPulleyJoint = new JMenuItem(Resources.getString("menu.context.jointFolder.addPulleyJoint"));
+		JMenuItem mnuAddRevoluteJoint = new JMenuItem(Resources.getString("menu.context.jointFolder.addRevoluteJoint"));
+		JMenuItem mnuAddRopeJoint = new JMenuItem(Resources.getString("menu.context.jointFolder.addRopeJoint"));
+		JMenuItem mnuAddWeldJoint = new JMenuItem(Resources.getString("menu.context.jointFolder.addWeldJoint"));
+		JMenuItem mnuAddWheelJoint = new JMenuItem(Resources.getString("menu.context.jointFolder.addWheelJoint"));
+		JMenuItem mnuAddMouseJoint = new JMenuItem(Resources.getString("menu.context.jointFolder.addMouseJoint"));
+		JMenuItem mnuRemoveAllJoints = new JMenuItem(Resources.getString("menu.context.jointFolder.removeAll"));
 		
 		mnuAddAngleJoint.setIcon(Icons.ADD_ANGLE_JOINT);
 		mnuAddDistanceJoint.setIcon(Icons.ADD_DISTANCE_JOINT);
@@ -387,20 +422,20 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 		
 		this.popBody = new JPopupMenu();
 		
-		JMenuItem mnuEditBody = new JMenuItem("Edit");
-		JMenuItem mnuRemoveBody = new JMenuItem("Remove");
-		JMenuItem mnuAddCircle = new JMenuItem("Add Circle Fixture");
-		JMenuItem mnuAddRectangle = new JMenuItem("Add Rectangle Fixture");
-		JMenuItem mnuAddPolygon = new JMenuItem("Add Convex Polygon Fixture");
-		JMenuItem mnuAddSegment = new JMenuItem("Add Segment Fixture");
-		JMenuItem mnuAddHull = new JMenuItem("Add Convex Hull Fixture");
-		JMenuItem mnuAddDecompose = new JMenuItem("Add Non-Convex Polygon Fixtures");
-		JMenuItem mnuRemoveAllFixtures = new JMenuItem("Remove All Fixtures");
-		JMenuItem mnuApplyForce = new JMenuItem("Apply Force");
-		JMenuItem mnuApplyTorque = new JMenuItem("Apply Torque");
-		JMenuItem mnuApplyForceAtPoint = new JMenuItem("Apply Force At Point");
-		JMenuItem mnuClearForce = new JMenuItem("Clear Accumulated Force");
-		JMenuItem mnuClearTorque = new JMenuItem("Clear Accumulated Torque");
+		JMenuItem mnuEditBody = new JMenuItem(Resources.getString("menu.context.body.edit"));
+		JMenuItem mnuRemoveBody = new JMenuItem(Resources.getString("menu.context.body.remove"));
+		JMenuItem mnuAddCircle = new JMenuItem(Resources.getString("menu.context.body.addCircleFixture"));
+		JMenuItem mnuAddRectangle = new JMenuItem(Resources.getString("menu.context.body.addRectangleFixture"));
+		JMenuItem mnuAddPolygon = new JMenuItem(Resources.getString("menu.context.body.addConvexPolygonFixture"));
+		JMenuItem mnuAddSegment = new JMenuItem(Resources.getString("menu.context.body.addSegmentFixture"));
+		JMenuItem mnuAddHull = new JMenuItem(Resources.getString("menu.context.body.addConvexHullFixture"));
+		JMenuItem mnuAddDecompose = new JMenuItem(Resources.getString("menu.context.body.addNonConvexPolygonFixtures"));
+		JMenuItem mnuRemoveAllFixtures = new JMenuItem(Resources.getString("menu.context.body.removeAll"));
+		JMenuItem mnuApplyForce = new JMenuItem(Resources.getString("menu.context.body.applyForce"));
+		JMenuItem mnuApplyTorque = new JMenuItem(Resources.getString("menu.context.body.applyTorque"));
+		JMenuItem mnuApplyForceAtPoint = new JMenuItem(Resources.getString("menu.context.body.applyForceAtPoint"));
+		JMenuItem mnuClearForce = new JMenuItem(Resources.getString("menu.context.body.clearAccumulatedForce"));
+		JMenuItem mnuClearTorque = new JMenuItem(Resources.getString("menu.context.body.clearAccumulatedTorque"));
 		
 		mnuEditBody.setIcon(Icons.EDIT_BODY);
 		mnuRemoveBody.setIcon(Icons.REMOVE_BODY);
@@ -471,8 +506,8 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 		
 		this.popFixture = new JPopupMenu();
 		
-		JMenuItem mnuEditFixture = new JMenuItem("Edit");
-		JMenuItem mnuRemoveFixture = new JMenuItem("Remove");
+		JMenuItem mnuEditFixture = new JMenuItem(Resources.getString("menu.context.fixture.edit"));
+		JMenuItem mnuRemoveFixture = new JMenuItem(Resources.getString("menu.context.fixture.remove"));
 		
 		// add default icons so that the menu is the correct size initially
 		mnuEditFixture.setIcon(Icons.EDIT_POLYGON);
@@ -491,8 +526,8 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 		
 		this.popJoint = new JPopupMenu();
 		
-		JMenuItem mnuEditJoint = new JMenuItem("Edit");
-		JMenuItem mnuRemoveJoint = new JMenuItem("Remove");
+		JMenuItem mnuEditJoint = new JMenuItem(Resources.getString("menu.context.joint.edit"));
+		JMenuItem mnuRemoveJoint = new JMenuItem(Resources.getString("menu.context.joint.remove"));
 		
 		// add default icons so that the menu is the correct size initially
 		mnuEditJoint.setIcon(Icons.EDIT_ANGLE_JOINT);
@@ -506,6 +541,45 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 		
 		this.popJoint.add(mnuEditJoint);
 		this.popJoint.add(mnuRemoveJoint);
+		
+		// create the ray folder popup menu
+		
+		this.popRayFolder = new JPopupMenu();
+		
+		JMenuItem mnuAddRay = new JMenuItem(Resources.getString("menu.context.ray.add"));
+		JMenuItem mnuRemoveAllRays = new JMenuItem(Resources.getString("menu.context.ray.removeAll"));
+		
+		mnuAddRay.setIcon(Icons.ADD_RAY);
+		mnuRemoveAllRays.setIcon(Icons.REMOVE);
+		
+		mnuAddRay.setActionCommand("addRay");
+		mnuRemoveAllRays.setActionCommand("removeAllRays");
+		
+		mnuAddRay.addActionListener(this);
+		mnuRemoveAllRays.addActionListener(this);
+		
+		this.popRayFolder.add(mnuAddRay);
+		this.popRayFolder.addSeparator();
+		this.popRayFolder.add(mnuRemoveAllRays);
+		
+		// create the ray popup menu
+		
+		this.popRay = new JPopupMenu();
+		
+		JMenuItem mnuEditRay = new JMenuItem(Resources.getString("menu.context.ray.edit"));
+		JMenuItem mnuRemoveRay = new JMenuItem(Resources.getString("menu.context.ray.remove"));
+		
+		mnuEditRay.setIcon(Icons.EDIT_RAY);
+		mnuRemoveRay.setIcon(Icons.REMOVE_RAY);
+		
+		mnuEditRay.setActionCommand("editRay");
+		mnuRemoveRay.setActionCommand("removeRay");
+		
+		mnuEditRay.addActionListener(this);
+		mnuRemoveRay.addActionListener(this);
+		
+		this.popRay.add(mnuEditRay);
+		this.popRay.add(mnuRemoveRay);
 	}
 	
 	/**
@@ -581,6 +655,8 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 		if (this.popJoint != null) SwingUtilities.updateComponentTreeUI(this.popJoint);
 		if (this.popJointFolder != null) SwingUtilities.updateComponentTreeUI(this.popJointFolder);
 		if (this.popWorld != null) SwingUtilities.updateComponentTreeUI(this.popWorld);
+		if (this.popRayFolder != null) SwingUtilities.updateComponentTreeUI(this.popRayFolder);
+		if (this.popRay != null) SwingUtilities.updateComponentTreeUI(this.popRay);
 		// reset the cell renderer
 		if (this.tree != null) this.tree.setCellRenderer(new Renderer());
 	}
@@ -613,6 +689,9 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				} else if (node == this.jointFolder) {
 					// show the joint folder context menu
 					this.popJointFolder.show(this.tree, x, y);
+				} else if (node == this.rayFolder) {
+					// show the joint folder context menu
+					this.popRayFolder.show(this.tree, x, y);
 				} else if (userData instanceof Body) {
 					// show the body context menu
 					this.popBody.show(this.tree, x, y);
@@ -672,6 +751,9 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 						((JMenuItem)this.popJoint.getComponent(0)).setIcon(Icons.EDIT_WHEEL_JOINT);
 						((JMenuItem)this.popJoint.getComponent(1)).setIcon(Icons.REMOVE_WHEEL_JOINT);
 					}
+				} else if (userData instanceof Ray) {
+					// show the ray context menu
+					this.popRay.show(this.tree, x, y);
 				}
 			}
 		}
@@ -752,19 +834,27 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 		} else if ("removeJoint".equals(command)) {
 			this.removeJointAction();
 		} else if ("applyForce".equals(command)) {
-			this.applyForce();
+			this.applyForceAction();
 		} else if ("applyTorque".equals(command)) {
-			this.applyTorque();
+			this.applyTorqueAction();
 		} else if ("applyForceAtPoint".equals(command)) {
-			this.applyForceAtPoint();
+			this.applyForceAtPointAction();
 		} else if ("clearForce".equals(command)) {
-			this.clearForce();
+			this.clearForceAction();
 		} else if ("clearTorque".equals(command)) {
-			this.clearTorque();
+			this.clearTorqueAction();
 		} else if ("removeAllBodies".equals(command)) {
-			this.removeAllBodies();
+			this.removeAllBodiesAction();
 		} else if ("removeAllJoints".equals(command)) {
-			this.removeAllJoints();
+			this.removeAllJointsAction();
+		} else if ("addRay".equals(command)) {
+			this.addRayAction();
+		} else if ("removeAllRays".equals(command)) {
+			this.removeAllRaysAction();
+		} else if ("editRay".equals(command)) {
+			this.editRayAction();
+		} else if ("removeRay".equals(command)) {
+			this.removeRayAction();
 		}
 	}
 	
@@ -818,6 +908,20 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 		}
 	}
 	
+	/**
+	 * Notifies all the action listeners of the event.
+	 * @param command the command
+	 * @param ray the affected ray
+	 */
+	private void notifyActionListeners(String command, SandboxRay ray) {
+		ActionListener[] listeners = this.getListeners(ActionListener.class);
+		int size = listeners.length;
+		RayActionEvent event = new RayActionEvent(this, ActionEvent.ACTION_PERFORMED, command, ray);
+		for (int i = 0; i < size; i++) {
+			listeners[i].actionPerformed(event);
+		}
+	}
+	
 	// context menu actions
 	
 	/**
@@ -825,7 +929,11 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 	 */
 	private void clearAllAction() {
 		// make sure they are sure
-		int choice = JOptionPane.showConfirmDialog(ControlUtilities.getParentWindow(this), "Are you sure you want to remove all bodies and joints?", "Clear Bodies and Joints", JOptionPane.YES_NO_CANCEL_OPTION);
+		int choice = JOptionPane.showConfirmDialog(
+				ControlUtilities.getParentWindow(this), 
+				Resources.getString("menu.context.removeAll.warning"), 
+				Resources.getString("menu.context.removeAll.warning.title"), 
+				JOptionPane.YES_NO_CANCEL_OPTION);
 		// check the user's choice
 		if (choice == JOptionPane.YES_OPTION) {
 			// remove it all from the world
@@ -896,7 +1004,7 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 	 */
 	private void addBodyAction() {
 		// create the body by showing the dialogs
-		SandboxBody body = AddBodyDialog.show(ControlUtilities.getParentWindow(this), "Add New Body");
+		SandboxBody body = AddBodyDialog.show(ControlUtilities.getParentWindow(this));
 		// make sure the user didn't cancel the operation
 		if (body != null) {
 			// add the body to the world
@@ -929,7 +1037,7 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				// get the body from the node
 				SandboxBody body = (SandboxBody)node.getUserObject();
 				// pass the body to the edit dialog
-				EditBodyDialog.show(ControlUtilities.getParentWindow(this), "Edit Body", body);
+				EditBodyDialog.show(ControlUtilities.getParentWindow(this), body);
 			}
 		}
 	}
@@ -951,7 +1059,11 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				// get the body from the node
 				SandboxBody body = (SandboxBody)node.getUserObject();
 				// make sure they are sure
-				int choice = JOptionPane.showConfirmDialog(ControlUtilities.getParentWindow(this), "Are you sure you want to remove " + body.getName() + "?", "Remove Body", JOptionPane.YES_NO_CANCEL_OPTION);
+				int choice = JOptionPane.showConfirmDialog(
+						ControlUtilities.getParentWindow(this),
+						MessageFormat.format(Resources.getString("menu.context.body.remove.warning"), body.getName()), 
+						Resources.getString("menu.context.body.remove.warning.title"), 
+						JOptionPane.YES_NO_CANCEL_OPTION);
 				// check the user's choice
 				if (choice == JOptionPane.YES_OPTION) {
 					// remove the body from the world
@@ -986,7 +1098,7 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				// get the body from the node
 				SandboxBody body = (SandboxBody)node.getUserObject();
 				// create the fixture by showing the dialogs (don't show the local transform panel if its the first fixture)
-				BodyFixture fixture = AddConvexFixtureDialog.show(ControlUtilities.getParentWindow(this), icon, "Add New Fixture", shapePanel);
+				BodyFixture fixture = AddConvexFixtureDialog.show(ControlUtilities.getParentWindow(this), icon, shapePanel);
 				// make sure the user didnt cancel the operation
 				if (fixture != null) {
 					// add the fixture to the body
@@ -1068,7 +1180,11 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				// get the fixture from the node
 				BodyFixture fixture = (BodyFixture)node.getUserObject();
 				// make sure they are sure
-				int choice = JOptionPane.showConfirmDialog(ControlUtilities.getParentWindow(this), "Are you sure you want to remove " + fixture.getUserData() + " from " + body.getName() + "?", "Remove Fixture", JOptionPane.YES_NO_CANCEL_OPTION);
+				int choice = JOptionPane.showConfirmDialog(
+						ControlUtilities.getParentWindow(this),
+						MessageFormat.format(Resources.getString("menu.context.fixture.remove.warning"), fixture.getUserData(), body.getName()), 
+						Resources.getString("menu.context.fixture.remove.warning.title"), 
+						JOptionPane.YES_NO_CANCEL_OPTION);
 				// check the user's choice
 				if (choice == JOptionPane.YES_OPTION) {
 					// remove the body from the world
@@ -1105,7 +1221,11 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				// get the body from the node
 				SandboxBody body = (SandboxBody)node.getUserObject();
 				// make sure they are sure
-				int choice = JOptionPane.showConfirmDialog(ControlUtilities.getParentWindow(this), "Are you sure you want to remove all the fixtures from " + body.getName() + "?", "Remove All Fixtures", JOptionPane.YES_NO_CANCEL_OPTION);
+				int choice = JOptionPane.showConfirmDialog(
+						ControlUtilities.getParentWindow(this), 
+						MessageFormat.format(Resources.getString("menu.context.body.removeAll.warning"), body.getName()), 
+						Resources.getString("menu.context.body.removeAll.warning.title"), 
+						JOptionPane.YES_NO_CANCEL_OPTION);
 				// check the user's choice
 				if (choice == JOptionPane.YES_OPTION) {
 					// remove the body from the world
@@ -1157,7 +1277,7 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 					icon = Icons.EDIT_POLYGON.getImage();
 				}
 				// make sure they are sure
-				EditFixtureDialog.show(ControlUtilities.getParentWindow(this), icon, "Edit Fixture", body, fixture);
+				EditFixtureDialog.show(ControlUtilities.getParentWindow(this), icon, body, fixture);
 			}
 		}
 	}
@@ -1174,9 +1294,9 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 		// check the joint class type
 		if (bodies == null || bodies.length == 0 || (clazz != MouseJoint.class && bodies.length == 1)) {
 			JOptionPane.showMessageDialog(ControlUtilities.getParentWindow(this),
-					"The world must contain at least 1 body" +
-					"\nbefore a mouse joint can be added and" +
-					"\nat least 2 bodies for all other joints.", "Notice", JOptionPane.ERROR_MESSAGE);
+					Resources.getString("menu.context.joint.add.warning"), 
+					Resources.getString("menu.context.joint.add.warning.title"), 
+					JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		
@@ -1232,7 +1352,11 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				// get the joint from the node
 				Joint joint = (Joint)node.getUserObject();
 				// make sure they are sure
-				int choice = JOptionPane.showConfirmDialog(ControlUtilities.getParentWindow(this), "Are you sure you want to remove " + joint.getUserData() + "?", "Remove Joint", JOptionPane.YES_NO_CANCEL_OPTION);
+				int choice = JOptionPane.showConfirmDialog(
+						ControlUtilities.getParentWindow(this), 
+						MessageFormat.format(Resources.getString("menu.context.joint.remove.warning"), joint.getUserData()), 
+						Resources.getString("menu.context.joint.remove.warning.title"), 
+						JOptionPane.YES_NO_CANCEL_OPTION);
 				// check the user's choice
 				if (choice == JOptionPane.YES_OPTION) {
 					// remove the joint from the world
@@ -1264,7 +1388,7 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				// get the body from the node
 				SandboxBody body = (SandboxBody)node.getUserObject();
 				// show a dialog to create the fixtures
-				List<BodyFixture> fixtures = AddNonConvexFixtureDialog.show(ControlUtilities.getParentWindow(this), Icons.ADD_NON_CONVEX_POLYGON.getImage(), "Add Non-Convex Polygon Fixtures");
+				List<BodyFixture> fixtures = AddNonConvexFixtureDialog.show(ControlUtilities.getParentWindow(this), Icons.ADD_NON_CONVEX_POLYGON.getImage());
 				// make sure the user didnt cancel the operation
 				if (fixtures != null) {
 					// add the fixture to the body
@@ -1294,7 +1418,7 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 	/**
 	 * Applies a force to the given body if the user accepts the input.
 	 */
-	private void applyForce() {
+	private void applyForceAction() {
 		// the current selection should have the body selected
 		TreePath path = this.tree.getSelectionPath();
 		// make sure that something is selected
@@ -1320,7 +1444,7 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 	/**
 	 * Applies a torque to the given body if the user accepts the input.
 	 */
-	private void applyTorque() {
+	private void applyTorqueAction() {
 		// the current selection should have the body selected
 		TreePath path = this.tree.getSelectionPath();
 		// make sure that something is selected
@@ -1347,7 +1471,7 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 	/**
 	 * Applies a foces at a point to the given body if the user accepts the input.
 	 */
-	private void applyForceAtPoint() {
+	private void applyForceAtPointAction() {
 		// the current selection should have the body selected
 		TreePath path = this.tree.getSelectionPath();
 		// make sure that something is selected
@@ -1376,7 +1500,7 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 	 * <p>
 	 * If the user accepts, the force accumulator is cleared.
 	 */
-	private void clearForce() {
+	private void clearForceAction() {
 		// the current selection should have the body selected
 		TreePath path = this.tree.getSelectionPath();
 		// make sure that something is selected
@@ -1388,7 +1512,11 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				// get the body from the node
 				SandboxBody body = (SandboxBody)node.getUserObject();
 				// make sure they are sure
-				int choice = JOptionPane.showConfirmDialog(ControlUtilities.getParentWindow(this), "Are you sure you want to clear the force accumulator for " + body.getName() + "?", "Clear Force Accumulator", JOptionPane.YES_NO_CANCEL_OPTION);
+				int choice = JOptionPane.showConfirmDialog(
+						ControlUtilities.getParentWindow(this), 
+						MessageFormat.format(Resources.getString("menu.context.body.clearForce.warning"), body.getName()), 
+						Resources.getString("menu.context.body.clearForce.warning.title"), 
+						JOptionPane.YES_NO_CANCEL_OPTION);
 				// check the user's choice
 				if (choice == JOptionPane.YES_OPTION) {
 					// clear only the force accumulator
@@ -1403,7 +1531,7 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 	 * <p>
 	 * If the user accepts, the torque accumulator is cleared.
 	 */
-	private void clearTorque() {
+	private void clearTorqueAction() {
 		// the current selection should have the body selected
 		TreePath path = this.tree.getSelectionPath();
 		// make sure that something is selected
@@ -1415,7 +1543,11 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				// get the body from the node
 				SandboxBody body = (SandboxBody)node.getUserObject();
 				// make sure they are sure
-				int choice = JOptionPane.showConfirmDialog(ControlUtilities.getParentWindow(this), "Are you sure you want to clear the torque accumulator for " + body.getName() + "?", "Clear Torque Accumulator", JOptionPane.YES_NO_CANCEL_OPTION);
+				int choice = JOptionPane.showConfirmDialog(
+						ControlUtilities.getParentWindow(this), 
+						MessageFormat.format(Resources.getString("menu.context.body.clearTorque.warning"), body.getName()), 
+						Resources.getString("menu.context.body.clearTorque.warning.title"), 
+						JOptionPane.YES_NO_CANCEL_OPTION);
 				// check the user's choice
 				if (choice == JOptionPane.YES_OPTION) {
 					// clear only the force accumulator
@@ -1430,9 +1562,13 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 	 * <p>
 	 * If the user accepts, all bodies are removed.
 	 */
-	private void removeAllBodies() {
+	private void removeAllBodiesAction() {
 		// make sure they are sure
-		int choice = JOptionPane.showConfirmDialog(ControlUtilities.getParentWindow(this), "Are you sure you want to remove all bodies?\n(This will remove all joints as well)", "Remove All Bodies", JOptionPane.YES_NO_CANCEL_OPTION);
+		int choice = JOptionPane.showConfirmDialog(
+				ControlUtilities.getParentWindow(this), 
+				Resources.getString("menu.context.bodyFolder.removeAll.warning"), 
+				Resources.getString("menu.context.bodyFolder.removeAll.warning.title"), 
+				JOptionPane.YES_NO_CANCEL_OPTION);
 		// check the user's choice
 		if (choice == JOptionPane.YES_OPTION) {
 			// clear only the force accumulator
@@ -1456,9 +1592,13 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 	 * <p>
 	 * If the user accepts, all joints are removed.
 	 */
-	private void removeAllJoints() {
+	private void removeAllJointsAction() {
 		// make sure they are sure
-		int choice = JOptionPane.showConfirmDialog(ControlUtilities.getParentWindow(this), "Are you sure you want to remove all joints?", "Remove All Joints", JOptionPane.YES_NO_CANCEL_OPTION);
+		int choice = JOptionPane.showConfirmDialog(
+				ControlUtilities.getParentWindow(this), 
+				Resources.getString("menu.context.jointFolder.removeAll.warning"), 
+				Resources.getString("menu.context.jointFolder.removeAll.warning.title"), 
+				JOptionPane.YES_NO_CANCEL_OPTION);
 		// check the user's choice
 		if (choice == JOptionPane.YES_OPTION) {
 			// clear only the force accumulator
@@ -1469,6 +1609,100 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 			// refresh the tree
 			this.jointFolder.removeAllChildren();
 			this.model.reload(this.jointFolder);
+		}
+	}
+	
+	/**
+	 * Shows a dialog allowing the user to create a ray to cast against the world.
+	 */
+	private void addRayAction() {
+		// create the body by showing the dialogs
+		SandboxRay ray = AddRayDialog.show(ControlUtilities.getParentWindow(this));
+		// make sure the user didn't cancel the operation
+		if (ray != null) {
+			// add the body to the sandbox
+			this.notifyActionListeners("add-ray", ray);
+			// add ray to the rayFolder node
+			DefaultMutableTreeNode rayNode = new DefaultMutableTreeNode(ray);
+			// insert into the tree
+			this.model.insertNodeInto(rayNode, this.rayFolder, this.rayFolder.getChildCount());
+			// expand the path to the new node
+			this.tree.expandPath(new TreePath(rayNode.getPath()).getParentPath());
+		}
+	}
+	
+	/**
+	 * Shows a confirmation dialog to the user to make sure they want to remove all rays.
+	 * <p>
+	 * If the user accepts, all rays in the Rays folder will be removed.
+	 */
+	private void removeAllRaysAction() {
+		// make sure they are sure
+		int choice = JOptionPane.showConfirmDialog(
+				ControlUtilities.getParentWindow(this), 
+				Resources.getString("menu.context.rayFolder.removeAll.warning"), 
+				Resources.getString("menu.context.rayFolder.removeAll.warning.title"), 
+				JOptionPane.YES_NO_CANCEL_OPTION);
+		// check the user's choice
+		if (choice == JOptionPane.YES_OPTION) {
+			// clear all the rays
+			this.notifyActionListeners("remove-all-rays", (SandboxRay)null);
+			// refresh the tree
+			this.rayFolder.removeAllChildren();
+			this.model.reload(this.rayFolder);
+		}
+	}
+	
+	/**
+	 * Shows the a dialog allowing the user to edit the ray.
+	 */
+	private void editRayAction() {
+		// get the currently selected body
+		TreePath path = this.tree.getSelectionPath();
+		// make sure something is selected
+		if (path != null) {
+			// get the selected node
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
+			// make sure its a ray that is selected
+			if (node.getUserObject() instanceof SandboxRay) {
+				// get the ray from the node
+				SandboxRay ray = (SandboxRay)node.getUserObject();
+				// show the right dialog
+				EditRayDialog.show(ControlUtilities.getParentWindow(this), ray);
+			}
+		}
+	}
+	
+	/**
+	 * Shows a confirmation dialog to the user to make sure they want to remove the selected ray.
+	 * <p>
+	 * If the user accepts, the selected ray is removed
+	 */
+	private void removeRayAction() {
+		// get the currently selected body
+		TreePath path = this.tree.getSelectionPath();
+		// make sure something is selected
+		if (path != null) {
+			// get the selected node
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
+			// make sure its a ray that is selected
+			if (node.getUserObject() instanceof SandboxRay) {
+				// get the ray from the node
+				SandboxRay ray = (SandboxRay)node.getUserObject();
+				// make sure they are sure
+				int choice = JOptionPane.showConfirmDialog(
+						ControlUtilities.getParentWindow(this), 
+						MessageFormat.format(Resources.getString("menu.context.ray.remove.warning"), ray.getName()), 
+						Resources.getString("menu.context.ray.remove.warning.title"), 
+						JOptionPane.YES_NO_CANCEL_OPTION);
+				// check the user's choice
+				if (choice == JOptionPane.YES_OPTION) {
+					// remove the joint from the world
+					this.notifyActionListeners("remove-ray", ray);
+					// remove the node from the tree
+					this.model.removeNodeFromParent(node);
+				}
+			}
 		}
 	}
 	
@@ -1542,7 +1776,7 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 			} else if (data instanceof Bounds) {
 				this.setIcon(Icons.BOUNDS);
 				if (data instanceof NullBounds) {
-					this.setText("No bounds set");
+					this.setText(Resources.getString("panel.tree.noBounds"));
 				} else if (data instanceof RectangularBounds) {
 					RectangularBounds bounds = (RectangularBounds)data;
 					Rectangle r = bounds.getBounds();
@@ -1550,6 +1784,9 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				} else {
 					this.setText(data.getClass().getSimpleName());
 				}
+			} else if (data instanceof Ray) {
+				this.setIcon(Icons.RAY);
+				this.setText(((SandboxRay)data).getName());
 			} else {
 				// just show folder icon
 				if (!expanded) {

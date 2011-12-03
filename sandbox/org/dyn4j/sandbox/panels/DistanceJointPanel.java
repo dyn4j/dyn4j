@@ -30,6 +30,7 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
@@ -46,6 +47,7 @@ import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
 import org.dyn4j.sandbox.utilities.ControlUtilities;
 import org.dyn4j.sandbox.utilities.Icons;
@@ -161,79 +163,77 @@ public class DistanceJointPanel extends JointPanel implements InputPanel, Action
 		this.txtName.setColumns(15);
 		this.chkCollision.setSelected(collision);
 		
-		this.lblBody1 = new JLabel("Body 1", Icons.INFO, JLabel.LEFT);
-		this.lblBody2 = new JLabel("Body 2", Icons.INFO, JLabel.LEFT);
-		this.lblBody1.setToolTipText("The first body participating in the joint.");
-		this.lblBody2.setToolTipText("The second body participating in the joint.");
+		this.lblBody1 = new JLabel(Resources.getString("panel.joint.body1"), Icons.INFO, JLabel.LEFT);
+		this.lblBody2 = new JLabel(Resources.getString("panel.joint.body2"), Icons.INFO, JLabel.LEFT);
+		this.lblBody1.setToolTipText(Resources.getString("panel.joint.body1.tooltip"));
+		this.lblBody2.setToolTipText(Resources.getString("panel.joint.body2.tooltip"));
 		
 		this.cmbBody1 = new JComboBox(bodies);
 		this.cmbBody2 = new JComboBox(bodies);
 		
-		this.lblAnchor1 = new JLabel("Anchor 1", Icons.INFO, JLabel.LEFT);
-		this.lblAnchor1.setToolTipText("The anchor point on the first body.");
+		this.lblAnchor1 = new JLabel(Resources.getString("panel.joint.anchor1"), Icons.INFO, JLabel.LEFT);
+		this.lblAnchor1.setToolTipText(Resources.getString("panel.joint.anchor1.tooltip"));
 		
-		this.lblAnchor2 = new JLabel("Anchor 2", Icons.INFO, JLabel.LEFT);
-		this.lblAnchor2.setToolTipText("The anchor point on the second body.");
+		this.lblAnchor2 = new JLabel(Resources.getString("panel.joint.anchor2"), Icons.INFO, JLabel.LEFT);
+		this.lblAnchor2.setToolTipText(Resources.getString("panel.joint.anchor2.tooltip"));
 		
-		this.lblX1 = new JLabel("x");
-		this.lblX2 = new JLabel("x");
-		this.lblY1 = new JLabel("y");
-		this.lblY2 = new JLabel("y");
+		this.lblX1 = new JLabel(Resources.getString("x"));
+		this.lblX2 = new JLabel(Resources.getString("x"));
+		this.lblY1 = new JLabel(Resources.getString("y"));
+		this.lblY2 = new JLabel(Resources.getString("y"));
 		
-		this.txtX1 = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtX1 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.anchor.format")));
 		this.txtX1.addFocusListener(new SelectTextFocusListener(this.txtX1));
 		this.txtX1.addPropertyChangeListener("value", this);
 		this.txtX1.setColumns(7);
 		
-		this.txtX2 = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtX2 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.anchor.format")));
 		this.txtX2.addFocusListener(new SelectTextFocusListener(this.txtX2));
 		this.txtX2.addPropertyChangeListener("value", this);
 		this.txtX2.setColumns(7);
 		
-		this.txtY1 = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtY1 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.anchor.format")));
 		this.txtY1.addFocusListener(new SelectTextFocusListener(this.txtY1));
 		this.txtY1.addPropertyChangeListener("value", this);
 		this.txtY1.setColumns(7);
 		
-		this.txtY2 = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtY2 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.anchor.format")));
 		this.txtY2.addFocusListener(new SelectTextFocusListener(this.txtY2));
 		this.txtY2.addPropertyChangeListener("value", this);
 		this.txtY2.setColumns(7);
 
-		this.btnUseCenter1 = new JButton("Use Center");
-		this.btnUseCenter1.setToolTipText("Set anchor 1 to the center of mass of body 1.");
+		this.btnUseCenter1 = new JButton(Resources.getString("panel.joint.useCenter"));
+		this.btnUseCenter1.setToolTipText(Resources.getString("panel.joint.useCenter.tooltip1"));
 		this.btnUseCenter1.setActionCommand("use-com1");
 		this.btnUseCenter1.addActionListener(this);
 		
-		this.btnUseCenter2 = new JButton("Use Center");
-		this.btnUseCenter2.setToolTipText("Set anchor 2 to the center of mass of body 2.");
+		this.btnUseCenter2 = new JButton(Resources.getString("panel.joint.useCenter"));
+		this.btnUseCenter2.setToolTipText(Resources.getString("panel.joint.useCenter.tooltip2"));
 		this.btnUseCenter2.setActionCommand("use-com2");
 		this.btnUseCenter2.addActionListener(this);
 		
-		this.lblRestDistance = new JLabel("Rest Distance", Icons.INFO, JLabel.LEFT);
-		this.lblRestDistance.setToolTipText("The rest distance between the two anchor points.");
-		this.txtRestDistance = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.lblRestDistance = new JLabel(Resources.getString("panel.joint.distance.rest"), Icons.INFO, JLabel.LEFT);
+		this.lblRestDistance.setToolTipText(Resources.getString("panel.joint.distance.rest.tooltip"));
+		this.txtRestDistance = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.distance.rest.format")));
 		this.txtRestDistance.addFocusListener(new SelectTextFocusListener(this.txtRestDistance));
 		this.txtRestDistance.setColumns(8);
 
-		this.tglRestDistance = new JToggleButton("Auto Compute");
-		this.tglRestDistance.setToolTipText("Automatically computes the distance from the anchor points.");
+		this.tglRestDistance = new JToggleButton(Resources.getString("panel.joint.distance.autoCompute"));
+		this.tglRestDistance.setToolTipText(Resources.getString("panel.joint.distance.autoCompute.tooltip"));
 		
-		this.btnResetRestDistance = new JButton("Reset");
-		this.btnResetRestDistance.setToolTipText("Resets the rest distance to the distance between the anchor points.");
+		this.btnResetRestDistance = new JButton(Resources.getString("panel.joint.distance.reset"));
+		this.btnResetRestDistance.setToolTipText(Resources.getString("panel.joint.distance.reset.tooltip"));
 		this.btnResetRestDistance.setActionCommand("reset-rest-distance");
 		this.btnResetRestDistance.addActionListener(this);
 		
-		this.lblFrequency = new JLabel("Frequency", Icons.INFO, JLabel.LEFT);
-		this.lblFrequency.setToolTipText(
-				"<html>Determines how fast the spring should oscillate in hertz (Seconds<sup>-1</sup>).<br />" +
-				"Set to zero to disable the spring/damper and make it a fixed distance joint.</html>");
-		this.txtFrequency = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.lblFrequency = new JLabel(Resources.getString("panel.joint.distance.frequency"), Icons.INFO, JLabel.LEFT);
+		this.lblFrequency.setToolTipText(MessageFormat.format(Resources.getString("panel.joint.distance.frequency.tooltip"), Resources.getString("unit.inverseTime"), Resources.getString("unit.time")));
+		this.txtFrequency = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.distance.frequency.format")));
 		this.txtFrequency.addFocusListener(new SelectTextFocusListener(this.txtFrequency));
 		
-		this.lblRatio = new JLabel("Damping Ratio", Icons.INFO, JLabel.LEFT);
-		this.lblRatio.setToolTipText("Determines how fast the spring is dampened from 0.0 to 1.0.");
-		this.txtRatio = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.lblRatio = new JLabel(Resources.getString("panel.joint.distance.dampingRatio"), Icons.INFO, JLabel.LEFT);
+		this.lblRatio.setToolTipText(Resources.getString("panel.joint.distance.dampingRatio.tooltip"));
+		this.txtRatio = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.distance.dampingRatio.format")));
 		this.txtRatio.addFocusListener(new SelectTextFocusListener(this.txtRatio));
 		
 		// set defaults
@@ -278,7 +278,7 @@ public class DistanceJointPanel extends JointPanel implements InputPanel, Action
 		GroupLayout layout;
 		
 		JPanel pnlGeneral = new JPanel();
-		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General ");
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.section.general"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlGeneral.setBorder(border);
 		
@@ -354,7 +354,7 @@ public class DistanceJointPanel extends JointPanel implements InputPanel, Action
 						.addComponent(this.btnResetRestDistance, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
 		
 		JPanel pnlSpringDamper = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Spring/Damper ");
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.joint.section.springDamper"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlSpringDamper.setBorder(border);
 		
@@ -446,17 +446,6 @@ public class DistanceJointPanel extends JointPanel implements InputPanel, Action
 			this.computeRestDistance();
 		}
 	}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.sandbox.panels.JointPanel#getDescription()
-	 */
-	@Override
-	public String getDescription() {
-		return "A distance joint is used to keep two bodies at a fixed distance.  " +
-			   "The joint allows both bodies rotation about the anchor points.  " +
-			   "The joint can also be used to simulate a spring/damper by setting the respective values.  " +
-			   "If you are looking to make a vehicle, use the Wheel Joint instead.";
-	}
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.sandbox.panels.JointPanel#setJoint(org.dyn4j.dynamics.joint.Joint)
@@ -542,25 +531,25 @@ public class DistanceJointPanel extends JointPanel implements InputPanel, Action
 	public void showInvalidInputMessage(Window owner) {
 		String name = this.txtName.getText();
 		if (name == null || name.isEmpty()) {
-			JOptionPane.showMessageDialog(owner, "You must specify a name for the joint.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.missingName"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// they can't be the same body
 		if (this.cmbBody1.getSelectedItem() == this.cmbBody2.getSelectedItem()) {
-			JOptionPane.showMessageDialog(owner, "You must select two different bodies.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.sameBody"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// the rest distance cannot be less than zero
 		if (ControlUtilities.getDoubleValue(this.txtRestDistance) < 0.0) {
-			JOptionPane.showMessageDialog(owner, "The rest distance must be greater than or equal to zero.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.distance.negativeDistance"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// check the damping ratio
 		double dr = ControlUtilities.getDoubleValue(this.txtRatio);
 		if (dr < 0.0 || dr > 1.0) {
-			JOptionPane.showMessageDialog(owner, "The damping ratio must be between 0 and 1 inclusive.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.invalidDampingRatio"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// check the frequency
 		double f = ControlUtilities.getDoubleValue(this.txtFrequency);
 		if (f < 0.0) {
-			JOptionPane.showMessageDialog(owner, "The frequency must be greater than or equal to zero.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.invalidFrequency"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

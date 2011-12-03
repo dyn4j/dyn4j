@@ -35,6 +35,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import org.dyn4j.sandbox.Resources;
+
 /**
  * Panel showing the memory information.
  * @author William Bittle
@@ -70,14 +72,14 @@ public class MemoryPanel extends JPanel {
 	 * Default constructor
 	 */
 	public  MemoryPanel() {
-		JLabel lblTotal = new JLabel("Total");
-		JLabel lblUsed = new JLabel("Used");
-		JLabel lblFree = new JLabel("Free");
+		JLabel lblTotal = new JLabel(Resources.getString("panel.memory.total"));
+		JLabel lblUsed = new JLabel(Resources.getString("panel.memory.used"));
+		JLabel lblFree = new JLabel(Resources.getString("panel.memory.free"));
 		
-		this.txtTotal = new JFormattedTextField(new DecimalFormat("0 MB"));
-		this.txtUsed = new JFormattedTextField(new DecimalFormat("0 MB"));
+		this.txtTotal = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.memory.format")));
+		this.txtUsed = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.memory.format")));
 		this.txtUsedPercent = new JFormattedTextField(DecimalFormat.getPercentInstance());
-		this.txtFree = new JFormattedTextField(new DecimalFormat("0 MB"));
+		this.txtFree = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.memory.format")));
 		this.txtFreePercent = new JFormattedTextField(DecimalFormat.getPercentInstance());
 		
 		this.txtTotal.setHorizontalAlignment(JTextField.RIGHT);
@@ -92,7 +94,7 @@ public class MemoryPanel extends JPanel {
 		this.txtFree.setEditable(false);
 		this.txtFreePercent.setEditable(false);
 		
-		this.pnlGraph = new LineGraphPanel(20);
+		this.pnlGraph = new LineGraphPanel(20, Resources.getString("panel.memory.format.axis"));
 		this.pnlGraph.addSeries(new Color(32, 171, 217));
 		this.pnlGraph.addSeries(new Color(241, 154, 42));
 		this.pnlGraph.setBorder(BorderFactory.createEtchedBorder());

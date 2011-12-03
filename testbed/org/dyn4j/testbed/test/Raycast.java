@@ -57,7 +57,7 @@ import org.dyn4j.testbed.input.Mouse;
 /**
  * Tests the {@link World}'s raycast methods.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.2
  * @since 2.0.0
  */
 public class Raycast extends Test {
@@ -330,7 +330,7 @@ public class Raycast extends Test {
 	protected void renderRay(GL2 gl, Ray ray, double length) {
 		// get the ray attributes (world coordinates)
 		Vector2 s = ray.getStart();
-		Vector2 d = ray.getDirection();
+		Vector2 d = ray.getDirectionVector();
 		
 		double l = length > 0.0 ? length : 10000.0;
 		
@@ -484,9 +484,9 @@ public class Raycast extends Test {
 		if (keyboard.isPressed(KeyEvent.VK_D)) {
 			// look for the shift key
 			if (keyboard.isPressed(KeyEvent.VK_SHIFT)) {
-				this.ray.getDirection().rotate(Math.toRadians(2.0));
+				this.ray.getDirectionVector().rotate(Math.toRadians(2.0));
 			} else {
-				this.ray.getDirection().rotate(Math.toRadians(-2.0));
+				this.ray.getDirectionVector().rotate(Math.toRadians(-2.0));
 			}
 		}
 		

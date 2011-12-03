@@ -54,13 +54,15 @@ public class SelectTextFocusListener extends FocusAdapter {
 	 */
 	@Override
 	public void focusGained(FocusEvent e) {
-		// add a runnable to be executed later
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				field.selectAll();
-			}
-		});
+		if (!e.isTemporary()) {
+			// add a runnable to be executed later
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					field.selectAll();
+				}
+			});
+		}
 		super.focusGained(e);
 	}
 }

@@ -31,6 +31,7 @@ import java.awt.FlowLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.MessageFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -43,6 +44,7 @@ import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.controls.BottomButtonPanel;
 import org.dyn4j.sandbox.panels.ConvexHullPolygonPanel;
 import org.dyn4j.sandbox.panels.FixturePanel;
@@ -79,7 +81,7 @@ public class AddConvexHullFixtureDialog extends JDialog implements ActionListene
 	 * @param owner the dialog owner
 	 */
 	private AddConvexHullFixtureDialog(Window owner) {
-		super(owner, "Add Convex Hull Fixture", ModalityType.APPLICATION_MODAL);
+		super(owner, Resources.getString("dialog.fixture.hull.add.title"), ModalityType.APPLICATION_MODAL);
 		
 		this.setIconImage(Icons.ADD_CONVEX_HULL.getImage());
 		
@@ -90,29 +92,25 @@ public class AddConvexHullFixtureDialog extends JDialog implements ActionListene
 		lblText = new JTextPane();
 		lblText.setContentType("text/html");
 		lblText.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
-		lblText.setText(
-				"<html>The local transform is used to move and rotate a fixture within " +
-				"body coordinates, i.e. relative to the body's center of mass.  Unlike " +
-				"the transform on the body, this transform is applied directly to the fixture's " +
-				"shape data and therefore not 'saved' directly.</html>");
+		lblText.setText(Resources.getString("label.transform.warning"));
 		lblText.setEditable(false);
 		lblText.setPreferredSize(new Dimension(350, 120));
 		
 		// have to create it with an arbitrary shape
 		this.fixture = new BodyFixture(Geometry.createCircle(1.0));
-		this.fixture.setUserData("Fixture" + AddConvexFixtureDialog.N);
+		this.fixture.setUserData(MessageFormat.format(Resources.getString("dialog.fixture.add.name.default"), AddConvexFixtureDialog.N));
 		this.pnlFixture = new FixturePanel(this.fixture);
 		this.pnlTransform = new TransformPanel(lblText);
 		
 		JTabbedPane tabs = new JTabbedPane();
 		
 		tabs.setBorder(BorderFactory.createEmptyBorder(7, 0, 0, 0));
-		tabs.addTab("Shape", this.pnlPolygon);
-		tabs.addTab("Fixture", this.pnlFixture);
-		tabs.addTab("Local Transform", this.pnlTransform);
+		tabs.addTab(Resources.getString("dialog.fixture.tab.shape"), this.pnlPolygon);
+		tabs.addTab(Resources.getString("dialog.fixture.tab.fixture"), this.pnlFixture);
+		tabs.addTab(Resources.getString("dialog.fixture.tab.transform"), this.pnlTransform);
 		
-		JButton btnCancel = new JButton("Cancel");
-		JButton btnAdd = new JButton("Add");
+		JButton btnCancel = new JButton(Resources.getString("button.cancel"));
+		JButton btnAdd = new JButton(Resources.getString("button.add"));
 		btnCancel.setActionCommand("cancel");
 		btnAdd.setActionCommand("add");
 		btnCancel.addActionListener(this);

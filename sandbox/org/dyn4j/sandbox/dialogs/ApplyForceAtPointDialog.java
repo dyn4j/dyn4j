@@ -36,6 +36,7 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.controls.BottomButtonPanel;
 import org.dyn4j.sandbox.panels.ForceAtPointPanel;
 import org.dyn4j.sandbox.utilities.Icons;
@@ -67,16 +68,16 @@ public class ApplyForceAtPointDialog extends JDialog implements ActionListener {
 	 * @param owner the dialog owner
 	 */
 	private ApplyForceAtPointDialog(Window owner) {
-		super(owner, "Apply Force At Point", ModalityType.APPLICATION_MODAL);
+		super(owner, Resources.getString("dialog.forceAtPoint.title"), ModalityType.APPLICATION_MODAL);
 		
 		this.setIconImage(Icons.FORCE_AT_POINT.getImage());
 		this.forceAtPointPanel = new ForceAtPointPanel();
 		
-		this.btnCancel = new JButton("Cancel");
+		this.btnCancel = new JButton(Resources.getString("button.cancel"));
 		this.btnCancel.setActionCommand("cancel");
 		this.btnCancel.addActionListener(this);
 		
-		this.btnApply = new JButton("Apply");
+		this.btnApply = new JButton(Resources.getString("button.apply"));
 		this.btnApply.setActionCommand("apply");
 		this.btnApply.addActionListener(this);
 		

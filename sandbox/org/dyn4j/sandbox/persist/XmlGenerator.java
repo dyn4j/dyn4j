@@ -24,6 +24,9 @@
  */
 package org.dyn4j.sandbox.persist;
 
+import java.util.List;
+import java.util.Locale;
+
 import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.collision.Filter;
 import org.dyn4j.collision.RectangularBounds;
@@ -51,28 +54,31 @@ import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.Camera;
+import org.dyn4j.sandbox.Sandbox;
 import org.dyn4j.sandbox.SandboxBody;
+import org.dyn4j.sandbox.SandboxRay;
 import org.dyn4j.sandbox.utilities.SystemUtilities;
 
 /**
  * Class used to export the world to xml.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class XmlGenerator {
 	/**
 	 * Returns the xml for the given world object.
 	 * @param world the world
+	 * @param rays the list of rays
 	 * @param settings the global settings
 	 * @param camera the camera settings
 	 * @return String
 	 */
-	public static final String toXml(World world, Settings settings, Camera camera) {
+	public static final String toXml(World world, List<SandboxRay> rays, Settings settings, Camera camera) {
 		StringBuilder sb = new StringBuilder();
 		
 		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-		sb.append("<Simulation xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://www.dyn4j.org/Sandbox/sandbox.xsd\">");
+		sb.append("<Simulation xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://www.dyn4j.org/Sandbox/sandbox.xsd\" version=\"" + Sandbox.VERSION + "\">");
 		
 		// output the simulation name
 		sb.append("<Name>").append(world.getUserData()).append("</Name>");
@@ -88,6 +94,15 @@ public class XmlGenerator {
 		
 		// output settings
 		sb.append(XmlGenerator.toXml(settings));
+		
+		// output rays
+		sb.append("<Rays>");
+		int rSize = rays.size();
+		for (int i = 0; i < rSize; i++) {
+			SandboxRay ray = rays.get(i);
+			sb.append(XmlGenerator.toXml(ray));
+		}
+		sb.append("</Rays>");
 		
 		// output the world
 		sb.append("<World>");
@@ -153,6 +168,7 @@ public class XmlGenerator {
 		.append("<OperatingSystem>").append(SystemUtilities.getOperatingSystem()).append("</OperatingSystem>")
 		.append("<Architecture>").append(SystemUtilities.getArchitecture()).append("</Architecture>")
 		.append("<NumberOfCpus>").append(Runtime.getRuntime().availableProcessors()).append("</NumberOfCpus>")
+		.append("<Locale>").append(Locale.getDefault().getLanguage()).append("_").append(Locale.getDefault().getCountry()).append("</Locale>")
 		.append("</System>");
 		
 		return sb.toString();
@@ -169,20 +185,20 @@ public class XmlGenerator {
 		sb.append("<Settings>")
 		.append("<StepFrequency>").append(1.0 / settings.getStepFrequency()).append("</StepFrequency>")
 		.append("<MaximumTranslation>").append(settings.getMaxTranslation()).append("</MaximumTranslation>")
-		.append("<MaximumRotation>").append(Math.toDegrees(settings.getMaxRotation())).append("</MaximumRotation>")
+		.append("<MaximumRotation>").append(settings.getMaxRotation()).append("</MaximumRotation>")
 		.append("<ContinuousCollisionDetectionMode>").append(settings.getContinuousDetectionMode()).append("</ContinuousCollisionDetectionMode>")
 		.append("<AutoSleep>").append(settings.isAutoSleepingEnabled()).append("</AutoSleep>")
 		.append("<SleepTime>").append(settings.getSleepTime()).append("</SleepTime>")
 		.append("<SleepLinearVelocity>").append(settings.getSleepVelocity()).append("</SleepLinearVelocity>")
-		.append("<SleepAngularVelocity>").append(Math.toDegrees(settings.getSleepAngularVelocity())).append("</SleepAngularVelocity>")
+		.append("<SleepAngularVelocity>").append(settings.getSleepAngularVelocity()).append("</SleepAngularVelocity>")
 		.append("<VelocitySolverIterations>").append(settings.getVelocityConstraintSolverIterations()).append("</VelocitySolverIterations>")
 		.append("<PositionSolverIterations>").append(settings.getPositionConstraintSolverIterations()).append("</PositionSolverIterations>")
 		.append("<WarmStartDistance>").append(settings.getWarmStartDistance()).append("</WarmStartDistance>")
 		.append("<RestitutionVelocity>").append(settings.getRestitutionVelocity()).append("</RestitutionVelocity>")
 		.append("<LinearTolerance>").append(settings.getLinearTolerance()).append("</LinearTolerance>")
-		.append("<AngularTolerance>").append(Math.toDegrees(settings.getAngularTolerance())).append("</AngularTolerance>")
+		.append("<AngularTolerance>").append(settings.getAngularTolerance()).append("</AngularTolerance>")
 		.append("<MaximumLinearCorrection>").append(settings.getMaxLinearCorrection()).append("</MaximumLinearCorrection>")
-		.append("<MaximumAngularCorrection>").append(Math.toDegrees(settings.getMaxAngularCorrection())).append("</MaximumAngularCorrection>")
+		.append("<MaximumAngularCorrection>").append(settings.getMaxAngularCorrection()).append("</MaximumAngularCorrection>")
 		.append("<Baumgarte>").append(settings.getBaumgarte()).append("</Baumgarte>")
 		.append("</Settings>");
 		
@@ -559,6 +575,25 @@ public class XmlGenerator {
 		}
 		
 		sb.append("</Joint>");
+		
+		return sb.toString();
+	}
+	
+	/**
+	 * Returns the xml for the given ray object.
+	 * @param ray the ray
+	 * @return String
+	 */
+	private static final String toXml(SandboxRay ray) {
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append("<Ray Name=\"").append(ray.getName()).append("\">")
+		.append(XmlGenerator.toXml(ray.getStart(), "Start"))
+		.append("<Direction>").append(ray.getDirection()).append("</Direction>")
+		.append("<Length>").append(ray.getLength()).append("</Length>")
+		.append("<IgnoreSensors>").append(ray.isIgnoreSensors()).append("</IgnoreSensors>")
+		.append("<TestAll>").append(ray.isAll()).append("</TestAll>")
+		.append("</Ray>");
 		
 		return sb.toString();
 	}
