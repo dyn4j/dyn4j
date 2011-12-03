@@ -837,7 +837,7 @@ public class BodyTest {
 		
 		double rdr = b.getRotationDiscRadius();
 		
-		TestCase.assertEquals(5.129, rdr, 1.0e-3);
+		TestCase.assertEquals(5.089, rdr, 1.0e-3);
 	}
 	
 
