@@ -33,6 +33,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import org.dyn4j.sandbox.ContactCounter;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.utilities.Icons;
 
 /**
@@ -76,26 +77,26 @@ public class ContactPanel extends JPanel {
 	public ContactPanel(ContactCounter counter) {
 		this.counter = counter;
 		
-		JLabel lblTotalContacts = new JLabel("Total", Icons.INFO, JLabel.LEFT);
-		JLabel lblSensedContacts = new JLabel("Sensed", Icons.INFO, JLabel.LEFT);
-		JLabel lblAddedContacts = new JLabel("Added", Icons.INFO, JLabel.LEFT);
-		JLabel lblPersistedContacts = new JLabel("Persisted", Icons.INFO, JLabel.LEFT);
-		JLabel lblRemovedContacts = new JLabel("Removed", Icons.INFO, JLabel.LEFT);
-		JLabel lblSolvedContacts = new JLabel("Solved", Icons.INFO, JLabel.LEFT);
+		JLabel lblTotalContacts = new JLabel(Resources.getString("panel.contact.total"), Icons.INFO, JLabel.LEFT);
+		JLabel lblSensedContacts = new JLabel(Resources.getString("panel.contact.sensed"), Icons.INFO, JLabel.LEFT);
+		JLabel lblAddedContacts = new JLabel(Resources.getString("panel.contact.added"), Icons.INFO, JLabel.LEFT);
+		JLabel lblPersistedContacts = new JLabel(Resources.getString("panel.contact.persisted"), Icons.INFO, JLabel.LEFT);
+		JLabel lblRemovedContacts = new JLabel(Resources.getString("panel.contact.removed"), Icons.INFO, JLabel.LEFT);
+		JLabel lblSolvedContacts = new JLabel(Resources.getString("panel.contact.solved"), Icons.INFO, JLabel.LEFT);
 		
-		lblTotalContacts.setToolTipText("<html>Added + Persisted + Sensed</html>");
-		lblSensedContacts.setToolTipText("<html>Contacts produced by fixtures flagged as sensors.</html>");
-		lblAddedContacts.setToolTipText("<html>New contacts created during this timestep.</html>");
-		lblPersistedContacts.setToolTipText("<html>Contacts that have been keep from the previous timestep.</html>");
-		lblRemovedContacts.setToolTipText("<html>Contacts that are not valid from the last timestep.</html>");
-		lblSolvedContacts.setToolTipText("<html>Added + Persisted</html>");
+		lblTotalContacts.setToolTipText(Resources.getString("panel.contact.total.tooltip"));
+		lblSensedContacts.setToolTipText(Resources.getString("panel.contact.sensed.tooltip"));
+		lblAddedContacts.setToolTipText(Resources.getString("panel.contact.added.tooltip"));
+		lblPersistedContacts.setToolTipText(Resources.getString("panel.contact.persisted.tooltip"));
+		lblRemovedContacts.setToolTipText(Resources.getString("panel.contact.removed.tooltip"));
+		lblSolvedContacts.setToolTipText(Resources.getString("panel.contact.solved.tooltip"));
 		
-		this.txtTotalContacts = new JFormattedTextField(new DecimalFormat("0"));
-		this.txtSensedContacts = new JFormattedTextField(new DecimalFormat("0"));
-		this.txtAddedContacts = new JFormattedTextField(new DecimalFormat("0"));
-		this.txtPersistedContacts = new JFormattedTextField(new DecimalFormat("0"));
-		this.txtRemovedContacts = new JFormattedTextField(new DecimalFormat("0"));
-		this.txtSolvedContacts = new JFormattedTextField(new DecimalFormat("0"));
+		this.txtTotalContacts = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.contact.format")));
+		this.txtSensedContacts = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.contact.format")));
+		this.txtAddedContacts = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.contact.format")));
+		this.txtPersistedContacts = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.contact.format")));
+		this.txtRemovedContacts = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.contact.format")));
+		this.txtSolvedContacts = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.contact.format")));
 		
 		this.txtTotalContacts.setEditable(false);
 		this.txtSensedContacts.setEditable(false);

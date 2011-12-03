@@ -70,7 +70,7 @@ import org.dyn4j.geometry.Vector2;
  * Employs the same {@link Island} solving technique as <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class World {
@@ -592,6 +592,13 @@ public class World {
 										                                                    body2, fixture2, 
 										                                                    manifold, 
 										                                                    friction, restitution);
+								
+								// notify of the created contact constraint
+								if (!this.collisionListener.collision(contactConstraint)) {
+									// if the collision listener returned false then skip this collision
+									continue;
+								}
+								
 								// add a contact edge to both bodies
 								ContactEdge contactEdge1 = new ContactEdge(body2, contactConstraint);
 								ContactEdge contactEdge2 = new ContactEdge(body1, contactConstraint);

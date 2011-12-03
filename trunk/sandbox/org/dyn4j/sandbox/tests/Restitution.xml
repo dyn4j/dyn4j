@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Simulation xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.dyn4j.org/Sandbox/sandbox.xsd">
+<Simulation xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.dyn4j.org/Sandbox/sandbox.xsd" version="1.0.1">
     <Name>Restitution</Name>
     <Camera>
 		<Scale>32</Scale>
@@ -11,26 +11,29 @@
         <OperatingSystem>Windows 7</OperatingSystem>
         <Architecture>x86</Architecture>
         <NumberOfCpus>2</NumberOfCpus>
+        <Locale>en_US</Locale>
     </System>
     <Settings>
         <StepFrequency>60.0</StepFrequency>
         <MaximumTranslation>2.0</MaximumTranslation>
-        <MaximumRotation>90.0</MaximumRotation>
+        <MaximumRotation>1.57079633</MaximumRotation>
         <ContinuousCollisionDetectionMode>ALL</ContinuousCollisionDetectionMode>
         <AutoSleep>true</AutoSleep>
         <SleepTime>0.5</SleepTime>
         <SleepLinearVelocity>0.01</SleepLinearVelocity>
-        <SleepAngularVelocity>2.0</SleepAngularVelocity>
+        <SleepAngularVelocity>0.034906585</SleepAngularVelocity>
         <VelocitySolverIterations>10</VelocitySolverIterations>
         <PositionSolverIterations>10</PositionSolverIterations>
         <WarmStartDistance>0.01</WarmStartDistance>
         <RestitutionVelocity>1.0</RestitutionVelocity>
         <LinearTolerance>0.0050</LinearTolerance>
-        <AngularTolerance>2.0</AngularTolerance>
+        <AngularTolerance>0.034906585</AngularTolerance>
         <MaximumLinearCorrection>0.2</MaximumLinearCorrection>
-        <MaximumAngularCorrection>8.0</MaximumAngularCorrection>
+        <MaximumAngularCorrection>0.13962634</MaximumAngularCorrection>
         <Baumgarte>0.2</Baumgarte>
     </Settings>
+    <Rays>
+    </Rays>
     <World>
         <BroadphaseDetector>DynamicAABBTree</BroadphaseDetector>
         <NarrowphaseDetector>Gjk</NarrowphaseDetector>

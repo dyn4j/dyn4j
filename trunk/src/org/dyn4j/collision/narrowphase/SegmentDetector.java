@@ -33,7 +33,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Class devoted to improving performance of {@link Segment} detection queries.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.2
  * @since 2.0.0
  */
 public class SegmentDetector {
@@ -50,7 +50,7 @@ public class SegmentDetector {
 	public static boolean raycast(Ray ray, double maxLength, Segment segment, Transform transform, Raycast raycast) {
 		// solve the problem algebraically
 		Vector2 p0 = ray.getStart();
-		Vector2 d0 = ray.getDirection();
+		Vector2 d0 = ray.getDirectionVector();
 		Vector2 p1 = transform.getTransformed(segment.getPoint1());
 		Vector2 p2 = transform.getTransformed(segment.getPoint2());
 		Vector2 d1 = p1.to(p2);

@@ -26,12 +26,14 @@ package org.dyn4j.sandbox.utilities;
 
 import java.text.DecimalFormat;
 
+import org.dyn4j.sandbox.Resources;
+
 /**
  * Utility class for calculating the frames per second.
  * <p>
  * Before the first fps calculation the fps is -1.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class Fps {
@@ -48,7 +50,7 @@ public class Fps {
 	protected double fps = 0;
 	
 	/** The format to use */
-	protected DecimalFormat format = new DecimalFormat("00.0");
+	protected DecimalFormat format = new DecimalFormat(Resources.getString("fps.format"));
 	
 	/**
 	 * Default constructor.

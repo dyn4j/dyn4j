@@ -34,7 +34,7 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * Renamed from CircleCircleDetector
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.0.2
  * @since 2.0.0
  */
 public class CircleDetector {
@@ -151,7 +151,7 @@ public class CircleDetector {
 	public static boolean raycast(Ray ray, double maxLength, Circle circle, Transform transform, Raycast raycast) {
 		// solve the problem algebraically
 		Vector2 s = ray.getStart();
-		Vector2 d = ray.getDirection();
+		Vector2 d = ray.getDirectionVector();
 		Vector2 ce = transform.getTransformed(circle.getCenter());
 		double r = circle.getRadius();
 		

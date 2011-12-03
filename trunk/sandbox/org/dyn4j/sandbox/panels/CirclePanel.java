@@ -38,6 +38,7 @@ import javax.swing.JOptionPane;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
 import org.dyn4j.sandbox.utilities.Icons;
 
@@ -70,9 +71,9 @@ public class CirclePanel extends ConvexShapePanel implements InputPanel {
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
 		
-		JLabel lblRadius = new JLabel("Radius", Icons.INFO, JLabel.LEFT);
-		lblRadius.setToolTipText("The radius of the circle in Meters.");
-		JFormattedTextField txtRadius = new JFormattedTextField(new DecimalFormat("0.000"));
+		JLabel lblRadius = new JLabel(Resources.getString("panel.circle.radius"), Icons.INFO, JLabel.LEFT);
+		lblRadius.setToolTipText(Resources.getString("panel.circle.radius.tooltip"));
+		JFormattedTextField txtRadius = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.circle.radius.format")));
 		txtRadius.setValue(DEFAULT_RADIUS);
 		
 		txtRadius.addFocusListener(new SelectTextFocusListener(txtRadius));
@@ -90,8 +91,8 @@ public class CirclePanel extends ConvexShapePanel implements InputPanel {
 			}
 		});
 		
-		JLabel lblPreview = new JLabel("Preview", Icons.INFO, JLabel.LEFT);
-		lblPreview.setToolTipText("Shows a preview of the current shape.");
+		JLabel lblPreview = new JLabel(Resources.getString("panel.preview"), Icons.INFO, JLabel.LEFT);
+		lblPreview.setToolTipText(Resources.getString("panel.preview.tooltip"));
 		this.pnlPreview = new PreviewPanel(new Dimension(250, 225), Geometry.createCircle(this.radius));
 		
 		layout.setAutoCreateContainerGaps(true);
@@ -142,7 +143,7 @@ public class CirclePanel extends ConvexShapePanel implements InputPanel {
 	@Override
 	public void showInvalidInputMessage(Window owner) {
 		if (!this.isValidInput()) {
-			JOptionPane.showMessageDialog(owner, "A circle requires a radius greater than zero.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.circle.invalidRadius"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

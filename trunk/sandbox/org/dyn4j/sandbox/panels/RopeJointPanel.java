@@ -28,6 +28,7 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
@@ -43,6 +44,7 @@ import javax.swing.border.TitledBorder;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.RopeJoint;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
 import org.dyn4j.sandbox.utilities.ControlUtilities;
@@ -160,68 +162,68 @@ public class RopeJointPanel extends JointPanel implements InputPanel, ActionList
 		this.txtName.setColumns(15);
 		this.chkCollision.setSelected(collision);
 		
-		this.lblBody1 = new JLabel("Body 1", Icons.INFO, JLabel.LEFT);
-		this.lblBody2 = new JLabel("Body 2", Icons.INFO, JLabel.LEFT);
-		this.lblBody1.setToolTipText("The first body participating in the joint.");
-		this.lblBody2.setToolTipText("The second body participating in the joint.");
+		this.lblBody1 = new JLabel(Resources.getString("panel.joint.body1"), Icons.INFO, JLabel.LEFT);
+		this.lblBody2 = new JLabel(Resources.getString("panel.joint.body2"), Icons.INFO, JLabel.LEFT);
+		this.lblBody1.setToolTipText(Resources.getString("panel.joint.body1.tooltip"));
+		this.lblBody2.setToolTipText(Resources.getString("panel.joint.body2.tooltip"));
 		
 		this.cmbBody1 = new JComboBox(bodies);
 		this.cmbBody2 = new JComboBox(bodies);
 		
-		this.lblAnchor1 = new JLabel("Anchor 1", Icons.INFO, JLabel.LEFT);
-		this.lblAnchor1.setToolTipText("The anchor point on the first body.");
+		this.lblAnchor1 = new JLabel(Resources.getString("panel.joint.anchor1"), Icons.INFO, JLabel.LEFT);
+		this.lblAnchor1.setToolTipText(Resources.getString("panel.joint.anchor1.tooltip"));
 		
-		this.lblAnchor2 = new JLabel("Anchor 2", Icons.INFO, JLabel.LEFT);
-		this.lblAnchor2.setToolTipText("The anchor point on the second body.");
+		this.lblAnchor2 = new JLabel(Resources.getString("panel.joint.anchor2"), Icons.INFO, JLabel.LEFT);
+		this.lblAnchor2.setToolTipText(Resources.getString("panel.joint.anchor2.tooltip"));
 		
-		this.lblX1 = new JLabel("x");
-		this.lblX2 = new JLabel("x");
-		this.lblY1 = new JLabel("y");
-		this.lblY2 = new JLabel("y");
+		this.lblX1 = new JLabel(Resources.getString("x"));
+		this.lblX2 = new JLabel(Resources.getString("x"));
+		this.lblY1 = new JLabel(Resources.getString("y"));
+		this.lblY2 = new JLabel(Resources.getString("y"));
 		
-		this.txtX1 = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtX1 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.anchor.format")));
 		this.txtX1.addFocusListener(new SelectTextFocusListener(this.txtX1));
 		this.txtX1.setColumns(7);
 		
-		this.txtX2 = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtX2 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.anchor.format")));
 		this.txtX2.addFocusListener(new SelectTextFocusListener(this.txtX2));
 		this.txtX2.setColumns(7);
 		
-		this.txtY1 = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtY1 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.anchor.format")));
 		this.txtY1.addFocusListener(new SelectTextFocusListener(this.txtY1));
 		this.txtY1.setColumns(7);
 		
-		this.txtY2 = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtY2 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.anchor.format")));
 		this.txtY2.addFocusListener(new SelectTextFocusListener(this.txtY2));
 		this.txtY2.setColumns(7);
 
-		this.btnUseCenter1 = new JButton("Use Center");
-		this.btnUseCenter1.setToolTipText("Set anchor 1 to the center of mass of body 1.");
+		this.btnUseCenter1 = new JButton(Resources.getString("panel.joint.useCenter"));
+		this.btnUseCenter1.setToolTipText(Resources.getString("panel.joint.useCenter.tooltip1"));
 		this.btnUseCenter1.setActionCommand("use-com1");
 		this.btnUseCenter1.addActionListener(this);
 		
-		this.btnUseCenter2 = new JButton("Use Center");
-		this.btnUseCenter2.setToolTipText("Set anchor 2 to the center of mass of body 2.");
+		this.btnUseCenter2 = new JButton(Resources.getString("panel.joint.useCenter"));
+		this.btnUseCenter2.setToolTipText(Resources.getString("panel.joint.useCenter.tooltip2"));
 		this.btnUseCenter2.setActionCommand("use-com2");
 		this.btnUseCenter2.addActionListener(this);
 		
-		this.lblLowerLimitEnabled = new JLabel("Lower Limit Enabled", Icons.INFO, JLabel.LEFT);
-		this.lblLowerLimitEnabled.setToolTipText("Check to enable the lower limit.");
+		this.lblLowerLimitEnabled = new JLabel(Resources.getString("panel.joint.rope.lowerLimitEnabled"), Icons.INFO, JLabel.LEFT);
+		this.lblLowerLimitEnabled.setToolTipText(Resources.getString("panel.joint.rope.lowerLimitEnabled.tooltip"));
 		this.chkLowerLimitEnabled = new JCheckBox();
 		
-		this.lblLowerLimit = new JLabel("Lower Limit", Icons.INFO, JLabel.LEFT);
-		this.lblLowerLimit.setToolTipText("The lower limit in Meters.");
-		this.txtLowerLimit = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.lblLowerLimit = new JLabel(Resources.getString("panel.joint.lowerLimit"), Icons.INFO, JLabel.LEFT);
+		this.lblLowerLimit.setToolTipText(MessageFormat.format(Resources.getString("panel.joint.lowerLimit.tooltip"), Resources.getString("unit.length")));
+		this.txtLowerLimit = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.rope.lowerLimit.format")));
 		this.txtLowerLimit.addFocusListener(new SelectTextFocusListener(this.txtLowerLimit));
 		this.txtLowerLimit.setColumns(7);
 		
-		this.lblUpperLimitEnabled = new JLabel("Upper Limit Enabled", Icons.INFO, JLabel.LEFT);
-		this.lblUpperLimitEnabled.setToolTipText("Check to enable the upper limit.");
+		this.lblUpperLimitEnabled = new JLabel(Resources.getString("panel.joint.rope.upperLimitEnabled"), Icons.INFO, JLabel.LEFT);
+		this.lblUpperLimitEnabled.setToolTipText(Resources.getString("panel.joint.rope.upperLimitEnabled.tooltip"));
 		this.chkUpperLimitEnabled = new JCheckBox();
 		
-		this.lblUpperLimit = new JLabel("Upper Limit", Icons.INFO, JLabel.LEFT);
-		this.lblUpperLimit.setToolTipText("The upper limit in Meters.");
-		this.txtUpperLimit = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.lblUpperLimit = new JLabel(Resources.getString("panel.joint.upperLimit"), Icons.INFO, JLabel.LEFT);
+		this.lblUpperLimit.setToolTipText(MessageFormat.format(Resources.getString("panel.joint.upperLimit.tooltip"), Resources.getString("unit.length")));
+		this.txtUpperLimit = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.rope.upperLimit.format")));
 		this.txtUpperLimit.addFocusListener(new SelectTextFocusListener(this.txtUpperLimit));
 		this.txtUpperLimit.setColumns(7);
 		
@@ -260,7 +262,7 @@ public class RopeJointPanel extends JointPanel implements InputPanel, ActionList
 		GroupLayout layout;
 		
 		JPanel pnlGeneral = new JPanel();
-		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General ");
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.section.general"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlGeneral.setBorder(border);
 		
@@ -325,7 +327,7 @@ public class RopeJointPanel extends JointPanel implements InputPanel, ActionList
 						.addComponent(this.lblY2)));
 		
 		JPanel pnlLimits = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Limits ");
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.joint.section.limits"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlLimits.setBorder(border);
 		
@@ -389,16 +391,6 @@ public class RopeJointPanel extends JointPanel implements InputPanel, ActionList
 			this.txtX2.setValue(c.x);
 			this.txtY2.setValue(c.y);
 		}
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.sandbox.panels.JointPanel#getDescription()
-	 */
-	@Override
-	public String getDescription() {
-		return "A rope joint is a distance joint that does not have the spring/damper capabilities.  However, " +
-				"it does have minimum and maximum limits.  The limits are on the distance between the given anchor " +
-				"points.  If the lower and upper limits are equal, this joint acts identical to the distance joint.";
 	}
 	
 	/* (non-Javadoc)
@@ -479,15 +471,15 @@ public class RopeJointPanel extends JointPanel implements InputPanel, ActionList
 	public void showInvalidInputMessage(Window owner) {
 		String name = this.txtName.getText();
 		if (name == null || name.isEmpty()) {
-			JOptionPane.showMessageDialog(owner, "You must specify a name for the joint.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.missingName"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// they can't be the same body
 		if (this.cmbBody1.getSelectedItem() == this.cmbBody2.getSelectedItem()) {
-			JOptionPane.showMessageDialog(owner, "You must select two different bodies.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.sameBody"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// the limits must be correct
 		if (ControlUtilities.getDoubleValue(this.txtLowerLimit) > ControlUtilities.getDoubleValue(this.txtUpperLimit)) {
-			JOptionPane.showMessageDialog(owner, "The upper limit must be greater than or equal to the lower limit.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.invalidLimits"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

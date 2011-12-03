@@ -28,6 +28,7 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
@@ -43,6 +44,7 @@ import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.MouseJoint;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
 import org.dyn4j.sandbox.utilities.ControlUtilities;
 import org.dyn4j.sandbox.utilities.Icons;
@@ -141,58 +143,56 @@ public class MouseJointPanel extends JointPanel implements InputPanel, ActionLis
 		this.txtName.setText(name);
 		this.txtName.setColumns(15);
 		
-		this.lblBody = new JLabel("Body", Icons.INFO, JLabel.LEFT);
-		this.lblBody.setToolTipText("The body participating in the joint.");
+		this.lblBody = new JLabel(Resources.getString("panel.joint.body"), Icons.INFO, JLabel.LEFT);
+		this.lblBody.setToolTipText(Resources.getString("panel.joint.body.tooltip"));
 		this.cmbBody = new JComboBox(bodies);
 		
-		this.lblAnchor = new JLabel("Anchor", Icons.INFO, JLabel.LEFT);
-		this.lblAnchor.setToolTipText("The anchor point on the body.");
+		this.lblAnchor = new JLabel(Resources.getString("panel.joint.anchor"), Icons.INFO, JLabel.LEFT);
+		this.lblAnchor.setToolTipText(Resources.getString("panel.joint.anchor.tooltip.singular"));
 		
-		this.lblTarget = new JLabel("Target", Icons.INFO, JLabel.LEFT);
-		this.lblTarget.setToolTipText(
-				"<html>The target point." +
-				"<br />The point that the anchor point will attempt to approach.</html>");
+		this.lblTarget = new JLabel(Resources.getString("panel.joint.mouse.target"), Icons.INFO, JLabel.LEFT);
+		this.lblTarget.setToolTipText(Resources.getString("panel.joint.mouse.target.tooltip"));
 		
-		this.lblX1 = new JLabel("x");
-		this.lblX2 = new JLabel("x");
-		this.lblY1 = new JLabel("y");
-		this.lblY2 = new JLabel("y");
+		this.lblX1 = new JLabel(Resources.getString("x"));
+		this.lblX2 = new JLabel(Resources.getString("x"));
+		this.lblY1 = new JLabel(Resources.getString("y"));
+		this.lblY2 = new JLabel(Resources.getString("y"));
 		
-		this.txtX1 = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtX1 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.anchor.format")));
 		this.txtX1.addFocusListener(new SelectTextFocusListener(this.txtX1));
 		this.txtX1.setColumns(7);
 		
-		this.txtX2 = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtX2 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.anchor.format")));
 		this.txtX2.addFocusListener(new SelectTextFocusListener(this.txtX2));
 		this.txtX2.setColumns(7);
 		
-		this.txtY1 = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtY1 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.mouse.target.format")));
 		this.txtY1.addFocusListener(new SelectTextFocusListener(this.txtY1));
 		this.txtY1.setColumns(7);
 		
-		this.txtY2 = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtY2 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.mouse.target.format")));
 		this.txtY2.addFocusListener(new SelectTextFocusListener(this.txtY2));
 		this.txtY2.setColumns(7);
 
-		this.btnUseCenter = new JButton("Use Center");
-		this.btnUseCenter.setToolTipText("Set the anchor to the center of mass of the body.");
+		this.btnUseCenter = new JButton(Resources.getString("panel.joint.useCenter"));
+		this.btnUseCenter.setToolTipText(Resources.getString("panel.joint.useCenter.tooltip"));
 		this.btnUseCenter.setActionCommand("use-com");
 		this.btnUseCenter.addActionListener(this);
 		
-		this.lblMaxForce = new JLabel("Maximum Force", Icons.INFO, JLabel.LEFT);
-		this.lblMaxForce.setToolTipText("The maximum force the joint can apply in Newtons.");
-		this.txtMaxForce = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.lblMaxForce = new JLabel(Resources.getString("panel.joint.force.maximum"), Icons.INFO, JLabel.LEFT);
+		this.lblMaxForce.setToolTipText(MessageFormat.format(Resources.getString("panel.joint.force.maximum.tooltip"), Resources.getString("unit.force")));
+		this.txtMaxForce = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.force.maximum.format")));
 		this.txtMaxForce.addFocusListener(new SelectTextFocusListener(this.txtMaxForce));
 		this.txtMaxForce.setColumns(8);
 		
-		this.lblFrequency = new JLabel("Frequency", Icons.INFO, JLabel.LEFT);
-		this.lblFrequency.setToolTipText("<html>Determines how fast the spring should oscillate in hertz (Seconds<sup>-1</sup>).</html>");
-		this.txtFrequency = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.lblFrequency = new JLabel(Resources.getString("panel.joint.mouse.frequency"), Icons.INFO, JLabel.LEFT);
+		this.lblFrequency.setToolTipText(MessageFormat.format(Resources.getString("panel.joint.mouse.frequency.tooltip"), Resources.getString("unit.inverseTime"), Resources.getString("unit.time")));
+		this.txtFrequency = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.mouse.frequency.format")));
 		this.txtFrequency.addFocusListener(new SelectTextFocusListener(this.txtFrequency));
 		
-		this.lblRatio = new JLabel("Damping Ratio", Icons.INFO, JLabel.LEFT);
-		this.lblRatio.setToolTipText("Determines how fast the spring is dampened from 0.0 to 1.0.");
-		this.txtRatio = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.lblRatio = new JLabel(Resources.getString("panel.joint.mouse.dampingRatio"), Icons.INFO, JLabel.LEFT);
+		this.lblRatio.setToolTipText(Resources.getString("panel.joint.mouse.dampingRatio.tooltip"));
+		this.txtRatio = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.mouse.dampingRatio.format")));
 		this.txtRatio.addFocusListener(new SelectTextFocusListener(this.txtRatio));
 		
 		// set defaults
@@ -227,7 +227,7 @@ public class MouseJointPanel extends JointPanel implements InputPanel, ActionLis
 		// setup the general section
 		
 		JPanel pnlGeneral = new JPanel();
-		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General ");
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.section.general"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlGeneral.setBorder(border);
 		
@@ -284,7 +284,7 @@ public class MouseJointPanel extends JointPanel implements InputPanel, ActionLis
 		// setup the spring/damper section
 		
 		JPanel pnlSpringDamper = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Spring/Damper ");
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.joint.section.springDamper"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlSpringDamper.setBorder(border);
 		
@@ -327,16 +327,6 @@ public class MouseJointPanel extends JointPanel implements InputPanel, ActionLis
 		layout.setVerticalGroup(layout.createSequentialGroup()
 				.addComponent(pnlGeneral)
 				.addComponent(pnlSpringDamper));
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.sandbox.panels.JointPanel#getDescription()
-	 */
-	@Override
-	public String getDescription() {
-		return "A mouse joint can be used to fix a body to a specific point (which can be changed) using a spring/damper.  " +
-			   "This joint was originally used to connect a body and a user's mouse for moving bodies but has been " +
-			   "adapted for other purposes.  Unlike the other joints, this joint only requires one body.";
 	}
 	
 	/* (non-Javadoc)
@@ -433,21 +423,21 @@ public class MouseJointPanel extends JointPanel implements InputPanel, ActionLis
 	public void showInvalidInputMessage(Window owner) {
 		String name = this.txtName.getText();
 		if (name == null || name.isEmpty()) {
-			JOptionPane.showMessageDialog(owner, "You must specify a name for the joint.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.missingName"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// the max force must be greater than zero
 		if (ControlUtilities.getDoubleValue(this.txtMaxForce) < 0.0) {
-			JOptionPane.showMessageDialog(owner, "The maximum force must be greater than or equal to zero.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.invalidMaximumForce"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// check the damping ratio
 		double dr = ControlUtilities.getDoubleValue(this.txtRatio);
 		if (dr < 0.0 || dr > 1.0) {
-			JOptionPane.showMessageDialog(owner, "The damping ratio must be between 0 and 1 inclusive.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.invalidDampingRatio"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// check the frequency
 		double f = ControlUtilities.getDoubleValue(this.txtFrequency);
 		if (f < 0.0) {
-			JOptionPane.showMessageDialog(owner, "The frequency must be greater than or equal to zero.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.mouse.invalidFrequency"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

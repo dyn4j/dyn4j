@@ -28,6 +28,7 @@ import java.awt.Window;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.SequentialGroup;
@@ -39,6 +40,7 @@ import javax.swing.JPanel;
 
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
 import org.dyn4j.sandbox.utilities.Icons;
 
@@ -135,16 +137,16 @@ public class TransformPanel extends JPanel implements InputPanel {
 		
 		boolean headerSupplied = (header != null);
 		
-		this.lblT = new JLabel("Translation", Icons.INFO, JLabel.LEFT);
-		this.lblT.setToolTipText("The translation along the x and y axes in Meters.");
-		this.lblX = new JLabel("x");
-		this.lblY = new JLabel("y");
-		this.lblR = new JLabel("Rotation", Icons.INFO, JLabel.LEFT);
-		this.lblR.setToolTipText("The rotate about the center in Degrees.");
+		this.lblT = new JLabel(Resources.getString("panel.transform.translation"), Icons.INFO, JLabel.LEFT);
+		this.lblT.setToolTipText(MessageFormat.format(Resources.getString("panel.transform.translation.tooltip"), Resources.getString("unit.length")));
+		this.lblX = new JLabel(Resources.getString("x"));
+		this.lblY = new JLabel(Resources.getString("y"));
+		this.lblR = new JLabel(Resources.getString("panel.transform.rotation"), Icons.INFO, JLabel.LEFT);
+		this.lblR.setToolTipText(MessageFormat.format(Resources.getString("panel.transform.rotation.tooltip"), Resources.getString("unit.rotation")));
 		
-		this.txtX = new JFormattedTextField(new DecimalFormat("0.000"));
-		this.txtY = new JFormattedTextField(new DecimalFormat("0.000"));
-		this.txtR = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtX = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.transform.translation.format")));
+		this.txtY = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.transform.translation.format")));
+		this.txtR = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.transform.rotation.format")));
 		
 		this.txtX.setColumns(7);
 		this.txtY.setColumns(7);

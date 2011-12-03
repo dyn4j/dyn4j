@@ -40,7 +40,7 @@ import org.dyn4j.geometry.Vector2;
  * Nearly identitcal to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class Island {
@@ -245,19 +245,19 @@ public class Island {
 			// check for sleep-able bodies
 			for (int i = 0; i < size; i++) {
 				Body body = this.bodies.get(i);
+				// just skip static bodies
+				if (body.isStatic()) continue;
 				// see if the body is allowed to sleep
 				if (body.isAutoSleepingEnabled()) {
-					// just skip static bodies
-					if (body.isStatic()) continue;
 					// check the linear and angular velocity
 					if (body.velocity.dot(body.velocity) > sleepVelocitySquared || body.angularVelocity * body.angularVelocity > sleepAngularVelocitySquared) {
 						// if either the linear or angular velocity is above the 
 						// threshold then reset the sleep time
-						body.setAsleep(false);
+						body.sleepTime = 0.0;
 						minSleepTime = 0.0;
 					} else {
 						// then increment the sleep time
-						body.incrementSleepTime(step.dt);
+						body.sleepTime += step.dt;
 						minSleepTime = Math.min(minSleepTime, body.getSleepTime());
 					}
 				} else {

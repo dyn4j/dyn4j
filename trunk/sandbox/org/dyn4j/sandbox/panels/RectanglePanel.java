@@ -38,6 +38,7 @@ import javax.swing.JOptionPane;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Rectangle;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
 import org.dyn4j.sandbox.utilities.Icons;
 
@@ -92,12 +93,12 @@ public class RectanglePanel extends ConvexShapePanel implements InputPanel {
 			this.height = rectangle.getHeight();
 		}
 		
-		JLabel lblWidth = new JLabel("Width", Icons.INFO, JLabel.LEFT);
-		lblWidth.setToolTipText("The width of the rectangle.");
-		JLabel lblHeight = new JLabel("Height", Icons.INFO, JLabel.LEFT);
-		lblHeight.setToolTipText("The height of the rectangle.");
-		JFormattedTextField txtWidth = new JFormattedTextField(new DecimalFormat("0.000"));
-		JFormattedTextField txtHeight = new JFormattedTextField(new DecimalFormat("0.000"));
+		JLabel lblWidth = new JLabel(Resources.getString("panel.rectangle.width"), Icons.INFO, JLabel.LEFT);
+		lblWidth.setToolTipText(Resources.getString("panel.rectangle.width.tooltip"));
+		JLabel lblHeight = new JLabel(Resources.getString("panel.rectangle.height"), Icons.INFO, JLabel.LEFT);
+		lblHeight.setToolTipText(Resources.getString("panel.rectangle.height.tooltip"));
+		JFormattedTextField txtWidth = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.rectangle.width.format")));
+		JFormattedTextField txtHeight = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.rectangle.height.format")));
 		txtWidth.setValue(this.width);
 		txtHeight.setValue(this.height);
 		
@@ -130,8 +131,8 @@ public class RectanglePanel extends ConvexShapePanel implements InputPanel {
 			}
 		});
 		
-		JLabel lblPreview = new JLabel("Preview", Icons.INFO, JLabel.LEFT);
-		lblPreview.setToolTipText("Shows a preview of the current shape.");
+		JLabel lblPreview = new JLabel(Resources.getString("panel.preview"), Icons.INFO, JLabel.LEFT);
+		lblPreview.setToolTipText(Resources.getString("panel.preview.tooltip"));
 		this.pnlPreview = new PreviewPanel(new Dimension(250, 225), Geometry.createRectangle(this.width, this.height));
 		
 		layout.setAutoCreateContainerGaps(true);
@@ -189,8 +190,8 @@ public class RectanglePanel extends ConvexShapePanel implements InputPanel {
 	 */
 	@Override
 	public void showInvalidInputMessage(Window owner) {
-		if (this.isValidInput()) {
-			JOptionPane.showMessageDialog(owner, "A rectangle must have a width and height greater than zero.", "Notice", JOptionPane.ERROR_MESSAGE);
+		if (!this.isValidInput()) {
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.rectangle.invalid"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

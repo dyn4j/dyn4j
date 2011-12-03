@@ -115,7 +115,7 @@ import org.dyn4j.geometry.Vector2;
  * {@link Shape}s.  Refer to {@link Gjk#distance(Convex, Transform, Convex, Transform, Separation)}
  * for details on the implementation.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetector {
@@ -619,7 +619,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 		// x is the current closest point on the ray
 		Vector2 x = start;
 		// r is the ray direction
-		Vector2 r = ray.getDirection();
+		Vector2 r = ray.getDirectionVector();
 		// n is the normal at the hit point
 		Vector2 n = new Vector2();
 		

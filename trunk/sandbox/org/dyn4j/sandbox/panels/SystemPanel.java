@@ -24,11 +24,14 @@
  */
 package org.dyn4j.sandbox.panels;
 
+import java.util.Locale;
+
 import javax.swing.GroupLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.utilities.SystemUtilities;
 
 /**
@@ -45,23 +48,26 @@ public class SystemPanel extends JPanel {
 	 * Default constructor
 	 */
 	public  SystemPanel() {
-		JLabel lblJavaVersion = new JLabel("Java");
-		JLabel lblJavaVendor = new JLabel("Vendor");
-		JLabel lblOperatingSystem = new JLabel("OS");
-		JLabel lblArchitecture = new JLabel("Arch.");
-		JLabel lblNumberOfCpus = new JLabel("CPUs");
+		JLabel lblJavaVersion = new JLabel(Resources.getString("panel.system.java"));
+		JLabel lblJavaVendor = new JLabel(Resources.getString("panel.system.vendor"));
+		JLabel lblOperatingSystem = new JLabel(Resources.getString("panel.system.os"));
+		JLabel lblArchitecture = new JLabel(Resources.getString("panel.system.architecture"));
+		JLabel lblNumberOfCpus = new JLabel(Resources.getString("panel.system.cpus"));
+		JLabel lblLocale = new JLabel(Resources.getString("panel.system.locale"));
 		
 		JTextField valJavaVersion = new JTextField(SystemUtilities.getJavaVersion());
 		JTextField valJavaVendor = new JTextField(SystemUtilities.getJavaVendor());
 		JTextField valOperatingSystem = new JTextField(SystemUtilities.getOperatingSystem());
 		JTextField valArchitecture = new JTextField(SystemUtilities.getArchitecture());
 		JTextField valNumberOfCpus = new JTextField(String.valueOf(Runtime.getRuntime().availableProcessors()));
+		JTextField valLocale = new JTextField(Locale.getDefault().getLanguage() + "_" + Locale.getDefault().getCountry());
 		
 		valJavaVersion.setEditable(false);
 		valJavaVendor.setEditable(false);
 		valOperatingSystem.setEditable(false);
 		valArchitecture.setEditable(false);
 		valNumberOfCpus.setEditable(false);
+		valLocale.setEditable(false);
 		
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
@@ -75,13 +81,15 @@ public class SystemPanel extends JPanel {
 						.addComponent(lblJavaVendor)
 						.addComponent(lblOperatingSystem)
 						.addComponent(lblArchitecture)
-						.addComponent(lblNumberOfCpus))
+						.addComponent(lblNumberOfCpus)
+						.addComponent(lblLocale))
 				.addGroup(layout.createParallelGroup()
 						.addComponent(valJavaVersion)
 						.addComponent(valJavaVendor)
 						.addComponent(valOperatingSystem)
 						.addComponent(valArchitecture)
-						.addComponent(valNumberOfCpus)));
+						.addComponent(valNumberOfCpus)
+						.addComponent(valLocale)));
 		layout.setVerticalGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblJavaVersion)
@@ -97,6 +105,9 @@ public class SystemPanel extends JPanel {
 						.addComponent(valArchitecture, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(lblNumberOfCpus)
-						.addComponent(valNumberOfCpus, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
+						.addComponent(valNumberOfCpus, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(lblLocale)
+						.addComponent(valLocale, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
 	}
 }

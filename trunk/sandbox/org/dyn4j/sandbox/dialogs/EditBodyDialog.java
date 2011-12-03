@@ -41,6 +41,7 @@ import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.sandbox.SandboxBody;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.controls.BottomButtonPanel;
 import org.dyn4j.sandbox.panels.BodyPanel;
 import org.dyn4j.sandbox.panels.TransformPanel;
@@ -71,11 +72,10 @@ public class EditBodyDialog extends JDialog implements ActionListener {
 	/**
 	 * Full constructor.
 	 * @param owner the dialog owner
-	 * @param title the dialog title
 	 * @param body the body to edit
 	 */
-	private EditBodyDialog(Window owner, String title, SandboxBody body) {
-		super(owner, title, ModalityType.APPLICATION_MODAL);
+	private EditBodyDialog(Window owner, SandboxBody body) {
+		super(owner, Resources.getString("dialog.body.edit.title"), ModalityType.APPLICATION_MODAL);
 		
 		this.body = new SandboxBody();
 		
@@ -115,11 +115,11 @@ public class EditBodyDialog extends JDialog implements ActionListener {
 		this.pnlTransform = new TransformPanel(body.getTransform(), null);
 		
 		tabs.setBorder(BorderFactory.createEmptyBorder(7, 0, 0, 0));
-		tabs.addTab("Body", this.pnlBody);
-		tabs.addTab("Transform", this.pnlTransform);
+		tabs.addTab(Resources.getString("dialog.body.tab.body"), this.pnlBody);
+		tabs.addTab(Resources.getString("dialog.body.tab.transform"), this.pnlTransform);
 		
-		JButton btnCancel = new JButton("Cancel");
-		JButton btnSave = new JButton("Save");
+		JButton btnCancel = new JButton(Resources.getString("button.cancel"));
+		JButton btnSave = new JButton(Resources.getString("button.save"));
 		btnSave.setActionCommand("save");
 		btnCancel.setActionCommand("cancel");
 		btnSave.addActionListener(this);
@@ -169,11 +169,10 @@ public class EditBodyDialog extends JDialog implements ActionListener {
 	/**
 	 * Shows an Edit Body Dialog using the values in the current body.
 	 * @param owner the dialog owner
-	 * @param title the dialog title
 	 * @param body the body to edit
 	 */
-	public static final void show(Window owner, String title, SandboxBody body) {
-		EditBodyDialog dialog = new EditBodyDialog(owner, title, body);
+	public static final void show(Window owner, SandboxBody body) {
+		EditBodyDialog dialog = new EditBodyDialog(owner, body);
 		dialog.setLocationRelativeTo(owner);
 		dialog.setIconImage(Icons.EDIT_BODY.getImage());
 		dialog.setVisible(true);

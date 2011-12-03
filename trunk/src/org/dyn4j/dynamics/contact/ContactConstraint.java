@@ -37,7 +37,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents a {@link Contact} constraint for each {@link Body} pair.  
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class ContactConstraint extends Constraint {
@@ -67,6 +67,9 @@ public class ContactConstraint extends Constraint {
 
 	/** Whether the contact is a sensor contact or not */
 	protected boolean sensor;
+	
+	/** The surface speed of the contact patch */
+	protected double tangentSpeed;
 	
 	/** The K matrix for block solving a contact pair */
 	protected Matrix22 K;
@@ -121,6 +124,8 @@ public class ContactConstraint extends Constraint {
 		// set the sensor flag (if either fixture is a sensor then the
 		// contact constraint between the fixtures is a sensor)
 		this.sensor = fixture1.isSensor() || fixture2.isSensor();
+		// by default the tangent speed is zero
+		this.tangentSpeed = 0;
 		// default to false
 		this.onIsland = false;
 	}
@@ -221,11 +226,29 @@ public class ContactConstraint extends Constraint {
 	}
 	
 	/**
+	 * Sets the coefficient of friction for this contact constraint.
+	 * @param friction the friction
+	 * @since 3.0.2
+	 */
+	public void setFriction(double friction) {
+		this.friction = friction;
+	}
+	
+	/**
 	 * Returns the coefficient of restitution for this contact constraint.
 	 * @return double
 	 */
 	public double getRestitution() {
 		return this.restitution;
+	}
+
+	/**
+	 * Sets the coefficient of restitution for this contact constraint.
+	 * @param restitution the restitution
+	 * @since 3.0.2
+	 */
+	public void setRestitution(double restitution) {
+		this.restitution = restitution;
 	}
 	
 	/**
@@ -235,5 +258,41 @@ public class ContactConstraint extends Constraint {
 	 */
 	public boolean isSensor() {
 		return this.sensor;
+	}
+	
+	/**
+	 * Sets this contact constraint to a sensor if flag is true.
+	 * <p>
+	 * A sensor constraint is not solved.
+	 * @param flag true if this contact constraint should be a sensor
+	 * @since 3.0.2
+	 */
+	public void setSensor(boolean flag) {
+		this.sensor = flag;
+	}
+	
+	/**
+	 * Returns the surface speed of the contact manifold.
+	 * <p>
+	 * This can be used to simulate a conveyor belt.
+	 * @return double
+	 * @since 3.0.2
+	 */
+	public double getTangentSpeed() {
+		return this.tangentSpeed;
+	}
+	
+	/**
+	 * Sets the surface speed of the contact manifold.
+	 * <p>
+	 * The surface speed, in meters / second, is used to simulate a
+	 * conveyor belt.
+	 * <p>
+	 * A value of zero deactivates this feature.
+	 * @param speed the speed in Meters / Second
+	 * @since 3.0.2
+	 */
+	public void setTangentSpeed(double speed) {
+		this.tangentSpeed = speed;
 	}
 }

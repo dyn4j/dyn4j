@@ -44,7 +44,7 @@ import org.junit.Test;
  * Test cases for the {@link Gjk#raycast(Ray, double, Convex, Transform, Raycast)}
  * method.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.0.2
  * @since 2.0.0
  */
 public class GjkRaycastTest {
@@ -80,7 +80,7 @@ public class GjkRaycastTest {
 		TestCase.assertTrue(gjk.raycast(ray, 1.6, r, t, raycast));
 		
 		// opposite direction test
-		ray.getDirection().negate();
+		ray.getDirectionVector().negate();
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, r, t, raycast));
 		
 		// non-intersection case
@@ -126,7 +126,7 @@ public class GjkRaycastTest {
 		TestCase.assertTrue(gjk.raycast(ray, 1.7, c, t, raycast));
 		
 		// opposite direction test
-		ray.getDirection().negate();
+		ray.getDirectionVector().negate();
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 		
 		// non-intersection case
@@ -172,7 +172,7 @@ public class GjkRaycastTest {
 		TestCase.assertTrue(gjk.raycast(ray, 1.7, c, t, raycast));
 		
 		// opposite direction test
-		ray.getDirection().negate();
+		ray.getDirectionVector().negate();
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 		
 		// non-intersection case
@@ -218,7 +218,7 @@ public class GjkRaycastTest {
 		TestCase.assertTrue(gjk.raycast(ray, 1.8, c, t, raycast));
 		
 		// opposite direction test
-		ray.getDirection().negate();
+		ray.getDirectionVector().negate();
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 		
 		// non-intersection case
@@ -264,7 +264,7 @@ public class GjkRaycastTest {
 		TestCase.assertTrue(gjk.raycast(ray, 2.4, c, t, raycast));
 		
 		// opposite direction test
-		ray.getDirection().negate();
+		ray.getDirectionVector().negate();
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 		
 		// non-intersection case
@@ -309,7 +309,7 @@ public class GjkRaycastTest {
 		TestCase.assertTrue(gjk.raycast(ray, 2.0, c, t, raycast));
 		
 		// opposite direction test
-		ray.getDirection().negate();
+		ray.getDirectionVector().negate();
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 		
 		// non-intersection case

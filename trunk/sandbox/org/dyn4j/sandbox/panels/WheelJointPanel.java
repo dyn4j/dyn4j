@@ -28,6 +28,7 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
@@ -43,6 +44,7 @@ import javax.swing.border.TitledBorder;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.WheelJoint;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
 import org.dyn4j.sandbox.utilities.ControlUtilities;
@@ -169,73 +171,73 @@ public class WheelJointPanel extends JointPanel implements InputPanel, ActionLis
 		this.txtName.setColumns(15);
 		this.chkCollision.setSelected(collision);
 		
-		this.lblBody1 = new JLabel("Body 1", Icons.INFO, JLabel.LEFT);
-		this.lblBody2 = new JLabel("Body 2", Icons.INFO, JLabel.LEFT);
-		this.lblBody1.setToolTipText("The first body participating in the joint.");
-		this.lblBody2.setToolTipText("The second body participating in the joint.");
+		this.lblBody1 = new JLabel(Resources.getString("panel.joint.body1"), Icons.INFO, JLabel.LEFT);
+		this.lblBody2 = new JLabel(Resources.getString("panel.joint.body2"), Icons.INFO, JLabel.LEFT);
+		this.lblBody1.setToolTipText(Resources.getString("panel.joint.body1.tooltip"));
+		this.lblBody2.setToolTipText(Resources.getString("panel.joint.body2.tooltip"));
 		
 		this.cmbBody1 = new JComboBox(bodies);
 		this.cmbBody2 = new JComboBox(bodies);
 		
-		this.lblAnchor = new JLabel("Anchor", Icons.INFO, JLabel.LEFT);
-		this.lblAnchor.setToolTipText("The anchor point to restrict translation.");
+		this.lblAnchor = new JLabel(Resources.getString("panel.joint.anchor"), Icons.INFO, JLabel.LEFT);
+		this.lblAnchor.setToolTipText(Resources.getString("panel.joint.wheel.anchor.tooltip"));
 		
-		this.lblAxis = new JLabel("Axis", Icons.INFO, JLabel.LEFT);
-		this.lblAxis.setToolTipText("The allowed motion axis.");
+		this.lblAxis = new JLabel(Resources.getString("panel.joint.axis"), Icons.INFO, JLabel.LEFT);
+		this.lblAxis.setToolTipText(Resources.getString("panel.joint.axis.tooltip"));
 		
-		this.lblX1 = new JLabel("x");
-		this.lblX2 = new JLabel("x");
-		this.lblY1 = new JLabel("y");
-		this.lblY2 = new JLabel("y");
+		this.lblX1 = new JLabel(Resources.getString("x"));
+		this.lblX2 = new JLabel(Resources.getString("x"));
+		this.lblY1 = new JLabel(Resources.getString("y"));
+		this.lblY2 = new JLabel(Resources.getString("y"));
 		
-		this.txtX1 = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtX1 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.anchor.format")));
 		this.txtX1.addFocusListener(new SelectTextFocusListener(this.txtX1));
 		this.txtX1.setColumns(7);
 		
-		this.txtX2 = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtX2 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.wheel.axis.format")));
 		this.txtX2.addFocusListener(new SelectTextFocusListener(this.txtX2));
 		this.txtX2.setColumns(7);
 		
-		this.txtY1 = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtY1 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.anchor.format")));
 		this.txtY1.addFocusListener(new SelectTextFocusListener(this.txtY1));
 		this.txtY1.setColumns(7);
 		
-		this.txtY2 = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtY2 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.wheel.axis.format")));
 		this.txtY2.addFocusListener(new SelectTextFocusListener(this.txtY2));
 		this.txtY2.setColumns(7);
 
-		this.btnUseCenter1 = new JButton("Use Center");
-		this.btnUseCenter1.setToolTipText("Set the anchor to the center of mass of body 1.");
+		this.btnUseCenter1 = new JButton(Resources.getString("panel.joint.useCenter"));
+		this.btnUseCenter1.setToolTipText(Resources.getString("panel.joint.useCenter.tooltip"));
 		this.btnUseCenter1.setActionCommand("use-com1");
 		this.btnUseCenter1.addActionListener(this);
 		
-		this.btnUseCenter2 = new JButton("Use Center");
-		this.btnUseCenter2.setToolTipText("Set the anchor to the center of mass of body 2.");
+		this.btnUseCenter2 = new JButton(Resources.getString("panel.joint.useCenter"));
+		this.btnUseCenter2.setToolTipText(Resources.getString("panel.joint.useCenter.tooltip"));
 		this.btnUseCenter2.setActionCommand("use-com2");
 		this.btnUseCenter2.addActionListener(this);
 		
-		this.lblFrequency = new JLabel("Frequency", Icons.INFO, JLabel.LEFT);
-		this.lblFrequency.setToolTipText("<html>Determines how fast the spring should oscillate in hertz (Seconds<sup>-1</sup>).</html>");
-		this.txtFrequency = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.lblFrequency = new JLabel(Resources.getString("panel.joint.wheel.frequency"), Icons.INFO, JLabel.LEFT);
+		this.lblFrequency.setToolTipText(MessageFormat.format(Resources.getString("panel.joint.wheel.frequency.tooltip"), Resources.getString("unit.inverseTime"), Resources.getString("unit.time")));
+		this.txtFrequency = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.wheel.frequency.format")));
 		this.txtFrequency.addFocusListener(new SelectTextFocusListener(this.txtFrequency));
 		
-		this.lblRatio = new JLabel("Damping Ratio", Icons.INFO, JLabel.LEFT);
-		this.lblRatio.setToolTipText("Determines how fast the spring is dampened from 0.0 to 1.0.");
-		this.txtRatio = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.lblRatio = new JLabel(Resources.getString("panel.joint.wheel.dampingRatio"), Icons.INFO, JLabel.LEFT);
+		this.lblRatio.setToolTipText(Resources.getString("panel.joint.wheel.dampingRatio.tooltip"));
+		this.txtRatio = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.wheel.dampingRatio.format")));
 		this.txtRatio.addFocusListener(new SelectTextFocusListener(this.txtRatio));
 		
-		this.lblMotorEnabled = new JLabel("Motor Enabled", Icons.INFO, JLabel.LEFT);
-		this.lblMotorEnabled.setToolTipText("Check to enable the angular motor.");
+		this.lblMotorEnabled = new JLabel(Resources.getString("panel.joint.motorEnabled"), Icons.INFO, JLabel.LEFT);
+		this.lblMotorEnabled.setToolTipText(Resources.getString("panel.joint.wheel.motorEnabled.tooltip"));
 		this.chkMotorEnabled = new JCheckBox();
 		
-		this.lblMotorSpeed = new JLabel("Motor Speed", Icons.INFO, JLabel.LEFT);
-		this.lblMotorSpeed.setToolTipText("The motor speed in Degrees/Second.");
-		this.txtMotorSpeed = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.lblMotorSpeed = new JLabel(Resources.getString("panel.joint.motorSpeed"), Icons.INFO, JLabel.LEFT);
+		this.lblMotorSpeed.setToolTipText(MessageFormat.format(Resources.getString("panel.joint.motorSpeed.tooltip"), Resources.getString("unit.velocity.angular")));
+		this.txtMotorSpeed = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.wheel.motorSpeed.format")));
 		this.txtMotorSpeed.addFocusListener(new SelectTextFocusListener(this.txtMotorSpeed));
 		
-		this.lblMaxMotorTorque = new JLabel("Maximum Motor Torque", Icons.INFO, JLabel.LEFT);
-		this.lblMaxMotorTorque.setToolTipText("The maximum torque the motor can apply in Newton-Meters.");
-		this.txtMaxMotorTorque = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.lblMaxMotorTorque = new JLabel(Resources.getString("panel.joint.motorMaximumTorque"), Icons.INFO, JLabel.LEFT);
+		this.lblMaxMotorTorque.setToolTipText(MessageFormat.format(Resources.getString("panel.joint.motorMaximumTorque.tooltip"), Resources.getString("unit.torque")));
+		this.txtMaxMotorTorque = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.wheel.motorMaximumTorque.format")));
 		this.txtMaxMotorTorque.addFocusListener(new SelectTextFocusListener(this.txtMaxMotorTorque));
 		
 		// set defaults
@@ -276,7 +278,7 @@ public class WheelJointPanel extends JointPanel implements InputPanel, ActionLis
 		// setup the general section
 		
 		JPanel pnlGeneral = new JPanel();
-		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General ");
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.section.general"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlGeneral.setBorder(border);
 		
@@ -346,7 +348,7 @@ public class WheelJointPanel extends JointPanel implements InputPanel, ActionLis
 		// setup the spring/damper section
 		
 		JPanel pnlSpringDamper = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Spring/Damper ");
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.joint.section.springDamper"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlSpringDamper.setBorder(border);
 		
@@ -373,7 +375,7 @@ public class WheelJointPanel extends JointPanel implements InputPanel, ActionLis
 		// setup the motor section
 		
 		JPanel pnlMotor = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Motor ");
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.joint.section.motor"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlMotor.setBorder(border);
 		
@@ -418,15 +420,6 @@ public class WheelJointPanel extends JointPanel implements InputPanel, ActionLis
 				.addComponent(pnlGeneral)
 				.addComponent(pnlSpringDamper)
 				.addComponent(pnlMotor));
-	}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.sandbox.panels.JointPanel#getDescription()
-	 */
-	@Override
-	public String getDescription() {
-		return "A wheel joint is a specialized joint to model a wheel of a vehicle attached to a frame.  The joint is a combination " +
-				"of a distance joint, whose target distance is zero, a prismatic joint, and a revolute joint.";
 	}
 	
 	/* (non-Javadoc)
@@ -533,25 +526,25 @@ public class WheelJointPanel extends JointPanel implements InputPanel, ActionLis
 	public void showInvalidInputMessage(Window owner) {
 		String name = this.txtName.getText();
 		if (name == null || name.isEmpty()) {
-			JOptionPane.showMessageDialog(owner, "You must specify a name for the joint.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.missingName"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// they can't be the same body
 		if (this.cmbBody1.getSelectedItem() == this.cmbBody2.getSelectedItem()) {
-			JOptionPane.showMessageDialog(owner, "You must select two different bodies.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.sameBody"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// check the damping ratio
 		double dr = ControlUtilities.getDoubleValue(this.txtRatio);
 		if (dr < 0.0 || dr > 1.0) {
-			JOptionPane.showMessageDialog(owner, "The damping ratio must be between 0 and 1 inclusive.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.invalidDampingRatio"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// check the frequency
 		double f = ControlUtilities.getDoubleValue(this.txtFrequency);
 		if (f < 0.0) {
-			JOptionPane.showMessageDialog(owner, "The frequency must be greater than or equal to zero.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.invalidFrequency"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// check the maximum motor force
 		if (ControlUtilities.getDoubleValue(this.txtMaxMotorTorque) < 0.0) {
-			JOptionPane.showMessageDialog(owner, "The maximum motor torque must be greater than or equal to zero.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.invalidMaximumMotorTorque"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

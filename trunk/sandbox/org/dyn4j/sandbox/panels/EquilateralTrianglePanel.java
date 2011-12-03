@@ -38,6 +38,7 @@ import javax.swing.JOptionPane;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Triangle;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
 import org.dyn4j.sandbox.utilities.Icons;
 
@@ -70,9 +71,9 @@ public class EquilateralTrianglePanel extends ConvexShapePanel implements InputP
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
 		
-		JLabel lblHeight = new JLabel("Height", Icons.INFO, JLabel.LEFT);
-		lblHeight.setToolTipText("The height of the equilateral triangle.");
-		JFormattedTextField txtHeight = new JFormattedTextField(new DecimalFormat("0.000"));
+		JLabel lblHeight = new JLabel(Resources.getString("panel.equilateral.height"), Icons.INFO, JLabel.LEFT);
+		lblHeight.setToolTipText(Resources.getString("panel.equilateral.height.tooltip"));
+		JFormattedTextField txtHeight = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.equilateral.height.format")));
 		txtHeight.setValue(DEFAULT_HEIGHT);
 		
 		txtHeight.addFocusListener(new SelectTextFocusListener(txtHeight));
@@ -90,8 +91,8 @@ public class EquilateralTrianglePanel extends ConvexShapePanel implements InputP
 			}
 		});
 		
-		JLabel lblPreview = new JLabel("Preview", Icons.INFO, JLabel.LEFT);
-		lblPreview.setToolTipText("Shows a preview of the current shape.");
+		JLabel lblPreview = new JLabel(Resources.getString("panel.preview"), Icons.INFO, JLabel.LEFT);
+		lblPreview.setToolTipText(Resources.getString("panel.preview.tooltip"));
 		this.pnlPreview = new PreviewPanel(new Dimension(250, 225), Geometry.createEquilateralTriangle(height));
 		
 		layout.setAutoCreateGaps(true);
@@ -143,8 +144,8 @@ public class EquilateralTrianglePanel extends ConvexShapePanel implements InputP
 	 */
 	@Override
 	public void showInvalidInputMessage(Window owner) {
-		if (this.isValidInput()) {
-			JOptionPane.showMessageDialog(owner, "An equilateral triangle must have a height greater than zero.", "Notice", JOptionPane.ERROR_MESSAGE);
+		if (!this.isValidInput()) {
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.equilateral.zeroOrLessHeight"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

@@ -28,6 +28,7 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
@@ -43,6 +44,7 @@ import javax.swing.border.TitledBorder;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.RevoluteJoint;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
 import org.dyn4j.sandbox.utilities.ControlUtilities;
@@ -160,66 +162,66 @@ public class RevoluteJointPanel extends JointPanel implements InputPanel, Action
 		this.txtName.setColumns(15);
 		this.chkCollision.setSelected(collision);
 		
-		this.lblBody1 = new JLabel("Body 1", Icons.INFO, JLabel.LEFT);
-		this.lblBody2 = new JLabel("Body 2", Icons.INFO, JLabel.LEFT);
-		this.lblBody1.setToolTipText("The first body participating in the joint.");
-		this.lblBody2.setToolTipText("The second body participating in the joint.");
+		this.lblBody1 = new JLabel(Resources.getString("panel.joint.body1"), Icons.INFO, JLabel.LEFT);
+		this.lblBody2 = new JLabel(Resources.getString("panel.joint.body2"), Icons.INFO, JLabel.LEFT);
+		this.lblBody1.setToolTipText(Resources.getString("panel.joint.body1.tooltip"));
+		this.lblBody2.setToolTipText(Resources.getString("panel.joint.body2.tooltip"));
 		
 		this.cmbBody1 = new JComboBox(bodies);
 		this.cmbBody2 = new JComboBox(bodies);
 		
-		this.lblAnchor = new JLabel("Anchor", Icons.INFO, JLabel.LEFT);
-		this.lblAnchor.setToolTipText("The anchor point to restrict translation.");
+		this.lblAnchor = new JLabel(Resources.getString("panel.joint.anchor"), Icons.INFO, JLabel.LEFT);
+		this.lblAnchor.setToolTipText(Resources.getString("panel.joint.revolute.anchor.tooltip"));
 		
-		this.lblX1 = new JLabel("x");
-		this.lblY1 = new JLabel("y");
+		this.lblX1 = new JLabel(Resources.getString("x"));
+		this.lblY1 = new JLabel(Resources.getString("y"));
 		
-		this.txtX1 = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtX1 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.anchor.format")));
 		this.txtX1.addFocusListener(new SelectTextFocusListener(this.txtX1));
 		this.txtX1.setColumns(7);
 		
-		this.txtY1 = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtY1 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.anchor.format")));
 		this.txtY1.addFocusListener(new SelectTextFocusListener(this.txtY1));
 		this.txtY1.setColumns(7);
 		
-		this.btnUseCenter1 = new JButton("Use Center");
-		this.btnUseCenter1.setToolTipText("Set the anchor to the center of mass of body 1.");
+		this.btnUseCenter1 = new JButton(Resources.getString("panel.joint.useCenter"));
+		this.btnUseCenter1.setToolTipText(Resources.getString("panel.joint.useCenter.tooltip"));
 		this.btnUseCenter1.setActionCommand("use-com1");
 		this.btnUseCenter1.addActionListener(this);
 		
-		this.btnUseCenter2 = new JButton("Use Center");
-		this.btnUseCenter2.setToolTipText("Set the anchor to the center of mass of body 2.");
+		this.btnUseCenter2 = new JButton(Resources.getString("panel.joint.useCenter"));
+		this.btnUseCenter2.setToolTipText(Resources.getString("panel.joint.useCenter.tooltip"));
 		this.btnUseCenter2.setActionCommand("use-com2");
 		this.btnUseCenter2.addActionListener(this);
 		
-		this.lblLimitEnabled = new JLabel("Limits Enabled", Icons.INFO, JLabel.LEFT);
-		this.lblLimitEnabled.setToolTipText("Check to enable limits for this joint.");
+		this.lblLimitEnabled = new JLabel(Resources.getString("panel.joint.limitsEnabled"), Icons.INFO, JLabel.LEFT);
+		this.lblLimitEnabled.setToolTipText(Resources.getString("panel.joint.limitsEnabled.tooltip"));
 		this.chkLimitEnabled = new JCheckBox();
 		
-		this.lblUpperLimit = new JLabel("Upper Limit", Icons.INFO, JLabel.LEFT);
-		this.lblUpperLimit.setToolTipText("The upper limit in Degrees.");
-		this.txtUpperLimit = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.lblUpperLimit = new JLabel(Resources.getString("panel.joint.upperLimit"), Icons.INFO, JLabel.LEFT);
+		this.lblUpperLimit.setToolTipText(MessageFormat.format(Resources.getString("panel.joint.upperLimit.tooltip"), Resources.getString("unit.rotation")));
+		this.txtUpperLimit = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.revolute.upperLimit.format")));
 		this.txtUpperLimit.addFocusListener(new SelectTextFocusListener(this.txtUpperLimit));
 		this.txtUpperLimit.setColumns(8);
 		
-		this.lblLowerLimit = new JLabel("Lower Limit", Icons.INFO, JLabel.LEFT);
-		this.lblLowerLimit.setToolTipText("The lower limit in Degrees.");
-		this.txtLowerLimit = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.lblLowerLimit = new JLabel(Resources.getString("panel.joint.lowerLimit"), Icons.INFO, JLabel.LEFT);
+		this.lblLowerLimit.setToolTipText(MessageFormat.format(Resources.getString("panel.joint.lowerLimit.tooltip"), Resources.getString("unit.rotation")));
+		this.txtLowerLimit = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.revolute.lowerLimit.format")));
 		this.txtLowerLimit.addFocusListener(new SelectTextFocusListener(this.txtLowerLimit));
 		this.txtLowerLimit.setColumns(8);
 		
-		this.lblMotorEnabled = new JLabel("Motor Enabled", Icons.INFO, JLabel.LEFT);
-		this.lblMotorEnabled.setToolTipText("Check to enable the angular motor.");
+		this.lblMotorEnabled = new JLabel(Resources.getString("panel.joint.motorEnabled"), Icons.INFO, JLabel.LEFT);
+		this.lblMotorEnabled.setToolTipText(Resources.getString("panel.joint.revolute.motorEnabled.tooltip"));
 		this.chkMotorEnabled = new JCheckBox();
 		
-		this.lblMotorSpeed = new JLabel("Motor Speed", Icons.INFO, JLabel.LEFT);
-		this.lblMotorSpeed.setToolTipText("The motor speed in Degrees/Second.");
-		this.txtMotorSpeed = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.lblMotorSpeed = new JLabel(Resources.getString("panel.joint.motorSpeed"), Icons.INFO, JLabel.LEFT);
+		this.lblMotorSpeed.setToolTipText(MessageFormat.format(Resources.getString("panel.joint.motorSpeed.tooltip"), Resources.getString("unit.velocity.angular")));
+		this.txtMotorSpeed = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.revolute.motorSpeed.format")));
 		this.txtMotorSpeed.addFocusListener(new SelectTextFocusListener(this.txtMotorSpeed));
 		
-		this.lblMaxMotorTorque = new JLabel("Maximum Motor Torque", Icons.INFO, JLabel.LEFT);
-		this.lblMaxMotorTorque.setToolTipText("The maximum torque the motor can apply in Newton-Meters.");
-		this.txtMaxMotorTorque = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.lblMaxMotorTorque = new JLabel(Resources.getString("panel.joint.motorMaximumTorque"), Icons.INFO, JLabel.LEFT);
+		this.lblMaxMotorTorque.setToolTipText(MessageFormat.format(Resources.getString("panel.joint.motorMaximumTorque.tooltip"), Resources.getString("unit.torque")));
+		this.txtMaxMotorTorque = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.revolute.motorMaximumTorque.format")));
 		this.txtMaxMotorTorque.addFocusListener(new SelectTextFocusListener(this.txtMaxMotorTorque));
 		
 		// set defaults
@@ -257,7 +259,7 @@ public class RevoluteJointPanel extends JointPanel implements InputPanel, Action
 		// setup the general section
 		
 		JPanel pnlGeneral = new JPanel();
-		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General ");
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.section.general"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlGeneral.setBorder(border);
 		
@@ -313,7 +315,7 @@ public class RevoluteJointPanel extends JointPanel implements InputPanel, Action
 		// setup the limits section
 		
 		JPanel pnlLimits = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Limits ");
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.joint.section.limits"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlLimits.setBorder(border);
 		
@@ -326,27 +328,27 @@ public class RevoluteJointPanel extends JointPanel implements InputPanel, Action
 		layout.setHorizontalGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup()
 						.addComponent(this.lblLimitEnabled)
-						.addComponent(this.lblUpperLimit)
-						.addComponent(this.lblLowerLimit))
+						.addComponent(this.lblLowerLimit)
+						.addComponent(this.lblUpperLimit))
 				.addGroup(layout.createParallelGroup()
 						.addComponent(this.chkLimitEnabled)
-						.addComponent(this.txtUpperLimit)
-						.addComponent(this.txtLowerLimit)));
+						.addComponent(this.txtLowerLimit)
+						.addComponent(this.txtUpperLimit)));
 		layout.setVerticalGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblLimitEnabled)
 						.addComponent(this.chkLimitEnabled))
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
-						.addComponent(this.lblUpperLimit)
-						.addComponent(this.txtUpperLimit, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblLowerLimit)
-						.addComponent(this.txtLowerLimit, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
+						.addComponent(this.txtLowerLimit, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(this.lblUpperLimit)
+						.addComponent(this.txtUpperLimit, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
 		
 		// setup the motor section
 		
 		JPanel pnlMotor = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Motor ");
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.joint.section.motor"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlMotor.setBorder(border);
 		
@@ -392,17 +394,6 @@ public class RevoluteJointPanel extends JointPanel implements InputPanel, Action
 				.addComponent(pnlGeneral)
 				.addComponent(pnlLimits)
 				.addComponent(pnlMotor));
-	}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.sandbox.panels.JointPanel#getDescription()
-	 */
-	@Override
-	public String getDescription() {
-		return "A revolute joint joins two bodies together at a single point.  The bodies cannot translate" +
-				"relative to one another but can freely rotate about the anchor point.  The limits are angular " +
-				"limits and work identically to the Angle Joint's limits.  The motor can be used to force a rotation " +
-				"about the anchor point between the two bodies.";
 	}
 	
 	/* (non-Javadoc)
@@ -504,19 +495,19 @@ public class RevoluteJointPanel extends JointPanel implements InputPanel, Action
 	public void showInvalidInputMessage(Window owner) {
 		String name = this.txtName.getText();
 		if (name == null || name.isEmpty()) {
-			JOptionPane.showMessageDialog(owner, "You must specify a name for the joint.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.missingName"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// they can't be the same body
 		if (this.cmbBody1.getSelectedItem() == this.cmbBody2.getSelectedItem()) {
-			JOptionPane.showMessageDialog(owner, "You must select two different bodies.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.sameBody"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// check the limit
 		if (ControlUtilities.getDoubleValue(this.txtLowerLimit) > ControlUtilities.getDoubleValue(this.txtUpperLimit)) {
-			JOptionPane.showMessageDialog(owner, "The lower limit must be less than or equal to the upper limit.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.invalidLimits"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// check the maximum motor force
 		if (ControlUtilities.getDoubleValue(this.txtMaxMotorTorque) < 0.0) {
-			JOptionPane.showMessageDialog(owner, "The maximum motor torque must be greater than or equal to zero.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.invalidMaximumMotorTorque"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

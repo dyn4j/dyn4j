@@ -43,6 +43,7 @@ import javax.swing.JTextPane;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.geometry.decompose.Decomposer;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.utilities.UIUtilities;
 
 /**
@@ -94,7 +95,7 @@ public class ArbitraryNonConvexPolygonPanel extends NonConvexShapePanel implemen
 		this.lblText.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 		this.lblText.setFont(UIUtilities.getDefaultLabelFont());
 		this.lblText.setContentType("text/html");
-		this.lblText.setText("<html>A simple polygon without holes or crossing edges.</html>");
+		this.lblText.setText(Resources.getString("panel.polygon.simple.warning"));
 		this.lblText.setEditable(false);
 		
 		this.scrPane = new JScrollPane(this.pnlPanel);
@@ -270,9 +271,9 @@ public class ArbitraryNonConvexPolygonPanel extends NonConvexShapePanel implemen
 		} catch (Exception e) {
 			String message = e.getMessage();
 			if (message == null || message.isEmpty()) {
-				message = "A simple polygon cannot have crossing edges.";
+				message = Resources.getString("panel.polygon.simple.crossingEdges");
 			}
-			JOptionPane.showMessageDialog(owner, message, "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, message, Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 	

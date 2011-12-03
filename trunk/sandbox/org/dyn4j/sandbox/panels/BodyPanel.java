@@ -33,6 +33,7 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
@@ -52,6 +53,7 @@ import javax.swing.event.DocumentListener;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.controls.JSliderWithTextField;
 import org.dyn4j.sandbox.dialogs.ColorDialog;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
@@ -251,8 +253,8 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		double torque = body.getAccumulatedTorque();
 		
 		// name
-		this.lblName = new JLabel("Name", Icons.INFO, JLabel.LEFT);
-		this.lblName.setToolTipText("The name of the body.");
+		this.lblName = new JLabel(Resources.getString("panel.body.name"), Icons.INFO, JLabel.LEFT);
+		this.lblName.setToolTipText(Resources.getString("panel.body.name.tooltip"));
 		this.txtName = new JTextField(name);
 		
 		this.txtName.addFocusListener(new SelectTextFocusListener(this.txtName));
@@ -270,7 +272,7 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		});
 		
 		// the color panel
-		this.lblSample = new JLabel("Sample");
+		this.lblSample = new JLabel(Resources.getString("panel.body.color.sample"));
 		this.lblSample.setForeground(ColorUtilities.getForegroundColorFromBackgroundColor(initialFillColor));
 		this.lblSample.setHorizontalAlignment(JLabel.CENTER);
 		this.pnlColor = new JPanel();
@@ -281,26 +283,22 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		this.pnlColor.add(this.lblSample, BorderLayout.CENTER);
 		
 		// outline color
-		this.lblOutlineColor = new JLabel("Outline Color", Icons.INFO, JLabel.LEFT);
-		this.lblOutlineColor.setToolTipText("The color used when drawing an outline of this body.");
-		this.btnOutlineColor = new JButton("Select");
+		this.lblOutlineColor = new JLabel(Resources.getString("panel.body.color.outline"), Icons.INFO, JLabel.LEFT);
+		this.lblOutlineColor.setToolTipText(Resources.getString("panel.body.color.outline.tooltip"));
+		this.btnOutlineColor = new JButton(Resources.getString("button.select"));
 		this.btnOutlineColor.setActionCommand("outlineColor");
 		this.btnOutlineColor.addActionListener(this);
 		
 		// fill color
-		this.lblFillColor = new JLabel("Fill Color", Icons.INFO, JLabel.LEFT);
-		this.lblFillColor.setToolTipText("The color used when filling this body.");
-		this.btnFillColor = new JButton("Select");
+		this.lblFillColor = new JLabel(Resources.getString("panel.body.color.fill"), Icons.INFO, JLabel.LEFT);
+		this.lblFillColor.setToolTipText(Resources.getString("panel.body.color.fill.tooltip"));
+		this.btnFillColor = new JButton(Resources.getString("button.select"));
 		this.btnFillColor.setActionCommand("fillColor");
 		this.btnFillColor.addActionListener(this);
 		
 		// mass type
-		this.lblMassType = new JLabel("Mass Type", Icons.INFO, JLabel.LEFT);
-		this.lblMassType.setToolTipText(
-				"<html>Normal: The body's linear and angular velocity will be affected by interactions with other bodies.<br />" +
-				"Infinite: The body's linear and angular velocity are not affected by interactions.<br />" +
-				"Fixed Linear Velocity: The body's linear velocity remains unaffected.<br />" +
-				"Fixed Angular Velocity: The body's angular velocity remains unaffected.</html>");
+		this.lblMassType = new JLabel(Resources.getString("panel.body.mass.type"), Icons.INFO, JLabel.LEFT);
+		this.lblMassType.setToolTipText(Resources.getString("panel.body.mass.type.tooltip"));
 		this.cmbMassType = new JComboBox(ITEMS);
 		this.cmbMassType.setSelectedItem(this.getMassTypeItem(massType));
 		this.cmbMassType.addActionListener(new ActionListener() {
@@ -318,8 +316,8 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 			showMass.setType(Mass.Type.NORMAL);
 		}
 		
-		this.lblMassExplicit = new JLabel("Manual", Icons.INFO, JLabel.LEFT);
-		this.lblMassExplicit.setToolTipText("Allows the mass to be set instead of calculated from the fixtures.");
+		this.lblMassExplicit = new JLabel(Resources.getString("panel.body.mass.manual"), Icons.INFO, JLabel.LEFT);
+		this.lblMassExplicit.setToolTipText(Resources.getString("panel.body.mass.manual.tooltip"));
 		this.chkMassExplicit = new JCheckBox();
 		this.chkMassExplicit.setSelected(body.isMassExplicit());
 		this.chkMassExplicit.addActionListener(new ActionListener() {
@@ -351,12 +349,12 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 			}
 		});
 		
-		this.lblCenter = new JLabel("Local Center", Icons.INFO, JLabel.LEFT);
-		this.lblCenter.setToolTipText("<html>The <b>local</b> center of mass of the body.</html>");
-		JLabel lblX = new JLabel("x");
-		JLabel lblY = new JLabel("y");
+		this.lblCenter = new JLabel(Resources.getString("panel.body.mass.center"), Icons.INFO, JLabel.LEFT);
+		this.lblCenter.setToolTipText(Resources.getString("panel.body.mass.center.tooltip"));
+		JLabel lblX = new JLabel(Resources.getString("x"));
+		JLabel lblY = new JLabel(Resources.getString("y"));
 		
-		this.txtX = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtX = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.body.mass.center.format")));
 		this.txtX.addFocusListener(new SelectTextFocusListener(this.txtX));
 		this.txtX.setValue(showMass.getCenter().x);
 		this.txtX.setEditable(body.isMassExplicit());
@@ -374,7 +372,7 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 			}
 		});
 		
-		this.txtY = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtY = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.body.mass.center.format")));
 		this.txtY.addFocusListener(new SelectTextFocusListener(this.txtY));
 		this.txtY.setValue(showMass.getCenter().y);
 		this.txtY.setEditable(body.isMassExplicit());
@@ -392,11 +390,9 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 			}
 		});
 		
-		this.lblMass = new JLabel("Mass", Icons.INFO, JLabel.LEFT);
-		this.lblMass.setToolTipText("<html>The total mass of the body in Kilograms/Meter<sup>2</sup>.<br />" +
-				"Specifies the body's resistance to change in its velocity.<br />" +
-				"The mass is computed automatically from the fixtures attached to this body.</html>");
-		this.txtMass = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.lblMass = new JLabel(Resources.getString("panel.body.mass"), Icons.INFO, JLabel.LEFT);
+		this.lblMass.setToolTipText(MessageFormat.format(Resources.getString("panel.body.mass.tooltip"), Resources.getString("unit.mass")));
+		this.txtMass = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.body.mass.format")));
 		this.txtMass.addFocusListener(new SelectTextFocusListener(this.txtMass));
 		this.txtMass.setValue(showMass.getMass());
 		this.txtMass.setEditable(body.isMassExplicit());
@@ -414,11 +410,9 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 			}
 		});
 		
-		this.lblInertia = new JLabel("Inertia", Icons.INFO, JLabel.LEFT);
-		this.lblInertia.setToolTipText("<html>The inertia tensor of the body in Kilogram-Meters<sup>2</sup>.<br />" +
-				"Specifies the body's resistance to change in its angular velocity.<br />" +
-				"The inertia is computed automatically from the fixtures attached to this body.</html>");
-		this.txtInertia = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.lblInertia = new JLabel(Resources.getString("panel.body.inertia"), Icons.INFO, JLabel.LEFT);
+		this.lblInertia.setToolTipText(MessageFormat.format(Resources.getString("panel.body.inertia.tooltip"), Resources.getString("unit.inertia")));
+		this.txtInertia = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.body.inertia.format")));
 		this.txtInertia.addFocusListener(new SelectTextFocusListener(this.txtInertia));
 		this.txtInertia.setValue(showMass.getInertia());
 		this.txtInertia.setEditable(body.isMassExplicit());
@@ -437,9 +431,9 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		});
 		
 		// linear damping
-		this.lblLinearDamping = new JLabel("Linear Damping", Icons.INFO, JLabel.LEFT);
-		this.lblLinearDamping.setToolTipText("<html>Specifies a drag like coefficient for linear motion.<br />Valid values are between 0 and 1 inclusive.</html>");
-		this.sldLinearDamping = new JSliderWithTextField(0, 100, (int)(linearDamping * 100.0), 0.01, new DecimalFormat("0.00"));
+		this.lblLinearDamping = new JLabel(Resources.getString("panel.body.damping.linear"), Icons.INFO, JLabel.LEFT);
+		this.lblLinearDamping.setToolTipText(Resources.getString("panel.body.damping.linear.tooltip"));
+		this.sldLinearDamping = new JSliderWithTextField(0, 100, (int)(linearDamping * 100.0), 0.01, new DecimalFormat(Resources.getString("panel.body.damping.linear.format")));
 		this.sldLinearDamping.setColumns(4);
 		this.sldLinearDamping.addChangeListener(new ChangeListener() {
 			@Override
@@ -451,9 +445,9 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		});
 		
 		// angular damping
-		this.lblAngularDamping = new JLabel("Angular Damping", Icons.INFO, JLabel.LEFT);
-		this.lblAngularDamping.setToolTipText("<html>Specifies a drag like coefficient for angular motion.<br />Valid values are between 0 and 1 inclusive.</html>");
-		this.sldAngularDamping = new JSliderWithTextField(0, 100, (int)(angularDamping * 100.0), 0.01, new DecimalFormat("0.00"));
+		this.lblAngularDamping = new JLabel(Resources.getString("panel.body.damping.angular"), Icons.INFO, JLabel.LEFT);
+		this.lblAngularDamping.setToolTipText(Resources.getString("panel.body.damping.angular.tooltip"));
+		this.sldAngularDamping = new JSliderWithTextField(0, 100, (int)(angularDamping * 100.0), 0.01, new DecimalFormat(Resources.getString("panel.body.damping.angular.format")));
 		this.sldAngularDamping.setColumns(4);
 		this.sldAngularDamping.addChangeListener(new ChangeListener() {
 			@Override
@@ -465,12 +459,12 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		});
 		
 		// initial velocity
-		this.lblVelocity = new JLabel("Velocity", Icons.INFO, JLabel.LEFT);
-		this.lblVelocity.setToolTipText("The linear velocity in Meters/Second.");
-		JLabel lblVelocityX = new JLabel("x");
-		JLabel lblVelocityY = new JLabel("y");
-		this.txtVelocityX = new JFormattedTextField(new DecimalFormat("##0.000"));
-		this.txtVelocityY = new JFormattedTextField(new DecimalFormat("##0.000"));
+		this.lblVelocity = new JLabel(Resources.getString("panel.body.velocity.linear"), Icons.INFO, JLabel.LEFT);
+		this.lblVelocity.setToolTipText(MessageFormat.format(Resources.getString("panel.body.velocity.linear.tooltip"), Resources.getString("unit.velocity.linear")));
+		JLabel lblVelocityX = new JLabel(Resources.getString("x"));
+		JLabel lblVelocityY = new JLabel(Resources.getString("y"));
+		this.txtVelocityX = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.body.velocity.linear.format")));
+		this.txtVelocityY = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.body.velocity.linear.format")));
 		this.txtVelocityX.setValue(velocity.x);
 		this.txtVelocityY.setValue(velocity.y);
 		this.txtVelocityX.setColumns(7);
@@ -496,9 +490,9 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		});
 		
 		// initial anuglar velocity
-		this.lblAngularVelocity = new JLabel("Angular Velocity", Icons.INFO, JLabel.LEFT);
-		this.lblAngularVelocity.setToolTipText("The angular velocity in Degrees/Second.");
-		this.txtAngularVelocity = new JFormattedTextField(new DecimalFormat("##0.000"));
+		this.lblAngularVelocity = new JLabel(Resources.getString("panel.body.velocity.angular"), Icons.INFO, JLabel.LEFT);
+		this.lblAngularVelocity.setToolTipText(MessageFormat.format(Resources.getString("panel.body.velocity.angular.tooltip"), Resources.getString("unit.velocity.angular")));
+		this.txtAngularVelocity = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.body.velocity.angular.format")));
 		this.txtAngularVelocity.setValue(Math.toDegrees(angularVelocity));
 		this.txtAngularVelocity.setColumns(7);
 		this.txtAngularVelocity.setMaximumSize(this.txtAngularVelocity.getPreferredSize());
@@ -512,36 +506,36 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		});
 		
 		// force and torque
-		JLabel lblForceX = new JLabel("x");
-		JLabel lblForceY = new JLabel("y");
-		this.lblForce = new JLabel("Accumulated Force", Icons.INFO, JLabel.LEFT);
-		this.lblForce.setToolTipText("<html>The total accumulated force.</html>");
+		JLabel lblForceX = new JLabel(Resources.getString("x"));
+		JLabel lblForceY = new JLabel(Resources.getString("x"));
+		this.lblForce = new JLabel(Resources.getString("panel.body.force"), Icons.INFO, JLabel.LEFT);
+		this.lblForce.setToolTipText(Resources.getString("panel.body.force.tooltip"));
 		
-		this.txtForceX = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtForceX = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.body.force.format")));
 		this.txtForceX.setValue(force.x);
 		this.txtForceX.setColumns(7);
 		this.txtForceX.setMaximumSize(this.txtForceX.getPreferredSize());
 		this.txtForceX.setEditable(false);
 		
-		this.txtForceY = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtForceY = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.body.force.format")));
 		this.txtForceY.setValue(force.y);
 		this.txtForceY.setColumns(7);
 		this.txtForceY.setMaximumSize(this.txtForceY.getPreferredSize());
 		this.txtForceY.setEditable(false);
 		
-		this.lblTorque = new JLabel("Accumulated Torque", Icons.INFO, JLabel.LEFT);
-		this.lblTorque.setToolTipText("<html>The total accumulated torque.</html>");
+		this.lblTorque = new JLabel(Resources.getString("panel.body.torque"), Icons.INFO, JLabel.LEFT);
+		this.lblTorque.setToolTipText(Resources.getString("panel.body.torque.tooltip"));
 		
-		this.txtTorque = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtTorque = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.body.torque.format")));
 		this.txtTorque.setValue(torque);
 		this.txtTorque.setColumns(7);
 		this.txtTorque.setMaximumSize(this.txtTorque.getPreferredSize());
 		this.txtTorque.setEditable(false);
 		
 		// gravity scale
-		this.lblGravityScale = new JLabel("Gravity Scale", Icons.INFO, JLabel.LEFT);
-		this.lblGravityScale.setToolTipText("<html>A scalar to apply less or more gravity to a specific body.<br />Valid values are zero or greater.</html>");
-		this.sldGravityScale = new JSliderWithTextField(0, 1000, (int)(gravityScale * 100.0), 0.01, new DecimalFormat("#0.00"));
+		this.lblGravityScale = new JLabel(Resources.getString("panel.body.gravityScale"), Icons.INFO, JLabel.LEFT);
+		this.lblGravityScale.setToolTipText(Resources.getString("panel.body.gravityScale.tooltip"));
+		this.sldGravityScale = new JSliderWithTextField(0, 1000, (int)(gravityScale * 100.0), 0.01, new DecimalFormat(Resources.getString("panel.body.gravityScale.format")));
 		this.sldGravityScale.setColumns(4);
 		this.sldGravityScale.addChangeListener(new ChangeListener() {
 			@Override
@@ -553,13 +547,10 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		});
 		
 		// initial state (Active/asleep)
-		this.lblState = new JLabel("State", Icons.INFO, JLabel.LEFT);
-		this.lblState.setToolTipText(
-				"<html>The current state of the body.<br />" +
-				"Inactive: The body does not participate in the world.<br />" +
-				"Asleep: The body has come to rest and only participates when awoken by another body or joint.</html>");
-		this.chkInactive = new JCheckBox("Inactive");
-		this.chkAsleep = new JCheckBox("Asleep");
+		this.lblState = new JLabel(Resources.getString("panel.body.state"), Icons.INFO, JLabel.LEFT);
+		this.lblState.setToolTipText(Resources.getString("panel.body.state.tooltip"));
+		this.chkInactive = new JCheckBox(Resources.getString("panel.body.state.inactive"));
+		this.chkAsleep = new JCheckBox(Resources.getString("panel.body.state.asleep"));
 		this.chkInactive.setSelected(inactive);
 		this.chkAsleep.setSelected(asleep);
 		
@@ -588,10 +579,8 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		});
 		
 		// allow auto sleep
-		this.lblAllowAutoSleep = new JLabel("Allow Auto-Sleeping", Icons.INFO, JLabel.LEFT);
-		this.lblAllowAutoSleep.setToolTipText(
-				"<html>Auto-sleeping allows the World to identify bodies who have come to rest and<br />" +
-				"skip steps with those bodies to provide better performance by putting them to sleep.</html>");
+		this.lblAllowAutoSleep = new JLabel(Resources.getString("panel.body.autoSleeping"), Icons.INFO, JLabel.LEFT);
+		this.lblAllowAutoSleep.setToolTipText(Resources.getString("panel.body.autoSleeping.tooltip"));
 		this.chkAllowAutoSleep = new JCheckBox();
 		this.chkAllowAutoSleep.setSelected(autoSleep);
 		
@@ -608,8 +597,8 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		});
 		
 		// is bullet
-		this.lblBullet = new JLabel("Bullet", Icons.INFO, JLabel.LEFT);
-		this.lblBullet.setToolTipText("A body flagged as a bullet require more processing, but can avoid tunneling.");
+		this.lblBullet = new JLabel(Resources.getString("panel.body.bullet"), Icons.INFO, JLabel.LEFT);
+		this.lblBullet.setToolTipText(Resources.getString("panel.body.bullet.tooltip"));
 		this.chkBullet = new JCheckBox();
 		this.chkBullet.setSelected(bullet);
 		
@@ -629,7 +618,7 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		
 		// setup the general section
 		JPanel pnlGeneral = new JPanel();
-		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General ");
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.section.general"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlGeneral.setBorder(border);
 		
@@ -666,7 +655,7 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		
 		// setup the mass section
 		JPanel pnlMass = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Mass ");
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.body.section.mass"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlMass.setBorder(border);
 		
@@ -714,7 +703,7 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		
 		// setup the state section
 		JPanel pnlProperties = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Properties ");
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.section.properties"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlProperties.setBorder(border);
 		
@@ -787,7 +776,7 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		
 		// setup the flags section
 		JPanel pnlFlags = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Flags ");
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.section.flags"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlFlags.setBorder(border);
 		
@@ -885,16 +874,16 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 	public void showInvalidInputMessage(Window owner) {}
 	
 	/** The normal mass type option */
-	private static final MassTypeItem NORMAL = new MassTypeItem("Normal", Mass.Type.NORMAL);
+	private static final MassTypeItem NORMAL = new MassTypeItem(Resources.getString("mass.type.normal"), Mass.Type.NORMAL);
 	
 	/** The infinite mass type option */
-	private static final MassTypeItem INFINITE = new MassTypeItem("Infinite", Mass.Type.INFINITE);
+	private static final MassTypeItem INFINITE = new MassTypeItem(Resources.getString("mass.type.infinite"), Mass.Type.INFINITE);
 	
 	/** The fixed linear velocity option */
-	private static final MassTypeItem FIXED_LINEAR_VELOCITY = new MassTypeItem("Fixed Linear Velocity", Mass.Type.FIXED_LINEAR_VELOCITY);
+	private static final MassTypeItem FIXED_LINEAR_VELOCITY = new MassTypeItem(Resources.getString("mass.type.fixedLinearVelocity"), Mass.Type.FIXED_LINEAR_VELOCITY);
 	
 	/** The fixed angular velocity option */
-	private static final MassTypeItem FIXED_ANGULAR_VELOCITY = new MassTypeItem("Fixed Angular Velocity", Mass.Type.FIXED_ANGULAR_VELOCITY);
+	private static final MassTypeItem FIXED_ANGULAR_VELOCITY = new MassTypeItem(Resources.getString("mass.type.fixedAngularVelocity"), Mass.Type.FIXED_ANGULAR_VELOCITY);
 	
 	/** The list of mass type items for the mass type drop down */
 	private static final MassTypeItem[] ITEMS = new MassTypeItem[] {

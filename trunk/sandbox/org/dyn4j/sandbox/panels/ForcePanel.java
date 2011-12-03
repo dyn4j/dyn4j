@@ -26,6 +26,7 @@ package org.dyn4j.sandbox.panels;
 
 import java.awt.Window;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 
 import javax.swing.GroupLayout;
 import javax.swing.JFormattedTextField;
@@ -33,6 +34,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
 import org.dyn4j.sandbox.utilities.ControlUtilities;
 import org.dyn4j.sandbox.utilities.Icons;
@@ -60,13 +62,13 @@ public class ForcePanel extends JPanel implements InputPanel {
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
 		
-		JLabel lblForce = new JLabel("Force", Icons.INFO, JLabel.LEFT);
-		lblForce.setToolTipText("The force in Newtons to apply to the center of the body.");
-		JLabel lblX = new JLabel("x");
-		JLabel lblY = new JLabel("y");
+		JLabel lblForce = new JLabel(Resources.getString("panel.force"), Icons.INFO, JLabel.LEFT);
+		lblForce.setToolTipText(MessageFormat.format(Resources.getString("panel.force.tooltip"), Resources.getString("unit.force")));
+		JLabel lblX = new JLabel(Resources.getString("x"));
+		JLabel lblY = new JLabel(Resources.getString("y"));
 		
-		this.txtX = new JFormattedTextField(new DecimalFormat("0.000"));
-		this.txtY = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtX = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.force.format")));
+		this.txtY = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.force.format")));
 		this.txtX.addFocusListener(new SelectTextFocusListener(this.txtX));
 		this.txtY.addFocusListener(new SelectTextFocusListener(this.txtY));
 		this.txtX.setColumns(7);

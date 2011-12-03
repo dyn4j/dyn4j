@@ -31,6 +31,7 @@ import java.awt.FlowLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.MessageFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -41,6 +42,7 @@ import javax.swing.JTabbedPane;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.sandbox.Preferences;
 import org.dyn4j.sandbox.SandboxBody;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.controls.BottomButtonPanel;
 import org.dyn4j.sandbox.panels.BodyPanel;
 import org.dyn4j.sandbox.panels.TransformPanel;
@@ -75,14 +77,13 @@ public class AddBodyDialog extends JDialog implements ActionListener {
 	/**
 	 * Full constructor.
 	 * @param owner the dialog owner
-	 * @param title the dialog title
 	 */
-	private AddBodyDialog(Window owner, String title) {
-		super(owner, title, ModalityType.APPLICATION_MODAL);
+	private AddBodyDialog(Window owner) {
+		super(owner, Resources.getString("dialog.body.add.title"), ModalityType.APPLICATION_MODAL);
 		
 		this.body = new SandboxBody();
 		this.body.getMass().setType(Mass.Type.NORMAL);
-		this.body.setName("Body" + N);
+		this.body.setName(MessageFormat.format(Resources.getString("dialog.body.add.name.default"), N));
 		
 		// check if we need to randomize colors
 		if (Preferences.isBodyColorRandom()) {
@@ -98,11 +99,11 @@ public class AddBodyDialog extends JDialog implements ActionListener {
 		this.pnlTransform = new TransformPanel();
 		
 		tabs.setBorder(BorderFactory.createEmptyBorder(7, 0, 0, 0));
-		tabs.addTab("Body", this.pnlBody);
-		tabs.addTab("Transform", this.pnlTransform);
+		tabs.addTab(Resources.getString("dialog.body.tab.body"), this.pnlBody);
+		tabs.addTab(Resources.getString("dialog.body.tab.transform"), this.pnlTransform);
 		
-		JButton btnCancel = new JButton("Cancel");
-		JButton btnAdd = new JButton("Add");
+		JButton btnCancel = new JButton(Resources.getString("button.cancel"));
+		JButton btnAdd = new JButton(Resources.getString("button.add"));
 		btnCancel.setActionCommand("cancel");
 		btnAdd.setActionCommand("add");
 		btnCancel.addActionListener(this);
@@ -154,11 +155,10 @@ public class AddBodyDialog extends JDialog implements ActionListener {
 	 * <p>
 	 * Returns null if the user clicked the cancel button or closed the dialog.
 	 * @param owner the dialog owner
-	 * @param title the dialog title
 	 * @return {@link SandboxBody}
 	 */
-	public static final SandboxBody show(Window owner, String title) {
-		AddBodyDialog dialog = new AddBodyDialog(owner, title);
+	public static final SandboxBody show(Window owner) {
+		AddBodyDialog dialog = new AddBodyDialog(owner);
 		dialog.setLocationRelativeTo(owner);
 		dialog.setIconImage(Icons.ADD_BODY.getImage());
 		dialog.setVisible(true);

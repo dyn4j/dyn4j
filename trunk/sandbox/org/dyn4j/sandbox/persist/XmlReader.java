@@ -76,6 +76,7 @@ import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.Camera;
 import org.dyn4j.sandbox.SandboxBody;
+import org.dyn4j.sandbox.SandboxRay;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -84,7 +85,7 @@ import org.xml.sax.helpers.DefaultHandler;
 /**
  * Class used to read in a saved simulation file.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class XmlReader extends DefaultHandler {
@@ -121,6 +122,11 @@ public class XmlReader extends DefaultHandler {
 	
 	/** Flag for the Mass tag under the Mass tag */
 	private boolean massMassFlag;
+	
+	// ray
+	
+	/** Flag for the ray tag */
+	private boolean rayFlag;
 	
 	// Data; storage for the final results and extra information
 	
@@ -321,17 +327,26 @@ public class XmlReader extends DefaultHandler {
 	/** Storage for the UpperLimitEnabled tag */
 	private boolean upperLimitEnabled;
 	
+	// rays
+	
+	/** Storage for the Ray tag */
+	private SandboxRay ray;
+	
+	/** Storage for the Rays tag */
+	private List<SandboxRay> rays;
+	
 	/**
 	 * Hidden constructor.
-	 * @see #fromXml(File, World, Camera)
-	 * @see #fromXml(InputStream, World, Camera)
-	 * @see #fromXml(String, World, Camera)
+	 * @see #fromXml(File, World, List, Camera)
+	 * @see #fromXml(InputStream, World, List, Camera)
+	 * @see #fromXml(String, World, List, Camera)
 	 */
 	private XmlReader() {
 		this.bodies = new ArrayList<SandboxBody>();
 		this.joints = new ArrayList<Joint>();
 		this.idMap = new HashMap<String, SandboxBody>();
 		this.vertices = new ArrayList<Vector2>();
+		this.rays = new ArrayList<SandboxRay>();
 	}
 	
 	/**
@@ -340,13 +355,14 @@ public class XmlReader extends DefaultHandler {
 	 * The world object is cleared before loading.
 	 * @param file the file to read from
 	 * @param world the world object to modify
+	 * @param rays the list to store the rays
 	 * @param camera the simulation camera
 	 * @throws ParserConfigurationException thrown if a SAX configuration error occurs
 	 * @throws SAXException thrown if a parsing error occurs
 	 * @throws IOException thrown if an IO error occurs
 	 */
-	public static void fromXml(File file, World world, Camera camera) throws ParserConfigurationException, SAXException, IOException {
-		XmlReader.fromXml(new InputSource(new FileReader(file)), world, camera);
+	public static void fromXml(File file, World world, List<SandboxRay> rays, Camera camera) throws ParserConfigurationException, SAXException, IOException {
+		XmlReader.fromXml(new InputSource(new FileReader(file)), world, rays, camera);
 	}
 	
 	/**
@@ -355,13 +371,14 @@ public class XmlReader extends DefaultHandler {
 	 * The world object is cleared before loading.
 	 * @param xml the string containing the XML to read from
 	 * @param world the world object to modify
+	 * @param rays the list to store the rays
 	 * @param camera the simulation camera
 	 * @throws ParserConfigurationException thrown if a SAX configuration error occurs
 	 * @throws SAXException thrown if a parsing error occurs
 	 * @throws IOException thrown if an IO error occurs
 	 */
-	public static void fromXml(String xml, World world, Camera camera) throws ParserConfigurationException, SAXException, IOException {
-		XmlReader.fromXml(new InputSource(new StringReader(xml)), world, camera);
+	public static void fromXml(String xml, World world, List<SandboxRay> rays, Camera camera) throws ParserConfigurationException, SAXException, IOException {
+		XmlReader.fromXml(new InputSource(new StringReader(xml)), world, rays, camera);
 	}
 	
 	/**
@@ -370,13 +387,14 @@ public class XmlReader extends DefaultHandler {
 	 * The world object is cleared before loading.
 	 * @param stream the input stream containing the xml
 	 * @param world the world object to modify
+	 * @param rays the list to store the rays
 	 * @param camera the simulation camera
 	 * @throws ParserConfigurationException thrown if a SAX configuration error occurs
 	 * @throws SAXException thrown if a parsing error occurs
 	 * @throws IOException thrown if an IO error occurs
 	 */
-	public static void fromXml(InputStream stream, World world, Camera camera) throws ParserConfigurationException, SAXException, IOException {
-		XmlReader.fromXml(new InputSource(stream), world, camera);
+	public static void fromXml(InputStream stream, World world, List<SandboxRay> rays, Camera camera) throws ParserConfigurationException, SAXException, IOException {
+		XmlReader.fromXml(new InputSource(stream), world, rays, camera);
 	}
 	
 	/**
@@ -385,12 +403,13 @@ public class XmlReader extends DefaultHandler {
 	 * The world object is cleared before loading.
 	 * @param source the source containing the XML
 	 * @param world the world object to modify
+	 * @param rays the list to store the rays
 	 * @param camera the simulation camera
 	 * @throws ParserConfigurationException thrown if a SAX configuration error occurs
 	 * @throws SAXException thrown if a parsing error occurs
 	 * @throws IOException thrown if an IO error occurs
 	 */
-	private static void fromXml(InputSource source, World world, Camera camera) throws ParserConfigurationException, SAXException, IOException {
+	private static void fromXml(InputSource source, World world, List<SandboxRay> rays, Camera camera) throws ParserConfigurationException, SAXException, IOException {
 		SAXParserFactory factory = SAXParserFactory.newInstance();
 		SAXParser parser = factory.newSAXParser();
 		
@@ -399,6 +418,7 @@ public class XmlReader extends DefaultHandler {
 		parser.parse(source, reader);
 		
 		world.removeAll();
+		rays.clear();
 		
 		// these can be null
 		if (reader.broadphase != null) world.setBroadphaseDetector(reader.broadphase);
@@ -420,6 +440,11 @@ public class XmlReader extends DefaultHandler {
 			world.add(joint);
 		}
 		
+		// loadup the rays list
+		for (SandboxRay ray : reader.rays) {
+			rays.add(ray);
+		}
+		
 		// set the camera
 		if (reader.camera != null) {
 			camera.setScale(reader.camera.getScale());
@@ -436,7 +461,12 @@ public class XmlReader extends DefaultHandler {
 		this.tagName = qName;
 		this.handled = true;
 		// look for tags that have attributes
-		if ("System".equalsIgnoreCase(qName)) {
+		if ("Simulation".equalsIgnoreCase(qName)) {
+			// check the version
+			// this.version = attributes.getValue("version");
+			// in later versions this may need to be checked
+			// to perform different logic
+		} else if ("System".equalsIgnoreCase(qName)) {
 			this.systemFlag = true;
 		} else if ("Camera".equalsIgnoreCase(qName)) {
 			this.camera = new Camera(32, new Vector2());
@@ -550,6 +580,13 @@ public class XmlReader extends DefaultHandler {
 			double x = Double.parseDouble(attributes.getValue("x"));
 			double y = Double.parseDouble(attributes.getValue("y"));
 			this.pulleyAnchor2 = new Vector2(x, y);
+		} else if ("Ray".equalsIgnoreCase(qName)) {
+			this.ray = new SandboxRay(attributes.getValue("Name"), 0.0);
+			this.rayFlag = true;
+		} else if ("Start".equalsIgnoreCase(qName)) {
+			double x = Double.parseDouble(attributes.getValue("x"));
+			double y = Double.parseDouble(attributes.getValue("y"));
+			this.ray.setStart(new Vector2(x, y));
 		} else {
 			this.handled = false;
 		}
@@ -686,7 +723,7 @@ public class XmlReader extends DefaultHandler {
 		} else if ("MaximumTranslation".equalsIgnoreCase(this.tagName)) {
 			Settings.getInstance().setMaxTranslation(Double.parseDouble(s));
 		} else if ("MaximumRotation".equalsIgnoreCase(this.tagName)) {
-			Settings.getInstance().setMaxRotation(Math.toRadians(Double.parseDouble(s)));
+			Settings.getInstance().setMaxRotation(Double.parseDouble(s));
 		} else if ("ContinuousCollisionDetectionMode".equalsIgnoreCase(this.tagName)) {
 			if (Settings.ContinuousDetectionMode.ALL.toString().equalsIgnoreCase(s)) {
 				Settings.getInstance().setContinuousDetectionMode(Settings.ContinuousDetectionMode.ALL);
@@ -704,7 +741,7 @@ public class XmlReader extends DefaultHandler {
 		} else if ("SleepLinearVelocity".equalsIgnoreCase(this.tagName)) {
 			Settings.getInstance().setSleepVelocity(Double.parseDouble(s));
 		} else if ("SleepAngularVelocity".equalsIgnoreCase(this.tagName)) {
-			Settings.getInstance().setSleepAngularVelocity(Math.toRadians(Double.parseDouble(s)));
+			Settings.getInstance().setSleepAngularVelocity(Double.parseDouble(s));
 		} else if ("VelocitySolverIterations".equalsIgnoreCase(this.tagName)) {
 			Settings.getInstance().setVelocityConstraintSolverIterations(Integer.parseInt(s));
 		} else if ("PositionSolverIterations".equalsIgnoreCase(this.tagName)) {
@@ -716,13 +753,21 @@ public class XmlReader extends DefaultHandler {
 		} else if ("LinearTolerance".equalsIgnoreCase(this.tagName)) {
 			Settings.getInstance().setLinearTolerance(Double.parseDouble(s));
 		} else if ("AngularTolerance".equalsIgnoreCase(this.tagName)) {
-			Settings.getInstance().setAngularTolerance(Math.toRadians(Double.parseDouble(s)));
+			Settings.getInstance().setAngularTolerance(Double.parseDouble(s));
 		} else if ("MaximumLinearCorrection".equalsIgnoreCase(this.tagName)) {
 			Settings.getInstance().setMaxLinearCorrection(Double.parseDouble(s));
 		} else if ("MaximumAngularCorrection".equalsIgnoreCase(this.tagName)) {
-			Settings.getInstance().setMaxAngularCorrection(Math.toRadians(Double.parseDouble(s)));
+			Settings.getInstance().setMaxAngularCorrection(Double.parseDouble(s));
 		} else if ("Baumgarte".equalsIgnoreCase(this.tagName)) {
 			Settings.getInstance().setBaumgarte(Double.parseDouble(s));
+		} else if ("Direction".equalsIgnoreCase(this.tagName) && this.rayFlag) {
+			this.ray.setDirection(Double.parseDouble(s));
+		} else if ("Length".equalsIgnoreCase(this.tagName) && this.rayFlag) {
+			this.ray.setLength(Double.parseDouble(s));
+		} else if ("IgnoreSensors".equalsIgnoreCase(this.tagName) && this.rayFlag) {
+			this.ray.setIgnoreSensors(Boolean.parseBoolean(s));
+		} else if ("TestAll".equalsIgnoreCase(this.tagName) && this.rayFlag) {
+			this.ray.setAll(Boolean.parseBoolean(s));
 		} else {
 			handled = false;
 		}
@@ -934,6 +979,10 @@ public class XmlReader extends DefaultHandler {
 			
 			this.jointName = null;
 			this.jointType = null;
+		} else if ("Ray".equalsIgnoreCase(qName)) {
+			this.rays.add(this.ray);
+			this.ray = null;
+			this.rayFlag = false;
 		}
 	}
 }

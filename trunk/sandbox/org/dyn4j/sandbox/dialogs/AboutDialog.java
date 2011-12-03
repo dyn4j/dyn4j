@@ -31,6 +31,7 @@ import java.awt.Window;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.MessageFormat;
 
 import javax.swing.BoxLayout;
 import javax.swing.JDialog;
@@ -42,12 +43,13 @@ import javax.swing.event.HyperlinkListener;
 
 import org.dyn4j.Version;
 import org.dyn4j.sandbox.Sandbox;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Dialog showing the about information.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class AboutDialog extends JDialog {
@@ -59,7 +61,7 @@ public class AboutDialog extends JDialog {
 	 * @param owner the dialog owner
 	 */
 	private AboutDialog(Window owner) {
-		super(owner, "About", ModalityType.APPLICATION_MODAL);
+		super(owner, Resources.getString("dialog.about.title"), ModalityType.APPLICATION_MODAL);
 		// set the icon
 		this.setIconImage(Icons.ABOUT.getImage());
 		// set the size
@@ -73,19 +75,16 @@ public class AboutDialog extends JDialog {
 		// add the logo to the top
 		JLabel icon = new JLabel();
 		icon.setIcon(Icons.SANDBOX_128);
-		icon.setText(
-				"<html>Sandbox - A testing application for dyn4j<br />" +
-				"Sandbox v" + Sandbox.VERSION + "<br />" +
-				"dyn4j v" + Version.getVersion() + "</html>");
+		icon.setText(MessageFormat.format(Resources.getString("dialog.about.text"), Sandbox.VERSION, Version.getVersion()));
 		
 		// add the about text section with clickable links
 		JTextPane text = new JTextPane();
 		text.setEditable(false);
 		try {
-			text.setPage(this.getClass().getResource("/org/dyn4j/sandbox/resources/about.html"));
+			text.setPage(this.getClass().getResource(Resources.getString("dialog.about.html")));
 		} catch (IOException e) {
 			// if the file is not found then just set the text to empty
-			text.setText("Was unable to load the about.html file.");
+			text.setText(Resources.getString("dialog.about.html.error"));
 		}
 		// add a hyperlink listener to open links in the default browser
 		text.addHyperlinkListener(new HyperlinkListener() {
@@ -106,12 +105,12 @@ public class AboutDialog extends JDialog {
 								desktop.browse(uri);
 							} catch (URISyntaxException ex) {
 								// this shouldn't happen
-								System.err.println("A link in the about.html is not correct: " + e.getURL());
+								System.err.println(MessageFormat.format(Resources.getString("dialog.about.uri.error"), e.getURL()));
 							} catch (IOException ex) {
 								// this shouldn't happen either since
 								// most desktops have a default program to
 								// open urls
-								System.err.println("Cannot navigate to link since a default program is not set or does not exist.");
+								System.err.println(Resources.getString("dialog.about.navigate.error"));
 							}
 						}
 					}

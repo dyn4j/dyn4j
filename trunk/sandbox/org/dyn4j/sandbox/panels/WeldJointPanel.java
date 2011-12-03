@@ -28,6 +28,7 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
@@ -42,6 +43,7 @@ import javax.swing.border.TitledBorder;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.WeldJoint;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
 import org.dyn4j.sandbox.utilities.ControlUtilities;
@@ -129,48 +131,46 @@ public class WeldJointPanel extends JointPanel implements InputPanel, ActionList
 		this.txtName.setColumns(15);
 		this.chkCollision.setSelected(collision);
 		
-		this.lblBody1 = new JLabel("Body 1", Icons.INFO, JLabel.LEFT);
-		this.lblBody2 = new JLabel("Body 2", Icons.INFO, JLabel.LEFT);
-		this.lblBody1.setToolTipText("The first body participating in the joint.");
-		this.lblBody2.setToolTipText("The second body participating in the joint.");
+		this.lblBody1 = new JLabel(Resources.getString("panel.joint.body1"), Icons.INFO, JLabel.LEFT);
+		this.lblBody2 = new JLabel(Resources.getString("panel.joint.body2"), Icons.INFO, JLabel.LEFT);
+		this.lblBody1.setToolTipText(Resources.getString("panel.joint.body1.tooltip"));
+		this.lblBody2.setToolTipText(Resources.getString("panel.joint.body2.tooltip"));
 		
 		this.cmbBody1 = new JComboBox(bodies);
 		this.cmbBody2 = new JComboBox(bodies);
 		
-		this.lblAnchor = new JLabel("Anchor", Icons.INFO, JLabel.LEFT);
-		this.lblAnchor.setToolTipText("The anchor point to restrict rotation and translation.");
+		this.lblAnchor = new JLabel(Resources.getString("panel.joint.anchor"), Icons.INFO, JLabel.LEFT);
+		this.lblAnchor.setToolTipText(Resources.getString("panel.joint.weld.anchor.tooltip"));
 		
-		this.lblX1 = new JLabel("x");
-		this.lblY1 = new JLabel("y");
+		this.lblX1 = new JLabel(Resources.getString("x"));
+		this.lblY1 = new JLabel(Resources.getString("y"));
 		
-		this.txtX1 = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtX1 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.anchor.format")));
 		this.txtX1.addFocusListener(new SelectTextFocusListener(this.txtX1));
 		this.txtX1.setColumns(7);
 		
-		this.txtY1 = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.txtY1 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.anchor.format")));
 		this.txtY1.addFocusListener(new SelectTextFocusListener(this.txtY1));
 		this.txtY1.setColumns(7);
 		
-		this.btnUseCenter1 = new JButton("Use Center");
-		this.btnUseCenter1.setToolTipText("Set the anchor to the center of mass of body 1.");
+		this.btnUseCenter1 = new JButton(Resources.getString("panel.joint.useCenter"));
+		this.btnUseCenter1.setToolTipText(Resources.getString("panel.joint.useCenter.tooltip"));
 		this.btnUseCenter1.setActionCommand("use-com1");
 		this.btnUseCenter1.addActionListener(this);
 		
-		this.btnUseCenter2 = new JButton("Use Center");
-		this.btnUseCenter2.setToolTipText("Set the anchor to the center of mass of body 2.");
+		this.btnUseCenter2 = new JButton(Resources.getString("panel.joint.useCenter"));
+		this.btnUseCenter2.setToolTipText(Resources.getString("panel.joint.useCenter.tooltip"));
 		this.btnUseCenter2.setActionCommand("use-com2");
 		this.btnUseCenter2.addActionListener(this);
 		
-		this.lblFrequency = new JLabel("Frequency", Icons.INFO, JLabel.LEFT);
-		this.lblFrequency.setToolTipText(
-				"<html>Determines how fast the spring should oscillate in hertz (Seconds<sup>-1</sup>).<br />" +
-				"Set to zero to disable the spring/damper and make it a fixed joint.</html>");
-		this.txtFrequency = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.lblFrequency = new JLabel(Resources.getString("panel.joint.weld.frequency"), Icons.INFO, JLabel.LEFT);
+		this.lblFrequency.setToolTipText(MessageFormat.format(Resources.getString("panel.joint.weld.frequency.tooltip"), Resources.getString("unit.inverseTime"), Resources.getString("unit.time")));
+		this.txtFrequency = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.weld.frequency.format")));
 		this.txtFrequency.addFocusListener(new SelectTextFocusListener(this.txtFrequency));
 		
-		this.lblRatio = new JLabel("Damping Ratio", Icons.INFO, JLabel.LEFT);
-		this.lblRatio.setToolTipText("Determines how fast the spring is dampened from 0.0 to 1.0.");
-		this.txtRatio = new JFormattedTextField(new DecimalFormat("0.000"));
+		this.lblRatio = new JLabel(Resources.getString("panel.joint.weld.dampingRatio"), Icons.INFO, JLabel.LEFT);
+		this.lblRatio.setToolTipText(Resources.getString("panel.joint.weld.dampingRatio.tooltip"));
+		this.txtRatio = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.weld.dampingRatio.format")));
 		this.txtRatio.addFocusListener(new SelectTextFocusListener(this.txtRatio));
 		
 		// set defaults
@@ -203,7 +203,7 @@ public class WeldJointPanel extends JointPanel implements InputPanel, ActionList
 		// setup the general section
 		
 		JPanel pnlGeneral = new JPanel();
-		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " General ");
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.section.general"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlGeneral.setBorder(border);
 		
@@ -258,7 +258,7 @@ public class WeldJointPanel extends JointPanel implements InputPanel, ActionList
 		// setup the spring/damper secion
 		
 		JPanel pnlSpringDamper = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Spring/Damper ");
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.joint.section.springDamper"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlSpringDamper.setBorder(border);
 		
@@ -297,16 +297,6 @@ public class WeldJointPanel extends JointPanel implements InputPanel, ActionList
 		layout.setVerticalGroup(layout.createSequentialGroup()
 				.addComponent(pnlGeneral)
 				.addComponent(pnlSpringDamper));
-	}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.sandbox.panels.JointPanel#getDescription()
-	 */
-	@Override
-	public String getDescription() {
-		return "A weld joint fixes two to move and rotate as one body.  This has the same effect as adding another fixture to " +
-				"a body.  A weld joint is a better choice than a new fixture if the bodies plan to separate.  The weld joint also " +
-				"allows a rotational spring/damper at the anchor point.";
 	}
 	
 	/* (non-Javadoc)
@@ -400,21 +390,21 @@ public class WeldJointPanel extends JointPanel implements InputPanel, ActionList
 	public void showInvalidInputMessage(Window owner) {
 		String name = this.txtName.getText();
 		if (name == null || name.isEmpty()) {
-			JOptionPane.showMessageDialog(owner, "You must specify a name for the joint.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.missingName"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// they can't be the same body
 		if (this.cmbBody1.getSelectedItem() == this.cmbBody2.getSelectedItem()) {
-			JOptionPane.showMessageDialog(owner, "You must select two different bodies.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.sameBody"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// check the damping ratio
 		double dr = ControlUtilities.getDoubleValue(this.txtRatio);
 		if (dr < 0.0 || dr > 1.0) {
-			JOptionPane.showMessageDialog(owner, "The damping ratio must be between 0 and 1 inclusive.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.invalidDampingRatio"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// check the frequency
 		double f = ControlUtilities.getDoubleValue(this.txtFrequency);
 		if (f < 0.0) {
-			JOptionPane.showMessageDialog(owner, "The frequency must be greater than or equal to zero.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.invalidFrequency"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

@@ -44,7 +44,7 @@ import org.dyn4j.geometry.Vector2;
  * facilitate stable stacking of rigid {@link Body}s.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class ContactConstraintSolver {
@@ -265,6 +265,8 @@ public class ContactConstraintSolver {
 			Vector2 N = contactConstraint.normal;
 			Vector2 T = contactConstraint.tangent;
 			
+			double tangentSpeed = contactConstraint.tangentSpeed;
+			
 			// evaluate friction impulse
 			for (int k = 0; k < cSize; k++) {
 				Contact contact = contacts[k];
@@ -282,7 +284,7 @@ public class ContactConstraintSolver {
 				Vector2 rv = lv1.subtract(lv2);
 				
 				// project the relative velocity onto the tangent normal
-				double rvt = T.dot(rv);
+				double rvt = T.dot(rv) - tangentSpeed;
 				// calculate the tangential impulse
 				double jt = contact.massT * (-rvt);
 				

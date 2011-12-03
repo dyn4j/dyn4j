@@ -28,7 +28,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.text.DecimalFormat;
+import java.text.MessageFormat;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -38,6 +38,7 @@ import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.geometry.Wound;
+import org.dyn4j.sandbox.Resources;
 
 /**
  * Panel used by the shape panels to preview the current shape being created.
@@ -63,9 +64,6 @@ public class PreviewPanel extends JPanel {
 	
 	/** The padding at the top to show the scale */
 	private static final int TOP = 10;
-	
-	/** The format for the scale */
-	private static final DecimalFormat FORMAT = new DecimalFormat("0");
 	
 	/** The convex shape to draw */
 	private Convex convex;
@@ -350,10 +348,7 @@ public class PreviewPanel extends JPanel {
 		g2d.drawOval(-2, -2, 5, 5);
 		g2d.scale(1.0, -1.0);
 		
-//		g2d.drawString("(0, 0)", 5, 5);
-		
 		g2d.translate(-w/2, -h/2 - TOP);
-		
-		g2d.drawString(FORMAT.format(s) + " Pixels/Meter", 5, 15);
+		g2d.drawString(MessageFormat.format(Resources.getString("panel.preview.format"), s, Resources.getString("unit.length.singular")), 5, 15);
 	}
 }

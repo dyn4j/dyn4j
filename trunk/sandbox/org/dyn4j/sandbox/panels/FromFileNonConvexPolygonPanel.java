@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,6 +48,7 @@ import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.geometry.decompose.Decomposer;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.dialogs.SampleFileDialog;
 import org.dyn4j.sandbox.utilities.Icons;
 
@@ -85,24 +87,24 @@ public class FromFileNonConvexPolygonPanel extends NonConvexShapePanel implement
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
 		
-		JLabel lblFile = new JLabel("File", Icons.INFO, JLabel.LEFT);
-		lblFile.setToolTipText("The file to load containing the points of the polygon.");
+		JLabel lblFile = new JLabel(Resources.getString("panel.concave.polygon.file"), Icons.INFO, JLabel.LEFT);
+		lblFile.setToolTipText(Resources.getString("panel.concave.polygon.file.tooltip"));
 		
 		this.txtFile = new JTextField();
 		this.txtFile.setEditable(false);
 		
-		JButton btnBrowse = new JButton("Browse");
-		btnBrowse.setToolTipText("Browse the file system for a file.");
+		JButton btnBrowse = new JButton(Resources.getString("button.browse"));
+		btnBrowse.setToolTipText(Resources.getString("button.browse.tooltip"));
 		btnBrowse.setActionCommand("browse");
 		btnBrowse.addActionListener(this);
 		
-		JButton btnGenerate = new JButton("View Sample File");
-		btnGenerate.setToolTipText("Shows a sample polygon file.");
+		JButton btnGenerate = new JButton(Resources.getString("panel.concave.polygon.viewSample"));
+		btnGenerate.setToolTipText(Resources.getString("panel.concave.polygon.viewSample.tooltip"));
 		btnGenerate.setActionCommand("generate");
 		btnGenerate.addActionListener(this);
 		
-		JLabel lblPreview = new JLabel("Preview", Icons.INFO, JLabel.LEFT);
-		lblPreview.setToolTipText("Shows a preview of the current shape.");
+		JLabel lblPreview = new JLabel(Resources.getString("panel.preview"), Icons.INFO, JLabel.LEFT);
+		lblPreview.setToolTipText(Resources.getString("panel.preview.tooltip"));
 		this.pnlPreview = new PreviewPanel(new Dimension(250, 225));
 		
 		layout.setAutoCreateGaps(true);
@@ -168,49 +170,34 @@ public class FromFileNonConvexPolygonPanel extends NonConvexShapePanel implement
 					this.txtFile.setText(file.getAbsolutePath());
 				} catch (NumberFormatException e) {
 					// file data incorrect
-					JOptionPane.showMessageDialog(this, "The flie is not the right format.  Non-numeric characters " +
-							"cannot exist exception on comment(#) lines.", "Notice", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(this, Resources.getString("panel.pointFile.nonNumericValue"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 				} catch (IllegalArgumentException e) {
 					// the file didnt contain something correctly
-					JOptionPane.showMessageDialog(this, "The file does not contain a simple polygon without holes and crossing edges.", "Notice", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(this, Resources.getString("panel.concave.polygon.crossedEdges"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 					this.vertices = null;
 				} catch (ArrayIndexOutOfBoundsException e) {
 					// file format not correct
-					JOptionPane.showMessageDialog(this, "The file is not the right format.  Each line should contain two " +
-							"numbers separated by one or many whitespace characters.", "Notice", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(this, Resources.getString("panel.pointFile.invalidFormat"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 					this.vertices = null;
 				} catch (FileNotFoundException e) {
 					// file not found
-					JOptionPane.showMessageDialog(this, "Could not find the specified file: " + file.getAbsolutePath(), "Notice", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(this, MessageFormat.format(Resources.getString("panel.fileNotFound"), file.getAbsolutePath()), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 				} catch (IOException e) {
 					// failure to read
-					JOptionPane.showMessageDialog(this, "An IO exception occurred while reading the file.", "Notice", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(this, Resources.getString("panel.ioError"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 				} catch (Exception e) {
 					// some other failure
 					// get the message from the exception
 					String message = e.getMessage();
 					if (message == null || message.isEmpty()) {
-						message = "A simple polygon cannot have crossing edges.";
+						message = Resources.getString("panel.concave.polygon.crossedEdges");
 					}
-					JOptionPane.showMessageDialog(this, message, "Notice", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(this, message, Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 					this.vertices = null;
 				}
 			}
 		} else {
-			SampleFileDialog.show(
-					this,
-					"# Sample non-convex simple polygon (without holes and crossed edges)\n" +
-					"# the # character must be the first character on the line to be flagged as a comment\n" +
-					"\n" +
-					"# Any number of blank lines can exist\n" +
-					"\n" +
-					"# You can use any whitespace character to separate the x and y values (space, tab, multiple spaces)\n" +
-					"-0.5 -0.5\n" +
-					"0.5\t-0.5\n" +
-					"\n" +
-					"0.5     0.5\n" +
-					"0.0   0.0\n" +
-					"-0.5\t0.5\n");
+			SampleFileDialog.show(this, Resources.getString("panel.concave.polygon.sample"));
 		}
 	}
 
@@ -262,7 +249,7 @@ public class FromFileNonConvexPolygonPanel extends NonConvexShapePanel implement
 	@Override
 	public void showInvalidInputMessage(Window owner) {
 		if (!this.isValidInput()) {
-			JOptionPane.showMessageDialog(this, "You must specify a file containing points for a decomposable polygon.", "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(this, Resources.getString("panel.concave.polygon.invalid"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

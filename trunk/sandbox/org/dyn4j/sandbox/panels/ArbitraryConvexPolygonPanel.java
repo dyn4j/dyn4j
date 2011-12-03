@@ -44,6 +44,7 @@ import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.sandbox.Resources;
 
 /**
  * Panel used to create a polygon using arbitrary points.
@@ -88,9 +89,7 @@ public class ArbitraryConvexPolygonPanel extends ConvexShapePanel implements Inp
 		this.lblText = new JTextPane();
 		this.lblText.setContentType("text/html");
 		this.lblText.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
-		this.lblText.setText(
-				"<html>A polygon must have 3 or more vertices, counter-clockwise winding, " +
-				"must be convex, and cannot have coincident vertices.</html>");
+		this.lblText.setText(Resources.getString("panel.polygon.convex.warning"));
 		this.lblText.setEditable(false);
 		this.lblText.setPreferredSize(new Dimension(350, 50));
 		
@@ -232,7 +231,7 @@ public class ArbitraryConvexPolygonPanel extends ConvexShapePanel implements Inp
 		try {
 			new Polygon(points);
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(owner, e.getMessage(), "Notice", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, e.getMessage(), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 	

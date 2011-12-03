@@ -36,6 +36,7 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.controls.BottomButtonPanel;
 import org.dyn4j.sandbox.panels.ForcePanel;
 import org.dyn4j.sandbox.utilities.Icons;
@@ -67,16 +68,16 @@ public class ApplyForceDialog extends JDialog implements ActionListener {
 	 * @param owner the dialog owner
 	 */
 	private ApplyForceDialog(Window owner) {
-		super(owner, "Apply Force", ModalityType.APPLICATION_MODAL);
+		super(owner, Resources.getString("dialog.force.title"), ModalityType.APPLICATION_MODAL);
 		
 		this.setIconImage(Icons.FORCE.getImage());
 		this.forcePanel = new ForcePanel();
 		
-		this.btnCancel = new JButton("Cancel");
+		this.btnCancel = new JButton(Resources.getString("button.cancel"));
 		this.btnCancel.setActionCommand("cancel");
 		this.btnCancel.addActionListener(this);
 		
-		this.btnApply = new JButton("Apply");
+		this.btnApply = new JButton(Resources.getString("button.apply"));
 		this.btnApply.setActionCommand("apply");
 		this.btnApply.addActionListener(this);
 		

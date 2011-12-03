@@ -47,7 +47,7 @@ import org.dyn4j.geometry.Vertex;
  * Derived from the open source project <a href="http://www.box2d.org">Box2d</a>.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 1.1.0
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class ClippingManifoldSolver implements ManifoldSolver {
@@ -169,7 +169,6 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 		List<Vertex> points = new ArrayList<Vertex>(2);
 		Vector2 p1 = v1.getPoint();
 		Vector2 p2 = v2.getPoint();
-		Vector2 e = p1.to(p2);
 		
 		// calculate the distance between the end points of the edge and the clip line
 		double d1 = n.dot(p1) - offset;
@@ -181,6 +180,8 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 		
 		// check if they are on opposing sides of the line
 		if (d1 * d2 < 0.0) {
+			// get the edge vector
+			Vector2 e = p1.to(p2);
 			// clip to obtain another point
 			double u = d1 / (d1 - d2);
 			e.multiply(u);
