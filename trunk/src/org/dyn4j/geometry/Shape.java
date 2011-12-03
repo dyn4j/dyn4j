@@ -36,7 +36,7 @@ package org.dyn4j.geometry;
  * class method <code>is</code> only performs a reference comparison. When creating the type make 
  * sure to pass the super type {@link Shape.Type}.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.2
  * @since 1.0.0
  */
 public interface Shape extends Transformable {	
@@ -166,6 +166,15 @@ public interface Shape extends Transformable {
 	 * @since 2.0.0
 	 */
 	public abstract double getRadius();
+	
+	/**
+	 * Returns the radius of the shape if the given point was the
+	 * center for this shape.
+	 * @param center the center point
+	 * @return double
+	 * @since 3.0.2
+	 */
+	public abstract double getRadius(Vector2 center);
 	
 	/**
 	 * Returns the user data.

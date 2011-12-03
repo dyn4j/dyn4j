@@ -38,6 +38,23 @@ public abstract class Wound extends AbstractShape implements Shape, Transformabl
 	protected Vector2[] normals;
 	
 	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Shape#getRadius(org.dyn4j.geometry.Vector2)
+	 */
+	@Override
+	public double getRadius(Vector2 center) {
+		// find the maximum radius from the center
+		int size = this.vertices.length;
+		double r2 = 0.0;
+		for (int i = 0; i < size; i++) {
+			double r2t = center.distanceSquared(this.vertices[i]);
+			// keep the largest
+			r2 = Math.max(r2, r2t);
+		}
+		// set the radius
+		return Math.sqrt(r2);
+	}
+	
+	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override

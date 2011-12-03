@@ -24,12 +24,10 @@
  */
 package org.dyn4j.sandbox.panels;
 
-import java.text.DecimalFormat;
-
 import javax.swing.GroupLayout;
-import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import org.dyn4j.sandbox.ContactCounter;
@@ -50,22 +48,22 @@ public class ContactPanel extends JPanel {
 	private ContactCounter counter;
 	
 	/** The text box to store the total number of contacts */
-	private JFormattedTextField txtTotalContacts;
+	private JTextField txtTotalContacts;
 	
 	/** The text box to store the number of sensed contacts */
-	private JFormattedTextField txtSensedContacts;
+	private JTextField txtSensedContacts;
 	
 	/** The text box to store the number of added contacts */
-	private JFormattedTextField txtAddedContacts;
+	private JTextField txtAddedContacts;
 	
 	/** The text box to store the number of persisted contacts */
-	private JFormattedTextField txtPersistedContacts;
+	private JTextField txtPersistedContacts;
 	
 	/** The text box to store the number of removed contacts */
-	private JFormattedTextField txtRemovedContacts;
+	private JTextField txtRemovedContacts;
 	
 	/** The text box to store the number of solved contacts */
-	private JFormattedTextField txtSolvedContacts;
+	private JTextField txtSolvedContacts;
 
 	/** The last time the panel was updated */
 	private long lastUpdate;
@@ -91,12 +89,12 @@ public class ContactPanel extends JPanel {
 		lblRemovedContacts.setToolTipText(Resources.getString("panel.contact.removed.tooltip"));
 		lblSolvedContacts.setToolTipText(Resources.getString("panel.contact.solved.tooltip"));
 		
-		this.txtTotalContacts = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.contact.format")));
-		this.txtSensedContacts = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.contact.format")));
-		this.txtAddedContacts = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.contact.format")));
-		this.txtPersistedContacts = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.contact.format")));
-		this.txtRemovedContacts = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.contact.format")));
-		this.txtSolvedContacts = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.contact.format")));
+		this.txtTotalContacts = new JTextField();
+		this.txtSensedContacts = new JTextField();
+		this.txtAddedContacts = new JTextField();
+		this.txtPersistedContacts = new JTextField();
+		this.txtRemovedContacts = new JTextField();
+		this.txtSolvedContacts = new JTextField();
 		
 		this.txtTotalContacts.setEditable(false);
 		this.txtSensedContacts.setEditable(false);
@@ -191,12 +189,12 @@ public class ContactPanel extends JPanel {
 				int sensed = counter.getSensed();
 				int total = added + persisted + sensed;
 				
-				txtTotalContacts.setValue(total);
-				txtAddedContacts.setValue(added);
-				txtPersistedContacts.setValue(persisted);
-				txtRemovedContacts.setValue(removed);
-				txtSolvedContacts.setValue(solved);
-				txtSensedContacts.setValue(sensed);
+				txtTotalContacts.setText(String.valueOf(total));
+				txtAddedContacts.setText(String.valueOf(added));
+				txtPersistedContacts.setText(String.valueOf(persisted));
+				txtRemovedContacts.setText(String.valueOf(removed));
+				txtSolvedContacts.setText(String.valueOf(solved));
+				txtSensedContacts.setText(String.valueOf(sensed));
 			}
 		});
 	}
