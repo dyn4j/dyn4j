@@ -46,7 +46,7 @@ import org.dyn4j.geometry.Vector2;
  * If there is a collision, one can obtain the penetration {@link Vector2} and depth from scaling the axis
  * by the projection overlap.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class Sat implements NarrowphaseDetector {
@@ -56,7 +56,7 @@ public class Sat implements NarrowphaseDetector {
 	@Override
 	public boolean detect(Convex convex1, Transform transform1, Convex convex2, Transform transform2, Penetration penetration) {
 		// check for circles
-		if (convex1.isType(Circle.TYPE) && convex2.isType(Circle.TYPE)) {
+		if (convex1 instanceof Circle && convex2 instanceof Circle) {
 			// if its a circle - circle collision use the faster method
 			return CircleDetector.detect((Circle) convex1, transform1, (Circle) convex2, transform2, penetration);
 		}
@@ -184,7 +184,7 @@ public class Sat implements NarrowphaseDetector {
 	@Override
 	public boolean detect(Convex convex1, Transform transform1, Convex convex2, Transform transform2) {
 		// check for circles
-		if (convex1.isType(Circle.TYPE) && convex2.isType(Circle.TYPE)) {
+		if (convex1 instanceof Circle && convex2 instanceof Circle) {
 			// if its a circle - circle collision use the faster method
 			return CircleDetector.detect((Circle) convex1, transform1, (Circle) convex2, transform2);
 		}

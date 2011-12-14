@@ -33,6 +33,7 @@ import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * Implementation of the <a href="http://mnbayazit.com/406/bayazit">Bayazit</a> convex decomposition algorithm.
@@ -50,11 +51,11 @@ public class Bayazit implements Decomposer {
 	@Override
 	public List<Convex> decompose(Vector2... points) {
 		// check for null array
-		if (points == null) throw new NullPointerException("Cannot decompose a null array of points.");
+		if (points == null) throw new NullPointerException(Messages.getString("geometry.decompose.nullArray"));
 		// get the number of points
 		int size = points.length;
 		// check the size
-		if (size < 4) throw new IllegalArgumentException("The polygon must have 4 or more vertices.");
+		if (size < 4) throw new IllegalArgumentException(Messages.getString("geometry.decompose.invalidSize"));
 		
 		// get the winding order
 		double winding = Geometry.getWinding(points);
@@ -245,7 +246,7 @@ public class Bayazit implements Decomposer {
 		// if we get here, we know the given polygon has 0 reflex vertices
 		// and is therefore convex, add it to the list of convex polygons
 		if (polygon.size() < 3) {
-			throw new IllegalArgumentException("A simple polygon cannot have crossing edges.");
+			throw new IllegalArgumentException(Messages.getString("geometry.decompose.crossingEdges"));
 		}
 		Vector2[] vertices = new Vector2[polygon.size()];
 		polygon.toArray(vertices);

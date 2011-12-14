@@ -56,10 +56,10 @@ import javax.swing.event.ListSelectionListener;
 import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.collision.Filter;
 import org.dyn4j.dynamics.BodyFixture;
-import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.controls.JSliderWithTextField;
+import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
-import org.dyn4j.sandbox.utilities.Icons;
+import org.dyn4j.sandbox.resources.Messages;
 
 /**
  * Panel used to edit a fixture.
@@ -110,10 +110,10 @@ public class FixturePanel extends JPanel implements InputPanel {
 		// the list of categories
 		Category[] categories = new Category[32];
 		// add the initial ones
-		categories[0] = new Category(Integer.MAX_VALUE, Resources.getString("panel.fixture.category.all"));
+		categories[0] = new Category(Integer.MAX_VALUE, Messages.getString("panel.fixture.category.all"));
 		int v = 1;
 		for (int i = 1; i < 32; i++) {
-			categories[i] = new Category(v, MessageFormat.format(Resources.getString("panel.fixture.category.template"), i));
+			categories[i] = new Category(v, MessageFormat.format(Messages.getString("panel.fixture.category.template"), i));
 			v *= 2;
 		}
 		CATEGORIES = categories;
@@ -209,8 +209,8 @@ public class FixturePanel extends JPanel implements InputPanel {
 		// see if the name is already populated
 		String name = (String)fixture.getUserData();
 		
-		this.lblName = new JLabel(Resources.getString("panel.fixture.name"), Icons.INFO, JLabel.LEFT);
-		this.lblName.setToolTipText(Resources.getString("panel.fixture.name.tooltip"));
+		this.lblName = new JLabel(Messages.getString("panel.fixture.name"), Icons.INFO, JLabel.LEFT);
+		this.lblName.setToolTipText(Messages.getString("panel.fixture.name.tooltip"));
 		this.txtName = new JTextField(name);
 		this.txtName.addFocusListener(new SelectTextFocusListener(this.txtName));
 		this.txtName.getDocument().addDocumentListener(new DocumentListener() {
@@ -233,9 +233,9 @@ public class FixturePanel extends JPanel implements InputPanel {
 			}
 		});
 		
-		this.lblDensity = new JLabel(Resources.getString("panel.fixture.density"), Icons.INFO, JLabel.LEFT);
-		this.lblDensity.setToolTipText(MessageFormat.format(Resources.getString("panel.fixture.density.tooltip"), Resources.getString("unit.density")));
-		this.txtDensity = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.fixture.density.format")));
+		this.lblDensity = new JLabel(Messages.getString("panel.fixture.density"), Icons.INFO, JLabel.LEFT);
+		this.lblDensity.setToolTipText(MessageFormat.format(Messages.getString("panel.fixture.density.tooltip"), Messages.getString("unit.density")));
+		this.txtDensity = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.fixture.density.format")));
 		this.txtDensity.setValue(fixture.getDensity());
 		this.txtDensity.setColumns(4);
 		this.txtDensity.setMaximumSize(this.txtDensity.getPreferredSize());
@@ -252,9 +252,9 @@ public class FixturePanel extends JPanel implements InputPanel {
 			}
 		});
 		
-		this.lblRestitution = new JLabel(Resources.getString("panel.fixture.restitution"), Icons.INFO, JLabel.LEFT);
-		this.lblRestitution.setToolTipText(Resources.getString("panel.fixture.restitution.tooltip"));
-		this.sldRestitution = new JSliderWithTextField(0, 100, (int)(fixture.getRestitution() * 100.0), 0.01, new DecimalFormat(Resources.getString("panel.fixture.restitution.format")));
+		this.lblRestitution = new JLabel(Messages.getString("panel.fixture.restitution"), Icons.INFO, JLabel.LEFT);
+		this.lblRestitution.setToolTipText(Messages.getString("panel.fixture.restitution.tooltip"));
+		this.sldRestitution = new JSliderWithTextField(0, 100, (int)(fixture.getRestitution() * 100.0), 0.01, new DecimalFormat(Messages.getString("panel.fixture.restitution.format")));
 		this.sldRestitution.setColumns(4);
 		this.sldRestitution.addChangeListener(new ChangeListener() {
 			@Override
@@ -265,9 +265,9 @@ public class FixturePanel extends JPanel implements InputPanel {
 			}
 		});
 		
-		this.lblFriction = new JLabel(Resources.getString("panel.fixture.friction"), Icons.INFO, JLabel.LEFT);
-		this.lblFriction.setToolTipText(Resources.getString("panel.fixture.friction.tooltip"));
-		this.sldFriction = new JSliderWithTextField(0, 100, (int)(fixture.getFriction() * 100.0), 0.01, new DecimalFormat(Resources.getString("panel.fixture.friction.format")));
+		this.lblFriction = new JLabel(Messages.getString("panel.fixture.friction"), Icons.INFO, JLabel.LEFT);
+		this.lblFriction.setToolTipText(Messages.getString("panel.fixture.friction.tooltip"));
+		this.sldFriction = new JSliderWithTextField(0, 100, (int)(fixture.getFriction() * 100.0), 0.01, new DecimalFormat(Messages.getString("panel.fixture.friction.format")));
 		this.sldFriction.setColumns(4);
 		this.sldFriction.addChangeListener(new ChangeListener() {
 			@Override
@@ -278,14 +278,14 @@ public class FixturePanel extends JPanel implements InputPanel {
 			}
 		});
 		
-		this.lblFilter = new JLabel(Resources.getString("panel.fixture.filter"), Icons.INFO, JLabel.LEFT);
-		this.lblFilter.setToolTipText(Resources.getString("panel.fixture.filter.tooltip"));
-		this.rdoDefaultFilter = new JRadioButton(Resources.getString("panel.fixture.filter.default"));
-		this.rdoCategoryFilter = new JRadioButton(Resources.getString("panel.fixture.filter.category"));
-		this.lblCategories = new JLabel(Resources.getString("panel.fixture.filter.category.member"), Icons.INFO, JLabel.LEFT);
-		this.lblCategories.setToolTipText(Resources.getString("panel.fixture.filter.category.member.tooltip"));
-		this.lblMasks = new JLabel(Resources.getString("panel.fixture.filter.category.collide"), Icons.INFO, JLabel.LEFT);
-		this.lblMasks.setToolTipText(Resources.getString("panel.fixture.filter.category.collide.tooltip"));
+		this.lblFilter = new JLabel(Messages.getString("panel.fixture.filter"), Icons.INFO, JLabel.LEFT);
+		this.lblFilter.setToolTipText(Messages.getString("panel.fixture.filter.tooltip"));
+		this.rdoDefaultFilter = new JRadioButton(Messages.getString("panel.fixture.filter.default"));
+		this.rdoCategoryFilter = new JRadioButton(Messages.getString("panel.fixture.filter.category"));
+		this.lblCategories = new JLabel(Messages.getString("panel.fixture.filter.category.member"), Icons.INFO, JLabel.LEFT);
+		this.lblCategories.setToolTipText(Messages.getString("panel.fixture.filter.category.member.tooltip"));
+		this.lblMasks = new JLabel(Messages.getString("panel.fixture.filter.category.collide"), Icons.INFO, JLabel.LEFT);
+		this.lblMasks.setToolTipText(Messages.getString("panel.fixture.filter.category.collide.tooltip"));
 		this.lstCategories = new JList(CATEGORIES);
 		this.lstMasks = new JList(CATEGORIES);
 		
@@ -298,7 +298,7 @@ public class FixturePanel extends JPanel implements InputPanel {
 		this.scrMasks.setMinimumSize(this.scrMasks.getPreferredSize());
 		
 		JLabel lblDefault = new JLabel();
-		lblDefault.setText(Resources.getString("panel.fixture.filter.default.tooltip"));
+		lblDefault.setText(Messages.getString("panel.fixture.filter.default.tooltip"));
 		
 		this.pnlFilter = new JPanel(new CardLayout());
 		// create the card layout for the categories/default filter area
@@ -376,8 +376,8 @@ public class FixturePanel extends JPanel implements InputPanel {
 			}
 		});
 		
-		this.lblSensor = new JLabel(Resources.getString("panel.fixture.sensor"), Icons.INFO, JLabel.LEFT);
-		this.lblSensor.setToolTipText(Resources.getString("panel.fixture.sensor.tooltip"));
+		this.lblSensor = new JLabel(Messages.getString("panel.fixture.sensor"), Icons.INFO, JLabel.LEFT);
+		this.lblSensor.setToolTipText(Messages.getString("panel.fixture.sensor.tooltip"));
 		this.chkSensor = new JCheckBox();
 		this.chkSensor.setSelected(fixture.isSensor());
 		this.chkSensor.addChangeListener(new ChangeListener() {
@@ -478,7 +478,7 @@ public class FixturePanel extends JPanel implements InputPanel {
 	@Override
 	public void showInvalidInputMessage(Window owner) {
 		if (!this.isValidInput()) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.fixture.zeroOrLessDensity"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.fixture.zeroOrLessDensity"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 	

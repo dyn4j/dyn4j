@@ -32,24 +32,37 @@ import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * Represents a angle joint.
  * <p>
- * A angle joint constrains the relative rotation.
+ * A angle joint constrains the relative rotation between [-&pi;, &pi;].
  * <p>
  * NOTE: The {@link #getAnchor1()} and {@link #getAnchor2()} methods return
  * null references since this joint does not require any anchor points at creation.
  * <p>
  * Defaults the min and max angles to the current angle (allowing no angular movement).
+ * <p>
+ * The joint limits must match the following restrictions:
+ * <ul>
+ * <li>lower limit &le; upper limit</li>
+ * <li>lower limit &ge; -180</li>
+ * <li>upper limit &le; 180</li>
+ * </ul> 
+ * To create a joint with limits other than this format use the {@link #setReferenceAngle(double)}
+ * method.  For example:
+ * <pre>
+ * // we would like the joint limits to be [30, 260]
+ * // this is the same as the limits [-60, 170] if the reference angle is 90
+ * angleJoint.setLimits(Math.toRadians(-60), Math.toRadians(170));
+ * angleJoint.setReferenceAngle(Math.toRadians(90));
+ * </pre>
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.0.2
  * @since 2.2.2
  */
 public class AngleJoint extends Joint {
-	/** The joint type */
-	public static final Joint.Type TYPE = new Joint.Type("Angle");
-	
 	/** The lower limit */
 	protected double lowerLimit;
 	
@@ -82,7 +95,7 @@ public class AngleJoint extends Joint {
 		// default no collision allowed
 		super(body1, body2, false);
 		// verify the bodies are not the same instance
-		if (body1 == body2) throw new IllegalArgumentException("Cannot create a angle joint between the same body instance.");
+		if (body1 == body2) throw new IllegalArgumentException(Messages.getString("dynamics.joint.sameBody"));
 		// initialize
 		this.impulse = 0.0;
 		// compute the reference angle
@@ -102,13 +115,12 @@ public class AngleJoint extends Joint {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("ANGLE_JOINT[")
-		.append(super.toString()).append("|")
-		.append(this.lowerLimit).append("|")
-		.append(this.upperLimit).append("|")
-		.append(this.limitEnabled).append("|")
-		.append(this.referenceAngle).append("|")
-		.append(this.impulse).append("]");
+		sb.append("AngleJoint[").append(super.toString())
+		.append("|LowerLimit=").append(this.lowerLimit)
+		.append("|UpperLimit=").append(this.upperLimit)
+		.append("|IsLimitEnabled=").append(this.limitEnabled)
+		.append("|ReferenceAngle=").append(this.referenceAngle)
+		.append("]");
 		return sb.toString();
 	}
 	
@@ -131,21 +143,11 @@ public class AngleJoint extends Joint {
 			this.invK = 1.0 / this.invK;
 		}
 		
-		// compute the current angle
-		
-		// this causes problems: when the one of the bodies is rotated, the other
-		// body compensates by rotating the greater distance instead of the shorter
-//		double angle = this.body1.getTransform().getRotation() - this.body2.getTransform().getRotation() - this.referenceAngle;
-		
-		// we can fix it by always taking the smaller rotation
-		double rr = this.body1.getTransform().getRotation() - this.body2.getTransform().getRotation();
-		if (rr < -Math.PI) rr += Geometry.TWO_PI;
-		if (rr > Math.PI) rr -= Geometry.TWO_PI;
-		// then apply the reference angle
-		double angle = rr - this.referenceAngle;
-		
 		// check if the limits are enabled
 		if (this.limitEnabled) {
+			// compute the current angle
+			double angle = this.getRelativeRotation();
+			
 			// if they are enabled check if they are equal
 			if (Math.abs(this.upperLimit - this.lowerLimit) < 2.0 * angularTolerance) {
 				// if so then set the state to equal
@@ -239,7 +241,7 @@ public class AngleJoint extends Joint {
 		if (this.limitState != Joint.LimitState.INACTIVE) {
 			Settings settings = Settings.getInstance();
 			double angularTolerance = settings.getAngularTolerance();
-			double maxAngularCorrection = settings.getMaxAngularCorrection();
+			double maxAngularCorrection = settings.getMaximumAngularCorrection();
 			
 			Mass m1 = this.body1.getMass();
 			Mass m2 = this.body2.getMass();
@@ -248,7 +250,7 @@ public class AngleJoint extends Joint {
 			double invI2 = m2.getInverseInertia();
 			
 			// get the current angle between the bodies
-			double angle = this.body1.getTransform().getRotation() - this.body2.getTransform().getRotation() - this.referenceAngle;
+			double angle = this.getRelativeRotation();
 			double impulse = 0.0;
 			double angularError = 0.0;
 			// check the limit state
@@ -282,12 +284,15 @@ public class AngleJoint extends Joint {
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getType()
+	/**
+	 * Returns the relative angle between the two bodies given the reference angle.
+	 * @return double
 	 */
-	@Override
-	public Type getType() {
-		return AngleJoint.TYPE;
+	private double getRelativeRotation() {
+		double rr = this.body1.getTransform().getRotation() - this.body2.getTransform().getRotation() - this.referenceAngle;
+		if (rr < -Math.PI) rr += Geometry.TWO_PI;
+		if (rr > Math.PI) rr -= Geometry.TWO_PI;
+		return rr;
 	}
 	
 	/* (non-Javadoc)
@@ -358,7 +363,7 @@ public class AngleJoint extends Joint {
 	 */
 	public void setUpperLimit(double upperLimit) {
 		// make sure the minimum is less than or equal to the maximum
-		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException("The upper limit must be greater than or equal to the current lower limit.");
+		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidUpperLimit"));
 		// wake up both bodies
 		this.body1.setAsleep(false);
 		this.body2.setAsleep(false);
@@ -381,7 +386,7 @@ public class AngleJoint extends Joint {
 	 */
 	public void setLowerLimit(double lowerLimit) {
 		// make sure the minimum is less than or equal to the maximum
-		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException("The lower limit must be less than or equal to the current upper limit.");
+		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLowerLimit"));
 		// wake up both bodies
 		this.body1.setAsleep(false);
 		this.body2.setAsleep(false);
@@ -397,7 +402,7 @@ public class AngleJoint extends Joint {
 	 */
 	public void setLimits(double lowerLimit, double upperLimit) {
 		// make sure the min < max
-		if (lowerLimit > upperLimit) throw new IllegalArgumentException("The lower limit must be smaller than the upper limit.");
+		if (lowerLimit > upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLimits"));
 		// wake up the bodies
 		this.body1.setAsleep(false);
 		this.body2.setAsleep(false);

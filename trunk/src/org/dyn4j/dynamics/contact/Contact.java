@@ -31,7 +31,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents a contact point between two {@link Body} objects.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class Contact {
@@ -100,21 +100,21 @@ public class Contact {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("CONTACT[")
-		.append(this.id).append("|")
-		.append(this.enabled).append("|")
-		.append(this.p).append("|")
-		.append(this.p1).append("|")
-		.append(this.p2).append("|")
-		.append(this.depth).append("|")
-		.append(this.r1).append("|")
-		.append(this.r2).append("|")
-		.append(this.jn).append("|")
-		.append(this.jt).append("|")
-		.append(this.jp).append("|")
-		.append(this.massN).append("|")
-		.append(this.massT).append("|")
-		.append(this.vb).append("]");
+		sb.append("Contact[Id=").append(this.id)
+		.append("|IsEnabled=").append(this.enabled)
+		.append("|Point=").append(this.p)
+		.append("|PointInBody1=").append(this.p1)
+		.append("|PointInBody2=").append(this.p2)
+		.append("|Depth=").append(this.depth)
+		.append("|R1=").append(this.r1)
+		.append("|R2=").append(this.r2)
+		.append("|NormalImpulse=").append(this.jn)
+		.append("|TangentImpulse=").append(this.jt)
+		.append("|PositionImpulse=").append(this.jp)
+		.append("|NormalMass=").append(this.massN)
+		.append("|TangentMass=").append(this.massT)
+		.append("|VelocityBias=").append(this.vb)
+		.append("]");
 		return sb.toString();
 	}
 	

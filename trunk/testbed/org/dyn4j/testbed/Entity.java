@@ -41,7 +41,7 @@ import org.dyn4j.geometry.Wound;
 /**
  * Represents a game entity.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class Entity extends Body {
@@ -235,7 +235,7 @@ public class Entity extends Body {
 	 */
 	private void drawShape(GL2 gl, Convex c) {
 		// check for polygon
-		if (c.isType(Polygon.TYPE)) {
+		if (c instanceof Polygon) {
 			// cast and get the data
 			Polygon p = (Polygon) c;
 			Vector2[] vertices = p.getVertices();
@@ -250,7 +250,7 @@ public class Entity extends Body {
 			}
 			gl.glEnd();
 		// check for circle
-		} else if (c.isType(Circle.TYPE)) {
+		} else if (c instanceof Circle) {
 			// cast and get data
 			Circle circle = (Circle) c;
 			double radius = circle.getRadius();
@@ -284,7 +284,7 @@ public class Entity extends Body {
 	 */
 	private void fillShape(GL2 gl, Convex c) {
 		// check for polygon
-		if (c.isType(Polygon.TYPE)) {
+		if (c instanceof Polygon) {
 			// cast and get data
 			Polygon p = (Polygon) c;
 			Vector2[] vertices = p.getVertices();
@@ -299,7 +299,7 @@ public class Entity extends Body {
 			}
 			gl.glEnd();
 		// check for circle
-		} else if (c.isType(Circle.TYPE)) {
+		} else if (c instanceof Circle) {
 			// cast and get data
 			Circle circle = (Circle) c;
 			double radius = circle.getRadius();

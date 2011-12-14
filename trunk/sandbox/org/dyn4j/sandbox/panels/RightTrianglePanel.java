@@ -41,9 +41,9 @@ import javax.swing.JOptionPane;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Triangle;
-import org.dyn4j.sandbox.Resources;
+import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
-import org.dyn4j.sandbox.utilities.Icons;
+import org.dyn4j.sandbox.resources.Messages;
 
 /**
  * Panel used to create a right triangle shape.
@@ -83,17 +83,17 @@ public class RightTrianglePanel extends ConvexShapePanel implements InputPanel {
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
 		
-		JLabel lblWidth = new JLabel(Resources.getString("panel.right.width"), Icons.INFO, JLabel.LEFT);
-		lblWidth.setToolTipText(Resources.getString("panel.right.width.tooltip"));
+		JLabel lblWidth = new JLabel(Messages.getString("panel.right.width"), Icons.INFO, JLabel.LEFT);
+		lblWidth.setToolTipText(Messages.getString("panel.right.width.tooltip"));
 		
-		JLabel lblHeight = new JLabel(Resources.getString("panel.right.height"), Icons.INFO, JLabel.LEFT);
-		lblHeight.setToolTipText(Resources.getString("panel.right.height.tooltip"));
+		JLabel lblHeight = new JLabel(Messages.getString("panel.right.height"), Icons.INFO, JLabel.LEFT);
+		lblHeight.setToolTipText(Messages.getString("panel.right.height.tooltip"));
 		
-		JLabel lblMirror = new JLabel(Resources.getString("panel.right.mirror"), Icons.INFO, JLabel.LEFT);
-		lblMirror.setToolTipText(Resources.getString("panel.right.mirror.tooltip"));
+		JLabel lblMirror = new JLabel(Messages.getString("panel.right.mirror"), Icons.INFO, JLabel.LEFT);
+		lblMirror.setToolTipText(Messages.getString("panel.right.mirror.tooltip"));
 		
-		JFormattedTextField txtWidth = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.right.width.format")));
-		JFormattedTextField txtHeight = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.right.height.format")));
+		JFormattedTextField txtWidth = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.right.width.format")));
+		JFormattedTextField txtHeight = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.right.height.format")));
 		txtWidth.setValue(DEFAULT_WIDTH);
 		txtHeight.setValue(DEFAULT_HEIGHT);
 		
@@ -141,8 +141,8 @@ public class RightTrianglePanel extends ConvexShapePanel implements InputPanel {
 			}
 		});
 		
-		JLabel lblPreview = new JLabel(Resources.getString("panel.preview"), Icons.INFO, JLabel.LEFT);
-		lblPreview.setToolTipText(Resources.getString("panel.preview.tooltip"));
+		JLabel lblPreview = new JLabel(Messages.getString("panel.preview"), Icons.INFO, JLabel.LEFT);
+		lblPreview.setToolTipText(Messages.getString("panel.preview.tooltip"));
 		this.pnlPreview = new PreviewPanel(new Dimension(250, 225), Geometry.createRightTriangle(this.width, this.height, this.mirror));
 		
 		layout.setAutoCreateGaps(true);
@@ -205,7 +205,7 @@ public class RightTrianglePanel extends ConvexShapePanel implements InputPanel {
 	@Override
 	public void showInvalidInputMessage(Window owner) {
 		if (!this.isValidInput()) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.right.invalid"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.right.invalid"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

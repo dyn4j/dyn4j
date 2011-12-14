@@ -24,6 +24,7 @@
  */
 package org.dyn4j.sandbox.persist;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Locale;
 
@@ -57,6 +58,7 @@ import org.dyn4j.sandbox.Camera;
 import org.dyn4j.sandbox.Sandbox;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.SandboxRay;
+import org.dyn4j.sandbox.resources.Messages;
 import org.dyn4j.sandbox.utilities.SystemUtilities;
 
 /**
@@ -125,7 +127,7 @@ public class XmlGenerator {
 			.append(XmlGenerator.toXml(r.getCenter(), "LocalCenter"))
 			.append("<Width>").append(r.getWidth()).append("</Width>")
 			.append("<Height>").append(r.getHeight()).append("</Height>")
-			.append("<LocalRotation>").append(r.getRotation()).append("</LocalRotation>")
+			.append("<LocalRotation>").append(Math.toDegrees(r.getRotation())).append("</LocalRotation>")
 			.append("</Rectangle>");
 			sb.append(XmlGenerator.toXml(bounds.getTransform()));
 			sb.append("</Bounds>");
@@ -184,21 +186,21 @@ public class XmlGenerator {
 		
 		sb.append("<Settings>")
 		.append("<StepFrequency>").append(1.0 / settings.getStepFrequency()).append("</StepFrequency>")
-		.append("<MaximumTranslation>").append(settings.getMaxTranslation()).append("</MaximumTranslation>")
-		.append("<MaximumRotation>").append(settings.getMaxRotation()).append("</MaximumRotation>")
+		.append("<MaximumTranslation>").append(settings.getMaximumTranslation()).append("</MaximumTranslation>")
+		.append("<MaximumRotation>").append(Math.toDegrees(settings.getMaximumRotation())).append("</MaximumRotation>")
 		.append("<ContinuousCollisionDetectionMode>").append(settings.getContinuousDetectionMode()).append("</ContinuousCollisionDetectionMode>")
 		.append("<AutoSleep>").append(settings.isAutoSleepingEnabled()).append("</AutoSleep>")
 		.append("<SleepTime>").append(settings.getSleepTime()).append("</SleepTime>")
-		.append("<SleepLinearVelocity>").append(settings.getSleepVelocity()).append("</SleepLinearVelocity>")
-		.append("<SleepAngularVelocity>").append(settings.getSleepAngularVelocity()).append("</SleepAngularVelocity>")
+		.append("<SleepLinearVelocity>").append(settings.getSleepLinearVelocity()).append("</SleepLinearVelocity>")
+		.append("<SleepAngularVelocity>").append(Math.toDegrees(settings.getSleepAngularVelocity())).append("</SleepAngularVelocity>")
 		.append("<VelocitySolverIterations>").append(settings.getVelocityConstraintSolverIterations()).append("</VelocitySolverIterations>")
 		.append("<PositionSolverIterations>").append(settings.getPositionConstraintSolverIterations()).append("</PositionSolverIterations>")
 		.append("<WarmStartDistance>").append(settings.getWarmStartDistance()).append("</WarmStartDistance>")
 		.append("<RestitutionVelocity>").append(settings.getRestitutionVelocity()).append("</RestitutionVelocity>")
 		.append("<LinearTolerance>").append(settings.getLinearTolerance()).append("</LinearTolerance>")
-		.append("<AngularTolerance>").append(settings.getAngularTolerance()).append("</AngularTolerance>")
-		.append("<MaximumLinearCorrection>").append(settings.getMaxLinearCorrection()).append("</MaximumLinearCorrection>")
-		.append("<MaximumAngularCorrection>").append(settings.getMaxAngularCorrection()).append("</MaximumAngularCorrection>")
+		.append("<AngularTolerance>").append(Math.toDegrees(settings.getAngularTolerance())).append("</AngularTolerance>")
+		.append("<MaximumLinearCorrection>").append(settings.getMaximumLinearCorrection()).append("</MaximumLinearCorrection>")
+		.append("<MaximumAngularCorrection>").append(Math.toDegrees(settings.getMaximumAngularCorrection())).append("</MaximumAngularCorrection>")
 		.append("<Baumgarte>").append(settings.getBaumgarte()).append("</Baumgarte>")
 		.append("</Settings>");
 		
@@ -236,7 +238,7 @@ public class XmlGenerator {
 		sb.append("<Transform>")
 		.append(XmlGenerator.toXml(t.getTranslation(), "Translation"))
 		.append("<Rotation>")
-		.append(t.getRotation())
+		.append(Math.toDegrees(t.getRotation()))
 		.append("</Rotation>")
 		.append("</Transform>");
 		
@@ -267,7 +269,7 @@ public class XmlGenerator {
 			.append(c)
 			.append("<Width>").append(r.getWidth()).append("</Width>")
 			.append("<Height>").append(r.getHeight()).append("</Height>")
-			.append("<LocalRotation>").append(r.getRotation()).append("</LocalRotation>");
+			.append("<LocalRotation>").append(Math.toDegrees(r.getRotation())).append("</LocalRotation>");
 		} else if (shape instanceof Triangle) {
 			Triangle t = (Triangle)shape;
 			Vector2[] vs = t.getVertices();
@@ -293,7 +295,7 @@ public class XmlGenerator {
 				sb.append(XmlGenerator.toXml(v, "Vertex"));
 			}
 		} else {
-			throw new UnsupportedOperationException(shape.getClass().getName() + " is not currently implemented in the sandbox xml persist module.");
+			throw new UnsupportedOperationException(MessageFormat.format(Messages.getString("exception.persist.unknownClass"), shape.getClass().getName()));
 		}
 		
 		sb.append("</Shape>");
@@ -324,7 +326,7 @@ public class XmlGenerator {
 			sb.append("</CollideWithGroups>");
 			sb.append("</Filter>");
 		} else {
-			throw new UnsupportedOperationException(filter.getClass().getName() + " is not currently implemented in the sandbox xml persist module.");
+			throw new UnsupportedOperationException(MessageFormat.format(Messages.getString("exception.persist.unknownClass"), filter.getClass().getName()));
 		}
 		
 		return sb.toString();
@@ -458,7 +460,7 @@ public class XmlGenerator {
 		sb.append(XmlGenerator.toXml(body.getMass(), body.isMassExplicit()));
 		
 		sb.append(XmlGenerator.toXml(body.getVelocity(), "Velocity"));
-		sb.append("<AngularVelocity>").append(body.getAngularVelocity()).append("</AngularVelocity>");
+		sb.append("<AngularVelocity>").append(Math.toDegrees(body.getAngularVelocity())).append("</AngularVelocity>");
 		sb.append(XmlGenerator.toXml(body.getAccumulatedForce(), "AccumulatedForce"));
 		sb.append("<AccumulatedTorque>").append(body.getAccumulatedTorque()).append("</AccumulatedTorque>");
 		sb.append("<AutoSleep>").append(body.isAutoSleepingEnabled()).append("</AutoSleep>");
@@ -496,10 +498,10 @@ public class XmlGenerator {
 		
 		if (joint instanceof AngleJoint) {
 			AngleJoint aj = (AngleJoint)joint;
-			sb.append("<LowerLimit>").append(aj.getLowerLimit()).append("</LowerLimit>");
-			sb.append("<UpperLimit>").append(aj.getUpperLimit()).append("</UpperLimit>");
+			sb.append("<LowerLimit>").append(Math.toDegrees(aj.getLowerLimit())).append("</LowerLimit>");
+			sb.append("<UpperLimit>").append(Math.toDegrees(aj.getUpperLimit())).append("</UpperLimit>");
 			sb.append("<LimitEnabled>").append(aj.isLimitEnabled()).append("</LimitEnabled>");
-			sb.append("<ReferenceAngle>").append(aj.getReferenceAngle()).append("</ReferenceAngle>");
+			sb.append("<ReferenceAngle>").append(Math.toDegrees(aj.getReferenceAngle())).append("</ReferenceAngle>");
 		} else if (joint instanceof DistanceJoint) {
 			DistanceJoint dj = (DistanceJoint)joint;
 			sb.append(XmlGenerator.toXml(dj.getAnchor1(), "Anchor1"));
@@ -529,7 +531,7 @@ public class XmlGenerator {
 			sb.append("<MotorSpeed>").append(pj.getMotorSpeed()).append("</MotorSpeed>");
 			sb.append("<MaximumMotorForce>").append(pj.getMaximumMotorForce()).append("</MaximumMotorForce>");
 			sb.append("<MotorEnabled>").append(pj.isMotorEnabled()).append("</MotorEnabled>");
-			sb.append("<ReferenceAngle>").append(pj.getReferenceAngle()).append("</ReferenceAngle>");
+			sb.append("<ReferenceAngle>").append(Math.toDegrees(pj.getReferenceAngle())).append("</ReferenceAngle>");
 		} else if (joint instanceof PulleyJoint) {
 			PulleyJoint pj = (PulleyJoint)joint;
 			sb.append(XmlGenerator.toXml(pj.getPulleyAnchor1(), "PulleyAnchor1"));
@@ -540,13 +542,13 @@ public class XmlGenerator {
 		} else if (joint instanceof RevoluteJoint) {
 			RevoluteJoint rj = (RevoluteJoint)joint;
 			sb.append(XmlGenerator.toXml(rj.getAnchor1(), "Anchor"));
-			sb.append("<LowerLimit>").append(rj.getLowerLimit()).append("</LowerLimit>");
-			sb.append("<UpperLimit>").append(rj.getUpperLimit()).append("</UpperLimit>");
+			sb.append("<LowerLimit>").append(Math.toDegrees(rj.getLowerLimit())).append("</LowerLimit>");
+			sb.append("<UpperLimit>").append(Math.toDegrees(rj.getUpperLimit())).append("</UpperLimit>");
 			sb.append("<LimitEnabled>").append(rj.isLimitEnabled()).append("</LimitEnabled>");
-			sb.append("<MotorSpeed>").append(rj.getMotorSpeed()).append("</MotorSpeed>");
+			sb.append("<MotorSpeed>").append(Math.toDegrees(rj.getMotorSpeed())).append("</MotorSpeed>");
 			sb.append("<MaximumMotorTorque>").append(rj.getMaximumMotorTorque()).append("</MaximumMotorTorque>");
 			sb.append("<MotorEnabled>").append(rj.isMotorEnabled()).append("</MotorEnabled>");
-			sb.append("<ReferenceAngle>").append(rj.getReferenceAngle()).append("</ReferenceAngle>");
+			sb.append("<ReferenceAngle>").append(Math.toDegrees(rj.getReferenceAngle())).append("</ReferenceAngle>");
 		} else if (joint instanceof RopeJoint) {
 			RopeJoint rj = (RopeJoint)joint;
 			sb.append(XmlGenerator.toXml(rj.getAnchor1(), "Anchor1"));
@@ -558,20 +560,20 @@ public class XmlGenerator {
 		} else if (joint instanceof WeldJoint) {
 			WeldJoint wj = (WeldJoint)joint;
 			sb.append(XmlGenerator.toXml(wj.getAnchor1(), "Anchor"));
-			sb.append("<ReferenceAngle>").append(wj.getReferenceAngle()).append("</ReferenceAngle>");
+			sb.append("<ReferenceAngle>").append(Math.toDegrees(wj.getReferenceAngle())).append("</ReferenceAngle>");
 			sb.append("<Frequency>").append(wj.getFrequency()).append("</Frequency>");
 			sb.append("<DampingRatio>").append(wj.getDampingRatio()).append("</DampingRatio>");
 		} else if (joint instanceof WheelJoint) {
 			WheelJoint wj = (WheelJoint)joint;
 			sb.append(XmlGenerator.toXml(wj.getAnchor1(), "Anchor"));
 			sb.append(XmlGenerator.toXml(wj.getAxis(), "Axis"));
-			sb.append("<MotorSpeed>").append(wj.getMotorSpeed()).append("</MotorSpeed>");
+			sb.append("<MotorSpeed>").append(Math.toDegrees(wj.getMotorSpeed())).append("</MotorSpeed>");
 			sb.append("<MaximumMotorTorque>").append(wj.getMaximumMotorTorque()).append("</MaximumMotorTorque>");
 			sb.append("<MotorEnabled>").append(wj.isMotorEnabled()).append("</MotorEnabled>");
 			sb.append("<Frequency>").append(wj.getFrequency()).append("</Frequency>");
 			sb.append("<DampingRatio>").append(wj.getDampingRatio()).append("</DampingRatio>");
 		} else {
-			throw new UnsupportedOperationException(joint.getClass().getName() + " is not currently implemented in the sandbox xml persist module.");
+			throw new UnsupportedOperationException(MessageFormat.format(Messages.getString("exception.persist.unknownClass"), joint.getClass().getName()));
 		}
 		
 		sb.append("</Joint>");

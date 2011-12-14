@@ -32,7 +32,7 @@ import java.util.List;
  * A monotone polygon can be triangulated in O(n) time.  Algorithms within this package may decompose
  * a polygon into monotone pieces, which are then used to decompose into triangles.
  * @author William Bittle
- * @version 2.2.0
+ * @version 3.0.2
  * @since 2.2.0
  * @param <E> the vertex data type
  */
@@ -75,15 +75,14 @@ public class MonotonePolygon<E> {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("MONOTONE_POLYGON[")
-		.append(this.type);
-		
+		sb.append("MonotonePolygon[Type=").append(this.type);
+		sb.append("|Vertices={");
 		int size = this.vertices.size();
 		for (int i = 0; i < size; i++) {
-			sb.append("|").append(this.vertices.get(i));
+			if (i != 0) sb.append(",");
+			sb.append(this.vertices.get(i));
 		}
-		
-		sb.append("]");
+		sb.append("}]");
 		return sb.toString();
 	}
 	

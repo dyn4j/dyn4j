@@ -41,11 +41,11 @@ import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.sandbox.SandboxBody;
-import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.controls.BottomButtonPanel;
+import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.panels.BodyPanel;
 import org.dyn4j.sandbox.panels.TransformPanel;
-import org.dyn4j.sandbox.utilities.Icons;
+import org.dyn4j.sandbox.resources.Messages;
 
 /**
  * Dialog to create a new body without any fixtures.
@@ -75,7 +75,7 @@ public class EditBodyDialog extends JDialog implements ActionListener {
 	 * @param body the body to edit
 	 */
 	private EditBodyDialog(Window owner, SandboxBody body) {
-		super(owner, Resources.getString("dialog.body.edit.title"), ModalityType.APPLICATION_MODAL);
+		super(owner, Messages.getString("dialog.body.edit.title"), ModalityType.APPLICATION_MODAL);
 		
 		this.body = new SandboxBody();
 		
@@ -115,11 +115,11 @@ public class EditBodyDialog extends JDialog implements ActionListener {
 		this.pnlTransform = new TransformPanel(body.getTransform(), null);
 		
 		tabs.setBorder(BorderFactory.createEmptyBorder(7, 0, 0, 0));
-		tabs.addTab(Resources.getString("dialog.body.tab.body"), this.pnlBody);
-		tabs.addTab(Resources.getString("dialog.body.tab.transform"), this.pnlTransform);
+		tabs.addTab(Messages.getString("dialog.body.tab.body"), this.pnlBody);
+		tabs.addTab(Messages.getString("dialog.body.tab.transform"), this.pnlTransform);
 		
-		JButton btnCancel = new JButton(Resources.getString("button.cancel"));
-		JButton btnSave = new JButton(Resources.getString("button.save"));
+		JButton btnCancel = new JButton(Messages.getString("button.cancel"));
+		JButton btnSave = new JButton(Messages.getString("button.save"));
 		btnSave.setActionCommand("save");
 		btnCancel.setActionCommand("cancel");
 		btnSave.addActionListener(this);

@@ -39,7 +39,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import org.dyn4j.sandbox.Resources;
+import org.dyn4j.sandbox.resources.Messages;
 import org.dyn4j.sandbox.utilities.ControlUtilities;
 
 /**
@@ -64,7 +64,7 @@ public class SampleFileDialog extends JDialog implements MouseListener, ActionLi
 	 * @param contents the file contents
 	 */
 	private SampleFileDialog(Component parent, String contents) {
-		super(ControlUtilities.getParentWindow(parent), Resources.getString("dialog.sampleFile.title"), ModalityType.APPLICATION_MODAL);
+		super(ControlUtilities.getParentWindow(parent), Messages.getString("dialog.sampleFile.title"), ModalityType.APPLICATION_MODAL);
 		
 		this.txtFile = new JTextArea();
 		this.txtFile.setText(contents);
@@ -91,11 +91,11 @@ public class SampleFileDialog extends JDialog implements MouseListener, ActionLi
 		
 		this.copyMenu = new JPopupMenu();
 		
-		JMenuItem mnuCopy = new JMenuItem(Resources.getString("menu.context.copy"));
+		JMenuItem mnuCopy = new JMenuItem(Messages.getString("menu.context.copy"));
 		mnuCopy.setActionCommand("copy");
 		mnuCopy.addActionListener(this);
 		
-		JMenuItem mnuSelectAll = new JMenuItem(Resources.getString("menu.context.selectAll"));
+		JMenuItem mnuSelectAll = new JMenuItem(Messages.getString("menu.context.selectAll"));
 		mnuSelectAll.setActionCommand("selectall");
 		mnuSelectAll.addActionListener(this);
 		

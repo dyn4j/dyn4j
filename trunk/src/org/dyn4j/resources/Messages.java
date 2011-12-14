@@ -22,33 +22,24 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.sandbox;
+package org.dyn4j.resources;
 
 import java.util.ResourceBundle;
 
 /**
- * Helper class used to get text resources from the properties files.
- * <p>
- * This class is used by all classes to get the appropriate resources.
+ * Helper class that returns messages from the property file.
  * @author William Bittle
- * @version 1.0.1
- * @since 1.0.1
+ * @version 3.0.2
+ * @since 3.0.2
  */
-public final class Resources {
-	// change this value to messages_test.properties to test the text translation
-	
-	/** The resource bundle containing the text resources */
-	private static final ResourceBundle BUNDLE = ResourceBundle.getBundle("org.dyn4j.sandbox.resources.messages");
+public class Messages {
+	/** The resource bundle for the current locale */
+	private static final ResourceBundle BUNDLE = ResourceBundle.getBundle("org.dyn4j.resources.messages");
 	
 	/**
-	 * Hidden constructor.
-	 */
-	private Resources() {}
-	
-	/**
-	 * Returns the value of the given key.
+	 * Returns the value for the specified key.
 	 * @param key the key
-	 * @return String the value
+	 * @return String
 	 */
 	public static final String getString(String key) {
 		return BUNDLE.getString(key);

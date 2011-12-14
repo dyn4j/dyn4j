@@ -29,7 +29,7 @@ import java.util.UUID;
 /**
  * Base implementation of the {@link Shape} interface.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.0.2
  * @since 1.0.0
  */
 public abstract class AbstractShape implements Shape, Transformable {
@@ -51,18 +51,10 @@ public abstract class AbstractShape implements Shape, Transformable {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(this.id).append("|")
-		.append(this.center);
+		sb.append("Id=").append(this.id)
+		.append("|Center=").append(this.center)
+		.append("|Radius=").append(this.radius);
 		return sb.toString();
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Shape#isType(org.dyn4j.geometry.Shape.Type)
-	 */
-	@Override
-	public boolean isType(Type type) {
-		// return the result
-		return this.getType().is(type);
 	}
 	
 	/* (non-Javadoc)

@@ -39,7 +39,7 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * This class will translate and rotate the {@link Body}s into a collision.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.0.2
  * @since 2.0.0
  */
 public class TimeOfImpactSolver {
@@ -53,7 +53,7 @@ public class TimeOfImpactSolver {
 	public void solve(Body b1, Body b2, TimeOfImpact toi) {
 		Settings settings = Settings.getInstance();
 		double linearTolerance = settings.getLinearTolerance();
-		double maxLinearCorrection = settings.getMaxLinearCorrection();
+		double maxLinearCorrection = settings.getMaximumLinearCorrection();
 		
 		Vector2 c1 = b1.getWorldCenter();
 		Vector2 c2 = b2.getWorldCenter();

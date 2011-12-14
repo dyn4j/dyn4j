@@ -24,10 +24,12 @@
  */
 package org.dyn4j.dynamics;
 
+import org.dyn4j.resources.Messages;
+
 /**
  * Responsible for housing all of the dynamics engine's settings.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class Settings {
@@ -63,13 +65,13 @@ public class Settings {
 	public static final double DEFAULT_STEP_FREQUENCY = 1.0 / 60.0;
 	
 	/** The default maximum translation a {@link Body} can have in one time step; in meters */
-	public static final double DEFAULT_MAX_TRANSLATION = 2.0;
+	public static final double DEFAULT_MAXIMUM_TRANSLATION = 2.0;
 	
 	/** The default maximum rotation a {@link Body} can have in one time step; in radians */
-	public static final double DEFAULT_MAX_ROTATION = 0.5 * Math.PI;
+	public static final double DEFAULT_MAXIMUM_ROTATION = 0.5 * Math.PI;
 	
 	/** The default maximum velocity for a {@link Body} to go to sleep; in meters/second */
-	public static final double DEFAULT_SLEEP_VELOCITY = 0.01;
+	public static final double DEFAULT_SLEEP_LINEAR_VELOCITY = 0.01;
 	
 	/** The default maximum angular velocity for a {@link Body} to go to sleep; in radians/second */
 	public static final double DEFAULT_SLEEP_ANGULAR_VELOCITY = Math.toRadians(2.0);
@@ -93,10 +95,10 @@ public class Settings {
 	public static final double DEFAULT_ANGULAR_TOLERANCE = Math.toRadians(2.0);
 	
 	/** The default maximum linear correction; in meters */
-	public static final double DEFAULT_MAX_LINEAR_CORRECTION = 0.2;
+	public static final double DEFAULT_MAXIMUM_LINEAR_CORRECTION = 0.2;
 	
 	/** The default maximum angular correction; in radians */
-	public static final double DEFAULT_MAX_ANGULAR_CORRECTION = Math.toRadians(8.0);
+	public static final double DEFAULT_MAXIMUM_ANGULAR_CORRECTION = Math.toRadians(8.0);
 	
 	/** The default baumgarte */
 	public static final double DEFAULT_BAUMGARTE = 0.2;
@@ -105,25 +107,25 @@ public class Settings {
 	private double stepFequency = Settings.DEFAULT_STEP_FREQUENCY;
 	
 	/** The maximum translation a {@link Body} can have in one time step */
-	private double maxTranslation = Settings.DEFAULT_MAX_TRANSLATION;
+	private double maximumTranslation = Settings.DEFAULT_MAXIMUM_TRANSLATION;
 	
-	/** The squared value of {@link #maxTranslation} */
-	private double maxTranslationSquared = Settings.DEFAULT_MAX_TRANSLATION * Settings.DEFAULT_MAX_TRANSLATION;
+	/** The squared value of {@link #maximumTranslation} */
+	private double maximumTranslationSquared = Settings.DEFAULT_MAXIMUM_TRANSLATION * Settings.DEFAULT_MAXIMUM_TRANSLATION;
 	
 	/** The maximum rotation a {@link Body} can have in one time step */
-	private double maxRotation = Settings.DEFAULT_MAX_ROTATION;
+	private double maximumRotation = Settings.DEFAULT_MAXIMUM_ROTATION;
 
-	/** The squared value of {@link #maxRotation} */
-	private double maxRotationSquared = Settings.DEFAULT_MAX_ROTATION * Settings.DEFAULT_MAX_ROTATION;
+	/** The squared value of {@link #maximumRotation} */
+	private double maximumRotationSquared = Settings.DEFAULT_MAXIMUM_ROTATION * Settings.DEFAULT_MAXIMUM_ROTATION;
 	
 	/** Whether on an engine level {@link Body}s are automatically put to sleep */
 	private boolean autoSleepingEnabled = true;
 	
-	/** The maximum velocity before a {@link Body} is considered to sleep */
-	private double sleepVelocity = Settings.DEFAULT_SLEEP_VELOCITY;
+	/** The maximum linear velocity before a {@link Body} is considered to sleep */
+	private double sleepLinearVelocity = Settings.DEFAULT_SLEEP_LINEAR_VELOCITY;
 	
-	/** The squared value of {@link #sleepVelocity} */
-	private double sleepVelocitySquared = Settings.DEFAULT_SLEEP_VELOCITY * Settings.DEFAULT_SLEEP_VELOCITY;
+	/** The squared value of {@link #sleepLinearVelocity} */
+	private double sleepLinearVelocitySquared = Settings.DEFAULT_SLEEP_LINEAR_VELOCITY * Settings.DEFAULT_SLEEP_LINEAR_VELOCITY;
 	
 	/** The maximum angular velocity before a {@link Body} is considered to sleep */
 	private double sleepAngularVelocity = Settings.DEFAULT_SLEEP_ANGULAR_VELOCITY;
@@ -165,16 +167,16 @@ public class Settings {
 	private double angularToleranceSquared = Settings.DEFAULT_ANGULAR_TOLERANCE * Settings.DEFAULT_ANGULAR_TOLERANCE;
 	
 	/** The maximum linear correction */
-	private double maxLinearCorrection = Settings.DEFAULT_MAX_LINEAR_CORRECTION;
+	private double maximumLinearCorrection = Settings.DEFAULT_MAXIMUM_LINEAR_CORRECTION;
 	
-	/** The squared value of {@link #maxLinearCorrection} */
-	private double maxLinearCorrectionSquared = Settings.DEFAULT_MAX_LINEAR_CORRECTION * Settings.DEFAULT_MAX_LINEAR_CORRECTION;
+	/** The squared value of {@link #maximumLinearCorrection} */
+	private double maximumLinearCorrectionSquared = Settings.DEFAULT_MAXIMUM_LINEAR_CORRECTION * Settings.DEFAULT_MAXIMUM_LINEAR_CORRECTION;
 	
 	/** The maximum angular correction */
-	private double maxAngularCorrection = Settings.DEFAULT_MAX_ANGULAR_CORRECTION;
+	private double maximumAngularCorrection = Settings.DEFAULT_MAXIMUM_ANGULAR_CORRECTION;
 	
-	/** The squared value of {@link #maxAngularCorrection} */
-	private double maxAngularCorrectionSquared = Settings.DEFAULT_MAX_ANGULAR_CORRECTION * Settings.DEFAULT_MAX_ANGULAR_CORRECTION;
+	/** The squared value of {@link #maximumAngularCorrection} */
+	private double maximumAngularCorrectionSquared = Settings.DEFAULT_MAXIMUM_ANGULAR_CORRECTION * Settings.DEFAULT_MAXIMUM_ANGULAR_CORRECTION;
 	
 	/** The baumgarte factor */
 	private double baumgarte = Settings.DEFAULT_BAUMGARTE;
@@ -204,10 +206,10 @@ public class Settings {
 		StringBuilder sb = new StringBuilder();
 		sb.append("SETTINGS[")
 		.append(this.stepFequency).append("|")
-		.append(this.maxTranslation).append("|")
-		.append(this.maxRotation).append("|")
+		.append(this.maximumTranslation).append("|")
+		.append(this.maximumRotation).append("|")
 		.append(this.autoSleepingEnabled).append("|")
-		.append(this.sleepVelocity).append("|")
+		.append(this.sleepLinearVelocity).append("|")
 		.append(this.sleepAngularVelocity).append("|")
 		.append(this.sleepTime).append("|")
 		.append(this.velocityConstraintSolverIterations).append("|")
@@ -216,8 +218,8 @@ public class Settings {
 		.append(this.restitutionVelocity).append("|")
 		.append(this.linearTolerance).append("|")
 		.append(this.angularTolerance).append("|")
-		.append(this.maxLinearCorrection).append("|")
-		.append(this.maxAngularCorrection).append("|")
+		.append(this.maximumLinearCorrection).append("|")
+		.append(this.maximumAngularCorrection).append("|")
 		.append(this.baumgarte).append("|")
 		.append(this.continuousDetectionMode)
 		.append("]");
@@ -229,13 +231,13 @@ public class Settings {
 	 */
 	public void reset() {
 		this.stepFequency = Settings.DEFAULT_STEP_FREQUENCY;
-		this.maxTranslation = Settings.DEFAULT_MAX_TRANSLATION;
-		this.maxTranslationSquared = Settings.DEFAULT_MAX_TRANSLATION * Settings.DEFAULT_MAX_TRANSLATION;
-		this.maxRotation = Settings.DEFAULT_MAX_ROTATION;
-		this.maxRotationSquared = Settings.DEFAULT_MAX_ROTATION * Settings.DEFAULT_MAX_ROTATION;
+		this.maximumTranslation = Settings.DEFAULT_MAXIMUM_TRANSLATION;
+		this.maximumTranslationSquared = Settings.DEFAULT_MAXIMUM_TRANSLATION * Settings.DEFAULT_MAXIMUM_TRANSLATION;
+		this.maximumRotation = Settings.DEFAULT_MAXIMUM_ROTATION;
+		this.maximumRotationSquared = Settings.DEFAULT_MAXIMUM_ROTATION * Settings.DEFAULT_MAXIMUM_ROTATION;
 		this.autoSleepingEnabled = true;
-		this.sleepVelocity = Settings.DEFAULT_SLEEP_VELOCITY;
-		this.sleepVelocitySquared = Settings.DEFAULT_SLEEP_VELOCITY * Settings.DEFAULT_SLEEP_VELOCITY;
+		this.sleepLinearVelocity = Settings.DEFAULT_SLEEP_LINEAR_VELOCITY;
+		this.sleepLinearVelocitySquared = Settings.DEFAULT_SLEEP_LINEAR_VELOCITY * Settings.DEFAULT_SLEEP_LINEAR_VELOCITY;
 		this.sleepAngularVelocity = Settings.DEFAULT_SLEEP_ANGULAR_VELOCITY;
 		this.sleepAngularVelocitySquared = Settings.DEFAULT_SLEEP_ANGULAR_VELOCITY * Settings.DEFAULT_SLEEP_ANGULAR_VELOCITY;
 		this.sleepTime = Settings.DEFAULT_SLEEP_TIME;
@@ -247,8 +249,8 @@ public class Settings {
 		this.restitutionVelocitySquared = Settings.DEFAULT_RESTITUTION_VELOCITY * Settings.DEFAULT_RESTITUTION_VELOCITY;
 		this.linearTolerance = Settings.DEFAULT_LINEAR_TOLERANCE;
 		this.linearToleranceSquared = Settings.DEFAULT_LINEAR_TOLERANCE * Settings.DEFAULT_LINEAR_TOLERANCE;
-		this.maxLinearCorrection = Settings.DEFAULT_MAX_LINEAR_CORRECTION;
-		this.maxLinearCorrectionSquared = Settings.DEFAULT_MAX_LINEAR_CORRECTION * Settings.DEFAULT_MAX_LINEAR_CORRECTION;
+		this.maximumLinearCorrection = Settings.DEFAULT_MAXIMUM_LINEAR_CORRECTION;
+		this.maximumLinearCorrectionSquared = Settings.DEFAULT_MAXIMUM_LINEAR_CORRECTION * Settings.DEFAULT_MAXIMUM_LINEAR_CORRECTION;
 		this.angularTolerance = Settings.DEFAULT_ANGULAR_TOLERANCE;
 		this.angularToleranceSquared = Settings.DEFAULT_ANGULAR_TOLERANCE * Settings.DEFAULT_ANGULAR_TOLERANCE;
 		this.baumgarte = Settings.DEFAULT_BAUMGARTE;
@@ -277,72 +279,72 @@ public class Settings {
 	 * @throws IllegalArgumentException if stepFrequency is less than 30
 	 */
 	public void setStepFrequency(double stepFrequency) {
-		if (stepFrequency < 30.0) throw new IllegalArgumentException("The step frequency must be 30.0 hz or greater.");
+		if (stepFrequency < 30.0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidStepFrequency"));
 		this.stepFequency = 1.0 / stepFrequency;
 	}
 	
 	/**
 	 * Returns the maximum translation a {@link Body} can have in one time step.
 	 * @return double the maximum translation in meters
-	 * @see #setMaxTranslation(double)
+	 * @see #setMaximumTranslation(double)
 	 */
-	public double getMaxTranslation() {
-		return this.maxTranslation;
+	public double getMaximumTranslation() {
+		return this.maximumTranslation;
 	}
 	
 	/**
 	 * Returns the maximum translation squared.
-	 * @see #getMaxTranslation()
-	 * @see #setMaxTranslation(double)
+	 * @see #getMaximumTranslation()
+	 * @see #setMaximumTranslation(double)
 	 * @return double
 	 */
-	public double getMaxTranslationSquared() {
-		return this.maxTranslationSquared;
+	public double getMaximumTranslationSquared() {
+		return this.maximumTranslationSquared;
 	}
 	
 	/**
 	 * Sets the maximum translation a {@link Body} can have in one time step.
 	 * <p>
 	 * Valid values are in the range [0, &infin;] meters
-	 * @param maxTranslation the maximum translation
+	 * @param maximumTranslation the maximum translation
 	 * @throws IllegalArgumentException if maxTranslation is less than zero
 	 */
-	public void setMaxTranslation(double maxTranslation) {
-		if (maxTranslation < 0) throw new IllegalArgumentException("The max translation cannot be negative.");
-		this.maxTranslation = maxTranslation;
-		this.maxTranslationSquared = maxTranslation * maxTranslation;
+	public void setMaximumTranslation(double maximumTranslation) {
+		if (maximumTranslation < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidMaximumTranslation"));
+		this.maximumTranslation = maximumTranslation;
+		this.maximumTranslationSquared = maximumTranslation * maximumTranslation;
 	}
 
 	/**
 	 * Returns the maximum rotation a {@link Body} can have in one time step.
 	 * @return double the maximum rotation in radians
-	 * @see #setMaxRotation(double)
+	 * @see #setMaximumRotation(double)
 	 */
-	public double getMaxRotation() {
-		return this.maxRotation;
+	public double getMaximumRotation() {
+		return this.maximumRotation;
 	}
 	
 	/**
 	 * Returns the max rotation squared.
-	 * @see #getMaxRotation()
-	 * @see #setMaxRotation(double)
+	 * @see #getMaximumRotation()
+	 * @see #setMaximumRotation(double)
 	 * @return double
 	 */
-	public double getMaxRotationSquared() {
-		return this.maxRotationSquared;
+	public double getMaximumRotationSquared() {
+		return this.maximumRotationSquared;
 	}
 	
 	/**
 	 * Sets the maximum rotation a {@link Body} can have in one time step.
 	 * <p>
 	 * Valid values are in the range [0, &infin;] radians
-	 * @param maxRotation the maximum rotation
+	 * @param maximumRotation the maximum rotation
 	 * @throws IllegalArgumentException if maxRotation is less than zero
 	 */
-	public void setMaxRotation(double maxRotation) {
-		if (maxRotation < 0) throw new IllegalArgumentException("The max rotation cannot be negative.");
-		this.maxRotation = maxRotation;
-		this.maxRotationSquared = maxRotation * maxRotation;
+	public void setMaximumRotation(double maximumRotation) {
+		if (maximumRotation < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidMaximumRotation"));
+		this.maximumRotation = maximumRotation;
+		this.maximumRotationSquared = maximumRotation * maximumRotation;
 	}
 
 	/**
@@ -362,38 +364,38 @@ public class Settings {
 	}
 	
 	/**
-	 * Returns the sleep velocity.
+	 * Returns the sleep linear velocity.
 	 * @return double the sleep velocity.
-	 * @see #setSleepVelocity(double)
+	 * @see #setSleepLinearVelocity(double)
 	 */
-	public double getSleepVelocity() {
-		return this.sleepVelocity;
+	public double getSleepLinearVelocity() {
+		return this.sleepLinearVelocity;
 	}
 	
 	/**
-	 * Returns the sleep velocity squared.
-	 * @see #getSleepVelocity()
-	 * @see #setSleepVelocity(double)
+	 * Returns the sleep linear velocity squared.
+	 * @see #getSleepLinearVelocity()
+	 * @see #setSleepLinearVelocity(double)
 	 * @return double
 	 */
-	public double getSleepVelocitySquared() {
-		return this.sleepVelocitySquared;
+	public double getSleepLinearVelocitySquared() {
+		return this.sleepLinearVelocitySquared;
 	}
 
 	/**
-	 * Sets the sleep velocity.
+	 * Sets the sleep linear velocity.
 	 * <p>
-	 * The sleep velocity is the maximum velocity a {@link Body} can have
+	 * The sleep linear velocity is the maximum velocity a {@link Body} can have
 	 * to be put to sleep.
 	 * <p>
 	 * Valid values are in the range [0, &infin;] meters/second
-	 * @param sleepVelocity the sleep velocity
-	 * @throws IllegalArgumentException if sleepVelocity is less than zero
+	 * @param sleepLinearVelocity the sleep linear velocity
+	 * @throws IllegalArgumentException if sleepLinearVelocity is less than zero
 	 */
-	public void setSleepVelocity(double sleepVelocity) {
-		if (sleepVelocity < 0) throw new IllegalArgumentException("The sleep velocity cannot be negative.");
-		this.sleepVelocity = sleepVelocity;
-		this.sleepVelocitySquared = sleepVelocity * sleepVelocity;
+	public void setSleepLinearVelocity(double sleepLinearVelocity) {
+		if (sleepLinearVelocity < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidSleepLinearVelocity"));
+		this.sleepLinearVelocity = sleepLinearVelocity;
+		this.sleepLinearVelocitySquared = sleepLinearVelocity * sleepLinearVelocity;
 	}
 	
 	/**
@@ -426,7 +428,7 @@ public class Settings {
 	 * @throws IllegalArgumentException if sleepAngularVelocity is less than zero
 	 */
 	public void setSleepAngularVelocity(double sleepAngularVelocity) {
-		if (sleepAngularVelocity < 0) throw new IllegalArgumentException("The sleep angular velocity cannot be negative.");
+		if (sleepAngularVelocity < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidSleepAngularVelocity"));
 		this.sleepAngularVelocity = sleepAngularVelocity;
 		this.sleepAngularVelocitySquared = sleepAngularVelocity * sleepAngularVelocity;
 	}
@@ -451,7 +453,7 @@ public class Settings {
 	 * @throws IllegalArgumentException if sleepTime is less than zero
 	 */
 	public void setSleepTime(double sleepTime) {
-		if (sleepTime < 0) throw new IllegalArgumentException("The sleep time cannot be negative.");
+		if (sleepTime < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidSleepTime"));
 		this.sleepTime = sleepTime;
 	}
 	
@@ -473,7 +475,7 @@ public class Settings {
 	 * @throws IllegalArgumentException if velocityConstraintSolverIterations is less than 5
 	 */
 	public void setVelocityConstraintSolverIterations(int velocityConstraintSolverIterations) {
-		if (velocityConstraintSolverIterations < 5) throw new IllegalArgumentException("The minimum number of iterations is 5.");
+		if (velocityConstraintSolverIterations < 5) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidVelocityIterations"));
 		this.velocityConstraintSolverIterations = velocityConstraintSolverIterations;
 	}
 	
@@ -495,7 +497,7 @@ public class Settings {
 	 * @throws IllegalArgumentException if positionConstraintSolverIterations is less than 5
 	 */
 	public void setPositionConstraintSolverIterations(int positionConstraintSolverIterations) {
-		if (positionConstraintSolverIterations < 5) throw new IllegalArgumentException("The minimum number of iterations is 5.");
+		if (positionConstraintSolverIterations < 5) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidPositionIterations"));
 		this.positionConstraintSolverIterations = positionConstraintSolverIterations;
 	}
 	
@@ -530,7 +532,7 @@ public class Settings {
 	 * @throws IllegalArgumentException if warmStartDistance is less than zero
 	 */
 	public void setWarmStartDistance(double warmStartDistance) {
-		if (warmStartDistance < 0) throw new IllegalArgumentException("The warm start distance cannot be negative.");
+		if (warmStartDistance < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidWarmStartDistance"));
 		this.warmStartDistance = warmStartDistance;
 		this.warmStartDistanceSquared = this.warmStartDistance * this.warmStartDistance;
 	}
@@ -565,7 +567,7 @@ public class Settings {
 	 * @throws IllegalArgumentException if restitutionVelocity is less than zero
 	 */
 	public void setRestitutionVelocity(double restitutionVelocity) {
-		if (restitutionVelocity < 0) throw new IllegalArgumentException("The restitution velocity cannot be negative.");
+		if (restitutionVelocity < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidRestitutionVelocity"));
 		this.restitutionVelocity = restitutionVelocity;
 		this.restitutionVelocitySquared = restitutionVelocity * restitutionVelocity;
 	}
@@ -599,7 +601,7 @@ public class Settings {
 	 * @throws IllegalArgumentException if linearTolerance is less than zero
 	 */
 	public void setLinearTolerance(double linearTolerance) {
-		if (linearTolerance < 0) throw new IllegalArgumentException("The linear tolerance cannot be negative.");
+		if (linearTolerance < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidLinearTolerance"));
 		this.linearTolerance = linearTolerance;
 		this.linearToleranceSquared = linearTolerance * linearTolerance;
 	}
@@ -633,7 +635,7 @@ public class Settings {
 	 * @throws IllegalArgumentException if angularTolerance is less than zero
 	 */
 	public void setAngularTolerance(double angularTolerance) {
-		if (angularTolerance < 0) throw new IllegalArgumentException("The angular tolerance cannot be negative.");
+		if (angularTolerance < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidAngularTolerance"));
 		this.angularTolerance = angularTolerance;
 		this.angularToleranceSquared = angularTolerance * angularTolerance;
 	}
@@ -641,20 +643,20 @@ public class Settings {
 	/**
 	 * Returns the maximum linear correction.
 	 * @return double the maximum linear correction
-	 * @see #setMaxLinearCorrection(double)
+	 * @see #setMaximumLinearCorrection(double)
 	 */
-	public double getMaxLinearCorrection() {
-		return this.maxLinearCorrection;
+	public double getMaximumLinearCorrection() {
+		return this.maximumLinearCorrection;
 	}
 	
 	/**
 	 * Returns the maximum linear correction squared.
-	 * @see #getMaxLinearCorrection()
-	 * @see #setMaxLinearCorrection(double)
+	 * @see #getMaximumLinearCorrection()
+	 * @see #setMaximumLinearCorrection(double)
 	 * @return double
 	 */
-	public double getMaxLinearCorrectionSquared() {
-		return maxLinearCorrectionSquared;
+	public double getMaximumLinearCorrectionSquared() {
+		return maximumLinearCorrectionSquared;
 	}
 
 	/**
@@ -666,32 +668,32 @@ public class Settings {
 	 * This is used to avoid large corrections.
 	 * <p>
 	 * Valid values are in the range (0, &infin;] meters
-	 * @param maxLinearCorrection the maximum linear correction
+	 * @param maximumLinearCorrection the maximum linear correction
 	 * @throws IllegalArgumentException if maxLinearCorrection is less than zero
 	 */
-	public void setMaxLinearCorrection(double maxLinearCorrection) {
-		if (maxLinearCorrection < 0) throw new IllegalArgumentException("The maximum linear correction cannot be negative.");
-		this.maxLinearCorrection = maxLinearCorrection;
-		this.maxLinearCorrectionSquared = maxLinearCorrection * maxLinearCorrection;
+	public void setMaximumLinearCorrection(double maximumLinearCorrection) {
+		if (maximumLinearCorrection < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidMaximumLinearCorrection"));
+		this.maximumLinearCorrection = maximumLinearCorrection;
+		this.maximumLinearCorrectionSquared = maximumLinearCorrection * maximumLinearCorrection;
 	}
 	
 	/**
 	 * Returns the maximum angular correction.
-	 * @see #setMaxAngularCorrection(double)
+	 * @see #setMaximumAngularCorrection(double)
 	 * @return double
 	 */
-	public double getMaxAngularCorrection() {
-		return maxAngularCorrection;
+	public double getMaximumAngularCorrection() {
+		return maximumAngularCorrection;
 	}
 	
 	/**
 	 * Returns the maximum angular correction squared.
-	 * @see #getMaxAngularCorrection()
-	 * @see #setMaxAngularCorrection(double)
+	 * @see #getMaximumAngularCorrection()
+	 * @see #setMaximumAngularCorrection(double)
 	 * @return double
 	 */
-	public double getMaxAngularCorrectionSquared() {
-		return maxAngularCorrectionSquared;
+	public double getMaximumAngularCorrectionSquared() {
+		return maximumAngularCorrectionSquared;
 	}
 	
 	/**
@@ -700,13 +702,13 @@ public class Settings {
 	 * This is used to prevent large angular corrections.
 	 * <p>
 	 * Valid values are in the range [0, &infin;] radians
-	 * @param maxAngularCorrection the maximum angular correction
+	 * @param maximumAngularCorrection the maximum angular correction
 	 * @throws IllegalArgumentException if maxAngularCorrection is less than zero
 	 */
-	public void setMaxAngularCorrection(double maxAngularCorrection) {
-		if (maxAngularCorrection < 0) throw new IllegalArgumentException("The maximum angular correction cannot be negative.");
-		this.maxAngularCorrection = maxAngularCorrection;
-		this.maxAngularCorrectionSquared = maxAngularCorrection * maxAngularCorrection;
+	public void setMaximumAngularCorrection(double maximumAngularCorrection) {
+		if (maximumAngularCorrection < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidMaximumAngularCorrection"));
+		this.maximumAngularCorrection = maximumAngularCorrection;
+		this.maximumAngularCorrectionSquared = maximumAngularCorrection * maximumAngularCorrection;
 	}
 	
 	/**
@@ -728,7 +730,7 @@ public class Settings {
 	 * @throws IllegalArgumentException if baumgarte is less than zero
 	 */
 	public void setBaumgarte(double baumgarte) {
-		if (baumgarte < 0) throw new IllegalArgumentException("The baumgarte factor cannot be negative.");
+		if (baumgarte < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidBaumgarte"));
 		this.baumgarte = baumgarte;
 	}
 	
@@ -749,7 +751,7 @@ public class Settings {
 	 */
 	public void setContinuousDetectionMode(ContinuousDetectionMode mode) {
 		// make sure its not null
-		if (mode == null) throw new NullPointerException("The continuous collision detection mode cannot be null.");
+		if (mode == null) throw new NullPointerException(Messages.getString("dynamics.settings.invalidCCDMode"));
 		// set the mode
 		this.continuousDetectionMode = mode;
 	}

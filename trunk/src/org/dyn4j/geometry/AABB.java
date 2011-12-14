@@ -24,10 +24,12 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.resources.Messages;
+
 /**
  * Represents an axis aligned bounding box.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.0.2
  * @since 3.0.0
  */
 public class AABB {
@@ -55,7 +57,7 @@ public class AABB {
 	 */
 	public AABB(Vector2 min, Vector2 max) {
 		// check the min and max
-		if (min.x > max.x || min.y > max.y) throw new IllegalArgumentException("The min cannot be greater than the max.");
+		if (min.x > max.x || min.y > max.y) throw new IllegalArgumentException(Messages.getString("geometry.aabb.invalidMinMax"));
 		this.min = min;
 		this.max = max;
 	}
@@ -65,7 +67,11 @@ public class AABB {
 	 */
 	@Override
 	public String toString() {
-		return "AABB[(" + this.min.x + ", " + this.min.y + ")|(" + this.max.x + ", " + this.max.y + ")]";
+		StringBuilder sb = new StringBuilder();
+		sb.append("AABB[Min=").append(this.min)
+		.append("|Max=").append(this.max)
+		.append("]");
+		return sb.toString();
 	}
 	
 	/**

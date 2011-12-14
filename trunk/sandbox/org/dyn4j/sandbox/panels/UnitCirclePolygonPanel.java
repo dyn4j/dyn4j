@@ -40,9 +40,9 @@ import javax.swing.JOptionPane;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Polygon;
-import org.dyn4j.sandbox.Resources;
+import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
-import org.dyn4j.sandbox.utilities.Icons;
+import org.dyn4j.sandbox.resources.Messages;
 
 /**
  * Panel used to create a unit circle polygon shape.
@@ -79,12 +79,12 @@ public class UnitCirclePolygonPanel extends ConvexShapePanel implements InputPan
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
 		
-		JLabel lblRadius = new JLabel(Resources.getString("panel.unitCircle.radius"), Icons.INFO, JLabel.LEFT);
-		lblRadius.setToolTipText(MessageFormat.format(Resources.getString("panel.unitCircle.radius.tooltip"), Resources.getString("unit.length")));
-		JLabel lblCount = new JLabel(Resources.getString("panel.unitCircle.pointCount"), Icons.INFO, JLabel.LEFT);
-		lblCount.setToolTipText(Resources.getString("panel.unitCircle.pointCount.tooltip"));
+		JLabel lblRadius = new JLabel(Messages.getString("panel.unitCircle.radius"), Icons.INFO, JLabel.LEFT);
+		lblRadius.setToolTipText(MessageFormat.format(Messages.getString("panel.unitCircle.radius.tooltip"), Messages.getString("unit.length")));
+		JLabel lblCount = new JLabel(Messages.getString("panel.unitCircle.pointCount"), Icons.INFO, JLabel.LEFT);
+		lblCount.setToolTipText(Messages.getString("panel.unitCircle.pointCount.tooltip"));
 		
-		JFormattedTextField txtRadius = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.unitCircle.radius.format")));
+		JFormattedTextField txtRadius = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.unitCircle.radius.format")));
 		JFormattedTextField txtCount = new JFormattedTextField(NumberFormat.getIntegerInstance());
 		
 		txtRadius.setValue(DEFAULT_RADIUS);
@@ -120,8 +120,8 @@ public class UnitCirclePolygonPanel extends ConvexShapePanel implements InputPan
 			}
 		});
 		
-		JLabel lblPreview = new JLabel(Resources.getString("panel.preview"), Icons.INFO, JLabel.LEFT);
-		lblPreview.setToolTipText(Resources.getString("panel.preview.tooltip"));
+		JLabel lblPreview = new JLabel(Messages.getString("panel.preview"), Icons.INFO, JLabel.LEFT);
+		lblPreview.setToolTipText(Messages.getString("panel.preview.tooltip"));
 		this.pnlPreview = new PreviewPanel(new Dimension(250, 225), Geometry.createUnitCirclePolygon(this.count, this.radius));
 		
 		layout.setAutoCreateGaps(true);
@@ -176,7 +176,7 @@ public class UnitCirclePolygonPanel extends ConvexShapePanel implements InputPan
 	@Override
 	public void showInvalidInputMessage(Window owner) {
 		if (!this.isValidInput()) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.unitCircle.invalid"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.unitCircle.invalid"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

@@ -36,9 +36,9 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.dyn4j.sandbox.Resources;
+import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
-import org.dyn4j.sandbox.utilities.Icons;
+import org.dyn4j.sandbox.resources.Messages;
 
 /**
  * Panel used to input a point or vector.
@@ -75,11 +75,11 @@ public class PointPanel extends JPanel implements ActionListener, PropertyChange
 	 * @param y the initial y value
 	 */
 	public PointPanel(double x, double y) {
-		JLabel lblX = new JLabel(Resources.getString("x"));
-		JLabel lblY = new JLabel(Resources.getString("y"));
+		JLabel lblX = new JLabel(Messages.getString("x"));
+		JLabel lblY = new JLabel(Messages.getString("y"));
 		
-		this.txtX = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.point.format")));
-		this.txtY = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.point.format")));
+		this.txtX = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.point.format")));
+		this.txtY = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.point.format")));
 		
 		this.txtX.addFocusListener(new SelectTextFocusListener(this.txtX));
 		this.txtY.addFocusListener(new SelectTextFocusListener(this.txtY));
@@ -95,13 +95,13 @@ public class PointPanel extends JPanel implements ActionListener, PropertyChange
 		
 		this.btnAdd = new JButton();
 		this.btnAdd.setIcon(Icons.ADD);
-		this.btnAdd.setToolTipText(Resources.getString("panel.point.add.tooltip"));
+		this.btnAdd.setToolTipText(Messages.getString("panel.point.add.tooltip"));
 		this.btnAdd.addActionListener(this);
 		this.btnAdd.setActionCommand("add");
 		
 		this.btnRemove = new JButton();
 		this.btnRemove.setIcon(Icons.REMOVE);
-		this.btnRemove.setToolTipText(Resources.getString("panel.point.remove.tooltip"));
+		this.btnRemove.setToolTipText(Messages.getString("panel.point.remove.tooltip"));
 		this.btnRemove.addActionListener(this);
 		this.btnRemove.setActionCommand("remove");
 		

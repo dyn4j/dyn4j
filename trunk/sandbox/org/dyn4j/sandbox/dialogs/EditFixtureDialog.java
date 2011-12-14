@@ -41,9 +41,9 @@ import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
-import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.panels.FixturePanel;
 import org.dyn4j.sandbox.panels.TransformPanel;
+import org.dyn4j.sandbox.resources.Messages;
 
 /**
  * Dialog to create a new body with an initial fixture/shape.
@@ -74,7 +74,7 @@ public class EditFixtureDialog extends JDialog implements ActionListener {
 	 * @param fixture the fixture being edited
 	 */
 	private EditFixtureDialog(Window owner, Image icon, BodyFixture fixture) {
-		super(owner, Resources.getString("dialog.fixture.edit.title"), ModalityType.APPLICATION_MODAL);
+		super(owner, Messages.getString("dialog.fixture.edit.title"), ModalityType.APPLICATION_MODAL);
 		
 		if (icon != null) {
 			this.setIconImage(icon);
@@ -98,7 +98,7 @@ public class EditFixtureDialog extends JDialog implements ActionListener {
 		JTextPane lblText = new JTextPane();
 		lblText = new JTextPane();
 		lblText.setContentType("text/html");
-		lblText.setText(Resources.getString("label.transform.warning"));
+		lblText.setText(Messages.getString("label.transform.warning"));
 		lblText.setEditable(false);
 		lblText.setPreferredSize(new Dimension(350, 120));
 		
@@ -107,11 +107,11 @@ public class EditFixtureDialog extends JDialog implements ActionListener {
 		this.pnlFixture = new FixturePanel(this.fixture);
 		this.pnlTransform = new TransformPanel(lblText);
 		
-		tabs.addTab(Resources.getString("dialog.fixture.tab.fixture"), this.pnlFixture);
-		tabs.addTab(Resources.getString("dialog.fixture.tab.transform"), this.pnlTransform);
+		tabs.addTab(Messages.getString("dialog.fixture.tab.fixture"), this.pnlFixture);
+		tabs.addTab(Messages.getString("dialog.fixture.tab.transform"), this.pnlTransform);
 		
-		JButton btnCancel = new JButton(Resources.getString("button.cancel"));
-		JButton btnCreate = new JButton(Resources.getString("button.save"));
+		JButton btnCancel = new JButton(Messages.getString("button.cancel"));
+		JButton btnCreate = new JButton(Messages.getString("button.save"));
 		btnCreate.setActionCommand("save");
 		btnCancel.setActionCommand("cancel");
 		btnCreate.addActionListener(this);

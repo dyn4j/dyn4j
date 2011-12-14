@@ -36,11 +36,11 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 
-import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.SandboxRay;
 import org.dyn4j.sandbox.controls.BottomButtonPanel;
+import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.panels.RayPanel;
-import org.dyn4j.sandbox.utilities.Icons;
+import org.dyn4j.sandbox.resources.Messages;
 
 /**
  * Dialog used to add a ray to the world.
@@ -72,10 +72,10 @@ public class AddRayDialog extends JDialog implements ActionListener {
 	 * @param owner the dialog owner
 	 */
 	private AddRayDialog(Window owner) {
-		super(owner, Resources.getString("dialog.ray.add.title"), ModalityType.APPLICATION_MODAL);
+		super(owner, Messages.getString("dialog.ray.add.title"), ModalityType.APPLICATION_MODAL);
 		
 		// create a default ray
-		SandboxRay ray = new SandboxRay(MessageFormat.format(Resources.getString("dialog.ray.name.default"), N), Math.toRadians(45.0));
+		SandboxRay ray = new SandboxRay(MessageFormat.format(Messages.getString("dialog.ray.name.default"), N), Math.toRadians(45.0));
 		ray.setLength(SandboxRay.INFINITE);
 		ray.setIgnoreSensors(false);
 		ray.setAll(true);
@@ -83,11 +83,11 @@ public class AddRayDialog extends JDialog implements ActionListener {
 		this.setIconImage(Icons.FORCE.getImage());
 		this.rayPanel = new RayPanel(ray);
 		
-		this.btnCancel = new JButton(Resources.getString("button.cancel"));
+		this.btnCancel = new JButton(Messages.getString("button.cancel"));
 		this.btnCancel.setActionCommand("cancel");
 		this.btnCancel.addActionListener(this);
 		
-		this.btnAdd = new JButton(Resources.getString("button.add"));
+		this.btnAdd = new JButton(Messages.getString("button.add"));
 		this.btnAdd.setActionCommand("add");
 		this.btnAdd.addActionListener(this);
 		

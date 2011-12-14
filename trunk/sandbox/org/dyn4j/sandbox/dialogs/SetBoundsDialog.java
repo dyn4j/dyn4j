@@ -42,11 +42,11 @@ import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.controls.BottomButtonPanel;
+import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.panels.RectanglePanel;
 import org.dyn4j.sandbox.panels.TransformPanel;
-import org.dyn4j.sandbox.utilities.Icons;
+import org.dyn4j.sandbox.resources.Messages;
 
 /**
  * Dialog to create a new body with an initial fixture/shape.
@@ -73,7 +73,7 @@ public class SetBoundsDialog extends JDialog implements ActionListener {
 	 * @param bounds the current bounds object
 	 */
 	private SetBoundsDialog(Window owner, RectangularBounds bounds) {
-		super(owner, Resources.getString("dialog.bounds.set.title"), ModalityType.APPLICATION_MODAL);
+		super(owner, Messages.getString("dialog.bounds.set.title"), ModalityType.APPLICATION_MODAL);
 		
 		this.setIconImage(Icons.SET_BOUNDS.getImage());
 		
@@ -90,11 +90,11 @@ public class SetBoundsDialog extends JDialog implements ActionListener {
 		this.pnlTransform = new TransformPanel(t);
 		
 		tabs.setBorder(BorderFactory.createEmptyBorder(7, 0, 0, 0));
-		tabs.addTab(Resources.getString("dialog.bounds.tab.bounds"), this.pnlRectangle);
-		tabs.addTab(Resources.getString("dialog.bounds.tab.transform"), this.pnlTransform);
+		tabs.addTab(Messages.getString("dialog.bounds.tab.bounds"), this.pnlRectangle);
+		tabs.addTab(Messages.getString("dialog.bounds.tab.transform"), this.pnlTransform);
 		
-		JButton btnCancel = new JButton(Resources.getString("button.cancel"));
-		JButton btnCreate = new JButton(Resources.getString("button.set"));
+		JButton btnCancel = new JButton(Messages.getString("button.cancel"));
+		JButton btnCreate = new JButton(Messages.getString("button.set"));
 		btnCancel.setActionCommand("cancel");
 		btnCreate.setActionCommand("set");
 		btnCreate.addActionListener(this);

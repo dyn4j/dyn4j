@@ -32,6 +32,7 @@ import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * Represents a maximum/minimum length distance joint.
@@ -50,13 +51,10 @@ import org.dyn4j.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.0.2
  * @since 2.2.1
  */
 public class RopeJoint extends Joint {
-	/** The joint type */
-	public static final Joint.Type TYPE = new Joint.Type("Rope");
-	
 	/** The local anchor point on the first {@link Body} */
 	protected Vector2 localAnchor1;
 	
@@ -101,9 +99,10 @@ public class RopeJoint extends Joint {
 	public RopeJoint(Body body1, Body body2, Vector2 anchor1, Vector2 anchor2) {
 		super(body1, body2, false);
 		// verify the bodies are not the same instance
-		if (body1 == body2) throw new IllegalArgumentException("Cannot create a rope joint between the same body instance.");
+		if (body1 == body2) throw new IllegalArgumentException(Messages.getString("dynamics.joint.sameBody"));
 		// verify the anchor points are not null
-		if (anchor1 == null || anchor2 == null) throw new NullPointerException("Neither anchor point can be null.");
+		if (anchor1 == null) throw new NullPointerException(Messages.getString("dynamics.joint.nullAnchor1"));
+		if (anchor2 == null) throw new NullPointerException(Messages.getString("dynamics.joint.nullAnchor2"));
 		// get the local anchor points
 		this.localAnchor1 = body1.getLocalPoint(anchor1);
 		this.localAnchor2 = body2.getLocalPoint(anchor2);
@@ -121,16 +120,16 @@ public class RopeJoint extends Joint {
 	 */
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("ROPE_JOINT[")
-		.append(super.toString()).append("|")
-		.append(this.localAnchor1).append("|")
-		.append(this.localAnchor2).append("|")
-		.append(this.upperLimit).append("|")
-		.append(this.upperLimitEnabled).append("|")
-		.append(this.lowerLimit).append("|")
-		.append(this.lowerLimitEnabled).append("|")
-		.append(this.limitState).append("|")
-		.append(this.impulse).append("]");
+		sb.append("RopeJoint[").append(super.toString())
+		.append("|LocalAnchor1=").append(this.localAnchor1)
+		.append("|LocalAnchor2=").append(this.localAnchor2)
+		.append("|WorldAnchor1=").append(this.getAnchor1())
+		.append("|WorldAnchor2=").append(this.getAnchor2())
+		.append("|IsLowerLimitEnabled=").append(this.lowerLimitEnabled)
+		.append("|LowerLimit").append(this.lowerLimit)
+		.append("|IsUpperLimitEnabled=").append(this.upperLimitEnabled)
+		.append("|UpperLimit=").append(this.upperLimit)
+		.append("]");
 		return sb.toString();
 	}
 	
@@ -298,7 +297,7 @@ public class RopeJoint extends Joint {
 			// get the current settings
 			Settings settings = Settings.getInstance();
 			double linearTolerance = settings.getLinearTolerance();
-			double maxLinearCorrection = settings.getMaxLinearCorrection();
+			double maxLinearCorrection = settings.getMaximumLinearCorrection();
 			
 			Transform t1 = this.body1.getTransform();
 			Transform t2 = this.body2.getTransform();
@@ -339,14 +338,6 @@ public class RopeJoint extends Joint {
 			// if not then just return true that the position constraint is satisfied
 			return true;
 		}
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getType()
-	 */
-	@Override
-	public Type getType() {
-		return RopeJoint.TYPE;
 	}
 	
 	/* (non-Javadoc)
@@ -394,9 +385,9 @@ public class RopeJoint extends Joint {
 	 */
 	public void setUpperLimit(double upperLimit) {
 		// make sure the distance is greater than zero
-		if (upperLimit < 0.0) throw new IllegalArgumentException("The upper limit must be greater than or equal to zero.");
+		if (upperLimit < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.rope.lessThanZeroUpperLimit"));
 		// make sure the minimum is less than or equal to the maximum
-		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException("The upper limit must be greater than or equal to the current lower limit.");
+		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidUpperLimit"));
 		// make sure its changed and enabled before waking the bodies
 		if (this.upperLimitEnabled && upperLimit != this.upperLimit) {
 			// wake up both bodies
@@ -442,9 +433,9 @@ public class RopeJoint extends Joint {
 	 */
 	public void setLowerLimit(double lowerLimit) {
 		// make sure the distance is greater than zero
-		if (lowerLimit < 0.0) throw new IllegalArgumentException("The lower limit must be greater than or equal to zero.");
+		if (lowerLimit < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.rope.lessThanZeroLowerLimit"));
 		// make sure the minimum is less than or equal to the maximum
-		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException("The lower limit must be less than or equal to the current upper limit.");
+		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLowerLimit"));
 		// make sure its changed and enabled before waking the bodies
 		if (this.lowerLimitEnabled && lowerLimit != this.lowerLimit) {
 			// wake up both bodies
@@ -483,11 +474,11 @@ public class RopeJoint extends Joint {
 	 */
 	public void setLimits(double lowerLimit, double upperLimit) {
 		// make sure the minimum distance is greater than zero
-		if (lowerLimit < 0.0) throw new IllegalArgumentException("The minimum distance must be greater than or equal to zero.");
+		if (lowerLimit < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.rope.lessThanZeroLowerLimit"));
 		// make sure the maximum distance is greater than zero
-		if (upperLimit < 0.0) throw new IllegalArgumentException("The maximum distance must be greater than or equal to zero.");
+		if (upperLimit < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.rope.lessThanZeroUpperLimit"));
 		// make sure the min < max
-		if (lowerLimit > upperLimit) throw new IllegalArgumentException("The minimum distance must be less than the maximum distance.");
+		if (lowerLimit > upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLimits"));
 		// make sure one of the limits is enabled and has changed before waking the bodies
 		if ((this.lowerLimitEnabled && lowerLimit != this.lowerLimit) || (this.upperLimitEnabled && upperLimit != this.upperLimit)) {
 			// wake up the bodies
@@ -536,7 +527,7 @@ public class RopeJoint extends Joint {
 	 */
 	public void setLimits(double limit) {
 		// make sure the distance is greater than zero
-		if (limit < 0.0) throw new IllegalArgumentException("The distance must be greater than or equal to zero.");
+		if (limit < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.rope.invalidLimit"));
 		// make sure one of the limits is enabled and has changed before waking the bodies
 		if ((this.lowerLimitEnabled && limit != this.lowerLimit) || (this.upperLimitEnabled && limit != this.upperLimit)) {
 			// wake up the bodies

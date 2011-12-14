@@ -36,7 +36,7 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * All {@link ManifoldPoint}s are in world space.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class Manifold {
@@ -69,12 +69,14 @@ public class Manifold {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("MANIFOLD[").append("{");
-		int size = points.size();
+		sb.append("Manifold[Normal=").append(this.normal);
+		sb.append("|Points={");
+		int size = this.points.size();
 		for (int i = 0; i < size; i++) {
+			if (i != 0) sb.append(",");
 			sb.append(this.points.get(i));
 		}
-		sb.append("}|").append(this.normal).append("]");
+		sb.append("}]");
 		return sb.toString();
 	}
 	

@@ -34,7 +34,7 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * This class is used by the {@link Gjk} and {@link Epa} classes.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class MinkowskiSum {
@@ -53,7 +53,7 @@ public class MinkowskiSum {
 	/**
 	 * Represents a point in the {@link MinkowskiSum}.
 	 * @author William Bittle
-	 * @version 2.0.0
+	 * @version 3.0.2
 	 * @since 1.0.0
 	 */
 	public static class Point {
@@ -105,10 +105,10 @@ public class MinkowskiSum {
 		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
-			sb.append("MINKOWSKI_POINT[")
-			.append(p).append("|")
-			.append(p1).append("|")
-			.append(p2).append("]");
+			sb.append("MinkowskiSum.Point[Point=").append(this.p)
+			.append("|SupportPoint1=").append(this.p1)
+			.append("|SupportPoint2=").append(this.p2)
+			.append("]");
 			return sb.toString();
 		}
 	}
@@ -133,9 +133,11 @@ public class MinkowskiSum {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("MINKOWSKI_SUM[")
-		.append(convex1).append("|").append(transform1).append("|")
-		.append(convex2).append("|").append(transform2).append("]");
+		sb.append("MinkowskiSum[Shape1=").append(this.convex1)
+		.append("|Transform1=").append(this.transform1)
+		.append("|Shape2=").append(this.convex2)
+		.append("|Transform2=").append(this.transform2)
+		.append("]");
 		return sb.toString();
 	}
 	

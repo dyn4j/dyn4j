@@ -28,11 +28,12 @@ import org.dyn4j.collision.Fixture;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Shape;
+import org.dyn4j.resources.Messages;
 
 /**
  * Represents a part of a {@link Body}.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.0.2
  * @since 2.0.0
  */
 public class BodyFixture extends Fixture {
@@ -71,15 +72,14 @@ public class BodyFixture extends Fixture {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("BODY_FIXTURE[")
-		.append(this.id).append("|")
-		.append(this.shape).append("|")
-		.append(this.density).append("|")
-		.append(this.filter).append("|")
-		.append(this.sensor).append("|")
-		.append(this.friction).append("|")
-		.append(this.restitution).append("|")
-		.append(this.userData).append("|")
+		sb.append("BodyFixture[Id=").append(this.id)
+		.append("|Shape=").append(this.shape)
+		.append("|Filter=").append(this.filter)
+		.append("|IsSensor=").append(this.sensor)
+		.append("|Density=").append(this.density)
+		.append("|Friction=").append(this.friction)
+		.append("|Restitution=").append(this.restitution)
+		.append("|UserData=").append(this.userData)
 		.append("]");
 		return sb.toString();
 	}
@@ -90,7 +90,7 @@ public class BodyFixture extends Fixture {
 	 * @throws IllegalArgumentException if density is less than or equal to zero
 	 */
 	public void setDensity(double density) {
-		if (density <= 0) throw new IllegalArgumentException("The density must be greater than 0.");
+		if (density <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.body.fixture.invalidDensity"));
 		this.density = density;
 	}
 	
@@ -116,7 +116,7 @@ public class BodyFixture extends Fixture {
 	 * @throws IllegalArgumentException if friction is less than zero
 	 */
 	public void setFriction(double friction) {
-		if (friction < 0) throw new IllegalArgumentException("The coefficient of friction cannot be negative.");
+		if (friction < 0) throw new IllegalArgumentException(Messages.getString("dynamics.body.fixture.invalidFriction"));
 		this.friction = friction;
 	}
 	
@@ -134,7 +134,7 @@ public class BodyFixture extends Fixture {
 	 * @throws IllegalArgumentException if restitution is less than zero
 	 */
 	public void setRestitution(double restitution) {
-		if (restitution < 0) throw new IllegalArgumentException("The coefficient of restitution cannot be negative.");
+		if (restitution < 0) throw new IllegalArgumentException(Messages.getString("dynamics.body.fixture.invalidRestitution"));
 		this.restitution = restitution;
 	}
 	

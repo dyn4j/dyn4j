@@ -29,6 +29,7 @@ import java.util.List;
 
 import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * Implementation of the Gift Wrapping convex hull algorithm.
@@ -51,7 +52,7 @@ public class GiftWrap implements HullGenerator {
 	@Override
 	public Vector2[] generate(Vector2... points) {
 		// check for null array
-		if (points == null) throw new NullPointerException("Cannot generate a convex hull from a null point array.");
+		if (points == null) throw new NullPointerException(Messages.getString("geometry.hull.nullArray"));
 		// get the size
 		int size = points.length;
 		// check the size
@@ -63,7 +64,7 @@ public class GiftWrap implements HullGenerator {
 		for (int i = 0; i < size; i++) {
 			Vector2 p = points[i];
 			// check for null points
-			if (p == null) throw new NullPointerException("The array of points cannot contain null points.");
+			if (p == null) throw new NullPointerException(Messages.getString("geometry.hull.nullPoints"));
 			// check the x cooridate
 			if (p.x < x) {
 				x = p.x;

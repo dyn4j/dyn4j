@@ -16,20 +16,20 @@
     <Settings>
         <StepFrequency>60.0</StepFrequency>
         <MaximumTranslation>2.0</MaximumTranslation>
-        <MaximumRotation>1.57079633</MaximumRotation>
+        <MaximumRotation>90</MaximumRotation>
         <ContinuousCollisionDetectionMode>ALL</ContinuousCollisionDetectionMode>
         <AutoSleep>true</AutoSleep>
         <SleepTime>0.5</SleepTime>
         <SleepLinearVelocity>0.01</SleepLinearVelocity>
-        <SleepAngularVelocity>0.034906585</SleepAngularVelocity>
+        <SleepAngularVelocity>2.0</SleepAngularVelocity>
         <VelocitySolverIterations>10</VelocitySolverIterations>
         <PositionSolverIterations>10</PositionSolverIterations>
         <WarmStartDistance>0.01</WarmStartDistance>
         <RestitutionVelocity>1.0</RestitutionVelocity>
         <LinearTolerance>0.0050</LinearTolerance>
-        <AngularTolerance>0.034906585</AngularTolerance>
+        <AngularTolerance>2.0</AngularTolerance>
         <MaximumLinearCorrection>0.2</MaximumLinearCorrection>
-        <MaximumAngularCorrection>0.13962634</MaximumAngularCorrection>
+        <MaximumAngularCorrection>8.0</MaximumAngularCorrection>
         <Baumgarte>0.2</Baumgarte>
     </Settings>
     <Rays>
@@ -195,8 +195,8 @@
                 <BodyId1>77fe5884-29e9-47e3-8d9e-0bfcfe08c8b2</BodyId1>
                 <BodyId2>0aa0f066-9a06-4077-ae1c-b6e3511deab5</BodyId2>
                 <CollisionAllowed>false</CollisionAllowed>
-                <LowerLimit>-0.5235987755982988</LowerLimit>
-                <UpperLimit>0.5235987755982988</UpperLimit>
+                <LowerLimit>-30.0</LowerLimit>
+                <UpperLimit>30.0</UpperLimit>
                 <LimitEnabled>true</LimitEnabled>
                 <ReferenceAngle>0.0</ReferenceAngle>
             </Joint>

@@ -568,7 +568,7 @@ public class ContactConstraintSolver {
 		// get the max linear correction, baumgarte, and allowed penetration from
 		// the settings object.
 		Settings settings = Settings.getInstance();
-		double maxLinearCorrection = settings.getMaxLinearCorrection();
+		double maxLinearCorrection = settings.getMaximumLinearCorrection();
 		double allowedPenetration = settings.getLinearTolerance();
 		double baumgarte = settings.getBaumgarte();
 		

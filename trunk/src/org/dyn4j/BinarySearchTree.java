@@ -28,6 +28,8 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Stack;
 
+import org.dyn4j.resources.Messages;
+
 /**
  * Represents an Binary Search Tree.
  * <p>
@@ -36,7 +38,7 @@ import java.util.Stack;
  * Use the {@link #isSelfBalancing()} and {@link #setSelfBalancing(boolean)} methods to 
  * make the tree an AVL tree.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.2
  * @since 2.2.0
  * @param <E> Comparable
  */
@@ -44,7 +46,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	/**
 	 * Node class for a {@link BinarySearchTree}.
 	 * @author William Bittle
-	 * @version 3.0.0
+	 * @version 3.0.2
 	 * @since 2.2.0
 	 */
 	protected class Node implements Comparable<Node> {
@@ -77,7 +79,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 		 * @throws NullPointerException if comparable is null
 		 */
 		public Node(E comparable, Node parent, Node left, Node right) {
-			if (comparable == null) throw new NullPointerException("Cannot create a node with a null comparable.");
+			if (comparable == null) throw new NullPointerException(Messages.getString("binarySearchTree.nullComparable"));
 			this.comparable = comparable;
 			this.parent = parent;
 			this.left = left;
@@ -157,8 +159,8 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 		 */
 		public TreeIterator(Node node, Direction direction) {
 			// check for null
-			if (node == null) throw new NullPointerException("Cannot create an iterator for a null (sub)tree.");
-			if (direction == null) throw new NullPointerException("A traversal direction must be specified.");
+			if (node == null) throw new NullPointerException(Messages.getString("binarySearchTree.nullSubTreeForIterator"));
+			if (direction == null) throw new NullPointerException(Messages.getString("binarySearchTree.nullTraversalDirection"));
 			// set the direction
 			this.direction = direction;
 			// create the node stack and initialize it

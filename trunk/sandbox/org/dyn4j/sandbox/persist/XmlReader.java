@@ -29,6 +29,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -77,6 +78,7 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.Camera;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.SandboxRay;
+import org.dyn4j.sandbox.resources.Messages;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -430,7 +432,7 @@ public class XmlReader extends DefaultHandler {
 		if (reader.worldName != null) {
 			world.setUserData(reader.worldName);
 		} else {
-			world.setUserData("World");
+			world.setUserData(Messages.getString("world.name.default"));
 		}
 		
 		for (SandboxBody body : reader.bodies) {
@@ -529,7 +531,7 @@ public class XmlReader extends DefaultHandler {
 				// otherwise always use the default filter
 				this.filter = null;
 			} else {
-				throw new SAXException("Filter type \"" + type + "\" unknown or not implemented.");
+				throw new SAXException(MessageFormat.format(Messages.getString("exception.persist.unknownFilterType"), type));
 			}
 		} else if ("PartOfGroups".equalsIgnoreCase(qName)) {
 			this.partOfGroupsFlag = true;
@@ -616,7 +618,7 @@ public class XmlReader extends DefaultHandler {
 			} else if (s.equalsIgnoreCase(DynamicAABBTree.class.getSimpleName())) { 
 				this.broadphase = new DynamicAABBTree<Body>();
 			} else {
-				throw new SAXException("Broadphase algorithm \"" + s + "\" unknown or not implemented.");
+				throw new SAXException(MessageFormat.format(Messages.getString("exception.persist.unknownBroadphaseAlgorithm"), s));
 			}
 		} else if ("NarrowphaseDetector".equalsIgnoreCase(this.tagName)) {
 			if (s.equalsIgnoreCase(Sat.class.getSimpleName())) {
@@ -624,19 +626,19 @@ public class XmlReader extends DefaultHandler {
 			} else if (s.equalsIgnoreCase(Gjk.class.getSimpleName())) {
 				this.narrowphase = new Gjk();
 			} else {
-				throw new SAXException("Narrowphase algorithm \"" + s + "\" unknown or not implemented.");
+				throw new SAXException(MessageFormat.format(Messages.getString("exception.persist.unknownNarrowphaseAlgorithm"), s));
 			}
 		} else if ("ManifoldSolver".equalsIgnoreCase(this.tagName)) {
 			if (s.equalsIgnoreCase(ClippingManifoldSolver.class.getSimpleName())) {
 				this.manifoldSolver = new ClippingManifoldSolver();
 			} else {
-				throw new SAXException("Manifold solver algorithm \"" + s + "\" unknown or not implemented.");
+				throw new SAXException(MessageFormat.format(Messages.getString("exception.persist.unknownManifoldSolverAlgorithm"), s));
 			}
 		} else if ("TimeOfImpactDetector".equalsIgnoreCase(this.tagName)) {
 			if (s.equalsIgnoreCase(ConservativeAdvancement.class.getSimpleName())) {
 				this.timeOfImpact = new ConservativeAdvancement();
 			} else {
-				throw new SAXException("Time of impact algorithm \"" + s + "\" unknown or not implemented.");
+				throw new SAXException(MessageFormat.format(Messages.getString("exception.persist.unknownTimeOfImpactAlgorithm"), s));
 			}
 		} else if ("Height".equalsIgnoreCase(this.tagName)) {
 			this.height = Double.parseDouble(s);
@@ -663,7 +665,7 @@ public class XmlReader extends DefaultHandler {
 		} else if ("Explicit".equalsIgnoreCase(this.tagName)) {
 			this.massExplicit = Boolean.parseBoolean(s);
 		} else if ("AngularVelocity".equalsIgnoreCase(this.tagName)) {
-			this.body.setAngularVelocity(Double.parseDouble(s));
+			this.body.setAngularVelocity(Math.toRadians(Double.parseDouble(s)));
 		} else if ("AccumulatedTorque".equalsIgnoreCase(this.tagName)) {
 			this.body.apply(Double.parseDouble(s));
 		} else if ("AutoSleep".equalsIgnoreCase(this.tagName) && !this.settingsFlag) {
@@ -721,9 +723,9 @@ public class XmlReader extends DefaultHandler {
 		} else if ("StepFrequency".equalsIgnoreCase(this.tagName)) {
 			Settings.getInstance().setStepFrequency(Double.parseDouble(s));
 		} else if ("MaximumTranslation".equalsIgnoreCase(this.tagName)) {
-			Settings.getInstance().setMaxTranslation(Double.parseDouble(s));
+			Settings.getInstance().setMaximumTranslation(Double.parseDouble(s));
 		} else if ("MaximumRotation".equalsIgnoreCase(this.tagName)) {
-			Settings.getInstance().setMaxRotation(Double.parseDouble(s));
+			Settings.getInstance().setMaximumRotation(Math.toRadians(Double.parseDouble(s)));
 		} else if ("ContinuousCollisionDetectionMode".equalsIgnoreCase(this.tagName)) {
 			if (Settings.ContinuousDetectionMode.ALL.toString().equalsIgnoreCase(s)) {
 				Settings.getInstance().setContinuousDetectionMode(Settings.ContinuousDetectionMode.ALL);
@@ -732,16 +734,16 @@ public class XmlReader extends DefaultHandler {
 			} else if (Settings.ContinuousDetectionMode.NONE.toString().equalsIgnoreCase(s)) {
 				Settings.getInstance().setContinuousDetectionMode(Settings.ContinuousDetectionMode.NONE);
 			} else {
-				throw new SAXException("Continuous collision detection mode '" + s + "' unknown.");
+				throw new SAXException(MessageFormat.format(Messages.getString("exception.persist.unknownCCDMode"), s));
 			}
 		} else if ("AutoSleep".equalsIgnoreCase(this.tagName) && this.settingsFlag) {
 			Settings.getInstance().setAutoSleepingEnabled(Boolean.parseBoolean(s));
 		} else if ("SleepTime".equalsIgnoreCase(this.tagName)) {
 			Settings.getInstance().setSleepTime(Double.parseDouble(s));
 		} else if ("SleepLinearVelocity".equalsIgnoreCase(this.tagName)) {
-			Settings.getInstance().setSleepVelocity(Double.parseDouble(s));
+			Settings.getInstance().setSleepLinearVelocity(Double.parseDouble(s));
 		} else if ("SleepAngularVelocity".equalsIgnoreCase(this.tagName)) {
-			Settings.getInstance().setSleepAngularVelocity(Double.parseDouble(s));
+			Settings.getInstance().setSleepAngularVelocity(Math.toRadians(Double.parseDouble(s)));
 		} else if ("VelocitySolverIterations".equalsIgnoreCase(this.tagName)) {
 			Settings.getInstance().setVelocityConstraintSolverIterations(Integer.parseInt(s));
 		} else if ("PositionSolverIterations".equalsIgnoreCase(this.tagName)) {
@@ -753,11 +755,11 @@ public class XmlReader extends DefaultHandler {
 		} else if ("LinearTolerance".equalsIgnoreCase(this.tagName)) {
 			Settings.getInstance().setLinearTolerance(Double.parseDouble(s));
 		} else if ("AngularTolerance".equalsIgnoreCase(this.tagName)) {
-			Settings.getInstance().setAngularTolerance(Double.parseDouble(s));
+			Settings.getInstance().setAngularTolerance(Math.toRadians(Double.parseDouble(s)));
 		} else if ("MaximumLinearCorrection".equalsIgnoreCase(this.tagName)) {
-			Settings.getInstance().setMaxLinearCorrection(Double.parseDouble(s));
+			Settings.getInstance().setMaximumLinearCorrection(Double.parseDouble(s));
 		} else if ("MaximumAngularCorrection".equalsIgnoreCase(this.tagName)) {
-			Settings.getInstance().setMaxAngularCorrection(Double.parseDouble(s));
+			Settings.getInstance().setMaximumAngularCorrection(Math.toRadians(Double.parseDouble(s)));
 		} else if ("Baumgarte".equalsIgnoreCase(this.tagName)) {
 			Settings.getInstance().setBaumgarte(Double.parseDouble(s));
 		} else if ("Direction".equalsIgnoreCase(this.tagName) && this.rayFlag) {
@@ -793,10 +795,10 @@ public class XmlReader extends DefaultHandler {
 			this.translation = null;
 		} else if ("Bounds".equalsIgnoreCase(qName)) {
 			Rectangle r = new Rectangle(this.width, this.height);
-			r.rotate(this.localRotation);
+			r.rotate(Math.toRadians(this.localRotation));
 			r.translate(this.localCenter);
 			this.bounds = new RectangularBounds(r);
-			this.bounds.rotate(this.rotation);
+			this.bounds.rotate(Math.toRadians(this.rotation));
 			this.bounds.translate(this.translation);
 		} else if ("Settings".equalsIgnoreCase(qName)) {
 			this.settingsFlag = false;
@@ -805,7 +807,7 @@ public class XmlReader extends DefaultHandler {
 			if (this.body != null) {
 				// if so, then set the transform
 				Transform transform = new Transform();
-				transform.setRotation(this.rotation);
+				transform.setRotation(Math.toRadians(this.rotation));
 				transform.setTranslation(this.translation);
 				this.body.setTransform(transform);
 			}
@@ -821,7 +823,7 @@ public class XmlReader extends DefaultHandler {
 				this.shape.translate(this.localCenter);
 			} else if ("Rectangle".equalsIgnoreCase(this.shapeType)) {
 				this.shape = Geometry.createRectangle(this.width, this.height);
-				this.shape.rotate(this.localRotation);
+				this.shape.rotate(Math.toRadians(this.localRotation));
 				this.shape.translate(this.localCenter);
 			} else if ("Triangle".equalsIgnoreCase(this.shapeType)) {
 				this.shape = Geometry.createTriangle(
@@ -840,7 +842,7 @@ public class XmlReader extends DefaultHandler {
 						this.vertices.get(1));
 				// no translation required because the vertices handle that
 			} else {
-				throw new SAXException("Shape type \"" + this.shapeType + "\" unknown or not implemented.");
+				throw new SAXException(MessageFormat.format(Messages.getString("exception.persist.unknownShapeType"), this.shapeType));
 			}
 			
 			// create the fixture
@@ -869,7 +871,7 @@ public class XmlReader extends DefaultHandler {
 			} else if (Mass.Type.FIXED_ANGULAR_VELOCITY.toString().equalsIgnoreCase(this.massType)) {
 				mass.setType(Mass.Type.FIXED_ANGULAR_VELOCITY);
 			} else {
-				throw new SAXException("Mass type \"" + this.massType + "\" unknown or not implemented.");
+				throw new SAXException(MessageFormat.format(Messages.getString("exception.persist.unknownMassType"), this.massType));
 			}
 			this.body.setMass(mass);
 			this.body.setMassExplicit(this.massExplicit);
@@ -887,9 +889,9 @@ public class XmlReader extends DefaultHandler {
 				SandboxBody b1 = this.idMap.get(this.bodyId1);
 				SandboxBody b2 = this.idMap.get(this.bodyId2);
 				AngleJoint aj = new AngleJoint(b1, b2);
-				aj.setLimits(this.lowerLimit, this.upperLimit);
+				aj.setLimits(Math.toRadians(this.lowerLimit), Math.toRadians(this.upperLimit));
 				aj.setLimitEnabled(this.limitsEnabled);
-				aj.setReferenceAngle(this.referenceAngle);
+				aj.setReferenceAngle(Math.toRadians(this.referenceAngle));
 				joint = aj;
 			} else if ("DistanceJoint".equalsIgnoreCase(this.jointType)) {
 				SandboxBody b1 = this.idMap.get(this.bodyId1);
@@ -922,7 +924,7 @@ public class XmlReader extends DefaultHandler {
 				pj.setMaximumMotorForce(this.maximumMotorForce);
 				pj.setMotorSpeed(this.motorSpeed);
 				pj.setMotorEnabled(this.motorEnabled);
-				pj.setReferenceAngle(this.referenceAngle);
+				pj.setReferenceAngle(Math.toRadians(this.referenceAngle));
 				joint = pj;
 			} else if ("PulleyJoint".equals(this.jointType)) {
 				SandboxBody b1 = this.idMap.get(this.bodyId1);
@@ -934,12 +936,12 @@ public class XmlReader extends DefaultHandler {
 				SandboxBody b1 = this.idMap.get(this.bodyId1);
 				SandboxBody b2 = this.idMap.get(this.bodyId2);
 				RevoluteJoint rj = new RevoluteJoint(b1, b2, this.anchor);
-				rj.setLimits(this.lowerLimit, this.upperLimit);
+				rj.setLimits(Math.toRadians(this.lowerLimit), Math.toRadians(this.upperLimit));
 				rj.setLimitEnabled(this.limitsEnabled);
 				rj.setMaximumMotorTorque(this.maximumMotorTorque);
 				rj.setMotorEnabled(this.motorEnabled);
-				rj.setMotorSpeed(this.motorSpeed);
-				rj.setReferenceAngle(this.referenceAngle);
+				rj.setMotorSpeed(Math.toRadians(this.motorSpeed));
+				rj.setReferenceAngle(Math.toRadians(this.referenceAngle));
 				joint = rj;
 			} else if ("RopeJoint".equalsIgnoreCase(this.jointType)) {
 				SandboxBody b1 = this.idMap.get(this.bodyId1);
@@ -953,7 +955,7 @@ public class XmlReader extends DefaultHandler {
 				SandboxBody b1 = this.idMap.get(this.bodyId1);
 				SandboxBody b2 = this.idMap.get(this.bodyId2);
 				WeldJoint wj = new WeldJoint(b1, b2, this.anchor);
-				wj.setReferenceAngle(this.referenceAngle);
+				wj.setReferenceAngle(Math.toRadians(this.referenceAngle));
 				wj.setFrequency(this.frequency);
 				wj.setDampingRatio(this.dampingRatio);
 				joint = wj;
@@ -964,11 +966,11 @@ public class XmlReader extends DefaultHandler {
 				wj.setFrequency(this.frequency);
 				wj.setDampingRatio(this.dampingRatio);
 				wj.setMaximumMotorTorque(this.maximumMotorTorque);
-				wj.setMotorSpeed(this.motorSpeed);
+				wj.setMotorSpeed(Math.toRadians(this.motorSpeed));
 				wj.setMotorEnabled(this.motorEnabled);
 				joint = wj;
 			} else {
-				throw new SAXException("Joint type \"" + this.jointType + "\" unknown or not implemented.");
+				throw new SAXException(MessageFormat.format(Messages.getString("exception.persist.unknownJointType"), this.jointType));
 			}
 			
 			if (joint != null) {

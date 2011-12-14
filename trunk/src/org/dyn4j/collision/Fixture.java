@@ -29,11 +29,12 @@ import java.util.UUID;
 import org.dyn4j.collision.Filter;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Shape;
+import org.dyn4j.resources.Messages;
 
 /**
  * Represents a part of a {@link Collidable}.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.0.2
  * @since 2.0.0
  */
 public class Fixture {
@@ -58,7 +59,7 @@ public class Fixture {
 	 * @throws NullPointerException if shape is null
 	 */
 	public Fixture(Convex shape) {
-		if (shape == null) throw new NullPointerException("The shape cannot be null.");
+		if (shape == null) throw new NullPointerException(Messages.getString("collision.fixture.nullShape"));
 		this.shape = shape;
 		this.filter = Filter.DEFAULT_FILTER;
 		this.sensor = false;
@@ -70,12 +71,11 @@ public class Fixture {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("FIXTURE[")
-		.append(this.id).append("|")
-		.append(this.shape).append("|")
-		.append(this.filter).append("|")
-		.append(this.sensor).append("|")
-		.append(this.userData).append("|")
+		sb.append("Fixture[Id=").append(this.id)
+		.append("|Shape=").append(this.shape)
+		.append("|Filter=").append(this.filter)
+		.append("|IsSensor=").append(this.sensor)
+		.append("|UserData=").append(this.userData)
 		.append("]");
 		return sb.toString();
 	}
@@ -112,7 +112,7 @@ public class Fixture {
 	 */
 	public void setFilter(Filter filter) {
 		// check if the given filter is null
-		if (filter == null) throw new NullPointerException("Cannot set a null filter.  Use the Filter.DEFAULT_FILTER instead.");
+		if (filter == null) throw new NullPointerException(Messages.getString("collision.fixture.nullFilter"));
 		// use the given filter
 		this.filter = filter;
 	}

@@ -41,10 +41,10 @@ import org.dyn4j.dynamics.joint.FrictionJoint;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
-import org.dyn4j.sandbox.Resources;
+import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.resources.Messages;
 import org.dyn4j.sandbox.utilities.ControlUtilities;
-import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to create or edit an friction joint.
@@ -122,36 +122,36 @@ public class FrictionJointPanel extends JointPanel implements InputPanel {
 		this.txtName.setColumns(15);
 		this.chkCollision.setSelected(collision);
 		
-		this.lblBody1 = new JLabel(Resources.getString("panel.joint.body1"), Icons.INFO, JLabel.LEFT);
-		this.lblBody2 = new JLabel(Resources.getString("panel.joint.body2"), Icons.INFO, JLabel.LEFT);
-		this.lblBody1.setToolTipText(Resources.getString("panel.joint.body1.tooltip"));
-		this.lblBody2.setToolTipText(Resources.getString("panel.joint.body2.tooltip"));
+		this.lblBody1 = new JLabel(Messages.getString("panel.joint.body1"), Icons.INFO, JLabel.LEFT);
+		this.lblBody2 = new JLabel(Messages.getString("panel.joint.body2"), Icons.INFO, JLabel.LEFT);
+		this.lblBody1.setToolTipText(Messages.getString("panel.joint.body1.tooltip"));
+		this.lblBody2.setToolTipText(Messages.getString("panel.joint.body2.tooltip"));
 		
 		this.cmbBody1 = new JComboBox(bodies);
 		this.cmbBody2 = new JComboBox(bodies);
 		
-		this.lblAnchor = new JLabel(Resources.getString("panel.joint.anchor"), Icons.INFO, JLabel.LEFT);
-		this.lblAnchor.setToolTipText(Resources.getString("panel.joint.anchor.tooltip.plural"));
+		this.lblAnchor = new JLabel(Messages.getString("panel.joint.anchor"), Icons.INFO, JLabel.LEFT);
+		this.lblAnchor.setToolTipText(Messages.getString("panel.joint.anchor.tooltip.plural"));
 		
-		this.lblX = new JLabel(Resources.getString("x"));
-		this.lblY = new JLabel(Resources.getString("y"));
+		this.lblX = new JLabel(Messages.getString("x"));
+		this.lblY = new JLabel(Messages.getString("y"));
 		
-		this.txtX = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.anchor.format")));
+		this.txtX = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.anchor.format")));
 		this.txtX.addFocusListener(new SelectTextFocusListener(this.txtX));
 		this.txtX.setColumns(7);
 		
-		this.txtY = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.anchor.format")));
+		this.txtY = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.anchor.format")));
 		this.txtY.addFocusListener(new SelectTextFocusListener(this.txtY));
 		this.txtY.setColumns(7);
 		
-		this.lblMaxForce = new JLabel(Resources.getString("panel.joint.force.maximum"), Icons.INFO, JLabel.LEFT);
-		this.lblMaxForce.setToolTipText(MessageFormat.format(Resources.getString("panel.joint.force.maximum.tooltip"), Resources.getString("unit.force")));
-		this.txtMaxForce = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.force.maximum.format")));
+		this.lblMaxForce = new JLabel(Messages.getString("panel.joint.force.maximum"), Icons.INFO, JLabel.LEFT);
+		this.lblMaxForce.setToolTipText(MessageFormat.format(Messages.getString("panel.joint.force.maximum.tooltip"), Messages.getString("unit.force")));
+		this.txtMaxForce = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.force.maximum.format")));
 		this.txtMaxForce.addFocusListener(new SelectTextFocusListener(this.txtMaxForce));
 		
-		this.lblMaxTorque = new JLabel(Resources.getString("panel.joint.torque.maximum"), Icons.INFO, JLabel.LEFT);
-		this.lblMaxTorque.setToolTipText(MessageFormat.format(Resources.getString("panel.joint.torque.maximum.tooltip"), Resources.getString("unit.torque")));
-		this.txtMaxTorque = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.torque.maximum.format")));
+		this.lblMaxTorque = new JLabel(Messages.getString("panel.joint.torque.maximum"), Icons.INFO, JLabel.LEFT);
+		this.lblMaxTorque.setToolTipText(MessageFormat.format(Messages.getString("panel.joint.torque.maximum.tooltip"), Messages.getString("unit.torque")));
+		this.txtMaxTorque = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.torque.maximum.format")));
 		this.txtMaxTorque.addFocusListener(new SelectTextFocusListener(this.txtMaxTorque));
 		
 		// set defaults
@@ -182,7 +182,7 @@ public class FrictionJointPanel extends JointPanel implements InputPanel {
 		// setup the general section
 		
 		JPanel pnlGeneral = new JPanel();
-		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.section.general"));
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Messages.getString("panel.section.general"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlGeneral.setBorder(border);
 		
@@ -231,7 +231,7 @@ public class FrictionJointPanel extends JointPanel implements InputPanel {
 		// setup the maximums section
 		
 		JPanel pnlMaximums = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.joint.friction.section.maximums"));
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Messages.getString("panel.joint.friction.section.maximums"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlMaximums.setBorder(border);
 		
@@ -343,18 +343,18 @@ public class FrictionJointPanel extends JointPanel implements InputPanel {
 	public void showInvalidInputMessage(Window owner) {
 		String name = this.txtName.getText();
 		if (name == null || name.isEmpty()) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.missingName"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.joint.missingName"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// they can't be the same body
 		if (this.cmbBody1.getSelectedItem() == this.cmbBody2.getSelectedItem()) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.sameBody"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.joint.sameBody"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// check the maximia
 		if (ControlUtilities.getDoubleValue(this.txtMaxForce) < 0.0) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.friction.lessThanZeroMaximumForce"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.joint.friction.lessThanZeroMaximumForce"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		if (ControlUtilities.getDoubleValue(this.txtMaxTorque) < 0.0) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.friction.lessThanZeroMaximumTorque"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.joint.friction.lessThanZeroMaximumTorque"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

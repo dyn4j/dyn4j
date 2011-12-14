@@ -33,6 +33,7 @@ import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Matrix22;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * Represents a line joint.
@@ -45,15 +46,12 @@ import org.dyn4j.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.2
  * @since 1.0.0
  * @deprecated As of version 3.0.0 replaced with {@link WheelJoint}
  */
 @Deprecated
 public class LineJoint extends Joint {
-	/** The joint type */
-	public static final Joint.Type TYPE = new Joint.Type("Line");
-	
 	/** The local anchor point on the first {@link Body} */
 	protected Vector2 localAnchor1;
 	
@@ -67,7 +65,7 @@ public class LineJoint extends Joint {
 	protected double motorSpeed;
 	
 	/** The maximum force the motor can apply in newtons */
-	protected double maxMotorForce;
+	protected double maximumMotorForce;
 	
 	/** Whether the limit is enabled or not */
 	protected boolean limitEnabled;
@@ -131,11 +129,11 @@ public class LineJoint extends Joint {
 	public LineJoint(Body body1, Body body2, Vector2 anchor, Vector2 axis) {
 		super(body1, body2, false);
 		// verify the bodies are not the same instance
-		if (body1 == body2) throw new IllegalArgumentException("Cannot create a line joint between the same body instance.");
+		if (body1 == body2) throw new IllegalArgumentException(Messages.getString("dynamics.joint.sameBody"));
 		// check for a null anchor
-		if (anchor == null) throw new NullPointerException("The anchor point cannot be null.");
+		if (anchor == null) throw new NullPointerException(Messages.getString("dynamics.joint.nullAnchor"));
 		// check for a null axis
-		if (axis == null) throw new NullPointerException("The axis cannot be null.");
+		if (axis == null) throw new NullPointerException(Messages.getString("dynamics.joint.nullAxis"));
 		// set the anchor point
 		this.localAnchor1 = body1.getLocalPoint(anchor);
 		this.localAnchor2 = body2.getLocalPoint(anchor);
@@ -159,21 +157,20 @@ public class LineJoint extends Joint {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("LINE_JOINT[")
-		.append(super.toString()).append("|")
-		.append(this.localAnchor1).append("|")
-		.append(this.localAnchor2).append("|")
-		.append(this.xAxis).append("|")
-		.append(this.yAxis).append("|")
-		.append(this.motorEnabled).append("|")
-		.append(this.motorSpeed).append("|")
-		.append(this.maxMotorForce).append("|")
-		.append(this.limitEnabled).append("|")
-		.append(this.lowerLimit).append("|")
-		.append(this.upperLimit).append("|")
-		.append(this.limitState).append("|")
-		.append(this.impulse).append("|")
-		.append(this.motorImpulse).append("]");
+		sb.append("LineJoint[").append(super.toString())
+		.append("|LocalAnchor1=").append(this.localAnchor1)
+		.append("|LocalAnchor2=").append(this.localAnchor2)
+		.append("|WorldAnchor=").append(this.getAnchor1())
+		.append("|XAxis=").append(this.xAxis)
+		.append("|YAxis=").append(this.yAxis)
+		.append("|Axis=").append(this.getAxis())
+		.append("|IsMotorEnabled=").append(this.motorEnabled)
+		.append("|MotorSpeed=").append(this.motorSpeed)
+		.append("|MaximumMotorForce=").append(this.maximumMotorForce)
+		.append("|IsLimitEnabled=").append(this.limitEnabled)
+		.append("|LowerLimit=").append(this.lowerLimit)
+		.append("|UpperLimit=").append(this.upperLimit)
+		.append("]");
 		return sb.toString();
 	}
 	
@@ -325,7 +322,7 @@ public class LineJoint extends Joint {
 			double impulse = this.motorMass * (this.motorSpeed - Cdt);
 			// clamp the impulse between the max force
 			double oldImpulse = this.motorImpulse;
-			double maxImpulse = this.maxMotorForce * step.getDeltaTime();
+			double maxImpulse = this.maximumMotorForce * step.getDeltaTime();
 			this.motorImpulse = Interval.clamp(this.motorImpulse + impulse, -maxImpulse, maxImpulse);
 			impulse = this.motorImpulse - oldImpulse;
 			
@@ -438,7 +435,7 @@ public class LineJoint extends Joint {
 	@Override
 	public boolean solvePositionConstraints() {
 		Settings settings = Settings.getInstance();
-		double maxLinearCorrection = settings.getMaxLinearCorrection();
+		double maxLinearCorrection = settings.getMaximumLinearCorrection();
 		double linearTolerance = settings.getLinearTolerance();
 		
 		Transform t1 = this.body1.getTransform();
@@ -552,14 +549,6 @@ public class LineJoint extends Joint {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getType()
-	 */
-	@Override
-	public Type getType() {
-		return LineJoint.TYPE;
-	}
-	
-	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.joint.Joint#getAnchor1()
 	 */
 	@Override
@@ -595,6 +584,15 @@ public class LineJoint extends Joint {
 	@Override
 	public double getReactionTorque(double invdt) {
 		return 0;
+	}
+	
+	/**
+	 * Returns the axis of the line joint.
+	 * @return {@link Vector2}
+	 * @since 3.0.2
+	 */
+	public Vector2 getAxis() {
+		return this.body2.getWorldVector(this.xAxis);
 	}
 	
 	/**
@@ -680,8 +678,8 @@ public class LineJoint extends Joint {
 	 * to achieve the target speed.
 	 * @return double
 	 */
-	public double getMaxMotorForce() {
-		return maxMotorForce;
+	public double getMaximumMotorForce() {
+		return maximumMotorForce;
 	}
 	
 	/**
@@ -690,14 +688,14 @@ public class LineJoint extends Joint {
 	 * @param maxMotorForce the maximum force in newtons; in the range [0, &infin;]
 	 * @throws IllegalArgumentException if maxMotorForce is less than zero
 	 */
-	public void setMaxMotorForce(double maxMotorForce) {
+	public void setMaximumMotorForce(double maxMotorForce) {
 		// make sure its greater than or equal to zero
-		if (maxMotorForce < 0.0) throw new IllegalArgumentException("The maximum motor force must be greater than or equal to zero.");
+		if (maxMotorForce < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidMaximumMotorForce"));
 		// wake up the joined bodies
 		this.body1.setAsleep(false);
 		this.body2.setAsleep(false);
 		// set the new value
-		this.maxMotorForce = maxMotorForce;
+		this.maximumMotorForce = maxMotorForce;
 	}
 	
 	/**
@@ -743,7 +741,7 @@ public class LineJoint extends Joint {
 	 */
 	public void setLowerLimit(double lowerLimit) {
 		// check for valid value
-		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException("The lower limit cannot be greater than the upper limit."); 
+		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLowerLimit")); 
 		// wake up the joined bodies
 		this.body1.setAsleep(false);
 		this.body2.setAsleep(false);
@@ -766,7 +764,7 @@ public class LineJoint extends Joint {
 	 */
 	public void setUpperLimit(double upperLimit) {
 		// check for valid value
-		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException("The upper limit cannot be less than the lower limit."); 
+		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidUpperLimit")); 
 		// wake up the joined bodies
 		this.body1.setAsleep(false);
 		this.body2.setAsleep(false);
@@ -783,7 +781,7 @@ public class LineJoint extends Joint {
 	 * @throws IllegalArgumentException if lowerLimit is greater than upperLimit
 	 */
 	public void setLimits(double lowerLimit, double upperLimit) {
-		if (lowerLimit > upperLimit) throw new IllegalArgumentException("The lower limit cannot be greater than the upper limit.");
+		if (lowerLimit > upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLimits"));
 		// wake up the bodies
 		this.body1.setAsleep(false);
 		this.body2.setAsleep(false);

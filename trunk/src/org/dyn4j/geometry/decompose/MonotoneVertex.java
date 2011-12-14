@@ -27,7 +27,7 @@ package org.dyn4j.geometry.decompose;
 /**
  * Represents a vertex of a monotone polygon.
  * @author William Bittle
- * @version 2.2.0
+ * @version 3.0.2
  * @since 2.2.0
  * @param <E> the vertex data type
  */
@@ -50,9 +50,8 @@ public class MonotoneVertex<E> {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("MONOTONE_VERTEX[")
-		.append(this.data).append("|")
-		.append(this.chain)
+		sb.append("MonotoneVertex[Data=").append(this.data)
+		.append("|ChainType=").append(this.chain)
 		.append("]");
 		return sb.toString();
 	}

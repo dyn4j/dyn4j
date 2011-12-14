@@ -25,6 +25,7 @@
 package org.dyn4j.geometry;
 
 import org.dyn4j.Epsilon;
+import org.dyn4j.resources.Messages;
 
 /**
  * Represents a 2x2 Matrix.
@@ -76,8 +77,8 @@ public class Matrix22 {
 	 * @throws IllegalArgumentException if values is not of length 4
 	 */
 	public Matrix22(double[] values) {
-		if (values == null) throw new NullPointerException("The values array cannot be null.");
-		if (values.length != 4) throw new IndexOutOfBoundsException("The values array must be of length 4.");
+		if (values == null) throw new NullPointerException(Messages.getString("geometry.matrix.nullArray"));
+		if (values.length != 4) throw new IndexOutOfBoundsException(Messages.getString("geometry.matrix.invalidLength4"));
 		this.m00 = values[0];
 		this.m01 = values[1];
 		this.m10 = values[2];

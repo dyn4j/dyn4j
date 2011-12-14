@@ -38,9 +38,9 @@ import javax.swing.JOptionPane;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Triangle;
-import org.dyn4j.sandbox.Resources;
+import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
-import org.dyn4j.sandbox.utilities.Icons;
+import org.dyn4j.sandbox.resources.Messages;
 
 /**
  * Panel used to create an isosceles triangle shape.
@@ -77,12 +77,12 @@ public class IsoscelesTrianglePanel extends ConvexShapePanel implements InputPan
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
 		
-		JLabel lblWidth = new JLabel(Resources.getString("panel.isosceles.width"), Icons.INFO, JLabel.LEFT);
-		lblWidth.setToolTipText(Resources.getString("panel.isosceles.width.tooltip"));
-		JLabel lblHeight = new JLabel(Resources.getString("panel.isosceles.height"), Icons.INFO, JLabel.LEFT);
-		lblHeight.setToolTipText(Resources.getString("panel.isosceles.height.tooltip"));
-		JFormattedTextField txtWidth = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.isosceles.width.format")));
-		JFormattedTextField txtHeight = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.isosceles.height.format")));
+		JLabel lblWidth = new JLabel(Messages.getString("panel.isosceles.width"), Icons.INFO, JLabel.LEFT);
+		lblWidth.setToolTipText(Messages.getString("panel.isosceles.width.tooltip"));
+		JLabel lblHeight = new JLabel(Messages.getString("panel.isosceles.height"), Icons.INFO, JLabel.LEFT);
+		lblHeight.setToolTipText(Messages.getString("panel.isosceles.height.tooltip"));
+		JFormattedTextField txtWidth = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.isosceles.width.format")));
+		JFormattedTextField txtHeight = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.isosceles.height.format")));
 		txtWidth.setValue(DEFAULT_WIDTH);
 		txtHeight.setValue(DEFAULT_HEIGHT);
 		
@@ -115,8 +115,8 @@ public class IsoscelesTrianglePanel extends ConvexShapePanel implements InputPan
 			}
 		});
 		
-		JLabel lblPreview = new JLabel(Resources.getString("panel.preview"), Icons.INFO, JLabel.LEFT);
-		lblPreview.setToolTipText(Resources.getString("panel.preview.tooltip"));
+		JLabel lblPreview = new JLabel(Messages.getString("panel.preview"), Icons.INFO, JLabel.LEFT);
+		lblPreview.setToolTipText(Messages.getString("panel.preview.tooltip"));
 		this.pnlPreview = new PreviewPanel(new Dimension(250, 225), Geometry.createIsoscelesTriangle(this.width, this.height));
 		
 		layout.setAutoCreateGaps(true);
@@ -174,7 +174,7 @@ public class IsoscelesTrianglePanel extends ConvexShapePanel implements InputPan
 	@Override
 	public void showInvalidInputMessage(Window owner) {
 		if (!this.isValidInput()) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.isosceles.invalid"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.isosceles.invalid"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

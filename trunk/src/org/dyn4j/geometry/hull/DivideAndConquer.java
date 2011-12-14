@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * Implementation of the Divide and Conquer convex hull algorithm.
@@ -103,7 +104,7 @@ public class DivideAndConquer implements HullGenerator {
 	@Override
 	public Vector2[] generate(Vector2... points) {
 		// check for a null array of points
-		if (points == null) throw new NullPointerException("Cannot generate a convex hull from a null point array.");
+		if (points == null) throw new NullPointerException(Messages.getString("geometry.hull.nullArray"));
 		
 		// get the size
 		int size = points.length;
@@ -116,7 +117,7 @@ public class DivideAndConquer implements HullGenerator {
 			Arrays.sort(points, new PointComparator());
 		} catch (NullPointerException e) {
 			// this will be hit if any of the points are null
-			throw new NullPointerException("The point array cannot contain null points.");
+			throw new NullPointerException(Messages.getString("geometry.hull.nullPoints"));
 		}
 		
 		// perform the divide and conquer algorithm on the point cloud

@@ -32,7 +32,7 @@ import org.dyn4j.collision.narrowphase.Separation;
  * Represents the time of impact information between two {@link Swept}
  * {@link Collidable}s.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.0.2
  * @since 1.2.0
  */
 public class TimeOfImpact {
@@ -73,11 +73,11 @@ public class TimeOfImpact {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("TIME_OF_IMPACT[")
-		.append(this.toi).append("|")
-		.append(this.separation).append("|")
-		.append(this.fixture1).append("|")
-		.append(this.fixture2).append("]");
+		sb.append("TimeOfImpact[Time=").append(this.toi)
+		.append("|Separation=").append(this.separation)
+		.append("|Fixture1=").append(this.fixture1)
+		.append("|Fixture2=").append(this.fixture2)
+		.append("]");
 		return sb.toString();
 	}
 	

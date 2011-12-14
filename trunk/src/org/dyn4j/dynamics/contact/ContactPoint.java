@@ -27,11 +27,12 @@ package org.dyn4j.dynamics.contact;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * Represents a contact point and used to report events via the {@link ContactListener}.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class ContactPoint {
@@ -90,7 +91,7 @@ public class ContactPoint {
 	 * @param contactPoint the {@link ContactPoint} to copy
 	 */
 	public ContactPoint(ContactPoint contactPoint) {
-		if (contactPoint == null) throw new NullPointerException("Cannot copy a null contact point.");
+		if (contactPoint == null) throw new NullPointerException(Messages.getString("dynamics.contact.contactPoint.nullContactPoint"));
 		// shallow copy all the fields
 		this.body1 = contactPoint.body1;
 		this.fixture1 = contactPoint.fixture1;
@@ -108,15 +109,15 @@ public class ContactPoint {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("CONTACT_POINT[")
-		.append(this.body1).append("|")
-		.append(this.fixture1).append("|")
-		.append(this.body2).append("|")
-		.append(this.fixture2).append("|")
-		.append(this.enabled).append("|")
-		.append(this.point).append("|")
-		.append(this.normal).append("|")
-		.append(this.depth).append("]");
+		sb.append("ContactPoint[Body1=").append(this.body1)
+		.append("|Fixture1=").append(this.fixture1)
+		.append("|Body2=").append(this.body2)
+		.append("|Fixture2=").append(this.fixture2)
+		.append("|IsEnabled=").append(this.enabled)
+		.append("|Point=").append(this.point)
+		.append("|Normal=").append(this.normal)
+		.append("|Depth=").append(this.depth)
+		.append("]");
 		return sb.toString();
 	}
 	

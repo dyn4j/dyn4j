@@ -32,13 +32,10 @@ package org.dyn4j.geometry;
  * This class is provided to enhance performance of some of the methods contained in
  * the {@link Convex} and {@link Shape} interfaces.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class Triangle extends Polygon implements Convex, Shape, Transformable {
-	/** The triangle {@link Shape.Type} */
-	public static final Shape.Type TYPE = new Shape.Type(Polygon.TYPE, "Triangle");
-	
 	/**
 	 * Full constructor.
 	 * @param point1 the first point
@@ -52,20 +49,12 @@ public class Triangle extends Polygon implements Convex, Shape, Transformable {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Polygon#getType()
-	 */
-	@Override
-	public Type getType() {
-		return Triangle.TYPE;
-	}
-	
-	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Wound#toString()
 	 */
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("TRIANGLE[").append(super.toString()).append("]");
+		sb.append("Triangle[").append(super.toString()).append("]");
 		return sb.toString();
 	}
 	

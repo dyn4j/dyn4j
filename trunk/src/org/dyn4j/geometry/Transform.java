@@ -24,12 +24,14 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.resources.Messages;
+
 /**
  * Represents a transformation matrix.
  * <p>
  * Supported operations are rotation and translation.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class Transform implements Transformable {
@@ -54,7 +56,7 @@ public class Transform implements Transformable {
 		 */
 		@Override
 		public void rotate(double theta) {
-			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
+			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
 		}
 		
 		/* (non-Javadoc)
@@ -62,7 +64,7 @@ public class Transform implements Transformable {
 		 */
 		@Override
 		public void rotate(double theta, double x, double y) {
-			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
+			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
 		}
 		
 		/* (non-Javadoc)
@@ -70,7 +72,7 @@ public class Transform implements Transformable {
 		 */
 		@Override
 		public void rotate(double theta, Vector2 point) {
-			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
+			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
 		}
 		
 		/* (non-Javadoc)
@@ -78,7 +80,7 @@ public class Transform implements Transformable {
 		 */
 		@Override
 		public void translate(double x, double y) {
-			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
+			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
 		}
 		
 		/* (non-Javadoc)
@@ -86,56 +88,56 @@ public class Transform implements Transformable {
 		 */
 		@Override
 		public void translate(Vector2 vector) {
-			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
+			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
 		}
 		
 		/* (non-Javadoc)
 		 * @see org.dyn4j.geometry.Transform#set(org.dyn4j.geometry.Transform)
 		 */
 		public void set(Transform transform) {
-			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
+			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
 		}
 		
 		/* (non-Javadoc)
 		 * @see org.dyn4j.geometry.Transform#setTranslation(double, double)
 		 */
 		public void setTranslation(double x, double y) {
-			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
+			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
 		}
 		
 		/* (non-Javadoc)
 		 * @see org.dyn4j.geometry.Transform#setTranslationX(double)
 		 */
 		public void setTranslationX(double x) {
-			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
+			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
 		}
 		
 		/* (non-Javadoc)
 		 * @see org.dyn4j.geometry.Transform#setTranslationY(double)
 		 */
 		public void setTranslationY(double y) {
-			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
+			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
 		}
 		
 		/* (non-Javadoc)
 		 * @see org.dyn4j.geometry.Transform#setTranslation(org.dyn4j.geometry.Vector2)
 		 */
 		public void setTranslation(Vector2 translation) {
-			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
+			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
 		}
 		
 		/* (non-Javadoc)
 		 * @see org.dyn4j.geometry.Transform#setRotation(double)
 		 */
 		public void setRotation(double theta) {
-			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
+			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
 		}
 		
 		/* (non-Javadoc)
 		 * @see org.dyn4j.geometry.Transform#lerp(org.dyn4j.geometry.Transform, double)
 		 */
 		public void lerp(Transform end, double alpha) {
-			throw new UnsupportedOperationException("Cannot modify the Transform.IDENTITY object.");
+			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
 		}
 	};
 	
@@ -163,8 +165,8 @@ public class Transform implements Transformable {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("[").append(m00).append(" ").append(m01).append(" | ").append(x).append("]")
-		  .append("[").append(m10).append(" ").append(m11).append(" | ").append(y).append("]");
+		sb.append("[").append(this.m00).append(" ").append(this.m01).append(" | ").append(this.x).append("]")
+		  .append("[").append(this.m10).append(" ").append(this.m11).append(" | ").append(this.y).append("]");
 		return sb.toString();
 	}
 	

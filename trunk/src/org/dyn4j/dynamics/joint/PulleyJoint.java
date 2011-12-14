@@ -32,6 +32,7 @@ import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * Represents a pulley between two {@link Body}s.
@@ -44,13 +45,10 @@ import org.dyn4j.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.0.2
  * @since 2.1.0
  */
 public class PulleyJoint extends Joint {
-	/** The joint type */
-	public static final Joint.Type TYPE = new Joint.Type("Pulley");
-	
 	/** The world space pulley anchor point for the first {@link Body} */
 	protected Vector2 pulleyAnchor1;
 	
@@ -103,11 +101,13 @@ public class PulleyJoint extends Joint {
 	public PulleyJoint(Body body1, Body body2, Vector2 pulleyAnchor1, Vector2 pulleyAnchor2, Vector2 bodyAnchor1, Vector2 bodyAnchor2) {
 		super(body1, body2, false);
 		// verify the bodies are not the same instance
-		if (body1 == body2) throw new IllegalArgumentException("Cannot create a pulley joint between the same body instance.");
+		if (body1 == body2) throw new IllegalArgumentException(Messages.getString("dynamics.joint.sameBody"));
 		// verify the pulley anchor points are not null
-		if (pulleyAnchor1 == null || pulleyAnchor2 == null) throw new NullPointerException("Neither pulley anchor point can be null.");
+		if (pulleyAnchor1 == null) throw new NullPointerException(Messages.getString("dynamics.joint.pulley.nullPulleyAnchor1"));
+		if (pulleyAnchor2 == null) throw new NullPointerException(Messages.getString("dynamics.joint.pulley.nullPulleyAnchor2"));
 		// verify the body anchor points are not null
-		if (bodyAnchor1 == null || bodyAnchor2 == null) throw new NullPointerException("Neither body anchor point can be null.");
+		if (bodyAnchor1 == null) throw new NullPointerException(Messages.getString("dynamics.joint.pulley.nullBodyAnchor1"));
+		if (bodyAnchor2 == null) throw new NullPointerException(Messages.getString("dynamics.joint.pulley.nullBodyAnchor2"));
 		// set the pulley anchor points
 		this.pulleyAnchor1 = pulleyAnchor1;
 		this.pulleyAnchor2 = pulleyAnchor2;
@@ -131,17 +131,18 @@ public class PulleyJoint extends Joint {
 	 */
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("PULLEY_JOINT[")
-		.append(super.toString()).append("|")
-		.append(this.pulleyAnchor1).append("|")
-		.append(this.pulleyAnchor2).append("|")
-		.append(this.localAnchor1).append("|")
-		.append(this.localAnchor2).append("|")
-		.append(this.ratio).append("|")
-		.append(this.length1).append("|")
-		.append(this.length2).append("|")
-		.append(this.length).append("|")
-		.append(this.impulse).append("]");
+		sb.append("PulleyJoint[").append(super.toString())
+		.append("|PulleyAnchor1=").append(this.pulleyAnchor1)
+		.append("|PulleyAnchor2=").append(this.pulleyAnchor2)
+		.append("|LocalAnchor1=").append(this.localAnchor1)
+		.append("|LocalAnchor2=").append(this.localAnchor2)
+		.append("|WorldAnchor1=").append(this.getAnchor1())
+		.append("|WorldAnchor2=").append(this.getAnchor2())
+		.append("|Ratio=").append(this.ratio)
+		.append("|Length1=").append(this.length1)
+		.append("|Length2=").append(this.length2)
+		.append("|Length=").append(this.length)
+		.append("]");
 		return sb.toString();
 	}
 	
@@ -266,7 +267,7 @@ public class PulleyJoint extends Joint {
 	public boolean solvePositionConstraints() {
 		Settings settings = Settings.getInstance();
 		double linearTolerance = settings.getLinearTolerance();
-		double maxLinearCorrection = settings.getMaxLinearCorrection();
+		double maxLinearCorrection = settings.getMaximumLinearCorrection();
 		
 		Transform t1 = body1.getTransform();
 		Transform t2 = body2.getTransform();
@@ -338,14 +339,6 @@ public class PulleyJoint extends Joint {
 		this.body2.rotateAboutCenter(r2.cross(J2) * invI2);
 		
 		return linearError < linearTolerance;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getType()
-	 */
-	@Override
-	public Type getType() {
-		return PulleyJoint.TYPE;
 	}
 	
 	/* (non-Javadoc)
@@ -453,7 +446,7 @@ public class PulleyJoint extends Joint {
 	 * @throws IllegalArgumentException if ratio is less than or equal to zero
 	 */
 	public void setRatio(double ratio) {
-		if (ratio <= 0.0) throw new IllegalArgumentException("The pulley ratio must be greater than zero.");
+		if (ratio <= 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.pulley.invalidRatio"));
 		// make sure the ratio changed
 		if (ratio != this.ratio) {
 			// set the new ratio

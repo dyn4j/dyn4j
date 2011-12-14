@@ -33,7 +33,7 @@ import org.dyn4j.geometry.Vector2;
  * Represents the result of a {@link Ray} cast against a 
  * {@link Convex} {@link Shape}.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.0.2
  * @since 2.0.0
  */
 public class Raycast {
@@ -69,10 +69,10 @@ public class Raycast {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("RAYCAST[")
-		.append(this.point).append("|")
-		.append(this.normal).append("|")
-		.append(this.distance).append("]");
+		sb.append("Raycast[Point=").append(this.point)
+		.append("|Normal=").append(this.normal)
+		.append("|Distance=").append(this.distance)
+		.append("]");
 		return sb.toString();
 	}
 	

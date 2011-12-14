@@ -27,7 +27,7 @@ package org.dyn4j.collision;
 /**
  * Interface representing a filter for collision detection.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.0.2
  * @since 1.0.0
  */
 public interface Filter {
@@ -46,7 +46,7 @@ public interface Filter {
 		 * @see java.lang.Object#toString()
 		 */
 		public String toString() {
-			return "DEFAULT_FILTER[]";
+			return "DefaultFilter[]";
 		}
 	};
 	

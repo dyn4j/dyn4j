@@ -33,10 +33,10 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.dyn4j.sandbox.Resources;
+import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.resources.Messages;
 import org.dyn4j.sandbox.utilities.ControlUtilities;
-import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to apply a torque to a body.
@@ -55,10 +55,10 @@ public class TorquePanel extends JPanel implements InputPanel {
 	 * Default constructor.
 	 */
 	public TorquePanel() {
-		JLabel lblTorque = new JLabel(Resources.getString("panel.torque"), Icons.INFO, JLabel.LEFT);
-		lblTorque.setToolTipText(MessageFormat.format(Resources.getString("panel.torque.tooltip"), Resources.getString("unit.torque")));
+		JLabel lblTorque = new JLabel(Messages.getString("panel.torque"), Icons.INFO, JLabel.LEFT);
+		lblTorque.setToolTipText(MessageFormat.format(Messages.getString("panel.torque.tooltip"), Messages.getString("unit.torque")));
 		
-		this.txtT = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.torque.format")));
+		this.txtT = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.torque.format")));
 		this.txtT.addFocusListener(new SelectTextFocusListener(this.txtT));
 		this.txtT.setColumns(7);
 		this.txtT.setValue(0.0);

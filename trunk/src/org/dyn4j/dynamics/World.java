@@ -63,6 +63,7 @@ import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Ray;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * Manages the logic of collision detection, resolution, and reporting.
@@ -973,9 +974,9 @@ public class World {
 	 */
 	public void add(Body body) {
 		// check for null body
-		if (body == null) throw new NullPointerException("Cannot add a null body to the world.");
+		if (body == null) throw new NullPointerException(Messages.getString("dynamics.world.addNullBody"));
 		// dont allow adding it twice
-		if (this.bodies.contains(body)) throw new IllegalArgumentException("Cannot add the same body more than once.");
+		if (this.bodies.contains(body)) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingBody"));
 		// add it to the world
 		this.bodies.add(body);
 		// add it to the broadphase
@@ -990,9 +991,9 @@ public class World {
 	 */
 	public void add(Joint joint) {
 		// check for null joint
-		if (joint == null) throw new NullPointerException("Cannot add a null joint to the world.");
+		if (joint == null) throw new NullPointerException(Messages.getString("dynamics.world.addNullJoint"));
 		// dont allow adding it twice
-		if (this.joints.contains(joint)) throw new IllegalArgumentException("Cannot add the same joint more than once.");
+		if (this.joints.contains(joint)) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingJoint"));
 		// add the joint to the joint list
 		this.joints.add(joint);
 		// get the associated bodies
@@ -1208,7 +1209,7 @@ public class World {
 	 * @throws NullPointerException if gravity is null
 	 */
 	public void setGravity(Vector2 gravity) {
-		if (gravity == null) throw new NullPointerException("The gravity vector cannot be null.");
+		if (gravity == null) throw new NullPointerException(Messages.getString("dynamics.world.nullGravity"));
 		this.gravity = gravity;
 	}
 	
@@ -1242,7 +1243,7 @@ public class World {
 	 * @throws NullPointerException if boundsListener is null
 	 */
 	public void setBoundsListener(BoundsListener boundsListener) {
-		if (boundsListener == null) throw new NullPointerException("The bounds listener cannot be null.  Create an instance of the BoundsAdapter class to set it to the default.");
+		if (boundsListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullBoundsListener"));
 		this.boundsListener = boundsListener;
 	}
 	
@@ -1260,7 +1261,7 @@ public class World {
 	 * @throws NullPointerException if contactListener is null
 	 */
 	public void setContactListener(ContactListener contactListener) {
-		if (contactListener == null) throw new NullPointerException("The contact listener cannot be null.  Create an instance of the ContactAdapter class to set it to the default.");
+		if (contactListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullContactListener"));
 		this.contactListener = contactListener;
 	}
 	
@@ -1286,7 +1287,7 @@ public class World {
 	 * @throws NullPointerException if timeOfImpactListener is null
 	 */
 	public void setTimeOfImpactListener(TimeOfImpactListener timeOfImpactListener) {
-		if (timeOfImpactListener == null) throw new NullPointerException("The time of impact listener cannot be null.  Create an instance of the TimeOfImpactAdapter class to set it to the default.");
+		if (timeOfImpactListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullTimeOfImpactListener"));
 		this.timeOfImpactListener = timeOfImpactListener;
 	}
 	
@@ -1297,7 +1298,7 @@ public class World {
 	 * @since 2.0.0
 	 */
 	public void setRaycastListener(RaycastListener raycastListener) {
-		if (raycastListener == null) throw new NullPointerException("The raycast listener cannot be null.  Create an instance of the RaycastAdapter class to set it to the default.");
+		if (raycastListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullRaycastListener"));
 		this.raycastListener = raycastListener;
 	}
 	
@@ -1316,7 +1317,7 @@ public class World {
 	 * @throws NullPointerException if destructionListener is null
 	 */
 	public void setDestructionListener(DestructionListener destructionListener) {
-		if (destructionListener == null) throw new NullPointerException("The destruction listener cannot be null.  Create an instance of the DestructionAdapter class to set it to the default.");
+		if (destructionListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullDestructionListener"));
 		this.destructionListener = destructionListener;
 	}
 	
@@ -1334,7 +1335,7 @@ public class World {
 	 * @throws NullPointerException if stepListener is null
 	 */
 	public void setStepListener(StepListener stepListener) {
-		if (stepListener == null) throw new NullPointerException("The step listener cannot be null.  Create an instance of the StepAdapter class to set it to the default.");
+		if (stepListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullStepListener"));
 		this.stepListener = stepListener;
 	}
 	
@@ -1355,7 +1356,7 @@ public class World {
 	 * @throws NullPointerException if broadphaseDetector is null
 	 */
 	public void setBroadphaseDetector(BroadphaseDetector<Body> broadphaseDetector) {
-		if (broadphaseDetector == null) throw new NullPointerException("The broadphase detector cannot be null.");
+		if (broadphaseDetector == null) throw new NullPointerException(Messages.getString("dynamics.world.nullBroadphaseDetector"));
 		// clear the broadphase
 		this.broadphaseDetector.clear();
 		// set the new broadphase
@@ -1384,7 +1385,7 @@ public class World {
 	 * @throws NullPointerException if narrowphaseDetector is null
 	 */
 	public void setNarrowphaseDetector(NarrowphaseDetector narrowphaseDetector) {
-		if (narrowphaseDetector == null) throw new NullPointerException("The narrowphase detector cannot be null.");
+		if (narrowphaseDetector == null) throw new NullPointerException(Messages.getString("dynamics.world.nullNarrowphaseDetector"));
 		this.narrowphaseDetector = narrowphaseDetector;
 	}
 	
@@ -1402,7 +1403,7 @@ public class World {
 	 * @throws NullPointerException if manifoldSolver is null
 	 */
 	public void setManifoldSolver(ManifoldSolver manifoldSolver) {
-		if (manifoldSolver == null) throw new NullPointerException("The manifold solver cannot be null.");
+		if (manifoldSolver == null) throw new NullPointerException(Messages.getString("dynamics.world.nullManifoldSolver"));
 		this.manifoldSolver = manifoldSolver;
 	}
 	
@@ -1421,7 +1422,7 @@ public class World {
 	 * @since 1.2.0
 	 */
 	public void setTimeOfImpactDetector(TimeOfImpactDetector timeOfImpactDetector) {
-		if (timeOfImpactDetector == null) throw new NullPointerException("The time of impact solver cannot be null.");
+		if (timeOfImpactDetector == null) throw new NullPointerException(Messages.getString("dynamics.world.nullTimeOfImpactDetector"));
 		this.timeOfImpactDetector = timeOfImpactDetector;
 	}
 	
@@ -1441,7 +1442,7 @@ public class World {
 	 * @since 2.0.0
 	 */
 	public void setRaycastDetector(RaycastDetector raycastDetector) {
-		if (raycastDetector == null) throw new NullPointerException("The raycast detector cannot be null.");
+		if (raycastDetector == null) throw new NullPointerException(Messages.getString("dynamics.world.nullRaycastDetector"));
 		this.raycastDetector = raycastDetector;
 	}
 	
@@ -1460,7 +1461,7 @@ public class World {
 	 * @throws NullPointerException if collisionListener is null
 	 */
 	public void setCollisionListener(CollisionListener collisionListener) {
-		if (collisionListener == null) throw new NullPointerException("The collision listener cannot be null.  Create an instance of the CollisionAdapter class to set it to the default.");
+		if (collisionListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullCollisionListener"));
 		this.collisionListener = collisionListener;
 	}
 	
@@ -1486,7 +1487,7 @@ public class World {
 	 * @throws NullPointerException if coefficientMixer is null
 	 */
 	public void setCoefficientMixer(CoefficientMixer coefficientMixer) {
-		if (coefficientMixer == null) throw new NullPointerException("The coefficient mixer cannot be null.  Set it to CoefficientMixer.DEFAULT_MIXER to set it to the defaut.");
+		if (coefficientMixer == null) throw new NullPointerException(Messages.getString("dynamics.world.nullCoefficientMixer"));
 		this.coefficientMixer = coefficientMixer;
 	}
 	
@@ -1507,28 +1508,8 @@ public class World {
 	 */
 	public void setContactManager(ContactManager contactManager) {
 		// make sure the contact manager is not null
-		if (contactManager == null) throw new NullPointerException("The contact manager cannot be null.");
+		if (contactManager == null) throw new NullPointerException(Messages.getString("dynamics.world.nullContactManager"));
 		this.contactManager = contactManager;
-	}
-	
-	/**
-	 * Returns the {@link TimeOfImpactSolver}.
-	 * @return {@link TimeOfImpactSolver}
-	 * @since 2.0.0
-	 */
-	public TimeOfImpactSolver getTimeOfImpactSolver() {
-		return this.timeOfImpactSolver;
-	}
-	
-	/**
-	 * Sets the {@link TimeOfImpactSolver}.
-	 * @param timeOfImpactSolver the time of impact solver
-	 * @throws NullPointerException if timeOfImpactSolver is null
-	 * @since 2.0.0
-	 */
-	public void setTimeOfImpactSolver(TimeOfImpactSolver timeOfImpactSolver) {
-		if (timeOfImpactSolver == null) throw new NullPointerException("The time of impact solver cannot be null.");
-		this.timeOfImpactSolver = timeOfImpactSolver;
 	}
 	
 	/**

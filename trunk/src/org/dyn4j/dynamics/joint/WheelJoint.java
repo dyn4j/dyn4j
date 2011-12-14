@@ -33,6 +33,7 @@ import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * Represents a revolute joint attached to a prismatic joint typically used
@@ -47,9 +48,6 @@ import org.dyn4j.geometry.Vector2;
  * @since 3.0.0
  */
 public class WheelJoint extends Joint {
-	/** The joint type */
-	public static final Joint.Type TYPE = new Joint.Type("Wheel");
-	
 	/** The local anchor point on the first {@link Body} */
 	protected Vector2 localAnchor1;
 	
@@ -131,11 +129,11 @@ public class WheelJoint extends Joint {
 	public WheelJoint(Body body1, Body body2, Vector2 anchor, Vector2 axis) {
 		super(body1, body2, false);
 		// verify the bodies are not the same instance
-		if (body1 == body2) throw new IllegalArgumentException("Cannot create a line joint between the same body instance.");
+		if (body1 == body2) throw new IllegalArgumentException(Messages.getString("dynamics.joint.sameBody"));
 		// check for a null anchor
-		if (anchor == null) throw new NullPointerException("The anchor point cannot be null.");
+		if (anchor == null) throw new NullPointerException(Messages.getString("dynamics.joint.nullAnchor"));
 		// check for a null axis
-		if (axis == null) throw new NullPointerException("The axis cannot be null.");
+		if (axis == null) throw new NullPointerException(Messages.getString("dynamics.joint.nullAxis"));
 		// set the anchor point
 		this.localAnchor1 = body1.getLocalPoint(anchor);
 		this.localAnchor2 = body2.getLocalPoint(anchor);
@@ -170,20 +168,19 @@ public class WheelJoint extends Joint {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("LINE_JOINT[")
-		.append(super.toString()).append("|")
-		.append(this.localAnchor1).append("|")
-		.append(this.localAnchor2).append("|")
-		.append(this.xAxis).append("|")
-		.append(this.yAxis).append("|")
-		.append(this.motorEnabled).append("|")
-		.append(this.motorSpeed).append("|")
-		.append(this.maximumMotorTorque).append("|")
-		.append(this.frequency).append("|")
-		.append(this.dampingRatio).append("|")
-		.append(this.impulse).append("|")
-		.append(this.springImpulse).append("|")
-		.append(this.motorImpulse).append("]");
+		sb.append("WheelJoint[").append(super.toString())
+		.append("|LocalAnchor1=").append(this.localAnchor1)
+		.append("|LocalAnchor2=").append(this.localAnchor2)
+		.append("|WorldAnchor=").append(this.getAnchor1())
+		.append("|XAxis=").append(this.xAxis)
+		.append("|YAxis=").append(this.yAxis)
+		.append("|Axis=").append(this.getAxis())
+		.append("|IsMotorEnabled=").append(this.motorEnabled)
+		.append("|MotorSpeed=").append(this.motorSpeed)
+		.append("|MaximumMotorTorque=").append(this.maximumMotorTorque)
+		.append("|Frequency=").append(this.frequency)
+		.append("|DampingRatio=").append(this.dampingRatio)
+		.append("]");
 		return sb.toString();
 	}
 	
@@ -442,14 +439,6 @@ public class WheelJoint extends Joint {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getType()
-	 */
-	@Override
-	public Type getType() {
-		return WheelJoint.TYPE;
-	}
-	
-	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.joint.Joint#getAnchor1()
 	 */
 	@Override
@@ -542,7 +531,7 @@ public class WheelJoint extends Joint {
 	 */
 	public void setDampingRatio(double dampingRatio) {
 		// make sure its within range
-		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException("The damping ratio must be between 0 and 1 inclusive.");
+		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidDampingRatio"));
 		// wake up both bodies
 		this.body1.setAsleep(false);
 		this.body2.setAsleep(false);
@@ -565,7 +554,7 @@ public class WheelJoint extends Joint {
 	 */
 	public void setFrequency(double frequency) {
 		// check for valid value
-		if (frequency < 0) throw new IllegalArgumentException("The frequency must be greater than or equal to zero.");
+		if (frequency < 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidFrequency"));
 		// wake up both bodies
 		this.body1.setAsleep(false);
 		this.body2.setAsleep(false);
@@ -630,7 +619,7 @@ public class WheelJoint extends Joint {
 	 */
 	public void setMaximumMotorTorque(double maximumMotorTorque) {
 		// make sure its greater than or equal to zero
-		if (maximumMotorTorque < 0.0) throw new IllegalArgumentException("The maximum motor torque must be greater than or equal to zero.");
+		if (maximumMotorTorque < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidMaximumMotorTorque"));
 		// wake up the joined bodies
 		this.body1.setAsleep(false);
 		this.body2.setAsleep(false);

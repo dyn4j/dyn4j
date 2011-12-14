@@ -22,53 +22,35 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.geometry;
+package org.dyn4j.sandbox.resources;
 
-import junit.framework.TestCase;
-
-import org.dyn4j.geometry.Circle;
-import org.dyn4j.geometry.Polygon;
-import org.dyn4j.geometry.Rectangle;
-import org.dyn4j.geometry.Shape;
-import org.junit.Test;
+import java.util.ResourceBundle;
 
 /**
- * Test case for the {@link Shape.Type} class.
+ * Helper class used to get text resources from the properties files.
+ * <p>
+ * This class is used by all classes to get the appropriate resources.
  * @author William Bittle
- * @version 1.0.3
- * @since 1.0.0
+ * @version 1.0.1
+ * @since 1.0.1
  */
-public class ShapeTypeTest {
+public final class Messages {
+	// change this value to messages_test.properties to test the text translation
+	
+	/** The resource bundle containing the text resources */
+	private static final ResourceBundle BUNDLE = ResourceBundle.getBundle("org.dyn4j.sandbox.resources.messages");
+	
 	/**
-	 * Tests the is method of the {@link Shape.Type} class.
+	 * Hidden constructor.
 	 */
-	@Test
-	public void is() {
-		// base types
-		Shape.Type t1 = new Shape.Type("type1");
-		Shape.Type t2 = new Shape.Type("type2");
-		
-		// sub types
-		Shape.Type t3 = new Shape.Type(t1, "type3");
-		Shape.Type t4 = new Shape.Type(t3, "type4");
-		
-		// not the same
-		TestCase.assertFalse(t1.is(t2));
-		
-		// sub type
-		TestCase.assertTrue(t3.is(t1));
-		
-		// sub sub type
-		TestCase.assertTrue(t4.is(t1));
-		
-		// sub type
-		TestCase.assertTrue(t4.is(t3));
-		
-		Circle c = new Circle(1.0);
-		TestCase.assertTrue(c.isType(Circle.TYPE));
-		
-		Rectangle r = new Rectangle(1.0, 1.0);
-		TestCase.assertTrue(r.isType(Rectangle.TYPE));
-		TestCase.assertTrue(r.isType(Polygon.TYPE));
+	private Messages() {}
+	
+	/**
+	 * Returns the value of the given key.
+	 * @param key the key
+	 * @return String the value
+	 */
+	public static final String getString(String key) {
+		return BUNDLE.getString(key);
 	}
 }

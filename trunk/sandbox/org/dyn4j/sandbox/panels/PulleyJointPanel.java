@@ -42,11 +42,11 @@ import javax.swing.border.TitledBorder;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.PulleyJoint;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.SandboxBody;
+import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.resources.Messages;
 import org.dyn4j.sandbox.utilities.ControlUtilities;
-import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to create or edit an pulley joint.
@@ -126,78 +126,78 @@ public class PulleyJointPanel extends JointPanel implements InputPanel, ActionLi
 		this.txtName.setColumns(15);
 		this.chkCollision.setSelected(collision);
 		
-		JLabel lblBody1 = new JLabel(Resources.getString("panel.joint.body1"), Icons.INFO, JLabel.LEFT);
-		JLabel lblBody2 = new JLabel(Resources.getString("panel.joint.body2"), Icons.INFO, JLabel.LEFT);
-		lblBody1.setToolTipText(Resources.getString("panel.joint.body1.tooltip"));
-		lblBody2.setToolTipText(Resources.getString("panel.joint.body2.tooltip"));
+		JLabel lblBody1 = new JLabel(Messages.getString("panel.joint.body1"), Icons.INFO, JLabel.LEFT);
+		JLabel lblBody2 = new JLabel(Messages.getString("panel.joint.body2"), Icons.INFO, JLabel.LEFT);
+		lblBody1.setToolTipText(Messages.getString("panel.joint.body1.tooltip"));
+		lblBody2.setToolTipText(Messages.getString("panel.joint.body2.tooltip"));
 		
 		this.cmbBody1 = new JComboBox(bodies);
 		this.cmbBody2 = new JComboBox(bodies);
 		
-		JLabel lblPulleyAnchor1 = new JLabel(Resources.getString("panel.joint.pulley.anchor.pulley1"), Icons.INFO, JLabel.LEFT);
-		lblPulleyAnchor1.setToolTipText(Resources.getString("panel.joint.pulley.anchor.pulley1.tooltip"));
-		JLabel lblPulleyAnchor2 = new JLabel(Resources.getString("panel.joint.pulley.anchor.pulley2"), Icons.INFO, JLabel.LEFT);
-		lblPulleyAnchor2.setToolTipText(Resources.getString("panel.joint.pulley.anchor.pulley2.tooltip"));
+		JLabel lblPulleyAnchor1 = new JLabel(Messages.getString("panel.joint.pulley.anchor.pulley1"), Icons.INFO, JLabel.LEFT);
+		lblPulleyAnchor1.setToolTipText(Messages.getString("panel.joint.pulley.anchor.pulley1.tooltip"));
+		JLabel lblPulleyAnchor2 = new JLabel(Messages.getString("panel.joint.pulley.anchor.pulley2"), Icons.INFO, JLabel.LEFT);
+		lblPulleyAnchor2.setToolTipText(Messages.getString("panel.joint.pulley.anchor.pulley2.tooltip"));
 		
-		JLabel lblBodyAnchor1 = new JLabel(Resources.getString("panel.joint.pulley.anchor.body1"), Icons.INFO, JLabel.LEFT);
-		lblBodyAnchor1.setToolTipText(Resources.getString("panel.joint.anchor1.tooltip"));
-		JLabel lblBodyAnchor2 = new JLabel(Resources.getString("panel.joint.pulley.anchor.body2"), Icons.INFO, JLabel.LEFT);
-		lblBodyAnchor2.setToolTipText(Resources.getString("panel.joint.anchor2.tooltip"));
+		JLabel lblBodyAnchor1 = new JLabel(Messages.getString("panel.joint.pulley.anchor.body1"), Icons.INFO, JLabel.LEFT);
+		lblBodyAnchor1.setToolTipText(Messages.getString("panel.joint.anchor1.tooltip"));
+		JLabel lblBodyAnchor2 = new JLabel(Messages.getString("panel.joint.pulley.anchor.body2"), Icons.INFO, JLabel.LEFT);
+		lblBodyAnchor2.setToolTipText(Messages.getString("panel.joint.anchor2.tooltip"));
 		
-		JLabel lblPX1 = new JLabel(Resources.getString("x"));
-		JLabel lblPX2 = new JLabel(Resources.getString("x"));
-		JLabel lblPY1 = new JLabel(Resources.getString("y"));
-		JLabel lblPY2 = new JLabel(Resources.getString("y"));
-		JLabel lblBX1 = new JLabel(Resources.getString("x"));
-		JLabel lblBX2 = new JLabel(Resources.getString("x"));
-		JLabel lblBY1 = new JLabel(Resources.getString("y"));
-		JLabel lblBY2 = new JLabel(Resources.getString("y"));
+		JLabel lblPX1 = new JLabel(Messages.getString("x"));
+		JLabel lblPX2 = new JLabel(Messages.getString("x"));
+		JLabel lblPY1 = new JLabel(Messages.getString("y"));
+		JLabel lblPY2 = new JLabel(Messages.getString("y"));
+		JLabel lblBX1 = new JLabel(Messages.getString("x"));
+		JLabel lblBX2 = new JLabel(Messages.getString("x"));
+		JLabel lblBY1 = new JLabel(Messages.getString("y"));
+		JLabel lblBY2 = new JLabel(Messages.getString("y"));
 		
-		this.txtPX1 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.pulley.anchor.pulley.format")));
+		this.txtPX1 = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.pulley.anchor.pulley.format")));
 		this.txtPX1.addFocusListener(new SelectTextFocusListener(this.txtPX1));
 		this.txtPX1.setColumns(7);
 		
-		this.txtPX2 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.pulley.anchor.pulley.format")));
+		this.txtPX2 = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.pulley.anchor.pulley.format")));
 		this.txtPX2.addFocusListener(new SelectTextFocusListener(this.txtPX2));
 		this.txtPX2.setColumns(7);
 		
-		this.txtPY1 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.pulley.anchor.pulley.format")));
+		this.txtPY1 = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.pulley.anchor.pulley.format")));
 		this.txtPY1.addFocusListener(new SelectTextFocusListener(this.txtPY1));
 		this.txtPY1.setColumns(7);
 		
-		this.txtPY2 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.pulley.anchor.pulley.format")));
+		this.txtPY2 = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.pulley.anchor.pulley.format")));
 		this.txtPY2.addFocusListener(new SelectTextFocusListener(this.txtPY2));
 		this.txtPY2.setColumns(7);
 		
-		this.txtBX1 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.pulley.anchor.body.format")));
+		this.txtBX1 = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.pulley.anchor.body.format")));
 		this.txtBX1.addFocusListener(new SelectTextFocusListener(this.txtBX1));
 		this.txtBX1.setColumns(7);
 		
-		this.txtBX2 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.pulley.anchor.body.format")));
+		this.txtBX2 = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.pulley.anchor.body.format")));
 		this.txtBX2.addFocusListener(new SelectTextFocusListener(this.txtBX2));
 		this.txtBX2.setColumns(7);
 		
-		this.txtBY1 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.pulley.anchor.body.format")));
+		this.txtBY1 = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.pulley.anchor.body.format")));
 		this.txtBY1.addFocusListener(new SelectTextFocusListener(this.txtBY1));
 		this.txtBY1.setColumns(7);
 		
-		this.txtBY2 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.pulley.anchor.body.format")));
+		this.txtBY2 = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.pulley.anchor.body.format")));
 		this.txtBY2.addFocusListener(new SelectTextFocusListener(this.txtBY2));
 		this.txtBY2.setColumns(7);
 
-		this.btnUseCenter1 = new JButton(Resources.getString("panel.joint.useCenter"));
-		this.btnUseCenter1.setToolTipText(Resources.getString("panel.joint.useCenter.tooltip1"));
+		this.btnUseCenter1 = new JButton(Messages.getString("panel.joint.useCenter"));
+		this.btnUseCenter1.setToolTipText(Messages.getString("panel.joint.useCenter.tooltip1"));
 		this.btnUseCenter1.setActionCommand("use-com1");
 		this.btnUseCenter1.addActionListener(this);
 		
-		this.btnUseCenter2 = new JButton(Resources.getString("panel.joint.useCenter"));
-		this.btnUseCenter2.setToolTipText(Resources.getString("panel.joint.useCenter.tooltip2"));
+		this.btnUseCenter2 = new JButton(Messages.getString("panel.joint.useCenter"));
+		this.btnUseCenter2.setToolTipText(Messages.getString("panel.joint.useCenter.tooltip2"));
 		this.btnUseCenter2.setActionCommand("use-com2");
 		this.btnUseCenter2.addActionListener(this);
 		
-		JLabel lblRatio = new JLabel(Resources.getString("panel.joint.pulley.ratio"), Icons.INFO, JLabel.LEFT);
-		lblRatio.setToolTipText(Resources.getString("panel.joint.pulley.ratio.tooltip"));
-		this.txtRatio = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.pulley.ratio.format")));
+		JLabel lblRatio = new JLabel(Messages.getString("panel.joint.pulley.ratio"), Icons.INFO, JLabel.LEFT);
+		lblRatio.setToolTipText(Messages.getString("panel.joint.pulley.ratio.tooltip"));
+		this.txtRatio = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.pulley.ratio.format")));
 		this.txtRatio.addFocusListener(new SelectTextFocusListener(this.txtRatio));
 		
 		// set defaults
@@ -240,7 +240,7 @@ public class PulleyJointPanel extends JointPanel implements InputPanel, ActionLi
 		// setup the general section
 		
 		JPanel pnlGeneral = new JPanel();
-		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.section.general"));
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Messages.getString("panel.section.general"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlGeneral.setBorder(border);
 		
@@ -332,7 +332,7 @@ public class PulleyJointPanel extends JointPanel implements InputPanel, ActionLi
 		// setup the block and tackle section
 		
 		JPanel pnlBlockAndTackle = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.joint.pulley.section.blockAndTackle"));
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Messages.getString("panel.joint.pulley.section.blockAndTackle"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlBlockAndTackle.setBorder(border);
 		
@@ -455,14 +455,14 @@ public class PulleyJointPanel extends JointPanel implements InputPanel, ActionLi
 	public void showInvalidInputMessage(Window owner) {
 		String name = this.txtName.getText();
 		if (name == null || name.isEmpty()) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.missingName"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.joint.missingName"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// they can't be the same body
 		if (this.cmbBody1.getSelectedItem() == this.cmbBody2.getSelectedItem()) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.sameBody"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.joint.sameBody"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		if (ControlUtilities.getDoubleValue(this.txtRatio) <= 0.0) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.pulley.invalidRatio"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.joint.pulley.invalidRatio"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

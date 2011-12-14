@@ -27,7 +27,7 @@ package org.dyn4j.geometry;
 /**
  * Represents an edge feature of a {@link Shape}.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class Edge extends Feature {
@@ -69,12 +69,12 @@ public class Edge extends Feature {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("EDGE[")
-		.append(this.vertex1).append("|")
-		.append(this.vertex2).append("|")
-		.append(this.edge).append("|")
-		.append(this.max).append("|")
-		.append(this.index).append("]");
+		sb.append("Edge[Vertex1=").append(this.vertex1)
+		.append("|Vertex2=").append(this.vertex2)
+		.append("|Edge=").append(this.edge)
+		.append("|Max=").append(this.max)
+		.append("|Index=").append(this.index)
+		.append("]");
 		return sb.toString();
 	}
 	

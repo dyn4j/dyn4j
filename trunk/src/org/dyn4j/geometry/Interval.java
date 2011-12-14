@@ -24,6 +24,8 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.resources.Messages;
+
 /**
  * Represents a numeric {@link Interval}.
  * @author William Bittle
@@ -44,7 +46,7 @@ public class Interval {
 	 * @throws IllegalArgumentException if min &gt; max
 	 */
 	public Interval(double min, double max) {
-		if (min > max) throw new IllegalArgumentException("The minimum value cannot be larger than the maximum: " + min + " > " + max);
+		if (min > max) throw new IllegalArgumentException(Messages.getString("geometry.interval.invalid"));
 		this.min = min;
 		this.max = max;
 	}
@@ -81,7 +83,7 @@ public class Interval {
 	 * @throws IllegalArgumentException if min &gt; max
 	 */
 	public void setMin(double min) {
-		if (min > this.max) throw new IllegalArgumentException("The minimum value must be smaller than the maximum.");
+		if (min > this.max) throw new IllegalArgumentException(Messages.getString("geometry.interval.invalidMinimum"));
 		this.min = min;
 	}
 	
@@ -91,7 +93,7 @@ public class Interval {
 	 * @throws IllegalArgumentException if max &lt; min
 	 */
 	public void setMax(double max) {
-		if (max < this.min) throw new IllegalArgumentException("The maximum value must be larger than the minimum.");
+		if (max < this.min) throw new IllegalArgumentException(Messages.getString("geometry.interval.invalidMaximum"));
 		this.max = max;
 	}
 

@@ -40,11 +40,11 @@ import javax.swing.border.TitledBorder;
 
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.Settings.ContinuousDetectionMode;
-import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.controls.ComboItem;
+import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.resources.Messages;
 import org.dyn4j.sandbox.utilities.ControlUtilities;
-import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to set global dynamics settings.
@@ -58,9 +58,9 @@ public class SettingsPanel extends JPanel implements InputPanel {
 	
 	/** The list of continuous collision detection modes */
 	private static final ComboItem[] CCD_MODES = new ComboItem[] {
-		new ComboItem(Resources.getString("ccd.mode.all"), Settings.ContinuousDetectionMode.ALL),
-		new ComboItem(Resources.getString("ccd.mode.bulletsOnly"), Settings.ContinuousDetectionMode.BULLETS_ONLY),
-		new ComboItem(Resources.getString("ccd.mode.none"), Settings.ContinuousDetectionMode.NONE)
+		new ComboItem(Messages.getString("ccd.mode.all"), Settings.ContinuousDetectionMode.ALL),
+		new ComboItem(Messages.getString("ccd.mode.bulletsOnly"), Settings.ContinuousDetectionMode.BULLETS_ONLY),
+		new ComboItem(Messages.getString("ccd.mode.none"), Settings.ContinuousDetectionMode.NONE)
 	};
 	
 	// general
@@ -128,121 +128,121 @@ public class SettingsPanel extends JPanel implements InputPanel {
 		
 		// general
 		
-		JLabel lblStepFrequency = new JLabel(Resources.getString("panel.settings.frequency"), Icons.INFO, JLabel.LEFT);
-		lblStepFrequency.setToolTipText(MessageFormat.format(Resources.getString("panel.settings.frequency.tooltip"), Resources.getString("unit.time.singular")));
-		this.txtStepFrequency = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.frequency.format")));
+		JLabel lblStepFrequency = new JLabel(Messages.getString("panel.settings.frequency"), Icons.INFO, JLabel.LEFT);
+		lblStepFrequency.setToolTipText(MessageFormat.format(Messages.getString("panel.settings.frequency.tooltip"), Messages.getString("unit.time.singular")));
+		this.txtStepFrequency = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.settings.frequency.format")));
 		this.txtStepFrequency.addFocusListener(new SelectTextFocusListener(this.txtStepFrequency));
 		this.txtStepFrequency.setColumns(5);
 		this.txtStepFrequency.setValue(1.0 / settings.getStepFrequency());
 		
-		JLabel lblMaxTranslation = new JLabel(Resources.getString("panel.settings.maximumTranslation"), Icons.INFO, JLabel.LEFT);
-		lblMaxTranslation.setToolTipText(MessageFormat.format(Resources.getString("panel.settings.maximumTranslation.tooltip"), Resources.getString("unit.length")));
-		this.txtMaxTranslation = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.maximumTranslation.format")));
+		JLabel lblMaxTranslation = new JLabel(Messages.getString("panel.settings.maximumTranslation"), Icons.INFO, JLabel.LEFT);
+		lblMaxTranslation.setToolTipText(MessageFormat.format(Messages.getString("panel.settings.maximumTranslation.tooltip"), Messages.getString("unit.length")));
+		this.txtMaxTranslation = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.settings.maximumTranslation.format")));
 		this.txtMaxTranslation.addFocusListener(new SelectTextFocusListener(this.txtMaxTranslation));
 		this.txtMaxTranslation.setColumns(5);
-		this.txtMaxTranslation.setValue(settings.getMaxTranslation());
+		this.txtMaxTranslation.setValue(settings.getMaximumTranslation());
 		
-		JLabel lblMaxRotation = new JLabel(Resources.getString("panel.settings.maximumRotation"), Icons.INFO, JLabel.LEFT);
-		lblMaxRotation.setToolTipText(MessageFormat.format(Resources.getString("panel.settings.maximumRotation.tooltip"), Resources.getString("unit.rotation")));
-		this.txtMaxRotation = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.maximumRotation.format")));
+		JLabel lblMaxRotation = new JLabel(Messages.getString("panel.settings.maximumRotation"), Icons.INFO, JLabel.LEFT);
+		lblMaxRotation.setToolTipText(MessageFormat.format(Messages.getString("panel.settings.maximumRotation.tooltip"), Messages.getString("unit.rotation")));
+		this.txtMaxRotation = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.settings.maximumRotation.format")));
 		this.txtMaxRotation.addFocusListener(new SelectTextFocusListener(this.txtMaxRotation));
 		this.txtMaxRotation.setColumns(5);
-		this.txtMaxRotation.setValue(Math.toDegrees(settings.getMaxRotation()));
+		this.txtMaxRotation.setValue(Math.toDegrees(settings.getMaximumRotation()));
 		
-		JLabel lblCCDMode = new JLabel(Resources.getString("panel.settings.ccd"), Icons.INFO, JLabel.LEFT);
-		lblCCDMode.setToolTipText(Resources.getString("panel.settings.ccd.tooltip"));
+		JLabel lblCCDMode = new JLabel(Messages.getString("panel.settings.ccd"), Icons.INFO, JLabel.LEFT);
+		lblCCDMode.setToolTipText(Messages.getString("panel.settings.ccd.tooltip"));
 		this.cmbCCDMode = new JComboBox(CCD_MODES);
 		this.cmbCCDMode.setSelectedItem(this.getItem(settings.getContinuousDetectionMode()));
 		
 		// sleep
 		
-		JLabel lblAutoSleep = new JLabel(Resources.getString("panel.settings.autoSleeping"), Icons.INFO, JLabel.LEFT);
-		lblAutoSleep.setToolTipText(Resources.getString("panel.settings.autoSleeping.tooltip"));
+		JLabel lblAutoSleep = new JLabel(Messages.getString("panel.settings.autoSleeping"), Icons.INFO, JLabel.LEFT);
+		lblAutoSleep.setToolTipText(Messages.getString("panel.settings.autoSleeping.tooltip"));
 		this.chkAutoSleep = new JCheckBox();
 		this.chkAutoSleep.setSelected(settings.isAutoSleepingEnabled());
 		
-		JLabel lblSleepTime = new JLabel(Resources.getString("panel.settings.sleepTime"), Icons.INFO, JLabel.LEFT);
-		lblSleepTime.setToolTipText(MessageFormat.format(Resources.getString("panel.settings.sleepTime.tooltip"), Resources.getString("unit.time")));
-		this.txtSleepTime = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.sleepTime.format")));
+		JLabel lblSleepTime = new JLabel(Messages.getString("panel.settings.sleepTime"), Icons.INFO, JLabel.LEFT);
+		lblSleepTime.setToolTipText(MessageFormat.format(Messages.getString("panel.settings.sleepTime.tooltip"), Messages.getString("unit.time")));
+		this.txtSleepTime = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.settings.sleepTime.format")));
 		this.txtSleepTime.addFocusListener(new SelectTextFocusListener(this.txtSleepTime));
 		this.txtSleepTime.setColumns(5);
 		this.txtSleepTime.setValue(settings.getSleepTime());
 		
-		JLabel lblSleepLinearVelocity = new JLabel(Resources.getString("panel.settings.sleepLinearVelocity"), Icons.INFO, JLabel.LEFT);
-		lblSleepLinearVelocity.setToolTipText(MessageFormat.format(Resources.getString("panel.settings.sleepLinearVelocity.tooltip"), Resources.getString("unit.velocity.linear")));
-		this.txtSleepLinearVelocity = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.sleepLinearVelocity.format")));
+		JLabel lblSleepLinearVelocity = new JLabel(Messages.getString("panel.settings.sleepLinearVelocity"), Icons.INFO, JLabel.LEFT);
+		lblSleepLinearVelocity.setToolTipText(MessageFormat.format(Messages.getString("panel.settings.sleepLinearVelocity.tooltip"), Messages.getString("unit.velocity.linear")));
+		this.txtSleepLinearVelocity = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.settings.sleepLinearVelocity.format")));
 		this.txtSleepLinearVelocity.addFocusListener(new SelectTextFocusListener(this.txtSleepLinearVelocity));
 		this.txtSleepLinearVelocity.setColumns(7);
-		this.txtSleepLinearVelocity.setValue(settings.getSleepVelocity());
+		this.txtSleepLinearVelocity.setValue(settings.getSleepLinearVelocity());
 		
-		JLabel lblSleepAngularVelocity = new JLabel(Resources.getString("panel.settings.sleepAngularVelocity"), Icons.INFO, JLabel.LEFT);
-		lblSleepAngularVelocity.setToolTipText(MessageFormat.format(Resources.getString("panel.settings.sleepAngularVelocity.tooltip"), Resources.getString("unit.velocity.angular")));
-		this.txtSleepAngularVelocity = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.sleepAngularVelocity.format")));
+		JLabel lblSleepAngularVelocity = new JLabel(Messages.getString("panel.settings.sleepAngularVelocity"), Icons.INFO, JLabel.LEFT);
+		lblSleepAngularVelocity.setToolTipText(MessageFormat.format(Messages.getString("panel.settings.sleepAngularVelocity.tooltip"), Messages.getString("unit.velocity.angular")));
+		this.txtSleepAngularVelocity = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.settings.sleepAngularVelocity.format")));
 		this.txtSleepAngularVelocity.addFocusListener(new SelectTextFocusListener(this.txtSleepAngularVelocity));
 		this.txtSleepAngularVelocity.setColumns(5);
 		this.txtSleepAngularVelocity.setValue(Math.toDegrees(settings.getSleepAngularVelocity()));
 		
 		// solver
 		
-		JLabel lblVelocityIterations = new JLabel(Resources.getString("panel.settings.velocityIterations"), Icons.INFO, JLabel.LEFT);
-		lblVelocityIterations.setToolTipText(Resources.getString("panel.settings.velocityIterations.tooltip"));
-		this.txtVelocityIterations = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.velocityIterations.format")));
+		JLabel lblVelocityIterations = new JLabel(Messages.getString("panel.settings.velocityIterations"), Icons.INFO, JLabel.LEFT);
+		lblVelocityIterations.setToolTipText(Messages.getString("panel.settings.velocityIterations.tooltip"));
+		this.txtVelocityIterations = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.settings.velocityIterations.format")));
 		this.txtVelocityIterations.addFocusListener(new SelectTextFocusListener(this.txtVelocityIterations));
 		this.txtVelocityIterations.setColumns(3);
 		this.txtVelocityIterations.setValue(settings.getVelocityConstraintSolverIterations());
 		
-		JLabel lblPositionIterations = new JLabel(Resources.getString("panel.settings.positionIterations"), Icons.INFO, JLabel.LEFT);
-		lblPositionIterations.setToolTipText(Resources.getString("panel.settings.positionIterations.tooltip"));
-		this.txtPositionIterations = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.positionIterations.format")));
+		JLabel lblPositionIterations = new JLabel(Messages.getString("panel.settings.positionIterations"), Icons.INFO, JLabel.LEFT);
+		lblPositionIterations.setToolTipText(Messages.getString("panel.settings.positionIterations.tooltip"));
+		this.txtPositionIterations = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.settings.positionIterations.format")));
 		this.txtPositionIterations.addFocusListener(new SelectTextFocusListener(this.txtPositionIterations));
 		this.txtPositionIterations.setColumns(3);
 		this.txtPositionIterations.setValue(settings.getPositionConstraintSolverIterations());
 		
-		JLabel lblWarmStartDistance = new JLabel(Resources.getString("panel.settings.warmStartDistance"), Icons.INFO, JLabel.LEFT);
-		lblWarmStartDistance.setToolTipText(MessageFormat.format(Resources.getString("panel.settings.warmStartDistance.tooltip"), Resources.getString("unit.length")));
-		this.txtWarmStartDistance = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.warmStartDistance.format")));
+		JLabel lblWarmStartDistance = new JLabel(Messages.getString("panel.settings.warmStartDistance"), Icons.INFO, JLabel.LEFT);
+		lblWarmStartDistance.setToolTipText(MessageFormat.format(Messages.getString("panel.settings.warmStartDistance.tooltip"), Messages.getString("unit.length")));
+		this.txtWarmStartDistance = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.settings.warmStartDistance.format")));
 		this.txtWarmStartDistance.addFocusListener(new SelectTextFocusListener(this.txtWarmStartDistance));
 		this.txtWarmStartDistance.setColumns(7);
 		this.txtWarmStartDistance.setValue(settings.getWarmStartDistance());
 		
-		JLabel lblRestitutionVelocity = new JLabel(Resources.getString("panel.settings.restVelocity"), Icons.INFO, JLabel.LEFT);
-		lblRestitutionVelocity.setToolTipText(MessageFormat.format(Resources.getString("panel.settings.restVelocity.tooltip"), Resources.getString("unit.velocity.linear")));
-		this.txtRestitutionVelocity = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.restVelocity.format")));
+		JLabel lblRestitutionVelocity = new JLabel(Messages.getString("panel.settings.restVelocity"), Icons.INFO, JLabel.LEFT);
+		lblRestitutionVelocity.setToolTipText(MessageFormat.format(Messages.getString("panel.settings.restVelocity.tooltip"), Messages.getString("unit.velocity.linear")));
+		this.txtRestitutionVelocity = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.settings.restVelocity.format")));
 		this.txtRestitutionVelocity.addFocusListener(new SelectTextFocusListener(this.txtRestitutionVelocity));
 		this.txtRestitutionVelocity.setColumns(5);
 		this.txtRestitutionVelocity.setValue(settings.getRestitutionVelocity());
 		
-		JLabel lblLinearTolerance = new JLabel(Resources.getString("panel.settings.linearTolerance"), Icons.INFO, JLabel.LEFT);
-		lblLinearTolerance.setToolTipText(MessageFormat.format(Resources.getString("panel.settings.linearTolerance.tooltip"), Resources.getString("unit.length")));
-		this.txtLinearTolerance = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.linearTolerance.format")));
+		JLabel lblLinearTolerance = new JLabel(Messages.getString("panel.settings.linearTolerance"), Icons.INFO, JLabel.LEFT);
+		lblLinearTolerance.setToolTipText(MessageFormat.format(Messages.getString("panel.settings.linearTolerance.tooltip"), Messages.getString("unit.length")));
+		this.txtLinearTolerance = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.settings.linearTolerance.format")));
 		this.txtLinearTolerance.addFocusListener(new SelectTextFocusListener(this.txtLinearTolerance));
 		this.txtLinearTolerance.setColumns(7);
 		this.txtLinearTolerance.setValue(settings.getLinearTolerance());
 		
-		JLabel lblAngularTolerance = new JLabel(Resources.getString("panel.settings.angularTolerance"), Icons.INFO, JLabel.LEFT);
-		lblAngularTolerance.setToolTipText(MessageFormat.format(Resources.getString("panel.settings.angularTolerance.tooltip"), Resources.getString("unit.rotation")));
-		this.txtAngularTolerance = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.angularTolerance.format")));
+		JLabel lblAngularTolerance = new JLabel(Messages.getString("panel.settings.angularTolerance"), Icons.INFO, JLabel.LEFT);
+		lblAngularTolerance.setToolTipText(MessageFormat.format(Messages.getString("panel.settings.angularTolerance.tooltip"), Messages.getString("unit.rotation")));
+		this.txtAngularTolerance = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.settings.angularTolerance.format")));
 		this.txtAngularTolerance.addFocusListener(new SelectTextFocusListener(this.txtAngularTolerance));
 		this.txtAngularTolerance.setColumns(5);
 		this.txtAngularTolerance.setValue(Math.toDegrees(settings.getAngularTolerance()));
 		
-		JLabel lblMaxLinearCorrection = new JLabel(Resources.getString("panel.settings.maximumLinearCorrection"), Icons.INFO, JLabel.LEFT);
-		lblMaxLinearCorrection.setToolTipText(MessageFormat.format(Resources.getString("panel.settings.maximumLinearCorrection.tooltip"), Resources.getString("unit.length")));
-		this.txtMaxLinearCorrection = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.maximumLinearCorrection.format")));
+		JLabel lblMaxLinearCorrection = new JLabel(Messages.getString("panel.settings.maximumLinearCorrection"), Icons.INFO, JLabel.LEFT);
+		lblMaxLinearCorrection.setToolTipText(MessageFormat.format(Messages.getString("panel.settings.maximumLinearCorrection.tooltip"), Messages.getString("unit.length")));
+		this.txtMaxLinearCorrection = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.settings.maximumLinearCorrection.format")));
 		this.txtMaxLinearCorrection.addFocusListener(new SelectTextFocusListener(this.txtMaxLinearCorrection));
 		this.txtMaxLinearCorrection.setColumns(5);
-		this.txtMaxLinearCorrection.setValue(settings.getMaxLinearCorrection());
+		this.txtMaxLinearCorrection.setValue(settings.getMaximumLinearCorrection());
 		
-		JLabel lblMaxAngularCorrection = new JLabel(Resources.getString("panel.settings.maximumAngularCorrection"), Icons.INFO, JLabel.LEFT);
-		lblMaxAngularCorrection.setToolTipText(MessageFormat.format(Resources.getString("panel.settings.maximumAngularCorrection.tooltip"), Resources.getString("unit.rotation")));
-		this.txtMaxAngularCorrection = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.maximumAngularCorrection.format")));
+		JLabel lblMaxAngularCorrection = new JLabel(Messages.getString("panel.settings.maximumAngularCorrection"), Icons.INFO, JLabel.LEFT);
+		lblMaxAngularCorrection.setToolTipText(MessageFormat.format(Messages.getString("panel.settings.maximumAngularCorrection.tooltip"), Messages.getString("unit.rotation")));
+		this.txtMaxAngularCorrection = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.settings.maximumAngularCorrection.format")));
 		this.txtMaxAngularCorrection.addFocusListener(new SelectTextFocusListener(this.txtMaxAngularCorrection));
 		this.txtMaxAngularCorrection.setColumns(5);
-		this.txtMaxAngularCorrection.setValue(Math.toDegrees(settings.getMaxAngularCorrection()));
+		this.txtMaxAngularCorrection.setValue(Math.toDegrees(settings.getMaximumAngularCorrection()));
 		
-		JLabel lblBaumgarte = new JLabel(Resources.getString("panel.settings.baumgarte"), Icons.INFO, JLabel.LEFT);
-		lblBaumgarte.setToolTipText(Resources.getString("panel.settings.baumgarte.tooltip"));
-		this.txtBaumgarte = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.settings.baumgarte.format")));
+		JLabel lblBaumgarte = new JLabel(Messages.getString("panel.settings.baumgarte"), Icons.INFO, JLabel.LEFT);
+		lblBaumgarte.setToolTipText(Messages.getString("panel.settings.baumgarte.tooltip"));
+		this.txtBaumgarte = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.settings.baumgarte.format")));
 		this.txtBaumgarte.addFocusListener(new SelectTextFocusListener(this.txtBaumgarte));
 		this.txtBaumgarte.setColumns(5);
 		this.txtBaumgarte.setValue(settings.getBaumgarte());
@@ -251,7 +251,7 @@ public class SettingsPanel extends JPanel implements InputPanel {
 		
 		// general section
 		JPanel pnlGeneral = new JPanel();
-		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.section.general"));
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Messages.getString("panel.section.general"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlGeneral.setBorder(border);
 		
@@ -287,7 +287,7 @@ public class SettingsPanel extends JPanel implements InputPanel {
 		
 		// sleep section
 		JPanel pnlSleep = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.settings.section.sleep"));
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Messages.getString("panel.settings.section.sleep"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlSleep.setBorder(border);
 		
@@ -323,7 +323,7 @@ public class SettingsPanel extends JPanel implements InputPanel {
 		
 		// solver section
 		JPanel pnlSolver = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.settings.section.solver"));
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Messages.getString("panel.settings.section.solver"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlSolver.setBorder(border);
 		
@@ -404,8 +404,8 @@ public class SettingsPanel extends JPanel implements InputPanel {
 	public void setSettings(Settings settings) {
 		// general
 		settings.setStepFrequency(ControlUtilities.getDoubleValue(this.txtStepFrequency));
-		settings.setMaxTranslation(ControlUtilities.getDoubleValue(this.txtMaxTranslation));
-		settings.setMaxRotation(Math.toRadians(ControlUtilities.getDoubleValue(this.txtMaxRotation)));
+		settings.setMaximumTranslation(ControlUtilities.getDoubleValue(this.txtMaxTranslation));
+		settings.setMaximumRotation(Math.toRadians(ControlUtilities.getDoubleValue(this.txtMaxRotation)));
 		ComboItem item = ((ComboItem)this.cmbCCDMode.getSelectedItem());
 		ContinuousDetectionMode cdm = (ContinuousDetectionMode)item.getValue();
 		settings.setContinuousDetectionMode(cdm);
@@ -413,7 +413,7 @@ public class SettingsPanel extends JPanel implements InputPanel {
 		// sleeping
 		settings.setAutoSleepingEnabled(this.chkAutoSleep.isSelected());
 		settings.setSleepTime(ControlUtilities.getDoubleValue(this.txtSleepTime));
-		settings.setSleepVelocity(ControlUtilities.getDoubleValue(this.txtSleepLinearVelocity));
+		settings.setSleepLinearVelocity(ControlUtilities.getDoubleValue(this.txtSleepLinearVelocity));
 		settings.setSleepAngularVelocity(Math.toRadians(ControlUtilities.getDoubleValue(this.txtSleepAngularVelocity)));
 		
 		// solver
@@ -423,8 +423,8 @@ public class SettingsPanel extends JPanel implements InputPanel {
 		settings.setRestitutionVelocity(ControlUtilities.getDoubleValue(this.txtRestitutionVelocity));
 		settings.setLinearTolerance(ControlUtilities.getDoubleValue(this.txtLinearTolerance));
 		settings.setAngularTolerance(Math.toRadians(ControlUtilities.getDoubleValue(this.txtAngularTolerance)));
-		settings.setMaxLinearCorrection(ControlUtilities.getDoubleValue(this.txtMaxLinearCorrection));
-		settings.setMaxAngularCorrection(Math.toRadians(ControlUtilities.getDoubleValue(this.txtMaxAngularCorrection)));
+		settings.setMaximumLinearCorrection(ControlUtilities.getDoubleValue(this.txtMaxLinearCorrection));
+		settings.setMaximumAngularCorrection(Math.toRadians(ControlUtilities.getDoubleValue(this.txtMaxAngularCorrection)));
 		settings.setBaumgarte(ControlUtilities.getDoubleValue(this.txtBaumgarte));
 	}
 	
@@ -487,35 +487,35 @@ public class SettingsPanel extends JPanel implements InputPanel {
 	@Override
 	public void showInvalidInputMessage(Window owner) {
 		if (ControlUtilities.getDoubleValue(this.txtStepFrequency) < 30.0) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidFrequency"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.settings.invalidFrequency"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getDoubleValue(this.txtMaxTranslation) < 0.0) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidMaximumTranslation"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.settings.invalidMaximumTranslation"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getDoubleValue(this.txtMaxRotation) < 0.0) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidMaximumRotation"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.settings.invalidMaximumRotation"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getDoubleValue(this.txtSleepTime) < 0.0) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidSleepTime"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.settings.invalidSleepTime"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getDoubleValue(this.txtSleepLinearVelocity) < 0.0) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidSleepLinearVelocity"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.settings.invalidSleepLinearVelocity"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getDoubleValue(this.txtSleepAngularVelocity) < 0.0) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidSleepAngularVelocity"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.settings.invalidSleepAngularVelocity"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getIntValue(this.txtVelocityIterations) < 5) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidVelocityIterations"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.settings.invalidVelocityIterations"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getIntValue(this.txtPositionIterations) < 5) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidPositionIterations"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.settings.invalidPositionIterations"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getDoubleValue(this.txtWarmStartDistance) < 0.0) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidWarmStartDistance"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.settings.invalidWarmStartDistance"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getDoubleValue(this.txtRestitutionVelocity) < 0.0) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidRestVelocity"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.settings.invalidRestVelocity"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getDoubleValue(this.txtLinearTolerance) < 0.0) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidLinearTolerance"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.settings.invalidLinearTolerance"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getDoubleValue(this.txtAngularTolerance) < 0.0) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidAngularTolerance"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.settings.invalidAngularTolerance"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getDoubleValue(this.txtMaxLinearCorrection) < 0.0) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidLinearCorrection"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.settings.invalidLinearCorrection"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getDoubleValue(this.txtMaxAngularCorrection) < 0.0) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidAngularCorrection"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.settings.invalidAngularCorrection"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		} else if (ControlUtilities.getDoubleValue(this.txtBaumgarte) < 0.0) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.settings.invalidBaumgarte"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.settings.invalidBaumgarte"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 	

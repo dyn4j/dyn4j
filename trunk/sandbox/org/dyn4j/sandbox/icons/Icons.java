@@ -22,9 +22,11 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.sandbox.utilities;
+package org.dyn4j.sandbox.icons;
 
 import javax.swing.ImageIcon;
+
+import org.dyn4j.sandbox.utilities.ImageUtilities;
 
 /**
  * Class storing all the icons used by the application.
@@ -81,6 +83,9 @@ public class Icons {
 	
 	/** New simulation icon */
 	public static final ImageIcon NEW_SIMULATION = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/new-simulation-icon.png");
+
+	/** Export java icon */
+	public static final ImageIcon EXPORT_JAVA = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/export-java-icon.png");
 	
 	/** Generic add icon */
 	public static final ImageIcon ADD = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/add-icon.png");

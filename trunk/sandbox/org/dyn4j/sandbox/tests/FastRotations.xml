@@ -16,20 +16,20 @@
     <Settings>
         <StepFrequency>60.0</StepFrequency>
         <MaximumTranslation>2.0</MaximumTranslation>
-        <MaximumRotation>1.57079633</MaximumRotation>
+        <MaximumRotation>90</MaximumRotation>
         <ContinuousCollisionDetectionMode>ALL</ContinuousCollisionDetectionMode>
         <AutoSleep>true</AutoSleep>
         <SleepTime>0.5</SleepTime>
         <SleepLinearVelocity>0.01</SleepLinearVelocity>
-        <SleepAngularVelocity>0.034906585</SleepAngularVelocity>
+        <SleepAngularVelocity>2.0</SleepAngularVelocity>
         <VelocitySolverIterations>10</VelocitySolverIterations>
         <PositionSolverIterations>10</PositionSolverIterations>
         <WarmStartDistance>0.01</WarmStartDistance>
         <RestitutionVelocity>1.0</RestitutionVelocity>
         <LinearTolerance>0.0050</LinearTolerance>
-        <AngularTolerance>0.034906585</AngularTolerance>
+        <AngularTolerance>2.0</AngularTolerance>
         <MaximumLinearCorrection>0.2</MaximumLinearCorrection>
-        <MaximumAngularCorrection>0.13962634</MaximumAngularCorrection>
+        <MaximumAngularCorrection>8.0</MaximumAngularCorrection>
         <Baumgarte>0.2</Baumgarte>
     </Settings>
     <Rays>
@@ -73,7 +73,7 @@
                 </Fixtures>
                 <Transform>
                     <Translation x="0.5" y="0.0" />
-                    <Rotation>-0.6981317007977318</Rotation>
+                    <Rotation>-40.0</Rotation>
                 </Transform>
                 <Mass>
                     <LocalCenter x="0.0" y="0.0" />
@@ -83,7 +83,7 @@
                     <Explicit>false</Explicit>
                 </Mass>
                 <Velocity x="0.0" y="0.0" />
-                <AngularVelocity>83.77580409572782</AngularVelocity>
+                <AngularVelocity>4800.0</AngularVelocity>
                 <AccumulatedForce x="0.0" y="0.0" />
                 <AccumulatedTorque>0.0</AccumulatedTorque>
                 <AutoSleep>true</AutoSleep>
@@ -114,7 +114,7 @@
                 </Fixtures>
                 <Transform>
                     <Translation x="-5.0" y="0.0" />
-                    <Rotation>-0.8726646259971647</Rotation>
+                    <Rotation>-50</Rotation>
                 </Transform>
                 <Mass>
                     <LocalCenter x="0.0" y="0.0" />
@@ -124,7 +124,7 @@
                     <Explicit>false</Explicit>
                 </Mass>
                 <Velocity x="0.0" y="0.0" />
-                <AngularVelocity>62.83185307179586</AngularVelocity>
+                <AngularVelocity>3600.0</AngularVelocity>
                 <AccumulatedForce x="0.0" y="0.0" />
                 <AccumulatedTorque>0.0</AccumulatedTorque>
                 <AutoSleep>true</AutoSleep>

@@ -1368,7 +1368,7 @@ public class ControlPanel extends JFrame {
 				0, 5, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		JSpinner spnMaxV = new JSpinner(new SpinnerNumberModel(settings.getMaxTranslation(), 0.0, 10.0, 0.1));
+		JSpinner spnMaxV = new JSpinner(new SpinnerNumberModel(settings.getMaximumTranslation(), 0.0, 10.0, 0.1));
 		spnMaxV.setEditor(new JSpinner.NumberEditor(spnMaxV, "0.0"));
 		((JSpinner.DefaultEditor)spnMaxV.getEditor()).getTextField().setColumns(4);
 		spnMaxV.addChangeListener(new ChangeListener() {
@@ -1377,7 +1377,7 @@ public class ControlPanel extends JFrame {
 				JSpinner spnr = (JSpinner) e.getSource();
 				double t = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
 				Settings settings = Settings.getInstance();
-				settings.setMaxTranslation(t);
+				settings.setMaximumTranslation(t);
 			}
 		});
 		// add the spinner to the layout
@@ -1397,7 +1397,7 @@ public class ControlPanel extends JFrame {
 				0, 6, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		JSpinner spnMaxAv = new JSpinner(new SpinnerNumberModel(Math.toDegrees(settings.getMaxRotation()), 0, 360, 1));
+		JSpinner spnMaxAv = new JSpinner(new SpinnerNumberModel(Math.toDegrees(settings.getMaximumRotation()), 0, 360, 1));
 		spnMaxAv.setEditor(new JSpinner.NumberEditor(spnMaxAv, "0"));
 		((JSpinner.DefaultEditor)spnMaxAv.getEditor()).getTextField().setColumns(3);
 		spnMaxAv.addChangeListener(new ChangeListener() {
@@ -1406,7 +1406,7 @@ public class ControlPanel extends JFrame {
 				JSpinner spnr = (JSpinner) e.getSource();
 				double r = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
 				Settings settings = Settings.getInstance();
-				settings.setMaxRotation(Math.toRadians(r));
+				settings.setMaximumRotation(Math.toRadians(r));
 			}
 		});
 		// add the spinner to the layout
@@ -1544,7 +1544,7 @@ public class ControlPanel extends JFrame {
 				0, 2, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		// create the spinner
-		JSpinner spnSleepMaxV = new JSpinner(new SpinnerNumberModel(settings.getSleepVelocity(), 0.0, 9.99, 0.01));
+		JSpinner spnSleepMaxV = new JSpinner(new SpinnerNumberModel(settings.getSleepLinearVelocity(), 0.0, 9.99, 0.01));
 		spnSleepMaxV.setEditor(new JSpinner.NumberEditor(spnSleepMaxV, "0.00"));
 		((JSpinner.DefaultEditor)spnSleepMaxV.getEditor()).getTextField().setColumns(4);
 		spnSleepMaxV.addChangeListener(new ChangeListener() {
@@ -1553,7 +1553,7 @@ public class ControlPanel extends JFrame {
 				JSpinner spnr = (JSpinner) e.getSource();
 				double v = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
 				Settings settings = Settings.getInstance();
-				settings.setSleepVelocity(v);
+				settings.setSleepLinearVelocity(v);
 			}
 		});
 		// add the spinner to the layout
@@ -1784,7 +1784,7 @@ public class ControlPanel extends JFrame {
 				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		JSpinner spnLinear = new JSpinner(new SpinnerNumberModel(settings.getMaxLinearCorrection(), 0.0, 1.0, 0.01));
+		JSpinner spnLinear = new JSpinner(new SpinnerNumberModel(settings.getMaximumLinearCorrection(), 0.0, 1.0, 0.01));
 		spnLinear.setEditor(new JSpinner.NumberEditor(spnLinear, "0.00"));
 		((JSpinner.DefaultEditor)spnLinear.getEditor()).getTextField().setColumns(4);
 		spnLinear.addChangeListener(new ChangeListener() {
@@ -1793,7 +1793,7 @@ public class ControlPanel extends JFrame {
 				JSpinner spnr = (JSpinner) e.getSource();
 				double lin = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
 				Settings settings = Settings.getInstance();
-				settings.setMaxLinearCorrection(lin);
+				settings.setMaximumLinearCorrection(lin);
 			}
 		});
 		pnlConstraint.add(spnLinear, new GridBagConstraints(
@@ -1812,7 +1812,7 @@ public class ControlPanel extends JFrame {
 				0, y, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, 
 				GridBagConstraints.NONE, insets, 0, 0));
 		
-		JSpinner spnAngular = new JSpinner(new SpinnerNumberModel(Math.toDegrees(settings.getMaxAngularCorrection()), 0.0, 90.0, 0.1));
+		JSpinner spnAngular = new JSpinner(new SpinnerNumberModel(Math.toDegrees(settings.getMaximumAngularCorrection()), 0.0, 90.0, 0.1));
 		spnAngular.setEditor(new JSpinner.NumberEditor(spnAngular, "0.0"));
 		((JSpinner.DefaultEditor)spnAngular.getEditor()).getTextField().setColumns(4);
 		spnAngular.addChangeListener(new ChangeListener() {
@@ -1821,7 +1821,7 @@ public class ControlPanel extends JFrame {
 				JSpinner spnr = (JSpinner) e.getSource();
 				double ang = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
 				Settings settings = Settings.getInstance();
-				settings.setMaxAngularCorrection(Math.toRadians(ang));
+				settings.setMaximumAngularCorrection(Math.toRadians(ang));
 			}
 		});
 		pnlConstraint.add(spnAngular, new GridBagConstraints(

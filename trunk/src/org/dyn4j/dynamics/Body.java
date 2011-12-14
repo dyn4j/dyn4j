@@ -45,6 +45,7 @@ import org.dyn4j.geometry.Shape;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Transformable;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * Represents some physical {@link Body}.
@@ -205,36 +206,33 @@ public class Body implements Swept, Collidable, Transformable {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("BODY[").append(id).append("|FIXTURES[");
+		sb.append("Body[Id=").append(id).append("|Fixtures={");
 		// append all the shapes
 		int size = this.fixtures.size();
 		for (int i = 0; i < size; i++) {
+			if (i != 0) sb.append(",");
 			sb.append(this.fixtures.get(i));
 		}
-		sb.append("]|").append(this.radius)
-		.append("|TRANSFORM_0[").append(this.transform0).append("]")
-		.append("|TRANSFORM[").append(this.transform).append("]")
-		.append("|").append(this.mass)
-		.append("|").append(this.velocity)
-		.append("|").append(this.angularVelocity)
-		.append("|").append(this.force)
-		.append("|").append(this.torque)
-		.append("|{");
-		size = this.forces.size();
-		for (int i = 0; i < size; i++) {
-			sb.append(this.forces.get(i));
-		}
-		sb.append("}|{");
-		size = this.torques.size();
-		for (int i = 0; i < size; i++) {
-			sb.append(this.torques.get(i));
-		}
-		sb.append("}|").append(this.state)
-		.append("|").append(this.linearDamping)
-		.append("|").append(this.angularDamping)
-		.append("|").append(this.gravityScale)
-		.append("|").append(this.sleepTime);
-		sb.append("]");
+		sb.append("}|InitialTransform=").append(this.transform0)
+		.append("|Transform=").append(this.transform)
+		.append("|RotationDiscRadius=").append(this.radius)
+		.append("|Mass=").append(this.mass)
+		.append("|Velocity=").append(this.velocity)
+		.append("|AngularVelocity=").append(this.angularVelocity)
+		.append("|Force=").append(this.force)
+		.append("|Torque=").append(this.torque)
+		.append("|AccumulatedForce=").append(this.getAccumulatedForce())
+		.append("|AccumulatedTorque=").append(this.getAccumulatedTorque())
+		.append("|IsAutoSleepingEnabled=").append(this.isAutoSleepingEnabled())
+		.append("|IsAsleep=").append(this.isAsleep())
+		.append("|IsActive=").append(this.isActive())
+		.append("|IsOnIsland=").append(this.isOnIsland())
+		.append("|IsBullet=").append(this.isBullet())
+		.append("|SleepTime=").append(this.sleepTime)
+		.append("|LinearDamping=").append(this.linearDamping)
+		.append("|AngularDamping").append(this.angularDamping)
+		.append("|GravityScale=").append(this.gravityScale)
+		.append("]");
 		return sb.toString();
 	}
 	
@@ -251,7 +249,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 */
 	public BodyFixture addFixture(Convex convex) {
 		// make sure the convex shape is not null
-		if (convex == null) throw new NullPointerException("The convex shape cannot be null.");
+		if (convex == null) throw new NullPointerException(Messages.getString("dynamics.body.addNullShape"));
 		// create the fixture
 		BodyFixture fixture = new BodyFixture(convex);
 		// add the fixture to the body
@@ -272,7 +270,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 */
 	public Body addFixture(BodyFixture fixture) {
 		// make sure neither is null
-		if (fixture == null) throw new NullPointerException("The fixture cannot be null.");
+		if (fixture == null) throw new NullPointerException(Messages.getString("dynamics.body.addNullFixture"));
 		// add the shape and mass to the respective lists
 		this.fixtures.add(fixture);
 		// return this body to facilitate chaining
@@ -368,7 +366,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 */
 	public Body setMass(Mass.Type type) {
 		// check for null
-		if (type == null) throw new NullPointerException("The specified mass type cannot be null.");
+		if (type == null) throw new NullPointerException(Messages.getString("dynamics.body.nullMassType"));
 		// get the size
 		int size = this.fixtures.size();
 		// check the size
@@ -406,7 +404,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 */
 	public Body setMass(Mass mass) {
 		// make sure the mass is not null
-		if (mass == null) throw new NullPointerException("The mass cannot be null.");
+		if (mass == null) throw new NullPointerException(Messages.getString("dynamics.body.nullMass"));
 		// set the mass
 		this.mass = mass;
 		// compute the rotation disc radius
@@ -434,7 +432,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 */
 	public Body setMassType(Mass.Type type) {
 		// check for null type
-		if (type == null) throw new NullPointerException("The mass type cannot be null.");
+		if (type == null) throw new NullPointerException(Messages.getString("dynamics.body.nullMassType"));
 		// make sure the current mass is not null
 		if (this.mass == null) {
 			// if its null then just compute it for the first time
@@ -459,7 +457,11 @@ public class Body implements Swept, Collidable, Transformable {
 		// get the number of fixtures
 		int size = this.fixtures.size();
 		// check for zero fixtures
-		if (size == 0) return;
+		if (size == 0) {
+			// set the radius to zero
+			this.radius = 0.0;
+			return;
+		}
 		// get the body's center of mass
 		Vector2 c = this.mass.getCenter();
 		// loop over the fixtures
@@ -495,7 +497,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 */
 	public Body apply(Vector2 force) {
 		// check for null
-		if (force == null) throw new NullPointerException("Cannot apply a null force.");
+		if (force == null) throw new NullPointerException(Messages.getString("dynamics.body.nullForce"));
 		// apply the force
 		this.forces.add(new Force(force));
 		// wake up the body
@@ -514,7 +516,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 */
 	public Body apply(Force force) {
 		// check for null
-		if (force == null) throw new NullPointerException("Cannot apply a null force.");
+		if (force == null) throw new NullPointerException(Messages.getString("dynamics.body.nullForce"));
 		// add the force to the list
 		this.forces.add(force);
 		// wake up the body
@@ -549,7 +551,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 */
 	public Body apply(Torque torque) {
 		// check for null
-		if (torque == null) throw new NullPointerException("Cannot apply a null torque.");
+		if (torque == null) throw new NullPointerException(Messages.getString("dynamics.body.nullTorque"));
 		// add the torque to the list
 		this.torques.add(torque);
 		// wake up the body
@@ -570,8 +572,8 @@ public class Body implements Swept, Collidable, Transformable {
 	 */
 	public Body apply(Vector2 force, Vector2 point) {
 		// check for null
-		if (force == null) throw new NullPointerException("Cannot apply a torque with a null force.");
-		if (point == null) throw new NullPointerException("Cannot apply a torque with a null application point.");
+		if (force == null) throw new NullPointerException(Messages.getString("dynamics.body.nullForceForTorque"));
+		if (point == null) throw new NullPointerException(Messages.getString("dynamics.body.nullPointForTorque"));
 		// apply the force
 		this.forces.add(new Force(force));
 		// compute the moment r
@@ -1045,7 +1047,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 * @since 1.1.0
 	 */
 	public void setTransform(Transform transform) {
-		if (transform == null) throw new NullPointerException("A body cannot have a null transform.");
+		if (transform == null) throw new NullPointerException(Messages.getString("dynamics.body.nullTransform"));
 		this.transform.set(transform);
 		this.transform0.set(transform);
 	}
@@ -1185,7 +1187,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 * @throws NullPointerException if velocity is null
 	 */
 	public void setVelocity(Vector2 velocity) {
-		if (velocity == null) throw new NullPointerException("The velocity vector cannot be null.");
+		if (velocity == null) throw new NullPointerException(Messages.getString("dynamics.body.nullVelocity"));
 		this.velocity = velocity;
 	}
 
@@ -1267,7 +1269,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 * @throws IllegalArgumentException if linearDamping is less than zero
 	 */
 	public void setLinearDamping(double linearDamping) {
-		if (linearDamping < 0) throw new IllegalArgumentException("The linear damping must be greater than or equal to zero.");
+		if (linearDamping < 0) throw new IllegalArgumentException(Messages.getString("dynamics.body.invalidLinearDamping"));
 		this.linearDamping = linearDamping;
 	}
 	
@@ -1285,7 +1287,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 * @throws IllegalArgumentException if angularDamping is less than zero
 	 */
 	public void setAngularDamping(double angularDamping) {
-		if (angularDamping < 0) throw new IllegalArgumentException("The angular damping must be greater than or equal to zero.");
+		if (angularDamping < 0) throw new IllegalArgumentException(Messages.getString("dynamics.body.invalidAngularDamping"));
 		this.angularDamping = angularDamping;
 	}
 	

@@ -44,9 +44,9 @@ import org.dyn4j.geometry.hull.GiftWrap;
 import org.dyn4j.geometry.hull.GrahamScan;
 import org.dyn4j.geometry.hull.HullGenerator;
 import org.dyn4j.geometry.hull.MonotoneChain;
-import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.controls.ComboItem;
-import org.dyn4j.sandbox.utilities.Icons;
+import org.dyn4j.sandbox.icons.Icons;
+import org.dyn4j.sandbox.resources.Messages;
 
 /**
  * Panel used to create a fixture from a point cloud.
@@ -59,16 +59,16 @@ public class ConvexHullPolygonPanel extends ConvexHullShapePanel implements Inpu
 	private static final long serialVersionUID = -9180521501510030534L;
 
 	/** The gift wrap algorithm item */
-	private static final ComboItem GIFT_WRAP = new ComboItem(Resources.getString("panel.hull.algorithm.giftWrap"), new GiftWrap());
+	private static final ComboItem GIFT_WRAP = new ComboItem(Messages.getString("panel.hull.algorithm.giftWrap"), new GiftWrap());
 	
 	/** The graham scan algorithm item */
-	private static final ComboItem GRAHAM_SCAN = new ComboItem(Resources.getString("panel.hull.algorithm.grahamScan"), new GrahamScan());
+	private static final ComboItem GRAHAM_SCAN = new ComboItem(Messages.getString("panel.hull.algorithm.grahamScan"), new GrahamScan());
 	
 	/** The monotone chain algorithm item */
-	private static final ComboItem MONOTONE_CHAIN = new ComboItem(Resources.getString("panel.hull.algorithm.monotoneChain"), new MonotoneChain());
+	private static final ComboItem MONOTONE_CHAIN = new ComboItem(Messages.getString("panel.hull.algorithm.monotoneChain"), new MonotoneChain());
 	
 	/** The divide and conquer algorithm item */
-	private static final ComboItem DIVIDE_AND_CONQUER = new ComboItem(Resources.getString("panel.hull.algorithm.divideAndConquer"), new DivideAndConquer());
+	private static final ComboItem DIVIDE_AND_CONQUER = new ComboItem(Messages.getString("panel.hull.algorithm.divideAndConquer"), new DivideAndConquer());
 	
 	/** The array of algorithms */
 	private static final ComboItem[] ITEMS = new ComboItem[] {
@@ -109,10 +109,10 @@ public class ConvexHullPolygonPanel extends ConvexHullShapePanel implements Inpu
 	 * Default constructor.
 	 */
 	public ConvexHullPolygonPanel() {
-		JLabel lblAlgorithm = new JLabel(Resources.getString("panel.hull.algorithm"), Icons.INFO, JLabel.LEFT);
-		lblAlgorithm.setToolTipText(Resources.getString("panel.hull.algorithm.tooltip"));
-		JLabel lblSource = new JLabel(Resources.getString("panel.hull.source"), Icons.INFO, JLabel.LEFT);
-		lblSource.setToolTipText(Resources.getString("panel.hull.source.tooltip"));
+		JLabel lblAlgorithm = new JLabel(Messages.getString("panel.hull.algorithm"), Icons.INFO, JLabel.LEFT);
+		lblAlgorithm.setToolTipText(Messages.getString("panel.hull.algorithm.tooltip"));
+		JLabel lblSource = new JLabel(Messages.getString("panel.hull.source"), Icons.INFO, JLabel.LEFT);
+		lblSource.setToolTipText(Messages.getString("panel.hull.source.tooltip"));
 		
 		this.cmbAlgorithms = new JComboBox(ITEMS);
 		this.cmbAlgorithms.setSelectedItem(DEFAULT_ALGORITHM);
@@ -132,8 +132,8 @@ public class ConvexHullPolygonPanel extends ConvexHullShapePanel implements Inpu
 		this.pnlArbitraryPolygon = new ArbitraryConvexHullPolygonPanel(hullGenerator);
 		this.pnlFromFilePolygon = new FromFileConvexHullPolygonPanel(hullGenerator);
 		
-		this.rdoArbitrary = new JRadioButton(Resources.getString("panel.hull.source.cloud"));
-		this.rdoFromFile = new JRadioButton(Resources.getString("panel.hull.source.file"));
+		this.rdoArbitrary = new JRadioButton(Messages.getString("panel.hull.source.cloud"));
+		this.rdoFromFile = new JRadioButton(Messages.getString("panel.hull.source.file"));
 		
 		// set arbitrary as the current one
 		this.rdoArbitrary.setSelected(true);

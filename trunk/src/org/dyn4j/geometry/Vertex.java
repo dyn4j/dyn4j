@@ -27,7 +27,7 @@ package org.dyn4j.geometry;
 /**
  * Represents a point on the edge of a {@link Shape}.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class Vertex extends Feature {
@@ -64,9 +64,9 @@ public class Vertex extends Feature {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("VERTEX").append("[");
-		sb.append(this.point).append("|");
-		sb.append(this.index).append("]");
+		sb.append("Vertex[Point=").append(this.point)
+		.append("|Index=").append(this.index)
+		.append("]");
 		return sb.toString();
 	}
 	

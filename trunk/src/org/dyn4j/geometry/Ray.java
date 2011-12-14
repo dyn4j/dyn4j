@@ -24,6 +24,8 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.resources.Messages;
+
 /**
  * Represents a ray.
  * @author William Bittle
@@ -72,11 +74,23 @@ public class Ray {
 	 * @throws IllegalArgumentException if direction is the zero vector
 	 */
 	public Ray(Vector2 start, Vector2 direction) {
-		if (start == null) throw new NullPointerException("The start point cannot be null.");
-		if (direction == null) throw new NullPointerException("The direction cannot be null.");
-		if (direction.isZero()) throw new IllegalArgumentException("A ray cannot have a zero direction vector.");
+		if (start == null) throw new NullPointerException(Messages.getString("geometry.ray.nullStart"));
+		if (direction == null) throw new NullPointerException(Messages.getString("geometry.ray.nullDirection"));
+		if (direction.isZero()) throw new IllegalArgumentException(Messages.getString("geometry.ray.zeroDirection"));
 		this.start = start;
 		this.direction = direction;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Ray[Start=").append(this.start)
+		.append("|Direction=").append(this.getDirection())
+		.append("]");
+		return sb.toString();
 	}
 	
 	/**
@@ -93,7 +107,7 @@ public class Ray {
 	 * @throws NullPointerException if start is null
 	 */
 	public void setStart(Vector2 start) {
-		if (start == null) throw new NullPointerException("The start point cannot be null.");
+		if (start == null) throw new NullPointerException(Messages.getString("geometry.ray.nullStart"));
 		this.start = start;
 	}
 	
@@ -134,8 +148,8 @@ public class Ray {
 	 * @throws IllegalArgumentException if direction is the zero vector
 	 */
 	public void setDirection(Vector2 direction) {
-		if (direction == null) throw new NullPointerException("The direction cannot be null.");
-		if (direction.isZero()) throw new IllegalArgumentException("A ray cannot have a zero direction vector.");
+		if (direction == null) throw new NullPointerException(Messages.getString("geometry.ray.nullDirection"));
+		if (direction.isZero()) throw new IllegalArgumentException(Messages.getString("geometry.ray.zeroDirection"));
 		this.direction = direction;
 	}
 }

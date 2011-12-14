@@ -27,7 +27,7 @@ package org.dyn4j.collision.manifold;
 /**
  * Represents a {@link ManifoldPointId} that uses indexing.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class IndexedManifoldPointId implements ManifoldPointId {
@@ -82,11 +82,11 @@ public class IndexedManifoldPointId implements ManifoldPointId {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("INDEXED_MANIFOLD_POINT_ID[")
-		.append(this.referenceEdge).append("|")
-		.append(this.incidentEdge).append("|")
-		.append(this.incidentVertex).append("|")
-		.append(this.flipped).append("]");
+		sb.append("IndexedManifoldPointId[ReferenceEdge=").append(this.referenceEdge)
+		.append("|IncidentEdge=").append(this.incidentEdge)
+		.append("|IncidentVertex=").append(this.incidentVertex)
+		.append("|IsFlipped=").append(this.flipped)
+		.append("]");
 		return sb.toString();
 	}
 	
@@ -116,9 +116,12 @@ public class IndexedManifoldPointId implements ManifoldPointId {
 	
 	/**
 	 * Returns true if the reference and incident edges flipped.
+	 * <p>
+	 * Renamed from <code>flipped</code> in 3.0.2.
 	 * @return boolean
+	 * @since 3.0.2
 	 */
-	public boolean flipped() {
+	public boolean isFlipped() {
 		return flipped;
 	}
 	

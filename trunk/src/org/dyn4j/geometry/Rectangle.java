@@ -24,18 +24,17 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.resources.Messages;
+
 /**
  * Represents a {@link Rectangle} (either axis aligned or oriented).
  * <p>
  * A {@link Rectangle} cannot have a width or height of zero.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class Rectangle extends Polygon implements Shape, Transformable {
-	/** The rectangle {@link Shape.Type} */
-	public static final Shape.Type TYPE = new Shape.Type(Polygon.TYPE, "Rectangle");
-	
 	/** The {@link Rectangle}'s width */
 	protected double width;
 	
@@ -51,8 +50,8 @@ public class Rectangle extends Polygon implements Shape, Transformable {
 	 * @throws IllegalArgumentException if width or height is less than or equal to zero
 	 */
 	public Rectangle(double width, double height) {
-		if (width <= 0.0) throw new IllegalArgumentException("A rectangle must have a positive non-zero width.");
-		if (height <= 0.0) throw new IllegalArgumentException("A rectangle must have a positive non-zero height.");
+		if (width <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.rectangle.invalidWidth"));
+		if (height <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.rectangle.invalidHeight"));
 		// set the vertices
 		this.vertices = new Vector2[] {
 			new Vector2(-width * 0.5, -height * 0.5),
@@ -77,21 +76,15 @@ public class Rectangle extends Polygon implements Shape, Transformable {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Polygon#getType()
-	 */
-	@Override
-	public Type getType() {
-		return Rectangle.TYPE;
-	}
-	
-	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Wound#toString()
 	 */
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("RECTANGLE[").append(super.toString()).append("|")
-		.append(width).append("|").append(height).append("]");
+		sb.append("Rectangle[").append(super.toString())
+		.append("|Width=").append(this.width)
+		.append("|Height=").append(this.height)
+		.append("]");
 		return sb.toString();
 	}
 	

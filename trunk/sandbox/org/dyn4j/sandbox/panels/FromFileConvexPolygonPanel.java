@@ -48,9 +48,9 @@ import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.dialogs.SampleFileDialog;
-import org.dyn4j.sandbox.utilities.Icons;
+import org.dyn4j.sandbox.icons.Icons;
+import org.dyn4j.sandbox.resources.Messages;
 
 /**
  * Panel used to create a polygon from a file.
@@ -81,24 +81,24 @@ public class FromFileConvexPolygonPanel extends ConvexShapePanel implements Inpu
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
 		
-		JLabel lblFile = new JLabel(Resources.getString("panel.convex.polygon.file"), Icons.INFO, JLabel.LEFT);
-		lblFile.setToolTipText(Resources.getString("panel.convex.polygon.file.tooltip"));
+		JLabel lblFile = new JLabel(Messages.getString("panel.convex.polygon.file"), Icons.INFO, JLabel.LEFT);
+		lblFile.setToolTipText(Messages.getString("panel.convex.polygon.file.tooltip"));
 		
 		this.txtFile = new JTextField();
 		this.txtFile.setEditable(false);
 		
-		JButton btnBrowse = new JButton(Resources.getString("button.browse"));
-		btnBrowse.setToolTipText(Resources.getString("button.browse.tooltip"));
+		JButton btnBrowse = new JButton(Messages.getString("button.browse"));
+		btnBrowse.setToolTipText(Messages.getString("button.browse.tooltip"));
 		btnBrowse.setActionCommand("browse");
 		btnBrowse.addActionListener(this);
 		
-		JButton btnGenerate = new JButton(Resources.getString("panel.convex.polygon.viewSample"));
-		btnGenerate.setToolTipText(Resources.getString("panel.convex.polygon.viewSample.tooltip"));
+		JButton btnGenerate = new JButton(Messages.getString("panel.convex.polygon.viewSample"));
+		btnGenerate.setToolTipText(Messages.getString("panel.convex.polygon.viewSample.tooltip"));
 		btnGenerate.setActionCommand("generate");
 		btnGenerate.addActionListener(this);
 		
-		JLabel lblPreview = new JLabel(Resources.getString("panel.preview"), Icons.INFO, JLabel.LEFT);
-		lblPreview.setToolTipText(Resources.getString("panel.preview.tooltip"));
+		JLabel lblPreview = new JLabel(Messages.getString("panel.preview"), Icons.INFO, JLabel.LEFT);
+		lblPreview.setToolTipText(Messages.getString("panel.preview.tooltip"));
 		this.pnlPreview = new PreviewPanel(new Dimension(250, 225), (Vector2[])null);
 		
 		layout.setAutoCreateGaps(true);
@@ -159,7 +159,7 @@ public class FromFileConvexPolygonPanel extends ConvexShapePanel implements Inpu
 						this.polygon = Geometry.createPolygon(vertices);
 					} catch (IllegalArgumentException e) {
 						// the polygon is not valid
-						JOptionPane.showMessageDialog(this, MessageFormat.format(Resources.getString("panel.convex.polygon.invalid.message"), e.getMessage()), Resources.getString("panel.invalid.title"), JOptionPane.INFORMATION_MESSAGE);
+						JOptionPane.showMessageDialog(this, MessageFormat.format(Messages.getString("panel.convex.polygon.invalid.message"), e.getMessage()), Messages.getString("panel.invalid.title"), JOptionPane.INFORMATION_MESSAGE);
 						// set the current polygon to null
 						this.polygon = null;
 					}
@@ -169,20 +169,20 @@ public class FromFileConvexPolygonPanel extends ConvexShapePanel implements Inpu
 					this.txtFile.setText(file.getAbsolutePath());
 				} catch (NumberFormatException e) {
 					// file data incorrect
-					JOptionPane.showMessageDialog(this, Resources.getString("panel.pointFile.nonNumericValue"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(this, Messages.getString("panel.pointFile.nonNumericValue"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 				} catch (ArrayIndexOutOfBoundsException e) {
 					// file format not correct
-					JOptionPane.showMessageDialog(this, Resources.getString("panel.pointFile.invalidFormat"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(this, Messages.getString("panel.pointFile.invalidFormat"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 				} catch (FileNotFoundException e) {
 					// file not found
-					JOptionPane.showMessageDialog(this, MessageFormat.format(Resources.getString("panel.fileNotFound"), file.getAbsolutePath()), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(this, MessageFormat.format(Messages.getString("panel.fileNotFound"), file.getAbsolutePath()), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 				} catch (IOException e) {
 					// failure to read
-					JOptionPane.showMessageDialog(this, Resources.getString("panel.ioError"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(this, Messages.getString("panel.ioError"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		} else {
-			SampleFileDialog.show(this, Resources.getString("panel.convex.polygon.sample"));
+			SampleFileDialog.show(this, Messages.getString("panel.convex.polygon.sample"));
 		}
 	}
 	
@@ -219,7 +219,7 @@ public class FromFileConvexPolygonPanel extends ConvexShapePanel implements Inpu
 	@Override
 	public void showInvalidInputMessage(Window owner) {
 		if (!this.isValidInput()) {
-			JOptionPane.showMessageDialog(this, Resources.getString("panel.convex.polygon.invalid"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(this, Messages.getString("panel.convex.polygon.invalid"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

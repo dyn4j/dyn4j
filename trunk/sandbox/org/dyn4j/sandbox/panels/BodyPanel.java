@@ -53,12 +53,12 @@ import javax.swing.event.DocumentListener;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
-import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.controls.JSliderWithTextField;
 import org.dyn4j.sandbox.dialogs.ColorDialog;
+import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.resources.Messages;
 import org.dyn4j.sandbox.utilities.ColorUtilities;
-import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel for editing a Body.
@@ -253,8 +253,8 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		double torque = body.getAccumulatedTorque();
 		
 		// name
-		this.lblName = new JLabel(Resources.getString("panel.body.name"), Icons.INFO, JLabel.LEFT);
-		this.lblName.setToolTipText(Resources.getString("panel.body.name.tooltip"));
+		this.lblName = new JLabel(Messages.getString("panel.body.name"), Icons.INFO, JLabel.LEFT);
+		this.lblName.setToolTipText(Messages.getString("panel.body.name.tooltip"));
 		this.txtName = new JTextField(name);
 		
 		this.txtName.addFocusListener(new SelectTextFocusListener(this.txtName));
@@ -272,7 +272,7 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		});
 		
 		// the color panel
-		this.lblSample = new JLabel(Resources.getString("panel.body.color.sample"));
+		this.lblSample = new JLabel(Messages.getString("panel.body.color.sample"));
 		this.lblSample.setForeground(ColorUtilities.getForegroundColorFromBackgroundColor(initialFillColor));
 		this.lblSample.setHorizontalAlignment(JLabel.CENTER);
 		this.pnlColor = new JPanel();
@@ -283,22 +283,22 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		this.pnlColor.add(this.lblSample, BorderLayout.CENTER);
 		
 		// outline color
-		this.lblOutlineColor = new JLabel(Resources.getString("panel.body.color.outline"), Icons.INFO, JLabel.LEFT);
-		this.lblOutlineColor.setToolTipText(Resources.getString("panel.body.color.outline.tooltip"));
-		this.btnOutlineColor = new JButton(Resources.getString("button.select"));
+		this.lblOutlineColor = new JLabel(Messages.getString("panel.body.color.outline"), Icons.INFO, JLabel.LEFT);
+		this.lblOutlineColor.setToolTipText(Messages.getString("panel.body.color.outline.tooltip"));
+		this.btnOutlineColor = new JButton(Messages.getString("button.select"));
 		this.btnOutlineColor.setActionCommand("outlineColor");
 		this.btnOutlineColor.addActionListener(this);
 		
 		// fill color
-		this.lblFillColor = new JLabel(Resources.getString("panel.body.color.fill"), Icons.INFO, JLabel.LEFT);
-		this.lblFillColor.setToolTipText(Resources.getString("panel.body.color.fill.tooltip"));
-		this.btnFillColor = new JButton(Resources.getString("button.select"));
+		this.lblFillColor = new JLabel(Messages.getString("panel.body.color.fill"), Icons.INFO, JLabel.LEFT);
+		this.lblFillColor.setToolTipText(Messages.getString("panel.body.color.fill.tooltip"));
+		this.btnFillColor = new JButton(Messages.getString("button.select"));
 		this.btnFillColor.setActionCommand("fillColor");
 		this.btnFillColor.addActionListener(this);
 		
 		// mass type
-		this.lblMassType = new JLabel(Resources.getString("panel.body.mass.type"), Icons.INFO, JLabel.LEFT);
-		this.lblMassType.setToolTipText(Resources.getString("panel.body.mass.type.tooltip"));
+		this.lblMassType = new JLabel(Messages.getString("panel.body.mass.type"), Icons.INFO, JLabel.LEFT);
+		this.lblMassType.setToolTipText(Messages.getString("panel.body.mass.type.tooltip"));
 		this.cmbMassType = new JComboBox(ITEMS);
 		this.cmbMassType.setSelectedItem(this.getMassTypeItem(massType));
 		this.cmbMassType.addActionListener(new ActionListener() {
@@ -316,8 +316,8 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 			showMass.setType(Mass.Type.NORMAL);
 		}
 		
-		this.lblMassExplicit = new JLabel(Resources.getString("panel.body.mass.manual"), Icons.INFO, JLabel.LEFT);
-		this.lblMassExplicit.setToolTipText(Resources.getString("panel.body.mass.manual.tooltip"));
+		this.lblMassExplicit = new JLabel(Messages.getString("panel.body.mass.manual"), Icons.INFO, JLabel.LEFT);
+		this.lblMassExplicit.setToolTipText(Messages.getString("panel.body.mass.manual.tooltip"));
 		this.chkMassExplicit = new JCheckBox();
 		this.chkMassExplicit.setSelected(body.isMassExplicit());
 		this.chkMassExplicit.addActionListener(new ActionListener() {
@@ -349,12 +349,12 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 			}
 		});
 		
-		this.lblCenter = new JLabel(Resources.getString("panel.body.mass.center"), Icons.INFO, JLabel.LEFT);
-		this.lblCenter.setToolTipText(Resources.getString("panel.body.mass.center.tooltip"));
-		JLabel lblX = new JLabel(Resources.getString("x"));
-		JLabel lblY = new JLabel(Resources.getString("y"));
+		this.lblCenter = new JLabel(Messages.getString("panel.body.mass.center"), Icons.INFO, JLabel.LEFT);
+		this.lblCenter.setToolTipText(Messages.getString("panel.body.mass.center.tooltip"));
+		JLabel lblX = new JLabel(Messages.getString("x"));
+		JLabel lblY = new JLabel(Messages.getString("y"));
 		
-		this.txtX = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.body.mass.center.format")));
+		this.txtX = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.body.mass.center.format")));
 		this.txtX.addFocusListener(new SelectTextFocusListener(this.txtX));
 		this.txtX.setValue(showMass.getCenter().x);
 		this.txtX.setEditable(body.isMassExplicit());
@@ -372,7 +372,7 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 			}
 		});
 		
-		this.txtY = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.body.mass.center.format")));
+		this.txtY = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.body.mass.center.format")));
 		this.txtY.addFocusListener(new SelectTextFocusListener(this.txtY));
 		this.txtY.setValue(showMass.getCenter().y);
 		this.txtY.setEditable(body.isMassExplicit());
@@ -390,9 +390,9 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 			}
 		});
 		
-		this.lblMass = new JLabel(Resources.getString("panel.body.mass"), Icons.INFO, JLabel.LEFT);
-		this.lblMass.setToolTipText(MessageFormat.format(Resources.getString("panel.body.mass.tooltip"), Resources.getString("unit.mass")));
-		this.txtMass = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.body.mass.format")));
+		this.lblMass = new JLabel(Messages.getString("panel.body.mass"), Icons.INFO, JLabel.LEFT);
+		this.lblMass.setToolTipText(MessageFormat.format(Messages.getString("panel.body.mass.tooltip"), Messages.getString("unit.mass")));
+		this.txtMass = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.body.mass.format")));
 		this.txtMass.addFocusListener(new SelectTextFocusListener(this.txtMass));
 		this.txtMass.setValue(showMass.getMass());
 		this.txtMass.setEditable(body.isMassExplicit());
@@ -410,9 +410,9 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 			}
 		});
 		
-		this.lblInertia = new JLabel(Resources.getString("panel.body.inertia"), Icons.INFO, JLabel.LEFT);
-		this.lblInertia.setToolTipText(MessageFormat.format(Resources.getString("panel.body.inertia.tooltip"), Resources.getString("unit.inertia")));
-		this.txtInertia = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.body.inertia.format")));
+		this.lblInertia = new JLabel(Messages.getString("panel.body.inertia"), Icons.INFO, JLabel.LEFT);
+		this.lblInertia.setToolTipText(MessageFormat.format(Messages.getString("panel.body.inertia.tooltip"), Messages.getString("unit.inertia")));
+		this.txtInertia = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.body.inertia.format")));
 		this.txtInertia.addFocusListener(new SelectTextFocusListener(this.txtInertia));
 		this.txtInertia.setValue(showMass.getInertia());
 		this.txtInertia.setEditable(body.isMassExplicit());
@@ -431,9 +431,9 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		});
 		
 		// linear damping
-		this.lblLinearDamping = new JLabel(Resources.getString("panel.body.damping.linear"), Icons.INFO, JLabel.LEFT);
-		this.lblLinearDamping.setToolTipText(Resources.getString("panel.body.damping.linear.tooltip"));
-		this.sldLinearDamping = new JSliderWithTextField(0, 100, (int)(linearDamping * 100.0), 0.01, new DecimalFormat(Resources.getString("panel.body.damping.linear.format")));
+		this.lblLinearDamping = new JLabel(Messages.getString("panel.body.damping.linear"), Icons.INFO, JLabel.LEFT);
+		this.lblLinearDamping.setToolTipText(Messages.getString("panel.body.damping.linear.tooltip"));
+		this.sldLinearDamping = new JSliderWithTextField(0, 100, (int)(linearDamping * 100.0), 0.01, new DecimalFormat(Messages.getString("panel.body.damping.linear.format")));
 		this.sldLinearDamping.setColumns(4);
 		this.sldLinearDamping.addChangeListener(new ChangeListener() {
 			@Override
@@ -445,9 +445,9 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		});
 		
 		// angular damping
-		this.lblAngularDamping = new JLabel(Resources.getString("panel.body.damping.angular"), Icons.INFO, JLabel.LEFT);
-		this.lblAngularDamping.setToolTipText(Resources.getString("panel.body.damping.angular.tooltip"));
-		this.sldAngularDamping = new JSliderWithTextField(0, 100, (int)(angularDamping * 100.0), 0.01, new DecimalFormat(Resources.getString("panel.body.damping.angular.format")));
+		this.lblAngularDamping = new JLabel(Messages.getString("panel.body.damping.angular"), Icons.INFO, JLabel.LEFT);
+		this.lblAngularDamping.setToolTipText(Messages.getString("panel.body.damping.angular.tooltip"));
+		this.sldAngularDamping = new JSliderWithTextField(0, 100, (int)(angularDamping * 100.0), 0.01, new DecimalFormat(Messages.getString("panel.body.damping.angular.format")));
 		this.sldAngularDamping.setColumns(4);
 		this.sldAngularDamping.addChangeListener(new ChangeListener() {
 			@Override
@@ -459,12 +459,12 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		});
 		
 		// initial velocity
-		this.lblVelocity = new JLabel(Resources.getString("panel.body.velocity.linear"), Icons.INFO, JLabel.LEFT);
-		this.lblVelocity.setToolTipText(MessageFormat.format(Resources.getString("panel.body.velocity.linear.tooltip"), Resources.getString("unit.velocity.linear")));
-		JLabel lblVelocityX = new JLabel(Resources.getString("x"));
-		JLabel lblVelocityY = new JLabel(Resources.getString("y"));
-		this.txtVelocityX = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.body.velocity.linear.format")));
-		this.txtVelocityY = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.body.velocity.linear.format")));
+		this.lblVelocity = new JLabel(Messages.getString("panel.body.velocity.linear"), Icons.INFO, JLabel.LEFT);
+		this.lblVelocity.setToolTipText(MessageFormat.format(Messages.getString("panel.body.velocity.linear.tooltip"), Messages.getString("unit.velocity.linear")));
+		JLabel lblVelocityX = new JLabel(Messages.getString("x"));
+		JLabel lblVelocityY = new JLabel(Messages.getString("y"));
+		this.txtVelocityX = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.body.velocity.linear.format")));
+		this.txtVelocityY = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.body.velocity.linear.format")));
 		this.txtVelocityX.setValue(velocity.x);
 		this.txtVelocityY.setValue(velocity.y);
 		this.txtVelocityX.setColumns(7);
@@ -490,9 +490,9 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		});
 		
 		// initial anuglar velocity
-		this.lblAngularVelocity = new JLabel(Resources.getString("panel.body.velocity.angular"), Icons.INFO, JLabel.LEFT);
-		this.lblAngularVelocity.setToolTipText(MessageFormat.format(Resources.getString("panel.body.velocity.angular.tooltip"), Resources.getString("unit.velocity.angular")));
-		this.txtAngularVelocity = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.body.velocity.angular.format")));
+		this.lblAngularVelocity = new JLabel(Messages.getString("panel.body.velocity.angular"), Icons.INFO, JLabel.LEFT);
+		this.lblAngularVelocity.setToolTipText(MessageFormat.format(Messages.getString("panel.body.velocity.angular.tooltip"), Messages.getString("unit.velocity.angular")));
+		this.txtAngularVelocity = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.body.velocity.angular.format")));
 		this.txtAngularVelocity.setValue(Math.toDegrees(angularVelocity));
 		this.txtAngularVelocity.setColumns(7);
 		this.txtAngularVelocity.setMaximumSize(this.txtAngularVelocity.getPreferredSize());
@@ -506,36 +506,36 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		});
 		
 		// force and torque
-		JLabel lblForceX = new JLabel(Resources.getString("x"));
-		JLabel lblForceY = new JLabel(Resources.getString("x"));
-		this.lblForce = new JLabel(Resources.getString("panel.body.force"), Icons.INFO, JLabel.LEFT);
-		this.lblForce.setToolTipText(Resources.getString("panel.body.force.tooltip"));
+		JLabel lblForceX = new JLabel(Messages.getString("x"));
+		JLabel lblForceY = new JLabel(Messages.getString("x"));
+		this.lblForce = new JLabel(Messages.getString("panel.body.force"), Icons.INFO, JLabel.LEFT);
+		this.lblForce.setToolTipText(Messages.getString("panel.body.force.tooltip"));
 		
-		this.txtForceX = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.body.force.format")));
+		this.txtForceX = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.body.force.format")));
 		this.txtForceX.setValue(force.x);
 		this.txtForceX.setColumns(7);
 		this.txtForceX.setMaximumSize(this.txtForceX.getPreferredSize());
 		this.txtForceX.setEditable(false);
 		
-		this.txtForceY = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.body.force.format")));
+		this.txtForceY = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.body.force.format")));
 		this.txtForceY.setValue(force.y);
 		this.txtForceY.setColumns(7);
 		this.txtForceY.setMaximumSize(this.txtForceY.getPreferredSize());
 		this.txtForceY.setEditable(false);
 		
-		this.lblTorque = new JLabel(Resources.getString("panel.body.torque"), Icons.INFO, JLabel.LEFT);
-		this.lblTorque.setToolTipText(Resources.getString("panel.body.torque.tooltip"));
+		this.lblTorque = new JLabel(Messages.getString("panel.body.torque"), Icons.INFO, JLabel.LEFT);
+		this.lblTorque.setToolTipText(Messages.getString("panel.body.torque.tooltip"));
 		
-		this.txtTorque = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.body.torque.format")));
+		this.txtTorque = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.body.torque.format")));
 		this.txtTorque.setValue(torque);
 		this.txtTorque.setColumns(7);
 		this.txtTorque.setMaximumSize(this.txtTorque.getPreferredSize());
 		this.txtTorque.setEditable(false);
 		
 		// gravity scale
-		this.lblGravityScale = new JLabel(Resources.getString("panel.body.gravityScale"), Icons.INFO, JLabel.LEFT);
-		this.lblGravityScale.setToolTipText(Resources.getString("panel.body.gravityScale.tooltip"));
-		this.sldGravityScale = new JSliderWithTextField(0, 1000, (int)(gravityScale * 100.0), 0.01, new DecimalFormat(Resources.getString("panel.body.gravityScale.format")));
+		this.lblGravityScale = new JLabel(Messages.getString("panel.body.gravityScale"), Icons.INFO, JLabel.LEFT);
+		this.lblGravityScale.setToolTipText(Messages.getString("panel.body.gravityScale.tooltip"));
+		this.sldGravityScale = new JSliderWithTextField(0, 1000, (int)(gravityScale * 100.0), 0.01, new DecimalFormat(Messages.getString("panel.body.gravityScale.format")));
 		this.sldGravityScale.setColumns(4);
 		this.sldGravityScale.addChangeListener(new ChangeListener() {
 			@Override
@@ -547,10 +547,10 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		});
 		
 		// initial state (Active/asleep)
-		this.lblState = new JLabel(Resources.getString("panel.body.state"), Icons.INFO, JLabel.LEFT);
-		this.lblState.setToolTipText(Resources.getString("panel.body.state.tooltip"));
-		this.chkInactive = new JCheckBox(Resources.getString("panel.body.state.inactive"));
-		this.chkAsleep = new JCheckBox(Resources.getString("panel.body.state.asleep"));
+		this.lblState = new JLabel(Messages.getString("panel.body.state"), Icons.INFO, JLabel.LEFT);
+		this.lblState.setToolTipText(Messages.getString("panel.body.state.tooltip"));
+		this.chkInactive = new JCheckBox(Messages.getString("panel.body.state.inactive"));
+		this.chkAsleep = new JCheckBox(Messages.getString("panel.body.state.asleep"));
 		this.chkInactive.setSelected(inactive);
 		this.chkAsleep.setSelected(asleep);
 		
@@ -579,8 +579,8 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		});
 		
 		// allow auto sleep
-		this.lblAllowAutoSleep = new JLabel(Resources.getString("panel.body.autoSleeping"), Icons.INFO, JLabel.LEFT);
-		this.lblAllowAutoSleep.setToolTipText(Resources.getString("panel.body.autoSleeping.tooltip"));
+		this.lblAllowAutoSleep = new JLabel(Messages.getString("panel.body.autoSleeping"), Icons.INFO, JLabel.LEFT);
+		this.lblAllowAutoSleep.setToolTipText(Messages.getString("panel.body.autoSleeping.tooltip"));
 		this.chkAllowAutoSleep = new JCheckBox();
 		this.chkAllowAutoSleep.setSelected(autoSleep);
 		
@@ -597,8 +597,8 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		});
 		
 		// is bullet
-		this.lblBullet = new JLabel(Resources.getString("panel.body.bullet"), Icons.INFO, JLabel.LEFT);
-		this.lblBullet.setToolTipText(Resources.getString("panel.body.bullet.tooltip"));
+		this.lblBullet = new JLabel(Messages.getString("panel.body.bullet"), Icons.INFO, JLabel.LEFT);
+		this.lblBullet.setToolTipText(Messages.getString("panel.body.bullet.tooltip"));
 		this.chkBullet = new JCheckBox();
 		this.chkBullet.setSelected(bullet);
 		
@@ -618,7 +618,7 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		
 		// setup the general section
 		JPanel pnlGeneral = new JPanel();
-		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.section.general"));
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Messages.getString("panel.section.general"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlGeneral.setBorder(border);
 		
@@ -655,7 +655,7 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		
 		// setup the mass section
 		JPanel pnlMass = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.body.section.mass"));
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Messages.getString("panel.body.section.mass"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlMass.setBorder(border);
 		
@@ -703,7 +703,7 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		
 		// setup the state section
 		JPanel pnlProperties = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.section.properties"));
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Messages.getString("panel.section.properties"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlProperties.setBorder(border);
 		
@@ -776,7 +776,7 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		
 		// setup the flags section
 		JPanel pnlFlags = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.section.flags"));
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Messages.getString("panel.section.flags"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlFlags.setBorder(border);
 		
@@ -874,16 +874,16 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 	public void showInvalidInputMessage(Window owner) {}
 	
 	/** The normal mass type option */
-	private static final MassTypeItem NORMAL = new MassTypeItem(Resources.getString("mass.type.normal"), Mass.Type.NORMAL);
+	private static final MassTypeItem NORMAL = new MassTypeItem(Messages.getString("mass.type.normal"), Mass.Type.NORMAL);
 	
 	/** The infinite mass type option */
-	private static final MassTypeItem INFINITE = new MassTypeItem(Resources.getString("mass.type.infinite"), Mass.Type.INFINITE);
+	private static final MassTypeItem INFINITE = new MassTypeItem(Messages.getString("mass.type.infinite"), Mass.Type.INFINITE);
 	
 	/** The fixed linear velocity option */
-	private static final MassTypeItem FIXED_LINEAR_VELOCITY = new MassTypeItem(Resources.getString("mass.type.fixedLinearVelocity"), Mass.Type.FIXED_LINEAR_VELOCITY);
+	private static final MassTypeItem FIXED_LINEAR_VELOCITY = new MassTypeItem(Messages.getString("mass.type.fixedLinearVelocity"), Mass.Type.FIXED_LINEAR_VELOCITY);
 	
 	/** The fixed angular velocity option */
-	private static final MassTypeItem FIXED_ANGULAR_VELOCITY = new MassTypeItem(Resources.getString("mass.type.fixedAngularVelocity"), Mass.Type.FIXED_ANGULAR_VELOCITY);
+	private static final MassTypeItem FIXED_ANGULAR_VELOCITY = new MassTypeItem(Messages.getString("mass.type.fixedAngularVelocity"), Mass.Type.FIXED_ANGULAR_VELOCITY);
 	
 	/** The list of mass type items for the mass type drop down */
 	private static final MassTypeItem[] ITEMS = new MassTypeItem[] {

@@ -32,7 +32,7 @@ import org.dyn4j.geometry.Vector2;
  * Represents a solved contact point.
  * @author William Bittle
  * @see ContactPoint
- * @version 2.0.0
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class SolvedContactPoint extends ContactPoint {
@@ -72,17 +72,17 @@ public class SolvedContactPoint extends ContactPoint {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("SOLVED_CONTACT_POINT[")
-		.append(this.body1).append("|")
-		.append(this.fixture1).append("|")
-		.append(this.body2).append("|")
-		.append(this.fixture2).append("|")
-		.append(this.enabled).append("|")
-		.append(this.point).append("|")
-		.append(this.normal).append("|")
-		.append(this.depth).append("|")
-		.append(this.normalImpulse).append("|")
-		.append(this.tangentialImpulse).append("]");
+		sb.append("SolvedContactPoint[Body1=").append(this.body1)
+		.append("|Fixture1=").append(this.fixture1)
+		.append("|Body2=").append(this.body2)
+		.append("|Fixture2=").append(this.fixture2)
+		.append("|IsEnabled=").append(this.enabled)
+		.append("|Point=").append(this.point)
+		.append("|Normal=").append(this.normal)
+		.append("|Depth=").append(this.depth)
+		.append("|NormalImpulse=").append(this.normalImpulse)
+		.append("|TangentImpulse=").append(this.tangentialImpulse)
+		.append("]");
 		return sb.toString();
 	}
 	

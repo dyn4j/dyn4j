@@ -43,7 +43,7 @@ import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.geometry.hull.HullGenerator;
-import org.dyn4j.sandbox.Resources;
+import org.dyn4j.sandbox.resources.Messages;
 
 /**
  * Panel used to create a polygon using arbitrary points.
@@ -239,7 +239,7 @@ public class ArbitraryConvexHullPolygonPanel extends ConvexHullShapePanel implem
 		try {
 			this.getShape();
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(owner, e.getMessage(), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, e.getMessage(), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 	

@@ -24,10 +24,12 @@
  */
 package org.dyn4j.dynamics;
 
+import org.dyn4j.resources.Messages;
+
 /**
  * Represents a torque about the z-axis.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class Torque {
@@ -56,7 +58,7 @@ public class Torque {
 	 * @throws NullPointerException if torque is null
 	 */
 	public Torque(Torque torque) {
-		if (torque == null) throw new NullPointerException("Cannot copy a null torque.");
+		if (torque == null) throw new NullPointerException(Messages.getString("dynamics.torque.nullTorque"));
 		this.torque = torque.torque;
 	}
 	
@@ -74,7 +76,7 @@ public class Torque {
 	 * @throws NullPointerException if torque is null
 	 */
 	public void set(Torque torque) {
-		if (torque == null) throw new NullPointerException("Cannot set this torque to a null torque.");
+		if (torque == null) throw new NullPointerException(Messages.getString("dynamics.torque.setNullTorque"));
 		this.torque = torque.torque;
 	}
 	
@@ -105,9 +107,7 @@ public class Torque {
 	 */
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("TORQUE[").append(this.torque).append("]");
-		return sb.toString();
+		return String.valueOf(this.torque);
 	}
 	
 	/**

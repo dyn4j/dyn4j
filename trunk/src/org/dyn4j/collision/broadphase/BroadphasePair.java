@@ -32,7 +32,7 @@ import org.dyn4j.geometry.Convex;
  * colliding in the {@link BroadphaseDetector}.
  * @author William Bittle
  * @param <E> the object type; intended to be of type {@link Collidable} or {@link Convex}
- * @version 3.0.0
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class BroadphasePair<E> {
@@ -63,7 +63,9 @@ public class BroadphasePair<E> {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("BROADPHASE_PAIR[").append(a).append("|").append(b).append("]");
+		sb.append("BroadphasePair[A=").append(this.a)
+		.append("|B=").append(this.b)
+		.append("]");
 		return sb.toString();
 	}
 }

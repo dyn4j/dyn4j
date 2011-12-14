@@ -32,6 +32,7 @@ import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Matrix22;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * Represents a friction joint.
@@ -42,13 +43,10 @@ import org.dyn4j.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class FrictionJoint extends Joint {
-	/** The joint type */
-	public static final Joint.Type TYPE = new Joint.Type("Friction");
-	
 	/** The local anchor point on the first {@link Body} */
 	protected Vector2 localAnchor1;
 	
@@ -85,9 +83,9 @@ public class FrictionJoint extends Joint {
 		// default no collision allowed
 		super(body1, body2, false);
 		// verify the bodies are not the same instance
-		if (body1 == body2) throw new IllegalArgumentException("Cannot create a friction joint between the same body instance.");
+		if (body1 == body2) throw new IllegalArgumentException(Messages.getString("dynamics.joint.sameBody"));
 		// verify the anchor point is non null
-		if (anchor == null) throw new NullPointerException("The anchor point cannot be null.");
+		if (anchor == null) throw new NullPointerException(Messages.getString("dynamics.joint.nullAnchor"));
 		// put the anchor in local space
 		this.localAnchor1 = body1.getLocalPoint(anchor);
 		this.localAnchor2 = body2.getLocalPoint(anchor);
@@ -103,14 +101,13 @@ public class FrictionJoint extends Joint {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("FRICTION_JOINT[")
-		.append(super.toString()).append("|")
-		.append(this.localAnchor1).append("|")
-		.append(this.localAnchor2).append("|")
-		.append(this.maximumForce).append("|")
-		.append(this.maximumTorque).append("|")
-		.append(this.linearImpulse).append("|")
-		.append(this.angularImpulse).append("]");
+		sb.append("FrictionJoint[").append(super.toString())
+		.append("|LocalAnchor1=").append(this.localAnchor1)
+		.append("|LocalAnchor2=").append(this.localAnchor2)
+		.append("|WorldAnchor=").append(this.getAnchor1())
+		.append("|MaximumForce=").append(this.maximumForce)
+		.append("|MaximumTorque=").append(this.maximumTorque)
+		.append("]");
 		return sb.toString();
 	}
 	
@@ -217,14 +214,6 @@ public class FrictionJoint extends Joint {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getType()
-	 */
-	@Override
-	public Type getType() {
-		return FrictionJoint.TYPE;
-	}
-	
-	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.joint.Joint#getAnchor1()
 	 */
 	@Override
@@ -271,7 +260,7 @@ public class FrictionJoint extends Joint {
 	 */
 	public void setMaximumTorque(double maximumTorque) {
 		// make sure its greater than or equal to zero
-		if (maximumTorque < 0.0) throw new IllegalArgumentException("The maximum torque must be greater than or equal to zero.");
+		if (maximumTorque < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.friction.invalidMaximumTorque"));
 		// set the max
 		this.maximumTorque = maximumTorque;
 	}
@@ -291,7 +280,7 @@ public class FrictionJoint extends Joint {
 	 */
 	public void setMaximumForce(double maximumForce) {
 		// make sure its greater than or equal to zero
-		if (maximumForce < 0.0) throw new IllegalArgumentException("The maximum force must be greater than or equal to zero.");
+		if (maximumForce < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.friction.invalidMaximumForce"));
 		// set the max
 		this.maximumForce = maximumForce;
 	}
