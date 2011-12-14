@@ -31,7 +31,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import org.dyn4j.sandbox.Resources;
+import org.dyn4j.sandbox.resources.Messages;
 import org.dyn4j.sandbox.utilities.SystemUtilities;
 
 /**
@@ -48,12 +48,12 @@ public class SystemPanel extends JPanel {
 	 * Default constructor
 	 */
 	public  SystemPanel() {
-		JLabel lblJavaVersion = new JLabel(Resources.getString("panel.system.java"));
-		JLabel lblJavaVendor = new JLabel(Resources.getString("panel.system.vendor"));
-		JLabel lblOperatingSystem = new JLabel(Resources.getString("panel.system.os"));
-		JLabel lblArchitecture = new JLabel(Resources.getString("panel.system.architecture"));
-		JLabel lblNumberOfCpus = new JLabel(Resources.getString("panel.system.cpus"));
-		JLabel lblLocale = new JLabel(Resources.getString("panel.system.locale"));
+		JLabel lblJavaVersion = new JLabel(Messages.getString("panel.system.java"));
+		JLabel lblJavaVendor = new JLabel(Messages.getString("panel.system.vendor"));
+		JLabel lblOperatingSystem = new JLabel(Messages.getString("panel.system.os"));
+		JLabel lblArchitecture = new JLabel(Messages.getString("panel.system.architecture"));
+		JLabel lblNumberOfCpus = new JLabel(Messages.getString("panel.system.cpus"));
+		JLabel lblLocale = new JLabel(Messages.getString("panel.system.locale"));
 		
 		JTextField valJavaVersion = new JTextField(SystemUtilities.getJavaVersion());
 		JTextField valJavaVendor = new JTextField(SystemUtilities.getJavaVendor());

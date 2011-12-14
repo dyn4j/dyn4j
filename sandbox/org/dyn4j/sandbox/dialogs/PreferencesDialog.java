@@ -36,10 +36,10 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 
-import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.controls.BottomButtonPanel;
+import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.panels.PreferencesPanel;
-import org.dyn4j.sandbox.utilities.Icons;
+import org.dyn4j.sandbox.resources.Messages;
 
 /**
  * Dialog used to configure the application preferences.
@@ -62,15 +62,15 @@ public class PreferencesDialog extends JDialog implements ActionListener {
 	 * @param owner the dialog owner
 	 */
 	private PreferencesDialog(Window owner) {
-		super(owner, Resources.getString("dialog.preferences.title"), ModalityType.APPLICATION_MODAL);
+		super(owner, Messages.getString("dialog.preferences.title"), ModalityType.APPLICATION_MODAL);
 		
 		this.setIconImage(Icons.PREFERENCES.getImage());
 		
 		this.pnlPreferences = new PreferencesPanel();
 		this.pnlPreferences.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
 		
-		JButton btnCancel = new JButton(Resources.getString("button.cancel"));
-		JButton btnApply = new JButton(Resources.getString("button.apply"));
+		JButton btnCancel = new JButton(Messages.getString("button.cancel"));
+		JButton btnApply = new JButton(Messages.getString("button.apply"));
 		btnCancel.setActionCommand("cancel");
 		btnApply.setActionCommand("apply");
 		btnCancel.addActionListener(this);

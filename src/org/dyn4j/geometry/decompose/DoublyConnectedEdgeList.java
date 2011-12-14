@@ -33,6 +33,7 @@ import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * Highly specialized DCEL class used to store vertices of a simple polygon and then be used
@@ -59,7 +60,7 @@ public class DoublyConnectedEdgeList {
 	/**
 	 * Represents a node in the Doubly-Connected Edge List.
 	 * @author William Bittle
-	 * @version 2.2.0
+	 * @version 3.0.2
 	 * @since 2.2.0
 	 */
 	public class Vertex {
@@ -74,11 +75,7 @@ public class DoublyConnectedEdgeList {
 		 */
 		@Override
 		public String toString() {
-			StringBuilder sb = new StringBuilder();
-			sb.append("VERTEX[")
-			.append(this.point)
-			.append("]");
-			return sb.toString();
+			return this.point.toString();
 		}
 		
 		/**
@@ -124,7 +121,7 @@ public class DoublyConnectedEdgeList {
 	/**
 	 * Represents a half edge of the Doubly-Connected Edge List.
 	 * @author William Bittle
-	 * @version 2.2.0
+	 * @version 3.0.2
 	 * @since 2.2.0
 	 */
 	public class HalfEdge {
@@ -146,9 +143,8 @@ public class DoublyConnectedEdgeList {
 		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
-			sb.append("HALF_EDGE[")
-			.append(this.origin).append("|")
-			.append(this.next.origin)
+			sb.append("HalfEdge[Origin=").append(this.origin)
+			.append("|Next=").append(this.next.origin)
 			.append("]");
 			return sb.toString();
 		}
@@ -211,7 +207,7 @@ public class DoublyConnectedEdgeList {
 	/**
 	 * Represents a face in the Doubly-Connected Edge List.
 	 * @author William Bittle
-	 * @version 2.2.0
+	 * @version 3.0.2
 	 * @since 2.2.0
 	 */
 	public class Face {
@@ -224,7 +220,7 @@ public class DoublyConnectedEdgeList {
 		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
-			sb.append("FACE[")
+			sb.append("Face[Edge=")
 			.append(this.edge)
 			.append("]");
 			return sb.toString();
@@ -560,7 +556,7 @@ public class DoublyConnectedEdgeList {
 			}
 			
 			if (vertices.length < 3) {
-				throw new IllegalArgumentException("A simple polygon cannot have crossing edges.");
+				throw new IllegalArgumentException(Messages.getString("geometry.decompose.crossingEdges"));
 			}
 			
 			Polygon p = Geometry.createPolygon(vertices);

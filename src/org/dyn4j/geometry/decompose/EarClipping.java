@@ -29,6 +29,7 @@ import java.util.List;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * Implementation of the Ear Clipping algorithm.
@@ -50,14 +51,14 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * This algorithm is O(n<sup>2</sup>).
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.0.2
  * @since 2.2.0
  */
 public class EarClipping implements Decomposer {
 	/**
 	 * Node class for a vertex within the simple polygon.
 	 * @author William Bittle
-	 * @version 2.2.0
+	 * @version 3.0.2
 	 * @since 2.2.0
 	 */
 	public class Vertex {
@@ -90,10 +91,10 @@ public class EarClipping implements Decomposer {
 		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
-			sb.append("VERTEX[")
-			.append(point).append("|")
-			.append(reflex).append("|")
-			.append(ear).append("]");
+			sb.append("EarClipping.Vertex[Point=").append(this.point)
+			.append("|Reflex=").append(this.reflex)
+			.append("|IsEar=").append(this.ear)
+			.append("]");
 			return sb.toString();
 		}
 	}
@@ -104,11 +105,11 @@ public class EarClipping implements Decomposer {
 	@Override
 	public List<Convex> decompose(Vector2... points) {
 		// check for null array
-		if (points == null) throw new NullPointerException("Cannot decompose a null array of points.");
+		if (points == null) throw new NullPointerException(Messages.getString("geometry.decompose.nullArray"));
 		// get the number of points
 		int size = points.length;
 		// check the size
-		if (size < 4) throw new IllegalArgumentException("The polygon must have 4 or more vertices.");
+		if (size < 4) throw new IllegalArgumentException(Messages.getString("geometry.decompose.invalidSize"));
 		
 		// get the winding order
 		double winding = Geometry.getWinding(points);
@@ -136,7 +137,7 @@ public class EarClipping implements Decomposer {
 			Vector2 v2 = p.to(p1);
 			// check for coincident vertices
 			if (v2.isZero()) {
-				throw new IllegalArgumentException("The polygon cannot have coincident vertices.");
+				throw new IllegalArgumentException(Messages.getString("geometry.decompose.coincident"));
 			}
 			// check the angle between the two vectors
 			if (v1.cross(v2) > 0.0) {

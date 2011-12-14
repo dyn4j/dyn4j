@@ -25,17 +25,15 @@
 package org.dyn4j.geometry;
 
 import org.dyn4j.Epsilon;
+import org.dyn4j.resources.Messages;
 
 /**
  * Represents a line {@link Segment}.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class Segment extends Wound implements Convex, Shape, Transformable {
-	/** The segment {@link Shape.Type} */
-	public static final Shape.Type TYPE = new Shape.Type("Segment");
-	
 	/** The segment length */
 	protected double length;
 	
@@ -49,10 +47,11 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	public Segment(Vector2 point1, Vector2 point2) {
 		super();
 		// make sure either point is not null
-		if (point1 == null || point2 == null) throw new NullPointerException("Both point1 and point2 cannot be null.");
+		if (point1 == null) throw new NullPointerException(Messages.getString("geometry.segment.nullPoint1"));
+		if (point2 == null) throw new NullPointerException(Messages.getString("geometry.segment.nullPoint2"));
 		// make sure the two points are not coincident
 		if (point1.equals(point2)) {
-			throw new IllegalArgumentException("A line segment must have two different vertices.");
+			throw new IllegalArgumentException(Messages.getString("geometry.segment.samePoint"));
 		}
 		// assign the verices
 		this.vertices = new Vector2[2];
@@ -73,20 +72,15 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Shape#getType()
-	 */
-	@Override
-	public Type getType() {
-		return Segment.TYPE;
-	}
-	
-	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Wound#toString()
 	 */
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("SEGMENT[").append(super.toString()).append("]");
+		sb.append("Segment[").append(super.toString())
+		.append("|Length=").append(this.length)
+		.append("|UserData=").append(this.userData)
+		.append("]");
 		return sb.toString();
 	}
 	

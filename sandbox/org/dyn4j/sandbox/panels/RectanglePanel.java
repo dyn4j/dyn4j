@@ -38,9 +38,9 @@ import javax.swing.JOptionPane;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Rectangle;
-import org.dyn4j.sandbox.Resources;
+import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
-import org.dyn4j.sandbox.utilities.Icons;
+import org.dyn4j.sandbox.resources.Messages;
 
 /**
  * Panel used to create a rectangle shape.
@@ -93,12 +93,12 @@ public class RectanglePanel extends ConvexShapePanel implements InputPanel {
 			this.height = rectangle.getHeight();
 		}
 		
-		JLabel lblWidth = new JLabel(Resources.getString("panel.rectangle.width"), Icons.INFO, JLabel.LEFT);
-		lblWidth.setToolTipText(Resources.getString("panel.rectangle.width.tooltip"));
-		JLabel lblHeight = new JLabel(Resources.getString("panel.rectangle.height"), Icons.INFO, JLabel.LEFT);
-		lblHeight.setToolTipText(Resources.getString("panel.rectangle.height.tooltip"));
-		JFormattedTextField txtWidth = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.rectangle.width.format")));
-		JFormattedTextField txtHeight = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.rectangle.height.format")));
+		JLabel lblWidth = new JLabel(Messages.getString("panel.rectangle.width"), Icons.INFO, JLabel.LEFT);
+		lblWidth.setToolTipText(Messages.getString("panel.rectangle.width.tooltip"));
+		JLabel lblHeight = new JLabel(Messages.getString("panel.rectangle.height"), Icons.INFO, JLabel.LEFT);
+		lblHeight.setToolTipText(Messages.getString("panel.rectangle.height.tooltip"));
+		JFormattedTextField txtWidth = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.rectangle.width.format")));
+		JFormattedTextField txtHeight = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.rectangle.height.format")));
 		txtWidth.setValue(this.width);
 		txtHeight.setValue(this.height);
 		
@@ -131,8 +131,8 @@ public class RectanglePanel extends ConvexShapePanel implements InputPanel {
 			}
 		});
 		
-		JLabel lblPreview = new JLabel(Resources.getString("panel.preview"), Icons.INFO, JLabel.LEFT);
-		lblPreview.setToolTipText(Resources.getString("panel.preview.tooltip"));
+		JLabel lblPreview = new JLabel(Messages.getString("panel.preview"), Icons.INFO, JLabel.LEFT);
+		lblPreview.setToolTipText(Messages.getString("panel.preview.tooltip"));
 		this.pnlPreview = new PreviewPanel(new Dimension(250, 225), Geometry.createRectangle(this.width, this.height));
 		
 		layout.setAutoCreateContainerGaps(true);
@@ -191,7 +191,7 @@ public class RectanglePanel extends ConvexShapePanel implements InputPanel {
 	@Override
 	public void showInvalidInputMessage(Window owner) {
 		if (!this.isValidInput()) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.rectangle.invalid"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.rectangle.invalid"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

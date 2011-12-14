@@ -34,6 +34,7 @@ import org.dyn4j.geometry.Matrix33;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.geometry.Vector3;
+import org.dyn4j.resources.Messages;
 
 /**
  * Represents a prismatic joint.
@@ -43,13 +44,10 @@ import org.dyn4j.geometry.Vector3;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class PrismaticJoint extends Joint {
-	/** The joint type */
-	public static final Joint.Type TYPE = new Joint.Type("Prismatic");
-	
 	/** The local anchor point on the first {@link Body} */
 	protected Vector2 localAnchor1;
 	
@@ -130,11 +128,11 @@ public class PrismaticJoint extends Joint {
 	public PrismaticJoint(Body body1, Body body2, Vector2 anchor, Vector2 axis) {
 		super(body1, body2, false);
 		// verify the bodies are not the same instance
-		if (body1 == body2) throw new IllegalArgumentException("Cannot create a prismatic joint between the same body instance.");
+		if (body1 == body2) throw new IllegalArgumentException(Messages.getString("dynamics.joint.sameBody"));
 		// check for a null anchor
-		if (anchor == null) throw new NullPointerException("The anchor point cannot be null.");
+		if (anchor == null) throw new NullPointerException(Messages.getString("dynamics.joint.nullAnchor"));
 		// check for a null axis
-		if (axis == null) throw new NullPointerException("The axis cannot be null.");
+		if (axis == null) throw new NullPointerException(Messages.getString("dynamics.joint.nullAxis"));
 		// set the anchor point
 		this.localAnchor1 = body1.getLocalPoint(anchor);
 		this.localAnchor2 = body2.getLocalPoint(anchor);
@@ -160,22 +158,21 @@ public class PrismaticJoint extends Joint {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("PRISMATIC_JOINT[")
-		.append(super.toString()).append("|")
-		.append(this.localAnchor1).append("|")
-		.append(this.localAnchor2).append("|")
-		.append(this.xAxis).append("|")
-		.append(this.yAxis).append("|")
-		.append(this.motorEnabled).append("|")
-		.append(this.motorSpeed).append("|")
-		.append(this.maximumMotorForce).append("|")
-		.append(this.referenceAngle).append("|")
-		.append(this.limitEnabled).append("|")
-		.append(this.lowerLimit).append("|")
-		.append(this.upperLimit).append("|")
-		.append(this.limitState).append("|")
-		.append(this.impulse).append("|")
-		.append(this.motorImpulse).append("]");
+		sb.append("PrismaticJoint[").append(super.toString())
+		.append("|LocalAnchor1=").append(this.localAnchor1)
+		.append("|LocalAnchor2=").append(this.localAnchor2)
+		.append("|WorldAnchor=").append(this.getAnchor1())
+		.append("|XAxis=").append(this.xAxis)
+		.append("|YAxis=").append(this.yAxis)
+		.append("|Axis=").append(this.getAxis())
+		.append("|IsMotorEnabled=").append(this.motorEnabled)
+		.append("|MotorSpeed=").append(this.motorSpeed)
+		.append("|MaximumMotorForce=").append(this.maximumMotorForce)
+		.append("|ReferenceAngle=").append(this.referenceAngle)
+		.append("|IsLimitEnabled=").append(this.limitEnabled)
+		.append("|LowerLimit=").append(this.lowerLimit)
+		.append("|UpperLimit=").append(this.upperLimit)
+		.append("]");
 		return sb.toString();
 	}
 	
@@ -442,7 +439,7 @@ public class PrismaticJoint extends Joint {
 	@Override
 	public boolean solvePositionConstraints() {
 		Settings settings = Settings.getInstance();
-		double maxLinearCorrection = settings.getMaxLinearCorrection();
+		double maxLinearCorrection = settings.getMaximumLinearCorrection();
 		double linearTolerance = settings.getLinearTolerance();
 		double angularTolerance = settings.getAngularTolerance();
 		
@@ -577,14 +574,6 @@ public class PrismaticJoint extends Joint {
 		
 		// return if we corrected the error enough
 		return linearError <= linearTolerance && angularError <= angularTolerance;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getType()
-	 */
-	@Override
-	public Type getType() {
-		return PrismaticJoint.TYPE;
 	}
 	
 	/* (non-Javadoc)
@@ -723,7 +712,7 @@ public class PrismaticJoint extends Joint {
 	 */
 	public void setMaximumMotorForce(double maximumMotorForce) {
 		// make sure its greater than or equal to zero
-		if (maximumMotorForce < 0.0) throw new IllegalArgumentException("The maximum motor force must be greater than or equal to zero.");
+		if (maximumMotorForce < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidMaximumMotorForce"));
 		// set the new value
 		this.maximumMotorForce = maximumMotorForce;
 	}
@@ -772,7 +761,7 @@ public class PrismaticJoint extends Joint {
 	 */
 	public void setLowerLimit(double lowerLimit) {
 		// check for valid value
-		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException("The lower limit cannot be greater than the upper limit.");
+		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLowerLimit"));
 		// make sure the limits are enabled and that the limit has changed
 		if (this.limitEnabled && lowerLimit != this.lowerLimit) {
 			// wake up the joined bodies
@@ -800,7 +789,7 @@ public class PrismaticJoint extends Joint {
 	 */
 	public void setUpperLimit(double upperLimit) {
 		// check for valid value
-		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException("The upper limit cannot be less than the lower limit.");
+		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidUpperLimit"));
 		// make sure the limits are enabled and that the limit has changed
 		if (this.limitEnabled && upperLimit != this.upperLimit) {
 			// wake up the joined bodies
@@ -822,7 +811,7 @@ public class PrismaticJoint extends Joint {
 	 * @throws IllegalArgumentException if lowerLimit is greater than upperLimit
 	 */
 	public void setLimits(double lowerLimit, double upperLimit) {
-		if (lowerLimit > upperLimit) throw new IllegalArgumentException("The lower limit cannot be greater than the upper limit.");
+		if (lowerLimit > upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLimits"));
 		// make sure the limits are enabled and that the limit has changed
 		if (this.limitEnabled) {
 			// wake up the bodies
@@ -846,7 +835,7 @@ public class PrismaticJoint extends Joint {
 	 * @since 2.2.2
 	 */
 	public void setLimitsEnabled(double lowerLimit, double upperLimit) {
-		if (lowerLimit > upperLimit) throw new IllegalArgumentException("The lower limit cannot be greater than the upper limit.");
+		if (lowerLimit > upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLimits"));
 		// wake up the bodies
 		this.body1.setAsleep(false);
 		this.body2.setAsleep(false);

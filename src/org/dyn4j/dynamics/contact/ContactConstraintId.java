@@ -33,7 +33,7 @@ import org.dyn4j.geometry.Shape;
  * Represents and id for a contact constraint between two {@link Convex}
  * {@link Shape}s on two {@link Body}s.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class ContactConstraintId {
@@ -100,11 +100,11 @@ public class ContactConstraintId {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("CONTACT_CONSTRAINT_ID[")
-		.append(this.body1Id).append("|")
-		.append(this.body2Id).append("|")
-		.append(this.fixture1Id).append("|")
-		.append(this.fixture2Id).append("]");
+		sb.append("ContactConstraintId[Body1Id=").append(this.body1Id)
+		.append("|Body2Id=").append(this.body2Id)
+		.append("|Fixture1Id=").append(this.fixture1Id)
+		.append("|Fixture2Id=").append(this.fixture2Id)
+		.append("]");
 		return sb.toString();
 	}
 }

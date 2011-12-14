@@ -34,9 +34,9 @@ import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.controls.JSliderWithTextField;
-import org.dyn4j.sandbox.utilities.Icons;
+import org.dyn4j.sandbox.icons.Icons;
+import org.dyn4j.sandbox.resources.Messages;
 
 /**
  * Customer color editor.
@@ -95,15 +95,15 @@ public class ColorPanel extends JPanel {
 		this.color = initialColor;
 		
 		// setup the labels
-		this.lblRed = new JLabel(Resources.getString("panel.color.red"), Icons.INFO, JLabel.LEFT);
-		this.lblGreen = new JLabel(Resources.getString("panel.color.green"), Icons.INFO, JLabel.LEFT);
-		this.lblBlue = new JLabel(Resources.getString("panel.color.blue"), Icons.INFO, JLabel.LEFT);
-		this.lblAlpha = new JLabel(Resources.getString("panel.color.alpha"), Icons.INFO, JLabel.LEFT);
+		this.lblRed = new JLabel(Messages.getString("panel.color.red"), Icons.INFO, JLabel.LEFT);
+		this.lblGreen = new JLabel(Messages.getString("panel.color.green"), Icons.INFO, JLabel.LEFT);
+		this.lblBlue = new JLabel(Messages.getString("panel.color.blue"), Icons.INFO, JLabel.LEFT);
+		this.lblAlpha = new JLabel(Messages.getString("panel.color.alpha"), Icons.INFO, JLabel.LEFT);
 		
-		this.lblRed.setToolTipText(Resources.getString("panel.color.red.tooltip"));
-		this.lblGreen.setToolTipText(Resources.getString("panel.color.green.tooltip"));
-		this.lblBlue.setToolTipText(Resources.getString("panel.color.blue.tooltip"));
-		this.lblAlpha.setToolTipText(Resources.getString("panel.color.alpha.tooltip"));
+		this.lblRed.setToolTipText(Messages.getString("panel.color.red.tooltip"));
+		this.lblGreen.setToolTipText(Messages.getString("panel.color.green.tooltip"));
+		this.lblBlue.setToolTipText(Messages.getString("panel.color.blue.tooltip"));
+		this.lblAlpha.setToolTipText(Messages.getString("panel.color.alpha.tooltip"));
 		
 		this.lblAlpha.setVisible(showAlpha);
 		

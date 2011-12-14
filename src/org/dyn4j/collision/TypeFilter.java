@@ -114,7 +114,7 @@ public abstract class TypeFilter implements Filter {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("TYPE_FILTER[").append(this.getClass().getName()).append("]");
+		sb.append("TypeFilter[ClassName=").append(this.getClass().getName()).append("]");
 		return sb.toString();
 	}
 }

@@ -41,7 +41,6 @@ import org.dyn4j.dynamics.contact.ContactAdapter;
 import org.dyn4j.dynamics.contact.ContactListener;
 import org.dyn4j.dynamics.contact.ContactManager;
 import org.dyn4j.dynamics.contact.ContactPoint;
-import org.dyn4j.dynamics.contact.TimeOfImpactSolver;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.Convex;
@@ -759,27 +758,6 @@ public class WorldTest {
 	public void setNullCoefficientMixer() {
 		World w = new World();
 		w.setCoefficientMixer(null);
-	}
-	
-	/**
-	 * Tests the set time of impact solver method.
-	 */
-	@Test
-	public void setTimeOfImpactSolver() {
-		World w = new World();
-		TimeOfImpactSolver tois = new TimeOfImpactSolver();
-		w.setTimeOfImpactSolver(tois);
-		
-		TestCase.assertSame(tois, w.getTimeOfImpactSolver());
-	}
-	
-	/**
-	 * Tests the set time of impact solver method.
-	 */
-	@Test(expected = NullPointerException.class)
-	public void setNullTimeOfImpactSolver() {
-		World w = new World();
-		w.setTimeOfImpactSolver(null);
 	}
 	
 	/**

@@ -56,7 +56,7 @@ import com.jogamp.opengl.util.Animator;
  * <p>
  * This class can be used as a starting point for projects.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.2
  * @since 3.0.0
  */
 public class ExampleJOGL extends JFrame implements GLEventListener {
@@ -72,7 +72,7 @@ public class ExampleJOGL extends JFrame implements GLEventListener {
 	/**
 	 * Custom Body class to add drawing functionality.
 	 * @author William Bittle
-	 * @version 3.0.0
+	 * @version 3.0.2
 	 * @since 3.0.0
 	 */
 	public static class GameObject extends Body {
@@ -110,7 +110,7 @@ public class ExampleJOGL extends JFrame implements GLEventListener {
 				// get the shape on the fixture
 				Convex convex = fixture.getShape();
 				// check the shape type
-				if (convex.isType(Polygon.TYPE)) {
+				if (convex instanceof Polygon) {
 					// since Triangle, Rectangle, and Polygon are all of
 					// type Polygon in addition to their main type
 					Polygon p = (Polygon) convex;
@@ -135,7 +135,7 @@ public class ExampleJOGL extends JFrame implements GLEventListener {
 					}
 					gl.glEnd();
 				}
-				// circles you have do something a little more work and im lazy
+				// circles you have do a little more work and im lazy
 				// in this example; see the GLHelper class in the TestBed
 			}
 			

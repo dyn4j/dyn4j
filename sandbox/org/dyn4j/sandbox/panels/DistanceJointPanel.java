@@ -47,10 +47,10 @@ import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
-import org.dyn4j.sandbox.Resources;
+import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.resources.Messages;
 import org.dyn4j.sandbox.utilities.ControlUtilities;
-import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to create or edit an distance joint.
@@ -163,83 +163,78 @@ public class DistanceJointPanel extends JointPanel implements InputPanel, Action
 		this.txtName.setColumns(15);
 		this.chkCollision.setSelected(collision);
 		
-		this.lblBody1 = new JLabel(Resources.getString("panel.joint.body1"), Icons.INFO, JLabel.LEFT);
-		this.lblBody2 = new JLabel(Resources.getString("panel.joint.body2"), Icons.INFO, JLabel.LEFT);
-		this.lblBody1.setToolTipText(Resources.getString("panel.joint.body1.tooltip"));
-		this.lblBody2.setToolTipText(Resources.getString("panel.joint.body2.tooltip"));
+		this.lblBody1 = new JLabel(Messages.getString("panel.joint.body1"), Icons.INFO, JLabel.LEFT);
+		this.lblBody2 = new JLabel(Messages.getString("panel.joint.body2"), Icons.INFO, JLabel.LEFT);
+		this.lblBody1.setToolTipText(Messages.getString("panel.joint.body1.tooltip"));
+		this.lblBody2.setToolTipText(Messages.getString("panel.joint.body2.tooltip"));
 		
 		this.cmbBody1 = new JComboBox(bodies);
 		this.cmbBody2 = new JComboBox(bodies);
 		
-		this.lblAnchor1 = new JLabel(Resources.getString("panel.joint.anchor1"), Icons.INFO, JLabel.LEFT);
-		this.lblAnchor1.setToolTipText(Resources.getString("panel.joint.anchor1.tooltip"));
+		this.lblAnchor1 = new JLabel(Messages.getString("panel.joint.anchor1"), Icons.INFO, JLabel.LEFT);
+		this.lblAnchor1.setToolTipText(Messages.getString("panel.joint.anchor1.tooltip"));
 		
-		this.lblAnchor2 = new JLabel(Resources.getString("panel.joint.anchor2"), Icons.INFO, JLabel.LEFT);
-		this.lblAnchor2.setToolTipText(Resources.getString("panel.joint.anchor2.tooltip"));
+		this.lblAnchor2 = new JLabel(Messages.getString("panel.joint.anchor2"), Icons.INFO, JLabel.LEFT);
+		this.lblAnchor2.setToolTipText(Messages.getString("panel.joint.anchor2.tooltip"));
 		
-		this.lblX1 = new JLabel(Resources.getString("x"));
-		this.lblX2 = new JLabel(Resources.getString("x"));
-		this.lblY1 = new JLabel(Resources.getString("y"));
-		this.lblY2 = new JLabel(Resources.getString("y"));
+		this.lblX1 = new JLabel(Messages.getString("x"));
+		this.lblX2 = new JLabel(Messages.getString("x"));
+		this.lblY1 = new JLabel(Messages.getString("y"));
+		this.lblY2 = new JLabel(Messages.getString("y"));
 		
-		this.txtX1 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.anchor.format")));
+		this.txtX1 = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.anchor.format")));
 		this.txtX1.addFocusListener(new SelectTextFocusListener(this.txtX1));
-		this.txtX1.addPropertyChangeListener("value", this);
 		this.txtX1.setColumns(7);
 		
-		this.txtX2 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.anchor.format")));
+		this.txtX2 = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.anchor.format")));
 		this.txtX2.addFocusListener(new SelectTextFocusListener(this.txtX2));
-		this.txtX2.addPropertyChangeListener("value", this);
 		this.txtX2.setColumns(7);
 		
-		this.txtY1 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.anchor.format")));
+		this.txtY1 = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.anchor.format")));
 		this.txtY1.addFocusListener(new SelectTextFocusListener(this.txtY1));
-		this.txtY1.addPropertyChangeListener("value", this);
 		this.txtY1.setColumns(7);
 		
-		this.txtY2 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.anchor.format")));
-		this.txtY2.addFocusListener(new SelectTextFocusListener(this.txtY2));
-		this.txtY2.addPropertyChangeListener("value", this);
+		this.txtY2 = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.anchor.format")));
+		this.txtY2.addFocusListener(new SelectTextFocusListener(this.txtY2));		
 		this.txtY2.setColumns(7);
 
-		this.btnUseCenter1 = new JButton(Resources.getString("panel.joint.useCenter"));
-		this.btnUseCenter1.setToolTipText(Resources.getString("panel.joint.useCenter.tooltip1"));
+		this.btnUseCenter1 = new JButton(Messages.getString("panel.joint.useCenter"));
+		this.btnUseCenter1.setToolTipText(Messages.getString("panel.joint.useCenter.tooltip1"));
 		this.btnUseCenter1.setActionCommand("use-com1");
 		this.btnUseCenter1.addActionListener(this);
 		
-		this.btnUseCenter2 = new JButton(Resources.getString("panel.joint.useCenter"));
-		this.btnUseCenter2.setToolTipText(Resources.getString("panel.joint.useCenter.tooltip2"));
+		this.btnUseCenter2 = new JButton(Messages.getString("panel.joint.useCenter"));
+		this.btnUseCenter2.setToolTipText(Messages.getString("panel.joint.useCenter.tooltip2"));
 		this.btnUseCenter2.setActionCommand("use-com2");
 		this.btnUseCenter2.addActionListener(this);
 		
-		this.lblRestDistance = new JLabel(Resources.getString("panel.joint.distance.rest"), Icons.INFO, JLabel.LEFT);
-		this.lblRestDistance.setToolTipText(Resources.getString("panel.joint.distance.rest.tooltip"));
-		this.txtRestDistance = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.distance.rest.format")));
+		this.lblRestDistance = new JLabel(Messages.getString("panel.joint.distance.rest"), Icons.INFO, JLabel.LEFT);
+		this.lblRestDistance.setToolTipText(Messages.getString("panel.joint.distance.rest.tooltip"));
+		this.txtRestDistance = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.distance.rest.format")));
 		this.txtRestDistance.addFocusListener(new SelectTextFocusListener(this.txtRestDistance));
 		this.txtRestDistance.setColumns(8);
 
-		this.tglRestDistance = new JToggleButton(Resources.getString("panel.joint.distance.autoCompute"));
-		this.tglRestDistance.setToolTipText(Resources.getString("panel.joint.distance.autoCompute.tooltip"));
+		this.tglRestDistance = new JToggleButton(Messages.getString("panel.joint.distance.autoCompute"));
+		this.tglRestDistance.setToolTipText(Messages.getString("panel.joint.distance.autoCompute.tooltip"));
+		this.tglRestDistance.setActionCommand("toggle-auto-compute");
+		this.tglRestDistance.setSelected(true);
 		
-		this.btnResetRestDistance = new JButton(Resources.getString("panel.joint.distance.reset"));
-		this.btnResetRestDistance.setToolTipText(Resources.getString("panel.joint.distance.reset.tooltip"));
+		this.btnResetRestDistance = new JButton(Messages.getString("panel.joint.distance.reset"));
+		this.btnResetRestDistance.setToolTipText(Messages.getString("panel.joint.distance.reset.tooltip"));
 		this.btnResetRestDistance.setActionCommand("reset-rest-distance");
 		this.btnResetRestDistance.addActionListener(this);
 		
-		this.lblFrequency = new JLabel(Resources.getString("panel.joint.distance.frequency"), Icons.INFO, JLabel.LEFT);
-		this.lblFrequency.setToolTipText(MessageFormat.format(Resources.getString("panel.joint.distance.frequency.tooltip"), Resources.getString("unit.inverseTime"), Resources.getString("unit.time")));
-		this.txtFrequency = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.distance.frequency.format")));
+		this.lblFrequency = new JLabel(Messages.getString("panel.joint.distance.frequency"), Icons.INFO, JLabel.LEFT);
+		this.lblFrequency.setToolTipText(MessageFormat.format(Messages.getString("panel.joint.distance.frequency.tooltip"), Messages.getString("unit.inverseTime"), Messages.getString("unit.time")));
+		this.txtFrequency = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.distance.frequency.format")));
 		this.txtFrequency.addFocusListener(new SelectTextFocusListener(this.txtFrequency));
 		
-		this.lblRatio = new JLabel(Resources.getString("panel.joint.distance.dampingRatio"), Icons.INFO, JLabel.LEFT);
-		this.lblRatio.setToolTipText(Resources.getString("panel.joint.distance.dampingRatio.tooltip"));
-		this.txtRatio = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.distance.dampingRatio.format")));
+		this.lblRatio = new JLabel(Messages.getString("panel.joint.distance.dampingRatio"), Icons.INFO, JLabel.LEFT);
+		this.lblRatio.setToolTipText(Messages.getString("panel.joint.distance.dampingRatio.tooltip"));
+		this.txtRatio = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.distance.dampingRatio.format")));
 		this.txtRatio.addFocusListener(new SelectTextFocusListener(this.txtRatio));
 		
 		// set defaults
-		
-		// disable the auto calculate while we set defaults
-		this.tglRestDistance.setSelected(false);
 		
 		this.txtX1.setValue(a1.x);
 		this.txtX2.setValue(a2.x);
@@ -253,7 +248,13 @@ public class DistanceJointPanel extends JointPanel implements InputPanel, Action
 		this.cmbBody1.setSelectedItem(b1);
 		this.cmbBody2.setSelectedItem(b2);
 		
-		this.tglRestDistance.setSelected(true);
+		// add listeners after all the values have been set
+		// this will preserve the initial values
+		this.tglRestDistance.addActionListener(this);
+		this.txtX1.addPropertyChangeListener("value", this);
+		this.txtX2.addPropertyChangeListener("value", this);
+		this.txtY1.addPropertyChangeListener("value", this);
+		this.txtY2.addPropertyChangeListener("value", this);
 		
 		// setup edit mode if necessary
 		
@@ -278,7 +279,7 @@ public class DistanceJointPanel extends JointPanel implements InputPanel, Action
 		GroupLayout layout;
 		
 		JPanel pnlGeneral = new JPanel();
-		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.section.general"));
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Messages.getString("panel.section.general"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlGeneral.setBorder(border);
 		
@@ -354,7 +355,7 @@ public class DistanceJointPanel extends JointPanel implements InputPanel, Action
 						.addComponent(this.btnResetRestDistance, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
 		
 		JPanel pnlSpringDamper = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.joint.section.springDamper"));
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Messages.getString("panel.joint.section.springDamper"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlSpringDamper.setBorder(border);
 		
@@ -433,6 +434,10 @@ public class DistanceJointPanel extends JointPanel implements InputPanel, Action
 			}
 		} else if ("reset-rest-distance".equals(e.getActionCommand())) {
 			this.computeRestDistance();
+		} else if ("toggle-auto-compute".equals(e.getActionCommand())) {
+			if (this.tglRestDistance.isSelected()) {
+				this.computeRestDistance();
+			}
 		}
 	}
 	
@@ -531,25 +536,25 @@ public class DistanceJointPanel extends JointPanel implements InputPanel, Action
 	public void showInvalidInputMessage(Window owner) {
 		String name = this.txtName.getText();
 		if (name == null || name.isEmpty()) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.missingName"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.joint.missingName"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// they can't be the same body
 		if (this.cmbBody1.getSelectedItem() == this.cmbBody2.getSelectedItem()) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.sameBody"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.joint.sameBody"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// the rest distance cannot be less than zero
 		if (ControlUtilities.getDoubleValue(this.txtRestDistance) < 0.0) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.distance.negativeDistance"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.joint.distance.negativeDistance"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// check the damping ratio
 		double dr = ControlUtilities.getDoubleValue(this.txtRatio);
 		if (dr < 0.0 || dr > 1.0) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.invalidDampingRatio"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.joint.invalidDampingRatio"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// check the frequency
 		double f = ControlUtilities.getDoubleValue(this.txtFrequency);
 		if (f < 0.0) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.invalidFrequency"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.joint.invalidFrequency"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

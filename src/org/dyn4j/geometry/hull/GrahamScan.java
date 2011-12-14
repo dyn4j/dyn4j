@@ -30,6 +30,7 @@ import java.util.Stack;
 
 import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * Implementation of Graham's Scan convex hull algorithm.
@@ -86,7 +87,7 @@ public class GrahamScan implements HullGenerator {
 	@Override
 	public Vector2[] generate(Vector2... points) {
 		// check for null points array
-		if (points == null) throw new NullPointerException("Cannot generate a convex hull from a null point array.");
+		if (points == null) throw new NullPointerException(Messages.getString("geometry.hull.nullArray"));
 		// get the size
 		int size = points.length;
 		
@@ -98,7 +99,7 @@ public class GrahamScan implements HullGenerator {
 		for (int i = 1; i < size; i++) {
 			Vector2 p = points[i];
 			// make sure the point is not null
-			if (p == null) throw new NullPointerException("The point array cannot contain null points.");
+			if (p == null) throw new NullPointerException(Messages.getString("geometry.hull.nullPoints"));
 			if (p.y < minY.y) {
 				minY = p;
 			} else if (p.y == minY.y) {

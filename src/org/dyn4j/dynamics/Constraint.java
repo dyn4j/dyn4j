@@ -24,10 +24,12 @@
  */
 package org.dyn4j.dynamics;
 
+import org.dyn4j.resources.Messages;
+
 /**
  * Represents some physical constraint between a pair of {@link Body}s.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.0.2
  * @since 1.0.0
  */
 public abstract class Constraint {
@@ -48,7 +50,8 @@ public abstract class Constraint {
 	 */
 	public Constraint(Body body1, Body body2) {
 		// the bodies cannot be null
-		if (body1 == null || body2 == null) throw new NullPointerException("Neither body1 nor body2 can be null.");
+		if (body1 == null) throw new NullPointerException(Messages.getString("dynamics.constraint.nullBody1"));
+		if (body2 == null) throw new NullPointerException(Messages.getString("dynamics.constraint.nullBody2"));
 		this.body1 = body1;
 		this.body2 = body2;
 		this.onIsland = false;
@@ -60,9 +63,9 @@ public abstract class Constraint {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(this.body1).append("|")
-		.append(this.body2).append("|")
-		.append(this.onIsland);
+		sb.append("Body1=").append(this.body1)
+		.append("|Body2=").append(this.body2)
+		.append("|IsOnIsland=").append(this.onIsland);
 		return sb.toString();
 	}
 	
@@ -88,7 +91,7 @@ public abstract class Constraint {
 	 * @throws NullPointerException if body1 is null
 	 */
 	public void setBody1(Body body1) {
-		if (body1 == null) throw new NullPointerException("Body1 cannot be null.");
+		if (body1 == null) throw new NullPointerException(Messages.getString("dynamics.constraint.nullBody1"));
 		this.body1 = body1;
 	}
 	
@@ -98,7 +101,7 @@ public abstract class Constraint {
 	 * @throws NullPointerException if body2 is null
 	 */
 	public void setBody2(Body body2) {
-		if (body2 == null) throw new NullPointerException("Body2 cannot be null.");
+		if (body2 == null) throw new NullPointerException(Messages.getString("dynamics.constraint.nullBody2"));
 		this.body2 = body2;
 	}
 

@@ -42,12 +42,12 @@ import javax.swing.JTabbedPane;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.sandbox.Preferences;
 import org.dyn4j.sandbox.SandboxBody;
-import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.controls.BottomButtonPanel;
+import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.panels.BodyPanel;
 import org.dyn4j.sandbox.panels.TransformPanel;
+import org.dyn4j.sandbox.resources.Messages;
 import org.dyn4j.sandbox.utilities.ColorUtilities;
-import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Dialog to add a new body without any fixtures.
@@ -79,11 +79,11 @@ public class AddBodyDialog extends JDialog implements ActionListener {
 	 * @param owner the dialog owner
 	 */
 	private AddBodyDialog(Window owner) {
-		super(owner, Resources.getString("dialog.body.add.title"), ModalityType.APPLICATION_MODAL);
+		super(owner, Messages.getString("dialog.body.add.title"), ModalityType.APPLICATION_MODAL);
 		
 		this.body = new SandboxBody();
 		this.body.getMass().setType(Mass.Type.NORMAL);
-		this.body.setName(MessageFormat.format(Resources.getString("dialog.body.add.name.default"), N));
+		this.body.setName(MessageFormat.format(Messages.getString("dialog.body.add.name.default"), N));
 		
 		// check if we need to randomize colors
 		if (Preferences.isBodyColorRandom()) {
@@ -99,11 +99,11 @@ public class AddBodyDialog extends JDialog implements ActionListener {
 		this.pnlTransform = new TransformPanel();
 		
 		tabs.setBorder(BorderFactory.createEmptyBorder(7, 0, 0, 0));
-		tabs.addTab(Resources.getString("dialog.body.tab.body"), this.pnlBody);
-		tabs.addTab(Resources.getString("dialog.body.tab.transform"), this.pnlTransform);
+		tabs.addTab(Messages.getString("dialog.body.tab.body"), this.pnlBody);
+		tabs.addTab(Messages.getString("dialog.body.tab.transform"), this.pnlTransform);
 		
-		JButton btnCancel = new JButton(Resources.getString("button.cancel"));
-		JButton btnAdd = new JButton(Resources.getString("button.add"));
+		JButton btnCancel = new JButton(Messages.getString("button.cancel"));
+		JButton btnAdd = new JButton(Messages.getString("button.add"));
 		btnCancel.setActionCommand("cancel");
 		btnAdd.setActionCommand("add");
 		btnCancel.addActionListener(this);

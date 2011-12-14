@@ -38,7 +38,7 @@ import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.geometry.Wound;
-import org.dyn4j.sandbox.Resources;
+import org.dyn4j.sandbox.resources.Messages;
 
 /**
  * Panel used by the shape panels to preview the current shape being created.
@@ -349,6 +349,6 @@ public class PreviewPanel extends JPanel {
 		g2d.scale(1.0, -1.0);
 		
 		g2d.translate(-w/2, -h/2 - TOP);
-		g2d.drawString(MessageFormat.format(Resources.getString("panel.preview.format"), s, Resources.getString("unit.length.singular")), 5, 15);
+		g2d.drawString(MessageFormat.format(Messages.getString("panel.preview.format"), s, Messages.getString("unit.length.singular")), 5, 15);
 	}
 }

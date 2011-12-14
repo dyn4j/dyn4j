@@ -44,11 +44,11 @@ import javax.swing.border.TitledBorder;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.RopeJoint;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.SandboxBody;
+import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.resources.Messages;
 import org.dyn4j.sandbox.utilities.ControlUtilities;
-import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to create or edit an rope joint.
@@ -162,68 +162,68 @@ public class RopeJointPanel extends JointPanel implements InputPanel, ActionList
 		this.txtName.setColumns(15);
 		this.chkCollision.setSelected(collision);
 		
-		this.lblBody1 = new JLabel(Resources.getString("panel.joint.body1"), Icons.INFO, JLabel.LEFT);
-		this.lblBody2 = new JLabel(Resources.getString("panel.joint.body2"), Icons.INFO, JLabel.LEFT);
-		this.lblBody1.setToolTipText(Resources.getString("panel.joint.body1.tooltip"));
-		this.lblBody2.setToolTipText(Resources.getString("panel.joint.body2.tooltip"));
+		this.lblBody1 = new JLabel(Messages.getString("panel.joint.body1"), Icons.INFO, JLabel.LEFT);
+		this.lblBody2 = new JLabel(Messages.getString("panel.joint.body2"), Icons.INFO, JLabel.LEFT);
+		this.lblBody1.setToolTipText(Messages.getString("panel.joint.body1.tooltip"));
+		this.lblBody2.setToolTipText(Messages.getString("panel.joint.body2.tooltip"));
 		
 		this.cmbBody1 = new JComboBox(bodies);
 		this.cmbBody2 = new JComboBox(bodies);
 		
-		this.lblAnchor1 = new JLabel(Resources.getString("panel.joint.anchor1"), Icons.INFO, JLabel.LEFT);
-		this.lblAnchor1.setToolTipText(Resources.getString("panel.joint.anchor1.tooltip"));
+		this.lblAnchor1 = new JLabel(Messages.getString("panel.joint.anchor1"), Icons.INFO, JLabel.LEFT);
+		this.lblAnchor1.setToolTipText(Messages.getString("panel.joint.anchor1.tooltip"));
 		
-		this.lblAnchor2 = new JLabel(Resources.getString("panel.joint.anchor2"), Icons.INFO, JLabel.LEFT);
-		this.lblAnchor2.setToolTipText(Resources.getString("panel.joint.anchor2.tooltip"));
+		this.lblAnchor2 = new JLabel(Messages.getString("panel.joint.anchor2"), Icons.INFO, JLabel.LEFT);
+		this.lblAnchor2.setToolTipText(Messages.getString("panel.joint.anchor2.tooltip"));
 		
-		this.lblX1 = new JLabel(Resources.getString("x"));
-		this.lblX2 = new JLabel(Resources.getString("x"));
-		this.lblY1 = new JLabel(Resources.getString("y"));
-		this.lblY2 = new JLabel(Resources.getString("y"));
+		this.lblX1 = new JLabel(Messages.getString("x"));
+		this.lblX2 = new JLabel(Messages.getString("x"));
+		this.lblY1 = new JLabel(Messages.getString("y"));
+		this.lblY2 = new JLabel(Messages.getString("y"));
 		
-		this.txtX1 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.anchor.format")));
+		this.txtX1 = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.anchor.format")));
 		this.txtX1.addFocusListener(new SelectTextFocusListener(this.txtX1));
 		this.txtX1.setColumns(7);
 		
-		this.txtX2 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.anchor.format")));
+		this.txtX2 = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.anchor.format")));
 		this.txtX2.addFocusListener(new SelectTextFocusListener(this.txtX2));
 		this.txtX2.setColumns(7);
 		
-		this.txtY1 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.anchor.format")));
+		this.txtY1 = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.anchor.format")));
 		this.txtY1.addFocusListener(new SelectTextFocusListener(this.txtY1));
 		this.txtY1.setColumns(7);
 		
-		this.txtY2 = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.anchor.format")));
+		this.txtY2 = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.anchor.format")));
 		this.txtY2.addFocusListener(new SelectTextFocusListener(this.txtY2));
 		this.txtY2.setColumns(7);
 
-		this.btnUseCenter1 = new JButton(Resources.getString("panel.joint.useCenter"));
-		this.btnUseCenter1.setToolTipText(Resources.getString("panel.joint.useCenter.tooltip1"));
+		this.btnUseCenter1 = new JButton(Messages.getString("panel.joint.useCenter"));
+		this.btnUseCenter1.setToolTipText(Messages.getString("panel.joint.useCenter.tooltip1"));
 		this.btnUseCenter1.setActionCommand("use-com1");
 		this.btnUseCenter1.addActionListener(this);
 		
-		this.btnUseCenter2 = new JButton(Resources.getString("panel.joint.useCenter"));
-		this.btnUseCenter2.setToolTipText(Resources.getString("panel.joint.useCenter.tooltip2"));
+		this.btnUseCenter2 = new JButton(Messages.getString("panel.joint.useCenter"));
+		this.btnUseCenter2.setToolTipText(Messages.getString("panel.joint.useCenter.tooltip2"));
 		this.btnUseCenter2.setActionCommand("use-com2");
 		this.btnUseCenter2.addActionListener(this);
 		
-		this.lblLowerLimitEnabled = new JLabel(Resources.getString("panel.joint.rope.lowerLimitEnabled"), Icons.INFO, JLabel.LEFT);
-		this.lblLowerLimitEnabled.setToolTipText(Resources.getString("panel.joint.rope.lowerLimitEnabled.tooltip"));
+		this.lblLowerLimitEnabled = new JLabel(Messages.getString("panel.joint.rope.lowerLimitEnabled"), Icons.INFO, JLabel.LEFT);
+		this.lblLowerLimitEnabled.setToolTipText(Messages.getString("panel.joint.rope.lowerLimitEnabled.tooltip"));
 		this.chkLowerLimitEnabled = new JCheckBox();
 		
-		this.lblLowerLimit = new JLabel(Resources.getString("panel.joint.lowerLimit"), Icons.INFO, JLabel.LEFT);
-		this.lblLowerLimit.setToolTipText(MessageFormat.format(Resources.getString("panel.joint.lowerLimit.tooltip"), Resources.getString("unit.length")));
-		this.txtLowerLimit = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.rope.lowerLimit.format")));
+		this.lblLowerLimit = new JLabel(Messages.getString("panel.joint.lowerLimit"), Icons.INFO, JLabel.LEFT);
+		this.lblLowerLimit.setToolTipText(MessageFormat.format(Messages.getString("panel.joint.lowerLimit.tooltip"), Messages.getString("unit.length")));
+		this.txtLowerLimit = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.rope.lowerLimit.format")));
 		this.txtLowerLimit.addFocusListener(new SelectTextFocusListener(this.txtLowerLimit));
 		this.txtLowerLimit.setColumns(7);
 		
-		this.lblUpperLimitEnabled = new JLabel(Resources.getString("panel.joint.rope.upperLimitEnabled"), Icons.INFO, JLabel.LEFT);
-		this.lblUpperLimitEnabled.setToolTipText(Resources.getString("panel.joint.rope.upperLimitEnabled.tooltip"));
+		this.lblUpperLimitEnabled = new JLabel(Messages.getString("panel.joint.rope.upperLimitEnabled"), Icons.INFO, JLabel.LEFT);
+		this.lblUpperLimitEnabled.setToolTipText(Messages.getString("panel.joint.rope.upperLimitEnabled.tooltip"));
 		this.chkUpperLimitEnabled = new JCheckBox();
 		
-		this.lblUpperLimit = new JLabel(Resources.getString("panel.joint.upperLimit"), Icons.INFO, JLabel.LEFT);
-		this.lblUpperLimit.setToolTipText(MessageFormat.format(Resources.getString("panel.joint.upperLimit.tooltip"), Resources.getString("unit.length")));
-		this.txtUpperLimit = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.joint.rope.upperLimit.format")));
+		this.lblUpperLimit = new JLabel(Messages.getString("panel.joint.upperLimit"), Icons.INFO, JLabel.LEFT);
+		this.lblUpperLimit.setToolTipText(MessageFormat.format(Messages.getString("panel.joint.upperLimit.tooltip"), Messages.getString("unit.length")));
+		this.txtUpperLimit = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.rope.upperLimit.format")));
 		this.txtUpperLimit.addFocusListener(new SelectTextFocusListener(this.txtUpperLimit));
 		this.txtUpperLimit.setColumns(7);
 		
@@ -262,7 +262,7 @@ public class RopeJointPanel extends JointPanel implements InputPanel, ActionList
 		GroupLayout layout;
 		
 		JPanel pnlGeneral = new JPanel();
-		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.section.general"));
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Messages.getString("panel.section.general"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlGeneral.setBorder(border);
 		
@@ -327,7 +327,7 @@ public class RopeJointPanel extends JointPanel implements InputPanel, ActionList
 						.addComponent(this.lblY2)));
 		
 		JPanel pnlLimits = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.joint.section.limits"));
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Messages.getString("panel.joint.section.limits"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlLimits.setBorder(border);
 		
@@ -471,15 +471,15 @@ public class RopeJointPanel extends JointPanel implements InputPanel, ActionList
 	public void showInvalidInputMessage(Window owner) {
 		String name = this.txtName.getText();
 		if (name == null || name.isEmpty()) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.missingName"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.joint.missingName"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// they can't be the same body
 		if (this.cmbBody1.getSelectedItem() == this.cmbBody2.getSelectedItem()) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.sameBody"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.joint.sameBody"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// the limits must be correct
 		if (ControlUtilities.getDoubleValue(this.txtLowerLimit) > ControlUtilities.getDoubleValue(this.txtUpperLimit)) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.joint.invalidLimits"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.joint.invalidLimits"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

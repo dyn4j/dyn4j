@@ -30,9 +30,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import org.dyn4j.dynamics.joint.Joint;
-import org.dyn4j.sandbox.Resources;
+import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
-import org.dyn4j.sandbox.utilities.Icons;
+import org.dyn4j.sandbox.resources.Messages;
 
 /**
  * Panel used to create or modify a joint.
@@ -62,13 +62,13 @@ public abstract class JointPanel extends JPanel implements InputPanel {
 	 * Creates the name and collision enabled fields and labels.
 	 */
 	protected JointPanel() {
-		this.lblName = new JLabel(Resources.getString("panel.joint.name"), Icons.INFO, JLabel.LEFT);
-		this.lblName.setToolTipText(Resources.getString("panel.joint.name.tooltip"));
+		this.lblName = new JLabel(Messages.getString("panel.joint.name"), Icons.INFO, JLabel.LEFT);
+		this.lblName.setToolTipText(Messages.getString("panel.joint.name.tooltip"));
 		this.txtName = new JTextField("");
 		this.txtName.addFocusListener(new SelectTextFocusListener(this.txtName));
 		
-		this.lblCollision = new JLabel(Resources.getString("panel.joint.collisionEnabled"), Icons.INFO, JLabel.LEFT);
-		this.lblCollision.setToolTipText(Resources.getString("panel.joint.collisionEnabled.tooltip"));
+		this.lblCollision = new JLabel(Messages.getString("panel.joint.collisionEnabled"), Icons.INFO, JLabel.LEFT);
+		this.lblCollision.setToolTipText(Messages.getString("panel.joint.collisionEnabled.tooltip"));
 		this.chkCollision = new JCheckBox();
 	}
 	

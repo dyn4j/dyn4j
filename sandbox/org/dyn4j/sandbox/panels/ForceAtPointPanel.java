@@ -34,10 +34,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.sandbox.Resources;
+import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.resources.Messages;
 import org.dyn4j.sandbox.utilities.ControlUtilities;
-import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to apply a force to a body.
@@ -65,13 +65,13 @@ public class ForceAtPointPanel extends JPanel implements InputPanel {
 	 * Default constructor.
 	 */
 	public ForceAtPointPanel() {
-		JLabel lblPoint = new JLabel(Resources.getString("panel.forceAtPoint.point"), Icons.INFO, JLabel.LEFT);
-		lblPoint.setToolTipText(Resources.getString("panel.forceAtPoint.point.tooltip"));
-		JLabel lblPX = new JLabel(Resources.getString("x"));
-		JLabel lblPY = new JLabel(Resources.getString("y"));
+		JLabel lblPoint = new JLabel(Messages.getString("panel.forceAtPoint.point"), Icons.INFO, JLabel.LEFT);
+		lblPoint.setToolTipText(Messages.getString("panel.forceAtPoint.point.tooltip"));
+		JLabel lblPX = new JLabel(Messages.getString("x"));
+		JLabel lblPY = new JLabel(Messages.getString("y"));
 		
-		this.txtPX = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.forceAtPoint.point.format")));
-		this.txtPY = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.forceAtPoint.point.format")));
+		this.txtPX = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.forceAtPoint.point.format")));
+		this.txtPY = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.forceAtPoint.point.format")));
 		this.txtPX.addFocusListener(new SelectTextFocusListener(this.txtPX));
 		this.txtPY.addFocusListener(new SelectTextFocusListener(this.txtPY));
 		this.txtPX.setColumns(7);
@@ -79,13 +79,13 @@ public class ForceAtPointPanel extends JPanel implements InputPanel {
 		this.txtPX.setValue(0.0);
 		this.txtPY.setValue(0.0);
 		
-		JLabel lblForce = new JLabel(Resources.getString("panel.forceAtPoint.force"), Icons.INFO, JLabel.LEFT);
-		lblForce.setToolTipText(MessageFormat.format(Resources.getString("panel.forceAtPoint.force.tooltip"), Resources.getString("unit.force")));
-		JLabel lblFX = new JLabel(Resources.getString("x"));
-		JLabel lblFY = new JLabel(Resources.getString("y"));
+		JLabel lblForce = new JLabel(Messages.getString("panel.forceAtPoint.force"), Icons.INFO, JLabel.LEFT);
+		lblForce.setToolTipText(MessageFormat.format(Messages.getString("panel.forceAtPoint.force.tooltip"), Messages.getString("unit.force")));
+		JLabel lblFX = new JLabel(Messages.getString("x"));
+		JLabel lblFY = new JLabel(Messages.getString("y"));
 		
-		this.txtFX = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.forceAtPoint.force.format")));
-		this.txtFY = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.forceAtPoint.force.format")));
+		this.txtFX = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.forceAtPoint.force.format")));
+		this.txtFY = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.forceAtPoint.force.format")));
 		this.txtFX.addFocusListener(new SelectTextFocusListener(this.txtFX));
 		this.txtFY.addFocusListener(new SelectTextFocusListener(this.txtFY));
 		this.txtFX.setColumns(7);

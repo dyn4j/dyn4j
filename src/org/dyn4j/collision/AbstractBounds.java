@@ -27,11 +27,12 @@ package org.dyn4j.collision;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Transformable;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * Abstract implementation of the {@link Bounds} interface.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.0.2
  * @since 1.0.0
  */
 public abstract class AbstractBounds implements Bounds, Transformable {
@@ -54,7 +55,7 @@ public abstract class AbstractBounds implements Bounds, Transformable {
 	 */
 	public AbstractBounds(Transform transform) {
 		// check for a null transform
-		if (transform == null) throw new NullPointerException("Cannot set the transform to null.");
+		if (transform == null) throw new NullPointerException(Messages.getString("collision.bounds.abstract.nullTransform"));
 		this.transform = transform;
 	}
 	

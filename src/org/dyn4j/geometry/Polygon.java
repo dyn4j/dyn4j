@@ -25,6 +25,7 @@
 package org.dyn4j.geometry;
 
 import org.dyn4j.Epsilon;
+import org.dyn4j.resources.Messages;
 
 /**
  * Represents a {@link Convex} {@link Polygon}.
@@ -34,13 +35,10 @@ import org.dyn4j.Epsilon;
  * <p>
  * A polygon cannot have coincident vertices.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class Polygon extends Wound implements Convex, Shape, Transformable {
-	/** The polygon {@link Shape.Type}  */
-	public static final Shape.Type TYPE = new Shape.Type("Polygon");
-	
 	/**
 	 * Default constructor for sub classes.
 	 */
@@ -57,14 +55,14 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 	public Polygon(Vector2... vertices) {
 		super();
 		// check the vertex array
-		if (vertices == null) throw new NullPointerException("The vertices array cannot be null.");
+		if (vertices == null) throw new NullPointerException(Messages.getString("geometry.polygon.nullArray"));
 		// get the size
 		int size = vertices.length;
 		// check the size
-		if (size < 3) throw new IllegalArgumentException("A polygon must have 3 or more vertices.");
+		if (size < 3) throw new IllegalArgumentException(Messages.getString("geometry.polygon.lessThan3Vertices"));
 		// check for null vertices
 		for (int i = 0; i < size; i++) {
-			if (vertices[i] == null) throw new NullPointerException("The vertices array cannot contain null points.");
+			if (vertices[i] == null) throw new NullPointerException(Messages.getString("geometry.polygon.nullVertices"));
 		}
 		// check for convex
 		double area = 0.0;
@@ -77,21 +75,21 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 			area += p1.cross(p2);
 			// check for coincident vertices
 			if (p1.equals(p2)) {
-				throw new IllegalArgumentException("A polygon cannot not have coincident vertices.");
+				throw new IllegalArgumentException(Messages.getString("geometry.polygon.coincidentVertices"));
 			}
 			double cross = Math.signum(p0.to(p1).cross(p1.to(p2)));
 			// check for colinear points (for now its allowed)
 			if (Math.abs(cross) > Epsilon.E) {
 				// check for convexity
 				if (sign != 0.0 && cross != sign) {
-					throw new IllegalArgumentException("A polygon must be convex.");
+					throw new IllegalArgumentException(Messages.getString("geometry.polygon.nonConvex"));
 				}
 			}
 			sign = cross;
 		}
 		// check for CCW
 		if (area < 0.0) {
-			throw new IllegalArgumentException("A polygon must have Counter-Clockwise vertex winding.");
+			throw new IllegalArgumentException(Messages.getString("geometry.polygon.invalidWinding"));
 		}
 		// set the vertices
 		this.vertices = vertices;
@@ -121,20 +119,14 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Shape#getType()
-	 */
-	@Override
-	public Type getType() {
-		return Polygon.TYPE;
-	}
-	
-	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Wound#toString()
 	 */
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("POLYGON[").append(super.toString()).append("]");
+		sb.append("Polygon[").append(super.toString())
+		.append("|UserData=").append(this.userData)
+		.append("]");
 		return sb.toString();
 	}
 	

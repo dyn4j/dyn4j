@@ -27,7 +27,7 @@ package org.dyn4j.collision.manifold;
 /**
  * Represents the identification of a specific point of a {@link Manifold}.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.0.2
  * @since 1.0.0
  */
 public interface ManifoldPointId {
@@ -41,7 +41,7 @@ public interface ManifoldPointId {
 		 */
 		@Override
 		public String toString() {
-			return "DISTANCE_MANIFOLD_POINT_ID[]";
+			return "DistanceManifoldPointId[]";
 		}
 	};
 }

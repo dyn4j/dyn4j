@@ -40,10 +40,10 @@ import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
 import org.dyn4j.sandbox.Preferences;
-import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.dialogs.ColorDialog;
+import org.dyn4j.sandbox.icons.Icons;
+import org.dyn4j.sandbox.resources.Messages;
 import org.dyn4j.sandbox.utilities.ColorUtilities;
-import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to configure the application preferences.
@@ -171,50 +171,50 @@ public class PreferencesPanel extends JPanel implements MouseListener {
 		Dimension size = new Dimension(13, 13);
 		Dimension msize = new Dimension(200, 0);
 		
-		JLabel lblRandomColors = new JLabel(Resources.getString("panel.preferences.bodyColor"), Icons.INFO, JLabel.LEFT);
-		lblRandomColors.setToolTipText(Resources.getString("panel.preferences.bodyColor.tooltip"));
+		JLabel lblRandomColors = new JLabel(Messages.getString("panel.preferences.bodyColor"), Icons.INFO, JLabel.LEFT);
+		lblRandomColors.setToolTipText(Messages.getString("panel.preferences.bodyColor.tooltip"));
 		lblRandomColors.setMinimumSize(msize);
 		this.chkRandomColors = new JCheckBox();
 		this.chkRandomColors.setSelected(Preferences.isBodyColorRandom());
 		
-		JLabel lblStenciling = new JLabel(Resources.getString("panel.preferences.bodyStenciling"), Icons.INFO, JLabel.LEFT);
-		lblStenciling.setToolTipText(Resources.getString("panel.preferences.bodyStenciling.tooltip"));
+		JLabel lblStenciling = new JLabel(Messages.getString("panel.preferences.bodyStenciling"), Icons.INFO, JLabel.LEFT);
+		lblStenciling.setToolTipText(Messages.getString("panel.preferences.bodyStenciling.tooltip"));
 		lblStenciling.setMinimumSize(msize);
 		this.chkStenciling = new JCheckBox();
 		this.chkStenciling.setSelected(Preferences.isBodyStenciled());
 		
-		JLabel lblBodyLabels = new JLabel(Resources.getString("panel.preferences.bodyLabels"), Icons.INFO, JLabel.LEFT);
-		lblBodyLabels.setToolTipText(Resources.getString("panel.preferences.bodyLabels.tooltip"));
+		JLabel lblBodyLabels = new JLabel(Messages.getString("panel.preferences.bodyLabels"), Icons.INFO, JLabel.LEFT);
+		lblBodyLabels.setToolTipText(Messages.getString("panel.preferences.bodyLabels.tooltip"));
 		lblBodyLabels.setMinimumSize(msize);
 		this.chkBodyLabels = new JCheckBox();
 		this.chkBodyLabels.setSelected(Preferences.isBodyLabeled());
 		
-		JLabel lblFixtureLabels = new JLabel(Resources.getString("panel.preferences.fixtureLabels"), Icons.INFO, JLabel.LEFT);
-		lblFixtureLabels.setToolTipText(Resources.getString("panel.preferences.fixtureLabels.tooltip"));
+		JLabel lblFixtureLabels = new JLabel(Messages.getString("panel.preferences.fixtureLabels"), Icons.INFO, JLabel.LEFT);
+		lblFixtureLabels.setToolTipText(Messages.getString("panel.preferences.fixtureLabels.tooltip"));
 		lblFixtureLabels.setMinimumSize(msize);
 		this.chkFixtureLabels = new JCheckBox();
 		this.chkFixtureLabels.setSelected(Preferences.isFixtureLabeled());
 		
-		JLabel lblAntiAliasing = new JLabel(Resources.getString("panel.preferences.aa"), Icons.INFO, JLabel.LEFT);
-		lblAntiAliasing.setToolTipText(Resources.getString("panel.preferences.aa.tooltip"));
+		JLabel lblAntiAliasing = new JLabel(Messages.getString("panel.preferences.aa"), Icons.INFO, JLabel.LEFT);
+		lblAntiAliasing.setToolTipText(Messages.getString("panel.preferences.aa.tooltip"));
 		lblAntiAliasing.setMinimumSize(msize);
 		this.chkAntiAliasing = new JCheckBox();
 		this.chkAntiAliasing.setSelected(Preferences.isAntiAliasingEnabled());
 		
-		JLabel lblVerticalSync = new JLabel(Resources.getString("panel.preferences.verticalSync"), Icons.INFO, JLabel.LEFT);
-		lblVerticalSync.setToolTipText(Resources.getString("panel.preferences.verticalSync.tooltip"));
+		JLabel lblVerticalSync = new JLabel(Messages.getString("panel.preferences.verticalSync"), Icons.INFO, JLabel.LEFT);
+		lblVerticalSync.setToolTipText(Messages.getString("panel.preferences.verticalSync.tooltip"));
 		lblVerticalSync.setMinimumSize(msize);
 		this.chkVerticalSync = new JCheckBox();
 		this.chkVerticalSync.setSelected(Preferences.isVerticalSyncEnabled());
 		
-		JLabel lblOriginLabel = new JLabel(Resources.getString("panel.preferences.originLabel"), Icons.INFO, JLabel.LEFT);
-		lblOriginLabel.setToolTipText(Resources.getString("panel.preferences.originLabel.tooltip"));
+		JLabel lblOriginLabel = new JLabel(Messages.getString("panel.preferences.originLabel"), Icons.INFO, JLabel.LEFT);
+		lblOriginLabel.setToolTipText(Messages.getString("panel.preferences.originLabel.tooltip"));
 		lblOriginLabel.setMinimumSize(msize);
 		this.chkOriginLabel = new JCheckBox();
 		this.chkOriginLabel.setSelected(Preferences.isOriginLabeled());
 		
-		JLabel lblBounds = new JLabel(Resources.getString("panel.preferences.worldBounds"), Icons.INFO, JLabel.LEFT);
-		lblBounds.setToolTipText(Resources.getString("panel.preferences.worldBounds.tooltip"));
+		JLabel lblBounds = new JLabel(Messages.getString("panel.preferences.worldBounds"), Icons.INFO, JLabel.LEFT);
+		lblBounds.setToolTipText(Messages.getString("panel.preferences.worldBounds.tooltip"));
 		lblBounds.setMinimumSize(msize);
 		this.chkBounds = new JCheckBox();
 		this.chkBounds.setSelected(Preferences.isBoundsEnabled());
@@ -223,10 +223,10 @@ public class PreferencesPanel extends JPanel implements MouseListener {
 		this.pnlBoundsColor.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		this.pnlBoundsColor.setPreferredSize(size);
 		this.pnlBoundsColor.setBackground(ColorUtilities.convertColor(Preferences.getBoundsColor()));
-		this.pnlBoundsColor.setToolTipText(Resources.getString("panel.preferences.color.tooltip"));
+		this.pnlBoundsColor.setToolTipText(Messages.getString("panel.preferences.color.tooltip"));
 		
-		JLabel lblSleepingBody = new JLabel(Resources.getString("panel.preferences.bodySleepColor"), Icons.INFO, JLabel.LEFT);
-		lblSleepingBody.setToolTipText(Resources.getString("panel.preferences.bodySleepColor.tooltip"));
+		JLabel lblSleepingBody = new JLabel(Messages.getString("panel.preferences.bodySleepColor"), Icons.INFO, JLabel.LEFT);
+		lblSleepingBody.setToolTipText(Messages.getString("panel.preferences.bodySleepColor.tooltip"));
 		lblSleepingBody.setMinimumSize(msize);
 		this.chkSleepingBodyColor = new JCheckBox();
 		this.chkSleepingBodyColor.setSelected(Preferences.isBodyAsleepColorEnabled());
@@ -235,10 +235,10 @@ public class PreferencesPanel extends JPanel implements MouseListener {
 		this.pnlSleepingBodyColor.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		this.pnlSleepingBodyColor.setPreferredSize(size);
 		this.pnlSleepingBodyColor.setBackground(ColorUtilities.convertColor(Preferences.getBodyAsleepColor()));
-		this.pnlSleepingBodyColor.setToolTipText(Resources.getString("panel.preferences.color.tooltip"));
+		this.pnlSleepingBodyColor.setToolTipText(Messages.getString("panel.preferences.color.tooltip"));
 		
-		JLabel lblInActiveBody = new JLabel(Resources.getString("panel.preferences.bodyInactiveColor"), Icons.INFO, JLabel.LEFT);
-		lblInActiveBody.setToolTipText(Resources.getString("panel.preferences.bodyInactiveColor.tooltip"));
+		JLabel lblInActiveBody = new JLabel(Messages.getString("panel.preferences.bodyInactiveColor"), Icons.INFO, JLabel.LEFT);
+		lblInActiveBody.setToolTipText(Messages.getString("panel.preferences.bodyInactiveColor.tooltip"));
 		lblInActiveBody.setMinimumSize(msize);
 		this.chkInActiveBodyColor = new JCheckBox();
 		this.chkInActiveBodyColor.setSelected(Preferences.isBodyInActiveColorEnabled());
@@ -247,10 +247,10 @@ public class PreferencesPanel extends JPanel implements MouseListener {
 		this.pnlInActiveBodyColor.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		this.pnlInActiveBodyColor.setPreferredSize(size);
 		this.pnlInActiveBodyColor.setBackground(ColorUtilities.convertColor(Preferences.getBodyInActiveColor()));
-		this.pnlInActiveBodyColor.setToolTipText(Resources.getString("panel.preferences.color.tooltip"));
+		this.pnlInActiveBodyColor.setToolTipText(Messages.getString("panel.preferences.color.tooltip"));
 		
-		JLabel lblBodyCenter = new JLabel(Resources.getString("panel.preferences.bodyCenter"), Icons.INFO, JLabel.LEFT);
-		lblBodyCenter.setToolTipText(Resources.getString("panel.preferences.bodyCenter.tooltip"));
+		JLabel lblBodyCenter = new JLabel(Messages.getString("panel.preferences.bodyCenter"), Icons.INFO, JLabel.LEFT);
+		lblBodyCenter.setToolTipText(Messages.getString("panel.preferences.bodyCenter.tooltip"));
 		lblBodyCenter.setMinimumSize(msize);
 		this.chkBodyCenter = new JCheckBox();
 		this.chkBodyCenter.setSelected(Preferences.isBodyCenterEnabled());
@@ -259,26 +259,26 @@ public class PreferencesPanel extends JPanel implements MouseListener {
 		this.pnlBodyCenterColor.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		this.pnlBodyCenterColor.setPreferredSize(size);
 		this.pnlBodyCenterColor.setBackground(ColorUtilities.convertColor(Preferences.getBodyCenterColor()));
-		this.pnlBodyCenterColor.setToolTipText(Resources.getString("panel.preferences.color.tooltip"));
+		this.pnlBodyCenterColor.setToolTipText(Messages.getString("panel.preferences.color.tooltip"));
 		
-		JLabel lblScale = new JLabel(Resources.getString("panel.preferences.scale"), Icons.INFO, JLabel.LEFT);
-		lblScale.setToolTipText(MessageFormat.format(Resources.getString("panel.preferences.scale.tooltip"), Resources.getString("unit.length.singular")));
+		JLabel lblScale = new JLabel(Messages.getString("panel.preferences.scale"), Icons.INFO, JLabel.LEFT);
+		lblScale.setToolTipText(MessageFormat.format(Messages.getString("panel.preferences.scale.tooltip"), Messages.getString("unit.length.singular")));
 		lblScale.setMinimumSize(msize);
 		this.chkScale = new JCheckBox();
 		this.chkScale.setSelected(Preferences.isScaleEnabled());
 		
-		JLabel lblSelectedColor = new JLabel(Resources.getString("panel.preferences.selectedColor"), Icons.INFO, JLabel.LEFT);
-		lblSelectedColor.setToolTipText(Resources.getString("panel.preferences.selectedColor.tooltip"));
+		JLabel lblSelectedColor = new JLabel(Messages.getString("panel.preferences.selectedColor"), Icons.INFO, JLabel.LEFT);
+		lblSelectedColor.setToolTipText(Messages.getString("panel.preferences.selectedColor.tooltip"));
 		lblSelectedColor.setMinimumSize(msize);
 		this.pnlSelectedColor = new JPanel();
 		this.pnlSelectedColor.addMouseListener(this);
 		this.pnlSelectedColor.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		this.pnlSelectedColor.setPreferredSize(size);
 		this.pnlSelectedColor.setBackground(ColorUtilities.convertColor(Preferences.getSelectedColor()));
-		this.pnlSelectedColor.setToolTipText(Resources.getString("panel.preferences.color.tooltip"));
+		this.pnlSelectedColor.setToolTipText(Messages.getString("panel.preferences.color.tooltip"));
 		
-		JLabel lblBodyAABBs = new JLabel(Resources.getString("panel.preferences.bodyAABBs"), Icons.INFO, JLabel.LEFT);
-		lblBodyAABBs.setToolTipText(Resources.getString("panel.preferences.bodyAABBs.tooltip"));
+		JLabel lblBodyAABBs = new JLabel(Messages.getString("panel.preferences.bodyAABBs"), Icons.INFO, JLabel.LEFT);
+		lblBodyAABBs.setToolTipText(Messages.getString("panel.preferences.bodyAABBs.tooltip"));
 		lblBodyAABBs.setMinimumSize(msize);
 		this.chkBodyAABB = new JCheckBox();
 		this.chkBodyAABB.setSelected(Preferences.isBodyAABBEnabled());
@@ -287,10 +287,10 @@ public class PreferencesPanel extends JPanel implements MouseListener {
 		this.pnlBodyAABBColor.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		this.pnlBodyAABBColor.setPreferredSize(size);
 		this.pnlBodyAABBColor.setBackground(ColorUtilities.convertColor(Preferences.getBodyAABBColor()));
-		this.pnlBodyAABBColor.setToolTipText(Resources.getString("panel.preferences.color.tooltip"));
+		this.pnlBodyAABBColor.setToolTipText(Messages.getString("panel.preferences.color.tooltip"));
 		
-		JLabel lblBodyNormals = new JLabel(Resources.getString("panel.preferences.fixtureNormals"), Icons.INFO, JLabel.LEFT);
-		lblBodyNormals.setToolTipText(Resources.getString("panel.preferences.fixtureNormals.tooltip"));
+		JLabel lblBodyNormals = new JLabel(Messages.getString("panel.preferences.fixtureNormals"), Icons.INFO, JLabel.LEFT);
+		lblBodyNormals.setToolTipText(Messages.getString("panel.preferences.fixtureNormals.tooltip"));
 		lblBodyNormals.setMinimumSize(msize);
 		this.chkBodyNormal = new JCheckBox();
 		this.chkBodyNormal.setSelected(Preferences.isBodyNormalEnabled());
@@ -299,10 +299,10 @@ public class PreferencesPanel extends JPanel implements MouseListener {
 		this.pnlBodyNormalColor.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		this.pnlBodyNormalColor.setPreferredSize(size);
 		this.pnlBodyNormalColor.setBackground(ColorUtilities.convertColor(Preferences.getBodyNormalColor()));
-		this.pnlBodyNormalColor.setToolTipText(Resources.getString("panel.preferences.color.tooltip"));
+		this.pnlBodyNormalColor.setToolTipText(Messages.getString("panel.preferences.color.tooltip"));
 		
-		JLabel lblBodyRotationDiscs = new JLabel(Resources.getString("panel.preferences.bodyRotationDiscs"), Icons.INFO, JLabel.LEFT);
-		lblBodyRotationDiscs.setToolTipText(Resources.getString("panel.preferences.bodyRotationDiscs.tooltip"));
+		JLabel lblBodyRotationDiscs = new JLabel(Messages.getString("panel.preferences.bodyRotationDiscs"), Icons.INFO, JLabel.LEFT);
+		lblBodyRotationDiscs.setToolTipText(Messages.getString("panel.preferences.bodyRotationDiscs.tooltip"));
 		lblBodyRotationDiscs.setMinimumSize(msize);
 		this.chkBodyRotationDisc = new JCheckBox();
 		this.chkBodyRotationDisc.setSelected(Preferences.isBodyRotationDiscEnabled());
@@ -311,10 +311,10 @@ public class PreferencesPanel extends JPanel implements MouseListener {
 		this.pnlBodyRotationDiscColor.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		this.pnlBodyRotationDiscColor.setPreferredSize(size);
 		this.pnlBodyRotationDiscColor.setBackground(ColorUtilities.convertColor(Preferences.getBodyRotationDiscColor()));
-		this.pnlBodyRotationDiscColor.setToolTipText(Resources.getString("panel.preferences.color.tooltip"));
+		this.pnlBodyRotationDiscColor.setToolTipText(Messages.getString("panel.preferences.color.tooltip"));
 		
-		JLabel lblBodyVelocities = new JLabel(Resources.getString("panel.preferences.bodyVelocities"), Icons.INFO, JLabel.LEFT);
-		lblBodyVelocities.setToolTipText(Resources.getString("panel.preferences.bodyVelocities.tooltip"));
+		JLabel lblBodyVelocities = new JLabel(Messages.getString("panel.preferences.bodyVelocities"), Icons.INFO, JLabel.LEFT);
+		lblBodyVelocities.setToolTipText(Messages.getString("panel.preferences.bodyVelocities.tooltip"));
 		lblBodyVelocities.setMinimumSize(msize);
 		this.chkBodyVelocity = new JCheckBox();
 		this.chkBodyVelocity.setSelected(Preferences.isBodyVelocityEnabled());
@@ -323,10 +323,10 @@ public class PreferencesPanel extends JPanel implements MouseListener {
 		this.pnlBodyVelocityColor.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		this.pnlBodyVelocityColor.setPreferredSize(size);
 		this.pnlBodyVelocityColor.setBackground(ColorUtilities.convertColor(Preferences.getBodyVelocityColor()));
-		this.pnlBodyVelocityColor.setToolTipText(Resources.getString("panel.preferences.color.tooltip"));
+		this.pnlBodyVelocityColor.setToolTipText(Messages.getString("panel.preferences.color.tooltip"));
 		
-		JLabel lblContacts = new JLabel(Resources.getString("panel.preferences.contacts"), Icons.INFO, JLabel.LEFT);
-		lblContacts.setToolTipText(Resources.getString("panel.preferences.contacts.tooltip"));
+		JLabel lblContacts = new JLabel(Messages.getString("panel.preferences.contacts"), Icons.INFO, JLabel.LEFT);
+		lblContacts.setToolTipText(Messages.getString("panel.preferences.contacts.tooltip"));
 		lblContacts.setMinimumSize(msize);
 		this.chkContacts = new JCheckBox();
 		this.chkContacts.setSelected(Preferences.isContactPointEnabled());
@@ -335,10 +335,10 @@ public class PreferencesPanel extends JPanel implements MouseListener {
 		this.pnlContactColor.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		this.pnlContactColor.setPreferredSize(size);
 		this.pnlContactColor.setBackground(ColorUtilities.convertColor(Preferences.getContactPointColor()));
-		this.pnlContactColor.setToolTipText(Resources.getString("panel.preferences.color.tooltip"));
+		this.pnlContactColor.setToolTipText(Messages.getString("panel.preferences.color.tooltip"));
 		
-		JLabel lblContactImpulses = new JLabel(Resources.getString("panel.preferences.contactImpulses"), Icons.INFO, JLabel.LEFT);
-		lblContactImpulses.setToolTipText(Resources.getString("panel.preferences.contactImpulses.tooltip"));
+		JLabel lblContactImpulses = new JLabel(Messages.getString("panel.preferences.contactImpulses"), Icons.INFO, JLabel.LEFT);
+		lblContactImpulses.setToolTipText(Messages.getString("panel.preferences.contactImpulses.tooltip"));
 		lblContactImpulses.setMinimumSize(msize);
 		this.chkContactImpulses = new JCheckBox();
 		this.chkContactImpulses.setSelected(Preferences.isContactImpulseEnabled());
@@ -347,10 +347,10 @@ public class PreferencesPanel extends JPanel implements MouseListener {
 		this.pnlContactImpulseColor.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		this.pnlContactImpulseColor.setPreferredSize(size);
 		this.pnlContactImpulseColor.setBackground(ColorUtilities.convertColor(Preferences.getContactImpulseColor()));
-		this.pnlContactImpulseColor.setToolTipText(Resources.getString("panel.preferences.color.tooltip"));
+		this.pnlContactImpulseColor.setToolTipText(Messages.getString("panel.preferences.color.tooltip"));
 		
-		JLabel lblFrictionImpulses = new JLabel(Resources.getString("panel.preferences.frictionImpulses"), Icons.INFO, JLabel.LEFT);
-		lblFrictionImpulses.setToolTipText(Resources.getString("panel.preferences.frictionImpulses.tooltip"));
+		JLabel lblFrictionImpulses = new JLabel(Messages.getString("panel.preferences.frictionImpulses"), Icons.INFO, JLabel.LEFT);
+		lblFrictionImpulses.setToolTipText(Messages.getString("panel.preferences.frictionImpulses.tooltip"));
 		lblFrictionImpulses.setMinimumSize(msize);
 		this.chkFrictionImpulses = new JCheckBox();
 		this.chkFrictionImpulses.setSelected(Preferences.isFrictionImpulseEnabled());
@@ -359,10 +359,10 @@ public class PreferencesPanel extends JPanel implements MouseListener {
 		this.pnlFrictionImpulseColor.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		this.pnlFrictionImpulseColor.setPreferredSize(size);
 		this.pnlFrictionImpulseColor.setBackground(ColorUtilities.convertColor(Preferences.getFrictionImpulseColor()));
-		this.pnlFrictionImpulseColor.setToolTipText(Resources.getString("panel.preferences.color.tooltip"));
+		this.pnlFrictionImpulseColor.setToolTipText(Messages.getString("panel.preferences.color.tooltip"));
 		
-		JLabel lblContactPairs = new JLabel(Resources.getString("panel.preferences.contactPairs"), Icons.INFO, JLabel.LEFT);
-		lblContactPairs.setToolTipText(Resources.getString("panel.preferences.contactPairs.tooltip"));
+		JLabel lblContactPairs = new JLabel(Messages.getString("panel.preferences.contactPairs"), Icons.INFO, JLabel.LEFT);
+		lblContactPairs.setToolTipText(Messages.getString("panel.preferences.contactPairs.tooltip"));
 		lblContactPairs.setMinimumSize(msize);
 		this.chkContactPairs = new JCheckBox();
 		this.chkContactPairs.setSelected(Preferences.isContactPairEnabled());
@@ -371,7 +371,7 @@ public class PreferencesPanel extends JPanel implements MouseListener {
 		this.pnlContactPairColor.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		this.pnlContactPairColor.setPreferredSize(size);
 		this.pnlContactPairColor.setBackground(ColorUtilities.convertColor(Preferences.getContactPairColor()));
-		this.pnlContactPairColor.setToolTipText(Resources.getString("panel.preferences.color.tooltip"));
+		this.pnlContactPairColor.setToolTipText(Messages.getString("panel.preferences.color.tooltip"));
 		
 		// layout
 		GroupLayout layout;
@@ -379,7 +379,7 @@ public class PreferencesPanel extends JPanel implements MouseListener {
 		// create the general section
 		
 		JPanel pnlGeneral = new JPanel();
-		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.section.general"));
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Messages.getString("panel.section.general"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlGeneral.setBorder(border);
 		
@@ -452,7 +452,7 @@ public class PreferencesPanel extends JPanel implements MouseListener {
 		// layout the body section
 		
 		JPanel pnlBody = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.preferences.section.body"));
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Messages.getString("panel.preferences.section.body"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlBody.setBorder(border);
 		

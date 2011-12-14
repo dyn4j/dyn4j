@@ -34,6 +34,7 @@ import org.dyn4j.geometry.Matrix33;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.geometry.Vector3;
+import org.dyn4j.resources.Messages;
 
 /**
  * Represents a weld joint.
@@ -46,13 +47,10 @@ import org.dyn4j.geometry.Vector3;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class WeldJoint extends Joint {
-	/** The joint type */
-	public static final Joint.Type TYPE = new Joint.Type("Weld");
-	
 	/** The local anchor point on the first {@link Body} */
 	protected Vector2 localAnchor1;
 	
@@ -91,9 +89,9 @@ public class WeldJoint extends Joint {
 	public WeldJoint(Body body1, Body body2, Vector2 anchor) {
 		super(body1, body2, false);
 		// verify the bodies are not the same instance
-		if (body1 == body2) throw new IllegalArgumentException("Cannot create a weld joint between the same body instance.");
+		if (body1 == body2) throw new IllegalArgumentException(Messages.getString("dynamics.joint.sameBody"));
 		// check for a null anchor
-		if (anchor == null) throw new NullPointerException("The anchor point cannot be null.");
+		if (anchor == null) throw new NullPointerException(Messages.getString("dynamics.joint.nullAnchor"));
 		// set the anchor point
 		this.localAnchor1 = body1.getLocalPoint(anchor);
 		this.localAnchor2 = body2.getLocalPoint(anchor);
@@ -114,14 +112,14 @@ public class WeldJoint extends Joint {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("WELD_JOINT[")
-		.append(super.toString()).append("|")
-		.append(this.localAnchor1).append("|")
-		.append(this.localAnchor2).append("|")
-		.append(this.referenceAngle).append("|")
-		.append(this.frequency).append("|")
-		.append(this.dampingRatio).append("|")
-		.append(this.impulse).append("]");
+		sb.append("WeldJoint[").append(super.toString())
+		.append("|LocalAnchor1=").append(this.localAnchor1)
+		.append("|LocalAnchor2=").append(this.localAnchor2)
+		.append("|WorldAnchor=").append(this.getAnchor1())
+		.append("|ReferenceAngle=").append(this.referenceAngle)
+		.append("|Frequency=").append(this.frequency)
+		.append("|DampingRatio=").append(this.dampingRatio)
+		.append("]");
 		return sb.toString();
 	}
 	
@@ -160,17 +158,7 @@ public class WeldJoint extends Joint {
 			double i = invI <= Epsilon.E ? 0.0 : 1.0 / invI;
 			
 			// compute the current angle between relative to the reference angle
-			
-			// this causes problems: when the one of the bodies is rotated, the other
-			// body compensates by rotating the greater distance instead of the shorter
-//			double r = t1.getRotation() - t2.getRotation() - this.referenceAngle;
-			
-			// we can fix it by always taking the shorter rotation
-			double rr = t1.getRotation() - t2.getRotation();
-			if (rr < -Math.PI) rr += Geometry.TWO_PI;
-			if (rr > Math.PI) rr -= Geometry.TWO_PI;
-			// then apply the reference angle
-			double r = rr - this.referenceAngle;
+			double r = this.getRelativeRotation();
 			
 			double dt = step.getDeltaTime();
 			// compute the natural frequency; f = w / (2 * pi) -> w = 2 * pi * f
@@ -293,7 +281,7 @@ public class WeldJoint extends Joint {
 		Vector2 p1 = this.body1.getWorldCenter().add(r1);
 		Vector2 p2 = this.body2.getWorldCenter().add(r2);
 		Vector2 C1 = p1.difference(p2);
-		double  C2 = this.body1.getTransform().getRotation() - this.body2.getTransform().getRotation() - this.referenceAngle;
+		double  C2 = this.getRelativeRotation();
 		Vector3 C = new Vector3(C1.x, C1.y, C2);
 		
 		double linearError = C1.getMagnitude();
@@ -332,13 +320,16 @@ public class WeldJoint extends Joint {
 		
 		return linearError <= linearTolerance && angularError <= angularTolerance;
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getType()
+
+	/**
+	 * Returns the relative angle between the two bodies given the reference angle.
+	 * @return double
 	 */
-	@Override
-	public Type getType() {
-		return WeldJoint.TYPE;
+	private double getRelativeRotation() {
+		double rr = this.body1.getTransform().getRotation() - this.body2.getTransform().getRotation() - this.referenceAngle;
+		if (rr < -Math.PI) rr += Geometry.TWO_PI;
+		if (rr > Math.PI) rr -= Geometry.TWO_PI;
+		return rr;
 	}
 	
 	/* (non-Javadoc)
@@ -410,7 +401,7 @@ public class WeldJoint extends Joint {
 	 */
 	public void setDampingRatio(double dampingRatio) {
 		// make sure its within range
-		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException("The damping ratio must be between 0 and 1 inclusive.");
+		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidDampingRatio"));
 		// set the new value
 		this.dampingRatio = dampingRatio;
 	}
@@ -432,7 +423,7 @@ public class WeldJoint extends Joint {
 	 */
 	public void setFrequency(double frequency) {
 		// check for valid value
-		if (frequency < 0) throw new IllegalArgumentException("The frequency must be greater than or equal to zero.");
+		if (frequency < 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidFrequency"));
 		// set the new value
 		this.frequency = frequency;
 	}

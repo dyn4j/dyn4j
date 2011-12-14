@@ -27,7 +27,7 @@ package org.dyn4j.geometry;
 /**
  * Represents an object that is defined by vertices, and has counter-clockwise winding.
  * @author William Bittle
- * @version 1.1.0
+ * @version 3.0.2
  * @since 1.0.0
  */
 public abstract class Wound extends AbstractShape implements Shape, Transformable {
@@ -60,16 +60,18 @@ public abstract class Wound extends AbstractShape implements Shape, Transformabl
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(super.toString()).append("|");
-		sb.append("VERTICES[");
-		for (int i = 0; i < vertices.length; i++) {
-			sb.append(vertices[i]);
+		sb.append(super.toString());
+		sb.append("|Vertices{");
+		for (int i = 0; i < this.vertices.length; i++) {
+			if (i != 0) sb.append(",");
+			sb.append(this.vertices[i]);
 		}
-		sb.append("]|NORMALS[");
-		for (int i = 0; i < normals.length; i++) {
-			sb.append(normals[i]);
+		sb.append("}|Normals{");
+		for (int i = 0; i < this.normals.length; i++) {
+			if (i != 0) sb.append(",");
+			sb.append(this.normals[i]);
 		}
-		sb.append("]");
+		sb.append("}");
 		return sb.toString();
 	}
 

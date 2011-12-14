@@ -27,6 +27,7 @@ package org.dyn4j.sandbox.controls;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import org.dyn4j.Epsilon;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.utilities.RenderUtilities;
 
@@ -56,6 +57,8 @@ public class MouseLocationTextField extends JTextField {
 	public void update(Vector2 mousePosition) {
 		// obtain the lock on the mouse position
 		synchronized (this.mousePosition) {
+			// check if the mouse has moved at all
+			if (this.mousePosition.distanceSquared(mousePosition) <= Epsilon.E) return;
 			// set the new mouse position
 			this.mousePosition = mousePosition.copy();
 			// see if a EDT update thread has already been queued

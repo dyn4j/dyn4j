@@ -39,11 +39,11 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.SandboxRay;
+import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.resources.Messages;
 import org.dyn4j.sandbox.utilities.ControlUtilities;
-import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to create or edit a ray.
@@ -121,53 +121,53 @@ public class RayPanel extends JPanel implements InputPanel {
 			d += 2.0 * Math.PI;
 		}
 		
-		this.lblName = new JLabel(Resources.getString("panel.ray.name"), Icons.INFO, JLabel.LEFT);
-		this.lblName.setToolTipText(Resources.getString("panel.ray.name.tooltip"));
+		this.lblName = new JLabel(Messages.getString("panel.ray.name"), Icons.INFO, JLabel.LEFT);
+		this.lblName.setToolTipText(Messages.getString("panel.ray.name.tooltip"));
 		this.txtName = new JTextField(name);
 		this.txtName.addFocusListener(new SelectTextFocusListener(this.txtName));
 		
-		this.lblStart = new JLabel(Resources.getString("panel.ray.start"), Icons.INFO, JLabel.LEFT);
-		this.lblStart.setToolTipText(Resources.getString("panel.ray.start.tooltip"));
+		this.lblStart = new JLabel(Messages.getString("panel.ray.start"), Icons.INFO, JLabel.LEFT);
+		this.lblStart.setToolTipText(Messages.getString("panel.ray.start.tooltip"));
 		
-		this.txtSX = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.ray.start.format")));
+		this.txtSX = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.ray.start.format")));
 		this.txtSX.addFocusListener(new SelectTextFocusListener(this.txtSX));
 		this.txtSX.setValue(s.x);
 		this.txtSX.setColumns(6);
 		
-		this.txtSY = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.ray.start.format")));
+		this.txtSY = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.ray.start.format")));
 		this.txtSY.addFocusListener(new SelectTextFocusListener(this.txtSY));
 		this.txtSY.setValue(s.y);
 		this.txtSY.setColumns(6);
 		
-		JLabel lblX = new JLabel(Resources.getString("x"));
-		JLabel lblY = new JLabel(Resources.getString("y"));
+		JLabel lblX = new JLabel(Messages.getString("x"));
+		JLabel lblY = new JLabel(Messages.getString("y"));
 		
-		this.lblDirection = new JLabel(Resources.getString("panel.ray.direction"), Icons.INFO, JLabel.LEFT);
-		this.lblDirection.setToolTipText(MessageFormat.format(Resources.getString("panel.ray.direction.tooltip"), Resources.getString("unit.rotation")));
-		this.txtD = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.ray.direction.format")));
+		this.lblDirection = new JLabel(Messages.getString("panel.ray.direction"), Icons.INFO, JLabel.LEFT);
+		this.lblDirection.setToolTipText(MessageFormat.format(Messages.getString("panel.ray.direction.tooltip"), Messages.getString("unit.rotation")));
+		this.txtD = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.ray.direction.format")));
 		this.txtD.addFocusListener(new SelectTextFocusListener(this.txtD));
 		this.txtD.setValue(Math.toDegrees(d));
 		this.txtD.setColumns(6);
 		
-		this.lblInfiniteLength = new JLabel(Resources.getString("panel.ray.infiniteLength"), Icons.INFO, JLabel.LEFT);
-		this.lblInfiniteLength.setToolTipText(Resources.getString("panel.ray.infiniteLength.tooltip"));
+		this.lblInfiniteLength = new JLabel(Messages.getString("panel.ray.infiniteLength"), Icons.INFO, JLabel.LEFT);
+		this.lblInfiniteLength.setToolTipText(Messages.getString("panel.ray.infiniteLength.tooltip"));
 		this.chkInfiniteLength = new JCheckBox();
 		this.chkInfiniteLength.setSelected(infinite);
 		
-		this.lblLength = new JLabel(Resources.getString("panel.ray.length"), Icons.INFO, JLabel.LEFT);
-		this.lblLength.setToolTipText(MessageFormat.format(Resources.getString("panel.ray.length.tooltip"), Resources.getString("unit.length")));
-		this.txtLength = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.ray.length.format")));
+		this.lblLength = new JLabel(Messages.getString("panel.ray.length"), Icons.INFO, JLabel.LEFT);
+		this.lblLength.setToolTipText(MessageFormat.format(Messages.getString("panel.ray.length.tooltip"), Messages.getString("unit.length")));
+		this.txtLength = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.ray.length.format")));
 		this.txtLength.addFocusListener(new SelectTextFocusListener(this.txtLength));
 		this.txtLength.setValue(l);
 		this.txtLength.setEnabled(false);
 		
-		this.lblIgnoreSensors = new JLabel(Resources.getString("panel.ray.ignoreSensors"), Icons.INFO, JLabel.LEFT);
-		this.lblIgnoreSensors.setToolTipText(Resources.getString("panel.ray.ignoreSensors.tooltip"));
+		this.lblIgnoreSensors = new JLabel(Messages.getString("panel.ray.ignoreSensors"), Icons.INFO, JLabel.LEFT);
+		this.lblIgnoreSensors.setToolTipText(Messages.getString("panel.ray.ignoreSensors.tooltip"));
 		this.chkIgnoreSensors = new JCheckBox();
 		this.chkIgnoreSensors.setSelected(sensors);
 		
-		this.lblTestAll = new JLabel(Resources.getString("panel.ray.testAll"), Icons.INFO, JLabel.LEFT);
-		this.lblTestAll.setToolTipText(Resources.getString("panel.ray.testAll.tooltip"));
+		this.lblTestAll = new JLabel(Messages.getString("panel.ray.testAll"), Icons.INFO, JLabel.LEFT);
+		this.lblTestAll.setToolTipText(Messages.getString("panel.ray.testAll.tooltip"));
 		this.chkTestAll = new JCheckBox();
 		this.chkTestAll.setSelected(all);
 		
@@ -307,11 +307,11 @@ public class RayPanel extends JPanel implements InputPanel {
 	public void showInvalidInputMessage(Window owner) {
 		String name = this.txtName.getText();
 		if (name == null || name.isEmpty()) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.ray.missingName"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.ray.missingName"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		// the length cannot be negative
 		if (!this.chkInfiniteLength.isSelected() && ControlUtilities.getDoubleValue(this.txtLength) <= 0.0) {
-			JOptionPane.showMessageDialog(owner, Resources.getString("panel.ray.invalidLength"), Resources.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.ray.invalidLength"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

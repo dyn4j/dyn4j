@@ -39,45 +39,6 @@ import org.dyn4j.geometry.Vector2;
  */
 public abstract class Joint extends Constraint {
 	/**
-	 * Represents a {@link Joint} type.
-	 * <p>
-	 * The type of a joint is static and doesn't
-	 * change therefore the comparison of joint 
-	 * types only does a reference comparison.
-	 * @author William Bittle
-	 * @version 1.0.3
-	 * @since 1.0.0
-	 */
-	public static class Type {
-		/** The type name */
-		private String name;
-		
-		/**
-		 * Default constructor.
-		 * @param name the name of the type
-		 */
-		public Type(String name) {
-			this.name = name;
-		}
-		
-		/* (non-Javadoc)
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			return this.name;
-		}
-		
-		/**
-		 * Returns the name of this type.
-		 * @return String
-		 */
-		public String getName() {
-			return this.name;
-		}
-	}
-	
-	/**
 	 * Enumeration for the limit states a joint can have.
 	 * @author William Bittle
 	 * @version 1.0.3
@@ -133,9 +94,10 @@ public abstract class Joint extends Constraint {
 	 */
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(super.toString()).append("|")
-		.append(this.id).append("|")
-		.append(this.collisionAllowed);
+		sb.append("Id=").append(this.id)
+		// body1, body2, island
+		.append("|").append(super.toString())
+		.append("|IsCollisionAllowed=").append(this.collisionAllowed);
 		return sb.toString();
 	}
 	
@@ -156,12 +118,6 @@ public abstract class Joint extends Constraint {
 	 * @return boolean true if the position constraints were solved
 	 */
 	public boolean solvePositionConstraints() { return true; };
-	
-	/**
-	 * Returns this joint's type.
-	 * @return {@link Joint.Type}
-	 */
-	public abstract Joint.Type getType();
 	
 	/**
 	 * Returns the anchor point on the first {@link Body} in

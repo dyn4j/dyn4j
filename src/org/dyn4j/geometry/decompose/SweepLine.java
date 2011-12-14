@@ -33,6 +33,7 @@ import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * Performs the Sweep Line algorithm to decompose the given polygon into y-monotone pieces which are
@@ -46,7 +47,7 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * This algorithm total complexity is O(n log n).
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.2
  * @since 2.2.0
  */
 public class SweepLine implements Decomposer {
@@ -54,7 +55,7 @@ public class SweepLine implements Decomposer {
 	 * Represents a vertex on a polygon that stores information
 	 * about the left and right edges and left and right vertices.
 	 * @author William Bittle
-	 * @version 2.2.0
+	 * @version 3.0.2
 	 * @since 2.2.0
 	 */
 	protected static class Vertex implements Comparable<Vertex> {
@@ -121,9 +122,9 @@ public class SweepLine implements Decomposer {
 		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
-			sb.append("VERTEX[")
-			.append(point).append("|")
-			.append(type).append("]");
+			sb.append("SweepLine.Vertex[Point=").append(this.point)
+			.append("|Type=").append(this.type)
+			.append("]");
 			return sb.toString();
 		}
 		
@@ -168,7 +169,7 @@ public class SweepLine implements Decomposer {
 	 * The edge also stores a helper vertex which is used during y-monotone
 	 * decomposition.
 	 * @author William Bittle
-	 * @version 2.2.0
+	 * @version 3.0.2
 	 * @since 2.2.0
 	 */
 	protected static class Edge implements Comparable<Edge> {
@@ -193,9 +194,9 @@ public class SweepLine implements Decomposer {
 		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
-			sb.append("EDGE[")
-			.append(v0).append("|")
-			.append(v1).append("]");
+			sb.append("SweepLine.Edge[V0=").append(this.v0)
+			.append("|V1=").append(this.v1)
+			.append("]");
 			return sb.toString();
 		}
 		
@@ -334,11 +335,11 @@ public class SweepLine implements Decomposer {
 	@Override
 	public List<Convex> decompose(Vector2... points) {
 		// check for a null list
-		if (points == null) throw new NullPointerException("Cannot decompose a null array of points.");
+		if (points == null) throw new NullPointerException(Messages.getString("geometry.decompose.nullArray"));
 		// get the number of points
 		int size = points.length;
 		// check the size
-		if (size < 4) throw new IllegalArgumentException("The polygon must have 4 or more vertices.");
+		if (size < 4) throw new IllegalArgumentException(Messages.getString("geometry.decompose.invalidSize"));
 		
 		// get the winding order
 		double winding = Geometry.getWinding(points);
@@ -517,7 +518,7 @@ public class SweepLine implements Decomposer {
 		Vector2 v2 = point.to(point1);
 		
 		// check for coincident points
-		if (v1.isZero() || v2.isZero()) throw new IllegalArgumentException("The polygon cannot have coincident vertices.");
+		if (v1.isZero() || v2.isZero()) throw new IllegalArgumentException(Messages.getString("geometry.decompose.coincident"));
 		
 		// get the angle between the two edges (we assume CCW winding)
 		double cross = v1.cross(v2);

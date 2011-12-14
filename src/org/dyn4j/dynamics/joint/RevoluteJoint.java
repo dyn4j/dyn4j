@@ -36,6 +36,7 @@ import org.dyn4j.geometry.Matrix33;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.geometry.Vector3;
+import org.dyn4j.resources.Messages;
 
 /**
  * Represents a pivot joint.
@@ -52,9 +53,6 @@ import org.dyn4j.geometry.Vector3;
  * @since 1.0.0
  */
 public class RevoluteJoint extends Joint {
-	/** The joint type */
-	public static final Joint.Type TYPE = new Joint.Type("Revolute");
-	
 	/** The local anchor point on the first {@link Body} */
 	protected Vector2 localAnchor1;
 	
@@ -109,9 +107,9 @@ public class RevoluteJoint extends Joint {
 		// default to no collision allowed between the bodies
 		super(body1, body2, false);
 		// verify the bodies are not the same instance
-		if (body1 == body2) throw new IllegalArgumentException("Cannot create a revolute joint between the same body instance.");
+		if (body1 == body2) throw new IllegalArgumentException(Messages.getString("dynamics.joint.sameBody"));
 		// make sure the anchor point is not null
-		if (anchor == null) throw new NullPointerException("The anchor point cannot be null.");
+		if (anchor == null) throw new NullPointerException(Messages.getString("dynamics.joint.nullAnchor"));
 		// get the local space points
 		this.localAnchor1 = body1.getLocalPoint(anchor);
 		this.localAnchor2 = body2.getLocalPoint(anchor);
@@ -131,20 +129,18 @@ public class RevoluteJoint extends Joint {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("REVOLUTE_JOINT[")
-		.append(super.toString()).append("|")
-		.append(this.localAnchor1).append("|")
-		.append(this.localAnchor2).append("|")
-		.append(this.motorEnabled).append("|")
-		.append(this.motorSpeed).append("|")
-		.append(this.maximumMotorTorque).append("|")
-		.append(this.limitEnabled).append("|")
-		.append(this.lowerLimit).append("|")
-		.append(this.upperLimit).append("|")
-		.append(this.referenceAngle).append("|")
-		.append(this.limitState).append("|")
-		.append(this.impulse).append("|")
-		.append(this.motorImpulse).append("]");
+		sb.append("RevoluteJoint[").append(super.toString())
+		.append("|LocalAnchor1=").append(this.localAnchor1)
+		.append("|LocalAnchor2=").append(this.localAnchor2)
+		.append("|WorldAnchor=").append(this.getAnchor1())
+		.append("|IsMotorEnabled=").append(this.motorEnabled)
+		.append("|MotorSpeed=").append(this.motorSpeed)
+		.append("|MaximumMotorTorque=").append(this.maximumMotorTorque)
+		.append("|IsLimitEnabled=").append(this.limitEnabled)
+		.append("|LowerLimit=").append(this.lowerLimit)
+		.append("|UpperLimit=").append(this.upperLimit)
+		.append("|ReferenceAngle=").append(this.referenceAngle)
+		.append("]");
 		return sb.toString();
 	}
 	
@@ -172,7 +168,7 @@ public class RevoluteJoint extends Joint {
 			if (invI1 <= 0.0 && invI2 <= 0.0) {
 				// cannot have a motor with two bodies
 				// who have fixed angular velocities
-				throw new IllegalStateException("A RevoluteJoint must have at least one body without fixed angular velocity.");
+				throw new IllegalStateException(Messages.getString("dynamics.joint.revolute.twoAngularFixedBodies"));
 			}
 		}
 		
@@ -205,17 +201,7 @@ public class RevoluteJoint extends Joint {
 		// check if the joint limit is enabled
 		if (this.limitEnabled) {
 			// set the current state of the joint limit
-			
-			// this causes problems: when the one of the bodies is rotated, the other
-			// body compensates by rotating the greater distance instead of the shorter
-//			double angle = t1.getRotation() - t2.getRotation() - this.referenceAngle;
-			
-			// we can fix it by always taking the smaller rotation
-			double rr = this.body1.getTransform().getRotation() - this.body2.getTransform().getRotation();
-			if (rr < -Math.PI) rr += Geometry.TWO_PI;
-			if (rr > Math.PI) rr -= Geometry.TWO_PI;
-			// then apply the reference angle
-			double angle = rr - this.referenceAngle;
+			double angle = this.getRelativeRotation();
 			
 			// see if the limits are close enough to be equal
 			if (Math.abs(this.upperLimit - this.lowerLimit) < 2.0 * angularTolerance) {
@@ -367,7 +353,7 @@ public class RevoluteJoint extends Joint {
 		Settings settings = Settings.getInstance();
 		double linearTolerance = settings.getLinearTolerance();
 		double angularTolerance = settings.getAngularTolerance();
-		double maxAngularCorrection = settings.getMaxAngularCorrection();
+		double maxAngularCorrection = settings.getMaximumAngularCorrection();
 		
 		Transform t1 = this.body1.getTransform();
 		Transform t2 = this.body2.getTransform();
@@ -386,7 +372,7 @@ public class RevoluteJoint extends Joint {
 		// solve the angular constraint if the limits are active
 		if (this.limitEnabled && this.limitState != Joint.LimitState.INACTIVE) {
 			// get the current angle between the bodies
-			double angle = t1.getRotation() - t2.getRotation() - this.referenceAngle;
+			double angle = this.getRelativeRotation();
 			double impulse = 0.0;
 			// check the limit state
 			if (this.limitState == Joint.LimitState.EQUAL) {
@@ -467,13 +453,16 @@ public class RevoluteJoint extends Joint {
 		
 		return linearError <= linearTolerance && angularError <= angularTolerance;
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getType()
+
+	/**
+	 * Returns the relative angle between the two bodies given the reference angle.
+	 * @return double
 	 */
-	@Override
-	public Type getType() {
-		return RevoluteJoint.TYPE;
+	private double getRelativeRotation() {
+		double rr = this.body1.getTransform().getRotation() - this.body2.getTransform().getRotation() - this.referenceAngle;
+		if (rr < -Math.PI) rr += Geometry.TWO_PI;
+		if (rr > Math.PI) rr -= Geometry.TWO_PI;
+		return rr;
 	}
 	
 	/* (non-Javadoc)
@@ -560,7 +549,7 @@ public class RevoluteJoint extends Joint {
 	 */
 	public void setMaximumMotorTorque(double maximumMotorTorque) {
 		// make sure its positive
-		if (maximumMotorTorque < 0.0) throw new IllegalArgumentException("The maximum motor torque must be greater than or equal to zero.");
+		if (maximumMotorTorque < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidMaximumMotorTorque"));
 		// set the max
 		this.maximumMotorTorque = maximumMotorTorque;
 	}
@@ -637,7 +626,7 @@ public class RevoluteJoint extends Joint {
 	 * @throws IllegalArgumentException if upperLimit is less than the current lower limit
 	 */
 	public void setUpperLimit(double upperLimit) {
-		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException("The upper limit cannot be less than the lower limit.");
+		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidUpperLimit"));
 		// only wake the bodies if the motor is enabled and the limit has changed
 		if (this.limitEnabled && upperLimit != this.upperLimit) {
 			// wake up the bodies
@@ -664,7 +653,7 @@ public class RevoluteJoint extends Joint {
 	 * @throws IllegalArgumentException if lowerLimit is greater than the current upper limit
 	 */
 	public void setLowerLimit(double lowerLimit) {
-		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException("The lower limit cannot be greater than the upper limit.");
+		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLowerLimit"));
 		// only wake the bodies if the motor is enabled and the limit has changed
 		if (this.limitEnabled && lowerLimit != this.lowerLimit) {
 			// wake up the bodies
@@ -684,7 +673,7 @@ public class RevoluteJoint extends Joint {
 	 * @throws IllegalArgumentException if the lowerLimit is greater than upperLimit
 	 */
 	public void setLimits(double lowerLimit, double upperLimit) {
-		if (lowerLimit > upperLimit) throw new IllegalArgumentException("The lower limit cannot be greater than the upper limit.");
+		if (lowerLimit > upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLimits"));
 		// only wake the bodies if the motor is enabled and one of the limits has changed
 		if (this.limitEnabled && (lowerLimit != this.lowerLimit || upperLimit != this.upperLimit)) {
 			// wake up the bodies

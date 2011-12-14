@@ -34,7 +34,7 @@ import org.dyn4j.geometry.Vector2;
  * The penetration axis should always be normalized and point from {@link Convex}1
  * to {@link Convex}2.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class Penetration {
@@ -65,9 +65,9 @@ public class Penetration {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("PENETRATION[")
-		.append(this.normal).append("|")
-		.append(this.depth).append("]");
+		sb.append("Penetration[Normal=").append(this.normal)
+		.append("|Depth=").append(this.depth)
+		.append("]");
 		return sb.toString();
 	}
 	

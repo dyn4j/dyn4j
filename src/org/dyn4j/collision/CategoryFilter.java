@@ -90,7 +90,7 @@ package org.dyn4j.collision;
  * Basically the filter from <a href="http://www.box2d.org">Box2d</a>.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class CategoryFilter implements Filter {
@@ -153,9 +153,9 @@ public class CategoryFilter implements Filter {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("CATEGORY_FILTER[")
-		.append(this.category).append("|")
-		.append(this.mask).append("]");
+		sb.append("CategoryFilter[Category=").append(this.category)
+		.append("|Mask=").append(this.mask)
+		.append("]");
 		return sb.toString();
 	}
 	

@@ -43,8 +43,8 @@ import javax.swing.event.HyperlinkListener;
 
 import org.dyn4j.Version;
 import org.dyn4j.sandbox.Sandbox;
-import org.dyn4j.sandbox.Resources;
-import org.dyn4j.sandbox.utilities.Icons;
+import org.dyn4j.sandbox.icons.Icons;
+import org.dyn4j.sandbox.resources.Messages;
 
 /**
  * Dialog showing the about information.
@@ -61,7 +61,7 @@ public class AboutDialog extends JDialog {
 	 * @param owner the dialog owner
 	 */
 	private AboutDialog(Window owner) {
-		super(owner, Resources.getString("dialog.about.title"), ModalityType.APPLICATION_MODAL);
+		super(owner, Messages.getString("dialog.about.title"), ModalityType.APPLICATION_MODAL);
 		// set the icon
 		this.setIconImage(Icons.ABOUT.getImage());
 		// set the size
@@ -75,16 +75,16 @@ public class AboutDialog extends JDialog {
 		// add the logo to the top
 		JLabel icon = new JLabel();
 		icon.setIcon(Icons.SANDBOX_128);
-		icon.setText(MessageFormat.format(Resources.getString("dialog.about.text"), Sandbox.VERSION, Version.getVersion()));
+		icon.setText(MessageFormat.format(Messages.getString("dialog.about.text"), Sandbox.VERSION, Version.getVersion()));
 		
 		// add the about text section with clickable links
 		JTextPane text = new JTextPane();
 		text.setEditable(false);
 		try {
-			text.setPage(this.getClass().getResource(Resources.getString("dialog.about.html")));
+			text.setPage(this.getClass().getResource(Messages.getString("dialog.about.html")));
 		} catch (IOException e) {
 			// if the file is not found then just set the text to empty
-			text.setText(Resources.getString("dialog.about.html.error"));
+			text.setText(Messages.getString("dialog.about.html.error"));
 		}
 		// add a hyperlink listener to open links in the default browser
 		text.addHyperlinkListener(new HyperlinkListener() {
@@ -105,12 +105,12 @@ public class AboutDialog extends JDialog {
 								desktop.browse(uri);
 							} catch (URISyntaxException ex) {
 								// this shouldn't happen
-								System.err.println(MessageFormat.format(Resources.getString("dialog.about.uri.error"), e.getURL()));
+								System.err.println(MessageFormat.format(Messages.getString("dialog.about.uri.error"), e.getURL()));
 							} catch (IOException ex) {
 								// this shouldn't happen either since
 								// most desktops have a default program to
 								// open urls
-								System.err.println(Resources.getString("dialog.about.navigate.error"));
+								System.err.println(Messages.getString("dialog.about.navigate.error"));
 							}
 						}
 					}

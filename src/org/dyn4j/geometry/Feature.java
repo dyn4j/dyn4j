@@ -30,7 +30,7 @@ package org.dyn4j.geometry;
  * <p>
  * This class does not handle curved edges.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.0.2
  * @since 1.0.0
  */
 public abstract class Feature {

@@ -25,11 +25,12 @@
 package org.dyn4j.dynamics;
 
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * Represents a force.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class Force {
@@ -58,7 +59,7 @@ public class Force {
 	 * @throws NullPointerException if force is null
 	 */
 	public Force(Vector2 force) {
-		if (force == null) throw new NullPointerException("The force vector cannot be null.");
+		if (force == null) throw new NullPointerException(Messages.getString("dynamics.force.nullVector"));
 		this.force = force;
 	}
 	
@@ -68,7 +69,7 @@ public class Force {
 	 * @throws NullPointerException if force is null
 	 */
 	public Force(Force force) {
-		if (force == null) throw new NullPointerException("Cannot copy a null force.");
+		if (force == null) throw new NullPointerException(Messages.getString("dynamics.force.nullForce"));
 		this.force = force.force.copy();
 	}
 	
@@ -87,7 +88,7 @@ public class Force {
 	 * @throws NullPointerException if force is null
 	 */
 	public void set(Vector2 force) {
-		if (force == null) throw new NullPointerException("Cannot set this force vector to a null vector.");
+		if (force == null) throw new NullPointerException(Messages.getString("dynamics.force.setNullVector"));
 		this.force.set(force);
 	}
 	
@@ -97,7 +98,7 @@ public class Force {
 	 * @throws NullPointerException if force is null
 	 */
 	public void set(Force force) {
-		if (force == null) throw new NullPointerException("Cannot set this force to a null force.");
+		if (force == null) throw new NullPointerException(Messages.getString("dynamics.force.setNullForce"));
 		this.force.set(force.force);
 	}
 	
@@ -128,9 +129,7 @@ public class Force {
 	 */
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("FORCE[").append(this.force).append("]");
-		return sb.toString();
+		return this.force.toString();
 	}
 	
 	/**

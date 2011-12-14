@@ -51,8 +51,8 @@ import org.dyn4j.dynamics.joint.RopeJoint;
 import org.dyn4j.dynamics.joint.WeldJoint;
 import org.dyn4j.dynamics.joint.WheelJoint;
 import org.dyn4j.sandbox.SandboxBody;
-import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.controls.BottomButtonPanel;
+import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.panels.AngleJointPanel;
 import org.dyn4j.sandbox.panels.DistanceJointPanel;
 import org.dyn4j.sandbox.panels.FrictionJointPanel;
@@ -64,7 +64,7 @@ import org.dyn4j.sandbox.panels.RevoluteJointPanel;
 import org.dyn4j.sandbox.panels.RopeJointPanel;
 import org.dyn4j.sandbox.panels.WeldJointPanel;
 import org.dyn4j.sandbox.panels.WheelJointPanel;
-import org.dyn4j.sandbox.utilities.Icons;
+import org.dyn4j.sandbox.resources.Messages;
 
 /**
  * Dialog used to create a joint.
@@ -104,53 +104,53 @@ public class EditJointDialog extends JDialog implements ActionListener {
 		if (joint instanceof AngleJoint) {
 			this.pnlJoint = new AngleJointPanel((AngleJoint)joint, bodies, true);
 			this.setIconImage(Icons.EDIT_ANGLE_JOINT.getImage());
-			this.setTitle(Resources.getString("dialog.joint.edit.angle.title"));
-			pneInfo.setText(Resources.getString("panel.joint.angle.description"));
+			this.setTitle(Messages.getString("dialog.joint.edit.angle.title"));
+			pneInfo.setText(Messages.getString("panel.joint.angle.description"));
 		} else if (joint instanceof DistanceJoint) {
 			this.pnlJoint = new DistanceJointPanel((DistanceJoint)joint, bodies, true);
 			this.setIconImage(Icons.EDIT_DISTANCE_JOINT.getImage());
-			this.setTitle(Resources.getString("dialog.joint.edit.distance.title"));
-			pneInfo.setText(Resources.getString("panel.joint.distance.description"));
+			this.setTitle(Messages.getString("dialog.joint.edit.distance.title"));
+			pneInfo.setText(Messages.getString("panel.joint.distance.description"));
 		} else if (joint instanceof FrictionJoint) {
 			this.pnlJoint = new FrictionJointPanel((FrictionJoint)joint, bodies, true);
 			this.setIconImage(Icons.EDIT_FRICTION_JOINT.getImage());
-			this.setTitle(Resources.getString("dialog.joint.edit.friction.title"));
-			pneInfo.setText(Resources.getString("panel.joint.friction.description"));
+			this.setTitle(Messages.getString("dialog.joint.edit.friction.title"));
+			pneInfo.setText(Messages.getString("panel.joint.friction.description"));
 		} else if (joint instanceof MouseJoint) {
 			this.pnlJoint = new MouseJointPanel((MouseJoint)joint, bodies, true);
 			this.setIconImage(Icons.EDIT_MOUSE_JOINT.getImage());
-			this.setTitle(Resources.getString("dialog.joint.edit.mouse.title"));
-			pneInfo.setText(Resources.getString("panel.joint.mouse.description"));
+			this.setTitle(Messages.getString("dialog.joint.edit.mouse.title"));
+			pneInfo.setText(Messages.getString("panel.joint.mouse.description"));
 		} else if (joint instanceof PrismaticJoint) {
 			this.pnlJoint = new PrismaticJointPanel((PrismaticJoint)joint, bodies, true);
 			this.setIconImage(Icons.EDIT_PRISMATIC_JOINT.getImage());
-			this.setTitle(Resources.getString("dialog.joint.edit.prismatic.title"));
-			pneInfo.setText(Resources.getString("panel.joint.prismatic.description"));
+			this.setTitle(Messages.getString("dialog.joint.edit.prismatic.title"));
+			pneInfo.setText(Messages.getString("panel.joint.prismatic.description"));
 		} else if (joint instanceof PulleyJoint) {
 			this.pnlJoint = new PulleyJointPanel((PulleyJoint)joint, bodies, true);
 			this.setIconImage(Icons.EDIT_PULLEY_JOINT.getImage());
-			this.setTitle(Resources.getString("dialog.joint.edit.pulley.title"));
-			pneInfo.setText(Resources.getString("panel.joint.pulley.description"));
+			this.setTitle(Messages.getString("dialog.joint.edit.pulley.title"));
+			pneInfo.setText(Messages.getString("panel.joint.pulley.description"));
 		} else if (joint instanceof RevoluteJoint) {
 			this.pnlJoint = new RevoluteJointPanel((RevoluteJoint)joint, bodies, true);
 			this.setIconImage(Icons.EDIT_REVOLUTE_JOINT.getImage());
-			this.setTitle(Resources.getString("dialog.joint.edit.revolute.title"));
-			pneInfo.setText(Resources.getString("panel.joint.revolute.description"));
+			this.setTitle(Messages.getString("dialog.joint.edit.revolute.title"));
+			pneInfo.setText(Messages.getString("panel.joint.revolute.description"));
 		} else if (joint instanceof RopeJoint) {
 			this.pnlJoint = new RopeJointPanel((RopeJoint)joint, bodies, true);
 			this.setIconImage(Icons.EDIT_ROPE_JOINT.getImage());
-			this.setTitle(Resources.getString("dialog.joint.edit.rope.title"));
-			pneInfo.setText(Resources.getString("panel.joint.rope.description"));
+			this.setTitle(Messages.getString("dialog.joint.edit.rope.title"));
+			pneInfo.setText(Messages.getString("panel.joint.rope.description"));
 		} else if (joint instanceof WeldJoint) {
 			this.pnlJoint = new WeldJointPanel((WeldJoint)joint, bodies, true);
 			this.setIconImage(Icons.EDIT_WELD_JOINT.getImage());
-			this.setTitle(Resources.getString("dialog.joint.edit.weld.title"));
-			pneInfo.setText(Resources.getString("panel.joint.weld.description"));
+			this.setTitle(Messages.getString("dialog.joint.edit.weld.title"));
+			pneInfo.setText(Messages.getString("panel.joint.weld.description"));
 		} else if (joint instanceof WheelJoint) {
 			this.pnlJoint = new WheelJointPanel((WheelJoint)joint, bodies, true);
 			this.setIconImage(Icons.EDIT_WHEEL_JOINT.getImage());
-			this.setTitle(Resources.getString("dialog.joint.edit.wheel.title"));
-			pneInfo.setText(Resources.getString("panel.joint.wheel.description"));
+			this.setTitle(Messages.getString("dialog.joint.edit.wheel.title"));
+			pneInfo.setText(Messages.getString("panel.joint.wheel.description"));
 		}
 		
 		JPanel pnlInfo = new JPanel();
@@ -160,11 +160,11 @@ public class EditJointDialog extends JDialog implements ActionListener {
 		
 		JTabbedPane tabbedPane = new JTabbedPane();
 		tabbedPane.setBorder(BorderFactory.createEmptyBorder(7, 0, 0, 0));
-		tabbedPane.addTab(Resources.getString("dialog.joint.tab.joint"), this.pnlJoint);
-		tabbedPane.addTab(Resources.getString("dialog.joint.tab.information"), pnlInfo);
+		tabbedPane.addTab(Messages.getString("dialog.joint.tab.joint"), this.pnlJoint);
+		tabbedPane.addTab(Messages.getString("dialog.joint.tab.information"), pnlInfo);
 		
-		JButton btnCancel = new JButton(Resources.getString("button.cancel"));
-		JButton btnSave = new JButton(Resources.getString("button.save"));
+		JButton btnCancel = new JButton(Messages.getString("button.cancel"));
+		JButton btnSave = new JButton(Messages.getString("button.save"));
 		btnCancel.setActionCommand("cancel");
 		btnSave.setActionCommand("save");
 		btnCancel.addActionListener(this);

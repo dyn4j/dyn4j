@@ -29,10 +29,13 @@ package org.dyn4j.sandbox.persist;
  * <p>
  * Simplified from: http://stackoverflow.com/questions/139076/how-to-pretty-print-xml-from-java/2920419#2920419
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class XmlFormatter {
+	/** The new line separator */
+	private static final String NEW_LINE = System.getProperty("line.separator");
+	
 	/** The number of characters to indent */
 	private int indentNumChars;
 	
@@ -72,7 +75,7 @@ public class XmlFormatter {
 			if (currentChar == '>') {
 				if (s.charAt(i - 1) == '/') {
 					indent -= indentNumChars;
-					sb.append("\n");
+					sb.append(NEW_LINE);
 				} else {
 					int nextStartElementPos = s.indexOf('<', i);
 					if (nextStartElementPos > i + 1) {
@@ -80,8 +83,8 @@ public class XmlFormatter {
 						// If the space between elements is solely newlines,
 						// let them through to preserve additional newlines
 						// in source document.
-						if (textBetweenElements.replaceAll("\n", "").length() == 0) {
-							sb.append(textBetweenElements + "\n");
+						if (textBetweenElements.replaceAll("(\n|\r\n|\r)", "").length() == 0) {
+							sb.append(textBetweenElements + NEW_LINE);
 						}
 						// Put tags and text on a single line if the text is
 						// short.
@@ -91,7 +94,7 @@ public class XmlFormatter {
 						}
 						i = nextStartElementPos - 1;
 					} else {
-						sb.append("\n");
+						sb.append(NEW_LINE);
 					}
 				}
 			}

@@ -54,7 +54,7 @@ import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.geometry.Wound;
 import org.dyn4j.sandbox.SandboxBody;
-import org.dyn4j.sandbox.Resources;
+import org.dyn4j.sandbox.resources.Messages;
 
 /**
  * Utility class used to perform common rendering operations.
@@ -741,13 +741,13 @@ public final class RenderUtilities {
 	 * @param points true if points should be drawn
 	 */
 	public static final void drawShape(GL2 gl, Shape s, boolean points) {
-		if (s.isType(Circle.TYPE)) {
+		if (s instanceof Circle) {
 			RenderUtilities.drawCircle(gl, (Circle)s, points, true);
-		} else if (s.isType(Rectangle.TYPE)) {
+		} else if (s instanceof Rectangle) {
 			RenderUtilities.drawRectangle(gl, (Rectangle)s, points);
-		} else if (s.isType(Polygon.TYPE)) {
+		} else if (s instanceof Polygon) {
 			RenderUtilities.drawPolygon(gl, (Polygon)s, points);
-		} else if (s.isType(Segment.TYPE)) {
+		} else if (s instanceof Segment) {
 			RenderUtilities.drawLineSegment(gl, (Segment)s, points);
 		} else {
 			// no rendering available
@@ -760,13 +760,13 @@ public final class RenderUtilities {
 	 * @param s the shape
 	 */
 	public static final void fillShape(GL2 gl, Shape s) {
-		if (s.isType(Circle.TYPE)) {
+		if (s instanceof Circle) {
 			RenderUtilities.fillCircle(gl, (Circle)s);
-		} else if (s.isType(Rectangle.TYPE)) {
+		} else if (s instanceof Rectangle) {
 			RenderUtilities.fillRectangle(gl, (Rectangle)s);
-		} else if (s.isType(Polygon.TYPE)) {
+		} else if (s instanceof Polygon) {
 			RenderUtilities.fillPolygon(gl, (Polygon)s);
-		} else if (s.isType(Segment.TYPE)) {
+		} else if (s instanceof Segment) {
 			// segments don't need to be filled
 		} else {
 			// no rendering available
@@ -1128,6 +1128,6 @@ public final class RenderUtilities {
 	 * @return String
 	 */
 	public static final String formatVector2(Vector2 v) {
-		return MessageFormat.format(Resources.getString("canvas.vector.format"), v.x, v.y);
+		return MessageFormat.format(Messages.getString("canvas.vector.format"), v.x, v.y);
 	}
 }

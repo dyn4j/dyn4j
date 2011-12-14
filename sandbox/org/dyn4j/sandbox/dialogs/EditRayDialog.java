@@ -35,11 +35,11 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 
-import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.SandboxRay;
 import org.dyn4j.sandbox.controls.BottomButtonPanel;
+import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.panels.RayPanel;
-import org.dyn4j.sandbox.utilities.Icons;
+import org.dyn4j.sandbox.resources.Messages;
 
 /**
  * Dialog used to edit a ray to the world.
@@ -69,16 +69,16 @@ public class EditRayDialog extends JDialog implements ActionListener {
 	 * @param ray the ray to edit
 	 */
 	private EditRayDialog(Window owner, SandboxRay ray) {
-		super(owner, Resources.getString("dialog.ray.edit.title"), ModalityType.APPLICATION_MODAL);
+		super(owner, Messages.getString("dialog.ray.edit.title"), ModalityType.APPLICATION_MODAL);
 		
 		this.setIconImage(Icons.FORCE.getImage());
 		this.rayPanel = new RayPanel(ray);
 		
-		this.btnCancel = new JButton(Resources.getString("button.cancel"));
+		this.btnCancel = new JButton(Messages.getString("button.cancel"));
 		this.btnCancel.setActionCommand("cancel");
 		this.btnCancel.addActionListener(this);
 		
-		this.btnSave = new JButton(Resources.getString("button.save"));
+		this.btnSave = new JButton(Messages.getString("button.save"));
 		this.btnSave.setActionCommand("save");
 		this.btnSave.addActionListener(this);
 		

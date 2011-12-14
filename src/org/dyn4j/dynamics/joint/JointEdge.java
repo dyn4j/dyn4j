@@ -29,7 +29,7 @@ import org.dyn4j.dynamics.Body;
 /**
  * Represents a link from one {@link Body} to another over a {@link Joint}.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class JointEdge {
@@ -54,9 +54,9 @@ public class JointEdge {
 	 */
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("JOINT_EDGE[")
-		.append(this.joint).append("|")
-		.append(this.other).append("]");
+		sb.append("JointEdge[Joint=").append(this.joint)
+		.append("|ConnectedBody=").append(this.other)
+		.append("]");
 		return sb.toString();
 	}
 	

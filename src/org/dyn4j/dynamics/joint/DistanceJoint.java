@@ -33,6 +33,7 @@ import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * Represents a fixed length distance joint.
@@ -47,13 +48,10 @@ import org.dyn4j.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class DistanceJoint extends Joint {
-	/** The joint type */
-	public static final Joint.Type TYPE = new Joint.Type("Distance");
-	
 	/** The local anchor point on the first {@link Body} */
 	protected Vector2 localAnchor1;
 	
@@ -100,9 +98,10 @@ public class DistanceJoint extends Joint {
 	public DistanceJoint(Body body1, Body body2, Vector2 anchor1, Vector2 anchor2) {
 		super(body1, body2, false);
 		// verify the bodies are not the same instance
-		if (body1 == body2) throw new IllegalArgumentException("Cannot create a distance joint between the same body instance.");
+		if (body1 == body2) throw new IllegalArgumentException(Messages.getString("dynamics.joint.sameBody"));
 		// verify the anchor points are not null
-		if (anchor1 == null || anchor2 == null) throw new NullPointerException("Neither anchor point can be null.");
+		if (anchor1 == null) throw new NullPointerException(Messages.getString("dynamics.joint.nullAnchor1"));
+		if (anchor2 == null) throw new NullPointerException(Messages.getString("dynamics.joint.nullAnchor2"));
 		// get the local anchor points
 		this.localAnchor1 = body1.getLocalPoint(anchor1);
 		this.localAnchor2 = body2.getLocalPoint(anchor2);
@@ -115,14 +114,15 @@ public class DistanceJoint extends Joint {
 	 */
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("DISTANCE_JOINT[")
-		.append(super.toString()).append("|")
-		.append(this.localAnchor1).append("|")
-		.append(this.localAnchor2).append("|")
-		.append(this.frequency).append("|")
-		.append(this.dampingRatio).append("|")
-		.append(this.distance).append("|")
-		.append(this.impulse).append("]");
+		sb.append("DistanceJoint[").append(super.toString())
+		.append("|LocalAnchor1=").append(this.localAnchor1)
+		.append("|LocalAnchor2=").append(this.localAnchor2)
+		.append("|WorldAnchor1=").append(this.getAnchor1())
+		.append("|WorldAnchor2=").append(this.getAnchor2())
+		.append("|Frequency=").append(this.frequency)
+		.append("|DampingRatio=").append(this.dampingRatio)
+		.append("|Distance=").append(this.distance)
+		.append("]");
 		return sb.toString();
 	}
 	
@@ -259,7 +259,7 @@ public class DistanceJoint extends Joint {
 		// get the current settings
 		Settings settings = Settings.getInstance();
 		double linearTolerance = settings.getLinearTolerance();
-		double maxLinearCorrection = settings.getMaxLinearCorrection();
+		double maxLinearCorrection = settings.getMaximumLinearCorrection();
 		
 		Transform t1 = body1.getTransform();
 		Transform t2 = body2.getTransform();
@@ -296,14 +296,6 @@ public class DistanceJoint extends Joint {
 		body2.rotate(-invI2 * r2.cross(J), c2);
 		
 		return Math.abs(C) < linearTolerance;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getType()
-	 */
-	@Override
-	public Type getType() {
-		return DistanceJoint.TYPE;
 	}
 	
 	/* (non-Javadoc)
@@ -368,7 +360,7 @@ public class DistanceJoint extends Joint {
 	 */
 	public void setDistance(double distance) {
 		// make sure the distance is greater than zero
-		if (distance < 0.0) throw new IllegalArgumentException("The distance must be greater than or equal to zero.");
+		if (distance < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.distance.invalidDistance"));
 		// wake up both bodies
 		this.body1.setAsleep(false);
 		this.body2.setAsleep(false);
@@ -391,7 +383,7 @@ public class DistanceJoint extends Joint {
 	 */
 	public void setDampingRatio(double dampingRatio) {
 		// make sure its within range
-		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException("The damping ratio must be between 0 and 1 inclusive.");
+		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidDampingRatio"));
 		// set the new value
 		this.dampingRatio = dampingRatio;
 	}
@@ -411,7 +403,7 @@ public class DistanceJoint extends Joint {
 	 */
 	public void setFrequency(double frequency) {
 		// check for valid value
-		if (frequency < 0) throw new IllegalArgumentException("The frequency must be greater than or equal to zero.");
+		if (frequency < 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidFrequency"));
 		// set the new value
 		this.frequency = frequency;
 	}

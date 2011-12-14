@@ -30,6 +30,7 @@ import java.util.Stack;
 
 import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * Implementation of the Andrew's Monotone Chain convex hull algorithm.
@@ -76,7 +77,7 @@ public class MonotoneChain implements HullGenerator {
 	@Override
 	public Vector2[] generate(Vector2... points) {
 		// check for a null array
-		if (points == null) throw new NullPointerException("Cannot generate a convex hull from a null point array.");
+		if (points == null) throw new NullPointerException(Messages.getString("geometry.hull.nullArray"));
 		
 		// get the size
 		int size = points.length;
@@ -89,7 +90,7 @@ public class MonotoneChain implements HullGenerator {
 		} catch (NullPointerException e) {
 			// if any comparison generates a null pointer exception
 			// throw a null pointer exception with a good message
-			throw new NullPointerException("The array of points cannot contain null points.");
+			throw new NullPointerException(Messages.getString("geometry.hull.nullPoints"));
 		}
 		
 		// find the points whose x values are the smallest and largest

@@ -35,6 +35,7 @@ import org.dyn4j.dynamics.Settings;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * Implements the Conservative Advancement technique to solve for the time of impact.
@@ -95,7 +96,7 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 	 * @throws NullPointerException if distanceDetector is null
 	 */
 	public ConservativeAdvancement(DistanceDetector distanceDetector) {
-		if (distanceDetector == null) throw new NullPointerException("The distance detector cannot null.");
+		if (distanceDetector == null) throw new NullPointerException(Messages.getString("collision.continuous.conservativeAdvancement.nullDistanceDetector"));
 		this.distanceDetector = distanceDetector;
 	}
 	
@@ -383,7 +384,7 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 	 * @throws NullPointerException if distanceDetector is null
 	 */
 	public void setDistanceDetector(DistanceDetector distanceDetector) {
-		if (distanceDetector == null) throw new NullPointerException("The distance detector cannot null.");
+		if (distanceDetector == null) throw new NullPointerException(Messages.getString("collision.continuous.conservativeAdvancement.nullDistanceDetector"));
 		this.distanceDetector = distanceDetector;
 	}
 	
@@ -403,7 +404,7 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 	 * @throws IllegalArgumentException if distanceEpsilon is less than or equal to zero
 	 */
 	public void setDistanceEpsilon(double distanceEpsilon) {
-		if (distanceEpsilon <= 0.0) throw new IllegalArgumentException("The tolerance must be greater than zero.");
+		if (distanceEpsilon <= 0.0) throw new IllegalArgumentException(Messages.getString("collision.continuous.conservativeAdvancement.invalidDistanceEpsilon"));
 		this.distanceEpsilon = distanceEpsilon;
 	}
 	
@@ -426,7 +427,7 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 	 * @throws IllegalArgumentException if maxIterations is less than 5
 	 */
 	public void setMaxIterations(int maxIterations) {
-		if (maxIterations < 5) throw new IllegalArgumentException("The root finder must have a minimum of 5 iterations.");
+		if (maxIterations < 5) throw new IllegalArgumentException(Messages.getString("collision.continuous.conservativeAdvancement.invalidMaximumIterations"));
 		this.maxIterations = maxIterations;
 	}
 }

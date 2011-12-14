@@ -50,11 +50,11 @@ import org.dyn4j.collision.narrowphase.Sat;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.controls.ComboItem;
+import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
+import org.dyn4j.sandbox.resources.Messages;
 import org.dyn4j.sandbox.utilities.ControlUtilities;
-import org.dyn4j.sandbox.utilities.Icons;
 
 /**
  * Panel used to configure a world object.
@@ -68,26 +68,26 @@ public class WorldPanel extends JPanel {
 
 	/** The list of available broadphase algorithms */
 	private static final ComboItem[] BROADPHASE_ALGORITHMS = new ComboItem[] {
-		new ComboItem(Resources.getString("panel.world.broad.algorithm.sapBruteForce"), SapBruteForce.class),
-		new ComboItem(Resources.getString("panel.world.broad.algorithm.sapIncremental"), SapIncremental.class),
-		new ComboItem(Resources.getString("panel.world.broad.algorithm.sapTree"), SapTree.class),
-		new ComboItem(Resources.getString("panel.world.broad.algorithm.dynamicAABBTree"), DynamicAABBTree.class),
+		new ComboItem(Messages.getString("panel.world.broad.algorithm.sapBruteForce"), SapBruteForce.class),
+		new ComboItem(Messages.getString("panel.world.broad.algorithm.sapIncremental"), SapIncremental.class),
+		new ComboItem(Messages.getString("panel.world.broad.algorithm.sapTree"), SapTree.class),
+		new ComboItem(Messages.getString("panel.world.broad.algorithm.dynamicAABBTree"), DynamicAABBTree.class),
 	};
 	
 	/** The list of available narrowphase algorithms */
 	private static final ComboItem[] NARROWPHASE_ALGORITHMS = new ComboItem[] {
-		new ComboItem(Resources.getString("panel.world.narrow.algorithm.sat"), Sat.class),
-		new ComboItem(Resources.getString("panel.world.narrow.algorithm.gjk"), Gjk.class)
+		new ComboItem(Messages.getString("panel.world.narrow.algorithm.sat"), Sat.class),
+		new ComboItem(Messages.getString("panel.world.narrow.algorithm.gjk"), Gjk.class)
 	};
 	
 	/** The list of available manifold solver algorithms */
 	private static final ComboItem[] MANIFOLD_SOLVER_ALGORITHMS = new ComboItem[] {
-		new ComboItem(Resources.getString("panel.world.manifold.algorithm.clip"), ClippingManifoldSolver.class)
+		new ComboItem(Messages.getString("panel.world.manifold.algorithm.clip"), ClippingManifoldSolver.class)
 	};
 	
 	/** The list of available time of impact algorithms */
 	private static final ComboItem[] TIME_OF_IMPACT_ALGORITHMS = new ComboItem[] {
-		new ComboItem(Resources.getString("panel.world.toi.algorithm.conservativeAdvancement"), ConservativeAdvancement.class)
+		new ComboItem(Messages.getString("panel.world.toi.algorithm.conservativeAdvancement"), ConservativeAdvancement.class)
 	};
 	
 	/** The world name */
@@ -116,23 +116,23 @@ public class WorldPanel extends JPanel {
 	 * @param world the current world object
 	 */
 	public WorldPanel(World world) {
-		JLabel lblName = new JLabel(Resources.getString("panel.world.name"), Icons.INFO, JLabel.LEFT);
-		lblName.setToolTipText(Resources.getString("panel.world.name.tooltip"));
+		JLabel lblName = new JLabel(Messages.getString("panel.world.name"), Icons.INFO, JLabel.LEFT);
+		lblName.setToolTipText(Messages.getString("panel.world.name.tooltip"));
 		this.txtName = new JTextField();
 		this.txtName.addFocusListener(new SelectTextFocusListener(this.txtName));
 		this.txtName.setText((String)world.getUserData());
 		
-		JLabel lblBroadphase = new JLabel(Resources.getString("panel.world.broad.algorithm"), Icons.INFO, JLabel.LEFT);
-		lblBroadphase.setToolTipText(Resources.getString("panel.world.broad.algorithm.tooltip"));
+		JLabel lblBroadphase = new JLabel(Messages.getString("panel.world.broad.algorithm"), Icons.INFO, JLabel.LEFT);
+		lblBroadphase.setToolTipText(Messages.getString("panel.world.broad.algorithm.tooltip"));
 		
-		JLabel lblNarrowphase = new JLabel(Resources.getString("panel.world.narrow.algorithm"), Icons.INFO, JLabel.LEFT);
-		lblNarrowphase.setToolTipText(Resources.getString("panel.world.narrow.algorithm.tooltip"));
+		JLabel lblNarrowphase = new JLabel(Messages.getString("panel.world.narrow.algorithm"), Icons.INFO, JLabel.LEFT);
+		lblNarrowphase.setToolTipText(Messages.getString("panel.world.narrow.algorithm.tooltip"));
 		
-		JLabel lblManifoldSolver = new JLabel(Resources.getString("panel.world.manifold.algorithm"), Icons.INFO, JLabel.LEFT);
-		lblManifoldSolver.setToolTipText(Resources.getString("panel.world.manifold.algorithm.tooltip"));
+		JLabel lblManifoldSolver = new JLabel(Messages.getString("panel.world.manifold.algorithm"), Icons.INFO, JLabel.LEFT);
+		lblManifoldSolver.setToolTipText(Messages.getString("panel.world.manifold.algorithm.tooltip"));
 		
-		JLabel lblToiSolver = new JLabel(Resources.getString("panel.world.toi.algorithm"), Icons.INFO, JLabel.LEFT);
-		lblToiSolver.setToolTipText(Resources.getString("panel.world.toi.algorithm.tooltip"));
+		JLabel lblToiSolver = new JLabel(Messages.getString("panel.world.toi.algorithm"), Icons.INFO, JLabel.LEFT);
+		lblToiSolver.setToolTipText(Messages.getString("panel.world.toi.algorithm.tooltip"));
 		
 		this.cmbBroadphase = new JComboBox(BROADPHASE_ALGORITHMS);
 		this.cmbBroadphase.setSelectedItem(getItem(world.getBroadphaseDetector()));
@@ -143,11 +143,11 @@ public class WorldPanel extends JPanel {
 		this.cmbToiDetector = new JComboBox(TIME_OF_IMPACT_ALGORITHMS);
 		this.cmbToiDetector.setSelectedItem(getItem(world.getTimeOfImpactDetector()));
 		
-		JLabel lblGravity = new JLabel(Resources.getString("panel.world.gravity"), Icons.INFO, JLabel.LEFT);
-		lblGravity.setToolTipText(Resources.getString("panel.world.gravity.tooltip"));
+		JLabel lblGravity = new JLabel(Messages.getString("panel.world.gravity"), Icons.INFO, JLabel.LEFT);
+		lblGravity.setToolTipText(Messages.getString("panel.world.gravity.tooltip"));
 		
-		this.txtGravityX = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.world.gravity.format")));
-		this.txtGravityY = new JFormattedTextField(new DecimalFormat(Resources.getString("panel.world.gravity.format")));
+		this.txtGravityX = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.world.gravity.format")));
+		this.txtGravityY = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.world.gravity.format")));
 		this.txtGravityX.addFocusListener(new SelectTextFocusListener(this.txtGravityX));
 		this.txtGravityY.addFocusListener(new SelectTextFocusListener(this.txtGravityY));
 		this.txtGravityX.setColumns(7);
@@ -156,13 +156,13 @@ public class WorldPanel extends JPanel {
 		this.txtGravityX.setValue(world.getGravity().x);
 		this.txtGravityY.setValue(world.getGravity().y);
 		
-		JLabel lblX = new JLabel(Resources.getString("x"));
-		JLabel lblY = new JLabel(Resources.getString("y"));
+		JLabel lblX = new JLabel(Messages.getString("x"));
+		JLabel lblY = new JLabel(Messages.getString("y"));
 		
 		GroupLayout layout;
 		
 		JPanel pnlWorld = new JPanel();
-		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.world.section.world"));
+		TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Messages.getString("panel.world.section.world"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlWorld.setBorder(border);
 		layout = new GroupLayout(pnlWorld);
@@ -193,7 +193,7 @@ public class WorldPanel extends JPanel {
 						.addComponent(lblY)));
 		
 		JPanel pnlAlgorithms = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Resources.getString("panel.world.section.algorithms"));
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Messages.getString("panel.world.section.algorithms"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlAlgorithms.setBorder(border);
 		layout = new GroupLayout(pnlAlgorithms);

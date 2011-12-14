@@ -24,25 +24,24 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.resources.Messages;
+
 /**
  * Represents a {@link Circle}.
  * <p>
  * A {@link Circle}'s radius must be larger than zero.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class Circle extends AbstractShape implements Convex, Shape, Transformable {
-	/** The circle {@link Shape.Type} */
-	public static final Shape.Type TYPE = new Shape.Type("Circle");
-	
 	/**
 	 * Full constructor.
 	 * @param radius the radius
 	 * @throws IllegalArgumentException if the given radius is less than or equal to zero
 	 */
 	public Circle(double radius) {
-		if (radius <= 0.0) throw new IllegalArgumentException("The radius must be greater than zero.");
+		if (radius <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.circle.invalidRadius"));
 		this.center = new Vector2();
 		this.radius = radius;
 	}
@@ -56,20 +55,14 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Shape#getType()
-	 */
-	@Override
-	public Type getType() {
-		return Circle.TYPE;
-	}
-	
-	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Wound#toString()
 	 */
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("CIRCLE[").append(super.toString()).append("|").append(radius).append("]");
+		sb.append("Circle[").append(super.toString())
+		.append("|UserData=").append(this.userData)
+		.append("]");
 		return sb.toString();
 	}
 	

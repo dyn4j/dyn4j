@@ -24,7 +24,7 @@
  */
 package org.dyn4j.sandbox.utilities;
 
-import org.dyn4j.sandbox.Resources;
+import org.dyn4j.sandbox.resources.Messages;
 
 /**
  * Utility class used to get system related information.
@@ -41,7 +41,7 @@ public class SystemUtilities {
 		try{
 			return System.getProperty("java.version");
 		} catch (SecurityException e) {
-			return Resources.getString("exception.security");
+			return Messages.getString("exception.security");
 		}
 	}
 	
@@ -53,7 +53,7 @@ public class SystemUtilities {
 		try{
 			return System.getProperty("java.vendor");
 		} catch (SecurityException e) {
-			return Resources.getString("exception.security");
+			return Messages.getString("exception.security");
 		}
 	}
 	
@@ -63,9 +63,9 @@ public class SystemUtilities {
 	 */
 	public static final String getOperatingSystem() {
 		try{
-			return System.getProperty("os.name");
+			return System.getProperty("os.name") + " " + System.getProperty("os.version");
 		} catch (SecurityException e) {
-			return Resources.getString("exception.security");
+			return Messages.getString("exception.security");
 		}
 	}
 	
@@ -77,7 +77,7 @@ public class SystemUtilities {
 		try{
 			return System.getProperty("os.arch");
 		} catch (SecurityException e) {
-			return Resources.getString("exception.security");
+			return Messages.getString("exception.security");
 		}
 	}
 }

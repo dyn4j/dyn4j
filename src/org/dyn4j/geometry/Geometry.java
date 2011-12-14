@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.dyn4j.Epsilon;
+import org.dyn4j.resources.Messages;
 
 /**
  * Contains static methods to perform standard geometric operations.
@@ -60,11 +61,11 @@ public class Geometry {
 	 */
 	public static final double getWinding(List<Vector2> points) {
 		// check for a null list
-		if (points == null) throw new NullPointerException("The points list cannot be null.");
+		if (points == null) throw new NullPointerException(Messages.getString("geometry.nullPointList"));
 		// get the size
 		int size = points.size();
 		// the size must be larger than 1
-		if (size < 2) throw new IllegalArgumentException("The points list must contain at least 2 non-null points.");
+		if (size < 2) throw new IllegalArgumentException(Messages.getString("geometry.invalidSizePointList2"));
 		// determine the winding by computing a signed "area"
 		double area = 0.0;
 		for (int i = 0; i < size; i++) {
@@ -72,7 +73,7 @@ public class Geometry {
 			Vector2 p1 = points.get(i);
 			Vector2 p2 = points.get(i + 1 == size ? 0 : i + 1);
 			// check for null
-			if (p1 == null || p2 == null) throw new NullPointerException("The points list cannot contain null points.");
+			if (p1 == null || p2 == null) throw new NullPointerException(Messages.getString("geometry.nullPointListElements"));
 			// add the signed area
 			area += p1.cross(p2);
 		}
@@ -91,11 +92,11 @@ public class Geometry {
 	 */
 	public static final double getWinding(Vector2... points) {
 		// check for a null list
-		if (points == null) throw new NullPointerException("The points array cannot be null.");
+		if (points == null) throw new NullPointerException(Messages.getString("geometry.nullPointArray"));
 		// get the size
 		int size = points.length;
 		// the size must be larger than 1
-		if (size < 2) throw new IllegalArgumentException("The points array must contain at least 2 non-null points.");
+		if (size < 2) throw new IllegalArgumentException(Messages.getString("geometry.invalidSizePointArray2"));
 		// determine the winding by computing a signed "area"
 		double area = 0.0;
 		for (int i = 0; i < size; i++) {
@@ -103,7 +104,7 @@ public class Geometry {
 			Vector2 p1 = points[i];
 			Vector2 p2 = points[i + 1 == size ? 0 : i + 1];
 			// check for null
-			if (p1 == null || p2 == null) throw new NullPointerException("The points array cannot contain null points.");
+			if (p1 == null || p2 == null) throw new NullPointerException(Messages.getString("geometry.nullPointArrayElements"));
 			// add the signed area
 			area += p1.cross(p2);
 		}
@@ -121,7 +122,7 @@ public class Geometry {
 	 */
 	public static final void reverseWinding(Vector2... points) {
 		// check for a null list
-		if (points == null) throw new NullPointerException("The points array cannot be null.");
+		if (points == null) throw new NullPointerException(Messages.getString("geometry.nullPointArray"));
 		// get the length
 		int size = points.length;
 		// check for a length of 1
@@ -151,7 +152,7 @@ public class Geometry {
 	 */
 	public static final void reverseWinding(List<Vector2> points) {
 		// check for a null list
-		if (points == null) throw new NullPointerException("The points list cannot be null.");
+		if (points == null) throw new NullPointerException(Messages.getString("geometry.nullPointList"));
 		// get the length
 		int size = points.size();
 		// check for a length of 1
@@ -169,16 +170,16 @@ public class Geometry {
 	 */
 	public static final Vector2 getAverageCenter(List<Vector2> points) {
 		// check for null list
-		if (points == null) throw new NullPointerException("The points list cannot be null.");
+		if (points == null) throw new NullPointerException(Messages.getString("geometry.nullPointList"));
 		// check for empty list
-		if (points.isEmpty()) throw new IllegalArgumentException("The points list must have at least one point.");
+		if (points.isEmpty()) throw new IllegalArgumentException(Messages.getString("geometry.invalidSizePointList1"));
 		// get the size
 		int size = points.size();
 		// check for a list of one point
 		if (size == 1) {
 			Vector2 p = points.get(0);
 			// make sure its not null
-			if (p == null) throw new NullPointerException("The points list cannot contain null points.");
+			if (p == null) throw new NullPointerException(Messages.getString("geometry.nullPointListElements"));
 			// return a copy
 			return p.copy();
 		}
@@ -188,7 +189,7 @@ public class Geometry {
 		for (int i = 0; i < size; i++) {
 			Vector2 point = points.get(i);
 			// check for null
-			if (point == null) throw new NullPointerException("The points list cannot contain null points.");
+			if (point == null) throw new NullPointerException(Messages.getString("geometry.nullPointListElements"));
 			x += point.x;
 			y += point.y;
 		}
@@ -205,16 +206,16 @@ public class Geometry {
 	 */
 	public static final Vector2 getAverageCenter(Vector2... points) {
 		// check for null array
-		if (points == null) throw new NullPointerException("The points array cannot be null.");
+		if (points == null) throw new NullPointerException(Messages.getString("geometry.nullPointArray"));
 		// get the length
 		int size = points.length;
 		// check for empty
-		if (size == 0) throw new IllegalArgumentException("The points array must have at least one point.");
+		if (size == 0) throw new IllegalArgumentException(Messages.getString("geometry.invalidSizePointArray1"));
 		// check for a list of one point
 		if (size == 1) {
 			Vector2 p = points[0];
 			// check for null
-			if (p == null) throw new NullPointerException("The points array cannot contain null points.");
+			if (p == null) throw new NullPointerException(Messages.getString("geometry.nullPointArrayElements"));
 			return p.copy();
 		}
 		double x = 0;
@@ -222,7 +223,7 @@ public class Geometry {
 		for (int i = 0; i < size; i++) {
 			Vector2 point = points[i];
 			// check for null
-			if (point == null) throw new NullPointerException("The points array cannot contain null points.");
+			if (point == null) throw new NullPointerException(Messages.getString("geometry.nullPointArrayElements"));
 			x += point.x;
 			y += point.y;
 		}
@@ -253,15 +254,15 @@ public class Geometry {
 	 */
 	public static final Vector2 getAreaWeightedCenter(List<Vector2> points) {
 		// check for null list
-		if (points == null) throw new NullPointerException("The points list cannot be null.");
+		if (points == null) throw new NullPointerException(Messages.getString("geometry.nullPointList"));
 		// check for empty list
-		if (points.isEmpty()) throw new IllegalArgumentException("The points list must have at least one point.");
+		if (points.isEmpty()) throw new IllegalArgumentException(Messages.getString("geometry.invalidSizePointList1"));
 		// check for list of one point
 		int size = points.size();
 		if (size == 1) {
 			Vector2 p = points.get(0);
 			// check for null
-			if (p == null) throw new NullPointerException("The points list cannot contain null points.");
+			if (p == null) throw new NullPointerException(Messages.getString("geometry.nullPointListElements"));
 			return p.copy();
 		}
 		// otherwise perform the computation
@@ -273,7 +274,7 @@ public class Geometry {
 			Vector2 p1 = points.get(i);
 			Vector2 p2 = i + 1 < size ? points.get(i + 1) : points.get(0);
 			// check for null
-			if (p1 == null || p2 == null) throw new NullPointerException("The points list cannot contain null points.");
+			if (p1 == null || p2 == null) throw new NullPointerException(Messages.getString("geometry.nullPointListElements"));
 			// perform the cross product (yi * x(i+1) - y(i+1) * xi)
 			double d = p1.cross(p2);
 			// multiply by half
@@ -309,16 +310,16 @@ public class Geometry {
 	 */
 	public static final Vector2 getAreaWeightedCenter(Vector2... points) {
 		// check for null array
-		if (points == null) throw new NullPointerException("The points array cannot be null.");
+		if (points == null) throw new NullPointerException(Messages.getString("geometry.nullPointArray"));
 		// get the size
 		int size = points.length;
 		// check for empty array
-		if (size == 0) throw new IllegalArgumentException("The points array must have at least one point.");
+		if (size == 0) throw new IllegalArgumentException(Messages.getString("geometry.invalidSizePointArray1"));
 		// check for array of one point
 		if (size == 1) {
 			Vector2 p = points[0];
 			// check for null
-			if (p == null) throw new NullPointerException("The points array cannot contain null points.");
+			if (p == null) throw new NullPointerException(Messages.getString("geometry.nullPointArrayElements"));
 			return p.copy();
 		}
 		// otherwise perform the computation
@@ -330,7 +331,7 @@ public class Geometry {
 			Vector2 p1 = points[i];
 			Vector2 p2 = i + 1 < size ? points[i + 1] : points[0];
 			// check for null
-			if (p1 == null || p2 == null) throw new NullPointerException("The points array cannot contain null points.");
+			if (p1 == null || p2 == null) throw new NullPointerException(Messages.getString("geometry.nullPointArrayElements"));
 			// perform the cross product (yi * x(i+1) - y(i+1) * xi)
 			double d = p1.cross(p2);
 			// multiply by half
@@ -378,7 +379,7 @@ public class Geometry {
 	 */
 	public static final Polygon createPolygon(Vector2... vertices) {
 		// check the vertices array
-		if (vertices == null) throw new NullPointerException("The vertices array cannot be null.");
+		if (vertices == null) throw new NullPointerException(Messages.getString("geometry.nullVerticesArray"));
 		// loop over the points an copy them
 		int size = vertices.length;
 		// check the size
@@ -389,7 +390,7 @@ public class Geometry {
 			if (vertex != null) {
 				verts[i] = vertex.copy();
 			} else {
-				throw new NullPointerException("A polygon cannot contain null points.");
+				throw new NullPointerException(Messages.getString("geometry.nullPolygonPoint"));
 			}
 		}
 		return new Polygon(verts);
@@ -447,9 +448,9 @@ public class Geometry {
 	 */
 	public static final Polygon createUnitCirclePolygon(int count, double radius, double theta) {
 		// check the count
-		if (count < 3) throw new IllegalArgumentException("The number of vertices must be greater than 2.");
+		if (count < 3) throw new IllegalArgumentException(Messages.getString("geometry.invalidVerticesSize"));
 		// check the radius
-		if (radius <= 0.0) throw new IllegalArgumentException("The radius must be greater than zero.");
+		if (radius <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.invalidRadius"));
 		Vector2[] verts = new Vector2[count];
 		double angle = Geometry.TWO_PI / count;
 		for (int i = count - 1; i >= 0; i--) {
@@ -466,7 +467,7 @@ public class Geometry {
 	 */
 	public static final Rectangle createSquare(double size) {
 		// check the size
-		if (size <= 0.0) throw new IllegalArgumentException("The size must be greater than zero.");
+		if (size <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.invalidSize"));
 		return new Rectangle(size, size);
 	}
 	
@@ -492,7 +493,7 @@ public class Geometry {
 	 * @throws NullPointerException if p1, p2, or p3 is null
 	 */
 	public static final Triangle createTriangle(Vector2 p1, Vector2 p2, Vector2 p3) {
-		if (p1 == null || p2 == null || p3 == null) throw new NullPointerException("A triangle cannot contain a null point.");
+		if (p1 == null || p2 == null || p3 == null) throw new NullPointerException(Messages.getString("geometry.nullTrianglePoint"));
 		return new Triangle(p1.copy(), p2.copy(), p3.copy());
 	}
 	
@@ -534,9 +535,9 @@ public class Geometry {
 	 */
 	public static final Triangle createRightTriangle(double width, double height, boolean mirror) {
 		// check the width
-		if (width <= 0.0) throw new IllegalArgumentException("The width must be greater than zero.");
+		if (width <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.invalidWidth"));
 		// check the height
-		if (height <= 0.0) throw new IllegalArgumentException("The width must be greater than zero.");
+		if (height <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.invalidHeight"));
 		Vector2 top = new Vector2(0.0, height);
 		Vector2 left = new Vector2(0.0, 0.0);
 		Vector2 right = new Vector2(mirror ? -width : width, 0.0);
@@ -560,7 +561,7 @@ public class Geometry {
 	 */
 	public static final Triangle createEquilateralTriangle(double height) {
 		// check the size
-		if (height <= 0.0) throw new IllegalArgumentException("The size must be greater than zero.");
+		if (height <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.invalidSize"));
 		// compute a where height = a * sqrt(3) / 2.0 (a is the width of the base
 		double a = 2.0 * height * INV_SQRT_3;
 		// create the triangle
@@ -576,9 +577,9 @@ public class Geometry {
 	 */
 	public static final Triangle createIsoscelesTriangle(double width, double height) {
 		// check the width
-		if (width <= 0.0) throw new IllegalArgumentException("The width must be greater than zero.");
+		if (width <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.invalidWidth"));
 		// check the height
-		if (height <= 0.0) throw new IllegalArgumentException("The width must be greater than zero.");
+		if (height <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.invalidHeight"));
 		Vector2 top = new Vector2(0.0, height);
 		Vector2 left = new Vector2(-width * 0.5, 0.0);
 		Vector2 right = new Vector2(width * 0.5, 0.0);
@@ -599,7 +600,7 @@ public class Geometry {
 	 * @throws NullPointerException if p1 or p2 is null
 	 */
 	public static final Segment createSegment(Vector2 p1, Vector2 p2) {
-		if (p1 == null || p2 == null) throw new NullPointerException("A segment cannot contain a null point.");
+		if (p1 == null || p2 == null) throw new NullPointerException(Messages.getString("geometry.nullSegmentPoint"));
 		return new Segment(p1.copy(), p2.copy());
 	}
 	
@@ -645,7 +646,7 @@ public class Geometry {
 	 */
 	public static final Segment createHorizontalSegment(double length) {
 		// check the length
-		if (length <= 0.0) throw new IllegalArgumentException("The length must be greater than zero.");
+		if (length <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.invalidLength"));
 		Vector2 start = new Vector2(-length * 0.5, 0.0);
 		Vector2 end = new Vector2(length * 0.5, 0.0);
 		return new Segment(start, end);
@@ -661,7 +662,7 @@ public class Geometry {
 	 */
 	public static final Segment createVerticalSegment(double length) {
 		// check the length
-		if (length <= 0.0) throw new IllegalArgumentException("The length must be greater than zero.");
+		if (length <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.invalidLength"));
 		Vector2 start = new Vector2(0.0, -length * 0.5);
 		Vector2 end = new Vector2(0.0, length * 0.5);
 		return new Segment(start, end);
@@ -679,7 +680,7 @@ public class Geometry {
 	 */
 	public static final List<Vector2> cleanse(List<Vector2> points) {
 		// check for null list
-		if (points == null) throw new NullPointerException("The points list cannot be null.");
+		if (points == null) throw new NullPointerException(Messages.getString("geometry.nullPointList"));
 		// get the size of the points list
 		int size = points.size();
 		// check the size
@@ -700,7 +701,7 @@ public class Geometry {
 			
 			// check for null
 			if (point == null || prev == null || next == null)
-				throw new NullPointerException("The points list cannot contain null elements.");
+				throw new NullPointerException(Messages.getString("geometry.nullPointListElements"));
 			
 			// is this point equal to the next?
 			Vector2 diff = point.difference(next);
@@ -753,7 +754,7 @@ public class Geometry {
 	 */
 	public static Vector2[] cleanse(Vector2... points) {
 		// check for null
-		if (points == null) throw new NullPointerException("The points array cannot be null.");
+		if (points == null) throw new NullPointerException(Messages.getString("geometry.nullPointArray"));
 		// create a list from the array
 		List<Vector2> pointList = Arrays.asList(points);
 		// cleanse the list

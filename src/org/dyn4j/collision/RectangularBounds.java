@@ -27,6 +27,7 @@ package org.dyn4j.collision;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Transformable;
+import org.dyn4j.resources.Messages;
 
 /**
  * Represents a {@link Bounds} object that is rectangular.
@@ -37,8 +38,11 @@ import org.dyn4j.geometry.Transformable;
  * If the {@link Collidable} and the {@link Bounds} AABBs are overlapping, then the {@link Collidable}
  * is considered to be inside, if they are not overlapping, the {@link Collidable} is considered
  * outside.
+ * <p>
+ * Since this class is {@link Transformable}, the bounds can be rotated.  Detection of a shape outside
+ * the bounds is done by testing the AABB of the shape and the rotated bounds.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class RectangularBounds extends AbstractBounds implements Bounds, Transformable {
@@ -51,7 +55,7 @@ public class RectangularBounds extends AbstractBounds implements Bounds, Transfo
 	 * @throws NullPointerException if bounds is null
 	 */
 	public RectangularBounds(Rectangle bounds) {
-		if (bounds == null) throw new NullPointerException("The bounds rectangle cannot be null.");
+		if (bounds == null) throw new NullPointerException(Messages.getString("collision.bounds.rectangular.nullRectangle"));
 		this.bounds = bounds;
 	}
 	
@@ -61,7 +65,9 @@ public class RectangularBounds extends AbstractBounds implements Bounds, Transfo
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("RECTANGULAR_BOUNDS[").append(this.bounds).append("]");
+		sb.append("RectangularBounds[Rectangle=").append(this.bounds)
+		.append("|Transform=").append(this.transform)
+		.append("]");
 		return sb.toString();
 	}
 	
@@ -87,7 +93,7 @@ public class RectangularBounds extends AbstractBounds implements Bounds, Transfo
 	 * @throws NullPointerException if bounds is null
 	 */
 	public void setBounds(Rectangle bounds) {
-		if (bounds == null) throw new NullPointerException("The bounds rectangle cannot be null.");
+		if (bounds == null) throw new NullPointerException(Messages.getString("collision.bounds.rectangular.nullRectangle"));
 		this.bounds = bounds;
 	}
 	

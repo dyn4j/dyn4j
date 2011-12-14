@@ -34,7 +34,7 @@ import org.junit.Test;
 /**
  * Tests the methods of the {@link Settings} class.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class SettingsTest {
@@ -95,39 +95,39 @@ public class SettingsTest {
 	}
 	
 	/**
-	 * Tests the set max translation method.
+	 * Tests the set maximum translation method.
 	 */
 	@Test
-	public void setValidMaxTranslation() {
-		settings.setMaxTranslation(3.0);
-		TestCase.assertEquals(3.0, settings.getMaxTranslation());
-		TestCase.assertEquals(9.0, settings.getMaxTranslationSquared());
+	public void setValidMaximumTranslation() {
+		settings.setMaximumTranslation(3.0);
+		TestCase.assertEquals(3.0, settings.getMaximumTranslation());
+		TestCase.assertEquals(9.0, settings.getMaximumTranslationSquared());
 	}
 	
 	/**
-	 * Tests the set max translation method passing a negative value.
+	 * Tests the set maximum translation method passing a negative value.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void setNegativeMaxTranslation() {
-		settings.setMaxTranslation(-3.0);
+	public void setNegativeMaximumTranslation() {
+		settings.setMaximumTranslation(-3.0);
 	}
 	
 	/**
-	 * Tests the set max angular velocity method.
+	 * Tests the set maximum angular velocity method.
 	 */
 	@Test
-	public void setMaxRotation() {
-		settings.setMaxRotation(3.0);
-		TestCase.assertEquals(3.0, settings.getMaxRotation());
-		TestCase.assertEquals(9.0, settings.getMaxRotationSquared());
+	public void setMaximumRotation() {
+		settings.setMaximumRotation(3.0);
+		TestCase.assertEquals(3.0, settings.getMaximumRotation());
+		TestCase.assertEquals(9.0, settings.getMaximumRotationSquared());
 	}
 
 	/**
-	 * Tests the set max translation method passing a negative value.
+	 * Tests the set maximum translation method passing a negative value.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void setNegativeMaxRotation() {
-		settings.setMaxRotation(Math.toRadians(-3.0));
+	public void setNegativeMaximumRotation() {
+		settings.setMaximumRotation(Math.toRadians(-3.0));
 	}
 	
 	/**
@@ -144,21 +144,21 @@ public class SettingsTest {
 	}
 	
 	/**
-	 * Tests the set sleep velocity method.
+	 * Tests the set sleep linear velocity method.
 	 */
 	@Test
-	public void setValidSleepVelocity() {
-		settings.setSleepVelocity(3.0);
-		TestCase.assertEquals(3.0, settings.getSleepVelocity());
-		TestCase.assertEquals(9.0, settings.getSleepVelocitySquared());
+	public void setValidSleepLinearVelocity() {
+		settings.setSleepLinearVelocity(3.0);
+		TestCase.assertEquals(3.0, settings.getSleepLinearVelocity());
+		TestCase.assertEquals(9.0, settings.getSleepLinearVelocitySquared());
 	}
 	
 	/**
-	 * Tests the set sleep velocity method passing a negative value.
+	 * Tests the set sleep linear velocity method passing a negative value.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void setNegativeSleepVelocity() {
-		settings.setSleepVelocity(-1.0);
+	public void setNegativeSleepLinearVelocity() {
+		settings.setSleepLinearVelocity(-1.0);
 	}
 	
 	/**
@@ -341,39 +341,39 @@ public class SettingsTest {
 	}
 	
 	/**
-	 * Tests the set max linear correction method.
+	 * Tests the set maximum linear correction method.
 	 */
 	@Test
-	public void setValidMaxLinearCorrection() {
-		settings.setMaxLinearCorrection(2.0);
-		TestCase.assertEquals(2.0, settings.getMaxLinearCorrection());
-		TestCase.assertEquals(4.0, settings.getMaxLinearCorrectionSquared());
+	public void setValidMaximumLinearCorrection() {
+		settings.setMaximumLinearCorrection(2.0);
+		TestCase.assertEquals(2.0, settings.getMaximumLinearCorrection());
+		TestCase.assertEquals(4.0, settings.getMaximumLinearCorrectionSquared());
 	}
 
 	/**
-	 * Tests the set max linear correction method passing a negative value.
+	 * Tests the set maximum linear correction method passing a negative value.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void setNegativeMaxLinearCorrection() {
-		settings.setMaxLinearCorrection(-3.0);
+	public void setNegativeMaximumLinearCorrection() {
+		settings.setMaximumLinearCorrection(-3.0);
 	}
 
 	/**
-	 * Tests the set max angular correction method.
+	 * Tests the set maximum angular correction method.
 	 */
 	@Test
-	public void setValidMaxAngularCorrection() {
-		settings.setMaxAngularCorrection(2.0);
-		TestCase.assertEquals(2.0, settings.getMaxAngularCorrection());
-		TestCase.assertEquals(4.0, settings.getMaxAngularCorrectionSquared());
+	public void setValidMaximumAngularCorrection() {
+		settings.setMaximumAngularCorrection(2.0);
+		TestCase.assertEquals(2.0, settings.getMaximumAngularCorrection());
+		TestCase.assertEquals(4.0, settings.getMaximumAngularCorrectionSquared());
 	}
 
 	/**
-	 * Tests the set max angular correction method passing a negative value.
+	 * Tests the set maximum angular correction method passing a negative value.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void setNegativeMaxAngularCorrection() {
-		settings.setMaxAngularCorrection(-3.0);
+	public void setNegativeMaximumAngularCorrection() {
+		settings.setMaximumAngularCorrection(-3.0);
 	}
 	
 	/**

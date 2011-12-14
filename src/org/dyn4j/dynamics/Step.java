@@ -28,7 +28,7 @@ package org.dyn4j.dynamics;
  * Contains the current and previous time step information
  * used to update the {@link World}.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class Step {
@@ -68,12 +68,12 @@ public class Step {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("STEP[")
-		.append(this.dt).append("|")
-		.append(this.invdt).append("|")
-		.append(this.dt0).append("|")
-		.append(this.invdt0).append("|")
-		.append(this.dtRatio).append("]");
+		sb.append("Step[DeltaTime=").append(this.dt)
+		.append("|InverseDeltaTime=").append(this.invdt)
+		.append("|PreviousDeltaTime=").append(this.dt0)
+		.append("|PreviousInverseDeltaTime=").append(this.invdt0)
+		.append("|DeltaTimeRatio=").append(this.dtRatio)
+		.append("]");
 		return sb.toString();
 	}
 	

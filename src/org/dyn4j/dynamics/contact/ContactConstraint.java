@@ -136,17 +136,19 @@ public class ContactConstraint extends Constraint {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("CONTACT_CONSTRAINT[")
-		.append(super.toString()).append("|")
-		.append(this.fixture1).append("|")
-		.append(this.fixture2).append("|")
-		.append(this.normal).append("|")
-		.append(this.tangent).append("|")
-		.append(this.friction).append("|")
-		.append(this.restitution).append("|")
-		.append(this.sensor).append("|{");
+		sb.append("ContactConstraint[").append(super.toString())
+		.append("|Fixture1=").append(this.fixture1)
+		.append("|Fixture2=").append(this.fixture2)
+		.append("|Normal=").append(this.normal)
+		.append("|Tangent=").append(this.tangent)
+		.append("|Friction=").append(this.friction)
+		.append("|Restitution=").append(this.restitution)
+		.append("|IsSensor=").append(this.sensor)
+		.append("|TangentSpeed=").append(this.tangentSpeed)
+		.append("|Contacts={");
 		int size = contacts.length;
 		for (int i = 0; i < size; i++) {
+			if (i != 0) sb.append(",");
 			sb.append(contacts[i]);
 		}
 		sb.append("}]");

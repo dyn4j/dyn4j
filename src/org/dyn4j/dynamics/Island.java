@@ -122,7 +122,7 @@ public class Island {
 		int positionSolverIterations = settings.getPositionConstraintSolverIterations();
 		// the sleep settings
 		double sleepAngularVelocitySquared = settings.getSleepAngularVelocitySquared();
-		double sleepVelocitySquared = settings.getSleepVelocitySquared();
+		double sleepLinearVelocitySquared = settings.getSleepLinearVelocitySquared();
 		double sleepTime = settings.getSleepTime();
 
 		int size = this.bodies.size();
@@ -188,10 +188,10 @@ public class Island {
 		}
 		
 		// the max settings
-		double maxTranslation = settings.getMaxTranslation();
-		double maxRotation = settings.getMaxRotation();
-		double maxTranslationSqrd = settings.getMaxTranslationSquared();
-		double maxRotationSqrd = settings.getMaxRotationSquared();
+		double maxTranslation = settings.getMaximumTranslation();
+		double maxRotation = settings.getMaximumRotation();
+		double maxTranslationSqrd = settings.getMaximumTranslationSquared();
+		double maxRotationSqrd = settings.getMaximumRotationSquared();
 		
 		// integrate the positions
 		for (int i = 0; i < size; i++) {
@@ -250,7 +250,7 @@ public class Island {
 				// see if the body is allowed to sleep
 				if (body.isAutoSleepingEnabled()) {
 					// check the linear and angular velocity
-					if (body.velocity.dot(body.velocity) > sleepVelocitySquared || body.angularVelocity * body.angularVelocity > sleepAngularVelocitySquared) {
+					if (body.velocity.dot(body.velocity) > sleepLinearVelocitySquared || body.angularVelocity * body.angularVelocity > sleepAngularVelocitySquared) {
 						// if either the linear or angular velocity is above the 
 						// threshold then reset the sleep time
 						body.sleepTime = 0.0;

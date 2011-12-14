@@ -1494,7 +1494,7 @@ public class TestBed extends GLCanvas implements GLEventListener {
 							break;
 						} else {
 							// check for line segment
-							if (c.isType(Segment.TYPE)) {
+							if (c instanceof Segment) {
 								Segment s = (Segment) c;
 								// if you are a tenth of a meter from it then consider that
 								// selecting the segment
@@ -1554,7 +1554,7 @@ public class TestBed extends GLCanvas implements GLEventListener {
 							break;
 						} else {
 							// check for line segment
-							if (c.isType(Segment.TYPE)) {
+							if (c instanceof Segment) {
 								Segment s = (Segment) c;
 								// if you are a tenth of a meter from it then consider that
 								// selecting the segment

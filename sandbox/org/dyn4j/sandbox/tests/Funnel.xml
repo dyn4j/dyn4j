@@ -16,20 +16,20 @@
     <Settings>
         <StepFrequency>60.0</StepFrequency>
         <MaximumTranslation>2.0</MaximumTranslation>
-        <MaximumRotation>1.57079633</MaximumRotation>
+        <MaximumRotation>90</MaximumRotation>
         <ContinuousCollisionDetectionMode>ALL</ContinuousCollisionDetectionMode>
         <AutoSleep>true</AutoSleep>
         <SleepTime>0.5</SleepTime>
         <SleepLinearVelocity>0.01</SleepLinearVelocity>
-        <SleepAngularVelocity>0.034906585</SleepAngularVelocity>
+        <SleepAngularVelocity>2.0</SleepAngularVelocity>
         <VelocitySolverIterations>10</VelocitySolverIterations>
         <PositionSolverIterations>10</PositionSolverIterations>
         <WarmStartDistance>0.01</WarmStartDistance>
         <RestitutionVelocity>1.0</RestitutionVelocity>
         <LinearTolerance>0.0050</LinearTolerance>
-        <AngularTolerance>0.034906585</AngularTolerance>
+        <AngularTolerance>2.0</AngularTolerance>
         <MaximumLinearCorrection>0.2</MaximumLinearCorrection>
-        <MaximumAngularCorrection>0.13962634</MaximumAngularCorrection>
+        <MaximumAngularCorrection>8.0</MaximumAngularCorrection>
         <Baumgarte>0.2</Baumgarte>
     </Settings>
     <Rays>
@@ -114,7 +114,7 @@
                 </Fixtures>
                 <Transform>
                     <Translation x="-8.0" y="8.0" />
-                    <Rotation>0.5235987755982987</Rotation>
+                    <Rotation>30.0</Rotation>
                 </Transform>
                 <Mass>
                     <LocalCenter x="0.0" y="0.0" />
@@ -155,7 +155,7 @@
                 </Fixtures>
                 <Transform>
                     <Translation x="8.0" y="8.0" />
-                    <Rotation>-0.5235987755982987</Rotation>
+                    <Rotation>-30.0</Rotation>
                 </Transform>
                 <Mass>
                     <LocalCenter x="0.0" y="0.0" />
@@ -2525,7 +2525,7 @@
                     </Fixture>
                 </Fixtures>
                 <Transform>
-                    <Translation x="-6.774158743450222" y="5.755027173759148" />
+                    <Translation x="-6.674158743450222" y="5.855027173759148" />
                     <Rotation>0.0</Rotation>
                 </Transform>
                 <Mass>

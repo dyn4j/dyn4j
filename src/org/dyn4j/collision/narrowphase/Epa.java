@@ -29,6 +29,7 @@ import java.util.List;
 import org.dyn4j.Epsilon;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * {@link Epa} stands for Expanding Polytope Algorithm and is used to find the 
@@ -57,7 +58,7 @@ import org.dyn4j.geometry.Vector2;
  * {@link Epa} will terminate in a finite number of iterations if the two shapes are {@link Polygon}s.
  * If either shape has curved surfaces the algorithm requires an expected accuracy epsilon.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class Epa implements MinkowskiPenetrationSolver {
@@ -76,7 +77,7 @@ public class Epa implements MinkowskiPenetrationSolver {
 	/**
 	 * Represents an {@link Edge} of the simplex.
 	 * @author William Bittle
-	 * @version 1.0.3
+	 * @version 3.0.2
 	 * @since 1.0.0
 	 */
 	protected class Edge {
@@ -95,10 +96,10 @@ public class Epa implements MinkowskiPenetrationSolver {
 		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
-			sb.append("EDGE[")
-			.append(n).append("|")
-			.append(distance).append("|")
-			.append(index).append("]");
+			sb.append("Epa.Edge[Normal=").append(this.n)
+			.append("|Index=").append(this.index)
+			.append("|Distance=").append(this.distance)
+			.append("]");
 			return sb.toString();
 		}
 	}
@@ -251,7 +252,7 @@ public class Epa implements MinkowskiPenetrationSolver {
 	 * @throws IllegalArgumentException if maxIterations is less than 5
 	 */
 	public void setMaxIterations(int maxIterations) {
-		if (maxIterations < 5) throw new IllegalArgumentException("The EPA penetration depth algorithm requires 5 or more iterations.");
+		if (maxIterations < 5) throw new IllegalArgumentException(Messages.getString("collision.narrowphase.epa.invalidMaximumIterations"));
 		this.maxIterations = maxIterations;
 	}
 
@@ -272,7 +273,7 @@ public class Epa implements MinkowskiPenetrationSolver {
 	 * @throws IllegalArgumentException if distanceEpsilon is less than or equal to zero
 	 */
 	public void setDistanceEpsilon(double distanceEpsilon) {
-		if (distanceEpsilon <= 0) throw new IllegalArgumentException("The EPA distance epsilon must be larger than zero.");
+		if (distanceEpsilon <= 0) throw new IllegalArgumentException(Messages.getString("collision.narrowphase.epa.invalidDistanceEpsilon"));
 		this.distanceEpsilon = distanceEpsilon;
 	}
 }

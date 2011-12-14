@@ -28,6 +28,7 @@ import java.util.List;
 
 import org.dyn4j.Epsilon;
 import org.dyn4j.dynamics.Body;
+import org.dyn4j.resources.Messages;
 
 /**
  * Represents {@link Mass} data for a {@link Body}.
@@ -97,9 +98,9 @@ public class Mass {
 	 */
 	public Mass(Vector2 center, double mass, double inertia) {
 		// validate the input
-		if (center == null) throw new NullPointerException("The center point cannot be null.");
-		if (mass < 0.0) throw new IllegalArgumentException("The mass must be greater than or equal to zero.");
-		if (inertia < 0.0) throw new IllegalArgumentException("The inertia tensor must be greater than or equal to zero.");
+		if (center == null) throw new NullPointerException(Messages.getString("geometry.mass.nullCenter"));
+		if (mass < 0.0) throw new IllegalArgumentException(Messages.getString("geometry.mass.invalidMass"));
+		if (inertia < 0.0) throw new IllegalArgumentException(Messages.getString("geometry.mass.invalidInertia"));
 		// create the mass
 		this.type = Mass.Type.NORMAL;
 		this.center = center.copy();
@@ -134,7 +135,7 @@ public class Mass {
 	 */
 	public Mass(Mass mass) {
 		// validate the input
-		if (mass == null) throw new NullPointerException("Cannot copy a null mass.");
+		if (mass == null) throw new NullPointerException(Messages.getString("geometry.mass.nullMass"));
 		// setup the mass
 		this.type = mass.type;
 		this.center = mass.center.copy();
@@ -197,10 +198,10 @@ public class Mass {
 	public static Mass create(List<Mass> masses) {
 		// check the list for null or empty
 		if (masses == null) {
-			throw new NullPointerException("The masses list cannot be null.");
+			throw new NullPointerException(Messages.getString("geometry.mass.nullMassList"));
 		}
 		if (masses.size() == 0) {
-			throw new IllegalArgumentException("The masses list must contain at least one non-null element.");
+			throw new IllegalArgumentException(Messages.getString("geometry.mass.invalidMassListSize"));
 		}
 		// get the length of the masses array
 		int size = masses.size();
@@ -212,7 +213,7 @@ public class Mass {
 			if (m != null) {
 				return new Mass(masses.get(0));
 			} else {
-				throw new NullPointerException("The masses list must contain at least one non-null element.");
+				throw new NullPointerException(Messages.getString("geometry.mass.invalidMassListSize"));
 			}
 		}
 		
@@ -225,7 +226,7 @@ public class Mass {
 		for (int i = 0; i < size; i++) {
 			Mass mass = masses.get(i);
 			// check for null mass
-			if (mass == null) throw new NullPointerException("The masses list cannot contain null elements.");
+			if (mass == null) throw new NullPointerException(Messages.getString("geometry.mass.nullMassListElement"));
 			// add the center's up (weighting them by their respective mass)
 			c.add(mass.center.product(mass.mass));
 			// sum the masses
@@ -271,7 +272,7 @@ public class Mass {
 	 * @throws NullPointerException if type is null
 	 */
 	public void setType(Mass.Type type) {
-		if (type == null) throw new NullPointerException("The mass type cannot be null.");
+		if (type == null) throw new NullPointerException(Messages.getString("geometry.mass.nullMassType"));
 		this.type = type;
 	}
 	

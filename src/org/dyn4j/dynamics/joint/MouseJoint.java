@@ -32,6 +32,7 @@ import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Matrix22;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * Represents a joint attached to a body and the mouse.
@@ -39,13 +40,10 @@ import org.dyn4j.geometry.Vector2;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class MouseJoint extends Joint {
-	/** The joint type */
-	public static final Joint.Type TYPE = new Joint.Type("Mouse");
-	
 	/** The world space target point */
 	protected Vector2 target;
 	
@@ -79,25 +77,25 @@ public class MouseJoint extends Joint {
 	 * @param target the target point; where the mouse clicked on the body
 	 * @param frequency the oscillation frequency in hz
 	 * @param dampingRatio the damping ratio
-	 * @param maxForce the maximum force this constraint can apply in newtons
+	 * @param maximumForce the maximum force this constraint can apply in newtons
 	 * @throws NullPointerException if body or target is null
 	 * @throws IllegalArgumentException if frequency is less than or equal to zero, or if dampingRatio is less than zero or greater than one, or if maxForce is less than zero
 	 */
-	public MouseJoint(Body body, Vector2 target, double frequency, double dampingRatio, double maxForce) {
+	public MouseJoint(Body body, Vector2 target, double frequency, double dampingRatio, double maximumForce) {
 		super(body, body, false);
 		// check for a null target
-		if (target == null) throw new NullPointerException("The target point cannot be null.");
+		if (target == null) throw new NullPointerException(Messages.getString("dynamics.joint.mouse.nullTarget"));
 		// verify the frequency
-		if (frequency <= 0) throw new IllegalArgumentException("The frequency must be greater than zero.");
+		if (frequency <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidFrequency"));
 		// verify the damping ratio
-		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException("The damping ratio must be between 0 and 1 inclusive.");
+		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidDampingRatio"));
 		// verity the max force
-		if (maxForce < 0.0) throw new IllegalArgumentException("The max force must be zero or greater.");
+		if (maximumForce < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.mouse.invalidMaximumForce"));
 		this.target = target;
 		this.anchor = body.getLocalPoint(target);
 		this.frequency = frequency;
 		this.dampingRatio = dampingRatio;
-		this.maximumForce = maxForce;
+		this.maximumForce = maximumForce;
 		// initialize
 		this.K = new Matrix22();
 		this.impulse = new Vector2();
@@ -109,14 +107,13 @@ public class MouseJoint extends Joint {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("MOUSE_JOINT[")
-		.append(super.toString()).append("|")
-		.append(this.target).append("|")
-		.append(this.anchor).append("|")
-		.append(this.frequency).append("|")
-		.append(this.dampingRatio).append("|")
-		.append(this.maximumForce).append("|")
-		.append(this.impulse).append("]");
+		sb.append("MouseJoint[").append(super.toString())
+		.append("|Target=").append(this.target)
+		.append("|Anchor=").append(this.anchor)
+		.append("|Frequency=").append(this.frequency)
+		.append("|DampingRatio=").append(this.dampingRatio)
+		.append("|MaximumForce=").append(this.maximumForce)
+		.append("]");
 		return sb.toString();
 	}
 	
@@ -213,14 +210,6 @@ public class MouseJoint extends Joint {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getType()
-	 */
-	@Override
-	public Type getType() {
-		return MouseJoint.TYPE;
-	}
-	
-	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.joint.Joint#getAnchor1()
 	 */
 	@Override
@@ -259,7 +248,7 @@ public class MouseJoint extends Joint {
 	 */
 	public void setTarget(Vector2 target) {
 		// make sure the target is non null
-		if (target == null) throw new NullPointerException("The target point cannot be null.");
+		if (target == null) throw new NullPointerException(Messages.getString("dynamics.joint.mouse.nullTarget"));
 		// wake up the body
 		this.body2.setAsleep(false);
 		// set the new target
@@ -289,7 +278,7 @@ public class MouseJoint extends Joint {
 	 */
 	public void setMaximumForce(double maximumForce) {
 		// make sure the max force is non negative
-		if (maximumForce < 0.0) throw new IllegalArgumentException("The maximum force must be zero or greater.");
+		if (maximumForce < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.mouse.invalidMaximumForce"));
 		// set the new max force
 		this.maximumForce = maximumForce;
 	}
@@ -309,7 +298,7 @@ public class MouseJoint extends Joint {
 	 */
 	public void setDampingRatio(double dampingRatio) {
 		// make sure its within range
-		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException("The damping ratio must be between 0 and 1.");
+		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidDampingRatio"));
 		// set the new value
 		this.dampingRatio = dampingRatio;
 	}
@@ -329,7 +318,7 @@ public class MouseJoint extends Joint {
 	 */
 	public void setFrequency(double frequency) {
 		// check for valid value
-		if (frequency <= 0) throw new IllegalArgumentException("The frequency must be greater than zero.");
+		if (frequency <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidFrequency"));
 		// set the new value
 		this.frequency = frequency;
 	}

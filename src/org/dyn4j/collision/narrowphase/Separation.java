@@ -33,7 +33,7 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * The separation axis should always be normalized.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class Separation {
@@ -74,11 +74,11 @@ public class Separation {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("SEPARATION[")
-		.append(this.normal).append("|")
-		.append(this.distance).append("|")
-		.append(this.point1).append("|")
-		.append(this.point2).append("]");
+		sb.append("Separation[Point1=").append(this.point1)
+		.append("|Point2=").append(this.point2)
+		.append("|Normal=").append(this.normal)
+		.append("|Distance=").append(this.distance)
+		.append("]");
 		return sb.toString();
 	}
 	

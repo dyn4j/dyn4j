@@ -26,7 +26,7 @@ package org.dyn4j.sandbox.utilities;
 
 import java.awt.Color;
 
-import org.dyn4j.sandbox.Resources;
+import org.dyn4j.sandbox.resources.Messages;
 
 /**
  * Utility class to handle colors for both OpenGL and Java.
@@ -55,7 +55,7 @@ public class ColorUtilities {
 		} else if (color.length == 4) {
 			return new Color(color[0], color[1], color[2], color[3]);
 		} else {
-			throw new IllegalArgumentException(Resources.getString("exception.color.notEnoughComponents"));
+			throw new IllegalArgumentException(Messages.getString("exception.color.notEnoughComponents"));
 		}
 	}
 	

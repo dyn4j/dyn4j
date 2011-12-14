@@ -32,7 +32,7 @@ import org.dyn4j.collision.narrowphase.Raycast;
  * <p>
  * Implements the Comparable interface to allow for sorting by the distance.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.2
  * @since 2.0.0
  */
 public class RaycastResult implements Comparable<RaycastResult> {
@@ -58,6 +58,19 @@ public class RaycastResult implements Comparable<RaycastResult> {
 		} else {
 			return 0;
 		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("RaycastResult[Body=").append(this.body)
+		.append("|Fixture=").append(this.fixture)
+		.append("|Raycast=").append(this.raycast)
+		.append("]");
+		return sb.toString();
 	}
 	
 	/**

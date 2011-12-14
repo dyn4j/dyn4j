@@ -47,11 +47,11 @@ import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.controls.BottomButtonPanel;
 import org.dyn4j.sandbox.panels.FixturePanel;
 import org.dyn4j.sandbox.panels.NonConvexPolygonPanel;
 import org.dyn4j.sandbox.panels.TransformPanel;
+import org.dyn4j.sandbox.resources.Messages;
 
 /**
  * Dialog to add a new fixture to an existing body.
@@ -84,7 +84,7 @@ public class AddNonConvexFixtureDialog extends JDialog implements ActionListener
 	 * @param icon the icon image
 	 */
 	private AddNonConvexFixtureDialog(Window owner, Image icon) {
-		super(owner, Resources.getString("dialog.fixture.nonconvex.title"), ModalityType.APPLICATION_MODAL);
+		super(owner, Messages.getString("dialog.fixture.nonconvex.title"), ModalityType.APPLICATION_MODAL);
 		
 		if (icon != null) {
 			this.setIconImage(icon);
@@ -97,25 +97,25 @@ public class AddNonConvexFixtureDialog extends JDialog implements ActionListener
 		lblText = new JTextPane();
 		lblText.setContentType("text/html");
 		lblText.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
-		lblText.setText(Resources.getString("label.transform.warning"));
+		lblText.setText(Messages.getString("label.transform.warning"));
 		lblText.setEditable(false);
 		lblText.setPreferredSize(new Dimension(350, 120));
 		
 		// have to create it with an arbitrary shape
 		this.fixture = new BodyFixture(Geometry.createCircle(1.0));
-		this.fixture.setUserData(MessageFormat.format(Resources.getString("dialog.fixture.add.name.default"), AddConvexFixtureDialog.N));
+		this.fixture.setUserData(MessageFormat.format(Messages.getString("dialog.fixture.add.name.default"), AddConvexFixtureDialog.N));
 		this.pnlFixture = new FixturePanel(this.fixture);
 		this.pnlTransform = new TransformPanel(lblText);
 		
 		JTabbedPane tabs = new JTabbedPane();
 		
 		tabs.setBorder(BorderFactory.createEmptyBorder(7, 0, 0, 0));
-		tabs.addTab(Resources.getString("dialog.fixture.tab.shape"), this.pnlPolygon);
-		tabs.addTab(Resources.getString("dialog.fixture.tab.fixture"), this.pnlFixture);
-		tabs.addTab(Resources.getString("dialog.fixture.tab.transform"), this.pnlTransform);
+		tabs.addTab(Messages.getString("dialog.fixture.tab.shape"), this.pnlPolygon);
+		tabs.addTab(Messages.getString("dialog.fixture.tab.fixture"), this.pnlFixture);
+		tabs.addTab(Messages.getString("dialog.fixture.tab.transform"), this.pnlTransform);
 		
-		JButton btnCancel = new JButton(Resources.getString("button.cancel"));
-		JButton btnAdd = new JButton(Resources.getString("button.add"));
+		JButton btnCancel = new JButton(Messages.getString("button.cancel"));
+		JButton btnAdd = new JButton(Messages.getString("button.add"));
 		btnCancel.setActionCommand("cancel");
 		btnAdd.setActionCommand("add");
 		btnCancel.addActionListener(this);

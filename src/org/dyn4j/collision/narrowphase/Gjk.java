@@ -36,6 +36,7 @@ import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Shape;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * Implementation of the {@link Gjk} algorithm.
@@ -148,7 +149,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * @throws NullPointerException if minkowskiPenetrationSolver is null
 	 */
 	public Gjk(MinkowskiPenetrationSolver minkowskiPenetrationSolver) {
-		if (minkowskiPenetrationSolver == null) throw new NullPointerException("The MinkowskiPenetrationSolver cannot be null.");
+		if (minkowskiPenetrationSolver == null) throw new NullPointerException(Messages.getString("collision.narrowphase.gjk.nullMinkowskiPenetrationSolver"));
 		this.minkowskiPenetrationSolver = minkowskiPenetrationSolver;
 	}
 	
@@ -158,7 +159,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	@Override
 	public boolean detect(Convex convex1, Transform transform1, Convex convex2, Transform transform2, Penetration penetration) {
 		// check for circles
-		if (convex1.isType(Circle.TYPE) && convex2.isType(Circle.TYPE)) {
+		if (convex1 instanceof Circle && convex2 instanceof Circle) {
 			// if its a circle - circle collision use the faster method
 			return CircleDetector.detect((Circle) convex1, transform1, (Circle) convex2, transform2, penetration);
 		}
@@ -212,7 +213,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	@Override
 	public boolean detect(Convex convex1, Transform transform1, Convex convex2, Transform transform2) {
 		// check for circles
-		if (convex1.isType(Circle.TYPE) && convex2.isType(Circle.TYPE)) {
+		if (convex1 instanceof Circle && convex2 instanceof Circle) {
 			// if its a circle - circle collision use the faster method
 			return CircleDetector.detect((Circle) convex1, transform1, (Circle) convex2, transform2);
 		}
@@ -344,7 +345,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 */
 	public boolean distance(Convex convex1, Transform transform1, Convex convex2, Transform transform2, Separation separation) {
 		// check for circles
-		if (convex1.isType(Circle.TYPE) && convex2.isType(Circle.TYPE)) {
+		if (convex1 instanceof Circle && convex2 instanceof Circle) {
 			// if its a circle - circle collision use the faster method
 			return CircleDetector.distance((Circle) convex1, transform1, (Circle) convex2, transform2, separation);
 		}
@@ -594,12 +595,12 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 */
 	public boolean raycast(Ray ray, double maxLength, Convex convex, Transform transform, Raycast raycast) {
 		// check for circle
-		if (convex.isType(Circle.TYPE)) {
+		if (convex instanceof Circle) {
 			// if the convex is a circle then use the more efficient method
 			return CircleDetector.raycast(ray, maxLength, (Circle) convex, transform, raycast);
 		}
 		// check for segment
-		if (convex.isType(Segment.TYPE)) {
+		if (convex instanceof Segment) {
 			// if the convex is a segment then use the more efficient method
 			return SegmentDetector.raycast(ray, maxLength, (Segment) convex, transform, raycast);
 		}
@@ -751,7 +752,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * @throws IllegalArgumentException if maxIterations is less than 5
 	 */
 	public void setMaxIterations(int maxIterations) {
-		if (maxIterations < 5) throw new IllegalArgumentException("The GJK distance algorithm requires 5 or more iterations.");
+		if (maxIterations < 5) throw new IllegalArgumentException(Messages.getString("collision.narrowphase.gjk.invalidMaximumIterations"));
 		this.maxIterations = maxIterations;
 	}
 
@@ -772,7 +773,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * @throws IllegalArgumentException if distanceEpsilon is less than or equal to zero
 	 */
 	public void setDistanceEpsilon(double distanceEpsilon) {
-		if (distanceEpsilon <= 0) throw new IllegalArgumentException("The GJK distance epsilon must be larger than zero.");
+		if (distanceEpsilon <= 0) throw new IllegalArgumentException(Messages.getString("collision.narrowphase.gjk.invalidDistanceEpsilon"));
 		this.distanceEpsilon = distanceEpsilon;
 	}
 	
@@ -792,7 +793,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * @throws NullPointerException if minkowskiPenetrationSolver is null
 	 */
 	public void setMinkowskiPenetrationSolver(MinkowskiPenetrationSolver minkowskiPenetrationSolver) {
-		if (minkowskiPenetrationSolver == null) throw new NullPointerException("The MinkowskiPenetrationSolver cannot be null.");
+		if (minkowskiPenetrationSolver == null) throw new NullPointerException(Messages.getString("collision.narrowphase.gjk.nullMinkowskiPenetrationSolver"));
 		this.minkowskiPenetrationSolver = minkowskiPenetrationSolver;
 	}
 }

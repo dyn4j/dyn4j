@@ -35,8 +35,8 @@ import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 
-import org.dyn4j.sandbox.Resources;
 import org.dyn4j.sandbox.panels.ColorPanel;
+import org.dyn4j.sandbox.resources.Messages;
 import org.dyn4j.sandbox.utilities.ControlUtilities;
 
 /**
@@ -68,15 +68,15 @@ public class ColorDialog extends JDialog implements ActionListener {
 	 * @param alpha true if the alpha slider should be shown
 	 */
 	private ColorDialog(Window owner, Color initialColor, boolean alpha) {
-		super(owner, Resources.getString("dialog.color.title"), ModalityType.APPLICATION_MODAL);
+		super(owner, Messages.getString("dialog.color.title"), ModalityType.APPLICATION_MODAL);
 		
 		this.pnlColor = new ColorPanel(initialColor, alpha);
 		
-		this.btnCancel = new JButton(Resources.getString("button.cancel"));
+		this.btnCancel = new JButton(Messages.getString("button.cancel"));
 		this.btnCancel.setActionCommand("cancel");
 		this.btnCancel.addActionListener(this);
 		
-		this.btnSelect = new JButton(Resources.getString("button.select"));
+		this.btnSelect = new JButton(Messages.getString("button.select"));
 		this.btnSelect.setActionCommand("select");
 		this.btnSelect.addActionListener(this);
 		

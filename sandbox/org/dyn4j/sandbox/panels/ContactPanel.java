@@ -31,8 +31,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import org.dyn4j.sandbox.ContactCounter;
-import org.dyn4j.sandbox.Resources;
-import org.dyn4j.sandbox.utilities.Icons;
+import org.dyn4j.sandbox.icons.Icons;
+import org.dyn4j.sandbox.resources.Messages;
 
 /**
  * Panel to show the number of contacts and their respective types.
@@ -75,19 +75,19 @@ public class ContactPanel extends JPanel {
 	public ContactPanel(ContactCounter counter) {
 		this.counter = counter;
 		
-		JLabel lblTotalContacts = new JLabel(Resources.getString("panel.contact.total"), Icons.INFO, JLabel.LEFT);
-		JLabel lblSensedContacts = new JLabel(Resources.getString("panel.contact.sensed"), Icons.INFO, JLabel.LEFT);
-		JLabel lblAddedContacts = new JLabel(Resources.getString("panel.contact.added"), Icons.INFO, JLabel.LEFT);
-		JLabel lblPersistedContacts = new JLabel(Resources.getString("panel.contact.persisted"), Icons.INFO, JLabel.LEFT);
-		JLabel lblRemovedContacts = new JLabel(Resources.getString("panel.contact.removed"), Icons.INFO, JLabel.LEFT);
-		JLabel lblSolvedContacts = new JLabel(Resources.getString("panel.contact.solved"), Icons.INFO, JLabel.LEFT);
+		JLabel lblTotalContacts = new JLabel(Messages.getString("panel.contact.total"), Icons.INFO, JLabel.LEFT);
+		JLabel lblSensedContacts = new JLabel(Messages.getString("panel.contact.sensed"), Icons.INFO, JLabel.LEFT);
+		JLabel lblAddedContacts = new JLabel(Messages.getString("panel.contact.added"), Icons.INFO, JLabel.LEFT);
+		JLabel lblPersistedContacts = new JLabel(Messages.getString("panel.contact.persisted"), Icons.INFO, JLabel.LEFT);
+		JLabel lblRemovedContacts = new JLabel(Messages.getString("panel.contact.removed"), Icons.INFO, JLabel.LEFT);
+		JLabel lblSolvedContacts = new JLabel(Messages.getString("panel.contact.solved"), Icons.INFO, JLabel.LEFT);
 		
-		lblTotalContacts.setToolTipText(Resources.getString("panel.contact.total.tooltip"));
-		lblSensedContacts.setToolTipText(Resources.getString("panel.contact.sensed.tooltip"));
-		lblAddedContacts.setToolTipText(Resources.getString("panel.contact.added.tooltip"));
-		lblPersistedContacts.setToolTipText(Resources.getString("panel.contact.persisted.tooltip"));
-		lblRemovedContacts.setToolTipText(Resources.getString("panel.contact.removed.tooltip"));
-		lblSolvedContacts.setToolTipText(Resources.getString("panel.contact.solved.tooltip"));
+		lblTotalContacts.setToolTipText(Messages.getString("panel.contact.total.tooltip"));
+		lblSensedContacts.setToolTipText(Messages.getString("panel.contact.sensed.tooltip"));
+		lblAddedContacts.setToolTipText(Messages.getString("panel.contact.added.tooltip"));
+		lblPersistedContacts.setToolTipText(Messages.getString("panel.contact.persisted.tooltip"));
+		lblRemovedContacts.setToolTipText(Messages.getString("panel.contact.removed.tooltip"));
+		lblSolvedContacts.setToolTipText(Messages.getString("panel.contact.solved.tooltip"));
 		
 		this.txtTotalContacts = new JTextField();
 		this.txtSensedContacts = new JTextField();
