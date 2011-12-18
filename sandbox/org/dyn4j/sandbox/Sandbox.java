@@ -440,15 +440,25 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		mnuOpen.setActionCommand("open");
 		mnuOpen.addActionListener(this);
 		
-		JMenuItem mnuExport = new JMenuItem(Messages.getString("menu.file.export.java"));
-		mnuExport.setIcon(Icons.EXPORT_JAVA);
-		mnuExport.setActionCommand("export");
-		mnuExport.addActionListener(this);
+		JMenu mnuExport = new JMenu(Messages.getString("menu.file.export"));
+		
+		JMenuItem mnuExportJava = new JMenuItem(Messages.getString("menu.file.export.java"));
+		mnuExportJava.setIcon(Icons.EXPORT_JAVA);
+		mnuExportJava.setActionCommand("export-java");
+		mnuExportJava.addActionListener(this);
+		mnuExport.add(mnuExportJava);
+		
+		JMenuItem mnuExit = new JMenuItem(Messages.getString("menu.file.exit"));
+		mnuExit.setActionCommand("exit");
+		mnuExit.addActionListener(this);
 		
 		this.mnuFile.add(mnuNew);
 		this.mnuFile.add(mnuOpen);
+		this.mnuFile.addSeparator();
 		this.mnuFile.add(mnuSave);
 		this.mnuFile.add(mnuExport);
+		this.mnuFile.addSeparator();
+		this.mnuFile.add(mnuExit);
 		
 		// snapshot menu
 		this.mnuSnapshot = new JMenu(Messages.getString("menu.snapshot"));
@@ -873,6 +883,9 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		if ("clear-all".equals(command)) {
 			// clear the current selection
 			this.endAllActions();
+			// clear the contact listener
+			((ContactCounter)this.world.getContactListener()).clear();
+			this.pnlContacts.update();
 		} else if ("remove-body".equals(command)) {
 			// check if it was this body
 			BodyActionEvent bae = (BodyActionEvent)event;
@@ -882,6 +895,9 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 			 || body == this.editBodyAction.getObject()) {
 				// if the body is selected or being edited then end the actions
 				this.endAllActions();
+				// clear the contact listener
+				((ContactCounter)this.world.getContactListener()).clear();
+				this.pnlContacts.update();
 			}
 		} else if ("add-ray".equals(command)) {
 			RayActionEvent rae = (RayActionEvent)event;
@@ -934,6 +950,11 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				this.camera.toOrigin();
 				// set the window title
 				this.setTitle(this.getWindowTitle());
+				// stop all actions
+				this.endAllActions();
+				// clear the contact listener
+				((ContactCounter)this.world.getContactListener()).clear();
+				this.pnlContacts.update();
 			}
 		} else if ("save".equals(command)) {
 			try {
@@ -949,13 +970,16 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				this.openSimulationAction();
 				// stop all actions
 				this.endAllActions();
+				// clear the contact listener
+				((ContactCounter)this.world.getContactListener()).clear();
+				this.pnlContacts.update();
 			} catch (Exception e) {
 				ExceptionDialog.show(this, 
 						Messages.getString("dialog.open.error.title"), 
 						Messages.getString("dialog.open.error.text"), 
 						e);
 			}
-		} else if ("export".equals(command)) {
+		} else if ("export-java".equals(command)) {
 			try {
 				this.exportToJavaCode();
 			} catch (Exception e) {
@@ -964,6 +988,11 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 						Messages.getString("dialog.export.java.error.text"), 
 						e);
 			}
+		} else if ("exit".equals(command)) {
+			// dispose of all resources
+			this.dispose();
+			// let the jvm exit
+			System.exit(0);
 		} else if ("start".equals(command)) {
 			if (isPaused()) {
 				// check for a floor/static body
@@ -1042,7 +1071,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 			Preferences.setContactPointEnabled(!Preferences.isContactPointEnabled());
 		} else if ("contactImpulse".equals(command)) {
 			Preferences.setContactImpulseEnabled(!Preferences.isContactImpulseEnabled());
-		} else if ("frictingImpulse".equals(command)) {
+		} else if ("frictionImpulse".equals(command)) {
 			Preferences.setFrictionImpulseEnabled(!Preferences.isFrictionImpulseEnabled());
 		} else if ("bodyCenter".equals(command)) {
 			Preferences.setBodyCenterEnabled(!Preferences.isBodyCenterEnabled());
@@ -1090,6 +1119,9 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 					this.restoreSnapshot(key);
 					// stop all actions
 					this.endAllActions();
+					// clear the contact listener
+					((ContactCounter)this.world.getContactListener()).clear();
+					this.pnlContacts.update();
 				} catch (Exception e) {
 					ExceptionDialog.show(this, 
 							Messages.getString("dialog.snapshot.load.error.title"), 
@@ -1126,6 +1158,9 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				this.openTestAction(file, name);
 				// stop all actions
 				this.endAllActions();
+				// clear the contact listener
+				((ContactCounter)this.world.getContactListener()).clear();
+				this.pnlContacts.update();
 			} catch (Exception e) {
 				ExceptionDialog.show(this, 
 						Messages.getString("dialog.test.open.error.title"), 
@@ -1460,7 +1495,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 					// set the color
 					gl.glColor4fv(Preferences.getContactPointColor(), 0);
 					// draw the contact points
-					RenderUtilities.fillRectangleFromCenter(gl, c.x, c.y, 0.02, 0.02);
+					RenderUtilities.fillRectangleFromCenter(gl, c.x, c.y, 0.05, 0.05);
 				}
 				
 				// check if the contact is a solved contact
@@ -2297,7 +2332,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	private boolean contains(Convex convex, Transform transform, Vector2 point) {
 		if (convex instanceof Segment) {
 			Segment segment = (Segment)convex;
-			return segment.contains(point, transform, 0.1);
+			return segment.contains(point, transform, 0.2 * 32.0 / this.camera.scale);
 		}
 		return convex.contains(point, transform);
 	}
