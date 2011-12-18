@@ -262,8 +262,6 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				// add the node to the tree
 				DefaultMutableTreeNode fixtureNode = new DefaultMutableTreeNode(fixture);
 				this.model.insertNodeInto(fixtureNode, bodyNode, bodyNode.getChildCount());
-				// expand the path to the new node
-				this.tree.expandPath(new TreePath(fixtureNode.getPath()).getParentPath());
 			}
 		}
 		

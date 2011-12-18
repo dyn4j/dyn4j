@@ -28,6 +28,7 @@ import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.dyn4j.Epsilon;
 import org.dyn4j.Version;
 import org.dyn4j.collision.Bounds;
 import org.dyn4j.collision.CategoryFilter;
@@ -38,13 +39,10 @@ import org.dyn4j.collision.broadphase.DynamicAABBTree;
 import org.dyn4j.collision.broadphase.SapBruteForce;
 import org.dyn4j.collision.broadphase.SapIncremental;
 import org.dyn4j.collision.broadphase.SapTree;
-import org.dyn4j.collision.continuous.ConservativeAdvancement;
-import org.dyn4j.collision.continuous.TimeOfImpactDetector;
-import org.dyn4j.collision.manifold.ClippingManifoldSolver;
-import org.dyn4j.collision.manifold.ManifoldSolver;
 import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.collision.narrowphase.Sat;
+import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.World;
@@ -81,6 +79,15 @@ public class CodeExporter {
 	/** The line separator for the system */
 	private static final String NEW_LINE = System.getProperty("line.separator");
 	
+	/** One tab */
+	private static final String TAB1 = "  ";
+	
+	/** Two tabs */
+	private static final String TAB2 = TAB1 + TAB1;
+	
+	/** Three tabs */
+	private static final String TAB3 = TAB1 + TAB1 + TAB1;
+	
 	/**
 	 * Exports the given world and settings to Java code.
 	 * <p>
@@ -110,64 +117,77 @@ public class CodeExporter {
 		.append("// dyn4j v").append(Version.getVersion()).append(NEW_LINE)
 		.append("public class ").append(name).append(" { ").append(NEW_LINE).append(NEW_LINE)
 		// private constructor
-		.append("\tprivate ").append(name).append("() {}").append(NEW_LINE).append(NEW_LINE)
+		.append(TAB1).append("private ").append(name).append("() {}").append(NEW_LINE).append(NEW_LINE)
 		// single static setup method
-		.append("\tpublic static final void setup(World world, Settings settings) {").append(NEW_LINE);
+		.append(TAB1).append("public static final void setup(World world, Settings settings) {").append(NEW_LINE);
 		
 		// output settings
 		sb.append(export(settings));
 		
 		// output world settings
+		sb.append(NEW_LINE);
 		Vector2 g = world.getGravity();
-		sb.append("\t\tworld.setGravity(").append(export(g)).append(");").append(NEW_LINE);
+		if (g == World.EARTH_GRAVITY || g.equals(0.0, -9.8)) {
+			// don't output anything since its the default
+		} else if (g == World.ZERO_GRAVITY || g.isZero()) {
+			sb.append(TAB2).append("world.setGravity(World.ZERO_GRAVITY);").append(NEW_LINE);
+		} else {
+			sb.append(TAB2).append("world.setGravity(").append(export(g)).append(");").append(NEW_LINE);
+		}
 
 		BroadphaseDetector<?> bpd = world.getBroadphaseDetector();
 		NarrowphaseDetector npd = world.getNarrowphaseDetector();
-		ManifoldSolver msr = world.getManifoldSolver();
-		TimeOfImpactDetector tid = world.getTimeOfImpactDetector();
+//		ManifoldSolver msr = world.getManifoldSolver();
+//		TimeOfImpactDetector tid = world.getTimeOfImpactDetector();
 		if (bpd instanceof SapBruteForce) {
-			sb.append("\t\tworld.setBroadphaseDetector(new SapBruteForce<Body>());").append(NEW_LINE);
+			sb.append(TAB2).append("world.setBroadphaseDetector(new SapBruteForce<Body>());").append(NEW_LINE);
 		} else if (bpd instanceof SapIncremental) {
-			sb.append("\t\tworld.setBroadphaseDetector(new SapIncremental<Body>());").append(NEW_LINE);
+			sb.append(TAB2).append("world.setBroadphaseDetector(new SapIncremental<Body>());").append(NEW_LINE);
 		} else if (bpd instanceof SapTree) {
-			sb.append("\t\tworld.setBroadphaseDetector(new SapTree<Body>());").append(NEW_LINE);
+			sb.append(TAB2).append("world.setBroadphaseDetector(new SapTree<Body>());").append(NEW_LINE);
 		} else if (bpd instanceof DynamicAABBTree) {
-			sb.append("\t\tworld.setBroadphaseDetector(new DynamicAABBTree<Body>());").append(NEW_LINE);
+			// don't output anything since its the default
 		} else {
 			throw new UnsupportedOperationException(MessageFormat.format(Messages.getString("exception.persist.unknownClass"), bpd.getClass().getName()));
 		}
 		
 		if (npd instanceof Sat) {
-			sb.append("\t\tworld.setNarrowphaseDetector(new Sat());").append(NEW_LINE);
+			sb.append(TAB2).append("world.setNarrowphaseDetector(new Sat());").append(NEW_LINE);
 		} else if (npd instanceof Gjk) {
-			sb.append("\t\tworld.setNarrowphaseDetector(new Gjk());").append(NEW_LINE);
+			// don't output anything since its the default
 		} else {
 			throw new UnsupportedOperationException(MessageFormat.format(Messages.getString("exception.persist.unknownClass"), npd.getClass().getName()));
 		}
 		
-		if (msr instanceof ClippingManifoldSolver) {
-			sb.append("\t\tworld.setManifoldSolver(new ClippingManifoldSolver());").append(NEW_LINE);
-		} else {
-			throw new UnsupportedOperationException(MessageFormat.format(Messages.getString("exception.persist.unknownClass"), msr.getClass().getName()));
-		}
+		// don't output anything since its the default
+//		if (msr instanceof ClippingManifoldSolver) {
+//			sb.append(TAB2).append("world.setManifoldSolver(new ClippingManifoldSolver());").append(NEW_LINE);
+//		} else {
+//			throw new UnsupportedOperationException(MessageFormat.format(Messages.getString("exception.persist.unknownClass"), msr.getClass().getName()));
+//		}
 		
-		if (tid instanceof ConservativeAdvancement) {
-			sb.append("\t\tworld.setTimeOfImpactDetector(new ConservativeAdvancement());").append(NEW_LINE);
-		} else {
-			throw new UnsupportedOperationException(MessageFormat.format(Messages.getString("exception.persist.unknownClass"), tid.getClass().getName()));
-		}
+		// don't output anything since its the default
+//		if (tid instanceof ConservativeAdvancement) {
+//			sb.append(TAB2).append("world.setTimeOfImpactDetector(new ConservativeAdvancement());").append(NEW_LINE);
+//		} else {
+//			throw new UnsupportedOperationException(MessageFormat.format(Messages.getString("exception.persist.unknownClass"), tid.getClass().getName()));
+//		}
 		
-		sb.append(NEW_LINE);
 		Bounds bounds = world.getBounds();
 		if (bounds instanceof NullBounds || bounds == null) {
-			sb.append("\t\tworld.setBounds(null);").append(NEW_LINE);
+			// don't output anything since its the default
 		} else if (bounds instanceof RectangularBounds) {
 			RectangularBounds rb = (RectangularBounds)bounds;
 			Rectangle r = rb.getBounds();
-			sb.append("\t\tRectangularBounds bounds = new RectangularBounds(new Rectangle(").append(r.getWidth()).append(", ").append(r.getHeight()).append("));").append(NEW_LINE)
-			.append("\t\tbounds.rotate(Math.toRadians(").append(Math.toDegrees(rb.getTransform().getRotation())).append("));").append(NEW_LINE)
-			.append("\t\tbounds.translate(").append(export(rb.getTransform().getTranslation())).append(");").append(NEW_LINE)
-			.append("\t\tworld.setBounds(bounds);").append(NEW_LINE)
+			sb.append(NEW_LINE)
+			.append(TAB2).append("RectangularBounds bounds = new RectangularBounds(new Rectangle(").append(r.getWidth()).append(", ").append(r.getHeight()).append("));").append(NEW_LINE);
+			if (Math.abs(rb.getTransform().getRotation()) > Epsilon.E) {
+				sb.append(TAB2).append("bounds.rotate(Math.toRadians(").append(Math.toDegrees(rb.getTransform().getRotation())).append("));").append(NEW_LINE);
+			}
+			if (!rb.getTransform().getTranslation().isZero()) {
+				sb.append(TAB2).append("bounds.translate(").append(export(rb.getTransform().getTranslation())).append(");").append(NEW_LINE);
+			}
+			sb.append(TAB2).append("world.setBounds(bounds);").append(NEW_LINE)
 			.append(NEW_LINE);
 		} else {
 			throw new UnsupportedOperationException(MessageFormat.format(Messages.getString("exception.persist.unknownClass"), bounds.getClass().getName()));
@@ -175,142 +195,181 @@ public class CodeExporter {
 		
 		// output bodies
 		int bSize = world.getBodyCount();
-		for (int i = 0; i < bSize; i++) {
-			SandboxBody body = (SandboxBody)world.getBody(i);
+		for (int i = 1; i < bSize + 1; i++) {
+			SandboxBody body = (SandboxBody)world.getBody(i - 1);
 			// save the id+name
 			idNameMap.put(body.getId(), "body" + i);
 			Mass mass = body.getMass();
 			// output the body settings
-			sb.append("\t\t// ").append(body.getUserData()).append(NEW_LINE)
-			.append("\t\tBody body").append(i).append(" = new Body();").append(NEW_LINE);
+			sb.append(TAB2).append("// ").append(body.getUserData()).append(NEW_LINE)
+			.append(TAB2).append("Body body").append(i).append(" = new Body();").append(NEW_LINE);
 			// add all fixtures
 			int fSize = body.getFixtureCount();
 			for (int j = 0; j < fSize; j++) {
 				BodyFixture bf = body.getFixture(j);
-				sb.append("\t\t{// ").append(bf.getUserData()).append(NEW_LINE)
+				sb.append(TAB2).append("{// ").append(bf.getUserData()).append(NEW_LINE)
 				// create the shape
-				.append(export(bf.getShape(), "\t\t\t"))
+				.append(export(bf.getShape(), TAB3))
 				// create the fixture
-				.append("\t\t\tBodyFixture bf = new BodyFixture(c);").append(NEW_LINE)
+				.append(TAB3).append("BodyFixture bf = new BodyFixture(c);").append(NEW_LINE);
 				// set the fixture properties
-				.append("\t\t\tbf.setSensor(").append(bf.isSensor()).append(");").append(NEW_LINE)
-				.append("\t\t\tbf.setDensity(").append(bf.getDensity()).append(");").append(NEW_LINE)
-				.append("\t\t\tbf.setFriction(").append(bf.getFriction()).append(");").append(NEW_LINE)
-				.append("\t\t\tbf.setRestitution(").append(bf.getRestitution()).append(");").append(NEW_LINE)
+				if (bf.isSensor()) {
+					sb.append(TAB3).append("bf.setSensor(").append(bf.isSensor()).append(");").append(NEW_LINE);
+				} // by default fixtures are not sensors
+				if (bf.getDensity() != BodyFixture.DEFAULT_DENSITY) {
+					sb.append(TAB3).append("bf.setDensity(").append(bf.getDensity()).append(");").append(NEW_LINE);
+				}
+				if (bf.getFriction() != BodyFixture.DEFAULT_FRICTION) {
+					sb.append(TAB3).append("bf.setFriction(").append(bf.getFriction()).append(");").append(NEW_LINE);
+				}
+				if (bf.getRestitution() != BodyFixture.DEFAULT_RESTITUTION) {
+					sb.append(TAB3).append("bf.setRestitution(").append(bf.getRestitution()).append(");").append(NEW_LINE);
+				}
 				// set the filter properties
-				.append(export(bf.getFilter(), "\t\t\t"))
+				sb.append(export(bf.getFilter(), TAB3))
 				// add the fixture to the body
-				.append("\t\t\tbody").append(i).append(".addFixture(bf);").append(NEW_LINE)
-				.append("\t\t}").append(NEW_LINE);
+				.append(TAB3).append("body").append(i).append(".addFixture(bf);").append(NEW_LINE)
+				.append(TAB2).append("}").append(NEW_LINE);
 			}
 			// set the transform
-			sb.append("\t\tbody").append(i).append(".rotate(Math.toRadians(").append(Math.toDegrees(body.getTransform().getRotation())).append("));").append(NEW_LINE)
-			.append("\t\tbody").append(i).append(".translate(").append(export(body.getTransform().getTranslation())).append(");").append(NEW_LINE)
+			if (Math.abs(body.getTransform().getRotation()) > Epsilon.E) {
+				sb.append(TAB2).append("body").append(i).append(".rotate(Math.toRadians(").append(Math.toDegrees(body.getTransform().getRotation())).append("));").append(NEW_LINE);
+			}
+			if (!body.getTransform().getTranslation().isZero()) {
+				sb.append(TAB2).append("body").append(i).append(".translate(").append(export(body.getTransform().getTranslation())).append(");").append(NEW_LINE);
+			}
 			// set velocity
-			.append("\t\tbody").append(i).append(".setVelocity(").append(export(body.getVelocity())).append(");").append(NEW_LINE)
-			.append("\t\tbody").append(i).append(".setAngularVelocity(Math.toRadians(").append(Math.toDegrees(body.getAngularVelocity())).append("));").append(NEW_LINE)
+			if (!body.getVelocity().isZero()) {
+				sb.append(TAB2).append("body").append(i).append(".setVelocity(").append(export(body.getVelocity())).append(");").append(NEW_LINE);
+			}
+			if (Math.abs(body.getAngularVelocity()) > Epsilon.E) {
+				sb.append(TAB2).append("body").append(i).append(".setAngularVelocity(Math.toRadians(").append(Math.toDegrees(body.getAngularVelocity())).append("));").append(NEW_LINE);
+			}
 			// set force/torque accumulators
-			.append("\t\tbody").append(i).append(".apply(").append(export(body.getAccumulatedForce())).append(");").append(NEW_LINE)
-			.append("\t\tbody").append(i).append(".apply(").append(body.getAccumulatedTorque()).append(");").append(NEW_LINE)
+			if (!body.getAccumulatedForce().isZero()) {
+				sb.append(TAB2).append("body").append(i).append(".apply(").append(export(body.getAccumulatedForce())).append(");").append(NEW_LINE);
+			}
+			if (Math.abs(body.getAccumulatedTorque()) > Epsilon.E) {
+				sb.append(TAB2).append("body").append(i).append(".apply(").append(body.getAccumulatedTorque()).append(");").append(NEW_LINE);
+			}
 			// set state properties
-			.append("\t\tbody").append(i).append(".setActive(").append(body.isActive()).append(");").append(NEW_LINE)
-			.append("\t\tbody").append(i).append(".setAsleep(").append(body.isAsleep()).append(");").append(NEW_LINE)
-			.append("\t\tbody").append(i).append(".setAutoSleepingEnabled(").append(body.isAutoSleepingEnabled()).append(");").append(NEW_LINE)
-			.append("\t\tbody").append(i).append(".setBullet(").append(body.isBullet()).append(");").append(NEW_LINE)
+			if (!body.isActive()) {
+				sb.append(TAB2).append("body").append(i).append(".setActive(false);").append(NEW_LINE);
+			} // by default the body is active
+			if (body.isAsleep()) {
+				sb.append(TAB2).append("body").append(i).append(".setAsleep(true);").append(NEW_LINE);
+			} // by default the body is awake
+			if (!body.isAutoSleepingEnabled()) {
+				sb.append(TAB2).append("body").append(i).append(".setAutoSleepingEnabled(false);").append(NEW_LINE);
+			} // by default auto sleeping is true
+			if (body.isBullet()) {
+				sb.append(TAB2).append("body").append(i).append(".setBullet(true);").append(NEW_LINE);
+			} // by default the body is not a bullet
 			// set damping
-			.append("\t\tbody").append(i).append(".setLinearDamping(").append(body.getLinearDamping()).append(");").append(NEW_LINE)
-			.append("\t\tbody").append(i).append(".setAngularDamping(").append(body.getAngularDamping()).append(");").append(NEW_LINE)
+			if (body.getLinearDamping() != Body.DEFAULT_LINEAR_DAMPING) {
+				sb.append(TAB2).append("body").append(i).append(".setLinearDamping(").append(body.getLinearDamping()).append(");").append(NEW_LINE);
+			}
+			if (body.getAngularDamping() != Body.DEFAULT_ANGULAR_DAMPING) {
+				sb.append(TAB2).append("body").append(i).append(".setAngularDamping(").append(body.getAngularDamping()).append(");").append(NEW_LINE);
+			}
 			// set gravity scale
-			.append("\t\tbody").append(i).append(".setGravityScale(").append(body.getGravityScale()).append(");").append(NEW_LINE)
+			if (body.getGravityScale() != 1.0) {
+				sb.append(TAB2).append("body").append(i).append(".setGravityScale(").append(body.getGravityScale()).append(");").append(NEW_LINE);
+			}
 			// set mass properties last
-			.append("\t\tbody").append(i).append(".setMass(").append(export(mass)).append(");").append(NEW_LINE)
-			// set mass type
-			.append("\t\tbody").append(i).append(".setMassType(Mass.Type.").append(mass.getType()).append(");").append(NEW_LINE)
-			.append("\t\tworld.add(body").append(i).append(");").append(NEW_LINE).append(NEW_LINE);
+			if (body.isMassExplicit()) {
+				sb.append(TAB2).append("body").append(i).append(".setMass(").append(export(mass)).append(");").append(NEW_LINE)
+				// set the mass type
+				.append(TAB2).append("body").append(i).append(".setMassType(Mass.Type.").append(mass.getType()).append(");").append(NEW_LINE);
+			} else {
+				sb.append(TAB2).append("body").append(i).append(".setMass(Mass.Type.").append(mass.getType()).append(");").append(NEW_LINE);
+			}
+			// add the body to the world
+			sb.append(TAB2).append("world.add(body").append(i).append(");").append(NEW_LINE).append(NEW_LINE);
 		}
 		
 		// output joints
 		int jSize = world.getJointCount();
-		for (int i = 0; i < jSize; i++) {
-			Joint joint = world.getJoint(i);
+		for (int i = 1; i < jSize + 1; i++) {
+			Joint joint = world.getJoint(i - 1);
 			
 			SandboxBody body1 = (SandboxBody)joint.getBody1();
 			SandboxBody body2 = (SandboxBody)joint.getBody2();
 			
-			sb.append("\t\t// ").append(joint.getUserData()).append(NEW_LINE);
+			sb.append(TAB2).append("// ").append(joint.getUserData()).append(NEW_LINE);
 			if (joint instanceof AngleJoint) {
 				AngleJoint aj = (AngleJoint)joint;
-				sb.append("\t\tAngleJoint joint").append(i).append(" = new AngleJoint(").append(idNameMap.get(body1.getId())).append(", ").append(idNameMap.get(body2.getId())).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setLimits(Math.toRadians(").append(Math.toDegrees(aj.getLowerLimit())).append("), Math.toRadians(").append(Math.toDegrees(aj.getUpperLimit())).append("));").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setLimitEnabled(").append(aj.isLimitEnabled()).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setReferenceAngle(Math.toRadians(").append(Math.toDegrees(aj.getReferenceAngle())).append("));").append(NEW_LINE);
+				sb.append(TAB2).append("AngleJoint joint").append(i).append(" = new AngleJoint(").append(idNameMap.get(body1.getId())).append(", ").append(idNameMap.get(body2.getId())).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setLimits(Math.toRadians(").append(Math.toDegrees(aj.getLowerLimit())).append("), Math.toRadians(").append(Math.toDegrees(aj.getUpperLimit())).append("));").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setLimitEnabled(").append(aj.isLimitEnabled()).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setReferenceAngle(Math.toRadians(").append(Math.toDegrees(aj.getReferenceAngle())).append("));").append(NEW_LINE);
 			} else if (joint instanceof DistanceJoint) {
 				DistanceJoint dj = (DistanceJoint)joint;
-				sb.append("\t\tDistanceJoint joint").append(i).append(" = new DistanceJoint(").append(idNameMap.get(body1.getId())).append(", ").append(idNameMap.get(body2.getId())).append(", ").append(export(dj.getAnchor1())).append(", ").append(export(dj.getAnchor2())).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setFrequency(").append(dj.getFrequency()).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setDampingRatio(").append(dj.getDampingRatio()).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setDistance(").append(dj.getDistance()).append(");").append(NEW_LINE);
+				sb.append(TAB2).append("DistanceJoint joint").append(i).append(" = new DistanceJoint(").append(idNameMap.get(body1.getId())).append(", ").append(idNameMap.get(body2.getId())).append(", ").append(export(dj.getAnchor1())).append(", ").append(export(dj.getAnchor2())).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setFrequency(").append(dj.getFrequency()).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setDampingRatio(").append(dj.getDampingRatio()).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setDistance(").append(dj.getDistance()).append(");").append(NEW_LINE);
 			} else if (joint instanceof FrictionJoint) {
 				FrictionJoint fj = (FrictionJoint)joint;
-				sb.append("\t\tFrictionJoint joint").append(i).append(" = new FrictionJoint(").append(idNameMap.get(body1.getId())).append(", ").append(idNameMap.get(body2.getId())).append(", ").append(export(fj.getAnchor1())).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setMaximumForce(").append(fj.getMaximumForce()).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setMaximumTorque(").append(fj.getMaximumTorque()).append(");").append(NEW_LINE);
+				sb.append(TAB2).append("FrictionJoint joint").append(i).append(" = new FrictionJoint(").append(idNameMap.get(body1.getId())).append(", ").append(idNameMap.get(body2.getId())).append(", ").append(export(fj.getAnchor1())).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setMaximumForce(").append(fj.getMaximumForce()).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setMaximumTorque(").append(fj.getMaximumTorque()).append(");").append(NEW_LINE);
 			} else if (joint instanceof MouseJoint) {
 				MouseJoint mj = (MouseJoint)joint;
-				sb.append("\t\tMouseJoint joint").append(i).append(" = new MouseJoint(").append(idNameMap.get(body1.getId())).append(", ").append(export(mj.getAnchor2())).append(", ").append(mj.getFrequency()).append(", ").append(mj.getDampingRatio()).append(", ").append(mj.getMaximumForce()).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setTarget(").append(export(mj.getAnchor1())).append(");").append(NEW_LINE);
+				sb.append(TAB2).append("MouseJoint joint").append(i).append(" = new MouseJoint(").append(idNameMap.get(body1.getId())).append(", ").append(export(mj.getAnchor2())).append(", ").append(mj.getFrequency()).append(", ").append(mj.getDampingRatio()).append(", ").append(mj.getMaximumForce()).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setTarget(").append(export(mj.getAnchor1())).append(");").append(NEW_LINE);
 			} else if (joint instanceof PrismaticJoint) {
 				PrismaticJoint pj = (PrismaticJoint)joint;
-				sb.append("\t\tPrismaticJoint joint").append(i).append(" = new PrismaticJoint(").append(idNameMap.get(body1.getId())).append(", ").append(idNameMap.get(body2.getId())).append(", ").append(export(pj.getAnchor1())).append(", ").append(export(pj.getAxis())).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setLimitEnabled(").append(pj.isLimitEnabled()).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setLimits(").append(pj.getLowerLimit()).append(", ").append(pj.getUpperLimit()).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setReferenceAngle(Math.toRadians(").append(Math.toDegrees(pj.getReferenceAngle())).append("));").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setMotorEnabled(").append(pj.isMotorEnabled()).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setMotorSpeed(").append(pj.getMotorSpeed()).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setMaximumMotorForce(").append(pj.getMaximumMotorForce()).append(");").append(NEW_LINE);
+				sb.append(TAB2).append("PrismaticJoint joint").append(i).append(" = new PrismaticJoint(").append(idNameMap.get(body1.getId())).append(", ").append(idNameMap.get(body2.getId())).append(", ").append(export(pj.getAnchor1())).append(", ").append(export(pj.getAxis())).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setLimitEnabled(").append(pj.isLimitEnabled()).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setLimits(").append(pj.getLowerLimit()).append(", ").append(pj.getUpperLimit()).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setReferenceAngle(Math.toRadians(").append(Math.toDegrees(pj.getReferenceAngle())).append("));").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setMotorEnabled(").append(pj.isMotorEnabled()).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setMotorSpeed(").append(pj.getMotorSpeed()).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setMaximumMotorForce(").append(pj.getMaximumMotorForce()).append(");").append(NEW_LINE);
 			} else if (joint instanceof PulleyJoint) {
 				PulleyJoint pj = (PulleyJoint)joint;
-				sb.append("\t\tPulleyJoint joint").append(i).append(" = new PulleyJoint(").append(idNameMap.get(body1.getId())).append(", ").append(idNameMap.get(body2.getId())).append(", ").append(export(pj.getPulleyAnchor1())).append(", ").append(export(pj.getPulleyAnchor2())).append(", ").append(export(pj.getAnchor1())).append(", ").append(export(pj.getAnchor2())).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setRatio(").append(pj.getRatio()).append(");").append(NEW_LINE);
+				sb.append(TAB2).append("PulleyJoint joint").append(i).append(" = new PulleyJoint(").append(idNameMap.get(body1.getId())).append(", ").append(idNameMap.get(body2.getId())).append(", ").append(export(pj.getPulleyAnchor1())).append(", ").append(export(pj.getPulleyAnchor2())).append(", ").append(export(pj.getAnchor1())).append(", ").append(export(pj.getAnchor2())).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setRatio(").append(pj.getRatio()).append(");").append(NEW_LINE);
 			} else if (joint instanceof RevoluteJoint) {
 				RevoluteJoint rj = (RevoluteJoint)joint;
-				sb.append("\t\tRevoluteJoint joint").append(i).append(" = new RevoluteJoint(").append(idNameMap.get(body1.getId())).append(", ").append(idNameMap.get(body2.getId())).append(", ").append(export(rj.getAnchor1())).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setLimitEnabled(").append(rj.isLimitEnabled()).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setLimits(Math.toRadians(").append(Math.toDegrees(rj.getLowerLimit())).append("), Math.toRadians(").append(Math.toDegrees(rj.getUpperLimit())).append("));").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setReferenceAngle(Math.toRadians(").append(Math.toDegrees(rj.getReferenceAngle())).append("));").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setMotorEnabled(").append(rj.isMotorEnabled()).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setMotorSpeed(").append(rj.getMotorSpeed()).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setMaximumMotorTorque(").append(rj.getMaximumMotorTorque()).append(");").append(NEW_LINE);
+				sb.append(TAB2).append("RevoluteJoint joint").append(i).append(" = new RevoluteJoint(").append(idNameMap.get(body1.getId())).append(", ").append(idNameMap.get(body2.getId())).append(", ").append(export(rj.getAnchor1())).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setLimitEnabled(").append(rj.isLimitEnabled()).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setLimits(Math.toRadians(").append(Math.toDegrees(rj.getLowerLimit())).append("), Math.toRadians(").append(Math.toDegrees(rj.getUpperLimit())).append("));").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setReferenceAngle(Math.toRadians(").append(Math.toDegrees(rj.getReferenceAngle())).append("));").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setMotorEnabled(").append(rj.isMotorEnabled()).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setMotorSpeed(").append(rj.getMotorSpeed()).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setMaximumMotorTorque(").append(rj.getMaximumMotorTorque()).append(");").append(NEW_LINE);
 			} else if (joint instanceof RopeJoint) {
 				RopeJoint rj = (RopeJoint)joint;
-				sb.append("\t\tRopeJoint joint").append(i).append(" = new RopeJoint(").append(idNameMap.get(body1.getId())).append(", ").append(idNameMap.get(body2.getId())).append(", ").append(export(rj.getAnchor1())).append(", ").append(export(rj.getAnchor2())).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setLimits(").append(rj.getLowerLimit()).append(", ").append(rj.getUpperLimit()).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setLowerLimitEnabled(").append(rj.isLowerLimitEnabled()).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setUpperLimitEnabled(").append(rj.isUpperLimitEnabled()).append(");").append(NEW_LINE);
+				sb.append(TAB2).append("RopeJoint joint").append(i).append(" = new RopeJoint(").append(idNameMap.get(body1.getId())).append(", ").append(idNameMap.get(body2.getId())).append(", ").append(export(rj.getAnchor1())).append(", ").append(export(rj.getAnchor2())).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setLimits(").append(rj.getLowerLimit()).append(", ").append(rj.getUpperLimit()).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setLowerLimitEnabled(").append(rj.isLowerLimitEnabled()).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setUpperLimitEnabled(").append(rj.isUpperLimitEnabled()).append(");").append(NEW_LINE);
 			} else if (joint instanceof WeldJoint) {
 				WeldJoint wj = (WeldJoint)joint;
-				sb.append("\t\tWeldJoint joint").append(i).append(" = new WeldJoint(").append(idNameMap.get(body1.getId())).append(", ").append(idNameMap.get(body2.getId())).append(", ").append(export(wj.getAnchor1())).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setFrequency(").append(wj.getFrequency()).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setDampingRatio(").append(wj.getDampingRatio()).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setReferenceAngle(Math.toRadians(").append(Math.toDegrees(wj.getReferenceAngle())).append("));").append(NEW_LINE);
+				sb.append(TAB2).append("WeldJoint joint").append(i).append(" = new WeldJoint(").append(idNameMap.get(body1.getId())).append(", ").append(idNameMap.get(body2.getId())).append(", ").append(export(wj.getAnchor1())).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setFrequency(").append(wj.getFrequency()).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setDampingRatio(").append(wj.getDampingRatio()).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setReferenceAngle(Math.toRadians(").append(Math.toDegrees(wj.getReferenceAngle())).append("));").append(NEW_LINE);
 			} else if (joint instanceof WheelJoint) {
 				WheelJoint wj = (WheelJoint)joint;
-				sb.append("\t\tWheelJoint joint").append(i).append(" = new WheelJoint(").append(idNameMap.get(body1.getId())).append(", ").append(idNameMap.get(body2.getId())).append(", ").append(export(wj.getAnchor1())).append(", ").append(export(wj.getAxis())).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setFrequency(").append(wj.getFrequency()).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setDampingRatio(").append(wj.getDampingRatio()).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setMotorEnabled(").append(wj.isMotorEnabled()).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setMotorSpeed(").append(wj.getMotorSpeed()).append(");").append(NEW_LINE)
-				.append("\t\tjoint").append(i).append(".setMaximumMotorTorque(").append(wj.getMaximumMotorTorque()).append(");").append(NEW_LINE);
+				sb.append(TAB2).append("WheelJoint joint").append(i).append(" = new WheelJoint(").append(idNameMap.get(body1.getId())).append(", ").append(idNameMap.get(body2.getId())).append(", ").append(export(wj.getAnchor1())).append(", ").append(export(wj.getAxis())).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setFrequency(").append(wj.getFrequency()).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setDampingRatio(").append(wj.getDampingRatio()).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setMotorEnabled(").append(wj.isMotorEnabled()).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setMotorSpeed(").append(wj.getMotorSpeed()).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setMaximumMotorTorque(").append(wj.getMaximumMotorTorque()).append(");").append(NEW_LINE);
 			} else {
 				throw new UnsupportedOperationException(MessageFormat.format(Messages.getString("exception.persist.unknownClass"), joint.getClass().getName()));
 			}
 			
-			sb.append("\t\tjoint").append(i).append(".setCollisionAllowed(").append(joint.isCollisionAllowed()).append(");").append(NEW_LINE);
+			sb.append(TAB2).append("joint").append(i).append(".setCollisionAllowed(").append(joint.isCollisionAllowed()).append(");").append(NEW_LINE);
 			sb.append(NEW_LINE);
 		}
 		
 		// end setup method
-		sb.append("\t}").append(NEW_LINE)
+		sb.append(TAB1).append("}").append(NEW_LINE)
 		// end class declaration
 		.append("}").append(NEW_LINE);
 		
@@ -325,24 +384,57 @@ public class CodeExporter {
 	 */
 	private static final String export(Settings settings) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("\t\tsettings.setStepFrequency(").append(1.0 / settings.getStepFrequency()).append(");").append(NEW_LINE)
-		.append("\t\tsettings.setMaximumTranslation(").append(settings.getMaximumTranslation()).append(");").append(NEW_LINE)
-		.append("\t\tsettings.setMaximumRotation(Math.toRadians(").append(Math.toDegrees(settings.getMaximumRotation())).append("));").append(NEW_LINE)
-		.append("\t\tsettings.setAutoSleepingEnabled(").append(settings.isAutoSleepingEnabled()).append(");").append(NEW_LINE)
-		.append("\t\tsettings.setSleepLinearVelocity(").append(settings.getSleepLinearVelocity()).append(");").append(NEW_LINE)
-		.append("\t\tsettings.setSleepAngularVelocity(Math.toRadians(").append(Math.toDegrees(settings.getSleepAngularVelocity())).append("));").append(NEW_LINE)
-		.append("\t\tsettings.setSleepTime(").append(settings.getSleepTime()).append(");").append(NEW_LINE)
-		.append("\t\tsettings.setVelocityConstraintSolverIterations(").append(settings.getVelocityConstraintSolverIterations()).append(");").append(NEW_LINE)
-		.append("\t\tsettings.setPositionConstraintSolverIterations(").append(settings.getPositionConstraintSolverIterations()).append(");").append(NEW_LINE)
-		.append("\t\tsettings.setWarmStartDistance(").append(settings.getWarmStartDistance()).append(");").append(NEW_LINE)
-		.append("\t\tsettings.setRestitutionVelocity(").append(settings.getRestitutionVelocity()).append(");").append(NEW_LINE)
-		.append("\t\tsettings.setLinearTolerance(").append(settings.getLinearTolerance()).append(");").append(NEW_LINE)
-		.append("\t\tsettings.setAngularTolerance(Math.toRadians(").append(Math.toDegrees(settings.getAngularTolerance())).append("));").append(NEW_LINE)
-		.append("\t\tsettings.setMaximumLinearCorrection(").append(settings.getMaximumLinearCorrection()).append(");").append(NEW_LINE)
-		.append("\t\tsettings.setMaximumAngularCorrection(Math.toRadians(").append(Math.toDegrees(settings.getMaximumAngularCorrection())).append("));").append(NEW_LINE)
-		.append("\t\tsettings.setBaumgarte(").append(settings.getBaumgarte()).append(");").append(NEW_LINE)
-		.append("\t\tsettings.setContinuousDetectionMode(Settings.ContinuousDetectionMode.").append(settings.getContinuousDetectionMode()).append(");").append(NEW_LINE)
-		.append(NEW_LINE);
+		if (settings.getStepFrequency() != Settings.DEFAULT_STEP_FREQUENCY) {
+			sb.append(TAB2).append("settings.setStepFrequency(").append(1.0 / settings.getStepFrequency()).append(");").append(NEW_LINE);
+		}
+		if (settings.getMaximumTranslation() != Settings.DEFAULT_MAXIMUM_TRANSLATION) {
+			sb.append(TAB2).append("settings.setMaximumTranslation(").append(settings.getMaximumTranslation()).append(");").append(NEW_LINE);
+		}
+		if (settings.getMaximumRotation() != Settings.DEFAULT_MAXIMUM_ROTATION) {
+			sb.append(TAB2).append("settings.setMaximumRotation(Math.toRadians(").append(Math.toDegrees(settings.getMaximumRotation())).append("));").append(NEW_LINE);
+		}
+		if (!settings.isAutoSleepingEnabled()) {
+			sb.append(TAB2).append("settings.setAutoSleepingEnabled(false);").append(NEW_LINE);
+		}
+		if (settings.getSleepLinearVelocity() != Settings.DEFAULT_SLEEP_LINEAR_VELOCITY) {
+			sb.append(TAB2).append("settings.setSleepLinearVelocity(").append(settings.getSleepLinearVelocity()).append(");").append(NEW_LINE);
+		}
+		if (settings.getSleepAngularVelocity() != Settings.DEFAULT_SLEEP_ANGULAR_VELOCITY) {
+			sb.append(TAB2).append("settings.setSleepAngularVelocity(Math.toRadians(").append(Math.toDegrees(settings.getSleepAngularVelocity())).append("));").append(NEW_LINE);
+		}
+		if (settings.getSleepTime() != Settings.DEFAULT_SLEEP_TIME) {
+			sb.append(TAB2).append("settings.setSleepTime(").append(settings.getSleepTime()).append(");").append(NEW_LINE);
+		}
+		if (settings.getVelocityConstraintSolverIterations() != Settings.DEFAULT_SOLVER_ITERATIONS) {
+			sb.append(TAB2).append("settings.setVelocityConstraintSolverIterations(").append(settings.getVelocityConstraintSolverIterations()).append(");").append(NEW_LINE);
+		}
+		if (settings.getPositionConstraintSolverIterations() != Settings.DEFAULT_SOLVER_ITERATIONS) {
+			sb.append(TAB2).append("settings.setPositionConstraintSolverIterations(").append(settings.getPositionConstraintSolverIterations()).append(");").append(NEW_LINE);
+		}
+		if (settings.getWarmStartDistance() != Settings.DEFAULT_WARM_START_DISTANCE) {
+			sb.append(TAB2).append("settings.setWarmStartDistance(").append(settings.getWarmStartDistance()).append(");").append(NEW_LINE);
+		}
+		if (settings.getRestitutionVelocity() != Settings.DEFAULT_RESTITUTION_VELOCITY) {
+			sb.append(TAB2).append("settings.setRestitutionVelocity(").append(settings.getRestitutionVelocity()).append(");").append(NEW_LINE);
+		}
+		if (settings.getLinearTolerance() != Settings.DEFAULT_LINEAR_TOLERANCE) {
+			sb.append(TAB2).append("settings.setLinearTolerance(").append(settings.getLinearTolerance()).append(");").append(NEW_LINE);
+		}
+		if (settings.getAngularTolerance() != Settings.DEFAULT_ANGULAR_TOLERANCE) {
+			sb.append(TAB2).append("settings.setAngularTolerance(Math.toRadians(").append(Math.toDegrees(settings.getAngularTolerance())).append("));").append(NEW_LINE);
+		}
+		if (settings.getMaximumLinearCorrection() != Settings.DEFAULT_MAXIMUM_LINEAR_CORRECTION) {
+			sb.append(TAB2).append("settings.setMaximumLinearCorrection(").append(settings.getMaximumLinearCorrection()).append(");").append(NEW_LINE);
+		}
+		if (settings.getMaximumAngularCorrection() != Settings.DEFAULT_MAXIMUM_ANGULAR_CORRECTION) {
+			sb.append(TAB2).append("settings.setMaximumAngularCorrection(Math.toRadians(").append(Math.toDegrees(settings.getMaximumAngularCorrection())).append("));").append(NEW_LINE);
+		}
+		if (settings.getBaumgarte() != Settings.DEFAULT_BAUMGARTE) {
+			sb.append(TAB2).append("settings.setBaumgarte(").append(settings.getBaumgarte()).append(");").append(NEW_LINE);
+		}
+		if (settings.getContinuousDetectionMode() != Settings.ContinuousDetectionMode.ALL) {
+			sb.append(TAB2).append("settings.setContinuousDetectionMode(Settings.ContinuousDetectionMode.").append(settings.getContinuousDetectionMode()).append(");").append(NEW_LINE);
+		}
 		return sb.toString();
 	}
 	
@@ -394,16 +486,25 @@ public class CodeExporter {
 		if (c instanceof Circle) {
 			Circle circle = (Circle)c;
 			sb.append(tabs).append("Convex c = Geometry.createCircle(").append(circle.getRadius()).append(");").append(NEW_LINE);
-			sb.append(tabs).append("c.translate(").append(export(circle.getCenter())).append(");").append(NEW_LINE);
+			// translate only if the center is not (0, 0)
+			if (!circle.getCenter().isZero()) {
+				sb.append(tabs).append("c.translate(").append(export(circle.getCenter())).append(");").append(NEW_LINE);
+			}
 		} else if (c instanceof Rectangle) {
 			Rectangle rectangle = (Rectangle)c;
 			sb.append(tabs).append("Convex c = Geometry.createRectangle(").append(rectangle.getWidth()).append(", ").append(rectangle.getHeight()).append(");").append(NEW_LINE);
-			sb.append(tabs).append("c.rotate(Math.toRadians(").append(Math.toDegrees(rectangle.getRotation())).append("));").append(NEW_LINE);
-			sb.append(tabs).append("c.translate(").append(export(rectangle.getCenter())).append(");").append(NEW_LINE);
+			// rotate only if the rotation is greater than zero
+			if (Math.abs(rectangle.getRotation()) > Epsilon.E) {
+				sb.append(tabs).append("c.rotate(Math.toRadians(").append(Math.toDegrees(rectangle.getRotation())).append("));").append(NEW_LINE);
+			}
+			// translate only if the center is not (0, 0)
+			if (!rectangle.getCenter().isZero()) {
+				sb.append(tabs).append("c.translate(").append(export(rectangle.getCenter())).append(");").append(NEW_LINE);
+			}
 		} else if (c instanceof Triangle) {
 			Triangle triangle = (Triangle)c;
 			sb.append(tabs).append("Convex c = Geometry.createTriangle(").append(export(triangle.getVertices()[0])).append(", ").append(export(triangle.getVertices()[1])).append(", ").append(export(triangle.getVertices()[2])).append(");").append(NEW_LINE);
-			// translation is maintained by the vertices
+			// transformations are maintained by the vertices
 		} else if (c instanceof Polygon) {
 			Polygon polygon = (Polygon)c;
 			sb.append(tabs).append("Convex c = Geometry.createPolygon(");
@@ -414,11 +515,11 @@ public class CodeExporter {
 				sb.append(export(v));
 			}
 			sb.append(");").append(NEW_LINE);
-			// translation is maintained by the vertices
+			// transformations are maintained by the vertices
 		} else if (c instanceof Segment) {
 			Segment segment = (Segment)c;
 			sb.append(tabs).append("Convex c = Geometry.createSegment(").append(export(segment.getVertices()[0])).append(", ").append(export(segment.getVertices()[1])).append(");").append(NEW_LINE);
-			// translation is maintained by the vertices
+			// transformations are maintained by the vertices
 		} else {
 			throw new UnsupportedOperationException(MessageFormat.format(Messages.getString("exception.persist.unknownClass"), c.getClass().getName()));
 		}

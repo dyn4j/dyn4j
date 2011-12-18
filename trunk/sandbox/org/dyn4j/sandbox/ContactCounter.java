@@ -146,7 +146,7 @@ public class ContactCounter implements ContactListener, StepListener {
 	 * Clears the state of the contact counter.
 	 * @since 3.0.1
 	 */
-	private void clear() {
+	protected void clear() {
 		// reset the values
 		this.sensed = 0;
 		this.added = 0;
