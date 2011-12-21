@@ -1,5 +1,5 @@
 #summary Frequently Asked Questions.
-#labels Phase-Deploy,Featured
+#labels Phase-Deploy,Featured,Documentation-User
 
 <wiki:toc max_depth="2" />
 
