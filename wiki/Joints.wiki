@@ -1,7 +1,7 @@
 #summary Describes the various Joints.
 #labels Documentation-User,Featured
 
-<wiki:toc max_depth="1" />
+<wiki:toc max_depth="2" />
 
 =Typical Joints=
 
