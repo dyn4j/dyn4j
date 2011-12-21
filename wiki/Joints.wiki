@@ -4,9 +4,11 @@
 <wiki:toc max_depth="1" />
 
 =Distance Joint=
-The !DistanceJoint class represents a fixed distance between two bodies.  The bodies are allowed to rotate freely.  The !DistanceJoint class can also act like a spring-damper where specified fixed distance is a target distance (or rest distance).
+The !DistanceJoint class represents a fixed distance between two bodies.  The bodies are allowed to rotate freely about the anchor points.  The !DistanceJoint class can also act like a spring-damper with specified fixed distance is a target distance (or rest distance).
 
-This joint is defined by supplying the anchor points on both bodies in world coordinates.
+This joint is defined by supplying the anchor points, a<sub>1</sub> and a<sub>2</sub>, in world coordinates.
+
+[http://www.dyn4j.org/images/distance-joint.png]
 
 =Friction Joint=
 The !FrictionJoint class represents a joint that attempts to drive the relative motion between the bodies to zero.  The maximum force and torque members are used to limit the rate at which the motion is driven to zero.
