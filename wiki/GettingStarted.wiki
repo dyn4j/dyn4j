@@ -8,9 +8,9 @@ You can post any questions on the <a href="http://forum.dyn4j.org/" target="_bla
 =Download=
 Download the latest dyn4j.jar from the <a href="http://code.google.com/p/dyn4j/downloads/list" target="_blank">Google Code project</a> page or build the source yourself.
 
-Typically you will only need to download the dyn4j-vX.X.X.jar since the javadocs are available online <a href="http://docs.dyn4j.org">here</a> and you can browse the source of the !TestBed project <a href="http://code.google.com/p/dyn4j/source/browse/">here</a>.
+Typically you will only need to download the dyn4j-vX.X.X.jar since the javadocs are available online <a href="http://docs.dyn4j.org">here</a> and you can browse the source of dyn4j, the !TestBed, or the Sandbox <a href="http://code.google.com/p/dyn4j/source/browse/">here</a>.
 
-All binaries builds posted on the download page are compiled under Java 1.6 and have no dependencies.  This excludes the !TestBed application which is dependent on <a href="http://www.jogamp.org/">JOGL</a>.
+All binaries posted on the download page are compiled under Java 1.6 and have no dependencies.
 
 If you intent on building the source from the repository here are few tips:
   * The trunk branch is the development branch and will contain the latest code but may be unstable.
@@ -32,7 +32,7 @@ javac ... -classpath /path/to/jars/dyn4j.jar
 }}}
 
 ==JAR Signing==
-Currently the JAR files on dyn4j.org (the ones used to show the !TestBed applet, jnlp, and zip) are signed by me, however the downloads offered on the Google Code Project are not signed.  This will cause the user of your application to receive an error message (if you deploy via JNLP or Applet and require all permissions) about the jar not being signed.
+Currently the releases are not signed.  This will cause the user of your application to receive an error message (if you deploy via JNLP or Applet and require all permissions) about the jar not being signed.
 
 In the meantime, you will need to sign the jars yourself.  Later releases will be signed using an CA if there is enough demand.
 
@@ -47,58 +47,58 @@ To setup your scene:
   # Create your Joints and add them to the World
   # Call the World.update(double) method in your game loop
 
-Take a look at the examples provided in the examples package in the test folder: ExampleGraphics2D and ExampleJOGL for a starting point.
+Take a look at the examples provided in the examples package: ExampleGraphics2D and ExampleJOGL for a starting point.
 
 ==Creating The World==
-The World class is in the dynamics package.  To create the World object for your game you only need to pass it a Bounds object.  The Bounds object controls the maximum bounds of the scene.  If an Body travels (fully) outside the Bounds the state of the Body will be set to "inactive" and will no longer be interacting with the World or other Bodies.
+The World class is in the dynamics package.  To create the World object for your game you only need to pass it a Bounds object.  The Bounds object controls the maximum bounds of the scene.  If an body travels (fully) outside the bounds the state of the body will be set to "inactive" and will no longer be interacting with the World or other bodies.
 
 Most games will use the provided !RectangularBounds class which defines a rectangular area.  You can also use the default constructor of the World class to create a World that has no Bounds.  Be careful when doing this since numeric overflow can happen.
 
-Once the World is created there a number of things you may want to configure.  The most common configurable item is gravity.  The default gravity is 9.8 m/s pointing in the negative y direction.  Refer to the Javadocs for more information on other configuration items.
+Once the World is created there a number of things you may want to configure.  The most common configurable item is gravity.  The default gravity is 9.8 m/s pointing in the negative y direction.  Refer to the [http://docs.dyn4j.org Javadocs] for more information on other configuration items.
 
 ==Creating Bodies==
-A Body represents any object in your scene that you want to interact with other objects using physics.  A Body can be comprised of one or more Convex Shapes.  Each Shape must be wrapped in a !BodyFixture.  A !BodyFixture provides a clear distinction between geometry and dynamics by adding the extra information for a shape such as density, friction, and restitution.
+A Body represents any object in your scene that you want to interact with other objects using physics.  A body can be comprised of one or more Convex Shapes.  Each shape must be wrapped in a !BodyFixture.  A !BodyFixture provides a clear distinction between geometry and dynamics by adding the extra information for a shape such as density, friction, and restitution.
 
 Here is a simple diagram explaining the relationship:
 
-<img src="http://www.dyn4j.org/files/body-structure.png"/>
+<img src="http://www.dyn4j.org/images/body-structure.png"/>
 
 There are a number of Convex Shapes provided including Circle, Polygon, Rectangle, etc all contained in the geometry package.
 
-Here are a few tips to creating Shapes:
-  * You can also use any methods in the Geometry class for alternate ways to create Shapes.
+Here are a few tips to creating shapes:
+  * You can also use any methods in the Geometry class for alternate ways to create shapes.
   * Rectangle and Circle objects created always have their center at (0, 0).  Segments, Polygons, and Triangles have their centers at the center of the points (average or area based center).
-  * Some of the Shape creation methods in the Geometry class create Shapes with their centers at the origin.  All the methods make copies of the given points and arrays.
-  * Only Convex Shapes are supported.  Concave Shapes are supported by decomposing the concave Shape into multiple Convex Shapes.
+  * Some of the Shape creation methods in the Geometry class create shapes with their centers at the origin.  All the methods make copies of the given points and arrays.
+  * Only convex shapes are supported.  Concave shapes are supported by decomposing the concave shape into multiple convex shapes.
 
-After creating the desired shape you can do two things to add it to a Body.  You can create a new !BodyFixture object passing the shape to it, configure it, then add it to the Body by using the addFixture method.  Or you can use the addFixture(Convex) method to create a default fixture that will automatically be added to the Body and returned so you can configure it.
+After creating the desired shape you can do two things to add it to a body.  You can create a new !BodyFixture object passing the shape to it, configure it, then add it to the body by using the addFixture method.  Or you can use the addFixture(Convex) method to create a default fixture that will automatically be added to the body and returned so you can configure it.
 
-If you use multiple Shapes for a Body use the Shape class's translate and rotate methods to place the shape at the right position and orientation in local coordinates.
-  * Note: This directly modifies the Shape.
+If you use multiple shapes for a body use the Shape class's translate and rotate methods to place the shape at the right position and orientation in local coordinates.
+  * Note: This directly modifies the shape.
 
-The Mass of a Body is created by its respective Shapes.  Each Shape type contains a createMass method which will use geometry and the density configured in its respective !BodyFixture to create a Mass object.  The density units are kg / m<sup>2</sup>.  The density for a Shape is set via the setDensity method in the !BodyFixture class.
+The mass of a body is created by its respective shapes.  Each shape type contains a createMass method which will use geometry and the density configured in its respective !BodyFixture to create a Mass object.  The density units are kg / m<sup>2</sup>.  The density for a shape is set via the setDensity method in the !BodyFixture class.
 
-After adding Shapes/!BodyFixtures to your Body be sure to call one of the setMass methods to set the Mass to the desired Mass.  The default Mass is an infinite mass centered at the origin.
-  * You can use the Mass.Type parameter to create specialized Masses like infinite Mass Bodies.
+After adding Shapes/!BodyFixtures to your body, be sure to call one of the setMass methods to set the mass.  The default mass is an infinite mass centered at the origin.
+  * You can use the Mass.Type parameter to create specialized masses like infinite mass bodies.
 
-The setMass methods will also compute what is called the rotation disc radius.  This is used in continuous collision detection and is dependent on the center of Mass being computed.
-  * The rotation disc radius is the radius of the disc created by a rotating Body (imagine a Body rotated 360 degrees about its center).
+The setMass methods will also compute what is called the rotation disc radius.  This is used in continuous collision detection and is dependent on the center of mass being computed.
+  * The rotation disc radius is the radius of the disc created by a rotating body (imagine a body rotated 360 degrees about its center).
 
-Finally add the Body to the World by calling the World.add(Body) method.
+Finally add the body to the World by calling the World.add(Body) method.
 
 ==Creating Joints==
-A Joint represents a connection between two Bodies that limit motion.  A connection might be a frame of a car connecting two wheels or a spring connecting a wheel to a car frame.
+A Joint represents a connection between two bodies that limit motion.  A connection might be a frame of a car connecting two wheels or a spring connecting a wheel to a car frame.
 
-All Joint classes are contained in the dynamics.joint package.  Each Joint class may have a different constructor depending on the type.
+All Joint classes are contained in the dynamics.joint package.  Each joint class may have a different constructor depending on the type.
 
-Once the Joint is created it can be added to the World by calling the World.add(Joint) method.
+Once the joint is created it can be added to the World by calling the World.add(Joint) method.
 
 See the [Joints Joints] page for more details about each Joint.
 
 ==General Creation Tips==
 The !BodyFixture, Body, Joint, and World classes, among others, typically only have minimal constructors.  This allows for less confusion in the source.
 
-For example the !DistanceJoint class only accepts two anchor points and the Bodies.  To use the optional features use the setXXX methods after creation of the object:
+For example the !DistanceJoint class only accepts two anchor points and the bodies.  To use the optional features, call the setXXX methods after creation of the object:
 
 {{{
 // creates a standard fixed distance joint
@@ -111,11 +111,11 @@ dj.setDampingRatio(0.4);
 RevoluteJoint rj = new RevoluteJoint(wheel, frame, pivot);
 // to use a motor
 rj.setMotorSpeed(Math.PI);
-rj.setMaxMotorTorque(1000);
+rj.setMaximumMotorTorque(1000);
 rj.setMotorEnabled(true);
 
 // or for a fixture
-Fixture f = new Fixture(rect);
+BodyFixture f = new BodyFixture(rect);
 f.setDensity(1.2);
 f.setFriction(0.6);
 
@@ -127,10 +127,9 @@ b.setVelocity(new Vector2(0.0, 2.0));
 }}}
 
 ==Integrating Into The Game Loop==
-Most, if not all, games use active rendering and something called a "game loop" to poll for input, update graphics, etc.  To allow simulation of the scene the World object has two methods that must be called from the game loop:  World.update(double) or World.updatev(double).  The method must be passed the elapsed time from the last iteration in seconds.
+Most, if not all, games use active rendering and something called a "game loop" to poll for input, update graphics, etc.  To allow simulation of the scene the World object has two methods that must be called from the game loop:  World.update(double) or World.updatev(double).  The method must be passed the elapsed time from the last iteration *in seconds*.
 
 The World.updatev(double) method can be used if you prefer a variable time step or would like to control when the World updates yourself.  The World.update(double) method will only update given the step frequency set in the Settings singleton.
-  * Be careful when using the World.updatev(double) method because the dynamics system may still use the configured step frequency to perform calculations.
 
 ==Exceptions==
 There are a number of !RuntimeExceptions that are thrown.  Exceptions like these are typically thrown when the creation of an object fails due to invalid arguments.  These exceptions should rarely occur.
@@ -138,20 +137,23 @@ There are a number of !RuntimeExceptions that are thrown.  Exceptions like these
 For example, adding a null Body to the World object throws a !NullPointerException.  The runtime exceptions you may encounter include:
   * !NullPointerException - usually caused by passing null instead of a object reference to a constructor or setXXX method.
   * !IllegalArgumentException - usually caused by passing an invalid value that has a predefined range or restriction.
-  * !UnsupportedOperationException - usually caused by attempting to modify a default object, Transform.IDENTITY for example, that is immutable.
+  * !UnsupportedOperationException - usually caused by attempting to modify an immutable object, Transform.IDENTITY for example.
   * !IndexOutOfBoundsException - usually caused by referencing an index of a !BodyFixture, Shape, etc that is out of bounds.  Can also because by supplying the wrong sized list or array to a method that expects a certain size.
 
-Most of these exceptions are obvious or documented indirectly in the source and Javadocs (using text like "in the range of [0, 1]") or by @throws javadoc documentation.
+Most of these exceptions are obvious or documented indirectly in the source and [http://docs.dyn4j.org Javadocs] (using text like "in the range of [0, 1]") or by @throws javadoc documentation.
 
 =Examples=
 For examples see the [ExampleListing Example Listing] wiki page for two starter applications ExampleGraphics2D and ExampleJOGL depending on which rendering engine you will use (renders are not limited to these two, the dyn4j project itself is not dependent on any).
 
 In addition, a listing of the !TestBed tests, what they do, what they show, and their class names is given.  Use these as examples on how to use all functionality.
 
+Also, the Sandbox application can be used to play with various features of the engine.
+
 =Extra Help=
 Finally if you need extra help you can look at the following resources:
   * <a href="http://code.google.com/p/dyn4j/w/list">Wiki</a> - for other topics about the library
   * <a href="http://code.google.com/p/dyn4j/source/browse/">!TestBed</a> application - for examples using the library
+  * <a href="http://code.google.com/p/dyn4j/source/browse/">Sandbox</a> application - to play with the features of the engine
   * <a href="http://code.google.com/p/dyn4j/source/browse/">JUnit tests</a> - for more examples using the library
   * <a href="http://docs.dyn4j.org">Javadocs</a> - for more documentation about specific methods/classes
 
