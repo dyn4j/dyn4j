@@ -51,7 +51,7 @@ The !PulleyJoint class represents a joint connecting two bodies by a fixed lengt
 This joint requires a world space fixed point, pa<sub>1</sub> and pa<sub>2</sub>, and a world space body point, a<sub>1</sub> and a<sub>2</sub> for each body.
 
 The lengths of the "ropes" are computed:
-||pa<sub>1</sub> - a<sub>1</sub>|| = ratio * ||pa<sub>2</sub> - a<sub>2</sub>||
+*||pa<sub>1</sub> - a<sub>1</sub>|| = ratio * ||pa<sub>2</sub> - a<sub>2</sub>||
 
 [http://www.dyn4j.org/images/pulley-joint.png]
 
