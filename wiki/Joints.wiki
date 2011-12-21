@@ -80,7 +80,7 @@ The !AngleJoint class represents a joint connecting two bodies limiting their an
 
 This joint only requires that the two joined bodies be given, initially defaulting to equal limits.
 
-=Friction Joint=
+==Friction Joint==
 The !FrictionJoint class represents a joint that attempts to drive the relative motion between the bodies to zero.  The maximum force and torque members are used to limit the rate at which the motion is driven to zero.
 
 This joint only requires one world space anchor point which is used as the pivot point for adding friction to the relative angular motion.
