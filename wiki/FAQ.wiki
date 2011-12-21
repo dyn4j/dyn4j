@@ -5,7 +5,7 @@ dyn4j is a 2D collision detection and rigid body physics engine written 100% in 
 ==What does the license allow?==
 dyn4j uses the New BSD license.  You may use the library in commercial applications without releasing your source, modifications to the library, or citing attribution.
 
-=How do I get started using dyn4j?=
+==How do I get started using dyn4j?==
 See the GettingStarted wiki page first.  This will help you setup your project and give you a few tips to get going.  From there I recommend that you read the [Advanced] wiki page to learn more about key aspects of the engine.  Then you can check out the ExampleListing page to see the list of examples (all the examples are checked into source control and can be found by browsing the source).  Last, I would take a look at the !TestBed and Sandbox applications.
 
 After reading the documentation, I would suggest you copy either ExampleGraphics2D or ExampleJOGL and attempt to get that working first, then modify from there.
