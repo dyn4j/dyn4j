@@ -6,6 +6,8 @@ A simple listing of classes in the /test directory that show the usage of the dy
 ==Example Applications==
 Getting started examples (under 500 lines of code each) contained in the test/org.dyn4j.game2d.examples package.
 
+[http://code.google.com/p/dyn4j/source/browse/ Browse the source]
+
 These can be used as a staring point to integrate dyn4j into your project.
 || *Example* || *Class* || *Description* ||
 || Using Java2D || _ExampleGraphics2D_ || Simple, self contained example application using Java2D and dyn4j to create a simple scene. ||
@@ -13,6 +15,8 @@ These can be used as a staring point to integrate dyn4j into your project.
 
 ==!TestBed Examples==
 Examples contained in the !TestBed contained in the test/org.dyn4j.game2d.testbed.test package.
+
+[http://code.google.com/p/dyn4j/source/browse/ Browse the source]
 
 These can be used as a feature reference and on how to use dyn4j.
 || *Example* || *Class* || *Description* ||
