@@ -27,9 +27,9 @@ I would recommend that you have some basic knowledge of physical properties like
 The library leaves the rendering/drawing up to you.  Java has a few options for rendering, standard Java2D that is packaged with the runtime or 3rd party libraries like JOGL.  You can see the ExampleListing page for a Graphic2D example and a JOGL example.  The choice of rendering API is totally up to you.  The !TestBed and Sandbox applications use JOGL.
 
 ==The simulation isn't behaving correctly, what should I do?==
-#Make sure you are using the MKS (meter-kilogram-second) system of measure (not Imperial or pixels) for length and mass.  See the UnitConversion class.
-#Make sure you understand that dyn4j does not produce pixel perfect results.  See the Settings class.
-#Be very careful when reusing Shape instances among bodies.
-#Read the [http://docs.dyn4j.org Javadoc] carefully.  One of the main focuses of the project was documentation, especially within the source.
-#Take a look at the ExampleListing wiki page, !TestBed application, and Sandbox application for examples of how to properly use features of the library.
-#Post a question on the [http://forum.dyn4j.org forum].
+  #Make sure you are using the MKS (meter-kilogram-second) system of measure (not Imperial or pixels) for length and mass.  See the !UnitConversion class.
+  #Make sure you understand that dyn4j does not produce pixel perfect results.  See the Settings class.
+  #Be very careful when reusing Shape instances among bodies.
+  #Read the [http://docs.dyn4j.org Javadoc] carefully.  One of the main focuses of the project was documentation, especially within the source.
+  #Take a look at the ExampleListing wiki page, !TestBed application, and Sandbox application for examples of how to properly use features of the library.
+  #Post a question on the [http://forum.dyn4j.org forum].
