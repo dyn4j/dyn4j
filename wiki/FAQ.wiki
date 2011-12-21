@@ -1,4 +1,4 @@
-#summary This page includes some frequently asked questions.
+#summary Frequently Asked Questions.
 #labels Phase-Deploy,Featured
 
 <wiki:toc max_depth="2" />
