@@ -1,5 +1,5 @@
 #labels Phase-Deploy,Featured
-<wiki:toc max_depth="1" />
+<wiki:toc max_depth="2" />
 
 ==What is dyn4j?==
 dyn4j is a 2D collision detection and rigid body physics engine written 100% in the Java programming language.  The library has zero dependencies and is primarily developed for game development.
