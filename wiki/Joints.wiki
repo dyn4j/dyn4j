@@ -52,7 +52,7 @@ This joint requires a world space fixed point, pa<sub>1</sub> and pa<sub>2</sub>
 
 The lengths of the "ropes" are computed:
 
-{{{||}}}pa<sub>1</sub> - a<sub>1</sub>{{{||}}} = ratio * {{{||}}}pa<sub>2</sub> - a<sub>2</sub>{{{||}}}
+{{{||}}}pa<sub>1</sub> - a<sub>1</sub>{{{||}}} = ratio {{{*}}} {{{||}}}pa<sub>2</sub> - a<sub>2</sub>{{{||}}}
 
 [http://www.dyn4j.org/images/pulley-joint.png]
 
