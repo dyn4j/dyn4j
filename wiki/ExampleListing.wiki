@@ -6,7 +6,7 @@ A simple listing of classes in the /test directory that show the usage of the dy
 ==Example Applications==
 Getting started examples (under 500 lines of code each) contained in the test/org.dyn4j.game2d.examples package.
 
-[http://code.google.com/p/dyn4j/source/browse/ Browse the source]
+[http://code.google.com/p/dyn4j/source/browse/#svn%2Ftrunk%2Fexamples%2Forg%2Fdyn4j%2Fexamples Click here to view the examples]
 
 These can be used as a staring point to integrate dyn4j into your project.
 || *Example* || *Class* || *Description* ||
