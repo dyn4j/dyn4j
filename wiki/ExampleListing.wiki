@@ -16,7 +16,7 @@ These can be used as a staring point to integrate dyn4j into your project.
 ==!TestBed Examples==
 Examples contained in the !TestBed contained in the test/org.dyn4j.game2d.testbed.test package.
 
-[http://code.google.com/p/dyn4j/source/browse/ Browse the source]
+[http://code.google.com/p/dyn4j/source/browse/#svn%2Ftrunk%2Ftestbed%2Forg%2Fdyn4j%2Ftestbed%2Ftest Click here to view the tests]
 
 These can be used as a feature reference and on how to use dyn4j.
 || *Example* || *Class* || *Description* ||
@@ -45,5 +45,6 @@ These can be used as a feature reference and on how to use dyn4j.
 || !RopeJoint || _Rope_ || Shows the use of the !RopeJoint using limits. ||
 || Auto-Sleeping || _Sleep, All_ || Shows the effect of automatic sleeping. ||
 || Segment Shapes || _Shapes, Terrain, Raycast_ || Shows the use of Segments in collision detection, resolution, and raycasting. ||
-|| !WeldJoint || _Weld, Destructible_ || Shows the use of the !WeldJoint to bind two Bodies together ||
+|| !WeldJoint || _Weld, Destructible, !DivingBoard_ || Shows the use of the !WeldJoint to bind two Bodies together ||
 || !MouseJoint || _Mouse, All_ || Shows the use of the !MouseJoint attached to a mouse and fixed at a point. ||
+|| Tanget Speed || _Conveyor_ || Shows the use of the tangent speed setting on contacts to simulate a conveyor belt effect. ||
