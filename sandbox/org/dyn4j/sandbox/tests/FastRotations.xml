@@ -2,13 +2,13 @@
 <Simulation xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.dyn4j.org/Sandbox/sandbox.xsd" version="1.0.1">
     <Name>Fast Rotations</Name>
     <Camera>
-		<Scale>32</Scale>
-		<Translation x="2.0" y="0.0" />
-	</Camera>
+        <Scale>32.0</Scale>
+        <Translation x="2.0" y="0.0" />
+    </Camera>
     <System>
         <JavaVersion>1.6.0_26</JavaVersion>
         <JavaVendor>Sun Microsystems Inc.</JavaVendor>
-        <OperatingSystem>Windows 7</OperatingSystem>
+        <OperatingSystem>Windows 7 6.1</OperatingSystem>
         <Architecture>x86</Architecture>
         <NumberOfCpus>2</NumberOfCpus>
         <Locale>en_US</Locale>
@@ -16,7 +16,7 @@
     <Settings>
         <StepFrequency>60.0</StepFrequency>
         <MaximumTranslation>2.0</MaximumTranslation>
-        <MaximumRotation>90</MaximumRotation>
+        <MaximumRotation>90.0</MaximumRotation>
         <ContinuousCollisionDetectionMode>ALL</ContinuousCollisionDetectionMode>
         <AutoSleep>true</AutoSleep>
         <SleepTime>0.5</SleepTime>
@@ -41,7 +41,7 @@
         <TimeOfImpactDetector>ConservativeAdvancement</TimeOfImpactDetector>
         <Gravity x="0.0" y="-9.8" />
         <Bounds>
-            <Rectangle Id="5f96472f-8c2a-4554-bb56-48db122dedf8">
+            <Rectangle Id="04bb2ff1-f2e3-4c1d-8d30-ef77835df9ac">
                 <LocalCenter x="0.0" y="0.0" />
                 <Width>50.0</Width>
                 <Height>50.0</Height>
@@ -53,12 +53,12 @@
             </Transform>
         </Bounds>
         <Bodies>
-            <Body Id="85e3c337-4f0d-45dc-bc8b-4c827d98ac85" Name="Body1">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="e4bf6add-17fd-430b-a4fb-11e88a1d82c8" Name="Body1">
+                <OutlineColor r="0.6796438" g="0.44749734" b="0.74312276" />
+                <FillColor r="0.8495548" g="0.55937165" b="0.92890346" />
                 <Fixtures>
-                    <Fixture Id="8f5fc4ac-e498-4005-b60c-d24f29deaf8d" Name="Fixture1">
-                        <Shape Id="9a749c1b-b1cb-45e8-ad23-202990b277f5" xsi:type="Rectangle">
+                    <Fixture Id="29741511-bb77-46e3-b7d1-cde41506fbb7" Name="Fixture1">
+                        <Shape Id="941005dd-a6a8-4b4d-8a81-77f2e2b001a0" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
                             <Width>2.0</Width>
                             <Height>0.2</Height>
@@ -83,7 +83,7 @@
                     <Explicit>false</Explicit>
                 </Mass>
                 <Velocity x="0.0" y="0.0" />
-                <AngularVelocity>4800.0</AngularVelocity>
+                <AngularVelocity>4800.000000000001</AngularVelocity>
                 <AccumulatedForce x="0.0" y="0.0" />
                 <AccumulatedTorque>0.0</AccumulatedTorque>
                 <AutoSleep>true</AutoSleep>
@@ -94,12 +94,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="47e75a15-bb25-4e7b-8fe3-dde65a26749a" Name="Body2">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="d3e39a3f-4155-45e6-ac06-66e1265affc9" Name="Body2">
+                <OutlineColor r="0.7381151" g="0.60052365" b="0.60825795" />
+                <FillColor r="0.92264384" g="0.7506546" b="0.7603224" />
                 <Fixtures>
-                    <Fixture Id="50001b91-9dc6-4b53-bc94-48128fd53d10" Name="Fixture1">
-                        <Shape Id="8c281ee3-cc89-431c-9aad-6d17f677e088" xsi:type="Rectangle">
+                    <Fixture Id="ae5313aa-281b-45bd-8ed7-40c35bdbf855" Name="Fixture1">
+                        <Shape Id="655b1a57-6fd2-440c-a512-1f696b92cee6" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
                             <Width>10.0</Width>
                             <Height>0.5</Height>
@@ -114,7 +114,7 @@
                 </Fixtures>
                 <Transform>
                     <Translation x="-5.0" y="0.0" />
-                    <Rotation>-50</Rotation>
+                    <Rotation>-49.99999999999999</Rotation>
                 </Transform>
                 <Mass>
                     <LocalCenter x="0.0" y="0.0" />

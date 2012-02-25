@@ -2,13 +2,13 @@
 <Simulation xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.dyn4j.org/Sandbox/sandbox.xsd" version="1.0.1">
     <Name>Rope</Name>
     <Camera>
-		<Scale>64</Scale>
-		<Translation x="0.0" y="0.0" />
-	</Camera>
+        <Scale>64.0</Scale>
+        <Translation x="0.0" y="0.0" />
+    </Camera>
     <System>
         <JavaVersion>1.6.0_26</JavaVersion>
         <JavaVendor>Sun Microsystems Inc.</JavaVendor>
-        <OperatingSystem>Windows 7</OperatingSystem>
+        <OperatingSystem>Windows 7 6.1</OperatingSystem>
         <Architecture>x86</Architecture>
         <NumberOfCpus>2</NumberOfCpus>
         <Locale>en_US</Locale>
@@ -16,7 +16,7 @@
     <Settings>
         <StepFrequency>60.0</StepFrequency>
         <MaximumTranslation>2.0</MaximumTranslation>
-        <MaximumRotation>90</MaximumRotation>
+        <MaximumRotation>90.0</MaximumRotation>
         <ContinuousCollisionDetectionMode>ALL</ContinuousCollisionDetectionMode>
         <AutoSleep>true</AutoSleep>
         <SleepTime>0.5</SleepTime>
@@ -41,7 +41,7 @@
         <TimeOfImpactDetector>ConservativeAdvancement</TimeOfImpactDetector>
         <Gravity x="0.0" y="-9.8" />
         <Bounds>
-            <Rectangle Id="eea4a348-ca8a-45ee-bd9d-2ac9543a11cd">
+            <Rectangle Id="4967d7b7-40da-472d-809a-3aedea79bc57">
                 <LocalCenter x="0.0" y="0.0" />
                 <Width>16.0</Width>
                 <Height>15.0</Height>
@@ -53,12 +53,12 @@
             </Transform>
         </Bounds>
         <Bodies>
-            <Body Id="4ae15416-a3e1-414e-b8cc-7d6c47c6a692" Name="Ground">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="a2ef23a3-6dec-411a-8931-cb46b0c18932" Name="Ground">
+                <OutlineColor r="0.42292887" g="0.79927796" b="0.7898118" />
+                <FillColor r="0.5286611" g="0.9990974" b="0.98726475" />
                 <Fixtures>
-                    <Fixture Id="46a76cdd-f18b-4f7e-8cf8-174113e4ade5" Name="Fixture1">
-                        <Shape Id="32630937-93b5-404f-bd21-3f9722c5ce19" xsi:type="Rectangle">
+                    <Fixture Id="cceddc43-b9df-4e99-81cf-e745c3d2e85b" Name="Fixture1">
+                        <Shape Id="a55e05bf-49c0-409b-b197-10bce8f9665d" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
                             <Width>15.0</Width>
                             <Height>1.0</Height>
@@ -94,12 +94,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="481b13ff-2345-428f-8ea4-b9e8357de298" Name="Body2">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="b15b7d0d-54dc-4528-973e-b308eab6b834" Name="Body2">
+                <OutlineColor r="0.4558969" g="0.6562627" b="0.72932714" />
+                <FillColor r="0.5698711" g="0.82032835" b="0.9116589" />
                 <Fixtures>
-                    <Fixture Id="e08f49ea-cbdc-4531-ba26-73a03759d9f3" Name="Fixture1">
-                        <Shape Id="481135e5-8e6f-4f6a-8550-56e7008f05f7" xsi:type="Rectangle">
+                    <Fixture Id="fc81e16a-5968-46f3-bfe1-22e10db2b4a7" Name="Fixture1">
+                        <Shape Id="74f0eafb-ec4b-4f54-809f-d9ce755c81bd" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
                             <Width>0.5</Width>
                             <Height>1.0</Height>
@@ -135,12 +135,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="b60dadf1-27be-43bc-84e3-e2c940a1abed" Name="Body3">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="f7ccf98d-323f-4381-9676-00acc89b7804" Name="Body3">
+                <OutlineColor r="0.79492855" g="0.7592239" b="0.6136119" />
+                <FillColor r="0.9936607" g="0.9490298" b="0.7670148" />
                 <Fixtures>
-                    <Fixture Id="3ea42305-57d4-46a4-9dae-1b8e6125a854" Name="Fixture1">
-                        <Shape Id="481135e5-8e6f-4f6a-8550-56e7008f05f7" xsi:type="Rectangle">
+                    <Fixture Id="e70b2b3b-b6c9-44da-ba9d-275004646620" Name="Fixture1">
+                        <Shape Id="42242fc7-8c93-41b9-8c9b-4f350596ef57" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
                             <Width>0.5</Width>
                             <Height>1.0</Height>
@@ -178,9 +178,9 @@
             </Body>
         </Bodies>
         <Joints>
-            <Joint Id="38ad3d4f-01f7-4b05-9f8d-82858dc96ff9" Name="RopeJoint1" xsi:type="RopeJoint">
-                <BodyId1>481b13ff-2345-428f-8ea4-b9e8357de298</BodyId1>
-                <BodyId2>b60dadf1-27be-43bc-84e3-e2c940a1abed</BodyId2>
+            <Joint Id="313d2600-897d-40a3-b214-9abe7f553c55" Name="RopeJoint1" xsi:type="RopeJoint">
+                <BodyId1>b15b7d0d-54dc-4528-973e-b308eab6b834</BodyId1>
+                <BodyId2>f7ccf98d-323f-4381-9676-00acc89b7804</BodyId2>
                 <CollisionAllowed>true</CollisionAllowed>
                 <Anchor1 x="2.0" y="3.2" />
                 <Anchor2 x="2.0" y="2.8" />

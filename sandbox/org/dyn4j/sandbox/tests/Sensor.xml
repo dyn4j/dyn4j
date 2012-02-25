@@ -2,13 +2,13 @@
 <Simulation xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.dyn4j.org/Sandbox/sandbox.xsd" version="1.0.1">
     <Name>Sensor</Name>
     <Camera>
-		<Scale>32</Scale>
-		<Translation x="0.0" y="0.0" />
-	</Camera>
+        <Scale>32.0</Scale>
+        <Translation x="0.0" y="0.0" />
+    </Camera>
     <System>
         <JavaVersion>1.6.0_26</JavaVersion>
         <JavaVendor>Sun Microsystems Inc.</JavaVendor>
-        <OperatingSystem>Windows 7</OperatingSystem>
+        <OperatingSystem>Windows 7 6.1</OperatingSystem>
         <Architecture>x86</Architecture>
         <NumberOfCpus>2</NumberOfCpus>
         <Locale>en_US</Locale>
@@ -16,7 +16,7 @@
     <Settings>
         <StepFrequency>60.0</StepFrequency>
         <MaximumTranslation>2.0</MaximumTranslation>
-        <MaximumRotation>90</MaximumRotation>
+        <MaximumRotation>90.0</MaximumRotation>
         <ContinuousCollisionDetectionMode>ALL</ContinuousCollisionDetectionMode>
         <AutoSleep>true</AutoSleep>
         <SleepTime>0.5</SleepTime>
@@ -41,7 +41,7 @@
         <TimeOfImpactDetector>ConservativeAdvancement</TimeOfImpactDetector>
         <Gravity x="0.0" y="-1.0" />
         <Bounds>
-            <Rectangle Id="c75c6311-f0c1-42c8-8ab4-2010dbed06f3">
+            <Rectangle Id="7ba49ea9-a2f0-47d6-b838-576240019e1f">
                 <LocalCenter x="0.0" y="0.0" />
                 <Width>16.0</Width>
                 <Height>15.0</Height>
@@ -53,12 +53,12 @@
             </Transform>
         </Bounds>
         <Bodies>
-            <Body Id="7e5b4149-f6aa-4d7a-990b-f83ce36f637a" Name="Ground">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="5d647845-eddc-4db9-a871-674806001b53" Name="Ground">
+                <OutlineColor r="0.64466125" g="0.70255244" b="0.5315461" />
+                <FillColor r="0.80582654" g="0.8781905" b="0.66443264" />
                 <Fixtures>
-                    <Fixture Id="8241b6de-4a9a-4d49-853a-384fb560959a" Name="Fixture1">
-                        <Shape Id="56b08dd6-a46b-4792-b8f4-f86369e3b22d" xsi:type="Rectangle">
+                    <Fixture Id="16d08e57-c665-4733-b524-38008c87d98e" Name="Fixture1">
+                        <Shape Id="4763d39a-ac41-405e-a82b-3dda5af85845" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
                             <Width>15.0</Width>
                             <Height>1.0</Height>
@@ -94,12 +94,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="ec585b07-d9c4-44f5-8661-1a05eac8a0f9" Name="SensorBody">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="78a922d2-4e75-4048-8b37-ac23203fc31a" Name="SensorBody">
+                <OutlineColor r="0.7979869" g="0.55906075" b="0.7906247" />
+                <FillColor r="0.9974836" g="0.6988259" b="0.98828083" />
                 <Fixtures>
-                    <Fixture Id="77b5b6af-6e9e-4ebd-8932-e413c045352f" Name="SensorFixture">
-                        <Shape Id="7b05bea5-b7a9-4e11-98a9-c106308119d4" xsi:type="Triangle">
+                    <Fixture Id="69de25aa-0d8f-4e2f-89cb-dee8331981d8" Name="SensorFixture">
+                        <Shape Id="fed9c422-4b42-467f-8daa-a2e52dcea3de" xsi:type="Triangle">
                             <LocalCenter x="0.0" y="-0.16666666666666666" />
                             <Vertex x="0.0" y="0.5" />
                             <Vertex x="-0.5" y="-0.5" />

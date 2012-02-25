@@ -2,13 +2,13 @@
 <Simulation xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.dyn4j.org/Sandbox/sandbox.xsd" version="1.0.1">
     <Name>Dyn4j</Name>
     <Camera>
-		<Scale>64</Scale>
-		<Translation x="0.0" y="-1.5" />
-	</Camera>
+        <Scale>64.0</Scale>
+        <Translation x="0.0" y="-1.5" />
+    </Camera>
     <System>
         <JavaVersion>1.6.0_26</JavaVersion>
         <JavaVendor>Sun Microsystems Inc.</JavaVendor>
-        <OperatingSystem>Windows 7</OperatingSystem>
+        <OperatingSystem>Windows 7 6.1</OperatingSystem>
         <Architecture>x86</Architecture>
         <NumberOfCpus>2</NumberOfCpus>
         <Locale>en_US</Locale>
@@ -16,7 +16,7 @@
     <Settings>
         <StepFrequency>60.0</StepFrequency>
         <MaximumTranslation>2.0</MaximumTranslation>
-        <MaximumRotation>90</MaximumRotation>
+        <MaximumRotation>90.0</MaximumRotation>
         <ContinuousCollisionDetectionMode>ALL</ContinuousCollisionDetectionMode>
         <AutoSleep>true</AutoSleep>
         <SleepTime>0.5</SleepTime>
@@ -41,7 +41,7 @@
         <TimeOfImpactDetector>ConservativeAdvancement</TimeOfImpactDetector>
         <Gravity x="0.0" y="-9.8" />
         <Bounds>
-            <Rectangle Id="d6c3bce9-23a8-4b81-9040-7cd94f496ae7">
+            <Rectangle Id="3132a2af-8508-4910-b295-655ee487a761">
                 <LocalCenter x="0.0" y="0.0" />
                 <Width>16.0</Width>
                 <Height>15.0</Height>
@@ -53,12 +53,12 @@
             </Transform>
         </Bounds>
         <Bodies>
-            <Body Id="8e8b02a3-be57-4fc1-aa07-22e8d7bb593e" Name="Ground">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="858e248f-9781-4002-8003-44bcbf387631" Name="Ground">
+                <OutlineColor r="0.6939625" g="0.6400024" b="0.41272378" />
+                <FillColor r="0.8674531" g="0.80000305" b="0.5159047" />
                 <Fixtures>
-                    <Fixture Id="28497536-746a-4e27-8cfa-6bbff9efceeb" Name="Fixture1">
-                        <Shape Id="b4dddffc-91f2-41ec-8060-c7c7ef1aceb9" xsi:type="Rectangle">
+                    <Fixture Id="6ef96fde-f1a9-4272-bbad-5c4ddd717b31" Name="Fixture1">
+                        <Shape Id="76b5e102-8f54-4a19-a279-8aeeabe1f39c" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
                             <Width>15.0</Width>
                             <Height>1.0</Height>
@@ -94,12 +94,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="13def794-8cba-4d3f-aa77-3b2665f672c5" Name="d">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="ada59973-4e7d-47da-a305-7ab552b7b8c4" Name="d">
+                <OutlineColor r="0.44903776" g="0.6749291" b="0.7028534" />
+                <FillColor r="0.5612972" g="0.84366137" b="0.87856674" />
                 <Fixtures>
-                    <Fixture Id="3c88f844-3296-4891-841c-d921f3a597b1" Name="Fixture1">
-                        <Shape Id="e2c04419-9a44-44e7-a2ae-62d557d8b161" xsi:type="Polygon">
+                    <Fixture Id="20158748-3400-4e5a-91cc-3c510d5e554e" Name="Fixture1">
+                        <Shape Id="3ec796aa-6e7c-40af-b9fd-7160beceb43e" xsi:type="Polygon">
                             <LocalCenter x="-0.5833538790269558" y="0.370564184746877" />
                             <Vertex x="-0.703125" y="0.859375" />
                             <Vertex x="-0.828125" y="0.625" />
@@ -114,8 +114,8 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="1e91ceb3-0dd4-40ec-b8ba-6a0a0c2055da" Name="Fixture1">
-                        <Shape Id="bdc87806-828c-49f9-84c4-565d7c76041f" xsi:type="Polygon">
+                    <Fixture Id="fceefdc7-a77a-4fe8-b28c-fbed5155dd11" Name="Fixture1">
+                        <Shape Id="f30806f2-2f0b-4730-b480-5f7ac7a9f775" xsi:type="Polygon">
                             <LocalCenter x="-0.08313964749176833" y="0.9626398169668795" />
                             <Vertex x="0.0" y="-0.0" />
                             <Vertex x="-0.015625" y="1.625" />
@@ -128,8 +128,8 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="76318f2b-250c-4da6-8094-4145bd47e0cb" Name="Fixture1">
-                        <Shape Id="9972f681-fdef-4930-af1e-6cd614103581" xsi:type="Polygon">
+                    <Fixture Id="7678b1d4-fe57-4d9a-b4bb-fd57390d194f" Name="Fixture1">
+                        <Shape Id="d66bc242-20a7-4e7d-bba7-bdff9e5bba89" xsi:type="Polygon">
                             <LocalCenter x="-0.13541666666666666" y="0.0625" />
                             <Vertex x="0.0" y="-0.0" />
                             <Vertex x="-0.1875" y="0.1875" />
@@ -141,8 +141,8 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="1a3658c3-c90c-46c2-ad62-5ff5f3b8fa40" Name="Fixture1">
-                        <Shape Id="d5a12fa8-a788-4446-b09c-2882bf3d3efc" xsi:type="Polygon">
+                    <Fixture Id="cb68931f-05f9-4d1b-89c5-33bf73a3283e" Name="Fixture1">
+                        <Shape Id="a2283072-ace6-47c5-a0b2-bec58a736bd7" xsi:type="Polygon">
                             <LocalCenter x="-0.3083782973621103" y="0.5355590527577937" />
                             <Vertex x="0.0" y="-0.0" />
                             <Vertex x="-0.171875" y="0.671875" />
@@ -159,7 +159,7 @@
                 </Fixtures>
                 <Transform>
                     <Translation x="-1.950745294864571" y="0.4726801090249715" />
-                    <Rotation>-0.17453292519943295</Rotation>
+                    <Rotation>-0.17453292519943292</Rotation>
                 </Transform>
                 <Mass>
                     <LocalCenter x="-0.35440092197417367" y="0.5745068669293061" />
@@ -180,12 +180,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="e8c3c798-020c-465d-af55-b5d431127bb1" Name="y">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="70db9746-b494-449b-a62a-b67af374a5ab" Name="y">
+                <OutlineColor r="0.5996863" g="0.7959677" b="0.6399519" />
+                <FillColor r="0.7496079" g="0.9949596" b="0.7999399" />
                 <Fixtures>
-                    <Fixture Id="fbb42263-23bd-4ee3-85ca-b5f78a792a35" Name="Fixture1">
-                        <Shape Id="89a149f5-ca03-4c89-b490-23813000efec" xsi:type="Polygon">
+                    <Fixture Id="cfbdae5b-203b-4334-828f-8d1cf7b41e23" Name="Fixture1">
+                        <Shape Id="1f0faa4d-e659-41b2-b633-27add41938d9" xsi:type="Polygon">
                             <LocalCenter x="0.7386363636363636" y="-0.0714962121212121" />
                             <Vertex x="1.015625" y="-0.34375" />
                             <Vertex x="0.703125" y="0.28125" />
@@ -198,8 +198,8 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="843a0c0e-5b18-46cc-90e7-5e67bd3f3358" Name="Fixture1">
-                        <Shape Id="a4b90ed8-8f8b-4201-8da9-2ee0bf96ddb9" xsi:type="Polygon">
+                    <Fixture Id="b5e9e3d9-5ef1-4a69-be71-a54e5d26c5fc" Name="Fixture1">
+                        <Shape Id="54e414e6-438c-4a67-bf68-529ba9c6898c" xsi:type="Polygon">
                             <LocalCenter x="1.3276565553327162" y="-0.059681296924817454" />
                             <Vertex x="1.703125" y="0.296875" />
                             <Vertex x="1.421875" y="0.3125" />
@@ -212,8 +212,8 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="76196a36-23dd-4810-ac30-943f71fe6a85" Name="Fixture1">
-                        <Shape Id="c605967d-f1dc-413a-9b7f-4ee80ea37d63" xsi:type="Polygon">
+                    <Fixture Id="3d785ff0-2193-4bf3-b245-b0ebfb837e75" Name="Fixture1">
+                        <Shape Id="2e6370ec-f6a9-460c-9e61-48c905d74365" xsi:type="Polygon">
                             <LocalCenter x="0.8880208333333333" y="-0.7604166666666661" />
                             <Vertex x="1.1171875" y="-0.546875" />
                             <Vertex x="1.015625" y="-0.34375" />
@@ -225,8 +225,8 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="473b97e8-63d2-4b9b-8d0e-7149be5854e0" Name="Fixture1">
-                        <Shape Id="7d415d55-4e49-419b-b895-d3e920ec79e7" xsi:type="Polygon">
+                    <Fixture Id="a63b5f1a-54c9-4fb5-8d7a-17ff33d6a334" Name="Fixture1">
+                        <Shape Id="97bd51e7-d222-4838-a0ea-5c39c29e0ce8" xsi:type="Polygon">
                             <LocalCenter x="0.6120432263814618" y="-0.9317959001782532" />
                             <Vertex x="1.015625" y="-0.34375" />
                             <Vertex x="0.8125" y="-0.484375" />
@@ -263,12 +263,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="95c682ac-6162-4746-ad74-7ac24de23614" Name="n">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="bcb1cbe7-dde5-4c18-bece-3fc0dbf79fb1" Name="n">
+                <OutlineColor r="0.56691176" g="0.5709294" b="0.7454855" />
+                <FillColor r="0.7086397" g="0.71366173" b="0.9318569" />
                 <Fixtures>
-                    <Fixture Id="ca31a4be-66fe-4e60-a4d6-c21df4c33944" Name="Fixture1">
-                        <Shape Id="2afc1fef-9d1c-482b-bbb0-a609b790160d" xsi:type="Polygon">
+                    <Fixture Id="724829c2-f16d-4f29-b9a1-a1a1c2d7a7ba" Name="Fixture1">
+                        <Shape Id="a967376d-aa7a-4fa3-9eed-b7b2cfa5feed" xsi:type="Polygon">
                             <LocalCenter x="0.05108848314606742" y="0.3627957950289411" />
                             <Vertex x="-0.03125" y="0.984375" />
                             <Vertex x="-0.015625" y="-0.015625" />
@@ -281,8 +281,8 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="efcd59c6-c50e-4704-9aac-52d66aff2faf" Name="Fixture1">
-                        <Shape Id="11113f45-4c8a-47c9-8af2-681743ccce5e" xsi:type="Polygon">
+                    <Fixture Id="dd5b19dc-7fce-4b5e-b34e-82bfd1550802" Name="Fixture1">
+                        <Shape Id="29b09093-7a82-4731-b800-0281a667e1a3" xsi:type="Polygon">
                             <LocalCenter x="0.22916666666666666" y="0.5625" />
                             <Vertex x="0.15625" y="0.375" />
                             <Vertex x="0.34375" y="0.578125" />
@@ -294,8 +294,8 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="0d61ff09-5202-4712-9b43-9b393435af86" Name="Fixture1">
-                        <Shape Id="1ee093c9-87c3-4eea-b63a-04ad6fe6d25f" xsi:type="Polygon">
+                    <Fixture Id="c5fba997-7cf8-4695-aff3-56e8eb2a03ab" Name="Fixture1">
+                        <Shape Id="d8fabd78-54df-4c8f-9709-7ec0ccefa515" xsi:type="Polygon">
                             <LocalCenter x="0.10820357554786621" y="0.7766363898500577" />
                             <Vertex x="0.1875" y="0.734375" />
                             <Vertex x="0.1875" y="0.984375" />
@@ -308,8 +308,8 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="a3ea7689-ec09-440a-a731-f662c010f7b6" Name="Fixture1">
-                        <Shape Id="29a8d0ae-c753-4dee-a416-4acde2c31a52" xsi:type="Polygon">
+                    <Fixture Id="683c6097-71d7-4fe7-a4d8-f3e279be2069" Name="Fixture1">
+                        <Shape Id="cb1d50e9-4f19-48d9-9070-41274c16d4f2" xsi:type="Polygon">
                             <LocalCenter x="0.3369343471810089" y="0.7157053659742828" />
                             <Vertex x="0.296875" y="0.84375" />
                             <Vertex x="0.1875" y="0.734375" />
@@ -322,8 +322,8 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="14e500d1-37e2-4b1d-943f-379a945329fc" Name="Fixture1">
-                        <Shape Id="a4bc11ce-92db-48b8-8f95-eaa6a8b7f3c2" xsi:type="Polygon">
+                    <Fixture Id="45cd5d8a-b418-44b8-9084-298b8a9e1370" Name="Fixture1">
+                        <Shape Id="8f877d41-d7e2-4649-8b93-9c3c93625d8a" xsi:type="Polygon">
                             <LocalCenter x="0.5692104672057502" y="0.8409282345013476" />
                             <Vertex x="0.78125" y="0.96875" />
                             <Vertex x="0.5" y="0.96875" />
@@ -337,8 +337,8 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="6e5cc65e-c30a-44e4-bc1d-b79f20d0561a" Name="Fixture1">
-                        <Shape Id="eaf53f5a-2d4c-4bb7-ba4e-8710dac9137e" xsi:type="Polygon">
+                    <Fixture Id="6cea40bb-99d5-4ed4-a17b-0642f75b8d2f" Name="Fixture1">
+                        <Shape Id="367af58c-c267-44e0-afb0-9fa9001943b6" xsi:type="Polygon">
                             <LocalCenter x="0.8942066618911174" y="0.29640490687679083" />
                             <Vertex x="0.765625" y="0.5625" />
                             <Vertex x="0.734375" y="-0.0" />
@@ -351,8 +351,8 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="e31d9959-e4ae-490d-9b62-4f617ef0286d" Name="Fixture1">
-                        <Shape Id="1b2e67ad-f131-4b55-8aae-11b36814a59a" xsi:type="Polygon">
+                    <Fixture Id="cc4cbf1f-ec38-45b8-90db-3421953d6274" Name="Fixture1">
+                        <Shape Id="d2bd5cf1-02cb-41ea-a624-8e4fa821f5ff" xsi:type="Polygon">
                             <LocalCenter x="0.8495128896882495" y="0.7388264388489211" />
                             <Vertex x="1.046875" y="0.640625" />
                             <Vertex x="0.953125" y="0.84375" />
@@ -390,12 +390,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="68257d94-b137-4a32-9d89-742249b13c0a" Name="4">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="a65665df-760e-4600-8604-5dc9112d0782" Name="4">
+                <OutlineColor r="0.735115" g="0.40106043" b="0.6161074" />
+                <FillColor r="0.91889375" g="0.50132555" b="0.77013427" />
                 <Fixtures>
-                    <Fixture Id="04a422fa-c5be-44f8-978a-92a1213331b3" Name="Fixture1">
-                        <Shape Id="e01dd713-046d-49c1-9598-10d5ef1cb9bc" xsi:type="Polygon">
+                    <Fixture Id="d92866ed-b9e4-40db-b429-a0affcb743eb" Name="Fixture1">
+                        <Shape Id="6c9ec9d1-5ee3-4865-9001-689846a286ed" xsi:type="Polygon">
                             <LocalCenter x="0.484375" y="1.1510416666666667" />
                             <Vertex x="0.859375" y="1.828125" />
                             <Vertex x="-0.21875" y="0.8125" />
@@ -407,8 +407,8 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="ee6f481d-f636-487f-af77-73b4620ce013" Name="Fixture1">
-                        <Shape Id="1c189740-85a6-425b-a2b5-f577b312fd12" xsi:type="Polygon">
+                    <Fixture Id="6a2d385b-9b2c-4d89-9b97-8c4f97ae25aa" Name="Fixture1">
+                        <Shape Id="c8e4bafe-2b6b-4148-9873-2512505ce115" xsi:type="Polygon">
                             <LocalCenter x="0.9768183310163733" y="0.9197704278653074" />
                             <Vertex x="0.8125" y="0.8125" />
                             <Vertex x="0.828125" y="0.046875" />
@@ -446,12 +446,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="464ed67c-3e70-48eb-8ed3-98746373102c" Name="j">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="ead5e272-0a99-414e-a414-00cea3f9ec00" Name="j">
+                <OutlineColor r="0.58562756" g="0.5448929" b="0.461493" />
+                <FillColor r="0.73203444" g="0.6811161" b="0.5768662" />
                 <Fixtures>
-                    <Fixture Id="bd4ff11d-7e72-4ffc-9994-53c647ae970f" Name="Fixture1">
-                        <Shape Id="a899698a-dd14-436c-9cc3-5d83c8734ba7" xsi:type="Polygon">
+                    <Fixture Id="ac2bec98-5254-4b3b-872f-7dc943f439ab" Name="Fixture1">
+                        <Shape Id="4e87d9c6-3c20-4fc2-8bea-a1c551cdda74" xsi:type="Polygon">
                             <LocalCenter x="0.8698779926335177" y="0.7519279465930021" />
                             <Vertex x="0.90625" y="0.203125" />
                             <Vertex x="0.96875" y="0.34375" />
@@ -465,8 +465,8 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="bb114d58-1ad3-4c09-942b-e5699cda9e60" Name="Fixture1">
-                        <Shape Id="799520b2-fcea-4d08-b509-dde2a8fa68a6" xsi:type="Polygon">
+                    <Fixture Id="4030a665-582e-414c-8f24-5297f74995bf" Name="Fixture1">
+                        <Shape Id="edf9b57d-1a9f-41a7-af71-6c7fcb003041" xsi:type="Polygon">
                             <LocalCenter x="0.7343750000000002" y="0.23437500000000006" />
                             <Vertex x="0.734375" y="0.109375" />
                             <Vertex x="0.90625" y="0.203125" />
@@ -479,8 +479,8 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="23b03dfa-985c-49dc-9de6-cc95e873d9dd" Name="Fixture1">
-                        <Shape Id="a35b397e-c313-4012-9e5f-deeb88b6d7c7" xsi:type="Polygon">
+                    <Fixture Id="19a9267e-6bf8-4447-9cf2-1eaad54a977b" Name="Fixture1">
+                        <Shape Id="0281a46e-a749-42d9-be06-397c80fa7485" xsi:type="Polygon">
                             <LocalCenter x="0.4633075842696629" y="0.17070458801498126" />
                             <Vertex x="0.203125" y="0.109375" />
                             <Vertex x="0.46875" y="0.046875" />
@@ -494,8 +494,8 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="af4784cb-b8a2-4805-a554-6a3b253701fd" Name="Fixture1">
-                        <Shape Id="abba3b6c-bd69-476b-b87a-12a66146f4ca" xsi:type="Polygon">
+                    <Fixture Id="45ff2615-594a-488e-a5de-b19cfac18a46" Name="Fixture1">
+                        <Shape Id="376454b7-6014-4c9c-ac54-dbac4592887f" xsi:type="Polygon">
                             <LocalCenter x="0.14583333333333331" y="0.5616319444444444" />
                             <Vertex x="0.234375" y="0.4375" />
                             <Vertex x="0.234375" y="0.65625" />
@@ -508,8 +508,8 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="b778588f-4a16-4a9c-bbc2-df61b070968f" Name="Fixture1">
-                        <Shape Id="7627b4d4-7ea1-43bf-aaee-b5b09924df77" xsi:type="Polygon">
+                    <Fixture Id="9cd57d35-b96a-49ad-8e33-2e9420ff209c" Name="Fixture1">
+                        <Shape Id="a4ee4aa8-7f2f-422c-850e-8dd5a2eed156" xsi:type="Polygon">
                             <LocalCenter x="0.18406148867313912" y="0.31816343042071193" />
                             <Vertex x="0.046875" y="0.5" />
                             <Vertex x="0.078125" y="0.28125" />

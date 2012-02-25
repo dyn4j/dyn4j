@@ -25,6 +25,8 @@
 package org.dyn4j.sandbox.panels;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 
 import javax.swing.BorderFactory;
@@ -33,7 +35,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 import org.dyn4j.sandbox.resources.Messages;
 
@@ -43,9 +45,12 @@ import org.dyn4j.sandbox.resources.Messages;
  * @version 1.0.1
  * @since 1.0.0
  */
-public class MemoryPanel extends JPanel {
+public class MemoryPanel extends JPanel implements ActionListener {
 	/** The version id */
 	private static final long serialVersionUID = 6078435493627945050L;
+	
+	/** The runtime */
+	private static final Runtime RUNTIME = Runtime.getRuntime();
 	
 	/** The text box for the total heap memory */
 	private JFormattedTextField txtTotal;
@@ -64,9 +69,6 @@ public class MemoryPanel extends JPanel {
 	
 	/** The graph panel */
 	private LineGraphPanel pnlGraph;
-	
-	/** The last time the panel was updated */
-	private long lastUpdate;
 	
 	/**
 	 * Default constructor
@@ -133,47 +135,29 @@ public class MemoryPanel extends JPanel {
 						.addComponent(this.txtFreePercent, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 				.addComponent(this.pnlGraph));
 		
-		this.lastUpdate = System.nanoTime();
+		Timer timer = new Timer(1000, this);
+		timer.start();
 	}
 	
-	/**
-	 * Updates the memory panel to get the new results.
+	/* (non-Javadoc)
+	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
-	public void update() {
-		// check if its time to update
-		long time = System.nanoTime();
-		long diff = time - this.lastUpdate;
-		// update only every second
-		if (diff > 1000000000) {
-			this.lastUpdate = time;
-			this.updateEDT();
-		}
-	}
-	
-	/**
-	 * Updates the chart and textboxes on the EDT thread.
-	 */
-	private void updateEDT() {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				Runtime runtime = Runtime.getRuntime();
-				// convert to MB
-				double total = runtime.totalMemory() / 1000000.0;
-				double free = runtime.freeMemory() / 1000000.0;
-				double used = total - free;
-				
-				txtTotal.setValue(total);
-				txtFree.setValue(free);
-				txtFreePercent.setValue(free / total);
-				txtUsed.setValue(used);
-				txtUsedPercent.setValue(used / total);
-				
-				pnlGraph.setMaximumValue(total + 3);
-				pnlGraph.addDataPoint(used, 0);
-				pnlGraph.addDataPoint(total, 1);
-				pnlGraph.repaint();
-			}
-		});
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// convert to MB
+		double total = RUNTIME.totalMemory() / 1000000.0;
+		double free = RUNTIME.freeMemory() / 1000000.0;
+		double used = total - free;
+		
+		txtTotal.setValue(total);
+		txtFree.setValue(free);
+		txtFreePercent.setValue(free / total);
+		txtUsed.setValue(used);
+		txtUsedPercent.setValue(used / total);
+		
+		pnlGraph.setMaximumValue(total + 3);
+		pnlGraph.addDataPoint(used, 0);
+		pnlGraph.addDataPoint(total, 1);
+		pnlGraph.repaint();
 	}
 }

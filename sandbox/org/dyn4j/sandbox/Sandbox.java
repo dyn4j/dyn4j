@@ -885,7 +885,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 			this.endAllActions();
 			// clear the contact listener
 			((ContactCounter)this.world.getContactListener()).clear();
-			this.pnlContacts.update();
 		} else if ("remove-body".equals(command)) {
 			// check if it was this body
 			BodyActionEvent bae = (BodyActionEvent)event;
@@ -897,7 +896,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				this.endAllActions();
 				// clear the contact listener
 				((ContactCounter)this.world.getContactListener()).clear();
-				this.pnlContacts.update();
 			}
 		} else if ("add-ray".equals(command)) {
 			RayActionEvent rae = (RayActionEvent)event;
@@ -954,7 +952,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				this.endAllActions();
 				// clear the contact listener
 				((ContactCounter)this.world.getContactListener()).clear();
-				this.pnlContacts.update();
 			}
 		} else if ("save".equals(command)) {
 			try {
@@ -972,7 +969,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				this.endAllActions();
 				// clear the contact listener
 				((ContactCounter)this.world.getContactListener()).clear();
-				this.pnlContacts.update();
 			} catch (Exception e) {
 				ExceptionDialog.show(this, 
 						Messages.getString("dialog.open.error.title"), 
@@ -1121,7 +1117,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 					this.endAllActions();
 					// clear the contact listener
 					((ContactCounter)this.world.getContactListener()).clear();
-					this.pnlContacts.update();
 				} catch (Exception e) {
 					ExceptionDialog.show(this, 
 							Messages.getString("dialog.snapshot.load.error.title"), 
@@ -1160,7 +1155,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				this.endAllActions();
 				// clear the contact listener
 				((ContactCounter)this.world.getContactListener()).clear();
-				this.pnlContacts.update();
 			} catch (Exception e) {
 				ExceptionDialog.show(this, 
 						Messages.getString("dialog.test.open.error.title"), 
@@ -1230,7 +1224,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		// initialize the matrix
 		gl.glLoadIdentity();
 		// set the view to a 2D view
-		gl.glOrtho(-300, 300, -300, 300, 0, 1);
+		gl.glOrtho(-400, 400, -300, 300, 0, 1);
 		
 		// switch to the model view matrix
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
@@ -1357,36 +1351,21 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		if (!this.isPaused()) {
 	    	// convert from nanoseconds to seconds
 	    	double elapsedTime = (double)diff / NANO_TO_BASE;
-	    	// see if a step will be taken
-	    	boolean stepped = false;
 	    	// obtain the lock on the world object
 	    	synchronized (this.world) {
 		        // update the world with the elapsed time
-		        stepped = this.world.update(elapsedTime);
+		        this.world.update(elapsedTime);
 			}
-	    	// only update the contact panel if a step was taken
-	    	if (stepped) {
-				// update the contact panel
-	    		// this will update the Swing components on the EDT internally
-		    	this.pnlContacts.update();
-	    	}
 		} else if (steps > 0) {
 			// if there are some steps to perform then do so
 			synchronized (this.world) {
 				this.world.step(steps);
 			}
-			// update the contact panel
-    		// this will update the Swing components on the EDT internally
-	    	this.pnlContacts.update();
 		}
 		
 		// update the fps text box
 		// this will update the Swing components on the EDT internally
 		this.updateFps(diff);
-		
-		// update the memory panel
-		// this will update the Swing components on the EDT internally
-		this.pnlMemory.update();
 	}
 	
 	/**
@@ -2761,6 +2740,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	 * @param args the command line arguments
 	 */
 	public static final void main(String[] args) {
+		GLProfile.initSingleton(true);
 		// attempt to use the nimbus look and feel
 		try {
 		    for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {

@@ -2,13 +2,13 @@
 <Simulation xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.dyn4j.org/Sandbox/sandbox.xsd" version="1.0.1">
     <Name>Concave</Name>
     <Camera>
-		<Scale>64</Scale>
-		<Translation x="0.0" y="-1.5" />
-	</Camera>
+        <Scale>64.0</Scale>
+        <Translation x="0.0" y="-1.5" />
+    </Camera>
     <System>
         <JavaVersion>1.6.0_26</JavaVersion>
         <JavaVendor>Sun Microsystems Inc.</JavaVendor>
-        <OperatingSystem>Windows 7</OperatingSystem>
+        <OperatingSystem>Windows 7 6.1</OperatingSystem>
         <Architecture>x86</Architecture>
         <NumberOfCpus>2</NumberOfCpus>
         <Locale>en_US</Locale>
@@ -16,7 +16,7 @@
     <Settings>
         <StepFrequency>60.0</StepFrequency>
         <MaximumTranslation>2.0</MaximumTranslation>
-        <MaximumRotation>90</MaximumRotation>
+        <MaximumRotation>90.0</MaximumRotation>
         <ContinuousCollisionDetectionMode>ALL</ContinuousCollisionDetectionMode>
         <AutoSleep>true</AutoSleep>
         <SleepTime>0.5</SleepTime>
@@ -41,7 +41,7 @@
         <TimeOfImpactDetector>ConservativeAdvancement</TimeOfImpactDetector>
         <Gravity x="0.0" y="-9.8" />
         <Bounds>
-            <Rectangle Id="31f61ebd-a1f9-4f83-8e06-0e0aac1570a9">
+            <Rectangle Id="43a2ecfb-8339-4626-8287-56a20e2e46ce">
                 <LocalCenter x="0.0" y="0.0" />
                 <Width>16.0</Width>
                 <Height>15.0</Height>
@@ -53,12 +53,12 @@
             </Transform>
         </Bounds>
         <Bodies>
-            <Body Id="2bd92b3d-6d5e-4ea6-a04b-13dc9e93c1bd" Name="Ground">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="552f9b8d-f37e-4575-8366-19cb320f425b" Name="Ground">
+                <OutlineColor r="0.55342764" g="0.48872128" b="0.73989403" />
+                <FillColor r="0.69178456" g="0.6109016" b="0.9248675" />
                 <Fixtures>
-                    <Fixture Id="fd5a6e65-2341-4a8f-a285-651e265b83ec" Name="Fixture1">
-                        <Shape Id="8fd95458-5579-4e13-a237-e159b8f5040f" xsi:type="Rectangle">
+                    <Fixture Id="620c720b-5526-43b0-8a92-7eb7c8c40528" Name="Fixture1">
+                        <Shape Id="02536fca-35a7-4966-baa7-c6e49ce07aa4" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
                             <Width>15.0</Width>
                             <Height>1.0</Height>
@@ -94,12 +94,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="cc0d225c-03bc-4737-b424-b6831d2f7135" Name="Concave">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="b3a25bcc-9914-4356-a21a-56ddf8aa734a" Name="Concave">
+                <OutlineColor r="0.7526321" g="0.4347836" b="0.5107832" />
+                <FillColor r="0.94079006" g="0.5434795" b="0.638479" />
                 <Fixtures>
-                    <Fixture Id="e9421049-3c63-4f86-842c-06815eb30ff7" Name="Fixture1">
-                        <Shape Id="e6cabe35-c63e-4f78-963e-dfd68c050767" xsi:type="Rectangle">
+                    <Fixture Id="8bd1576a-da41-4f61-9796-eef162102cb1" Name="Fixture1">
+                        <Shape Id="64dc0531-554f-4732-9967-853532e1d010" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.5" />
                             <Width>3.0</Width>
                             <Height>1.0</Height>
@@ -111,8 +111,8 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="fa0dee26-d044-4242-a8b9-24746c5ce824" Name="Fixture1">
-                        <Shape Id="b6d1ea3c-bf98-48e3-82c1-a5484908013f" xsi:type="Rectangle">
+                    <Fixture Id="4dbb7f76-0e0e-4738-9f99-f39ac0a869c8" Name="Fixture1">
+                        <Shape Id="62ea087a-5920-493f-942d-d7fd9c8745d1" xsi:type="Rectangle">
                             <LocalCenter x="-1.0" y="-0.5" />
                             <Width>1.0</Width>
                             <Height>1.0</Height>
@@ -124,8 +124,8 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="b64b38b8-4e9e-4607-b9e4-c0e3bb49ff93" Name="Fixture1">
-                        <Shape Id="349035ad-b847-48a6-a0db-11bcfeb5df82" xsi:type="Rectangle">
+                    <Fixture Id="eb81357d-18e2-4596-ac6f-bcab56308631" Name="Fixture1">
+                        <Shape Id="c6e7ffbb-9373-4b1b-8f2a-790c54bae052" xsi:type="Rectangle">
                             <LocalCenter x="1.0" y="-0.5" />
                             <Width>1.0</Width>
                             <Height>1.0</Height>
@@ -161,12 +161,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="063bb2c9-8f46-4cfe-93d3-ddc75de2b64c" Name="Body3">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="335f027f-16ea-4e8c-8cfc-787637d4b365" Name="Body3">
+                <OutlineColor r="0.6990393" g="0.48251435" b="0.4400742" />
+                <FillColor r="0.8737991" g="0.6031429" b="0.55009276" />
                 <Fixtures>
-                    <Fixture Id="353a1390-d2e7-452a-8b6c-d8ab1518a4a0" Name="Fixture1">
-                        <Shape Id="91422d88-b50c-4753-a606-7270b5d28b9e" xsi:type="Rectangle">
+                    <Fixture Id="8565078b-4f23-4f47-a89c-9b1fd2b5ec1c" Name="Fixture1">
+                        <Shape Id="aae30f1e-ffd8-491d-9225-c88f76868e2f" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
                             <Width>0.5</Width>
                             <Height>0.5</Height>

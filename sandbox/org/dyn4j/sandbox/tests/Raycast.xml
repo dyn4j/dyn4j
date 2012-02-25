@@ -8,7 +8,7 @@
     <System>
         <JavaVersion>1.6.0_26</JavaVersion>
         <JavaVendor>Sun Microsystems Inc.</JavaVendor>
-        <OperatingSystem>Windows 7</OperatingSystem>
+        <OperatingSystem>Windows 7 6.1</OperatingSystem>
         <Architecture>x86</Architecture>
         <NumberOfCpus>2</NumberOfCpus>
         <Locale>en_US</Locale>
@@ -16,7 +16,7 @@
     <Settings>
         <StepFrequency>60.0</StepFrequency>
         <MaximumTranslation>2.0</MaximumTranslation>
-        <MaximumRotation>90</MaximumRotation>
+        <MaximumRotation>90.0</MaximumRotation>
         <ContinuousCollisionDetectionMode>ALL</ContinuousCollisionDetectionMode>
         <AutoSleep>true</AutoSleep>
         <SleepTime>0.5</SleepTime>
@@ -35,7 +35,7 @@
     <Rays>
         <Ray Name="Ray1">
             <Start x="0.0" y="0.0" />
-            <Direction>0.785398163</Direction>
+            <Direction>0.7853981630000001</Direction>
             <Length>0.0</Length>
             <IgnoreSensors>false</IgnoreSensors>
             <TestAll>true</TestAll>
@@ -47,13 +47,25 @@
         <ManifoldSolver>ClippingManifoldSolver</ManifoldSolver>
         <TimeOfImpactDetector>ConservativeAdvancement</TimeOfImpactDetector>
         <Gravity x="0.0" y="0.0" />
+        <Bounds>
+            <Rectangle Id="1adedc06-e4f4-4bbe-b690-0505f7328867">
+                <LocalCenter x="0.0" y="0.0" />
+                <Width>16.0</Width>
+                <Height>15.0</Height>
+                <LocalRotation>0.0</LocalRotation>
+            </Rectangle>
+            <Transform>
+                <Translation x="0.0" y="0.0" />
+                <Rotation>0.0</Rotation>
+            </Transform>
+        </Bounds>
         <Bodies>
-            <Body Id="bef93a4f-15c7-43d1-94b5-31e4f42eb952" Name="Rectangle">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="d59957ff-09a3-4c36-9439-e4faf1721969" Name="Rectangle">
+                <OutlineColor r="0.48948666" g="0.6261078" b="0.52009815" />
+                <FillColor r="0.6118583" g="0.78263474" b="0.65012264" />
                 <Fixtures>
-                    <Fixture Id="5914eb61-3cd5-4ebe-b2d9-9068ffdc5156" Name="Fixture1">
-                        <Shape Id="bbaa6e56-d094-4464-8be9-dbb040eec44d" xsi:type="Triangle">
+                    <Fixture Id="3c625b7f-eb38-4877-9bd5-1055046eea8a" Name="Fixture1">
+                        <Shape Id="1542ace9-3b0d-4b73-bb5a-7c6416581ed8" xsi:type="Triangle">
                             <LocalCenter x="0.0" y="-0.16666666666666666" />
                             <Vertex x="0.0" y="0.5" />
                             <Vertex x="-0.5" y="-0.5" />
@@ -89,12 +101,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="659bb615-ffda-4fb7-aeae-d6bcad8361cb" Name="Circle">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="d41ed9b2-6a7b-4517-ab6c-4a40ab9995e1" Name="Circle">
+                <OutlineColor r="0.704191" g="0.72199965" b="0.7365057" />
+                <FillColor r="0.8802388" g="0.90249956" b="0.9206321" />
                 <Fixtures>
-                    <Fixture Id="4f4bbac5-a0c9-4058-9037-61a9e9b98e2b" Name="Fixture1">
-                        <Shape Id="3095931f-40ea-4363-b5e3-28ac2cc30903" xsi:type="Circle">
+                    <Fixture Id="237ca4b8-37a6-496a-a29d-dae79fa6a731" Name="Fixture1">
+                        <Shape Id="3531103e-2efb-4050-8a3c-21f235cc43f2" xsi:type="Circle">
                             <LocalCenter x="0.0" y="0.0" />
                             <Radius>0.5</Radius>
                         </Shape>
@@ -128,12 +140,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="2a2cdadb-3443-43c1-8034-f6bdeba127c5" Name="Segment">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="e7258281-6e58-4129-a470-d942d50b0c94" Name="Segment">
+                <OutlineColor r="0.7502872" g="0.48356915" b="0.7596961" />
+                <FillColor r="0.93785894" g="0.60446143" b="0.9496201" />
                 <Fixtures>
-                    <Fixture Id="7140c906-81a8-4ef2-938e-97141b6ac9fd" Name="Fixture1">
-                        <Shape Id="0a516419-4714-46fc-8e58-f5b00e6d4e0d" xsi:type="Segment">
+                    <Fixture Id="b2a1018c-c090-4b0d-b877-cdc74f027602" Name="Fixture1">
+                        <Shape Id="2cee0b5e-bbd2-4c2b-8224-abcb9920720e" xsi:type="Segment">
                             <LocalCenter x="0.0" y="0.0" />
                             <Vertex x="0.5" y="0.5" />
                             <Vertex x="-0.5" y="-0.5" />
@@ -168,12 +180,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="f0367558-8462-44ea-8ca1-37811ecfcef8" Name="Square">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="d2951e34-5e92-4073-93a1-37eea3ffde26" Name="Square">
+                <OutlineColor r="0.54855937" g="0.4558936" b="0.7926206" />
+                <FillColor r="0.68569916" g="0.569867" b="0.9907757" />
                 <Fixtures>
-                    <Fixture Id="d0ce20dd-b7e2-479b-8183-db6c1a269a51" Name="Fixture1">
-                        <Shape Id="60ab135e-a86c-46d0-a93c-f9dae694265f" xsi:type="Rectangle">
+                    <Fixture Id="409396ed-af5f-4bd7-9124-57f8554c2dc0" Name="Fixture1">
+                        <Shape Id="c6102e72-9e5b-4c59-afe2-6fe0adccdb25" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
                             <Width>1.0</Width>
                             <Height>1.0</Height>
@@ -209,12 +221,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="a84e4046-8a32-4915-b202-311a8fb8377c" Name="Polygon">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="7ffdbef9-127c-4d3a-b313-76993a38b496" Name="Polygon">
+                <OutlineColor r="0.79859465" g="0.79749376" b="0.6646933" />
+                <FillColor r="0.99824333" g="0.9968672" b="0.8308666" />
                 <Fixtures>
-                    <Fixture Id="d575a475-c422-4278-b49e-f78b156eef23" Name="Fixture1">
-                        <Shape Id="67097d6b-7322-4af9-9523-e417817bb2c7" xsi:type="Polygon">
+                    <Fixture Id="7772f498-96ef-43a4-a168-ef8a6e7e4b50" Name="Fixture1">
+                        <Shape Id="7e8370f5-661a-481a-9fc9-91a904b79601" xsi:type="Polygon">
                             <LocalCenter x="-1.888824226696872E-17" y="2.36103028337109E-18" />
                             <Vertex x="1.0" y="0.0" />
                             <Vertex x="0.8090169943749475" y="0.5877852522924731" />
@@ -257,12 +269,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="af002674-bcbf-455c-9570-c225ac5f9c38" Name="Capsule">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="ab57a601-aaee-42a7-bd5e-c8c855eca06b" Name="Capsule">
+                <OutlineColor r="0.7065568" g="0.6096684" b="0.705095" />
+                <FillColor r="0.883196" g="0.76208544" b="0.88136876" />
                 <Fixtures>
-                    <Fixture Id="5c68c671-b4bc-44f3-a07b-823491010298" Name="Fixture1">
-                        <Shape Id="e8872651-383b-46ff-9c28-ceb3cd4cdf1e" xsi:type="Circle">
+                    <Fixture Id="d41e0380-e2b0-48eb-8291-1bcb7b858e05" Name="Fixture1">
+                        <Shape Id="1ee3308d-416d-4b64-a279-d31011261c62" xsi:type="Circle">
                             <LocalCenter x="-1.0" y="0.0" />
                             <Radius>0.5</Radius>
                         </Shape>
@@ -272,8 +284,8 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="99fbd5a4-1ac2-4a5a-8f07-751cd82d6c90" Name="Fixture2">
-                        <Shape Id="30b33346-ce42-4780-80fa-13436b2a9847" xsi:type="Circle">
+                    <Fixture Id="dd60cf7f-3351-4999-b8b0-0a9304ffdbc0" Name="Fixture2">
+                        <Shape Id="f85993c4-0d02-40bb-aa5f-0268f42789f6" xsi:type="Circle">
                             <LocalCenter x="1.0" y="0.0" />
                             <Radius>0.5</Radius>
                         </Shape>
@@ -283,8 +295,8 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="7403a895-970f-42ca-9ae0-134259278f77" Name="Fixture3">
-                        <Shape Id="eccb8160-c2f0-4459-a79a-b6870437b4b8" xsi:type="Rectangle">
+                    <Fixture Id="a9a4343a-1868-4c0e-b4e5-f20128b76c5d" Name="Fixture3">
+                        <Shape Id="71ca813c-9536-4170-b439-ef8851d14fa8" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
                             <Width>2.0</Width>
                             <Height>1.0</Height>
@@ -325,4 +337,3 @@
         </Joints>
     </World>
 </Simulation>
-
