@@ -893,8 +893,8 @@
 			<xs:element name="Camera" type="Camera" maxOccurs="1" minOccurs="1" />
 			<xs:element name="System" type="System" maxOccurs="1" minOccurs="0" />
 			<xs:element name="Settings" type="Settings" maxOccurs="1" minOccurs="1" />
-			<xs:element name="World" type="World" maxOccurs="1" minOccurs="1" />
 			<xs:element name="Rays" type="Rays" maxOccurs="1" minOccurs="1" />
+			<xs:element name="World" type="World" maxOccurs="1" minOccurs="1" />
 		</xs:sequence>
 		<xs:attribute name="version" type="xs:string" use="required" />
 	</xs:complexType>

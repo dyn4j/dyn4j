@@ -2,13 +2,13 @@
 <Simulation xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.dyn4j.org/Sandbox/sandbox.xsd" version="1.0.1">
     <Name>Seesaw</Name>
     <Camera>
-		<Scale>32</Scale>
-		<Translation x="0.0" y="-2.0" />
-	</Camera>
+        <Scale>32.0</Scale>
+        <Translation x="0.0" y="-2.0" />
+    </Camera>
     <System>
         <JavaVersion>1.6.0_26</JavaVersion>
         <JavaVendor>Sun Microsystems Inc.</JavaVendor>
-        <OperatingSystem>Windows 7</OperatingSystem>
+        <OperatingSystem>Windows 7 6.1</OperatingSystem>
         <Architecture>x86</Architecture>
         <NumberOfCpus>2</NumberOfCpus>
         <Locale>en_US</Locale>
@@ -16,7 +16,7 @@
     <Settings>
         <StepFrequency>60.0</StepFrequency>
         <MaximumTranslation>2.0</MaximumTranslation>
-        <MaximumRotation>90</MaximumRotation>
+        <MaximumRotation>90.0</MaximumRotation>
         <ContinuousCollisionDetectionMode>ALL</ContinuousCollisionDetectionMode>
         <AutoSleep>true</AutoSleep>
         <SleepTime>0.5</SleepTime>
@@ -41,7 +41,7 @@
         <TimeOfImpactDetector>ConservativeAdvancement</TimeOfImpactDetector>
         <Gravity x="0.0" y="-9.8" />
         <Bounds>
-            <Rectangle Id="56e3c338-ed1c-4629-84ba-2d5786702b85">
+            <Rectangle Id="59d20f21-96e6-49ec-b8ab-6f0480f0ab66">
                 <LocalCenter x="0.0" y="0.0" />
                 <Width>16.0</Width>
                 <Height>15.0</Height>
@@ -53,12 +53,12 @@
             </Transform>
         </Bounds>
         <Bodies>
-            <Body Id="edb51a7f-225f-4e9e-9681-e8e656fc7c16" Name="Ground">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="3dced976-572d-4542-816c-66835674fe29" Name="Ground">
+                <OutlineColor r="0.6251601" g="0.7945671" b="0.6555641" />
+                <FillColor r="0.7814501" g="0.9932089" b="0.81945515" />
                 <Fixtures>
-                    <Fixture Id="cd467952-e174-4370-b682-29fe3434eec5" Name="Fixture1">
-                        <Shape Id="ea848d5d-eecb-4c94-a796-f449771e1b7a" xsi:type="Rectangle">
+                    <Fixture Id="2f14b468-c178-4aeb-bdcf-3d99f6a5d617" Name="Fixture1">
+                        <Shape Id="fe6b7bf0-91b3-4f7e-b938-dafde9fec0ac" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
                             <Width>15.0</Width>
                             <Height>1.0</Height>
@@ -94,12 +94,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="eb11edfb-30c1-495b-ac64-f91e25adc141" Name="Pivot">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="6a80702d-86fb-400c-8c44-8c10c66a2303" Name="Pivot">
+                <OutlineColor r="0.7194166" g="0.5692953" b="0.49531913" />
+                <FillColor r="0.8992708" g="0.7116191" b="0.6191489" />
                 <Fixtures>
-                    <Fixture Id="0df062c0-e5ef-44f2-a9aa-7e6bc23ecc48" Name="Fixture1">
-                        <Shape Id="48dd78aa-5e7d-409f-85e8-288ae5b88a6c" xsi:type="Triangle">
+                    <Fixture Id="0ab3b11c-7066-496b-9c64-260c4a788f16" Name="Fixture1">
+                        <Shape Id="84ab5554-24af-451e-9fbe-2230dcaccea4" xsi:type="Triangle">
                             <LocalCenter x="0.0" y="0.16666666666666666" />
                             <Vertex x="0.0" y="0.5" />
                             <Vertex x="-1.0" y="0.0" />
@@ -135,12 +135,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="101b0d04-d852-4461-9125-f5161cd527e6" Name="Seesaw-Board">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="a76f6037-814d-4627-9adb-3af936279112" Name="Seesaw-Board">
+                <OutlineColor r="0.5361814" g="0.6814097" b="0.53124464" />
+                <FillColor r="0.6702267" g="0.8517621" b="0.66405576" />
                 <Fixtures>
-                    <Fixture Id="3a1fb320-aaf2-475f-9849-9be4a1f7e0c3" Name="Fixture1">
-                        <Shape Id="b15ddb34-f67d-4b80-bb00-57d433609751" xsi:type="Rectangle">
+                    <Fixture Id="24b8f843-61c3-4c38-9dbc-1503aa59d666" Name="Fixture1">
+                        <Shape Id="7ff166ab-0d4a-45e0-8cb6-026aa3ac05db" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
                             <Width>10.0</Width>
                             <Height>0.2</Height>
@@ -176,12 +176,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="3ada1360-04d7-4e13-b44d-ed4c0ec8b9b0" Name="Body1">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="6ee4e3a1-7e18-4e0a-b854-257e51d56c6e" Name="Body1">
+                <OutlineColor r="0.6599622" g="0.5344915" b="0.5295633" />
+                <FillColor r="0.8249527" g="0.6681143" b="0.6619541" />
                 <Fixtures>
-                    <Fixture Id="a0566495-cb6f-4470-92ef-988f893b7638" Name="Fixture1">
-                        <Shape Id="dded2094-03a6-4663-a184-b456e8eeeb3c" xsi:type="Rectangle">
+                    <Fixture Id="856a1353-232d-45e9-ba29-ac4272e3ea83" Name="Fixture1">
+                        <Shape Id="67a83a84-063f-4e72-93b2-a88c9074dfff" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
                             <Width>1.0</Width>
                             <Height>1.0</Height>
@@ -217,12 +217,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="ba1712a4-8159-4ead-b296-6de124da6405" Name="Body2">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="98368928-a631-48a6-8b7d-255df003382e" Name="Body2">
+                <OutlineColor r="0.73497516" g="0.62114793" b="0.7991096" />
+                <FillColor r="0.91871893" g="0.7764349" b="0.99888694" />
                 <Fixtures>
-                    <Fixture Id="b5033c0e-1852-4cee-b4ca-330c9b47de2b" Name="Fixture1">
-                        <Shape Id="2994dbf4-98fb-44ff-bd8c-810ea2e44518" xsi:type="Rectangle">
+                    <Fixture Id="ca89f074-2f25-464f-b2a3-585f36704f96" Name="Fixture1">
+                        <Shape Id="892c578b-e5e3-4455-a0db-9b0123723892" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
                             <Width>1.0</Width>
                             <Height>1.0</Height>

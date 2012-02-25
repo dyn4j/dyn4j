@@ -2,13 +2,13 @@
 <Simulation xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.dyn4j.org/Sandbox/sandbox.xsd" version="1.0.1">
     <Name>Sleep</Name>
     <Camera>
-		<Scale>32</Scale>
-		<Translation x="0.0" y="0.0" />
-	</Camera>
+        <Scale>32.0</Scale>
+        <Translation x="0.0" y="0.0" />
+    </Camera>
     <System>
         <JavaVersion>1.6.0_26</JavaVersion>
         <JavaVendor>Sun Microsystems Inc.</JavaVendor>
-        <OperatingSystem>Windows 7</OperatingSystem>
+        <OperatingSystem>Windows 7 6.1</OperatingSystem>
         <Architecture>x86</Architecture>
         <NumberOfCpus>2</NumberOfCpus>
         <Locale>en_US</Locale>
@@ -16,7 +16,7 @@
     <Settings>
         <StepFrequency>60.0</StepFrequency>
         <MaximumTranslation>2.0</MaximumTranslation>
-        <MaximumRotation>90</MaximumRotation>
+        <MaximumRotation>90.0</MaximumRotation>
         <ContinuousCollisionDetectionMode>ALL</ContinuousCollisionDetectionMode>
         <AutoSleep>true</AutoSleep>
         <SleepTime>0.5</SleepTime>
@@ -41,7 +41,7 @@
         <TimeOfImpactDetector>ConservativeAdvancement</TimeOfImpactDetector>
         <Gravity x="0.0" y="-9.8" />
         <Bounds>
-            <Rectangle Id="23cdc8cb-b5b2-43c2-a583-5fe221120970">
+            <Rectangle Id="2ce572aa-3058-418d-b3d5-7feb5e996563">
                 <LocalCenter x="0.0" y="0.0" />
                 <Width>16.0</Width>
                 <Height>15.0</Height>
@@ -53,12 +53,12 @@
             </Transform>
         </Bounds>
         <Bodies>
-            <Body Id="d3489662-2a91-4a6b-9703-4ba84987d7f7" Name="Ground">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="4ad18910-93f9-4d82-aab9-8f1f76ea832f" Name="Ground">
+                <OutlineColor r="0.5839343" g="0.7829718" b="0.48346302" />
+                <FillColor r="0.7299179" g="0.9787147" b="0.60432875" />
                 <Fixtures>
-                    <Fixture Id="a349032d-56e8-4d91-82f1-642bf661cdbe" Name="Fixture1">
-                        <Shape Id="250ada18-3dd4-4e3e-a135-398f91f30e34" xsi:type="Rectangle">
+                    <Fixture Id="97d355bd-3bd4-491d-b014-83d9323c75a2" Name="Fixture1">
+                        <Shape Id="c35e6de5-eaa0-4c79-ad60-11fe507ee940" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
                             <Width>15.0</Width>
                             <Height>1.0</Height>
@@ -94,12 +94,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="afcd06e7-ab97-464f-8084-1341c890b674" Name="Body2">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="cd0a90ac-e2a1-4dbf-8d8b-ac2d760ea075" Name="Body2">
+                <OutlineColor r="0.59150857" g="0.77483076" b="0.5514002" />
+                <FillColor r="0.7393857" g="0.9685384" b="0.68925023" />
                 <Fixtures>
-                    <Fixture Id="7b0187c1-5530-431d-9003-94b3565130de" Name="Fixture1">
-                        <Shape Id="f728a01d-c1a5-490d-88c7-59096df03f4e" xsi:type="Rectangle">
+                    <Fixture Id="b5ba747d-62ef-44d0-a3ce-08b363677085" Name="Fixture1">
+                        <Shape Id="bb6e8aab-950a-4bf2-b074-4a5b3ec5da23" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
                             <Width>1.0</Width>
                             <Height>1.0</Height>
@@ -135,12 +135,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="3f4edf1d-114b-4e62-a602-4ad556a550b5" Name="Body3">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="8cd3f3ec-338b-40e2-8478-01deed36dafa" Name="Body3">
+                <OutlineColor r="0.6098693" g="0.6360911" b="0.5505938" />
+                <FillColor r="0.7623366" g="0.79511386" b="0.68824226" />
                 <Fixtures>
-                    <Fixture Id="4808c361-bb19-43fc-9c5d-cf854c2f4970" Name="Fixture1">
-                        <Shape Id="f728a01d-c1a5-490d-88c7-59096df03f4e" xsi:type="Rectangle">
+                    <Fixture Id="cac2731e-97eb-493c-bb76-af63a92f76cc" Name="Fixture1">
+                        <Shape Id="618d9643-31d7-45e3-9a0e-45b054452e10" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
                             <Width>1.0</Width>
                             <Height>1.0</Height>
@@ -176,12 +176,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="d9ff7c05-a2ec-4d9c-bb6e-d3794a191476" Name="Body4">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="4b98425d-1cc4-49a0-b3ae-27ecc7c30a46" Name="Body4">
+                <OutlineColor r="0.4191029" g="0.43523106" b="0.7924258" />
+                <FillColor r="0.52387863" g="0.54403883" b="0.9905323" />
                 <Fixtures>
-                    <Fixture Id="74ae1c12-7bfc-4b9f-b002-2c8568b952cf" Name="Fixture1">
-                        <Shape Id="f728a01d-c1a5-490d-88c7-59096df03f4e" xsi:type="Rectangle">
+                    <Fixture Id="61f4ff4c-446a-49e7-9c7e-64ff2b4a3db6" Name="Fixture1">
+                        <Shape Id="623df983-4c11-43e6-9228-d1dde5793c85" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
                             <Width>1.0</Width>
                             <Height>1.0</Height>
@@ -217,12 +217,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="e2e42013-14e9-4168-8f39-2b4fa3000b1a" Name="Body5">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="2f94d214-9731-46c1-a531-63ba46caf97a" Name="Body5">
+                <OutlineColor r="0.68764305" g="0.56995976" b="0.42190948" />
+                <FillColor r="0.8595538" g="0.71244967" b="0.52738684" />
                 <Fixtures>
-                    <Fixture Id="d8c86d7d-493c-4ee4-9b97-e6edc403eaad" Name="Fixture1">
-                        <Shape Id="f728a01d-c1a5-490d-88c7-59096df03f4e" xsi:type="Rectangle">
+                    <Fixture Id="4c930095-82be-4c49-9a4c-c1931e148238" Name="Fixture1">
+                        <Shape Id="452ed111-eaa5-4ad8-af63-9351eb439af9" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
                             <Width>1.0</Width>
                             <Height>1.0</Height>

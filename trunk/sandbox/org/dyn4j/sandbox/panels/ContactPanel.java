@@ -24,11 +24,14 @@
  */
 package org.dyn4j.sandbox.panels;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.swing.GroupLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 import org.dyn4j.sandbox.ContactCounter;
 import org.dyn4j.sandbox.icons.Icons;
@@ -40,7 +43,7 @@ import org.dyn4j.sandbox.resources.Messages;
  * @version 1.0.1
  * @since 1.0.0
  */
-public class ContactPanel extends JPanel {
+public class ContactPanel extends JPanel implements ActionListener {
 	/** The version id */
 	private static final long serialVersionUID = 1878435102775553243L;
 	
@@ -65,9 +68,6 @@ public class ContactPanel extends JPanel {
 	/** The text box to store the number of solved contacts */
 	private JTextField txtSolvedContacts;
 
-	/** The last time the panel was updated */
-	private long lastUpdate;
-	
 	/**
 	 * Full constructor.
 	 * @param counter the contact counter object used by the current world
@@ -143,9 +143,9 @@ public class ContactPanel extends JPanel {
 						.addComponent(lblSolvedContacts)
 						.addComponent(this.txtSolvedContacts, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
 		
-		this.update();
-
-		this.lastUpdate = System.nanoTime();
+		// every quarter second
+		Timer timer = new Timer(250, this);
+		timer.start();
 	}
 	
 	/**
@@ -158,44 +158,27 @@ public class ContactPanel extends JPanel {
 	 */
 	public void setContactCounter(ContactCounter counter) {
 		this.counter = counter;
-		this.update();
 	}
 	
-	/**
-	 * Updates the text boxes with the new values from the contact counter.
+	/* (non-Javadoc)
+	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
-	public void update() {
-		// check if its time to update
-		long time = System.nanoTime();
-		long diff = time - this.lastUpdate;
-		// update 4 times every second
-		if (diff > 250000000) {
-			this.lastUpdate = time;
-			this.updateEDT();
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if (this.counter != null) {
+			int added = counter.getAdded();
+			int persisted = counter.getPersisted();
+			int removed = counter.getRemoved();
+			int solved = counter.getSolved();
+			int sensed = counter.getSensed();
+			int total = added + persisted + sensed;
+			
+			txtTotalContacts.setText(String.valueOf(total));
+			txtAddedContacts.setText(String.valueOf(added));
+			txtPersistedContacts.setText(String.valueOf(persisted));
+			txtRemovedContacts.setText(String.valueOf(removed));
+			txtSolvedContacts.setText(String.valueOf(solved));
+			txtSensedContacts.setText(String.valueOf(sensed));
 		}
-	}
-	
-	/**
-	 * Updates the textboxes on the EDT thread.
-	 */
-	private void updateEDT() {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				int added = counter.getAdded();
-				int persisted = counter.getPersisted();
-				int removed = counter.getRemoved();
-				int solved = counter.getSolved();
-				int sensed = counter.getSensed();
-				int total = added + persisted + sensed;
-				
-				txtTotalContacts.setText(String.valueOf(total));
-				txtAddedContacts.setText(String.valueOf(added));
-				txtPersistedContacts.setText(String.valueOf(persisted));
-				txtRemovedContacts.setText(String.valueOf(removed));
-				txtSolvedContacts.setText(String.valueOf(solved));
-				txtSensedContacts.setText(String.valueOf(sensed));
-			}
-		});
 	}
 }

@@ -2,13 +2,13 @@
 <Simulation xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.dyn4j.org/Sandbox/sandbox.xsd" version="1.0.1">
     <Name>Joint Collision</Name>
     <Camera>
-		<Scale>64</Scale>
-		<Translation x="0.0" y="0.0" />
-	</Camera>
+        <Scale>64.0</Scale>
+        <Translation x="0.0" y="0.0" />
+    </Camera>
     <System>
         <JavaVersion>1.6.0_26</JavaVersion>
         <JavaVendor>Sun Microsystems Inc.</JavaVendor>
-        <OperatingSystem>Windows 7</OperatingSystem>
+        <OperatingSystem>Windows 7 6.1</OperatingSystem>
         <Architecture>x86</Architecture>
         <NumberOfCpus>2</NumberOfCpus>
         <Locale>en_US</Locale>
@@ -16,7 +16,7 @@
     <Settings>
         <StepFrequency>60.0</StepFrequency>
         <MaximumTranslation>2.0</MaximumTranslation>
-        <MaximumRotation>90</MaximumRotation>
+        <MaximumRotation>90.0</MaximumRotation>
         <ContinuousCollisionDetectionMode>ALL</ContinuousCollisionDetectionMode>
         <AutoSleep>true</AutoSleep>
         <SleepTime>0.5</SleepTime>
@@ -41,7 +41,7 @@
         <TimeOfImpactDetector>ConservativeAdvancement</TimeOfImpactDetector>
         <Gravity x="0.0" y="-9.8" />
         <Bounds>
-            <Rectangle Id="19bf1f10-fcf2-4a08-b03f-eea45b3aeb62">
+            <Rectangle Id="5edc073a-843e-46b3-8abf-504741df2bba">
                 <LocalCenter x="0.0" y="0.0" />
                 <Width>16.0</Width>
                 <Height>15.0</Height>
@@ -53,12 +53,12 @@
             </Transform>
         </Bounds>
         <Bodies>
-            <Body Id="1aa3b05a-f63a-4e54-9f20-99c0faeeac22" Name="Ground">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="50f1c808-a31a-4cf7-b3ae-d60e53faf6b9" Name="Ground">
+                <OutlineColor r="0.48184666" g="0.79551524" b="0.75464195" />
+                <FillColor r="0.60230833" g="0.994394" b="0.9433024" />
                 <Fixtures>
-                    <Fixture Id="2ca37ed0-9426-4b57-b59c-03bdd340e21a" Name="Fixture1">
-                        <Shape Id="11a28e78-0417-4488-91c5-7b4cfc46bf8e" xsi:type="Rectangle">
+                    <Fixture Id="e24b4acd-43da-4d1c-91dc-a21eed271473" Name="Fixture1">
+                        <Shape Id="c6e1c649-5f6e-4ba3-946c-3b24c9edc17a" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
                             <Width>15.0</Width>
                             <Height>1.0</Height>
@@ -94,12 +94,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="705270b1-0982-474d-97a8-69f93e78f179" Name="Body2">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="61ad3b92-fc87-426a-83f4-fcc72e43c00b" Name="Body2">
+                <OutlineColor r="0.7861604" g="0.77134305" b="0.75286263" />
+                <FillColor r="0.98270047" g="0.9641788" b="0.94107825" />
                 <Fixtures>
-                    <Fixture Id="a85b5e59-7a11-4e66-a72f-b8a19dacdac8" Name="Fixture1">
-                        <Shape Id="94177822-a5e9-4bb2-a5b1-522f5727ca37" xsi:type="Rectangle">
+                    <Fixture Id="34b2bb47-2b5c-4a72-b42e-54423986889b" Name="Fixture1">
+                        <Shape Id="f57e1c6c-38ff-42a8-95f1-94739c51694f" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
                             <Width>0.5</Width>
                             <Height>1.0</Height>
@@ -135,12 +135,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="0471652c-db60-4a30-856f-64333d00e34d" Name="Body3">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="8caa6019-3c58-49e5-8fb1-8655e83c1284" Name="Body3">
+                <OutlineColor r="0.5196458" g="0.7922327" b="0.44553795" />
+                <FillColor r="0.64955723" g="0.9902909" b="0.55692244" />
                 <Fixtures>
-                    <Fixture Id="442c7de4-b16a-4375-b93c-1f863c208fcb" Name="Fixture1">
-                        <Shape Id="94177822-a5e9-4bb2-a5b1-522f5727ca37" xsi:type="Rectangle">
+                    <Fixture Id="21b893b7-a73c-43f4-bea6-5e3692dd62c7" Name="Fixture1">
+                        <Shape Id="5ccafb30-fcae-462f-8d52-e8eb3a73425a" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
                             <Width>0.5</Width>
                             <Height>1.0</Height>
@@ -176,12 +176,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="6592f66d-90f0-4e9f-9d0e-7e91747e7b9b" Name="Body4">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="5e377e5e-7005-4166-9110-bdb3390f0d0a" Name="Body4">
+                <OutlineColor r="0.45000932" g="0.76983786" b="0.55284387" />
+                <FillColor r="0.5625116" g="0.9622973" b="0.6910548" />
                 <Fixtures>
-                    <Fixture Id="d5cc9d2a-908a-4c3d-8853-21034b6ad55a" Name="Fixture1">
-                        <Shape Id="94177822-a5e9-4bb2-a5b1-522f5727ca37" xsi:type="Rectangle">
+                    <Fixture Id="6f26f96e-9c37-40a2-b1f1-9629bea47f2f" Name="Fixture1">
+                        <Shape Id="bb577b7f-15a9-4ab1-a0c7-a418debe4686" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
                             <Width>0.5</Width>
                             <Height>1.0</Height>
@@ -217,12 +217,12 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="1ab68055-78cc-49e6-9ce7-2ded4c3663e3" Name="Body5">
-                <OutlineColor r="0.44313726" g="0.58431375" b="0.27450982" />
-                <FillColor r="0.76862746" g="0.8352941" b="0.5882353" />
+            <Body Id="e105111b-9282-43c9-bbd1-47633f9e9334" Name="Body5">
+                <OutlineColor r="0.5481973" g="0.5135913" b="0.6597541" />
+                <FillColor r="0.68524665" g="0.6419891" b="0.8246926" />
                 <Fixtures>
-                    <Fixture Id="433764e3-f106-4622-a808-b9450f137140" Name="Fixture1">
-                        <Shape Id="94177822-a5e9-4bb2-a5b1-522f5727ca37" xsi:type="Rectangle">
+                    <Fixture Id="5433e9a8-1a5a-4550-b4a7-14099577135c" Name="Fixture1">
+                        <Shape Id="22f91ffe-7452-486d-8f46-29b937091695" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
                             <Width>0.5</Width>
                             <Height>1.0</Height>
@@ -260,9 +260,9 @@
             </Body>
         </Bodies>
         <Joints>
-            <Joint Id="cc8e3987-1f48-4f71-8de9-890eb582cc45" Name="Collision Allowed" xsi:type="DistanceJoint">
-                <BodyId1>705270b1-0982-474d-97a8-69f93e78f179</BodyId1>
-                <BodyId2>0471652c-db60-4a30-856f-64333d00e34d</BodyId2>
+            <Joint Id="82335fcd-2968-4afd-be15-33193c72a3ac" Name="Collision Allowed" xsi:type="DistanceJoint">
+                <BodyId1>61ad3b92-fc87-426a-83f4-fcc72e43c00b</BodyId1>
+                <BodyId2>8caa6019-3c58-49e5-8fb1-8655e83c1284</BodyId2>
                 <CollisionAllowed>true</CollisionAllowed>
                 <Anchor1 x="2.0" y="3.2" />
                 <Anchor2 x="2.0" y="2.8" />
@@ -270,9 +270,9 @@
                 <DampingRatio>0.0</DampingRatio>
                 <Distance>0.40000000000000036</Distance>
             </Joint>
-            <Joint Id="20ae88f0-f94d-47de-b1c7-a0ae59918e37" Name="Collision Not Allowed" xsi:type="DistanceJoint">
-                <BodyId1>6592f66d-90f0-4e9f-9d0e-7e91747e7b9b</BodyId1>
-                <BodyId2>1ab68055-78cc-49e6-9ce7-2ded4c3663e3</BodyId2>
+            <Joint Id="ca283a35-79ef-4f8f-98bd-b89ce716214f" Name="Collision Not Allowed" xsi:type="DistanceJoint">
+                <BodyId1>5e377e5e-7005-4166-9110-bdb3390f0d0a</BodyId1>
+                <BodyId2>e105111b-9282-43c9-bbd1-47633f9e9334</BodyId2>
                 <CollisionAllowed>false</CollisionAllowed>
                 <Anchor1 x="-2.0" y="3.2" />
                 <Anchor2 x="-2.0" y="2.8" />
