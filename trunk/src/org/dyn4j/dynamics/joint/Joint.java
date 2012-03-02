@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -28,13 +28,12 @@ import java.util.UUID;
 
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Constraint;
-import org.dyn4j.dynamics.Step;
 import org.dyn4j.geometry.Vector2;
 
 /**
  * Represents constrained motion between two {@link Body}s.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.0.3
  * @since 1.0.0
  */
 public abstract class Joint extends Constraint {
@@ -103,21 +102,19 @@ public abstract class Joint extends Constraint {
 	
 	/**
 	 * Performs any initialization of the velocity and position constraints.
-	 * @param step the current step
 	 */
-	public void initializeConstraints(Step step) {};
+	public abstract void initializeConstraints();
 	
 	/**
 	 * Solves the velocity constraints.
-	 * @param step the current step
 	 */
-	public void solveVelocityConstraints(Step step) {};
+	public abstract void solveVelocityConstraints();
 	
 	/**
 	 * Solves the position constraints.
 	 * @return boolean true if the position constraints were solved
 	 */
-	public boolean solvePositionConstraints() { return true; };
+	public abstract boolean solvePositionConstraints();
 	
 	/**
 	 * Returns the anchor point on the first {@link Body} in

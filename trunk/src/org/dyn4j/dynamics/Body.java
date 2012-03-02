@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -81,7 +81,7 @@ import org.dyn4j.resources.Messages;
  * setting in the {@link Settings} singleton.  Use this if the body is a fast moving
  * body, but be careful as this will incur a performance hit.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.0.3
  * @since 1.0.0
  */
 public class Body implements Swept, Collidable, Transformable {
@@ -108,6 +108,9 @@ public class Body implements Swept, Collidable, Transformable {
 	
 	/** The state flag indicating the {@link Body} is a really fast object and requires CCD */
 	protected static final int BULLET = 16;
+	
+	/** The world this body belongs to */
+	protected World world;
 	
 	/** The {@link Body}'s unique identifier */
 	protected String id;
@@ -173,6 +176,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 * Default constructor.
 	 */
 	public Body() {
+		this.world = null;
 		// the majority of bodies will contain one fixture/shape
 		this.fixtures = new ArrayList<BodyFixture>(Body.TYPICAL_FIXTURE_COUNT);
 		this.radius = 0.0;
@@ -689,6 +693,27 @@ public class Body implements Swept, Collidable, Transformable {
 	 */
 	public boolean isDynamic() {
 		return !this.mass.isInfinite();
+	}
+	
+	/**
+	 * Sets the world that this body belongs to.
+	 * @param world the world
+	 * @since 3.0.3
+	 */
+	protected void setWorld(World world) {
+		this.world = world;
+	}
+	
+	/**
+	 * Returns the world this body belongs to.
+	 * <p>
+	 * Returns null if the body has not been added to a world
+	 * or has been removed.
+	 * @return {@link World}
+	 * @since 3.0.3
+	 */
+	public World getWorld() {
+		return this.world;
 	}
 	
 	/**

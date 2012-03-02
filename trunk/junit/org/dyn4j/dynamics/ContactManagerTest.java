@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -46,7 +46,7 @@ import org.junit.Test;
 /**
  * Used to test the {@link ContactManager} class.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.0.3
  * @since 1.0.2
  */
 public class ContactManagerTest {
@@ -107,8 +107,11 @@ public class ContactManagerTest {
 	 */
 	@Before
 	public void setup() {
-		this.contactManager = new ContactManager();
+		World world = new World();
+		this.contactManager = world.getContactManager();
+		
 		this.contactListener = new CMTContactListener();
+		world.setContactListener(this.contactListener);
 		
 		Gjk gjk = new Gjk();
 		ClippingManifoldSolver cms = new ClippingManifoldSolver();
@@ -140,25 +143,25 @@ public class ContactManagerTest {
 		// b1 - b2 (2 contacts)
 		gjk.detect(c1, b1.transform, c2, b2.transform, p);
 		cms.getManifold(p, c1, b1.transform, c2, b2.transform, m);
-		cc = new ContactConstraint(b1, f1, b2, f2, m, 0.2, 0.3);
+		cc = new ContactConstraint(b1, f1, b2, f2, m, world);
 		this.contactManager.add(cc);
 		
 		// b1 - b3 (1 contacts)
 		p.clear(); m.clear();
 		gjk.detect(c1, b1.transform, c3, b3.transform, p);
 		cms.getManifold(p, c1, b1.transform, c3, b3.transform, m);
-		cc = new ContactConstraint(b1, f1, b3, f3, m, 0.2, 0.3);
+		cc = new ContactConstraint(b1, f1, b3, f3, m, world);
 		this.contactManager.add(cc);
 		
 		// b2 - b3 (1 contacts)
 		p.clear(); m.clear();
 		gjk.detect(c2, b2.transform, c3, b3.transform, p);
 		cms.getManifold(p, c2, b2.transform, c3, b3.transform, m);
-		cc = new ContactConstraint(b2, f2, b3, f3, m, 0.2, 0.3);
+		cc = new ContactConstraint(b2, f2, b3, f3, m, world);
 		this.contactManager.add(cc);
 		
 		// perform one upadate (since there is nothing yet)
-		this.contactManager.updateContacts(this.contactListener);
+		this.contactManager.updateContacts();
 		this.contactManager.clear();
 		this.contactListener.clear();
 		
@@ -172,21 +175,21 @@ public class ContactManagerTest {
 		p.clear(); m.clear();
 		gjk.detect(c1, b1.transform, c2, b2.transform, p);
 		cms.getManifold(p, c1, b1.transform, c2, b2.transform, m);
-		cc = new ContactConstraint(b1, f1, b2, f2, m, 0.2, 0.3);
+		cc = new ContactConstraint(b1, f1, b2, f2, m, world);
 		this.contactManager.add(cc);
 		
 		// b1 - b3 (1 contacts)
 		p.clear(); m.clear();
 		gjk.detect(c1, b1.transform, c3, b3.transform, p);
 		cms.getManifold(p, c1, b1.transform, c3, b3.transform, m);
-		cc = new ContactConstraint(b1, f1, b3, f3, m, 0.2, 0.3);
+		cc = new ContactConstraint(b1, f1, b3, f3, m, world);
 		this.contactManager.add(cc);
 		
 		// b2 - b3 (1 contacts)
 		p.clear(); m.clear();
 		gjk.detect(c2, b2.transform, c3, b3.transform, p);
 		cms.getManifold(p, c2, b2.transform, c3, b3.transform, m);
-		cc = new ContactConstraint(b2, f2, b3, f3, m, 0.2, 0.3);
+		cc = new ContactConstraint(b2, f2, b3, f3, m, world);
 		this.contactManager.add(cc);
 		
 		// do one sensor contact
@@ -194,7 +197,7 @@ public class ContactManagerTest {
 		p.clear(); m.clear();
 		gjk.detect(c1, b1.transform, c4, b4.transform, p);
 		cms.getManifold(p, c1, b1.transform, c4, b4.transform, m);
-		cc = new ContactConstraint(b1, f1, b4, f4, m, 0.2, 0.3);
+		cc = new ContactConstraint(b1, f1, b4, f4, m, world);
 		this.contactManager.add(cc);
 	}
 	
@@ -204,9 +207,9 @@ public class ContactManagerTest {
 	@Test
 	public void updateContacts() {
 		// call the update contacts method
-		this.contactManager.updateContacts(this.contactListener);
-		this.contactManager.preSolveNotify(this.contactListener);
-		this.contactManager.postSolveNotify(this.contactListener);
+		this.contactManager.updateContacts();
+		this.contactManager.preSolveNotify();
+		this.contactManager.postSolveNotify();
 		
 		// verify that the contact listener received the correct events
 		TestCase.assertEquals(2, this.contactListener.persisted);

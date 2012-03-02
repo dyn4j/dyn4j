@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -30,14 +30,16 @@ import org.dyn4j.collision.manifold.Manifold;
 import org.dyn4j.collision.manifold.ManifoldPoint;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.CoefficientMixer;
 import org.dyn4j.dynamics.Constraint;
+import org.dyn4j.dynamics.World;
 import org.dyn4j.geometry.Matrix22;
 import org.dyn4j.geometry.Vector2;
 
 /**
  * Represents a {@link Contact} constraint for each {@link Body} pair.  
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.0.3
  * @since 1.0.0
  */
 public class ContactConstraint extends Constraint {
@@ -84,11 +86,10 @@ public class ContactConstraint extends Constraint {
 	 * @param body2 the second {@link Body}
 	 * @param fixture2 the second {@link Body}'s {@link BodyFixture}
 	 * @param manifold the contact {@link Manifold}
-	 * @param friction the contact's coefficient of friction
-	 * @param restitution the contact's coefficient of restitution
+	 * @param world the {@link World} this contact constraint belongs to
 	 */
 	public ContactConstraint(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2,
-			Manifold manifold, double friction, double restitution) {
+			Manifold manifold, World world) {
 		super(body1, body2);
 		// set the involved convex shapes
 		this.fixture1 = fixture1;
@@ -118,9 +119,12 @@ public class ContactConstraint extends Constraint {
 		this.normal = manifold.getNormal();
 		// set the tangent
 		this.tangent = this.normal.cross(1.0);
-		// set the coefficients
-		this.friction = friction;
-		this.restitution = restitution;
+		// set the world
+		this.world = world;
+		// compute the coefficients
+		CoefficientMixer mixer = world.getCoefficientMixer();
+		this.friction = mixer.mixFriction(fixture1.getFriction(), fixture2.getFriction());
+		this.restitution = mixer.mixRestitution(fixture1.getRestitution(), fixture2.getRestitution());
 		// set the sensor flag (if either fixture is a sensor then the
 		// contact constraint between the fixtures is a sensor)
 		this.sensor = fixture1.isSensor() || fixture2.isSensor();

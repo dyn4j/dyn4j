@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -39,7 +39,6 @@ import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.dynamics.contact.ContactAdapter;
 import org.dyn4j.dynamics.contact.ContactListener;
-import org.dyn4j.dynamics.contact.ContactManager;
 import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
@@ -51,7 +50,7 @@ import org.junit.Test;
 /**
  * Contains the test cases for the {@link World} class.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.0.3
  * @since 1.0.2
  */
 public class WorldTest {
@@ -90,22 +89,6 @@ public class WorldTest {
 	}
 	
 	/**
-	 * Contact manager for testing.
-	 * @author William Bittle
-	 * @version 1.0.2
-	 * @since 1.0.2
-	 */
-	public class WTContactManager extends ContactManager {
-		/**
-		 * Returns true if the contact manager has no cached contacts.
-		 * @return boolean
-		 */
-		public boolean isEmpty() {
-			return this.map.isEmpty();
-		}
-	}
-	
-	/**
 	 * Tests the successful creation of a world object.
 	 */
 	@Test
@@ -114,6 +97,7 @@ public class WorldTest {
 		World w = new World();
 		w = new World(new RectangularBounds(Geometry.createRectangle(1.0, 1.0)));
 		// make sure all the other junk is not null
+		TestCase.assertNotNull(w.settings);
 		TestCase.assertNotNull(w.bodies);
 		TestCase.assertNotNull(w.bounds);
 		TestCase.assertNotNull(w.boundsListener);
@@ -140,7 +124,7 @@ public class WorldTest {
 	 */
 	@Test
 	public void update() {
-		Settings s = Settings.getInstance();
+		Settings s = new Settings();
 		World w = new World();
 		
 		// update using enough elapsed time to make a step happen
@@ -229,6 +213,8 @@ public class WorldTest {
 		Body b = new Body();
 		w.add(b);
 		TestCase.assertFalse(w.bodies.isEmpty());
+		// make sure the body's world reference is there
+		TestCase.assertNotNull(b.world);
 		// make sure it was added to the broadphase
 		TestCase.assertNotNull(w.broadphaseDetector.getAABB(b));
 	}
@@ -272,6 +258,8 @@ public class WorldTest {
 		TestCase.assertFalse(w.joints.isEmpty());
 		TestCase.assertFalse(b1.joints.isEmpty());
 		TestCase.assertFalse(b2.joints.isEmpty());
+		// make sure the world object is not null
+		TestCase.assertNotNull(j.world);
 	}
 
 	/**
@@ -308,10 +296,6 @@ public class WorldTest {
 		WTDestructionListener dl = new WTDestructionListener();
 		w.setDestructionListener(dl);
 		
-		// setup the contact manager
-		WTContactManager cm = new WTContactManager();
-		w.setContactManager(cm);
-		
 		// test removing a null body
 		boolean success = w.remove((Body) null);
 		TestCase.assertFalse(success);
@@ -333,12 +317,14 @@ public class WorldTest {
 		success = w.remove(b1);
 		TestCase.assertTrue(success);
 		TestCase.assertFalse(w.bodies.isEmpty());
+		TestCase.assertNull(b1.world);
 		
 		// make sure it was added to the broadphase
 		TestCase.assertNull(w.broadphaseDetector.getAABB(b1));
 		
 		// add that one back
 		w.add(b1);
+		TestCase.assertNotNull(b1.world);
 		// create a joint
 		Joint j = new DistanceJoint(b1, b2, new Vector2(), new Vector2());
 		j.setCollisionAllowed(true);
@@ -365,11 +351,12 @@ public class WorldTest {
 		// make sure the removed body has no joints or contacts
 		TestCase.assertTrue(b2.joints.isEmpty());
 		TestCase.assertTrue(b2.contacts.isEmpty());
+		TestCase.assertNull(b2.world);
 		// make sure the destruction listener was called for the one
 		// joint and one contact
 		TestCase.assertEquals(2, dl.called);
 		// the contact manager should not have anything in the cache
-		TestCase.assertTrue(cm.isEmpty());
+		TestCase.assertTrue(w.contactManager.isEmpty());
 	}
 	
 	/**
@@ -422,6 +409,7 @@ public class WorldTest {
 		TestCase.assertTrue(b2.joints.isEmpty());
 		// make sure that no contacts were removed
 		TestCase.assertFalse(b2.contacts.isEmpty());
+		TestCase.assertNull(j.world);
 	}
 	
 	/**
@@ -605,27 +593,6 @@ public class WorldTest {
 	}
 	
 	/**
-	 * Tests the set contact manager method.
-	 */
-	@Test
-	public void setContactManager() {
-		World w = new World();
-		ContactManager cm = new ContactManager();
-		w.setContactManager(cm);
-		
-		TestCase.assertSame(cm, w.getContactManager());
-	}
-	
-	/**
-	 * Tests the set contact manager method passing a null value.
-	 */
-	@Test(expected = NullPointerException.class)
-	public void setNullContactManager() {
-		World w = new World();
-		w.setContactManager(null);
-	}
-	
-	/**
 	 * Tests the set broadphase detector method.
 	 */
 	@Test
@@ -771,10 +738,6 @@ public class WorldTest {
 		WTDestructionListener dl = new WTDestructionListener();
 		w.setDestructionListener(dl);
 		
-		// setup the contact manager
-		WTContactManager cm = new WTContactManager();
-		w.setContactManager(cm);
-		
 		// setup the bodies
 		Convex c1 = Geometry.createCircle(1.0);
 		Convex c2 = Geometry.createEquilateralTriangle(0.5);
@@ -802,10 +765,13 @@ public class WorldTest {
 		TestCase.assertTrue(b2.joints.isEmpty());
 		TestCase.assertTrue(w.joints.isEmpty());
 		TestCase.assertTrue(w.bodies.isEmpty());
+		TestCase.assertNull(b1.world);
+		TestCase.assertNull(b2.world);
+		TestCase.assertNull(j.world);
 		// one contact, one joint, and two bodies
 		TestCase.assertEquals(4, dl.called);
 		// the contact manager should not have anything in the cache
-		TestCase.assertTrue(cm.isEmpty());
+		TestCase.assertTrue(w.contactManager.isEmpty());
 	}
 	
 	/**
@@ -819,10 +785,6 @@ public class WorldTest {
 		// setup the listener
 		WTDestructionListener dl = new WTDestructionListener();
 		w.setDestructionListener(dl);
-		
-		// setup the contact manager
-		WTContactManager cm = new WTContactManager();
-		w.setContactManager(cm);
 		
 		// setup the bodies
 		Convex c1 = Geometry.createCircle(1.0);
@@ -854,10 +816,12 @@ public class WorldTest {
 		TestCase.assertTrue(b2.joints.isEmpty());
 		TestCase.assertTrue(w.joints.isEmpty());
 		TestCase.assertTrue(w.bodies.isEmpty());
+		TestCase.assertNull(b1.world);
+		TestCase.assertNull(b2.world);
 		// one contact, one joint, and two bodies
 		TestCase.assertEquals(4, dl.called);
 		// the contact manager should not have anything in the cache
-		TestCase.assertTrue(cm.isEmpty());
+		TestCase.assertTrue(w.contactManager.isEmpty());
 	}
 	
 	/**
@@ -871,10 +835,6 @@ public class WorldTest {
 		// setup the listener
 		WTDestructionListener dl = new WTDestructionListener();
 		w.setDestructionListener(dl);
-		
-		// setup the contact manager
-		WTContactManager cm = new WTContactManager();
-		w.setContactManager(cm);
 		
 		// setup the bodies
 		Convex c1 = Geometry.createCircle(1.0);
@@ -901,6 +861,7 @@ public class WorldTest {
 		TestCase.assertTrue(b1.joints.isEmpty());
 		TestCase.assertTrue(b2.joints.isEmpty());
 		TestCase.assertTrue(w.joints.isEmpty());
+		TestCase.assertNull(j.world);
 		// one contact, one joint, and two bodies
 		TestCase.assertEquals(1, dl.called);
 	}
@@ -931,5 +892,28 @@ public class WorldTest {
 		w.add(b1);
 		w.add(b2);
 		TestCase.assertFalse(w.isEmpty());
+	}
+	
+	/**
+	 * Tests the setSettings method.
+	 * @since 3.0.3
+	 */
+	@Test
+	public void setSettings() {
+		World w = new World();
+		Settings s = new Settings();
+		s.setLinearTolerance(10000.0);
+		w.setSettings(s);
+		TestCase.assertEquals(s, w.getSettings());
+		TestCase.assertEquals(10000.0, w.getSettings().getLinearTolerance());
+	}
+	
+	/**
+	 * Tests setting the settings to null.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void setNullSettings() {
+		World w = new World();
+		w.setSettings(null);
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -64,7 +64,7 @@ import org.dyn4j.sandbox.utilities.SystemUtilities;
 /**
  * Class used to export the world to xml.
  * @author William Bittle
- * @version 1.0.1
+ * @version 1.0.2
  * @since 1.0.0
  */
 public class XmlGenerator {
@@ -72,11 +72,10 @@ public class XmlGenerator {
 	 * Returns the xml for the given world object.
 	 * @param world the world
 	 * @param rays the list of rays
-	 * @param settings the global settings
 	 * @param camera the camera settings
 	 * @return String
 	 */
-	public static final String toXml(World world, List<SandboxRay> rays, Settings settings, Camera camera) {
+	public static final String toXml(World world, List<SandboxRay> rays, Camera camera) {
 		StringBuilder sb = new StringBuilder();
 		
 		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
@@ -95,7 +94,7 @@ public class XmlGenerator {
 		sb.append(XmlGenerator.toXml());
 		
 		// output settings
-		sb.append(XmlGenerator.toXml(settings));
+		sb.append(XmlGenerator.toXml(world.getSettings()));
 		
 		// output rays
 		sb.append("<Rays>");

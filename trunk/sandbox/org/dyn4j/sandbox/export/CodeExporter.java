@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -72,7 +72,7 @@ import org.dyn4j.sandbox.resources.Messages;
 /**
  * Class to export a simulation to Java code.
  * @author William Bittle
- * @version 1.0.1
+ * @version 1.0.2
  * @since 1.0.1
  */
 public class CodeExporter {
@@ -94,10 +94,9 @@ public class CodeExporter {
 	 * Returns a string containing the code for the export.
 	 * @param name the name
 	 * @param world the world
-	 * @param settings the settings
 	 * @return String
 	 */
-	public static final String export(String name, World world, Settings settings) {
+	public static final String export(String name, World world) {
 		StringBuilder sb = new StringBuilder();
 		// this map contains the id to output name for bodies
 		Map<String, String> idNameMap = new HashMap<String, String>();
@@ -122,7 +121,7 @@ public class CodeExporter {
 		.append(TAB1).append("public static final void setup(World world, Settings settings) {").append(NEW_LINE);
 		
 		// output settings
-		sb.append(export(settings));
+		sb.append(export(world.getSettings()));
 		
 		// output world settings
 		sb.append(NEW_LINE);

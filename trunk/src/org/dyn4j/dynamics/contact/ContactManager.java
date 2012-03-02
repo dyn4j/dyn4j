@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,6 +33,7 @@ import java.util.Map;
 import org.dyn4j.collision.manifold.ManifoldPointId;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Settings;
+import org.dyn4j.dynamics.World;
 
 /**
  * Maintains {@link ContactConstraint}s between {@link Body}s.
@@ -40,10 +41,13 @@ import org.dyn4j.dynamics.Settings;
  * This class performs the {@link ContactConstraint} warm starting and manages contact
  * listening.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.3
  * @since 1.0.0
  */
 public class ContactManager {
+	/** The world this contact manager belongs to */
+	protected World world;
+	
 	/** Map for fast look up of  {@link ContactConstraint}s */
 	protected Map<ContactConstraintId, ContactConstraint> map;
 
@@ -51,10 +55,12 @@ public class ContactManager {
 	protected List<ContactConstraint> list;
 	
 	/**
-	 * Default constructor.
-	 * @since 1.0.2
+	 * Full constructor.
+	 * @param world the {@link World} this contact manager belongs to
+	 * @since 3.0.3
 	 */
-	public ContactManager()  {
+	public ContactManager(World world)  {
+		this.world = world;
 		// initialize the members
 		this.map = new HashMap<ContactConstraintId, ContactConstraint>();
 		this.list = new ArrayList<ContactConstraint>();
@@ -105,15 +111,18 @@ public class ContactManager {
 	 * the {@link ContactListener#preSolve(ContactPoint)} and {@link ContactListener#postSolve(SolvedContactPoint)}
 	 * methods.
 	 * @see ContactListener
-	 * @param listener the {@link ContactListener} to use for event notification
 	 * @since 1.0.2
 	 */
-	public void updateContacts(ContactListener listener) {
+	public void updateContacts() {
 		// get the size of the list
 		int size = this.list.size();
 		
+		// get the listener 
+		ContactListener listener = this.world.getContactListener();
+		
+		Settings settings = this.world.getSettings();
 		// get the warm start distance from the settings
-		double warmStartDistanceSquared = Settings.getInstance().getWarmStartDistanceSquared();
+		double warmStartDistanceSquared = settings.getWarmStartDistanceSquared();
 		
 		// create a new map for the new contacts constraints
 		Map<ContactConstraintId, ContactConstraint> newMap = null;
@@ -310,11 +319,14 @@ public class ContactManager {
 	
 	/**
 	 * Called before the contact constraints are solved.
-	 * @param listener the {@link ContactListener} to use for event notification
 	 */
-	public void preSolveNotify(ContactListener listener) {
-		// loop through the list of contacts that were solved
+	public void preSolveNotify() {
 		int size = this.list.size();
+		
+		// get the contact listener
+		ContactListener listener = this.world.getContactListener();
+		
+		// loop through the list of contacts that were solved
 		for (int i = 0; i < size; i++) {
 			// get the contact constraint
 			ContactConstraint contactConstraint = this.list.get(i);
@@ -342,11 +354,14 @@ public class ContactManager {
 	
 	/**
 	 * Called after the contact constraints have been solved.
-	 * @param listener the {@link ContactListener} to use for event notification
 	 */
-	public void postSolveNotify(ContactListener listener) {
-		// loop through the list of contacts that were solved
+	public void postSolveNotify() {
 		int size = this.list.size();
+
+		// get the contact listener
+		ContactListener listener = this.world.getContactListener();
+		
+		// loop through the list of contacts that were solved
 		for (int i = 0; i < size; i++) {
 			// get the contact constraint
 			ContactConstraint contactConstraint = this.list.get(i);
@@ -373,5 +388,14 @@ public class ContactManager {
 				listener.postSolve(point);
 			}
 		}
+	}
+	
+	/**
+	 * Returns true if there are no contacts in this contact manager.
+	 * @return boolean
+	 * @since 3.0.3
+	 */
+	public boolean isEmpty() {
+		return this.map.isEmpty();
 	}
 }

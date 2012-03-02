@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -71,7 +71,7 @@ import org.dyn4j.resources.Messages;
  * Employs the same {@link Island} solving technique as <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.0.3
  * @since 1.0.0
  */
 public class World {
@@ -80,7 +80,10 @@ public class World {
 	
 	/** Zero gravity constant */
 	public static final Vector2 ZERO_GRAVITY = new Vector2(0.0, 0.0);
-		
+
+	/** The dynamics settings for this world */
+	protected Settings settings;
+	
 	/** The {@link Step} used by the dynamics calculations */
 	protected Step step;
 	
@@ -171,7 +174,8 @@ public class World {
 	 */
 	public World(Bounds bounds) {
 		// initialize all the classes with default values
-		this.step = new Step();
+		this.settings = new Settings();
+		this.step = new Step(this.settings.getStepFrequency());
 		this.gravity = World.EARTH_GRAVITY;
 		this.bounds = bounds;
 		this.broadphaseDetector = new DynamicAABBTree<Body>();
@@ -181,7 +185,7 @@ public class World {
 		this.raycastDetector = new Gjk();
 		// create default listeners
 		this.collisionListener = new CollisionAdapter();
-		this.contactManager = new ContactManager();
+		this.contactManager = new ContactManager(this);
 		this.contactListener = new ContactAdapter();
 		this.timeOfImpactListener = new TimeOfImpactAdapter();
 		this.raycastListener = new RaycastAdapter();
@@ -189,10 +193,10 @@ public class World {
 		this.destructionListener = new DestructionAdapter();
 		this.stepListener = new StepAdapter();
 		this.coefficientMixer = CoefficientMixer.DEFAULT_MIXER;
-		this.timeOfImpactSolver = new TimeOfImpactSolver();
+		this.timeOfImpactSolver = new TimeOfImpactSolver(this);
 		this.bodies = new ArrayList<Body>();
 		this.joints = new ArrayList<Joint>();
-		this.island = new Island();
+		this.island = new Island(this);
 		this.time = 0.0;
 		this.updateRequired = true;
 	}
@@ -220,7 +224,7 @@ public class World {
 		// update the time
 		this.time += elapsedTime;
 		// check the frequency in settings
-		double invhz = Settings.getInstance().getStepFrequency();
+		double invhz = this.settings.getStepFrequency();
 		// see if we should update or not
 		if (this.time >= invhz) {
 			// update the step
@@ -262,7 +266,7 @@ public class World {
 	 */
 	public void step(int steps) {
 		// get the frequency from settings
-		double invhz = Settings.getInstance().getStepFrequency();
+		double invhz = this.settings.getStepFrequency();
 		// perform the steps
 		this.step(steps, invhz);
 	}
@@ -315,10 +319,10 @@ public class World {
 		}
 		
 		// notify of all the contacts that will be solved and all the sensed contacts
-		this.contactManager.preSolveNotify(this.contactListener);
+		this.contactManager.preSolveNotify();
 		
 		// check for CCD
-		ContinuousDetectionMode continuousDetectionMode = Settings.getInstance().getContinuousDetectionMode();
+		ContinuousDetectionMode continuousDetectionMode = this.settings.getContinuousDetectionMode();
 		
 		// get the number of bodies
 		int size = this.bodies.size();
@@ -428,7 +432,7 @@ public class World {
 			}
 			
 			// solve the island
-			island.solve(this.gravity, this.step);
+			island.solve();
 			
 			// allow static bodies to participate in other islands
 			for (int j = 0; j < size; j++) {
@@ -440,7 +444,7 @@ public class World {
 		}
 		
 		// notify of the all solved contacts
-		this.contactManager.postSolveNotify(this.contactListener);
+		this.contactManager.postSolveNotify();
 		
 		// make sure CCD is enabled
 		if (continuousDetectionMode != ContinuousDetectionMode.NONE) {
@@ -585,14 +589,10 @@ public class World {
 									// if the collision listener returned false then skip this collision
 									continue;
 								}
-								// compute the friction and restitution
-								double friction = this.coefficientMixer.mixFriction(fixture1.getFriction(), fixture2.getFriction());
-								double restitution = this.coefficientMixer.mixRestitution(fixture1.getRestitution(), fixture2.getRestitution());
 								// create a contact constraint
 								ContactConstraint contactConstraint = new ContactConstraint(body1, fixture1, 
 										                                                    body2, fixture2, 
-										                                                    manifold, 
-										                                                    friction, restitution);
+										                                                    manifold, this);
 								
 								// notify of the created contact constraint
 								if (!this.collisionListener.collision(contactConstraint)) {
@@ -615,7 +615,7 @@ public class World {
 		}
 		
 		// warm start the contact constraints
-		this.contactManager.updateContacts(this.contactListener);
+		this.contactManager.updateContacts();
 	}
 	
 	/**
@@ -979,6 +979,8 @@ public class World {
 		if (this.bodies.contains(body)) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingBody"));
 		// add it to the world
 		this.bodies.add(body);
+		// set the world property on the body
+		body.setWorld(this);
 		// add it to the broadphase
 		this.broadphaseDetector.add(body);
 	}
@@ -996,6 +998,8 @@ public class World {
 		if (this.joints.contains(joint)) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingJoint"));
 		// add the joint to the joint list
 		this.joints.add(joint);
+		// set the world property on the joint
+		joint.setWorld(this);
 		// get the associated bodies
 		Body body1 = joint.getBody1();
 		Body body2 = joint.getBody2();
@@ -1020,11 +1024,14 @@ public class World {
 		// remove the body from the list
 		boolean removed = this.bodies.remove(body);
 		
-		// remove the body from the broadphase
-		this.broadphaseDetector.remove(body);
-		
 		// only remove joints and contacts if the body was removed
 		if (removed) {
+			// set the world property to null
+			body.world = null;
+			
+			// remove the body from the broadphase
+			this.broadphaseDetector.remove(body);
+			
 			// wake up any bodies connected to this body by a joint
 			// and destroy the joints and remove the edges
 			Iterator<JointEdge> aIterator = body.joints.iterator();
@@ -1051,7 +1058,7 @@ public class World {
 						// remove the joint edge
 						bIterator.remove();
 						// we can break from the loop since there should
-						// not be more than one contact edge per joint per body
+						// not be more than one joint edge per joint per body
 						break;
 					}
 				}
@@ -1059,6 +1066,8 @@ public class World {
 				this.destructionListener.destroyed(joint);
 				// remove the joint from the world
 				this.joints.remove(joint);
+				// set the world property to null
+				joint.world = null;
 			}
 			
 			// remove any contacts this body had with any other body
@@ -1092,6 +1101,8 @@ public class World {
 				}
 				// remove the contact constraint from the contact manager
 				this.contactManager.remove(contactConstraint);
+				// set the world property to null
+				contactConstraint.world = null;
 				// loop over the contact points
 				Contact[] contacts = contactConstraint.getContacts();
 				int size = contacts.length;
@@ -1128,12 +1139,15 @@ public class World {
 		// remove the joint from the joint list
 		boolean removed = this.joints.remove(joint);
 		
-		// get the involved bodies
-		Body body1 = joint.getBody1();
-		Body body2 = joint.getBody2();
-		
 		// see if the given joint was removed
 		if (removed) {
+			// set the world property to null
+			joint.world = null;
+			
+			// get the involved bodies
+			Body body1 = joint.getBody1();
+			Body body2 = joint.getBody2();
+			
 			// remove the joint edges from body1
 			Iterator<JointEdge> iterator = body1.joints.iterator();
 			while (iterator.hasNext()) {
@@ -1199,6 +1213,25 @@ public class World {
 	 */
 	public void setUpdateRequired(boolean flag) {
 		this.updateRequired = flag;
+	}
+	
+	/**
+	 * Returns the settings for this world.
+	 * @return {@link Settings}
+	 * @since 3.0.3
+	 */
+	public Settings getSettings() {
+		return this.settings;
+	}
+	
+	/**
+	 * Sets the dynamics settings for this world.
+	 * @param settings the desired settings
+	 * @since 3.0.3
+	 */
+	public void setSettings(Settings settings) {
+		if (settings == null) throw new NullPointerException(Messages.getString("dynamics.world.nullSettings"));
+		this.settings = settings;
 	}
 	
 	/**
@@ -1501,18 +1534,6 @@ public class World {
 	}
 	
 	/**
-	 * Sets the {@link ContactManager}.
-	 * @param contactManager the contact manager
-	 * @throws NullPointerException if contactManager is null
-	 * @since 1.0.2
-	 */
-	public void setContactManager(ContactManager contactManager) {
-		// make sure the contact manager is not null
-		if (contactManager == null) throw new NullPointerException(Messages.getString("dynamics.world.nullContactManager"));
-		this.contactManager = contactManager;
-	}
-	
-	/**
 	 * Removes all the joints and bodies from the world.
 	 * <p>
 	 * This method does <b>not</b> notify of destroyed objects.
@@ -1570,6 +1591,8 @@ public class World {
 							break;
 						}
 					}
+					// set the world to null
+					contactConstraint.world = null;
 					// notify of all the contacts on the contact constraint
 					Contact[] contacts = contactConstraint.getContacts();
 					int csize = contacts.length;
@@ -1594,6 +1617,8 @@ public class World {
 			body.contacts.clear();
 			// notify of the destroyed body
 			this.destructionListener.destroyed(body);
+			// set the world to null
+			body.world = null;
 		}
 		// do we need to notify?
 		if (notify) {
@@ -1604,6 +1629,8 @@ public class World {
 				Joint joint = this.joints.get(i);
 				// call the destruction listener
 				this.destructionListener.destroyed(joint);
+				// set the world to null
+				joint.world = null;
 			}
 		}
 		// clear all the broadphase bodies
@@ -1701,6 +1728,9 @@ public class World {
 			if (notify) {
 				this.destructionListener.destroyed(joint);
 			}
+			
+			// set the world to null
+			joint.world = null;
 		}
 		
 		// remove all the joints from the joint list

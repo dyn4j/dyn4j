@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -34,12 +34,12 @@ import org.junit.Test;
 /**
  * Tests the methods of the {@link Settings} class.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.0.3
  * @since 1.0.0
  */
 public class SettingsTest {
 	/** The test settings */
-	private Settings settings = Settings.getInstance();
+	private Settings settings = new Settings();
 	
 	/**
 	 * Setup the test case.
@@ -47,18 +47,6 @@ public class SettingsTest {
 	@Before
 	public void setup() {
 		settings.reset();
-	}
-	
-	/**
-	 * Tests that the {@link Settings} class is
-	 * performing as expected as a singleton.
-	 */
-	@Test
-	public void getInstance() {
-		Settings s1 = Settings.getInstance();
-		Settings s2 = Settings.getInstance();
-		// should be the same instance
-		TestCase.assertEquals(s1, s2);
 	}
 	
 	/**
@@ -135,12 +123,11 @@ public class SettingsTest {
 	 */
 	@Test
 	public void setSleep() {
-		Settings s = Settings.getInstance();
-		s.reset();
-		s.setAutoSleepingEnabled(false);
-		TestCase.assertFalse(s.isAutoSleepingEnabled());
-		s.setAutoSleepingEnabled(true);
-		TestCase.assertTrue(s.isAutoSleepingEnabled());
+		settings.reset();
+		settings.setAutoSleepingEnabled(false);
+		TestCase.assertFalse(settings.isAutoSleepingEnabled());
+		settings.setAutoSleepingEnabled(true);
+		TestCase.assertTrue(settings.isAutoSleepingEnabled());
 	}
 	
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -94,7 +94,7 @@ import org.dyn4j.dynamics.Settings.ContinuousDetectionMode;
 /**
  * The JFrame that controls the TestBed.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.0.3
  * @since 1.0.0
  */
 public class ControlPanel extends JFrame {
@@ -160,6 +160,9 @@ public class ControlPanel extends JFrame {
 	
 	/** The current test */
 	private Test test;
+	
+	/** The tabs on the control panel */
+	private JTabbedPane tabs = null;
 	
 	/** The panel containing the test controls */
 	private JPanel pnlTestControls = null;
@@ -346,7 +349,7 @@ public class ControlPanel extends JFrame {
 		this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 
 		// create a tabbed pane
-		JTabbedPane tabs = new JTabbedPane();
+		this.tabs = new JTabbedPane();
 		tabs.setBorder(new EmptyBorder(5, 5, 5, 5));
 
 		// create the panel for the controls listing tab
@@ -533,6 +536,12 @@ public class ControlPanel extends JFrame {
 				pnlTestControls.removeAll();
 				// add all the new ones
 				addTestControls(pnlTestControls, test.getControls());
+				// refresh the settings panel
+				tabs.removeTabAt(3);
+				// create a panel for the simulation settings tab
+				JPanel pnlSettings = createSimulationSettingsPanel();
+				// create a tab for the panel
+				tabs.insertTab(" Simulation Settings ", null, pnlSettings, "Set simulation settings.", 3);
 			}
 		});
 		// add the button to the panel
@@ -1192,7 +1201,7 @@ public class ControlPanel extends JFrame {
 	 */
 	private JPanel createSimulationSettingsPanel() {
 		// get the current settings
-		Settings settings = Settings.getInstance();
+		Settings settings = this.test.world.getSettings();
 		
 		// create a container for the settings tab
 		JPanel panel = new JPanel();
@@ -1347,7 +1356,7 @@ public class ControlPanel extends JFrame {
 			public void stateChanged(ChangeEvent e) {
 				JSpinner spnr = (JSpinner) e.getSource();
 				double hz = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
-				Settings settings = Settings.getInstance();
+				Settings settings = test.world.getSettings();
 				settings.setStepFrequency(hz);
 			}
 		});
@@ -1376,7 +1385,7 @@ public class ControlPanel extends JFrame {
 			public void stateChanged(ChangeEvent e) {
 				JSpinner spnr = (JSpinner) e.getSource();
 				double t = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
-				Settings settings = Settings.getInstance();
+				Settings settings = test.world.getSettings();
 				settings.setMaximumTranslation(t);
 			}
 		});
@@ -1405,7 +1414,7 @@ public class ControlPanel extends JFrame {
 			public void stateChanged(ChangeEvent e) {
 				JSpinner spnr = (JSpinner) e.getSource();
 				double r = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
-				Settings settings = Settings.getInstance();
+				Settings settings = test.world.getSettings();
 				settings.setMaximumRotation(Math.toRadians(r));
 			}
 		});
@@ -1440,7 +1449,7 @@ public class ControlPanel extends JFrame {
 				// set the selected item
 				String value = (String) cmbCCDMode.getSelectedItem();
 				// get the settings instance
-				Settings settings = Settings.getInstance();
+				Settings settings = test.world.getSettings();
 				// set the value
 				if ("All".equals(value)) {
 					settings.setContinuousDetectionMode(ContinuousDetectionMode.ALL);
@@ -1497,7 +1506,7 @@ public class ControlPanel extends JFrame {
 		chkAllowSleep.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Settings settings = Settings.getInstance();
+				Settings settings = test.world.getSettings();
 				settings.setAutoSleepingEnabled(!settings.isAutoSleepingEnabled());
 			}
 		});
@@ -1522,7 +1531,7 @@ public class ControlPanel extends JFrame {
 			public void stateChanged(ChangeEvent e) {
 				JSpinner spnr = (JSpinner) e.getSource();
 				double time = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
-				Settings settings = Settings.getInstance();
+				Settings settings = test.world.getSettings();
 				settings.setSleepTime(time);
 			}
 		});
@@ -1552,7 +1561,7 @@ public class ControlPanel extends JFrame {
 			public void stateChanged(ChangeEvent e) {
 				JSpinner spnr = (JSpinner) e.getSource();
 				double v = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
-				Settings settings = Settings.getInstance();
+				Settings settings = test.world.getSettings();
 				settings.setSleepLinearVelocity(v);
 			}
 		});
@@ -1582,7 +1591,7 @@ public class ControlPanel extends JFrame {
 			public void stateChanged(ChangeEvent e) {
 				JSpinner spnr = (JSpinner) e.getSource();
 				double v = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
-				Settings settings = Settings.getInstance();
+				Settings settings = test.world.getSettings();
 				settings.setSleepAngularVelocity(Math.toRadians(v));
 			}
 		});
@@ -1628,7 +1637,7 @@ public class ControlPanel extends JFrame {
 			public void stateChanged(ChangeEvent e) {
 				JSpinner spnr = (JSpinner) e.getSource();
 				int iter = ((SpinnerNumberModel) spnr.getModel()).getNumber().intValue();
-				Settings settings = Settings.getInstance();
+				Settings settings = test.world.getSettings();
 				settings.setVelocityConstraintSolverIterations(iter);
 			}
 		});
@@ -1653,7 +1662,7 @@ public class ControlPanel extends JFrame {
 			public void stateChanged(ChangeEvent e) {
 				JSpinner spnr = (JSpinner) e.getSource();
 				int iter = ((SpinnerNumberModel) spnr.getModel()).getNumber().intValue();
-				Settings settings = Settings.getInstance();
+				Settings settings = test.world.getSettings();
 				settings.setPositionConstraintSolverIterations(iter);
 			}
 		});
@@ -1680,7 +1689,7 @@ public class ControlPanel extends JFrame {
 			public void stateChanged(ChangeEvent e) {
 				JSpinner spnr = (JSpinner) e.getSource();
 				double warm = ((MultiplicativeSpinnerNumberModel) spnr.getModel()).getValue();
-				Settings settings = Settings.getInstance();
+				Settings settings = test.world.getSettings();
 				settings.setWarmStartDistance(warm);
 			}
 		});
@@ -1708,7 +1717,7 @@ public class ControlPanel extends JFrame {
 			public void stateChanged(ChangeEvent e) {
 				JSpinner spnr = (JSpinner) e.getSource();
 				double r = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
-				Settings settings = Settings.getInstance();
+				Settings settings = test.world.getSettings();
 				settings.setRestitutionVelocity(r);
 			}
 		});
@@ -1736,7 +1745,7 @@ public class ControlPanel extends JFrame {
 			public void stateChanged(ChangeEvent e) {
 				JSpinner spnr = (JSpinner) e.getSource();
 				double tol = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
-				Settings settings = Settings.getInstance();
+				Settings settings = test.world.getSettings();
 				settings.setLinearTolerance(tol);
 			}
 		});
@@ -1764,7 +1773,7 @@ public class ControlPanel extends JFrame {
 			public void stateChanged(ChangeEvent e) {
 				JSpinner spnr = (JSpinner) e.getSource();
 				double tol = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
-				Settings settings = Settings.getInstance();
+				Settings settings = test.world.getSettings();
 				settings.setAngularTolerance(Math.toRadians(tol));
 			}
 		});
@@ -1792,7 +1801,7 @@ public class ControlPanel extends JFrame {
 			public void stateChanged(ChangeEvent e) {
 				JSpinner spnr = (JSpinner) e.getSource();
 				double lin = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
-				Settings settings = Settings.getInstance();
+				Settings settings = test.world.getSettings();
 				settings.setMaximumLinearCorrection(lin);
 			}
 		});
@@ -1820,7 +1829,7 @@ public class ControlPanel extends JFrame {
 			public void stateChanged(ChangeEvent e) {
 				JSpinner spnr = (JSpinner) e.getSource();
 				double ang = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
-				Settings settings = Settings.getInstance();
+				Settings settings = test.world.getSettings();
 				settings.setMaximumAngularCorrection(Math.toRadians(ang));
 			}
 		});
@@ -1847,7 +1856,7 @@ public class ControlPanel extends JFrame {
 			public void stateChanged(ChangeEvent e) {
 				JSpinner spnr = (JSpinner) e.getSource();
 				double baum = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
-				Settings settings = Settings.getInstance();
+				Settings settings = test.world.getSettings();
 				settings.setBaumgarte(baum);
 			}
 		});
