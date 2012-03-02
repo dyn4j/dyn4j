@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -28,6 +28,7 @@ import org.dyn4j.collision.continuous.TimeOfImpact;
 import org.dyn4j.collision.narrowphase.Separation;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Settings;
+import org.dyn4j.dynamics.World;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Vector2;
@@ -39,10 +40,22 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * This class will translate and rotate the {@link Body}s into a collision.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.0.3
  * @since 2.0.0
  */
 public class TimeOfImpactSolver {
+	/** The world this solver belongs to */
+	protected World world;
+	
+	/**
+	 * Full constructor.
+	 * @param world the {@link World} this solver belongs to
+	 * @since 3.0.3
+	 */
+	public TimeOfImpactSolver(World world) {
+		this.world = world;
+	}
+	
 	/**
 	 * Moves the given {@link Body}s into collision given the {@link TimeOfImpact}
 	 * information.
@@ -51,7 +64,7 @@ public class TimeOfImpactSolver {
 	 * @param toi the {@link TimeOfImpact}
 	 */
 	public void solve(Body b1, Body b2, TimeOfImpact toi) {
-		Settings settings = Settings.getInstance();
+		Settings settings = this.world.getSettings();
 		double linearTolerance = settings.getLinearTolerance();
 		double maxLinearCorrection = settings.getMaximumLinearCorrection();
 		

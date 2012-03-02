@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -59,7 +59,7 @@ import org.dyn4j.resources.Messages;
  * angleJoint.setReferenceAngle(Math.toRadians(90));
  * </pre>
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.0.3
  * @since 2.2.2
  */
 public class AngleJoint extends Joint {
@@ -125,11 +125,14 @@ public class AngleJoint extends Joint {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.Step)
+	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints()
 	 */
 	@Override
-	public void initializeConstraints(Step step) {
-		double angularTolerance = Settings.getInstance().getAngularTolerance();
+	public void initializeConstraints() {
+		Step step = this.world.getStep();
+		Settings settings = this.world.getSettings();
+		
+		double angularTolerance = settings.getAngularTolerance();
 		
 		Mass m1 = this.body1.getMass();
 		Mass m2 = this.body2.getMass();
@@ -192,10 +195,10 @@ public class AngleJoint extends Joint {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.Step)
+	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints()
 	 */
 	@Override
-	public void solveVelocityConstraints(Step step) {
+	public void solveVelocityConstraints() {
 		// check if the constraint needs to be applied
 		if (this.limitState != Joint.LimitState.INACTIVE) {
 			Mass m1 = this.body1.getMass();
@@ -239,7 +242,8 @@ public class AngleJoint extends Joint {
 	public boolean solvePositionConstraints() {
 		// check if the constraint needs to be applied
 		if (this.limitState != Joint.LimitState.INACTIVE) {
-			Settings settings = Settings.getInstance();
+			Settings settings = this.world.getSettings();
+			
 			double angularTolerance = settings.getAngularTolerance();
 			double maxAngularCorrection = settings.getMaximumAngularCorrection();
 			

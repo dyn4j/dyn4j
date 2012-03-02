@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -87,7 +87,6 @@ import org.dyn4j.collision.narrowphase.Raycast;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.RaycastResult;
-import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.dynamics.contact.SolvedContactPoint;
@@ -131,7 +130,7 @@ import com.jogamp.opengl.util.awt.TextRenderer;
 /**
  * Main class for the Sandbox application.
  * @author William Bittle
- * @version 1.0.1
+ * @version 1.0.2
  * @since 1.0.0
  */
 public class Sandbox extends JFrame implements GLEventListener, ActionListener, WindowListener {
@@ -941,8 +940,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				this.pnlWorld.setWorld(this.world, this.rays);
 				// set the contact panel
 				this.pnlContacts.setContactCounter(counter);
-				// reset the global settings
-				Settings.getInstance().reset();
 				// reset the camera
 				this.camera.setScale(32.0);
 				this.camera.toOrigin();
@@ -985,10 +982,13 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 						e);
 			}
 		} else if ("exit".equals(command)) {
-			// dispose of all resources
-			this.dispose();
-			// let the jvm exit
-			System.exit(0);
+			int choice = JOptionPane.showConfirmDialog(this, Messages.getString("dialog.exit.text"), Messages.getString("dialog.exit.title"), JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+			if (choice == JOptionPane.YES_OPTION) {
+				// dispose of all resources
+				this.dispose();
+				// let the jvm exit
+				System.exit(0);
+			}
 		} else if ("start".equals(command)) {
 			if (isPaused()) {
 				// check for a floor/static body
@@ -1042,7 +1042,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 			}
 		} else if ("settings".equals(command)) {
 			// show the settings dialog
-			SettingsDialog.show(this, Settings.getInstance());
+			SettingsDialog.show(this, this.world.getSettings());
 		} else if ("color".equals(command)) {
 			Preferences.setBodyColorRandom(!Preferences.isBodyColorRandom());
 		} else if ("stencil".equals(command)) {
@@ -2356,7 +2356,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	private void saveSimulationAction() throws IOException {
 		String xml = "";
 		synchronized (this.world) {
-			xml = XmlGenerator.toXml(this.world, this.rays, Settings.getInstance(), this.camera);
+			xml = XmlGenerator.toXml(this.world, this.rays, this.camera);
 		}
 		XmlFormatter formatter = new XmlFormatter(2);
 		xml = formatter.format(xml);
@@ -2524,7 +2524,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		// get the xml for the current simulation
 		String xml = "";
 		synchronized (this.world) {
-			xml = XmlGenerator.toXml(this.world, this.rays, Settings.getInstance(), this.camera);
+			xml = XmlGenerator.toXml(this.world, this.rays, this.camera);
 		}
 		// save it in the snapshot map using the timestamp as the key
 		Date date = new Date();
@@ -2615,7 +2615,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 			// get the class name from the file name
 			String contents;
 			synchronized (this.world) {
-				contents = CodeExporter.export(name, this.world, Settings.getInstance());
+				contents = CodeExporter.export(name, this.world);
 			}
 			// see if its a new one or it already exists
 			if (file.exists()) {

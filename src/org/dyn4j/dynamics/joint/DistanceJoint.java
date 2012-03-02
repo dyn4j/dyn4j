@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -48,7 +48,7 @@ import org.dyn4j.resources.Messages;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.0.3
  * @since 1.0.0
  */
 public class DistanceJoint extends Joint {
@@ -127,12 +127,13 @@ public class DistanceJoint extends Joint {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.Step)
+	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints()
 	 */
 	@Override
-	public void initializeConstraints(Step step) {
-		// get the current settings
-		Settings settings = Settings.getInstance();
+	public void initializeConstraints() {
+		Step step = this.world.getStep();
+		Settings settings = this.world.getSettings();
+		
 		double linearTolerance = settings.getLinearTolerance();
 		
 		Transform t1 = body1.getTransform();
@@ -208,10 +209,10 @@ public class DistanceJoint extends Joint {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.Step)
+	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints()
 	 */
 	@Override
-	public void solveVelocityConstraints(Step step) {
+	public void solveVelocityConstraints() {
 		Transform t1 = body1.getTransform();
 		Transform t2 = body2.getTransform();
 		Mass m1 = body1.getMass();
@@ -257,7 +258,8 @@ public class DistanceJoint extends Joint {
 		}
 		
 		// get the current settings
-		Settings settings = Settings.getInstance();
+		Settings settings = this.world.getSettings();
+		
 		double linearTolerance = settings.getLinearTolerance();
 		double maxLinearCorrection = settings.getMaximumLinearCorrection();
 		

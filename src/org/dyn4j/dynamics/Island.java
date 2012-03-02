@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,10 +40,13 @@ import org.dyn4j.geometry.Vector2;
  * Nearly identitcal to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.0.3
  * @since 1.0.0
  */
 public class Island {
+	/** The world this island belongs to */
+	protected World world;
+	
 	/** The {@link ContactConstraintSolver} */
 	protected ContactConstraintSolver contactConstraintSolver;
 	
@@ -58,10 +61,11 @@ public class Island {
 	
 	/**
 	 * Full constructor.
+	 * @param world the {@link World} this island belongs to
 	 */
-	public Island() {
-		super();
-		this.contactConstraintSolver = new ContactConstraintSolver();
+	public Island(World world) {
+		this.world = world;
+		this.contactConstraintSolver = new ContactConstraintSolver(world);
 		this.bodies = new ArrayList<Body>();
 		this.contactConstraints = new ArrayList<ContactConstraint>();
 		this.joints = new ArrayList<Joint>();
@@ -111,12 +115,12 @@ public class Island {
 	/**
 	 * Integrates the {@link Body}s, solves all {@link ContactConstraint}s and
 	 * {@link Joint}s, and attempts to sleep motionless {@link Body}s.
-	 * @param gravity the gravity vector
-	 * @param step the {@link Step}
 	 */
-	public void solve(Vector2 gravity, Step step) {
-		// get the settings
-		Settings settings = Settings.getInstance();
+	public void solve() {
+		Vector2 gravity = this.world.gravity;
+		Step step = this.world.step;
+		Settings settings = this.world.settings;
+		
 		// the number of solver iterations
 		int velocitySolverIterations = settings.getVelocityConstraintSolverIterations();
 		int positionSolverIterations = settings.getPositionConstraintSolverIterations();
@@ -173,7 +177,7 @@ public class Island {
 		// initialize joint constraints
 		for (int i = 0; i < jSize; i++) {
 			Joint joint = this.joints.get(i);
-			joint.initializeConstraints(step);
+			joint.initializeConstraints();
 		}
 
 		// solve the velocity constraints
@@ -181,7 +185,7 @@ public class Island {
 			// solve the joint velocity constraints
 			for (int j = 0; j < jSize; j++) {
 				Joint joint = this.joints.get(j);
-				joint.solveVelocityConstraints(step);
+				joint.solveVelocityConstraints();
 			}
 			
 			this.contactConstraintSolver.solveVelocityContraints();

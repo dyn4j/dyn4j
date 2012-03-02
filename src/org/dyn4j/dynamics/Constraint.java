@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,10 +29,13 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents some physical constraint between a pair of {@link Body}s.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.0.3
  * @since 1.0.0
  */
 public abstract class Constraint {
+	/** The world that contains this joint */
+	protected World world;
+	
 	/** The first {@link Body} */
 	protected Body body1;
 	
@@ -41,7 +44,7 @@ public abstract class Constraint {
 	
 	/** Whether the {@link Constraint} has been added to an {@link Island} or not */
 	protected boolean onIsland;
-	
+
 	/**
 	 * Full constructor.
 	 * @param body1 the first participating {@link Body}
@@ -104,7 +107,25 @@ public abstract class Constraint {
 		if (body2 == null) throw new NullPointerException(Messages.getString("dynamics.constraint.nullBody2"));
 		this.body2 = body2;
 	}
-
+	
+	/**
+	 * Sets the world that contains this constraint.
+	 * @param world the world
+	 * @since 3.0.3
+	 */
+	protected void setWorld(World world) {
+		this.world = world;
+	}
+	
+	/**
+	 * Returns the world that this constraint belongs to.
+	 * @return {@link World}
+	 * @since 3.0.3
+	 */
+	public World getWorld() {
+		return this.world;
+	}
+	
 	/**
 	 * Sets the on {@link Island} flag to the given value.
 	 * @param onIsland true if the {@link Constraint} has been added to an {@link Island}

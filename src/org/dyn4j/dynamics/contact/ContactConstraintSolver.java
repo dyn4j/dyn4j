@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -30,6 +30,7 @@ import org.dyn4j.Epsilon;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.Step;
+import org.dyn4j.dynamics.World;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Matrix22;
@@ -44,12 +45,23 @@ import org.dyn4j.geometry.Vector2;
  * facilitate stable stacking of rigid {@link Body}s.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.0.3
  * @since 1.0.0
  */
 public class ContactConstraintSolver {
+	/** The world object this solver is solving */
+	protected World world;
+	
 	/** List for iterating through the {@link ContactConstraint}s */
 	protected List<ContactConstraint> contactConstraints = null;
+	
+	/**
+	 * Minimal constructor.
+	 * @param world the {@link World} this solver will be solving
+	 */
+	public ContactConstraintSolver(World world) {
+		this.world = world;
+	}
 	
 	/**
 	 * Sets the {@link ContactConstraint}s to solve.
@@ -57,14 +69,16 @@ public class ContactConstraintSolver {
 	 */
 	public void setup(List<ContactConstraint> ccs) {
 		this.contactConstraints = ccs;
-		
+
+		Settings settings = this.world.getSettings();
 		// get the restitution velocity from the settings object
-		double restitutionVelocity = Settings.getInstance().getRestitutionVelocity();
+		double restitutionVelocity = settings.getRestitutionVelocity();
 		
 		// loop through the contact constraints
 		int size = this.contactConstraints.size();
 		for (int i = 0; i < size; i++) {
 			ContactConstraint contactConstraint = this.contactConstraints.get(i);
+			
 			// get the bodies
 			Body b1 = contactConstraint.getBody1();
 			Body b2 = contactConstraint.getBody2();
@@ -565,20 +579,25 @@ public class ContactConstraintSolver {
 	 * @return boolean if the constraints were held
 	 */
 	public boolean solvePositionContraints() {
-		// get the max linear correction, baumgarte, and allowed penetration from
-		// the settings object.
-		Settings settings = Settings.getInstance();
-		double maxLinearCorrection = settings.getMaximumLinearCorrection();
-		double allowedPenetration = settings.getLinearTolerance();
-		double baumgarte = settings.getBaumgarte();
+		// immediately return true if there are no contact constraints to solve
+		if (this.contactConstraints.isEmpty()) return true;
 		
 		// track the minimum separation
 		double minSeparation = 0.0;
+		
+		// since all contact constraints will be part
+		Settings settings = this.world.getSettings();
+		// get the max linear correction, baumgarte, and allowed penetration from
+		// the settings object.
+		double maxLinearCorrection = settings.getMaximumLinearCorrection();
+		double allowedPenetration = settings.getLinearTolerance();
+		double baumgarte = settings.getBaumgarte();
 		
 		// loop through the contact constraints
 		int size = this.contactConstraints.size();
 		for (int i = 0; i < size; i++) {
 			ContactConstraint contactConstraint = this.contactConstraints.get(i);
+			
 			// get the bodies
 			Body b1 = contactConstraint.getBody1();
 			Body b2 = contactConstraint.getBody2();

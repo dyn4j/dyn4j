@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -28,7 +28,7 @@ package org.dyn4j.dynamics;
  * Contains the current and previous time step information
  * used to update the {@link World}.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.0.3
  * @since 1.0.0
  */
 public class Step {
@@ -49,13 +49,12 @@ public class Step {
 
 	/**
 	 * Default constructor.
+	 * @param dt the initial delta time; in seconds<sup>-1</sup>
 	 */
-	public Step() {
+	public Step(double dt) {
 		super();
-		// get the current settings
-		Settings settings = Settings.getInstance();
 		// 1.0 / hz
-		this.dt = settings.getStepFrequency();
+		this.dt = dt;
 		this.invdt = 1.0 / dt;
 		this.dt0 = this.dt;
 		this.invdt0 = this.invdt;

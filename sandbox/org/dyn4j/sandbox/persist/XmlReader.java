@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -87,7 +87,7 @@ import org.xml.sax.helpers.DefaultHandler;
 /**
  * Class used to read in a saved simulation file.
  * @author William Bittle
- * @version 1.0.1
+ * @version 1.0.2
  * @since 1.0.0
  */
 public class XmlReader extends DefaultHandler {
@@ -146,6 +146,9 @@ public class XmlReader extends DefaultHandler {
 	
 	/** The Gravity tag */
 	private Vector2 gravity;
+	
+	/** The settings */
+	private Settings settings;
 	
 	/** The bounds object */
 	private Bounds bounds;
@@ -349,6 +352,7 @@ public class XmlReader extends DefaultHandler {
 		this.idMap = new HashMap<String, SandboxBody>();
 		this.vertices = new ArrayList<Vector2>();
 		this.rays = new ArrayList<SandboxRay>();
+		this.settings = new Settings();
 	}
 	
 	/**
@@ -421,6 +425,9 @@ public class XmlReader extends DefaultHandler {
 		
 		world.removeAll();
 		rays.clear();
+		
+		// set the settings
+		world.setSettings(reader.settings);
 		
 		// these can be null
 		if (reader.broadphase != null) world.setBroadphaseDetector(reader.broadphase);
@@ -721,47 +728,47 @@ public class XmlReader extends DefaultHandler {
 		} else if ("UpperLimitEnabled".equalsIgnoreCase(this.tagName)) {
 			this.upperLimitEnabled = Boolean.parseBoolean(s);
 		} else if ("StepFrequency".equalsIgnoreCase(this.tagName)) {
-			Settings.getInstance().setStepFrequency(Double.parseDouble(s));
+			this.settings.setStepFrequency(Double.parseDouble(s));
 		} else if ("MaximumTranslation".equalsIgnoreCase(this.tagName)) {
-			Settings.getInstance().setMaximumTranslation(Double.parseDouble(s));
+			this.settings.setMaximumTranslation(Double.parseDouble(s));
 		} else if ("MaximumRotation".equalsIgnoreCase(this.tagName)) {
-			Settings.getInstance().setMaximumRotation(Math.toRadians(Double.parseDouble(s)));
+			this.settings.setMaximumRotation(Math.toRadians(Double.parseDouble(s)));
 		} else if ("ContinuousCollisionDetectionMode".equalsIgnoreCase(this.tagName)) {
 			if (Settings.ContinuousDetectionMode.ALL.toString().equalsIgnoreCase(s)) {
-				Settings.getInstance().setContinuousDetectionMode(Settings.ContinuousDetectionMode.ALL);
+				this.settings.setContinuousDetectionMode(Settings.ContinuousDetectionMode.ALL);
 			} else if (Settings.ContinuousDetectionMode.BULLETS_ONLY.toString().equalsIgnoreCase(s)) {
-				Settings.getInstance().setContinuousDetectionMode(Settings.ContinuousDetectionMode.BULLETS_ONLY);
+				this.settings.setContinuousDetectionMode(Settings.ContinuousDetectionMode.BULLETS_ONLY);
 			} else if (Settings.ContinuousDetectionMode.NONE.toString().equalsIgnoreCase(s)) {
-				Settings.getInstance().setContinuousDetectionMode(Settings.ContinuousDetectionMode.NONE);
+				this.settings.setContinuousDetectionMode(Settings.ContinuousDetectionMode.NONE);
 			} else {
 				throw new SAXException(MessageFormat.format(Messages.getString("exception.persist.unknownCCDMode"), s));
 			}
 		} else if ("AutoSleep".equalsIgnoreCase(this.tagName) && this.settingsFlag) {
-			Settings.getInstance().setAutoSleepingEnabled(Boolean.parseBoolean(s));
+			this.settings.setAutoSleepingEnabled(Boolean.parseBoolean(s));
 		} else if ("SleepTime".equalsIgnoreCase(this.tagName)) {
-			Settings.getInstance().setSleepTime(Double.parseDouble(s));
+			this.settings.setSleepTime(Double.parseDouble(s));
 		} else if ("SleepLinearVelocity".equalsIgnoreCase(this.tagName)) {
-			Settings.getInstance().setSleepLinearVelocity(Double.parseDouble(s));
+			this.settings.setSleepLinearVelocity(Double.parseDouble(s));
 		} else if ("SleepAngularVelocity".equalsIgnoreCase(this.tagName)) {
-			Settings.getInstance().setSleepAngularVelocity(Math.toRadians(Double.parseDouble(s)));
+			this.settings.setSleepAngularVelocity(Math.toRadians(Double.parseDouble(s)));
 		} else if ("VelocitySolverIterations".equalsIgnoreCase(this.tagName)) {
-			Settings.getInstance().setVelocityConstraintSolverIterations(Integer.parseInt(s));
+			this.settings.setVelocityConstraintSolverIterations(Integer.parseInt(s));
 		} else if ("PositionSolverIterations".equalsIgnoreCase(this.tagName)) {
-			 Settings.getInstance().setPositionConstraintSolverIterations(Integer.parseInt(s));
+			 this.settings.setPositionConstraintSolverIterations(Integer.parseInt(s));
 		} else if ("WarmStartDistance".equalsIgnoreCase(this.tagName)) {
-			Settings.getInstance().setWarmStartDistance(Double.parseDouble(s));
+			this.settings.setWarmStartDistance(Double.parseDouble(s));
 		} else if ("RestitutionVelocity".equalsIgnoreCase(this.tagName)) {
-			Settings.getInstance().setRestitutionVelocity(Double.parseDouble(s));
+			this.settings.setRestitutionVelocity(Double.parseDouble(s));
 		} else if ("LinearTolerance".equalsIgnoreCase(this.tagName)) {
-			Settings.getInstance().setLinearTolerance(Double.parseDouble(s));
+			this.settings.setLinearTolerance(Double.parseDouble(s));
 		} else if ("AngularTolerance".equalsIgnoreCase(this.tagName)) {
-			Settings.getInstance().setAngularTolerance(Math.toRadians(Double.parseDouble(s)));
+			this.settings.setAngularTolerance(Math.toRadians(Double.parseDouble(s)));
 		} else if ("MaximumLinearCorrection".equalsIgnoreCase(this.tagName)) {
-			Settings.getInstance().setMaximumLinearCorrection(Double.parseDouble(s));
+			this.settings.setMaximumLinearCorrection(Double.parseDouble(s));
 		} else if ("MaximumAngularCorrection".equalsIgnoreCase(this.tagName)) {
-			Settings.getInstance().setMaximumAngularCorrection(Math.toRadians(Double.parseDouble(s)));
+			this.settings.setMaximumAngularCorrection(Math.toRadians(Double.parseDouble(s)));
 		} else if ("Baumgarte".equalsIgnoreCase(this.tagName)) {
-			Settings.getInstance().setBaumgarte(Double.parseDouble(s));
+			this.settings.setBaumgarte(Double.parseDouble(s));
 		} else if ("Direction".equalsIgnoreCase(this.tagName) && this.rayFlag) {
 			this.ray.setDirection(Double.parseDouble(s));
 		} else if ("Length".equalsIgnoreCase(this.tagName) && this.rayFlag) {

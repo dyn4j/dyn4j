@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -43,7 +43,7 @@ import org.dyn4j.resources.Messages;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.0.3
  * @since 1.0.0
  */
 public class FrictionJoint extends Joint {
@@ -112,10 +112,12 @@ public class FrictionJoint extends Joint {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.Step)
+	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints()
 	 */
 	@Override
-	public void initializeConstraints(Step step) {
+	public void initializeConstraints() {
+		Step step = this.world.getStep();
+		
 		Transform t1 = this.body1.getTransform();
 		Transform t2 = this.body2.getTransform();
 		
@@ -154,10 +156,12 @@ public class FrictionJoint extends Joint {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.Step)
+	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints()
 	 */
 	@Override
-	public void solveVelocityConstraints(Step step) {
+	public void solveVelocityConstraints() {
+		Step step = this.world.getStep();
+		
 		Transform t1 = this.body1.getTransform();
 		Transform t2 = this.body2.getTransform();
 		
@@ -211,6 +215,15 @@ public class FrictionJoint extends Joint {
 		this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(impulse));
 		this.body2.getVelocity().subtract(impulse.product(invM2));
 		this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * r2.cross(impulse));
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints()
+	 */
+	@Override
+	public boolean solvePositionConstraints() {
+		// nothing to do here for this joint
+		return true;
 	}
 	
 	/* (non-Javadoc)
