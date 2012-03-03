@@ -129,7 +129,7 @@ b.setVelocity(new Vector2(0.0, 2.0));
 ==Integrating Into The Game Loop==
 Most, if not all, games use active rendering and something called a "game loop" to poll for input, update graphics, etc.  To allow simulation of the scene the World object has two methods that must be called from the game loop:  World.update(double) or World.updatev(double).  The method must be passed the elapsed time from the last iteration *in seconds*.
 
-The World.updatev(double) method can be used if you prefer a variable time step or would like to control when the World updates yourself.  The World.update(double) method will only update given the step frequency set in the Settings singleton.
+The World.updatev(double) method can be used if you prefer a variable time step or would like to control when the World updates yourself.  The World.update(double) method will only update given the step frequency set in the Settings object.
 
 ==Exceptions==
 There are a number of !RuntimeExceptions that are thrown.  Exceptions like these are typically thrown when the creation of an object fails due to invalid arguments.  These exceptions should rarely occur.
