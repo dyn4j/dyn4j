@@ -15,7 +15,7 @@ Each Shape, Fixture/!BodyFixture, and Body (and some other classes, see the [htt
 This member can be used to store anything that you want to be associated with the object.
 
 ==Settings==
-The Settings class contained in the dynamics package is the class used to configure the physics pipeline.  The class is a singleton object and is *not* thread safe.
+The Settings class contained in the dynamics package is the class used to configure the physics pipeline.  Each instance of the World class has it's own Settings.
 
 You can use this object to set physics settings at any time.  The Settings object is defaulted to the settings that worked best for all the tests in the !TestBed application.
 
@@ -88,7 +88,7 @@ All three methods are acceptable and intended for use.  The !TestBed and Sandbox
 ==Body States==
 The life time of a body is usually very long.  Over that span the body's state may change.
 
-A body becomes "asleep" when the physics engine has determined that it is not moving.  The body is still tested for collisions but is excluded from the physics pipeline to save time.  Sleeping of a body only occurs when the body's linear and angular velocity are below a threshold set in the Settings singleton.  Automatic sleeping can be controlled on a body by body basis or globally using the Settings class via the setAutoSleepingEnabled methods.
+A body becomes "asleep" when the physics engine has determined that it is not moving.  The body is still tested for collisions but is excluded from the physics pipeline to save time.  Sleeping of a body only occurs when the body's linear and angular velocity are below a threshold set in the Settings object.  Automatic sleeping can be controlled on a body by body basis or globally using the Settings class via the setAutoSleepingEnabled methods.
 
 A body becomes "inactive" when the collision detection system detects that the entire body is outside the bounds of the world.  The body no longer participates in collision detection or physics.  This state will never be set automatically if the world has no bounds.
 
