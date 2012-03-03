@@ -43,7 +43,9 @@ public class Settings {
 		/** CCD is not performed at all */
 		NONE,
 		/** 
-		 * CCD is only performed on the following pairs:
+		 * CCD is performed on bodies flagged as bullets only.
+		 * <p>
+		 * More precisely, the following pairs are tested:
 		 * <ul>
 		 * <li>Bullet vs. Dynamic</li>
 		 * <li>Bullet vs. Static</li>
@@ -51,7 +53,9 @@ public class Settings {
 		 */
 		BULLETS_ONLY,
 		/** 
-		 * CCD is performed on the following pairs:
+		 * CCD is performed on all bodies against static bodies.
+		 * <p>
+		 * More precisely, the following pairs are tested:
 		 * <ul>
 		 * <li>Dynamic vs. Static</li>
 		 * <li>Bullet vs. Static</li>
@@ -193,24 +197,23 @@ public class Settings {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("SETTINGS[")
-		.append(this.stepFequency).append("|")
-		.append(this.maximumTranslation).append("|")
-		.append(this.maximumRotation).append("|")
-		.append(this.autoSleepingEnabled).append("|")
-		.append(this.sleepLinearVelocity).append("|")
-		.append(this.sleepAngularVelocity).append("|")
-		.append(this.sleepTime).append("|")
-		.append(this.velocityConstraintSolverIterations).append("|")
-		.append(this.positionConstraintSolverIterations).append("|")
-		.append(this.warmStartDistance).append("|")
-		.append(this.restitutionVelocity).append("|")
-		.append(this.linearTolerance).append("|")
-		.append(this.angularTolerance).append("|")
-		.append(this.maximumLinearCorrection).append("|")
-		.append(this.maximumAngularCorrection).append("|")
-		.append(this.baumgarte).append("|")
-		.append(this.continuousDetectionMode)
+		sb.append("Settings[StepFrequency=").append(this.stepFequency)
+		.append("|MaximumTranslation=").append(this.maximumTranslation)
+		.append("|MaximumRotation=").append(this.maximumRotation)
+		.append("|AutoSleepingEnabled=").append(this.autoSleepingEnabled)
+		.append("|SleepLinearVelocity=").append(this.sleepLinearVelocity)
+		.append("|SleepAngularVelocity=").append(this.sleepAngularVelocity)
+		.append("|SleepTime=").append(this.sleepTime)
+		.append("|VelocityConstraintSolverIterations=").append(this.velocityConstraintSolverIterations)
+		.append("|PositionConstraintSolverIterations=").append(this.positionConstraintSolverIterations)
+		.append("|WarmStartDistance=").append(this.warmStartDistance)
+		.append("|RestitutionVelocity=").append(this.restitutionVelocity)
+		.append("|LinearTolerance=").append(this.linearTolerance)
+		.append("|AngularTolerance=").append(this.angularTolerance)
+		.append("|MaximumLinearCorrection=").append(this.maximumLinearCorrection)
+		.append("|MaximumAngularCorrection=").append(this.maximumAngularCorrection)
+		.append("|Baumgarte=").append(this.baumgarte)
+		.append("|ContinuousDetectionMode=").append(this.continuousDetectionMode)
 		.append("]");
 		return sb.toString();
 	}

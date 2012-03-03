@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -35,7 +35,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * Stores the center of mass, mass, and inertia tensor.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.3
  * @since 1.0.0
  */
 public class Mass {
@@ -151,11 +151,11 @@ public class Mass {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("MASS[")
-		.append(this.type).append("|")
-		.append(this.center).append("|")
-		.append(this.mass).append("|")
-		.append(this.inertia).append("]");
+		sb.append("Mass[Type=").append(this.type)
+		.append("|Center=").append(this.center)
+		.append("|Mass=").append(this.mass)
+		.append("|Inertia").append(this.inertia)
+		.append("]");
 		return sb.toString();
 	}
 	
