@@ -24,7 +24,7 @@ In addition to leaving this setting enabled:
   * Decrease the time required for Bodies to be stationary before being put to sleep using the Settings.setSleepTime(double) method.
 
 =World Updates=
-Using the World.update(double) method forces that the World only update at a given frequency defined in the Settings singleton.  You can decrease this value to a minimum of 30, the default is 60, to have the entire engine update less often, leaving more time for your application to perform other tasks.
+Using the World.update(double) method forces that the World only update at a given frequency defined in the Settings class.  You can decrease this value to a minimum of 30, the default is 60, to have the entire engine update less often, leaving more time for your application to perform other tasks.
 
 Use the World.setUpdateRequired method sparingly since this method performs collision detection with all bodies in the world.
 
