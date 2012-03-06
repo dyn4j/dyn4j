@@ -71,7 +71,7 @@ import org.dyn4j.resources.Messages;
  * Employs the same {@link Island} solving technique as <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.3
+ * @version 3.0.4
  * @since 1.0.0
  */
 public class World {
@@ -970,13 +970,15 @@ public class World {
 	 * Adds a {@link Body} to the {@link World}.
 	 * @param body the {@link Body} to add
 	 * @throws NullPointerException if body is null
-	 * @throws IllegalArgumentException if body has already been added to this world
+	 * @throws IllegalArgumentException if body has already been added to this world or if its a member of another world instance
 	 */
 	public void add(Body body) {
 		// check for null body
 		if (body == null) throw new NullPointerException(Messages.getString("dynamics.world.addNullBody"));
 		// dont allow adding it twice
-		if (this.bodies.contains(body)) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingBody"));
+		if (body.world == this) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingBody"));
+		// dont allow a body that already is assigned to another world
+		if (body.world != null) throw new IllegalArgumentException(Messages.getString("dynamics.world.addOtherWorldBody"));
 		// add it to the world
 		this.bodies.add(body);
 		// set the world property on the body
@@ -989,13 +991,15 @@ public class World {
 	 * Adds a {@link Joint} to the {@link World}.
 	 * @param joint the {@link Joint} to add
 	 * @throws NullPointerException if joint is null
-	 * @throws IllegalArgumentException if joint has already been added to this world
+	 * @throws IllegalArgumentException if joint has already been added to this world or if its a member of another world instance
 	 */
 	public void add(Joint joint) {
 		// check for null joint
 		if (joint == null) throw new NullPointerException(Messages.getString("dynamics.world.addNullJoint"));
 		// dont allow adding it twice
-		if (this.joints.contains(joint)) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingJoint"));
+		if (joint.world == this) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingJoint"));
+		// dont allow a joint that already is assigned to another world
+		if (joint.world != null) throw new IllegalArgumentException(Messages.getString("dynamics.world.addOtherWorldJoint"));
 		// add the joint to the joint list
 		this.joints.add(joint);
 		// set the world property on the joint

@@ -1136,7 +1136,7 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="061089fb-8f72-4c82-a16c-afcdfc613d43" Name="Fixture1">
+                    <Fixture Id="061089fb-8f72-4c82-a16c-afcdfc613d43" Name="Fixture2">
                         <Shape Id="7e02f5e5-5a20-4e5e-80e2-1a956e1262ed" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.5" />
                             <Width>5.2</Width>
@@ -1149,7 +1149,7 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="ff0a5955-974d-4595-b9b5-103775a34351" Name="Fixture1">
+                    <Fixture Id="ff0a5955-974d-4595-b9b5-103775a34351" Name="Fixture3">
                         <Shape Id="0e811b9f-7e84-4ef6-b98f-c9ee4119388b" xsi:type="Rectangle">
                             <LocalCenter x="2.4" y="1.0" />
                             <Width>0.25</Width>
@@ -1162,7 +1162,7 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="30c3217b-1d95-4dc3-bda9-be49097b676a" Name="Fixture1">
+                    <Fixture Id="30c3217b-1d95-4dc3-bda9-be49097b676a" Name="Fixture4">
                         <Shape Id="bef439b7-7571-4dbf-aa23-6353f8deaea8" xsi:type="Rectangle">
                             <LocalCenter x="-2.4" y="1.0" />
                             <Width>0.25</Width>

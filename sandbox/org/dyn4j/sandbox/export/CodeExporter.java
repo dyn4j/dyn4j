@@ -92,8 +92,8 @@ public class CodeExporter {
 	 * Exports the given world and settings to Java code.
 	 * <p>
 	 * Returns a string containing the code for the export.
-	 * @param name the name
-	 * @param world the world
+	 * @param name the name of the generated class
+	 * @param world the world to export
 	 * @return String
 	 */
 	public static final String export(String name, World world) {
@@ -113,12 +113,14 @@ public class CodeExporter {
 		.append("import org.dyn4j.geometry.*;").append(NEW_LINE).append(NEW_LINE)
 		// class declaration
 		.append("// ").append(world.getUserData()).append(NEW_LINE)
-		.append("// dyn4j v").append(Version.getVersion()).append(NEW_LINE)
+		.append("// generated for dyn4j v").append(Version.getVersion()).append(NEW_LINE)
 		.append("public class ").append(name).append(" { ").append(NEW_LINE).append(NEW_LINE)
 		// private constructor
 		.append(TAB1).append("private ").append(name).append("() {}").append(NEW_LINE).append(NEW_LINE)
 		// single static setup method
-		.append(TAB1).append("public static final void setup(World world, Settings settings) {").append(NEW_LINE);
+		.append(TAB1).append("public static final void setup(World world) {").append(NEW_LINE)
+		// get the settings object from the world
+		.append(TAB2).append("Settings settings = world.getSettings();").append(NEW_LINE);
 		
 		// output settings
 		sb.append(export(world.getSettings()));

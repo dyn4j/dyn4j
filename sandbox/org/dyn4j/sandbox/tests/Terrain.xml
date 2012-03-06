@@ -69,7 +69,7 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="ddad06c4-5fe7-4f12-a745-b929f238f331" Name="Fixture1">
+                    <Fixture Id="ddad06c4-5fe7-4f12-a745-b929f238f331" Name="Fixture2">
                         <Shape Id="ea1a87b0-1c86-40c1-bf0a-10c63104e25b" xsi:type="Segment">
                             <LocalCenter x="1.5" y="0.5" />
                             <Vertex x="3.0" y="2.0" />
@@ -81,7 +81,7 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="bc329977-dec3-4ae0-acd7-eea99270bcf5" Name="Fixture1">
+                    <Fixture Id="bc329977-dec3-4ae0-acd7-eea99270bcf5" Name="Fixture3">
                         <Shape Id="687e2816-fceb-447e-9450-56e3f4d1a1df" xsi:type="Segment">
                             <LocalCenter x="-1.0" y="1.0" />
                             <Vertex x="0.0" y="-1.0" />
@@ -93,7 +93,7 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="d4b3739d-81ee-4efb-bfbc-9e53a59b2ab3" Name="Fixture1">
+                    <Fixture Id="d4b3739d-81ee-4efb-bfbc-9e53a59b2ab3" Name="Fixture4">
                         <Shape Id="9a1d8686-e70a-4f1e-9e01-48787e7988ff" xsi:type="Segment">
                             <LocalCenter x="-3.0" y="1.5" />
                             <Vertex x="-2.0" y="3.0" />
@@ -105,7 +105,7 @@
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
-                    <Fixture Id="2e678e9a-621a-4770-aff2-9239b3474432" Name="Fixture1">
+                    <Fixture Id="2e678e9a-621a-4770-aff2-9239b3474432" Name="Fixture5">
                         <Shape Id="8393ab7c-e493-4d7a-8a8f-b98967fc5d86" xsi:type="Segment">
                             <LocalCenter x="-5.0" y="0.5" />
                             <Vertex x="-4.0" y="0.0" />
