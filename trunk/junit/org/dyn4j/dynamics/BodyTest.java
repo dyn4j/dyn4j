@@ -55,7 +55,7 @@ import org.junit.Test;
 /**
  * Class to test the {@link Body} class.
  * @author William Bittle
- * @version 3.0.3
+ * @version 3.0.4
  * @since 1.0.2
  */
 public class BodyTest {
@@ -78,6 +78,7 @@ public class BodyTest {
 		TestCase.assertNotNull(b.transform);
 		TestCase.assertNotNull(b.transform0);
 		TestCase.assertNotNull(b.velocity);
+		TestCase.assertNull(b.world);
 	}
 	
 	/**

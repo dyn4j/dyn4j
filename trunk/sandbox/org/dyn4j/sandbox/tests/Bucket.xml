@@ -53,7 +53,7 @@
             </Transform>
         </Bounds>
         <Bodies>
-            <Body Id="ab8ad777-009a-4c20-bffa-a8af76db3f52" Name="Ground">
+            <Body Id="ab8ad777-009a-4c20-bffa-a8af76db3f52" Name="Bottom">
                 <OutlineColor r="0.47834545" g="0.7587337" b="0.45543572" />
                 <FillColor r="0.5979318" g="0.94841707" b="0.56929463" />
                 <Fixtures>
@@ -94,7 +94,7 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="7f7c9c76-c562-491d-ae7b-49eb84ad85bd" Name="Body2">
+            <Body Id="7f7c9c76-c562-491d-ae7b-49eb84ad85bd" Name="Left-Side">
                 <OutlineColor r="0.75480324" g="0.7351002" b="0.7710989" />
                 <FillColor r="0.94350404" g="0.9188753" b="0.9638736" />
                 <Fixtures>
@@ -135,7 +135,7 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="a1ae0d0d-7917-4d40-9f11-ba71a4be9ae5" Name="Body3">
+            <Body Id="a1ae0d0d-7917-4d40-9f11-ba71a4be9ae5" Name="Right-Side">
                 <OutlineColor r="0.53174716" g="0.4077898" b="0.7713956" />
                 <FillColor r="0.66468394" g="0.50973725" b="0.96424454" />
                 <Fixtures>

@@ -42,6 +42,7 @@ import org.dyn4j.dynamics.contact.ContactListener;
 import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
+import org.dyn4j.dynamics.joint.MouseJoint;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Vector2;
@@ -50,7 +51,7 @@ import org.junit.Test;
 /**
  * Contains the test cases for the {@link World} class.
  * @author William Bittle
- * @version 3.0.3
+ * @version 3.0.4
  * @since 1.0.2
  */
 public class WorldTest {
@@ -915,5 +916,37 @@ public class WorldTest {
 	public void setNullSettings() {
 		World w = new World();
 		w.setSettings(null);
+	}
+	
+	/**
+	 * Tests adding a body to a world that has already been added to a different world.
+	 * @since 3.0.4
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void addBodyFromAnotherWorld() {
+		World w1 = new World();
+		World w2 = new World();
+		
+		Body b = new Body();
+		
+		w1.add(b);
+		
+		w2.add(b);
+	}
+	
+	/**
+	 * Tests adding a body to a world that has already been added to a different world.
+	 * @since 3.0.4
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void addJointFromAnotherWorld() {
+		World w1 = new World();
+		World w2 = new World();
+		
+		Joint j = new MouseJoint(new Body(), new Vector2(), 0.8, 0.8, 100);
+		
+		w1.add(j);
+		
+		w2.add(j);
 	}
 }

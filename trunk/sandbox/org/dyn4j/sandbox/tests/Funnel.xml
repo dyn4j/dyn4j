@@ -94,7 +94,7 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="d698a098-f1d9-4d9d-8f83-e1c130708170" Name="Left Ramp">
+            <Body Id="d698a098-f1d9-4d9d-8f83-e1c130708170" Name="Left-Ramp">
                 <OutlineColor r="0.61337465" g="0.6299016" b="0.4961402" />
                 <FillColor r="0.76671827" g="0.787377" b="0.62017524" />
                 <Fixtures>
@@ -135,7 +135,7 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="ee079ecd-a651-48bf-8f78-81dbd5960fd8" Name="Right Ramp">
+            <Body Id="ee079ecd-a651-48bf-8f78-81dbd5960fd8" Name="Right-Ramp">
                 <OutlineColor r="0.4554883" g="0.48603112" b="0.6448582" />
                 <FillColor r="0.5693604" g="0.6075389" b="0.8060727" />
                 <Fixtures>
