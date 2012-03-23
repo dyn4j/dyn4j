@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -36,7 +36,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Circle} class.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.0.4
  * @since 1.0.0
  */
 public class CircleTest {
@@ -202,5 +202,32 @@ public class CircleTest {
 		
 		TestCase.assertEquals( 1.000, c.center.x, 1.0e-3);
 		TestCase.assertEquals(-0.500, c.center.y, 1.0e-3);
+	}
+	
+	/**
+	 * Tests the generated AABB.
+	 * @since 3.0.4
+	 */
+	@Test
+	public void createAABB() {
+		Circle c = new Circle(1.2);
+		
+		// using an identity transform
+		AABB aabb = c.createAABB(Transform.IDENTITY);
+		TestCase.assertEquals(-1.2, aabb.getMinX(), 1.0e-3);
+		TestCase.assertEquals(-1.2, aabb.getMinY(), 1.0e-3);
+		TestCase.assertEquals( 1.2, aabb.getMaxX(), 1.0e-3);
+		TestCase.assertEquals( 1.2, aabb.getMaxY(), 1.0e-3);
+		
+		// test using a rotation and translation matrix
+		Transform tx = new Transform();
+		tx.rotate(Math.toRadians(30.0));
+		tx.translate(1.0, 2.0);
+		
+		aabb = c.createAABB(tx);
+		TestCase.assertEquals(-0.2, aabb.getMinX(), 1.0e-3);
+		TestCase.assertEquals( 0.8, aabb.getMinY(), 1.0e-3);
+		TestCase.assertEquals( 2.2, aabb.getMaxX(), 1.0e-3);
+		TestCase.assertEquals( 3.2, aabb.getMaxY(), 1.0e-3);
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,10 @@
  */
 package org.dyn4j.dynamics;
 
+import junit.framework.TestCase;
+
+import org.dyn4j.collision.CategoryFilter;
+import org.dyn4j.collision.Filter;
 import org.dyn4j.collision.Fixture;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Convex;
@@ -33,11 +37,13 @@ import org.junit.Test;
 
 /**
  * Tests the methods of the {@link BodyFixture} and {@link Fixture} classes.
+ * <p>
+ * Was FixtureTest.
  * @author William Bittle
- * @version 2.0.0
- * @since 1.0.0
+ * @version 3.0.4
+ * @since 3.0.4
  */
-public class FixtureTest {
+public class BodyFixtureTest {
 	/** The {@link BodyFixture} object to test */
 	private BodyFixture fixture;
 	
@@ -124,5 +130,25 @@ public class FixtureTest {
 		fixture.setRestitution(0.0);
 		fixture.setRestitution(1.0);
 		fixture.setRestitution(5.0);
+	}
+	
+	/**
+	 * Tests setting the filter.
+	 * @since 3.0.4
+	 */
+	@Test
+	public void setFilter() {
+		Filter f = new CategoryFilter();
+		fixture.setFilter(f);
+		TestCase.assertEquals(f, fixture.getFilter());
+	}
+
+	/**
+	 * Tests setting a null filter.
+	 * @since 3.0.4
+	 */
+	@Test(expected = NullPointerException.class)
+	public void setNullFilter() {
+		fixture.setFilter(null);
 	}
 }

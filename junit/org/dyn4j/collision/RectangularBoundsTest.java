@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -41,7 +41,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link RectangularBounds} class.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.0.4
  * @since 1.0.0
  */
 public class RectangularBoundsTest {
@@ -55,6 +55,15 @@ public class RectangularBoundsTest {
 	public void setup() {
 		// create some bounds [-10, 10]
 		this.rb = new RectangularBounds(new Rectangle(20.0, 20.0));
+	}
+
+	/**
+	 * Tests creating a {@link RectangularBounds} with null bounds.
+	 * @since 3.0.4
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createNullBounds() {
+		new RectangularBounds(null);
 	}
 	
 	/**
@@ -94,6 +103,22 @@ public class RectangularBoundsTest {
 		
 		// test half way out a corner
 		ct.transform.translate(-1.5, 1.5);
+		TestCase.assertFalse(rb.isOutside(ct));
+		
+		// test rotating the bounds
+		rb.rotate(Math.toRadians(45.0), 2.0, 1.0);
+		
+		// test half way out of a corner
+		ct.transform.setTranslation(0.0, 0.0);
+		ct.transform.translate(16.5, 0.0);
+		TestCase.assertFalse(rb.isOutside(ct));
+		
+		// test all the way out
+		ct.transform.translate(1.0, 0.0);
+		TestCase.assertTrue(rb.isOutside(ct));
+		
+		// test half way out of a side
+		ct.transform.setTranslation(10.25, 9.25);
 		TestCase.assertFalse(rb.isOutside(ct));
 	}
 	
@@ -135,6 +160,22 @@ public class RectangularBoundsTest {
 		// test half way out a corner
 		ct.transform.translate(-1.5, 1.5);
 		TestCase.assertFalse(rb.isOutside(ct));
+
+		// test rotating the bounds
+		rb.rotate(Math.toRadians(45.0), 2.0, 1.0);
+		
+		// test half way out of a corner
+		ct.transform.setTranslation(0.0, 0.0);
+		ct.transform.translate(16.5, 0.0);
+		TestCase.assertFalse(rb.isOutside(ct));
+		
+		// test all the way out
+		ct.transform.translate(1.0, 0.0);
+		TestCase.assertTrue(rb.isOutside(ct));
+		
+		// test half way out of a side
+		ct.transform.setTranslation(10.25, 9.25);
+		TestCase.assertFalse(rb.isOutside(ct));
 	}
 	
 	/**
@@ -174,6 +215,22 @@ public class RectangularBoundsTest {
 		
 		// test half way out a corner
 		ct.transform.translate(-1.5, 1.0);
+		TestCase.assertFalse(rb.isOutside(ct));
+		
+		// test rotating the bounds
+		rb.rotate(Math.toRadians(45.0), 2.0, 1.0);
+		
+		// test half way out of a corner
+		ct.transform.setTranslation(0.0, 0.0);
+		ct.transform.translate(16.5, 0.0);
+		TestCase.assertFalse(rb.isOutside(ct));
+		
+		// test all the way out
+		ct.transform.translate(1.0, 0.0);
+		TestCase.assertTrue(rb.isOutside(ct));
+		
+		// test half way out of a side
+		ct.transform.setTranslation(10.25, 9.25);
 		TestCase.assertFalse(rb.isOutside(ct));
 	}
 	
@@ -219,6 +276,22 @@ public class RectangularBoundsTest {
 		// test half way out a corner
 		ct.transform.translate(-1.5, 1.5);
 		TestCase.assertFalse(rb.isOutside(ct));
+
+		// test rotating the bounds
+		rb.rotate(Math.toRadians(45.0), 2.0, 1.0);
+		
+		// test half way out of a corner
+		ct.transform.setTranslation(0.0, 0.0);
+		ct.transform.translate(16.5, 0.0);
+		TestCase.assertFalse(rb.isOutside(ct));
+		
+		// test all the way out
+		ct.transform.translate(1.0, 0.0);
+		TestCase.assertTrue(rb.isOutside(ct));
+		
+		// test half way out of a side
+		ct.transform.setTranslation(10.25, 9.25);
+		TestCase.assertFalse(rb.isOutside(ct));
 	}
 	
 	/**
@@ -259,5 +332,30 @@ public class RectangularBoundsTest {
 		// test half way out a corner
 		ct.transform.translate(-1.5, 1.5);
 		TestCase.assertFalse(rb.isOutside(ct));
+
+		// test rotating the bounds
+		rb.rotate(Math.toRadians(45.0), 2.0, 1.0);
+		
+		// test half way out of a corner
+		ct.transform.setTranslation(0.0, 0.0);
+		ct.transform.translate(16.5, 0.0);
+		TestCase.assertFalse(rb.isOutside(ct));
+		
+		// test all the way out
+		ct.transform.translate(1.0, 0.0);
+		TestCase.assertTrue(rb.isOutside(ct));
+		
+		// test half way out of a side
+		ct.transform.setTranslation(10.25, 9.25);
+		TestCase.assertFalse(rb.isOutside(ct));
+	}
+	
+	/**
+	 * Tests setting the bounds to null.
+	 * @since 3.0.4
+	 */
+	@Test(expected = NullPointerException.class)
+	public void setNullBounds() {
+		rb.setBounds(null);
 	}
 }

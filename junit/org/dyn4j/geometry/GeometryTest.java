@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -41,7 +41,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Geometry} class.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.0.4
  * @since 1.0.0
  */
 public class GeometryTest {
@@ -52,7 +52,7 @@ public class GeometryTest {
 	 * center of mass when vertices are more dense at any place along the perimeter.
 	 */
 	@Test
-	public void getAverageCenter() {
+	public void getAverageCenterArray() {
 		Vector2[] vertices = new Vector2[6];
 		vertices[0] = new Vector2(-2.0, 1.0);
 		vertices[1] = new Vector2(-1.0, 2.0);
@@ -68,12 +68,59 @@ public class GeometryTest {
 	}
 	
 	/**
+	 * Tests the getAverageCenter method.
+	 * <p>
+	 * This test also shows that the average method can produce an incorrect
+	 * center of mass when vertices are more dense at any place along the perimeter.
+	 * @since 3.0.4
+	 */
+	@Test
+	public void getAverageCenterList() {
+		List<Vector2> vertices = new ArrayList<Vector2>();
+		vertices.add(new Vector2(-2.0, 1.0));
+		vertices.add(new Vector2(-1.0, 2.0));
+		vertices.add(new Vector2(1.2, 0.5));
+		vertices.add(new Vector2(1.3, 0.3));
+		vertices.add(new Vector2(1.4, 0.2));
+		vertices.add(new Vector2(0.0, -1.0));
+		
+		Vector2 c = Geometry.getAverageCenter(vertices);
+		
+		TestCase.assertEquals(0.150, c.x, 1.0e-3);
+		TestCase.assertEquals(0.500, c.y, 1.0e-3);
+	}
+	
+	/**
 	 * Tests the getAverageCenter method passing a null array.
 	 * @since 2.0.0
 	 */
 	@Test(expected = NullPointerException.class)
 	public void getAverageCenterNullArray() {
 		Geometry.getAverageCenter((Vector2[]) null);
+	}
+	
+	/**
+	 * Tests the getAverageCenter method passing an empty array.
+	 * @since 3.0.4
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void getAverageCenterEmptyArray() {
+		Geometry.getAverageCenter(new Vector2[] {});
+	}
+	
+	/**
+	 * Tests the getAverageCenter method passing an array with null elements.
+	 * @since 3.0.4
+	 */
+	@Test(expected = NullPointerException.class)
+	public void getAverageCenterArrayNullElements() {
+		Geometry.getAverageCenter(new Vector2[] {
+			new Vector2(1.0, 0.0),
+			null,
+			new Vector2(4.0, 3.0),
+			new Vector2(-2.0, -1.0),
+			null
+		});
 	}
 	
 	/**
@@ -92,6 +139,21 @@ public class GeometryTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void getAverageCenterEmptyList() {
 		Geometry.getAverageCenter(new ArrayList<Vector2>());
+	}
+	
+	/**
+	 * Tests the getAverageCenter method passing an array with null elements.
+	 * @since 3.0.4
+	 */
+	@Test(expected = NullPointerException.class)
+	public void getAverageCenterListNullElements() {
+		List<Vector2> vertices = new ArrayList<Vector2>();
+		vertices.add(new Vector2(0.0, -1.0));
+		vertices.add(null);
+		vertices.add(new Vector2(2.0, -1.0));
+		vertices.add(new Vector2(-3.0, -1.0));
+		vertices.add(null);
+		Geometry.getAverageCenter(vertices);
 	}
 	
 	/**
@@ -123,6 +185,30 @@ public class GeometryTest {
 	public void getAreaWeightedCenterNullArray() {
 		Geometry.getAreaWeightedCenter((Vector2[]) null);
 	}
+
+	/**
+	 * Tests the getAreaWeightedCenter method passing an empty array.
+	 * @since 3.0.4
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void getAreaWeightedCenterEmptyArray() {
+		Geometry.getAreaWeightedCenter(new Vector2[] {});
+	}
+
+	/**
+	 * Tests the getAreaWeightedCenter method passing an array with null elements.
+	 * @since 3.0.4
+	 */
+	@Test(expected = NullPointerException.class)
+	public void getAreaWeightedCenterArrayNullElements() {
+		Geometry.getAreaWeightedCenter(new Vector2[] {
+			new Vector2(1.0, 0.0),
+			null,
+			new Vector2(4.0, 3.0),
+			new Vector2(-2.0, -1.0),
+			null
+		});
+	}
 	
 	/**
 	 * Tests the getAreaWeightedCenter method passing a null list.
@@ -140,6 +226,21 @@ public class GeometryTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void getAreaWeightedCenterEmptyList() {
 		Geometry.getAreaWeightedCenter(new ArrayList<Vector2>());
+	}
+	
+	/**
+	 * Tests the getAreaWeightedCenter method passing an list with null elements.
+	 * @since 3.0.4
+	 */
+	@Test(expected = NullPointerException.class)
+	public void getAreaWeightedCenterListNullElements() {
+		List<Vector2> vertices = new ArrayList<Vector2>();
+		vertices.add(new Vector2(0.0, -1.0));
+		vertices.add(null);
+		vertices.add(new Vector2(2.0, -1.0));
+		vertices.add(new Vector2(-3.0, -1.0));
+		vertices.add(null);
+		Geometry.getAreaWeightedCenter(vertices);
 	}
 	
 	/**
@@ -182,9 +283,10 @@ public class GeometryTest {
 	
 	/**
 	 * Test case for the unitCirclePolygon methods.
+	 * @since 3.0.4
 	 */
 	@Test
-	public void unitCirclePolygon() {
+	public void createUnitCirclePolygon() {
 		Polygon p = Geometry.createUnitCirclePolygon(5, 0.5);
 		// no exception indicates the generated polygon is valid
 		// test that the correct vertices are created
@@ -223,11 +325,56 @@ public class GeometryTest {
 	}
 	
 	/**
+	 * Tests the failed creation of a negative radius unit circle polygon.
+	 * @since 3.0.4
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createNegativeRadiusUnitCirclePolygon() {
+		Geometry.createUnitCirclePolygon(5, -0.5);
+	}
+
+	/**
+	 * Tests the failed creation of a zero radius unit circle polygon.
+	 * @since 3.0.4
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createZeroRadiusUnitCirclePolygon() {
+		Geometry.createUnitCirclePolygon(5, 0.0);
+	}
+
+	/**
+	 * Tests the failed creation of a unit circle polygon with less than 3 points.
+	 * @since 3.0.4
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createLessThan3PointsUnitCirclePolygon() {
+		Geometry.createUnitCirclePolygon(2, 0.5);
+	}
+	
+	/**
 	 * Tests the successful creation of a circle.
 	 */
 	@Test
 	public void createCircle() {
 		Geometry.createCircle(1.0);
+	}
+	
+	/**
+	 * Tests the failed creation of a circle using a negative radius.
+	 * @since 3.0.4
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createNegativeRadiusCircle() {
+		Geometry.createCircle(-1.0);
+	}
+
+	/**
+	 * Tests the failed creation of a circle using a zero radius.
+	 * @since 3.0.4
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createZeroRadiusCircle() {
+		Geometry.createCircle(0.0);
 	}
 	
 	/**
@@ -303,7 +450,7 @@ public class GeometryTest {
 	 * Tests the creation of a square with a zero size.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void createSquareZero() {
+	public void createZeroSizeSquare() {
 		Geometry.createSquare(0.0);
 	}
 	
@@ -311,7 +458,7 @@ public class GeometryTest {
 	 * Tests the creation of a square with a negative size.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void createSquareNegative() {
+	public void createNegativeSizeSquare() {
 		Geometry.createSquare(-1.0);
 	}
 	
@@ -331,6 +478,38 @@ public class GeometryTest {
 	@Test
 	public void createRectangle() {
 		Geometry.createRectangle(1.0, 2.0);
+	}
+	
+	/**
+	 * Tests the failed creation of a rectangle with a negative width.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createNegativeWidthRectangle() {
+		Geometry.createRectangle(-1.0, 2.0);
+	}
+	
+	/**
+	 * Tests the failed creation of a rectangle with a negative height.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createNegativeHeightRectangle() {
+		Geometry.createRectangle(1.0, -2.0);
+	}
+
+	/**
+	 * Tests the failed creation of a rectangle with a zero width.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createZeroWidthRectangle() {
+		Geometry.createRectangle(0.0, 2.0);
+	}
+	
+	/**
+	 * Tests the failed creation of a rectangle with a zero height.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createZeroHeightRectangle() {
+		Geometry.createRectangle(1.0, 0.0);
 	}
 	
 	/**
@@ -621,8 +800,17 @@ public class GeometryTest {
 	 * Tests the creation of a segment passing a null point.
 	 */
 	@Test(expected = NullPointerException.class)
-	public void createSegmentNullPoint() {
+	public void createSegmentNullPoint1() {
 		Geometry.createSegment(null, new Vector2());
+	}
+
+	/**
+	 * Tests the creation of a segment passing a null point.
+	 * @since 3.0.4
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createSegmentNullPoint2() {
+		Geometry.createSegment(new Vector2(), null);
 	}
 	
 	/**
@@ -658,7 +846,7 @@ public class GeometryTest {
 	 * Tests the creation of a segment passing a zero length.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void createHorizontalSegmentZeroLength() {
+	public void createZeroLengthHorizontalSegment() {
 		Geometry.createHorizontalSegment(0.0);
 	}
 
@@ -666,7 +854,7 @@ public class GeometryTest {
 	 * Tests the creation of a segment passing a negative length.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void createHorizontalSegmentNegativeLength() {
+	public void createNegativeLengthHorizontalSegment() {
 		Geometry.createHorizontalSegment(-1.0);
 	}
 	
@@ -674,7 +862,7 @@ public class GeometryTest {
 	 * Tests the successful creation of a segment given a length.
 	 */
 	@Test
-	public void createHorizontalSegmentLength() {
+	public void createHorizontalSegment() {
 		Segment s = Geometry.createHorizontalSegment(5.0);
 		
 		// test that the center is the origin
@@ -688,7 +876,7 @@ public class GeometryTest {
 	 * @since 2.2.3
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void createVerticalSegmentZeroLength() {
+	public void createZeroLengthVerticalSegment() {
 		Geometry.createVerticalSegment(0.0);
 	}
 
@@ -697,7 +885,7 @@ public class GeometryTest {
 	 * @since 2.2.3
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void createVerticalSegmentNegativeLength() {
+	public void createNegativeLengthVerticalSegment() {
 		Geometry.createVerticalSegment(-1.0);
 	}
 	
@@ -706,7 +894,7 @@ public class GeometryTest {
 	 * @since 2.2.3
 	 */
 	@Test
-	public void createVerticalSegmentLength() {
+	public void createVerticalSegment() {
 		Segment s = Geometry.createVerticalSegment(5.0);
 		
 		// test that the center is the origin

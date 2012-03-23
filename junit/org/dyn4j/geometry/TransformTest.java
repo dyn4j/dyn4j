@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Transform} object.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.0.4
  * @since 1.0.0
  */
 public class TransformTest {
@@ -154,6 +154,39 @@ public class TransformTest {
 	}
 	
 	/**
+	 * Tests the transform methods.
+	 * @since 3.0.4
+	 */
+	@Test
+	public void transform() {
+		Transform t = new Transform();
+		t.translate(2.0, 1.0);
+		t.rotate(Math.toRadians(25), 1.0, -1.0);
+		
+		Vector2 v = new Vector2(1.0, 0.0);
+		
+		// test transformation
+		t.transform(v);
+		TestCase.assertEquals(1.967, v.x, 1.0e-3);
+		TestCase.assertEquals(1.657, v.y, 1.0e-3);
+		
+		// test inverse transformation
+		t.inverseTransform(v);
+		TestCase.assertEquals(1.000, v.x, 1.0e-3);
+		TestCase.assertEquals(0.000, v.y, 1.0e-3);
+		
+		// test just a rotation transformation
+		t.transformR(v);
+		TestCase.assertEquals(0.906, v.x, 1.0e-3);
+		TestCase.assertEquals(0.422, v.y, 1.0e-3);
+		
+		// test inverse rotation transformation
+		t.inverseTransformR(v);
+		t.transformR(v);
+		TestCase.assertTrue(v.equals(v));
+	}
+	
+	/**
 	 * Tests the setTransform method.
 	 */
 	@Test
@@ -207,11 +240,11 @@ public class TransformTest {
 	@Test
 	public void setRotation() {
 		Transform tx = new Transform();
-		tx.translate(1.0, 0.0);
 		tx.rotate(Math.toRadians(45.0));
+		tx.translate(1.0, 0.0);
 		
-		tx.setRotation(0.0);
-		TestCase.assertEquals(0.000, tx.getRotation(), 1.0e-3);
+		tx.setRotation(Math.toRadians(30.0));
+		TestCase.assertEquals(30.000, Math.toDegrees(tx.getRotation()), 1.0e-3);
 		TestCase.assertEquals(1.0, tx.x);
 		TestCase.assertEquals(0.0, tx.y);
 	}
@@ -237,10 +270,17 @@ public class TransformTest {
 		
 		final double alpha = 0.5;
 		
+		Transform mid = new Transform();
+		start.lerp(end, alpha, mid);
 		start.lerp(end, alpha);
 		
-		Vector2 m = start.getTransformed(p);
+		Vector2 m = mid.getTransformed(p);
+		// this test only works this way for the mid point
+		// otherwise we would have to replicate the lerp method
+		TestCase.assertEquals((s.x + e.x) * alpha, m.x);
+		TestCase.assertEquals((s.y + e.y) * alpha, m.y);
 		
+		m = start.getTransformed(p);
 		// this test only works this way for the mid point
 		// otherwise we would have to replicate the lerp method
 		TestCase.assertEquals((s.x + e.x) * alpha, m.x);

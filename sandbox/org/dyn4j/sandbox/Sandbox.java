@@ -1895,9 +1895,9 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 			int scroll = this.mouse.getScrollAmount();
 			// zoom in or out
 			if (scroll < 0) {
-				this.camera.zoomIn();
-			} else {
 				this.camera.zoomOut();
+			} else {
+				this.camera.zoomIn();
 			}
 		}
 		
@@ -2771,7 +2771,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	 * @param args the command line arguments
 	 */
 	public static final void main(String[] args) {
-		GLProfile.initSingleton(true);
 		// attempt to use the nimbus look and feel
 		try {
 		    for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {

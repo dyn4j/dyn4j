@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -34,10 +34,49 @@ import org.junit.Test;
 /**
  * Test case for the {@link Triangle} class.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.0.4
  * @since 1.0.0
  */
 public class TriangleTest {
+	/**
+	 * Tests the failed creation of a triangle with one point being null.
+	 * @since 3.0.4
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createNullPoint1() {
+		new Triangle(
+			null,
+			new Vector2(-0.5, -0.5),
+			new Vector2( 0.5, -0.5)
+		);
+	}
+	
+	/**
+	 * Tests the failed creation of a triangle with one point being null.
+	 * @since 3.0.4
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createNullPoint2() {
+		new Triangle(
+			new Vector2(-0.5, -0.5),
+			null,
+			new Vector2( 0.5, -0.5)
+		);
+	}
+
+	/**
+	 * Tests the failed creation of a triangle with one point being null.
+	 * @since 3.0.4
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createNullPoint3() {
+		new Triangle(
+			new Vector2(-0.5, -0.5),
+			new Vector2( 0.5, -0.5),
+			null
+		);
+	}
+	
 	/**
 	 * Tests the contains method.
 	 */

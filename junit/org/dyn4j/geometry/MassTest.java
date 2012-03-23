@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -41,7 +41,7 @@ import org.junit.Test;
 /**
  * Tests the methods of the {@link Mass} class.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.0.4
  * @since 1.0.0
  */
 public class MassTest {
@@ -273,6 +273,24 @@ public class MassTest {
 		TestCase.assertEquals(1.000, m.getMass(), 1.0e-3);
 		TestCase.assertEquals(2.000, m.getInertia(), 1.0e-3);
 	}
+
+	/**
+	 * Test the create method accepting a null list.
+	 * @since 3.0.4
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createListNull() {
+		Mass.create(null);
+	}
+	
+	/**
+	 * Test the create method accepting an empty list.
+	 * @since 3.0.4
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createListEmpty() {
+		Mass.create(new ArrayList<Mass>());
+	}
 	
 	/**
 	 * Test the create method accepting a list of one null mass.
@@ -338,5 +356,15 @@ public class MassTest {
 		TestCase.assertFalse(0.0 == mi.invInertia);
 		TestCase.assertEquals(0.0, mi.getMass());
 		TestCase.assertEquals(0.0, mi.getInverseMass());
+	}
+	
+	/**
+	 * Tests setting the type of mass to null.
+	 * @since 3.0.4
+	 */
+	@Test(expected = NullPointerException.class)
+	public void setNullType() {
+		Mass m = new Mass();
+		m.setType(null);
 	}
 }

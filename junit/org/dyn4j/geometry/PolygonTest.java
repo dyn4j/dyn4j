@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -36,7 +36,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Polygon} class.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.0.4
  * @since 1.0.0
  */
 public class PolygonTest {
@@ -332,5 +332,34 @@ public class PolygonTest {
 		
 		TestCase.assertEquals( 2.000, p.vertices[2].x, 1.0e-3);
 		TestCase.assertEquals(-1.500, p.vertices[2].y, 1.0e-3);
+	}
+	
+	/**
+	 * Tests the createAABB method.
+	 * @since 3.0.4
+	 */
+	@Test
+	public void createAABB() {
+		Vector2[] vertices = new Vector2[] {
+				new Vector2(0.0, 1.0),
+				new Vector2(-1.0, -1.0),
+				new Vector2(1.0, -1.0)
+			};
+		Polygon p = new Polygon(vertices);
+		
+		AABB aabb = p.createAABB(Transform.IDENTITY);
+		TestCase.assertEquals(-1.0, aabb.getMinX(), 1.0e-3);
+		TestCase.assertEquals(-1.0, aabb.getMinY(), 1.0e-3);
+		TestCase.assertEquals( 1.0, aabb.getMaxX(), 1.0e-3);
+		TestCase.assertEquals( 1.0, aabb.getMaxY(), 1.0e-3);
+		
+		Transform tx = new Transform();
+		tx.rotate(Math.toRadians(30.0));
+		tx.translate(1.0, 2.0);
+		aabb = p.createAABB(tx);
+		TestCase.assertEquals( 0.500, aabb.getMinX(), 1.0e-3);
+		TestCase.assertEquals( 0.634, aabb.getMinY(), 1.0e-3);
+		TestCase.assertEquals( 2.366, aabb.getMaxX(), 1.0e-3);
+		TestCase.assertEquals( 2.866, aabb.getMaxY(), 1.0e-3);
 	}
 }
