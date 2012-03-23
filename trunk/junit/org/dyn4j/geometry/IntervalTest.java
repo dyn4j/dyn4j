@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Interval} class.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.0.4
  * @since 1.0.0
  */
 public class IntervalTest {
@@ -218,5 +218,47 @@ public class IntervalTest {
 		u = i1.getIntersection(i3);
 		TestCase.assertEquals(0.0, u.min);
 		TestCase.assertEquals(0.0, u.max);
+	}
+	
+	/**
+	 * Tests the distance method.
+	 * @since 3.0.4
+	 */
+	@Test
+	public void distance() {
+		Interval i1 = new Interval(-2.0, 3.0);
+		Interval i2 = new Interval(-1.0, 4.0);
+		
+		// overlapping intervals should return 0
+		TestCase.assertEquals(0.0, i1.distance(i2));
+		
+		i2 = new Interval(4.0, 6.0);
+		
+		TestCase.assertEquals(1.0, i1.distance(i2));
+		TestCase.assertEquals(1.0, i2.distance(i1));
+	}
+	
+	/**
+	 * Tests the expand method.
+	 * @since 3.0.4
+	 */
+	@Test
+	public void expand() {
+		Interval i = new Interval(-2.0, 2.0);
+		
+		// test a normal expansion
+		i.expand(2.0);
+		TestCase.assertEquals(-3.0, i.min, 1.0e-3);
+		TestCase.assertEquals( 3.0, i.max, 1.0e-3);
+		
+		// test no expansion
+		i.expand(0.0);
+		TestCase.assertEquals(-3.0, i.min, 1.0e-3);
+		TestCase.assertEquals( 3.0, i.max, 1.0e-3);
+		
+		// test negative expansion
+		i.expand(-1.0);
+		TestCase.assertEquals(-2.5, i.min, 1.0e-3);
+		TestCase.assertEquals( 2.5, i.max, 1.0e-3);
 	}
 }

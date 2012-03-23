@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,11 +31,11 @@ import org.dyn4j.resources.Messages;
  * <p>
  * Supported operations are rotation and translation.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.0.4
  * @since 1.0.0
  */
 public class Transform implements Transformable {
-	/** Two times PI */
+	/** Two times &pi; */
 	private static final double TWO_PI = Math.PI * 2.0;
 	
 	/**
@@ -129,7 +129,7 @@ public class Transform implements Transformable {
 		/* (non-Javadoc)
 		 * @see org.dyn4j.geometry.Transform#setRotation(double)
 		 */
-		public void setRotation(double theta) {
+		public double setRotation(double theta) {
 			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
 		}
 		
@@ -515,7 +515,7 @@ public class Transform implements Transformable {
 	
 	/**
 	 * Returns the rotation.
-	 * @return double angle in the range [-pi, pi]
+	 * @return double angle in the range [-&pi;, &pi;]
 	 */
 	public double getRotation() {
 		return Math.atan2(this.m10, this.m00);
@@ -525,15 +525,18 @@ public class Transform implements Transformable {
 	 * Sets the rotation and returns the previous
 	 * rotation.
 	 * @param theta the angle in radians
-	 * @since 1.2.0
+	 * @return double the old rotation in radians in the range [-&pi;, &pi;] 
+	 * @since 3.0.4
 	 */
-	public void setRotation(double theta) {
+	public double setRotation(double theta) {
 		// get the current rotation
 		double r = this.getRotation();
 		// get rid of the current rotation
-		this.rotate(-r);
+		this.rotate(-r, this.x, this.y);
 		// rotate the given amount
-		this.rotate(theta);
+		this.rotate(theta, this.x, this.y);
+		// return the previous amount
+		return r;
 	}
 	
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -28,7 +28,9 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.dyn4j.collision.broadphase.AbstractAABBDetector;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
+import org.dyn4j.collision.broadphase.BroadphasePair;
 import org.dyn4j.collision.broadphase.DynamicAABBTree;
 import org.dyn4j.collision.broadphase.SapBruteForce;
 import org.dyn4j.collision.broadphase.SapIncremental;
@@ -43,7 +45,7 @@ import org.junit.Test;
 /**
  * Class used to test the {@link BroadphaseDetector} methods.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.0.4
  * @since 3.0.0
  */
 public class BroadphaseTest {
@@ -273,6 +275,57 @@ public class BroadphaseTest {
 		if (Math.abs(aabb1.getMaxX() - aabb2.getMaxX()) >= 1.0E-8) return false;
 		if (Math.abs(aabb1.getMaxY() - aabb2.getMaxY()) >= 1.0E-8) return false;
 		return true;
+	}
+	
+	/**
+	 * Tests the {@link AbstractAABBDetector} detect methods.
+	 * @since 3.0.4
+	 */
+	@Test
+	public void detectAbstract() {
+		CollidableTest ct1 = new CollidableTest(Geometry.createCircle(1.0));
+		CollidableTest ct2 = new CollidableTest(Geometry.createUnitCirclePolygon(5, 0.5));
+		ct1.translate(-2.0, 0.0);
+		ct2.translate(-1.0, 1.0);
+		
+		TestCase.assertTrue(this.dynT.detect(ct1, ct2));
+		TestCase.assertTrue(this.dynT.detect(ct1.getFixture(0).shape, ct1.transform, ct2.getFixture(0).shape, ct2.transform));
+		
+		ct1.translate(-1.0, 0.0);
+		TestCase.assertFalse(this.dynT.detect(ct1, ct2));
+		TestCase.assertFalse(this.dynT.detect(ct1.getFixture(0).shape, ct1.transform, ct2.getFixture(0).shape, ct2.transform));
+	}
+	
+	/**
+	 * Tests the detect method.
+	 * @since 3.0.4
+	 */
+	@Test
+	public void detect() {
+		CollidableTest ct1 = new CollidableTest(Geometry.createCircle(1.0));
+		CollidableTest ct2 = new CollidableTest(Geometry.createUnitCirclePolygon(5, 0.5));
+		CollidableTest ct3 = new CollidableTest(Geometry.createRectangle(1.0, 0.5));
+		CollidableTest ct4 = new CollidableTest(Geometry.createVerticalSegment(2.0));
+		
+		ct1.translate(-2.0, 0.0);
+		ct2.translate(-1.0, 1.0);
+		ct3.translate(0.5, -2.0);
+		ct4.translate(1.0, 1.0);
+		
+		// add the items to the broadphases
+		this.sapI.add(ct1); this.sapI.add(ct2); this.sapI.add(ct3); this.sapI.add(ct4);
+		this.sapBF.add(ct1); this.sapBF.add(ct2); this.sapBF.add(ct3); this.sapBF.add(ct4);
+		this.sapT.add(ct1); this.sapT.add(ct2); this.sapT.add(ct3); this.sapT.add(ct4);
+		this.dynT.add(ct1); this.dynT.add(ct2); this.dynT.add(ct3); this.dynT.add(ct4);
+		
+		List<BroadphasePair<CollidableTest>> pairs = this.sapI.detect();
+		TestCase.assertEquals(1, pairs.size());
+		pairs = this.sapBF.detect();
+		TestCase.assertEquals(1, pairs.size());
+		pairs = this.sapT.detect();
+		TestCase.assertEquals(1, pairs.size());
+		pairs = this.dynT.detect();
+		TestCase.assertEquals(1, pairs.size());
 	}
 	
 	/**

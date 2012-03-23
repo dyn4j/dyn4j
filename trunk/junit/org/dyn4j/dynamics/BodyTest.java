@@ -276,12 +276,41 @@ public class BodyTest {
 	 * Tests setting the mass type.
 	 * @since 2.2.3
 	 */
+	@Test
 	public void setMassType() {
 		Body b = new Body();
 		// should auto generate it
 		b.setMassType(Mass.Type.NORMAL);
-		// should generate another and should default to normal
+	}
+
+	/**
+	 * Tests setting the mass type to null.
+	 * @since 3.0.4
+	 */
+	@Test(expected = NullPointerException.class)
+	public void setNullMassType() {
+		Body b = new Body();
 		b.setMassType(null);
+	}
+
+	/**
+	 * Tests setting the mass to null.
+	 * @since 3.0.4
+	 */
+	@Test(expected = NullPointerException.class)
+	public void setNullMass() {
+		Body b = new Body();
+		b.setMass((Mass)null);
+	}
+
+	/**
+	 * Tests setting the mass type to null.
+	 * @since 3.0.4
+	 */
+	@Test(expected = NullPointerException.class)
+	public void setNullMassType2() {
+		Body b = new Body();
+		b.setMass((Mass.Type)null);
 	}
 	
 	/**

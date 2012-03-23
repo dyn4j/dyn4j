@@ -168,7 +168,7 @@ public class World {
 	/**
 	 * Full constructor.
 	 * <p>
-	 * Defaults to using {@link #EARTH_GRAVITY}, {@link SapIncremental} broad-phase,
+	 * Defaults to using {@link #EARTH_GRAVITY}, {@link DynamicAABBTree} broad-phase,
 	 * {@link Gjk} narrow-phase, and {@link ClippingManifoldSolver}.
 	 * @param bounds the bounds of the {@link World}; can be null
 	 */
@@ -1616,11 +1616,12 @@ public class World {
 						this.destructionListener.destroyed(contactPoint);
 					}
 				}
+				
+				// notify of the destroyed body
+				this.destructionListener.destroyed(body);
 			}
 			// clear all the contacts
 			body.contacts.clear();
-			// notify of the destroyed body
-			this.destructionListener.destroyed(body);
 			// set the world to null
 			body.world = null;
 		}
