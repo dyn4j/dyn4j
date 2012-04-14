@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE jnlp SYSTEM "http://java.sun.com/dtd/JNLP-1.5.dtd">
-<jnlp spec="1.5+" codebase="http://www.dyn4j.org/TestBed/latest/" version="3.0.4">
+<jnlp spec="1.5+" codebase="http://www.dyn4j.org/TestBed/latest/" version="3.1.0">
 	<information>
 		<title>dyn4j TestBed</title>
 		<vendor>dyn4j</vendor>

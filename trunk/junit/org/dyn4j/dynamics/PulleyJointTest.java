@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,7 +26,6 @@ package org.dyn4j.dynamics;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.joint.PulleyJoint;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Before;
@@ -129,5 +128,24 @@ public class PulleyJointTest {
 	public void setRatioZero() {
 		PulleyJoint pj = new PulleyJoint(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
 		pj.setRatio(0.0);
+	}
+	
+	/**
+	 * Tests the shiftCoordinates method.
+	 * @since 3.1.0
+	 */
+	@Test
+	public void shiftCoordinates() {
+		World w = new World();
+		
+		PulleyJoint pj = new PulleyJoint(b1, b2, new Vector2(1.0, 0.0), new Vector2(-1.0, 1.0), new Vector2(), new Vector2());
+		
+		w.add(pj);
+		w.shiftCoordinates(new Vector2(-1.0, 2.0));
+		
+		TestCase.assertEquals( 0.0, pj.getPulleyAnchor1().x, 1.0e-3);
+		TestCase.assertEquals( 2.0, pj.getPulleyAnchor1().y, 1.0e-3);
+		TestCase.assertEquals(-2.0, pj.getPulleyAnchor2().x, 1.0e-3);
+		TestCase.assertEquals( 3.0, pj.getPulleyAnchor2().y, 1.0e-3);
 	}
 }

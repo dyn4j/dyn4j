@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -59,7 +59,7 @@ import org.dyn4j.resources.Messages;
  * angleJoint.setReferenceAngle(Math.toRadians(90));
  * </pre>
  * @author William Bittle
- * @version 3.0.3
+ * @version 3.1.0
  * @since 2.2.2
  */
 public class AngleJoint extends Joint {
@@ -330,7 +330,24 @@ public class AngleJoint extends Joint {
 	public double getReactionTorque(double invdt) {
 		return this.impulse * invdt;
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.Constraint#shiftCoordinates(org.dyn4j.geometry.Vector2)
+	 */
+	@Override
+	protected void shiftCoordinates(Vector2 shift) {
+		// nothing to do here since there are no anchor points
+	}
 
+	/**
+	 * Returns the relative angle between the two {@link Body}s in radians in the range [-&pi;, &pi;].
+	 * @return double
+	 * @since 3.1.0
+	 */
+	public double getJointAngle() {
+		return this.getRelativeRotation();
+	}
+	
 	/**
 	 * Sets whether the angle limits are enabled.
 	 * @param flag true if the angle limits should be enforced
@@ -362,6 +379,8 @@ public class AngleJoint extends Joint {
 	
 	/**
 	 * Sets the upper limit in radians.
+	 * <p>
+	 * See the class documentation for more details on the limit ranges.
 	 * @param upperLimit the upper limit in radians
 	 * @throws IllegalArgumentException if upperLimit is less than the current lower limit
 	 */
@@ -385,6 +404,8 @@ public class AngleJoint extends Joint {
 	
 	/**
 	 * Sets the lower limit in radians.
+	 * <p>
+	 * See the class documentation for more details on the limit ranges.
 	 * @param lowerLimit the lower limit in radians
 	 * @throws IllegalArgumentException if lowerLimit is greater than the current upper limit
 	 */
@@ -400,6 +421,8 @@ public class AngleJoint extends Joint {
 	
 	/**
 	 * Sets both the lower and upper limits.
+	 * <p>
+	 * See the class documentation for more details on the limit ranges.
 	 * @param lowerLimit the lower limit in radians
 	 * @param upperLimit the upper limit in radians
 	 * @throws IllegalArgumentException if lowerLimit is greater than upperLimit
@@ -417,6 +440,8 @@ public class AngleJoint extends Joint {
 
 	/**
 	 * Sets both the lower and upper limits and enables them.
+	 * <p>
+	 * See the class documentation for more details on the limit ranges.
 	 * @param lowerLimit the lower limit in radians
 	 * @param upperLimit the upper limit in radians
 	 * @throws IllegalArgumentException if lowerLimit is greater than upperLimit
@@ -430,6 +455,8 @@ public class AngleJoint extends Joint {
 	
 	/**
 	 * Sets both the lower and upper limits to the given limit.
+	 * <p>
+	 * See the class documentation for more details on the limit ranges.
 	 * @param limit the desired limit
 	 */
 	public void setLimits(double limit) {
@@ -443,6 +470,8 @@ public class AngleJoint extends Joint {
 	
 	/**
 	 * Sets both the lower and upper limits to the given limit and enables them.
+	 * <p>
+	 * See the class documentation for more details on the limit ranges.
 	 * @param limit the desired limit
 	 */
 	public void setLimitsEnabled(double limit) {
@@ -471,7 +500,9 @@ public class AngleJoint extends Joint {
 	 * This method can be used to set the reference angle to override the computed
 	 * reference angle from the constructor.  This is useful in recreating the joint
 	 * from a current state.
-	 * @param angle the reference angle
+	 * <p>
+	 * See the class documentation for more details.
+	 * @param angle the reference angle in radians
 	 * @see #getReferenceAngle()
 	 * @since 3.0.1
 	 */

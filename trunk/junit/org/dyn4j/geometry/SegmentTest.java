@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -36,13 +36,13 @@ import org.junit.Test;
 /**
  * Test case for the {@link Segment} class.
  * @author William Bittle
- * @version 3.0.4
+ * @version 3.1.0
  * @since 1.0.0
  */
 public class SegmentTest {
 	/**
 	 * Tests a failed create using one null point.
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createNullPoint1() {
@@ -51,7 +51,7 @@ public class SegmentTest {
 	
 	/**
 	 * Tests a failed create using one null point.
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createNullPoint2() {
@@ -356,7 +356,7 @@ public class SegmentTest {
 	
 	/**
 	 * Tests the createAABB method.
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	@Test
 	public void createAABB() {

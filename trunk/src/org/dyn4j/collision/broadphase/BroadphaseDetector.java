@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,6 +33,7 @@ import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Ray;
 import org.dyn4j.geometry.Shape;
 import org.dyn4j.geometry.Transform;
+import org.dyn4j.geometry.Vector2;
 
 /**
  * Represents a broad-phase collision detection algorithm.
@@ -55,7 +56,7 @@ import org.dyn4j.geometry.Transform;
  * The {@link #detect(Collidable, Collidable)} and {@link #detect(Convex, Transform, Convex, Transform)} methods do not
  * use the current state of the broadphase.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.1.0
  * @since 1.0.0
  * @param <E> the {@link Collidable} type
  */
@@ -164,4 +165,11 @@ public interface BroadphaseDetector<E extends Collidable> {
 	 * @param expansion the expansion
 	 */
 	public abstract void setAABBExpansion(double expansion);
+	
+	/**
+	 * Translates all {@link Collidable} proxies to match the given coordinate shift.
+	 * @param shift the amount to shift along the x and y axes
+	 * @since 3.1.0
+	 */
+	public abstract void shiftCoordinates(Vector2 shift);
 }

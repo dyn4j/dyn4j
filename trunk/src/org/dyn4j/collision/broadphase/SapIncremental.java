@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -84,7 +84,7 @@ import org.dyn4j.geometry.Vector2;
  * However, allowing this causes more work for the {@link NarrowphaseDetector}s whose
  * algorithms are more complex.  These situations should be avoided for maximum performance.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.0
  * @since 1.0.0
  * @param <E> the {@link Collidable} type
  */
@@ -122,7 +122,7 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 				} else if (diff < 0) {
 					return -1;
 				} else {
-					// finally if they y values are the same compare on the ids
+					// finally if their y values are the same then compare on the ids
 					return this.collidable.getId().compareTo(o.collidable.getId());
 				}
 			}
@@ -463,5 +463,18 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 		
 		// pass it to the aabb detection routine
 		return this.detect(aabb);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#shiftCoordinates(org.dyn4j.geometry.Vector2)
+	 */
+	@Override
+	public void shiftCoordinates(Vector2 shift) {
+		// loop over all the proxies and translate their aabb
+		int pSize = this.proxyList.size();
+		for (int i = 0; i < pSize; i++) {
+			Proxy proxy = this.proxyList.get(i);
+			proxy.aabb.translate(shift);
+		}
 	}
 }

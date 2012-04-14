@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,8 +40,8 @@ import org.junit.Test;
  * <p>
  * Was FixtureTest.
  * @author William Bittle
- * @version 3.0.4
- * @since 3.0.4
+ * @version 3.1.0
+ * @since 3.1.0
  */
 public class BodyFixtureTest {
 	/** The {@link BodyFixture} object to test */
@@ -134,7 +134,7 @@ public class BodyFixtureTest {
 	
 	/**
 	 * Tests setting the filter.
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	@Test
 	public void setFilter() {
@@ -145,7 +145,7 @@ public class BodyFixtureTest {
 
 	/**
 	 * Tests setting a null filter.
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	@Test(expected = NullPointerException.class)
 	public void setNullFilter() {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -36,7 +36,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Circle} class.
  * @author William Bittle
- * @version 3.0.4
+ * @version 3.1.0
  * @since 1.0.0
  */
 public class CircleTest {
@@ -206,7 +206,7 @@ public class CircleTest {
 	
 	/**
 	 * Tests the generated AABB.
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	@Test
 	public void createAABB() {

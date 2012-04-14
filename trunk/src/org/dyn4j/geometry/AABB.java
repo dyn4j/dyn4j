@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,7 +29,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents an axis aligned bounding box.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.0
  * @since 3.0.0
  */
 public class AABB {
@@ -72,6 +72,16 @@ public class AABB {
 		.append("|Max=").append(this.max)
 		.append("]");
 		return sb.toString();
+	}
+	
+	/**
+	 * Translates the AABB by the given translation.
+	 * @param translation the translation
+	 * @since 3.1.0
+	 */
+	public void translate(Vector2 translation) {
+		this.max.add(translation);
+		this.min.add(translation);
 	}
 	
 	/**

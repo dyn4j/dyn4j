@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -71,7 +71,7 @@ import org.dyn4j.resources.Messages;
  * Employs the same {@link Island} solving technique as <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.4
+ * @version 3.1.0
  * @since 1.0.0
  */
 public class World {
@@ -515,7 +515,7 @@ public class World {
 		if (size > 0) {
 			// test for collisions via the broad-phase
 			List<BroadphasePair<Body>> pairs = this.broadphaseDetector.detect();
-			int pSize = pairs.size();		
+			int pSize = pairs.size();
 			
 			// using the broad-phase results, test for narrow-phase
 			for (int i = 0; i < pSize; i++) {
@@ -964,6 +964,48 @@ public class World {
 		}
 		
 		return found;
+	}
+	
+	/**
+	 * Shifts the coordinates of the entire world by the given amount.
+	 * <pre>
+	 * NewPosition = OldPosition + shift
+	 * </pre>
+	 * This method is useful in situations where the world is very large
+	 * causing very large numbers to be used in the computations.  Shifting
+	 * the coordinate system allows the computations to be localized and 
+	 * retain accuracy.
+	 * <p>
+	 * This method modifies the coordinates of every body and joint in the world.
+	 * <p>
+	 * Adding joints or bodies after this method is called should consider that
+	 * everything has been shifted.
+	 * <p>
+	 * This method does <b>NOT</b> require a call to {@link #setUpdateRequired(boolean)}.
+	 * @param shift the distance to shift along the x and y axes
+	 * @since 3.1.0
+	 */
+	public void shiftCoordinates(Vector2 shift) {
+		// update the bodies
+		int bSize = this.bodies.size();
+		for (int i = 0; i < bSize; i++) {
+			Body body = this.bodies.get(i);
+			body.shiftCoordinates(shift);
+		}
+		// update the joints
+		int jSize = this.joints.size();
+		for (int i = 0; i < jSize; i++) {
+			Joint joint = this.joints.get(i);
+			joint.shiftCoordinates(shift);
+		}
+		// update the broadphase
+		this.broadphaseDetector.shiftCoordinates(shift);
+		// update the bounds
+		if (this.bounds != null) {
+			this.bounds.shiftCoordinates(shift);
+		}
+		// update contact manager
+		this.contactManager.shiftCoordinates(shift);
 	}
 	
 	/**

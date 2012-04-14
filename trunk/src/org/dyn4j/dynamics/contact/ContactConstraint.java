@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -39,7 +39,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents a {@link Contact} constraint for each {@link Body} pair.  
  * @author William Bittle
- * @version 3.0.3
+ * @version 3.1.0
  * @since 1.0.0
  */
 public class ContactConstraint extends Constraint {
@@ -157,6 +157,22 @@ public class ContactConstraint extends Constraint {
 		}
 		sb.append("}]");
 		return sb.toString();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.Constraint#shiftCoordinates(org.dyn4j.geometry.Vector2)
+	 */
+	@Override
+	protected void shiftCoordinates(Vector2 shift) {
+		int size = this.contacts.length;
+		// loop over the contacts
+		for (int i = 0; i < size; i++) {
+			Contact c = this.contacts[i];
+			// translate the world space contact point
+			c.p.add(shift);
+			// c.p1 and c.p2 are in local coordinates
+			// and don't need to be shifted
+		}
 	}
 	
 	/**

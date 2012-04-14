@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -34,6 +34,7 @@ import org.dyn4j.collision.manifold.ManifoldPointId;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.World;
+import org.dyn4j.geometry.Vector2;
 
 /**
  * Maintains {@link ContactConstraint}s between {@link Body}s.
@@ -41,7 +42,7 @@ import org.dyn4j.dynamics.World;
  * This class performs the {@link ContactConstraint} warm starting and manages contact
  * listening.
  * @author William Bittle
- * @version 3.0.3
+ * @version 3.1.0
  * @since 1.0.0
  */
 public class ContactManager {
@@ -98,6 +99,24 @@ public class ContactManager {
 	public void reset() {
 		// clear the current contact constraints
 		this.map.clear();
+	}
+	
+	/**
+	 * Shifts stored contacts by the given coordinate shift.
+	 * <p>
+	 * Typically this method should not be called directly.  Instead 
+	 * use the {@link World#shiftCoordinates(Vector2)} method to move the 
+	 * entire world.
+	 * @param shift the distance to shift along the x and y axes
+	 * @since 3.1.0
+	 */
+	public void shiftCoordinates(Vector2 shift) {
+		// update all the contacts
+		Iterator<ContactConstraint> it = this.map.values().iterator();
+		while (it.hasNext()) {
+			ContactConstraint cc = it.next();
+			cc.shiftCoordinates(shift);
+		}
 	}
 	
 	/**

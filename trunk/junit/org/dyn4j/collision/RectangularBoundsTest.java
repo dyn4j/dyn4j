@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -41,7 +41,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link RectangularBounds} class.
  * @author William Bittle
- * @version 3.0.4
+ * @version 3.1.0
  * @since 1.0.0
  */
 public class RectangularBoundsTest {
@@ -59,7 +59,7 @@ public class RectangularBoundsTest {
 
 	/**
 	 * Tests creating a {@link RectangularBounds} with null bounds.
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createNullBounds() {
@@ -352,10 +352,27 @@ public class RectangularBoundsTest {
 	
 	/**
 	 * Tests setting the bounds to null.
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	@Test(expected = NullPointerException.class)
 	public void setNullBounds() {
 		rb.setBounds(null);
+	}
+	
+	/**
+	 * Tests shifting the coordinates of the bounds.
+	 * @since 3.1.0
+	 */
+	@Test
+	public void shiftCoordinates() {
+		Vector2 tx = rb.transform.getTranslation();
+		TestCase.assertEquals(0.000, tx.x, 1.0e-3);
+		TestCase.assertEquals(0.000, tx.y, 1.0e-3);
+		
+		// test the shifting which is really just a translation
+		rb.shiftCoordinates(new Vector2(1.0, 1.0));
+		tx = rb.transform.getTranslation();
+		TestCase.assertEquals(1.000, tx.x, 1.0e-3);
+		TestCase.assertEquals(1.000, tx.y, 1.0e-3);
 	}
 }
