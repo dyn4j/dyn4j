@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -37,11 +37,12 @@ import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.Sat;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Ray;
+import org.dyn4j.geometry.Vector2;
 
 /**
  * Abstract test for all shape - shape test classes.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.1.0
  * @since 1.0.0
  */
 public abstract class AbstractTest {
@@ -63,6 +64,8 @@ public abstract class AbstractTest {
 		public AABB getAABB(CollidableTest collidable) { return null; }
 		@Override
 		public List<CollidableTest> raycast(Ray ray, double length) { return null; }
+		@Override
+		public void shiftCoordinates(Vector2 shift) {}
 	};
 	
 	/** The SAT algorithm */

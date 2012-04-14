@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -44,7 +44,7 @@ import org.dyn4j.resources.Messages;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.3
+ * @version 3.1.0
  * @since 1.0.0
  */
 public class PrismaticJoint extends Joint {
@@ -620,6 +620,15 @@ public class PrismaticJoint extends Joint {
 		return invdt * this.impulse.y;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.Constraint#shiftCoordinates(org.dyn4j.geometry.Vector2)
+	 */
+	@Override
+	protected void shiftCoordinates(Vector2 shift) {
+		// nothing to translate here since the anchor points are in local coordinates
+		// they will move with the bodies
+	}
+	
 	/**
 	 * Returns the current joint speed.
 	 * @return double
@@ -880,6 +889,8 @@ public class PrismaticJoint extends Joint {
 	 * This method can be used to set the reference angle to override the computed
 	 * reference angle from the constructor.  This is useful in recreating the joint
 	 * from a current state.
+	 * <p>
+	 * This can also be used to override the initial angle between the bodies.
 	 * @param angle the reference angle
 	 * @see #getReferenceAngle()
 	 * @since 3.0.1

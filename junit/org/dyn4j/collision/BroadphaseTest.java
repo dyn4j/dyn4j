@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -45,7 +45,7 @@ import org.junit.Test;
 /**
  * Class used to test the {@link BroadphaseDetector} methods.
  * @author William Bittle
- * @version 3.0.4
+ * @version 3.1.0
  * @since 3.0.0
  */
 public class BroadphaseTest {
@@ -279,7 +279,7 @@ public class BroadphaseTest {
 	
 	/**
 	 * Tests the {@link AbstractAABBDetector} detect methods.
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	@Test
 	public void detectAbstract() {
@@ -298,7 +298,7 @@ public class BroadphaseTest {
 	
 	/**
 	 * Tests the detect method.
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	@Test
 	public void detect() {
@@ -524,5 +524,54 @@ public class BroadphaseTest {
 		TestCase.assertTrue(isEqual(aabbSapBF, aabb));
 		TestCase.assertTrue(isEqual(aabbSapT, aabb));
 		TestCase.assertTrue(isEqual(aabbDynT, aabb));
+	}
+	
+	/**
+	 * Tests the shiftCoordinates method.
+	 */
+	@Test
+	public void shiftCoordinates() {
+		CollidableTest ct1 = new CollidableTest(Geometry.createCircle(1.0));
+		CollidableTest ct2 = new CollidableTest(Geometry.createUnitCirclePolygon(5, 0.5));
+		CollidableTest ct3 = new CollidableTest(Geometry.createRectangle(1.0, 0.5));
+		CollidableTest ct4 = new CollidableTest(Geometry.createVerticalSegment(2.0));
+		
+		ct1.translate(-2.0, 0.0);
+		ct2.translate(-1.0, 1.0);
+		ct3.translate(0.5, -2.0);
+		ct4.translate(1.0, 1.0);
+		
+		// add the items to the broadphases
+		this.sapI.add(ct1); this.sapI.add(ct2); this.sapI.add(ct3); this.sapI.add(ct4);
+		this.sapBF.add(ct1); this.sapBF.add(ct2); this.sapBF.add(ct3); this.sapBF.add(ct4);
+		this.sapT.add(ct1); this.sapT.add(ct2); this.sapT.add(ct3); this.sapT.add(ct4);
+		this.dynT.add(ct1); this.dynT.add(ct2); this.dynT.add(ct3); this.dynT.add(ct4);
+		
+		// perform a detect on the whole broadphase
+		List<BroadphasePair<CollidableTest>> pairs = this.sapI.detect();
+		TestCase.assertEquals(1, pairs.size());
+		pairs = this.sapBF.detect();
+		TestCase.assertEquals(1, pairs.size());
+		pairs = this.sapT.detect();
+		TestCase.assertEquals(1, pairs.size());
+		pairs = this.dynT.detect();
+		TestCase.assertEquals(1, pairs.size());
+		
+		// shift the broadphases
+		Vector2 shift = new Vector2(1.0, -2.0);
+		this.sapI.shiftCoordinates(shift);
+		this.sapBF.shiftCoordinates(shift);
+		this.sapT.shiftCoordinates(shift);
+		this.dynT.shiftCoordinates(shift);
+		
+		// the number of pairs detected should be identical
+		pairs = this.sapI.detect();
+		TestCase.assertEquals(1, pairs.size());
+		pairs = this.sapBF.detect();
+		TestCase.assertEquals(1, pairs.size());
+		pairs = this.sapT.detect();
+		TestCase.assertEquals(1, pairs.size());
+		pairs = this.dynT.detect();
+		TestCase.assertEquals(1, pairs.size());
 	}
 }

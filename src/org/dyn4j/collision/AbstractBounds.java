@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Abstract implementation of the {@link Bounds} interface.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.0
  * @since 1.0.0
  */
 public abstract class AbstractBounds implements Bounds, Transformable {
@@ -105,5 +105,13 @@ public abstract class AbstractBounds implements Bounds, Transformable {
 	@Override
 	public void translate(Vector2 vector) {
 		this.transform.translate(vector);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.Bounds#shiftCoordinates(org.dyn4j.geometry.Vector2)
+	 */
+	@Override
+	public void shiftCoordinates(Vector2 shift) {
+		this.transform.translate(shift);
 	}
 }

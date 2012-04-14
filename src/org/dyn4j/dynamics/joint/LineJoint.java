@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -46,7 +46,7 @@ import org.dyn4j.resources.Messages;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.3
+ * @version 3.1.0
  * @since 1.0.0
  * @deprecated As of version 3.0.0 replaced with {@link WheelJoint}
  */
@@ -590,6 +590,15 @@ public class LineJoint extends Joint {
 	@Override
 	public double getReactionTorque(double invdt) {
 		return 0;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.Constraint#shiftCoordinates(org.dyn4j.geometry.Vector2)
+	 */
+	@Override
+	protected void shiftCoordinates(Vector2 shift) {
+		// nothing to translate here since the anchor points are in local coordinates
+		// they will move with the bodies
 	}
 	
 	/**

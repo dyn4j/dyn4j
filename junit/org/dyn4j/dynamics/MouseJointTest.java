@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -23,6 +23,8 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package org.dyn4j.dynamics;
+
+import junit.framework.TestCase;
 
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.joint.MouseJoint;
@@ -198,5 +200,22 @@ public class MouseJointTest {
 	public void setZeroFrequency() {
 		MouseJoint mj = new MouseJoint(b, new Vector2(), 4.0, 0.4, 10.0);
 		mj.setFrequency(0.0);
+	}
+
+	/**
+	 * Tests the shiftCoordinates method.
+	 * @since 3.1.0
+	 */
+	@Test
+	public void shiftCoordinates() {
+		World w = new World();
+		MouseJoint mj = new MouseJoint(b, new Vector2(), 4.0, 0.4, 10.0);
+		mj.setTarget(new Vector2(1.0, -1.0));
+		
+		w.add(mj);
+		w.shiftCoordinates(new Vector2(-1.0, 2.0));
+		
+		TestCase.assertEquals(0.0, mj.getTarget().x, 1.0e-3);
+		TestCase.assertEquals(1.0, mj.getTarget().y, 1.0e-3);
 	}
 }

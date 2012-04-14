@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -81,7 +81,7 @@ import org.dyn4j.resources.Messages;
  * setting in the {@link Settings} singleton.  Use this if the body is a fast moving
  * body, but be careful as this will incur a performance hit.
  * @author William Bittle
- * @version 3.0.3
+ * @version 3.1.0
  * @since 1.0.0
  */
 public class Body implements Swept, Collidable, Transformable {
@@ -1019,6 +1019,19 @@ public class Body implements Swept, Collidable, Transformable {
 		Vector2 wc = this.transform.getTransformed(this.mass.getCenter());
 		// translate the body negative that much to put it at the origin
 		this.transform.translate(-wc.x, -wc.y);
+	}
+	
+	/**
+	 * Shifts (translates) this body by the given shift amount.
+	 * <p>
+	 * Typically this method should not be called directly.  Instead 
+	 * use the {@link World#shiftCoordinates(Vector2)} method to move the 
+	 * entire world.
+	 * @param shift the distance to shift along the x and y axes
+	 * @since 3.1.0
+	 */
+	protected void shiftCoordinates(Vector2 shift) {
+		this.transform.translate(shift);
 	}
 	
 	/* (non-Javadoc)

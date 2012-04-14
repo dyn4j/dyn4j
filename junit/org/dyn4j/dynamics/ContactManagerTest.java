@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -30,8 +30,6 @@ import org.dyn4j.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.collision.manifold.Manifold;
 import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.Penetration;
-import org.dyn4j.dynamics.Body;
-import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.dynamics.contact.ContactListener;
 import org.dyn4j.dynamics.contact.ContactManager;
@@ -46,7 +44,7 @@ import org.junit.Test;
 /**
  * Used to test the {@link ContactManager} class.
  * @author William Bittle
- * @version 3.0.3
+ * @version 3.1.0
  * @since 1.0.2
  */
 public class ContactManagerTest {
@@ -160,7 +158,7 @@ public class ContactManagerTest {
 		cc = new ContactConstraint(b2, f2, b3, f3, m, world);
 		this.contactManager.add(cc);
 		
-		// perform one upadate (since there is nothing yet)
+		// perform one update (since there is nothing yet)
 		this.contactManager.updateContacts();
 		this.contactManager.clear();
 		this.contactListener.clear();

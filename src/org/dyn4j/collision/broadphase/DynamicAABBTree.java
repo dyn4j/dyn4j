@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -41,7 +41,7 @@ import org.dyn4j.geometry.Vector2;
  * This class uses a self-balancing binary tree to store the AABBs.  The AABBs are sort using the perimeter.
  * The perimeter hueristic is better than area for 2D because axis aligned segments have zero area.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.0
  * @since 3.0.0
  * @param <E> the {@link Collidable} type
  */
@@ -277,6 +277,46 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 		
 		// pass it to the aabb detection routine
 		return this.detect(aabb);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#shiftCoordinates(org.dyn4j.geometry.Vector2)
+	 */
+	@Override
+	public void shiftCoordinates(Vector2 shift) {
+		// we need to update all nodes in the tree (not just the
+		// nodes that contain the bodies)
+		Node node = root;
+		// perform a iterative, stack-less, in order traversal of the tree
+		while (node != null) {
+			// traverse down the left most tree first
+			if (node.left != null) {
+				node = node.left;
+			} else if (node.right != null) {
+				// if the left sub tree is null then go
+				// down the right sub tree
+				node.aabb.translate(shift);
+				node = node.right;
+			} else {
+				// if both sub trees are null then go back
+				// up the tree until we find the first left
+				// node who's right node is not null
+				node.aabb.translate(shift);
+				boolean nextNodeFound = false;
+				while (node.parent != null) {
+					if (node == node.parent.left) {
+						if (node.parent.right != null) {
+							node.parent.aabb.translate(shift);
+							node = node.parent.right;
+							nextNodeFound = true;
+							break;
+						}
+					}
+					node = node.parent;
+				}
+				if (!nextNodeFound) break;
+			}
+		}
 	}
 	
 	/**

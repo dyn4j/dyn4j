@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,11 +27,12 @@ package org.dyn4j.collision;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Transformable;
+import org.dyn4j.geometry.Vector2;
 
 /**
  * Represents the {@link Bounds} of the simulation/world.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.1.0
  * @since 1.0.0
  */
 public interface Bounds extends Transformable {
@@ -40,6 +41,13 @@ public interface Bounds extends Transformable {
 	 * @return {@link Transform}
 	 */
 	public abstract Transform getTransform();
+	
+	/**
+	 * Translates the bounds to match the given coordinate shift.
+	 * @param shift the amount to shift along the x and y axes
+	 * @since 3.1.0
+	 */
+	public abstract void shiftCoordinates(Vector2 shift);
 	
 	/**
 	 * Returns true if the given {@link Collidable} is outside the bounds.

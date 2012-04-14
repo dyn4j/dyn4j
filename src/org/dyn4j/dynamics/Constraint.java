@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,12 +24,13 @@
  */
 package org.dyn4j.dynamics;
 
+import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
 /**
  * Represents some physical constraint between a pair of {@link Body}s.
  * @author William Bittle
- * @version 3.0.3
+ * @version 3.1.0
  * @since 1.0.0
  */
 public abstract class Constraint {
@@ -125,6 +126,17 @@ public abstract class Constraint {
 	public World getWorld() {
 		return this.world;
 	}
+	
+	/**
+	 * Shifts (translates) the coordinates of this constraint.
+	 * <p>
+	 * Typically this method should not be called directly.  Instead 
+	 * use the {@link World#shiftCoordinates(Vector2)} method to move the 
+	 * entire world.
+	 * @param shift the distance to shift along the x and y axes
+	 * @since 3.1.0
+	 */
+	protected abstract void shiftCoordinates(Vector2 shift);
 	
 	/**
 	 * Sets the on {@link Island} flag to the given value.

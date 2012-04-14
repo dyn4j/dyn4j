@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -41,7 +41,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Geometry} class.
  * @author William Bittle
- * @version 3.0.4
+ * @version 3.1.0
  * @since 1.0.0
  */
 public class GeometryTest {
@@ -72,7 +72,7 @@ public class GeometryTest {
 	 * <p>
 	 * This test also shows that the average method can produce an incorrect
 	 * center of mass when vertices are more dense at any place along the perimeter.
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	@Test
 	public void getAverageCenterList() {
@@ -101,7 +101,7 @@ public class GeometryTest {
 	
 	/**
 	 * Tests the getAverageCenter method passing an empty array.
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void getAverageCenterEmptyArray() {
@@ -110,7 +110,7 @@ public class GeometryTest {
 	
 	/**
 	 * Tests the getAverageCenter method passing an array with null elements.
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	@Test(expected = NullPointerException.class)
 	public void getAverageCenterArrayNullElements() {
@@ -143,7 +143,7 @@ public class GeometryTest {
 	
 	/**
 	 * Tests the getAverageCenter method passing an array with null elements.
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	@Test(expected = NullPointerException.class)
 	public void getAverageCenterListNullElements() {
@@ -188,7 +188,7 @@ public class GeometryTest {
 
 	/**
 	 * Tests the getAreaWeightedCenter method passing an empty array.
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void getAreaWeightedCenterEmptyArray() {
@@ -197,7 +197,7 @@ public class GeometryTest {
 
 	/**
 	 * Tests the getAreaWeightedCenter method passing an array with null elements.
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	@Test(expected = NullPointerException.class)
 	public void getAreaWeightedCenterArrayNullElements() {
@@ -230,7 +230,7 @@ public class GeometryTest {
 	
 	/**
 	 * Tests the getAreaWeightedCenter method passing an list with null elements.
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	@Test(expected = NullPointerException.class)
 	public void getAreaWeightedCenterListNullElements() {
@@ -283,7 +283,7 @@ public class GeometryTest {
 	
 	/**
 	 * Test case for the unitCirclePolygon methods.
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	@Test
 	public void createUnitCirclePolygon() {
@@ -326,7 +326,7 @@ public class GeometryTest {
 	
 	/**
 	 * Tests the failed creation of a negative radius unit circle polygon.
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createNegativeRadiusUnitCirclePolygon() {
@@ -335,7 +335,7 @@ public class GeometryTest {
 
 	/**
 	 * Tests the failed creation of a zero radius unit circle polygon.
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createZeroRadiusUnitCirclePolygon() {
@@ -344,7 +344,7 @@ public class GeometryTest {
 
 	/**
 	 * Tests the failed creation of a unit circle polygon with less than 3 points.
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createLessThan3PointsUnitCirclePolygon() {
@@ -361,7 +361,7 @@ public class GeometryTest {
 	
 	/**
 	 * Tests the failed creation of a circle using a negative radius.
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createNegativeRadiusCircle() {
@@ -370,7 +370,7 @@ public class GeometryTest {
 
 	/**
 	 * Tests the failed creation of a circle using a zero radius.
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createZeroRadiusCircle() {
@@ -806,7 +806,7 @@ public class GeometryTest {
 
 	/**
 	 * Tests the creation of a segment passing a null point.
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createSegmentNullPoint2() {

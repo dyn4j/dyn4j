@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import org.junit.Test;
 /**
  * Test case for the AABB class.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.0
  * @since 3.0.0
  */
 public class AABBTest {
@@ -192,4 +192,20 @@ public class AABBTest {
 		
 		TestCase.assertEquals(1.0, aabb.getHeight());
 	}
+
+	/**
+	 * Tests the translate method.
+	 * @since 3.1.0
+	 */
+	@Test
+	public void translate() {
+		AABB aabb = new AABB(-2.0, 0.0, 1.0, 1.0);
+		aabb.translate(new Vector2(-1.0, 2.0));
+		
+		TestCase.assertEquals(-3.0, aabb.getMinX(), 1.0E-4);
+		TestCase.assertEquals( 2.0, aabb.getMinY(), 1.0E-4);
+		TestCase.assertEquals( 0.0, aabb.getMaxX(), 1.0E-4);
+		TestCase.assertEquals( 3.0, aabb.getMaxY(), 1.0E-4);
+	}
+	
 }

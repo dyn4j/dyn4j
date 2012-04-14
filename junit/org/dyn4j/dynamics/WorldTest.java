@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -51,7 +51,7 @@ import org.junit.Test;
 /**
  * Contains the test cases for the {@link World} class.
  * @author William Bittle
- * @version 3.0.4
+ * @version 3.1.0
  * @since 1.0.2
  */
 public class WorldTest {
@@ -920,7 +920,7 @@ public class WorldTest {
 	
 	/**
 	 * Tests adding a body to a world that has already been added to a different world.
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void addBodyFromAnotherWorld() {
@@ -936,7 +936,7 @@ public class WorldTest {
 	
 	/**
 	 * Tests adding a body to a world that has already been added to a different world.
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void addJointFromAnotherWorld() {

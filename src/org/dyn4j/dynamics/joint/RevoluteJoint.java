@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -46,10 +46,24 @@ import org.dyn4j.resources.Messages;
  * bodies given at joint creation time).  Therefore its recommended to only use the limits 
  * when one body is fixed.
  * <p>
+ * The joint limits must match the following restrictions:
+ * <ul>
+ * <li>lower limit &le; upper limit</li>
+ * <li>lower limit &ge; -180</li>
+ * <li>upper limit &le; 180</li>
+ * </ul> 
+ * To create a joint with limits other than this format use the {@link #setReferenceAngle(double)}
+ * method.  For example:
+ * <pre>
+ * // we would like the joint limits to be [30, 260]
+ * // this is the same as the limits [-60, 170] if the reference angle is 90
+ * setLimits(Math.toRadians(-60), Math.toRadians(170));
+ * setReferenceAngle(Math.toRadians(90));
+ * <p>
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.3
+ * @version 3.1.0
  * @since 1.0.0
  */
 public class RevoluteJoint extends Joint {
@@ -503,6 +517,15 @@ public class RevoluteJoint extends Joint {
 		return this.impulse.z * invdt;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.Constraint#shiftCoordinates(org.dyn4j.geometry.Vector2)
+	 */
+	@Override
+	protected void shiftCoordinates(Vector2 shift) {
+		// nothing to translate here since the anchor points are in local coordinates
+		// they will move with the bodies
+	}
+	
 	/**
 	 * Returns the relative speed at which the {@link Body}s
 	 * are rotating in radians/second.
@@ -513,11 +536,11 @@ public class RevoluteJoint extends Joint {
 	}
 	
 	/**
-	 * Returns the relative angle between the two {@link Body}s in radians.
+	 * Returns the relative angle between the two {@link Body}s in radians in the range [-&pi;, &pi;].
 	 * @return double
 	 */
 	public double getJointAngle() {
-		return this.body1.getTransform().getRotation() - this.body2.getTransform().getRotation() - this.referenceAngle;
+		return this.getRelativeRotation();
 	}
 	
 	/**
@@ -628,6 +651,8 @@ public class RevoluteJoint extends Joint {
 	 * Sets the upper rotational limit.
 	 * <p>
 	 * Must be greater than or equal to the lower rotational limit.
+	 * <p>
+	 * See the class documentation for more details on the limit ranges.
 	 * @param upperLimit the upper rotational limit in radians
 	 * @throws IllegalArgumentException if upperLimit is less than the current lower limit
 	 */
@@ -655,6 +680,8 @@ public class RevoluteJoint extends Joint {
 	 * Sets the lower rotational limit.
 	 * <p>
 	 * Must be less than or equal to the upper rotational limit.
+	 * <p>
+	 * See the class documentation for more details on the limit ranges.
 	 * @param lowerLimit the lower rotational limit in radians
 	 * @throws IllegalArgumentException if lowerLimit is greater than the current upper limit
 	 */
@@ -674,6 +701,8 @@ public class RevoluteJoint extends Joint {
 	 * Sets the upper and lower rotational limits.
 	 * <p>
 	 * The lower limit must be less than or equal to the upper limit.
+	 * <p>
+	 * See the class documentation for more details on the limit ranges.
 	 * @param lowerLimit the lower limit in radians
 	 * @param upperLimit the upper limit in radians
 	 * @throws IllegalArgumentException if the lowerLimit is greater than upperLimit
@@ -710,7 +739,7 @@ public class RevoluteJoint extends Joint {
 	 * This method can be used to set the reference angle to override the computed
 	 * reference angle from the constructor.  This is useful in recreating the joint
 	 * from a current state.
-	 * @param angle the reference angle
+	 * @param angle the reference angle in radians
 	 * @see #getReferenceAngle()
 	 * @since 3.0.1
 	 */

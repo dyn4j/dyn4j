@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * Supported operations are rotation and translation.
  * @author William Bittle
- * @version 3.0.4
+ * @version 3.1.0
  * @since 1.0.0
  */
 public class Transform implements Transformable {
@@ -526,7 +526,7 @@ public class Transform implements Transformable {
 	 * rotation.
 	 * @param theta the angle in radians
 	 * @return double the old rotation in radians in the range [-&pi;, &pi;] 
-	 * @since 3.0.4
+	 * @since 3.1.0
 	 */
 	public double setRotation(double theta) {
 		// get the current rotation
