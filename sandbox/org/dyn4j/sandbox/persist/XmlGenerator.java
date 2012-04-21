@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -500,6 +500,7 @@ public class XmlGenerator {
 			sb.append("<LowerLimit>").append(Math.toDegrees(aj.getLowerLimit())).append("</LowerLimit>");
 			sb.append("<UpperLimit>").append(Math.toDegrees(aj.getUpperLimit())).append("</UpperLimit>");
 			sb.append("<LimitEnabled>").append(aj.isLimitEnabled()).append("</LimitEnabled>");
+			sb.append("<Ratio>").append(aj.getRatio()).append("</Ratio>");
 			sb.append("<ReferenceAngle>").append(Math.toDegrees(aj.getReferenceAngle())).append("</ReferenceAngle>");
 		} else if (joint instanceof DistanceJoint) {
 			DistanceJoint dj = (DistanceJoint)joint;

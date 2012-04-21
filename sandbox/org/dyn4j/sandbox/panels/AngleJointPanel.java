@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -55,7 +55,7 @@ import org.dyn4j.sandbox.utilities.ControlUtilities;
 /**
  * Panel used to create or edit an angle joint.
  * @author William Bittle
- * @version 1.0.1
+ * @version 1.0.2
  * @since 1.0.0
  */
 public class AngleJointPanel extends JointPanel implements InputPanel, ActionListener, ItemListener {
@@ -104,6 +104,12 @@ public class AngleJointPanel extends JointPanel implements InputPanel, ActionLis
 	/** The limit maximum text field */
 	private JFormattedTextField txtMaximum;
 	
+	/** The ratio label */
+	private JLabel lblRatio;
+	
+	/** The ratio text field */
+	private JFormattedTextField txtRatio;
+	
 	/**
 	 * Full constructor.
 	 * @param joint the original joint; null if creating
@@ -122,6 +128,7 @@ public class AngleJointPanel extends JointPanel implements InputPanel, ActionLis
 		double lower = joint.getLowerLimit();
 		double upper = joint.getUpperLimit();
 		double ref = joint.getReferenceAngle();
+		double ratio = joint.getRatio();
 		
 		// set the super classes defaults
 		this.txtName.setText(name);
@@ -170,6 +177,12 @@ public class AngleJointPanel extends JointPanel implements InputPanel, ActionLis
 		this.btnResetReferenceAngle = new JButton(Messages.getString("panel.joint.referenceAngle.reset"));
 		this.btnResetReferenceAngle.setToolTipText(Messages.getString("panel.joint.referenceAngle.reset.tooltip"));
 		this.btnResetReferenceAngle.setActionCommand("reset-reference-angle");
+		
+		this.lblRatio = new JLabel(Messages.getString("panel.joint.angle.ratio"), Icons.INFO, JLabel.LEFT);
+		this.lblRatio.setToolTipText(Messages.getString("panel.joint.angle.ratio.tooltip"));
+		this.txtRatio = new JFormattedTextField(new DecimalFormat(Messages.getString("panel.joint.angle.ratio.format")));
+		this.txtRatio.addFocusListener(new SelectTextFocusListener(this.txtRatio));
+		this.txtRatio.setValue(ratio);
 		
 		if (edit) {
 			this.cmbBody1.setEnabled(false);
@@ -271,6 +284,27 @@ public class AngleJointPanel extends JointPanel implements InputPanel, ActionLis
 						.addComponent(this.lblMaximum)
 						.addComponent(this.txtMaximum, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
 		
+		// setup the other section
+		
+		JPanel pnlOther = new JPanel();
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Messages.getString("panel.joint.section.other"));
+		border.setTitlePosition(TitledBorder.TOP);
+		pnlOther.setBorder(border);
+		
+		layout = new GroupLayout(pnlOther);
+		pnlOther.setLayout(layout);
+		
+		layout.setAutoCreateContainerGaps(true);
+		layout.setAutoCreateGaps(true);
+		
+		layout.setHorizontalGroup(layout.createSequentialGroup()
+				.addComponent(this.lblRatio)
+				.addComponent(this.txtRatio));
+		layout.setVerticalGroup(layout.createParallelGroup()
+				.addComponent(this.lblRatio)
+				.addComponent(this.txtRatio, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE));
+		
+		// setup the overall layout
 		
 		layout = new GroupLayout(this);
 		this.setLayout(layout);
@@ -280,10 +314,12 @@ public class AngleJointPanel extends JointPanel implements InputPanel, ActionLis
 		
 		layout.setHorizontalGroup(layout.createParallelGroup()
 				.addComponent(pnlGeneral)
-				.addComponent(pnlLimits));
+				.addComponent(pnlLimits)
+				.addComponent(pnlOther));
 		layout.setVerticalGroup(layout.createSequentialGroup()
 				.addComponent(pnlGeneral)
-				.addComponent(pnlLimits));
+				.addComponent(pnlLimits)
+				.addComponent(pnlOther));
 	}
 	
 	/**
@@ -336,15 +372,16 @@ public class AngleJointPanel extends JointPanel implements InputPanel, ActionLis
 			aj.setCollisionAllowed(this.chkCollision.isSelected());
 			
 			aj.setLimitEnabled(this.chkLimitEnabled.isSelected());
-			
 			// get the min and max
 			Number min = (Number)this.txtMinimum.getValue();
 			Number max = (Number)this.txtMaximum.getValue();
-			
 			aj.setLimits(Math.toRadians(min.doubleValue()), Math.toRadians(max.doubleValue()));
 			
 			double ref = ControlUtilities.getDoubleValue(this.txtReferenceAngle);
 			aj.setReferenceAngle(Math.toRadians(ref));
+			
+			double ratio = ControlUtilities.getDoubleValue(this.txtRatio);
+			aj.setRatio(ratio);
 		}
 	}
 	
@@ -363,10 +400,16 @@ public class AngleJointPanel extends JointPanel implements InputPanel, ActionLis
 		AngleJoint aj = new AngleJoint(body1, body2);
 		aj.setUserData(this.txtName.getText());
 		aj.setCollisionAllowed(this.chkCollision.isSelected());
+		
 		aj.setLimitEnabled(this.chkLimitEnabled.isSelected());
 		aj.setLimits(Math.toRadians(min.doubleValue()), Math.toRadians(max.doubleValue()));
+		
 		double ref = ControlUtilities.getDoubleValue(this.txtReferenceAngle);
 		aj.setReferenceAngle(Math.toRadians(ref));
+		
+		double ratio = ControlUtilities.getDoubleValue(this.txtRatio);
+		aj.setRatio(ratio);
+		
 		return aj;
 	}
 	

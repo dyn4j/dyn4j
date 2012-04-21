@@ -133,6 +133,14 @@ public class MouseJoint extends Joint {
 		double invM = mass.getInverseMass();
 		double invI = mass.getInverseInertia();
 		
+		// check if the mass is zero
+		if (m <= Epsilon.E) {
+			// if the mass is zero, use the inertia
+			// this will allow the mouse joint to work with
+			// all mass types other than INFINITE
+			m = mass.getInertia();
+		}
+		
 		// compute the natural frequency; f = w / (2 * pi) -> w = 2 * pi * f
 		double w = Geometry.TWO_PI * this.frequency;
 		// compute the damping coefficient; dRatio = d / (2 * m * w) -> d = 2 * m * w * dRatio
