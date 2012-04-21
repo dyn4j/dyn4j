@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0.1">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0.2">
 	<xs:complexType name="Transform">
 		<xs:sequence>
 			<xs:element name="Translation" type="Vector" maxOccurs="1" minOccurs="1" />
@@ -421,6 +421,7 @@
 					<xs:element name="LowerLimit" type="xs:double" maxOccurs="1" minOccurs="1" />
 					<xs:element name="UpperLimit" type="xs:double" maxOccurs="1" minOccurs="1" />
 					<xs:element name="LimitEnabled" type="xs:boolean" maxOccurs="1" minOccurs="1" />
+					<xs:element name="Ratio" type="xs:double" maxOccurs="1" minOccurs="1" />
 					<xs:element name="ReferenceAngle" type="xs:double" maxOccurs="1" minOccurs="1" />
 				</xs:sequence>
 			</xs:extension>

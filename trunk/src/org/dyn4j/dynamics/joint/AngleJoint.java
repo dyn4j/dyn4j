@@ -40,7 +40,7 @@ import org.dyn4j.resources.Messages;
  * A angle joint constrains the relative rotation between [-&pi;, &pi;].
  * <p>
  * NOTE: The {@link #getAnchor1()} and {@link #getAnchor2()} methods return
- * null references since this joint does not require any anchor points at creation.
+ * the world space center points for the joined bodies.
  * <p>
  * Defaults the min and max angles to the current angle (allowing no angular movement).
  * <p>
@@ -58,11 +58,23 @@ import org.dyn4j.resources.Messages;
  * angleJoint.setLimits(Math.toRadians(-60), Math.toRadians(170));
  * angleJoint.setReferenceAngle(Math.toRadians(90));
  * </pre>
+ * The angle joint also allows a ratio value that allow the bodies to rotate at a specified
+ * value relative to the other.  This can be used to simulate gears.
+ * <p>
+ * Since the AngleJoint class defaults the upper and lower limits to the same value and
+ * by default the limits are enabled, you will need to modify the limits, or disable
+ * the limit to see the effect of the ratio.
+ * <p>
+ * When the angle between the bodies reaches a limit, if limits are enabled, the ratio is 
+ * effectively turned off.
  * @author William Bittle
  * @version 3.1.0
  * @since 2.2.2
  */
 public class AngleJoint extends Joint {
+	/** The angular velocity ratio */
+	protected double ratio;
+	
 	/** The lower limit */
 	protected double lowerLimit;
 	
@@ -97,6 +109,7 @@ public class AngleJoint extends Joint {
 		// verify the bodies are not the same instance
 		if (body1 == body2) throw new IllegalArgumentException(Messages.getString("dynamics.joint.sameBody"));
 		// initialize
+		this.ratio = 1.0;
 		this.impulse = 0.0;
 		// compute the reference angle
 		this.referenceAngle = body1.getTransform().getRotation() - body2.getTransform().getRotation();
@@ -107,6 +120,7 @@ public class AngleJoint extends Joint {
 		this.limitEnabled = true;
 		// default the limit state
 		this.limitState = Joint.LimitState.EQUAL;
+		
 	}
 	
 	/* (non-Javadoc)
@@ -116,6 +130,7 @@ public class AngleJoint extends Joint {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("AngleJoint[").append(super.toString())
+		.append("|Ratio=").append(this.ratio)
 		.append("|LowerLimit=").append(this.lowerLimit)
 		.append("|UpperLimit=").append(this.upperLimit)
 		.append("|IsLimitEnabled=").append(this.limitEnabled)
@@ -139,12 +154,6 @@ public class AngleJoint extends Joint {
 		
 		double invI1 = m1.getInverseInertia();
 		double invI2 = m2.getInverseInertia();
-		
-		// compute the angular mass
-		this.invK = invI1 + invI2;
-		if (this.invK > Epsilon.E) {
-			this.invK = 1.0 / this.invK;
-		}
 		
 		// check if the limits are enabled
 		if (this.limitEnabled) {
@@ -186,12 +195,27 @@ public class AngleJoint extends Joint {
 			this.impulse = 0;
 		}
 		
+		// compute the mass
+		if (this.limitState == Joint.LimitState.INACTIVE) {
+			// compute the angular mass including the ratio
+			this.invK = invI1 + this.ratio * this.ratio * invI2;
+		} else {
+			// compute the angular mass normally
+			this.invK = invI1 + invI2;
+		}
+		
+		if (this.invK > Epsilon.E) {
+			this.invK = 1.0 / this.invK;
+		}
+		
 		// account for variable time step
 		this.impulse *= step.getDeltaTimeRatio();
 		
 		// warm start
 		this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * this.impulse);
-		this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * this.impulse);
+		// we only want to apply the ratio to the impulse if the limits are not active.  When the
+		// limits are active we effectively disable the ratio
+		this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * this.impulse * (this.limitState == Joint.LimitState.INACTIVE ? this.ratio : 1.0));
 	}
 	
 	/* (non-Javadoc)
@@ -199,16 +223,17 @@ public class AngleJoint extends Joint {
 	 */
 	@Override
 	public void solveVelocityConstraints() {
-		// check if the constraint needs to be applied
+		Mass m1 = this.body1.getMass();
+		Mass m2 = this.body2.getMass();
+		
+		double invI1 = m1.getInverseInertia();
+		double invI2 = m2.getInverseInertia();
+		
+		// check if the limit needs to be applied (if we are at one of the limits
+		// then we ignore the ratio)
 		if (this.limitState != Joint.LimitState.INACTIVE) {
-			Mass m1 = this.body1.getMass();
-			Mass m2 = this.body2.getMass();
-			
-			double invI1 = m1.getInverseInertia();
-			double invI2 = m2.getInverseInertia();
-			
 			// solve the angular constraint
-			// get the relative velocity - the target motor speed
+			// get the relative velocity
 			double C = this.body1.getAngularVelocity() - this.body2.getAngularVelocity();
 			// get the impulse required to obtain the speed
 			double impulse = this.invK * -C;
@@ -228,10 +253,20 @@ public class AngleJoint extends Joint {
 					this.impulse = 0.0;
 				}
 			}
-			
+		
 			// apply the impulse
 			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * impulse);
 			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * impulse);
+		} else if (this.ratio != 1.0) {
+			// the limit is inactive and the ratio is not one
+			// get the relative velocity
+			double C = this.body1.getAngularVelocity() - this.ratio * this.body2.getAngularVelocity();
+			// get the impulse required to obtain the speed
+			double impulse = this.invK * -C;
+			
+			// apply the impulse
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * impulse);
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * impulse * this.ratio);
 		}
 	}
 	
@@ -304,7 +339,7 @@ public class AngleJoint extends Joint {
 	 */
 	@Override
 	public Vector2 getAnchor1() {
-		return null;
+		return this.body1.getWorldCenter();
 	}
 	
 	/* (non-Javadoc)
@@ -312,7 +347,7 @@ public class AngleJoint extends Joint {
 	 */
 	@Override
 	public Vector2 getAnchor2() {
-		return null;
+		return this.body2.getWorldCenter();
 	}
 	
 	/* (non-Javadoc)
@@ -346,6 +381,29 @@ public class AngleJoint extends Joint {
 	 */
 	public double getJointAngle() {
 		return this.getRelativeRotation();
+	}
+	
+	/**
+	 * Returns the angular velocity ratio between the two bodies.
+	 * @return double
+	 * @since 3.1.0
+	 */
+	public double getRatio() {
+		return this.ratio;
+	}
+	
+	/**
+	 * Sets the angular velocity ratio between the two bodies.
+	 * <p>
+	 * To disable the ratio and fix their velocities set the ratio to 1.0.
+	 * <p>
+	 * The ratio can be negative to reverse the direction of the velocity
+	 * of the other body.
+	 * @param ratio the ratio
+	 * @since 3.1.0
+	 */
+	public void setRatio(double ratio) {
+		this.ratio = ratio;
 	}
 	
 	/**

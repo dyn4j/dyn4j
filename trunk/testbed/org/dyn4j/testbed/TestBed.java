@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -47,6 +47,7 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import org.dyn4j.Epsilon;
 import org.dyn4j.Version;
 import org.dyn4j.collision.Fixture;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
@@ -66,9 +67,9 @@ import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.testbed.input.Input;
+import org.dyn4j.testbed.input.Input.Hold;
 import org.dyn4j.testbed.input.Keyboard;
 import org.dyn4j.testbed.input.Mouse;
-import org.dyn4j.testbed.input.Input.Hold;
 
 import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.FBObject;
@@ -78,7 +79,7 @@ import com.jogamp.opengl.util.glsl.ShaderUtil;
 /**
  * Container for the tests.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.0
  * @since 1.0.0
  */
 public class TestBed extends GLCanvas implements GLEventListener {
@@ -1485,7 +1486,13 @@ public class TestBed extends GLCanvas implements GLEventListener {
 						// see if the point is contained in it
 						if (c.contains(v, b.getTransform())) {
 							// once we find the body, create a mouse joint
-							this.mouseJoint = new MouseJoint(b, v, 4.0, 0.7, 1000.0 * b.getMass().getMass());
+							// get the mass of the body
+							double mass = b.getMass().getMass();
+							if (mass <= Epsilon.E) {
+								// if the mass is zero, attempt to use the inertia
+								mass = b.getMass().getInertia();
+							}
+							this.mouseJoint = new MouseJoint(b, v, 4.0, 0.7, 1000.0 * mass);
 							// add the joint to the world
 							this.test.world.add(this.mouseJoint);
 							// make sure the body is awake
@@ -1500,7 +1507,13 @@ public class TestBed extends GLCanvas implements GLEventListener {
 								// selecting the segment
 								if (s.contains(v, b.getTransform(), 0.05)) {
 									// once we find the body, create a mouse joint
-									this.mouseJoint = new MouseJoint(b, v, 4.0, 0.7, 1000.0 * b.getMass().getMass());
+									// get the mass of the body
+									double mass = b.getMass().getMass();
+									if (mass <= Epsilon.E) {
+										// if the mass is zero, attempt to use the inertia
+										mass = b.getMass().getInertia();
+									}
+									this.mouseJoint = new MouseJoint(b, v, 4.0, 0.7, 1000.0 * mass);
 									// add the joint to the world
 									this.test.world.add(this.mouseJoint);
 									// make sure the body is awake

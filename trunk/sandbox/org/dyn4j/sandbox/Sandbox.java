@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -82,6 +82,7 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.dyn4j.Epsilon;
 import org.dyn4j.Version;
 import org.dyn4j.collision.narrowphase.Raycast;
 import org.dyn4j.dynamics.Body;
@@ -1977,7 +1978,13 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				} else {
 					// update the mouse joint's target point
 					if (this.selectedBodyJoint == null) {
-						this.selectedBodyJoint = new MouseJoint(body, pw, 4.0, 0.7, 1000.0 * body.getMass().getMass());
+						// get the mass of the body
+						double mass = body.getMass().getMass();
+						if (mass <= Epsilon.E) {
+							// if the mass is zero, attempt to use the inertia
+							mass = body.getMass().getInertia();
+						}
+						this.selectedBodyJoint = new MouseJoint(body, pw, 4.0, 0.7, 1000.0 * mass);
 						synchronized (this.world) {
 							this.world.add(this.selectedBodyJoint);
 						}

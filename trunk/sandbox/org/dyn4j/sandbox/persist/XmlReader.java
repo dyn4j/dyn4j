@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -898,6 +898,7 @@ public class XmlReader extends DefaultHandler {
 				AngleJoint aj = new AngleJoint(b1, b2);
 				aj.setLimits(Math.toRadians(this.lowerLimit), Math.toRadians(this.upperLimit));
 				aj.setLimitEnabled(this.limitsEnabled);
+				aj.setRatio(this.ratio);
 				aj.setReferenceAngle(Math.toRadians(this.referenceAngle));
 				joint = aj;
 			} else if ("DistanceJoint".equalsIgnoreCase(this.jointType)) {
