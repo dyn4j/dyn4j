@@ -37,8 +37,6 @@ import org.dyn4j.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.collision.manifold.ManifoldSolver;
 import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
-import org.dyn4j.dynamics.contact.ContactAdapter;
-import org.dyn4j.dynamics.contact.ContactListener;
 import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
@@ -101,23 +99,19 @@ public class WorldTest {
 		TestCase.assertNotNull(w.settings);
 		TestCase.assertNotNull(w.bodies);
 		TestCase.assertNotNull(w.bounds);
-		TestCase.assertNotNull(w.boundsListener);
 		TestCase.assertNotNull(w.broadphaseDetector);
 		TestCase.assertNotNull(w.coefficientMixer);
-		TestCase.assertNotNull(w.collisionListener);
 		TestCase.assertNotNull(w.contactManager);
-		TestCase.assertNotNull(w.destructionListener);
 		TestCase.assertNotNull(w.gravity);
 		TestCase.assertNotNull(w.island);
 		TestCase.assertNotNull(w.joints);
 		TestCase.assertNotNull(w.manifoldSolver);
 		TestCase.assertNotNull(w.narrowphaseDetector);
 		TestCase.assertNotNull(w.step);
-		TestCase.assertNotNull(w.stepListener);
 		TestCase.assertNotNull(w.raycastDetector);
-		TestCase.assertNotNull(w.raycastListener);
 		TestCase.assertNotNull(w.timeOfImpactDetector);
-		TestCase.assertNotNull(w.timeOfImpactListener);
+		TestCase.assertNotNull(w.listeners);
+		TestCase.assertEquals(0, w.listeners.size());
 	}
 	
 	/**
@@ -149,7 +143,7 @@ public class WorldTest {
 	public void updatev() {
 		World w = new World();
 		WTStepListener sl = new WTStepListener();
-		w.setStepListener(sl);
+		w.addListener(sl);
 		
 		// a step is always taken unless the update time
 		// is zero or less
@@ -171,7 +165,7 @@ public class WorldTest {
 	public void stepInt() {
 		World w = new World();
 		WTStepListener sl = new WTStepListener();
-		w.setStepListener(sl);
+		w.addListener(sl);
 		
 		// make sure the specified number of steps are taken
 		w.step(3);
@@ -192,7 +186,7 @@ public class WorldTest {
 	public void stepIntElapsed() {
 		World w = new World();
 		WTStepListener sl = new WTStepListener();
-		w.setStepListener(sl);
+		w.addListener(sl);
 		
 		// make sure the specified number of steps are taken
 		w.step(3, 1.0 / 50.0);
@@ -295,7 +289,7 @@ public class WorldTest {
 		
 		// setup the destruction listener
 		WTDestructionListener dl = new WTDestructionListener();
-		w.setDestructionListener(dl);
+		w.addListener(dl);
 		
 		// test removing a null body
 		boolean success = w.remove((Body) null);
@@ -315,7 +309,7 @@ public class WorldTest {
 		w.add(b1);
 		w.add(b2);
 		// remove one of them
-		success = w.remove(b1);
+		success = w.remove(b1, true);
 		TestCase.assertTrue(success);
 		TestCase.assertFalse(w.bodies.isEmpty());
 		TestCase.assertNull(b1.world);
@@ -335,7 +329,7 @@ public class WorldTest {
 		w.step(1);
 		
 		// remove a body and make sure destruction events are called
-		w.remove(b2);
+		w.remove(b2, true);
 		// make sure it was added to the broadphase
 		TestCase.assertNull(w.broadphaseDetector.getAABB(b2));
 		// make sure the world has zero joints
@@ -446,151 +440,24 @@ public class WorldTest {
 	}
 	
 	/**
-	 * Tests the set bounds listener method.
+	 * Tests the add listener method.
 	 */
 	@Test
-	public void setBoundsListener() {
+	public void addListener() {
 		World w = new World();
 		BoundsListener bl = new BoundsAdapter();
-		w.setBoundsListener(bl);
+		w.addListener(bl);
 		
-		TestCase.assertSame(bl, w.getBoundsListener());
+		TestCase.assertSame(bl, w.getListeners(BoundsListener.class).get(0));
 	}
 	
 	/**
-	 * Tests the set bounds listener method passing a null value.
+	 * Tests the add listener method passing a null value.
 	 */
 	@Test(expected = NullPointerException.class)
 	public void setNullBoundsListener() {
 		World w = new World();
-		w.setBoundsListener(null);
-	}
-	
-	/**
-	 * Tests the set contact listener method.
-	 */
-	@Test
-	public void setContactListener() {
-		World w = new World();
-		ContactListener cl = new ContactAdapter();
-		w.setContactListener(cl);
-		
-		TestCase.assertSame(cl, w.getContactListener());
-	}
-	
-	/**
-	 * Tests the set contact listener method passing a null value.
-	 */
-	@Test(expected = NullPointerException.class)
-	public void setNullContactListener() {
-		World w = new World();
-		w.setContactListener(null);
-	}
-	
-	/**
-	 * Tests the set time of impact listener method.
-	 * @since 1.2.0
-	 */
-	@Test
-	public void setTimeOfImpactListener() {
-		World w = new World();
-		TimeOfImpactListener toil = new TimeOfImpactAdapter();
-		w.setTimeOfImpactListener(toil);
-		
-		TestCase.assertSame(toil, w.getTimeOfImpactListener());
-	}
-	
-	/**
-	 * Tests the set time of impact listener method passing a null value.
-	 * @since 1.2.0
-	 */
-	@Test(expected = NullPointerException.class)
-	public void setNullTimeOfImpactListener() {
-		World w = new World();
-		w.setTimeOfImpactListener(null);
-	}
-	
-	/**
-	 * Tests the set raycast listener method.
-	 * @since 2.0.0
-	 */
-	@Test
-	public void setRaycastListener() {
-		World w = new World();
-		w.setRaycastListener(new RaycastAdapter());
-	}
-	
-	/**
-	 * Tests the set raycast listener method passing a null value.
-	 * @since 2.0.0
-	 */
-	@Test(expected = NullPointerException.class)
-	public void setNullRaycastListener() {
-		World w = new World();
-		w.setRaycastListener(null);
-	}
-	
-	/**
-	 * Tests the set destruction listener method.
-	 */
-	@Test
-	public void setDestructionListener() {
-		World w = new World();
-		DestructionListener dl = new DestructionAdapter();
-		w.setDestructionListener(dl);
-		
-		TestCase.assertSame(dl, w.getDestructionListener());
-	}
-	
-	/**
-	 * Tests the set destruction listener method passing a null value.
-	 */
-	@Test(expected = NullPointerException.class)
-	public void setNullDestructionListener() {
-		World w = new World();
-		w.setDestructionListener(null);
-	}
-	
-	/**
-	 * Tests the set step listener method.
-	 */
-	@Test
-	public void setStepListener() {
-		World w = new World();
-		StepListener sl = new StepAdapter();
-		w.setStepListener(sl);
-		
-		TestCase.assertSame(sl, w.getStepListener());
-	}
-	
-	/**
-	 * Tests the set step listener method passing a null value.
-	 */
-	@Test(expected = NullPointerException.class)
-	public void setNullStepListener() {
-		World w = new World();
-		w.setStepListener(null);
-	}
-	
-	/**
-	 * Tests the set collision listener method.
-	 */
-	@Test
-	public void setCollisionListener() {
-		World w = new World();
-		CollisionListener cl = new CollisionAdapter();
-		w.setCollisionListener(cl);
-		
-		TestCase.assertSame(cl, w.getCollisionListener());
-	}
-	
-	/**
-	 * Tests the set collision listener method passing a null value.
-	 */
-	@Test(expected = NullPointerException.class)
-	public void setNullCollisionListener() {
-		World w = new World();
-		w.setCollisionListener(null);
+		w.addListener(null);
 	}
 	
 	/**
@@ -737,7 +604,7 @@ public class WorldTest {
 		
 		// setup the listener
 		WTDestructionListener dl = new WTDestructionListener();
-		w.setDestructionListener(dl);
+		w.addListener(dl);
 		
 		// setup the bodies
 		Convex c1 = Geometry.createCircle(1.0);
@@ -785,7 +652,7 @@ public class WorldTest {
 		
 		// setup the listener
 		WTDestructionListener dl = new WTDestructionListener();
-		w.setDestructionListener(dl);
+		w.addListener(dl);
 		
 		// setup the bodies
 		Convex c1 = Geometry.createCircle(1.0);
@@ -835,7 +702,7 @@ public class WorldTest {
 		
 		// setup the listener
 		WTDestructionListener dl = new WTDestructionListener();
-		w.setDestructionListener(dl);
+		w.addListener(dl);
 		
 		// setup the bodies
 		Convex c1 = Geometry.createCircle(1.0);

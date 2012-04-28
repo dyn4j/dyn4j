@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,7 +40,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Class to count the number of added, removed, and persisted contacts.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.2
  * @since 1.0.0
  */
 public class ContactCounter implements ContactListener, StepListener {
@@ -96,10 +96,8 @@ public class ContactCounter implements ContactListener, StepListener {
 	 * @see org.dyn4j.dynamics.contact.ContactListener#end(org.dyn4j.dynamics.contact.ContactPoint)
 	 */
 	@Override
-	public boolean end(ContactPoint c) {
+	public void end(ContactPoint c) {
 		this.removed++;
-		// all contacts should be enabled
-		return true;
 	}
 	
 	/* (non-Javadoc)
@@ -144,9 +142,8 @@ public class ContactCounter implements ContactListener, StepListener {
 	
 	/**
 	 * Clears the state of the contact counter.
-	 * @since 3.0.1
 	 */
-	protected void clear() {
+	public void clear() {
 		// reset the values
 		this.sensed = 0;
 		this.added = 0;
@@ -183,7 +180,6 @@ public class ContactCounter implements ContactListener, StepListener {
 	/**
 	 * Returns the number of sensed contacts.
 	 * @return int the number of sensed contacts
-	 * @since 1.1.0
 	 */
 	public int getSensed() {
 		return sensed;

@@ -77,7 +77,7 @@ public class ContactManagerTest {
 		@Override
 		public boolean begin(ContactPoint point) { this.added++; return true; }
 		@Override
-		public boolean end(ContactPoint point) { this.removed++; return true; }
+		public void end(ContactPoint point) { this.removed++; }
 		@Override
 		public boolean persist(PersistedContactPoint point) { this.persisted++; return true; }
 		@Override
@@ -109,7 +109,7 @@ public class ContactManagerTest {
 		this.contactManager = world.getContactManager();
 		
 		this.contactListener = new CMTContactListener();
-		world.setContactListener(this.contactListener);
+		world.addListener(this.contactListener);
 		
 		Gjk gjk = new Gjk();
 		ClippingManifoldSolver cms = new ClippingManifoldSolver();

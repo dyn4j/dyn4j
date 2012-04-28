@@ -55,6 +55,9 @@ public class ContactManager {
 	/** The current list of contact constraints */
 	protected List<ContactConstraint> list;
 	
+	/** The list of contact listeners (this is reassigned each time {@link #updateContacts()} is called) */
+	protected List<ContactListener> listeners;
+	
 	/**
 	 * Full constructor.
 	 * @param world the {@link World} this contact manager belongs to
@@ -65,6 +68,7 @@ public class ContactManager {
 		// initialize the members
 		this.map = new HashMap<ContactConstraintId, ContactConstraint>();
 		this.list = new ArrayList<ContactConstraint>();
+		this.listeners = world.getListeners(ContactListener.class);
 	}
 	
 	/**
@@ -136,8 +140,8 @@ public class ContactManager {
 		// get the size of the list
 		int size = this.list.size();
 		
-		// get the listener 
-		ContactListener listener = this.world.getContactListener();
+		// re-assign listeners
+		this.listeners = world.getListeners(ContactListener.class);
 		
 		Settings settings = this.world.getSettings();
 		// get the warm start distance from the settings
@@ -181,8 +185,10 @@ public class ContactManager {
 					point.depth = contact.depth;
 					point.point = contact.p;
 					point.enabled = false;
-					// call the listener method
-					listener.sensed(point);
+					// call the listeners
+					for (ContactListener cl : this.listeners) {
+						cl.sensed(point);
+					}
 				}
 				// we don't need to perform any warm starting for
 				// sensed contacts so continue to the next contact constraint
@@ -235,15 +241,21 @@ public class ContactManager {
 							point.oldNormal = oldContactConstraint.normal;
 							point.oldPoint = oldContact.p;
 							point.oldDepth = oldContact.depth;
-							// call the listener and set the enabled flag to the result
-							newContact.enabled = listener.persist(point);
+							// call the listeners and set the enabled flag to the result
+							boolean allow = true;
+							for (ContactListener cl : this.listeners) {
+								if (!cl.persist(point)) {
+									allow = false;
+								}
+							}
+							newContact.enabled = allow;
 							// flag that the contact was persisted
 							persisted[k] = true;
 							found = true;
 							break;
 						}
 					}
-					// check for persistence
+					// check for persistence, if it wasn't persisted its a new contact
 					if (!found) {
 						// notify of new contact (begin of contact)
 						ContactPoint point = new ContactPoint();
@@ -255,8 +267,14 @@ public class ContactManager {
 						point.body2 = newContactConstraint.getBody2();
 						point.fixture1 = newContactConstraint.getFixture1();
 						point.fixture2 = newContactConstraint.getFixture2();
-						// call the listener and set the enabled flag to the result
-						newContact.enabled = listener.begin(point);
+						// call the listeners and set the enabled flag to the result
+						boolean allow = true;
+						for (ContactListener cl : this.listeners) {
+							if (!cl.begin(point)) {
+								allow = false;
+							}
+						}
+						newContact.enabled = allow;
 					}
 				}
 				
@@ -278,8 +296,10 @@ public class ContactManager {
 						point.body2 = newContactConstraint.getBody2();
 						point.fixture1 = newContactConstraint.getFixture1();
 						point.fixture2 = newContactConstraint.getFixture2();
-						// call the listener and set the enabled flag to the result
-						contact.enabled = listener.end(point);
+						// call the listeners
+						for (ContactListener cl : this.listeners) {
+							cl.end(point);
+						}
 					}
 				}
 			} else {
@@ -299,8 +319,14 @@ public class ContactManager {
 					point.body2 = newContactConstraint.getBody2();
 					point.fixture1 = newContactConstraint.getFixture1();
 					point.fixture2 = newContactConstraint.getFixture2();
-					// call the listener and set the enabled flag to the result
-					contact.enabled = listener.begin(point);
+					// call the listeners and set the enabled flag to the result
+					boolean allow = true;
+					for (ContactListener cl : this.listeners) {
+						if (!cl.begin(point)) {
+							allow = false;
+						}
+					}
+					contact.enabled = allow;
 				}
 			}
 			// add the contact constraint to the map
@@ -327,8 +353,10 @@ public class ContactManager {
 					point.body2 = contactConstraint.getBody2();
 					point.fixture1 = contactConstraint.getFixture1();
 					point.fixture2 = contactConstraint.getFixture2();
-					// call the listener and set the enabled flag to the result
-					contact.enabled = listener.end(point);
+					// call the listeners
+					for (ContactListener cl : this.listeners) {
+						cl.end(point);
+					}
 				}
 			}
 		}
@@ -341,9 +369,6 @@ public class ContactManager {
 	 */
 	public void preSolveNotify() {
 		int size = this.list.size();
-		
-		// get the contact listener
-		ContactListener listener = this.world.getContactListener();
 		
 		// loop through the list of contacts that were solved
 		for (int i = 0; i < size; i++) {
@@ -365,8 +390,14 @@ public class ContactManager {
 				point.body2 = contactConstraint.getBody2();
 				point.fixture1 = contactConstraint.getFixture1();
 				point.fixture2 = contactConstraint.getFixture2();
-				// call the listener and set the enabled flag to the result
-				contact.enabled = listener.preSolve(point);
+				// call the listeners and set the enabled flag to the result
+				boolean allow = true;
+				for (ContactListener cl : this.listeners) {
+					if (!cl.preSolve(point)) {
+						allow = false;
+					}
+				}
+				contact.enabled = allow;
 			}
 		}
 	}
@@ -376,9 +407,6 @@ public class ContactManager {
 	 */
 	public void postSolveNotify() {
 		int size = this.list.size();
-
-		// get the contact listener
-		ContactListener listener = this.world.getContactListener();
 		
 		// loop through the list of contacts that were solved
 		for (int i = 0; i < size; i++) {
@@ -404,7 +432,9 @@ public class ContactManager {
 				point.normalImpulse = contact.jn;
 				point.tangentialImpulse = contact.jt;
 				// notify of them being solved
-				listener.postSolve(point);
+				for (ContactListener cl : this.listeners) {
+					cl.postSolve(point);
+				}
 			}
 		}
 	}

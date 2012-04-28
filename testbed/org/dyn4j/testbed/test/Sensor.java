@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -81,8 +81,7 @@ public class Sensor extends Test {
 		
 		// setup the contact counter
 		ContactCounter cc = new ContactCounter();
-		this.world.setContactListener(cc);
-		this.world.setStepListener(cc);
+		this.world.addListener(cc);
 		
 		// make gravity far less so that it falls slower
 		this.world.setGravity(new Vector2(0.0, -1.0));

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,13 +24,15 @@
  */
 package org.dyn4j.dynamics.contact;
 
+import org.dyn4j.Listener;
+
 /**
  * Convenience class for implementing the {@link ContactListener} interface.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.1.0
  * @since 1.0.0
  */
-public class ContactAdapter implements ContactListener {
+public class ContactAdapter implements ContactListener, Listener {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.contact.ContactListener#sensed(org.dyn4j.dynamics.contact.SensedContactPoint)
 	 */
@@ -47,7 +49,7 @@ public class ContactAdapter implements ContactListener {
 	 * @see org.dyn4j.dynamics.contact.ContactListener#end(org.dyn4j.dynamics.contact.ContactPoint)
 	 */
 	@Override
-	public boolean end(ContactPoint point) { return true; }
+	public void end(ContactPoint point) {}
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.contact.ContactListener#persist(org.dyn4j.dynamics.contact.PersistedContactPoint)

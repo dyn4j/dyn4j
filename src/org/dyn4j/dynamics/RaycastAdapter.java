@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,15 +24,16 @@
  */
 package org.dyn4j.dynamics;
 
+import org.dyn4j.Listener;
 import org.dyn4j.geometry.Ray;
 
 /**
- * Default implementation of the {@link RaycastListener} interface
+ * Default implementation of the {@link RaycastListener} interface.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.1.0
  * @since 2.0.0
  */
-public class RaycastAdapter implements RaycastListener {
+public class RaycastAdapter implements RaycastListener, Listener {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.RaycastListener#allow(org.dyn4j.geometry.Ray, org.dyn4j.dynamics.Body)
 	 */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,13 +24,15 @@
  */
 package org.dyn4j.dynamics;
 
+import org.dyn4j.Listener;
+
 /**
  * Convience class for implementing the {@link StepListener} interface.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.1.0
  * @since 1.0.0
  */
-public class StepAdapter implements StepListener {
+public class StepAdapter implements StepListener, Listener {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.StepListener#begin(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.World)
 	 */

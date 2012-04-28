@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,15 +24,16 @@
  */
 package org.dyn4j.dynamics;
 
+import org.dyn4j.Listener;
 import org.dyn4j.geometry.Ray;
 
 /**
  * Interface for listening for raycast events.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.1.0
  * @since 2.0.0
  */
-public interface RaycastListener {
+public interface RaycastListener extends Listener {
 	/**
 	 * Called before a {@link Body} is tested against the {@link Ray}.  This method will be
 	 * called for every body in the {@link World}.

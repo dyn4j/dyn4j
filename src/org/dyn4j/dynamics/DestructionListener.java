@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,7 @@
  */
 package org.dyn4j.dynamics;
 
+import org.dyn4j.Listener;
 import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.dynamics.joint.Joint;
@@ -31,10 +32,10 @@ import org.dyn4j.dynamics.joint.Joint;
 /**
  * Listens for implicit destruction events.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.1.0
  * @since 1.0.0
  */
-public interface DestructionListener {
+public interface DestructionListener extends Listener {
 	/**
 	 * Called when implicit destruction of a {@link Joint} has occurred.
 	 * @see World#remove(Body)

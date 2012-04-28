@@ -90,8 +90,7 @@ public class Shift extends Test {
 		
 		// setup the contact counter
 		ContactCounter cc = new ContactCounter();
-		this.world.setContactListener(cc);
-		this.world.setStepListener(cc);
+		this.world.addListener(cc);
 		
 		// setup the bodies
 		this.setup();

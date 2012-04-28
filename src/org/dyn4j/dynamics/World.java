@@ -29,8 +29,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
+import org.dyn4j.Listener;
 import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.BoundsAdapter;
 import org.dyn4j.collision.BoundsListener;
 import org.dyn4j.collision.Filter;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
@@ -50,10 +50,8 @@ import org.dyn4j.collision.narrowphase.Raycast;
 import org.dyn4j.collision.narrowphase.RaycastDetector;
 import org.dyn4j.dynamics.Settings.ContinuousDetectionMode;
 import org.dyn4j.dynamics.contact.Contact;
-import org.dyn4j.dynamics.contact.ContactAdapter;
 import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.dynamics.contact.ContactEdge;
-import org.dyn4j.dynamics.contact.ContactListener;
 import org.dyn4j.dynamics.contact.ContactManager;
 import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.dynamics.contact.TimeOfImpactSolver;
@@ -69,6 +67,11 @@ import org.dyn4j.resources.Messages;
  * Manages the logic of collision detection, resolution, and reporting.
  * <p>
  * Employs the same {@link Island} solving technique as <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
+ * <p>
+ * Via the {@link #addListener(Listener)} method, a {@link World} instance can have multiple listeners for all the listener types.
+ * Some listener types return a boolean to indicate continuing or allowing something, like {@link CollisionListener}.  If, for example,
+ * there are multiple {@link CollisionListener}s and <b>any</b> one of them returns false for an event, the collision is skipped.  However,
+ * all listeners will still be called no matter if the first returned false.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
  * @version 3.1.0
@@ -81,6 +84,8 @@ public class World {
 	/** Zero gravity constant */
 	public static final Vector2 ZERO_GRAVITY = new Vector2(0.0, 0.0);
 
+	// settings
+	
 	/** The dynamics settings for this world */
 	protected Settings settings;
 	
@@ -92,6 +97,8 @@ public class World {
 	
 	/** The world {@link Bounds} */
 	protected Bounds bounds;
+	
+	// algos
 	
 	/** The {@link BroadphaseDetector} */
 	protected BroadphaseDetector<Body> broadphaseDetector;
@@ -108,35 +115,21 @@ public class World {
 	/** The {@link RaycastDetector} */
 	protected RaycastDetector raycastDetector;
 	
-	/** The {@link CollisionListener} */
-	protected CollisionListener collisionListener;
-	
 	/** The {@link ContactManager} */
 	protected ContactManager contactManager;
 
-	/** The {@link ContactListener} */
-	protected ContactListener contactListener;
-	
-	/** The {@link TimeOfImpactListener} */
-	protected TimeOfImpactListener timeOfImpactListener;
-	
-	/** The {@link RaycastListener} */
-	protected RaycastListener raycastListener;
-	
-	/** The {@link BoundsListener} */
-	protected BoundsListener boundsListener;
-	
-	/** The {@link DestructionListener} */
-	protected DestructionListener destructionListener;
-	
-	/** The {@link StepListener} */
-	protected StepListener stepListener;
-	
 	/** The {@link CoefficientMixer} */
 	protected CoefficientMixer coefficientMixer;
 	
 	/** The {@link TimeOfImpactSolver} */
 	protected TimeOfImpactSolver timeOfImpactSolver;
+
+	// listeners
+	
+	/** The list of listeners for this world */
+	protected List<Listener> listeners;
+	
+	// bodies/joints
 	
 	/** The {@link Body} list */
 	protected List<Body> bodies;
@@ -146,6 +139,8 @@ public class World {
 	
 	/** The application data associated */
 	protected Object userData;
+	
+	// temp data
 	
 	/** The reusable island */
 	protected Island island;
@@ -183,19 +178,13 @@ public class World {
 		this.manifoldSolver = new ClippingManifoldSolver();
 		this.timeOfImpactDetector = new ConservativeAdvancement();
 		this.raycastDetector = new Gjk();
-		// create default listeners
-		this.collisionListener = new CollisionAdapter();
-		this.contactManager = new ContactManager(this);
-		this.contactListener = new ContactAdapter();
-		this.timeOfImpactListener = new TimeOfImpactAdapter();
-		this.raycastListener = new RaycastAdapter();
-		this.boundsListener = new BoundsAdapter();
-		this.destructionListener = new DestructionAdapter();
-		this.stepListener = new StepAdapter();
 		this.coefficientMixer = CoefficientMixer.DEFAULT_MIXER;
-		this.timeOfImpactSolver = new TimeOfImpactSolver(this);
 		this.bodies = new ArrayList<Body>();
 		this.joints = new ArrayList<Joint>();
+		
+		this.listeners = new ArrayList<Listener>();
+		this.timeOfImpactSolver = new TimeOfImpactSolver(this);
+		this.contactManager = new ContactManager(this);
 		this.island = new Island(this);
 		this.time = 0.0;
 		this.updateRequired = true;
@@ -305,15 +294,22 @@ public class World {
 	 * event listeners tied to this method.
 	 */
 	protected void step() {
-		// notify the step listener
-		this.stepListener.begin(this.step, this);
+		// get all the step listeners
+		List<StepListener> listeners = this.getListeners(StepListener.class);
+		
+		// notify the step listeners
+		for (StepListener sl : listeners) {
+			sl.begin(this.step, this);
+		}
 		
 		// check if we need to update the contacts first
 		if (this.updateRequired) {
 			// if so then update the contacts
 			this.detect();
 			// notify that an update was performed
-			this.stepListener.updatePerformed(this.step, this);
+			for (StepListener sl : listeners) {
+				sl.updatePerformed(this.step, this);
+			}
 			// set the update required flag to false
 			this.updateRequired = false;
 		}
@@ -461,7 +457,9 @@ public class World {
 		this.updateRequired = false;
 		
 		// notify the step listener
-		this.stepListener.end(this.step, this);
+		for (StepListener sl : listeners) {
+			sl.end(this.step, this);
+		}
 	}
 	
 	/**
@@ -478,9 +476,15 @@ public class World {
 	 * 	<li>Warm starts the contacts</li>
 	 * </ol>
 	 * <p>
+	 * This method will notify all bounds and collision listeners.  If any {@link CollisionListener}
+	 * return false, the collision is ignored.
 	 * @since 3.0.0
 	 */
 	protected void detect() {
+		// get the bounds listeners
+		List<BoundsListener> boundsListeners = this.getListeners(BoundsListener.class);
+		List<CollisionListener> collisionListeners = this.getListeners(CollisionListener.class);
+		
 		// clear the old contact list (does NOT clear the contact map
 		// which is used to warm start)
 		this.contactManager.clear();
@@ -503,8 +507,10 @@ public class World {
 				if (this.bounds.isOutside(body)) {
 					// set the body to inactive
 					body.setActive(false);
-					// if so, notify via the listener
-					this.boundsListener.outside(body);
+					// if so, notify via the listeners
+					for (BoundsListener bl : boundsListeners) {
+						bl.outside(body);
+					}
 				}
 			}
 			// update the broadphase with the new position/orientation
@@ -533,10 +539,16 @@ public class World {
 				if (body1.isConnected(body2, false)) continue;
 				
 				// notify of the broadphase collision
-				if (!this.collisionListener.collision(body1, body2)) {
-					// if the collision listener returned false then skip this collision
-					continue;
+				boolean allow = true;
+				for (CollisionListener cl : collisionListeners) {
+					if (!cl.collision(body1, body2)) {
+						// if any collision listener returned false then skip this collision
+						// we need to make sure all the listeners are called though so we can't
+						// just exit here
+						allow = false;
+					}
 				}
+				if (!allow) continue;
 	
 				// get their transforms
 				Transform transform1 = body1.transform;
@@ -572,10 +584,16 @@ public class World {
 								continue;
 							}
 							// notify of the narrow-phase collision
-							if (!this.collisionListener.collision(body1, fixture1, body2, fixture2, penetration)) {
-								// if the collision listener returned false then skip this collision
-								continue;
+							allow = true;
+							for (CollisionListener cl : collisionListeners) {
+								if (!cl.collision(body1, fixture1, body2, fixture2, penetration)) {
+									// if any collision listener returned false then skip this collision
+									// we must allow all the listeners to get notified first, then skip
+									// the collision
+									allow = false;
+								}
 							}
+							if (!allow) continue;
 							// if there is penetration then find a contact manifold
 							// using the filled in penetration object
 							if (this.manifoldSolver.getManifold(penetration, convex1, transform1, convex2, transform2, manifold)) {
@@ -585,20 +603,32 @@ public class World {
 									continue;
 								}
 								// notify of the manifold solving result
-								if (!this.collisionListener.collision(body1, fixture1, body2, fixture2, manifold)) {
-									// if the collision listener returned false then skip this collision
-									continue;
+								allow = true;
+								for (CollisionListener cl : collisionListeners) {
+									if (!cl.collision(body1, fixture1, body2, fixture2, manifold)) {
+										// if any collision listener returned false then skip this collision
+										// we must allow all the listeners to get notified first, then skip
+										// the collision
+										allow = false;
+									}
 								}
+								if (!allow) continue;
 								// create a contact constraint
 								ContactConstraint contactConstraint = new ContactConstraint(body1, fixture1, 
 										                                                    body2, fixture2, 
 										                                                    manifold, this);
 								
+								allow = true;
 								// notify of the created contact constraint
-								if (!this.collisionListener.collision(contactConstraint)) {
-									// if the collision listener returned false then skip this collision
-									continue;
+								for (CollisionListener cl : collisionListeners) {
+									if (!cl.collision(contactConstraint)) {
+										// if any collision listener returned false then skip this collision
+										// we must allow all the listeners to get notified first, then skip
+										// the collision
+										allow = false;
+									}
 								}
+								if (!allow) continue;
 								
 								// add a contact edge to both bodies
 								ContactEdge contactEdge1 = new ContactEdge(body2, contactConstraint);
@@ -639,6 +669,7 @@ public class World {
 	 * @since 1.2.0
 	 */
 	protected void solveTOI(ContinuousDetectionMode mode) {
+		List<TimeOfImpactListener> listeners = this.getListeners(TimeOfImpactListener.class);
 		// get the number of bodies
 		int size = this.bodies.size();
 		
@@ -672,7 +703,7 @@ public class World {
 			if (!body.isOnIsland() || body.isAsleep()) continue;
 
 			// solve for time of impact
-			this.solveTOI(body);
+			this.solveTOI(body, listeners);
 		}
 	}
 	
@@ -682,6 +713,9 @@ public class World {
 	 * This method will find the first {@link Body} that the given {@link Body}
 	 * collides with unless ignored via the {@link TimeOfImpactListener}.
 	 * <p>
+	 * If any {@link TimeOfImpactListener} doesn't allow the collision the collision
+	 * is ignored.
+	 * <p>
 	 * After the first {@link Body} is found the two {@link Body}s are interpolated
 	 * to the time of impact.
 	 * <p>
@@ -689,9 +723,10 @@ public class World {
 	 * to force the {@link Body}s into collision.  This causes the discrete collision
 	 * detector to detect the collision on the next time step.
 	 * @param body the {@link Body}
-	 * @since 2.0.0
+	 * @param listeners the list of {@link TimeOfImpactListener}s
+	 * @since 3.1.0
 	 */
-	protected void solveTOI(Body body) {
+	protected void solveTOI(Body body, List<TimeOfImpactListener> listeners) {
 		int size = this.bodies.size();
 		
 		// setup the initial time bounds [0, 1]
@@ -731,8 +766,16 @@ public class World {
 				// check if the time of impact is less than
 				// the current time of impact
 				if (t < t2) {
-					// if it is then ask the listener if we should use this collision
-					if (this.timeOfImpactListener.collision(body, b2, toi)) {
+					// if it is then ask the listeners if we should use this collision
+					boolean allow = true;
+					for (TimeOfImpactListener tl : listeners) {
+						if (!tl.collision(body, b2, toi)) {
+							// if any toi listener doesnt allow it, then don't allow it
+							// we need to allow all listeners to be notified before we continue
+							allow = false;
+						}
+					}
+					if (allow) {
 						// set the new upper bound
 						t2 = t;
 						// save the minimum toi and body
@@ -781,6 +824,9 @@ public class World {
 	 * distance from the ray's origin.
 	 * <p>
 	 * If the all flag is false, the results list will only contain the closest result (if any).
+	 * <p>
+	 * All raycasts pass through the {@link RaycastListener}s before being tested.  If <b>any</b>
+	 * {@link RaycastListener} doesn't allow the raycast then the body will not be tested.
 	 * @param start the start point
 	 * @param end the end point
 	 * @param ignoreSensors true if sensor {@link BodyFixture}s should be ignored
@@ -814,6 +860,9 @@ public class World {
 	 * If the all flag is false, the results list will only contain the closest result (if any).
 	 * <p>
 	 * Pass 0 into the maxLength field to specify an infinite length {@link Ray}.
+	 * <p>
+	 * All raycasts pass through the {@link RaycastListener}s before being tested.  If <b>any</b>
+	 * {@link RaycastListener} doesn't allow the raycast then the body will not be tested.
 	 * @param ray the {@link Ray}
 	 * @param maxLength the maximum length of the ray; 0 for infinite length
 	 * @param ignoreSensors true if sensor {@link BodyFixture}s should be ignored
@@ -847,9 +896,6 @@ public class World {
 		for (int i = 0; i < size; i++) {
 			// get a body to test
 			Body body = bodies.get(i);
-			// see if we should test this body
-			if (!this.raycastListener.allow(ray, body)) continue;
-			// otherwise test the body
 			// does the ray intersect the body?
 			if (raycast(ray, body, max, ignoreSensors, result)) {
 				// check if we are raycasting for all the objects
@@ -878,6 +924,9 @@ public class World {
 	 * <p>
 	 * The given {@link RaycastResult} object, result, will be filled with the raycast result
 	 * if the given ray intersected the given body. 
+	 * <p>
+	 * All raycasts pass through the {@link RaycastListener}s before being tested.  If <b>any</b>
+	 * {@link RaycastListener} doesn't allow the raycast then the body will not be tested.
 	 * @param start the start point
 	 * @param end the end point
 	 * @param body the {@link Body} to test
@@ -906,6 +955,9 @@ public class World {
 	 * if the given ray intersected the given body.
 	 * <p>
 	 * Pass 0 into the maxLength field to specify an infinite length {@link Ray}.
+	 * <p>
+	 * All raycasts pass through the {@link RaycastListener}s before being tested.  If <b>any</b>
+	 * {@link RaycastListener} doesn't allow the raycast then the body will not be tested.
 	 * @param ray the {@link Ray} to cast
 	 * @param body the {@link Body} to test
 	 * @param maxLength the maximum length of the ray; 0 for infinite length
@@ -918,6 +970,15 @@ public class World {
 	 * @since 2.0.0
 	 */
 	public boolean raycast(Ray ray, Body body, double maxLength, boolean ignoreSensors, RaycastResult result) {
+		List<RaycastListener> listeners = this.getListeners(RaycastListener.class);
+		boolean allow = true;
+		for (RaycastListener rl : listeners) {
+			// see if we should test this body
+			if (!rl.allow(ray, body)) {
+				allow = false;
+			}
+		}
+		if (!allow) return false;
 		// get the number of fixtures
 		int size = body.getFixtureCount();
 		// get the body transform
@@ -939,8 +1000,15 @@ public class World {
 				// skip this fixture
 				continue;
 			}
-			// notify the listener to see if we should test this fixture
-			if (!this.raycastListener.allow(ray, body, fixture)) continue;
+			// notify the listeners to see if we should test this fixture
+			allow = true;
+			for (RaycastListener rl : listeners) {
+				// see if we should test this fixture
+				if (!rl.allow(ray, body, fixture)) {
+					allow = false;
+				}
+			}
+			if (!allow) continue;
 			// get the convex shape
 			Convex convex = fixture.getShape();
 			// perform the raycast
@@ -1061,10 +1129,32 @@ public class World {
 	
 	/**
 	 * Removes the given {@link Body} from the {@link World}.
-	 * @param body the {@link Body} to remove
+	 * <p>
+	 * Use the {@link #remove(Body, boolean)} method to enable implicit
+	 * destruction notification.
+	 * @param body the {@link Body} to remove.
 	 * @return boolean true if the body was removed
 	 */
 	public boolean remove(Body body) {
+		return remove(body, false);
+	}
+	
+	/**
+	 * Removes the given {@link Body} from the {@link World}.
+	 * <p>
+	 * When a body is removed, joints and contacts may be implicitly destroyed.
+	 * Pass true to the notify parameter to be notified the destruction of these objects
+	 * via the {@link DestructionListener}s.
+	 * @param body the {@link Body} to remove
+	 * @param notify true if implicit destruction should be notified
+	 * @return boolean true if the body was removed
+	 * @since 3.1.0
+	 */
+	public boolean remove(Body body, boolean notify) {
+		List<DestructionListener> listeners = null;
+		if (notify) {
+			listeners = this.getListeners(DestructionListener.class);
+		}
 		// check for null body
 		if (body == null) return false;
 		// remove the body from the list
@@ -1109,7 +1199,11 @@ public class World {
 					}
 				}
 				// notify of the destroyed joint
-				this.destructionListener.destroyed(joint);
+				if (notify) {
+					for (DestructionListener dl : listeners) {
+						dl.destroyed(joint);
+					}
+				}
 				// remove the joint from the world
 				this.joints.remove(joint);
 				// set the world property to null
@@ -1165,8 +1259,12 @@ public class World {
 													contact.getPoint(), 
 													contactConstraint.getNormal(), 
 													contact.getDepth());
-					// call the destruction listener
-					this.destructionListener.destroyed(contactPoint);
+					// call the destruction listeners
+					if (notify) {
+						for (DestructionListener dl : listeners) {
+							dl.destroyed(contactPoint);
+						}
+					}
 				}
 			}
 		}
@@ -1176,6 +1274,8 @@ public class World {
 	
 	/**
 	 * Removes the given {@link Joint} from the {@link World}.
+	 * <p>
+	 * When joints are removed no other objects are implicitly destroyed.
 	 * @param joint the {@link Joint} to remove
 	 * @return boolean true if the {@link Joint} was removed
 	 */
@@ -1227,6 +1327,227 @@ public class World {
 		}
 		
 		return removed;
+	}
+	
+	/**
+	 * Removes all the joints and bodies from the world.
+	 * <p>
+	 * This method does <b>not</b> notify of destroyed objects.
+	 * <p>
+	 * Renamed from clear (3.0.0 and below).
+	 * @see #removeAll(boolean)
+	 * @since 3.0.1
+	 */
+	public void removeAll() {
+		this.removeAll(false);
+	}
+	
+	/**
+	 * Removes all the joints and bodies from the world.
+	 * <p>
+	 * This method will remove the joints and contacts from all {@link Body}s.
+	 * <p>
+	 * Renamed from clear (3.0.0 to 1.0.2).
+	 * @param notify true if destruction of joints and contacts should be notified of by the {@link DestructionListener}
+	 * @since 3.0.1
+	 */
+	public void removeAll(boolean notify) {
+		List<DestructionListener> listeners = null;
+		if (notify) {
+			listeners = this.getListeners(DestructionListener.class);
+		}
+		// loop over the bodies and clear the
+		// joints and contacts
+		int bsize = this.bodies.size();
+		for (int i = 0; i < bsize; i++) {
+			// get the body
+			Body body = this.bodies.get(i);
+			// clear the joint edges
+			body.joints.clear();
+			// do we need to notify?
+			if (notify) {
+				// notify of all the destroyed contacts
+				Iterator<ContactEdge> aIterator = body.contacts.iterator();
+				while (aIterator.hasNext()) {
+					// get the contact edge
+					ContactEdge contactEdge = aIterator.next();
+					// get the other body involved
+					Body other = contactEdge.getOther();
+					// get the contact constraint
+					ContactConstraint contactConstraint = contactEdge.getContactConstraint();
+					// find the other contact edge
+					Iterator<ContactEdge> bIterator = other.contacts.iterator();
+					while (bIterator.hasNext()) {
+						// get the contact edge
+						ContactEdge otherContactEdge = bIterator.next();
+						// get the contact constraint on the edge
+						ContactConstraint otherContactConstraint = otherContactEdge.getContactConstraint();
+						// are the constraints the same object reference
+						if (otherContactConstraint == contactConstraint) {
+							// if so then remove it
+							bIterator.remove();
+							// there should only be one contact edge
+							// for each body-body pair
+							break;
+						}
+					}
+					// set the world to null
+					contactConstraint.world = null;
+					// notify of all the contacts on the contact constraint
+					Contact[] contacts = contactConstraint.getContacts();
+					int csize = contacts.length;
+					for (int j = 0; j < csize; j++) {
+						Contact contact = contacts[j];
+						// create a contact point for notification
+						ContactPoint contactPoint = new ContactPoint(
+														contactConstraint.getBody1(), 
+														contactConstraint.getFixture1(), 
+														contactConstraint.getBody2(), 
+														contactConstraint.getFixture2(),
+														contact.isEnabled(),
+														contact.getPoint(), 
+														contactConstraint.getNormal(), 
+														contact.getDepth());
+						// call the destruction listeners
+						for (DestructionListener dl : listeners) {
+							dl.destroyed(contactPoint);
+						}
+					}
+				}
+				
+				// notify of the destroyed body
+				for (DestructionListener dl : listeners) {
+					dl.destroyed(body);
+				}
+			}
+			// clear all the contacts
+			body.contacts.clear();
+			// set the world to null
+			body.world = null;
+		}
+		// do we need to notify?
+		if (notify) {
+			// notify of all the destroyed joints
+			int jsize = this.joints.size();
+			for (int i = 0; i < jsize; i++) {
+				// get the joint
+				Joint joint = this.joints.get(i);
+				// call the destruction listeners
+				for (DestructionListener dl : listeners) {
+					dl.destroyed(joint);
+				}
+				// set the world to null
+				joint.world = null;
+			}
+		}
+		// clear all the broadphase bodies
+		this.broadphaseDetector.clear();
+		// clear all the joints
+		this.joints.clear();
+		// clear all the bodies
+		this.bodies.clear();
+		// clear the contact manager of cached contacts
+		this.contactManager.reset();
+	}
+	
+	/**
+	 * This is a convenience method for the {@link #removeAll()} method since all joints will be removed
+	 * when all bodies are removed.
+	 * <p>
+	 * This method does not notify of the destroyed contacts, joints, etc.
+	 * @see #removeAllBodies(boolean)
+	 * @since 3.0.1
+	 */
+	public void removeAllBodies() {
+		this.removeAll();
+	}
+	
+	/**
+	 * This is a convenience method for the {@link #removeAll(boolean)} method since all joints will be removed
+	 * when all bodies are removed.
+	 * @param notify true if destruction of joints and contacts should be notified of by the {@link DestructionListener}
+	 * @since 3.0.1
+	 */
+	public void removeAllBodies(boolean notify) {
+		this.removeAll(notify);
+	}
+	
+	/**
+	 * Removes all {@link Joint}s from this {@link World}.
+	 * <p>
+	 * This method does not notify of the joints removed.
+	 * @see #removeAllJoints(boolean)
+	 * @since 3.0.1
+	 */
+	public void removeAllJoints() {
+		this.removeAllJoints(false);
+	}
+	
+	/**
+	 * Removes all {@link Joint}s from this {@link World}.
+	 * @param notify true if destruction of joints should be notified of by the {@link DestructionListener}
+	 * @since 3.0.1
+	 */
+	public void removeAllJoints(boolean notify) {
+		List<DestructionListener> listeners = null;
+		if (notify) {
+			listeners = this.getListeners(DestructionListener.class);
+		}
+		// get the number of joints
+		int jSize = this.joints.size();
+		// remove all the joints
+		for (int i = 0; i < jSize; i++) {
+			// remove the joint from the joint list
+			Joint joint = this.joints.get(i);
+			
+			// get the involved bodies
+			Body body1 = joint.getBody1();
+			Body body2 = joint.getBody2();
+			
+			// remove the joint edges from body1
+			Iterator<JointEdge> iterator = body1.joints.iterator();
+			while (iterator.hasNext()) {
+				// see if this is the edge we want to remove
+				JointEdge jointEdge = iterator.next();
+				if (jointEdge.getJoint() == joint) {
+					// then remove this joint edge
+					iterator.remove();
+					// joints should only have one joint edge
+					// per body
+					break;
+				}
+			}
+			// remove the joint edges from body2
+			iterator = body2.joints.iterator();
+			while (iterator.hasNext()) {
+				// see if this is the edge we want to remove
+				JointEdge jointEdge = iterator.next();
+				if (jointEdge.getJoint() == joint) {
+					// then remove this joint edge
+					iterator.remove();
+					// joints should only have one joint edge
+					// per body
+					break;
+				}
+			}
+			
+			// finally wake both bodies
+			body1.setAsleep(false);
+			body2.setAsleep(false);
+			
+			// notify of the destruction if required
+			if (notify) {
+				for (DestructionListener dl : listeners) {
+					dl.destroyed(joint);
+				}
+			}
+			
+			// set the world to null
+			joint.world = null;
+		}
+		
+		// remove all the joints from the joint list
+		this.joints.clear();
 	}
 	
 	/**
@@ -1317,113 +1638,47 @@ public class World {
 	}
 	
 	/**
-	 * Sets the bounds listener.
-	 * @param boundsListener the bounds listener
-	 * @throws NullPointerException if boundsListener is null
+	 * Returns the listeners that are of the given type 
+	 * or sub types of the given type.
+	 * <p>
+	 * Returns an empty list if no listeners for the given type are found.
+	 * <p>
+	 * Returns null if clazz is null.
+	 * @param clazz the type of listener to get (ContactListener.class for example)
+	 * @return List&lt;T&gt;
 	 */
-	public void setBoundsListener(BoundsListener boundsListener) {
-		if (boundsListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullBoundsListener"));
-		this.boundsListener = boundsListener;
+	public <T extends Listener> List<T> getListeners(Class<T> clazz) {
+		// check for null
+		if (clazz == null) return null;
+		// create a new list and loop over the listeners
+		List<T> listeners = new ArrayList<T>();
+		for (Listener l : this.listeners) {
+			// check if the listener is of the given type
+			if (clazz.isInstance(l)) {
+				// if so, add it to the new list
+				listeners.add(clazz.cast(l));
+			}
+		}
+		// return the new list
+		return listeners;
 	}
 	
 	/**
-	 * Returns the bounds listener.
-	 * @return {@link BoundsListener} the bounds listener
+	 * Adds the given listener to the list of listeners.
+	 * @param listener the listener
 	 */
-	public BoundsListener getBoundsListener() {
-		return this.boundsListener;
+	public void addListener(Listener listener) {
+		if (listener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullListener"));
+		this.listeners.add(listener);
 	}
 	
 	/**
-	 * Sets the {@link ContactListener}.
-	 * @param contactListener the contact listener
-	 * @throws NullPointerException if contactListener is null
+	 * Removes the given listener.
+	 * @param listener the listener to remove
+	 * @return boolean true if the listener was removed
 	 */
-	public void setContactListener(ContactListener contactListener) {
-		if (contactListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullContactListener"));
-		this.contactListener = contactListener;
-	}
-	
-	/**
-	 * Returns the contact listener.
-	 * @return {@link ContactListener} the contact listener
-	 */
-	public ContactListener getContactListener() {
-		return this.contactListener;
-	}
-	
-	/**
-	 * Returns the time of impact listener.
-	 * @return {@link TimeOfImpactListener} the time of impact listener
-	 */
-	public TimeOfImpactListener getTimeOfImpactListener() {
-		return this.timeOfImpactListener;
-	}
-	
-	/**
-	 * Sets the {@link TimeOfImpactListener}.
-	 * @param timeOfImpactListener the time of impact listener
-	 * @throws NullPointerException if timeOfImpactListener is null
-	 */
-	public void setTimeOfImpactListener(TimeOfImpactListener timeOfImpactListener) {
-		if (timeOfImpactListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullTimeOfImpactListener"));
-		this.timeOfImpactListener = timeOfImpactListener;
-	}
-	
-	/**
-	 * Sets the raycast listener.
-	 * @param raycastListener the raycast listener
-	 * @throws NullPointerException if raycastListener is null
-	 * @since 2.0.0
-	 */
-	public void setRaycastListener(RaycastListener raycastListener) {
-		if (raycastListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullRaycastListener"));
-		this.raycastListener = raycastListener;
-	}
-	
-	/**
-	 * Returns the raycast listener.
-	 * @return {@link RaycastListener}
-	 * @since 2.0.0
-	 */
-	public RaycastListener getRaycastListener() {
-		return this.raycastListener;
-	}
-	
-	/**
-	 * Sets the {@link DestructionListener}.
-	 * @param destructionListener the {@link DestructionListener}
-	 * @throws NullPointerException if destructionListener is null
-	 */
-	public void setDestructionListener(DestructionListener destructionListener) {
-		if (destructionListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullDestructionListener"));
-		this.destructionListener = destructionListener;
-	}
-	
-	/**
-	 * Returns the {@link DestructionListener}.
-	 * @return {@link DestructionListener} the destruction listener
-	 */
-	public DestructionListener getDestructionListener() {
-		return this.destructionListener;
-	}
-	
-	/**
-	 * Sets the {@link StepListener}.
-	 * @param stepListener the {@link StepListener}
-	 * @throws NullPointerException if stepListener is null
-	 */
-	public void setStepListener(StepListener stepListener) {
-		if (stepListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullStepListener"));
-		this.stepListener = stepListener;
-	}
-	
-	/**
-	 * Returns the {@link StepListener}
-	 * @return {@link StepListener}
-	 */
-	public StepListener getStepListener() {
-		return this.stepListener;
+	public boolean removeListener(Listener listener) {
+		return this.listeners.remove(listener);
 	}
 	
 	/**
@@ -1533,25 +1788,7 @@ public class World {
 	public RaycastDetector getRaycastDetector() {
 		return this.raycastDetector;
 	}
-	
-	/**
-	 * Sets the collision listener.
-	 * @param collisionListener the collision listener
-	 * @throws NullPointerException if collisionListener is null
-	 */
-	public void setCollisionListener(CollisionListener collisionListener) {
-		if (collisionListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullCollisionListener"));
-		this.collisionListener = collisionListener;
-	}
-	
-	/**
-	 * Returns the collision listener.
-	 * @return {@link CollisionListener} the collision listener
-	 */
-	public CollisionListener getCollisionListener() {
-		return this.collisionListener;
-	}
-	
+
 	/**
 	 * Returns the {@link CoefficientMixer}.
 	 * @return {@link CoefficientMixer}
@@ -1579,210 +1816,135 @@ public class World {
 		return contactManager;
 	}
 	
-	/**
-	 * Removes all the joints and bodies from the world.
-	 * <p>
-	 * This method does <b>not</b> notify of destroyed objects.
-	 * <p>
-	 * Renamed from clear (3.0.0 and below).
-	 * @see #removeAll(boolean)
-	 * @since 3.0.1
-	 */
-	public void removeAll() {
-		this.removeAll(false);
-	}
-	
-	/**
-	 * Removes all the joints and bodies from the world.
-	 * <p>
-	 * This method will remove the joints and contacts from all {@link Body}s.
-	 * <p>
-	 * Renamed from clear (3.0.0 to 1.0.2).
-	 * @param notify true if destruction of joints and contacts should be notified of by the {@link DestructionListener}
-	 * @since 3.0.1
-	 */
-	public void removeAll(boolean notify) {
-		// loop over the bodies and clear the
-		// joints and contacts
-		int bsize = this.bodies.size();
-		for (int i = 0; i < bsize; i++) {
-			// get the body
-			Body body = this.bodies.get(i);
-			// clear the joint edges
-			body.joints.clear();
-			// do we need to notify?
-			if (notify) {
-				// notify of all the destroyed contacts
-				Iterator<ContactEdge> aIterator = body.contacts.iterator();
-				while (aIterator.hasNext()) {
-					// get the contact edge
-					ContactEdge contactEdge = aIterator.next();
-					// get the other body involved
-					Body other = contactEdge.getOther();
-					// get the contact constraint
-					ContactConstraint contactConstraint = contactEdge.getContactConstraint();
-					// find the other contact edge
-					Iterator<ContactEdge> bIterator = other.contacts.iterator();
-					while (bIterator.hasNext()) {
-						// get the contact edge
-						ContactEdge otherContactEdge = bIterator.next();
-						// get the contact constraint on the edge
-						ContactConstraint otherContactConstraint = otherContactEdge.getContactConstraint();
-						// are the constraints the same object reference
-						if (otherContactConstraint == contactConstraint) {
-							// if so then remove it
-							bIterator.remove();
-							// there should only be one contact edge
-							// for each body-body pair
-							break;
-						}
-					}
-					// set the world to null
-					contactConstraint.world = null;
-					// notify of all the contacts on the contact constraint
-					Contact[] contacts = contactConstraint.getContacts();
-					int csize = contacts.length;
-					for (int j = 0; j < csize; j++) {
-						Contact contact = contacts[j];
-						// create a contact point for notification
-						ContactPoint contactPoint = new ContactPoint(
-														contactConstraint.getBody1(), 
-														contactConstraint.getFixture1(), 
-														contactConstraint.getBody2(), 
-														contactConstraint.getFixture2(),
-														contact.isEnabled(),
-														contact.getPoint(), 
-														contactConstraint.getNormal(), 
-														contact.getDepth());
-						// call the destruction listener
-						this.destructionListener.destroyed(contactPoint);
-					}
-				}
-				
-				// notify of the destroyed body
-				this.destructionListener.destroyed(body);
-			}
-			// clear all the contacts
-			body.contacts.clear();
-			// set the world to null
-			body.world = null;
-		}
-		// do we need to notify?
-		if (notify) {
-			// notify of all the destroyed joints
-			int jsize = this.joints.size();
-			for (int i = 0; i < jsize; i++) {
-				// get the joint
-				Joint joint = this.joints.get(i);
-				// call the destruction listener
-				this.destructionListener.destroyed(joint);
-				// set the world to null
-				joint.world = null;
-			}
-		}
-		// clear all the broadphase bodies
-		this.broadphaseDetector.clear();
-		// clear all the joints
-		this.joints.clear();
-		// clear all the bodies
-		this.bodies.clear();
-		// clear the contact manager of cached contacts
-		this.contactManager.reset();
-	}
-	
-	/**
-	 * This is a convenience method for the {@link #removeAll()} method since all joints will be removed
-	 * when all bodies are removed.
-	 * <p>
-	 * This method does not notify of the destroyed contacts, joints, etc.
-	 * @see #removeAllBodies(boolean)
-	 * @since 3.0.1
-	 */
-	public void removeAllBodies() {
-		this.removeAll();
-	}
-	
-	/**
-	 * This is a convenience method for the {@link #removeAll(boolean)} method since all joints will be removed
-	 * when all bodies are removed.
-	 * @param notify true if destruction of joints and contacts should be notified of by the {@link DestructionListener}
-	 * @since 3.0.1
-	 */
-	public void removeAllBodies(boolean notify) {
-		this.removeAll(notify);
-	}
-	
-	/**
-	 * Removes all {@link Joint}s from this {@link World}.
-	 * <p>
-	 * This method does not notify of the joints removed.
-	 * @see #removeAllJoints(boolean)
-	 * @since 3.0.1
-	 */
-	public void removeAllJoints() {
-		this.removeAllJoints(false);
-	}
-	
-	/**
-	 * Removes all {@link Joint}s from this {@link World}.
-	 * @param notify true if destruction of joints should be notified of by the {@link DestructionListener}
-	 * @since 3.0.1
-	 */
-	public void removeAllJoints(boolean notify) {
-		// get the number of joints
-		int jSize = this.joints.size();
-		// remove all the joints
-		for (int i = 0; i < jSize; i++) {
-			// remove the joint from the joint list
-			Joint joint = this.joints.get(i);
-			
-			// get the involved bodies
-			Body body1 = joint.getBody1();
-			Body body2 = joint.getBody2();
-			
-			// remove the joint edges from body1
-			Iterator<JointEdge> iterator = body1.joints.iterator();
-			while (iterator.hasNext()) {
-				// see if this is the edge we want to remove
-				JointEdge jointEdge = iterator.next();
-				if (jointEdge.getJoint() == joint) {
-					// then remove this joint edge
-					iterator.remove();
-					// joints should only have one joint edge
-					// per body
-					break;
-				}
-			}
-			// remove the joint edges from body2
-			iterator = body2.joints.iterator();
-			while (iterator.hasNext()) {
-				// see if this is the edge we want to remove
-				JointEdge jointEdge = iterator.next();
-				if (jointEdge.getJoint() == joint) {
-					// then remove this joint edge
-					iterator.remove();
-					// joints should only have one joint edge
-					// per body
-					break;
-				}
-			}
-			
-			// finally wake both bodies
-			body1.setAsleep(false);
-			body2.setAsleep(false);
-			
-			// notify of the destruction if required
-			if (notify) {
-				this.destructionListener.destroyed(joint);
-			}
-			
-			// set the world to null
-			joint.world = null;
-		}
-		
-		// remove all the joints from the joint list
-		this.joints.clear();
-	}
+//	
+//	/**
+//	 * Sets the collision listener.
+//	 * @param collisionListener the collision listener
+//	 * @throws NullPointerException if collisionListener is null
+//	 */
+//	public void setCollisionListener(CollisionListener collisionListener) {
+//		if (collisionListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullCollisionListener"));
+//		this.collisionListener = collisionListener;
+//	}
+//	
+//	/**
+//	 * Returns the collision listener.
+//	 * @return {@link CollisionListener} the collision listener
+//	 */
+//	public CollisionListener getCollisionListener() {
+//		return this.collisionListener;
+//	}
+//
+//	/**
+//	 * Sets the bounds listener.
+//	 * @param boundsListener the bounds listener
+//	 * @throws NullPointerException if boundsListener is null
+//	 */
+//	public void setBoundsListener(BoundsListener boundsListener) {
+//		if (boundsListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullBoundsListener"));
+//		this.boundsListener = boundsListener;
+//	}
+//	
+//	/**
+//	 * Returns the bounds listener.
+//	 * @return {@link BoundsListener} the bounds listener
+//	 */
+//	public BoundsListener getBoundsListener() {
+//		return this.boundsListener;
+//	}
+//	
+//	/**
+//	 * Sets the {@link ContactListener}.
+//	 * @param contactListener the contact listener
+//	 * @throws NullPointerException if contactListener is null
+//	 */
+//	public void setContactListener(ContactListener contactListener) {
+//		if (contactListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullContactListener"));
+//		this.contactListener = contactListener;
+//	}
+//	
+//	/**
+//	 * Returns the contact listener.
+//	 * @return {@link ContactListener} the contact listener
+//	 */
+//	public ContactListener getContactListener() {
+//		return this.contactListener;
+//	}
+//	
+//	/**
+//	 * Returns the time of impact listener.
+//	 * @return {@link TimeOfImpactListener} the time of impact listener
+//	 */
+//	public TimeOfImpactListener getTimeOfImpactListener() {
+//		return this.timeOfImpactListener;
+//	}
+//	
+//	/**
+//	 * Sets the {@link TimeOfImpactListener}.
+//	 * @param timeOfImpactListener the time of impact listener
+//	 * @throws NullPointerException if timeOfImpactListener is null
+//	 */
+//	public void setTimeOfImpactListener(TimeOfImpactListener timeOfImpactListener) {
+//		if (timeOfImpactListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullTimeOfImpactListener"));
+//		this.timeOfImpactListener = timeOfImpactListener;
+//	}
+//	
+//	/**
+//	 * Sets the raycast listener.
+//	 * @param raycastListener the raycast listener
+//	 * @throws NullPointerException if raycastListener is null
+//	 * @since 2.0.0
+//	 */
+//	public void setRaycastListener(RaycastListener raycastListener) {
+//		if (raycastListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullRaycastListener"));
+//		this.raycastListener = raycastListener;
+//	}
+//	
+//	/**
+//	 * Returns the raycast listener.
+//	 * @return {@link RaycastListener}
+//	 * @since 2.0.0
+//	 */
+//	public RaycastListener getRaycastListener() {
+//		return this.raycastListener;
+//	}
+//	
+//	/**
+//	 * Sets the {@link DestructionListener}.
+//	 * @param destructionListener the {@link DestructionListener}
+//	 * @throws NullPointerException if destructionListener is null
+//	 */
+//	public void setDestructionListener(DestructionListener destructionListener) {
+//		if (destructionListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullDestructionListener"));
+//		this.destructionListener = destructionListener;
+//	}
+//	
+//	/**
+//	 * Returns the {@link DestructionListener}.
+//	 * @return {@link DestructionListener} the destruction listener
+//	 */
+//	public DestructionListener getDestructionListener() {
+//		return this.destructionListener;
+//	}
+//	
+//	/**
+//	 * Sets the {@link StepListener}.
+//	 * @param stepListener the {@link StepListener}
+//	 * @throws NullPointerException if stepListener is null
+//	 */
+//	public void setStepListener(StepListener stepListener) {
+//		if (stepListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullStepListener"));
+//		this.stepListener = stepListener;
+//	}
+//	
+//	/**
+//	 * Returns the {@link StepListener}
+//	 * @return {@link StepListener}
+//	 */
+//	public StepListener getStepListener() {
+//		return this.stepListener;
+//	}
+//	
 	
 	/**
 	 * Returns the application data associated with this {@link World}.

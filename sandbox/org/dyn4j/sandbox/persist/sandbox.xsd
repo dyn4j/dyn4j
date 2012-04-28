@@ -716,6 +716,8 @@
 
 	<xs:complexType name="World">
 		<xs:sequence>
+			<xs:element name="Name" type="xs:string" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Settings" type="Settings" maxOccurs="1" minOccurs="1" />
 			<xs:element name="BroadphaseDetector" type="BroadphaseDetector" maxOccurs="1" minOccurs="0" />
 			<xs:element name="NarrowphaseDetector" type="NarrowphaseDetector" maxOccurs="1" minOccurs="0" />
 			<xs:element name="ManifoldSolver" type="ManifoldSolver" maxOccurs="1" minOccurs="0" />
@@ -890,10 +892,9 @@
 	
 	<xs:complexType name="Simulation">
 		<xs:sequence>
-			<xs:element name="Name" type="xs:string" maxOccurs="1" minOccurs="1" />
-			<xs:element name="Camera" type="Camera" maxOccurs="1" minOccurs="1" />
+			<!-- This is output only -->
 			<xs:element name="System" type="System" maxOccurs="1" minOccurs="0" />
-			<xs:element name="Settings" type="Settings" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Camera" type="Camera" maxOccurs="1" minOccurs="1" />
 			<xs:element name="Rays" type="Rays" maxOccurs="1" minOccurs="1" />
 			<xs:element name="World" type="World" maxOccurs="1" minOccurs="1" />
 		</xs:sequence>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.dyn4j.sandbox.utilities.ImageUtilities;
 /**
  * Class storing all the icons used by the application.
  * @author William Bittle
- * @version 1.0.1
+ * @version 1.0.2
  * @since 1.0.0
  */
 public class Icons {
@@ -158,6 +158,9 @@ public class Icons {
 	
 	/** Origin icon */
 	public static final ImageIcon ORIGIN = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/origin-icon.png");
+	
+	/** Center on origin icon */
+	public static final ImageIcon CENTER_ON_ORIGIN = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/center-on-origin-icon.png");
 	
 	/** Clear all icon */
 	public static final ImageIcon CLEAR_ALL = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/clear-all-icon.png");

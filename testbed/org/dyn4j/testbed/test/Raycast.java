@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -170,10 +170,9 @@ public class Raycast extends Test {
 		
 		// setup the contact counter
 		ContactCounter cc = new ContactCounter();
-		this.world.setContactListener(cc);
-		this.world.setStepListener(cc);
+		this.world.addListener(cc);
 		// setup the custom raycast listener
-		this.world.setRaycastListener(new CustomRaycastListener());
+		this.world.addListener(new CustomRaycastListener());
 		
 		// turn off gravity
 		this.world.setGravity(new Vector2());

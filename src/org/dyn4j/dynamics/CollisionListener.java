@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,7 @@
  */
 package org.dyn4j.dynamics;
 
+import org.dyn4j.Listener;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.collision.manifold.Manifold;
 import org.dyn4j.collision.manifold.ManifoldSolver;
@@ -36,10 +37,10 @@ import org.dyn4j.geometry.Shape;
 /**
  * Interface to listen for collision events.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.0
  * @since 1.0.0
  */
-public interface CollisionListener {
+public interface CollisionListener extends Listener {
 	/**
 	 * Called when two {@link Body}s are colliding as determined by the {@link BroadphaseDetector}.
 	 * @param body1 the first {@link Body}

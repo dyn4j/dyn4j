@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,7 +40,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Class to count the number of added, removed, and persisted contacts.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.1.0
  * @since 1.0.0
  */
 public class ContactCounter implements ContactListener, StepListener {
@@ -96,10 +96,8 @@ public class ContactCounter implements ContactListener, StepListener {
 	 * @see org.dyn4j.dynamics.contact.ContactListener#end(org.dyn4j.dynamics.contact.ContactPoint)
 	 */
 	@Override
-	public boolean end(ContactPoint c) {
+	public void end(ContactPoint c) {
 		this.removed++;
-		// all contacts should be enabled
-		return true;
 	}
 	
 	/* (non-Javadoc)
