@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -78,6 +78,7 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.NullBounds;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.SandboxRay;
+import org.dyn4j.sandbox.Simulation;
 import org.dyn4j.sandbox.dialogs.AddBodyDialog;
 import org.dyn4j.sandbox.dialogs.AddConvexFixtureDialog;
 import org.dyn4j.sandbox.dialogs.AddConvexHullFixtureDialog;
@@ -94,7 +95,6 @@ import org.dyn4j.sandbox.dialogs.EditRayDialog;
 import org.dyn4j.sandbox.dialogs.EditWorldDialog;
 import org.dyn4j.sandbox.dialogs.SetBoundsDialog;
 import org.dyn4j.sandbox.events.BodyActionEvent;
-import org.dyn4j.sandbox.events.RayActionEvent;
 import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.resources.Messages;
 import org.dyn4j.sandbox.utilities.ControlUtilities;
@@ -102,15 +102,15 @@ import org.dyn4j.sandbox.utilities.ControlUtilities;
 /**
  * Panel used to display and manage the World object using a JTree interface.
  * @author William Bittle
- * @version 1.0.1
+ * @version 1.0.2
  * @since 1.0.0
  */
-public class WorldTreePanel extends JPanel implements MouseListener, ActionListener {
+public class SimulationTreePanel extends JPanel implements MouseListener, ActionListener {
 	/** The version id */
 	private static final long serialVersionUID = 4557154805670204181L;
 	
-	/** The world object */
-	private World world;
+	/** The simulation object */
+	private Simulation simulation;
 	
 	/** The JTree containing the nodes */
 	private JTree tree;
@@ -164,15 +164,10 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 	private JPopupMenu popRay;
 	
 	/**
-	 * Full constructor.
-	 * <p>
-	 * Creates a JTree inside a JPanel that is used to interact with the objects in the world.
-	 * @param world the world
+	 * Default constructor.
 	 */
-	public WorldTreePanel(World world) {
-		this.world = world;
-		
-		this.root = new DefaultMutableTreeNode(world, true);
+	public SimulationTreePanel() {
+		this.root = new DefaultMutableTreeNode(null, true);
 		this.model = new DefaultTreeModel(this.root);
 		this.tree = new JTree(this.model);
 		this.tree.setCellRenderer(new Renderer());
@@ -221,14 +216,17 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 	}
 	
 	/**
-	 * Sets the world of this world tree panel.
+	 * Sets the simulation of this simulation tree panel.
 	 * <p>
 	 * This method will create the nodes for all objects.
-	 * @param world the world
-	 * @param rays the list of rays
+	 * @param simulation the current simulation
 	 */
-	public void setWorld(World world, List<SandboxRay> rays) {
-		this.world = world;
+	public void setSimulation(Simulation simulation) {
+		this.simulation = simulation;
+		
+		World world = simulation.getWorld();
+		List<SandboxRay> rays = simulation.getRays();
+		
 		this.root.setUserObject(world);
 		
 		// reset everything
@@ -434,6 +432,7 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 		JMenuItem mnuApplyForceAtPoint = new JMenuItem(Messages.getString("menu.context.body.applyForceAtPoint"));
 		JMenuItem mnuClearForce = new JMenuItem(Messages.getString("menu.context.body.clearAccumulatedForce"));
 		JMenuItem mnuClearTorque = new JMenuItem(Messages.getString("menu.context.body.clearAccumulatedTorque"));
+		JMenuItem mnuCenterOnOrigin = new JMenuItem(Messages.getString("menu.context.body.centerOnOrigin"));
 		
 		mnuEditBody.setIcon(Icons.EDIT_BODY);
 		mnuRemoveBody.setIcon(Icons.REMOVE_BODY);
@@ -449,6 +448,7 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 		mnuApplyForceAtPoint.setIcon(Icons.FORCE_AT_POINT);
 		mnuClearForce.setIcon(Icons.CLEAR_ALL);
 		mnuClearTorque.setIcon(Icons.CLEAR_ALL);
+		mnuCenterOnOrigin.setIcon(Icons.CENTER_ON_ORIGIN);
 		
 		mnuEditBody.setActionCommand("editBody");
 		mnuRemoveBody.setActionCommand("removeBody");
@@ -464,6 +464,7 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 		mnuApplyForceAtPoint.setActionCommand("applyForceAtPoint");
 		mnuClearForce.setActionCommand("clearForce");
 		mnuClearTorque.setActionCommand("clearTorque");
+		mnuCenterOnOrigin.setActionCommand("centerOnOrigin");
 		
 		mnuEditBody.addActionListener(this);
 		mnuRemoveBody.addActionListener(this);
@@ -479,6 +480,7 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 		mnuApplyForceAtPoint.addActionListener(this);
 		mnuClearForce.addActionListener(this);
 		mnuClearTorque.addActionListener(this);
+		mnuCenterOnOrigin.addActionListener(this);
 		
 		this.popBody.add(mnuEditBody);
 		this.popBody.add(mnuRemoveBody);
@@ -499,6 +501,8 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 		this.popBody.addSeparator();
 		this.popBody.add(mnuClearForce);
 		this.popBody.add(mnuClearTorque);
+		this.popBody.addSeparator();
+		this.popBody.add(mnuCenterOnOrigin);
 		
 		// create the fixture node popup menu
 		
@@ -807,6 +811,8 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 			this.editFixtureAction();
 		} else if ("removeFixture".equals(command)) {
 			this.removeFixtureAction();
+		} else if ("centerOnOrigin".equals(command)) {
+			this.centerOnOriginAction();
 		} else if ("addAngleJoint".equals(command)) {
 			this.addJointAction(AngleJoint.class);
 		} else if ("addDistanceJoint".equals(command)) {
@@ -865,17 +871,16 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 	private SandboxBody[] getBodies() {
 		// get the current list of bodies
 		SandboxBody[] bodies = null;
-		synchronized (this.world) {
-			int size = this.world.getBodyCount();
-			if (size != 0) {
-				bodies = new SandboxBody[size];
-				for (int i = 0; i < size; i++) {
-					bodies[i] = (SandboxBody)this.world.getBody(i);
-				}
-				return bodies;
-			} else {
-				return null;
+		World world = this.simulation.getWorld();
+		int size = world.getBodyCount();
+		if (size != 0) {
+			bodies = new SandboxBody[size];
+			for (int i = 0; i < size; i++) {
+				bodies[i] = (SandboxBody)world.getBody(i);
 			}
+			return bodies;
+		} else {
+			return null;
 		}
 	}
 	
@@ -906,20 +911,6 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 		}
 	}
 	
-	/**
-	 * Notifies all the action listeners of the event.
-	 * @param command the command
-	 * @param ray the affected ray
-	 */
-	private void notifyActionListeners(String command, SandboxRay ray) {
-		ActionListener[] listeners = this.getListeners(ActionListener.class);
-		int size = listeners.length;
-		RayActionEvent event = new RayActionEvent(this, ActionEvent.ACTION_PERFORMED, command, ray);
-		for (int i = 0; i < size; i++) {
-			listeners[i].actionPerformed(event);
-		}
-	}
-	
 	// context menu actions
 	
 	/**
@@ -935,8 +926,11 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 		// check the user's choice
 		if (choice == JOptionPane.YES_OPTION) {
 			// remove it all from the world
-			synchronized (this.world) {
-				this.world.removeAll();
+			synchronized (Simulation.LOCK) {
+				// remove everything
+				this.simulation.getWorld().removeAll(false);
+				// clear the contact listener
+				this.simulation.getContactCounter().clear();
 			}
 			// remove the nodes from the tree
 			this.bodyFolder.removeAllChildren();
@@ -953,7 +947,9 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 	 * Shows an edit world dialog.
 	 */
 	private void editWorldAction() {
-		EditWorldDialog.show(ControlUtilities.getParentWindow(this), this.world);
+		synchronized (Simulation.LOCK) {
+			EditWorldDialog.show(ControlUtilities.getParentWindow(this), this.simulation.getWorld());
+		}
 		
 		this.model.nodeChanged(this.root);
 	}
@@ -965,8 +961,8 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 	 */
 	private void setBoundsAction() {
 		Bounds bounds = null;
-		synchronized (this.world) {
-			bounds = this.world.getBounds();
+		synchronized (Simulation.LOCK) {
+			bounds = this.simulation.getWorld().getBounds();
 		}
 		RectangularBounds b = null;
 		if (bounds instanceof NullBounds) {
@@ -975,8 +971,8 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 			b = SetBoundsDialog.show(ControlUtilities.getParentWindow(this), (RectangularBounds)bounds);
 		}
 		if (b != null) {
-			synchronized (this.world) {
-				this.world.setBounds(b);
+			synchronized (Simulation.LOCK) {
+				this.simulation.getWorld().setBounds(b);
 			}
 			this.bounds.setUserObject(b);
 			this.model.reload(this.bounds);
@@ -988,8 +984,8 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 	 */
 	private void unsetBoundsAction() {
 		NullBounds bounds = new NullBounds();
-		synchronized (this.world) {
-			this.world.setBounds(bounds);
+		synchronized (Simulation.LOCK) {
+			this.simulation.getWorld().setBounds(bounds);
 		}
 		this.bounds.setUserObject(bounds);
 		this.model.reload(this.bounds);
@@ -1006,8 +1002,8 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 		// make sure the user didn't cancel the operation
 		if (body != null) {
 			// add the body to the world
-			synchronized (this.world) {
-				this.world.add(body);
+			synchronized (Simulation.LOCK) {
+				this.simulation.getWorld().add(body);
 			}
 			// add the body and the fixtures to the root node
 			DefaultMutableTreeNode bodyNode = new DefaultMutableTreeNode(body);
@@ -1035,7 +1031,9 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				// get the body from the node
 				SandboxBody body = (SandboxBody)node.getUserObject();
 				// pass the body to the edit dialog
-				EditBodyDialog.show(ControlUtilities.getParentWindow(this), body);
+				synchronized (Simulation.LOCK) {
+					EditBodyDialog.show(ControlUtilities.getParentWindow(this), body);
+				}
 			}
 		}
 	}
@@ -1065,8 +1063,8 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				// check the user's choice
 				if (choice == JOptionPane.YES_OPTION) {
 					// remove the body from the world
-					synchronized (this.world) {
-						this.world.remove(body);
+					synchronized (Simulation.LOCK) {
+						this.simulation.getWorld().remove(body);
 					}
 					// remove the node from the tree
 					this.model.removeNodeFromParent(node);
@@ -1093,14 +1091,14 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
 			// make sure the selected node is a body
 			if (node.getUserObject() instanceof SandboxBody) {
-				// get the body from the node
-				SandboxBody body = (SandboxBody)node.getUserObject();
 				// create the fixture by showing the dialogs (don't show the local transform panel if its the first fixture)
 				BodyFixture fixture = AddConvexFixtureDialog.show(ControlUtilities.getParentWindow(this), icon, shapePanel);
+				// get the body from the node
+				SandboxBody body = (SandboxBody)node.getUserObject();
 				// make sure the user didnt cancel the operation
 				if (fixture != null) {
 					// add the fixture to the body
-					synchronized (this.world) {
+					synchronized (Simulation.LOCK) {
 						body.addFixture(fixture);
 						// check if the mass is set explicitly or not
 						if (!body.isMassExplicit()) {
@@ -1132,14 +1130,14 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
 			// make sure the selected node is a body
 			if (node.getUserObject() instanceof SandboxBody) {
-				// get the body from the node
-				SandboxBody body = (SandboxBody)node.getUserObject();
 				// create the fixture by showing the dialogs (don't show the local transform panel if its the first fixture)
 				BodyFixture fixture = AddConvexHullFixtureDialog.show(ControlUtilities.getParentWindow(this));
+				// get the body from the node
+				SandboxBody body = (SandboxBody)node.getUserObject();
 				// make sure the user didnt cancel the operation
 				if (fixture != null) {
 					// add the fixture to the body
-					synchronized (this.world) {
+					synchronized (Simulation.LOCK) {
 						body.addFixture(fixture);
 						// check if the mass is set explicitly or not
 						if (!body.isMassExplicit()) {
@@ -1186,7 +1184,7 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				// check the user's choice
 				if (choice == JOptionPane.YES_OPTION) {
 					// remove the body from the world
-					synchronized (this.world) {
+					synchronized (Simulation.LOCK) {
 						// remove the fixture
 						body.removeFixture(fixture);
 						// check if the mass is set explicitly or not
@@ -1199,6 +1197,29 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 					this.model.removeNodeFromParent(node);
 				}
 			}
+		}
+	}
+	
+	/**
+	 * Called when the user clicks the Center On Origin menu item on a body.
+	 */
+	private void centerOnOriginAction() {
+		// the current selection should have the body selected
+		TreePath path = this.tree.getSelectionPath();
+		// make sure that something is selected
+		if (path != null) {
+			// get the currently selected node
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
+			// make sure the selected node is a body
+			if (node.getUserObject() instanceof SandboxBody) {
+				// get the body from the node
+				SandboxBody body = (SandboxBody)node.getUserObject();
+				synchronized (Simulation.LOCK) {
+					// re-center the body
+					body.translateToOrigin();
+				}
+			}
+			
 		}
 	}
 	
@@ -1227,7 +1248,7 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				// check the user's choice
 				if (choice == JOptionPane.YES_OPTION) {
 					// remove the body from the world
-					synchronized (this.world) {
+					synchronized (Simulation.LOCK) {
 						// remove the fixture
 						body.removeAllFixtures();
 						// check if the mass is set explicitly or not
@@ -1263,19 +1284,21 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				SandboxBody body = (SandboxBody)parent.getUserObject();
 				// get the fixture from the node
 				BodyFixture fixture = (BodyFixture)node.getUserObject();
-				Convex convex = fixture.getShape();
-				Image icon;
-				if (convex instanceof Circle) {
-					icon = Icons.EDIT_CIRCLE.getImage();
-				} else if (convex instanceof Rectangle) {
-					icon = Icons.EDIT_RECTANGLE.getImage();
-				} else if (convex instanceof Segment) {
-					icon = Icons.EDIT_SEGMENT.getImage();
-				} else {
-					icon = Icons.EDIT_POLYGON.getImage();
+				// show the edit dialog
+				synchronized (Simulation.LOCK) {
+					Convex convex = fixture.getShape();
+					Image icon;
+					if (convex instanceof Circle) {
+						icon = Icons.EDIT_CIRCLE.getImage();
+					} else if (convex instanceof Rectangle) {
+						icon = Icons.EDIT_RECTANGLE.getImage();
+					} else if (convex instanceof Segment) {
+						icon = Icons.EDIT_SEGMENT.getImage();
+					} else {
+						icon = Icons.EDIT_POLYGON.getImage();
+					}
+					EditFixtureDialog.show(ControlUtilities.getParentWindow(this), icon, body, fixture);
 				}
-				// make sure they are sure
-				EditFixtureDialog.show(ControlUtilities.getParentWindow(this), icon, body, fixture);
 			}
 		}
 	}
@@ -1288,28 +1311,28 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 	 * @param clazz the joint class
 	 */
 	private void addJointAction(Class<? extends Joint> clazz) {
-		SandboxBody[] bodies = this.getBodies();
-		// check the joint class type
-		if (bodies == null || bodies.length == 0 || (clazz != MouseJoint.class && bodies.length == 1)) {
-			JOptionPane.showMessageDialog(ControlUtilities.getParentWindow(this),
-					Messages.getString("menu.context.joint.add.warning"), 
-					Messages.getString("menu.context.joint.add.warning.title"), 
-					JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-		
-		Joint joint = AddJointDialog.show(ControlUtilities.getParentWindow(this), bodies, clazz);
-		if (joint != null) {
-			// add the joint to the world
-			synchronized (this.world) {
-				this.world.add(joint);
+		synchronized (Simulation.LOCK) {
+			SandboxBody[] bodies = this.getBodies();
+			// check the joint class type
+			if (bodies == null || bodies.length == 0 || (clazz != MouseJoint.class && bodies.length == 1)) {
+				JOptionPane.showMessageDialog(ControlUtilities.getParentWindow(this),
+						Messages.getString("menu.context.joint.add.warning"), 
+						Messages.getString("menu.context.joint.add.warning.title"), 
+						JOptionPane.ERROR_MESSAGE);
+				return;
 			}
-			// add the joint to the root node
-			DefaultMutableTreeNode jointNode = new DefaultMutableTreeNode(joint);
-			// insert into the tree
-			this.model.insertNodeInto(jointNode, this.jointFolder, this.jointFolder.getChildCount());
-			// expand the path to the new node
-			this.tree.expandPath(new TreePath(jointNode.getPath()).getParentPath());
+			
+			Joint joint = AddJointDialog.show(ControlUtilities.getParentWindow(this), bodies, clazz);
+			if (joint != null) {
+				// add the joint to the world
+				this.simulation.getWorld().add(joint);
+				// add the joint to the root node
+				DefaultMutableTreeNode jointNode = new DefaultMutableTreeNode(joint);
+				// insert into the tree
+				this.model.insertNodeInto(jointNode, this.jointFolder, this.jointFolder.getChildCount());
+				// expand the path to the new node
+				this.tree.expandPath(new TreePath(jointNode.getPath()).getParentPath());
+			}
 		}
 	}
 	
@@ -1328,7 +1351,9 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				// get the joint from the node
 				Joint joint = (Joint)node.getUserObject();
 				// show the right dialog
-				EditJointDialog.show(ControlUtilities.getParentWindow(this), joint);
+				synchronized (Simulation.LOCK) {
+					EditJointDialog.show(ControlUtilities.getParentWindow(this), joint);
+				}
 			}
 		}
 	}
@@ -1358,9 +1383,9 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				// check the user's choice
 				if (choice == JOptionPane.YES_OPTION) {
 					// remove the joint from the world
-					synchronized (this.world) {
+					synchronized (Simulation.LOCK) {
 						// remove the joint
-						this.world.remove(joint);
+						this.simulation.getWorld().remove(joint);
 					}
 					// remove the node from the tree
 					this.model.removeNodeFromParent(node);
@@ -1390,7 +1415,7 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				// make sure the user didnt cancel the operation
 				if (fixtures != null) {
 					// add the fixture to the body
-					synchronized (this.world) {
+					synchronized (Simulation.LOCK) {
 						// add all the fixtures
 						for (BodyFixture fixture : fixtures) {
 							body.addFixture(fixture);
@@ -1431,7 +1456,7 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				Vector2 f = ApplyForceDialog.show(ControlUtilities.getParentWindow(this));
 				// make sure the user accepted the input
 				if (f != null) {
-					synchronized (this.world) {
+					synchronized (Simulation.LOCK) {
 						body.apply(f);
 					}
 				}
@@ -1458,7 +1483,7 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				// check if it was cancelled
 				if (torque != 0.0) {
 					// apply it to the body
-					synchronized (this.world) {
+					synchronized (Simulation.LOCK) {
 						body.apply(torque);
 					}
 				}
@@ -1467,7 +1492,7 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 	}
 	
 	/**
-	 * Applies a foces at a point to the given body if the user accepts the input.
+	 * Applies a forces at a point to the given body if the user accepts the input.
 	 */
 	private void applyForceAtPointAction() {
 		// the current selection should have the body selected
@@ -1485,7 +1510,7 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				// check if it was cancelled
 				if (forcePoint != null) {
 					// apply it to the body
-					synchronized (this.world) {
+					synchronized (Simulation.LOCK) {
 						body.apply(forcePoint[0], forcePoint[1]);
 					}
 				}
@@ -1518,7 +1543,9 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				// check the user's choice
 				if (choice == JOptionPane.YES_OPTION) {
 					// clear only the force accumulator
-					body.clearAccumulatedForce();
+					synchronized (Simulation.LOCK) {
+						body.clearAccumulatedForce();
+					}
 				}
 			}
 		}
@@ -1549,7 +1576,9 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				// check the user's choice
 				if (choice == JOptionPane.YES_OPTION) {
 					// clear only the force accumulator
-					body.clearAccumulatedTorque();
+					synchronized (Simulation.LOCK) {
+						body.clearAccumulatedTorque();
+					}
 				}
 			}
 		}
@@ -1570,9 +1599,11 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 		// check the user's choice
 		if (choice == JOptionPane.YES_OPTION) {
 			// clear only the force accumulator
-			synchronized (this.world) {
+			synchronized (Simulation.LOCK) {
 				// clear all the bodies
-				this.world.removeAllBodies();
+				this.simulation.getWorld().removeAllBodies();
+				// clear the contacts
+				this.simulation.getContactCounter().clear();
 			}
 			// refresh the tree
 			this.bodyFolder.removeAllChildren();
@@ -1600,9 +1631,9 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 		// check the user's choice
 		if (choice == JOptionPane.YES_OPTION) {
 			// clear only the force accumulator
-			synchronized (this.world) {
+			synchronized (Simulation.LOCK) {
 				// clear all the joints
-				this.world.removeAllJoints();
+				this.simulation.getWorld().removeAllJoints();
 			}
 			// refresh the tree
 			this.jointFolder.removeAllChildren();
@@ -1618,8 +1649,10 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 		SandboxRay ray = AddRayDialog.show(ControlUtilities.getParentWindow(this));
 		// make sure the user didn't cancel the operation
 		if (ray != null) {
-			// add the body to the sandbox
-			this.notifyActionListeners("add-ray", ray);
+			// add the ray to the simulation
+			synchronized (Simulation.LOCK) {
+				this.simulation.getRays().add(ray);
+			}
 			// add ray to the rayFolder node
 			DefaultMutableTreeNode rayNode = new DefaultMutableTreeNode(ray);
 			// insert into the tree
@@ -1644,7 +1677,9 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 		// check the user's choice
 		if (choice == JOptionPane.YES_OPTION) {
 			// clear all the rays
-			this.notifyActionListeners("remove-all-rays", (SandboxRay)null);
+			synchronized (Simulation.LOCK) {
+				this.simulation.getRays().clear();
+			}
 			// refresh the tree
 			this.rayFolder.removeAllChildren();
 			this.model.reload(this.rayFolder);
@@ -1666,7 +1701,9 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				// get the ray from the node
 				SandboxRay ray = (SandboxRay)node.getUserObject();
 				// show the right dialog
-				EditRayDialog.show(ControlUtilities.getParentWindow(this), ray);
+				synchronized (Simulation.LOCK) {
+					EditRayDialog.show(ControlUtilities.getParentWindow(this), ray);
+				}
 			}
 		}
 	}
@@ -1696,7 +1733,9 @@ public class WorldTreePanel extends JPanel implements MouseListener, ActionListe
 				// check the user's choice
 				if (choice == JOptionPane.YES_OPTION) {
 					// remove the joint from the world
-					this.notifyActionListeners("remove-ray", ray);
+					synchronized (Simulation.LOCK) {
+						this.simulation.getRays().remove(ray);
+					}
 					// remove the node from the tree
 					this.model.removeNodeFromParent(node);
 				}

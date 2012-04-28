@@ -108,15 +108,14 @@ import org.dyn4j.sandbox.dialogs.ExceptionDialog;
 import org.dyn4j.sandbox.dialogs.PreferencesDialog;
 import org.dyn4j.sandbox.dialogs.SettingsDialog;
 import org.dyn4j.sandbox.events.BodyActionEvent;
-import org.dyn4j.sandbox.events.RayActionEvent;
 import org.dyn4j.sandbox.export.CodeExporter;
 import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.input.Keyboard;
 import org.dyn4j.sandbox.input.Mouse;
 import org.dyn4j.sandbox.panels.ContactPanel;
 import org.dyn4j.sandbox.panels.MemoryPanel;
+import org.dyn4j.sandbox.panels.SimulationTreePanel;
 import org.dyn4j.sandbox.panels.SystemPanel;
-import org.dyn4j.sandbox.panels.WorldTreePanel;
 import org.dyn4j.sandbox.persist.XmlFormatter;
 import org.dyn4j.sandbox.persist.XmlGenerator;
 import org.dyn4j.sandbox.persist.XmlReader;
@@ -156,6 +155,11 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	/** The scale length (pulled into a local variable for fast rendering) */
 	private static final String SCALE_LENGTH = Messages.getString("canvas.scale.length");
 
+	// the simulation
+	
+	/** The current simulation */
+	private Simulation simulation;
+	
 	// data
 	
 	/** The canvas to draw to */
@@ -170,12 +174,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	/** The OpenGL text renderer (sans-serif, plain, 12) */
 	private TextRenderer textRenderer;
 	
-	/** The dynamics engine */
-	private World world;
-	
-	/** The list of rays cast against the world */
-	private List<SandboxRay> rays;
-	
 	/** The time stamp for the last iteration */
 	private long last;
 	
@@ -184,9 +182,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	
 	/** The number of steps to perform (single steps from the single step button) */
 	private int steps;
-	
-	/** The camera settings */
-	private Camera camera;
 	
 	/** The keyboard to accept and store key events */
 	private Keyboard keyboard;
@@ -234,7 +229,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	// The world tree panel
 	
 	/** The world tree control */
-	private WorldTreePanel pnlWorld;
+	private SimulationTreePanel pnlSimulation;
 	
 	// bottom left panels
 	
@@ -374,7 +369,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	/**
 	 * Default constructor.
 	 */
-	public Sandbox() {
+	private Sandbox() {
 		super();
 		
 		// let the methods in this class handle closing the window
@@ -388,35 +383,27 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		
-		ContactCounter counter = new ContactCounter();
-		
-		// create the world
-		this.world = new World();
-		this.world.setUserData(Messages.getString("world.name.default"));
-		this.world.setContactListener(counter);
-		this.world.setStepListener(counter);
-		
-		// create the list of rays
-		this.rays = new ArrayList<SandboxRay>();
+		// setup a default simulation
+		this.simulation = new Simulation();
 		
 		// create the contact panel
-		this.pnlContacts = new ContactPanel(counter);
+		this.pnlContacts = new ContactPanel(this.simulation.getContactCounter());
 		this.pnlSystem = new SystemPanel();
 		this.pnlSystem.setPreferredSize(new Dimension(205, 100));
 		this.pnlMemory = new MemoryPanel();
 		
 		// create the keyboard and mouse
-		this.camera = new Camera(32, new Vector2());
 		this.keyboard = new Keyboard();
 		this.mouse = new Mouse();
 		this.fps = new Fps();
 		
 		// create the world tree
 		Dimension size = new Dimension(220, 400);
-		this.pnlWorld = new WorldTreePanel(this.world);
-		this.pnlWorld.setPreferredSize(size);
-		this.pnlWorld.setMinimumSize(size);
-		this.pnlWorld.addActionListener(this);
+		this.pnlSimulation = new SimulationTreePanel();
+		this.pnlSimulation.setSimulation(this.simulation);
+		this.pnlSimulation.setPreferredSize(size);
+		this.pnlSimulation.setMinimumSize(size);
+		this.pnlSimulation.addActionListener(this);
 		
 		// create the main menu bar
 		
@@ -773,7 +760,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		
 		JPanel pnlLeft = new JPanel();
 		pnlLeft.setLayout(new BoxLayout(pnlLeft, BoxLayout.Y_AXIS));
-		pnlLeft.add(this.pnlWorld);
+		pnlLeft.add(this.pnlSimulation);
 		pnlLeft.add(tabs);
 		
 		// add a split pane
@@ -808,21 +795,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		this.animator = new Animator(this.canvas);
 		this.animator.setRunAsFastAsPossible(false);
 		this.animator.start();
-	}
-	
-	/**
-	 * Start active rendering the example.
-	 */
-	public void start() {
-		// start the animator
-		this.animator.start();
-	}
-	
-	/**
-	 * Stops the animator thread from running.
-	 */
-	public void stop() {
-		this.animator.stop();
 	}
 	
 	/* (non-Javadoc)
@@ -879,12 +851,11 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	@Override
 	public void actionPerformed(ActionEvent event) {
 		String command = event.getActionCommand();
+		
 		// World tree panel events
 		if ("clear-all".equals(command)) {
 			// clear the current selection
 			this.endAllActions();
-			// clear the contact listener
-			((ContactCounter)this.world.getContactListener()).clear();
 		} else if ("remove-body".equals(command)) {
 			// check if it was this body
 			BodyActionEvent bae = (BodyActionEvent)event;
@@ -894,29 +865,9 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 			 || body == this.editBodyAction.getObject()) {
 				// if the body is selected or being edited then end the actions
 				this.endAllActions();
-				// clear the contact listener
-				((ContactCounter)this.world.getContactListener()).clear();
-			}
-		} else if ("add-ray".equals(command)) {
-			RayActionEvent rae = (RayActionEvent)event;
-			SandboxRay ray = rae.getRay();
-			// add the ray to the list
-			synchronized (this.rays) {
-				this.rays.add(ray);
-			}
-		} else if ("remove-ray".equals(command)) {
-			RayActionEvent rae = (RayActionEvent)event;
-			SandboxRay ray = rae.getRay();
-			// remove the ray from the list
-			synchronized (this.rays) {
-				this.rays.remove(ray);
-			}
-		} else if ("remove-all-rays".equals(command)) {
-			// remove them all
-			synchronized (this.rays) {
-				this.rays.clear();
 			}
 		}
+		
 		// Sandbox events
 		if ("new".equals(command)) {
 			// make sure they are sure
@@ -930,26 +881,18 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				this.clearAllSnapshots();
 				// clear the last file name
 				this.currentFileName = null;
-				// create a new contact counter
-				ContactCounter counter = new ContactCounter();
-				// create a new world object
-				this.world = new World();
-				this.world.setUserData(Messages.getString("world.name.default"));
-				this.world.setContactListener(counter);
-				this.world.setStepListener(counter);
-				// reset the world in the world panel
-				this.pnlWorld.setWorld(this.world, this.rays);
-				// set the contact panel
-				this.pnlContacts.setContactCounter(counter);
-				// reset the camera
-				this.camera.setScale(32.0);
-				this.camera.toOrigin();
+				// create a new empty simulation
+				synchronized (Simulation.LOCK) {
+					this.simulation = new Simulation();
+					// update the simulation tree
+					this.pnlSimulation.setSimulation(this.simulation);
+					// update the contact panel
+					this.pnlContacts.setContactCounter(this.simulation.getContactCounter());
+				}
 				// set the window title
 				this.setTitle(this.getWindowTitle());
 				// stop all actions
 				this.endAllActions();
-				// clear the contact listener
-				((ContactCounter)this.world.getContactListener()).clear();
 			}
 		} else if ("save".equals(command)) {
 			try {
@@ -965,8 +908,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				this.openSimulationAction();
 				// stop all actions
 				this.endAllActions();
-				// clear the contact listener
-				((ContactCounter)this.world.getContactListener()).clear();
 			} catch (Exception e) {
 				ExceptionDialog.show(this, 
 						Messages.getString("dialog.open.error.title"), 
@@ -992,24 +933,12 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 			}
 		} else if ("start".equals(command)) {
 			if (isPaused()) {
-				// check for a floor/static body
-				if (!this.hasStaticBody() && !this.world.isEmpty()) {
-					// make sure they are sure
-					int choice = JOptionPane.showConfirmDialog(this, 
-							Messages.getString("dialog.start.warning.text"), 
-							Messages.getString("dialog.start.warning.title"), 
-							JOptionPane.YES_NO_CANCEL_OPTION);
-					// check the user's choice
-					if (choice != JOptionPane.YES_OPTION) {
-						return;
-					}
-				}
 				// stop all actions
 				this.endAllActions();
 				// take a snapshot of the current simulation
 				this.takeSnapshot(true);
-				// disable the world editor
-				this.pnlWorld.setEnabled(false);
+				// disable the simulation editor
+				this.pnlSimulation.setEnabled(false);
 				this.btnStart.setEnabled(false);
 				this.btnStep.setEnabled(false);
 				this.btnStop.setEnabled(true);
@@ -1031,7 +960,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				// clear the mouse joint
 				this.selectedBodyJoint = null;
 				// enable the world editor
-				this.pnlWorld.setEnabled(true);
+				this.pnlSimulation.setEnabled(true);
 				this.btnStart.setEnabled(true);
 				this.btnStep.setEnabled(true);
 				this.btnStop.setEnabled(false);
@@ -1043,7 +972,8 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 			}
 		} else if ("settings".equals(command)) {
 			// show the settings dialog
-			SettingsDialog.show(this, this.world.getSettings());
+			// this dialog will block so there is no need to synchronize
+			SettingsDialog.show(this, this.simulation.getWorld().getSettings());
 		} else if ("color".equals(command)) {
 			Preferences.setBodyColorRandom(!Preferences.isBodyColorRandom());
 		} else if ("stencil".equals(command)) {
@@ -1081,13 +1011,19 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		} else if ("velocity".equals(command)) {
 			Preferences.setBodyVelocityEnabled(!Preferences.isBodyVelocityEnabled());
 		} else if ("zoom-in".equals(command)) {
-			this.camera.zoomIn();
+			synchronized (Simulation.LOCK) {
+				this.simulation.getCamera().zoomIn();
+			}
 		} else if ("zoom-out".equals(command)) {
-			this.camera.zoomOut();
+			synchronized (Simulation.LOCK) {
+				this.simulation.getCamera().zoomOut();
+			}
+		} else if ("to-origin".equals(command)) {
+			synchronized (Simulation.LOCK) {
+				this.simulation.getCamera().toOrigin();
+			}
 		} else if ("about".equals(command)) {
 			AboutDialog.show(this);
-		} else if ("to-origin".equals(command)) {
-			this.camera.toOrigin();
 		} else if ("snapshotTake".equals(command)) {
 			this.takeSnapshot(false);
 		} else if ("snapshotClearAll".equals(command)) {
@@ -1116,8 +1052,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 					this.restoreSnapshot(key);
 					// stop all actions
 					this.endAllActions();
-					// clear the contact listener
-					((ContactCounter)this.world.getContactListener()).clear();
 				} catch (Exception e) {
 					ExceptionDialog.show(this, 
 							Messages.getString("dialog.snapshot.load.error.title"), 
@@ -1154,8 +1088,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				this.openTestAction(file, name);
 				// stop all actions
 				this.endAllActions();
-				// clear the contact listener
-				((ContactCounter)this.world.getContactListener()).clear();
 			} catch (Exception e) {
 				ExceptionDialog.show(this, 
 						Messages.getString("dialog.test.open.error.title"), 
@@ -1353,14 +1285,17 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	    	// convert from nanoseconds to seconds
 	    	double elapsedTime = (double)diff / NANO_TO_BASE;
 	    	// obtain the lock on the world object
-	    	synchronized (this.world) {
+	    	synchronized (Simulation.LOCK) {
 		        // update the world with the elapsed time
-		        this.world.update(elapsedTime);
+		        if (this.simulation.getWorld().update(elapsedTime)) {
+		        	// TODO call custom test step code
+		        }
 			}
 		} else if (steps > 0) {
 			// if there are some steps to perform then do so
-			synchronized (this.world) {
-				this.world.step(steps);
+			synchronized (Simulation.LOCK) {
+				this.simulation.getWorld().step(steps);
+				// TODO call custom test step code
 			}
 		}
 		
@@ -1374,9 +1309,12 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	 * @param gl the OpenGL surface
 	 */
 	private void render(GL2 gl) {
+		World world = this.simulation.getWorld();
+		List<SandboxRay> rays = this.simulation.getRays();
+		
 		Dimension size = this.canvasSize;
-		Vector2 offset = this.camera.getTranslation();
-		double scale = this.camera.getScale();
+		Vector2 offset = this.simulation.getCamera().getTranslation();
+		double scale = this.simulation.getCamera().getScale();
 		
 		// apply a scaling transformation
 		gl.glPushMatrix();
@@ -1384,17 +1322,17 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		gl.glTranslated(offset.x, offset.y, 0.0);
 		
 		// draw all the bodies and the bounds
-		synchronized (this.world) {
+		synchronized (Simulation.LOCK) {
 			// draw the bounds
 			if (Preferences.isBoundsEnabled()) {
 				gl.glColor4fv(Preferences.getBoundsColor(), 0);
-				RenderUtilities.drawBounds(gl, this.world.getBounds());
+				RenderUtilities.drawBounds(gl, world.getBounds());
 			}
 			
 			// render all the bodies in the world
-			int bSize = this.world.getBodyCount();
+			int bSize = world.getBodyCount();
 			for (int i = 0; i < bSize; i++) {
-				SandboxBody body = (SandboxBody)this.world.getBody(i);
+				SandboxBody body = (SandboxBody)world.getBody(i);
 				// dont draw the selected body
 				if (body == this.selectBodyAction.getObject()) continue;
 				if (body == this.editBodyAction.getObject()) continue;
@@ -1405,7 +1343,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 			// draw all AABBs so that they are on top of all shapes (except for the selected one)
 			if (Preferences.isBodyAABBEnabled()) {
 				for (int i = 0; i < bSize; i++) {
-					SandboxBody body = (SandboxBody)this.world.getBody(i);
+					SandboxBody body = (SandboxBody)world.getBody(i);
 					// dont draw the selected body
 					if (body == this.selectBodyAction.getObject()) continue;
 					if (body == this.editBodyAction.getObject()) continue;
@@ -1415,109 +1353,104 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 			}
 			
 			// render the joints
-			int jSize = this.world.getJointCount();
+			int jSize = world.getJointCount();
 			for (int i = 0; i < jSize; i++) {
-				Joint joint = this.world.getJoint(i);
+				Joint joint = world.getJoint(i);
 				// dont draw the mouse joint used during simulation since its drawn again
 				if (joint == this.selectedBodyJoint) continue;
 				// otherwise draw the joint normally
-				RenderUtilities.drawJoint(gl, joint, this.world.getStep().getInverseDeltaTime());
+				RenderUtilities.drawJoint(gl, joint, world.getStep().getInverseDeltaTime());
 			}
-		}
 
-		// the selected body is rendered by itself
-		if (this.selectBodyAction.isActive()) {
-			this.renderSelectedBody(gl, this.selectBodyAction.getObject());
-		}
-		
-		// the selected body is rendered by itself
-		if (this.editBodyAction.isActive()) {
-			this.renderEditingBody(gl, this.editBodyAction.getObject());
-		}
-		
-		// draw the mouse joint last always
-		if (this.selectedBodyJoint != null) {
-			synchronized (this.world) {
-				RenderUtilities.drawMouseJoint(gl, this.selectedBodyJoint, this.world.getStep().getInverseDeltaTime());
+			// the selected body is rendered by itself
+			if (this.selectBodyAction.isActive()) {
+				this.renderSelectedBody(gl, this.selectBodyAction.getObject());
 			}
-		}
-		
-		// render contacts, contact impulses, friction impulses, and pairs
-		if (Preferences.isContactPairEnabled()
-		 || Preferences.isContactImpulseEnabled()
-		 || Preferences.isContactPointEnabled()
-		 || Preferences.isFrictionImpulseEnabled()) {
-			// get the contact counter
-			ContactCounter cc = (ContactCounter) this.world.getContactListener();
-			// get the contacts from the counter
-			List<ContactPoint> contacts = cc.getContacts();
 			
-			// loop over the contacts
-			int cSize = contacts.size();
-			for (int i = 0; i < cSize; i++) {
-				// draw the contacts
-				ContactPoint cp = contacts.get(i);
-				// get the world space contact point
-				Vector2 c = cp.getPoint();
-				// draw the contact pairs
-				if (Preferences.isContactPairEnabled()) {
-					// set the color
-					gl.glColor4fv(Preferences.getContactPairColor(), 0);
-					// get the world space points
-					Vector2 p1 = cp.getBody1().getTransform().getTransformed(cp.getFixture1().getShape().getCenter());
-					Vector2 p2 = cp.getBody2().getTransform().getTransformed(cp.getFixture2().getShape().getCenter());
-					// draw line between the shapes
-					RenderUtilities.drawLineSegment(gl, p1, p2, false);
-				}
+			// the selected body is rendered by itself
+			if (this.editBodyAction.isActive()) {
+				this.renderEditingBody(gl, this.editBodyAction.getObject());
+			}
+			
+			// draw the mouse joint last always
+			if (this.selectedBodyJoint != null) {
+				RenderUtilities.drawMouseJoint(gl, this.selectedBodyJoint, this.simulation.getWorld().getStep().getInverseDeltaTime());
+			}
+			
+			// render contacts, contact impulses, friction impulses, and pairs
+			if (Preferences.isContactPairEnabled()
+			 || Preferences.isContactImpulseEnabled()
+			 || Preferences.isContactPointEnabled()
+			 || Preferences.isFrictionImpulseEnabled()) {
+				// get the contact counter
+				ContactCounter cc = this.simulation.getContactCounter();
+				// get the contacts from the counter
+				List<ContactPoint> contacts = cc.getContacts();
 				
-				// draw the contact
-				if (Preferences.isContactPointEnabled()) {
-					// set the color
-					gl.glColor4fv(Preferences.getContactPointColor(), 0);
-					// draw the contact points
-					RenderUtilities.fillRectangleFromCenter(gl, c.x, c.y, 0.05, 0.05);
-				}
-				
-				// check if the contact is a solved contact
-				if (cp instanceof SolvedContactPoint) {
-					// get the solved contact point to show the impulses applied
-					SolvedContactPoint scp = (SolvedContactPoint) cp;
-					Vector2 n = scp.getNormal();
-					Vector2 t = n.cross(1.0);
-					double j = scp.getNormalImpulse();
-					double jt = scp.getTangentialImpulse();
-					
-					// draw the contact forces
-					if (Preferences.isContactImpulseEnabled()) {
+				// loop over the contacts
+				int cSize = contacts.size();
+				for (int i = 0; i < cSize; i++) {
+					// draw the contacts
+					ContactPoint cp = contacts.get(i);
+					// get the world space contact point
+					Vector2 c = cp.getPoint();
+					// draw the contact pairs
+					if (Preferences.isContactPairEnabled()) {
 						// set the color
-						gl.glColor4fv(Preferences.getContactImpulseColor(), 0);
-						RenderUtilities.drawLineSegment(
-								gl, 
-								c.x, c.y, 
-								c.x + n.x * j, c.y + n.y * j,
-								false);
+						gl.glColor4fv(Preferences.getContactPairColor(), 0);
+						// get the world space points
+						Vector2 p1 = cp.getBody1().getTransform().getTransformed(cp.getFixture1().getShape().getCenter());
+						Vector2 p2 = cp.getBody2().getTransform().getTransformed(cp.getFixture2().getShape().getCenter());
+						// draw line between the shapes
+						RenderUtilities.drawLineSegment(gl, p1, p2, false);
 					}
 					
-					// draw the friction forces
-					if (Preferences.isFrictionImpulseEnabled()) {
+					// draw the contact
+					if (Preferences.isContactPointEnabled()) {
 						// set the color
-						gl.glColor4fv(Preferences.getFrictionImpulseColor(), 0);
-						RenderUtilities.drawLineSegment(
-								gl, 
-								c.x, c.y, 
-								c.x + t.x * jt, c.y + t.y * jt,
-								false);
+						gl.glColor4fv(Preferences.getContactPointColor(), 0);
+						// draw the contact points
+						RenderUtilities.fillRectangleFromCenter(gl, c.x, c.y, 0.05, 0.05);
+					}
+					
+					// check if the contact is a solved contact
+					if (cp instanceof SolvedContactPoint) {
+						// get the solved contact point to show the impulses applied
+						SolvedContactPoint scp = (SolvedContactPoint) cp;
+						Vector2 n = scp.getNormal();
+						Vector2 t = n.cross(1.0);
+						double j = scp.getNormalImpulse();
+						double jt = scp.getTangentialImpulse();
+						
+						// draw the contact forces
+						if (Preferences.isContactImpulseEnabled()) {
+							// set the color
+							gl.glColor4fv(Preferences.getContactImpulseColor(), 0);
+							RenderUtilities.drawLineSegment(
+									gl, 
+									c.x, c.y, 
+									c.x + n.x * j, c.y + n.y * j,
+									false);
+						}
+						
+						// draw the friction forces
+						if (Preferences.isFrictionImpulseEnabled()) {
+							// set the color
+							gl.glColor4fv(Preferences.getFrictionImpulseColor(), 0);
+							RenderUtilities.drawLineSegment(
+									gl, 
+									c.x, c.y, 
+									c.x + t.x * jt, c.y + t.y * jt,
+									false);
+						}
 					}
 				}
 			}
-		}
-		
-		// draw rays & results
-		
-		synchronized (this.rays) {
+			
+			// draw rays & results
 			List<RaycastResult> results = new ArrayList<RaycastResult>();
-			for (int i = 0; i < this.rays.size(); i++) {
-				SandboxRay ray = this.rays.get(i);
+			for (int i = 0; i < rays.size(); i++) {
+				SandboxRay ray = rays.get(i);
 				// draw the ray
 				// get the ray attributes (world coordinates)
 				Vector2 s = ray.getStart();
@@ -1539,7 +1472,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				gl.glEnd();
 				
 				// perform the raycast
-				if (this.world.raycast(ray, ray.length, ray.sensors, ray.all, results)) {
+				if (world.raycast(ray, ray.length, ray.sensors, ray.all, results)) {
 					// draw the raycast results
 					// get the number of results
 					int rSize = results.size();
@@ -1563,44 +1496,42 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 					}
 				}
 			}
-		}
-		
-		gl.glPopMatrix();
-		
-		// draw other stuff
-		
-		gl.glPushMatrix();
-		gl.glLoadIdentity();
-		
-		// draw origin label
-		
-		if (Preferences.isOriginLabeled()) {
-			double ox = offset.x * scale;
-			double oy = offset.y * scale;
 			
-			this.textRenderer.beginRendering(size.width, size.height);
-			this.textRenderer.setColor(0.0f, 0.0f, 0.0f, 0.8f);
-			this.textRenderer.draw(ORIGIN_LABEL, (int)Math.floor(ox) + size.width / 2 + 3, (int)Math.floor(oy) + size.height / 2 - 12);
-			this.textRenderer.endRendering();
+			gl.glPopMatrix();
 			
-			gl.glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
-			RenderUtilities.fillRectangleFromCenter(gl, ox, oy, 3, 3);
-		}
-
-		// draw labels over the origin label
-		boolean bodyLabels = Preferences.isBodyLabeled();
-		boolean fixtureLabels = Preferences.isFixtureLabeled();
-		if ((bodyLabels || fixtureLabels) && !this.editBodyAction.isActive()) {
-			synchronized (this.world) {
+			// draw other stuff
+			
+			gl.glPushMatrix();
+			gl.glLoadIdentity();
+			
+			// draw origin label
+			
+			if (Preferences.isOriginLabeled()) {
+				double ox = offset.x * scale;
+				double oy = offset.y * scale;
+				
+				this.textRenderer.beginRendering(size.width, size.height);
+				this.textRenderer.setColor(0.0f, 0.0f, 0.0f, 0.8f);
+				this.textRenderer.draw(ORIGIN_LABEL, (int)Math.floor(ox) + size.width / 2 + 3, (int)Math.floor(oy) + size.height / 2 - 12);
+				this.textRenderer.endRendering();
+				
+				gl.glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
+				RenderUtilities.fillRectangleFromCenter(gl, ox, oy, 3, 3);
+			}
+	
+			// draw labels over the origin label
+			boolean bodyLabels = Preferences.isBodyLabeled();
+			boolean fixtureLabels = Preferences.isFixtureLabeled();
+			if ((bodyLabels || fixtureLabels) && !this.editBodyAction.isActive()) {
 				// begin rendering text
 				this.textRenderer.beginRendering(size.width, size.height);
 				// set the color
 				this.textRenderer.setColor(0.0f, 0.0f, 0.0f, 0.8f);
 				
 				// render all the bodies in the world
-				int bSize = this.world.getBodyCount();
+				bSize = world.getBodyCount();
 				for (int i = 0; i < bSize; i++) {
-					SandboxBody body = (SandboxBody)this.world.getBody(i);
+					SandboxBody body = (SandboxBody)world.getBody(i);
 					// get the center point
 					Vector2 c = body.getWorldCenter();
 					
@@ -1753,6 +1684,8 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	 * @param body the body to render
 	 */
 	private void renderSelectedBody(GL2 gl, SandboxBody body) {
+		double scale = this.simulation.getCamera().getScale();
+		
 		// render the aabb
 		if (Preferences.isBodyAABBEnabled()) {
 			this.renderAABB(gl, body);
@@ -1768,15 +1701,15 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 			// check for stenciling
 			if (Preferences.isBodyStenciled()) {
 				// stenciling requires a larger radius
-				RenderUtilities.outlineShapes(gl, body, 6, Preferences.getSelectedColor(), this.camera.getScale());
+				RenderUtilities.outlineShapes(gl, body, 6, Preferences.getSelectedColor(), scale);
 				body.setFillColor(gl);
 				body.fill(gl);
 			} else {
-				RenderUtilities.outlineShapes(gl, body, 4, Preferences.getSelectedColor(), this.camera.getScale());
+				RenderUtilities.outlineShapes(gl, body, 4, Preferences.getSelectedColor(), scale);
 				body.render(gl);
 			}
 		} else {
-			RenderUtilities.outlineShapes(gl, body, 4, Preferences.getSelectedColor(), this.camera.getScale());
+			RenderUtilities.outlineShapes(gl, body, 4, Preferences.getSelectedColor(), scale);
 			body.render(gl);
 		}
 
@@ -1872,7 +1805,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	 */
 	private void renderAABB(GL2 gl, SandboxBody body) {
 		gl.glColor4fv(Preferences.getBodyAABBColor(), 0);
-		AABB aabb = this.world.getBroadphaseDetector().getAABB(body);
+		AABB aabb = this.simulation.getWorld().getBroadphaseDetector().getAABB(body);
 		if (aabb != null) {
 			RenderUtilities.drawRectangleFromStartToEnd(
 					gl,
@@ -1885,308 +1818,311 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	/**
 	 * Polls for input from the user.
 	 */
-	public void poll() {
-		Dimension size = this.canvasSize;
-		Vector2 offset = this.camera.getTranslation();
-		double scale = this.camera.getScale();
-		
-		// see if the user has zoomed in or not
-		if (this.mouse.hasScrolled()) {
-			// get the scroll amount
-			int scroll = this.mouse.getScrollAmount();
-			// zoom in or out
-			if (scroll < 0) {
-				this.camera.zoomOut();
-			} else {
-				this.camera.zoomIn();
-			}
-		}
-		
-		// get the mouse location
-		Point p = this.mouse.getLocation();
-		if (p == null) {
-			p = new Point();
-		}
-		Vector2 pw = this.screenToWorld(p, size, offset, scale);
-		
-		// update the mouse location
-		if (this.mouse.hasMoved()) {
-			this.lblMouseLocation.update(pw);
-		}
-		
-		// the mouse button 1 or 3 was clicked
-		if (this.mouse.wasClicked(MouseEvent.BUTTON1) || this.mouse.wasClicked(MouseEvent.BUTTON3)) {
-			// check if a body is already clicked
-			if (this.selectBodyAction.isActive()) {
-				// get the body
-				SandboxBody body = this.selectBodyAction.getObject();
-				// get the fixture
-				BodyFixture fixture = this.getFixtureAtPoint(body, pw);
-				// make sure the click was inside the same body
-				if (fixture == null) {
-					// otherwise de-select the body
-					this.selectBodyAction.end();
-					this.editBodyAction.end();
-				}
-			} else if (this.editBodyAction.isActive()) {
-				// get the body
-				SandboxBody body = this.editBodyAction.getObject();
-				// get the fixture
-				BodyFixture fixture = this.getFixtureAtPoint(body, pw);
-				// see if a fixture was clicked
-				if (fixture != null) {
-					// start the select fixture action
-					this.selectFixtureAction.begin(fixture);
+	private void poll() {
+		synchronized (Simulation.LOCK) {
+			Camera camera = this.simulation.getCamera();
+			World world = this.simulation.getWorld();
+			
+			Dimension size = this.canvasSize;
+			Vector2 offset = camera.getTranslation();
+			double scale = camera.getScale();
+			
+			// see if the user has zoomed in or not
+			if (this.mouse.hasScrolled()) {
+				// get the scroll amount
+				int scroll = this.mouse.getScrollAmount();
+				// zoom in or out
+				if (scroll < 0) {
+					camera.zoomOut();
 				} else {
-					// end the edit body action
-					this.editBodyAction.end();
-					this.selectFixtureAction.end();
-				}
-			} else {
-				// dont allow selection of any kind unless its mouse button 1 (creates
-				// a mouse joint if running) or the simulation is paused
-				if (this.mouse.wasClicked(MouseEvent.BUTTON1) || this.isPaused()) {
-					// otherwise see if a body is being selected
-					SandboxBody body = this.getBodyAtPoint(pw);
-					// check for null
-					if (body != null) {
-						// begin the select body action
-						this.selectBodyAction.begin(body);
-					}
+					camera.zoomIn();
 				}
 			}
-		}
-		
-		// the mouse button 1 is pressed and being held
-		if (this.mouse.isPressed(MouseEvent.BUTTON1)) {
-			// check if a body is already selected
-			if (this.selectBodyAction.isActive() && this.moveBodyAction.isActive()) {
-				// get the body
-				SandboxBody body = this.selectBodyAction.getObject();
-				// check if the world is running
-				if (this.isPaused()) {
-					// get the difference
-					Vector2 tx = pw.difference(this.moveBodyAction.getBeginPosition());
-					// move the body with the mouse
-					body.translate(tx);
-					// update the broadphase to update the AABB
-					// this is only done here to show a valid AABB to the user while they are editing
-					// the AABB is updated every frame so typically you wouldnt need to do this
-					this.world.getBroadphaseDetector().update(body);
-					// update the action
-					this.moveBodyAction.update(pw);
-				} else {
-					// update the mouse joint's target point
-					if (this.selectedBodyJoint == null) {
-						// get the mass of the body
-						double mass = body.getMass().getMass();
-						if (mass <= Epsilon.E) {
-							// if the mass is zero, attempt to use the inertia
-							mass = body.getMass().getInertia();
-						}
-						this.selectedBodyJoint = new MouseJoint(body, pw, 4.0, 0.7, 1000.0 * mass);
-						synchronized (this.world) {
-							this.world.add(this.selectedBodyJoint);
-						}
-					} else {
-						this.selectedBodyJoint.setTarget(pw);
-					}
-				}
-			} else if (this.moveWorldAction.isActive()) {
-				// then translate the offset
-				// we need to get the current position in world coordinates using the old offset
-				Vector2 pwt = this.screenToWorld(p, size, this.moveWorldAction.getOffset(), scale);
-				// compute the difference in the new position to get the offset
-				Vector2 tx = pwt.difference(this.moveWorldAction.getBeginPosition());
-				// apply it to the offset
-				this.camera.translate(tx);
-				// update the new mouse position
-				this.moveWorldAction.update(pwt);
-			} else if (this.editBodyAction.isActive()) {
-				// get the body
-				SandboxBody body = this.editBodyAction.getObject();
-				// see if the move fixture action is active
-				if (this.selectFixtureAction.isActive() && this.moveFixtureAction.isActive()) {
+			
+			// get the mouse location
+			Point p = this.mouse.getLocation();
+			if (p == null) {
+				p = new Point();
+			}
+			Vector2 pw = this.screenToWorld(p, size, offset, scale);
+			
+			// update the mouse location
+			if (this.mouse.hasMoved()) {
+				this.lblMouseLocation.update(pw);
+			}
+			
+			// the mouse button 1 or 3 was clicked
+			if (this.mouse.wasClicked(MouseEvent.BUTTON1) || this.mouse.wasClicked(MouseEvent.BUTTON3)) {
+				// check if a body is already clicked
+				if (this.selectBodyAction.isActive()) {
+					// get the body
+					SandboxBody body = this.selectBodyAction.getObject();
 					// get the fixture
-					BodyFixture bf = this.selectFixtureAction.getObject();
-					// get the local pw
-					Vector2 lpw = body.getTransform().getInverseTransformed(pw);
-					// get the difference
-					Vector2 tx = lpw.difference(this.moveFixtureAction.getBeginPosition());
-					// move the body with the mouse
-					bf.getShape().translate(tx);
-					// update the mass since the inertia, COM, and rotation disc may change
-					body.setMass(body.getMass().getType());
-					// update the broadphase to update the AABB
-					// this is only done here to show a valid AABB to the user while they are editing
-					// the AABB is updated every frame so typically you wouldnt need to do this
-					this.world.getBroadphaseDetector().update(body);
-					// update the action
-					this.moveFixtureAction.update(lpw);
-				} else {
-					// get the current fixture that the mouse is on
+					BodyFixture fixture = this.getFixtureAtPoint(body, pw);
+					// make sure the click was inside the same body
+					if (fixture == null) {
+						// otherwise de-select the body
+						this.selectBodyAction.end();
+						this.editBodyAction.end();
+					}
+				} else if (this.editBodyAction.isActive()) {
+					// get the body
+					SandboxBody body = this.editBodyAction.getObject();
+					// get the fixture
 					BodyFixture fixture = this.getFixtureAtPoint(body, pw);
 					// see if a fixture was clicked
 					if (fixture != null) {
 						// start the select fixture action
 						this.selectFixtureAction.begin(fixture);
-						this.moveFixtureAction.begin(body.getTransform().getInverseTransformed(pw));
 					} else {
 						// end the edit body action
 						this.editBodyAction.end();
 						this.selectFixtureAction.end();
 					}
-				}
-			} else {
-				// otherwise see if a body is being selected
-				SandboxBody body = this.getBodyAtPoint(pw);
-				// check for null
-				if (body != null) {
-					// begin the select body action
-					this.selectBodyAction.begin(body);
-					// begin the move body action
-					this.moveBodyAction.begin(pw);
-					this.editBodyAction.end();
-					// set the body to awake and active
-					body.setAsleep(false);
-					body.setActive(true);
 				} else {
-					// then assume the user wants to move the world
-					this.moveWorldAction.begin(offset.copy(), pw, this);
-				}
-			}
-		}
-		
-		// the mouse button 1 was double clicked
-		if (this.mouse.wasDoubleClicked(MouseEvent.BUTTON1)) {
-			// dont allow editing during simulation
-			if (this.isPaused()) {
-				SandboxBody body = this.getBodyAtPoint(pw);
-				// check for null
-				if (body != null) {
-					// end the body selection action
-					this.selectBodyAction.end();
-					// begin the edit body action
-					this.editBodyAction.begin(body);
-					// set the body to awake and active
-					body.setAsleep(false);
-					body.setActive(true);
-				} else {
-					// then assume the user is done editing fixtures on the body
-					this.editBodyAction.end();
-				}
-			}
-		}
-		
-		// the mouse button 3 is pressed and being held
-		if (this.mouse.isPressed(MouseEvent.BUTTON3)) {
-			// check if a body is already selected
-			if (this.selectBodyAction.isActive() && this.rotateBodyAction.isActive()) {
-				// get the body
-				SandboxBody body = this.selectBodyAction.getObject();
-				// get the rotation
-				Vector2 c = body.getWorldCenter();
-				Vector2 v1 = c.to(this.rotateBodyAction.getBeginPosition());
-				Vector2 v2 = c.to(pw);
-				double theta = v1.getAngleBetween(v2);
-				// move the body with the mouse
-				body.rotate(theta, c);
-				// update the broadphase to update the AABB
-				// this is only done here to show a valid AABB to the user while they are editing
-				// the AABB is updated every frame so typically you wouldnt need to do this
-				this.world.getBroadphaseDetector().update(body);
-				// update the action
-				this.rotateBodyAction.update(pw);
-			} else if (this.editBodyAction.isActive()) {
-				// get the body
-				SandboxBody body = this.editBodyAction.getObject();
-				// see if the move fixture action is active
-				if (this.selectFixtureAction.isActive() && this.rotateFixtureAction.isActive()) {
-					// get the fixture
-					BodyFixture bf = this.selectFixtureAction.getObject();
-					Convex convex = bf.getShape();
-					Vector2 c = convex.getCenter();
-					Vector2 lpw = body.getTransform().getInverseTransformed(pw);
-					// get the rotation
-					Vector2 v1 = c.to(this.rotateFixtureAction.getBeginPosition());
-					Vector2 v2 = c.to(lpw);
-					double theta = v1.getAngleBetween(v2);
-					// rotate the fixture about the local center
-					bf.getShape().rotate(theta, convex.getCenter());
-					// update the mass since the inertia, COM, and rotation disc may change
-					body.setMass(body.getMass().getType());
-					// update the broadphase to update the AABB
-					// this is only done here to show a valid AABB to the user while they are editing
-					// the AABB is updated every frame so typically you wouldnt need to do this
-					this.world.getBroadphaseDetector().update(body);
-					// update the action
-					this.rotateFixtureAction.update(lpw);
-				} else {
-					// get the current fixture that the mouse is on
-					BodyFixture fixture = this.getFixtureAtPoint(body, pw);
-					// see if a fixture was clicked
-					if (fixture != null) {
-						// start the select fixture action
-						this.selectFixtureAction.begin(fixture);
-						this.rotateFixtureAction.begin(body.getTransform().getInverseTransformed(pw));
-					} else {
-						// end the edit body action
-						this.editBodyAction.end();
-						this.selectFixtureAction.end();
+					// dont allow selection of any kind unless its mouse button 1 (creates
+					// a mouse joint if running) or the simulation is paused
+					if (this.mouse.wasClicked(MouseEvent.BUTTON1) || this.isPaused()) {
+						// otherwise see if a body is being selected
+						SandboxBody body = this.getBodyAtPoint(world, pw);
+						// check for null
+						if (body != null) {
+							// begin the select body action
+							this.selectBodyAction.begin(body);
+						}
 					}
 				}
-			} else {
-				// dont allow rotating while simulating
-				if (this.isPaused()) {
+			}
+			
+			// the mouse button 1 is pressed and being held
+			if (this.mouse.isPressed(MouseEvent.BUTTON1)) {
+				// check if a body is already selected
+				if (this.selectBodyAction.isActive() && this.moveBodyAction.isActive()) {
+					// get the body
+					SandboxBody body = this.selectBodyAction.getObject();
+					// check if the world is running
+					if (this.isPaused()) {
+						// get the difference
+						Vector2 tx = pw.difference(this.moveBodyAction.getBeginPosition());
+						// move the body with the mouse
+						body.translate(tx);
+						// update the broadphase to update the AABB
+						// this is only done here to show a valid AABB to the user while they are editing
+						// the AABB is updated every frame so typically you wouldnt need to do this
+						world.getBroadphaseDetector().update(body);
+						// update the action
+						this.moveBodyAction.update(pw);
+					} else {
+						// update the mouse joint's target point
+						if (this.selectedBodyJoint == null) {
+							// get the mass of the body
+							double mass = body.getMass().getMass();
+							if (mass <= Epsilon.E) {
+								// if the mass is zero, attempt to use the inertia
+								mass = body.getMass().getInertia();
+							}
+							this.selectedBodyJoint = new MouseJoint(body, pw, 4.0, 0.7, 1000.0 * mass);
+							synchronized (Simulation.LOCK) {
+								world.add(this.selectedBodyJoint);
+							}
+						} else {
+							this.selectedBodyJoint.setTarget(pw);
+						}
+					}
+				} else if (this.moveWorldAction.isActive()) {
+					// then translate the offset
+					// we need to get the current position in world coordinates using the old offset
+					Vector2 pwt = this.screenToWorld(p, size, this.moveWorldAction.getOffset(), scale);
+					// compute the difference in the new position to get the offset
+					Vector2 tx = pwt.difference(this.moveWorldAction.getBeginPosition());
+					// apply it to the offset
+					camera.translate(tx);
+					// update the new mouse position
+					this.moveWorldAction.update(pwt);
+				} else if (this.editBodyAction.isActive()) {
+					// get the body
+					SandboxBody body = this.editBodyAction.getObject();
+					// see if the move fixture action is active
+					if (this.selectFixtureAction.isActive() && this.moveFixtureAction.isActive()) {
+						// get the fixture
+						BodyFixture bf = this.selectFixtureAction.getObject();
+						// get the local pw
+						Vector2 lpw = body.getTransform().getInverseTransformed(pw);
+						// get the difference
+						Vector2 tx = lpw.difference(this.moveFixtureAction.getBeginPosition());
+						// move the body with the mouse
+						bf.getShape().translate(tx);
+						// update the mass since the inertia, COM, and rotation disc may change
+						body.setMass(body.getMass().getType());
+						// update the broadphase to update the AABB
+						// this is only done here to show a valid AABB to the user while they are editing
+						// the AABB is updated every frame so typically you wouldnt need to do this
+						world.getBroadphaseDetector().update(body);
+						// update the action
+						this.moveFixtureAction.update(lpw);
+					} else {
+						// get the current fixture that the mouse is on
+						BodyFixture fixture = this.getFixtureAtPoint(body, pw);
+						// see if a fixture was clicked
+						if (fixture != null) {
+							// start the select fixture action
+							this.selectFixtureAction.begin(fixture);
+							this.moveFixtureAction.begin(body.getTransform().getInverseTransformed(pw));
+						} else {
+							// end the edit body action
+							this.editBodyAction.end();
+							this.selectFixtureAction.end();
+						}
+					}
+				} else {
 					// otherwise see if a body is being selected
-					SandboxBody body = this.getBodyAtPoint(pw);
+					SandboxBody body = this.getBodyAtPoint(world, pw);
 					// check for null
 					if (body != null) {
 						// begin the select body action
 						this.selectBodyAction.begin(body);
 						// begin the move body action
-						this.rotateBodyAction.begin(pw);
+						this.moveBodyAction.begin(pw);
+						this.editBodyAction.end();
 						// set the body to awake and active
 						body.setAsleep(false);
 						body.setActive(true);
+					} else {
+						// then assume the user wants to move the world
+						this.moveWorldAction.begin(offset.copy(), pw, this);
 					}
 				}
 			}
-		}
-		
-		// check if the mouse button 1 was released
-		if (this.mouse.wasReleased(MouseEvent.BUTTON1)) {
-			if (this.moveBodyAction.isActive()) {
-				// end the action
-				this.moveBodyAction.end();
-				// end the move body joint
-				if (this.selectedBodyJoint != null) {
-					synchronized (this.world) {
-						this.world.remove(this.selectedBodyJoint);
+			
+			// the mouse button 1 was double clicked
+			if (this.mouse.wasDoubleClicked(MouseEvent.BUTTON1)) {
+				// dont allow editing during simulation
+				if (this.isPaused()) {
+					SandboxBody body = this.getBodyAtPoint(world, pw);
+					// check for null
+					if (body != null) {
+						// end the body selection action
+						this.selectBodyAction.end();
+						// begin the edit body action
+						this.editBodyAction.begin(body);
+						// set the body to awake and active
+						body.setAsleep(false);
+						body.setActive(true);
+					} else {
+						// then assume the user is done editing fixtures on the body
+						this.editBodyAction.end();
 					}
-					this.selectedBodyJoint = null;
 				}
 			}
-			if (this.moveFixtureAction.isActive()) {
-				SandboxBody body = this.editBodyAction.getObject();
-				// recompute the mass if the position changes
-				body.setMass(body.getMass().getType());
-				this.moveFixtureAction.end();
+			
+			// the mouse button 3 is pressed and being held
+			if (this.mouse.isPressed(MouseEvent.BUTTON3)) {
+				// check if a body is already selected
+				if (this.selectBodyAction.isActive() && this.rotateBodyAction.isActive()) {
+					// get the body
+					SandboxBody body = this.selectBodyAction.getObject();
+					// get the rotation
+					Vector2 c = body.getWorldCenter();
+					Vector2 v1 = c.to(this.rotateBodyAction.getBeginPosition());
+					Vector2 v2 = c.to(pw);
+					double theta = v1.getAngleBetween(v2);
+					// move the body with the mouse
+					body.rotate(theta, c);
+					// update the broadphase to update the AABB
+					// this is only done here to show a valid AABB to the user while they are editing
+					// the AABB is updated every frame so typically you wouldnt need to do this
+					world.getBroadphaseDetector().update(body);
+					// update the action
+					this.rotateBodyAction.update(pw);
+				} else if (this.editBodyAction.isActive()) {
+					// get the body
+					SandboxBody body = this.editBodyAction.getObject();
+					// see if the move fixture action is active
+					if (this.selectFixtureAction.isActive() && this.rotateFixtureAction.isActive()) {
+						// get the fixture
+						BodyFixture bf = this.selectFixtureAction.getObject();
+						Convex convex = bf.getShape();
+						Vector2 c = convex.getCenter();
+						Vector2 lpw = body.getTransform().getInverseTransformed(pw);
+						// get the rotation
+						Vector2 v1 = c.to(this.rotateFixtureAction.getBeginPosition());
+						Vector2 v2 = c.to(lpw);
+						double theta = v1.getAngleBetween(v2);
+						// rotate the fixture about the local center
+						bf.getShape().rotate(theta, convex.getCenter());
+						// update the mass since the inertia, COM, and rotation disc may change
+						body.setMass(body.getMass().getType());
+						// update the broadphase to update the AABB
+						// this is only done here to show a valid AABB to the user while they are editing
+						// the AABB is updated every frame so typically you wouldnt need to do this
+						world.getBroadphaseDetector().update(body);
+						// update the action
+						this.rotateFixtureAction.update(lpw);
+					} else {
+						// get the current fixture that the mouse is on
+						BodyFixture fixture = this.getFixtureAtPoint(body, pw);
+						// see if a fixture was clicked
+						if (fixture != null) {
+							// start the select fixture action
+							this.selectFixtureAction.begin(fixture);
+							this.rotateFixtureAction.begin(body.getTransform().getInverseTransformed(pw));
+						} else {
+							// end the edit body action
+							this.editBodyAction.end();
+							this.selectFixtureAction.end();
+						}
+					}
+				} else {
+					// dont allow rotating while simulating
+					if (this.isPaused()) {
+						// otherwise see if a body is being selected
+						SandboxBody body = this.getBodyAtPoint(world, pw);
+						// check for null
+						if (body != null) {
+							// begin the select body action
+							this.selectBodyAction.begin(body);
+							// begin the move body action
+							this.rotateBodyAction.begin(pw);
+							// set the body to awake and active
+							body.setAsleep(false);
+							body.setActive(true);
+						}
+					}
+				}
 			}
-			if (this.moveWorldAction.isActive()) {
-				// end the action
-				this.moveWorldAction.end(this);
+			
+			// check if the mouse button 1 was released
+			if (this.mouse.wasReleased(MouseEvent.BUTTON1)) {
+				if (this.moveBodyAction.isActive()) {
+					// end the action
+					this.moveBodyAction.end();
+					// end the move body joint
+					if (this.selectedBodyJoint != null) {
+						world.remove(this.selectedBodyJoint);
+						this.selectedBodyJoint = null;
+					}
+				}
+				if (this.moveFixtureAction.isActive()) {
+					SandboxBody body = this.editBodyAction.getObject();
+					// recompute the mass if the position changes
+					body.setMass(body.getMass().getType());
+					this.moveFixtureAction.end();
+				}
+				if (this.moveWorldAction.isActive()) {
+					// end the action
+					this.moveWorldAction.end(this);
+				}
 			}
-		}
-		
-		// check if the mouse button 3 was released
-		if (this.mouse.wasReleased(MouseEvent.BUTTON3)) {
-			if (this.rotateBodyAction.isActive()) {
-				// end the action
-				this.rotateBodyAction.end();
-			}
-			if (this.rotateFixtureAction.isActive()) {
-				this.rotateFixtureAction.end();
+			
+			// check if the mouse button 3 was released
+			if (this.mouse.wasReleased(MouseEvent.BUTTON3)) {
+				if (this.rotateBodyAction.isActive()) {
+					// end the action
+					this.rotateBodyAction.end();
+				}
+				if (this.rotateFixtureAction.isActive()) {
+					this.rotateFixtureAction.end();
+				}
 			}
 		}
 		
@@ -2197,7 +2133,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	 * Returns true if the simulation is paused.
 	 * @return boolean
 	 */
-	public synchronized boolean isPaused() {
+	private synchronized boolean isPaused() {
 		return this.paused;
 	}
 	
@@ -2205,7 +2141,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	 * Sets the paused flag of the simulation.
 	 * @param flag true if the simulation should be paused
 	 */
-	public synchronized void setPaused(boolean flag) {
+	private synchronized void setPaused(boolean flag) {
 		this.paused = flag;
 		if (!flag) {
 			// if the simulation is being unpaused then
@@ -2226,11 +2162,12 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	 * Returns the first body in the world's body list to contain the given point.
 	 * <p>
 	 * If no body is found at the given point, null is returned.
+	 * @param world the world
 	 * @param point the world space point
 	 * @return {@link SandboxBody}
 	 */
-	private SandboxBody getBodyAtPoint(Vector2 point) {
-		int bSize = this.world.getBodyCount();
+	private SandboxBody getBodyAtPoint(World world, Vector2 point) {
+		int bSize = world.getBodyCount();
 		// check if there is already a selected body
 		if (this.selectBodyAction.isActive()) {
 			// if so, then check that body first
@@ -2243,7 +2180,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		// then check the other bodies in the world
 		// loop over all the bodies in the world
 		for (int i = bSize - 1; i >= 0; i--) {
-			Body body = this.world.getBody(i);
+			Body body = world.getBody(i);
 			// does the body contain the point
 			if (contains(body, point)) {
 				return (SandboxBody) body;
@@ -2316,9 +2253,10 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	 * @return boolean
 	 */
 	private boolean contains(Convex convex, Transform transform, Vector2 point) {
+		double scale = this.simulation.getCamera().getScale();
 		if (convex instanceof Segment) {
 			Segment segment = (Segment)convex;
-			return segment.contains(point, transform, 0.2 * 32.0 / this.camera.scale);
+			return segment.contains(point, transform, 0.2 * 32.0 / scale);
 		}
 		return convex.contains(point, transform);
 	}
@@ -2362,8 +2300,10 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	 */
 	private void saveSimulationAction() throws IOException {
 		String xml = "";
-		synchronized (this.world) {
-			xml = XmlGenerator.toXml(this.world, this.rays, this.camera);
+		String name = Simulation.DEFAULT_SIMULATION_NAME;
+		synchronized (Simulation.LOCK) {
+			xml = XmlGenerator.toXml(this.simulation);
+			name = this.simulation.getWorld().getUserData().toString();
 		}
 		XmlFormatter formatter = new XmlFormatter(2);
 		xml = formatter.format(xml);
@@ -2418,7 +2358,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				fw.write(xml);
 				fw.close();
 				// set the window title
-				this.setTitle(this.getWindowTitle() + " - " + this.world.getUserData());
+				this.setTitle(this.getWindowTitle() + " - " + name);
 				JOptionPane.showMessageDialog(this, 
 						Messages.getString("dialog.save.success.text"), 
 						Messages.getString("dialog.save.success.title"), 
@@ -2430,7 +2370,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 					fw.write(xml);
 					fw.close();
 					// set the window title
-					this.setTitle(this.getWindowTitle() + " - " + this.world.getUserData());
+					this.setTitle(this.getWindowTitle() + " - " + name);
 					JOptionPane.showMessageDialog(this, 
 							Messages.getString("dialog.save.success.text"), 
 							Messages.getString("dialog.save.success.title"), 
@@ -2472,15 +2412,21 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				// check the user's choice
 				if (option == JOptionPane.YES_OPTION) {
 					// read the file into a stream
-					synchronized (this.world) {
-						XmlReader.fromXml(file, this.world, this.rays, this.camera);					
+					String name = Simulation.DEFAULT_SIMULATION_NAME;
+					synchronized (Simulation.LOCK) {
+						// read the file
+						this.simulation = XmlReader.fromXml(file);
+						// get the world name
+						name = this.simulation.getWorld().getUserData().toString();
+						// update the simulation tree
+						this.pnlSimulation.setSimulation(this.simulation);
+						// update the contact panel
+						this.pnlContacts.setContactCounter(this.simulation.getContactCounter());
 					}
-					// update the world tree
-					this.pnlWorld.setWorld(this.world, this.rays);
 					// clear the snapshots
 					this.clearAllSnapshots();
 					// set the window title
-					this.setTitle(this.getWindowTitle() + " - " + this.world.getUserData());
+					this.setTitle(this.getWindowTitle() + " - " + name);
 				}
 			} else {
 				JOptionPane.showMessageDialog(this, 
@@ -2511,15 +2457,21 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		// check the user's choice
 		if (option == JOptionPane.YES_OPTION) {
 			// read the file into a stream
-			synchronized (this.world) {
-				XmlReader.fromXml(this.getClass().getResourceAsStream(file), this.world, this.rays, this.camera);					
+			String simName = Simulation.DEFAULT_SIMULATION_NAME;
+			synchronized (Simulation.LOCK) {
+				// read the file
+				this.simulation = XmlReader.fromXml(this.getClass().getResourceAsStream(file));
+				// get the world name
+				simName = this.simulation.getWorld().getUserData().toString();
+				// update the simulation tree
+				this.pnlSimulation.setSimulation(this.simulation);
+				// update the contact panel
+				this.pnlContacts.setContactCounter(this.simulation.getContactCounter());
 			}
-			// update the world tree
-			this.pnlWorld.setWorld(this.world, this.rays);
 			// clear the snapshots
 			this.clearAllSnapshots();
 			// set the window title
-			this.setTitle(this.getWindowTitle() + " - " + name);
+			this.setTitle(this.getWindowTitle() + " - " + simName);
 		}
 	}
 	
@@ -2530,8 +2482,8 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	private void takeSnapshot(boolean auto) {
 		// get the xml for the current simulation
 		String xml = "";
-		synchronized (this.world) {
-			xml = XmlGenerator.toXml(this.world, this.rays, this.camera);
+		synchronized (Simulation.LOCK) {
+			xml = XmlGenerator.toXml(this.simulation);
 		}
 		// save it in the snapshot map using the timestamp as the key
 		Date date = new Date();
@@ -2561,14 +2513,26 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	private void restoreSnapshot(String snapshot) throws ParserConfigurationException, SAXException, IOException {
 		String xml = this.snapshots.get(snapshot);
 		// read the file into a stream
-		synchronized (this.world) {
-			// dont set the camera
-			XmlReader.fromXml(xml, this.world, this.rays, new Camera());
+		String name = Simulation.DEFAULT_SIMULATION_NAME;
+		synchronized (Simulation.LOCK) {
+			// save the old camera
+			Camera oldCamera = this.simulation.getCamera();
+			// read the previous snapshot
+			Simulation simulation = XmlReader.fromXml(xml);
+			// set the older camera
+			simulation.getCamera().setScale(oldCamera.getScale());
+			simulation.getCamera().setTranslation(oldCamera.getTranslation());
+			// set the simulation
+			this.simulation = simulation;
+			// get the world name
+			name = this.simulation.getWorld().getUserData().toString();
+			// update the simulation tree
+			this.pnlSimulation.setSimulation(this.simulation);
+			// update the contact panel
+			this.pnlContacts.setContactCounter(this.simulation.getContactCounter());
 		}
-		// update the world tree
-		this.pnlWorld.setWorld(this.world, this.rays);
 		// set the window title
-		this.setTitle(this.getWindowTitle() + " - " + this.world.getUserData());
+		this.setTitle(this.getWindowTitle() + " - " + name);
 	}
 	
 	/**
@@ -2609,13 +2573,13 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 						
 						// check the name
 						boolean valid = true;
-						if (!Character.isJavaIdentifierStart(name.charAt(0))) {
+						if (!Character.isJavaIdentifierStart(name.codePointAt(0))) {
 							// the first character is not valid
 							valid = false;
 						}
 						// loop through the rest of the name
 						for (int i = 1; i < name.length(); i++) {
-							if (!Character.isJavaIdentifierPart(name.charAt(i))) {
+							if (!Character.isJavaIdentifierPart(name.codePointAt(i))) {
 								valid = false;
 								break;
 							}
@@ -2652,8 +2616,8 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 			}
 			// get the class name from the file name
 			String contents;
-			synchronized (this.world) {
-				contents = CodeExporter.export(name, this.world);
+			synchronized (Simulation.LOCK) {
+				contents = CodeExporter.export(name, this.simulation.getWorld());
 			}
 			// see if its a new one or it already exists
 			if (file.exists()) {
@@ -2691,27 +2655,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		this.rotateBodyAction.end();
 		this.moveFixtureAction.end();
 		this.rotateFixtureAction.end();
-	}
-	
-	/**
-	 * Returns true if the world currently has a static body.
-	 * <p>
-	 * This is used as a simple check to issue a warning when the user
-	 * hasn't added a static body (like a floor body) to stop other bodies
-	 * from just falling indefinitely.
-	 * @return boolean
-	 */
-	private boolean hasStaticBody() {
-		synchronized (this.world) {
-			int bSize = this.world.getBodyCount();
-			for (int i = 0; i < bSize; i++) {
-				Body body = this.world.getBody(i);
-				if (body.isStatic()) {
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 	
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -60,7 +60,7 @@ import org.dyn4j.testbed.input.Mouse;
  * Using the {@link TestBed} class one can switch test without stopping
  * and starting the driver again.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.1.0
  * @since 1.0.0
  */
 public abstract class Test implements Comparable<Test> {
@@ -251,7 +251,7 @@ public abstract class Test implements Comparable<Test> {
 		if (draw.drawContacts() || draw.drawContactImpulses() 
 		 || draw.drawFrictionImpulses() || draw.drawContactPairs()) {
 			// get the contact counter
-			ContactCounter cc = (ContactCounter) this.world.getContactListener();
+			ContactCounter cc = (ContactCounter) this.world.getListeners(ContactCounter.class).get(0);
 			// get the contacts from the counter
 			List<ContactPoint> contacts = cc.getContacts();
 			

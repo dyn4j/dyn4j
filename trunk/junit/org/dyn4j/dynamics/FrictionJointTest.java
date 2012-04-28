@@ -24,8 +24,12 @@
  */
 package org.dyn4j.dynamics;
 
+import junit.framework.TestCase;
+
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.joint.FrictionJoint;
+import org.dyn4j.geometry.Geometry;
+import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Before;
 import org.junit.Test;
@@ -114,5 +118,49 @@ public class FrictionJointTest {
 	public void setNegativeMaxForce() {
 		FrictionJoint fj = new FrictionJoint(b1, b2, new Vector2());
 		fj.setMaximumForce(-2.0);
+	}
+	
+	/**
+	 * Tests the friction joint to ensure that the attached body is slowed.
+	 */
+	@Test
+	public void friction1() {
+		World w = new World();
+		// take gravity out the picture
+		w.setGravity(World.ZERO_GRAVITY);
+		
+		// take friction and damping out of the picture
+		
+		Body g = new Body();
+		BodyFixture gf = g.addFixture(Geometry.createRectangle(10.0, 0.5));
+		gf.setFriction(0.0);
+		g.setMass(Mass.Type.INFINITE);
+		g.setLinearDamping(0.0);
+		g.setAngularDamping(0.0);
+		w.add(g);
+		
+		Body b = new Body();
+		BodyFixture bf = b.addFixture(Geometry.createCircle(0.5));
+		bf.setFriction(0.0);
+		b.setMass();
+		b.translate(0.0, 2.0);
+		// 5 meters/second
+		b.setVelocity(new Vector2(4.0, 3.0));
+		// 30 degrees/second
+		b.setAngularVelocity(Math.toRadians(30.0));
+		b.setLinearDamping(0.0);
+		b.setAngularDamping(0.0);
+		w.add(b);
+		
+		FrictionJoint fj = new FrictionJoint(g, b, b.getWorldCenter());
+		fj.setMaximumForce(1000.0);
+		fj.setMaximumTorque(1000.0);
+		w.add(fj);
+		
+		w.step(1);
+		
+		// make sure that the body has been slowed linearly and angularly
+		TestCase.assertTrue(b.getVelocity().getMagnitude() < 5.0);
+		TestCase.assertTrue(b.getAngularVelocity() < Math.toRadians(30));
 	}
 }

@@ -78,6 +78,7 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.Camera;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.SandboxRay;
+import org.dyn4j.sandbox.Simulation;
 import org.dyn4j.sandbox.resources.Messages;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -342,9 +343,6 @@ public class XmlReader extends DefaultHandler {
 	
 	/**
 	 * Hidden constructor.
-	 * @see #fromXml(File, World, List, Camera)
-	 * @see #fromXml(InputStream, World, List, Camera)
-	 * @see #fromXml(String, World, List, Camera)
 	 */
 	private XmlReader() {
 		this.bodies = new ArrayList<SandboxBody>();
@@ -356,66 +354,50 @@ public class XmlReader extends DefaultHandler {
 	}
 	
 	/**
-	 * Parses the given file and loads the bounds, bodies, and joints into the given world object.
-	 * <p>
-	 * The world object is cleared before loading.
+	 * Returns a new simulation object from the given file.
 	 * @param file the file to read from
-	 * @param world the world object to modify
-	 * @param rays the list to store the rays
-	 * @param camera the simulation camera
+	 * @return Simulation the simulation object
 	 * @throws ParserConfigurationException thrown if a SAX configuration error occurs
 	 * @throws SAXException thrown if a parsing error occurs
 	 * @throws IOException thrown if an IO error occurs
 	 */
-	public static void fromXml(File file, World world, List<SandboxRay> rays, Camera camera) throws ParserConfigurationException, SAXException, IOException {
-		XmlReader.fromXml(new InputSource(new FileReader(file)), world, rays, camera);
+	public static Simulation fromXml(File file) throws ParserConfigurationException, SAXException, IOException {
+		return XmlReader.fromXml(new InputSource(new FileReader(file)));
 	}
 	
 	/**
-	 * Parses the given string and loads the bounds, bodies, and joints into the given world object.
-	 * <p>
-	 * The world object is cleared before loading.
+	 * Returns a new simulation object from the given string.
 	 * @param xml the string containing the XML to read from
-	 * @param world the world object to modify
-	 * @param rays the list to store the rays
-	 * @param camera the simulation camera
+	 * @return Simulation the simulation object
 	 * @throws ParserConfigurationException thrown if a SAX configuration error occurs
 	 * @throws SAXException thrown if a parsing error occurs
 	 * @throws IOException thrown if an IO error occurs
 	 */
-	public static void fromXml(String xml, World world, List<SandboxRay> rays, Camera camera) throws ParserConfigurationException, SAXException, IOException {
-		XmlReader.fromXml(new InputSource(new StringReader(xml)), world, rays, camera);
+	public static Simulation fromXml(String xml) throws ParserConfigurationException, SAXException, IOException {
+		return XmlReader.fromXml(new InputSource(new StringReader(xml)));
 	}
 	
 	/**
-	 * Parses the given input source and loads the bounds, bodies, and joints into the given world object.
-	 * <p>
-	 * The world object is cleared before loading.
+	 * Returns a new simulation object from the given stream.
 	 * @param stream the input stream containing the xml
-	 * @param world the world object to modify
-	 * @param rays the list to store the rays
-	 * @param camera the simulation camera
+	 * @return Simulation the simulation object
 	 * @throws ParserConfigurationException thrown if a SAX configuration error occurs
 	 * @throws SAXException thrown if a parsing error occurs
 	 * @throws IOException thrown if an IO error occurs
 	 */
-	public static void fromXml(InputStream stream, World world, List<SandboxRay> rays, Camera camera) throws ParserConfigurationException, SAXException, IOException {
-		XmlReader.fromXml(new InputSource(stream), world, rays, camera);
+	public static Simulation fromXml(InputStream stream) throws ParserConfigurationException, SAXException, IOException {
+		return XmlReader.fromXml(new InputSource(stream));
 	}
 	
 	/**
-	 * Parses the given input source and loads the bounds, bodies, and joints into the given world object.
-	 * <p>
-	 * The world object is cleared before loading.
+	 * Returns a new simulation object from the given input source.
 	 * @param source the source containing the XML
-	 * @param world the world object to modify
-	 * @param rays the list to store the rays
-	 * @param camera the simulation camera
+	 * @return Simulation the simulation object
 	 * @throws ParserConfigurationException thrown if a SAX configuration error occurs
 	 * @throws SAXException thrown if a parsing error occurs
 	 * @throws IOException thrown if an IO error occurs
 	 */
-	private static void fromXml(InputSource source, World world, List<SandboxRay> rays, Camera camera) throws ParserConfigurationException, SAXException, IOException {
+	private static Simulation fromXml(InputSource source) throws ParserConfigurationException, SAXException, IOException {
 		SAXParserFactory factory = SAXParserFactory.newInstance();
 		SAXParser parser = factory.newSAXParser();
 		
@@ -423,8 +405,9 @@ public class XmlReader extends DefaultHandler {
 		
 		parser.parse(source, reader);
 		
-		world.removeAll();
-		rays.clear();
+		World world = new World();
+		List<SandboxRay> rays = new ArrayList<SandboxRay>();
+		Camera camera = new Camera();
 		
 		// set the settings
 		world.setSettings(reader.settings);
@@ -459,6 +442,8 @@ public class XmlReader extends DefaultHandler {
 			camera.setScale(reader.camera.getScale());
 			camera.setTranslation(reader.camera.getTranslation());
 		}
+		
+		return new Simulation(camera, rays, world);
 	}
 
 	/* (non-Javadoc)

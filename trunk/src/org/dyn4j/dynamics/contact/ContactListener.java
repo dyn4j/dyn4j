@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,7 @@
  */
 package org.dyn4j.dynamics.contact;
 
+import org.dyn4j.Listener;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
@@ -39,10 +40,10 @@ import org.dyn4j.dynamics.World;
  * If a body is to be removed, make sure to return false to disable the contact.  Otherwise
  * the contact between the bodies will still be resolved even if the body has been removed.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.1.0
  * @since 1.0.0
  */
-public interface ContactListener {
+public interface ContactListener extends Listener {
 	/**
 	 * Called when a contact has been sensed between two {@link Body}s,
 	 * where one or both {@link Body}'s {@link BodyFixture}s are sensors.
@@ -60,9 +61,8 @@ public interface ContactListener {
 	/**
 	 * Called when two {@link BodyFixture}s begin to separate.
 	 * @param point the contact point that was removed
-	 * @return boolean true if the contact should remain enabled
 	 */
-	public abstract boolean end(ContactPoint point);
+	public abstract void end(ContactPoint point);
 	
 	/**
 	 * Called when two {@link BodyFixture}s remain in contact.

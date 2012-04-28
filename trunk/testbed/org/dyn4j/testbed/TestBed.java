@@ -1054,7 +1054,7 @@ public class TestBed extends GLCanvas implements GLEventListener {
 		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Contacts");
 		
 		// get the contact counter
-		ContactCounter cc = (ContactCounter) this.test.getWorld().getContactListener();
+		ContactCounter cc = (ContactCounter) this.test.getWorld().getListeners(ContactCounter.class).get(0);
 		// get the numbers
 		int added = cc.getAdded();
 		int persisted = cc.getPersisted();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,7 @@
  */
 package org.dyn4j.dynamics;
 
+import org.dyn4j.Listener;
 import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.dynamics.joint.Joint;
 
@@ -33,10 +34,10 @@ import org.dyn4j.dynamics.joint.Joint;
  * This class can be used to implement only the methods desired instead of all
  * the methods contained in the {@link DestructionListener} interface.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.1.0
  * @since 1.0.0
  */
-public class DestructionAdapter implements DestructionListener {
+public class DestructionAdapter implements DestructionListener, Listener {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.DestructionListener#destroyed(org.dyn4j.dynamics.contact.ContactPoint)
 	 */

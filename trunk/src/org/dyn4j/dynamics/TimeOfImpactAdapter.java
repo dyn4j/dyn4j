@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,15 +24,16 @@
  */
 package org.dyn4j.dynamics;
 
+import org.dyn4j.Listener;
 import org.dyn4j.collision.continuous.TimeOfImpact;
 
 /**
  * Convenience class for implementing the {@link TimeOfImpactListener} interface.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.1.0
  * @since 1.2.0
  */
-public class TimeOfImpactAdapter implements TimeOfImpactListener {
+public class TimeOfImpactAdapter implements TimeOfImpactListener, Listener {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.TimeOfImpactListener#collision(org.dyn4j.dynamics.Body, org.dyn4j.dynamics.Body, org.dyn4j.collision.continuous.TimeOfImpact)
 	 */

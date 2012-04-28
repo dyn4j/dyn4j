@@ -28,6 +28,8 @@ import junit.framework.TestCase;
 
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.joint.MouseJoint;
+import org.dyn4j.geometry.Geometry;
+import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Before;
 import org.junit.Test;
@@ -217,5 +219,31 @@ public class MouseJointTest {
 		
 		TestCase.assertEquals(0.0, mj.getTarget().x, 1.0e-3);
 		TestCase.assertEquals(1.0, mj.getTarget().y, 1.0e-3);
+	}
+	
+	/**
+	 * Tests the MouseJoint with a body who has FIXED_LINEAR_VELOCITY as its
+	 * mass type.  The mouse joint applied at a point on the body should rotate
+	 * the body (before it wasn't doing anything).
+	 */
+	@Test
+	public void fixedLinearVelocity() {
+		World w = new World();
+		
+		Body body = new Body();
+		body.addFixture(Geometry.createCircle(1.0));
+		body.setMass(Mass.Type.FIXED_LINEAR_VELOCITY);
+		w.add(body);
+		
+		MouseJoint mj = new MouseJoint(body, new Vector2(0.5, 0.0), 8.0, 0.3, 1000.0);
+		w.add(mj);
+		
+		mj.setTarget(new Vector2(0.7, -0.5));
+		
+		w.step(1);
+		
+		TestCase.assertTrue(mj.getReactionForce(w.step.invdt).getMagnitude() > 0);
+		TestCase.assertTrue(mj.getReactionForce(w.step.invdt).getMagnitude() <= 1000.0);
+		TestCase.assertTrue(body.getTransform().getRotation() < 0);
 	}
 }

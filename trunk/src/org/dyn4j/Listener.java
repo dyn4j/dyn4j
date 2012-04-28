@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -22,42 +22,12 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.sandbox.events;
-
-import java.awt.event.ActionEvent;
-
-import org.dyn4j.sandbox.SandboxRay;
+package org.dyn4j;
 
 /**
- * An action event involving a body.
+ * Marker interface for all listener objects.
  * @author William Bittle
- * @version 1.0.1
- * @since 1.0.1
+ * @version 3.1.0
+ * @since 3.1.0
  */
-public class RayActionEvent extends ActionEvent {
-	/** The version id */
-	private static final long serialVersionUID = -5041631963145918442L;
-	
-	/** The effected ray */
-	private SandboxRay ray;
-	
-	/**
-	 * Full constructor.
-	 * @param source the source object of the event
-	 * @param id the action event id
-	 * @param command the action command
-	 * @param ray the effected ray
-	 */
-	public RayActionEvent(Object source, int id, String command, SandboxRay ray) {
-		super(source, id, command);
-		this.ray = ray;
-	}
-	
-	/**
-	 * Returns the effected ray.
-	 * @return {@link SandboxRay}
-	 */
-	public SandboxRay getRay() {
-		return ray;
-	}
-}
+public interface Listener {}

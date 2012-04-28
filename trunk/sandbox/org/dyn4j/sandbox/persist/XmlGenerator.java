@@ -58,43 +58,40 @@ import org.dyn4j.sandbox.Camera;
 import org.dyn4j.sandbox.Sandbox;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.SandboxRay;
+import org.dyn4j.sandbox.Simulation;
 import org.dyn4j.sandbox.resources.Messages;
 import org.dyn4j.sandbox.utilities.SystemUtilities;
 
 /**
- * Class used to export the world to xml.
+ * Class used to export a simulation to xml.
  * @author William Bittle
  * @version 1.0.2
  * @since 1.0.0
  */
 public class XmlGenerator {
 	/**
-	 * Returns the xml for the given world object.
-	 * @param world the world
-	 * @param rays the list of rays
-	 * @param camera the camera settings
+	 * Returns the xml for the given simulation.
+	 * @param simulation the simulation
 	 * @return String
 	 */
-	public static final String toXml(World world, List<SandboxRay> rays, Camera camera) {
+	public static final String toXml(Simulation simulation) {
+		World world = simulation.getWorld();
+		Camera camera = simulation.getCamera();
+		List<SandboxRay> rays = simulation.getRays();
+		
 		StringBuilder sb = new StringBuilder();
 		
 		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 		sb.append("<Simulation xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://www.dyn4j.org/Sandbox/sandbox.xsd\" version=\"" + Sandbox.VERSION + "\">");
 		
-		// output the simulation name
-		sb.append("<Name>").append(world.getUserData()).append("</Name>");
+		// output system properties
+		sb.append(XmlGenerator.toXml());
 		
 		// output the camera information
 		sb.append("<Camera>");
 		sb.append("<Scale>").append(camera.getScale()).append("</Scale>");
 		sb.append(XmlGenerator.toXml(camera.getTranslation(), "Translation"));
 		sb.append("</Camera>");
-		
-		// output system properties
-		sb.append(XmlGenerator.toXml());
-		
-		// output settings
-		sb.append(XmlGenerator.toXml(world.getSettings()));
 		
 		// output rays
 		sb.append("<Rays>");
@@ -107,6 +104,12 @@ public class XmlGenerator {
 		
 		// output the world
 		sb.append("<World>");
+
+		// output the simulation name
+		sb.append("<Name>").append(world.getUserData()).append("</Name>");
+
+		// output settings
+		sb.append(XmlGenerator.toXml(world.getSettings()));
 		
 		// algorithms
 		sb.append("<BroadphaseDetector>").append(world.getBroadphaseDetector().getClass().getSimpleName()).append("</BroadphaseDetector>");
