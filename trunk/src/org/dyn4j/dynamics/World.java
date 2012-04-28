@@ -1644,6 +1644,7 @@ public class World {
 	 * Returns an empty list if no listeners for the given type are found.
 	 * <p>
 	 * Returns null if clazz is null.
+	 * @param <T> the listener type
 	 * @param clazz the type of listener to get (ContactListener.class for example)
 	 * @return List&lt;T&gt;
 	 */

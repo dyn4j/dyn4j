@@ -24,8 +24,11 @@
  */
 package org.dyn4j.dynamics;
 
+import java.util.List;
+
 import junit.framework.TestCase;
 
+import org.dyn4j.Listener;
 import org.dyn4j.collision.BoundsAdapter;
 import org.dyn4j.collision.BoundsListener;
 import org.dyn4j.collision.RectangularBounds;
@@ -37,6 +40,7 @@ import org.dyn4j.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.collision.manifold.ManifoldSolver;
 import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
+import org.dyn4j.dynamics.contact.ContactAdapter;
 import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
@@ -815,5 +819,57 @@ public class WorldTest {
 		w1.add(j);
 		
 		w2.add(j);
+	}
+	
+	/**
+	 * Tests the get/add/remove listeners methods.
+	 */
+	@Test
+	public void listeners() {
+		World w = new World();
+		
+		// the world should begin with no listeners
+		List<Listener> listeners = w.getListeners(Listener.class);
+		TestCase.assertEquals(0, listeners.size());
+		
+		// add some listeners
+		BoundsAdapter ba = new BoundsAdapter();
+		CollisionAdapter ca = new CollisionAdapter();
+		DestructionAdapter da = new DestructionAdapter();
+		RaycastAdapter ra = new RaycastAdapter();
+		StepAdapter sa = new StepAdapter();
+		TimeOfImpactAdapter ta = new TimeOfImpactAdapter();
+		ContactAdapter na = new ContactAdapter();
+		
+		w.addListener(ba);
+		w.addListener(ca);
+		w.addListener(da);
+		w.addListener(ra);
+		w.addListener(sa);
+		w.addListener(ta);
+		w.addListener(na);
+		
+		// we should have 7 listeners now
+		listeners = w.getListeners(Listener.class);
+		TestCase.assertEquals(7, listeners.size());
+		
+		// remove a listener
+		w.removeListener(ta);
+		listeners = w.getListeners(Listener.class);
+		TestCase.assertEquals(6, listeners.size());
+		
+		// attempt to get a specific type
+		List<BoundsListener> bls = w.getListeners(BoundsListener.class);
+		TestCase.assertEquals(1, bls.size());
+		
+		// test the multi-listener functionality
+		w.addListener(new WTStepListener());
+		w.addListener(new WTStepListener());
+		w.step();
+		List<WTStepListener> sls = w.getListeners(WTStepListener.class);
+		TestCase.assertEquals(2, sls.size());
+		// verify both were called
+		TestCase.assertEquals(1, sls.get(0).steps);
+		TestCase.assertEquals(1, sls.get(1).steps);
 	}
 }
