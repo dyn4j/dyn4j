@@ -25,14 +25,14 @@
 package org.dyn4j.sandbox.input;
 
 import java.awt.Point;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+
+import com.jogamp.newt.event.MouseEvent;
+import com.jogamp.newt.event.MouseListener;
 
 /**
  * Represents a polled Mouse input device.
@@ -40,7 +40,7 @@ import java.util.Map;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class Mouse implements MouseListener, MouseMotionListener, MouseWheelListener {
+public class Mouse implements MouseListener, MouseWheelListener {
 	/** The map of mouse buttons */
 	private Map<Integer, MouseButton> buttons = new Hashtable<Integer, MouseButton>();
 	
@@ -119,7 +119,7 @@ public class Mouse implements MouseListener, MouseMotionListener, MouseWheelList
 	 * the listening component.
 	 * @return Point
 	 */
-	public synchronized Point getLocation() {
+	public Point getLocation() {
 		return this.location;
 	}
 	
@@ -127,7 +127,7 @@ public class Mouse implements MouseListener, MouseMotionListener, MouseWheelList
 	 * Returns true if the mouse has moved.
 	 * @return boolean
 	 */
-	public synchronized boolean hasMoved() {
+	public boolean hasMoved() {
 		return this.moved;
 	}
 	
@@ -173,8 +173,9 @@ public class Mouse implements MouseListener, MouseMotionListener, MouseWheelList
 		return this.scroll;
 	}
 	
-	/* (non-Javadoc)
-	 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
+	/*
+	 * (non-Javadoc)
+	 * @see com.jogamp.newt.event.MouseListener#mouseClicked(com.jogamp.newt.event.MouseEvent)
 	 */
 	@Override
 	public void mouseClicked(MouseEvent e) {
@@ -190,8 +191,9 @@ public class Mouse implements MouseListener, MouseMotionListener, MouseWheelList
 		mb.setValue(e.getClickCount());
 	}
 	
-	/* (non-Javadoc)
-	 * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
+	/*
+	 * (non-Javadoc)
+	 * @see com.jogamp.newt.event.MouseListener#mousePressed(com.jogamp.newt.event.MouseEvent)
 	 */
 	@Override
 	public void mousePressed(MouseEvent e) {
@@ -209,8 +211,9 @@ public class Mouse implements MouseListener, MouseMotionListener, MouseWheelList
 		mb.setPressed(true);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
+	/*
+	 * (non-Javadoc)
+	 * @see com.jogamp.newt.event.MouseListener#mouseReleased(com.jogamp.newt.event.MouseEvent)
 	 */
 	@Override
 	public void mouseReleased(MouseEvent e) {
@@ -229,15 +232,17 @@ public class Mouse implements MouseListener, MouseMotionListener, MouseWheelList
 		mb.setWasReleased(true);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see com.jogamp.newt.event.MouseListener#mouseDragged(com.jogamp.newt.event.MouseEvent)
+	 */
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		// called when a mouse button is waiting for release and the mouse is moving
 		
 		// set the mouse location
-		synchronized (this) {
-			this.moved = true;
-			this.location = e.getPoint();
-		}
+		this.moved = true;
+		this.location = new Point(e.getX(), e.getY());
 		// set the mouse button pressed flag
 		int code = e.getButton();
 		MouseButton mb = this.buttons.get(code);
@@ -250,33 +255,44 @@ public class Mouse implements MouseListener, MouseMotionListener, MouseWheelList
 		mb.setPressed(true);
 	}
 	
-	/* (non-Javadoc)
-	 * @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
+	/*
+	 * (non-Javadoc)
+	 * @see com.jogamp.newt.event.MouseListener#mouseMoved(com.jogamp.newt.event.MouseEvent)
 	 */
 	@Override
-	public synchronized void mouseMoved(MouseEvent e) {
+	public void mouseMoved(MouseEvent e) {
 		this.moved = true;
-		this.location = e.getPoint();
+		this.location = new Point(e.getX(), e.getY());
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see com.jogamp.newt.event.MouseListener#mouseWheelMoved(com.jogamp.newt.event.MouseEvent)
+	 */
+	@Override
+	public void mouseWheelMoved(MouseEvent e) {
+//		this.scroll += e.getWheelRotation();
 	}
 	
 	/* (non-Javadoc)
 	 * @see java.awt.event.MouseWheelListener#mouseWheelMoved(java.awt.event.MouseWheelEvent)
 	 */
 	@Override
-	public synchronized void mouseWheelMoved(MouseWheelEvent e) {
+	public void mouseWheelMoved(MouseWheelEvent e) {
 		this.scroll += e.getWheelRotation();
 	}
-
-	// not using right now
-
+	
+	// not used
+	
 	/* (non-Javadoc)
-	 * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
+	 * @see com.jogamp.newt.event.MouseListener#mouseEntered(com.jogamp.newt.event.MouseEvent)
 	 */
 	@Override
 	public void mouseEntered(MouseEvent e) {}
 
-	/* (non-Javadoc)
-	 * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
+	/*
+	 * (non-Javadoc)
+	 * @see com.jogamp.newt.event.MouseListener#mouseExited(com.jogamp.newt.event.MouseEvent)
 	 */
 	@Override
 	public void mouseExited(MouseEvent e) {}

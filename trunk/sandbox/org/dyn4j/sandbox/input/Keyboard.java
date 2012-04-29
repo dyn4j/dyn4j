@@ -24,12 +24,15 @@
  */
 package org.dyn4j.sandbox.input;
 
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+//import java.awt.event.KeyEvent;
+//import java.awt.event.KeyListener;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.dyn4j.sandbox.input.Input.Hold;
+
+import com.jogamp.newt.event.KeyEvent;
+import com.jogamp.newt.event.KeyListener;
 
 /**
  * Represents a keyboard input device.
@@ -130,7 +133,7 @@ public class Keyboard implements KeyListener {
 				this.keys.get(keyCode).press();
 			}
 		}
-		e.consume();
+//		e.consume();
 	}
 	
 	/* (non-Javadoc)
@@ -148,7 +151,7 @@ public class Keyboard implements KeyListener {
 				}
 			}
 		}
-		e.consume();
+//		e.consume();
 	}
 	
 	/* (non-Javadoc)
@@ -156,6 +159,6 @@ public class Keyboard implements KeyListener {
 	 */
 	@Override
 	public void keyTyped(KeyEvent e) {
-		e.consume();
+//		e.consume();
 	}
 }

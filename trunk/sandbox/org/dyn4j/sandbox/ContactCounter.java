@@ -27,7 +27,6 @@ package org.dyn4j.sandbox;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Step;
 import org.dyn4j.dynamics.StepListener;
 import org.dyn4j.dynamics.World;
@@ -44,30 +43,24 @@ import org.dyn4j.geometry.Vector2;
  * @since 1.0.0
  */
 public class ContactCounter implements ContactListener, StepListener {
-	/** The number of contacts between sensor {@link Body}s */
-	private int sensed = 0;
-	
-	/** The number of new contacts */
-	private int added = 0;
-	
-	/** The number of retained contacts */
-	private int persisted = 0;
-	
-	/** The number of removed contacts */
-	private int removed = 0;
-	
-	/** The number of solved contacts (or the total number of contacts) */
-	private int solved = 0;
-	
+	/** Array for counting contact events */
+	private int[] counters = new int[] {0, 0, 0, 0, 0};
+
 	/** The current contact points */
 	private List<ContactPoint> contacts = new ArrayList<ContactPoint>();
+	
+	/** Array for the last cached counters */
+	private int[] cachedCounters = new int[] {0, 0, 0, 0, 0};
+	
+	/** The cached contact points */
+	private List<ContactPoint> cachedContacts = new ArrayList<ContactPoint>();
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.contact.ContactListener#sensed(org.dyn4j.dynamics.contact.SensedContactPoint)
 	 */
 	@Override
 	public void sensed(ContactPoint p) {
-		this.sensed++;
+		this.counters[0]++;
 		this.contacts.add(p);
 	}
 	
@@ -76,7 +69,7 @@ public class ContactCounter implements ContactListener, StepListener {
 	 */
 	@Override
 	public boolean begin(ContactPoint c) {
-		this.added++;
+		this.counters[1]++;
 		this.contacts.add(c);
 		// all contacts should be enabled
 		return true;
@@ -87,7 +80,7 @@ public class ContactCounter implements ContactListener, StepListener {
 	 */
 	@Override
 	public boolean persist(PersistedContactPoint c) {
-		this.persisted++;
+		this.counters[2]++;
 		// all contacts should be enabled
 		return true;
 	}
@@ -97,7 +90,7 @@ public class ContactCounter implements ContactListener, StepListener {
 	 */
 	@Override
 	public void end(ContactPoint c) {
-		this.removed++;
+		this.counters[3]++;
 	}
 	
 	/* (non-Javadoc)
@@ -114,8 +107,8 @@ public class ContactCounter implements ContactListener, StepListener {
 	 */
 	@Override
 	public void postSolve(SolvedContactPoint c) {
+		this.counters[4]++;
 		this.contacts.add(c);
-		this.solved++;
 	}
 	
 	/* (non-Javadoc)
@@ -145,12 +138,21 @@ public class ContactCounter implements ContactListener, StepListener {
 	 */
 	public void clear() {
 		// reset the values
-		this.sensed = 0;
-		this.added = 0;
-		this.persisted = 0;
-		this.removed = 0;
-		this.solved = 0;
+		for (int i = 0; i < this.counters.length; i++) {
+			this.cachedCounters[i] = this.counters[i];
+			this.counters[i] = 0;
+		}
+		this.cachedContacts.clear();
+		this.cachedContacts.addAll(this.contacts);
 		this.contacts.clear();
+	}
+
+	/**
+	 * Returns the number of sensed contacts.
+	 * @return int the number of sensed contacts
+	 */
+	public int getSensed() {
+		return this.cachedCounters[0];
 	}
 	
 	/**
@@ -158,7 +160,7 @@ public class ContactCounter implements ContactListener, StepListener {
 	 * @return int the number of new contacts
 	 */
 	public int getAdded() {
-		return added;
+		return this.cachedCounters[1];
 	}
 
 	/**
@@ -166,7 +168,7 @@ public class ContactCounter implements ContactListener, StepListener {
 	 * @return int the number of retained contacts
 	 */
 	public int getPersisted() {
-		return persisted;
+		return this.cachedCounters[2];
 	}
 
 	/**
@@ -174,15 +176,7 @@ public class ContactCounter implements ContactListener, StepListener {
 	 * @return int the number of removed contacts
 	 */
 	public int getRemoved() {
-		return removed;
-	}
-	
-	/**
-	 * Returns the number of sensed contacts.
-	 * @return int the number of sensed contacts
-	 */
-	public int getSensed() {
-		return sensed;
+		return this.cachedCounters[3];
 	}
 	
 	/**
@@ -192,7 +186,7 @@ public class ContactCounter implements ContactListener, StepListener {
 	 * @return int the number of solved contacts.
 	 */
 	public int getSolved() {
-		return this.solved;
+		return this.cachedCounters[4];
 	}
 	
 	/**
@@ -200,6 +194,6 @@ public class ContactCounter implements ContactListener, StepListener {
 	 * @return List&lt;{@link Vector2}&gt;
 	 */
 	public List<ContactPoint> getContacts() {
-		return this.contacts;
+		return this.cachedContacts;
 	}
 }
