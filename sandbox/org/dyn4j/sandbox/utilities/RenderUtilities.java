@@ -645,6 +645,11 @@ public final class RenderUtilities {
 		x = Math.cos(sa) * x - Math.sin(sa) * y;
 		y = Math.sin(sa) * t + Math.cos(sa) * y;
 		
+		// determine the direction given the +/- of the angular velocity
+		double sign = Math.signum(aa);
+		double cos = COS;
+		double sin = sign >= 0 ? SIN : -SIN;
+		
 		gl.glBegin(GL.GL_LINE_STRIP); 
 		for(int i = 0; i < N; i++) 
 		{ 
@@ -652,10 +657,10 @@ public final class RenderUtilities {
 	        
 			//apply the rotation matrix
 			t = x;
-			x = COS * x - SIN * y;
-			y = SIN * t + COS * y;
+			x = cos * x - sin * y;
+			y = sin * t + cos * y;
 			
-			if (COS * i >= Math.abs(aa)) break;
+			if (Math.abs(cos * i) >= Math.abs(aa)) break;
 		} 
 		gl.glEnd();  
 	}
