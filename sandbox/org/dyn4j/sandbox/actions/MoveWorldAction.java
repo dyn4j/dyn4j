@@ -24,8 +24,8 @@
  */
 package org.dyn4j.sandbox.actions;
 
+import java.awt.Component;
 import java.awt.Cursor;
-import java.awt.Window;
 
 import org.dyn4j.geometry.Vector2;
 
@@ -46,12 +46,12 @@ public class MoveWorldAction extends Action {
 	 * Begins the move action with the specified begin position in world coordinates.
 	 * @param currentOffset the current offset
 	 * @param mousePosition the begin position in world coordinates
-	 * @param window the window
+	 * @param component the component
 	 */
-	public synchronized void begin(Vector2 currentOffset, Vector2 mousePosition, Window window) {
+	public synchronized void begin(Vector2 currentOffset, Vector2 mousePosition, Component component) {
 		this.active = true;
 		this.offset = currentOffset;
-		window.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+		component.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
 		this.beginPosition = mousePosition;
 	}
 	
@@ -68,13 +68,13 @@ public class MoveWorldAction extends Action {
 	
 	/**
 	 * Ends the move body action.
-	 * @param window the window
+	 * @param component the component
 	 */
-	public synchronized void end(Window window) {
+	public synchronized void end(Component component) {
 		this.active = false;
 		this.offset = null;
 		this.beginPosition = null;
-		window.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+		component.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	}
 	
 	/**
