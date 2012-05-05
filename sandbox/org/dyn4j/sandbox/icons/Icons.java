@@ -65,6 +65,9 @@ public class Icons {
 	
 	/** Stop icon */
 	public static final ImageIcon STOP = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/stop-icon.png");
+
+	/** Reset icon */
+	public static final ImageIcon RESET = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/reset-icon.png");
 	
 	/** Settings icon */
 	public static final ImageIcon SETTINGS = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/settings-icon.png");
@@ -153,7 +156,7 @@ public class Icons {
 	/** Zoom out icon */
 	public static final ImageIcon ZOOM_OUT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/zoom-out-icon.png");
 	
-	/** To origin icon */
+	/** To origin icon (camera) */
 	public static final ImageIcon TO_ORIGIN = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/to-origin-icon.png");
 	
 	/** Origin icon */
@@ -192,14 +195,17 @@ public class Icons {
 	/** Check icon */
 	public static final ImageIcon CHECK = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/check-icon.png");
 	
+	/** Shift coordinates icon */
+	public static final ImageIcon SHIFT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/shift-icon.png");
+	
 	// normal icons
 
-	/** Bounds icon */
-	public static final ImageIcon BOUNDS = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/bounds-icon.png");
-	
 	/** Snapshot icon */
 	public static final ImageIcon SNAPSHOT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/snapshot-icon.png");
 	
+	/** Bounds icon */
+	public static final ImageIcon BOUNDS = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/bounds-icon.png");
+		
 	/** Body icon */
 	public static final ImageIcon BODY = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/body-icon.png");
 	
@@ -226,6 +232,9 @@ public class Icons {
 	
 	/** Mouse joint icon */
 	public static final ImageIcon MOUSE_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/mouse-joint-icon.png");
+
+	/** Motor joint icon */
+	public static final ImageIcon MOTOR_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/motor-joint-icon.png");
 	
 	/** Prismatic joint icon */
 	public static final ImageIcon PRISMATIC_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/prismatic-joint-icon.png");
@@ -247,6 +256,71 @@ public class Icons {
 	
 	/** Ray icon */
 	public static final ImageIcon RAY = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/ray-icon.png");
+	
+	// disabled icons
+
+	/** World icon */
+	public static final ImageIcon DISABLED_WORLD = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/disabled-world-icon.png");
+	
+	/** Folder open icon */
+	public static final ImageIcon DISABLED_FOLDER_OPEN = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/disabled-folder-open-icon.png");
+	
+	/** Folder closed icon */
+	public static final ImageIcon DISABLED_FOLDER_CLOSED = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/disabled-folder-closed-icon.png");
+	
+	/** Bounds icon */
+	public static final ImageIcon DISABLED_BOUNDS = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/disabled-bounds-icon.png");
+		
+	/** Body icon */
+	public static final ImageIcon DISABLED_BODY = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/disabled-body-icon.png");
+	
+	/** Circle icon */
+	public static final ImageIcon DISABLED_CIRCLE = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/disabled-circle-icon.png");
+	
+	/** Polygon icon */
+	public static final ImageIcon DISABLED_POLYGON = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/disabled-polygon-icon.png");
+	
+	/** Rectangle icon */
+	public static final ImageIcon DISABLED_RECTANGLE = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/disabled-rectangle-icon.png");
+	
+	/** Segment icon */
+	public static final ImageIcon DISABLED_SEGMENT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/disabled-segment-icon.png");
+	
+	/** Angle joint icon */
+	public static final ImageIcon DISABLED_ANGLE_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/disabled-angle-joint-icon.png");
+	
+	/** Distance joint icon */
+	public static final ImageIcon DISABLED_DISTANCE_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/disabled-distance-joint-icon.png");
+	
+	/** Friction joint icon */
+	public static final ImageIcon DISABLED_FRICTION_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/disabled-friction-joint-icon.png");
+
+	/** Motor joint icon */
+	public static final ImageIcon DISABLED_MOTOR_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/disabled-motor-joint-icon.png");
+	
+	/** Mouse joint icon */
+	public static final ImageIcon DISABLED_MOUSE_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/disabled-mouse-joint-icon.png");
+	
+	/** Prismatic joint icon */
+	public static final ImageIcon DISABLED_PRISMATIC_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/disabled-prismatic-joint-icon.png");
+	
+	/** Pulley joint icon */
+	public static final ImageIcon DISABLED_PULLEY_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/disabled-pulley-joint-icon.png");
+	
+	/** Revolute joint icon */
+	public static final ImageIcon DISABLED_REVOLUTE_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/disabled-revolute-joint-icon.png");
+	
+	/** Rope joint icon */
+	public static final ImageIcon DISABLED_ROPE_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/disabled-rope-joint-icon.png");
+	
+	/** Weld joint icon */
+	public static final ImageIcon DISABLED_WELD_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/disabled-weld-joint-icon.png");
+	
+	/** Wheel joint icon */
+	public static final ImageIcon DISABLED_WHEEL_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/disabled-wheel-joint-icon.png");
+	
+	/** Ray icon */
+	public static final ImageIcon DISABLED_RAY = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/disabled-ray-icon.png");
 	
 	// create icons
 
@@ -282,6 +356,9 @@ public class Icons {
 	
 	/** Add friction joint icon */
 	public static final ImageIcon ADD_FRICTION_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/add-friction-joint-icon.png");
+
+	/** Add motor joint icon */
+	public static final ImageIcon ADD_MOTOR_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/add-motor-joint-icon.png");
 	
 	/** Add mouse joint icon */
 	public static final ImageIcon ADD_MOUSE_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/add-mouse-joint-icon.png");
@@ -338,6 +415,9 @@ public class Icons {
 	
 	/** Edit friction joint icon */
 	public static final ImageIcon EDIT_FRICTION_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/edit-friction-joint-icon.png");
+
+	/** Edit motor joint icon */
+	public static final ImageIcon EDIT_MOTOR_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/edit-motor-joint-icon.png");
 	
 	/** Edit mouse joint icon */
 	public static final ImageIcon EDIT_MOUSE_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/edit-mouse-joint-icon.png");
@@ -394,6 +474,9 @@ public class Icons {
 	
 	/** Remove friction joint icon */
 	public static final ImageIcon REMOVE_FRICTION_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/remove-friction-joint-icon.png");
+
+	/** Remove motor joint icon */
+	public static final ImageIcon REMOVE_MOTOR_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/remove-motor-joint-icon.png");
 	
 	/** Remove mouse joint icon */
 	public static final ImageIcon REMOVE_MOUSE_JOINT = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/remove-mouse-joint-icon.png");

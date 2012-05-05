@@ -181,11 +181,13 @@ public class World {
 		this.coefficientMixer = CoefficientMixer.DEFAULT_MIXER;
 		this.bodies = new ArrayList<Body>();
 		this.joints = new ArrayList<Joint>();
-		
 		this.listeners = new ArrayList<Listener>();
+		
+		// create last anything that requires a reference to this world
 		this.timeOfImpactSolver = new TimeOfImpactSolver(this);
 		this.contactManager = new ContactManager(this);
 		this.island = new Island(this);
+		
 		this.time = 0.0;
 		this.updateRequired = true;
 	}
@@ -477,7 +479,7 @@ public class World {
 	 * </ol>
 	 * <p>
 	 * This method will notify all bounds and collision listeners.  If any {@link CollisionListener}
-	 * return false, the collision is ignored.
+	 * returns false, the collision is ignored.
 	 * @since 3.0.0
 	 */
 	protected void detect() {
@@ -1647,6 +1649,7 @@ public class World {
 	 * @param <T> the listener type
 	 * @param clazz the type of listener to get (ContactListener.class for example)
 	 * @return List&lt;T&gt;
+	 * @since 3.1.0
 	 */
 	public <T extends Listener> List<T> getListeners(Class<T> clazz) {
 		// check for null
@@ -1667,6 +1670,7 @@ public class World {
 	/**
 	 * Adds the given listener to the list of listeners.
 	 * @param listener the listener
+	 * @since 3.1.0
 	 */
 	public void addListener(Listener listener) {
 		if (listener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullListener"));
@@ -1677,9 +1681,18 @@ public class World {
 	 * Removes the given listener.
 	 * @param listener the listener to remove
 	 * @return boolean true if the listener was removed
+	 * @since 3.1.0
 	 */
 	public boolean removeListener(Listener listener) {
 		return this.listeners.remove(listener);
+	}
+	
+	/**
+	 * Removes all the listeners.
+	 * @since 3.1.0
+	 */
+	public void removeListeners() {
+		this.listeners.clear();
 	}
 	
 	/**
@@ -1816,136 +1829,6 @@ public class World {
 	public ContactManager getContactManager() {
 		return contactManager;
 	}
-	
-//	
-//	/**
-//	 * Sets the collision listener.
-//	 * @param collisionListener the collision listener
-//	 * @throws NullPointerException if collisionListener is null
-//	 */
-//	public void setCollisionListener(CollisionListener collisionListener) {
-//		if (collisionListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullCollisionListener"));
-//		this.collisionListener = collisionListener;
-//	}
-//	
-//	/**
-//	 * Returns the collision listener.
-//	 * @return {@link CollisionListener} the collision listener
-//	 */
-//	public CollisionListener getCollisionListener() {
-//		return this.collisionListener;
-//	}
-//
-//	/**
-//	 * Sets the bounds listener.
-//	 * @param boundsListener the bounds listener
-//	 * @throws NullPointerException if boundsListener is null
-//	 */
-//	public void setBoundsListener(BoundsListener boundsListener) {
-//		if (boundsListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullBoundsListener"));
-//		this.boundsListener = boundsListener;
-//	}
-//	
-//	/**
-//	 * Returns the bounds listener.
-//	 * @return {@link BoundsListener} the bounds listener
-//	 */
-//	public BoundsListener getBoundsListener() {
-//		return this.boundsListener;
-//	}
-//	
-//	/**
-//	 * Sets the {@link ContactListener}.
-//	 * @param contactListener the contact listener
-//	 * @throws NullPointerException if contactListener is null
-//	 */
-//	public void setContactListener(ContactListener contactListener) {
-//		if (contactListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullContactListener"));
-//		this.contactListener = contactListener;
-//	}
-//	
-//	/**
-//	 * Returns the contact listener.
-//	 * @return {@link ContactListener} the contact listener
-//	 */
-//	public ContactListener getContactListener() {
-//		return this.contactListener;
-//	}
-//	
-//	/**
-//	 * Returns the time of impact listener.
-//	 * @return {@link TimeOfImpactListener} the time of impact listener
-//	 */
-//	public TimeOfImpactListener getTimeOfImpactListener() {
-//		return this.timeOfImpactListener;
-//	}
-//	
-//	/**
-//	 * Sets the {@link TimeOfImpactListener}.
-//	 * @param timeOfImpactListener the time of impact listener
-//	 * @throws NullPointerException if timeOfImpactListener is null
-//	 */
-//	public void setTimeOfImpactListener(TimeOfImpactListener timeOfImpactListener) {
-//		if (timeOfImpactListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullTimeOfImpactListener"));
-//		this.timeOfImpactListener = timeOfImpactListener;
-//	}
-//	
-//	/**
-//	 * Sets the raycast listener.
-//	 * @param raycastListener the raycast listener
-//	 * @throws NullPointerException if raycastListener is null
-//	 * @since 2.0.0
-//	 */
-//	public void setRaycastListener(RaycastListener raycastListener) {
-//		if (raycastListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullRaycastListener"));
-//		this.raycastListener = raycastListener;
-//	}
-//	
-//	/**
-//	 * Returns the raycast listener.
-//	 * @return {@link RaycastListener}
-//	 * @since 2.0.0
-//	 */
-//	public RaycastListener getRaycastListener() {
-//		return this.raycastListener;
-//	}
-//	
-//	/**
-//	 * Sets the {@link DestructionListener}.
-//	 * @param destructionListener the {@link DestructionListener}
-//	 * @throws NullPointerException if destructionListener is null
-//	 */
-//	public void setDestructionListener(DestructionListener destructionListener) {
-//		if (destructionListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullDestructionListener"));
-//		this.destructionListener = destructionListener;
-//	}
-//	
-//	/**
-//	 * Returns the {@link DestructionListener}.
-//	 * @return {@link DestructionListener} the destruction listener
-//	 */
-//	public DestructionListener getDestructionListener() {
-//		return this.destructionListener;
-//	}
-//	
-//	/**
-//	 * Sets the {@link StepListener}.
-//	 * @param stepListener the {@link StepListener}
-//	 * @throws NullPointerException if stepListener is null
-//	 */
-//	public void setStepListener(StepListener stepListener) {
-//		if (stepListener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullStepListener"));
-//		this.stepListener = stepListener;
-//	}
-//	
-//	/**
-//	 * Returns the {@link StepListener}
-//	 * @return {@link StepListener}
-//	 */
-//	public StepListener getStepListener() {
-//		return this.stepListener;
-//	}
-//	
 	
 	/**
 	 * Returns the application data associated with this {@link World}.

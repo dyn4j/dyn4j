@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,7 +40,7 @@ import org.dyn4j.geometry.Vector2;
  * Nearly identitcal to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.3
+ * @version 3.1.0
  * @since 1.0.0
  */
 public class Island {
@@ -140,7 +140,7 @@ public class Island {
 			// check if the body has infinite mass and infinite inertia
 			if (!body.isDynamic()) continue;
 			// accumulate the forces and torques
-			body.accumulate();
+			body.accumulate(step.dt);
 			// get the mass properties
 			invM = body.mass.getInverseMass();
 			invI = body.mass.getInverseInertia();

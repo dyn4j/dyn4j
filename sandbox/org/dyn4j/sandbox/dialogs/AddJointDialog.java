@@ -46,6 +46,7 @@ import org.dyn4j.dynamics.joint.AngleJoint;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.FrictionJoint;
 import org.dyn4j.dynamics.joint.Joint;
+import org.dyn4j.dynamics.joint.MotorJoint;
 import org.dyn4j.dynamics.joint.MouseJoint;
 import org.dyn4j.dynamics.joint.PrismaticJoint;
 import org.dyn4j.dynamics.joint.PulleyJoint;
@@ -61,6 +62,7 @@ import org.dyn4j.sandbox.panels.AngleJointPanel;
 import org.dyn4j.sandbox.panels.DistanceJointPanel;
 import org.dyn4j.sandbox.panels.FrictionJointPanel;
 import org.dyn4j.sandbox.panels.JointPanel;
+import org.dyn4j.sandbox.panels.MotorJointPanel;
 import org.dyn4j.sandbox.panels.MouseJointPanel;
 import org.dyn4j.sandbox.panels.PrismaticJointPanel;
 import org.dyn4j.sandbox.panels.PulleyJointPanel;
@@ -155,6 +157,17 @@ public class AddJointDialog extends JDialog implements ActionListener {
 			this.setIconImage(Icons.ADD_MOUSE_JOINT.getImage());
 			this.setTitle(Messages.getString("dialog.joint.add.mouse.title"));
 			pneInfo.setText(Messages.getString("panel.joint.mouse.description"));
+		} else if (clazz == MotorJoint.class) {
+			// create the joint
+			MotorJoint mj = new MotorJoint(b1, b2);
+			// set the name
+			mj.setUserData(MessageFormat.format(Messages.getString("dialog.joint.add.motor.name.default"), this.getCounter(clazz)));
+			// create the panel
+			this.pnlJoint = new MotorJointPanel(mj, bodies, false);
+			// set the icon and title
+			this.setIconImage(Icons.ADD_MOTOR_JOINT.getImage());
+			this.setTitle(Messages.getString("dialog.joint.add.motor.title"));
+			pneInfo.setText(Messages.getString("panel.joint.motor.description"));
 		} else if (clazz == PrismaticJoint.class) {
 			// create the joint
 			PrismaticJoint pj = new PrismaticJoint(b1, b2, b1.getWorldCenter(), new Vector2(1.0, 0.0));

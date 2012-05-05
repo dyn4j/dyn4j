@@ -74,25 +74,25 @@ public class MouseJoint extends Joint {
 	/**
 	 * Full constructor.
 	 * @param body the body to attach the joint to
-	 * @param target the target point; where the mouse clicked on the body
+	 * @param anchor the anchor point on the body
 	 * @param frequency the oscillation frequency in hz
 	 * @param dampingRatio the damping ratio
 	 * @param maximumForce the maximum force this constraint can apply in newtons
-	 * @throws NullPointerException if body or target is null
+	 * @throws NullPointerException if body or anchor is null
 	 * @throws IllegalArgumentException if frequency is less than or equal to zero, or if dampingRatio is less than zero or greater than one, or if maxForce is less than zero
 	 */
-	public MouseJoint(Body body, Vector2 target, double frequency, double dampingRatio, double maximumForce) {
+	public MouseJoint(Body body, Vector2 anchor, double frequency, double dampingRatio, double maximumForce) {
 		super(body, body, false);
-		// check for a null target
-		if (target == null) throw new NullPointerException(Messages.getString("dynamics.joint.mouse.nullTarget"));
+		// check for a null anchor
+		if (anchor == null) throw new NullPointerException(Messages.getString("dynamics.joint.mouse.nullAnchor"));
 		// verify the frequency
 		if (frequency <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidFrequency"));
 		// verify the damping ratio
 		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidDampingRatio"));
 		// verity the max force
 		if (maximumForce < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.mouse.invalidMaximumForce"));
-		this.target = target;
-		this.anchor = body.getLocalPoint(target);
+		this.target = anchor;
+		this.anchor = body.getLocalPoint(anchor);
 		this.frequency = frequency;
 		this.dampingRatio = dampingRatio;
 		this.maximumForce = maximumForce;

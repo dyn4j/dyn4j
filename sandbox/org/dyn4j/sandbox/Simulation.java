@@ -45,16 +45,16 @@ public class Simulation {
 	public static final Object LOCK = new Object();
 	
 	/** The sandbox camera */
-	private Camera camera;
+	protected Camera camera;
 	
 	/** The current list of rays */
-	private List<SandboxRay> rays;
+	protected List<SandboxRay> rays;
 	
 	/** The world */
-	private World world;
+	protected World world;
 	
 	/** The contact counter */
-	private ContactCounter contactCounter;
+	protected ContactCounter contactCounter;
 	
 	/**
 	 * Creates a default simulation.

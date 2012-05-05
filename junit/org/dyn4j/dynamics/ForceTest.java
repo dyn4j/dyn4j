@@ -28,6 +28,7 @@ import junit.framework.TestCase;
 
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Force;
+import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
 
@@ -125,5 +126,39 @@ public class ForceTest {
 		
 		TestCase.assertEquals(2.0, b.force.x);
 		TestCase.assertEquals(1.0, b.force.y);
+	}
+	
+	/**
+	 * Tests the apply method where the force is retained for two steps.
+	 */
+	@Test
+	public void applyTimed() {
+		World w = new World();
+		Body b = new Body();
+		b.addFixture(Geometry.createCircle(1.0));
+		b.setMass();
+		
+		Force f = new Force() {
+			private double time = 0;
+			public boolean isComplete(double elapsedTime) {
+				time += elapsedTime;
+				if (time >= 2.0 / 60.0) {
+					return true;
+				}
+				return false;
+			}
+		};
+		
+		b.apply(f);
+		w.add(b);
+		
+		w.step(1);
+		
+		// make sure the force is still there
+		TestCase.assertEquals(1, b.forces.size());
+		
+		w.step(1);
+		
+		TestCase.assertEquals(0, b.forces.size());
 	}
 }

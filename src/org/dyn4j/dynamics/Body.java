@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import org.dyn4j.Epsilon;
 import org.dyn4j.collision.Collidable;
 import org.dyn4j.collision.continuous.Swept;
 import org.dyn4j.dynamics.contact.Contact;
@@ -78,7 +79,7 @@ import org.dyn4j.resources.Messages;
  * resolution but is handled in collision detection.
  * <p>
  * A {@link Body} flagged as a Bullet will be check for tunneling depending on the CCD
- * setting in the {@link Settings} singleton.  Use this if the body is a fast moving
+ * setting in the world's {@link Settings}.  Use this if the body is a fast moving
  * body, but be careful as this will incur a performance hit.
  * @author William Bittle
  * @version 3.1.0
@@ -631,8 +632,10 @@ public class Body implements Swept, Collidable, Transformable {
 	
 	/**
 	 * Accumulates the forces and torques.
+	 * @param elapsedTime the elapsed time since the last call
+	 * @since 3.1.0
 	 */
-	protected void accumulate() {
+	protected void accumulate(double elapsedTime) {
 		// set the current force to zero
 		this.force.zero();
 		// get the number of forces
@@ -645,7 +648,7 @@ public class Body implements Swept, Collidable, Transformable {
 				Force force = it.next();
 				force.apply(this);
 				// see if we should remove the force
-				if (force.isComplete()) {
+				if (force.isComplete(elapsedTime)) {
 					it.remove();
 				}
 			}
@@ -662,7 +665,7 @@ public class Body implements Swept, Collidable, Transformable {
 				Torque torque = it.next();
 				torque.apply(this);
 				// see if we should remove the torque
-				if (torque.isComplete()) {
+				if (torque.isComplete(elapsedTime)) {
 					it.remove();
 				}
 			}
@@ -675,7 +678,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 * @return boolean
 	 */
 	public boolean isStatic() {
-		return this.mass.isInfinite() && this.velocity.isZero() && this.angularVelocity == 0.0;
+		return this.mass.isInfinite() && this.velocity.isZero() && Math.abs(this.angularVelocity) <= Epsilon.E;
 	}
 	
 	/**
@@ -684,7 +687,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 * @return boolean
 	 */
 	public boolean isKinematic() {
-		return this.mass.isInfinite() && (!this.velocity.isZero() || this.angularVelocity != 0.0);
+		return this.mass.isInfinite() && (!this.velocity.isZero() || Math.abs(this.angularVelocity) > Epsilon.E);
 	}
 	
 	/**
@@ -750,6 +753,9 @@ public class Body implements Swept, Collidable, Transformable {
 	
 	/**
 	 * Sets whether this {@link Body} is awake or not.
+	 * <p>
+	 * If flag is true, this body's velocity, angular velocity,
+	 * force, torque, and accumulators are cleared.
 	 * @param flag true if the body should be put to sleep
 	 */
 	public void setAsleep(boolean flag) {
@@ -1350,6 +1356,10 @@ public class Body implements Swept, Collidable, Transformable {
 	/**
 	 * Returns a list of {@link Body}s connected
 	 * by {@link Joint}s.
+	 * <p>
+	 * If a body is connected to another body with more
+	 * than one joint, this method will return just one
+	 * entry for the connected body.
 	 * @return List&lt;{@link Body}&gt;
 	 * @since 1.0.1
 	 */
@@ -1360,7 +1370,13 @@ public class Body implements Swept, Collidable, Transformable {
 		// add all the joint bodies
 		for (int i = 0; i < size; i++) {
 			JointEdge je = this.joints.get(i);
-			bodies.add(je.getOther());
+			// get the other body
+			Body other = je.getOther();
+			// make sure that the body hasn't been added
+			// to the list already
+			if (!bodies.contains(other)) {
+				bodies.add(other);
+			}
 		}
 		// return the connected bodies
 		return bodies;
@@ -1395,6 +1411,10 @@ public class Body implements Swept, Collidable, Transformable {
 	 * <p>
 	 * Calling this method from any of the {@link CollisionListener} methods
 	 * may produce incorrect results.
+	 * <p>
+	 * If this body has multiple contact constraints with another body (which can
+	 * happen when either body has multiple fixtures), this method will only return
+	 * one entry for the in contact body.
 	 * @param sensed true for only sensed contacts; false for only normal contacts
 	 * @return List&lt;{@link Body}&gt;
 	 * @since 1.0.1
@@ -1409,8 +1429,14 @@ public class Body implements Swept, Collidable, Transformable {
 			// check for sensor contact
 			ContactConstraint constraint = ce.getContactConstraint();
 			if (sensed == constraint.isSensor()) {
-				// add it to the list
-				bodies.add(ce.getOther());
+				// get the other body
+				Body other = ce.getOther();
+				// make sure the body hasn't been added to 
+				// the list already
+				if (!bodies.contains(other)) {
+					// add it to the list
+					bodies.add(other);
+				}
 			}
 		}
 		// return the connected bodies

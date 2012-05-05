@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,7 +29,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents a torque about the z-axis.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.0
  * @since 1.0.0
  */
 public class Torque {
@@ -95,10 +95,11 @@ public class Torque {
 	 * that are not cleared each iteration by the {@link World}.
 	 * <p>
 	 * The default implementation always returns true.
+	 * @param elapsedTime the elapsed time since the last call to this method
 	 * @return boolean true if this torque should be removed
-	 * @since 2.0.0
+	 * @since 3.1.0
 	 */
-	public boolean isComplete() {
+	public boolean isComplete(double elapsedTime) {
 		return true;
 	}
 	
