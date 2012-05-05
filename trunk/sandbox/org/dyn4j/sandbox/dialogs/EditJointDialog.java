@@ -43,6 +43,7 @@ import org.dyn4j.dynamics.joint.AngleJoint;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.FrictionJoint;
 import org.dyn4j.dynamics.joint.Joint;
+import org.dyn4j.dynamics.joint.MotorJoint;
 import org.dyn4j.dynamics.joint.MouseJoint;
 import org.dyn4j.dynamics.joint.PrismaticJoint;
 import org.dyn4j.dynamics.joint.PulleyJoint;
@@ -57,6 +58,7 @@ import org.dyn4j.sandbox.panels.AngleJointPanel;
 import org.dyn4j.sandbox.panels.DistanceJointPanel;
 import org.dyn4j.sandbox.panels.FrictionJointPanel;
 import org.dyn4j.sandbox.panels.JointPanel;
+import org.dyn4j.sandbox.panels.MotorJointPanel;
 import org.dyn4j.sandbox.panels.MouseJointPanel;
 import org.dyn4j.sandbox.panels.PrismaticJointPanel;
 import org.dyn4j.sandbox.panels.PulleyJointPanel;
@@ -121,6 +123,11 @@ public class EditJointDialog extends JDialog implements ActionListener {
 			this.setIconImage(Icons.EDIT_MOUSE_JOINT.getImage());
 			this.setTitle(Messages.getString("dialog.joint.edit.mouse.title"));
 			pneInfo.setText(Messages.getString("panel.joint.mouse.description"));
+		} else if (joint instanceof MotorJoint) {
+			this.pnlJoint = new MotorJointPanel((MotorJoint)joint, bodies, true);
+			this.setIconImage(Icons.EDIT_MOTOR_JOINT.getImage());
+			this.setTitle(Messages.getString("dialog.joint.edit.motor.title"));
+			pneInfo.setText(Messages.getString("panel.joint.motor.description"));
 		} else if (joint instanceof PrismaticJoint) {
 			this.pnlJoint = new PrismaticJointPanel((PrismaticJoint)joint, bodies, true);
 			this.setIconImage(Icons.EDIT_PRISMATIC_JOINT.getImage());

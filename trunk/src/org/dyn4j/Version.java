@@ -32,13 +32,13 @@ package org.dyn4j;
  */
 public final class Version {
 	/** The major version number; API changes, major enhancements, etc. */
-	public static final int MAJOR = 3;
+	private static final int MAJOR = 3;
 	
 	/** The minor version number; minor enhancements, major bug fixes, etc. */
-	public static final int MINOR = 1;
+	private static final int MINOR = 1;
 	
 	/** The revision number; minor bug fixes */
-	public static final int REVISION = 0;
+	private static final int REVISION = 0;
 	
 	/**
 	 * Hide the constructor.
@@ -51,6 +51,45 @@ public final class Version {
 	 */
 	public static String getVersion() {
 		return MAJOR + "." + MINOR + "." + REVISION;
+	}
+	
+	/**
+	 * Returns the version numbers in an array of ints.
+	 * <p>
+	 * The array is of length 3 and has the major, minor, and
+	 * revision numbers in that order.
+	 * @return int[] the major, minor, and revision numbers
+	 * @since 3.1.0
+	 */
+	public static int[] getVersionNumbers() {
+		return new int[] { MAJOR, MINOR, REVISION };
+	}
+	
+	/**
+	 * Returns the major version number.
+	 * @return int
+	 * @since 3.1.0
+	 */
+	public static int getMajorNumber() {
+		return MAJOR;
+	}
+	
+	/**
+	 * Returns the minor version number.
+	 * @return int
+	 * @since 3.1.0
+	 */
+	public static int getMinorNumber() {
+		return MINOR;
+	}
+	
+	/**
+	 * Returns the revision number.
+	 * @return int
+	 * @since 3.1.0
+	 */
+	public static int getRevisionNumber() {
+		return REVISION;
 	}
 	
 	/**

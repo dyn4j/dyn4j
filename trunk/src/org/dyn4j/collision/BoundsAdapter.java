@@ -27,7 +27,7 @@ package org.dyn4j.collision;
 import org.dyn4j.Listener;
 
 /**
- * Convience class for implementing the {@link BoundsListener} interface.
+ * Convenience class for implementing the {@link BoundsListener} interface.
  * <p>
  * This class can be used to implement only the methods desired instead of all
  * the methods contained in the {@link BoundsListener} interface.

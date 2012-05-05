@@ -60,6 +60,7 @@ import org.dyn4j.dynamics.joint.AngleJoint;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.FrictionJoint;
 import org.dyn4j.dynamics.joint.Joint;
+import org.dyn4j.dynamics.joint.MotorJoint;
 import org.dyn4j.dynamics.joint.MouseJoint;
 import org.dyn4j.dynamics.joint.PrismaticJoint;
 import org.dyn4j.dynamics.joint.PulleyJoint;
@@ -94,6 +95,7 @@ import org.dyn4j.sandbox.dialogs.EditJointDialog;
 import org.dyn4j.sandbox.dialogs.EditRayDialog;
 import org.dyn4j.sandbox.dialogs.EditWorldDialog;
 import org.dyn4j.sandbox.dialogs.SetBoundsDialog;
+import org.dyn4j.sandbox.dialogs.ShiftWorldDialog;
 import org.dyn4j.sandbox.events.BodyActionEvent;
 import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.resources.Messages;
@@ -297,6 +299,11 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 		
 		this.popWorld = new JPopupMenu();
 		
+		JMenuItem mnuShiftWorld = new JMenuItem(Messages.getString("menu.context.world.shift"));
+		mnuShiftWorld.setActionCommand("shiftWorld");
+		mnuShiftWorld.addActionListener(this);
+		mnuShiftWorld.setIcon(Icons.SHIFT);
+		
 		JMenuItem mnuEditWorld = new JMenuItem(Messages.getString("menu.context.world.edit"));
 		mnuEditWorld.setActionCommand("editWorld");
 		mnuEditWorld.addActionListener(this);
@@ -308,6 +315,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 		mnuClearWorld.setIcon(Icons.REMOVE);
 		
 		this.popWorld.add(mnuEditWorld);
+		this.popWorld.add(mnuShiftWorld);
 		this.popWorld.addSeparator();
 		this.popWorld.add(mnuClearWorld);
 		
@@ -361,6 +369,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 		JMenuItem mnuAddRopeJoint = new JMenuItem(Messages.getString("menu.context.jointFolder.addRopeJoint"));
 		JMenuItem mnuAddWeldJoint = new JMenuItem(Messages.getString("menu.context.jointFolder.addWeldJoint"));
 		JMenuItem mnuAddWheelJoint = new JMenuItem(Messages.getString("menu.context.jointFolder.addWheelJoint"));
+		JMenuItem mnuAddMotorJoint = new JMenuItem(Messages.getString("menu.context.jointFolder.addMotorJoint"));
 		JMenuItem mnuAddMouseJoint = new JMenuItem(Messages.getString("menu.context.jointFolder.addMouseJoint"));
 		JMenuItem mnuRemoveAllJoints = new JMenuItem(Messages.getString("menu.context.jointFolder.removeAll"));
 		
@@ -374,6 +383,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 		mnuAddRopeJoint.setIcon(Icons.ADD_ROPE_JOINT);
 		mnuAddWeldJoint.setIcon(Icons.ADD_WELD_JOINT);
 		mnuAddWheelJoint.setIcon(Icons.ADD_WHEEL_JOINT);
+		mnuAddMotorJoint.setIcon(Icons.ADD_MOTOR_JOINT);
 		mnuRemoveAllJoints.setIcon(Icons.REMOVE);
 		
 		mnuAddAngleJoint.setActionCommand("addAngleJoint");
@@ -386,6 +396,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 		mnuAddWeldJoint.setActionCommand("addWeldJoint");
 		mnuAddWheelJoint.setActionCommand("addWheelJoint");
 		mnuAddMouseJoint.setActionCommand("addMouseJoint");
+		mnuAddMotorJoint.setActionCommand("addMotorJoint");
 		mnuRemoveAllJoints.setActionCommand("removeAllJoints");
 		
 		mnuAddAngleJoint.addActionListener(this);
@@ -398,6 +409,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 		mnuAddWeldJoint.addActionListener(this);
 		mnuAddWheelJoint.addActionListener(this);
 		mnuAddMouseJoint.addActionListener(this);
+		mnuAddMotorJoint.addActionListener(this);
 		mnuRemoveAllJoints.addActionListener(this);
 		
 		this.popJointFolder.add(mnuAddDistanceJoint);
@@ -411,6 +423,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 		this.popJointFolder.addSeparator();
 		this.popJointFolder.add(mnuAddAngleJoint);
 		this.popJointFolder.add(mnuAddFrictionJoint);
+		this.popJointFolder.add(mnuAddMotorJoint);
 		this.popJointFolder.addSeparator();
 		this.popJointFolder.add(mnuRemoveAllJoints);
 		
@@ -731,6 +744,9 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 					} else if (joint instanceof FrictionJoint) {
 						((JMenuItem)this.popJoint.getComponent(0)).setIcon(Icons.EDIT_FRICTION_JOINT);
 						((JMenuItem)this.popJoint.getComponent(1)).setIcon(Icons.REMOVE_FRICTION_JOINT);
+					} else if (joint instanceof MotorJoint) {
+						((JMenuItem)this.popJoint.getComponent(0)).setIcon(Icons.EDIT_MOTOR_JOINT);
+						((JMenuItem)this.popJoint.getComponent(1)).setIcon(Icons.REMOVE_MOTOR_JOINT);
 					} else if (joint instanceof MouseJoint) {
 						((JMenuItem)this.popJoint.getComponent(0)).setIcon(Icons.EDIT_MOUSE_JOINT);
 						((JMenuItem)this.popJoint.getComponent(1)).setIcon(Icons.REMOVE_MOUSE_JOINT);
@@ -783,6 +799,8 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 			this.clearAllAction();
 		} else if ("editWorld".equals(command)) {
 			this.editWorldAction();
+		} else if ("shiftWorld".equals(command)) {
+			this.shiftWorldAction();
 		} else if ("set-bounds".equals(command)) {
 			this.setBoundsAction();
 		} else if ("unset-bounds".equals(command)) {
@@ -831,6 +849,8 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 			this.addJointAction(WeldJoint.class);
 		} else if ("addWheelJoint".equals(command)) {
 			this.addJointAction(WheelJoint.class);
+		} else if ("addMotorJoint".equals(command)) {
+			this.addJointAction(MotorJoint.class);
 		} else if ("addMouseJoint".equals(command)) {
 			this.addJointAction(MouseJoint.class);
 		} else if ("editJoint".equals(command)) {
@@ -952,6 +972,18 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 		}
 		
 		this.model.nodeChanged(this.root);
+	}
+	
+	/**
+	 * Shows a shift world dialog.
+	 */
+	private void shiftWorldAction() {
+		Vector2 shift = ShiftWorldDialog.show(ControlUtilities.getParentWindow(this));
+		if (shift != null) {
+			synchronized (Simulation.LOCK) {
+				this.simulation.getWorld().shiftCoordinates(shift);
+			}
+		}
 	}
 	
 	/**
@@ -1767,23 +1799,29 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 			
 			if (data instanceof Body) {
 				this.setIcon(Icons.BODY);
+				this.setDisabledIcon(Icons.DISABLED_BODY);
 				this.setText(((SandboxBody)data).getName());
 			} else if (data instanceof Fixture) {
 				Fixture fixture = (Fixture)data;
 				Shape shape = fixture.getShape();
 				if (shape instanceof Rectangle) {
 					this.setIcon(Icons.RECTANGLE);
+					this.setDisabledIcon(Icons.DISABLED_RECTANGLE);
 				} else if (shape instanceof Polygon) {
 					this.setIcon(Icons.POLYGON);
+					this.setDisabledIcon(Icons.DISABLED_POLYGON);
 				} else if (shape instanceof Circle) {
 					this.setIcon(Icons.CIRCLE);
+					this.setDisabledIcon(Icons.DISABLED_CIRCLE);
 				} else if (shape instanceof Segment) {
 					this.setIcon(Icons.SEGMENT);
+					this.setDisabledIcon(Icons.DISABLED_SEGMENT);
 				}
 				this.setText((String)fixture.getUserData());
 			} else if (data instanceof World) {
 				World world = (World)data;
 				this.setIcon(Icons.WORLD);
+				this.setDisabledIcon(Icons.DISABLED_WORLD);
 				this.setText(world.getUserData() + " [" + world.getBodyCount() + ", " + world.getJointCount() + "]");
 			} else if (data instanceof Joint) {
 				// set the text
@@ -1791,27 +1829,41 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 				// set the icon
 				if (data instanceof AngleJoint) {
 					this.setIcon(Icons.ANGLE_JOINT);
+					this.setDisabledIcon(Icons.DISABLED_ANGLE_JOINT);
 				} else if (data instanceof DistanceJoint) {
 					this.setIcon(Icons.DISTANCE_JOINT);
+					this.setDisabledIcon(Icons.DISABLED_DISTANCE_JOINT);
 				} else if (data instanceof FrictionJoint) {
 					this.setIcon(Icons.FRICTION_JOINT);
+					this.setDisabledIcon(Icons.DISABLED_FRICTION_JOINT);
+				} else if (data instanceof MotorJoint) {
+					this.setIcon(Icons.MOTOR_JOINT);
+					this.setDisabledIcon(Icons.DISABLED_MOTOR_JOINT);
 				} else if (data instanceof MouseJoint) {
 					this.setIcon(Icons.MOUSE_JOINT);
+					this.setDisabledIcon(Icons.DISABLED_MOUSE_JOINT);
 				} else if (data instanceof PrismaticJoint) {
 					this.setIcon(Icons.PRISMATIC_JOINT);
+					this.setDisabledIcon(Icons.DISABLED_PRISMATIC_JOINT);
 				} else if (data instanceof PulleyJoint) {
 					this.setIcon(Icons.PULLEY_JOINT);
+					this.setDisabledIcon(Icons.DISABLED_PULLEY_JOINT);
 				} else if (data instanceof RevoluteJoint) {
 					this.setIcon(Icons.REVOLUTE_JOINT);
+					this.setDisabledIcon(Icons.DISABLED_REVOLUTE_JOINT);
 				} else if (data instanceof RopeJoint) {
 					this.setIcon(Icons.ROPE_JOINT);
+					this.setDisabledIcon(Icons.DISABLED_ROPE_JOINT);
 				} else if (data instanceof WeldJoint) {
 					this.setIcon(Icons.WELD_JOINT);
+					this.setDisabledIcon(Icons.DISABLED_WELD_JOINT);
 				} else if (data instanceof WheelJoint) {
 					this.setIcon(Icons.WHEEL_JOINT);
+					this.setDisabledIcon(Icons.DISABLED_WHEEL_JOINT);
 				}
 			} else if (data instanceof Bounds) {
 				this.setIcon(Icons.BOUNDS);
+				this.setDisabledIcon(Icons.DISABLED_BOUNDS);
 				if (data instanceof NullBounds) {
 					this.setText(Messages.getString("panel.tree.noBounds"));
 				} else if (data instanceof RectangularBounds) {
@@ -1823,13 +1875,16 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 				}
 			} else if (data instanceof Ray) {
 				this.setIcon(Icons.RAY);
+				this.setDisabledIcon(Icons.DISABLED_RAY);
 				this.setText(((SandboxRay)data).getName());
 			} else {
 				// just show folder icon
 				if (!expanded) {
 					this.setIcon(Icons.FOLDER_CLOSED);
+					this.setDisabledIcon(Icons.DISABLED_FOLDER_CLOSED);
 				} else {
 					this.setIcon(Icons.FOLDER_OPEN);
+					this.setDisabledIcon(Icons.DISABLED_FOLDER_OPEN);
 				}
 			}
 			

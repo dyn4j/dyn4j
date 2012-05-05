@@ -551,7 +551,8 @@ public class TestBed extends GLCanvas implements GLEventListener {
 				gl.glValidateProgram(this.blurShaderProgramId);
 				
 				// verify the shader program can be used
-				if (ShaderUtil.isProgramValid(gl, this.blurShaderProgramId, System.out)
+				if (ShaderUtil.isProgramLinkStatusValid(gl, this.blurShaderProgramId, System.out)
+				 && ShaderUtil.isProgramExecStatusValid(gl, this.blurShaderProgramId, System.out)
 				 && ShaderUtil.isShaderStatusValid(gl, this.blurVertexShaderId, GL2.GL_COMPILE_STATUS, System.out)
 				 && ShaderUtil.isShaderStatusValid(gl, this.blurFragmentShaderId, GL2.GL_COMPILE_STATUS, System.out)) {
 					// we are good to use the shader

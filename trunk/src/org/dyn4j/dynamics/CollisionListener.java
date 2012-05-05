@@ -88,11 +88,11 @@ public interface CollisionListener extends Listener {
 	 * {@link Body} objects can have many {@link Convex} {@link Shape}s that make up their geometry.  Because
 	 * of this, this method may be called multiple times.
 	 * <p>
-	 * Modification of the friction, restitution, and sensor flags is allowed.
+	 * Modification of the friction, restitution, and sensor fields is allowed.
 	 * <p>
 	 * This method is intended to be used to override the computed friction and restitution values or the sensor flag.
 	 * <p>
-	 * You can also set the tangent velocity to achieve conveyor belt effect.
+	 * You can also set the tangent velocity to achieve a conveyor belt effect.
 	 * @param contactConstraint the contact constraint
 	 * @return boolean true if processing should continue for this collision
 	 * @since 3.0.2

@@ -871,5 +871,9 @@ public class WorldTest {
 		// verify both were called
 		TestCase.assertEquals(1, sls.get(0).steps);
 		TestCase.assertEquals(1, sls.get(1).steps);
+		
+		w.removeListeners();
+		List<Listener> ls = w.getListeners(Listener.class);
+		TestCase.assertEquals(0, ls.size());
 	}
 }

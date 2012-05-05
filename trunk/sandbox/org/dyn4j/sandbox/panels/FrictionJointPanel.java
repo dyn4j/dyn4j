@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -49,7 +49,7 @@ import org.dyn4j.sandbox.utilities.ControlUtilities;
 /**
  * Panel used to create or edit an friction joint.
  * @author William Bittle
- * @version 1.0.1
+ * @version 1.0.2
  * @since 1.0.0
  */
 public class FrictionJointPanel extends JointPanel implements InputPanel {
@@ -231,7 +231,7 @@ public class FrictionJointPanel extends JointPanel implements InputPanel {
 		// setup the maximums section
 		
 		JPanel pnlMaximums = new JPanel();
-		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Messages.getString("panel.joint.friction.section.maximums"));
+		border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Messages.getString("panel.joint.section.maximums"));
 		border.setTitlePosition(TitledBorder.TOP);
 		pnlMaximums.setBorder(border);
 		
@@ -351,10 +351,10 @@ public class FrictionJointPanel extends JointPanel implements InputPanel {
 		}
 		// check the maximia
 		if (ControlUtilities.getDoubleValue(this.txtMaxForce) < 0.0) {
-			JOptionPane.showMessageDialog(owner, Messages.getString("panel.joint.friction.lessThanZeroMaximumForce"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.joint.lessThanZeroMaximumForce"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 		if (ControlUtilities.getDoubleValue(this.txtMaxTorque) < 0.0) {
-			JOptionPane.showMessageDialog(owner, Messages.getString("panel.joint.friction.lessThanZeroMaximumTorque"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(owner, Messages.getString("panel.joint.lessThanZeroMaximumTorque"), Messages.getString("panel.invalid.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

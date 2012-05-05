@@ -442,7 +442,8 @@ public class BodyTest {
 		b.addFixture(Geometry.createCircle(1.0));
 		
 		b.apply(new Vector2(0.0, -2.0), new Vector2(1.0, -0.3));
-		b.accumulate();
+		// just use the default elapsed time
+		b.accumulate(1.0 / 60.0);
 		
 		TestCase.assertFalse(b.force.isZero());
 		TestCase.assertFalse(0.0 == b.torque);
@@ -1047,5 +1048,61 @@ public class BodyTest {
 		Vector2 tx = b.getTransform().getTranslation();
 		TestCase.assertEquals(-2.0, tx.x, 1.0e-3);
 		TestCase.assertEquals(1.0, tx.y, 1.0e-3);
+	}
+	
+	/**
+	 * Tests bodies joined by multiple joints ensuring that the
+	 * getJoinedBodies method only returns one instance of the joined
+	 * body.
+	 */
+	@Test
+	public void getJoinedBodiesMulti() {
+		World w = new World();
+		
+		Body b1 = new Body();
+		Body b2 = new Body();
+		
+		w.add(b1);
+		w.add(b2);
+		
+		Joint j1 = new AngleJoint(b1, b2);
+		Joint j2 = new AngleJoint(b1, b2);
+		
+		w.add(j1);
+		w.add(j2);
+		
+		List<Body> jbs = b1.getJoinedBodies();
+		TestCase.assertEquals(1, jbs.size());
+	}
+	
+	/**
+	 * Tests bodies in contact with multiple fixtures ensuring that the
+	 * getInContactBodies method only returns one instance of the in contact
+	 * body.
+	 */
+	@Test
+	public void getInContactBodiesMulti() {
+		World w = new World();
+		
+		Body b1 = new Body();
+		Body b2 = new Body();
+		
+		b1.addFixture(Geometry.createRectangle(15.0, 1.0));
+		b1.setMass();
+		
+		b2.addFixture(Geometry.createSquare(1.0));
+		Convex c = Geometry.createSquare(1.0);
+		c.translate(-0.5, 0.0);
+		b2.addFixture(c);
+		b2.setMass();
+		b2.translate(0.0, 0.75);
+		
+		w.add(b1);
+		w.add(b2);
+		
+		w.step(1);
+		
+		List<Body> cbs = b1.getInContactBodies(false);
+		TestCase.assertEquals(1, cbs.size());
 	}
 }

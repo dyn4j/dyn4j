@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -37,6 +37,7 @@ import org.dyn4j.dynamics.joint.AngleJoint;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.FrictionJoint;
 import org.dyn4j.dynamics.joint.Joint;
+import org.dyn4j.dynamics.joint.MotorJoint;
 import org.dyn4j.dynamics.joint.MouseJoint;
 import org.dyn4j.dynamics.joint.PrismaticJoint;
 import org.dyn4j.dynamics.joint.PulleyJoint;
@@ -59,7 +60,7 @@ import org.dyn4j.sandbox.resources.Messages;
 /**
  * Utility class used to perform common rendering operations.
  * @author William Bittle
- * @version 1.0.1
+ * @version 1.0.2
  * @since 1.0.0
  */
 public final class RenderUtilities {
@@ -855,6 +856,8 @@ public final class RenderUtilities {
 			RenderUtilities.drawDistanceJoint(gl, (DistanceJoint)joint);
 		} else if (joint instanceof FrictionJoint) {
 			// no rendering available
+		} else if (joint instanceof MotorJoint) {
+			RenderUtilities.drawMotorJoint(gl, (MotorJoint)joint);
 		} else if (joint instanceof MouseJoint) {
 			RenderUtilities.drawMouseJoint(gl, (MouseJoint)joint, invdt);
 		} else if (joint instanceof PrismaticJoint) {
@@ -966,6 +969,19 @@ public final class RenderUtilities {
 		RenderUtilities.fillCircleFromCenter(gl, 0.025, anchor.x, anchor.y);
 		gl.glColor4f(0.3f, 0.3f, 0.3f, 1.0f);
 		RenderUtilities.drawCircleFromCenter(gl, 0.025, anchor.x, anchor.y, false, false);
+	}
+	
+	/**
+	 * Draws the given MotorJoint.
+	 * @param gl the OpenGL graphics context
+	 * @param joint the joint
+	 * @since 3.1.0
+	 */
+	public static final void drawMotorJoint(GL2 gl, MotorJoint joint) {
+		// set the color
+		gl.glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+		Vector2 target = joint.getBody1().getWorldVector(joint.getLinearTarget());
+		RenderUtilities.fillRectangleFromCenter(gl, target.x, target.y, 0.1, 0.1);
 	}
 	
 	/**

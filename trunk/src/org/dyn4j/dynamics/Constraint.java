@@ -34,7 +34,7 @@ import org.dyn4j.resources.Messages;
  * @since 1.0.0
  */
 public abstract class Constraint {
-	/** The world that contains this joint */
+	/** The world that contains this constraint */
 	protected World world;
 	
 	/** The first {@link Body} */

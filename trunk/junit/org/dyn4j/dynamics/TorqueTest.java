@@ -28,6 +28,7 @@ import junit.framework.TestCase;
 
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Torque;
+import org.dyn4j.geometry.Geometry;
 import org.junit.Test;
 
 /**
@@ -95,5 +96,39 @@ public class TorqueTest {
 		t.apply(b);
 		
 		TestCase.assertEquals(-0.2, b.torque);
+	}
+
+	/**
+	 * Tests the apply method where the torque is retained for two steps.
+	 */
+	@Test
+	public void applyTimed() {
+		World w = new World();
+		Body b = new Body();
+		b.addFixture(Geometry.createCircle(1.0));
+		b.setMass();
+		
+		Torque t = new Torque() {
+			private double time = 0;
+			public boolean isComplete(double elapsedTime) {
+				time += elapsedTime;
+				if (time >= 2.0 / 60.0) {
+					return true;
+				}
+				return false;
+			}
+		};
+		
+		b.apply(t);
+		w.add(b);
+		
+		w.step(1);
+		
+		// make sure the torque is still there
+		TestCase.assertEquals(1, b.torques.size());
+		
+		w.step(1);
+		
+		TestCase.assertEquals(0, b.torques.size());
 	}
 }

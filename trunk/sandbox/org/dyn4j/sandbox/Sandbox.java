@@ -119,6 +119,7 @@ import org.dyn4j.sandbox.persist.XmlFormatter;
 import org.dyn4j.sandbox.persist.XmlGenerator;
 import org.dyn4j.sandbox.persist.XmlReader;
 import org.dyn4j.sandbox.resources.Messages;
+import org.dyn4j.sandbox.tests.CompiledSimulation;
 import org.dyn4j.sandbox.utilities.Fps;
 import org.dyn4j.sandbox.utilities.RenderUtilities;
 import org.xml.sax.SAXException;
@@ -212,6 +213,18 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	/** The file menu */
 	private JMenu mnuFile;
 	
+	/** The File_New menu option */
+	private JMenuItem mnuNew;
+	
+	/** The File_Open menu option */
+	private JMenuItem mnuOpen;
+	
+	/** The File_Save As... menu option */
+	private JMenuItem mnuSaveAs;
+	
+	/** The File_Export menu option */
+	private JMenu mnuExport;
+	
 	/** The snapshot menu */
 	private JMenu mnuSnapshot;
 	
@@ -253,6 +266,9 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	
 	/** The stop button for the simulation */
 	private JButton btnStop;
+	
+	/** The reset button (only for compiled simulations) */
+	private JButton btnReset;
 	
 	/** The settings button for the simulation */
 	private JButton btnSettings;
@@ -413,22 +429,22 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		// file menu
 		this.mnuFile = new JMenu(Messages.getString("menu.file"));
 		
-		JMenuItem mnuNew = new JMenuItem(Messages.getString("menu.file.new"));
-		mnuNew.setIcon(Icons.NEW_SIMULATION);
-		mnuNew.setActionCommand("new");
-		mnuNew.addActionListener(this);
+		this.mnuNew = new JMenuItem(Messages.getString("menu.file.new"));
+		this.mnuNew.setIcon(Icons.NEW_SIMULATION);
+		this.mnuNew.setActionCommand("new");
+		this.mnuNew.addActionListener(this);
 		
-		JMenuItem mnuSave = new JMenuItem(Messages.getString("menu.file.save"));
-		mnuSave.setIcon(Icons.SAVE);
-		mnuSave.setActionCommand("save");
-		mnuSave.addActionListener(this);
+		this.mnuSaveAs = new JMenuItem(Messages.getString("menu.file.save"));
+		this.mnuSaveAs.setIcon(Icons.SAVE);
+		this.mnuSaveAs.setActionCommand("save");
+		this.mnuSaveAs.addActionListener(this);
 		
-		JMenuItem mnuOpen = new JMenuItem(Messages.getString("menu.file.open"));
-		mnuOpen.setIcon(Icons.OPEN);
-		mnuOpen.setActionCommand("open");
-		mnuOpen.addActionListener(this);
+		this.mnuOpen = new JMenuItem(Messages.getString("menu.file.open"));
+		this.mnuOpen.setIcon(Icons.OPEN);
+		this.mnuOpen.setActionCommand("open");
+		this.mnuOpen.addActionListener(this);
 		
-		JMenu mnuExport = new JMenu(Messages.getString("menu.file.export"));
+		this.mnuExport = new JMenu(Messages.getString("menu.file.export"));
 		
 		JMenuItem mnuExportJava = new JMenuItem(Messages.getString("menu.file.export.java"));
 		mnuExportJava.setIcon(Icons.EXPORT_JAVA);
@@ -440,11 +456,11 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		mnuExit.setActionCommand("exit");
 		mnuExit.addActionListener(this);
 		
-		this.mnuFile.add(mnuNew);
-		this.mnuFile.add(mnuOpen);
+		this.mnuFile.add(this.mnuNew);
+		this.mnuFile.add(this.mnuOpen);
 		this.mnuFile.addSeparator();
-		this.mnuFile.add(mnuSave);
-		this.mnuFile.add(mnuExport);
+		this.mnuFile.add(this.mnuSaveAs);
+		this.mnuFile.add(this.mnuExport);
 		this.mnuFile.addSeparator();
 		this.mnuFile.add(mnuExit);
 		
@@ -522,12 +538,19 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		this.btnStop.setActionCommand("stop");
 		this.btnStop.setToolTipText(Messages.getString("toolbar.simulation.stop"));
 		
+		this.btnReset = new JButton(Icons.RESET);
+		this.btnReset.addActionListener(this);
+		this.btnReset.setActionCommand("reset");
+		this.btnReset.setToolTipText(Messages.getString("toolbar.simulation.reset"));
+		
 		this.btnStart.setEnabled(true);
 		this.btnStop.setEnabled(false);
+		this.btnReset.setEnabled(false);
 		
 		barSimulation.add(this.btnStart);
 		barSimulation.add(this.btnStep);
 		barSimulation.add(this.btnStop);
+		barSimulation.add(this.btnReset);
 		
 		this.btnSettings = new JButton(Icons.SETTINGS);
 		this.btnSettings.addActionListener(this);
@@ -768,6 +791,8 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		pnlLeft.add(this.pnlSimulation);
 		pnlLeft.add(tabs);
 		
+		setCompiledSimulation(false);
+		
 		// add a split pane
 		JSplitPane pneSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, pnlLeft, pnlTest);
 		
@@ -893,6 +918,8 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 					this.pnlSimulation.setSimulation(this.simulation);
 					// update the contact panel
 					this.pnlContacts.setContactCounter(this.simulation.getContactCounter());
+					// disable/enable stuff because of the compiled test
+					this.setCompiledSimulation(false);
 				}
 				// set the window title
 				this.setTitle(this.getWindowTitle());
@@ -941,14 +968,23 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				// stop all actions
 				this.endAllActions();
 				// take a snapshot of the current simulation
-				this.takeSnapshot(true);
-				// disable the simulation editor
-				this.pnlSimulation.setEnabled(false);
+				// if its not a compiled simulation
+				synchronized (Simulation.LOCK) {
+					if (!(this.simulation instanceof CompiledSimulation)) {
+						this.takeSnapshot(true);
+						// disable the simulation editor
+						this.pnlSimulation.setEnabled(false);
+					}
+				}
 				this.btnStart.setEnabled(false);
 				this.btnStep.setEnabled(false);
 				this.btnStop.setEnabled(true);
+				this.btnReset.setEnabled(false);
 				this.btnSettings.setEnabled(false);
-				this.mnuFile.setEnabled(false);
+				this.mnuNew.setEnabled(false);
+				this.mnuOpen.setEnabled(false);
+				this.mnuSaveAs.setEnabled(false);
+				this.mnuExport.setEnabled(false);
 				this.mnuSnapshot.setEnabled(false);
 				this.mnuTests.setEnabled(false);
 				setPaused(false);
@@ -964,16 +1000,39 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				this.endAllActions();
 				// clear the mouse joint
 				this.selectedBodyJoint = null;
-				// enable the world editor
-				this.pnlSimulation.setEnabled(true);
+				
+				// enable the world editor if its not a compiled simulation
+				synchronized (Simulation.LOCK) {
+					if (!(this.simulation instanceof CompiledSimulation)) {
+						// enable the simulation editor
+						this.pnlSimulation.setEnabled(true);
+						// enable the snapshots menu
+						this.mnuSnapshot.setEnabled(true);
+						this.mnuSaveAs.setEnabled(true);
+						this.mnuExport.setEnabled(true);
+					} else {
+						// only re-enable reset if its a compiled simulation
+						this.btnReset.setEnabled(true);
+					}
+				}
 				this.btnStart.setEnabled(true);
 				this.btnStep.setEnabled(true);
 				this.btnStop.setEnabled(false);
 				this.btnSettings.setEnabled(true);
-				this.mnuFile.setEnabled(true);
-				this.mnuSnapshot.setEnabled(true);
+				this.mnuNew.setEnabled(true);
+				this.mnuOpen.setEnabled(true);
 				this.mnuTests.setEnabled(true);
 				setPaused(true);
+			}
+		} else if ("reset".equals(command)) {
+			// reset the compiled simulation
+			synchronized (Simulation.LOCK) {
+				if (this.simulation instanceof CompiledSimulation) {
+					CompiledSimulation simulation = (CompiledSimulation)this.simulation;
+					simulation.reset();
+					// make sure we update the simulation panel
+					this.pnlSimulation.setSimulation(this.simulation);
+				}
 			}
 		} else if ("settings".equals(command)) {
 			// show the settings dialog
@@ -1087,17 +1146,33 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 			this.tglBodyVelocities.setSelected(Preferences.isBodyVelocityEnabled());
 		} else if (command.startsWith("test+")) {
 			// load the test up
-			String name = command.substring(command.lastIndexOf("/") + 1, command.length() - 4);
-			String file = command.replace("test+", "");
-			try {
-				this.openTestAction(file, name);
-				// stop all actions
-				this.endAllActions();
-			} catch (Exception e) {
-				ExceptionDialog.show(this, 
-						Messages.getString("dialog.test.open.error.title"), 
-						Messages.getString("dialog.test.open.error.text"), 
-						e);
+			if (command.endsWith(".xml")) {
+				// load a declarative test
+				String name = command.substring(command.lastIndexOf("/") + 1, command.length() - 4);
+				String file = command.replace("test+", "");
+				try {
+					this.openTestAction(file, name);
+					// stop all actions
+					this.endAllActions();
+				} catch (Exception e) {
+					ExceptionDialog.show(this, 
+							Messages.getString("dialog.test.open.error.title"), 
+							Messages.getString("dialog.test.open.error.text"), 
+							e);
+				}
+			} else {
+				// load a compiled test
+				String className = command.replace("test+", "");
+				try {
+					this.openTestAction(className);
+					// stop all actions
+					this.endAllActions();
+				} catch (Exception e) {
+					ExceptionDialog.show(this, 
+							Messages.getString("dialog.test.open.error.title"), 
+							Messages.getString("dialog.test.open.error.text"), 
+							e);
+				}
 			}
 		} else if (command.startsWith("laf+")) {
 			// make sure they are sure
@@ -1290,10 +1365,33 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	    	// convert from nanoseconds to seconds
 	    	double elapsedTime = (double)diff / NANO_TO_BASE;
 	        // update the world with the elapsed time
-	        this.simulation.getWorld().update(elapsedTime);
+	    	boolean stepped = this.simulation.getWorld().update(elapsedTime);
+	    	// see if its a compiled simulation
+	    	if (this.simulation instanceof CompiledSimulation) {
+	    		// its compiled
+	    		CompiledSimulation cs = (CompiledSimulation)this.simulation;
+	    		cs.update(elapsedTime, stepped);
+	    	}
 		} else if (steps > 0) {
 			// if there are some steps to perform then do so
 			this.simulation.getWorld().step(steps);
+			// see if its a compiled simulation
+	    	if (this.simulation instanceof CompiledSimulation) {
+	    		// its compiled
+	    		CompiledSimulation cs = (CompiledSimulation)this.simulation;
+	    		cs.update(steps * this.simulation.getWorld().getStep().getDeltaTime(), true);
+	    	}
+		}
+		
+		// see if something changed in the simulation to warrant an update to
+		// the simulation JTree panel
+		if (this.simulation instanceof CompiledSimulation) {
+			CompiledSimulation cs = (CompiledSimulation)this.simulation;
+			// we don't want to use isUpdateRequired here since initially (before a step is performed)
+			// the isUpdateRequired method will always return true.
+			if (cs.isChanged()) {
+				this.pnlSimulation.setSimulation(cs);
+			}
 		}
 		
 		// update the fps text box
@@ -1493,6 +1591,13 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				}
 			}
 		}
+		
+		// draw compiled simulation stuff
+    	if (this.simulation instanceof CompiledSimulation) {
+    		// its compiled
+    		CompiledSimulation cs = (CompiledSimulation) this.simulation;
+    		cs.render(gl);
+    	}
 		
 		gl.glPopMatrix();
 		
@@ -2405,11 +2510,13 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 						JOptionPane.YES_NO_CANCEL_OPTION);
 				// check the user's choice
 				if (option == JOptionPane.YES_OPTION) {
-					// read the file into a stream
+					// set the name to the default name for now
 					String name = Simulation.DEFAULT_SIMULATION_NAME;
+					// read the file
+					Simulation simulation = XmlReader.fromXml(file);
 					synchronized (Simulation.LOCK) {
-						// read the file
-						this.simulation = XmlReader.fromXml(file);
+						// assign the simulation
+						this.simulation = simulation;
 						// get the world name
 						name = this.simulation.getWorld().getUserData().toString();
 						// update the simulation tree
@@ -2421,6 +2528,8 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 					this.clearAllSnapshots();
 					// set the window title
 					this.setTitle(this.getWindowTitle() + " - " + name);
+					// disable/enable stuff because of the compiled test
+					this.setCompiledSimulation(false);
 				}
 			} else {
 				JOptionPane.showMessageDialog(this, 
@@ -2466,6 +2575,45 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 			this.clearAllSnapshots();
 			// set the window title
 			this.setTitle(this.getWindowTitle() + " - " + simName);
+			// disable/enable stuff because of the compiled test
+			this.setCompiledSimulation(false);
+		}
+	}
+	
+	/**
+	 * Called when a compiled tests is to be opened.
+	 * @param className the class name of the compiled test
+	 * @throws ClassNotFoundException thrown if the given class is not found
+	 * @throws InstantiationException thrown if the given class could not be instantiated
+	 * @throws IllegalAccessException thrown if the class is private
+	 */
+	private void openTestAction(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+		String name = className.substring(className.lastIndexOf(".") + 1);
+		// make sure they are sure
+		int option = JOptionPane.showConfirmDialog(this, 
+				Messages.getString("dialog.test.open.warning.text"),
+				MessageFormat.format(Messages.getString("dialog.test.open.warning.title"), name), 
+				JOptionPane.YES_NO_CANCEL_OPTION);
+		// check the user's choice
+		if (option == JOptionPane.YES_OPTION) {
+			// attempt to load the class
+			Class<?> clazz = Class.forName(className);
+			// attempt to create an instance of it
+			CompiledSimulation simulation = (CompiledSimulation) clazz.newInstance();
+			synchronized (Simulation.LOCK) {
+				// set the simulation
+				this.simulation = simulation;
+				// update the simulation tree
+				this.pnlSimulation.setSimulation(this.simulation);
+				// update the contact panel
+				this.pnlContacts.setContactCounter(this.simulation.getContactCounter());
+			}
+			// clear the snapshots
+			this.clearAllSnapshots();
+			// set the window title
+			this.setTitle(this.getWindowTitle() + " - " + name);
+			// disable/enable stuff because of the compiled test
+			this.setCompiledSimulation(true);
 		}
 	}
 	
@@ -2652,11 +2800,29 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	}
 	
 	/**
+	 * Used to toggle declarative vs. compiled simulation controls.
+	 * @param flag true if the current simulation is a compiled simulation
+	 */
+	private void setCompiledSimulation(boolean flag) {
+		// if its a compiled simulation, we need to disable
+		// the simulation tree and snapshots
+		this.pnlSimulation.setEnabled(!flag);
+		this.mnuSnapshot.setEnabled(!flag);
+		this.mnuExport.setEnabled(!flag);
+		this.mnuSaveAs.setEnabled(!flag);
+		this.btnReset.setEnabled(flag);
+	}
+	
+	/**
 	 * Creates the test menu items and attaches them to the
 	 * given menu.
 	 * @param menu the menu to attach the menu items
 	 */
 	private void createTestMenuItems(JMenu menu) {
+		JMenu dTests = new JMenu(Messages.getString("menu.tests.declarative"));
+		JMenu cTests = new JMenu(Messages.getString("menu.tests.compiled"));
+		menu.add(dTests);
+		menu.add(cTests);
 		// get the test listing file
 		ResourceBundle bundle = ResourceBundle.getBundle("org.dyn4j.sandbox.tests.list");
 		// read in all the tests
@@ -2665,10 +2831,15 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		Collections.sort(keys);
 		// loop through the keys
 		for (String key : keys) {
+			String value = bundle.getString(key);
 			JMenuItem mnuTest = new JMenuItem(key);
-			mnuTest.setActionCommand("test+" + bundle.getString(key));
+			mnuTest.setActionCommand("test+" + value);
 			mnuTest.addActionListener(this);
-			menu.add(mnuTest);
+			if (value.contains(".xml")) {
+				dTests.add(mnuTest);
+			} else {
+				cTests.add(mnuTest);
+			}
 		}
 	}
 	
@@ -2725,6 +2896,27 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		    }
 		} catch (Exception e) {
 			// completely ignore the error and just use the default look and feel
+		}
+		
+		// the compatible version
+		final int major = 3;
+		final int minor = 1;
+		final int revision = 0;
+		final String vnr = major + "." + minor + "." + revision;
+		
+		// check the version of dyn4j
+		boolean isValidVersion = false;
+		try {
+			if (Version.getMajorNumber() >= major && Version.getMinorNumber() >= minor && Version.getRevisionNumber() >= revision) {
+				isValidVersion = true;
+			}
+		} catch (Throwable t) {
+			// this can happen if the getXXXNumber methods don't exist (which is the case before 3.1.0)
+			throw new VersionException(MessageFormat.format(Messages.getString("dyn4j.version.exception"), Sandbox.VERSION, vnr, Version.getVersion()), t);
+		}
+		// is the version valid?
+		if (!isValidVersion) {
+			throw new VersionException(MessageFormat.format(Messages.getString("dyn4j.version.exception"), Sandbox.VERSION, vnr, Version.getVersion()));
 		}
 		
 		// show the GUI on the EDT

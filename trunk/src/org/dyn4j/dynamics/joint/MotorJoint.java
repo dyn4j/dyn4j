@@ -307,6 +307,11 @@ public class MotorJoint extends Joint {
 	
 	/**
 	 * Returns the desired linear distance along the x and y coordinates from body1's world center.
+	 * <p>
+	 * To get the world linear target:
+	 * <pre>
+	 * joint.getBody1().getWorldVector(joint.getLinearTarget());
+	 * </pre>
 	 * @return {@link Vector2}
 	 */
 	public Vector2 getLinearTarget() {

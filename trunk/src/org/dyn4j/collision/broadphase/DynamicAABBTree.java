@@ -38,7 +38,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Implementation of an axis-aligned bounding box tree.
  * <p>
- * This class uses a self-balancing binary tree to store the AABBs.  The AABBs are sort using the perimeter.
+ * This class uses a self-balancing binary tree to store the AABBs.  The AABBs are sorted using the perimeter.
  * The perimeter hueristic is better than area for 2D because axis aligned segments have zero area.
  * @author William Bittle
  * @version 3.1.0
