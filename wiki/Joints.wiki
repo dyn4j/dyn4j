@@ -78,7 +78,7 @@ This joint can be thought of as a combination of the revolute, prismatic and dis
 The !AngleJoint class represents a joint connecting two bodies limiting their angles.  This is similar to the !RevoluteJoint when limits are enforced.  When the angle limits are equal this joint will force both body's angles to be identical.  Regardless of the limits, the bodies are allowed to translate freely.
   * The angular limits are relative to the initial angle between the two bodies.
 
-Setting the ratio field of the !AngleJoint allows the bodies to rotate at the given ratio of one another.  This creates a gear-like effect.  If limits are used in conjunction with the ratio, the ratio will be ignored at when the joint reaches a limit.
+Setting the ratio field of the !AngleJoint allows the bodies to rotate at the given ratio of one another.  This creates a gear-like effect.  If limits are used in conjunction with the ratio, the ratio will be ignored when the joint reaches a limit.
 
 This joint only requires that the two joined bodies be given, initially defaulting to equal limits.
 
@@ -90,7 +90,7 @@ This joint only requires one world space anchor point which is used as the pivot
 ==Motor Joint==
 The !MotorJoint class represents a joint that uses motors to move a body.  The application sets a target position and rotation (relative to the other body) and the joint attempts to reach that state.  The maximum motor torque and force can be limited.  This joint is better for character movement since it still allows the bodies to interact naturally with the world.
 
-This joint requires the two bodies.  Typically one of the bodies is static.  The linear and angular targets are relative to the first body's center of mass and angle.
+This joint only requires two bodies (the initial linear target is the first body's center of mass).  Typically one of the bodies is static.  The linear and angular targets are relative to the first body's center of mass and angle.
 
 ==Line Joint (Deprecated)==
 The !LineJoint class represents a joint that allows bodies to translate freely along an axis and rotate freely about a pivot point.  This joint is identical to the !PrismaticJoint except allows rotation about the pivot point.  Like the !RevoluteJoint and !PrismaticJoints, this joint allows for motors and limits.  The motor will drive the linear motion along the axis toward the given speed and the limits will limit the linear motion along the axis.
