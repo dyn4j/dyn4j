@@ -225,6 +225,10 @@ The World class contains a number of event listeners used to receive notificatio
 
 There is one exception.  If you listen for the Step events, you can respond to events at this time.
 
+The World class allows multiple instances of each listener type.  This allows developers to better separate their own code for event handling.
+
+  * Many listeners have methods that return booleans that indicate to continue or stop processing or something along those lines.  In the case of multiple listeners, if *any* listener returns a "skip" valued boolean (or the like) the action will be skipped.
+
 ===Out of Bounds Event===
 As described above, when a body goes out of bounds it is set to inactive.
 
