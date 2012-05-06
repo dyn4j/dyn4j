@@ -13,21 +13,20 @@ These can be used as a staring point to integrate dyn4j into your project.
 || Using Java2D || _ExampleGraphics2D_ || Simple, self contained example application using Java2D and dyn4j to create a simple scene. ||
 || Using JOGL || _ExampleJOGL_ || Simple, self contained example application using JOGL and dyn4j to create a simple scene. ||
 
-==!TestBed Examples==
-Examples contained in the !TestBed contained in the test/org.dyn4j.game2d.testbed.test package.
+==Sandbox Examples==
+Examples contained in the Sandbox application located in the /sandbox/org/dyn4j/sandbox/tests folder.
 
-[http://code.google.com/p/dyn4j/source/browse/#svn%2Ftrunk%2Ftestbed%2Forg%2Fdyn4j%2Ftestbed%2Ftest Click here to view the tests]
+[http://code.google.com/p/dyn4j/source/browse/#svn%2Ftrunk%2Fsandbox%2Forg%2Fdyn4j%2Fsandbox%2Ftests Click here to view the tests].  These tests are best run in the application itself (Use the Export->Java feature of the Sandbox to generate Java code for the .xml tests).
 
-These can be used as a feature reference and on how to use dyn4j.
 || *Example* || *Class* || *Description* ||
-|| Extending The Body Class || _Entity_ || This class is used to draw the Body's shape from the shapes added to the body using OpenGL.  Using this same techniques, a game object could be created inheriting from Body. ||
+|| Extending The Body Class || _SandboxBody_ || This class is used to draw the Body's shape from the shapes added to the body using OpenGL.  Using this same techniques, a game object could be created inheriting from Body. ||
 || Performance || _Bucket, Funnel, Parallel, Pyramid, !RaycastPerformance_ || These test are used to stress test the library (lots of bodies and lots of contacts). ||
 || General || _Shapes, Seesaw_ || Classes used to setup the scene/creating objects. ||
-|| !AngleJoint || _Angle_ || This class sets up an angle joint between two bodies one of which is fixed (infinite mass).  The limits are set and the mouse can be used to move the lower body to test the limits. ||
+|| !AngleJoint || _Angle, AngleRatio_ || This class sets up an angle joint between two bodies.  The limits are set and the mouse can be used to move the lower body to test the limits. The later tests the ratio option. ||
 || !RevoluteJoint || _Bridge, Chain, Motor_ || These tests are mainly used to stress test the !RevoluteJoint's position solving.  The Motor class uses a !RevoluteJoint to power a truck like object carry some boxes up a ramp. ||
 || CCD || _Bullet, !FastRotation_ || These tests show what can happen when CCD is disabled. ||
 || Concave Bodies || _Concave, Dyn4j_ || These tests show the use of composing convex shapes to form concave Bodies. ||
-|| Convex Decomposition || _Decompose_ || This test can be used to draw a simple polygon, decompose it, and output generated code for the decomposition.  See the test specific controls for details.  The Dyn4j Bodies were generated in this test (then slightly modified manually). ||
+|| Convex Decomposition || _All_ || A body in the Sandbox can have a decomposed shape added to it.  The Dyn4j Bodies were generated in this test (then slightly modified manually). ||
 || Convex Hull Generation || _Hull_ || This test can be used to draw point sets and generate a convex hull from it.  See the controls for details. ||
 || Collision Filtering || _Filter_ || This class tests the !CategoryFilter.  Take a look at the Javadoc for !CategoryFilter before using. ||
 || Contact Listening || _!ContactCounter, Destructible.Destructor_ || These show how to use the !ContactListener to respond when contact events occur.  The first class simple counts the number of each type of contact and the second performs some logic when a contact has begun. ||
@@ -48,3 +47,5 @@ These can be used as a feature reference and on how to use dyn4j.
 || !WeldJoint || _Weld, Destructible, !DivingBoard_ || Shows the use of the !WeldJoint to bind two Bodies together ||
 || !MouseJoint || _Mouse, All_ || Shows the use of the !MouseJoint attached to a mouse and fixed at a point. ||
 || Tanget Speed || _Conveyor_ || Shows the use of the tangent speed setting on contacts to simulate a conveyor belt effect. ||
+|| !MotorJoint || _Animate_ || Shows an example use of the !MotorJoint class. ||
+|| Coordinate Shifting || _!CoordinateShift, All_ || Shows the use of coordinate shifting for large worlds. ||
