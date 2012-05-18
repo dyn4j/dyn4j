@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE jnlp SYSTEM "http://java.sun.com/dtd/JNLP-1.5.dtd">
-<jnlp spec="1.5+" codebase="http://www.dyn4j.org/Sandbox/latest/" version="1.0.2">
+<jnlp spec="1.5+" codebase="http://www.dyn4j.org/Sandbox/latest/" version="1.0.3">
 	<information>
 		<title>dyn4j Sandbox</title>
 		<vendor>dyn4j</vendor>

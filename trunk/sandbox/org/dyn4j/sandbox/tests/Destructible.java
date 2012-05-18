@@ -44,7 +44,7 @@ import org.dyn4j.sandbox.SandboxBody;
 /**
  * Compiled test for testing destruction of bodies.
  * @author William Bittle
- * @version 1.0.2
+ * @version 1.0.3
  * @since 1.0.2
  */
 public class Destructible extends CompiledSimulation {
@@ -53,7 +53,7 @@ public class Destructible extends CompiledSimulation {
 	 * of a joint when a contact is encountered.  Normally you would just
 	 * extend the {@link ContactListener} interface.
 	 * @author William Bittle
-	 * @version 1.0.2
+	 * @version 1.0.3
 	 * @since 1.0.2
 	 */
 	public class Destructor extends ContactAdapter {
