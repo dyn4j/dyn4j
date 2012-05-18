@@ -78,8 +78,7 @@ public class Destructible extends CompiledSimulation {
 				Body b2 = point.getBody2();
 				
 				// check the bodies involved
-				if ((b1 == floor && (b2 == jb1 || b2 == jb2))
-				 || (b2 == floor && (b1 == jb1 || b1 == jb2))) {
+				if (b2 == jb1 || b2 == jb2 || b1 == jb1 || b1 == jb2) {
 					// remove the joint
 					world.remove(joint);
 					
@@ -95,8 +94,7 @@ public class Destructible extends CompiledSimulation {
 				Body b2 = point.getBody2();
 				
 				// check the bodies involved
-				if ((b1 == floor && b2 == icosigon)
-				 || (b2 == floor && b1 == icosigon)) {
+				if (b2 == icosigon || b1 == icosigon) {
 					// remove the body from the world
 					world.remove(icosigon);
 					
@@ -129,8 +127,7 @@ public class Destructible extends CompiledSimulation {
 						b.addFixture(Geometry.createTriangle(p1, p2, center));
 						b.setMass();
 						// copy over the transform
-						b.translate(tx.getTranslation());
-						b.rotate(tx.getRotation());
+						b.setTransform(tx.copy());
 						// copy over the velocity
 						b.setVelocity(v.copy());
 						b.setUserData("Piece" + (i + 1));
