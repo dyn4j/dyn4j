@@ -1391,6 +1391,23 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 			// the isUpdateRequired method will always return true.
 			if (cs.isChanged()) {
 				this.pnlSimulation.setSimulation(cs);
+				// see if the currently selected body still exists
+				if (this.selectBodyAction.isActive()) {
+					Body b = this.selectBodyAction.getObject();
+					boolean exists = false;
+					int bSize = cs.getWorld().getBodyCount();
+					for (int i = 0; i < bSize; i++) {
+						Body q = cs.getWorld().getBody(i);
+						if (b == q) {
+							exists = true;
+							break;
+						}
+					}
+					if (!exists) {
+						this.selectBodyAction.end();
+						this.selectedBodyJoint = null;
+					}
+				}
 			}
 		}
 		
