@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -44,7 +44,7 @@ import org.junit.Test;
  * All bodies in this test must be infinite mass so that the
  * World class doesn't solve their TOI when a step is performed.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.1
  * @since 1.2.0
  */
 public class ConservativeAdvancementTest {
@@ -76,8 +76,8 @@ public class ConservativeAdvancementTest {
 		
 		this.world = new World();
 		
-		this.world.add(this.b1);
-		this.world.add(this.b2);
+		this.world.addBody(this.b1);
+		this.world.addBody(this.b2);
 	}
 	
 	/**

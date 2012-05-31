@@ -104,7 +104,7 @@ import org.dyn4j.sandbox.utilities.ControlUtilities;
 /**
  * Panel used to display and manage the World object using a JTree interface.
  * @author William Bittle
- * @version 1.0.2
+ * @version 1.0.4
  * @since 1.0.0
  */
 public class SimulationTreePanel extends JPanel implements MouseListener, ActionListener {
@@ -948,7 +948,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 			// remove it all from the world
 			synchronized (Simulation.LOCK) {
 				// remove everything
-				this.simulation.getWorld().removeAll(false);
+				this.simulation.getWorld().removeAllBodiesAndJoints(false);
 				// clear the contact listener
 				this.simulation.getContactCounter().clear();
 			}
@@ -1035,7 +1035,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 		if (body != null) {
 			// add the body to the world
 			synchronized (Simulation.LOCK) {
-				this.simulation.getWorld().add(body);
+				this.simulation.getWorld().addBody(body);
 			}
 			// add the body and the fixtures to the root node
 			DefaultMutableTreeNode bodyNode = new DefaultMutableTreeNode(body);
@@ -1096,7 +1096,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 				if (choice == JOptionPane.YES_OPTION) {
 					// remove the body from the world
 					synchronized (Simulation.LOCK) {
-						this.simulation.getWorld().remove(body);
+						this.simulation.getWorld().removeBody(body);
 					}
 					// remove the node from the tree
 					this.model.removeNodeFromParent(node);
@@ -1357,7 +1357,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 			Joint joint = AddJointDialog.show(ControlUtilities.getParentWindow(this), bodies, clazz);
 			if (joint != null) {
 				// add the joint to the world
-				this.simulation.getWorld().add(joint);
+				this.simulation.getWorld().addJoint(joint);
 				// add the joint to the root node
 				DefaultMutableTreeNode jointNode = new DefaultMutableTreeNode(joint);
 				// insert into the tree
@@ -1417,7 +1417,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 					// remove the joint from the world
 					synchronized (Simulation.LOCK) {
 						// remove the joint
-						this.simulation.getWorld().remove(joint);
+						this.simulation.getWorld().removeJoint(joint);
 					}
 					// remove the node from the tree
 					this.model.removeNodeFromParent(node);

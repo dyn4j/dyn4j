@@ -57,6 +57,7 @@ import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.dynamics.contact.TimeOfImpactSolver;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.JointEdge;
+import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Ray;
 import org.dyn4j.geometry.Transform;
@@ -66,15 +67,19 @@ import org.dyn4j.resources.Messages;
 /**
  * Manages the logic of collision detection, resolution, and reporting.
  * <p>
- * Employs the same {@link Island} solving technique as <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
+ * Interfacing with dyn4j starts with this class.  Create a new instance of this class
+ * and add bodies and joints.  Then call one of the update or step methods in your game
+ * loop to move the physics engine forward in time.
  * <p>
  * Via the {@link #addListener(Listener)} method, a {@link World} instance can have multiple listeners for all the listener types.
  * Some listener types return a boolean to indicate continuing or allowing something, like {@link CollisionListener}.  If, for example,
  * there are multiple {@link CollisionListener}s and <b>any</b> one of them returns false for an event, the collision is skipped.  However,
  * all listeners will still be called no matter if the first returned false.
+ * <p>
+ * Employs the same {@link Island} solving technique as <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class World {
@@ -1037,6 +1042,84 @@ public class World {
 	}
 	
 	/**
+	 * Convenience method to get a list of bodies within the specified Axis-Aligned bounding box.
+	 * <p>
+	 * If any part of a body is contained in the AABB, it is added to the list.
+	 * <p>
+	 * This performs a static collision test of the world using the {@link BroadphaseDetector}.
+	 * @param aabb the {@link AABB}
+	 * @return List&lt;{@link Body}&gt; a list of bodies within the given AABB
+	 * @since 3.1.1
+	 */
+	public List<Body> detect(AABB aabb) {
+		return this.broadphaseDetector.detect(aabb);
+	}
+	
+	/**
+	 * Convenience method to get a list of bodies within the specified convex shape.
+	 * <p>
+	 * If any part of a body is contained in the convex, it is added to the list.
+	 * <p>
+	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
+	 * are colliding.
+	 * @param convex the convex shape in world coordinates
+	 * @return List&lt;{@link Body}&gt; a list of bodies within the given convex shape
+	 * @since 3.1.1
+	 */
+	public List<Body> detect(Convex convex) {
+		return this.detect(convex, Transform.IDENTITY);
+	}
+	
+	/**
+	 * Convenience method to get a list of bodies within the specified convex shape.
+	 * <p>
+	 * If any part of a body is contained in the convex, it is added to the list.
+	 * <p>
+	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
+	 * are colliding.
+	 * @param convex the convex shape in local coordinates
+	 * @param transform the convex shape's world transform
+	 * @return List&lt;{@link Body}&gt; a list of bodies within the given convex shape
+	 * @since 3.1.1
+	 */
+	public List<Body> detect(Convex convex, Transform transform) {
+		// create an aabb for the given convex
+		AABB aabb = convex.createAABB(transform);
+		// test using the broadphase to rule out as many bodies as we can
+		List<Body> bodies = this.broadphaseDetector.detect(aabb);
+		// now perform a more accurate test
+		Iterator<Body> bi = bodies.iterator();
+		while (bi.hasNext()) {
+			Body body = bi.next();
+			// get the body transform
+			Transform bt = body.getTransform();
+			// test all the fixtures
+			int fSize = body.getFixtureCount();
+			boolean collision = false;
+			for (int i = 0; i < fSize; i++) {
+				BodyFixture bf = body.getFixture(i);
+				Convex bc = bf.getShape();
+				// just perform a boolean test since its typically faster
+				if (this.narrowphaseDetector.detect(convex, transform, bc, bt)) {
+					// if we found a fixture on the body that is in collision
+					// with the given convex, we can skip the rest of the fixtures
+					// and continue testing other bodies
+					collision = true;
+					break;
+				}
+			}
+			// if we went through all the fixtures of the
+			// body and we didn't find one that collided with
+			// the given convex, then remove it from the list
+			if (!collision) {
+				bi.remove();
+			}
+		}
+		// return the bodies in collision
+		return bodies;
+	}
+	
+	/**
 	 * Shifts the coordinates of the entire world by the given amount.
 	 * <pre>
 	 * NewPosition = OldPosition + shift
@@ -1083,8 +1166,9 @@ public class World {
 	 * @param body the {@link Body} to add
 	 * @throws NullPointerException if body is null
 	 * @throws IllegalArgumentException if body has already been added to this world or if its a member of another world instance
+	 * @since 3.1.1
 	 */
-	public void add(Body body) {
+	public void addBody(Body body) {
 		// check for null body
 		if (body == null) throw new NullPointerException(Messages.getString("dynamics.world.addNullBody"));
 		// dont allow adding it twice
@@ -1104,8 +1188,9 @@ public class World {
 	 * @param joint the {@link Joint} to add
 	 * @throws NullPointerException if joint is null
 	 * @throws IllegalArgumentException if joint has already been added to this world or if its a member of another world instance
+	 * @since 3.1.1
 	 */
-	public void add(Joint joint) {
+	public void addJoint(Joint joint) {
 		// check for null joint
 		if (joint == null) throw new NullPointerException(Messages.getString("dynamics.world.addNullJoint"));
 		// dont allow adding it twice
@@ -1130,15 +1215,35 @@ public class World {
 	}
 	
 	/**
+	 * Returns true if this world contains the given body.
+	 * @param body the {@link Body} to test for
+	 * @return boolean true if the body is contained in this world
+	 * @since 3.1.1
+	 */
+	public boolean containsBody(Body body) {
+		return this.bodies.contains(body);
+	}
+	
+	/**
+	 * Returns true if this world contains the given joint.
+	 * @param joint the {@link Joint} to test for
+	 * @return boolean true if the joint is contained in this world
+	 * @since 3.1.1
+	 */
+	public boolean containsJoint(Joint joint) {
+		return this.joints.contains(joint);
+	}
+	
+	/**
 	 * Removes the given {@link Body} from the {@link World}.
 	 * <p>
-	 * Use the {@link #remove(Body, boolean)} method to enable implicit
+	 * Use the {@link #removeBody(Body, boolean)} method to enable implicit
 	 * destruction notification.
 	 * @param body the {@link Body} to remove.
 	 * @return boolean true if the body was removed
 	 */
-	public boolean remove(Body body) {
-		return remove(body, false);
+	public boolean removeBody(Body body) {
+		return removeBody(body, false);
 	}
 	
 	/**
@@ -1150,9 +1255,9 @@ public class World {
 	 * @param body the {@link Body} to remove
 	 * @param notify true if implicit destruction should be notified
 	 * @return boolean true if the body was removed
-	 * @since 3.1.0
+	 * @since 3.1.1
 	 */
-	public boolean remove(Body body, boolean notify) {
+	public boolean removeBody(Body body, boolean notify) {
 		List<DestructionListener> listeners = null;
 		if (notify) {
 			listeners = this.getListeners(DestructionListener.class);
@@ -1281,7 +1386,7 @@ public class World {
 	 * @param joint the {@link Joint} to remove
 	 * @return boolean true if the {@link Joint} was removed
 	 */
-	public boolean remove(Joint joint) {
+	public boolean removeJoint(Joint joint) {
 		// check for null joint
 		if (joint == null) return false;
 		// remove the joint from the joint list
@@ -1335,25 +1440,21 @@ public class World {
 	 * Removes all the joints and bodies from the world.
 	 * <p>
 	 * This method does <b>not</b> notify of destroyed objects.
-	 * <p>
-	 * Renamed from clear (3.0.0 and below).
-	 * @see #removeAll(boolean)
-	 * @since 3.0.1
+	 * @see #removeAllBodiesAndJoints(boolean)
+	 * @since 3.1.1
 	 */
-	public void removeAll() {
-		this.removeAll(false);
+	public void removeAllBodiesAndJoints() {
+		this.removeAllBodiesAndJoints(false);
 	}
 	
 	/**
 	 * Removes all the joints and bodies from the world.
 	 * <p>
 	 * This method will remove the joints and contacts from all {@link Body}s.
-	 * <p>
-	 * Renamed from clear (3.0.0 to 1.0.2).
 	 * @param notify true if destruction of joints and contacts should be notified of by the {@link DestructionListener}
-	 * @since 3.0.1
+	 * @since 3.1.1
 	 */
-	public void removeAll(boolean notify) {
+	public void removeAllBodiesAndJoints(boolean notify) {
 		List<DestructionListener> listeners = null;
 		if (notify) {
 			listeners = this.getListeners(DestructionListener.class);
@@ -1453,7 +1554,7 @@ public class World {
 	}
 	
 	/**
-	 * This is a convenience method for the {@link #removeAll()} method since all joints will be removed
+	 * This is a convenience method for the {@link #removeAllBodiesAndJoints()} method since all joints will be removed
 	 * when all bodies are removed.
 	 * <p>
 	 * This method does not notify of the destroyed contacts, joints, etc.
@@ -1461,17 +1562,17 @@ public class World {
 	 * @since 3.0.1
 	 */
 	public void removeAllBodies() {
-		this.removeAll();
+		this.removeAllBodiesAndJoints(false);
 	}
 	
 	/**
-	 * This is a convenience method for the {@link #removeAll(boolean)} method since all joints will be removed
+	 * This is a convenience method for the {@link #removeAllBodiesAndJoints(boolean)} method since all joints will be removed
 	 * when all bodies are removed.
 	 * @param notify true if destruction of joints and contacts should be notified of by the {@link DestructionListener}
 	 * @since 3.0.1
 	 */
 	public void removeAllBodies(boolean notify) {
-		this.removeAll(notify);
+		this.removeAllBodiesAndJoints(notify);
 	}
 	
 	/**
@@ -1899,5 +2000,105 @@ public class World {
 		int bSize = this.bodies.size();
 		int jSize = this.joints.size();
 		return bSize == 0 && jSize == 0;
+	}
+	
+	// deprecated methods
+
+	/**
+	 * Adds a {@link Body} to the {@link World}.
+	 * @param body the {@link Body} to add
+	 * @throws NullPointerException if body is null
+	 * @throws IllegalArgumentException if body has already been added to this world or if its a member of another world instance
+	 * @deprecated replaced with {@link #addBody(Body)} in 3.1.1
+	 */
+	@Deprecated
+	public void add(Body body) {
+		this.addBody(body);
+	}
+
+	/**
+	 * Adds a {@link Joint} to the {@link World}.
+	 * @param joint the {@link Joint} to add
+	 * @throws NullPointerException if joint is null
+	 * @throws IllegalArgumentException if joint has already been added to this world or if its a member of another world instance
+	 * @deprecated replaced with {@link #addJoint(Joint)} in 3.1.1
+	 */
+	@Deprecated
+	public void add(Joint joint) {
+		this.addJoint(joint);
+	}
+
+	/**
+	 * Removes the given {@link Body} from the {@link World}.
+	 * <p>
+	 * Use the {@link #remove(Body, boolean)} method to enable implicit
+	 * destruction notification.
+	 * @param body the {@link Body} to remove.
+	 * @return boolean true if the body was removed
+	 * @deprecated replaced with {@link #removeBody(Body)} in 3.1.1
+	 */
+	@Deprecated
+	public boolean remove(Body body) {
+		return this.removeBody(body);
+	}
+
+	/**
+	 * Removes the given {@link Body} from the {@link World}.
+	 * <p>
+	 * When a body is removed, joints and contacts may be implicitly destroyed.
+	 * Pass true to the notify parameter to be notified the destruction of these objects
+	 * via the {@link DestructionListener}s.
+	 * @param body the {@link Body} to remove
+	 * @param notify true if implicit destruction should be notified
+	 * @return boolean true if the body was removed
+	 * @since 3.1.0
+	 * @deprecated replaced with {@link #removeBody(Body, boolean)} in 3.1.1
+	 */
+	@Deprecated
+	public boolean remove(Body body, boolean notify) {
+		return this.removeBody(body, notify);
+	}
+
+	/**
+	 * Removes the given {@link Joint} from the {@link World}.
+	 * <p>
+	 * When joints are removed no other objects are implicitly destroyed.
+	 * @param joint the {@link Joint} to remove
+	 * @return boolean true if the {@link Joint} was removed
+	 * @deprecated replaced with {@link #removeJoint(Joint)} in 3.1.1
+	 */
+	@Deprecated
+	public boolean remove(Joint joint) {
+		return this.removeJoint(joint);
+	}
+
+	/**
+	 * Removes all the joints and bodies from the world.
+	 * <p>
+	 * This method does <b>not</b> notify of destroyed objects.
+	 * <p>
+	 * Renamed from clear (3.0.0 and below).
+	 * @see #removeAll(boolean)
+	 * @since 3.0.1
+	 * @deprecated replaced with {@link #removeAllBodiesAndJoints()} in 3.1.1
+	 */
+	@Deprecated
+	public void removeAll() {
+		this.removeAllBodiesAndJoints(false);
+	}
+
+	/**
+	 * Removes all the joints and bodies from the world.
+	 * <p>
+	 * This method will remove the joints and contacts from all {@link Body}s.
+	 * <p>
+	 * Renamed from clear (3.0.0 to 1.0.2).
+	 * @param notify true if destruction of joints and contacts should be notified of by the {@link DestructionListener}
+	 * @since 3.0.1
+	 * @deprecated replaced with {@link #removeAllBodiesAndJoints(boolean)} in 3.1.1
+	 */
+	@Deprecated
+	public void removeAll(boolean notify) {
+		this.removeAllBodiesAndJoints(notify);
 	}
 }

@@ -55,7 +55,7 @@ import org.junit.Test;
 /**
  * Class to test the {@link Body} class.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.1
  * @since 1.0.2
  */
 public class BodyTest {
@@ -1062,14 +1062,14 @@ public class BodyTest {
 		Body b1 = new Body();
 		Body b2 = new Body();
 		
-		w.add(b1);
-		w.add(b2);
+		w.addBody(b1);
+		w.addBody(b2);
 		
 		Joint j1 = new AngleJoint(b1, b2);
 		Joint j2 = new AngleJoint(b1, b2);
 		
-		w.add(j1);
-		w.add(j2);
+		w.addJoint(j1);
+		w.addJoint(j2);
 		
 		List<Body> jbs = b1.getJoinedBodies();
 		TestCase.assertEquals(1, jbs.size());
@@ -1097,8 +1097,8 @@ public class BodyTest {
 		b2.setMass();
 		b2.translate(0.0, 0.75);
 		
-		w.add(b1);
-		w.add(b2);
+		w.addBody(b1);
+		w.addBody(b2);
 		
 		w.step(1);
 		

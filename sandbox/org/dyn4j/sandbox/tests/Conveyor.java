@@ -35,7 +35,7 @@ import org.dyn4j.sandbox.SandboxBody;
 /**
  * Compiled test for the contact tangent speed feature.
  * @author William Bittle
- * @version 1.0.2
+ * @version 1.0.4
  * @since 1.0.2
  */
 public class Conveyor extends CompiledSimulation {
@@ -88,8 +88,8 @@ public class Conveyor extends CompiledSimulation {
 		
 		this.listener = new CustomCollisionListener();
 		
-		this.world.add(this.floor);
-		this.world.add(box);
+		this.world.addBody(this.floor);
+		this.world.addBody(box);
 		this.world.addListener(this.listener);
 	}
 	
@@ -111,7 +111,7 @@ public class Conveyor extends CompiledSimulation {
 	@Override
 	public void reset() {
 		// remove everything from the world
-		this.world.removeAll();
+		this.world.removeAllBodiesAndJoints();
 		// remove all the listeners
 		this.world.removeListener(this.listener);
 		// add it all back

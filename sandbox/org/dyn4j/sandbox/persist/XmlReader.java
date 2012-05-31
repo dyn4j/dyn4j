@@ -88,7 +88,7 @@ import org.xml.sax.helpers.DefaultHandler;
 /**
  * Class used to read in a saved simulation file.
  * @author William Bittle
- * @version 1.0.2
+ * @version 1.0.4
  * @since 1.0.0
  */
 public class XmlReader extends DefaultHandler {
@@ -426,10 +426,10 @@ public class XmlReader extends DefaultHandler {
 		}
 		
 		for (SandboxBody body : reader.bodies) {
-			world.add(body);
+			world.addBody(body);
 		}
 		for (Joint joint : reader.joints) {
-			world.add(joint);
+			world.addJoint(joint);
 		}
 		
 		// loadup the rays list

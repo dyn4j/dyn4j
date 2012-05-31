@@ -132,7 +132,7 @@ import com.jogamp.opengl.util.awt.TextRenderer;
 /**
  * Main class for the Sandbox application.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.0.4
  * @since 1.0.0
  */
 public class Sandbox extends JFrame implements GLEventListener, ActionListener, WindowListener {
@@ -143,7 +143,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	private static final double NANO_TO_BASE = 1.0e9;
 	
 	/** The sandbox version */
-	public static final String VERSION = "1.0.3";
+	public static final String VERSION = "1.0.4";
 
 	/** The origin label (pulled into a local variable for fast rendering) */
 	private static final String ORIGIN_LABEL = Messages.getString("canvas.originLabel");
@@ -2040,7 +2040,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 						}
 						this.selectedBodyJoint = new MouseJoint(body, pw, 4.0, 0.7, 1000.0 * mass);
 						synchronized (Simulation.LOCK) {
-							world.add(this.selectedBodyJoint);
+							world.addJoint(this.selectedBodyJoint);
 						}
 					} else {
 						this.selectedBodyJoint.setTarget(pw);
@@ -2215,7 +2215,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				this.moveBodyAction.end();
 				// end the move body joint
 				if (this.selectedBodyJoint != null) {
-					world.remove(this.selectedBodyJoint);
+					world.removeJoint(this.selectedBodyJoint);
 					this.selectedBodyJoint = null;
 				}
 			}
@@ -2918,7 +2918,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		// the compatible version
 		final int major = 3;
 		final int minor = 1;
-		final int revision = 0;
+		final int revision = 1;
 		final String vnr = major + "." + minor + "." + revision;
 		
 		// check the version of dyn4j

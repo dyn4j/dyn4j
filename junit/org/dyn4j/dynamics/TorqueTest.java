@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -34,7 +34,7 @@ import org.junit.Test;
 /**
  * Class used to test the {@link Torque} class.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.1.1
  * @since 1.0.2
  */
 public class TorqueTest {
@@ -120,7 +120,7 @@ public class TorqueTest {
 		};
 		
 		b.apply(t);
-		w.add(b);
+		w.addBody(b);
 		
 		w.step(1);
 		
