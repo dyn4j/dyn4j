@@ -44,7 +44,7 @@ import org.dyn4j.sandbox.SandboxBody;
 /**
  * Compiled test for testing destruction of bodies.
  * @author William Bittle
- * @version 1.0.3
+ * @version 1.0.4
  * @since 1.0.2
  */
 public class Destructible extends CompiledSimulation {
@@ -80,7 +80,7 @@ public class Destructible extends CompiledSimulation {
 				// check the bodies involved
 				if (b2 == jb1 || b2 == jb2 || b1 == jb1 || b1 == jb2) {
 					// remove the joint
-					world.remove(joint);
+					world.removeJoint(joint);
 					
 					this.removed = true;
 
@@ -96,7 +96,7 @@ public class Destructible extends CompiledSimulation {
 				// check the bodies involved
 				if (b2 == icosigon || b1 == icosigon) {
 					// remove the body from the world
-					world.remove(icosigon);
+					world.removeBody(icosigon);
 					
 					// make the test body into triangles
 					
@@ -132,7 +132,7 @@ public class Destructible extends CompiledSimulation {
 						b.setVelocity(v.copy());
 						b.setUserData("Piece" + (i + 1));
 						// add the new body to the world
-						world.add(b);
+						world.addBody(b);
 					}
 					
 					this.broken = true;
@@ -203,11 +203,11 @@ public class Destructible extends CompiledSimulation {
 		
 		this.destructor = new Destructor();
 		
-		this.world.add(this.floor);
-		this.world.add(this.icosigon);
-		this.world.add(top);
-		this.world.add(bot);
-		this.world.add(this.joint);
+		this.world.addBody(this.floor);
+		this.world.addBody(this.icosigon);
+		this.world.addBody(top);
+		this.world.addBody(bot);
+		this.world.addJoint(this.joint);
 		this.world.addListener(this.destructor);
 	}
 	
@@ -229,7 +229,7 @@ public class Destructible extends CompiledSimulation {
 	@Override
 	public void reset() {
 		// remove everything from the world
-		this.world.removeAll();
+		this.world.removeAllBodiesAndJoints();
 		// remove the listener
 		this.world.removeListener(this.destructor);
 		// add it all back

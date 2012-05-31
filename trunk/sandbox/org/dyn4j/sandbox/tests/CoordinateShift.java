@@ -38,7 +38,7 @@ import org.dyn4j.sandbox.SandboxBody;
 /**
  * Compiled test for the shiftCoordinates method.
  * @author William Bittle
- * @version 1.0.2
+ * @version 1.0.4
  * @since 1.0.2
  */
 public class CoordinateShift extends CompiledSimulation {
@@ -60,7 +60,7 @@ public class CoordinateShift extends CompiledSimulation {
 		floor.addFixture(Geometry.createRectangle(30.0, 1.0));
 		floor.setMass(Mass.Type.INFINITE);
 		floor.setUserData("Floor");
-		this.world.add(floor);
+		this.world.addBody(floor);
 		
 		// create a triangle object
 		SandboxBody triangle = new SandboxBody();
@@ -71,7 +71,7 @@ public class CoordinateShift extends CompiledSimulation {
 		triangle.setMass();
 		triangle.translate(-1.0, 2.0);
 		triangle.setUserData("Triangle");
-		this.world.add(triangle);
+		this.world.addBody(triangle);
 		
 		// create a circle
 		SandboxBody circle = new SandboxBody();
@@ -79,7 +79,7 @@ public class CoordinateShift extends CompiledSimulation {
 		circle.setMass();
 		circle.translate(2.0, 2.0);
 		circle.setUserData("Circle");
-		this.world.add(circle);
+		this.world.addBody(circle);
 		
 		// create a line segment
 		SandboxBody segment = new SandboxBody();
@@ -87,7 +87,7 @@ public class CoordinateShift extends CompiledSimulation {
 		segment.setMass();
 		segment.translate(1.0, 6.0);
 		segment.setUserData("Segment");
-		this.world.add(segment);
+		this.world.addBody(segment);
 		
 		// try a rectangle
 		SandboxBody rectangle = new SandboxBody();
@@ -95,7 +95,7 @@ public class CoordinateShift extends CompiledSimulation {
 		rectangle.setMass();
 		rectangle.translate(0.0, 2.0);
 		rectangle.setUserData("Rectangle");
-		this.world.add(rectangle);
+		this.world.addBody(rectangle);
 		
 		// try a polygon with lots of vertices
 		SandboxBody polygon = new SandboxBody();
@@ -103,7 +103,7 @@ public class CoordinateShift extends CompiledSimulation {
 		polygon.setMass();
 		polygon.translate(-2.5, 2.0);
 		polygon.setUserData("Polygon");
-		this.world.add(polygon);
+		this.world.addBody(polygon);
 		
 		// try a compound object (Capsule)
 		BodyFixture c1Fixture = new BodyFixture(Geometry.createCircle(0.5));
@@ -120,7 +120,7 @@ public class CoordinateShift extends CompiledSimulation {
 		capsule.setMass();
 		capsule.translate(0.0, 2.0);
 		capsule.setUserData("Capsule");
-		this.world.add(capsule);
+		this.world.addBody(capsule);
 		
 		// create mouse joint
 		{
@@ -130,14 +130,14 @@ public class CoordinateShift extends CompiledSimulation {
 			box.translate(-4.0, 2.5);
 			box.setUserData("MouseJoint Box");
 			
-			this.world.add(box);
+			this.world.addBody(box);
 			
 			MouseJoint mj = new MouseJoint(box, new Vector2(-4.0, 2.75), 5.0, 0.3, 100);
 			// pin it to a arbitrary point
 			mj.setTarget(new Vector2(-4.0, 4.0));
 			mj.setUserData("MouseJoint");
 			
-			this.world.add(mj);
+			this.world.addJoint(mj);
 		}
 		
 		// create pulley joint
@@ -163,8 +163,8 @@ public class CoordinateShift extends CompiledSimulation {
 			obj2.translate(x, y);
 			obj2.setUserData("PulleyJoint Box2");
 			
-			this.world.add(obj1);
-			this.world.add(obj2);
+			this.world.addBody(obj1);
+			this.world.addBody(obj2);
 			
 			// compute the joint points
 			Vector2 bodyAnchor1 = new Vector2(-x, y + h);
@@ -181,7 +181,7 @@ public class CoordinateShift extends CompiledSimulation {
 			pulleyJoint.setUserData("PulleyJoint");
 			
 			// defaults to collision not allowed
-			this.world.add(pulleyJoint);
+			this.world.addJoint(pulleyJoint);
 		}
 		
 	}
@@ -217,7 +217,7 @@ public class CoordinateShift extends CompiledSimulation {
 	public void reset() {
 		this.time = 0;
 		// remove everything from the world
-		this.world.removeAll();
+		this.world.removeAllBodiesAndJoints();
 		// add it all back
 		this.initialize();
 	}

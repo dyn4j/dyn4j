@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -37,7 +37,7 @@ import org.junit.Test;
 /**
  * Used to test the {@link FrictionJoint} class.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.1.1
  * @since 1.0.2
  */
 public class FrictionJointTest {
@@ -137,7 +137,7 @@ public class FrictionJointTest {
 		g.setMass(Mass.Type.INFINITE);
 		g.setLinearDamping(0.0);
 		g.setAngularDamping(0.0);
-		w.add(g);
+		w.addBody(g);
 		
 		Body b = new Body();
 		BodyFixture bf = b.addFixture(Geometry.createCircle(0.5));
@@ -150,12 +150,12 @@ public class FrictionJointTest {
 		b.setAngularVelocity(Math.toRadians(30.0));
 		b.setLinearDamping(0.0);
 		b.setAngularDamping(0.0);
-		w.add(b);
+		w.addBody(b);
 		
 		FrictionJoint fj = new FrictionJoint(g, b, b.getWorldCenter());
 		fj.setMaximumForce(1000.0);
 		fj.setMaximumTorque(1000.0);
-		w.add(fj);
+		w.addJoint(fj);
 		
 		w.step(1);
 		

@@ -37,7 +37,7 @@ import org.junit.Test;
 /**
  * Used to test the {@link MouseJoint} class.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.1.1
  * @since 1.0.2
  */
 public class MouseJointTest {
@@ -214,7 +214,7 @@ public class MouseJointTest {
 		MouseJoint mj = new MouseJoint(b, new Vector2(), 4.0, 0.4, 10.0);
 		mj.setTarget(new Vector2(1.0, -1.0));
 		
-		w.add(mj);
+		w.addJoint(mj);
 		w.shiftCoordinates(new Vector2(-1.0, 2.0));
 		
 		TestCase.assertEquals(0.0, mj.getTarget().x, 1.0e-3);
@@ -233,10 +233,10 @@ public class MouseJointTest {
 		Body body = new Body();
 		body.addFixture(Geometry.createCircle(1.0));
 		body.setMass(Mass.Type.FIXED_LINEAR_VELOCITY);
-		w.add(body);
+		w.addBody(body);
 		
 		MouseJoint mj = new MouseJoint(body, new Vector2(0.5, 0.0), 8.0, 0.3, 1000.0);
-		w.add(mj);
+		w.addJoint(mj);
 		
 		mj.setTarget(new Vector2(0.7, -0.5));
 		

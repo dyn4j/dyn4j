@@ -50,6 +50,7 @@ import org.dyn4j.dynamics.joint.AngleJoint;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.FrictionJoint;
 import org.dyn4j.dynamics.joint.Joint;
+import org.dyn4j.dynamics.joint.MotorJoint;
 import org.dyn4j.dynamics.joint.MouseJoint;
 import org.dyn4j.dynamics.joint.PrismaticJoint;
 import org.dyn4j.dynamics.joint.PulleyJoint;
@@ -72,7 +73,7 @@ import org.dyn4j.sandbox.resources.Messages;
 /**
  * Class to export a simulation to Java code.
  * @author William Bittle
- * @version 1.0.2
+ * @version 1.0.4
  * @since 1.0.1
  */
 public class CodeExporter {
@@ -286,7 +287,7 @@ public class CodeExporter {
 				sb.append(TAB2).append("body").append(i).append(".setMass(Mass.Type.").append(mass.getType()).append(");").append(NEW_LINE);
 			}
 			// add the body to the world
-			sb.append(TAB2).append("world.add(body").append(i).append(");").append(NEW_LINE).append(NEW_LINE);
+			sb.append(TAB2).append("world.addBody(body").append(i).append(");").append(NEW_LINE).append(NEW_LINE);
 		}
 		
 		// output joints
@@ -303,7 +304,8 @@ public class CodeExporter {
 				sb.append(TAB2).append("AngleJoint joint").append(i).append(" = new AngleJoint(").append(idNameMap.get(body1.getId())).append(", ").append(idNameMap.get(body2.getId())).append(");").append(NEW_LINE)
 				.append(TAB2).append("joint").append(i).append(".setLimits(Math.toRadians(").append(Math.toDegrees(aj.getLowerLimit())).append("), Math.toRadians(").append(Math.toDegrees(aj.getUpperLimit())).append("));").append(NEW_LINE)
 				.append(TAB2).append("joint").append(i).append(".setLimitEnabled(").append(aj.isLimitEnabled()).append(");").append(NEW_LINE)
-				.append(TAB2).append("joint").append(i).append(".setReferenceAngle(Math.toRadians(").append(Math.toDegrees(aj.getReferenceAngle())).append("));").append(NEW_LINE);
+				.append(TAB2).append("joint").append(i).append(".setReferenceAngle(Math.toRadians(").append(Math.toDegrees(aj.getReferenceAngle())).append("));").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setRatio(").append(aj.getRatio()).append(");").append(NEW_LINE);
 			} else if (joint instanceof DistanceJoint) {
 				DistanceJoint dj = (DistanceJoint)joint;
 				sb.append(TAB2).append("DistanceJoint joint").append(i).append(" = new DistanceJoint(").append(idNameMap.get(body1.getId())).append(", ").append(idNameMap.get(body2.getId())).append(", ").append(export(dj.getAnchor1())).append(", ").append(export(dj.getAnchor2())).append(");").append(NEW_LINE)
@@ -339,7 +341,7 @@ public class CodeExporter {
 				.append(TAB2).append("joint").append(i).append(".setLimits(Math.toRadians(").append(Math.toDegrees(rj.getLowerLimit())).append("), Math.toRadians(").append(Math.toDegrees(rj.getUpperLimit())).append("));").append(NEW_LINE)
 				.append(TAB2).append("joint").append(i).append(".setReferenceAngle(Math.toRadians(").append(Math.toDegrees(rj.getReferenceAngle())).append("));").append(NEW_LINE)
 				.append(TAB2).append("joint").append(i).append(".setMotorEnabled(").append(rj.isMotorEnabled()).append(");").append(NEW_LINE)
-				.append(TAB2).append("joint").append(i).append(".setMotorSpeed(").append(rj.getMotorSpeed()).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setMotorSpeed(Math.toRadians(").append(Math.toDegrees(rj.getMotorSpeed())).append("));").append(NEW_LINE)
 				.append(TAB2).append("joint").append(i).append(".setMaximumMotorTorque(").append(rj.getMaximumMotorTorque()).append(");").append(NEW_LINE);
 			} else if (joint instanceof RopeJoint) {
 				RopeJoint rj = (RopeJoint)joint;
@@ -359,13 +361,22 @@ public class CodeExporter {
 				.append(TAB2).append("joint").append(i).append(".setFrequency(").append(wj.getFrequency()).append(");").append(NEW_LINE)
 				.append(TAB2).append("joint").append(i).append(".setDampingRatio(").append(wj.getDampingRatio()).append(");").append(NEW_LINE)
 				.append(TAB2).append("joint").append(i).append(".setMotorEnabled(").append(wj.isMotorEnabled()).append(");").append(NEW_LINE)
-				.append(TAB2).append("joint").append(i).append(".setMotorSpeed(").append(wj.getMotorSpeed()).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setMotorSpeed(Math.toRadians(").append(Math.toDegrees(wj.getMotorSpeed())).append("));").append(NEW_LINE)
 				.append(TAB2).append("joint").append(i).append(".setMaximumMotorTorque(").append(wj.getMaximumMotorTorque()).append(");").append(NEW_LINE);
+			} else if (joint instanceof MotorJoint) {
+				MotorJoint mj = (MotorJoint)joint;
+				sb.append(TAB2).append("MotorJoint joint").append(i).append(" = new MotorJoint(").append(idNameMap.get(body1.getId())).append(", ").append(idNameMap.get(body2.getId())).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setLinearTarget(").append(export(mj.getLinearTarget())).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setAngularTarget(Math.toRadians(").append(Math.toDegrees(mj.getAngularTarget())).append("));").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setCorrectionFactor(").append(mj.getCorrectionFactor()).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setMaximumForce(").append(mj.getMaximumForce()).append(");").append(NEW_LINE)
+				.append(TAB2).append("joint").append(i).append(".setMaximumTorque(").append(mj.getMaximumTorque()).append(");").append(NEW_LINE);
 			} else {
 				throw new UnsupportedOperationException(MessageFormat.format(Messages.getString("exception.persist.unknownClass"), joint.getClass().getName()));
 			}
 			
 			sb.append(TAB2).append("joint").append(i).append(".setCollisionAllowed(").append(joint.isCollisionAllowed()).append(");").append(NEW_LINE);
+			sb.append(TAB2).append("world.addJoint(joint").append(i).append(");");
 			sb.append(NEW_LINE);
 		}
 		

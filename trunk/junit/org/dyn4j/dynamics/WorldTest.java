@@ -53,7 +53,7 @@ import org.junit.Test;
 /**
  * Contains the test cases for the {@link World} class.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.1
  * @since 1.0.2
  */
 public class WorldTest {
@@ -210,7 +210,7 @@ public class WorldTest {
 	public void addBody() {
 		World w = new World();
 		Body b = new Body();
-		w.add(b);
+		w.addBody(b);
 		TestCase.assertFalse(w.bodies.isEmpty());
 		// make sure the body's world reference is there
 		TestCase.assertNotNull(b.world);
@@ -224,7 +224,7 @@ public class WorldTest {
 	@Test(expected = NullPointerException.class)
 	public void addNullBody() {
 		World w = new World();
-		w.add((Body) null);
+		w.addBody((Body) null);
 	}
 	
 	/**
@@ -235,8 +235,8 @@ public class WorldTest {
 	public void addSameBody() {
 		World w = new World();
 		Body b1 = new Body();
-		w.add(b1);
-		w.add(b1);
+		w.addBody(b1);
+		w.addBody(b1);
 	}
 	
 	/**
@@ -250,9 +250,9 @@ public class WorldTest {
 		
 		Joint j = new DistanceJoint(b1, b2, new Vector2(), new Vector2());
 		
-		w.add(b1);
-		w.add(b2);
-		w.add(j);
+		w.addBody(b1);
+		w.addBody(b2);
+		w.addJoint(j);
 		
 		TestCase.assertFalse(w.joints.isEmpty());
 		TestCase.assertFalse(b1.joints.isEmpty());
@@ -267,7 +267,7 @@ public class WorldTest {
 	@Test(expected = NullPointerException.class)
 	public void addNullJoint() {
 		World w = new World();
-		w.add((Joint) null);
+		w.addJoint((Joint) null);
 	}
 	
 	/**
@@ -280,8 +280,8 @@ public class WorldTest {
 		Body b1 = new Body();
 		Body b2 = new Body();
 		Joint j = new DistanceJoint(b1, b2, new Vector2(), new Vector2());
-		w.add(j);
-		w.add(j);
+		w.addJoint(j);
+		w.addJoint(j);
 	}
 	
 	/**
@@ -296,11 +296,11 @@ public class WorldTest {
 		w.addListener(dl);
 		
 		// test removing a null body
-		boolean success = w.remove((Body) null);
+		boolean success = w.removeBody((Body) null);
 		TestCase.assertFalse(success);
 		
 		// test removing a body not in the list
-		success = w.remove(new Body());
+		success = w.removeBody(new Body());
 		TestCase.assertFalse(success);
 		
 		// setup the bodies
@@ -310,10 +310,10 @@ public class WorldTest {
 		Body b2 = new Body(); b2.addFixture(c2); b2.setMass();
 		
 		// add them to the world
-		w.add(b1);
-		w.add(b2);
+		w.addBody(b1);
+		w.addBody(b2);
 		// remove one of them
-		success = w.remove(b1, true);
+		success = w.removeBody(b1, true);
 		TestCase.assertTrue(success);
 		TestCase.assertFalse(w.bodies.isEmpty());
 		TestCase.assertNull(b1.world);
@@ -322,18 +322,18 @@ public class WorldTest {
 		TestCase.assertNull(w.broadphaseDetector.getAABB(b1));
 		
 		// add that one back
-		w.add(b1);
+		w.addBody(b1);
 		TestCase.assertNotNull(b1.world);
 		// create a joint
 		Joint j = new DistanceJoint(b1, b2, new Vector2(), new Vector2());
 		j.setCollisionAllowed(true);
-		w.add(j);
+		w.addJoint(j);
 		
 		// perform a world step to get contacts
 		w.step(1);
 		
 		// remove a body and make sure destruction events are called
-		w.remove(b2, true);
+		w.removeBody(b2, true);
 		// make sure it was added to the broadphase
 		TestCase.assertNull(w.broadphaseDetector.getAABB(b2));
 		// make sure the world has zero joints
@@ -366,7 +366,7 @@ public class WorldTest {
 		World w = new World();
 		
 		// test removing a null body
-		boolean success = w.remove((Joint) null);
+		boolean success = w.removeJoint((Joint) null);
 		TestCase.assertFalse(success);
 		
 		// setup the bodies
@@ -376,25 +376,25 @@ public class WorldTest {
 		Body b2 = new Body(); b2.addFixture(c2); b2.setMass();
 		
 		// add them to the world
-		w.add(b1);
-		w.add(b2);
+		w.addBody(b1);
+		w.addBody(b2);
 		// remove one of them
-		success = w.remove(b1);
+		success = w.removeBody(b1);
 		TestCase.assertTrue(success);
 		TestCase.assertFalse(w.bodies.isEmpty());
 		
 		// add that one back
-		w.add(b1);
+		w.addBody(b1);
 		// create a joint
 		Joint j = new DistanceJoint(b1, b2, new Vector2(), new Vector2());
 		j.setCollisionAllowed(true);
-		w.add(j);
+		w.addJoint(j);
 		
 		// perform a world step to get contacts
 		w.step(1);
 		
 		// remove a body and make sure destruction events are called
-		w.remove(j);
+		w.removeJoint(j);
 		// make sure the world has zero joints
 		TestCase.assertTrue(w.joints.isEmpty());
 		// make sure the world still has both bodies
@@ -471,7 +471,7 @@ public class WorldTest {
 	public void setBroadphaseDetector() {
 		World w = new World();
 		Body b = new Body();
-		w.add(b);
+		w.addBody(b);
 		BroadphaseDetector<Body> bd = new SapIncremental<Body>();
 		w.setBroadphaseDetector(bd);
 		TestCase.assertSame(bd, w.getBroadphaseDetector());
@@ -620,15 +620,15 @@ public class WorldTest {
 		Joint j = new DistanceJoint(b1, b2, new Vector2(), new Vector2());
 		j.setCollisionAllowed(true);
 		
-		w.add(b1);
-		w.add(b2);
-		w.add(j);
+		w.addBody(b1);
+		w.addBody(b2);
+		w.addJoint(j);
 		
 		// perform a world step to generate contacts
 		w.step(1);
 		
 		// call the clear method
-		w.removeAll(true);
+		w.removeAllBodiesAndJoints(true);
 		
 		// verify that it cleared everything and made all the callbacks
 		TestCase.assertTrue(b1.contacts.isEmpty());
@@ -668,9 +668,9 @@ public class WorldTest {
 		Joint j = new DistanceJoint(b1, b2, new Vector2(), new Vector2());
 		j.setCollisionAllowed(true);
 		
-		w.add(b1);
-		w.add(b2);
-		w.add(j);
+		w.addBody(b1);
+		w.addBody(b2);
+		w.addJoint(j);
 		
 		// perform a world step to generate contacts
 		w.step(1);
@@ -718,9 +718,9 @@ public class WorldTest {
 		Joint j = new DistanceJoint(b1, b2, new Vector2(), new Vector2());
 		j.setCollisionAllowed(true);
 		
-		w.add(b1);
-		w.add(b2);
-		w.add(j);
+		w.addBody(b1);
+		w.addBody(b2);
+		w.addJoint(j);
 		
 		// perform a world step to generate contacts
 		w.step(1);
@@ -752,17 +752,17 @@ public class WorldTest {
 		Body b2 = new Body();
 		Joint j = new DistanceJoint(b1, b2, new Vector2(), new Vector2());
 		
-		w.add(b1);
+		w.addBody(b1);
 		TestCase.assertFalse(w.isEmpty());
 		
-		w.removeAll();
+		w.removeAllBodiesAndJoints();
 		TestCase.assertTrue(w.isEmpty());
 		
-		w.add(j);
+		w.addJoint(j);
 		TestCase.assertFalse(w.isEmpty());
 		
-		w.add(b1);
-		w.add(b2);
+		w.addBody(b1);
+		w.addBody(b2);
 		TestCase.assertFalse(w.isEmpty());
 	}
 	
@@ -800,9 +800,9 @@ public class WorldTest {
 		
 		Body b = new Body();
 		
-		w1.add(b);
+		w1.addBody(b);
 		
-		w2.add(b);
+		w2.addBody(b);
 	}
 	
 	/**
@@ -816,9 +816,9 @@ public class WorldTest {
 		
 		Joint j = new MouseJoint(new Body(), new Vector2(), 0.8, 0.8, 100);
 		
-		w1.add(j);
+		w1.addJoint(j);
 		
-		w2.add(j);
+		w2.addJoint(j);
 	}
 	
 	/**

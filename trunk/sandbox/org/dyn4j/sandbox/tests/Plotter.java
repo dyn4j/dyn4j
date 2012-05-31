@@ -54,7 +54,7 @@ import org.dyn4j.sandbox.utilities.RenderUtilities;
 /**
  * Compiled test for the collision detection pipeline.
  * @author William Bittle
- * @version 1.0.2
+ * @version 1.0.4
  * @since 1.0.2
  */
 public class Plotter extends CompiledSimulation {
@@ -83,7 +83,7 @@ public class Plotter extends CompiledSimulation {
 		
 		for (int i = 0; i < 5; i++) {
 			SandboxBody body = create(i);
-			this.world.add(body);
+			this.world.addBody(body);
 		}
 	}
 	
@@ -234,7 +234,7 @@ public class Plotter extends CompiledSimulation {
 	@Override
 	public void reset() {
 		// remove everything from the world
-		this.world.removeAll();
+		this.world.removeAllBodiesAndJoints();
 		// add it all back
 		this.initialize();
 	}

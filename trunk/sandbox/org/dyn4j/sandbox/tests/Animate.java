@@ -36,7 +36,7 @@ import org.dyn4j.sandbox.SandboxBody;
 /**
  * Compiled test for the MotorJoint class.
  * @author William Bittle
- * @version 1.0.2
+ * @version 1.0.4
  * @since 1.0.2
  */
 public class Animate extends CompiledSimulation {
@@ -74,9 +74,9 @@ public class Animate extends CompiledSimulation {
 		this.mj.setCorrectionFactor(1.0);
 		this.mj.setUserData("MotorJoint1");
 		
-		this.world.add(floor);
-		this.world.add(character);
-		this.world.add(this.mj);
+		this.world.addBody(floor);
+		this.world.addBody(character);
+		this.world.addJoint(this.mj);
 	}
 	
 	/* (non-Javadoc)
@@ -111,7 +111,7 @@ public class Animate extends CompiledSimulation {
 	public void reset() {
 		this.time = 0;
 		// remove everything from the world
-		this.world.removeAll();
+		this.world.removeAllBodiesAndJoints();
 		// add it all back
 		this.initialize();
 	}
