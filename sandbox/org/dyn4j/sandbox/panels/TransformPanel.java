@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,8 +31,8 @@ import java.text.DecimalFormat;
 import java.text.MessageFormat;
 
 import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.SequentialGroup;
 import javax.swing.GroupLayout.ParallelGroup;
+import javax.swing.GroupLayout.SequentialGroup;
 import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
@@ -47,7 +47,7 @@ import org.dyn4j.sandbox.resources.Messages;
 /**
  * Panel used to capture translation and rotation.
  * @author William Bittle
- * @version 1.0.1
+ * @version 1.0.4
  * @since 1.0.0
  */
 public class TransformPanel extends JPanel implements InputPanel {
@@ -85,7 +85,7 @@ public class TransformPanel extends JPanel implements InputPanel {
 	 * Default contructor.
 	 */
 	public TransformPanel() {
-		this(new Vector2(), 0.0, null);
+		this(new Vector2(), 0.0, true, null);
 	}
 	
 	/**
@@ -93,7 +93,7 @@ public class TransformPanel extends JPanel implements InputPanel {
 	 * @param header the header component of the panel
 	 */
 	public TransformPanel(JComponent header) {
-		this(new Vector2(), 0.0, header);
+		this(new Vector2(), 0.0, true, header);
 	}
 	
 	/**
@@ -101,34 +101,35 @@ public class TransformPanel extends JPanel implements InputPanel {
 	 * @param transform initial transform values
 	 */
 	public TransformPanel(Transform transform) {
-		this(transform.getTranslation(), transform.getRotation(), null);
+		this(transform.getTranslation(), transform.getRotation(), true, null);
 	}
 	
 	/**
-	 * Full constructor.
+	 * Optional constructor.
 	 * @param transform initial transform values
 	 * @param header the header component of the panel
 	 */
 	public TransformPanel(Transform transform, JComponent header) {
-		this(transform.getTranslation(), transform.getRotation(), header);
+		this(transform.getTranslation(), transform.getRotation(), true, header);
 	}
-	
+
 	/**
 	 * Optional constructor.
 	 * @param tx the initial translation
 	 * @param rot the initial rotation
 	 */
 	public TransformPanel(Vector2 tx, double rot) {
-		this(tx, rot, null);
+		this(tx, rot, true, null);
 	}
 	
 	/**
 	 * Full constructor.
 	 * @param tx the initial translation
 	 * @param rot the initial rotation
+	 * @param showRotation true if the rotation field should be shown
 	 * @param header the header component of the panel
 	 */
-	public TransformPanel(Vector2 tx, double rot, JComponent header) {
+	public TransformPanel(Vector2 tx, double rot, boolean showRotation, JComponent header) {
 		this.translation = tx.copy();
 		this.rotation = Math.toDegrees(rot);
 		
@@ -184,6 +185,8 @@ public class TransformPanel extends JPanel implements InputPanel {
 		});
 		
 		JLabel lblFiller = new JLabel();
+		JPanel pnlBlank1 = new JPanel();
+		JPanel pnlBlank2 = new JPanel();
 		
 		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
@@ -197,7 +200,7 @@ public class TransformPanel extends JPanel implements InputPanel {
 						.addGroup(layout.createParallelGroup()
 								.addComponent(this.lblT)
 								.addComponent(lblFiller)
-								.addComponent(this.lblR))
+								.addComponent(showRotation ? this.lblR : pnlBlank1))
 						.addGroup(layout.createParallelGroup()
 								.addGroup(layout.createSequentialGroup()
 										.addComponent(this.txtX)
@@ -205,7 +208,7 @@ public class TransformPanel extends JPanel implements InputPanel {
 								.addGroup(layout.createSequentialGroup()
 										.addComponent(this.txtY)
 										.addComponent(this.lblY))
-								.addComponent(this.txtR))));
+								.addComponent(showRotation ? this.txtR : pnlBlank2))));
 		
 		SequentialGroup sg = layout.createSequentialGroup();
 		if (headerSupplied) {
@@ -221,8 +224,8 @@ public class TransformPanel extends JPanel implements InputPanel {
 						.addComponent(this.txtY, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(this.lblY))
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
-						.addComponent(this.lblR)
-						.addComponent(this.txtR, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
+						.addComponent(showRotation ? this.lblR : pnlBlank1)
+						.addComponent(showRotation ? this.txtR : pnlBlank2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
 	}
 	
 	/**

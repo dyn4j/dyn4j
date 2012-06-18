@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -37,7 +37,7 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
-import org.dyn4j.collision.RectangularBounds;
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Transform;
@@ -51,7 +51,7 @@ import org.dyn4j.sandbox.resources.Messages;
 /**
  * Dialog to create a new body with an initial fixture/shape.
  * @author William Bittle
- * @version 1.0.1
+ * @version 1.0.4
  * @since 1.0.0
  */
 public class SetBoundsDialog extends JDialog implements ActionListener {
@@ -72,7 +72,7 @@ public class SetBoundsDialog extends JDialog implements ActionListener {
 	 * @param owner the dialog owner
 	 * @param bounds the current bounds object
 	 */
-	private SetBoundsDialog(Window owner, RectangularBounds bounds) {
+	private SetBoundsDialog(Window owner, AxisAlignedBounds bounds) {
 		super(owner, Messages.getString("dialog.bounds.set.title"), ModalityType.APPLICATION_MODAL);
 		
 		this.setIconImage(Icons.SET_BOUNDS.getImage());
@@ -82,12 +82,12 @@ public class SetBoundsDialog extends JDialog implements ActionListener {
 		Rectangle r = new Rectangle(10.0, 10.0);
 		Transform t = new Transform();
 		if (bounds != null) {
-			r = bounds.getBounds();
+			r = new Rectangle(bounds.getWidth(), bounds.getHeight());
 			t = bounds.getTransform();
-		}		
+		}
 		
 		this.pnlRectangle = new RectanglePanel(r);
-		this.pnlTransform = new TransformPanel(t);
+		this.pnlTransform = new TransformPanel(t.getTranslation(), 0.0, false, null);
 		
 		tabs.setBorder(BorderFactory.createEmptyBorder(7, 0, 0, 0));
 		tabs.addTab(Messages.getString("dialog.bounds.tab.bounds"), this.pnlRectangle);
@@ -148,7 +148,7 @@ public class SetBoundsDialog extends JDialog implements ActionListener {
 	 * @param bounds the current bounds object
 	 * @return RectangularBounds
 	 */
-	public static final RectangularBounds show(Window owner, RectangularBounds bounds) {
+	public static final AxisAlignedBounds show(Window owner, AxisAlignedBounds bounds) {
 		SetBoundsDialog dialog = new SetBoundsDialog(owner, bounds);
 		dialog.setLocationRelativeTo(owner);
 		dialog.setVisible(true);
@@ -161,11 +161,10 @@ public class SetBoundsDialog extends JDialog implements ActionListener {
 			
 			// apply any local transform
 			Vector2 tx = dialog.pnlTransform.getTranslation();
-			double a = dialog.pnlTransform.getRotation();
 			
-			RectangularBounds b = new RectangularBounds((Rectangle)convex);
+			Rectangle r = (Rectangle)convex;
+			AxisAlignedBounds b = new AxisAlignedBounds(r.getWidth(), r.getHeight());
 			b.translate(tx);
-			b.rotate(a, tx);
 			
 			// return the bounds
 			return b;

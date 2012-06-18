@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,6 +26,15 @@ package org.dyn4j.dynamics;
 
 /**
  * Interface used to customize the way friction and restitution values are mixed.
+ * <p>
+ * By default the friction coefficients are mixed using:
+ * <pre>
+ * sqrt(friction1 * friction2)
+ * </pre>
+ * By default the restitution coefficients are mixed using:
+ * <pre>
+ * max(restitution1, restitution2)
+ * </pre>
  * @author William Bittle
  * @version 2.0.0
  * @since 1.0.0

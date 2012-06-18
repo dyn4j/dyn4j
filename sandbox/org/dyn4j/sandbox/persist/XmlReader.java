@@ -39,9 +39,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.collision.Bounds;
 import org.dyn4j.collision.CategoryFilter;
-import org.dyn4j.collision.RectangularBounds;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.collision.broadphase.DynamicAABBTree;
 import org.dyn4j.collision.broadphase.SapBruteForce;
@@ -72,7 +72,6 @@ import org.dyn4j.dynamics.joint.WheelJoint;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
-import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.Camera;
@@ -164,6 +163,9 @@ public class XmlReader extends DefaultHandler {
 	private Map<String, SandboxBody> idMap;
 	
 	// Tag Data; for temporary storage
+	
+	/** the version number */
+	private String version;
 	
 	/** The camera */
 	private Camera camera;
@@ -457,9 +459,12 @@ public class XmlReader extends DefaultHandler {
 		// look for tags that have attributes
 		if ("Simulation".equalsIgnoreCase(qName)) {
 			// check the version
-			// this.version = attributes.getValue("version");
-			// in later versions this may need to be checked
-			// to perform different logic
+			this.version = attributes.getValue("version");
+			if (this.version == null) {
+				// this is the version in which we first needed
+				// to check for version numbers
+				this.version = "1.0.2";
+			}
 		} else if ("System".equalsIgnoreCase(qName)) {
 			this.systemFlag = true;
 		} else if ("Camera".equalsIgnoreCase(qName)) {
@@ -786,12 +791,20 @@ public class XmlReader extends DefaultHandler {
 			}
 			this.translation = null;
 		} else if ("Bounds".equalsIgnoreCase(qName)) {
-			Rectangle r = new Rectangle(this.width, this.height);
-			r.rotate(Math.toRadians(this.localRotation));
-			r.translate(this.localCenter);
-			this.bounds = new RectangularBounds(r);
-			this.bounds.rotate(Math.toRadians(this.rotation));
-			this.bounds.translate(this.translation);
+			if (compareVersions(this.version, "1.0.4") < 0) {
+				// versions before 1.0.4 used the RectangularBounds class
+				// which is now deprecated
+				// so we will convert what information the old xml format
+				// had into the new AxisAlignedBounds class and ignore any
+				// other information
+				this.bounds = new AxisAlignedBounds(this.width, this.height);
+				this.bounds.translate(this.translation);
+			} else {
+				// versions 1.0.4 and above should be using the new
+				// AxisAlignedBounds class
+				this.bounds = new AxisAlignedBounds(this.width, this.height);
+				this.bounds.translate(this.translation);
+			}
 		} else if ("Settings".equalsIgnoreCase(qName)) {
 			this.settingsFlag = false;
 		} else if ("Transform".equalsIgnoreCase(qName)) {
@@ -979,5 +992,36 @@ public class XmlReader extends DefaultHandler {
 			this.ray = null;
 			this.rayFlag = false;
 		}
+	}
+	
+	/**
+	 * Compares the given version numbers.
+	 * @param v1 the first version number
+	 * @param v2 the second version number
+	 * @return 0 if they are equal; -1 if v1 < v2; 1 if v1 > v2
+	 * @throws SAXException if either version number is invalid
+	 */
+	private int compareVersions(String v1, String v2) throws SAXException {
+		String[] p1 = v1.split("\\.");
+		String[] p2 = v2.split("\\.");
+		try {
+			int n = p1.length;
+			for (int i = 0; i < n; i++) {
+				int n1 = Integer.parseInt(p1[i]);
+				int n2 = Integer.parseInt(p2[i]);
+				if (n1 < n2) {
+					return -1;
+				} else if (n1 > n2) {
+					return 1;
+				}
+				// if they are equal, continue to the
+				// next version number
+			}
+		} catch (NumberFormatException e) {
+			// this indicates the version number is botched up in
+			// the xml document
+			throw new SAXException(MessageFormat.format(Messages.getString("exception.persist.invalidVersionNumber"), v1, v2), e);
+		}
+		return 0;
 	}
 }

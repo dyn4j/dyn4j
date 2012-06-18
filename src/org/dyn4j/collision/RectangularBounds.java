@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -41,10 +41,15 @@ import org.dyn4j.resources.Messages;
  * <p>
  * Since this class is {@link Transformable}, the bounds can be rotated.  Detection of a shape outside
  * the bounds is done by testing the AABB of the shape and the AABB of the rotated bounds.
+ * <p>
+ * This class has been replaced by the {@link AxisAlignedBounds} class because of confusion in its detection
+ * method.  The {@link AxisAlignedBounds} class better represents the intention of this class.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.1
  * @since 1.0.0
+ * @deprecated replaced with {@link AxisAlignedBounds} in 3.1.1
  */
+@Deprecated
 public class RectangularBounds extends AbstractBounds implements Bounds, Transformable {
 	/** The bounding rectangle */
 	protected Rectangle bounds;

@@ -9,13 +9,13 @@
         <Locale>en_US</Locale>
     </System>
     <Camera>
-        <Scale>32.0</Scale>
-        <Translation x="0.0" y="2.0" />
+        <Scale>64.0</Scale>
+        <Translation x="0.0" y="-7.0" />
     </Camera>
     <Rays>
     </Rays>
     <World>
-        <Name>Wheel</Name>
+        <Name>Slider/Crank</Name>
         <Settings>
             <StepFrequency>60.0</StepFrequency>
             <MaximumTranslation>2.0</MaximumTranslation>
@@ -40,39 +40,21 @@
         <ManifoldSolver>ClippingManifoldSolver</ManifoldSolver>
         <TimeOfImpactDetector>ConservativeAdvancement</TimeOfImpactDetector>
         <Gravity x="0.0" y="-9.8" />
-        <Bounds>
-            <Width>16.0</Width>
-            <Height>15.0</Height>
-            <Translation x="0.0" y="0.0" />
-        </Bounds>
         <Bodies>
-            <Body Id="83198c20-97a7-44e9-9d28-bad47a37f972" Name="Ground">
-                <OutlineColor r="0.48665562" g="0.6898299" b="0.6796876" />
-                <FillColor r="0.6083195" g="0.86228734" b="0.8496095" />
+            <Body Id="86490998-d99b-4783-8d71-640b05fe2040" Name="Floor">
+                <OutlineColor r="0.7710034" g="0.7649553" b="0.7871653" />
+                <FillColor r="0.9637543" g="0.9561941" b="0.9839566" />
                 <Fixtures>
-                    <Fixture Id="fe0b6b6e-9dd4-4a19-8364-aa23d7b7a09f" Name="Fixture1">
-                        <Shape Id="3cab20bf-c658-4fbf-8a00-0c1b0a40b07c" xsi:type="Rectangle">
-                            <LocalCenter x="0.0" y="0.0" />
-                            <Width>15.0</Width>
-                            <Height>1.0</Height>
-                            <LocalRotation>0.0</LocalRotation>
-                        </Shape>
-                        <Filter xsi:type="DefaultFilter" />
-                        <Sensor>false</Sensor>
-                        <Density>1.0</Density>
-                        <Friction>0.2</Friction>
-                        <Restitution>0.0</Restitution>
-                    </Fixture>
                 </Fixtures>
                 <Transform>
-                    <Translation x="0.0" y="-4.0" />
+                    <Translation x="0.0" y="0.0" />
                     <Rotation>0.0</Rotation>
                 </Transform>
                 <Mass>
                     <LocalCenter x="0.0" y="0.0" />
                     <Type>INFINITE</Type>
-                    <Mass>15.0</Mass>
-                    <Inertia>282.5</Inertia>
+                    <Mass>0.0</Mass>
+                    <Inertia>0.0</Inertia>
                     <Explicit>false</Explicit>
                 </Mass>
                 <Velocity x="0.0" y="0.0" />
@@ -87,33 +69,33 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="09ef833e-c463-4d23-9745-73a14c5feccd" Name="Frame">
-                <OutlineColor r="0.43801698" g="0.75885993" b="0.6487262" />
-                <FillColor r="0.54752123" g="0.9485749" b="0.8109078" />
+            <Body Id="8b66cad1-130f-4628-ac25-52d04257ae91" Name="Crank">
+                <OutlineColor r="0.40141058" g="0.46716276" b="0.6166024" />
+                <FillColor r="0.5017632" g="0.58395344" b="0.770753" />
                 <Fixtures>
-                    <Fixture Id="cfbd105d-d541-4959-8ae3-431c0db0d015" Name="Fixture1">
-                        <Shape Id="5c0fa655-d054-4862-8c2f-4023369772e5" xsi:type="Rectangle">
+                    <Fixture Id="6500e5b7-6f31-4486-8f98-e1f19a62eb4a" Name="Fixture1">
+                        <Shape Id="3b1dc1a3-a632-4e07-98e7-df5cfb12aa9f" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
-                            <Width>3.0</Width>
-                            <Height>0.5</Height>
+                            <Width>0.5</Width>
+                            <Height>2.0</Height>
                             <LocalRotation>0.0</LocalRotation>
                         </Shape>
                         <Filter xsi:type="DefaultFilter" />
                         <Sensor>false</Sensor>
-                        <Density>1.0</Density>
+                        <Density>2.0</Density>
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
                 </Fixtures>
                 <Transform>
-                    <Translation x="-3.0" y="4.25" />
+                    <Translation x="0.0" y="5.0" />
                     <Rotation>0.0</Rotation>
                 </Transform>
                 <Mass>
                     <LocalCenter x="0.0" y="0.0" />
                     <Type>NORMAL</Type>
-                    <Mass>1.5</Mass>
-                    <Inertia>1.15625</Inertia>
+                    <Mass>2.0</Mass>
+                    <Inertia>0.7083333333333334</Inertia>
                     <Explicit>false</Explicit>
                 </Mass>
                 <Velocity x="0.0" y="0.0" />
@@ -128,31 +110,33 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="9138ac49-b91f-4657-8ea0-b896ffbda0ff" Name="Wheel1">
-                <OutlineColor r="0.40298566" g="0.45333406" b="0.70829195" />
-                <FillColor r="0.5037321" g="0.56666756" b="0.8853649" />
+            <Body Id="0719870c-5fed-4bf5-a089-264f2b5efe14" Name="Follower">
+                <OutlineColor r="0.71890545" g="0.5344175" b="0.7835844" />
+                <FillColor r="0.8986318" g="0.66802186" b="0.9794805" />
                 <Fixtures>
-                    <Fixture Id="cc361baf-50bc-4cc4-a04e-3ac57e3a8f91" Name="Fixture1">
-                        <Shape Id="6e3b4c78-7a47-4b5c-8685-21e582ee4836" xsi:type="Circle">
+                    <Fixture Id="1249ad1b-750a-4ef4-91d6-93cd70911c9b" Name="Fixture2">
+                        <Shape Id="8b2f8a6d-4d2d-458c-befb-f1dce7b448b3" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
-                            <Radius>0.25</Radius>
+                            <Width>0.5</Width>
+                            <Height>4.0</Height>
+                            <LocalRotation>0.0</LocalRotation>
                         </Shape>
                         <Filter xsi:type="DefaultFilter" />
                         <Sensor>false</Sensor>
-                        <Density>1.0</Density>
+                        <Density>2.0</Density>
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
                 </Fixtures>
                 <Transform>
-                    <Translation x="-4.0" y="3.6" />
+                    <Translation x="0.0" y="7.5" />
                     <Rotation>0.0</Rotation>
                 </Transform>
                 <Mass>
                     <LocalCenter x="0.0" y="0.0" />
                     <Type>NORMAL</Type>
-                    <Mass>0.19634954084936207</Mass>
-                    <Inertia>0.006135923151542565</Inertia>
+                    <Mass>4.0</Mass>
+                    <Inertia>5.416666666666667</Inertia>
                     <Explicit>false</Explicit>
                 </Mass>
                 <Velocity x="0.0" y="0.0" />
@@ -167,31 +151,33 @@
                 <AngularDamping>0.01</AngularDamping>
                 <GravityScale>1.0</GravityScale>
             </Body>
-            <Body Id="08db1d7d-4836-472b-b414-ac0cf170322b" Name="Wheel2">
-                <OutlineColor r="0.40642706" g="0.65455484" b="0.7850423" />
-                <FillColor r="0.5080338" g="0.81819355" b="0.98130286" />
+            <Body Id="c24a227f-3627-47e0-a2a1-16f276af0f2b" Name="Piston">
+                <OutlineColor r="0.44755682" g="0.71485776" b="0.7403617" />
+                <FillColor r="0.55944604" g="0.8935722" b="0.9254521" />
                 <Fixtures>
-                    <Fixture Id="ee0ef6da-f07b-47e1-a756-b7325e420018" Name="Fixture1">
-                        <Shape Id="caf309fb-3a6b-4492-9a25-9868a32e3974" xsi:type="Circle">
+                    <Fixture Id="19ec16ec-985a-46ca-a51a-280e2c921189" Name="Fixture3">
+                        <Shape Id="a6e9a287-99eb-4b87-a358-a3f08d95935a" xsi:type="Rectangle">
                             <LocalCenter x="0.0" y="0.0" />
-                            <Radius>0.25</Radius>
+                            <Width>1.5</Width>
+                            <Height>1.5</Height>
+                            <LocalRotation>0.0</LocalRotation>
                         </Shape>
                         <Filter xsi:type="DefaultFilter" />
                         <Sensor>false</Sensor>
-                        <Density>1.0</Density>
+                        <Density>2.0</Density>
                         <Friction>0.2</Friction>
                         <Restitution>0.0</Restitution>
                     </Fixture>
                 </Fixtures>
                 <Transform>
-                    <Translation x="-2.0" y="3.6" />
+                    <Translation x="0.0" y="9.75" />
                     <Rotation>0.0</Rotation>
                 </Transform>
                 <Mass>
                     <LocalCenter x="0.0" y="0.0" />
-                    <Type>NORMAL</Type>
-                    <Mass>0.19634954084936207</Mass>
-                    <Inertia>0.006135923151542565</Inertia>
+                    <Type>FIXED_ANGULAR_VELOCITY</Type>
+                    <Mass>4.5</Mass>
+                    <Inertia>1.6875</Inertia>
                     <Explicit>false</Explicit>
                 </Mass>
                 <Velocity x="0.0" y="0.0" />
@@ -208,29 +194,58 @@
             </Body>
         </Bodies>
         <Joints>
-            <Joint Id="8c3976d2-eeec-411b-bfc4-c9383c8c0001" Name="WheelJoint1" xsi:type="WheelJoint">
-                <BodyId1>09ef833e-c463-4d23-9745-73a14c5feccd</BodyId1>
-                <BodyId2>9138ac49-b91f-4657-8ea0-b896ffbda0ff</BodyId2>
-                <CollisionAllowed>true</CollisionAllowed>
-                <Anchor x="-4.0" y="3.6" />
-                <Axis x="0.0" y="1.0" />
+            <Joint Id="d3f4bdc6-caa4-49b9-8635-330f77dc4bd9" Name="CrankJoint" xsi:type="RevoluteJoint">
+                <BodyId1>86490998-d99b-4783-8d71-640b05fe2040</BodyId1>
+                <BodyId2>8b66cad1-130f-4628-ac25-52d04257ae91</BodyId2>
+                <CollisionAllowed>false</CollisionAllowed>
+                <Anchor x="0.0" y="4.25" />
+                <LowerLimit>0.0</LowerLimit>
+                <UpperLimit>0.0</UpperLimit>
+                <LimitEnabled>false</LimitEnabled>
                 <MotorSpeed>180.0</MotorSpeed>
-                <MaximumMotorTorque>1000.0</MaximumMotorTorque>
+                <MaximumMotorTorque>10000.0</MaximumMotorTorque>
                 <MotorEnabled>true</MotorEnabled>
-                <Frequency>8.0</Frequency>
-                <DampingRatio>0.4</DampingRatio>
+                <ReferenceAngle>0.0</ReferenceAngle>
             </Joint>
-            <Joint Id="194aa05f-aac8-4428-bca1-35a5526c18dc" Name="WheelJoint2" xsi:type="WheelJoint">
-                <BodyId1>09ef833e-c463-4d23-9745-73a14c5feccd</BodyId1>
-                <BodyId2>08db1d7d-4836-472b-b414-ac0cf170322b</BodyId2>
-                <CollisionAllowed>true</CollisionAllowed>
-                <Anchor x="-2.0" y="3.6" />
-                <Axis x="0.0" y="1.0" />
+            <Joint Id="f43132ff-a481-4de7-86f0-179d3eb1a077" Name="FollowerJoint" xsi:type="RevoluteJoint">
+                <BodyId1>8b66cad1-130f-4628-ac25-52d04257ae91</BodyId1>
+                <BodyId2>0719870c-5fed-4bf5-a089-264f2b5efe14</BodyId2>
+                <CollisionAllowed>false</CollisionAllowed>
+                <Anchor x="0.0" y="5.75" />
+                <LowerLimit>0.0</LowerLimit>
+                <UpperLimit>0.0</UpperLimit>
+                <LimitEnabled>false</LimitEnabled>
                 <MotorSpeed>0.0</MotorSpeed>
                 <MaximumMotorTorque>0.0</MaximumMotorTorque>
                 <MotorEnabled>false</MotorEnabled>
-                <Frequency>8.0</Frequency>
-                <DampingRatio>0.4</DampingRatio>
+                <ReferenceAngle>0.0</ReferenceAngle>
+            </Joint>
+            <Joint Id="126e1e85-121a-4243-ad45-87ed60e617aa" Name="PistonJoint1" xsi:type="RevoluteJoint">
+                <BodyId1>0719870c-5fed-4bf5-a089-264f2b5efe14</BodyId1>
+                <BodyId2>c24a227f-3627-47e0-a2a1-16f276af0f2b</BodyId2>
+                <CollisionAllowed>false</CollisionAllowed>
+                <Anchor x="0.0" y="9.25" />
+                <LowerLimit>0.0</LowerLimit>
+                <UpperLimit>0.0</UpperLimit>
+                <LimitEnabled>false</LimitEnabled>
+                <MotorSpeed>0.0</MotorSpeed>
+                <MaximumMotorTorque>0.0</MaximumMotorTorque>
+                <MotorEnabled>false</MotorEnabled>
+                <ReferenceAngle>0.0</ReferenceAngle>
+            </Joint>
+            <Joint Id="fad30165-fd54-4fad-85eb-b86bc5c9b158" Name="PistonJoint2" xsi:type="PrismaticJoint">
+                <BodyId1>86490998-d99b-4783-8d71-640b05fe2040</BodyId1>
+                <BodyId2>c24a227f-3627-47e0-a2a1-16f276af0f2b</BodyId2>
+                <CollisionAllowed>false</CollisionAllowed>
+                <Anchor x="0.0" y="9.75" />
+                <Axis x="0.0" y="1.0" />
+                <LowerLimit>0.0</LowerLimit>
+                <UpperLimit>0.0</UpperLimit>
+                <LimitEnabled>false</LimitEnabled>
+                <MotorSpeed>0.0</MotorSpeed>
+                <MaximumMotorForce>0.0</MaximumMotorForce>
+                <MotorEnabled>false</MotorEnabled>
+                <ReferenceAngle>0.0</ReferenceAngle>
             </Joint>
         </Joints>
     </World>

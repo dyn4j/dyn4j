@@ -30,10 +30,10 @@ import java.util.Map;
 
 import org.dyn4j.Epsilon;
 import org.dyn4j.Version;
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.collision.Bounds;
 import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.collision.Filter;
-import org.dyn4j.collision.RectangularBounds;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.collision.broadphase.DynamicAABBTree;
 import org.dyn4j.collision.broadphase.SapBruteForce;
@@ -178,16 +178,14 @@ public class CodeExporter {
 		Bounds bounds = world.getBounds();
 		if (bounds instanceof NullBounds || bounds == null) {
 			// don't output anything since its the default
-		} else if (bounds instanceof RectangularBounds) {
-			RectangularBounds rb = (RectangularBounds)bounds;
-			Rectangle r = rb.getBounds();
+		} else if (bounds instanceof AxisAlignedBounds) {
+			AxisAlignedBounds aab = (AxisAlignedBounds)bounds;
+			double w = aab.getWidth();
+			double h = aab.getHeight();
 			sb.append(NEW_LINE)
-			.append(TAB2).append("RectangularBounds bounds = new RectangularBounds(new Rectangle(").append(r.getWidth()).append(", ").append(r.getHeight()).append("));").append(NEW_LINE);
-			if (Math.abs(rb.getTransform().getRotation()) > Epsilon.E) {
-				sb.append(TAB2).append("bounds.rotate(Math.toRadians(").append(Math.toDegrees(rb.getTransform().getRotation())).append("));").append(NEW_LINE);
-			}
-			if (!rb.getTransform().getTranslation().isZero()) {
-				sb.append(TAB2).append("bounds.translate(").append(export(rb.getTransform().getTranslation())).append(");").append(NEW_LINE);
+			.append(TAB2).append("AxisAlignedBounds bounds = new AxisAlignedBounds(").append(w).append(", ").append(h).append(");").append(NEW_LINE);
+			if (!aab.getTransform().getTranslation().isZero()) {
+				sb.append(TAB2).append("bounds.translate(").append(export(aab.getTransform().getTranslation())).append(");").append(NEW_LINE);
 			}
 			sb.append(TAB2).append("world.setBounds(bounds);").append(NEW_LINE)
 			.append(NEW_LINE);

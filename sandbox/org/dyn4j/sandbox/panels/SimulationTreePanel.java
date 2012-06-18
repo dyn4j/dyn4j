@@ -50,9 +50,9 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.collision.Bounds;
 import org.dyn4j.collision.Fixture;
-import org.dyn4j.collision.RectangularBounds;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
@@ -996,11 +996,11 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 		synchronized (Simulation.LOCK) {
 			bounds = this.simulation.getWorld().getBounds();
 		}
-		RectangularBounds b = null;
+		AxisAlignedBounds b = null;
 		if (bounds instanceof NullBounds) {
 			b = SetBoundsDialog.show(ControlUtilities.getParentWindow(this), null);
 		} else {
-			b = SetBoundsDialog.show(ControlUtilities.getParentWindow(this), (RectangularBounds)bounds);
+			b = SetBoundsDialog.show(ControlUtilities.getParentWindow(this), (AxisAlignedBounds)bounds);
 		}
 		if (b != null) {
 			synchronized (Simulation.LOCK) {
@@ -1866,10 +1866,9 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 				this.setDisabledIcon(Icons.DISABLED_BOUNDS);
 				if (data instanceof NullBounds) {
 					this.setText(Messages.getString("panel.tree.noBounds"));
-				} else if (data instanceof RectangularBounds) {
-					RectangularBounds bounds = (RectangularBounds)data;
-					Rectangle r = bounds.getBounds();
-					this.setText("[" + r.getWidth() + ", " + r.getHeight() + "]");
+				} else if (data instanceof AxisAlignedBounds) {
+					AxisAlignedBounds bounds = (AxisAlignedBounds)data;
+					this.setText("[" + bounds.getWidth() + ", " + bounds.getHeight() + "]");
 				} else {
 					this.setText(data.getClass().getSimpleName());
 				}

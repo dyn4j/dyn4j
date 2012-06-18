@@ -141,7 +141,7 @@ public class ContactManager {
 		int size = this.list.size();
 		
 		// re-assign listeners
-		this.listeners = world.getListeners(ContactListener.class);
+		this.listeners = this.world.getListeners(ContactListener.class);
 		
 		Settings settings = this.world.getSettings();
 		// get the warm start distance from the settings

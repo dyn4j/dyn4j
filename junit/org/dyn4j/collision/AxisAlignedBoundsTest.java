@@ -26,8 +26,6 @@ package org.dyn4j.collision;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Polygon;
@@ -39,14 +37,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Test case for the {@link RectangularBounds} class.
+ * Test case for the {@link AxisAlignedBounds} class.
  * @author William Bittle
- * @version 3.1.0
- * @since 1.0.0
+ * @version 3.1.1
+ * @since 3.1.1
  */
-public class RectangularBoundsTest {
+public class AxisAlignedBoundsTest {
 	/** The {@link Bounds} to test with */
-	private RectangularBounds rb;
+	private AxisAlignedBounds bounds;
 	
 	/**
 	 * Sets up the test.
@@ -54,16 +52,39 @@ public class RectangularBoundsTest {
 	@Before
 	public void setup() {
 		// create some bounds [-10, 10]
-		this.rb = new RectangularBounds(new Rectangle(20.0, 20.0));
+		this.bounds = new AxisAlignedBounds(20.0, 20.0);
 	}
 
 	/**
-	 * Tests creating a {@link RectangularBounds} with null bounds.
-	 * @since 3.1.0
+	 * Tests creating a {@link AxisAlignedBounds} with invalid bounds.
 	 */
-	@Test(expected = NullPointerException.class)
-	public void createNullBounds() {
-		new RectangularBounds(null);
+	@Test(expected = IllegalArgumentException.class)
+	public void createInvalidBounds1() {
+		new AxisAlignedBounds(0, 1);
+	}
+	
+	/**
+	 * Tests creating a {@link AxisAlignedBounds} with invalid bounds.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createInvalidBounds2() {
+		new AxisAlignedBounds(1, 0);
+	}
+	
+	/**
+	 * Tests creating a {@link AxisAlignedBounds} with invalid bounds.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createInvalidBounds3() {
+		new AxisAlignedBounds(1, -1);
+	}
+	
+	/**
+	 * Tests creating a {@link AxisAlignedBounds} with invalid bounds.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createInvalidBounds4() {
+		new AxisAlignedBounds(-1, 1);
 	}
 	
 	/**
@@ -76,50 +97,34 @@ public class RectangularBoundsTest {
 		CollidableTest ct = new CollidableTest(c);
 		
 		// should be in
-		TestCase.assertFalse(rb.isOutside(ct));
+		TestCase.assertFalse(bounds.isOutside(ct));
 		
 		// test half way in and out
 		ct.transform.translate(9.5, 0.0);
-		TestCase.assertFalse(rb.isOutside(ct));
+		TestCase.assertFalse(bounds.isOutside(ct));
 		
 		// test all the way out
 		ct.transform.translate(1.6, 0.0);
-		TestCase.assertTrue(rb.isOutside(ct));
+		TestCase.assertTrue(bounds.isOutside(ct));
 		
 		// test half way out a corner
 		ct.transform.translate(-1.5, 9.5);
-		TestCase.assertFalse(rb.isOutside(ct));
+		TestCase.assertFalse(bounds.isOutside(ct));
 		
 		// test moving the bounds
-		rb.translate(2.0, 1.0);
+		bounds.translate(2.0, 1.0);
 		
 		// test half way in and out
 		ct.transform.translate(2.0, 0.0);
-		TestCase.assertFalse(rb.isOutside(ct));
+		TestCase.assertFalse(bounds.isOutside(ct));
 		
 		// test all the way out
 		ct.transform.translate(1.6, 0.0);
-		TestCase.assertTrue(rb.isOutside(ct));
+		TestCase.assertTrue(bounds.isOutside(ct));
 		
 		// test half way out a corner
 		ct.transform.translate(-1.5, 1.5);
-		TestCase.assertFalse(rb.isOutside(ct));
-		
-		// test rotating the bounds
-		rb.rotate(Math.toRadians(45.0), 2.0, 1.0);
-		
-		// test half way out of a corner
-		ct.transform.setTranslation(0.0, 0.0);
-		ct.transform.translate(16.5, 0.0);
-		TestCase.assertFalse(rb.isOutside(ct));
-		
-		// test all the way out
-		ct.transform.translate(1.0, 0.0);
-		TestCase.assertTrue(rb.isOutside(ct));
-		
-		// test half way out of a side
-		ct.transform.setTranslation(10.25, 9.25);
-		TestCase.assertFalse(rb.isOutside(ct));
+		TestCase.assertFalse(bounds.isOutside(ct));
 	}
 	
 	/**
@@ -132,50 +137,34 @@ public class RectangularBoundsTest {
 		CollidableTest ct = new CollidableTest(r);
 		
 		// should be in
-		TestCase.assertFalse(rb.isOutside(ct));
+		TestCase.assertFalse(bounds.isOutside(ct));
 		
 		// test half way in and out
 		ct.transform.translate(10.0, 0.0);
-		TestCase.assertFalse(rb.isOutside(ct));
+		TestCase.assertFalse(bounds.isOutside(ct));
 		
 		// test all the way out
 		ct.transform.translate(0.6, 0.0);
-		TestCase.assertTrue(rb.isOutside(ct));
+		TestCase.assertTrue(bounds.isOutside(ct));
 		
 		// test half way out a corner
 		ct.transform.translate(-0.6, 10.0);
-		TestCase.assertFalse(rb.isOutside(ct));
+		TestCase.assertFalse(bounds.isOutside(ct));
 		
 		// test moving the bounds
-		rb.translate(2.0, 1.0);
+		bounds.translate(2.0, 1.0);
 		
 		// test half way in and out
 		ct.transform.translate(2.0, 0.0);
-		TestCase.assertFalse(rb.isOutside(ct));
+		TestCase.assertFalse(bounds.isOutside(ct));
 		
 		// test all the way out
 		ct.transform.translate(1.6, 0.0);
-		TestCase.assertTrue(rb.isOutside(ct));
+		TestCase.assertTrue(bounds.isOutside(ct));
 		
 		// test half way out a corner
 		ct.transform.translate(-1.5, 1.5);
-		TestCase.assertFalse(rb.isOutside(ct));
-
-		// test rotating the bounds
-		rb.rotate(Math.toRadians(45.0), 2.0, 1.0);
-		
-		// test half way out of a corner
-		ct.transform.setTranslation(0.0, 0.0);
-		ct.transform.translate(16.5, 0.0);
-		TestCase.assertFalse(rb.isOutside(ct));
-		
-		// test all the way out
-		ct.transform.translate(1.0, 0.0);
-		TestCase.assertTrue(rb.isOutside(ct));
-		
-		// test half way out of a side
-		ct.transform.setTranslation(10.25, 9.25);
-		TestCase.assertFalse(rb.isOutside(ct));
+		TestCase.assertFalse(bounds.isOutside(ct));
 	}
 	
 	/**
@@ -188,50 +177,34 @@ public class RectangularBoundsTest {
 		CollidableTest ct = new CollidableTest(p);
 		
 		// should be in
-		TestCase.assertFalse(rb.isOutside(ct));
+		TestCase.assertFalse(bounds.isOutside(ct));
 		
 		// test half way in and out
 		ct.transform.translate(10.0, 0.0);
-		TestCase.assertFalse(rb.isOutside(ct));
+		TestCase.assertFalse(bounds.isOutside(ct));
 		
 		// test all the way out
 		ct.transform.translate(0.6, 0.0);
-		TestCase.assertTrue(rb.isOutside(ct));
+		TestCase.assertTrue(bounds.isOutside(ct));
 		
 		// test half way out a corner
 		ct.transform.translate(-0.6, 10.0);
-		TestCase.assertFalse(rb.isOutside(ct));
+		TestCase.assertFalse(bounds.isOutside(ct));
 		
 		// test moving the bounds
-		rb.translate(2.0, 1.0);
+		bounds.translate(2.0, 1.0);
 		
 		// test half way in and out
 		ct.transform.translate(2.0, 0.0);
-		TestCase.assertFalse(rb.isOutside(ct));
+		TestCase.assertFalse(bounds.isOutside(ct));
 		
 		// test all the way out
 		ct.transform.translate(1.6, 0.0);
-		TestCase.assertTrue(rb.isOutside(ct));
+		TestCase.assertTrue(bounds.isOutside(ct));
 		
 		// test half way out a corner
 		ct.transform.translate(-1.5, 1.0);
-		TestCase.assertFalse(rb.isOutside(ct));
-		
-		// test rotating the bounds
-		rb.rotate(Math.toRadians(45.0), 2.0, 1.0);
-		
-		// test half way out of a corner
-		ct.transform.setTranslation(0.0, 0.0);
-		ct.transform.translate(16.5, 0.0);
-		TestCase.assertFalse(rb.isOutside(ct));
-		
-		// test all the way out
-		ct.transform.translate(1.0, 0.0);
-		TestCase.assertTrue(rb.isOutside(ct));
-		
-		// test half way out of a side
-		ct.transform.setTranslation(10.25, 9.25);
-		TestCase.assertFalse(rb.isOutside(ct));
+		TestCase.assertFalse(bounds.isOutside(ct));
 	}
 	
 	/**
@@ -248,50 +221,34 @@ public class RectangularBoundsTest {
 		CollidableTest ct = new CollidableTest(t);
 		
 		// should be in
-		TestCase.assertFalse(rb.isOutside(ct));
+		TestCase.assertFalse(bounds.isOutside(ct));
 		
 		// test half way in and out
 		ct.transform.translate(10.0, 0.0);
-		TestCase.assertFalse(rb.isOutside(ct));
+		TestCase.assertFalse(bounds.isOutside(ct));
 		
 		// test all the way out
 		ct.transform.translate(0.6, 0.0);
-		TestCase.assertTrue(rb.isOutside(ct));
+		TestCase.assertTrue(bounds.isOutside(ct));
 		
 		// test half way out a corner
 		ct.transform.translate(-0.6, 10.0);
-		TestCase.assertFalse(rb.isOutside(ct));
+		TestCase.assertFalse(bounds.isOutside(ct));
 		
 		// test moving the bounds
-		rb.translate(2.0, 1.0);
+		bounds.translate(2.0, 1.0);
 		
 		// test half way in and out
 		ct.transform.translate(2.0, 0.0);
-		TestCase.assertFalse(rb.isOutside(ct));
+		TestCase.assertFalse(bounds.isOutside(ct));
 		
 		// test all the way out
 		ct.transform.translate(1.6, 0.0);
-		TestCase.assertTrue(rb.isOutside(ct));
+		TestCase.assertTrue(bounds.isOutside(ct));
 		
 		// test half way out a corner
 		ct.transform.translate(-1.5, 1.5);
-		TestCase.assertFalse(rb.isOutside(ct));
-
-		// test rotating the bounds
-		rb.rotate(Math.toRadians(45.0), 2.0, 1.0);
-		
-		// test half way out of a corner
-		ct.transform.setTranslation(0.0, 0.0);
-		ct.transform.translate(16.5, 0.0);
-		TestCase.assertFalse(rb.isOutside(ct));
-		
-		// test all the way out
-		ct.transform.translate(1.0, 0.0);
-		TestCase.assertTrue(rb.isOutside(ct));
-		
-		// test half way out of a side
-		ct.transform.setTranslation(10.25, 9.25);
-		TestCase.assertFalse(rb.isOutside(ct));
+		TestCase.assertFalse(bounds.isOutside(ct));
 	}
 	
 	/**
@@ -304,74 +261,48 @@ public class RectangularBoundsTest {
 		CollidableTest ct = new CollidableTest(s);
 		
 		// should be in
-		TestCase.assertFalse(rb.isOutside(ct));
+		TestCase.assertFalse(bounds.isOutside(ct));
 		
 		// test half way in and out
 		ct.transform.translate(10.0, 0.0);
-		TestCase.assertFalse(rb.isOutside(ct));
+		TestCase.assertFalse(bounds.isOutside(ct));
 		
 		// test all the way out
 		ct.transform.translate(0.6, 0.0);
-		TestCase.assertTrue(rb.isOutside(ct));
+		TestCase.assertTrue(bounds.isOutside(ct));
 		
 		// test half way out a corner
 		ct.transform.translate(-0.6, 10.0);
-		TestCase.assertFalse(rb.isOutside(ct));
+		TestCase.assertFalse(bounds.isOutside(ct));
 		
 		// test moving the bounds
-		rb.translate(2.0, 1.0);
+		bounds.translate(2.0, 1.0);
 		
 		// test half way in and out
 		ct.transform.translate(2.0, 0.0);
-		TestCase.assertFalse(rb.isOutside(ct));
+		TestCase.assertFalse(bounds.isOutside(ct));
 		
 		// test all the way out
 		ct.transform.translate(1.6, 0.0);
-		TestCase.assertTrue(rb.isOutside(ct));
+		TestCase.assertTrue(bounds.isOutside(ct));
 		
 		// test half way out a corner
 		ct.transform.translate(-1.5, 1.5);
-		TestCase.assertFalse(rb.isOutside(ct));
-
-		// test rotating the bounds
-		rb.rotate(Math.toRadians(45.0), 2.0, 1.0);
-		
-		// test half way out of a corner
-		ct.transform.setTranslation(0.0, 0.0);
-		ct.transform.translate(16.5, 0.0);
-		TestCase.assertFalse(rb.isOutside(ct));
-		
-		// test all the way out
-		ct.transform.translate(1.0, 0.0);
-		TestCase.assertTrue(rb.isOutside(ct));
-		
-		// test half way out of a side
-		ct.transform.setTranslation(10.25, 9.25);
-		TestCase.assertFalse(rb.isOutside(ct));
-	}
-	
-	/**
-	 * Tests setting the bounds to null.
-	 * @since 3.1.0
-	 */
-	@Test(expected = NullPointerException.class)
-	public void setNullBounds() {
-		rb.setBounds(null);
+		TestCase.assertFalse(bounds.isOutside(ct));
 	}
 	
 	/**
 	 * Tests shifting the coordinates of the bounds.
-	 * @since 3.1.0
 	 */
 	@Test
 	public void shiftCoordinates() {
-		Vector2 tx = rb.transform.getTranslation();
+		Vector2 tx = bounds.transform.getTranslation();
 		TestCase.assertEquals(0.000, tx.x, 1.0e-3);
 		TestCase.assertEquals(0.000, tx.y, 1.0e-3);
 		
 		// test the shifting which is really just a translation
-		rb.shiftCoordinates(new Vector2(1.0, 1.0));
-		tx = rb.transform.getTranslation();
+		bounds.shiftCoordinates(new Vector2(1.0, 1.0));
+		tx = bounds.transform.getTranslation();
 		TestCase.assertEquals(1.000, tx.x, 1.0e-3);
 		TestCase.assertEquals(1.000, tx.y, 1.0e-3);
 	}
