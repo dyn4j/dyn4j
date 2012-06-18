@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -28,7 +28,7 @@ package org.dyn4j.dynamics;
  * Contains the current and previous time step information
  * used to update the {@link World}.
  * @author William Bittle
- * @version 3.0.3
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class Step {
@@ -80,7 +80,7 @@ public class Step {
 	 * Updates the current {@link Step} using the new elapsed time.
 	 * @param dt in seconds.
 	 */
-	public void update(double dt) {
+	protected void update(double dt) {
 		this.dt0 = this.dt;
 		this.invdt0 = this.invdt;
 		this.dt = dt;
@@ -89,7 +89,7 @@ public class Step {
 	}
 	
 	/**
-	 * Returns the elapsed time since the last time step.
+	 * Returns the elapsed time since the last time step in seconds.
 	 * @return double
 	 */
 	public double getDeltaTime() {
@@ -97,7 +97,7 @@ public class Step {
 	}
 	
 	/**
-	 * Returns the inverse of the elapsed time since the last time step.
+	 * Returns the inverse of the elapsed time (in seconds) since the last time step.
 	 * @return double
 	 */
 	public double getInverseDeltaTime() {
@@ -116,7 +116,7 @@ public class Step {
 	}
 	
 	/**
-	 * Returns the previous frame's elapsed time.
+	 * Returns the previous frame's elapsed time in seconds.
 	 * @return double
 	 */
 	public double getPrevousDeltaTime() {
@@ -124,7 +124,7 @@ public class Step {
 	}
 
 	/**
-	 * Returns the previous frame's inverse elapsed time.
+	 * Returns the previous frame's inverse elapsed time (in seconds).
 	 * @return double
 	 */
 	public double getPreviousInverseDeltaTime() {

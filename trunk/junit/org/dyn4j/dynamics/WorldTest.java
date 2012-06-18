@@ -29,9 +29,9 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.dyn4j.Listener;
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.collision.BoundsAdapter;
 import org.dyn4j.collision.BoundsListener;
-import org.dyn4j.collision.RectangularBounds;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.collision.broadphase.SapIncremental;
 import org.dyn4j.collision.continuous.ConservativeAdvancement;
@@ -98,7 +98,7 @@ public class WorldTest {
 	public void createSuccess() {
 		// test the two creation methods
 		World w = new World();
-		w = new World(new RectangularBounds(Geometry.createRectangle(1.0, 1.0)));
+		w = new World(new AxisAlignedBounds(1.0, 1.0));
 		// make sure all the other junk is not null
 		TestCase.assertNotNull(w.settings);
 		TestCase.assertNotNull(w.bodies);
@@ -437,10 +437,12 @@ public class WorldTest {
 	@Test
 	public void setBounds() {
 		World w = new World();
-		RectangularBounds rb = new RectangularBounds(Geometry.createRectangle(1.0, 1.0));
-		w.setBounds(rb);
+		AxisAlignedBounds b = new AxisAlignedBounds(1.0, 1.0);
+		w.setBounds(b);
 		
-		TestCase.assertSame(rb, w.getBounds());
+		TestCase.assertNotNull(w.getBounds());
+		TestCase.assertEquals(1.0, ((AxisAlignedBounds)w.getBounds()).getWidth());
+		TestCase.assertEquals(1.0, ((AxisAlignedBounds)w.getBounds()).getHeight());
 	}
 	
 	/**
@@ -823,6 +825,7 @@ public class WorldTest {
 	
 	/**
 	 * Tests the get/add/remove listeners methods.
+	 * @since 3.1.1
 	 */
 	@Test
 	public void listeners() {
@@ -849,12 +852,19 @@ public class WorldTest {
 		w.addListener(ta);
 		w.addListener(na);
 		
+		// test the counting methods
+		int n = w.getListenerCount();
+		TestCase.assertEquals(7, n);
+		
+		n = w.getListenerCount(BoundsListener.class);
+		TestCase.assertEquals(1, n);
+		
 		// we should have 7 listeners now
 		listeners = w.getListeners(Listener.class);
 		TestCase.assertEquals(7, listeners.size());
 		
 		// remove a listener
-		w.removeListener(ta);
+		TestCase.assertTrue(w.removeListener(ta));
 		listeners = w.getListeners(Listener.class);
 		TestCase.assertEquals(6, listeners.size());
 		
@@ -872,8 +882,18 @@ public class WorldTest {
 		TestCase.assertEquals(1, sls.get(0).steps);
 		TestCase.assertEquals(1, sls.get(1).steps);
 		
-		w.removeListeners();
+		// test the remove all listener's of a type
+		n = w.removeAllListeners(WTStepListener.class);
+		listeners = w.getListeners(Listener.class);
+		TestCase.assertEquals(6, listeners.size());
+		TestCase.assertEquals(2, n);
+		List<WTStepListener> wtsls = w.getListeners(WTStepListener.class);
+		TestCase.assertEquals(0, wtsls.size());
+		
+		// test removing all
+		n = w.removeAllListeners();
 		List<Listener> ls = w.getListeners(Listener.class);
 		TestCase.assertEquals(0, ls.size());
+		TestCase.assertEquals(6, n);
 	}
 }

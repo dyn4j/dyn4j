@@ -29,8 +29,8 @@ import java.text.MessageFormat;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.joint.AngleJoint;
@@ -60,7 +60,7 @@ import org.dyn4j.sandbox.resources.Messages;
 /**
  * Utility class used to perform common rendering operations.
  * @author William Bittle
- * @version 1.0.2
+ * @version 1.0.4
  * @since 1.0.0
  */
 public final class RenderUtilities {
@@ -726,15 +726,13 @@ public final class RenderUtilities {
 	 * @param b the bounds
 	 */
 	public static final void drawBounds(GL2 gl, Bounds b) {
-		if (b instanceof RectangularBounds) {
-			RectangularBounds rb = (RectangularBounds)b;
-			Rectangle r = rb.getBounds();
-			Transform t = rb.getTransform();
+		if (b instanceof AxisAlignedBounds) {
+			AxisAlignedBounds aab = (AxisAlignedBounds)b;
+			double w = aab.getWidth();
+			double h = aab.getHeight();
+			Vector2 c = aab.getTranslation();
 			
-			RenderUtilities.pushTransform(gl);
-			RenderUtilities.applyTransform(gl, t);
-			RenderUtilities.drawRectangle(gl, r, false);
-			RenderUtilities.popTransform(gl);
+			RenderUtilities.drawRectangleFromCenter(gl, c.x, c.y, w, h, false);
 		} else {
 			// no rendering available
 		}

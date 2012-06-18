@@ -52,6 +52,7 @@ import org.dyn4j.dynamics.Settings.ContinuousDetectionMode;
 import org.dyn4j.dynamics.contact.Contact;
 import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.dynamics.contact.ContactEdge;
+import org.dyn4j.dynamics.contact.ContactListener;
 import org.dyn4j.dynamics.contact.ContactManager;
 import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.dynamics.contact.TimeOfImpactSolver;
@@ -456,8 +457,8 @@ public class World {
 		}
 		
 		// after all has been updated find new contacts
-		// this done so that the user has the latest contacts
-		// the broadphase has the latest AABBs, etc.
+		// this is done so that the user has the latest contacts
+		// and the broadphase has the latest AABBs, etc.
 		this.detect();
 		
 		// set the update required flag to false
@@ -485,6 +486,11 @@ public class World {
 	 * <p>
 	 * This method will notify all bounds and collision listeners.  If any {@link CollisionListener}
 	 * returns false, the collision is ignored.
+	 * <p>
+	 * This method also notifies using the {@link ContactListener#sensed(ContactPoint)},
+	 * {@link ContactListener#begin(ContactPoint)}, 
+	 * {@link ContactListener#persist(org.dyn4j.dynamics.contact.PersistedContactPoint)}, and
+	 * {@link ContactListener#end(ContactPoint)} methods.
 	 * @since 3.0.0
 	 */
 	protected void detect() {
@@ -661,7 +667,7 @@ public class World {
 	 * This method solves for the time of impact for each {@link Body} iteratively
 	 * and pairwise.
 	 * <p>
-	 * The cases considered are dependent on the current collision detection mode.
+	 * The cases considered are dependent on the given collision detection mode.
 	 * <p>
 	 * Cases skipped (including the converse of the above):
 	 * <ul>
@@ -729,12 +735,15 @@ public class World {
 	 * Then the {@link Body}s are position solved using the {@link TimeOfImpactSolver}
 	 * to force the {@link Body}s into collision.  This causes the discrete collision
 	 * detector to detect the collision on the next time step.
-	 * @param body the {@link Body}
+	 * @param body1 the {@link Body}
 	 * @param listeners the list of {@link TimeOfImpactListener}s
 	 * @since 3.1.0
 	 */
-	protected void solveTOI(Body body, List<TimeOfImpactListener> listeners) {
+	protected void solveTOI(Body body1, List<TimeOfImpactListener> listeners) {
 		int size = this.bodies.size();
+		
+		// generate a swept AABB for this body
+		AABB aabb1 = body1.createSweptAABB();
 		
 		// setup the initial time bounds [0, 1]
 		double t1 = 0.0;
@@ -747,27 +756,32 @@ public class World {
 		// loop over all the other bodies to find the minimum TOI
 		for (int j = 0; j < size; j++) {
 			// get the other body
-			Body b2 = this.bodies.get(j);
+			Body body2 = this.bodies.get(j);
 			
 			// make sure the other body is active
-			if (!b2.isActive()) continue;
+			if (!body2.isActive()) continue;
 			
 			// skip other dynamic bodies; we only do TOI for
 			// dynamic vs. static/kinematic unless its a bullet
-			if (b2.isDynamic() && !body.isBullet()) continue;
+			if (body2.isDynamic() && !body1.isBullet()) continue;
 			
 			// check for connected pairs who's collision is not allowed
-			if (body.isConnected(b2, false)) continue;
+			if (body1.isConnected(body2, false)) continue;
 			
 			// check for bodies already in collision
-			if (body.isInContact(b2)) continue;
+			if (body1.isInContact(body2)) continue;
 			
 			// skip this test if they are the same body
-			if (body == b2) continue;
+			if (body1 == body2) continue;
+			
+			// create a swept AABB for the other body
+			AABB aabb2 = body2.createSweptAABB();
+			// if the swept AABBs don't overlap then don't bother testing them
+			if (!aabb1.overlaps(aabb2)) continue; 
 			
 			// compute the time of impact between the two bodies
 			TimeOfImpact toi = new TimeOfImpact();
-			if (this.timeOfImpactDetector.getTimeOfImpact(body, b2, t1, t2, toi)) {
+			if (this.timeOfImpactDetector.getTimeOfImpact(body1, body2, t1, t2, toi)) {
 				// get the time of impact
 				double t = toi.getToi();
 				// check if the time of impact is less than
@@ -776,7 +790,7 @@ public class World {
 					// if it is then ask the listeners if we should use this collision
 					boolean allow = true;
 					for (TimeOfImpactListener tl : listeners) {
-						if (!tl.collision(body, b2, toi)) {
+						if (!tl.collision(body1, body2, toi)) {
 							// if any toi listener doesnt allow it, then don't allow it
 							// we need to allow all listeners to be notified before we continue
 							allow = false;
@@ -787,7 +801,7 @@ public class World {
 						t2 = t;
 						// save the minimum toi and body
 						minToi = toi;
-						minBody = b2;
+						minBody = body2;
 					}
 				}
 			}
@@ -802,7 +816,7 @@ public class World {
 			double t = minToi.getToi();
 			
 			// move the dynamic body to the time of impact
-			body.transform0.lerp(body.transform, t, body.transform);
+			body1.transform0.lerp(body1.transform, t, body1.transform);
 			// check if the other body is dynamic
 			if (minBody.isDynamic()) {
 				// if the other body is dynamic then interpolate its transform also
@@ -815,7 +829,7 @@ public class World {
 			
 			// performs position correction on the body/bodies so that they are
 			// in collision and will be detected in the next time step
-			this.timeOfImpactSolver.solve(body, minBody, minToi);
+			this.timeOfImpactSolver.solve(body1, minBody, minToi);
 			
 			// this method does not conserve time
 		}
@@ -1042,12 +1056,12 @@ public class World {
 	}
 	
 	/**
-	 * Convenience method to get a list of bodies within the specified Axis-Aligned bounding box.
+	 * Returns a list of bodies within the specified (world-space) axis-aligned bounding box.
 	 * <p>
 	 * If any part of a body is contained in the AABB, it is added to the list.
 	 * <p>
 	 * This performs a static collision test of the world using the {@link BroadphaseDetector}.
-	 * @param aabb the {@link AABB}
+	 * @param aabb the world space {@link AABB}
 	 * @return List&lt;{@link Body}&gt; a list of bodies within the given AABB
 	 * @since 3.1.1
 	 */
@@ -1056,7 +1070,7 @@ public class World {
 	}
 	
 	/**
-	 * Convenience method to get a list of bodies within the specified convex shape.
+	 * Returns a list of bodies within the specified convex shape.
 	 * <p>
 	 * If any part of a body is contained in the convex, it is added to the list.
 	 * <p>
@@ -1071,7 +1085,7 @@ public class World {
 	}
 	
 	/**
-	 * Convenience method to get a list of bodies within the specified convex shape.
+	 * Returns a list of bodies within the specified convex shape.
 	 * <p>
 	 * If any part of a body is contained in the convex, it is added to the list.
 	 * <p>
@@ -1656,6 +1670,7 @@ public class World {
 	/**
 	 * Returns true if upon the next time step the contacts must be updated.
 	 * @return boolean
+	 * @see #setUpdateRequired(boolean)
 	 */
 	public boolean isUpdateRequired() {
 		return this.updateRequired;
@@ -1734,6 +1749,10 @@ public class World {
 	
 	/**
 	 * Returns the bounds of the world.
+	 * <p>
+	 * This will return null if no bounds were initially set
+	 * or if it was set to null via the {@link #setBounds(Bounds)}
+	 * method.
 	 * @return {@link Bounds} the bounds
 	 */
 	public Bounds getBounds() {
@@ -1747,8 +1766,13 @@ public class World {
 	 * Returns an empty list if no listeners for the given type are found.
 	 * <p>
 	 * Returns null if clazz is null.
+	 * <p>
+	 * Example usage:
+	 * <pre>
+	 * world.getListeners(ContactListener.class);
+	 * </pre>
 	 * @param <T> the listener type
-	 * @param clazz the type of listener to get (ContactListener.class for example)
+	 * @param clazz the type of listener to get
 	 * @return List&lt;T&gt;
 	 * @since 3.1.0
 	 */
@@ -1757,11 +1781,11 @@ public class World {
 		if (clazz == null) return null;
 		// create a new list and loop over the listeners
 		List<T> listeners = new ArrayList<T>();
-		for (Listener l : this.listeners) {
+		for (Listener listener : this.listeners) {
 			// check if the listener is of the given type
-			if (clazz.isInstance(l)) {
+			if (clazz.isInstance(listener)) {
 				// if so, add it to the new list
-				listeners.add(clazz.cast(l));
+				listeners.add(clazz.cast(listener));
 			}
 		}
 		// return the new list
@@ -1771,11 +1795,27 @@ public class World {
 	/**
 	 * Adds the given listener to the list of listeners.
 	 * @param listener the listener
+	 * @throws NullPointerException if the given listener is null
+	 * @throws IllegalArgumentException if the given listener has already been added to this world
 	 * @since 3.1.0
 	 */
 	public void addListener(Listener listener) {
+		// make sure its not null
 		if (listener == null) throw new NullPointerException(Messages.getString("dynamics.world.nullListener"));
+		// make sure its not already been added
+		if (this.listeners.contains(listener)) throw new IllegalArgumentException("dynamics.world.addExistingListener");
+		// then add the listener
 		this.listeners.add(listener);
+	}
+	
+	/**
+	 * Returns true if the given listener is already attached to this world.
+	 * @param listener the listener
+	 * @return boolean
+	 * @since 3.1.1
+	 */
+	public boolean containsListener(Listener listener) {
+		return this.listeners.contains(listener);
 	}
 	
 	/**
@@ -1790,10 +1830,84 @@ public class World {
 	
 	/**
 	 * Removes all the listeners.
-	 * @since 3.1.0
+	 * @return int the number of listeners removed
+	 * @since 3.1.1
 	 */
-	public void removeListeners() {
+	public int removeAllListeners() {
+		int count = this.listeners.size();
 		this.listeners.clear();
+		return count;
+	}
+	
+	/**
+	 * Removes all the listeners of the specified type.
+	 * <p>
+	 * Returns zero if the given type is null or there are zero listeners
+	 * attached.
+	 * <p>
+	 * Example usage:
+	 * <pre>
+	 * world.removeAllListeners(ContactListener.class);
+	 * </pre>
+	 * @param clazz the listener type
+	 * @return int the number of listeners removed
+	 * @since 3.1.1
+	 */
+	public <T extends Listener> int removeAllListeners(Class<T> clazz) {
+		// if null, just return
+		if (clazz == null) return 0;
+		// if empty list, return
+		if (this.listeners.isEmpty()) return 0;
+		// loop over the list of listeners
+		int count = 0;
+		Iterator<Listener> listenerIterator = this.listeners.iterator();
+		while (listenerIterator.hasNext()) {
+			Listener listener = listenerIterator.next();
+			if (clazz.isInstance(listener)) {
+				listenerIterator.remove();
+				count++;
+			}
+		}
+		return count;
+	}
+	
+	/**
+	 * Returns the total number of listeners attached to this world.
+	 * @return int
+	 * @since 3.1.1
+	 */
+	public int getListenerCount() {
+		return this.listeners.size();
+	}
+	
+	/**
+	 * Returns the total number of listeners of the given type attached
+	 * to this world.
+	 * <p>
+	 * Returns zero if the given class type is null.
+	 * <p>
+	 * Example usage:
+	 * <pre>
+	 * world.getListenerCount(BoundsListener.class);
+	 * </pre>
+	 * @param clazz the listener type
+	 * @return int
+	 * @since 3.1.1
+	 */
+	public <T extends Listener> int getListenerCount(Class<T> clazz) {
+		// check for null
+		if (clazz == null) return 0;
+		// loop over the listeners
+		int count = 0;
+		for (Listener listener : this.listeners) {
+			// check if the listener is of the given type
+			if (clazz.isInstance(listener)) {
+				// if so, increment
+				count++;
+			}
+		}
+		// return the count
+		return count;
 	}
 	
 	/**
@@ -1907,6 +2021,7 @@ public class World {
 	/**
 	 * Returns the {@link CoefficientMixer}.
 	 * @return {@link CoefficientMixer}
+	 * @see #setCoefficientMixer(CoefficientMixer)
 	 */
 	public CoefficientMixer getCoefficientMixer() {
 		return coefficientMixer;
@@ -1914,8 +2029,17 @@ public class World {
 	
 	/**
 	 * Sets the {@link CoefficientMixer}.
+	 * <p>
+	 * A {@link CoefficientMixer} is an implementation of mixing functions for various
+	 * coefficients used in contact solving.  Common coefficients are restitution and 
+	 * friction.  Since each {@link BodyFixture} can have it's own value for these 
+	 * coefficients, the {@link CoefficientMixer} is used to mathematically combine them
+	 * into one coefficient to be used in contact resolution.
+	 * <p>
+	 * Uses {@link CoefficientMixer#DEFAULT_MIXER} by default.
 	 * @param coefficientMixer the coefficient mixer
 	 * @throws NullPointerException if coefficientMixer is null
+	 * @see CoefficientMixer
 	 */
 	public void setCoefficientMixer(CoefficientMixer coefficientMixer) {
 		if (coefficientMixer == null) throw new NullPointerException(Messages.getString("dynamics.world.nullCoefficientMixer"));
@@ -1924,6 +2048,12 @@ public class World {
 	
 	/**
 	 * Returns the {@link ContactManager}.
+	 * <p>
+	 * The contact manager is used to store contacts for the purpose of notifications
+	 * via the {@link ContactListener} and to warm start contacts for better simulation
+	 * speed and accuracy.
+	 * <p>
+	 * This method should rarely be used by application code.
 	 * @return {@link ContactManager}
 	 * @since 1.0.2
 	 */
@@ -1932,7 +2062,7 @@ public class World {
 	}
 	
 	/**
-	 * Returns the application data associated with this {@link World}.
+	 * Returns the custom application data associated with this {@link World}.
 	 * @return Object
 	 */
 	public Object getUserData() {
@@ -1940,7 +2070,7 @@ public class World {
 	}
 	
 	/**
-	 * Sets the application data associated with this {@link World}.
+	 * Sets the custom application data associated with this {@link World}.
 	 * @param userData the application data
 	 */
 	public void setUserData(Object userData) {
@@ -1948,7 +2078,7 @@ public class World {
 	}
 	
 	/**
-	 * Returns the number of {@link Body} objects.
+	 * Returns the number of {@link Body}s in this {@link World}.
 	 * @return int the number of bodies
 	 */
 	public int getBodyCount() {
@@ -1965,7 +2095,7 @@ public class World {
 	}
 	
 	/**
-	 * Returns the number of {@link Joint} objects.
+	 * Returns the number of {@link Joint}s in this {@link World}.
 	 * @return int the number of joints
 	 */
 	public int getJointCount() {
@@ -1984,6 +2114,9 @@ public class World {
 	/**
 	 * Returns the {@link Step} object used to advance
 	 * the simulation.
+	 * <p>
+	 * The returned object contains the step information (elapsed time)
+	 * for the last and the previous time step.
 	 * @return {@link Step} the current step object
 	 */
 	public Step getStep() {
@@ -2010,6 +2143,7 @@ public class World {
 	 * @throws NullPointerException if body is null
 	 * @throws IllegalArgumentException if body has already been added to this world or if its a member of another world instance
 	 * @deprecated replaced with {@link #addBody(Body)} in 3.1.1
+	 * @see #addBody(Body)
 	 */
 	@Deprecated
 	public void add(Body body) {
@@ -2022,6 +2156,7 @@ public class World {
 	 * @throws NullPointerException if joint is null
 	 * @throws IllegalArgumentException if joint has already been added to this world or if its a member of another world instance
 	 * @deprecated replaced with {@link #addJoint(Joint)} in 3.1.1
+	 * @see #addJoint(Joint)
 	 */
 	@Deprecated
 	public void add(Joint joint) {
@@ -2036,6 +2171,7 @@ public class World {
 	 * @param body the {@link Body} to remove.
 	 * @return boolean true if the body was removed
 	 * @deprecated replaced with {@link #removeBody(Body)} in 3.1.1
+	 * @see #removeBody(Body)
 	 */
 	@Deprecated
 	public boolean remove(Body body) {
@@ -2053,6 +2189,7 @@ public class World {
 	 * @return boolean true if the body was removed
 	 * @since 3.1.0
 	 * @deprecated replaced with {@link #removeBody(Body, boolean)} in 3.1.1
+	 * @see #removeBody(Body, boolean)
 	 */
 	@Deprecated
 	public boolean remove(Body body, boolean notify) {
@@ -2066,6 +2203,7 @@ public class World {
 	 * @param joint the {@link Joint} to remove
 	 * @return boolean true if the {@link Joint} was removed
 	 * @deprecated replaced with {@link #removeJoint(Joint)} in 3.1.1
+	 * @see #removeJoint(Joint)
 	 */
 	@Deprecated
 	public boolean remove(Joint joint) {
@@ -2078,9 +2216,9 @@ public class World {
 	 * This method does <b>not</b> notify of destroyed objects.
 	 * <p>
 	 * Renamed from clear (3.0.0 and below).
-	 * @see #removeAll(boolean)
 	 * @since 3.0.1
 	 * @deprecated replaced with {@link #removeAllBodiesAndJoints()} in 3.1.1
+	 * @see #removeAllBodiesAndJoints()
 	 */
 	@Deprecated
 	public void removeAll() {
@@ -2096,9 +2234,21 @@ public class World {
 	 * @param notify true if destruction of joints and contacts should be notified of by the {@link DestructionListener}
 	 * @since 3.0.1
 	 * @deprecated replaced with {@link #removeAllBodiesAndJoints(boolean)} in 3.1.1
+	 * @see #removeAllBodiesAndJoints(boolean)
 	 */
 	@Deprecated
 	public void removeAll(boolean notify) {
 		this.removeAllBodiesAndJoints(notify);
+	}
+	
+	/**
+	 * Removes all the listeners.
+	 * @since 3.1.0
+	 * @deprecated replaced with {@link #removeAllListeners()} in 3.1.1
+	 * @see #removeAllListeners()
+	 */
+	@Deprecated
+	public void removeListeners() {
+		this.removeAllListeners();
 	}
 }

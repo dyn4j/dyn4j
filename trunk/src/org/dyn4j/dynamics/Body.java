@@ -82,7 +82,7 @@ import org.dyn4j.resources.Messages;
  * setting in the world's {@link Settings}.  Use this if the body is a fast moving
  * body, but be careful as this will incur a performance hit.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class Body implements Swept, Collidable, Transformable {
@@ -455,7 +455,12 @@ public class Body implements Swept, Collidable, Transformable {
 	 * <p>
 	 * This method requires that the center of mass be
 	 * computed first.
+	 * <p>
+	 * The rotation disc radius is the radius, from the center of mass,
+	 * of the disc that encompasses the entire body as if it was rotated
+	 * 360 degrees.
 	 * @since 2.0.0
+	 * @see #getRotationDiscRadius()
 	 */
 	protected void setRotationDiscRadius() {
 		double r = 0.0;
@@ -1086,6 +1091,12 @@ public class Body implements Swept, Collidable, Transformable {
 	
 	/**
 	 * Sets this {@link Body}'s transform.
+	 * <p>
+	 * This method sets both the initial and final transform of this body.  This is 
+	 * important to know when this body is a fast moving body (bullet) and needs to
+	 * be checked for tunneling.  Instead, set the initial and final transforms
+	 * explicitly using {@link #getInitialTransform()} and {@link #getFinalTransform()}
+	 * and calling the {@link Transform#set(Transform)} method.
 	 * @param transform the transform
 	 * @throws NullPointerException if transform is null
 	 * @since 1.1.0
@@ -1124,16 +1135,30 @@ public class Body implements Swept, Collidable, Transformable {
 	 */
 	@Override
 	public AABB createAABB() {
+		return this.createAABB(this.transform);
+	}
+	
+	/**
+	 * Creates an {@link AABB} from this {@link Body} using the given 
+	 * world space {@link Transform}.
+	 * <p>
+	 * This method returns a degenerate AABB, (0.0, 0.0) to (0.0, 0.0),
+	 * for {@link Body}s that have no fixtures.
+	 * @param transform the world space {@link Transform}
+	 * @return {@link AABB}
+	 * @since 3.1.1
+	 */
+	public AABB createAABB(Transform transform) {
 		// get the number of fixtures
 		int size = this.fixtures.size();
 		// make sure there is at least one
 		if (size > 0) {
 			// create the aabb for the first fixture
-			AABB aabb = this.fixtures.get(0).getShape().createAABB(this.transform);
+			AABB aabb = this.fixtures.get(0).getShape().createAABB(transform);
 			// loop over the remaining fixtures, unioning the aabbs
 			for (int i = 1; i < size; i++) {
 				// create the aabb for the current fixture
-				AABB faabb = this.fixtures.get(i).getShape().createAABB(this.transform);
+				AABB faabb = this.fixtures.get(i).getShape().createAABB(transform);
 				// union the aabbs
 				aabb.union(faabb);
 			}
@@ -1141,6 +1166,41 @@ public class Body implements Swept, Collidable, Transformable {
 			return aabb;
 		}
 		return new AABB(0.0, 0.0, 0.0, 0.0);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.continuous.Swept#createSweptAABB()
+	 */
+	@Override
+	public AABB createSweptAABB() {
+		return this.createSweptAABB(this.transform0, this.transform);
+	}
+	
+	/**
+	 * Creates a swept {@link AABB} from the given start and end {@link Transform}s
+	 * for this {@link Body}.
+	 * <p>
+	 * This method may return a degenerate AABB, where the min == max, if the body 
+	 * has not moved and does not have any fixtures.  If this body does have 
+	 * fixtures, but didn't move, an AABB encompassing the initial and final center 
+	 * points is returned.
+	 * @param initialTransform the initial {@link Transform}
+	 * @param finalTransform the final {@link Transform}
+	 * @return {@link AABB}
+	 * @since 3.1.1
+	 */
+	public AABB createSweptAABB(Transform initialTransform, Transform finalTransform) {
+		// get the initial transform's world center
+		Vector2 iCenter = initialTransform.getTransformed(this.mass.getCenter());
+		// get the final transform's world center
+		Vector2 fCenter = finalTransform.getTransformed(this.mass.getCenter());
+		// return an AABB containing both points (expanded into circles by the
+		// rotation disc radius)
+		return new AABB(
+				Math.min(iCenter.x, fCenter.x) - this.radius,
+				Math.min(iCenter.y, fCenter.y) - this.radius,
+				Math.max(iCenter.x, fCenter.x) + this.radius,
+				Math.max(iCenter.y, fCenter.y) + this.radius);
 	}
 	
 	/**

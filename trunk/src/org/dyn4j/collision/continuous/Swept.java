@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -25,12 +25,13 @@
 package org.dyn4j.collision.continuous;
 
 import org.dyn4j.collision.Collidable;
+import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Transform;
 
 /**
  * Represents a {@link Collidable} that can take part in continuous collision detection.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.1.1
  * @since 1.2.0
  */
 public interface Swept extends Collidable {
@@ -57,4 +58,17 @@ public interface Swept extends Collidable {
 	 * @return double the maximum radius of the rotation disk
 	 */
 	public abstract double getRotationDiscRadius();
+	
+	/**
+	 * Returns an AABB that contains the maximal space in which
+	 * the {@link Collidable} exists from the initial transform
+	 * to the final transform.
+	 * <p>
+	 * This method takes the bounding circle, using the world center
+	 * and rotation disc radius, at the initial and final transforms
+	 * and creates an AABB containing both.
+	 * @return {@link AABB}
+	 * @since 3.1.1
+	 */
+	public abstract AABB createSweptAABB();
 }

@@ -681,8 +681,21 @@
 	
 	<xs:complexType name="Bounds">
 		<xs:sequence>
-			<xs:element name="Rectangle" type="Rectangle" maxOccurs="1" minOccurs="1" />
-			<xs:element name="Transform" type="Transform" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Width" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minExclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Height" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minExclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Translation" type="Vector" maxOccurs="1" minOccurs="1" />
 		</xs:sequence>
 	</xs:complexType>
 

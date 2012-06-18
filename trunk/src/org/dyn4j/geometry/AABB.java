@@ -29,7 +29,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents an axis aligned bounding box.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.1
  * @since 3.0.0
  */
 public class AABB {
@@ -82,6 +82,19 @@ public class AABB {
 	public void translate(Vector2 translation) {
 		this.max.add(translation);
 		this.min.add(translation);
+	}
+	
+	/**
+	 * Returns a new AABB of this AABB translated by the
+	 * given translation amount.
+	 * @param translation the translation
+	 * @return AABB
+	 * @since 3.1.1
+	 */
+	public AABB getTranslated(Vector2 translation) {
+		return new AABB(
+				this.min.sum(translation),
+				this.max.sum(translation));
 	}
 	
 	/**
@@ -189,6 +202,32 @@ public class AABB {
 	public boolean contains(AABB aabb) {
 		if (this.min.x <= aabb.min.x && this.max.x >= aabb.max.x) {
 			if (this.min.y <= aabb.min.y && this.max.y >= aabb.max.y) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Returns true if the given point is contained within this {@link AABB}.
+	 * @param point the point to test
+	 * @return boolean
+	 * @since 3.1.1
+	 */
+	public boolean contains(Vector2 point) {
+		return this.contains(point.x, point.y);
+	}
+	
+	/**
+	 * Returns true if the given point's coordinates are contained within this {@link AABB}.
+	 * @param x the x coordinate of the point
+	 * @param y the y coordinate of the point
+	 * @return boolean
+	 * @since 3.1.1
+	 */
+	public boolean contains(double x, double y) {
+		if (this.min.x <= x && this.max.x >= x) {
+			if (this.min.y <= y && this.max.y >= y) {
 				return true;
 			}
 		}

@@ -28,9 +28,9 @@ import java.text.MessageFormat;
 import java.util.List;
 import java.util.Locale;
 
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.collision.Filter;
-import org.dyn4j.collision.RectangularBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.World;
@@ -65,7 +65,7 @@ import org.dyn4j.sandbox.utilities.SystemUtilities;
 /**
  * Class used to export a simulation to xml.
  * @author William Bittle
- * @version 1.0.2
+ * @version 1.0.4
  * @since 1.0.0
  */
 public class XmlGenerator {
@@ -121,18 +121,13 @@ public class XmlGenerator {
 		sb.append(XmlGenerator.toXml(world.getGravity(), "Gravity"));
 		
 		// bounds
-		if (world.getBounds() instanceof RectangularBounds) {
-			RectangularBounds bounds = (RectangularBounds)world.getBounds();
-			Rectangle r = bounds.getBounds();
-			sb.append("<Bounds>");
-			sb.append("<Rectangle Id=\"").append(r.getId()).append("\">")
-			.append(XmlGenerator.toXml(r.getCenter(), "LocalCenter"))
-			.append("<Width>").append(r.getWidth()).append("</Width>")
-			.append("<Height>").append(r.getHeight()).append("</Height>")
-			.append("<LocalRotation>").append(Math.toDegrees(r.getRotation())).append("</LocalRotation>")
-			.append("</Rectangle>");
-			sb.append(XmlGenerator.toXml(bounds.getTransform()));
-			sb.append("</Bounds>");
+		if (world.getBounds() instanceof AxisAlignedBounds) {
+			AxisAlignedBounds bounds = (AxisAlignedBounds)world.getBounds();
+			sb.append("<Bounds>")
+			.append("<Width>").append(bounds.getWidth()).append("</Width>")
+			.append("<Height>").append(bounds.getHeight()).append("</Height>")
+			.append(XmlGenerator.toXml(bounds.getTranslation(), "Translation"))
+			.append("</Bounds>");
 		}
 		
 		// bodies

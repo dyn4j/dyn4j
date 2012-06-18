@@ -33,7 +33,7 @@ import org.junit.Test;
 /**
  * Test case for the AABB class.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.1
  * @since 3.0.0
  */
 public class AABBTest {
@@ -200,6 +200,20 @@ public class AABBTest {
 	@Test
 	public void translate() {
 		AABB aabb = new AABB(-2.0, 0.0, 1.0, 1.0);
+		
+		AABB aabb2 = aabb.getTranslated(new Vector2(-1.0, 2.0));
+		TestCase.assertNotSame(aabb, aabb2);
+		
+		TestCase.assertEquals(-2.0, aabb.getMinX(), 1.0E-4);
+		TestCase.assertEquals( 0.0, aabb.getMinY(), 1.0E-4);
+		TestCase.assertEquals( 1.0, aabb.getMaxX(), 1.0E-4);
+		TestCase.assertEquals( 1.0, aabb.getMaxY(), 1.0E-4);
+		
+		TestCase.assertEquals(-3.0, aabb2.getMinX(), 1.0E-4);
+		TestCase.assertEquals( 2.0, aabb2.getMinY(), 1.0E-4);
+		TestCase.assertEquals( 0.0, aabb2.getMaxX(), 1.0E-4);
+		TestCase.assertEquals( 3.0, aabb2.getMaxY(), 1.0E-4);
+		
 		aabb.translate(new Vector2(-1.0, 2.0));
 		
 		TestCase.assertEquals(-3.0, aabb.getMinX(), 1.0E-4);
@@ -208,4 +222,21 @@ public class AABBTest {
 		TestCase.assertEquals( 3.0, aabb.getMaxY(), 1.0E-4);
 	}
 	
+	/**
+	 * Tests the contains point method.
+	 * @since 3.1.1
+	 */
+	@Test
+	public void containsPoint() {
+		AABB aabb = new AABB(-2.0, 0.0, 2.0, 1.0);
+		
+		// test containment
+		TestCase.assertTrue(aabb.contains(0.0, 0.5));
+		
+		// test no containment
+		TestCase.assertFalse(aabb.contains(0.0, 2.0));
+		
+		// test on edge
+		TestCase.assertTrue(aabb.contains(0.0, 1.0));
+	}
 }
