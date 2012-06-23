@@ -48,6 +48,7 @@ import org.dyn4j.resources.Messages;
  * @version 3.1.1
  * @since 1.0.0
  * @deprecated replaced with {@link AxisAlignedBounds} in 3.1.1
+ * @see AxisAlignedBounds
  */
 @Deprecated
 public class RectangularBounds extends AbstractBounds implements Bounds, Transformable {

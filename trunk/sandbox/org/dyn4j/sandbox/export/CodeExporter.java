@@ -247,10 +247,10 @@ public class CodeExporter {
 			}
 			// set force/torque accumulators
 			if (!body.getAccumulatedForce().isZero()) {
-				sb.append(TAB2).append("body").append(i).append(".apply(").append(export(body.getAccumulatedForce())).append(");").append(NEW_LINE);
+				sb.append(TAB2).append("body").append(i).append(".applyForce(").append(export(body.getAccumulatedForce())).append(");").append(NEW_LINE);
 			}
 			if (Math.abs(body.getAccumulatedTorque()) > Epsilon.E) {
-				sb.append(TAB2).append("body").append(i).append(".apply(").append(body.getAccumulatedTorque()).append(");").append(NEW_LINE);
+				sb.append(TAB2).append("body").append(i).append(".applyTorque(").append(body.getAccumulatedTorque()).append(");").append(NEW_LINE);
 			}
 			// set state properties
 			if (!body.isActive()) {

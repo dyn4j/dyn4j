@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,6 +33,9 @@ import org.dyn4j.resources.Messages;
 
 /**
  * Represents a part of a {@link Collidable}.
+ * <p>
+ * A {@link Fixture} has a one-to-one relationship with a {@link Convex} {@link Shape}.
+ * Each {@link Collidable} can have any number of {@link Fixture}s attached.
  * @author William Bittle
  * @version 3.0.2
  * @since 2.0.0

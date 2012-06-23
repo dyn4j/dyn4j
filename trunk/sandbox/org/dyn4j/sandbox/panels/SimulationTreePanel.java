@@ -1489,7 +1489,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 				// make sure the user accepted the input
 				if (f != null) {
 					synchronized (Simulation.LOCK) {
-						body.apply(f);
+						body.applyForce(f);
 					}
 				}
 			}
@@ -1516,7 +1516,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 				if (torque != 0.0) {
 					// apply it to the body
 					synchronized (Simulation.LOCK) {
-						body.apply(torque);
+						body.applyTorque(torque);
 					}
 				}
 			}
@@ -1543,7 +1543,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 				if (forcePoint != null) {
 					// apply it to the body
 					synchronized (Simulation.LOCK) {
-						body.apply(forcePoint[0], forcePoint[1]);
+						body.applyForce(forcePoint[0], forcePoint[1]);
 					}
 				}
 			}

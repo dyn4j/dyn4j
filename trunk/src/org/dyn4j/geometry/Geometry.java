@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -358,7 +358,7 @@ public class Geometry {
 	}
 	
 	/**
-	 * Returns a new {@link Circle} with the given radius.
+	 * Returns a new {@link Circle} with the given radius centered on the origin.
 	 * @param radius the radius in meters
 	 * @return {@link Circle}
 	 * @throws IllegalArgumentException if radius is less than or equal to zero
@@ -372,10 +372,13 @@ public class Geometry {
 	 * <p>
 	 * This method makes a copy of both the array and the vertices within the array to 
 	 * create the new {@link Polygon}.
+	 * <p>
+	 * The center of the {@link Polygon} will be computed using the area weighted method.
 	 * @param vertices the array of vertices
 	 * @return {@link Polygon}
 	 * @throws NullPointerException if vertices is null or an element of vertices is null
 	 * @throws IllegalArgumentException if vertices contains less than 3 non-null vertices
+	 * @see #createPolygonAtOrigin(Vector2...) to create a new {@link Polygon} that is centered on the origin
 	 */
 	public static final Polygon createPolygon(Vector2... vertices) {
 		// check the vertices array
@@ -397,7 +400,7 @@ public class Geometry {
 	}
 	
 	/**
-	 * Returns a new {@link Polygon} with the given vertices centered at the origin.
+	 * Returns a new {@link Polygon}, using the given vertices, centered at the origin.
 	 * <p>
 	 * This method makes a copy of both the array and the vertices within the array to 
 	 * create the new {@link Polygon}.
@@ -417,10 +420,10 @@ public class Geometry {
 	
 	/**
 	 * Returns a new {@link Polygon} object with count number of points, where the
-	 * points are evenly distributed around the unit circle.
+	 * points are evenly distributed around the unit circle.  The resulting {@link Polygon}
+	 * will be centered on the origin.
 	 * <p>
-	 * The radius parameter is the distance from the center of the polygon 
-	 * (the origin) to each vertex.
+	 * The radius parameter is the distance from the center of the polygon to each vertex.
 	 * @see #createUnitCirclePolygon(int, double, double)
 	 * @param count the number of vertices
 	 * @param radius the radius from the center to each vertex in meters
@@ -433,10 +436,10 @@ public class Geometry {
 	
 	/**
 	 * Returns a new {@link Polygon} object with count number of points, where the
-	 * points are evenly distributed around the unit circle.
+	 * points are evenly distributed around the unit circle.  The resulting {@link Polygon}
+	 * will be centered on the origin.
 	 * <p>
-	 * The radius parameter is the distance from the center of the polygon 
-	 * (the origin) to each vertex.
+	 * The radius parameter is the distance from the center of the polygon to each vertex.
 	 * <p>
 	 * The theta parameter is a vertex angle offset used to rotate all the vertices
 	 * by the given amount.
@@ -460,7 +463,8 @@ public class Geometry {
 	}
 	
 	/**
-	 * Creates a new {@link Rectangle} with the given size centered at the origin.
+	 * Creates a square (equal height and width {@link Rectangle}) with the given size 
+	 * centered at the origin.
 	 * @param size the size in meters
 	 * @return {@link Rectangle}
 	 * @throws IllegalArgumentException if size is less than or equal to zero
@@ -483,14 +487,17 @@ public class Geometry {
 	}
 	
 	/**
-	 * Creates a new {@link Triangle} with the given points.
+	 * Creates a new {@link Triangle}, using the given points.
 	 * <p>
 	 * This method makes a copy of the given points to create the {@link Triangle}.
+	 * <p>
+	 * The center of the {@link Triangle} will be computed using the area weighted method.
 	 * @param p1 the first point
 	 * @param p2 the second point
 	 * @param p3 the third point
 	 * @return {@link Triangle}
 	 * @throws NullPointerException if p1, p2, or p3 is null
+	 * @see #createTriangleAtOrigin(Vector2, Vector2, Vector2) to create a new {@link Triangle} that is centered on the origin
 	 */
 	public static final Triangle createTriangle(Vector2 p1, Vector2 p2, Vector2 p3) {
 		if (p1 == null || p2 == null || p3 == null) throw new NullPointerException(Messages.getString("geometry.nullTrianglePoint"));
@@ -594,10 +601,13 @@ public class Geometry {
 	 * Creates a new {@link Segment} with the given points.
 	 * <p>
 	 * This method makes a copy of the given points to create the {@link Segment}.
+	 * <p>
+	 * The center of the {@link Segment} will be the average of the two points.
 	 * @param p1 the first point
 	 * @param p2 the second point
 	 * @return {@link Segment}
 	 * @throws NullPointerException if p1 or p2 is null
+	 * @see #createSegmentAtOrigin(Vector2, Vector2) to create a {@link Segment} centered on the origin
 	 */
 	public static final Segment createSegment(Vector2 p1, Vector2 p2) {
 		if (p1 == null || p2 == null) throw new NullPointerException(Messages.getString("geometry.nullSegmentPoint"));

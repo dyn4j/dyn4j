@@ -27,15 +27,17 @@ package org.dyn4j.dynamics.contact;
 import org.dyn4j.Listener;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.CollisionListener;
 import org.dyn4j.dynamics.World;
 
 /**
  * Represents an object that is notified of contact events.
  * <p>
  * Implement this interface and register it with the {@link World}
- * to be notified when contact events occur.
+ * to be notified when contact events occur.  Contact events occur after all 
+ * {@link CollisionListener} events have been raised.
  * <p>
- * {@link Body} objects can be removed from the {@link World} from any of these methods.
+ * Modification of the {@link World} is permitted from any of these methods.
  * <p>
  * If a body is to be removed, make sure to return false to disable the contact.  Otherwise
  * the contact between the bodies will still be resolved even if the body has been removed.

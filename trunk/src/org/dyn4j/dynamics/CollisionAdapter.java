@@ -34,6 +34,8 @@ import org.dyn4j.dynamics.contact.ContactConstraint;
  * <p>
  * This class can be used to implement only the methods desired instead of all
  * the methods contained in the {@link CollisionListener} interface.
+ * <p>
+ * By default this class allows processing to continue for all collision events.
  * @author William Bittle
  * @version 3.1.0
  * @since 1.0.0

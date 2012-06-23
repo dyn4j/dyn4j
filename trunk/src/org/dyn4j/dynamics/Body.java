@@ -251,12 +251,50 @@ public class Body implements Swept, Collidable, Transformable {
 	 * @param convex the {@link Convex} {@link Shape} to add to the {@link Body}
 	 * @return {@link BodyFixture} the fixture created using the given {@link Shape} and added to the {@link Body}
 	 * @throws NullPointerException if convex is null
+	 * @see #addFixture(Convex, double, double, double)
 	 */
 	public BodyFixture addFixture(Convex convex) {
 		// make sure the convex shape is not null
 		if (convex == null) throw new NullPointerException(Messages.getString("dynamics.body.addNullShape"));
 		// create the fixture
 		BodyFixture fixture = new BodyFixture(convex);
+		// add the fixture to the body
+		this.fixtures.add(fixture);
+		// return the fixture so the caller can configure it
+		return fixture;
+	}
+	
+	/**
+	 * Creates a {@link BodyFixture} for the given {@link Convex} {@link Shape},
+	 * adds it to the {@link Body}, and returns it for configuration.
+	 * <p>
+	 * After adding or removing fixtures make sure to call the {@link #setMass()}
+	 * or {@link #setMass(Mass.Type)} method to compute the new total
+	 * {@link Mass} for the body.
+	 * <p>
+	 * This is a convenience method for setting the properties of a {@link BodyFixture}.
+	 * Use the {@link BodyFixture#DEFAULT_DENSITY}, {@link BodyFixture#DEFAULT_FRICTION},
+	 * and {@link BodyFixture#DEFAULT_RESTITUTION} values if you need to only set one
+	 * of these properties.  
+	 * @param convex the {@link Convex} {@link Shape} to add to the {@link Body}
+	 * @param density the density of the shape in kg/m<sup>2</sup>; in the range (0.0, &infin;]
+	 * @param friction the coefficient of friction; in the range [0.0, &infin;]
+	 * @param restitution the coefficient of restitution; in the range [0.0, &infin;]
+	 * @return {@link BodyFixture} the fixture created using the given {@link Shape} and added to the {@link Body}
+	 * @throws NullPointerException if convex is null
+	 * @throws IllegalArgumentException if density is less than or equal to zero; if friction or restitution is less than zero
+	 * @see #addFixture(Convex)
+	 * @since 3.1.1
+	 */
+	public BodyFixture addFixture(Convex convex, double density, double friction, double restitution) {
+		// make sure the convex shape is not null
+		if (convex == null) throw new NullPointerException(Messages.getString("dynamics.body.addNullShape"));
+		// create the fixture
+		BodyFixture fixture = new BodyFixture(convex);
+		// set the properties
+		fixture.setDensity(density);
+		fixture.setFriction(friction);
+		fixture.setRestitution(restitution);
 		// add the fixture to the body
 		this.fixtures.add(fixture);
 		// return the fixture so the caller can configure it
@@ -333,6 +371,16 @@ public class Body implements Swept, Collidable, Transformable {
 		this.fixtures = new ArrayList<BodyFixture>(Body.TYPICAL_FIXTURE_COUNT);
 		// return the current list
 		return fixtures;
+	}
+	
+	/**
+	 * Returns true if this {@link Body} contains the given {@link BodyFixture}.
+	 * @param fixture the fixture
+	 * @return boolean
+	 * @since 3.1.1
+	 */
+	public boolean containsFixture(BodyFixture fixture) {
+		return this.fixtures.contains(fixture);
 	}
 	
 	/**
@@ -501,13 +549,27 @@ public class Body implements Swept, Collidable, Transformable {
 	 * Applies the given force to this {@link Body}.
 	 * <p>
 	 * This method will wake-up the body if its sleeping.
+	 * <p>
+	 * This method does not apply the force if this body 
+	 * returns zero from the {@link Mass#getMass()} method.
+	 * <p>
+	 * The force is not applied immediately, but instead stored in the 
+	 * force accumulator ({@link #getAccumulatedForce()}).  This is to 
+	 * preserve the last time step's computed force ({@link #getForce()}.
 	 * @param force the force
 	 * @return {@link Body} this body
 	 * @throws NullPointerException if force is null
+	 * @since 3.1.1
 	 */
-	public Body apply(Vector2 force) {
+	public Body applyForce(Vector2 force) {
 		// check for null
 		if (force == null) throw new NullPointerException(Messages.getString("dynamics.body.nullForce"));
+		// check the linear mass of the body
+		if (this.mass.getMass() == 0.0) {
+			// this means that applying a force will do nothing
+			// so, just return
+			return this;
+		}
 		// apply the force
 		this.forces.add(new Force(force));
 		// wake up the body
@@ -520,13 +582,27 @@ public class Body implements Swept, Collidable, Transformable {
 	 * Applies the given {@link Force} to this {@link Body}.
 	 * <p>
 	 * This method will wake-up the body if its sleeping.
+	 * <p>
+	 * This method does not apply the force if this body 
+	 * returns zero from the {@link Mass#getMass()} method.
+	 * <p>
+	 * The force is not applied immediately, but instead stored in the 
+	 * force accumulator ({@link #getAccumulatedForce()}).  This is to 
+	 * preserve the last time step's computed force ({@link #getForce()}.
 	 * @param force the force
 	 * @return {@link Body} this body
 	 * @throws NullPointerException if force is null
+	 * @since 3.1.1
 	 */
-	public Body apply(Force force) {
+	public Body applyForce(Force force) {
 		// check for null
 		if (force == null) throw new NullPointerException(Messages.getString("dynamics.body.nullForce"));
+		// check the linear mass of the body
+		if (this.mass.getMass() == 0.0) {
+			// this means that applying a force will do nothing
+			// so, just return
+			return this;
+		}
 		// add the force to the list
 		this.forces.add(force);
 		// wake up the body
@@ -539,12 +615,26 @@ public class Body implements Swept, Collidable, Transformable {
 	 * Applies the given torque about the center of this {@link Body}.
 	 * <p>
 	 * This method will wake-up the body if its sleeping.
+	 * <p>
+	 * This method does not apply the torque if this body returns 
+	 * zero from the {@link Mass#getInertia()} method.
+	 * <p>
+	 * The torque is not applied immediately, but instead stored in the 
+	 * torque accumulator ({@link #getAccumulatedTorque()}).  This is to 
+	 * preserve the last time step's computed torque ({@link #getTorque()}.
 	 * @param torque the torque about the center
 	 * @return {@link Body} this body
+	 * @since 3.1.1
 	 */
-	public Body apply(double torque) {
+	public Body applyTorque(double torque) {
 		// apply the torque
 		this.torques.add(new Torque(torque));
+		// check the angular mass of the body
+		if (this.mass.getInertia() == 0.0) {
+			// this means that applying a torque will do nothing
+			// so, just return
+			return this;
+		}
 		// wake up the body
 		this.setAsleep(false);
 		// return this body
@@ -555,13 +645,27 @@ public class Body implements Swept, Collidable, Transformable {
 	 * Applies the given {@link Torque} to this {@link Body}.
 	 * <p>
 	 * This method will wake-up the body if its sleeping.
+	 * <p>
+	 * This method does not apply the torque if this body returns 
+	 * zero from the {@link Mass#getInertia()} method.
+	 * <p>
+	 * The torque is not applied immediately, but instead stored in the 
+	 * torque accumulator ({@link #getAccumulatedTorque()}).  This is to 
+	 * preserve the last time step's computed torque ({@link #getTorque()}.
 	 * @param torque the torque
 	 * @return {@link Body} this body
 	 * @throws NullPointerException if torque is null
+	 * @since 3.1.1
 	 */
-	public Body apply(Torque torque) {
+	public Body applyTorque(Torque torque) {
 		// check for null
 		if (torque == null) throw new NullPointerException(Messages.getString("dynamics.body.nullTorque"));
+		// check the angular mass of the body
+		if (this.mass.getInertia() == 0.0) {
+			// this means that applying a torque will do nothing
+			// so, just return
+			return this;
+		}
 		// add the torque to the list
 		this.torques.add(torque);
 		// wake up the body
@@ -575,29 +679,163 @@ public class Body implements Swept, Collidable, Transformable {
 	 * given point (torque).
 	 * <p>
 	 * This method will wake-up the body if its sleeping.
+	 * <p>
+	 * This method does not apply the force if this body  
+	 * returns zero from the {@link Mass#getMass()} method nor 
+	 * will it apply the torque if this body returns 
+	 * zero from the {@link Mass#getInertia()} method.
+	 * <p>
+	 * The force/torque is not applied immediately, but instead stored in the 
+	 * force/torque accumulators ({@link #getAccumulatedForce()} and
+	 * {@link #getAccumulatedTorque()}).  This is to preserve the last time 
+	 * step's computed force ({@link #getForce()} and torque ({@link #getTorque()}).
 	 * @param force the force
 	 * @param point the application point in world coordinates
 	 * @return {@link Body} this body
 	 * @throws NullPointerException if force or point is null
+	 * @since 3.1.1
 	 */
-	public Body apply(Vector2 force, Vector2 point) {
+	public Body applyForce(Vector2 force, Vector2 point) {
 		// check for null
 		if (force == null) throw new NullPointerException(Messages.getString("dynamics.body.nullForceForTorque"));
 		if (point == null) throw new NullPointerException(Messages.getString("dynamics.body.nullPointForTorque"));
-		// apply the force
-		this.forces.add(new Force(force));
-		// compute the moment r
-		Vector2 r = this.getWorldCenter().to(point);
-		// check for the zero vector
-		if (!r.isZero()) {
-			// find the torque about the given point
-			double tao = r.cross(force);
-			// apply the torque
-			this.torques.add(new Torque(tao));
+		boolean awaken = false;
+		// check the linear mass of the body
+		if (this.mass.getMass() != 0.0) {
+			// apply the force
+			this.forces.add(new Force(force));
+			awaken = true;
 		}
+		// check the angular mass of the body
+		if (this.mass.getInertia() != 0.0) {
+			// compute the moment r
+			Vector2 r = this.getWorldCenter().to(point);
+			// check for the zero vector
+			if (!r.isZero()) {
+				// find the torque about the given point
+				double tao = r.cross(force);
+				// apply the torque
+				this.torques.add(new Torque(tao));
+				awaken = true;
+			}
+		}
+		// see if we applied either
+		if (awaken) {
+			// wake up the body
+			this.setAsleep(false);
+		}
+		// return this body to facilitate chaining
+		return this;
+	}
+	
+	/**
+	 * Applies a linear impulse to this {@link Body} at its center of mass.
+	 * <p>
+	 * This method will wake-up the body if its sleeping.
+	 * <p>
+	 * This method does not apply the impulse if this body's mass 
+	 * returns zero from the {@link Mass#getInertia()} method.
+	 * <p>
+	 * <b>NOTE:</b> Applying an impulse differs from applying a force and/or torque. Forces
+	 * and torques are stored in accumulators, but impulses are applied to the
+	 * velocities of the body immediately.
+	 * @param impulse the impulse to apply
+	 * @return {@link Body} this body
+	 * @throws NullPointerException if impulse is null
+	 * @since 3.1.1
+	 */
+	public Body applyImpulse(Vector2 impulse) {
+		// check for null
+		if (impulse == null) throw new NullPointerException(Messages.getString("dynamics.body.nullImpulse"));
+		// get the inverse linear mass
+		double invM = this.mass.getInverseMass();
+		// check the linear mass
+		if (invM == 0.0) {
+			// this means that applying an impulse will do nothing
+			// so, just return
+			return this;
+		}
+		// apply the impulse immediately
+		this.velocity.add(impulse.x * invM, impulse.y * invM);
 		// wake up the body
 		this.setAsleep(false);
-		// return this body to facilitate chaining
+		// return this body
+		return this;
+	}
+	
+	/**
+	 * Applies an angular impulse to this {@link Body} about its center of mass.
+	 * <p>
+	 * This method will wake-up the body if its sleeping.
+	 * <p>
+	 * This method does not apply the impulse if this body's inertia 
+	 * returns zero from the {@link Mass#getInertia()} method.
+	 * <p>
+	 * <b>NOTE:</b> Applying an impulse differs from applying a force and/or torque. Forces
+	 * and torques are stored in accumulators, but impulses are applied to the
+	 * velocities of the body immediately.
+	 * @param impulse the impulse to apply
+	 * @return {@link Body} this body
+	 * @since 3.1.1
+	 */
+	public Body applyImpulse(double impulse) {
+		double invI = this.mass.getInverseInertia();
+		// check the angular mass
+		if (invI == 0.0) {
+			// this means that applying an impulse will do nothing
+			// so, just return
+			return this;
+		}
+		// apply the impulse immediately
+		this.angularVelocity += invI * impulse;
+		// wake up the body
+		this.setAsleep(false);
+		// return this body
+		return this;
+	}
+	
+	/**
+	 * Applies an impulse to this {@link Body} at the given point.
+	 * <p>
+	 * This method will wake-up the body if its sleeping.
+	 * <p>
+	 * This method does not apply the linear impulse if this body 
+	 * returns zero from the {@link Mass#getMass()} method nor 
+	 * will it apply the angular impulse if this body returns 
+	 * zero from the {@link Mass#getInertia()} method.
+	 * <p>
+	 * <b>NOTE:</b> Applying an impulse differs from applying a force and/or torque. Forces
+	 * and torques are stored in accumulators, but impulses are applied to the
+	 * velocities of the body immediately.
+	 * @param impulse the impulse to apply
+	 * @param point the world space point to apply the impulse
+	 * @return {@link Body} this body
+	 * @throws NullPointerException if impulse or point is null
+	 * @since 3.1.1
+	 */
+	public Body applyImpulse(Vector2 impulse, Vector2 point) {
+		// check for null
+		if (impulse == null) throw new NullPointerException(Messages.getString("dynamics.body.nullImpulse"));
+		if (point == null) throw new NullPointerException(Messages.getString("dynamics.body.nullPointForImpulse"));
+		boolean awaken = false;
+		// get the inverse mass
+		double invM = this.mass.getInverseMass();
+		double invI = this.mass.getInverseInertia();
+		// check the linear mass
+		if (invM != 0.0) {
+			// apply the impulse immediately
+			this.velocity.add(impulse.x * invM, impulse.y * invM);
+		}
+		if (invI != 0.0) {
+			// apply the impulse immediately
+			Vector2 r = this.getWorldCenter().to(point);
+			this.angularVelocity += invI * r.cross(impulse);
+		}
+		if (awaken) {
+			// wake up the body
+			this.setAsleep(false);
+		}
+		// return this body
 		return this;
 	}
 	
@@ -1550,5 +1788,83 @@ public class Body implements Swept, Collidable, Transformable {
 		}
 		// return the connected bodies
 		return contactPoints;
+	}
+	
+	// deprecated methods
+	
+	/**
+	 * Applies the given force to this {@link Body} at the
+	 * given point (torque).
+	 * <p>
+	 * This method will wake-up the body if its sleeping.
+	 * @param force the force
+	 * @param point the application point in world coordinates
+	 * @return {@link Body} this body
+	 * @throws NullPointerException if force or point is null
+	 * @deprecated replaced with {@link #applyForce(Vector2, Vector2)} in 3.1.1
+	 * @see #applyForce(Vector2, Vector2)
+	 */
+	@Deprecated
+	public Body apply(Vector2 force, Vector2 point) {
+		return this.applyForce(force, point);
+	}
+	
+	/**
+	 * Applies the given {@link Torque} to this {@link Body}.
+	 * <p>
+	 * This method will wake-up the body if its sleeping.
+	 * @param torque the torque
+	 * @return {@link Body} this body
+	 * @throws NullPointerException if torque is null
+	 * @deprecated replaced with {@link #applyTorque(Torque)} in 3.1.1
+	 * @see #applyTorque(Torque)
+	 */
+	@Deprecated
+	public Body apply(Torque torque) {
+		return this.applyTorque(torque);
+	}
+	
+	/**
+	 * Applies the given torque about the center of this {@link Body}.
+	 * <p>
+	 * This method will wake-up the body if its sleeping.
+	 * @param torque the torque about the center
+	 * @return {@link Body} this body
+	 * @deprecated replaced with {@link #applyTorque(double)} in 3.1.1
+	 * @see #applyTorque(double)
+	 */
+	@Deprecated
+	public Body apply(double torque) {
+		return this.applyTorque(torque);
+	}
+	
+	/**
+	 * Applies the given {@link Force} to this {@link Body}.
+	 * <p>
+	 * This method will wake-up the body if its sleeping.
+	 * @param force the force
+	 * @return {@link Body} this body
+	 * @throws NullPointerException if force is null
+	 * @deprecated replaced with {@link #applyForce(Force)} in 3.1.1
+	 * @see #applyForce(Force)
+	 */
+	@Deprecated
+	public Body apply(Force force) {
+		return this.applyForce(force);
+	}
+
+	/**
+	 * Applies the given force to this {@link Body}.
+	 * <p>
+	 * This method will wake-up the body if its sleeping.
+	 * @param force the force
+	 * @return {@link Body} this body
+	 * @throws NullPointerException if force is null
+	 * @deprecated replaced with {@link #applyForce(Vector2)} in 3.1.1
+	 * @see #applyForce(Vector2)
+	 */
+	@Deprecated
+	public Body apply(Vector2 force) {
+		return this.applyForce(force);
 	}
 }

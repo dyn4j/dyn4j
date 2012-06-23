@@ -29,6 +29,12 @@ import org.dyn4j.collision.continuous.TimeOfImpact;
 
 /**
  * Interface to listen for time of impact events.
+ * <p>
+ * Time of impact events are events fired when a collision was missed by
+ * the static collision detection routines, and then caught by the continuous
+ * collision detection routines.
+ * <p>
+ * Modification of the {@link World} is not permitted during these methods.
  * @author William Bittle
  * @version 3.1.0
  * @since 1.2.0
@@ -38,7 +44,7 @@ public interface TimeOfImpactListener extends Listener {
 	 * Called when a time of impact has been detected between two bodies.
 	 * <p>
 	 * Returning true from this method indicates that the collision of these
-	 * two {@link Body}s should be processed.
+	 * two {@link Body}s should be processed (solved).
 	 * <p>
 	 * The values of the <code>toi</code> parameter can be changed in this method.
 	 * @param body1 the first {@link Body}

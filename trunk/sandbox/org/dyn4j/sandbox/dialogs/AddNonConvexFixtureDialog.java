@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -56,7 +56,7 @@ import org.dyn4j.sandbox.resources.Messages;
 /**
  * Dialog to add a new fixture to an existing body.
  * @author William Bittle
- * @version 1.0.1
+ * @version 1.0.4
  * @since 1.0.0
  */
 public class AddNonConvexFixtureDialog extends JDialog implements ActionListener {
@@ -205,7 +205,7 @@ public class AddNonConvexFixtureDialog extends JDialog implements ActionListener
 					convex.translate(tx);
 				}
 				if (a != 0.0) {
-					convex.rotate(a);
+					convex.rotateAboutCenter(a);
 				}
 				
 				bf.setDensity(fixture.getDensity());

@@ -262,7 +262,7 @@ public class ExampleGraphics2D extends JFrame {
 		circle.setMass();
 		circle.translate(2.0, 2.0);
 		// test adding some force
-		circle.apply(new Vector2(-100.0, 0.0));
+		circle.applyForce(new Vector2(-100.0, 0.0));
 		// set some linear damping to simulate rolling friction
 		circle.setLinearDamping(0.05);
 		this.world.addBody(circle);

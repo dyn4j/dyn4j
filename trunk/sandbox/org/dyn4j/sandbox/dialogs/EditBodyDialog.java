@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -50,7 +50,7 @@ import org.dyn4j.sandbox.resources.Messages;
 /**
  * Dialog to create a new body without any fixtures.
  * @author William Bittle
- * @version 1.0.1
+ * @version 1.0.4
  * @since 1.0.0
  */
 public class EditBodyDialog extends JDialog implements ActionListener {
@@ -80,8 +80,8 @@ public class EditBodyDialog extends JDialog implements ActionListener {
 		this.body = new SandboxBody();
 		
 		// copy over the force/torque
-		this.body.apply(body.getAccumulatedForce());
-		this.body.apply(body.getAccumulatedTorque());
+		this.body.applyForce(body.getAccumulatedForce());
+		this.body.applyTorque(body.getAccumulatedTorque());
 		
 		// add the fixtures to the body copy
 		// its possible that the mass will be reset here on

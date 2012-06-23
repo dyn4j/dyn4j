@@ -31,6 +31,10 @@ import org.dyn4j.dynamics.joint.Joint;
 
 /**
  * Listens for implicit destruction events.
+ * <p>
+ * These events can happen when, for example, a {@link Body} is removed from a {@link World}
+ * where it was attached to a {@link Joint}.  The joint must be removed as well.  These methods
+ * will be called when any such implicit destruction events happen.
  * @author William Bittle
  * @version 3.1.1
  * @since 1.0.0
@@ -38,6 +42,8 @@ import org.dyn4j.dynamics.joint.Joint;
 public interface DestructionListener extends Listener {
 	/**
 	 * Called when implicit destruction of a {@link Joint} has occurred.
+	 * <p>
+	 * Modification of the {@link World} is permitted during this method.
 	 * @see World#removeBody(Body)
 	 * @see World#removeAllBodiesAndJoints(boolean)
 	 * @param joint the {@link Joint} that was destroyed
@@ -46,6 +52,8 @@ public interface DestructionListener extends Listener {
 	
 	/**
 	 * Called when implicit destruction of a {@link ContactConstraint} has occurred.
+	 * <p>
+	 * Modification of the {@link World} is not permitted during this method.
 	 * @see World#removeBody(Body)
 	 * @see World#removeAllBodiesAndJoints(boolean)
 	 * @param contactPoint the {@link ContactPoint} that was destroyed
@@ -54,6 +62,8 @@ public interface DestructionListener extends Listener {
 	
 	/**
 	 * Called when implicit destruction of a {@link Body} has occurred.
+	 * <p>
+	 * Modification of the {@link World} is not permitted during this method.
 	 * @see World#removeAllBodiesAndJoints(boolean)
 	 * @param body the {@link Body} that was destroyed
 	 * @since 1.0.2

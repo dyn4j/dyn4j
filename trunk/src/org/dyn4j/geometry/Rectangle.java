@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -44,7 +44,9 @@ public class Rectangle extends Polygon implements Shape, Transformable {
 	/**
 	 * Full constructor.
 	 * <p>
-	 * The center of the {@link Rectangle} is (0, 0).
+	 * The center of the rectangle will be the origin.
+	 * <p>
+	 * A rectangle must have a width and height greater than zero.
 	 * @param width the width
 	 * @param height the height
 	 * @throws IllegalArgumentException if width or height is less than or equal to zero

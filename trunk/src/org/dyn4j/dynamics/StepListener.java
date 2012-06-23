@@ -28,6 +28,8 @@ import org.dyn4j.Listener;
 
 /**
  * Listener notified before and after a simulation step by the {@link World}.
+ * <p>
+ * Modification of the {@link World} is permitted in any of these methods.
  * @author William Bittle
  * @version 3.1.0
  * @since 1.0.0
@@ -42,10 +44,11 @@ public interface StepListener extends Listener {
 	
 	/**
 	 * Called after collision detection and contact updates have been performed due
-	 * to a call to the {@link World#setUpdateRequired(boolean)}.
+	 * to a call to the {@link World#setUpdateRequired(boolean)} passing true.
 	 * @param step the step information
 	 * @param world the simulation {@link World}
 	 * @since 3.0.1
+	 * @see World#setUpdateRequired(boolean)
 	 */
 	public void updatePerformed(Step step, World world);
 	

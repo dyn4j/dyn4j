@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -38,6 +38,12 @@ package org.dyn4j.geometry;
 public class Triangle extends Polygon implements Convex, Shape, Transformable {
 	/**
 	 * Full constructor.
+	 * <p>
+	 * Creates a new triangle using the given points.  The center will be the area
+	 * weighted center of the points.
+	 * <p>
+	 * A triangle must have 3 non-null points of which one is not colinear with the
+	 * other two.
 	 * @param point1 the first point
 	 * @param point2 the second point
 	 * @param point3 the third point

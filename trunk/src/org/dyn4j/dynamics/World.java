@@ -1850,6 +1850,7 @@ public class World {
 	 * <pre>
 	 * world.removeAllListeners(ContactListener.class);
 	 * </pre>
+	 * @param <T> the listener type
 	 * @param clazz the listener type
 	 * @return int the number of listeners removed
 	 * @since 3.1.1
@@ -1891,6 +1892,7 @@ public class World {
 	 * <pre>
 	 * world.getListenerCount(BoundsListener.class);
 	 * </pre>
+	 * @param <T> the listener type
 	 * @param clazz the listener type
 	 * @return int
 	 * @since 3.1.1

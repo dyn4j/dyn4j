@@ -102,6 +102,14 @@ public abstract class AbstractShape implements Shape, Transformable {
 	 */
 	@Override
 	public void rotate(double theta) {
+		this.rotate(theta, 0.0, 0.0);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Shape#rotateAboutCenter(double)
+	 */
+	@Override
+	public void rotateAboutCenter(double theta) {
 		this.rotate(theta, this.center);
 	}
 	

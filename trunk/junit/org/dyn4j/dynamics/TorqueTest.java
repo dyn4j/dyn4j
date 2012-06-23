@@ -119,7 +119,7 @@ public class TorqueTest {
 			}
 		};
 		
-		b.apply(t);
+		b.applyTorque(t);
 		w.addBody(b);
 		
 		w.step(1);
