@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,7 +29,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Responsible for housing all of the dynamics engine's settings.
  * @author William Bittle
- * @version 3.0.3
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class Settings {
@@ -108,7 +108,7 @@ public class Settings {
 	public static final double DEFAULT_BAUMGARTE = 0.2;
 	
 	/** The step frequency of the dynamics engine */
-	private double stepFequency = Settings.DEFAULT_STEP_FREQUENCY;
+	private double stepFrequency = Settings.DEFAULT_STEP_FREQUENCY;
 	
 	/** The maximum translation a {@link Body} can have in one time step */
 	private double maximumTranslation = Settings.DEFAULT_MAXIMUM_TRANSLATION;
@@ -197,7 +197,7 @@ public class Settings {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Settings[StepFrequency=").append(this.stepFequency)
+		sb.append("Settings[StepFrequency=").append(this.stepFrequency)
 		.append("|MaximumTranslation=").append(this.maximumTranslation)
 		.append("|MaximumRotation=").append(this.maximumRotation)
 		.append("|AutoSleepingEnabled=").append(this.autoSleepingEnabled)
@@ -222,7 +222,7 @@ public class Settings {
 	 * Resets the settings back to defaults.
 	 */
 	public void reset() {
-		this.stepFequency = Settings.DEFAULT_STEP_FREQUENCY;
+		this.stepFrequency = Settings.DEFAULT_STEP_FREQUENCY;
 		this.maximumTranslation = Settings.DEFAULT_MAXIMUM_TRANSLATION;
 		this.maximumTranslationSquared = Settings.DEFAULT_MAXIMUM_TRANSLATION * Settings.DEFAULT_MAXIMUM_TRANSLATION;
 		this.maximumRotation = Settings.DEFAULT_MAXIMUM_ROTATION;
@@ -250,29 +250,30 @@ public class Settings {
 	}
 	
 	/**
-	 * Returns the step frequency of the dynamics engine.
-	 * <p>
-	 * The returned value is:
-	 * <pre>1.0 / frequency</pre>
-	 * in seconds.
+	 * Returns the step frequency of the dynamics engine in seconds.
 	 * <p>
 	 * @return double the step frequency
 	 * @see #setStepFrequency(double)
 	 */
 	public double getStepFrequency() {
-		return this.stepFequency;
+		return this.stepFrequency;
 	}
 	
 	/**
-	 * Sets the step frequency of the dynamics engine.
+	 * Sets the step frequency of the dynamics engine.  This value determines how often to 
+	 * update the dynamics engine in seconds (every 1/60th of a second for example).
 	 * <p>
-	 * Valid values are in the range [30, &infin;] seconds<sup>-1</sup>
+	 * Valid values are in the range (0, &infin;] seconds.
+	 * <p>
+	 * Versions before 3.1.1 would convert the stepFrequency parameter from seconds<sup>-1</sup> to
+	 * seconds (60 to 1/60 for example) automatically.  This automatic conversion has been removed 
+	 * in versions 3.1.1 and higher.  Instead pass in the value in seconds (1/60 for example).
 	 * @param stepFrequency the step frequency
-	 * @throws IllegalArgumentException if stepFrequency is less than 30
+	 * @throws IllegalArgumentException if stepFrequency is less than or equal to zero
 	 */
 	public void setStepFrequency(double stepFrequency) {
-		if (stepFrequency < 30.0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidStepFrequency"));
-		this.stepFequency = 1.0 / stepFrequency;
+		if (stepFrequency <= 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidStepFrequency"));
+		this.stepFrequency = stepFrequency;
 	}
 	
 	/**
@@ -462,12 +463,12 @@ public class Settings {
 	 * <p>
 	 * Increasing the number will increase accuracy but decrease performance.
 	 * <p>
-	 * Valid values are in the range [5, &infin;]
+	 * Valid values are in the range [1, &infin;]
 	 * @param velocityConstraintSolverIterations the number of iterations used to solve velocity constraints
 	 * @throws IllegalArgumentException if velocityConstraintSolverIterations is less than 5
 	 */
 	public void setVelocityConstraintSolverIterations(int velocityConstraintSolverIterations) {
-		if (velocityConstraintSolverIterations < 5) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidVelocityIterations"));
+		if (velocityConstraintSolverIterations < 1) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidVelocityIterations"));
 		this.velocityConstraintSolverIterations = velocityConstraintSolverIterations;
 	}
 	
@@ -484,12 +485,12 @@ public class Settings {
 	 * <p>
 	 * Increasing the number will increase accuracy but decrease performance.
 	 * <p>
-	 * Valid values are in the range [5, &infin;]
+	 * Valid values are in the range [1, &infin;]
 	 * @param positionConstraintSolverIterations the number of iterations used to solve position constraints
 	 * @throws IllegalArgumentException if positionConstraintSolverIterations is less than 5
 	 */
 	public void setPositionConstraintSolverIterations(int positionConstraintSolverIterations) {
-		if (positionConstraintSolverIterations < 5) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidPositionIterations"));
+		if (positionConstraintSolverIterations < 1) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidPositionIterations"));
 		this.positionConstraintSolverIterations = positionConstraintSolverIterations;
 	}
 	

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,7 @@
  */
 package org.dyn4j.dynamics.contact;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.dyn4j.Epsilon;
@@ -45,7 +46,7 @@ import org.dyn4j.geometry.Vector2;
  * facilitate stable stacking of rigid {@link Body}s.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.3
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class ContactConstraintSolver {
@@ -99,8 +100,17 @@ public class ContactConstraintSolver {
 			Vector2 c2 = t2.getTransformed(m2.getCenter());
 			
 			// get the contacts
-			Contact[] contacts = contactConstraint.contacts;
-			int cSize = contacts.length;
+			List<Contact> contacts = contactConstraint.contacts;
+			// remove disabled contacts
+			Iterator<Contact> contactIterator = contacts.iterator();
+			while (contactIterator.hasNext()) {
+				Contact contact = contactIterator.next();
+				if (!contact.enabled) {
+					contactIterator.remove();
+				}
+			}
+			// get the size
+			int cSize = contacts.size();
 			
 			// get the penetration axis
 			Vector2 N = contactConstraint.normal;
@@ -109,10 +119,7 @@ public class ContactConstraintSolver {
 			
 			// loop through the contact points
 			for (int j = 0; j < cSize; j++) {
-				Contact contact = contacts[j];
-				
-				// is the contact enabled?
-				if (!contact.isEnabled()) continue;
+				Contact contact = contacts.get(j);
 				
 				// get ra and rb
 				Vector2 r1 = c1.to(contact.p);
@@ -150,44 +157,43 @@ public class ContactConstraintSolver {
 			// does this contact have 2 points?
 			if (cSize == 2) {
 				// setup the block solver
-				Contact contact1 = contacts[0];
-				Contact contact2 = contacts[1];
+				Contact contact1 = contacts.get(0);
+				Contact contact2 = contacts.get(1);
 				
-				// both contacts must be enabled
-				if (contact1.isEnabled() && contact2.isEnabled()) {
-					double rn1A = contact1.r1.cross(N);
-					double rn1B = contact1.r2.cross(N);
-					double rn2A = contact2.r1.cross(N);
-					double rn2B = contact2.r2.cross(N);
+				double rn1A = contact1.r1.cross(N);
+				double rn1B = contact1.r2.cross(N);
+				double rn2A = contact2.r1.cross(N);
+				double rn2B = contact2.r2.cross(N);
+				
+				// compute the K matrix for the constraints
+				Matrix22 K = new Matrix22();
+				K.m00 = invM1 + invM2 + invI1 * rn1A * rn1A + invI2 * rn1B * rn1B;
+				K.m01 = invM1 + invM2 + invI1 * rn1A * rn2A + invI2 * rn1B * rn2B;
+				K.m10 = K.m01;
+				K.m11 = invM1 + invM2 + invI1 * rn2A * rn2A + invI2 * rn2B * rn2B;
+				
+				// check the condition number of the matrix
+				final double maxCondition = 1000.0;
+				if (K.m00 * K.m00 < maxCondition * K.determinant()) {
+					// if the condition number is below the max then we can
+					// assume that we can invert K
+					contactConstraint.K = K;
+					contactConstraint.invK = K.getInverse();
+				} else {
+					// otherwise the matrix is ill conditioned
 					
-					// compute the K matrix for the constraints
-					Matrix22 K = new Matrix22();
-					K.m00 = invM1 + invM2 + invI1 * rn1A * rn1A + invI2 * rn1B * rn1B;
-					K.m01 = invM1 + invM2 + invI1 * rn1A * rn2A + invI2 * rn1B * rn2B;
-					K.m10 = K.m01;
-					K.m11 = invM1 + invM2 + invI1 * rn2A * rn2A + invI2 * rn2B * rn2B;
+					// it looks like this will only be the case if the points are the
+					// close to being the same point.  If they were the same point
+					// then the constraints would be redundant
+					// just choose one of the points as the point to solve
 					
-					// check the condition number of the matrix
-					final double maxCondition = 1000.0;
-					if (K.m00 * K.m00 < maxCondition * K.determinant()) {
-						// if the condition number is below the max then we can
-						// assume that we can invert K
-						contactConstraint.K = K;
-						contactConstraint.invK = K.getInverse();
+					// let's choose the deepest point
+					if (contact1.depth > contact2.depth) {
+						// then remove the second contact
+						contactConstraint.contacts.remove(1);
 					} else {
-						// otherwise the matrix is ill conditioned
-						
-						// it looks like this will only be the case if the points are the
-						// close to being the same point.  If they were the same point
-						// then the constraints would be redundant
-						// just choose one of the points as the point to solve
-						
-						// let's choose the deepest point
-						if (contact1.depth > contact2.depth) {
-							contactConstraint.contacts = new Contact[] {contact1};
-						} else {
-							contactConstraint.contacts = new Contact[] {contact2};
-						}
+						// then remove the first contact
+						contactConstraint.contacts.remove(0);
 					}
 				}
 			}
@@ -227,25 +233,26 @@ public class ContactConstraintSolver {
 			Vector2 T = contactConstraint.tangent;
 			
 			// get the contacts and contact size
-			Contact[] contacts = contactConstraint.getContacts();
-			int cSize = contacts.length;
+			List<Contact> contacts = contactConstraint.getContacts();
+			int cSize = contacts.size();
+			if (cSize == 0) continue;
 			
 			for (int j = 0; j < cSize; j++) {
-				Contact contact = contacts[j];
-				
-				// is the contact enabled?
-				if (!contact.isEnabled()) continue;
+				Contact contact = contacts.get(j);
 				
 				// scale the accumulated impulses by the delta time ratio
 				contact.jn *= ratio;
 				contact.jt *= ratio;
 				
 				// apply accumulated impulses to warm start the solver
-				Vector2 J = N.product(contact.jn);
-				J.add(T.product(contact.jt));
-				b1.getVelocity().add(J.product(invM1));
+
+//				Vector2 J = N.product(contact.jn).add(T.product(contact.jt));
+				Vector2 J = new Vector2(N.x * contact.jn + T.x * contact.jt, N.y * contact.jn + T.y * contact.jt);
+//				b1.getVelocity().add(J.product(invM1));
+				b1.getVelocity().add(J.x * invM1, J.y * invM1);
 				b1.setAngularVelocity(b1.getAngularVelocity() + invI1 * contact.r1.cross(J));
-				b2.getVelocity().subtract(J.product(invM2));
+//				b2.getVelocity().subtract(J.product(invM2));
+				b2.getVelocity().subtract(J.x * invM2, J.y * invM2);
 				b2.setAngularVelocity(b2.getAngularVelocity() - invI2 * contact.r2.cross(J));
 			}
 		}
@@ -272,8 +279,9 @@ public class ContactConstraintSolver {
 			double invI2 = m2.getInverseInertia();
 
 			// get the contact list
-			Contact[] contacts = contactConstraint.contacts;
-			int cSize = contacts.length;
+			List<Contact> contacts = contactConstraint.contacts;
+			int cSize = contacts.size();
+			if (cSize == 0) continue;
 			
 			// get the penetration axis and tangent
 			Vector2 N = contactConstraint.normal;
@@ -283,10 +291,7 @@ public class ContactConstraintSolver {
 			
 			// evaluate friction impulse
 			for (int k = 0; k < cSize; k++) {
-				Contact contact = contacts[k];
-				
-				// is the contact enabled?
-				if (!contact.isEnabled()) continue;
+				Contact contact = contacts.get(k);
 				
 				// get ra and rb
 				Vector2 r1 = contact.r1;
@@ -310,10 +315,14 @@ public class ContactConstraintSolver {
 				jt = contact.jt - Jt0;
 				
 				// apply to the bodies immediately
-				Vector2 J = T.product(jt);
-				b1.getVelocity().add(J.product(invM1));
+
+//				Vector2 J = T.product(jt);
+				Vector2 J = new Vector2(T.x * jt, T.y * jt);
+//				b1.getVelocity().add(J.product(invM1));
+				b1.getVelocity().add(J.x * invM1, J.y * invM1);
 				b1.setAngularVelocity(b1.getAngularVelocity() + invI1 * r1.cross(J));
-				b2.getVelocity().subtract(J.product(invM2));
+//				b2.getVelocity().subtract(J.product(invM2));
+				b2.getVelocity().subtract(J.x * invM2, J.y * invM2);
 				b2.setAngularVelocity(b2.getAngularVelocity() - invI2 * r2.cross(J));
 			}
 			
@@ -322,10 +331,7 @@ public class ContactConstraintSolver {
 			// check the number of contacts to solve
 			if (cSize == 1) {
 				// if its one then solve the one contact
-				Contact contact = contacts[0];
-				
-				// is the contact enabled?
-				if (!contact.isEnabled()) continue;
+				Contact contact = contacts.get(0);
 				
 				// get ra and rb
 				Vector2 r1 = contact.r1;
@@ -348,10 +354,14 @@ public class ContactConstraintSolver {
 				j = contact.jn - j0;
 				
 				// only update the bodies after processing all the contacts
-				Vector2 J = N.product(j);
-				b1.getVelocity().add(J.product(invM1));
+				
+//				Vector2 J = N.product(j);
+				Vector2 J = new Vector2(N.x * j, N.y * j);
+//				b1.getVelocity().add(J.product(invM1));
+				b1.getVelocity().add(J.x * invM1, J.y * invM1);
 				b1.setAngularVelocity(b1.getAngularVelocity() + invI1 * r1.cross(J));
-				b2.getVelocity().subtract(J.product(invM2));
+//				b2.getVelocity().subtract(J.product(invM2));
+				b2.getVelocity().subtract(J.x * invM2, J.y * invM2);
 				b2.setAngularVelocity(b2.getAngularVelocity() - invI2 * r2.cross(J));
 			} else {
 				// if its 2 then solve the contacts simultaneously using a mini-LCP
@@ -389,8 +399,8 @@ public class ContactConstraintSolver {
 				//    = A * x + b'
 				// b' = b - A * a;
 				
-				Contact contact1 = contacts[0];
-				Contact contact2 = contacts[1];
+				Contact contact1 = contacts.get(0);
+				Contact contact2 = contacts.get(1);
 				
 				Vector2 r11 = contact1.r1;
 				Vector2 r21 = contact1.r2;
@@ -612,8 +622,9 @@ public class ContactConstraintSolver {
 			double mass2 = m2.getMass();
 			
 			// get the contact list
-			Contact[] contacts = contactConstraint.contacts;
-			int cSize = contacts.length;
+			List<Contact> contacts = contactConstraint.contacts;
+			int cSize = contacts.size();
+			if (cSize == 0) continue;
 			
 			// get the penetration axis
 			Vector2 N = contactConstraint.normal;
@@ -627,10 +638,7 @@ public class ContactConstraintSolver {
 			
 			// solve normal constraints
 			for (int k = 0; k < cSize; k++) {
-				Contact contact = contacts[k];
-				
-				// is the contact enabled?
-				if (!contact.isEnabled()) continue;
+				Contact contact = contacts.get(k);
 				
 				// get the world centers of mass
 				Vector2 c1 = t1.getTransformed(m1.getCenter());

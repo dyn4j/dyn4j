@@ -1357,7 +1357,7 @@ public class ControlPanel extends JFrame {
 				JSpinner spnr = (JSpinner) e.getSource();
 				double hz = ((SpinnerNumberModel) spnr.getModel()).getNumber().doubleValue();
 				Settings settings = test.world.getSettings();
-				settings.setStepFrequency(hz);
+				settings.setStepFrequency(1.0 / hz);
 			}
 		});
 		// add the spinner to the layout

@@ -42,7 +42,7 @@ import org.dyn4j.geometry.Vector2;
  * This class performs the {@link ContactConstraint} warm starting and manages contact
  * listening.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class ContactManager {
@@ -167,14 +167,15 @@ public class ContactManager {
 			// define the old contact constraint
 			ContactConstraint oldContactConstraint = null;
 			
+			List<Contact> contacts = newContactConstraint.contacts;
+			int nsize = contacts.size();
+			
 			// check if this contact constraint is a sensor
 			if (newContactConstraint.isSensor()) {
 				// notify of the sensed contacts
-				Contact[] contacts = newContactConstraint.contacts;
-				int psize = contacts.length;
-				for (int j = 0; j < psize; j++) {
+				for (int j = 0; j < nsize; j++) {
 					// get the contact
-					Contact contact = contacts[j];
+					Contact contact = contacts.get(j);
 					// notify of the sensed contact
 					ContactPoint point = new ContactPoint();
 					point.body1 = newContactConstraint.getBody1();
@@ -207,19 +208,19 @@ public class ContactManager {
 			
 			// check if the contact constraint exists
 			if (oldContactConstraint != null) {
+				List<Contact> ocontacts = oldContactConstraint.contacts;
+				int osize = ocontacts.size();
 				// create an array for removed contacts
-				boolean[] persisted = new boolean[oldContactConstraint.contacts.length];
+				boolean[] persisted = new boolean[osize];
 				// warm start the constraint
-				int nsize = newContactConstraint.contacts.length;
 				for (int j = 0; j < nsize; j++) {
 					// get the new contact
-					Contact newContact = newContactConstraint.contacts[j];
+					Contact newContact = contacts.get(j);
 					// loop over the old contacts
-					int osize = oldContactConstraint.contacts.length;
 					boolean found = false;
 					for (int k = 0; k < osize; k++) {
 						// get the old contact
-						Contact oldContact = oldContactConstraint.contacts[k];
+						Contact oldContact = ocontacts.get(k);
 						// check if the id type is distance, if so perform a distance check using the warm start distance
 						// else just compare the ids
 						if ((newContact.id == ManifoldPointId.DISTANCE && newContact.p.distanceSquared(oldContact.p) <= warmStartDistanceSquared) || newContact.id.equals(oldContact.id)) {
@@ -285,7 +286,7 @@ public class ContactManager {
 					// check the boolean array
 					if (!persisted[j]) {
 						// get the contact
-						Contact contact = oldContactConstraint.contacts[j];
+						Contact contact = ocontacts.get(j);
 						// notify of new contact (begin of contact)
 						ContactPoint point = new ContactPoint();
 						// set the values
@@ -305,10 +306,9 @@ public class ContactManager {
 			} else {
 				// notify new contacts
 				// if the old contact point was not found notify of the new contact
-				int nsize = newContactConstraint.contacts.length;
 				for (int j = 0; j < nsize; j++) {
 					// get the contact
-					Contact contact = newContactConstraint.contacts[j];
+					Contact contact = contacts.get(j);
 					// notify of new contact (begin of contact)
 					ContactPoint point = new ContactPoint();
 					// set the values
@@ -340,10 +340,10 @@ public class ContactManager {
 			while (icc.hasNext()) {
 				ContactConstraint contactConstraint = icc.next();
 				// loop over the contact points
-				int rsize = contactConstraint.contacts.length;
+				int rsize = contactConstraint.contacts.size();
 				for (int i = 0; i < rsize; i++) {
 					// get the contact
-					Contact contact = contactConstraint.contacts[i];
+					Contact contact = contactConstraint.contacts.get(i);
 					// set the contact point values
 					ContactPoint point = new ContactPoint();
 					point.normal = contactConstraint.normal;
@@ -377,10 +377,10 @@ public class ContactManager {
 			// sensed contacts are not solved
 			if (contactConstraint.isSensor()) continue;
 			// loop over the contacts
-			int rsize = contactConstraint.contacts.length;
+			int rsize = contactConstraint.contacts.size();
 			for (int j = 0; j < rsize; j++) {
 				// get the contact
-				Contact contact = contactConstraint.contacts[j];
+				Contact contact = contactConstraint.contacts.get(j);
 				// notify of the contact that will be solved
 				ContactPoint point = new ContactPoint();
 				point.normal = contactConstraint.normal;
@@ -415,10 +415,10 @@ public class ContactManager {
 			// sensed contacts are not solved
 			if (contactConstraint.isSensor()) continue;
 			// loop over the contacts
-			int rsize = contactConstraint.contacts.length;
+			int rsize = contactConstraint.contacts.size();
 			for (int j = 0; j < rsize; j++) {
 				// get the contact
-				Contact contact = contactConstraint.contacts[j];
+				Contact contact = contactConstraint.contacts.get(j);
 				// set the contact point values
 				SolvedContactPoint point = new SolvedContactPoint();
 				point.normal = contactConstraint.normal;

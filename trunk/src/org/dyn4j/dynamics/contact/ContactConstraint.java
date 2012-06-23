@@ -24,6 +24,7 @@
  */
 package org.dyn4j.dynamics.contact;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.dyn4j.collision.manifold.Manifold;
@@ -39,7 +40,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents a {@link Contact} constraint for each {@link Body} pair.  
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class ContactConstraint extends Constraint {
@@ -53,7 +54,7 @@ public class ContactConstraint extends Constraint {
 	protected BodyFixture fixture2;
 	
 	/** The {@link Contact}s */
-	protected Contact[] contacts;
+	protected List<Contact> contacts;
 	
 	/** The penetration normal */
 	protected Vector2 normal;
@@ -101,7 +102,7 @@ public class ContactConstraint extends Constraint {
 		// get the manifold point size
 		int mSize = points.size();
 		// create contact array
-		this.contacts = new Contact[mSize];
+		this.contacts = new ArrayList<Contact>(mSize);
 		// create contacts for each point
 		for (int l = 0; l < mSize; l++) {
 			// get the manifold point
@@ -113,7 +114,7 @@ public class ContactConstraint extends Constraint {
 					                      this.body1.getLocalPoint(point.getPoint()), 
 					                      this.body2.getLocalPoint(point.getPoint()));
 			// add the contact to the array
-			this.contacts[l] = contact;
+			this.contacts.add(contact);
 		}
 		// set the normal
 		this.normal = manifold.getNormal();
@@ -150,10 +151,10 @@ public class ContactConstraint extends Constraint {
 		.append("|IsSensor=").append(this.sensor)
 		.append("|TangentSpeed=").append(this.tangentSpeed)
 		.append("|Contacts={");
-		int size = contacts.length;
+		int size = contacts.size();
 		for (int i = 0; i < size; i++) {
 			if (i != 0) sb.append(",");
-			sb.append(contacts[i]);
+			sb.append(this.contacts.get(i));
 		}
 		sb.append("}]");
 		return sb.toString();
@@ -164,10 +165,10 @@ public class ContactConstraint extends Constraint {
 	 */
 	@Override
 	protected void shiftCoordinates(Vector2 shift) {
-		int size = this.contacts.length;
+		int size = this.contacts.size();
 		// loop over the contacts
 		for (int i = 0; i < size; i++) {
-			Contact c = this.contacts[i];
+			Contact c = this.contacts.get(i);
 			// translate the world space contact point
 			c.p.add(shift);
 			// c.p1 and c.p2 are in local coordinates
@@ -200,10 +201,10 @@ public class ContactConstraint extends Constraint {
 	}
 	
 	/**
-	 * Returns the array of {@link Contact}s.
-	 * @return {@link Contact}[] the array of {@link Contact}s
+	 * Returns the list of {@link Contact}s.
+	 * @return List&lt;{@link Contact}&gt; the list of {@link Contact}s
 	 */
-	public Contact[] getContacts() {
+	public List<Contact> getContacts() {
 		return this.contacts;
 	}
 	

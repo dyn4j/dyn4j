@@ -24,7 +24,9 @@
  */
 package org.dyn4j.collision.broadphase;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +43,7 @@ import org.dyn4j.geometry.Vector2;
  * This class uses a self-balancing binary tree to store the AABBs.  The AABBs are sorted using the perimeter.
  * The perimeter hueristic is better than area for 2D because axis aligned segments have zero area.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.1
  * @since 3.0.0
  * @param <E> the {@link Collidable} type
  */
@@ -361,7 +363,7 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 		// check for empty tree
 		if (root == null) return;
 		// create a stack to hold nodes that have not been tested
-		Stack<Node> stack = new Stack<Node>();
+		Deque<Node> stack = new ArrayDeque<Node>(this.root.height + 1);
 		// start at the root node
 		stack.push(root);
 		// loop until the stack is empty
