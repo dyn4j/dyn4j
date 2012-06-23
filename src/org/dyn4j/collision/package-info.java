@@ -44,7 +44,7 @@
  * <p>
  * The {@link org.dyn4j.collision.narrowphase.NarrowphaseDetector}s will determine whether two 
  * {@link org.dyn4j.geometry.Convex} {@link org.dyn4j.geometry.Shape}s penetrate and 
- * return a {@link org.dyn4j.collision.narrowphase.Penetration} or null.
+ * return a {@link org.dyn4j.collision.narrowphase.Penetration}.
  * <p>
  * A {@link org.dyn4j.collision.narrowphase.Penetration} object represents the minimum distance 
  * along some vector required to push the {@link org.dyn4j.geometry.Shape}s out of the penetration.

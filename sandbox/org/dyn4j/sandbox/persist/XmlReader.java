@@ -547,7 +547,7 @@ public class XmlReader extends DefaultHandler {
 		} else if ("AccumulatedForce".equalsIgnoreCase(qName)) {
 			double x = Double.parseDouble(attributes.getValue("x"));
 			double y = Double.parseDouble(attributes.getValue("y"));
-			this.body.apply(new Vector2(x, y));
+			this.body.applyForce(new Vector2(x, y));
 		} else if ("Joint".equalsIgnoreCase(qName)) {
 			this.jointName = attributes.getValue("Name");
 			this.jointType = attributes.getValue("xsi:type");
@@ -664,7 +664,7 @@ public class XmlReader extends DefaultHandler {
 		} else if ("AngularVelocity".equalsIgnoreCase(this.tagName)) {
 			this.body.setAngularVelocity(Math.toRadians(Double.parseDouble(s)));
 		} else if ("AccumulatedTorque".equalsIgnoreCase(this.tagName)) {
-			this.body.apply(Double.parseDouble(s));
+			this.body.applyTorque(Double.parseDouble(s));
 		} else if ("AutoSleep".equalsIgnoreCase(this.tagName) && !this.settingsFlag) {
 			this.body.setAutoSleepingEnabled(Boolean.parseBoolean(s));
 		} else if ("Asleep".equalsIgnoreCase(this.tagName)) {
@@ -828,6 +828,8 @@ public class XmlReader extends DefaultHandler {
 				this.shape.translate(this.localCenter);
 			} else if ("Rectangle".equalsIgnoreCase(this.shapeType)) {
 				this.shape = Geometry.createRectangle(this.width, this.height);
+				// we can perform normal rotation since the shape's center
+				// is the origin
 				this.shape.rotate(Math.toRadians(this.localRotation));
 				this.shape.translate(this.localCenter);
 			} else if ("Triangle".equalsIgnoreCase(this.shapeType)) {

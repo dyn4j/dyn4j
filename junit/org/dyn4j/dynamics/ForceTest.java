@@ -149,7 +149,7 @@ public class ForceTest {
 			}
 		};
 		
-		b.apply(f);
+		b.applyForce(f);
 		w.addBody(b);
 		
 		w.step(1);

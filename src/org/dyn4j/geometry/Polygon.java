@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.dyn4j.resources.Messages;
  * Represents a {@link Convex} {@link Polygon}.
  * <p>
  * A {@link Polygon} must have at least 3 vertices where one of which is not colinear with the other two
- * simultaneously.  A {@link Polygon} must also be {@link Convex} and have CCW winding of points.
+ * simultaneously.  A {@link Polygon} must also be {@link Convex} and have anti-clockwise winding of points.
  * <p>
  * A polygon cannot have coincident vertices.
  * @author William Bittle
@@ -48,6 +48,13 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 	
 	/**
 	 * Full constructor.
+	 * <p>
+	 * Creates a new {@link Polygon} using the given vertices.  The center of the polygon
+	 * is calculated using an area weighted method.
+	 * <p>
+	 * A polygon must have 3 or more vertices, of which one is not colinear with the other two.
+	 * <p>
+	 * A polygon must also be convex and have anti-clockwise winding.
 	 * @param vertices the array of vertices
 	 * @throws NullPointerException if vertices is null or contains a null element
 	 * @throws IllegalArgumentException if vertices contains less than 3 points, contains coincident points, is not convex, or has clockwise winding

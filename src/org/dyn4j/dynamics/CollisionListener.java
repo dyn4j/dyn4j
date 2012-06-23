@@ -31,11 +31,28 @@ import org.dyn4j.collision.manifold.ManifoldSolver;
 import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.collision.narrowphase.Penetration;
 import org.dyn4j.dynamics.contact.ContactConstraint;
+import org.dyn4j.dynamics.contact.ContactListener;
+import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Shape;
 
 /**
  * Interface to listen for collision events.
+ * <p>
+ * Events for a pair of bodies (as long as they pass the criteria for the event to be called)
+ * will be called in the following order:
+ * <ol>
+ * <li>Collision detected by the broadphase: {@link #collision(Body, Body)}</li>
+ * <li>Collision detected by the narrowphase: {@link #collision(Body, BodyFixture, Body, BodyFixture, Penetration)}</li>
+ * <li>Contact manifold created by the manifold solver:{@link #collision(Body, BodyFixture, Body, BodyFixture, Manifold)}</li>
+ * <li>Contact constraint created: {@link #collision(ContactConstraint)}</li>
+ * </ol>
+ * Returning false from any of the listener methods will halt processing of that event.  Other
+ * {@link CollisionListener}s will still be notified of that event, but subsequent events will
+ * not occur (this indicates that you didn't want the collision to be resolved later).
+ * <p>
+ * Modification of the {@link World} is permitted in these methods.  Modification of the {@link Body}'s
+ * fixtures is not permitted (adding/removing will cause a runtime exception).
  * @author William Bittle
  * @version 3.1.0
  * @since 1.0.0
@@ -43,6 +60,18 @@ import org.dyn4j.geometry.Shape;
 public interface CollisionListener extends Listener {
 	/**
 	 * Called when two {@link Body}s are colliding as determined by the {@link BroadphaseDetector}.
+	 * <p>
+	 * This method is called when the two {@link Body}'s expanded {@link AABB}s are overlapping.
+	 * Visually the bodies may not appear to be colliding (which is a valid case).  If you need to 
+	 * make sure the {@link Body}s are colliding, and not just their AABBs, use the 
+	 * {@link #collision(Body, BodyFixture, Body, BodyFixture, Penetration)} method.
+	 * <p>
+	 * Return false from this method to stop processing of this collision.  Other 
+	 * {@link CollisionListener}s will still be notified of this event, however, no further
+	 * collision or contact events will occur for this pair.
+	 * <p>
+	 * The {@link #collision(Body, BodyFixture, Body, BodyFixture, Penetration)} method is next
+	 * in the sequence of collision events.
 	 * @param body1 the first {@link Body}
 	 * @param body2 the second {@link Body}
 	 * @return boolean true if processing should continue for this collision
@@ -53,10 +82,17 @@ public interface CollisionListener extends Listener {
 	 * Called when two {@link Body}s are colliding as determined by the {@link NarrowphaseDetector}.
 	 * <p>
 	 * {@link Body} objects can have many {@link Convex} {@link Shape}s that make up their geometry.  Because
-	 * of this, this method may be called multiple times.
+	 * of this, this method may be called multiple times if two multi-fixtured {@link Body}s are colliding.
 	 * <p>
-	 * Modification of the {@link Penetration} object is allowed and will be used to generate the contact
-	 * manifold in the {@link ManifoldSolver}.
+	 * Modification of the {@link Penetration} object is allowed.  The {@link Penetration} object passed 
+	 * will be used to generate the contact manifold in the {@link ManifoldSolver}.
+	 * <p>
+	 * Return false from this method to stop processing of this collision.  Other 
+	 * {@link CollisionListener}s will still be notified of this event, however, no further
+	 * collision or contact events will occur for this pair.
+	 * <p>
+	 * The {@link #collision(Body, BodyFixture, Body, BodyFixture, Manifold)} method is next
+	 * in the sequence of collision events.
 	 * @param body1 the first {@link Body}
 	 * @param fixture1 the first {@link Body}'s {@link BodyFixture}
 	 * @param body2 the second {@link Body}
@@ -70,9 +106,16 @@ public interface CollisionListener extends Listener {
 	 * Called when two {@link Body}s are colliding and a contact {@link Manifold} has been found.
 	 * <p>
 	 * {@link Body} objects can have many {@link Convex} {@link Shape}s that make up their geometry.  Because
-	 * of this, this method may be called multiple times.
+	 * of this, this method may be called multiple times if two multi-fixtured {@link Body}s are colliding.
 	 * <p>
-	 * Modification of the {@link Manifold} object is allowed.  The {@link Manifold} is used to create contact constraints.
+	 * Modification of the {@link Manifold} object is allowed.  The {@link Manifold} is used to create contact 
+	 * constraints.
+	 * <p>
+	 * Return false from this method to stop processing of this collision.  Other 
+	 * {@link CollisionListener}s will still be notified of this event, however, no further
+	 * collision or contact events will occur for this pair.
+	 * <p>
+	 * The {@link #collision(ContactConstraint)} method is next in the sequence of collision events.
 	 * @param body1 the first {@link Body}
 	 * @param fixture1 the first {@link Body}'s {@link BodyFixture}
 	 * @param body2 the second {@link Body}
@@ -86,13 +129,18 @@ public interface CollisionListener extends Listener {
 	 * Called after a {@link ContactConstraint} has been created for a collision.
 	 * <p>
 	 * {@link Body} objects can have many {@link Convex} {@link Shape}s that make up their geometry.  Because
-	 * of this, this method may be called multiple times.
+	 * of this, this method may be called multiple times if two multi-fixtured {@link Body}s are colliding.
 	 * <p>
-	 * Modification of the friction, restitution, and sensor fields is allowed.
+	 * Modification of the friction and restitution (both computed using the {@link CoefficientMixer}
+	 * and sensor fields is allowed.
 	 * <p>
-	 * This method is intended to be used to override the computed friction and restitution values or the sensor flag.
+	 * Setting the tangent velocity of the {@link ContactConstraint} can create a conveyor effect.
 	 * <p>
-	 * You can also set the tangent velocity to achieve a conveyor belt effect.
+	 * Return false from this method to stop processing of this collision.  Other 
+	 * {@link CollisionListener}s will still be notified of this event, however, no further
+	 * collision or contact events will occur for this pair.
+	 * <p>
+	 * This is the last collision event before contact processing (via {@link ContactListener}s) occur.
 	 * @param contactConstraint the contact constraint
 	 * @return boolean true if processing should continue for this collision
 	 * @since 3.0.2

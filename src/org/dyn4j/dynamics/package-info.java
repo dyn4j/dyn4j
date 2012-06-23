@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -41,9 +41,10 @@
  * be in seconds).
  * <p>
  * Upon creating a {@link org.dyn4j.dynamics.World} a {@link org.dyn4j.collision.Bounds} 
- * object must be supplied.  The {@link org.dyn4j.collision.Bounds} will determine when 
- * {@link org.dyn4j.dynamics.Body}s go out of bounds and freeze them.  Using the 
- * {@link org.dyn4j.dynamics.World#World()} constructor will create a world that uses no bounds.
+ * object may be supplied.  The {@link org.dyn4j.collision.Bounds} will determine when 
+ * {@link org.dyn4j.dynamics.Body}s go out of bounds and deactivate them.  Using the 
+ * {@link org.dyn4j.dynamics.World#World()} constructor will create a world that has no bounds,
+ * in which case the {@link org.dyn4j.dynamics.World#getBounds()} method will return null.
  * <p>
  * A {@link org.dyn4j.dynamics.World} object also contains a number listeners that can be used to 
  * respond to events that happen within the world, contact for instance.
@@ -59,16 +60,16 @@
  * <li>{@link org.dyn4j.dynamics.TimeOfImpactListener} for responding to time of impact events</li>
  * </ul>
  * Please read the respective documentation on each listener.  Certain operations on the 
- * {@link org.dyn4j.dynamics.World} object are not allowed.
+ * {@link org.dyn4j.dynamics.World} object may not be allowed inside the listener methods.
  * <p>
  * The gravity of the {@link org.dyn4j.dynamics.World} object can be changed, and can be in any 
- * direction.
+ * direction via the {@link org.dyn4j.dynamics.World#setGravity(org.dyn4j.geometry.Vector2)} method.
  * <p>
- * The dynamics engine requires some configuration, the defaults should cover most applications, that can 
- * be changed using the {@link org.dyn4j.dynamics.Settings} singleton.  Any setting can be changed 
- * at runtime so that no source code modification is needed.  Refer to the source of 
- * {@link org.dyn4j.dynamics.Settings} and the TestBed for details on what each individual 
- * setting controls.
+ * The dynamics engine may require some configuration.  The defaults should cover most applications, 
+ * however, they can be changed using the {@link org.dyn4j.dynamics.Settings} class on the 
+ * {@link org.dyn4j.dynamics.World}.  Any setting can be changed at runtime so that no source code 
+ * modification is needed.  Refer to the source of {@link org.dyn4j.dynamics.Settings} and the 
+ * Sandbox for details on what each individual setting controls.
  * @author William Bittle
  * @version 2.2.3
  * @since 1.0.0

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ package org.dyn4j.geometry;
  * be used instead of directly transforming the {@link Shape}.  Doing so will allow reuse of
  * the same {@link Shape} object in multiple places, where only the {@link Transform} differs.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.1
  * @since 1.0.0
  */
 public interface Shape extends Transformable {	
@@ -77,9 +77,13 @@ public interface Shape extends Transformable {
 	
 	/**
 	 * Rotates the {@link Shape} about it's center.
+	 * <p>
+	 * This method replaced the overriding functionality of the
+	 * rotate method from the {@link Transformable} interface.
 	 * @param theta the rotation angle in radians
+	 * @since 3.1.1
 	 */
-	public abstract void rotate(double theta);
+	public abstract void rotateAboutCenter(double theta);
 	
 	/**
 	 * Returns the {@link Interval} of this {@link Shape} projected onto the given {@link Vector2} 

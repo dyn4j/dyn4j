@@ -177,15 +177,20 @@ public class CircleTest {
 		// center is at 0,0
 		Circle c = new Circle(1.0);
 		
-		// should do nothing since its about the circle's center
-		c.rotate(Math.toRadians(30));
+		// rotate about center
+		c.translate(1.0, 1.0);
+		c.rotateAboutCenter(Math.toRadians(30));
+		TestCase.assertEquals(1.000, c.center.x, 1.0e-3);
+		TestCase.assertEquals(1.000, c.center.y, 1.0e-3);
 		
-		TestCase.assertEquals(0.000, c.center.x, 1.0e-3);
-		TestCase.assertEquals(0.000, c.center.y, 1.0e-3);
+		// rotate about the origin
+		c.rotate(Math.toRadians(90));
+		TestCase.assertEquals(-1.000, c.center.x, 1.0e-3);
+		TestCase.assertEquals( 1.000, c.center.y, 1.0e-3);
+		c.translate(c.getCenter().getNegative());
 		
 		// should move the center
 		c.rotate(Math.toRadians(90), 1.0, -1.0);
-		
 		TestCase.assertEquals( 0.000, c.center.x, 1.0e-3);
 		TestCase.assertEquals(-2.000, c.center.y, 1.0e-3);
 	}

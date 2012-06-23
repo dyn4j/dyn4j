@@ -199,6 +199,33 @@ public class BodyTest {
 	}
 	
 	/**
+	 * Tests adding a valid fixture.
+	 */
+	@Test
+	public void addFixture() {
+		Body b = new Body();
+		b.addFixture(Geometry.createCircle(1.0));
+		TestCase.assertEquals(1, b.getFixtureCount());
+		
+		b.addFixture(new BodyFixture(Geometry.createEquilateralTriangle(2.0)));
+		TestCase.assertEquals(2, b.getFixtureCount());
+	}
+	
+	/**
+	 * Tests adding a fixture with density, friction and restitution values.
+	 */
+	@Test
+	public void addFixtureDFR() {
+		Body b = new Body();
+		b.addFixture(Geometry.createCircle(1.0), 2.0, 0.5, 0.4);
+		TestCase.assertEquals(1, b.getFixtureCount());
+		BodyFixture bf = b.getFixture(0);
+		TestCase.assertEquals(2.0, bf.getDensity());
+		TestCase.assertEquals(0.5, bf.getFriction());
+		TestCase.assertEquals(0.4, bf.getRestitution());
+	}
+	
+	/**
 	 * Tests the set mass methods.
 	 */
 	@Test
@@ -319,6 +346,8 @@ public class BodyTest {
 	@Test
 	public void apply() {
 		Body b = new Body();
+		b.addFixture(Geometry.createCircle(1.0));
+		b.setMass();
 		
 		// all the methods should add forces/torques to
 		// an accumulator, wake up the body, and not
@@ -326,21 +355,21 @@ public class BodyTest {
 		
 		// test the apply force method
 		b.setAsleep(true);
-		b.apply(new Force(new Vector2(0.0, 2.0)));
+		b.applyForce(new Force(new Vector2(0.0, 2.0)));
 		TestCase.assertEquals(1, b.forces.size());
 		TestCase.assertTrue(b.force.isZero());
 		TestCase.assertFalse(b.isAsleep());
 		
 		// test the apply force vector method
 		b.setAsleep(true);
-		b.apply(new Vector2(0.0, 2.0));
+		b.applyForce(new Vector2(0.0, 2.0));
 		TestCase.assertEquals(1, b.forces.size());
 		TestCase.assertTrue(b.force.isZero());
 		TestCase.assertFalse(b.isAsleep());
 		
 		// test the apply force at point method
 		b.setAsleep(true);
-		b.apply(new Vector2(0.0, 2.0), new Vector2(0.0, 0.5));
+		b.applyForce(new Vector2(0.0, 2.0), new Vector2(0.0, 0.5));
 		TestCase.assertEquals(1, b.forces.size());
 		TestCase.assertEquals(1, b.torques.size());
 		TestCase.assertTrue(b.force.isZero());
@@ -349,14 +378,14 @@ public class BodyTest {
 		
 		// test the apply torque method
 		b.setAsleep(true);
-		b.apply(new Torque(0.4));
+		b.applyTorque(new Torque(0.4));
 		TestCase.assertEquals(1, b.torques.size());
 		TestCase.assertEquals(0.0, b.torque);
 		TestCase.assertFalse(b.isAsleep());
 		
 		// test the apply torque value method
 		b.setAsleep(true);
-		b.apply(0.4);
+		b.applyTorque(0.4);
 		TestCase.assertEquals(1, b.torques.size());
 		TestCase.assertEquals(0.0, b.torque);
 		TestCase.assertFalse(b.isAsleep());
@@ -368,7 +397,7 @@ public class BodyTest {
 	@Test(expected = NullPointerException.class)
 	public void applyNullForce() {
 		Body b = new Body();
-		b.apply((Force) null);
+		b.applyForce((Force) null);
 	}
 	
 	/**
@@ -377,7 +406,7 @@ public class BodyTest {
 	@Test(expected = NullPointerException.class)
 	public void applyNullForceVector() {
 		Body b = new Body();
-		b.apply((Vector2) null);
+		b.applyForce((Vector2) null);
 	}
 	
 	/**
@@ -386,7 +415,7 @@ public class BodyTest {
 	@Test(expected = NullPointerException.class)
 	public void applyNullTorque() {
 		Body b = new Body();
-		b.apply((Torque) null);
+		b.applyTorque((Torque) null);
 	}
 	
 	/**
@@ -396,7 +425,7 @@ public class BodyTest {
 	@Test(expected = NullPointerException.class)
 	public void applyNullForceAtPoint() {
 		Body b = new Body();
-		b.apply(null, new Vector2(0.0, 0.0));
+		b.applyForce(null, new Vector2(0.0, 0.0));
 	}
 	
 	/**
@@ -406,7 +435,7 @@ public class BodyTest {
 	@Test(expected = NullPointerException.class)
 	public void applyForceAtNullPoint() {
 		Body b = new Body();
-		b.apply(new Vector2(0.0, 1.0), null);
+		b.applyForce(new Vector2(0.0, 1.0), null);
 	}
 	
 	/**
@@ -416,7 +445,7 @@ public class BodyTest {
 	public void clear() {
 		Body b = new Body();
 		
-		b.apply(new Vector2(0.0, 1.0), new Vector2(2.0, 1.0));
+		b.applyForce(new Vector2(0.0, 1.0), new Vector2(2.0, 1.0));
 		b.force = new Vector2(-1.0, 0.5);
 		b.torque = 0.4;
 		
@@ -440,10 +469,11 @@ public class BodyTest {
 	public void accumulate() {
 		Body b = new Body();
 		b.addFixture(Geometry.createCircle(1.0));
+		b.setMass();
 		
-		b.apply(new Vector2(0.0, -2.0), new Vector2(1.0, -0.3));
+		b.applyForce(new Vector2(0.0, -2.0), new Vector2(1.0, -0.3));
 		// just use the default elapsed time
-		b.accumulate(1.0 / 60.0);
+		b.accumulate(Settings.DEFAULT_STEP_FREQUENCY);
 		
 		TestCase.assertFalse(b.force.isZero());
 		TestCase.assertFalse(0.0 == b.torque);
@@ -523,8 +553,8 @@ public class BodyTest {
 		b.angularVelocity = 3.2;
 		b.force.x = 1.0;
 		b.torque = 1.2;
-		b.apply(0.3);
-		b.apply(new Vector2(1.0, 1.0));
+		b.applyTorque(0.3);
+		b.applyForce(new Vector2(1.0, 1.0));
 		b.setAsleep(true);
 		TestCase.assertTrue(b.isAsleep());
 		TestCase.assertTrue(b.forces.isEmpty());
@@ -978,6 +1008,8 @@ public class BodyTest {
 	@Test
 	public void getAccumulatedForce() {
 		Body b = new Body();
+		b.addFixture(Geometry.createCircle(1.0));
+		b.setMass();
 		
 		// no force applied yet
 		Vector2 f = b.getAccumulatedForce();
@@ -985,25 +1017,25 @@ public class BodyTest {
 		TestCase.assertEquals(0.0, f.y);
 		
 		// one force
-		b.apply(new Vector2(1.0, 0.0));
+		b.applyForce(new Vector2(1.0, 0.0));
 		f = b.getAccumulatedForce();
 		TestCase.assertEquals(1.0, f.x);
 		TestCase.assertEquals(0.0, f.y);
 		
 		// two forces
-		b.apply(new Vector2(0.5, 2.0));
+		b.applyForce(new Vector2(0.5, 2.0));
 		f = b.getAccumulatedForce();
 		TestCase.assertEquals(1.5, f.x);
 		TestCase.assertEquals(2.0, f.y);
 		
 		// two forces and a force at point
-		b.apply(new Vector2(0.5, 0.0), new Vector2(0.5, 0.0));
+		b.applyForce(new Vector2(0.5, 0.0), new Vector2(0.5, 0.0));
 		f = b.getAccumulatedForce();
 		TestCase.assertEquals(2.0, f.x);
 		TestCase.assertEquals(2.0, f.y);
 		
 		// just a torque shouldn't affect the force
-		b.apply(0.5);
+		b.applyTorque(0.5);
 		f = b.getAccumulatedForce();
 		TestCase.assertEquals(2.0, f.x);
 		TestCase.assertEquals(2.0, f.y);
@@ -1022,17 +1054,17 @@ public class BodyTest {
 		TestCase.assertEquals(0.0, t);
 		
 		// one torque
-		b.apply(0.5);
+		b.applyTorque(0.5);
 		t = b.getAccumulatedTorque();
 		TestCase.assertEquals(0.5, t);
 		
 		// two torques
-		b.apply(0.5);
+		b.applyTorque(0.5);
 		t = b.getAccumulatedTorque();
 		TestCase.assertEquals(1.0, t);
 		
 		// a force shouldn't affect the torque
-		b.apply(new Vector2(0.5, 0.0));
+		b.applyForce(new Vector2(0.5, 0.0));
 		t = b.getAccumulatedTorque();
 		TestCase.assertEquals(1.0, t);
 	}
@@ -1104,5 +1136,66 @@ public class BodyTest {
 		
 		List<Body> cbs = b1.getInContactBodies(false);
 		TestCase.assertEquals(1, cbs.size());
+	}
+	
+	/**
+	 * Tests passing a null impulse.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void applyNullImpulse() {
+		Body b = new Body();
+		b.applyImpulse(null);
+	}
+	
+	/**
+	 * Tests passing a null impulse.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void applyNullImpulse2() {
+		Body b = new Body();
+		b.applyImpulse(null, new Vector2());
+	}
+	
+	/**
+	 * Tests passing a null point.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void applyNullImpulsePoint() {
+		Body b = new Body();
+		b.applyImpulse(new Vector2(), null);
+	}
+	
+	/**
+	 * Test the successful use of the applyImpulse methods.
+	 */
+	@Test
+	public void applyImpulse() {
+		Body b = new Body();
+		b.addFixture(Geometry.createRectangle(1.0, 1.0));
+		b.setMass();
+		
+		double m = b.getMass().getMass();
+		double i = b.getMass().getInertia();
+		
+		// should yield a velocity of 1.0, 1.0
+		b.applyImpulse(new Vector2(m, m));
+		TestCase.assertEquals(1.0, b.getVelocity().x);
+		TestCase.assertEquals(1.0, b.getVelocity().y);
+		
+		// clear velocity
+		b.getVelocity().zero();
+		
+		// should yield an angular velocity of 1.0 rads
+		b.applyImpulse(i);
+		TestCase.assertEquals(1.0, b.getAngularVelocity());
+		
+		// clear angular velocity
+		b.setAngularVelocity(0.0);
+		
+		// should yield a velocity of 1.0, 1.0 and an angular velocity of 1.0
+		b.applyImpulse(new Vector2(0.0, i), new Vector2(1.0, 0.0));
+		TestCase.assertEquals(1.0, b.getAngularVelocity());
+		TestCase.assertEquals(i, b.getVelocity().y);
+		TestCase.assertEquals(0.0, b.getVelocity().x);
 	}
 }

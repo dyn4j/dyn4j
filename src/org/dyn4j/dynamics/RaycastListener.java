@@ -29,6 +29,8 @@ import org.dyn4j.geometry.Ray;
 
 /**
  * Interface for listening for raycast events.
+ * <p>
+ * Modification of the {@link World} is not permitted inside these methods.
  * @author William Bittle
  * @version 3.1.0
  * @since 2.0.0

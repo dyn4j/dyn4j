@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,6 +26,12 @@ package org.dyn4j.collision;
 
 /**
  * Interface representing a filter for collision detection.
+ * <p>
+ * Filters allow the collision detection system to skip expensive operations
+ * between {@link Collidable}s that should be colliding at all (as determined by
+ * the application).
+ * <p>
+ * The {@link #DEFAULT_FILTER} allows all collisions.
  * @author William Bittle
  * @version 3.0.2
  * @since 1.0.0

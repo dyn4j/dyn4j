@@ -27,7 +27,10 @@ package org.dyn4j.collision;
 import org.dyn4j.Listener;
 
 /**
- * Represents an object that is notified when a {@link Collidable} goes out of {@link Bounds}.
+ * Represents an object that is notified when a {@link Collidable} 
+ * goes out of {@link Bounds}.
+ * <p>
+ * Modification of the World object is not permitted in these methods.
  * @author William Bittle
  * @version 3.1.0
  * @since 1.0.0
