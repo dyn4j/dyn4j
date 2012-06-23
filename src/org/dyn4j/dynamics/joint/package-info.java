@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,24 +33,26 @@
  * <p>
  * Current listing of joints:
  * <ul>
+ * <li>{@link org.dyn4j.dynamics.joint.AngleJoint} for constraining the rotation of two bodies</li>
  * <li>{@link org.dyn4j.dynamics.joint.DistanceJoint} for fixed length distance and spring/damper</li>
- * <li>{@link org.dyn4j.dynamics.joint.RopeJoint} for min/max distance</li>
- * <li>{@link org.dyn4j.dynamics.joint.RevoluteJoint} for only allowing relative rotation with or
- * without a motor</li>
- * <li>{@link org.dyn4j.dynamics.joint.PrismaticJoint} for only allowing relative linear motion
- * along an axis with or without a motor and limits</li>
  * <li>{@link org.dyn4j.dynamics.joint.FrictionJoint} for applying friction, air resistance, joint
  * friction, etc</li>
- * <li>{@link org.dyn4j.dynamics.joint.WeldJoint} for connecting two bodies together completely</li>
- * <li>{@link org.dyn4j.dynamics.joint.PulleyJoint} for creating a pulley with or without block-and-
- * tackle</li>
+ * <li>{@link org.dyn4j.dynamics.joint.MotorJoint} for character control</li>
  * <li>{@link org.dyn4j.dynamics.joint.MouseJoint} specifically to connect a distance joint with
  * spring/damper to one body</li>
+ * <li>{@link org.dyn4j.dynamics.joint.PrismaticJoint} for only allowing relative linear motion
+ * along an axis with or without a motor and limits</li>
+ * <li>{@link org.dyn4j.dynamics.joint.PulleyJoint} for creating a pulley with or without block-and-
+ * tackle</li>
+ * <li>{@link org.dyn4j.dynamics.joint.RevoluteJoint} for only allowing relative rotation with or
+ * without a motor</li>
+ * <li>{@link org.dyn4j.dynamics.joint.RopeJoint} for min/max distance</li>
+ * <li>{@link org.dyn4j.dynamics.joint.WeldJoint} for connecting two bodies together completely</li>
  * <li>{@link org.dyn4j.dynamics.joint.WheelJoint} for connecting two bodies in a frame-wheel type
  * configuration with linear spring/damper and angular motor</li>
  * </ul>
  * @author William Bittle
- * @version 2.2.2
+ * @version 3.1.1
  * @since 1.0.0
  */
 package org.dyn4j.dynamics.joint;

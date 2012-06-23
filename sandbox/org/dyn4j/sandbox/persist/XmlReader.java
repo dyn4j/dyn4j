@@ -718,7 +718,7 @@ public class XmlReader extends DefaultHandler {
 		} else if ("UpperLimitEnabled".equalsIgnoreCase(this.tagName)) {
 			this.upperLimitEnabled = Boolean.parseBoolean(s);
 		} else if ("StepFrequency".equalsIgnoreCase(this.tagName)) {
-			this.settings.setStepFrequency(Double.parseDouble(s));
+			this.settings.setStepFrequency(1.0 / Double.parseDouble(s));
 		} else if ("MaximumTranslation".equalsIgnoreCase(this.tagName)) {
 			this.settings.setMaximumTranslation(Double.parseDouble(s));
 		} else if ("MaximumRotation".equalsIgnoreCase(this.tagName)) {

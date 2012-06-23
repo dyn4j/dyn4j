@@ -403,7 +403,7 @@ public class SettingsPanel extends JPanel implements InputPanel {
 	 */
 	public void setSettings(Settings settings) {
 		// general
-		settings.setStepFrequency(ControlUtilities.getDoubleValue(this.txtStepFrequency));
+		settings.setStepFrequency(1.0 / ControlUtilities.getDoubleValue(this.txtStepFrequency));
 		settings.setMaximumTranslation(ControlUtilities.getDoubleValue(this.txtMaxTranslation));
 		settings.setMaximumRotation(Math.toRadians(ControlUtilities.getDoubleValue(this.txtMaxRotation)));
 		ComboItem item = ((ComboItem)this.cmbCCDMode.getSelectedItem());

@@ -1,0 +1,42 @@
+3.1.1
+-------------------------------------------------------------------------------
+New Features:
+  - 
+
+3.1.0
+-------------------------------------------------------------------------------
+New Features:
+  - MotorJoint - Best for character movement.
+  - Coordinate Shifting - For large worlds.
+  - AngleJoint ratio - For creating gears.
+  - Multiple listeners
+  - Runtime version checking
+  
+Bug Fixes:
+  - Added checks for bodies and joints already added to another world.
+  - Fixed a bug in the World.removeAll method where it would still report a 
+    destoryed body even if notify was false.
+  - Fixed a bug in the Transform.setRotation method where it was set 
+    incorrectly.
+  - Fixed a bug in the FrictionJoint class where the linear constraint was 
+    not being satisfied.
+  - Fixed a bug in the MouseJoint class where it wouldn't work if the body 
+    was FIXED_LINEAR_VELOCITY mass type.
+  - Fixed a bug in the World.getJoinedBodies and World.getInContactBodies 
+    methods to only return one instance of a joined/contact body if it was 
+    joined or in contact multiple times.
+
+API Changes (breaking ones):
+  - The World.remove(Body) no longer automatically notifies of destroyed 
+    contacts or joints. Use the World.remove(Body,boolean) method to receive 
+    notifications.
+  - The entire listener scheme has been revamped to allow multiple listeners 
+    of all types. There are new methods that replace all the old methods on 
+    the World class: World.addListener, World.removeListener, 
+    World.getListeners(class), etc.
+  - The Version class no longer has the version numbers public. Instead use 
+    the getXXX methods. This allows runtime version checking of the dyn4j jar.
+  - The Force.isComplete and Torque.isComplete methods have changed to add an 
+    elapsed time parameter. This allows better tracking of when a force/torque
+    is completed.
+-------------------------------------------------------------------------------

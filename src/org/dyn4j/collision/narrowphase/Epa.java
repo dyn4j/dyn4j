@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -58,7 +58,7 @@ import org.dyn4j.resources.Messages;
  * {@link Epa} will terminate in a finite number of iterations if the two shapes are {@link Polygon}s.
  * If either shape has curved surfaces the algorithm requires an expected accuracy epsilon.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class Epa implements MinkowskiPenetrationSolver {
@@ -177,7 +177,8 @@ public class Epa implements MinkowskiPenetrationSolver {
 			Vector2 a = simplex.get(i);
 			Vector2 b = simplex.get(j);
 			// create the edge
-			Vector2 normal = a.to(b);
+			// inline b - a
+			Vector2 normal = new Vector2(b.x - a.x, b.y - a.y);
 			// depending on the winding get the edge normal
 			// it would be better to use Vector.tripleProduct(ab, ao, ab);
 			// where ab is the edge and ao is a.to(ORIGIN) but this will

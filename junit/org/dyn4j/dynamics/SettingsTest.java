@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -34,7 +34,7 @@ import org.junit.Test;
 /**
  * Tests the methods of the {@link Settings} class.
  * @author William Bittle
- * @version 3.0.3
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class SettingsTest {
@@ -54,7 +54,7 @@ public class SettingsTest {
 	 */
 	@Test
 	public void setValidFrequency() {
-		settings.setStepFrequency(70.0);
+		settings.setStepFrequency(1.0 / 70.0);
 		TestCase.assertEquals(1.0 / 70.0, settings.getStepFrequency());
 	}
 	
@@ -63,7 +63,7 @@ public class SettingsTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setNegativeFrequency() {
-		settings.setStepFrequency(-30.0);
+		settings.setStepFrequency(-1.0 / 30.0);
 	}
 	
 	/**
@@ -72,14 +72,6 @@ public class SettingsTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setZeroFrequency() {
 		settings.setStepFrequency(0.0);
-	}
-	
-	/**
-	 * Tests the set step frequency method passing a frequency value &lt; 30.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setLessThan30Frequency() {
-		settings.setStepFrequency(22.0);
 	}
 	
 	/**
@@ -211,15 +203,6 @@ public class SettingsTest {
 	}
 	
 	/**
-	 * Tests the set velocity constraint solver iterations method passing
-	 * a value less than 5.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setLessThan5VelocityConstraintSolverIterations() {
-		settings.setVelocityConstraintSolverIterations(2);
-	}
-	
-	/**
 	 * Tests the set position constraint solver iterations method.
 	 */
 	@Test
@@ -244,15 +227,6 @@ public class SettingsTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setZeroPositionConstraintSolverIterations() {
 		settings.setPositionConstraintSolverIterations(0);
-	}
-	
-	/**
-	 * Tests the set position constraint solver iterations method passing
-	 * a value less than 5.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setLessThan5PositionConstraintSolverIterations() {
-		settings.setPositionConstraintSolverIterations(2);
 	}
 	
 	/**

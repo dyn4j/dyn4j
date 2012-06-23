@@ -687,7 +687,7 @@ public class World {
 		int size = this.bodies.size();
 		
 		// check the CCD mode
-		boolean bulletsOnly = mode == ContinuousDetectionMode.BULLETS_ONLY;
+		boolean bulletsOnly = (mode == ContinuousDetectionMode.BULLETS_ONLY);
 		
 		// loop over all the bodies and find the minimum TOI for each
 		// dynamic body
@@ -744,6 +744,7 @@ public class World {
 		
 		// generate a swept AABB for this body
 		AABB aabb1 = body1.createSweptAABB();
+		boolean bullet = body1.isBullet();
 		
 		// setup the initial time bounds [0, 1]
 		double t1 = 0.0;
@@ -757,28 +758,28 @@ public class World {
 		for (int j = 0; j < size; j++) {
 			// get the other body
 			Body body2 = this.bodies.get(j);
+
+			// skip this test if they are the same body
+			if (body1 == body2) continue;
 			
 			// make sure the other body is active
 			if (!body2.isActive()) continue;
-			
+
 			// skip other dynamic bodies; we only do TOI for
 			// dynamic vs. static/kinematic unless its a bullet
-			if (body2.isDynamic() && !body1.isBullet()) continue;
+			if (body2.isDynamic() && !bullet) continue;
 			
 			// check for connected pairs who's collision is not allowed
 			if (body1.isConnected(body2, false)) continue;
 			
 			// check for bodies already in collision
 			if (body1.isInContact(body2)) continue;
-			
-			// skip this test if they are the same body
-			if (body1 == body2) continue;
-			
+
 			// create a swept AABB for the other body
 			AABB aabb2 = body2.createSweptAABB();
 			// if the swept AABBs don't overlap then don't bother testing them
 			if (!aabb1.overlaps(aabb2)) continue; 
-			
+
 			// compute the time of impact between the two bodies
 			TimeOfImpact toi = new TimeOfImpact();
 			if (this.timeOfImpactDetector.getTimeOfImpact(body1, body2, t1, t2, toi)) {
@@ -1365,11 +1366,11 @@ public class World {
 				// set the world property to null
 				contactConstraint.world = null;
 				// loop over the contact points
-				Contact[] contacts = contactConstraint.getContacts();
-				int size = contacts.length;
+				List<Contact> contacts = contactConstraint.getContacts();
+				int size = contacts.size();
 				for (int j = 0; j < size; j++) {
 					// get the contact
-					Contact contact = contacts[j];
+					Contact contact = contacts.get(j);
 					// create a contact point for notification
 					ContactPoint contactPoint = new ContactPoint(
 													contactConstraint.getBody1(), 
@@ -1511,10 +1512,10 @@ public class World {
 					// set the world to null
 					contactConstraint.world = null;
 					// notify of all the contacts on the contact constraint
-					Contact[] contacts = contactConstraint.getContacts();
-					int csize = contacts.length;
+					List<Contact> contacts = contactConstraint.getContacts();
+					int csize = contacts.size();
 					for (int j = 0; j < csize; j++) {
-						Contact contact = contacts[j];
+						Contact contact = contacts.get(j);
 						// create a contact point for notification
 						ContactPoint contactPoint = new ContactPoint(
 														contactConstraint.getBody1(), 

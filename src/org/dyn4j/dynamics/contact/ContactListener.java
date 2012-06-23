@@ -39,6 +39,8 @@ import org.dyn4j.dynamics.World;
  * <p>
  * If a body is to be removed, make sure to return false to disable the contact.  Otherwise
  * the contact between the bodies will still be resolved even if the body has been removed.
+ * If a body is removed you should check the remaining contacts for that body and return
+ * false from the those methods as well.
  * @author William Bittle
  * @version 3.1.0
  * @since 1.0.0

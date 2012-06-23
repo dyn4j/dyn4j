@@ -700,7 +700,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 * @return boolean
 	 */
 	public boolean isDynamic() {
-		return !this.mass.isInfinite();
+		return this.mass.getType() != Mass.Type.INFINITE;
 	}
 	
 	/**
@@ -768,8 +768,6 @@ public class Body implements Swept, Collidable, Transformable {
 			this.state |= Body.ASLEEP;
 			this.velocity.zero();
 			this.angularVelocity = 0.0;
-			this.clearForce();
-			this.clearTorque();
 			this.forces.clear();
 			this.torques.clear();
 		} else {
@@ -1165,7 +1163,7 @@ public class Body implements Swept, Collidable, Transformable {
 			// return the aabb
 			return aabb;
 		}
-		return new AABB(0.0, 0.0, 0.0, 0.0);
+		return new AABB(new Vector2(0.0, 0.0), new Vector2(0.0, 0.0));
 	}
 	
 	/* (non-Javadoc)
@@ -1197,10 +1195,12 @@ public class Body implements Swept, Collidable, Transformable {
 		// return an AABB containing both points (expanded into circles by the
 		// rotation disc radius)
 		return new AABB(
-				Math.min(iCenter.x, fCenter.x) - this.radius,
-				Math.min(iCenter.y, fCenter.y) - this.radius,
-				Math.max(iCenter.x, fCenter.x) + this.radius,
-				Math.max(iCenter.y, fCenter.y) + this.radius);
+				new Vector2(
+					Math.min(iCenter.x, fCenter.x) - this.radius,
+					Math.min(iCenter.y, fCenter.y) - this.radius),
+				new Vector2(
+					Math.max(iCenter.x, fCenter.x) + this.radius,
+					Math.max(iCenter.y, fCenter.y) + this.radius));
 	}
 	
 	/**
@@ -1530,11 +1530,11 @@ public class Body implements Swept, Collidable, Transformable {
 			ContactConstraint constraint = ce.getContactConstraint();
 			if (sensed == constraint.isSensor()) {
 				// loop over the contacts
-				Contact[] contacts = constraint.getContacts();
-				int csize = contacts.length;
+				List<Contact> contacts = constraint.getContacts();
+				int csize = contacts.size();
 				for (int j = 0; j < csize; j++) {
 					// get the contact
-					Contact contact = contacts[j];
+					Contact contact = contacts.get(j);
 					// create the contact point
 					ContactPoint contactPoint = new ContactPoint(
 							constraint.body1, constraint.getFixture1(),

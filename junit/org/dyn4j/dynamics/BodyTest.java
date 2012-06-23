@@ -529,8 +529,8 @@ public class BodyTest {
 		TestCase.assertTrue(b.isAsleep());
 		TestCase.assertTrue(b.forces.isEmpty());
 		TestCase.assertTrue(b.torques.isEmpty());
-		TestCase.assertEquals(0.0, b.torque);
-		TestCase.assertTrue(b.force.isZero());
+		TestCase.assertEquals(1.2, b.torque);
+		TestCase.assertEquals(1.0, b.force.x);
 		TestCase.assertTrue(b.velocity.isZero());
 		TestCase.assertEquals(0.0, b.angularVelocity);
 	}
