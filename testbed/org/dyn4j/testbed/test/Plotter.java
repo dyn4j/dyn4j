@@ -60,7 +60,7 @@ import org.dyn4j.testbed.input.Mouse;
 /**
  * Test used to plot shapes, points, vectors, etc for debugging.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class Plotter extends Test {
@@ -143,8 +143,8 @@ public class Plotter extends Test {
 		this.e1 = this.e1List[4];
 		this.e2 = this.e2List[5];
 		// add them to the world
-		this.world.add(this.e1);
-		this.world.add(this.e2);
+		this.world.addBody(this.e1);
+		this.world.addBody(this.e2);
 	}
 	
 	/**
@@ -447,7 +447,7 @@ public class Plotter extends Test {
 			// increment the current shape
 			this.e1Shape = this.e1Shape + 1 == this.e1List.length ? 0 : this.e1Shape + 1;
 			// remove the current body from the world
-			this.world.remove(this.e1);
+			this.world.removeBody(this.e1);
 			// set the new shape
 			this.e1 = this.e1List[this.e1Shape];
 			// find the difference in the centers
@@ -455,7 +455,7 @@ public class Plotter extends Test {
 			// translate the shape to that position
 			this.e1.translate(tx);
 			// add it to the world
-			this.world.add(this.e1);
+			this.world.addBody(this.e1);
 		}
 		
 		// look for the 2 key
@@ -465,7 +465,7 @@ public class Plotter extends Test {
 			// increment the current shape
 			this.e2Shape = this.e2Shape + 1 == this.e2List.length ? 0 : this.e2Shape + 1;
 			// remove the current body from the world
-			this.world.remove(this.e2);
+			this.world.removeBody(this.e2);
 			// set the new shape
 			this.e2 = this.e2List[this.e2Shape];
 			// find the difference in the centers
@@ -473,7 +473,7 @@ public class Plotter extends Test {
 			// translate the shape to that position
 			this.e2.translate(tx);
 			// add it to the world
-			this.world.add(this.e2);
+			this.world.addBody(this.e2);
 		}
 		
 		// look for the f key

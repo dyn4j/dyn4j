@@ -30,7 +30,6 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 
 import org.dyn4j.collision.Collidable;
 import org.dyn4j.geometry.AABB;
@@ -425,7 +424,7 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	 */
 	protected List<E> detectNonRecursive(AABB aabb, Node node) {
 		List<E> list = new ArrayList<E>();
-		Stack<Node> stack = new Stack<Node>();
+		Deque<Node> stack = new ArrayDeque<Node>();
 		// add the subtree root
 		stack.push(node);
 		// loop until the stack is empty

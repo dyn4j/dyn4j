@@ -24,8 +24,7 @@
  */
 package org.dyn4j.testbed.test;
 
-import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.geometry.Geometry;
@@ -40,7 +39,7 @@ import org.dyn4j.testbed.Test;
  * Tests the handling of very fast bodies and the prevention of
  * tunneling.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.1.1
  * @since 1.2.0
  */
 public class Bullet extends Test {
@@ -72,8 +71,7 @@ public class Bullet extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(50.0, 50.0));
-		this.world = new World(bounds);
+		this.world = new World(new AxisAlignedBounds(50.0, 50.0));
 		
 		// setup the contact counter
 		ContactCounter cc = new ContactCounter();
@@ -95,7 +93,7 @@ public class Bullet extends Test {
 		floor.setMass(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
-		this.world.add(floor);
+		this.world.addBody(floor);
 		
 		// create one body that is moving extremely fast downward
 		// such that when its velocity is integrated it passes through
@@ -109,7 +107,7 @@ public class Bullet extends Test {
 		fast.translate(0.0, 1.0);
 		fast.getVelocity().set(0.0, -120.0);
 		fast.setBullet(true);
-		this.world.add(fast);
+		this.world.addBody(fast);
 	}
 	
 	/* (non-Javadoc)

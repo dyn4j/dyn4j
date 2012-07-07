@@ -22,32 +22,59 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j;
+package org.dyn4j.geometry;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.Epsilon;
 import org.junit.Test;
 
 /**
- * Test case for the {@link Epsilon} class.
+ * Test case for the AbstractShape class.
  * @author William Bittle
  * @version 3.1.1
- * @since 2.0.0
+ * @since 3.1.1
  */
-public class EpsilonTest {
+public class AbstractShapeTest {
 	/**
-	 * Tests the machine epsilon computation.
+	 * Test shape class.
+	 * @author William Bittle
+	 * @version 3.1.1
+	 * @since 3.1.1
+	 */
+	private class TestShape extends AbstractShape {
+		@Override
+		public boolean contains(Vector2 point, Transform transform) { return false; }
+		@Override
+		public AABB createAABB(Transform transform) { return null; }		
+		@Override
+		public Mass createMass(double density) { return new Mass(); };
+		@Override
+		public double getRadius(Vector2 center) { return 0.0; };
+		@Override
+		public Interval project(Vector2 n, Transform transform) { return null; }
+	}
+	
+	/**
+	 * Tests that an id is created for a fixture.
 	 */
 	@Test
-	public void compute() {
-		// ensure that the static variable is set
-		TestCase.assertFalse(Epsilon.E == 0.0);
-		// ensure the compute method returns in a
-		// finite number of iterations
-		Epsilon.compute();
-		// ensure that the epsilon adds nothing to the
-		// number 1
-		TestCase.assertEquals(1.0, 1.0 + Epsilon.E);
+	public void getId() {
+		Shape s = new TestShape();
+		TestCase.assertNotNull(s.getId());
+	}
+
+	/**
+	 * Make sure storage of user data is working.
+	 */
+	@Test
+	public void setUserData() {
+		Shape s = new TestShape();
+		// should be initial null
+		TestCase.assertNull(s.getUserData());
+		
+		String obj = "hello";
+		s.setUserData(obj);
+		TestCase.assertNotNull(s.getUserData());
+		TestCase.assertSame(obj, s.getUserData());
 	}
 }

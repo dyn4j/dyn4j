@@ -24,11 +24,9 @@
  */
 package org.dyn4j.testbed.test;
 
-import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
-import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.testbed.ContactCounter;
@@ -38,7 +36,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests a number of stacks of boxes.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.1.1
  * @since 2.1.0
  */
 public class Parallel extends Test {
@@ -76,8 +74,7 @@ public class Parallel extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(STACKS + 10.0, 15.0));
-		this.world = new World(bounds);
+		this.world = new World(new AxisAlignedBounds(STACKS + 10.0, 15.0));
 		
 		// setup the contact counter
 		ContactCounter cc = new ContactCounter();
@@ -97,7 +94,7 @@ public class Parallel extends Test {
 		Entity floor = new Entity();
 		floor.addFixture(new BodyFixture(floorRect));
 		floor.setMass(Mass.Type.INFINITE);
-		this.world.add(floor);
+		this.world.addBody(floor);
 		
 		// create the stack
 		
@@ -120,7 +117,7 @@ public class Parallel extends Test {
 				e.addFixture(new BodyFixture(rect));
 				e.setMass();
 				e.translate(x, y);
-				this.world.add(e);
+				this.world.addBody(e);
 				// increment y
 				y += height;
 			}

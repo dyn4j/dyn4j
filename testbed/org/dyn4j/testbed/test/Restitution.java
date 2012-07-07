@@ -24,12 +24,10 @@
  */
 package org.dyn4j.testbed.test;
 
-import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.geometry.Circle;
-import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.testbed.ContactCounter;
@@ -39,7 +37,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests a number of bodies with different coefficients of restitution.
  * @author William Bittle
- * @version 2.2.2
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class Restitution extends Test {
@@ -71,8 +69,7 @@ public class Restitution extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(16.0, 15.0));
-		this.world = new World(bounds);
+		this.world = new World(new AxisAlignedBounds(16.0, 15.0));
 		
 		// setup the contact counter
 		ContactCounter cc = new ContactCounter();
@@ -94,7 +91,7 @@ public class Restitution extends Test {
 		floor.setMass(Mass.Type.INFINITE);
 		// move the floor up a bit
 		floor.translate(0.0, -4.0);
-		this.world.add(floor);
+		this.world.addBody(floor);
 		
 		final double r = 0.5;
 		final double y = 3.0;
@@ -116,7 +113,7 @@ public class Restitution extends Test {
 			e.setMass();
 			e.translate(x, y);
 			x += r + r + 0.25;
-			this.world.add(e);
+			this.world.addBody(e);
 		}
 	}
 	

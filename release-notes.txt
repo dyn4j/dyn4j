@@ -15,11 +15,20 @@ New Features:
   - Added a contains(BodyFixture) method to the Body class.
   - Added applyImpulse(Vector2), applyImpulse(double) and 
     applyImpulse(Vector2, Vector2) methods to the Body class.
+  - Added a getExpanded methods to the AABB and Interval classes.  Added 
+    intersection and getIntersection methods to the AABB class.  Added a
+    getLength method to the Interval class.
+  - Moved getUserData to the Constraint class so that you can now assign a
+    user object to contact constraints.
 
 Bug Fixes:
   - Fixed a bug in the ContactConstraintSolver where if there were two contacts
     and just one was disabled, it was still possible that they would both
     be solved.
+  - The expand methods in the Interval and AABB classes would accept a negative
+    expansion amount.  If the expansion was larger than the size, the interval
+    or AABB would be invalid.  This has been fixed to return degenerate
+    versions (about the mid point) instead.
 
 Deprecated:
   - World class methods remove(Body,boolean), remove(Body), remove(Joint),
@@ -54,6 +63,9 @@ Other:
     the center of the shape will be and general restrictions on construction.
   - Updated Javadocs for all listener types to help aid understanding of
     their use and pitfalls.
+  - Replaced the usage of the synchronized Stack class with ArrayDeque or
+    ArrayList to improve performance.
+  - Many more JUnit tests.
 
 ===============================================================================
 Version 3.1.0

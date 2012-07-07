@@ -79,7 +79,7 @@ import com.jogamp.opengl.util.glsl.ShaderUtil;
 /**
  * Container for the tests.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class TestBed extends GLCanvas implements GLEventListener {
@@ -1495,7 +1495,7 @@ public class TestBed extends GLCanvas implements GLEventListener {
 							}
 							this.mouseJoint = new MouseJoint(b, v, 4.0, 0.7, 1000.0 * mass);
 							// add the joint to the world
-							this.test.world.add(this.mouseJoint);
+							this.test.world.addJoint(this.mouseJoint);
 							// make sure the body is awake
 							b.setAsleep(false);
 							// break from the loop
@@ -1516,7 +1516,7 @@ public class TestBed extends GLCanvas implements GLEventListener {
 									}
 									this.mouseJoint = new MouseJoint(b, v, 4.0, 0.7, 1000.0 * mass);
 									// add the joint to the world
-									this.test.world.add(this.mouseJoint);
+									this.test.world.addJoint(this.mouseJoint);
 									// make sure the body is awake
 									b.setAsleep(false);
 									// break from the loop
@@ -1534,7 +1534,7 @@ public class TestBed extends GLCanvas implements GLEventListener {
 			}
 		} else if (this.mouseJoint != null) {
 			// remove the mouse joint from the world
-			this.test.world.remove(this.mouseJoint);
+			this.test.world.removeJoint(this.mouseJoint);
 			// make the local reference null
 			this.mouseJoint = null;
 		}
@@ -1665,7 +1665,7 @@ public class TestBed extends GLCanvas implements GLEventListener {
 			// move the bomb 'off' screen
 			bomb.translate(-6.0, 3.0);
 			// add the bomb to the world
-			this.test.world.add(bomb);
+			this.test.world.addBody(bomb);
 			// if we add another body to the world then we need to
 			// update the contacts
 			this.test.world.setUpdateRequired(true);

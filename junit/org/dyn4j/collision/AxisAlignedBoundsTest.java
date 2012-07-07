@@ -26,6 +26,7 @@ package org.dyn4j.collision;
 
 import junit.framework.TestCase;
 
+import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Polygon;
@@ -55,6 +56,67 @@ public class AxisAlignedBoundsTest {
 		this.bounds = new AxisAlignedBounds(20.0, 20.0);
 	}
 
+	/**
+	 * Tests the width and height getters.
+	 */
+	@Test
+	public void getWidthAndHeight() {
+		AxisAlignedBounds ab = new AxisAlignedBounds(10.0, 7.0);
+		TestCase.assertEquals(10.0, ab.getWidth());
+		TestCase.assertEquals(7.0, ab.getHeight());
+	}
+	
+	/**
+	 * Tests the getTranslation method.
+	 */
+	@Test
+	public void getTranslation() {
+		this.bounds.translate(1.0, -2.0);
+		Vector2 tx = this.bounds.getTranslation();
+		TestCase.assertEquals(1.0, tx.x);
+		TestCase.assertEquals(-2.0, tx.y);
+	}
+	
+	/**
+	 * Tests the getBounds method.
+	 */
+	@Test
+	public void getBounds() {
+		AABB aabb = this.bounds.getBounds();
+		// should be centered about the origin
+		TestCase.assertEquals(-10.0, aabb.getMinX());
+		TestCase.assertEquals(-10.0, aabb.getMinY());
+		TestCase.assertEquals(10.0, aabb.getMaxX());
+		TestCase.assertEquals(10.0, aabb.getMaxY());
+		
+		// move it a bit
+		this.bounds.translate(1.0, -2.0);
+		aabb = this.bounds.getBounds();
+		TestCase.assertEquals(-9.0, aabb.getMinX());
+		TestCase.assertEquals(-12.0, aabb.getMinY());
+		TestCase.assertEquals(11.0, aabb.getMaxX());
+		TestCase.assertEquals(8.0, aabb.getMaxY());
+	}
+	
+	/**
+	 * Verifies the rotate methods do not modify the internal
+	 * structure of the bounds.
+	 */
+	@Test
+	public void rotateNoOp() {
+		// perform some rotations
+		this.bounds.rotate(Math.toRadians(30.0));
+		this.bounds.rotate(Math.toRadians(-15.0), 3.0, -4.0);
+		this.bounds.rotate(Math.toRadians(7.5), new Vector2(1.0, 0.0));
+		// verify that the bounds are left unchanged
+		AABB aabb = this.bounds.getBounds();
+		// should be centered about the origin
+		TestCase.assertEquals(-10.0, aabb.getMinX());
+		TestCase.assertEquals(-10.0, aabb.getMinY());
+		TestCase.assertEquals(10.0, aabb.getMaxX());
+		TestCase.assertEquals(10.0, aabb.getMaxY());
+	}
+	
 	/**
 	 * Tests creating a {@link AxisAlignedBounds} with invalid bounds.
 	 */

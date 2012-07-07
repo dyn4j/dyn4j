@@ -24,13 +24,14 @@
  */
 package org.dyn4j.dynamics;
 
+import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
 /**
  * Represents some physical constraint between a pair of {@link Body}s.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.1
  * @since 1.0.0
  */
 public abstract class Constraint {
@@ -46,6 +47,9 @@ public abstract class Constraint {
 	/** Whether the {@link Constraint} has been added to an {@link Island} or not */
 	protected boolean onIsland;
 
+	/** The user data */
+	protected Object userData;
+	
 	/**
 	 * Full constructor.
 	 * @param body1 the first participating {@link Body}
@@ -154,4 +158,21 @@ public abstract class Constraint {
 	protected boolean isOnIsland() {
 		return this.onIsland;
 	}
+	
+	/**
+	 * Returns the user data for this {@link Joint}.
+	 * @return Object
+	 */
+	public Object getUserData() {
+		return this.userData;
+	}
+	
+	/**
+	 * Sets the user data for this {@link Joint}.
+	 * @param userData the user data
+	 */
+	public void setUserData(Object userData) {
+		this.userData = userData;
+	}
+	
 }

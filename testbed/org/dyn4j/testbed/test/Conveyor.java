@@ -24,8 +24,7 @@
  */
 package org.dyn4j.testbed.test;
 
-import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.CollisionAdapter;
 import org.dyn4j.dynamics.World;
@@ -40,7 +39,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests the angle joint.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.1
  * @since 3.0.2
  */
 public class Conveyor extends Test {
@@ -98,8 +97,7 @@ public class Conveyor extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(16.0, 15.0));
-		this.world = new World(bounds);
+		this.world = new World(new AxisAlignedBounds(16.0, 15.0));
 		
 		// setup the contact counter
 		ContactCounter cc = new ContactCounter();
@@ -122,12 +120,12 @@ public class Conveyor extends Test {
 		this.floor.setMass(Mass.Type.INFINITE);
 		// move the floor down a bit
 		this.floor.translate(0.0, -4.0);
-		this.world.add(this.floor);
+		this.world.addBody(this.floor);
 		
 		Entity box = new Entity();
 		box.addFixture(Geometry.createRectangle(1.0, 1.0));
 		box.setMass();
-		this.world.add(box);
+		this.world.addBody(box);
 	}
 	
 	/* (non-Javadoc)

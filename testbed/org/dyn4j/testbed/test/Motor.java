@@ -24,13 +24,11 @@
  */
 package org.dyn4j.testbed.test;
 
-import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.joint.RevoluteJoint;
 import org.dyn4j.geometry.Circle;
-import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Vector2;
@@ -41,7 +39,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests the a motorized revolute joint.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class Motor extends Test {
@@ -76,8 +74,7 @@ public class Motor extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(150.0, 15.0));
-		this.world = new World(bounds);
+		this.world = new World(new AxisAlignedBounds(150.0, 15.0));
 		
 		// setup the contact counter
 		ContactCounter cc = new ContactCounter();
@@ -146,7 +143,7 @@ public class Motor extends Test {
 				payload1.addFixture(new BodyFixture(pRect));
 				payload1.setMass();
 				payload1.translate(x, y);
-				this.world.add(payload1);
+				this.world.addBody(payload1);
 			}
 		}
 		
@@ -170,11 +167,11 @@ public class Motor extends Test {
 		wheel2.translate(-21.0, -3.0);
 		
 		// add the bodies to the world
-		this.world.add(floor);
-		this.world.add(slope);
-		this.world.add(body);
-		this.world.add(wheel1);
-		this.world.add(wheel2);
+		this.world.addBody(floor);
+		this.world.addBody(slope);
+		this.world.addBody(body);
+		this.world.addBody(wheel1);
+		this.world.addBody(wheel2);
 		
 		// create a revolute joint between the wheels and the frame
 		Vector2 p1 = wheel1.getWorldCenter().copy();
@@ -195,8 +192,8 @@ public class Motor extends Test {
 		j2.setMotorEnabled(true);
 		
 		// add the joints to the world
-		this.world.add(j1);
-		this.world.add(j2);
+		this.world.addJoint(j1);
+		this.world.addJoint(j2);
 	}
 	
 	/* (non-Javadoc)

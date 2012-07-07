@@ -62,6 +62,16 @@ public class AABB {
 		this.max = max;
 	}
 	
+	/**
+	 * Copy constructor.
+	 * @param aabb the {@link AABB} to copy
+	 * @since 3.1.1
+	 */
+	public AABB(AABB aabb) {
+		this.min = aabb.min.copy();
+		this.max = aabb.max.copy();
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -162,7 +172,66 @@ public class AABB {
 	}
 	
 	/**
+	 * Performs the intersection of this {@link AABB} and the given {@link AABB} placing
+	 * the result into this {@link AABB}.
+	 * <p>
+	 * If the given {@link AABB} does not overlap this {@link AABB}, this {@link AABB} is
+	 * set to a zero {@link AABB}.
+	 * @param aabb the {@link AABB} to intersect
+	 * @since 3.1.1
+	 */
+	public void intersection(AABB aabb) {
+		this.min.x = Math.max(this.min.x, aabb.min.x);
+		this.min.y = Math.max(this.min.y, aabb.min.y);
+		this.max.x = Math.min(this.max.x, aabb.max.x);
+		this.max.y = Math.min(this.max.y, aabb.max.y);
+		
+		// check for a bad AABB
+		if (this.min.x > this.max.x || this.min.y > this.max.y) {
+			// the two AABBs were not overlapping
+			// set this AABB to a degenerate one
+			this.min.x = 0.0;
+			this.min.y = 0.0;
+			this.max.x = 0.0;
+			this.max.y = 0.0;
+		}
+	}
+	
+	/**
+	 * Performs the intersection of this {@link AABB} and the given {@link AABB} returning
+	 * the result in a new {@link AABB}.
+	 * <p>
+	 * If the given {@link AABB} does not overlap this {@link AABB}, a zero {@link AABB} is
+	 * returned.
+	 * @param aabb the {@link AABB} to intersect
+	 * @return {@link AABB}
+	 * @since 3.1.1
+	 */
+	public AABB getIntersection(AABB aabb) {
+		Vector2 min = new Vector2();
+		Vector2 max = new Vector2();
+		
+		min.x = Math.max(this.min.x, aabb.min.x);
+		min.y = Math.max(this.min.y, aabb.min.y);
+		max.x = Math.min(this.max.x, aabb.max.x);
+		max.y = Math.min(this.max.y, aabb.max.y);
+		
+		// check for a bad AABB
+		if (min.x > max.x || min.y > max.y) {
+			// the two AABBs were not overlapping
+			// return a degenerate one
+			return new AABB(new Vector2(), new Vector2());
+		}
+		return new AABB(min, max);
+	}
+	
+	/**
 	 * Expands this {@link AABB} by half the given expansion in each direction.
+	 * <p>
+	 * The expansion can be negative to shrink the {@link AABB}.  However, if the expansion is
+	 * greater than the current width/height, the {@link AABB} can become invalid.  In this 
+	 * case, the AABB will become a degenerate AABB at the mid point of the min and max for 
+	 * the respective coordinates.
 	 * @param expansion the expansion amount
 	 */
 	public void expand(double expansion) {
@@ -171,6 +240,61 @@ public class AABB {
 		this.min.y -= e;
 		this.max.x += e;
 		this.max.y += e;
+		// we only need to verify the new aabb if the expansion
+		// was inwardly
+		if (expansion < 0.0) {
+			// if the aabb is invalid then set the min/max(es) to
+			// the middle value of their current values
+			if (this.min.x > this.max.x) {
+				double mid = (this.min.x + this.max.x) * 0.5;
+				this.min.x = mid;
+				this.max.x = mid;
+			}
+			if (this.min.y > this.max.y) {
+				double mid = (this.min.y + this.max.y) * 0.5;
+				this.min.y = mid;
+				this.max.y = mid;
+			}
+		}
+	}
+	
+	/**
+	 * Returns a new {@link AABB} of this AABB expanded by half the given expansion
+	 * in both the x and y directions.
+	 * <p>
+	 * The expansion can be negative to shrink the {@link AABB}.  However, if the expansion is
+	 * greater than the current width/height, the {@link AABB} can become invalid.  In this 
+	 * case, the AABB will become a degenerate AABB at the mid point of the min and max for 
+	 * the respective coordinates.
+	 * @param expansion the expansion amount
+	 * @return {@link AABB}
+	 * @since 3.1.1
+	 */
+	public AABB getExpanded(double expansion) {
+		double e = expansion * 0.5;
+		double minx = this.min.x - e;
+		double miny = this.min.y - e;
+		double maxx = this.max.x + e;
+		double maxy = this.max.y + e;
+		// we only need to verify the new aabb if the expansion
+		// was inwardly
+		if (expansion < 0.0) {
+			// if the aabb is invalid then set the min/max(es) to
+			// the middle value of their current values
+			if (minx > maxx) {
+				double mid = (minx + maxx) * 0.5;
+				minx = mid;
+				maxx = mid;
+			}
+			if (miny > maxy) {
+				double mid = (miny + maxy) * 0.5;
+				miny = mid;
+				maxy = mid;
+			}
+		}
+		return new AABB(
+				new Vector2(minx, miny), 
+				new Vector2(maxx, maxy));
 	}
 	
 	/**
@@ -232,6 +356,33 @@ public class AABB {
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * Returns true if this {@link AABB} is degenerate.
+	 * <p>
+	 * A degenerate {@link AABB} is one where its min and max x or y
+	 * coordinates are equal.
+	 * @return boolean
+	 * @since 3.1.1
+	 */
+	public boolean isDegenerate() {
+		return this.min.x == this.max.x || this.min.y == this.max.y;
+	}
+	
+	/**
+	 * Returns true if this {@link AABB} is degenerate given
+	 * the specified error.
+	 * <p>
+	 * An {@link AABB} is degenerate given some error if
+	 * max - min <= error for either the x or y coordinate.
+	 * @param error the allowed error
+	 * @return boolean
+	 * @since 3.1.1
+	 * @see #isDegenerate()
+	 */
+	public boolean isDegenerate(double error) {
+		return Math.abs(this.max.x - this.min.x) <= error || Math.abs(this.max.y - this.min.y) <= error;
 	}
 	
 	/**

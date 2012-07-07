@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,9 +24,10 @@
  */
 package org.dyn4j.geometry.hull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Stack;
+import java.util.List;
 
 import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Vector2;
@@ -42,7 +43,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * If the input point array has a size of 1 or 2 the input point array is returned.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.1.1
  * @since 2.2.0
  */
 public class MonotoneChain implements HullGenerator {
@@ -137,10 +138,11 @@ public class MonotoneChain implements HullGenerator {
 		}
 		
 		// build the lower convex hull
-		Stack<Vector2> lower = new Stack<Vector2>();
+		List<Vector2> lower = new ArrayList<Vector2>();
 		Vector2 lp1 = points[maxmin];
 		Vector2 lp2 = points[minmin];
-		lower.push(points[minmin]);
+		// push
+		lower.add(points[minmin]);
 		// loop over the points between the min and max
 		for (int i = minmax + 1; i <= maxmin; i++) {
 			// get the current point
@@ -150,9 +152,10 @@ public class MonotoneChain implements HullGenerator {
 				// if its on or to the left of the dividing line
 				// check if this invalidates any points currently
 				// in the convex hull
-				while (lower.size() >= 2) {
-					Vector2 p1 = lower.peek();
-					Vector2 p2 = lower.get(lower.size() - 2);
+				int lSize = lower.size(); 
+				while (lSize >= 2) {
+					Vector2 p1 = lower.get(lSize - 1);
+					Vector2 p2 = lower.get(lSize - 2);
 					// check if the point is to the left of the
 					// last edge in the current convex hull
 					if (Segment.getLocation(p, p2, p1) > 0.0) {
@@ -162,19 +165,23 @@ public class MonotoneChain implements HullGenerator {
 					}
 					// otherwise we need to remove the top point because
 					// it creates a concavity
-					lower.pop();
+					// pop
+					lower.remove(lSize - 1);
+					lSize--;
 				}
 				// when we are done always add the point
 				// (it will be removed later if it creates a concavity)
-				lower.push(p);
+				// push
+				lower.add(p);
 			}
 		}
 		
 		// build the upper convex hull
-		Stack<Vector2> upper = new Stack<Vector2>();
+		List<Vector2> upper = new ArrayList<Vector2>();
 		Vector2 up1 = points[minmax];
 		Vector2 up2 = points[maxmax];
-		upper.push(points[maxmax]);
+		// push
+		upper.add(points[maxmax]);
 		// loop over the points between the min and max
 		for (int i = maxmax - 1; i >= minmax; i--) {
 			// get the current point
@@ -184,9 +191,10 @@ public class MonotoneChain implements HullGenerator {
 				// if its on or to the left of the dividing line
 				// check if this invalidates any points currently
 				// in the convex hull
-				while (upper.size() >= 2) {
-					Vector2 p1 = upper.peek();
-					Vector2 p2 = upper.get(upper.size() - 2);
+				int uSize = upper.size();
+				while (uSize >= 2) {
+					Vector2 p1 = upper.get(uSize - 1);
+					Vector2 p2 = upper.get(uSize - 2);
 					// check if the point is to the left of the
 					// last edge in the current convex hull
 					if (Segment.getLocation(p, p2, p1) > 0.0) {
@@ -196,22 +204,25 @@ public class MonotoneChain implements HullGenerator {
 					}
 					// otherwise we need to remove the top point because
 					// it creates a concavity
-					upper.pop();
+					// pop
+					upper.remove(uSize - 1);
+					uSize--;
 				}
 				// when we are done always add the point
 				// (it will be removed later if it creates a concavity)
-				upper.push(p);
+				// push
+				upper.add(p);
 			}
 		}
 		
 		// check if the first element of the upper hull is the same as
 		// the last element of the lower hull
-		if (upper.firstElement() == lower.lastElement()) {
+		if (upper.get(0) == lower.get(lower.size() - 1)) {
 			upper.remove(0);
 		}
 		// likewise check the first element of the lower hull with the
 		// last element of the upper hull
-		if (lower.firstElement() == upper.lastElement()) {
+		if (lower.get(0) == upper.get(upper.size() - 1)) {
 			lower.remove(0);
 		}
 		// append all the upper hull points to the lower hull

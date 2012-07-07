@@ -22,32 +22,53 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j;
+package org.dyn4j.dynamics;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.Epsilon;
+import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
 
 /**
- * Test case for the {@link Epsilon} class.
+ * Class to test the {@link Constraint} class.
  * @author William Bittle
  * @version 3.1.1
- * @since 2.0.0
+ * @since 3.1.1
  */
-public class EpsilonTest {
+public class ConstraintTest {
 	/**
-	 * Tests the machine epsilon computation.
+	 * Class for testing the {@link Constraint} classes methods.
+	 * @author William Bittle
+	 * @version 3.1.1
+	 * @since 3.1.1
+	 */
+	private class TestConstraint extends Constraint {
+		/**
+		 * Full constructor.
+		 * @param b1 the first body
+		 * @param b2 the second body
+		 */
+		public TestConstraint(Body b1, Body b2) {
+			super(b1, b2);
+		}
+		@Override
+		protected void shiftCoordinates(Vector2 shift) {}
+	}
+	
+	/**
+	 * Tests the get/set user data.
 	 */
 	@Test
-	public void compute() {
-		// ensure that the static variable is set
-		TestCase.assertFalse(Epsilon.E == 0.0);
-		// ensure the compute method returns in a
-		// finite number of iterations
-		Epsilon.compute();
-		// ensure that the epsilon adds nothing to the
-		// number 1
-		TestCase.assertEquals(1.0, 1.0 + Epsilon.E);
+	public void getUserData() {
+		String obj = "hello";
+		Body b1 = new Body();
+		Body b2 = new Body();
+		TestConstraint tc = new TestConstraint(b1, b2);
+		
+		TestCase.assertNull(tc.getUserData());
+		
+		tc.setUserData(obj);
+		TestCase.assertNotNull(tc.getUserData());
+		TestCase.assertSame(obj, tc.getUserData());
 	}
 }

@@ -55,7 +55,7 @@ import com.jogamp.opengl.util.gl2.GLUT;
 /**
  * Tests the performance of the {@link World}'s raycast methods.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.1
  * @since 2.0.0
  */
 public class RaycastPerformance extends Test {
@@ -158,7 +158,7 @@ public class RaycastPerformance extends Test {
 			}
 			e.setMass(Mass.Type.INFINITE);
 			e.translate(x, y);
-			this.world.add(e);
+			this.world.addBody(e);
 		}
 	}
 	

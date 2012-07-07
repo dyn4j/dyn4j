@@ -24,8 +24,7 @@
  */
 package org.dyn4j.testbed.test;
 
-import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.geometry.Circle;
@@ -43,7 +42,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests a floor/terrain created by a set of line segments.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class Terrain extends Test {
@@ -77,8 +76,7 @@ public class Terrain extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(16.0, 15.0));
-		this.world = new World(bounds);
+		this.world = new World(new AxisAlignedBounds(16.0, 15.0));
 		
 		// setup the contact counter
 		ContactCounter cc = new ContactCounter();
@@ -107,7 +105,7 @@ public class Terrain extends Test {
 		terrain.addFixture(new BodyFixture(s5));
 		terrain.setMass(Mass.Type.INFINITE);
 		terrain.translate(0.0, -2.0);
-		this.world.add(terrain);
+		this.world.addBody(terrain);
 		
 		// create a triangle object
 		Triangle triShape = new Triangle(
@@ -120,7 +118,7 @@ public class Terrain extends Test {
 		triangle.translate(0.0, 2.0);
 		// test having a velocity
 		triangle.getVelocity().set(5.0, 0.0);
-		this.world.add(triangle);
+		this.world.addBody(triangle);
 		
 		// create a circle
 		Circle cirShape = new Circle(0.5);
@@ -129,10 +127,10 @@ public class Terrain extends Test {
 		circle.setMass();
 		circle.translate(2.0, 2.0);
 		// test adding some force
-		circle.apply(new Vector2(-100.0, 0.0));
+		circle.applyForce(new Vector2(-100.0, 0.0));
 		// set some linear damping to simulate rolling friction
 		circle.setLinearDamping(0.05);
-		this.world.add(circle);
+		this.world.addBody(circle);
 
 		// try a thin rectangle
 		Rectangle rectShape = new Rectangle(2.0, 0.1);
@@ -141,7 +139,7 @@ public class Terrain extends Test {
 		rectangle.setMass();
 		rectangle.translate(0.0, 3.0);
 		rectangle.rotate(Math.toRadians(10.0));
-		this.world.add(rectangle);
+		this.world.addBody(rectangle);
 		
 		// try a segment (shouldn't work)
 		Segment segShape = new Segment(new Vector2(0.5, 0.0), new Vector2(-0.5, 0.0));
@@ -149,7 +147,7 @@ public class Terrain extends Test {
 		segment.addFixture(new BodyFixture(segShape));
 		segment.setMass();
 		segment.translate(-5.0, 4.0);
-		this.world.add(segment);
+		this.world.addBody(segment);
 		
 		// try a polygon with lots of vertices
 		Polygon polyShape = Geometry.createUnitCirclePolygon(10, 1.0);
@@ -159,7 +157,7 @@ public class Terrain extends Test {
 		polygon.translate(-2.0, 5.0);
 		// set the angular velocity
 		polygon.setAngularVelocity(Math.toRadians(20.0));
-		this.world.add(polygon);
+		this.world.addBody(polygon);
 	}
 	
 	/* (non-Javadoc)

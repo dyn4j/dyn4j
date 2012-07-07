@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -44,7 +44,8 @@ import org.dyn4j.geometry.Vertex;
  * A {@link NarrowphaseDetector} should return a penetration normal and depth when two {@link Convex} {@link Shape}s are
  * intersecting.  The penetration normal should always point from the first {@link Shape} to the second.
  * <p>
- * Derived from the open source project <a href="http://www.box2d.org">Box2d</a>.
+ * Uses Sutherland–Hodgman clipping to clip the closest features of the two {@link Convex} {@link Shape}s to obtain
+ * a contact {@link Manifold}.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
  * @version 3.0.2

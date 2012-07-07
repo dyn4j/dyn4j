@@ -24,12 +24,10 @@
  */
 package org.dyn4j.testbed.test;
 
-import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.joint.PulleyJoint;
-import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Vector2;
@@ -40,7 +38,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests the pulley joint.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.1.1
  * @since 2.1.0
  */
 public class Pulley extends Test {
@@ -72,8 +70,7 @@ public class Pulley extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(16.0, 40.0));
-		this.world = new World(bounds);
+		this.world = new World(new AxisAlignedBounds(16.0, 40.0));
 		
 		// setup the contact counter
 		ContactCounter cc = new ContactCounter();
@@ -95,7 +92,7 @@ public class Pulley extends Test {
 		floor.setMass(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
-		this.world.add(floor);
+		this.world.addBody(floor);
 
 		double x = 1.0;
 		double y = 1.0;
@@ -118,8 +115,8 @@ public class Pulley extends Test {
 		obj2.setMass();
 		obj2.translate(x, y);
 		
-		this.world.add(obj1);
-		this.world.add(obj2);
+		this.world.addBody(obj1);
+		this.world.addBody(obj2);
 		
 		// compute the joint points
 		Vector2 bodyAnchor1 = new Vector2(-x, y + h);
@@ -135,7 +132,7 @@ public class Pulley extends Test {
 		pulleyJoint.setCollisionAllowed(true);
 		
 		// defaults to collision not allowed
-		this.world.add(pulleyJoint);
+		this.world.addJoint(pulleyJoint);
 	}
 	
 	/* (non-Javadoc)

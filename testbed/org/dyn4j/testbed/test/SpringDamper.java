@@ -24,13 +24,11 @@
  */
 package org.dyn4j.testbed.test;
 
-import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.geometry.Circle;
-import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Vector2;
@@ -41,7 +39,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests the distance joint's spring damper capabilities.
  * @author William Bittle
- * @version 2.2.2
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class SpringDamper extends Test {
@@ -73,8 +71,7 @@ public class SpringDamper extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(16.0, 15.0));
-		this.world = new World(bounds);
+		this.world = new World(new AxisAlignedBounds(16.0, 15.0));
 		
 		// setup the contact counter
 		ContactCounter cc = new ContactCounter();
@@ -96,7 +93,7 @@ public class SpringDamper extends Test {
 		floor.setMass(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
-		this.world.add(floor);
+		this.world.addBody(floor);
 		
 		/*
 		 * Make this configuration
@@ -132,9 +129,9 @@ public class SpringDamper extends Test {
 		wheel2.setMass();
 		wheel2.translate(1.0, 3.6);
 		
-		this.world.add(body);
-		this.world.add(wheel1);
-		this.world.add(wheel2);
+		this.world.addBody(body);
+		this.world.addBody(wheel1);
+		this.world.addBody(wheel2);
 		
 		// create a  fixed distance joint between the wheels
 		Vector2 p1 = wheel1.getWorldCenter().copy();
@@ -144,24 +141,24 @@ public class SpringDamper extends Test {
 		// join them
 		DistanceJoint j1 = new DistanceJoint(body, wheel1, p3, p1);
 		j1.setCollisionAllowed(true);
-		this.world.add(j1);
+		this.world.addJoint(j1);
 		DistanceJoint j2 = new DistanceJoint(body, wheel2, p3, p2);
 		j2.setCollisionAllowed(true);
-		this.world.add(j2);
+		this.world.addJoint(j2);
 		
 		// create a spring joint for the rear wheel
 		DistanceJoint j3 = new DistanceJoint(body, wheel1, new Vector2(-1.0, 4.0), p1);
 		j3.setCollisionAllowed(true);
 		j3.setFrequency(8.0);
 		j3.setDampingRatio(0.4);
-		this.world.add(j3);
+		this.world.addJoint(j3);
 		
 		// create a spring joint for the front wheel
 		DistanceJoint j4 = new DistanceJoint(body, wheel2, new Vector2(1.0, 4.0), p2);
 		j4.setCollisionAllowed(true);
 		j4.setFrequency(8.0);
 		j4.setDampingRatio(0.4);
-		this.world.add(j4);
+		this.world.addJoint(j4);
 	}
 	
 	/* (non-Javadoc)

@@ -24,12 +24,11 @@
  */
 package org.dyn4j.testbed.test;
 
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.collision.Bounds;
 import org.dyn4j.collision.CategoryFilter;
-import org.dyn4j.collision.RectangularBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
-import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.testbed.ContactCounter;
@@ -39,7 +38,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests body filtering.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class Filter extends Test {
@@ -72,7 +71,7 @@ public class Filter extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(16.0, 18.0));
+		Bounds bounds = new AxisAlignedBounds(16.0, 18.0);
 		bounds.translate(0.0, 6.0);
 		this.world = new World(bounds);
 		
@@ -95,7 +94,7 @@ public class Filter extends Test {
 		Entity floor = new Entity();
 		floor.addFixture(new BodyFixture(floorRect));
 		floor.setMass(Mass.Type.INFINITE);
-		this.world.add(floor);
+		this.world.addBody(floor);
 		
 		// create some filters (collide with all & in category 1 by default)
 		CategoryFilter filter = new CategoryFilter();
@@ -141,7 +140,7 @@ public class Filter extends Test {
 		left.translate(0.0, 2.0);
 		left.getVelocity().set(-5.0, 0.0);
 		
-		this.world.add(left);
+		this.world.addBody(left);
 		
 		// create a right traveling object
 		Rectangle r2 = new Rectangle(1.0, 1.0);
@@ -154,7 +153,7 @@ public class Filter extends Test {
 		right1.setMass();
 		right1.translate(-2.0, 2.0);
 		
-		this.world.add(right1);
+		this.world.addBody(right1);
 		
 		// create a second right traveling object
 		Rectangle r3 = new Rectangle(1.0, 1.0);
@@ -167,7 +166,7 @@ public class Filter extends Test {
 		right2.setMass();
 		right2.translate(-4.0, 2.0);
 		
-		this.world.add(right2);
+		this.world.addBody(right2);
 	}
 	
 	/* (non-Javadoc)

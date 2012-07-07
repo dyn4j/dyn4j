@@ -24,8 +24,7 @@
  */
 package org.dyn4j.testbed.test;
 
-import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.collision.continuous.TimeOfImpact;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.TimeOfImpactAdapter;
@@ -39,7 +38,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests the handling of bodies that rotate very fast.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.1.1
  * @since 1.2.0
  */
 public class FastRotation extends Test {
@@ -93,8 +92,7 @@ public class FastRotation extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(50.0, 50.0));
-		this.world = new World(bounds);
+		this.world = new World(new AxisAlignedBounds(50.0, 50.0));
 		
 		// setup the contact counter
 		ContactCounter cc = new ContactCounter();
@@ -127,8 +125,8 @@ public class FastRotation extends Test {
 		e2.rotateAboutCenter(Math.toRadians(-50));
 		e2.setAngularVelocity(Math.toRadians(60.0 * 60.0));
 		
-		this.world.add(e1);
-		this.world.add(e2);
+		this.world.addBody(e1);
+		this.world.addBody(e2);
 	}
 	
 	/* (non-Javadoc)

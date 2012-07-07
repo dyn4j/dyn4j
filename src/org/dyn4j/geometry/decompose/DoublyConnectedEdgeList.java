@@ -26,7 +26,6 @@ package org.dyn4j.geometry.decompose;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
 import org.dyn4j.Epsilon;
 import org.dyn4j.geometry.Convex;
@@ -692,7 +691,7 @@ public class DoublyConnectedEdgeList {
 	 */
 	public void triangulateMonotoneY(MonotonePolygon<Vertex> monotonePolygon) {
 		// create a stack to support triangulation
-		Stack<MonotoneVertex<Vertex>> stack = new Stack<MonotoneVertex<Vertex>>();
+		List<MonotoneVertex<Vertex>> stack = new ArrayList<MonotoneVertex<Vertex>>();
 		
 		// get the sorted monotone vertices
 		List<MonotoneVertex<Vertex>> vertices = monotonePolygon.vertices;
@@ -700,8 +699,9 @@ public class DoublyConnectedEdgeList {
 		// a monotone polygon can be triangulated in O(n) time
 		
 		// push the first two onto the stack
-		stack.push(vertices.get(0));
-		stack.push(vertices.get(1));
+		// push
+		stack.add(vertices.get(0));
+		stack.add(vertices.get(1));
 		
 		int i = 2;
 		while (!stack.isEmpty()) {
@@ -709,15 +709,16 @@ public class DoublyConnectedEdgeList {
 			MonotoneVertex<Vertex> v = vertices.get(i);
 			
 			// get the bottom and top elements of the stack
-			MonotoneVertex<Vertex> vBot = stack.firstElement();
-			MonotoneVertex<Vertex> vTop = stack.lastElement();
+			MonotoneVertex<Vertex> vBot = stack.get(0);
+			MonotoneVertex<Vertex> vTop = stack.get(stack.size() - 1);
 			
 			// is the current vertex adjacent to the bottom element
 			// but not to the top element?
 			if (v.isAdjacent(vBot) && !v.isAdjacent(vTop)) {
 				// create the triangles and pop all the points
 				while (stack.size() > 1) {
-					MonotoneVertex<Vertex> vt = stack.pop();
+					// pop
+					MonotoneVertex<Vertex> vt = stack.remove(stack.size() - 1);
 					// create diagonal
 					this.addHalfEdges(v.data, vt.data);
 				}
@@ -725,14 +726,15 @@ public class DoublyConnectedEdgeList {
 				stack.clear();
 				
 				// push the remaining edge
-				stack.push(vTop);
-				stack.push(v);
+				stack.add(vTop);
+				stack.add(v);
 			} else if (v.isAdjacent(vTop) && !v.isAdjacent(vBot)) {
 				double angle = 0;
 				
-				while (stack.size() > 1) {
-					MonotoneVertex<Vertex> vt = stack.lastElement();
-					MonotoneVertex<Vertex> vt1 = stack.elementAt(stack.size() - 2);
+				int sSize = stack.size();
+				while (sSize > 1) {
+					MonotoneVertex<Vertex> vt = stack.get(sSize - 1);
+					MonotoneVertex<Vertex> vt1 = stack.get(sSize - 2);
 					
 					Vector2 p1 = v.data.point;
 					Vector2 p2 = vt.data.point;
@@ -751,19 +753,23 @@ public class DoublyConnectedEdgeList {
 						// add the half edges
 						this.addHalfEdges(v.data, vt1.data);
 						// remove the top element
-						stack.pop();
+						// pop
+						stack.remove(sSize - 1);
+						sSize--;
 					} else {
 						// once we find an angle that is greater than pi then
 						// we can quit and move to the next vertex in the sorted list
 						break;
 					}
 				}
-				stack.push(v);
+				stack.add(v);
 			} else if (v.isAdjacent(vTop) && v.isAdjacent(vBot)) {
 				// create the triangles and pop all the points
-				stack.pop();
+				// pop
+				stack.remove(stack.size() - 1);
 				while (stack.size() > 1) {
-					MonotoneVertex<Vertex> vt = stack.pop();
+					// pop
+					MonotoneVertex<Vertex> vt = stack.remove(stack.size() - 1);
 					// create diagonal
 					this.addHalfEdges(v.data, vt.data);
 				}

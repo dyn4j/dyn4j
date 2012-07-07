@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,9 +24,10 @@
  */
 package org.dyn4j.geometry.hull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Stack;
+import java.util.List;
 
 import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Vector2;
@@ -42,7 +43,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * If the input point array has a size of 1 or 2 the input point array is returned.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.1.1
  * @since 2.2.0
  */
 public class GrahamScan implements HullGenerator {
@@ -115,22 +116,25 @@ public class GrahamScan implements HullGenerator {
 		Arrays.sort(points, pc);
 		
 		// build the hull
-		Stack<Vector2> stack = new Stack<Vector2>();
-		stack.push(points[0]);
-		stack.push(points[1]);
+		List<Vector2> stack = new ArrayList<Vector2>();
+		// push
+		stack.add(points[0]);
+		stack.add(points[1]);
 		int i = 2;
 		while (i < size) {
+			int sSize = stack.size();
 			// if the stack size is one then just
 			// push the current point onto the stack
 			// thereby making a line segment
-			if (stack.size() == 1) {
-				stack.push(points[i]);
+			if (sSize == 1) {
+				// push
+				stack.add(points[i]);
 				i++;
 				continue;
 			}
 			// otherwise get the top two items off the stack
-			Vector2 p1 = stack.get(stack.size() - 2);
-			Vector2 p2 = stack.peek();
+			Vector2 p1 = stack.get(sSize - 2);
+			Vector2 p2 = stack.get(sSize - 1);
 			// get the current point
 			Vector2 p3 = points[i];
 			// test if the current point is to the left of the line
@@ -140,13 +144,15 @@ public class GrahamScan implements HullGenerator {
 			if (location > 0.0) {
 				// if its to the left, then push the new point on
 				// the stack since it maintains convexity
-				stack.push(p3);
+				// push
+				stack.add(p3);
 				i++;
 			} else {
 				// otherwise the pop the previous point off the stack
 				// since this indicates that if we added the current
 				// point to the stack we would make a concave section
-				stack.pop();
+				// pop
+				stack.remove(sSize - 1);
 			}
 		}
 		

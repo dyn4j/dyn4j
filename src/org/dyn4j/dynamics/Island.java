@@ -40,7 +40,7 @@ import org.dyn4j.geometry.Vector2;
  * Nearly identitcal to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class Island {
@@ -265,6 +265,7 @@ public class Island {
 						minSleepTime = Math.min(minSleepTime, body.getSleepTime());
 					}
 				} else {
+					body.sleepTime = 0.0;
 					minSleepTime = 0.0;
 				}
 			}
