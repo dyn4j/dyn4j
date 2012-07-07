@@ -24,11 +24,9 @@
  */
 package org.dyn4j.testbed.test;
 
-import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
-import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Triangle;
@@ -40,7 +38,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests body sensor flagging.
  * @author William Bittle
- * @version 2.2.2
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class Sensor extends Test {
@@ -76,8 +74,7 @@ public class Sensor extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(16.0, 15.0));
-		this.world = new World(bounds);
+		this.world = new World(new AxisAlignedBounds(16.0, 15.0));
 		
 		// setup the contact counter
 		ContactCounter cc = new ContactCounter();
@@ -100,7 +97,7 @@ public class Sensor extends Test {
 		Entity floor = new Entity();
 		floor.addFixture(new BodyFixture(floorRect));
 		floor.setMass(Mass.Type.INFINITE);
-		this.world.add(floor);
+		this.world.addBody(floor);
 		
 		// create a sensor object
 		Triangle triangle = new Triangle(
@@ -117,7 +114,7 @@ public class Sensor extends Test {
 		sensor.addFixture(fixture);
 		sensor.setMass();
 		sensor.translate(0.0, 4.0);
-		this.world.add(sensor);
+		this.world.addBody(sensor);
 	}
 	
 	/* (non-Javadoc)

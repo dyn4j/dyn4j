@@ -24,8 +24,7 @@
  */
 package org.dyn4j.testbed.test;
 
-import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.joint.WeldJoint;
@@ -40,7 +39,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests the weld joint.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class DivingBoard extends Test {
@@ -72,8 +71,7 @@ public class DivingBoard extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(16.0, 15.0));
-		this.world = new World(bounds);
+		this.world = new World(new AxisAlignedBounds(16.0, 15.0));
 		
 		// setup the contact counter
 		ContactCounter cc = new ContactCounter();
@@ -95,7 +93,7 @@ public class DivingBoard extends Test {
 		floor.setMass(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
-		this.world.add(floor);
+		this.world.addBody(floor);
 		
 		final int LENGTH = 3;
 		final double w = 1.0;
@@ -108,7 +106,7 @@ public class DivingBoard extends Test {
 		previous.addFixture(new BodyFixture(Geometry.createRectangle(w, h)));
 		previous.setMass(Mass.Type.INFINITE);
 		previous.translate(x, y);
-		this.world.add(previous);
+		this.world.addBody(previous);
 		
 		x += w;
 		for (int i = 0; i < LENGTH - 1; i++) {
@@ -116,12 +114,12 @@ public class DivingBoard extends Test {
 			next.addFixture(new BodyFixture(Geometry.createRectangle(w, h)));
 			next.setMass();
 			next.translate(x, y);
-			this.world.add(next);
+			this.world.addBody(next);
 			
 			WeldJoint joint = new WeldJoint(previous, next, new Vector2(x - w * 0.5, y));
 			joint.setFrequency(5.0);
 			joint.setDampingRatio(0.7);
-			this.world.add(joint);
+			this.world.addJoint(joint);
 			
 			previous = next;
 			x += w;

@@ -1198,4 +1198,19 @@ public class BodyTest {
 		TestCase.assertEquals(i, b.getVelocity().y);
 		TestCase.assertEquals(0.0, b.getVelocity().x);
 	}
+	
+	/**
+	 * Make sure the user data is stored.
+	 */
+	@Test
+	public void getUserData() {
+		String obj = "hello";
+		Body b = new Body();
+		
+		TestCase.assertNull(b.getUserData());
+		
+		b.setUserData(obj);
+		TestCase.assertNotNull(b.getUserData());
+		TestCase.assertSame(obj, b.getUserData());
+	}
 }

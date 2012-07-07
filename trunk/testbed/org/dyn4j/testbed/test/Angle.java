@@ -24,13 +24,11 @@
  */
 package org.dyn4j.testbed.test;
 
-import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.joint.AngleJoint;
 import org.dyn4j.dynamics.joint.RevoluteJoint;
-import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Vector2;
@@ -41,7 +39,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests the angle joint.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.1.1
  * @since 2.2.2
  */
 public class Angle extends Test {
@@ -73,8 +71,7 @@ public class Angle extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(16.0, 15.0));
-		this.world = new World(bounds);
+		this.world = new World(new AxisAlignedBounds(16.0, 15.0));
 		
 		// setup the contact counter
 		ContactCounter cc = new ContactCounter();
@@ -96,7 +93,7 @@ public class Angle extends Test {
 		floor.setMass(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
-		this.world.add(floor);
+		this.world.addBody(floor);
 		
 		/*
 		 * Make this configuration
@@ -126,16 +123,16 @@ public class Angle extends Test {
 		obj2.setMass();
 		obj2.translate(0.0, -0.6);
 		
-		this.world.add(obj1);
-		this.world.add(obj2);
+		this.world.addBody(obj1);
+		this.world.addBody(obj2);
 		
 		RevoluteJoint rj = new RevoluteJoint(obj1, obj2, new Vector2(0.0, 0.0));
-		this.world.add(rj);
+		this.world.addJoint(rj);
 		
 		AngleJoint j1 = new AngleJoint(obj1, obj2);
 		j1.setLimitsEnabled(Math.toRadians(-30), Math.toRadians(30));
 		
-		this.world.add(j1);
+		this.world.addJoint(j1);
 	}
 	
 	/* (non-Javadoc)

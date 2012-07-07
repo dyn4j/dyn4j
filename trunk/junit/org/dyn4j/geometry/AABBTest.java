@@ -26,6 +26,7 @@ package org.dyn4j.geometry;
 
 import junit.framework.TestCase;
 
+import org.dyn4j.Epsilon;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
@@ -45,6 +46,20 @@ public class AABBTest {
 		new AABB(0.0, 0.0, 1.0, 1.0);
 		new AABB(-2.0, 2.0, -1.0, 5.0);
 		new AABB(new Vector2(-3.0, 0.0), new Vector2(-2.0, 2.0));
+	}
+	
+	/**
+	 * Tests the successful copy of an AABB.
+	 */
+	@Test
+	public void createCopy() {
+		AABB aabb1 = new AABB(new Vector2(-3.0, 0.0), new Vector2(-2.0, 2.0));
+		AABB aabb2 = new AABB(aabb1);
+		TestCase.assertNotSame(aabb1, aabb2);
+		TestCase.assertEquals(aabb1.getMinX(), aabb2.getMinX(), 1.0E-4);
+		TestCase.assertEquals(aabb1.getMinY(), aabb2.getMinY(), 1.0E-4);
+		TestCase.assertEquals(aabb1.getMaxX(), aabb2.getMaxX(), 1.0E-4);
+		TestCase.assertEquals(aabb1.getMaxY(), aabb2.getMaxY(), 1.0E-4);
 	}
 	
 	/**
@@ -88,8 +103,9 @@ public class AABBTest {
 	 */
 	@Test
 	public void union() {
+		// overlapping AABBs
 		AABB aabb1 = new AABB(-2.0, 0.0, 2.0, 1.0);
-		AABB aabb2 = new AABB(-1.0, -2.0, 5.0, -1.0);
+		AABB aabb2 = new AABB(-1.0, -2.0, 5.0, 0.5);
 		
 		// test the getUnion method
 		AABB aabbr = aabb1.getUnion(aabb2);
@@ -119,12 +135,45 @@ public class AABBTest {
 	@Test
 	public void expand() {
 		AABB aabb = new AABB(-2.0, 0.0, 4.0, 4.0);
-		aabb.expand(1.0);
+		AABB aabb2 = aabb.getExpanded(2.0);
 		
+		TestCase.assertNotSame(aabb, aabb2);
+		
+		aabb.expand(1.0);
 		TestCase.assertEquals(-2.5, aabb.getMinX(), 1.0E-4);
 		TestCase.assertEquals(-0.5, aabb.getMinY(), 1.0E-4);
 		TestCase.assertEquals(4.5, aabb.getMaxX(), 1.0E-4);
 		TestCase.assertEquals(4.5, aabb.getMaxY(), 1.0E-4);
+		
+		// the second aabb will have different values
+		TestCase.assertEquals(-3.0, aabb2.getMinX(), 1.0E-4);
+		TestCase.assertEquals(-1.0, aabb2.getMinY(), 1.0E-4);
+		TestCase.assertEquals(5.0, aabb2.getMaxX(), 1.0E-4);
+		TestCase.assertEquals(5.0, aabb2.getMaxY(), 1.0E-4);
+		
+		// test negative expansion
+		aabb2 = aabb.getExpanded(-1.0);
+		TestCase.assertEquals(-2.0, aabb2.getMinX(), 1.0E-4);
+		TestCase.assertEquals(0.0, aabb2.getMinY(), 1.0E-4);
+		TestCase.assertEquals(4.0, aabb2.getMaxX(), 1.0E-4);
+		TestCase.assertEquals(4.0, aabb2.getMaxY(), 1.0E-4);
+		aabb.expand(-1.0);
+		TestCase.assertEquals(-2.0, aabb.getMinX(), 1.0E-4);
+		TestCase.assertEquals(0.0, aabb.getMinY(), 1.0E-4);
+		TestCase.assertEquals(4.0, aabb.getMaxX(), 1.0E-4);
+		TestCase.assertEquals(4.0, aabb.getMaxY(), 1.0E-4);
+		
+		// test an overly negative expansion
+		aabb2 = aabb.getExpanded(-8.0);
+		TestCase.assertEquals(1.0, aabb2.getMinX(), 1.0E-4);
+		TestCase.assertEquals(2.0, aabb2.getMinY(), 1.0E-4);
+		TestCase.assertEquals(1.0, aabb2.getMaxX(), 1.0E-4);
+		TestCase.assertEquals(2.0, aabb2.getMaxY(), 1.0E-4);
+		aabb.expand(-8.0);
+		TestCase.assertEquals(1.0, aabb.getMinX(), 1.0E-4);
+		TestCase.assertEquals(2.0, aabb.getMinY(), 1.0E-4);
+		TestCase.assertEquals(1.0, aabb.getMaxX(), 1.0E-4);
+		TestCase.assertEquals(2.0, aabb.getMaxY(), 1.0E-4);
 	}
 	
 	/**
@@ -238,5 +287,55 @@ public class AABBTest {
 		
 		// test on edge
 		TestCase.assertTrue(aabb.contains(0.0, 1.0));
+	}
+	
+	/**
+	 * Tests the intersection methods.
+	 * @since 3.1.1
+	 */
+	@Test
+	public void intersection() {
+		AABB aabb1 = new AABB(-2.0, 0.0, 2.0, 1.0);
+		AABB aabb2 = new AABB(-1.0, -2.0, 5.0, 0.5);
+		
+		AABB aabbr = aabb1.getIntersection(aabb2);
+		TestCase.assertEquals(-1.0, aabbr.getMinX(), 1.0E-4);
+		TestCase.assertEquals(0.0, aabbr.getMinY(), 1.0E-4);
+		TestCase.assertEquals(2.0, aabbr.getMaxX(), 1.0E-4);
+		TestCase.assertEquals(0.5, aabbr.getMaxY(), 1.0E-4);
+		
+		// test using separated aabbs (should give a zero AABB)
+		AABB aabb3 = new AABB(-4.0, 2.0, -3.0, 4.0);
+		aabbr = aabb1.getIntersection(aabb3);
+		TestCase.assertEquals(0.0, aabbr.getMinX(), 1.0E-4);
+		TestCase.assertEquals(0.0, aabbr.getMinY(), 1.0E-4);
+		TestCase.assertEquals(0.0, aabbr.getMaxX(), 1.0E-4);
+		TestCase.assertEquals(0.0, aabbr.getMaxY(), 1.0E-4);
+		
+		aabb1.intersection(aabb2);
+		TestCase.assertEquals(-1.0, aabb1.getMinX(), 1.0E-4);
+		TestCase.assertEquals(0.0, aabb1.getMinY(), 1.0E-4);
+		TestCase.assertEquals(2.0, aabb1.getMaxX(), 1.0E-4);
+		TestCase.assertEquals(0.5, aabb1.getMaxY(), 1.0E-4);
+	}
+	
+	/**
+	 * Tests the isDegenerate methods.
+	 */
+	@Test
+	public void degenerate() {
+		AABB aabb = new AABB(0.0, 0.0, 0.0, 0.0);
+		TestCase.assertTrue(aabb.isDegenerate());
+		
+		aabb = new AABB(1.0, 2.0, 1.0, 3.0);
+		TestCase.assertTrue(aabb.isDegenerate());
+		
+		aabb = new AABB(1.0, 0.0, 2.0, 1.0);
+		TestCase.assertFalse(aabb.isDegenerate());
+		
+		aabb = new AABB(1.0, 0.0, 1.000001, 2.0);
+		TestCase.assertFalse(aabb.isDegenerate());
+		TestCase.assertFalse(aabb.isDegenerate(Epsilon.E));
+		TestCase.assertTrue(aabb.isDegenerate(0.000001));
 	}
 }

@@ -24,9 +24,10 @@
  */
 package org.dyn4j;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.Stack;
 
 import org.dyn4j.resources.Messages;
 
@@ -138,7 +139,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 */
 	public class TreeIterator implements Iterator<E> {
 		/** The node stack for iterative traversal */
-		protected Stack<Node> stack;
+		protected Deque<Node> stack;
 		
 		/** The traversal direction */
 		protected final Direction direction;
@@ -164,7 +165,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 			// set the direction
 			this.direction = direction;
 			// create the node stack and initialize it
-			this.stack = new Stack<Node>();
+			this.stack = new ArrayDeque<Node>();
 			// check the direction to determine how to initialize it
 			if (direction == Direction.ASCENDING) {
 				this.pushLeft(node);

@@ -57,7 +57,7 @@ import org.dyn4j.testbed.input.Mouse;
 /**
  * Tests the {@link World}'s raycast methods.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.1
  * @since 2.0.0
  */
 public class Raycast extends Test {
@@ -195,7 +195,7 @@ public class Raycast extends Test {
 		triangle.addFixture(new BodyFixture(triShape));
 		triangle.setMass(Mass.Type.INFINITE);
 		triangle.translate(-0.90625, 2.40625);
-		this.world.add(triangle);
+		this.world.addBody(triangle);
 		
 		// create a circle
 		Circle cirShape = new Circle(0.5);
@@ -203,7 +203,7 @@ public class Raycast extends Test {
 		circle.addFixture(new BodyFixture(cirShape));
 		circle.setMass(Mass.Type.INFINITE);
 		circle.translate(2.421875, 3.5);
-		this.world.add(circle);
+		this.world.addBody(circle);
 		
 		// save the circle shape so we can ignore it later
 		this.circle = circle;
@@ -214,7 +214,7 @@ public class Raycast extends Test {
 		segment1.addFixture(new BodyFixture(segShape));
 		segment1.setMass(Mass.Type.INFINITE);
 		segment1.translate(4.53125, 3.34375);
-		this.world.add(segment1);
+		this.world.addBody(segment1);
 		
 		// try a rectangle
 		Rectangle rectShape = new Rectangle(1.0, 1.0);
@@ -222,7 +222,7 @@ public class Raycast extends Test {
 		rectangle.addFixture(new BodyFixture(rectShape));
 		rectangle.setMass(Mass.Type.INFINITE);
 		rectangle.translate(1.65625, 2.21875);
-		this.world.add(rectangle);
+		this.world.addBody(rectangle);
 		
 		// try a polygon with lots of vertices
 		Polygon polyShape = Geometry.createUnitCirclePolygon(10, 1.0);
@@ -230,7 +230,7 @@ public class Raycast extends Test {
 		polygon.addFixture(new BodyFixture(polyShape));
 		polygon.setMass(Mass.Type.INFINITE);
 		polygon.translate(0.28125, 4.765625);
-		this.world.add(polygon);
+		this.world.addBody(polygon);
 		
 		// try a compound object (Capsule)
 		Circle c1 = new Circle(0.5);
@@ -249,7 +249,7 @@ public class Raycast extends Test {
 		capsule.addFixture(new BodyFixture(rm));
 		capsule.setMass(Mass.Type.INFINITE);
 		capsule.translate(4.890625, 5.328125);
-		this.world.add(capsule);
+		this.world.addBody(capsule);
 		
 		// create another circle that isnt ignored
 		Circle cirShape2 = new Circle(0.25);
@@ -257,7 +257,7 @@ public class Raycast extends Test {
 		circle2.addFixture(new BodyFixture(cirShape2));
 		circle2.setMass(Mass.Type.INFINITE);
 		circle2.translate(-2.421875, 3.5);
-		this.world.add(circle2);
+		this.world.addBody(circle2);
 	}
 	
 	/* (non-Javadoc)

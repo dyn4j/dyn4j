@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,7 +29,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents a numeric {@link Interval}.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class Interval {
@@ -49,6 +49,16 @@ public class Interval {
 		if (min > max) throw new IllegalArgumentException(Messages.getString("geometry.interval.invalid"));
 		this.min = min;
 		this.max = max;
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param interval the {@link Interval} to copy
+	 * @since 3.1.1
+	 */
+	public Interval(Interval interval) {
+		this.min = interval.min;
+		this.max = interval.max;
 	}
 	
 	/* (non-Javadoc)
@@ -302,10 +312,60 @@ public class Interval {
 	
 	/**
 	 * Expands this {@link Interval} by half the given amount in both directions.
+	 * <p>
+	 * The value can be negative to shrink the interval.  However, if the value is
+	 * greater than the current length of the interval, the interval can become
+	 * invalid.  In this case, the interval will become a degenerate interval at
+	 * the mid point of the min and max.
 	 * @param value the value
 	 */
 	public void expand(double value) {
-		this.min -= value * 0.5;
-		this.max += value * 0.5;
+		double e = value * 0.5;
+		this.min -= e;
+		this.max += e;
+		// verify the interval is still valid
+		if (value < 0.0 && this.min > this.max) {
+			// if its not then set the min/max to
+			// the middle value of their current values
+			double p = (this.min + this.max) * 0.5;
+			this.min = p;
+			this.max = p;
+		}
+	}
+	
+	/**
+	 * Returns a new {@link Interval} of this interval expanded by half the given amount
+	 * in both directions.
+	 * <p>
+	 * The value can be negative to shrink the interval.  However, if the value is
+	 * greater than the current length of the interval, the interval will be 
+	 * invalid.  In this case, the interval returned will be a degenerate interval at
+	 * the mid point of the min and max.
+	 * @param value the value
+	 * @return {@link Interval}
+	 * @since 3.1.1
+	 */
+	public Interval getExpanded(double value) {
+		double e = value * 0.5;
+		double min = this.min - e;
+		double max = this.max + e;
+		// verify the interval is still valid
+		if (value < 0.0 && min > max) {
+			// if its not then set the min/max to
+			// the middle value of their current values
+			double p = (min + max) * 0.5;
+			min = p;
+			max = p;
+		}
+		return new Interval(min, max);
+	}
+	
+	/**
+	 * Returns the length of this interval from its min to its max.
+	 * @return double
+	 * @since 3.1.1
+	 */
+	public double getLength() {
+		return this.max - this.min;
 	}
 }

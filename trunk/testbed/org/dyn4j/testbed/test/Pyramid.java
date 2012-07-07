@@ -24,11 +24,10 @@
  */
 package org.dyn4j.testbed.test;
 
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
-import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.testbed.ContactCounter;
@@ -38,7 +37,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests a triangular stack of boxes.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class Pyramid extends Test {
@@ -73,7 +72,7 @@ public class Pyramid extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(16.0, 20.0));
+		Bounds bounds = new AxisAlignedBounds(16.0, 20.0);
 		bounds.translate(0.0, 7.0);
 		this.world = new World(bounds);
 		
@@ -95,7 +94,7 @@ public class Pyramid extends Test {
 		Entity floor = new Entity();
 		floor.addFixture(new BodyFixture(floorRect));
 		floor.setMass(Mass.Type.INFINITE);
-		this.world.add(floor);
+		this.world.addBody(floor);
 		
 		// create the rows
 		
@@ -133,7 +132,7 @@ public class Pyramid extends Test {
 				// move it to the right position
 				e.translate(x, y);
 				// add it to the world
-				this.world.add(e);
+				this.world.addBody(e);
 				// increment x
 				x += (width + xspacing);
 			}

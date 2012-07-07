@@ -24,12 +24,10 @@
  */
 package org.dyn4j.testbed.test;
 
-import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.joint.RevoluteJoint;
-import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Vector2;
@@ -40,7 +38,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests a number of revolute joints linked in a chain.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class Chain extends Test {
@@ -75,8 +73,7 @@ public class Chain extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(30.0, 10.0));
-		this.world = new World(bounds);
+		this.world = new World(new AxisAlignedBounds(30.0, 10.0));
 		
 		// setup the contact counter
 		ContactCounter cc = new ContactCounter();
@@ -98,7 +95,7 @@ public class Chain extends Test {
 		floor.setMass(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
-		this.world.add(floor);
+		this.world.addBody(floor);
 		
 		/*
 		 * Make this configuration (boxes overlap a bit)
@@ -125,14 +122,14 @@ public class Chain extends Test {
 			link.addFixture(new BodyFixture(r));
 			link.setMass();
 			link.translate(x, y);
-			this.world.add(link);
+			this.world.addBody(link);
 			
 			// define the anchor point
 			Vector2 anchor = new Vector2(x - (w * 0.5 - overlap), y);
 			
 			// create a joint from the previous body to this body
 			RevoluteJoint joint = new RevoluteJoint(previous, link, anchor);
-			this.world.add(joint);
+			this.world.addJoint(joint);
 			
 			x += w - overlap * 2.0;
 			previous = link;

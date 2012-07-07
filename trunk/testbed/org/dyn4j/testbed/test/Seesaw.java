@@ -24,11 +24,9 @@
  */
 package org.dyn4j.testbed.test;
 
-import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
-import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Triangle;
@@ -40,7 +38,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests a seesaw type configuration.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class Seesaw extends Test {
@@ -74,8 +72,7 @@ public class Seesaw extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(16.0, 15.0));
-		this.world = new World(bounds);
+		this.world = new World(new AxisAlignedBounds(16.0, 15.0));
 		
 		// setup the contact counter
 		ContactCounter cc = new ContactCounter();
@@ -95,7 +92,7 @@ public class Seesaw extends Test {
 		Entity floor = new Entity();
 		floor.addFixture(new BodyFixture(floorShape));
 		floor.setMass(Mass.Type.INFINITE);
-		this.world.add(floor);
+		this.world.addBody(floor);
 		
 		// create the pivot
 		Triangle pivotShape = new Triangle(
@@ -106,7 +103,7 @@ public class Seesaw extends Test {
 		pivot.addFixture(new BodyFixture(pivotShape));
 		pivot.setMass(Mass.Type.INFINITE);
 		pivot.translate(0.0, 0.5);
-		this.world.add(pivot);
+		this.world.addBody(pivot);
 		
 		// create the plank
 		Rectangle plankShape = new Rectangle(10.0, 0.2);
@@ -114,7 +111,7 @@ public class Seesaw extends Test {
 		plank.addFixture(new BodyFixture(plankShape));
 		plank.setMass();
 		plank.translate(0.0, 1.5);
-		this.world.add(plank);
+		this.world.addBody(plank);
 		
 		// create a box
 		Rectangle box = new Rectangle(1.0, 1.0);
@@ -124,7 +121,7 @@ public class Seesaw extends Test {
 		lBox.addFixture(new BodyFixture(box));
 		lBox.setMass();
 		lBox.translate(-4.0, 2.5);
-		this.world.add(lBox);
+		this.world.addBody(lBox);
 		
 		box = new Rectangle(1.0, 1.0);
 		
@@ -136,7 +133,7 @@ public class Seesaw extends Test {
 		rBox.addFixture(boxFixture);
 		rBox.setMass();
 		rBox.translate(4.0, 5.7);
-		this.world.add(rBox);
+		this.world.addBody(rBox);
 	}
 	
 	/* (non-Javadoc)

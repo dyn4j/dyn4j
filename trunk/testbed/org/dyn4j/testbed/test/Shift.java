@@ -27,8 +27,8 @@ package org.dyn4j.testbed.test;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.joint.MouseJoint;
@@ -52,7 +52,7 @@ import org.dyn4j.testbed.input.Mouse;
 /**
  * Tests the shifting of the entire world by a given amount.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.1
  * @since 3.1.0
  */
 public class Shift extends Test {
@@ -84,7 +84,7 @@ public class Shift extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(20, 30));
+		Bounds bounds = new AxisAlignedBounds(20.0, 30.0);
 		bounds.translate(0.0, 3.0);
 		this.world = new World(bounds);
 		
@@ -107,7 +107,7 @@ public class Shift extends Test {
 		floor.addFixture(new BodyFixture(floorRect));
 		floor.setMass(Mass.Type.INFINITE);
 		floor.translate(0.0, -3.0);
-		this.world.add(floor);
+		this.world.addBody(floor);
 		
 		// create a triangle object
 		Triangle triShape = new Triangle(
@@ -120,7 +120,7 @@ public class Shift extends Test {
 		triangle.translate(-1.0, -1.0);
 		// test having a velocity
 		triangle.getVelocity().set(5.0, 0.0);
-		this.world.add(triangle);
+		this.world.addBody(triangle);
 		
 		// create a circle
 		Circle cirShape = new Circle(0.5);
@@ -129,10 +129,10 @@ public class Shift extends Test {
 		circle.setMass();
 		circle.translate(2.0, -1.0);
 		// test adding some force
-		circle.apply(new Vector2(-100.0, 0.0));
+		circle.applyForce(new Vector2(-100.0, 0.0));
 		// set some linear damping to simulate rolling friction
 		circle.setLinearDamping(0.05);
-		this.world.add(circle);
+		this.world.addBody(circle);
 		
 		// create a line segment
 		Segment segShape = new Segment(new Vector2(0.5, 0.5), new Vector2(-0.5, -0.5));
@@ -140,7 +140,7 @@ public class Shift extends Test {
 		segment1.addFixture(new BodyFixture(segShape));
 		segment1.setMass();
 		segment1.translate(1.0, 3.0);
-		this.world.add(segment1);
+		this.world.addBody(segment1);
 		
 		// try a segment parallel to the floor
 		Entity segment2 = new Entity();
@@ -148,7 +148,7 @@ public class Shift extends Test {
 		segment2.setMass();
 		segment2.rotateAboutCenter(Math.toRadians(-45.0));
 		segment2.translate(-4.5, -2.0);
-		this.world.add(segment2);
+		this.world.addBody(segment2);
 		
 		// try a rectangle
 		Rectangle rectShape = new Rectangle(1.0, 1.0);
@@ -157,7 +157,7 @@ public class Shift extends Test {
 		rectangle.setMass();
 		rectangle.translate(0.0, -1.0);
 		rectangle.getVelocity().set(-5.0, 0.0);
-		this.world.add(rectangle);
+		this.world.addBody(rectangle);
 		
 		// try a polygon with lots of vertices
 		Polygon polyShape = Geometry.createUnitCirclePolygon(10, 1.0);
@@ -167,7 +167,7 @@ public class Shift extends Test {
 		polygon.translate(-2.5, -1.0);
 		// set the angular velocity
 		polygon.setAngularVelocity(Math.toRadians(-20.0));
-		this.world.add(polygon);
+		this.world.addBody(polygon);
 		
 		// try a compound object (Capsule)
 		Circle c1 = new Circle(0.5);
@@ -190,25 +190,25 @@ public class Shift extends Test {
 		capsule.addFixture(new BodyFixture(rm));
 		capsule.setMass();
 		capsule.translate(0.0, -1.0);
-		this.world.add(capsule);
+		this.world.addBody(capsule);
 		
 		Entity issTri = new Entity();
 		issTri.addFixture(Geometry.createIsoscelesTriangle(1.0, 3.0));
 		issTri.setMass();
 		issTri.translate(2.0, 0.0);
-		this.world.add(issTri);
+		this.world.addBody(issTri);
 		
 		Entity equTri = new Entity();
 		equTri.addFixture(Geometry.createEquilateralTriangle(2.0));
 		equTri.setMass();
 		equTri.translate(3.0, 0.0);
-		this.world.add(equTri);
+		this.world.addBody(equTri);
 		
 		Entity rightTri = new Entity();
 		rightTri.addFixture(Geometry.createRightTriangle(2.0, 1.0));
 		rightTri.setMass();
 		rightTri.translate(4.0, 0.0);
-		this.world.add(rightTri);
+		this.world.addBody(rightTri);
 		
 		// create mouse joint
 		{
@@ -220,13 +220,13 @@ public class Shift extends Test {
 			top.setMass();
 			top.translate(-4.0, -0.5);
 			
-			this.world.add(top);
+			this.world.addBody(top);
 			
 			MouseJoint mj = new MouseJoint(top, new Vector2(-4.0, 0.25), 5.0, 0.3, 100);
 			// pin it to a random point
 			mj.setTarget(new Vector2(-4.0, 1.0));
 			
-			this.world.add(mj);
+			this.world.addJoint(mj);
 		}
 		
 		// create pulley joint
@@ -252,8 +252,8 @@ public class Shift extends Test {
 			obj2.setMass();
 			obj2.translate(x, y);
 			
-			this.world.add(obj1);
-			this.world.add(obj2);
+			this.world.addBody(obj1);
+			this.world.addBody(obj2);
 			
 			// compute the joint points
 			Vector2 bodyAnchor1 = new Vector2(-x, y + h);
@@ -269,7 +269,7 @@ public class Shift extends Test {
 			pulleyJoint.setCollisionAllowed(true);
 			
 			// defaults to collision not allowed
-			this.world.add(pulleyJoint);
+			this.world.addJoint(pulleyJoint);
 		}
 	}
 	
@@ -290,7 +290,7 @@ public class Shift extends Test {
 	@Override
 	public void reset() {
 		super.reset();
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(20, 30));
+		Bounds bounds = new AxisAlignedBounds(20.0, 30.0);
 		bounds.translate(0.0, 3.0);
 		this.world.setBounds(bounds);
 	}

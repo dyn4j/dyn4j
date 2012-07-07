@@ -30,8 +30,8 @@ import java.util.List;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Step;
 import org.dyn4j.dynamics.World;
@@ -48,7 +48,6 @@ import org.dyn4j.dynamics.joint.WeldJoint;
 import org.dyn4j.dynamics.joint.WheelJoint;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Interval;
-import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.testbed.input.Keyboard;
@@ -132,7 +131,7 @@ public abstract class Test implements Comparable<Test> {
 	 */
 	public void reset() {
 		// clear all the bodies
-		this.world.removeAll(false);
+		this.world.removeAllBodiesAndJoints(false);
 		// setup the test
 		this.setup();
 	}
@@ -356,37 +355,25 @@ public abstract class Test implements Comparable<Test> {
 			// get the bounds object
 			Bounds bounds = this.world.getBounds();
 			// check the type
-			if (bounds instanceof RectangularBounds) {
+			if (bounds instanceof AxisAlignedBounds) {
 				// cast to get access to the fields
-				RectangularBounds rb = (RectangularBounds) bounds;
+				AxisAlignedBounds aab = (AxisAlignedBounds) bounds;
 				
-				// get the bounding rectangle
-				Rectangle r = rb.getBounds();
 				// get the transform
-				Transform t = rb.getTransform();
-				// get the rectangle's vertices
-				Vector2[] vertices = r.getVertices();
-				
-				// save the current model-view matrix
-				gl.glPushMatrix();
-				// transform the model-view matrix
-				gl.glTranslated(t.getTranslationX(), t.getTranslationY(), 0.0);
-				gl.glRotated(Math.toDegrees(t.getRotation()), 0.0, 0.0, 1.0);
+				Transform t = aab.getTransform();
+				Vector2 c = t.getTranslation();
+				// get the size
+				double hw = aab.getWidth() * 0.5;
+				double hh = aab.getHeight() * 0.5;
 				
 				// draw the box
 				gl.glBegin(GL.GL_LINE_LOOP);
-				// declare a vector for use
-				Vector2 v;
-				for (int i = 0; i < 4; i++) {
-					// get the point
-					v = vertices[i];
-					// add the vertex
-					gl.glVertex2d(v.x, v.y);
-				}
+					// add the vertices
+					gl.glVertex2d(-hw + c.x, -hh + c.y);
+					gl.glVertex2d(-hw + c.x, hh + c.y);
+					gl.glVertex2d(hw + c.x, hh + c.y);
+					gl.glVertex2d(hw + c.x, -hh + c.y);
 				gl.glEnd();
-				
-				// throw away the current model-view matrix
-				gl.glPopMatrix();
 			}
 		}
 		

@@ -40,7 +40,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests the angle joint.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.1
  * @since 3.1.0
  */
 public class Animate extends Test {
@@ -112,9 +112,9 @@ public class Animate extends Test {
 		mj.setAngularTarget(Math.toRadians(30));
 		mj.setCorrectionFactor(1.0);
 		
-		this.world.add(floor);
-		this.world.add(character);
-		this.world.add(mj);
+		this.world.addBody(floor);
+		this.world.addBody(character);
+		this.world.addJoint(mj);
 	}
 	
 	/* (non-Javadoc)

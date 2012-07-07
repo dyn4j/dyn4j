@@ -24,12 +24,10 @@
  */
 package org.dyn4j.testbed.test;
 
-import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.joint.MouseJoint;
-import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Vector2;
@@ -40,7 +38,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests the {@link Mouse} without attaching it to the mouse.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class Mouse extends Test {
@@ -72,8 +70,7 @@ public class Mouse extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(16.0, 15.0));
-		this.world = new World(bounds);
+		this.world = new World(new AxisAlignedBounds(16.0, 15.0));
 		
 		// setup the contact counter
 		ContactCounter cc = new ContactCounter();
@@ -95,7 +92,7 @@ public class Mouse extends Test {
 		floor.setMass(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
-		this.world.add(floor);
+		this.world.addBody(floor);
 		
 		// create a reusable rectangle
 		Rectangle r = new Rectangle(1.0, 1.0);
@@ -105,13 +102,13 @@ public class Mouse extends Test {
 		top.setMass();
 		top.translate(0.0, -1.5);
 		
-		this.world.add(top);
+		this.world.addBody(top);
 		
 		MouseJoint mj = new MouseJoint(top, new Vector2(0.0, -0.75), 5.0, 0.3, 100);
 		// pin it to a random point
 		mj.setTarget(new Vector2(0.0, 1.0));
 		
-		this.world.add(mj);
+		this.world.addJoint(mj);
 	}
 	
 	/* (non-Javadoc)

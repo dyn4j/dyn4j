@@ -22,108 +22,107 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.dynamics;
+package org.dyn4j.collision;
 
-import org.dyn4j.collision.Fixture;
+import junit.framework.TestCase;
+
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Tests the methods of the {@link BodyFixture} and {@link Fixture} classes.
- * <p>
- * Was FixtureTest.
+ * Test case for the {@link Fixture} class.
  * @author William Bittle
  * @version 3.1.1
  * @since 3.1.1
  */
-public class BodyFixtureTest {
-	/** The {@link BodyFixture} object to test */
-	private BodyFixture fixture;
-	
+public class FixtureTest {
 	/**
-	 * Sets up the test.
-	 */
-	@Before
-	public void setup() {
-		fixture = new BodyFixture(Geometry.createUnitCirclePolygon(5, 0.5));
-	}
-	
-	/**
-	 * Tests the creation of a fixture with a null shape.
-	 */
-	@Test(expected = NullPointerException.class)
-	public void createNullShape() {
-		new BodyFixture(null);
-	}
-	
-	/**
-	 * Tests a successful creation.
+	 * Tests the successful creation of a fixture.
 	 */
 	@Test
 	public void createSuccess() {
-		Convex convex = Geometry.createUnitCirclePolygon(5, 0.5);
-		new BodyFixture(convex);
+		new Fixture(Geometry.createCircle(1.0));
 	}
 	
 	/**
-	 * Tests setting the density to a negative value.
+	 * Tests the failed creation of a fixture by passing a null
+	 * shape.
 	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setNegativeDensity() {
-		fixture.setDensity(-1.0);
+	@Test(expected = NullPointerException.class)
+	public void createNullFixture() {
+		new Fixture(null);
 	}
 	
 	/**
-	 * Tests setting the density to a zero value.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setZeroDensity() {
-		fixture.setDensity(0.0);
-	}
-	
-	/**
-	 * Tests setting the density to a valid value
+	 * Tests that an id is created for a fixture.
 	 */
 	@Test
-	public void setValidDensity() {
-		fixture.setDensity(1.0);
+	public void getId() {
+		Fixture f = new Fixture(Geometry.createCircle(1.0));
+		TestCase.assertNotNull(f.getId());
 	}
 	
 	/**
-	 * Tests setting friction to a negative value.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setNegativeFriction() {
-		fixture.setFriction(-2.0);
-	}
-	
-	/**
-	 * Tests setting friction to a valid value
+	 * Tests the getShape method.
 	 */
 	@Test
-	public void setValidFriction() {
-		fixture.setFriction(0.0);
-		fixture.setFriction(1.0);
-		fixture.setFriction(5.0);
+	public void getShape() {
+		Convex c = Geometry.createCircle(1.0);
+		Fixture f = new Fixture(c);
+		
+		TestCase.assertNotNull(f.getShape());
+		TestCase.assertEquals(c, f.getShape());
 	}
 	
 	/**
-	 * Tests setting the restitution to a negative value.
+	 * Tests setting the filter.
 	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setNegativeRestitution() {
-		fixture.setRestitution(-1.0);
+	@Test
+	public void setFilter() {
+		Fixture fixture = new Fixture(Geometry.createCircle(1.0));
+		Filter f = new CategoryFilter();
+		fixture.setFilter(f);
+		TestCase.assertEquals(f, fixture.getFilter());
 	}
 
 	/**
-	 * Tests setting restitution to a valid value
+	 * Tests setting a null filter.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void setNullFilter() {
+		Fixture fixture = new Fixture(Geometry.createCircle(1.0));
+		fixture.setFilter(null);
+	}
+	
+	/**
+	 * Tests the set/get sensor methods.
 	 */
 	@Test
-	public void setValidRestitution() {
-		fixture.setRestitution(0.0);
-		fixture.setRestitution(1.0);
-		fixture.setRestitution(5.0);
+	public void setSensor() {
+		Fixture fixture = new Fixture(Geometry.createCircle(1.0));
+		// by default it should be false
+		TestCase.assertFalse(fixture.isSensor());
+		
+		fixture.setSensor(true);
+		TestCase.assertTrue(fixture.isSensor());
+		
+		fixture.setSensor(false);
+		TestCase.assertFalse(fixture.isSensor());
+	}
+	
+	/**
+	 * Make sure storage of user data is working.
+	 */
+	@Test
+	public void setUserData() {
+		Fixture fixture = new Fixture(Geometry.createCircle(1.0));
+		// should be initial null
+		TestCase.assertNull(fixture.getUserData());
+		
+		String obj = "hello";
+		fixture.setUserData(obj);
+		TestCase.assertNotNull(fixture.getUserData());
+		TestCase.assertSame(obj, fixture.getUserData());
 	}
 }

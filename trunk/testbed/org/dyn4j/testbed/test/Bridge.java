@@ -24,12 +24,10 @@
  */
 package org.dyn4j.testbed.test;
 
-import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.joint.RevoluteJoint;
-import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Vector2;
@@ -41,7 +39,7 @@ import org.dyn4j.testbed.Test;
  * Tests a number of revolute joints linked in a chain suspended
  * by two points on either end to create a bridge.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class Bridge extends Test {
@@ -77,8 +75,7 @@ public class Bridge extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(30.0, 15.0));
-		this.world = new World(bounds);
+		this.world = new World(new AxisAlignedBounds(30.0, 15.0));
 		
 		// setup the contact counter
 		ContactCounter cc = new ContactCounter();
@@ -100,7 +97,7 @@ public class Bridge extends Test {
 		floor.setMass(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
-		this.world.add(floor);
+		this.world.addBody(floor);
 		
 		// create a reusable rectangle
 		final double h = 0.25;
@@ -119,14 +116,14 @@ public class Bridge extends Test {
 			link.addFixture(f);
 			link.setMass();
 			link.translate(-x + w * (i + 0.5), y);
-			this.world.add(link);
+			this.world.addBody(link);
 			
 			// define the anchor point
 			Vector2 anchor = new Vector2(-x + w * i, y);
 			
 			// create a joint from the previous body to this body
 			RevoluteJoint joint = new RevoluteJoint(previous, link, anchor);
-			this.world.add(joint);
+			this.world.addJoint(joint);
 			
 			previous = link;
 		}
@@ -136,7 +133,7 @@ public class Bridge extends Test {
 		
 		// create a joint from the previous body to this body
 		RevoluteJoint joint = new RevoluteJoint(previous, floor, anchor);
-		this.world.add(joint);
+		this.world.addJoint(joint);
 	}
 	
 	/* (non-Javadoc)

@@ -24,12 +24,10 @@
  */
 package org.dyn4j.testbed.test;
 
-import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.joint.WeldJoint;
-import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Vector2;
@@ -40,7 +38,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests the weld joint.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class Weld extends Test {
@@ -72,8 +70,7 @@ public class Weld extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(16.0, 15.0));
-		this.world = new World(bounds);
+		this.world = new World(new AxisAlignedBounds(16.0, 15.0));
 		
 		// setup the contact counter
 		ContactCounter cc = new ContactCounter();
@@ -95,7 +92,7 @@ public class Weld extends Test {
 		floor.setMass(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
-		this.world.add(floor);
+		this.world.addBody(floor);
 		
 		/*
 		 * Make this configuration
@@ -124,12 +121,12 @@ public class Weld extends Test {
 		bot.setMass();
 		bot.translate(0.0, -0.5);
 		
-		this.world.add(top);
-		this.world.add(bot);
+		this.world.addBody(top);
+		this.world.addBody(bot);
 		
 		WeldJoint joint = new WeldJoint(top, bot, new Vector2(0.0, -1.0));
 		
-		this.world.add(joint);
+		this.world.addJoint(joint);
 	}
 	
 	/* (non-Javadoc)

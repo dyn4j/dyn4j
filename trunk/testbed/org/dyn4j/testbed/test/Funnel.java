@@ -26,12 +26,11 @@ package org.dyn4j.testbed.test;
 
 import java.util.Random;
 
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.geometry.Circle;
-import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.testbed.ContactCounter;
@@ -41,7 +40,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests lots of random shapes (and sizes) moving through a funnel.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class Funnel extends Test {
@@ -80,7 +79,7 @@ public class Funnel extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(16.0, 18.0));
+		Bounds bounds = new AxisAlignedBounds(16.0, 18.0);
 		bounds.translate(0.0, 6.0);
 		this.world = new World(bounds);
 		
@@ -102,7 +101,7 @@ public class Funnel extends Test {
 		Entity floor = new Entity();
 		floor.addFixture(new BodyFixture(floorShape));
 		floor.setMass(Mass.Type.INFINITE);
-		this.world.add(floor);
+		this.world.addBody(floor);
 		
 		// create the funnel sides
 		Rectangle leftShape = new Rectangle(1.0, 7.0);
@@ -111,7 +110,7 @@ public class Funnel extends Test {
 		left.setMass(Mass.Type.INFINITE);
 		left.translate(-8.0, 8.0);
 		left.rotateAboutCenter(Math.toRadians(30.0));
-		this.world.add(left);
+		this.world.addBody(left);
 		
 		Rectangle rightShape = new Rectangle(1.0, 7.0);
 		Entity right = new Entity();
@@ -119,7 +118,7 @@ public class Funnel extends Test {
 		right.setMass(Mass.Type.INFINITE);
 		right.translate(8.0, 8.0);
 		right.rotateAboutCenter(-Math.toRadians(30.0));
-		this.world.add(right);
+		this.world.addBody(right);
 		
 		// temp variables
 		Random random = new Random();
@@ -149,7 +148,7 @@ public class Funnel extends Test {
 			}
 			e.setMass();
 			e.translate(x, y);
-			this.world.add(e);
+			this.world.addBody(e);
 		}
 	}
 	

@@ -28,8 +28,7 @@ import java.text.DecimalFormat;
 
 import javax.media.opengl.GL2;
 
-import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.joint.AngleJoint;
@@ -45,7 +44,7 @@ import com.jogamp.opengl.util.gl2.GLUT;
 /**
  * Tests the angle joint.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.1
  * @since 3.1.0
  */
 public class AngleRatio extends Test {
@@ -92,8 +91,7 @@ public class AngleRatio extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(16.0, 15.0));
-		this.world = new World(bounds);
+		this.world = new World(new AxisAlignedBounds(16.0, 15.0));
 		
 		// setup the contact counter
 		ContactCounter cc = new ContactCounter();
@@ -115,7 +113,7 @@ public class AngleRatio extends Test {
 		floor.setMass(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
-		this.world.add(floor);
+		this.world.addBody(floor);
 		
 		this.body1 = new Entity();
 		this.body1.addFixture(Geometry.createCircle(1.0));
@@ -128,15 +126,15 @@ public class AngleRatio extends Test {
 		this.body2.translate(2.0, 0.0);
 		this.body2.setAngularVelocity(Math.toRadians(10.0));
 		
-		this.world.add(this.body1);
-		this.world.add(this.body2);
+		this.world.addBody(this.body1);
+		this.world.addBody(this.body2);
 		
 		this.aj = new AngleJoint(this.body1, this.body2);
 		this.aj.setRatio(-2.0);
 		//this.aj.setLimitsEnabled(Math.toRadians(-30.0), Math.toRadians(30.0));
 		this.aj.setLimitEnabled(false);
 		
-		this.world.add(this.aj);
+		this.world.addJoint(this.aj);
 	}
 	
 	/* (non-Javadoc)

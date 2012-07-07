@@ -53,6 +53,19 @@ public class IntervalTest {
 	}
 	
 	/**
+	 * Tests the copy constructor.
+	 */
+	@Test
+	public void createCopy() {
+		Interval i1 = new Interval(-1.0, 2.0);
+		Interval i2 = new Interval(i1);
+		
+		TestCase.assertNotSame(i2, i1);
+		TestCase.assertEquals(i1.min, i2.min);
+		TestCase.assertEquals(i1.max, i2.max);
+	}
+	
+	/**
 	 * Tests an invalid max.
 	 */
 	@Test(expected = IllegalArgumentException.class)
@@ -245,20 +258,75 @@ public class IntervalTest {
 	@Test
 	public void expand() {
 		Interval i = new Interval(-2.0, 2.0);
+		Interval ci = null;
 		
 		// test a normal expansion
+		ci = i.getExpanded(2.0);
+		TestCase.assertEquals(-3.0, ci.min, 1.0e-3);
+		TestCase.assertEquals( 3.0, ci.max, 1.0e-3);
 		i.expand(2.0);
 		TestCase.assertEquals(-3.0, i.min, 1.0e-3);
 		TestCase.assertEquals( 3.0, i.max, 1.0e-3);
 		
 		// test no expansion
+		ci = i.getExpanded(0.0);
+		TestCase.assertEquals(-3.0, ci.min, 1.0e-3);
+		TestCase.assertEquals( 3.0, ci.max, 1.0e-3);
 		i.expand(0.0);
 		TestCase.assertEquals(-3.0, i.min, 1.0e-3);
 		TestCase.assertEquals( 3.0, i.max, 1.0e-3);
 		
 		// test negative expansion
+		ci = i.getExpanded(-1.0);
+		TestCase.assertEquals(-2.5, ci.min, 1.0e-3);
+		TestCase.assertEquals( 2.5, ci.max, 1.0e-3);
 		i.expand(-1.0);
 		TestCase.assertEquals(-2.5, i.min, 1.0e-3);
 		TestCase.assertEquals( 2.5, i.max, 1.0e-3);
+		
+		// test large negative expansion (this should
+		// make the interval invalid, so the interval
+		// is instead reduced down to a degenerate
+		// interval at the mid point
+		ci = i.getExpanded(-6.0);
+		TestCase.assertEquals(0.0, ci.min, 1.0e-3);
+		TestCase.assertEquals(0.0, ci.max, 1.0e-3);
+		i.expand(-6.0);
+		TestCase.assertEquals(0.0, i.min, 1.0e-3);
+		TestCase.assertEquals(0.0, i.max, 1.0e-3);
+
+		// make a copy
+		i = new Interval(-2.5, 1.5);
+		ci = i.getExpanded(-6.0);
+		TestCase.assertEquals(-0.5, ci.min, 1.0e-3);
+		TestCase.assertEquals(-0.5, ci.max, 1.0e-3);
+		i.expand(-6.0);
+		TestCase.assertEquals(-0.5, i.min, 1.0e-3);
+		TestCase.assertEquals(-0.5, i.max, 1.0e-3);
+	}
+	
+	/**
+	 * Returns the length of the interval.
+	 */
+	@Test
+	public void getLength() {
+		Interval i = new Interval(-2.0, 2.0);
+		TestCase.assertEquals(4.0, i.getLength());
+		
+		i = new Interval(-1.0, 2.0);
+		TestCase.assertEquals(3.0, i.getLength());
+		
+		i = new Interval(-3.0, -1.0);
+		TestCase.assertEquals(2.0, i.getLength());
+		
+		i = new Interval(2.0, 3.0);
+		TestCase.assertEquals(1.0, i.getLength());
+		
+		i = new Interval(-1.0, 2.0);
+		i.expand(-4.0);
+		TestCase.assertEquals(0.0, i.getLength());
+		
+		i = new Interval(-1.0, -1.0);
+		TestCase.assertEquals(0.0, i.getLength());
 	}
 }

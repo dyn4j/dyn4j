@@ -24,10 +24,11 @@
  */
 package org.dyn4j.dynamics;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Stack;
 
 import org.dyn4j.Listener;
 import org.dyn4j.collision.Bounds;
@@ -358,8 +359,7 @@ public class World {
 		
 		// perform a depth first search of the contact graph
 		// to create islands for constraint solving
-		Stack<Body> stack = new Stack<Body>();
-		stack.ensureCapacity(size);
+		Deque<Body> stack = new ArrayDeque<Body>(size);
 		// loop over the bodies and their contact edges to create the islands
 		for (int i = 0; i < size; i++) {
 			Body seed = this.bodies.get(i);

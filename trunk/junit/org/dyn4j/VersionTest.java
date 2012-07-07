@@ -26,28 +26,24 @@ package org.dyn4j;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.Epsilon;
 import org.junit.Test;
 
 /**
- * Test case for the {@link Epsilon} class.
+ * Test case for the {@link Version} class.
  * @author William Bittle
  * @version 3.1.1
- * @since 2.0.0
+ * @since 3.1.1
  */
-public class EpsilonTest {
+public class VersionTest {
 	/**
-	 * Tests the machine epsilon computation.
+	 * Tests the get verion number methods.
 	 */
 	@Test
-	public void compute() {
-		// ensure that the static variable is set
-		TestCase.assertFalse(Epsilon.E == 0.0);
-		// ensure the compute method returns in a
-		// finite number of iterations
-		Epsilon.compute();
-		// ensure that the epsilon adds nothing to the
-		// number 1
-		TestCase.assertEquals(1.0, 1.0 + Epsilon.E);
+	public void versions() {
+		// get the version array
+		int[] version = Version.getVersionNumbers();
+		TestCase.assertEquals(Version.getMajorNumber(), version[0]);
+		TestCase.assertEquals(Version.getMinorNumber(), version[1]);
+		TestCase.assertEquals(Version.getRevisionNumber(), version[2]);
 	}
 }

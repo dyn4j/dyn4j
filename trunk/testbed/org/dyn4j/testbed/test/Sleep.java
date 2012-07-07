@@ -26,25 +26,23 @@ package org.dyn4j.testbed.test;
 
 import java.awt.event.KeyEvent;
 
-import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
-import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.testbed.ContactCounter;
 import org.dyn4j.testbed.Entity;
 import org.dyn4j.testbed.Test;
 import org.dyn4j.testbed.input.Input;
+import org.dyn4j.testbed.input.Input.Hold;
 import org.dyn4j.testbed.input.Keyboard;
 import org.dyn4j.testbed.input.Mouse;
-import org.dyn4j.testbed.input.Input.Hold;
 
 /**
  * Tests bodies being put to sleep.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class Sleep extends Test {
@@ -78,8 +76,7 @@ public class Sleep extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(16.0, 15.0));
-		this.world = new World(bounds);
+		this.world = new World(new AxisAlignedBounds(16.0, 15.0));
 		
 		// setup the contact counter
 		ContactCounter cc = new ContactCounter();
@@ -99,7 +96,7 @@ public class Sleep extends Test {
 		Entity floor = new Entity();
 		floor.addFixture(new BodyFixture(floorRect));
 		floor.setMass(Mass.Type.INFINITE);
-		this.world.add(floor);
+		this.world.addBody(floor);
 		
 		// create the stack
 		
@@ -109,25 +106,25 @@ public class Sleep extends Test {
 		box1.addFixture(new BodyFixture(rect));
 		box1.setMass();
 		box1.translate(0.0, 1.0);
-		this.world.add(box1);
+		this.world.addBody(box1);
 		
 		Entity box2 = new Entity();
 		box2.addFixture(new BodyFixture(rect));
 		box2.setMass();
 		box2.translate(0.0, 2.0);
-		this.world.add(box2);
+		this.world.addBody(box2);
 
 		Entity box3 = new Entity();
 		box3.addFixture(new BodyFixture(rect));
 		box3.setMass();
 		box3.translate(0.0, 3.0);
-		this.world.add(box3);
+		this.world.addBody(box3);
 		
 		Entity box4 = new Entity();
 		box4.addFixture(new BodyFixture(rect));
 		box4.setMass();
 		box4.translate(0.0, 4.0);
-		this.world.add(box4);
+		this.world.addBody(box4);
 	}
 	
 	/* (non-Javadoc)
@@ -162,7 +159,7 @@ public class Sleep extends Test {
 		if (keyboard.isPressed(KeyEvent.VK_ENTER)) {
 			// check the size of the list
 			if (this.world.getBodyCount() > 1) {
-				this.world.remove(this.world.getBody(1));
+				this.world.removeBody(this.world.getBody(1));
 			}
 		}
 	}

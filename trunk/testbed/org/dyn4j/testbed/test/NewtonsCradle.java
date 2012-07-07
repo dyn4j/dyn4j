@@ -24,13 +24,11 @@
  */
 package org.dyn4j.testbed.test;
 
-import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.geometry.Circle;
-import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Vector2;
@@ -41,7 +39,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests the distance joint in a Newton's Cradle configuration.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class NewtonsCradle extends Test {
@@ -73,8 +71,7 @@ public class NewtonsCradle extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(16.0, 15.0));
-		this.world = new World(bounds);
+		this.world = new World(new AxisAlignedBounds(16.0, 15.0));
 		
 		// setup the contact counter
 		ContactCounter cc = new ContactCounter();
@@ -96,7 +93,7 @@ public class NewtonsCradle extends Test {
 		floor.setMass(Mass.Type.INFINITE);
 		// move the floor up a bit
 		floor.translate(0.0, 4.0);
-		this.world.add(floor);
+		this.world.addBody(floor);
 		
 		double x = -2.0;
 		double y =  0.0;
@@ -115,12 +112,12 @@ public class NewtonsCradle extends Test {
 			ball.setLinearDamping(0.1);
 			ball.translate(x, y);
 			e = ball;
-			this.world.add(ball);
+			this.world.addBody(ball);
 			
 			// create the joint
 			DistanceJoint dj = new DistanceJoint(floor, ball, new Vector2(x, 4.0), ball.getWorldCenter());
 			dj.setCollisionAllowed(true);
-			this.world.add(dj);
+			this.world.addJoint(dj);
 			
 			x += 1.0;
 		}

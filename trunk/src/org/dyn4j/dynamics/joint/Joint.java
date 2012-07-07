@@ -33,7 +33,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents constrained motion between two {@link Body}s.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.1
  * @since 1.0.0
  */
 public abstract class Joint extends Constraint {
@@ -59,9 +59,6 @@ public abstract class Joint extends Constraint {
 	
 	/** Whether the pair of bodies joined together can collide with each other */
 	protected boolean collisionAllowed;
-	
-	/** The user data */
-	protected Object userData;
 	
 	/**
 	 * Optional constructor.
@@ -163,22 +160,6 @@ public abstract class Joint extends Constraint {
 	 */
 	public boolean isActive() {
 		return this.body1.isActive() && this.body2.isActive();
-	}
-	
-	/**
-	 * Returns the user data for this {@link Joint}.
-	 * @return Object
-	 */
-	public Object getUserData() {
-		return this.userData;
-	}
-	
-	/**
-	 * Sets the user data for this {@link Joint}.
-	 * @param userData the user data
-	 */
-	public void setUserData(Object userData) {
-		this.userData = userData;
 	}
 	
 	/**

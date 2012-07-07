@@ -896,4 +896,19 @@ public class WorldTest {
 		TestCase.assertEquals(0, ls.size());
 		TestCase.assertEquals(6, n);
 	}
+	
+	/**
+	 * Tests the get/set of the user data.
+	 */
+	@Test
+	public void getUserData() {
+		String obj = "hello";
+		World w = new World();
+		
+		TestCase.assertNull(w.getUserData());
+		
+		w.setUserData(obj);
+		TestCase.assertNotNull(w.getUserData());
+		TestCase.assertSame(obj, w.getUserData());
+	}
 }

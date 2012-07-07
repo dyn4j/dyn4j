@@ -24,8 +24,7 @@
  */
 package org.dyn4j.testbed.test;
 
-import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
@@ -46,7 +45,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests the destruction of a joint and a body.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.1.1
  * @since 1.0.3
  */
 public class Destructible extends Test {
@@ -97,7 +96,7 @@ public class Destructible extends Test {
 				if ((b1 == floor || b1 == top || b1 == bot)
 				 && (b2 == floor || b2 == top || b2 == bot)) {
 					// remove the joint
-					world.remove(joint);
+					world.removeJoint(joint);
 					removed = true;
 				}
 				
@@ -114,7 +113,7 @@ public class Destructible extends Test {
 				if ((b1 == floor || b1 == test)
 				 && (b2 == floor || b2 == test)) {
 					// remove the body from the world
-					world.remove(test);
+					world.removeBody(test);
 					
 					// make the test body into triangles
 					
@@ -142,12 +141,11 @@ public class Destructible extends Test {
 						b.addFixture(Geometry.createTriangle(p1, p2, center));
 						b.setMass();
 						// copy over the transform
-						b.translate(tx.getTranslation());
-						b.rotate(tx.getRotation());
+						b.setTransform(tx.copy());
 						// copy over the velocity
 						b.setVelocity(v.copy());						
 						// add the new body to the world
-						world.add(b);
+						world.addBody(b);
 					}
 					
 					broken = true;
@@ -201,8 +199,7 @@ public class Destructible extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(16.0, 15.0));
-		this.world = new World(bounds);
+		this.world = new World(new AxisAlignedBounds(16.0, 15.0));
 		
 		// setup the contact counter
 		this.destructor = new Destructor();
@@ -224,7 +221,7 @@ public class Destructible extends Test {
 		floor.setMass(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
-		this.world.add(floor);
+		this.world.addBody(floor);
 		
 		// create a reusable rectangle
 		Rectangle r = new Rectangle(0.5, 1.0);
@@ -240,18 +237,18 @@ public class Destructible extends Test {
 		bot.setMass();
 		bot.translate(0.0, -0.5);
 		
-		this.world.add(top);
-		this.world.add(bot);
+		this.world.addBody(top);
+		this.world.addBody(bot);
 		
 		WeldJoint joint = new WeldJoint(top, bot, new Vector2(0.0, -1.0));
 		
-		this.world.add(joint);
+		this.world.addJoint(joint);
 		
 		Entity test = new Entity();
 		test.addFixture(Geometry.createUnitCirclePolygon(20, 1.0));
 		test.setMass();
 		test.translate(-2.5, 0.0);
-		this.world.add(test);
+		this.world.addBody(test);
 		
 		// set the class variables to help
 		// with referencing

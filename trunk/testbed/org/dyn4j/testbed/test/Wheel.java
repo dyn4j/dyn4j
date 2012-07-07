@@ -24,8 +24,7 @@
  */
 package org.dyn4j.testbed.test;
 
-import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.joint.WheelJoint;
@@ -40,7 +39,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests the wheel joint.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.1.1
  * @since 3.0.0
  */
 public class Wheel extends Test {
@@ -72,8 +71,7 @@ public class Wheel extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(16.0, 15.0));
-		this.world = new World(bounds);
+		this.world = new World(new AxisAlignedBounds(16.0, 15.0));
 		
 		// setup the contact counter
 		ContactCounter cc = new ContactCounter();
@@ -95,7 +93,7 @@ public class Wheel extends Test {
 		floor.setMass(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
-		this.world.add(floor);
+		this.world.addBody(floor);
 		
 		// create a reusable rectangle
 		Rectangle r = new Rectangle(3.0, 0.5);
@@ -115,9 +113,9 @@ public class Wheel extends Test {
 		wheelf.setMass();
 		wheelf.translate(-2.0, 3.6);
 		
-		this.world.add(frame);
-		this.world.add(wheelr);
-		this.world.add(wheelf);
+		this.world.addBody(frame);
+		this.world.addBody(wheelr);
+		this.world.addBody(wheelf);
 		
 		WheelJoint j1 = new WheelJoint(frame, wheelr, wheelr.getWorldCenter(), new Vector2(0.0, 1.0));
 		j1.setCollisionAllowed(true);
@@ -138,8 +136,8 @@ public class Wheel extends Test {
 		j2.setDampingRatio(0.4);
 		
 		// add the joints to the world
-		this.world.add(j1);
-		this.world.add(j2);
+		this.world.addJoint(j1);
+		this.world.addJoint(j2);
 	}
 	
 	/* (non-Javadoc)

@@ -24,12 +24,10 @@
  */
 package org.dyn4j.testbed.test;
 
-import org.dyn4j.collision.Bounds;
-import org.dyn4j.collision.RectangularBounds;
+import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.joint.RopeJoint;
-import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Vector2;
@@ -40,7 +38,7 @@ import org.dyn4j.testbed.Test;
 /**
  * Tests the rope joint.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.1.1
  * @since 2.2.1
  */
 public class Rope extends Test {
@@ -72,8 +70,7 @@ public class Rope extends Test {
 		this.home();
 		
 		// create the world
-		Bounds bounds = new RectangularBounds(Geometry.createRectangle(16.0, 15.0));
-		this.world = new World(bounds);
+		this.world = new World(new AxisAlignedBounds(16.0, 15.0));
 		
 		// setup the contact counter
 		ContactCounter cc = new ContactCounter();
@@ -95,7 +92,7 @@ public class Rope extends Test {
 		floor.setMass(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
-		this.world.add(floor);
+		this.world.addBody(floor);
 		
 		/*
 		 * Make this configuration
@@ -125,8 +122,8 @@ public class Rope extends Test {
 		obj2.setMass();
 		obj2.translate(2.0, 2.4);
 		
-		this.world.add(obj1);
-		this.world.add(obj2);
+		this.world.addBody(obj1);
+		this.world.addBody(obj2);
 		
 		// compute the joint points
 		Vector2 p1 = obj1.getWorldCenter().copy();
@@ -140,7 +137,7 @@ public class Rope extends Test {
 		// set and enable the limits
 		j1.setLimitsEnabled(0.5, 1.5);
 		j1.setCollisionAllowed(true);
-		this.world.add(j1);
+		this.world.addJoint(j1);
 	}
 	
 	/* (non-Javadoc)
