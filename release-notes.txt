@@ -44,6 +44,7 @@ Deprecated:
     apply(Vector2), and apply(Vector2, Vector2) replaced with 
     applyTorque(double), applyForce(Force), applyTorque(Torque), 
     applyForce(Vector2), and applyForce(Vector2, Vector2) respectively.
+  - ContactManager.isEmpty() replaced with ContactManager.isCacheEmpty()
 
 Breaking Changes:
   - The Step.update(double) method has been changed from public to protected.

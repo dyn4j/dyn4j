@@ -181,6 +181,8 @@ public class SapTree<E extends Collidable> extends AbstractAABBDetector<E> imple
 	 * <p>
 	 * Allows fine tuning of the initial capacity of local storage for faster running times.
 	 * @param initialCapacity the initial capacity of local storage
+	 * @throws IllegalArgumentException if initialCapacity is less than zero
+	 * @since 3.1.1
 	 */
 	public SapTree(int initialCapacity) {
 		this.proxyTree = new TreeSet<Proxy>();

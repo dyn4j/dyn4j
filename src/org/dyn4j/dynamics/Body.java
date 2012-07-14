@@ -189,6 +189,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 * for optimal memory/performance.  This estimated fixture count is <b>not</b> a
 	 * limit on the number of fixtures.
 	 * @param fixtureCount the estimated number of fixtures
+	 * @throws IllegalArgumentException if fixtureCount less than zero
 	 * @since 3.1.1
 	 */
 	public Body(int fixtureCount) {

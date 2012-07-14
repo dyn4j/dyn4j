@@ -210,9 +210,12 @@ public class World {
 	 * performance.  The internal structures can grow past the initial capacity.
 	 * @param initialCapacity the initial capacity settings
 	 * @param bounds the bounds of the {@link World}; can be null
+	 * @throws NullPointerException if initialCapacity is null
 	 * @since 3.1.1
 	 */
 	public World(Capacity initialCapacity, Bounds bounds) {
+		// check for null capacity
+		if (initialCapacity == null) throw new NullPointerException(Messages.getString("dynamics.nullCapacity"));
 		// initialize all the classes with default values
 		this.settings = new Settings();
 		this.step = new Step(this.settings.getStepFrequency());

@@ -24,10 +24,15 @@
  */
 package org.dyn4j.dynamics;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import junit.framework.TestCase;
 
 import org.dyn4j.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.collision.manifold.Manifold;
+import org.dyn4j.collision.manifold.ManifoldPoint;
+import org.dyn4j.collision.manifold.ManifoldPointId;
 import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.Penetration;
 import org.dyn4j.dynamics.contact.ContactConstraint;
@@ -38,6 +43,7 @@ import org.dyn4j.dynamics.contact.PersistedContactPoint;
 import org.dyn4j.dynamics.contact.SolvedContactPoint;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
+import org.dyn4j.geometry.Vector2;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -200,6 +206,110 @@ public class ContactManagerTest {
 	}
 	
 	/**
+	 * Tests the add and remove methods.
+	 */
+	@Test
+	public void addRemove() {
+		World w = new World();
+		ContactConstraint cc = new ContactConstraint(
+				new Body(), 
+				new BodyFixture(Geometry.createCircle(1.0)), 
+				new Body(), 
+				new BodyFixture(Geometry.createCircle(1.0)), 
+				new Manifold(new ArrayList<ManifoldPoint>(), new Vector2()), 
+				w);
+		
+		ContactManager cm = new ContactManager(w);
+		cm.add(cc);
+		cm.updateContacts();
+		
+		TestCase.assertFalse(cm.isCacheEmpty());
+		// remove should remove the contact from the cache
+		TestCase.assertTrue(cm.remove(cc));
+		TestCase.assertTrue(cm.isCacheEmpty());
+		
+		TestCase.assertFalse(cm.remove(cc));
+	}
+	
+	/**
+	 * Tests the shift coordinates method.
+	 */
+	@Test
+	public void shiftCoordinates() {
+		World w = new World();
+		List<ManifoldPoint> points = new ArrayList<ManifoldPoint>(2);
+		points.add(new ManifoldPoint(ManifoldPointId.DISTANCE, new Vector2(2.0, 0.0), 1.0));
+		ContactConstraint cc = new ContactConstraint(
+				new Body(), 
+				new BodyFixture(Geometry.createCircle(1.0)), 
+				new Body(), 
+				new BodyFixture(Geometry.createCircle(1.0)), 
+				new Manifold(points, new Vector2(1.0, 0.0)), 
+				w);
+		
+		ContactManager cm = new ContactManager(w);
+		cm.add(cc);
+		cm.updateContacts();
+		
+		cm.shiftCoordinates(new Vector2(2.0, -1.0));
+		
+		// make sure the point has been moved
+		TestCase.assertEquals(4.0, cc.getContacts().get(0).getPoint().x);
+		TestCase.assertEquals(-1.0, cc.getContacts().get(0).getPoint().y);
+	}
+	
+	/**
+	 * Tests the clear method.
+	 */
+	@Test
+	public void clear() {
+		World w = new World();
+		ContactConstraint cc = new ContactConstraint(
+				new Body(), 
+				new BodyFixture(Geometry.createCircle(1.0)), 
+				new Body(), 
+				new BodyFixture(Geometry.createCircle(1.0)), 
+				new Manifold(new ArrayList<ManifoldPoint>(), new Vector2()), 
+				w);
+		
+		ContactManager cm = new ContactManager(w);
+		cm.add(cc);
+		
+		TestCase.assertFalse(cm.isListEmpty());
+		
+		cm.clear();
+		
+		TestCase.assertTrue(cm.isListEmpty());
+	}
+	
+	/**
+	 * Tests the reset method.
+	 */
+	@Test
+	public void reset() {
+		World w = new World();
+		ContactConstraint cc = new ContactConstraint(
+				new Body(), 
+				new BodyFixture(Geometry.createCircle(1.0)), 
+				new Body(), 
+				new BodyFixture(Geometry.createCircle(1.0)), 
+				new Manifold(new ArrayList<ManifoldPoint>(), new Vector2()), 
+				w);
+		
+		ContactManager cm = new ContactManager(w);
+		cm.add(cc);
+		cm.updateContacts();
+		
+		TestCase.assertFalse(cm.isListEmpty());
+		TestCase.assertFalse(cm.isCacheEmpty());
+		
+		cm.reset();
+		
+		TestCase.assertTrue(cm.isListEmpty());
+		TestCase.assertTrue(cm.isCacheEmpty());
+	}
+	
+	/**
 	 * Tests the update contacts method.
 	 */
 	@Test
@@ -216,5 +326,23 @@ public class ContactManagerTest {
 		TestCase.assertEquals(2, this.contactListener.sensed);
 		TestCase.assertEquals(4, this.contactListener.preSolve);
 		TestCase.assertEquals(4, this.contactListener.postSolve);
+	}
+	
+	/**
+	 * Tests the creation of the contact manager with a null capacity.
+	 * @since 3.1.1
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createFailureNullCapacity() {
+		new ContactManager(new World(), null);
+	}
+	
+	/**
+	 * Tests the creation of the contact manager with a null world.
+	 * @since 3.1.1
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createFailureNullWorld() {
+		new ContactManager(null, Capacity.DEFAULT_CAPACITY);
 	}
 }

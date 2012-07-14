@@ -26,6 +26,7 @@ package org.dyn4j.dynamics;
 
 import org.dyn4j.Listener;
 import org.dyn4j.dynamics.joint.Joint;
+import org.dyn4j.resources.Messages;
 
 /**
  * Represents the estimated number of objects of different types.
@@ -69,16 +70,16 @@ public class Capacity {
 	
 	/**
 	 * Full constructor.
-	 * <p>
-	 * If any given count is zero or less, the default is used instead.
 	 * @param bodyCount the estimated number of bodies
 	 * @param jointCount the estimated number of joints
 	 * @param listenerCount the estimated number of listeners
+	 * @throws IllegalArgumentException if any count is less than zero
 	 */
 	public Capacity(int bodyCount, int jointCount, int listenerCount) {
-		this.bodyCount = bodyCount <= 0 ? Capacity.DEFAULT_BODY_COUNT : bodyCount;
-		this.jointCount = jointCount <= 0 ? Capacity.DEFAULT_JOINT_COUNT : jointCount;
-		this.listenerCount = listenerCount <= 0 ? Capacity.DEFAULT_LISTENER_COUNT : listenerCount;
+		if (bodyCount < 0 || jointCount < 0 || listenerCount < 0) throw new IllegalArgumentException(Messages.getString("dynamics.capacity.invalidCapacity"));
+		this.bodyCount = bodyCount;
+		this.jointCount = jointCount;
+		this.listenerCount = listenerCount;
 	}
 	
 	/**

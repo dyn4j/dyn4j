@@ -149,7 +149,7 @@ public class SapBruteForce<E extends Collidable> extends AbstractAABBDetector<E>
 		public Proxy proxy;
 		
 		/** The proxy's potential pairs */
-		public List<Proxy> potentials = new ArrayList<Proxy>(8);
+		public List<Proxy> potentials = new ArrayList<Proxy>(Collisions.getEstimatedCollisions());
 	}
 	
 	/** Sorted list of proxies */
@@ -174,6 +174,8 @@ public class SapBruteForce<E extends Collidable> extends AbstractAABBDetector<E>
 	 * <p>
 	 * Allows fine tuning of the initial capacity of local storage for faster running times.
 	 * @param initialCapacity the initial capacity of local storage
+	 * @throws IllegalArgumentException if initialCapacity is less than zero
+	 * @since 3.1.1
 	 */
 	public SapBruteForce(int initialCapacity) {
 		this.proxyList = new ArrayList<Proxy>(initialCapacity);

@@ -34,6 +34,7 @@ import org.dyn4j.dynamics.contact.ContactConstraintSolver;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * Used to solve the contact constraints and joints for a group of interconnected bodies.
@@ -65,6 +66,7 @@ public class Island {
 	 * <p>
 	 * Uses a default {@link Capacity} for the initial capacity.
 	 * @param world the {@link World} this island belongs to
+	 * @throws NullPointerException if world is null
 	 */
 	public Island(World world) {
 		this(world, Capacity.DEFAULT_CAPACITY);
@@ -74,9 +76,14 @@ public class Island {
 	 * Full constructor.
 	 * @param world the {@link World} this island belongs to
 	 * @param initialCapacity the initial capacity of the island
+	 * @throws NullPointerException if world or initialCapacity is null
 	 * @since 3.1.1
 	 */
 	public Island(World world, Capacity initialCapacity) {
+		// check for null world
+		if (world == null) throw new NullPointerException(Messages.getString("dynamics.nullWorld"));
+		// check for null capacity
+		if (initialCapacity == null) throw new NullPointerException(Messages.getString("dynamics.nullCapacity"));
 		this.world = world;
 		this.bodies = new ArrayList<Body>(initialCapacity.getBodyCount());
 		this.joints = new ArrayList<Joint>(initialCapacity.getJointCount());

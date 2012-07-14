@@ -119,6 +119,24 @@ public class WorldTest {
 	}
 	
 	/**
+	 * Tests passing a null capacity.
+	 * @since 3.1.1
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createFailureNullCapacity1() {
+		new World((Capacity)null);
+	}
+	
+	/**
+	 * Tests passing a null capacity.
+	 * @since 3.1.1
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createFailureNullCapacity2() {
+		new World(null, new AxisAlignedBounds(1, 1));
+	}
+	
+	/**
 	 * Tests the update method.
 	 */
 	@Test
@@ -355,7 +373,7 @@ public class WorldTest {
 		// joint and one contact
 		TestCase.assertEquals(2, dl.called);
 		// the contact manager should not have anything in the cache
-		TestCase.assertTrue(w.contactManager.isEmpty());
+		TestCase.assertTrue(w.contactManager.isCacheEmpty());
 	}
 	
 	/**
@@ -645,7 +663,7 @@ public class WorldTest {
 		// one contact, one joint, and two bodies
 		TestCase.assertEquals(4, dl.called);
 		// the contact manager should not have anything in the cache
-		TestCase.assertTrue(w.contactManager.isEmpty());
+		TestCase.assertTrue(w.contactManager.isCacheEmpty());
 	}
 	
 	/**
@@ -695,7 +713,7 @@ public class WorldTest {
 		// one contact, one joint, and two bodies
 		TestCase.assertEquals(4, dl.called);
 		// the contact manager should not have anything in the cache
-		TestCase.assertTrue(w.contactManager.isEmpty());
+		TestCase.assertTrue(w.contactManager.isCacheEmpty());
 	}
 	
 	/**
@@ -895,6 +913,21 @@ public class WorldTest {
 		List<Listener> ls = w.getListeners(Listener.class);
 		TestCase.assertEquals(0, ls.size());
 		TestCase.assertEquals(6, n);
+		
+		// test get listeners passing a list
+		w.addListener(ba);
+		w.addListener(ca);
+		w.addListener(da);
+		w.addListener(ra);
+		w.addListener(sa);
+		w.addListener(ta);
+		w.addListener(na);
+		listeners.clear();
+		w.getListeners(Listener.class, listeners);
+		TestCase.assertEquals(7, listeners.size());
+		// make sure we test that it doesn't clear the passed in list
+		w.getListeners(Listener.class, listeners);
+		TestCase.assertEquals(14, listeners.size());
 	}
 	
 	/**

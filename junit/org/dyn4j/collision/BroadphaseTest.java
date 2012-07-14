@@ -574,4 +574,36 @@ public class BroadphaseTest {
 		pairs = this.dynT.detect();
 		TestCase.assertEquals(1, pairs.size());
 	}
+	
+	/**
+	 * Tests creating a SapBruteForce detector using a negative capacity.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void SapBruteForceNegativeInitialCapacity() {
+		new SapBruteForce<Collidable>(-10);
+	}
+	
+	/**
+	 * Tests creating a SapIncremental detector using a negative capacity.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void SapIncrementalNegativeInitialCapacity() {
+		new SapIncremental<Collidable>(-10);
+	}
+	
+	/**
+	 * Tests creating a SapTree detector using a negative capacity.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void SapTreeNegativeInitialCapacity() {
+		new SapTree<Collidable>(-10);
+	}
+	
+	/**
+	 * Tests creating a DynamicAABBTree detector using a negative capacity.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void DynamicAABBTreeNegativeInitialCapacity() {
+		new DynamicAABBTree<Collidable>(-10);
+	}
 }
