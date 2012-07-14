@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dyn4j.Epsilon;
+import org.dyn4j.collision.Collisions;
 import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.dynamics.contact.ContactConstraintSolver;
 import org.dyn4j.dynamics.joint.Joint;
@@ -60,15 +61,29 @@ public class Island {
 	protected List<Joint> joints;
 	
 	/**
-	 * Full constructor.
+	 * Optional constructor.
+	 * <p>
+	 * Uses a default {@link Capacity} for the initial capacity.
 	 * @param world the {@link World} this island belongs to
 	 */
 	public Island(World world) {
+		this(world, Capacity.DEFAULT_CAPACITY);
+	}
+	
+	/**
+	 * Full constructor.
+	 * @param world the {@link World} this island belongs to
+	 * @param initialCapacity the initial capacity of the island
+	 * @since 3.1.1
+	 */
+	public Island(World world, Capacity initialCapacity) {
 		this.world = world;
+		this.bodies = new ArrayList<Body>(initialCapacity.getBodyCount());
+		this.joints = new ArrayList<Joint>(initialCapacity.getJointCount());
 		this.contactConstraintSolver = new ContactConstraintSolver(world);
-		this.bodies = new ArrayList<Body>();
-		this.contactConstraints = new ArrayList<ContactConstraint>();
-		this.joints = new ArrayList<Joint>();
+		// estimated the number of contacts
+		int eSize = Collisions.getEstimatedCollisionPairs(initialCapacity.getBodyCount());
+		this.contactConstraints = new ArrayList<ContactConstraint>(eSize);
 	}
 
 	/**
@@ -76,8 +91,8 @@ public class Island {
 	 */
 	public void clear() {
 		this.bodies.clear();
-		this.contactConstraints.clear();
 		this.joints.clear();
+		this.contactConstraints.clear();
 	}
 	
 	/**

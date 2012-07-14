@@ -56,6 +56,7 @@ import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.collision.narrowphase.Sat;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.Capacity;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.joint.AngleJoint;
@@ -407,7 +408,13 @@ public class XmlReader extends DefaultHandler {
 		
 		parser.parse(source, reader);
 		
-		World world = new World();
+		// create an initial capacity
+		Capacity capacity = new Capacity(
+				reader.bodies.size(),
+				reader.joints.size(),
+				10);
+		
+		World world = new World(capacity);
 		List<SandboxRay> rays = new ArrayList<SandboxRay>();
 		Camera camera = new Camera();
 		

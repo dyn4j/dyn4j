@@ -30,8 +30,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.dyn4j.collision.Collisions;
 import org.dyn4j.collision.manifold.ManifoldPointId;
 import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.Capacity;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.geometry.Vector2;
@@ -59,16 +61,33 @@ public class ContactManager {
 	protected List<ContactListener> listeners;
 	
 	/**
-	 * Full constructor.
+	 * Optional constructor.
 	 * @param world the {@link World} this contact manager belongs to
 	 * @since 3.0.3
 	 */
 	public ContactManager(World world)  {
+		// use the default capacity
+		this(world, Capacity.DEFAULT_CAPACITY);
+	}
+	
+	/**
+	 * Full constructor.
+	 * <p>
+	 * The initial capacity is used to help performance in the event that the developer
+	 * knows the number of bodies the world will contain.  The {@link ContactManager}
+	 * will grow past the initial capacity if necessary.
+	 * @param world the {@link World} this contact manager belongs to
+	 * @param initialCapacity the estimated number of {@link Body}s
+	 * @since 3.1.1
+	 */
+	public ContactManager(World world, Capacity initialCapacity)  {
 		this.world = world;
+		// estimate the number of contact constraints
+		int eSize = Collisions.getEstimatedCollisionPairs(initialCapacity.getBodyCount());
 		// initialize the members
-		this.map = new HashMap<ContactConstraintId, ContactConstraint>();
-		this.list = new ArrayList<ContactConstraint>();
-		this.listeners = world.getListeners(ContactListener.class);
+		this.map = new HashMap<ContactConstraintId, ContactConstraint>(eSize);
+		this.list = new ArrayList<ContactConstraint>(eSize);
+		this.listeners = null;
 	}
 	
 	/**
@@ -153,10 +172,7 @@ public class ContactManager {
 		// check if any new contact constraints were found
 		if (size > 0) {
 			// if so then create a new map to contain the new contacts
-			newMap = new HashMap<ContactConstraintId, ContactConstraint>(size * 2);
-		} else {
-			// otherwise set the new map to the old map
-			newMap = new HashMap<ContactConstraintId, ContactConstraint>();
+			newMap = new HashMap<ContactConstraintId, ContactConstraint>(size);
 		}
 		
 		// loop over the new contact constraints
@@ -360,8 +376,14 @@ public class ContactManager {
 				}
 			}
 		}
+		
 		// finally overwrite the contact constraint map with the new map
-		this.map = newMap;
+		if (size > 0) {
+			this.map = newMap;
+		} else {
+			// if no contact constraints exist, just clear the old map
+			this.map.clear();
+		}
 	}
 	
 	/**

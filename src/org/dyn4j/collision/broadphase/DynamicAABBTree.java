@@ -24,14 +24,14 @@
  */
 package org.dyn4j.collision.broadphase;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.dyn4j.collision.Collidable;
+import org.dyn4j.collision.Collisions;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Ray;
 import org.dyn4j.geometry.Vector2;
@@ -88,13 +88,29 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	protected Node root;
 	
 	/** The unsorted list of proxies */
-	protected List<Node> proxyList = new ArrayList<Node>();
+	protected List<Node> proxyList;
 	
 	/** Id to node map for fast lookup */
-	protected Map<String, Node> proxyMap = new HashMap<String, Node>();
+	protected Map<String, Node> proxyMap;
 	
-	/** Reusable list for storing detected pairs */
-	protected ArrayList<BroadphasePair<E>> pairs = new ArrayList<BroadphasePair<E>>();
+	/**
+	 * Default constructor.
+	 */
+	public DynamicAABBTree() {
+		this(64);
+	}
+	
+	/**
+	 * Optional constructor.
+	 * <p>
+	 * Allows fine tuning of the initial capacity of local storage for faster running times.
+	 * @param initialCapacity the initial capacity of local storage
+	 * @since 3.1.1
+	 */
+	public DynamicAABBTree(int initialCapacity) {
+		this.proxyList = new ArrayList<Node>(initialCapacity);
+		this.proxyMap = new HashMap<String, Node>(initialCapacity);
+	}
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#add(org.dyn4j.collision.Collidable)
@@ -195,14 +211,9 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 
 		// check the size
 		if (size == 0) {
-			// clear the local pair list
-			this.pairs.clear();
 			// return the empty list
-			return this.pairs;
+			return Collections.emptyList();
 		}
-		
-		// the estimated size of the pair list
-		int eSize = ((size * size) - size) / 10;
 		
 		// clear all the tested flags on the nodes
 		for (int i = 0; i < size; i++) {
@@ -210,26 +221,23 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 			// reset the flag
 			node.tested = false;
 		}
-		
-		// clear the local list and make sure it can store
-		// all the potential pairs
-		this.pairs.clear();
-		this.pairs.ensureCapacity(eSize);
+
+		// the estimated size of the pair list
+		int eSize = Collisions.getEstimatedCollisionPairs(size);
+		List<BroadphasePair<E>> pairs = new ArrayList<BroadphasePair<E>>(eSize);
 		
 		// test each collidable in the list
 		for (int i = 0; i < size; i++) {
 			// get the current collidable to test
 			Node node = this.proxyList.get(i);
-			// perform a recursive detection routine
-			// for some reason the recursive one is faster
-			// than the stack based one...
-			detect(node, this.root);
+			// perform a stackless detection routine
+			detectNonRecursive(node, this.root, pairs);
 			// update the tested flag
 			node.tested = true;
 		}
 		
 		// return the list of pairs
-		return this.pairs;
+		return pairs;
 	}
 	
 	/* (non-Javadoc)
@@ -248,7 +256,7 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 		// check the size of the proxy list
 		if (this.proxyList.size() == 0) {
 			// return an empty list
-			return new ArrayList<E>();
+			return Collections.emptyList();
 		}
 		
 		// create an aabb from the ray
@@ -322,74 +330,93 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	
 	/**
 	 * Internal recursive detection method.
-	 * @param c the node to test
-	 * @param node the root node of the subtree
+	 * @param node the node to test
+	 * @param root the root node of the subtree
+	 * @param pairs the list of pairs to add to
 	 */
-	protected void detect(Node c, Node node) {
+	protected void detect(Node node, Node root, List<BroadphasePair<E>> pairs) {
 		// check for null node (shouldnt happen)
-		if (node == null) return;
+		if (root == null) return;
 		// check for the tested flag (to remove duplicates)
-		if (node.tested) return;
+		if (root.tested) return;
 		// don't bother returning a pair of the same object
-		if (c.collidable == node.collidable) return;
+		if (node.collidable == root.collidable) return;
 		// test the node itself
-		if (c.aabb.overlaps(node.aabb)) {
+		if (node.aabb.overlaps(root.aabb)) {
 			// check for leaf node
 			// non-leaf nodes always have a left child
-			if (node.left == null) {
+			if (root.left == null) {
 				// its a leaf so add the pair
 				BroadphasePair<E> p = new BroadphasePair<E>();
-				p.a = c.collidable;
-				p.b = node.collidable;
+				p.a = node.collidable;
+				p.b = root.collidable;
 				// add the pair to the list of pairs
-				this.pairs.add(p);
+				pairs.add(p);
 				// return and check other limbs
 				return;
 			}
 			// they overlap so descend into both children
-			if (node.left != null) detect(c, node.left);
-			if (node.right != null) detect(c, node.right);
+			if (root.left != null) detect(node, root.left, pairs);
+			if (root.right != null) detect(node, root.right, pairs);
 		}
 	}
 	
 	/**
-	 * Internal non-recursive detection method that starts
-	 * at the root of the tree.
+	 * Internal non-recursive detection method.
 	 * @param node the node to test
 	 * @param root the root node of the subtree
+	 * @param pairs the list of pairs to add to
 	 */
-	protected void detectNonRecursive(Node node, Node root) {
-		// check for empty tree
-		if (root == null) return;
-		// create a stack to hold nodes that have not been tested
-		Deque<Node> stack = new ArrayDeque<Node>(this.root.height + 1);
+	protected void detectNonRecursive(Node node, Node root, List<BroadphasePair<E>> pairs) {
 		// start at the root node
-		stack.push(root);
-		// loop until the stack is empty
-		while (!stack.isEmpty()) {
-			// get the next node to test
-			Node n = stack.pop();
-			// check for the tested flag (to remove duplicates)
-			if (n.tested) continue;
-			// don't bother returning a pair of the same object
-			if (n.collidable == node.collidable) continue;
-			// test the node itself
+		Node n = root;
+		// perform a iterative, stack-less, traversal of the tree
+		while (n != null) {
+			// check if the current node overlaps the desired node
 			if (n.aabb.overlaps(node.aabb)) {
-				// check for leaf node
-				// non-leaf nodes always have a left child
-				if (n.left == null) {
-					// its a leaf so add the pair
-					BroadphasePair<E> p = new BroadphasePair<E>();
-					p.a = node.collidable;
-					p.b = n.collidable;
-					// add the pair to the list of pairs
-					this.pairs.add(p);
+				// if they do overlap, then check the left child node
+				if (n.left != null) {
+					// if the left is not null, then check that subtree
+					n = n.left;
+					continue;
 				} else {
-					// they overlap so descend into both children
-					if (n.left != null) stack.push(n.left);
-					if (n.right != null) stack.push(n.right);
+					// if both are null, then this is a leaf node
+					// check the tested flag to avoid duplicates and
+					// verify we aren't testing the same collidable against
+					// itself
+					if (!n.tested && n.collidable != node.collidable) {
+						// its a leaf so add the pair
+						BroadphasePair<E> p = new BroadphasePair<E>();
+						p.a = node.collidable;
+						p.b = n.collidable;
+						// add the pair to the list of pairs
+						pairs.add(p);
+					}
+					// if its a leaf node then we need to go back up the
+					// tree and test nodes we haven't yet
 				}
 			}
+			// if the current node is a leaf node or doesnt overlap the
+			// desired aabb, then we need to go back up the tree until we
+			// find the first left node who's right node is not null
+			boolean nextNodeFound = false;
+			while (n.parent != null) {
+				// check if the current node the left child of its parent
+				if (n == n.parent.left) {
+					// it is, so check if the right node is non-null
+					if (n.parent.right != null) {
+						// it isn't so the sibling node is the next node
+						n = n.parent.right;
+						nextNodeFound = true;
+						break;
+					}
+				}
+				// if the current node isn't a left node or it is but its
+				// sibling is null, go to the parent node
+				n = n.parent;
+			}
+			// if we didn't find it then we are done
+			if (!nextNodeFound) break;
 		}
 	}
 	
@@ -423,29 +450,48 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	 * @return List a list containing the results
 	 */
 	protected List<E> detectNonRecursive(AABB aabb, Node node) {
-		List<E> list = new ArrayList<E>();
-		Deque<Node> stack = new ArrayDeque<Node>();
-		// add the subtree root
-		stack.push(node);
-		// loop until the stack is empty
-		while (!stack.isEmpty()) {
-			// get the next element
-			Node n = stack.pop();
-			// test the node itself
-			if (aabb.overlaps(n.aabb)) {
-				// check for leaf node
-				// non-leaf nodes always have a left child
-				if (n.left == null) {
-					// its a leaf so add the collidable
-					list.add(n.collidable);
-					// return and check other limbs
+		// get the estimated collision count
+		int eSize = Collisions.getEstimatedCollisions();
+		List<E> list = new ArrayList<E>(eSize);
+		// perform a iterative, stack-less, traversal of the tree
+		while (node != null) {
+			// check if the current node overlaps the desired node
+			if (aabb.overlaps(node.aabb)) {
+				// if they do overlap, then check the left child node
+				if (node.left != null) {
+					// if the left is not null, then check that subtree
+					node = node.left;
 					continue;
+				} else {
+					// if both are null, then this is a leaf node
+					list.add(node.collidable);
+					// if its a leaf node then we need to go back up the
+					// tree and test nodes we haven't yet
 				}
-				// they overlap so descend into both children
-				if (n.left != null) stack.push(n.left);
-				if (n.right != null) stack.push(n.right);
 			}
+			// if the current node is a leaf node or doesnt overlap the
+			// desired aabb, then we need to go back up the tree until we
+			// find the first left node who's right node is not null
+			boolean nextNodeFound = false;
+			while (node.parent != null) {
+				// check if the current node the left child of its parent
+				if (node == node.parent.left) {
+					// it is, so check if the right node is non-null
+					if (node.parent.right != null) {
+						// it isn't so the sibling node is the next node
+						node = node.parent.right;
+						nextNodeFound = true;
+						break;
+					}
+				}
+				// if the current node isn't a left node or it is but its
+				// sibling is null, go to the parent node
+				node = node.parent;
+			}
+			// if we didn't find it then we are done
+			if (!nextNodeFound) break;
 		}
+		
 		return list;
 	}
 	

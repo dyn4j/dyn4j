@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.dyn4j.collision.Collidable;
+import org.dyn4j.collision.Collisions;
 import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Interval;
@@ -84,7 +85,7 @@ import org.dyn4j.geometry.Vector2;
  * However, allowing this causes more work for the {@link NarrowphaseDetector}s whose
  * algorithms are more complex.  These situations should be avoided for maximum performance.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.1
  * @since 1.0.0
  * @param <E> the {@link Collidable} type
  */
@@ -148,7 +149,7 @@ public class SapBruteForce<E extends Collidable> extends AbstractAABBDetector<E>
 		public Proxy proxy;
 		
 		/** The proxy's potential pairs */
-		public List<Proxy> potentials = new ArrayList<Proxy>();
+		public List<Proxy> potentials = new ArrayList<Proxy>(8);
 	}
 	
 	/** Sorted list of proxies */
@@ -157,19 +158,19 @@ public class SapBruteForce<E extends Collidable> extends AbstractAABBDetector<E>
 	/** Id to proxy map for fast lookup */
 	protected Map<String, Proxy> proxyMap;
 	
-	/** Reusable list for storing detected pairs */
-	protected ArrayList<BroadphasePair<E>> pairs;
+	/** Reusable list for storing potential detected pairs along the x-axis */
+	protected ArrayList<PairList> potentialPairs;
 	
 	/** Flag used to indicate that the proxyList must be sorted before use */
 	protected boolean sort = false;
 	
 	/** Default constructor. */
 	public SapBruteForce() {
-		this(50);
+		this(64);
 	}
 	
 	/**
-	 * Full constructor.
+	 * Optional constructor.
 	 * <p>
 	 * Allows fine tuning of the initial capacity of local storage for faster running times.
 	 * @param initialCapacity the initial capacity of local storage
@@ -177,13 +178,7 @@ public class SapBruteForce<E extends Collidable> extends AbstractAABBDetector<E>
 	public SapBruteForce(int initialCapacity) {
 		this.proxyList = new ArrayList<Proxy>(initialCapacity);
 		this.proxyMap = new HashMap<String, Proxy>(initialCapacity);
-		
-		// compute the estimated size
-		// size * size is the maximum number of pairs and there are size many pairs which are self pairs
-		// therefore making size * size - size the maximum number of pairs
-		int eSize = ((initialCapacity * initialCapacity) - initialCapacity) / 10;
-		
-		this.pairs = new ArrayList<BroadphasePair<E>>(eSize);
+		this.potentialPairs = new ArrayList<PairList>(initialCapacity);
 	}
 	
 	/* (non-Javadoc)
@@ -232,6 +227,7 @@ public class SapBruteForce<E extends Collidable> extends AbstractAABBDetector<E>
 		}
 		// finally remove it from the map
 		this.proxyMap.remove(collidable.getId());
+		// no re-sort required
 	}
 	
 	/* (non-Javadoc)
@@ -287,23 +283,22 @@ public class SapBruteForce<E extends Collidable> extends AbstractAABBDetector<E>
 	@Override
 	public List<BroadphasePair<E>> detect() {
 		// get the number of proxies
-		int size = proxyList.size();
+		int size = this.proxyList.size();
 
 		// check the size
 		if (size == 0) {
-			// clear the local pair list
-			this.pairs.clear();
 			// return the empty list
-			return this.pairs;
+			return Collections.emptyList();
 		}
 		
 		// the estimated size of the pair list
-		int eSize = ((size * size) - size) / 10;
-		
+		int eSize = Collisions.getEstimatedCollisionPairs(size);
+		// create a new list for the resulting pairs
+		List<BroadphasePair<E>> pairs = new ArrayList<BroadphasePair<E>>(eSize);
 		// clear the local list and make sure it can store
 		// all the potential pairs
-		this.pairs.clear();
-		this.pairs.ensureCapacity(eSize);
+		this.potentialPairs.clear();
+		this.potentialPairs.ensureCapacity(size);
 		
 		// check the sort flag
 		if (this.sort) {
@@ -312,9 +307,6 @@ public class SapBruteForce<E extends Collidable> extends AbstractAABBDetector<E>
 			// set the needs sort flag to false
 			this.sort = false;
 		}
-		
-		// create a list of potential pairs
-		List<PairList> potentialPairs = new ArrayList<PairList>(size);
 		
 		// create the potential pairs using the sorted x axis
 		PairList pl = new PairList();
@@ -340,7 +332,7 @@ public class SapBruteForce<E extends Collidable> extends AbstractAABBDetector<E>
 				// set the current collidable
 				pl.proxy = current;
 				// add the pair list to the potential pairs
-				potentialPairs.add(pl);
+				this.potentialPairs.add(pl);
 				// create a new pair list for the next collidable
 				pl = new PairList();
 			}
@@ -348,9 +340,9 @@ public class SapBruteForce<E extends Collidable> extends AbstractAABBDetector<E>
 		
 		// go through the potential pairs and filter using the
 		// y axis projections
-		size = potentialPairs.size();
+		size = this.potentialPairs.size();
 		for (int i = 0; i < size; i++) {
-			PairList current = potentialPairs.get(i);
+			PairList current = this.potentialPairs.get(i);
 			int pls = current.potentials.size();
 			for (int j = 0; j < pls; j++) {
 				Proxy test = current.potentials.get(j);
@@ -360,13 +352,13 @@ public class SapBruteForce<E extends Collidable> extends AbstractAABBDetector<E>
 					BroadphasePair<E> pair = new BroadphasePair<E>();
 					pair.a = current.proxy.collidable;
 					pair.b = test.collidable;
-					this.pairs.add(pair);
+					pairs.add(pair);
 				}
 			}
 		}
 		
 		// return the list
-		return this.pairs;
+		return pairs;
 	}
 	
 	/* (non-Javadoc)
@@ -378,13 +370,11 @@ public class SapBruteForce<E extends Collidable> extends AbstractAABBDetector<E>
 		int size = this.proxyList.size();
 		
 		// check the size of the proxy list
-		List<E> list;
 		if (size == 0) {
 			// return the empty list
-			return new ArrayList<E>();
-		} else {
-			list = new ArrayList<E>(size);
+			return Collections.emptyList();
 		}
+		List<E> list = new ArrayList<E>(Collisions.getEstimatedCollisions());
 		
 		// check the sort flag to see if we need to sort
 		if (this.sort) {
@@ -437,7 +427,7 @@ public class SapBruteForce<E extends Collidable> extends AbstractAABBDetector<E>
 		// check the size of the proxy list
 		if (this.proxyList.size() == 0) {
 			// return an empty list
-			return new ArrayList<E>();
+			return Collections.emptyList();
 		}
 		
 		// create an aabb from the ray

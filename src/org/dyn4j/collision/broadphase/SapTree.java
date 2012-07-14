@@ -25,6 +25,7 @@
 package org.dyn4j.collision.broadphase;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -33,6 +34,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.dyn4j.collision.Collidable;
+import org.dyn4j.collision.Collisions;
 import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Interval;
@@ -85,7 +87,7 @@ import org.dyn4j.geometry.Vector2;
  * However, allowing this causes more work for the {@link NarrowphaseDetector}s whose
  * algorithms are more complex.  These situations should be avoided for maximum performance.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.1
  * @since 1.0.0
  * @param <E> the {@link Collidable} type
  */
@@ -157,7 +159,7 @@ public class SapTree<E extends Collidable> extends AbstractAABBDetector<E> imple
 		public Proxy proxy;
 		
 		/** The proxy's potential pairs */
-		public List<Proxy> potentials = new ArrayList<Proxy>();
+		public List<Proxy> potentials = new ArrayList<Proxy>(8);
 	}
 	
 	/** Sorted tree set of proxies */
@@ -165,13 +167,13 @@ public class SapTree<E extends Collidable> extends AbstractAABBDetector<E> imple
 	
 	/** Id to proxy map for fast lookup */
 	protected Map<String, Proxy> proxyMap;
-	
-	/** Reusable list for storing detected pairs */
-	protected ArrayList<BroadphasePair<E>> pairs;
+
+	/** Reusable list for storing potential detected pairs along the x-axis */
+	protected ArrayList<PairList> potentialPairs;
 	
 	/** Default constructor. */
 	public SapTree() {
-		this(50);
+		this(64);
 	}
 	
 	/**
@@ -183,13 +185,7 @@ public class SapTree<E extends Collidable> extends AbstractAABBDetector<E> imple
 	public SapTree(int initialCapacity) {
 		this.proxyTree = new TreeSet<Proxy>();
 		this.proxyMap = new HashMap<String, Proxy>(initialCapacity);
-		
-		// compute the estimated size
-		// size * size is the maximum number of pairs and there are size many pairs which are self pairs
-		// therefore making size * size - size the maximum number of pairs
-		int eSize = ((initialCapacity * initialCapacity) - initialCapacity) / 10;
-		
-		this.pairs = new ArrayList<BroadphasePair<E>>(eSize);
+		this.potentialPairs = new ArrayList<PairList>(initialCapacity);
 	}
 	
 	/* (non-Javadoc)
@@ -287,22 +283,17 @@ public class SapTree<E extends Collidable> extends AbstractAABBDetector<E> imple
 		
 		// check the size
 		if (size == 0) {
-			// clear the local pair list
-			this.pairs.clear();
 			// return the empty list
-			return this.pairs;
+			return Collections.emptyList();
 		}
 		
 		// the estimated size of the pair list
-		int eSize = ((size * size) - size) / 10;
+		int eSize = Collisions.getEstimatedCollisionPairs(size);
+		List<BroadphasePair<E>> pairs = new ArrayList<BroadphasePair<E>>(eSize);
 		
-		// clear the local list and make sure it can store
-		// all the potential pairs
-		this.pairs.clear();
-		this.pairs.ensureCapacity(eSize);
-		
-		// create a list of potential pairs
-		List<PairList> potentialPairs = new ArrayList<PairList>(size);
+		// make sure the potential pairs list is sized appropriately
+		this.potentialPairs.clear();
+		this.potentialPairs.ensureCapacity(size);
 		
 		// clear the tested flags
 		Iterator<Proxy> itp = this.proxyTree.iterator();
@@ -344,7 +335,7 @@ public class SapTree<E extends Collidable> extends AbstractAABBDetector<E> imple
 				// set the current collidable
 				pl.proxy = current;
 				// add the pair list to the potential pairs
-				potentialPairs.add(pl);
+				this.potentialPairs.add(pl);
 				// create a new pair list for the next collidable
 				pl = new PairList();
 			}
@@ -353,9 +344,9 @@ public class SapTree<E extends Collidable> extends AbstractAABBDetector<E> imple
 		
 		// go through the potential pairs and filter using the
 		// y axis projections
-		size = potentialPairs.size();
+		size = this.potentialPairs.size();
 		for (int i = 0; i < size; i++) {
-			PairList current = potentialPairs.get(i);
+			PairList current = this.potentialPairs.get(i);
 			int pls = current.potentials.size();
 			for (int j = 0; j < pls; j++) {
 				Proxy test = current.potentials.get(j);
@@ -365,12 +356,12 @@ public class SapTree<E extends Collidable> extends AbstractAABBDetector<E> imple
 					BroadphasePair<E> pair = new BroadphasePair<E>();
 					pair.a = current.proxy.collidable;
 					pair.b = test.collidable;
-					this.pairs.add(pair);
+					pairs.add(pair);
 				}
 			}
 		}
 		
-		return this.pairs;
+		return pairs;
 	}
 
 	/* (non-Javadoc)
@@ -382,13 +373,12 @@ public class SapTree<E extends Collidable> extends AbstractAABBDetector<E> imple
 		int size = this.proxyTree.size();
 		
 		// check the size of the proxy list
-		List<E> list;
 		if (size == 0) {
 			// return the empty list
-			return new ArrayList<E>();
-		} else {
-			list = new ArrayList<E>(size);
+			return Collections.emptyList();
 		}
+		
+		List<E> list = new ArrayList<E>(Collisions.getEstimatedCollisions());
 		
 		// create a proxy for the aabb
 		Proxy p = new Proxy();
@@ -431,7 +421,7 @@ public class SapTree<E extends Collidable> extends AbstractAABBDetector<E> imple
 		// check the size of the proxy list
 		if (this.proxyTree.size() == 0) {
 			// return an empty list
-			return new ArrayList<E>();
+			return Collections.emptyList();
 		}
 		
 		// create an aabb from the ray
