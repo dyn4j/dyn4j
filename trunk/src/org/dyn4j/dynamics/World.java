@@ -162,9 +162,41 @@ public class World {
 	 * Default constructor.
 	 * <p>
 	 * Builds a simulation {@link World} without bounds.
+	 * <p>
+	 * Defaults to using {@link #EARTH_GRAVITY}, {@link DynamicAABBTree} broad-phase,
+	 * {@link Gjk} narrow-phase, and {@link ClippingManifoldSolver}.
+	 * <p>
+	 * Uses the {@link Capacity#DEFAULT_CAPACITY} capacity object for initialization.
 	 */
 	public World() {
-		this(null);
+		this(Capacity.DEFAULT_CAPACITY, null);
+	}
+	
+	/**
+	 * Optional constructor.
+	 * <p>
+	 * Defaults to using {@link #EARTH_GRAVITY}, {@link DynamicAABBTree} broad-phase,
+	 * {@link Gjk} narrow-phase, and {@link ClippingManifoldSolver}.
+	 * <p>
+	 * The initial capacity specifies the estimated number of bodies that the simulation
+	 * will have at any one time.  This is used to size internal structures to improve
+	 * performance.  The internal structures can grow past the initial capacity.
+	 * @param initialCapacity the initial capacity settings
+	 * @since 3.1.1
+	 */
+	public World(Capacity initialCapacity) {
+		this(initialCapacity, null);
+	}
+	
+	/**
+	 * Optional constructor.
+	 * <p>
+	 * Defaults to using {@link #EARTH_GRAVITY}, {@link DynamicAABBTree} broad-phase,
+	 * {@link Gjk} narrow-phase, and {@link ClippingManifoldSolver}.
+	 * @param bounds the bounds of the {@link World}; can be null
+	 */
+	public World(Bounds bounds) {
+		this(Capacity.DEFAULT_CAPACITY, bounds);
 	}
 	
 	/**
@@ -172,28 +204,34 @@ public class World {
 	 * <p>
 	 * Defaults to using {@link #EARTH_GRAVITY}, {@link DynamicAABBTree} broad-phase,
 	 * {@link Gjk} narrow-phase, and {@link ClippingManifoldSolver}.
+	 * <p>
+	 * The initial capacity specifies the estimated number of bodies that the simulation
+	 * will have at any one time.  This is used to size internal structures to improve
+	 * performance.  The internal structures can grow past the initial capacity.
+	 * @param initialCapacity the initial capacity settings
 	 * @param bounds the bounds of the {@link World}; can be null
+	 * @since 3.1.1
 	 */
-	public World(Bounds bounds) {
+	public World(Capacity initialCapacity, Bounds bounds) {
 		// initialize all the classes with default values
 		this.settings = new Settings();
 		this.step = new Step(this.settings.getStepFrequency());
 		this.gravity = World.EARTH_GRAVITY;
 		this.bounds = bounds;
-		this.broadphaseDetector = new DynamicAABBTree<Body>();
+		this.broadphaseDetector = new DynamicAABBTree<Body>(initialCapacity.getBodyCount());
 		this.narrowphaseDetector = new Gjk();
 		this.manifoldSolver = new ClippingManifoldSolver();
 		this.timeOfImpactDetector = new ConservativeAdvancement();
 		this.raycastDetector = new Gjk();
 		this.coefficientMixer = CoefficientMixer.DEFAULT_MIXER;
-		this.bodies = new ArrayList<Body>();
-		this.joints = new ArrayList<Joint>();
-		this.listeners = new ArrayList<Listener>();
+		this.bodies = new ArrayList<Body>(initialCapacity.getBodyCount());
+		this.joints = new ArrayList<Joint>(initialCapacity.getJointCount());
+		this.listeners = new ArrayList<Listener>(initialCapacity.getListenerCount());
 		
 		// create last anything that requires a reference to this world
 		this.timeOfImpactSolver = new TimeOfImpactSolver(this);
-		this.contactManager = new ContactManager(this);
-		this.island = new Island(this);
+		this.contactManager = new ContactManager(this, initialCapacity);
+		this.island = new Island(this, initialCapacity);
 		
 		this.time = 0.0;
 		this.updateRequired = true;
@@ -567,11 +605,6 @@ public class World {
 				Transform transform1 = body1.transform;
 				Transform transform2 = body2.transform;
 				
-				// create a reusable penetration object
-				Penetration penetration = new Penetration();
-				// create a reusable manifold object
-				Manifold manifold = new Manifold();
-				
 				// loop through the fixtures of body 1
 				int b1Size = body1.getFixtureCount();
 				int b2Size = body2.getFixtureCount();
@@ -589,6 +622,7 @@ public class World {
 							// if the collision is not allowed then continue
 							continue;
 						}
+						Penetration penetration = new Penetration();
 						// test the two convex shapes
 						if (this.narrowphaseDetector.detect(convex1, transform1, convex2, transform2, penetration)) {
 							// check for zero penetration
@@ -607,6 +641,7 @@ public class World {
 								}
 							}
 							if (!allow) continue;
+							Manifold manifold = new Manifold();
 							// if there is penetration then find a contact manifold
 							// using the filled in penetration object
 							if (this.manifoldSolver.getManifold(penetration, convex1, transform1, convex2, transform2, manifold)) {
@@ -1791,6 +1826,37 @@ public class World {
 		}
 		// return the new list
 		return listeners;
+	}
+	
+	/**
+	 * Adds the listeners of the given type to the given list.
+	 * <p>
+	 * This method does <b>not</b> clear the given listeners list before
+	 * adding the listeners.
+	 * <p>
+	 * If clazz or listeners is null, this method immediately returns.
+	 * <p>
+	 * Example usage:
+	 * <pre>
+	 * List&lt;ContactListener&gt; list = ...;
+	 * world.getListeners(ContactListener.class, list);
+	 * </pre>
+	 * @param <T> the listener type
+	 * @param clazz the type of listener to get
+	 * @param listeners the list to add the listeners to
+	 * @since 3.1.1
+	 */
+	public <T extends Listener> void getListeners(Class<T> clazz, List<T> listeners) {
+		// check for null
+		if (clazz == null || listeners == null) return;
+		// create a new list and loop over the listeners
+		for (Listener listener : this.listeners) {
+			// check if the listener is of the given type
+			if (clazz.isInstance(listener)) {
+				// if so, add it to the new list
+				listeners.add(clazz.cast(listener));
+			}
+		}
 	}
 	
 	/**

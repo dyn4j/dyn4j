@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.dyn4j.collision.Collidable;
+import org.dyn4j.collision.Collisions;
 import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Interval;
@@ -84,7 +85,7 @@ import org.dyn4j.geometry.Vector2;
  * However, allowing this causes more work for the {@link NarrowphaseDetector}s whose
  * algorithms are more complex.  These situations should be avoided for maximum performance.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.1
  * @since 1.0.0
  * @param <E> the {@link Collidable} type
  */
@@ -148,7 +149,7 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 		public Proxy proxy;
 		
 		/** The proxy's potential pairs */
-		public List<Proxy> potentials = new ArrayList<Proxy>();
+		public List<Proxy> potentials = new ArrayList<Proxy>(8);
 	}
 	
 	/** Sorted list of proxies */
@@ -156,13 +157,13 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 	
 	/** Id to proxy map for fast lookup */
 	protected Map<String, Proxy> proxyMap;
-	
-	/** Reusable list for storing detected pairs */
-	protected ArrayList<BroadphasePair<E>> pairs;
+
+	/** Reusable list for storing potential detected pairs along the x-axis */
+	protected ArrayList<PairList> potentialPairs;
 	
 	/** Default constructor. */
 	public SapIncremental() {
-		this(50);
+		this(64);
 	}
 	
 	/**
@@ -174,13 +175,7 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 	public SapIncremental(int initialCapacity) {
 		this.proxyList = new ArrayList<Proxy>(initialCapacity);
 		this.proxyMap = new HashMap<String, Proxy>(initialCapacity);
-		
-		// compute the estimated size
-		// size * size is the maximum number of pairs and there are size many pairs which are self pairs
-		// therefore making size * size - size the maximum number of pairs
-		int eSize = ((initialCapacity * initialCapacity) - initialCapacity) / 10;
-		
-		this.pairs = new ArrayList<BroadphasePair<E>>(eSize);
+		this.potentialPairs = new ArrayList<PairList>(initialCapacity);
 	}
 	
 	/* (non-Javadoc)
@@ -303,22 +298,17 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 		
 		// check the size
 		if (size == 0) {
-			// clear the local pair list
-			this.pairs.clear();
 			// return the empty list
-			return this.pairs;
+			return Collections.emptyList();
 		}
 		
 		// the estimated size of the pair list
-		int eSize = ((size * size) - size) / 10;
+		int eSize = Collisions.getEstimatedCollisionPairs(size);
+		List<BroadphasePair<E>> pairs = new ArrayList<BroadphasePair<E>>(eSize);
 		
-		// clear the local list and make sure it can store
-		// all the potential pairs
-		this.pairs.clear();
-		this.pairs.ensureCapacity(eSize);
-		
-		// create a list of potential pairs
-		List<PairList> potentialPairs = new ArrayList<PairList>(size);
+		// make sure the potential pairs list is sized appropriately
+		this.potentialPairs.clear();
+		this.potentialPairs.ensureCapacity(size);
 		
 		// create the potential pairs using the sorted x axis
 		PairList pl = new PairList();
@@ -344,7 +334,7 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 				// set the current collidable
 				pl.proxy = current;
 				// add the pair list to the potential pairs
-				potentialPairs.add(pl);
+				this.potentialPairs.add(pl);
 				// create a new pair list for the next collidable
 				pl = new PairList();
 			}
@@ -364,13 +354,13 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 					BroadphasePair<E> pair = new BroadphasePair<E>();
 					pair.a = current.proxy.collidable;
 					pair.b = test.collidable;
-					this.pairs.add(pair);
+					pairs.add(pair);
 				}
 			}
 		}
 		
 		// return the list
-		return this.pairs;
+		return pairs;
 	}
 	
 	/* (non-Javadoc)
@@ -382,13 +372,12 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 		int size = this.proxyList.size();
 		
 		// check the size of the proxy list
-		List<E> list;
 		if (size == 0) {
 			// return the empty list
-			return new ArrayList<E>();
-		} else {
-			list = new ArrayList<E>(size);
+			return Collections.emptyList();
 		}
+		
+		List<E> list = new ArrayList<E>(Collisions.getEstimatedCollisions());
 		
 		// peform a binary search to find where this
 		// aabb should be inserted
@@ -433,7 +422,7 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 		// check the size of the proxy list
 		if (this.proxyList.size() == 0) {
 			// return an empty list
-			return new ArrayList<E>();
+			return Collections.emptyList();
 		}
 		
 		// create an aabb from the ray

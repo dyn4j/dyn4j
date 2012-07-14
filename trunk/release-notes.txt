@@ -20,6 +20,8 @@ New Features:
     getLength method to the Interval class.
   - Moved getUserData to the Constraint class so that you can now assign a
     user object to contact constraints.
+  - Added initial capacity parameters to the constructors of relevant classes
+    to help size internal structures appropriately for better performance.
 
 Bug Fixes:
   - Fixed a bug in the ContactConstraintSolver where if there were two contacts
@@ -53,9 +55,20 @@ Breaking Changes:
   - The Shape.rotate(double) method's purpose has been changed to rotate the
     shape about the origin.  A new method, rotateAboutCenter has been created
     to replace the old functionality.
+  - The Broadphase detectors were returning a locally stored list that was
+    cleared and re-populated on the detect method.  These methods now return
+    a new list each time.  They now also return an empty list when there are
+    no collisions via the Collections.emptyList() method.
     
 Other:
   - Small performance enhancements via manual inlining of methods.
+  - Small performance enhancements via appropriate collection sizing.
+  - Small performance hit from returning a new list from the broadphase
+    detect methods.
+  - Small performance enhancement to DynamicAABBTree.detect methods by
+    changing the recursive search to a stackless iterative search.
+  - Small performance hit from returning new Penetration and Manifold objects
+    from the CollisionListener methods.
   - The Settings class now allows any values one or greater for the velocity
     and position constraint solver iterations.  In addition any value greater
     than zero can be used for the step frequency.

@@ -31,6 +31,7 @@ import java.util.UUID;
 
 import org.dyn4j.Epsilon;
 import org.dyn4j.collision.Collidable;
+import org.dyn4j.collision.Collisions;
 import org.dyn4j.collision.continuous.Swept;
 import org.dyn4j.dynamics.contact.Contact;
 import org.dyn4j.dynamics.contact.ContactConstraint;
@@ -177,9 +178,23 @@ public class Body implements Swept, Collidable, Transformable {
 	 * Default constructor.
 	 */
 	public Body() {
+		this(Body.TYPICAL_FIXTURE_COUNT);
+	}
+	
+	/**
+	 * Optional constructor.
+	 * <p>
+	 * Creates a new {@link Body} using the given estimated fixture count.
+	 * Assignment of the initial fixture count allows sizing of internal structures
+	 * for optimal memory/performance.  This estimated fixture count is <b>not</b> a
+	 * limit on the number of fixtures.
+	 * @param fixtureCount the estimated number of fixtures
+	 * @since 3.1.1
+	 */
+	public Body(int fixtureCount) {
 		this.world = null;
 		// the majority of bodies will contain one fixture/shape
-		this.fixtures = new ArrayList<BodyFixture>(Body.TYPICAL_FIXTURE_COUNT);
+		this.fixtures = new ArrayList<BodyFixture>(fixtureCount);
 		this.radius = 0.0;
 		this.mass = new Mass();
 		this.id = UUID.randomUUID().toString();
@@ -189,8 +204,8 @@ public class Body implements Swept, Collidable, Transformable {
 		this.angularVelocity = 0.0;
 		this.force = new Vector2();
 		this.torque = 0.0;
-		this.forces = new ArrayList<Force>();
-		this.torques = new ArrayList<Torque>();
+		this.forces = new ArrayList<Force>(8);
+		this.torques = new ArrayList<Torque>(8);
 		// initialize the state
 		this.state = 0;
 		// allow sleeping
@@ -201,8 +216,8 @@ public class Body implements Swept, Collidable, Transformable {
 		this.linearDamping = Body.DEFAULT_LINEAR_DAMPING;
 		this.angularDamping = Body.DEFAULT_ANGULAR_DAMPING;
 		this.gravityScale = 1.0;
-		this.contacts = new ArrayList<ContactEdge>();
-		this.joints = new ArrayList<JointEdge>();
+		this.contacts = new ArrayList<ContactEdge>(Collisions.getEstimatedCollisions());
+		this.joints = new ArrayList<JointEdge>(2);
 	}
 	
 	/* (non-Javadoc)
@@ -431,7 +446,7 @@ public class Body implements Swept, Collidable, Transformable {
 			this.mass = this.fixtures.get(0).createMass();
 		} else {
 			// create a list of mass objects
-			List<Mass> masses = new ArrayList<Mass>();
+			List<Mass> masses = new ArrayList<Mass>(size);
 			// create a mass object for each shape
 			for (int i = 0; i < size; i++) {
 				Mass mass = this.fixtures.get(i).createMass();
