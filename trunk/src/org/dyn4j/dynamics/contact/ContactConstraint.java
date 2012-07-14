@@ -89,8 +89,7 @@ public class ContactConstraint extends Constraint {
 	 * @param manifold the contact {@link Manifold}
 	 * @param world the {@link World} this contact constraint belongs to
 	 */
-	public ContactConstraint(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2,
-			Manifold manifold, World world) {
+	public ContactConstraint(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2, Manifold manifold, World world) {
 		super(body1, body2);
 		// set the involved convex shapes
 		this.fixture1 = fixture1;

@@ -65,7 +65,6 @@ public class Collisions {
 	 * @return int
 	 */
 	public static final int getEstimatedCollisionPairs(int n) {
-		if (n == 0) return 0;
 		return n * Collisions.ESTIMATED_COLLISIONS_PER_BODY;
 	}
 	

@@ -37,6 +37,7 @@ import org.dyn4j.dynamics.Capacity;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * Maintains {@link ContactConstraint}s between {@link Body}s.
@@ -63,6 +64,7 @@ public class ContactManager {
 	/**
 	 * Optional constructor.
 	 * @param world the {@link World} this contact manager belongs to
+	 * @throws NullPointerException if world is null
 	 * @since 3.0.3
 	 */
 	public ContactManager(World world)  {
@@ -78,9 +80,14 @@ public class ContactManager {
 	 * will grow past the initial capacity if necessary.
 	 * @param world the {@link World} this contact manager belongs to
 	 * @param initialCapacity the estimated number of {@link Body}s
+	 * @throws NullPointerException if world or initialCapacity is null
 	 * @since 3.1.1
 	 */
 	public ContactManager(World world, Capacity initialCapacity)  {
+		// check for null world
+		if (world == null) throw new NullPointerException(Messages.getString("dynamics.nullWorld"));
+		// check for null capacity
+		if (initialCapacity == null) throw new NullPointerException(Messages.getString("dynamics.nullCapacity"));
 		this.world = world;
 		// estimate the number of contact constraints
 		int eSize = Collisions.getEstimatedCollisionPairs(initialCapacity.getBodyCount());
@@ -103,24 +110,30 @@ public class ContactManager {
 	 * <p>
 	 * This method does not notify the {@link ContactListener}.
 	 * @param contactConstraint the {@link ContactConstraint}
+	 * @return boolean true if the contact was removed
+	 * @since 3.1.1
 	 */
-	public void remove(ContactConstraint contactConstraint) {
+	public boolean remove(ContactConstraint contactConstraint) {
 		// remove the contact from the cache
-		this.map.remove(contactConstraint.id);
+		return this.map.remove(contactConstraint.id) != null;
 	}
 	
 	/**
 	 * Clears the list of {@link ContactConstraint}s.
 	 */
 	public void clear() {
+		// only clear the list
 		this.list.clear();
 	}
 	
 	/**
-	 * Resets the contact manager, removing all {@link ContactConstraint}s.
+	 * Resets the contact manager, removing all {@link ContactConstraint}s
+	 * from the warm starting cache and {@link ContactConstraint} list.
 	 */
 	public void reset() {
-		// clear the current contact constraints
+		// clear the list
+		this.list.clear();
+		// clear the current contact constraints warm start cache
 		this.map.clear();
 	}
 	
@@ -462,10 +475,39 @@ public class ContactManager {
 	}
 	
 	/**
+	 * Returns true if there are no contacts in this {@link ContactManager}'s list.
+	 * <p>
+	 * Contacts are added to this contact manager via the {@link #add(ContactConstraint)}
+	 * method.  When the {@link #updateContacts()} method is called these contacts are updated
+	 * with the cached {@link ContactConstraint}'s impulses to warm start the solution.
+	 * @return boolean
+	 * @since 3.1.1
+	 */
+	public boolean isListEmpty() {
+		return this.list.isEmpty();
+	}
+	
+	/**
+	 * Returns true if the {@link ContactConstraint} warm starting cache is empty.
+	 * <p>
+	 * The warm starting cache contains the previous time step's {@link ContactConstraint}s and
+	 * their computed impulses.  These impulses from the last time step are used to warm
+	 * start the new contacts added via the {@link #add(ContactConstraint)} method.  Warm
+	 * starting of the {@link ContactConstraint}s allow the global solution to converge quicker
+	 * and eliminate jitter.
+	 * @return boolean
+	 * @since 3.1.1
+	 */
+	public boolean isCacheEmpty() {
+		return this.map.isEmpty();
+	}
+	
+	/**
 	 * Returns true if there are no contacts in this contact manager.
 	 * @return boolean
 	 * @since 3.0.3
 	 */
+	@Deprecated
 	public boolean isEmpty() {
 		return this.map.isEmpty();
 	}
