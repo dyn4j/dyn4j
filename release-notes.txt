@@ -22,6 +22,7 @@ New Features:
     user object to contact constraints.
   - Added initial capacity parameters to the constructors of relevant classes
     to help size internal structures appropriately for better performance.
+  - Added line and segment intersection methods to the Segment class
 
 Bug Fixes:
   - Fixed a bug in the ContactConstraintSolver where if there were two contacts
