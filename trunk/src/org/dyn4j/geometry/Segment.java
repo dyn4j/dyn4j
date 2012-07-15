@@ -30,7 +30,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents a line {@link Segment}.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.1
  * @since 1.0.0
  */
 public class Segment extends Wound implements Convex, Shape, Transformable {
@@ -200,6 +200,134 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	    t = Interval.clamp(t, 0.0, 1.0);
 	    // create the point on the line
 	    return line.multiply(t).add(linePoint1);
+	}
+	
+	/**
+	 * Returns the intersection point of the two lines or null if they are parallel or coincident.
+	 * <p>
+	 * If we let:
+	 * <pre>
+	 * A = A<sub>p2</sub> - A<sub>p1</sub>
+	 * B = B<sub>p2</sub> - B<sub>p1</sub>
+	 * </pre>
+	 * we can create two parametric equations:
+	 * <pre>
+	 * Q = A<sub>p1</sub> + t<sub>a</sub>A
+	 * Q = B<sub>p1</sub> + t<sub>b</sub>B
+	 * </pre>
+	 * Where Q is the intersection point:
+	 * <pre>
+	 * A<sub>p1</sub> + t<sub>a</sub>A = B<sub>p1</sub> + t<sub>b</sub>B
+	 * </pre>
+	 * We can solve for t<sub>b</sub> by applying the cross product with A on both sides:
+	 * <pre>
+	 * (A<sub>p1</sub> + t<sub>a</sub>A) x A = (B<sub>p1</sub> + t<sub>b</sub>B) x A
+	 * A<sub>p1</sub> x A = B<sub>p1</sub> x A + t<sub>b</sub>B x A
+	 * (A<sub>p1</sub> - B<sub>p1</sub>) x A = t<sub>b</sub>B x A
+	 * t<sub>b</sub> = ((A<sub>p1</sub> - B<sub>p1</sub>) x A) / (B x A)
+	 * </pre>
+	 * If B x A == 0 then the lines are parallel.  If both the top and bottom are zero 
+	 * then the lines are coincident.
+	 * <p>
+	 * If the lines are parallel or coincident, null is returned.
+	 * @param ap1 the first point of the first line
+	 * @param ap2 the second point of the first line
+	 * @param bp1 the first point of the second line
+	 * @param bp2 the second point of the second line
+	 * @return Vector2 the intersection point; null if the lines are parallel or coincident
+	 * @see #getSegmentIntersection(Vector2, Vector2, Vector2, Vector2)
+	 * @since 3.1.1
+	 */
+	public static Vector2 getLineIntersection(Vector2 ap1, Vector2 ap2, Vector2 bp1, Vector2 bp2) {
+		Vector2 A = ap1.to(ap2);
+		Vector2 B = bp1.to(bp2);
+		
+		// compute the bottom
+		double BxA = B.cross(A);
+		if (Math.abs(BxA) <= Epsilon.E) {
+			// the line segments are parallel and don't intersect
+			return null;
+		}
+		
+		// compute the top
+		double ambxA = ap1.difference(bp1).cross(A);
+		if (Math.abs(ambxA) <= Epsilon.E) {
+			// the line segments are coincident
+			return null;
+		}
+		
+		// compute tb
+		double tb = ambxA / BxA;
+		// compute the intersection point
+		return B.product(tb).add(bp1);
+	}
+	
+	/**
+	 * Returns the intersection point of the two line segments or null if they are parallel, coincident
+	 * or don't intersect.
+	 * <p>
+	 * If we let:
+	 * <pre>
+	 * A = A<sub>p2</sub> - A<sub>p1</sub>
+	 * B = B<sub>p2</sub> - B<sub>p1</sub>
+	 * </pre>
+	 * we can create two parametric equations:
+	 * <pre>
+	 * Q = A<sub>p1</sub> + t<sub>a</sub>A
+	 * Q = B<sub>p1</sub> + t<sub>b</sub>B
+	 * </pre>
+	 * Where Q is the intersection point:
+	 * <pre>
+	 * A<sub>p1</sub> + t<sub>a</sub>A = B<sub>p1</sub> + t<sub>b</sub>B
+	 * </pre>
+	 * We can solve for t<sub>b</sub> by applying the cross product with A on both sides:
+	 * <pre>
+	 * (A<sub>p1</sub> + t<sub>a</sub>A) x A = (B<sub>p1</sub> + t<sub>b</sub>B) x A
+	 * A<sub>p1</sub> x A = B<sub>p1</sub> x A + t<sub>b</sub>B x A
+	 * (A<sub>p1</sub> - B<sub>p1</sub>) x A = t<sub>b</sub>B x A
+	 * t<sub>b</sub> = ((A<sub>p1</sub> - B<sub>p1</sub>) x A) / (B x A)
+	 * </pre>
+	 * If B x A == 0 then the segments are parallel.  If the top == 0 then they don't intersect.  If both the
+	 * top and bottom are zero then the segments are coincident.
+	 * <p>
+	 * If t<sub>b</sub> or t<sub>a</sub> less than zero or greater than 1 then the segments do not intersect.
+	 * <p>
+	 * If the segments do not intersect, are parallel, or are coincident, null is returned.
+	 * @param ap1 the first point of the first line segment
+	 * @param ap2 the second point of the first line segment
+	 * @param bp1 the first point of the second line segment
+	 * @param bp2 the second point of the second line segment
+	 * @return Vector2 the intersection point; null if the line segments don't intersect, are parallel, or are coincident
+	 * @see #getLineIntersection(Vector2, Vector2, Vector2, Vector2)
+	 * @since 3.1.1
+	 */
+	public static Vector2 getSegmentIntersection(Vector2 ap1, Vector2 ap2, Vector2 bp1, Vector2 bp2) {
+		Vector2 A = ap1.to(ap2);
+		Vector2 B = bp1.to(bp2);
+		
+		// compute the bottom
+		double BxA = B.cross(A);
+		if (Math.abs(BxA) <= Epsilon.E) {
+			// the line segments are parallel and don't intersect
+			return null;
+		}
+		
+		// compute the top
+		double ambxA = ap1.difference(bp1).cross(A);
+		if (Math.abs(ambxA) <= Epsilon.E) {
+			// the line segments are coincident
+			return null;
+		}
+		
+		// compute tb
+		double tb = ambxA / BxA;
+		if (tb < 0.0 || tb > 1.0) {
+			// no intersection
+			return null;
+		}
+		
+		// compute the intersection point
+		return B.product(tb).add(bp1);
 	}
 	
 	/* (non-Javadoc)
