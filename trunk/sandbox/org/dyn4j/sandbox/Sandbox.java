@@ -104,8 +104,8 @@ import org.dyn4j.sandbox.actions.SelectAction;
 import org.dyn4j.sandbox.controls.MouseLocationTextField;
 import org.dyn4j.sandbox.dialogs.AboutDialog;
 import org.dyn4j.sandbox.dialogs.ExceptionDialog;
+import org.dyn4j.sandbox.dialogs.HelpDialog;
 import org.dyn4j.sandbox.dialogs.PreferencesDialog;
-import org.dyn4j.sandbox.dialogs.SettingsDialog;
 import org.dyn4j.sandbox.events.BodyActionEvent;
 import org.dyn4j.sandbox.export.CodeExporter;
 import org.dyn4j.sandbox.icons.Icons;
@@ -269,9 +269,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	
 	/** The reset button (only for compiled simulations) */
 	private JButton btnReset;
-	
-	/** The settings button for the simulation */
-	private JButton btnSettings;
 	
 	/** Label to show the frames per second */
 	private JTextField lblFps;
@@ -504,10 +501,15 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		this.mnuHelp = new JMenu(Messages.getString("menu.help"));
 		
 		JMenuItem mnuAbout = new JMenuItem(Messages.getString("menu.help.about"));
-		mnuAbout.setIcon(Icons.ABOUT);
 		mnuAbout.setActionCommand("about");
 		mnuAbout.addActionListener(this);
 		
+		JMenuItem mnuHelpContents = new JMenuItem(Messages.getString("menu.help.contents"));
+		mnuHelpContents.setIcon(Icons.HELP);
+		mnuHelpContents.setActionCommand("helpContents");
+		mnuHelpContents.addActionListener(this);
+		
+		this.mnuHelp.add(mnuHelpContents);
 		this.mnuHelp.add(mnuAbout);
 		
 		this.barMenu.add(this.mnuFile);
@@ -551,13 +553,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		barSimulation.add(this.btnStep);
 		barSimulation.add(this.btnStop);
 		barSimulation.add(this.btnReset);
-		
-		this.btnSettings = new JButton(Icons.SETTINGS);
-		this.btnSettings.addActionListener(this);
-		this.btnSettings.setActionCommand("settings");
-		this.btnSettings.setToolTipText(Messages.getString("toolbar.simulation.settings"));
-		
-		barSimulation.add(this.btnSettings);
 		
 		this.lblFps = new JTextField();
 		this.lblFps.setMaximumSize(new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
@@ -980,7 +975,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				this.btnStep.setEnabled(false);
 				this.btnStop.setEnabled(true);
 				this.btnReset.setEnabled(false);
-				this.btnSettings.setEnabled(false);
 				this.mnuNew.setEnabled(false);
 				this.mnuOpen.setEnabled(false);
 				this.mnuSaveAs.setEnabled(false);
@@ -1018,7 +1012,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 				this.btnStart.setEnabled(true);
 				this.btnStep.setEnabled(true);
 				this.btnStop.setEnabled(false);
-				this.btnSettings.setEnabled(true);
 				this.mnuNew.setEnabled(true);
 				this.mnuOpen.setEnabled(true);
 				this.mnuTests.setEnabled(true);
@@ -1034,10 +1027,6 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 					this.pnlSimulation.setSimulation(this.simulation);
 				}
 			}
-		} else if ("settings".equals(command)) {
-			// show the settings dialog
-			// this dialog will block so there is no need to synchronize
-			SettingsDialog.show(this, this.simulation.getWorld().getSettings());
 		} else if ("color".equals(command)) {
 			Preferences.setBodyColorRandom(!Preferences.isBodyColorRandom());
 		} else if ("stencil".equals(command)) {
@@ -1088,6 +1077,8 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 			}
 		} else if ("about".equals(command)) {
 			AboutDialog.show(this);
+		} else if ("helpContents".equals(command)) {
+			HelpDialog.show(this);
 		} else if ("snapshotTake".equals(command)) {
 			this.takeSnapshot(false);
 		} else if ("snapshotClearAll".equals(command)) {

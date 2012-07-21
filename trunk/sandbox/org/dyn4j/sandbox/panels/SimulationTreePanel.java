@@ -95,6 +95,7 @@ import org.dyn4j.sandbox.dialogs.EditJointDialog;
 import org.dyn4j.sandbox.dialogs.EditRayDialog;
 import org.dyn4j.sandbox.dialogs.EditWorldDialog;
 import org.dyn4j.sandbox.dialogs.SetBoundsDialog;
+import org.dyn4j.sandbox.dialogs.SettingsDialog;
 import org.dyn4j.sandbox.dialogs.ShiftWorldDialog;
 import org.dyn4j.sandbox.events.BodyActionEvent;
 import org.dyn4j.sandbox.icons.Icons;
@@ -314,7 +315,13 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 		mnuClearWorld.addActionListener(this);
 		mnuClearWorld.setIcon(Icons.REMOVE);
 		
+		JMenuItem mnuSettings = new JMenuItem(Messages.getString("menu.context.world.settings"));
+		mnuSettings.setActionCommand("settings");
+		mnuSettings.addActionListener(this);
+		mnuSettings.setIcon(Icons.SETTINGS);
+		
 		this.popWorld.add(mnuEditWorld);
+		this.popWorld.add(mnuSettings);
 		this.popWorld.add(mnuShiftWorld);
 		this.popWorld.addSeparator();
 		this.popWorld.add(mnuClearWorld);
@@ -879,6 +886,8 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 			this.editRayAction();
 		} else if ("removeRay".equals(command)) {
 			this.removeRayAction();
+		} else if ("settings".equals(command)) {
+			this.editSettingsAction();
 		}
 	}
 	
@@ -1773,6 +1782,14 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Shows a dialog to edit simulation settings.
+	 * @since 1.0.4
+	 */
+	private void editSettingsAction() {
+		SettingsDialog.show(ControlUtilities.getParentWindow(this), this.simulation.getWorld().getSettings());
 	}
 	
 	/**
