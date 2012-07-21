@@ -31,7 +31,7 @@ import org.dyn4j.sandbox.utilities.ImageUtilities;
 /**
  * Class storing all the icons used by the application.
  * @author William Bittle
- * @version 1.0.2
+ * @version 1.0.4
  * @since 1.0.0
  */
 public class Icons {
@@ -75,9 +75,6 @@ public class Icons {
 	/** Preferences icon */
 	public static final ImageIcon PREFERENCES = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/preferences-icon.png");
 	
-	/** Running indicator icon */
-	public static final ImageIcon RUNNING = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/running-icon.png");
-	
 	/** Stopped indicator icon */
 	public static final ImageIcon STOPPED = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/stopped-icon.png");
 	
@@ -101,6 +98,15 @@ public class Icons {
 	
 	/** Folder closed icon */
 	public static final ImageIcon FOLDER_CLOSED = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/folder-closed-icon.png");
+	
+	/** Help contents open icon */
+	public static final ImageIcon HELP_OPEN = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/help-open-icon.png");
+	
+	/** Help contents closed icon */
+	public static final ImageIcon HELP_CLOSED = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/help-closed-icon.png");
+
+	/** Help contents leaf icon */
+	public static final ImageIcon HELP_LEAF = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/help-leaf-icon.png");
 	
 	/** Color icon */
 	public static final ImageIcon COLOR = ImageUtilities.getIconFromClassPathSuppressExceptions("/org/dyn4j/sandbox/icons/color-icon.png");
