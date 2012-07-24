@@ -83,7 +83,7 @@ The Body class can be extended or can be contained in another object or can be c
   * The Body class can be contained in another class
   * The Body class can be completely separate by using the userData member variable for association.
 
-All three methods are acceptable and intended for use.  The !TestBed and Sandbox applications use the extension method.
+All three methods are acceptable and intended for use.  The Sandbox application uses the extension method.
 
 ==Body States==
 The life time of a body is usually very long.  Over that span the body's state may change.
@@ -94,12 +94,14 @@ A body becomes "inactive" when the collision detection system detects that the e
 
 Using the setActive and setAsleep methods you can manually put a body to sleep or set inactive.
 
-==Applying Forces & Torques==
+==Applying Forces, Torques, & Impulses==
 When applying forces and torques to a body, they are queued in an accumulator and not immediately applied.  When a simulation step is performed, the stored forces and torques are applied to the bodies and placed in the force and torque member variables.  This is done so that the previous simulation step's force and torque values can be queried via the getForce and getTorque methods.
 
 The force and torque classes also feature an isComplete method that can be overridden by sub classes.  This allows a force to be created that may or may not be removed at the end of a world step given the return of the isComplete method.
 
 Applying forces or torques to a body will immediately awaken the body if it was asleep.
+
+Impulses are applied to bodies immediately (not stored in an accumulator).  Applying an impulse will immediately awaken the body as well.
 
 ==Fixtures & !BodyFixtures==
 Fixture is the base class for !BodyFixture.  !BodyFixtures are the only Fixtures allowed to be added to a body.  The Fixture base class is present to allow developers to use the collision detection system without the dynamics engine.
@@ -179,6 +181,8 @@ The collision detector classes also allow for static collision detection queries
 
 In addition to this, you can use the faster boolean result methods if you don't plan to use the extra information provided by the standard detect methods.
 
+See the World class's detect methods for static area queries.
+
 ==Continuous Collision Detection (CCD)==
 Continuous collision detection is aimed at solving the "tunneling" problem.  Tunneling occurs when a fast moving object starts on one side of another object and after one time step is on the other side of that object.  This can happen when bodies are fast or thin.
 
@@ -191,15 +195,15 @@ This process is performed at the end of each time step.
 =Collision Detection & Physics Pipeline=
 The collision detection and physics pipeline is structured as shown in the following flowcharts.  Its important to know the order in which operations occur and when to expect up-to-date or old information.
 
-[http://www.dyn4j.org/images/World.update.png]
+[http://www.dyn4j.org/images/update-diagram-800.png]
 
 And the detect method:
 
-[http://www.dyn4j.org/images/World.detect.png]
+[http://www.dyn4j.org/images/detect-diagram-800.png]
 
 The listener classes that are discussed in the next section are shown in green.  These are intended to notify the user of specific actions happening in the pipeline and allow the user to respond.
 
-*Excluding the !StepListener.begin and !StepListener.end methods, all listener methods should not modify/add/remove bodies, joints, or the world.  Doing so can cause runtime exceptions or cause unexpected behavior.  If you need to respond to a particular event, store the necessary information and respond in the !StepListener.begin or !StepListener.end methods or after the World.update method has returned.*
+*Excluding the !StepListener.begin and !StepListener.end methods, all listener methods should avoid modifying/adding/removing bodies, joints, or the world.  Doing so can cause runtime exceptions or cause unexpected behavior (see the individual Listener classes for more details on operations supported).  If you need to respond to a particular event, its recommended to store the necessary information and respond in the !StepListener.begin or !StepListener.end methods or after the World.update method has returned.*
 
 One last important concept here is the World.setUpdateRequired method.  Examining the flowchart reveals that new contacts are found immediately after the previous contacts have been solved.  This allows the user to have the most up-to-date information about contacts, colliding bodies, etc.  This also enables accurate Raycasting and Broadphase tests.
 
@@ -221,9 +225,8 @@ The following is a list of actions that require the setUpdateRequired method to 
 
 ==Event Listening==
 The World class contains a number of event listeners used to receive notifications when an event occurs.
-  * *NEVER modify/remove/add bodies or joints during a call to World.update(double)*.  This can cause unexpected results and runtime errors.  If you are listening for events, save the events for later processing.  After the World.update(double) method returns you should respond to the queued events.
 
-There is one exception.  If you listen for the Step events, you can respond to events at this time.
+*Excluding the !StepListener.begin and !StepListener.end methods, all listener methods should avoid modifying/adding/removing bodies, joints, or the world.  Doing so can cause runtime exceptions or cause unexpected behavior (see the individual Listener classes for more details on operations supported).  If you need to respond to a particular event, its recommended to store the necessary information and respond in the !StepListener.begin or !StepListener.end methods or after the World.update method has returned.*
 
 The World class allows multiple instances of each listener type.  This allows developers to better separate their own code for event handling.
 
