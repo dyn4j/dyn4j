@@ -6,6 +6,15 @@ After reading through the GettingStarted page and getting your project integrate
 <wiki:toc max_depth="3" />
 
 =General=
+==Package Architecture==
+The following diagram describes the package dependencies:
+
+[http://www.dyn4j.org/images/package-diagram-800.png]
+
+  * The geometry packages are dependent upon the root dyn4j package.
+  * The collision packages are dependent upon the base geometry package.
+  * The dynamics packages are dependent upon the base geometry package and the collision packages.
+
 ==Ids==
 Each Shape, Fixture/!BodyFixture, and Body are given random UUIDs upon creation.  These ids are used to refer to the objects stored in maps, comparisons, etc.  Currently the ids are read only as to ensure that each is unique.  This may change in a future release.
 
