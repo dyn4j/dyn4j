@@ -25,6 +25,10 @@ To see the classes you must add the JAR to the classpath of your project.
   # Copy the dyn4j.jar to your project in eclipse.
   # Right click on the dyn4j.jar and select Build Path → Add to Build Path
 
+Watch the video below for a full description on how to get a new Eclipse project setup to use dyn4j:
+
+<wiki:video url="http://www.youtube.com/watch?v=P9G7Yn6GR-w"/>
+
 ==Command Line==
 When building your project on the command line add the jar in the -classpath flag for example:
 {{{
