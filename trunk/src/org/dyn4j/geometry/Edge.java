@@ -50,8 +50,8 @@ public class Edge extends Feature {
 	 * Creates an edge feature.
 	 * @param vertex1 the first vertex of the edge
 	 * @param vertex2 the second vertex of the edge
-	 * @param edge the vector representing the edge
 	 * @param max the maximum point
+	 * @param edge the vector representing the edge
 	 * @param index the index of the edge
 	 */
 	public Edge(Vertex vertex1, Vertex vertex2, Vertex max, Vector2 edge, int index) {
