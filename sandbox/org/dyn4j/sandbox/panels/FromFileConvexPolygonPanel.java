@@ -151,6 +151,7 @@ public class FromFileConvexPolygonPanel extends ConvexShapePanel implements Inpu
 									Double.parseDouble(coords[1])));
 						}
 					}
+					br.close();
 					// create the polygon
 					Vector2[] vertices = new Vector2[points.size()];
 					points.toArray(vertices);
