@@ -157,6 +157,7 @@ public class FromFileNonConvexPolygonPanel extends NonConvexShapePanel implement
 									Double.parseDouble(coords[1])));
 						}
 					}
+					br.close();
 					// create the polygon
 					this.vertices = new Vector2[points.size()];
 					points.toArray(this.vertices);

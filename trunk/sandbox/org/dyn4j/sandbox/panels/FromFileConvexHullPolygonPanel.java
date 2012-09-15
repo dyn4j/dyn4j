@@ -157,6 +157,7 @@ public class FromFileConvexHullPolygonPanel extends ConvexHullShapePanel impleme
 									Double.parseDouble(coords[1])));
 						}
 					}
+					br.close();
 					// create the polygon
 					this.points = new Vector2[points.size()];
 					points.toArray(this.points);
