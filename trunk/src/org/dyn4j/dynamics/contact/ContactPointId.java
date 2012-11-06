@@ -22,39 +22,31 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.collision.manifold;
+package org.dyn4j.dynamics.contact;
+
+import org.dyn4j.collision.manifold.ManifoldPointId;
 
 /**
- * Represents a {@link ManifoldPointId} that uses indexing.
+ * Represents a contact point id to identify contacts from frame to frame.
  * @author William Bittle
  * @version 3.1.2
- * @since 1.0.0
+ * @since 3.1.2
  */
-public class IndexedManifoldPointId implements ManifoldPointId {
-	/** The reference edge index */
-	protected int referenceEdge;
+public class ContactPointId {
+	/** The contact constraint id */
+	protected ContactConstraintId contactConstraintId;
 	
-	/** The incident edge index */
-	protected int incidentEdge;
-	
-	/** The index of the incident vertex */
-	protected int incidentVertex;
-	
-	/** Whether the reference and incident features flipped */
-	protected boolean flipped;
+	/** The manifold point id */
+	protected ManifoldPointId manifoldPointId;
 	
 	/**
 	 * Full constructor.
-	 * @param referenceEdge the reference edge index
-	 * @param incidentEdge the incident edge index
-	 * @param incidentVertex the incident vertex index
-	 * @param flipped whether the reference and incident features flipped
+	 * @param contactConstraintId the contact constraint id
+	 * @param manifoldPointId the manifold point id
 	 */
-	public IndexedManifoldPointId(int referenceEdge, int incidentEdge, int incidentVertex, boolean flipped) {
-		this.referenceEdge = referenceEdge;
-		this.incidentEdge = incidentEdge;
-		this.incidentVertex = incidentVertex;
-		this.flipped = flipped;
+	public ContactPointId(ContactConstraintId contactConstraintId, ManifoldPointId manifoldPointId) {
+		this.contactConstraintId = contactConstraintId;
+		this.manifoldPointId = manifoldPointId;
 	}
 	
 	/* (non-Javadoc)
@@ -64,12 +56,9 @@ public class IndexedManifoldPointId implements ManifoldPointId {
 	public boolean equals(Object other) {
 		if (other == null) return false;
 		if (other == this) return true;
-		if (other instanceof IndexedManifoldPointId) {
-			IndexedManifoldPointId o = (IndexedManifoldPointId) other;
-			if (this.referenceEdge == o.referenceEdge
-			 && this.incidentEdge == o.incidentEdge
-			 && this.incidentVertex == o.incidentVertex
-			 && this.flipped == o.flipped) {
+		if (other instanceof ContactPointId) {
+			ContactPointId id = (ContactPointId)other;
+			if (id.contactConstraintId.equals(this.contactConstraintId) && id.manifoldPointId.equals(this.manifoldPointId)) {
 				return true;
 			}
 		}
@@ -81,10 +70,9 @@ public class IndexedManifoldPointId implements ManifoldPointId {
 	 */
 	@Override
 	public int hashCode() {
-		int hash = this.referenceEdge;
-		hash = 37 * hash + this.incidentEdge;
-		hash = 37 * hash + this.incidentVertex;
-		hash = 37 * hash + (this.flipped ? 1231 : 1237);
+		int hash = 1;
+		hash = hash * 31 + this.contactConstraintId.hashCode();
+		hash = hash * 31 + this.manifoldPointId.hashCode();
 		return hash;
 	}
 	
@@ -94,46 +82,25 @@ public class IndexedManifoldPointId implements ManifoldPointId {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("IndexedManifoldPointId[ReferenceEdge=").append(this.referenceEdge)
-		.append("|IncidentEdge=").append(this.incidentEdge)
-		.append("|IncidentVertex=").append(this.incidentVertex)
-		.append("|IsFlipped=").append(this.flipped)
+		sb.append("ContactPointId[ContactConstraintId=").append(this.contactConstraintId)
+		.append("|ManifoldPointId=").append(this.manifoldPointId)
 		.append("]");
 		return sb.toString();
 	}
-	
+
 	/**
-	 * Returns the index of the reference edge.
-	 * @return int
+	 * Returns the {@link ContactConstraintId} for this contact.
+	 * @return {@link ContactConstraintId}
 	 */
-	public int getReferenceEdge() {
-		return referenceEdge;
+	public ContactConstraintId getContactConstraintId() {
+		return this.contactConstraintId;
 	}
-	
+
 	/**
-	 * Returns the index of the incident edge.
-	 * @return int
+	 * Returns the {@link ManifoldPointId} for this contact.
+	 * @return {@link ManifoldPointId}
 	 */
-	public int getIncidentEdge() {
-		return incidentEdge;
-	}
-	
-	/**
-	 * Returns the index of the incident vertex.
-	 * @return int
-	 */
-	public int getIncidentVertex() {
-		return incidentVertex;
-	}
-	
-	/**
-	 * Returns true if the reference and incident edges flipped.
-	 * <p>
-	 * Renamed from <code>flipped</code> in 3.0.2.
-	 * @return boolean
-	 * @since 3.0.2
-	 */
-	public boolean isFlipped() {
-		return flipped;
+	public ManifoldPointId getManifoldPointId() {
+		return this.manifoldPointId;
 	}
 }

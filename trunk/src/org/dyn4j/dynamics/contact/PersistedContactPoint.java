@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ import org.dyn4j.geometry.Vector2;
  * Represents a persisted contact point.
  * @author William Bittle
  * @see ContactPoint
- * @version 3.0.2
+ * @version 3.1.2
  * @since 1.0.0
  */
 public class PersistedContactPoint extends ContactPoint {
@@ -50,6 +50,7 @@ public class PersistedContactPoint extends ContactPoint {
 	
 	/**
 	 * Full constructor.
+	 * @param id the contact point id
 	 * @param body1 the first {@link Body} in contact
 	 * @param fixture1 the first {@link Body}'s {@link BodyFixture}
 	 * @param body2 the second {@link Body} in contact
@@ -62,10 +63,11 @@ public class PersistedContactPoint extends ContactPoint {
 	 * @param oldNormal the previous world space contact normal
 	 * @param oldDepth the previous penetration depth
 	 */
-	public PersistedContactPoint(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2, 
+	public PersistedContactPoint(ContactPointId id, 
+			Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2, 
 			boolean enabled, Vector2 point, Vector2 normal, double depth,
 			Vector2 oldPoint, Vector2 oldNormal, double oldDepth) {
-		super(body1, fixture1, body2, fixture2, enabled, point, normal, depth);
+		super(id, body1, fixture1, body2, fixture2, enabled, point, normal, depth);
 		this.oldPoint = oldPoint;
 		this.oldNormal = oldNormal;
 		this.oldDepth = oldDepth;

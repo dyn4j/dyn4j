@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import org.dyn4j.geometry.Shape;
  * Represents and id for a contact constraint between two {@link Convex}
  * {@link Shape}s on two {@link Body}s.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.2
  * @since 1.0.0
  */
 public class ContactConstraintId {
@@ -106,5 +106,41 @@ public class ContactConstraintId {
 		.append("|Fixture2Id=").append(this.fixture2Id)
 		.append("]");
 		return sb.toString();
+	}
+
+	/**
+	 * Returns the id of the first body.
+	 * @return String
+	 * @since 3.1.2
+	 */
+	public String getBody1Id() {
+		return this.body1Id;
+	}
+
+	/**
+	 * Returns the id of the second body.
+	 * @return String
+	 * @since 3.1.2
+	 */
+	public String getBody2Id() {
+		return this.body2Id;
+	}
+
+	/**
+	 * Returns the id of the fixture on the first body.
+	 * @return String
+	 * @since 3.1.2
+	 */
+	public String getFixture1Id() {
+		return this.fixture1Id;
+	}
+
+	/**
+	 * Returns the id of the fixture on the second body.
+	 * @return String
+	 * @since 3.1.2
+	 */
+	public String getFixture2Id() {
+		return this.fixture2Id;
 	}
 }

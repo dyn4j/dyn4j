@@ -45,7 +45,7 @@ import org.dyn4j.resources.Messages;
  * This class performs the {@link ContactConstraint} warm starting and manages contact
  * listening.
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.1.2
  * @since 1.0.0
  */
 public class ContactManager {
@@ -206,15 +206,16 @@ public class ContactManager {
 					// get the contact
 					Contact contact = contacts.get(j);
 					// notify of the sensed contact
-					ContactPoint point = new ContactPoint();
-					point.body1 = newContactConstraint.getBody1();
-					point.body2 = newContactConstraint.getBody2();
-					point.fixture1 = newContactConstraint.fixture1;
-					point.fixture2 = newContactConstraint.fixture2;
-					point.normal = newContactConstraint.normal;
-					point.depth = contact.depth;
-					point.point = contact.p;
-					point.enabled = false;
+					ContactPoint point = new ContactPoint(
+							new ContactPointId(newContactConstraint.id, contact.id),
+							newContactConstraint.getBody1(),
+							newContactConstraint.fixture1,
+							newContactConstraint.getBody2(),
+							newContactConstraint.fixture2,
+							false,
+							contact.p,
+							newContactConstraint.normal,
+							contact.depth);
 					// call the listeners
 					for (ContactListener cl : this.listeners) {
 						cl.sensed(point);
@@ -258,19 +259,19 @@ public class ContactManager {
 							newContact.jn = oldContact.jn;
 							newContact.jt = oldContact.jt;
 							// notify of a persisted contact
-							PersistedContactPoint point = new PersistedContactPoint();
-							// set the values for the new point
-							point.normal = newContactConstraint.normal;
-							point.point = newContact.p;
-							point.depth = newContact.depth;
-							point.body1 = newContactConstraint.getBody1();
-							point.body2 = newContactConstraint.getBody2();
-							point.fixture1 = newContactConstraint.getFixture1();
-							point.fixture2 = newContactConstraint.getFixture2();
-							// set the values for the old point
-							point.oldNormal = oldContactConstraint.normal;
-							point.oldPoint = oldContact.p;
-							point.oldDepth = oldContact.depth;
+							PersistedContactPoint point = new PersistedContactPoint(
+									new ContactPointId(newContactConstraint.id, newContact.id),
+									newContactConstraint.getBody1(),
+									newContactConstraint.getFixture1(),
+									newContactConstraint.getBody2(),
+									newContactConstraint.getFixture2(),
+									true,
+									newContact.p,
+									newContactConstraint.normal,
+									newContact.depth,
+									oldContact.p,
+									oldContactConstraint.normal,
+									oldContact.depth);
 							// call the listeners and set the enabled flag to the result
 							boolean allow = true;
 							for (ContactListener cl : this.listeners) {
@@ -288,15 +289,16 @@ public class ContactManager {
 					// check for persistence, if it wasn't persisted its a new contact
 					if (!found) {
 						// notify of new contact (begin of contact)
-						ContactPoint point = new ContactPoint();
-						// set the values
-						point.normal = newContactConstraint.normal;
-						point.point = newContact.p;
-						point.depth = newContact.depth;
-						point.body1 = newContactConstraint.getBody1();
-						point.body2 = newContactConstraint.getBody2();
-						point.fixture1 = newContactConstraint.getFixture1();
-						point.fixture2 = newContactConstraint.getFixture2();
+						ContactPoint point = new ContactPoint(
+								new ContactPointId(newContactConstraint.id, newContact.id),
+								newContactConstraint.getBody1(),
+								newContactConstraint.fixture1,
+								newContactConstraint.getBody2(),
+								newContactConstraint.fixture2,
+								false,
+								newContact.p,
+								newContactConstraint.normal,
+								newContact.depth);
 						// call the listeners and set the enabled flag to the result
 						boolean allow = true;
 						for (ContactListener cl : this.listeners) {
@@ -317,15 +319,16 @@ public class ContactManager {
 						// get the contact
 						Contact contact = ocontacts.get(j);
 						// notify of new contact (begin of contact)
-						ContactPoint point = new ContactPoint();
-						// set the values
-						point.normal = newContactConstraint.normal;
-						point.point = contact.p;
-						point.depth = contact.depth;
-						point.body1 = newContactConstraint.getBody1();
-						point.body2 = newContactConstraint.getBody2();
-						point.fixture1 = newContactConstraint.getFixture1();
-						point.fixture2 = newContactConstraint.getFixture2();
+						ContactPoint point = new ContactPoint(
+								new ContactPointId(newContactConstraint.id, contact.id),
+								newContactConstraint.getBody1(),
+								newContactConstraint.fixture1,
+								newContactConstraint.getBody2(),
+								newContactConstraint.fixture2,
+								false,
+								contact.p,
+								newContactConstraint.normal,
+								contact.depth);
 						// call the listeners
 						for (ContactListener cl : this.listeners) {
 							cl.end(point);
@@ -339,15 +342,16 @@ public class ContactManager {
 					// get the contact
 					Contact contact = contacts.get(j);
 					// notify of new contact (begin of contact)
-					ContactPoint point = new ContactPoint();
-					// set the values
-					point.normal = newContactConstraint.normal;
-					point.point = contact.p;
-					point.depth = contact.depth;
-					point.body1 = newContactConstraint.getBody1();
-					point.body2 = newContactConstraint.getBody2();
-					point.fixture1 = newContactConstraint.getFixture1();
-					point.fixture2 = newContactConstraint.getFixture2();
+					ContactPoint point = new ContactPoint(
+							new ContactPointId(newContactConstraint.id, contact.id),
+							newContactConstraint.getBody1(),
+							newContactConstraint.fixture1,
+							newContactConstraint.getBody2(),
+							newContactConstraint.fixture2,
+							false,
+							contact.p,
+							newContactConstraint.normal,
+							contact.depth);
 					// call the listeners and set the enabled flag to the result
 					boolean allow = true;
 					for (ContactListener cl : this.listeners) {
@@ -374,14 +378,16 @@ public class ContactManager {
 					// get the contact
 					Contact contact = contactConstraint.contacts.get(i);
 					// set the contact point values
-					ContactPoint point = new ContactPoint();
-					point.normal = contactConstraint.normal;
-					point.point = contact.p;
-					point.depth = contact.depth;
-					point.body1 = contactConstraint.getBody1();
-					point.body2 = contactConstraint.getBody2();
-					point.fixture1 = contactConstraint.getFixture1();
-					point.fixture2 = contactConstraint.getFixture2();
+					ContactPoint point = new ContactPoint(
+							new ContactPointId(contactConstraint.id, contact.id),
+							contactConstraint.getBody1(),
+							contactConstraint.fixture1,
+							contactConstraint.getBody2(),
+							contactConstraint.fixture2,
+							false,
+							contact.p,
+							contactConstraint.normal,
+							contact.depth);
 					// call the listeners
 					for (ContactListener cl : this.listeners) {
 						cl.end(point);
@@ -417,14 +423,16 @@ public class ContactManager {
 				// get the contact
 				Contact contact = contactConstraint.contacts.get(j);
 				// notify of the contact that will be solved
-				ContactPoint point = new ContactPoint();
-				point.normal = contactConstraint.normal;
-				point.point = contact.p;
-				point.depth = contact.depth;
-				point.body1 = contactConstraint.getBody1();
-				point.body2 = contactConstraint.getBody2();
-				point.fixture1 = contactConstraint.getFixture1();
-				point.fixture2 = contactConstraint.getFixture2();
+				ContactPoint point = new ContactPoint(
+						new ContactPointId(contactConstraint.id, contact.id),
+						contactConstraint.getBody1(),
+						contactConstraint.fixture1,
+						contactConstraint.getBody2(),
+						contactConstraint.fixture2,
+						false,
+						contact.p,
+						contactConstraint.normal,
+						contact.depth);
 				// call the listeners and set the enabled flag to the result
 				boolean allow = true;
 				for (ContactListener cl : this.listeners) {
@@ -455,17 +463,18 @@ public class ContactManager {
 				// get the contact
 				Contact contact = contactConstraint.contacts.get(j);
 				// set the contact point values
-				SolvedContactPoint point = new SolvedContactPoint();
-				point.normal = contactConstraint.normal;
-				point.point = contact.p;
-				point.depth = contact.depth;
-				point.body1 = contactConstraint.getBody1();
-				point.body2 = contactConstraint.getBody2();
-				point.fixture1 = contactConstraint.getFixture1();
-				point.fixture2 = contactConstraint.getFixture2();
-				// set the solved attributes
-				point.normalImpulse = contact.jn;
-				point.tangentialImpulse = contact.jt;
+				SolvedContactPoint point = new SolvedContactPoint(
+						new ContactPointId(contactConstraint.id, contact.id),
+						contactConstraint.getBody1(),
+						contactConstraint.fixture1,
+						contactConstraint.getBody2(),
+						contactConstraint.fixture2,
+						false,
+						contact.p,
+						contactConstraint.normal,
+						contact.depth,
+						contact.jn,
+						contact.jt);
 				// notify of them being solved
 				for (ContactListener cl : this.listeners) {
 					cl.postSolve(point);

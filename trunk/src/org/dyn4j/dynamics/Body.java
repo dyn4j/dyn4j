@@ -38,6 +38,7 @@ import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.dynamics.contact.ContactEdge;
 import org.dyn4j.dynamics.contact.ContactListener;
 import org.dyn4j.dynamics.contact.ContactPoint;
+import org.dyn4j.dynamics.contact.ContactPointId;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.JointEdge;
 import org.dyn4j.geometry.AABB;
@@ -83,7 +84,7 @@ import org.dyn4j.resources.Messages;
  * setting in the world's {@link Settings}.  Use this if the body is a fast moving
  * body, but be careful as this will incur a performance hit.
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.1.2
  * @since 1.0.0
  */
 public class Body implements Swept, Collidable, Transformable {
@@ -1791,6 +1792,7 @@ public class Body implements Swept, Collidable, Transformable {
 					Contact contact = contacts.get(j);
 					// create the contact point
 					ContactPoint contactPoint = new ContactPoint(
+							new ContactPointId(constraint.getId(), contact.getId()),
 							constraint.body1, constraint.getFixture1(),
 							constraint.body2, constraint.getFixture2(),
 							contact.isEnabled(),

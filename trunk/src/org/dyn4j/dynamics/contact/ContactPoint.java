@@ -32,10 +32,13 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents a contact point and used to report events via the {@link ContactListener}.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.2
  * @since 1.0.0
  */
 public class ContactPoint {
+	/** The contact point id */
+	protected ContactPointId id;
+	
 	/** The first {@link Body} in contact */
 	protected Body body1;
 	
@@ -65,6 +68,7 @@ public class ContactPoint {
 	
 	/**
 	 * Full constructor.
+	 * @param id the contact point id
 	 * @param body1 the first {@link Body} in contact
 	 * @param fixture1 the first {@link Body}'s {@link BodyFixture}
 	 * @param body2 the second {@link Body} in contact
@@ -74,8 +78,9 @@ public class ContactPoint {
 	 * @param normal the world space contact normal
 	 * @param depth the penetration depth
 	 */
-	public ContactPoint(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2,
+	public ContactPoint(ContactPointId id, Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2,
 			boolean enabled, Vector2 point, Vector2 normal, double depth) {
+		this.id = id;
 		this.body1 = body1;
 		this.fixture1 = fixture1;
 		this.body2 = body2;
@@ -93,6 +98,7 @@ public class ContactPoint {
 	public ContactPoint(ContactPoint contactPoint) {
 		if (contactPoint == null) throw new NullPointerException(Messages.getString("dynamics.contact.contactPoint.nullContactPoint"));
 		// shallow copy all the fields
+		this.id = contactPoint.id;
 		this.body1 = contactPoint.body1;
 		this.fixture1 = contactPoint.fixture1;
 		this.body2 = contactPoint.body2;
@@ -109,7 +115,8 @@ public class ContactPoint {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("ContactPoint[Body1=").append(this.body1)
+		sb.append("ContactPoint[Id=").append(this.id)
+		.append("|Body1=").append(this.body1)
 		.append("|Fixture1=").append(this.fixture1)
 		.append("|Body2=").append(this.body2)
 		.append("|Fixture2=").append(this.fixture2)
@@ -122,11 +129,20 @@ public class ContactPoint {
 	}
 	
 	/**
+	 * Returns the contact point id.
+	 * @return {@link ContactPointId}
+	 * @since 3.1.2
+	 */
+	public ContactPointId getId() {
+		return this.id;
+	}
+	
+	/**
 	 * Returns true if this contact point is enabled.
 	 * @return boolean
 	 */
 	public boolean isEnabled() {
-		return enabled;
+		return this.enabled;
 	}
 	
 	/**
@@ -134,7 +150,7 @@ public class ContactPoint {
 	 * @return {@link Vector2}
 	 */
 	public Vector2 getPoint() {
-		return point;
+		return this.point;
 	}
 	
 	/**
@@ -142,7 +158,7 @@ public class ContactPoint {
 	 * @return {@link Vector2}
 	 */
 	public Vector2 getNormal() {
-		return normal;
+		return this.normal;
 	}
 	
 	/**
@@ -150,7 +166,7 @@ public class ContactPoint {
 	 * @return double
 	 */
 	public double getDepth() {
-		return depth;
+		return this.depth;
 	}
 	
 	/**
@@ -158,7 +174,7 @@ public class ContactPoint {
 	 * @return {@link Body}
 	 */
 	public Body getBody1() {
-		return body1;
+		return this.body1;
 	}
 	
 	/**
@@ -166,7 +182,7 @@ public class ContactPoint {
 	 * @return {@link Body}
 	 */
 	public Body getBody2() {
-		return body2;
+		return this.body2;
 	}
 	
 	/**
@@ -174,7 +190,7 @@ public class ContactPoint {
 	 * @return {@link BodyFixture}
 	 */
 	public BodyFixture getFixture1() {
-		return fixture1;
+		return this.fixture1;
 	}
 	
 	/**
@@ -182,6 +198,6 @@ public class ContactPoint {
 	 * @return {@link BodyFixture}
 	 */
 	public BodyFixture getFixture2() {
-		return fixture2;
+		return this.fixture2;
 	}
 }
