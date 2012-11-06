@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents a contact point between two {@link Body} objects.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.2
  * @since 1.0.0
  */
 public class Contact {
@@ -119,11 +119,20 @@ public class Contact {
 	}
 	
 	/**
+	 * Returns the manifold point id.
+	 * @return {@link ManifoldPointId}
+	 * @since 3.1.2
+	 */
+	public ManifoldPointId getId() {
+		return this.id;
+	}
+	
+	/**
 	 * Returns true if this contact is enabled.
 	 * @return boolean
 	 */
 	public boolean isEnabled() {
-		return enabled;
+		return this.enabled;
 	}
 	
 	/**

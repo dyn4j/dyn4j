@@ -1,4 +1,20 @@
 ===============================================================================
+Version 3.1.2
+===============================================================================
+New Features:
+  - Added ids to ContactPoint objects to help track them.
+
+Bug Fixes:
+
+Deprecated:
+
+Breaking Changes:
+  - The ContactPoint and subclasses now must take in a ContactPointId object
+  - The IndexedManifoldPointId class no longer has the setXXX methods
+    
+Other:
+
+===============================================================================
 Version 3.1.1
 ===============================================================================
 New Features:

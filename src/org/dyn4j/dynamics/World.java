@@ -56,6 +56,7 @@ import org.dyn4j.dynamics.contact.ContactEdge;
 import org.dyn4j.dynamics.contact.ContactListener;
 import org.dyn4j.dynamics.contact.ContactManager;
 import org.dyn4j.dynamics.contact.ContactPoint;
+import org.dyn4j.dynamics.contact.ContactPointId;
 import org.dyn4j.dynamics.contact.TimeOfImpactSolver;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.JointEdge;
@@ -81,7 +82,7 @@ import org.dyn4j.resources.Messages;
  * Employs the same {@link Island} solving technique as <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.1.2
  * @since 1.0.0
  */
 public class World {
@@ -1411,14 +1412,15 @@ public class World {
 					Contact contact = contacts.get(j);
 					// create a contact point for notification
 					ContactPoint contactPoint = new ContactPoint(
-													contactConstraint.getBody1(), 
-													contactConstraint.getFixture1(), 
-													contactConstraint.getBody2(), 
-													contactConstraint.getFixture2(),
-													contact.isEnabled(),
-													contact.getPoint(), 
-													contactConstraint.getNormal(), 
-													contact.getDepth());
+							new ContactPointId(contactConstraint.getId(), contact.getId()),
+							contactConstraint.getBody1(), 
+							contactConstraint.getFixture1(), 
+							contactConstraint.getBody2(), 
+							contactConstraint.getFixture2(),
+							contact.isEnabled(),
+							contact.getPoint(), 
+							contactConstraint.getNormal(), 
+							contact.getDepth());
 					// call the destruction listeners
 					if (notify) {
 						for (DestructionListener dl : listeners) {
@@ -1556,14 +1558,15 @@ public class World {
 						Contact contact = contacts.get(j);
 						// create a contact point for notification
 						ContactPoint contactPoint = new ContactPoint(
-														contactConstraint.getBody1(), 
-														contactConstraint.getFixture1(), 
-														contactConstraint.getBody2(), 
-														contactConstraint.getFixture2(),
-														contact.isEnabled(),
-														contact.getPoint(), 
-														contactConstraint.getNormal(), 
-														contact.getDepth());
+								new ContactPointId(contactConstraint.getId(), contact.getId()),
+								contactConstraint.getBody1(), 
+								contactConstraint.getFixture1(), 
+								contactConstraint.getBody2(), 
+								contactConstraint.getFixture2(),
+								contact.isEnabled(),
+								contact.getPoint(), 
+								contactConstraint.getNormal(), 
+								contact.getDepth());
 						// call the destruction listeners
 						for (DestructionListener dl : listeners) {
 							dl.destroyed(contactPoint);
