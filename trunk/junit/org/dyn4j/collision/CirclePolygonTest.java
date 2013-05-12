@@ -51,7 +51,7 @@ import org.junit.Test;
 /**
  * Test case for {@link Circle} - {@link Polygon} collision detection.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.1.3
  * @since 1.0.0
  */
 public class CirclePolygonTest extends AbstractTest {
@@ -234,7 +234,7 @@ public class CirclePolygonTest extends AbstractTest {
 		TestCase.assertTrue(this.sat.detect(poly, t2, circ, t1));
 		n = p.getNormal();
 		TestCase.assertEquals(0.000, n.x, 1.0e-3);
-		TestCase.assertEquals(1.000, n.y, 1.0e-3);
+		TestCase.assertEquals(-1.000, n.y, 1.0e-3);
 		TestCase.assertEquals(1.433, p.getDepth(), 1.0e-3);
 		
 		// test overlap
