@@ -35,7 +35,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * A polygon cannot have coincident vertices.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.3
  * @since 1.0.0
  */
 public class Polygon extends Wound implements Convex, Shape, Transformable {
@@ -412,6 +412,12 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		double area = 0.0;
 		double I = 0.0;
 		int n = this.vertices.length;
+		// get the average center
+		Vector2 ac = new Vector2();
+		for (int i = 0; i < n; i++) {
+			ac.add(this.vertices[i]);
+		}
+		ac.multiply(1.0 / n);
 		// calculate inverse three once
 		final double inv3 = 1.0 / 3.0;
 		// loop through the vertices
@@ -419,6 +425,9 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 			// get two vertices
 			Vector2 p1 = this.vertices[i];
 			Vector2 p2 = i + 1 < n ? this.vertices[i + 1] : this.vertices[0];
+			// get the vector from the center to the point
+			p1 = p1.difference(ac);
+			p2 = p2.difference(ac);
 			// perform the cross product (yi * x(i+1) - y(i+1) * xi)
 			double D = p1.cross(p2);
 			// multiply by half
@@ -430,7 +439,8 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 			// (p1 + p2) * (D / 6)
 			// = (x1 + x2) * (yi * x(i+1) - y(i+1) * xi) / 6
 			// we will divide by the total area later
-			center.add(p1.sum(p2).multiply(inv3).multiply(triangleArea));
+			center.x += (p1.x + p2.x) * inv3 * triangleArea;
+			center.y += (p1.y + p2.y) * inv3 * triangleArea;
 
 			// (yi * x(i+1) - y(i+1) * xi) * (p2^2 + p2 . p1 + p1^2)
 			I += triangleArea * (p2.dot(p2) + p2.dot(p1) + p1.dot(p1));
@@ -439,10 +449,16 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 		// compute the mass
 		double m = density * area;
 		// finish the centroid calculation by dividing by the total area
+		// and adding in the average center
 		center.multiply(1.0 / area);
+		Vector2 c = center.sum(ac);
 		// finish the inertia tensor by dividing by the total area and multiplying by d / 6
 		I *= (density / 6.0);
-		return new Mass(center, m, I);
+		// shift the axis of rotation to the area weighted center
+		// (center is the vector from the average center to the area weighted center since
+		// the average center is used as the origin)
+		I -= m * center.getMagnitudeSquared();
+		return new Mass(c, m, I);
 	}
 	
 	/* (non-Javadoc)

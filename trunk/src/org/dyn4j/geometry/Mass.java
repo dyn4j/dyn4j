@@ -35,7 +35,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * Stores the center of mass, mass, and inertia tensor.
  * @author William Bittle
- * @version 3.0.3
+ * @version 3.1.3
  * @since 1.0.0
  */
 public class Mass {
@@ -154,7 +154,7 @@ public class Mass {
 		sb.append("Mass[Type=").append(this.type)
 		.append("|Center=").append(this.center)
 		.append("|Mass=").append(this.mass)
-		.append("|Inertia").append(this.inertia)
+		.append("|Inertia=").append(this.inertia)
 		.append("]");
 		return sb.toString();
 	}

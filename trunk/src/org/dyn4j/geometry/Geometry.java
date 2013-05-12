@@ -35,7 +35,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Contains static methods to perform standard geometric operations.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.1.3
  * @since 1.0.0
  */
 public class Geometry {
@@ -265,6 +265,12 @@ public class Geometry {
 			if (p == null) throw new NullPointerException(Messages.getString("geometry.nullPointListElements"));
 			return p.copy();
 		}
+		// get the average center
+		Vector2 ac = new Vector2();
+		for (int i = 0; i < size; i++) {
+			ac.add(points.get(i));
+		}
+		ac.multiply(1.0 / size);
 		// otherwise perform the computation
 		Vector2 center = new Vector2();
 		double area = 0.0;
@@ -275,6 +281,8 @@ public class Geometry {
 			Vector2 p2 = i + 1 < size ? points.get(i + 1) : points.get(0);
 			// check for null
 			if (p1 == null || p2 == null) throw new NullPointerException(Messages.getString("geometry.nullPointListElements"));
+			p1 = p1.difference(ac);
+			p2 = p2.difference(ac);
 			// perform the cross product (yi * x(i+1) - y(i+1) * xi)
 			double d = p1.cross(p2);
 			// multiply by half
@@ -286,7 +294,7 @@ public class Geometry {
 			// (p1 + p2) * (D / 3)
 			// = (x1 + x2) * (yi * x(i+1) - y(i+1) * xi) / 3
 			// we will divide by the total area later
-			center.add(p1.sum(p2).multiply(INV_3).multiply(triangleArea));
+			center.add(p1.add(p2).multiply(INV_3).multiply(triangleArea));
 		}
 		// check for zero area
 		if (Math.abs(area) <= Epsilon.E) {
@@ -296,6 +304,7 @@ public class Geometry {
 		}
 		// finish the centroid calculation by dividing by the total area
 		center.multiply(1.0 / area);
+		center.add(ac);
 		// return the center
 		return center;
 	}
@@ -323,6 +332,12 @@ public class Geometry {
 			return p.copy();
 		}
 		// otherwise perform the computation
+		// get the average center
+		Vector2 ac = new Vector2();
+		for (int i = 0; i < size; i++) {
+			ac.add(points[1]);
+		}
+		ac.multiply(1.0 / size);
 		Vector2 center = new Vector2();
 		double area = 0.0;
 		// loop through the vertices
@@ -332,6 +347,8 @@ public class Geometry {
 			Vector2 p2 = i + 1 < size ? points[i + 1] : points[0];
 			// check for null
 			if (p1 == null || p2 == null) throw new NullPointerException(Messages.getString("geometry.nullPointArrayElements"));
+			p1 = p1.difference(ac);
+			p2 = p2.difference(ac);
 			// perform the cross product (yi * x(i+1) - y(i+1) * xi)
 			double d = p1.cross(p2);
 			// multiply by half
@@ -353,6 +370,7 @@ public class Geometry {
 		}
 		// finish the centroid calculation by dividing by the total area
 		center.multiply(1.0 / area);
+		center.add(ac);
 		// return the center
 		return center;
 	}
