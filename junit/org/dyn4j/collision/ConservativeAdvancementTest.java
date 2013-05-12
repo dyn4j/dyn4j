@@ -44,7 +44,7 @@ import org.junit.Test;
  * All bodies in this test must be infinite mass so that the
  * World class doesn't solve their TOI when a step is performed.
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.1.3
  * @since 1.2.0
  */
 public class ConservativeAdvancementTest {
@@ -110,7 +110,7 @@ public class ConservativeAdvancementTest {
 		// test the final transform the body should be at before the collision
 		Transform tx = b1.getInitialTransform().lerped(b1.getFinalTransform(), toi.getToi());
 		TestCase.assertEquals(0.000, tx.getTranslationX(), 1.0e-3);
-		TestCase.assertEquals(0.345, tx.getTranslationY(), 1.0e-3);
+		TestCase.assertEquals(0.346, tx.getTranslationY(), 1.0e-3);
 	}
 	
 	/**
@@ -143,7 +143,7 @@ public class ConservativeAdvancementTest {
 		// test the final transform the body should be at before the collision
 		Transform tx = b1.getInitialTransform().lerped(b1.getFinalTransform(), toi.getToi());
 		TestCase.assertEquals(0.000, tx.getTranslationX(), 1.0e-3);
-		TestCase.assertEquals(0.345, tx.getTranslationY(), 1.0e-3);
+		TestCase.assertEquals(0.346, tx.getTranslationY(), 1.0e-3);
 	}
 	
 	/**
