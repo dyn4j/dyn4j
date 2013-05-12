@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Simulation xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.dyn4j.org/Sandbox/sandbox.xsd" version="1.0.4">
+    <System>
+        <JavaVersion>1.6.0_31</JavaVersion>
+        <JavaVendor>Sun Microsystems Inc.</JavaVendor>
+        <OperatingSystem>Windows 7 6.1</OperatingSystem>
+        <Architecture>x86</Architecture>
+        <NumberOfCpus>4</NumberOfCpus>
+        <Locale>en_US</Locale>
+    </System>
+    <Camera>
+        <Scale>32.0</Scale>
+        <Translation x="0.0" y="0.0" />
+    </Camera>
+    <Rays>
+    </Rays>
+    <World>
+        <Name>Angle</Name>
+        <Settings>
+            <StepFrequency>60.0</StepFrequency>
+            <MaximumTranslation>2.0</MaximumTranslation>
+            <MaximumRotation>90.0</MaximumRotation>
+            <ContinuousCollisionDetectionMode>ALL</ContinuousCollisionDetectionMode>
+            <AutoSleep>true</AutoSleep>
+            <SleepTime>0.5</SleepTime>
+            <SleepLinearVelocity>0.01</SleepLinearVelocity>
+            <SleepAngularVelocity>2.0</SleepAngularVelocity>
+            <VelocitySolverIterations>10</VelocitySolverIterations>
+            <PositionSolverIterations>10</PositionSolverIterations>
+            <WarmStartDistance>0.01</WarmStartDistance>
+            <RestitutionVelocity>1.0</RestitutionVelocity>
+            <LinearTolerance>0.0050</LinearTolerance>
+            <AngularTolerance>2.0</AngularTolerance>
+            <MaximumLinearCorrection>0.2</MaximumLinearCorrection>
+            <MaximumAngularCorrection>8.0</MaximumAngularCorrection>
+            <Baumgarte>0.2</Baumgarte>
+        </Settings>
+        <BroadphaseDetector>DynamicAABBTree</BroadphaseDetector>
+        <NarrowphaseDetector>Gjk</NarrowphaseDetector>
+        <ManifoldSolver>ClippingManifoldSolver</ManifoldSolver>
+        <TimeOfImpactDetector>ConservativeAdvancement</TimeOfImpactDetector>
+        <Gravity x="0.0" y="-9.8" />
+        <Bounds>
+            <Width>16.0</Width>
+            <Height>15.0</Height>
+            <Translation x="0.0" y="0.0" />
+        </Bounds>
+        <Bodies>
+            <Body Id="c9d5a473-8db1-4366-80f5-b2698c3d18c5" Name="Ground">
+                <OutlineColor r="0.67387" g="0.6268108" b="0.6293458" />
+                <FillColor r="0.8423375" g="0.7835135" b="0.7866822" />
+                <Fixtures>
+                    <Fixture Id="a742b8be-a1b2-4ac9-adcd-990549a4b835" Name="Fixture1">
+                        <Shape Id="c1ebe271-8d9e-4889-9820-96c7bde4171c" xsi:type="Rectangle">
+                            <LocalCenter x="0.0" y="0.0" />
+                            <Width>15.0</Width>
+                            <Height>1.0</Height>
+                            <LocalRotation>0.0</LocalRotation>
+                        </Shape>
+                        <Filter xsi:type="DefaultFilter" />
+                        <Sensor>false</Sensor>
+                        <Density>1.0</Density>
+                        <Friction>0.2</Friction>
+                        <Restitution>0.0</Restitution>
+                    </Fixture>
+                </Fixtures>
+                <Transform>
+                    <Translation x="0.0" y="-4.0" />
+                    <Rotation>0.0</Rotation>
+                </Transform>
+                <Mass>
+                    <LocalCenter x="0.0" y="0.0" />
+                    <Type>INFINITE</Type>
+                    <Mass>15.0</Mass>
+                    <Inertia>282.5</Inertia>
+                    <Explicit>false</Explicit>
+                </Mass>
+                <Velocity x="0.0" y="0.0" />
+                <AngularVelocity>0.0</AngularVelocity>
+                <AccumulatedForce x="0.0" y="0.0" />
+                <AccumulatedTorque>0.0</AccumulatedTorque>
+                <AutoSleep>true</AutoSleep>
+                <Asleep>false</Asleep>
+                <Active>true</Active>
+                <Bullet>false</Bullet>
+                <LinearDamping>0.0</LinearDamping>
+                <AngularDamping>0.01</AngularDamping>
+                <GravityScale>1.0</GravityScale>
+            </Body>
+            <Body Id="9a839b83-aad7-45cb-b08f-b9b2dc03ca17" Name="Body2">
+                <OutlineColor r="0.4235087" g="0.732969" b="0.4667841" />
+                <FillColor r="0.52938586" g="0.9162112" b="0.5834801" />
+                <Fixtures>
+                    <Fixture Id="07cda801-c87f-4d72-b93b-26885d73eabf" Name="Fixture1">
+                        <Shape Id="428312f7-a86b-4367-8341-cf2a5474af7a" xsi:type="Rectangle">
+                            <LocalCenter x="0.0" y="0.0" />
+                            <Width>0.5</Width>
+                            <Height>1.0</Height>
+                            <LocalRotation>0.0</LocalRotation>
+                        </Shape>
+                        <Filter xsi:type="DefaultFilter" />
+                        <Sensor>false</Sensor>
+                        <Density>1.0</Density>
+                        <Friction>0.2</Friction>
+                        <Restitution>0.0</Restitution>
+                    </Fixture>
+                </Fixtures>
+                <Transform>
+                    <Translation x="0.0" y="0.6" />
+                    <Rotation>0.0</Rotation>
+                </Transform>
+                <Mass>
+                    <LocalCenter x="0.0" y="0.0" />
+                    <Type>NORMAL</Type>
+                    <Mass>0.5</Mass>
+                    <Inertia>0.052083333333333336</Inertia>
+                    <Explicit>false</Explicit>
+                </Mass>
+                <Velocity x="0.0" y="0.0" />
+                <AngularVelocity>0.0</AngularVelocity>
+                <AccumulatedForce x="0.0" y="0.0" />
+                <AccumulatedTorque>0.0</AccumulatedTorque>
+                <AutoSleep>true</AutoSleep>
+                <Asleep>false</Asleep>
+                <Active>true</Active>
+                <Bullet>false</Bullet>
+                <LinearDamping>0.0</LinearDamping>
+                <AngularDamping>0.01</AngularDamping>
+                <GravityScale>1.0</GravityScale>
+            </Body>
+            <Body Id="545f781f-60de-46f0-9250-e711a1a96a02" Name="Body3">
+                <OutlineColor r="0.6187052" g="0.6088632" b="0.79426223" />
+                <FillColor r="0.7733815" g="0.76107895" b="0.9928278" />
+                <Fixtures>
+                    <Fixture Id="e4f64a0a-59af-48fd-96d1-e2ec12b6bcf1" Name="Fixture1">
+                        <Shape Id="8e8f34fd-518b-4856-96ee-ec28c226a589" xsi:type="Rectangle">
+                            <LocalCenter x="0.0" y="0.0" />
+                            <Width>0.5</Width>
+                            <Height>1.0</Height>
+                            <LocalRotation>0.0</LocalRotation>
+                        </Shape>
+                        <Filter xsi:type="DefaultFilter" />
+                        <Sensor>false</Sensor>
+                        <Density>1.0</Density>
+                        <Friction>0.2</Friction>
+                        <Restitution>0.0</Restitution>
+                    </Fixture>
+                </Fixtures>
+                <Transform>
+                    <Translation x="0.0" y="-0.6" />
+                    <Rotation>0.0</Rotation>
+                </Transform>
+                <Mass>
+                    <LocalCenter x="0.0" y="0.0" />
+                    <Type>NORMAL</Type>
+                    <Mass>0.5</Mass>
+                    <Inertia>0.052083333333333336</Inertia>
+                    <Explicit>false</Explicit>
+                </Mass>
+                <Velocity x="0.0" y="0.0" />
+                <AngularVelocity>0.0</AngularVelocity>
+                <AccumulatedForce x="0.0" y="0.0" />
+                <AccumulatedTorque>0.0</AccumulatedTorque>
+                <AutoSleep>true</AutoSleep>
+                <Asleep>false</Asleep>
+                <Active>true</Active>
+                <Bullet>false</Bullet>
+                <LinearDamping>0.0</LinearDamping>
+                <AngularDamping>0.01</AngularDamping>
+                <GravityScale>1.0</GravityScale>
+            </Body>
+        </Bodies>
+        <Joints>
+            <Joint Id="11060bc2-5274-4ac1-8ab4-778cd5627f63" Name="RevoluteJoint1" xsi:type="RevoluteJoint">
+                <BodyId1>9a839b83-aad7-45cb-b08f-b9b2dc03ca17</BodyId1>
+                <BodyId2>545f781f-60de-46f0-9250-e711a1a96a02</BodyId2>
+                <CollisionAllowed>false</CollisionAllowed>
+                <Anchor x="0.0" y="0.0" />
+                <LowerLimit>0.0</LowerLimit>
+                <UpperLimit>0.0</UpperLimit>
+                <LimitEnabled>false</LimitEnabled>
+                <MotorSpeed>0.0</MotorSpeed>
+                <MaximumMotorTorque>0.0</MaximumMotorTorque>
+                <MotorEnabled>false</MotorEnabled>
+                <ReferenceAngle>0.0</ReferenceAngle>
+            </Joint>
+            <Joint Id="e448aac4-7da5-4be0-a70f-ec257b2cd17f" Name="AngleJoint1" xsi:type="AngleJoint">
+                <BodyId1>9a839b83-aad7-45cb-b08f-b9b2dc03ca17</BodyId1>
+                <BodyId2>545f781f-60de-46f0-9250-e711a1a96a02</BodyId2>
+                <CollisionAllowed>false</CollisionAllowed>
+                <LowerLimit>-29.999999999999996</LowerLimit>
+                <UpperLimit>29.999999999999996</UpperLimit>
+                <LimitEnabled>true</LimitEnabled>
+                <Ratio>1.0</Ratio>
+                <ReferenceAngle>0.0</ReferenceAngle>
+            </Joint>
+        </Joints>
+    </World>
+</Simulation>

@@ -1,0 +1,63 @@
+<h1><u>Adding Bodies & Fixtures</u></h1>
+
+<div>
+Creating bodies is the start to setting up a simulation.  Bodies represent the objects in the simulation.
+<br /><br />
+To add a body Right Click or Command Click on the Bodies folder node in the Simulation Tree on the left:
+<br /><br />
+</div>
+
+<div><img src="classpath://org/dyn4j/sandbox/help/body-folder-context-menu.png" /></div>
+
+<div>
+<br /><br />
+This will bring up a new dialog window where you can setup the new body.  Hover over any of the <i>i</i> icons 
+to see help information about the different settings.  Usually you will only change the name of the body and
+maybe its mass type.
+<ul>
+	<li>If you are creating the ground body, choose a mass type of Infinite.</li>
+	<li>All the options are available later when editing a body.</li>
+	<li>You can use the Transform tab to manually move a body to a specific position.</li>
+</ul>
+<br /><br />
+</div>
+<div><img src="classpath://org/dyn4j/sandbox/help/add-body-dialog.png" /></div>
+
+<div>
+<br /><br />
+When you are done setting up the body click the Add button at the bottom of the dialog.  You will now see
+the body in the Simulation Tree.  Next we need to specify what the body looks like, or its shape.  We do this 
+by adding fixtures to the body.  A body can have multiple fixtures.  To add a fixture Right Click or Command 
+Click the body you created and choose the fixture type you would like to create.
+<ul>
+	<li>A convex hull fixture will create a convex shape from a point cloud.</li>
+	<li>A non-convex polygon can be decomposed into a number of fixtures.</li>
+</ul>
+<br /><br />
+</div>
+<div><img src="classpath://org/dyn4j/sandbox/help/body-context-menu.png" /></div>
+
+<div>
+<br /><br />
+For simplicity we will create a Rectangle fixture.  This will bring up a new dialog where you can set the
+rectangle's properties.  You can also setup the fixture settings using the Fixture tab.  The fixture settings 
+include density, filters, and coefficients.
+<ul>
+	<li>The local transform tab allows you to move the new fixture locally to the body.  This is useful if the body 
+will have more than one fixture.  Be aware that this modifies the vertices of the fixture directly.</li>
+	<li>The shape of the fixture cannot be edited later.</li>
+</ul>
+<br /><br />
+</div>
+<div><img src="classpath://org/dyn4j/sandbox/help/add-fixture-rect.png" /></div>
+
+<div>
+<br /><br />
+When you are done setting up the new fixture click the Add button at the bottom of the dialog.  Will now see
+the new fixture on the body in the Simulation Tree.  You will also see the body (its fixtures) rendered in the
+Simulation window on the right.
+<br /><br />
+</div>
+<div>
+<img src="classpath://org/dyn4j/sandbox/help/add-body-done.png" />
+</div>
