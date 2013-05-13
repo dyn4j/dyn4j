@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -36,7 +36,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Segment} class.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.4
  * @since 1.0.0
  */
 public class SegmentTest {
@@ -370,6 +370,13 @@ public class SegmentTest {
 		TestCase.assertEquals(0.0, aabb.getMinY(), 1.0e-3);
 		TestCase.assertEquals(1.0, aabb.getMaxX(), 1.0e-3);
 		TestCase.assertEquals(1.0, aabb.getMaxY(), 1.0e-3);
+		
+		// try using the default method
+		AABB aabb2 = s.createAABB();
+		TestCase.assertEquals(aabb.getMinX(), aabb2.getMinX());
+		TestCase.assertEquals(aabb.getMinY(), aabb2.getMinY());
+		TestCase.assertEquals(aabb.getMaxX(), aabb2.getMaxX());
+		TestCase.assertEquals(aabb.getMaxY(), aabb2.getMaxY());
 		
 		Transform tx = new Transform();
 		tx.rotate(Math.toRadians(30.0));
