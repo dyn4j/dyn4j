@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,12 +29,12 @@ import java.util.UUID;
 /**
  * Base implementation of the {@link Shape} interface.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.4
  * @since 1.0.0
  */
 public abstract class AbstractShape implements Shape, Transformable {
 	/** The shape's unique identifier */
-	protected String id = UUID.randomUUID().toString();
+	protected UUID id = UUID.randomUUID();
 	
 	/** The center of this {@link Shape} */
 	protected Vector2 center;
@@ -61,7 +61,7 @@ public abstract class AbstractShape implements Shape, Transformable {
 	 * @see org.dyn4j.geometry.Shape#getId()
 	 */
 	@Override
-	public String getId() {
+	public UUID getId() {
 		return this.id;
 	}
 	
@@ -147,5 +147,13 @@ public abstract class AbstractShape implements Shape, Transformable {
 	@Override
 	public void translate(Vector2 vector) {
 		this.translate(vector.x, vector.y);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Shape#createAABB()
+	 */
+	@Override
+	public AABB createAABB() {
+		return this.createAABB(Transform.IDENTITY);
 	}
 }

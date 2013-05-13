@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,8 @@
  */
 package org.dyn4j.geometry;
 
+import java.util.UUID;
+
 /**
  * Represents a geometric {@link Shape}.
  * <p>
@@ -31,15 +33,15 @@ package org.dyn4j.geometry;
  * be used instead of directly transforming the {@link Shape}.  Doing so will allow reuse of
  * the same {@link Shape} object in multiple places, where only the {@link Transform} differs.
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.1.4
  * @since 1.0.0
  */
 public interface Shape extends Transformable {	
 	/**
 	 * Returns the unique identifier for this shape instance.
-	 * @return String
+	 * @return UUID
 	 */
-	public abstract String getId();
+	public abstract UUID getId();
 	
 	/**
 	 * Returns the center/centroid of the {@link Shape} in local coordinates.
@@ -117,6 +119,14 @@ public interface Shape extends Transformable {
 	
 	/**
 	 * Creates an {@link AABB} from this {@link Shape}.
+	 * @return {@link AABB} the {@link AABB} enclosing this {@link Shape}
+	 * @since 3.1.4
+	 */
+	public abstract AABB createAABB();
+	
+	/**
+	 * Creates an {@link AABB} from this {@link Shape} after applying the given
+	 * transformation to the shape.
 	 * @param transform the {@link Transform} for this {@link Shape}
 	 * @return {@link AABB} the {@link AABB} enclosing this {@link Shape}
 	 * @since 3.0.0

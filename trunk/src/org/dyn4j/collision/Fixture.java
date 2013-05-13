@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -37,12 +37,12 @@ import org.dyn4j.resources.Messages;
  * A {@link Fixture} has a one-to-one relationship with a {@link Convex} {@link Shape}.
  * Each {@link Collidable} can have any number of {@link Fixture}s attached.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.4
  * @since 2.0.0
  */
 public class Fixture {
 	/** The id for the fixture */
-	protected String id = UUID.randomUUID().toString();
+	protected UUID id = UUID.randomUUID();
 	
 	/** The convex shape for this fixture */
 	protected Convex shape;
@@ -85,9 +85,9 @@ public class Fixture {
 	
 	/**
 	 * Returns the id for this fixture.
-	 * @return String
+	 * @return UUID
 	 */
-	public String getId() {
+	public UUID getId() {
 		return this.id;
 	}
 	

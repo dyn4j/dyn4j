@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -41,7 +41,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Geometry} class.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.4
  * @since 1.0.0
  */
 public class GeometryTest {
@@ -175,6 +175,29 @@ public class GeometryTest {
 		// note the x is closer to the "real" center of the object
 		TestCase.assertEquals(-0.318, c.x, 1.0e-3);
 		TestCase.assertEquals( 0.527, c.y, 1.0e-3);
+	}
+	
+	/**
+	 * Tests the getAreaWeightedCenter method with a polygon that is not centered
+	 * about the origin.
+	 * @since 3.1.4
+	 */
+	@Test
+	public void getAreaWeightedCenterOffset() {
+		Vector2[] vertices = new Vector2[6];
+		vertices[0] = new Vector2(-1.0, 2.0);
+		vertices[1] = new Vector2(0.0, 3.0);
+		// test dense area of points
+		vertices[2] = new Vector2(2.2, 1.5);
+		vertices[3] = new Vector2(2.3, 1.3);
+		vertices[4] = new Vector2(2.4, 1.2);
+		vertices[5] = new Vector2(1.0, 0.0);
+		
+		Vector2 c = Geometry.getAreaWeightedCenter(vertices);
+		
+		// note the x is closer to the "real" center of the object
+		TestCase.assertEquals(0.682, c.x, 1.0e-3);
+		TestCase.assertEquals(1.527, c.y, 1.0e-3);
 	}
 
 	/**
@@ -1104,5 +1127,29 @@ public class GeometryTest {
 		
 		TestCase.assertTrue(Geometry.getWinding(result) > 0.0);
 		TestCase.assertEquals(4, result.length);
+	}
+	
+	/**
+	 * Tests the flip polygon method.
+	 * @since 3.1.4
+	 */
+	@Test
+	public void flip() {
+		Polygon p = Geometry.createUnitCirclePolygon(5, 1.0);
+		
+		// flip about an arbitrary vector and point (line)
+		Polygon flipped = Geometry.flip(p, new Vector2(1.0, 1.0),  new Vector2(0.0, 2.0));
+		
+		Vector2[] vertices = flipped.getVertices();
+		TestCase.assertEquals(-2.951, vertices[0].x, 1.0e-3);
+		TestCase.assertEquals( 2.309, vertices[0].y, 1.0e-3);
+		TestCase.assertEquals(-2.587, vertices[1].x, 1.0e-3);
+		TestCase.assertEquals( 1.190, vertices[1].y, 1.0e-3);
+		TestCase.assertEquals(-1.412, vertices[2].x, 1.0e-3);
+		TestCase.assertEquals( 1.190, vertices[2].y, 1.0e-3);
+		TestCase.assertEquals(-1.048, vertices[3].x, 1.0e-3);
+		TestCase.assertEquals( 2.309, vertices[3].y, 1.0e-3);
+		TestCase.assertEquals(-2.000, vertices[4].x, 1.0e-3);
+		TestCase.assertEquals( 3.000, vertices[4].y, 1.0e-3);
 	}
 }

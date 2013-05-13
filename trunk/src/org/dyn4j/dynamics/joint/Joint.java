@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents constrained motion between two {@link Body}s.
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.1.4
  * @since 1.0.0
  */
 public abstract class Joint extends Constraint {
@@ -55,7 +55,7 @@ public abstract class Joint extends Constraint {
 	}
 	
 	/** The joint's unique identifier */
-	protected String id = UUID.randomUUID().toString();
+	protected UUID id = UUID.randomUUID();
 	
 	/** Whether the pair of bodies joined together can collide with each other */
 	protected boolean collisionAllowed;
@@ -148,7 +148,7 @@ public abstract class Joint extends Constraint {
 	 * @return String
 	 * @since 3.0.1
 	 */
-	public String getId() {
+	public UUID getId() {
 		return this.id;
 	}
 	

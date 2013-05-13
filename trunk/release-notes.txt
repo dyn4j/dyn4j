@@ -1,4 +1,27 @@
 ===============================================================================
+Version 3.1.4
+===============================================================================
+New Features:
+  - Added a new feature to the Geometry class for flipping shapes about
+    an arbitrary line (defined as an axis and point).
+  - Not really a feature, but a createAABB accepting no arguments was added
+    to the shape interface for convenience.
+    
+Bug Fixes:
+  - Fixed a bug that was introduced in 3.1.3 where the average center was not
+    computed correctly since the vertex indexer was a 1 instead of an i.
+
+Deprecated:
+
+Breaking Changes:
+  - The shape, fixture, body, etc ids were updated from string to their UUID
+    counter parts for better flexibility.  However, if you were saving or
+    doing anything with the ids, that will need to change to something like
+    getId().toString().
+    
+Other:
+
+===============================================================================
 Version 3.1.3
 ===============================================================================
 New Features:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -84,7 +84,7 @@ import org.dyn4j.resources.Messages;
  * setting in the world's {@link Settings}.  Use this if the body is a fast moving
  * body, but be careful as this will incur a performance hit.
  * @author William Bittle
- * @version 3.1.2
+ * @version 3.1.4
  * @since 1.0.0
  */
 public class Body implements Swept, Collidable, Transformable {
@@ -116,7 +116,7 @@ public class Body implements Swept, Collidable, Transformable {
 	protected World world;
 	
 	/** The {@link Body}'s unique identifier */
-	protected String id;
+	protected UUID id;
 	
 	/** The beginning transform for CCD */
 	protected Transform transform0;
@@ -199,7 +199,7 @@ public class Body implements Swept, Collidable, Transformable {
 		this.fixtures = new ArrayList<BodyFixture>(fixtureCount);
 		this.radius = 0.0;
 		this.mass = new Mass();
-		this.id = UUID.randomUUID().toString();
+		this.id = UUID.randomUUID();
 		this.transform0 = new Transform();
 		this.transform = new Transform();
 		this.velocity = new Vector2();
@@ -1379,7 +1379,7 @@ public class Body implements Swept, Collidable, Transformable {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.Collidable#getId()
 	 */
-	public String getId() {
+	public UUID getId() {
 		return this.id;
 	}
 	

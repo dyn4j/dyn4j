@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,8 @@
  */
 package org.dyn4j.dynamics.contact;
 
+import java.util.UUID;
+
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Convex;
@@ -33,21 +35,21 @@ import org.dyn4j.geometry.Shape;
  * Represents and id for a contact constraint between two {@link Convex}
  * {@link Shape}s on two {@link Body}s.
  * @author William Bittle
- * @version 3.1.2
+ * @version 3.1.4
  * @since 1.0.0
  */
 public class ContactConstraintId {
 	/** The first {@link Body}'s id */
-	protected String body1Id;
+	protected UUID body1Id;
 	
 	/** The second {@link Body}'s id */
-	protected String body2Id;
+	protected UUID body2Id;
 	
 	/** The first {@link Body}'s {@link Convex} {@link Shape} id */
-	protected String fixture1Id;
+	protected UUID fixture1Id;
 	
 	/** The second {@link Body}'s {@link Convex} {@link Shape} id */
-	protected String fixture2Id;
+	protected UUID fixture2Id;
 	
 	/**
 	 * Full constructor.
@@ -113,7 +115,7 @@ public class ContactConstraintId {
 	 * @return String
 	 * @since 3.1.2
 	 */
-	public String getBody1Id() {
+	public UUID getBody1Id() {
 		return this.body1Id;
 	}
 
@@ -122,7 +124,7 @@ public class ContactConstraintId {
 	 * @return String
 	 * @since 3.1.2
 	 */
-	public String getBody2Id() {
+	public UUID getBody2Id() {
 		return this.body2Id;
 	}
 
@@ -131,7 +133,7 @@ public class ContactConstraintId {
 	 * @return String
 	 * @since 3.1.2
 	 */
-	public String getFixture1Id() {
+	public UUID getFixture1Id() {
 		return this.fixture1Id;
 	}
 
@@ -140,7 +142,7 @@ public class ContactConstraintId {
 	 * @return String
 	 * @since 3.1.2
 	 */
-	public String getFixture2Id() {
+	public UUID getFixture2Id() {
 		return this.fixture2Id;
 	}
 }

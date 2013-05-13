@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -132,7 +132,7 @@ import com.jogamp.opengl.util.awt.TextRenderer;
 /**
  * Main class for the Sandbox application.
  * @author William Bittle
- * @version 1.0.4
+ * @version 1.0.5
  * @since 1.0.0
  */
 public class Sandbox extends JFrame implements GLEventListener, ActionListener, WindowListener {
@@ -143,7 +143,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	private static final double NANO_TO_BASE = 1.0e9;
 	
 	/** The sandbox version */
-	public static final String VERSION = "1.0.4";
+	public static final String VERSION = "1.0.5";
 
 	/** The origin label (pulled into a local variable for fast rendering) */
 	private static final String ORIGIN_LABEL = Messages.getString("canvas.originLabel");

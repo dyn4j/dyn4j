@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,8 @@
  */
 package org.dyn4j.collision;
 
+import java.util.UUID;
+
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Transformable;
@@ -31,16 +33,16 @@ import org.dyn4j.geometry.Transformable;
 /**
  * Represents an object that can collide with other objects.
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.1.4
  * @since 1.0.0
  */
 public interface Collidable extends Transformable {
 	/**
 	 * Returns a unique identifier for this {@link Collidable}.
-	 * @return String the unique id
+	 * @return UUID the unique id
 	 * @since 3.0.0
 	 */
-	public abstract String getId();
+	public abstract UUID getId();
 	
 	/**
 	 * Creates an {@link AABB} from this {@link Collidable}.
