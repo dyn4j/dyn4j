@@ -803,6 +803,8 @@ public class Geometry {
 	/**
 	 * Flips the given polygon about its center along the x-axis and
 	 * returns the result as a new polygon.
+	 * <p>
+	 * This method assumes that the line is through the origin.
 	 * @param polygon the polygon to flip
 	 * @return {@link Polygon}
 	 * @see #flip(Polygon, Vector2)
@@ -816,6 +818,8 @@ public class Geometry {
 	/**
 	 * Flips the given polygon about its center along the y-axis and
 	 * returns the result as a new polygon.
+	 * <p>
+	 * This method assumes that the line is through the origin.
 	 * @param polygon the polygon to flip
 	 * @return {@link Polygon}
 	 * @see #flip(Polygon, Vector2)
