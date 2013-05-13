@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -51,7 +51,7 @@ import org.junit.Test;
 /**
  * Test case for {@link Polygon} - {@link Rectangle} collision detection.
  * @author William Bittle
- * @version 3.1.3
+ * @version 3.1.4
  * @since 1.0.0
  */
 public class PolygonRectangleTest extends AbstractTest {
@@ -219,14 +219,14 @@ public class PolygonRectangleTest extends AbstractTest {
 		TestCase.assertTrue(this.sat.detect(poly, t1, rect, t2));
 		n = p.getNormal();
 		TestCase.assertEquals(1.309, p.getDepth(), 1.0e-3);
-		TestCase.assertEquals(-1.0, n.x, 1.0e-3);
+		TestCase.assertEquals(1.0, n.x, 1.0e-3);
 		TestCase.assertEquals(0.0, n.y, 1.0e-3);
 		// try reversing the shapes
 		TestCase.assertTrue(this.sat.detect(rect, t2, poly, t1, p));
 		TestCase.assertTrue(this.sat.detect(rect, t2, poly, t1));
 		n = p.getNormal();
 		TestCase.assertEquals(1.309, p.getDepth(), 1.0e-3);
-		TestCase.assertEquals(1.0, n.x, 1.0e-3);
+		TestCase.assertEquals(-1.0, n.x, 1.0e-3);
 		TestCase.assertEquals(0.0, n.y, 1.0e-3);
 		
 		// test overlap

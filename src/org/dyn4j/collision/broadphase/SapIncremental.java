@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.dyn4j.collision.Collidable;
 import org.dyn4j.collision.Collisions;
@@ -85,7 +86,7 @@ import org.dyn4j.geometry.Vector2;
  * However, allowing this causes more work for the {@link NarrowphaseDetector}s whose
  * algorithms are more complex.  These situations should be avoided for maximum performance.
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.1.4
  * @since 1.0.0
  * @param <E> the {@link Collidable} type
  */
@@ -156,7 +157,7 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 	protected List<Proxy> proxyList;
 	
 	/** Id to proxy map for fast lookup */
-	protected Map<String, Proxy> proxyMap;
+	protected Map<UUID, Proxy> proxyMap;
 
 	/** Reusable list for storing potential detected pairs along the x-axis */
 	protected ArrayList<PairList> potentialPairs;
@@ -176,7 +177,7 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 	 */
 	public SapIncremental(int initialCapacity) {
 		this.proxyList = new ArrayList<Proxy>(initialCapacity);
-		this.proxyMap = new HashMap<String, Proxy>(initialCapacity);
+		this.proxyMap = new HashMap<UUID, Proxy>(initialCapacity);
 		this.potentialPairs = new ArrayList<PairList>(initialCapacity);
 	}
 	
@@ -186,7 +187,7 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 	@Override
 	public void add(E collidable) {
 		// get the id
-		String id = collidable.getId();
+		UUID id = collidable.getId();
 		// create an aabb from the collidable
 		AABB aabb = collidable.createAABB();
 		// expand the aabb by some factor

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -41,7 +41,7 @@ import org.junit.Test;
 /**
  * Tests the methods of the {@link Mass} class.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.4
  * @since 1.0.0
  */
 public class MassTest {
@@ -366,5 +366,22 @@ public class MassTest {
 	public void setNullType() {
 		Mass m = new Mass();
 		m.setType(null);
+	}
+	
+	/**
+	 * Tests the inertia and COM calculations for polygon shapes.
+	 * @since 3.1.4
+	 */
+	@Test
+	public void polygonInertiaAndCOM() {
+		// a polygon of a simple shape should match a simple shape's mass and inertia
+		Polygon p = Geometry.createUnitCirclePolygon(4, Math.hypot(0.5, 0.5));
+		Rectangle r = Geometry.createSquare(1.0);
+		
+		Mass pm = p.createMass(10.0);
+		Mass rm = r.createMass(10.0);
+		
+		TestCase.assertEquals(rm.mass, pm.mass, 1.0e-3);
+		TestCase.assertEquals(rm.inertia, pm.inertia, 1.0e-3);
 	}
 }

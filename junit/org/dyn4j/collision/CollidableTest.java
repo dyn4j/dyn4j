@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,12 +40,12 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Test {@link Collidable} class for junit test cases.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.1.4
  * @since 1.0.0
  */
 public class CollidableTest implements Collidable, Transformable {
 	/** The unique identifier */
-	protected String id = UUID.randomUUID().toString();
+	protected UUID id = UUID.randomUUID();
 	
 	/** The {@link BodyFixture}s list */
 	protected List<BodyFixture> fixtures;
@@ -102,7 +102,7 @@ public class CollidableTest implements Collidable, Transformable {
 	 * @see org.dyn4j.collision.Collidable#getId()
 	 */
 	@Override
-	public String getId() {
+	public UUID getId() {
 		return this.id;
 	}
 	

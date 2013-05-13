@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.dyn4j.collision.Collidable;
 import org.dyn4j.collision.Collisions;
@@ -42,7 +43,7 @@ import org.dyn4j.geometry.Vector2;
  * This class uses a self-balancing binary tree to store the AABBs.  The AABBs are sorted using the perimeter.
  * The perimeter hueristic is better than area for 2D because axis aligned segments have zero area.
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.1.4
  * @since 3.0.0
  * @param <E> the {@link Collidable} type
  */
@@ -91,7 +92,7 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	protected List<Node> proxyList;
 	
 	/** Id to node map for fast lookup */
-	protected Map<String, Node> proxyMap;
+	protected Map<UUID, Node> proxyMap;
 	
 	/**
 	 * Default constructor.
@@ -110,7 +111,7 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	 */
 	public DynamicAABBTree(int initialCapacity) {
 		this.proxyList = new ArrayList<Node>(initialCapacity);
-		this.proxyMap = new HashMap<String, Node>(initialCapacity);
+		this.proxyMap = new HashMap<UUID, Node>(initialCapacity);
 	}
 	
 	/* (non-Javadoc)

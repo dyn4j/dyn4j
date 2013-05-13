@@ -35,7 +35,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Contains static methods to perform standard geometric operations.
  * @author William Bittle
- * @version 3.1.3
+ * @version 3.1.4
  * @since 1.0.0
  */
 public class Geometry {
@@ -265,12 +265,17 @@ public class Geometry {
 			if (p == null) throw new NullPointerException(Messages.getString("geometry.nullPointListElements"));
 			return p.copy();
 		}
+		
 		// get the average center
 		Vector2 ac = new Vector2();
 		for (int i = 0; i < size; i++) {
-			ac.add(points.get(i));
+			Vector2 p = points.get(i);
+			// check for null
+			if (p == null) throw new NullPointerException(Messages.getString("geometry.nullPointListElements"));
+			ac.add(p);
 		}
-		ac.multiply(1.0 / size);
+		ac.multiply(1.0 / (double) size);
+		
 		// otherwise perform the computation
 		Vector2 center = new Vector2();
 		double area = 0.0;
@@ -279,8 +284,6 @@ public class Geometry {
 			// get two verticies
 			Vector2 p1 = points.get(i);
 			Vector2 p2 = i + 1 < size ? points.get(i + 1) : points.get(0);
-			// check for null
-			if (p1 == null || p2 == null) throw new NullPointerException(Messages.getString("geometry.nullPointListElements"));
 			p1 = p1.difference(ac);
 			p2 = p2.difference(ac);
 			// perform the cross product (yi * x(i+1) - y(i+1) * xi)
@@ -332,12 +335,17 @@ public class Geometry {
 			return p.copy();
 		}
 		// otherwise perform the computation
+		
 		// get the average center
 		Vector2 ac = new Vector2();
 		for (int i = 0; i < size; i++) {
-			ac.add(points[1]);
+			Vector2 p = points[i];
+			// check for null
+			if (p == null) throw new NullPointerException(Messages.getString("geometry.nullPointArrayElements"));
+			ac.add(p);
 		}
-		ac.multiply(1.0 / size);
+		ac.multiply(1.0 / (double) size);
+		
 		Vector2 center = new Vector2();
 		double area = 0.0;
 		// loop through the vertices
@@ -345,8 +353,6 @@ public class Geometry {
 			// get two verticies
 			Vector2 p1 = points[i];
 			Vector2 p2 = i + 1 < size ? points[i + 1] : points[0];
-			// check for null
-			if (p1 == null || p2 == null) throw new NullPointerException(Messages.getString("geometry.nullPointArrayElements"));
 			p1 = p1.difference(ac);
 			p2 = p2.difference(ac);
 			// perform the cross product (yi * x(i+1) - y(i+1) * xi)
@@ -360,7 +366,7 @@ public class Geometry {
 			// (p1 + p2) * (D / 3)
 			// = (x1 + x2) * (yi * x(i+1) - y(i+1) * xi) / 3
 			// we will divide by the total area later
-			center.add(p1.sum(p2).multiply(INV_3).multiply(triangleArea));
+			center.add(p1.add(p2).multiply(INV_3).multiply(triangleArea));
 		}
 		// check for zero area
 		if (Math.abs(area) <= Epsilon.E) {
@@ -780,7 +786,7 @@ public class Geometry {
 	 * @return {@link Vector2}[]
 	 * @throws NullPointerException if points is null or points contains null elements
 	 */
-	public static Vector2[] cleanse(Vector2... points) {
+	public static final Vector2[] cleanse(Vector2... points) {
 		// check for null
 		if (points == null) throw new NullPointerException(Messages.getString("geometry.nullPointArray"));
 		// create a list from the array
@@ -792,5 +798,108 @@ public class Geometry {
 		resultList.toArray(result);
 		// return the result
 		return result;
+	}
+	
+	/**
+	 * Flips the given polygon about its center along the x-axis.
+	 * @param polygon the polygon to flip
+	 * @return E
+	 * @see #flip(Polygon, Vector2)
+	 * @see #flip(Polygon, Vector2, Vector2)
+	 * @since 3.1.4
+	 */
+	public static final Polygon flipAlongTheXAxis(Polygon polygon) {
+		return Geometry.flip(polygon, Vector2.X_AXIS, null);
+	}
+	
+	/**
+	 * Flips the given polygon about its center along the y-axis.
+	 * @param polygon the polygon to flip
+	 * @return E
+	 * @see #flip(Polygon, Vector2)
+	 * @see #flip(Polygon, Vector2, Vector2)
+	 * @since 3.1.4
+	 */
+	public static final Polygon flipAlongTheYAxis(Polygon polygon) {
+		return Geometry.flip(polygon, Vector2.Y_AXIS, null);
+	}
+	
+	/**
+	 * Flips the given polygon about the given point along the x-axis.
+	 * @param polygon the polygon to flip
+	 * @param point the point to flip about
+	 * @return E
+	 * @see #flip(Polygon, Vector2)
+	 * @see #flip(Polygon, Vector2, Vector2)
+	 * @since 3.1.4
+	 */
+	public static final Polygon flipAlongTheXAxis(Polygon polygon, Vector2 point) {
+		return Geometry.flip(polygon, Vector2.X_AXIS, point);
+	}
+	
+	/**
+	 * Flips the given polygon about the given point along the y-axis.
+	 * @param polygon the polygon to flip
+	 * @param point the point to flip about
+	 * @return E
+	 * @see #flip(Polygon, Vector2)
+	 * @see #flip(Polygon, Vector2, Vector2)
+	 * @since 3.1.4
+	 */
+	public static final Polygon flipAlongTheYAxis(Polygon polygon, Vector2 point) {
+		return Geometry.flip(polygon, Vector2.Y_AXIS, point);
+	}
+	
+	/**
+	 * Flips the given polygon about the given line and returns a new polygon.
+	 * <p>
+	 * This method assumes that the line is through the origin.
+	 * @param polygon the polygon to flip
+	 * @param axis the axis to flip about
+	 * @return E
+	 * @see #flip(Polygon, Vector2, Vector2)
+	 * @since 3.1.4
+	 */
+	public static final Polygon flip(Polygon polygon, Vector2 axis) {
+		return Geometry.flip(polygon, axis, null);
+	}
+	
+	/**
+	 * Flips the given polygon about the given line and returns a new polygon.
+	 * @param polygon the polygon to flip
+	 * @param axis the axis to flip about
+	 * @param point the point to flip about
+	 * @return E
+	 * @since 3.1.4
+	 */
+	public static final Polygon flip(Polygon polygon, Vector2 axis, Vector2 point) {
+		// check for valid input
+		if (polygon == null) throw new NullPointerException("geometry.nullFlipPolygon");
+		if (axis == null) throw new NullPointerException("geometry.nullFlipAxis");
+		if (axis.isZero()) throw new IllegalArgumentException("geometry.zeroFlipAxis");
+		// just use the center of the polygon if the given point is null
+		if (point == null) point = polygon.getCenter();
+		// flip about the axis and point
+		// make sure the axis is normalized
+		axis.normalize();
+		Vector2[] pv = polygon.getVertices();
+		Vector2[] nv = new Vector2[pv.length];
+		for (int i = 0; i < pv.length; i++) {
+			Vector2 v0 = pv[i];
+			// center on the origin
+			Vector2 v1 = v0.difference(point);
+			// get the projection of the point onto the axis
+			double proj = v1.dot(axis);
+			// get the point on the axis
+			Vector2 vp = axis.product(proj);
+			// get the point past the projection
+			Vector2 rv = vp.add(vp.x - v1.x, vp.y - v1.y);
+			nv[i] = rv.add(point);
+		}
+		// check the winding
+		if (Geometry.getWinding(nv) < 0.0) {
+			Geometry.reverseWinding(nv);
+		}
+		return new Polygon(nv);
 	}
 }

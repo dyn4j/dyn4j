@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -73,7 +73,7 @@ import org.dyn4j.sandbox.resources.Messages;
 /**
  * Class to export a simulation to Java code.
  * @author William Bittle
- * @version 1.0.4
+ * @version 1.0.5
  * @since 1.0.1
  */
 public class CodeExporter {
@@ -198,7 +198,7 @@ public class CodeExporter {
 		for (int i = 1; i < bSize + 1; i++) {
 			SandboxBody body = (SandboxBody)world.getBody(i - 1);
 			// save the id+name
-			idNameMap.put(body.getId(), "body" + i);
+			idNameMap.put(body.getId().toString(), "body" + i);
 			Mass mass = body.getMass();
 			// output the body settings
 			sb.append(TAB2).append("// ").append(body.getUserData()).append(NEW_LINE)
