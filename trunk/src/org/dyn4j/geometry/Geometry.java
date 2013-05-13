@@ -801,9 +801,10 @@ public class Geometry {
 	}
 	
 	/**
-	 * Flips the given polygon about its center along the x-axis.
+	 * Flips the given polygon about its center along the x-axis and
+	 * returns the result as a new polygon.
 	 * @param polygon the polygon to flip
-	 * @return E
+	 * @return {@link Polygon}
 	 * @see #flip(Polygon, Vector2)
 	 * @see #flip(Polygon, Vector2, Vector2)
 	 * @since 3.1.4
@@ -813,9 +814,10 @@ public class Geometry {
 	}
 	
 	/**
-	 * Flips the given polygon about its center along the y-axis.
+	 * Flips the given polygon about its center along the y-axis and
+	 * returns the result as a new polygon.
 	 * @param polygon the polygon to flip
-	 * @return E
+	 * @return {@link Polygon}
 	 * @see #flip(Polygon, Vector2)
 	 * @see #flip(Polygon, Vector2, Vector2)
 	 * @since 3.1.4
@@ -825,10 +827,11 @@ public class Geometry {
 	}
 	
 	/**
-	 * Flips the given polygon about the given point along the x-axis.
+	 * Flips the given polygon about the given point along the x-axis and
+	 * returns the result as a new polygon.
 	 * @param polygon the polygon to flip
 	 * @param point the point to flip about
-	 * @return E
+	 * @return {@link Polygon}
 	 * @see #flip(Polygon, Vector2)
 	 * @see #flip(Polygon, Vector2, Vector2)
 	 * @since 3.1.4
@@ -838,10 +841,11 @@ public class Geometry {
 	}
 	
 	/**
-	 * Flips the given polygon about the given point along the y-axis.
+	 * Flips the given polygon about the given point along the y-axis and
+	 * returns the result as a new polygon.
 	 * @param polygon the polygon to flip
 	 * @param point the point to flip about
-	 * @return E
+	 * @return {@link Polygon}
 	 * @see #flip(Polygon, Vector2)
 	 * @see #flip(Polygon, Vector2, Vector2)
 	 * @since 3.1.4
@@ -851,12 +855,13 @@ public class Geometry {
 	}
 	
 	/**
-	 * Flips the given polygon about the given line and returns a new polygon.
+	 * Flips the given polygon about the given line and returns the result
+	 * as a new polygon.
 	 * <p>
 	 * This method assumes that the line is through the origin.
 	 * @param polygon the polygon to flip
 	 * @param axis the axis to flip about
-	 * @return E
+	 * @return {@link Polygon}
 	 * @see #flip(Polygon, Vector2, Vector2)
 	 * @since 3.1.4
 	 */
@@ -865,11 +870,12 @@ public class Geometry {
 	}
 	
 	/**
-	 * Flips the given polygon about the given line and returns a new polygon.
+	 * Flips the given polygon about the given line and returns the result
+	 * as a new polygon.
 	 * @param polygon the polygon to flip
 	 * @param axis the axis to flip about
 	 * @param point the point to flip about
-	 * @return E
+	 * @return {@link Polygon}
 	 * @since 3.1.4
 	 */
 	public static final Polygon flip(Polygon polygon, Vector2 axis, Vector2 point) {
