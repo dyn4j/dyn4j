@@ -1152,4 +1152,41 @@ public class GeometryTest {
 		TestCase.assertEquals(-2.000, vertices[4].x, 1.0e-3);
 		TestCase.assertEquals( 3.000, vertices[4].y, 1.0e-3);
 	}
+	
+	/**
+	 * Tests the flip polygon method with a null polygon.
+	 * @since 3.1.4
+	 */
+	@Test(expected = NullPointerException.class)
+	public void flipNullPolygon() {
+		Geometry.flip(null, new Vector2(1.0, 1.0),  null);
+	}
+	
+	/**
+	 * Tests the flip polygon method with a null axis.
+	 * @since 3.1.4
+	 */
+	@Test(expected = NullPointerException.class)
+	public void flipNullAxis() {
+		Geometry.flip(Geometry.createSquare(1.0), null,  null);
+	}
+
+	/**
+	 * Tests the flip polygon method with a zero vector axis.
+	 * @since 3.1.4
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void flipZeroAxis() {
+		Geometry.flip(Geometry.createSquare(1.0), new Vector2(),  null);
+	}
+	
+	/**
+	 * Tests the flip polygon method with a null point.
+	 * @since 3.1.4
+	 */
+	@Test
+	public void flipNullPoint() {
+		// it should use the center
+		Geometry.flip(Geometry.createSquare(1.0), new Vector2(1.0, 1.0),  null);
+	}
 }
