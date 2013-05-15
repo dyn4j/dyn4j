@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ package org.dyn4j.geometry;
  * This class is provided to enhance performance of some of the methods contained in
  * the {@link Convex} and {@link Shape} interfaces.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class Triangle extends Polygon implements Convex, Shape, Transformable {
@@ -150,8 +150,9 @@ public class Triangle extends Polygon implements Convex, Shape, Transformable {
 		double dot12 = ab.dot(pa);
 
 		double denominator = dot00 * dot11 - dot01 * dot01;
-		u = (dot11 * dot02 - dot01 * dot12) / denominator;
-		v = (dot00 * dot12 - dot01 * dot02) / denominator;
+		double invD = 1.0 / denominator;
+		u = (dot11 * dot02 - dot01 * dot12) * invD;
+		v = (dot00 * dot12 - dot01 * dot02) * invD;
 		
 		return u > 0 && v > 0 && (u + v <= 1);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -41,7 +41,7 @@ import org.dyn4j.Epsilon;
  * </pre>
  * This can decrease the number of temporary vectors.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class Vector2 {
@@ -289,7 +289,7 @@ public class Vector2 {
 	 */
 	public double getMagnitude() {
 		// the magnitude is just the pathagorean theorem
-		return Math.sqrt(this.x * this.x + this.y * this.y);
+		return Math.hypot(this.x, this.y);
 	}
 	
 	/**
@@ -317,7 +317,7 @@ public class Vector2 {
 			return this;
 		}
 		// get the magnitude
-		double mag = Math.sqrt(this.x * this.x + this.y * this.y);
+		double mag = Math.hypot(this.x, this.y);
 		// normalize and multiply by the new magnitude
 		mag = magnitude / mag;
 		this.x *= mag;
@@ -340,7 +340,7 @@ public class Vector2 {
 	 * @return {@link Vector2} this vector
 	 */
 	public Vector2 setDirection(double angle) {
-		double magnitude = Math.sqrt(this.x * this.x + this.y * this.y);
+		double magnitude = Math.hypot(this.x, this.y);
         this.x = magnitude * Math.cos(angle);
         this.y = magnitude * Math.sin(angle);
         return this;
@@ -711,7 +711,7 @@ public class Vector2 {
 	 * @return double
 	 */
 	public double normalize() {
-		double magnitude = this.getMagnitude();
+		double magnitude = Math.hypot(this.x, this.y);
 		if (magnitude <= Epsilon.E) return 0;
 		double m = 1.0 / magnitude;
 		this.x *= m;

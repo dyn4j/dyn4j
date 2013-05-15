@@ -35,7 +35,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Contains static methods to perform standard geometric operations.
  * @author William Bittle
- * @version 3.1.4
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class Geometry {
@@ -703,6 +703,58 @@ public class Geometry {
 	}
 	
 	/**
+	 * Creates a new {@link Polygon} in the shape of an ellipse with count number of vertices centered
+	 * on the origin.
+	 * <p>
+	 * The count must be a multiple of 2.  If not, the returned polygon will have count - 1
+	 * vertices.
+	 * <p>
+	 * Since dyn4j does not have an ellipse primitive, this method returns a {@link Polygon}.  The number of
+	 * vertices should be high enough to look visually "round".
+	 * @param count the number of vertices to use; should be even, if not, count - 1 vertices will be generated
+	 * @param width the width of the ellipse
+	 * @param height the height of the ellipse
+	 * @return {@link Polygon}
+	 * @throws IllegalArgumentException thrown if count is less than 4 or the width or height are less than or equal to zero
+	 * @since 3.1.5
+	 */
+	public static final Polygon createEllipse(int count, double width, double height) {
+		// validate the input
+		if (count < 4) throw new IllegalArgumentException(Messages.getString("geometry.ellipseInvalidCount"));
+		if (width <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.ellipseInvalidWidth"));
+		if (height <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.ellipseInvalidHeight"));
+		
+		final double a = width * 0.5;
+		final double b = height * 0.5;
+		
+		final int n2 = count / 2;
+		// compute the angular increment
+		final double pin2 = Math.PI / n2;
+		// make sure the resulting output is an even number of vertices
+		final Vector2[] vertices = new Vector2[n2 * 2];
+		
+		// use the parametric equations:
+		// x = a * cos(t)
+		// y = b * sin(t)
+		
+		int j = 0;
+		for (int i = 0; i < n2 + 1; i++) {
+			final double t = pin2 * i;
+			// since the under side of the ellipse is the same
+			// as the top side, only with a negated y, lets save
+			// some time by creating the under side at the same time
+			final double x = a * Math.cos(t);
+			final double y = b * Math.sin(t);
+			if (i > 0) {
+				vertices[vertices.length - j] = new Vector2(x, -y);
+			}
+			vertices[j++] = new Vector2(x, y);
+		}
+		
+		return new Polygon(vertices);
+	}
+	
+	/**
 	 * Returns a new list containing the 'cleansed' version of the given listing of polygon points.
 	 * <p>
 	 * This method ensures the polygon has CCW winding, removes colinear vertices, and removes coincident vertices.
@@ -807,6 +859,7 @@ public class Geometry {
 	 * This method assumes that the line is through the origin.
 	 * @param polygon the polygon to flip
 	 * @return {@link Polygon}
+	 * @throws NullPointerException if the given polygon is null
 	 * @see #flip(Polygon, Vector2)
 	 * @see #flip(Polygon, Vector2, Vector2)
 	 * @since 3.1.4
@@ -822,6 +875,7 @@ public class Geometry {
 	 * This method assumes that the line is through the origin.
 	 * @param polygon the polygon to flip
 	 * @return {@link Polygon}
+	 * @throws NullPointerException if the given polygon is null
 	 * @see #flip(Polygon, Vector2)
 	 * @see #flip(Polygon, Vector2, Vector2)
 	 * @since 3.1.4
@@ -836,6 +890,7 @@ public class Geometry {
 	 * @param polygon the polygon to flip
 	 * @param point the point to flip about
 	 * @return {@link Polygon}
+	 * @throws NullPointerException if the given polygon is null
 	 * @see #flip(Polygon, Vector2)
 	 * @see #flip(Polygon, Vector2, Vector2)
 	 * @since 3.1.4
@@ -850,6 +905,7 @@ public class Geometry {
 	 * @param polygon the polygon to flip
 	 * @param point the point to flip about
 	 * @return {@link Polygon}
+	 * @throws NullPointerException if the given polygon is null
 	 * @see #flip(Polygon, Vector2)
 	 * @see #flip(Polygon, Vector2, Vector2)
 	 * @since 3.1.4
@@ -866,6 +922,8 @@ public class Geometry {
 	 * @param polygon the polygon to flip
 	 * @param axis the axis to flip about
 	 * @return {@link Polygon}
+	 * @throws NullPointerException if the given polygon or axis is null
+	 * @throws IllegalArgumentException if the given axis is the zero vector
 	 * @see #flip(Polygon, Vector2, Vector2)
 	 * @since 3.1.4
 	 */
@@ -878,15 +936,17 @@ public class Geometry {
 	 * as a new polygon.
 	 * @param polygon the polygon to flip
 	 * @param axis the axis to flip about
-	 * @param point the point to flip about
+	 * @param point the point to flip about; if null, the polygon center is used
 	 * @return {@link Polygon}
+	 * @throws NullPointerException if the given polygon or axis is null
+	 * @throws IllegalArgumentException if the given axis is the zero vector
 	 * @since 3.1.4
 	 */
 	public static final Polygon flip(Polygon polygon, Vector2 axis, Vector2 point) {
 		// check for valid input
-		if (polygon == null) throw new NullPointerException("geometry.nullFlipPolygon");
-		if (axis == null) throw new NullPointerException("geometry.nullFlipAxis");
-		if (axis.isZero()) throw new IllegalArgumentException("geometry.zeroFlipAxis");
+		if (polygon == null) throw new NullPointerException(Messages.getString("geometry.nullFlipPolygon"));
+		if (axis == null) throw new NullPointerException(Messages.getString("geometry.nullFlipAxis"));
+		if (axis.isZero()) throw new IllegalArgumentException(Messages.getString("geometry.zeroFlipAxis"));
 		// just use the center of the polygon if the given point is null
 		if (point == null) point = polygon.getCenter();
 		// flip about the axis and point

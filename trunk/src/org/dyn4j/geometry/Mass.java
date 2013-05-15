@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -289,7 +289,7 @@ public class Mass {
 	 * @return {@link Vector2}
 	 */
 	public Vector2 getCenter() {
-		return center;
+		return this.center;
 	}
 	
 	/**
@@ -300,7 +300,7 @@ public class Mass {
 		if (this.type == Mass.Type.INFINITE || this.type == Mass.Type.FIXED_LINEAR_VELOCITY) {
 			return 0.0;
 		} else {
-			return mass;
+			return this.mass;
 		}
 	}
 	
@@ -312,7 +312,7 @@ public class Mass {
 		if (this.type == Mass.Type.INFINITE || this.type == Mass.Type.FIXED_ANGULAR_VELOCITY) {
 			return 0.0;
 		} else {
-			return inertia;
+			return this.inertia;
 		}
 	}
 	
@@ -324,7 +324,7 @@ public class Mass {
 		if (this.type == Mass.Type.INFINITE || this.type == Mass.Type.FIXED_LINEAR_VELOCITY) {
 			return 0.0;
 		} else {
-			return invMass;
+			return this.invMass;
 		}
 	}
 	
@@ -336,7 +336,7 @@ public class Mass {
 		if (this.type == Mass.Type.INFINITE || this.type == Mass.Type.FIXED_ANGULAR_VELOCITY) {
 			return 0.0;
 		} else {
-			return invInertia;
+			return this.invInertia;
 		}
 	}
 }

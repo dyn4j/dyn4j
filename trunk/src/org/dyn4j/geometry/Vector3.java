@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ import org.dyn4j.Epsilon;
  * Used to solve 3x3 systems of equations.
  * @see Vector2
  * @author William Bittle
- * @version 3.0.0
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class Vector3 {
@@ -601,7 +601,7 @@ public class Vector3 {
 	 * @return {@link Vector3}
 	 */
 	public Vector3 getNormalized() {
-		double magnitude = this.getMagnitude();
+		double magnitude = Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
 		if (magnitude <= Epsilon.E) return new Vector3();
 		magnitude = 1.0 / magnitude;
 		return new Vector3(this.x * magnitude, this.y * magnitude, this.z * magnitude);
@@ -615,7 +615,7 @@ public class Vector3 {
 	 * @return double
 	 */
 	public double normalize() {
-		double magnitude = this.getMagnitude();
+		double magnitude = Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
 		if (magnitude <= Epsilon.E) return 0;
 		double m = 1.0 / magnitude;
 		this.x *= m;

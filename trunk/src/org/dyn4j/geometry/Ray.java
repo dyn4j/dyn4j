@@ -98,7 +98,7 @@ public class Ray {
 	 * @return {@link Vector2}
 	 */
 	public Vector2 getStart() {
-		return start;
+		return this.start;
 	}
 	
 	/**
@@ -138,7 +138,7 @@ public class Ray {
 	 * @since 3.0.2
 	 */
 	public Vector2 getDirectionVector() {
-		return direction;
+		return this.direction;
 	}
 	
 	/**

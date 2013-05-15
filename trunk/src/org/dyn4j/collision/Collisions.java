@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,10 +29,13 @@ import org.dyn4j.collision.Collidable;
 /**
  * Class used to estimate collision counts and other one-off collision tasks.
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.1.5
  * @since 3.1.1
  */
-public class Collisions {
+public final class Collisions {
+	/** Hidden constructor. */
+	private Collisions() {}
+	
 	/**
 	 * The estimated collisions per body.
 	 * <p>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -30,7 +30,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents a line {@link Segment}.
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class Segment extends Wound implements Convex, Shape, Transformable {
@@ -565,7 +565,7 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 		// compute the mass
 		double mass = density * length;
 		// compute the inertia tensor
-		double inertia = 1.0 / 12.0 * length * length * mass;
+		double inertia = length * length * mass / 12.0;
 		// since we know that a line segment has only two points we can
 		// feel safe using the averaging method for the centroid
 		return new Mass(this.center, mass, inertia);

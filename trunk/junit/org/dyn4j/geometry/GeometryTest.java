@@ -41,7 +41,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Geometry} class.
  * @author William Bittle
- * @version 3.1.4
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class GeometryTest {
@@ -1151,6 +1151,81 @@ public class GeometryTest {
 		TestCase.assertEquals( 2.309, vertices[3].y, 1.0e-3);
 		TestCase.assertEquals(-2.000, vertices[4].x, 1.0e-3);
 		TestCase.assertEquals( 3.000, vertices[4].y, 1.0e-3);
+	}
+	
+	/**
+	 * Tests the createEllipse method.
+	 * @since 3.1.5
+	 */
+	@Test
+	public void createEllipse() {
+		// this method should succeed
+		Polygon p = Geometry.createEllipse(10, 2, 1);
+		// and the center should be the origin
+		TestCase.assertEquals(0.000, p.getCenter().x, 1.0e-3);
+		TestCase.assertEquals(0.000, p.getCenter().y, 1.0e-3);
+	}
+
+	/**
+	 * Tests the createEllipse method with an odd count.
+	 * @since 3.1.5
+	 */
+	@Test
+	public void createEllipseOddCount() {
+		// this method should succeed
+		Polygon p = Geometry.createEllipse(5, 2, 1);
+		// and the center should be the origin
+		TestCase.assertEquals(4, p.getVertices().length);
+		
+		// this method should succeed
+		p = Geometry.createEllipse(11, 2, 1);
+		// and the center should be the origin
+		TestCase.assertEquals(10, p.getVertices().length);
+	}
+	
+	/**
+	 * Tests the createEllipse method with less than 4 vertices.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createEllipseLessCount() {
+		Geometry.createEllipse(3, 2, 1);
+	}
+	
+	/**
+	 * Tests the createEllipse method with a zero width.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createEllipseZeroWidth() {
+		Geometry.createEllipse(10, 0, 1);
+	}
+	
+	/**
+	 * Tests the createEllipse method with a zero height.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createEllipseZeroHeight() {
+		Geometry.createEllipse(10, 2, 0);
+	}
+	
+	/**
+	 * Tests the createEllipse method with a negative width.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createEllipseNegativeWidth() {
+		Geometry.createEllipse(10, -1, 1);
+	}
+	
+	/**
+	 * Tests the createEllipse method with a negative height.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createEllipseNegativeHeight() {
+		Geometry.createEllipse(10, 2, -1);
 	}
 	
 	/**

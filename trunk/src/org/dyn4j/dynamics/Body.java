@@ -84,7 +84,7 @@ import org.dyn4j.resources.Messages;
  * setting in the world's {@link Settings}.  Use this if the body is a fast moving
  * body, but be careful as this will incur a performance hit.
  * @author William Bittle
- * @version 3.1.4
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class Body implements Swept, Collidable, Transformable {
@@ -289,6 +289,37 @@ public class Body implements Swept, Collidable, Transformable {
 	 * or {@link #setMass(Mass.Type)} method to compute the new total
 	 * {@link Mass} for the body.
 	 * <p>
+	 * This is a convenience method for setting the density of a {@link BodyFixture}.
+	 * @param convex the {@link Convex} {@link Shape} to add to the {@link Body}
+	 * @param density the density of the shape in kg/m<sup>2</sup>; in the range (0.0, &infin;]
+	 * @return {@link BodyFixture} the fixture created using the given {@link Shape} and added to the {@link Body}
+	 * @throws NullPointerException if convex is null
+	 * @throws IllegalArgumentException if density is less than or equal to zero; if friction or restitution is less than zero
+	 * @see #addFixture(Convex)
+	 * @see #addFixture(Convex, double, double, double)
+	 * @since 3.1.5
+	 */
+	public BodyFixture addFixture(Convex convex, double density) {
+		// make sure the convex shape is not null
+		if (convex == null) throw new NullPointerException(Messages.getString("dynamics.body.addNullShape"));
+		// create the fixture
+		BodyFixture fixture = new BodyFixture(convex);
+		// set the properties
+		fixture.setDensity(density);
+		// add the fixture to the body
+		this.fixtures.add(fixture);
+		// return the fixture so the caller can configure it
+		return fixture;
+	}
+	
+	/**
+	 * Creates a {@link BodyFixture} for the given {@link Convex} {@link Shape},
+	 * adds it to the {@link Body}, and returns it for configuration.
+	 * <p>
+	 * After adding or removing fixtures make sure to call the {@link #setMass()}
+	 * or {@link #setMass(Mass.Type)} method to compute the new total
+	 * {@link Mass} for the body.
+	 * <p>
 	 * This is a convenience method for setting the properties of a {@link BodyFixture}.
 	 * Use the {@link BodyFixture#DEFAULT_DENSITY}, {@link BodyFixture#DEFAULT_FRICTION},
 	 * and {@link BodyFixture#DEFAULT_RESTITUTION} values if you need to only set one
@@ -301,6 +332,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 * @throws NullPointerException if convex is null
 	 * @throws IllegalArgumentException if density is less than or equal to zero; if friction or restitution is less than zero
 	 * @see #addFixture(Convex)
+	 * @see #addFixture(Convex, double)
 	 * @since 3.1.1
 	 */
 	public BodyFixture addFixture(Convex convex, double density, double friction, double restitution) {
@@ -1365,7 +1397,7 @@ public class Body implements Swept, Collidable, Transformable {
 	 * @return Object
 	 */
 	public Object getUserData() {
-		return userData;
+		return this.userData;
 	}
 	
 	/**
