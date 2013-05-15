@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * Supported operations are rotation and translation.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class Transform implements Transformable {
@@ -377,8 +377,21 @@ public class Transform implements Transformable {
 	 * destination {@link Vector2}.
 	 * @param vector the {@link Vector2} to transform
 	 * @param destination the {@link Vector2} containing the result
+	 * @deprecated replaced with {@link #getTransformedR(Vector2, Vector2)} in 3.1.5
 	 */
+	@Deprecated
 	public void transformR(Vector2 vector, Vector2 destination) {
+		this.getTransformedR(vector, destination);
+	}
+	
+	/**
+	 * Transforms the given {@link Vector2} only by the rotation and returns the result in the
+	 * destination {@link Vector2}.
+	 * @param vector the {@link Vector2} to transform
+	 * @param destination the {@link Vector2} containing the result
+	 * @since 3.1.5
+	 */
+	public void getTransformedR(Vector2 vector, Vector2 destination) {
 		double x = vector.x;
 		double y = vector.y;
 		destination.x = this.m00 * x + this.m01 * y;
@@ -418,8 +431,21 @@ public class Transform implements Transformable {
 	 * destination {@link Vector2}.
 	 * @param vector the {@link Vector2} to transform
 	 * @param destination the {@link Vector2} containing the result
+	 * @deprecated replaced with {@link #getInverseTransformedR(Vector2, Vector2)} in 3.1.5
 	 */
+	@Deprecated
 	public void inverseTransformR(Vector2 vector, Vector2 destination) {
+		this.getInverseTransformedR(vector, destination);
+	}
+	
+	/**
+	 * Transforms the given {@link Vector2} only by the rotation and returns the result in the
+	 * destination {@link Vector2}.
+	 * @param vector the {@link Vector2} to transform
+	 * @param destination the {@link Vector2} containing the result
+	 * @since 3.1.5
+	 */
+	public void getInverseTransformedR(Vector2 vector, Vector2 destination) {
 		double x = vector.x;
 		double y = vector.y;
 		// since the transpose of a rotation matrix is the inverse

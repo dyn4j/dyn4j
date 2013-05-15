@@ -37,7 +37,7 @@ import org.dyn4j.resources.Messages;
  * A {@link Fixture} has a one-to-one relationship with a {@link Convex} {@link Shape}.
  * Each {@link Collidable} can have any number of {@link Fixture}s attached.
  * @author William Bittle
- * @version 3.1.4
+ * @version 3.1.5
  * @since 2.0.0
  */
 public class Fixture {
@@ -97,7 +97,7 @@ public class Fixture {
 	 * @return {@link Convex}
 	 */
 	public Convex getShape() {
-		return shape;
+		return this.shape;
 	}
 	
 	/**
@@ -105,7 +105,7 @@ public class Fixture {
 	 * @return {@link Filter}
 	 */
 	public Filter getFilter() {
-		return filter;
+		return this.filter;
 	}
 	
 	/**
@@ -126,7 +126,7 @@ public class Fixture {
 	 * @return boolean
 	 */
 	public boolean isSensor() {
-		return sensor;
+		return this.sensor;
 	}
 	
 	/**
@@ -143,7 +143,7 @@ public class Fixture {
 	 * @return Object
 	 */
 	public Object getUserData() {
-		return userData;
+		return this.userData;
 	}
 	
 	/**

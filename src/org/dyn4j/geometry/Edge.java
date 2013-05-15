@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -83,7 +83,7 @@ public class Edge extends Feature {
 	 * @return {@link Vertex}
 	 */
 	public Vertex getVertex1() {
-		return vertex1;
+		return this.vertex1;
 	}
 	
 	/**
@@ -91,7 +91,7 @@ public class Edge extends Feature {
 	 * @return {@link Vertex}
 	 */
 	public Vertex getVertex2() {
-		return vertex2;
+		return this.vertex2;
 	}
 	
 	/**
