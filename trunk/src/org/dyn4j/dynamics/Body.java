@@ -1545,6 +1545,24 @@ public class Body implements Swept, Collidable, Transformable {
 	public Vector2 getWorldVector(Vector2 localVector) {
 		return this.transform.getTransformedR(localVector);
 	}
+
+	/**
+	 * Returns true if the given world space point is contained in this body.
+	 * @param point the world space test point
+	 * @return boolean
+	 * @since 3.1.5
+	 */
+	public boolean contains(Vector2 point) {
+		int size = this.fixtures.size();
+		for (int i = 0; i < size; i++) {
+			BodyFixture fixture = this.fixtures.get(i);
+			Convex convex = fixture.getShape();
+			if (convex.contains(point, this.transform)) {
+				return true;
+			}
+		}
+		return false;
+	}
 	
 	/**
 	 * Returns the velocity {@link Vector2}.

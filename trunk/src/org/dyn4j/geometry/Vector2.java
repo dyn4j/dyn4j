@@ -641,12 +641,7 @@ public class Vector2 {
 	}
 
 	/**
-	 * Returns the perproduct.
-	 * <p>
-	 * The perproduct of a {@link Vector2} results in two orthogonal {@link Vector2}s relative
-	 * to the original {@link Vector2}.
-	 * <p>
-	 * This method returns the right hand one.
+	 * Returns the right-handed normal of this vector.
 	 * @return {@link Vector2} the right hand orthogonal {@link Vector2}
 	 */
 	public Vector2 getRightHandOrthogonalVector() {
@@ -654,7 +649,7 @@ public class Vector2 {
 	}
 	
 	/**
-	 * Performs the perproduct and places the result in this {@link Vector2}.
+	 * Sets this vector to the right-handed normal of this vector.
 	 * @return {@link Vector2} this vector
 	 * @see #getRightHandOrthogonalVector()
 	 */
@@ -666,12 +661,7 @@ public class Vector2 {
 	}
 	
 	/**
-	 * Returns the perproduct.
-	 * <p>
-	 * The perproduct of a {@link Vector2} results in two orthogonal {@link Vector2}s relative
-	 * to the original {@link Vector2}.
-	 * <p>
-	 * This method returns the left hand one.
+	 * Returns the left-handed normal of this vector.
 	 * @return {@link Vector2} the left hand orthogonal {@link Vector2}
 	 */
 	public Vector2 getLeftHandOrthogonalVector() {
@@ -679,7 +669,7 @@ public class Vector2 {
 	}
 	
 	/**
-	 * Performs the perproduct and places the result in this {@link Vector2}.
+	 * Sets this vector to the left-handed normal of this vector.
 	 * @return {@link Vector2} this vector
 	 * @see #getLeftHandOrthogonalVector()
 	 */
