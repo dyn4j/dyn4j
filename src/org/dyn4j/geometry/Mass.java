@@ -27,15 +27,17 @@ package org.dyn4j.geometry;
 import java.util.List;
 
 import org.dyn4j.Epsilon;
-import org.dyn4j.dynamics.Body;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents {@link Mass} data for a {@link Body}.
+ * Represents {@link Mass} data for an object about a given point.
  * <p>
  * Stores the center of mass, mass, and inertia tensor.
+ * <p>
+ * The center point may be something other than the origin (0, 0).  In this case, the mass and
+ * inertia are about this point, not the origin.
  * @author William Bittle
- * @version 3.1.3
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class Mass {

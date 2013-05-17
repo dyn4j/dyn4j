@@ -1158,9 +1158,9 @@ public class GeometryTest {
 	 * @since 3.1.5
 	 */
 	@Test
-	public void createEllipse() {
+	public void createPolygonalEllipse() {
 		// this method should succeed
-		Polygon p = Geometry.createEllipse(10, 2, 1);
+		Polygon p = Geometry.createPolygonalEllipse(10, 2, 1);
 		// and the center should be the origin
 		TestCase.assertEquals(0.000, p.getCenter().x, 1.0e-3);
 		TestCase.assertEquals(0.000, p.getCenter().y, 1.0e-3);
@@ -1171,14 +1171,14 @@ public class GeometryTest {
 	 * @since 3.1.5
 	 */
 	@Test
-	public void createEllipseOddCount() {
+	public void createPolygonalEllipseOddCount() {
 		// this method should succeed
-		Polygon p = Geometry.createEllipse(5, 2, 1);
+		Polygon p = Geometry.createPolygonalEllipse(5, 2, 1);
 		// and the center should be the origin
 		TestCase.assertEquals(4, p.getVertices().length);
 		
 		// this method should succeed
-		p = Geometry.createEllipse(11, 2, 1);
+		p = Geometry.createPolygonalEllipse(11, 2, 1);
 		// and the center should be the origin
 		TestCase.assertEquals(10, p.getVertices().length);
 	}
@@ -1188,8 +1188,8 @@ public class GeometryTest {
 	 * @since 3.1.5
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void createEllipseLessCount() {
-		Geometry.createEllipse(3, 2, 1);
+	public void createPolygonalEllipseLessCount() {
+		Geometry.createPolygonalEllipse(3, 2, 1);
 	}
 	
 	/**
@@ -1197,8 +1197,8 @@ public class GeometryTest {
 	 * @since 3.1.5
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void createEllipseZeroWidth() {
-		Geometry.createEllipse(10, 0, 1);
+	public void createPolygonalEllipseZeroWidth() {
+		Geometry.createPolygonalEllipse(10, 0, 1);
 	}
 	
 	/**
@@ -1206,8 +1206,8 @@ public class GeometryTest {
 	 * @since 3.1.5
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void createEllipseZeroHeight() {
-		Geometry.createEllipse(10, 2, 0);
+	public void createPolygonalEllipseZeroHeight() {
+		Geometry.createPolygonalEllipse(10, 2, 0);
 	}
 	
 	/**
@@ -1215,8 +1215,8 @@ public class GeometryTest {
 	 * @since 3.1.5
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void createEllipseNegativeWidth() {
-		Geometry.createEllipse(10, -1, 1);
+	public void createPolygonalEllipseNegativeWidth() {
+		Geometry.createPolygonalEllipse(10, -1, 1);
 	}
 	
 	/**
@@ -1224,8 +1224,8 @@ public class GeometryTest {
 	 * @since 3.1.5
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void createEllipseNegativeHeight() {
-		Geometry.createEllipse(10, 2, -1);
+	public void createPolygonalEllipseNegativeHeight() {
+		Geometry.createPolygonalEllipse(10, 2, -1);
 	}
 	
 	/**

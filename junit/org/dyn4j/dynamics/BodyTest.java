@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -55,7 +55,7 @@ import org.junit.Test;
 /**
  * Class to test the {@link Body} class.
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.1.5
  * @since 1.0.2
  */
 public class BodyTest {
@@ -1212,5 +1212,25 @@ public class BodyTest {
 		b.setUserData(obj);
 		TestCase.assertNotNull(b.getUserData());
 		TestCase.assertSame(obj, b.getUserData());
+	}
+	
+	/**
+	 * Tests the contains(Vector2) method.
+	 * @since 3.1.5
+	 */
+	@Test
+	public void containsPoint() {
+		Body b = new Body();
+		Convex c1 = Geometry.createCircle(0.5);
+		Convex c2 = Geometry.createRectangle(1.0, 1.0);
+		c1.translate(0.75, 0.0);
+		b.addFixture(c1);
+		b.addFixture(c2);
+		
+		TestCase.assertTrue(b.contains(new Vector2(0.0, 0.0)));
+		TestCase.assertTrue(b.contains(new Vector2(0.5, 0.0)));
+		TestCase.assertTrue(b.contains(new Vector2(0.55, 0.25)));
+		TestCase.assertFalse(b.contains(new Vector2(0.52, 0.45)));
+		TestCase.assertTrue(b.contains(new Vector2(0.70, 0.3)));
 	}
 }

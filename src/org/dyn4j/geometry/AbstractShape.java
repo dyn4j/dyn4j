@@ -110,7 +110,7 @@ public abstract class AbstractShape implements Shape, Transformable {
 	 */
 	@Override
 	public void rotateAboutCenter(double theta) {
-		this.rotate(theta, this.center);
+		this.rotate(theta, this.center.x, this.center.y);
 	}
 	
 	/* (non-Javadoc)

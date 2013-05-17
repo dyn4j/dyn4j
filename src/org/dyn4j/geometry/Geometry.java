@@ -448,11 +448,13 @@ public class Geometry {
 	 * will be centered on the origin.
 	 * <p>
 	 * The radius parameter is the distance from the center of the polygon to each vertex.
-	 * @see #createUnitCirclePolygon(int, double, double)
 	 * @param count the number of vertices
 	 * @param radius the radius from the center to each vertex in meters
 	 * @return {@link Polygon}
 	 * @throws IllegalArgumentException if count is less than 3 or radius is less than or equal to zero
+	 * @see #createUnitCirclePolygon(int, double, double)
+	 * @see #createPolygonalCircle(int, double)
+	 * @see #createPolygonalCircle(int, double, double)
 	 */
 	public static final Polygon createUnitCirclePolygon(int count, double radius) {
 		return Geometry.createUnitCirclePolygon(count, radius, 0.0);
@@ -472,18 +474,15 @@ public class Geometry {
 	 * @param theta the vertex angle offset in radians
 	 * @return {@link Polygon}
 	 * @throws IllegalArgumentException if count is less than 3 or radius is less than or equal to zero
+	 * @see #createPolygonalCircle(int, double, double)
 	 */
 	public static final Polygon createUnitCirclePolygon(int count, double radius, double theta) {
 		// check the count
 		if (count < 3) throw new IllegalArgumentException(Messages.getString("geometry.invalidVerticesSize"));
 		// check the radius
 		if (radius <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.invalidRadius"));
-		Vector2[] verts = new Vector2[count];
-		double angle = Geometry.TWO_PI / count;
-		for (int i = count - 1; i >= 0; i--) {
-			verts[i] = new Vector2(Math.cos(angle * i + theta) * radius, Math.sin(angle * i + theta) * radius);
-		}
-		return new Polygon(verts);
+		// call the more efficient method here
+		return Geometry.createPolygonalCircle(count, radius, theta);
 	}
 	
 	/**
@@ -703,6 +702,63 @@ public class Geometry {
 	}
 	
 	/**
+	 * Creates a new {@link Polygon} in the shape of a circle with count number of vertices centered
+	 * on the origin.
+	 * @param count the number of vertices to use; must be greater than 2
+	 * @param radius the radius of the circle; must be greater than zero
+	 * @return {@link Polygon}
+	 * @throws IllegalArgumentException thrown if count is less than 3 or the radius is less than or equal to zero
+	 * @since 3.1.5
+	 */
+	public static final Polygon createPolygonalCircle(int count, double radius) {
+		return Geometry.createPolygonalCircle(count, radius, 0);
+	}
+	
+	/**
+	 * Creates a new {@link Polygon} in the shape of a circle with count number of vertices centered
+	 * on the origin.
+	 * @param count the number of vertices to use; must be greater than 2
+	 * @param radius the radius of the circle; must be greater than zero
+	 * @param theta the radial offset for the points in radians
+	 * @return {@link Polygon}
+	 * @throws IllegalArgumentException thrown if count is less than 3 or the radius is less than or equal to zero
+	 * @since 3.1.5
+	 */
+	public static final Polygon createPolygonalCircle(int count, double radius, double theta) {
+		// validate the input
+		if (count < 3) throw new IllegalArgumentException(Messages.getString("geometry.circleInvalidCount"));
+		if (radius <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.circleInvalidRadius"));
+		
+		// compute the angular increment
+		final double pin = Geometry.TWO_PI / count;
+		// make sure the resulting output is an even number of vertices
+		final Vector2[] vertices = new Vector2[count];
+		
+		final double c = Math.cos(pin);
+		final double s = Math.sin(pin);
+		double t = 0;
+
+		double x = radius;
+		double y = 0;
+		// initialize at theta if necessary
+		if (theta != 0) {
+			x = radius * Math.cos(theta);
+			y = radius * Math.sin(theta);
+		}
+		
+		for(int i = 0; i < count; i++) {
+			vertices[i] = new Vector2(x, y);
+
+			//apply the rotation matrix
+			t = x;
+			x = c * x - s * y;
+			y = s * t + c * y;
+		} 
+		
+		return new Polygon(vertices);
+	}
+	
+	/**
 	 * Creates a new {@link Polygon} in the shape of an ellipse with count number of vertices centered
 	 * on the origin.
 	 * <p>
@@ -718,7 +774,7 @@ public class Geometry {
 	 * @throws IllegalArgumentException thrown if count is less than 4 or the width or height are less than or equal to zero
 	 * @since 3.1.5
 	 */
-	public static final Polygon createEllipse(int count, double width, double height) {
+	public static final Polygon createPolygonalEllipse(int count, double width, double height) {
 		// validate the input
 		if (count < 4) throw new IllegalArgumentException(Messages.getString("geometry.ellipseInvalidCount"));
 		if (width <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.ellipseInvalidWidth"));
