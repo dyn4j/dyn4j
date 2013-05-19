@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -116,7 +116,7 @@ import org.dyn4j.resources.Messages;
  * {@link Shape}s.  Refer to {@link Gjk#distance(Convex, Transform, Convex, Transform, Separation)}
  * for details on the implementation.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetector {
@@ -637,11 +637,10 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 		Vector2 d = c.to(x);
 		
 		// define an epsilon to compare the distance with
-		double epsilonSqrd = this.distanceEpsilon * this.distanceEpsilon;
 		double distanceSqrd = Double.MAX_VALUE;
 		int iterations = 0;
 		// loop until we have found the correct distance
-		while (distanceSqrd > epsilonSqrd) {
+		while (distanceSqrd > this.distanceEpsilon) {
 			// get a point on the edge of the convex in the direction of d
 			Vector2 p = convex.getFarthestPoint(d, transform);
 			// get the vector from the current closest point to the edge point

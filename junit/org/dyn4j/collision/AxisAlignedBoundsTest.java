@@ -26,6 +26,7 @@ package org.dyn4j.collision;
 
 import junit.framework.TestCase;
 
+import org.dyn4j.extras.Ellipse;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Geometry;
@@ -156,6 +157,46 @@ public class AxisAlignedBoundsTest {
 	public void isOutsideCircle() {
 		// create some shapes
 		Circle c = new Circle(1.0);
+		CollidableTest ct = new CollidableTest(c);
+		
+		// should be in
+		TestCase.assertFalse(bounds.isOutside(ct));
+		
+		// test half way in and out
+		ct.transform.translate(9.5, 0.0);
+		TestCase.assertFalse(bounds.isOutside(ct));
+		
+		// test all the way out
+		ct.transform.translate(1.6, 0.0);
+		TestCase.assertTrue(bounds.isOutside(ct));
+		
+		// test half way out a corner
+		ct.transform.translate(-1.5, 9.5);
+		TestCase.assertFalse(bounds.isOutside(ct));
+		
+		// test moving the bounds
+		bounds.translate(2.0, 1.0);
+		
+		// test half way in and out
+		ct.transform.translate(2.0, 0.0);
+		TestCase.assertFalse(bounds.isOutside(ct));
+		
+		// test all the way out
+		ct.transform.translate(1.6, 0.0);
+		TestCase.assertTrue(bounds.isOutside(ct));
+		
+		// test half way out a corner
+		ct.transform.translate(-1.5, 1.5);
+		TestCase.assertFalse(bounds.isOutside(ct));
+	}
+	
+	/**
+	 * Tests the isOutside method on a {@link Ellipse}.
+	 */
+	@Test
+	public void isOutsideEllipse() {
+		// create some shapes
+		Ellipse c = new Ellipse(1.0, 0.5);
 		CollidableTest ct = new CollidableTest(c);
 		
 		// should be in
