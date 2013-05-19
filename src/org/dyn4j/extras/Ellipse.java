@@ -102,6 +102,20 @@ public class Ellipse extends AbstractShape implements Transformable, Shape, Conv
 	}
 	
 	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Wound#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Ellipse[").append(super.toString())
+		.append("|Width=").append(this.width)
+		.append("|Height=").append(this.height)
+		.append("|UserData=").append(this.userData)
+		.append("]");
+		return sb.toString();
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Convex#getAxes(org.dyn4j.geometry.Vector2[], org.dyn4j.geometry.Transform)
 	 */
 	@Override
