@@ -178,30 +178,22 @@ public class EllipseTest {
 		TestCase.assertEquals( 0.838, p.y, 1.0e-3);
 	}
 	
-	// TODO fix tests past this point and add a collision tester classes for ellipse
-	
 	/**
 	 * Tests the getAxes method.
 	 */
-	@Test
+	@Test(expected = UnsupportedOperationException.class)
 	public void getAxes() {
-		Circle c = new Circle(1.5);
-		Transform t = new Transform();
-		// a cicle has infinite axes so it should be null
-		Vector2[] axes = c.getAxes(null, t);
-		TestCase.assertNull(axes);
+		Ellipse e = new Ellipse(1.0, 0.5);
+		e.getAxes(new Vector2[] { new Vector2() }, Transform.IDENTITY);
 	}
 	
 	/**
 	 * Tests the getFoci method.
 	 */
-	@Test
+	@Test(expected = UnsupportedOperationException.class)
 	public void getFoci() {
-		Circle c = new Circle(1.5);
-		Transform t = new Transform();
-		// should only return one
-		Vector2[] foci = c.getFoci(t);
-		TestCase.assertEquals(1, foci.length);
+		Ellipse e = new Ellipse(1.0, 0.5);
+		e.getFoci(Transform.IDENTITY);
 	}
 	
 	/**
@@ -209,25 +201,24 @@ public class EllipseTest {
 	 */
 	@Test
 	public void rotate() {
-		// center is at 0,0
-		Circle c = new Circle(1.0);
+		Ellipse e = new Ellipse(1.0, 0.5);
 		
 		// rotate about center
-		c.translate(1.0, 1.0);
-		c.rotateAboutCenter(Math.toRadians(30));
-		TestCase.assertEquals(1.000, c.center.x, 1.0e-3);
-		TestCase.assertEquals(1.000, c.center.y, 1.0e-3);
+		e.translate(1.0, 1.0);
+		e.rotateAboutCenter(Math.toRadians(30));
+		TestCase.assertEquals(1.000, e.center.x, 1.0e-3);
+		TestCase.assertEquals(1.000, e.center.y, 1.0e-3);
 		
 		// rotate about the origin
-		c.rotate(Math.toRadians(90));
-		TestCase.assertEquals(-1.000, c.center.x, 1.0e-3);
-		TestCase.assertEquals( 1.000, c.center.y, 1.0e-3);
-		c.translate(c.getCenter().getNegative());
+		e.rotate(Math.toRadians(90));
+		TestCase.assertEquals(-1.000, e.center.x, 1.0e-3);
+		TestCase.assertEquals( 1.000, e.center.y, 1.0e-3);
+		e.translate(e.getCenter().getNegative());
 		
 		// should move the center
-		c.rotate(Math.toRadians(90), 1.0, -1.0);
-		TestCase.assertEquals( 0.000, c.center.x, 1.0e-3);
-		TestCase.assertEquals(-2.000, c.center.y, 1.0e-3);
+		e.rotate(Math.toRadians(90), 1.0, -1.0);
+		TestCase.assertEquals( 0.000, e.center.x, 1.0e-3);
+		TestCase.assertEquals(-2.000, e.center.y, 1.0e-3);
 	}
 	
 	/**
@@ -235,13 +226,12 @@ public class EllipseTest {
 	 */
 	@Test
 	public void translate() {
-		// center is at 0,0
-		Circle c = new Circle(1.0);
+		Ellipse e = new Ellipse(1.0, 0.5);
 		
-		c.translate(1.0, -0.5);
+		e.translate(1.0, -0.5);
 		
-		TestCase.assertEquals( 1.000, c.center.x, 1.0e-3);
-		TestCase.assertEquals(-0.500, c.center.y, 1.0e-3);
+		TestCase.assertEquals( 1.000, e.center.x, 1.0e-3);
+		TestCase.assertEquals(-0.500, e.center.y, 1.0e-3);
 	}
 	
 	/**
@@ -250,17 +240,17 @@ public class EllipseTest {
 	 */
 	@Test
 	public void createAABB() {
-		Circle c = new Circle(1.2);
+		Ellipse e = new Ellipse(1.0, 0.5);
 		
 		// using an identity transform
-		AABB aabb = c.createAABB(Transform.IDENTITY);
-		TestCase.assertEquals(-1.2, aabb.getMinX(), 1.0e-3);
-		TestCase.assertEquals(-1.2, aabb.getMinY(), 1.0e-3);
-		TestCase.assertEquals( 1.2, aabb.getMaxX(), 1.0e-3);
-		TestCase.assertEquals( 1.2, aabb.getMaxY(), 1.0e-3);
+		AABB aabb = e.createAABB(Transform.IDENTITY);
+		TestCase.assertEquals(-0.500, aabb.getMinX(), 1.0e-3);
+		TestCase.assertEquals(-0.250, aabb.getMinY(), 1.0e-3);
+		TestCase.assertEquals( 0.500, aabb.getMaxX(), 1.0e-3);
+		TestCase.assertEquals( 0.250, aabb.getMaxY(), 1.0e-3);
 		
 		// try using the default method
-		AABB aabb2 = c.createAABB();
+		AABB aabb2 = e.createAABB();
 		TestCase.assertEquals(aabb.getMinX(), aabb2.getMinX());
 		TestCase.assertEquals(aabb.getMinY(), aabb2.getMinY());
 		TestCase.assertEquals(aabb.getMaxX(), aabb2.getMaxX());
@@ -271,10 +261,10 @@ public class EllipseTest {
 		tx.rotate(Math.toRadians(30.0));
 		tx.translate(1.0, 2.0);
 		
-		aabb = c.createAABB(tx);
-		TestCase.assertEquals(-0.2, aabb.getMinX(), 1.0e-3);
-		TestCase.assertEquals( 0.8, aabb.getMinY(), 1.0e-3);
-		TestCase.assertEquals( 2.2, aabb.getMaxX(), 1.0e-3);
-		TestCase.assertEquals( 3.2, aabb.getMaxY(), 1.0e-3);
+		aabb = e.createAABB(tx);
+		TestCase.assertEquals(0.549, aabb.getMinX(), 1.0e-3);
+		TestCase.assertEquals(1.669, aabb.getMinY(), 1.0e-3);
+		TestCase.assertEquals(1.450, aabb.getMaxX(), 1.0e-3);
+		TestCase.assertEquals(2.330, aabb.getMaxY(), 1.0e-3);
 	}
 }

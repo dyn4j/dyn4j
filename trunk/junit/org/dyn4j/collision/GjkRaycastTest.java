@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -28,6 +28,7 @@ import junit.framework.TestCase;
 
 import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.Raycast;
+import org.dyn4j.extras.Ellipse;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
@@ -44,7 +45,7 @@ import org.junit.Test;
  * Test cases for the {@link Gjk#raycast(Ray, double, Convex, Transform, Raycast)}
  * method.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.5
  * @since 2.0.0
  */
 public class GjkRaycastTest {
@@ -216,6 +217,53 @@ public class GjkRaycastTest {
 		// length test
 		TestCase.assertFalse(gjk.raycast(ray, 1.7, c, t, raycast));
 		TestCase.assertTrue(gjk.raycast(ray, 1.8, c, t, raycast));
+		
+		// opposite direction test
+		ray.getDirectionVector().negate();
+		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
+		
+		// non-intersection case
+		ray.setDirection(new Vector2(1.0, 2.0));
+		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
+		
+		// start at center case (or any point within the convex shape)
+		ray.setStart(t.getTransformed(c.getCenter()));
+		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
+	}
+	
+	/**
+	 * Tests a successful raycast against a {@link Ellipse}.
+	 * @since 3.1.5
+	 */
+	@Test
+	public void raycastEllipse() {
+		Vector2 d = new Vector2(2.0, 1.0);
+		d.normalize();
+		Ray ray = new Ray(d);
+		Gjk gjk = new Gjk();
+		Convex c = new Ellipse(1.0, 0.5);
+		Transform t = new Transform();
+		t.translate(2.1, 1.0);
+		Raycast raycast = new Raycast();
+		
+		// successful test
+		boolean collision = gjk.raycast(ray, 0.0, c, t, raycast);
+		
+		TestCase.assertTrue(collision);
+		
+		Vector2 point = raycast.getPoint();
+		Vector2 normal = raycast.getNormal();
+		
+		TestCase.assertEquals( 1.699, point.x, 1.0e-3);
+		TestCase.assertEquals( 0.849, point.y, 1.0e-3);
+		TestCase.assertEquals(-0.548, normal.x, 1.0e-3);
+		TestCase.assertEquals(-0.836, normal.y, 1.0e-3);
+		TestCase.assertEquals( 1.900, raycast.getDistance(), 1.0e-3);
+		raycast.clear();
+		
+		// length test
+		TestCase.assertFalse(gjk.raycast(ray, 1.7, c, t, raycast));
+		TestCase.assertTrue(gjk.raycast(ray, 1.95, c, t, raycast));
 		
 		// opposite direction test
 		ray.getDirectionVector().negate();
