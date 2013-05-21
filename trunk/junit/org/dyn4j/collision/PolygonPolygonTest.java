@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -28,9 +28,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.collision.Collidable;
 import org.dyn4j.collision.broadphase.BroadphasePair;
-import org.dyn4j.collision.broadphase.SapIncremental;
 import org.dyn4j.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.collision.manifold.Manifold;
 import org.dyn4j.collision.manifold.ManifoldPoint;
@@ -49,7 +47,7 @@ import org.junit.Test;
 /**
  * Test case for {@link Polygon} - {@link Polygon} collision detection.
  * @author William Bittle
- * @version 1.1.0
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class PolygonPolygonTest extends AbstractTest {
@@ -126,10 +124,10 @@ public class PolygonPolygonTest extends AbstractTest {
 	}
 	
 	/**
-	 * Tests {@link SapIncremental}.
+	 * Tests the broadphase detectors.
 	 */
 	@Test
-	public void detectSap() {
+	public void detectBroadphase() {
 		List<BroadphasePair<CollidableTest>> pairs;
 		
 		// create some collidables

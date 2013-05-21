@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -47,7 +47,7 @@ import org.junit.Test;
 /**
  * Test case for {@link Rectangle} - {@link Triangle} collision detection.
  * @author William Bittle
- * @version 1.1.0
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class RectangleEllipseTest extends AbstractTest {
