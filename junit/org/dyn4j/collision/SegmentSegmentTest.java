@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -28,9 +28,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.collision.Collidable;
 import org.dyn4j.collision.broadphase.BroadphasePair;
-import org.dyn4j.collision.broadphase.SapIncremental;
 import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.Penetration;
 import org.dyn4j.collision.narrowphase.Sat;
@@ -45,7 +43,7 @@ import org.junit.Test;
 /**
  * Test case for {@link Segment} - {@link Segment} collision detection.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class SegmentSegmentTest extends AbstractTest {
@@ -112,10 +110,10 @@ public class SegmentSegmentTest extends AbstractTest {
 	}
 	
 	/**
-	 * Tests {@link SapIncremental}.
+	 * Tests the broadphase detectors.
 	 */
 	@Test
-	public void detectSap() {
+	public void detectBroadphase() {
 		List<BroadphasePair<CollidableTest>> pairs;
 		
 		// create some collidables

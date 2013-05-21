@@ -236,7 +236,6 @@ public class EllipseTest {
 	
 	/**
 	 * Tests the generated AABB.
-	 * @since 3.1.0
 	 */
 	@Test
 	public void createAABB() {

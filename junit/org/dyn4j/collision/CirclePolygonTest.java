@@ -29,9 +29,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.collision.Collidable;
 import org.dyn4j.collision.broadphase.BroadphasePair;
-import org.dyn4j.collision.broadphase.SapIncremental;
 import org.dyn4j.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.collision.manifold.Manifold;
 import org.dyn4j.collision.manifold.ManifoldPoint;
@@ -132,7 +130,7 @@ public class CirclePolygonTest extends AbstractTest {
 	}
 	
 	/**
-	 * Tests {@link SapIncremental}.
+	 * Tests the broadphase detectors.
 	 */
 	@Test
 	public void detectBroadphase() {

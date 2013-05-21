@@ -28,9 +28,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.collision.Collidable;
 import org.dyn4j.collision.broadphase.BroadphasePair;
-import org.dyn4j.collision.broadphase.SapIncremental;
 import org.dyn4j.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.collision.manifold.Manifold;
 import org.dyn4j.collision.manifold.ManifoldPoint;
@@ -51,7 +49,7 @@ import org.junit.Test;
 /**
  * Test case for {@link Polygon} - {@link Rectangle} collision detection.
  * @author William Bittle
- * @version 3.1.4
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class PolygonRectangleTest extends AbstractTest {
@@ -128,10 +126,10 @@ public class PolygonRectangleTest extends AbstractTest {
 	}
 	
 	/**
-	 * Tests {@link SapIncremental}.
+	 * Tests the broadphase detectors.
 	 */
 	@Test
-	public void detectSap() {
+	public void detectBroadphase() {
 		List<BroadphasePair<CollidableTest>> pairs;
 		
 		// create some collidables
