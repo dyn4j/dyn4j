@@ -4,6 +4,8 @@ Version 3.1.5
 New Features:
   - Added a new feature to the Geometry class for generating ellipse shapes
     in the form of Polygons.
+  - Added a new Ellipse shape in the extras package.
+  - Updated the createUnitCirclePolygon method to be more efficient.
     
 Bug Fixes:
 
