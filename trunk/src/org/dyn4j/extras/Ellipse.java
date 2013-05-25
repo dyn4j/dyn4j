@@ -47,7 +47,7 @@ import org.dyn4j.resources.Messages;
  * @since 3.1.5
  * @version 3.1.5
  */
-public class Ellipse extends AbstractShape implements Transformable, Shape, Convex {
+public class Ellipse extends AbstractShape implements Convex, Shape, Transformable {
 	/** The x-axis */
 	private static final Vector2 X_AXIS = new Vector2(1.0, 0.0);
 	
