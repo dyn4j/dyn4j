@@ -717,6 +717,9 @@ public class Vector2 {
 	 * @return angle in radians [-pi, pi]
 	 */
 	public double getAngleBetween(Vector2 vector) {
-		return Math.atan2(vector.y, vector.x) - Math.atan2(this.y, this.x);
+		double a = Math.atan2(vector.y, vector.x) - Math.atan2(this.y, this.x);
+		if (a > Math.PI) return a - Geometry.TWO_PI;
+		if (a < -Math.PI) return a + Geometry.TWO_PI;
+		return a;
 	}
 }

@@ -330,6 +330,73 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 		return B.product(tb).add(bp1);
 	}
 	
+	/**
+	 * Returns the farthest feature on the given segment.
+	 * <p>
+	 * This will always return the segment itself, but must return it with the correct winding
+	 * and the correct maximum.
+	 * @param v1 the first segment vertex
+	 * @param v2 the second segment vertex
+	 * @param n the direction
+	 * @param transform the local to world space {@link Transform} of this {@link Convex} {@link Shape}
+	 * @return {@link Edge}
+	 * @since 3.1.5
+	 */
+	public static final Edge getFarthestFeature(Vector2 v1, Vector2 v2, Vector2 n, Transform transform) {
+		// the farthest feature for a line is always the line itself
+		Vector2 max = null;
+		// get the vertices
+		Vector2 p1 = transform.getTransformed(v1);
+		Vector2 p2 = transform.getTransformed(v2);
+		// project them onto the vector
+		double dot1 = n.dot(p1);
+		double dot2 = n.dot(p2);
+		// find the greatest projection
+		int index = 0;
+		if (dot1 >= dot2) {
+			max = p1;
+			index = 0;
+		} else {
+			max = p2;
+			index = 1;
+		}
+		// return the points of the segment in the
+		// opposite direction as the other shape
+		Vertex vp1 = new Vertex(p1, 0);
+		Vertex vp2 = new Vertex(p2, 1);
+		Vertex vm = new Vertex(max, index);
+		// make sure the edge is the right winding
+		if (p1.to(p2).right().dot(n) > 0) {
+			return new Edge(vp2, vp1, vm, p2.to(p1), 0);
+		} else {
+			return new Edge(vp1, vp2, vm, p1.to(p2), 0);
+		}
+	}
+	
+	/**
+	 * Returns the farthest point on the given segment.
+	 * @param v1 the first point of the segment
+	 * @param v2 the second point of the segment
+	 * @param n the direction
+	 * @param transform the local to world space {@link Transform} of this {@link Convex} {@link Shape}
+	 * @return {@link Vector2}
+	 * @since 3.1.5
+	 */
+	public static final Vector2 getFarthestPoint(Vector2 v1, Vector2 v2, Vector2 n, Transform transform) {
+		// get the vertices and the center
+		Vector2 p1 = transform.getTransformed(v1);
+		Vector2 p2 = transform.getTransformed(v2);
+		// project them onto the vector
+		double dot1 = n.dot(p1);
+		double dot2 = n.dot(p2);
+		// find the greatest projection
+		if (dot1 >= dot2) {
+			return p1;
+		} else {
+			return p2;
+		}
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Convex#getAxes(java.util.List, org.dyn4j.geometry.Transform)
 	 */
@@ -473,18 +540,7 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	 */
 	@Override
 	public Vector2 getFarthestPoint(Vector2 n, Transform transform) {
-		// get the vertices and the center
-		Vector2 p1 = transform.getTransformed(this.vertices[0]);
-		Vector2 p2 = transform.getTransformed(this.vertices[1]);
-		// project them onto the vector
-		double dot1 = n.dot(p1);
-		double dot2 = n.dot(p2);
-		// find the greatest projection
-		if (dot1 >= dot2) {
-			return p1;
-		} else {
-			return p2;
-		}
+		return Segment.getFarthestPoint(this.vertices[0], this.vertices[1], n, transform);
 	}
 	
 	/**
@@ -497,34 +553,7 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	 */
 	@Override
 	public Edge getFarthestFeature(Vector2 n, Transform transform) {
-		// the farthest feature for a line is always the line itself
-		Vector2 max = null;
-		// get the vertices
-		Vector2 p1 = transform.getTransformed(this.vertices[0]);
-		Vector2 p2 = transform.getTransformed(this.vertices[1]);
-		// project them onto the vector
-		double dot1 = n.dot(p1);
-		double dot2 = n.dot(p2);
-		// find the greatest projection
-		int index = 0;
-		if (dot1 >= dot2) {
-			max = p1;
-			index = 0;
-		} else {
-			max = p2;
-			index = 1;
-		}
-		// return the points of the segment in the
-		// opposite direction as the other shape
-		Vertex vp1 = new Vertex(p1, 0);
-		Vertex vp2 = new Vertex(p2, 1);
-		Vertex vm = new Vertex(max, index);
-		// make sure the edge is the right winding
-		if (p1.to(p2).right().dot(n) > 0) {
-			return new Edge(vp2, vp1, vm, p2.to(p1), 0);
-		} else {
-			return new Edge(vp1, vp2, vm, p1.to(p2), 0);
-		}
+		return Segment.getFarthestFeature(this.vertices[0], this.vertices[1], n, transform);
 	}
 	
 	/* (non-Javadoc)

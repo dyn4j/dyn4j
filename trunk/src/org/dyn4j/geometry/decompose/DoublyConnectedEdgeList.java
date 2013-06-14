@@ -729,7 +729,7 @@ public class DoublyConnectedEdgeList {
 				stack.add(vTop);
 				stack.add(v);
 			} else if (v.isAdjacent(vTop) && !v.isAdjacent(vBot)) {
-				double angle = 0;
+				double cross = 0;
 				
 				int sSize = stack.size();
 				while (sSize > 1) {
@@ -742,14 +742,19 @@ public class DoublyConnectedEdgeList {
 					
 					// what chain is the current vertex on
 					if (v.chain == MonotoneChain.Type.LEFT || v.chain == MonotoneChain.Type.BOTTOM) {
-						angle = p2.to(p3).getAngleBetween(p2.to(p1));
+						Vector2 v1 = p2.to(p3);
+						Vector2 v2 = p2.to(p1);
+						cross = v1.cross(v2);
 					} else {
-						angle = p1.to(p2).getAngleBetween(p3.to(p2));
+						Vector2 v1 = p1.to(p2);
+						Vector2 v2 = p3.to(p2);
+						cross = v1.cross(v2);
 					}
 					
 					// make sure the angle is less than pi before we create
 					// a triangle from the points
-					if (Math.abs(angle) < Math.PI) {
+					// epsilon is to handle near colinearity
+					if (cross < Epsilon.E) {
 						// add the half edges
 						this.addHalfEdges(v.data, vt1.data);
 						// remove the top element

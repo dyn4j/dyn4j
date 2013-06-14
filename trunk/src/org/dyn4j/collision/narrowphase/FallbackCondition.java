@@ -22,15 +22,29 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.dyn4j.collision.narrowphase;
+
+import org.dyn4j.geometry.Convex;
 
 /**
- * This package contains extra functionality that is not part of the core library but could still prove
- * useful to users.
- * <p>
- * If you intend on using a class from this package, be sure to read the Javadocs to fully understand
- * any caveats that these classes may come with.
- * @author William Bittle 
+ * Represents a condition that returns true to indicate a fallback {@link NarrowphaseDetector}
+ * should be used instead of the primary.
+ * @author William Bittle
  * @version 3.1.5
  * @since 3.1.5
  */
-package org.dyn4j.extras;
+public interface FallbackCondition extends Comparable<FallbackCondition> {
+	/**
+	 * Returns true if this condition matches the given input.
+	 * @param convex1 the first {@link Convex}
+	 * @param convex2 the second {@link Convex}
+	 * @return boolean
+	 */
+	public abstract boolean isMatch(Convex convex1, Convex convex2);
+	
+	/**
+	 * Returns the sort index for this condition.
+	 * @return int
+	 */
+	public abstract int getSortIndex();
+}
