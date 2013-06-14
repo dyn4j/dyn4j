@@ -2,13 +2,20 @@
 Version 3.1.5
 ===============================================================================
 New Features:
-  - Added a new feature to the Geometry class for generating ellipse shapes
-    in the form of Polygons.
-  - Added a new Ellipse shape in the extras package.
+  - Added a new Capsule shape primitive.
+  - Added a new Slice shape primitive.
   - Updated the createUnitCirclePolygon method to be more efficient.
+  - Added methods to generate polygonal ellipses and capsules.
+  - Added a new Ellipse shape primitive (GJK support only).
+  - Added a new HalfEllipse shape primitive (GJK support only).
+  - Added a Graphics2DRenderer class to the examples directory to show how to
+    render the shapes using Java2D.  Some of the new shapes are difficult to
+    render properly due to local rotation.
     
 Bug Fixes:
-
+  - Fixed a bug in the Vector2.getAngleBetween method where it would return
+    an angle outside the range of [-pi, pi]
+    
 Deprecated:
 
 Breaking Changes:

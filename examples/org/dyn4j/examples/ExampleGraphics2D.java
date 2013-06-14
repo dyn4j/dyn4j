@@ -112,49 +112,7 @@ public class ExampleGraphics2D extends JFrame {
 			for (BodyFixture fixture : this.fixtures) {
 				// get the shape on the fixture
 				Convex convex = fixture.getShape();
-				// check the shape type
-				if (convex instanceof Polygon) {
-					// since Triangle, Rectangle, and Polygon are all of
-					// type Polygon in addition to their main type
-					Polygon p = (Polygon) convex;
-					int l = p.getVertices().length;
-					int[] x = new int[l];
-					int[] y = new int[l];
-					
-					int i = 0;
-					for (Vector2 v : p.getVertices()) {
-						x[i] = (int)(v.x * SCALE);
-						y[i] = (int)(v.y * SCALE);
-						i++;
-					}
-					
-					java.awt.Polygon poly = new java.awt.Polygon(x, y, l);
-					
-					// set the color
-					g.setColor(this.color);
-					// fill the shape
-					g.fillPolygon(poly);
-					// set the color
-					g.setColor(this.color.darker());
-					// draw the shape
-					g.drawPolygon(poly);
-				} else if (convex instanceof Circle) {
-					// cast the shape to get the radius
-					Circle c = (Circle) convex;
-					double r = c.getRadius();
-					Vector2 cc = c.getCenter();
-					int x = (int)Math.ceil((cc.x - r) * SCALE);
-					int y = (int)Math.ceil((cc.y - r) * SCALE);
-					int w = (int)Math.ceil(r * 2 * SCALE);
-					// set the color
-					g.setColor(this.color);
-					// fill the shape
-					g.fillOval(x, y, w, w);
-					// set the color
-					g.setColor(this.color.darker());
-					// draw the shape
-					g.drawOval(x, y, w, w);
-				}
+				Graphics2DRenderer.render(g, convex, SCALE, color);
 			}
 			
 			// set the original transform

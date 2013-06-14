@@ -702,6 +702,65 @@ public class Geometry {
 	}
 	
 	/**
+	 * Creates a new {@link Capsule} bounded by the given rectangle width and height.
+	 * <p>
+	 * The capsule will be axis-aligned and centered on the origin with the caps on the
+	 * ends of the largest dimension.
+	 * <p>
+	 * If width and height are equal use a {@link Circle} shape instead.
+	 * @param width the width
+	 * @param height the height
+	 * @return {@link Capsule}
+	 * @throws IllegalArgumentException if width or height are less than or equal to zero or if the width and height are near equal
+	 * @since 3.1.5
+	 */
+	public static final Capsule createCapsule(double width, double height) {
+		return new Capsule(width, height);
+	}
+	
+	/**
+	 * Creates a new {@link Slice} with the given circle radius and arc length theta.
+	 * <p>
+	 * A {@link Slice} is an arbitrary slice of a circle. The specified radius is the radius
+	 * of the circle. The slice will be positioned with the <i>circle center</i> on the origin.
+	 * <p>
+	 * Theta is the total arc length of the slice specified in radians. Theta is halved, putting
+	 * half the arc length below the x-axis and half above.
+	 * <p>
+	 * Theta cannot be greater than &pi;.
+	 * @param radius the circle radius
+	 * @param theta the total arc length in radians
+	 * @return {@link Slice}
+	 * @throws IllegalArgumentException if radius is less than or equal to zero; if theta is less than or equal to zero or is greater than &pi;
+	 * @since 3.1.5
+	 */
+	public static final Slice createSlice(double radius, double theta) {
+		return new Slice(radius, theta);
+	}
+	
+	/**
+	 * Creates a new {@link Slice} with the given circle radius and arc length theta.
+	 * <p>
+	 * A {@link Slice} is an arbitrary slice of a circle. The specified radius is the radius
+	 * of the circle. The slice will be positioned with the <i>centroid</i> at the origin.
+	 * <p>
+	 * Theta is the total arc length of the slice specified in radians. Theta is halved, putting
+	 * half the arc length below the x-axis and half above.
+	 * <p>
+	 * Theta cannot be greater than &pi;.
+	 * @param radius the circle radius
+	 * @param theta the total arc length in radians
+	 * @return {@link Slice}
+	 * @throws IllegalArgumentException if radius is less than or equal to zero; if theta is less than or equal to zero or is greater than &pi;
+	 * @since 3.1.5
+	 */
+	public static final Slice createSliceAtOrigin(double radius, double theta) {
+		Slice slice = new Slice(radius, theta);
+		slice.translate(-slice.center.x, -slice.center.y);
+		return slice;
+	}
+	
+	/**
 	 * Creates a new {@link Polygon} in the shape of a circle with count number of vertices centered
 	 * on the origin.
 	 * @param count the number of vertices to use; must be greater than 2
@@ -762,11 +821,8 @@ public class Geometry {
 	 * Creates a new {@link Polygon} in the shape of an ellipse with count number of vertices centered
 	 * on the origin.
 	 * <p>
-	 * The count must be a multiple of 2.  If not, the returned polygon will have count - 1
+	 * The count should be a multiple of 2.  If not, the returned polygon will have count - 1
 	 * vertices.
-	 * <p>
-	 * Since dyn4j does not have an ellipse primitive, this method returns a {@link Polygon}.  The number of
-	 * vertices should be high enough to look visually "round".
 	 * @param count the number of vertices to use; should be even, if not, count - 1 vertices will be generated
 	 * @param width the width of the ellipse
 	 * @param height the height of the ellipse
@@ -805,6 +861,111 @@ public class Geometry {
 				vertices[vertices.length - j] = new Vector2(x, -y);
 			}
 			vertices[j++] = new Vector2(x, y);
+		}
+		
+		return new Polygon(vertices);
+	}
+	
+	/**
+	 * Creates a new {@link Polygon} in the shape of a capsule using count number of vertices on each
+	 * cap, centered on the origin.  The caps will be on the ends of the largest dimension.
+	 * <p>
+	 * The returned polygon will have 4 + 2 * count number of vertices.
+	 * @param count the number of vertices to use for one cap
+	 * @param width the bounding rectangle width
+	 * @param height the bounding rectangle height
+	 * @return {@link Polygon}
+	 * @since 3.1.5
+	 */
+	public static final Polygon createPolygonalCapsule(int count, double width, double height) {
+		// validate the input
+		if (count < 1) throw new IllegalArgumentException(Messages.getString("geometry.capsuleInvalidCount"));
+		if (width <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.capsuleInvalidWidth"));
+		if (height <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.capsuleInvalidHeight"));
+		
+		// if the width and height are close enough to being equal, just return a circle
+		if (Math.abs(width - height) < Epsilon.E) {
+			return Geometry.createPolygonalCircle(count, width);
+		}
+		
+		// compute the angular increment
+		final double pin = Math.PI / (count + 1);
+		// 4 rect verts plus 2 * circle half verts
+		final Vector2[] vertices = new Vector2[4 + 2 * count];
+		
+		final double c = Math.cos(pin);
+		final double s = Math.sin(pin);
+		double t = 0;
+
+		// get the major and minor axes
+		double major = width;
+		double minor = height;
+		boolean vertical = false;
+		if (width < height) {
+			major = height;
+			minor = width;
+			vertical = true;
+		}
+		
+		// get the radius from the minor axis
+		double radius = minor * 0.5;
+		
+		// compute the x/y offsets
+		double offset = major * 0.5 - radius;
+		double ox = 0;
+		double oy = 0;
+		if (vertical) {
+			// aligned to the y
+			oy = offset;
+		} else {
+			// aligned to the x
+			ox = offset;
+		}
+		
+		int n = 0;
+		
+		// right cap
+		double ao = vertical ? 0 : Math.PI * 0.5;
+		double x = radius * Math.cos(pin - ao);
+		double y = radius * Math.sin(pin - ao);
+		for(int i = 0; i < count; i++) {
+			vertices[n++] = new Vector2(x + ox, y + oy);
+
+			//apply the rotation matrix
+			t = x;
+			x = c * x - s * y;
+			y = s * t + c * y;
+		}
+		
+		// add in top/left vertices
+		if (vertical) {
+			vertices[n++] = new Vector2(-radius,  oy);
+			vertices[n++] = new Vector2(-radius, -oy);
+		} else {
+			vertices[n++] = new Vector2( ox, radius);
+			vertices[n++] = new Vector2(-ox, radius);
+		}
+		
+		// left cap
+		ao = vertical ? Math.PI : Math.PI * 0.5;
+		x = radius * Math.cos(pin + ao);
+		y = radius * Math.sin(pin + ao);
+		for(int i = 0; i < count; i++) {
+			vertices[n++] = new Vector2(x - ox, y - oy);
+
+			//apply the rotation matrix
+			t = x;
+			x = c * x - s * y;
+			y = s * t + c * y;
+		}
+		
+		// add in bottom/right vertices
+		if (vertical) {
+			vertices[n++] = new Vector2(radius, -oy);
+			vertices[n++] = new Vector2(radius,  oy);
+		} else {
+			vertices[n++] = new Vector2(-ox, -radius);
+			vertices[n++] = new Vector2( ox, -radius);
 		}
 		
 		return new Polygon(vertices);

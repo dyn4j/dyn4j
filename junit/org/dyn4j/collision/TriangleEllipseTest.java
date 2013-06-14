@@ -35,11 +35,11 @@ import org.dyn4j.collision.manifold.ManifoldPoint;
 import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.Penetration;
 import org.dyn4j.collision.narrowphase.Separation;
-import org.dyn4j.extras.Ellipse;
 import org.dyn4j.geometry.Shape;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.geometry.extras.Ellipse;
 import org.junit.Before;
 import org.junit.Test;
 

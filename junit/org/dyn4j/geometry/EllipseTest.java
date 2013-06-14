@@ -26,7 +26,7 @@ package org.dyn4j.geometry;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.extras.Ellipse;
+import org.dyn4j.geometry.extras.Ellipse;
 import org.junit.Test;
 
 /**
