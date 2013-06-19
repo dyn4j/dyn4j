@@ -284,14 +284,14 @@ public class CirclePolygonTest extends AbstractTest {
 		TestCase.assertTrue(this.gjk.detect(circ, t1, poly, t2));
 		n = p.getNormal();
 		TestCase.assertEquals(1.433, p.getDepth(), 1.0e-3);
-		TestCase.assertEquals(-0.866, n.x, 1.0e-3);
+		TestCase.assertEquals( 0.866, n.x, 1.0e-3);
 		TestCase.assertEquals( 0.499, n.y, 1.0e-3);
 		// try reversing the shapes
 		TestCase.assertTrue(this.gjk.detect(poly, t2, circ, t1, p));
 		TestCase.assertTrue(this.gjk.detect(poly, t2, circ, t1));
 		n = p.getNormal();
 		TestCase.assertEquals(1.433, p.getDepth(), 1.0e-3);
-		TestCase.assertEquals(0.866, n.x, 1.0e-3);
+		TestCase.assertEquals( 0.866, n.x, 1.0e-3);
 		TestCase.assertEquals(-0.499, n.y, 1.0e-3);
 		
 		// test overlap

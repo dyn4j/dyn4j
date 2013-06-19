@@ -40,6 +40,21 @@ import org.dyn4j.resources.Messages;
  * @since 3.1.5
  */
 public class Capsule extends AbstractShape implements Convex, Shape, Transformable {
+	/** 
+	 * The Capsule shape has two edge features which could be returned from the {@link #getFarthestFeature(Vector2, Transform)}
+	 * method. Under normal floating point conditions the edges will never be selected as the farthest features. Due to this,
+	 * stacking of capsule shapes is very unstable (or any resting contact that involves the edge). We introduce this factor
+	 * (% of projected normal) to help select the edge in cases where the collision normal is nearly parallel to the edge normal.
+	 */
+	protected static final double EDGE_FEATURE_SELECTION_CRITERIA = 0.98;
+	
+	/**
+	 * Because we are selecting an edge even when the farthest feature should be a vertex, when the edges are clipped
+	 * against each other (in the ClippingManifoldSolver) they will not overlap. Due to this, we introduce an expansion
+	 * value (% of the width) that expands the edge feature so that in these cases a collision manifold is still generated.
+	 */
+	protected static final double EDGE_FEATURE_EXPANSION_FACTOR = 0.1;
+	
 	/** The bounding rectangle width */
 	protected double width;
 	
@@ -199,26 +214,35 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 		// test whether the given direction is within a certain angle of the
 		// local x axis. if so, use the edge feature rather than the point
 		Vector2 localAxis = transform.getInverseTransformedR(n);
-		Vector2 py = this.localXAxis.getLeftHandOrthogonalVector();
-		Vector2 ny = this.localXAxis.getRightHandOrthogonalVector();
+		Vector2 n1 = this.localXAxis.getLeftHandOrthogonalVector();
 		
-		final double FUDGE_FACTOR = 0.99999;
-		double d = localAxis.dot(localAxis) * FUDGE_FACTOR;
-		double d1 = localAxis.dot(py);
-		double d2 = localAxis.dot(ny);
+		// get the squared length of the localaxis and add the fudge factor
+		// should always 1.0 * factor since localaxis is normalized
+		double d = localAxis.dot(localAxis) * Capsule.EDGE_FEATURE_SELECTION_CRITERIA;
+		// project the normal onto the localaxis normal
+		double d1 = localAxis.dot(n1);
 		
-		// Math.abs(d1) < d && Math.abs(d2) < d
-		if (Math.abs(d1) < d && Math.abs(d2) < d) {
+		// we only need to test one normal since we only care about its projection length
+		// we can later determine which direction by the sign of the projection
+		if (Math.abs(d1) < d) {
 			// then its the farthest point
 			Vector2 point = this.getFarthestPoint(n, transform);
 			return new Vertex(point);
-		} else if (d1 > 0) {
-			Vector2 v = this.localXAxis.getLeftHandOrthogonalVector().multiply(this.capRadius);
-			// return the full bottom side
-			return Segment.getFarthestFeature(this.foci[0].sum(v), this.foci[1].sum(v), n, transform);
 		} else {
-			Vector2 v = this.localXAxis.getLeftHandOrthogonalVector().multiply(-this.capRadius);
-			return Segment.getFarthestFeature(this.foci[0].sum(v), this.foci[1].sum(v), n, transform);
+			// compute the vector to add/sub from the foci
+			Vector2 v = n1.multiply(this.capRadius);
+			// compute an expansion amount based on the width of the shape
+			Vector2 e = this.localXAxis.product(this.width * 0.5 * EDGE_FEATURE_EXPANSION_FACTOR);
+			if (d1 > 0) {
+				Vector2 p1 = this.foci[0].sum(v).subtract(e);
+				Vector2 p2 = this.foci[1].sum(v).add(e);
+				// return the full bottom side
+				return Segment.getFarthestFeature(p1, p2, n, transform);
+			} else {
+				Vector2 p1 = this.foci[0].difference(v).subtract(e);
+				Vector2 p2 = this.foci[1].difference(v).add(e);
+				return Segment.getFarthestFeature(p1, p2, n, transform);
+			}
 		}
 	}
 

@@ -41,7 +41,7 @@ import org.junit.Test;
 /**
  * Tests the methods of the {@link Mass} class.
  * @author William Bittle
- * @version 3.1.4
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class MassTest {
@@ -383,5 +383,22 @@ public class MassTest {
 		
 		TestCase.assertEquals(rm.mass, pm.mass, 1.0e-3);
 		TestCase.assertEquals(rm.inertia, pm.inertia, 1.0e-3);
+	}
+
+	/**
+	 * Make sure the center of mass does not effect the mass or inertia.
+	 * @since 3.1.5
+	 */
+	@Test
+	public void polygonInertiaAndMass() {
+		// a polygon of a simple shape should match a simple shape's mass and inertia
+		Polygon p = Geometry.createUnitCirclePolygon(4, Math.hypot(0.5, 0.5));
+		Mass m1 = p.createMass(10.0);
+		
+		p.translate(0.5, -2.0);
+		Mass m2 = p.createMass(10.0);
+		
+		TestCase.assertEquals(m1.mass, m2.mass, 1.0e-3);
+		TestCase.assertEquals(m1.inertia, m2.inertia, 1.0e-3);
 	}
 }

@@ -150,6 +150,22 @@ public abstract class AbstractShape implements Shape, Transformable {
 	}
 	
 	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Shape#project(org.dyn4j.geometry.Vector2)
+	 */
+	@Override
+	public Interval project(Vector2 n) {
+		return this.project(n, Transform.IDENTITY);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Shape#contains(org.dyn4j.geometry.Vector2)
+	 */
+	@Override
+	public boolean contains(Vector2 point) {
+		return this.contains(point, Transform.IDENTITY);
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Shape#createAABB()
 	 */
 	@Override

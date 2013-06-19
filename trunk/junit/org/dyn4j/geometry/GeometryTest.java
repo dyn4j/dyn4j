@@ -1130,6 +1130,290 @@ public class GeometryTest {
 	}
 	
 	/**
+	 * Tests the createPolygonalEllipse method.
+	 * @since 3.1.5
+	 */
+	@Test
+	public void createPolygonalEllipse() {
+		// this method should succeed
+		Polygon p = Geometry.createPolygonalEllipse(10, 2, 1);
+		// and the center should be the origin
+		TestCase.assertEquals(0.000, p.getCenter().x, 1.0e-3);
+		TestCase.assertEquals(0.000, p.getCenter().y, 1.0e-3);
+	}
+
+	/**
+	 * Tests the createPolygonalEllipse method with an odd count.
+	 * @since 3.1.5
+	 */
+	@Test
+	public void createPolygonalEllipseOddCount() {
+		// this method should succeed
+		Polygon p = Geometry.createPolygonalEllipse(5, 2, 1);
+		// and the center should be the origin
+		TestCase.assertEquals(4, p.getVertices().length);
+		
+		// this method should succeed
+		p = Geometry.createPolygonalEllipse(11, 2, 1);
+		// and the center should be the origin
+		TestCase.assertEquals(10, p.getVertices().length);
+	}
+	
+	/**
+	 * Tests the createPolygonalEllipse method with less than 4 vertices.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonalEllipseLessCount() {
+		Geometry.createPolygonalEllipse(3, 2, 1);
+	}
+	
+	/**
+	 * Tests the createPolygonalEllipse method with a zero width.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonalEllipseZeroWidth() {
+		Geometry.createPolygonalEllipse(10, 0, 1);
+	}
+	
+	/**
+	 * Tests the createPolygonalEllipse method with a zero height.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonalEllipseZeroHeight() {
+		Geometry.createPolygonalEllipse(10, 2, 0);
+	}
+	
+	/**
+	 * Tests the createPolygonalEllipse method with a negative width.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonalEllipseNegativeWidth() {
+		Geometry.createPolygonalEllipse(10, -1, 1);
+	}
+	
+	/**
+	 * Tests the createPolygonalEllipse method with a negative height.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonalEllipseNegativeHeight() {
+		Geometry.createPolygonalEllipse(10, 2, -1);
+	}
+	
+	/**
+	 * Tests the createPolygonalSlice method.
+	 * @since 3.1.5
+	 */
+	@Test
+	public void createPolygonalSlice() {
+		// this method should succeed
+		Polygon p = Geometry.createPolygonalSlice(5, 1.0, Math.toRadians(30));
+		// the center should not be at the origin
+		TestCase.assertEquals(0.658, p.getCenter().x, 1.0e-3);
+		TestCase.assertEquals(0.000, p.getCenter().y, 1.0e-3);
+	}
+	
+	/**
+	 * Tests the createPolygonalSliceAtOrigin method.
+	 * @since 3.1.5
+	 */
+	@Test
+	public void createPolygonalSliceAtOrigin() {
+		// this method should succeed
+		Polygon p = Geometry.createPolygonalSliceAtOrigin(5, 1.0, Math.toRadians(30));
+		// and the center should be the origin
+		TestCase.assertEquals(0.000, p.getCenter().x, 1.0e-3);
+		TestCase.assertEquals(0.000, p.getCenter().y, 1.0e-3);
+	}
+	
+	/**
+	 * Tests the createPolygonalSlice method with an invalid count.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonalSliceInvalidCount() {
+		Geometry.createPolygonalSlice(0, 1.0, Math.toRadians(30));
+	}
+	
+	/**
+	 * Tests the createPolygonalSlice method with a negative radius.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonalSliceNegativeRadius() {
+		Geometry.createPolygonalSlice(5, -1, Math.toRadians(30));
+	}
+
+	/**
+	 * Tests the createPolygonalSlice method with a zero radius.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonalSliceZeroRadius() {
+		Geometry.createPolygonalSlice(5, 0, Math.toRadians(30));
+	}
+	
+	/**
+	 * Tests the createPolygonalSlice method with a negative theta.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonalSliceThetaLessThanZero() {
+		Geometry.createPolygonalSlice(5, 1.0, -Math.toRadians(30));
+	}
+	
+	/**
+	 * Tests the createPolygonalSlice method with theta equal to zero.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonalSliceThetaLessZero() {
+		Geometry.createPolygonalSlice(5, 1.0, 0);
+	}
+	
+	/**
+	 * Tests the createPolygonalSlice method with theta greater than 180 degrees.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonalSliceThetaGreaterThan180() {
+		Geometry.createPolygonalSlice(5, 1.0, Math.toRadians(190));
+	}
+
+	/**
+	 * Tests the createPolygonalHalfEllipse method.
+	 * @since 3.1.5
+	 */
+	@Test
+	public void createPolygonalHalfEllipse() {
+		// this method should succeed
+		Polygon p = Geometry.createPolygonalHalfEllipse(5, 1.0, 0.5);
+		// the center should not be at the origin
+		TestCase.assertEquals(0.000, p.getCenter().x, 1.0e-3);
+		TestCase.assertEquals(0.103, p.getCenter().y, 1.0e-3);
+	}
+	
+	/**
+	 * Tests the createPolygonalHalfEllipseAtOrigin method.
+	 * @since 3.1.5
+	 */
+	@Test
+	public void createPolygonalHalfEllipseAtOrigin() {
+		// this method should succeed
+		Polygon p = Geometry.createPolygonalHalfEllipseAtOrigin(5, 1.0, 0.5);
+		// the center should be at the origin
+		TestCase.assertEquals(0.000, p.getCenter().x, 1.0e-3);
+		TestCase.assertEquals(0.000, p.getCenter().y, 1.0e-3);
+	}
+	
+	/**
+	 * Tests the createPolygonalHalfEllipse method with an invalid count.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonalHalfEllipseInvalidCount() {
+		Geometry.createPolygonalHalfEllipse(0, 1.0, 0.5);
+	}
+
+	/**
+	 * Tests the createPolygonalHalfEllipse method with a negative width.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonalHalfEllipseZeroWidth() {
+		Geometry.createPolygonalHalfEllipse(5, 0, 0.5);
+	}
+
+	/**
+	 * Tests the createPolygonalHalfEllipse method with zero width.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonalHalfEllipseNegativeWidth() {
+		Geometry.createPolygonalHalfEllipse(5, -1, 0.5);
+	}
+
+	/**
+	 * Tests the createPolygonalHalfEllipse method with a negative height.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonalHalfEllipseNegativeHeight() {
+		Geometry.createPolygonalHalfEllipse(5, 1.0, -0.5);
+	}
+
+	/**
+	 * Tests the createPolygonalHalfEllipse method with zero height.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonalHalfEllipseZeroHeight() {
+		Geometry.createPolygonalHalfEllipse(5, 1.0, 0);
+	}
+
+	/**
+	 * Tests the createPolygonalCapsule method.
+	 * @since 3.1.5
+	 */
+	@Test
+	public void createPolygonalCapsule() {
+		// this method should succeed
+		Polygon p = Geometry.createPolygonalCapsule(5, 1.0, 0.5);
+		// the center should be at the origin
+		TestCase.assertEquals(0.000, p.getCenter().x, 1.0e-3);
+		TestCase.assertEquals(0.000, p.getCenter().y, 1.0e-3);
+	}
+	
+	/**
+	 * Tests the createPolygonalCapsule method with an invalid count.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonalCapsuleInvalidCount() {
+		Geometry.createPolygonalCapsule(0, 1.0, 0.5);
+	}
+	
+	/**
+	 * Tests the createPolygonalCapsule method with zero width.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonalCapsuleZeroWidth() {
+		Geometry.createPolygonalCapsule(5, 0, 0.5);
+	}
+
+	/**
+	 * Tests the createPolygonalCapsule method with a negative width.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonalCapsuleNegativeWidth() {
+		Geometry.createPolygonalCapsule(5, -1, 0.5);
+	}
+
+	/**
+	 * Tests the createPolygonalCapsule method with zero height.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonalCapsuleZeroHeight() {
+		Geometry.createPolygonalCapsule(5, 1.0, 0);
+	}
+
+	/**
+	 * Tests the createPolygonalCapsule method with zero width.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonalCapsuleNegativeHeight() {
+		Geometry.createPolygonalCapsule(5, 1.0, -0.5);
+	}
+	
+	/**
 	 * Tests the flip polygon method.
 	 * @since 3.1.4
 	 */
@@ -1151,81 +1435,6 @@ public class GeometryTest {
 		TestCase.assertEquals( 2.309, vertices[3].y, 1.0e-3);
 		TestCase.assertEquals(-2.000, vertices[4].x, 1.0e-3);
 		TestCase.assertEquals( 3.000, vertices[4].y, 1.0e-3);
-	}
-	
-	/**
-	 * Tests the createEllipse method.
-	 * @since 3.1.5
-	 */
-	@Test
-	public void createPolygonalEllipse() {
-		// this method should succeed
-		Polygon p = Geometry.createPolygonalEllipse(10, 2, 1);
-		// and the center should be the origin
-		TestCase.assertEquals(0.000, p.getCenter().x, 1.0e-3);
-		TestCase.assertEquals(0.000, p.getCenter().y, 1.0e-3);
-	}
-
-	/**
-	 * Tests the createEllipse method with an odd count.
-	 * @since 3.1.5
-	 */
-	@Test
-	public void createPolygonalEllipseOddCount() {
-		// this method should succeed
-		Polygon p = Geometry.createPolygonalEllipse(5, 2, 1);
-		// and the center should be the origin
-		TestCase.assertEquals(4, p.getVertices().length);
-		
-		// this method should succeed
-		p = Geometry.createPolygonalEllipse(11, 2, 1);
-		// and the center should be the origin
-		TestCase.assertEquals(10, p.getVertices().length);
-	}
-	
-	/**
-	 * Tests the createEllipse method with less than 4 vertices.
-	 * @since 3.1.5
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void createPolygonalEllipseLessCount() {
-		Geometry.createPolygonalEllipse(3, 2, 1);
-	}
-	
-	/**
-	 * Tests the createEllipse method with a zero width.
-	 * @since 3.1.5
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void createPolygonalEllipseZeroWidth() {
-		Geometry.createPolygonalEllipse(10, 0, 1);
-	}
-	
-	/**
-	 * Tests the createEllipse method with a zero height.
-	 * @since 3.1.5
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void createPolygonalEllipseZeroHeight() {
-		Geometry.createPolygonalEllipse(10, 2, 0);
-	}
-	
-	/**
-	 * Tests the createEllipse method with a negative width.
-	 * @since 3.1.5
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void createPolygonalEllipseNegativeWidth() {
-		Geometry.createPolygonalEllipse(10, -1, 1);
-	}
-	
-	/**
-	 * Tests the createEllipse method with a negative height.
-	 * @since 3.1.5
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void createPolygonalEllipseNegativeHeight() {
-		Geometry.createPolygonalEllipse(10, 2, -1);
 	}
 	
 	/**
