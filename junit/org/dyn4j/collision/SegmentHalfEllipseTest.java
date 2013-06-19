@@ -35,37 +35,34 @@ import org.dyn4j.collision.manifold.ManifoldPoint;
 import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.Penetration;
 import org.dyn4j.collision.narrowphase.Separation;
-import org.dyn4j.geometry.Ellipse;
+import org.dyn4j.geometry.HalfEllipse;
+import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Shape;
 import org.dyn4j.geometry.Transform;
-import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Test case for {@link Triangle} - {@link Ellipse} collision detection.
+ * Test case for {@link Segment} - {@link HalfEllipse} collision detection.
  * @author William Bittle
  * @version 3.1.5
  * @since 3.1.5
  */
-public class TriangleEllipseTest extends AbstractTest {
-	/** The {@link Triangle} */
-	private Triangle t;
+public class SegmentHalfEllipseTest extends AbstractTest {
+	/** The test {@link Segment} */
+	private Segment s;
 	
-	/** The {@link Ellipse} */
-	private Ellipse e;
+	/** The test {@link HalfEllipse} */
+	private HalfEllipse e;
 	
 	/**
 	 * Sets up the test.
 	 */
 	@Before
 	public void setup() {
-		this.t = new Triangle(
-						new Vector2(1.29, 0.25),
-						new Vector2(-0.71, 0.65),
-						new Vector2(-0.59, -0.85));
-		this.e = new Ellipse(1.0, 0.5);
+		this.s = new Segment(new Vector2(-1.5, 1.0), new Vector2(1.5, -1.0));
+		this.e = new HalfEllipse(2.0, 0.5);
 	}
 	
 	/**
@@ -77,23 +74,23 @@ public class TriangleEllipseTest extends AbstractTest {
 		Transform t2 = new Transform();
 		
 		// test containment
-		TestCase.assertTrue(this.aabb.detect(t, t1, e, t2));
-		TestCase.assertTrue(this.aabb.detect(e, t2, t, t1));
+		TestCase.assertTrue(this.aabb.detect(s, t1, e, t2));
+		TestCase.assertTrue(this.aabb.detect(e, t2, s, t1));
 		
 		// test overlap
-		t1.translate(-0.8, 0.0);
-		TestCase.assertTrue(this.aabb.detect(t, t1, e, t2));
-		TestCase.assertTrue(this.aabb.detect(e, t2, t, t1));
+		t1.translate(0.6, 0.0);
+		TestCase.assertTrue(this.aabb.detect(s, t1, e, t2));
+		TestCase.assertTrue(this.aabb.detect(e, t2, s, t1));
 		
 		// test only AABB overlap
-		t2.translate(0.5, -0.5);
-		TestCase.assertTrue(this.aabb.detect(t, t1, e, t2));
-		TestCase.assertTrue(this.aabb.detect(e, t2, t, t1));
+		t2.translate(0.0, -0.5);
+		TestCase.assertTrue(this.aabb.detect(s, t1, e, t2));
+		TestCase.assertTrue(this.aabb.detect(e, t2, s, t1));
 		
 		// test no overlap
-		t2.translate(1.0, 0.5);
-		TestCase.assertFalse(this.aabb.detect(t, t1, e, t2));
-		TestCase.assertFalse(this.aabb.detect(e, t2, t, t1));
+		t2.translate(-3.0, 0.0);
+		TestCase.assertFalse(this.aabb.detect(s, t1, e, t2));
+		TestCase.assertFalse(this.aabb.detect(e, t2, s, t1));
 	}
 	
 	/**
@@ -102,7 +99,7 @@ public class TriangleEllipseTest extends AbstractTest {
 	@Test	
 	public void detectCollidableAABB() {
 		// create some collidables
-		CollidableTest ct1 = new CollidableTest(t);
+		CollidableTest ct1 = new CollidableTest(s);
 		CollidableTest ct2 = new CollidableTest(e);
 		
 		// test containment
@@ -110,30 +107,30 @@ public class TriangleEllipseTest extends AbstractTest {
 		TestCase.assertTrue(this.aabb.detect(ct2, ct1));
 		
 		// test overlap
-		ct1.translate(-0.8, 0.0);
+		ct1.translate(0.6, 0.0);
 		TestCase.assertTrue(this.aabb.detect(ct1, ct2));
 		TestCase.assertTrue(this.aabb.detect(ct2, ct1));
 		
 		// test only AABB overlap
-		ct2.translate(0.5, -0.5);
+		ct2.translate(0.0, -0.5);
 		TestCase.assertTrue(this.aabb.detect(ct1, ct2));
 		TestCase.assertTrue(this.aabb.detect(ct2, ct1));
 		
 		// test no overlap
-		ct2.translate(1.0, 0.5);
+		ct2.translate(-3.0, 0.0);
 		TestCase.assertFalse(this.aabb.detect(ct1, ct2));
 		TestCase.assertFalse(this.aabb.detect(ct2, ct1));
 	}
 	
 	/**
-	 * Tests the broadphase.
+	 * Tests the broadphase detectors.
 	 */
 	@Test
 	public void detectBroadphase() {
 		List<BroadphasePair<CollidableTest>> pairs;
 		
 		// create some collidables
-		CollidableTest ct1 = new CollidableTest(t);
+		CollidableTest ct1 = new CollidableTest(s);
 		CollidableTest ct2 = new CollidableTest(e);
 		
 		this.sapI.add(ct1);
@@ -156,7 +153,7 @@ public class TriangleEllipseTest extends AbstractTest {
 		TestCase.assertEquals(1, pairs.size());
 		
 		// test overlap
-		ct1.translate(-0.8, 0.0);
+		ct1.translate(0.6, 0.0);
 		this.sapI.update(ct1);
 		this.sapBF.update(ct1);
 		this.sapT.update(ct1);
@@ -171,7 +168,7 @@ public class TriangleEllipseTest extends AbstractTest {
 		TestCase.assertEquals(1, pairs.size());
 		
 		// test only AABB overlap
-		ct2.translate(0.5, -0.5);
+		ct2.translate(0.0, -0.5);
 		this.sapI.update(ct2);
 		this.sapBF.update(ct2);
 		this.sapT.update(ct2);
@@ -186,7 +183,7 @@ public class TriangleEllipseTest extends AbstractTest {
 		TestCase.assertEquals(1, pairs.size());
 		
 		// test no overlap
-		ct2.translate(1.0, 0.5);
+		ct2.translate(-3.0, 0.0);
 		this.sapI.update(ct2);
 		this.sapBF.update(ct2);
 		this.sapT.update(ct2);
@@ -210,7 +207,7 @@ public class TriangleEllipseTest extends AbstractTest {
 		Transform t1 = new Transform();
 		Transform t2 = new Transform();
 		
-		this.sat.detect(t, t1, e, t2, p);
+		this.sat.detect(s, t1, e, t2, p);
 	}
 	
 	/**
@@ -225,51 +222,51 @@ public class TriangleEllipseTest extends AbstractTest {
 		Vector2 n = null;
 		
 		// test containment
-		TestCase.assertTrue(this.gjk.detect(t, t1, e, t2, p));
-		TestCase.assertTrue(this.gjk.detect(t, t1, e, t2));
+		TestCase.assertTrue(this.gjk.detect(s, t1, e, t2, p));
+		TestCase.assertTrue(this.gjk.detect(s, t1, e, t2));
 		n = p.getNormal();
-		TestCase.assertEquals( 0.196, n.x, 1.0e-3);
-		TestCase.assertEquals( 0.980, n.y, 1.0e-3);
-		TestCase.assertEquals( 0.762, p.getDepth(), 1.0e-3);
+		TestCase.assertEquals( 0.554, n.x, 1.0e-3);
+		TestCase.assertEquals( 0.832, n.y, 1.0e-3);
+		TestCase.assertEquals( 0.554, p.getDepth(), 1.0e-3);
 		// try reversing the shapes
-		TestCase.assertTrue(this.gjk.detect(e, t2, t, t1, p));
-		TestCase.assertTrue(this.gjk.detect(e, t2, t, t1));
+		TestCase.assertTrue(this.gjk.detect(e, t2, s, t1, p));
+		TestCase.assertTrue(this.gjk.detect(e, t2, s, t1));
 		n = p.getNormal();
-		TestCase.assertEquals(-0.196, n.x, 1.0e-3);
-		TestCase.assertEquals(-0.980, n.y, 1.0e-3);
-		TestCase.assertEquals( 0.762, p.getDepth(), 1.0e-3);
+		TestCase.assertEquals(-0.554, n.x, 1.0e-3);
+		TestCase.assertEquals(-0.832, n.y, 1.0e-3);
+		TestCase.assertEquals( 0.554, p.getDepth(), 1.0e-3);
 		
 		// test overlap
-		t1.translate(-0.8, 0.0);
-		TestCase.assertTrue(this.gjk.detect(t, t1, e, t2, p));
-		TestCase.assertTrue(this.gjk.detect(t, t1, e, t2));
+		t1.translate(0.6, 0.0);
+		TestCase.assertTrue(this.gjk.detect(s, t1, e, t2, p));
+		TestCase.assertTrue(this.gjk.detect(s, t1, e, t2));
 		n = p.getNormal();
-		TestCase.assertEquals( 0.505, n.x, 1.0e-3);
-		TestCase.assertEquals(-0.863, n.y, 1.0e-3);
-		TestCase.assertEquals( 0.363, p.getDepth(), 1.0e-3);
+		TestCase.assertEquals(-0.554, n.x, 1.0e-3);
+		TestCase.assertEquals(-0.832, n.y, 1.0e-3);
+		TestCase.assertEquals( 0.360, p.getDepth(), 1.0e-3);
 		// try reversing the shapes
-		TestCase.assertTrue(this.gjk.detect(e, t2, t, t1, p));
-		TestCase.assertTrue(this.gjk.detect(e, t2, t, t1));
+		TestCase.assertTrue(this.gjk.detect(e, t2, s, t1, p));
+		TestCase.assertTrue(this.gjk.detect(e, t2, s, t1));
 		n = p.getNormal();
-		TestCase.assertEquals(-0.505, n.x, 1.0e-3);
-		TestCase.assertEquals( 0.863, n.y, 1.0e-3);
-		TestCase.assertEquals( 0.363, p.getDepth(), 1.0e-3);
+		TestCase.assertEquals( 0.554, n.x, 1.0e-3);
+		TestCase.assertEquals( 0.832, n.y, 1.0e-3);
+		TestCase.assertEquals( 0.360, p.getDepth(), 1.0e-3);
 		
 		// test AABB overlap
-		t2.translate(0.5, -0.5);
-		TestCase.assertFalse(this.gjk.detect(t, t1, e, t2, p));
-		TestCase.assertFalse(this.gjk.detect(t, t1, e, t2));
+		t2.translate(0.0, -0.5);
+		TestCase.assertFalse(this.gjk.detect(s, t1, e, t2, p));
+		TestCase.assertFalse(this.gjk.detect(s, t1, e, t2));
 		// try reversing the shapes
-		TestCase.assertFalse(this.gjk.detect(e, t2, t, t1, p));
-		TestCase.assertFalse(this.gjk.detect(e, t2, t, t1));
+		TestCase.assertFalse(this.gjk.detect(e, t2, s, t1, p));
+		TestCase.assertFalse(this.gjk.detect(e, t2, s, t1));
 		
 		// test no overlap
-		t2.translate(1.0, 0.5);
-		TestCase.assertFalse(this.gjk.detect(t, t1, e, t2, p));
-		TestCase.assertFalse(this.gjk.detect(t, t1, e, t2));
+		t2.translate(-3.0, 0.0);
+		TestCase.assertFalse(this.gjk.detect(s, t1, e, t2, p));
+		TestCase.assertFalse(this.gjk.detect(s, t1, e, t2));
 		// try reversing the shapes
-		TestCase.assertFalse(this.gjk.detect(e, t2, t, t1, p));
-		TestCase.assertFalse(this.gjk.detect(e, t2, t, t1));
+		TestCase.assertFalse(this.gjk.detect(e, t2, s, t1, p));
+		TestCase.assertFalse(this.gjk.detect(e, t2, s, t1));
 	}
 	
 	/**
@@ -277,7 +274,7 @@ public class TriangleEllipseTest extends AbstractTest {
 	 */
 	@Test
 	public void gjkDistance() {
-		Separation s = new Separation();
+		Separation se = new Separation();
 		
 		Transform t1 = new Transform();
 		Transform t2 = new Transform();
@@ -285,67 +282,67 @@ public class TriangleEllipseTest extends AbstractTest {
 		Vector2 n, p1, p2;
 		
 		// test containment
-		TestCase.assertFalse(this.gjk.distance(t, t1, e, t2, s));
+		TestCase.assertFalse(this.gjk.distance(s, t1, e, t2, se));
 		// try reversing the shapes
-		TestCase.assertFalse(this.gjk.distance(e, t2, t, t1, s));
+		TestCase.assertFalse(this.gjk.distance(e, t2, s, t1, se));
 		
 		// test overlap
-		t1.translate(-0.8, 0.0);
-		TestCase.assertFalse(this.gjk.distance(t, t1, e, t2, s));
+		t1.translate(0.6, 0.0);
+		TestCase.assertFalse(this.gjk.distance(s, t1, e, t2, se));
 		// try reversing the shapes
-		TestCase.assertFalse(this.gjk.distance(e, t2, t, t1, s));
+		TestCase.assertFalse(this.gjk.distance(e, t2, s, t1, se));
 		
 		// test AABB overlap
-		t2.translate(0.5, -0.5);
-		TestCase.assertTrue(this.gjk.distance(t, t1, e, t2, s));
-		n = s.getNormal();
-		p1 = s.getPoint1();
-		p2 = s.getPoint2();
-		TestCase.assertEquals( 0.320, s.getDistance(), 1.0e-3);
-		TestCase.assertEquals( 0.505, n.x, 1.0e-3);
-		TestCase.assertEquals(-0.863, n.y, 1.0e-3);
-		TestCase.assertEquals(-0.041, p1.x, 1.0e-3);
-		TestCase.assertEquals(-0.061, p1.y, 1.0e-3);
-		TestCase.assertEquals( 0.119, p2.x, 1.0e-3);
-		TestCase.assertEquals(-0.337, p2.y, 1.0e-3);
+		t2.translate(0.0, -0.5);
+		TestCase.assertTrue(this.gjk.distance(s, t1, e, t2, se));
+		n = se.getNormal();
+		p1 = se.getPoint1();
+		p2 = se.getPoint2();
+		TestCase.assertEquals( 0.055, se.getDistance(), 1.0e-3);
+		TestCase.assertEquals(-0.554, n.x, 1.0e-3);
+		TestCase.assertEquals(-0.832, n.y, 1.0e-3);
+		TestCase.assertEquals( 0.830, p1.x, 1.0e-3);
+		TestCase.assertEquals(-0.153, p1.y, 1.0e-3);
+		TestCase.assertEquals( 0.799, p2.x, 1.0e-3);
+		TestCase.assertEquals(-0.199, p2.y, 1.0e-3);
 		// try reversing the shapes
-		TestCase.assertTrue(this.gjk.distance(e, t2, t, t1, s));
-		n = s.getNormal();
-		p1 = s.getPoint1();
-		p2 = s.getPoint2();
-		TestCase.assertEquals( 0.320, s.getDistance(), 1.0e-3);
-		TestCase.assertEquals(-0.505, n.x, 1.0e-3);
-		TestCase.assertEquals( 0.863, n.y, 1.0e-3);
-		TestCase.assertEquals( 0.119, p1.x, 1.0e-3);
-		TestCase.assertEquals(-0.337, p1.y, 1.0e-3);
-		TestCase.assertEquals(-0.041, p2.x, 1.0e-3);
-		TestCase.assertEquals(-0.061, p2.y, 1.0e-3);
+		TestCase.assertTrue(this.gjk.distance(e, t2, s, t1, se));
+		n = se.getNormal();
+		p1 = se.getPoint1();
+		p2 = se.getPoint2();
+		TestCase.assertEquals( 0.055, se.getDistance(), 1.0e-3);
+		TestCase.assertEquals( 0.554, n.x, 1.0e-3);
+		TestCase.assertEquals( 0.832, n.y, 1.0e-3);
+		TestCase.assertEquals( 0.799, p1.x, 1.0e-3);
+		TestCase.assertEquals(-0.199, p1.y, 1.0e-3);
+		TestCase.assertEquals( 0.830, p2.x, 1.0e-3);
+		TestCase.assertEquals(-0.153, p2.y, 1.0e-3);
 		
 		// test no overlap
-		t2.translate(1.0, 0.5);
-		TestCase.assertTrue(this.gjk.distance(t, t1, e, t2, s));
-		n = s.getNormal();
-		p1 = s.getPoint1();
-		p2 = s.getPoint2();
-		TestCase.assertEquals( 0.557, s.getDistance(), 1.0e-3);
-		TestCase.assertEquals( 0.931, n.x, 1.0e-3);
-		TestCase.assertEquals(-0.362, n.y, 1.0e-3);
-		TestCase.assertEquals( 0.490, p1.x, 1.0e-3);
-		TestCase.assertEquals( 0.250, p1.y, 1.0e-3);
-		TestCase.assertEquals( 1.009, p2.x, 1.0e-3);
-		TestCase.assertEquals( 0.047, p2.y, 1.0e-3);
+		t2.translate(-3.0, 0.0);
+		TestCase.assertTrue(this.gjk.distance(s, t1, e, t2, se));
+		n = se.getNormal();
+		p1 = se.getPoint1();
+		p2 = se.getPoint2();
+		TestCase.assertEquals( 1.755, se.getDistance(), 1.0e-3);
+		TestCase.assertEquals(-0.691, n.x, 1.0e-3);
+		TestCase.assertEquals(-0.722, n.y, 1.0e-3);
+		TestCase.assertEquals(-0.900, p1.x, 1.0e-3);
+		TestCase.assertEquals( 1.000, p1.y, 1.0e-3);
+		TestCase.assertEquals(-2.113, p2.x, 1.0e-3);
+		TestCase.assertEquals(-0.268, p2.y, 1.0e-3);
 		// try reversing the shapes
-		TestCase.assertTrue(this.gjk.distance(e, t2, t, t1, s));
-		n = s.getNormal();
-		p1 = s.getPoint1();
-		p2 = s.getPoint2();
-		TestCase.assertEquals( 0.557, s.getDistance(), 1.0e-3);
-		TestCase.assertEquals(-0.931, n.x, 1.0e-3);
-		TestCase.assertEquals( 0.362, n.y, 1.0e-3);
-		TestCase.assertEquals( 1.009, p1.x, 1.0e-3);
-		TestCase.assertEquals( 0.047, p1.y, 1.0e-3);
-		TestCase.assertEquals( 0.490, p2.x, 1.0e-3);
-		TestCase.assertEquals( 0.250, p2.y, 1.0e-3);
+		TestCase.assertTrue(this.gjk.distance(e, t2, s, t1, se));
+		n = se.getNormal();
+		p1 = se.getPoint1();
+		p2 = se.getPoint2();
+		TestCase.assertEquals( 1.755, se.getDistance(), 1.0e-3);
+		TestCase.assertEquals( 0.691, n.x, 1.0e-3);
+		TestCase.assertEquals( 0.722, n.y, 1.0e-3);
+		TestCase.assertEquals(-2.113, p1.x, 1.0e-3);
+		TestCase.assertEquals(-0.268, p1.y, 1.0e-3);
+		TestCase.assertEquals(-0.900, p2.x, 1.0e-3);
+		TestCase.assertEquals( 1.000, p2.y, 1.0e-3);
 	}
 	
 	/**
@@ -359,36 +356,36 @@ public class TriangleEllipseTest extends AbstractTest {
 		Transform t1 = new Transform();
 		Transform t2 = new Transform();
 		
-		ManifoldPoint mp1;
+		ManifoldPoint mp;
 		Vector2 p1;
 		
 		// test containment gjk
-		this.gjk.detect(t, t1, e, t2, p);
-		TestCase.assertTrue(this.cmfs.getManifold(p, t, t1, e, t2, m));
+		this.gjk.detect(s, t1, e, t2, p);
+		TestCase.assertTrue(this.cmfs.getManifold(p, s, t1, e, t2, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		// try reversing the shapes
-		TestCase.assertTrue(this.cmfs.getManifold(p, e, t2, t, t1, m));
+		TestCase.assertTrue(this.cmfs.getManifold(p, e, t2, s, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		
-		t1.translate(-0.8, 0.0);
+		t1.translate(0.6, 0.0);
 		
 		// test overlap gjk
-		this.gjk.detect(t, t1, e, t2, p);
-		TestCase.assertTrue(this.cmfs.getManifold(p, t, t1, e, t2, m));
+		this.gjk.detect(s, t1, e, t2, p);
+		TestCase.assertTrue(this.cmfs.getManifold(p, s, t1, e, t2, m));
 		TestCase.assertEquals(1, m.getPoints().size());
-		mp1 = m.getPoints().get(0);
-		p1 = mp1.getPoint();
-		TestCase.assertEquals(-0.380, p1.x, 1.0e-3);
-		TestCase.assertEquals( 0.162, p1.y, 1.0e-3);
-		TestCase.assertEquals( 0.363, mp1.getDepth(), 1.0e-3);
+		mp = m.getPoints().get(0);
+		p1 = mp.getPoint();
+		TestCase.assertEquals( 0.800, p1.x, 1.0e-3);
+		TestCase.assertEquals( 0.299, p1.y, 1.0e-3);
+		TestCase.assertEquals( 0.360, mp.getDepth(), 1.0e-3);
 		// try reversing the shapes
-		this.gjk.detect(e, t2, t, t1, p);
-		TestCase.assertTrue(this.cmfs.getManifold(p, e, t2, t, t1, m));
+		this.gjk.detect(e, t2, s, t1, p);
+		TestCase.assertTrue(this.cmfs.getManifold(p, e, t2, s, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
-		mp1 = m.getPoints().get(0);
-		p1 = mp1.getPoint();
-		TestCase.assertEquals(-0.380, p1.x, 1.0e-3);
-		TestCase.assertEquals( 0.162, p1.y, 1.0e-3);
-		TestCase.assertEquals( 0.363, mp1.getDepth(), 1.0e-3);
+		mp = m.getPoints().get(0);
+		p1 = mp.getPoint();
+		TestCase.assertEquals( 0.800, p1.x, 1.0e-3);
+		TestCase.assertEquals( 0.299, p1.y, 1.0e-3);
+		TestCase.assertEquals( 0.360, mp.getDepth(), 1.0e-3);
 	}
 }

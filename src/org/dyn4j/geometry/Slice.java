@@ -29,18 +29,12 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents a section or slice of a Circle shape.
  * <p>
- * This shape can represent any section of a circle up to 180 degrees (half circle).
+ * This shape can represent any slice of a circle up to 180 degrees (half circle).
  * @author William Bittle
  * @since 3.1.5
  * @version 3.1.5
  */
 public class Slice extends AbstractShape implements Convex, Shape, Transformable {
-	/** The x-axis */
-	private static final Vector2 X_AXIS = new Vector2(1.0, 0.0);
-	
-	/** The y-axis */
-	private static final Vector2 Y_AXIS = new Vector2(0.0, 1.0);
-	
 	/** The total circular section in radians */
 	protected double theta;
 	
@@ -48,7 +42,7 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	protected double alpha;
 	
 	/** The maximum radius of this shape rotated about its center */
-	protected double circleRadius;
+	protected double sliceRadius;
 	
 	/** The vertices of the slice */
 	protected Vector2[] vertices;
@@ -62,7 +56,7 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	/**
 	 * Full constructor.
 	 * <p>
-	 * This method creates a circular section with the <b>circle center</b> at the origin
+	 * This method creates a slice of a circle with the <b>circle center</b> at the origin
 	 * and half of theta below the x-axis and half above.
 	 * @param radius the radius of the circular section
 	 * @param theta the angular extent in radians; must be greater than zero and less than or equal to &pi;
@@ -70,11 +64,11 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	 */
 	public Slice(double radius, double theta) {
 		// check the radius
-		if (radius <= 0) throw new IllegalArgumentException(Messages.getString("geometry.circularSection.invalidRadius"));
+		if (radius <= 0) throw new IllegalArgumentException(Messages.getString("geometry.slice.invalidRadius"));
 		// check the theta
-		if (theta <= 0 || theta > Math.PI) throw new IllegalArgumentException(Messages.getString("geometry.circularSection.invalidTheta"));
+		if (theta <= 0 || theta > Math.PI) throw new IllegalArgumentException(Messages.getString("geometry.slice.invalidTheta"));
 		
-		this.circleRadius = radius;
+		this.sliceRadius = radius;
 		this.theta = theta;
 		this.alpha = theta * 0.5;
 		
@@ -94,11 +88,11 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 			new Vector2(x, -y)
 		};
 		
-		Vector2 n1 = this.vertices[1].to(this.vertices[0]).right();
-		Vector2 n2 = this.vertices[0].to(this.vertices[2]).right();
-		n1.normalize();
-		n2.normalize();
-		this.normals = new Vector2[] { n1, n2 };
+		Vector2 v1 = this.vertices[1].to(this.vertices[0]);
+		Vector2 v2 = this.vertices[0].to(this.vertices[2]);
+		v1.left().normalize();
+		v2.left().normalize();
+		this.normals = new Vector2[] { v1, v2 };
 
 		// compute the rotation disc radius
 		double cToOrigin = this.center.getMagnitudeSquared();
@@ -115,7 +109,7 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Slice[").append(super.toString())
-		.append("|Radius=").append(this.circleRadius)
+		.append("|Radius=").append(this.sliceRadius)
 		.append("|Theta=").append(this.theta)
 		.append("|UserData=").append(this.userData)
 		.append("]");
@@ -133,7 +127,7 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 		int size = this.vertices.length;
 		// the axes of a polygon are created from the normal of the edges
 		// plus the closest point to each focus
-		Vector2[] axes = new Vector2[2 + fociSize * 2];
+		Vector2[] axes = new Vector2[2 + fociSize];
 		int n = 0;
 		
 		// add the normals of the sides
@@ -170,11 +164,6 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 			// normalize it
 			axis.normalize();
 			// add it to the array
-			axes[n++] = axis;
-			
-			// add a foci to foci normal
-			axis = focus.to(f);
-			axis.normalize();
 			axes[n++] = axis;
 		}
 		// return all the axes
@@ -227,7 +216,7 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 		} else {
 			// NOTE: taken from Circle.getFarthestPoint with some modifications
 			localn.normalize();
-			localn.multiply(this.circleRadius).add(this.vertices[0]);
+			localn.multiply(this.sliceRadius).add(this.vertices[0]);
 			transform.transform(localn);
 			return localn;
 		}
@@ -283,8 +272,8 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	 */
 	@Override
 	public AABB createAABB(Transform transform) {
-		Interval x = this.project(X_AXIS, transform);
-		Interval y = this.project(Y_AXIS, transform);
+		Interval x = this.project(Vector2.X_AXIS, transform);
+		Interval y = this.project(Vector2.Y_AXIS, transform);
 		
 		return new AABB(x.getMin(), y.getMin(), x.getMax(), y.getMax());
 	}
@@ -295,7 +284,7 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	@Override
 	public Mass createMass(double density) {
 		// area of a circular section is a = r^2 * alpha
-		double r2 = this.circleRadius * this.circleRadius;
+		double r2 = this.sliceRadius * this.sliceRadius;
 		double m = density * r2 * this.alpha;
 		// inertia about z: http://www.efunda.com/math/areas/CircularSection.cfm
 		double sina = Math.sin(this.alpha);
@@ -320,7 +309,7 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 		// transform the point into local space
 		Vector2 lp = transform.getInverseTransformed(point);
 		// get the transformed radius squared
-		double radiusSquared = this.circleRadius * this.circleRadius;
+		double radiusSquared = this.sliceRadius * this.sliceRadius;
 		// create a vector from the circle center to the given point
 		Vector2 v = this.vertices[0].to(lp);
 		if (v.getMagnitudeSquared() <= radiusSquared) {
@@ -371,11 +360,11 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	 * @return double the rotation in radians
 	 */
 	public double getRotation() {
-		return X_AXIS.getAngleBetween(this.localXAxis);
+		return Vector2.X_AXIS.getAngleBetween(this.localXAxis);
 	}
 	
 	/**
-	 * Returns the angular extent of the circular section in radians.
+	 * Returns the angular extent of the slice in radians.
 	 * @return double
 	 */
 	public double getTheta() {
@@ -383,11 +372,15 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	}
 
 	/**
-	 * Returns the circle radius.
+	 * Returns the slice radius.
+	 * <p>
+	 * This differs from the {@link #getRadius()} since it returns the 
+	 * maximum rotation radius of the shape about its center. This method
+	 * returns the radius passed in at creation.
 	 * @return double
 	 */
-	public double getCircleRadius() {
-		return this.circleRadius;
+	public double getSliceRadius() {
+		return this.sliceRadius;
 	}
 	
 	/**

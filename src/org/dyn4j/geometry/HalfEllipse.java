@@ -22,37 +22,25 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.geometry.extras;
+package org.dyn4j.geometry;
 
-import org.dyn4j.geometry.AABB;
-import org.dyn4j.geometry.AbstractShape;
-import org.dyn4j.geometry.Convex;
-import org.dyn4j.geometry.Feature;
-import org.dyn4j.geometry.Interval;
-import org.dyn4j.geometry.Mass;
-import org.dyn4j.geometry.Shape;
-import org.dyn4j.geometry.Transform;
-import org.dyn4j.geometry.Transformable;
-import org.dyn4j.geometry.Vector2;
-import org.dyn4j.geometry.Vertex;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents an ellipse shape.
+ * Represents a half ellipse shape.
  * <p>
- * An ellipse must have a width and height greater than zero.
+ * A half ellipse must have a width and height greater than zero. 
+ * The height parameter is the height of the half.
  * <p>
- * This shape is only supported by the GJK collision detection algorithm.
+ * This shape is only supported by the GJK collision detection algorithm. It may even be more efficient
+ * and stable using {@link Geometry#createPolygonalHalfEllipse(int, double, double)} instead.
  * @author William Bittle
  * @since 3.1.5
  * @version 3.1.5
  */
-public class Ellipse extends AbstractShape implements Convex, Shape, Transformable {
-	/** The x-axis */
-	private static final Vector2 X_AXIS = new Vector2(1.0, 0.0);
-	
-	/** The y-axis */
-	private static final Vector2 Y_AXIS = new Vector2(0.0, 1.0);
+public class HalfEllipse extends AbstractShape implements Convex, Shape, Transformable {
+	/** The half ellipse inertia constant. See http://www.efunda.com/math/areas/ellipticalhalf.cfm */
+	private static final double INERTIA_CONSTANT = Math.PI / 8.0 - 8.0 / (9.0 * Math.PI);
 	
 	/** The ellipse width */
 	protected double width;
@@ -63,27 +51,28 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	/** The half-width */
 	protected double a;
 	
-	/** The half-height */
-	protected double b;
-	
 	/** A local vector to  */
 	protected Vector2 localXAxis;
+
+	/** The ellipse center */
+	protected Vector2 ellipseCenter;
 	
+	/** The vertices of the bottom */
+	protected Vector2[] vertices;
+
 	/**
 	 * Minimal constructor.
 	 * <p>
-	 * This creates an axis-aligned ellipse fitting inside a rectangle
+	 * This creates an axis-aligned half ellipse fitting inside a rectangle
 	 * of the given width and height.
 	 * @param width the width
-	 * @param height the height
+	 * @param height the height of the half
 	 * @throws IllegalArgumentException if either the width or height is less than or equal to zero
 	 */
-	public Ellipse(double width, double height) {
+	public HalfEllipse(double width, double height) {
 		// validate the width and height
-		if (width <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.ellipse.invalidWidth"));
-		if (height <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.ellipse.invalidHeight"));
-		
-		this.center = new Vector2();
+		if (width <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.halfEllipse.invalidWidth"));
+		if (height <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.halfEllipse.invalidHeight"));
 		
 		this.width = width;
 		this.height = height;
@@ -91,15 +80,26 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		// compute the major and minor axis lengths
 		// (the x,y radii)
 		this.a = width * 0.5;
-		this.b = height * 0.5;
-		
-		// the rotation radius of the entire shape is the maximum
-		// of the radii
-		this.radius = Math.max(this.a, this.b);
+
+		// set the ellipse center
+		this.ellipseCenter = new Vector2();
+		// compute the real center
+		this.center = new Vector2(0, (4.0 * height) / (3.0 * Math.PI));
 		
 		// since we create ellipses as axis aligned we set the local x axis
 		// to the world space x axis
 		this.localXAxis = new Vector2(1.0, 0.0);
+		
+		// setup the vertices
+		this.vertices = new Vector2[] {
+			// the left point
+			new Vector2(-this.a, 0),
+			// the right point
+			new Vector2( this.a, 0)
+		};
+
+		// set the rotation radius
+		this.radius = this.center.distance(this.vertices[1]);
 	}
 	
 	/* (non-Javadoc)
@@ -108,28 +108,21 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Ellipse[").append(super.toString())
+		sb.append("HalfEllipse[").append(super.toString())
 		.append("|Width=").append(this.width)
 		.append("|Height=").append(this.height)
 		.append("|UserData=").append(this.userData)
 		.append("]");
 		return sb.toString();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Convex#getAxes(org.dyn4j.geometry.Vector2[], org.dyn4j.geometry.Transform)
 	 */
 	@Override
 	public Vector2[] getAxes(Vector2[] foci, Transform transform) {
 		// this shape is not supported by SAT
-		
-		// Actually we could support SAT by returning a sampling of 
-		// the normals of the ellipse, effectively making it a polygonal
-		// ellipse as far as SAT is concerned.  However, there is still
-		// an issue in the ClippingManifoldSolver where if it gets a 
-		// Vertex feature back, it immediately uses it.  This is fine
-		// for circular shapes but not skewed shapes like an ellipse.
-		throw new UnsupportedOperationException(Messages.getString("geometry.ellipse.satNotSupported"));
+		throw new UnsupportedOperationException(Messages.getString("geometry.halfEllipse.satNotSupported"));
 	}
 
 	/* (non-Javadoc)
@@ -138,14 +131,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	@Override
 	public Vector2[] getFoci(Transform transform) {
 		// this shape is not supported by SAT
-		
-		// Actually we could support SAT by returning a sampling of 
-		// the normals of the ellipse, effectively making it a polygonal
-		// ellipse as far as SAT is concerned.  However, there is still
-		// an issue in the ClippingManifoldSolver where if it gets a 
-		// Vertex feature back, it immediately uses it.  This is fine
-		// for circular shapes but not skewed shapes like an ellipse.
-		throw new UnsupportedOperationException(Messages.getString("geometry.ellipse.satNotSupported"));
+		throw new UnsupportedOperationException(Messages.getString("geometry.halfEllipse.satNotSupported"));
 	}
 	
 	/* (non-Javadoc)
@@ -163,51 +149,27 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		// so we can achieve that by scaling the input axis by the major and minor
 		// axis lengths
 		localAxis.x *= this.a;
-		localAxis.y *= this.b;
+		localAxis.y *= this.height;
 		// then normalize it
 		localAxis.normalize();
-		// add the radius along the vector to the center to get the farthest point
-		Vector2 p = new Vector2(localAxis.x * this.a, localAxis.y  * this.b);
+		
+		Vector2 p = null;
+		if (localAxis.y <= 0 && localAxis.x >= 0) {
+			return transform.getTransformed(this.vertices[1]);
+		} else if (localAxis.y <= 0 && localAxis.x <= 0) {
+			return transform.getTransformed(this.vertices[0]);
+		} else {
+			// add the radius along the vector to the center to get the farthest point
+			p = new Vector2(localAxis.x * this.a, localAxis.y  * this.height);
+		}
+		
 		// include local rotation
 		// invert the local rotation
 		p.rotate(r);
-		p.add(this.center);
+		p.add(this.ellipseCenter);
 		// then finally convert back into world space coordinates
 		transform.transform(p);
 		return p;
-	}
-	
-	/**
-	 * Returns the point on the ellipse closest to the given point.
-	 * @param point the world space point
-	 * @param transform the transform
-	 * @return {@link Vector2} in world space
-	 */
-	public Vector2 getPointClosestToPoint(Vector2 point, Transform transform) {
-		// convert the world space vector(n) to local space
-		Vector2 localPoint = transform.getInverseTransformed(point);
-		// include local rotation
-		double r = this.getRotation();
-		// invert the local rotation
-		localPoint.rotate(-r);
-		// an ellipse is a circle with a non-uniform scaling transformation applied
-		// so we can achieve that by scaling the vector from this center to the
-		// point by the major and minor axis lengths to get the point on the ellipse
-		// closest to the given point
-		
-		Vector2 v = this.center.to(localPoint);
-		v.normalize();
-		
-		v.x *= this.a;
-		v.y *= this.b;
-		
-		// include local rotation
-		// invert the local rotation
-		v.rotate(r);
-		v.add(this.center);
-		// then finally convert back into world space coordinates
-		transform.transform(v);
-		return v;
 	}
 
 	/* (non-Javadoc)
@@ -215,10 +177,15 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 */
 	@Override
 	public Feature getFarthestFeature(Vector2 n, Transform transform) {
-		// obtain the farthest point along the given vector
-		Vector2 farthest = this.getFarthestPoint(n, transform);
-		// for an ellipse the farthest feature along a vector will always be a vertex
-		return new Vertex(farthest);
+		Vector2 localAxis = transform.getInverseTransformedR(n);
+		if (localAxis.getAngleBetween(this.localXAxis) < 0) {
+			// then its the farthest point
+			Vector2 point = this.getFarthestPoint(n, transform);
+			return new Vertex(point);
+		} else {
+			// return the full bottom side
+			return Segment.getFarthestFeature(this.vertices[0], this.vertices[1], n, transform);
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -228,14 +195,12 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	public Interval project(Vector2 n, Transform transform) {
 		// get the world space farthest point
 		Vector2 p1 = this.getFarthestPoint(n, transform);
-		// get the center in world space
-		Vector2 center = transform.getTransformed(this.center);
-		// project the center onto the axis
-		double c = center.dot(n);
+		Vector2 p2 = this.getFarthestPoint(n.getNegative(), transform);
 		// project the point onto the axis
-		double d = p1.dot(n);
+		double d1 = p1.dot(n);
+		double d2 = p2.dot(n);
 		// get the interval along the axis
-		return new Interval(2 * c - d, d);
+		return new Interval(d2, d1);
 	}
 
 	/* (non-Javadoc)
@@ -243,8 +208,8 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 */
 	@Override
 	public AABB createAABB(Transform transform) {
-		Interval x = this.project(X_AXIS, transform);
-		Interval y = this.project(Y_AXIS, transform);
+		Interval x = this.project(Vector2.X_AXIS, transform);
+		Interval y = this.project(Vector2.Y_AXIS, transform);
 		
 		return new AABB(x.getMin(), y.getMin(), x.getMax(), y.getMax());
 	}
@@ -254,10 +219,10 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 */
 	@Override
 	public Mass createMass(double density) {
-		double area = Math.PI * this.a * this.b;
-		double m = area * density;
-		// inertia about the z see http://math.stackexchange.com/questions/152277/moment-of-inertia-of-an-ellipse-in-2d
-		double I = m * (this.a * this.a + this.b * this.b) / 4.0;
+		double area = Math.PI * this.a * this.height;
+		double m = area * density * 0.5;
+		// moment of inertia given by: http://www.efunda.com/math/areas/ellipticalhalf.cfm
+		double I = m * (this.a * this.a + this.height * this.height) * INERTIA_CONSTANT;
 		return new Mass(this.center, m, I);
 	}
 
@@ -286,12 +251,17 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		double r = this.getRotation();
 		localPoint.rotate(-r);
 		
-		double x = (localPoint.x - this.center.x);
-		double y = (localPoint.y - this.center.y);
+		// translate into local coordinates
+		double x = (localPoint.x - this.ellipseCenter.x);
+		double y = (localPoint.y - this.ellipseCenter.y);
+		
+		// for half ellipse we have an early out
+		if (y < 0) return false;
+		
 		double x2 = x * x;
 		double y2 = y * y;
 		double a2 = this.a * this.a;
-		double b2 = this.b * this.b;
+		double b2 = this.height * this.height;
 		double value = x2 / a2 + y2 / b2;
 		
 		if (value <= 1.0) {
@@ -308,14 +278,35 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		super.rotate(theta, x, y);
 		// rotate the local axis as well
 		this.localXAxis.rotate(theta);
+		// rotate the vertices
+		for (int i = 0; i < this.vertices.length; i++) {
+			this.vertices[i].rotate(theta, x, y);
+		}
+		// rotate the ellipse center
+		this.ellipseCenter.rotate(theta, x, y);
 	}
-	
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.AbstractShape#translate(double, double)
+	 */
+	@Override
+	public void translate(double x, double y) {
+		// translate the centroid
+		super.translate(x, y);
+		// translate the pie vertices
+		for (int i = 0; i < this.vertices.length; i++) {
+			this.vertices[i].add(x, y);
+		}
+		// translate the ellipse center
+		this.ellipseCenter.add(x, y);
+	}
+
 	/**
 	 * Returns the rotation about the local center in radians.
 	 * @return double the rotation in radians
 	 */
 	public double getRotation() {
-		return X_AXIS.getAngleBetween(this.localXAxis);
+		return Vector2.X_AXIS.getAngleBetween(this.localXAxis);
 	}
 	
 	/**
@@ -341,12 +332,12 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	public double getHalfWidth() {
 		return this.a;
 	}
-
+	
 	/**
-	 * Returns the half height.
-	 * @return double
+	 * Returns the center of the ellipse.
+	 * @return {@link Vector2}
 	 */
-	public double getHalfHeight() {
-		return this.a;
+	public Vector2 getEllipseCenter() {
+		return this.ellipseCenter;
 	}
 }

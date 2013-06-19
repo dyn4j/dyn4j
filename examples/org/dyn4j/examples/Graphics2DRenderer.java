@@ -31,17 +31,16 @@ import java.awt.geom.Arc2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
-import java.awt.geom.Rectangle2D;
 
 import org.dyn4j.geometry.Capsule;
 import org.dyn4j.geometry.Circle;
+import org.dyn4j.geometry.Ellipse;
+import org.dyn4j.geometry.HalfEllipse;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Shape;
 import org.dyn4j.geometry.Slice;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.geometry.extras.Ellipse;
-import org.dyn4j.geometry.extras.HalfEllipse;
 
 /**
  * Graphics2D renderer for dyn4j shape types.
@@ -77,7 +76,6 @@ public class Graphics2DRenderer {
 			Graphics2DRenderer.render(g, (HalfEllipse)shape, scale, color);
 		} else {
 			// unknown shape
-			System.out.println("Unknown shape type.");
 		}
 	}
 	
@@ -184,7 +182,7 @@ public class Graphics2DRenderer {
 				radius2 * scale,
 				90.0,
 				180.0,
-				Arc2D.CHORD);
+				Arc2D.OPEN);
 		Arc2D.Double arcR = new Arc2D.Double(
 				(width * 0.5 - radius2) * scale,
 				-radius * scale,
@@ -192,38 +190,23 @@ public class Graphics2DRenderer {
 				radius2 * scale,
 				-90.0,
 				180.0,
-				Arc2D.CHORD);
-		Rectangle2D.Double rect = new Rectangle2D.Double(
-				-(width * 0.5 - radius) * scale,
-				-radius * scale,
-				(width - radius2) * scale,
-				radius2 * scale);
-		Line2D.Double top = new Line2D.Double(
-				-(width * 0.5 - radius) * scale,
-				-radius * scale,
-				(width * 0.5 - radius) * scale,
-				-radius * scale);
-		Line2D.Double bot = new Line2D.Double(
-				-(width * 0.5 - radius) * scale,
-				radius * scale,
-				(width * 0.5 - radius) * scale,
-				radius * scale);
+				Arc2D.OPEN);
+		
+		// connect the shapes
+		Path2D.Double path = new Path2D.Double();
+		path.append(arcL, true);
+		path.append(new Line2D.Double(arcL.getEndPoint(), arcR.getStartPoint()), true);
+		path.append(arcR, true);
+		path.append(new Line2D.Double(arcR.getEndPoint(), arcL.getStartPoint()), true);
 		
 		// set the color
 		g.setColor(color);
 		// fill the shape
-		g.fill(arcL);
-		g.fill(rect);
-		g.fill(arcR);
+		g.fill(path);
 		// set the color
 		g.setColor(color.darker());
 		// draw the shape
-		arcL.setArcType(Arc2D.OPEN);
-		arcR.setArcType(Arc2D.OPEN);
-		g.draw(arcL);
-		g.draw(top);
-		g.draw(bot);
-		g.draw(arcR);
+		g.draw(path);
 		
 		// re-instate the old transform
 		g.setTransform(oTransform);
@@ -272,7 +255,7 @@ public class Graphics2DRenderer {
 	 * @param color the color
 	 */
 	public static final void render(Graphics2D g, Slice slice, double scale, Color color) {
-		double radius = slice.getCircleRadius();
+		double radius = slice.getSliceRadius();
 		double theta2 = slice.getTheta() * 0.5;
 		
 		// get the local rotation and translation
@@ -319,7 +302,7 @@ public class Graphics2DRenderer {
 		
 		// get the local rotation and translation
 		double rotation = halfEllipse.getRotation();
-		Vector2 center = halfEllipse.getCenter();
+		Vector2 center = halfEllipse.getEllipseCenter();
 		
 		// save the old transform
 		AffineTransform oTransform = g.getTransform();

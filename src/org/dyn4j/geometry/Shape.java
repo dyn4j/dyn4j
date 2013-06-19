@@ -90,12 +90,38 @@ public interface Shape extends Transformable {
 	/**
 	 * Returns the {@link Interval} of this {@link Shape} projected onto the given {@link Vector2} 
 	 * given the {@link Transform}.
+	 * <p>
+	 * This is the same as calling {@link #project(Vector2, Transform)} and passing {@link Transform#IDENTITY}.
+	 * @param n {@link Vector2} to project onto
+	 * @return {@link Interval}
+	 * @since 3.1.5
+	 */
+	public abstract Interval project(Vector2 n);
+	
+	/**
+	 * Returns the {@link Interval} of this {@link Shape} projected onto the given {@link Vector2} 
+	 * given the {@link Transform}.
 	 * @param n {@link Vector2} to project onto
 	 * @param transform {@link Transform} for this {@link Shape}
 	 * @return {@link Interval}
 	 */
 	public abstract Interval project(Vector2 n, Transform transform);
 
+	/**
+	 * Returns true if the given point is inside this {@link Shape}.
+	 * <p>
+	 * If the given point lies on an edge the point is considered
+	 * to be inside the {@link Shape}.
+	 * <p>
+	 * The given point is assumed to be in world space.
+	 * <p>
+	 * This is the same as calling {@link #contains(Vector2, Transform)} and passing {@link Transform#IDENTITY}.
+	 * @param point world space point
+	 * @return boolean
+	 * @since 3.1.5
+	 */
+	public abstract boolean contains(Vector2 point);
+	
 	/**
 	 * Returns true if the given point is inside this {@link Shape}.
 	 * <p>
@@ -119,6 +145,8 @@ public interface Shape extends Transformable {
 	
 	/**
 	 * Creates an {@link AABB} from this {@link Shape}.
+	 * <p>
+	 * This is the same as calling {@link #createAABB(Transform)} and passing {@link Transform#IDENTITY}.
 	 * @return {@link AABB} the {@link AABB} enclosing this {@link Shape}
 	 * @since 3.1.4
 	 */

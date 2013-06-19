@@ -28,13 +28,13 @@ import junit.framework.TestCase;
 
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Circle;
+import org.dyn4j.geometry.Ellipse;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.geometry.extras.Ellipse;
 import org.junit.Before;
 import org.junit.Test;
 

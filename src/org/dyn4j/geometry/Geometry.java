@@ -818,6 +818,74 @@ public class Geometry {
 	}
 	
 	/**
+	 * Creates a new {@link Polygon} in the shape of a {@link Slice} with count number of vertices with the
+	 * circle center centered on the origin.
+	 * <p>
+	 * This method returns a polygon with count + 3 vertices.
+	 * @param count the number of vertices to use; must be greater than or equal to 1
+	 * @param radius the radius of the circle; must be greater than zero
+	 * @param theta the arc length of the slice in radians; must be greater than zero
+	 * @return {@link Polygon}
+	 * @throws IllegalArgumentException thrown if count is less than 1 or the radius is less than or equal to zero or theta is less than or equal to zero
+	 * @since 3.1.5
+	 */
+	public static final Polygon createPolygonalSlice(int count, double radius, double theta) {
+		// validate the input
+		if (count < 1) throw new IllegalArgumentException(Messages.getString("geometry.sliceInvalidCount"));
+		if (radius <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.sliceInvalidRadius"));
+		if (theta <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.sliceInvalidTheta"));
+		
+		// compute the angular increment
+		final double pin = theta / (count + 1);
+		// make sure the resulting output is an even number of vertices
+		final Vector2[] vertices = new Vector2[count + 3];
+		
+		final double c = Math.cos(pin);
+		final double s = Math.sin(pin);
+		double t = 0;
+
+		// initialize at minus theta
+		double x = radius * Math.cos(-theta * 0.5);
+		double y = radius * Math.sin(-theta * 0.5);
+		
+		// set the first and last points of the arc
+		vertices[0] = new Vector2(x, y);
+		vertices[count + 1] = new Vector2(x, -y);
+		
+		for(int i = 1; i < count + 1; i++) {
+			//apply the rotation matrix
+			t = x;
+			x = c * x - s * y;
+			y = s * t + c * y;
+			// add a point
+			vertices[i] = new Vector2(x, y);
+		}
+		
+		// finish off by adding the origin
+		vertices[count + 2] = new Vector2();
+		
+		return new Polygon(vertices);
+	}
+	
+	/**
+	 * Creates a new {@link Polygon} in the shape of a {@link Slice} with count number of vertices centered on the origin.
+	 * <p>
+	 * This method returns a polygon with count + 3 vertices.
+	 * @param count the number of vertices to use; must be greater than or equal to 1
+	 * @param radius the radius of the circle; must be greater than zero
+	 * @param theta the arc length of the slice in radians; must be greater than zero
+	 * @return {@link Polygon}
+	 * @throws IllegalArgumentException thrown if count is less than 1 or the radius is less than or equal to zero or theta is less than or equal to zero
+	 * @since 3.1.5
+	 */
+	public static final Polygon createPolygonalSliceAtOrigin(int count, double radius, double theta) {
+		Polygon polygon = Geometry.createPolygonalSlice(count, radius, theta);
+		Vector2 center = polygon.getCenter();
+		polygon.translate(-center.x, -center.y);
+		return polygon;
+	}
+	
+	/**
 	 * Creates a new {@link Polygon} in the shape of an ellipse with count number of vertices centered
 	 * on the origin.
 	 * <p>
@@ -864,6 +932,76 @@ public class Geometry {
 		}
 		
 		return new Polygon(vertices);
+	}
+
+	/**
+	 * Creates a new {@link Polygon} in the shape of a half ellipse with count number of vertices with the
+	 * base at the origin.
+	 * <p>
+	 * Returns a polygon with count + 2 vertices.
+	 * <p>
+	 * The height is the total height of the half not the half height.
+	 * @param count the number of vertices to use; should be even, if not, count - 1 vertices will be generated
+	 * @param width the width of the half ellipse
+	 * @param height the height of the half ellipse; should be the total height
+	 * @return {@link Polygon}
+	 * @throws IllegalArgumentException thrown if count is less than 4 or the width or height are less than or equal to zero
+	 * @since 3.1.5
+	 */
+	public static final Polygon createPolygonalHalfEllipse(int count, double width, double height) {
+		// validate the input
+		if (count < 1) throw new IllegalArgumentException(Messages.getString("geometry.halfEllipseInvalidCount"));
+		if (width <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.halfEllipseInvalidWidth"));
+		if (height <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.halfEllipseInvalidHeight"));
+		
+		final double a = width * 0.5;
+		final double b = height * 0.5;
+		
+		// compute the angular increment
+		final double inc = Math.PI / (count + 1);
+		// make sure the resulting output is an even number of vertices
+		final Vector2[] vertices = new Vector2[count + 2];
+		
+		// set the start and end vertices
+		vertices[0] = new Vector2(a, 0);
+		vertices[count + 1] = new Vector2(-a, 0);
+		
+		// use the parametric equations:
+		// x = a * cos(t)
+		// y = b * sin(t)
+		
+		for (int i = 1; i < count + 1; i++) {
+			final double t = inc * i;
+			// since the under side of the ellipse is the same
+			// as the top side, only with a negated y, lets save
+			// some time by creating the under side at the same time
+			final double x = a * Math.cos(t);
+			final double y = b * Math.sin(t);
+			vertices[i] = new Vector2(x, y);
+		}
+		
+		return new Polygon(vertices);
+	}
+	
+	/**
+	 * Creates a new {@link Polygon} in the shape of a half ellipse with count number of vertices centered
+	 * on the origin.
+	 * <p>
+	 * Returns a polygon with count + 2 vertices.
+	 * <p>
+	 * The height is the total height of the half not the half height.
+	 * @param count the number of vertices to use; should be even, if not, count - 1 vertices will be generated
+	 * @param width the width of the half ellipse
+	 * @param height the height of the half ellipse; should be the total height
+	 * @return {@link Polygon}
+	 * @throws IllegalArgumentException thrown if count is less than 1 or the width or height are less than or equal to zero
+	 * @since 3.1.5
+	 */
+	public static final Polygon createPolygonalHalfEllipseAtOrigin(int count, double width, double height) {
+		Polygon polygon = Geometry.createPolygonalHalfEllipse(count, width, height);
+		Vector2 center = polygon.getCenter();
+		polygon.translate(-center.x, -center.y);
+		return polygon;
 	}
 	
 	/**

@@ -29,18 +29,18 @@ import junit.framework.TestCase;
 import org.junit.Test;
 
 /**
- * Test case for the {@link Ellipse} class.
+ * Test case for the {@link Capsule} class.
  * @author William Bittle
  * @version 3.1.5
  * @since 3.1.5
  */
-public class EllipseTest {
+public class CapsuleTest {
 	/**
 	 * Tests a zero width.
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createZeroWidth() {
-		new Ellipse(0.0, 1.0);
+		new Capsule(0.0, 1.0);
 	}
 	
 	/**
@@ -48,7 +48,7 @@ public class EllipseTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createNegativeWidth() {
-		new Ellipse(-1.0, 1.0);
+		new Capsule(-1.0, 1.0);
 	}
 	
 	/**
@@ -56,7 +56,7 @@ public class EllipseTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createZeroHeight() {
-		new Ellipse(1.0, 0.0);
+		new Capsule(1.0, 0.0);
 	}
 	
 	/**
@@ -64,15 +64,29 @@ public class EllipseTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createNegativeHeight() {
-		new Ellipse(1.0, -1.0);
+		new Capsule(1.0, -1.0);
 	}
 	
 	/**
 	 * Tests the constructor.
 	 */
 	@Test
-	public void createSuccess() {
-		new Ellipse(1.0, 2.0);
+	public void createSuccessHorizontal() {
+		Capsule cap = new Capsule(2.0, 1.0);
+		Vector2 x = cap.localXAxis;
+		TestCase.assertEquals(1.000, x.x, 1.0e-3);
+		TestCase.assertEquals(0.000, x.y, 1.0e-3);
+	}
+	
+	/**
+	 * Tests the constructor.
+	 */
+	@Test
+	public void createSuccessVertical() {
+		Capsule cap = new Capsule(1.0, 2.0);
+		Vector2 x = cap.localXAxis;
+		TestCase.assertEquals(0.000, x.x, 1.0e-3);
+		TestCase.assertEquals(1.000, x.y, 1.0e-3);
 	}
 	
 	/**
@@ -80,21 +94,23 @@ public class EllipseTest {
 	 */
 	@Test
 	public void contains() {
-		Ellipse e = new Ellipse(2.0, 1.0);
+		Capsule e = new Capsule(2.0, 1.0);
 		Transform t = new Transform();
-		Vector2 p = new Vector2(0.75, 0.35);
+		Vector2 p = new Vector2(0.8, -0.45);
 		
-		// shouldn't be in the circle
+		// shouldn't be inside
 		TestCase.assertTrue(!e.contains(p, t));
 		
-		// move the circle a bit
+		// move it a bit
 		t.translate(0.5, 0.0);
 		
-		// should be in the circle
+		// should be inside
 		TestCase.assertTrue(e.contains(p, t));
 		
 		p.set(1.5, 0.0);
-		
+		// should be on the edge
+		TestCase.assertTrue(e.contains(p, t));
+		p.set(0.75, 0.5);
 		// should be on the edge
 		TestCase.assertTrue(e.contains(p, t));
 	}
@@ -104,7 +120,7 @@ public class EllipseTest {
 	 */
 	@Test
 	public void project() {
-		Ellipse e = new Ellipse(2.0, 1.0);
+		Capsule e = new Capsule(2.0, 1.0);
 		Transform t = new Transform();
 		Vector2 x = new Vector2(1.0, 0.0);
 		Vector2 y = new Vector2(0.0, -1.0);
@@ -120,22 +136,22 @@ public class EllipseTest {
 		t.rotate(Math.toRadians(30), 1.0, 0.5);
 		
 		i = e.project(y, t);
-		TestCase.assertEquals(-1.161, i.min, 1.0e-3);
-		TestCase.assertEquals( 0.161, i.max, 1.0e-3);
+		TestCase.assertEquals(-1.25, i.min, 1.0e-3);
+		TestCase.assertEquals( 0.25, i.max, 1.0e-3);
 		
 		// try some local rotation
 		e.translate(1.0, 0.5);
 		e.rotate(Math.toRadians(30), 1.0, 0.5);
 		
 		i = e.project(y, Transform.IDENTITY);
-		TestCase.assertEquals(-1.161, i.min, 1.0e-3);
-		TestCase.assertEquals( 0.161, i.max, 1.0e-3);
+		TestCase.assertEquals(-1.25, i.min, 1.0e-3);
+		TestCase.assertEquals( 0.25, i.max, 1.0e-3);
 		
 		t.identity();
 		t.translate(0.0, 1.0);
 		i = e.project(y, t);
-		TestCase.assertEquals(-2.161, i.min, 1.0e-3);
-		TestCase.assertEquals(-0.839, i.max, 1.0e-3);
+		TestCase.assertEquals(-2.25, i.min, 1.0e-3);
+		TestCase.assertEquals(-0.75, i.max, 1.0e-3);
 	}
 	
 	/**
@@ -143,7 +159,7 @@ public class EllipseTest {
 	 */
 	@Test
 	public void getFarthest() {
-		Ellipse e = new Ellipse(2.0, 1.0);
+		Capsule e = new Capsule(2.0, 1.0);
 		Transform t = new Transform();
 		Vector2 x = new Vector2(1.0, 0.0);
 		Vector2 y = new Vector2(0.0, -1.0);
@@ -159,40 +175,60 @@ public class EllipseTest {
 		t.rotate(Math.toRadians(30), 1.0, 0.5);
 		
 		p = e.getFarthestPoint(y, t);
-		TestCase.assertEquals( 0.509, p.x, 1.0e-3);
-		TestCase.assertEquals(-0.161, p.y, 1.0e-3);
+		TestCase.assertEquals( 0.566, p.x, 1.0e-3);
+		TestCase.assertEquals(-0.25, p.y, 1.0e-3);
 		
 		// try some local rotation
 		e.translate(1.0, 0.5);
 		e.rotate(Math.toRadians(30), 1.0, 0.5);
 		
 		p = e.getFarthestPoint(y, Transform.IDENTITY);
-		TestCase.assertEquals( 0.509, p.x, 1.0e-3);
-		TestCase.assertEquals(-0.161, p.y, 1.0e-3);
+		TestCase.assertEquals( 0.566, p.x, 1.0e-3);
+		TestCase.assertEquals(-0.25, p.y, 1.0e-3);
 		
 		t.identity();
 		t.translate(0.0, 1.0);
 		p = e.getFarthestPoint(y, t);
-		TestCase.assertEquals( 0.509, p.x, 1.0e-3);
-		TestCase.assertEquals( 0.838, p.y, 1.0e-3);
+		TestCase.assertEquals( 0.566, p.x, 1.0e-3);
+		TestCase.assertEquals( 0.75, p.y, 1.0e-3);
 	}
 	
 	/**
 	 * Tests the getAxes method.
 	 */
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void getAxes() {
-		Ellipse e = new Ellipse(1.0, 0.5);
-		e.getAxes(new Vector2[] { new Vector2() }, Transform.IDENTITY);
+		Capsule e = new Capsule(1.0, 0.5);
+		// should be two axes + number of foci
+		Vector2[] foci = new Vector2[] {
+			new Vector2(2.0, -0.5),
+			new Vector2(1.0, 3.0)
+		};
+		Vector2[] axes = e.getAxes(foci, Transform.IDENTITY);
+		TestCase.assertEquals(4, axes.length);
+		
+		// make sure we get back the right axes
+		axes = e.getAxes(null, Transform.IDENTITY);
+		TestCase.assertEquals(1.000, axes[0].x, 1.0e-3);
+		TestCase.assertEquals(0.000, axes[0].y, 1.0e-3);
+		TestCase.assertEquals(0.000, axes[1].x, 1.0e-3);
+		TestCase.assertEquals(1.000, axes[1].y, 1.0e-3);
 	}
 	
 	/**
 	 * Tests the getFoci method.
 	 */
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void getFoci() {
-		Ellipse e = new Ellipse(1.0, 0.5);
-		e.getFoci(Transform.IDENTITY);
+		Capsule e = new Capsule(1.0, 0.5);
+		Vector2[] foci = e.getFoci(Transform.IDENTITY);
+		// should be two foci
+		TestCase.assertEquals(2, foci.length);
+		// make sure the foci are correct
+		TestCase.assertEquals(-0.250, foci[0].x, 1.0e-3);
+		TestCase.assertEquals( 0.000, foci[0].y, 1.0e-3);
+		TestCase.assertEquals( 0.250, foci[1].x, 1.0e-3);
+		TestCase.assertEquals( 0.000, foci[1].y, 1.0e-3);
 	}
 	
 	/**
@@ -200,7 +236,7 @@ public class EllipseTest {
 	 */
 	@Test
 	public void rotate() {
-		Ellipse e = new Ellipse(1.0, 0.5);
+		Capsule e = new Capsule(1.0, 0.5);
 		
 		// rotate about center
 		e.translate(1.0, 1.0);
@@ -225,7 +261,7 @@ public class EllipseTest {
 	 */
 	@Test
 	public void translate() {
-		Ellipse e = new Ellipse(1.0, 0.5);
+		Capsule e = new Capsule(1.0, 0.5);
 		
 		e.translate(1.0, -0.5);
 		
@@ -238,7 +274,7 @@ public class EllipseTest {
 	 */
 	@Test
 	public void createAABB() {
-		Ellipse e = new Ellipse(1.0, 0.5);
+		Capsule e = new Capsule(1.0, 0.5);
 		
 		// using an identity transform
 		AABB aabb = e.createAABB(Transform.IDENTITY);
@@ -260,9 +296,9 @@ public class EllipseTest {
 		tx.translate(1.0, 2.0);
 		
 		aabb = e.createAABB(tx);
-		TestCase.assertEquals(0.549, aabb.getMinX(), 1.0e-3);
-		TestCase.assertEquals(1.669, aabb.getMinY(), 1.0e-3);
-		TestCase.assertEquals(1.450, aabb.getMaxX(), 1.0e-3);
-		TestCase.assertEquals(2.330, aabb.getMaxY(), 1.0e-3);
+		TestCase.assertEquals(0.533, aabb.getMinX(), 1.0e-3);
+		TestCase.assertEquals(1.625, aabb.getMinY(), 1.0e-3);
+		TestCase.assertEquals(1.466, aabb.getMaxX(), 1.0e-3);
+		TestCase.assertEquals(2.375, aabb.getMaxY(), 1.0e-3);
 	}
 }

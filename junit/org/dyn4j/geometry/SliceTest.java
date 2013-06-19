@@ -26,45 +26,46 @@ package org.dyn4j.geometry;
 
 import junit.framework.TestCase;
 
+import org.dyn4j.Epsilon;
 import org.junit.Test;
 
 /**
- * Test case for the {@link Ellipse} class.
+ * Test case for the {@link Slice} class.
  * @author William Bittle
  * @version 3.1.5
  * @since 3.1.5
  */
-public class EllipseTest {
+public class SliceTest {
 	/**
-	 * Tests a zero width.
+	 * Tests a zero radius.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void createZeroWidth() {
-		new Ellipse(0.0, 1.0);
+	public void createZeroRadius() {
+		new Slice(0.0, Math.toRadians(50));
 	}
 	
 	/**
-	 * Tests a negative width.
+	 * Tests a negative radius.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void createNegativeWidth() {
-		new Ellipse(-1.0, 1.0);
+	public void createNegativeRadius() {
+		new Slice(-1.0, Math.toRadians(50));
 	}
 	
 	/**
-	 * Tests a zero height.
+	 * Tests a zero theta.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void createZeroHeight() {
-		new Ellipse(1.0, 0.0);
+	public void createZeroTheta() {
+		new Slice(1.0, 0);
 	}
 	
 	/**
-	 * Tests a negative height.
+	 * Tests a negative theta.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void createNegativeHeight() {
-		new Ellipse(1.0, -1.0);
+	public void createNegativeTheta() {
+		new Slice(1.0, -Math.toRadians(50));
 	}
 	
 	/**
@@ -72,7 +73,11 @@ public class EllipseTest {
 	 */
 	@Test
 	public void createSuccess() {
-		new Ellipse(1.0, 2.0);
+		Slice slice = new Slice(1.0, Math.toRadians(50));
+		
+		// the circle center should be the origin
+		TestCase.assertEquals(0.000, slice.getCircleCenter().x, 1.0e-3);
+		TestCase.assertEquals(0.000, slice.getCircleCenter().y, 1.0e-3);
 	}
 	
 	/**
@@ -80,21 +85,20 @@ public class EllipseTest {
 	 */
 	@Test
 	public void contains() {
-		Ellipse e = new Ellipse(2.0, 1.0);
+		Slice e = new Slice(1.0, Math.toRadians(50));
 		Transform t = new Transform();
-		Vector2 p = new Vector2(0.75, 0.35);
+		Vector2 p = new Vector2(0.5, -0.3);
 		
-		// shouldn't be in the circle
+		// shouldn't be inside
 		TestCase.assertTrue(!e.contains(p, t));
 		
-		// move the circle a bit
-		t.translate(0.5, 0.0);
+		// move it a bit
+		t.translate(-0.25, 0.0);
 		
-		// should be in the circle
+		// should be inside
 		TestCase.assertTrue(e.contains(p, t));
 		
-		p.set(1.5, 0.0);
-		
+		p.set(0.75, 0.0);
 		// should be on the edge
 		TestCase.assertTrue(e.contains(p, t));
 	}
@@ -104,38 +108,38 @@ public class EllipseTest {
 	 */
 	@Test
 	public void project() {
-		Ellipse e = new Ellipse(2.0, 1.0);
+		Slice e = new Slice(1.0, Math.toRadians(50));
 		Transform t = new Transform();
 		Vector2 x = new Vector2(1.0, 0.0);
-		Vector2 y = new Vector2(0.0, -1.0);
+		Vector2 y = new Vector2(0.0, 1.0);
 		
 		// try some translation
 		t.translate(1.0, 0.5);
 		
 		Interval i = e.project(x, t);
-		TestCase.assertEquals( 0.000, i.min, 1.0e-3);
+		TestCase.assertEquals( 1.000, i.min, 1.0e-3);
 		TestCase.assertEquals( 2.000, i.max, 1.0e-3);
 		
 		// try some rotation
-		t.rotate(Math.toRadians(30), 1.0, 0.5);
+		t.rotate(Math.toRadians(30), t.getTransformed(e.getCenter()));
 		
 		i = e.project(y, t);
-		TestCase.assertEquals(-1.161, i.min, 1.0e-3);
-		TestCase.assertEquals( 0.161, i.max, 1.0e-3);
+		TestCase.assertEquals(0.177, i.min, 1.0e-3);
+		TestCase.assertEquals(0.996, i.max, 1.0e-3);
 		
 		// try some local rotation
 		e.translate(1.0, 0.5);
-		e.rotate(Math.toRadians(30), 1.0, 0.5);
+		e.rotateAboutCenter(Math.toRadians(30));
 		
 		i = e.project(y, Transform.IDENTITY);
-		TestCase.assertEquals(-1.161, i.min, 1.0e-3);
-		TestCase.assertEquals( 0.161, i.max, 1.0e-3);
+		TestCase.assertEquals(0.177, i.min, 1.0e-3);
+		TestCase.assertEquals(0.996, i.max, 1.0e-3);
 		
 		t.identity();
 		t.translate(0.0, 1.0);
 		i = e.project(y, t);
-		TestCase.assertEquals(-2.161, i.min, 1.0e-3);
-		TestCase.assertEquals(-0.839, i.max, 1.0e-3);
+		TestCase.assertEquals(1.177, i.min, 1.0e-3);
+		TestCase.assertEquals(1.996, i.max, 1.0e-3);
 	}
 	
 	/**
@@ -143,10 +147,10 @@ public class EllipseTest {
 	 */
 	@Test
 	public void getFarthest() {
-		Ellipse e = new Ellipse(2.0, 1.0);
+		Slice e = new Slice(1.0, Math.toRadians(50));
 		Transform t = new Transform();
 		Vector2 x = new Vector2(1.0, 0.0);
-		Vector2 y = new Vector2(0.0, -1.0);
+		Vector2 y = new Vector2(0.0, 1.0);
 		
 		// try some translation
 		t.translate(1.0, 0.5);
@@ -159,40 +163,58 @@ public class EllipseTest {
 		t.rotate(Math.toRadians(30), 1.0, 0.5);
 		
 		p = e.getFarthestPoint(y, t);
-		TestCase.assertEquals( 0.509, p.x, 1.0e-3);
-		TestCase.assertEquals(-0.161, p.y, 1.0e-3);
+		TestCase.assertEquals( 1.573, p.x, 1.0e-3);
+		TestCase.assertEquals( 1.319, p.y, 1.0e-3);
 		
 		// try some local rotation
 		e.translate(1.0, 0.5);
 		e.rotate(Math.toRadians(30), 1.0, 0.5);
 		
 		p = e.getFarthestPoint(y, Transform.IDENTITY);
-		TestCase.assertEquals( 0.509, p.x, 1.0e-3);
-		TestCase.assertEquals(-0.161, p.y, 1.0e-3);
+		TestCase.assertEquals( 1.573, p.x, 1.0e-3);
+		TestCase.assertEquals( 1.319, p.y, 1.0e-3);
 		
 		t.identity();
 		t.translate(0.0, 1.0);
 		p = e.getFarthestPoint(y, t);
-		TestCase.assertEquals( 0.509, p.x, 1.0e-3);
-		TestCase.assertEquals( 0.838, p.y, 1.0e-3);
+		TestCase.assertEquals( 1.573, p.x, 1.0e-3);
+		TestCase.assertEquals( 2.319, p.y, 1.0e-3);
 	}
 	
 	/**
 	 * Tests the getAxes method.
 	 */
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void getAxes() {
-		Ellipse e = new Ellipse(1.0, 0.5);
-		e.getAxes(new Vector2[] { new Vector2() }, Transform.IDENTITY);
+		Slice e = new Slice(1.0, Math.toRadians(50));
+		// should be two axes + number of foci
+		Vector2[] foci = new Vector2[] {
+			new Vector2(2.0, -0.5),
+			new Vector2(1.0, 3.0)
+		};
+		Vector2[] axes = e.getAxes(foci, Transform.IDENTITY);
+		TestCase.assertEquals(4, axes.length);
+		
+		// make sure we get back the right axes
+		axes = e.getAxes(null, Transform.IDENTITY);
+		TestCase.assertEquals(-0.422, axes[0].x, 1.0e-3);
+		TestCase.assertEquals( 0.906, axes[0].y, 1.0e-3);
+		TestCase.assertEquals(-0.422, axes[1].x, 1.0e-3);
+		TestCase.assertEquals(-0.906, axes[1].y, 1.0e-3);
 	}
 	
 	/**
 	 * Tests the getFoci method.
 	 */
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void getFoci() {
-		Ellipse e = new Ellipse(1.0, 0.5);
-		e.getFoci(Transform.IDENTITY);
+		Slice e = new Slice(1.0, Math.toRadians(50));
+		Vector2[] foci = e.getFoci(Transform.IDENTITY);
+		// should be two foci
+		TestCase.assertEquals(1, foci.length);
+		// make sure the foci are correct
+		TestCase.assertEquals( 0.000, foci[0].x, 1.0e-3);
+		TestCase.assertEquals( 0.000, foci[0].y, 1.0e-3);
 	}
 	
 	/**
@@ -200,18 +222,19 @@ public class EllipseTest {
 	 */
 	@Test
 	public void rotate() {
-		Ellipse e = new Ellipse(1.0, 0.5);
+		Slice e = new Slice(1.0, Math.toRadians(50));
+		// note: the center is not at the origin
 		
 		// rotate about center
 		e.translate(1.0, 1.0);
 		e.rotateAboutCenter(Math.toRadians(30));
-		TestCase.assertEquals(1.000, e.center.x, 1.0e-3);
+		TestCase.assertEquals(1.645, e.center.x, 1.0e-3);
 		TestCase.assertEquals(1.000, e.center.y, 1.0e-3);
 		
 		// rotate about the origin
 		e.rotate(Math.toRadians(90));
 		TestCase.assertEquals(-1.000, e.center.x, 1.0e-3);
-		TestCase.assertEquals( 1.000, e.center.y, 1.0e-3);
+		TestCase.assertEquals( 1.645, e.center.y, 1.0e-3);
 		e.translate(e.getCenter().getNegative());
 		
 		// should move the center
@@ -225,11 +248,11 @@ public class EllipseTest {
 	 */
 	@Test
 	public void translate() {
-		Ellipse e = new Ellipse(1.0, 0.5);
+		Slice e = new Slice(1.0, Math.toRadians(50));
 		
 		e.translate(1.0, -0.5);
 		
-		TestCase.assertEquals( 1.000, e.center.x, 1.0e-3);
+		TestCase.assertEquals( 1.645, e.center.x, 1.0e-3);
 		TestCase.assertEquals(-0.500, e.center.y, 1.0e-3);
 	}
 	
@@ -238,14 +261,14 @@ public class EllipseTest {
 	 */
 	@Test
 	public void createAABB() {
-		Ellipse e = new Ellipse(1.0, 0.5);
+		Slice e = new Slice(1.0, Math.toRadians(50));
 		
 		// using an identity transform
 		AABB aabb = e.createAABB(Transform.IDENTITY);
-		TestCase.assertEquals(-0.500, aabb.getMinX(), 1.0e-3);
-		TestCase.assertEquals(-0.250, aabb.getMinY(), 1.0e-3);
-		TestCase.assertEquals( 0.500, aabb.getMaxX(), 1.0e-3);
-		TestCase.assertEquals( 0.250, aabb.getMaxY(), 1.0e-3);
+		TestCase.assertEquals( 0.000, aabb.getMinX(), 1.0e-3);
+		TestCase.assertEquals(-0.422, aabb.getMinY(), 1.0e-3);
+		TestCase.assertEquals( 1.000, aabb.getMaxX(), 1.0e-3);
+		TestCase.assertEquals( 0.422, aabb.getMaxY(), 1.0e-3);
 		
 		// try using the default method
 		AABB aabb2 = e.createAABB();
@@ -260,9 +283,20 @@ public class EllipseTest {
 		tx.translate(1.0, 2.0);
 		
 		aabb = e.createAABB(tx);
-		TestCase.assertEquals(0.549, aabb.getMinX(), 1.0e-3);
-		TestCase.assertEquals(1.669, aabb.getMinY(), 1.0e-3);
-		TestCase.assertEquals(1.450, aabb.getMaxX(), 1.0e-3);
-		TestCase.assertEquals(2.330, aabb.getMaxY(), 1.0e-3);
+		TestCase.assertEquals( 1.000, aabb.getMinX(), 1.0e-3);
+		TestCase.assertEquals( 2.000, aabb.getMinY(), 1.0e-3);
+		TestCase.assertEquals( 1.996, aabb.getMaxX(), 1.0e-3);
+		TestCase.assertEquals( 2.819, aabb.getMaxY(), 1.0e-3);
+	}
+	
+	/**
+	 * Verifies the output of the getRadius and getSliceRadius methods.
+	 */
+	@Test
+	public void sliceRadius() {
+		Slice e = new Slice(1.0, Math.toRadians(50));
+		TestCase.assertEquals(1.000, e.getSliceRadius(), 1.0e-3);
+		TestCase.assertFalse(Math.abs(1.0 - e.getRadius()) < Epsilon.E);
+		TestCase.assertFalse(Math.abs(e.getSliceRadius() - e.getRadius()) < Epsilon.E);
 	}
 }

@@ -332,7 +332,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			direction.set(Vector2.tripleProduct(ab, ao, ab));
 			// check for degenerate cases where the origin lies on the segment
 			// created by a -> b which will yield a zero edge normal
-			if (direction.isZero()) {
+			if (direction.getMagnitudeSquared() <= Epsilon.E) {
 				// in this case just choose either normal (left or right)
 				direction.set(ab.left());
 			}
@@ -377,7 +377,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			// the vector from the point we found to the origin is the new search direction
 			d.negate();
 			// check if d is zero
-			if (d.isZero()) {
+			if (d.getMagnitudeSquared() <= Epsilon.E) {
 				// if the closest point is the origin then the shapes are not separated
 				return false;
 			}

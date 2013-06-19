@@ -30,6 +30,7 @@ import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.Raycast;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Convex;
+import org.dyn4j.geometry.Ellipse;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Ray;
@@ -38,7 +39,6 @@ import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.geometry.extras.Ellipse;
 import org.junit.Test;
 
 /**

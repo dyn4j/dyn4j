@@ -453,4 +453,17 @@ public class Vector2Test {
 		TestCase.assertEquals( 3.0 / 5.0, v.x, 1.0e-3);
 		TestCase.assertEquals( 4.0 / 5.0, v.y, 1.0e-3);
 	}
+	
+	/**
+	 * Tests the getAngleBetween method for the range.
+	 * @since 3.1.5
+	 */
+	@Test
+	public void getAngleBetweenRange() {
+		Vector2 v1 = new Vector2(-1.0, 2.0);
+		Vector2 v2 = new Vector2(-2.0, -1.0);
+		
+		// this should return in the range of -pi,pi
+		TestCase.assertTrue(Math.PI >= Math.abs(v1.getAngleBetween(v2)));
+	}
 }

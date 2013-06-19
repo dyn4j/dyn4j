@@ -35,20 +35,19 @@ import org.dyn4j.collision.manifold.ManifoldPoint;
 import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.Penetration;
 import org.dyn4j.collision.narrowphase.Separation;
+import org.dyn4j.geometry.Ellipse;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Shape;
 import org.dyn4j.geometry.Transform;
-import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.geometry.extras.Ellipse;
 import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Test case for {@link Rectangle} - {@link Triangle} collision detection.
+ * Test case for {@link Rectangle} - {@link Ellipse} collision detection.
  * @author William Bittle
  * @version 3.1.5
- * @since 1.0.0
+ * @since 3.1.5
  */
 public class RectangleEllipseTest extends AbstractTest {
 	/** The test {@link Rectangle} */
