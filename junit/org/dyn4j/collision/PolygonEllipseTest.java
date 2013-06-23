@@ -366,6 +366,7 @@ public class PolygonEllipseTest extends AbstractTest {
 		TestCase.assertTrue(this.cmfs.getManifold(p, poly, t1, ellipse, t2, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		// try reversing the shapes
+		this.gjk.detect(ellipse, t2, poly, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, ellipse, t2, poly, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		

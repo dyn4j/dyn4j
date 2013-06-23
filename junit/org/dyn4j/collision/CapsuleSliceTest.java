@@ -416,6 +416,7 @@ public class CapsuleSliceTest extends AbstractTest {
 		TestCase.assertTrue(this.cmfs.getManifold(p, capsule, t1, slice, t2, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		// try reversing the shapes
+		this.gjk.detect(slice, t2, capsule, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, slice, t2, capsule, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		
@@ -424,7 +425,8 @@ public class CapsuleSliceTest extends AbstractTest {
 		TestCase.assertTrue(this.cmfs.getManifold(p, capsule, t1, slice, t2, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		// try reversing the shapes
-		TestCase.assertTrue(this.cmfs.getManifold(p, capsule, t2, slice, t1, m));
+		this.sat.detect(slice, t2, capsule, t1, p);
+		TestCase.assertTrue(this.cmfs.getManifold(p, slice, t2, capsule, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		
 		t1.translate(-0.25, 0.0);
@@ -439,6 +441,7 @@ public class CapsuleSliceTest extends AbstractTest {
 		TestCase.assertEquals(-0.170, p1.y, 1.0e-3);
 		TestCase.assertEquals( 0.250, mp.getDepth(), 1.0e-3);
 		// try reversing the shapes
+		this.gjk.detect(slice, t2, capsule, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, slice, t2, capsule, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
@@ -457,12 +460,13 @@ public class CapsuleSliceTest extends AbstractTest {
 		TestCase.assertEquals(-0.226, p1.y, 1.0e-3);
 		TestCase.assertEquals( 0.250, mp.getDepth(), 1.0e-3);
 		// try reversing the shapes
-		TestCase.assertTrue(this.cmfs.getManifold(p, capsule, t2, slice, t1, m));
+		this.sat.detect(slice, t2, capsule, t1, p);
+		TestCase.assertTrue(this.cmfs.getManifold(p, slice, t2, capsule, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
 		p1 = mp.getPoint();
-		TestCase.assertEquals(-0.355, p1.x, 1.0e-3);
-		TestCase.assertEquals( 0.226, p1.y, 1.0e-3);
+		TestCase.assertEquals( 0.105, p1.x, 1.0e-3);
+		TestCase.assertEquals(-0.226, p1.y, 1.0e-3);
 		TestCase.assertEquals( 0.250, mp.getDepth(), 1.0e-3);
 	}
 }

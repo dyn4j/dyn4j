@@ -37,14 +37,11 @@ import org.dyn4j.geometry.Convex;
  * @since 3.1.5
  */
 public abstract class TypedFallbackCondition extends AbstractFallbackCondition implements FallbackCondition, Comparable<FallbackCondition> {
-	/** True if a strict class equals should be used */
-	protected boolean strict;
-	
 	/**
 	 * Default constructor.
 	 */
 	public TypedFallbackCondition() {
-		this(0, true);
+		this(0);
 	}
 	
 	/**
@@ -52,28 +49,9 @@ public abstract class TypedFallbackCondition extends AbstractFallbackCondition i
 	 * @param sortIndex the sort index of this condition
 	 */
 	public TypedFallbackCondition(int sortIndex) {
-		this(sortIndex, true);
-	}
-	
-	
-	/**
-	 * Optional constructor.
-	 * @param strict true if a strict type comparison should be performed
-	 */
-	public TypedFallbackCondition(boolean strict) {
-		this(0, strict);
+		super(sortIndex);
 	}
 
-	/**
-	 * Full constructor.
-	 * @param sortIndex the sort index of this condition
-	 * @param strict true if a strict type comparison should be performed
-	 */
-	public TypedFallbackCondition(int sortIndex, boolean strict) {
-		super(sortIndex);
-		this.strict = strict;
-	}
-	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.extras.FallbackCondition#isMatch(org.dyn4j.geometry.Convex, org.dyn4j.geometry.Convex)
 	 */
@@ -90,12 +68,4 @@ public abstract class TypedFallbackCondition extends AbstractFallbackCondition i
 	 * @return boolean
 	 */
 	public abstract boolean isMatch(Class<? extends Convex> type1, Class<? extends Convex> type2);
-	
-	/**
-	 * Returns true if this condition uses a strict type comparison.
-	 * @return boolean
-	 */
-	public boolean isStrict() {
-		return this.strict;
-	}
 }

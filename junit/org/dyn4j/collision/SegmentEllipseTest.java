@@ -364,6 +364,7 @@ public class SegmentEllipseTest extends AbstractTest {
 		TestCase.assertTrue(this.cmfs.getManifold(p, s, t1, e, t2, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		// try reversing the shapes
+		this.gjk.detect(e, t2, s, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, e, t2, s, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		

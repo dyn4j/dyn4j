@@ -38,6 +38,9 @@ public class SingleTypedFallbackCondition extends TypedFallbackCondition impleme
 	/** The type to compare to */
 	protected Class<? extends Convex> type;
 	
+	/** True if a strict class equals should be used */
+	protected boolean strict;
+	
 	/**
 	 * Minimal constructor.
 	 * @param type the type
@@ -72,8 +75,9 @@ public class SingleTypedFallbackCondition extends TypedFallbackCondition impleme
 	 * @param strict true if a strict type comparison should be performed
 	 */
 	public SingleTypedFallbackCondition(Class<? extends Convex> type, int sortIndex, boolean strict) {
-		super(sortIndex, strict);
+		super(sortIndex);
 		this.type = type;
+		this.strict = strict;
 	}
 	
 	/* (non-Javadoc)
@@ -105,5 +109,13 @@ public class SingleTypedFallbackCondition extends TypedFallbackCondition impleme
 		}
 		// otherwise it must be assignable to type
 		return this.type.isAssignableFrom(type1) || this.type.isAssignableFrom(type2);
+	}
+	
+	/**
+	 * Returns true if this condition uses a strict type comparison.
+	 * @return boolean
+	 */
+	public boolean isStrict() {
+		return this.strict;
 	}
 }

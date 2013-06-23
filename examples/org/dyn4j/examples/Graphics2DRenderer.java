@@ -48,7 +48,7 @@ import org.dyn4j.geometry.Vector2;
  * @version 3.1.5
  * @since 3.1.5
  */
-public class Graphics2DRenderer {
+public final class Graphics2DRenderer {
 	/**
 	 * Renders the given shape to the given graphics context using the given scale and color.
 	 * @param g the graphics context
@@ -171,7 +171,7 @@ public class Graphics2DRenderer {
 		g.translate(center.x * scale, center.y * scale);
 		g.rotate(rotation);
 		
-		double width = capsule.getWidth();
+		double width = capsule.getLength();
 		double radius = capsule.getCapRadius();
 		double radius2 = radius * 2.0;
 		

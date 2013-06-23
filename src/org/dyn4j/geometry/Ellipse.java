@@ -31,8 +31,12 @@ import org.dyn4j.resources.Messages;
  * <p>
  * An ellipse must have a width and height greater than zero.
  * <p>
- * This shape is only supported by the GJK collision detection algorithm. It may even be more efficient
- * and stable using {@link Geometry#createPolygonalEllipse(int, double, double)} instead.
+ * <b>This shape is only supported by the GJK collision detection algorithm</b>. An 
+ * <code>UnsupportedOperationException</code> is thrown when this shape is used with SAT.  If you are using
+ * or are planning on using the SAT collision detection algorithm, you can use the 
+ * {@link Geometry#createPolygonalEllipse(int, double, double)} method to create a half ellipse
+ * {@link Polygon} approximation. Another option is to use the GJK or your own collision detection
+ * algorithm for this shape only and use SAT on others (fallback).
  * @author William Bittle
  * @since 3.1.5
  * @version 3.1.5

@@ -370,6 +370,7 @@ public class CircleEllipseTest extends AbstractTest {
 		TestCase.assertTrue(this.cmfs.getManifold(p, c, t1, e, t2, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		// try reversing the shapes
+		this.gjk.detect(e, t2, c, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, e, t2, c, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		
@@ -385,6 +386,7 @@ public class CircleEllipseTest extends AbstractTest {
 		TestCase.assertEquals( 0.000, p1.y, 1.0e-3);
 		TestCase.assertEquals( 1.000, mp.getDepth(), 1.0e-3);
 		// try reversing the shapes
+		this.gjk.detect(e, t2, c, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, e, t2, c, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);

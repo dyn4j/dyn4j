@@ -368,8 +368,9 @@ public class TriangleHalfEllipseTest extends AbstractTest {
 		TestCase.assertTrue(this.cmfs.getManifold(p, t, t1, e, t2, m));
 		TestCase.assertEquals(2, m.getPoints().size());
 		// try reversing the shapes
+		this.gjk.detect(e, t2, t, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, e, t2, t, t1, m));
-		TestCase.assertEquals(1, m.getPoints().size());
+		TestCase.assertEquals(2, m.getPoints().size());
 		
 		t1.translate(-1.0, 0.0);
 		

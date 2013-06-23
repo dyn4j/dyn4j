@@ -88,7 +88,7 @@ public class RectangleCapsuleTest extends AbstractTest {
 		TestCase.assertTrue(this.aabb.detect(capsule, t2, rectangle, t1));
 		
 		// test only AABB overlap
-		t2.translate(0.45, 0.45);
+		t2.translate(0.35, -0.5);
 		TestCase.assertTrue(this.aabb.detect(rectangle, t1, capsule, t2));
 		TestCase.assertTrue(this.aabb.detect(capsule, t2, rectangle, t1));
 		
@@ -416,6 +416,7 @@ public class RectangleCapsuleTest extends AbstractTest {
 		TestCase.assertTrue(this.cmfs.getManifold(p, rectangle, t1, capsule, t2, m));
 		TestCase.assertEquals(2, m.getPoints().size());
 		// try reversing the shapes
+		this.gjk.detect(capsule, t2, rectangle, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, capsule, t2, rectangle, t1, m));
 		TestCase.assertEquals(2, m.getPoints().size());
 		
@@ -424,7 +425,8 @@ public class RectangleCapsuleTest extends AbstractTest {
 		TestCase.assertTrue(this.cmfs.getManifold(p, rectangle, t1, capsule, t2, m));
 		TestCase.assertEquals(2, m.getPoints().size());
 		// try reversing the shapes
-		TestCase.assertTrue(this.cmfs.getManifold(p, rectangle, t2, capsule, t1, m));
+		this.sat.detect(capsule, t2, rectangle, t1, p);
+		TestCase.assertTrue(this.cmfs.getManifold(p, capsule, t2, rectangle, t1, m));
 		TestCase.assertEquals(2, m.getPoints().size());
 		
 		t1.translate(-0.5, 0.0);
@@ -439,6 +441,7 @@ public class RectangleCapsuleTest extends AbstractTest {
 		TestCase.assertEquals( 0.000, p1.y, 1.0e-3);
 		TestCase.assertEquals( 0.500, mp.getDepth(), 1.0e-3);
 		// try reversing the shapes
+		this.gjk.detect(capsule, t2, rectangle, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, capsule, t2, rectangle, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
@@ -457,11 +460,12 @@ public class RectangleCapsuleTest extends AbstractTest {
 		TestCase.assertEquals( 0.000, p1.y, 1.0e-3);
 		TestCase.assertEquals( 0.500, mp.getDepth(), 1.0e-3);
 		// try reversing the shapes
-		TestCase.assertTrue(this.cmfs.getManifold(p, rectangle, t2, capsule, t1, m));
+		this.sat.detect(capsule, t2, rectangle, t1, p);
+		TestCase.assertTrue(this.cmfs.getManifold(p, capsule, t2, rectangle, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
 		p1 = mp.getPoint();
-		TestCase.assertEquals( 0.000, p1.x, 1.0e-3);
+		TestCase.assertEquals(-0.500, p1.x, 1.0e-3);
 		TestCase.assertEquals( 0.000, p1.y, 1.0e-3);
 		TestCase.assertEquals( 0.500, mp.getDepth(), 1.0e-3);
 	}

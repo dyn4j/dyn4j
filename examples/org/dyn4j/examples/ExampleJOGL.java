@@ -135,8 +135,9 @@ public class ExampleJOGL extends JFrame implements GLEventListener {
 					}
 					gl.glEnd();
 				}
-				// circles you have do a little more work and im lazy
-				// in this example; see the GLHelper class in the TestBed
+				// circles and other curved shapes require a little more work, so to keep
+				// this example short we only include polygon shapes; see the RenderUtilities
+				// in the Sandbox application
 			}
 			
 			// set the original transform

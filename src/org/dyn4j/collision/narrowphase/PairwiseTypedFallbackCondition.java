@@ -38,30 +38,40 @@ public class PairwiseTypedFallbackCondition extends TypedFallbackCondition imple
 	/** The first type to compare to */
 	protected Class<? extends Convex> type1;
 	
+	/** True if strict type matching should be performed on the first type */
+	protected boolean strict1;
+	
 	/** The second type to compare to */
 	protected Class<? extends Convex> type2;
+
+	/** True if strict type matching should be performed on the second type */
+	protected boolean strict2;
 	
 	/**
 	 * Default constructor.
 	 * <p>
 	 * The ordering of the types doesn't matter.
+	 * <p>
+	 * The type matching defaults to strict for both types.
 	 * @param type1 the first type of the pair
 	 * @param type2 the second type of the pair
 	 */
 	public PairwiseTypedFallbackCondition(Class<? extends Convex> type1, Class<? extends Convex> type2) {
-		this(type1, type2, 0, true);
+		this(type1, true, type2, true, 0);
 	}
 	
 	/**
 	 * Optional constructor.
 	 * <p>
 	 * The ordering of the types doesn't matter.
+	 * <p>
+	 * The type matching defaults to strict for both types.
 	 * @param type1 the first type of the pair
 	 * @param type2 the second type of the pair
 	 * @param sortIndex the sort index of this condition
 	 */
 	public PairwiseTypedFallbackCondition(Class<? extends Convex> type1, Class<? extends Convex> type2, int sortIndex) {
-		this(type1, type2, sortIndex, true);
+		this(type1, true, type2, true, sortIndex);
 	}
 	
 	
@@ -71,10 +81,36 @@ public class PairwiseTypedFallbackCondition extends TypedFallbackCondition imple
 	 * The ordering of the types doesn't matter.
 	 * @param type1 the first type of the pair
 	 * @param type2 the second type of the pair
-	 * @param strict true if a strict type comparison should be performed
+	 * @param strict true if a strict type comparison should be performed for both types
 	 */
 	public PairwiseTypedFallbackCondition(Class<? extends Convex> type1, Class<? extends Convex> type2, boolean strict) {
-		this(type1, type2, 0, strict);
+		this(type1, strict, type2, strict, 0);
+	}
+
+	/**
+	 * Optional constructor.
+	 * <p>
+	 * The ordering of the types doesn't matter.
+	 * @param type1 the first type of the pair
+	 * @param type2 the second type of the pair
+	 * @param strict true if a strict type comparison should be performed on both types
+	 * @param sortIndex the sort index of this condition
+	 */
+	public PairwiseTypedFallbackCondition(Class<? extends Convex> type1, Class<? extends Convex> type2, boolean strict, int sortIndex) {
+		this(type1, strict, type2, strict, sortIndex);
+	}
+
+	/**
+	 * Optional constructor.
+	 * <p>
+	 * The ordering of the types doesn't matter.
+	 * @param type1 the first type of the pair
+	 * @param strict1 true if a strict type comparison should be performed on the first type
+	 * @param type2 the second type of the pair
+	 * @param strict2 true if a strict type comparison should be performed on the second type
+	 */
+	public PairwiseTypedFallbackCondition(Class<? extends Convex> type1, boolean strict1, Class<? extends Convex> type2, boolean strict2) {
+		this(type1, strict1, type2, strict2, 0);
 	}
 
 	/**
@@ -82,14 +118,17 @@ public class PairwiseTypedFallbackCondition extends TypedFallbackCondition imple
 	 * <p>
 	 * The ordering of the types doesn't matter.
 	 * @param type1 the first type of the pair
+	 * @param strict1 true if a strict type comparison should be performed on the first type
 	 * @param type2 the second type of the pair
+	 * @param strict2 true if a strict type comparison should be performed on the second type
 	 * @param sortIndex the sort index of this condition
-	 * @param strict true if a strict type comparison should be performed
 	 */
-	public PairwiseTypedFallbackCondition(Class<? extends Convex> type1, Class<? extends Convex> type2, int sortIndex, boolean strict) {
-		super(sortIndex, strict);
+	public PairwiseTypedFallbackCondition(Class<? extends Convex> type1, boolean strict1, Class<? extends Convex> type2, boolean strict2, int sortIndex) {
+		super(sortIndex);
 		this.type1 = type1;
+		this.strict1 = strict1;
 		this.type2 = type2;
+		this.strict2 = strict2;
 	}
 	
 	/* (non-Javadoc)
@@ -105,7 +144,7 @@ public class PairwiseTypedFallbackCondition extends TypedFallbackCondition imple
 			if (((pfc.type1 == this.type1 && pfc.type2 == this.type2) || 
 				 (pfc.type1 == this.type2 && pfc.type2 == this.type1)) &&
 				 // and their strictness must be equal
-			      pfc.strict == this.strict &&
+			      pfc.strict1 == this.strict1 && pfc.strict2 == this.strict2 &&
 			      pfc.sortIndex == this.sortIndex) {
 				return true;
 			}
@@ -117,14 +156,26 @@ public class PairwiseTypedFallbackCondition extends TypedFallbackCondition imple
 	 * @see org.dyn4j.extras.TypedFallbackCondition#isMatch(java.lang.Class, java.lang.Class)
 	 */
 	public boolean isMatch(Class<? extends Convex> type1, Class<? extends Convex> type2) {
-		if (this.strict) {
-			// don't do subclass matching
-			return (this.type1 == type1 && this.type2 == type2) || 
-				   (this.type1 == type2 && this.type2 == type1);
+		if (this.strict1) {
+			if (this.strict2) {
+				// don't do subclass matching
+				return (this.type1 == type1 && this.type2 == type2) || 
+					   (this.type1 == type2 && this.type2 == type1);
+			} else {
+				// only type1 is strict
+				return (this.type1 == type1 && this.type2.isAssignableFrom(type2)) || 
+					   (this.type1 == type2 && this.type2.isAssignableFrom(type1));
+			}
 		} else {
-			// allow subclass matching
-			return (this.type1.isAssignableFrom(type1) && this.type2.isAssignableFrom(type2)) ||
-				   (this.type1.isAssignableFrom(type2) && this.type2.isAssignableFrom(type1));
+			if (this.strict2) {
+				// only type 2 is strict
+				return (this.type1.isAssignableFrom(type1) && this.type2 == type2) || 
+					   (this.type1.isAssignableFrom(type2) && this.type2 == type1);
+			} else {
+				// allow subclass matching on both types
+				return (this.type1.isAssignableFrom(type1) && this.type2.isAssignableFrom(type2)) ||
+					   (this.type1.isAssignableFrom(type2) && this.type2.isAssignableFrom(type1));
+			}
 		}
 	}
 }

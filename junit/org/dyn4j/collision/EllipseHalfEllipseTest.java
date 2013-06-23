@@ -369,6 +369,7 @@ public class EllipseHalfEllipseTest extends AbstractTest {
 		TestCase.assertTrue(this.cmfs.getManifold(p, c1, t1, c2, t2, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		// try reversing the shapes
+		this.gjk.detect(c2, t2, c1, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, c2, t2, c1, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		
@@ -384,6 +385,7 @@ public class EllipseHalfEllipseTest extends AbstractTest {
 		TestCase.assertEquals(-0.899, p1.y, 1.0e-3);
 		TestCase.assertEquals( 0.250, mp.getDepth(), 1.0e-3);
 		// try reversing the shapes
+		this.gjk.detect(c2, t2, c1, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, c2, t2, c1, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
