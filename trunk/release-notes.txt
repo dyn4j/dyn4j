@@ -6,7 +6,7 @@ New Features:
   - Added a new Slice shape primitive.
   - Updated the createUnitCirclePolygon method to be more efficient.
   - Added methods to generate polygonal capsules, slices, ellipses, and half 
-    ellipses.
+    ellipses to the Geometry class.
   - Added a new Ellipse shape primitive (GJK support only).
   - Added a new HalfEllipse shape primitive (GJK support only).
   - Added a Graphics2DRenderer class to the examples directory to show how to
@@ -15,7 +15,8 @@ New Features:
   - Added a new FallbackNarrowphaseDetector which uses FallbackConditions to 
     determine when to use a fallback NarrowphaseDetector rather than the
     primary. This is useful when you want to use the SAT algorithm with the
-    ellipse or half ellipse shapes (fallback to GJK on these types).
+    ellipse or half ellipse shapes (fallback to GJK on these types). See the
+    SingleTypedFallbackCondition and PairwiseTypedFallbackCondition classes.
     
 Bug Fixes:
   - Fixed a bug in the Vector2.getAngleBetween method where it would return
@@ -23,6 +24,8 @@ Bug Fixes:
   - Fixed a bug in the Gjk algorithm where a near zero vector was not being
     caught, causing a false negative during collision and a false positive
     in the distance method.
+  - Fixed some bugs in the JUnit tests (no real effect but still important
+    so that future releases do not impact existing functionality)
     
 Deprecated:
 

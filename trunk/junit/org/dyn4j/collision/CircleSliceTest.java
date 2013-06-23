@@ -416,6 +416,7 @@ public class CircleSliceTest extends AbstractTest {
 		TestCase.assertTrue(this.cmfs.getManifold(p, circle, t1, slice, t2, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		// try reversing the shapes
+		this.gjk.detect(slice, t2, circle, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, slice, t2, circle, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		
@@ -424,7 +425,8 @@ public class CircleSliceTest extends AbstractTest {
 		TestCase.assertTrue(this.cmfs.getManifold(p, circle, t1, slice, t2, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		// try reversing the shapes
-		TestCase.assertTrue(this.cmfs.getManifold(p, circle, t2, slice, t1, m));
+		this.sat.detect(slice, t2, circle, t1, p);
+		TestCase.assertTrue(this.cmfs.getManifold(p, slice, t2, circle, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		
 		t1.translate(-0.25, 0.0);
@@ -439,6 +441,7 @@ public class CircleSliceTest extends AbstractTest {
 		TestCase.assertEquals( 0.000, p1.y, 1.0e-3);
 		TestCase.assertEquals( 0.250, mp.getDepth(), 1.0e-3);
 		// try reversing the shapes
+		this.gjk.detect(slice, t2, circle, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, slice, t2, circle, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
@@ -457,11 +460,12 @@ public class CircleSliceTest extends AbstractTest {
 		TestCase.assertEquals( 0.000, p1.y, 1.0e-3);
 		TestCase.assertEquals( 0.250, mp.getDepth(), 1.0e-3);
 		// try reversing the shapes
-		TestCase.assertTrue(this.cmfs.getManifold(p, circle, t2, slice, t1, m));
+		this.sat.detect(slice, t2, circle, t1, p);
+		TestCase.assertTrue(this.cmfs.getManifold(p, slice, t2, circle, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
 		p1 = mp.getPoint();
-		TestCase.assertEquals(-0.500, p1.x, 1.0e-3);
+		TestCase.assertEquals( 0.000, p1.x, 1.0e-3);
 		TestCase.assertEquals( 0.000, p1.y, 1.0e-3);
 		TestCase.assertEquals( 0.250, mp.getDepth(), 1.0e-3);
 	}

@@ -56,7 +56,7 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 	protected static final double EDGE_FEATURE_EXPANSION_FACTOR = 0.1;
 	
 	/** The bounding rectangle width */
-	protected double width;
+	protected double length;
 	
 	/** The end cap radius */
 	protected double capRadius;
@@ -95,7 +95,7 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 		}
 		
 		// set the width
-		this.width = major;
+		this.length = major;
 		// the cap radius is half the height
 		this.capRadius = minor * 0.5;
 		
@@ -134,7 +134,7 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Capsule[").append(super.toString())
-		.append("|Width=").append(this.width)
+		.append("|Width=").append(this.length)
 		.append("|CapRadius=").append(this.capRadius)
 		.append("|UserData=").append(this.userData)
 		.append("]");
@@ -232,7 +232,7 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 			// compute the vector to add/sub from the foci
 			Vector2 v = n1.multiply(this.capRadius);
 			// compute an expansion amount based on the width of the shape
-			Vector2 e = this.localXAxis.product(this.width * 0.5 * EDGE_FEATURE_EXPANSION_FACTOR);
+			Vector2 e = this.localXAxis.product(this.length * 0.5 * EDGE_FEATURE_EXPANSION_FACTOR);
 			if (d1 > 0) {
 				Vector2 p1 = this.foci[0].sum(v).subtract(e);
 				Vector2 p2 = this.foci[1].sum(v).add(e);
@@ -283,7 +283,7 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 		// of two half circles (really just one circle)
 		
 		double h = this.capRadius * 2.0;
-		double w = this.width - h;
+		double w = this.length - h;
 		double r2 = this.capRadius * this.capRadius;
 		
 		// compute the rectangular area
@@ -359,11 +359,14 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 	}
 	
 	/**
-	 * Returns the bounding rectangle width of this capsule.
+	 * Returns the length of the capsule.
+	 * <p>
+	 * The length is the largest dimension of the capsule's
+	 * bounding rectangle.
 	 * @return double
 	 */
-	public double getWidth() {
-		return this.width;
+	public double getLength() {
+		return this.length;
 	}
 	
 	/**

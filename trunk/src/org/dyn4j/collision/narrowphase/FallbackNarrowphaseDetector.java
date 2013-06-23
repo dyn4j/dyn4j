@@ -112,13 +112,40 @@ public class FallbackNarrowphaseDetector implements NarrowphaseDetector {
 	}
 	
 	/**
+	 * Returns true if the given condition is contained in this detector.
+	 * @param condition the fallback condition
+	 * @return boolean
+	 */
+	public boolean containsCondition(FallbackCondition condition) {
+		return this.fallbackConditions.contains(condition);
+	}
+	
+	/**
+	 * Returns the number of fallback conditions.
+	 * @return int
+	 */
+	public int getConditionCount() {
+		return this.fallbackConditions.size();
+	}
+	
+	/**
+	 * Returns the fallback condition at the given index.
+	 * @param index the index
+	 * @return {@link FallbackCondition}
+	 * @throws IndexOutOfBoundsException if index is not between 0 and {@link #getConditionCount()}
+	 */
+	public FallbackCondition getCondition(int index) {
+		return this.fallbackConditions.get(index);
+	}
+	
+	/**
 	 * Returns true if the fallback {@link NarrowphaseDetector} should be used rather
 	 * than the primary.
 	 * @param convex1 the first convex
 	 * @param convex2 the second convex
 	 * @return boolean
 	 */
-	protected boolean useFallbackDetector(Convex convex1, Convex convex2) {
+	public boolean isFallbackRequired(Convex convex1, Convex convex2) {
 		int size = this.fallbackConditions.size();
 		for (int i = 0; i < size; i++) {
 			FallbackCondition condition = this.fallbackConditions.get(i);
@@ -134,7 +161,7 @@ public class FallbackNarrowphaseDetector implements NarrowphaseDetector {
 	 */
 	@Override
 	public boolean detect(Convex convex1, Transform transform1, Convex convex2, Transform transform2) {
-		if (this.useFallbackDetector(convex1, convex2)) {
+		if (this.isFallbackRequired(convex1, convex2)) {
 			return this.fallbackNarrowphaseDetector.detect(convex1, transform1, convex2, transform2);
 		}
 		return this.primaryNarrowphaseDetector.detect(convex1, transform1, convex2, transform2);
@@ -145,7 +172,7 @@ public class FallbackNarrowphaseDetector implements NarrowphaseDetector {
 	 */
 	@Override
 	public boolean detect(Convex convex1, Transform transform1, Convex convex2, Transform transform2, Penetration penetration) {
-		if (this.useFallbackDetector(convex1, convex2)) {
+		if (this.isFallbackRequired(convex1, convex2)) {
 			return this.fallbackNarrowphaseDetector.detect(convex1, transform1, convex2, transform2, penetration);
 		}
 		return this.primaryNarrowphaseDetector.detect(convex1, transform1, convex2, transform2, penetration);

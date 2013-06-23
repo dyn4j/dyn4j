@@ -708,10 +708,10 @@ public class Geometry {
 	 * ends of the largest dimension.
 	 * <p>
 	 * If width and height are equal use a {@link Circle} shape instead.
-	 * @param width the width
-	 * @param height the height
+	 * @param width the bounding rectangle width
+	 * @param height the bounding rectangle height
 	 * @return {@link Capsule}
-	 * @throws IllegalArgumentException if width or height are less than or equal to zero or if the width and height are near equal
+	 * @throws IllegalArgumentException if width or height are less than or equal to zero
 	 * @since 3.1.5
 	 */
 	public static final Capsule createCapsule(double width, double height) {
@@ -761,6 +761,59 @@ public class Geometry {
 	}
 	
 	/**
+	 * Creates a new {@link Ellipse} bounded by the given rectangle width and height.
+	 * <p>
+	 * The ellipse will be axis-aligned and centered on the origin.
+	 * <p>
+	 * If width and height are equal use a {@link Circle} shape instead.
+	 * @param width the bounding rectangle width
+	 * @param height the bounding rectangle height
+	 * @return {@link Ellipse}
+	 * @throws IllegalArgumentException if width or height are less than or equal to zero
+	 * @since 3.1.5
+	 */
+	public static final Ellipse createEllipse(double width, double height) {
+		return new Ellipse(width, height);
+	}
+	
+	/**
+	 * Creates a new {@link HalfEllipse} bounded by the given rectangle width and height.
+	 * <p>
+	 * The ellipse will be axis-aligned with the base of the half ellipse on the x-axis. The given height
+	 * is the height of the half, not the height of the full ellipse.
+	 * <p>
+	 * If width and height are equal use a {@link Slice} shape with <code>theta = Math.PI</code> instead.
+	 * @param width the bounding rectangle width
+	 * @param height the bounding rectangle height
+	 * @return {@link HalfEllipse}
+	 * @throws IllegalArgumentException if width or height are less than or equal to zero
+	 * @since 3.1.5
+	 */
+	public static final HalfEllipse createHalfEllipse(double width, double height) {
+		return new HalfEllipse(width, height);
+	}
+	
+	/**
+	 * Creates a new {@link HalfEllipse} bounded by the given rectangle width and height.
+	 * <p>
+	 * The ellipse will be axis-aligned with the base of the half ellipse on the x-axis. The given height
+	 * is the height of the half, not the height of the full ellipse.
+	 * <p>
+	 * If width and height are equal use a {@link Slice} shape with <code>theta = Math.PI</code> instead.
+	 * @param width the bounding rectangle width
+	 * @param height the bounding rectangle height
+	 * @return {@link HalfEllipse}
+	 * @throws IllegalArgumentException if width or height are less than or equal to zero
+	 * @since 3.1.5
+	 */
+	public static final HalfEllipse createHalfEllipseAtOrigin(double width, double height) {
+		HalfEllipse half = new HalfEllipse(width, height);
+		Vector2 c = half.getCenter();
+		half.translate(-c.x, -c.y);
+		return half;
+	}
+	
+	/**
 	 * Creates a new {@link Polygon} in the shape of a circle with count number of vertices centered
 	 * on the origin.
 	 * @param count the number of vertices to use; must be greater than 2
@@ -776,7 +829,7 @@ public class Geometry {
 	/**
 	 * Creates a new {@link Polygon} in the shape of a circle with count number of vertices centered
 	 * on the origin.
-	 * @param count the number of vertices to use; must be greater than 2
+	 * @param count the number of vertices to use; must be greater than or equal to 3
 	 * @param radius the radius of the circle; must be greater than zero
 	 * @param theta the radial offset for the points in radians
 	 * @return {@link Polygon}
@@ -889,9 +942,9 @@ public class Geometry {
 	 * Creates a new {@link Polygon} in the shape of an ellipse with count number of vertices centered
 	 * on the origin.
 	 * <p>
-	 * The count should be a multiple of 2.  If not, the returned polygon will have count - 1
+	 * The count should be greater than or equal to 4 and a multiple of 2.  If not, the returned polygon will have count - 1
 	 * vertices.
-	 * @param count the number of vertices to use; should be even, if not, count - 1 vertices will be generated
+	 * @param count the number of vertices to use; must be greater than or equal to 4; should be even, if not, count - 1 vertices will be generated
 	 * @param width the width of the ellipse
 	 * @param height the height of the ellipse
 	 * @return {@link Polygon}
@@ -941,11 +994,11 @@ public class Geometry {
 	 * Returns a polygon with count + 2 vertices.
 	 * <p>
 	 * The height is the total height of the half not the half height.
-	 * @param count the number of vertices to use; should be even, if not, count - 1 vertices will be generated
+	 * @param count the number of vertices to use; must be greater than or equal to 1
 	 * @param width the width of the half ellipse
 	 * @param height the height of the half ellipse; should be the total height
 	 * @return {@link Polygon}
-	 * @throws IllegalArgumentException thrown if count is less than 4 or the width or height are less than or equal to zero
+	 * @throws IllegalArgumentException thrown if count is less than 1 or the width or height are less than or equal to zero
 	 * @since 3.1.5
 	 */
 	public static final Polygon createPolygonalHalfEllipse(int count, double width, double height) {
@@ -1009,7 +1062,7 @@ public class Geometry {
 	 * cap, centered on the origin.  The caps will be on the ends of the largest dimension.
 	 * <p>
 	 * The returned polygon will have 4 + 2 * count number of vertices.
-	 * @param count the number of vertices to use for one cap
+	 * @param count the number of vertices to use for one cap; must be greater than or equal to 1
 	 * @param width the bounding rectangle width
 	 * @param height the bounding rectangle height
 	 * @return {@link Polygon}

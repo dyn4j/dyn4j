@@ -41,12 +41,14 @@ import javax.swing.UnsupportedLookAndFeelException;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
+import org.dyn4j.geometry.Capsule;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Rectangle;
+import org.dyn4j.geometry.Slice;
 import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
 
@@ -56,7 +58,7 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * This class can be used as a starting point for projects.
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.1.5
  * @since 3.0.0
  */
 public class ExampleGraphics2D extends JFrame {
@@ -244,7 +246,7 @@ public class ExampleGraphics2D extends JFrame {
 		polygon.setAngularVelocity(Math.toRadians(-20.0));
 		this.world.addBody(polygon);
 		
-		// try a compound object (Capsule)
+		// try a compound object
 		Circle c1 = new Circle(0.5);
 		BodyFixture c1Fixture = new BodyFixture(c1);
 		c1Fixture.setDensity(0.5);
@@ -280,6 +282,18 @@ public class ExampleGraphics2D extends JFrame {
 		rightTri.setMass();
 		rightTri.translate(4.0, 3.0);
 		this.world.addBody(rightTri);
+		
+		GameObject cap = new GameObject();
+		cap.addFixture(new Capsule(1.0, 0.5));
+		cap.setMass();
+		cap.translate(-3.0, 3.0);
+		this.world.addBody(cap);
+		
+		GameObject slice = new GameObject();
+		slice.addFixture(new Slice(0.5, Math.toRadians(120)));
+		slice.setMass();
+		slice.translate(-3.0, 3.0);
+		this.world.addBody(slice);
 	}
 	
 	/**

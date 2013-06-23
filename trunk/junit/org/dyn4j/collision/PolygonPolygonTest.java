@@ -412,6 +412,7 @@ public class PolygonPolygonTest extends AbstractTest {
 		TestCase.assertTrue(this.cmfs.getManifold(p, poly1, t1, poly2, t2, m));
 		TestCase.assertEquals(2, m.getPoints().size());
 		// try reversing the shapes
+		this.gjk.detect(poly2, t2, poly1, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, poly2, t2, poly1, t1, m));
 		TestCase.assertEquals(2, m.getPoints().size());
 		
@@ -420,6 +421,7 @@ public class PolygonPolygonTest extends AbstractTest {
 		TestCase.assertTrue(this.cmfs.getManifold(p, poly1, t1, poly2, t2, m));
 		TestCase.assertEquals(2, m.getPoints().size());
 		// try reversing the shapes
+		this.sat.detect(poly2, t2, poly1, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, poly2, t2, poly1, t1, m));
 		TestCase.assertEquals(2, m.getPoints().size());
 		
