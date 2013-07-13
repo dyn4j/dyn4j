@@ -103,6 +103,14 @@ public final class Graphics2DRenderer {
 		// draw the outline
 		g.setColor(color.darker());
 		g.draw(c);
+		
+		// draw a line so that rotation is visible
+		Line2D.Double l = new Line2D.Double(
+				center.x * scale,
+				center.y * scale,
+				(center.x + radius) * scale,
+				center.y * scale);
+		g.draw(l);
 	}
 	
 	/**
