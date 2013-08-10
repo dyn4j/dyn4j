@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -48,7 +48,7 @@ import org.dyn4j.resources.Messages;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class DistanceJoint extends Joint {
@@ -202,9 +202,9 @@ public class DistanceJoint extends Joint {
 		impulse *= step.getDeltaTimeRatio();
 		
 		Vector2 J = n.product(impulse);
-		body1.getVelocity().add(J.product(invM1));
+		body1.getLinearVelocity().add(J.product(invM1));
 		body1.setAngularVelocity(body1.getAngularVelocity() + invI1 * r1.cross(J));
-		body2.getVelocity().subtract(J.product(invM2));
+		body2.getLinearVelocity().subtract(J.product(invM2));
 		body2.setAngularVelocity(body2.getAngularVelocity() - invI2 * r2.cross(J));
 	}
 	
@@ -228,8 +228,8 @@ public class DistanceJoint extends Joint {
 		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
 		
 		// compute the relative velocity
-		Vector2 v1 = body1.getVelocity().sum(r1.cross(body1.getAngularVelocity()));
-		Vector2 v2 = body2.getVelocity().sum(r2.cross(body2.getAngularVelocity()));
+		Vector2 v1 = body1.getLinearVelocity().sum(r1.cross(body1.getAngularVelocity()));
+		Vector2 v2 = body2.getLinearVelocity().sum(r2.cross(body2.getAngularVelocity()));
 		
 		// compute Jv
 		double Jv = n.dot(v1.difference(v2));
@@ -240,9 +240,9 @@ public class DistanceJoint extends Joint {
 		
 		// apply the impulse
 		Vector2 J = n.product(j);
-		body1.getVelocity().add(J.product(invM1));
+		body1.getLinearVelocity().add(J.product(invM1));
 		body1.setAngularVelocity(body1.getAngularVelocity() + invI1 * r1.cross(J));
-		body2.getVelocity().subtract(J.product(invM2));
+		body2.getLinearVelocity().subtract(J.product(invM2));
 		body2.setAngularVelocity(body2.getAngularVelocity() - invI2 * r2.cross(J));
 	}
 	

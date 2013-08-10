@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -22,53 +22,37 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.collision.continuous;
+package org.dyn4j.dynamics;
 
-import org.dyn4j.collision.Collidable;
-import org.dyn4j.geometry.AABB;
-import org.dyn4j.geometry.Transform;
+import org.dyn4j.collision.continuous.TimeOfImpact;
+import org.dyn4j.geometry.Convex;
 
 /**
- * Represents a {@link Collidable} that can take part in continuous collision detection.
+ * Default implemenation of the {@link ConvexCastListener} interface.
+ * <p>
+ * Inherit from this class to only implement the desired methods.
+ * <p>
+ * By default all methods return true.
  * @author William Bittle
- * @version 3.1.1
- * @since 1.2.0
+ * @version 3.1.5
+ * @since 3.1.5
  */
-public interface Swept extends Collidable {
-	/**
-	 * Returns the initial transformation.  This is the
-	 * transformation before integration.
-	 * @return {@link Transform} the initial transform
+public class ConvexCastAdapter implements ConvexCastListener {
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.ConvexCastListener#allow(org.dyn4j.geometry.Convex, org.dyn4j.dynamics.Body)
 	 */
-	public abstract Transform getInitialTransform();
-	
-	/**
-	 * Returns the final transformation.  This is the
-	 * transformation after integration.
-	 * <p>
-	 * This method may return the same transform as
-	 * the {@link #getTransform()} method.
-	 * @return {@link Transform} the final transform
+	@Override
+	public boolean allow(Convex convex, Body body) { return true; }
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.ConvexCastListener#allow(org.dyn4j.geometry.Convex, org.dyn4j.dynamics.Body, org.dyn4j.dynamics.BodyFixture)
 	 */
-	public abstract Transform getFinalTransform();
-	
-	/**
-	 * Returns the maximum radius of the disk that the
-	 * {@link Collidable} creates if rotated 360 degrees.
-	 * @return double the maximum radius of the rotation disk
+	@Override
+	public boolean allow(Convex convex, Body body, BodyFixture fixture) { return true; }
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.ConvexCastListener#allow(org.dyn4j.geometry.Convex, org.dyn4j.dynamics.Body, org.dyn4j.dynamics.BodyFixture, org.dyn4j.collision.continuous.TimeOfImpact)
 	 */
-	public abstract double getRotationDiscRadius();
-	
-	/**
-	 * Returns an AABB that contains the maximal space in which
-	 * the {@link Collidable} exists from the initial transform
-	 * to the final transform.
-	 * <p>
-	 * This method takes the bounding circle, using the world center
-	 * and rotation disc radius, at the initial and final transforms
-	 * and creates an AABB containing both.
-	 * @return {@link AABB}
-	 * @since 3.1.1
-	 */
-	public abstract AABB createSweptAABB();
+	@Override
+	public boolean allow(Convex convex, Body body, BodyFixture fixture, TimeOfImpact toi) { return true; }
 }

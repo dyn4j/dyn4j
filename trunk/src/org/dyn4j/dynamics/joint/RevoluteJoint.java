@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -63,7 +63,7 @@ import org.dyn4j.resources.Messages;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class RevoluteJoint extends Joint {
@@ -253,9 +253,9 @@ public class RevoluteJoint extends Joint {
 		
 		// warm start
 		Vector2 impulse = new Vector2(this.impulse.x, this.impulse.y);
-		this.body1.getVelocity().add(impulse.product(invM1));
+		this.body1.getLinearVelocity().add(impulse.product(invM1));
 		this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * (r1.cross(impulse) + this.motorImpulse + this.impulse.z));
-		this.body2.getVelocity().subtract(impulse.product(invM2));
+		this.body2.getLinearVelocity().subtract(impulse.product(invM2));
 		this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * (r2.cross(impulse) + this.motorImpulse + this.impulse.z));
 	}
 	
@@ -298,8 +298,8 @@ public class RevoluteJoint extends Joint {
 		Vector2 r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
 		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
 		
-		Vector2 v1 = this.body1.getVelocity().sum(r1.cross(this.body1.getAngularVelocity()));
-		Vector2 v2 = this.body2.getVelocity().sum(r2.cross(this.body2.getAngularVelocity()));
+		Vector2 v1 = this.body1.getLinearVelocity().sum(r1.cross(this.body1.getAngularVelocity()));
+		Vector2 v2 = this.body2.getLinearVelocity().sum(r2.cross(this.body2.getAngularVelocity()));
 		// the 2x2 version of Jv + b
 		Vector2 Jvb2 = v1.subtract(v2);
 		
@@ -347,9 +347,9 @@ public class RevoluteJoint extends Joint {
 			
 			// apply the impulses
 			Vector2 impulse = new Vector2(impulse3.x, impulse3.y);
-			this.body1.getVelocity().add(impulse.product(invM1));
+			this.body1.getLinearVelocity().add(impulse.product(invM1));
 			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * (r1.cross(impulse) + impulse3.z));
-			this.body2.getVelocity().subtract(impulse.product(invM2));
+			this.body2.getLinearVelocity().subtract(impulse.product(invM2));
 			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * (r2.cross(impulse) + impulse3.z));
 		} else {
 			// solve the point-to-point constraint
@@ -357,9 +357,9 @@ public class RevoluteJoint extends Joint {
 			this.impulse.x += impulse.x;
 			this.impulse.y += impulse.y;
 			
-			this.body1.getVelocity().add(impulse.product(invM1));
+			this.body1.getLinearVelocity().add(impulse.product(invM1));
 			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(impulse));
-			this.body2.getVelocity().subtract(impulse.product(invM2));
+			this.body2.getLinearVelocity().subtract(impulse.product(invM2));
 			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * r2.cross(impulse));
 		}
 	}

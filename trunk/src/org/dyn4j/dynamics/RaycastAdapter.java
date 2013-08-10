@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -25,12 +25,13 @@
 package org.dyn4j.dynamics;
 
 import org.dyn4j.Listener;
+import org.dyn4j.collision.narrowphase.Raycast;
 import org.dyn4j.geometry.Ray;
 
 /**
  * Default implementation of the {@link RaycastListener} interface.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.5
  * @since 2.0.0
  */
 public class RaycastAdapter implements RaycastListener, Listener {
@@ -45,4 +46,10 @@ public class RaycastAdapter implements RaycastListener, Listener {
 	 */
 	@Override
 	public boolean allow(Ray ray, Body body, BodyFixture fixture) { return true; }
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.RaycastListener#allow(org.dyn4j.geometry.Ray, org.dyn4j.dynamics.Body, org.dyn4j.dynamics.BodyFixture, org.dyn4j.collision.narrowphase.Raycast)
+	 */
+	@Override
+	public boolean allow(Ray ray, Body body, BodyFixture fixture, Raycast raycast) { return true; }
 }

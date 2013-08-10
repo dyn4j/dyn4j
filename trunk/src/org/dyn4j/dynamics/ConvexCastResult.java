@@ -24,32 +24,30 @@
  */
 package org.dyn4j.dynamics;
 
-import org.dyn4j.collision.narrowphase.Raycast;
+import org.dyn4j.collision.continuous.TimeOfImpact;
 
 /**
- * Represents the result of a raycast.
- * <p>
- * Implements the Comparable interface to allow for sorting by the distance.
+ * Represents the result of a convex cast.
  * @author William Bittle
  * @version 3.1.5
- * @since 2.0.0
+ * @since 3.1.5
  */
-public class RaycastResult implements Comparable<RaycastResult> {
-	/** The {@link Body} detected */
+public class ConvexCastResult implements Comparable<ConvexCastResult> {
+	/** The body */
 	protected Body body;
 	
-	/** The {@link BodyFixture} of the {@link Body} detected */
+	/** The body fixture with the smallest time of impact */
 	protected BodyFixture fixture;
 	
-	/** The {@link Raycast} result information */
-	protected Raycast raycast;
+	/** The time of impact information */
+	protected TimeOfImpact timeOfImpact;
 	
 	/* (non-Javadoc)
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
 	@Override
-	public int compareTo(RaycastResult o) {
-		return (int)Math.signum(this.raycast.getDistance() - o.raycast.getDistance());
+	public int compareTo(ConvexCastResult o) {
+		return (int)Math.signum(this.timeOfImpact.getTime() - o.timeOfImpact.getTime());
 	}
 	
 	/* (non-Javadoc)
@@ -58,15 +56,15 @@ public class RaycastResult implements Comparable<RaycastResult> {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("RaycastResult[Body=").append(this.body)
+		sb.append("ConvexCastResult[Body=").append(this.body)
 		.append("|Fixture=").append(this.fixture)
-		.append("|Raycast=").append(this.raycast)
+		.append("|TimeOfImpact=").append(this.timeOfImpact)
 		.append("]");
 		return sb.toString();
 	}
 	
 	/**
-	 * Returns the {@link Body} detected.
+	 * Returns the body.
 	 * @return {@link Body}
 	 */
 	public Body getBody() {
@@ -74,15 +72,16 @@ public class RaycastResult implements Comparable<RaycastResult> {
 	}
 	
 	/**
-	 * Sets the detected {@link Body}.
-	 * @param body the body detected
+	 * Sets the body.
+	 * @param body the body
 	 */
 	public void setBody(Body body) {
 		this.body = body;
 	}
 	
 	/**
-	 * Returns the {@link BodyFixture} of the {@link Body} detected.
+	 * Returns the fixture on the body with the smallest
+	 * time of impact.
 	 * @return {@link BodyFixture}
 	 */
 	public BodyFixture getFixture() {
@@ -90,26 +89,27 @@ public class RaycastResult implements Comparable<RaycastResult> {
 	}
 	
 	/**
-	 * Sets the {@link BodyFixture} of the {@link Body} detected.
-	 * @param fixture the fixture of the body detected
+	 * Sets the fixture on the body with the smallest
+	 * time of impact.
+	 * @param fixture the fixture
 	 */
 	public void setFixture(BodyFixture fixture) {
 		this.fixture = fixture;
 	}
 	
 	/**
-	 * Returns the {@link Raycast} result information.
-	 * @return {@link Raycast}
+	 * Returns the time of impact information.
+	 * @return {@link TimeOfImpact}
 	 */
-	public Raycast getRaycast() {
-		return this.raycast;
+	public TimeOfImpact getTimeOfImpact() {
+		return this.timeOfImpact;
 	}
 	
 	/**
-	 * Sets the {@link Raycast} result information.
-	 * @param raycast the raycast result information
+	 * Sets the time of impact information.
+	 * @param timeOfImpact the time of impact information
 	 */
-	public void setRaycast(Raycast raycast) {
-		this.raycast = raycast;
+	public void setTimeOfImpact(TimeOfImpact timeOfImpact) {
+		this.timeOfImpact = timeOfImpact;
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -65,7 +65,7 @@ import org.dyn4j.sandbox.utilities.SystemUtilities;
 /**
  * Class used to export a simulation to xml.
  * @author William Bittle
- * @version 1.0.4
+ * @version 1.0.5
  * @since 1.0.0
  */
 public class XmlGenerator {
@@ -456,7 +456,7 @@ public class XmlGenerator {
 		// output mass
 		sb.append(XmlGenerator.toXml(body.getMass(), body.isMassExplicit()));
 		
-		sb.append(XmlGenerator.toXml(body.getVelocity(), "Velocity"));
+		sb.append(XmlGenerator.toXml(body.getLinearVelocity(), "Velocity"));
 		sb.append("<AngularVelocity>").append(Math.toDegrees(body.getAngularVelocity())).append("</AngularVelocity>");
 		sb.append(XmlGenerator.toXml(body.getAccumulatedForce(), "AccumulatedForce"));
 		sb.append("<AccumulatedTorque>").append(body.getAccumulatedTorque()).append("</AccumulatedTorque>");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -34,7 +34,7 @@ import org.junit.Test;
 /**
  * Test case for the AABB class.
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.1.5
  * @since 3.0.0
  */
 public class AABBTest {
@@ -46,6 +46,25 @@ public class AABBTest {
 		new AABB(0.0, 0.0, 1.0, 1.0);
 		new AABB(-2.0, 2.0, -1.0, 5.0);
 		new AABB(new Vector2(-3.0, 0.0), new Vector2(-2.0, 2.0));
+	}
+	
+	/**
+	 * Creates an aabb from a radius.
+	 * @since 3.1.5
+	 */
+	@Test
+	public void createRadius() {
+		AABB aabb = new AABB(0.5);
+		TestCase.assertEquals(-0.500, aabb.getMinX(), 1.0e-3);
+		TestCase.assertEquals(-0.500, aabb.getMinY(), 1.0e-3);
+		TestCase.assertEquals( 0.500, aabb.getMaxX(), 1.0e-3);
+		TestCase.assertEquals( 0.500, aabb.getMaxY(), 1.0e-3);
+		
+		aabb = new AABB(new Vector2(-1.0, 1.0), 0.5);
+		TestCase.assertEquals(-1.500, aabb.getMinX(), 1.0e-3);
+		TestCase.assertEquals( 0.500, aabb.getMinY(), 1.0e-3);
+		TestCase.assertEquals(-0.500, aabb.getMaxX(), 1.0e-3);
+		TestCase.assertEquals( 1.500, aabb.getMaxY(), 1.0e-3);
 	}
 	
 	/**

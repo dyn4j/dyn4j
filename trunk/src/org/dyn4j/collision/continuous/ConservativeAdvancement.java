@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -25,9 +25,6 @@
 package org.dyn4j.collision.continuous;
 
 import org.dyn4j.Epsilon;
-import org.dyn4j.collision.Collidable;
-import org.dyn4j.collision.Filter;
-import org.dyn4j.collision.Fixture;
 import org.dyn4j.collision.narrowphase.DistanceDetector;
 import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.Separation;
@@ -43,31 +40,12 @@ import org.dyn4j.resources.Messages;
  * This method assumes that translation and rotation are linear and computes the
  * time of impact within a given tolerance.
  * <p>
- * This method is based on the one found in <a href="http://bulletphysics.org">Bullet</a>.
+ * This method is described in "Continuous Collision Detection and Physics" by Erwin Coumans (Draft).
  * @author William Bittle
- * @see <a href="http://bulletphysics.org">Bullet</a>
- * @version 3.0.2
+ * @version 3.1.5
  * @since 1.2.0
  */
 public class ConservativeAdvancement implements TimeOfImpactDetector {
-	/**
-	 * Class used to store the minimum separation and the closest
-	 * fixtures for the separation.
-	 * @author William Bittle
-	 * @version 2.0.0
-	 * @since 2.0.0
-	 */
-	protected static class MinimumSeparation {
-		/** The minimum {@link Separation} */
-		public Separation separation;
-		
-		/** The closest {@link Fixture} on the first {@link Swept} {@link Collidable} */
-		public Fixture fixture1;
-		
-		/** The closest {@link Fixture} on the second {@link Swept} {@link Collidable} */
-		public Fixture fixture2;
-	}
-	
 	/** The default distance epsilon; 0.5 * {@link Settings}.DEFAULT_LINEAR_TOLERANCE */
 	public static final double DEFAULT_DISTANCE_EPSILON = 0.5 * Settings.DEFAULT_LINEAR_TOLERANCE;
 	
@@ -101,65 +79,54 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.continuous.TimeOfImpactDetector#getTimeOfImpact(org.dyn4j.collision.continuous.Swept, org.dyn4j.collision.continuous.Swept, org.dyn4j.collision.continuous.TimeOfImpact)
+	 * @see org.dyn4j.collision.continuous.TimeOfImpactDetector#getTimeOfImpact(org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform, org.dyn4j.geometry.Vector2, double, org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform, org.dyn4j.geometry.Vector2, double, org.dyn4j.collision.continuous.TimeOfImpact)
 	 */
 	@Override
-	public boolean getTimeOfImpact(Swept swept1, Swept swept2, TimeOfImpact toi) {
-		return this.getTimeOfImpact(swept1, swept2, 0.0, 1.0, toi);
+	public boolean getTimeOfImpact(Convex convex1, Transform transform1, Vector2 dp1, double da1, Convex convex2, Transform transform2, Vector2 dp2, double da2, TimeOfImpact toi) {
+		return this.getTimeOfImpact(convex1, transform1, dp1, da1, convex2, transform2, dp2, da2, 0.0, 1.0, toi);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.continuous.TimeOfImpactDetector#getTimeOfImpact(org.dyn4j.collision.continuous.Swept, org.dyn4j.collision.continuous.Swept, double, double, org.dyn4j.collision.continuous.TimeOfImpact)
+	 * @see org.dyn4j.collision.continuous.TimeOfImpactDetector#getTimeOfImpact(org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform, org.dyn4j.geometry.Vector2, double, org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform, org.dyn4j.geometry.Vector2, double, double, double, org.dyn4j.collision.continuous.TimeOfImpact)
 	 */
-	public boolean getTimeOfImpact(Swept swept1, Swept swept2, double t1, double t2, TimeOfImpact toi) {
+	@Override
+	public boolean getTimeOfImpact(Convex convex1, Transform transform1, Vector2 dp1, double da1, Convex convex2, Transform transform2, Vector2 dp2, double da2, double t1, double t2, TimeOfImpact toi) {
 		// count the number of iterations
 		int iterations = 0;
 		
+		// create some reusable transforms for interpolation
+		Transform lerpTx1 = new Transform();
+		Transform lerpTx2 = new Transform();
+		
 		// check for separation at the beginning of the interval
-		MinimumSeparation distance = new MinimumSeparation();
-		boolean separated = this.getSeparation(swept1, swept2, t1, distance);
+		Separation separation = new Separation();
+		boolean separated = this.distanceDetector.distance(convex1, transform1, convex2, transform2, separation);
 		// if they are not separated then there is nothing to do
 		if (!separated) {
 			return false;
 		}
-		// get the separation object
-		Separation separation = distance.separation;
 		// get the distance
 		double d = separation.getDistance();
 		// check if the distance is less than the tolerance
 		if (d < this.distanceEpsilon) {
 			// fill up the toi
-			toi.toi = 0.0;
+			toi.time = 0.0;
 			toi.separation = separation;
-			toi.fixture1 = distance.fixture1;
-			toi.fixture2 = distance.fixture2;
 			return true;
 		}
 		// get the separation normal
 		Vector2 n = separation.getNormal();
 		
-		// get the transforms
-		Transform ti1 = swept1.getInitialTransform();
-		Transform tf1 = swept1.getFinalTransform();
-		Transform ti2 = swept2.getInitialTransform();
-		Transform tf2 = swept2.getFinalTransform();
-		
-		// get this timestep's velocities
-		Vector2 v1 = this.getLinearVelocity(ti1, tf1);
-		Vector2 v2 = this.getLinearVelocity(ti2, tf2);
-		double  a1 = this.getAngularVelocity(ti1, tf1);
-		double  a2 = this.getAngularVelocity(ti2, tf2);
-		
 		// get the rotation disc radius for the swept object
-		double rmax1 = swept1.getRotationDiscRadius();
-		double rmax2 = swept2.getRotationDiscRadius();
+		double rmax1 = convex1.getRadius();
+		double rmax2 = convex2.getRadius();
 		
 		// compute the relative linear velocity
-		Vector2 rv = v1.difference(v2);
+		Vector2 rv = dp1.difference(dp2);
 		// compute the relative linear velocity magnitude
 		double rvl = rv.getMagnitude();		
 		// compute the maximum rotational velocity
-		double amax = rmax1 * Math.abs(a1) + rmax2 * Math.abs(a2);
+		double amax = rmax1 * Math.abs(da1) + rmax2 * Math.abs(da2);
 		
 		// check if the bodies are moving relative to one another
 		if (rvl + amax == 0.0) {
@@ -207,9 +174,13 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 			// increment the number of iterations
 			iterations++;
 			
+			// interpolate to time
+			transform1.lerp(dp1, da1, l, lerpTx1);
+			transform2.lerp(dp2, da2, l, lerpTx2);
+			
 			// find closest points
-			separated = this.getSeparation(swept1, swept2, l, distance);
-			d = distance.separation.getDistance();
+			separated = this.distanceDetector.distance(convex1, lerpTx1, convex2, lerpTx2, separation);
+			d = separation.getDistance();
 			// check for intersection
 			if (!separated || d <= Epsilon.E) {
 				// the shapes are intersecting.  This should
@@ -220,10 +191,13 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 				if (!separated || d <= 0.5 * this.distanceEpsilon) {
 					// back up to half the distance epsilon
 					l -= 0.5 * this.distanceEpsilon / drel;
+					// interpolate
+					transform1.lerp(dp1, da1, l, lerpTx1);
+					transform2.lerp(dp2, da2, l, lerpTx2);
 					// compute a new separation
-					separated = this.getSeparation(swept1, swept2, l, distance);
+					separated = this.distanceDetector.distance(convex1, lerpTx1, convex2, lerpTx2, separation);
 					// get the distance
-					d = distance.separation.getDistance();
+					d = separation.getDistance();
 					// the separation here could still be close to zero if the
 					// objects are rotating very fast, in which case just assume
 					// this is as close as we can get
@@ -234,139 +208,14 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 			}
 			
 			// set the new normal and distance
-			n = distance.separation.getNormal();
-			d = distance.separation.getDistance();
+			n = separation.getNormal();
+			d = separation.getDistance();
 		}
 		
 		// fill up the separation object
-		toi.toi = l;
-		toi.separation = distance.separation;
-		toi.fixture1 = distance.fixture1;
-		toi.fixture2 = distance.fixture2;
+		toi.time = l;
+		toi.separation = separation;
 		
-		return true;
-	}
-	
-	/**
-	 * Returns the linear velocity given the start and end {@link Transform}s.
-	 * @param txi the initial {@link Transform}
-	 * @param txf the final {@link Transform}
-	 * @return {@link Vector2} the linear velocity
-	 */
-	protected Vector2 getLinearVelocity(Transform txi, Transform txf) {
-		return txf.getTranslation().subtract(txi.getTranslation());
-	}
-	
-	/**
-	 * Returns the angular velocity given the start and end {@link Transform}s.
-	 * @param txi the initial {@link Transform}
-	 * @param txf the final {@link Transform}
-	 * @return double the angular velocity
-	 */
-	protected double getAngularVelocity(Transform txi, Transform txf) {
-		double r = txf.getRotation() - txi.getRotation();
-		// this will always get the smallest rotation distance
-		if (r > Math.PI) {
-			r -= Math.PI;
-		} else if (r < -Math.PI) {
-			r += Math.PI;
-		}
-		return r;
-	}
-	
-	/**
-	 * Returns the separation object containing the smallest distance between the two
-	 * {@link Swept} {@link Collidable}s.
-	 * @param swept1 the first {@link Swept} {@link Collidable}
-	 * @param swept2 the second {@link Swept} {@link Collidable}
-	 * @param t the time in the range [0, 1] that should be tested
-	 * @param distance the distance output in separation cases
-	 * @return boolean true if the {@link Swept} {@link Collidable}s are separated
-	 */
-	protected boolean getSeparation(Swept swept1, Swept swept2, double t, MinimumSeparation distance) {
-		// get the initial transforms
-		Transform it1 = swept1.getInitialTransform();
-		Transform it2 = swept2.getInitialTransform();
-		// get the final transforms
-		Transform ft1 = swept1.getFinalTransform();
-		Transform ft2 = swept2.getFinalTransform();
-		
-		// linearly interpolate t amount from the beginning
-		Transform txa = it1.lerped(ft1, t);
-		Transform txb = it2.lerped(ft2, t);
-		
-		int f1size = swept1.getFixtureCount();
-		int f2size = swept2.getFixtureCount();
-		boolean separated = true;
-		
-		// keep track of the minimum distance fixtures
-		// and separation objects
-		Separation minSeparation = null;
-		Fixture minFixture1 = null;
-		Fixture minFixture2 = null;
-		double minDistance = Double.MAX_VALUE;
-		boolean found = false;
-		
-		// loop over each shape of the first object
-		for (int k = 0; k < f1size; k++) {
-			// get the shape
-			Fixture fixture1 = swept1.getFixture(k);
-			// ignore sensor fixtures
-			if (fixture1.isSensor()) continue;
-			Filter filter1 = fixture1.getFilter();
-			Convex convex1 = fixture1.getShape();
-			// compare the distance to every shape of
-			// the second object
-			for (int l = 0; l < f2size; l++) {
-				// get the shape
-				Fixture fixture2 = swept2.getFixture(l);
-				// ignore sensor fixtures
-				if (fixture2.isSensor()) continue;
-				Filter filter2 = fixture2.getFilter();
-				Convex convex2 = fixture2.getShape();
-				
-				// test the filter
-				if (!filter1.isAllowed(filter2)) {
-					// if the collision is not allowed then continue
-					continue;
-				}
-				
-				// get the distance using the initial transforms
-				Separation temp = new Separation();
-				separated = this.distanceDetector.distance(convex1, txa, convex2, txb, temp);
-				
-				// are they separated?
-				if (!separated) {
-					// if there exists a pair of shapes that
-					// are not separated, then we can conclude
-					// that the bodies are not separated
-					return false;
-				}
-				
-				// get the distance
-				double dist = temp.getDistance();
-				
-				// compare the distance
-				if (dist < minDistance) {
-					// keep only the minimum
-					minSeparation = temp;
-					minDistance = dist;
-					minFixture1 = fixture1;
-					minFixture2 = fixture2;
-					found = true;
-				}
-			}
-		}
-		
-		// check if a separation was found
-		if (!found) return false;
-		
-		// fill up the distance object
-		distance.separation = minSeparation;
-		distance.fixture1 = minFixture1;
-		distance.fixture2 = minFixture2;
-		
-		// return the minimum separation
 		return true;
 	}
 	
@@ -414,7 +263,7 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 	 * @return the maximum number of iterations the root finder will perform
 	 */
 	public int getMaxIterations() {
-		return maxIterations;
+		return this.maxIterations;
 	}
 	
 	/**

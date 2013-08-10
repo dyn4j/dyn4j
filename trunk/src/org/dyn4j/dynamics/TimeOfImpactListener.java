@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -36,7 +36,7 @@ import org.dyn4j.collision.continuous.TimeOfImpact;
  * <p>
  * Modification of the {@link World} is not permitted during these methods.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.5
  * @since 1.2.0
  */
 public interface TimeOfImpactListener extends Listener {
@@ -48,10 +48,12 @@ public interface TimeOfImpactListener extends Listener {
 	 * <p>
 	 * The values of the <code>toi</code> parameter can be changed in this method.
 	 * @param body1 the first {@link Body}
+	 * @param fixture1 the first {@link Body}'s fixture
 	 * @param body2 the second {@link Body}
+	 * @param fixture2 the second {@link Body}'s fixture
 	 * @param toi the {@link TimeOfImpact}
 	 * @return boolean true if the collision should be handled
 	 * @since 2.0.0
 	 */
-	public abstract boolean collision(Body body1, Body body2, TimeOfImpact toi);
+	public abstract boolean collision(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2, TimeOfImpact toi);
 }

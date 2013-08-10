@@ -28,6 +28,8 @@ Bug Fixes:
     so that future releases do not impact existing functionality)
     
 Deprecated:
+  - Body.setVelocity and Body.getVelocity have been replaced by
+    Body.setLinearVelocity and Body.getLinearVelocity respectively.
 
 Breaking Changes:
     

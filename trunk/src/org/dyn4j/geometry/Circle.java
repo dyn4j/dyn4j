@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * A {@link Circle}'s radius must be larger than zero.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class Circle extends AbstractShape implements Convex, Shape, Transformable {
@@ -180,6 +180,6 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 		// if the transform is not null then transform the center
 		Vector2 center = transform.getTransformed(this.center);
 		// return a new aabb
-		return new AABB(center.x - this.radius, center.y - this.radius, center.x + this.radius, center.y + this.radius);
+		return new AABB(center, this.radius);
 	}
 }

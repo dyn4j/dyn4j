@@ -86,7 +86,7 @@ import org.dyn4j.geometry.Vector2;
  * However, allowing this causes more work for the {@link NarrowphaseDetector}s whose
  * algorithms are more complex.  These situations should be avoided for maximum performance.
  * @author William Bittle
- * @version 3.1.4
+ * @version 3.1.5
  * @since 1.0.0
  * @param <E> the {@link Collidable} type
  */
@@ -177,7 +177,10 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 	 */
 	public SapIncremental(int initialCapacity) {
 		this.proxyList = new ArrayList<Proxy>(initialCapacity);
-		this.proxyMap = new HashMap<UUID, Proxy>(initialCapacity);
+		// 0.75 = 3/4, we can garuantee that the hashmap will not need to be rehashed
+		// if we take capacity / load factor
+		// the default load factor is 0.75 according to the javadocs, but lets assign it to be sure
+		this.proxyMap = new HashMap<UUID, Proxy>(initialCapacity * 4 / 3 + 1, 0.75f);
 		this.potentialPairs = new ArrayList<PairList>(initialCapacity);
 	}
 	

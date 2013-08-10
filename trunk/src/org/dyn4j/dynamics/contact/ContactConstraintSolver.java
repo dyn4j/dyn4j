@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -46,7 +46,7 @@ import org.dyn4j.geometry.Vector2;
  * facilitate stable stacking of rigid {@link Body}s.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class ContactConstraintSolver {
@@ -141,8 +141,8 @@ public class ContactConstraintSolver {
 				contact.vb = 0.0;
 				
 				// find the relative velocity
-				Vector2 lv1 = r1.cross(b1.getAngularVelocity()).add(b1.getVelocity());
-				Vector2 lv2 = r2.cross(b2.getAngularVelocity()).add(b2.getVelocity());
+				Vector2 lv1 = r1.cross(b1.getAngularVelocity()).add(b1.getLinearVelocity());
+				Vector2 lv2 = r2.cross(b2.getAngularVelocity()).add(b2.getLinearVelocity());
 				Vector2 rv = lv1.subtract(lv2);
 				
 				// project the relative velocity onto the penetration normal
@@ -249,10 +249,10 @@ public class ContactConstraintSolver {
 //				Vector2 J = N.product(contact.jn).add(T.product(contact.jt));
 				Vector2 J = new Vector2(N.x * contact.jn + T.x * contact.jt, N.y * contact.jn + T.y * contact.jt);
 //				b1.getVelocity().add(J.product(invM1));
-				b1.getVelocity().add(J.x * invM1, J.y * invM1);
+				b1.getLinearVelocity().add(J.x * invM1, J.y * invM1);
 				b1.setAngularVelocity(b1.getAngularVelocity() + invI1 * contact.r1.cross(J));
 //				b2.getVelocity().subtract(J.product(invM2));
-				b2.getVelocity().subtract(J.x * invM2, J.y * invM2);
+				b2.getLinearVelocity().subtract(J.x * invM2, J.y * invM2);
 				b2.setAngularVelocity(b2.getAngularVelocity() - invI2 * contact.r2.cross(J));
 			}
 		}
@@ -298,8 +298,8 @@ public class ContactConstraintSolver {
 				Vector2 r2 = contact.r2;
 				
 				// get the relative velocity
-				Vector2 lv1 = r1.cross(b1.getAngularVelocity()).add(b1.getVelocity());
-				Vector2 lv2 = r2.cross(b2.getAngularVelocity()).add(b2.getVelocity());
+				Vector2 lv1 = r1.cross(b1.getAngularVelocity()).add(b1.getLinearVelocity());
+				Vector2 lv2 = r2.cross(b2.getAngularVelocity()).add(b2.getLinearVelocity());
 				Vector2 rv = lv1.subtract(lv2);
 				
 				// project the relative velocity onto the tangent normal
@@ -319,10 +319,10 @@ public class ContactConstraintSolver {
 //				Vector2 J = T.product(jt);
 				Vector2 J = new Vector2(T.x * jt, T.y * jt);
 //				b1.getVelocity().add(J.product(invM1));
-				b1.getVelocity().add(J.x * invM1, J.y * invM1);
+				b1.getLinearVelocity().add(J.x * invM1, J.y * invM1);
 				b1.setAngularVelocity(b1.getAngularVelocity() + invI1 * r1.cross(J));
 //				b2.getVelocity().subtract(J.product(invM2));
-				b2.getVelocity().subtract(J.x * invM2, J.y * invM2);
+				b2.getLinearVelocity().subtract(J.x * invM2, J.y * invM2);
 				b2.setAngularVelocity(b2.getAngularVelocity() - invI2 * r2.cross(J));
 			}
 			
@@ -338,8 +338,8 @@ public class ContactConstraintSolver {
 				Vector2 r2 = contact.r2;
 				
 				// get the relative velocity
-				Vector2 lv1 = r1.cross(b1.getAngularVelocity()).add(b1.getVelocity());
-				Vector2 lv2 = r2.cross(b2.getAngularVelocity()).add(b2.getVelocity());
+				Vector2 lv1 = r1.cross(b1.getAngularVelocity()).add(b1.getLinearVelocity());
+				Vector2 lv2 = r2.cross(b2.getAngularVelocity()).add(b2.getLinearVelocity());
 				Vector2 rv = lv1.subtract(lv2);
 				
 				// project the relative velocity onto the penetration normal
@@ -358,10 +358,10 @@ public class ContactConstraintSolver {
 //				Vector2 J = N.product(j);
 				Vector2 J = new Vector2(N.x * j, N.y * j);
 //				b1.getVelocity().add(J.product(invM1));
-				b1.getVelocity().add(J.x * invM1, J.y * invM1);
+				b1.getLinearVelocity().add(J.x * invM1, J.y * invM1);
 				b1.setAngularVelocity(b1.getAngularVelocity() + invI1 * r1.cross(J));
 //				b2.getVelocity().subtract(J.product(invM2));
-				b2.getVelocity().subtract(J.x * invM2, J.y * invM2);
+				b2.getLinearVelocity().subtract(J.x * invM2, J.y * invM2);
 				b2.setAngularVelocity(b2.getAngularVelocity() - invI2 * r2.cross(J));
 			} else {
 				// if its 2 then solve the contacts simultaneously using a mini-LCP
@@ -407,8 +407,8 @@ public class ContactConstraintSolver {
 				Vector2 r12 = contact2.r1;
 				Vector2 r22 = contact2.r2;
 				
-				Vector2 v1 = b1.getVelocity();
-				Vector2 v2 = b2.getVelocity();
+				Vector2 v1 = b1.getLinearVelocity();
+				Vector2 v2 = b2.getLinearVelocity();
 				double av1 = b1.getAngularVelocity();
 				double av2 = b2.getAngularVelocity();
 				

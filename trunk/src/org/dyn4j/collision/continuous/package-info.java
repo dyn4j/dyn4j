@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -30,13 +30,13 @@
  * implementation of CCD.
  * <p>
  * A {@link org.dyn4j.collision.continuous.TimeOfImpactDetector} should accept a pair of 
- * {@link org.dyn4j.collision.continuous.Swept} {@link org.dyn4j.collision.Collidable}s 
+ * {@link org.dyn4j.geometry.Convex} {@link org.dyn4j.geometry.Shape}s 
  * and return a {@link org.dyn4j.collision.continuous.TimeOfImpact} between them if a collision 
- * was missed within the time step.
+ * was detected within the time step.
  * <p>
  * CCD is a very computationally intensive process and should be used with caution.
  * @author William Bittle
- * @version 2.2.2
+ * @version 3.1.5
  * @since 2.0.0
  */
 package org.dyn4j.collision.continuous;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -44,7 +44,7 @@ import org.dyn4j.sandbox.SandboxBody;
 /**
  * Compiled test for testing destruction of bodies.
  * @author William Bittle
- * @version 1.0.4
+ * @version 1.0.5
  * @since 1.0.2
  */
 public class Destructible extends CompiledSimulation {
@@ -105,7 +105,7 @@ public class Destructible extends CompiledSimulation {
 					float[] ocolor = icosigon.getOutlineColor();
 					
 					// get the velocity
-					Vector2 v = icosigon.getVelocity().copy();
+					Vector2 v = icosigon.getLinearVelocity().copy();
 					// half the velocity to give the effect of a broken body
 					v.multiply(0.5);
 					
@@ -129,7 +129,7 @@ public class Destructible extends CompiledSimulation {
 						// copy over the transform
 						b.setTransform(tx.copy());
 						// copy over the velocity
-						b.setVelocity(v.copy());
+						b.setLinearVelocity(v.copy());
 						b.setUserData("Piece" + (i + 1));
 						// add the new body to the world
 						world.addBody(b);
@@ -183,7 +183,7 @@ public class Destructible extends CompiledSimulation {
 		top.addFixture(Geometry.createRectangle(0.5, 1.0));
 		top.setMass();
 		top.translate(0.0, 3.0);
-		top.getVelocity().set(2.0, 0.0);
+		top.getLinearVelocity().set(2.0, 0.0);
 		top.setUserData("Top");
 		
 		SandboxBody bot = new SandboxBody();

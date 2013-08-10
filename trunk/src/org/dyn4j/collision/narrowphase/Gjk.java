@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -163,48 +163,23 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			// if its a circle - circle collision use the faster method
 			return CircleDetector.detect((Circle) convex1, transform1, (Circle) convex2, transform2, penetration);
 		}
+		
 		// define the simplex
 		List<Vector2> simplex = new ArrayList<Vector2>(3);
+		
 		// create a Minkowski sum
 		MinkowskiSum ms = new MinkowskiSum(convex1, transform1, convex2, transform2);
-		// transform into world space if transform is not null
-		Vector2 c1 = transform1.getTransformed(convex1.getCenter());
-		Vector2 c2 = transform2.getTransformed(convex2.getCenter());
+		
 		// choose some search direction
-		Vector2 d = c1.to(c2);
-		// check for a zero direction vector
-		if (d.isZero()) d.set(1.0, 0.0);
-		// add the first point
-		simplex.add(ms.support(d));
-		// is the support point past the origin along d?
-		if (simplex.get(0).dot(d) <= 0.0) {
-			return false;
+		Vector2 d = this.getInitialDirection(convex1, transform1, convex2, transform2);
+		
+		// perform the detection
+		if (this.detect(ms, simplex, d)) {
+			this.minkowskiPenetrationSolver.getPenetration(simplex, ms, penetration);
+			return true;
 		}
-		// negate the search direction
-		d.negate();
-		// start the loop
-		while (true) {
-			// always add another point to the simplex at the beginning of the loop
-			simplex.add(ms.support(d));
-			// make sure that the last point we added was past the origin
-			if (simplex.get(simplex.size() - 1).dot(d) <= 0.0) {
-				// a is not past the origin so therefore the shapes do not intersect
-				// here we treat the origin on the line as no intersection
-				// immediately return with null indicating no penetration
-				return false;
-			} else {
-				// if it is past the origin, then test whether the simplex contains the origin
-				if (this.checkSimplex(simplex, d)) {
-					// if the simplex contains the origin then we know that there is an intersection.
-					// if we broke out of the loop then we know there was an intersection
-					// perform epa to get the penetration vector
-					this.minkowskiPenetrationSolver.getPenetration(simplex, ms, penetration);
-					return true;
-				}
-				// if the simplex does not contain the origin then we need to loop using the new
-				// search direction and simplex
-			}
-		}
+		
+		return false;
 	}
 	
 	/* (non-Javadoc)
@@ -217,15 +192,52 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			// if its a circle - circle collision use the faster method
 			return CircleDetector.detect((Circle) convex1, transform1, (Circle) convex2, transform2);
 		}
+		
 		// define the simplex
 		List<Vector2> simplex = new ArrayList<Vector2>(3);
+		
 		// create a Minkowski sum
 		MinkowskiSum ms = new MinkowskiSum(convex1, transform1, convex2, transform2);
+		
+		// choose some search direction
+		Vector2 d = this.getInitialDirection(convex1, transform1, convex2, transform2);
+		
+		// perform the detection
+		return detect(ms, simplex, d);
+	}
+	
+	/**
+	 * Returns a vector for the initial direction for the GJK algorithm.
+	 * <p>
+	 * This implementation returns the vector from the center of the first convex to the center of the second.
+	 * @param convex1 the first convex
+	 * @param transform1 the first convex's transform
+	 * @param convex2 the second convex
+	 * @param transform2 the second convex's transform
+	 * @return Vector2
+	 */
+	protected Vector2 getInitialDirection(Convex convex1, Transform transform1, Convex convex2, Transform transform2) {
 		// transform into world space if transform is not null
 		Vector2 c1 = transform1.getTransformed(convex1.getCenter());
 		Vector2 c2 = transform2.getTransformed(convex2.getCenter());
 		// choose some search direction
-		Vector2 d = c1.to(c2);
+		return c1.to(c2);
+	}
+	
+	/**
+	 * The main GJK algorithm loop.
+	 * <p>
+	 * Returns true if a collision was detected and false otherwise.
+	 * <p>
+	 * The simplex and direction parameters will reflect the state of the algorithm at termination, whether
+	 * a collision was found or not.  This is useful for subsequent algorithms that use the GJK simplex to
+	 * find the collision information ({@link Epa} for example).
+	 * @param ms the {@link MinkowskiSum}
+	 * @param simplex the simplex; should be an empty list
+	 * @param d the initial direction
+	 * @return boolean
+	 */
+	protected boolean detect(MinkowskiSum ms, List<Vector2> simplex, Vector2 d) {
 		// check for a zero direction vector
 		if (d.isZero()) d.set(1.0, 0.0);
 		// add the first point
@@ -343,6 +355,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.narrowphase.DistanceDetector#distance(org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform, org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform, org.dyn4j.collision.narrowphase.Separation)
 	 */
+	@Override
 	public boolean distance(Convex convex1, Transform transform1, Convex convex2, Transform transform2, Separation separation) {
 		// check for circles
 		if (convex1 instanceof Circle && convex2 instanceof Circle) {
@@ -593,6 +606,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.narrowphase.RaycastDetector#raycast(org.dyn4j.geometry.Ray, double, org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform, org.dyn4j.collision.narrowphase.Raycast)
 	 */
+	@Override
 	public boolean raycast(Ray ray, double maxLength, Convex convex, Transform transform, Raycast raycast) {
 		// check for circle
 		if (convex instanceof Circle) {
@@ -739,7 +753,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * @see #setMaxIterations(int)
 	 */
 	public int getMaxIterations() {
-		return maxIterations;
+		return this.maxIterations;
 	}
 
 	/**
@@ -761,7 +775,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * @see #setDistanceEpsilon(double)
 	 */
 	public double getDistanceEpsilon() {
-		return distanceEpsilon;
+		return this.distanceEpsilon;
 	}
 
 	/**
@@ -782,7 +796,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * @return {@link MinkowskiPenetrationSolver}
 	 */
 	public MinkowskiPenetrationSolver getMinkowskiPenetrationSolver() {
-		return minkowskiPenetrationSolver;
+		return this.minkowskiPenetrationSolver;
 	}
 	
 	/**

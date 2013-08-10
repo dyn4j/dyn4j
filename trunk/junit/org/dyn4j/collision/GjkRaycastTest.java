@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -28,14 +28,17 @@ import junit.framework.TestCase;
 
 import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.Raycast;
+import org.dyn4j.geometry.Capsule;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Ellipse;
 import org.dyn4j.geometry.Geometry;
+import org.dyn4j.geometry.HalfEllipse;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Ray;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Segment;
+import org.dyn4j.geometry.Slice;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
@@ -276,6 +279,33 @@ public class GjkRaycastTest {
 		// start at center case (or any point within the convex shape)
 		ray.setStart(t.getTransformed(c.getCenter()));
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
+	}
+	
+	/**
+	 * Tests a successful raycast against a {@link HalfEllipse}.
+	 * @since 3.1.5
+	 */
+	@Test
+	public void raycastHalfEllipse() {
+		TestCase.fail("Implement this test");
+	}
+	
+	/**
+	 * Tests a successful raycast against a {@link Slice}.
+	 * @since 3.1.5
+	 */
+	@Test
+	public void raycastSlice() {
+		TestCase.fail("Implement this test");
+	}
+	
+	/**
+	 * Tests a successful raycast against a {@link Capsule}.
+	 * @since 3.1.5
+	 */
+	@Test
+	public void raycastCapsule() {
+		TestCase.fail("Implement this test");
 	}
 	
 	/**

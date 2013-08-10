@@ -679,6 +679,51 @@ public class Transform implements Transformable {
 	}
 	
 	/**
+	 * Interpolates this transform linearly, by alpha, given the change in 
+	 * position (&Delta;p) and the change in angle (&Delta;a) and places it into result.
+	 * @param dp the change in position
+	 * @param da the change in angle
+	 * @param alpha the amount to interpolate
+	 * @param result the transform to place the result
+	 * @since 3.1.5
+	 */
+	public void lerp(Vector2 dp, double da, double alpha, Transform result) {
+		result.set(this);
+		result.translate(dp.x * alpha, dp.y * alpha);
+		result.rotate(da * alpha, result.getTranslationX(), result.getTranslationY());
+	}
+	
+	/**
+	 * Interpolates this transform linearly, by alpha, given the change in 
+	 * position (&Delta;p) and the change in angle (&Delta;a).
+	 * @param dp the change in position
+	 * @param da the change in angle
+	 * @param alpha the amount to interpolate
+	 * @since 3.1.5
+	 */
+	public void lerp(Vector2 dp, double da, double alpha) {
+		this.translate(dp.x * alpha, dp.y * alpha);
+		this.rotate(da * alpha, this.getTranslationX(), this.getTranslationY());
+	}
+	
+	/**
+	 * Interpolates this transform linearly, by alpha, given the change in 
+	 * position (&Delta;p) and the change in angle (&Delta;a) and returns the result.
+	 * @param dp the change in position
+	 * @param da the change in angle
+	 * @param alpha the amount to interpolate
+	 * @return {@link Transform}
+	 * @since 3.1.5
+	 */
+	public Transform lerped(Vector2 dp, double da, double alpha) {
+		Transform result = new Transform();
+		result.set(this);
+		result.translate(dp.x * alpha, dp.y * alpha);
+		result.rotate(da * alpha, result.getTranslationX(), result.getTranslationY());
+		return result;
+	}
+	
+	/**
 	 * Interpolates linearly by alpha towards the given end transform returning
 	 * a new transform containing the result.
 	 * <p>

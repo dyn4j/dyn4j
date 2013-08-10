@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -45,7 +45,7 @@ import org.dyn4j.resources.Messages;
  * This class performs the {@link ContactConstraint} warm starting and manages contact
  * listening.
  * @author William Bittle
- * @version 3.1.2
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class ContactManager {
@@ -92,7 +92,10 @@ public class ContactManager {
 		// estimate the number of contact constraints
 		int eSize = Collisions.getEstimatedCollisionPairs(initialCapacity.getBodyCount());
 		// initialize the members
-		this.map = new HashMap<ContactConstraintId, ContactConstraint>(eSize);
+		// 0.75 = 3/4, we can garuantee that the hashmap will not need to be rehashed
+		// if we take capacity / load factor
+		// the default load factor is 0.75 according to the javadocs, but lets assign it to be sure
+		this.map = new HashMap<ContactConstraintId, ContactConstraint>(eSize * 4 / 3 + 1, 0.75f);
 		this.list = new ArrayList<ContactConstraint>(eSize);
 		this.listeners = null;
 	}
@@ -185,7 +188,10 @@ public class ContactManager {
 		// check if any new contact constraints were found
 		if (size > 0) {
 			// if so then create a new map to contain the new contacts
-			newMap = new HashMap<ContactConstraintId, ContactConstraint>(size);
+			// 0.75 = 3/4, we can garuantee that the hashmap will not need to be rehashed
+			// if we take capacity / load factor
+			// the default load factor is 0.75 according to the javadocs, but lets assign it to be sure
+			newMap = new HashMap<ContactConstraintId, ContactConstraint>(size * 4 / 3 + 1, 0.75f);
 		}
 		
 		// loop over the new contact constraints

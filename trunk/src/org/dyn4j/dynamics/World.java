@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -82,7 +82,7 @@ import org.dyn4j.resources.Messages;
  * Employs the same {@link Island} solving technique as <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.1.2
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class World {
@@ -615,17 +615,21 @@ public class World {
 				for (int j = 0; j < b1Size; j++) {
 					BodyFixture fixture1 = body1.getFixture(j);
 					Filter filter1 = fixture1.getFilter();
-					Convex convex1 = fixture1.getShape();
+					
 					// test against each fixture of body 2
 					for (int k = 0; k < b2Size; k++) {
 						BodyFixture fixture2 = body2.getFixture(k);
 						Filter filter2 = fixture2.getFilter();
-						Convex convex2 = fixture2.getShape();
+						
 						// test the filter
 						if (!filter1.isAllowed(filter2)) {
 							// if the collision is not allowed then continue
 							continue;
 						}
+						
+						Convex convex2 = fixture2.getShape();
+						Convex convex1 = fixture1.getShape();
+						
 						Penetration penetration = new Penetration();
 						// test the two convex shapes
 						if (this.narrowphaseDetector.detect(convex1, transform1, convex2, transform2, penetration)) {
@@ -794,9 +798,9 @@ public class World {
 		Body minBody = null;
 		
 		// loop over all the other bodies to find the minimum TOI
-		for (int j = 0; j < size; j++) {
+		for (int i = 0; i < size; i++) {
 			// get the other body
-			Body body2 = this.bodies.get(j);
+			Body body2 = this.bodies.get(i);
 
 			// skip this test if they are the same body
 			if (body1 == body2) continue;
@@ -819,29 +823,79 @@ public class World {
 			// if the swept AABBs don't overlap then don't bother testing them
 			if (!aabb1.overlaps(aabb2)) continue; 
 
-			// compute the time of impact between the two bodies
 			TimeOfImpact toi = new TimeOfImpact();
-			if (this.timeOfImpactDetector.getTimeOfImpact(body1, body2, t1, t2, toi)) {
-				// get the time of impact
-				double t = toi.getToi();
-				// check if the time of impact is less than
-				// the current time of impact
-				if (t < t2) {
-					// if it is then ask the listeners if we should use this collision
-					boolean allow = true;
-					for (TimeOfImpactListener tl : listeners) {
-						if (!tl.collision(body1, body2, toi)) {
-							// if any toi listener doesnt allow it, then don't allow it
-							// we need to allow all listeners to be notified before we continue
-							allow = false;
-						}
+			int fc1 = body1.getFixtureCount();
+			int fc2 = body2.getFixtureCount();
+			
+			// get the velocities for the time step since we want
+			// [t1, t2] to be bound to this time step
+			double dt = this.step.getDeltaTime();
+			// the linear and angular velocities should match what 
+			// we did when we advanced the position. alternatively
+			// we could calculate these from the start and end transforms
+			// but this has the problem of not knowing which direction
+			// the angular velocity is going (clockwise or anti-clockwise).
+			// however, this also has the problem of being different that
+			// the way the bodies are advanced in the Island solving
+			// (for now they are the same, but could be changed in the
+			// future).
+			Vector2 v1 = body1.getLinearVelocity().product(dt);
+			Vector2 v2 = body2.getLinearVelocity().product(dt);
+			double av1 = body1.getAngularVelocity() * dt;
+			double av2 = body2.getAngularVelocity() * dt;
+			
+			Transform tx1 = body1.getInitialTransform();
+			Transform tx2 = body2.getInitialTransform();
+			
+			// test against all fixture pairs taking the fixture
+			// with the smallest time of impact
+			for (int j = 0; j < fc1; j++) {
+				BodyFixture f1 = body1.getFixture(j);
+				
+				// skip sensor fixtures
+				if (f1.isSensor()) continue;
+				
+				for (int k = 0; k < fc2; k++) {
+					BodyFixture f2 = body2.getFixture(k);
+					
+					// skip sensor fixtures
+					if (f2.isSensor()) continue;
+
+					Filter filter1 = f1.getFilter();
+					Filter filter2 = f2.getFilter();
+					
+					// make sure the fixture filters allow the collision
+					if (!filter1.isAllowed(filter2)) {
+						continue;
 					}
-					if (allow) {
-						// set the new upper bound
-						t2 = t;
-						// save the minimum toi and body
-						minToi = toi;
-						minBody = body2;
+					
+					Convex c1 = f1.getShape();
+					Convex c2 = f2.getShape();
+					
+					// get the time of impact for the fixture pair
+					if (this.timeOfImpactDetector.getTimeOfImpact(c1, tx1, v1, av1, c2, tx2, v2, av2, t1, t2, toi)) {
+						// get the time of impact
+						double t = toi.getTime();
+						// check if the time of impact is less than
+						// the current time of impact
+						if (t < t2) {
+							// if it is then ask the listeners if we should use this collision
+							boolean allow = true;
+							for (TimeOfImpactListener tl : listeners) {
+								if (!tl.collision(body1, f1, body2, f2, toi)) {
+									// if any toi listener doesnt allow it, then don't allow it
+									// we need to allow all listeners to be notified before we continue
+									allow = false;
+								}
+							}
+							if (allow) {
+								// set the new upper bound
+								t2 = t;
+								// save the minimum toi and body
+								minToi = toi;
+								minBody = body2;
+							}
+						}
 					}
 				}
 			}
@@ -853,7 +907,7 @@ public class World {
 		// make sure the time of impact is not null
 		if (minToi != null) {
 			// get the time of impact info
-			double t = minToi.getToi();
+			double t = minToi.getTime();
 			
 			// move the dynamic body to the time of impact
 			body1.transform0.lerp(body1.transform, t, body1.transform);
@@ -888,6 +942,8 @@ public class World {
 	 * <p>
 	 * All raycasts pass through the {@link RaycastListener}s before being tested.  If <b>any</b>
 	 * {@link RaycastListener} doesn't allow the raycast then the body will not be tested.
+	 * <p>
+	 * Bodies that contain the start of the ray will not be included in the results.
 	 * @param start the start point
 	 * @param end the end point
 	 * @param ignoreSensors true if sensor {@link BodyFixture}s should be ignored
@@ -924,6 +980,8 @@ public class World {
 	 * <p>
 	 * All raycasts pass through the {@link RaycastListener}s before being tested.  If <b>any</b>
 	 * {@link RaycastListener} doesn't allow the raycast then the body will not be tested.
+	 * <p>
+	 * Bodies that contain the start of the ray will not be included in the results.
 	 * @param ray the {@link Ray}
 	 * @param maxLength the maximum length of the ray; 0 for infinite length
 	 * @param ignoreSensors true if sensor {@link BodyFixture}s should be ignored
@@ -937,7 +995,6 @@ public class World {
 	 * @since 2.0.0
 	 */
 	public boolean raycast(Ray ray, double maxLength, boolean ignoreSensors, boolean all, List<RaycastResult> results) {
-		boolean found = false;
 		// check for the desired length
 		double max = 0.0;
 		if (maxLength > 0.0) {
@@ -945,11 +1002,6 @@ public class World {
 		}
 		// create a raycast result
 		RaycastResult result = new RaycastResult();
-		// if we are only looking for the minimum then go ahead
-		// and add the result to the list
-		if (!all) {
-			results.add(result);
-		}
 		// filter using the broadphase first
 		List<Body> bodies = this.broadphaseDetector.raycast(ray, maxLength);
 		// loop over the list of bodies testing each one
@@ -965,18 +1017,20 @@ public class World {
 					// we are only looking for the closest so
 					// set the new maximum
 					max = result.raycast.getDistance();
+					// see if the results list has the item in it
+					if (results.size() == 0) {
+						results.add(result);
+					}
 				} else {
 					// add this result to the results
 					results.add(result);
 					// create a new result for the next iteration
 					result = new RaycastResult();
 				}
-				// set the found flag
-				found = true;
 			}
 		}
 		
-		return found;
+		return results.size() > 0;
 	}
 	
 	/**
@@ -988,6 +1042,8 @@ public class World {
 	 * <p>
 	 * All raycasts pass through the {@link RaycastListener}s before being tested.  If <b>any</b>
 	 * {@link RaycastListener} doesn't allow the raycast then the body will not be tested.
+	 * <p>
+	 * Returns false if the start position of the ray lies inside the given body.
 	 * @param start the start point
 	 * @param end the end point
 	 * @param body the {@link Body} to test
@@ -1019,6 +1075,8 @@ public class World {
 	 * <p>
 	 * All raycasts pass through the {@link RaycastListener}s before being tested.  If <b>any</b>
 	 * {@link RaycastListener} doesn't allow the raycast then the body will not be tested.
+	 * <p>
+	 * Returns false if the start position of the ray lies inside the given body.
 	 * @param ray the {@link Ray} to cast
 	 * @param body the {@link Body} to test
 	 * @param maxLength the maximum length of the ray; 0 for infinite length
@@ -1074,6 +1132,15 @@ public class World {
 			Convex convex = fixture.getShape();
 			// perform the raycast
 			if (this.raycastDetector.raycast(ray, max, convex, transform, raycast)) {
+				// notify the listeners to see if we should allow this result
+				allow = true;
+				for (RaycastListener rl : listeners) {
+					// see if we should test this fixture
+					if (!rl.allow(ray, body, fixture, raycast)) {
+						allow = false;
+					}
+				}
+				if (!allow) continue;
 				// if the raycast detected a collision then set the new
 				// maximum distance
 				max = raycast.getDistance();
@@ -1090,6 +1157,302 @@ public class World {
 		if (found) {
 			result.body = body;
 			result.raycast = raycast;
+		}
+		
+		return found;
+	}
+	
+	/**
+	 * Performs a linear convex cast on the world, placing any detected collisions into the given results list.
+	 * <p>
+	 * This method does a static test of bodies (in other words, does not take into account the bodies linear
+	 * or angular velocity, but rather assumes they are stationary).
+	 * <p>
+	 * The <code>dp</code> parameter is the linear cast vector determining the direction and magnitude of the cast.
+	 * <p>
+	 * The {@link ConvexCastResult} class implements the Comparable interface to allow sorting by
+	 * the time of impact.
+	 * <p>
+	 * If the all flag is false, the results list will only contain the closest result (if any).
+	 * <p>
+	 * All convex casts pass through the {@link ConvexCastListener}s before being tested.  If <b>any</b>
+	 * {@link ConvexCastListener} doesn't allow the convex cast, then the body will not be tested.
+	 * <p>
+	 * For multi-fixtured bodies, only the fixture that has the minimum time of impact will be added to the
+	 * results list.
+	 * @param convex the convex to cast
+	 * @param transform the initial position and orientation of the convex
+	 * @param dp &Delta;position; the change in position (the cast length and direction basically)
+	 * @param ignoreSensors true if sensor fixtures should be ignored in the tests
+	 * @param all true if all hits should be returned; false if only the first should be returned
+	 * @param results the list to add the results to
+	 * @return boolean true if a collision was found
+	 * @since 3.1.5
+	 * @see #convexCast(Convex, Transform, Vector2, double, boolean, boolean, List)
+	 */
+	public boolean convexCast(Convex convex, Transform transform, Vector2 dp, boolean ignoreSensors, boolean all, List<ConvexCastResult> results) {
+		return this.convexCast(convex, transform, dp, 0.0, ignoreSensors, all, results);
+	}
+	
+	/**
+	 * Performs a linear convex cast on the world, placing any detected collisions into the given results list.
+	 * <p>
+	 * This method does a static test of bodies (in other words, does not take into account the bodies linear
+	 * or angular velocity, but rather assumes they are stationary).
+	 * <p>
+	 * The <code>dp</code> parameter is the linear cast vector determining the direction and magnitude of the cast.  
+	 * The <code>da</code> parameter is the change in angle over the linear cast and is interpolated linearly 
+	 * during detection.
+	 * <p>
+	 * The {@link ConvexCastResult} class implements the Comparable interface to allow sorting by
+	 * the time of impact.
+	 * <p>
+	 * If the all flag is false, the results list will only contain the closest result (if any).
+	 * <p>
+	 * All convex casts pass through the {@link ConvexCastListener}s before being tested.  If <b>any</b>
+	 * {@link ConvexCastListener} doesn't allow the convex cast, then the body will not be tested.
+	 * <p>
+	 * For multi-fixtured bodies, only the fixture that has the minimum time of impact will be added to the
+	 * results list.
+	 * @param convex the convex to cast
+	 * @param transform the initial position and orientation of the convex
+	 * @param dp &Delta;position; the change in position (the cast length and direction basically)
+	 * @param da &Delta;angle; the change in the angle; this is the change in the angle over the linear period
+	 * @param ignoreSensors true if sensor fixtures should be ignored in the tests
+	 * @param all true if all hits should be returned; false if only the first should be returned
+	 * @param results the list to add the results to
+	 * @return boolean true if a collision was found
+	 * @since 3.1.5
+	 */
+	public boolean convexCast(Convex convex, Transform transform, Vector2 dp, double da, boolean ignoreSensors, boolean all, List<ConvexCastResult> results) {
+		// get the listeners
+		List<ConvexCastListener> listeners = this.getListeners(ConvexCastListener.class);
+		
+		// compute a conservative AABB for the motion of the convex
+		double radius = convex.getRadius();
+		Vector2 startWorldCenter = transform.getTransformed(convex.getCenter());
+		AABB startAABB = new AABB(startWorldCenter, radius);
+		// linearlly interpolate to get the final transform given the
+		// change in position and angle
+		Transform finalTransform = transform.lerped(dp, da, 1.0);
+		// get the end AABB
+		Vector2 endWorldCenter = finalTransform.getTransformed(convex.getCenter());
+		AABB endAABB = new AABB(endWorldCenter, radius);
+		// union the AABBs to get the swept AABB
+		AABB aabb = startAABB.getUnion(endAABB);
+		
+		ConvexCastResult min = null;
+		final Vector2 dp2 = new Vector2();
+		double t2 = 1.0;
+		// use the broadphase to filter first
+		List<Body> bodies = this.broadphaseDetector.detect(aabb);
+		// loop over the potential collisions
+		for (Body body : bodies) {
+			boolean allow = true;
+			for (ConvexCastListener ccl : listeners) {
+				// see if we should test this body
+				if (!ccl.allow(convex, body)) {
+					allow = false;
+				}
+			}
+			if (!allow) return false;
+			
+			// only get the minimum fixture
+			double ft2 = t2;
+			// find the minimum time of impact for the given convex
+			// and the current body
+			TimeOfImpact bodyMinToi = null;
+			BodyFixture bodyMinFixture = null;
+			int bSize = body.getFixtureCount();
+			Transform bodyTransform = body.getTransform();
+			
+			// loop through all the body fixtures until we find
+			// a the fixture that has the smallest time of impact
+			for (int i = 0; i < bSize; i++) {
+				BodyFixture bodyFixture = body.getFixture(i);
+				
+				// filter out sensors if desired
+				if (ignoreSensors && bodyFixture.isSensor()) continue;
+				
+				// notify the listeners to see if we should test this fixture
+				allow = true;
+				for (ConvexCastListener ccl : listeners) {
+					// see if we should test this fixture
+					if (!ccl.allow(convex, body, bodyFixture)) {
+						allow = false;
+					}
+				}
+				if (!allow) continue;
+				
+				// get the time of impact
+				Convex c = bodyFixture.getShape();
+				TimeOfImpact toi = new TimeOfImpact();
+				// we pass the zero vector and 0 for the change in position and angle for the body
+				// since we assume that it is not moving since this is a static test
+				if (this.timeOfImpactDetector.getTimeOfImpact(convex, transform, dp, da, c, bodyTransform, dp2, 0.0, 0.0, ft2, toi)) {
+					// notify the listeners to see if we should test this fixture
+					allow = true;
+					for (ConvexCastListener ccl : listeners) {
+						// see if we should test this fixture
+						if (!ccl.allow(convex, body, bodyFixture, toi)) {
+							allow = false;
+						}
+					}
+					if (!allow) continue;
+					
+					// only save the minimum for the body
+					if (bodyMinToi == null || toi.getTime() < bodyMinToi.getTime()) {
+						ft2 = toi.getTime();
+						bodyMinToi = toi;
+						bodyMinFixture = bodyFixture;
+					}
+				}
+			}
+			if (bodyMinToi != null) {
+				if (!all) {
+					t2 = bodyMinToi.getTime();
+					if (min == null) {
+						min = new ConvexCastResult();
+						min.timeOfImpact = bodyMinToi;
+						min.fixture = bodyMinFixture;
+						min.body = body;
+					} else if (bodyMinToi.getTime() < min.timeOfImpact.getTime()) {
+						// just reassign the minimums data
+						min.timeOfImpact = bodyMinToi;
+						min.fixture = bodyMinFixture;
+						min.body = body;
+					}
+				} else {
+					ConvexCastResult result = new ConvexCastResult();
+					result.timeOfImpact = bodyMinToi;
+					result.fixture = bodyMinFixture;
+					result.body = body;
+					results.add(result);
+				}
+			}
+		}
+		
+		if (min != null) {
+			results.add(min);
+		}
+		
+		// if something is in the list then we know we found a collision
+		return results.size() > 0;
+	}
+	
+	/**
+	 * Performs a linear convex cast on the given body, placing a detected collision into the given result object.
+	 * <p>
+	 * This method does a static test of the body (in other words, does not take into account the body's linear
+	 * or angular velocity, but rather assumes it is stationary).
+	 * <p>
+	 * The <code>dp</code> parameter is the linear cast vector determining the direction and magnitude of the cast.
+	 * <p>
+	 * All convex casts pass through the {@link ConvexCastListener}s before being tested.  If <b>any</b>
+	 * {@link ConvexCastListener} doesn't allow the convex cast, then the body will not be tested.
+	 * <p>
+	 * For multi-fixtured bodies, the fixture that has the minimum time of impact will be the result.
+	 * @param convex the convex to cast
+	 * @param transform the initial position and orientation of the convex
+	 * @param dp &Delta;position; the change in position (the cast length and direction basically)
+	 * @param body the body to cast against
+	 * @param ignoreSensors true if sensor fixtures should be ignored in the tests
+	 * @param result the convex cast result
+	 * @return boolean true if a collision was found
+	 * @since 3.1.5
+	 */
+	public boolean convexCast(Convex convex, Transform transform, Vector2 dp, Body body, boolean ignoreSensors, ConvexCastResult result) {
+		return this.convexCast(convex, transform, dp, 0, body, ignoreSensors, result);
+	}
+	
+	/**
+	 * Performs a linear convex cast on the given body, placing a detected collision into the given result object.
+	 * <p>
+	 * This method does a static test of the body (in other words, does not take into account the body's linear
+	 * or angular velocity, but rather assumes it is stationary).
+	 * <p>
+	 * The <code>dp</code> parameter is the linear cast vector determining the direction and magnitude of the cast.  
+	 * The <code>da</code> parameter is the change in angle over the linear cast and is interpolated linearly 
+	 * during detection.
+	 * <p>
+	 * All convex casts pass through the {@link ConvexCastListener}s before being tested.  If <b>any</b>
+	 * {@link ConvexCastListener} doesn't allow the convex cast, then the body will not be tested.
+	 * <p>
+	 * For multi-fixtured bodies, the fixture that has the minimum time of impact will be the result.
+	 * @param convex the convex to cast
+	 * @param transform the initial position and orientation of the convex
+	 * @param dp &Delta;position; the change in position (the cast length and direction basically)
+	 * @param da &Delta;angle; the change in the angle; this is the change in the angle over the linear period
+	 * @param body the body to cast against
+	 * @param ignoreSensors true if sensor fixtures should be ignored in the tests
+	 * @param result the convex cast result
+	 * @return boolean true if a collision was found
+	 * @since 3.1.5
+	 */
+	public boolean convexCast(Convex convex, Transform transform, Vector2 dp, double da, Body body, boolean ignoreSensors, ConvexCastResult result) {
+		// get the listeners
+		List<ConvexCastListener> listeners = this.getListeners(ConvexCastListener.class);
+		
+		boolean allow = true;
+		for (ConvexCastListener ccl : listeners) {
+			// see if we should test this body
+			if (!ccl.allow(convex, body)) {
+				allow = false;
+			}
+		}
+		if (!allow) return false;
+		
+		boolean found = false;
+		final Vector2 dp2 = new Vector2();
+		double t2 = 1.0;
+
+		// find the minimum time of impact for the given convex
+		// and the current body
+		int bSize = body.getFixtureCount();
+		Transform bodyTransform = body.getTransform();
+		
+		// loop through all the body fixtures until we find
+		// a the fixture that has the smallest time of impact
+		for (int i = 0; i < bSize; i++) {
+			BodyFixture bodyFixture = body.getFixture(i);
+			
+			// filter out sensors if desired
+			if (ignoreSensors && bodyFixture.isSensor()) continue;
+			
+			allow = true;
+			for (ConvexCastListener ccl : listeners) {
+				// see if we should test this body
+				if (!ccl.allow(convex, body, bodyFixture)) {
+					allow = false;
+				}
+			}
+			if (!allow) return false;
+			
+			// get the time of impact
+			Convex c = bodyFixture.getShape();
+			TimeOfImpact toi = new TimeOfImpact();
+			// we pass the zero vector and 0 for the change in position and angle for the body
+			// since we assume that it is not moving since this is a static test
+			if (this.timeOfImpactDetector.getTimeOfImpact(convex, transform, dp, da, c, bodyTransform, dp2, 0.0, 0.0, t2, toi)) {
+				// notify the listeners to see if we should test this fixture
+				allow = true;
+				for (ConvexCastListener ccl : listeners) {
+					// see if we should test this fixture
+					if (!ccl.allow(convex, body, bodyFixture, toi)) {
+						allow = false;
+					}
+				}
+				if (!allow) continue;
+				
+				// set the new maximum time
+				t2 = toi.getTime();
+				// save the min time of impact
+				result.fixture = bodyFixture;
+				result.timeOfImpact = toi;
+				result.body = body;
+				// set the found flag
+				found = true;
+			}
 		}
 		
 		return found;

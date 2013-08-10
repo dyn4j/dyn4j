@@ -26,17 +26,59 @@ package org.dyn4j.dynamics;
 
 import org.dyn4j.Listener;
 import org.dyn4j.collision.continuous.TimeOfImpact;
+import org.dyn4j.geometry.Convex;
 
 /**
- * Convenience class for implementing the {@link TimeOfImpactListener} interface.
+ * Interface to listen for convex cast events.
+ * <p>
+ * Modification of the {@link World} is not permitted during these methods.
+ * <p>
+ * By default all methods should return true.
  * @author William Bittle
  * @version 3.1.5
- * @since 1.2.0
+ * @since 3.1.5
  */
-public class TimeOfImpactAdapter implements TimeOfImpactListener, Listener {
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.TimeOfImpactListener#collision(org.dyn4j.dynamics.Body, org.dyn4j.dynamics.BodyFixture, org.dyn4j.dynamics.Body, org.dyn4j.dynamics.BodyFixture, org.dyn4j.collision.continuous.TimeOfImpact)
+public interface ConvexCastListener extends Listener {
+	/**
+	 * Called before the given body is cast against.
+	 * <p>
+	 * Returning true from this method indicates that the cast
+	 * should be performed.
+	 * <p>
+	 * Use this method to filter bodies from the tests to improve
+	 * performance.
+	 * @param convex the convex being cast
+	 * @param body the body
+	 * @return boolean true if the body should be tested
 	 */
-	@Override
-	public boolean collision(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2, TimeOfImpact toi) { return true; }
+	public abstract boolean allow(Convex convex, Body body);
+	
+	/**
+	 * Called before the given fixture is cast against.
+	 * <p>
+	 * Returning true from this method indicates that the cast
+	 * should be performed.
+	 * <p>
+	 * Use this method to filter fixtures from the tests to improve
+	 * performance.
+	 * @param convex the convex being cast
+	 * @param body the body
+	 * @param fixture the body fixture
+	 * @return boolean true if the body should be tested
+	 */
+	public abstract boolean allow(Convex convex, Body body, BodyFixture fixture);
+	
+	/**
+	 * Called after the given fixture has been cast against and a collision was
+	 * detected.
+	 * <p>
+	 * Returning true from this method indicates that this time of impact result
+	 * should be used by the final result.
+	 * @param convex the convex being cast
+	 * @param body the body
+	 * @param fixture the body fixture
+	 * @param toi the time of impact
+	 * @return boolean true if the body should be tested
+	 */
+	public abstract boolean allow(Convex convex, Body body, BodyFixture fixture, TimeOfImpact toi);
 }

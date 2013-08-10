@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,7 +40,7 @@ import org.dyn4j.sandbox.utilities.RenderUtilities;
 /**
  * Custom body class used to store colors and a name.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.5
  * @since 1.0.0
  */
 public class SandboxBody extends Body {
@@ -266,7 +266,7 @@ public class SandboxBody extends Body {
 		gl.glColor4fv(Preferences.getBodyVelocityColor(), 0);
 		// draw the velocities
 		Vector2 c = this.getWorldCenter();
-		Vector2 v = this.getVelocity();
+		Vector2 v = this.getLinearVelocity();
 		double av = this.getAngularVelocity();
 		
 		// draw the linear velocity for each body

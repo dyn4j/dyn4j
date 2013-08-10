@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -45,7 +45,7 @@ import org.dyn4j.resources.Messages;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.5
  * @since 2.1.0
  */
 public class PulleyJoint extends Joint {
@@ -218,9 +218,9 @@ public class PulleyJoint extends Joint {
 		Vector2 J2 = this.n2.product(-this.ratio * this.impulse);
 		
 		// apply the impulse
-		this.body1.getVelocity().add(J1.product(invM1));
+		this.body1.getLinearVelocity().add(J1.product(invM1));
 		this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J1));
-		this.body2.getVelocity().add(J2.product(invM2));
+		this.body2.getLinearVelocity().add(J2.product(invM2));
 		this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * r2.cross(J2));
 	}
 	
@@ -244,8 +244,8 @@ public class PulleyJoint extends Joint {
 		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
 		
 		// compute the relative velocity
-		Vector2 v1 = this.body1.getVelocity().sum(r1.cross(this.body1.getAngularVelocity()));
-		Vector2 v2 = this.body2.getVelocity().sum(r2.cross(this.body2.getAngularVelocity()));
+		Vector2 v1 = this.body1.getLinearVelocity().sum(r1.cross(this.body1.getAngularVelocity()));
+		Vector2 v2 = this.body2.getLinearVelocity().sum(r2.cross(this.body2.getAngularVelocity()));
 		
 		// compute Jv + b
 		double C = -this.n1.dot(v1) - this.ratio * this.n2.dot(v2);
@@ -258,9 +258,9 @@ public class PulleyJoint extends Joint {
 		Vector2 J2 = this.n2.product(-impulse * this.ratio);
 		
 		// apply the impulse
-		this.body1.getVelocity().add(J1.product(invM1));
+		this.body1.getLinearVelocity().add(J1.product(invM1));
 		this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J1));
-		this.body2.getVelocity().add(J2.product(invM2));
+		this.body2.getLinearVelocity().add(J2.product(invM2));
 		this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * r2.cross(J2));
 	}
 	
