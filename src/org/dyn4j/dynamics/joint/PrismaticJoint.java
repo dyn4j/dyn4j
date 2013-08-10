@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -44,7 +44,7 @@ import org.dyn4j.resources.Messages;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class PrismaticJoint extends Joint {
@@ -305,9 +305,9 @@ public class PrismaticJoint extends Joint {
 		double l2 = this.impulse.x * this.s2 + this.impulse.y + (this.motorImpulse + this.impulse.z) * this.a2;
 		
 		// apply the impulses
-		this.body1.getVelocity().add(P.product(invM1));
+		this.body1.getLinearVelocity().add(P.product(invM1));
 		this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * l1);
-		this.body2.getVelocity().subtract(P.product(invM2));
+		this.body2.getLinearVelocity().subtract(P.product(invM2));
 		this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * l2);
 	}
 	
@@ -326,8 +326,8 @@ public class PrismaticJoint extends Joint {
 		double invI1 = m1.getInverseInertia();
 		double invI2 = m2.getInverseInertia();
 		
-		Vector2 v1 = this.body1.getVelocity();
-		Vector2 v2 = this.body2.getVelocity();
+		Vector2 v1 = this.body1.getLinearVelocity();
+		Vector2 v2 = this.body2.getLinearVelocity();
 		double w1 = this.body1.getAngularVelocity();
 		double w2 = this.body2.getAngularVelocity();
 		
@@ -646,8 +646,8 @@ public class PrismaticJoint extends Joint {
 		Vector2 d = c1.sum(r1).subtract(c2.sum(r2));
 		Vector2 axis = this.body2.getWorldVector(this.xAxis);
 		
-		Vector2 v1 = this.body1.getVelocity();
-		Vector2 v2 = this.body2.getVelocity();
+		Vector2 v1 = this.body1.getLinearVelocity();
+		Vector2 v2 = this.body2.getLinearVelocity();
 		double w1 = this.body1.getAngularVelocity();
 		double w2 = this.body2.getAngularVelocity();
 		

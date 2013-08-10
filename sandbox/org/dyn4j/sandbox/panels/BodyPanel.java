@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2011-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -63,7 +63,7 @@ import org.dyn4j.sandbox.utilities.ColorUtilities;
 /**
  * Panel for editing a Body.
  * @author William Bittle
- * @version 1.0.1
+ * @version 1.0.5
  * @since 1.0.0
  */
 public class BodyPanel extends JPanel implements InputPanel, ActionListener {
@@ -241,7 +241,7 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		Mass.Type massType = mass.getType();
 		double linearDamping = body.getLinearDamping();
 		double angularDamping = body.getAngularDamping();
-		Vector2 velocity = body.getVelocity().copy();
+		Vector2 velocity = body.getLinearVelocity().copy();
 		double angularVelocity = body.getAngularVelocity();
 		double gravityScale = body.getGravityScale();
 		boolean inactive = !body.isActive();
@@ -478,14 +478,14 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				Number number = (Number)event.getNewValue();
-				body.getVelocity().x = number.doubleValue();
+				body.getLinearVelocity().x = number.doubleValue();
 			}
 		});
 		this.txtVelocityY.addPropertyChangeListener("value", new PropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				Number number = (Number)event.getNewValue();
-				body.getVelocity().y = number.doubleValue();
+				body.getLinearVelocity().y = number.doubleValue();
 			}
 		});
 		

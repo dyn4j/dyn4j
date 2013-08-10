@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -47,7 +47,7 @@ import org.dyn4j.resources.Messages;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class WeldJoint extends Joint {
@@ -191,9 +191,9 @@ public class WeldJoint extends Joint {
 		
 		// warm start
 		Vector2 impulse = new Vector2(this.impulse.x, this.impulse.y);
-		this.body1.getVelocity().add(impulse.product(invM1));
+		this.body1.getLinearVelocity().add(impulse.product(invM1));
 		this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * (r1.cross(impulse) + this.impulse.z));
-		this.body2.getVelocity().subtract(impulse.product(invM2));
+		this.body2.getLinearVelocity().subtract(impulse.product(invM2));
 		this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * (r2.cross(impulse) + this.impulse.z));
 	}
 	
@@ -227,21 +227,21 @@ public class WeldJoint extends Joint {
 			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * j2);
 			
 			// solve the point-to-point and angle constraint
-			Vector2 v1 = this.body1.getVelocity().sum(r1.cross(this.body1.getAngularVelocity()));
-			Vector2 v2 = this.body2.getVelocity().sum(r2.cross(this.body2.getAngularVelocity()));
+			Vector2 v1 = this.body1.getLinearVelocity().sum(r1.cross(this.body1.getAngularVelocity()));
+			Vector2 v2 = this.body2.getLinearVelocity().sum(r2.cross(this.body2.getAngularVelocity()));
 			Vector2 anchorV = v1.subtract(v2);
 			
 			Vector2 j1 = this.K.solve22(anchorV).negate();
 			this.impulse.x += j1.x;
 			this.impulse.y += j1.y;
 			
-			this.body1.getVelocity().add(j1.product(invM1));
+			this.body1.getLinearVelocity().add(j1.product(invM1));
 			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(j1));
-			this.body2.getVelocity().subtract(j1.product(invM2));
+			this.body2.getLinearVelocity().subtract(j1.product(invM2));
 			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * r2.cross(j1));
 		} else {
-			Vector2 v1 = this.body1.getVelocity().sum(r1.cross(this.body1.getAngularVelocity()));
-			Vector2 v2 = this.body2.getVelocity().sum(r2.cross(this.body2.getAngularVelocity()));
+			Vector2 v1 = this.body1.getLinearVelocity().sum(r1.cross(this.body1.getAngularVelocity()));
+			Vector2 v2 = this.body2.getLinearVelocity().sum(r2.cross(this.body2.getAngularVelocity()));
 			Vector2 anchorV = v1.subtract(v2);
 			Vector3 C = new Vector3(anchorV.x, anchorV.y, this.body1.getAngularVelocity() - this.body2.getAngularVelocity());
 			
@@ -250,9 +250,9 @@ public class WeldJoint extends Joint {
 			
 			// apply the impulse
 			Vector2 imp = new Vector2(impulse.x, impulse.y);
-			this.body1.getVelocity().add(imp.product(invM1));
+			this.body1.getLinearVelocity().add(imp.product(invM1));
 			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * (r1.cross(imp) + impulse.z));
-			this.body2.getVelocity().subtract(imp.product(invM2));
+			this.body2.getLinearVelocity().subtract(imp.product(invM2));
 			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * (r2.cross(imp) + impulse.z));
 		}
 	}

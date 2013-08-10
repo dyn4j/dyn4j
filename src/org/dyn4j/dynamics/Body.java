@@ -32,7 +32,6 @@ import java.util.UUID;
 import org.dyn4j.Epsilon;
 import org.dyn4j.collision.Collidable;
 import org.dyn4j.collision.Collisions;
-import org.dyn4j.collision.continuous.Swept;
 import org.dyn4j.dynamics.contact.Contact;
 import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.dynamics.contact.ContactEdge;
@@ -87,7 +86,7 @@ import org.dyn4j.resources.Messages;
  * @version 3.1.5
  * @since 1.0.0
  */
-public class Body implements Swept, Collidable, Transformable {
+public class Body implements Collidable, Transformable {
 	/** Number of fixtures typically added to a {@link Body} */
 	private static final int TYPICAL_FIXTURE_COUNT = 1;
 	
@@ -1351,24 +1350,21 @@ public class Body implements Swept, Collidable, Transformable {
 		return this.transform;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.continuous.Swept#getInitialTransform()
+	/**
+	 * Returns the transform of the last iteration.
+	 * <p>
+	 * This transform represents the last frame's position and
+	 * orientation.
+	 * @return {@link Transform}
 	 */
-	@Override
 	public Transform getInitialTransform() {
 		return this.transform0;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.continuous.Swept#getFinalTransform()
-	 */
-	@Override
-	public Transform getFinalTransform() {
-		return this.transform;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.continuous.Swept#getRotationDiscRadius()
+	/**
+	 * Returns the maximum radius of the disk that the
+	 * {@link Collidable} creates if rotated 360 degrees.
+	 * @return double the maximum radius of the rotation disk
 	 */
 	public double getRotationDiscRadius() {
 		return this.radius;
@@ -1377,10 +1373,10 @@ public class Body implements Swept, Collidable, Transformable {
 	/**
 	 * Sets this {@link Body}'s transform.
 	 * <p>
-	 * This method sets both the initial and final transform of this body.  This is 
+	 * This method sets both the initial and the current transform of this body.  This is 
 	 * important to know when this body is a fast moving body (bullet) and needs to
 	 * be checked for tunneling.  Instead, set the initial and final transforms
-	 * explicitly using {@link #getInitialTransform()} and {@link #getFinalTransform()}
+	 * explicitly by calling {@link #getInitialTransform()} and {@link #getTransform()}
 	 * and calling the {@link Transform#set(Transform)} method.
 	 * @param transform the transform
 	 * @throws NullPointerException if transform is null
@@ -1452,11 +1448,18 @@ public class Body implements Swept, Collidable, Transformable {
 		}
 		return new AABB(new Vector2(0.0, 0.0), new Vector2(0.0, 0.0));
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.continuous.Swept#createSweptAABB()
+
+	/**
+	 * Returns an AABB that contains the maximal space in which
+	 * the {@link Collidable} exists from the initial transform
+	 * to the final transform.
+	 * <p>
+	 * This method takes the bounding circle, using the world center
+	 * and rotation disc radius, at the initial and final transforms
+	 * and creates an AABB containing both.
+	 * @return {@link AABB}
+	 * @since 3.1.1
 	 */
-	@Override
 	public AABB createSweptAABB() {
 		return this.createSweptAABB(this.transform0, this.transform);
 	}
@@ -1488,6 +1491,50 @@ public class Body implements Swept, Collidable, Transformable {
 				new Vector2(
 					Math.max(iCenter.x, fCenter.x) + this.radius,
 					Math.max(iCenter.y, fCenter.y) + this.radius));
+	}
+	
+	/**
+	 * Returns the change in position computed from last frame's transform
+	 * and this frame's transform.
+	 * @return Vector2
+	 * @since 3.1.5
+	 */
+	public Vector2 getChangeInPosition() {
+		return this.transform.getTranslation().subtract(this.transform0.getTranslation());
+	}
+	
+	/**
+	 * Returns the change in orientation computed from last frame's transform
+	 * and this frame's transform.
+	 * <p>
+	 * This method will return a change in the range [0, 2&pi;).  This isn't as useful
+	 * if the angular velocity is greater than 2&pi; per time step.  Since we don't have
+	 * the timestep here, we can't compute the exact change in this case.
+	 * @return double
+	 * @since 3.1.5
+	 */
+	public double getChangeInOrientation() {
+		double ri = this.transform0.getRotation();
+		double rf = this.transform.getRotation();
+		
+		final double twopi = 2.0 * Math.PI;
+		
+		// put the angles in the range [0, 2pi] rather than [-pi, pi]
+		if (ri < 0) ri += twopi;
+		if (rf < 0) rf += twopi;
+		
+		// compute the difference
+		double r = rf - ri;
+		
+		// determine which way the angular velocity was going so that
+		// we know which angle is correct
+		// check if the end is smaller than the start and for a positive velocity
+		if (rf < ri && this.angularVelocity > 0) r += twopi;
+		// check if the end is larger than the start and for a negative velocity
+		if (rf > ri && this.angularVelocity < 0) r -= twopi;
+		
+		// return the rotation
+		return r;
 	}
 	
 	/**
@@ -1565,20 +1612,25 @@ public class Body implements Swept, Collidable, Transformable {
 	}
 	
 	/**
-	 * Returns the velocity {@link Vector2}.
+	 * Returns the linear velocity.
+	 * <p>
+	 * This method replaces the {@link Body#getVelocity(Vector2)} method.
 	 * @return {@link Vector2}
+	 * @since 3.1.5
 	 */
-	public Vector2 getVelocity() {
+	public Vector2 getLinearVelocity() {
 		return this.velocity;
 	}
 	
 	/**
-	 * Returns the velocity of this body at the given point on the body.
-	 * @param point the point
+	 * Returns the velocity of this body at the given world space point.
+	 * <p>
+	 * This method replaces the {@link Body#getVelocity(Vector2)} method.
+	 * @param point the point in world space
 	 * @return {@link Vector2}
-	 * @since 3.0.1
+	 * @since 3.1.5
 	 */
-	public Vector2 getVelocity(Vector2 point) {
+	public Vector2 getLinearVelocity(Vector2 point) {
 		// get the world space center point
 		Vector2 c = this.getWorldCenter();
 		// compute the r vector from the center of mass to the point
@@ -1588,18 +1640,35 @@ public class Body implements Swept, Collidable, Transformable {
 	}
 	
 	/**
-	 * Sets the velocity {@link Vector2}.
+	 * Sets the linear velocity.
 	 * <p>
 	 * Call the {@link #setAsleep(boolean)} method to wake up the {@link Body}
 	 * if the {@link Body} is asleep and the velocity is not zero.
-	 * @param velocity the velocity
+	 * <p>
+	 * This method replaces the {@link Body#setVelocity(Vector2)} method.
+	 * @param velocity the desired velocity
 	 * @throws NullPointerException if velocity is null
+	 * @since 3.1.5
 	 */
-	public void setVelocity(Vector2 velocity) {
+	public void setLinearVelocity(Vector2 velocity) {
 		if (velocity == null) throw new NullPointerException(Messages.getString("dynamics.body.nullVelocity"));
 		this.velocity = velocity;
 	}
 
+	/**
+	 * Sets the linear velocity.
+	 * <p>
+	 * Call the {@link #setAsleep(boolean)} method to wake up the {@link Body}
+	 * if the {@link Body} is asleep and the velocity is not zero.
+	 * @param x the linear velocity along the x-axis
+	 * @param y the linear velocity along the y-axis
+	 * @since 3.1.5
+	 */
+	public void setLinearVelocity(double x, double y) {
+		this.velocity.x = x;
+		this.velocity.y = y;
+	}
+	
 	/**
 	 * Returns the angular velocity.
 	 * @return double
@@ -1934,5 +2003,41 @@ public class Body implements Swept, Collidable, Transformable {
 	@Deprecated
 	public Body apply(Vector2 force) {
 		return this.applyForce(force);
+	}
+
+	/**
+	 * Returns the velocity {@link Vector2}.
+	 * @return {@link Vector2}
+	 * @deprecated replaced by {@link Body#getLinearVelocity()} in 3.1.5
+	 */
+	@Deprecated
+	public Vector2 getVelocity() {
+		return this.getLinearVelocity();
+	}
+
+	/**
+	 * Returns the velocity of this body at the given point on the body.
+	 * @param point the point
+	 * @return {@link Vector2}
+	 * @since 3.0.1
+	 * @deprecated replaced by {@link Body#getLinearVelocity(Vector2)} in 3.1.5
+	 */
+	@Deprecated
+	public Vector2 getVelocity(Vector2 point) {
+		return this.getLinearVelocity(point);
+	}
+
+	/**
+	 * Sets the velocity {@link Vector2}.
+	 * <p>
+	 * Call the {@link #setAsleep(boolean)} method to wake up the {@link Body}
+	 * if the {@link Body} is asleep and the velocity is not zero.
+	 * @param velocity the velocity
+	 * @throws NullPointerException if velocity is null
+	 * @deprecated replaced by {@link Body#setLinearVelocity(Vector2)} in 3.1.5
+	 */
+	@Deprecated
+	public void setVelocity(Vector2 velocity) {
+		this.setLinearVelocity(velocity);
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -25,22 +25,24 @@
 package org.dyn4j.dynamics;
 
 import org.dyn4j.Listener;
+import org.dyn4j.collision.narrowphase.Raycast;
 import org.dyn4j.geometry.Ray;
 
 /**
  * Interface for listening for raycast events.
  * <p>
  * Modification of the {@link World} is not permitted inside these methods.
+ * <p>
+ * By default all methods should return true.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.5
  * @since 2.0.0
  */
 public interface RaycastListener extends Listener {
 	/**
-	 * Called before a {@link Body} is tested against the {@link Ray}.  This method will be
-	 * called for every body in the {@link World}.
+	 * Called before a {@link Body} is tested against the {@link Ray}.
 	 * <p>
-	 * Use this method to filter the raycasting based on the {@link Body}.
+	 * Use this method to filter the ray casting based on the {@link Body}.
 	 * @param ray the {@link Ray}
 	 * @param body the {@link Body} to be tested
 	 * @return boolean true if the {@link Body} should be included in the raycast
@@ -49,10 +51,9 @@ public interface RaycastListener extends Listener {
 	public abstract boolean allow(Ray ray, Body body);
 	
 	/**
-	 * Called when a {@link BodyFixture} of a {@link Body} is intersected by a {@link Ray}.
-	 * This method will be called for every fixture on each {@link Body}.
+	 * Called before a {@link BodyFixture} is tested against the {@link Ray}.
 	 * <p>
-	 * Use this method to filter the raycasting based on the {@link BodyFixture}.
+	 * Use this method to filter the ray casting based on the {@link BodyFixture}.
 	 * @param ray the {@link Ray}
 	 * @param body the {@link Body}
 	 * @param fixture the {@link BodyFixture} to be tested
@@ -60,4 +61,17 @@ public interface RaycastListener extends Listener {
 	 * @since 3.0.0
 	 */
 	public abstract boolean allow(Ray ray, Body body, BodyFixture fixture);
+	
+	/**
+	 * Called after a successful raycast of the given {@link Body} and {@link BodyFixture}.
+	 * <p>
+	 * Use this method to filter the raycasting based on the {@link Raycast} result.
+	 * @param ray the {@link Ray}
+	 * @param body the {@link Body}
+	 * @param fixture the {@link BodyFixture} to be tested
+	 * @param raycast the {@link Raycast} result
+	 * @return boolean true if the {@link Raycast} result should be allowed
+	 * @since 3.1.5
+	 */
+	public abstract boolean allow(Ray ray, Body body, BodyFixture fixture, Raycast raycast);
 }

@@ -43,7 +43,7 @@ import org.dyn4j.geometry.Vector2;
  * This class uses a self-balancing binary tree to store the AABBs.  The AABBs are sorted using the perimeter.
  * The perimeter hueristic is better than area for 2D because axis aligned segments have zero area.
  * @author William Bittle
- * @version 3.1.4
+ * @version 3.1.5
  * @since 3.0.0
  * @param <E> the {@link Collidable} type
  */
@@ -111,7 +111,10 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	 */
 	public DynamicAABBTree(int initialCapacity) {
 		this.proxyList = new ArrayList<Node>(initialCapacity);
-		this.proxyMap = new HashMap<UUID, Node>(initialCapacity);
+		// 0.75 = 3/4, we can garuantee that the hashmap will not need to be rehashed
+		// if we take capacity / load factor
+		// the default load factor is 0.75 according to the javadocs, but lets assign it to be sure
+		this.proxyMap = new HashMap<UUID, Node>(initialCapacity * 4 / 3 + 1, 0.75f);
 	}
 	
 	/* (non-Javadoc)

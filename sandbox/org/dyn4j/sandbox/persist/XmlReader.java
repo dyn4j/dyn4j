@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -88,7 +88,7 @@ import org.xml.sax.helpers.DefaultHandler;
 /**
  * Class used to read in a saved simulation file.
  * @author William Bittle
- * @version 1.0.4
+ * @version 1.0.5
  * @since 1.0.0
  */
 public class XmlReader extends DefaultHandler {
@@ -550,7 +550,7 @@ public class XmlReader extends DefaultHandler {
 		} else if ("Velocity".equalsIgnoreCase(qName)) {
 			double x = Double.parseDouble(attributes.getValue("x"));
 			double y = Double.parseDouble(attributes.getValue("y"));
-			this.body.getVelocity().set(x, y);
+			this.body.getLinearVelocity().set(x, y);
 		} else if ("AccumulatedForce".equalsIgnoreCase(qName)) {
 			double x = Double.parseDouble(attributes.getValue("x"));
 			double y = Double.parseDouble(attributes.getValue("y"));

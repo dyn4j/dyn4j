@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -50,7 +50,7 @@ import org.dyn4j.sandbox.resources.Messages;
 /**
  * Dialog to create a new body without any fixtures.
  * @author William Bittle
- * @version 1.0.4
+ * @version 1.0.5
  * @since 1.0.0
  */
 public class EditBodyDialog extends JDialog implements ActionListener {
@@ -106,7 +106,7 @@ public class EditBodyDialog extends JDialog implements ActionListener {
 		this.body.setGravityScale(body.getGravityScale());
 		this.body.setLinearDamping(body.getLinearDamping());
 		this.body.setName(body.getName());
-		this.body.setVelocity(body.getVelocity().copy());
+		this.body.setLinearVelocity(body.getLinearVelocity().copy());
 		this.body.setMassExplicit(body.isMassExplicit());
 		
 		JTabbedPane tabs = new JTabbedPane();
@@ -195,7 +195,7 @@ public class EditBodyDialog extends JDialog implements ActionListener {
 			body.setLinearDamping(bodyChanges.getLinearDamping());
 			body.setMass(new Mass(bodyChanges.getMass()));
 			body.setName(bodyChanges.getName());
-			body.setVelocity(bodyChanges.getVelocity().copy());
+			body.setLinearVelocity(bodyChanges.getLinearVelocity().copy());
 			body.setMassExplicit(bodyChanges.isMassExplicit());
 			
 			// apply the transform

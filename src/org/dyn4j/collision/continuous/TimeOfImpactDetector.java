@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,39 +24,70 @@
  */
 package org.dyn4j.collision.continuous;
 
-import org.dyn4j.collision.Collidable;
+import org.dyn4j.geometry.Convex;
+import org.dyn4j.geometry.Shape;
+import org.dyn4j.geometry.Transform;
+import org.dyn4j.geometry.Vector2;
 
 /**
  * Interface representing a time of impact algorithm.
  * @author William Bittle
- * @version 1.2.0
+ * @version 3.1.5
  * @since 1.2.0
  */
 public interface TimeOfImpactDetector {
 	/**
-	 * Returns true if the given {@link Swept} {@link Collidable}s have a time of impact within
-	 * the range [0, 1].
+	 * Detects whether the given {@link Convex} {@link Shape}s collide given their current positions and orientation
+	 * and the rate of change their position and orientation, returning the time of impact within an epsilon.
 	 * <p>
-	 * This method places the result of the time of impact in the toi input parameter.
-	 * @see #getTimeOfImpact(Swept, Swept, double, double, TimeOfImpact)
-	 * @param swept1 the first {@link Swept} {@link Collidable}
-	 * @param swept2 the second {@link Swept} {@link Collidable}
-	 * @param toi the time of impact information
-	 * @return boolean true if the two have a time of impact within the given range
+	 * If a collision is detected, the <code>toi</code> parameter will be filled with the time of impact and the 
+	 * separation at the time of impact.
+	 * <p>
+	 * If a time of impact is detected, the time will be in the range [0, 1].  This can be used, along with the change
+	 * and position and orientation, to place to the shapes at the time of impact.  Note that the shapes will still
+	 * be separated, by a small amount, at the time of impact.
+	 * <p>
+	 * This method returns false if the shape do not collide.
+	 * @param convex1 the first convex shape
+	 * @param transform1 the first convex shape's transform
+	 * @param dp1 the change in position of the first shape
+	 * @param da1 the change in orientation of the first shape
+	 * @param convex2 the second convex shape
+	 * @param transform2 the second convex shape's transform
+	 * @param dp2 the change in position of the second shape
+	 * @param da2 the change in orientation of the second shape
+	 * @param toi the {@link TimeOfImpact} object to be filled in the case of a collision
+	 * @return boolean true if a collision was detected
+	 * @since 3.1.5
 	 */
-	public boolean getTimeOfImpact(Swept swept1, Swept swept2, TimeOfImpact toi);
+	public boolean getTimeOfImpact(Convex convex1, Transform transform1, Vector2 dp1, double da1, Convex convex2, Transform transform2, Vector2 dp2, double da2, TimeOfImpact toi);
 	
 	/**
-	 * Returns true if the given {@link Swept} {@link Collidable}s have a time of impact within
-	 * the given range.
+	 * Detects whether the given {@link Convex} {@link Shape}s collide given their current positions and orientation
+	 * and the rate of change their position and orientation in the time range of [t1, t2] and returning the time of 
+	 * impact within an epsilon.
 	 * <p>
-	 * This method places the result of the time of impact in the toi input parameter.
-	 * @param swept1 the first {@link Swept} {@link Collidable}
-	 * @param swept2 the second {@link Swept} {@link Collidable}
-	 * @param t1 the time lower bound; must be greater than or equal zero
-	 * @param t2 the time upper bound; must be less than or equal to one
-	 * @param toi the time of impact information
-	 * @return boolean true if the two have a time of impact within the given range
+	 * If a collision is detected, the <code>toi</code> parameter will be filled with the time of impact and the 
+	 * separation at the time of impact.
+	 * <p>
+	 * If a time of impact is detected, the time will be in the range [0, 1].  This can be used, along with the change
+	 * and position and orientation, to place to the shapes at the time of impact.  Note that the shapes will still
+	 * be separated, by a small amount, at the time of impact.
+	 * <p>
+	 * This method returns false if the shape do not collide.
+	 * @param convex1 the first convex shape
+	 * @param transform1 the first convex shape's transform
+	 * @param dp1 the change in position of the first shape
+	 * @param da1 the change in orientation of the first shape
+	 * @param convex2 the second convex shape
+	 * @param transform2 the second convex shape's transform
+	 * @param dp2 the change in position of the second shape
+	 * @param da2 the change in orientation of the second shape
+	 * @param toi the {@link TimeOfImpact} object to be filled in the case of a collision
+	 * @param t1 the lower time bound
+	 * @param t2 the upper time bound
+	 * @return boolean true if a collision was detected
+	 * @since 3.1.5
 	 */
-	public boolean getTimeOfImpact(Swept swept1, Swept swept2, double t1, double t2, TimeOfImpact toi);
+	public boolean getTimeOfImpact(Convex convex1, Transform transform1, Vector2 dp1, double da1, Convex convex2, Transform transform2, Vector2 dp2, double da2, double t1, double t2, TimeOfImpact toi);
 }

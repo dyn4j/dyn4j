@@ -503,7 +503,7 @@ public class BodyTest {
 	public void isKinematic() {
 		Body b = new Body();
 		
-		b.setVelocity(new Vector2(0.0, 2.0));
+		b.setLinearVelocity(new Vector2(0.0, 2.0));
 		TestCase.assertFalse(b.isDynamic());
 		TestCase.assertTrue(b.isKinematic());
 		TestCase.assertFalse(b.isStatic());
@@ -671,7 +671,7 @@ public class BodyTest {
 	@Test(expected = NullPointerException.class)
 	public void setNullVelocity() {
 		Body b = new Body();
-		b.setVelocity(null);
+		b.setLinearVelocity(null);
 	}
 	
 	/**
@@ -962,7 +962,7 @@ public class BodyTest {
 		
 		Vector2 p = new Vector2(-2.0, 1.0);
 		
-		Vector2 vp = b.getVelocity(p);
+		Vector2 vp = b.getLinearVelocity(p);
 		
 		TestCase.assertEquals( 1.858, vp.x, 1.0E-3);
 		TestCase.assertEquals(-2.283, vp.y, 1.0E-3);
@@ -1179,11 +1179,11 @@ public class BodyTest {
 		
 		// should yield a velocity of 1.0, 1.0
 		b.applyImpulse(new Vector2(m, m));
-		TestCase.assertEquals(1.0, b.getVelocity().x);
-		TestCase.assertEquals(1.0, b.getVelocity().y);
+		TestCase.assertEquals(1.0, b.getLinearVelocity().x);
+		TestCase.assertEquals(1.0, b.getLinearVelocity().y);
 		
 		// clear velocity
-		b.getVelocity().zero();
+		b.getLinearVelocity().zero();
 		
 		// should yield an angular velocity of 1.0 rads
 		b.applyImpulse(i);
@@ -1195,8 +1195,8 @@ public class BodyTest {
 		// should yield a velocity of 1.0, 1.0 and an angular velocity of 1.0
 		b.applyImpulse(new Vector2(0.0, i), new Vector2(1.0, 0.0));
 		TestCase.assertEquals(1.0, b.getAngularVelocity());
-		TestCase.assertEquals(i, b.getVelocity().y);
-		TestCase.assertEquals(0.0, b.getVelocity().x);
+		TestCase.assertEquals(i, b.getLinearVelocity().y);
+		TestCase.assertEquals(0.0, b.getLinearVelocity().x);
 	}
 	
 	/**
@@ -1232,5 +1232,100 @@ public class BodyTest {
 		TestCase.assertTrue(b.contains(new Vector2(0.55, 0.25)));
 		TestCase.assertFalse(b.contains(new Vector2(0.52, 0.45)));
 		TestCase.assertTrue(b.contains(new Vector2(0.70, 0.3)));
+	}
+	
+	/**
+	 * Tests the getChangeInPosition method.
+	 * @since 3.1.5
+	 */
+	@Test
+	public void getChangeInPosition() {
+		Body b = new Body();
+		b.addFixture(Geometry.createCircle(0.5));
+		
+		b.getInitialTransform().set(b.getTransform());
+		
+		// test moving just right
+		b.translate(2.0, 0.0);
+		Vector2 dp = b.getChangeInPosition();
+		TestCase.assertEquals(2.000, dp.x, 1.0e-3);
+		TestCase.assertEquals(0.000, dp.y, 1.0e-3);
+		
+		// test moving just left
+		b.getTransform().identity();
+		b.translate(-2.0, 0.0);
+		dp = b.getChangeInPosition();
+		TestCase.assertEquals(-2.000, dp.x, 1.0e-3);
+		TestCase.assertEquals(0.000, dp.y, 1.0e-3);
+		
+		// test moving up and left
+		b.getTransform().identity();
+		b.translate(-2.0, 1.0);
+		dp = b.getChangeInPosition();
+		TestCase.assertEquals(-2.000, dp.x, 1.0e-3);
+		TestCase.assertEquals(1.000, dp.y, 1.0e-3);
+		
+		// test with a rotation mixed in
+		b.getTransform().identity();
+		b.rotate(Math.toRadians(30));
+		b.translate(-2.0, 1.0);
+		b.rotate(Math.toRadians(30), -2.0, 1.0);
+		dp = b.getChangeInPosition();
+		TestCase.assertEquals(-2.000, dp.x, 1.0e-3);
+		TestCase.assertEquals(1.000, dp.y, 1.0e-3);
+	}
+	
+	/**
+	 * Tests the getChangeInOrientation method.
+	 * @since 3.1.5
+	 */
+	@Test
+	public void getChangeInOrientation() {
+		Body b = new Body();
+		b.addFixture(Geometry.createCircle(0.5));
+		b.rotate(Math.toRadians(30));
+		b.setAngularVelocity(Math.toRadians(1));
+		b.setMass();
+		
+		b.getInitialTransform().set(b.getTransform());
+		
+		// test moving forward 20 degrees
+		b.getTransform().identity();
+		b.rotate(Math.toRadians(50));
+		double da = b.getChangeInOrientation();
+		TestCase.assertEquals(20.000, Math.toDegrees(da), 1.0e-3);
+		
+		// test moving forward 200 degrees
+		b.getTransform().identity();
+		b.rotate(Math.toRadians(200));
+		da = b.getChangeInOrientation();
+		TestCase.assertEquals(170.000, Math.toDegrees(da), 1.0e-3);
+		
+		// test moving forward 350 degrees
+		b.getTransform().identity();
+		b.rotate(Math.toRadians(20));
+		da = b.getChangeInOrientation();
+		TestCase.assertEquals(350.000, Math.toDegrees(da), 1.0e-3);
+		
+		// reverse direction
+		b.setAngularVelocity(Math.toRadians(-1));
+		
+		// test moving forward 20 degrees
+		b.getTransform().identity();
+		b.rotate(Math.toRadians(50));
+		da = b.getChangeInOrientation();
+		TestCase.assertEquals(-340.000, Math.toDegrees(da), 1.0e-3);
+		
+		// test moving forward 200 degrees
+		b.getTransform().identity();
+		b.rotate(Math.toRadians(200));
+		da = b.getChangeInOrientation();
+		TestCase.assertEquals(-190.000, Math.toDegrees(da), 1.0e-3);
+		
+		// test moving forward 350 degrees
+		b.getTransform().identity();
+		b.rotate(Math.toRadians(20));
+		da = b.getChangeInOrientation();
+		TestCase.assertEquals(-10.000, Math.toDegrees(da), 1.0e-3);
 	}
 }

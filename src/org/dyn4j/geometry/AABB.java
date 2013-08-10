@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,7 +29,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents an axis aligned bounding box.
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.1.5
  * @since 3.0.0
  */
 public class AABB {
@@ -60,6 +60,34 @@ public class AABB {
 		if (min.x > max.x || min.y > max.y) throw new IllegalArgumentException(Messages.getString("geometry.aabb.invalidMinMax"));
 		this.min = min;
 		this.max = max;
+	}
+	
+	/**
+	 * Full constructor.
+	 * @param radius the radius of a circle fitting inside an AABB
+	 * @since 3.1.5
+	 */
+	public AABB(double radius) {
+		this(null, radius);
+	}
+	
+	/**
+	 * Full constructor.
+	 * <p>
+	 * Creates an AABB for a circle with the given center and radius.
+	 * @param center the center of the circle
+	 * @param radius the radius of the circle
+	 * @since 3.1.5
+	 */
+	public AABB(Vector2 center, double radius) {
+		if (radius < 0) throw new IllegalArgumentException(Messages.getString("geometry.aabb.invalidRadius"));
+		if (center == null) {
+			this.min = new Vector2(-radius, -radius);
+			this.max = new Vector2( radius,  radius);
+		} else {
+			this.min = new Vector2(center.x - radius, center.y - radius);
+			this.max = new Vector2(center.x + radius, center.y + radius);
+		}
 	}
 	
 	/**

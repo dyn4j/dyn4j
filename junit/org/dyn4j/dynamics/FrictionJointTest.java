@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -37,7 +37,7 @@ import org.junit.Test;
 /**
  * Used to test the {@link FrictionJoint} class.
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.1.5
  * @since 1.0.2
  */
 public class FrictionJointTest {
@@ -145,7 +145,7 @@ public class FrictionJointTest {
 		b.setMass();
 		b.translate(0.0, 2.0);
 		// 5 meters/second
-		b.setVelocity(new Vector2(4.0, 3.0));
+		b.setLinearVelocity(new Vector2(4.0, 3.0));
 		// 30 degrees/second
 		b.setAngularVelocity(Math.toRadians(30.0));
 		b.setLinearDamping(0.0);
@@ -160,7 +160,7 @@ public class FrictionJointTest {
 		w.step(1);
 		
 		// make sure that the body has been slowed linearly and angularly
-		TestCase.assertTrue(b.getVelocity().getMagnitude() < 5.0);
+		TestCase.assertTrue(b.getLinearVelocity().getMagnitude() < 5.0);
 		TestCase.assertTrue(b.getAngularVelocity() < Math.toRadians(30));
 	}
 }

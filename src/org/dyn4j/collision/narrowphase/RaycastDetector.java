@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -34,7 +34,7 @@ import org.dyn4j.geometry.Transform;
  * {@link Shape} intersect, given the ray's maximum length and the convex shape's
  * transform.
  * @author William Bittle
- * @version 2.0.0
+ * @version 3.1.5
  * @since 2.0.0
  */
 public interface RaycastDetector {
@@ -44,6 +44,8 @@ public interface RaycastDetector {
 	 * <p>
 	 * The raycast parameter is used to stored the results of the raycast upon a successful
 	 * or true return.
+	 * <p>
+	 * Returns false if the start position of the ray lies inside the given convex.
 	 * @param ray the {@link Ray}
 	 * @param maxLength the maximum length of the ray; 0 for infinite length
 	 * @param convex the {@link Convex} {@link Shape}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -227,7 +227,7 @@ public class ExampleJOGL extends JFrame implements GLEventListener {
 		triangle.setMass();
 		triangle.translate(-1.0, 2.0);
 		// test having a velocity
-		triangle.getVelocity().set(5.0, 0.0);
+		triangle.getLinearVelocity().set(5.0, 0.0);
 		this.world.addBody(triangle);
 		
 		// try a rectangle
@@ -236,7 +236,7 @@ public class ExampleJOGL extends JFrame implements GLEventListener {
 		rectangle.addFixture(rectShape);
 		rectangle.setMass();
 		rectangle.translate(0.0, 2.0);
-		rectangle.getVelocity().set(-5.0, 0.0);
+		rectangle.getLinearVelocity().set(-5.0, 0.0);
 		this.world.addBody(rectangle);
 		
 		// try a polygon with lots of vertices

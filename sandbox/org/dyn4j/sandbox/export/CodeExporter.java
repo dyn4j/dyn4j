@@ -239,8 +239,8 @@ public class CodeExporter {
 				sb.append(TAB2).append("body").append(i).append(".translate(").append(export(body.getTransform().getTranslation())).append(");").append(NEW_LINE);
 			}
 			// set velocity
-			if (!body.getVelocity().isZero()) {
-				sb.append(TAB2).append("body").append(i).append(".setVelocity(").append(export(body.getVelocity())).append(");").append(NEW_LINE);
+			if (!body.getLinearVelocity().isZero()) {
+				sb.append(TAB2).append("body").append(i).append(".setVelocity(").append(export(body.getLinearVelocity())).append(");").append(NEW_LINE);
 			}
 			if (Math.abs(body.getAngularVelocity()) > Epsilon.E) {
 				sb.append(TAB2).append("body").append(i).append(".setAngularVelocity(Math.toRadians(").append(Math.toDegrees(body.getAngularVelocity())).append("));").append(NEW_LINE);

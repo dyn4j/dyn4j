@@ -27,6 +27,7 @@ package org.dyn4j.testbed.test;
 import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.collision.continuous.TimeOfImpact;
 import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.TimeOfImpactAdapter;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.geometry.Geometry;
@@ -50,10 +51,10 @@ public class FastRotation extends Test {
 	 */
 	private class ToiListener extends TimeOfImpactAdapter {
 		/* (non-Javadoc)
-		 * @see org.dyn4j.dynamics.TimeOfImpactAdapter#collision(org.dyn4j.dynamics.Body, org.dyn4j.dynamics.Body, org.dyn4j.collision.continuous.TimeOfImpact)
+		 * @see org.dyn4j.dynamics.TimeOfImpactAdapter#collision(org.dyn4j.dynamics.Body, org.dyn4j.dynamics.BodyFixture, org.dyn4j.dynamics.Body, org.dyn4j.dynamics.BodyFixture, org.dyn4j.collision.continuous.TimeOfImpact)
 		 */
 		@Override
-		public boolean collision(Body body1, Body body2, TimeOfImpact toi) {
+		public boolean collision(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2, TimeOfImpact toi) {
 			body1.getVelocity().zero();
 			body1.setAngularVelocity(0);
 			

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,29 +24,20 @@
  */
 package org.dyn4j.collision.continuous;
 
-import org.dyn4j.collision.Collidable;
-import org.dyn4j.collision.Fixture;
 import org.dyn4j.collision.narrowphase.Separation;
 
 /**
- * Represents the time of impact information between two {@link Swept}
- * {@link Collidable}s.
+ * Represents the time of impact information between two objects.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.5
  * @since 1.2.0
  */
 public class TimeOfImpact {
 	/** The time of impact in the range [0, 1] */
-	protected double toi;
+	protected double time;
 	
 	/** The separation at the time of impact */
 	protected Separation separation;
-	
-	/** The closest {@link Fixture} on the first {@link Swept} {@link Collidable} */
-	protected Fixture fixture1;
-	
-	/** The closest {@link Fixture} on the second {@link Swept} {@link Collidable} */
-	protected Fixture fixture2;
 	
 	/**
 	 * Default constructor.
@@ -55,16 +46,12 @@ public class TimeOfImpact {
 	
 	/**
 	 * Full constructor.
-	 * @param toi the time of impact; in the range [0, 1]
+	 * @param time the time of impact; in the range [0, 1]
 	 * @param separation the separation at the time of impact
-	 * @param fixture1 the closest {@link Fixture} on the first {@link Swept} {@link Collidable}
-	 * @param fixture2 the closest {@link Fixture} on the second {@link Swept} {@link Collidable}
 	 */
-	public TimeOfImpact(double toi, Separation separation, Fixture fixture1, Fixture fixture2) {
-		this.toi = toi;
+	public TimeOfImpact(double time, Separation separation) {
+		this.time = time;
 		this.separation = separation;
-		this.fixture1 = fixture1;
-		this.fixture2 = fixture2;
 	}
 	
 	/* (non-Javadoc)
@@ -73,10 +60,8 @@ public class TimeOfImpact {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("TimeOfImpact[Time=").append(this.toi)
+		sb.append("TimeOfImpact[Time=").append(this.time)
 		.append("|Separation=").append(this.separation)
-		.append("|Fixture1=").append(this.fixture1)
-		.append("|Fixture2=").append(this.fixture2)
 		.append("]");
 		return sb.toString();
 	}
@@ -84,17 +69,19 @@ public class TimeOfImpact {
 	/**
 	 * Returns the time of impact in the range [0, 1].
 	 * @return double
+	 * @since 3.1.5
 	 */
-	public double getToi() {
-		return this.toi;
+	public double getTime() {
+		return this.time;
 	}
 	
 	/**
 	 * Sets the time of impact.
-	 * @param toi the time of impact in the range [0, 1]
+	 * @param time the time of impact in the range [0, 1]
+	 * @since 3.1.5
 	 */
-	public void setToi(double toi) {
-		this.toi = toi;
+	public void setTime(double time) {
+		this.time = time;
 	}
 	
 	/**
@@ -111,41 +98,5 @@ public class TimeOfImpact {
 	 */
 	public void setSeparation(Separation separation) {
 		this.separation = separation;
-	}
-	
-	/**
-	 * Returns the closest {@link Fixture} on the first {@link Swept} {@link Collidable}.
-	 * @return {@link Fixture}
-	 * @since 2.0.0
-	 */
-	public Fixture getFixture1() {
-		return fixture1;
-	}
-	
-	/**
-	 * Sets the closest {@link Fixture} on the first {@link Swept} {@link Collidable}.
-	 * @param fixture1 the closest fixture
-	 * @since 2.0.0
-	 */
-	public void setFixture1(Fixture fixture1) {
-		this.fixture1 = fixture1;
-	}
-	
-	/**
-	 * Returns the closest {@link Fixture} on the second {@link Swept} {@link Collidable}.
-	 * @return {@link Fixture}
-	 * @since 2.0.0
-	 */
-	public Fixture getFixture2() {
-		return fixture2;
-	}
-	
-	/**
-	 * Sets the closest {@link Fixture} on the second {@link Swept} {@link Collidable}.
-	 * @param fixture2 the closest fixture
-	 * @since 2.0.0
-	 */
-	public void setFixture2(Fixture fixture2) {
-		this.fixture2 = fixture2;
 	}
 }

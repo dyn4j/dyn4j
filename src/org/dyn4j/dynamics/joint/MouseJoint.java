@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,7 +40,7 @@ import org.dyn4j.resources.Messages;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class MouseJoint extends Joint {
@@ -176,7 +176,7 @@ public class MouseJoint extends Joint {
 		
 		// warm start
 		this.impulse.multiply(step.getDeltaTimeRatio());
-		body.getVelocity().add(this.impulse.product(invM));
+		body.getLinearVelocity().add(this.impulse.product(invM));
 		body.setAngularVelocity(body.getAngularVelocity() + invI * r.cross(this.impulse));
 	}
 	
@@ -199,7 +199,7 @@ public class MouseJoint extends Joint {
 		Vector2 r = transform.getTransformedR(body.getLocalCenter().to(this.anchor));
 
 		// Cdot = v + cross(w, r)
-		Vector2 C = r.cross(body.getAngularVelocity()).add(body.getVelocity());
+		Vector2 C = r.cross(body.getAngularVelocity()).add(body.getLinearVelocity());
 		// compute Jv + b
 		Vector2 jvb = C;
 		jvb.add(this.bias);
@@ -217,7 +217,7 @@ public class MouseJoint extends Joint {
 		}
 		J = this.impulse.difference(oldImpulse);
 		
-		body.getVelocity().add(J.product(invM));
+		body.getLinearVelocity().add(J.product(invM));
 		body.setAngularVelocity(body.getAngularVelocity() + invI * r.cross(J));
 	}
 	
