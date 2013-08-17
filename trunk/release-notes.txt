@@ -35,6 +35,8 @@ Breaking Changes:
     
 Other:
   - Many more JUnit tests.
+  - Updated license dates to be consistent.
+  - Removed the TestBed code.
 
 ===============================================================================
 Version 3.1.4
