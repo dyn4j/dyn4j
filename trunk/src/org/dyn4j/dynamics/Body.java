@@ -1344,6 +1344,15 @@ public class Body implements Collidable, Transformable {
 	}
 	
 	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.Collidable#getFixtures()
+	 */
+	public List<BodyFixture> getFixtures() {
+		List<BodyFixture> fixtures = new ArrayList<BodyFixture>(this.fixtures.size());
+		fixtures.addAll(this.fixtures);
+		return fixtures;
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.Collidable#getTransform()
 	 */
 	public Transform getTransform() {

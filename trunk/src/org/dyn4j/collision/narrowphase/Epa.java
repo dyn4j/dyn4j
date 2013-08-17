@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -58,7 +58,7 @@ import org.dyn4j.resources.Messages;
  * {@link Epa} will terminate in a finite number of iterations if the two shapes are {@link Polygon}s.
  * If either shape has curved surfaces the algorithm requires an expected accuracy epsilon.
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class Epa implements MinkowskiPenetrationSolver {
@@ -85,7 +85,7 @@ public class Epa implements MinkowskiPenetrationSolver {
 		public double distance;
 		
 		/** The edge normal */
-		public Vector2 n;
+		public Vector2 normal;
 		
 		/** The edge index in the simplex */
 		public int index;
@@ -96,7 +96,7 @@ public class Epa implements MinkowskiPenetrationSolver {
 		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
-			sb.append("Epa.Edge[Normal=").append(this.n)
+			sb.append("Epa.Edge[Normal=").append(this.normal)
 			.append("|Index=").append(this.index)
 			.append("|Distance=").append(this.distance)
 			.append("]");
@@ -129,17 +129,17 @@ public class Epa implements MinkowskiPenetrationSolver {
 			// get the closest edge to the origin
 			edge = this.findClosestEdge(simplex, winding);
 			// get a new support point in the direction of the edge normal
-			point = minkowskiSum.support(edge.n);
+			point = minkowskiSum.support(edge.normal);
 			
 			// see if the new point is significantly past the edge
-			double projection = point.dot(edge.n);
+			double projection = point.dot(edge.normal);
 			if ((projection - edge.distance) < this.distanceEpsilon) {
 				// then the new point we just made is not far enough
 				// in the direction of n so we can stop now and
 				// return n as the direction and the projection
 				// as the depth since this is the closest found
 				// edge and it cannot increase any more
-				penetration.normal = edge.n;
+				penetration.normal = edge.normal;
 				penetration.depth = projection;
 				return;
 			}
@@ -152,8 +152,8 @@ public class Epa implements MinkowskiPenetrationSolver {
 		// if we made it here then we know that we hit the maximum number of iterations
 		// this is really a catch all termination case
 		// set the normal and depth equal to the last edge we created
-		penetration.normal = edge.n;
-		penetration.depth = point.dot(edge.n);
+		penetration.normal = edge.normal;
+		penetration.depth = point.dot(edge.normal);
 	}
 	
 	/**
@@ -169,6 +169,9 @@ public class Epa implements MinkowskiPenetrationSolver {
 		Edge edge = new Edge();
 		// set edge's distance to the max double value
 		edge.distance = Double.MAX_VALUE;
+		edge.normal = new Vector2();
+		// create a reusable vector for the normal
+		Vector2 normal = new Vector2();
 		// find the edge on the simplex closest to the origin
 		for (int i = 0; i < size; i++) {
 			// compute j
@@ -178,7 +181,7 @@ public class Epa implements MinkowskiPenetrationSolver {
 			Vector2 b = simplex.get(j);
 			// create the edge
 			// inline b - a
-			Vector2 normal = new Vector2(b.x - a.x, b.y - a.y);
+			normal.set(b.x - a.x, b.y - a.y);
 			// depending on the winding get the edge normal
 			// it would be better to use Vector.tripleProduct(ab, ao, ab);
 			// where ab is the edge and ao is a.to(ORIGIN) but this will
@@ -198,7 +201,7 @@ public class Epa implements MinkowskiPenetrationSolver {
 			// record the closest edge
 			if (d < edge.distance) {
 				edge.distance = d;
-				edge.n = normal;
+				edge.normal.set(normal);
 				edge.index = j;
 			}
 		}
@@ -242,7 +245,7 @@ public class Epa implements MinkowskiPenetrationSolver {
 	 * @see #setMaxIterations(int)
 	 */
 	public int getMaxIterations() {
-		return maxIterations;
+		return this.maxIterations;
 	}
 
 	/**
@@ -263,7 +266,7 @@ public class Epa implements MinkowskiPenetrationSolver {
 	 * @see #setDistanceEpsilon(double)
 	 */
 	public double getDistanceEpsilon() {
-		return distanceEpsilon;
+		return this.distanceEpsilon;
 	}
 
 	/**

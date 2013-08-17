@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,7 +29,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents a collision point.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class ManifoldPoint {
@@ -79,7 +79,16 @@ public class ManifoldPoint {
 	public ManifoldPointId getId() {
 		return this.id;
 	}
-	
+
+	/**
+	 * Sets the manifold point id.
+	 * @param id the id
+	 * @since 3.1.5
+	 */
+	public void setId(ManifoldPointId id) {
+		this.id = id;
+	}
+
 	/**
 	 * Returns the point.
 	 * @return {@link Vector2} the point in world coordinates
@@ -87,12 +96,30 @@ public class ManifoldPoint {
 	public Vector2 getPoint() {
 		return this.point;
 	}
-	
+
+	/**
+	 * Sets the point.
+	 * @param point the point
+	 * @since 3.1.5
+	 */
+	public void setPoint(Vector2 point) {
+		this.point = point;
+	}
+
 	/**
 	 * Returns the depth.
 	 * @return double
 	 */
 	public double getDepth() {
 		return this.depth;
+	}
+
+	/**
+	 * Sets the depth.
+	 * @param depth the depth
+	 * @since 3.1.5
+	 */
+	public void setDepth(double depth) {
+		this.depth = depth;
 	}
 }

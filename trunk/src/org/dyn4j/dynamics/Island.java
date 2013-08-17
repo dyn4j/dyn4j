@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -42,7 +42,7 @@ import org.dyn4j.resources.Messages;
  * Nearly identitcal to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class Island {
@@ -154,6 +154,7 @@ public class Island {
 		int size = this.bodies.size();
 		int jSize = this.joints.size();
 		
+		double dt = step.dt;
 		double invM, invI;
 		
 		// integrate the velocities
@@ -162,7 +163,7 @@ public class Island {
 			// check if the body has infinite mass and infinite inertia
 			if (!body.isDynamic()) continue;
 			// accumulate the forces and torques
-			body.accumulate(step.dt);
+			body.accumulate(dt);
 			// get the mass properties
 			invM = body.mass.getInverseMass();
 			invI = body.mass.getInverseInertia();
@@ -172,21 +173,23 @@ public class Island {
 			if (invM > Epsilon.E) {
 				// only perform this step if the body does not have
 				// a fixed linear velocity
-				body.velocity.x += (body.force.x * invM + gravity.x * body.gravityScale) * step.dt;
-				body.velocity.y += (body.force.y * invM + gravity.y * body.gravityScale) * step.dt;
+				body.velocity.x += (body.force.x * invM + gravity.x * body.gravityScale) * dt;
+				body.velocity.y += (body.force.y * invM + gravity.y * body.gravityScale) * dt;
 			}
 			// av1 = av0 + (t / I) * dt
 			if (invI > Epsilon.E) {
 				// only perform this step if the body does not have
 				// a fixed angular velocity
-				body.angularVelocity += step.dt * invI * body.torque;
+				body.angularVelocity += dt * invI * body.torque;
 			}
 			// apply damping
-			double linear = 1.0 - step.dt * body.linearDamping;
-			double angular = 1.0 - step.dt * body.angularDamping;
+			double linear = 1.0 - dt * body.linearDamping;
+			double angular = 1.0 - dt * body.angularDamping;
 			linear = Interval.clamp(linear, 0.0, 1.0);
 			angular = Interval.clamp(angular, 0.0, 1.0);
-			body.velocity.multiply(linear);
+			// inline body.velocity.multiply(linear);
+			body.velocity.x *= linear;
+			body.velocity.y *= linear;
 			body.angularVelocity *= angular;
 		}
 		
@@ -226,8 +229,8 @@ public class Island {
 			if (body.isStatic()) continue;
 			
 			// compute the translation and rotation for this time step
-			Vector2 translation = body.velocity.product(step.dt);
-			double rotation = body.angularVelocity * step.dt;
+			Vector2 translation = body.velocity.product(dt);
+			double rotation = body.angularVelocity * dt;
 			
 			// make sure the translation is not over the maximum
 			if (translation.getMagnitudeSquared() > maxTranslationSqrd) {
@@ -242,8 +245,9 @@ public class Island {
 			}
 			
 			// recompute the translation/rotation in case we hit the maximums
-			body.translate(body.velocity.product(step.dt));
-			body.rotateAboutCenter(body.angularVelocity * step.dt);
+			// inline body.translate(body.velocity.product(dt));
+			body.translate(body.velocity.x * dt, body.velocity.y * dt);
+			body.rotateAboutCenter(body.angularVelocity * dt);
 		}
 		
 		// solve the position constraints

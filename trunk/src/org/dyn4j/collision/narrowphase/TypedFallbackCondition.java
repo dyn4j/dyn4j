@@ -29,9 +29,6 @@ import org.dyn4j.geometry.Convex;
 /**
  * Represents a {@link FallbackCondition} that uses the {@link Convex}'s class type to determine
  * which pairs will be detected by the fallback {@link NarrowphaseDetector}.
- * <p>
- * The strict parameter indicates that the types should be compared for equality rather than by
- * class hierarchy.
  * @author William Bittle
  * @version 3.1.5
  * @since 3.1.5

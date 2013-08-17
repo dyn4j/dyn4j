@@ -46,8 +46,8 @@ import org.dyn4j.resources.Messages;
  * @since 1.2.0
  */
 public class ConservativeAdvancement implements TimeOfImpactDetector {
-	/** The default distance epsilon; 0.5 * {@link Settings}.DEFAULT_LINEAR_TOLERANCE */
-	public static final double DEFAULT_DISTANCE_EPSILON = 0.5 * Settings.DEFAULT_LINEAR_TOLERANCE;
+	/** The default distance epsilon; {@link Settings}.DEFAULT_LINEAR_TOLERANCE */
+	public static final double DEFAULT_DISTANCE_EPSILON = Math.cbrt(Epsilon.E);
 	
 	/** The default maximum number of iterations */
 	public static final int DEFAULT_MAX_ITERATIONS = 30;
@@ -182,26 +182,25 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 			separated = this.distanceDetector.distance(convex1, lerpTx1, convex2, lerpTx2, separation);
 			d = separation.getDistance();
 			// check for intersection
-			if (!separated || d <= Epsilon.E) {
+			if (!separated) {
 				// the shapes are intersecting.  This should
 				// not happen because of the conservative nature
-				// of the algorithm, however because of numerical
-				// error it will. Subtract epsilon from the toi
-				// to back-up a bit
-				if (!separated || d <= 0.5 * this.distanceEpsilon) {
-					// back up to half the distance epsilon
-					l -= 0.5 * this.distanceEpsilon / drel;
-					// interpolate
-					transform1.lerp(dp1, da1, l, lerpTx1);
-					transform2.lerp(dp2, da2, l, lerpTx2);
-					// compute a new separation
-					separated = this.distanceDetector.distance(convex1, lerpTx1, convex2, lerpTx2, separation);
-					// get the distance
-					d = separation.getDistance();
-					// the separation here could still be close to zero if the
-					// objects are rotating very fast, in which case just assume
-					// this is as close as we can get
-				}
+				// of the algorithm, however because of numeric
+				// error it will.
+				
+				// back up to half the distance epsilon
+				l -= 0.5 * this.distanceEpsilon / drel;
+				// interpolate
+				transform1.lerp(dp1, da1, l, lerpTx1);
+				transform2.lerp(dp2, da2, l, lerpTx2);
+				// compute a new separation
+				separated = this.distanceDetector.distance(convex1, lerpTx1, convex2, lerpTx2, separation);
+				// get the distance
+				d = separation.getDistance();
+				// the separation here could still be close to zero if the
+				// objects are rotating very fast, in which case just assume
+				// this is as close as we can get
+				
 				// break from the loop since we have detected the
 				// time of impact but had to fix the distance
 				break;

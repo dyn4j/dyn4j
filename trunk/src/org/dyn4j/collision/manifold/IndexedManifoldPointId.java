@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,7 +27,7 @@ package org.dyn4j.collision.manifold;
 /**
  * Represents a {@link ManifoldPointId} that uses indexing.
  * @author William Bittle
- * @version 3.1.2
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class IndexedManifoldPointId implements ManifoldPointId {
@@ -42,6 +42,23 @@ public class IndexedManifoldPointId implements ManifoldPointId {
 	
 	/** Whether the reference and incident features flipped */
 	protected boolean flipped;
+	
+	/**
+	 * Default constructor.
+	 * @since 3.1.5
+	 */
+	public IndexedManifoldPointId() {}
+	
+	/**
+	 * Optional constructor.
+	 * @param referenceEdge the reference edge index
+	 * @param incidentEdge the incident edge index
+	 * @param incidentVertex the incident vertex index
+	 * @since 3.1.5
+	 */
+	public IndexedManifoldPointId(int referenceEdge, int incidentEdge, int incidentVertex) {
+		this(referenceEdge, incidentEdge, incidentVertex, false);
+	}
 	
 	/**
 	 * Full constructor.
@@ -107,7 +124,7 @@ public class IndexedManifoldPointId implements ManifoldPointId {
 	 * @return int
 	 */
 	public int getReferenceEdge() {
-		return referenceEdge;
+		return this.referenceEdge;
 	}
 	
 	/**
@@ -115,7 +132,7 @@ public class IndexedManifoldPointId implements ManifoldPointId {
 	 * @return int
 	 */
 	public int getIncidentEdge() {
-		return incidentEdge;
+		return this.incidentEdge;
 	}
 	
 	/**
@@ -123,7 +140,7 @@ public class IndexedManifoldPointId implements ManifoldPointId {
 	 * @return int
 	 */
 	public int getIncidentVertex() {
-		return incidentVertex;
+		return this.incidentVertex;
 	}
 	
 	/**
@@ -134,6 +151,6 @@ public class IndexedManifoldPointId implements ManifoldPointId {
 	 * @since 3.0.2
 	 */
 	public boolean isFlipped() {
-		return flipped;
+		return this.flipped;
 	}
 }

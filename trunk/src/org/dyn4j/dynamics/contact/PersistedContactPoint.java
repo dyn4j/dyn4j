@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ import org.dyn4j.geometry.Vector2;
  * Represents a persisted contact point.
  * @author William Bittle
  * @see ContactPoint
- * @version 3.1.2
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class PersistedContactPoint extends ContactPoint {
@@ -110,7 +110,7 @@ public class PersistedContactPoint extends ContactPoint {
 	 * @return {@link Vector2}
 	 */
 	public Vector2 getOldPoint() {
-		return oldPoint;
+		return this.oldPoint;
 	}
 	
 	/**
@@ -118,7 +118,7 @@ public class PersistedContactPoint extends ContactPoint {
 	 * @return {@link Vector2}
 	 */
 	public Vector2 getOldNormal() {
-		return oldNormal;
+		return this.oldNormal;
 	}
 	
 	/**
@@ -126,6 +126,6 @@ public class PersistedContactPoint extends ContactPoint {
 	 * @return double
 	 */
 	public double getOldDepth() {
-		return oldDepth;
+		return this.oldDepth;
 	}
 }

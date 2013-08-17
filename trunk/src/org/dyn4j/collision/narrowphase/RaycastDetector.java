@@ -49,9 +49,9 @@ public interface RaycastDetector {
 	 * @param ray the {@link Ray}
 	 * @param maxLength the maximum length of the ray; 0 for infinite length
 	 * @param convex the {@link Convex} {@link Shape}
-	 * @param t the {@link Convex} {@link Shape}'s {@link Transform}
+	 * @param transform the {@link Convex} {@link Shape}'s {@link Transform}
 	 * @param raycast the ray cast result
 	 * @return boolean true if the {@link Ray} passes through the {@link Convex} {@link Shape}
 	 */
-	public abstract boolean raycast(Ray ray, double maxLength, Convex convex, Transform t, Raycast raycast);
+	public abstract boolean raycast(Ray ray, double maxLength, Convex convex, Transform transform, Raycast raycast);
 }

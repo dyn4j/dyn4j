@@ -234,7 +234,7 @@ public class ConservativeAdvancementTest {
 		
 		// test the final transform the body should be at before the collision
 		Transform tx1 = t1.lerped(dp1, 0.0, toi.getTime());
-		TestCase.assertEquals(0.798, tx1.getTranslationX(), 1.0e-3);
+		TestCase.assertEquals(0.800, tx1.getTranslationX(), 1.0e-3);
 		TestCase.assertEquals(1.500, tx1.getTranslationY(), 1.0e-3);
 		Transform tx2 = t2.lerped(dp2, 0.0, toi.getTime());
 		TestCase.assertEquals(1.000, tx2.getTranslationX(), 1.0e-3);
@@ -430,9 +430,9 @@ public class ConservativeAdvancementTest {
 		Transform tx1f = t1.lerped(dp1, da1, toi.getTime());
 		
 		// make sure the time of impact is small in this case
-		TestCase.assertEquals(0.037, toi.getTime(), 1.0e-3);
+		TestCase.assertEquals(0.039, toi.getTime(), 1.0e-3);
 		// the rotation shouldn't be much more than -40
-		TestCase.assertEquals(-0.645, tx1f.getRotation(), 1.0e-3);
+		TestCase.assertEquals(-0.643, tx1f.getRotation(), 1.0e-3);
 	}
 	
 	/**

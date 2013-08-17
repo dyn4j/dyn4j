@@ -52,6 +52,9 @@ public abstract class AbstractFallbackCondition implements FallbackCondition, Co
 		return this.getSortIndex() - o.getSortIndex();
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.narrowphase.FallbackCondition#getSortIndex()
+	 */
 	@Override
 	public int getSortIndex() {
 		return this.sortIndex;
