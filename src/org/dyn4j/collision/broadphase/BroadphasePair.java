@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,15 +32,15 @@ import org.dyn4j.geometry.Convex;
  * colliding in the {@link BroadphaseDetector}.
  * @author William Bittle
  * @param <E> the object type; intended to be of type {@link Collidable} or {@link Convex}
- * @version 3.0.2
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class BroadphasePair<E> {
 	/** The first object */
-	public E a;
+	protected E a;
 	
 	/** The second object */
-	public E b;
+	protected E b;
 	
 	/**
 	 * Default constructor.
@@ -67,5 +67,41 @@ public class BroadphasePair<E> {
 		.append("|B=").append(this.b)
 		.append("]");
 		return sb.toString();
+	}
+
+	/**
+	 * Returns the first object.
+	 * @return E
+	 * @since 3.1.5
+	 */
+	public E getA() {
+		return this.a;
+	}
+
+	/**
+	 * Sets the first object.
+	 * @param a the first object
+	 * @since 3.1.5
+	 */
+	public void setA(E a) {
+		this.a = a;
+	}
+
+	/**
+	 * Returns the second object.
+	 * @return E
+	 * @since 3.1.5
+	 */
+	public E getB() {
+		return this.b;
+	}
+
+	/**
+	 * Sets the second object.
+	 * @param b the second object
+	 * @since 3.1.5
+	 */
+	public void setB(E b) {
+		this.b = b;
 	}
 }

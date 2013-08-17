@@ -357,9 +357,9 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 				// have to do full overlap test since the list is not sorted
 				if (current.proxy.aabb.overlaps(test.aabb)) {
 					// add to the colliding list
-					BroadphasePair<E> pair = new BroadphasePair<E>();
-					pair.a = current.proxy.collidable;
-					pair.b = test.collidable;
+					BroadphasePair<E> pair = new BroadphasePair<E>(
+							current.proxy.collidable,	// A
+							test.collidable);			// B
 					pairs.add(pair);
 				}
 			}

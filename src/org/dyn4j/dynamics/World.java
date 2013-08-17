@@ -106,7 +106,7 @@ public class World {
 	/** The world {@link Bounds} */
 	protected Bounds bounds;
 	
-	// algos
+	// algorithms
 	
 	/** The {@link BroadphaseDetector} */
 	protected BroadphaseDetector<Body> broadphaseDetector;
@@ -583,8 +583,8 @@ public class World {
 				BroadphasePair<Body> pair = pairs.get(i);
 				
 				// get the bodies
-				Body body1 = pair.a;
-				Body body2 = pair.b;
+				Body body1 = pair.getA();
+				Body body2 = pair.getB();
 				
 				// inactive objects don't have collision detection/response
 				if (!body1.isActive() || !body2.isActive()) continue;
@@ -2198,7 +2198,7 @@ public class World {
 	}
 	
 	/**
-	 * Adds the listeners of the given type to the given list.
+	 * Returns the listeners of the given type (or sub types) in the given list.
 	 * <p>
 	 * This method does <b>not</b> clear the given listeners list before
 	 * adding the listeners.
@@ -2496,7 +2496,7 @@ public class World {
 	 * @since 1.0.2
 	 */
 	public ContactManager getContactManager() {
-		return contactManager;
+		return this.contactManager;
 	}
 	
 	/**
@@ -2533,6 +2533,17 @@ public class World {
 	}
 	
 	/**
+	 * Returns a new list containing all the bodies in this world.
+	 * @return List&lt;{@link Body}&gt;
+	 * @since 3.1.5
+	 */
+	public List<Body> getBodies() {
+		List<Body> bodies = new ArrayList<Body>(this.bodies.size());
+		bodies.addAll(this.bodies);
+		return bodies;
+	}
+	
+	/**
 	 * Returns the number of {@link Joint}s in this {@link World}.
 	 * @return int the number of joints
 	 */
@@ -2547,6 +2558,17 @@ public class World {
 	 */
 	public Joint getJoint(int index) {
 		return this.joints.get(index);
+	}
+	
+	/**
+	 * Returns a new list containing all the joints in this world.
+	 * @return List&lt;{@link Joint}&gt;
+	 * @since 3.1.5
+	 */
+	public List<Joint> getJoints() {
+		List<Joint> joints = new ArrayList<Joint>(this.joints.size());
+		joints.addAll(this.joints);
+		return joints;
 	}
 	
 	/**

@@ -127,6 +127,14 @@ public class CollidableTest implements Collidable, Transformable {
 	}
 
 	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.Collidable#getFixtures()
+	 */
+	@Override
+	public List<BodyFixture> getFixtures() {
+		return this.fixtures;
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.Collidable#getTransform()
 	 */
 	@Override

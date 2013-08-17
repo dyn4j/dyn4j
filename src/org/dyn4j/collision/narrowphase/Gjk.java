@@ -124,7 +124,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	protected static final Vector2 ORIGIN = new Vector2();
 	
 	/** The default {@link Gjk} maximum iterations */
-	public static final int DEFAULT_MAX_ITERATIONS = 100;
+	public static final int DEFAULT_MAX_ITERATIONS = 30;
 	
 	/** The default {@link Gjk} distance epsilon in meters; near 1E-8 */
 	public static final double DEFAULT_DISTANCE_EPSILON = Math.sqrt(Epsilon.E);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,7 @@
  */
 package org.dyn4j.collision;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.dyn4j.geometry.AABB;
@@ -33,7 +34,7 @@ import org.dyn4j.geometry.Transformable;
 /**
  * Represents an object that can collide with other objects.
  * @author William Bittle
- * @version 3.1.4
+ * @version 3.1.5
  * @since 1.0.0
  */
 public interface Collidable extends Transformable {
@@ -73,6 +74,13 @@ public interface Collidable extends Transformable {
 	 * @since 2.0.0
 	 */
 	public abstract int getFixtureCount();
+	
+	/**
+	 * Returns a new list containing the fixtures attached to this {@link Collidable}.
+	 * @return List&lt;? extends {@link Fixture}&gt;
+	 * @since 3.1.5
+	 */
+	public abstract List<? extends Fixture> getFixtures();
 	
 	/**
 	 * Returns the {@link Transform} of the object.

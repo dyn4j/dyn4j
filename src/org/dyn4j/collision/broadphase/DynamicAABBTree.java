@@ -352,11 +352,11 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 			// non-leaf nodes always have a left child
 			if (root.left == null) {
 				// its a leaf so add the pair
-				BroadphasePair<E> p = new BroadphasePair<E>();
-				p.a = node.collidable;
-				p.b = root.collidable;
+				BroadphasePair<E> pair = new BroadphasePair<E>(
+						node.collidable,	// A
+						root.collidable);	// B
 				// add the pair to the list of pairs
-				pairs.add(p);
+				pairs.add(pair);
 				// return and check other limbs
 				return;
 			}
@@ -391,11 +391,11 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 					// itself
 					if (!n.tested && n.collidable != node.collidable) {
 						// its a leaf so add the pair
-						BroadphasePair<E> p = new BroadphasePair<E>();
-						p.a = node.collidable;
-						p.b = n.collidable;
+						BroadphasePair<E> pair = new BroadphasePair<E>(
+								node.collidable,	// A
+								n.collidable);		// B
 						// add the pair to the list of pairs
-						pairs.add(p);
+						pairs.add(pair);
 					}
 					// if its a leaf node then we need to go back up the
 					// tree and test nodes we haven't yet

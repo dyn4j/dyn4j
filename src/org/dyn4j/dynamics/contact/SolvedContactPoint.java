@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2013 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ import org.dyn4j.geometry.Vector2;
  * Represents a solved contact point.
  * @author William Bittle
  * @see ContactPoint
- * @version 3.1.2
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class SolvedContactPoint extends ContactPoint {
@@ -103,7 +103,7 @@ public class SolvedContactPoint extends ContactPoint {
 	 * @return double
 	 */
 	public double getNormalImpulse() {
-		return normalImpulse;
+		return this.normalImpulse;
 	}
 	
 	/**
@@ -111,6 +111,6 @@ public class SolvedContactPoint extends ContactPoint {
 	 * @return double
 	 */
 	public double getTangentialImpulse() {
-		return tangentialImpulse;
+		return this.tangentialImpulse;
 	}
 }
