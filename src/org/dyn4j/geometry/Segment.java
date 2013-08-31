@@ -168,12 +168,26 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	    // create the point on the line
 	    return line.multiply(t).add(linePoint1);
 	}
+
+	/**
+	 * Returns the point on the <b>line</b> that this {@link Segment} 
+	 * defines closest to the given point.
+	 * <p>
+	 * This method works in this {@link Segment}'s local space.
+	 * @param point the local space point
+	 * @return {@link Vector2}
+	 * @since 3.1.5
+	 * @see #getPointOnLineClosestToPoint(Vector2, Vector2, Vector2)
+	 */
+	public Vector2 getPointOnLineClosestToPoint(Vector2 point) {
+		return Segment.getPointOnLineClosestToPoint(point, this.vertices[0], this.vertices[1]);
+	}
 	
 	/**
-	 * Returns the point on this line segment closest to the given point.
+	 * Returns the point on the given line segment closest to the given point.
 	 * <p>
-	 * If the point closest to the given point on the line created by this
-	 * line segment is not on the line segment then either of the segments
+	 * If the point closest to the given point is on the line created by the
+	 * given line segment, but is not on the line segment then either of the segments
 	 * end points will be returned.
 	 * <p>
 	 * Assumes all points are in world space.
@@ -200,6 +214,19 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 	    t = Interval.clamp(t, 0.0, 1.0);
 	    // create the point on the line
 	    return line.multiply(t).add(linePoint1);
+	}
+	
+	/**
+	 * Returns the point on this {@link Segment} closest to the given point.
+	 * <p>
+	 * This method works in this {@link Segment}'s local space.
+	 * @param point the local space point
+	 * @return {@link Vector2}
+	 * @since 3.1.5
+	 * @see #getPointOnSegmentClosestToPoint(Vector2, Vector2, Vector2)
+	 */
+	public Vector2 getPointOnSegmentClosestToPoint(Vector2 point) {
+		return Segment.getPointOnSegmentClosestToPoint(point, this.vertices[0], this.vertices[1]);
 	}
 	
 	/**
@@ -260,6 +287,24 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 		double tb = ambxA / BxA;
 		// compute the intersection point
 		return B.product(tb).add(bp1);
+	}
+	
+	/**
+	 * Returns the line intersection of the given {@link Segment} and this {@link Segment}.
+	 * <p>
+	 * This method treats this segment and the given segment as defining <b>lines</b> rather than segments.
+	 * <p>
+	 * This method assumes that both this and the given segment are in the same space (either
+	 * local or world space).
+	 * <p>
+	 * If the lines are parallel or coincident, null is returned.
+	 * @param segment the other segment
+	 * @return {@link Vector2}
+	 * @since 3.1.5
+	 * @see #getLineIntersection(Vector2, Vector2, Vector2, Vector2)
+	 */
+	public Vector2 getLineIntersection(Segment segment) {
+		return Segment.getLineIntersection(this.vertices[0], this.vertices[1], segment.vertices[0], segment.vertices[1]);
 	}
 	
 	/**
@@ -328,6 +373,22 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 		
 		// compute the intersection point
 		return B.product(tb).add(bp1);
+	}
+
+	/**
+	 * Returns the intersection of the given {@link Segment} and this {@link Segment}.
+	 * <p>
+	 * This method assumes that both this and the given segment are in the same space (either
+	 * local or world space).
+	 * <p>
+	 * If the segments do not intersect, are parallel, or are coincident, null is returned.
+	 * @param segment the other segment
+	 * @return {@link Vector2}
+	 * @since 3.1.5
+	 * @see #getSegmentIntersection(Vector2, Vector2, Vector2, Vector2)
+	 */
+	public Vector2 getSegmentIntersection(Segment segment) {
+		return Segment.getSegmentIntersection(this.vertices[0], this.vertices[1], segment.vertices[0], segment.vertices[1]);
 	}
 	
 	/**

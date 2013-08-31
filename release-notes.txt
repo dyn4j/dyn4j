@@ -17,6 +17,10 @@ New Features:
     primary. This is useful when you want to use the SAT algorithm with the
     ellipse or half ellipse shapes (fallback to GJK on these types). See the
     SingleTypedFallbackCondition and PairwiseTypedFallbackCondition classes.
+  - Added equivalent instance methods for common Segment and line operations
+    to the Segment class.
+  - Added a couple of methods to do a fast radial expansion of a polygon.
+  - Added scaling operations to the Geometry class.
     
 Bug Fixes:
   - Fixed a bug in the Vector2.getAngleBetween method where it would return

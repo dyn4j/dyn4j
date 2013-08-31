@@ -1380,4 +1380,201 @@ public class Geometry {
 		}
 		return new Polygon(nv);
 	}
+	
+	/**
+	 * Performs the Minkowski Sum of the given {@link Polygon} and {@link Circle}.
+	 * <p>
+	 * Use the count parameter to specify the number of vertices to use per round corner.
+	 * <p>
+	 * If the given polygon has <i>n</i> number of vertices, the returned polygon will have 
+	 * <i>n * 2 + n * count</i> number of vertices.
+	 * <p>
+	 * This method is O(n) where n is the number of vertices in the given polygon.
+	 * @param polygon the polygon
+	 * @param circle the circle to add to the polygon
+	 * @param count the number of vertices to add for each rounded corner; must be greater than zero
+	 * @return {@link Polygon}
+	 * @throws NullPointerException if the given polygon is null
+	 * @throws IllegalArgumentException if the given radius or count is less than or equal to zero
+	 * @since 3.1.5
+	 * @see #minkowskiSum(Polygon, double, int)
+	 */
+	public static final Polygon minkowskiSum(Polygon polygon, Circle circle, int count) {
+		if (circle == null) throw new NullPointerException(Messages.getString("geometry.nullMinkowskiSumCircle"));
+		return Geometry.minkowskiSum(polygon, circle.radius, count);
+	}
+	
+	/**
+	 * Returns a new polygon that has been radially expanded.  This is equivalent to the Minkowski sum of
+	 * a circle, of the given radius, and the given polygon.
+	 * <p>
+	 * Use the count parameter to specify the number of vertices to use per round corner.
+	 * <p>
+	 * If the given polygon has <i>n</i> number of vertices, the returned polygon will have 
+	 * <i>n * 2 + n * count</i> number of vertices.
+	 * <p>
+	 * This method is O(n) where n is the number of vertices in the given polygon.
+	 * @param polygon the polygon to expand radially
+	 * @param radius the radial expansion; must be greater than zero
+	 * @param count the number of vertices to add for each rounded corner; must be greater than zero
+	 * @return {@link Polygon}
+	 * @throws NullPointerException if the given polygon is null
+	 * @throws IllegalArgumentException if the given radius or count is less than or equal to zero
+	 * @since 3.1.5
+	 */
+	public static final Polygon minkowskiSum(Polygon polygon, double radius, int count) {
+		// check for valid input
+		if (polygon == null) throw new NullPointerException(Messages.getString("geometry.nullMinkowskiSumPolygon"));
+		if (radius <= 0) throw new IllegalArgumentException(Messages.getString("geometry.invalidMinkowskiSumRadius"));
+		if (count <= 0) throw new IllegalArgumentException(Messages.getString("geometry.invalidMinkowskiSumCount"));
+		
+		Vector2[] vertices = polygon.vertices;
+		Vector2[] normals = polygon.normals;
+		int size = vertices.length;
+		
+		Vector2[] nVerts = new Vector2[size * 2 + size * count];
+		// perform the expansion
+		int j = 0;
+		for (int i = 0; i < size; i++) {
+			Vector2 v1 = vertices[i];
+			Vector2 v2 = vertices[i + 1 == size ? 0 : i + 1];
+			Vector2 normal = normals[i];
+			Vector2 nv1 = normal.product(radius).add(v1); 
+			Vector2 nv2 = normal.product(radius).add(v2);
+			
+			// generate the previous polygonal arc with count vertices
+			// compute (circular) angle between the edges
+			Vector2 cv1 = null;
+			if (i == 0) {
+				// if its the first iteration, then we need to compute the
+				// last vertex's new position
+				Vector2 tn = normals[size - 1];
+				cv1 = v1.to(tn.product(radius).add(v1));
+			} else {
+				cv1 = v1.to(nVerts[j - 1]);
+			}
+			Vector2 cv2 = v1.to(nv1);
+			final double theta = cv1.getAngleBetween(cv2);
+			// compute the angular increment
+			final double pin = theta / (count + 1);
+			
+			final double c = Math.cos(pin);
+			final double s = Math.sin(pin);
+			double t = 0;
+
+			// compute the start theta
+			double sTheta = Vector2.X_AXIS.getAngleBetween(normals[i - 1 < 0 ? size - 1 : i - 1]);
+			if (sTheta < 0) {
+				sTheta += Geometry.TWO_PI;
+			}
+			
+			// initialize at minus theta
+			double x = radius * Math.cos(sTheta);
+			double y = radius * Math.sin(sTheta);
+			
+			for(int k = 0; k < count; k++) {
+				//apply the rotation matrix
+				t = x;
+				x = c * x - s * y;
+				y = s * t + c * y;
+				// add a point
+				nVerts[j++] = new Vector2(x, y).add(v1);
+			}
+			
+			nVerts[j++] = nv1;
+			nVerts[j++] = nv2;
+		}
+		
+		return new Polygon(nVerts);
+	}
+	
+	/**
+	 * Returns a scaled version of the given circle.
+	 * @param circle the circle
+	 * @param scale the scale; must be greater than zero
+	 * @return {@link Circle}
+	 * @since 3.1.5
+	 */
+	public static final Circle scale(Circle circle, double scale) {
+		return new Circle(circle.radius * scale);
+	}
+	
+	/**
+	 * Returns a scaled version of the given capsule.
+	 * @param capsule the capsule
+	 * @param scale the scale; must be greater than zero
+	 * @return {@link Capsule}
+	 * @since 3.1.5
+	 */
+	public static final Capsule scale(Capsule capsule, double scale) {
+		return new Capsule(capsule.length * scale, capsule.capRadius * scale);
+	}
+	
+	/**
+	 * Returns a scaled version of the given ellipse.
+	 * @param ellipse the ellipse
+	 * @param scale the scale; must be greater than zero
+	 * @return {@link Ellipse}
+	 * @since 3.1.5
+	 */
+	public static final Ellipse scale(Ellipse ellipse, double scale) {
+		return new Ellipse(ellipse.width * scale, ellipse.height * scale);
+	}
+
+	/**
+	 * Returns a scaled version of the given half-ellipse.
+	 * @param halfEllipse the half-ellipse
+	 * @param scale the scale; must be greater than zero
+	 * @return {@link HalfEllipse}
+	 * @since 3.1.5
+	 */
+	public static final HalfEllipse scale(HalfEllipse halfEllipse, double scale) {
+		return new HalfEllipse(halfEllipse.width * scale, halfEllipse.height * scale);
+	}
+	
+	/**
+	 * Returns a scaled version of the given slice.
+	 * @param slice the slice
+	 * @param scale the scale; must be greater than zero
+	 * @return {@link Slice}
+	 * @since 3.1.5
+	 */
+	public static final Slice scale(Slice slice, double scale) {
+		return new Slice(slice.radius * scale, slice.theta);
+	}
+	
+	/**
+	 * Returns a scaled version of the given polygon.
+	 * @param polygon the polygon
+	 * @param scale the scale; must be greater than zero
+	 * @return {@link Polygon}
+	 * @since 3.1.5
+	 */
+	public static final Polygon scale(Polygon polygon, double scale) {
+		Vector2[] oVertices = polygon.vertices;
+		int size = oVertices.length;
+		
+		Vector2[] vertices = new Vector2[size];
+		Vector2 center = polygon.center;
+		for (int i = 0; i < size; i++) {
+			vertices[i] = center.to(oVertices[i]).multiply(scale).add(center);
+		}
+		
+		return new Polygon(vertices);
+	}
+	
+	/**
+	 * Returns a scaled version of the given segment.
+	 * @param segment the segment
+	 * @param scale the scale; must be greater than zero
+	 * @return {@link Segment}
+	 * @since 3.1.5
+	 */
+	public static final Segment scale(Segment segment, double scale) {
+		final double length = segment.getLength() * scale * 0.5;
+		Vector2 n = segment.vertices[0].to(segment.vertices[1]);
+		n.normalize();
+		n.multiply(length);
+		return new Segment(segment.center.sum(n.x, n.y), segment.center.difference(n.x, n.y));
+	}
 }
