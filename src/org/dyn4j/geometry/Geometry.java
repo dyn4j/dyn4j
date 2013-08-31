@@ -1394,7 +1394,7 @@ public class Geometry {
 	 * @param circle the circle to add to the polygon
 	 * @param count the number of vertices to add for each rounded corner; must be greater than zero
 	 * @return {@link Polygon}
-	 * @throws NullPointerException if the given polygon is null
+	 * @throws NullPointerException if the given polygon or circle is null
 	 * @throws IllegalArgumentException if the given radius or count is less than or equal to zero
 	 * @since 3.1.5
 	 * @see #minkowskiSum(Polygon, double, int)
@@ -1493,9 +1493,13 @@ public class Geometry {
 	 * @param circle the circle
 	 * @param scale the scale; must be greater than zero
 	 * @return {@link Circle}
+	 * @throws NullPointerException if the given circle is null
+	 * @throws IllegalArgumentException if the given scale is less than or equal to zero
 	 * @since 3.1.5
 	 */
 	public static final Circle scale(Circle circle, double scale) {
+		if (circle == null) throw new NullPointerException(Messages.getString("geometry.nullShape"));
+		if (scale <= 0) throw new IllegalArgumentException(Messages.getString("geometry.invalidScale"));
 		return new Circle(circle.radius * scale);
 	}
 	
@@ -1504,10 +1508,14 @@ public class Geometry {
 	 * @param capsule the capsule
 	 * @param scale the scale; must be greater than zero
 	 * @return {@link Capsule}
+	 * @throws NullPointerException if the given capsule is null
+	 * @throws IllegalArgumentException if the given scale is less than or equal to zero
 	 * @since 3.1.5
 	 */
 	public static final Capsule scale(Capsule capsule, double scale) {
-		return new Capsule(capsule.length * scale, capsule.capRadius * scale);
+		if (capsule == null) throw new NullPointerException(Messages.getString("geometry.nullShape"));
+		if (scale <= 0) throw new IllegalArgumentException(Messages.getString("geometry.invalidScale"));
+		return new Capsule(capsule.length * scale, capsule.capRadius * 2.0 * scale);
 	}
 	
 	/**
@@ -1515,9 +1523,13 @@ public class Geometry {
 	 * @param ellipse the ellipse
 	 * @param scale the scale; must be greater than zero
 	 * @return {@link Ellipse}
+	 * @throws NullPointerException if the given ellipse is null
+	 * @throws IllegalArgumentException if the given scale is less than or equal to zero
 	 * @since 3.1.5
 	 */
 	public static final Ellipse scale(Ellipse ellipse, double scale) {
+		if (ellipse == null) throw new NullPointerException(Messages.getString("geometry.nullShape"));
+		if (scale <= 0) throw new IllegalArgumentException(Messages.getString("geometry.invalidScale"));
 		return new Ellipse(ellipse.width * scale, ellipse.height * scale);
 	}
 
@@ -1526,9 +1538,13 @@ public class Geometry {
 	 * @param halfEllipse the half-ellipse
 	 * @param scale the scale; must be greater than zero
 	 * @return {@link HalfEllipse}
+	 * @throws NullPointerException if the given half-ellipse is null
+	 * @throws IllegalArgumentException if the given scale is less than or equal to zero
 	 * @since 3.1.5
 	 */
 	public static final HalfEllipse scale(HalfEllipse halfEllipse, double scale) {
+		if (halfEllipse == null) throw new NullPointerException(Messages.getString("geometry.nullShape"));
+		if (scale <= 0) throw new IllegalArgumentException(Messages.getString("geometry.invalidScale"));
 		return new HalfEllipse(halfEllipse.width * scale, halfEllipse.height * scale);
 	}
 	
@@ -1537,10 +1553,14 @@ public class Geometry {
 	 * @param slice the slice
 	 * @param scale the scale; must be greater than zero
 	 * @return {@link Slice}
+	 * @throws NullPointerException if the given slice is null
+	 * @throws IllegalArgumentException if the given scale is less than or equal to zero
 	 * @since 3.1.5
 	 */
 	public static final Slice scale(Slice slice, double scale) {
-		return new Slice(slice.radius * scale, slice.theta);
+		if (slice == null) throw new NullPointerException(Messages.getString("geometry.nullShape"));
+		if (scale <= 0) throw new IllegalArgumentException(Messages.getString("geometry.invalidScale"));
+		return new Slice(slice.sliceRadius * scale, slice.theta);
 	}
 	
 	/**
@@ -1548,9 +1568,14 @@ public class Geometry {
 	 * @param polygon the polygon
 	 * @param scale the scale; must be greater than zero
 	 * @return {@link Polygon}
+	 * @throws NullPointerException if the given polygon is null
+	 * @throws IllegalArgumentException if the given scale is less than or equal to zero
 	 * @since 3.1.5
 	 */
 	public static final Polygon scale(Polygon polygon, double scale) {
+		if (polygon == null) throw new NullPointerException(Messages.getString("geometry.nullShape"));
+		if (scale <= 0) throw new IllegalArgumentException(Messages.getString("geometry.invalidScale"));
+		
 		Vector2[] oVertices = polygon.vertices;
 		int size = oVertices.length;
 		
@@ -1568,9 +1593,14 @@ public class Geometry {
 	 * @param segment the segment
 	 * @param scale the scale; must be greater than zero
 	 * @return {@link Segment}
+	 * @throws NullPointerException if the given segment is null
+	 * @throws IllegalArgumentException if the given scale is less than or equal to zero
 	 * @since 3.1.5
 	 */
 	public static final Segment scale(Segment segment, double scale) {
+		if (segment == null) throw new NullPointerException(Messages.getString("geometry.nullShape"));
+		if (scale <= 0) throw new IllegalArgumentException(Messages.getString("geometry.invalidScale"));
+		
 		final double length = segment.getLength() * scale * 0.5;
 		Vector2 n = segment.vertices[0].to(segment.vertices[1]);
 		n.normalize();

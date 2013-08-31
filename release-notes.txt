@@ -21,6 +21,8 @@ New Features:
     to the Segment class.
   - Added a couple of methods to do a fast radial expansion of a polygon.
   - Added scaling operations to the Geometry class.
+  - Added Convex Casting to the World class.  This also included a rework
+    of the Time of Impact and CCD code.
     
 Bug Fixes:
   - Fixed a bug in the Vector2.getAngleBetween method where it would return
@@ -36,11 +38,15 @@ Deprecated:
     Body.setLinearVelocity and Body.getLinearVelocity respectively.
 
 Breaking Changes:
+  - The addition of convex casting caused an overhaul of the Time of Impact
+    and CCD code.  This could have breaking changes if you were hooking
+    directly into any of this functionality.
     
 Other:
   - Many more JUnit tests.
   - Updated license dates to be consistent.
-  - Removed the TestBed code.
+  - Removed the TestBed code.  You can always go get it from any version
+    tagged 3.1.4 or lower under the tags folder in SVN.
 
 ===============================================================================
 Version 3.1.4
