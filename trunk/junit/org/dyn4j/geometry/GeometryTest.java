@@ -1473,4 +1473,273 @@ public class GeometryTest {
 		// it should use the center
 		Geometry.flip(Geometry.createSquare(1.0), new Vector2(1.0, 1.0),  null);
 	}
+	
+	/**
+	 * Test the minkowski sum method.
+	 * @since 3.1.5
+	 */
+	@Test
+	public void minkowskiSum() {
+		// verify the generation of the polygon works
+		Polygon p = Geometry.minkowskiSum(Geometry.createUnitCirclePolygon(5, 0.5), Geometry.createCircle(0.2), 3);
+		// verify the new vertex count
+		TestCase.assertEquals(25, p.vertices.length);
+		
+		// verify the generation of the polygon works
+		p = Geometry.minkowskiSum(Geometry.createUnitCirclePolygon(5, 0.5), 0.2, 3);
+		// verify the new vertex count
+		TestCase.assertEquals(25, p.vertices.length);
+	}
+	
+	/**
+	 * Test the minkowski sum method given a null shape.
+	 * @since 3.1.5
+	 */
+	@Test(expected = NullPointerException.class)
+	public void minkowskiSumNullShape1() {
+		Geometry.minkowskiSum(null, Geometry.createCircle(0.2), 3);
+	}
+	
+	/**
+	 * Test the minkowski sum method given a null shape.
+	 * @since 3.1.5
+	 */
+	@Test(expected = NullPointerException.class)
+	public void minkowskiSumNullShape2() {
+		Geometry.minkowskiSum(Geometry.createUnitCirclePolygon(5, 0.5), null, 3);
+	}
+	
+	/**
+	 * Test the minkowski sum method given a null shape.
+	 * @since 3.1.5
+	 */
+	@Test(expected = NullPointerException.class)
+	public void minkowskiSumNullShape3() {
+		Geometry.minkowskiSum(null, 0.2, 3);
+	}
+	
+	/**
+	 * Test the minkowski sum method given an invalid count.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void minkowskiSumInvalidCount1() {
+		Geometry.minkowskiSum(Geometry.createUnitCirclePolygon(5, 0.5), 0.2, 0);
+	}
+	
+	/**
+	 * Test the minkowski sum method given an invalid count.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void minkowskiSumInvalidCount2() {
+		Geometry.minkowskiSum(Geometry.createUnitCirclePolygon(5, 0.5), 0.2, -2);
+	}
+	
+	/**
+	 * Test the minkowski sum method given an invalid count.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void minkowskiSumInvalidCount3() {
+		Geometry.minkowskiSum(Geometry.createUnitCirclePolygon(5, 0.5), Geometry.createCircle(0.5), 0);
+	}
+	
+	/**
+	 * Test the minkowski sum method given an invalid count.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void minkowskiSumInvalidCount4() {
+		Geometry.minkowskiSum(Geometry.createUnitCirclePolygon(5, 0.5), Geometry.createCircle(0.5), -2);
+	}
+	
+	/**
+	 * Test the minkowski sum method given an invalid radius.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void minkowskiSumInvalidRadius1() {
+		Geometry.minkowskiSum(Geometry.createUnitCirclePolygon(5, 0.5), 0, 3);
+	}
+	
+	/**
+	 * Test the minkowski sum method given an invalid radius.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void minkowskiSumInvalidRadius2() {
+		Geometry.minkowskiSum(Geometry.createUnitCirclePolygon(5, 0.5), -2.0, 3);
+	}
+	
+	/**
+	 * Tests that the scale methods work as expected.
+	 * @since 3.1.5
+	 */
+	@Test
+	public void scale() {
+		Circle s1 = Geometry.scale(Geometry.createCircle(0.5), 2);
+		Capsule s2 = Geometry.scale(Geometry.createCapsule(1.0, 0.5), 2);
+		Ellipse s3 = Geometry.scale(Geometry.createEllipse(1.0, 0.5), 2);
+		HalfEllipse s4 = Geometry.scale(Geometry.createHalfEllipse(1.0, 0.25), 2);
+		Slice s5 = Geometry.scale(Geometry.createSlice(0.5, Math.toRadians(30)), 2);
+		Polygon s6 = Geometry.scale(Geometry.createUnitCirclePolygon(5, 0.5), 2);
+		Segment s7 = Geometry.scale(Geometry.createSegment(new Vector2(1.0, 0.0)), 2);
+		
+		TestCase.assertEquals(1.000, s1.radius, 1.0e-3);
+		TestCase.assertEquals(2.000, s2.length, 1.0e-3);
+		TestCase.assertEquals(1.000, s2.capRadius * 2.0, 1.0e-3);
+		TestCase.assertEquals(2.000, s3.width, 1.0e-3);
+		TestCase.assertEquals(1.000, s3.height, 1.0e-3);
+		TestCase.assertEquals(2.000, s4.width, 1.0e-3);
+		TestCase.assertEquals(0.500, s4.height, 1.0e-3);
+		TestCase.assertEquals(1.000, s5.sliceRadius, 1.0e-3);
+		TestCase.assertEquals(1.000, s6.radius, 1.0e-3);
+		TestCase.assertEquals(2.000, s7.length, 1.0e-3);
+		
+		s1 = Geometry.scale(Geometry.createCircle(0.5), 0.5);
+		s2 = Geometry.scale(Geometry.createCapsule(1.0, 0.5), 0.5);
+		s3 = Geometry.scale(Geometry.createEllipse(1.0, 0.5), 0.5);
+		s4 = Geometry.scale(Geometry.createHalfEllipse(1.0, 0.25), 0.5);
+		s5 = Geometry.scale(Geometry.createSlice(0.5, Math.toRadians(30)), 0.5);
+		s6 = Geometry.scale(Geometry.createUnitCirclePolygon(5, 0.5), 0.5);
+		s7 = Geometry.scale(Geometry.createSegment(new Vector2(1.0, 0.0)), 0.5);
+		
+		TestCase.assertEquals(0.250, s1.radius, 1.0e-3);
+		TestCase.assertEquals(0.500, s2.length, 1.0e-3);
+		TestCase.assertEquals(0.250, s2.capRadius * 2.0, 1.0e-3);
+		TestCase.assertEquals(0.500, s3.width, 1.0e-3);
+		TestCase.assertEquals(0.250, s3.height, 1.0e-3);
+		TestCase.assertEquals(0.500, s4.width, 1.0e-3);
+		TestCase.assertEquals(0.125, s4.height, 1.0e-3);
+		TestCase.assertEquals(0.250, s5.sliceRadius, 1.0e-3);
+		TestCase.assertEquals(0.250, s6.radius, 1.0e-3);
+		TestCase.assertEquals(0.500, s7.length, 1.0e-3);
+	}
+	
+	/**
+	 * Tests that the scale method fails if given a null shape.
+	 * @since 3.1.5
+	 */
+	@Test(expected = NullPointerException.class)
+	public void scaleNullCircle() {
+		Geometry.scale((Circle)null, 1.2);
+	}
+	
+	/**
+	 * Tests that the scale method fails if given a null shape.
+	 * @since 3.1.5
+	 */
+	@Test(expected = NullPointerException.class)
+	public void scaleNullCapsule() {
+		Geometry.scale((Capsule)null, 1.2);
+	}
+	
+	/**
+	 * Tests that the scale method fails if given a null shape.
+	 * @since 3.1.5
+	 */
+	@Test(expected = NullPointerException.class)
+	public void scaleNullEllipse() {
+		Geometry.scale((Ellipse)null, 1.2);
+	}
+	
+	/**
+	 * Tests that the scale method fails if given a null shape.
+	 * @since 3.1.5
+	 */
+	@Test(expected = NullPointerException.class)
+	public void scaleNullHalfEllipse() {
+		Geometry.scale((HalfEllipse)null, 1.2);
+	}
+	
+	/**
+	 * Tests that the scale method fails if given a null shape.
+	 * @since 3.1.5
+	 */
+	@Test(expected = NullPointerException.class)
+	public void scaleNullSlice() {
+		Geometry.scale((Slice)null, 1.2);
+	}
+	
+	/**
+	 * Tests that the scale method fails if given a null shape.
+	 * @since 3.1.5
+	 */
+	@Test(expected = NullPointerException.class)
+	public void scaleNullPolygon() {
+		Geometry.scale((Polygon)null, 1.2);
+	}
+	
+	/**
+	 * Tests that the scale method fails if given a null shape.
+	 * @since 3.1.5
+	 */
+	@Test(expected = NullPointerException.class)
+	public void scaleNullSegment() {
+		Geometry.scale((Segment)null, 1.2);
+	}
+	
+	/**
+	 * Tests that the scale method fails if given an invalid scale factor.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void scaleCircleInvalid() {
+		Geometry.scale(Geometry.createCircle(0.5), 0);
+	}
+	
+	/**
+	 * Tests that the scale method fails if given an invalid scale factor.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void scaleCapsuleInvalid() {
+		Geometry.scale(Geometry.createCapsule(1.0, 0.5), 0);
+	}
+	
+	/**
+	 * Tests that the scale method fails if given an invalid scale factor.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void scaleEllipseInvalid() {
+		Geometry.scale(Geometry.createEllipse(1.0, 0.5), 0);
+	}
+	
+	/**
+	 * Tests that the scale method fails if given an invalid scale factor.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void scaleHalfEllipseInvalid() {
+		Geometry.scale(Geometry.createHalfEllipse(1.0, 0.25), 0);
+	}
+	
+	/**
+	 * Tests that the scale method fails if given an invalid scale factor.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void scaleSliceInvalid() {
+		Geometry.scale(Geometry.createSlice(0.5, Math.toRadians(30)), 0);
+	}
+	
+	/**
+	 * Tests that the scale method fails if given an invalid scale factor.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void scalePolygonInvalid() {
+		Geometry.scale(Geometry.createUnitCirclePolygon(5, 0.5), 0);
+	}
+	
+	/**
+	 * Tests that the scale method fails if given an invalid scale factor.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void scaleSegmentInvalid() {
+		Geometry.scale(Geometry.createSegment(new Vector2(1.0, 1.0)), 0);
+	}
 }
