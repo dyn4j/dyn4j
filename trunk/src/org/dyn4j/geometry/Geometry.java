@@ -1382,6 +1382,125 @@ public class Geometry {
 	}
 	
 	/**
+	 * Returns the Minkowski Sum of the given convex shapes.
+	 * <p>
+	 * This method computes the Minkowski Sum in O(n + m) time where n and m are the number
+	 * of vertices of the first and second convex respectively.
+	 * <p>
+	 * This method accepts any {@link Convex} {@link Wound} shape which basically means
+	 * {@link Polygon}s or {@link Segment}s.
+	 * <p>
+	 * This method throws an IllegalArgumentException if two {@link Segment}s are supplied
+	 * that are colinear (in this case the resulting Minkowski Sum would be another segment
+	 * rather than a polygon).
+	 * @param convex1 the first convex
+	 * @param convex2 the second convex
+	 * @return {@link Polygon}
+	 * @throws NullPointerException if convex1 or convex2 are null
+	 * @throws IllegalArgumentException if both convex1 and convex2 are {@link Segment}s and are colinear
+	 * @since 3.1.5
+	 */
+	public static final <E extends Wound & Convex> Polygon minkowskiSum(E convex1, E convex2) {
+		if (convex1 == null) throw new NullPointerException(Messages.getString("geometry.nullMinkowskiSumConvex"));
+		if (convex2 == null) throw new NullPointerException(Messages.getString("geometry.nullMinkowskiSumConvex"));
+		
+		// check for two segments
+		if (convex1 instanceof Segment && convex2 instanceof Segment) {
+			// check if they are colinear
+			Vector2 s1 = convex1.vertices[0].to(convex1.vertices[1]);
+			Vector2 s2 = convex2.vertices[0].to(convex2.vertices[1]);
+			if (s1.cross(s2) <= Epsilon.E) {
+				throw new IllegalArgumentException(Messages.getString("geometry.invalidMinkowskiSumSegments"));
+			}
+		}
+		
+		Vector2[] p1v = convex1.vertices;
+		Vector2[] p2v = convex2.vertices;
+		int c1 = p1v.length;
+		int c2 = p2v.length;
+		
+		// find the minimum y-coordinate vertex in the first polygon
+		// (in the case of a tie, use the minimum x-coordinate vertex)
+		int i = 0, j = 0;
+		Vector2 min = new Vector2(Double.MAX_VALUE, Double.MAX_VALUE);
+		for (int k = 0; k < c1; k++) {
+			Vector2 v = p1v[k];
+			if (v.y < min.y) {
+				min.set(v);
+				i = k;
+			} else if (v.y == min.y) {
+				if (v.x < min.x) {
+					min.set(v);
+					i = k;
+				}
+			}
+		}
+		// find the minimum y-coordinate vertex in the second polygon
+		// (in the case of a tie, use the minimum x-coordinate vertex)
+		min.set(Double.MAX_VALUE, Double.MAX_VALUE);
+		for (int k = 0; k < c2; k++) {
+			Vector2 v = p2v[k];
+			if (v.y < min.y) {
+				min.set(v);
+				j = k;
+			} else if (v.y == min.y) {
+				if (v.x < min.x) {
+					min.set(v);
+					j = k;
+				}
+			}
+		}
+		
+		// iterate through the vertices
+		int n1 = c1 + i;
+		int n2 = c2 + j;
+		// the maximum number of vertices for the output shape is m + n
+		List<Vector2> sum = new ArrayList<Vector2>(c1 + c2);
+		for (; i <= n1 && j <= n2;) {
+			// get the current edges
+			Vector2 v1s = p1v[i % c1];
+			Vector2 v1e = p1v[(i + 1) % c1];
+			
+			Vector2 v2s = p2v[j % c2];
+			Vector2 v2e = p2v[(j + 1) % c2];
+			
+			// add the vertex to the final output
+			
+			// on the first iteration we can assume this is a correct
+			// one since we started at the minimum y-coordinate vertices
+			
+			// on subsequent interations we can assume this is a correct
+			// one since the angle condition was used to increment the
+			// vertex index
+			sum.add(v1s.sum(v2s));
+			
+			// compute the edge vectors
+			Vector2 e1 = v1s.to(v1e);
+			Vector2 e2 = v2s.to(v2e);
+			
+			// get the angles between the x-axis; in the range [-pi, pi]
+			double a1 = Vector2.X_AXIS.getAngleBetween(e1);
+			double a2 = Vector2.X_AXIS.getAngleBetween(e2);
+			
+			// put the angles in the range [0, 2pi]
+			if (a1 < 0) a1 += Geometry.TWO_PI;
+			if (a2 < 0) a2 += Geometry.TWO_PI;
+			
+			// determine which vertex to use next
+			if (a1 < a2) {
+				i++;
+			} else if (a1 > a2) {
+				j++;
+			} else {
+				i++;
+				j++;
+			}
+		}
+		
+		return new Polygon(sum.toArray(new Vector2[0]));
+	}
+	
+	/**
 	 * Performs the Minkowski Sum of the given {@link Polygon} and {@link Circle}.
 	 * <p>
 	 * Use the count parameter to specify the number of vertices to use per round corner.
