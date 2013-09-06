@@ -1489,6 +1489,45 @@ public class GeometryTest {
 		p = Geometry.minkowskiSum(Geometry.createUnitCirclePolygon(5, 0.5), 0.2, 3);
 		// verify the new vertex count
 		TestCase.assertEquals(25, p.vertices.length);
+		
+		// verify the generation of the polygon works
+		p = Geometry.minkowskiSum(Geometry.createSquare(1.0), Geometry.createUnitCirclePolygon(5, 0.2));
+		TestCase.assertEquals(8, p.vertices.length);
+		
+		// verify the generation of the polygon works
+		p = Geometry.minkowskiSum(Geometry.createSegment(new Vector2(1.0, 0.0)), Geometry.createUnitCirclePolygon(5, 0.2));
+		TestCase.assertEquals(5, p.vertices.length);
+		
+		// verify the generation of the polygon works
+		p = Geometry.minkowskiSum(Geometry.createSegment(new Vector2(1.0, 0.0)), Geometry.createSegment(new Vector2(0.5, 0.5)));
+		TestCase.assertEquals(4, p.vertices.length);
+	}
+	
+	/**
+	 * Test the minkowski sum method with invalid segments.
+	 * @since 3.1.5
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void minkowskiSumInvalidSegments() {
+		Geometry.minkowskiSum(Geometry.createSegment(new Vector2(1.0, 0.0)), Geometry.createSegment(new Vector2(-0.5, 0.0)));
+	}
+	
+	/**
+	 * Test the minkowski sum method given a null shape.
+	 * @since 3.1.5
+	 */
+	@Test(expected = NullPointerException.class)
+	public void minkowskiSumNullWound1() {
+		Geometry.minkowskiSum(null, Geometry.createUnitCirclePolygon(5, 0.5));
+	}
+	
+	/**
+	 * Test the minkowski sum method given a null shape.
+	 * @since 3.1.5
+	 */
+	@Test(expected = NullPointerException.class)
+	public void minkowskiSumNullWound2() {
+		Geometry.minkowskiSum(Geometry.createUnitCirclePolygon(5, 0.5), null);
 	}
 	
 	/**
