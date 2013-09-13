@@ -1518,6 +1518,28 @@ public class Geometry {
 	 * @since 3.1.5
 	 * @see #minkowskiSum(Polygon, double, int)
 	 */
+	public static final Polygon minkowskiSum(Circle circle, Polygon polygon, int count) {
+		return Geometry.minkowskiSum(polygon, circle, count);
+	}
+	
+	/**
+	 * Performs the Minkowski Sum of the given {@link Polygon} and {@link Circle}.
+	 * <p>
+	 * Use the count parameter to specify the number of vertices to use per round corner.
+	 * <p>
+	 * If the given polygon has <i>n</i> number of vertices, the returned polygon will have 
+	 * <i>n * 2 + n * count</i> number of vertices.
+	 * <p>
+	 * This method is O(n) where n is the number of vertices in the given polygon.
+	 * @param polygon the polygon
+	 * @param circle the circle to add to the polygon
+	 * @param count the number of vertices to add for each rounded corner; must be greater than zero
+	 * @return {@link Polygon}
+	 * @throws NullPointerException if the given polygon or circle is null
+	 * @throws IllegalArgumentException if the given radius or count is less than or equal to zero
+	 * @since 3.1.5
+	 * @see #minkowskiSum(Polygon, double, int)
+	 */
 	public static final Polygon minkowskiSum(Polygon polygon, Circle circle, int count) {
 		if (circle == null) throw new NullPointerException(Messages.getString("geometry.nullMinkowskiSumCircle"));
 		return Geometry.minkowskiSum(polygon, circle.radius, count);
