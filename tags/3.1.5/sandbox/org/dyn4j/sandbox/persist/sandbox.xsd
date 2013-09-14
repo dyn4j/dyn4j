@@ -1,0 +1,918 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0.4">
+	<xs:complexType name="Transform">
+		<xs:sequence>
+			<xs:element name="Translation" type="Vector" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Rotation" type="xs:double" nillable="false" maxOccurs="1" minOccurs="1" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="Vector">
+		<xs:attribute name="x" type="xs:double" use="required" />
+		<xs:attribute name="y" type="xs:double" use="required" />
+	</xs:complexType>
+
+	<xs:simpleType name="ColorComponent">
+		<xs:restriction base="xs:double">
+			<xs:minInclusive value="0.0"></xs:minInclusive>
+			<xs:maxInclusive value="1.0"></xs:maxInclusive>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="Color">
+		<xs:attribute name="r" type="ColorComponent" use="required" />
+		<xs:attribute name="g" type="ColorComponent" use="required" />
+		<xs:attribute name="b" type="ColorComponent" use="required" />
+	</xs:complexType>
+
+	<xs:complexType name="Shape" abstract="true">
+		<xs:sequence>
+			<xs:element name="LocalCenter" type="Vector" maxOccurs="1" minOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="Id" type="xs:string" use="required" />
+	</xs:complexType>
+
+	<xs:complexType name="Circle">
+		<xs:complexContent>
+			<xs:extension base="Shape">
+				<xs:sequence>
+					<xs:element name="Radius" maxOccurs="1" minOccurs="1">
+						<xs:simpleType>
+							<xs:restriction base="xs:double">
+								<xs:minExclusive value="0.0" />
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="Rectangle">
+		<xs:complexContent>
+			<xs:extension base="Shape">
+				<xs:sequence>
+					<xs:element name="Width" maxOccurs="1" minOccurs="1">
+						<xs:simpleType>
+							<xs:restriction base="xs:double">
+								<xs:minExclusive value="0.0" />
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="Height" maxOccurs="1" minOccurs="1">
+						<xs:simpleType>
+							<xs:restriction base="xs:double">
+								<xs:minExclusive value="0.0" />
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="LocalRotation" type="xs:double" maxOccurs="1" minOccurs="1" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="Triangle">
+		<xs:complexContent>
+			<xs:extension base="Shape">
+				<xs:sequence>
+					<xs:element name="Vertex" type="Vector" maxOccurs="3" minOccurs="3" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="Polygon">
+		<xs:complexContent>
+			<xs:extension base="Shape">
+				<xs:sequence>
+					<xs:element name="Vertex" type="Vector" maxOccurs="unbounded" minOccurs="3" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="Segment">
+		<xs:complexContent>
+			<xs:extension base="Shape">
+				<xs:sequence>
+					<xs:element name="Vertex" type="Vector" maxOccurs="2" minOccurs="2" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="Filter" abstract="true" />
+	
+	<xs:complexType name="DefaultFilter">
+		<xs:complexContent>
+			<xs:extension base="Filter" />
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="All">
+		<xs:attribute name="Value" type="xs:integer" fixed="2147483647" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group1">
+		<xs:attribute name="Value" type="xs:integer" fixed="1" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group2">
+		<xs:attribute name="Value" type="xs:integer" fixed="2" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group3">
+		<xs:attribute name="Value" type="xs:integer" fixed="4" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group4">
+		<xs:attribute name="Value" type="xs:integer" fixed="8" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group5">
+		<xs:attribute name="Value" type="xs:integer" fixed="16" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group6">
+		<xs:attribute name="Value" type="xs:integer" fixed="32" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group7">
+		<xs:attribute name="Value" type="xs:integer" fixed="64" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group8">
+		<xs:attribute name="Value" type="xs:integer" fixed="128" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group9">
+		<xs:attribute name="Value" type="xs:integer" fixed="256" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group10">
+		<xs:attribute name="Value" type="xs:integer" fixed="512" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group11">
+		<xs:attribute name="Value" type="xs:integer" fixed="1024" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group12">
+		<xs:attribute name="Value" type="xs:integer" fixed="2048" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group13">
+		<xs:attribute name="Value" type="xs:integer" fixed="4096" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group14">
+		<xs:attribute name="Value" type="xs:integer" fixed="8192" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group15">
+		<xs:attribute name="Value" type="xs:integer" fixed="16384" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group16">
+		<xs:attribute name="Value" type="xs:integer" fixed="32768" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group17">
+		<xs:attribute name="Value" type="xs:integer" fixed="65536" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group18">
+		<xs:attribute name="Value" type="xs:integer" fixed="131072" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group19">
+		<xs:attribute name="Value" type="xs:integer" fixed="262144" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group20">
+		<xs:attribute name="Value" type="xs:integer" fixed="524288" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group21">
+		<xs:attribute name="Value" type="xs:integer" fixed="1048576" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group22">
+		<xs:attribute name="Value" type="xs:integer" fixed="2097152" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group23">
+		<xs:attribute name="Value" type="xs:integer" fixed="4194304" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group24">
+		<xs:attribute name="Value" type="xs:integer" fixed="8388608" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group25">
+		<xs:attribute name="Value" type="xs:integer" fixed="16777216" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group26">
+		<xs:attribute name="Value" type="xs:integer" fixed="33554432" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group27">
+		<xs:attribute name="Value" type="xs:integer" fixed="67108864" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group28">
+		<xs:attribute name="Value" type="xs:integer" fixed="134217728" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group29">
+		<xs:attribute name="Value" type="xs:integer" fixed="268435456" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group30">
+		<xs:attribute name="Value" type="xs:integer" fixed="536870912" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Group31">
+		<xs:attribute name="Value" type="xs:integer" fixed="1073741824" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Categories">
+		<xs:sequence>
+			<xs:element name="All" type="All" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group1" type="Group1" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group2" type="Group2" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group3" type="Group3" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group4" type="Group4" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group5" type="Group5" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group6" type="Group6" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group7" type="Group7" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group8" type="Group8" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group9" type="Group9" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group10" type="Group10" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group11" type="Group11" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group12" type="Group12" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group13" type="Group13" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group14" type="Group14" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group15" type="Group15" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group16" type="Group16" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group17" type="Group17" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group18" type="Group18" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group19" type="Group19" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group20" type="Group20" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group21" type="Group21" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group22" type="Group22" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group23" type="Group23" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group24" type="Group24" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group25" type="Group25" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group26" type="Group26" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group27" type="Group27" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group28" type="Group28" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group29" type="Group29" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group30" type="Group30" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Group31" type="Group31" minOccurs="0" maxOccurs="1" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="CategoryFilter">
+		<xs:complexContent>
+			<xs:extension base="Filter">
+				<xs:sequence>
+					<xs:element name="PartOfGroups" type="Categories" minOccurs="1" maxOccurs="1" />
+					<xs:element name="CollideWithGroups" type="Categories" minOccurs="1" maxOccurs="1" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="Fixture">
+		<xs:sequence>
+			<xs:element name="Shape" type="Shape" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Filter" type="Filter" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Sensor" type="xs:boolean" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Density" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Friction" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Restitution" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="Id" type="xs:string" use="required" />
+		<xs:attribute name="Name" type="xs:string" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Mass">
+		<xs:sequence>
+			<xs:element name="LocalCenter" type="Vector" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Type" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="NORMAL" />
+						<xs:enumeration value="INFINITE" />
+						<xs:enumeration value="FIXED_LINEAR_VELOCITY" />
+						<xs:enumeration value="FIXED_ANGULAR_VELOCITY" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Mass" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Inertia" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Explicit" type="xs:boolean" maxOccurs="1" minOccurs="1" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="Fixtures">
+		<xs:sequence>
+			<xs:element name="Fixture" type="Fixture" maxOccurs="unbounded" minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="Body">
+		<xs:sequence>
+			<xs:element name="OutlineColor" type="Color" maxOccurs="1" minOccurs="0" />
+			<xs:element name="FillColor" type="Color" maxOccurs="1" minOccurs="0" />
+			<xs:element name="Fixtures" type="Fixtures" maxOccurs="1" minOccurs="0" />
+			<xs:element name="Transform" type="Transform" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Mass" type="Mass" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Velocity" type="Vector" maxOccurs="1" minOccurs="1" />
+			<xs:element name="AngularVelocity" type="xs:double" maxOccurs="1" minOccurs="1" />
+			<xs:element name="AccumulatedForce" type="Vector" maxOccurs="1" minOccurs="1" />
+			<xs:element name="AccumulatedTorque" type="xs:double" maxOccurs="1" minOccurs="1" />
+			<xs:element name="AutoSleep" type="xs:boolean" minOccurs="1" maxOccurs="1" />
+			<xs:element name="Asleep" type="xs:boolean" minOccurs="1" maxOccurs="1" />
+			<xs:element name="Active" type="xs:boolean" minOccurs="1" maxOccurs="1" />
+			<xs:element name="Bullet" type="xs:boolean" minOccurs="1" maxOccurs="1" />
+			<xs:element name="LinearDamping" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minInclusive value="0.0" />
+						<xs:maxInclusive value="1.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="AngularDamping" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minInclusive value="0.0" />
+						<xs:maxInclusive value="1.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="GravityScale" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minInclusive value="0.0" />
+						<xs:maxInclusive value="1.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="Id" type="xs:string" use="required" />
+		<xs:attribute name="Name" type="xs:string" use="required" />
+	</xs:complexType>
+
+	<xs:complexType name="Bodies">
+		<xs:sequence>
+			<xs:element name="Body" type="Body" maxOccurs="unbounded" minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="Joint" abstract="true">
+		<xs:sequence>
+			<xs:element name="BodyId1" type="xs:string" maxOccurs="1" minOccurs="1" />
+			<xs:element name="BodyId2" type="xs:string" maxOccurs="1" minOccurs="1" />
+			<xs:element name="CollisionAllowed" type="xs:boolean" maxOccurs="1" minOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="Id" type="xs:string" use="required" />
+		<xs:attribute name="Name" type="xs:string" use="required" />
+	</xs:complexType>
+
+	<xs:complexType name="AngleJoint">
+		<xs:complexContent>
+			<xs:extension base="Joint">
+				<xs:sequence>
+					<xs:element name="LowerLimit" type="xs:double" maxOccurs="1" minOccurs="1" />
+					<xs:element name="UpperLimit" type="xs:double" maxOccurs="1" minOccurs="1" />
+					<xs:element name="LimitEnabled" type="xs:boolean" maxOccurs="1" minOccurs="1" />
+					<xs:element name="Ratio" type="xs:double" maxOccurs="1" minOccurs="1" />
+					<xs:element name="ReferenceAngle" type="xs:double" maxOccurs="1" minOccurs="1" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="DistanceJoint">
+		<xs:complexContent>
+			<xs:extension base="Joint">
+				<xs:sequence>
+					<xs:element name="Anchor1" type="Vector" maxOccurs="1" minOccurs="1" />
+					<xs:element name="Anchor2" type="Vector" maxOccurs="1" minOccurs="1" />
+					<xs:element name="Frequency" maxOccurs="1" minOccurs="1">
+						<xs:simpleType>
+							<xs:restriction base="xs:double">
+								<xs:minInclusive value="0.0" />
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="DampingRatio" maxOccurs="1" minOccurs="1">
+						<xs:simpleType>
+							<xs:restriction base="xs:double">
+								<xs:minInclusive value="0.0" />
+								<xs:maxInclusive value="1.0" />
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="Distance" maxOccurs="1" minOccurs="1">
+						<xs:simpleType>
+							<xs:restriction base="xs:double">
+								<xs:minInclusive value="0.0" />
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="FrictionJoint">
+		<xs:complexContent>
+			<xs:extension base="Joint">
+				<xs:sequence>
+					<xs:element name="Anchor" type="Vector" maxOccurs="1" minOccurs="1" />
+					<xs:element name="MaximumForce" maxOccurs="1" minOccurs="1">
+						<xs:simpleType>
+							<xs:restriction base="xs:double">
+								<xs:minInclusive value="0.0" />
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="MaximumTorque" maxOccurs="1" minOccurs="1">
+						<xs:simpleType>
+							<xs:restriction base="xs:double">
+								<xs:minInclusive value="0.0" />
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="MouseJoint">
+		<xs:complexContent>
+			<xs:extension base="Joint">
+				<xs:sequence>
+					<xs:element name="Anchor" type="Vector" maxOccurs="1" minOccurs="1" />
+					<xs:element name="Target" type="Vector" maxOccurs="1" minOccurs="1" />
+					<xs:element name="Frequency" maxOccurs="1" minOccurs="1">
+						<xs:simpleType>
+							<xs:restriction base="xs:double">
+								<xs:minInclusive value="0.0" />
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="DampingRatio" maxOccurs="1" minOccurs="1">
+						<xs:simpleType>
+							<xs:restriction base="xs:double">
+								<xs:minInclusive value="0.0" />
+								<xs:maxInclusive value="1.0" />
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="MaximumForce" maxOccurs="1" minOccurs="1">
+						<xs:simpleType>
+							<xs:restriction base="xs:double">
+								<xs:minInclusive value="0.0" />
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="PrismaticJoint">
+		<xs:complexContent>
+			<xs:extension base="Joint">
+				<xs:sequence>
+					<xs:element name="Anchor" type="Vector" maxOccurs="1" minOccurs="1" />
+					<xs:element name="Axis" type="Vector" maxOccurs="1" minOccurs="1" />
+					<xs:element name="LowerLimit" type="xs:double" maxOccurs="1" minOccurs="1" />
+					<xs:element name="UpperLimit" type="xs:double" maxOccurs="1" minOccurs="1" />
+					<xs:element name="LimitEnabled" type="xs:boolean" maxOccurs="1" minOccurs="1" />
+					<xs:element name="MotorSpeed" type="xs:double" maxOccurs="1" minOccurs="1" />
+					<xs:element name="MaximumMotorForce" maxOccurs="1" minOccurs="1">
+						<xs:simpleType>
+							<xs:restriction base="xs:double">
+								<xs:minInclusive value="0.0" />
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="MotorEnabled" type="xs:boolean" maxOccurs="1" minOccurs="1" />
+					<xs:element name="ReferenceAngle" type="xs:double" maxOccurs="1" minOccurs="1" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="PulleyJoint">
+		<xs:complexContent>
+			<xs:extension base="Joint">
+				<xs:sequence>
+					<xs:element name="PulleyAnchor1" type="Vector" maxOccurs="1" minOccurs="1" />
+					<xs:element name="PulleyAnchor2" type="Vector" maxOccurs="1" minOccurs="1" />
+					<xs:element name="BodyAnchor1" type="Vector" maxOccurs="1" minOccurs="1" />
+					<xs:element name="BodyAnchor2" type="Vector" maxOccurs="1" minOccurs="1" />
+					<xs:element name="Ratio" maxOccurs="1" minOccurs="1">
+						<xs:simpleType>
+							<xs:restriction base="xs:double">
+								<xs:minInclusive value="0.0" />
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="RevoluteJoint">
+		<xs:complexContent>
+			<xs:extension base="Joint">
+				<xs:sequence>
+					<xs:element name="Anchor" type="Vector" maxOccurs="1" minOccurs="1" />
+					<xs:element name="LowerLimit" type="xs:double" maxOccurs="1" minOccurs="1" />
+					<xs:element name="UpperLimit" type="xs:double" maxOccurs="1" minOccurs="1" />
+					<xs:element name="LimitEnabled" type="xs:boolean" maxOccurs="1" minOccurs="1" />
+					<xs:element name="MotorSpeed" type="xs:double" maxOccurs="1" minOccurs="1" />
+					<xs:element name="MaximumMotorTorque" maxOccurs="1" minOccurs="1">
+						<xs:simpleType>
+							<xs:restriction base="xs:double">
+								<xs:minInclusive value="0.0" />
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="MotorEnabled" type="xs:boolean" maxOccurs="1" minOccurs="1" />
+					<xs:element name="ReferenceAngle" type="xs:double" maxOccurs="1" minOccurs="1" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="RopeJoint">
+		<xs:complexContent>
+			<xs:extension base="Joint">
+				<xs:sequence>
+					<xs:element name="Anchor1" type="Vector" maxOccurs="1" minOccurs="1" />
+					<xs:element name="Anchor2" type="Vector" maxOccurs="1" minOccurs="1" />
+					<xs:element name="LowerLimit" maxOccurs="1" minOccurs="1">
+						<xs:simpleType>
+							<xs:restriction base="xs:double">
+								<xs:minInclusive value="0.0" />
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="UpperLimit" maxOccurs="1" minOccurs="1">
+						<xs:simpleType>
+							<xs:restriction base="xs:double">
+								<xs:minInclusive value="0.0" />
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="LowerLimitEnabled" type="xs:boolean" maxOccurs="1" minOccurs="1" />
+					<xs:element name="UpperLimitEnabled" type="xs:boolean" maxOccurs="1" minOccurs="1" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="WeldJoint">
+		<xs:complexContent>
+			<xs:extension base="Joint">
+				<xs:sequence>
+					<xs:element name="Anchor" type="Vector" maxOccurs="1" minOccurs="1" />
+					<xs:element name="ReferenceAngle" type="xs:double" maxOccurs="1" minOccurs="1" />
+					<xs:element name="Frequency" maxOccurs="1" minOccurs="1">
+						<xs:simpleType>
+							<xs:restriction base="xs:double">
+								<xs:minInclusive value="0.0" />
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="DampingRatio" maxOccurs="1" minOccurs="1">
+						<xs:simpleType>
+							<xs:restriction base="xs:double">
+								<xs:minInclusive value="0.0" />
+								<xs:maxInclusive value="1.0" />
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="WheelJoint">
+		<xs:complexContent>
+			<xs:extension base="Joint">
+				<xs:sequence>
+					<xs:element name="Anchor" type="Vector" maxOccurs="1" minOccurs="1" />
+					<xs:element name="Axis" type="Vector" maxOccurs="1" minOccurs="1" />
+					<xs:element name="MotorSpeed" type="xs:double" maxOccurs="1" minOccurs="1" />
+					<xs:element name="MaximumMotorTorque" maxOccurs="1" minOccurs="1">
+						<xs:simpleType>
+							<xs:restriction base="xs:double">
+								<xs:minInclusive value="0.0" />
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="MotorEnabled" type="xs:boolean" maxOccurs="1" minOccurs="1" />
+					<xs:element name="Frequency" maxOccurs="1" minOccurs="1">
+						<xs:simpleType>
+							<xs:restriction base="xs:double">
+								<xs:minInclusive value="0.0" />
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="DampingRatio" maxOccurs="1" minOccurs="1">
+						<xs:simpleType>
+							<xs:restriction base="xs:double">
+								<xs:minInclusive value="0.0" />
+								<xs:maxInclusive value="1.0" />
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="Joints">
+		<xs:sequence>
+			<xs:element name="Joint" type="Joint" maxOccurs="unbounded" minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="Bounds">
+		<xs:sequence>
+			<xs:element name="Width" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minExclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Height" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minExclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Translation" type="Vector" maxOccurs="1" minOccurs="1" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:simpleType name="BroadphaseDetector">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="SapBruteForce" />
+			<xs:enumeration value="SapIncremental" />
+			<xs:enumeration value="SapTree" />
+			<xs:enumeration value="DynamicAABBTree" />
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:simpleType name="NarrowphaseDetector">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Sat" />
+			<xs:enumeration value="Gjk" />
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:simpleType name="ManifoldSolver">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="ClippingManifoldSolver" />
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:simpleType name="TimeOfImpactDetector">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="ConservativeAdvancement" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="World">
+		<xs:sequence>
+			<xs:element name="Name" type="xs:string" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Settings" type="Settings" maxOccurs="1" minOccurs="1" />
+			<xs:element name="BroadphaseDetector" type="BroadphaseDetector" maxOccurs="1" minOccurs="0" />
+			<xs:element name="NarrowphaseDetector" type="NarrowphaseDetector" maxOccurs="1" minOccurs="0" />
+			<xs:element name="ManifoldSolver" type="ManifoldSolver" maxOccurs="1" minOccurs="0" />
+			<xs:element name="TimeOfImpactDetector" type="TimeOfImpactDetector" maxOccurs="1" minOccurs="0" />
+			<xs:element name="Gravity" type="Vector" maxOccurs="1" minOccurs="0" />
+			<xs:element name="Bounds" type="Bounds" maxOccurs="1" minOccurs="0" />
+			<xs:element name="Bodies" type="Bodies" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Joints" type="Joints" maxOccurs="1" minOccurs="1" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<!-- Global dyn4j settings -->
+
+	<xs:complexType name="Settings">
+		<xs:sequence>
+			<xs:element name="StepFrequency" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minInclusive value="30.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="MaximumTranslation" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="MaximumRotation" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="ContinuousCollisionDetectionMode" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="NONE"></xs:enumeration>
+						<xs:enumeration value="BULLETS_ONLY"></xs:enumeration>
+						<xs:enumeration value="ALL"></xs:enumeration>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			
+			<!-- Sleep -->
+			<xs:element name="AutoSleep" type="xs:boolean" maxOccurs="1" minOccurs="1" />
+			<xs:element name="SleepTime" type="xs:double" maxOccurs="1" minOccurs="1" />
+			<xs:element name="SleepLinearVelocity" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="SleepAngularVelocity" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			
+			<!-- Constraint solver -->
+			<xs:element name="VelocitySolverIterations" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:positiveInteger">
+						<xs:minInclusive value="5" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="PositionSolverIterations" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:positiveInteger">
+						<xs:minInclusive value="5" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="WarmStartDistance" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="RestitutionVelocity" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="LinearTolerance" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="AngularTolerance" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="MaximumLinearCorrection" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="MaximumAngularCorrection" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Baumgarte" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="System">
+		<xs:sequence>
+			<xs:element name="JavaVersion" type="xs:string" maxOccurs="1" minOccurs="0" />
+			<xs:element name="JavaVendor" type="xs:string" maxOccurs="1" minOccurs="0" />
+			<xs:element name="OperatingSystem" type="xs:string" maxOccurs="1" minOccurs="0" />
+			<xs:element name="Architecture" type="xs:string" maxOccurs="1" minOccurs="0" />
+			<xs:element name="NumberOfCpus" type="xs:string" maxOccurs="1" minOccurs="0" />
+			<xs:element name="Locale" type="xs:string" maxOccurs="1" minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="Camera">
+		<xs:sequence>
+			<xs:element name="Scale" type="xs:double" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Translation" type="Vector" maxOccurs="1" minOccurs="1" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="Ray">
+		<xs:sequence>
+			<xs:element name="Start" type="Vector" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Direction" type="xs:double" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Length" maxOccurs="1" minOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minInclusive value="0.0" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="IgnoreSensors" type="xs:boolean" maxOccurs="1" minOccurs="1" />
+			<xs:element name="TestAll" type="xs:boolean" maxOccurs="1" minOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="Name" type="xs:string" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="Rays">
+		<xs:sequence>
+			<xs:element name="Ray" type="Ray" maxOccurs="unbounded" minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="Simulation">
+		<xs:sequence>
+			<!-- This is output only -->
+			<xs:element name="System" type="System" maxOccurs="1" minOccurs="0" />
+			<xs:element name="Camera" type="Camera" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Rays" type="Rays" maxOccurs="1" minOccurs="1" />
+			<xs:element name="World" type="World" maxOccurs="1" minOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="version" type="xs:string" use="required" />
+	</xs:complexType>
+	
+	<xs:element name="Simulation" type="Simulation"></xs:element>
+</xs:schema>
