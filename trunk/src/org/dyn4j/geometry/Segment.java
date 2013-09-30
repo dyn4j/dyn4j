@@ -30,7 +30,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents a line {@link Segment}.
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.1.6
  * @since 1.0.0
  */
 public class Segment extends Wound implements Convex, Shape, Transformable {
@@ -272,14 +272,14 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 		// compute the bottom
 		double BxA = B.cross(A);
 		if (Math.abs(BxA) <= Epsilon.E) {
-			// the line segments are parallel and don't intersect
+			// the lines are parallel and don't intersect
 			return null;
 		}
 		
 		// compute the top
 		double ambxA = ap1.difference(bp1).cross(A);
 		if (Math.abs(ambxA) <= Epsilon.E) {
-			// the line segments are coincident
+			// the lines are coincident
 			return null;
 		}
 		
@@ -372,7 +372,18 @@ public class Segment extends Wound implements Convex, Shape, Transformable {
 		}
 		
 		// compute the intersection point
-		return B.product(tb).add(bp1);
+		Vector2 ip = B.product(tb).add(bp1);
+		
+		// since both are segments we need to verify that
+		// ta is also valid.
+		// compute ta
+		double ta = ip.difference(ap1).dot(A) / A.dot(A);
+		if (ta < 0.0 || ta > 1.0) {
+			// no intersection
+			return null;
+		}
+		
+		return ip;
 	}
 
 	/**

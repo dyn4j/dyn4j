@@ -36,7 +36,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Segment} class.
  * @author William Bittle
- * @version 3.1.4
+ * @version 3.1.6
  * @since 1.0.0
  */
 public class SegmentTest {
@@ -514,7 +514,7 @@ public class SegmentTest {
 		
 		// try a vertical and horizontal segment
 		p = Segment.getSegmentIntersection(
-				new Vector2(3.0, 0.0), new Vector2(3.0, -2.0), 
+				new Vector2(3.0, 2.0), new Vector2(3.0, -2.0), 
 				new Vector2(0.0, 1.0), new Vector2(4.0, 1.0));
 		
 		TestCase.assertNotNull(p);
@@ -571,5 +571,11 @@ public class SegmentTest {
 		TestCase.assertNotNull(p);
 		TestCase.assertEquals(1.0, p.x);
 		TestCase.assertEquals(0.0, p.y);
+		
+		// test segment intersection perpendicular
+		Segment s1 = new Segment(new Vector2(-10, 10), new Vector2(10, 10));
+		Segment s2 = new Segment(new Vector2(0, 0), new Vector2(0, 5));
+		p = s2.getSegmentIntersection(s1);
+		TestCase.assertNull(p);
 	}
 }
