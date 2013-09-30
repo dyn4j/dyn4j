@@ -28,7 +28,6 @@ import org.dyn4j.Epsilon;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.Step;
-import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
@@ -45,7 +44,7 @@ import org.dyn4j.resources.Messages;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.1.6
  * @since 2.1.0
  */
 public class PulleyJoint extends Joint {
@@ -84,6 +83,12 @@ public class PulleyJoint extends Joint {
 	
 	/** The accumulated impulse from the previous time step */
 	protected double impulse;
+	
+	/** True if slack in the rope is enabled */
+	protected boolean slackEnabled;
+	
+	/** The state of the limit (only used for slack) */
+	protected LimitState limitState;
 	
 	/**
 	 * Minimal constructor.
@@ -124,6 +129,9 @@ public class PulleyJoint extends Joint {
 		this.length = this.length1 + this.length2;
 		// initialize the other fields
 		this.impulse = 0.0;
+		// initialize the slack parameters
+		this.slackEnabled = false;
+		this.limitState = Joint.LimitState.AT_UPPER;
 	}
 	
 	/* (non-Javadoc)
@@ -142,6 +150,7 @@ public class PulleyJoint extends Joint {
 		.append("|Length1=").append(this.length1)
 		.append("|Length2=").append(this.length2)
 		.append("|Length=").append(this.length)
+		.append("|SlackEnabled=").append(this.slackEnabled)
 		.append("]");
 		return sb.toString();
 	}
@@ -156,10 +165,10 @@ public class PulleyJoint extends Joint {
 		
 		double linearTolerance = settings.getLinearTolerance();
 		
-		Transform t1 = body1.getTransform();
-		Transform t2 = body2.getTransform();
-		Mass m1 = body1.getMass();
-		Mass m2 = body2.getMass();
+		Transform t1 = this.body1.getTransform();
+		Transform t2 = this.body2.getTransform();
+		Mass m1 = this.body1.getMass();
+		Mass m2 = this.body2.getMass();
 		
 		double invM1 = m1.getInverseMass();
 		double invM2 = m2.getInverseMass();
@@ -183,45 +192,57 @@ public class PulleyJoint extends Joint {
 		double l1 = this.n1.normalize();
 		double l2 = this.n2.normalize();
 		
-		// check for near zero length
-		if (l1 <= 10.0 * linearTolerance) {
-			// zero out the axis
-			this.n1.zero();
-		}
+		// get the current total length
+		double l = l1 + this.ratio * l2;
 		
-		// check for near zero length		
-		if (l2 <= 10.0 * linearTolerance) {
-			// zero out the axis
-			this.n2.zero();
-		}
-		
-		// compute the inverse effective masses (K matrix, in this case its a scalar) for the constraints
-		double r1CrossN1 = r1.cross(this.n1);
-		double r2CrossN2 = r2.cross(this.n2);
-		double pm1 = invM1 + invI1 * r1CrossN1 * r1CrossN1;
-		double pm2 = invM2 + invI2 * r2CrossN2 * r2CrossN2;
-		this.invK = pm1 + this.ratio * this.ratio * pm2;
-		// make sure we can invert it
-		if (this.invK > Epsilon.E) {
-			this.invK = 1.0 / this.invK;
+		// check if we need to solve the constraint
+		if (l > this.length || !this.slackEnabled) {
+			this.limitState = Joint.LimitState.AT_UPPER;
+			
+			// check for near zero length
+			if (l1 <= 10.0 * linearTolerance) {
+				// zero out the axis
+				this.n1.zero();
+			}
+			
+			// check for near zero length		
+			if (l2 <= 10.0 * linearTolerance) {
+				// zero out the axis
+				this.n2.zero();
+			}
+			
+			// compute the inverse effective masses (K matrix, in this case its a scalar) for the constraints
+			double r1CrossN1 = r1.cross(this.n1);
+			double r2CrossN2 = r2.cross(this.n2);
+			double pm1 = invM1 + invI1 * r1CrossN1 * r1CrossN1;
+			double pm2 = invM2 + invI2 * r2CrossN2 * r2CrossN2;
+			this.invK = pm1 + this.ratio * this.ratio * pm2;
+			// make sure we can invert it
+			if (this.invK > Epsilon.E) {
+				this.invK = 1.0 / this.invK;
+			} else {
+				this.invK = 0.0;
+			}
+			
+			// warm start the constraints taking
+			// variable time steps into account
+			double dtRatio = step.getDeltaTimeRatio();
+			this.impulse *= dtRatio;
+			
+			// compute the impulse along the axes
+			Vector2 J1 = this.n1.product(-this.impulse);
+			Vector2 J2 = this.n2.product(-this.ratio * this.impulse);
+			
+			// apply the impulse
+			this.body1.getLinearVelocity().add(J1.product(invM1));
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J1));
+			this.body2.getLinearVelocity().add(J2.product(invM2));
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * r2.cross(J2));
 		} else {
-			this.invK = 0.0;
+			// clear the impulse and don't solve anything
+			this.impulse = 0;
+			this.limitState = Joint.LimitState.INACTIVE;
 		}
-		
-		// warm start the constraints taking
-		// variable time steps into account
-		double dtRatio = step.getDeltaTimeRatio();
-		this.impulse *= dtRatio;
-		
-		// compute the impulse along the axes
-		Vector2 J1 = this.n1.product(-this.impulse);
-		Vector2 J2 = this.n2.product(-this.ratio * this.impulse);
-		
-		// apply the impulse
-		this.body1.getLinearVelocity().add(J1.product(invM1));
-		this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J1));
-		this.body2.getLinearVelocity().add(J2.product(invM2));
-		this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * r2.cross(J2));
 	}
 	
 	/* (non-Javadoc)
@@ -229,39 +250,41 @@ public class PulleyJoint extends Joint {
 	 */
 	@Override
 	public void solveVelocityConstraints() {
-		Transform t1 = this.body1.getTransform();
-		Transform t2 = this.body2.getTransform();
-		Mass m1 = this.body1.getMass();
-		Mass m2 = this.body2.getMass();
-		
-		double invM1 = m1.getInverseMass();
-		double invM2 = m2.getInverseMass();
-		double invI1 = m1.getInverseInertia();
-		double invI2 = m2.getInverseInertia();
-		
-		// compute r1 and r2
-		Vector2 r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
-		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
-		
-		// compute the relative velocity
-		Vector2 v1 = this.body1.getLinearVelocity().sum(r1.cross(this.body1.getAngularVelocity()));
-		Vector2 v2 = this.body2.getLinearVelocity().sum(r2.cross(this.body2.getAngularVelocity()));
-		
-		// compute Jv + b
-		double C = -this.n1.dot(v1) - this.ratio * this.n2.dot(v2);
-		// compute the impulse
-		double impulse = this.invK * (-C);
-		this.impulse += impulse;
-		
-		// compute the impulse along each axis
-		Vector2 J1 = this.n1.product(-impulse);
-		Vector2 J2 = this.n2.product(-impulse * this.ratio);
-		
-		// apply the impulse
-		this.body1.getLinearVelocity().add(J1.product(invM1));
-		this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J1));
-		this.body2.getLinearVelocity().add(J2.product(invM2));
-		this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * r2.cross(J2));
+		if (this.limitState != Joint.LimitState.INACTIVE) {
+			Transform t1 = this.body1.getTransform();
+			Transform t2 = this.body2.getTransform();
+			Mass m1 = this.body1.getMass();
+			Mass m2 = this.body2.getMass();
+			
+			double invM1 = m1.getInverseMass();
+			double invM2 = m2.getInverseMass();
+			double invI1 = m1.getInverseInertia();
+			double invI2 = m2.getInverseInertia();
+			
+			// compute r1 and r2
+			Vector2 r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
+			Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
+			
+			// compute the relative velocity
+			Vector2 v1 = this.body1.getLinearVelocity().sum(r1.cross(this.body1.getAngularVelocity()));
+			Vector2 v2 = this.body2.getLinearVelocity().sum(r2.cross(this.body2.getAngularVelocity()));
+			
+			// compute Jv + b
+			double C = -this.n1.dot(v1) - this.ratio * this.n2.dot(v2);
+			// compute the impulse
+			double impulse = this.invK * (-C);
+			this.impulse += impulse;
+			
+			// compute the impulse along each axis
+			Vector2 J1 = this.n1.product(-impulse);
+			Vector2 J2 = this.n2.product(-impulse * this.ratio);
+			
+			// apply the impulse
+			this.body1.getLinearVelocity().add(J1.product(invM1));
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J1));
+			this.body2.getLinearVelocity().add(J2.product(invM2));
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * r2.cross(J2));
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -269,81 +292,86 @@ public class PulleyJoint extends Joint {
 	 */
 	@Override
 	public boolean solvePositionConstraints() {
-		Settings settings = this.world.getSettings();
-		
-		double linearTolerance = settings.getLinearTolerance();
-		double maxLinearCorrection = settings.getMaximumLinearCorrection();
-		
-		Transform t1 = body1.getTransform();
-		Transform t2 = body2.getTransform();
-		Mass m1 = body1.getMass();
-		Mass m2 = body2.getMass();
-		
-		double invM1 = m1.getInverseMass();
-		double invM2 = m2.getInverseMass();
-		double invI1 = m1.getInverseInertia();
-		double invI2 = m2.getInverseInertia();
-		
-		// put the body anchors in world space
-		Vector2 r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
-		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
-		Vector2 p1 = r1.sum(this.body1.getWorldCenter());
-		Vector2 p2 = r2.sum(this.body2.getWorldCenter());
-		
-		Vector2 s1 = this.pulleyAnchor1;
-		Vector2 s2 = this.pulleyAnchor2;
-		
-		// compute the axes
-		this.n1 = s1.to(p1);
-		this.n2 = s2.to(p2);
-		
-		// normalize and save the length
-		double l1 = this.n1.normalize();
-		double l2 = this.n2.normalize();
-		
-		// make sure the length is not near zero
-		if (l1 <= 10.0 * linearTolerance) {
-			this.n1.zero();
-		}
-		// make sure the length is not near zero
-		if (l2 <= 10.0 * linearTolerance) {
-			this.n2.zero();
-		}
-		
-		double linearError = 0.0;
-		
-		// recompute K
-		double r1CrossN1 = r1.cross(this.n1);
-		double r2CrossN2 = r2.cross(this.n2);
-		double pm1 = invM1 + invI1 * r1CrossN1 * r1CrossN1;
-		double pm2 = invM2 + invI2 * r2CrossN2 * r2CrossN2;
-		this.invK = pm1 + this.ratio * this.ratio * pm2;
-		// make sure we can invert it
-		if (this.invK > Epsilon.E) {
-			this.invK = 1.0 / this.invK;
+		if (this.limitState != Joint.LimitState.INACTIVE) {
+			Settings settings = this.world.getSettings();
+			
+			double linearTolerance = settings.getLinearTolerance();
+//			double maxLinearCorrection = settings.getMaximumLinearCorrection();
+			
+			Transform t1 = this.body1.getTransform();
+			Transform t2 = this.body2.getTransform();
+			Mass m1 = this.body1.getMass();
+			Mass m2 = this.body2.getMass();
+			
+			double invM1 = m1.getInverseMass();
+			double invM2 = m2.getInverseMass();
+			double invI1 = m1.getInverseInertia();
+			double invI2 = m2.getInverseInertia();
+			
+			// put the body anchors in world space
+			Vector2 r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
+			Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
+			Vector2 p1 = r1.sum(this.body1.getWorldCenter());
+			Vector2 p2 = r2.sum(this.body2.getWorldCenter());
+			
+			Vector2 s1 = this.pulleyAnchor1;
+			Vector2 s2 = this.pulleyAnchor2;
+			
+			// compute the axes
+			this.n1 = s1.to(p1);
+			this.n2 = s2.to(p2);
+			
+			// normalize and save the length
+			double l1 = this.n1.normalize();
+			double l2 = this.n2.normalize();
+			
+			// make sure the length is not near zero
+			if (l1 <= 10.0 * linearTolerance) {
+				this.n1.zero();
+			}
+			// make sure the length is not near zero
+			if (l2 <= 10.0 * linearTolerance) {
+				this.n2.zero();
+			}
+			
+			double linearError = 0.0;
+			
+			// recompute K
+			double r1CrossN1 = r1.cross(this.n1);
+			double r2CrossN2 = r2.cross(this.n2);
+			double pm1 = invM1 + invI1 * r1CrossN1 * r1CrossN1;
+			double pm2 = invM2 + invI2 * r2CrossN2 * r2CrossN2;
+			this.invK = pm1 + this.ratio * this.ratio * pm2;
+			// make sure we can invert it
+			if (this.invK > Epsilon.E) {
+				this.invK = 1.0 / this.invK;
+			} else {
+				this.invK = 0.0;
+			}
+			
+			// compute the constraint error
+			double C = this.length - l1 - this.ratio * l2;
+			linearError = Math.abs(C);
+			
+			// clamping the impulse does not work with the limit state
+			// clamp the error
+//			C = Interval.clamp(C + linearTolerance, -maxLinearCorrection, maxLinearCorrection);
+			double impulse = -this.invK * C;
+			
+			// compute the impulse along the axes
+			Vector2 J1 = this.n1.product(-impulse);
+			Vector2 J2 = this.n2.product(-this.ratio * impulse);
+			
+			// apply the impulse
+			this.body1.translate(J1.x * invM1, J1.y * invM1);
+			this.body1.rotateAboutCenter(r1.cross(J1) * invI1);
+			this.body2.translate(J2.x * invM2, J2.y * invM2);
+			this.body2.rotateAboutCenter(r2.cross(J2) * invI2);
+			
+			return linearError < linearTolerance;
 		} else {
-			this.invK = 0.0;
+			return true;
 		}
-		
-		// compute the constraint error
-		double C = this.length - l1 - this.ratio * l2;
-		linearError = Math.abs(C);
-		
-		// clamp the error
-		C = Interval.clamp(C + linearTolerance, -maxLinearCorrection, maxLinearCorrection);
-		double impulse = -this.invK * C;
-		
-		// compute the impulse along the axes
-		Vector2 J1 = this.n1.product(-impulse);
-		Vector2 J2 = this.n2.product(-this.ratio * impulse);
-		
-		// apply the impulse
-		this.body1.translate(J1.x * invM1, J1.y * invM1);
-		this.body1.rotateAboutCenter(r1.cross(J1) * invI1);
-		this.body2.translate(J2.x * invM2, J2.y * invM2);
-		this.body2.rotateAboutCenter(r2.cross(J2) * invI2);
-		
-		return linearError < linearTolerance;
 	}
 	
 	/* (non-Javadoc)
@@ -472,5 +500,25 @@ public class PulleyJoint extends Joint {
 			this.body1.setAsleep(false);
 			this.body2.setAsleep(false);
 		}
+	}
+	
+	/**
+	 * Returns true if slack in the rope is enabled.
+	 * @return boolean
+	 * @since 3.1.6
+	 */
+	public boolean isSlackEnabled() {
+		return this.slackEnabled;
+	}
+	
+	/**
+	 * Toggles the slack in the rope.
+	 * <p>
+	 * If slack is not enabled the rope length is fixed to the total length of the rope, acting like the {@link DistanceJoint}.
+	 * @param flag true to enable slack
+	 * @since 3.1.6
+	 */
+	public void setSlackEnabled(boolean flag) {
+		this.slackEnabled = flag;
 	}
 }
