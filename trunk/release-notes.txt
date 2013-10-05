@@ -1,4 +1,23 @@
 ===============================================================================
+Version 3.1.6
+===============================================================================
+New Features:
+  - Added a "slack" flag to the PulleyJoint to allow the constraint to be
+    applied only when the current length is greater than the total length.
+    To turn this feature on, use the setSlackEnabled method.
+    
+Bug Fixes:
+  - Fixed a bug in the Segment.getSegmentIntersection methods where it would
+    return an intersection point falsely.
+    
+Deprecated:
+
+Breaking Changes:
+    
+Other:
+  - Regression JUnit test for Segment.getSegmentIntersection
+
+===============================================================================
 Version 3.1.5
 ===============================================================================
 New Features:
