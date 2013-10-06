@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Help Name="help.root" Path="/org/dyn4j/sandbox/help/general.html">
+	<Item Name="help.simulation">
+		<Item Name="help.newOpenSave" Path="/org/dyn4j/sandbox/help/newOpenSave.html" />
+		<Item Name="help.export" Path="/org/dyn4j/sandbox/help/export.html" />
+		<Item Name="help.startStopStep" Path="/org/dyn4j/sandbox/help/startStopStep.html" />
+		<Item Name="help.snapshots" Path="/org/dyn4j/sandbox/help/snapshots.html" />
+		<Item Name="help.body">
+			<Item Name="help.add.body" Path="/org/dyn4j/sandbox/help/add-body.html" />
+			<Item Name="help.remove.body" Path="/org/dyn4j/sandbox/help/remove-body.html" />
+			<Item Name="help.remove.fixture" Path="/org/dyn4j/sandbox/help/remove-fixture.html" />
+			<Item Name="help.edit.fixture" Path="/org/dyn4j/sandbox/help/edit-fixture.html" />
+			<Item Name="help.move.body" Path="/org/dyn4j/sandbox/help/movingBodiesFixtures.html" />
+		</Item>
+		<Item Name="help.joint">
+			<Item Name="help.add.joint" Path="/org/dyn4j/sandbox/help/add-joint.html" />
+			<Item Name="help.edit.joint" Path="/org/dyn4j/sandbox/help/edit-joint.html" />
+			<Item Name="help.remove.joint" Path="/org/dyn4j/sandbox/help/remove-joint.html" />
+		</Item>
+		<Item Name="help.settings" Path="/org/dyn4j/sandbox/help/settings.html" />
+		<Item Name="help.bounds" Path="/org/dyn4j/sandbox/help/bounds.html" />
+		<Item Name="help.ray">
+			<Item Name="help.add.ray" Path="/org/dyn4j/sandbox/help/add-ray.html" />
+			<Item Name="help.edit.ray" Path="/org/dyn4j/sandbox/help/edit-ray.html" />
+			<Item Name="help.remove.ray" Path="/org/dyn4j/sandbox/help/remove-ray.html" />
+		</Item>
+	</Item>
+	<Item Name="help.camera" Path="/org/dyn4j/sandbox/help/camera.html" />
+	<Item Name="help.preferences" Path="/org/dyn4j/sandbox/help/preferences.html" />
+	<Item Name="help.tests" Path="/org/dyn4j/sandbox/help/tests.html" />
+	<Item Name="help.status" Path="/org/dyn4j/sandbox/help/status.html" />
+</Help>
