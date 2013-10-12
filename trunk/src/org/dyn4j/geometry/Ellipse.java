@@ -39,7 +39,7 @@ import org.dyn4j.resources.Messages;
  * algorithm for this shape only and use SAT on others (fallback).
  * @author William Bittle
  * @since 3.1.5
- * @version 3.1.5
+ * @version 3.1.7
  */
 public class Ellipse extends AbstractShape implements Convex, Shape, Transformable {
 	/** The ellipse width */
@@ -151,39 +151,6 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		return p;
 	}
 	
-	/**
-	 * Returns the point on the ellipse closest to the given point.
-	 * @param point the world space point
-	 * @param transform the transform
-	 * @return {@link Vector2} in world space
-	 */
-	public Vector2 getPointClosestToPoint(Vector2 point, Transform transform) {
-		// convert the world space vector(n) to local space
-		Vector2 localPoint = transform.getInverseTransformed(point);
-		// include local rotation
-		double r = this.getRotation();
-		// invert the local rotation
-		localPoint.rotate(-r);
-		// an ellipse is a circle with a non-uniform scaling transformation applied
-		// so we can achieve that by scaling the vector from this center to the
-		// point by the major and minor axis lengths to get the point on the ellipse
-		// closest to the given point
-		
-		Vector2 v = this.center.to(localPoint);
-		v.normalize();
-		
-		v.x *= this.a;
-		v.y *= this.b;
-		
-		// include local rotation
-		// invert the local rotation
-		v.rotate(r);
-		v.add(this.center);
-		// then finally convert back into world space coordinates
-		transform.transform(v);
-		return v;
-	}
-
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Convex#getFarthestFeature(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform)
 	 */
@@ -258,7 +225,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		Vector2 localPoint = transform.getInverseTransformed(point);
 		// account for local rotation
 		double r = this.getRotation();
-		localPoint.rotate(-r);
+		localPoint.rotate(-r, this.center.x, this.center.y);
 		
 		double x = (localPoint.x - this.center.x);
 		double y = (localPoint.y - this.center.y);
@@ -321,6 +288,6 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 * @return double
 	 */
 	public double getHalfHeight() {
-		return this.a;
+		return this.b;
 	}
 }

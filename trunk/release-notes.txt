@@ -1,4 +1,31 @@
 ===============================================================================
+Version 3.1.7
+===============================================================================
+New Features:
+    
+Bug Fixes:
+  - Fixed a bug in the Ellipse.getHalfHeight method where it was returning
+    the half width instead.
+  - Fixed a bug in the Ellipse.contains method where it would fail if there 
+    was a local translation and a local rotation.
+  - Fixed a bug in the Graphics2DRenderer that would incorrectly render the
+    Ellipse shapes (this was why the above bug existed).
+  - Fixed a bug in the HalfEllipse.contains method where it would fail if
+    there was a local translation and a local rotation.
+    
+Deprecated:
+
+Breaking Changes:
+  - Had to remove the Ellipse.getPointClosestToPoint method due to an 
+    incorrect assumption resulting in incorrect return values.  The real
+    solution to this problem involves solving a quartic equation which
+    is typically done by a root finding algorithm.
+    
+Other:
+  - Regression JUnit test for Ellipse.getHalfHeight, Ellipse.contains, 
+    and HalfEllipse.contains methods
+
+===============================================================================
 Version 3.1.6
 ===============================================================================
 New Features:

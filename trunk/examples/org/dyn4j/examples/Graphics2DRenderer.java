@@ -45,7 +45,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Graphics2D renderer for dyn4j shape types.
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.1.7
  * @since 3.1.5
  */
 public final class Graphics2DRenderer {
@@ -237,13 +237,14 @@ public final class Graphics2DRenderer {
 		
 		// save the old transform
 		AffineTransform oTransform = g.getTransform();
+		g.translate(center.x * scale, center.y * scale);
 		g.rotate(rotation);
 		
 		double width = ellipse.getWidth();
 		double height = ellipse.getHeight();
 		Ellipse2D.Double c = new Ellipse2D.Double(
-			(center.x - width * 0.5) * scale,
-			(center.y - height * 0.5) * scale,
+			(-width * 0.5) * scale,
+			(-height * 0.5) * scale,
 			width * scale,
 			height * scale);
 		

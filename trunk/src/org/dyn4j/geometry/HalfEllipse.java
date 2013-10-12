@@ -40,7 +40,7 @@ import org.dyn4j.resources.Messages;
  * algorithm for this shape only and use SAT on others (fallback).
  * @author William Bittle
  * @since 3.1.5
- * @version 3.1.5
+ * @version 3.1.7
  */
 public class HalfEllipse extends AbstractShape implements Convex, Shape, Transformable {
 	/** The half ellipse inertia constant. See http://www.efunda.com/math/areas/ellipticalhalf.cfm */
@@ -253,7 +253,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		Vector2 localPoint = transform.getInverseTransformed(point);
 		// account for local rotation
 		double r = this.getRotation();
-		localPoint.rotate(-r);
+		localPoint.rotate(-r, this.ellipseCenter.x, this.ellipseCenter.y);
 		
 		// translate into local coordinates
 		double x = (localPoint.x - this.ellipseCenter.x);
