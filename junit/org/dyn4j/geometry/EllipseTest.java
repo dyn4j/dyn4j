@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Ellipse} class.
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.1.7
  * @since 3.1.5
  */
 public class EllipseTest {
@@ -72,7 +72,11 @@ public class EllipseTest {
 	 */
 	@Test
 	public void createSuccess() {
-		new Ellipse(1.0, 2.0);
+		Ellipse e = new Ellipse(1.0, 2.0);
+		TestCase.assertEquals(1.0, e.getHalfHeight());
+		TestCase.assertEquals(0.5, e.getHalfWidth());
+		TestCase.assertEquals(1.0, e.getWidth());
+		TestCase.assertEquals(2.0, e.getHeight());
 	}
 	
 	/**
@@ -96,6 +100,16 @@ public class EllipseTest {
 		p.set(1.5, 0.0);
 		
 		// should be on the edge
+		TestCase.assertTrue(e.contains(p, t));
+		
+		// test with local translation
+		e.rotate(Math.toRadians(90));
+		e.translate(0.5, 1.0);
+		
+		TestCase.assertFalse(e.contains(p, t));
+		p.set(1.0, 2.1);
+		TestCase.assertFalse(e.contains(p, t));
+		p.set(1.0, 2.0);
 		TestCase.assertTrue(e.contains(p, t));
 	}
 	
