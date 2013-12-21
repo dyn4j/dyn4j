@@ -82,7 +82,7 @@ import org.dyn4j.resources.Messages;
  * Employs the same {@link Island} solving technique as <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.1.8
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class World {
@@ -1180,8 +1180,6 @@ public class World {
 	 * <p>
 	 * For multi-fixtured bodies, only the fixture that has the minimum time of impact will be added to the
 	 * results list.
-	 * <p>
-	 * Bodies in collision with the given convex at the begining of the cast are not included in the results.
 	 * @param convex the convex to cast
 	 * @param transform the initial position and orientation of the convex
 	 * @param dp &Delta;position; the change in position (the cast length and direction basically)
@@ -1216,8 +1214,6 @@ public class World {
 	 * <p>
 	 * For multi-fixtured bodies, only the fixture that has the minimum time of impact will be added to the
 	 * results list.
-	 * <p>
-	 * Bodies in collision with the given convex at the begining of the cast are not included in the results.
 	 * @param convex the convex to cast
 	 * @param transform the initial position and orientation of the convex
 	 * @param dp &Delta;position; the change in position (the cast length and direction basically)
@@ -1356,8 +1352,6 @@ public class World {
 	 * {@link ConvexCastListener} doesn't allow the convex cast, then the body will not be tested.
 	 * <p>
 	 * For multi-fixtured bodies, the fixture that has the minimum time of impact will be the result.
-	 * <p>
-	 * Returns false if the given body and convex are in collision at the beginning of the cast.
 	 * @param convex the convex to cast
 	 * @param transform the initial position and orientation of the convex
 	 * @param dp &Delta;position; the change in position (the cast length and direction basically)
@@ -1385,8 +1379,6 @@ public class World {
 	 * {@link ConvexCastListener} doesn't allow the convex cast, then the body will not be tested.
 	 * <p>
 	 * For multi-fixtured bodies, the fixture that has the minimum time of impact will be the result.
-	 * <p>
-	 * Returns false if the given body and convex are in collision at the beginning of the cast.
 	 * @param convex the convex to cast
 	 * @param transform the initial position and orientation of the convex
 	 * @param dp &Delta;position; the change in position (the cast length and direction basically)

@@ -1,33 +1,4 @@
 ===============================================================================
-Version 3.1.8
-===============================================================================
-New Features:
-  - Added the methods Body.getFixture(Vector2), Body.getFixtures(Vector2),
-    Body.removeFixture(Vector2), and Body.removeFixtures(Vector2) which allow
-    you to get/remove fixtures given a world space point.
-    
-Bug Fixes:
-  - Fixed a bug in the Vector2.distance(double, double) method (wrong since 
-    1.1.0, yikes!).  Thankfully its not used anywhere in the engine so no 
-    regression.
-  - Fixed a bug in Body.applyImpulse(Vector2, Vector2) where the body would
-    not be awakened.
-    
-Deprecated:
-
-Breaking Changes:
-    
-Other:
-  - Regression JUnit test for Vector2.distance(double, double) method.
-  - Added documentation to the World.convexCast methods to explain the
-    limitation of the start of the cast (its a similar limitation as the
-    raycast methods).
-  - The Body.setLinearVelocity(Vector2) method now transfers the x,y values
-    of the given velocity to the body's velocity vector.  This has no effect
-    on anything, except this way you can reuse the vector passed to this
-    method now (earlier it was doing a reference assignment).
-
-===============================================================================
 Version 3.1.7
 ===============================================================================
 New Features:

@@ -83,7 +83,7 @@ import org.dyn4j.resources.Messages;
  * setting in the world's {@link Settings}.  Use this if the body is a fast moving
  * body, but be careful as this will incur a performance hit.
  * @author William Bittle
- * @version 3.1.8
+ * @version 3.1.5
  * @since 1.0.0
  */
 public class Body implements Collidable, Transformable {
@@ -873,13 +873,11 @@ public class Body implements Collidable, Transformable {
 		if (invM != 0.0) {
 			// apply the impulse immediately
 			this.velocity.add(impulse.x * invM, impulse.y * invM);
-			awaken = true;
 		}
 		if (invI != 0.0) {
 			// apply the impulse immediately
 			Vector2 r = this.getWorldCenter().to(point);
 			this.angularVelocity += invI * r.cross(impulse);
-			awaken = true;
 		}
 		if (awaken) {
 			// wake up the body
@@ -1338,92 +1336,6 @@ public class Body implements Collidable, Transformable {
 		return this.fixtures.get(index);
 	}
 	
-	/**
-	 * Returns the first fixture, as determined by the order in which they were added, that
-	 * contains the given point.
-	 * <p>
-	 * Returns null if the point is not contained in any fixture in this body.
-	 * @param point a world space point
-	 * @return {@link BodyFixture}
-	 * @since 3.1.8
-	 */
-	public BodyFixture getFixture(Vector2 point) {
-		int size = this.fixtures.size();
-		for (int i = 0; i < size; i++) {
-			BodyFixture fixture = this.fixtures.get(i);
-			Convex convex = fixture.getShape();
-			if (convex.contains(point, this.transform)) {
-				return fixture;
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * Returns all the fixtures that contain the given point.
-	 * <p>
-	 * Returns an empty list if the point is not contained in any fixture in this body.
-	 * @param point a world space point
-	 * @return List&lt;{@link BodyFixture}&gt;
-	 * @since 3.1.8
-	 */
-	public List<BodyFixture> getFixtures(Vector2 point) {
-		List<BodyFixture> fixtures = new ArrayList<BodyFixture>();
-		int size = this.fixtures.size();
-		for (int i = 0; i < size; i++) {
-			BodyFixture fixture = this.fixtures.get(i);
-			Convex convex = fixture.getShape();
-			if (convex.contains(point, this.transform)) {
-				fixtures.add(fixture);
-			}
-		}
-		return fixtures;
-	}
-	
-	/**
-	 * Removes the first fixture, as determined by the order in which they were added, that
-	 * contains the given point and returns it.
-	 * <p>
-	 * Returns null if the point is not contained in any fixture in this body.
-	 * @param point a world space point
-	 * @return {@link BodyFixture}
-	 * @since 3.1.8
-	 */
-	public BodyFixture removeFixture(Vector2 point) {
-		int size = this.fixtures.size();
-		for (int i = 0; i < size; i++) {
-			BodyFixture fixture = this.fixtures.get(i);
-			Convex convex = fixture.getShape();
-			if (convex.contains(point, this.transform)) {
-				this.fixtures.remove(i);
-				return fixture;
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * Returns all the fixtures that contain the given point.
-	 * <p>
-	 * Returns an empty list if the point is not contained in any fixture in this body.
-	 * @param point a world space point
-	 * @return List&lt;{@link BodyFixture}&gt;
-	 * @since 3.1.8
-	 */
-	public List<BodyFixture> removeFixtures(Vector2 point) {
-		List<BodyFixture> fixtures = new ArrayList<BodyFixture>();
-		Iterator<BodyFixture> it = this.fixtures.iterator();
-		while (it.hasNext()) {
-			BodyFixture fixture = it.next();
-			Convex convex = fixture.getShape();
-			if (convex.contains(point, this.transform)) {
-				it.remove();
-				fixtures.add(fixture);
-			}
-		}
-		return fixtures;
-	}
-	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.Collidable#getFixtureCount()
 	 */
@@ -1749,7 +1661,7 @@ public class Body implements Collidable, Transformable {
 	 */
 	public void setLinearVelocity(Vector2 velocity) {
 		if (velocity == null) throw new NullPointerException(Messages.getString("dynamics.body.nullVelocity"));
-		this.velocity.set(velocity);
+		this.velocity = velocity;
 	}
 
 	/**

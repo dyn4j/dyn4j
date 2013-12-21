@@ -45,7 +45,6 @@ import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.JointEdge;
 import org.dyn4j.dynamics.joint.RevoluteJoint;
 import org.dyn4j.geometry.AABB;
-import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
@@ -56,7 +55,7 @@ import org.junit.Test;
 /**
  * Class to test the {@link Body} class.
  * @author William Bittle
- * @version 3.1.8
+ * @version 3.1.5
  * @since 1.0.2
  */
 public class BodyTest {
@@ -137,104 +136,13 @@ public class BodyTest {
 		Body b = new Body();
 		
 		// test null fixture
-		boolean success = b.removeFixture((BodyFixture)null);
+		boolean success = b.removeFixture(null);
 		TestCase.assertFalse(success);
 		
 		// test not found fixture
 		b.addFixture(Geometry.createCircle(1.0));
 		success = b.removeFixture(new BodyFixture(Geometry.createRightTriangle(0.5, 0.3)));
 		TestCase.assertFalse(success);
-	}
-	
-	/**
-	 * Tests getting fixtures using a world space point.
-	 * @since 3.1.8
-	 */
-	@Test
-	public void getFixtureByPoint() {
-		Body b = new Body();
-		b.addFixture(Geometry.createCircle(1.0));
-		BodyFixture bf = b.addFixture(Geometry.createUnitCirclePolygon(5, 1.0));
-		bf.getShape().translate(0.5, 0);
-		
-		// test not in body
-		bf = b.getFixture(new Vector2(-1.0, -1.0));
-		TestCase.assertNull(bf);
-		
-		// confirm there are two fixtures at this location
-		TestCase.assertEquals(2, b.getFixtures(new Vector2(0.5, 0.25)).size());
-		
-		// test getting the first one
-		bf = b.getFixture(new Vector2(0.5, 0.25));
-		TestCase.assertNotNull(bf);
-		TestCase.assertTrue(bf.getShape() instanceof Circle);
-		
-		// test not in body
-		List<BodyFixture> bfs = b.getFixtures(new Vector2(-1.0, -1.0));
-		TestCase.assertNotNull(bfs);
-		TestCase.assertEquals(0, bfs.size());
-		
-		// test in body remove one
-		bfs = b.getFixtures(new Vector2(1.25, 0.10));
-		TestCase.assertNotNull(bfs);
-		TestCase.assertEquals(1, bfs.size());
-		TestCase.assertTrue(bfs.get(0).getShape() instanceof Polygon);
-		
-		// test in body remove both
-		bfs = b.getFixtures(new Vector2(0.75, 0.10));
-		TestCase.assertNotNull(bfs);
-		TestCase.assertEquals(2, bfs.size());
-	}
-	
-	/**
-	 * Tests removing fixtures by a world space point.
-	 * @since 3.1.8
-	 */
-	@Test
-	public void removeFixtureByPoint() {
-		Body b = new Body();
-		b.addFixture(Geometry.createCircle(1.0));
-		BodyFixture bf = b.addFixture(Geometry.createUnitCirclePolygon(5, 1.0));
-		bf.getShape().translate(0.5, 0);
-		
-		// test not in body
-		bf = b.removeFixture(new Vector2(-1.0, -1.0));
-		TestCase.assertNull(bf);
-		TestCase.assertEquals(2, b.fixtures.size());
-		
-		// confirm there are two fixtures at this location
-		TestCase.assertEquals(2, b.getFixtures(new Vector2(0.5, 0.25)).size());
-		// test remove the first one
-		bf = b.removeFixture(new Vector2(0.5, 0.25));
-		TestCase.assertNotNull(bf);
-		TestCase.assertTrue(bf.getShape() instanceof Circle);
-		TestCase.assertEquals(1, b.fixtures.size());
-		
-		// add the fixture back
-		bf = b.addFixture(Geometry.createCircle(1.0));
-		
-		// test not in body
-		List<BodyFixture> bfs = b.removeFixtures(new Vector2(-1.0, -1.0));
-		TestCase.assertNotNull(bfs);
-		TestCase.assertEquals(0, bfs.size());
-		TestCase.assertEquals(2, b.fixtures.size());
-		
-		// test in body remove one
-		bfs = b.removeFixtures(new Vector2(1.25, 0.10));
-		TestCase.assertNotNull(bfs);
-		TestCase.assertEquals(1, bfs.size());
-		TestCase.assertTrue(bfs.get(0).getShape() instanceof Polygon);
-		TestCase.assertEquals(1, b.fixtures.size());
-		
-		// add the fixture back
-		bf = b.addFixture(Geometry.createUnitCirclePolygon(5, 1.0));
-		bf.getShape().translate(0.5, 0);
-		
-		// test in body remove both
-		bfs = b.removeFixtures(new Vector2(0.75, 0.10));
-		TestCase.assertNotNull(bfs);
-		TestCase.assertEquals(2, bfs.size());
-		TestCase.assertEquals(0, b.fixtures.size());
 	}
 	
 	/**
