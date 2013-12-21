@@ -157,8 +157,8 @@ public class Keyboard implements KeyListener {
 	/* (non-Javadoc)
 	 * @see java.awt.event.KeyListener#keyTyped(java.awt.event.KeyEvent)
 	 */
-	@Override
-	public void keyTyped(KeyEvent e) {
+//	@Override
+//	public void keyTyped(KeyEvent e) {
 //		e.consume();
-	}
+//	}
 }
