@@ -32,7 +32,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Vector2} class.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.1.8
  * @since 1.0.0
  */
 public class Vector2Test {
@@ -101,6 +101,20 @@ public class Vector2Test {
 		TestCase.assertEquals(5.000, v.distanceSquared(new Vector2(2.0, -1.0)), 1.0e-3);
 		TestCase.assertEquals(2.000, v.distance(new Vector2(2.0, 0.0)), 1.0e-3);
 		TestCase.assertEquals(5.000, v.distance(new Vector2(3.0, 4.0)), 1.0e-3);
+	}
+	
+	/**
+	 * Tests the distance(double,double) method for bug found in versions 1.1.0 to 3.1.7.
+	 * @since 3.1.8
+	 */
+	@Test
+	public void distanceBugInVersions_1_1_0_to_3_1_7() {
+		Vector2 v = new Vector2(1.0, 2.0);
+		TestCase.assertEquals(2.236, v.getMagnitude(), 1.0e-3);
+		TestCase.assertEquals(2.236, v.distance(2.0, 0.0), 1.0e-3);
+		TestCase.assertEquals(0.000, v.distance(1.0, 2.0), 1.0e-3);
+		TestCase.assertEquals(1.414, v.distance(2.0, 1.0), 1.0e-3);
+		TestCase.assertEquals(4.242, v.distance(-2.0, -1.0), 1.0e-3);
 	}
 	
 	/**

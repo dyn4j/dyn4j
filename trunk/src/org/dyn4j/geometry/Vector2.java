@@ -41,7 +41,7 @@ import org.dyn4j.Epsilon;
  * </pre>
  * This can decrease the number of temporary vectors.
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.1.8
  * @since 1.0.0
  */
 public class Vector2 {
@@ -138,7 +138,7 @@ public class Vector2 {
 	 * @return double
 	 */
 	public double distance(double x, double y) {
-		return Math.hypot(x, y);
+		return Math.hypot(this.x - x, this.y - y);
 	}
 	
 	/**
