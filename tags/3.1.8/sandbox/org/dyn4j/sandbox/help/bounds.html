@@ -1,0 +1,25 @@
+<h1><u>Bounds</u></h1>
+<div>
+The bounds are the area in which bodies and joints will be simulation.  Once a body has left the bounds the body is
+no longer simulated and collision detection is no longer performed.  Bounds are useful if you have an open world in
+which bodies can fall off the stage.  It's ideal to have some set bounds since eventually the position of the body
+could cause overflow.
+<br /><br />
+Bounds can be set or unset using the Bounds Context menu.
+<br /><br />
+</div>
+
+<div><img src="classpath://org/dyn4j/sandbox/help/bounds-context-menu.png" /></div>
+
+<div>
+<br /><br />
+The Bounds Dialog allows you to set the width and height of the bounds.  In the case of the Sandbox application, an 
+Axis-Aligned Bounding Box (AABB) bounds is the only type you can create.  dyn4j does not provide any other bounds types but 
+allows the programmer to create new bounds types.
+<br /><br />
+The bounds can be translated as well to move the bounds left, right, up, or down using the Transform tab.  The bounds 
+in the Sandbox cannot be rotated because this would break the AABB contract.
+<br /><br />
+</div>
+
+<div><img src="classpath://org/dyn4j/sandbox/help/bounds-dialog.png" /></div>

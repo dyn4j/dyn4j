@@ -1,0 +1,302 @@
+===============================================================================
+Version 3.1.8
+===============================================================================
+New Features:
+  - Added the methods Body.getFixture(Vector2), Body.getFixtures(Vector2),
+    Body.removeFixture(Vector2), and Body.removeFixtures(Vector2) which allow
+    you to get/remove fixtures given a world space point.
+    
+Bug Fixes:
+  - Fixed a bug in the Vector2.distance(double, double) method (wrong since 
+    1.1.0, yikes!).  Thankfully its not used anywhere in the engine so no 
+    regression.
+  - Fixed a bug in Body.applyImpulse(Vector2, Vector2) where the body would
+    not be awakened.
+    
+Deprecated:
+
+Breaking Changes:
+    
+Other:
+  - Regression JUnit test for Vector2.distance(double, double) method.
+  - Added documentation to the World.convexCast methods to explain the
+    limitation of the start of the cast (its a similar limitation as the
+    raycast methods).
+  - The Body.setLinearVelocity(Vector2) method now transfers the x,y values
+    of the given velocity to the body's velocity vector.  This has no effect
+    on anything, except this way you can reuse the vector passed to this
+    method now (earlier it was doing a reference assignment).
+
+===============================================================================
+Version 3.1.7
+===============================================================================
+New Features:
+    
+Bug Fixes:
+  - Fixed a bug in the Ellipse.getHalfHeight method where it was returning
+    the half width instead.
+  - Fixed a bug in the Ellipse.contains method where it would fail if there 
+    was a local translation and a local rotation.
+  - Fixed a bug in the Graphics2DRenderer that would incorrectly render the
+    Ellipse shapes (this was why the above bug existed).
+  - Fixed a bug in the HalfEllipse.contains method where it would fail if
+    there was a local translation and a local rotation.
+    
+Deprecated:
+
+Breaking Changes:
+  - Had to remove the Ellipse.getPointClosestToPoint method due to an 
+    incorrect assumption resulting in incorrect return values.  The real
+    solution to this problem involves solving a quartic equation which
+    is typically done by a root finding algorithm.
+    
+Other:
+  - Regression JUnit test for Ellipse.getHalfHeight, Ellipse.contains, 
+    and HalfEllipse.contains methods
+
+===============================================================================
+Version 3.1.6
+===============================================================================
+New Features:
+  - Added a "slack" flag to the PulleyJoint to allow the constraint to be
+    applied only when the current length is greater than the total length.
+    To turn this feature on, use the setSlackEnabled method.
+    
+Bug Fixes:
+  - Fixed a bug in the Segment.getSegmentIntersection methods where it would
+    return an intersection point falsely.
+    
+Deprecated:
+
+Breaking Changes:
+    
+Other:
+  - Regression JUnit test for Segment.getSegmentIntersection
+
+===============================================================================
+Version 3.1.5
+===============================================================================
+New Features:
+  - Added a new Capsule shape primitive.
+  - Added a new Slice shape primitive.
+  - Updated the createUnitCirclePolygon method to be more efficient.
+  - Added methods to generate polygonal capsules, slices, ellipses, and half 
+    ellipses to the Geometry class.
+  - Added a new Ellipse shape primitive (GJK support only).
+  - Added a new HalfEllipse shape primitive (GJK support only).
+  - Added a Graphics2DRenderer class to the examples directory to show how to
+    render the shapes using Java2D.  Some of the new shapes are difficult to
+    render properly due to local rotation and curved features.
+  - Added a new FallbackNarrowphaseDetector which uses FallbackConditions to 
+    determine when to use a fallback NarrowphaseDetector rather than the
+    primary. This is useful when you want to use the SAT algorithm with the
+    ellipse or half ellipse shapes (fallback to GJK on these types). See the
+    SingleTypedFallbackCondition and PairwiseTypedFallbackCondition classes.
+  - Added equivalent instance methods for common Segment and line operations
+    to the Segment class.
+  - Added a couple of methods to do a fast radial expansion of a polygon.
+  - Added scaling operations to the Geometry class.
+  - Added Convex Casting to the World class.  This also included a rework
+    of the Time of Impact and CCD code.
+    
+Bug Fixes:
+  - Fixed a bug in the Vector2.getAngleBetween method where it would return
+    an angle outside the range of [-pi, pi]
+  - Fixed a bug in the Gjk algorithm where a near zero vector was not being
+    caught, causing a false negative during collision and a false positive
+    in the distance method.
+  - Fixed some bugs in the JUnit tests (no real effect but still important
+    so that future releases do not impact existing functionality)
+    
+Deprecated:
+  - Body.setVelocity and Body.getVelocity have been replaced by
+    Body.setLinearVelocity and Body.getLinearVelocity respectively.
+
+Breaking Changes:
+  - The addition of convex casting caused an overhaul of the Time of Impact
+    and CCD code.  This could have breaking changes if you were hooking
+    directly into any of this functionality.
+    
+Other:
+  - Many more JUnit tests.
+  - Updated license dates to be consistent.
+  - Removed the TestBed code.  You can always go get it from any version
+    tagged 3.1.4 or lower under the tags folder in SVN.
+
+===============================================================================
+Version 3.1.4
+===============================================================================
+New Features:
+  - Added a new feature to the Geometry class for flipping shapes about
+    an arbitrary line (defined as an axis and point).
+  - Not really a feature, but a createAABB accepting no arguments was added
+    to the shape interface for convenience.
+    
+Bug Fixes:
+  - Fixed a bug that was introduced in 3.1.3 where the average center was not
+    computed correctly since the vertex indexer was a 1 instead of an i.
+
+Deprecated:
+
+Breaking Changes:
+  - The shape, fixture, body, etc ids were updated from string to their UUID
+    counter parts for better flexibility.  However, if you were saving or
+    doing anything with the ids, that will need to change to something like
+    getId().toString().
+    
+Other:
+
+===============================================================================
+Version 3.1.3
+===============================================================================
+New Features:
+
+Bug Fixes:
+  - Fixed a major bug in the Polygon inertia calculation where it did not
+    take into account the local center.  This in turn made multi-fixture
+    masses incorrect as well.
+
+Deprecated:
+
+Breaking Changes:
+    
+Other:
+
+===============================================================================
+Version 3.1.2
+===============================================================================
+New Features:
+  - Added ids to ContactPoint objects to help track them.
+
+Bug Fixes:
+
+Deprecated:
+
+Breaking Changes:
+  - The ContactPoint and subclasses now must take in a ContactPointId object
+  - The IndexedManifoldPointId class no longer has the setXXX methods
+    
+Other:
+
+===============================================================================
+Version 3.1.1
+===============================================================================
+New Features:
+  - Added detect methods to the World class to do collision detection on a
+    area bounded by an AABB or Convex.
+  - Added contains methods for bodies, joints and listeners to the World
+    class.
+  - Added the createSweptAABB method to the Swept interface. Used in the CCD
+    code to help cull collision tests.
+  - Added contains(Vector2) and contains(double,double) to the AABB class to
+    test for point in AABB.
+  - Added a addFixture method to the Body class that accepts density, friction
+    and restitution values for convenience.
+  - Added a contains(BodyFixture) method to the Body class.
+  - Added applyImpulse(Vector2), applyImpulse(double) and 
+    applyImpulse(Vector2, Vector2) methods to the Body class.
+  - Added a getExpanded methods to the AABB and Interval classes.  Added 
+    intersection and getIntersection methods to the AABB class.  Added a
+    getLength method to the Interval class.
+  - Moved getUserData to the Constraint class so that you can now assign a
+    user object to contact constraints.
+  - Added initial capacity parameters to the constructors of relevant classes
+    to help size internal structures appropriately for better performance.
+  - Added line and segment intersection methods to the Segment class
+
+Bug Fixes:
+  - Fixed a bug in the ContactConstraintSolver where if there were two contacts
+    and just one was disabled, it was still possible that they would both
+    be solved.
+  - The expand methods in the Interval and AABB classes would accept a negative
+    expansion amount.  If the expansion was larger than the size, the interval
+    or AABB would be invalid.  This has been fixed to return degenerate
+    versions (about the mid point) instead.
+
+Deprecated:
+  - World class methods remove(Body,boolean), remove(Body), remove(Joint),
+    removeAll, removeAll(boolean), add(Body), add(Joint), and removeListeners
+    replaced with removeBody(Body,boolean), removeBody(Body), 
+    removeJoint(Joint), removeAllBodiesAndJoints, 
+    removeAllBodiesAndJoints(boolean), addBody(Body), addJoint(Joint), and
+    removeAllListeners respectively.
+  - RectangularBounds replaced with AxisAlignedBounds.
+  - Body class methods apply(double), apply(Force), apply(Torque), 
+    apply(Vector2), and apply(Vector2, Vector2) replaced with 
+    applyTorque(double), applyForce(Force), applyTorque(Torque), 
+    applyForce(Vector2), and applyForce(Vector2, Vector2) respectively.
+  - ContactManager.isEmpty() replaced with ContactManager.isCacheEmpty()
+
+Breaking Changes:
+  - The Step.update(double) method has been changed from public to protected.
+  - Changed the ContactConstraint to have a List of Contacts instead of the
+    Contact array.
+  - The Settings.setStepFrequency method has been changed to accept 
+    1/frequency (1/60) instead of frequency (60) as before. In versions before
+    3.1.1 one you could pass in 60 and it would be automatically inverted.
+  - The Shape.rotate(double) method's purpose has been changed to rotate the
+    shape about the origin.  A new method, rotateAboutCenter has been created
+    to replace the old functionality.
+  - The Broadphase detectors were returning a locally stored list that was
+    cleared and re-populated on the detect method.  These methods now return
+    a new list each time.  They now also return an empty list when there are
+    no collisions via the Collections.emptyList() method.
+    
+Other:
+  - Small performance enhancements via manual inlining of methods.
+  - Small performance enhancements via appropriate collection sizing.
+  - Small performance hit from returning a new list from the broadphase
+    detect methods.
+  - Small performance enhancement to DynamicAABBTree.detect methods by
+    changing the recursive search to a stackless iterative search.
+  - Small performance hit from returning new Penetration and Manifold objects
+    from the CollisionListener methods.
+  - The Settings class now allows any values one or greater for the velocity
+    and position constraint solver iterations.  In addition any value greater
+    than zero can be used for the step frequency.
+  - Updated Javadocs for the convex shape classes with documentation on where
+    the center of the shape will be and general restrictions on construction.
+  - Updated Javadocs for all listener types to help aid understanding of
+    their use and pitfalls.
+  - Replaced the usage of the synchronized Stack class with ArrayDeque or
+    ArrayList to improve performance.
+  - Many more JUnit tests.
+
+===============================================================================
+Version 3.1.0
+===============================================================================
+New Features:
+  - MotorJoint - Best for character movement.
+  - Coordinate Shifting - For large worlds.
+  - AngleJoint ratio - For creating gears.
+  - Multiple listeners
+  - Runtime version checking
+  
+Bug Fixes:
+  - Added checks for bodies and joints already added to another world.
+  - Fixed a bug in the World.removeAll method where it would still report a 
+    destoryed body even if notify was false.
+  - Fixed a bug in the Transform.setRotation method where it was set 
+    incorrectly.
+  - Fixed a bug in the FrictionJoint class where the linear constraint was 
+    not being satisfied.
+  - Fixed a bug in the MouseJoint class where it wouldn't work if the body 
+    was FIXED_LINEAR_VELOCITY mass type.
+  - Fixed a bug in the World.getJoinedBodies and World.getInContactBodies 
+    methods to only return one instance of a joined/contact body if it was 
+    joined or in contact multiple times.
+
+API Changes (breaking ones):
+  - The World.remove(Body) no longer automatically notifies of destroyed 
+    contacts or joints. Use the World.remove(Body,boolean) method to receive 
+    notifications.
+  - The entire listener scheme has been revamped to allow multiple listeners 
+    of all types. There are new methods that replace all the old methods on 
+    the World class: World.addListener, World.removeListener, 
+    World.getListeners(class), etc.
+  - The Version class no longer has the version numbers public. Instead use 
+    the getXXX methods. This allows runtime version checking of the dyn4j jar.
+  - The Force.isComplete and Torque.isComplete methods have changed to add an 
+    elapsed time parameter. This allows better tracking of when a force/torque
+    is completed.
+-------------------------------------------------------------------------------

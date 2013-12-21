@@ -1,0 +1,69 @@
+<h1><u>Moving Bodies & Fixtures</u></h1>
+
+<div>
+By default bodies and fixtures are created either at their origin or at their centroid.
+<br /><br />
+<h2>Moving Bodies</h2>
+Bodies can be moved around the simulation in two ways.  One way, <i>while the simulation is not running</i>, is to 
+manually assign the translation and rotation while creating or editing the body using the Transform tab.  
+This is useful when you need the body to be at a specific location and rotation.
+<br /><br />
+</div>
+
+<div><img src="classpath://org/dyn4j/sandbox/help/edit-body-transform.png" /></div>
+
+<div>
+<br /><br />
+Another way, <i>while the simulation is not running</i>, to move a body (after it has been created) is to use 
+the Left Mouse Button.  You can click and hold the Left Mouse Button on the body (any of its fixtures) and drag 
+the mouse around to drag the body around.
+<br /><br />
+Bodies can also be rotated using the mouse.  You can click and hold the Right Mouse Button on the body (any of its
+fixtures) and drag the mouse around to rotated the body about its center of mass.
+</div>
+
+<div><img src="classpath://org/dyn4j/sandbox/help/selected-body.png" /></div>
+
+<div>
+<br /><br />
+When the simulation is running the translation and rotation of a body cannot be changed directly.  Instead, it is
+changed using a Mouse Joint.  This joint is created and destroyed automatically by the Sandbox when you click and
+hold the Left Mouse Button on any part of a body.  The Mouse Joint allows you to drag the body around using a 
+rubber band like rope.
+<br /><br />
+This can be used in Compiled tests as well and is the only way to move bodies in those tests.
+</div>
+
+<div><img src="classpath://org/dyn4j/sandbox/help/selected-body-running.png" /></div>
+
+<div>
+<h2>Moving Fixtures</h2>
+Moving fixtures is just as easy.  One way, <i>when the simulation is not running</i>, to move a fixture is to apply 
+translation and rotation using the Transform tab in the Create or Edit Fixture Dialog.  This does not have the same 
+effect as it has when applied to bodies.  The translation and rotation applied here directly modifies the 
+vertices/center of the shape.  As a result, when editing the Fixture you will notice that the translation and 
+rotation are not saved.
+<br /><br />
+</div>
+
+<div><img src="classpath://org/dyn4j/sandbox/help/edit-fixture-transform.png" /></div>
+
+<div>
+<br /><br />
+Fixtures can also be moved, <i>when the simulation is not running</i>, using the mouse.  Double clicking the Left Mouse 
+Button will take you into fixture movement mode.  In this mode you can use the same body moving controls above to move 
+the individual fixtures.  Clicking on an area not within the body will cancel fixture move mode.
+<br /><br />
+</div>
+
+<div><img src="classpath://org/dyn4j/sandbox/help/selected-fixture.png" /></div>
+
+<div>
+<br /><br />
+Notes:
+<ul>
+	<li>The selected body or fixture will have a blue outline.</li>
+	<li>Fixtures cannot be moved while the simulation is running.</li>
+	<li>The Mouse Joint created when the simulation is running has a maximum force that is allowed to apply.</li>
+</ul>
+</div>
