@@ -29,7 +29,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents a numeric {@link Interval}.
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.1.9
  * @since 1.0.0
  */
 public class Interval {
@@ -266,8 +266,8 @@ public class Interval {
 	 */
 	public void intersection(Interval interval) {
 		if (this.overlaps(interval)) {
-			this.min = Math.min(interval.min, this.min);
-			this.max = Math.max(interval.max, this.max);
+			this.min = Math.max(interval.min, this.min);
+			this.max = Math.min(interval.max, this.max);
 		} else {
 			this.min = 0;
 			this.max = 0;
