@@ -224,4 +224,18 @@ public class BayazitTest extends AbstractDecomposeTest {
 		// the result should have less than or equal to n - 2 convex shapes
 		TestCase.assertTrue(result.size() <= 1034);
 	}
+
+	/**
+	 * Tests the bayazit implementation against the zoom(forum) data file 1.
+	 */
+	@Test
+	public void successZoom1() {
+		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/data/zoom1.dat"));
+		
+		// decompose the poly
+		List<Convex> result = this.algo.decompose(vertices);
+		
+		// the result should have less than or equal to n - 2 convex shapes
+		TestCase.assertTrue(result.size() <= 1034);
+	}
 }

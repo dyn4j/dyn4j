@@ -202,7 +202,7 @@ public class Bayazit implements Decomposer {
 					for (int j = lowerIndex; j <= upperIndex; j++) {
 						Vector2 q = polygon.get(j % size);
 						
-						if (q == p || q == p0 || q == p1) continue;
+						//if (q == p || q == p0 || q == p1) continue;
 						
 						// make sure q is in the range made by extending the
 						// previous and next edges of p

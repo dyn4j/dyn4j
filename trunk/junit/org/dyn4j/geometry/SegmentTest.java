@@ -113,6 +113,18 @@ public class SegmentTest {
 		// test valid line/right-below line
 		loc = Segment.getLocation(new Vector2(1.0, 1.0), new Vector2(), new Vector2(1.0, 2.0));
 		TestCase.assertTrue(loc < 0);
+		
+		// test vertical line
+		loc = Segment.getLocation(new Vector2(1.0, 1.0), new Vector2(), new Vector2(0.0, 3.0));
+		TestCase.assertTrue(loc < 0);
+		loc = Segment.getLocation(new Vector2(-1.0, 1.0), new Vector2(), new Vector2(0.0, 3.0));
+		TestCase.assertTrue(loc > 0);
+		
+		// test horizontal line
+		loc = Segment.getLocation(new Vector2(1.0, 1.0), new Vector2(0.0, 0.0), new Vector2(1.0, 0.0));
+		TestCase.assertTrue(loc > 0);
+		loc = Segment.getLocation(new Vector2(1.0, -1.0), new Vector2(0.0, 0.0), new Vector2(1.0, 0.0));
+		TestCase.assertTrue(loc < 0);
 	}
 	
 	/**
