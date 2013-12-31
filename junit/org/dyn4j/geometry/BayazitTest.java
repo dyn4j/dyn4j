@@ -36,7 +36,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Bayazit} class.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.1.9
  * @since 3.0.0
  */
 public class BayazitTest extends AbstractDecomposeTest {
@@ -227,6 +227,7 @@ public class BayazitTest extends AbstractDecomposeTest {
 
 	/**
 	 * Tests the bayazit implementation against the zoom(forum) data file 1.
+	 * @since 3.1.9
 	 */
 	@Test
 	public void successZoom1() {

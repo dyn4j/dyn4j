@@ -31,6 +31,7 @@ import org.dyn4j.Epsilon;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Polygon;
+import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
@@ -52,7 +53,7 @@ import org.dyn4j.resources.Messages;
  * can be achieved since the indexing of the {@link #vertices} list is the same as the source {@link Vector2}[].
  * No check is performed to ensure that a pair of {@link HalfEdge}s are added that already exist.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.9
  * @since 2.2.0
  */
 public class DoublyConnectedEdgeList {
@@ -562,8 +563,53 @@ public class DoublyConnectedEdgeList {
 			convexes.add(p);
 		}
 		
-		
 		return convexes;
+	}
+	
+	/**
+	 * Returns the triangulation of this DCEL assuming that the remaining
+	 * faces are all triangles.
+	 * @return List&lt;{@link Triangle}&gt;
+	 * @since 3.1.9
+	 */
+	public List<Triangle> getTriangulation() {
+		List<Triangle> triangles = new ArrayList<Triangle>();
+		
+		// get the number of faces
+		int fSize = this.faces.size();
+		
+		// create a y-monotone polygon for each face
+		for (int i = 0; i < fSize; i++) {
+			// get the face
+			Face face = this.faces.get(i);
+			
+			// get the number of Edges ( = the number of vertices) on this face
+			int size = face.getEdgeCount();
+			
+			// get the reference edge of the face
+			HalfEdge left = face.edge;
+			
+			Vector2[] vertices = new Vector2[size];
+			vertices[0] = left.origin.point;
+			
+			left = left.next;
+			
+			int j = 1;
+			while (left != face.edge) {
+				vertices[j++] = left.origin.point;
+				left = left.next;
+			}
+			
+			// the vertices should form a triangle
+			if (vertices.length != 3) {
+				throw new IllegalArgumentException(Messages.getString("geometry.decompose.crossingEdges"));
+			}
+			
+			Triangle t = Geometry.createTriangle(vertices[0], vertices[1], vertices[2]);
+			triangles.add(t);
+		}
+		
+		return triangles;
 	}
 	
 	/**
