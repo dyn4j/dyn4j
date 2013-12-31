@@ -36,7 +36,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link EarClipping} class.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.1.9
  * @since 2.2.0
  */
 public class EarClippingTest extends AbstractDecomposeTest {
@@ -90,7 +90,7 @@ public class EarClippingTest extends AbstractDecomposeTest {
 	}
 	
 	/**
-	 * Tests the ear clipping implementation against a 10 vertex
+	 * Tests the implementation against a 10 vertex
 	 * non-convex polygon.
 	 */
 	@Test
@@ -115,7 +115,32 @@ public class EarClippingTest extends AbstractDecomposeTest {
 	}
 	
 	/**
-	 * Tests the ear clipping implementation against the 1st polygon data file.
+	 * Tests the triangulation implementation against a 10 vertex
+	 * non-convex polygon.
+	 * @since 3.1.9
+	 */
+	@Test
+	public void triangulateSuccess1() {
+		Vector2[] vertices = new Vector2[10];
+		vertices[0] = new Vector2(2.0, 0.5);
+		vertices[1] = new Vector2(1.0, 1.0);
+		vertices[2] = new Vector2(-0.25, 0.25);
+		vertices[3] = new Vector2(-0.75, 1.5);
+		vertices[4] = new Vector2(-1.0, 2.0);
+		vertices[5] = new Vector2(-1.0, 0.0);
+		vertices[6] = new Vector2(-0.5, -0.75);
+		vertices[7] = new Vector2(0.25, -0.4);
+		vertices[8] = new Vector2(1.0, 0.3);
+		vertices[9] = new Vector2(0.25, -0.5);
+		
+		List<Triangle> triangulation = this.algo.triangulate(vertices);
+		
+		// the result should have n - 2 triangles shapes
+		TestCase.assertTrue(triangulation.size() == vertices.length - 2);
+	}
+	
+	/**
+	 * Tests the implementation against the 1st polygon data file.
 	 */
 	@Test
 	public void success2() {
@@ -129,7 +154,22 @@ public class EarClippingTest extends AbstractDecomposeTest {
 	}
 	
 	/**
-	 * Tests the ear clipping implementation against the 2nd polygon data file.
+	 * Tests the triangulation implementation against the 1st polygon data file.
+	 * @since 3.1.9
+	 */
+	@Test
+	public void triangulateSuccess2() {
+		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/data/polygon1.dat"));
+		
+		// decompose the poly
+		List<Triangle> result = this.algo.triangulate(vertices);
+		
+		// the result should have n - 2 triangles shapes
+		TestCase.assertTrue(result.size() == 15);
+	}
+	
+	/**
+	 * Tests the implementation against the 2nd polygon data file.
 	 */
 	@Test
 	public void success3() {
@@ -141,9 +181,24 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		// the result should have less than or equal to n - 2 convex shapes
 		TestCase.assertTrue(result.size() <= 18);
 	}
+
+	/**
+	 * Tests the triangulation implementation against the 2nd polygon data file.
+	 * @since 3.1.9
+	 */
+	@Test
+	public void triangulateSuccess3() {
+		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/data/polygon2.dat"));
+		
+		// decompose the poly
+		List<Triangle> result = this.algo.triangulate(vertices);
+		
+		// the result should have n - 2 triangles shapes
+		TestCase.assertTrue(result.size() == 18);
+	}
 	
 	/**
-	 * Tests the ear clipping implementation against the 3rd polygon data file.
+	 * Tests the implementation against the 3rd polygon data file.
 	 */
 	@Test
 	public void success4() {
@@ -155,9 +210,24 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		// the result should have less than or equal to n - 2 convex shapes
 		TestCase.assertTrue(result.size() <= 17);
 	}
+
+	/**
+	 * Tests the triangulation implementation against the 3rd polygon data file.
+	 * @since 3.1.9
+	 */
+	@Test
+	public void triangulateSuccess4() {
+		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/data/polygon3.dat"));
+		
+		// decompose the poly
+		List<Triangle> result = this.algo.triangulate(vertices);
+		
+		// the result should have n - 2 triangles shapes
+		TestCase.assertTrue(result.size() == 17);
+	}
 	
 	/**
-	 * Tests the ear clipping implementation against the 4th polygon data file.
+	 * Tests the implementation against the 4th polygon data file.
 	 */
 	@Test
 	public void success5() {
@@ -169,9 +239,24 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		// the result should have less than or equal to n - 2 convex shapes
 		TestCase.assertTrue(result.size() <= 26);
 	}
+
+	/**
+	 * Tests the triangulation implementation against the 4th polygon data file.
+	 * @since 3.1.9
+	 */
+	@Test
+	public void triangulateSuccess5() {
+		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/data/polygon4.dat"));
+		
+		// decompose the poly
+		List<Triangle> result = this.algo.triangulate(vertices);
+		
+		// the result should have n - 2 triangles shapes
+		TestCase.assertTrue(result.size() == 26);
+	}
 	
 	/**
-	 * Tests the ear clipping implementation against the bird data file.
+	 * Tests the implementation against the bird data file.
 	 */
 	@Test
 	public void successBird() {
@@ -183,9 +268,24 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		// the result should have less than or equal to n - 2 convex shapes
 		TestCase.assertTrue(result.size() <= 273);
 	}
+
+	/**
+	 * Tests the triangulation implementation against the bird data file.
+	 * @since 3.1.9
+	 */
+	@Test
+	public void triangulateSuccessBird() {
+		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/data/bird.dat"));
+		
+		// decompose the poly
+		List<Triangle> result = this.algo.triangulate(vertices);
+		
+		// the result should have n - 2 triangles shapes
+		TestCase.assertTrue(result.size() == 273);
+	}
 	
 	/**
-	 * Tests the ear clipping implementation against the tank data file.
+	 * Tests the implementation against the tank data file.
 	 */
 	@Test
 	public void successTank() {
@@ -197,9 +297,24 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		// the result should have less than or equal to n - 2 convex shapes
 		TestCase.assertTrue(result.size() <= 53);
 	}
+
+	/**
+	 * Tests the triangulation implementation against the tank data file.
+	 * @since 3.1.9
+	 */
+	@Test
+	public void triangulateSuccessTank() {
+		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/data/tank.dat"));
+		
+		// decompose the poly
+		List<Triangle> result = this.algo.triangulate(vertices);
+		
+		// the result should have n - 2 triangles shapes
+		TestCase.assertTrue(result.size() == 53);
+	}
 	
 	/**
-	 * Tests the ear clipping implementation against the nazca_monkey data file.
+	 * Tests the implementation against the nazca_monkey data file.
 	 */
 	@Test
 	public void successNazcaMonkey() {
@@ -213,7 +328,22 @@ public class EarClippingTest extends AbstractDecomposeTest {
 	}
 
 	/**
-	 * Tests the ear clipping implementation against the nazca_heron data file.
+	 * Tests the triangulation implementation against the nazca_monkey data file.
+	 * @since 3.1.9
+	 */
+	@Test
+	public void triangulateSuccessNazcaMonkey() {
+		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/data/nazca_monkey.dat"));
+		
+		// decompose the poly
+		List<Triangle> result = this.algo.triangulate(vertices);
+		
+		// the result should have n - 2 triangles shapes
+		TestCase.assertTrue(result.size() == 1202);
+	}
+	
+	/**
+	 * Tests the implementation against the nazca_heron data file.
 	 */
 	@Test
 	public void successNazcaHeron() {
@@ -225,9 +355,25 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		// the result should have less than or equal to n - 2 convex shapes
 		TestCase.assertTrue(result.size() <= 1034);
 	}
+
+	/**
+	 * Tests the triangulation implementation against the nazca_monkey data file.
+	 * @since 3.1.9
+	 */
+	@Test
+	public void triangulateSuccessNazcaHeron() {
+		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/data/nazca_heron.dat"));
+		
+		// decompose the poly
+		List<Triangle> result = this.algo.triangulate(vertices);
+		
+		// the result should have n - 2 triangles shapes
+		TestCase.assertTrue(result.size() == 1034);
+	}
 	
 	/**
-	 * Tests the ear clipping implementation against the zoom(forum) data file 1.
+	 * Tests the implementation against the zoom(forum) data file 1.
+	 * @since 3.1.9
 	 */
 	@Test
 	public void successZoom1() {
@@ -237,6 +383,21 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		List<Convex> result = this.algo.decompose(vertices);
 		
 		// the result should have less than or equal to n - 2 convex shapes
-		TestCase.assertTrue(result.size() <= 1034);
+		TestCase.assertTrue(result.size() <= 74);
+	}
+
+	/**
+	 * Tests the triangulation implementation against the zoom1 data file.
+	 * @since 3.1.9
+	 */
+	@Test
+	public void triangulateSuccessZoom1() {
+		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/data/zoom1.dat"));
+		
+		// decompose the poly
+		List<Triangle> result = this.algo.triangulate(vertices);
+		
+		// the result should have n - 2 triangles shapes
+		TestCase.assertTrue(result.size() == 74);
 	}
 }

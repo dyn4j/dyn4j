@@ -32,6 +32,7 @@ import org.dyn4j.Epsilon;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Segment;
+import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
@@ -47,10 +48,13 @@ import org.dyn4j.resources.Messages;
  * <p>
  * This algorithm total complexity is O(n log n).
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.9
  * @since 2.2.0
  */
-public class SweepLine implements Decomposer {
+public class SweepLine implements Decomposer, Triangulator {
+	/** The epsilon used for vertex sorting */
+	private static final double EPSILON = Epsilon.E * 10.0;
+	
 	/**
 	 * Represents a vertex on a polygon that stores information
 	 * about the left and right edges and left and right vertices.
@@ -108,7 +112,7 @@ public class SweepLine implements Decomposer {
 			Vector2 p = this.point;
 			Vector2 q = other.point;
 			double diff = q.y - p.y;
-			if (Math.abs(diff) <= Epsilon.E) {
+			if (Math.abs(diff) <= SweepLine.EPSILON) {
 				// if the difference is near equal then compare the x values
 				return (int) Math.signum(p.x - q.x);
 			} else {
@@ -334,6 +338,38 @@ public class SweepLine implements Decomposer {
 	 */
 	@Override
 	public List<Convex> decompose(Vector2... points) {
+		// triangulate
+		DoublyConnectedEdgeList dcel = this.createTriangulation(points);
+		
+		// the DCEL now contains a valid triangulation
+		// next we perform the Hertel-Mehlhorn algorithm to
+		// remove unnecessary edges
+		dcel.hertelMehlhorn();
+		
+		// the DCEL now contains a valid convex decompostion
+		// convert the dcel into a list of convex shapes
+		return dcel.getConvexDecomposition();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.decompose.Triangulator#triangulate(org.dyn4j.geometry.Vector2[])
+	 */
+	@Override
+	public List<Triangle> triangulate(Vector2... points) {
+		// triangulate
+		DoublyConnectedEdgeList dcel = this.createTriangulation(points);
+		// return the triangulation
+		return dcel.getTriangulation();
+	}
+	
+	/**
+	 * Creates a triangulation of the given simple polygon and places it in the
+	 * returned doubly-connected edge list (DCEL).
+	 * @param points the vertices of the simple polygon to triangulate
+	 * @return {@link DoublyConnectedEdgeList}
+	 * @since 3.1.9
+	 */
+	protected DoublyConnectedEdgeList createTriangulation(Vector2... points) {
 		// check for a null list
 		if (points == null) throw new NullPointerException(Messages.getString("geometry.decompose.nullArray"));
 		// get the number of points
@@ -384,14 +420,8 @@ public class SweepLine implements Decomposer {
 			dcel.triangulateMonotoneY(polygons.get(i));
 		}
 		
-		// the DCEL now contains a valid triangulation
-		// next we perform the Hertel-Mehlhorn algorithm to
-		// remove unnecessary edges
-		dcel.hertelMehlhorn();
-		
-		// the DCEL now contains a valid convex decompostion
-		// convert the dcel into a list of convex shapes
-		return dcel.getConvexDecomposition();
+		// return the triangulation
+		return dcel;
 	}
 	
 	/**

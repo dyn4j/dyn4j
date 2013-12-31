@@ -28,6 +28,7 @@ import java.util.List;
 
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
+import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
@@ -51,10 +52,10 @@ import org.dyn4j.resources.Messages;
  * <p>
  * This algorithm is O(n<sup>2</sup>).
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.9
  * @since 2.2.0
  */
-public class EarClipping implements Decomposer {
+public class EarClipping implements Decomposer, Triangulator {
 	/**
 	 * Node class for a vertex within the simple polygon.
 	 * @author William Bittle
@@ -104,6 +105,37 @@ public class EarClipping implements Decomposer {
 	 */
 	@Override
 	public List<Convex> decompose(Vector2... points) {
+		// triangulate
+		DoublyConnectedEdgeList dcel = this.createTriangulation(points);
+				
+		// perform the Hertel-Mehlhorn algorithm to reduce the number
+		// of convex pieces
+		dcel.hertelMehlhorn();
+		
+		// return the convex pieces
+		return dcel.getConvexDecomposition();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.decompose.Triangulator#triangulate(org.dyn4j.geometry.Vector2[])
+	 */
+	@Override
+	public List<Triangle> triangulate(Vector2... points) {
+		// triangulate
+		DoublyConnectedEdgeList dcel = this.createTriangulation(points);
+		
+		// return the triangulation
+		return dcel.getTriangulation();
+	}
+	
+	/**
+	 * Creates a triangulation of the given simple polygon and places it into the returned
+	 * doubly-connected edge list (DCEL).
+	 * @param points the simple polygon vertices
+	 * @return {@link DoublyConnectedEdgeList}
+	 * @since 3.1.9
+	 */
+	protected DoublyConnectedEdgeList createTriangulation(Vector2... points) {
 		// check for null array
 		if (points == null) throw new NullPointerException(Messages.getString("geometry.decompose.nullArray"));
 		// get the number of points
@@ -213,15 +245,7 @@ public class EarClipping implements Decomposer {
 			node = node.next;
 		}
 		
-		// lastly, add the last diagonal
-		dcel.addHalfEdges(node.next.reference, node.prev.reference);
-		
-		// perform the Hertel-Mehlhorn algorithm to reduce the number
-		// of convex pieces
-		dcel.hertelMehlhorn();
-		
-		// return the convex pieces
-		return dcel.getConvexDecomposition();
+		return dcel;
 	}
 	
 	/**
