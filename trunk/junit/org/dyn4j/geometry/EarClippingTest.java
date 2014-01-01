@@ -136,7 +136,7 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		List<Triangle> triangulation = this.algo.triangulate(vertices);
 		
 		// the result should have n - 2 triangles shapes
-		TestCase.assertTrue(triangulation.size() == vertices.length - 2);
+		TestCase.assertEquals(vertices.length - 2, triangulation.size());
 	}
 	
 	/**
@@ -165,7 +165,7 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		List<Triangle> result = this.algo.triangulate(vertices);
 		
 		// the result should have n - 2 triangles shapes
-		TestCase.assertTrue(result.size() == 15);
+		TestCase.assertEquals(vertices.length - 2, result.size());
 	}
 	
 	/**
@@ -194,7 +194,7 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		List<Triangle> result = this.algo.triangulate(vertices);
 		
 		// the result should have n - 2 triangles shapes
-		TestCase.assertTrue(result.size() == 18);
+		TestCase.assertEquals(vertices.length - 2, result.size());
 	}
 	
 	/**
@@ -223,7 +223,7 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		List<Triangle> result = this.algo.triangulate(vertices);
 		
 		// the result should have n - 2 triangles shapes
-		TestCase.assertTrue(result.size() == 17);
+		TestCase.assertEquals(vertices.length - 2, result.size());
 	}
 	
 	/**
@@ -252,7 +252,7 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		List<Triangle> result = this.algo.triangulate(vertices);
 		
 		// the result should have n - 2 triangles shapes
-		TestCase.assertTrue(result.size() == 26);
+		TestCase.assertEquals(vertices.length - 2, result.size());
 	}
 	
 	/**
@@ -281,7 +281,7 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		List<Triangle> result = this.algo.triangulate(vertices);
 		
 		// the result should have n - 2 triangles shapes
-		TestCase.assertTrue(result.size() == 273);
+		TestCase.assertEquals(vertices.length - 2, result.size());
 	}
 	
 	/**
@@ -310,7 +310,7 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		List<Triangle> result = this.algo.triangulate(vertices);
 		
 		// the result should have n - 2 triangles shapes
-		TestCase.assertTrue(result.size() == 53);
+		TestCase.assertEquals(vertices.length - 2, result.size());
 	}
 	
 	/**
@@ -339,7 +339,7 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		List<Triangle> result = this.algo.triangulate(vertices);
 		
 		// the result should have n - 2 triangles shapes
-		TestCase.assertTrue(result.size() == 1202);
+		TestCase.assertEquals(vertices.length - 2, result.size());
 	}
 	
 	/**
@@ -368,7 +368,7 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		List<Triangle> result = this.algo.triangulate(vertices);
 		
 		// the result should have n - 2 triangles shapes
-		TestCase.assertTrue(result.size() == 1034);
+		TestCase.assertEquals(vertices.length - 2, result.size());
 	}
 	
 	/**
@@ -398,6 +398,6 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		List<Triangle> result = this.algo.triangulate(vertices);
 		
 		// the result should have n - 2 triangles shapes
-		TestCase.assertTrue(result.size() == 74);
+		TestCase.assertEquals(vertices.length - 2, result.size());
 	}
 }
