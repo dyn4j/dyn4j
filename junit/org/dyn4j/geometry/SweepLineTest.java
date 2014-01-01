@@ -136,7 +136,7 @@ public class SweepLineTest extends AbstractDecomposeTest {
 		List<Triangle> triangulation = this.algo.triangulate(vertices);
 		
 		// the result should have n - 2 triangles shapes
-		TestCase.assertTrue(triangulation.size() == vertices.length - 2);
+		TestCase.assertEquals(vertices.length - 2, triangulation.size());
 	}
 	
 	/**
@@ -165,7 +165,9 @@ public class SweepLineTest extends AbstractDecomposeTest {
 		List<Triangle> result = this.algo.triangulate(vertices);
 		
 		// the result should have n - 2 triangles shapes
-		TestCase.assertTrue(result.size() == 15);
+		// NOTE: this ends up being 14 instead of 15 since one
+		// of the triangles has zero area, and we toss those
+		TestCase.assertEquals(14, result.size());
 	}
 	
 	/**
@@ -194,7 +196,9 @@ public class SweepLineTest extends AbstractDecomposeTest {
 		List<Triangle> result = this.algo.triangulate(vertices);
 		
 		// the result should have n - 2 triangles shapes
-		TestCase.assertTrue(result.size() == 18);
+		// NOTE: this ends up being 15 instead of 18 since some
+		// of the triangles have zero area, and we toss those
+		TestCase.assertEquals(15, result.size());
 	}
 	
 	/**
@@ -223,7 +227,7 @@ public class SweepLineTest extends AbstractDecomposeTest {
 		List<Triangle> result = this.algo.triangulate(vertices);
 		
 		// the result should have n - 2 triangles shapes
-		TestCase.assertTrue(result.size() == 17);
+		TestCase.assertEquals(vertices.length - 2, result.size());
 	}
 	
 	/**
@@ -252,7 +256,7 @@ public class SweepLineTest extends AbstractDecomposeTest {
 		List<Triangle> result = this.algo.triangulate(vertices);
 		
 		// the result should have n - 2 triangles shapes
-		TestCase.assertTrue(result.size() == 26);
+		TestCase.assertEquals(vertices.length - 2, result.size());
 	}
 	
 	/**
@@ -281,7 +285,9 @@ public class SweepLineTest extends AbstractDecomposeTest {
 		List<Triangle> result = this.algo.triangulate(vertices);
 		
 		// the result should have n - 2 triangles shapes
-		TestCase.assertTrue(result.size() == 273);
+		// NOTE: this ends up being 271 instead of 273 since some
+		// of the triangles have zero area, and we toss those
+		TestCase.assertEquals(271, result.size());
 	}
 	
 	/**
@@ -310,7 +316,9 @@ public class SweepLineTest extends AbstractDecomposeTest {
 		List<Triangle> result = this.algo.triangulate(vertices);
 		
 		// the result should have n - 2 triangles shapes
-		TestCase.assertTrue(result.size() == 53);
+		// NOTE: this ends up being 52 instead of 53 since some
+		// of the triangles have zero area, and we toss those
+		TestCase.assertEquals(52, result.size());
 	}
 	
 	/**
@@ -339,7 +347,7 @@ public class SweepLineTest extends AbstractDecomposeTest {
 		List<Triangle> result = this.algo.triangulate(vertices);
 		
 		// the result should have n - 2 triangles shapes
-		TestCase.assertTrue(result.size() == 1202);
+		TestCase.assertEquals(vertices.length - 2, result.size());
 	}
 	
 	/**
@@ -368,7 +376,7 @@ public class SweepLineTest extends AbstractDecomposeTest {
 		List<Triangle> result = this.algo.triangulate(vertices);
 		
 		// the result should have n - 2 triangles shapes
-		TestCase.assertTrue(result.size() == 1034);
+		TestCase.assertEquals(vertices.length - 2, result.size());
 	}
 	
 	/**
@@ -398,6 +406,6 @@ public class SweepLineTest extends AbstractDecomposeTest {
 		List<Triangle> result = this.algo.triangulate(vertices);
 		
 		// the result should have n - 2 triangles shapes
-		TestCase.assertTrue(result.size() == 74);
+		TestCase.assertEquals(vertices.length - 2, result.size());
 	}
 }
