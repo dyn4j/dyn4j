@@ -1,4 +1,27 @@
 ===============================================================================
+Version 3.1.9
+===============================================================================
+New Features:
+  - Added a new interface, Triangulator, that both the EarClipping and
+    SweepLine algorithms implement that allow you to get a triangulation of
+    a simple polygon.
+    
+Bug Fixes:
+  - Fixed a bug in the SweepLine class where it would get a NPE when there
+    were vertices who had close to the same y value (were sorted incorrectly).
+  - Fixed a bug in the EarClipping class where extra half edges were added
+    to the DCEL at termination that didn't need to be.
+  - Fixed a bug in the Interval.intersection(Interval) class where it was
+    performing the union rather than the intersection.
+    
+Deprecated:
+
+Breaking Changes:
+    
+Other:
+  - Regression JUnit tests for bugs listed above.
+
+===============================================================================
 Version 3.1.8
 ===============================================================================
 New Features:
