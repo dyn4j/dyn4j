@@ -212,7 +212,7 @@ public class SweepLine implements Decomposer, Triangulator {
 			// check for reference equality first
 			if (this == o) return 0;
 			// first sort by the minimum x value
-			double value = this.getMinX() - o.getMinX();
+			double value = this.getMaxX() - o.getMaxX();
 			if (Math.abs(value) <= Epsilon.E) {
 				// if they are near zero sort by the minimum y
 				value = o.getMinY() - this.getMinY();
