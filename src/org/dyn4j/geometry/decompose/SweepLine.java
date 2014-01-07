@@ -209,15 +209,10 @@ public class SweepLine implements Decomposer, Triangulator {
 		 */
 		@Override
 		public int compareTo(Edge o) {
-			// check for reference equality first
-			if (this == o) return 0;
-			// first sort by the minimum x value
-			double value = this.getMaxX() - o.getMaxX();
-			if (Math.abs(value) <= Epsilon.E) {
-				// if they are near zero sort by the minimum y
-				value = o.getMinY() - this.getMinY();
-			}
-			return (int) Math.signum(value);
+			// an edge is less than another if its start vertex is to the right
+			// of the other edge
+			double location = Segment.getLocation(this.v0.point, o.v0.point, o.v1.point);
+			return (int)Math.signum(location);
 		}
 		
 		/**
