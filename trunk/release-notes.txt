@@ -13,6 +13,8 @@ Bug Fixes:
     to the DCEL at termination that didn't need to be.
   - Fixed a bug in the Interval.intersection(Interval) class where it was
     performing the union rather than the intersection.
+  - Fixed a bug in the SweepLine class where it would enter an infinite loop
+    due to a poor sort condition during the decompose to y-monotone phase.
     
 Deprecated:
 

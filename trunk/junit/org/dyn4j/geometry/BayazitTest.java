@@ -174,7 +174,7 @@ public class BayazitTest extends AbstractDecomposeTest {
 	 */
 	@Test
 	public void successBird() {
-		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/data/bird.dat"));
+		Vector2[] vertices = this.load(BayazitTest.class.getResourceAsStream("/org/dyn4j/data/bird.dat"));
 		
 		// decompose the poly
 		List<Convex> result = this.algo.decompose(vertices);
@@ -188,7 +188,7 @@ public class BayazitTest extends AbstractDecomposeTest {
 	 */
 	@Test
 	public void successTank() {
-		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/data/tank.dat"));
+		Vector2[] vertices = this.load(BayazitTest.class.getResourceAsStream("/org/dyn4j/data/tank.dat"));
 		
 		// decompose the poly
 		List<Convex> result = this.algo.decompose(vertices);
@@ -202,7 +202,7 @@ public class BayazitTest extends AbstractDecomposeTest {
 	 */
 	@Test
 	public void successNazcaMonkey() {
-		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/data/nazca_monkey.dat"));
+		Vector2[] vertices = this.load(BayazitTest.class.getResourceAsStream("/org/dyn4j/data/nazca_monkey.dat"));
 		
 		// decompose the poly
 		List<Convex> result = this.algo.decompose(vertices);
@@ -216,7 +216,7 @@ public class BayazitTest extends AbstractDecomposeTest {
 	 */
 	@Test
 	public void successNazcaHeron() {
-		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/data/nazca_heron.dat"));
+		Vector2[] vertices = this.load(BayazitTest.class.getResourceAsStream("/org/dyn4j/data/nazca_heron.dat"));
 		
 		// decompose the poly
 		List<Convex> result = this.algo.decompose(vertices);
@@ -231,7 +231,7 @@ public class BayazitTest extends AbstractDecomposeTest {
 	 */
 	@Test
 	public void successZoom1() {
-		Vector2[] vertices = this.load(EarClippingTest.class.getResourceAsStream("/org/dyn4j/data/zoom1.dat"));
+		Vector2[] vertices = this.load(BayazitTest.class.getResourceAsStream("/org/dyn4j/data/zoom1.dat"));
 		
 		// decompose the poly
 		List<Convex> result = this.algo.decompose(vertices);
@@ -239,4 +239,20 @@ public class BayazitTest extends AbstractDecomposeTest {
 		// the result should have less than or equal to n - 2 convex shapes
 		TestCase.assertTrue(result.size() <= 1034);
 	}
+
+	/**
+	 * Tests the triangulation implementation against the zoom1 data file.
+	 * @since 3.1.9
+	 */
+	@Test
+	public void successZoom2() {
+		Vector2[] vertices = this.load(BayazitTest.class.getResourceAsStream("/org/dyn4j/data/zoom2.dat"));
+		
+		// decompose the poly
+		List<? extends Convex> result = this.algo.decompose(vertices);
+		
+		// the result should have n - 2 triangles shapes
+		TestCase.assertTrue(result.size() <= vertices.length - 2);
+	}
+	
 }
