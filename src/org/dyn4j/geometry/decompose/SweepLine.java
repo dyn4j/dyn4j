@@ -138,12 +138,6 @@ public class SweepLine implements Decomposer, Triangulator {
 		 * @return boolean true if this {@link Vertex} is to the left of the given {@link Edge}
 		 */
 		public boolean isLeft(Edge edge) {
-			// attempt the simple comparison first
-			if (this.point.x < edge.getMinX()) {
-				return true;
-			} else if (this.point.x > edge.getMaxX()) {
-				return false;
-			}
 			// its in between the min and max x so we need to 
 			// do a side of line test
 			double location = Segment.getLocation(this.point, edge.v0.point, edge.v1.point);
