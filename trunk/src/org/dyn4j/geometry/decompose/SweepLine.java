@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 import org.dyn4j.BinarySearchTree;
-import org.dyn4j.Epsilon;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Segment;
@@ -52,9 +51,6 @@ import org.dyn4j.resources.Messages;
  * @since 2.2.0
  */
 public class SweepLine implements Decomposer, Triangulator {
-	/** The epsilon used for vertex sorting */
-	private static final double EPSILON = Epsilon.E * 10.0;
-	
 	/**
 	 * Represents a vertex on a polygon that stores information
 	 * about the left and right edges and left and right vertices.
@@ -112,7 +108,7 @@ public class SweepLine implements Decomposer, Triangulator {
 			Vector2 p = this.point;
 			Vector2 q = other.point;
 			double diff = q.y - p.y;
-			if (Math.abs(diff) <= SweepLine.EPSILON) {
+			if (diff == 0.0) {
 				// if the difference is near equal then compare the x values
 				return (int) Math.signum(p.x - q.x);
 			} else {
@@ -254,9 +250,8 @@ public class SweepLine implements Decomposer, Triangulator {
 		 */
 		public boolean isInteriorRight() {
 			double diff = v0.point.y - v1.point.y;
-			// check if the points have nearly the
-			// same x value
-			if (Math.abs(diff) <= Epsilon.E) {
+			// check if the points have the same y value
+			if (diff == 0.0) {
 				// if they do, is the vector of the
 				// two points to the right or to the left
 				if (v0.point.x < v1.point.x) {
@@ -593,7 +588,7 @@ public class SweepLine implements Decomposer, Triangulator {
 	 */
 	protected boolean isBelow(Vector2 p, Vector2 q) {
 		double diff = p.y - q.y;
-		if (Math.abs(diff) <= Epsilon.E) {
+		if (diff == 0.0) {
 			if (p.x > q.x) {
 				return true;
 			} else {

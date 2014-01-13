@@ -468,4 +468,34 @@ public class SweepLineTest extends AbstractDecomposeTest {
 		// the result should have n - 2 triangles shapes
 		TestCase.assertEquals(vertices.length - 2, result.size());
 	}
+	
+	/**
+	 * Tests the implementation against the zoom4 data file.
+	 * @since 3.1.9
+	 */
+	@Test
+	public void successZoom4() {
+		Vector2[] vertices = this.load(SweepLineTest.class.getResourceAsStream("/org/dyn4j/data/zoom4.dat"));
+		
+		// decompose the poly
+		List<? extends Convex> result = this.algo.decompose(vertices);
+		
+		// the result should have n - 2 triangles shapes
+		TestCase.assertTrue(result.size() <= vertices.length - 2);
+	}
+	
+	/**
+	 * Tests the triangulation implementation against the zoom4 data file.
+	 * @since 3.1.9
+	 */
+	@Test
+	public void triangulateSuccessZoom4() {
+		Vector2[] vertices = this.load(SweepLineTest.class.getResourceAsStream("/org/dyn4j/data/zoom4.dat"));
+		
+		// decompose the poly
+		List<? extends Convex> result = this.algo.triangulate(vertices);
+		
+		// the result should have n - 2 triangles shapes
+		TestCase.assertEquals(vertices.length - 2, result.size());
+	}
 }
