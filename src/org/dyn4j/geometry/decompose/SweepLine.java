@@ -202,6 +202,11 @@ public class SweepLine implements Decomposer, Triangulator {
 			// an edge is less than another if its start vertex is to the right
 			// of the other edge
 			double location = Segment.getLocation(this.v0.point, o.v0.point, o.v1.point);
+			// its possible that the start vertex lies on the line, in which case test
+			// the end vertex of this edge to see where it is
+			if (location == 0.0) {
+				location = Segment.getLocation(this.v1.point, o.v0.point, o.v1.point);
+			}
 			return (int)Math.signum(location);
 		}
 		
