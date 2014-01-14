@@ -199,6 +199,8 @@ public class SweepLine implements Decomposer, Triangulator {
 		 */
 		@Override
 		public int compareTo(Edge o) {
+			// check for equality
+			if (this == o) return 0;
 			// an edge is less than another if its start vertex is to the right
 			// of the other edge
 			double location = Segment.getLocation(this.v0.point, o.v0.point, o.v1.point);
@@ -206,6 +208,13 @@ public class SweepLine implements Decomposer, Triangulator {
 			// the end vertex of this edge to see where it is
 			if (location == 0.0) {
 				location = Segment.getLocation(this.v1.point, o.v0.point, o.v1.point);
+				if (location == 0.0) {
+					// if the edges are colinear then test the x values
+					location = this.v0.point.x - o.v0.point.x;
+					if (location == 0.0) {
+						location = this.v1.point.x - o.v1.point.x;
+					}
+				}
 			}
 			return (int)Math.signum(location);
 		}
