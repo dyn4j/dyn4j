@@ -31,7 +31,6 @@ import org.dyn4j.Epsilon;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Polygon;
-import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
@@ -606,11 +605,9 @@ public class DoublyConnectedEdgeList {
 				throw new IllegalArgumentException(Messages.getString("geometry.decompose.crossingEdges"));
 			}
 			
-			// add triangles that have more than zero area
-			if (Math.abs(Segment.getLocation(vertices[0], vertices[1], vertices[2])) > Epsilon.E) {
-				Triangle t = Geometry.createTriangle(vertices[0], vertices[1], vertices[2]);
-				triangles.add(t);
-			}
+			// add the triangle
+			Triangle t = Geometry.createTriangle(vertices[0], vertices[1], vertices[2]);
+			triangles.add(t);
 		}
 		
 		return triangles;
@@ -672,7 +669,7 @@ public class DoublyConnectedEdgeList {
 				Vector2 q = max.data.point;
 				// compare the y values
 				double diff = p.y - q.y;
-				if (Math.abs(diff) <= Epsilon.E) {
+				if (diff == 0.0) {
 					// if they are near zero then
 					// compare the x values
 					diff = p.x - q.x;

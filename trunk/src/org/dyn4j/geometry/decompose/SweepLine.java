@@ -166,7 +166,10 @@ public class SweepLine implements Decomposer, Triangulator {
 	 * @version 3.0.2
 	 * @since 2.2.0
 	 */
-	protected static class Edge implements Comparable<Edge> {
+	protected class Edge implements Comparable<Edge> {
+		/** The tree this edge will be added to */
+		protected EdgeBinaryTree tree;
+		
 		/** The next edge in Counter-Clockwise order */
 		protected Edge next;
 		
@@ -181,6 +184,12 @@ public class SweepLine implements Decomposer, Triangulator {
 		
 		/** The helper vertex of this edge */
 		protected Vertex helper;
+		
+		/** 
+		 * The inverted slope of the edge (run/rise); This will be 
+		 * Double.POSITIVE_INFINITY if its a horizontal edge
+		 */
+		protected double slope;
 		
 		/* (non-Javadoc)
 		 * @see java.lang.Object#toString()
@@ -201,43 +210,46 @@ public class SweepLine implements Decomposer, Triangulator {
 		public int compareTo(Edge o) {
 			// check for equality
 			if (this == o) return 0;
-			double value = this.v1.point.x - o.v1.point.x;
-			if (value == 0.0) {
-				value = o.v1.point.y - this.v1.point.y;
+			
+			// compare the intersection of the sweep line and the edges
+			// to see which is to the left or right
+			double y = this.tree.referenceY;
+			
+			double x1 = this.getSortValue(y);
+			double x2 = o.getSortValue(y);
+			
+			if (x1 < x2) {
+				return -1;
+			} else {
+				return 1;
 			}
-			return (int) Math.signum(value);
 		}
 		
 		/**
-		 * Returns the minimum x value of this edge.
+		 * Returns the intersection point of the given y value (horizontal
+		 * sweep line) with this edge.
+		 * <p>
+		 * Returns the x value of the corresponding intersection point.
+		 * @param y the horizontal line y value
 		 * @return double
 		 */
-		public double getMinX() {
-			return Math.min(v0.point.x, v1.point.x);
-		}
-		
-		/**
-		 * Returns the maximum x value of this edge.
-		 * @return double
-		 */
-		public double getMaxX() {
-			return Math.max(v0.point.x, v1.point.x);
-		}
-		
-		/**
-		 * Returns the minimum y value of this edge.
-		 * @return double
-		 */
-		public double getMinY() {
-			return Math.min(v0.point.y, v1.point.y);
-		}
-		
-		/**
-		 * Returns the maximum y value of this edge.
-		 * @return double
-		 */
-		public double getMaxY() {
-			return Math.max(v0.point.y, v1.point.y);
+		public double getSortValue(double y) {
+			// get the minimum x vertex
+			// (if we use the min x vertex rather than an 
+			// arbitrary one, we can save a step to check
+			// if the edge is vertical)
+			Vector2 min = this.v0.point;
+			if (this.v1.point.x < this.v0.point.x) {
+				min = this.v1.point;
+			}
+			// check for a horizontal line
+			if (this.slope == Double.POSITIVE_INFINITY) {
+				// for horizontal lines, use the min x
+				return min.x;
+			} else {
+				// otherwise compute the intersection point
+				return min.x + (y - min.y) * this.slope;
+			}
 		}
 		
 		/**
@@ -285,6 +297,9 @@ public class SweepLine implements Decomposer, Triangulator {
 		public EdgeBinaryTree() {
 			super(true);
 		}
+		
+		/** The current position of the sweep line */
+		protected double referenceY = 0.0;
 		
 		/**
 		 * Performs a search to find the right most {@link Edge}
@@ -375,13 +390,15 @@ public class SweepLine implements Decomposer, Triangulator {
 		// create a DCEL to efficiently store the resulting y-monotone polygons
 		DoublyConnectedEdgeList dcel = new DoublyConnectedEdgeList(points);
 		
+		// create a binary tree to store edges
+		EdgeBinaryTree tree = new EdgeBinaryTree();
+		
 		// create the priority queue (sorted queue by largest y value) and
 		// the cyclical lists
-		PriorityQueue<Vertex> queue = this.initialize(points, dcel);
+		PriorityQueue<Vertex> queue = this.initialize(points, dcel, tree);
 		
 		// Find all edges that need to be added to the polygon
 		// to create a y-monotone decomposition
-		EdgeBinaryTree tree = new EdgeBinaryTree();
 		while (!queue.isEmpty()) {
 			Vertex v = queue.poll();
 			if (v.type == Vertex.Type.START) {
@@ -418,9 +435,10 @@ public class SweepLine implements Decomposer, Triangulator {
 	 * and edges used to neighbor features in constant time.
 	 * @param points the array of polygon points
 	 * @param dcel the DCEL object to add references to the priority queue vertices
+	 * @param tree the binary tree to store edges
 	 * @return PriorityQueue&lt;{@link Vertex}&gt;
 	 */
-	protected PriorityQueue<Vertex> initialize(Vector2[] points, DoublyConnectedEdgeList dcel) {
+	protected PriorityQueue<Vertex> initialize(Vector2[] points, DoublyConnectedEdgeList dcel, EdgeBinaryTree tree) {
 		// get the number points
 		int size = points.length;
 		
@@ -472,9 +490,19 @@ public class SweepLine implements Decomposer, Triangulator {
 			
 			// create the next edge
 			Edge e = new Edge();
+			e.tree = tree;
 			e.prev = prevEdge;
 			// the first vertex is this vertex
 			e.v0 = vertex;
+			
+			// compute the slope
+			double my = point.y - point1.y;
+			if (my == 0.0) {
+				e.slope = Double.POSITIVE_INFINITY;
+			} else {
+				double mx = point.x - point1.x;
+				e.slope = (mx / my);
+			}
 			
 			// set the previous edge's end vertex and
 			// next edge pointers
@@ -615,6 +643,8 @@ public class SweepLine implements Decomposer, Triangulator {
 		// we need to add the edge to the left to the tree
 		// since the line in the next event may be intersecting it
 		Edge leftEdge = vertex.left;
+		// set the reference y to the current vertex's y
+		tree.referenceY = vertex.point.y;
 		tree.insert(leftEdge);
 		// set the left edge's helper to this vertex
 		leftEdge.helper = vertex;
@@ -637,6 +667,8 @@ public class SweepLine implements Decomposer, Triangulator {
 			// connect v to v.right.helper
 			dcel.addHalfEdges(vertex.dcelReference, rightEdge.helper.dcelReference);
 		}
+		// set the reference y to the current vertex's y
+		tree.referenceY = vertex.point.y;
 		// remove v.right from T
 		tree.remove(rightEdge);
 	}
@@ -658,6 +690,8 @@ public class SweepLine implements Decomposer, Triangulator {
 		
 		// set the new helper for the edge
 		ej.helper = vertex;
+		// set the reference y to the current vertex's y
+				tree.referenceY = vertex.point.y;
 		// insert the edge to the left of this vertex
 		tree.insert(vertex.left);
 		// set the left edge's helper
@@ -678,6 +712,8 @@ public class SweepLine implements Decomposer, Triangulator {
 			// connect v to v.right.helper
 			dcel.addHalfEdges(vertex.dcelReference, eiPrev.helper.dcelReference);
 		}
+		// set the reference y to the current vertex's y
+				tree.referenceY = vertex.point.y;
 		// remove the previous edge since the sweep 
 		// line no longer intersects with it
 		tree.remove(eiPrev);
@@ -707,6 +743,8 @@ public class SweepLine implements Decomposer, Triangulator {
 				// connect v to v.right.helper
 				dcel.addHalfEdges(vertex.dcelReference, vertex.right.helper.dcelReference);
 			}
+			// set the reference y to the current vertex's y
+			tree.referenceY = vertex.point.y;
 			// remove the previous edge since the sweep 
 			// line no longer intersects with it
 			tree.remove(vertex.right);

@@ -314,5 +314,19 @@ public class BayazitTest extends AbstractDecomposeTest {
 		// the result should have n - 2 triangles shapes
 		TestCase.assertTrue(result.size() <= vertices.length - 2);
 	}
-	
+
+	/**
+	 * Tests the implementation against the zoom7 data file.
+	 * @since 3.1.9
+	 */
+	@Test
+	public void successZoom7() {
+		Vector2[] vertices = this.load(BayazitTest.class.getResourceAsStream("/org/dyn4j/data/zoom7.dat"));
+		
+		// decompose the poly
+		List<? extends Convex> result = this.algo.decompose(vertices);
+		
+		// the result should have n - 2 triangles shapes
+		TestCase.assertTrue(result.size() <= vertices.length - 2);
+	}
 }
