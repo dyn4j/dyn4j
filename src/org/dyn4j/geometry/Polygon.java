@@ -78,21 +78,22 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 			Vector2 p0 = (i - 1 < 0) ? vertices[size - 1] : vertices[i - 1];
 			Vector2 p1 = vertices[i];
 			Vector2 p2 = (i + 1 == size) ? vertices[0] : vertices[i + 1];
-			// check the cross product for CCW winding
-			area += p1.cross(p2);
 			// check for coincident vertices
 			if (p1.equals(p2)) {
 				throw new IllegalArgumentException(Messages.getString("geometry.polygon.coincidentVertices"));
 			}
-			double cross = Math.signum(p0.to(p1).cross(p1.to(p2)));
+			// check the cross product for CCW winding
+			double cross = p0.to(p1).cross(p1.to(p2));
+			double tsign = Math.signum(cross);
+			area += cross;
 			// check for colinear points (for now its allowed)
 			if (Math.abs(cross) > Epsilon.E) {
 				// check for convexity
-				if (sign != 0.0 && cross != sign) {
+				if (sign != 0.0 && tsign != sign) {
 					throw new IllegalArgumentException(Messages.getString("geometry.polygon.nonConvex"));
 				}
 			}
-			sign = cross;
+			sign = tsign;
 		}
 		// check for CCW
 		if (area < 0.0) {
