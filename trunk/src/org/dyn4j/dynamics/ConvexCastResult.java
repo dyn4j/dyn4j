@@ -28,6 +28,8 @@ import org.dyn4j.collision.continuous.TimeOfImpact;
 
 /**
  * Represents the result of a convex cast.
+ * <p>
+ * Note: this class has a natural ordering that is inconsistent with equals.
  * @author William Bittle
  * @version 3.1.5
  * @since 3.1.5

@@ -82,7 +82,7 @@ import org.dyn4j.resources.Messages;
  * Employs the same {@link Island} solving technique as <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.1.8
+ * @version 3.1.9
  * @since 1.0.0
  */
 public class World {
@@ -1472,12 +1472,59 @@ public class World {
 	 * If any part of a body is contained in the AABB, it is added to the list.
 	 * <p>
 	 * This performs a static collision test of the world using the {@link BroadphaseDetector}.
+	 * <p>
+	 * This may return bodies who only have sensor fixtures overlapping.
 	 * @param aabb the world space {@link AABB}
 	 * @return List&lt;{@link Body}&gt; a list of bodies within the given AABB
+	 * @see #detect(AABB, boolean)
 	 * @since 3.1.1
 	 */
 	public List<Body> detect(AABB aabb) {
-		return this.broadphaseDetector.detect(aabb);
+		return this.detect(aabb, true);
+	}
+	/**
+	 * Returns a list of bodies within the specified (world-space) axis-aligned bounding box.
+	 * <p>
+	 * If any part of a body is contained in the AABB, it is added to the list.
+	 * <p>
+	 * This performs a static collision test of the world using the {@link BroadphaseDetector}.
+	 * <p>
+	 * This may return bodies who only have sensor fixtures overlapping.
+	 * @param aabb the world space {@link AABB}
+	 * @param ignoreInactive true if inactive bodies should be ignored
+	 * @return List&lt;{@link Body}&gt; a list of bodies within the given AABB
+	 * @since 3.1.9
+	 */
+	public List<Body> detect(AABB aabb, boolean ignoreInactive) {
+		List<Body> bodies = this.broadphaseDetector.detect(aabb);
+		Iterator<Body> it = bodies.iterator();
+		while (it.hasNext()) {
+			Body body = it.next();
+			if (!body.isActive()) {
+				it.remove();
+			}
+		}
+		return bodies;
+	}
+	
+	/**
+	 * Returns a list of bodies within the specified convex shape.
+	 * <p>
+	 * If any part of a body is contained in the convex, it is added to the list.
+	 * <p>
+	 * This may return bodies who only have sensor fixtures overlapping.
+	 * <p>
+	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
+	 * are colliding.
+	 * @param convex the convex shape in world coordinates
+	 * @return List&lt;{@link Body}&gt; a list of bodies within the given convex shape
+	 * @see #detect(Convex, boolean, boolean)
+	 * @see #detect(Convex, Filter, boolean, boolean)
+	 * @see #detect(Convex, Transform, Filter, boolean, boolean)
+	 * @since 3.1.1
+	 */
+	public List<Body> detect(Convex convex) {
+		return this.detect(convex, Transform.IDENTITY, null, false, true);
 	}
 	
 	/**
@@ -1487,12 +1534,55 @@ public class World {
 	 * <p>
 	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
 	 * are colliding.
-	 * @param convex the convex shape in world coordinates
+	 * @param convex the convex shape in local coordinates
+	 * @param ignoreSensors true if sensor fixtures should be ignored
+	 * @param ignoreInactive true if inactive bodies should be ignored
 	 * @return List&lt;{@link Body}&gt; a list of bodies within the given convex shape
+	 * @see #detect(Convex, Filter, boolean, boolean)
+	 * @see #detect(Convex, Transform, Filter, boolean, boolean)
+	 * @since 3.1.9
+	 */
+	public List<Body> detect(Convex convex, boolean ignoreSensors, boolean ignoreInactive) {
+		return this.detect(convex, Transform.IDENTITY, null, ignoreSensors, ignoreInactive);
+	}
+	
+	/**
+	 * Returns a list of bodies within the specified convex shape.
+	 * <p>
+	 * If any part of a body is contained in the convex, it is added to the list.
+	 * <p>
+	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
+	 * are colliding.
+	 * @param convex the convex shape in local coordinates
+	 * @param filter the {@link Filter} to use against the fixtures; can be null
+	 * @param ignoreSensors true if sensor fixtures should be ignored
+	 * @param ignoreInactive true if inactive bodies should be ignored
+	 * @return List&lt;{@link Body}&gt; a list of bodies within the given convex shape
+	 * @see #detect(Convex, Transform, Filter, boolean, boolean)
+	 * @since 3.1.9
+	 */
+	public List<Body> detect(Convex convex, Filter filter, boolean ignoreSensors, boolean ignoreInactive) {
+		return this.detect(convex, Transform.IDENTITY, filter, ignoreSensors, ignoreInactive);
+	}
+
+	/**
+	 * Returns a list of bodies within the specified convex shape.
+	 * <p>
+	 * If any part of a body is contained in the convex, it is added to the list.
+	 * <p>
+	 * This may return bodies who only have sensor fixtures overlapping.
+	 * <p>
+	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
+	 * are colliding.
+	 * @param convex the convex shape in local coordinates
+	 * @param transform the convex shape's world transform
+	 * @return List&lt;{@link Body}&gt; a list of bodies within the given convex shape
+	 * @see #detect(Convex, Transform, boolean, boolean)
+	 * @see #detect(Convex, Transform, Filter, boolean, boolean)
 	 * @since 3.1.1
 	 */
-	public List<Body> detect(Convex convex) {
-		return this.detect(convex, Transform.IDENTITY);
+	public List<Body> detect(Convex convex, Transform transform) {
+		return detect(convex, transform, null, false, true);
 	}
 	
 	/**
@@ -1504,10 +1594,32 @@ public class World {
 	 * are colliding.
 	 * @param convex the convex shape in local coordinates
 	 * @param transform the convex shape's world transform
+	 * @param ignoreSensors true if sensor fixtures should be ignored
+	 * @param ignoreInactive true if inactive bodies should be ignored
 	 * @return List&lt;{@link Body}&gt; a list of bodies within the given convex shape
-	 * @since 3.1.1
+	 * @see #detect(Convex, Transform, Filter, boolean, boolean)
+	 * @since 3.1.9
 	 */
-	public List<Body> detect(Convex convex, Transform transform) {
+	public List<Body> detect(Convex convex, Transform transform, boolean ignoreSensors, boolean ignoreInactive) {
+		return this.detect(convex, transform, null, ignoreSensors, ignoreInactive);
+	}
+	
+	/**
+	 * Returns a list of bodies within the specified convex shape.
+	 * <p>
+	 * If any part of a body is contained in the convex, it is added to the list.
+	 * <p>
+	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
+	 * are colliding.
+	 * @param convex the convex shape in local coordinates
+	 * @param transform the convex shape's world transform
+	 * @param filter the {@link Filter} to use against the fixtures; can be null
+	 * @param ignoreSensors true if sensor fixtures should be ignored
+	 * @param ignoreInactive true if inactive bodies should be ignored
+	 * @return List&lt;{@link Body}&gt; a list of bodies within the given convex shape
+	 * @since 3.1.9
+	 */
+	public List<Body> detect(Convex convex, Transform transform, Filter filter, boolean ignoreSensors, boolean ignoreInactive) {
 		// create an aabb for the given convex
 		AABB aabb = convex.createAABB(transform);
 		// test using the broadphase to rule out as many bodies as we can
@@ -1521,16 +1633,26 @@ public class World {
 			// test all the fixtures
 			int fSize = body.getFixtureCount();
 			boolean collision = false;
-			for (int i = 0; i < fSize; i++) {
-				BodyFixture bf = body.getFixture(i);
-				Convex bc = bf.getShape();
-				// just perform a boolean test since its typically faster
-				if (this.narrowphaseDetector.detect(convex, transform, bc, bt)) {
-					// if we found a fixture on the body that is in collision
-					// with the given convex, we can skip the rest of the fixtures
-					// and continue testing other bodies
-					collision = true;
-					break;
+			// make sure the body is active if ignoreInactive is set to true
+			if (!ignoreInactive || body.isActive()) {
+				for (int i = 0; i < fSize; i++) {
+					BodyFixture bf = body.getFixture(i);
+					// check against the sensor flag
+					if (ignoreSensors && bf.isSensor()) continue;
+					
+					// check against the filter if given
+					Filter ff = bf.getFilter();
+					if (filter != null && !ff.isAllowed(filter)) continue;
+
+					// just perform a boolean test since its typically faster
+					Convex bc = bf.getShape();
+					if (this.narrowphaseDetector.detect(convex, transform, bc, bt)) {
+						// if we found a fixture on the body that is in collision
+						// with the given convex, we can skip the rest of the fixtures
+						// and continue testing other bodies
+						collision = true;
+						break;
+					}
 				}
 			}
 			// if we went through all the fixtures of the

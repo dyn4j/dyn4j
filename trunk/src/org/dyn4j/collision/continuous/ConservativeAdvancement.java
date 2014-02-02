@@ -194,7 +194,7 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 				transform1.lerp(dp1, da1, l, lerpTx1);
 				transform2.lerp(dp2, da2, l, lerpTx2);
 				// compute a new separation
-				separated = this.distanceDetector.distance(convex1, lerpTx1, convex2, lerpTx2, separation);
+				this.distanceDetector.distance(convex1, lerpTx1, convex2, lerpTx2, separation);
 				// get the distance
 				d = separation.getDistance();
 				// the separation here could still be close to zero if the

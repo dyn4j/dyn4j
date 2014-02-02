@@ -135,7 +135,7 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 		 */
 		@Override
 		public String toString() {
-			return aabb.toString();
+			return this.aabb.toString();
 		}
 	}
 	

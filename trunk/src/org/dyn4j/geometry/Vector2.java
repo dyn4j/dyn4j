@@ -203,6 +203,35 @@ public class Vector2 {
 		r.y = b.y * ac - a.y * bc;
 		return r;
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		long temp;
+		temp = Double.doubleToLongBits(x);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(y);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		return result;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (obj == this) return true;
+		if (obj instanceof Vector2) {
+			Vector2 vector = (Vector2)obj;
+			return this.x == vector.x && this.y == vector.y;
+		}
+		return false;
+	}
 
 	/**
 	 * Returns true if the x and y components of this {@link Vector2}

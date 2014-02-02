@@ -162,6 +162,27 @@ public class Mass {
 	}
 	
 	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((this.center == null) ? 0 : this.center.hashCode());
+		long temp;
+		temp = Double.doubleToLongBits(this.inertia);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(this.invInertia);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(this.invMass);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(this.mass);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + ((this.type == null) ? 0 : this.type.hashCode());
+		return result;
+	}
+
+	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
@@ -178,7 +199,7 @@ public class Mass {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Creates a {@link Mass} object from the given array of masses.
 	 * <p>

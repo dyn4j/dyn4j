@@ -145,7 +145,7 @@ public class SapTree<E extends Collidable> extends AbstractAABBDetector<E> imple
 		 */
 		@Override
 		public String toString() {
-			return aabb.toString();
+			return this.aabb.toString();
 		}
 	}
 
