@@ -30,6 +30,8 @@ import org.dyn4j.collision.narrowphase.Raycast;
  * Represents the result of a raycast.
  * <p>
  * Implements the Comparable interface to allow for sorting by the distance.
+ * <p>
+ * Note: this class has a natural ordering that is inconsistent with equals.
  * @author William Bittle
  * @version 3.1.5
  * @since 2.0.0

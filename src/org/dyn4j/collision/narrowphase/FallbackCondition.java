@@ -29,6 +29,8 @@ import org.dyn4j.geometry.Convex;
 /**
  * Represents a condition that returns true to indicate a fallback {@link NarrowphaseDetector}
  * should be used instead of the primary.
+ * <p>
+ * Note: implementing classes may have a natural ordering that is inconsistent with equals.
  * @author William Bittle
  * @version 3.1.5
  * @since 3.1.5

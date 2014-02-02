@@ -35,10 +35,13 @@ import org.dyn4j.resources.Messages;
  * <p>
  * A polygon cannot have coincident vertices.
  * @author William Bittle
- * @version 3.1.3
+ * @version 3.1.9
  * @since 1.0.0
  */
 public class Polygon extends Wound implements Convex, Shape, Transformable {
+	/** Inverse of 3 */
+	private static final double INV3 = 1.0 / 3.0;
+	
 	/**
 	 * Default constructor for sub classes.
 	 */
@@ -419,8 +422,6 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 			ac.add(this.vertices[i]);
 		}
 		ac.multiply(1.0 / n);
-		// calculate inverse three once
-		final double inv3 = 1.0 / 3.0;
 		// loop through the vertices
 		for (int i = 0; i < n; i++) {
 			// get two vertices
@@ -440,8 +441,8 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
 			// (p1 + p2) * (D / 6)
 			// = (x1 + x2) * (yi * x(i+1) - y(i+1) * xi) / 6
 			// we will divide by the total area later
-			center.x += (p1.x + p2.x) * inv3 * triangleArea;
-			center.y += (p1.y + p2.y) * inv3 * triangleArea;
+			center.x += (p1.x + p2.x) * Polygon.INV3 * triangleArea;
+			center.y += (p1.y + p2.y) * Polygon.INV3 * triangleArea;
 
 			// (yi * x(i+1) - y(i+1) * xi) * (p2^2 + p2 . p1 + p1^2)
 			I += triangleArea * (p2.dot(p2) + p2.dot(p1) + p1.dot(p1));

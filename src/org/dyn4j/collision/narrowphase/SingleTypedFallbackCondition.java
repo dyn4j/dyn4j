@@ -30,8 +30,10 @@ import org.dyn4j.geometry.Convex;
  * Represents a {@link TypedFallbackCondition} that filters on a single type.
  * <p>
  * If either {@link Convex} type matches this type, then the condition is met.
+ * <p>
+ * Note: this class has a natural ordering that is inconsistent with equals.
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.1.9
  * @since 3.1.5
  */
 public class SingleTypedFallbackCondition extends TypedFallbackCondition implements FallbackCondition, Comparable<FallbackCondition> {
@@ -81,23 +83,35 @@ public class SingleTypedFallbackCondition extends TypedFallbackCondition impleme
 	}
 	
 	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
+	 * @see org.dyn4j.collision.narrowphase.AbstractFallbackCondition#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + (this.strict ? 1231 : 1237);
+		result = prime * result + ((this.type == null) ? 0 : this.type.hashCode());
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.narrowphase.AbstractFallbackCondition#equals(java.lang.Object)
 	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == null) return false;
-		if (obj == this) return true;
+		if (this == obj) return true;
 		if (obj instanceof SingleTypedFallbackCondition) {
-			SingleTypedFallbackCondition sfc = (SingleTypedFallbackCondition)obj;
-			if (sfc.type == this.type && 
-				sfc.strict == this.strict &&
-				sfc.sortIndex == this.sortIndex) {
+			SingleTypedFallbackCondition other = (SingleTypedFallbackCondition) obj;
+			if (this.strict == other.strict
+			 && this.type == other.type
+			 && this.sortIndex == other.sortIndex) {
 				return true;
 			}
 		}
 		return false;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.dyn4j.extras.TypedFallbackCondition#isMatch(java.lang.Class, java.lang.Class)
 	 */

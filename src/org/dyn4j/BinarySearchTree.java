@@ -39,7 +39,7 @@ import org.dyn4j.resources.Messages;
  * Use the {@link #isSelfBalancing()} and {@link #setSelfBalancing(boolean)} methods to 
  * make the tree an AVL tree.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.9
  * @since 2.2.0
  * @param <E> Comparable
  */
@@ -47,10 +47,10 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	/**
 	 * Node class for a {@link BinarySearchTree}.
 	 * @author William Bittle
-	 * @version 3.0.2
+	 * @version 3.1.9
 	 * @since 2.2.0
 	 */
-	protected class Node implements Comparable<Node> {
+	protected class Node {
 		/** The comparable data */
 		public E comparable;
 		
@@ -85,14 +85,6 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 			this.parent = parent;
 			this.left = left;
 			this.right = right;
-		}
-		
-		/* (non-Javadoc)
-		 * @see java.lang.Comparable#compareTo(java.lang.Object)
-		 */
-		@Override
-		public int compareTo(Node other) {
-			return this.comparable.compareTo(other.comparable);
 		}
 		
 		/* (non-Javadoc)
@@ -650,7 +642,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 			if (curr == node) return true;
 			// otherwise pick the direction to search
 			// by comparing the data in the nodes
-			int diff = node.compareTo(curr);
+			int diff = node.comparable.compareTo(curr.comparable);
 			// check the difference
 			if (diff == 0) {
 				// we have found an item exactly like this
@@ -852,7 +844,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 		// loop until we find where the node should be placed
 		while (node != null) {
 			// compare the item to the current item
-			if (item.compareTo(node) < 0) {
+			if (item.comparable.compareTo(node.comparable) < 0) {
 				// if the new item is less than the current item,
 				// then check the left node of the current item
 				if (node.left == null) {

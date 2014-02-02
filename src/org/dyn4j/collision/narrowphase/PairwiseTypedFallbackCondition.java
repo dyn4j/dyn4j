@@ -30,8 +30,10 @@ import org.dyn4j.geometry.Convex;
  * Represents a {@link TypedFallbackCondition} that filters on a particular pair of types.
  * <p>
  * If the pair {@link Convex} types match this pair, then the condition is met.
+ * <p>
+ * Note: this class has a natural ordering that is inconsistent with equals.
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.1.9
  * @since 3.1.5
  */
 public class PairwiseTypedFallbackCondition extends TypedFallbackCondition implements FallbackCondition, Comparable<FallbackCondition> {
@@ -129,6 +131,20 @@ public class PairwiseTypedFallbackCondition extends TypedFallbackCondition imple
 		this.strict1 = strict1;
 		this.type2 = type2;
 		this.strict2 = strict2;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.narrowphase.AbstractFallbackCondition#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + (this.strict1 ? 1231 : 1237);
+		result = prime * result + (this.strict2 ? 1231 : 1237);
+		result = prime * result + ((this.type1 == null) ? 0 : this.type1.hashCode());
+		result = prime * result + ((this.type2 == null) ? 0 : this.type2.hashCode());
+		return result;
 	}
 	
 	/* (non-Javadoc)

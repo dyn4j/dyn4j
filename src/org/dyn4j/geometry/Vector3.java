@@ -191,6 +191,41 @@ public class Vector3 {
 		r.z = b.z * ac - a.z * bc;
 		return r;
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		long temp;
+		temp = Double.doubleToLongBits(x);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(y);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(z);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		return result;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (obj == this) return true;
+		if (obj instanceof Vector3) {
+			Vector3 other = (Vector3) obj;
+			if (this.x == other.x
+			 && this.y == other.y
+			 && this.z == other.z) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Returns true if the x and y components of this {@link Vector3}

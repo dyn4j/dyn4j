@@ -80,7 +80,7 @@ public class Epa implements MinkowskiPenetrationSolver {
 	 * @version 3.0.2
 	 * @since 1.0.0
 	 */
-	protected class Edge {
+	protected static class Edge {
 		/** The distance from the origin to the edge along n */
 		public double distance;
 		
