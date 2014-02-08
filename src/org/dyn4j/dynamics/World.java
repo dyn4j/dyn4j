@@ -928,6 +928,39 @@ public class World {
 			// this method does not conserve time
 		}
 	}
+
+	/**
+	 * Performs a raycast against all the {@link Body}s in the {@link World}.
+	 * <p>
+	 * The given {@link RaycastResult} list, results, will be filled with the raycast results
+	 * if the given ray intersected any bodies.
+	 * <p>
+	 * The {@link RaycastResult} class implements the Comparable interface to allow sorting by
+	 * distance from the ray's origin.
+	 * <p>
+	 * If the all flag is false, the results list will only contain the closest result (if any).
+	 * <p>
+	 * All raycasts pass through the {@link RaycastListener}s before being tested.  If <b>any</b>
+	 * {@link RaycastListener} doesn't allow the raycast then the body will not be tested.
+	 * <p>
+	 * Bodies that contain the start of the ray will not be included in the results.
+	 * <p>
+	 * Inactive bodies are ignored in this test.
+	 * @param start the start point
+	 * @param end the end point
+	 * @param ignoreSensors true if sensor {@link BodyFixture}s should be ignored
+	 * @param all true if all intersected {@link Body}s should be returned; false if only the closest {@link Body} should be returned
+	 * @param results a list to contain the results of the raycast
+	 * @return boolean true if at least one {@link Body} was intersected by the {@link Ray}
+	 * @throws NullPointerException if start, end, or results is null
+	 * @see #raycast(Ray, double, boolean, boolean, List)
+	 * @see RaycastListener#allow(Ray, Body)
+	 * @see RaycastListener#allow(Ray, Body, BodyFixture)
+	 * @since 2.0.0
+	 */
+	public boolean raycast(Vector2 start, Vector2 end, boolean ignoreSensors, boolean all, List<RaycastResult> results) {
+		return this.raycast(start, end, ignoreSensors, true, all, results);
+	}
 	
 	/**
 	 * Performs a raycast against all the {@link Body}s in the {@link World}.
@@ -947,22 +980,125 @@ public class World {
 	 * @param start the start point
 	 * @param end the end point
 	 * @param ignoreSensors true if sensor {@link BodyFixture}s should be ignored
+	 * @param ignoreInactive true if inactive bodies should be ignored
 	 * @param all true if all intersected {@link Body}s should be returned; false if only the closest {@link Body} should be returned
 	 * @param results a list to contain the results of the raycast
 	 * @return boolean true if at least one {@link Body} was intersected by the {@link Ray}
 	 * @throws NullPointerException if start, end, or results is null
-	 * @see #raycast(Ray, double, boolean, boolean, List)
+	 * @see #raycast(Ray, double, boolean, boolean, boolean, List)
 	 * @see RaycastListener#allow(Ray, Body)
 	 * @see RaycastListener#allow(Ray, Body, BodyFixture)
-	 * @since 2.0.0
+	 * @since 3.1.9
 	 */
-	public boolean raycast(Vector2 start, Vector2 end, boolean ignoreSensors, boolean all, List<RaycastResult> results) {
+	public boolean raycast(Vector2 start, Vector2 end, boolean ignoreSensors, boolean ignoreInactive, boolean all, List<RaycastResult> results) {
+		return this.raycast(start, end, ignoreSensors, ignoreInactive, all, results);
+	}
+	
+	/**
+	 * Performs a raycast against all the {@link Body}s in the {@link World}.
+	 * <p>
+	 * The given {@link RaycastResult} list, results, will be filled with the raycast results
+	 * if the given ray intersected any bodies.
+	 * <p>
+	 * The {@link RaycastResult} class implements the Comparable interface to allow sorting by
+	 * distance from the ray's origin.
+	 * <p>
+	 * If the all flag is false, the results list will only contain the closest result (if any).
+	 * <p>
+	 * All raycasts pass through the {@link RaycastListener}s before being tested.  If <b>any</b>
+	 * {@link RaycastListener} doesn't allow the raycast then the body will not be tested.
+	 * <p>
+	 * Bodies that contain the start of the ray will not be included in the results.
+	 * @param start the start point
+	 * @param end the end point
+	 * @param filter the {@link Filter} to use against the fixtures; can be null
+	 * @param ignoreSensors true if sensor {@link BodyFixture}s should be ignored
+	 * @param ignoreInactive true if inactive bodies should be ignored
+	 * @param all true if all intersected {@link Body}s should be returned; false if only the closest {@link Body} should be returned
+	 * @param results a list to contain the results of the raycast
+	 * @return boolean true if at least one {@link Body} was intersected by the {@link Ray}
+	 * @throws NullPointerException if start, end, or results is null
+	 * @see #raycast(Ray, double, Filter, boolean, boolean, boolean, List)
+	 * @see RaycastListener#allow(Ray, Body)
+	 * @see RaycastListener#allow(Ray, Body, BodyFixture)
+	 * @since 3.1.9
+	 */
+	public boolean raycast(Vector2 start, Vector2 end, Filter filter, boolean ignoreSensors, boolean ignoreInactive, boolean all, List<RaycastResult> results) {
 		// create the ray and obtain the maximum length
 		Vector2 d = start.to(end);
 		double maxLength = d.normalize();
 		Ray ray = new Ray(start, d);
 		// call the raycast method
-		return this.raycast(ray, maxLength, ignoreSensors, all, results);
+		return this.raycast(ray, maxLength, filter, ignoreSensors, ignoreInactive, all, results);
+	}
+	
+	/**
+	 * Performs a raycast against all the {@link Body}s in the {@link World}.
+	 * <p>
+	 * The given {@link RaycastResult} list, results, will be filled with the raycast results
+	 * if the given ray intersected any bodies.
+	 * <p>
+	 * The {@link RaycastResult} class implements the Comparable interface to allow sorting by
+	 * distance from the ray's origin.
+	 * <p>
+	 * If the all flag is false, the results list will only contain the closest result (if any).
+	 * <p>
+	 * Pass 0 into the maxLength field to specify an infinite length {@link Ray}.
+	 * <p>
+	 * All raycasts pass through the {@link RaycastListener}s before being tested.  If <b>any</b>
+	 * {@link RaycastListener} doesn't allow the raycast then the body will not be tested.
+	 * <p>
+	 * Bodies that contain the start of the ray will not be included in the results.
+	 * <p>
+	 * Inactive bodies are ignored in this test.
+	 * @param ray the {@link Ray}
+	 * @param maxLength the maximum length of the ray; 0 for infinite length
+	 * @param ignoreSensors true if sensor {@link BodyFixture}s should be ignored
+	 * @param all true if all intersected {@link Body}s should be returned; false if only the closest {@link Body} should be returned
+	 * @param results a list to contain the results of the raycast
+	 * @return boolean true if at least one {@link Body} was intersected by the given {@link Ray}
+	 * @throws NullPointerException if ray or results is null
+	 * @see #raycast(Vector2, Vector2, boolean, boolean, List)
+	 * @see RaycastListener#allow(Ray, Body)
+	 * @see RaycastListener#allow(Ray, Body, BodyFixture)
+	 * @since 2.0.0
+	 */
+	public boolean raycast(Ray ray, double maxLength, boolean ignoreSensors, boolean all, List<RaycastResult> results) {
+		return this.raycast(ray, maxLength, ignoreSensors, true, all, results);
+	}
+
+	/**
+	 * Performs a raycast against all the {@link Body}s in the {@link World}.
+	 * <p>
+	 * The given {@link RaycastResult} list, results, will be filled with the raycast results
+	 * if the given ray intersected any bodies.
+	 * <p>
+	 * The {@link RaycastResult} class implements the Comparable interface to allow sorting by
+	 * distance from the ray's origin.
+	 * <p>
+	 * If the all flag is false, the results list will only contain the closest result (if any).
+	 * <p>
+	 * Pass 0 into the maxLength field to specify an infinite length {@link Ray}.
+	 * <p>
+	 * All raycasts pass through the {@link RaycastListener}s before being tested.  If <b>any</b>
+	 * {@link RaycastListener} doesn't allow the raycast then the body will not be tested.
+	 * <p>
+	 * Bodies that contain the start of the ray will not be included in the results.
+	 * @param ray the {@link Ray}
+	 * @param maxLength the maximum length of the ray; 0 for infinite length
+	 * @param ignoreSensors true if sensor {@link BodyFixture}s should be ignored
+	 * @param ignoreInactive true if inactive bodies should be ignored
+	 * @param all true if all intersected {@link Body}s should be returned; false if only the closest {@link Body} should be returned
+	 * @param results a list to contain the results of the raycast
+	 * @return boolean true if at least one {@link Body} was intersected by the given {@link Ray}
+	 * @throws NullPointerException if ray or results is null
+	 * @see #raycast(Vector2, Vector2, boolean, boolean, boolean, List)
+	 * @see RaycastListener#allow(Ray, Body)
+	 * @see RaycastListener#allow(Ray, Body, BodyFixture)
+	 * @since 3.1.9
+	 */
+	public boolean raycast(Ray ray, double maxLength, boolean ignoreSensors, boolean ignoreInactive, boolean all, List<RaycastResult> results) {
+		return this.raycast(ray, maxLength, null, ignoreSensors, ignoreInactive, all, results);
 	}
 	
 	/**
@@ -984,17 +1120,19 @@ public class World {
 	 * Bodies that contain the start of the ray will not be included in the results.
 	 * @param ray the {@link Ray}
 	 * @param maxLength the maximum length of the ray; 0 for infinite length
+	 * @param filter the {@link Filter} to use against the fixtures; can be null
 	 * @param ignoreSensors true if sensor {@link BodyFixture}s should be ignored
+	 * @param ignoreInactive true if inactive bodies should be ignored
 	 * @param all true if all intersected {@link Body}s should be returned; false if only the closest {@link Body} should be returned
 	 * @param results a list to contain the results of the raycast
 	 * @return boolean true if at least one {@link Body} was intersected by the given {@link Ray}
 	 * @throws NullPointerException if ray or results is null
-	 * @see #raycast(Vector2, Vector2, boolean, boolean, List)
+	 * @see #raycast(Vector2, Vector2, Filter, boolean, boolean, boolean, List)
 	 * @see RaycastListener#allow(Ray, Body)
 	 * @see RaycastListener#allow(Ray, Body, BodyFixture)
-	 * @since 2.0.0
+	 * @since 3.1.9
 	 */
-	public boolean raycast(Ray ray, double maxLength, boolean ignoreSensors, boolean all, List<RaycastResult> results) {
+	public boolean raycast(Ray ray, double maxLength, Filter filter, boolean ignoreSensors, boolean ignoreInactive, boolean all, List<RaycastResult> results) {
 		// check for the desired length
 		double max = 0.0;
 		if (maxLength > 0.0) {
@@ -1006,11 +1144,14 @@ public class World {
 		List<Body> bodies = this.broadphaseDetector.raycast(ray, maxLength);
 		// loop over the list of bodies testing each one
 		int size = bodies.size();
+		boolean found = false;
 		for (int i = 0; i < size; i++) {
 			// get a body to test
 			Body body = bodies.get(i);
+			// check for inactive
+			if (ignoreInactive && !body.isActive()) continue;
 			// does the ray intersect the body?
-			if (raycast(ray, body, max, ignoreSensors, result)) {
+			if (this.raycast(ray, body, max, filter, ignoreSensors, result)) {
 				// check if we are raycasting for all the objects
 				// or only the closest
 				if (!all) {
@@ -1020,19 +1161,21 @@ public class World {
 					// see if the results list has the item in it
 					if (results.size() == 0) {
 						results.add(result);
+						found = true;
 					}
 				} else {
 					// add this result to the results
 					results.add(result);
+					found = true;
 					// create a new result for the next iteration
 					result = new RaycastResult();
 				}
 			}
 		}
 		
-		return results.size() > 0;
+		return found;
 	}
-	
+
 	/**
 	 * Performs a raycast against the given {@link Body} and returns true
 	 * if the ray intersects the body.
@@ -1056,12 +1199,39 @@ public class World {
 	 * @since 2.0.0
 	 */
 	public boolean raycast(Vector2 start, Vector2 end, Body body, boolean ignoreSensors, RaycastResult result) {
+		return this.raycast(start, end, body, null, ignoreSensors, result);
+	}
+	
+	/**
+	 * Performs a raycast against the given {@link Body} and returns true
+	 * if the ray intersects the body.
+	 * <p>
+	 * The given {@link RaycastResult} object, result, will be filled with the raycast result
+	 * if the given ray intersected the given body. 
+	 * <p>
+	 * All raycasts pass through the {@link RaycastListener}s before being tested.  If <b>any</b>
+	 * {@link RaycastListener} doesn't allow the raycast then the body will not be tested.
+	 * <p>
+	 * Returns false if the start position of the ray lies inside the given body.
+	 * @param start the start point
+	 * @param end the end point
+	 * @param body the {@link Body} to test
+	 * @param filter the {@link Filter} to use against the fixtures; can be null
+	 * @param ignoreSensors whether or not to ignore sensor {@link BodyFixture}s
+	 * @param result the raycast result
+	 * @return boolean true if the {@link Ray} intersects the {@link Body}
+	 * @throws NullPointerException if start, end, body, or result is null
+	 * @see #raycast(Ray, Body, double, Filter, boolean, RaycastResult)
+	 * @see RaycastListener#allow(Ray, Body, BodyFixture)
+	 * @since 3.1.9
+	 */
+	public boolean raycast(Vector2 start, Vector2 end, Body body, Filter filter, boolean ignoreSensors, RaycastResult result) {
 		// create the ray and obtain the maximum length
 		Vector2 d = start.to(end);
 		double maxLength = d.normalize();
 		Ray ray = new Ray(start, d);
 		// call the raycast method
-		return this.raycast(ray, body, maxLength, ignoreSensors, result);
+		return this.raycast(ray, body, maxLength, filter, ignoreSensors, result);
 	}
 	
 	/**
@@ -1089,6 +1259,35 @@ public class World {
 	 * @since 2.0.0
 	 */
 	public boolean raycast(Ray ray, Body body, double maxLength, boolean ignoreSensors, RaycastResult result) {
+		return this.raycast(ray, body, maxLength, null, ignoreSensors, result);
+	}
+	
+	/**
+	 * Performs a raycast against the given {@link Body} and returns true
+	 * if the ray intersects the body.
+	 * <p>
+	 * The given {@link RaycastResult} object, result, will be filled with the raycast result
+	 * if the given ray intersected the given body.
+	 * <p>
+	 * Pass 0 into the maxLength field to specify an infinite length {@link Ray}.
+	 * <p>
+	 * All raycasts pass through the {@link RaycastListener}s before being tested.  If <b>any</b>
+	 * {@link RaycastListener} doesn't allow the raycast then the body will not be tested.
+	 * <p>
+	 * Returns false if the start position of the ray lies inside the given body.
+	 * @param ray the {@link Ray} to cast
+	 * @param body the {@link Body} to test
+	 * @param maxLength the maximum length of the ray; 0 for infinite length
+	 * @param filter the {@link Filter} to use against the fixtures; can be null
+	 * @param ignoreSensors whether or not to ignore sensor {@link BodyFixture}s
+	 * @param result the raycast result
+	 * @return boolean true if the {@link Ray} intersects the {@link Body}
+	 * @throws NullPointerException if ray, body, or result is null
+	 * @see #raycast(Vector2, Vector2, Body, Filter, boolean, RaycastResult)
+	 * @see RaycastListener#allow(Ray, Body, BodyFixture)
+	 * @since 3.1.9
+	 */
+	public boolean raycast(Ray ray, Body body, double maxLength, Filter filter, boolean ignoreSensors, RaycastResult result) {
 		List<RaycastListener> listeners = this.getListeners(RaycastListener.class);
 		boolean allow = true;
 		for (RaycastListener rl : listeners) {
@@ -1117,6 +1316,10 @@ public class World {
 			// check for sensor
 			if (ignoreSensors && fixture.isSensor()) {
 				// skip this fixture
+				continue;
+			}
+			// check against the filter
+			if (filter != null && !filter.isAllowed(fixture.getFilter())) {
 				continue;
 			}
 			// notify the listeners to see if we should test this fixture
@@ -1182,18 +1385,131 @@ public class World {
 	 * results list.
 	 * <p>
 	 * Bodies in collision with the given convex at the begining of the cast are not included in the results.
+	 * <p>
+	 * Inactive bodies are ignored in this test.
 	 * @param convex the convex to cast
 	 * @param transform the initial position and orientation of the convex
-	 * @param dp &Delta;position; the change in position (the cast length and direction basically)
+	 * @param deltaPosition &Delta;position; the change in position (the cast length and direction basically)
 	 * @param ignoreSensors true if sensor fixtures should be ignored in the tests
 	 * @param all true if all hits should be returned; false if only the first should be returned
 	 * @param results the list to add the results to
 	 * @return boolean true if a collision was found
 	 * @since 3.1.5
-	 * @see #convexCast(Convex, Transform, Vector2, double, boolean, boolean, List)
+	 * @see #convexCast(Convex, Transform, Vector2, double, boolean, boolean, boolean, List)
 	 */
-	public boolean convexCast(Convex convex, Transform transform, Vector2 dp, boolean ignoreSensors, boolean all, List<ConvexCastResult> results) {
-		return this.convexCast(convex, transform, dp, 0.0, ignoreSensors, all, results);
+	public boolean convexCast(Convex convex, Transform transform, Vector2 deltaPosition, boolean ignoreSensors, boolean all, List<ConvexCastResult> results) {
+		return this.convexCast(convex, transform, deltaPosition, 0.0, null, ignoreSensors, true, all, results);
+	}
+	
+	/**
+	 * Performs a linear convex cast on the world, placing any detected collisions into the given results list.
+	 * <p>
+	 * This method does a static test of bodies (in other words, does not take into account the bodies linear
+	 * or angular velocity, but rather assumes they are stationary).
+	 * <p>
+	 * The <code>dp</code> parameter is the linear cast vector determining the direction and magnitude of the cast.
+	 * <p>
+	 * The {@link ConvexCastResult} class implements the Comparable interface to allow sorting by
+	 * the time of impact.
+	 * <p>
+	 * If the all flag is false, the results list will only contain the closest result (if any).
+	 * <p>
+	 * All convex casts pass through the {@link ConvexCastListener}s before being tested.  If <b>any</b>
+	 * {@link ConvexCastListener} doesn't allow the convex cast, then the body will not be tested.
+	 * <p>
+	 * For multi-fixtured bodies, only the fixture that has the minimum time of impact will be added to the
+	 * results list.
+	 * <p>
+	 * Bodies in collision with the given convex at the begining of the cast are not included in the results.
+	 * @param convex the convex to cast
+	 * @param transform the initial position and orientation of the convex
+	 * @param deltaPosition &Delta;position; the change in position (the cast length and direction basically)
+	 * @param ignoreSensors true if sensor fixtures should be ignored in the tests
+	 * @param ignoreInactive true if inactive bodies should be ignored in the tests
+	 * @param all true if all hits should be returned; false if only the first should be returned
+	 * @param results the list to add the results to
+	 * @return boolean true if a collision was found
+	 * @since 3.1.9
+	 * @see #convexCast(Convex, Transform, Vector2, double, boolean, boolean, boolean, List)
+	 */
+	public boolean convexCast(Convex convex, Transform transform, Vector2 deltaPosition, boolean ignoreSensors, boolean ignoreInactive, boolean all, List<ConvexCastResult> results) {
+		return this.convexCast(convex, transform, deltaPosition, 0.0, null, ignoreSensors, ignoreInactive, all, results);
+	}
+
+	/**
+	 * Performs a linear convex cast on the world, placing any detected collisions into the given results list.
+	 * <p>
+	 * This method does a static test of bodies (in other words, does not take into account the bodies linear
+	 * or angular velocity, but rather assumes they are stationary).
+	 * <p>
+	 * The <code>dp</code> parameter is the linear cast vector determining the direction and magnitude of the cast.  
+	 * The <code>da</code> parameter is the change in angle over the linear cast and is interpolated linearly 
+	 * during detection.
+	 * <p>
+	 * The {@link ConvexCastResult} class implements the Comparable interface to allow sorting by
+	 * the time of impact.
+	 * <p>
+	 * If the all flag is false, the results list will only contain the closest result (if any).
+	 * <p>
+	 * All convex casts pass through the {@link ConvexCastListener}s before being tested.  If <b>any</b>
+	 * {@link ConvexCastListener} doesn't allow the convex cast, then the body will not be tested.
+	 * <p>
+	 * For multi-fixtured bodies, only the fixture that has the minimum time of impact will be added to the
+	 * results list.
+	 * <p>
+	 * Bodies in collision with the given convex at the begining of the cast are not included in the results.
+	 * <p>
+	 * Inactive bodies are ignored in this test.
+	 * @param convex the convex to cast
+	 * @param transform the initial position and orientation of the convex
+	 * @param deltaPosition &Delta;position; the change in position (the cast length and direction basically)
+	 * @param deltaAngle &Delta;angle; the change in the angle; this is the change in the angle over the linear period
+	 * @param ignoreSensors true if sensor fixtures should be ignored in the tests
+	 * @param all true if all hits should be returned; false if only the first should be returned
+	 * @param results the list to add the results to
+	 * @return boolean true if a collision was found
+	 * @see #convexCast(Convex, Transform, Vector2, double, boolean, boolean, boolean, List)
+	 * @since 3.1.5
+	 */
+	public boolean convexCast(Convex convex, Transform transform, Vector2 deltaPosition, double deltaAngle, boolean ignoreSensors, boolean all, List<ConvexCastResult> results) {
+		return this.convexCast(convex, transform, deltaPosition, deltaAngle, null, ignoreSensors, true, all, results);
+	}
+
+	/**
+	 * Performs a linear convex cast on the world, placing any detected collisions into the given results list.
+	 * <p>
+	 * This method does a static test of bodies (in other words, does not take into account the bodies linear
+	 * or angular velocity, but rather assumes they are stationary).
+	 * <p>
+	 * The <code>dp</code> parameter is the linear cast vector determining the direction and magnitude of the cast.  
+	 * The <code>da</code> parameter is the change in angle over the linear cast and is interpolated linearly 
+	 * during detection.
+	 * <p>
+	 * The {@link ConvexCastResult} class implements the Comparable interface to allow sorting by
+	 * the time of impact.
+	 * <p>
+	 * If the all flag is false, the results list will only contain the closest result (if any).
+	 * <p>
+	 * All convex casts pass through the {@link ConvexCastListener}s before being tested.  If <b>any</b>
+	 * {@link ConvexCastListener} doesn't allow the convex cast, then the body will not be tested.
+	 * <p>
+	 * For multi-fixtured bodies, only the fixture that has the minimum time of impact will be added to the
+	 * results list.
+	 * <p>
+	 * Bodies in collision with the given convex at the begining of the cast are not included in the results.
+	 * @param convex the convex to cast
+	 * @param transform the initial position and orientation of the convex
+	 * @param deltaPosition &Delta;position; the change in position (the cast length and direction basically)
+	 * @param deltaAngle &Delta;angle; the change in the angle; this is the change in the angle over the linear period
+	 * @param ignoreSensors true if sensor fixtures should be ignored in the tests
+	 * @param ignoreInactive true if inactive bodies should be ignored in the tests
+	 * @param all true if all hits should be returned; false if only the first should be returned
+	 * @param results the list to add the results to
+	 * @return boolean true if a collision was found
+	 * @since 3.1.9
+	 */
+	public boolean convexCast(Convex convex, Transform transform, Vector2 deltaPosition, double deltaAngle, boolean ignoreSensors, boolean ignoreInactive, boolean all, List<ConvexCastResult> results) {
+		return this.convexCast(convex, transform, deltaPosition, deltaAngle, null, ignoreSensors, ignoreInactive, all, results);
 	}
 	
 	/**
@@ -1220,15 +1536,17 @@ public class World {
 	 * Bodies in collision with the given convex at the begining of the cast are not included in the results.
 	 * @param convex the convex to cast
 	 * @param transform the initial position and orientation of the convex
-	 * @param dp &Delta;position; the change in position (the cast length and direction basically)
-	 * @param da &Delta;angle; the change in the angle; this is the change in the angle over the linear period
+	 * @param deltaPosition &Delta;position; the change in position (the cast length and direction basically)
+	 * @param deltaAngle &Delta;angle; the change in the angle; this is the change in the angle over the linear period
+	 * @param filter the {@link Filter} to use against the fixtures; can be null
 	 * @param ignoreSensors true if sensor fixtures should be ignored in the tests
+	 * @param ignoreInactive true if inactive bodies should be ignored in the tests
 	 * @param all true if all hits should be returned; false if only the first should be returned
 	 * @param results the list to add the results to
 	 * @return boolean true if a collision was found
-	 * @since 3.1.5
+	 * @since 3.1.9
 	 */
-	public boolean convexCast(Convex convex, Transform transform, Vector2 dp, double da, boolean ignoreSensors, boolean all, List<ConvexCastResult> results) {
+	public boolean convexCast(Convex convex, Transform transform, Vector2 deltaPosition, double deltaAngle, Filter filter, boolean ignoreSensors, boolean ignoreInactive, boolean all, List<ConvexCastResult> results) {
 		// get the listeners
 		List<ConvexCastListener> listeners = this.getListeners(ConvexCastListener.class);
 		
@@ -1238,7 +1556,7 @@ public class World {
 		AABB startAABB = new AABB(startWorldCenter, radius);
 		// linearlly interpolate to get the final transform given the
 		// change in position and angle
-		Transform finalTransform = transform.lerped(dp, da, 1.0);
+		Transform finalTransform = transform.lerped(deltaPosition, deltaAngle, 1.0);
 		// get the end AABB
 		Vector2 endWorldCenter = finalTransform.getTransformed(convex.getCenter());
 		AABB endAABB = new AABB(endWorldCenter, radius);
@@ -1248,10 +1566,14 @@ public class World {
 		ConvexCastResult min = null;
 		final Vector2 dp2 = new Vector2();
 		double t2 = 1.0;
+		boolean found = false;
 		// use the broadphase to filter first
 		List<Body> bodies = this.broadphaseDetector.detect(aabb);
 		// loop over the potential collisions
 		for (Body body : bodies) {
+			// check for inactive bodies
+			if (ignoreInactive && !body.isActive()) continue;
+			
 			boolean allow = true;
 			for (ConvexCastListener ccl : listeners) {
 				// see if we should test this body
@@ -1259,7 +1581,7 @@ public class World {
 					allow = false;
 				}
 			}
-			if (!allow) return false;
+			if (!allow) continue;
 			
 			// only get the minimum fixture
 			double ft2 = t2;
@@ -1274,9 +1596,10 @@ public class World {
 			// a the fixture that has the smallest time of impact
 			for (int i = 0; i < bSize; i++) {
 				BodyFixture bodyFixture = body.getFixture(i);
-				
 				// filter out sensors if desired
 				if (ignoreSensors && bodyFixture.isSensor()) continue;
+				// check the filter
+				if (filter != null && !filter.isAllowed(bodyFixture.getFilter())) continue;
 				
 				// notify the listeners to see if we should test this fixture
 				allow = true;
@@ -1293,7 +1616,7 @@ public class World {
 				TimeOfImpact toi = new TimeOfImpact();
 				// we pass the zero vector and 0 for the change in position and angle for the body
 				// since we assume that it is not moving since this is a static test
-				if (this.timeOfImpactDetector.getTimeOfImpact(convex, transform, dp, da, c, bodyTransform, dp2, 0.0, 0.0, ft2, toi)) {
+				if (this.timeOfImpactDetector.getTimeOfImpact(convex, transform, deltaPosition, deltaAngle, c, bodyTransform, dp2, 0.0, 0.0, ft2, toi)) {
 					// notify the listeners to see if we should test this fixture
 					allow = true;
 					for (ConvexCastListener ccl : listeners) {
@@ -1333,6 +1656,7 @@ public class World {
 					result.body = body;
 					results.add(result);
 				}
+				found = true;
 			}
 		}
 		
@@ -1341,7 +1665,7 @@ public class World {
 		}
 		
 		// if something is in the list then we know we found a collision
-		return results.size() > 0;
+		return found;
 	}
 	
 	/**
@@ -1360,15 +1684,45 @@ public class World {
 	 * Returns false if the given body and convex are in collision at the beginning of the cast.
 	 * @param convex the convex to cast
 	 * @param transform the initial position and orientation of the convex
-	 * @param dp &Delta;position; the change in position (the cast length and direction basically)
+	 * @param deltaPosition &Delta;position; the change in position (the cast length and direction basically)
 	 * @param body the body to cast against
 	 * @param ignoreSensors true if sensor fixtures should be ignored in the tests
 	 * @param result the convex cast result
 	 * @return boolean true if a collision was found
 	 * @since 3.1.5
 	 */
-	public boolean convexCast(Convex convex, Transform transform, Vector2 dp, Body body, boolean ignoreSensors, ConvexCastResult result) {
-		return this.convexCast(convex, transform, dp, 0, body, ignoreSensors, result);
+	public boolean convexCast(Convex convex, Transform transform, Vector2 deltaPosition, Body body, boolean ignoreSensors, ConvexCastResult result) {
+		return this.convexCast(convex, transform, deltaPosition, 0, body, null, ignoreSensors, result);
+	}
+
+	/**
+	 * Performs a linear convex cast on the given body, placing a detected collision into the given result object.
+	 * <p>
+	 * This method does a static test of the body (in other words, does not take into account the body's linear
+	 * or angular velocity, but rather assumes it is stationary).
+	 * <p>
+	 * The <code>dp</code> parameter is the linear cast vector determining the direction and magnitude of the cast.  
+	 * The <code>da</code> parameter is the change in angle over the linear cast and is interpolated linearly 
+	 * during detection.
+	 * <p>
+	 * All convex casts pass through the {@link ConvexCastListener}s before being tested.  If <b>any</b>
+	 * {@link ConvexCastListener} doesn't allow the convex cast, then the body will not be tested.
+	 * <p>
+	 * For multi-fixtured bodies, the fixture that has the minimum time of impact will be the result.
+	 * <p>
+	 * Returns false if the given body and convex are in collision at the beginning of the cast.
+	 * @param convex the convex to cast
+	 * @param transform the initial position and orientation of the convex
+	 * @param deltaPosition &Delta;position; the change in position (the cast length and direction basically)
+	 * @param deltaAngle &Delta;angle; the change in the angle; this is the change in the angle over the linear period
+	 * @param body the body to cast against
+	 * @param ignoreSensors true if sensor fixtures should be ignored in the tests
+	 * @param result the convex cast result
+	 * @return boolean true if a collision was found
+	 * @since 3.1.5
+	 */
+	public boolean convexCast(Convex convex, Transform transform, Vector2 deltaPosition, double deltaAngle, Body body, boolean ignoreSensors, ConvexCastResult result) {
+		return this.convexCast(convex, transform, deltaPosition, deltaAngle, body, null, ignoreSensors, result);
 	}
 	
 	/**
@@ -1389,15 +1743,16 @@ public class World {
 	 * Returns false if the given body and convex are in collision at the beginning of the cast.
 	 * @param convex the convex to cast
 	 * @param transform the initial position and orientation of the convex
-	 * @param dp &Delta;position; the change in position (the cast length and direction basically)
-	 * @param da &Delta;angle; the change in the angle; this is the change in the angle over the linear period
+	 * @param deltaPosition &Delta;position; the change in position (the cast length and direction basically)
+	 * @param deltaAngle &Delta;angle; the change in the angle; this is the change in the angle over the linear period
 	 * @param body the body to cast against
+	 * @param filter the {@link Filter} to use against the fixtures; can be null
 	 * @param ignoreSensors true if sensor fixtures should be ignored in the tests
 	 * @param result the convex cast result
 	 * @return boolean true if a collision was found
-	 * @since 3.1.5
+	 * @since 3.1.9
 	 */
-	public boolean convexCast(Convex convex, Transform transform, Vector2 dp, double da, Body body, boolean ignoreSensors, ConvexCastResult result) {
+	public boolean convexCast(Convex convex, Transform transform, Vector2 deltaPosition, double deltaAngle, Body body, Filter filter, boolean ignoreSensors, ConvexCastResult result) {
 		// get the listeners
 		List<ConvexCastListener> listeners = this.getListeners(ConvexCastListener.class);
 		
@@ -1423,9 +1778,10 @@ public class World {
 		// a the fixture that has the smallest time of impact
 		for (int i = 0; i < bSize; i++) {
 			BodyFixture bodyFixture = body.getFixture(i);
-			
 			// filter out sensors if desired
 			if (ignoreSensors && bodyFixture.isSensor()) continue;
+			// check the filter
+			if (filter != null && !filter.isAllowed(bodyFixture.getFilter())) continue;
 			
 			allow = true;
 			for (ConvexCastListener ccl : listeners) {
@@ -1441,7 +1797,7 @@ public class World {
 			TimeOfImpact toi = new TimeOfImpact();
 			// we pass the zero vector and 0 for the change in position and angle for the body
 			// since we assume that it is not moving since this is a static test
-			if (this.timeOfImpactDetector.getTimeOfImpact(convex, transform, dp, da, c, bodyTransform, dp2, 0.0, 0.0, t2, toi)) {
+			if (this.timeOfImpactDetector.getTimeOfImpact(convex, transform, deltaPosition, deltaAngle, c, bodyTransform, dp2, 0.0, 0.0, t2, toi)) {
 				// notify the listeners to see if we should test this fixture
 				allow = true;
 				for (ConvexCastListener ccl : listeners) {
@@ -1467,176 +1823,425 @@ public class World {
 	}
 	
 	/**
-	 * Returns a list of bodies within the specified (world-space) axis-aligned bounding box.
+	 * Returns true if the given AABB overlaps a {@link Body} in this {@link World}.
 	 * <p>
-	 * If any part of a body is contained in the AABB, it is added to the list.
+	 * If any part of a body is overlaping the AABB, the body is added to the list.
 	 * <p>
 	 * This performs a static collision test of the world using the {@link BroadphaseDetector}.
 	 * <p>
 	 * This may return bodies who only have sensor fixtures overlapping.
-	 * @param aabb the world space {@link AABB}
-	 * @return List&lt;{@link Body}&gt; a list of bodies within the given AABB
-	 * @see #detect(AABB, boolean)
-	 * @since 3.1.1
-	 */
-	public List<Body> detect(AABB aabb) {
-		return this.detect(aabb, true);
-	}
-	/**
-	 * Returns a list of bodies within the specified (world-space) axis-aligned bounding box.
 	 * <p>
-	 * If any part of a body is contained in the AABB, it is added to the list.
+	 * Inactive bodies are ignored in this test.
+	 * @param aabb the world space {@link AABB}
+	 * @param bodies the list of bodies the given AABB overlaps
+	 * @return boolean true if the AABB overlaps any body
+	 * @since 3.1.9
+	 */
+	public boolean detect(AABB aabb, List<Body> bodies) {
+		return this.detect(aabb, true, bodies);
+	}
+	
+	/**
+	 * Returns true if the given AABB overlaps a {@link Body} in this {@link World}.
+	 * <p>
+	 * If any part of a body is overlaping the AABB, the body is added to the list.
 	 * <p>
 	 * This performs a static collision test of the world using the {@link BroadphaseDetector}.
 	 * <p>
 	 * This may return bodies who only have sensor fixtures overlapping.
 	 * @param aabb the world space {@link AABB}
 	 * @param ignoreInactive true if inactive bodies should be ignored
-	 * @return List&lt;{@link Body}&gt; a list of bodies within the given AABB
+	 * @param bodies the list of bodies the given AABB overlaps
+	 * @return boolean true if the AABB overlaps any body
 	 * @since 3.1.9
 	 */
-	public List<Body> detect(AABB aabb, boolean ignoreInactive) {
-		List<Body> bodies = this.broadphaseDetector.detect(aabb);
-		Iterator<Body> it = bodies.iterator();
-		while (it.hasNext()) {
-			Body body = it.next();
-			if (!body.isActive()) {
-				it.remove();
+	public boolean detect(AABB aabb, boolean ignoreInactive, List<Body> bodies) {
+		List<DetectListener> listeners = this.getListeners(DetectListener.class);
+		
+		List<Body> collisions = this.broadphaseDetector.detect(aabb);
+		boolean found = false;
+		
+		int bSize = collisions.size();
+		boolean allow;
+		for (int i = 0; i < bSize; i++) {
+			Body body = collisions.get(i);
+			// check for inactive
+			if (ignoreInactive && !body.isActive()) {
+				continue;
+			}
+			// pass through the listeners
+			allow = true;
+			for (DetectListener listener : listeners) {
+				if (!listener.allow(aabb, body)) {
+					allow = false;
+				}
+			}
+			if (allow) {
+				bodies.add(body);
+				found = true;
 			}
 		}
-		return bodies;
+		
+		return found;
 	}
 	
 	/**
-	 * Returns a list of bodies within the specified convex shape.
+	 * Returns true if the given AABB overlaps a {@link Body} in this {@link World}.
 	 * <p>
-	 * If any part of a body is contained in the convex, it is added to the list.
+	 * If this method returns true, the results list will contain the bodies and
+	 * fixtures that the convex overlaps.
 	 * <p>
 	 * This may return bodies who only have sensor fixtures overlapping.
-	 * <p>
-	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
-	 * are colliding.
-	 * @param convex the convex shape in world coordinates
-	 * @return List&lt;{@link Body}&gt; a list of bodies within the given convex shape
-	 * @see #detect(Convex, boolean, boolean)
-	 * @see #detect(Convex, Filter, boolean, boolean)
-	 * @see #detect(Convex, Transform, Filter, boolean, boolean)
-	 * @since 3.1.1
-	 */
-	public List<Body> detect(Convex convex) {
-		return this.detect(convex, Transform.IDENTITY, null, false, true);
-	}
-	
-	/**
-	 * Returns a list of bodies within the specified convex shape.
-	 * <p>
-	 * If any part of a body is contained in the convex, it is added to the list.
-	 * <p>
-	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
-	 * are colliding.
-	 * @param convex the convex shape in local coordinates
+	 * @param aabb the world space {@link AABB}
 	 * @param ignoreSensors true if sensor fixtures should be ignored
 	 * @param ignoreInactive true if inactive bodies should be ignored
-	 * @return List&lt;{@link Body}&gt; a list of bodies within the given convex shape
-	 * @see #detect(Convex, Filter, boolean, boolean)
-	 * @see #detect(Convex, Transform, Filter, boolean, boolean)
+	 * @param results the list of overlapping bodies and fixtures
+	 * @return boolean true if the AABB overlaps any fixture
 	 * @since 3.1.9
 	 */
-	public List<Body> detect(Convex convex, boolean ignoreSensors, boolean ignoreInactive) {
-		return this.detect(convex, Transform.IDENTITY, null, ignoreSensors, ignoreInactive);
-	}
-	
-	/**
-	 * Returns a list of bodies within the specified convex shape.
-	 * <p>
-	 * If any part of a body is contained in the convex, it is added to the list.
-	 * <p>
-	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
-	 * are colliding.
-	 * @param convex the convex shape in local coordinates
-	 * @param filter the {@link Filter} to use against the fixtures; can be null
-	 * @param ignoreSensors true if sensor fixtures should be ignored
-	 * @param ignoreInactive true if inactive bodies should be ignored
-	 * @return List&lt;{@link Body}&gt; a list of bodies within the given convex shape
-	 * @see #detect(Convex, Transform, Filter, boolean, boolean)
-	 * @since 3.1.9
-	 */
-	public List<Body> detect(Convex convex, Filter filter, boolean ignoreSensors, boolean ignoreInactive) {
-		return this.detect(convex, Transform.IDENTITY, filter, ignoreSensors, ignoreInactive);
+	public boolean detect(AABB aabb, boolean ignoreSensors, boolean ignoreInactive, List<DetectResult> results) {
+		return this.detect(aabb, null, ignoreSensors, ignoreInactive, results);
 	}
 
 	/**
-	 * Returns a list of bodies within the specified convex shape.
+	 * Returns true if the given AABB overlaps a {@link Body} in this {@link World}.
 	 * <p>
-	 * If any part of a body is contained in the convex, it is added to the list.
+	 * If this method returns true, the results list will contain the bodies and
+	 * fixtures that the convex overlaps.
 	 * <p>
 	 * This may return bodies who only have sensor fixtures overlapping.
-	 * <p>
-	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
-	 * are colliding.
-	 * @param convex the convex shape in local coordinates
-	 * @param transform the convex shape's world transform
-	 * @return List&lt;{@link Body}&gt; a list of bodies within the given convex shape
-	 * @see #detect(Convex, Transform, boolean, boolean)
-	 * @see #detect(Convex, Transform, Filter, boolean, boolean)
-	 * @since 3.1.1
+	 * @param aabb the world space {@link AABB}
+	 * @param filter the {@link Filter} to use against the fixtures; can be null
+	 * @param ignoreSensors true if sensor fixtures should be ignored
+	 * @param ignoreInactive true if inactive bodies should be ignored
+	 * @param results the list of overlapping bodies and fixtures
+	 * @return boolean true if the AABB overlaps any fixture
+	 * @since 3.1.9
 	 */
-	public List<Body> detect(Convex convex, Transform transform) {
-		return detect(convex, transform, null, false, true);
+	public boolean detect(AABB aabb, Filter filter, boolean ignoreSensors, boolean ignoreInactive, List<DetectResult> results) {
+		List<DetectListener> listeners = this.getListeners(DetectListener.class);
+		
+		List<Body> collisions = this.broadphaseDetector.detect(aabb);
+		boolean found = false;
+		
+		int bSize = collisions.size();
+		boolean allow;
+		for (int i = 0; i < bSize; i++) {
+			Body body = collisions.get(i);
+			// check for inactive
+			if (ignoreInactive && !body.isActive()) {
+				continue;
+			}
+			// pass through the listeners
+			allow = true;
+			for (DetectListener listener : listeners) {
+				if (!listener.allow(aabb, body)) {
+					allow = false;
+				}
+			}
+			if (!allow) {
+				continue;
+			}
+			// check body's fixtures next
+			Transform transform = body.getTransform();
+			int fSize = body.getFixtureCount();
+			for (int j = 0; j < fSize; j++) {
+				BodyFixture fixture = body.getFixture(j);
+				// test for sensors
+				if (ignoreSensors && fixture.isSensor()) continue;
+				// test the filter
+				if (filter != null && !filter.isAllowed(fixture.getFilter())) continue;
+				// pass through the listeners
+				allow = true;
+				for (DetectListener listener : listeners) {
+					if (!listener.allow(aabb, body, fixture)) {
+						allow = false;
+					}
+				}
+				if (!allow) {
+					continue;
+				}
+				// create an AABB for the fixture
+				AABB faabb = fixture.getShape().createAABB(transform);
+				// test the aabbs
+				if (aabb.overlaps(faabb)) {
+					// add this fixture to the results list
+					DetectResult result = new DetectResult();
+					result.body = body;
+					result.fixture = fixture;
+					results.add(result);
+					found = true;
+				}
+			}
+		}
+		
+		return found;
 	}
 	
 	/**
-	 * Returns a list of bodies within the specified convex shape.
+	 * Returns true if the given convex overlaps a body in the world.
 	 * <p>
-	 * If any part of a body is contained in the convex, it is added to the list.
+	 * If this method returns true, the results list will contain the bodies and
+	 * fixtures that the convex overlaps.
 	 * <p>
 	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
 	 * are colliding.
+	 * <p>
+	 * The returned results may include sensor fixutres.
+	 * <p>
+	 * Inactive bodies are ignored in this test.
+	 * <p>
+	 * The results from this test will not include {@link Penetration} objects.
+	 * @param convex the convex shape in world coordinates
+	 * @param results the list of overlapping bodies and fixtures
+	 * @return boolean true if an overlap was found
+	 * @since 3.1.9
+	 * @see #detect(Convex, boolean, List)
+	 */
+	public boolean detect(Convex convex, List<DetectResult> results) {
+		return this.detect(convex, Transform.IDENTITY, null, false, true, false, results);
+	}
+
+	/**
+	 * Returns true if the given convex overlaps a body in the world.
+	 * <p>
+	 * If this method returns true, the results list will contain the bodies and
+	 * fixtures that the convex overlaps.
+	 * <p>
+	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
+	 * are colliding.
+	 * <p>
+	 * Inactive bodies are ignored in this test.
+	 * <p>
+	 * The results from this test will not include {@link Penetration} objects.
+	 * @param convex the convex shape in world coordinates
+	 * @param ignoreSensors true if sensor fixtures should be ignored
+	 * @param results the list of overlapping bodies and fixtures
+	 * @return boolean true if an overlap was found
+	 * @since 3.1.9
+	 * @see #detect(Convex, boolean, boolean, List)
+	 */
+	public boolean detect(Convex convex, boolean ignoreSensors, List<DetectResult> results) {
+		return this.detect(convex, Transform.IDENTITY, null, ignoreSensors, true, false, results);
+	}
+
+	/**
+	 * Returns true if the given convex overlaps a body in the world.
+	 * <p>
+	 * If this method returns true, the results list will contain the bodies and
+	 * fixtures that the convex overlaps.
+	 * <p>
+	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
+	 * are colliding.
+	 * <p>
+	 * The results from this test will not include {@link Penetration} objects.
+	 * @param convex the convex shape in world coordinates
+	 * @param ignoreSensors true if sensor fixtures should be ignored
+	 * @param ignoreInactive true if inactive bodies should be ignored
+	 * @param results the list of overlapping bodies and fixtures
+	 * @return boolean true if an overlap was found
+	 * @since 3.1.9
+	 * @see #detect(Convex, Transform, Filter, boolean, boolean, List)
+	 */
+	public boolean detect(Convex convex, boolean ignoreSensors, boolean ignoreInactive, List<DetectResult> results) {
+		return this.detect(convex, Transform.IDENTITY, null, ignoreSensors, ignoreInactive, false, results);
+	}
+	
+	/**
+	 * Returns true if the given convex overlaps a body in the world.
+	 * <p>
+	 * If this method returns true, the results list will contain the bodies and
+	 * fixtures that the convex overlaps.
+	 * <p>
+	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
+	 * are colliding.
+	 * <p>
+	 * The results from this test will not include {@link Penetration} objects.
+	 * @param convex the convex shape in world coordinates
+	 * @param filter the {@link Filter} to use against the fixtures; can be null
+	 * @param ignoreSensors true if sensor fixtures should be ignored
+	 * @param ignoreInactive true if inactive bodies should be ignored
+	 * @param results the list of overlapping bodies and fixtures
+	 * @return boolean true if an overlap was found
+	 * @since 3.1.9
+	 * @see #detect(Convex, Transform, Filter, boolean, boolean, boolean, List)
+	 */
+	public boolean detect(Convex convex, Filter filter, boolean ignoreSensors, boolean ignoreInactive, List<DetectResult> results) {
+		return this.detect(convex, Transform.IDENTITY, filter, ignoreSensors, ignoreInactive, false, results);
+	}
+	
+	/**
+	 * Returns true if the given convex overlaps a body in the world.
+	 * <p>
+	 * If this method returns true, the results list will contain the bodies and
+	 * fixtures that the convex overlaps.
+	 * <p>
+	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
+	 * are colliding.
+	 * <p>
+	 * Use the <code>includeCollisionData</code> parameter to have the {@link Penetration} object
+	 * filled in the {@link DetectResult}s.  Including this information negatively impacts performance.
+	 * @param convex the convex shape in world coordinates
+	 * @param filter the {@link Filter} to use against the fixtures; can be null
+	 * @param ignoreSensors true if sensor fixtures should be ignored
+	 * @param ignoreInactive true if inactive bodies should be ignored
+	 * @param includeCollisionData true if the overlap {@link Penetration} should be returned
+	 * @param results the list of overlapping bodies and fixtures
+	 * @return boolean true if an overlap was found
+	 * @since 3.1.9
+	 */
+	public boolean detect(Convex convex, Filter filter, boolean ignoreSensors, boolean ignoreInactive, boolean includeCollisionData, List<DetectResult> results) {
+		return this.detect(convex, Transform.IDENTITY, filter, ignoreSensors, ignoreInactive, includeCollisionData, results);
+	}
+	
+	/**
+	 * Returns true if the given convex overlaps a body in the world.
+	 * <p>
+	 * If this method returns true, the results list will contain the bodies and
+	 * fixtures that the convex overlaps.
+	 * <p>
+	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
+	 * are colliding.
+	 * <p>
+	 * The returned results may include sensor fixutres.
+	 * <p>
+	 * Inactive bodies are ignored in this test.
+	 * <p>
+	 * The results from this test will not include {@link Penetration} objects.
+	 * @param convex the convex shape in local coordinates
+	 * @param transform the convex shape's world transform
+	 * @param results the list of overlapping bodies and fixtures
+	 * @return boolean true if an overlap was found
+	 * @since 3.1.9
+	 * @see #detect(Convex, Transform, boolean, List)
+	 */
+	public boolean detect(Convex convex, Transform transform, List<DetectResult> results) {
+		return this.detect(convex, transform, null, false, true, false, results);
+	}
+	
+	/**
+	 * Returns true if the given convex overlaps a body in the world.
+	 * <p>
+	 * If this method returns true, the results list will contain the bodies and
+	 * fixtures that the convex overlaps.
+	 * <p>
+	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
+	 * are colliding.
+	 * <p>
+	 * Inactive bodies are ignored in this test.
+	 * <p>
+	 * The results from this test will not include {@link Penetration} objects.
+	 * @param convex the convex shape in local coordinates
+	 * @param transform the convex shape's world transform
+	 * @param ignoreSensors true if sensor fixtures should be ignored
+	 * @param results the list of overlapping bodies and fixtures
+	 * @return boolean true if an overlap was found
+	 * @since 3.1.9
+	 * @see #detect(Convex, Transform, boolean, boolean, List)
+	 */
+	public boolean detect(Convex convex, Transform transform, boolean ignoreSensors, List<DetectResult> results) {
+		return this.detect(convex, transform, null, ignoreSensors, true, false, results);
+	}
+	
+	/**
+	 * Returns true if the given convex overlaps a body in the world.
+	 * <p>
+	 * If this method returns true, the results list will contain the bodies and
+	 * fixtures that the convex overlaps.
+	 * <p>
+	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
+	 * are colliding.
+	 * <p>
+	 * The results from this test will not include {@link Penetration} objects.
 	 * @param convex the convex shape in local coordinates
 	 * @param transform the convex shape's world transform
 	 * @param ignoreSensors true if sensor fixtures should be ignored
 	 * @param ignoreInactive true if inactive bodies should be ignored
-	 * @return List&lt;{@link Body}&gt; a list of bodies within the given convex shape
-	 * @see #detect(Convex, Transform, Filter, boolean, boolean)
+	 * @param results the list of overlapping bodies and fixtures
+	 * @return boolean true if an overlap was found
 	 * @since 3.1.9
+	 * @see #detect(Convex, Transform, Filter, boolean, boolean, List)
 	 */
-	public List<Body> detect(Convex convex, Transform transform, boolean ignoreSensors, boolean ignoreInactive) {
-		return this.detect(convex, transform, null, ignoreSensors, ignoreInactive);
+	public boolean detect(Convex convex, Transform transform, boolean ignoreSensors, boolean ignoreInactive, List<DetectResult> results) {
+		return this.detect(convex, transform, null, ignoreSensors, ignoreInactive, false, results);
 	}
 	
 	/**
-	 * Returns a list of bodies within the specified convex shape.
+	 * Returns true if the given convex overlaps a body in the world.
 	 * <p>
-	 * If any part of a body is contained in the convex, it is added to the list.
+	 * If this method returns true, the results list will contain the bodies and
+	 * fixtures that the convex overlaps.
 	 * <p>
 	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
 	 * are colliding.
+	 * <p>
+	 * The results from this test will not include {@link Penetration} objects.
 	 * @param convex the convex shape in local coordinates
 	 * @param transform the convex shape's world transform
 	 * @param filter the {@link Filter} to use against the fixtures; can be null
 	 * @param ignoreSensors true if sensor fixtures should be ignored
 	 * @param ignoreInactive true if inactive bodies should be ignored
-	 * @return List&lt;{@link Body}&gt; a list of bodies within the given convex shape
+	 * @param results the list of overlapping bodies and fixtures
+	 * @return boolean true if an overlap was found
+	 * @since 3.1.9
+	 * @see #detect(Convex, Transform, Filter, boolean, boolean, boolean, List)
+	 */
+	public boolean detect(Convex convex, Transform transform, Filter filter, boolean ignoreSensors, boolean ignoreInactive, List<DetectResult> results) {
+		return this.detect(convex, transform, filter, ignoreSensors, ignoreInactive, false, results);
+	}
+	
+	/**
+	 * Returns true if the given convex overlaps a body in the world.
+	 * <p>
+	 * If this method returns true, the results list will contain the bodies and
+	 * fixtures that the convex overlaps.
+	 * <p>
+	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
+	 * are colliding.
+	 * <p>
+	 * Use the <code>includeCollisionData</code> parameter to have the {@link Penetration} object
+	 * filled in the {@link DetectResult}s.  Including this information negatively impacts performance.
+	 * @param convex the convex shape in local coordinates
+	 * @param transform the convex shape's world transform
+	 * @param filter the {@link Filter} to use against the fixtures; can be null
+	 * @param ignoreSensors true if sensor fixtures should be ignored
+	 * @param ignoreInactive true if inactive bodies should be ignored
+	 * @param includeCollisionData true if the overlap {@link Penetration} should be returned
+	 * @param results the list of overlapping bodies and fixtures
+	 * @return boolean true if an overlap was found
 	 * @since 3.1.9
 	 */
-	public List<Body> detect(Convex convex, Transform transform, Filter filter, boolean ignoreSensors, boolean ignoreInactive) {
+	public boolean detect(Convex convex, Transform transform, Filter filter, boolean ignoreSensors, boolean ignoreInactive, boolean includeCollisionData, List<DetectResult> results) {
+		List<DetectListener> listeners = this.getListeners(DetectListener.class);
+		boolean allow = true;
+		
 		// create an aabb for the given convex
 		AABB aabb = convex.createAABB(transform);
 		// test using the broadphase to rule out as many bodies as we can
 		List<Body> bodies = this.broadphaseDetector.detect(aabb);
 		// now perform a more accurate test
-		Iterator<Body> bi = bodies.iterator();
-		while (bi.hasNext()) {
-			Body body = bi.next();
+		int bSize = bodies.size();
+		boolean found = false;
+		for (int i = 0; i < bSize; i++) {
+			Body body = bodies.get(i);
+			// pass through the listeners
+			allow = true;
+			for (DetectListener listener : listeners) {
+				if (!listener.allow(convex, transform, body)) {
+					allow = false;
+				}
+			}
+			if (!allow) {
+				continue;
+			}
 			// get the body transform
 			Transform bt = body.getTransform();
 			// test all the fixtures
 			int fSize = body.getFixtureCount();
-			boolean collision = false;
 			// make sure the body is active if ignoreInactive is set to true
 			if (!ignoreInactive || body.isActive()) {
-				for (int i = 0; i < fSize; i++) {
-					BodyFixture bf = body.getFixture(i);
+				for (int j = 0; j < fSize; j++) {
+					BodyFixture bf = body.getFixture(j);
 					// check against the sensor flag
 					if (ignoreSensors && bf.isSensor()) continue;
 					
@@ -1644,26 +2249,332 @@ public class World {
 					Filter ff = bf.getFilter();
 					if (filter != null && !ff.isAllowed(filter)) continue;
 
+					// pass through the listeners
+					allow = true;
+					for (DetectListener listener : listeners) {
+						if (!listener.allow(convex, transform, body, bf)) {
+							allow = false;
+						}
+					}
+					if (!allow) {
+						continue;
+					}
+					
 					// just perform a boolean test since its typically faster
 					Convex bc = bf.getShape();
-					if (this.narrowphaseDetector.detect(convex, transform, bc, bt)) {
-						// if we found a fixture on the body that is in collision
-						// with the given convex, we can skip the rest of the fixtures
-						// and continue testing other bodies
-						collision = true;
-						break;
+					boolean collision = false;
+					// should we use the fast method or the one that returns the collision info
+					Penetration penetration = (includeCollisionData ? new Penetration() : null); 
+					if (includeCollisionData) {
+						collision = this.narrowphaseDetector.detect(convex, transform, bc, bt);
+					} else {
+						collision = this.narrowphaseDetector.detect(convex, transform, bc, bt, penetration);
+					}
+					if (collision) {
+						// add this fixture to the results list
+						DetectResult result = new DetectResult();
+						result.body = body;
+						result.fixture = bf;
+						result.penetration = penetration;
+						results.add(result);
+						found = true;
 					}
 				}
 			}
-			// if we went through all the fixtures of the
-			// body and we didn't find one that collided with
-			// the given convex, then remove it from the list
-			if (!collision) {
-				bi.remove();
+		}
+		// return the bodies in collision
+		return found;
+	}
+	
+	/**
+	 * Returns true if the given AABB overlaps the given body in the world.
+	 * <p>
+	 * If this method returns true, the results list will contain the bodies and
+	 * fixtures that the AABB overlaps.
+	 * <p>
+	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
+	 * are colliding.
+	 * @param aabb the {@link AABB} in world coordinates
+	 * @param body the {@link Body} to test against
+	 * @param ignoreSensors true if sensor fixtures should be ignored
+	 * @param results the list of overlapping bodies and fixtures
+	 * @return boolean true if an overlap was found
+	 * @since 3.1.9
+	 */
+	public boolean detect(AABB aabb, Body body, boolean ignoreSensors, List<DetectResult> results) {
+		return this.detect(aabb, body, null, ignoreSensors, results);
+	}
+	
+	/**
+	 * Returns true if the given AABB overlaps the given body in the world.
+	 * <p>
+	 * If this method returns true, the results list will contain the bodies and
+	 * fixtures that the AABB overlaps.
+	 * <p>
+	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
+	 * are colliding.
+	 * @param aabb the {@link AABB} in world coordinates
+	 * @param body the {@link Body} to test against
+	 * @param filter the {@link Filter} to use against the fixtures; can be null
+	 * @param ignoreSensors true if sensor fixtures should be ignored
+	 * @param results the list of overlapping bodies and fixtures
+	 * @return boolean true if an overlap was found
+	 * @since 3.1.9
+	 */
+	public boolean detect(AABB aabb, Body body, Filter filter, boolean ignoreSensors, List<DetectResult> results) {
+		List<DetectListener> listeners = this.getListeners(DetectListener.class);
+		
+		// pass through the listeners first
+		boolean allow = true;
+		for (DetectListener listener : listeners) {
+			if (!listener.allow(aabb, body)) {
+				allow = false;
+			}
+		}
+		if (!allow) return false;
+		
+		// test the AABBs
+		boolean found = false;
+		AABB baabb = this.broadphaseDetector.getAABB(body);
+		if (baabb == null) {
+			baabb = body.createAABB();
+		}
+		if (aabb.overlaps(baabb)) {
+			// check body's fixtures next
+			Transform transform = body.getTransform();
+			int fSize = body.getFixtureCount();
+			for (int j = 0; j < fSize; j++) {
+				BodyFixture fixture = body.getFixture(j);
+				// test for sensors
+				if (ignoreSensors && fixture.isSensor()) continue;
+				// test the filter
+				if (filter != null && !filter.isAllowed(fixture.getFilter())) continue;
+				// pass through the listeners
+				allow = true;
+				for (DetectListener listener : listeners) {
+					if (!listener.allow(aabb, body, fixture)) {
+						allow = false;
+					}
+				}
+				if (!allow) {
+					continue;
+				}
+				// create an AABB for the fixture
+				AABB faabb = fixture.getShape().createAABB(transform);
+				// test the aabbs
+				if (aabb.overlaps(faabb)) {
+					// add this fixture to the results list
+					DetectResult result = new DetectResult();
+					result.body = body;
+					result.fixture = fixture;
+					results.add(result);
+					found = true;
+				}
+			}
+		}
+		
+		return found;
+	}
+	
+	/**
+	 * Returns true if the given {@link Convex} overlaps the given body in the world.
+	 * <p>
+	 * If this method returns true, the results list will contain the bodies and
+	 * fixtures that the AABB overlaps.
+	 * <p>
+	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
+	 * are colliding.
+	 * <p>
+	 * The results from this test will not include {@link Penetration} objects.
+	 * @param convex the {@link Convex} in world coordinates
+	 * @param body the {@link Body} to test against
+	 * @param ignoreSensors true if sensor fixtures should be ignored
+	 * @param results the list of overlapping bodies and fixtures
+	 * @return boolean true if an overlap was found
+	 * @since 3.1.9
+	 */
+	public boolean detect(Convex convex, Body body, boolean ignoreSensors, List<DetectResult> results) {
+		return this.detect(convex, Transform.IDENTITY, body, null, ignoreSensors, false, results);
+	}
+	
+	/**
+	 * Returns true if the given {@link Convex} overlaps the given body in the world.
+	 * <p>
+	 * If this method returns true, the results list will contain the bodies and
+	 * fixtures that the AABB overlaps.
+	 * <p>
+	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
+	 * are colliding.
+	 * <p>
+	 * The results from this test will not include {@link Penetration} objects.
+	 * @param convex the {@link Convex} in world coordinates
+	 * @param body the {@link Body} to test against
+	 * @param filter the {@link Filter} to use against the fixtures; can be null
+	 * @param ignoreSensors true if sensor fixtures should be ignored
+	 * @param results the list of overlapping bodies and fixtures
+	 * @return boolean true if an overlap was found
+	 * @since 3.1.9
+	 */
+	public boolean detect(Convex convex, Body body, Filter filter, boolean ignoreSensors, List<DetectResult> results) {
+		return this.detect(convex, Transform.IDENTITY, body, filter, ignoreSensors, false, results);
+	}
+	
+	/**
+	 * Returns true if the given {@link Convex} overlaps the given body in the world.
+	 * <p>
+	 * If this method returns true, the results list will contain the bodies and
+	 * fixtures that the AABB overlaps.
+	 * <p>
+	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
+	 * are colliding.
+	 * <p>
+	 * Use the <code>includeCollisionData</code> parameter to have the {@link Penetration} object
+	 * filled in the {@link DetectResult}s.  Including this information negatively impacts performance.
+	 * @param convex the {@link Convex} in world coordinates
+	 * @param body the {@link Body} to test against
+	 * @param filter the {@link Filter} to use against the fixtures; can be null
+	 * @param includeCollisionData true if the overlap {@link Penetration} should be returned
+	 * @param ignoreSensors true if sensor fixtures should be ignored
+	 * @param results the list of overlapping bodies and fixtures
+	 * @return boolean true if an overlap was found
+	 * @since 3.1.9
+	 */
+	public boolean detect(Convex convex, Body body, Filter filter, boolean ignoreSensors, boolean includeCollisionData, List<DetectResult> results) {
+		return this.detect(convex, Transform.IDENTITY, body, filter, ignoreSensors, includeCollisionData, results);
+	}
+	
+	/**
+	 * Returns true if the given {@link Convex} overlaps the given body in the world.
+	 * <p>
+	 * If this method returns true, the results list will contain the bodies and
+	 * fixtures that the AABB overlaps.
+	 * <p>
+	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
+	 * are colliding.
+	 * <p>
+	 * The results from this test will not include {@link Penetration} objects.
+	 * @param convex the {@link Convex} in local coordinates
+	 * @param transform the convex shape's world {@link Transform}
+	 * @param body the {@link Body} to test against
+	 * @param ignoreSensors true if sensor fixtures should be ignored
+	 * @param results the list of overlapping bodies and fixtures
+	 * @return boolean true if an overlap was found
+	 * @since 3.1.9
+	 */
+	public boolean detect(Convex convex, Transform transform, Body body, boolean ignoreSensors, List<DetectResult> results) {
+		return this.detect(convex, transform, body, null, ignoreSensors, false, results);
+	}
+	
+	/**
+	 * Returns true if the given {@link Convex} overlaps the given body in the world.
+	 * <p>
+	 * If this method returns true, the results list will contain the bodies and
+	 * fixtures that the AABB overlaps.
+	 * <p>
+	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
+	 * are colliding.
+	 * <p>
+	 * The results from this test will not include {@link Penetration} objects.
+	 * @param convex the {@link Convex} in local coordinates
+	 * @param transform the convex shape's world {@link Transform}
+	 * @param body the {@link Body} to test against
+	 * @param filter the {@link Filter} to use against the fixtures; can be null
+	 * @param ignoreSensors true if sensor fixtures should be ignored
+	 * @param results the list of overlapping bodies and fixtures
+	 * @return boolean true if an overlap was found
+	 * @since 3.1.9
+	 */
+	public boolean detect(Convex convex, Transform transform, Body body, Filter filter, boolean ignoreSensors, List<DetectResult> results) {
+		return this.detect(convex, transform, body, filter, ignoreSensors, false, results);
+	}
+	
+	/**
+	 * Returns true if the given {@link Convex} overlaps the given body in the world.
+	 * <p>
+	 * If this method returns true, the results list will contain the bodies and
+	 * fixtures that the AABB overlaps.
+	 * <p>
+	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
+	 * are colliding.
+	 * <p>
+	 * Use the <code>includeCollisionData</code> parameter to have the {@link Penetration} object
+	 * filled in the {@link DetectResult}s.  Including this information negatively impacts performance.
+	 * @param convex the {@link Convex} in local coordinates
+	 * @param transform the convex shape's world {@link Transform}
+	 * @param body the {@link Body} to test against
+	 * @param filter the {@link Filter} to use against the fixtures; can be null
+	 * @param includeCollisionData true if the overlap {@link Penetration} should be returned
+	 * @param ignoreSensors true if sensor fixtures should be ignored
+	 * @param results the list of overlapping bodies and fixtures
+	 * @return boolean true if an overlap was found
+	 * @since 3.1.9
+	 */
+	public boolean detect(Convex convex, Transform transform, Body body, Filter filter, boolean ignoreSensors, boolean includeCollisionData, List<DetectResult> results) {
+		List<DetectListener> listeners = this.getListeners(DetectListener.class);
+		// make sure we can test the body
+		boolean allow = true;
+		for (DetectListener listener : listeners) {
+			if (!listener.allow(convex, transform, body)) {
+				allow = false;
+			}
+		}
+		if (!allow) return false;
+		// create an aabb for the given convex
+		AABB aabb = convex.createAABB(transform);
+		// test using the broadphase to rule out as many bodies as we can
+		AABB baabb = this.broadphaseDetector.getAABB(body);
+		if (baabb == null) {
+			baabb = body.createAABB();
+		}
+		// now perform an AABB test first
+		boolean found = false;
+		if (aabb.overlaps(baabb)) {
+			// get the body transform
+			Transform bt = body.getTransform();
+			// test all the fixtures
+			int fSize = body.getFixtureCount();
+			for (int j = 0; j < fSize; j++) {
+				BodyFixture bf = body.getFixture(j);
+				// check against the sensor flag
+				if (ignoreSensors && bf.isSensor()) continue;
+				// check against the filter if given
+				Filter ff = bf.getFilter();
+				if (filter != null && !ff.isAllowed(filter)) continue;
+
+				// pass through the listeners
+				allow = true;
+				for (DetectListener listener : listeners) {
+					if (!listener.allow(convex, transform, body, bf)) {
+						allow = false;
+					}
+				}
+				if (!allow) {
+					continue;
+				}
+				
+				// just perform a boolean test since its typically faster
+				Convex bc = bf.getShape();
+				boolean collision = false;
+				// should we use the fast method or the one that returns the collision info
+				Penetration penetration = (includeCollisionData ? new Penetration() : null); 
+				if (includeCollisionData) {
+					collision = this.narrowphaseDetector.detect(convex, transform, bc, bt);
+				} else {
+					collision = this.narrowphaseDetector.detect(convex, transform, bc, bt, penetration);
+				}
+				if (collision) {
+					// add this fixture to the results list
+					DetectResult result = new DetectResult();
+					result.body = body;
+					result.fixture = bf;
+					result.penetration = penetration;
+					results.add(result);
+					found = true;
+				}
 			}
 		}
 		// return the bodies in collision
-		return bodies;
+		return found;
 	}
 	
 	/**
@@ -2840,5 +3751,128 @@ public class World {
 	@Deprecated
 	public void removeListeners() {
 		this.removeAllListeners();
+	}
+
+	/**
+	 * Returns a list of bodies within the specified (world-space) axis-aligned bounding box.
+	 * <p>
+	 * If any part of a body is contained in the AABB, it is added to the list.
+	 * <p>
+	 * This performs a static collision test of the world using the {@link BroadphaseDetector}.
+	 * <p>
+	 * This may return bodies who only have sensor fixtures overlapping.
+	 * <p>
+	 * Inactive bodies are ignored in this test.
+	 * @param aabb the world space {@link AABB}
+	 * @return List&lt;{@link Body}&gt; a list of bodies within the given AABB
+	 * @since 3.1.1
+	 * @deprecated replaced with {@link #detect(AABB, List)} in 3.1.9
+	 * @see #detect(AABB, List)
+	 */
+	@Deprecated
+	public List<Body> detect(AABB aabb) {
+		List<Body> bodies = new ArrayList<Body>();
+		this.detect(aabb, true, bodies);
+		return bodies;
+	}
+
+	/**
+	 * Returns a list of bodies within the specified convex shape.
+	 * <p>
+	 * If any part of a body is contained in the convex, it is added to the list.
+	 * <p>
+	 * This may return bodies who only have sensor fixtures overlapping.
+	 * <p>
+	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
+	 * are colliding.
+	 * <p>
+	 * Inactive bodies are ignored in this test.
+	 * @param convex the convex shape in world coordinates
+	 * @return List&lt;{@link Body}&gt; a list of bodies within the given convex shape
+	 * @since 3.1.1
+	 * @deprecated replaced with {@link #detect(Convex, List)} in 3.1.9
+	 * @see #detect(Convex, List)
+	 */
+	@Deprecated
+	public List<Body> detect(Convex convex) {
+		return this.detect(convex, Transform.IDENTITY);
+	}
+	
+	/**
+	 * Returns a list of bodies within the specified convex shape.
+	 * <p>
+	 * If any part of a body is contained in the convex, it is added to the list.
+	 * <p>
+	 * This may return bodies who only have sensor fixtures overlapping.
+	 * <p>
+	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
+	 * are colliding.
+	 * <p>
+	 * Inactive bodies are ignored in this test.
+	 * @param convex the convex shape in local coordinates
+	 * @param transform the convex shape's world transform
+	 * @return List&lt;{@link Body}&gt; a list of bodies within the given convex shape
+	 * @since 3.1.1
+	 * @deprecated replaced with {@link #detect(Convex, Transform, List)} in 3.1.9
+	 * @see #detect(Convex, Transform, List)
+	 */
+	@Deprecated
+	public List<Body> detect(Convex convex, Transform transform) {
+		List<DetectListener> listeners = this.getListeners(DetectListener.class);
+		boolean allow = true;
+		
+		// create an aabb for the given convex
+		AABB aabb = convex.createAABB(transform);
+		// test using the broadphase to rule out as many bodies as we can
+		List<Body> bodies = this.broadphaseDetector.detect(aabb);
+		// now perform a more accurate test
+		Iterator<Body> bi = bodies.iterator();
+		while (bi.hasNext()) {
+			Body body = bi.next();
+			// pass through the listeners
+			allow = true;
+			for (DetectListener listener : listeners) {
+				if (!listener.allow(convex, transform, body)) {
+					allow = false;
+				}
+			}
+			if (!allow) {
+				bi.remove();
+				continue;
+			}
+			// get the body transform
+			Transform bt = body.getTransform();
+			// test all the fixtures
+			int fSize = body.getFixtureCount();
+			boolean collision = false;
+			for (int i = 0; i < fSize; i++) {
+				BodyFixture bf = body.getFixture(i);
+				// should we even test this fixture?
+				allow = true;
+				for (DetectListener listener : listeners) {
+					if (!listener.allow(convex, transform, body, bf)) {
+						allow = false;
+					}
+				}
+				if (!allow) {
+					continue;
+				}
+				// just perform a boolean test since its typically faster
+				Convex bc = bf.getShape();
+				if (this.narrowphaseDetector.detect(convex, transform, bc, bt)) {
+					// we can skip the rest of the fixtures and continue testing other bodies
+					collision = true;
+					break;
+				}
+			}
+			// if we went through all the fixtures of the
+			// body and we didn't find one that collided with
+			// the given convex, then remove it from the list
+			if (!collision) {
+				bi.remove();
+			}
+		}
+		// return the bodies in collision
+		return bodies;
 	}
 }

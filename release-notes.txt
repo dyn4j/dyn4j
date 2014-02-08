@@ -5,6 +5,13 @@ New Features:
   - Added a new interface, Triangulator, that both the EarClipping and
     SweepLine algorithms implement that allow you to get a triangulation of
     a simple polygon.
+  - Added a bunch of new detect methods to the World class to allow filtering
+    of sensor bodies, inactive bodies, or by a Filter object and some other
+    features.
+  - Added a new DetectListener interface specifically for the World.detect
+    methods that allow arbitrary filtering of collision tests.
+  - Added new raycast and convexCast methods that include a Filter and
+    ignoreInactive parameters.
     
 Bug Fixes:
   - Fixed a bug in the SweepLine class where it would get a NPE when there
@@ -15,13 +22,21 @@ Bug Fixes:
     performing the union rather than the intersection.
   - Fixed a bug in the SweepLine class where it would enter an infinite loop
     due to a poor sort condition during the decompose to y-monotone phase.
+  - Fixed a bug in the convexCast methods where it would exit early instead
+    of continuing to test other fixtures when false was returned from a
+    particular ConvexCastListener method.
     
 Deprecated:
 
 Breaking Changes:
+  - The World.detect, World.raycast, and World.convexCast methods now filter
+    out inactive bodies by default (they were included in versions before).
     
 Other:
   - Regression JUnit tests for bugs listed above.
+  - Made a few small changes to some classes (added hashcode methods and
+    changes like this) that have zero effect on usage, output or 
+    performance.
 
 ===============================================================================
 Version 3.1.8
