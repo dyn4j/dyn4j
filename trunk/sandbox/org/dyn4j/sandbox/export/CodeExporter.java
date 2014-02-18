@@ -27,6 +27,7 @@ package org.dyn4j.sandbox.export;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.dyn4j.Epsilon;
 import org.dyn4j.Version;
@@ -100,7 +101,7 @@ public class CodeExporter {
 	public static final String export(String name, World world) {
 		StringBuilder sb = new StringBuilder();
 		// this map contains the id to output name for bodies
-		Map<String, String> idNameMap = new HashMap<String, String>();
+		Map<UUID, String> idNameMap = new HashMap<UUID, String>();
 		
 		sb
 		// imports
@@ -198,7 +199,7 @@ public class CodeExporter {
 		for (int i = 1; i < bSize + 1; i++) {
 			SandboxBody body = (SandboxBody)world.getBody(i - 1);
 			// save the id+name
-			idNameMap.put(body.getId().toString(), "body" + i);
+			idNameMap.put(body.getId(), "body" + i);
 			Mass mass = body.getMass();
 			// output the body settings
 			sb.append(TAB2).append("// ").append(body.getUserData()).append(NEW_LINE)
