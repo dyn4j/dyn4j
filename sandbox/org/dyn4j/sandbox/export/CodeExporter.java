@@ -74,7 +74,7 @@ import org.dyn4j.sandbox.resources.Messages;
 /**
  * Class to export a simulation to Java code.
  * @author William Bittle
- * @version 1.0.5
+ * @version 1.0.6
  * @since 1.0.1
  */
 public class CodeExporter {
