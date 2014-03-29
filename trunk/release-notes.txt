@@ -3,7 +3,7 @@ Version 3.1.9
 ===============================================================================
 New Features:
   - Added a new interface, Triangulator, that both the EarClipping and
-    SweepLine algorithms implement that allow you to get a triangulation of
+    SweepLine algorithms implement that allows you to get a triangulation of
     a simple polygon.
   - Added a bunch of new detect methods to the World class to allow filtering
     of sensor bodies, inactive bodies, or by a Filter object and some other
@@ -25,8 +25,13 @@ Bug Fixes:
   - Fixed a bug in the convexCast methods where it would exit early instead
     of continuing to test other fixtures when false was returned from a
     particular ConvexCastListener method.
+  - Fixed a bug in the Sandbox app where null would be output instead
+    of the correct body instance.
     
 Deprecated:
+  - World.detect(AABB), World.detect(Convex), and 
+    World.detect(Convex, Transform) have been replaced by with new
+    World.detect methods that have more input and output options.
 
 Breaking Changes:
   - The World.detect, World.raycast, and World.convexCast methods now filter
