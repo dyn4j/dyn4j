@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Main-Class: org.dyn4j.Version
+Name: dyn4j
+Implementation-Title: Java Collision Detection and Physics Engine
+Implementation-Version: 3.1.9
+Implementation-Vendor: dyn4j.org
