@@ -47,7 +47,7 @@ import org.dyn4j.resources.Messages;
  * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.1.10
  * @since 1.0.0
  */
 public class WeldJoint extends Joint {
@@ -155,7 +155,7 @@ public class WeldJoint extends Joint {
 		this.K.m21 = this.K.m12;
 		this.K.m22 = invI1 + invI2;
 		
-		if (this.frequency > 0.0) {
+		if (this.frequency > 0.0 && this.K.m22 > 0.0) {
 			double invI = invI1 + invI2;
 			double i = invI <= Epsilon.E ? 0.0 : 1.0 / invI;
 			
@@ -245,7 +245,13 @@ public class WeldJoint extends Joint {
 			Vector2 anchorV = v1.subtract(v2);
 			Vector3 C = new Vector3(anchorV.x, anchorV.y, this.body1.getAngularVelocity() - this.body2.getAngularVelocity());
 			
-			Vector3 impulse = this.K.solve33(C.negate());
+			Vector3 impulse = null;
+			if (this.K.m22 > 0.0) {
+				impulse = this.K.solve33(C.negate());
+			} else {
+				Vector2 impulse2 = this.K.solve22(anchorV).negate();
+				impulse = new Vector3(impulse2.x, impulse2.y, 0.0);
+			}
 			this.impulse.add(impulse);
 			
 			// apply the impulse
@@ -311,7 +317,14 @@ public class WeldJoint extends Joint {
 			this.body2.translate(j.product(-invM2));
 			this.body2.rotateAboutCenter(-invI2 * r2.cross(j));
 		} else {
-			Vector3 impulse = this.K.solve33(C.negate());
+			Vector3 impulse = null;
+			
+			if (this.K.m22 > 0.0) {
+				impulse = this.K.solve33(C.negate());
+			} else {
+				Vector2 impulse2 = this.K.solve22(C1).negate();
+				impulse = new Vector3(impulse2.x, impulse2.y, 0.0);
+			}
 	
 			// translate and rotate the objects
 			Vector2 imp = new Vector2(impulse.x, impulse.y);
