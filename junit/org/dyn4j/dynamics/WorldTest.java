@@ -24,6 +24,7 @@
  */
 package org.dyn4j.dynamics;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -32,6 +33,7 @@ import org.dyn4j.Listener;
 import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.collision.BoundsAdapter;
 import org.dyn4j.collision.BoundsListener;
+import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.collision.broadphase.SapIncremental;
 import org.dyn4j.collision.continuous.ConservativeAdvancement;
@@ -45,6 +47,7 @@ import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.MouseJoint;
+import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Vector2;
@@ -943,5 +946,21 @@ public class WorldTest {
 		w.setUserData(obj);
 		TestCase.assertNotNull(w.getUserData());
 		TestCase.assertSame(obj, w.getUserData());
+	}
+	
+	/**
+	 * Tests the new detect methods.
+	 */
+	@Test
+	public void testNewDetectMethod() {
+	   World world = new World() ;
+	   Circle c = new Circle(20.0) ;
+	   ArrayList<DetectResult> result = new ArrayList<DetectResult>() ;
+	   Body b = new Body();
+	   b.addFixture(c) ;
+	   world.addBody(b);
+	   if (!world.detect(c, new CategoryFilter(2,15), true, false, result)) {
+		   TestCase.fail();
+	   }
 	}
 }

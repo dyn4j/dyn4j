@@ -1,4 +1,20 @@
 ===============================================================================
+Version 3.1.10
+===============================================================================
+New Features:
+    
+Bug Fixes:
+  - Fixed a bug in the WeldJoint class when using to fixed angular velocity
+    bodies.
+  - Fixed a NPE bug in the World.detect methods.
+    
+Deprecated:
+
+Breaking Changes:
+    
+Other:
+
+===============================================================================
 Version 3.1.9
 ===============================================================================
 New Features:

@@ -82,7 +82,7 @@ import org.dyn4j.resources.Messages;
  * Employs the same {@link Island} solving technique as <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.1.9
+ * @version 3.1.10
  * @since 1.0.0
  */
 public class World {
@@ -2266,9 +2266,9 @@ public class World {
 					// should we use the fast method or the one that returns the collision info
 					Penetration penetration = (includeCollisionData ? new Penetration() : null); 
 					if (includeCollisionData) {
-						collision = this.narrowphaseDetector.detect(convex, transform, bc, bt);
-					} else {
 						collision = this.narrowphaseDetector.detect(convex, transform, bc, bt, penetration);
+					} else {
+						collision = this.narrowphaseDetector.detect(convex, transform, bc, bt);
 					}
 					if (collision) {
 						// add this fixture to the results list
@@ -2558,9 +2558,9 @@ public class World {
 				// should we use the fast method or the one that returns the collision info
 				Penetration penetration = (includeCollisionData ? new Penetration() : null); 
 				if (includeCollisionData) {
-					collision = this.narrowphaseDetector.detect(convex, transform, bc, bt);
-				} else {
 					collision = this.narrowphaseDetector.detect(convex, transform, bc, bt, penetration);
+				} else {
+					collision = this.narrowphaseDetector.detect(convex, transform, bc, bt);
 				}
 				if (collision) {
 					// add this fixture to the results list
