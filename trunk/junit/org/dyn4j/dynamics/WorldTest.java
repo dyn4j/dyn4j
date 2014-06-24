@@ -56,7 +56,7 @@ import org.junit.Test;
 /**
  * Contains the test cases for the {@link World} class.
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.1.10
  * @since 1.0.2
  */
 public class WorldTest {
@@ -950,6 +950,7 @@ public class WorldTest {
 	
 	/**
 	 * Tests the new detect methods.
+	 * @since 3.1.10
 	 */
 	@Test
 	public void testNewDetectMethod() {

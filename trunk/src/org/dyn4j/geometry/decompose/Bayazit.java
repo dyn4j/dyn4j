@@ -41,7 +41,7 @@ import org.dyn4j.resources.Messages;
  * This algorithm is a O(nr) complexity algorithm where n is the number of input vertices and r is the number of
  * output convex polygons.  This algorithm can achieve optimal decompositions, however this is not guaranteed.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.10
  * @since 2.2.0
  */
 public class Bayazit implements Decomposer {
@@ -198,21 +198,20 @@ public class Bayazit implements Decomposer {
 						upperIndex += size;
 					}
 					
+					closestIndex = lowerIndex;
 					// find the closest visible point
 					for (int j = lowerIndex; j <= upperIndex; j++) {
-						Vector2 q = polygon.get(j % size);
+						int jmod = j % size;
+						Vector2 q = polygon.get(jmod);
 						
-						//if (q == p || q == p0 || q == p1) continue;
+						if (q == p || q == p0 || q == p1) continue;
 						
-						// make sure q is in the range made by extending the
-						// previous and next edges of p
-						if (leftOn(p0, p, q) && rightOn(p1, p, q)) {
+						if (this.isVisible(polygon, i, jmod)) {
 							// get the distance
 							double dist = p.distanceSquared(q);
-							// only keep the closest
 							if (dist < closestDistance) {
 								closestDistance = dist;
-								closestIndex = j % size;
+								closestIndex = jmod;
 							}
 						}
 					}
@@ -393,5 +392,52 @@ public class Bayazit implements Decomposer {
 			// return that they intersect
 			return true;
 		}
+	}
+	
+	/**
+	 * Returns true if the vertex at index i can see the vertex at index j.
+	 * @param polygon the current polygon
+	 * @param i the ith vertex
+	 * @param j the jth vertex
+	 * @return boolean
+	 * @since 3.1.10
+	 */
+	private boolean isVisible(List<Vector2> polygon, int i, int j) {
+		int s = polygon.size();
+		Vector2 iv0, iv, iv1;
+		Vector2 jv0, jv, jv1;
+		
+		iv0 = polygon.get(i == 0 ? s - 1 : i - 1);
+		iv = polygon.get(i);
+		iv1 = polygon.get(i + 1 == s ? 0 : i + 1);
+		
+		jv0 = polygon.get(j == 0 ? s - 1 : j - 1);
+		jv = polygon.get(j);
+		jv1 = polygon.get(j + 1 == s ? 0 : j + 1);
+		
+		// can i see j
+		if (this.isReflex(iv0, iv, iv1)) {
+			if (leftOn(iv, iv0, jv) && rightOn(iv, iv1, jv)) return false;
+		} else {
+			if (rightOn(iv, iv1, jv) || leftOn(iv, iv0, jv)) return false;
+		}
+		// can j see i
+		if (this.isReflex(jv0, jv, jv1)) {
+			if (leftOn(jv, jv0, iv) && rightOn(jv, jv1, iv)) return false;
+		} else {
+			if (rightOn(jv, jv1, iv) || leftOn(jv, jv0, iv)) return false;
+		}
+		// make sure the segment from i to j doesn't intersect any edges
+		for (int k = 0; k < s; k++) {
+			int ki1 = k + 1 == s ? 0 : k + 1;
+			if (k == i || k == j || ki1 == i || ki1 == j) continue;
+			Vector2 k1 = polygon.get(k);
+			Vector2 k2 = polygon.get(ki1);
+			
+			Vector2 in = Segment.getSegmentIntersection(iv, jv, k1, k2);
+			if (in != null) return false;
+		}
+		
+		return true;
 	}
 }

@@ -36,7 +36,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link SweepLine} class.
  * @author William Bittle
- * @version 3.1.9
+ * @version 3.1.10
  * @since 3.0.0
  */
 public class SweepLineTest extends AbstractDecomposeTest {
@@ -573,6 +573,96 @@ public class SweepLineTest extends AbstractDecomposeTest {
 	@Test
 	public void triangulateSuccessZoom7() {
 		Vector2[] vertices = this.load(SweepLineTest.class.getResourceAsStream("/org/dyn4j/data/zoom7.dat"));
+		
+		// decompose the poly
+		List<? extends Convex> result = this.algo.triangulate(vertices);
+		
+		// the result should have n - 2 triangles shapes
+		TestCase.assertEquals(vertices.length - 2, result.size());
+	}
+	
+	/**
+	 * Tests the implementation against the tridol1 data file.
+	 * @since 3.1.10
+	 */
+	@Test
+	public void successTridol1() {
+		Vector2[] vertices = this.load(SweepLineTest.class.getResourceAsStream("/org/dyn4j/data/tridol1.dat"));
+		
+		// decompose the poly
+		List<? extends Convex> result = this.algo.decompose(vertices);
+		
+		// the result should have n - 2 triangles shapes
+		TestCase.assertTrue(result.size() <= vertices.length - 2);
+	}
+	
+	/**
+	 * Tests the triangulation implementation against the tridol1 data file.
+	 * @since 3.1.10
+	 */
+	@Test
+	public void triangulateSuccessTridol1() {
+		Vector2[] vertices = this.load(SweepLineTest.class.getResourceAsStream("/org/dyn4j/data/tridol1.dat"));
+		
+		// decompose the poly
+		List<? extends Convex> result = this.algo.triangulate(vertices);
+		
+		// the result should have n - 2 triangles shapes
+		TestCase.assertEquals(vertices.length - 2, result.size());
+	}
+	
+	/**
+	 * Tests the implementation against the tridol2 data file.
+	 * @since 3.1.10
+	 */
+	@Test
+	public void successTridol2() {
+		Vector2[] vertices = this.load(SweepLineTest.class.getResourceAsStream("/org/dyn4j/data/tridol2.dat"));
+		
+		// decompose the poly
+		List<? extends Convex> result = this.algo.decompose(vertices);
+		
+		// the result should have n - 2 triangles shapes
+		TestCase.assertTrue(result.size() <= vertices.length - 2);
+	}
+	
+	/**
+	 * Tests the triangulation implementation against the tridol2 data file.
+	 * @since 3.1.10
+	 */
+	@Test
+	public void triangulateSuccessTridol2() {
+		Vector2[] vertices = this.load(SweepLineTest.class.getResourceAsStream("/org/dyn4j/data/tridol2.dat"));
+		
+		// decompose the poly
+		List<? extends Convex> result = this.algo.triangulate(vertices);
+		
+		// the result should have n - 2 triangles shapes
+		TestCase.assertEquals(vertices.length - 2, result.size());
+	}
+	
+	/**
+	 * Tests the implementation against the tridol2 data file.
+	 * @since 3.1.10
+	 */
+	@Test
+	public void successTridol3() {
+		Vector2[] vertices = this.load(SweepLineTest.class.getResourceAsStream("/org/dyn4j/data/tridol3.dat"));
+		
+		// decompose the poly
+		List<? extends Convex> result = this.algo.decompose(vertices);
+		
+		// the result should have n - 2 triangles shapes
+		TestCase.assertTrue(result.size() <= vertices.length - 2);
+	}
+	
+	/**
+	 * Tests the triangulation implementation against the tridol2 data file.
+	 * @since 3.1.10
+	 */
+	@Test
+	public void triangulateSuccessTridol3() {
+		Vector2[] vertices = this.load(SweepLineTest.class.getResourceAsStream("/org/dyn4j/data/tridol3.dat"));
 		
 		// decompose the poly
 		List<? extends Convex> result = this.algo.triangulate(vertices);
