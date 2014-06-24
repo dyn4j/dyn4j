@@ -26,6 +26,7 @@ package org.dyn4j.geometry.decompose;
 
 import java.util.List;
 
+import org.dyn4j.Epsilon;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Triangle;
@@ -52,10 +53,13 @@ import org.dyn4j.resources.Messages;
  * <p>
  * This algorithm is O(n<sup>2</sup>).
  * @author William Bittle
- * @version 3.1.9
+ * @version 3.1.10
  * @since 2.2.0
  */
 public class EarClipping implements Decomposer, Triangulator {
+	/** Epsilon for checking for near containment of vertices within triangles */
+	private static final double CONTAINS_EPSILON = Math.sqrt(Epsilon.E);
+	
 	/**
 	 * Node class for a vertex within the simple polygon.
 	 * @author William Bittle
@@ -172,7 +176,7 @@ public class EarClipping implements Decomposer, Triangulator {
 				throw new IllegalArgumentException(Messages.getString("geometry.decompose.coincident"));
 			}
 			// check the angle between the two vectors
-			if (v1.cross(v2) > 0.0) {
+			if (v1.cross(v2) >= 0.0) {
 				// this means this vertex is a reflex vertex
 				curr.reflex = true;
 			} else {
@@ -345,6 +349,6 @@ public class EarClipping implements Decomposer, Triangulator {
 		double u = (dot11 * dot02 - dot01 * dot12) / denominator;
 		double v = (dot00 * dot12 - dot01 * dot02) / denominator;
 		
-		return u > 0 && v > 0 && (u + v <= 1);
+		return u > 0 && v > 0 && (u + v <= 1 + EarClipping.CONTAINS_EPSILON);
 	}
 }

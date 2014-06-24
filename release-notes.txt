@@ -7,6 +7,11 @@ Bug Fixes:
   - Fixed a bug in the WeldJoint class when using to fixed angular velocity
     bodies.
   - Fixed a NPE bug in the World.detect methods.
+  - Fixed a bug in the EarClipping class where the decomposition would lead
+    to a colinear vertex situation.
+  - Fixed a bug in Bayazit class where it would select a closest vertex that
+    was not visible by the current vertex.  Sadly, this has made it much
+    slower.
     
 Deprecated:
 
