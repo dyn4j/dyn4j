@@ -2,6 +2,9 @@
 Version 3.1.10
 ===============================================================================
 New Features:
+  - Added a new update(double, int) method to the World class that will 
+    execute any number of steps given the elapsed time.
+  - Added get/set methods for the time accumulator.
     
 Bug Fixes:
   - Fixed a bug in the WeldJoint class when using to fixed angular velocity
@@ -18,6 +21,7 @@ Deprecated:
 Breaking Changes:
     
 Other:
+  - Updated license dates.
 
 ===============================================================================
 Version 3.1.9

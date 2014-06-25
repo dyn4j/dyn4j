@@ -232,7 +232,7 @@ public class World {
 		this.joints = new ArrayList<Joint>(initialCapacity.getJointCount());
 		this.listeners = new ArrayList<Listener>(initialCapacity.getListenerCount());
 		
-		// create last anything that requires a reference to this world
+		// create anything that requires a reference to this world last
 		this.timeOfImpactSolver = new TimeOfImpactSolver(this);
 		this.contactManager = new ContactManager(this, initialCapacity);
 		this.island = new Island(this, initialCapacity);
@@ -249,18 +249,23 @@ public class World {
 	 * to listen for when a step is actually performed.  In addition, this method will
 	 * return true if a step was performed.
 	 * <p>
+	 * This method performs at maximum one simulation step.  Any remaining time from 
+	 * the previous call of this method is added to the given elapsed time to determine
+	 * if a step needs to be performed.  If the given elapsed time is usually greater 
+	 * than the step frequency, consider using the {@link #update(double, int)} method
+	 * instead.
+	 * <p>
 	 * Alternatively you can call the {@link #updatev(double)} method to use a variable
 	 * time step.
-	 * <p>
-	 * This method immediately returns if the given elapsedTime is less than or equal to
-	 * zero.
+	 * @see #update(double, int)
 	 * @see #updatev(double)
+	 * @see #getAccumulatedTime()
 	 * @param elapsedTime the elapsed time in seconds
 	 * @return boolean true if the {@link World} performed a simulation step
 	 */
 	public boolean update(double elapsedTime) {
-		// make sure the update time is greater than zero
-		if (elapsedTime <= 0.0) return false;
+		// check for negative elapsed time
+		if (elapsedTime < 0.0) elapsedTime = 0.0;
 		// update the time
 		this.time += elapsedTime;
 		// check the frequency in settings
@@ -282,6 +287,51 @@ public class World {
 	/**
 	 * Updates the {@link World}.
 	 * <p>
+	 * This method will only update the world given the step frequency contained
+	 * in the {@link Settings} object.  You can use the {@link StepListener} interface
+	 * to listen for when a step is actually performed.
+	 * <p>
+	 * Unlike the {@link #update(double)} method, this method will perform more than one
+	 * step based on the given elapsed time.  For example, if the given elapsed time + the
+	 * remaining time from the last call of this method is 2 * step frequency, then 2 steps 
+	 * will be performed.  Use the maximumSteps parameter to put an upper bound on the 
+	 * number of steps performed.
+	 * <p>
+	 * Alternatively you can call the {@link #updatev(double)} method to use a variable
+	 * time step.
+	 * @see #update(double)
+	 * @see #updatev(double)
+	 * @see #getAccumulatedTime()
+	 * @param elapsedTime the elapsed time in seconds
+	 * @param maximumSteps the maximum number of steps to perform
+	 * @return boolean true if the {@link World} performed at least one simulation step
+	 * @since 3.1.10
+	 */
+	public boolean update(double elapsedTime, int maximumSteps) {
+		// make sure the update time is greater than zero
+		if (elapsedTime < 0.0) elapsedTime = 0.0;
+		// update the time
+		this.time += elapsedTime;
+		// check the frequency in settings
+		double invhz = this.settings.getStepFrequency();
+		// see if we should update or not
+		int steps = 0;
+		while (this.time >= invhz && steps <= maximumSteps) {
+			// update the step
+			this.step.update(invhz);
+			// reset the time
+			this.time = this.time - invhz;
+			// step the world
+			this.step();
+			// increment the number of steps
+			steps++;
+		}
+		return steps > 0;
+	}
+	
+	/**
+	 * Updates the {@link World}.
+	 * <p>
 	 * This method will update the world on every call.  Unlike the {@link #update(double)}
 	 * method, this method uses the given elapsed time and does not attempt to update the world
 	 * in a set interval.
@@ -289,6 +339,7 @@ public class World {
 	 * This method immediately returns if the given elapsedTime is less than or equal to
 	 * zero.
 	 * @see #update(double)
+	 * @see #update(double, int)
 	 * @param elapsedTime the elapsed time in seconds
 	 */
 	public void updatev(double elapsedTime) {
@@ -3634,6 +3685,51 @@ public class World {
 		int bSize = this.bodies.size();
 		int jSize = this.joints.size();
 		return bSize == 0 && jSize == 0;
+	}
+	
+	/**
+	 * Returns the current accumulated time.
+	 * <p>
+	 * This is the time that has elapsed since the last step
+	 * of the engine.
+	 * <p>
+	 * This time is used and/or accumulated on each call of the 
+	 * {@link #update(double)} and {@link #update(double, int)} methods.
+	 * <p>
+	 * This time is reduced by the step frequency for each step
+	 * of the engine.
+	 * @return double
+	 * @since 3.1.10
+	 */
+	public double getAccumulatedTime() {
+		return this.time;
+	}
+	
+	/**
+	 * Sets the current accumulated time.
+	 * <p>
+	 * A typical use case would be to throw away any remaining time
+	 * that the {@link #update(double)} or {@link #update(double, int)}
+	 * methods didn't use:
+	 * <pre>
+	 * boolean updated = world.update(elapsedTime);
+	 * // the check if the world actually updated is crutial in this example
+	 * if (updated) {
+	 * 	// throw away any remaining time we didnt use
+	 * 	world.setAccumulatedTime(0);
+	 * }
+	 * </pre>
+	 * Or, in the case of reusing the same World object, you could use this
+	 * method to clear any accumulated time.
+	 * <p>
+	 * If elapsedTime is less than zero, this method immediately returns.
+	 * @see #getAccumulatedTime()
+	 * @param elapsedTime the desired elapsed time
+	 * @since 3.1.10
+	 */
+	public void setAccumulatedTime(double elapsedTime) {
+		if (elapsedTime < 0.0) return;
+		this.time = elapsedTime;
 	}
 	
 	// deprecated methods
