@@ -151,8 +151,10 @@ public class WorldTest {
 		boolean stepped = w.update(s.getStepFrequency());
 		TestCase.assertTrue(stepped);
 		
-		stepped = w.update(s.getStepFrequency() * 2.0);
+		stepped = w.update(s.getStepFrequency() * 2.5, 10);
 		TestCase.assertTrue(stepped);
+		// verify left over time
+		TestCase.assertEquals(s.getStepFrequency() * 0.5, w.getAccumulatedTime(), 1.0e-8);
 		
 		// make sure negative or zero does nothing
 		stepped = w.update(-2.0);
