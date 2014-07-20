@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE jnlp SYSTEM "http://java.sun.com/dtd/JNLP-1.5.dtd">
+<jnlp spec="1.5+" codebase="http://www.dyn4j.org/Sandbox/latest/" version="1.0.6">
+	<information>
+		<title>dyn4j - Sandbox</title>
+		<vendor>dyn4j</vendor>
+		<homepage href="http://www.dyn4j.org/" />
+		<description>Test application and playground for the dyn4j collision detection and physics library.</description>
+		<description kind="short">Test application for the dyn4j collision detection and physics library.</description>
+		<description kind="one-line">Application for testing the dyn4j project.</description>
+		<description kind="tooltip">dyn4j - Sandbox</description>
+		<icon href="sandbox-icon-32.png" width="32" height="32" />
+		<icon href="sandbox-icon-64.png" width="64" height="64" />
+		<offline-allowed/>
+	</information>
+	<security>
+		<all-permissions/>
+	</security>
+	<resources>
+		<j2se version="1.6+" />
+		<jar href="dyn4j.jar"/>
+		<jar href="dyn4j-Sandbox.jar" main="true" />
+		<extension name="JOGL" href="http://jogamp.org/deployment/jogamp-current/jogl-all-awt.jnlp" />
+	</resources>
+	<application-desc main-class="org.dyn4j.sandbox.Sandbox" />
+</jnlp>

@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Main-Class: org.dyn4j.sandbox.Sandbox
+Name: dyn4j - Sandbox
+Implementation-Title: A test environment for the dyn4j library.
+Implementation-Version: 1.0.6
+Implementation-Vendor: dyn4j.org
+Permissions: all-permissions
+Codebase: *.dyn4j.org
+Application-Name: dyn4j - Sandbox
+Trusted-Only: true
