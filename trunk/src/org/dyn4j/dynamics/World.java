@@ -316,7 +316,7 @@ public class World {
 		double invhz = this.settings.getStepFrequency();
 		// see if we should update or not
 		int steps = 0;
-		while (this.time >= invhz && steps <= maximumSteps) {
+		while (this.time >= invhz && steps < maximumSteps) {
 			// update the step
 			this.step.update(invhz);
 			// reset the time
