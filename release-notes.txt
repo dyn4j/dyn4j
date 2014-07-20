@@ -4,10 +4,10 @@ Version 3.1.10
 New Features:
   - Added a new update(double, int) method to the World class that will 
     execute any number of steps given the elapsed time.
-  - Added get/set methods for the time accumulator.
+  - Added get/set methods for the time accumulator on the World class.
     
 Bug Fixes:
-  - Fixed a bug in the WeldJoint class when using to fixed angular velocity
+  - Fixed a bug in the WeldJoint class when using two fixed angular velocity
     bodies.
   - Fixed a NPE bug in the World.detect methods.
   - Fixed a bug in the EarClipping class where the decomposition would lead
