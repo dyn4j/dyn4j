@@ -111,7 +111,7 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		List<Convex> result = this.algo.decompose(vertices);
 		
 		// the result should have less than or equal to n - 2 convex shapes
-		TestCase.assertTrue(result.size() <= 8);
+		TestCase.assertTrue(result.size() <= vertices.length - 2);
 	}
 	
 	/**
@@ -150,7 +150,7 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		List<Convex> result = this.algo.decompose(vertices);
 		
 		// the result should have less than or equal to n - 2 convex shapes
-		TestCase.assertTrue(result.size() <= 15);
+		TestCase.assertTrue(result.size() <= vertices.length - 2);
 	}
 	
 	/**
@@ -179,7 +179,7 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		List<Convex> result = this.algo.decompose(vertices);
 		
 		// the result should have less than or equal to n - 2 convex shapes
-		TestCase.assertTrue(result.size() <= 18);
+		TestCase.assertTrue(result.size() <= vertices.length - 2);
 	}
 
 	/**
@@ -208,7 +208,7 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		List<Convex> result = this.algo.decompose(vertices);
 		
 		// the result should have less than or equal to n - 2 convex shapes
-		TestCase.assertTrue(result.size() <= 17);
+		TestCase.assertTrue(result.size() <= vertices.length - 2);
 	}
 
 	/**
@@ -237,7 +237,7 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		List<Convex> result = this.algo.decompose(vertices);
 		
 		// the result should have less than or equal to n - 2 convex shapes
-		TestCase.assertTrue(result.size() <= 26);
+		TestCase.assertTrue(result.size() <= vertices.length - 2);
 	}
 
 	/**
@@ -266,7 +266,7 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		List<Convex> result = this.algo.decompose(vertices);
 		
 		// the result should have less than or equal to n - 2 convex shapes
-		TestCase.assertTrue(result.size() <= 273);
+		TestCase.assertTrue(result.size() <= vertices.length - 2);
 	}
 
 	/**
@@ -295,7 +295,7 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		List<Convex> result = this.algo.decompose(vertices);
 		
 		// the result should have less than or equal to n - 2 convex shapes
-		TestCase.assertTrue(result.size() <= 53);
+		TestCase.assertTrue(result.size() <= vertices.length - 2);
 	}
 
 	/**
@@ -324,7 +324,7 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		List<Convex> result = this.algo.decompose(vertices);
 		
 		// the result should have less than or equal to n - 2 convex shapes
-		TestCase.assertTrue(result.size() <= 1202);
+		TestCase.assertTrue(result.size() <= vertices.length - 2);
 	}
 
 	/**
@@ -353,7 +353,7 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		List<Convex> result = this.algo.decompose(vertices);
 		
 		// the result should have less than or equal to n - 2 convex shapes
-		TestCase.assertTrue(result.size() <= 1034);
+		TestCase.assertTrue(result.size() <= vertices.length - 2);
 	}
 
 	/**
@@ -383,7 +383,7 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		List<Convex> result = this.algo.decompose(vertices);
 		
 		// the result should have less than or equal to n - 2 convex shapes
-		TestCase.assertTrue(result.size() <= 74);
+		TestCase.assertTrue(result.size() <= vertices.length - 2);
 	}
 
 	/**

@@ -206,10 +206,11 @@ public class Bayazit implements Decomposer {
 						
 						if (q == p || q == p0 || q == p1) continue;
 						
-						if (this.isVisible(polygon, i, jmod)) {
-							// get the distance
-							double dist = p.distanceSquared(q);
-							if (dist < closestDistance) {
+						// check the distance first, since this is generally
+						// a much faster operation than checking if its visible
+						double dist = p.distanceSquared(q);
+						if (dist < closestDistance) {
+							if (this.isVisible(polygon, i, jmod)) {
 								closestDistance = dist;
 								closestIndex = jmod;
 							}
