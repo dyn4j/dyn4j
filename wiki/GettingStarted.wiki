@@ -6,13 +6,15 @@ You can post any questions on the <a href="http://forum.dyn4j.org/" target="_bla
 <wiki:toc max_depth="4" />
 
 =Download=
-Download the latest dyn4j.jar from the <a href="http://code.google.com/p/dyn4j/downloads/list" target="_blank">Google Code project</a> page or build the source yourself.
+*Google Code no longer allows downloads to be uploaded to projects.*
+
+Latest versions of dyn4j can be found on *[http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.dyn4j%22%20AND%20a%3A%22dyn4j%22 Maven Central]*.  Older versions will remain on the Google Code downloads page.
 
 Typically you will only need to download the dyn4j-vX.X.X.jar since the javadocs are available online <a href="http://docs.dyn4j.org">here</a> and you can browse the source <a href="http://code.google.com/p/dyn4j/source/browse/">here</a>.
 
-All binaries posted on the download page are compiled under Java 1.6 and have no dependencies.
+All binaries are compiled under Java 1.6 and have no dependencies.
 
-If you intent on building the source from the repository here are few tips:
+If you are intent on building the source from the repository here are few tips:
   * The trunk branch is the development branch and will contain the latest code but may be unstable.
   * For stable builds look in the tags folder and connect to the desired release version.
   * There may be other branches available in the branches folder, labeled for specific purposes.
