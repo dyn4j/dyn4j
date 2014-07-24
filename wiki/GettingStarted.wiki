@@ -28,6 +28,7 @@ To see the classes you must add the JAR to the classpath of your project.
 Watch the video below for a full description on how to get a new Eclipse project setup to use dyn4j:
 
 <wiki:video url="http://www.youtube.com/watch?v=P9G7Yn6GR-w"/>
+
 ** NOTE: The [https://code.google.com/p/dyn4j/source/browse/trunk/examples/org/dyn4j/examples/ExampleGraphics2D.java ExampleGraphics2D] class now requires the [https://code.google.com/p/dyn4j/source/browse/trunk/examples/org/dyn4j/examples/Graphics2DRenderer.java Graphics2DRenderer] class as well.
 
 ** NOTE 2: Google Code no longer houses the latest builds.  You can find the latest builds on [http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.dyn4j%22%20AND%20a%3A%22dyn4j%22 Maven Central].
