@@ -10,7 +10,7 @@ You can post any questions on the <a href="http://forum.dyn4j.org/" target="_bla
 
 Latest versions of dyn4j can be found on *[http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.dyn4j%22%20AND%20a%3A%22dyn4j%22 Maven Central]*.  Older versions will remain on the Google Code downloads page.
 
-Typically you will only need to download the dyn4j-vX.X.X.jar since the javadocs are available online <a href="http://docs.dyn4j.org">here</a> and you can browse the source <a href="http://code.google.com/p/dyn4j/source/browse/">here</a>.
+The javadocs can be found in the maven distributable or online <a href="http://docs.dyn4j.org">here</a>.  You can browse the source <a href="http://code.google.com/p/dyn4j/source/browse/">here</a>.
 
 All binaries are compiled under Java 1.6 and have no dependencies.
 
