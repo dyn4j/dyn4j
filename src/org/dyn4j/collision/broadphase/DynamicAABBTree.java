@@ -43,7 +43,7 @@ import org.dyn4j.geometry.Vector2;
  * This class uses a self-balancing binary tree to store the AABBs.  The AABBs are sorted using the perimeter.
  * The perimeter hueristic is better than area for 2D because axis aligned segments have zero area.
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.1.11
  * @since 3.0.0
  * @param <E> the {@link Collidable} type
  */
@@ -409,12 +409,13 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 				// check if the current node the left child of its parent
 				if (n == n.parent.left) {
 					// it is, so check if the right node is non-null
-					if (n.parent.right != null) {
+					// NOTE: not need since the tree is a complete tree (every node has two children)
+					//if (n.parent.right != null) {
 						// it isn't so the sibling node is the next node
 						n = n.parent.right;
 						nextNodeFound = true;
 						break;
-					}
+					//}
 				}
 				// if the current node isn't a left node or it is but its
 				// sibling is null, go to the parent node
@@ -482,12 +483,13 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 				// check if the current node the left child of its parent
 				if (node == node.parent.left) {
 					// it is, so check if the right node is non-null
-					if (node.parent.right != null) {
+					// NOTE: not need since the tree is a complete tree (every node has two children)
+					//if (node.parent.right != null) {
 						// it isn't so the sibling node is the next node
 						node = node.parent.right;
 						nextNodeFound = true;
 						break;
-					}
+					//}
 				}
 				// if the current node isn't a left node or it is but its
 				// sibling is null, go to the parent node

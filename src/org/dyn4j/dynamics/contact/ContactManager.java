@@ -45,7 +45,7 @@ import org.dyn4j.resources.Messages;
  * This class performs the {@link ContactConstraint} warm starting and manages contact
  * listening.
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.1.11
  * @since 1.0.0
  */
 public class ContactManager {
@@ -206,7 +206,7 @@ public class ContactManager {
 			int nsize = contacts.size();
 			
 			// check if this contact constraint is a sensor
-			if (newContactConstraint.isSensor()) {
+			if (newContactConstraint.sensor) {
 				// notify of the sensed contacts
 				for (int j = 0; j < nsize; j++) {
 					// get the contact
@@ -259,7 +259,8 @@ public class ContactManager {
 						Contact oldContact = ocontacts.get(k);
 						// check if the id type is distance, if so perform a distance check using the warm start distance
 						// else just compare the ids
-						if ((newContact.id == ManifoldPointId.DISTANCE && newContact.p.distanceSquared(oldContact.p) <= warmStartDistanceSquared) || newContact.id.equals(oldContact.id)) {
+						if ((newContact.id == ManifoldPointId.DISTANCE && newContact.p.distanceSquared(oldContact.p) <= warmStartDistanceSquared) 
+						  || newContact.id.equals(oldContact.id)) {
 							// warm start by setting the new contact constraint
 							// accumulated impulses to the old contact constraint
 							newContact.jn = oldContact.jn;
@@ -268,9 +269,9 @@ public class ContactManager {
 							PersistedContactPoint point = new PersistedContactPoint(
 									new ContactPointId(newContactConstraint.id, newContact.id),
 									newContactConstraint.getBody1(),
-									newContactConstraint.getFixture1(),
+									newContactConstraint.fixture1,
 									newContactConstraint.getBody2(),
-									newContactConstraint.getFixture2(),
+									newContactConstraint.fixture2,
 									true,
 									newContact.p,
 									newContactConstraint.normal,
@@ -422,7 +423,7 @@ public class ContactManager {
 			// get the contact constraint
 			ContactConstraint contactConstraint = this.list.get(i);
 			// sensed contacts are not solved
-			if (contactConstraint.isSensor()) continue;
+			if (contactConstraint.sensor) continue;
 			// loop over the contacts
 			int rsize = contactConstraint.contacts.size();
 			for (int j = 0; j < rsize; j++) {
@@ -462,7 +463,7 @@ public class ContactManager {
 			// get the contact constraint
 			ContactConstraint contactConstraint = this.list.get(i);
 			// sensed contacts are not solved
-			if (contactConstraint.isSensor()) continue;
+			if (contactConstraint.sensor) continue;
 			// loop over the contacts
 			int rsize = contactConstraint.contacts.size();
 			for (int j = 0; j < rsize; j++) {

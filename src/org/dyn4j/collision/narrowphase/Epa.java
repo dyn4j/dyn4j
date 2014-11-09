@@ -58,7 +58,7 @@ import org.dyn4j.resources.Messages;
  * {@link Epa} will terminate in a finite number of iterations if the two shapes are {@link Polygon}s.
  * If either shape has curved surfaces the algorithm requires an expected accuracy epsilon.
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.1.11
  * @since 1.0.0
  */
 public class Epa implements MinkowskiPenetrationSolver {
@@ -181,7 +181,8 @@ public class Epa implements MinkowskiPenetrationSolver {
 			Vector2 b = simplex.get(j);
 			// create the edge
 			// inline b - a
-			normal.set(b.x - a.x, b.y - a.y);
+			normal.x = b.x - a.x;
+			normal.y = b.y - a.y;
 			// depending on the winding get the edge normal
 			// it would be better to use Vector.tripleProduct(ab, ao, ab);
 			// where ab is the edge and ao is a.to(ORIGIN) but this will
@@ -197,11 +198,13 @@ public class Epa implements MinkowskiPenetrationSolver {
 			normal.normalize();
 			// project the first point onto the normal (it doesnt matter which
 			// you project since the normal is perpendicular to the edge)
-			double d = Math.abs(a.dot(normal));
+			//double d = Math.abs(a.dot(normal));
+			double d = Math.abs(a.x * normal.x + a.y * normal.y);
 			// record the closest edge
 			if (d < edge.distance) {
 				edge.distance = d;
-				edge.normal.set(normal);
+				edge.normal.x = normal.x;
+				edge.normal.y = normal.y;
 				edge.index = j;
 			}
 		}

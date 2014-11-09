@@ -47,7 +47,7 @@ import org.junit.Test;
 /**
  * Test case for {@link Circle} - {@link Slice} collision detection.
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.1.11
  * @since 3.1.5
  */
 public class CircleSliceTest extends AbstractTest {
@@ -275,15 +275,15 @@ public class CircleSliceTest extends AbstractTest {
 		TestCase.assertTrue(this.gjk.detect(circle, t1, slice, t2, p));
 		TestCase.assertTrue(this.gjk.detect(circle, t1, slice, t2));
 		n = p.getNormal();
-		TestCase.assertEquals( 0.887, n.x, 1.0e-3);
-		TestCase.assertEquals( 0.461, n.y, 1.0e-3);
+		TestCase.assertEquals( 0.737, n.x, 1.0e-3);
+		TestCase.assertEquals(-0.674, n.y, 1.0e-3);
 		TestCase.assertEquals( 0.500, p.getDepth(), 1.0e-3);
 		// try reversing the shapes
 		TestCase.assertTrue(this.gjk.detect(slice, t2, circle, t1, p));
 		TestCase.assertTrue(this.gjk.detect(slice, t2, circle, t1));
 		n = p.getNormal();
-		TestCase.assertEquals(-0.887, n.x, 1.0e-3);
-		TestCase.assertEquals(-0.461, n.y, 1.0e-3);
+		TestCase.assertEquals(-0.737, n.x, 1.0e-3);
+		TestCase.assertEquals( 0.674, n.y, 1.0e-3);
 		TestCase.assertEquals( 0.500, p.getDepth(), 1.0e-3);
 		
 		// test overlap

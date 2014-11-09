@@ -46,7 +46,7 @@ import org.dyn4j.geometry.Vector2;
  * facilitate stable stacking of rigid {@link Body}s.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.1.11
  * @since 1.0.0
  */
 public class ContactConstraintSolver {
@@ -463,13 +463,10 @@ public class ContactConstraintSolver {
 						Vector2 J1 = N.product(d.x);
 						Vector2 J2 = N.product(d.y);
 						
-//						b1.getVelocity().add(J1.sum(J2).product(invM1));
-//						b1.setAngularVelocity(b1.getAngularVelocity() + invI1 * (contact1.r1.cross(J1) + contact2.r1.cross(J2)));
-//						b2.getVelocity().subtract(J1.sum(J2).product(invM2));
-//						b2.setAngularVelocity(b2.getAngularVelocity() - invI2 * (contact1.r2.cross(J1) + contact2.r2.cross(J2)));
-						v1.add(J1.sum(J2).multiply(invM1));
+						//v1.add(J1.sum(J2).multiply(invM1));
+						v1.add((J1.x + J2.x) * invM1, (J1.y + J2.y) * invM1);
 						b1.setAngularVelocity(av1 + invI1 * (r11.cross(J1) + r12.cross(J2)));
-						v2.subtract(J1.sum(J2).multiply(invM2));
+						v2.subtract((J1.x + J2.x) * invM2, (J1.y + J2.y) * invM2);
 						b2.setAngularVelocity(av2 - invI2 * (r21.cross(J1) + r22.cross(J2)));
 
 						// set the new accumulated impulse
@@ -500,9 +497,11 @@ public class ContactConstraintSolver {
 						Vector2 J1 = N.product(d.x);
 						Vector2 J2 = N.product(d.y);
 						
-						v1.add(J1.sum(J2).multiply(invM1));
+						//v1.add(J1.sum(J2).multiply(invM1));
+						v1.add((J1.x + J2.x) * invM1, (J1.y + J2.y) * invM1);
 						b1.setAngularVelocity(av1 + invI1 * (r11.cross(J1) + r12.cross(J2)));
-						v2.subtract(J1.sum(J2).multiply(invM2));
+						//v2.subtract(J1.sum(J2).multiply(invM2));
+						v2.subtract((J1.x + J2.x) * invM2, (J1.y + J2.y) * invM2);
 						b2.setAngularVelocity(av2 - invI2 * (r21.cross(J1) + r22.cross(J2)));
 						
 						// set the new incremental impulse
@@ -534,9 +533,11 @@ public class ContactConstraintSolver {
 						Vector2 J1 = N.product(d.x);
 						Vector2 J2 = N.product(d.y);
 						
-						v1.add(J1.sum(J2).multiply(invM1));
+						//v1.add(J1.sum(J2).multiply(invM1));
+						v1.add((J1.x + J2.x) * invM1, (J1.y + J2.y) * invM1);
 						b1.setAngularVelocity(av1 + invI1 * (r11.cross(J1) + r12.cross(J2)));
-						v2.subtract(J1.sum(J2).multiply(invM2));
+						//v2.subtract(J1.sum(J2).multiply(invM2));
+						v2.subtract((J1.x + J2.x) * invM2, (J1.y + J2.y) * invM2);
 						b2.setAngularVelocity(av2 - invI2 * (r21.cross(J1) + r22.cross(J2)));
 						
 						// set the new incremental impulse
@@ -565,9 +566,11 @@ public class ContactConstraintSolver {
 						Vector2 J1 = N.product(d.x);
 						Vector2 J2 = N.product(d.y);
 						
-						v1.add(J1.sum(J2).multiply(invM1));
+						//v1.add(J1.sum(J2).multiply(invM1));
+						v1.add((J1.x + J2.x) * invM1, (J1.y + J2.y) * invM1);
 						b1.setAngularVelocity(av1 + invI1 * (r11.cross(J1) + r12.cross(J2)));
-						v2.subtract(J1.sum(J2).multiply(invM2));
+						//v2.subtract(J1.sum(J2).multiply(invM2));
+						v2.subtract((J1.x + J2.x) * invM2, (J1.y + J2.y) * invM2);
 						b2.setAngularVelocity(av2 - invI2 * (r21.cross(J1) + r22.cross(J2)));
 						
 						// set the new incremental impulse

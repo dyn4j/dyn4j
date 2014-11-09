@@ -31,7 +31,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * A {@link Circle}'s radius must be larger than zero.
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.1.11
  * @since 1.0.0
  */
 public class Circle extends AbstractShape implements Convex, Shape, Transformable {
@@ -124,7 +124,8 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 		// get the transformed center
 		Vector2 center = transform.getTransformed(this.center);
 		// add the radius along the vector to the center to get the farthest point
-		center.add(this.radius * nAxis.x, this.radius * nAxis.y);
+		center.x += this.radius * nAxis.x;
+		center.y += this.radius * nAxis.y;
 		// return the new point
 		return center;
 	}
@@ -162,12 +163,11 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 	 */
 	@Override
 	public Mass createMass(double density) {
-		// get the radius and density
-		double radius = this.radius;
+		double r2 = this.radius * this.radius;
 		// compute the mass
-		double mass = density * Math.PI * radius * radius;
+		double mass = density * Math.PI * r2;
 		// compute the inertia tensor
-		double inertia = mass * radius * radius * 0.5;
+		double inertia = mass * r2 * 0.5;
 		// use the center supplied to the circle
 		return new Mass(this.center, mass, inertia);
 	}
