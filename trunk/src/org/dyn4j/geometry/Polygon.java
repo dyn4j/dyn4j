@@ -35,7 +35,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * A polygon cannot have coincident vertices.
  * @author William Bittle
- * @version 3.1.9
+ * @version 3.1.11
  * @since 1.0.0
  */
 public class Polygon extends Wound implements Convex, Shape, Transformable {
@@ -486,10 +486,14 @@ public class Polygon extends Wound implements Convex, Shape, Transformable {
             vx = Vector2.X_AXIS.dot(p);
             vy = Vector2.Y_AXIS.dot(p);
             // compare the x values
-            minX = Math.min(minX, vx);
-            maxX = Math.max(maxX, vx);
-            minY = Math.min(minY, vy);
-            maxY = Math.max(maxY, vy);
+            if (vx < minX) minX = vx;
+            else if (vx > maxX) maxX = vx;
+            if (vy < minY) minY = vy;
+            else if (vy > maxY) maxY = vy;
+//            minX = Math.min(minX, vx);
+//            maxX = Math.max(maxX, vx);
+//            minY = Math.min(minY, vy);
+//            maxY = Math.max(maxY, vy);
         }
 		// create the aabb
 		return new AABB(minX, minY, maxX, maxY);

@@ -47,7 +47,7 @@ import org.junit.Test;
 /**
  * Test case for {@link Capsule} - {@link Slice} collision detection.
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.1.11
  * @since 3.1.5
  */
 public class CapsuleSliceTest extends AbstractTest {
@@ -291,15 +291,15 @@ public class CapsuleSliceTest extends AbstractTest {
 		TestCase.assertTrue(this.gjk.detect(capsule, t1, slice, t2, p));
 		TestCase.assertTrue(this.gjk.detect(capsule, t1, slice, t2));
 		n = p.getNormal();
-		TestCase.assertEquals( 0.730, n.x, 1.0e-3);
-		TestCase.assertEquals(-0.683, n.y, 1.0e-3);
+		TestCase.assertEquals( 0.750, n.x, 1.0e-3);
+		TestCase.assertEquals(-0.661, n.y, 1.0e-3);
 		TestCase.assertEquals( 0.250, p.getDepth(), 1.0e-3);
 		// try reversing the shapes
 		TestCase.assertTrue(this.gjk.detect(slice, t2, capsule, t1, p));
 		TestCase.assertTrue(this.gjk.detect(slice, t2, capsule, t1));
 		n = p.getNormal();
-		TestCase.assertEquals(-0.730, n.x, 1.0e-3);
-		TestCase.assertEquals( 0.683, n.y, 1.0e-3);
+		TestCase.assertEquals(-0.750, n.x, 1.0e-3);
+		TestCase.assertEquals( 0.661, n.y, 1.0e-3);
 		TestCase.assertEquals( 0.250, p.getDepth(), 1.0e-3);
 		
 		// test AABB overlap
@@ -437,8 +437,8 @@ public class CapsuleSliceTest extends AbstractTest {
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
 		p1 = mp.getPoint();
-		TestCase.assertEquals( 0.182, p1.x, 1.0e-3);
-		TestCase.assertEquals(-0.170, p1.y, 1.0e-3);
+		TestCase.assertEquals( 0.187, p1.x, 1.0e-3);
+		TestCase.assertEquals(-0.165, p1.y, 1.0e-3);
 		TestCase.assertEquals( 0.250, mp.getDepth(), 1.0e-3);
 		// try reversing the shapes
 		this.gjk.detect(slice, t2, capsule, t1, p);
@@ -446,8 +446,8 @@ public class CapsuleSliceTest extends AbstractTest {
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
 		p1 = mp.getPoint();
-		TestCase.assertEquals( 0.182, p1.x, 1.0e-3);
-		TestCase.assertEquals(-0.170, p1.y, 1.0e-3);
+		TestCase.assertEquals( 0.187, p1.x, 1.0e-3);
+		TestCase.assertEquals(-0.165, p1.y, 1.0e-3);
 		TestCase.assertEquals( 0.250, mp.getDepth(), 1.0e-3);
 		
 		// test overlap sat

@@ -31,7 +31,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * Supported operations are rotation and translation.
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.1.11
  * @since 1.0.0
  */
 public class Transform implements Transformable {
@@ -247,7 +247,8 @@ public class Transform implements Transformable {
 	 */
 	@Override
 	public void translate(Vector2 vector) {
-		this.translate(vector.x, vector.y);
+		this.x += vector.x;
+		this.y += vector.y;
 	}
 	
 	/**
@@ -601,8 +602,9 @@ public class Transform implements Transformable {
 	 */
 	public void lerp(Transform end, double alpha) {
 		// interpolate the position
-		double x = (1.0 - alpha) * this.x + alpha * end.x;
-		double y = (1.0 - alpha) * this.y + alpha * end.y;
+		double a1 = 1.0 - alpha;
+		double x = a1 * this.x + alpha * end.x;
+		double y = a1 * this.y + alpha * end.y;
 		
 		// compute the angle
 		// get the start and end rotations
@@ -647,8 +649,9 @@ public class Transform implements Transformable {
 	 */
 	public void lerp(Transform end, double alpha, Transform result) {
 		// interpolate the position
-		double x = (1.0 - alpha) * this.x + alpha * end.x;
-		double y = (1.0 - alpha) * this.y + alpha * end.y;
+		double a1 = 1.0 - alpha;
+		double x = a1 * this.x + alpha * end.x;
+		double y = a1 * this.y + alpha * end.y;
 		
 		// compute the angle
 		// get the start and end rotations
@@ -738,8 +741,9 @@ public class Transform implements Transformable {
 	 */
 	public Transform lerped(Transform end, double alpha) {
 		// interpolate the position
-		double x = (1.0 - alpha) * this.x + alpha * end.x;
-		double y = (1.0 - alpha) * this.y + alpha * end.y;
+		double a1 = 1.0 - alpha;
+		double x = a1 * this.x + alpha * end.x;
+		double y = a1 * this.y + alpha * end.y;
 		
 		// compute the angle
 		// get the start and end rotations

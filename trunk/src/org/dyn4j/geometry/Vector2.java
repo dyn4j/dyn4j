@@ -41,7 +41,7 @@ import org.dyn4j.Epsilon;
  * </pre>
  * This can decrease the number of temporary vectors.
  * @author William Bittle
- * @version 3.1.8
+ * @version 3.1.11
  * @since 1.0.0
  */
 public class Vector2 {
@@ -138,7 +138,10 @@ public class Vector2 {
 	 * @return double
 	 */
 	public double distance(double x, double y) {
-		return Math.hypot(this.x - x, this.y - y);
+		//return Math.hypot(this.x - x, this.y - y);
+		double dx = this.x - x;
+		double dy = this.y - y;
+		return Math.sqrt(dx * dx + dy * dy);
 	}
 	
 	/**
@@ -147,7 +150,10 @@ public class Vector2 {
 	 * @return double
 	 */
 	public double distance(Vector2 point) {
-		return Math.hypot(this.x - point.x, this.y - point.y);
+		//return Math.hypot(this.x - point.x, this.y - point.y);
+		double dx = this.x - point.x;
+		double dy = this.y - point.y;
+		return Math.sqrt(dx * dx + dy * dy);
 	}
 	
 	/**
@@ -157,7 +163,10 @@ public class Vector2 {
 	 * @return double
 	 */
 	public double distanceSquared(double x, double y) {
-		return (this.x - x) * (this.x - x) + (this.y - y) * (this.y - y);
+		//return (this.x - x) * (this.x - x) + (this.y - y) * (this.y - y);
+		double dx = this.x - x;
+		double dy = this.y - y;
+		return dx * dx + dy * dy;
 	}
 	
 	/**
@@ -166,7 +175,10 @@ public class Vector2 {
 	 * @return double
 	 */
 	public double distanceSquared(Vector2 point) {
-		return (this.x - point.x) * (this.x - point.x) + (this.y - point.y) * (this.y - point.y);
+		//return (this.x - point.x) * (this.x - point.x) + (this.y - point.y) * (this.y - point.y);
+		double dx = this.x - point.x;
+		double dy = this.y - point.y;
+		return dx * dx + dy * dy;
 	}
 	
 	/**
@@ -318,7 +330,7 @@ public class Vector2 {
 	 */
 	public double getMagnitude() {
 		// the magnitude is just the pathagorean theorem
-		return Math.hypot(this.x, this.y);
+		return Math.sqrt(this.x * this.x + this.y * this.y);
 	}
 	
 	/**
@@ -346,7 +358,7 @@ public class Vector2 {
 			return this;
 		}
 		// get the magnitude
-		double mag = Math.hypot(this.x, this.y);
+		double mag = Math.sqrt(this.x * this.x + this.y * this.y);
 		// normalize and multiply by the new magnitude
 		mag = magnitude / mag;
 		this.x *= mag;
@@ -369,7 +381,8 @@ public class Vector2 {
 	 * @return {@link Vector2} this vector
 	 */
 	public Vector2 setDirection(double angle) {
-		double magnitude = Math.hypot(this.x, this.y);
+		//double magnitude = Math.hypot(this.x, this.y);
+		double magnitude = Math.sqrt(this.x * this.x + this.y * this.y);
         this.x = magnitude * Math.cos(angle);
         this.y = magnitude * Math.sin(angle);
         return this;
@@ -730,11 +743,12 @@ public class Vector2 {
 	 * @return double
 	 */
 	public double normalize() {
-		double magnitude = Math.hypot(this.x, this.y);
+		double magnitude = Math.sqrt(this.x * this.x + this.y * this.y);
 		if (magnitude <= Epsilon.E) return 0;
 		double m = 1.0 / magnitude;
 		this.x *= m;
 		this.y *= m;
+		//return 1.0 / m;
 		return magnitude;
 	}
 	

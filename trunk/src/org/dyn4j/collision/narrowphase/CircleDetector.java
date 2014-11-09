@@ -34,7 +34,7 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * Renamed from CircleCircleDetector
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.1.11
  * @since 2.0.0
  */
 public class CircleDetector {
@@ -60,7 +60,7 @@ public class CircleDetector {
 		Vector2 ce1 = transform1.getTransformed(circle1.getCenter());
 		Vector2 ce2 = transform2.getTransformed(circle2.getCenter());
 		// create a vector from one center to the other
-		Vector2 v = ce1.to(ce2);
+		Vector2 v = ce2.subtract(ce1);
 		// check the magnitude against the sum of the radii
 		double radii = circle1.getRadius() + circle2.getRadius();
 		// get the magnitude squared
@@ -88,7 +88,7 @@ public class CircleDetector {
 		Vector2 ce1 = transform1.getTransformed(circle1.getCenter());
 		Vector2 ce2 = transform2.getTransformed(circle2.getCenter());
 		// create a vector from one center to the other
-		Vector2 v = ce1.to(ce2);
+		Vector2 v = ce2.subtract(ce1);
 		// check the magnitude against the sum of the radii
 		double radii = circle1.getRadius() + circle2.getRadius();
 		// get the magnitude squared

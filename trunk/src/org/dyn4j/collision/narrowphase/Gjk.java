@@ -116,7 +116,7 @@ import org.dyn4j.resources.Messages;
  * {@link Shape}s.  Refer to {@link Gjk#distance(Convex, Transform, Convex, Transform, Separation)}
  * for details on the implementation.
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.1.11
  * @since 1.0.0
  */
 public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetector {
@@ -221,7 +221,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 		Vector2 c1 = transform1.getTransformed(convex1.getCenter());
 		Vector2 c2 = transform2.getTransformed(convex2.getCenter());
 		// choose some search direction
-		return c1.to(c2);
+		return c2.subtract(c1);
 	}
 	
 	/**
