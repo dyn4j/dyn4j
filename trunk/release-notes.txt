@@ -1,4 +1,22 @@
 ===============================================================================
+Version 3.1.11
+===============================================================================
+New Features:
+  - A few minor performance improvements.
+    
+Bug Fixes:
+    
+Deprecated:
+
+Breaking Changes:
+    
+Other:
+  - A number of methods were using the Math.hypot method which handles
+    overflow and underflow.  Unfortunately this method is much slower than
+    the Math.sqrt method.  This should have little effect on existing
+    applications.
+
+===============================================================================
 Version 3.1.10
 ===============================================================================
 New Features:
