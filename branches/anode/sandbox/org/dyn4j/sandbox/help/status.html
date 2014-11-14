@@ -1,0 +1,46 @@
+<h1><u>Status Information</u></h1>
+<div>
+The Sandbox application has a number of areas that convey status information about the application and environment.
+<br /><br />
+In the toolbar there is a field that shows the current Frames Per Second (FPS) and another field that shows the
+current World Space location of the mouse.  The former is useful to see the performance of the simulation.  <i>The 
+performance of Sandbox will generally be slower due to Swing interaction and reporting.</i>  The later is useful 
+for getting locations for creating joints (anchor points) or moving bodies and fixtures.
+<br /><br />
+The FPS field will typically always report 60 FPS.  This is because vertical-sync is turned on by default.  To see
+the achievable FPS click the <img src="classpath://org/dyn4j/sandbox/icons/sync-icon.png" /> Vertical-Sync button 
+on the Preferences Quick Toolbar.
+<br /><br />
+</div>
+
+<div><img src="classpath://org/dyn4j/sandbox/help/fps-toolbar.png" /></div>
+
+<div>
+<br /><br />
+In the bottom left corner of the main window there are three tabs.
+<br /><br />
+The first tab shows the number of contacts that have been reported.  This is only relevant for a running simulation.
+The contact counts are updated in cycles and may not reflect the current number of contacts for that time step.  When
+stepping the simulation, this tab will show the correct number of contacts.
+<br /><br />
+</div>
+
+<div><img src="classpath://org/dyn4j/sandbox/help/contacts-tab.png" /></div>
+
+<div>
+<br /><br />
+The second tab shows the current environment information.  This is useful when reporting bugs in Sandbox or dyn4j.
+<br /><br />
+</div>
+
+<div><img src="classpath://org/dyn4j/sandbox/help/system-tab.png" /></div>
+
+<div>
+<br /><br />
+The third tab is a simple view of the current memory usage with a small graph of the usage over ten cycles.  This tab
+updates at the same rate as the Contacts tab.  <i>The memory usage shown here is not reflective of dyn4j as the
+Sandbox adds a good bit of overhead.</i>
+<br /><br />
+</div>
+
+<div><img src="classpath://org/dyn4j/sandbox/help/memory-tab.png" /></div>

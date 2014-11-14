@@ -1,0 +1,40 @@
+<h1><u>Adding Joints</u></h1>
+
+<div>
+Joints are objects that join two bodies.  Joints can only be created with already existing bodies.
+<br /><br />
+To add a joint Right Click or Command Click on the Joints folder node in the Simulation Tree on the left:
+<br /><br />
+</div>
+
+<div><img src="classpath://org/dyn4j/sandbox/help/joint-folder-context-menu.png" /></div>
+
+<div>
+<br /><br />
+When you click on any joint type a new dialog will be displayed allowing you to configure the new joint.  
+Hover over any of the <i>i</i> icons to see help information about the different settings.  Most joints require
+that you specify certain information.  The Distance Joint, for example, Requires that you specify two anchor
+points (in world space) and a target distance.  See the Information tab to learn more about each joint.
+<ul>
+	<li>Many joints have an AutoCompute feature for fields.  This allows you to set some fields and let
+	the application fill in the rest.  You can turn this off by clicking the AutoCompute toggle button.</li>
+	<li>Not all options are available when editing the joint later (specifically body assignment and anchor points).</li>
+</ul>
+<br /><br />
+</div>
+<div><img src="classpath://org/dyn4j/sandbox/help/add-joint-dialog.png" /></div>
+
+<div>
+<br /><br />
+When you are done setting up the joint click the Add button at the bottom of the dialog.  You will now see
+the joint in the Simulation Tree.
+<br /><br />
+</div>
+<div><img src="classpath://org/dyn4j/sandbox/help/add-joint-done.png" /></div>
+
+<div>
+<br /><br />
+Joints in the second division of the context menu are joints that are typically used in conjunction with other
+joints between the same bodies.  For example, the Friction Joint allows you to apply friction to the linear
+and angular velocities between the bodies (effectively slowing them down).
+</div>
