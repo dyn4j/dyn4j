@@ -30,7 +30,7 @@ package org.dyn4j;
  * @version 2.0.0
  * @since 2.0.0
  */
-public class Epsilon {
+public final class Epsilon {
 	/** The double precision floating point machine epsilon approximation */
 	public static final double E = Epsilon.compute();
 	
