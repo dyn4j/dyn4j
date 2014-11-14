@@ -11,10 +11,9 @@ Deprecated:
 Breaking Changes:
     
 Other:
-  - A number of methods were using the Math.hypot method which handles
-    overflow and underflow.  Unfortunately this method is much slower than
-    the Math.sqrt method.  This should have little effect on existing
-    applications.
+  - Changed the Math.hypot calls to Math.sqrt since the former is much
+    slower.  It's slower due to the overflow/underflow handling, which dyn4j
+    doesn't need.
 
 ===============================================================================
 Version 3.1.10
