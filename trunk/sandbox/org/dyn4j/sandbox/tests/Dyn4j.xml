@@ -88,8 +88,8 @@
                 <GravityScale>1.0</GravityScale>
             </Body>
             <Body Id="64059161-9a62-407a-943b-347be53947b5" Name="d">
-                <OutlineColor r="0.5995741" g="0.69106394" b="0.55344766" />
-                <FillColor r="0.7494676" g="0.8638299" b="0.69180954" />
+				<OutlineColor r="0.0" g="0.6901961" b="0.5529412" />
+				<FillColor r="0.0" g="0.8627451" b="0.6901961" />
                 <Fixtures>
                     <Fixture Id="7e808e83-fb3f-4858-bfba-51f66837f060" Name="Fixture1">
                         <Shape Id="7cbd5633-527a-4105-8e47-d2b91f8e3c46" xsi:type="Polygon">
@@ -174,8 +174,8 @@
                 <GravityScale>1.0</GravityScale>
             </Body>
             <Body Id="73d163ee-5dbe-46b0-8909-c52d086fffe6" Name="y">
-                <OutlineColor r="0.4836095" g="0.5139937" b="0.41330677" />
-                <FillColor r="0.60451186" g="0.6424921" b="0.51663345" />
+				<OutlineColor r="1.0" g="0.5137255" b="0.4117647" />
+				<FillColor r="1.0" g="0.6431373" b="0.5176471" />
                 <Fixtures>
                     <Fixture Id="8c13966e-824f-4f06-865e-b9b36a6d356a" Name="Fixture1">
                         <Shape Id="e1ef71d4-b7d3-4be8-97dd-f214de3cec18" xsi:type="Polygon">
@@ -257,8 +257,8 @@
                 <GravityScale>1.0</GravityScale>
             </Body>
             <Body Id="cbfad328-3c27-4e09-b77e-bd7c08cd9269" Name="n">
-                <OutlineColor r="0.61533606" g="0.42471632" b="0.6903096" />
-                <FillColor r="0.76917005" g="0.5308954" b="0.86288697" />
+				<OutlineColor r="0.61533606" g="0.42471632" b="0.6903096" />
+				<FillColor r="0.76917005" g="0.5308954" b="0.86288697" />
                 <Fixtures>
                     <Fixture Id="08510cc4-2dbb-4e0a-830b-3a058fafc232" Name="Fixture1">
                         <Shape Id="ac54ca9c-4bbf-4571-90de-149f5504b73b" xsi:type="Polygon">
@@ -384,8 +384,8 @@
                 <GravityScale>1.0</GravityScale>
             </Body>
             <Body Id="49dcfee6-509e-4865-92e9-1900031a798f" Name="4">
-                <OutlineColor r="0.51083624" g="0.56451464" b="0.4106655" />
-                <FillColor r="0.6385453" g="0.7056433" b="0.5133319" />
+				<OutlineColor r="0.34901962" g="0.8039216" b="0.4117647" />
+				<FillColor r="0.6392157" g="1.0" b="0.5137255" />
                 <Fixtures>
                     <Fixture Id="7af990b5-c402-40fa-9bcc-16299728b177" Name="Fixture1">
                         <Shape Id="075272c3-589c-42d1-b893-85f402c8280b" xsi:type="Polygon">
@@ -440,8 +440,8 @@
                 <GravityScale>1.0</GravityScale>
             </Body>
             <Body Id="cf2a4019-0121-4dce-be29-2d3187894c20" Name="j">
-                <OutlineColor r="0.573416" g="0.6082954" b="0.6408588" />
-                <FillColor r="0.71677" g="0.7603692" b="0.8010735" />
+				<OutlineColor r="1.0" g="0.0" b="0.6392157" />
+				<FillColor r="1.0" g="0.48235294" b="0.8" />
                 <Fixtures>
                     <Fixture Id="26bf72bb-814f-4121-a715-60174d171440" Name="Fixture1">
                         <Shape Id="6844f2ed-426f-43ba-93e1-9e184a50e7c3" xsi:type="Polygon">
