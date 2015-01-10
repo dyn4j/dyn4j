@@ -28,6 +28,7 @@ import org.dyn4j.collision.Collidable;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Transform;
+import org.dyn4j.geometry.Vector2;
 
 /**
  * Abstract implementation of a {@link BroadphaseDetector} providing AABB
@@ -71,6 +72,41 @@ public abstract class AbstractAABBDetector<E extends Collidable> implements Broa
 		}
 		// otherwise they definitely do not intersect
 		return false;
+	}
+	
+	// TODO call from all broadphase detectors
+	/**
+	 * Returns true if the ray and AABB intersect.
+	 * <p>
+	 * This method is ideally called for a number of AABBs where the invDx and invDy can
+	 * be computed once.
+	 * @param start the start position of the ray
+	 * @param length the length of the ray
+	 * @param invDx the inverse of the x component of the ray direction
+	 * @param invDy the inverse of the y component of the ray direction
+	 * @param aabb the AABB to test
+	 * @return true if the AABB and ray intersect
+	 */
+	protected boolean raycast(Vector2 start, double length, double invDx, double invDy, AABB aabb) {
+		// see here for implementation details
+		// http://tavianator.com/2011/05/fast-branchless-raybounding-box-intersections/
+		double tx1 = (aabb.getMinX() - start.x) * invDx;
+		double tx2 = (aabb.getMaxX() - start.x) * invDx;
+
+		double tmin = Math.min(tx1, tx2);
+		double tmax = Math.max(tx1, tx2);
+
+		double ty1 = (aabb.getMinY() - start.y) * invDy;
+		double ty2 = (aabb.getMaxY() - start.y) * invDy;
+
+		tmin = Math.max(tmin, Math.min(ty1, ty2));
+		tmax = Math.min(tmax, Math.max(ty1, ty2));
+		// the ray is pointing in the opposite direction
+		if (tmax < 0) return false;
+		// consider the ray length
+		if (tmin > length) return false;
+		// along the ray, tmax should be larger than tmin
+		return tmax >= tmin;
 	}
 	
 	/* (non-Javadoc)
