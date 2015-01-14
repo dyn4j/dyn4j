@@ -112,17 +112,13 @@ public class SapBruteForce<E extends Collidable> extends AbstractAABBDetector<E>
 			if (this == o) return 0;
 			// compute the difference in the minimum x values of the aabbs
 			double diff = this.aabb.getMinX() - o.aabb.getMinX();
-			if (diff > 0) {
-				return 1;
-			} else if (diff < 0) {
-				return -1;
+			if (diff != 0) {
+				return (int)Math.signum(diff);
 			} else {
 				// if the x values are the same then compare on the y values
 				diff = this.aabb.getMinY() - o.aabb.getMinY();
-				if (diff > 0) {
-					return 1;
-				} else if (diff < 0) {
-					return -1;
+				if (diff != 0) {
+					return (int)Math.signum(diff);
 				} else {
 					// finally if their y values are the same then compare on the ids
 					return this.collidable.getId().compareTo(o.collidable.getId());
