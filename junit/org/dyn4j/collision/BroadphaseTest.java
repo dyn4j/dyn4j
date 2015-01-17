@@ -34,7 +34,7 @@ import org.dyn4j.collision.broadphase.BroadphasePair;
 import org.dyn4j.collision.broadphase.DynamicAABBTree;
 import org.dyn4j.collision.broadphase.SapBruteForce;
 import org.dyn4j.collision.broadphase.SapIncremental;
-import org.dyn4j.collision.broadphase.SapTree;
+import org.dyn4j.collision.broadphase.Sap;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Ray;
@@ -56,7 +56,7 @@ public class BroadphaseTest {
 	private SapBruteForce<CollidableTest> sapBF = new SapBruteForce<CollidableTest>();
 	
 	/** The tree implementation of incremental SAP */
-	private SapTree<CollidableTest> sapT = new SapTree<CollidableTest>();
+	private Sap<CollidableTest> sapT = new Sap<CollidableTest>();
 	
 	/** The dynamic aabb tree */
 	private DynamicAABBTree<CollidableTest> dynT = new DynamicAABBTree<CollidableTest>();
@@ -104,31 +104,36 @@ public class BroadphaseTest {
 	 */
 	@Test
 	public void remove() {
-		CollidableTest ct = new CollidableTest(Geometry.createCircle(1.0));
+		CollidableTest ct1 = new CollidableTest(Geometry.createCircle(1.0));
+		CollidableTest ct2 = new CollidableTest(Geometry.createCircle(2.0));
 		
 		// add the item to the broadphases
-		this.sapI.add(ct);
-		this.sapBF.add(ct);
-		this.sapT.add(ct);
-		this.dynT.add(ct);
+		this.sapI.add(ct1);
+		this.sapI.add(ct2);
+		this.sapBF.add(ct1);
+		this.sapBF.add(ct2);
+		this.sapT.add(ct1);
+		this.sapT.add(ct2);
+		this.dynT.add(ct1);
+		this.dynT.add(ct2);
 		
 		// make sure they are there
-		TestCase.assertNotNull(this.sapI.getAABB(ct));
-		TestCase.assertNotNull(this.sapBF.getAABB(ct));
-		TestCase.assertNotNull(this.sapT.getAABB(ct));
-		TestCase.assertNotNull(this.dynT.getAABB(ct));
+		TestCase.assertTrue(this.sapI.contains(ct1));
+		TestCase.assertTrue(this.sapBF.contains(ct1));
+		TestCase.assertTrue(this.sapT.contains(ct1));
+		TestCase.assertTrue(this.dynT.contains(ct1));
 		
 		// then remove them from the broadphases
-		this.sapI.remove(ct);
-		this.sapBF.remove(ct);
-		this.sapT.remove(ct);
-		this.dynT.remove(ct);
+		this.sapI.remove(ct1);
+		this.sapBF.remove(ct1);
+		this.sapT.remove(ct1);
+		this.dynT.remove(ct1);
 		
 		// make sure they aren't there any more
-		TestCase.assertNull(this.sapI.getAABB(ct));
-		TestCase.assertNull(this.sapBF.getAABB(ct));
-		TestCase.assertNull(this.sapT.getAABB(ct));
-		TestCase.assertNull(this.dynT.getAABB(ct));
+		TestCase.assertFalse(this.sapI.contains(ct1));
+		TestCase.assertFalse(this.sapBF.contains(ct1));
+		TestCase.assertFalse(this.sapT.contains(ct1));
+		TestCase.assertFalse(this.dynT.contains(ct1));
 	}
 	
 	/**
@@ -596,7 +601,7 @@ public class BroadphaseTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void SapTreeNegativeInitialCapacity() {
-		new SapTree<Collidable>(-10);
+		new Sap<Collidable>(-10);
 	}
 	
 	/**

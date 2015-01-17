@@ -25,16 +25,20 @@
 package org.dyn4j.collision.broadphase;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.dyn4j.Tuple;
 import org.dyn4j.collision.Collidable;
 import org.dyn4j.collision.Collisions;
+import org.dyn4j.collision.Fixture;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Ray;
+import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 
 /**
@@ -47,52 +51,12 @@ import org.dyn4j.geometry.Vector2;
  * @since 3.0.0
  * @param <E> the {@link Collidable} type
  */
-public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<E> implements BroadphaseDetector<E> {
-	/**
-	 * Represents a node in the tree.
-	 * @author William Bittle
-	 * @version 3.0.0
-	 * @since 3.0.0
-	 */
-	protected class Node {
-		/** The left child */
-		public Node left;
-		
-		/** The right child */
-		public Node right;
-		
-		/** The parent node */
-		public Node parent;
-		
-		/** The height of this subtree */
-		public int height;
-		
-		/** The collidable; null if this node is not a leaf node */
-		public E collidable;
-		
-		/** The aabb containing all children */
-		public AABB aabb;
-		
-		/** Flag used to determine if a node has been tested before */
-		public boolean tested = false;
-		
-		/**
-		 * Returns true if this node is a leaf node.
-		 * @return boolean true if this node is a leaf node
-		 */
-		public boolean isLeaf() {
-			return left == null;
-		}
-	}
-	
+public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends AbstractAABBDetector<E, T> implements BroadphaseDetector<E, T> {
 	/** The root node of the tree */
-	protected Node root;
-	
-	/** The unsorted list of proxies */
-	protected List<Node> proxyList;
+	protected DynamicAABBTreeNode<E, T> root;
 	
 	/** Id to node map for fast lookup */
-	protected Map<UUID, Node> proxyMap;
+	protected Map<Tuple<UUID, UUID>, DynamicAABBTreeNode<E, T>> proxyMap;
 	
 	/**
 	 * Default constructor.
@@ -110,11 +74,10 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	 * @since 3.1.1
 	 */
 	public DynamicAABBTree(int initialCapacity) {
-		this.proxyList = new ArrayList<Node>(initialCapacity);
 		// 0.75 = 3/4, we can garuantee that the hashmap will not need to be rehashed
 		// if we take capacity / load factor
 		// the default load factor is 0.75 according to the javadocs, but lets assign it to be sure
-		this.proxyMap = new HashMap<UUID, Node>(initialCapacity * 4 / 3 + 1, 0.75f);
+		this.proxyMap = new LinkedHashMap<Tuple<UUID, UUID>, DynamicAABBTreeNode<E, T>>(initialCapacity * 4 / 3 + 1, 0.75f);
 	}
 	
 	/* (non-Javadoc)
@@ -122,20 +85,23 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	 */
 	@Override
 	public void add(E collidable) {
-		// create an aabb for the collidable
-		AABB aabb = collidable.createAABB();
-		// expand the aabb
-		aabb.expand(this.expansion);
-		// create a new node for the collidable
-		Node node = new Node();
-		node.collidable = collidable;
-		node.aabb = aabb;
-		// add the proxy to the list
-		this.proxyList.add(node);
-		// add the proxy to the map
-		this.proxyMap.put(collidable.getId(), node);
-		// insert the node into the tree
-		this.insert(node);
+		Transform tx = collidable.getTransform();
+		int size = collidable.getFixtureCount();
+		for (int i = 0; i < size; i++) {
+			T fixture = collidable.getFixture(i);
+			AABB aabb = fixture.getShape().createAABB(tx);
+			// expand the aabb
+			aabb.expand(this.expansion);
+			// create a new node for the collidable
+			DynamicAABBTreeNode<E, T> node = new DynamicAABBTreeNode<E, T>();
+			node.collidable = collidable;
+			node.fixture = fixture;
+			node.aabb = aabb;
+			// add the proxy to the map
+			this.proxyMap.put(new Tuple<UUID, UUID>(collidable.getId(), fixture.getId()), node);
+			// insert the node into the tree
+			this.insert(node);	
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -143,18 +109,17 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	 */
 	@Override
 	public void remove(E collidable) {
-		// find the node in the map
-		Node node = this.proxyMap.get(collidable.getId());
-		// make sure it was found
-		if (node != null) {
-			// remove the node from the tree
-			this.remove(node);
-			// remove the node from the list
-			this.proxyList.remove(node);
-			// remove the node from the map
-			this.proxyMap.remove(collidable.getId());
+		int size = collidable.getFixtureCount();
+		for (int i = 0; i < size; i++) {
+			T fixture = collidable.getFixture(i);
+			// find the node in the map
+			DynamicAABBTreeNode<E, T> node = this.proxyMap.remove(fixture.getId());
+			// make sure it was found
+			if (node != null) {
+				// remove the node from the tree
+				this.remove(node);
+			}
 		}
-		
 	}
 	
 	/* (non-Javadoc)
@@ -162,34 +127,38 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	 */
 	@Override
 	public void update(E collidable) {
-		// get the node from the map
-		Node node = this.proxyMap.get(collidable.getId());
-		// make sure we found it
-		if (node != null) {
-			// create the new aabb
-			AABB aabb = collidable.createAABB();
-			// see if the old aabb contains the new one
-			if (node.aabb.contains(aabb)) {
-				// if so, don't do anything
-				return;
+		Transform tx = collidable.getTransform();
+		int size = collidable.getFixtureCount();
+		for (int i = 0; i < size; i++) {
+			T fixture = collidable.getFixture(i);
+			// get the node from the map
+			DynamicAABBTreeNode<E, T> node = this.proxyMap.get(fixture.getId());
+			// make sure we found it
+			if (node != null) {
+				// create the new aabb
+				AABB aabb = fixture.getShape().createAABB(tx);
+				// see if the old aabb contains the new one
+				if (node.aabb.contains(aabb)) {
+					// if so, don't do anything
+					return;
+				}
+				// otherwise expand the new aabb
+				aabb.expand(this.expansion);
+				// remove the current node from the tree
+				this.remove(node);
+				// set the new aabb
+				node.aabb = aabb;
+				// reinsert the node
+				this.insert(node);
 			}
-			// otherwise expand the new aabb
-			aabb.expand(this.expansion);
-			// remove the current node from the tree
-			this.remove(node);
-			// set the new aabb
-			node.aabb = aabb;
-			// reinsert the node
-			this.insert(node);
 		}
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#clear()
 	 */
 	@Override
 	public void clear() {
-		this.proxyList.clear();
 		this.proxyMap.clear();
 		this.root = null;
 	}
@@ -199,11 +168,11 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	 */
 	@Override
 	public AABB getAABB(E collidable) {
-		Node node = this.proxyMap.get(collidable.getId());
+		DynamicAABBTreeNode<E, T> node = this.proxyMap.get(collidable.getId());
 		if (node != null) {
 			return node.aabb;
 		}
-		return null;
+		return collidable.createAABB();
 	}
 	
 	/* (non-Javadoc)
@@ -212,7 +181,8 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	@Override
 	public List<BroadphasePair<E>> detect() {
 		// get the number of proxies
-		int size = this.proxyList.size();
+		Collection<DynamicAABBTreeNode<E, T>> nodes = this.proxyMap.values();
+		int size = this.proxyMap.size();
 
 		// check the size
 		if (size == 0) {
@@ -221,8 +191,8 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 		}
 		
 		// clear all the tested flags on the nodes
-		for (int i = 0; i < size; i++) {
-			Node node = this.proxyList.get(i);
+		for (DynamicAABBTreeNode<E, T> node : nodes) {
+			//Node node = this.proxyMap.get(i);
 			// reset the flag
 			node.tested = false;
 		}
@@ -232,9 +202,7 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 		List<BroadphasePair<E>> pairs = new ArrayList<BroadphasePair<E>>(eSize);
 		
 		// test each collidable in the list
-		for (int i = 0; i < size; i++) {
-			// get the current collidable to test
-			Node node = this.proxyList.get(i);
+		for (DynamicAABBTreeNode<E, T> node : nodes) {
 			// perform a stackless detection routine
 			detectNonRecursive(node, this.root, pairs);
 			// update the tested flag
@@ -259,7 +227,7 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	@Override
 	public List<E> raycast(Ray ray, double length) {
 		// check the size of the proxy list
-		if (this.proxyList.size() == 0) {
+		if (this.proxyMap.size() == 0) {
 			// return an empty list
 			return Collections.emptyList();
 		}
@@ -289,8 +257,55 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 		// create the aabb
 		AABB aabb = new AABB(min, max);
 		
-		// pass it to the aabb detection routine
-		return this.detect(aabb);
+		// precompute
+		double invDx = 1.0 / d.x;
+		double invDy = 1.0 / d.y;
+		DynamicAABBTreeNode<E, T> node = this.root;
+		
+		// get the estimated collision count
+		int eSize = Collisions.getEstimatedRaycastCollisions(this.proxyMap.size());
+		List<E> list = new ArrayList<E>(eSize);
+		// perform a iterative, stack-less, traversal of the tree
+		while (node != null) {
+			// check if the current node overlaps the desired node
+			if (aabb.overlaps(node.aabb)) {
+				// if they do overlap, then check the left child node
+				if (node.left != null) {
+					// if the left is not null, then check that subtree
+					node = node.left;
+					continue;
+				} else if (this.raycast(s, l, invDx, invDy, node.aabb)) {
+					// if both are null, then this is a leaf node
+					list.add(node.collidable);
+					// if its a leaf node then we need to go back up the
+					// tree and test nodes we haven't yet
+				}
+			}
+			// if the current node is a leaf node or doesnt overlap the
+			// desired aabb, then we need to go back up the tree until we
+			// find the first left node who's right node is not null
+			boolean nextNodeFound = false;
+			while (node.parent != null) {
+				// check if the current node the left child of its parent
+				if (node == node.parent.left) {
+					// it is, so check if the right node is non-null
+					// NOTE: not need since the tree is a complete tree (every node has two children)
+					//if (node.parent.right != null) {
+						// it isn't so the sibling node is the next node
+						node = node.parent.right;
+						nextNodeFound = true;
+						break;
+					//}
+				}
+				// if the current node isn't a left node or it is but its
+				// sibling is null, go to the parent node
+				node = node.parent;
+			}
+			// if we didn't find it then we are done
+			if (!nextNodeFound) break;
+		}
+		
+		return list;
 	}
 	
 	/* (non-Javadoc)
@@ -300,7 +315,7 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	public void shiftCoordinates(Vector2 shift) {
 		// we need to update all nodes in the tree (not just the
 		// nodes that contain the bodies)
-		Node node = root;
+		DynamicAABBTreeNode<E, T> node = root;
 		// perform a iterative, stack-less, in order traversal of the tree
 		while (node != null) {
 			// traverse down the left most tree first
@@ -339,7 +354,7 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	 * @param root the root node of the subtree
 	 * @param pairs the list of pairs to add to
 	 */
-	protected void detect(Node node, Node root, List<BroadphasePair<E>> pairs) {
+	protected void detect(DynamicAABBTreeNode<E, T> node, DynamicAABBTreeNode<E, T> root, List<BroadphasePair<E>> pairs) {
 		// check for null node (shouldnt happen)
 		if (root == null) return;
 		// check for the tested flag (to remove duplicates)
@@ -372,9 +387,9 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	 * @param root the root node of the subtree
 	 * @param pairs the list of pairs to add to
 	 */
-	protected void detectNonRecursive(Node node, Node root, List<BroadphasePair<E>> pairs) {
+	protected void detectNonRecursive(DynamicAABBTreeNode<E, T> node, DynamicAABBTreeNode<E, T> root, List<BroadphasePair<E>> pairs) {
 		// start at the root node
-		Node n = root;
+		DynamicAABBTreeNode<E, T> n = root;
 		// perform a iterative, stack-less, traversal of the tree
 		while (n != null) {
 			// check if the current node overlaps the desired node
@@ -432,7 +447,7 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	 * @param node the root node of the subtree
 	 * @param list the list to contain the results
 	 */
-	protected void detect(AABB aabb, Node node, List<E> list) {
+	protected void detect(AABB aabb, DynamicAABBTreeNode<E, T> node, List<E> list) {
 		// test the node itself
 		if (aabb.overlaps(node.aabb)) {
 			// check for leaf node
@@ -455,7 +470,7 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	 * @param node the root node of the subtree
 	 * @return List a list containing the results
 	 */
-	protected List<E> detectNonRecursive(AABB aabb, Node node) {
+	protected List<E> detectNonRecursive(AABB aabb, DynamicAABBTreeNode<E, T> node) {
 		// get the estimated collision count
 		int eSize = Collisions.getEstimatedCollisions();
 		List<E> list = new ArrayList<E>(eSize);
@@ -506,7 +521,7 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	 * Internal method to insert a node into the tree.
 	 * @param item the node to insert
 	 */
-	protected void insert(Node item) {
+	protected void insert(DynamicAABBTreeNode<E, T> item) {
 		// make sure the root is not null
 		if (this.root == null) {
 			// if it is then set this node as the root
@@ -519,7 +534,7 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 		AABB itemAABB = item.aabb;
 		
 		// start looking for the insertion point at the root
-		Node node = this.root;
+		DynamicAABBTreeNode<E, T> node = this.root;
 		// loop until node is a leaf or we find a better location
 		while (!node.isLeaf()) {
 			// get the current node's aabb
@@ -546,8 +561,8 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 			double descendCost = 2 * (unionPerimeter - perimeter);
 			
 			// get the left and right nodes
-			Node left = node.left;
-			Node right = node.right;
+			DynamicAABBTreeNode<E, T> left = node.left;
+			DynamicAABBTreeNode<E, T> right = node.right;
 			
 			// compute the cost of descending to the left
 			double costl = 0.0;
@@ -589,8 +604,8 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 		
 		// now that we have found a suitable place, insert a new root
 		// node for node and item
-		Node parent = node.parent;
-		Node newParent = new Node();
+		DynamicAABBTreeNode<E, T> parent = node.parent;
+		DynamicAABBTreeNode<E, T> newParent = new DynamicAABBTreeNode<E, T>();
 		newParent.parent = node.parent;
 		newParent.aabb = node.aabb.getUnion(itemAABB);
 		newParent.height = node.height + 1;
@@ -622,8 +637,8 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 			// balance the current tree
 			node = balance(node);
 			
-			Node left = node.left;
-			Node right = node.right;
+			DynamicAABBTreeNode<E, T> left = node.left;
+			DynamicAABBTreeNode<E, T> right = node.right;
 			
 			// neither node should be null
 			node.height = 1 + Math.max(left.height, right.height);
@@ -637,7 +652,7 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	 * Internal method to remove a node from the tree.
 	 * @param node the node to remove
 	 */
-	protected void remove(Node node) {
+	protected void remove(DynamicAABBTreeNode<E, T> node) {
 		// check for an empty tree
 		if (this.root == null) return;
 		// check the root node
@@ -649,9 +664,9 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 		}
 		
 		// get the node's parent, grandparent, and sibling
-		Node parent = node.parent;
-		Node grandparent = parent.parent;
-		Node other;
+		DynamicAABBTreeNode<E, T> parent = node.parent;
+		DynamicAABBTreeNode<E, T> grandparent = parent.parent;
+		DynamicAABBTreeNode<E, T> other;
 		if (parent.left == node) {
 			other = parent.right;
 		} else {
@@ -672,13 +687,13 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 			other.parent = grandparent;
 			
 			// finally rebalance the tree
-			Node n = grandparent;
+			DynamicAABBTreeNode<E, T> n = grandparent;
 			while (n != null) {
 				// balance the current subtree
 				n = balance(n);
 				
-				Node left = n.left;
-				Node right = n.right;
+				DynamicAABBTreeNode<E, T> left = n.left;
+				DynamicAABBTreeNode<E, T> right = n.right;
 				
 				// neither node should be null
 				n.height = 1 + Math.max(left.height, right.height);
@@ -697,10 +712,10 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	/**
 	 * Balances the subtree using node as the root.
 	 * @param node the root node of the subtree to balance
-	 * @return {@link Node} the new root of the subtree
+	 * @return {@link DynamicAABBTreeNode} the new root of the subtree
 	 */
-	protected Node balance(Node node) {
-		Node a = node;
+	protected DynamicAABBTreeNode<E, T> balance(DynamicAABBTreeNode<E, T> node) {
+		DynamicAABBTreeNode<E, T> a = node;
 		
 		// see if the node is a leaf node or if
 		// it doesn't have enough children to be unbalanced
@@ -710,8 +725,8 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 		}
 		
 		// get the nodes left and right children
-		Node b = a.left;
-		Node c = a.right;
+		DynamicAABBTreeNode<E, T> b = a.left;
+		DynamicAABBTreeNode<E, T> c = a.right;
 		
 		// compute the balance factor for node a
 		int balance = c.height - b.height;
@@ -719,8 +734,8 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 		// if the balance is off on the right side
 		if (balance > 1) {
 			// get the c's left and right nodes
-			Node f = c.left;
-			Node g = c.right;
+			DynamicAABBTreeNode<E, T> f = c.left;
+			DynamicAABBTreeNode<E, T> g = c.right;
 			
 			// switch a and c
 			c.left = a;
@@ -768,8 +783,8 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 		// if the balance is off on the left side
 		if (balance < -1) {
 			// get b's children
-			Node d = b.left;
-			Node e = b.right;
+			DynamicAABBTreeNode<E, T> d = b.left;
+			DynamicAABBTreeNode<E, T> e = b.right;
 			
 			// switch a and b
 			b.left = a;
@@ -825,7 +840,7 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	 * Used for testing only.  Test using the -ea flag on the command line.
 	 * @param node the root of the subtree to validate
 	 */
-	protected void validate(Node node) {
+	protected void validate(DynamicAABBTreeNode<E, T> node) {
 		// just return if the given node is null
 		if (node == null) {
 			return;
@@ -837,8 +852,8 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 		}
 		
 		// get the left and right children
-		Node left = node.left;
-		Node right = node.right;
+		DynamicAABBTreeNode<E, T> left = node.left;
+		DynamicAABBTreeNode<E, T> right = node.right;
 		
 		// check if the node is a leaf
 		if (node.isLeaf()) {

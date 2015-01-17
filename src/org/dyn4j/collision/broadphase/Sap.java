@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import org.dyn4j.collision.Collidable;
@@ -44,8 +46,8 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Implementation of the Sweep and Prune broad-phase collision detection algorithm.
  * <p>
- * This implementation maintains a sorted list of {@link Collidable}s where each update
- * will reposition the respective {@link Collidable} in the sorted list.
+ * This implementation maintains a red-black tree of {@link Collidable}s where each update
+ * will reposition the respective {@link Collidable} in the tree.
  * <p>
  * Projects all {@link Collidable}s on both the x and y axes and performs overlap checks
  * on all the projections to test for possible collisions (AABB tests).
@@ -53,44 +55,12 @@ import org.dyn4j.geometry.Vector2;
  * The overlap checks are performed faster when the {@link Interval}s created by the projections
  * are sorted by their minimum value.  Doing so will allow the detector to ignore any projections
  * after the first {@link Interval} that does not overlap.
- * <p>
- * If a {@link Collidable} is made up of more than one {@link Shape} and the {@link Shape}s 
- * are not connected, this detection algorithm may cause false hits.  For example,
- * if your {@link Collidable} consists of the following geometry: (the line below the {@link Shape}s
- * is the projection that will be used for the broad-phase)
- * <pre>
- * +--------+     +--------+  |
- * | body1  |     | body1  |  |
- * | shape1 |     | shape2 |  | y-axis projection
- * |        |     |        |  |
- * +--------+     +--------+  |
- * 
- * -------------------------
- *     x-axis projection
- * </pre>
- * So if following configuration is encountered it will generate a hit:
- * <pre>
- *             +--------+               |
- * +--------+  | body2  |  +--------+   | |
- * | body1  |  | shape1 |  | body1  |   | |
- * | shape1 |  |        |  | shape2 |   | | y-axis projection
- * |        |  |        |  |        |   | |
- * +--------+  |        |  +--------+   | |
- *             +--------+               |
- * 
- *             ----------
- * ----------------------------------
- *         x-axis projection
- * </pre>
- * These cases are OK since the {@link NarrowphaseDetector}s will handle these cases.
- * However, allowing this causes more work for the {@link NarrowphaseDetector}s whose
- * algorithms are more complex.  These situations should be avoided for maximum performance.
  * @author William Bittle
  * @version 3.1.5
  * @since 1.0.0
  * @param <E> the {@link Collidable} type
  */
-public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E> implements BroadphaseDetector<E> {
+public class Sap<E extends Collidable> extends AbstractAABBDetector<E> implements BroadphaseDetector<E> {
 	/**
 	 * Internal class to hold the {@link Collidable} to {@link AABB} relationship.
 	 * @author William Bittle
@@ -104,6 +74,9 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 		/** The collidable's aabb */
 		public AABB aabb;
 		
+		/** Whether the proxy has been tested or not */
+		public boolean tested;
+		
 		/* (non-Javadoc)
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
 		 */
@@ -112,17 +85,13 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 			if (this == o) return 0;
 			// compute the difference in the minimum x values of the aabbs
 			double diff = this.aabb.getMinX() - o.aabb.getMinX();
-			if (diff > 0) {
-				return 1;
-			} else if (diff < 0) {
-				return -1;
+			if (diff != 0) {
+				return (int)Math.signum(diff);
 			} else {
 				// if the x values are the same then compare on the y values
 				diff = this.aabb.getMinY() - o.aabb.getMinY();
-				if (diff > 0) {
-					return 1;
-				} else if (diff < 0) {
-					return -1;
+				if (diff != 0) {
+					return (int)Math.signum(diff);
 				} else {
 					// finally if their y values are the same then compare on the ids
 					return this.collidable.getId().compareTo(o.collidable.getId());
@@ -138,32 +107,15 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 			return this.aabb.toString();
 		}
 	}
-	
-	/**
-	 * Represents a list of potential pairs for a proxy.
-	 * @author William Bittle
-	 * @version 3.0.0
-	 * @since 3.0.0
-	 */
-	protected class PairList {
-		/** The proxy */
-		public Proxy proxy;
-		
-		/** The proxy's potential pairs */
-		public List<Proxy> potentials = new ArrayList<Proxy>(Collisions.getEstimatedCollisions());
-	}
-	
-	/** Sorted list of proxies */
-	protected List<Proxy> proxyList;
+
+	/** Sorted tree set of proxies */
+	protected TreeSet<Proxy> proxyTree;
 	
 	/** Id to proxy map for fast lookup */
 	protected Map<UUID, Proxy> proxyMap;
 
-	/** Reusable list for storing potential detected pairs along the x-axis */
-	protected ArrayList<PairList> potentialPairs;
-	
 	/** Default constructor. */
-	public SapIncremental() {
+	public Sap() {
 		this(64);
 	}
 	
@@ -175,13 +127,12 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 	 * @throws IllegalArgumentException if initialCapacity is less than zero
 	 * @since 3.1.1
 	 */
-	public SapIncremental(int initialCapacity) {
-		this.proxyList = new ArrayList<Proxy>(initialCapacity);
+	public Sap(int initialCapacity) {
+		this.proxyTree = new TreeSet<Proxy>();
 		// 0.75 = 3/4, we can garuantee that the hashmap will not need to be rehashed
 		// if we take capacity / load factor
 		// the default load factor is 0.75 according to the javadocs, but lets assign it to be sure
 		this.proxyMap = new HashMap<UUID, Proxy>(initialCapacity * 4 / 3 + 1, 0.75f);
-		this.potentialPairs = new ArrayList<PairList>(initialCapacity);
 	}
 	
 	/* (non-Javadoc)
@@ -189,28 +140,19 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 	 */
 	@Override
 	public void add(E collidable) {
-		// get the id
+		// get the id of the collidable
 		UUID id = collidable.getId();
-		// create an aabb from the collidable
+		// create an aabb for this collidable
 		AABB aabb = collidable.createAABB();
-		// expand the aabb by some factor
+		// expand it
 		aabb.expand(this.expansion);
-		// create a proxy for the collidable
+		// otherwise add it to the list
 		Proxy p = new Proxy();
 		p.collidable = collidable;
 		p.aabb = aabb;
-		
-		// perform a binary search to find where the proxy should be inserted
-		int index = Collections.binarySearch(this.proxyList, p);
-		// if the item isn't already in the list then the index will be negative
-		if (index < 0) {
-			index *= -1;
-			index -= 1;
-		}
-		
-		// insert the proxy into the sorted list
-		this.proxyList.add(index, p);
-		// insert the proxy into the map
+		// add it to the tree [log(n)]
+		this.proxyTree.add(p);
+		// add it to the map [constant]
 		this.proxyMap.put(id, p);
 	}
 	
@@ -219,21 +161,13 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 	 */
 	@Override
 	public void remove(E collidable) {
-		// loop through the list sequentially until we find
-		// the element and remove it
-		Iterator<Proxy> it = this.proxyList.iterator();
-		while (it.hasNext()) {
-			Proxy p = it.next();
-			// test the collidable
-			if (p.collidable == collidable) {
-				// remove it
-				it.remove();
-				// break immediately
-				break;
-			}
+		// remove it from the map [constant]
+		Proxy p = this.proxyMap.remove(collidable.getId());
+		// make sure its found
+		if (p != null) {
+			// remove it from the tree [log(n)]
+			this.proxyTree.remove(p);
 		}
-		// finally remove it from the map
-		this.proxyMap.remove(collidable.getId());
 	}
 	
 	/* (non-Javadoc)
@@ -241,36 +175,36 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 	 */
 	@Override
 	public void update(E collidable) {
-		// get the proxy
-		Proxy p0 = this.proxyMap.get(collidable.getId());
+		// get the proxy for this collidable [constant]
+		Proxy p = this.proxyMap.get(collidable.getId());
 		// check for not found
-		if (p0 == null) return;
-		// test if we need to update
+		if (p == null) return;
+		
+		// create a new aabb
 		AABB aabb = collidable.createAABB();
-		if (p0.aabb.contains(aabb)) {
-			// if the object is still inside the old aabb then don't
-			// bother updating, just continue to use the current aabb
+		// check the aabb
+		if (p.aabb.contains(aabb)) {
+			// if the aabb is still inside the expanded
+			// aabb then just return
 			return;
 		} else {
-			// otherwise use the new aabb and expand it
+			// otherwise expand the new aabb
 			aabb.expand(this.expansion);
 		}
 		
-		// remove the proxy
-		this.proxyList.remove(p0);
-		
-		p0.aabb = aabb;
-		
-		// add the proxy back
-		// O(log(n)) search
-		int index = Collections.binarySearch(this.proxyList, p0);
-		// if the item isnt already in the list then the index will be negative
-		if (index < 0) {
-			index *= -1;
-			index -= 1;
-		}
-		// O(n) insert
-		this.proxyList.add(index, p0);
+		// remove the proxy from the tree [log(n)]
+		this.proxyTree.remove(p);
+		// update the aabb
+		p.aabb = aabb;
+		// add back the proxy [log(n)]
+		this.proxyTree.add(p);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#contains(org.dyn4j.collision.Collidable)
+	 */
+	public boolean contains(E collidable) {
+		return this.proxyMap.containsKey(collidable.getId());
 	}
 	
 	/* (non-Javadoc)
@@ -278,20 +212,20 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 	 */
 	@Override
 	public void clear() {
-		this.proxyList.clear();
+		this.proxyTree.clear();
 		this.proxyMap.clear();
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#getAABB(org.dyn4j.collision.Collidable)
 	 */
-	@Override
 	public AABB getAABB(E collidable) {
-		Proxy proxy = this.proxyMap.get(collidable.getId());
-		if (proxy != null) {
-			return proxy.aabb;
+		// [constant]
+		Proxy p = this.proxyMap.get(collidable.getId());
+		if (p != null) {
+			return p.aabb;
 		}
-		return null;
+		return collidable.createAABB();
 	}
 	
 	/* (non-Javadoc)
@@ -300,7 +234,7 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 	@Override
 	public List<BroadphasePair<E>> detect() {
 		// get the number of proxies
-		int size = this.proxyList.size();
+		int size = this.proxyTree.size();
 		
 		// check the size
 		if (size == 0) {
@@ -312,70 +246,51 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 		int eSize = Collisions.getEstimatedCollisionPairs(size);
 		List<BroadphasePair<E>> pairs = new ArrayList<BroadphasePair<E>>(eSize);
 		
-		// make sure the potential pairs list is sized appropriately
-		this.potentialPairs.clear();
-		this.potentialPairs.ensureCapacity(size);
+		// clear the tested flags
+		Iterator<Proxy> itp = this.proxyTree.iterator();
+		while (itp.hasNext()) {
+			Proxy p = itp.next();
+			p.tested = false;
+		}
 		
-		// create the potential pairs using the sorted x axis
-		PairList pl = new PairList();
-		for (int i = 0; i < size; i++) {
-			Proxy current = this.proxyList.get(i);
-			for (int j = i + 1; j < size; j++) {
-				Proxy test = this.proxyList.get(j);
+		// find all the possible pairs
+		Iterator<Proxy> ito = this.proxyTree.iterator();
+		while (ito.hasNext()) {
+			// get the current proxy
+			Proxy current = ito.next();
+			// only check the ones greater than (or equal to) the current item
+			SortedSet<Proxy> set = this.proxyTree.tailSet(current, false);
+			Iterator<Proxy> iti = set.iterator();
+			while (iti.hasNext()) {
+				Proxy test = iti.next();
+				// dont compare objects against themselves
+				if (test.collidable == current.collidable) continue;
+				// dont compare object that have already been compared
+				if (test.tested) continue;
 				// test overlap
 				// the >= is to support degenerate intervals created by vertical segments
 				if (current.aabb.getMaxX() >= test.aabb.getMinX()) {
-					// add it to the current collidable's potential list
-					pl.potentials.add(test);
+					if (current.aabb.overlaps(test.aabb)) {
+						pairs.add(new BroadphasePair<E>(current.collidable, test.collidable));
+					}
 				} else {
 					// otherwise we can break from the loop
 					break;
 				}
 			}
-			// finally check if we found any potentials
-			if (pl.potentials.size() > 0) {
-				// sorting on the potentials proved to be slower than just
-				// testing all potentials in the y phase
-				
-				// set the current collidable
-				pl.proxy = current;
-				// add the pair list to the potential pairs
-				this.potentialPairs.add(pl);
-				// create a new pair list for the next collidable
-				pl = new PairList();
-			}
+			current.tested = true;
 		}
 		
-		// go through the potential pairs and filter using the
-		// y axis projections
-		size = potentialPairs.size();
-		for (int i = 0; i < size; i++) {
-			PairList current = potentialPairs.get(i);
-			int pls = current.potentials.size();
-			for (int j = 0; j < pls; j++) {
-				Proxy test = current.potentials.get(j);
-				// have to do full overlap test since the list is not sorted
-				if (current.proxy.aabb.overlaps(test.aabb)) {
-					// add to the colliding list
-					BroadphasePair<E> pair = new BroadphasePair<E>(
-							current.proxy.collidable,	// A
-							test.collidable);			// B
-					pairs.add(pair);
-				}
-			}
-		}
-		
-		// return the list
 		return pairs;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.geometry.AABB)
 	 */
 	@Override
 	public List<E> detect(AABB aabb) {
 		// get the size of the proxy list
-		int size = this.proxyList.size();
+		int size = this.proxyTree.size();
 		
 		// check the size of the proxy list
 		if (size == 0) {
@@ -385,35 +300,33 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 		
 		List<E> list = new ArrayList<E>(Collisions.getEstimatedCollisions());
 		
-		// peform a binary search to find where this
-		// aabb should be inserted
-		int index = size / 2;
-		int max = size;
-		int min = 0;
-		while (true) {
-			Proxy p = this.proxyList.get(index);
-			if (p.aabb.getMinX() < aabb.getMinX()) {
-				min = index;
-			} else {
-				max = index;
-			}
-			if (max - min == 1) {
-				break;
-			}
-			index = (min + max) / 2;
-		}
+		// create a proxy for the aabb
+		Proxy p = new Proxy();
+		p.aabb = aabb;
+		p.collidable = null;
+		p.tested = false;
+		// find the proxy in the tree that is least of all the
+		// proxies greater than this one
+		Proxy l = this.proxyTree.ceiling(p);
 		
-		// we must check all aabbs up to the found index
+		// we must check all aabbs up to the found proxy
 		// from which point the first aabb to not intersect
 		// flags us to stop
-		for (int i = 0; i < size; i++) {
-			Proxy p = this.proxyList.get(i);
-			if (p.aabb.getMaxX() > aabb.getMinX()) {
-				if (p.aabb.overlaps(aabb)) {
-					list.add(p.collidable);
+		Iterator<Proxy> it = this.proxyTree.iterator();
+		boolean found = false;
+		while (it.hasNext()) {
+			Proxy proxy = it.next();
+			// see if we found the proxy
+			if (proxy == l) {
+				found = true;
+			}
+			if (proxy.aabb.getMaxX() > aabb.getMinX()) {
+				if (proxy.aabb.overlaps(aabb)) {
+					list.add(proxy.collidable);
 				}
 			} else {
-				if (i >= index) break;
+				// check if we have passed the proxy
+				if (found) break;
 			}
 		}
 		
@@ -426,7 +339,7 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 	@Override
 	public List<E> raycast(Ray ray, double length) {
 		// check the size of the proxy list
-		if (this.proxyList.size() == 0) {
+		if (this.proxyTree.size() == 0) {
 			// return an empty list
 			return Collections.emptyList();
 		}
@@ -456,8 +369,53 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 		// create the aabb
 		AABB aabb = new AABB(min, max);
 		
-		// pass it to the aabb detection routine
-		return this.detect(aabb);
+		double invDx = 1.0 / d.x;
+		double invDy = 1.0 / d.y;
+		
+		// get the size of the proxy list
+		int size = this.proxyTree.size();
+		
+		// check the size of the proxy list
+		if (size == 0) {
+			// return the empty list
+			return Collections.emptyList();
+		}
+		
+		List<E> list = new ArrayList<E>(Collisions.getEstimatedCollisions());
+		
+		// create a proxy for the aabb
+		Proxy p = new Proxy();
+		p.aabb = aabb;
+		p.collidable = null;
+		p.tested = false;
+		// find the proxy in the tree that is least of all the
+		// proxies greater than this one
+		Proxy ceil = this.proxyTree.ceiling(p);
+		
+		// we must check all aabbs up to the found proxy
+		// from which point the first aabb to not intersect
+		// flags us to stop
+		Iterator<Proxy> it = this.proxyTree.iterator();
+		boolean found = false;
+		while (it.hasNext()) {
+			Proxy proxy = it.next();
+			// see if we found the proxy
+			if (proxy == ceil) {
+				found = true;
+			}
+			if (proxy.aabb.getMaxX() > aabb.getMinX()) {
+				if (proxy.aabb.overlaps(aabb)) {
+					if (this.raycast(s, l, invDx, invDy, aabb)) {
+						list.add(proxy.collidable);
+					}
+				}
+			} else {
+				// check if we have passed the proxy
+				if (found) break;
+			}
+		}
+		
+		return list;
 	}
 	
 	/* (non-Javadoc)
@@ -466,9 +424,9 @@ public class SapIncremental<E extends Collidable> extends AbstractAABBDetector<E
 	@Override
 	public void shiftCoordinates(Vector2 shift) {
 		// loop over all the proxies and translate their aabb
-		int pSize = this.proxyList.size();
-		for (int i = 0; i < pSize; i++) {
-			Proxy proxy = this.proxyList.get(i);
+		Iterator<Proxy> it = this.proxyTree.iterator();
+		while (it.hasNext()) {
+			Proxy proxy = it.next();
 			proxy.aabb.translate(shift);
 		}
 	}

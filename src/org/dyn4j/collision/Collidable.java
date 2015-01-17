@@ -37,7 +37,7 @@ import org.dyn4j.geometry.Transformable;
  * @version 3.1.5
  * @since 1.0.0
  */
-public interface Collidable extends Transformable {
+public interface Collidable<T extends Fixture> extends Transformable {
 	/**
 	 * Returns a unique identifier for this {@link Collidable}.
 	 * @return UUID the unique id
@@ -63,7 +63,7 @@ public interface Collidable extends Transformable {
 	 * @return {@link Fixture}
 	 * @since 2.0.0
 	 */
-	public abstract Fixture getFixture(int index);
+	public abstract T getFixture(int index);
 	
 	/**
 	 * Returns the number of {@link Fixture}s attached

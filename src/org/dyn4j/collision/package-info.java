@@ -67,7 +67,7 @@
  * 	<ul>
  * 	<li>{@link org.dyn4j.collision.broadphase.SapIncremental}</li>
  * 	<li>{@link org.dyn4j.collision.broadphase.SapBruteForce}</li>
- *	<li>{@link org.dyn4j.collision.broadphase.SapTree}</li>
+ *	<li>{@link org.dyn4j.collision.broadphase.Sap}</li>
  * 	<li>{@link org.dyn4j.collision.broadphase.DynamicAABBTree}</li>
  * 	</ul>
  * </li>

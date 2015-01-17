@@ -31,7 +31,7 @@ import org.dyn4j.collision.broadphase.BroadphasePair;
 import org.dyn4j.collision.broadphase.DynamicAABBTree;
 import org.dyn4j.collision.broadphase.SapBruteForce;
 import org.dyn4j.collision.broadphase.SapIncremental;
-import org.dyn4j.collision.broadphase.SapTree;
+import org.dyn4j.collision.broadphase.Sap;
 import org.dyn4j.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.Sat;
@@ -59,9 +59,11 @@ public abstract class AbstractTest {
 		@Override
 		public List<CollidableTest> detect(AABB aabb) { return null; }
 		@Override
+		public boolean contains(CollidableTest collidable) { return false; }
+		@Override
 		public void clear() {}
 		@Override
-		public AABB getAABB(CollidableTest collidable) { return null; }
+		public AABB getAABB(CollidableTest collidable) { return collidable.createAABB(); }
 		@Override
 		public List<CollidableTest> raycast(Ray ray, double length) { return null; }
 		@Override
@@ -81,7 +83,7 @@ public abstract class AbstractTest {
 	protected SapBruteForce<CollidableTest> sapBF = new SapBruteForce<CollidableTest>();
 	
 	/** The sap incremental (using a tree) algorithm */
-	protected SapTree<CollidableTest> sapT = new SapTree<CollidableTest>();
+	protected Sap<CollidableTest> sapT = new Sap<CollidableTest>();
 	
 	/** The dynamic aabb algorithm */
 	protected DynamicAABBTree<CollidableTest> dynT = new DynamicAABBTree<CollidableTest>();

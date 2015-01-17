@@ -25,6 +25,7 @@
 package org.dyn4j.collision.broadphase;
 
 import org.dyn4j.collision.Collidable;
+import org.dyn4j.collision.Fixture;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Transform;
@@ -37,7 +38,7 @@ import org.dyn4j.geometry.Transform;
  * @since 1.0.0
  * @param <E> the {@link Collidable} type
  */
-public abstract class AbstractAABBDetector<E extends Collidable> implements BroadphaseDetector<E> {
+public abstract class AbstractAABBDetector<E extends Collidable<T>, T extends Fixture> implements BroadphaseDetector<E, T> {
 	/** The {@link AABB} expansion value */
 	protected double expansion = BroadphaseDetector.DEFAULT_AABB_EXPANSION;
 	
@@ -47,8 +48,8 @@ public abstract class AbstractAABBDetector<E extends Collidable> implements Broa
 	@Override
 	public boolean detect(E a, E b) {
 		// attempt to use this broadphase's cache
-		AABB aAABB = a.createAABB();
-		AABB bAABB = b.createAABB();
+		AABB aAABB = this.getAABB(a);
+		AABB bAABB = this.getAABB(b);
 		// perform the test
 		if (aAABB.overlaps(bAABB)) {
 			return true;

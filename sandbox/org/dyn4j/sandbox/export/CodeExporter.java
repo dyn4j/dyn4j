@@ -39,7 +39,7 @@ import org.dyn4j.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.collision.broadphase.DynamicAABBTree;
 import org.dyn4j.collision.broadphase.SapBruteForce;
 import org.dyn4j.collision.broadphase.SapIncremental;
-import org.dyn4j.collision.broadphase.SapTree;
+import org.dyn4j.collision.broadphase.Sap;
 import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.collision.narrowphase.Sat;
@@ -146,7 +146,7 @@ public class CodeExporter {
 			sb.append(TAB2).append("world.setBroadphaseDetector(new SapBruteForce<Body>());").append(NEW_LINE);
 		} else if (bpd instanceof SapIncremental) {
 			sb.append(TAB2).append("world.setBroadphaseDetector(new SapIncremental<Body>());").append(NEW_LINE);
-		} else if (bpd instanceof SapTree) {
+		} else if (bpd instanceof Sap) {
 			sb.append(TAB2).append("world.setBroadphaseDetector(new SapTree<Body>());").append(NEW_LINE);
 		} else if (bpd instanceof DynamicAABBTree) {
 			// don't output anything since its the default
