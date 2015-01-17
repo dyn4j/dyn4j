@@ -44,8 +44,6 @@ import org.dyn4j.collision.Bounds;
 import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.collision.broadphase.DynamicAABBTree;
-import org.dyn4j.collision.broadphase.SapBruteForce;
-import org.dyn4j.collision.broadphase.SapIncremental;
 import org.dyn4j.collision.broadphase.Sap;
 import org.dyn4j.collision.continuous.ConservativeAdvancement;
 import org.dyn4j.collision.continuous.TimeOfImpactDetector;
@@ -134,7 +132,7 @@ public class XmlReader extends DefaultHandler {
 	// Data; storage for the final results and extra information
 	
 	/** Storage for the BroadphaseDetector tag */
-	private BroadphaseDetector<Body> broadphase;
+	private BroadphaseDetector<Body, BodyFixture> broadphase;
 	
 	/** Storage for the NarrowphaseDetector tag */
 	private NarrowphaseDetector narrowphase;
@@ -613,14 +611,11 @@ public class XmlReader extends DefaultHandler {
 		} else if ("Scale".equalsIgnoreCase(this.tagName)) {
 			this.camera.setScale(Double.parseDouble(s));
 		} else if ("BroadphaseDetector".equalsIgnoreCase(this.tagName)) {
-			if (s.equalsIgnoreCase(SapBruteForce.class.getSimpleName())) {
-				this.broadphase = new SapBruteForce<Body>();
-			} else if (s.equalsIgnoreCase(SapIncremental.class.getSimpleName())) {
-				this.broadphase = new SapIncremental<Body>();
-			} else if (s.equalsIgnoreCase(Sap.class.getSimpleName())) {
-				this.broadphase = new Sap<Body>();
+			if (s.equalsIgnoreCase(Sap.class.getSimpleName())) {
+				// TODO fix this
+				//this.broadphase = new Sap<Body>();
 			} else if (s.equalsIgnoreCase(DynamicAABBTree.class.getSimpleName())) { 
-				this.broadphase = new DynamicAABBTree<Body>();
+				this.broadphase = new DynamicAABBTree<Body, BodyFixture>();
 			} else {
 				throw new SAXException(MessageFormat.format(Messages.getString("exception.persist.unknownBroadphaseAlgorithm"), s));
 			}

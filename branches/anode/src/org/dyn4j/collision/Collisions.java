@@ -63,6 +63,12 @@ public final class Collisions {
 	protected static final int ESTIMATED_COLLISIONS_PER_BODY = 4;
 	
 	/**
+	 * An estimate of the number of bodies that will be hit when raycasting assuming uniform
+	 * distribution of bodies.
+	 */
+	protected static final double ESTIMATED_RAYCAST_DENSITY = 0.02;
+	
+	/**
 	 * Returns an estimate on the number of collision pairs given the number of collidables.
 	 * @param n the number of {@link Collidable}s
 	 * @return int
@@ -80,5 +86,15 @@ public final class Collisions {
 		// this could change at any time so we keep the original method
 		// and make the static field private
 		return Collisions.ESTIMATED_COLLISIONS_PER_BODY;
+	}
+	
+	/**
+	 * Returns an estimate on the number of raycast collisions given the total number
+	 * of objects to collide with.
+	 * @param n the number of {@link Collidable}s
+	 * @return int
+	 */
+	public static final int getEstimatedRaycastCollisions(int n) {
+		return (int)Math.max(1.0, n * ESTIMATED_RAYCAST_DENSITY);
 	}
 }

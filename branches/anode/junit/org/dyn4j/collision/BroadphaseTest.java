@@ -480,10 +480,8 @@ public class BroadphaseTest {
 		TestCase.assertTrue(list.contains(ct2));
 		TestCase.assertTrue(list.contains(ct4));
 		list = this.dynT.raycast(r, l);
-		TestCase.assertEquals(3, list.size());
+		TestCase.assertEquals(1, list.size());
 		TestCase.assertTrue(list.contains(ct1));
-		TestCase.assertTrue(list.contains(ct2));
-		TestCase.assertTrue(list.contains(ct4));
 	}
 	
 	/**

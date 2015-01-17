@@ -81,9 +81,9 @@ public interface BroadphaseDetector<E extends Collidable<T>, T extends Fixture> 
 	 * @param collidable the {@link Collidable}
 	 * @since 3.0.0
 	 */
-	public abstract void remove(E collidable);
+	public abstract boolean remove(E collidable);
 	
-	public abstract void remove(E collidable, T fixture);
+	public abstract boolean remove(E collidable, T fixture);
 	
 	/**
 	 * Updates the given {@link Collidable}.
@@ -96,16 +96,8 @@ public interface BroadphaseDetector<E extends Collidable<T>, T extends Fixture> 
 	
 	public abstract void update(E collidable, T fixture);
 	
-	/**
-	 * Returns the expanded {@link AABB} for a given {@link Collidable}.
-	 * <p>
-	 * Returns a new AABB if the collidable has not been added to this
-	 * broadphase detector.
-	 * @param collidable the {@link Collidable}
-	 * @return {@link AABB} the {@link AABB} for the given {@link Collidable}
-	 */
 	public abstract AABB getAABB(E collidable);
-
+	
 	public abstract AABB getAABB(E collidable, T fixture);
 	
 	public abstract boolean contains(E collidable);
@@ -126,7 +118,7 @@ public interface BroadphaseDetector<E extends Collidable<T>, T extends Fixture> 
 	 * @return List&lt;{@link BroadphasePair}&gt;
 	 * @since 3.0.0
 	 */
-	public abstract List<BroadphasePair<E>> detect();
+	public abstract List<BroadphasePair<E, T>> detect(BroadphaseFilter<E, T> filter);
 	
 	/**
 	 * Performs a broadphase collision test using the given {@link AABB}.

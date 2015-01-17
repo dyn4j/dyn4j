@@ -86,7 +86,7 @@ import org.dyn4j.resources.Messages;
  * @version 3.1.8
  * @since 1.0.0
  */
-public class Body implements Collidable, Transformable {
+public class Body implements Collidable<BodyFixture>, Transformable {
 	/** Number of fixtures typically added to a {@link Body} */
 	private static final int TYPICAL_FIXTURE_COUNT = 1;
 	
@@ -255,6 +255,27 @@ public class Body implements Collidable, Transformable {
 		.append("|GravityScale=").append(this.gravityScale)
 		.append("]");
 		return sb.toString();
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (obj == this) return true;
+		if (obj instanceof Body) {
+			return this.id.equals(((Body)obj).id);
+		}
+		return false;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return this.id.hashCode();
 	}
 	
 	/**
