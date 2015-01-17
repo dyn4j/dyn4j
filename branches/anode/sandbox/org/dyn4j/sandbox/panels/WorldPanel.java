@@ -39,7 +39,7 @@ import org.dyn4j.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.collision.broadphase.DynamicAABBTree;
 import org.dyn4j.collision.broadphase.SapBruteForce;
 import org.dyn4j.collision.broadphase.SapIncremental;
-import org.dyn4j.collision.broadphase.SapTree;
+import org.dyn4j.collision.broadphase.Sap;
 import org.dyn4j.collision.continuous.ConservativeAdvancement;
 import org.dyn4j.collision.continuous.TimeOfImpactDetector;
 import org.dyn4j.collision.manifold.ClippingManifoldSolver;
@@ -70,7 +70,7 @@ public class WorldPanel extends JPanel {
 	private static final ComboItem[] BROADPHASE_ALGORITHMS = new ComboItem[] {
 		new ComboItem(Messages.getString("panel.world.broad.algorithm.sapBruteForce"), SapBruteForce.class),
 		new ComboItem(Messages.getString("panel.world.broad.algorithm.sapIncremental"), SapIncremental.class),
-		new ComboItem(Messages.getString("panel.world.broad.algorithm.sapTree"), SapTree.class),
+		new ComboItem(Messages.getString("panel.world.broad.algorithm.sapTree"), Sap.class),
 		new ComboItem(Messages.getString("panel.world.broad.algorithm.dynamicAABBTree"), DynamicAABBTree.class),
 	};
 	
@@ -251,8 +251,8 @@ public class WorldPanel extends JPanel {
 			world.setBroadphaseDetector(new SapBruteForce<Body>());
 		} else if (clazz == SapIncremental.class) {
 			world.setBroadphaseDetector(new SapIncremental<Body>());
-		} else if (clazz == SapTree.class) {
-			world.setBroadphaseDetector(new SapTree<Body>());
+		} else if (clazz == Sap.class) {
+			world.setBroadphaseDetector(new Sap<Body>());
 		} else if (clazz == DynamicAABBTree.class) {
 			world.setBroadphaseDetector(new DynamicAABBTree<Body>());
 		}

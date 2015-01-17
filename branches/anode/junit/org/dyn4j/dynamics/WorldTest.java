@@ -342,7 +342,7 @@ public class WorldTest {
 		TestCase.assertNull(b1.world);
 		
 		// make sure it was added to the broadphase
-		TestCase.assertNull(w.broadphaseDetector.getAABB(b1));
+		TestCase.assertFalse(w.broadphaseDetector.contains(b1));
 		
 		// add that one back
 		w.addBody(b1);
@@ -358,7 +358,7 @@ public class WorldTest {
 		// remove a body and make sure destruction events are called
 		w.removeBody(b2, true);
 		// make sure it was added to the broadphase
-		TestCase.assertNull(w.broadphaseDetector.getAABB(b2));
+		TestCase.assertFalse(w.broadphaseDetector.contains(b2));
 		// make sure the world has zero joints
 		TestCase.assertTrue(w.joints.isEmpty());
 		// make sure the world still has the first body

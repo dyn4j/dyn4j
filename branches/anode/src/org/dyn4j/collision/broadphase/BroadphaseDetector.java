@@ -27,6 +27,7 @@ package org.dyn4j.collision.broadphase;
 import java.util.List;
 
 import org.dyn4j.collision.Collidable;
+import org.dyn4j.collision.Fixture;
 import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
@@ -60,7 +61,9 @@ import org.dyn4j.geometry.Vector2;
  * @since 1.0.0
  * @param <E> the {@link Collidable} type
  */
-public interface BroadphaseDetector<E extends Collidable> {
+// TODO drop or condense Sap broadphases
+// TODO rework proxies to store collidable/fixture/aabb for better multi-fixure performance
+public interface BroadphaseDetector<E extends Collidable<T>, T extends Fixture> {
 	/** The default {@link AABB} expansion value */
 	public static final double DEFAULT_AABB_EXPANSION = 0.2;
 	
@@ -69,14 +72,18 @@ public interface BroadphaseDetector<E extends Collidable> {
 	 * @param collidable the {@link Collidable}
 	 * @since 3.0.0
 	 */
-	public void add(E collidable);
+	public abstract void add(E collidable);
+	
+	public abstract void add(E collidable, T fixture);
 	
 	/**
 	 * Removes the given {@link Collidable} from the broadphase.
 	 * @param collidable the {@link Collidable}
 	 * @since 3.0.0
 	 */
-	public void remove(E collidable);
+	public abstract void remove(E collidable);
+	
+	public abstract void remove(E collidable, T fixture);
 	
 	/**
 	 * Updates the given {@link Collidable}.
@@ -85,23 +92,33 @@ public interface BroadphaseDetector<E extends Collidable> {
 	 * @param collidable the {@link Collidable}
 	 * @since 3.0.0
 	 */
-	public void update(E collidable);
+	public abstract void update(E collidable);
+	
+	public abstract void update(E collidable, T fixture);
+	
+	/**
+	 * Returns the expanded {@link AABB} for a given {@link Collidable}.
+	 * <p>
+	 * Returns a new AABB if the collidable has not been added to this
+	 * broadphase detector.
+	 * @param collidable the {@link Collidable}
+	 * @return {@link AABB} the {@link AABB} for the given {@link Collidable}
+	 */
+	public abstract AABB getAABB(E collidable);
+
+	public abstract AABB getAABB(E collidable, T fixture);
+	
+	public abstract boolean contains(E collidable);
+	
+	public abstract boolean contains(E collidable, T fixture);
 	
 	/**
 	 * Clears all {@link Collidable}s from the broadphase.
 	 * @since 3.0.0
 	 */
-	public void clear();
+	public abstract void clear();
 	
-	/**
-	 * Returns the expanded {@link AABB} for a given {@link Collidable}.
-	 * <p>
-	 * Returns null if the collidable has not been added to this
-	 * broadphase detector.
-	 * @param collidable the {@link Collidable}
-	 * @return {@link AABB} the {@link AABB} for the given {@link Collidable}
-	 */
-	public AABB getAABB(E collidable);
+	public abstract int size();
 	
 	/**
 	 * Performs collision detection on all {@link Collidable}s that have been added to
@@ -109,7 +126,7 @@ public interface BroadphaseDetector<E extends Collidable> {
 	 * @return List&lt;{@link BroadphasePair}&gt;
 	 * @since 3.0.0
 	 */
-	public List<BroadphasePair<E>> detect();
+	public abstract List<BroadphasePair<E>> detect();
 	
 	/**
 	 * Performs a broadphase collision test using the given {@link AABB}.
@@ -117,7 +134,7 @@ public interface BroadphaseDetector<E extends Collidable> {
 	 * @return List list of all {@link AABB}s that overlap with the given {@link AABB}
 	 * @since 3.0.0
 	 */
-	public List<E> detect(AABB aabb);
+	public abstract List<E> detect(AABB aabb);
 
 	/**
 	 * Performs a preliminary raycast over all the collidables in the broadphase to improve performance of the

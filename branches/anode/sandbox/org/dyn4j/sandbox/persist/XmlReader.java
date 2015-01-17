@@ -46,7 +46,7 @@ import org.dyn4j.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.collision.broadphase.DynamicAABBTree;
 import org.dyn4j.collision.broadphase.SapBruteForce;
 import org.dyn4j.collision.broadphase.SapIncremental;
-import org.dyn4j.collision.broadphase.SapTree;
+import org.dyn4j.collision.broadphase.Sap;
 import org.dyn4j.collision.continuous.ConservativeAdvancement;
 import org.dyn4j.collision.continuous.TimeOfImpactDetector;
 import org.dyn4j.collision.manifold.ClippingManifoldSolver;
@@ -617,8 +617,8 @@ public class XmlReader extends DefaultHandler {
 				this.broadphase = new SapBruteForce<Body>();
 			} else if (s.equalsIgnoreCase(SapIncremental.class.getSimpleName())) {
 				this.broadphase = new SapIncremental<Body>();
-			} else if (s.equalsIgnoreCase(SapTree.class.getSimpleName())) {
-				this.broadphase = new SapTree<Body>();
+			} else if (s.equalsIgnoreCase(Sap.class.getSimpleName())) {
+				this.broadphase = new Sap<Body>();
 			} else if (s.equalsIgnoreCase(DynamicAABBTree.class.getSimpleName())) { 
 				this.broadphase = new DynamicAABBTree<Body>();
 			} else {
