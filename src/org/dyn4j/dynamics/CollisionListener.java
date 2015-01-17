@@ -76,7 +76,7 @@ public interface CollisionListener extends Listener {
 	 * @param body2 the second {@link Body}
 	 * @return boolean true if processing should continue for this collision
 	 */
-	public abstract boolean collision(Body body1, Body body2);
+	public abstract boolean collision(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2);
 	
 	/**
 	 * Called when two {@link Body}s are colliding as determined by the {@link NarrowphaseDetector}.

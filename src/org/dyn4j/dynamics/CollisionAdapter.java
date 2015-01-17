@@ -42,10 +42,10 @@ import org.dyn4j.dynamics.contact.ContactConstraint;
  */
 public class CollisionAdapter implements CollisionListener, Listener {
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.CollisionListener#collision(org.dyn4j.dynamics.Body, org.dyn4j.dynamics.Body)
+	 * @see org.dyn4j.dynamics.CollisionListener#collision(org.dyn4j.dynamics.Body, org.dyn4j.dynamics.BodyFixture, org.dyn4j.dynamics.Body, org.dyn4j.dynamics.BodyFixture)
 	 */
 	@Override
-	public boolean collision(Body body1, Body body2) { return true; }
+	public boolean collision(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2) { return true; }
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.CollisionListener#collision(org.dyn4j.dynamics.Body, org.dyn4j.dynamics.Fixture, org.dyn4j.dynamics.Body, org.dyn4j.dynamics.Fixture, org.dyn4j.collision.manifold.Manifold)

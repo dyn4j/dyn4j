@@ -37,8 +37,6 @@ import javax.swing.border.TitledBorder;
 
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.collision.broadphase.DynamicAABBTree;
-import org.dyn4j.collision.broadphase.SapBruteForce;
-import org.dyn4j.collision.broadphase.SapIncremental;
 import org.dyn4j.collision.broadphase.Sap;
 import org.dyn4j.collision.continuous.ConservativeAdvancement;
 import org.dyn4j.collision.continuous.TimeOfImpactDetector;
@@ -48,6 +46,7 @@ import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.collision.narrowphase.Sat;
 import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.controls.ComboItem;
@@ -68,8 +67,9 @@ public class WorldPanel extends JPanel {
 
 	/** The list of available broadphase algorithms */
 	private static final ComboItem[] BROADPHASE_ALGORITHMS = new ComboItem[] {
-		new ComboItem(Messages.getString("panel.world.broad.algorithm.sapBruteForce"), SapBruteForce.class),
-		new ComboItem(Messages.getString("panel.world.broad.algorithm.sapIncremental"), SapIncremental.class),
+		// TODO remove
+//		new ComboItem(Messages.getString("panel.world.broad.algorithm.sapBruteForce"), SapBruteForce.class),
+//		new ComboItem(Messages.getString("panel.world.broad.algorithm.sapIncremental"), SapIncremental.class),
 		new ComboItem(Messages.getString("panel.world.broad.algorithm.sapTree"), Sap.class),
 		new ComboItem(Messages.getString("panel.world.broad.algorithm.dynamicAABBTree"), DynamicAABBTree.class),
 	};
@@ -247,14 +247,11 @@ public class WorldPanel extends JPanel {
 		// set the broadphase algorithm
 		ComboItem item = (ComboItem)this.cmbBroadphase.getSelectedItem();
 		Class<?> clazz = (Class<?>)item.getValue();
-		if (clazz == SapBruteForce.class) {
-			world.setBroadphaseDetector(new SapBruteForce<Body>());
-		} else if (clazz == SapIncremental.class) {
-			world.setBroadphaseDetector(new SapIncremental<Body>());
-		} else if (clazz == Sap.class) {
-			world.setBroadphaseDetector(new Sap<Body>());
+		if (clazz == Sap.class) {
+			// TODO fix this
+			//world.setBroadphaseDetector(new Sap<Body>());
 		} else if (clazz == DynamicAABBTree.class) {
-			world.setBroadphaseDetector(new DynamicAABBTree<Body>());
+			world.setBroadphaseDetector(new DynamicAABBTree<Body, BodyFixture>());
 		}
 		
 		// set the narrowphase algorithm
@@ -281,7 +278,7 @@ public class WorldPanel extends JPanel {
 	 * @param broadphaseDetector the broadphase detector
 	 * @return ComboItem
 	 */
-	private static final ComboItem getItem(BroadphaseDetector<?> broadphaseDetector) {
+	private static final ComboItem getItem(BroadphaseDetector<?, ?> broadphaseDetector) {
 		for (ComboItem item : BROADPHASE_ALGORITHMS) {
 			Class<?> clazz = (Class<?>)item.getValue();
 			if (clazz == broadphaseDetector.getClass()) {

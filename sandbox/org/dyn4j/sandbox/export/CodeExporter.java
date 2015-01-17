@@ -37,8 +37,6 @@ import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.collision.Filter;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.collision.broadphase.DynamicAABBTree;
-import org.dyn4j.collision.broadphase.SapBruteForce;
-import org.dyn4j.collision.broadphase.SapIncremental;
 import org.dyn4j.collision.broadphase.Sap;
 import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
@@ -138,15 +136,11 @@ public class CodeExporter {
 			sb.append(TAB2).append("world.setGravity(").append(export(g)).append(");").append(NEW_LINE);
 		}
 
-		BroadphaseDetector<?> bpd = world.getBroadphaseDetector();
+		BroadphaseDetector<?, ?> bpd = world.getBroadphaseDetector();
 		NarrowphaseDetector npd = world.getNarrowphaseDetector();
 //		ManifoldSolver msr = world.getManifoldSolver();
 //		TimeOfImpactDetector tid = world.getTimeOfImpactDetector();
-		if (bpd instanceof SapBruteForce) {
-			sb.append(TAB2).append("world.setBroadphaseDetector(new SapBruteForce<Body>());").append(NEW_LINE);
-		} else if (bpd instanceof SapIncremental) {
-			sb.append(TAB2).append("world.setBroadphaseDetector(new SapIncremental<Body>());").append(NEW_LINE);
-		} else if (bpd instanceof Sap) {
+		if (bpd instanceof Sap) {
 			sb.append(TAB2).append("world.setBroadphaseDetector(new SapTree<Body>());").append(NEW_LINE);
 		} else if (bpd instanceof DynamicAABBTree) {
 			// don't output anything since its the default

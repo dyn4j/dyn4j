@@ -1,9 +1,9 @@
 package org.dyn4j;
 
-public class Tuple<E, T> {
+public class Pair<E, T> {
 	public final E x;
 	public final T y;
-	public Tuple(E x, T y) {
+	public Pair(E x, T y) {
 		if (x == null) throw new NullPointerException();
 		if (y == null) throw new NullPointerException();
 		this.x = x;
@@ -14,8 +14,8 @@ public class Tuple<E, T> {
 	public boolean equals(Object obj) {
 		if (obj == null) return false;
 		if (obj == this) return true;
-		if (obj instanceof Tuple) {
-			Tuple<?, ?> o = (Tuple<?, ?>)obj;
+		if (obj instanceof Pair) {
+			Pair<?, ?> o = (Pair<?, ?>)obj;
 			return x.equals(o.x) && y.equals(o.y);
 		}
 		return false;

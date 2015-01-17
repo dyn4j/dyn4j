@@ -30,9 +30,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
-import org.dyn4j.Tuple;
 import org.dyn4j.collision.Collidable;
 import org.dyn4j.collision.Collisions;
 import org.dyn4j.collision.Fixture;
@@ -56,7 +54,7 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 	protected DynamicAABBTreeNode<E, T> root;
 	
 	/** Id to node map for fast lookup */
-	protected Map<Tuple<UUID, UUID>, DynamicAABBTreeNode<E, T>> proxyMap;
+	protected Map<BroadphaseKey, DynamicAABBTreeNode<E, T>> proxyMap;
 	
 	/**
 	 * Default constructor.
@@ -77,7 +75,7 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 		// 0.75 = 3/4, we can garuantee that the hashmap will not need to be rehashed
 		// if we take capacity / load factor
 		// the default load factor is 0.75 according to the javadocs, but lets assign it to be sure
-		this.proxyMap = new LinkedHashMap<Tuple<UUID, UUID>, DynamicAABBTreeNode<E, T>>(initialCapacity * 4 / 3 + 1, 0.75f);
+		this.proxyMap = new LinkedHashMap<BroadphaseKey, DynamicAABBTreeNode<E, T>>(initialCapacity);
 	}
 	
 	/* (non-Javadoc)
@@ -85,10 +83,19 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 	 */
 	@Override
 	public void add(E collidable) {
-		Transform tx = collidable.getTransform();
-		int size = collidable.getFixtureCount();
-		for (int i = 0; i < size; i++) {
-			T fixture = collidable.getFixture(i);
+		this.update(collidable);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#add(org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
+	 */
+	@Override
+	public void add(E collidable, T fixture) {
+		BroadphaseKey key = BroadphaseKey.get(collidable, fixture);
+		if (this.proxyMap.containsKey(key)) {
+			this.update(collidable, fixture);
+		} else {
+			Transform tx = collidable.getTransform();
 			AABB aabb = fixture.getShape().createAABB(tx);
 			// expand the aabb
 			aabb.expand(this.expansion);
@@ -98,7 +105,7 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 			node.fixture = fixture;
 			node.aabb = aabb;
 			// add the proxy to the map
-			this.proxyMap.put(new Tuple<UUID, UUID>(collidable.getId(), fixture.getId()), node);
+			this.proxyMap.put(key, node);
 			// insert the node into the tree
 			this.insert(node);	
 		}
@@ -108,18 +115,31 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#remove(org.dyn4j.collision.Collidable)
 	 */
 	@Override
-	public void remove(E collidable) {
+	public boolean remove(E collidable) {
 		int size = collidable.getFixtureCount();
+		if (size == 0) return false;
 		for (int i = 0; i < size; i++) {
 			T fixture = collidable.getFixture(i);
-			// find the node in the map
-			DynamicAABBTreeNode<E, T> node = this.proxyMap.remove(fixture.getId());
-			// make sure it was found
-			if (node != null) {
-				// remove the node from the tree
-				this.remove(node);
-			}
+			this.remove(collidable, fixture);
 		}
+		return true;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#remove(org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
+	 */
+	@Override
+	public boolean remove(E collidable, T fixture) {
+		BroadphaseKey key = BroadphaseKey.get(collidable, fixture);
+		// find the node in the map
+		DynamicAABBTreeNode<E, T> node = this.proxyMap.remove(key);
+		// make sure it was found
+		if (node != null) {
+			// remove the node from the tree
+			this.remove(node);
+			return true;
+		}
+		return false;
 	}
 	
 	/* (non-Javadoc)
@@ -127,16 +147,30 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 	 */
 	@Override
 	public void update(E collidable) {
-		Transform tx = collidable.getTransform();
 		int size = collidable.getFixtureCount();
+		// iterate over the new list
 		for (int i = 0; i < size; i++) {
 			T fixture = collidable.getFixture(i);
+			this.update(collidable, fixture);
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#update(org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
+	 */
+	@Override
+	public void update(E collidable, T fixture) {
+		BroadphaseKey key = BroadphaseKey.get(collidable, fixture);
+		if (!this.proxyMap.containsKey(key)) {
+			this.add(collidable, fixture);
+		} else {
+			Transform tx = collidable.getTransform();
 			// get the node from the map
-			DynamicAABBTreeNode<E, T> node = this.proxyMap.get(fixture.getId());
+			DynamicAABBTreeNode<E, T> node = this.proxyMap.get(key);
+			// create the new aabb
+			AABB aabb = fixture.getShape().createAABB(tx);
 			// make sure we found it
 			if (node != null) {
-				// create the new aabb
-				AABB aabb = fixture.getShape().createAABB(tx);
 				// see if the old aabb contains the new one
 				if (node.aabb.contains(aabb)) {
 					// if so, don't do anything
@@ -155,6 +189,38 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 	}
 	
 	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#getAABB(org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
+	 */
+	@Override
+	public AABB getAABB(E collidable, T fixture) {
+		BroadphaseKey key = BroadphaseKey.get(collidable, fixture);
+		DynamicAABBTreeNode<E, T> node = this.proxyMap.get(key);
+		if (node != null) {
+			return node.aabb;
+		}
+		return fixture.getShape().createAABB(collidable.getTransform());
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#contains(org.dyn4j.collision.Collidable)
+	 */
+	@Override
+	public boolean contains(E collidable) {
+		// TODO fix this
+		//return this.proxyMap.contains(collidable);
+		return false;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#contains(org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
+	 */
+	@Override
+	public boolean contains(E collidable, T fixture) {
+		BroadphaseKey key = BroadphaseKey.get(collidable, fixture);
+		return this.proxyMap.containsKey(key);
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#clear()
 	 */
 	@Override
@@ -164,47 +230,39 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 	}
 
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#getAABB(org.dyn4j.collision.Collidable)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#size()
 	 */
 	@Override
-	public AABB getAABB(E collidable) {
-		DynamicAABBTreeNode<E, T> node = this.proxyMap.get(collidable.getId());
-		if (node != null) {
-			return node.aabb;
-		}
-		return collidable.createAABB();
+	public int size() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect()
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.collision.broadphase.BroadphaseFilter)
 	 */
 	@Override
-	public List<BroadphasePair<E>> detect() {
-		// get the number of proxies
-		Collection<DynamicAABBTreeNode<E, T>> nodes = this.proxyMap.values();
-		int size = this.proxyMap.size();
-
-		// check the size
-		if (size == 0) {
-			// return the empty list
-			return Collections.emptyList();
-		}
-		
+	public List<BroadphasePair<E, T>> detect(BroadphaseFilter<E, T> filter) {
 		// clear all the tested flags on the nodes
+		Collection<DynamicAABBTreeNode<E, T>> nodes = this.proxyMap.values();
+		int size = nodes.size(); 
+//		for (int i = 0; i < size; i++) {
+//			DynamicAABBTreeNode<E, T> node = nodes.get(i);
 		for (DynamicAABBTreeNode<E, T> node : nodes) {
-			//Node node = this.proxyMap.get(i);
 			// reset the flag
 			node.tested = false;
 		}
 
 		// the estimated size of the pair list
 		int eSize = Collisions.getEstimatedCollisionPairs(size);
-		List<BroadphasePair<E>> pairs = new ArrayList<BroadphasePair<E>>(eSize);
+		List<BroadphasePair<E, T>> pairs = new ArrayList<BroadphasePair<E, T>>(eSize);
 		
 		// test each collidable in the list
+//		for (int i = 0; i < size; i++) {
+//			DynamicAABBTreeNode<E, T> node = nodes.get(i);
 		for (DynamicAABBTreeNode<E, T> node : nodes) {
 			// perform a stackless detection routine
-			detectNonRecursive(node, this.root, pairs);
+			detectNonRecursive(node, this.root, filter, pairs);
 			// update the tested flag
 			node.tested = true;
 		}
@@ -354,7 +412,7 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 	 * @param root the root node of the subtree
 	 * @param pairs the list of pairs to add to
 	 */
-	protected void detect(DynamicAABBTreeNode<E, T> node, DynamicAABBTreeNode<E, T> root, List<BroadphasePair<E>> pairs) {
+	protected void detect(DynamicAABBTreeNode<E, T> node, DynamicAABBTreeNode<E, T> root, BroadphaseFilter<E, T> filter, List<BroadphasePair<E, T>> pairs) {
 		// check for null node (shouldnt happen)
 		if (root == null) return;
 		// check for the tested flag (to remove duplicates)
@@ -367,17 +425,21 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 			// non-leaf nodes always have a left child
 			if (root.left == null) {
 				// its a leaf so add the pair
-				BroadphasePair<E> pair = new BroadphasePair<E>(
-						node.collidable,	// A
-						root.collidable);	// B
-				// add the pair to the list of pairs
-				pairs.add(pair);
+				if (filter.isAllowed(node.collidable, node.fixture, root.collidable, root.fixture)) {
+					BroadphasePair<E, T> pair = new BroadphasePair<E, T>(
+							node.collidable,	// A
+							node.fixture,
+							root.collidable,	// B
+							root.fixture);	
+					// add the pair to the list of pairs
+					pairs.add(pair);
+				}
 				// return and check other limbs
 				return;
 			}
 			// they overlap so descend into both children
-			if (root.left != null) detect(node, root.left, pairs);
-			if (root.right != null) detect(node, root.right, pairs);
+			if (root.left != null) detect(node, root.left, filter, pairs);
+			if (root.right != null) detect(node, root.right, filter, pairs);
 		}
 	}
 	
@@ -387,7 +449,7 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 	 * @param root the root node of the subtree
 	 * @param pairs the list of pairs to add to
 	 */
-	protected void detectNonRecursive(DynamicAABBTreeNode<E, T> node, DynamicAABBTreeNode<E, T> root, List<BroadphasePair<E>> pairs) {
+	protected void detectNonRecursive(DynamicAABBTreeNode<E, T> node, DynamicAABBTreeNode<E, T> root, BroadphaseFilter<E, T> filter, List<BroadphasePair<E, T>> pairs) {
 		// start at the root node
 		DynamicAABBTreeNode<E, T> n = root;
 		// perform a iterative, stack-less, traversal of the tree
@@ -406,11 +468,15 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 					// itself
 					if (!n.tested && n.collidable != node.collidable) {
 						// its a leaf so add the pair
-						BroadphasePair<E> pair = new BroadphasePair<E>(
-								node.collidable,	// A
-								n.collidable);		// B
-						// add the pair to the list of pairs
-						pairs.add(pair);
+						if (filter.isAllowed(node.collidable, node.fixture, n.collidable, n.fixture)) {
+							BroadphasePair<E, T> pair = new BroadphasePair<E, T>(
+									node.collidable,	// A
+									node.fixture,
+									n.collidable,	// B
+									n.fixture);	
+							// add the pair to the list of pairs
+							pairs.add(pair);
+						}
 					}
 					// if its a leaf node then we need to go back up the
 					// tree and test nodes we haven't yet

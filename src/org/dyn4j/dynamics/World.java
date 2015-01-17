@@ -35,9 +35,9 @@ import org.dyn4j.collision.Bounds;
 import org.dyn4j.collision.BoundsListener;
 import org.dyn4j.collision.Filter;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
+import org.dyn4j.collision.broadphase.BroadphaseFilter;
 import org.dyn4j.collision.broadphase.BroadphasePair;
 import org.dyn4j.collision.broadphase.DynamicAABBTree;
-import org.dyn4j.collision.broadphase.SapIncremental;
 import org.dyn4j.collision.continuous.ConservativeAdvancement;
 import org.dyn4j.collision.continuous.TimeOfImpact;
 import org.dyn4j.collision.continuous.TimeOfImpactDetector;
@@ -109,7 +109,7 @@ public class World {
 	// algorithms
 	
 	/** The {@link BroadphaseDetector} */
-	protected BroadphaseDetector<Body> broadphaseDetector;
+	protected BroadphaseDetector<Body, BodyFixture> broadphaseDetector;
 	
 	/** The {@link NarrowphaseDetector} */
 	protected NarrowphaseDetector narrowphaseDetector;
@@ -222,7 +222,7 @@ public class World {
 		this.step = new Step(this.settings.getStepFrequency());
 		this.gravity = World.EARTH_GRAVITY;
 		this.bounds = bounds;
-		this.broadphaseDetector = new DynamicAABBTree<Body>(initialCapacity.getBodyCount());
+		this.broadphaseDetector = new DynamicAABBTree<Body, BodyFixture>(initialCapacity.getBodyCount());
 		this.narrowphaseDetector = new Gjk();
 		this.manifoldSolver = new ClippingManifoldSolver();
 		this.timeOfImpactDetector = new ConservativeAdvancement();
@@ -626,126 +626,102 @@ public class World {
 		// make sure there are some bodies
 		if (size > 0) {
 			// test for collisions via the broad-phase
-			List<BroadphasePair<Body>> pairs = this.broadphaseDetector.detect();
+			BroadphaseFilter<Body, BodyFixture> filter = new BodyBroadphaseFilter();
+			List<BroadphasePair<Body, BodyFixture>> pairs = this.broadphaseDetector.detect(filter);
 			int pSize = pairs.size();
+			boolean allow = true;
 			
 			// using the broad-phase results, test for narrow-phase
 			for (int i = 0; i < pSize; i++) {
-				BroadphasePair<Body> pair = pairs.get(i);
+				BroadphasePair<Body, BodyFixture> pair = pairs.get(i);
 				
 				// get the bodies
-				Body body1 = pair.getA();
-				Body body2 = pair.getB();
+				Body body1 = pair.collidable1;
+				Body body2 = pair.collidable2;
+				BodyFixture fixture1 = pair.fixture1;
+				BodyFixture fixture2 = pair.fixture2;
 				
-				// inactive objects don't have collision detection/response
-				if (!body1.isActive() || !body2.isActive()) continue;
-				// one body must be dynamic
-				if (!body1.isDynamic() && !body2.isDynamic()) continue;
-				// check for connected pairs who's collision is not allowed
-				if (body1.isConnected(body2, false)) continue;
-				
-				// notify of the broadphase collision
-				boolean allow = true;
+				allow = true;
 				for (CollisionListener cl : collisionListeners) {
-					if (!cl.collision(body1, body2)) {
+					if (!cl.collision(body1, fixture1, body2, fixture2)) {
 						// if any collision listener returned false then skip this collision
-						// we need to make sure all the listeners are called though so we can't
-						// just exit here
+						// we must allow all the listeners to get notified first, then skip
+						// the collision
 						allow = false;
 					}
 				}
 				if (!allow) continue;
-	
+				
 				// get their transforms
 				Transform transform1 = body1.transform;
 				Transform transform2 = body2.transform;
 				
-				// loop through the fixtures of body 1
-				int b1Size = body1.getFixtureCount();
-				int b2Size = body2.getFixtureCount();
-				for (int j = 0; j < b1Size; j++) {
-					BodyFixture fixture1 = body1.getFixture(j);
-					Filter filter1 = fixture1.getFilter();
-					
-					// test against each fixture of body 2
-					for (int k = 0; k < b2Size; k++) {
-						BodyFixture fixture2 = body2.getFixture(k);
-						Filter filter2 = fixture2.getFilter();
-						
-						// test the filter
-						if (!filter1.isAllowed(filter2)) {
-							// if the collision is not allowed then continue
+				Convex convex2 = fixture2.getShape();
+				Convex convex1 = fixture1.getShape();
+				
+				Penetration penetration = new Penetration();
+				// test the two convex shapes
+				if (this.narrowphaseDetector.detect(convex1, transform1, convex2, transform2, penetration)) {
+					// check for zero penetration
+					if (penetration.getDepth() == 0.0) {
+						// this should only happen if numerical error occurs
+						continue;
+					}
+					// notify of the narrow-phase collision
+					allow = true;
+					for (CollisionListener cl : collisionListeners) {
+						if (!cl.collision(body1, fixture1, body2, fixture2, penetration)) {
+							// if any collision listener returned false then skip this collision
+							// we must allow all the listeners to get notified first, then skip
+							// the collision
+							allow = false;
+						}
+					}
+					if (!allow) continue;
+					Manifold manifold = new Manifold();
+					// if there is penetration then find a contact manifold
+					// using the filled in penetration object
+					if (this.manifoldSolver.getManifold(penetration, convex1, transform1, convex2, transform2, manifold)) {
+						// check for zero points
+						if (manifold.getPoints().size() == 0) {
+							// this should only happen if numerical error occurs
 							continue;
 						}
-						
-						Convex convex2 = fixture2.getShape();
-						Convex convex1 = fixture1.getShape();
-						
-						Penetration penetration = new Penetration();
-						// test the two convex shapes
-						if (this.narrowphaseDetector.detect(convex1, transform1, convex2, transform2, penetration)) {
-							// check for zero penetration
-							if (penetration.getDepth() == 0.0) {
-								// this should only happen if numerical error occurs
-								continue;
-							}
-							// notify of the narrow-phase collision
-							allow = true;
-							for (CollisionListener cl : collisionListeners) {
-								if (!cl.collision(body1, fixture1, body2, fixture2, penetration)) {
-									// if any collision listener returned false then skip this collision
-									// we must allow all the listeners to get notified first, then skip
-									// the collision
-									allow = false;
-								}
-							}
-							if (!allow) continue;
-							Manifold manifold = new Manifold();
-							// if there is penetration then find a contact manifold
-							// using the filled in penetration object
-							if (this.manifoldSolver.getManifold(penetration, convex1, transform1, convex2, transform2, manifold)) {
-								// check for zero points
-								if (manifold.getPoints().size() == 0) {
-									// this should only happen if numerical error occurs
-									continue;
-								}
-								// notify of the manifold solving result
-								allow = true;
-								for (CollisionListener cl : collisionListeners) {
-									if (!cl.collision(body1, fixture1, body2, fixture2, manifold)) {
-										// if any collision listener returned false then skip this collision
-										// we must allow all the listeners to get notified first, then skip
-										// the collision
-										allow = false;
-									}
-								}
-								if (!allow) continue;
-								// create a contact constraint
-								ContactConstraint contactConstraint = new ContactConstraint(body1, fixture1, 
-										                                                    body2, fixture2, 
-										                                                    manifold, this);
-								
-								allow = true;
-								// notify of the created contact constraint
-								for (CollisionListener cl : collisionListeners) {
-									if (!cl.collision(contactConstraint)) {
-										// if any collision listener returned false then skip this collision
-										// we must allow all the listeners to get notified first, then skip
-										// the collision
-										allow = false;
-									}
-								}
-								if (!allow) continue;
-								
-								// add a contact edge to both bodies
-								ContactEdge contactEdge1 = new ContactEdge(body2, contactConstraint);
-								ContactEdge contactEdge2 = new ContactEdge(body1, contactConstraint);
-								body1.contacts.add(contactEdge1);
-								body2.contacts.add(contactEdge2);
-								// add the contact constraint to the contact manager
-								this.contactManager.add(contactConstraint);
+						// notify of the manifold solving result
+						allow = true;
+						for (CollisionListener cl : collisionListeners) {
+							if (!cl.collision(body1, fixture1, body2, fixture2, manifold)) {
+								// if any collision listener returned false then skip this collision
+								// we must allow all the listeners to get notified first, then skip
+								// the collision
+								allow = false;
 							}
 						}
+						if (!allow) continue;
+						// create a contact constraint
+						ContactConstraint contactConstraint = new ContactConstraint(body1, fixture1, 
+								                                                    body2, fixture2, 
+								                                                    manifold, this);
+						
+						allow = true;
+						// notify of the created contact constraint
+						for (CollisionListener cl : collisionListeners) {
+							if (!cl.collision(contactConstraint)) {
+								// if any collision listener returned false then skip this collision
+								// we must allow all the listeners to get notified first, then skip
+								// the collision
+								allow = false;
+							}
+						}
+						if (!allow) continue;
+						
+						// add a contact edge to both bodies
+						ContactEdge contactEdge1 = new ContactEdge(body2, contactConstraint);
+						ContactEdge contactEdge2 = new ContactEdge(body1, contactConstraint);
+						body1.contacts.add(contactEdge1);
+						body2.contacts.add(contactEdge2);
+						// add the contact constraint to the contact manager
+						this.contactManager.add(contactConstraint);
 					}
 				}
 			}
@@ -3442,13 +3418,11 @@ public class World {
 	
 	/**
 	 * Sets the broad-phase collision detection algorithm.
-	 * <p>
-	 * If the given detector is null then the default {@link SapIncremental}
 	 * {@link BroadphaseDetector} is set as the current broad phase.
 	 * @param broadphaseDetector the broad-phase collision detection algorithm
 	 * @throws NullPointerException if broadphaseDetector is null
 	 */
-	public void setBroadphaseDetector(BroadphaseDetector<Body> broadphaseDetector) {
+	public void setBroadphaseDetector(BroadphaseDetector<Body, BodyFixture> broadphaseDetector) {
 		if (broadphaseDetector == null) throw new NullPointerException(Messages.getString("dynamics.world.nullBroadphaseDetector"));
 		// clear the broadphase
 		this.broadphaseDetector.clear();
@@ -3465,7 +3439,7 @@ public class World {
 	 * Returns the broad-phase collision detection algorithm.
 	 * @return {@link BroadphaseDetector} the broad-phase collision detection algorithm
 	 */
-	public BroadphaseDetector<Body> getBroadphaseDetector() {
+	public BroadphaseDetector<Body, BodyFixture> getBroadphaseDetector() {
 		return this.broadphaseDetector;
 	}
 	

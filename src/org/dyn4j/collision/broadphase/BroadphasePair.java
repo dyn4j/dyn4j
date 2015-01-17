@@ -25,6 +25,7 @@
 package org.dyn4j.collision.broadphase;
 
 import org.dyn4j.collision.Collidable;
+import org.dyn4j.collision.Fixture;
 import org.dyn4j.geometry.Convex;
 
 /**
@@ -35,26 +36,22 @@ import org.dyn4j.geometry.Convex;
  * @version 3.1.5
  * @since 1.0.0
  */
-public class BroadphasePair<E> {
-	/** The first object */
-	protected E a;
-	
-	/** The second object */
-	protected E b;
-	
-	/**
-	 * Default constructor.
-	 */
-	public BroadphasePair() {}
+public class BroadphasePair<E extends Collidable<T>, T extends Fixture> {
+	public final E collidable1;
+	public final T fixture1;
+	public final E collidable2;
+	public final T fixture2;
 	
 	/**
 	 * Full constructor.
 	 * @param a the first object
 	 * @param b the second object
 	 */
-	public BroadphasePair(E a, E b) {
-		this.a = a;
-		this.b = b;
+	public BroadphasePair(E collidable1, T fixture1, E collidable2, T fixture2) {
+		this.collidable1 = collidable1;
+		this.fixture1 = fixture1;
+		this.collidable2 = collidable2;
+		this.fixture2 = fixture2;
 	}
 	
 	/* (non-Javadoc)
@@ -63,45 +60,11 @@ public class BroadphasePair<E> {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("BroadphasePair[A=").append(this.a)
-		.append("|B=").append(this.b)
+		sb.append("BroadphasePair[Collidable1=").append(this.collidable1)
+		.append("|Fixture1=").append(this.fixture1)
+		.append("|Collidable2=").append(this.collidable2)
+		.append("|Fixture2=").append(this.fixture2)
 		.append("]");
 		return sb.toString();
-	}
-
-	/**
-	 * Returns the first object.
-	 * @return E
-	 * @since 3.1.5
-	 */
-	public E getA() {
-		return this.a;
-	}
-
-	/**
-	 * Sets the first object.
-	 * @param a the first object
-	 * @since 3.1.5
-	 */
-	public void setA(E a) {
-		this.a = a;
-	}
-
-	/**
-	 * Returns the second object.
-	 * @return E
-	 * @since 3.1.5
-	 */
-	public E getB() {
-		return this.b;
-	}
-
-	/**
-	 * Sets the second object.
-	 * @param b the second object
-	 * @since 3.1.5
-	 */
-	public void setB(E b) {
-		this.b = b;
 	}
 }
