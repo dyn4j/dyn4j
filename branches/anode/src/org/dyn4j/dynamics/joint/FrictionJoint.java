@@ -30,6 +30,7 @@ import org.dyn4j.dynamics.Step;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Matrix22;
+import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
@@ -46,7 +47,7 @@ import org.dyn4j.resources.Messages;
  * @version 3.1.5
  * @since 1.0.0
  */
-public class FrictionJoint extends Joint {
+public class FrictionJoint extends Joint implements Shiftable {
 	/** The local anchor point on the first {@link Body} */
 	protected Vector2 localAnchor1;
 	
@@ -259,10 +260,10 @@ public class FrictionJoint extends Joint {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.Constraint#shiftCoordinates(org.dyn4j.geometry.Vector2)
+	 * @see org.dyn4j.geometry.Shiftable#shift(org.dyn4j.geometry.Vector2)
 	 */
 	@Override
-	protected void shiftCoordinates(Vector2 shift) {
+	public void shift(Vector2 shift) {
 		// nothing to translate here since the anchor points are in local coordinates
 		// they will move with the bodies
 	}

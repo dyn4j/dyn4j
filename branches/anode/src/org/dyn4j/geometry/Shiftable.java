@@ -22,22 +22,18 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.collision;
-
-import org.dyn4j.Listener;
+package org.dyn4j.geometry;
 
 /**
- * Convenience class for implementing the {@link BoundsListener} interface.
- * <p>
- * This class can be used to implement only the methods desired instead of all
- * the methods contained in the {@link BoundsListener} interface.
+ * Represents an object that can be shifted in the x and y plane.
  * @author William Bittle
  * @version 4.0.0
- * @since 1.0.0
+ * @since 4.0.0
  */
-public class BoundsAdapter implements BoundsListener, Listener {
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.BoundsListener#outside(org.dyn4j.collision.Collidable)
+public interface Shiftable {
+	/**
+	 * Translates the object to match the given coordinate shift.
+	 * @param shift the amount to shift along the x and y axes
 	 */
-	public <E extends Collidable<T>, T extends Fixture> void outside(E collidable) {};
+	public abstract void shift(Vector2 shift);
 }

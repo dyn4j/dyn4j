@@ -29,6 +29,7 @@ import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.Step;
 import org.dyn4j.geometry.Mass;
+import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
@@ -47,7 +48,7 @@ import org.dyn4j.resources.Messages;
  * @version 3.1.6
  * @since 2.1.0
  */
-public class PulleyJoint extends Joint {
+public class PulleyJoint extends Joint implements Shiftable {
 	/** The world space pulley anchor point for the first {@link Body} */
 	protected Vector2 pulleyAnchor1;
 	
@@ -405,10 +406,10 @@ public class PulleyJoint extends Joint {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.Constraint#shiftCoordinates(org.dyn4j.geometry.Vector2)
+	 * @see org.dyn4j.geometry.Shiftable#shift(org.dyn4j.geometry.Vector2)
 	 */
 	@Override
-	protected void shiftCoordinates(Vector2 shift) {
+	public void shift(Vector2 shift) {
 		// we must move the world space pulley anchors
 		this.pulleyAnchor1.add(shift);
 		this.pulleyAnchor2.add(shift);

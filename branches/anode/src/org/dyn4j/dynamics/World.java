@@ -34,8 +34,10 @@ import org.dyn4j.Listener;
 import org.dyn4j.collision.Bounds;
 import org.dyn4j.collision.BoundsListener;
 import org.dyn4j.collision.Filter;
+import org.dyn4j.collision.Fixture;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.collision.broadphase.BroadphaseFilter;
+import org.dyn4j.collision.broadphase.BroadphaseItem;
 import org.dyn4j.collision.broadphase.BroadphasePair;
 import org.dyn4j.collision.broadphase.DynamicAABBTree;
 import org.dyn4j.collision.continuous.ConservativeAdvancement;
@@ -63,6 +65,7 @@ import org.dyn4j.dynamics.joint.JointEdge;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Ray;
+import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
@@ -82,10 +85,12 @@ import org.dyn4j.resources.Messages;
  * Employs the same {@link Island} solving technique as <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.1.10
+ * @version 4.0.0
  * @since 1.0.0
  */
-public class World {
+// TODO look for places for member variables to be final
+// TODO look for clean up in the contact solving code
+public class World implements Shiftable {
 	/** Earths gravity constant */
 	public static final Vector2 EARTH_GRAVITY = new Vector2(0.0, -9.8);
 	
@@ -132,7 +137,7 @@ public class World {
 	/** The {@link TimeOfImpactSolver} */
 	protected TimeOfImpactSolver timeOfImpactSolver;
 
-	// listeners
+	// listeners and config
 	
 	/** The list of listeners for this world */
 	protected List<Listener> listeners;
@@ -437,7 +442,7 @@ public class World {
 			// bother if its completely disabled
 			if (continuousDetectionMode != ContinuousDetectionMode.NONE) {
 				// save the current transform into the previous transform
-				body.transform0.set(body.transform);
+				body.transform0.set(body.getTransform());
 			}
 		}
 		
@@ -626,7 +631,7 @@ public class World {
 		// make sure there are some bodies
 		if (size > 0) {
 			// test for collisions via the broad-phase
-			BroadphaseFilter<Body, BodyFixture> filter = new BodyBroadphaseFilter();
+			BroadphaseFilter<Body, BodyFixture> filter = new DetectBroadphaseFilter();
 			List<BroadphasePair<Body, BodyFixture>> pairs = this.broadphaseDetector.detect(filter);
 			int pSize = pairs.size();
 			boolean allow = true;
@@ -653,8 +658,8 @@ public class World {
 				if (!allow) continue;
 				
 				// get their transforms
-				Transform transform1 = body1.transform;
-				Transform transform2 = body2.transform;
+				Transform transform1 = body1.getTransform();
+				Transform transform2 = body2.getTransform();
 				
 				Convex convex2 = fixture2.getShape();
 				Convex convex1 = fixture1.getShape();
@@ -937,11 +942,11 @@ public class World {
 			double t = minToi.getTime();
 			
 			// move the dynamic body to the time of impact
-			body1.transform0.lerp(body1.transform, t, body1.transform);
+			body1.transform0.lerp(body1.getTransform(), t, body1.getTransform());
 			// check if the other body is dynamic
 			if (minBody.isDynamic()) {
 				// if the other body is dynamic then interpolate its transform also
-				minBody.transform0.lerp(minBody.transform, t, minBody.transform);
+				minBody.transform0.lerp(minBody.getTransform(), t, minBody.getTransform());
 			}
 			// this should bring the bodies within d distance from one another
 			// we need to move the bodies more so that they are in collision
@@ -981,7 +986,6 @@ public class World {
 	 * @return boolean true if at least one {@link Body} was intersected by the {@link Ray}
 	 * @throws NullPointerException if start, end, or results is null
 	 * @see #raycast(Ray, double, boolean, boolean, List)
-	 * @see RaycastListener#allow(Ray, Body)
 	 * @see RaycastListener#allow(Ray, Body, BodyFixture)
 	 * @since 2.0.0
 	 */
@@ -1013,7 +1017,6 @@ public class World {
 	 * @return boolean true if at least one {@link Body} was intersected by the {@link Ray}
 	 * @throws NullPointerException if start, end, or results is null
 	 * @see #raycast(Ray, double, boolean, boolean, boolean, List)
-	 * @see RaycastListener#allow(Ray, Body)
 	 * @see RaycastListener#allow(Ray, Body, BodyFixture)
 	 * @since 3.1.9
 	 */
@@ -1046,7 +1049,6 @@ public class World {
 	 * @return boolean true if at least one {@link Body} was intersected by the {@link Ray}
 	 * @throws NullPointerException if start, end, or results is null
 	 * @see #raycast(Ray, double, Filter, boolean, boolean, boolean, List)
-	 * @see RaycastListener#allow(Ray, Body)
 	 * @see RaycastListener#allow(Ray, Body, BodyFixture)
 	 * @since 3.1.9
 	 */
@@ -1086,7 +1088,6 @@ public class World {
 	 * @return boolean true if at least one {@link Body} was intersected by the given {@link Ray}
 	 * @throws NullPointerException if ray or results is null
 	 * @see #raycast(Vector2, Vector2, boolean, boolean, List)
-	 * @see RaycastListener#allow(Ray, Body)
 	 * @see RaycastListener#allow(Ray, Body, BodyFixture)
 	 * @since 2.0.0
 	 */
@@ -1120,7 +1121,6 @@ public class World {
 	 * @return boolean true if at least one {@link Body} was intersected by the given {@link Ray}
 	 * @throws NullPointerException if ray or results is null
 	 * @see #raycast(Vector2, Vector2, boolean, boolean, boolean, List)
-	 * @see RaycastListener#allow(Ray, Body)
 	 * @see RaycastListener#allow(Ray, Body, BodyFixture)
 	 * @since 3.1.9
 	 */
@@ -1155,11 +1155,11 @@ public class World {
 	 * @return boolean true if at least one {@link Body} was intersected by the given {@link Ray}
 	 * @throws NullPointerException if ray or results is null
 	 * @see #raycast(Vector2, Vector2, Filter, boolean, boolean, boolean, List)
-	 * @see RaycastListener#allow(Ray, Body)
 	 * @see RaycastListener#allow(Ray, Body, BodyFixture)
 	 * @since 3.1.9
 	 */
 	public boolean raycast(Ray ray, double maxLength, Filter filter, boolean ignoreSensors, boolean ignoreInactive, boolean all, List<RaycastResult> results) {
+		List<RaycastListener> listeners = this.getListeners(RaycastListener.class);
 		// check for the desired length
 		double max = 0.0;
 		if (maxLength > 0.0) {
@@ -1167,20 +1167,50 @@ public class World {
 		}
 		// create a raycast result
 		RaycastResult result = new RaycastResult();
+		RaycastBroadphaseFilter bpFilter = new RaycastBroadphaseFilter(ignoreInactive, ignoreSensors, filter);
 		// filter using the broadphase first
-		List<Body> bodies = this.broadphaseDetector.raycast(ray, maxLength);
+		List<BroadphaseItem<Body, BodyFixture>> items = this.broadphaseDetector.raycast(ray, maxLength, bpFilter);
 		// loop over the list of bodies testing each one
-		int size = bodies.size();
+		int size = items.size();
 		boolean found = false;
+		boolean allow = true;
 		for (int i = 0; i < size; i++) {
 			// get a body to test
-			Body body = bodies.get(i);
-			// check for inactive
-			if (ignoreInactive && !body.isActive()) continue;
-			// does the ray intersect the body?
-			if (this.raycast(ray, body, max, filter, ignoreSensors, result)) {
-				// check if we are raycasting for all the objects
-				// or only the closest
+			BroadphaseItem<Body, BodyFixture> item = items.get(i);
+			Body body = item.collidable;
+			BodyFixture fixture = item.fixture;
+			Transform transform = body.getTransform();
+
+			// create a raycast object to store the result
+			Raycast raycast = new Raycast();
+
+			// notify the listeners to see if we should test this fixture
+			allow = true;
+			for (RaycastListener rl : listeners) {
+				// see if we should test this fixture
+				if (!rl.allow(ray, body, fixture)) {
+					allow = false;
+				}
+			}
+			if (!allow) continue;
+			// get the convex shape
+			Convex convex = fixture.getShape();
+			// perform the raycast
+			if (this.raycastDetector.raycast(ray, max, convex, transform, raycast)) {
+				// notify the listeners to see if we should allow this result
+				allow = true;
+				for (RaycastListener rl : listeners) {
+					// see if we should test this fixture
+					if (!rl.allow(ray, body, fixture, raycast)) {
+						allow = false;
+					}
+				}
+				if (!allow) continue;
+				
+				result.body = body;
+				result.fixture = fixture;
+				result.raycast = raycast;
+				
 				if (!all) {
 					// we are only looking for the closest so
 					// set the new maximum
@@ -1317,13 +1347,6 @@ public class World {
 	public boolean raycast(Ray ray, Body body, double maxLength, Filter filter, boolean ignoreSensors, RaycastResult result) {
 		List<RaycastListener> listeners = this.getListeners(RaycastListener.class);
 		boolean allow = true;
-		for (RaycastListener rl : listeners) {
-			// see if we should test this body
-			if (!rl.allow(ray, body)) {
-				allow = false;
-			}
-		}
-		if (!allow) return false;
 		// get the number of fixtures
 		int size = body.getFixtureCount();
 		// get the body transform
@@ -1594,21 +1617,14 @@ public class World {
 		final Vector2 dp2 = new Vector2();
 		double t2 = 1.0;
 		boolean found = false;
+		boolean allow = true;
+		AABBBroadphaseFilter bpFilter = new AABBBroadphaseFilter(ignoreInactive, ignoreSensors, filter);
 		// use the broadphase to filter first
-		List<Body> bodies = this.broadphaseDetector.detect(aabb);
+		List<BroadphaseItem<Body, BodyFixture>> items = this.broadphaseDetector.detect(aabb, bpFilter);
 		// loop over the potential collisions
-		for (Body body : bodies) {
-			// check for inactive bodies
-			if (ignoreInactive && !body.isActive()) continue;
-			
-			boolean allow = true;
-			for (ConvexCastListener ccl : listeners) {
-				// see if we should test this body
-				if (!ccl.allow(convex, body)) {
-					allow = false;
-				}
-			}
-			if (!allow) continue;
+		for (BroadphaseItem<Body, BodyFixture> item : items) {
+			Body body = item.collidable;
+			BodyFixture fixture = item.fixture;
 			
 			// only get the minimum fixture
 			double ft2 = t2;
@@ -1616,50 +1632,39 @@ public class World {
 			// and the current body
 			TimeOfImpact bodyMinToi = null;
 			BodyFixture bodyMinFixture = null;
-			int bSize = body.getFixtureCount();
 			Transform bodyTransform = body.getTransform();
 			
-			// loop through all the body fixtures until we find
-			// a the fixture that has the smallest time of impact
-			for (int i = 0; i < bSize; i++) {
-				BodyFixture bodyFixture = body.getFixture(i);
-				// filter out sensors if desired
-				if (ignoreSensors && bodyFixture.isSensor()) continue;
-				// check the filter
-				if (filter != null && !filter.isAllowed(bodyFixture.getFilter())) continue;
-				
+			// notify the listeners to see if we should test this fixture
+			allow = true;
+			for (ConvexCastListener ccl : listeners) {
+				// see if we should test this fixture
+				if (!ccl.allow(convex, body, fixture)) {
+					allow = false;
+				}
+			}
+			if (!allow) continue;
+			
+			// get the time of impact
+			Convex c = fixture.getShape();
+			TimeOfImpact toi = new TimeOfImpact();
+			// we pass the zero vector and 0 for the change in position and angle for the body
+			// since we assume that it is not moving since this is a static test
+			if (this.timeOfImpactDetector.getTimeOfImpact(convex, transform, deltaPosition, deltaAngle, c, bodyTransform, dp2, 0.0, 0.0, ft2, toi)) {
 				// notify the listeners to see if we should test this fixture
 				allow = true;
 				for (ConvexCastListener ccl : listeners) {
 					// see if we should test this fixture
-					if (!ccl.allow(convex, body, bodyFixture)) {
+					if (!ccl.allow(convex, body, fixture, toi)) {
 						allow = false;
 					}
 				}
 				if (!allow) continue;
 				
-				// get the time of impact
-				Convex c = bodyFixture.getShape();
-				TimeOfImpact toi = new TimeOfImpact();
-				// we pass the zero vector and 0 for the change in position and angle for the body
-				// since we assume that it is not moving since this is a static test
-				if (this.timeOfImpactDetector.getTimeOfImpact(convex, transform, deltaPosition, deltaAngle, c, bodyTransform, dp2, 0.0, 0.0, ft2, toi)) {
-					// notify the listeners to see if we should test this fixture
-					allow = true;
-					for (ConvexCastListener ccl : listeners) {
-						// see if we should test this fixture
-						if (!ccl.allow(convex, body, bodyFixture, toi)) {
-							allow = false;
-						}
-					}
-					if (!allow) continue;
-					
-					// only save the minimum for the body
-					if (bodyMinToi == null || toi.getTime() < bodyMinToi.getTime()) {
-						ft2 = toi.getTime();
-						bodyMinToi = toi;
-						bodyMinFixture = bodyFixture;
-					}
+				// only save the minimum for the body
+				if (bodyMinToi == null || toi.getTime() < bodyMinToi.getTime()) {
+					ft2 = toi.getTime();
+					bodyMinToi = toi;
+					bodyMinFixture = fixture;
 				}
 			}
 			if (bodyMinToi != null) {
@@ -1784,14 +1789,6 @@ public class World {
 		List<ConvexCastListener> listeners = this.getListeners(ConvexCastListener.class);
 		
 		boolean allow = true;
-		for (ConvexCastListener ccl : listeners) {
-			// see if we should test this body
-			if (!ccl.allow(convex, body)) {
-				allow = false;
-			}
-		}
-		if (!allow) return false;
-		
 		boolean found = false;
 		final Vector2 dp2 = new Vector2();
 		double t2 = 1.0;
@@ -1860,56 +1857,31 @@ public class World {
 	 * <p>
 	 * Inactive bodies are ignored in this test.
 	 * @param aabb the world space {@link AABB}
-	 * @param bodies the list of bodies the given AABB overlaps
+	 * @param results the list of overlapping bodies and fixtures
 	 * @return boolean true if the AABB overlaps any body
 	 * @since 3.1.9
 	 */
-	public boolean detect(AABB aabb, List<Body> bodies) {
-		return this.detect(aabb, true, bodies);
+	public boolean detect(AABB aabb, List<DetectResult> results) {
+		return this.detect(aabb, null, false, true, results);
 	}
 	
 	/**
-	 * Returns true if the given AABB overlaps a {@link Body} in this {@link World}.
+	 * Returns true if the given AABB overlaps a {@link Body} {@link Fixture} in this {@link World}.
 	 * <p>
-	 * If any part of a body is overlaping the AABB, the body is added to the list.
+	 * If any part of a body is overlaping the AABB, the body and that respective fixture is added 
+	 * to the returned list.
 	 * <p>
 	 * This performs a static collision test of the world using the {@link BroadphaseDetector}.
 	 * <p>
 	 * This may return bodies who only have sensor fixtures overlapping.
 	 * @param aabb the world space {@link AABB}
 	 * @param ignoreInactive true if inactive bodies should be ignored
-	 * @param bodies the list of bodies the given AABB overlaps
+	 * @param results the list of overlapping bodies and fixtures
 	 * @return boolean true if the AABB overlaps any body
 	 * @since 3.1.9
 	 */
-	public boolean detect(AABB aabb, boolean ignoreInactive, List<Body> bodies) {
-		List<DetectListener> listeners = this.getListeners(DetectListener.class);
-		
-		List<Body> collisions = this.broadphaseDetector.detect(aabb);
-		boolean found = false;
-		
-		int bSize = collisions.size();
-		boolean allow;
-		for (int i = 0; i < bSize; i++) {
-			Body body = collisions.get(i);
-			// check for inactive
-			if (ignoreInactive && !body.isActive()) {
-				continue;
-			}
-			// pass through the listeners
-			allow = true;
-			for (DetectListener listener : listeners) {
-				if (!listener.allow(aabb, body)) {
-					allow = false;
-				}
-			}
-			if (allow) {
-				bodies.add(body);
-				found = true;
-			}
-		}
-		
-		return found;
+	public boolean detect(AABB aabb, boolean ignoreInactive, List<DetectResult> results) {
+		return this.detect(aabb, null, false, ignoreInactive, results);
 	}
 	
 	/**
@@ -1948,57 +1920,38 @@ public class World {
 	public boolean detect(AABB aabb, Filter filter, boolean ignoreSensors, boolean ignoreInactive, List<DetectResult> results) {
 		List<DetectListener> listeners = this.getListeners(DetectListener.class);
 		
-		List<Body> collisions = this.broadphaseDetector.detect(aabb);
+		AABBBroadphaseFilter bpFilter = new AABBBroadphaseFilter(ignoreInactive, ignoreSensors, filter);
+		List<BroadphaseItem<Body, BodyFixture>> collisions = this.broadphaseDetector.detect(aabb, bpFilter);
 		boolean found = false;
 		
 		int bSize = collisions.size();
 		boolean allow;
 		for (int i = 0; i < bSize; i++) {
-			Body body = collisions.get(i);
-			// check for inactive
-			if (ignoreInactive && !body.isActive()) {
-				continue;
-			}
+			BroadphaseItem<Body, BodyFixture> item = collisions.get(i);
+			Body body = item.collidable;
+			BodyFixture fixture = item.fixture;
+			// check body's fixtures next
+			Transform transform = body.getTransform();
 			// pass through the listeners
 			allow = true;
 			for (DetectListener listener : listeners) {
-				if (!listener.allow(aabb, body)) {
+				if (!listener.allow(aabb, body, fixture)) {
 					allow = false;
 				}
 			}
 			if (!allow) {
 				continue;
 			}
-			// check body's fixtures next
-			Transform transform = body.getTransform();
-			int fSize = body.getFixtureCount();
-			for (int j = 0; j < fSize; j++) {
-				BodyFixture fixture = body.getFixture(j);
-				// test for sensors
-				if (ignoreSensors && fixture.isSensor()) continue;
-				// test the filter
-				if (filter != null && !filter.isAllowed(fixture.getFilter())) continue;
-				// pass through the listeners
-				allow = true;
-				for (DetectListener listener : listeners) {
-					if (!listener.allow(aabb, body, fixture)) {
-						allow = false;
-					}
-				}
-				if (!allow) {
-					continue;
-				}
-				// create an AABB for the fixture
-				AABB faabb = fixture.getShape().createAABB(transform);
-				// test the aabbs
-				if (aabb.overlaps(faabb)) {
-					// add this fixture to the results list
-					DetectResult result = new DetectResult();
-					result.body = body;
-					result.fixture = fixture;
-					results.add(result);
-					found = true;
-				}
+			// create an AABB for the fixture
+			AABB faabb = fixture.getShape().createAABB(transform);
+			// test the aabbs
+			if (aabb.overlaps(faabb)) {
+				// add this fixture to the results list
+				DetectResult result = new DetectResult();
+				result.body = body;
+				result.fixture = fixture;
+				results.add(result);
+				found = true;
 			}
 		}
 		
@@ -2244,69 +2197,48 @@ public class World {
 		
 		// create an aabb for the given convex
 		AABB aabb = convex.createAABB(transform);
+		AABBBroadphaseFilter bpFilter = new AABBBroadphaseFilter(ignoreInactive, ignoreSensors, filter);
 		// test using the broadphase to rule out as many bodies as we can
-		List<Body> bodies = this.broadphaseDetector.detect(aabb);
+		List<BroadphaseItem<Body, BodyFixture>> items = this.broadphaseDetector.detect(aabb, bpFilter);
 		// now perform a more accurate test
-		int bSize = bodies.size();
+		int bSize = items.size();
 		boolean found = false;
 		for (int i = 0; i < bSize; i++) {
-			Body body = bodies.get(i);
+			BroadphaseItem<Body, BodyFixture> item = items.get(i);
+			Body body = item.collidable;
+			BodyFixture fixture = item.fixture;
+			// get the body transform
+			Transform bt = body.getTransform();
+			
 			// pass through the listeners
 			allow = true;
 			for (DetectListener listener : listeners) {
-				if (!listener.allow(convex, transform, body)) {
+				if (!listener.allow(convex, transform, body, fixture)) {
 					allow = false;
 				}
 			}
 			if (!allow) {
 				continue;
 			}
-			// get the body transform
-			Transform bt = body.getTransform();
-			// test all the fixtures
-			int fSize = body.getFixtureCount();
-			// make sure the body is active if ignoreInactive is set to true
-			if (!ignoreInactive || body.isActive()) {
-				for (int j = 0; j < fSize; j++) {
-					BodyFixture bf = body.getFixture(j);
-					// check against the sensor flag
-					if (ignoreSensors && bf.isSensor()) continue;
-					
-					// check against the filter if given
-					Filter ff = bf.getFilter();
-					if (filter != null && !ff.isAllowed(filter)) continue;
-
-					// pass through the listeners
-					allow = true;
-					for (DetectListener listener : listeners) {
-						if (!listener.allow(convex, transform, body, bf)) {
-							allow = false;
-						}
-					}
-					if (!allow) {
-						continue;
-					}
-					
-					// just perform a boolean test since its typically faster
-					Convex bc = bf.getShape();
-					boolean collision = false;
-					// should we use the fast method or the one that returns the collision info
-					Penetration penetration = (includeCollisionData ? new Penetration() : null); 
-					if (includeCollisionData) {
-						collision = this.narrowphaseDetector.detect(convex, transform, bc, bt, penetration);
-					} else {
-						collision = this.narrowphaseDetector.detect(convex, transform, bc, bt);
-					}
-					if (collision) {
-						// add this fixture to the results list
-						DetectResult result = new DetectResult();
-						result.body = body;
-						result.fixture = bf;
-						result.penetration = penetration;
-						results.add(result);
-						found = true;
-					}
-				}
+			
+			// just perform a boolean test since its typically faster
+			Convex bc = fixture.getShape();
+			boolean collision = false;
+			// should we use the fast method or the one that returns the collision info
+			Penetration penetration = (includeCollisionData ? new Penetration() : null); 
+			if (includeCollisionData) {
+				collision = this.narrowphaseDetector.detect(convex, transform, bc, bt, penetration);
+			} else {
+				collision = this.narrowphaseDetector.detect(convex, transform, bc, bt);
+			}
+			if (collision) {
+				// add this fixture to the results list
+				DetectResult result = new DetectResult();
+				result.body = body;
+				result.fixture = fixture;
+				result.penetration = penetration;
+				results.add(result);
+				found = true;
 			}
 		}
 		// return the bodies in collision
@@ -2350,16 +2282,7 @@ public class World {
 	 */
 	public boolean detect(AABB aabb, Body body, Filter filter, boolean ignoreSensors, List<DetectResult> results) {
 		List<DetectListener> listeners = this.getListeners(DetectListener.class);
-		
-		// pass through the listeners first
 		boolean allow = true;
-		for (DetectListener listener : listeners) {
-			if (!listener.allow(aabb, body)) {
-				allow = false;
-			}
-		}
-		if (!allow) return false;
-		
 		// test the AABBs
 		boolean found = false;
 		AABB baabb = this.broadphaseDetector.getAABB(body);
@@ -2621,29 +2544,29 @@ public class World {
 	 * <p>
 	 * This method does <b>NOT</b> require a call to {@link #setUpdateRequired(boolean)}.
 	 * @param shift the distance to shift along the x and y axes
-	 * @since 3.1.0
+	 * @since 4.0.0
 	 */
-	public void shiftCoordinates(Vector2 shift) {
+	public void shift(Vector2 shift) {
 		// update the bodies
 		int bSize = this.bodies.size();
 		for (int i = 0; i < bSize; i++) {
 			Body body = this.bodies.get(i);
-			body.shiftCoordinates(shift);
+			body.shift(shift);
 		}
 		// update the joints
 		int jSize = this.joints.size();
 		for (int i = 0; i < jSize; i++) {
 			Joint joint = this.joints.get(i);
-			joint.shiftCoordinates(shift);
+			joint.shift(shift);
 		}
 		// update the broadphase
-		this.broadphaseDetector.shiftCoordinates(shift);
+		this.broadphaseDetector.shift(shift);
 		// update the bounds
 		if (this.bounds != null) {
-			this.bounds.shiftCoordinates(shift);
+			this.bounds.shift(shift);
 		}
 		// update contact manager
-		this.contactManager.shiftCoordinates(shift);
+		this.contactManager.shift(shift);
 	}
 	
 	/**
@@ -3704,245 +3627,5 @@ public class World {
 	public void setAccumulatedTime(double elapsedTime) {
 		if (elapsedTime < 0.0) return;
 		this.time = elapsedTime;
-	}
-	
-	// deprecated methods
-
-	/**
-	 * Adds a {@link Body} to the {@link World}.
-	 * @param body the {@link Body} to add
-	 * @throws NullPointerException if body is null
-	 * @throws IllegalArgumentException if body has already been added to this world or if its a member of another world instance
-	 * @deprecated replaced with {@link #addBody(Body)} in 3.1.1
-	 * @see #addBody(Body)
-	 */
-	@Deprecated
-	public void add(Body body) {
-		this.addBody(body);
-	}
-
-	/**
-	 * Adds a {@link Joint} to the {@link World}.
-	 * @param joint the {@link Joint} to add
-	 * @throws NullPointerException if joint is null
-	 * @throws IllegalArgumentException if joint has already been added to this world or if its a member of another world instance
-	 * @deprecated replaced with {@link #addJoint(Joint)} in 3.1.1
-	 * @see #addJoint(Joint)
-	 */
-	@Deprecated
-	public void add(Joint joint) {
-		this.addJoint(joint);
-	}
-
-	/**
-	 * Removes the given {@link Body} from the {@link World}.
-	 * <p>
-	 * Use the {@link #remove(Body, boolean)} method to enable implicit
-	 * destruction notification.
-	 * @param body the {@link Body} to remove.
-	 * @return boolean true if the body was removed
-	 * @deprecated replaced with {@link #removeBody(Body)} in 3.1.1
-	 * @see #removeBody(Body)
-	 */
-	@Deprecated
-	public boolean remove(Body body) {
-		return this.removeBody(body);
-	}
-
-	/**
-	 * Removes the given {@link Body} from the {@link World}.
-	 * <p>
-	 * When a body is removed, joints and contacts may be implicitly destroyed.
-	 * Pass true to the notify parameter to be notified the destruction of these objects
-	 * via the {@link DestructionListener}s.
-	 * @param body the {@link Body} to remove
-	 * @param notify true if implicit destruction should be notified
-	 * @return boolean true if the body was removed
-	 * @since 3.1.0
-	 * @deprecated replaced with {@link #removeBody(Body, boolean)} in 3.1.1
-	 * @see #removeBody(Body, boolean)
-	 */
-	@Deprecated
-	public boolean remove(Body body, boolean notify) {
-		return this.removeBody(body, notify);
-	}
-
-	/**
-	 * Removes the given {@link Joint} from the {@link World}.
-	 * <p>
-	 * When joints are removed no other objects are implicitly destroyed.
-	 * @param joint the {@link Joint} to remove
-	 * @return boolean true if the {@link Joint} was removed
-	 * @deprecated replaced with {@link #removeJoint(Joint)} in 3.1.1
-	 * @see #removeJoint(Joint)
-	 */
-	@Deprecated
-	public boolean remove(Joint joint) {
-		return this.removeJoint(joint);
-	}
-
-	/**
-	 * Removes all the joints and bodies from the world.
-	 * <p>
-	 * This method does <b>not</b> notify of destroyed objects.
-	 * <p>
-	 * Renamed from clear (3.0.0 and below).
-	 * @since 3.0.1
-	 * @deprecated replaced with {@link #removeAllBodiesAndJoints()} in 3.1.1
-	 * @see #removeAllBodiesAndJoints()
-	 */
-	@Deprecated
-	public void removeAll() {
-		this.removeAllBodiesAndJoints(false);
-	}
-
-	/**
-	 * Removes all the joints and bodies from the world.
-	 * <p>
-	 * This method will remove the joints and contacts from all {@link Body}s.
-	 * <p>
-	 * Renamed from clear (3.0.0 to 1.0.2).
-	 * @param notify true if destruction of joints and contacts should be notified of by the {@link DestructionListener}
-	 * @since 3.0.1
-	 * @deprecated replaced with {@link #removeAllBodiesAndJoints(boolean)} in 3.1.1
-	 * @see #removeAllBodiesAndJoints(boolean)
-	 */
-	@Deprecated
-	public void removeAll(boolean notify) {
-		this.removeAllBodiesAndJoints(notify);
-	}
-	
-	/**
-	 * Removes all the listeners.
-	 * @since 3.1.0
-	 * @deprecated replaced with {@link #removeAllListeners()} in 3.1.1
-	 * @see #removeAllListeners()
-	 */
-	@Deprecated
-	public void removeListeners() {
-		this.removeAllListeners();
-	}
-
-	/**
-	 * Returns a list of bodies within the specified (world-space) axis-aligned bounding box.
-	 * <p>
-	 * If any part of a body is contained in the AABB, it is added to the list.
-	 * <p>
-	 * This performs a static collision test of the world using the {@link BroadphaseDetector}.
-	 * <p>
-	 * This may return bodies who only have sensor fixtures overlapping.
-	 * <p>
-	 * Inactive bodies are ignored in this test.
-	 * @param aabb the world space {@link AABB}
-	 * @return List&lt;{@link Body}&gt; a list of bodies within the given AABB
-	 * @since 3.1.1
-	 * @deprecated replaced with {@link #detect(AABB, List)} in 3.1.9
-	 * @see #detect(AABB, List)
-	 */
-	@Deprecated
-	public List<Body> detect(AABB aabb) {
-		List<Body> bodies = new ArrayList<Body>();
-		this.detect(aabb, true, bodies);
-		return bodies;
-	}
-
-	/**
-	 * Returns a list of bodies within the specified convex shape.
-	 * <p>
-	 * If any part of a body is contained in the convex, it is added to the list.
-	 * <p>
-	 * This may return bodies who only have sensor fixtures overlapping.
-	 * <p>
-	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
-	 * are colliding.
-	 * <p>
-	 * Inactive bodies are ignored in this test.
-	 * @param convex the convex shape in world coordinates
-	 * @return List&lt;{@link Body}&gt; a list of bodies within the given convex shape
-	 * @since 3.1.1
-	 * @deprecated replaced with {@link #detect(Convex, List)} in 3.1.9
-	 * @see #detect(Convex, List)
-	 */
-	@Deprecated
-	public List<Body> detect(Convex convex) {
-		return this.detect(convex, Transform.IDENTITY);
-	}
-	
-	/**
-	 * Returns a list of bodies within the specified convex shape.
-	 * <p>
-	 * If any part of a body is contained in the convex, it is added to the list.
-	 * <p>
-	 * This may return bodies who only have sensor fixtures overlapping.
-	 * <p>
-	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
-	 * are colliding.
-	 * <p>
-	 * Inactive bodies are ignored in this test.
-	 * @param convex the convex shape in local coordinates
-	 * @param transform the convex shape's world transform
-	 * @return List&lt;{@link Body}&gt; a list of bodies within the given convex shape
-	 * @since 3.1.1
-	 * @deprecated replaced with {@link #detect(Convex, Transform, List)} in 3.1.9
-	 * @see #detect(Convex, Transform, List)
-	 */
-	@Deprecated
-	public List<Body> detect(Convex convex, Transform transform) {
-		List<DetectListener> listeners = this.getListeners(DetectListener.class);
-		boolean allow = true;
-		
-		// create an aabb for the given convex
-		AABB aabb = convex.createAABB(transform);
-		// test using the broadphase to rule out as many bodies as we can
-		List<Body> bodies = this.broadphaseDetector.detect(aabb);
-		// now perform a more accurate test
-		Iterator<Body> bi = bodies.iterator();
-		while (bi.hasNext()) {
-			Body body = bi.next();
-			// pass through the listeners
-			allow = true;
-			for (DetectListener listener : listeners) {
-				if (!listener.allow(convex, transform, body)) {
-					allow = false;
-				}
-			}
-			if (!allow) {
-				bi.remove();
-				continue;
-			}
-			// get the body transform
-			Transform bt = body.getTransform();
-			// test all the fixtures
-			int fSize = body.getFixtureCount();
-			boolean collision = false;
-			for (int i = 0; i < fSize; i++) {
-				BodyFixture bf = body.getFixture(i);
-				// should we even test this fixture?
-				allow = true;
-				for (DetectListener listener : listeners) {
-					if (!listener.allow(convex, transform, body, bf)) {
-						allow = false;
-					}
-				}
-				if (!allow) {
-					continue;
-				}
-				// just perform a boolean test since its typically faster
-				Convex bc = bf.getShape();
-				if (this.narrowphaseDetector.detect(convex, transform, bc, bt)) {
-					// we can skip the rest of the fixtures and continue testing other bodies
-					collision = true;
-					break;
-				}
-			}
-			// if we went through all the fixtures of the
-			// body and we didn't find one that collided with
-			// the given convex, then remove it from the list
-			if (!collision) {
-				bi.remove();
-			}
-		}
-		// return the bodies in collision
-		return bodies;
 	}
 }

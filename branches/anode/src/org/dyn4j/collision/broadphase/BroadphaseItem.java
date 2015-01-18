@@ -28,39 +28,28 @@ import org.dyn4j.collision.Collidable;
 import org.dyn4j.collision.Fixture;
 
 /**
- * Represents a pair of {@link Collidable} {@link Fixture}s that have been detected as
- * colliding in the {@link BroadphaseDetector}.
+ * Represents an individual broadphase item.
  * @author William Bittle
+ * @version 4.0.0
+ * @since 4.0.0
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
- * @version 4.0.0
- * @since 1.0.0
  */
-public class BroadphasePair<E extends Collidable<T>, T extends Fixture> {
-	/** The first {@link Collidable} */
-	public final E collidable1;
+public class BroadphaseItem<E extends Collidable<T>, T extends Fixture> {
+	/** The {@link Collidable} */
+	public final E collidable;
 	
-	/** The first {@link Collidable}'s {@link Fixture} */
-	public final T fixture1;
-	
-	/** The second {@link Collidable} */
-	public final E collidable2;
-	
-	/** The second {@link Collidable}'s {@link Fixture} */
-	public final T fixture2;
+	/** The {@link Fixture} */
+	public final T fixture;
 	
 	/**
 	 * Minimal constructor.
-	 * @param collidable1 the first collidable
-	 * @param fixture1 the first collidable's fixture
-	 * @param collidable2 the second collidable
-	 * @param fixture2 the second collidable's fixture
+	 * @param collidable the collidable
+	 * @param fixture the fixture
 	 */
-	public BroadphasePair(E collidable1, T fixture1, E collidable2, T fixture2) {
-		this.collidable1 = collidable1;
-		this.fixture1 = fixture1;
-		this.collidable2 = collidable2;
-		this.fixture2 = fixture2;
+	public BroadphaseItem(E collidable, T fixture) {
+		this.collidable = collidable;
+		this.fixture = fixture;
 	}
 	
 	/* (non-Javadoc)
@@ -70,12 +59,10 @@ public class BroadphasePair<E extends Collidable<T>, T extends Fixture> {
 	public boolean equals(Object obj) {
 		if (obj == null) return false;
 		if (obj == this) return true;
-		if (obj instanceof BroadphasePair) {
-			BroadphasePair<?, ?> pair = (BroadphasePair<?, ?>)obj;
-			if (pair.collidable1 == this.collidable1 &&
-				pair.fixture1 == this.fixture1 &&
-				pair.collidable2 == this.collidable2 &&
-				pair.fixture2 == this.fixture2) {
+		if (obj instanceof BroadphaseItem) {
+			BroadphaseItem<?, ?> pair = (BroadphaseItem<?, ?>)obj;
+			if (pair.collidable == this.collidable &&
+				pair.fixture == this.fixture) {
 				return true;
 			}
 		}
@@ -88,10 +75,8 @@ public class BroadphasePair<E extends Collidable<T>, T extends Fixture> {
 	@Override
 	public int hashCode() {
 		int hash = 17;
-		hash = hash * 31 + this.collidable1.hashCode();
-		hash = hash * 31 + this.fixture1.hashCode();
-		hash = hash * 31 + this.collidable2.hashCode();
-		hash = hash * 31 + this.fixture2.hashCode();
+		hash = hash * 31 + this.collidable.getId().hashCode();
+		hash = hash * 31 + this.fixture.getId().hashCode();
 		return hash;
 	}
 	
@@ -101,10 +86,8 @@ public class BroadphasePair<E extends Collidable<T>, T extends Fixture> {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("BroadphasePair[Collidable1=").append(this.collidable1)
-		.append("|Fixture1=").append(this.fixture1)
-		.append("|Collidable2=").append(this.collidable2)
-		.append("|Fixture2=").append(this.fixture2)
+		sb.append("BroadphaseItem[Collidable=").append(this.collidable)
+		.append("|Fixture=").append(this.fixture)
 		.append("]");
 		return sb.toString();
 	}

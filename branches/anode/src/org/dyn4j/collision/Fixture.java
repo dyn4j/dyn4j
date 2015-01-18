@@ -37,15 +37,15 @@ import org.dyn4j.resources.Messages;
  * A {@link Fixture} has a one-to-one relationship with a {@link Convex} {@link Shape}.
  * Each {@link Collidable} can have any number of {@link Fixture}s attached.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.0.0
  * @since 2.0.0
  */
 public class Fixture {
 	/** The id for the fixture */
-	protected UUID id = UUID.randomUUID();
+	protected final UUID id = UUID.randomUUID();
 	
 	/** The convex shape for this fixture */
-	protected Convex shape;
+	protected final Convex shape;
 	
 	/** The collision filter */
 	protected Filter filter;

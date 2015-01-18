@@ -32,14 +32,13 @@ import org.dyn4j.Listener;
  * <p>
  * Modification of the World object is not permitted in these methods.
  * @author William Bittle
- * @version 3.1.0
+ * @version 4.0.0
  * @since 1.0.0
  */
 public interface BoundsListener extends Listener {
 	/**
 	 * Method called when a {@link Collidable} is outside the {@link Bounds}.
-	 * @param <E> the {@link Collidable} type
 	 * @param collidable the {@link Collidable} outside the {@link Bounds}
 	 */
-	public abstract <E extends Collidable> void outside(E collidable);
+	public abstract <E extends Collidable<T>, T extends Fixture> void outside(E collidable);
 }

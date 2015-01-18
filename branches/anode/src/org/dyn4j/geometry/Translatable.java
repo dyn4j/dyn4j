@@ -22,22 +22,26 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.collision;
-
-import org.dyn4j.Listener;
+package org.dyn4j.geometry;
 
 /**
- * Convenience class for implementing the {@link BoundsListener} interface.
- * <p>
- * This class can be used to implement only the methods desired instead of all
- * the methods contained in the {@link BoundsListener} interface.
+ * Represents an object that can be translated.
  * @author William Bittle
  * @version 4.0.0
- * @since 1.0.0
+ * @since 4.0.0
  */
-public class BoundsAdapter implements BoundsListener, Listener {
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.BoundsListener#outside(org.dyn4j.collision.Collidable)
+public interface Translatable {
+	/**
+	 * Translates the object the given amounts in the respective directions.
+	 * @param x the translation in the x direction
+	 * @param y the translation in the y direction
 	 */
-	public <E extends Collidable<T>, T extends Fixture> void outside(E collidable) {};
+	public abstract void translate(double x, double y);
+	
+	/**
+	 * Translates the object along the given vector.
+	 * @param vector the translation along a vector
+	 */
+	public abstract void translate(Vector2 vector);
 }
+

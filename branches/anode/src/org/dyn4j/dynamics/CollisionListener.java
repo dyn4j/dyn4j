@@ -42,7 +42,7 @@ import org.dyn4j.geometry.Shape;
  * Events for a pair of bodies (as long as they pass the criteria for the event to be called)
  * will be called in the following order:
  * <ol>
- * <li>Collision detected by the broadphase: {@link #collision(Body, Body)}</li>
+ * <li>Collision detected by the broadphase: {@link #collision(Body, BodyFixture, Body, BodyFixture)}</li>
  * <li>Collision detected by the narrowphase: {@link #collision(Body, BodyFixture, Body, BodyFixture, Penetration)}</li>
  * <li>Contact manifold created by the manifold solver:{@link #collision(Body, BodyFixture, Body, BodyFixture, Manifold)}</li>
  * <li>Contact constraint created: {@link #collision(ContactConstraint)}</li>
@@ -54,7 +54,7 @@ import org.dyn4j.geometry.Shape;
  * Modification of the {@link World} is permitted in these methods.  Modification of the {@link Body}'s
  * fixtures is not permitted (adding/removing will cause a runtime exception).
  * @author William Bittle
- * @version 3.1.0
+ * @version 4.0.0
  * @since 1.0.0
  */
 public interface CollisionListener extends Listener {
@@ -73,8 +73,11 @@ public interface CollisionListener extends Listener {
 	 * The {@link #collision(Body, BodyFixture, Body, BodyFixture, Penetration)} method is next
 	 * in the sequence of collision events.
 	 * @param body1 the first {@link Body}
+	 * @param fixture1 the first {@link Body}'s {@link BodyFixture}
 	 * @param body2 the second {@link Body}
+	 * @param fixture2 the second {@link Body}'s {@link BodyFixture}
 	 * @return boolean true if processing should continue for this collision
+	 * @since 4.0.0
 	 */
 	public abstract boolean collision(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2);
 	

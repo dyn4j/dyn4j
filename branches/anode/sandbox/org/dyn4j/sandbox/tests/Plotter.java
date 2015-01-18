@@ -54,7 +54,7 @@ import org.dyn4j.sandbox.utilities.RenderUtilities;
 /**
  * Compiled test for the collision detection pipeline.
  * @author William Bittle
- * @version 1.0.4
+ * @version 1.0.6
  * @since 1.0.2
  */
 public class Plotter extends CompiledSimulation {
@@ -112,7 +112,7 @@ public class Plotter extends CompiledSimulation {
 			body.translate(-1.0, -1.5);
 		}
 		// set the mass to infinite
-		body.setMass(Mass.Type.INFINITE);
+		body.update(Mass.Type.INFINITE);
 		body.setUserData("Body" + (index + 1));
 		// return the entity
 		return body;

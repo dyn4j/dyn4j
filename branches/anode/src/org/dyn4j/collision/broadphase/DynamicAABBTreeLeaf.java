@@ -22,22 +22,36 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.collision;
+package org.dyn4j.collision.broadphase;
 
-import org.dyn4j.Listener;
+import org.dyn4j.collision.Collidable;
+import org.dyn4j.collision.Fixture;
 
 /**
- * Convenience class for implementing the {@link BoundsListener} interface.
- * <p>
- * This class can be used to implement only the methods desired instead of all
- * the methods contained in the {@link BoundsListener} interface.
+ * Represents a leaf node in a Dynamic AABB Tree.
  * @author William Bittle
  * @version 4.0.0
- * @since 1.0.0
+ * @since 4.0.0
+ * @param <E> the {@link Collidable} type
+ * @param <T> the {@link Fixture} type
  */
-public class BoundsAdapter implements BoundsListener, Listener {
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.BoundsListener#outside(org.dyn4j.collision.Collidable)
+public class DynamicAABBTreeLeaf<E extends Collidable<T>, T extends Fixture> extends DynamicAABBTreeNode {
+	/** The {@link Collidable} */
+	public final E collidable;
+	
+	/** The {@link Fixture} */
+	public final T fixture;
+	
+	/** Flag used to determine if a node has been tested before */
+	protected boolean tested = false;
+	
+	/**
+	 * Minimal constructor.
+	 * @param collidable the collidable
+	 * @param fixture the fixture
 	 */
-	public <E extends Collidable<T>, T extends Fixture> void outside(E collidable) {};
+	public DynamicAABBTreeLeaf(E collidable, T fixture) {
+		this.collidable = collidable;
+		this.fixture = fixture;
+	}
 }

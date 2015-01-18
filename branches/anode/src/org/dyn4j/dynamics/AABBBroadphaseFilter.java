@@ -24,29 +24,56 @@
  */
 package org.dyn4j.dynamics;
 
-import org.dyn4j.collision.continuous.TimeOfImpact;
-import org.dyn4j.geometry.Convex;
+import org.dyn4j.collision.Filter;
+import org.dyn4j.collision.broadphase.BroadphaseDetector;
+import org.dyn4j.collision.broadphase.BroadphaseFilter;
+import org.dyn4j.collision.broadphase.BroadphaseFilterAdapter;
+import org.dyn4j.geometry.AABB;
 
 /**
- * Default implemenation of the {@link ConvexCastListener} interface.
- * <p>
- * Inherit from this class to only implement the desired methods.
- * <p>
- * By default all methods return true.
+ * Represents a {@link BroadphaseFilter} for the {@link BroadphaseDetector#detect(AABB, BroadphaseFilter)} method.
  * @author William Bittle
  * @version 4.0.0
- * @since 3.1.5
+ * @since 4.0.0
  */
-public class ConvexCastAdapter implements ConvexCastListener {
+public class AABBBroadphaseFilter extends BroadphaseFilterAdapter<Body, BodyFixture> implements BroadphaseFilter<Body, BodyFixture> {
+	/** True to ignore inactive bodies */
+	public final boolean ignoreInactive;
+	
+	/** True to ignore sensor fixtures */
+	public final boolean ignoreSensors;
+	
+	/** The fixture filter */
+	public final Filter filter;
+	
+	/**
+	 * Full constructor.
+	 * @param ignoreInactive true to ignore inactive bodies
+	 * @param ignoreSensors true to ignore sensor fixtures
+	 * @param filter the fixture filter
+	 */
+	public AABBBroadphaseFilter(boolean ignoreInactive, boolean ignoreSensors, Filter filter) {
+		this.ignoreInactive = ignoreInactive;
+		this.ignoreSensors = ignoreSensors;
+		this.filter = filter;
+	}
+	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.ConvexCastListener#allow(org.dyn4j.geometry.Convex, org.dyn4j.dynamics.Body, org.dyn4j.dynamics.BodyFixture)
+	 * @see org.dyn4j.collision.broadphase.DefaultBroadphaseFilter#isAllowed(org.dyn4j.geometry.AABB, org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
 	 */
 	@Override
-	public boolean allow(Convex convex, Body body, BodyFixture fixture) { return true; }
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.ConvexCastListener#allow(org.dyn4j.geometry.Convex, org.dyn4j.dynamics.Body, org.dyn4j.dynamics.BodyFixture, org.dyn4j.collision.continuous.TimeOfImpact)
-	 */
-	@Override
-	public boolean allow(Convex convex, Body body, BodyFixture fixture, TimeOfImpact toi) { return true; }
+	public boolean isAllowed(AABB aabb, Body body, BodyFixture fixture) {
+		// check for inactive
+		if (this.ignoreInactive && !body.isActive()) return false;
+		// check for sensor
+		if (this.ignoreSensors && fixture.isSensor()) {
+			// skip this fixture
+			return false;
+		}
+		// check against the filter
+		if (this.filter != null && !this.filter.isAllowed(fixture.getFilter())) {
+			return false;
+		}
+		return super.isAllowed(aabb, body, fixture);
+	}
 }

@@ -35,21 +35,10 @@ import org.dyn4j.geometry.Ray;
  * <p>
  * By default all methods should return true.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.0.0
  * @since 2.0.0
  */
 public interface RaycastListener extends Listener {
-	/**
-	 * Called before a {@link Body} is tested against the {@link Ray}.
-	 * <p>
-	 * Use this method to filter the ray casting based on the {@link Body}.
-	 * @param ray the {@link Ray}
-	 * @param body the {@link Body} to be tested
-	 * @return boolean true if the {@link Body} should be included in the raycast
-	 * @since 3.0.0
-	 */
-	public abstract boolean allow(Ray ray, Body body);
-	
 	/**
 	 * Called before a {@link BodyFixture} is tested against the {@link Ray}.
 	 * <p>

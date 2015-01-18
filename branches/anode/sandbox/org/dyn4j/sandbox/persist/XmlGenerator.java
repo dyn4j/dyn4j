@@ -65,7 +65,7 @@ import org.dyn4j.sandbox.utilities.SystemUtilities;
 /**
  * Class used to export a simulation to xml.
  * @author William Bittle
- * @version 1.0.5
+ * @version 1.0.6
  * @since 1.0.0
  */
 public class XmlGenerator {
@@ -316,10 +316,10 @@ public class XmlGenerator {
 			sb.append("CategoryFilter\">");
 			CategoryFilter cf = (CategoryFilter)filter;
 			sb.append("<PartOfGroups>");
-			sb.append(XmlGenerator.toXml(cf.getCategory()));
+			sb.append(XmlGenerator.toXml((int)cf.getCategory()));
 			sb.append("</PartOfGroups>");
 			sb.append("<CollideWithGroups>");
-			sb.append(XmlGenerator.toXml(cf.getMask()));
+			sb.append(XmlGenerator.toXml((int)cf.getMask()));
 			sb.append("</CollideWithGroups>");
 			sb.append("</Filter>");
 		} else {

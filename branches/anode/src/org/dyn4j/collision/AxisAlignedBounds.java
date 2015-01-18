@@ -25,7 +25,7 @@
 package org.dyn4j.collision;
 
 import org.dyn4j.geometry.AABB;
-import org.dyn4j.geometry.Transformable;
+import org.dyn4j.geometry.Translatable;
 import org.dyn4j.geometry.Vector2;
 
 /**
@@ -33,17 +33,11 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * This class compares its AABB with the AABB of the given body and returns true
  * if they do not overlap.
- * <p>
- * Since this class is Axis-Aligned the {@link #rotate(double)}, {@link #rotate(double, Vector2)},
- * and {@link #rotate(double, double, double)} methods are no-ops.
- * <p>
- * The {@link #getTransform()} method returns the transform used by the current instance.  Calling
- * the rotate methods on the returned transform will cause undefined behavior.
  * @author William Bittle
- * @version 3.1.1
+ * @version 4.0.0
  * @since 3.1.1
  */
-public class AxisAlignedBounds extends AbstractBounds implements Bounds, Transformable {
+public class AxisAlignedBounds extends AbstractBounds implements Bounds, Translatable {
 	/** The local coordinates AABB */
 	protected AABB aabb;
 	
@@ -51,6 +45,7 @@ public class AxisAlignedBounds extends AbstractBounds implements Bounds, Transfo
 	 * Minimal constructor.
 	 * @param width the width of the bounds; must be greater than zero
 	 * @param height the height of the bounds; must be greater than zero
+	 * @throws IllegalArgumentException if either width or height are less than or equal to zero
 	 */
 	public AxisAlignedBounds(double width, double height) {
 		if (width <= 0.0) throw new IllegalArgumentException();
@@ -77,7 +72,7 @@ public class AxisAlignedBounds extends AbstractBounds implements Bounds, Transfo
 	 * @see org.dyn4j.collision.Bounds#isOutside(org.dyn4j.collision.Collidable)
 	 */
 	@Override
-	public boolean isOutside(Collidable collidable) {
+	public boolean isOutside(Collidable<?> collidable) {
 		Vector2 tx = this.transform.getTranslation();
 		
 		AABB aabbBounds = this.aabb.getTranslated(tx);
@@ -102,14 +97,6 @@ public class AxisAlignedBounds extends AbstractBounds implements Bounds, Transfo
 	}
 	
 	/**
-	 * Returns the translation of this bounding box.
-	 * @return {@link Vector2}
-	 */
-	public Vector2 getTranslation() {
-		return this.transform.getTranslation();
-	}
-	
-	/**
 	 * Returns the width of the bounds.
 	 * @return double
 	 */
@@ -124,22 +111,4 @@ public class AxisAlignedBounds extends AbstractBounds implements Bounds, Transfo
 	public double getHeight() {
 		return this.aabb.getHeight();
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.AbstractBounds#rotate(double)
-	 */
-	@Override
-	public void rotate(double theta) {}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.AbstractBounds#rotate(double, double, double)
-	 */
-	@Override
-	public void rotate(double theta, double x, double y) {}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.AbstractBounds#rotate(double, org.dyn4j.geometry.Vector2)
-	 */
-	@Override
-	public void rotate(double theta, Vector2 point) {}
 }

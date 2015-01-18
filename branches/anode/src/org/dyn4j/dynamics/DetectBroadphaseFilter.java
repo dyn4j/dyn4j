@@ -22,22 +22,31 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.collision;
+package org.dyn4j.dynamics;
 
-import org.dyn4j.Listener;
+import org.dyn4j.collision.broadphase.BroadphaseDetector;
+import org.dyn4j.collision.broadphase.BroadphaseFilter;
+import org.dyn4j.collision.broadphase.DefaultBroadphaseFilter;
 
 /**
- * Convenience class for implementing the {@link BoundsListener} interface.
- * <p>
- * This class can be used to implement only the methods desired instead of all
- * the methods contained in the {@link BoundsListener} interface.
+ * Represents a {@link BroadphaseFilter} for the {@link BroadphaseDetector#detect(BroadphaseFilter)} method.
  * @author William Bittle
  * @version 4.0.0
- * @since 1.0.0
+ * @since 4.0.0
  */
-public class BoundsAdapter implements BoundsListener, Listener {
+public class DetectBroadphaseFilter extends DefaultBroadphaseFilter<Body, BodyFixture> implements BroadphaseFilter<Body, BodyFixture> {
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.BoundsListener#outside(org.dyn4j.collision.Collidable)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseFilter#isAllowed(org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture, org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
 	 */
-	public <E extends Collidable<T>, T extends Fixture> void outside(E collidable) {};
+	@Override
+	public boolean isAllowed(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2) {
+		// inactive objects don't have collision detection/response
+		if (!body1.isActive() || !body2.isActive()) return false;
+		// one body must be dynamic
+		if (!body1.isDynamic() && !body2.isDynamic()) return false;
+		// check for connected pairs who's collision is not allowed
+		if (body1.isConnected(body2, false)) return false;
+		
+		return super.isAllowed(body1, fixture1, body2, fixture2);
+	}
 }

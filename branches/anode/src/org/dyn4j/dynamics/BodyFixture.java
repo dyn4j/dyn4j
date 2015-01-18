@@ -33,7 +33,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents a part of a {@link Body}.
  * @author William Bittle
- * @version 3.0.2
+ * @version 4.0.0
  * @since 2.0.0
  */
 public class BodyFixture extends Fixture {
@@ -107,7 +107,7 @@ public class BodyFixture extends Fixture {
 	 * @return double
 	 */
 	public double getFriction() {
-		return friction;
+		return this.friction;
 	}
 	
 	/**
@@ -125,7 +125,7 @@ public class BodyFixture extends Fixture {
 	 * @return double
 	 */
 	public double getRestitution() {
-		return restitution;
+		return this.restitution;
 	}
 	
 	/**

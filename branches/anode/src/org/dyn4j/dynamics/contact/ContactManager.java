@@ -36,6 +36,7 @@ import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Capacity;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.World;
+import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
@@ -48,7 +49,7 @@ import org.dyn4j.resources.Messages;
  * @version 3.1.11
  * @since 1.0.0
  */
-public class ContactManager {
+public class ContactManager implements Shiftable {
 	/** The world this contact manager belongs to */
 	protected World world;
 	
@@ -144,17 +145,17 @@ public class ContactManager {
 	 * Shifts stored contacts by the given coordinate shift.
 	 * <p>
 	 * Typically this method should not be called directly.  Instead 
-	 * use the {@link World#shiftCoordinates(Vector2)} method to move the 
+	 * use the {@link World#shift(Vector2)} method to move the 
 	 * entire world.
 	 * @param shift the distance to shift along the x and y axes
 	 * @since 3.1.0
 	 */
-	public void shiftCoordinates(Vector2 shift) {
+	public void shift(Vector2 shift) {
 		// update all the contacts
 		Iterator<ContactConstraint> it = this.map.values().iterator();
 		while (it.hasNext()) {
 			ContactConstraint cc = it.next();
-			cc.shiftCoordinates(shift);
+			cc.shift(shift);
 		}
 	}
 	

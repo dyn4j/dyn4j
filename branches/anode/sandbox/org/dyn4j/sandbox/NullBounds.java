@@ -31,7 +31,7 @@ import org.dyn4j.collision.Collidable;
 /**
  * Simple class to flag null bounds inside the WorldTreePanel for icon and text usage.
  * @author William Bittle
- * @version 1.0.0
+ * @version 1.0.6
  * @since 1.0.0
  */
 public class NullBounds extends AbstractBounds implements Bounds {
@@ -39,7 +39,7 @@ public class NullBounds extends AbstractBounds implements Bounds {
 	 * @see org.dyn4j.collision.Bounds#isOutside(org.dyn4j.collision.Collidable)
 	 */
 	@Override
-	public boolean isOutside(Collidable collidable) {
+	public boolean isOutside(Collidable<?> collidable) {
 		// a null bounds object lets everything through
 		return false;
 	}

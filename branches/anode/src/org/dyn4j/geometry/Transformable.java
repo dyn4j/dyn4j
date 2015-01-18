@@ -25,45 +25,10 @@
 package org.dyn4j.geometry;
 
 /**
- * Represents an object that is {@link Transformable}.
+ * Represents an object that is both {@link Rotatable} and {@link Translatable}.
  * @author William Bittle
- * @version 1.0.3
+ * @version 4.0.0
  * @since 1.0.0
  */
-// TODO create two new interfaces Rotatable and Translatable
-public interface Transformable {
-	/**
-	 * Rotates the object about the origin.
-	 * @param theta the angle of rotation in radians
-	 */
-	public abstract void rotate(double theta);
-	
-	/**
-	 * Rotates the object about the given point.
-	 * @param theta the angle of rotation in radians
-	 * @param point the point to rotate about
-	 */
-	public abstract void rotate(double theta, Vector2 point);
-	
-	/**
-	 * Rotates the object about the given coordinates.
-	 * @param theta the angle of rotation in radians
-	 * @param x the x coordinate to rotate about
-	 * @param y the y coordinate to rotate about
-	 */
-	public abstract void rotate(double theta, double x, double y);
-	
-	/**
-	 * Translates the object the given amounts in the respective directions.
-	 * @param x the translation in the x direction
-	 * @param y the translation in the y direction
-	 */
-	public abstract void translate(double x, double y);
-	
-	/**
-	 * Translates the object along the given vector.
-	 * @param vector the translation along a vector
-	 */
-	public abstract void translate(Vector2 vector);
-}
+public interface Transformable extends Rotatable, Translatable {}
 

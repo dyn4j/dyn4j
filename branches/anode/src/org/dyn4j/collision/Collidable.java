@@ -28,22 +28,41 @@ import java.util.List;
 import java.util.UUID;
 
 import org.dyn4j.geometry.AABB;
+import org.dyn4j.geometry.Convex;
+import org.dyn4j.geometry.Shape;
+import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Transformable;
+import org.dyn4j.geometry.Vector2;
 
 /**
  * Represents an object that can collide with other objects.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.0.0
  * @since 1.0.0
+ * @param <T> the {@link Fixture} type
  */
-public interface Collidable<T extends Fixture> extends Transformable {
+public interface Collidable<T extends Fixture> extends Transformable, Shiftable {
 	/**
 	 * Returns a unique identifier for this {@link Collidable}.
 	 * @return UUID the unique id
 	 * @since 3.0.0
 	 */
 	public abstract UUID getId();
+	
+	/**
+	 * Returns the user data associated to this {@link Collidable}.
+	 * @return Object
+	 * @since 4.0.0
+	 */
+	public abstract Object getUserData();
+
+	/**
+	 * Sets the user data associated to this {@link Collidable}.
+	 * @param data the user data
+	 * @since 4.0.0
+	 */
+	public abstract void setUserData(Object data);
 	
 	/**
 	 * Creates an {@link AABB} from this {@link Collidable}.
@@ -56,14 +75,127 @@ public interface Collidable<T extends Fixture> extends Transformable {
 	public abstract AABB createAABB();
 	
 	/**
+	 * Creates an {@link AABB} from this {@link Collidable} using the given 
+	 * world space {@link Transform}.
+	 * <p>
+	 * This method returns a degenerate AABB, (0.0, 0.0) to (0.0, 0.0),
+	 * for {@link Collidable}s that have no fixtures.
+	 * @param transform the world space {@link Transform}
+	 * @return {@link AABB}
+	 * @since 4.0.0
+	 */
+	public abstract AABB createAABB(Transform transform);
+	
+	/**
+	 * Adds the given {@link Fixture} to this {@link Collidable}.
+	 * @param fixture the {@link Fixture}
+	 * @return {@link Collidable} this collidable
+	 * @since 4.0.0
+	 */
+	public abstract Collidable<T> addFixture(T fixture);
+	
+	/**
+	 * Creates a {@link Fixture} for the given {@link Convex} {@link Shape},
+	 * adds it to the {@link Collidable}, and returns it.
+	 * @param convex the {@link Convex} {@link Shape} to add
+	 * @return T the fixture created
+	 * @since 4.0.0
+	 */
+	public abstract T addFixture(Convex convex);
+	
+	/**
 	 * Returns the {@link Fixture} at the given index.
 	 * <p>
 	 * Renamed from getShape(int).
 	 * @param index the index of the {@link Fixture}
-	 * @return {@link Fixture}
+	 * @return T the fixture
 	 * @since 2.0.0
 	 */
 	public abstract T getFixture(int index);
+	
+	/**
+	 * Returns true if this {@link Collidable} contains the given {@link Fixture}.
+	 * @param fixture the fixture
+	 * @return boolean
+	 * @since 4.0.0
+	 */
+	public abstract boolean containsFixture(T fixture);
+	
+	/**
+	 * Returns the first {@link Fixture}, as determined by the order in which they were added, that
+	 * contains the given point.
+	 * <p>
+	 * Returns null if the point is not contained in any fixture in this {@link Collidable}.
+	 * @param point a world space point
+	 * @return T the fixture
+	 * @since 4.0.0
+	 */
+	public abstract T getFixture(Vector2 point);
+
+	/**
+	 * Removes the given {@link Fixture} from this {@link Collidable}.
+	 * @param fixture the {@link Fixture}
+	 * @return boolean true if the {@link Fixture} was removed from this {@link Collidable}
+	 * @since 4.0.0
+	 */
+	public abstract boolean removeFixture(T fixture);
+	
+	/**
+	 * Removes the {@link Fixture} at the given index.
+	 * @param index the index
+	 * @return T the fixture removed
+	 * @throws IndexOutOfBoundsException if index is out of bounds
+	 * @since 4.0.0
+	 */
+	public abstract T removeFixture(int index);
+	
+	/**
+	 * Removes all fixtures from this {@link Collidable} and returns them.
+	 * @return List&lt;T&gt;
+	 * @since 4.0.0
+	 */
+	public abstract List<T> removeAllFixtures();
+	
+	/**
+	 * Removes the first {@link Fixture}, as determined by the order in which they were added, that
+	 * contains the given point and returns it.
+	 * <p>
+	 * Returns null if the point is not contained in any fixture in this {@link Collidable}.
+	 * @param point a world space point
+	 * @return T the fixture
+	 * @since 4.0.0
+	 */
+	public abstract T removeFixture(Vector2 point);
+	
+	/**
+	 * Returns all the {@link Fixture}s that contain the given point.
+	 * <p>
+	 * Returns an empty list if the point is not contained in any fixture in this {@link Collidable}.
+	 * @param point a world space point
+	 * @return List&lt;T&gt;
+	 * @since 4.0.0
+	 */
+	public abstract List<T> removeFixtures(Vector2 point);
+	
+	/**
+	 * Updates any internally cached information about the attached {@link Fixture}s.
+	 * <p>
+	 * This method should be used after adding, removing, or updating any fixtures
+	 * on a {@link Collidable} since these operations can affect information such
+	 * as the collidable center.
+	 * @return {@link Collidable} this collidable
+	 */
+	public abstract Collidable<T> update();
+	
+	/**
+	 * Returns all the {@link Fixture}s that contain the given point.
+	 * <p>
+	 * Returns an empty list if the point is not contained in any fixture in this {@link Collidable}.
+	 * @param point a world space point
+	 * @return List&lt;T&gt;
+	 * @since 4.0.0
+	 */
+	public abstract List<T> getFixtures(Vector2 point);
 	
 	/**
 	 * Returns the number of {@link Fixture}s attached
@@ -77,14 +209,104 @@ public interface Collidable<T extends Fixture> extends Transformable {
 	
 	/**
 	 * Returns a new list containing the fixtures attached to this {@link Collidable}.
-	 * @return List&lt;? extends {@link Fixture}&gt;
+	 * @return List&lt;T&gt;
 	 * @since 3.1.5
 	 */
-	public abstract List<? extends Fixture> getFixtures();
+	public abstract List<T> getFixtures();
+	
+	/**
+	 * Returns true if the given world space point is contained in this collidable.
+	 * @param point the world space test point
+	 * @return boolean
+	 * @since 4.0.0
+	 */
+	public abstract boolean contains(Vector2 point);
+
+	/**
+	 * Returns the center for this {@link Collidable} in local coordinates.
+	 * @return {@link Vector2} the center in local coordinates
+	 * @since 4.0.0
+	 */
+	public abstract Vector2 getLocalCenter();
+	
+	/**
+	 * Returns the center for this {@link Collidable} in world coordinates.
+	 * @return {@link Vector2} the center in world coordinates
+	 * @since 4.0.0
+	 */
+	public abstract Vector2 getWorldCenter();
+	
+	/**
+	 * Returns a new point in local coordinates of this {@link Collidable} given
+	 * a point in world coordinates.
+	 * @param worldPoint a world space point
+	 * @return {@link Vector2} local space point
+	 * @since 4.0.0
+	 */
+	public abstract Vector2 getLocalPoint(Vector2 worldPoint);
+	
+	/**
+	 * Returns a new point in world coordinates given a point in the
+	 * local coordinates of this {@link Collidable}.
+	 * @param localPoint a point in the local coordinates of this {@link Collidable}
+	 * @return {@link Vector2} world space point
+	 * @since 4.0.0
+	 */
+	public abstract Vector2 getWorldPoint(Vector2 localPoint);
+	
+	/**
+	 * Returns a new vector in local coordinates of this {@link Collidable} given
+	 * a vector in world coordinates.
+	 * @param worldVector a world space vector
+	 * @return {@link Vector2} local space vector
+	 * @since 4.0.0
+	 */
+	public abstract Vector2 getLocalVector(Vector2 worldVector);
+	
+	/**
+	 * Returns a new vector in world coordinates given a vector in the
+	 * local coordinates of this {@link Collidable}.
+	 * @param localVector a vector in the local coordinates of this {@link Collidable}
+	 * @return {@link Vector2} world space vector
+	 * @since 4.0.0
+	 */
+	public abstract Vector2 getWorldVector(Vector2 localVector);
+
+	/**
+	 * Returns the maximum radius of the disk that the
+	 * {@link Collidable} creates if rotated 360 degrees about its center.
+	 * @return double the maximum radius of the rotation disk
+	 */
+	public abstract double getRotationDiscRadius();
 	
 	/**
 	 * Returns the {@link Transform} of the object.
 	 * @return {@link Transform}
 	 */
 	public abstract Transform getTransform();
+	
+	/**
+	 * Sets this {@link Collidable}'s transform.
+	 * <p>
+	 * Does nothing if the given {@link Transform} is null.
+	 * @param transform the transform
+	 * @since 4.0.0
+	 */
+	public abstract void setTransform(Transform transform);
+	
+	/**
+	 * Rotates the {@link Collidable} about its center.
+	 * @param theta the angle of rotation in radians
+	 */
+	public abstract void rotateAboutCenter(double theta);
+
+	/**
+	 * Translates the center of the {@link Collidable} to the origin.
+	 * <p>
+	 * This method is useful if bodies have a number of fixtures and the center
+	 * is not at the origin.  This method will reposition this {@link Collidable} so 
+	 * that the center is at the origin.
+	 * @since 4.0.0
+	 */
+	public abstract void translateToOrigin();
 }

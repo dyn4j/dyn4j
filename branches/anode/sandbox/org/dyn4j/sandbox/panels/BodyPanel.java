@@ -63,7 +63,7 @@ import org.dyn4j.sandbox.utilities.ColorUtilities;
 /**
  * Panel for editing a Body.
  * @author William Bittle
- * @version 1.0.5
+ * @version 1.0.6
  * @since 1.0.0
  */
 public class BodyPanel extends JPanel implements InputPanel, ActionListener {
@@ -333,7 +333,7 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 				} else {
 					body.setMassExplicit(false);
 					// recompute the mass and set the current mass type
-					body.setMass(body.getMass().getType());
+					body.update(body.getMass().getType());
 					// set the new values after computing the mass
 					Mass m = body.getMass();
 					txtX.setValue(m.getCenter().x);

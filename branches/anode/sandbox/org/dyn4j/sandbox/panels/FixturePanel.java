@@ -64,7 +64,7 @@ import org.dyn4j.sandbox.resources.Messages;
 /**
  * Panel used to edit a fixture.
  * @author William Bittle
- * @version 1.0.1
+ * @version 1.0.6
  * @since 1.0.0
  */
 public class FixturePanel extends JPanel implements InputPanel {
@@ -332,8 +332,8 @@ public class FixturePanel extends JPanel implements InputPanel {
 			
 			// set the default selected groups
 			CategoryFilter filter = (CategoryFilter)fixture.getFilter();
-			int category = filter.getCategory();
-			int mask = filter.getMask();
+			int category = (int)filter.getCategory();
+			int mask = (int)filter.getMask();
 			
 			int[] indices = this.getSelectedIndices(category);
 			this.lstCategories.setSelectedIndices(indices);

@@ -35,16 +35,10 @@ import org.dyn4j.geometry.Transform;
  * This class can be used to implement only the methods desired instead of all
  * the methods contained in the {@link DetectListener} interface.
  * @author William Bittle
- * @version 3.1.9
+ * @version 4.0.0
  * @since 3.1.9
  */
 public class DetectAdapter implements DetectListener, Listener {
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.DetectListener#allow(org.dyn4j.geometry.AABB, org.dyn4j.dynamics.Body)
-	 */
-	@Override
-	public boolean allow(AABB aabb, Body body) { return true; }
-	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.DetectListener#allow(org.dyn4j.geometry.AABB, org.dyn4j.dynamics.Body, org.dyn4j.dynamics.BodyFixture)
 	 */

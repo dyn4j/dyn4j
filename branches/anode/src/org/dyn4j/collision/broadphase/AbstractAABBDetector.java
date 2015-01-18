@@ -35,9 +35,10 @@ import org.dyn4j.geometry.Vector2;
  * Abstract implementation of a {@link BroadphaseDetector} providing AABB
  * (Axis Aligned Bounding Box) detection methods.
  * @author William Bittle
- * @version 3.1.1
+ * @version 4.0.0
  * @since 1.0.0
  * @param <E> the {@link Collidable} type
+ * @param <T> the {@link Fixture} type
  */
 public abstract class AbstractAABBDetector<E extends Collidable<T>, T extends Fixture> implements BroadphaseDetector<E, T> {
 	/** The {@link AABB} expansion value */
@@ -92,7 +93,6 @@ public abstract class AbstractAABBDetector<E extends Collidable<T>, T extends Fi
 		return false;
 	}
 	
-	// TODO call from all broadphase detectors
 	/**
 	 * Returns true if the ray and AABB intersect.
 	 * <p>

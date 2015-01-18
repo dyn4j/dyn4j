@@ -25,16 +25,17 @@
 package org.dyn4j.dynamics;
 
 import org.dyn4j.dynamics.joint.Joint;
-import org.dyn4j.geometry.Vector2;
+import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.resources.Messages;
 
 /**
  * Represents some physical constraint between a pair of {@link Body}s.
  * @author William Bittle
- * @version 3.1.1
+ * @version 4.0.0
  * @since 1.0.0
  */
-public abstract class Constraint {
+// TODO split into constraint interface, unary constraint, binary constraint
+public abstract class Constraint implements Shiftable {
 	/** The world that contains this constraint */
 	protected World world;
 	
@@ -130,17 +131,6 @@ public abstract class Constraint {
 	public World getWorld() {
 		return this.world;
 	}
-	
-	/**
-	 * Shifts (translates) the coordinates of this constraint.
-	 * <p>
-	 * Typically this method should not be called directly.  Instead 
-	 * use the {@link World#shiftCoordinates(Vector2)} method to move the 
-	 * entire world.
-	 * @param shift the distance to shift along the x and y axes
-	 * @since 3.1.0
-	 */
-	protected abstract void shiftCoordinates(Vector2 shift);
 	
 	/**
 	 * Sets the on {@link Island} flag to the given value.

@@ -35,7 +35,7 @@ import org.dyn4j.sandbox.SandboxBody;
 /**
  * Compiled test for the contact tangent speed feature.
  * @author William Bittle
- * @version 1.0.4
+ * @version 1.0.6
  * @since 1.0.2
  */
 public class Conveyor extends CompiledSimulation {
@@ -77,12 +77,12 @@ public class Conveyor extends CompiledSimulation {
 		
 		this.floor = new SandboxBody();
 		this.floor.addFixture(Geometry.createRectangle(15.0, 1.0));
-		this.floor.setMass(Mass.Type.INFINITE);
+		this.floor.update(Mass.Type.INFINITE);
 		this.floor.setUserData("Floor");
 		
 		SandboxBody box = new SandboxBody();
 		box.addFixture(Geometry.createSquare(1.0));
-		box.setMass();
+		box.update();
 		box.translate(0.0, 2.0);
 		box.setUserData("Box");
 		
