@@ -24,26 +24,57 @@
  */
 package org.dyn4j.dynamics;
 
-import org.dyn4j.Listener;
-import org.dyn4j.collision.narrowphase.Raycast;
+import org.dyn4j.collision.Filter;
+import org.dyn4j.collision.broadphase.BroadphaseDetector;
+import org.dyn4j.collision.broadphase.BroadphaseFilter;
+import org.dyn4j.collision.broadphase.BroadphaseFilterAdapter;
 import org.dyn4j.geometry.Ray;
 
 /**
- * Default implementation of the {@link RaycastListener} interface.
+ * Represents a {@link BroadphaseFilter} for the {@link BroadphaseDetector#raycast(Ray, double, BroadphaseFilter)} method.
  * @author William Bittle
  * @version 4.0.0
- * @since 2.0.0
+ * @since 4.0.0
  */
-public class RaycastAdapter implements RaycastListener, Listener {
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.RaycastListener#allow(org.dyn4j.geometry.Ray, org.dyn4j.dynamics.Body, org.dyn4j.dynamics.BodyFixture)
+public class RaycastBroadphaseFilter extends BroadphaseFilterAdapter<Body, BodyFixture> implements BroadphaseFilter<Body, BodyFixture> {
+	/** True to ignore inactive bodies */
+	public final boolean ignoreInactive;
+	
+	/** True to ignore sensor fixtures */
+	public final boolean ignoreSensors;
+	
+	/** The fixture filter */
+	public final Filter filter;
+	
+	/**
+	 * Full constructor.
+	 * @param ignoreInactive true to ignore inactive bodies
+	 * @param ignoreSensors true to ignore sensor fixtures
+	 * @param filter the fixture filter
 	 */
-	@Override
-	public boolean allow(Ray ray, Body body, BodyFixture fixture) { return true; }
+	public RaycastBroadphaseFilter(boolean ignoreInactive, boolean ignoreSensors, Filter filter) {
+		this.ignoreInactive = ignoreInactive;
+		this.ignoreSensors = ignoreSensors;
+		this.filter = filter;
+	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.RaycastListener#allow(org.dyn4j.geometry.Ray, org.dyn4j.dynamics.Body, org.dyn4j.dynamics.BodyFixture, org.dyn4j.collision.narrowphase.Raycast)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseFilterAdapter#isAllowed(org.dyn4j.geometry.Ray, double, org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
 	 */
 	@Override
-	public boolean allow(Ray ray, Body body, BodyFixture fixture, Raycast raycast) { return true; }
+	public boolean isAllowed(Ray ray, double length, Body body, BodyFixture fixture) {
+		// check for inactive
+		if (this.ignoreInactive && !body.isActive()) return false;
+		// check for sensor
+		if (this.ignoreSensors && fixture.isSensor()) {
+			// skip this fixture
+			return false;
+		}
+		// check against the filter
+		if (this.filter != null && !this.filter.isAllowed(fixture.getFilter())) {
+			return false;
+		}
+		
+		return super.isAllowed(ray, length, body, fixture);
+	}
 }

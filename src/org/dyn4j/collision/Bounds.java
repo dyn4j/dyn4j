@@ -24,38 +24,31 @@
  */
 package org.dyn4j.collision;
 
-import org.dyn4j.dynamics.BodyFixture;
-import org.dyn4j.geometry.Transform;
-import org.dyn4j.geometry.Transformable;
+import org.dyn4j.geometry.Shiftable;
+import org.dyn4j.geometry.Translatable;
 import org.dyn4j.geometry.Vector2;
 
 /**
  * Represents the {@link Bounds} of the simulation/world.
  * @author William Bittle
- * @version 3.1.0
+ * @version 4.0.0
  * @since 1.0.0
  */
-public interface Bounds extends Transformable {
+public interface Bounds extends Translatable, Shiftable {
 	/**
-	 * Returns the {@link Bounds} {@link Transform}.
-	 * @return {@link Transform}
+	 * Returns the translation of the bounds.
+	 * @return {@link Vector2}
+	 * @since 4.0.0
 	 */
-	public abstract Transform getTransform();
-	
-	/**
-	 * Translates the bounds to match the given coordinate shift.
-	 * @param shift the amount to shift along the x and y axes
-	 * @since 3.1.0
-	 */
-	public abstract void shiftCoordinates(Vector2 shift);
+	public abstract Vector2 getTranslation();
 	
 	/**
 	 * Returns true if the given {@link Collidable} is outside the bounds.
 	 * <p>
-	 * If the {@link Collidable} contains zero {@link BodyFixture}s then 
+	 * If the {@link Collidable} contains zero {@link Fixture}s then 
 	 * {@link Collidable} is considered to be outside the bounds.
 	 * @param collidable the {@link Collidable} to test
 	 * @return boolean true if outside the bounds
 	 */
-	public abstract boolean isOutside(Collidable collidable);
+	public abstract boolean isOutside(Collidable<?> collidable);
 }

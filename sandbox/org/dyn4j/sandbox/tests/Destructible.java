@@ -44,7 +44,7 @@ import org.dyn4j.sandbox.SandboxBody;
 /**
  * Compiled test for testing destruction of bodies.
  * @author William Bittle
- * @version 1.0.5
+ * @version 1.0.6
  * @since 1.0.2
  */
 public class Destructible extends CompiledSimulation {
@@ -125,7 +125,7 @@ public class Destructible extends CompiledSimulation {
 						b.setFillColor(Arrays.copyOf(fcolor, fcolor.length));
 						b.setOutlineColor(Arrays.copyOf(ocolor, ocolor.length));
 						b.addFixture(Geometry.createTriangle(p1, p2, center));
-						b.setMass();
+						b.update();
 						// copy over the transform
 						b.setTransform(tx.copy());
 						// copy over the velocity
@@ -175,20 +175,20 @@ public class Destructible extends CompiledSimulation {
 		// create the floor
 		this.floor = new SandboxBody();
 		this.floor.addFixture(Geometry.createRectangle(15.0, 1.0));
-		this.floor.setMass(Mass.Type.INFINITE);
+		this.floor.update(Mass.Type.INFINITE);
 		this.floor.setUserData("Floor");
 		
 		// create the weld joint bodies
 		SandboxBody top = new SandboxBody();
 		top.addFixture(Geometry.createRectangle(0.5, 1.0));
-		top.setMass();
+		top.update();
 		top.translate(0.0, 3.0);
 		top.getLinearVelocity().set(2.0, 0.0);
 		top.setUserData("Top");
 		
 		SandboxBody bot = new SandboxBody();
 		bot.addFixture(Geometry.createRectangle(0.5, 1.0));
-		bot.setMass();
+		bot.update();
 		bot.translate(0.0, 2.0);
 		bot.setUserData("Bottom");
 		
@@ -197,7 +197,7 @@ public class Destructible extends CompiledSimulation {
 		
 		this.icosigon = new SandboxBody();
 		this.icosigon.addFixture(Geometry.createUnitCirclePolygon(20, 1.0));
-		this.icosigon.setMass();
+		this.icosigon.update();
 		this.icosigon.translate(-2.5, 2.0);
 		this.icosigon.setUserData("Icosigon");
 		

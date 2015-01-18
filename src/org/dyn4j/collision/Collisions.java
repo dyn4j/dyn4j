@@ -29,7 +29,7 @@ import org.dyn4j.collision.Collidable;
 /**
  * Class used to estimate collision counts and other one-off collision tasks.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.0.0
  * @since 3.1.1
  */
 public final class Collisions {
@@ -93,6 +93,7 @@ public final class Collisions {
 	 * of objects to collide with.
 	 * @param n the number of {@link Collidable}s
 	 * @return int
+	 * @since 4.0.0
 	 */
 	public static final int getEstimatedRaycastCollisions(int n) {
 		return (int)Math.max(1.0, n * ESTIMATED_RAYCAST_DENSITY);

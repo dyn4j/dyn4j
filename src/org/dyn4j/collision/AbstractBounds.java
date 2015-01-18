@@ -25,70 +25,51 @@
 package org.dyn4j.collision;
 
 import org.dyn4j.geometry.Transform;
-import org.dyn4j.geometry.Transformable;
+import org.dyn4j.geometry.Translatable;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * Abstract implementation of the {@link Bounds} interface.
  * @author William Bittle
- * @version 3.1.0
+ * @version 4.0.0
  * @since 1.0.0
  */
-public abstract class AbstractBounds implements Bounds, Transformable {
+public abstract class AbstractBounds implements Bounds, Translatable {
 	/** The {@link Bounds} {@link Transform} */
 	protected Transform transform;
 	
 	/**
 	 * Default constructor.
-	 * <p>
-	 * Creates a new transform.
 	 */
 	public AbstractBounds() {
 		this.transform = new Transform();
 	}
+
+	/**
+	 * Optional constructor.
+	 * @param x the initial x translation of the bounds
+	 * @param y the initial x translation of the bounds
+	 */
+	public AbstractBounds(double x, double y) {
+		this();
+		this.translate(x, y);
+	}
 	
 	/**
-	 * Full constructor.
-	 * @param transform the transform for the bounds
-	 * @throws NullPointerException if transform is null
+	 * Optional constructor.
+	 * @param translation the initial translation of the bounds
 	 */
-	public AbstractBounds(Transform transform) {
-		// check for a null transform
-		if (transform == null) throw new NullPointerException(Messages.getString("collision.bounds.abstract.nullTransform"));
-		this.transform = transform;
+	public AbstractBounds(Vector2 translation) {
+		this();
+		this.translate(translation);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.Bounds#getTransform()
+	 * @see org.dyn4j.collision.Bounds#getTranslation()
 	 */
 	@Override
-	public Transform getTransform() {
-		return this.transform;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Transformable#rotate(double)
-	 */
-	@Override
-	public void rotate(double theta) {
-		this.transform.rotate(theta);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Transformable#rotate(double, org.dyn4j.geometry.Vector)
-	 */
-	@Override
-	public void rotate(double theta, Vector2 point) {
-		this.transform.rotate(theta, point.x, point.y);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Transformable#rotate(double, double, double)
-	 */
-	@Override
-	public void rotate(double theta, double x, double y) {
-		this.transform.rotate(theta, x, y);
+	public Vector2 getTranslation() {
+		return this.transform.getTranslation();
 	}
 	
 	/* (non-Javadoc)
@@ -108,10 +89,10 @@ public abstract class AbstractBounds implements Bounds, Transformable {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.Bounds#shiftCoordinates(org.dyn4j.geometry.Vector2)
+	 * @see org.dyn4j.geometry.Shiftable#shift(org.dyn4j.geometry.Vector2)
 	 */
 	@Override
-	public void shiftCoordinates(Vector2 shift) {
+	public void shift(Vector2 shift) {
 		this.transform.translate(shift);
 	}
 }

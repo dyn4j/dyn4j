@@ -90,15 +90,15 @@ package org.dyn4j.collision;
  * Basically the filter from <a href="http://www.box2d.org">Box2d</a>.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.0.2
+ * @version 4.0.0
  * @since 1.0.0
  */
 public class CategoryFilter implements Filter {
 	/** The category this object is in */
-	protected int category;
+	protected long category;
 	
 	/** The categories this object can collide with */
-	protected int mask;
+	protected long mask;
 	
 	/**
 	 * Default constructor.
@@ -107,7 +107,7 @@ public class CategoryFilter implements Filter {
 	 */
 	public CategoryFilter() {
 		this.category = 1;
-		this.mask = Integer.MAX_VALUE;
+		this.mask = Long.MAX_VALUE;
 	}
 	
 	/**
@@ -115,7 +115,7 @@ public class CategoryFilter implements Filter {
 	 * @param category the category bits
 	 * @param mask the mask bits
 	 */
-	public CategoryFilter(int category, int mask) {
+	public CategoryFilter(long category, long mask) {
 		super();
 		this.category = category;
 		this.mask = mask;
@@ -161,17 +161,17 @@ public class CategoryFilter implements Filter {
 	
 	/**
 	 * Returns the category bits.
-	 * @return int the category bits
+	 * @return long the category bits
 	 */
-	public int getCategory() {
+	public long getCategory() {
 		return this.category;
 	}
 	
 	/**
 	 * Returns the mask bits.
-	 * @return int the mask bits
+	 * @return long the mask bits
 	 */
-	public int getMask() {
+	public long getMask() {
 		return this.mask;
 	}
 	
@@ -179,7 +179,7 @@ public class CategoryFilter implements Filter {
 	 * Sets the category bits.
 	 * @param category the category bits
 	 */
-	public void setCategory(int category) {
+	public void setCategory(long category) {
 		this.category = category;
 	}
 	
@@ -187,7 +187,7 @@ public class CategoryFilter implements Filter {
 	 * Sets the mask bits.
 	 * @param mask the mask bits
 	 */
-	public void setMask(int mask) {
+	public void setMask(long mask) {
 		this.mask = mask;
 	}
 }

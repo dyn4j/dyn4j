@@ -26,9 +26,8 @@
 /**
  * Sub package of the Collision package handling broad-phase collision detection.
  * <p>
- * Currently there are three broadphase implementations:
- * {@link org.dyn4j.collision.broadphase.SapIncremental},
- * {@link org.dyn4j.collision.broadphase.SapBruteForce}, and
+ * Currently there are two broadphase implementations:
+ * {@link org.dyn4j.collision.broadphase.Sap} and
  * {@link org.dyn4j.collision.broadphase.DynamicAABBTree}.
  * <p>
  * A {@link org.dyn4j.collision.broadphase.BroadphaseDetector} should accept a list of 
@@ -38,15 +37,8 @@
  * {@link org.dyn4j.collision.broadphase.BroadphaseDetector}s are not expected to be accurate, 
  * but are expected to be conservative.  Meaning, its acceptable for a 
  * {@link org.dyn4j.collision.broadphase.BroadphaseDetector} to return false positives.
- * <p>
- * Typical applications will want to use the {@link org.dyn4j.collision.broadphase.DynamicAABBTree}
- * class since it has double the performance than the other two in raycasting at minimal performance
- * decrease in general collision detection.  If raycasting is not a large portion of the application, then
- * use of {@link org.dyn4j.collision.broadphase.SapIncremental} is advised because of its performance
- * benefits when objects are moving either rarely or not at all.  Finally, if constant performance is required
- * use {@link org.dyn4j.collision.broadphase.SapBruteForce}.
  * @author William Bittle
- * @version 3.0.0
+ * @version 4.0.0
  * @since 1.0.0
  */
 package org.dyn4j.collision.broadphase;

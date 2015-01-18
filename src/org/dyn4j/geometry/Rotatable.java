@@ -22,22 +22,33 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.collision;
-
-import org.dyn4j.Listener;
+package org.dyn4j.geometry;
 
 /**
- * Convenience class for implementing the {@link BoundsListener} interface.
- * <p>
- * This class can be used to implement only the methods desired instead of all
- * the methods contained in the {@link BoundsListener} interface.
+ * Interface representing an object that can be rotated.
  * @author William Bittle
  * @version 4.0.0
- * @since 1.0.0
+ * @since 4.0.0
  */
-public class BoundsAdapter implements BoundsListener, Listener {
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.BoundsListener#outside(org.dyn4j.collision.Collidable)
+public interface Rotatable {
+	/**
+	 * Rotates the object about the origin.
+	 * @param theta the angle of rotation in radians
 	 */
-	public <E extends Collidable<T>, T extends Fixture> void outside(E collidable) {};
+	public abstract void rotate(double theta);
+	
+	/**
+	 * Rotates the object about the given point.
+	 * @param theta the angle of rotation in radians
+	 * @param point the point to rotate about
+	 */
+	public abstract void rotate(double theta, Vector2 point);
+	
+	/**
+	 * Rotates the object about the given coordinates.
+	 * @param theta the angle of rotation in radians
+	 * @param x the x coordinate to rotate about
+	 * @param y the y coordinate to rotate about
+	 */
+	public abstract void rotate(double theta, double x, double y);
 }

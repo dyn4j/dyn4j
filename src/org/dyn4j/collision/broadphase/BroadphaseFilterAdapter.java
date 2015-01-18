@@ -22,22 +22,44 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.collision;
+package org.dyn4j.collision.broadphase;
 
-import org.dyn4j.Listener;
+import org.dyn4j.collision.Collidable;
+import org.dyn4j.collision.Fixture;
+import org.dyn4j.geometry.AABB;
+import org.dyn4j.geometry.Ray;
 
 /**
- * Convenience class for implementing the {@link BoundsListener} interface.
- * <p>
- * This class can be used to implement only the methods desired instead of all
- * the methods contained in the {@link BoundsListener} interface.
+ * Helper class to avoid having to override all the methods of the {@link BroadphaseFilter}
+ * interface
  * @author William Bittle
  * @version 4.0.0
- * @since 1.0.0
+ * @since 4.0.0
+ * @param <E> the {@link Collidable} type
+ * @param <T> the {@link Fixture} type
  */
-public class BoundsAdapter implements BoundsListener, Listener {
+public class BroadphaseFilterAdapter<E extends Collidable<T>, T extends Fixture> implements BroadphaseFilter<E, T>{
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.BoundsListener#outside(org.dyn4j.collision.Collidable)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseFilter#isAllowed(org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture, org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
 	 */
-	public <E extends Collidable<T>, T extends Fixture> void outside(E collidable) {};
+	@Override
+	public boolean isAllowed(E collidable1, T fixture1, E collidable2, T fixture2) {
+		return true;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseFilter#isAllowed(org.dyn4j.geometry.AABB, org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
+	 */
+	@Override
+	public boolean isAllowed(AABB aabb, E collidable, T fixture) {
+		return true;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseFilter#isAllowed(org.dyn4j.geometry.Ray, double, org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
+	 */
+	@Override
+	public boolean isAllowed(Ray ray, double length, E collidable, T fixture) {
+		return true;
+	}
 }

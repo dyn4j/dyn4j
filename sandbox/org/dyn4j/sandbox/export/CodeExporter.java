@@ -179,8 +179,8 @@ public class CodeExporter {
 			double h = aab.getHeight();
 			sb.append(NEW_LINE)
 			.append(TAB2).append("AxisAlignedBounds bounds = new AxisAlignedBounds(").append(w).append(", ").append(h).append(");").append(NEW_LINE);
-			if (!aab.getTransform().getTranslation().isZero()) {
-				sb.append(TAB2).append("bounds.translate(").append(export(aab.getTransform().getTranslation())).append(");").append(NEW_LINE);
+			if (!aab.getTranslation().isZero()) {
+				sb.append(TAB2).append("bounds.translate(").append(export(aab.getTranslation())).append(");").append(NEW_LINE);
 			}
 			sb.append(TAB2).append("world.setBounds(bounds);").append(NEW_LINE)
 			.append(NEW_LINE);

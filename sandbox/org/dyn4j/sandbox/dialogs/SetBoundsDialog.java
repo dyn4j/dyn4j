@@ -40,7 +40,6 @@ import javax.swing.JTabbedPane;
 import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Rectangle;
-import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.controls.BottomButtonPanel;
 import org.dyn4j.sandbox.icons.Icons;
@@ -51,7 +50,7 @@ import org.dyn4j.sandbox.resources.Messages;
 /**
  * Dialog to create a new body with an initial fixture/shape.
  * @author William Bittle
- * @version 1.0.4
+ * @version 1.0.6
  * @since 1.0.0
  */
 public class SetBoundsDialog extends JDialog implements ActionListener {
@@ -80,14 +79,14 @@ public class SetBoundsDialog extends JDialog implements ActionListener {
 		JTabbedPane tabs = new JTabbedPane();
 		
 		Rectangle r = new Rectangle(10.0, 10.0);
-		Transform t = new Transform();
+		Vector2 t = new Vector2();
 		if (bounds != null) {
 			r = new Rectangle(bounds.getWidth(), bounds.getHeight());
-			t = bounds.getTransform();
+			t = bounds.getTranslation();
 		}
 		
 		this.pnlRectangle = new RectanglePanel(r);
-		this.pnlTransform = new TransformPanel(t.getTranslation(), 0.0, false, null);
+		this.pnlTransform = new TransformPanel(t, 0.0, false, null);
 		
 		tabs.setBorder(BorderFactory.createEmptyBorder(7, 0, 0, 0));
 		tabs.addTab(Messages.getString("dialog.bounds.tab.bounds"), this.pnlRectangle);

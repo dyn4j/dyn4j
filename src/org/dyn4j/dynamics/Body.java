@@ -27,9 +27,9 @@ package org.dyn4j.dynamics;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 import org.dyn4j.Epsilon;
+import org.dyn4j.collision.AbstractCollidable;
 import org.dyn4j.collision.Collidable;
 import org.dyn4j.collision.Collisions;
 import org.dyn4j.dynamics.contact.Contact;
@@ -57,7 +57,7 @@ import org.dyn4j.resources.Messages;
  * are no {@link BodyFixture}s attached.  Concave {@link Body}s can be created
  * by attaching multiple {@link Convex} {@link BodyFixture}s.
  * <p>
- * Use the {@link #setMass()} or {@link #setMass(org.dyn4j.geometry.Mass.Type)}
+ * Use the {@link #update()} or {@link #update(org.dyn4j.geometry.Mass.Type)}
  * methods to set the mass of the entire {@link Body} given the currently attached
  * {@link BodyFixture}s.  The {@link #setMass(Mass)} method can be used to set
  * the mass directly.  Use the {@link #setMassType(org.dyn4j.geometry.Mass.Type)}
@@ -83,13 +83,10 @@ import org.dyn4j.resources.Messages;
  * setting in the world's {@link Settings}.  Use this if the body is a fast moving
  * body, but be careful as this will incur a performance hit.
  * @author William Bittle
- * @version 3.1.8
+ * @version 4.0.0
  * @since 1.0.0
  */
-public class Body implements Collidable<BodyFixture>, Transformable {
-	/** Number of fixtures typically added to a {@link Body} */
-	private static final int TYPICAL_FIXTURE_COUNT = 1;
-	
+public class Body extends AbstractCollidable<BodyFixture> implements Collidable<BodyFixture>, Transformable {
 	/** The default linear damping; value = {@value #DEFAULT_LINEAR_DAMPING} */
 	public static final double DEFAULT_LINEAR_DAMPING = 0.0;
 	
@@ -114,23 +111,8 @@ public class Body implements Collidable<BodyFixture>, Transformable {
 	/** The world this body belongs to */
 	protected World world;
 	
-	/** The {@link Body}'s unique identifier */
-	protected UUID id;
-	
 	/** The beginning transform for CCD */
 	protected Transform transform0;
-	
-	/** The current {@link Transform} */
-	protected Transform transform;
-
-	/** The {@link BodyFixture}s list */
-	protected List<BodyFixture> fixtures;
-	
-	/** The the rotation disk radius */
-	protected double radius;
-	
-	/** The user data associated to this {@link Body} */
-	protected Object userData;
 	
 	/** The {@link Mass} information */
 	protected Mass mass;
@@ -178,7 +160,7 @@ public class Body implements Collidable<BodyFixture>, Transformable {
 	 * Default constructor.
 	 */
 	public Body() {
-		this(Body.TYPICAL_FIXTURE_COUNT);
+		this(AbstractCollidable.TYPICAL_FIXTURE_COUNT);
 	}
 	
 	/**
@@ -193,14 +175,11 @@ public class Body implements Collidable<BodyFixture>, Transformable {
 	 * @since 3.1.1
 	 */
 	public Body(int fixtureCount) {
+		super(fixtureCount);
 		this.world = null;
-		// the majority of bodies will contain one fixture/shape
-		this.fixtures = new ArrayList<BodyFixture>(fixtureCount);
 		this.radius = 0.0;
 		this.mass = new Mass();
-		this.id = UUID.randomUUID();
 		this.transform0 = new Transform();
-		this.transform = new Transform();
 		this.velocity = new Vector2();
 		this.angularVelocity = 0.0;
 		this.force = new Vector2();
@@ -258,37 +237,7 @@ public class Body implements Collidable<BodyFixture>, Transformable {
 	}
 	
 	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) return false;
-		if (obj == this) return true;
-		if (obj instanceof Body) {
-			return this.id.equals(((Body)obj).id);
-		}
-		return false;
-	}
-	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		return this.id.hashCode();
-	}
-	
-	/**
-	 * Creates a {@link BodyFixture} for the given {@link Convex} {@link Shape},
-	 * adds it to the {@link Body}, and returns it for configuration.
-	 * <p>
-	 * After adding or removing fixtures make sure to call the {@link #setMass()}
-	 * or {@link #setMass(Mass.Type)} method to compute the new total
-	 * {@link Mass} for the body.
-	 * @param convex the {@link Convex} {@link Shape} to add to the {@link Body}
-	 * @return {@link BodyFixture} the fixture created using the given {@link Shape} and added to the {@link Body}
-	 * @throws NullPointerException if convex is null
-	 * @see #addFixture(Convex, double, double, double)
+	 * @see org.dyn4j.collision.Collidable#addFixture(org.dyn4j.geometry.Convex)
 	 */
 	public BodyFixture addFixture(Convex convex) {
 		// make sure the convex shape is not null
@@ -305,8 +254,8 @@ public class Body implements Collidable<BodyFixture>, Transformable {
 	 * Creates a {@link BodyFixture} for the given {@link Convex} {@link Shape},
 	 * adds it to the {@link Body}, and returns it for configuration.
 	 * <p>
-	 * After adding or removing fixtures make sure to call the {@link #setMass()}
-	 * or {@link #setMass(Mass.Type)} method to compute the new total
+	 * After adding or removing fixtures make sure to call the {@link #update()}
+	 * or {@link #update(Mass.Type)} method to compute the new total
 	 * {@link Mass} for the body.
 	 * <p>
 	 * This is a convenience method for setting the density of a {@link BodyFixture}.
@@ -336,8 +285,8 @@ public class Body implements Collidable<BodyFixture>, Transformable {
 	 * Creates a {@link BodyFixture} for the given {@link Convex} {@link Shape},
 	 * adds it to the {@link Body}, and returns it for configuration.
 	 * <p>
-	 * After adding or removing fixtures make sure to call the {@link #setMass()}
-	 * or {@link #setMass(Mass.Type)} method to compute the new total
+	 * After adding or removing fixtures make sure to call the {@link #update()}
+	 * or {@link #update(Mass.Type)} method to compute the new total
 	 * {@link Mass} for the body.
 	 * <p>
 	 * This is a convenience method for setting the properties of a {@link BodyFixture}.
@@ -370,15 +319,8 @@ public class Body implements Collidable<BodyFixture>, Transformable {
 		return fixture;
 	}
 	
-	/**
-	 * Adds the given {@link BodyFixture} to this {@link Body}.
-	 * <p>
-	 * After adding or removing fixtures make sure to call the {@link #setMass()}
-	 * or {@link #setMass(Mass.Type)} method to compute the new total
-	 * {@link Mass} for the body.
-	 * @param fixture the {@link BodyFixture}
-	 * @return {@link Body} this body
-	 * @throws NullPointerException if fixture is null
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.Collidable#addFixture(org.dyn4j.collision.Fixture)
 	 */
 	public Body addFixture(BodyFixture fixture) {
 		// make sure neither is null
@@ -390,69 +332,6 @@ public class Body implements Collidable<BodyFixture>, Transformable {
 	}
 
 	/**
-	 * Removes the given {@link BodyFixture} from the {@link Body}.
-	 * <p>
-	 * After adding or removing fixtures make sure to call the {@link #setMass()}
-	 * or {@link #setMass(Mass.Type)} method to compute the new total
-	 * {@link Mass} for the body.
-	 * @param fixture the {@link BodyFixture}
-	 * @return boolean true if the {@link BodyFixture} was removed from this {@link Body}
-	 */
-	public boolean removeFixture(BodyFixture fixture) {
-		// make sure the passed in fixture is not null
-		if (fixture == null) return false;
-		// get the number of fixtures
-		int size = this.fixtures.size();
-		// check fixtures size
-		if (size > 0) {
-			return this.fixtures.remove(fixture);
-		}
-		return false;
-	}
-	
-	/**
-	 * Removes the {@link BodyFixture} at the given index.
-	 * <p>
-	 * After adding or removing fixtures make sure to call the {@link #setMass()}
-	 * or {@link #setMass(Mass.Type)} method to compute the new total
-	 * {@link Mass} for the body.
-	 * @param index the index
-	 * @return {@link BodyFixture} the fixture removed
-	 * @throws IndexOutOfBoundsException if index is out of bounds
-	 */
-	public BodyFixture removeFixture(int index) {
-		return this.fixtures.remove(index);
-	}
-	
-	/**
-	 * Removes all fixtures from this body and returns them.
-	 * <p>
-	 * After adding or removing fixtures make sure to call the {@link #setMass()}
-	 * or {@link #setMass(Mass.Type)} method to compute the new total
-	 * {@link Mass} for the body.
-	 * @return List&lt;{@link BodyFixture}&gt;
-	 * @since 3.0.1
-	 */
-	public List<BodyFixture> removeAllFixtures() {
-		// return the current list
-		List<BodyFixture> fixtures = this.fixtures;
-		// create a new list to replace the current list
-		this.fixtures = new ArrayList<BodyFixture>(Body.TYPICAL_FIXTURE_COUNT);
-		// return the current list
-		return fixtures;
-	}
-	
-	/**
-	 * Returns true if this {@link Body} contains the given {@link BodyFixture}.
-	 * @param fixture the fixture
-	 * @return boolean
-	 * @since 3.1.1
-	 */
-	public boolean containsFixture(BodyFixture fixture) {
-		return this.fixtures.contains(fixture);
-	}
-	
-	/**
 	 * This method should be called after fixture modification
 	 * is complete.
 	 * <p>
@@ -461,13 +340,12 @@ public class Body implements Collidable<BodyFixture>, Transformable {
 	 * <p>
 	 * This method will always set this body's mass type to Normal.
 	 * @return {@link Body} this body
-	 * @see #setMass(Mass.Type)
-	 * @see #addFixture(BodyFixture)
-	 * @see #removeFixture(BodyFixture)
-	 * @see #removeFixture(int)
+	 * @since 4.0.0
+	 * @see #update(Mass.Type)
 	 */
-	public Body setMass() {
-		return this.setMass(Mass.Type.NORMAL);
+	@Override
+	public Body update() {
+		return this.update(Mass.Type.NORMAL);
 	}
 	
 	/**
@@ -478,17 +356,14 @@ public class Body implements Collidable<BodyFixture>, Transformable {
 	 * given the masses of the fixtures.
 	 * <p>
 	 * A {@link org.dyn4j.geometry.Mass.Type} can be used to create special mass
-	 * types.
+	 * types.  If the mass type is null, the method will immediately return.
 	 * @param type the {@link org.dyn4j.geometry.Mass.Type}
 	 * @return {@link Body} this body
-	 * @throws NullPointerException if type is null
-	 * @see #addFixture(BodyFixture)
-	 * @see #removeFixture(BodyFixture)
-	 * @see #removeFixture(int)
+	 * @since 4.0.0
 	 */
-	public Body setMass(Mass.Type type) {
+	public Body update(Mass.Type type) {
 		// check for null
-		if (type == null) throw new NullPointerException(Messages.getString("dynamics.body.nullMassType"));
+		if (type == null) return this;
 		// get the size
 		int size = this.fixtures.size();
 		// check the size
@@ -519,19 +394,22 @@ public class Body implements Collidable<BodyFixture>, Transformable {
 	/**
 	 * Sets this {@link Body}'s mass information.
 	 * <p>
-	 * This method can be used to set the mass of the body explicitly.
+	 * This method can be used to set the mass of the body explicitly. Immediately
+	 * returns if the mass is null.
+	 * <p>
+	 * This method will automatically update the body.
 	 * @param mass the new {@link Mass}
 	 * @return {@link Body} this body
-	 * @throws NullPointerException if mass is null
 	 */
 	public Body setMass(Mass mass) {
 		// make sure the mass is not null
-		if (mass == null) throw new NullPointerException(Messages.getString("dynamics.body.nullMass"));
-		// set the mass
-		this.mass = mass;
-		// compute the rotation disc radius
-		this.setRotationDiscRadius();
-		// return this body to facilitate chaining
+		if (mass != null) {
+			// set the mass
+			this.mass = mass;
+			// compute the rotation disc radius
+			this.setRotationDiscRadius();
+			// return this body to facilitate chaining
+		}
 		return this;
 	}
 	
@@ -539,9 +417,10 @@ public class Body implements Collidable<BodyFixture>, Transformable {
 	 * Sets the {@link org.dyn4j.geometry.Mass.Type} of this {@link Body}.
 	 * <p>
 	 * This method does not compute/recompute the mass of the body but solely
-	 * sets the mass type to one of the special types.
+	 * sets the mass type to one of the special types.  If the given type is null,
+	 * the method immediately returns.
 	 * <p>
-	 * If the mass of this body has not been set previously by one of the {@link #setMass()}
+	 * If the mass of this body has not been set previously by one of the {@link #update()}
 	 * methods, then this method will compute the mass.
 	 * <p>
 	 * Since its possible to create a {@link Mass} object with zero mass and/or
@@ -549,16 +428,15 @@ public class Body implements Collidable<BodyFixture>, Transformable {
 	 * to something other than Mass.Type.INFINITE can have undefined results.
 	 * @param type the desired type
 	 * @return {@link Body} this body
-	 * @throws NullPointerException if type is null
 	 * @since 2.2.3
 	 */
 	public Body setMassType(Mass.Type type) {
 		// check for null type
-		if (type == null) throw new NullPointerException(Messages.getString("dynamics.body.nullMassType"));
+		if (type == null) return this;
 		// make sure the current mass is not null
 		if (this.mass == null) {
 			// if its null then just compute it for the first time
-			this.setMass(type);
+			this.update(type);
 		} else {
 			// otherwise just set the type
 			this.mass.setType(type);
@@ -1276,198 +1154,6 @@ public class Body implements Collidable<BodyFixture>, Transformable {
 		return false;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Transformable#rotate(double, double, double)
-	 */
-	@Override
-	public void rotate(double theta, double x, double y) {
-		this.transform.rotate(theta, x, y);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Transformable#rotate(double, org.dyn4j.geometry.Vector)
-	 */
-	@Override
-	public void rotate(double theta, Vector2 point) {
-		this.transform.rotate(theta, point);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Transformable#rotate(double)
-	 */
-	@Override
-	public void rotate(double theta) {
-		this.transform.rotate(theta);
-	}
-	
-	/**
-	 * Rotates the {@link Body} about its center of mass.
-	 * @param theta the angle of rotation in radians
-	 */
-	public void rotateAboutCenter(double theta) {
-		Vector2 center = this.getWorldCenter();
-		this.rotate(theta, center);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Transformable#translate(double, double)
-	 */
-	@Override
-	public void translate(double x, double y) {
-		this.transform.translate(x, y);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Transformable#translate(org.dyn4j.geometry.Vector)
-	 */
-	@Override
-	public void translate(Vector2 vector) {
-		this.transform.translate(vector);
-	}
-	/**
-	 * Translates the body to the origin.
-	 * <p>
-	 * This method is useful if bodies have a number of fixtures and the center of mass
-	 * is not at the origin.  This method will reposition the body so that the center of
-	 * mass is at the origin.
-	 * @since 2.2.2
-	 */
-	public void translateToOrigin() {
-		// get the world space center of mass
-		Vector2 wc = this.transform.getTransformed(this.mass.getCenter());
-		// translate the body negative that much to put it at the origin
-		this.transform.translate(-wc.x, -wc.y);
-	}
-	
-	/**
-	 * Shifts (translates) this body by the given shift amount.
-	 * <p>
-	 * Typically this method should not be called directly.  Instead 
-	 * use the {@link World#shiftCoordinates(Vector2)} method to move the 
-	 * entire world.
-	 * @param shift the distance to shift along the x and y axes
-	 * @since 3.1.0
-	 */
-	protected void shiftCoordinates(Vector2 shift) {
-		this.transform.translate(shift);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.Collidable#getFixture(int)
-	 */
-	public BodyFixture getFixture(int index) {
-		return this.fixtures.get(index);
-	}
-	
-	/**
-	 * Returns the first fixture, as determined by the order in which they were added, that
-	 * contains the given point.
-	 * <p>
-	 * Returns null if the point is not contained in any fixture in this body.
-	 * @param point a world space point
-	 * @return {@link BodyFixture}
-	 * @since 3.1.8
-	 */
-	public BodyFixture getFixture(Vector2 point) {
-		int size = this.fixtures.size();
-		for (int i = 0; i < size; i++) {
-			BodyFixture fixture = this.fixtures.get(i);
-			Convex convex = fixture.getShape();
-			if (convex.contains(point, this.transform)) {
-				return fixture;
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * Returns all the fixtures that contain the given point.
-	 * <p>
-	 * Returns an empty list if the point is not contained in any fixture in this body.
-	 * @param point a world space point
-	 * @return List&lt;{@link BodyFixture}&gt;
-	 * @since 3.1.8
-	 */
-	public List<BodyFixture> getFixtures(Vector2 point) {
-		List<BodyFixture> fixtures = new ArrayList<BodyFixture>();
-		int size = this.fixtures.size();
-		for (int i = 0; i < size; i++) {
-			BodyFixture fixture = this.fixtures.get(i);
-			Convex convex = fixture.getShape();
-			if (convex.contains(point, this.transform)) {
-				fixtures.add(fixture);
-			}
-		}
-		return fixtures;
-	}
-	
-	/**
-	 * Removes the first fixture, as determined by the order in which they were added, that
-	 * contains the given point and returns it.
-	 * <p>
-	 * Returns null if the point is not contained in any fixture in this body.
-	 * @param point a world space point
-	 * @return {@link BodyFixture}
-	 * @since 3.1.8
-	 */
-	public BodyFixture removeFixture(Vector2 point) {
-		int size = this.fixtures.size();
-		for (int i = 0; i < size; i++) {
-			BodyFixture fixture = this.fixtures.get(i);
-			Convex convex = fixture.getShape();
-			if (convex.contains(point, this.transform)) {
-				this.fixtures.remove(i);
-				return fixture;
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * Returns all the fixtures that contain the given point.
-	 * <p>
-	 * Returns an empty list if the point is not contained in any fixture in this body.
-	 * @param point a world space point
-	 * @return List&lt;{@link BodyFixture}&gt;
-	 * @since 3.1.8
-	 */
-	public List<BodyFixture> removeFixtures(Vector2 point) {
-		List<BodyFixture> fixtures = new ArrayList<BodyFixture>();
-		Iterator<BodyFixture> it = this.fixtures.iterator();
-		while (it.hasNext()) {
-			BodyFixture fixture = it.next();
-			Convex convex = fixture.getShape();
-			if (convex.contains(point, this.transform)) {
-				it.remove();
-				fixtures.add(fixture);
-			}
-		}
-		return fixtures;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.Collidable#getFixtureCount()
-	 */
-	public int getFixtureCount() {
-		return this.fixtures.size();
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.Collidable#getFixtures()
-	 */
-	public List<BodyFixture> getFixtures() {
-		List<BodyFixture> fixtures = new ArrayList<BodyFixture>(this.fixtures.size());
-		fixtures.addAll(this.fixtures);
-		return fixtures;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.Collidable#getTransform()
-	 */
-	public Transform getTransform() {
-		return this.transform;
-	}
-	
 	/**
 	 * Returns the transform of the last iteration.
 	 * <p>
@@ -1479,94 +1165,6 @@ public class Body implements Collidable<BodyFixture>, Transformable {
 		return this.transform0;
 	}
 	
-	/**
-	 * Returns the maximum radius of the disk that the
-	 * {@link Collidable} creates if rotated 360 degrees.
-	 * @return double the maximum radius of the rotation disk
-	 */
-	public double getRotationDiscRadius() {
-		return this.radius;
-	}
-	
-	/**
-	 * Sets this {@link Body}'s transform.
-	 * <p>
-	 * This method sets both the initial and the current transform of this body.  This is 
-	 * important to know when this body is a fast moving body (bullet) and needs to
-	 * be checked for tunneling.  Instead, set the initial and final transforms
-	 * explicitly by calling {@link #getInitialTransform()} and {@link #getTransform()}
-	 * and calling the {@link Transform#set(Transform)} method.
-	 * @param transform the transform
-	 * @throws NullPointerException if transform is null
-	 * @since 1.1.0
-	 */
-	public void setTransform(Transform transform) {
-		if (transform == null) throw new NullPointerException(Messages.getString("dynamics.body.nullTransform"));
-		this.transform.set(transform);
-		this.transform0.set(transform);
-	}
-	
-	/**
-	 * Returns the user data associated to this {@link Body}.
-	 * @return Object
-	 */
-	public Object getUserData() {
-		return this.userData;
-	}
-	
-	/**
-	 * Sets the user data associated to this {@link Body}.
-	 * @param userData the user data object
-	 */
-	public void setUserData(Object userData) {
-		this.userData = userData;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.Collidable#getId()
-	 */
-	public UUID getId() {
-		return this.id;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.Collidable#createAABB()
-	 */
-	@Override
-	public AABB createAABB() {
-		return this.createAABB(this.transform);
-	}
-	
-	/**
-	 * Creates an {@link AABB} from this {@link Body} using the given 
-	 * world space {@link Transform}.
-	 * <p>
-	 * This method returns a degenerate AABB, (0.0, 0.0) to (0.0, 0.0),
-	 * for {@link Body}s that have no fixtures.
-	 * @param transform the world space {@link Transform}
-	 * @return {@link AABB}
-	 * @since 3.1.1
-	 */
-	public AABB createAABB(Transform transform) {
-		// get the number of fixtures
-		int size = this.fixtures.size();
-		// make sure there is at least one
-		if (size > 0) {
-			// create the aabb for the first fixture
-			AABB aabb = this.fixtures.get(0).getShape().createAABB(transform);
-			// loop over the remaining fixtures, unioning the aabbs
-			for (int i = 1; i < size; i++) {
-				// create the aabb for the current fixture
-				AABB faabb = this.fixtures.get(i).getShape().createAABB(transform);
-				// union the aabbs
-				aabb.union(faabb);
-			}
-			// return the aabb
-			return aabb;
-		}
-		return new AABB(new Vector2(0.0, 0.0), new Vector2(0.0, 0.0));
-	}
-
 	/**
 	 * Returns an AABB that contains the maximal space in which
 	 * the {@link Collidable} exists from the initial transform
@@ -1672,67 +1270,7 @@ public class Body implements Collidable<BodyFixture>, Transformable {
 	}
 	
 	/**
-	 * Returns a new point in local coordinates of this body given
-	 * a point in world coordinates.
-	 * @param worldPoint a world space point
-	 * @return {@link Vector2} local space point
-	 */
-	public Vector2 getLocalPoint(Vector2 worldPoint) {
-		return this.transform.getInverseTransformed(worldPoint);
-	}
-	
-	/**
-	 * Returns a new point in world coordinates given a point in the
-	 * local coordinates of this {@link Body}.
-	 * @param localPoint a point in the local coordinates of this {@link Body}
-	 * @return {@link Vector2} world space point
-	 */
-	public Vector2 getWorldPoint(Vector2 localPoint) {
-		return this.transform.getTransformed(localPoint);
-	}
-	
-	/**
-	 * Returns a new vector in local coordinates of this body given
-	 * a vector in world coordinates.
-	 * @param worldVector a world space vector
-	 * @return {@link Vector2} local space vector
-	 */
-	public Vector2 getLocalVector(Vector2 worldVector) {
-		return this.transform.getInverseTransformedR(worldVector);
-	}
-	
-	/**
-	 * Returns a new vector in world coordinates given a vector in the
-	 * local coordinates of this {@link Body}.
-	 * @param localVector a vector in the local coordinates of this {@link Body}
-	 * @return {@link Vector2} world space vector
-	 */
-	public Vector2 getWorldVector(Vector2 localVector) {
-		return this.transform.getTransformedR(localVector);
-	}
-
-	/**
-	 * Returns true if the given world space point is contained in this body.
-	 * @param point the world space test point
-	 * @return boolean
-	 * @since 3.1.5
-	 */
-	public boolean contains(Vector2 point) {
-		int size = this.fixtures.size();
-		for (int i = 0; i < size; i++) {
-			BodyFixture fixture = this.fixtures.get(i);
-			Convex convex = fixture.getShape();
-			if (convex.contains(point, this.transform)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	/**
 	 * Returns the linear velocity.
-	 * <p>
-	 * This method replaces the {@link Body#getVelocity(Vector2)} method.
 	 * @return {@link Vector2}
 	 * @since 3.1.5
 	 */
@@ -1742,8 +1280,6 @@ public class Body implements Collidable<BodyFixture>, Transformable {
 	
 	/**
 	 * Returns the velocity of this body at the given world space point.
-	 * <p>
-	 * This method replaces the {@link Body#getVelocity(Vector2)} method.
 	 * @param point the point in world space
 	 * @return {@link Vector2}
 	 * @since 3.1.5
@@ -1762,8 +1298,6 @@ public class Body implements Collidable<BodyFixture>, Transformable {
 	 * <p>
 	 * Call the {@link #setAsleep(boolean)} method to wake up the {@link Body}
 	 * if the {@link Body} is asleep and the velocity is not zero.
-	 * <p>
-	 * This method replaces the {@link Body#setVelocity(Vector2)} method.
 	 * @param velocity the desired velocity
 	 * @throws NullPointerException if velocity is null
 	 * @since 3.1.5
@@ -2043,119 +1577,5 @@ public class Body implements Collidable<BodyFixture>, Transformable {
 		}
 		// return the connected bodies
 		return contactPoints;
-	}
-	
-	// deprecated methods
-	
-	/**
-	 * Applies the given force to this {@link Body} at the
-	 * given point (torque).
-	 * <p>
-	 * This method will wake-up the body if its sleeping.
-	 * @param force the force
-	 * @param point the application point in world coordinates
-	 * @return {@link Body} this body
-	 * @throws NullPointerException if force or point is null
-	 * @deprecated replaced with {@link #applyForce(Vector2, Vector2)} in 3.1.1
-	 * @see #applyForce(Vector2, Vector2)
-	 */
-	@Deprecated
-	public Body apply(Vector2 force, Vector2 point) {
-		return this.applyForce(force, point);
-	}
-	
-	/**
-	 * Applies the given {@link Torque} to this {@link Body}.
-	 * <p>
-	 * This method will wake-up the body if its sleeping.
-	 * @param torque the torque
-	 * @return {@link Body} this body
-	 * @throws NullPointerException if torque is null
-	 * @deprecated replaced with {@link #applyTorque(Torque)} in 3.1.1
-	 * @see #applyTorque(Torque)
-	 */
-	@Deprecated
-	public Body apply(Torque torque) {
-		return this.applyTorque(torque);
-	}
-	
-	/**
-	 * Applies the given torque about the center of this {@link Body}.
-	 * <p>
-	 * This method will wake-up the body if its sleeping.
-	 * @param torque the torque about the center
-	 * @return {@link Body} this body
-	 * @deprecated replaced with {@link #applyTorque(double)} in 3.1.1
-	 * @see #applyTorque(double)
-	 */
-	@Deprecated
-	public Body apply(double torque) {
-		return this.applyTorque(torque);
-	}
-	
-	/**
-	 * Applies the given {@link Force} to this {@link Body}.
-	 * <p>
-	 * This method will wake-up the body if its sleeping.
-	 * @param force the force
-	 * @return {@link Body} this body
-	 * @throws NullPointerException if force is null
-	 * @deprecated replaced with {@link #applyForce(Force)} in 3.1.1
-	 * @see #applyForce(Force)
-	 */
-	@Deprecated
-	public Body apply(Force force) {
-		return this.applyForce(force);
-	}
-
-	/**
-	 * Applies the given force to this {@link Body}.
-	 * <p>
-	 * This method will wake-up the body if its sleeping.
-	 * @param force the force
-	 * @return {@link Body} this body
-	 * @throws NullPointerException if force is null
-	 * @deprecated replaced with {@link #applyForce(Vector2)} in 3.1.1
-	 * @see #applyForce(Vector2)
-	 */
-	@Deprecated
-	public Body apply(Vector2 force) {
-		return this.applyForce(force);
-	}
-
-	/**
-	 * Returns the velocity {@link Vector2}.
-	 * @return {@link Vector2}
-	 * @deprecated replaced by {@link Body#getLinearVelocity()} in 3.1.5
-	 */
-	@Deprecated
-	public Vector2 getVelocity() {
-		return this.getLinearVelocity();
-	}
-
-	/**
-	 * Returns the velocity of this body at the given point on the body.
-	 * @param point the point
-	 * @return {@link Vector2}
-	 * @since 3.0.1
-	 * @deprecated replaced by {@link Body#getLinearVelocity(Vector2)} in 3.1.5
-	 */
-	@Deprecated
-	public Vector2 getVelocity(Vector2 point) {
-		return this.getLinearVelocity(point);
-	}
-
-	/**
-	 * Sets the velocity {@link Vector2}.
-	 * <p>
-	 * Call the {@link #setAsleep(boolean)} method to wake up the {@link Body}
-	 * if the {@link Body} is asleep and the velocity is not zero.
-	 * @param velocity the velocity
-	 * @throws NullPointerException if velocity is null
-	 * @deprecated replaced by {@link Body#setLinearVelocity(Vector2)} in 3.1.5
-	 */
-	@Deprecated
-	public void setVelocity(Vector2 velocity) {
-		this.setLinearVelocity(velocity);
 	}
 }

@@ -35,24 +35,10 @@ import org.dyn4j.geometry.Convex;
  * <p>
  * By default all methods should return true.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.0.0
  * @since 3.1.5
  */
 public interface ConvexCastListener extends Listener {
-	/**
-	 * Called before the given body is cast against.
-	 * <p>
-	 * Returning true from this method indicates that the cast
-	 * should be performed.
-	 * <p>
-	 * Use this method to filter bodies from the tests to improve
-	 * performance.
-	 * @param convex the convex being cast
-	 * @param body the body
-	 * @return boolean true if the body should be tested
-	 */
-	public abstract boolean allow(Convex convex, Body body);
-	
 	/**
 	 * Called before the given fixture is cast against.
 	 * <p>

@@ -36,7 +36,7 @@ import org.dyn4j.sandbox.SandboxBody;
 /**
  * Compiled test for the MotorJoint class.
  * @author William Bittle
- * @version 1.0.4
+ * @version 1.0.6
  * @since 1.0.2
  */
 public class Animate extends CompiledSimulation {
@@ -55,14 +55,14 @@ public class Animate extends CompiledSimulation {
 		
 		SandboxBody floor = new SandboxBody();
 		floor.addFixture(Geometry.createRectangle(40.0, 0.5));
-		floor.setMass(Mass.Type.INFINITE);
+		floor.update(Mass.Type.INFINITE);
 		floor.setUserData("Floor");
 		
 		SandboxBody character = new SandboxBody();
 		BodyFixture bf = character.addFixture(Geometry.createRectangle(2.0, 0.5));
 		bf.setDensity(2.0);
 		bf.setFriction(0.6);
-		character.setMass();
+		character.update();
 		character.translate(0.0, 0.5);
 		character.setUserData("Character");
 		

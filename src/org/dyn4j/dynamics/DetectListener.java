@@ -39,20 +39,6 @@ import org.dyn4j.geometry.Transform;
  */
 public interface DetectListener extends Listener {
 	/**
-	 * Called after the given {@link AABB} has been found to overlap the 
-	 * a {@link Body}'s AABB.
-	 * <p>
-	 * Return false from this method to eliminate this body from the 
-	 * list of results.
-	 * <p>
-	 * This method is only called by the <code>World.detect(AABB,...)</code> methods.
-	 * @param aabb the AABB given
-	 * @param body the {@link Body} whose AABB overlaps the given AABB
-	 * @return boolean true to allow this body to be included in the results
-	 */
-	public abstract boolean allow(AABB aabb, Body body);
-	
-	/**
 	 * Called <b>before</b> the {@link BodyFixture} is tested against the
 	 * given {@link AABB}.
 	 * <p>

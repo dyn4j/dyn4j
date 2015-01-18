@@ -105,7 +105,7 @@ import org.dyn4j.sandbox.utilities.ControlUtilities;
 /**
  * Panel used to display and manage the World object using a JTree interface.
  * @author William Bittle
- * @version 1.0.4
+ * @version 1.0.6
  * @since 1.0.0
  */
 public class SimulationTreePanel extends JPanel implements MouseListener, ActionListener {
@@ -990,7 +990,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 		Vector2 shift = ShiftWorldDialog.show(ControlUtilities.getParentWindow(this));
 		if (shift != null) {
 			synchronized (Simulation.LOCK) {
-				this.simulation.getWorld().shiftCoordinates(shift);
+				this.simulation.getWorld().shift(shift);
 			}
 		}
 	}
@@ -1144,7 +1144,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 						// check if the mass is set explicitly or not
 						if (!body.isMassExplicit()) {
 							// reset the mass using the type it was before
-							body.setMass(body.getMass().getType());
+							body.update(body.getMass().getType());
 						}
 					}
 					// add the node to the tree
@@ -1183,7 +1183,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 						// check if the mass is set explicitly or not
 						if (!body.isMassExplicit()) {
 							// reset the mass using the type it was before
-							body.setMass(body.getMass().getType());
+							body.update(body.getMass().getType());
 						}
 					}
 					// add the node to the tree
@@ -1231,7 +1231,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 						// check if the mass is set explicitly or not
 						if (!body.isMassExplicit()) {
 							// reset the mass using the type it was before
-							body.setMass(body.getMass().getType());
+							body.update(body.getMass().getType());
 						}
 					}
 					// remove the node from the tree
@@ -1295,7 +1295,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 						// check if the mass is set explicitly or not
 						if (!body.isMassExplicit()) {
 							// reset the mass using the type it was before
-							body.setMass(body.getMass().getType());
+							body.update(body.getMass().getType());
 						}
 					}
 					// remove the nodes
@@ -1464,7 +1464,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 						// check if the mass is set explicitly or not
 						if (!body.isMassExplicit()) {
 							// reset the mass using the type it was before
-							body.setMass(body.getMass().getType());
+							body.update(body.getMass().getType());
 						}
 					}
 					for (BodyFixture fixture : fixtures) {

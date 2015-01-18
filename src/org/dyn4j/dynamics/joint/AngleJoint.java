@@ -31,6 +31,7 @@ import org.dyn4j.dynamics.Step;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
+import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
@@ -71,7 +72,7 @@ import org.dyn4j.resources.Messages;
  * @version 3.1.0
  * @since 2.2.2
  */
-public class AngleJoint extends Joint {
+public class AngleJoint extends Joint implements Shiftable {
 	/** The angular velocity ratio */
 	protected double ratio;
 	
@@ -367,10 +368,10 @@ public class AngleJoint extends Joint {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.Constraint#shiftCoordinates(org.dyn4j.geometry.Vector2)
+	 * @see org.dyn4j.geometry.Shiftable#shift(org.dyn4j.geometry.Vector2)
 	 */
 	@Override
-	protected void shiftCoordinates(Vector2 shift) {
+	public void shift(Vector2 shift) {
 		// nothing to do here since there are no anchor points
 	}
 

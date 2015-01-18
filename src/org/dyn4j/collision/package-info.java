@@ -65,8 +65,6 @@
  * <ul>
  * <li>{@link org.dyn4j.collision.broadphase.BroadphaseDetector}s
  * 	<ul>
- * 	<li>{@link org.dyn4j.collision.broadphase.SapIncremental}</li>
- * 	<li>{@link org.dyn4j.collision.broadphase.SapBruteForce}</li>
  *	<li>{@link org.dyn4j.collision.broadphase.Sap}</li>
  * 	<li>{@link org.dyn4j.collision.broadphase.DynamicAABBTree}</li>
  * 	</ul>
@@ -84,7 +82,7 @@
  * </li>
  * </ul>
  * @author William Bittle
- * @version 3.0.0
+ * @version 4.0.0
  * @since 1.0.0
  */
 package org.dyn4j.collision;

@@ -35,6 +35,7 @@ import org.dyn4j.dynamics.CoefficientMixer;
 import org.dyn4j.dynamics.Constraint;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.geometry.Matrix22;
+import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Vector2;
 
 /**
@@ -43,7 +44,7 @@ import org.dyn4j.geometry.Vector2;
  * @version 3.1.1
  * @since 1.0.0
  */
-public class ContactConstraint extends Constraint {
+public class ContactConstraint extends Constraint implements Shiftable {
 	/** The unique contact id */
 	protected ContactConstraintId id;
 	
@@ -160,10 +161,10 @@ public class ContactConstraint extends Constraint {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.Constraint#shiftCoordinates(org.dyn4j.geometry.Vector2)
+	 * @see org.dyn4j.geometry.Shiftable#shift(org.dyn4j.geometry.Vector2)
 	 */
 	@Override
-	protected void shiftCoordinates(Vector2 shift) {
+	public void shift(Vector2 shift) {
 		int size = this.contacts.size();
 		// loop over the contacts
 		for (int i = 0; i < size; i++) {

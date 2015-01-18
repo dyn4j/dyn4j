@@ -56,7 +56,7 @@ import com.jogamp.opengl.util.Animator;
  * <p>
  * This class can be used as a starting point for projects.
  * @author William Bittle
- * @version 3.1.1
+ * @version 4.0.0
  * @since 3.0.0
  */
 public class ExampleJOGL extends JFrame implements GLEventListener {
@@ -212,7 +212,7 @@ public class ExampleJOGL extends JFrame implements GLEventListener {
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		GameObject floor = new GameObject();
 		floor.addFixture(new BodyFixture(floorRect));
-		floor.setMass(Mass.Type.INFINITE);
+		floor.update(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
 		this.world.addBody(floor);
@@ -224,7 +224,7 @@ public class ExampleJOGL extends JFrame implements GLEventListener {
 				new Vector2(0.5, -0.5));
 		GameObject triangle = new GameObject();
 		triangle.addFixture(triShape);
-		triangle.setMass();
+		triangle.update();
 		triangle.translate(-1.0, 2.0);
 		// test having a velocity
 		triangle.getLinearVelocity().set(5.0, 0.0);
@@ -234,7 +234,7 @@ public class ExampleJOGL extends JFrame implements GLEventListener {
 		Rectangle rectShape = new Rectangle(1.0, 1.0);
 		GameObject rectangle = new GameObject();
 		rectangle.addFixture(rectShape);
-		rectangle.setMass();
+		rectangle.update();
 		rectangle.translate(0.0, 2.0);
 		rectangle.getLinearVelocity().set(-5.0, 0.0);
 		this.world.addBody(rectangle);
@@ -243,7 +243,7 @@ public class ExampleJOGL extends JFrame implements GLEventListener {
 		Polygon polyShape = Geometry.createUnitCirclePolygon(10, 1.0);
 		GameObject polygon = new GameObject();
 		polygon.addFixture(polyShape);
-		polygon.setMass();
+		polygon.update();
 		polygon.translate(-2.5, 2.0);
 		// set the angular velocity
 		polygon.setAngularVelocity(Math.toRadians(-20.0));
@@ -251,19 +251,19 @@ public class ExampleJOGL extends JFrame implements GLEventListener {
 		
 		GameObject issTri = new GameObject();
 		issTri.addFixture(Geometry.createIsoscelesTriangle(1.0, 3.0));
-		issTri.setMass();
+		issTri.update();
 		issTri.translate(2.0, 3.0);
 		this.world.addBody(issTri);
 		
 		GameObject equTri = new GameObject();
 		equTri.addFixture(Geometry.createEquilateralTriangle(2.0));
-		equTri.setMass();
+		equTri.update();
 		equTri.translate(3.0, 3.0);
 		this.world.addBody(equTri);
 		
 		GameObject rightTri = new GameObject();
 		rightTri.addFixture(Geometry.createRightTriangle(2.0, 1.0));
-		rightTri.setMass();
+		rightTri.update();
 		rightTri.translate(4.0, 3.0);
 		this.world.addBody(rightTri);
 	}

@@ -48,7 +48,7 @@ import org.dyn4j.sandbox.resources.Messages;
 /**
  * Dialog to create a new body with an initial fixture/shape.
  * @author William Bittle
- * @version 1.0.4
+ * @version 1.0.6
  * @since 1.0.0
  */
 public class EditFixtureDialog extends JDialog implements ActionListener {
@@ -205,7 +205,7 @@ public class EditFixtureDialog extends JDialog implements ActionListener {
 			if (!body.isMassExplicit()) {
 				// recompute the mass
 				// we must do this if the density or position of the fixture has changed
-				body.setMass(body.getMass().getType());
+				body.update(body.getMass().getType());
 			}
 		}
 	}
