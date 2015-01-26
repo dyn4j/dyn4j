@@ -30,7 +30,6 @@ package org.dyn4j.geometry;
  * @version 1.0.3
  * @since 1.0.0
  */
-// TODO create two new interfaces Rotatable and Translatable
 public interface Transformable {
 	/**
 	 * Rotates the object about the origin.

@@ -1010,7 +1010,7 @@ public class World {
 	 * @since 2.0.0
 	 */
 	public boolean raycast(Vector2 start, Vector2 end, boolean ignoreSensors, boolean all, List<RaycastResult> results) {
-		return this.raycast(start, end, ignoreSensors, true, all, results);
+		return this.raycast(start, end, null, ignoreSensors, true, all, results);
 	}
 	
 	/**
@@ -1042,7 +1042,7 @@ public class World {
 	 * @since 3.1.9
 	 */
 	public boolean raycast(Vector2 start, Vector2 end, boolean ignoreSensors, boolean ignoreInactive, boolean all, List<RaycastResult> results) {
-		return this.raycast(start, end, ignoreSensors, ignoreInactive, all, results);
+		return this.raycast(start, end, null, ignoreSensors, ignoreInactive, all, results);
 	}
 	
 	/**
