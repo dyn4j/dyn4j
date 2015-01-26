@@ -74,7 +74,6 @@ public abstract class AbstractAABBDetector<E extends Collidable> implements Broa
 		return false;
 	}
 	
-	// TODO call from all broadphase detectors
 	/**
 	 * Returns true if the ray and AABB intersect.
 	 * <p>

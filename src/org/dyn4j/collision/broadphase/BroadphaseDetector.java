@@ -60,9 +60,6 @@ import org.dyn4j.geometry.Vector2;
  * @since 1.0.0
  * @param <E> the {@link Collidable} type
  */
-// TODO add abstract keyword to methods
-// TODO drop or condense Sap broadphases
-// TODO rework proxies to store collidable/fixture/aabb for better multi-fixure performance
 public interface BroadphaseDetector<E extends Collidable> {
 	/** The default {@link AABB} expansion value */
 	public static final double DEFAULT_AABB_EXPANSION = 0.2;
@@ -104,7 +101,6 @@ public interface BroadphaseDetector<E extends Collidable> {
 	 * @param collidable the {@link Collidable}
 	 * @return {@link AABB} the {@link AABB} for the given {@link Collidable}
 	 */
-	// TODO have this return a new AABB if the collidable hasn't been added to the broadphase
 	public AABB getAABB(E collidable);
 	
 	/**
@@ -140,7 +136,6 @@ public interface BroadphaseDetector<E extends Collidable> {
 	 * @param b the second {@link Collidable}
 	 * @return boolean
 	 */
-	// TODO have this use the AABBs in the broadphase via the getAABB method
 	public abstract boolean detect(E a, E b);
 	
 	/**
