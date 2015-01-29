@@ -25,9 +25,8 @@
 package org.dyn4j.collision.broadphase;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -89,6 +88,9 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	/** The root node of the tree */
 	protected Node root;
 	
+	/** The unsorted list of proxies */
+	protected List<Node> proxyList;
+	
 	/** Id to node map for fast lookup */
 	protected Map<UUID, Node> proxyMap;
 	
@@ -108,10 +110,11 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	 * @since 3.1.1
 	 */
 	public DynamicAABBTree(int initialCapacity) {
-		// 0.75 = 3/4, we can guarantee that the hashmap will not need to be rehashed
+		this.proxyList = new ArrayList<Node>(initialCapacity);
+		// 0.75 = 3/4, we can garuantee that the hashmap will not need to be rehashed
 		// if we take capacity / load factor
 		// the default load factor is 0.75 according to the javadocs, but lets assign it to be sure
-		this.proxyMap = new LinkedHashMap<UUID, Node>(initialCapacity * 4 / 3 + 1, 0.75f);
+		this.proxyMap = new HashMap<UUID, Node>(initialCapacity * 4 / 3 + 1, 0.75f);
 	}
 	
 	/* (non-Javadoc)
@@ -127,6 +130,8 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 		Node node = new Node();
 		node.collidable = collidable;
 		node.aabb = aabb;
+		// add the proxy to the list
+		this.proxyList.add(node);
 		// add the proxy to the map
 		this.proxyMap.put(collidable.getId(), node);
 		// insert the node into the tree
@@ -144,6 +149,8 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 		if (node != null) {
 			// remove the node from the tree
 			this.remove(node);
+			// remove the node from the list
+			this.proxyList.remove(node);
 			// remove the node from the map
 			this.proxyMap.remove(collidable.getId());
 		}
@@ -182,6 +189,7 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	 */
 	@Override
 	public void clear() {
+		this.proxyList.clear();
 		this.proxyMap.clear();
 		this.root = null;
 	}
@@ -204,8 +212,7 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	@Override
 	public List<BroadphasePair<E>> detect() {
 		// get the number of proxies
-		Collection<Node> nodes = this.proxyMap.values();
-		int size = this.proxyMap.size();
+		int size = this.proxyList.size();
 
 		// check the size
 		if (size == 0) {
@@ -214,8 +221,8 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 		}
 		
 		// clear all the tested flags on the nodes
-		for (Node node : nodes) {
-			//Node node = this.proxyMap.get(i);
+		for (int i = 0; i < size; i++) {
+			Node node = this.proxyList.get(i);
 			// reset the flag
 			node.tested = false;
 		}
@@ -225,7 +232,9 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 		List<BroadphasePair<E>> pairs = new ArrayList<BroadphasePair<E>>(eSize);
 		
 		// test each collidable in the list
-		for (Node node : nodes) {
+		for (int i = 0; i < size; i++) {
+			// get the current collidable to test
+			Node node = this.proxyList.get(i);
 			// perform a stackless detection routine
 			detectNonRecursive(node, this.root, pairs);
 			// update the tested flag
@@ -250,7 +259,7 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 	@Override
 	public List<E> raycast(Ray ray, double length) {
 		// check the size of the proxy list
-		if (this.proxyMap.size() == 0) {
+		if (this.proxyList.size() == 0) {
 			// return an empty list
 			return Collections.emptyList();
 		}
@@ -280,55 +289,8 @@ public class DynamicAABBTree<E extends Collidable> extends AbstractAABBDetector<
 		// create the aabb
 		AABB aabb = new AABB(min, max);
 		
-		// precompute
-		double invDx = 1.0 / d.x;
-		double invDy = 1.0 / d.y;
-		Node node = this.root;
-		
-		// get the estimated collision count
-		int eSize = Collisions.getEstimatedRaycastCollisions(this.proxyMap.size());
-		List<E> list = new ArrayList<E>(eSize);
-		// perform a iterative, stack-less, traversal of the tree
-		while (node != null) {
-			// check if the current node overlaps the desired node
-			if (aabb.overlaps(node.aabb)) {
-				// if they do overlap, then check the left child node
-				if (node.left != null) {
-					// if the left is not null, then check that subtree
-					node = node.left;
-					continue;
-				} else if (this.raycast(s, l, invDx, invDy, node.aabb)) {
-					// if both are null, then this is a leaf node
-					list.add(node.collidable);
-					// if its a leaf node then we need to go back up the
-					// tree and test nodes we haven't yet
-				}
-			}
-			// if the current node is a leaf node or doesnt overlap the
-			// desired aabb, then we need to go back up the tree until we
-			// find the first left node who's right node is not null
-			boolean nextNodeFound = false;
-			while (node.parent != null) {
-				// check if the current node the left child of its parent
-				if (node == node.parent.left) {
-					// it is, so check if the right node is non-null
-					// NOTE: not need since the tree is a complete tree (every node has two children)
-					//if (node.parent.right != null) {
-						// it isn't so the sibling node is the next node
-						node = node.parent.right;
-						nextNodeFound = true;
-						break;
-					//}
-				}
-				// if the current node isn't a left node or it is but its
-				// sibling is null, go to the parent node
-				node = node.parent;
-			}
-			// if we didn't find it then we are done
-			if (!nextNodeFound) break;
-		}
-		
-		return list;
+		// pass it to the aabb detection routine
+		return this.detect(aabb);
 	}
 	
 	/* (non-Javadoc)

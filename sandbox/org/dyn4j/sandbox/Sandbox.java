@@ -2767,7 +2767,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 			// get the class name from the file name
 			String contents;
 			synchronized (Simulation.LOCK) {
-				contents = CodeExporter.export(name, this.simulation.getWorld());
+				contents = CodeExporter.export(name, this.simulation);
 			}
 			// see if its a new one or it already exists
 			if (file.exists()) {

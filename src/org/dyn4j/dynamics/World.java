@@ -82,7 +82,7 @@ import org.dyn4j.resources.Messages;
  * Employs the same {@link Island} solving technique as <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.1.10
+ * @version 3.1.11
  * @since 1.0.0
  */
 public class World {
@@ -1115,7 +1115,7 @@ public class World {
 	 * @since 2.0.0
 	 */
 	public boolean raycast(Ray ray, double maxLength, boolean ignoreSensors, boolean all, List<RaycastResult> results) {
-		return this.raycast(ray, maxLength, ignoreSensors, true, all, results);
+		return this.raycast(ray, maxLength, null, ignoreSensors, true, all, results);
 	}
 
 	/**
