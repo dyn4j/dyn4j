@@ -102,7 +102,7 @@ public interface BroadphaseDetector<E extends Collidable<T>, T extends Fixture> 
 	 * <p>
 	 * If a fixture is removed from a {@link Collidable}, the calling code must
 	 * call the {@link #remove(Collidable, Fixture)} method for that fixture to 
-	 * be removed from the broadphase.  This method makes no effor to remove other
+	 * be removed from the broadphase.  This method makes no effort to remove other
 	 * fixtures no longer attached to the given collidable.
 	 * @param collidable the {@link Collidable}
 	 * @since 3.0.0
