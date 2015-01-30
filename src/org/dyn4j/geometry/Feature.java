@@ -30,7 +30,7 @@ package org.dyn4j.geometry;
  * <p>
  * This class does not handle curved edges.
  * @author William Bittle
- * @version 3.0.2
+ * @version 4.0.0
  * @since 1.0.0
  */
 public abstract class Feature {
@@ -39,7 +39,7 @@ public abstract class Feature {
 	 * @author William Bittle
 	 * @version $Revision: 440 $
 	 */
-	public static enum Type {
+	protected static enum Type {
 		/** A vertex feature */
 		VERTEX,
 		/** An edge feature */
@@ -50,7 +50,7 @@ public abstract class Feature {
 	public static final int NOT_INDEXED = -1;
 	
 	/** The {@link Feature.Type} */
-	protected Feature.Type type;
+	protected final Feature.Type type;
 	
 	/**
 	 * Full constructor.

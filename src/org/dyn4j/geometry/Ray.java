@@ -29,15 +29,15 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents a ray.
  * @author William Bittle
- * @version 3.0.2
+ * @version 4.0.0
  * @since 2.0.0
  */
 public class Ray {
 	/** The start point */
-	protected Vector2 start;
+	protected final Vector2 start;
 	
 	/** The direction */
-	protected Vector2 direction;
+	protected final Vector2 direction;
 	
 	/**
 	 * Creates a ray from the origin in the given direction.
@@ -102,16 +102,6 @@ public class Ray {
 	}
 	
 	/**
-	 * Sets the start point.
-	 * @param start the start point
-	 * @throws NullPointerException if start is null
-	 */
-	public void setStart(Vector2 start) {
-		if (start == null) throw new NullPointerException(Messages.getString("geometry.ray.nullStart"));
-		this.start = start;
-	}
-	
-	/**
 	 * Returns the direction of this ray in radians.
 	 * @return double the direction in radians between [-&pi;, &pi]
 	 * @since 3.0.2
@@ -119,37 +109,13 @@ public class Ray {
 	public double getDirection() {
 		return this.direction.getDirection();
 	}
-	
-	/**
-	 * Sets the direction of this ray in radians.
-	 * @param direction the direction in radians
-	 * @since 3.0.2
-	 */
-	public void setDirection(double direction) {
-		this.direction = new Vector2(direction);
-	}
-	
+
 	/**
 	 * Returns the direction.
-	 * <p>
-	 * Renamed from <code>getDirection()</code>.
-	 * @see #setDirection(Vector2)
 	 * @return {@link Vector2}
 	 * @since 3.0.2
 	 */
 	public Vector2 getDirectionVector() {
 		return this.direction;
-	}
-	
-	/**
-	 * Sets the direction.
-	 * @param direction the direction; should be normalized
-	 * @throws NullPointerException if direction is null
-	 * @throws IllegalArgumentException if direction is the zero vector
-	 */
-	public void setDirection(Vector2 direction) {
-		if (direction == null) throw new NullPointerException(Messages.getString("geometry.ray.nullDirection"));
-		if (direction.isZero()) throw new IllegalArgumentException(Messages.getString("geometry.ray.zeroDirection"));
-		this.direction = direction;
 	}
 }

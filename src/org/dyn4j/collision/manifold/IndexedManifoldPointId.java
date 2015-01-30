@@ -27,27 +27,21 @@ package org.dyn4j.collision.manifold;
 /**
  * Represents a {@link ManifoldPointId} that uses indexing.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.0.0
  * @since 1.0.0
  */
 public class IndexedManifoldPointId implements ManifoldPointId {
 	/** The reference edge index */
-	protected int referenceEdge;
+	protected final int referenceEdge;
 	
 	/** The incident edge index */
-	protected int incidentEdge;
+	protected final int incidentEdge;
 	
 	/** The index of the incident vertex */
-	protected int incidentVertex;
+	protected final int incidentVertex;
 	
 	/** Whether the reference and incident features flipped */
-	protected boolean flipped;
-	
-	/**
-	 * Default constructor.
-	 * @since 3.1.5
-	 */
-	public IndexedManifoldPointId() {}
+	protected final boolean flipped;
 	
 	/**
 	 * Optional constructor.

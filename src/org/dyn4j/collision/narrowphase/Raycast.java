@@ -91,7 +91,7 @@ public class Raycast {
 	 * @return {@link Vector2}
 	 */
 	public Vector2 getPoint() {
-		return point;
+		return this.point;
 	}
 	
 	/**
@@ -107,7 +107,7 @@ public class Raycast {
 	 * @return {@link Vector2}
 	 */
 	public Vector2 getNormal() {
-		return normal;
+		return this.normal;
 	}
 	
 	/**
@@ -124,7 +124,7 @@ public class Raycast {
 	 * @return double
 	 */
 	public double getDistance() {
-		return distance;
+		return this.distance;
 	}
 	
 	/**

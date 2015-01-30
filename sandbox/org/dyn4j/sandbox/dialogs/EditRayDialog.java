@@ -44,7 +44,7 @@ import org.dyn4j.sandbox.resources.Messages;
 /**
  * Dialog used to edit a ray to the world.
  * @author William Bittle
- * @version 1.0.1
+ * @version 1.0.7
  * @since 1.0.1
  */
 public class EditRayDialog extends JDialog implements ActionListener {
@@ -123,14 +123,17 @@ public class EditRayDialog extends JDialog implements ActionListener {
 	 * Returns null if the dialog is closed or canceled.
 	 * @param owner the dialog owner
 	 * @param ray the ray to edit
+	 * @return {@link SandboxRay} the new ray
 	 */
-	public static final void show(Window owner, SandboxRay ray) {
+	public static final SandboxRay show(Window owner, SandboxRay ray) {
 		EditRayDialog ard = new EditRayDialog(owner, ray);
 		ard.setLocationRelativeTo(owner);
 		ard.setVisible(true);
 		
 		if (!ard.canceled) {
-			ard.rayPanel.setRay(ray);
+			return ard.rayPanel.getRay();
 		}
+		
+		return ray;
 	}
 }

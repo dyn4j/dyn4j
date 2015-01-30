@@ -28,7 +28,6 @@ import org.dyn4j.Epsilon;
 import org.dyn4j.collision.narrowphase.DistanceDetector;
 import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.Separation;
-import org.dyn4j.dynamics.Settings;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
@@ -46,7 +45,7 @@ import org.dyn4j.resources.Messages;
  * @since 1.2.0
  */
 public class ConservativeAdvancement implements TimeOfImpactDetector {
-	/** The default distance epsilon; {@link Settings}.DEFAULT_LINEAR_TOLERANCE */
+	/** The default distance epsilon */
 	public static final double DEFAULT_DISTANCE_EPSILON = Math.cbrt(Epsilon.E);
 	
 	/** The default maximum number of iterations */

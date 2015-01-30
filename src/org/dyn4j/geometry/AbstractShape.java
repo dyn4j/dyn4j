@@ -29,12 +29,12 @@ import java.util.UUID;
 /**
  * Base implementation of the {@link Shape} interface.
  * @author William Bittle
- * @version 3.1.4
+ * @version 4.0.0
  * @since 1.0.0
  */
 public abstract class AbstractShape implements Shape, Transformable {
 	/** The shape's unique identifier */
-	protected UUID id = UUID.randomUUID();
+	protected final UUID id = UUID.randomUUID();
 	
 	/** The center of this {@link Shape} */
 	protected Vector2 center;

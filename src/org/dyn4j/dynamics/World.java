@@ -90,6 +90,7 @@ import org.dyn4j.resources.Messages;
  */
 // TODO look for places for member variables to be final
 // TODO look for clean up in the contact solving code
+// TODO add interface for userdata
 public class World implements Shiftable {
 	/** Earths gravity constant */
 	public static final Vector2 EARTH_GRAVITY = new Vector2(0.0, -9.8);
@@ -1021,7 +1022,7 @@ public class World implements Shiftable {
 	 * @since 3.1.9
 	 */
 	public boolean raycast(Vector2 start, Vector2 end, boolean ignoreSensors, boolean ignoreInactive, boolean all, List<RaycastResult> results) {
-		return this.raycast(start, end, ignoreSensors, ignoreInactive, all, results);
+		return this.raycast(start, end, null, ignoreSensors, ignoreInactive, all, results);
 	}
 	
 	/**

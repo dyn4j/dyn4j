@@ -33,21 +33,21 @@ import org.dyn4j.geometry.Convex;
  * <p>
  * Note: this class has a natural ordering that is inconsistent with equals.
  * @author William Bittle
- * @version 3.1.9
+ * @version 4.0.0
  * @since 3.1.5
  */
 public class PairwiseTypedFallbackCondition extends TypedFallbackCondition implements FallbackCondition, Comparable<FallbackCondition> {
 	/** The first type to compare to */
-	protected Class<? extends Convex> type1;
+	protected final Class<? extends Convex> type1;
 	
 	/** True if strict type matching should be performed on the first type */
-	protected boolean strict1;
+	protected final boolean strict1;
 	
 	/** The second type to compare to */
-	protected Class<? extends Convex> type2;
+	protected final Class<? extends Convex> type2;
 
 	/** True if strict type matching should be performed on the second type */
-	protected boolean strict2;
+	protected final boolean strict2;
 	
 	/**
 	 * Default constructor.
@@ -193,5 +193,37 @@ public class PairwiseTypedFallbackCondition extends TypedFallbackCondition imple
 					   (this.type1.isAssignableFrom(type2) && this.type2.isAssignableFrom(type1));
 			}
 		}
+	}
+	
+	/**
+	 * Returns the first type for this fallback condition.
+	 * @return Class&lt;? extends {@link Convex}&gt;
+	 */
+	public Class<? extends Convex> getType1() {
+		return this.type1;
+	}
+	
+	/**
+	 * Returns the second type for this fallback condition.
+	 * @return Class&lt;? extends {@link Convex}&gt;
+	 */
+	public Class<? extends Convex> getType2() {
+		return this.type2;
+	}
+	
+	/**
+	 * Returns true if this condition uses a strict type comparison for the first type.
+	 * @return boolean
+	 */
+	public boolean isStrict1() {
+		return this.strict1;
+	}
+	
+	/**
+	 * Returns true if this condition uses a strict type comparison for the second type.
+	 * @return boolean
+	 */
+	public boolean isStrict2() {
+		return this.strict2;
 	}
 }

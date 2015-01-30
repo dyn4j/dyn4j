@@ -58,7 +58,7 @@ import org.dyn4j.resources.Messages;
  * {@link Epa} will terminate in a finite number of iterations if the two shapes are {@link Polygon}s.
  * If either shape has curved surfaces the algorithm requires an expected accuracy epsilon.
  * @author William Bittle
- * @version 3.1.11
+ * @version 4.0.0
  * @since 1.0.0
  */
 public class Epa implements MinkowskiPenetrationSolver {
@@ -75,59 +75,19 @@ public class Epa implements MinkowskiPenetrationSolver {
 	protected double distanceEpsilon = Epa.DEFAULT_DISTANCE_EPSILON;
 	
 	/**
-	 * Represents an {@link Edge} of the simplex.
-	 * @author William Bittle
-	 * @version 3.0.2
-	 * @since 1.0.0
-	 */
-	protected static class Edge {
-		/** The distance from the origin to the edge along n */
-		public double distance;
-		
-		/** The edge normal */
-		public Vector2 normal;
-		
-		/** The edge index in the simplex */
-		public int index;
-		
-		/* (non-Javadoc)
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			StringBuilder sb = new StringBuilder();
-			sb.append("Epa.Edge[Normal=").append(this.normal)
-			.append("|Index=").append(this.index)
-			.append("|Distance=").append(this.distance)
-			.append("]");
-			return sb.toString();
-		}
-	}
-	
-	/**
 	 * Returns the penetration in the given penetration object given the simplex
 	 * created by {@link Gjk} and the {@link MinkowskiSum}.
 	 * @param simplex the simplex
 	 * @param minkowskiSum the {@link MinkowskiSum}
 	 * @param penetration the {@link Penetration} object to fill
 	 */
-	@Override
 	public void getPenetration(List<Vector2> simplex, MinkowskiSum minkowskiSum, Penetration penetration) {
-		// this method is called from the GJK detect method and therefore we can assume
-		// that the simplex has 3 points
-		
-		// get the winding of the simplex points
-		// the winding may be different depending on the points added by GJK
-		// however EPA will preserve the winding so we only need to compute this once
-		int winding = this.getWinding(simplex);
-		// store the last point added to the simplex
+		ExpandingSimplex smplx = new ExpandingSimplex(simplex);
+		ExpandingSimplexEdge edge = null;
 		Vector2 point = null;
-		// the current closest edge
-		Edge edge = null;
-		// start the loop
 		for (int i = 0; i < this.maxIterations; i++) {
 			// get the closest edge to the origin
-			edge = this.findClosestEdge(simplex, winding);
+			edge = smplx.getClosestEdge();
 			// get a new support point in the direction of the edge normal
 			point = minkowskiSum.support(edge.normal);
 			
@@ -147,99 +107,13 @@ public class Epa implements MinkowskiPenetrationSolver {
 			// lastly add the point to the simplex
 			// this breaks the edge we just found to be closest into two edges
 			// from a -> b to a -> newPoint -> b
-			simplex.add(edge.index, point);
+			smplx.expand(point);
 		}
 		// if we made it here then we know that we hit the maximum number of iterations
 		// this is really a catch all termination case
 		// set the normal and depth equal to the last edge we created
 		penetration.normal = edge.normal;
 		penetration.depth = point.dot(edge.normal);
-	}
-	
-	/**
-	 * Returns the edge on the simplex that is closest to the origin.
-	 * @param simplex the simplex
-	 * @param winding the simplex winding
-	 * @return {@link Edge} the closest edge to the origin
-	 */
-	protected Edge findClosestEdge(List<Vector2> simplex, int winding) {
-		// get the current size of the simplex
-		int size = simplex.size();
-		// create an edge
-		Edge edge = new Edge();
-		// set edge's distance to the max double value
-		edge.distance = Double.MAX_VALUE;
-		edge.normal = new Vector2();
-		// create a reusable vector for the normal
-		Vector2 normal = new Vector2();
-		// find the edge on the simplex closest to the origin
-		for (int i = 0; i < size; i++) {
-			// compute j
-			int j = i + 1 == size ? 0 : i + 1;
-			// get the points that make up the current edge
-			Vector2 a = simplex.get(i);
-			Vector2 b = simplex.get(j);
-			// create the edge
-			// inline b - a
-			normal.x = b.x - a.x;
-			normal.y = b.y - a.y;
-			// depending on the winding get the edge normal
-			// it would be better to use Vector.tripleProduct(ab, ao, ab);
-			// where ab is the edge and ao is a.to(ORIGIN) but this will
-			// return an incorrect normal if the origin lies on the ab segment
-			// therefore we use the winding of the simplex to determine the 
-			// normal direction
-			if (winding < 0) {
-				normal.right();
-			} else {
-				normal.left();
-			}
-			// normalize the vector
-			normal.normalize();
-			// project the first point onto the normal (it doesnt matter which
-			// you project since the normal is perpendicular to the edge)
-			//double d = Math.abs(a.dot(normal));
-			double d = Math.abs(a.x * normal.x + a.y * normal.y);
-			// record the closest edge
-			if (d < edge.distance) {
-				edge.distance = d;
-				edge.normal.x = normal.x;
-				edge.normal.y = normal.y;
-				edge.index = j;
-			}
-		}
-		// return the closest edge
-		return edge;
-	}
-	
-	/**
-	 * Returns the winding of the given simplex.
-	 * <p>
-	 * Returns -1 if the winding is Clockwise.<br />
-	 * Returns 1 if the winding is Counter-Clockwise.
-	 * <p>
-	 * This method will continue checking all edges until
-	 * an edge is found whose cross product is less than 
-	 * or greater than zero.
-	 * <p>
-	 * This is used to get the correct edge normal of
-	 * the simplex.
-	 * @param simplex the simplex
-	 * @return int the winding
-	 */
-	protected int getWinding(List<Vector2> simplex) {
-		int size = simplex.size();
-		for (int i = 0; i < size; i++) {
-			int j = i + 1 == size ? 0 : i + 1;
-			Vector2 a = simplex.get(i);
-			Vector2 b = simplex.get(j);
-			if (a.cross(b) > 0) {
-				return 1;
-			} else if (a.cross(b) < 0) {
-				return -1;
-			}
-		}
-		return 0;
 	}
 	
 	/**

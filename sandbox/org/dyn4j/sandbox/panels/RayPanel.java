@@ -48,7 +48,7 @@ import org.dyn4j.sandbox.utilities.ControlUtilities;
 /**
  * Panel used to create or edit a ray.
  * @author William Bittle
- * @version 1.0.1
+ * @version 1.0.7
  * @since 1.0.1
  */
 public class RayPanel extends JPanel implements InputPanel {
@@ -239,25 +239,6 @@ public class RayPanel extends JPanel implements InputPanel {
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(this.lblTestAll)
 						.addComponent(this.chkTestAll, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)));
-	}
-	
-	/**
-	 * Sets the given ray's properties to the user selected ones.
-	 * @param ray the ray to set
-	 */
-	public void setRay(SandboxRay ray) {
-		ray.setName(this.txtName.getText());
-		ray.setStart(new Vector2(
-				ControlUtilities.getDoubleValue(this.txtSX),
-				ControlUtilities.getDoubleValue(this.txtSY)));
-		ray.setDirection(Math.toRadians(ControlUtilities.getDoubleValue(this.txtD)));
-		if (this.chkInfiniteLength.isSelected()) {
-			ray.setLength(SandboxRay.INFINITE);
-		} else {
-			ray.setLength(ControlUtilities.getDoubleValue(this.txtLength));
-		}
-		ray.setIgnoreSensors(this.chkIgnoreSensors.isSelected());
-		ray.setAll(this.chkTestAll.isSelected());
 	}
 	
 	/**
