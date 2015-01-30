@@ -54,7 +54,7 @@ public class ExpandingSimplexEdge implements Comparable<ExpandingSimplexEdge> {
 	public ExpandingSimplexEdge(Vector2 point1, Vector2 point2, int winding) {
 		// create the edge
 		// inline b - a
-		this.normal = new Vector2(point1.x - point1.x, point1.y - point1.y);
+		this.normal = new Vector2(point2.x - point1.x, point2.y - point1.y);
 		// depending on the winding get the edge normal
 		// it would be better to use Vector.tripleProduct(ab, ao, ab);
 		// where ab is the edge and ao is a.to(ORIGIN) but this will
