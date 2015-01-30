@@ -331,6 +331,71 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 		return this;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.AbstractCollidable#removeFixture(org.dyn4j.collision.Fixture)
+	 */
+	@Override
+	public boolean removeFixture(BodyFixture fixture) {
+		if (this.world != null) {
+			this.world.broadphaseDetector.remove(this, fixture);
+		}
+		return super.removeFixture(fixture);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.AbstractCollidable#removeFixture(int)
+	 */
+	@Override
+	public BodyFixture removeFixture(int index) {
+		BodyFixture fixture = super.removeFixture(index);
+		if (this.world != null) {
+			this.world.broadphaseDetector.remove(this, fixture);
+		}
+		return fixture;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.AbstractCollidable#removeFixture(org.dyn4j.geometry.Vector2)
+	 */
+	@Override
+	public BodyFixture removeFixture(Vector2 point) {
+		BodyFixture fixture = super.removeFixture(point);
+		if (this.world != null) {
+			this.world.broadphaseDetector.remove(this, fixture);
+		}
+		return fixture;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.AbstractCollidable#removeAllFixtures()
+	 */
+	@Override
+	public List<BodyFixture> removeAllFixtures() {
+		List<BodyFixture> fixtures = super.removeAllFixtures();
+		int size = fixtures.size();
+		if (this.world != null) {
+			for (int i = 0; i < size; i++) {
+				this.world.broadphaseDetector.remove(this, fixtures.get(i));
+			}
+		}
+		return fixtures;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.AbstractCollidable#removeFixtures(org.dyn4j.geometry.Vector2)
+	 */
+	@Override
+	public List<BodyFixture> removeFixtures(Vector2 point) {
+		List<BodyFixture> fixtures = super.removeFixtures(point);
+		int size = fixtures.size();
+		if (this.world != null) {
+			for (int i = 0; i < size; i++) {
+				this.world.broadphaseDetector.remove(this, fixtures.get(i));
+			}
+		}
+		return fixtures;
+	}
+	
 	/**
 	 * This method should be called after fixture modification
 	 * is complete.
