@@ -67,6 +67,8 @@ import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.NullBounds;
 import org.dyn4j.sandbox.SandboxBody;
+import org.dyn4j.sandbox.SandboxRay;
+import org.dyn4j.sandbox.Simulation;
 import org.dyn4j.sandbox.resources.Messages;
 
 /**
@@ -93,16 +95,19 @@ public class CodeExporter {
 	 * <p>
 	 * Returns a string containing the code for the export.
 	 * @param name the name of the generated class
-	 * @param world the world to export
+	 * @param simulation the simulation to export
 	 * @return String
 	 */
-	public static final String export(String name, World world) {
+	public static final String export(String name, Simulation simulation) {
 		StringBuilder sb = new StringBuilder();
 		// this map contains the id to output name for bodies
 		Map<UUID, String> idNameMap = new HashMap<UUID, String>();
 		
+		World world = simulation.getWorld();
+		
 		sb
 		// imports
+		.append("import java.util.*;").append(NEW_LINE)
 		.append("import org.dyn4j.collision.*;").append(NEW_LINE)
 		.append("import org.dyn4j.collision.broadphase.*;").append(NEW_LINE)
 		.append("import org.dyn4j.collision.continuous.*;").append(NEW_LINE)
@@ -373,6 +378,14 @@ public class CodeExporter {
 			sb.append(NEW_LINE);
 		}
 		
+		// rays
+		sb.append(NEW_LINE);
+		for (SandboxRay ray : simulation.getRays()) {
+			sb.append(TAB2).append("{// ").append(ray.getName()).append(NEW_LINE)
+			.append(export(ray, TAB3))
+			.append(TAB2).append("}").append(NEW_LINE);
+		}
+		
 		// end setup method
 		sb.append(TAB1).append("}").append(NEW_LINE)
 		// end class declaration
@@ -549,6 +562,32 @@ public class CodeExporter {
 		} else {
 			throw new UnsupportedOperationException(MessageFormat.format(Messages.getString("exception.persist.unknownClass"), f.getClass().getName()));
 		}
+		
+		return sb.toString();
+	}
+	
+	/**
+	 * Exports the given ray and its call.
+	 * @param ray the ray
+	 * @param tabs the tabs string for formatting
+	 * @return String
+	 */
+	private static final String export(SandboxRay ray, String tabs) {
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append(tabs).append("List<RaycastResult> results = new ArrayList<RaycastResult>();").append(NEW_LINE);
+		sb.append(tabs).append("Ray ray = new Ray(")
+			.append(export(ray.getStart())).append(", ") 										// ray start
+			.append("Math.toRadians(").append(Math.toDegrees(ray.getDirection())).append(")")	// ray direction
+			.append(");").append(NEW_LINE);
+		sb.append(tabs).append("world.raycast(ray, ")		// ray
+			.append(ray.getLength()).append(", ") 			// length
+			.append("null, ")								// filter
+			.append(ray.isIgnoreSensors()).append(", ")		// ignore sensors
+			.append("true, ")								// ignore inactive
+			.append(ray.isAll()).append(", ")				// all
+			.append("results);")							// results
+			.append(NEW_LINE);
 		
 		return sb.toString();
 	}

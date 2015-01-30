@@ -1,10 +1,26 @@
 ===============================================================================
+Version 4.0.0
+===============================================================================
+New Features:
+  - Performance improvements.
+    
+Bug Fixes: 
+    
+Deprecated:
+
+Breaking Changes:
+    
+Other:
+
+===============================================================================
 Version 3.1.11
 ===============================================================================
 New Features:
   - A few minor performance improvements.
     
 Bug Fixes:
+  - Fixed a bug in the raycast(Ray,double,boolean,boolean,List<RaycastResult>)
+    method where it was calling itself, causing a StackOverflowException. 
     
 Deprecated:
 
@@ -14,6 +30,7 @@ Other:
   - Changed the Math.hypot calls to Math.sqrt since the former is much
     slower.  It's slower due to the overflow/underflow handling, which dyn4j
     doesn't need.
+  - Added code to export Rays for the Java exporter.
 
 ===============================================================================
 Version 3.1.10
