@@ -34,84 +34,21 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * This class is used by the {@link Gjk} and {@link Epa} classes.
  * @author William Bittle
- * @version 3.0.2
+ * @version 4.0.0
  * @since 1.0.0
  */
 public class MinkowskiSum {
 	/** The first {@link Convex} */
-	protected Convex convex1;
+	protected final Convex convex1;
 	
 	/** The second {@link Convex} */
-	protected Convex convex2;
+	protected final Convex convex2;
 	
 	/** The first {@link Convex}'s {@link Transform} */
-	protected Transform transform1;
+	protected final Transform transform1;
 	
 	/** The second {@link Convex}'s {@link Transform} */
-	protected Transform transform2;
-	
-	/**
-	 * Represents a point in the {@link MinkowskiSum}.
-	 * @author William Bittle
-	 * @version 3.0.2
-	 * @since 1.0.0
-	 */
-	public static class Point {
-		/** The support point in the first {@link Convex} {@link Shape} */
-		protected Vector2 p1;
-		
-		/** The support point in the second {@link Convex} {@link Shape} */
-		protected Vector2 p2;
-		
-		/** The Minkowski sum point */
-		protected Vector2 p;
-		
-		/** Default constructor */
-		protected Point() {}
-		
-		/**
-		 * Full constructor.
-		 * @param p1 the support point in the first {@link Convex} {@link Shape}
-		 * @param p2 the support point in the second {@link Convex} {@link Shape}
-		 */
-		public Point(Vector2 p1, Vector2 p2) {
-			this.set(p1, p2);
-		}
-		
-		/**
-		 * Sets the values of this {@link MinkowskiSum.Point} to the given values.
-		 * @param p1 the support point in the first {@link Convex} {@link Shape}
-		 * @param p2 the support point in the second {@link Convex} {@link Shape}
-		 */
-		public void set(Vector2 p1, Vector2 p2) {
-			this.p1 = p1;
-			this.p2 = p2;
-			this.p = p1.difference(p2);
-		}
-		
-		/**
-		 * Copies the values of the given point to this point.
-		 * @param p the point to copy
-		 */
-		public void set(MinkowskiSum.Point p) {
-			this.p1 = p.p1;
-			this.p2 = p.p2;
-			this.p = p.p;
-		}
-		
-		/* (non-Javadoc)
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			StringBuilder sb = new StringBuilder();
-			sb.append("MinkowskiSum.Point[Point=").append(this.p)
-			.append("|SupportPoint1=").append(this.p1)
-			.append("|SupportPoint2=").append(this.p2)
-			.append("]");
-			return sb.toString();
-		}
-	}
+	protected final Transform transform2;
 		
 	/**
 	 * Full constructor.
@@ -133,9 +70,9 @@ public class MinkowskiSum {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("MinkowskiSum[Shape1=").append(this.convex1)
+		sb.append("MinkowskiSum[Convex1=").append(this.convex1)
 		.append("|Transform1=").append(this.transform1)
-		.append("|Shape2=").append(this.convex2)
+		.append("|Convex2=").append(this.convex2)
 		.append("|Transform2=").append(this.transform2)
 		.append("]");
 		return sb.toString();
@@ -159,11 +96,11 @@ public class MinkowskiSum {
 	
 	/**
 	 * Returns the farthest point in the Minkowski sum given the direction
-	 * in the given {@link MinkowskiSum.Point} object.
+	 * in the given {@link MinkowskiSumPoint} object.
 	 * @param direction the search direction
-	 * @param p the {@link MinkowskiSum.Point} object to fill
+	 * @param p the {@link MinkowskiSumPoint} object to fill
 	 */
-	public void support(Vector2 direction, MinkowskiSum.Point p) {
+	public void support(Vector2 direction, MinkowskiSumPoint p) {
 		// get the farthest point in the given direction in convex1
 		Vector2 point1 = this.convex1.getFarthestPoint(direction, this.transform1);
 		direction.negate();
@@ -179,15 +116,7 @@ public class MinkowskiSum {
 	 * @return {@link Convex}
 	 */
 	public Convex getConvex1() {
-		return convex1;
-	}
-	
-	/**
-	 * Sets the first {@link Convex}
-	 * @param convex1 the first {@link Convex}
-	 */
-	public void setConvex1(Convex convex1) {
-		this.convex1 = convex1;
+		return this.convex1;
 	}
 	
 	/**
@@ -195,15 +124,7 @@ public class MinkowskiSum {
 	 * @return {@link Convex}
 	 */
 	public Convex getConvex2() {
-		return convex2;
-	}
-	
-	/**
-	 * Sets the second {@link Convex}
-	 * @param convex2 the second {@link Convex}
-	 */
-	public void setConvex2(Convex convex2) {
-		this.convex2 = convex2;
+		return this.convex2;
 	}
 	
 	/**
@@ -211,15 +132,7 @@ public class MinkowskiSum {
 	 * @return {@link Transform}
 	 */
 	public Transform getTransform1() {
-		return transform1;
-	}
-	
-	/**
-	 * Sets the first {@link Convex}'s {@link Transform}.
-	 * @param transform1 the first {@link Convex} {@link Transform}
-	 */
-	public void setTransform1(Transform transform1) {
-		this.transform1 = transform1;
+		return this.transform1;
 	}
 	
 	/**
@@ -227,14 +140,6 @@ public class MinkowskiSum {
 	 * @return {@link Transform}
 	 */
 	public Transform getTransform2() {
-		return transform2;
-	}
-	
-	/**
-	 * Sets the second {@link Convex}'s {@link Transform}.
-	 * @param transform2 the second {@link Convex} {@link Transform}
-	 */
-	public void setTransform2(Transform transform2) {
-		this.transform2 = transform2;
+		return this.transform2;
 	}
 }

@@ -97,7 +97,7 @@ public class ContactProfiler {
 			BodyFixture bf = new BodyFixture(c);
 			body1.addFixture(bf);
 		}
-		body1.setMass(Mass.Type.INFINITE);
+		body1.update(Mass.Type.INFINITE);
 		world.addBody(body1);
 
 		// Left-Side
@@ -108,7 +108,7 @@ public class ContactProfiler {
 			body2.addFixture(bf);
 		}
 		body2.translate(new Vector2(-7.5, 7.0));
-		body2.setMass(Mass.Type.INFINITE);
+		body2.update(Mass.Type.INFINITE);
 		world.addBody(body2);
 
 		// Right-Side
@@ -119,7 +119,7 @@ public class ContactProfiler {
 			body3.addFixture(bf);
 		}
 		body3.translate(new Vector2(7.5, 7.0));
-		body3.setMass(Mass.Type.INFINITE);
+		body3.update(Mass.Type.INFINITE);
 		world.addBody(body3);
 
 		// Body4
@@ -132,7 +132,7 @@ public class ContactProfiler {
 			body4.addFixture(bf);
 		}
 		body4.translate(new Vector2(-1.1330084195675079, 5.50713143344162));
-		body4.setMass(Mass.Type.NORMAL);
+		body4.update(Mass.Type.NORMAL);
 		world.addBody(body4);
 
 		// Body5
@@ -145,7 +145,7 @@ public class ContactProfiler {
 			body5.addFixture(bf);
 		}
 		body5.translate(new Vector2(5.603235147719401, 13.411960949246117));
-		body5.setMass(Mass.Type.NORMAL);
+		body5.update(Mass.Type.NORMAL);
 		world.addBody(body5);
 
 		// Body6
@@ -157,7 +157,7 @@ public class ContactProfiler {
 			body6.addFixture(bf);
 		}
 		body6.translate(new Vector2(-6.329934811410148, 6.927759853134262));
-		body6.setMass(Mass.Type.NORMAL);
+		body6.update(Mass.Type.NORMAL);
 		world.addBody(body6);
 
 		// Body7
@@ -170,7 +170,7 @@ public class ContactProfiler {
 			body7.addFixture(bf);
 		}
 		body7.translate(new Vector2(4.679834541654975, 6.438757601586879));
-		body7.setMass(Mass.Type.NORMAL);
+		body7.update(Mass.Type.NORMAL);
 		world.addBody(body7);
 
 		// Body8
@@ -182,7 +182,7 @@ public class ContactProfiler {
 			body8.addFixture(bf);
 		}
 		body8.translate(new Vector2(-0.8485805483210063, 13.847950280799422));
-		body8.setMass(Mass.Type.NORMAL);
+		body8.update(Mass.Type.NORMAL);
 		world.addBody(body8);
 
 		// Body9
@@ -195,7 +195,7 @@ public class ContactProfiler {
 			body9.addFixture(bf);
 		}
 		body9.translate(new Vector2(4.973900551680926, 9.273285652109875));
-		body9.setMass(Mass.Type.NORMAL);
+		body9.update(Mass.Type.NORMAL);
 		world.addBody(body9);
 
 		// Body10
@@ -208,7 +208,7 @@ public class ContactProfiler {
 			body10.addFixture(bf);
 		}
 		body10.translate(new Vector2(-1.742686187270787, 3.490862643618847));
-		body10.setMass(Mass.Type.NORMAL);
+		body10.update(Mass.Type.NORMAL);
 		world.addBody(body10);
 
 		// Body11
@@ -221,7 +221,7 @@ public class ContactProfiler {
 			body11.addFixture(bf);
 		}
 		body11.translate(new Vector2(2.6941316494464393, 5.1610120488699565));
-		body11.setMass(Mass.Type.NORMAL);
+		body11.update(Mass.Type.NORMAL);
 		world.addBody(body11);
 
 		// Body12
@@ -234,7 +234,7 @@ public class ContactProfiler {
 			body12.addFixture(bf);
 		}
 		body12.translate(new Vector2(-0.1833092549830776, 4.682417370760636));
-		body12.setMass(Mass.Type.NORMAL);
+		body12.update(Mass.Type.NORMAL);
 		world.addBody(body12);
 
 		// Body13
@@ -247,7 +247,7 @@ public class ContactProfiler {
 			body13.addFixture(bf);
 		}
 		body13.translate(new Vector2(1.962512418931428, 2.4628065359233693));
-		body13.setMass(Mass.Type.NORMAL);
+		body13.update(Mass.Type.NORMAL);
 		world.addBody(body13);
 
 		// Body14
@@ -259,7 +259,7 @@ public class ContactProfiler {
 			body14.addFixture(bf);
 		}
 		body14.translate(new Vector2(-4.2380766695232435, 9.34224354276551));
-		body14.setMass(Mass.Type.NORMAL);
+		body14.update(Mass.Type.NORMAL);
 		world.addBody(body14);
 
 		// Body15
@@ -272,7 +272,7 @@ public class ContactProfiler {
 			body15.addFixture(bf);
 		}
 		body15.translate(new Vector2(5.053142188283335, 4.644335892212074));
-		body15.setMass(Mass.Type.NORMAL);
+		body15.update(Mass.Type.NORMAL);
 		world.addBody(body15);
 
 		// Body16
@@ -284,7 +284,7 @@ public class ContactProfiler {
 			body16.addFixture(bf);
 		}
 		body16.translate(new Vector2(-3.461132870705931, 7.374911939464545));
-		body16.setMass(Mass.Type.NORMAL);
+		body16.update(Mass.Type.NORMAL);
 		world.addBody(body16);
 
 		// Body17
@@ -296,7 +296,7 @@ public class ContactProfiler {
 			body17.addFixture(bf);
 		}
 		body17.translate(new Vector2(4.6807372127965605, 14.72171270835167));
-		body17.setMass(Mass.Type.NORMAL);
+		body17.update(Mass.Type.NORMAL);
 		world.addBody(body17);
 
 		// Body18
@@ -309,7 +309,7 @@ public class ContactProfiler {
 			body18.addFixture(bf);
 		}
 		body18.translate(new Vector2(-6.177132372638269, 6.001832935956893));
-		body18.setMass(Mass.Type.NORMAL);
+		body18.update(Mass.Type.NORMAL);
 		world.addBody(body18);
 
 		// Body19
@@ -321,7 +321,7 @@ public class ContactProfiler {
 			body19.addFixture(bf);
 		}
 		body19.translate(new Vector2(4.2370008533239405, 3.547601358264866));
-		body19.setMass(Mass.Type.NORMAL);
+		body19.update(Mass.Type.NORMAL);
 		world.addBody(body19);
 
 		// Body20
@@ -333,7 +333,7 @@ public class ContactProfiler {
 			body20.addFixture(bf);
 		}
 		body20.translate(new Vector2(-4.76829837703779, 2.75234255450824));
-		body20.setMass(Mass.Type.NORMAL);
+		body20.update(Mass.Type.NORMAL);
 		world.addBody(body20);
 
 		// Body21
@@ -345,7 +345,7 @@ public class ContactProfiler {
 			body21.addFixture(bf);
 		}
 		body21.translate(new Vector2(1.882900596069884, 8.385362338792662));
-		body21.setMass(Mass.Type.NORMAL);
+		body21.update(Mass.Type.NORMAL);
 		world.addBody(body21);
 
 		// Body22
@@ -357,7 +357,7 @@ public class ContactProfiler {
 			body22.addFixture(bf);
 		}
 		body22.translate(new Vector2(-5.7760143259393315, 12.151269177101588));
-		body22.setMass(Mass.Type.NORMAL);
+		body22.update(Mass.Type.NORMAL);
 		world.addBody(body22);
 
 		// Body23
@@ -370,7 +370,7 @@ public class ContactProfiler {
 			body23.addFixture(bf);
 		}
 		body23.translate(new Vector2(0.6625380390614225, 7.515475929812812));
-		body23.setMass(Mass.Type.NORMAL);
+		body23.update(Mass.Type.NORMAL);
 		world.addBody(body23);
 
 		// Body24
@@ -383,7 +383,7 @@ public class ContactProfiler {
 			body24.addFixture(bf);
 		}
 		body24.translate(new Vector2(-4.29129333045134, 3.6046894694310776));
-		body24.setMass(Mass.Type.NORMAL);
+		body24.update(Mass.Type.NORMAL);
 		world.addBody(body24);
 
 		// Body25
@@ -396,7 +396,7 @@ public class ContactProfiler {
 			body25.addFixture(bf);
 		}
 		body25.translate(new Vector2(4.479341185976786, 6.18004713671508));
-		body25.setMass(Mass.Type.NORMAL);
+		body25.update(Mass.Type.NORMAL);
 		world.addBody(body25);
 
 		// Body26
@@ -409,7 +409,7 @@ public class ContactProfiler {
 			body26.addFixture(bf);
 		}
 		body26.translate(new Vector2(-0.9734522651974241, 12.160382324262478));
-		body26.setMass(Mass.Type.NORMAL);
+		body26.update(Mass.Type.NORMAL);
 		world.addBody(body26);
 
 		// Body27
@@ -421,7 +421,7 @@ public class ContactProfiler {
 			body27.addFixture(bf);
 		}
 		body27.translate(new Vector2(0.23159523353113676, 6.229803763316303));
-		body27.setMass(Mass.Type.NORMAL);
+		body27.update(Mass.Type.NORMAL);
 		world.addBody(body27);
 
 		// Body28
@@ -433,7 +433,7 @@ public class ContactProfiler {
 			body28.addFixture(bf);
 		}
 		body28.translate(new Vector2(-0.6376643479052707, 8.283928961628414));
-		body28.setMass(Mass.Type.NORMAL);
+		body28.update(Mass.Type.NORMAL);
 		world.addBody(body28);
 
 		// Body29
@@ -445,7 +445,7 @@ public class ContactProfiler {
 			body29.addFixture(bf);
 		}
 		body29.translate(new Vector2(3.576063444857732, 5.757436195304736));
-		body29.setMass(Mass.Type.NORMAL);
+		body29.update(Mass.Type.NORMAL);
 		world.addBody(body29);
 
 		// Body30
@@ -457,7 +457,7 @@ public class ContactProfiler {
 			body30.addFixture(bf);
 		}
 		body30.translate(new Vector2(-4.113027539339198, 1.5758158168112055));
-		body30.setMass(Mass.Type.NORMAL);
+		body30.update(Mass.Type.NORMAL);
 		world.addBody(body30);
 
 		// Body31
@@ -469,7 +469,7 @@ public class ContactProfiler {
 			body31.addFixture(bf);
 		}
 		body31.translate(new Vector2(3.7404752061532904, 1.3650463467028633));
-		body31.setMass(Mass.Type.NORMAL);
+		body31.update(Mass.Type.NORMAL);
 		world.addBody(body31);
 
 		// Body32
@@ -481,7 +481,7 @@ public class ContactProfiler {
 			body32.addFixture(bf);
 		}
 		body32.translate(new Vector2(-1.9975104146582772, 10.41311022405915));
-		body32.setMass(Mass.Type.NORMAL);
+		body32.update(Mass.Type.NORMAL);
 		world.addBody(body32);
 
 		// Body33
@@ -493,7 +493,7 @@ public class ContactProfiler {
 			body33.addFixture(bf);
 		}
 		body33.translate(new Vector2(5.645732898794953, 12.84426714483509));
-		body33.setMass(Mass.Type.NORMAL);
+		body33.update(Mass.Type.NORMAL);
 		world.addBody(body33);
 
 		// Body34
@@ -506,7 +506,7 @@ public class ContactProfiler {
 			body34.addFixture(bf);
 		}
 		body34.translate(new Vector2(-6.436651121897059, 1.0845162989758197));
-		body34.setMass(Mass.Type.NORMAL);
+		body34.update(Mass.Type.NORMAL);
 		world.addBody(body34);
 
 		// Body35
@@ -518,7 +518,7 @@ public class ContactProfiler {
 			body35.addFixture(bf);
 		}
 		body35.translate(new Vector2(4.94102060437015, 13.7920539244557));
-		body35.setMass(Mass.Type.NORMAL);
+		body35.update(Mass.Type.NORMAL);
 		world.addBody(body35);
 
 		// Body36
@@ -531,7 +531,7 @@ public class ContactProfiler {
 			body36.addFixture(bf);
 		}
 		body36.translate(new Vector2(-4.9076410653918625, 1.111386916955206));
-		body36.setMass(Mass.Type.NORMAL);
+		body36.update(Mass.Type.NORMAL);
 		world.addBody(body36);
 
 		// Body37
@@ -544,7 +544,7 @@ public class ContactProfiler {
 			body37.addFixture(bf);
 		}
 		body37.translate(new Vector2(0.5156337910571108, 10.364795452932713));
-		body37.setMass(Mass.Type.NORMAL);
+		body37.update(Mass.Type.NORMAL);
 		world.addBody(body37);
 
 		// Body38
@@ -557,7 +557,7 @@ public class ContactProfiler {
 			body38.addFixture(bf);
 		}
 		body38.translate(new Vector2(-1.3363180958386027, 13.913354940886506));
-		body38.setMass(Mass.Type.NORMAL);
+		body38.update(Mass.Type.NORMAL);
 		world.addBody(body38);
 
 		// Body39
@@ -569,7 +569,7 @@ public class ContactProfiler {
 			body39.addFixture(bf);
 		}
 		body39.translate(new Vector2(2.2867806759809888, 11.361279564445159));
-		body39.setMass(Mass.Type.NORMAL);
+		body39.update(Mass.Type.NORMAL);
 		world.addBody(body39);
 
 		// Body40
@@ -582,7 +582,7 @@ public class ContactProfiler {
 			body40.addFixture(bf);
 		}
 		body40.translate(new Vector2(-6.791487795404287, 13.295707204422149));
-		body40.setMass(Mass.Type.NORMAL);
+		body40.update(Mass.Type.NORMAL);
 		world.addBody(body40);
 
 		// Body41
@@ -594,7 +594,7 @@ public class ContactProfiler {
 			body41.addFixture(bf);
 		}
 		body41.translate(new Vector2(4.645147358453109, 1.2715327368569647));
-		body41.setMass(Mass.Type.NORMAL);
+		body41.update(Mass.Type.NORMAL);
 		world.addBody(body41);
 
 		// Body42
@@ -607,7 +607,7 @@ public class ContactProfiler {
 			body42.addFixture(bf);
 		}
 		body42.translate(new Vector2(-4.653141924310416, 14.03379116787397));
-		body42.setMass(Mass.Type.NORMAL);
+		body42.update(Mass.Type.NORMAL);
 		world.addBody(body42);
 
 		// Body43
@@ -619,7 +619,7 @@ public class ContactProfiler {
 			body43.addFixture(bf);
 		}
 		body43.translate(new Vector2(2.8934320398435314, 12.722664967167887));
-		body43.setMass(Mass.Type.NORMAL);
+		body43.update(Mass.Type.NORMAL);
 		world.addBody(body43);
 
 		// Body44
@@ -631,7 +631,7 @@ public class ContactProfiler {
 			body44.addFixture(bf);
 		}
 		body44.translate(new Vector2(-5.607063410659674, 4.18992848948463));
-		body44.setMass(Mass.Type.NORMAL);
+		body44.update(Mass.Type.NORMAL);
 		world.addBody(body44);
 
 		// Body45
@@ -643,7 +643,7 @@ public class ContactProfiler {
 			body45.addFixture(bf);
 		}
 		body45.translate(new Vector2(5.1146614116851286, 14.867359297805047));
-		body45.setMass(Mass.Type.NORMAL);
+		body45.update(Mass.Type.NORMAL);
 		world.addBody(body45);
 
 		// Body46
@@ -656,7 +656,7 @@ public class ContactProfiler {
 			body46.addFixture(bf);
 		}
 		body46.translate(new Vector2(-5.576028900547054, 6.264671470063004));
-		body46.setMass(Mass.Type.NORMAL);
+		body46.update(Mass.Type.NORMAL);
 		world.addBody(body46);
 
 		// Body47
@@ -669,7 +669,7 @@ public class ContactProfiler {
 			body47.addFixture(bf);
 		}
 		body47.translate(new Vector2(2.8924423982963807, 6.1919480666560975));
-		body47.setMass(Mass.Type.NORMAL);
+		body47.update(Mass.Type.NORMAL);
 		world.addBody(body47);
 
 		// Body48
@@ -682,7 +682,7 @@ public class ContactProfiler {
 			body48.addFixture(bf);
 		}
 		body48.translate(new Vector2(-4.599413511874901, 10.09288807701673));
-		body48.setMass(Mass.Type.NORMAL);
+		body48.update(Mass.Type.NORMAL);
 		world.addBody(body48);
 
 		// Body49
@@ -694,7 +694,7 @@ public class ContactProfiler {
 			body49.addFixture(bf);
 		}
 		body49.translate(new Vector2(3.89376828781741, 4.296977512396952));
-		body49.setMass(Mass.Type.NORMAL);
+		body49.update(Mass.Type.NORMAL);
 		world.addBody(body49);
 
 		// Body50
@@ -707,7 +707,7 @@ public class ContactProfiler {
 			body50.addFixture(bf);
 		}
 		body50.translate(new Vector2(-4.298064677586164, 5.795616925977458));
-		body50.setMass(Mass.Type.NORMAL);
+		body50.update(Mass.Type.NORMAL);
 		world.addBody(body50);
 
 		// Body51
@@ -720,7 +720,7 @@ public class ContactProfiler {
 			body51.addFixture(bf);
 		}
 		body51.translate(new Vector2(5.515393450088526, 13.095395558542654));
-		body51.setMass(Mass.Type.NORMAL);
+		body51.update(Mass.Type.NORMAL);
 		world.addBody(body51);
 
 		// Body52
@@ -733,7 +733,7 @@ public class ContactProfiler {
 			body52.addFixture(bf);
 		}
 		body52.translate(new Vector2(-1.3455614416097157, 14.445239223123615));
-		body52.setMass(Mass.Type.NORMAL);
+		body52.update(Mass.Type.NORMAL);
 		world.addBody(body52);
 
 		// Body53
@@ -745,7 +745,7 @@ public class ContactProfiler {
 			body53.addFixture(bf);
 		}
 		body53.translate(new Vector2(6.6614538521501245, 11.71178097549447));
-		body53.setMass(Mass.Type.NORMAL);
+		body53.update(Mass.Type.NORMAL);
 		world.addBody(body53);
 
 		// Body54
@@ -758,7 +758,7 @@ public class ContactProfiler {
 			body54.addFixture(bf);
 		}
 		body54.translate(new Vector2(-0.5982649143457038, 9.707963633158768));
-		body54.setMass(Mass.Type.NORMAL);
+		body54.update(Mass.Type.NORMAL);
 		world.addBody(body54);
 
 		// Body55
@@ -771,7 +771,7 @@ public class ContactProfiler {
 			body55.addFixture(bf);
 		}
 		body55.translate(new Vector2(5.4710317609321555, 2.4165991252902006));
-		body55.setMass(Mass.Type.NORMAL);
+		body55.update(Mass.Type.NORMAL);
 		world.addBody(body55);
 
 		// Body56
@@ -784,7 +784,7 @@ public class ContactProfiler {
 			body56.addFixture(bf);
 		}
 		body56.translate(new Vector2(-6.036991852461182, 1.2886810020279817));
-		body56.setMass(Mass.Type.NORMAL);
+		body56.update(Mass.Type.NORMAL);
 		world.addBody(body56);
 
 		// Body57
@@ -796,7 +796,7 @@ public class ContactProfiler {
 			body57.addFixture(bf);
 		}
 		body57.translate(new Vector2(6.155153441857344, 4.859882036012544));
-		body57.setMass(Mass.Type.NORMAL);
+		body57.update(Mass.Type.NORMAL);
 		world.addBody(body57);
 
 		// Body58
@@ -808,7 +808,7 @@ public class ContactProfiler {
 			body58.addFixture(bf);
 		}
 		body58.translate(new Vector2(-2.381935652360842, 8.701001840366512));
-		body58.setMass(Mass.Type.NORMAL);
+		body58.update(Mass.Type.NORMAL);
 		world.addBody(body58);
 
 		// Body59
@@ -820,7 +820,7 @@ public class ContactProfiler {
 			body59.addFixture(bf);
 		}
 		body59.translate(new Vector2(2.9787332494427647, 6.185809559172435));
-		body59.setMass(Mass.Type.NORMAL);
+		body59.update(Mass.Type.NORMAL);
 		world.addBody(body59);
 
 		// Body60
@@ -833,7 +833,7 @@ public class ContactProfiler {
 			body60.addFixture(bf);
 		}
 		body60.translate(new Vector2(-2.0709644055898475, 5.109891643137622));
-		body60.setMass(Mass.Type.NORMAL);
+		body60.update(Mass.Type.NORMAL);
 		world.addBody(body60);
 
 		// Body61
@@ -846,7 +846,7 @@ public class ContactProfiler {
 			body61.addFixture(bf);
 		}
 		body61.translate(new Vector2(5.9976093972769515, 13.918653529648326));
-		body61.setMass(Mass.Type.NORMAL);
+		body61.update(Mass.Type.NORMAL);
 		world.addBody(body61);
 
 		// Body62
@@ -858,7 +858,7 @@ public class ContactProfiler {
 			body62.addFixture(bf);
 		}
 		body62.translate(new Vector2(-0.5272784965213353, 14.92077022389309));
-		body62.setMass(Mass.Type.NORMAL);
+		body62.update(Mass.Type.NORMAL);
 		world.addBody(body62);
 
 		// Body63
@@ -870,7 +870,7 @@ public class ContactProfiler {
 			body63.addFixture(bf);
 		}
 		body63.translate(new Vector2(1.4145128559863944, 14.806462564515838));
-		body63.setMass(Mass.Type.NORMAL);
+		body63.update(Mass.Type.NORMAL);
 		world.addBody(body63);
 
 		// Body64
@@ -882,7 +882,7 @@ public class ContactProfiler {
 			body64.addFixture(bf);
 		}
 		body64.translate(new Vector2(-0.8367389307960994, 12.865540326614669));
-		body64.setMass(Mass.Type.NORMAL);
+		body64.update(Mass.Type.NORMAL);
 		world.addBody(body64);
 
 		// Body65
@@ -895,7 +895,7 @@ public class ContactProfiler {
 			body65.addFixture(bf);
 		}
 		body65.translate(new Vector2(6.037082857507388, 3.0735217761863165));
-		body65.setMass(Mass.Type.NORMAL);
+		body65.update(Mass.Type.NORMAL);
 		world.addBody(body65);
 
 		// Body66
@@ -908,7 +908,7 @@ public class ContactProfiler {
 			body66.addFixture(bf);
 		}
 		body66.translate(new Vector2(-2.6324577401989595, 14.050555036015213));
-		body66.setMass(Mass.Type.NORMAL);
+		body66.update(Mass.Type.NORMAL);
 		world.addBody(body66);
 
 		// Body67
@@ -920,7 +920,7 @@ public class ContactProfiler {
 			body67.addFixture(bf);
 		}
 		body67.translate(new Vector2(0.5759906628114146, 9.473409038515605));
-		body67.setMass(Mass.Type.NORMAL);
+		body67.update(Mass.Type.NORMAL);
 		world.addBody(body67);
 
 		// Body68
@@ -932,7 +932,7 @@ public class ContactProfiler {
 			body68.addFixture(bf);
 		}
 		body68.translate(new Vector2(-5.6710705517767055, 6.536012187641885));
-		body68.setMass(Mass.Type.NORMAL);
+		body68.update(Mass.Type.NORMAL);
 		world.addBody(body68);
 
 		// Body69
@@ -944,7 +944,7 @@ public class ContactProfiler {
 			body69.addFixture(bf);
 		}
 		body69.translate(new Vector2(0.6124645143026399, 3.3628094274699225));
-		body69.setMass(Mass.Type.NORMAL);
+		body69.update(Mass.Type.NORMAL);
 		world.addBody(body69);
 
 		// Body70
@@ -956,7 +956,7 @@ public class ContactProfiler {
 			body70.addFixture(bf);
 		}
 		body70.translate(new Vector2(-6.56012999544052, 13.701447446631734));
-		body70.setMass(Mass.Type.NORMAL);
+		body70.update(Mass.Type.NORMAL);
 		world.addBody(body70);
 
 		// Body71
@@ -968,7 +968,7 @@ public class ContactProfiler {
 			body71.addFixture(bf);
 		}
 		body71.translate(new Vector2(5.9509359144112635, 8.727518312280695));
-		body71.setMass(Mass.Type.NORMAL);
+		body71.update(Mass.Type.NORMAL);
 		world.addBody(body71);
 
 		// Body72
@@ -981,7 +981,7 @@ public class ContactProfiler {
 			body72.addFixture(bf);
 		}
 		body72.translate(new Vector2(-2.9197071199071005, 1.9769904699605134));
-		body72.setMass(Mass.Type.NORMAL);
+		body72.update(Mass.Type.NORMAL);
 		world.addBody(body72);
 
 		// Body73
@@ -993,7 +993,7 @@ public class ContactProfiler {
 			body73.addFixture(bf);
 		}
 		body73.translate(new Vector2(0.07310921348839017, 5.769460173776579));
-		body73.setMass(Mass.Type.NORMAL);
+		body73.update(Mass.Type.NORMAL);
 		world.addBody(body73);
 
 		// Body74
@@ -1006,7 +1006,7 @@ public class ContactProfiler {
 			body74.addFixture(bf);
 		}
 		body74.translate(new Vector2(-1.5500981528016586, 6.713997016920705));
-		body74.setMass(Mass.Type.NORMAL);
+		body74.update(Mass.Type.NORMAL);
 		world.addBody(body74);
 
 		// Body75
@@ -1018,7 +1018,7 @@ public class ContactProfiler {
 			body75.addFixture(bf);
 		}
 		body75.translate(new Vector2(0.9034127886465787, 1.892649576213631));
-		body75.setMass(Mass.Type.NORMAL);
+		body75.update(Mass.Type.NORMAL);
 		world.addBody(body75);
 
 		// Body76
@@ -1031,7 +1031,7 @@ public class ContactProfiler {
 			body76.addFixture(bf);
 		}
 		body76.translate(new Vector2(-3.2442791769911876, 14.034068091889033));
-		body76.setMass(Mass.Type.NORMAL);
+		body76.update(Mass.Type.NORMAL);
 		world.addBody(body76);
 
 		// Body77
@@ -1044,7 +1044,7 @@ public class ContactProfiler {
 			body77.addFixture(bf);
 		}
 		body77.translate(new Vector2(3.4248610298949496, 8.467916849078179));
-		body77.setMass(Mass.Type.NORMAL);
+		body77.update(Mass.Type.NORMAL);
 		world.addBody(body77);
 
 		// Body78
@@ -1056,7 +1056,7 @@ public class ContactProfiler {
 			body78.addFixture(bf);
 		}
 		body78.translate(new Vector2(-0.7705369191762341, 3.8555899682525516));
-		body78.setMass(Mass.Type.NORMAL);
+		body78.update(Mass.Type.NORMAL);
 		world.addBody(body78);
 
 		// Body79
@@ -1068,7 +1068,7 @@ public class ContactProfiler {
 			body79.addFixture(bf);
 		}
 		body79.translate(new Vector2(2.8985043684552627, 7.190560848735549));
-		body79.setMass(Mass.Type.NORMAL);
+		body79.update(Mass.Type.NORMAL);
 		world.addBody(body79);
 
 		// Body80
@@ -1080,7 +1080,7 @@ public class ContactProfiler {
 			body80.addFixture(bf);
 		}
 		body80.translate(new Vector2(-0.6387730740946571, 7.04168480007445));
-		body80.setMass(Mass.Type.NORMAL);
+		body80.update(Mass.Type.NORMAL);
 		world.addBody(body80);
 
 		// Body81
@@ -1093,7 +1093,7 @@ public class ContactProfiler {
 			body81.addFixture(bf);
 		}
 		body81.translate(new Vector2(1.797902543104146, 4.956051800080884));
-		body81.setMass(Mass.Type.NORMAL);
+		body81.update(Mass.Type.NORMAL);
 		world.addBody(body81);
 
 		// Body82
@@ -1106,7 +1106,7 @@ public class ContactProfiler {
 			body82.addFixture(bf);
 		}
 		body82.translate(new Vector2(-5.050058480113792, 9.211341593062468));
-		body82.setMass(Mass.Type.NORMAL);
+		body82.update(Mass.Type.NORMAL);
 		world.addBody(body82);
 
 		// Body83
@@ -1118,7 +1118,7 @@ public class ContactProfiler {
 			body83.addFixture(bf);
 		}
 		body83.translate(new Vector2(4.750581782092442, 11.420536305692208));
-		body83.setMass(Mass.Type.NORMAL);
+		body83.update(Mass.Type.NORMAL);
 		world.addBody(body83);
 
 		// Body84
@@ -1131,7 +1131,7 @@ public class ContactProfiler {
 			body84.addFixture(bf);
 		}
 		body84.translate(new Vector2(-2.2141607452347567, 13.910690592127295));
-		body84.setMass(Mass.Type.NORMAL);
+		body84.update(Mass.Type.NORMAL);
 		world.addBody(body84);
 
 		// Body85
@@ -1144,7 +1144,7 @@ public class ContactProfiler {
 			body85.addFixture(bf);
 		}
 		body85.translate(new Vector2(5.526067332403243, 2.8518116265178355));
-		body85.setMass(Mass.Type.NORMAL);
+		body85.update(Mass.Type.NORMAL);
 		world.addBody(body85);
 
 		// Body86
@@ -1156,7 +1156,7 @@ public class ContactProfiler {
 			body86.addFixture(bf);
 		}
 		body86.translate(new Vector2(-1.3632675300029597, 9.488957181758515));
-		body86.setMass(Mass.Type.NORMAL);
+		body86.update(Mass.Type.NORMAL);
 		world.addBody(body86);
 
 		// Body87
@@ -1168,7 +1168,7 @@ public class ContactProfiler {
 			body87.addFixture(bf);
 		}
 		body87.translate(new Vector2(6.583745072696165, 2.572963137914148));
-		body87.setMass(Mass.Type.NORMAL);
+		body87.update(Mass.Type.NORMAL);
 		world.addBody(body87);
 
 		// Body88
@@ -1180,7 +1180,7 @@ public class ContactProfiler {
 			body88.addFixture(bf);
 		}
 		body88.translate(new Vector2(-4.836826171746334, 11.266752969725065));
-		body88.setMass(Mass.Type.NORMAL);
+		body88.update(Mass.Type.NORMAL);
 		world.addBody(body88);
 
 		// Body89
@@ -1193,7 +1193,7 @@ public class ContactProfiler {
 			body89.addFixture(bf);
 		}
 		body89.translate(new Vector2(5.056529064336144, 11.152387160215692));
-		body89.setMass(Mass.Type.NORMAL);
+		body89.update(Mass.Type.NORMAL);
 		world.addBody(body89);
 
 		// Body90
@@ -1206,7 +1206,7 @@ public class ContactProfiler {
 			body90.addFixture(bf);
 		}
 		body90.translate(new Vector2(-5.00854236494412, 13.691338860825708));
-		body90.setMass(Mass.Type.NORMAL);
+		body90.update(Mass.Type.NORMAL);
 		world.addBody(body90);
 
 		// Body91
@@ -1219,7 +1219,7 @@ public class ContactProfiler {
 			body91.addFixture(bf);
 		}
 		body91.translate(new Vector2(0.8721174520496123, 10.125620393370214));
-		body91.setMass(Mass.Type.NORMAL);
+		body91.update(Mass.Type.NORMAL);
 		world.addBody(body91);
 
 		// Body92
@@ -1231,7 +1231,7 @@ public class ContactProfiler {
 			body92.addFixture(bf);
 		}
 		body92.translate(new Vector2(-3.0948835846727047, 12.563988731101967));
-		body92.setMass(Mass.Type.NORMAL);
+		body92.update(Mass.Type.NORMAL);
 		world.addBody(body92);
 
 		// Body93
@@ -1243,7 +1243,7 @@ public class ContactProfiler {
 			body93.addFixture(bf);
 		}
 		body93.translate(new Vector2(0.5668676987591313, 11.386736734712253));
-		body93.setMass(Mass.Type.NORMAL);
+		body93.update(Mass.Type.NORMAL);
 		world.addBody(body93);
 
 		// Body94
@@ -1256,7 +1256,7 @@ public class ContactProfiler {
 			body94.addFixture(bf);
 		}
 		body94.translate(new Vector2(-0.03633653795944514, 13.887145655312901));
-		body94.setMass(Mass.Type.NORMAL);
+		body94.update(Mass.Type.NORMAL);
 		world.addBody(body94);
 
 		// Body95
@@ -1268,7 +1268,7 @@ public class ContactProfiler {
 			body95.addFixture(bf);
 		}
 		body95.translate(new Vector2(6.421004385596704, 1.2101933923308814));
-		body95.setMass(Mass.Type.NORMAL);
+		body95.update(Mass.Type.NORMAL);
 		world.addBody(body95);
 
 		// Body96
@@ -1281,7 +1281,7 @@ public class ContactProfiler {
 			body96.addFixture(bf);
 		}
 		body96.translate(new Vector2(-2.260662128356081, 10.075108586938763));
-		body96.setMass(Mass.Type.NORMAL);
+		body96.update(Mass.Type.NORMAL);
 		world.addBody(body96);
 
 		// Body97
@@ -1293,7 +1293,7 @@ public class ContactProfiler {
 			body97.addFixture(bf);
 		}
 		body97.translate(new Vector2(4.525113822274603, 5.392919583499586));
-		body97.setMass(Mass.Type.NORMAL);
+		body97.update(Mass.Type.NORMAL);
 		world.addBody(body97);
 
 		// Body98
@@ -1306,7 +1306,7 @@ public class ContactProfiler {
 			body98.addFixture(bf);
 		}
 		body98.translate(new Vector2(-6.9677437609246615, 9.892688092535213));
-		body98.setMass(Mass.Type.NORMAL);
+		body98.update(Mass.Type.NORMAL);
 		world.addBody(body98);
 
 		// Body99
@@ -1318,7 +1318,7 @@ public class ContactProfiler {
 			body99.addFixture(bf);
 		}
 		body99.translate(new Vector2(1.7495176663188992, 6.652825403380667));
-		body99.setMass(Mass.Type.NORMAL);
+		body99.update(Mass.Type.NORMAL);
 		world.addBody(body99);
 
 		// Body100
@@ -1331,7 +1331,7 @@ public class ContactProfiler {
 			body100.addFixture(bf);
 		}
 		body100.translate(new Vector2(-4.627495196184105, 12.242864914054335));
-		body100.setMass(Mass.Type.NORMAL);
+		body100.update(Mass.Type.NORMAL);
 		world.addBody(body100);
 
 		// Body101
@@ -1343,7 +1343,7 @@ public class ContactProfiler {
 			body101.addFixture(bf);
 		}
 		body101.translate(new Vector2(6.287262763773848, 8.37889461603794));
-		body101.setMass(Mass.Type.NORMAL);
+		body101.update(Mass.Type.NORMAL);
 		world.addBody(body101);
 
 		// Body102
@@ -1356,7 +1356,7 @@ public class ContactProfiler {
 			body102.addFixture(bf);
 		}
 		body102.translate(new Vector2(-5.435408785032828, 1.8634128731412085));
-		body102.setMass(Mass.Type.NORMAL);
+		body102.update(Mass.Type.NORMAL);
 		world.addBody(body102);
 
 		// Body103
@@ -1369,7 +1369,7 @@ public class ContactProfiler {
 			body103.addFixture(bf);
 		}
 		body103.translate(new Vector2(6.536236476913971, 8.061011411766376));
-		body103.setMass(Mass.Type.NORMAL);
+		body103.update(Mass.Type.NORMAL);
 		world.addBody(body103);
 
 		// Body104
@@ -1382,7 +1382,7 @@ public class ContactProfiler {
 			body104.addFixture(bf);
 		}
 		body104.translate(new Vector2(-6.5500937632742575, 12.440683402922138));
-		body104.setMass(Mass.Type.NORMAL);
+		body104.update(Mass.Type.NORMAL);
 		world.addBody(body104);
 
 		// Body105
@@ -1394,7 +1394,7 @@ public class ContactProfiler {
 			body105.addFixture(bf);
 		}
 		body105.translate(new Vector2(4.06388790018847, 11.84447402778531));
-		body105.setMass(Mass.Type.NORMAL);
+		body105.update(Mass.Type.NORMAL);
 		world.addBody(body105);
 
 		// Body106
@@ -1406,7 +1406,7 @@ public class ContactProfiler {
 			body106.addFixture(bf);
 		}
 		body106.translate(new Vector2(-6.721753943733683, 2.405955189728253));
-		body106.setMass(Mass.Type.NORMAL);
+		body106.update(Mass.Type.NORMAL);
 		world.addBody(body106);
 
 		// Body107
@@ -1418,7 +1418,7 @@ public class ContactProfiler {
 			body107.addFixture(bf);
 		}
 		body107.translate(new Vector2(4.04006660374961, 2.7806346117348815));
-		body107.setMass(Mass.Type.NORMAL);
+		body107.update(Mass.Type.NORMAL);
 		world.addBody(body107);
 
 		// Body108
@@ -1431,7 +1431,7 @@ public class ContactProfiler {
 			body108.addFixture(bf);
 		}
 		body108.translate(new Vector2(-2.201398890594816, 8.887382048643255));
-		body108.setMass(Mass.Type.NORMAL);
+		body108.update(Mass.Type.NORMAL);
 		world.addBody(body108);
 
 		// Body109
@@ -1444,7 +1444,7 @@ public class ContactProfiler {
 			body109.addFixture(bf);
 		}
 		body109.translate(new Vector2(6.908905202965681, 2.1244566778606684));
-		body109.setMass(Mass.Type.NORMAL);
+		body109.update(Mass.Type.NORMAL);
 		world.addBody(body109);
 
 		// Body110
@@ -1457,7 +1457,7 @@ public class ContactProfiler {
 			body110.addFixture(bf);
 		}
 		body110.translate(new Vector2(-6.043215689577052, 12.719736338826358));
-		body110.setMass(Mass.Type.NORMAL);
+		body110.update(Mass.Type.NORMAL);
 		world.addBody(body110);
 
 		// Body111
@@ -1470,7 +1470,7 @@ public class ContactProfiler {
 			body111.addFixture(bf);
 		}
 		body111.translate(new Vector2(4.860040209571233, 12.468615103400069));
-		body111.setMass(Mass.Type.NORMAL);
+		body111.update(Mass.Type.NORMAL);
 		world.addBody(body111);
 
 		// Body112
@@ -1482,7 +1482,7 @@ public class ContactProfiler {
 			body112.addFixture(bf);
 		}
 		body112.translate(new Vector2(-6.4817532066929235, 5.727350456958197));
-		body112.setMass(Mass.Type.NORMAL);
+		body112.update(Mass.Type.NORMAL);
 		world.addBody(body112);
 
 		// Body113
@@ -1495,7 +1495,7 @@ public class ContactProfiler {
 			body113.addFixture(bf);
 		}
 		body113.translate(new Vector2(2.0734275418728543, 13.436339717603166));
-		body113.setMass(Mass.Type.NORMAL);
+		body113.update(Mass.Type.NORMAL);
 		world.addBody(body113);
 
 		// Body114
@@ -1508,7 +1508,7 @@ public class ContactProfiler {
 			body114.addFixture(bf);
 		}
 		body114.translate(new Vector2(-6.504610215074548, 1.3490456812951934));
-		body114.setMass(Mass.Type.NORMAL);
+		body114.update(Mass.Type.NORMAL);
 		world.addBody(body114);
 
 		// Body115
@@ -1521,7 +1521,7 @@ public class ContactProfiler {
 			body115.addFixture(bf);
 		}
 		body115.translate(new Vector2(1.654858977132177, 1.161786335890563));
-		body115.setMass(Mass.Type.NORMAL);
+		body115.update(Mass.Type.NORMAL);
 		world.addBody(body115);
 
 		// Body116
@@ -1533,7 +1533,7 @@ public class ContactProfiler {
 			body116.addFixture(bf);
 		}
 		body116.translate(new Vector2(-5.950945500120648, 12.34028347978079));
-		body116.setMass(Mass.Type.NORMAL);
+		body116.update(Mass.Type.NORMAL);
 		world.addBody(body116);
 
 		// Body117
@@ -1545,7 +1545,7 @@ public class ContactProfiler {
 			body117.addFixture(bf);
 		}
 		body117.translate(new Vector2(3.7383227773959273, 12.964402766239635));
-		body117.setMass(Mass.Type.NORMAL);
+		body117.update(Mass.Type.NORMAL);
 		world.addBody(body117);
 
 		// Body118
@@ -1557,7 +1557,7 @@ public class ContactProfiler {
 			body118.addFixture(bf);
 		}
 		body118.translate(new Vector2(-2.2364349009417066, 11.792357117874213));
-		body118.setMass(Mass.Type.NORMAL);
+		body118.update(Mass.Type.NORMAL);
 		world.addBody(body118);
 
 		// Body119
@@ -1569,7 +1569,7 @@ public class ContactProfiler {
 			body119.addFixture(bf);
 		}
 		body119.translate(new Vector2(1.3131438191695293, 14.670878457007444));
-		body119.setMass(Mass.Type.NORMAL);
+		body119.update(Mass.Type.NORMAL);
 		world.addBody(body119);
 
 		// Body120
@@ -1581,7 +1581,7 @@ public class ContactProfiler {
 			body120.addFixture(bf);
 		}
 		body120.translate(new Vector2(-2.3882693819633123, 13.281602039179695));
-		body120.setMass(Mass.Type.NORMAL);
+		body120.update(Mass.Type.NORMAL);
 		world.addBody(body120);
 
 		// Body121
@@ -1594,7 +1594,7 @@ public class ContactProfiler {
 			body121.addFixture(bf);
 		}
 		body121.translate(new Vector2(0.48094681620964186, 11.675626996585168));
-		body121.setMass(Mass.Type.NORMAL);
+		body121.update(Mass.Type.NORMAL);
 		world.addBody(body121);
 
 		// Body122
@@ -1607,7 +1607,7 @@ public class ContactProfiler {
 			body122.addFixture(bf);
 		}
 		body122.translate(new Vector2(-6.0319823232422305, 4.9265132149582245));
-		body122.setMass(Mass.Type.NORMAL);
+		body122.update(Mass.Type.NORMAL);
 		world.addBody(body122);
 
 		// Body123
@@ -1620,7 +1620,7 @@ public class ContactProfiler {
 			body123.addFixture(bf);
 		}
 		body123.translate(new Vector2(2.309351972957582, 13.645733248242074));
-		body123.setMass(Mass.Type.NORMAL);
+		body123.update(Mass.Type.NORMAL);
 		world.addBody(body123);
 
 		// Body124
@@ -1633,7 +1633,7 @@ public class ContactProfiler {
 			body124.addFixture(bf);
 		}
 		body124.translate(new Vector2(-1.6739009431721397, 3.1553130599369856));
-		body124.setMass(Mass.Type.NORMAL);
+		body124.update(Mass.Type.NORMAL);
 		world.addBody(body124);
 
 		// Body125
@@ -1646,7 +1646,7 @@ public class ContactProfiler {
 			body125.addFixture(bf);
 		}
 		body125.translate(new Vector2(4.363162144475284, 2.1383004817738858));
-		body125.setMass(Mass.Type.NORMAL);
+		body125.update(Mass.Type.NORMAL);
 		world.addBody(body125);
 
 		// Body126
@@ -1659,7 +1659,7 @@ public class ContactProfiler {
 			body126.addFixture(bf);
 		}
 		body126.translate(new Vector2(-3.6633851717616692, 1.9417348565426193));
-		body126.setMass(Mass.Type.NORMAL);
+		body126.update(Mass.Type.NORMAL);
 		world.addBody(body126);
 
 		// Body127
@@ -1671,7 +1671,7 @@ public class ContactProfiler {
 			body127.addFixture(bf);
 		}
 		body127.translate(new Vector2(3.0620302940134945, 4.156175072288958));
-		body127.setMass(Mass.Type.NORMAL);
+		body127.update(Mass.Type.NORMAL);
 		world.addBody(body127);
 
 		// Body128
@@ -1684,7 +1684,7 @@ public class ContactProfiler {
 			body128.addFixture(bf);
 		}
 		body128.translate(new Vector2(-5.6959672338035965, 7.745834510039156));
-		body128.setMass(Mass.Type.NORMAL);
+		body128.update(Mass.Type.NORMAL);
 		world.addBody(body128);
 
 		// Body129
@@ -1697,7 +1697,7 @@ public class ContactProfiler {
 			body129.addFixture(bf);
 		}
 		body129.translate(new Vector2(0.34581005283913757, 12.904049471351712));
-		body129.setMass(Mass.Type.NORMAL);
+		body129.update(Mass.Type.NORMAL);
 		world.addBody(body129);
 
 		// Body130
@@ -1710,7 +1710,7 @@ public class ContactProfiler {
 			body130.addFixture(bf);
 		}
 		body130.translate(new Vector2(-1.709512771523146, 12.26289338907026));
-		body130.setMass(Mass.Type.NORMAL);
+		body130.update(Mass.Type.NORMAL);
 		world.addBody(body130);
 
 		// Body131
@@ -1723,7 +1723,7 @@ public class ContactProfiler {
 			body131.addFixture(bf);
 		}
 		body131.translate(new Vector2(3.9474803129463845, 3.680725531299211));
-		body131.setMass(Mass.Type.NORMAL);
+		body131.update(Mass.Type.NORMAL);
 		world.addBody(body131);
 
 		// Body132
@@ -1735,7 +1735,7 @@ public class ContactProfiler {
 			body132.addFixture(bf);
 		}
 		body132.translate(new Vector2(-6.756635102279852, 7.226029835517388));
-		body132.setMass(Mass.Type.NORMAL);
+		body132.update(Mass.Type.NORMAL);
 		world.addBody(body132);
 
 		// Body133
@@ -1747,7 +1747,7 @@ public class ContactProfiler {
 			body133.addFixture(bf);
 		}
 		body133.translate(new Vector2(0.26411543106905533, 6.22737110335172));
-		body133.setMass(Mass.Type.NORMAL);
+		body133.update(Mass.Type.NORMAL);
 		world.addBody(body133);
 
 		// Body134
@@ -1760,7 +1760,7 @@ public class ContactProfiler {
 			body134.addFixture(bf);
 		}
 		body134.translate(new Vector2(-3.5480361892874, 2.2980080283232707));
-		body134.setMass(Mass.Type.NORMAL);
+		body134.update(Mass.Type.NORMAL);
 		world.addBody(body134);
 
 		// Body135
@@ -1773,7 +1773,7 @@ public class ContactProfiler {
 			body135.addFixture(bf);
 		}
 		body135.translate(new Vector2(3.333135419328551, 13.217145521813954));
-		body135.setMass(Mass.Type.NORMAL);
+		body135.update(Mass.Type.NORMAL);
 		world.addBody(body135);
 
 		// Body136
@@ -1786,7 +1786,7 @@ public class ContactProfiler {
 			body136.addFixture(bf);
 		}
 		body136.translate(new Vector2(-1.3279460971108892, 10.838398292083765));
-		body136.setMass(Mass.Type.NORMAL);
+		body136.update(Mass.Type.NORMAL);
 		world.addBody(body136);
 
 		// Body137
@@ -1799,7 +1799,7 @@ public class ContactProfiler {
 			body137.addFixture(bf);
 		}
 		body137.translate(new Vector2(2.3419858113161425, 10.648782549813207));
-		body137.setMass(Mass.Type.NORMAL);
+		body137.update(Mass.Type.NORMAL);
 		world.addBody(body137);
 
 		// Body138
@@ -1812,7 +1812,7 @@ public class ContactProfiler {
 			body138.addFixture(bf);
 		}
 		body138.translate(new Vector2(-0.9136063915967683, 12.382695964078762));
-		body138.setMass(Mass.Type.NORMAL);
+		body138.update(Mass.Type.NORMAL);
 		world.addBody(body138);
 
 		// Body139
@@ -1825,7 +1825,7 @@ public class ContactProfiler {
 			body139.addFixture(bf);
 		}
 		body139.translate(new Vector2(5.654229025018095, 14.205494340641346));
-		body139.setMass(Mass.Type.NORMAL);
+		body139.update(Mass.Type.NORMAL);
 		world.addBody(body139);
 
 		// Body140
@@ -1837,7 +1837,7 @@ public class ContactProfiler {
 			body140.addFixture(bf);
 		}
 		body140.translate(new Vector2(-3.610211330820338, 11.519354973660365));
-		body140.setMass(Mass.Type.NORMAL);
+		body140.update(Mass.Type.NORMAL);
 		world.addBody(body140);
 
 		// Body141
@@ -1850,7 +1850,7 @@ public class ContactProfiler {
 			body141.addFixture(bf);
 		}
 		body141.translate(new Vector2(1.5118710409555787, 6.779917069102093));
-		body141.setMass(Mass.Type.NORMAL);
+		body141.update(Mass.Type.NORMAL);
 		world.addBody(body141);
 
 		// Body142
@@ -1862,7 +1862,7 @@ public class ContactProfiler {
 			body142.addFixture(bf);
 		}
 		body142.translate(new Vector2(-6.009230355380466, 8.0867305328487));
-		body142.setMass(Mass.Type.NORMAL);
+		body142.update(Mass.Type.NORMAL);
 		world.addBody(body142);
 
 		// Body143
@@ -1875,7 +1875,7 @@ public class ContactProfiler {
 			body143.addFixture(bf);
 		}
 		body143.translate(new Vector2(6.941047095306077, 12.123122772617466));
-		body143.setMass(Mass.Type.NORMAL);
+		body143.update(Mass.Type.NORMAL);
 		world.addBody(body143);
 
 		// Body144
@@ -1887,7 +1887,7 @@ public class ContactProfiler {
 			body144.addFixture(bf);
 		}
 		body144.translate(new Vector2(-4.30435350101775, 14.188365181168525));
-		body144.setMass(Mass.Type.NORMAL);
+		body144.update(Mass.Type.NORMAL);
 		world.addBody(body144);
 
 		// Body145
@@ -1899,7 +1899,7 @@ public class ContactProfiler {
 			body145.addFixture(bf);
 		}
 		body145.translate(new Vector2(0.5499657126309837, 7.429032350983618));
-		body145.setMass(Mass.Type.NORMAL);
+		body145.update(Mass.Type.NORMAL);
 		world.addBody(body145);
 
 		// Body146
@@ -1911,7 +1911,7 @@ public class ContactProfiler {
 			body146.addFixture(bf);
 		}
 		body146.translate(new Vector2(-5.37448217052999, 12.254580281012185));
-		body146.setMass(Mass.Type.NORMAL);
+		body146.update(Mass.Type.NORMAL);
 		world.addBody(body146);
 
 		// Body147
@@ -1924,7 +1924,7 @@ public class ContactProfiler {
 			body147.addFixture(bf);
 		}
 		body147.translate(new Vector2(1.5416824244030356, 12.165116961024651));
-		body147.setMass(Mass.Type.NORMAL);
+		body147.update(Mass.Type.NORMAL);
 		world.addBody(body147);
 
 		// Body148
@@ -1936,7 +1936,7 @@ public class ContactProfiler {
 			body148.addFixture(bf);
 		}
 		body148.translate(new Vector2(-6.722144568097052, 11.321142721609977));
-		body148.setMass(Mass.Type.NORMAL);
+		body148.update(Mass.Type.NORMAL);
 		world.addBody(body148);
 
 		// Body149
@@ -1949,7 +1949,7 @@ public class ContactProfiler {
 			body149.addFixture(bf);
 		}
 		body149.translate(new Vector2(1.4713621967077406, 6.827427961693318));
-		body149.setMass(Mass.Type.NORMAL);
+		body149.update(Mass.Type.NORMAL);
 		world.addBody(body149);
 
 		// Body150
@@ -1961,7 +1961,7 @@ public class ContactProfiler {
 			body150.addFixture(bf);
 		}
 		body150.translate(new Vector2(-6.998661519056404, 6.43582127381071));
-		body150.setMass(Mass.Type.NORMAL);
+		body150.update(Mass.Type.NORMAL);
 		world.addBody(body150);
 
 		// Body151
@@ -1973,7 +1973,7 @@ public class ContactProfiler {
 			body151.addFixture(bf);
 		}
 		body151.translate(new Vector2(3.509370724423099, 12.212789890540451));
-		body151.setMass(Mass.Type.NORMAL);
+		body151.update(Mass.Type.NORMAL);
 		world.addBody(body151);
 
 		// Body152
@@ -1986,7 +1986,7 @@ public class ContactProfiler {
 			body152.addFixture(bf);
 		}
 		body152.translate(new Vector2(-4.237883106860887, 13.717259236094263));
-		body152.setMass(Mass.Type.NORMAL);
+		body152.update(Mass.Type.NORMAL);
 		world.addBody(body152);
 
 		// Body153
@@ -1999,7 +1999,7 @@ public class ContactProfiler {
 			body153.addFixture(bf);
 		}
 		body153.translate(new Vector2(4.07173074402495, 3.401431987490366));
-		body153.setMass(Mass.Type.NORMAL);
+		body153.update(Mass.Type.NORMAL);
 		world.addBody(body153);
 
 		// Body154
@@ -2012,7 +2012,7 @@ public class ContactProfiler {
 			body154.addFixture(bf);
 		}
 		body154.translate(new Vector2(-6.346578763124829, 3.424692793870255));
-		body154.setMass(Mass.Type.NORMAL);
+		body154.update(Mass.Type.NORMAL);
 		world.addBody(body154);
 
 		// Body155
@@ -2024,7 +2024,7 @@ public class ContactProfiler {
 			body155.addFixture(bf);
 		}
 		body155.translate(new Vector2(4.619931936483606, 8.322756420895669));
-		body155.setMass(Mass.Type.NORMAL);
+		body155.update(Mass.Type.NORMAL);
 		world.addBody(body155);
 
 		// Body156
@@ -2037,7 +2037,7 @@ public class ContactProfiler {
 			body156.addFixture(bf);
 		}
 		body156.translate(new Vector2(-2.3104304393501556, 13.586607557359706));
-		body156.setMass(Mass.Type.NORMAL);
+		body156.update(Mass.Type.NORMAL);
 		world.addBody(body156);
 
 		// Body157
@@ -2049,7 +2049,7 @@ public class ContactProfiler {
 			body157.addFixture(bf);
 		}
 		body157.translate(new Vector2(6.094762012949048, 7.427408759618526));
-		body157.setMass(Mass.Type.NORMAL);
+		body157.update(Mass.Type.NORMAL);
 		world.addBody(body157);
 
 		// Body158
@@ -2062,7 +2062,7 @@ public class ContactProfiler {
 			body158.addFixture(bf);
 		}
 		body158.translate(new Vector2(-2.007058722360677, 6.703341380823966));
-		body158.setMass(Mass.Type.NORMAL);
+		body158.update(Mass.Type.NORMAL);
 		world.addBody(body158);
 
 		// Body159
@@ -2074,7 +2074,7 @@ public class ContactProfiler {
 			body159.addFixture(bf);
 		}
 		body159.translate(new Vector2(6.342424345547997, 3.9020043502452384));
-		body159.setMass(Mass.Type.NORMAL);
+		body159.update(Mass.Type.NORMAL);
 		world.addBody(body159);
 
 		// Body160
@@ -2087,7 +2087,7 @@ public class ContactProfiler {
 			body160.addFixture(bf);
 		}
 		body160.translate(new Vector2(-2.5699880489983444, 12.026797530477335));
-		body160.setMass(Mass.Type.NORMAL);
+		body160.update(Mass.Type.NORMAL);
 		world.addBody(body160);
 
 		// Body161
@@ -2099,7 +2099,7 @@ public class ContactProfiler {
 			body161.addFixture(bf);
 		}
 		body161.translate(new Vector2(4.96965004248245, 9.561364770146803));
-		body161.setMass(Mass.Type.NORMAL);
+		body161.update(Mass.Type.NORMAL);
 		world.addBody(body161);
 
 		// Body162
@@ -2111,7 +2111,7 @@ public class ContactProfiler {
 			body162.addFixture(bf);
 		}
 		body162.translate(new Vector2(-5.437923951903824, 8.934040370555442));
-		body162.setMass(Mass.Type.NORMAL);
+		body162.update(Mass.Type.NORMAL);
 		world.addBody(body162);
 
 		// Body163
@@ -2123,7 +2123,7 @@ public class ContactProfiler {
 			body163.addFixture(bf);
 		}
 		body163.translate(new Vector2(1.8468419457409877, 6.388574071281916));
-		body163.setMass(Mass.Type.NORMAL);
+		body163.update(Mass.Type.NORMAL);
 		world.addBody(body163);
 
 		// Body164
@@ -2135,7 +2135,7 @@ public class ContactProfiler {
 			body164.addFixture(bf);
 		}
 		body164.translate(new Vector2(-0.7295341059221937, 2.236488160239513));
-		body164.setMass(Mass.Type.NORMAL);
+		body164.update(Mass.Type.NORMAL);
 		world.addBody(body164);
 
 		// Body165
@@ -2148,7 +2148,7 @@ public class ContactProfiler {
 			body165.addFixture(bf);
 		}
 		body165.translate(new Vector2(1.4501092572920558, 4.109214536293088));
-		body165.setMass(Mass.Type.NORMAL);
+		body165.update(Mass.Type.NORMAL);
 		world.addBody(body165);
 
 		// Body166
@@ -2161,7 +2161,7 @@ public class ContactProfiler {
 			body166.addFixture(bf);
 		}
 		body166.translate(new Vector2(-5.265163178915082, 4.066879072481729));
-		body166.setMass(Mass.Type.NORMAL);
+		body166.update(Mass.Type.NORMAL);
 		world.addBody(body166);
 
 		// Body167
@@ -2173,7 +2173,7 @@ public class ContactProfiler {
 			body167.addFixture(bf);
 		}
 		body167.translate(new Vector2(6.04166446686976, 8.107583470468315));
-		body167.setMass(Mass.Type.NORMAL);
+		body167.update(Mass.Type.NORMAL);
 		world.addBody(body167);
 
 		// Body168
@@ -2185,7 +2185,7 @@ public class ContactProfiler {
 			body168.addFixture(bf);
 		}
 		body168.translate(new Vector2(-2.322007112508924, 3.280984017946152));
-		body168.setMass(Mass.Type.NORMAL);
+		body168.update(Mass.Type.NORMAL);
 		world.addBody(body168);
 
 		// Body169
@@ -2198,7 +2198,7 @@ public class ContactProfiler {
 			body169.addFixture(bf);
 		}
 		body169.translate(new Vector2(1.9237494491673126, 1.8638057611931909));
-		body169.setMass(Mass.Type.NORMAL);
+		body169.update(Mass.Type.NORMAL);
 		world.addBody(body169);
 
 		// Body170
@@ -2210,7 +2210,7 @@ public class ContactProfiler {
 			body170.addFixture(bf);
 		}
 		body170.translate(new Vector2(-5.687856206050134, 5.9472139927978525));
-		body170.setMass(Mass.Type.NORMAL);
+		body170.update(Mass.Type.NORMAL);
 		world.addBody(body170);
 
 		// Body171
@@ -2223,7 +2223,7 @@ public class ContactProfiler {
 			body171.addFixture(bf);
 		}
 		body171.translate(new Vector2(2.389542247109277, 8.64922959142487));
-		body171.setMass(Mass.Type.NORMAL);
+		body171.update(Mass.Type.NORMAL);
 		world.addBody(body171);
 
 		// Body172
@@ -2235,7 +2235,7 @@ public class ContactProfiler {
 			body172.addFixture(bf);
 		}
 		body172.translate(new Vector2(-1.2223643421629355, 13.550377058883393));
-		body172.setMass(Mass.Type.NORMAL);
+		body172.update(Mass.Type.NORMAL);
 		world.addBody(body172);
 
 		// Body173
@@ -2248,7 +2248,7 @@ public class ContactProfiler {
 			body173.addFixture(bf);
 		}
 		body173.translate(new Vector2(6.6041225766992335, 5.151906658261973));
-		body173.setMass(Mass.Type.NORMAL);
+		body173.update(Mass.Type.NORMAL);
 		world.addBody(body173);
 
 		// Body174
@@ -2260,7 +2260,7 @@ public class ContactProfiler {
 			body174.addFixture(bf);
 		}
 		body174.translate(new Vector2(-2.7744953614182686, 13.87900419902253));
-		body174.setMass(Mass.Type.NORMAL);
+		body174.update(Mass.Type.NORMAL);
 		world.addBody(body174);
 
 		// Body175
@@ -2272,7 +2272,7 @@ public class ContactProfiler {
 			body175.addFixture(bf);
 		}
 		body175.translate(new Vector2(4.252737053365385, 13.906202659247748));
-		body175.setMass(Mass.Type.NORMAL);
+		body175.update(Mass.Type.NORMAL);
 		world.addBody(body175);
 
 		// Body176
@@ -2284,7 +2284,7 @@ public class ContactProfiler {
 			body176.addFixture(bf);
 		}
 		body176.translate(new Vector2(-3.845368674116036, 13.162694505980873));
-		body176.setMass(Mass.Type.NORMAL);
+		body176.update(Mass.Type.NORMAL);
 		world.addBody(body176);
 
 		// Body177
@@ -2296,7 +2296,7 @@ public class ContactProfiler {
 			body177.addFixture(bf);
 		}
 		body177.translate(new Vector2(0.8015970251894683, 5.586248440694629));
-		body177.setMass(Mass.Type.NORMAL);
+		body177.update(Mass.Type.NORMAL);
 		world.addBody(body177);
 
 		// Body178
@@ -2308,7 +2308,7 @@ public class ContactProfiler {
 			body178.addFixture(bf);
 		}
 		body178.translate(new Vector2(-3.731506227320013, 12.814688544465458));
-		body178.setMass(Mass.Type.NORMAL);
+		body178.update(Mass.Type.NORMAL);
 		world.addBody(body178);
 
 		// Body179
@@ -2321,7 +2321,7 @@ public class ContactProfiler {
 			body179.addFixture(bf);
 		}
 		body179.translate(new Vector2(0.6256316486142202, 10.255985273339453));
-		body179.setMass(Mass.Type.NORMAL);
+		body179.update(Mass.Type.NORMAL);
 		world.addBody(body179);
 
 		// Body180
@@ -2334,7 +2334,7 @@ public class ContactProfiler {
 			body180.addFixture(bf);
 		}
 		body180.translate(new Vector2(-1.3378410730829668, 13.181695304961817));
-		body180.setMass(Mass.Type.NORMAL);
+		body180.update(Mass.Type.NORMAL);
 		world.addBody(body180);
 
 		// Body181
@@ -2347,7 +2347,7 @@ public class ContactProfiler {
 			body181.addFixture(bf);
 		}
 		body181.translate(new Vector2(4.855695589686542, 12.988380621247606));
-		body181.setMass(Mass.Type.NORMAL);
+		body181.update(Mass.Type.NORMAL);
 		world.addBody(body181);
 
 		// Body182
@@ -2359,7 +2359,7 @@ public class ContactProfiler {
 			body182.addFixture(bf);
 		}
 		body182.translate(new Vector2(-5.142546488327987, 7.6194106953401555));
-		body182.setMass(Mass.Type.NORMAL);
+		body182.update(Mass.Type.NORMAL);
 		world.addBody(body182);
 
 		// Body183
@@ -2372,7 +2372,7 @@ public class ContactProfiler {
 			body183.addFixture(bf);
 		}
 		body183.translate(new Vector2(4.377292016092975, 12.378419171919344));
-		body183.setMass(Mass.Type.NORMAL);
+		body183.update(Mass.Type.NORMAL);
 		world.addBody(body183);
 
 		// Body184
@@ -2384,7 +2384,7 @@ public class ContactProfiler {
 			body184.addFixture(bf);
 		}
 		body184.translate(new Vector2(-1.5462403880895503, 12.639188887505844));
-		body184.setMass(Mass.Type.NORMAL);
+		body184.update(Mass.Type.NORMAL);
 		world.addBody(body184);
 
 		// Body185
@@ -2396,7 +2396,7 @@ public class ContactProfiler {
 			body185.addFixture(bf);
 		}
 		body185.translate(new Vector2(4.041103017599663, 10.527772507082318));
-		body185.setMass(Mass.Type.NORMAL);
+		body185.update(Mass.Type.NORMAL);
 		world.addBody(body185);
 
 		// Body186
@@ -2409,7 +2409,7 @@ public class ContactProfiler {
 			body186.addFixture(bf);
 		}
 		body186.translate(new Vector2(-3.6697219326028634, 2.148347451583983));
-		body186.setMass(Mass.Type.NORMAL);
+		body186.update(Mass.Type.NORMAL);
 		world.addBody(body186);
 
 		// Body187
@@ -2422,7 +2422,7 @@ public class ContactProfiler {
 			body187.addFixture(bf);
 		}
 		body187.translate(new Vector2(0.5634431652581207, 9.116546546375307));
-		body187.setMass(Mass.Type.NORMAL);
+		body187.update(Mass.Type.NORMAL);
 		world.addBody(body187);
 
 		// Body188
@@ -2435,7 +2435,7 @@ public class ContactProfiler {
 			body188.addFixture(bf);
 		}
 		body188.translate(new Vector2(-1.3405058229292188, 2.754324247032513));
-		body188.setMass(Mass.Type.NORMAL);
+		body188.update(Mass.Type.NORMAL);
 		world.addBody(body188);
 
 		// Body189
@@ -2447,7 +2447,7 @@ public class ContactProfiler {
 			body189.addFixture(bf);
 		}
 		body189.translate(new Vector2(6.600743136336251, 4.707752881998891));
-		body189.setMass(Mass.Type.NORMAL);
+		body189.update(Mass.Type.NORMAL);
 		world.addBody(body189);
 
 		// Body190
@@ -2460,7 +2460,7 @@ public class ContactProfiler {
 			body190.addFixture(bf);
 		}
 		body190.translate(new Vector2(-5.86793721999458, 9.163056434471903));
-		body190.setMass(Mass.Type.NORMAL);
+		body190.update(Mass.Type.NORMAL);
 		world.addBody(body190);
 
 		// Body191
@@ -2472,7 +2472,7 @@ public class ContactProfiler {
 			body191.addFixture(bf);
 		}
 		body191.translate(new Vector2(6.688188823276665, 8.531190819579868));
-		body191.setMass(Mass.Type.NORMAL);
+		body191.update(Mass.Type.NORMAL);
 		world.addBody(body191);
 
 		// Body192
@@ -2485,7 +2485,7 @@ public class ContactProfiler {
 			body192.addFixture(bf);
 		}
 		body192.translate(new Vector2(-1.8324633442973748, 8.487784379000612));
-		body192.setMass(Mass.Type.NORMAL);
+		body192.update(Mass.Type.NORMAL);
 		world.addBody(body192);
 
 		// Body193
@@ -2497,7 +2497,7 @@ public class ContactProfiler {
 			body193.addFixture(bf);
 		}
 		body193.translate(new Vector2(6.358838735481853, 1.2222934410919495));
-		body193.setMass(Mass.Type.NORMAL);
+		body193.update(Mass.Type.NORMAL);
 		world.addBody(body193);
 
 		// Body194
@@ -2509,7 +2509,7 @@ public class ContactProfiler {
 			body194.addFixture(bf);
 		}
 		body194.translate(new Vector2(-1.5746433647685463, 3.90981268845536));
-		body194.setMass(Mass.Type.NORMAL);
+		body194.update(Mass.Type.NORMAL);
 		world.addBody(body194);
 
 		// Body195
@@ -2522,7 +2522,7 @@ public class ContactProfiler {
 			body195.addFixture(bf);
 		}
 		body195.translate(new Vector2(0.16834185188011097, 10.935374748565403));
-		body195.setMass(Mass.Type.NORMAL);
+		body195.update(Mass.Type.NORMAL);
 		world.addBody(body195);
 
 		// Body196
@@ -2535,7 +2535,7 @@ public class ContactProfiler {
 			body196.addFixture(bf);
 		}
 		body196.translate(new Vector2(-6.226706467374679, 11.498974636999522));
-		body196.setMass(Mass.Type.NORMAL);
+		body196.update(Mass.Type.NORMAL);
 		world.addBody(body196);
 
 		// Body197
@@ -2548,7 +2548,7 @@ public class ContactProfiler {
 			body197.addFixture(bf);
 		}
 		body197.translate(new Vector2(0.7994965012937562, 1.6182204607215396));
-		body197.setMass(Mass.Type.NORMAL);
+		body197.update(Mass.Type.NORMAL);
 		world.addBody(body197);
 
 		// Body198
@@ -2561,7 +2561,7 @@ public class ContactProfiler {
 			body198.addFixture(bf);
 		}
 		body198.translate(new Vector2(-2.4232278238798974, 8.534762865269139));
-		body198.setMass(Mass.Type.NORMAL);
+		body198.update(Mass.Type.NORMAL);
 		world.addBody(body198);
 
 		// Body199
@@ -2574,7 +2574,7 @@ public class ContactProfiler {
 			body199.addFixture(bf);
 		}
 		body199.translate(new Vector2(6.047465729130442, 3.9481275809190692));
-		body199.setMass(Mass.Type.NORMAL);
+		body199.update(Mass.Type.NORMAL);
 		world.addBody(body199);
 
 		// Body200
@@ -2587,7 +2587,7 @@ public class ContactProfiler {
 			body200.addFixture(bf);
 		}
 		body200.translate(new Vector2(-2.584309371303852, 1.8122184732521593));
-		body200.setMass(Mass.Type.NORMAL);
+		body200.update(Mass.Type.NORMAL);
 		world.addBody(body200);
 
 		// Body201
@@ -2599,7 +2599,7 @@ public class ContactProfiler {
 			body201.addFixture(bf);
 		}
 		body201.translate(new Vector2(4.815031695708246, 12.240518386097973));
-		body201.setMass(Mass.Type.NORMAL);
+		body201.update(Mass.Type.NORMAL);
 		world.addBody(body201);
 
 		// Body202
@@ -2611,7 +2611,7 @@ public class ContactProfiler {
 			body202.addFixture(bf);
 		}
 		body202.translate(new Vector2(-1.4039068404915347, 8.493563750151));
-		body202.setMass(Mass.Type.NORMAL);
+		body202.update(Mass.Type.NORMAL);
 		world.addBody(body202);
 
 		// Body203
@@ -2623,7 +2623,7 @@ public class ContactProfiler {
 			body203.addFixture(bf);
 		}
 		body203.translate(new Vector2(6.545890277585758, 1.3593228301677163));
-		body203.setMass(Mass.Type.NORMAL);
+		body203.update(Mass.Type.NORMAL);
 		world.addBody(body203);
 
 	}

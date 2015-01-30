@@ -33,15 +33,15 @@ import org.dyn4j.geometry.Convex;
  * <p>
  * Note: this class has a natural ordering that is inconsistent with equals.
  * @author William Bittle
- * @version 3.1.9
+ * @version 4.0.0
  * @since 3.1.5
  */
 public class SingleTypedFallbackCondition extends TypedFallbackCondition implements FallbackCondition, Comparable<FallbackCondition> {
 	/** The type to compare to */
-	protected Class<? extends Convex> type;
+	protected final Class<? extends Convex> type;
 	
 	/** True if a strict class equals should be used */
-	protected boolean strict;
+	protected final boolean strict;
 	
 	/**
 	 * Minimal constructor.
@@ -123,6 +123,14 @@ public class SingleTypedFallbackCondition extends TypedFallbackCondition impleme
 		}
 		// otherwise it must be assignable to type
 		return this.type.isAssignableFrom(type1) || this.type.isAssignableFrom(type2);
+	}
+	
+	/**
+	 * Returns the type for this fallback condition.
+	 * @return Class&lt;? extends {@link Convex}&gt;
+	 */
+	public Class<? extends Convex> getType() {
+		return this.type;
 	}
 	
 	/**

@@ -86,7 +86,7 @@ import org.xml.sax.helpers.DefaultHandler;
 /**
  * Class used to read in a saved simulation file.
  * @author William Bittle
- * @version 1.0.5
+ * @version 1.0.7
  * @since 1.0.0
  */
 public class XmlReader extends DefaultHandler {
@@ -339,6 +339,12 @@ public class XmlReader extends DefaultHandler {
 	/** Storage for the Ray tag */
 	private SandboxRay ray;
 	
+	/** The ray direction */
+	private double rayDirection;
+	
+	/** The start */
+	private Vector2 rayStart;
+	
 	/** Storage for the Rays tag */
 	private List<SandboxRay> rays;
 	
@@ -590,7 +596,7 @@ public class XmlReader extends DefaultHandler {
 		} else if ("Start".equalsIgnoreCase(qName)) {
 			double x = Double.parseDouble(attributes.getValue("x"));
 			double y = Double.parseDouble(attributes.getValue("y"));
-			this.ray.setStart(new Vector2(x, y));
+			this.rayStart = new Vector2(x, y);
 		} else {
 			this.handled = false;
 		}
@@ -762,7 +768,7 @@ public class XmlReader extends DefaultHandler {
 		} else if ("Baumgarte".equalsIgnoreCase(this.tagName)) {
 			this.settings.setBaumgarte(Double.parseDouble(s));
 		} else if ("Direction".equalsIgnoreCase(this.tagName) && this.rayFlag) {
-			this.ray.setDirection(Double.parseDouble(s));
+			this.rayDirection = Double.parseDouble(s);
 		} else if ("Length".equalsIgnoreCase(this.tagName) && this.rayFlag) {
 			this.ray.setLength(Double.parseDouble(s));
 		} else if ("IgnoreSensors".equalsIgnoreCase(this.tagName) && this.rayFlag) {
@@ -992,7 +998,11 @@ public class XmlReader extends DefaultHandler {
 			this.jointName = null;
 			this.jointType = null;
 		} else if ("Ray".equalsIgnoreCase(qName)) {
-			this.rays.add(this.ray);
+			SandboxRay ray = new SandboxRay(this.ray.getName(), this.rayStart, this.rayDirection);
+			ray.setLength(this.ray.getLength());
+			ray.setAll(this.ray.isAll());
+			ray.setIgnoreSensors(this.ray.isIgnoreSensors());
+			this.rays.add(ray);
 			this.ray = null;
 			this.rayFlag = false;
 		}

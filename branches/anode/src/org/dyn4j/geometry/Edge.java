@@ -27,24 +27,24 @@ package org.dyn4j.geometry;
 /**
  * Represents an edge feature of a {@link Shape}.
  * @author William Bittle
- * @version 3.0.2
+ * @version 4.0.0
  * @since 1.0.0
  */
 public class Edge extends Feature {
 	/** The first vertex of the edge */
-	protected Vertex vertex1;
+	protected final Vertex vertex1;
 	
 	/** The second vertex of the edge */
-	protected Vertex vertex2;
+	protected final Vertex vertex2;
 	
 	/** The edge vector */
-	protected Vector2 edge;
+	protected final Vector2 edge;
 	
 	/** The vertex of maximum projection along a {@link Vector2} */
-	protected Vertex max;
+	protected final Vertex max;
 	
 	/** The index of the edge on the shape */
-	protected int index;
+	protected final int index;
 	
 	/**
 	 * Creates an edge feature.

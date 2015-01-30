@@ -22,40 +22,59 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.geometry;
+package org.dyn4j.collision.narrowphase;
+
+import org.dyn4j.geometry.Convex;
+import org.dyn4j.geometry.Shape;
+import org.dyn4j.geometry.Vector2;
 
 /**
- * Represents a point on the edge of a {@link Shape}.
+ * Represents a point in the {@link MinkowskiSum}.
  * @author William Bittle
  * @version 4.0.0
  * @since 1.0.0
  */
-public class Vertex extends Feature {
-	/** The vertex or point */
-	protected final Vector2 point;
+public class MinkowskiSumPoint {
+	/** The support point in the first {@link Convex} {@link Shape} */
+	protected Vector2 supportPoint1;
 	
-	/** The index in the  */
-	protected final int index;
+	/** The support point in the second {@link Convex} {@link Shape} */
+	protected Vector2 supportPoint2;
 	
-	/**
-	 * Optional constructor.
-	 * <p>
-	 * Assumes the given point is not indexed.
-	 * @param point the vertex point
-	 */
-	public Vertex(Vector2 point) {
-		this(point, Feature.NOT_INDEXED);
-	}
+	/** The Minkowski sum point */
+	protected Vector2 point;
+	
+	/** Default constructor */
+	protected MinkowskiSumPoint() {}
 	
 	/**
 	 * Full constructor.
-	 * @param point the vertex point
-	 * @param index the index 
+	 * @param supportPoint1 the support point in the first {@link Convex} {@link Shape}
+	 * @param supportPoint2 the support point in the second {@link Convex} {@link Shape}
 	 */
-	public Vertex(Vector2 point, int index) {
-		super(Feature.Type.VERTEX);
-		this.point = point;
-		this.index = index;
+	public MinkowskiSumPoint(Vector2 supportPoint1, Vector2 supportPoint2) {
+		this.set(supportPoint1, supportPoint2);
+	}
+	
+	/**
+	 * Sets the values of this {@link MinkowskiSumPoint} to the given values.
+	 * @param supportPoint1 the support point in the first {@link Convex} {@link Shape}
+	 * @param supportPoint2 the support point in the second {@link Convex} {@link Shape}
+	 */
+	public void set(Vector2 supportPoint1, Vector2 supportPoint2) {
+		this.supportPoint1 = supportPoint1;
+		this.supportPoint2 = supportPoint2;
+		this.point = supportPoint1.difference(supportPoint2);
+	}
+	
+	/**
+	 * Copies the values of the given point to this point.
+	 * @param point the point to copy
+	 */
+	public void set(MinkowskiSumPoint point) {
+		this.supportPoint1 = point.supportPoint1;
+		this.supportPoint2 = point.supportPoint2;
+		this.point = point.point;
 	}
 	
 	/* (non-Javadoc)
@@ -64,25 +83,11 @@ public class Vertex extends Feature {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Vertex[Point=").append(this.point)
-		.append("|Index=").append(this.index)
+		sb.append("MinkowskiSum.Point[Point=").append(this.point)
+		.append("|SupportPoint1=").append(this.supportPoint1)
+		.append("|SupportPoint2=").append(this.supportPoint2)
 		.append("]");
 		return sb.toString();
 	}
-	
-	/**
-	 * Returns the point.
-	 * @return {@link Vector2}
-	 */
-	public Vector2 getPoint() {
-		return this.point;
-	}
-	
-	/**
-	 * Returns the index of this vertex.
-	 * @return int
-	 */
-	public int getIndex() {
-		return this.index;
-	}
 }
+	

@@ -105,7 +105,7 @@ import org.dyn4j.sandbox.utilities.ControlUtilities;
 /**
  * Panel used to display and manage the World object using a JTree interface.
  * @author William Bittle
- * @version 1.0.6
+ * @version 1.0.7
  * @since 1.0.0
  */
 public class SimulationTreePanel extends JPanel implements MouseListener, ActionListener {
@@ -1743,7 +1743,10 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 				SandboxRay ray = (SandboxRay)node.getUserObject();
 				// show the right dialog
 				synchronized (Simulation.LOCK) {
-					EditRayDialog.show(ControlUtilities.getParentWindow(this), ray);
+					SandboxRay nRay = EditRayDialog.show(ControlUtilities.getParentWindow(this), ray);
+					this.simulation.getRays().remove(ray);
+					this.simulation.getRays().add(nRay);
+					node.setUserObject(nRay);
 				}
 			}
 		}

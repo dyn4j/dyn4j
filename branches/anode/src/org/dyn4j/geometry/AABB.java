@@ -29,15 +29,15 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents an axis aligned bounding box.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.0.0
  * @since 3.0.0
  */
-public class AABB {
+public class AABB implements Translatable {
 	/** The minimum extent */
-	protected Vector2 min;
+	protected final Vector2 min;
 	
 	/** The maximum extent */
-	protected Vector2 max;
+	protected final Vector2 max;
 	
 	/**
 	 * Full constructor.
@@ -112,10 +112,17 @@ public class AABB {
 		return sb.toString();
 	}
 	
-	/**
-	 * Translates the AABB by the given translation.
-	 * @param translation the translation
-	 * @since 3.1.0
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Translatable#translate(double, double)
+	 */
+	@Override
+	public void translate(double x, double y) {
+		this.max.add(x, y);
+		this.min.add(x, y);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Translatable#translate(org.dyn4j.geometry.Vector2)
 	 */
 	public void translate(Vector2 translation) {
 		this.max.add(translation);

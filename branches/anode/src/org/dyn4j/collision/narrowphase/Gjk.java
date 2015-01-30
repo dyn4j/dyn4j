@@ -365,9 +365,9 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 		// create a Minkowski sum
 		MinkowskiSum ms = new MinkowskiSum(convex1, transform1, convex2, transform2);
 		// create some Minkowski points
-		MinkowskiSum.Point a = new MinkowskiSum.Point();
-		MinkowskiSum.Point b = new MinkowskiSum.Point();
-		MinkowskiSum.Point c = new MinkowskiSum.Point();
+		MinkowskiSumPoint a = new MinkowskiSumPoint();
+		MinkowskiSumPoint b = new MinkowskiSumPoint();
+		MinkowskiSumPoint c = new MinkowskiSumPoint();
 		// transform into world space if transform is not null
 		Vector2 c1 = transform1.getTransformed(convex1.getCenter());
 		Vector2 c2 = transform2.getTransformed(convex2.getCenter());
@@ -385,7 +385,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 		ms.support(d, b);
 		// find the point on the simplex (segment) closest to the origin
 		// and use that as the new search direction
-		d = Segment.getPointOnSegmentClosestToPoint(ORIGIN, b.p, a.p);
+		d = Segment.getPointOnSegmentClosestToPoint(ORIGIN, b.point, a.point);
 		for (int i = 0; i < this.maxIterations; i++) {
 			// the vector from the point we found to the origin is the new search direction
 			d.negate();
@@ -399,21 +399,21 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			ms.support(d, c);
 			
 			// test if the triangle made by a, b, and c contains the origin
-			if (this.containsOrigin(a.p, b.p, c.p)){
+			if (this.containsOrigin(a.point, b.point, c.point)){
 				// if it does then return false;
 				return false;
 			}
 			
 			// see if the new point is far enough along d
-			double projection = c.p.dot(d);
-			if ((projection - a.p.dot(d)) < this.distanceEpsilon) {
+			double projection = c.point.dot(d);
+			if ((projection - a.point.dot(d)) < this.distanceEpsilon) {
 				// then the new point we just made is not far enough
 				// in the direction of n so we can stop now
 				// normalize d
 				d.normalize();
 				separation.normal = d;
 				// compute the real distance
-				separation.distance = -c.p.dot(d);
+				separation.distance = -c.point.dot(d);
 				// get the closest points
 				this.findClosestPoints(a, b, separation);
 				// return true to indicate separation
@@ -421,8 +421,8 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			}
 			
 			// get the closest point on each segment to the origin
-			Vector2 p1 = Segment.getPointOnSegmentClosestToPoint(ORIGIN, a.p, c.p);
-			Vector2 p2 = Segment.getPointOnSegmentClosestToPoint(ORIGIN, c.p, b.p);
+			Vector2 p1 = Segment.getPointOnSegmentClosestToPoint(ORIGIN, a.point, c.point);
+			Vector2 p2 = Segment.getPointOnSegmentClosestToPoint(ORIGIN, c.point, b.point);
 			
 			// get the distance to the origin
 			double p1Mag = p1.getMagnitudeSquared();
@@ -463,7 +463,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 		// this is really a catch all termination case
 		d.normalize();
 		separation.normal = d;
-		separation.distance = -c.p.dot(d);
+		separation.distance = -c.point.dot(d);
 		// get the closest points
 		this.findClosestPoints(a, b, separation);
 		// return true to indicate separation
@@ -521,29 +521,29 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * B<sub>1</sub>,B<sub>2</sub> &isin; C<sub>2</sub></pre>
 	 * If &lambda;<sub>1</sub> or &lambda;<sub>2</sub> is less than zero then this indicates
 	 * that the closest points lie at a vertex.  In the case where &lambda;<sub>1</sub> is negative
-	 * the closest points are the points, p1 and p2 that made the {@link MinkowskiSum.Point} B.
+	 * the closest points are the points, p1 and p2 that made the {@link MinkowskiSumPoint} B.
 	 * In the case where &lambda;<sub>2</sub> is negative the closest points are the points, p1
-	 * and p2 that made the {@link MinkowskiSum.Point} A.
+	 * and p2 that made the {@link MinkowskiSumPoint} A.
 	 * @param a the first simplex point
 	 * @param b the second simplex point
 	 * @param s the {@link Separation} object to populate
 	 */
-	protected void findClosestPoints(MinkowskiSum.Point a, MinkowskiSum.Point b, Separation s) {
+	protected void findClosestPoints(MinkowskiSumPoint a, MinkowskiSumPoint b, Separation s) {
 		Vector2 p1 = new Vector2();
 		Vector2 p2 = new Vector2();
 		
 		// find lambda1 and lambda2
-		Vector2 l = a.p.to(b.p);
+		Vector2 l = a.point.to(b.point);
 		
 		// check if a and b are the same point
 		if (l.isZero()) {
 			// then the closest points are a or b support points
-			p1.set(a.p1);
-			p2.set(a.p2);
+			p1.set(a.supportPoint1);
+			p2.set(a.supportPoint2);
 		} else {
 			// otherwise compute lambda1 and lambda2
 			double ll = l.dot(l);
-			double l2 = -l.dot(a.p) / ll;
+			double l2 = -l.dot(a.point) / ll;
 			double l1 = 1 - l2;
 			
 			// check if either lambda1 or lambda2 is less than zero
@@ -551,23 +551,23 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 				// if lambda1 is less than zero then that means that
 				// the support points of the Minkowski point B are
 				// the closest points
-				p1.set(b.p1);
-				p2.set(b.p2);
+				p1.set(b.supportPoint1);
+				p2.set(b.supportPoint2);
 			} else if (l2 < 0) {
 				// if lambda2 is less than zero then that means that
 				// the support points of the Minkowski point A are
 				// the closest points
-				p1.set(a.p1);
-				p2.set(a.p2);
+				p1.set(a.supportPoint1);
+				p2.set(a.supportPoint2);
 			} else {
 				// compute the closest points using lambda1 and lambda2
 				// this is the expanded version of
 				// p1 = a.p1.multiply(l1).add(b.p1.multiply(l2));
 				// p2 = a.p2.multiply(l1).add(b.p2.multiply(l2));
-				p1.x = a.p1.x * l1 + b.p1.x * l2;
-				p1.y = a.p1.y * l1 + b.p1.y * l2;
-				p2.x = a.p2.x * l1 + b.p2.x * l2;
-				p2.y = a.p2.y * l1 + b.p2.y * l2;
+				p1.x = a.supportPoint1.x * l1 + b.supportPoint1.x * l2;
+				p1.y = a.supportPoint1.y * l1 + b.supportPoint1.y * l2;
+				p2.x = a.supportPoint2.x * l1 + b.supportPoint2.x * l2;
+				p2.y = a.supportPoint2.y * l1 + b.supportPoint2.y * l2;
 			}
 		}
 		// set the new points in the separation object

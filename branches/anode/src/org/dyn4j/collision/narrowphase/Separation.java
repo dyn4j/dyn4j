@@ -97,7 +97,7 @@ public class Separation {
 	 * @return {@link Vector2}
 	 */
 	public Vector2 getNormal() {
-		return normal;
+		return this.normal;
 	}
 	
 	/**
@@ -105,7 +105,7 @@ public class Separation {
 	 * @return double
 	 */
 	public double getDistance() {
-		return distance;
+		return this.distance;
 	}
 	
 	/**
@@ -113,7 +113,7 @@ public class Separation {
 	 * @return {@link Vector2}
 	 */
 	public Vector2 getPoint1() {
-		return point1;
+		return this.point1;
 	}
 	
 	/**
@@ -121,7 +121,7 @@ public class Separation {
 	 * @return {@link Vector2}
 	 */
 	public Vector2 getPoint2() {
-		return point2;
+		return this.point2;
 	}
 	
 	/**
