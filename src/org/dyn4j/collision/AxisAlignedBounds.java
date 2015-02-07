@@ -27,6 +27,7 @@ package org.dyn4j.collision;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Translatable;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.sandbox.resources.Messages;
 
 /**
  * Represents a bounding region that is an Axis-Aligned bounding box.
@@ -39,7 +40,7 @@ import org.dyn4j.geometry.Vector2;
  */
 public class AxisAlignedBounds extends AbstractBounds implements Bounds, Translatable {
 	/** The local coordinates AABB */
-	protected AABB aabb;
+	protected final AABB aabb;
 	
 	/**
 	 * Minimal constructor.
@@ -48,8 +49,7 @@ public class AxisAlignedBounds extends AbstractBounds implements Bounds, Transla
 	 * @throws IllegalArgumentException if either width or height are less than or equal to zero
 	 */
 	public AxisAlignedBounds(double width, double height) {
-		if (width <= 0.0) throw new IllegalArgumentException();
-		if (height <= 0.0) throw new IllegalArgumentException();
+		if (width <= 0.0 || height <= 0.0) throw new IllegalArgumentException(Messages.getString("collision.bounds.axisAligned.invalidArgument"));
 		double w2 = width * 0.5;
 		double h2 = height * 0.5;
 		this.aabb = new AABB(-w2, -h2, w2, h2);

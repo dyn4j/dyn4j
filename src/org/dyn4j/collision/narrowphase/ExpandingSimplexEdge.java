@@ -28,6 +28,8 @@ import org.dyn4j.geometry.Vector2;
 
 /**
  * Represents an edge of an expanding simplex.
+ * <p>
+ * Note: this class has a natural ordering that is inconsistent with equals.
  * @author William Bittle
  * @version 4.0.0
  * @since 4.0.0

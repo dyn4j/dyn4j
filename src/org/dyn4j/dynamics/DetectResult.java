@@ -29,7 +29,7 @@ import org.dyn4j.collision.narrowphase.Penetration;
 /**
  * Represents the result of a static detect of the world.
  * @author William Bittle
- * @version 3.1.9
+ * @version 4.0.0
  * @since 3.1.9
  */
 public class DetectResult {
@@ -43,19 +43,61 @@ public class DetectResult {
 	protected Penetration penetration;
 	
 	/**
+	 * Minimal constructor.
+	 * @param body the body 
+	 * @param fixture the fixture
+	 */
+	public DetectResult(Body body, BodyFixture fixture) {
+		this(body, fixture, null);
+	}
+	
+	/**
+	 * Full constructor.
+	 * @param body the body 
+	 * @param fixture the fixture
+	 * @param penetration the penetration; can be null
+	 */
+	public DetectResult(Body body, BodyFixture fixture, Penetration penetration) {
+		this.body = body;
+		this.fixture = fixture;
+		this.penetration = penetration;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (obj == this) return true;
+		if (obj instanceof DetectResult) {
+			DetectResult result = (DetectResult)obj;
+			return (result.body == this.body &&
+					result.fixture == this.fixture &&
+					result.penetration == this.penetration);
+		}
+		return false;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("DetectResult[Body=").append(this.body.getId())
+		  .append("|Fixture=").append(this.fixture.getId())
+		  .append("|Penetration=").append(this.penetration)
+		  .append("]");
+		return sb.toString();
+	}
+	
+	/**
 	 * Returns the overlapping body.
 	 * @return {@link Body}
 	 */
 	public Body getBody() {
 		return this.body;
-	}
-	
-	/**
-	 * Sets the overlapping body.
-	 * @param body the body
-	 */
-	public void setBody(Body body) {
-		this.body = body;
 	}
 	
 	/**
@@ -67,14 +109,6 @@ public class DetectResult {
 	}
 	
 	/**
-	 * Sets the overlapping fixture.
-	 * @param fixture the fixture
-	 */
-	public void setFixture(BodyFixture fixture) {
-		this.fixture = fixture;
-	}
-	
-	/**
 	 * Returns the overlap penetration (collision data).
 	 * <p>
 	 * This will return null if the collision data was flagged to not be included. 
@@ -82,13 +116,5 @@ public class DetectResult {
 	 */
 	public Penetration getPenetration() {
 		return this.penetration;
-	}
-	
-	/**
-	 * Sets the overlap penetration (collision data).
-	 * @param penetration the penetration
-	 */
-	public void setPenetration(Penetration penetration) {
-		this.penetration = penetration;
 	}
 }

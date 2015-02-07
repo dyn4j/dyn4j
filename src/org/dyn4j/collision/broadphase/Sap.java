@@ -32,15 +32,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.UUID;
 
 import org.dyn4j.collision.Collidable;
 import org.dyn4j.collision.Collisions;
-import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
+import org.dyn4j.collision.Fixture;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Ray;
-import org.dyn4j.geometry.Shape;
+import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 
 /**
@@ -56,67 +55,21 @@ import org.dyn4j.geometry.Vector2;
  * are sorted by their minimum value.  Doing so will allow the detector to ignore any projections
  * after the first {@link Interval} that does not overlap.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.0.0
  * @since 1.0.0
  * @param <E> the {@link Collidable} type
+ * @param <T> the {@link Fixture} type
  */
-public class Sap<E extends Collidable> extends AbstractAABBDetector<E> implements BroadphaseDetector<E> {
-	/**
-	 * Internal class to hold the {@link Collidable} to {@link AABB} relationship.
-	 * @author William Bittle
-	 * @version 3.0.0
-	 * @since 3.0.0
-	 */
-	protected class Proxy implements Comparable<Proxy> {
-		/** The collidable */
-		public E collidable;
-		
-		/** The collidable's aabb */
-		public AABB aabb;
-		
-		/** Whether the proxy has been tested or not */
-		public boolean tested;
-		
-		/* (non-Javadoc)
-		 * @see java.lang.Comparable#compareTo(java.lang.Object)
-		 */
-		public int compareTo(Proxy o) {
-			// check if the objects are the same instance
-			if (this == o) return 0;
-			// compute the difference in the minimum x values of the aabbs
-			double diff = this.aabb.getMinX() - o.aabb.getMinX();
-			if (diff != 0) {
-				return (int)Math.signum(diff);
-			} else {
-				// if the x values are the same then compare on the y values
-				diff = this.aabb.getMinY() - o.aabb.getMinY();
-				if (diff != 0) {
-					return (int)Math.signum(diff);
-				} else {
-					// finally if their y values are the same then compare on the ids
-					return this.collidable.getId().compareTo(o.collidable.getId());
-				}
-			}
-		}
-		
-		/* (non-Javadoc)
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			return this.aabb.toString();
-		}
-	}
-
+public class Sap<E extends Collidable<T>, T extends Fixture> extends AbstractBroadphaseDetector<E, T> implements BroadphaseDetector<E, T> {
 	/** Sorted tree set of proxies */
-	protected TreeSet<Proxy> proxyTree;
+	protected TreeSet<SapProxy<E, T>> tree;
 	
 	/** Id to proxy map for fast lookup */
-	protected Map<UUID, Proxy> proxyMap;
+	protected Map<BroadphaseKey, SapProxy<E, T>> map;
 
 	/** Default constructor. */
 	public Sap() {
-		this(64);
+		this(BroadphaseDetector.DEFAULT_INITIAL_CAPACITY);
 	}
 	
 	/**
@@ -128,83 +81,112 @@ public class Sap<E extends Collidable> extends AbstractAABBDetector<E> implement
 	 * @since 3.1.1
 	 */
 	public Sap(int initialCapacity) {
-		this.proxyTree = new TreeSet<Proxy>();
+		this.tree = new TreeSet<SapProxy<E, T>>();
 		// 0.75 = 3/4, we can garuantee that the hashmap will not need to be rehashed
 		// if we take capacity / load factor
 		// the default load factor is 0.75 according to the javadocs, but lets assign it to be sure
-		this.proxyMap = new HashMap<UUID, Proxy>(initialCapacity * 4 / 3 + 1, 0.75f);
+		this.map = new HashMap<BroadphaseKey, SapProxy<E, T>>(initialCapacity * 4 / 3 + 1, 0.75f);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#add(org.dyn4j.collision.Collidable)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#add(org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
 	 */
 	@Override
-	public void add(E collidable) {
-		// get the id of the collidable
-		UUID id = collidable.getId();
-		// create an aabb for this collidable
-		AABB aabb = collidable.createAABB();
-		// expand it
+	public void add(E collidable, T fixture) {
+		BroadphaseKey key = BroadphaseKey.get(collidable, fixture);
+		Transform tx = collidable.getTransform();
+		AABB aabb = fixture.getShape().createAABB(tx);
+		// expand the aabb
 		aabb.expand(this.expansion);
-		// otherwise add it to the list
-		Proxy p = new Proxy();
-		p.collidable = collidable;
-		p.aabb = aabb;
-		// add it to the tree [log(n)]
-		this.proxyTree.add(p);
-		// add it to the map [constant]
-		this.proxyMap.put(id, p);
+		// create a new node for the collidable
+		SapProxy<E, T> proxy = new SapProxy<E, T>(collidable, fixture, aabb);
+		// add the proxy to the map
+		this.map.put(key, proxy);
+		// insert the node into the tree
+		this.tree.add(proxy);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#remove(org.dyn4j.collision.Collidable)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#remove(org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
 	 */
 	@Override
-	public void remove(E collidable) {
-		// remove it from the map [constant]
-		Proxy p = this.proxyMap.remove(collidable.getId());
-		// make sure its found
-		if (p != null) {
-			// remove it from the tree [log(n)]
-			this.proxyTree.remove(p);
+	public boolean remove(E collidable, T fixture) {
+		BroadphaseKey key = BroadphaseKey.get(collidable, fixture);
+		// find the proxy in the map
+		SapProxy<E, T> proxy = this.map.remove(key);
+		// make sure it was found
+		if (proxy != null) {
+			// remove the proxy from the tree
+			this.tree.remove(proxy);
+			return true;
 		}
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#update(org.dyn4j.collision.Collidable)
-	 */
-	@Override
-	public void update(E collidable) {
-		// get the proxy for this collidable [constant]
-		Proxy p = this.proxyMap.get(collidable.getId());
-		// check for not found
-		if (p == null) return;
-		
-		// create a new aabb
-		AABB aabb = collidable.createAABB();
-		// check the aabb
-		if (p.aabb.contains(aabb)) {
-			// if the aabb is still inside the expanded
-			// aabb then just return
-			return;
-		} else {
-			// otherwise expand the new aabb
-			aabb.expand(this.expansion);
-		}
-		
-		// remove the proxy from the tree [log(n)]
-		this.proxyTree.remove(p);
-		// update the aabb
-		p.aabb = aabb;
-		// add back the proxy [log(n)]
-		this.proxyTree.add(p);
+		return false;
 	}
 
 	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#update(org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
+	 */
+	@Override
+	public void update(E collidable, T fixture) {
+		BroadphaseKey key = BroadphaseKey.get(collidable, fixture);
+		Transform tx = collidable.getTransform();
+		// get the proxy from the map
+		SapProxy<E, T> proxy = this.map.get(key);
+		// create the new aabb
+		AABB aabb = fixture.getShape().createAABB(tx);
+		// make sure we found it
+		if (proxy != null) {
+			// see if the old aabb contains the new one
+			if (proxy.aabb.contains(aabb)) {
+				// if so, don't do anything
+				return;
+			}
+			// otherwise expand the new aabb
+			aabb.expand(this.expansion);
+			// remove the current proxy from the tree
+			this.tree.remove(proxy);
+			// set the new aabb
+			proxy.aabb = aabb;
+			// reinsert the proxy
+			this.tree.add(proxy);
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#getAABB(org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
+	 */
+	@Override
+	public AABB getAABB(E collidable, T fixture) {
+		BroadphaseKey key = BroadphaseKey.get(collidable, fixture);
+		SapProxy<E, T> proxy = this.map.get(key);
+		if (proxy != null) {
+			return proxy.aabb;
+		}
+		return fixture.getShape().createAABB(collidable.getTransform());
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#contains(org.dyn4j.collision.Collidable)
 	 */
+	@Override
 	public boolean contains(E collidable) {
-		return this.proxyMap.containsKey(collidable.getId());
+		int size = collidable.getFixtureCount();
+		boolean result = true;
+		for (int i = 0; i < size; i++) {
+			T fixture = collidable.getFixture(i);
+			BroadphaseKey key = BroadphaseKey.get(collidable, fixture);
+			result &= this.map.containsKey(key);
+		}
+		return result;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#contains(org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
+	 */
+	@Override
+	public boolean contains(E collidable, T fixture) {
+		BroadphaseKey key = BroadphaseKey.get(collidable, fixture);
+		return this.map.containsKey(key);
 	}
 	
 	/* (non-Javadoc)
@@ -212,29 +194,25 @@ public class Sap<E extends Collidable> extends AbstractAABBDetector<E> implement
 	 */
 	@Override
 	public void clear() {
-		this.proxyTree.clear();
-		this.proxyMap.clear();
+		this.map.clear();
+		this.tree.clear();
 	}
-	
+
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#getAABB(org.dyn4j.collision.Collidable)
-	 */
-	public AABB getAABB(E collidable) {
-		// [constant]
-		Proxy p = this.proxyMap.get(collidable.getId());
-		if (p != null) {
-			return p.aabb;
-		}
-		return collidable.createAABB();
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect()
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#size()
 	 */
 	@Override
-	public List<BroadphasePair<E>> detect() {
+	public int size() {
+		return this.map.size();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.collision.broadphase.BroadphaseFilter)
+	 */
+	@Override
+	public List<BroadphasePair<E, T>> detect(BroadphaseFilter<E, T> filter) {
 		// get the number of proxies
-		int size = this.proxyTree.size();
+		int size = this.tree.size();
 		
 		// check the size
 		if (size == 0) {
@@ -244,25 +222,25 @@ public class Sap<E extends Collidable> extends AbstractAABBDetector<E> implement
 		
 		// the estimated size of the pair list
 		int eSize = Collisions.getEstimatedCollisionPairs(size);
-		List<BroadphasePair<E>> pairs = new ArrayList<BroadphasePair<E>>(eSize);
+		List<BroadphasePair<E, T>> pairs = new ArrayList<BroadphasePair<E, T>>(eSize);
 		
 		// clear the tested flags
-		Iterator<Proxy> itp = this.proxyTree.iterator();
+		Iterator<SapProxy<E, T>> itp = this.tree.iterator();
 		while (itp.hasNext()) {
-			Proxy p = itp.next();
+			SapProxy<E, T> p = itp.next();
 			p.tested = false;
 		}
 		
 		// find all the possible pairs
-		Iterator<Proxy> ito = this.proxyTree.iterator();
+		Iterator<SapProxy<E, T>> ito = this.tree.iterator();
 		while (ito.hasNext()) {
 			// get the current proxy
-			Proxy current = ito.next();
+			SapProxy<E, T> current = ito.next();
 			// only check the ones greater than (or equal to) the current item
-			SortedSet<Proxy> set = this.proxyTree.tailSet(current, false);
-			Iterator<Proxy> iti = set.iterator();
+			SortedSet<SapProxy<E, T>> set = this.tree.tailSet(current, false);
+			Iterator<SapProxy<E, T>> iti = set.iterator();
 			while (iti.hasNext()) {
-				Proxy test = iti.next();
+				SapProxy<E, T> test = iti.next();
 				// dont compare objects against themselves
 				if (test.collidable == current.collidable) continue;
 				// dont compare object that have already been compared
@@ -271,7 +249,13 @@ public class Sap<E extends Collidable> extends AbstractAABBDetector<E> implement
 				// the >= is to support degenerate intervals created by vertical segments
 				if (current.aabb.getMaxX() >= test.aabb.getMinX()) {
 					if (current.aabb.overlaps(test.aabb)) {
-						pairs.add(new BroadphasePair<E>(current.collidable, test.collidable));
+						if (filter.isAllowed(current.collidable, current.fixture, test.collidable, test.fixture)) {
+							pairs.add(new BroadphasePair<E, T>(
+									current.collidable,
+									current.fixture,
+									test.collidable,
+									test.fixture));
+						}
 					}
 				} else {
 					// otherwise we can break from the loop
@@ -285,12 +269,12 @@ public class Sap<E extends Collidable> extends AbstractAABBDetector<E> implement
 	}
 
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.geometry.AABB)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.geometry.AABB, org.dyn4j.collision.broadphase.BroadphaseFilter)
 	 */
 	@Override
-	public List<E> detect(AABB aabb) {
+	public List<BroadphaseItem<E, T>> detect(AABB aabb, BroadphaseFilter<E, T> filter) {
 		// get the size of the proxy list
-		int size = this.proxyTree.size();
+		int size = this.tree.size();
 		
 		// check the size of the proxy list
 		if (size == 0) {
@@ -298,31 +282,37 @@ public class Sap<E extends Collidable> extends AbstractAABBDetector<E> implement
 			return Collections.emptyList();
 		}
 		
-		List<E> list = new ArrayList<E>(Collisions.getEstimatedCollisions());
+		List<BroadphaseItem<E, T>> list = new ArrayList<BroadphaseItem<E, T>>(Collisions.getEstimatedCollisions());
 		
 		// create a proxy for the aabb
-		Proxy p = new Proxy();
-		p.aabb = aabb;
-		p.collidable = null;
-		p.tested = false;
+		SapProxy<E, T> p = new SapProxy<E, T>(null, null, aabb);
+		
 		// find the proxy in the tree that is least of all the
 		// proxies greater than this one
-		Proxy l = this.proxyTree.ceiling(p);
+		SapProxy<E, T> least = this.tree.ceiling(p);
+		
+		if (least == null) {
+			return Collections.emptyList();
+		}
 		
 		// we must check all aabbs up to the found proxy
 		// from which point the first aabb to not intersect
 		// flags us to stop
-		Iterator<Proxy> it = this.proxyTree.iterator();
+		Iterator<SapProxy<E, T>> it = this.tree.iterator();
 		boolean found = false;
 		while (it.hasNext()) {
-			Proxy proxy = it.next();
+			SapProxy<E, T> proxy = it.next();
 			// see if we found the proxy
-			if (proxy == l) {
+			if (proxy == least) {
 				found = true;
 			}
 			if (proxy.aabb.getMaxX() > aabb.getMinX()) {
 				if (proxy.aabb.overlaps(aabb)) {
-					list.add(proxy.collidable);
+					if (filter.isAllowed(aabb, proxy.collidable, proxy.fixture)) {
+						list.add(new BroadphaseItem<E, T>(
+								proxy.collidable,
+								proxy.fixture));
+					}
 				}
 			} else {
 				// check if we have passed the proxy
@@ -337,9 +327,9 @@ public class Sap<E extends Collidable> extends AbstractAABBDetector<E> implement
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#raycast(org.dyn4j.geometry.Ray, double)
 	 */
 	@Override
-	public List<E> raycast(Ray ray, double length) {
+	public List<BroadphaseItem<E, T>> raycast(Ray ray, double length, BroadphaseFilter<E, T> filter) {
 		// check the size of the proxy list
-		if (this.proxyTree.size() == 0) {
+		if (this.tree.size() == 0) {
 			// return an empty list
 			return Collections.emptyList();
 		}
@@ -373,7 +363,7 @@ public class Sap<E extends Collidable> extends AbstractAABBDetector<E> implement
 		double invDy = 1.0 / d.y;
 		
 		// get the size of the proxy list
-		int size = this.proxyTree.size();
+		int size = this.tree.size();
 		
 		// check the size of the proxy list
 		if (size == 0) {
@@ -381,24 +371,23 @@ public class Sap<E extends Collidable> extends AbstractAABBDetector<E> implement
 			return Collections.emptyList();
 		}
 		
-		List<E> list = new ArrayList<E>(Collisions.getEstimatedCollisions());
+		int eSize = Collisions.getEstimatedRaycastCollisions(this.map.size());
+		List<BroadphaseItem<E, T>> list = new ArrayList<BroadphaseItem<E, T>>(eSize);
 		
 		// create a proxy for the aabb
-		Proxy p = new Proxy();
-		p.aabb = aabb;
-		p.collidable = null;
-		p.tested = false;
+		SapProxy<E, T> p = new SapProxy<E, T>(null, null, aabb);
+		
 		// find the proxy in the tree that is least of all the
 		// proxies greater than this one
-		Proxy ceil = this.proxyTree.ceiling(p);
+		SapProxy<E, T> ceil = this.tree.ceiling(p);
 		
 		// we must check all aabbs up to the found proxy
 		// from which point the first aabb to not intersect
 		// flags us to stop
-		Iterator<Proxy> it = this.proxyTree.iterator();
+		Iterator<SapProxy<E, T>> it = this.tree.iterator();
 		boolean found = false;
 		while (it.hasNext()) {
-			Proxy proxy = it.next();
+			SapProxy<E, T> proxy = it.next();
 			// see if we found the proxy
 			if (proxy == ceil) {
 				found = true;
@@ -406,7 +395,11 @@ public class Sap<E extends Collidable> extends AbstractAABBDetector<E> implement
 			if (proxy.aabb.getMaxX() > aabb.getMinX()) {
 				if (proxy.aabb.overlaps(aabb)) {
 					if (this.raycast(s, l, invDx, invDy, aabb)) {
-						list.add(proxy.collidable);
+						if (filter.isAllowed(ray, length, proxy.collidable, proxy.fixture)) {
+							list.add(new BroadphaseItem<E, T>(
+									proxy.collidable,
+									proxy.fixture));
+						}
 					}
 				}
 			} else {
@@ -419,14 +412,14 @@ public class Sap<E extends Collidable> extends AbstractAABBDetector<E> implement
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#shiftCoordinates(org.dyn4j.geometry.Vector2)
+	 * @see org.dyn4j.geometry.Shiftable#shift(org.dyn4j.geometry.Vector2)
 	 */
 	@Override
-	public void shiftCoordinates(Vector2 shift) {
+	public void shift(Vector2 shift) {
 		// loop over all the proxies and translate their aabb
-		Iterator<Proxy> it = this.proxyTree.iterator();
+		Iterator<SapProxy<E, T>> it = this.tree.iterator();
 		while (it.hasNext()) {
-			Proxy proxy = it.next();
+			SapProxy<E, T> proxy = it.next();
 			proxy.aabb.translate(shift);
 		}
 	}

@@ -24,26 +24,70 @@
  */
 package org.dyn4j.collision.broadphase;
 
+import java.util.List;
+
 import org.dyn4j.collision.Collidable;
 import org.dyn4j.collision.Fixture;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
+import org.dyn4j.geometry.Ray;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Abstract implementation of a {@link BroadphaseDetector} providing AABB
- * (Axis Aligned Bounding Box) detection methods.
+ * Abstract implementation of a {@link BroadphaseDetector}.
  * @author William Bittle
  * @version 4.0.0
  * @since 1.0.0
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
  */
-public abstract class AbstractAABBDetector<E extends Collidable<T>, T extends Fixture> implements BroadphaseDetector<E, T> {
+public abstract class AbstractBroadphaseDetector<E extends Collidable<T>, T extends Fixture> implements BroadphaseDetector<E, T> {
 	/** The {@link AABB} expansion value */
 	protected double expansion = BroadphaseDetector.DEFAULT_AABB_EXPANSION;
 	
+	/** The default broadphase filter object */
+	protected final BroadphaseFilter<E, T> defaultFilter = new DefaultBroadphaseFilter<E, T>();
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#add(org.dyn4j.collision.Collidable)
+	 */
+	@Override
+	public void add(E collidable) {
+		int size = collidable.getFixtureCount();
+		// iterate over the new list
+		for (int i = 0; i < size; i++) {
+			T fixture = collidable.getFixture(i);
+			this.add(collidable, fixture);
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#remove(org.dyn4j.collision.Collidable)
+	 */
+	@Override
+	public void remove(E collidable) {
+		int size = collidable.getFixtureCount();
+		if (size == 0) return;
+		for (int i = 0; i < size; i++) {
+			T fixture = collidable.getFixture(i);
+			this.remove(collidable, fixture);
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#update(org.dyn4j.collision.Collidable)
+	 */
+	@Override
+	public void update(E collidable) {
+		int size = collidable.getFixtureCount();
+		// iterate over the new list
+		for (int i = 0; i < size; i++) {
+			T fixture = collidable.getFixture(i);
+			this.update(collidable, fixture);
+		}
+	}
+		
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.collision.Collidable, org.dyn4j.collision.Collidable)
 	 */
@@ -125,6 +169,30 @@ public abstract class AbstractAABBDetector<E extends Collidable<T>, T extends Fi
 		if (tmin > length) return false;
 		// along the ray, tmax should be larger than tmin
 		return tmax >= tmin;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect()
+	 */
+	@Override
+	public List<BroadphasePair<E, T>> detect() {
+		return this.detect(this.defaultFilter);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.geometry.AABB)
+	 */
+	@Override
+	public List<BroadphaseItem<E, T>> detect(AABB aabb) {
+		return this.detect(aabb, this.defaultFilter);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#raycast(org.dyn4j.geometry.Ray, double)
+	 */
+	@Override
+	public List<BroadphaseItem<E, T>> raycast(Ray ray, double length) {
+		return this.raycast(ray, length, this.defaultFilter);
 	}
 	
 	/* (non-Javadoc)

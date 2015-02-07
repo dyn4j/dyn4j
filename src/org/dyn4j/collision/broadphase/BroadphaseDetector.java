@@ -65,18 +65,19 @@ import org.dyn4j.geometry.Transform;
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
  */
-// TODO drop or condense Sap broadphases
 public interface BroadphaseDetector<E extends Collidable<T>, T extends Fixture> extends Shiftable {
 	/** The default {@link AABB} expansion value */
 	public static final double DEFAULT_AABB_EXPANSION = 0.2;
 	
+	/** The default initial capacity of fixtures */
+	public static final int DEFAULT_INITIAL_CAPACITY = 64;
+	
 	/**
 	 * Adds a new {@link Collidable} to the broadphase.
 	 * <p>
-	 * This will add all the collidable's to the broadphase.
+	 * This will add all the collidable's {@link Fixture}s to the broadphase.
 	 * <p>
-	 * This method does not check if the collidable has already been
-	 * added.
+	 * This method does not check if the collidable has already been added.
 	 * @param collidable the {@link Collidable}
 	 * @since 3.0.0
 	 */

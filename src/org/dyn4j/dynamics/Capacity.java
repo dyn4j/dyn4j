@@ -26,7 +26,6 @@ package org.dyn4j.dynamics;
 
 import org.dyn4j.Listener;
 import org.dyn4j.dynamics.joint.Joint;
-import org.dyn4j.resources.Messages;
 
 /**
  * Represents the estimated number of objects of different types.
@@ -34,8 +33,8 @@ import org.dyn4j.resources.Messages;
  * This class is used to initially size internal structures to improve performance.
  * These same structures will grow larger than the given sizes if necessary.
  * @author William Bittle
- * @version 3.1.1
- * @since 3.1.1
+ * @version 4.0.0
+ * @since 4.0.0
  */
 public class Capacity {
 	/** The default {@link Body} count */
@@ -53,20 +52,26 @@ public class Capacity {
 	// counts
 	
 	/** The estimated {@link Body} count */
-	protected int bodyCount = Capacity.DEFAULT_BODY_COUNT;
+	protected final int bodyCount;
 	
 	/** The estimated {@link Joint} count */
-	protected int jointCount = Capacity.DEFAULT_JOINT_COUNT;
+	protected final int jointCount;
 	
 	/** The estimated {@link Listener} (all listener types) count */
-	protected int listenerCount = Capacity.DEFAULT_LISTENER_COUNT;
+	protected final int listenerCount;
 	
 	/**
 	 * Default constructor.
 	 * <p>
 	 * Creates a default capacity with the default counts.
 	 */
-	public Capacity() {}
+	public Capacity() {
+		this(
+			Capacity.DEFAULT_BODY_COUNT,
+			Capacity.DEFAULT_JOINT_COUNT,
+			Capacity.DEFAULT_LISTENER_COUNT
+		);
+	}
 	
 	/**
 	 * Full constructor.
@@ -76,10 +81,50 @@ public class Capacity {
 	 * @throws IllegalArgumentException if any count is less than zero
 	 */
 	public Capacity(int bodyCount, int jointCount, int listenerCount) {
-		if (bodyCount < 0 || jointCount < 0 || listenerCount < 0) throw new IllegalArgumentException(Messages.getString("dynamics.capacity.invalidCapacity"));
-		this.bodyCount = bodyCount;
-		this.jointCount = jointCount;
-		this.listenerCount = listenerCount;
+		this.bodyCount = bodyCount > 0 ? bodyCount : Capacity.DEFAULT_BODY_COUNT;
+		this.jointCount = jointCount > 0 ? jointCount : Capacity.DEFAULT_JOINT_COUNT;
+		this.listenerCount = listenerCount > 0 ? listenerCount : Capacity.DEFAULT_LISTENER_COUNT;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (obj == this) return true;
+		if (obj instanceof Capacity) {
+			Capacity capacity = (Capacity)obj;
+			return capacity.bodyCount == this.bodyCount && 
+				   capacity.jointCount == this.jointCount &&
+				   capacity.listenerCount == this.listenerCount;
+		}
+		return false;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		int hash = 17;
+		hash = hash * 31 + this.bodyCount;
+		hash = hash * 31 + this.jointCount;
+		hash = hash * 31 + this.listenerCount;
+		return hash;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Capacity[BodyCount=").append(this.bodyCount)
+		  .append("|JointCount=").append(this.jointCount)
+		  .append("|ListenerCount=").append(this.listenerCount)
+		  .append("]");
+		return sb.toString();
 	}
 	
 	/**

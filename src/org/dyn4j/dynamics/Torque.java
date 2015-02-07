@@ -104,6 +104,20 @@ public class Torque {
 	}
 	
 	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (obj == this) return true;
+		if (obj instanceof Torque) {
+			Torque torque = (Torque)obj;
+			return torque.torque == this.torque;
+		}
+		return false;
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.Force#toString()
 	 */
 	@Override

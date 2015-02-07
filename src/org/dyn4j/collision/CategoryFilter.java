@@ -148,6 +148,20 @@ public class CategoryFilter implements Filter {
 	}
 	
 	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (obj == this) return true;
+		if (obj instanceof CategoryFilter) {
+			CategoryFilter filter = (CategoryFilter)obj;
+			return filter.category == this.category && filter.mask == this.mask;
+		}
+		return false;
+	}
+	
+	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override

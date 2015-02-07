@@ -55,4 +55,32 @@ public class DynamicAABBTreeNode {
 	public boolean isLeaf() {
 		return left == null;
 	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (obj == this) return true;
+		if (obj instanceof DynamicAABBTreeLeaf) {
+			DynamicAABBTreeNode node = (DynamicAABBTreeNode)obj;
+			if (node.aabb.equals(this.aabb)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("DynamicAABBTreeNode[AABB=").append(this.aabb.toString())
+		  .append("|Height=").append(this.height)
+		  .append("]");
+		return sb.toString();
+	}
 }

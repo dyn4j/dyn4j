@@ -39,7 +39,7 @@ import org.dyn4j.resources.Messages;
  * Use the {@link #isSelfBalancing()} and {@link #setSelfBalancing(boolean)} methods to 
  * make the tree an AVL tree.
  * @author William Bittle
- * @version 3.1.9
+ * @version 4.0.0
  * @since 2.2.0
  * @param <E> Comparable
  */
@@ -52,7 +52,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 */
 	protected class Node {
 		/** The comparable data */
-		public E comparable;
+		public final E comparable;
 		
 		/** The parent node of this node */
 		public Node parent;
@@ -129,9 +129,9 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * @version 3.0.0
 	 * @since 2.2.0
 	 */
-	public class TreeIterator implements Iterator<E> {
+	public final class TreeIterator implements Iterator<E> {
 		/** The node stack for iterative traversal */
-		protected Deque<Node> stack;
+		protected final Deque<Node> stack;
 		
 		/** The traversal direction */
 		protected final Direction direction;

@@ -50,18 +50,18 @@ import org.dyn4j.geometry.Transform;
  * New condition types can be added by implementing the {@link FallbackCondition} interface. Doing so can lead to
  * interesting options like custom collision detectors for specific cases or custom shapes.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.0.0
  * @since 3.1.5
  */
 public class FallbackNarrowphaseDetector implements NarrowphaseDetector {
 	/** The primary {@link NarrowphaseDetector} */
-	protected NarrowphaseDetector primaryNarrowphaseDetector;
+	protected final NarrowphaseDetector primaryNarrowphaseDetector;
 	
 	/** The fallback {@link NarrowphaseDetector} */
-	protected NarrowphaseDetector fallbackNarrowphaseDetector;
+	protected final NarrowphaseDetector fallbackNarrowphaseDetector;
 	
 	/** The conditions for when to use the fallback {@link NarrowphaseDetector} */
-	protected List<FallbackCondition> fallbackConditions;
+	protected final List<FallbackCondition> fallbackConditions;
 	
 	/**
 	 * Minimal constructor.

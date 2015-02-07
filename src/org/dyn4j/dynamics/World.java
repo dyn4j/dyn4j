@@ -141,15 +141,15 @@ public class World implements Shiftable {
 	// listeners and config
 	
 	/** The list of listeners for this world */
-	protected List<Listener> listeners;
+	protected final List<Listener> listeners;
 	
 	// bodies/joints
 	
 	/** The {@link Body} list */
-	protected List<Body> bodies;
+	protected final List<Body> bodies;
 	
 	/** The {@link Joint} list */
-	protected List<Joint> joints;
+	protected final List<Joint> joints;
 	
 	/** The application data associated */
 	protected Object userData;
@@ -222,7 +222,7 @@ public class World implements Shiftable {
 	 */
 	public World(Capacity initialCapacity, Bounds bounds) {
 		// check for null capacity
-		if (initialCapacity == null) throw new NullPointerException(Messages.getString("dynamics.nullCapacity"));
+		if (initialCapacity == null) initialCapacity = new Capacity();
 		// initialize all the classes with default values
 		this.settings = new Settings();
 		this.step = new Step(this.settings.getStepFrequency());
@@ -1167,7 +1167,7 @@ public class World implements Shiftable {
 			max = maxLength;
 		}
 		// create a raycast result
-		RaycastResult result = new RaycastResult();
+		RaycastResult result = null;
 		RaycastBroadphaseFilter bpFilter = new RaycastBroadphaseFilter(ignoreInactive, ignoreSensors, filter);
 		// filter using the broadphase first
 		List<BroadphaseItem<Body, BodyFixture>> items = this.broadphaseDetector.raycast(ray, maxLength, bpFilter);
@@ -1208,25 +1208,23 @@ public class World implements Shiftable {
 				}
 				if (!allow) continue;
 				
-				result.body = body;
-				result.fixture = fixture;
-				result.raycast = raycast;
-				
 				if (!all) {
+					if (result == null) {
+						result = new RaycastResult(body, fixture, raycast);
+						results.add(result);
+						found = true;
+					} else {
+						result.body = body;
+						result.fixture = fixture;
+						result.raycast = raycast;
+					}
 					// we are only looking for the closest so
 					// set the new maximum
 					max = result.raycast.getDistance();
-					// see if the results list has the item in it
-					if (results.size() == 0) {
-						results.add(result);
-						found = true;
-					}
 				} else {
 					// add this result to the results
-					results.add(result);
+					results.add(new RaycastResult(body, fixture, raycast));
 					found = true;
-					// create a new result for the next iteration
-					result = new RaycastResult();
 				}
 			}
 		}
@@ -1647,46 +1645,35 @@ public class World implements Shiftable {
 			
 			// get the time of impact
 			Convex c = fixture.getShape();
-			TimeOfImpact toi = new TimeOfImpact();
+			TimeOfImpact timeOfImpact = new TimeOfImpact();
 			// we pass the zero vector and 0 for the change in position and angle for the body
 			// since we assume that it is not moving since this is a static test
-			if (this.timeOfImpactDetector.getTimeOfImpact(convex, transform, deltaPosition, deltaAngle, c, bodyTransform, dp2, 0.0, 0.0, ft2, toi)) {
+			if (this.timeOfImpactDetector.getTimeOfImpact(convex, transform, deltaPosition, deltaAngle, c, bodyTransform, dp2, 0.0, 0.0, ft2, timeOfImpact)) {
 				// notify the listeners to see if we should test this fixture
 				allow = true;
 				for (ConvexCastListener ccl : listeners) {
 					// see if we should test this fixture
-					if (!ccl.allow(convex, body, fixture, toi)) {
+					if (!ccl.allow(convex, body, fixture, timeOfImpact)) {
 						allow = false;
 					}
 				}
 				if (!allow) continue;
 				
 				// only save the minimum for the body
-				if (bodyMinToi == null || toi.getTime() < bodyMinToi.getTime()) {
-					ft2 = toi.getTime();
-					bodyMinToi = toi;
+				if (bodyMinToi == null || timeOfImpact.getTime() < bodyMinToi.getTime()) {
+					ft2 = timeOfImpact.getTime();
+					bodyMinToi = timeOfImpact;
 					bodyMinFixture = fixture;
 				}
 			}
 			if (bodyMinToi != null) {
 				if (!all) {
 					t2 = bodyMinToi.getTime();
-					if (min == null) {
-						min = new ConvexCastResult();
-						min.timeOfImpact = bodyMinToi;
-						min.fixture = bodyMinFixture;
-						min.body = body;
-					} else if (bodyMinToi.getTime() < min.timeOfImpact.getTime()) {
-						// just reassign the minimums data
-						min.timeOfImpact = bodyMinToi;
-						min.fixture = bodyMinFixture;
-						min.body = body;
+					if (min == null || bodyMinToi.getTime() < min.timeOfImpact.getTime()) {
+						min = new ConvexCastResult(body, bodyMinFixture, bodyMinToi);
 					}
 				} else {
-					ConvexCastResult result = new ConvexCastResult();
-					result.timeOfImpact = bodyMinToi;
-					result.fixture = bodyMinFixture;
-					result.body = body;
+					ConvexCastResult result = new ConvexCastResult(body, fixture, timeOfImpact);
 					results.add(result);
 				}
 				found = true;
@@ -1948,9 +1935,7 @@ public class World implements Shiftable {
 			// test the aabbs
 			if (aabb.overlaps(faabb)) {
 				// add this fixture to the results list
-				DetectResult result = new DetectResult();
-				result.body = body;
-				result.fixture = fixture;
+				DetectResult result = new DetectResult(body, fixture);
 				results.add(result);
 				found = true;
 			}
@@ -2234,10 +2219,7 @@ public class World implements Shiftable {
 			}
 			if (collision) {
 				// add this fixture to the results list
-				DetectResult result = new DetectResult();
-				result.body = body;
-				result.fixture = fixture;
-				result.penetration = penetration;
+				DetectResult result = new DetectResult(body, fixture, penetration);
 				results.add(result);
 				found = true;
 			}
@@ -2315,9 +2297,7 @@ public class World implements Shiftable {
 				// test the aabbs
 				if (aabb.overlaps(faabb)) {
 					// add this fixture to the results list
-					DetectResult result = new DetectResult();
-					result.body = body;
-					result.fixture = fixture;
+					DetectResult result = new DetectResult(body, fixture);
 					results.add(result);
 					found = true;
 				}
@@ -2485,17 +2465,17 @@ public class World implements Shiftable {
 			// test all the fixtures
 			int fSize = body.getFixtureCount();
 			for (int j = 0; j < fSize; j++) {
-				BodyFixture bf = body.getFixture(j);
+				BodyFixture fixture = body.getFixture(j);
 				// check against the sensor flag
-				if (ignoreSensors && bf.isSensor()) continue;
+				if (ignoreSensors && fixture.isSensor()) continue;
 				// check against the filter if given
-				Filter ff = bf.getFilter();
+				Filter ff = fixture.getFilter();
 				if (filter != null && !ff.isAllowed(filter)) continue;
 
 				// pass through the listeners
 				allow = true;
 				for (DetectListener listener : listeners) {
-					if (!listener.allow(convex, transform, body, bf)) {
+					if (!listener.allow(convex, transform, body, fixture)) {
 						allow = false;
 					}
 				}
@@ -2504,7 +2484,7 @@ public class World implements Shiftable {
 				}
 				
 				// just perform a boolean test since its typically faster
-				Convex bc = bf.getShape();
+				Convex bc = fixture.getShape();
 				boolean collision = false;
 				// should we use the fast method or the one that returns the collision info
 				Penetration penetration = (includeCollisionData ? new Penetration() : null); 
@@ -2515,10 +2495,7 @@ public class World implements Shiftable {
 				}
 				if (collision) {
 					// add this fixture to the results list
-					DetectResult result = new DetectResult();
-					result.body = body;
-					result.fixture = bf;
-					result.penetration = penetration;
+					DetectResult result = new DetectResult(body, fixture, penetration);
 					results.add(result);
 					found = true;
 				}

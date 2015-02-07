@@ -37,10 +37,10 @@ import org.dyn4j.collision.Fixture;
  */
 public class DynamicAABBTreeLeaf<E extends Collidable<T>, T extends Fixture> extends DynamicAABBTreeNode {
 	/** The {@link Collidable} */
-	public final E collidable;
+	protected final E collidable;
 	
 	/** The {@link Fixture} */
-	public final T fixture;
+	protected final T fixture;
 	
 	/** Flag used to determine if a node has been tested before */
 	protected boolean tested = false;
@@ -53,5 +53,48 @@ public class DynamicAABBTreeLeaf<E extends Collidable<T>, T extends Fixture> ext
 	public DynamicAABBTreeLeaf(E collidable, T fixture) {
 		this.collidable = collidable;
 		this.fixture = fixture;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (obj == this) return true;
+		if (obj instanceof DynamicAABBTreeLeaf) {
+			DynamicAABBTreeLeaf<?, ?> leaf = (DynamicAABBTreeLeaf<?, ?>)obj;
+			if (leaf.collidable == this.collidable &&
+				leaf.fixture == this.fixture) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		int hash = 17;
+		hash = hash * 31 + this.collidable.hashCode();
+		hash = hash * 31 + this.fixture.hashCode();
+		return hash;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("DynamicAABBTreeLeaf[Collidable=").append(this.collidable.getId())
+		  .append("|Fixture=").append(this.fixture.getId())
+		  .append("|AABB=").append(this.aabb.toString())
+		  .append("|Height=").append(this.height)
+		  .append("|Tested=").append(this.tested)
+		  .append("]");
+		return sb.toString();
 	}
 }
