@@ -58,6 +58,14 @@ public abstract class AbstractShape implements Shape, Transformable {
 	}
 	
 	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return this.id.hashCode();
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Shape#getId()
 	 */
 	@Override

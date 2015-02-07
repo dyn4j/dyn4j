@@ -215,7 +215,7 @@ public class MouseJointTest {
 		mj.setTarget(new Vector2(1.0, -1.0));
 		
 		w.addJoint(mj);
-		w.shiftCoordinates(new Vector2(-1.0, 2.0));
+		w.shift(new Vector2(-1.0, 2.0));
 		
 		TestCase.assertEquals(0.0, mj.getTarget().x, 1.0e-3);
 		TestCase.assertEquals(1.0, mj.getTarget().y, 1.0e-3);
@@ -232,7 +232,7 @@ public class MouseJointTest {
 		
 		Body body = new Body();
 		body.addFixture(Geometry.createCircle(1.0));
-		body.setMass(Mass.Type.FIXED_LINEAR_VELOCITY);
+		body.update(Mass.Type.FIXED_LINEAR_VELOCITY);
 		w.addBody(body);
 		
 		MouseJoint mj = new MouseJoint(body, new Vector2(0.5, 0.0), 8.0, 0.3, 1000.0);

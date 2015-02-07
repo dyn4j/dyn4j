@@ -35,7 +35,7 @@ import org.dyn4j.collision.BoundsAdapter;
 import org.dyn4j.collision.BoundsListener;
 import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
-import org.dyn4j.collision.broadphase.SapIncremental;
+import org.dyn4j.collision.broadphase.Sap;
 import org.dyn4j.collision.continuous.ConservativeAdvancement;
 import org.dyn4j.collision.continuous.TimeOfImpactDetector;
 import org.dyn4j.collision.manifold.ClippingManifoldSolver;
@@ -125,7 +125,6 @@ public class WorldTest {
 	 * Tests passing a null capacity.
 	 * @since 3.1.1
 	 */
-	@Test(expected = NullPointerException.class)
 	public void createFailureNullCapacity1() {
 		new World((Capacity)null);
 	}
@@ -134,7 +133,6 @@ public class WorldTest {
 	 * Tests passing a null capacity.
 	 * @since 3.1.1
 	 */
-	@Test(expected = NullPointerException.class)
 	public void createFailureNullCapacity2() {
 		new World(null, new AxisAlignedBounds(1, 1));
 	}
@@ -233,12 +231,14 @@ public class WorldTest {
 	public void addBody() {
 		World w = new World();
 		Body b = new Body();
+		b.addFixture(Geometry.createCapsule(1.0, 0.5));
 		w.addBody(b);
 		TestCase.assertFalse(w.bodies.isEmpty());
 		// make sure the body's world reference is there
 		TestCase.assertNotNull(b.world);
 		// make sure it was added to the broadphase
-		TestCase.assertNotNull(w.broadphaseDetector.getAABB(b));
+		TestCase.assertTrue(w.broadphaseDetector.contains(b));
+		TestCase.assertTrue(w.broadphaseDetector.contains(b, b.getFixture(0)));
 	}
 	
 	/**
@@ -329,8 +329,8 @@ public class WorldTest {
 		// setup the bodies
 		Convex c1 = Geometry.createCircle(1.0);
 		Convex c2 = Geometry.createEquilateralTriangle(0.5);
-		Body b1 = new Body(); b1.addFixture(c1); b1.setMass();
-		Body b2 = new Body(); b2.addFixture(c2); b2.setMass();
+		Body b1 = new Body(); b1.addFixture(c1); b1.update();
+		Body b2 = new Body(); b2.addFixture(c2); b2.update();
 		
 		// add them to the world
 		w.addBody(b1);
@@ -395,8 +395,8 @@ public class WorldTest {
 		// setup the bodies
 		Convex c1 = Geometry.createCircle(1.0);
 		Convex c2 = Geometry.createEquilateralTriangle(0.5);
-		Body b1 = new Body(); b1.addFixture(c1); b1.setMass();
-		Body b2 = new Body(); b2.addFixture(c2); b2.setMass();
+		Body b1 = new Body(); b1.addFixture(c1); b1.update();
+		Body b2 = new Body(); b2.addFixture(c2); b2.update();
 		
 		// add them to the world
 		w.addBody(b1);
@@ -496,12 +496,14 @@ public class WorldTest {
 	public void setBroadphaseDetector() {
 		World w = new World();
 		Body b = new Body();
+		b.addFixture(Geometry.createCircle(1.0));
 		w.addBody(b);
-		BroadphaseDetector<Body> bd = new SapIncremental<Body>();
+		BroadphaseDetector<Body, BodyFixture> bd = new Sap<Body, BodyFixture>();
 		w.setBroadphaseDetector(bd);
 		TestCase.assertSame(bd, w.getBroadphaseDetector());
 		// test bodies are re-added
-		TestCase.assertNotNull(w.broadphaseDetector.getAABB(b));
+		TestCase.assertTrue(w.broadphaseDetector.contains(b));
+		TestCase.assertTrue(w.broadphaseDetector.contains(b, b.getFixture(0)));
 	}
 	
 	/**
@@ -638,8 +640,8 @@ public class WorldTest {
 		// setup the bodies
 		Convex c1 = Geometry.createCircle(1.0);
 		Convex c2 = Geometry.createEquilateralTriangle(0.5);
-		Body b1 = new Body(); b1.addFixture(c1); b1.setMass();
-		Body b2 = new Body(); b2.addFixture(c2); b2.setMass();
+		Body b1 = new Body(); b1.addFixture(c1); b1.update();
+		Body b2 = new Body(); b2.addFixture(c2); b2.update();
 		
 		// setup the joint
 		Joint j = new DistanceJoint(b1, b2, new Vector2(), new Vector2());
@@ -686,8 +688,8 @@ public class WorldTest {
 		// setup the bodies
 		Convex c1 = Geometry.createCircle(1.0);
 		Convex c2 = Geometry.createEquilateralTriangle(0.5);
-		Body b1 = new Body(); b1.addFixture(c1); b1.setMass();
-		Body b2 = new Body(); b2.addFixture(c2); b2.setMass();
+		Body b1 = new Body(); b1.addFixture(c1); b1.update();
+		Body b2 = new Body(); b2.addFixture(c2); b2.update();
 		
 		// setup the joint
 		Joint j = new DistanceJoint(b1, b2, new Vector2(), new Vector2());
@@ -736,8 +738,8 @@ public class WorldTest {
 		// setup the bodies
 		Convex c1 = Geometry.createCircle(1.0);
 		Convex c2 = Geometry.createEquilateralTriangle(0.5);
-		Body b1 = new Body(); b1.addFixture(c1); b1.setMass();
-		Body b2 = new Body(); b2.addFixture(c2); b2.setMass();
+		Body b1 = new Body(); b1.addFixture(c1); b1.update();
+		Body b2 = new Body(); b2.addFixture(c2); b2.update();
 		
 		// setup the joint
 		Joint j = new DistanceJoint(b1, b2, new Vector2(), new Vector2());

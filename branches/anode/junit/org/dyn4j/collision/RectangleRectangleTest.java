@@ -75,18 +75,18 @@ public class RectangleRectangleTest extends AbstractTest {
 		Transform t2 = new Transform();
 		
 		// test containment
-		TestCase.assertTrue(this.aabb.detect(rect1, t1, rect2, t2));
-		TestCase.assertTrue(this.aabb.detect(rect2, t2, rect1, t1));
+		TestCase.assertTrue(this.sap.detect(rect1, t1, rect2, t2));
+		TestCase.assertTrue(this.sap.detect(rect2, t2, rect1, t1));
 		
 		// test overlap
 		t1.translate(-0.5, 0.0);
-		TestCase.assertTrue(this.aabb.detect(rect1, t1, rect2, t2));
-		TestCase.assertTrue(this.aabb.detect(rect2, t2, rect1, t1));
+		TestCase.assertTrue(this.sap.detect(rect1, t1, rect2, t2));
+		TestCase.assertTrue(this.sap.detect(rect2, t2, rect1, t1));
 		
 		// test no overlap
 		t1.translate(-0.3, 0.0);
-		TestCase.assertFalse(this.aabb.detect(rect1, t1, rect2, t2));
-		TestCase.assertFalse(this.aabb.detect(rect2, t2, rect1, t1));
+		TestCase.assertFalse(this.sap.detect(rect1, t1, rect2, t2));
+		TestCase.assertFalse(this.sap.detect(rect2, t2, rect1, t1));
 	}
 	
 	/**
@@ -99,18 +99,18 @@ public class RectangleRectangleTest extends AbstractTest {
 		CollidableTest ct2 = new CollidableTest(rect2);
 		
 		// test containment
-		TestCase.assertTrue(this.aabb.detect(ct1, ct2));
-		TestCase.assertTrue(this.aabb.detect(ct2, ct1));
+		TestCase.assertTrue(this.sap.detect(ct1, ct2));
+		TestCase.assertTrue(this.sap.detect(ct2, ct1));
 		
 		// test overlap
 		ct1.translate(-0.5, 0.0);
-		TestCase.assertTrue(this.aabb.detect(ct1, ct2));
-		TestCase.assertTrue(this.aabb.detect(ct2, ct1));
+		TestCase.assertTrue(this.sap.detect(ct1, ct2));
+		TestCase.assertTrue(this.sap.detect(ct2, ct1));
 		
 		// test no overlap
 		ct1.translate(-0.3, 0.0);
-		TestCase.assertFalse(this.aabb.detect(ct1, ct2));
-		TestCase.assertFalse(this.aabb.detect(ct2, ct1));
+		TestCase.assertFalse(this.sap.detect(ct1, ct2));
+		TestCase.assertFalse(this.sap.detect(ct2, ct1));
 	}
 	
 	/**
@@ -118,61 +118,41 @@ public class RectangleRectangleTest extends AbstractTest {
 	 */
 	@Test
 	public void detectBroadphase() {
-		List<BroadphasePair<CollidableTest>> pairs;
+		List<BroadphasePair<CollidableTest, Fixture>> pairs;
 		
 		// create some collidables
 		CollidableTest ct1 = new CollidableTest(rect1);
 		CollidableTest ct2 = new CollidableTest(rect2);
 		
-		this.sapI.add(ct1);
-		this.sapI.add(ct2);
-		this.sapBF.add(ct1);
-		this.sapBF.add(ct2);
-		this.sapT.add(ct1);
-		this.sapT.add(ct2);
-		this.dynT.add(ct1);
-		this.dynT.add(ct2);
+		this.sap.add(ct1);
+		this.sap.add(ct2);
+		this.dyn.add(ct1);
+		this.dyn.add(ct2);
 		
 		// test containment
-		pairs = this.sapI.detect();
+		pairs = this.sap.detect();
 		TestCase.assertEquals(1, pairs.size());
-		pairs = this.sapBF.detect();
-		TestCase.assertEquals(1, pairs.size());
-		pairs = this.sapT.detect();
-		TestCase.assertEquals(1, pairs.size());
-		pairs = this.dynT.detect();
+		pairs = this.dyn.detect();
 		TestCase.assertEquals(1, pairs.size());
 		
 		// test overlap
 		ct1.translate(-0.5, 0.0);
-		this.sapI.update(ct1);
-		this.sapBF.update(ct1);
-		this.sapT.update(ct1);
-		this.dynT.update(ct1);
-		pairs = this.sapI.detect();
+		this.sap.update(ct1);
+		this.dyn.update(ct1);
+		pairs = this.sap.detect();
 		TestCase.assertEquals(1, pairs.size());
-		pairs = this.sapBF.detect();
-		TestCase.assertEquals(1, pairs.size());
-		pairs = this.sapT.detect();
-		TestCase.assertEquals(1, pairs.size());
-		pairs = this.dynT.detect();
+		pairs = this.dyn.detect();
 		TestCase.assertEquals(1, pairs.size());
 		
 		// test no overlap
 		// ct1.translate(-0.3, 0.0) isnt enough because of
 		// the broadphase expansion value
 		ct1.translate(-0.5, 0.0);
-		this.sapI.update(ct1);
-		this.sapBF.update(ct1);
-		this.sapT.update(ct1);
-		this.dynT.update(ct1);
-		pairs = this.sapI.detect();
+		this.sap.update(ct1);
+		this.dyn.update(ct1);
+		pairs = this.sap.detect();
 		TestCase.assertEquals(0, pairs.size());
-		pairs = this.sapBF.detect();
-		TestCase.assertEquals(0, pairs.size());
-		pairs = this.sapT.detect();
-		TestCase.assertEquals(0, pairs.size());
-		pairs = this.dynT.detect();
+		pairs = this.dyn.detect();
 		TestCase.assertEquals(0, pairs.size());
 	}
 	
@@ -242,16 +222,16 @@ public class RectangleRectangleTest extends AbstractTest {
 		TestCase.assertTrue(this.gjk.detect(rect1, t1, rect2, t2, p));
 		TestCase.assertTrue(this.gjk.detect(rect1, t1, rect2, t2));
 		n = p.getNormal();
-		TestCase.assertEquals(0.750, p.getDepth(), 1.0e-3);
-		TestCase.assertEquals(1.0, n.x, 1.0e-3);
-		TestCase.assertEquals(0.0, n.y, 1.0e-3);
+		TestCase.assertEquals( 0.750, p.getDepth(), 1.0e-3);
+		TestCase.assertEquals(-1.000, n.x, 1.0e-3);
+		TestCase.assertEquals( 0.000, n.y, 1.0e-3);
 		// try reversing the shapes
 		TestCase.assertTrue(this.gjk.detect(rect2, t2, rect1, t1, p));
 		TestCase.assertTrue(this.gjk.detect(rect2, t2, rect1, t1));
 		n = p.getNormal();
-		TestCase.assertEquals(0.750, p.getDepth(), 1.0e-3);
-		TestCase.assertEquals(1.0, n.x, 1.0e-3);
-		TestCase.assertEquals(0.0, n.y, 1.0e-3);
+		TestCase.assertEquals( 0.750, p.getDepth(), 1.0e-3);
+		TestCase.assertEquals(-1.000, n.x, 1.0e-3);
+		TestCase.assertEquals( 0.000, n.y, 1.0e-3);
 		
 		// test overlap
 		t1.translate(-0.5, 0.0);

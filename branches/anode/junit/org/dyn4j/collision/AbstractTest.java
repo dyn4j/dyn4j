@@ -24,69 +24,30 @@
  */
 package org.dyn4j.collision;
 
-import java.util.List;
-
-import org.dyn4j.collision.broadphase.AbstractBroadphaseDetector;
-import org.dyn4j.collision.broadphase.BroadphasePair;
 import org.dyn4j.collision.broadphase.DynamicAABBTree;
-import org.dyn4j.collision.broadphase.SapBruteForce;
-import org.dyn4j.collision.broadphase.SapIncremental;
 import org.dyn4j.collision.broadphase.Sap;
 import org.dyn4j.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.Sat;
-import org.dyn4j.geometry.AABB;
-import org.dyn4j.geometry.Ray;
-import org.dyn4j.geometry.Vector2;
 
 /**
  * Abstract test for all shape - shape test classes.
  * @author William Bittle
- * @version 3.1.0
+ * @version 4.0.0
  * @since 1.0.0
  */
 public abstract class AbstractTest {
-	/** Abstract AABB detector */
-	protected AbstractBroadphaseDetector<CollidableTest> aabb = new AbstractBroadphaseDetector<CollidableTest>() {
-		@Override
-		public void add(CollidableTest collidable) {}
-		@Override
-		public List<BroadphasePair<CollidableTest>> detect() { return null;	}
-		@Override
-		public void remove(CollidableTest collidable) {}
-		@Override
-		public void update(CollidableTest collidable) {}
-		@Override
-		public List<CollidableTest> detect(AABB aabb) { return null; }
-		@Override
-		public boolean contains(CollidableTest collidable) { return false; }
-		@Override
-		public void clear() {}
-		@Override
-		public AABB getAABB(CollidableTest collidable) { return collidable.createAABB(); }
-		@Override
-		public List<CollidableTest> raycast(Ray ray, double length) { return null; }
-		@Override
-		public void shiftCoordinates(Vector2 shift) {}
-	};
-	
 	/** The SAT algorithm */
 	protected Sat sat = new Sat();
 	
 	/** The GJK/EPA algorithm */
 	protected Gjk gjk = new Gjk();
 	
-	/** The sap incremental (using a list) algorithm */
-	protected SapIncremental<CollidableTest> sapI = new SapIncremental<CollidableTest>();
-	
-	/** The sap brute force algorithm */
-	protected SapBruteForce<CollidableTest> sapBF = new SapBruteForce<CollidableTest>();
-	
-	/** The sap incremental (using a tree) algorithm */
-	protected Sap<CollidableTest> sapT = new Sap<CollidableTest>();
+	/** The sap algorithm */
+	protected Sap<CollidableTest, Fixture> sap = new Sap<CollidableTest, Fixture>();
 	
 	/** The dynamic aabb algorithm */
-	protected DynamicAABBTree<CollidableTest> dynT = new DynamicAABBTree<CollidableTest>();
+	protected DynamicAABBTree<CollidableTest, Fixture> dyn = new DynamicAABBTree<CollidableTest, Fixture>();
 	
 	/** The clipping manifold algorithm */
 	protected ClippingManifoldSolver cmfs = new ClippingManifoldSolver();

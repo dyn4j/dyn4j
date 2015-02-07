@@ -100,25 +100,6 @@ public class AxisAlignedBoundsTest {
 	}
 	
 	/**
-	 * Verifies the rotate methods do not modify the internal
-	 * structure of the bounds.
-	 */
-	@Test
-	public void rotateNoOp() {
-		// perform some rotations
-		this.bounds.rotate(Math.toRadians(30.0));
-		this.bounds.rotate(Math.toRadians(-15.0), 3.0, -4.0);
-		this.bounds.rotate(Math.toRadians(7.5), new Vector2(1.0, 0.0));
-		// verify that the bounds are left unchanged
-		AABB aabb = this.bounds.getBounds();
-		// should be centered about the origin
-		TestCase.assertEquals(-10.0, aabb.getMinX());
-		TestCase.assertEquals(-10.0, aabb.getMinY());
-		TestCase.assertEquals(10.0, aabb.getMaxX());
-		TestCase.assertEquals(10.0, aabb.getMaxY());
-	}
-	
-	/**
 	 * Tests creating a {@link AxisAlignedBounds} with invalid bounds.
 	 */
 	@Test(expected = IllegalArgumentException.class)
@@ -404,7 +385,7 @@ public class AxisAlignedBoundsTest {
 		TestCase.assertEquals(0.000, tx.y, 1.0e-3);
 		
 		// test the shifting which is really just a translation
-		bounds.shiftCoordinates(new Vector2(1.0, 1.0));
+		bounds.shift(new Vector2(1.0, 1.0));
 		tx = bounds.transform.getTranslation();
 		TestCase.assertEquals(1.000, tx.x, 1.0e-3);
 		TestCase.assertEquals(1.000, tx.y, 1.0e-3);

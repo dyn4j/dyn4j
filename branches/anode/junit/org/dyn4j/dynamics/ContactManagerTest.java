@@ -149,46 +149,46 @@ public class ContactManagerTest {
 		ContactConstraint cc = null;
 		
 		// b1 - b2 (2 contacts)
-		if (gjk.detect(c1, b1.transform, c2, b2.transform, p)) {
-			cms.getManifold(p, c1, b1.transform, c2, b2.transform, m);
+		if (gjk.detect(c1, b1.getTransform(), c2, b2.getTransform(), p)) {
+			cms.getManifold(p, c1, b1.getTransform(), c2, b2.getTransform(), m);
 			cc = new ContactConstraint(b1, f1, b2, f2, m, world);
 			this.contactManager.add(cc);
 		}
 		
 		// b1 - b3 (2 contacts)
-		if (gjk.detect(c1, b1.transform, c3, b3.transform, p)) {
-			cms.getManifold(p, c1, b1.transform, c3, b3.transform, m);
+		if (gjk.detect(c1, b1.getTransform(), c3, b3.getTransform(), p)) {
+			cms.getManifold(p, c1, b1.getTransform(), c3, b3.getTransform(), m);
 			cc = new ContactConstraint(b1, f1, b3, f3, m, world);
 			this.contactManager.add(cc);
 		}
 		
 		// b1 - b4 (2 contacts)
-		if (gjk.detect(c1, b1.transform, c4, b4.transform, p)) {
-			cms.getManifold(p, c1, b1.transform, c4, b4.transform, m);
+		if (gjk.detect(c1, b1.getTransform(), c4, b4.getTransform(), p)) {
+			cms.getManifold(p, c1, b1.getTransform(), c4, b4.getTransform(), m);
 			cc = new ContactConstraint(b1, f1, b4, f4, m, world);
 			this.contactManager.add(cc);
 		}
 		
 		// b2 - b3 (1 contact)
 		p.clear(); m.clear();
-		if (gjk.detect(c2, b2.transform, c3, b3.transform, p)) {
-			cms.getManifold(p, c2, b2.transform, c3, b3.transform, m);
+		if (gjk.detect(c2, b2.getTransform(), c3, b3.getTransform(), p)) {
+			cms.getManifold(p, c2, b2.getTransform(), c3, b3.getTransform(), m);
 			cc = new ContactConstraint(b2, f2, b3, f3, m, world);
 			this.contactManager.add(cc);
 		}
 		
 		// b2 - b4 (1 contact)
 		p.clear(); m.clear();
-		if (gjk.detect(c2, b2.transform, c4, b4.transform, p)) {
-			cms.getManifold(p, c2, b2.transform, c4, b4.transform, m);
+		if (gjk.detect(c2, b2.getTransform(), c4, b4.getTransform(), p)) {
+			cms.getManifold(p, c2, b2.getTransform(), c4, b4.getTransform(), m);
 			cc = new ContactConstraint(b2, f2, b4, f4, m, world);
 			this.contactManager.add(cc);
 		}
 		
 		// b3 - b4 (1 contact)
 		p.clear(); m.clear();
-		if (gjk.detect(c3, b3.transform, c4, b4.transform, p)) {
-			cms.getManifold(p, c3, b3.transform, c4, b4.transform, m);
+		if (gjk.detect(c3, b3.getTransform(), c4, b4.getTransform(), p)) {
+			cms.getManifold(p, c3, b3.getTransform(), c4, b4.getTransform(), m);
 			cc = new ContactConstraint(b3, f3, b4, f4, m, world);
 			this.contactManager.add(cc);
 		}
@@ -204,46 +204,46 @@ public class ContactManagerTest {
 		b3.translate(-0.75, -0.50);
 		
 		// b1 - b2 (2 contacts)
-		if (gjk.detect(c1, b1.transform, c2, b2.transform, p)) {
-			cms.getManifold(p, c1, b1.transform, c2, b2.transform, m);
+		if (gjk.detect(c1, b1.getTransform(), c2, b2.getTransform(), p)) {
+			cms.getManifold(p, c1, b1.getTransform(), c2, b2.getTransform(), m);
 			cc = new ContactConstraint(b1, f1, b2, f2, m, world);
 			this.contactManager.add(cc);
 		}
 		
 		// b1 - b3 (2 contacts)
-		if (gjk.detect(c1, b1.transform, c3, b3.transform, p)) {
-			cms.getManifold(p, c1, b1.transform, c3, b3.transform, m);
+		if (gjk.detect(c1, b1.getTransform(), c3, b3.getTransform(), p)) {
+			cms.getManifold(p, c1, b1.getTransform(), c3, b3.getTransform(), m);
 			cc = new ContactConstraint(b1, f1, b3, f3, m, world);
 			this.contactManager.add(cc);
 		}
 		
 		// b1 - b4 (2 contacts)
-		if (gjk.detect(c1, b1.transform, c4, b4.transform, p)) {
-			cms.getManifold(p, c1, b1.transform, c4, b4.transform, m);
+		if (gjk.detect(c1, b1.getTransform(), c4, b4.getTransform(), p)) {
+			cms.getManifold(p, c1, b1.getTransform(), c4, b4.getTransform(), m);
 			cc = new ContactConstraint(b1, f1, b4, f4, m, world);
 			this.contactManager.add(cc);
 		}
 		
 		// b2 - b3 (1 contact)
 		p.clear(); m.clear();
-		if (gjk.detect(c2, b2.transform, c3, b3.transform, p)) {
-			cms.getManifold(p, c2, b2.transform, c3, b3.transform, m);
+		if (gjk.detect(c2, b2.getTransform(), c3, b3.getTransform(), p)) {
+			cms.getManifold(p, c2, b2.getTransform(), c3, b3.getTransform(), m);
 			cc = new ContactConstraint(b2, f2, b3, f3, m, world);
 			this.contactManager.add(cc);
 		}
 		
 		// b2 - b4 (1 contact)
 		p.clear(); m.clear();
-		if (gjk.detect(c2, b2.transform, c4, b4.transform, p)) {
-			cms.getManifold(p, c2, b2.transform, c4, b4.transform, m);
+		if (gjk.detect(c2, b2.getTransform(), c4, b4.getTransform(), p)) {
+			cms.getManifold(p, c2, b2.getTransform(), c4, b4.getTransform(), m);
 			cc = new ContactConstraint(b2, f2, b4, f4, m, world);
 			this.contactManager.add(cc);
 		}
 		
 		// b3 - b4 (1 contact)
 		p.clear(); m.clear();
-		if (gjk.detect(c3, b3.transform, c4, b4.transform, p)) {
-			cms.getManifold(p, c3, b3.transform, c4, b4.transform, m);
+		if (gjk.detect(c3, b3.getTransform(), c4, b4.getTransform(), p)) {
+			cms.getManifold(p, c3, b3.getTransform(), c4, b4.getTransform(), m);
 			cc = new ContactConstraint(b3, f3, b4, f4, m, world);
 			this.contactManager.add(cc);
 		}
@@ -295,7 +295,7 @@ public class ContactManagerTest {
 		cm.add(cc);
 		cm.updateContacts();
 		
-		cm.shiftCoordinates(new Vector2(2.0, -1.0));
+		cm.shift(new Vector2(2.0, -1.0));
 		
 		// make sure the point has been moved
 		TestCase.assertEquals(4.0, cc.getContacts().get(0).getPoint().x);
