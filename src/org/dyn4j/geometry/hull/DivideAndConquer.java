@@ -37,8 +37,6 @@ import org.dyn4j.resources.Messages;
  * the points of the convex hull.
  * <p>
  * This algorithm is O(n log n) where n is the number of points.
- * <p>
- * If the input point array has a size of 1 or 2 the input point array is returned.
  * @author William Bittle
  * @version 2.2.3
  * @since 2.2.0
@@ -104,13 +102,12 @@ public class DivideAndConquer implements HullGenerator {
 	@Override
 	public Vector2[] generate(Vector2... points) {
 		// check for a null array of points
-		if (points == null) throw new NullPointerException(Messages.getString("geometry.hull.nullArray"));
+		if (points == null) return null;
 		
 		// get the size
 		int size = points.length;
-		
 		// check the size
-		if (size == 1 || size == 2) return points;
+		if (size <= 2) return points;
 		
 		try {
 			// sort the points by the x coordinate

@@ -78,6 +78,8 @@ public interface BroadphaseDetector<E extends Collidable<T>, T extends Fixture> 
 	 * This will add all the collidable's {@link Fixture}s to the broadphase.
 	 * <p>
 	 * This method does not check if the collidable has already been added.
+	 * <p>
+	 * If the colliable has no fixtures, this method does nothing.
 	 * @param collidable the {@link Collidable}
 	 * @since 3.0.0
 	 */
@@ -127,7 +129,7 @@ public interface BroadphaseDetector<E extends Collidable<T>, T extends Fixture> 
 	 * <p>
 	 * This method updates all the {@link Fixture}s attached to the
 	 * given {@link Collidable} from the broadphase, if they exist.  If they
-	 * do not exist in the broadphase they will not be updated.
+	 * do not exist in the broadphase they will not be added or updated.
 	 * @param collidable the {@link Collidable}
 	 * @since 4.0.0
 	 */
@@ -149,6 +151,9 @@ public interface BroadphaseDetector<E extends Collidable<T>, T extends Fixture> 
 	 * The AABB returned is an AABB encompasing all fixtures on the
 	 * given {@link Collidable}.  When possible, AABBs from the
 	 * broadphase will be used to create this.
+	 * <p>
+	 * If the collidable doesn't have any fixtures a degenerate
+	 * AABB is returned.
 	 * @param collidable the {@link Collidable}
 	 * @return {@link AABB}
 	 * @since 4.0.0
@@ -170,6 +175,10 @@ public interface BroadphaseDetector<E extends Collidable<T>, T extends Fixture> 
 	/**
 	 * Returns true if all the {@link Fixture}s on the given {@link Collidable}
 	 * have been added to this broadphase.
+	 * <p>
+	 * If a collidable is added without any fixtures, this method will return
+	 * false, since the fixtures, and not the collidable are added to the
+	 * broadphase.
 	 * @param collidable the {@link Collidable}
 	 * @return boolean
 	 * @since 4.0.0

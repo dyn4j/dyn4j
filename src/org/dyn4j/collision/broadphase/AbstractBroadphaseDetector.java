@@ -111,7 +111,7 @@ public abstract class AbstractBroadphaseDetector<E extends Collidable<T>, T exte
 	@Override
 	public AABB getAABB(E collidable) {
 		int size = collidable.getFixtureCount();
-		if (size == 0) return null;
+		if (size == 0) return new AABB(0, 0, 0, 0);
 		AABB union = this.getAABB(collidable, collidable.getFixture(0));
 		for (int i = 1; i < size; i++) {
 			AABB aabb = this.getAABB(collidable, collidable.getFixture(i));

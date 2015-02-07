@@ -39,9 +39,13 @@ public interface HullGenerator {
 	 * <p>
 	 * The resulting point set may not have the correct winding.  Use the {@link Geometry#getWinding(Vector2...)}
 	 * and {@link Geometry#reverseWinding(Vector2...)} methods to get and set the winding direction.
+	 * <p>
+	 * Returns null if the given points array is null.
+	 * <p>
+	 * Returns the array unchanged if the length is less than or equal to 2.
 	 * @param points the point set
 	 * @return {@link Vector2}[] the convex hull vertices
-	 * @throws NullPointerException if points is null or contains null points
+	 * @throws NullPointerException if the points array contains null points
 	 */
 	public abstract Vector2[] generate(Vector2... points);
 }

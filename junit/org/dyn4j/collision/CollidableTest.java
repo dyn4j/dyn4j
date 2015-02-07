@@ -26,12 +26,8 @@ package org.dyn4j.collision;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
-import org.dyn4j.collision.Collidable;
-import org.dyn4j.collision.Fixture;
 import org.dyn4j.dynamics.BodyFixture;
-import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Transformable;
@@ -40,24 +36,15 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Test {@link Collidable} class for junit test cases.
  * @author William Bittle
- * @version 3.1.4
+ * @version 4.0.0
  * @since 1.0.0
  */
-public class CollidableTest implements Collidable, Transformable {
-	/** The unique identifier */
-	protected UUID id = UUID.randomUUID();
-	
-	/** The {@link BodyFixture}s list */
-	protected List<BodyFixture> fixtures;
-	
-	/** The {@link Transform} */
-	protected Transform transform;
-	
+public class CollidableTest extends AbstractCollidable<Fixture> implements Collidable<Fixture>, Transformable {
 	/**
 	 * Full constructor.
-	 * @param fixtures the {@link BodyFixture}s list
+	 * @param fixtures the {@link Fixture}s list
 	 */
-	public CollidableTest(List<BodyFixture> fixtures) {
+	public CollidableTest(List<Fixture> fixtures) {
 		this.fixtures = fixtures;
 		this.transform = new Transform();
 	}
@@ -69,116 +56,36 @@ public class CollidableTest implements Collidable, Transformable {
 	 * @param shape the shape to use
 	 */
 	public CollidableTest(Convex shape) {
-		this.fixtures = new ArrayList<BodyFixture>();
+		this.fixtures = new ArrayList<Fixture>();
 		this.fixtures.add(new BodyFixture(shape));
 		this.transform = new Transform();
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.Collidable#createAABB()
-	 */
+
 	@Override
-	public AABB createAABB() {
-		// get the number of fixtures
-		int size = this.fixtures.size();
-		// make sure there is at least one
-		if (size > 0) {
-			// create the aabb for the first fixture
-			AABB aabb = this.fixtures.get(0).getShape().createAABB(this.transform);
-			// loop over the remaining fixtures, unioning the aabbs
-			for (int i = 1; i < size; i++) {
-				// create the aabb for the current fixture
-				AABB faabb = this.fixtures.get(i).getShape().createAABB(this.transform);
-				// union the aabbs
-				aabb.union(faabb);
-			}
-			// return the aabb
-			return aabb;
-		}
-		return new AABB(0.0, 0.0, 0.0, 0.0);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.Collidable#getId()
-	 */
-	@Override
-	public UUID getId() {
-		return this.id;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.Collidable#getFixture(int)
-	 */
-	@Override
-	public Fixture getFixture(int index) {
-		int size = this.fixtures.size();
-		if (size > 0 && index < size) {
-			return this.fixtures.get(index);
-		}
-		throw new ArrayIndexOutOfBoundsException();
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.Collidable#getFixtureCount()
-	 */
-	@Override
-	public int getFixtureCount() {
-		return this.fixtures.size();
+	public CollidableTest addFixture(Fixture fixture) {
+		this.fixtures.add(fixture);
+		return this;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.Collidable#getFixtures()
-	 */
 	@Override
-	public List<BodyFixture> getFixtures() {
-		return this.fixtures;
+	public Fixture addFixture(Convex convex) {
+		Fixture bf = new Fixture(convex);
+		this.fixtures.add(bf);
+		return bf;
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.Collidable#getTransform()
-	 */
+
 	@Override
-	public Transform getTransform() {
-		return transform;
+	public Collidable<Fixture> update() {
+		throw new UnsupportedOperationException();
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Transformable#rotate(double)
-	 */
+
 	@Override
-	public void rotate(double theta) {
-		this.transform.rotate(theta);
+	public Vector2 getLocalCenter() {
+		throw new UnsupportedOperationException();
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Transformable#rotate(double, org.dyn4j.geometry.Vector)
-	 */
+
 	@Override
-	public void rotate(double theta, Vector2 point) {
-		this.transform.rotate(theta, point.x, point.y);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Transformable#rotate(double, double, double)
-	 */
-	@Override
-	public void rotate(double theta, double x, double y) {
-		this.transform.rotate(theta, x, y);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Transformable#translate(double, double)
-	 */
-	@Override
-	public void translate(double x, double y) {
-		this.transform.translate(x, y);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Transformable#translate(org.dyn4j.geometry.Vector)
-	 */
-	@Override
-	public void translate(Vector2 vector) {
-		this.transform.translate(vector);
+	public Vector2 getWorldCenter() {
+		throw new UnsupportedOperationException();
 	}
 }

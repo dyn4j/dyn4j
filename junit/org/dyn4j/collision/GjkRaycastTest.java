@@ -88,11 +88,11 @@ public class GjkRaycastTest {
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, r, t, raycast));
 		
 		// non-intersection case
-		ray.setDirection(new Vector2(1.0, 1.0));
+		ray.getDirectionVector().set(new Vector2(1.0, 1.0));
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, r, t, raycast));
 		
 		// start at center case (or any point within the convex shape)
-		ray.setStart(t.getTransformed(r.getCenter()));
+		ray.getStart().set(t.getTransformed(r.getCenter()));
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, r, t, raycast));
 	}
 	
@@ -134,11 +134,11 @@ public class GjkRaycastTest {
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 		
 		// non-intersection case
-		ray.setDirection(new Vector2(1.0, 2.0));
+		ray.getDirectionVector().set(new Vector2(1.0, 2.0));
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 		
 		// start at center case (or any point within the convex shape)
-		ray.setStart(t.getTransformed(c.getCenter()));
+		ray.getStart().set(t.getTransformed(c.getCenter()));
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 	}
 	
@@ -180,11 +180,11 @@ public class GjkRaycastTest {
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 		
 		// non-intersection case
-		ray.setDirection(new Vector2(1.0, 2.0));
+		ray.getDirectionVector().set(new Vector2(1.0, 2.0));
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 		
 		// start at center case (or any point within the convex shape)
-		ray.setStart(t.getTransformed(c.getCenter()));
+		ray.getStart().set(t.getTransformed(c.getCenter()));
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 	}
 	
@@ -226,11 +226,11 @@ public class GjkRaycastTest {
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 		
 		// non-intersection case
-		ray.setDirection(new Vector2(1.0, 2.0));
+		ray.getDirectionVector().set(new Vector2(1.0, 2.0));
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 		
 		// start at center case (or any point within the convex shape)
-		ray.setStart(t.getTransformed(c.getCenter()));
+		ray.getStart().set(t.getTransformed(c.getCenter()));
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 	}
 	
@@ -273,11 +273,11 @@ public class GjkRaycastTest {
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 		
 		// non-intersection case
-		ray.setDirection(new Vector2(1.0, 2.0));
+		ray.getDirectionVector().set(new Vector2(1.0, 2.0));
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 		
 		// start at center case (or any point within the convex shape)
-		ray.setStart(t.getTransformed(c.getCenter()));
+		ray.getStart().set(t.getTransformed(c.getCenter()));
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 	}
 	
@@ -318,11 +318,11 @@ public class GjkRaycastTest {
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 		
 		// non-intersection case
-		ray.setDirection(new Vector2(Math.toRadians(120)));
+		ray.getDirectionVector().set(new Vector2(Math.toRadians(120)));
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 		
 		// start at center case (or any point within the convex shape)
-		ray.setStart(t.getTransformed(c.getCenter()));
+		ray.getStart().set(t.getTransformed(c.getCenter()));
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 	}
 	
@@ -363,11 +363,11 @@ public class GjkRaycastTest {
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 		
 		// non-intersection case
-		ray.setDirection(new Vector2(Math.toRadians(-45)));
+		ray.getDirectionVector().set(new Vector2(Math.toRadians(-45)));
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 		
 		// start at center case (or any point within the convex shape)
-		ray.setStart(t.getTransformed(c.getCenter()));
+		ray.getStart().set(t.getTransformed(c.getCenter()));
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 	}
 	
@@ -408,11 +408,11 @@ public class GjkRaycastTest {
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 		
 		// non-intersection case
-		ray.setDirection(new Vector2(Math.toRadians(-115)));
+		ray.getDirectionVector().set(new Vector2(Math.toRadians(-115)));
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 		
 		// start at center case (or any point within the convex shape)
-		ray.setStart(t.getTransformed(c.getCenter()));
+		ray.getStart().set(t.getTransformed(c.getCenter()));
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 	}
 	
@@ -454,11 +454,11 @@ public class GjkRaycastTest {
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 		
 		// non-intersection case
-		ray.setDirection(new Vector2(1.0, 2.0));
+		ray.getDirectionVector().set(new Vector2(1.0, 2.0));
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 		
 		// start at center case (or any point within the convex shape)
-		ray.setStart(t.getTransformed(c.getCenter()));
+		ray.getStart().set(t.getTransformed(c.getCenter()));
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 	}
 	
@@ -499,11 +499,11 @@ public class GjkRaycastTest {
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 		
 		// non-intersection case
-		ray.setStart(new Vector2(0.0, 1.0));
+		ray.getStart().set(new Vector2(0.0, 1.0));
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 		
 		// start at center case (or any point within the convex shape)
-		ray.setStart(t.getTransformed(c.getCenter()));
+		ray.getStart().set(t.getTransformed(c.getCenter()));
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 	}
 }

@@ -225,15 +225,15 @@ public class SegmentEllipseTest extends AbstractTest {
 		TestCase.assertTrue(this.gjk.detect(s, t1, e, t2, p));
 		TestCase.assertTrue(this.gjk.detect(s, t1, e, t2));
 		n = p.getNormal();
-		TestCase.assertEquals( 0.554, n.x, 1.0e-3);
-		TestCase.assertEquals( 0.832, n.y, 1.0e-3);
+		TestCase.assertEquals(-0.554, n.x, 1.0e-3);
+		TestCase.assertEquals(-0.832, n.y, 1.0e-3);
 		TestCase.assertEquals( 0.346, p.getDepth(), 1.0e-3);
 		// try reversing the shapes
 		TestCase.assertTrue(this.gjk.detect(e, t2, s, t1, p));
 		TestCase.assertTrue(this.gjk.detect(e, t2, s, t1));
 		n = p.getNormal();
-		TestCase.assertEquals( 0.554, n.x, 1.0e-3);
-		TestCase.assertEquals( 0.832, n.y, 1.0e-3);
+		TestCase.assertEquals(-0.554, n.x, 1.0e-3);
+		TestCase.assertEquals(-0.832, n.y, 1.0e-3);
 		TestCase.assertEquals( 0.346, p.getDepth(), 1.0e-3);
 		
 		// test overlap

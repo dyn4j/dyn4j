@@ -58,7 +58,6 @@ public class CapacityTest {
 	 * Tests the failed creation of a capacity by passing a negative
 	 * body count.
 	 */
-	@Test(expected = IllegalArgumentException.class)
 	public void createFailureBodyCount() {
 		new Capacity(-3, 0, 0);
 	}
@@ -67,7 +66,6 @@ public class CapacityTest {
 	 * Tests the failed creation of a capacity by passing a negative
 	 * joint count.
 	 */
-	@Test(expected = IllegalArgumentException.class)
 	public void createFailureJointCount() {
 		new Capacity(0, -3, 0);
 	}
@@ -76,7 +74,6 @@ public class CapacityTest {
 	 * Tests the failed creation of a capacity by passing a negative
 	 * listener count.
 	 */
-	@Test(expected = IllegalArgumentException.class)
 	public void createFailureListenerCount() {
 		new Capacity(0, 0, -3);
 	}

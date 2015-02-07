@@ -29,7 +29,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Ray} class.
  * @author William Bittle
- * @version 3.0.2
+ * @version 4.0.0
  * @since 3.0.2
  */
 public class RayTest {
@@ -63,32 +63,5 @@ public class RayTest {
 	@Test
 	public void create() {
 		new Ray(new Vector2(), Math.toRadians(10));
-	}
-	
-	/**
-	 * Tests the set null start.
-	 */
-	@Test(expected = NullPointerException.class)
-	public void setNullStart() {
-		Ray ray = new Ray(new Vector2(), Math.toRadians(10));
-		ray.setStart(null);
-	}
-	
-	/**
-	 * Tests the set null direction.
-	 */
-	@Test(expected = NullPointerException.class)
-	public void setNullDirection() {
-		Ray ray = new Ray(new Vector2(), Math.toRadians(10));
-		ray.setDirection(null);
-	}
-	
-	/**
-	 * Tests the set zero direction.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setZeroDirection() {
-		Ray ray = new Ray(new Vector2(), Math.toRadians(10));
-		ray.setDirection(new Vector2());
 	}
 }

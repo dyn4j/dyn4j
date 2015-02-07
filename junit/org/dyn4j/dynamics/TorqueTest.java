@@ -106,7 +106,7 @@ public class TorqueTest {
 		World w = new World();
 		Body b = new Body();
 		b.addFixture(Geometry.createCircle(1.0));
-		b.setMass();
+		b.update();
 		
 		Torque t = new Torque() {
 			private double time = 0;

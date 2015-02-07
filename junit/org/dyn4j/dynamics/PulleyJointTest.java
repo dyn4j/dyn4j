@@ -141,7 +141,7 @@ public class PulleyJointTest {
 		PulleyJoint pj = new PulleyJoint(b1, b2, new Vector2(1.0, 0.0), new Vector2(-1.0, 1.0), new Vector2(), new Vector2());
 		
 		w.addJoint(pj);
-		w.shiftCoordinates(new Vector2(-1.0, 2.0));
+		w.shift(new Vector2(-1.0, 2.0));
 		
 		TestCase.assertEquals( 0.0, pj.getPulleyAnchor1().x, 1.0e-3);
 		TestCase.assertEquals( 2.0, pj.getPulleyAnchor1().y, 1.0e-3);

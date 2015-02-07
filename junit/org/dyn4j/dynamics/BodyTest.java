@@ -68,15 +68,15 @@ public class BodyTest {
 		Body b = new Body();
 		
 		// these field should be defaulted
-		TestCase.assertNotNull(b.id);
+		TestCase.assertNotNull(b.getId());
 		TestCase.assertNotNull(b.contacts);
-		TestCase.assertNotNull(b.fixtures);
+		TestCase.assertNotNull(b.getFixtures());
 		TestCase.assertNotNull(b.force);
 		TestCase.assertNotNull(b.forces);
 		TestCase.assertNotNull(b.joints);
 		TestCase.assertNotNull(b.mass);
 		TestCase.assertNotNull(b.torques);
-		TestCase.assertNotNull(b.transform);
+		TestCase.assertNotNull(b.getTransform());
 		TestCase.assertNotNull(b.transform0);
 		TestCase.assertNotNull(b.velocity);
 		TestCase.assertNull(b.world);
@@ -110,14 +110,14 @@ public class BodyTest {
 		
 		// test removing the fixture
 		boolean success = b.removeFixture(f);
-		TestCase.assertEquals(0, b.fixtures.size());
+		TestCase.assertEquals(0, b.getFixtures().size());
 		TestCase.assertTrue(success);
 		
 		b.addFixture(f);
 		BodyFixture f2 = b.addFixture(Geometry.createSquare(0.5));
 		success = b.removeFixture(f);
-		TestCase.assertEquals(1, b.fixtures.size());
-		TestCase.assertTrue(f2 == b.fixtures.get(0));
+		TestCase.assertEquals(1, b.getFixtures().size());
+		TestCase.assertTrue(f2 == b.getFixtures().get(0));
 		TestCase.assertTrue(success);
 		
 		// test removing by index
@@ -125,7 +125,7 @@ public class BodyTest {
 		b.addFixture(Geometry.createRectangle(1.0, 2.0));
 		f2 = b.removeFixture(1);
 		
-		TestCase.assertEquals(2, b.fixtures.size());
+		TestCase.assertEquals(2, b.getFixtures().size());
 		TestCase.assertTrue(f2 == f);
 	}
 	
@@ -200,7 +200,7 @@ public class BodyTest {
 		// test not in body
 		bf = b.removeFixture(new Vector2(-1.0, -1.0));
 		TestCase.assertNull(bf);
-		TestCase.assertEquals(2, b.fixtures.size());
+		TestCase.assertEquals(2, b.getFixtures().size());
 		
 		// confirm there are two fixtures at this location
 		TestCase.assertEquals(2, b.getFixtures(new Vector2(0.5, 0.25)).size());
@@ -208,7 +208,7 @@ public class BodyTest {
 		bf = b.removeFixture(new Vector2(0.5, 0.25));
 		TestCase.assertNotNull(bf);
 		TestCase.assertTrue(bf.getShape() instanceof Circle);
-		TestCase.assertEquals(1, b.fixtures.size());
+		TestCase.assertEquals(1, b.getFixtures().size());
 		
 		// add the fixture back
 		bf = b.addFixture(Geometry.createCircle(1.0));
@@ -217,14 +217,14 @@ public class BodyTest {
 		List<BodyFixture> bfs = b.removeFixtures(new Vector2(-1.0, -1.0));
 		TestCase.assertNotNull(bfs);
 		TestCase.assertEquals(0, bfs.size());
-		TestCase.assertEquals(2, b.fixtures.size());
+		TestCase.assertEquals(2, b.getFixtures().size());
 		
 		// test in body remove one
 		bfs = b.removeFixtures(new Vector2(1.25, 0.10));
 		TestCase.assertNotNull(bfs);
 		TestCase.assertEquals(1, bfs.size());
 		TestCase.assertTrue(bfs.get(0).getShape() instanceof Polygon);
-		TestCase.assertEquals(1, b.fixtures.size());
+		TestCase.assertEquals(1, b.getFixtures().size());
 		
 		// add the fixture back
 		bf = b.addFixture(Geometry.createUnitCirclePolygon(5, 1.0));
@@ -234,7 +234,7 @@ public class BodyTest {
 		bfs = b.removeFixtures(new Vector2(0.75, 0.10));
 		TestCase.assertNotNull(bfs);
 		TestCase.assertEquals(2, bfs.size());
-		TestCase.assertEquals(0, b.fixtures.size());
+		TestCase.assertEquals(0, b.getFixtures().size());
 	}
 	
 	/**
@@ -325,7 +325,7 @@ public class BodyTest {
 		Body b = new Body();
 		
 		// test setting the mass with no fixtures
-		b.setMass();
+		b.update();
 		TestCase.assertNotNull(b.mass);
 		// make sure its not infinite (the mass and inertia will still be zero however)
 		TestCase.assertTrue(!b.mass.isInfinite());
@@ -338,7 +338,7 @@ public class BodyTest {
 		// test setting with one fixture
 		// it should not be infinite
 		BodyFixture f1 = b.addFixture(Geometry.createUnitCirclePolygon(5, 0.5));
-		b.setMass();
+		b.update();
 		TestCase.assertNotNull(b.mass);
 		TestCase.assertFalse(b.mass.isInfinite());
 		
@@ -346,7 +346,7 @@ public class BodyTest {
 		// it should not be infinite and should not be
 		// equal to either shapes mass
 		BodyFixture f2 = b.addFixture(Geometry.createIsoscelesTriangle(1.0, 1.0));
-		b.setMass();
+		b.update();
 		TestCase.assertNotNull(b.mass);
 		TestCase.assertFalse(b.mass.isInfinite());
 		Mass m1 = f1.createMass();
@@ -357,25 +357,25 @@ public class BodyTest {
 		// test setting the mass with a flag
 		// make sure the type of mass is correct but the
 		// values of the mass and 
-		b.setMass(Mass.Type.INFINITE);
+		b.update(Mass.Type.INFINITE);
 		TestCase.assertNotNull(b.mass);
 		TestCase.assertTrue(b.mass.isInfinite());
 		TestCase.assertEquals(0.0, b.mass.getMass());
 		TestCase.assertEquals(0.0, b.mass.getInverseMass());
 		TestCase.assertEquals(0.0, b.mass.getInertia());
 		TestCase.assertEquals(0.0, b.mass.getInverseInertia());
-		b.setMass(Mass.Type.FIXED_ANGULAR_VELOCITY);
+		b.update(Mass.Type.FIXED_ANGULAR_VELOCITY);
 		TestCase.assertNotNull(b.mass);
 		TestCase.assertEquals(0.0, b.mass.getInertia());
 		TestCase.assertEquals(0.0, b.mass.getInverseInertia());
-		b.setMass(Mass.Type.FIXED_LINEAR_VELOCITY);
+		b.update(Mass.Type.FIXED_LINEAR_VELOCITY);
 		TestCase.assertNotNull(b.mass);
 		TestCase.assertEquals(0.0, b.mass.getMass());
 		TestCase.assertEquals(0.0, b.mass.getInverseMass());
 		
 		// test setting the mass directly
 		Mass mass = new Mass(f2.getShape().getCenter(), 2.3, 20.3);
-		b.setMass(mass);
+		b.update(mass);
 		TestCase.assertSame(mass, b.mass);
 		
 		// test only setting the type
@@ -419,7 +419,7 @@ public class BodyTest {
 	@Test(expected = NullPointerException.class)
 	public void setNullMass() {
 		Body b = new Body();
-		b.setMass((Mass)null);
+		b.update((Mass)null);
 	}
 
 	/**
@@ -429,7 +429,7 @@ public class BodyTest {
 	@Test(expected = NullPointerException.class)
 	public void setNullMassType2() {
 		Body b = new Body();
-		b.setMass((Mass.Type)null);
+		b.update((Mass.Type)null);
 	}
 	
 	/**
@@ -439,7 +439,7 @@ public class BodyTest {
 	public void apply() {
 		Body b = new Body();
 		b.addFixture(Geometry.createCircle(1.0));
-		b.setMass();
+		b.update();
 		
 		// all the methods should add forces/torques to
 		// an accumulator, wake up the body, and not
@@ -561,7 +561,7 @@ public class BodyTest {
 	public void accumulate() {
 		Body b = new Body();
 		b.addFixture(Geometry.createCircle(1.0));
-		b.setMass();
+		b.update();
 		
 		b.applyForce(new Vector2(0.0, -2.0), new Vector2(1.0, -0.3));
 		// just use the default elapsed time
@@ -581,7 +581,7 @@ public class BodyTest {
 	public void isDynamic() {
 		Body b = new Body();
 		b.addFixture(Geometry.createIsoscelesTriangle(2.0, 1.0));
-		b.setMass();
+		b.update();
 		
 		TestCase.assertTrue(b.isDynamic());
 		TestCase.assertFalse(b.isKinematic());
@@ -880,11 +880,11 @@ public class BodyTest {
 		Sat sat = new Sat();
 		Penetration p = new Penetration();
 		// detect the collision
-		sat.detect(c1, b1.transform, c2, b2.transform, p);
+		sat.detect(c1, b1.getTransform(), c2, b2.getTransform(), p);
 		// create a manifold
 		ClippingManifoldSolver cms = new ClippingManifoldSolver();
 		Manifold m = new Manifold();
-		cms.getManifold(p, c1, b1.transform, c2, b2.transform, m);
+		cms.getManifold(p, c1, b1.getTransform(), c2, b2.getTransform(), m);
 		ContactConstraint cc = new ContactConstraint(b1, f1, b2, f2, m, world);
 		ContactEdge ce1 = new ContactEdge(b2, cc);
 		ContactEdge ce2 = new ContactEdge(b1, cc);
@@ -941,11 +941,11 @@ public class BodyTest {
 		Sat sat = new Sat();
 		Penetration p = new Penetration();
 		// detect the collision
-		sat.detect(c1, b1.transform, c2, b2.transform, p);
+		sat.detect(c1, b1.getTransform(), c2, b2.getTransform(), p);
 		// create a manifold
 		ClippingManifoldSolver cms = new ClippingManifoldSolver();
 		Manifold m = new Manifold();
-		cms.getManifold(p, c1, b1.transform, c2, b2.transform, m);
+		cms.getManifold(p, c1, b1.getTransform(), c2, b2.getTransform(), m);
 		ContactConstraint cc = new ContactConstraint(b1, f1, b2, f2, m, world);
 		ContactEdge ce1 = new ContactEdge(b2, cc);
 		ContactEdge ce2 = new ContactEdge(b1, cc);
@@ -988,7 +988,7 @@ public class BodyTest {
 		b.addFixture(Geometry.createSquare(1.0));
 		f = b.addFixture(Geometry.createUnitCirclePolygon(5, 1.0));
 		f.getShape().translate(1.0, -3.0);
-		b.setMass();
+		b.update();
 		
 		double rdr = b.getRotationDiscRadius();
 		
@@ -1021,7 +1021,7 @@ public class BodyTest {
 		b.addFixture(four2);
 		
 		// setup the body
-		b.setMass();
+		b.update();
 		
 		// make sure the center of mass is not at the origin
 		Vector2 p = b.getWorldCenter();
@@ -1049,7 +1049,7 @@ public class BodyTest {
 		b.addFixture(Geometry.createEquilateralTriangle(2.0));
 		BodyFixture bf = b.addFixture(Geometry.createUnitCirclePolygon(5, 1.0));
 		bf.getShape().translate(-1.0, 1.0);
-		b.setMass();
+		b.update();
 		b.translateToOrigin();
 		
 		Vector2 p = new Vector2(-2.0, 1.0);
@@ -1101,7 +1101,7 @@ public class BodyTest {
 	public void getAccumulatedForce() {
 		Body b = new Body();
 		b.addFixture(Geometry.createCircle(1.0));
-		b.setMass();
+		b.update();
 		
 		// no force applied yet
 		Vector2 f = b.getAccumulatedForce();
@@ -1167,7 +1167,7 @@ public class BodyTest {
 	@Test
 	public void shiftCoordinates() {
 		Body b = new Body();
-		b.shiftCoordinates(new Vector2(-2.0, 1.0));
+		b.shift(new Vector2(-2.0, 1.0));
 		// it just translates the transform
 		Vector2 tx = b.getTransform().getTranslation();
 		TestCase.assertEquals(-2.0, tx.x, 1.0e-3);
@@ -1212,13 +1212,13 @@ public class BodyTest {
 		Body b2 = new Body();
 		
 		b1.addFixture(Geometry.createRectangle(15.0, 1.0));
-		b1.setMass();
+		b1.update();
 		
 		b2.addFixture(Geometry.createSquare(1.0));
 		Convex c = Geometry.createSquare(1.0);
 		c.translate(-0.5, 0.0);
 		b2.addFixture(c);
-		b2.setMass();
+		b2.update();
 		b2.translate(0.0, 0.75);
 		
 		w.addBody(b1);
@@ -1264,7 +1264,7 @@ public class BodyTest {
 	public void applyImpulse() {
 		Body b = new Body();
 		b.addFixture(Geometry.createRectangle(1.0, 1.0));
-		b.setMass();
+		b.update();
 		
 		double m = b.getMass().getMass();
 		double i = b.getMass().getInertia();
@@ -1377,7 +1377,7 @@ public class BodyTest {
 		b.addFixture(Geometry.createCircle(0.5));
 		b.rotate(Math.toRadians(30));
 		b.setAngularVelocity(Math.toRadians(1));
-		b.setMass();
+		b.update();
 		
 		b.getInitialTransform().set(b.getTransform());
 		

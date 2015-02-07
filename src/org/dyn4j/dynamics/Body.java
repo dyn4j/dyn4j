@@ -59,7 +59,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * Use the {@link #update()} or {@link #update(org.dyn4j.geometry.Mass.Type)}
  * methods to set the mass of the entire {@link Body} given the currently attached
- * {@link BodyFixture}s.  The {@link #setMass(Mass)} method can be used to set
+ * {@link BodyFixture}s.  The {@link #update(Mass)} method can be used to set
  * the mass directly.  Use the {@link #setMassType(org.dyn4j.geometry.Mass.Type)}
  * method to toggle the mass type between the special types.
  * <p>
@@ -420,7 +420,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 */
 	public Body update(Mass.Type type) {
 		// check for null
-		if (type == null) return this;
+		if (type == null) throw new NullPointerException(Messages.getString("dynamics.body.nullMassType"));
 		// get the size
 		int size = this.fixtures.size();
 		// check the size
@@ -458,15 +458,30 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * @param mass the new {@link Mass}
 	 * @return {@link Body} this body
 	 */
+	public Body update(Mass mass) {
+		// make sure the mass is not null
+		if (mass == null) throw new NullPointerException(Messages.getString("dynamics.body.nullMass"));
+		// set the mass
+		this.mass = mass;
+		// compute the rotation disc radius
+		this.setRotationDiscRadius();
+		// return this body to facilitate chaining
+		return this;
+	}
+
+	/**
+	 * Sets this {@link Body}'s mass information.
+	 * <p>
+	 * This method can be used to set the mass of the body explicitly. Immediately
+	 * returns if the mass is null.
+	 * @param mass the new {@link Mass}
+	 * @return {@link Body} this body
+	 */
 	public Body setMass(Mass mass) {
 		// make sure the mass is not null
-		if (mass != null) {
-			// set the mass
-			this.mass = mass;
-			// compute the rotation disc radius
-			this.setRotationDiscRadius();
-			// return this body to facilitate chaining
-		}
+		if (mass == null) throw new NullPointerException(Messages.getString("dynamics.body.nullMass"));
+		// set the mass
+		this.mass = mass;
 		return this;
 	}
 	
@@ -489,7 +504,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 */
 	public Body setMassType(Mass.Type type) {
 		// check for null type
-		if (type == null) return this;
+		if (type == null) throw new NullPointerException(Messages.getString("dynamics.body.nullMassType"));
 		// make sure the current mass is not null
 		if (this.mass == null) {
 			// if its null then just compute it for the first time

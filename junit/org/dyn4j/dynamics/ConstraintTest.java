@@ -26,6 +26,7 @@ package org.dyn4j.dynamics;
 
 import junit.framework.TestCase;
 
+import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
 
@@ -42,7 +43,7 @@ public class ConstraintTest {
 	 * @version 3.1.1
 	 * @since 3.1.1
 	 */
-	private class TestConstraint extends Constraint {
+	private class TestConstraint extends Constraint implements Shiftable {
 		/**
 		 * Full constructor.
 		 * @param b1 the first body
@@ -52,7 +53,7 @@ public class ConstraintTest {
 			super(b1, b2);
 		}
 		@Override
-		protected void shiftCoordinates(Vector2 shift) {}
+		public void shift(Vector2 shift) {}
 	}
 	
 	/**
