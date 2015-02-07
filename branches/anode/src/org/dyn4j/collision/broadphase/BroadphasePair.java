@@ -101,10 +101,10 @@ public class BroadphasePair<E extends Collidable<T>, T extends Fixture> {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("BroadphasePair[Collidable1=").append(this.collidable1)
-		.append("|Fixture1=").append(this.fixture1)
-		.append("|Collidable2=").append(this.collidable2)
-		.append("|Fixture2=").append(this.fixture2)
+		sb.append("BroadphasePair[Collidable1=").append(this.collidable1.getId())
+		.append("|Fixture1=").append(this.fixture1.getId())
+		.append("|Collidable2=").append(this.collidable2.getId())
+		.append("|Fixture2=").append(this.fixture2.getId())
 		.append("]");
 		return sb.toString();
 	}

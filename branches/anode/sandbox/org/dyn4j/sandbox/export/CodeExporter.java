@@ -146,7 +146,7 @@ public class CodeExporter {
 //		ManifoldSolver msr = world.getManifoldSolver();
 //		TimeOfImpactDetector tid = world.getTimeOfImpactDetector();
 		if (bpd instanceof Sap) {
-			sb.append(TAB2).append("world.setBroadphaseDetector(new SapTree<Body>());").append(NEW_LINE);
+			sb.append(TAB2).append("world.setBroadphaseDetector(new Sap<Body, BodyFixture>());").append(NEW_LINE);
 		} else if (bpd instanceof DynamicAABBTree) {
 			// don't output anything since its the default
 		} else {

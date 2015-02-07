@@ -31,7 +31,7 @@ import org.dyn4j.collision.continuous.TimeOfImpact;
  * <p>
  * Note: this class has a natural ordering that is inconsistent with equals.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.0.0
  * @since 3.1.5
  */
 public class ConvexCastResult implements Comparable<ConvexCastResult> {
@@ -44,12 +44,40 @@ public class ConvexCastResult implements Comparable<ConvexCastResult> {
 	/** The time of impact information */
 	protected TimeOfImpact timeOfImpact;
 	
+	/** 
+	 * Full constructor.
+	 * @param body the body
+	 * @param fixture the fixture
+	 * @param timeOfImpact the time of impact
+	 */
+	public ConvexCastResult(Body body, BodyFixture fixture, TimeOfImpact timeOfImpact) {
+		this.body = body;
+		this.fixture = fixture;
+		this.timeOfImpact = timeOfImpact;
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
 	@Override
 	public int compareTo(ConvexCastResult o) {
 		return (int)Math.signum(this.timeOfImpact.getTime() - o.timeOfImpact.getTime());
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (obj == this) return true;
+		if (obj instanceof ConvexCastResult) {
+			ConvexCastResult result = (ConvexCastResult)obj;
+			return (result.body == this.body &&
+					result.fixture == this.fixture &&
+					result.timeOfImpact == this.timeOfImpact);
+		}
+		return false;
 	}
 	
 	/* (non-Javadoc)
@@ -74,14 +102,6 @@ public class ConvexCastResult implements Comparable<ConvexCastResult> {
 	}
 	
 	/**
-	 * Sets the body.
-	 * @param body the body
-	 */
-	public void setBody(Body body) {
-		this.body = body;
-	}
-	
-	/**
 	 * Returns the fixture on the body with the smallest
 	 * time of impact.
 	 * @return {@link BodyFixture}
@@ -91,27 +111,10 @@ public class ConvexCastResult implements Comparable<ConvexCastResult> {
 	}
 	
 	/**
-	 * Sets the fixture on the body with the smallest
-	 * time of impact.
-	 * @param fixture the fixture
-	 */
-	public void setFixture(BodyFixture fixture) {
-		this.fixture = fixture;
-	}
-	
-	/**
 	 * Returns the time of impact information.
 	 * @return {@link TimeOfImpact}
 	 */
 	public TimeOfImpact getTimeOfImpact() {
 		return this.timeOfImpact;
-	}
-	
-	/**
-	 * Sets the time of impact information.
-	 * @param timeOfImpact the time of impact information
-	 */
-	public void setTimeOfImpact(TimeOfImpact timeOfImpact) {
-		this.timeOfImpact = timeOfImpact;
 	}
 }

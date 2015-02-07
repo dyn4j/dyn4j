@@ -33,10 +33,15 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Class devoted to improving performance of {@link Segment} detection queries.
  * @author William Bittle
- * @version 3.0.2
+ * @version 4.0.0
  * @since 2.0.0
  */
-public class SegmentDetector {
+public final class SegmentDetector {
+	/**
+	 * Hidden constructor.
+	 */
+	private SegmentDetector() {}
+	
 	/**
 	 * Performs a ray cast against the given segment.
 	 * @param ray the {@link Ray}

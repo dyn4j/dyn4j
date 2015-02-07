@@ -30,10 +30,10 @@ package org.dyn4j;
  * Dyn4j by default uses meters-kilograms-seconds (MKS) units.  This class can be used
  * to convert to and from MKS.
  * @author William Bittle
- * @version 1.0.3
+ * @version 4.0.0
  * @since 1.0.0
  */
-public class UnitConversion {
+public final class UnitConversion {
 	/** 1 foot = {@value #FOOT_TO_METER} meters */
 	public static final double FOOT_TO_METER = 0.0254 * 12.0;
 	
@@ -63,6 +63,11 @@ public class UnitConversion {
 	
 	/** 1 newton-meter = {@value #NEWTON_METER_TO_FOOT_POUND} foot-pounds */
 	public static final double NEWTON_METER_TO_FOOT_POUND = 1.0 / FOOT_POUND_TO_NEWTON_METER;
+	
+	/**
+	 * Hidden constructor.
+	 */
+	private UnitConversion() {}
 	
 	// FPS (mixture of Gravitational and Engineering approaches) to MKS
 	

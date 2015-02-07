@@ -618,8 +618,7 @@ public class XmlReader extends DefaultHandler {
 			this.camera.setScale(Double.parseDouble(s));
 		} else if ("BroadphaseDetector".equalsIgnoreCase(this.tagName)) {
 			if (s.equalsIgnoreCase(Sap.class.getSimpleName())) {
-				// TODO fix this
-				//this.broadphase = new Sap<Body>();
+				this.broadphase = new Sap<Body, BodyFixture>();
 			} else if (s.equalsIgnoreCase(DynamicAABBTree.class.getSimpleName())) { 
 				this.broadphase = new DynamicAABBTree<Body, BodyFixture>();
 			} else {

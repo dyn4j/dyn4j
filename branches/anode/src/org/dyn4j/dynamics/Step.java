@@ -28,7 +28,7 @@ package org.dyn4j.dynamics;
  * Contains the current and previous time step information
  * used to update the {@link World}.
  * @author William Bittle
- * @version 3.1.1
+ * @version 4.0.0
  * @since 1.0.0
  */
 public class Step {
@@ -59,6 +59,26 @@ public class Step {
 		this.dt0 = this.dt;
 		this.invdt0 = this.invdt;
 		this.dtRatio = 1.0;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (obj == this) return true;
+		if (obj instanceof Step) {
+			Step step = (Step)obj;
+			if (step.dt == this.dt &&
+				step.dt0 == this.dt0 &&
+				step.dtRatio == this.dtRatio &&
+				step.invdt == this.invdt &&
+				step.invdt0 == this.invdt0) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/* (non-Javadoc)

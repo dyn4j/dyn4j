@@ -33,7 +33,7 @@ import org.dyn4j.collision.narrowphase.Raycast;
  * <p>
  * Note: this class has a natural ordering that is inconsistent with equals.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.0.0
  * @since 2.0.0
  */
 public class RaycastResult implements Comparable<RaycastResult> {
@@ -46,12 +46,42 @@ public class RaycastResult implements Comparable<RaycastResult> {
 	/** The {@link Raycast} result information */
 	protected Raycast raycast;
 	
+	/**
+	 * Full constructor.
+	 * @param body the body
+	 * @param fixture the fixture
+	 * @param raycast the raycast
+	 */
+	public RaycastResult(Body body, BodyFixture fixture, Raycast raycast) {
+		this.body = body;
+		this.fixture = fixture;
+		this.raycast = raycast;
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
 	@Override
 	public int compareTo(RaycastResult o) {
 		return (int)Math.signum(this.raycast.getDistance() - o.raycast.getDistance());
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (obj == this) return true;
+		if (obj instanceof RaycastResult) {
+			RaycastResult result = (RaycastResult)obj;
+			if (result.body == this.body &&
+				result.fixture == this.fixture &&
+				result.raycast == this.raycast) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/* (non-Javadoc)
@@ -76,42 +106,18 @@ public class RaycastResult implements Comparable<RaycastResult> {
 	}
 	
 	/**
-	 * Sets the detected {@link Body}.
-	 * @param body the body detected
-	 */
-	public void setBody(Body body) {
-		this.body = body;
-	}
-	
-	/**
 	 * Returns the {@link BodyFixture} of the {@link Body} detected.
 	 * @return {@link BodyFixture}
 	 */
 	public BodyFixture getFixture() {
 		return this.fixture;
 	}
-	
-	/**
-	 * Sets the {@link BodyFixture} of the {@link Body} detected.
-	 * @param fixture the fixture of the body detected
-	 */
-	public void setFixture(BodyFixture fixture) {
-		this.fixture = fixture;
-	}
-	
+
 	/**
 	 * Returns the {@link Raycast} result information.
 	 * @return {@link Raycast}
 	 */
 	public Raycast getRaycast() {
 		return this.raycast;
-	}
-	
-	/**
-	 * Sets the {@link Raycast} result information.
-	 * @param raycast the raycast result information
-	 */
-	public void setRaycast(Raycast raycast) {
-		this.raycast = raycast;
 	}
 }

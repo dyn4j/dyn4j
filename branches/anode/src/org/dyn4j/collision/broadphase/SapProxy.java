@@ -26,32 +26,74 @@ package org.dyn4j.collision.broadphase;
 
 import org.dyn4j.collision.Collidable;
 import org.dyn4j.collision.Fixture;
+import org.dyn4j.geometry.AABB;
 
 /**
- * Represents an individual broadphase item.
+ * Represents a sortable proxy for a collidable fixture in the broad phase.
+ * <p>
+ * Note: This class has a natural ordering that is inconsistent with equals.
  * @author William Bittle
- * @version 4.0.0
  * @since 4.0.0
+ * @version 4.0.0
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
  */
-public class BroadphaseItem<E extends Collidable<T>, T extends Fixture> {
-	/** The {@link Collidable} */
-	public final E collidable;
+public class SapProxy<E extends Collidable<T>, T extends Fixture> implements Comparable<SapProxy<E, T>> {
+	/** The collidable */
+	protected final E collidable;
 	
-	/** The {@link Fixture} */
-	public final T fixture;
+	/** The fixture */
+	protected final T fixture;
+	
+	/** The collidable's aabb */
+	protected AABB aabb;
+	
+	/** Whether the proxy has been tested or not */
+	protected boolean tested;
 	
 	/**
-	 * Minimal constructor.
+	 * Full constructor.
 	 * @param collidable the collidable
 	 * @param fixture the fixture
+	 * @param aabb the aabb
 	 */
-	public BroadphaseItem(E collidable, T fixture) {
+	public SapProxy(E collidable, T fixture, AABB aabb) {
 		this.collidable = collidable;
 		this.fixture = fixture;
+		this.aabb = aabb;
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
+	public int compareTo(SapProxy<E, T> o) {
+		// check if the objects are the same instance
+		if (this == o) return 0;
+		// compute the difference in the minimum x values of the aabbs
+		double diff = this.aabb.getMinX() - o.aabb.getMinX();
+		if (diff != 0) {
+			return (int)Math.signum(diff);
+		} else {
+			// if the x values are the same then compare on the y values
+			diff = this.aabb.getMinY() - o.aabb.getMinY();
+			if (diff != 0) {
+				return (int)Math.signum(diff);
+			} else {
+				if (this.isSearch()) {
+					return -1;
+				} else if (o.isSearch()) {
+					return 1;
+				}
+				// finally if their y values are the same then compare on the ids
+				diff = this.collidable.getId().compareTo(o.collidable.getId());
+				if (diff == 0) {
+					return this.fixture.getId().compareTo(o.fixture.getId());
+				}
+				return (int)Math.signum(diff);
+			}
+		}
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
@@ -59,8 +101,8 @@ public class BroadphaseItem<E extends Collidable<T>, T extends Fixture> {
 	public boolean equals(Object obj) {
 		if (obj == null) return false;
 		if (obj == this) return true;
-		if (obj instanceof BroadphaseItem) {
-			BroadphaseItem<?, ?> pair = (BroadphaseItem<?, ?>)obj;
+		if (obj instanceof SapProxy) {
+			SapProxy<?, ?> pair = (SapProxy<?, ?>)obj;
 			if (pair.collidable == this.collidable &&
 				pair.fixture == this.fixture) {
 				return true;
@@ -75,8 +117,8 @@ public class BroadphaseItem<E extends Collidable<T>, T extends Fixture> {
 	@Override
 	public int hashCode() {
 		int hash = 17;
-		hash = hash * 31 + this.collidable.getId().hashCode();
-		hash = hash * 31 + this.fixture.getId().hashCode();
+		hash = hash * 31 + this.collidable.hashCode();
+		hash = hash * 31 + this.fixture.hashCode();
 		return hash;
 	}
 	
@@ -86,9 +128,24 @@ public class BroadphaseItem<E extends Collidable<T>, T extends Fixture> {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("BroadphaseItem[Collidable=").append(this.collidable.getId())
-		.append("|Fixture=").append(this.fixture.getId())
-		.append("]");
+		sb.append("SapProxy[Collidable=").append(this.collidable.getId())
+		  .append("|Fixture=").append(this.fixture.getId())
+		  .append("|AABB=").append(this.aabb.toString())
+		  .append("|Tested=").append(this.tested)
+		  .append("]");
 		return sb.toString();
+	}
+	
+	/**
+	 * Returns true if the given proxy is a search
+	 * proxy.
+	 * <p>
+	 * These should not be stored in the broad phase, but
+	 * instead used to do searching.
+	 * @return boolean
+	 */
+	protected boolean isSearch() {
+		return (this.collidable == null ||
+				this.fixture == null);
 	}
 }

@@ -26,7 +26,7 @@ package org.dyn4j.collision;
 
 import java.util.List;
 
-import org.dyn4j.collision.broadphase.AbstractAABBDetector;
+import org.dyn4j.collision.broadphase.AbstractBroadphaseDetector;
 import org.dyn4j.collision.broadphase.BroadphasePair;
 import org.dyn4j.collision.broadphase.DynamicAABBTree;
 import org.dyn4j.collision.broadphase.SapBruteForce;
@@ -47,7 +47,7 @@ import org.dyn4j.geometry.Vector2;
  */
 public abstract class AbstractTest {
 	/** Abstract AABB detector */
-	protected AbstractAABBDetector<CollidableTest> aabb = new AbstractAABBDetector<CollidableTest>() {
+	protected AbstractBroadphaseDetector<CollidableTest> aabb = new AbstractBroadphaseDetector<CollidableTest>() {
 		@Override
 		public void add(CollidableTest collidable) {}
 		@Override

@@ -50,10 +50,7 @@ import org.dyn4j.geometry.Vector2;
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
  */
-public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends AbstractAABBDetector<E, T> implements BroadphaseDetector<E, T> {
-	/** The default broadphase filter object */
-	protected final BroadphaseFilter<E, T> defaultFilter = new DefaultBroadphaseFilter<E, T>();
-	
+public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends AbstractBroadphaseDetector<E, T> implements BroadphaseDetector<E, T> {
 	/** The root node of the tree */
 	protected DynamicAABBTreeNode root;
 	
@@ -64,7 +61,7 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 	 * Default constructor.
 	 */
 	public DynamicAABBTree() {
-		this(64);
+		this(BroadphaseDetector.DEFAULT_INITIAL_CAPACITY);
 	}
 	
 	/**
@@ -80,19 +77,6 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 		// if we take capacity / load factor
 		// the default load factor is 0.75 according to the javadocs, but lets assign it to be sure
 		this.map = new LinkedHashMap<BroadphaseKey, DynamicAABBTreeLeaf<E, T>>(initialCapacity * 4 / 3 + 1, 0.75f);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#add(org.dyn4j.collision.Collidable)
-	 */
-	@Override
-	public void add(E collidable) {
-		int size = collidable.getFixtureCount();
-		// iterate over the new list
-		for (int i = 0; i < size; i++) {
-			T fixture = collidable.getFixture(i);
-			this.add(collidable, fixture);
-		}
 	}
 	
 	/* (non-Javadoc)
@@ -115,19 +99,6 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#remove(org.dyn4j.collision.Collidable)
-	 */
-	@Override
-	public void remove(E collidable) {
-		int size = collidable.getFixtureCount();
-		if (size == 0) return;
-		for (int i = 0; i < size; i++) {
-			T fixture = collidable.getFixture(i);
-			this.remove(collidable, fixture);
-		}
-	}
-	
-	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#remove(org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
 	 */
 	@Override
@@ -142,19 +113,6 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 			return true;
 		}
 		return false;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#update(org.dyn4j.collision.Collidable)
-	 */
-	@Override
-	public void update(E collidable) {
-		int size = collidable.getFixtureCount();
-		// iterate over the new list
-		for (int i = 0; i < size; i++) {
-			T fixture = collidable.getFixture(i);
-			this.update(collidable, fixture);
-		}
 	}
 	
 	/* (non-Javadoc)
@@ -241,14 +199,6 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect()
-	 */
-	@Override
-	public List<BroadphasePair<E, T>> detect() {
-		return this.detect(this.defaultFilter);
-	}
-	
-	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.collision.broadphase.BroadphaseFilter)
 	 */
 	@Override
@@ -281,24 +231,8 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.geometry.AABB)
 	 */
 	@Override
-	public List<BroadphaseItem<E, T>> detect(AABB aabb) {
-		return this.detect(aabb, this.defaultFilter);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.geometry.AABB)
-	 */
-	@Override
 	public List<BroadphaseItem<E, T>> detect(AABB aabb, BroadphaseFilter<E, T> filter) {
 		return this.detectNonRecursive(aabb, this.root, filter);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#raycast(org.dyn4j.geometry.Ray, double)
-	 */
-	@Override
-	public List<BroadphaseItem<E, T>> raycast(Ray ray, double length) {
-		return this.raycast(ray, length, this.defaultFilter);
 	}
 	
 	/* (non-Javadoc)

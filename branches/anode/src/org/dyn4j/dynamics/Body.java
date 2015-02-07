@@ -130,10 +130,10 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	protected double torque;
 	
 	/** The force accumulator */
-	protected List<Force> forces;
+	protected final List<Force> forces;
 	
 	/** The torque accumulator */
-	protected List<Torque> torques;
+	protected final List<Torque> torques;
 	
 	/** The {@link Body}'s state */
 	protected int state;
@@ -151,10 +151,10 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	protected double gravityScale;
 	
 	/** The {@link Body}'s contacts */
-	protected List<ContactEdge> contacts;
+	protected final List<ContactEdge> contacts;
 	
 	/** The {@link Body}'s joints */
-	protected List<JointEdge> joints;
+	protected final List<JointEdge> joints;
 	
 	/**
 	 * Default constructor.
@@ -240,14 +240,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * @see org.dyn4j.collision.Collidable#addFixture(org.dyn4j.geometry.Convex)
 	 */
 	public BodyFixture addFixture(Convex convex) {
-		// make sure the convex shape is not null
-		if (convex == null) throw new NullPointerException(Messages.getString("dynamics.body.addNullShape"));
-		// create the fixture
-		BodyFixture fixture = new BodyFixture(convex);
-		// add the fixture to the body
-		this.fixtures.add(fixture);
-		// return the fixture so the caller can configure it
-		return fixture;
+		return this.addFixture(convex, BodyFixture.DEFAULT_DENSITY, BodyFixture.DEFAULT_FRICTION, BodyFixture.DEFAULT_RESTITUTION);
 	}
 	
 	/**
@@ -269,16 +262,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * @since 3.1.5
 	 */
 	public BodyFixture addFixture(Convex convex, double density) {
-		// make sure the convex shape is not null
-		if (convex == null) throw new NullPointerException(Messages.getString("dynamics.body.addNullShape"));
-		// create the fixture
-		BodyFixture fixture = new BodyFixture(convex);
-		// set the properties
-		fixture.setDensity(density);
-		// add the fixture to the body
-		this.fixtures.add(fixture);
-		// return the fixture so the caller can configure it
-		return fixture;
+		return this.addFixture(convex, density, BodyFixture.DEFAULT_FRICTION, BodyFixture.DEFAULT_RESTITUTION);
 	}
 	
 	/**
@@ -315,6 +299,10 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 		fixture.setRestitution(restitution);
 		// add the fixture to the body
 		this.fixtures.add(fixture);
+		// add the fixture to the broadphase
+		if (this.world != null) {
+			this.world.broadphaseDetector.add(this, fixture);
+		}
 		// return the fixture so the caller can configure it
 		return fixture;
 	}
@@ -327,6 +315,10 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 		if (fixture == null) throw new NullPointerException(Messages.getString("dynamics.body.addNullFixture"));
 		// add the shape and mass to the respective lists
 		this.fixtures.add(fixture);
+		// add the fixture to the broadphase
+		if (this.world != null) {
+			this.world.broadphaseDetector.add(this, fixture);
+		}
 		// return this body to facilitate chaining
 		return this;
 	}

@@ -248,8 +248,7 @@ public class WorldPanel extends JPanel {
 		ComboItem item = (ComboItem)this.cmbBroadphase.getSelectedItem();
 		Class<?> clazz = (Class<?>)item.getValue();
 		if (clazz == Sap.class) {
-			// TODO fix this
-			//world.setBroadphaseDetector(new Sap<Body>());
+			world.setBroadphaseDetector(new Sap<Body, BodyFixture>());
 		} else if (clazz == DynamicAABBTree.class) {
 			world.setBroadphaseDetector(new DynamicAABBTree<Body, BodyFixture>());
 		}

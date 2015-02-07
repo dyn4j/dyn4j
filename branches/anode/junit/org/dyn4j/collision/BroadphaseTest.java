@@ -28,7 +28,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.collision.broadphase.AbstractAABBDetector;
+import org.dyn4j.collision.broadphase.AbstractBroadphaseDetector;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.collision.broadphase.BroadphasePair;
 import org.dyn4j.collision.broadphase.DynamicAABBTree;
@@ -283,7 +283,7 @@ public class BroadphaseTest {
 	}
 	
 	/**
-	 * Tests the {@link AbstractAABBDetector} detect methods.
+	 * Tests the {@link AbstractBroadphaseDetector} detect methods.
 	 * @since 3.1.0
 	 */
 	@Test

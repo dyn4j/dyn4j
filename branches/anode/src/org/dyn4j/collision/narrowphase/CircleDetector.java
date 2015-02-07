@@ -34,10 +34,15 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * Renamed from CircleCircleDetector
  * @author William Bittle
- * @version 3.1.11
+ * @version 4.0.0
  * @since 2.0.0
  */
-public class CircleDetector {
+public final class CircleDetector {
+	/**
+	 * Hidden constructor.
+	 */
+	private CircleDetector() {}
+	
 	/**
 	 * Fast method for determining a collision between two {@link Circle}s.
 	 * <p>
