@@ -128,8 +128,8 @@ public class SapProxy<E extends Collidable<T>, T extends Fixture> implements Com
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("SapProxy[Collidable=").append(this.collidable.getId())
-		  .append("|Fixture=").append(this.fixture.getId())
+		sb.append("SapProxy[Collidable=").append(this.collidable != null ? this.collidable.getId() : "null")
+		  .append("|Fixture=").append(this.fixture != null ? this.fixture.getId() : "null")
 		  .append("|AABB=").append(this.aabb.toString())
 		  .append("|Tested=").append(this.tested)
 		  .append("]");

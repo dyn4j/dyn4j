@@ -63,8 +63,7 @@ public class IslandTest {
 	/**
 	 * Tests the failed creation of an island.
 	 */
-	@Test(expected = NullPointerException.class)
-	public void createFailNullWorld() {
+	public void createSuccessNullCapacity() {
 		new Island(new World(), null);
 	}
 
@@ -72,7 +71,7 @@ public class IslandTest {
 	 * Tests the failed creation of an island.
 	 */
 	@Test(expected = NullPointerException.class)
-	public void createFailNullCapacity() {
+	public void createFailNullWorld() {
 		new Island(null, Capacity.DEFAULT_CAPACITY);
 	}
 	

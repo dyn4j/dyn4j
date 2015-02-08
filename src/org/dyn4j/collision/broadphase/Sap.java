@@ -394,7 +394,7 @@ public class Sap<E extends Collidable<T>, T extends Fixture> extends AbstractBro
 			}
 			if (proxy.aabb.getMaxX() > aabb.getMinX()) {
 				if (proxy.aabb.overlaps(aabb)) {
-					if (this.raycast(s, l, invDx, invDy, aabb)) {
+					if (this.raycast(s, l, invDx, invDy, proxy.aabb)) {
 						if (filter.isAllowed(ray, length, proxy.collidable, proxy.fixture)) {
 							list.add(new BroadphaseItem<E, T>(
 									proxy.collidable,

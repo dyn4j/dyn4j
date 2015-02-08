@@ -27,7 +27,7 @@ package org.dyn4j.collision;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Translatable;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.sandbox.resources.Messages;
+import org.dyn4j.resources.Messages;
 
 /**
  * Represents a bounding region that is an Axis-Aligned bounding box.

@@ -262,15 +262,15 @@ public class CapsuleSliceTest extends AbstractTest {
 		TestCase.assertTrue(this.gjk.detect(capsule, t1, slice, t2, p));
 		TestCase.assertTrue(this.gjk.detect(capsule, t1, slice, t2));
 		n = p.getNormal();
-		TestCase.assertEquals( 0.750, n.x, 1.0e-3);
-		TestCase.assertEquals(-0.661, n.y, 1.0e-3);
+		TestCase.assertEquals( 0.981, n.x, 1.0e-3);
+		TestCase.assertEquals( 0.190, n.y, 1.0e-3);
 		TestCase.assertEquals( 0.250, p.getDepth(), 1.0e-3);
 		// try reversing the shapes
 		TestCase.assertTrue(this.gjk.detect(slice, t2, capsule, t1, p));
 		TestCase.assertTrue(this.gjk.detect(slice, t2, capsule, t1));
 		n = p.getNormal();
-		TestCase.assertEquals(-0.750, n.x, 1.0e-3);
-		TestCase.assertEquals( 0.661, n.y, 1.0e-3);
+		TestCase.assertEquals(-0.981, n.x, 1.0e-3);
+		TestCase.assertEquals(-0.190, n.y, 1.0e-3);
 		TestCase.assertEquals( 0.250, p.getDepth(), 1.0e-3);
 		
 		// test AABB overlap
@@ -408,8 +408,8 @@ public class CapsuleSliceTest extends AbstractTest {
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
 		p1 = mp.getPoint();
-		TestCase.assertEquals( 0.187, p1.x, 1.0e-3);
-		TestCase.assertEquals(-0.165, p1.y, 1.0e-3);
+		TestCase.assertEquals( 0.245, p1.x, 1.0e-3);
+		TestCase.assertEquals( 0.047, p1.y, 1.0e-3);
 		TestCase.assertEquals( 0.250, mp.getDepth(), 1.0e-3);
 		// try reversing the shapes
 		this.gjk.detect(slice, t2, capsule, t1, p);
@@ -417,8 +417,8 @@ public class CapsuleSliceTest extends AbstractTest {
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
 		p1 = mp.getPoint();
-		TestCase.assertEquals( 0.187, p1.x, 1.0e-3);
-		TestCase.assertEquals(-0.165, p1.y, 1.0e-3);
+		TestCase.assertEquals( 0.245, p1.x, 1.0e-3);
+		TestCase.assertEquals( 0.047, p1.y, 1.0e-3);
 		TestCase.assertEquals( 0.250, mp.getDepth(), 1.0e-3);
 		
 		// test overlap sat
