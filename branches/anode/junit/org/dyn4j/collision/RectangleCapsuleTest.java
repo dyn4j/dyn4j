@@ -29,7 +29,6 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.dyn4j.collision.broadphase.BroadphasePair;
-import org.dyn4j.collision.broadphase.SapIncremental;
 import org.dyn4j.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.collision.manifold.Manifold;
 import org.dyn4j.collision.manifold.ManifoldPoint;
@@ -64,10 +63,8 @@ public class RectangleCapsuleTest extends AbstractTest {
 	public void setup() {
 		this.rectangle = new Rectangle(1.0, 0.5);
 		this.capsule = new Capsule(1.0, 0.5);
-		this.sapI.clear();
-		this.sapBF.clear();
-		this.sapT.clear();
-		this.dynT.clear();
+		this.sap.clear();
+		this.dyn.clear();
 	}
 	
 	/**
@@ -79,23 +76,23 @@ public class RectangleCapsuleTest extends AbstractTest {
 		Transform t2 = new Transform();
 		
 		// test containment
-		TestCase.assertTrue(this.aabb.detect(rectangle, t1, capsule, t2));
-		TestCase.assertTrue(this.aabb.detect(capsule, t2, rectangle, t1));
+		TestCase.assertTrue(this.sap.detect(rectangle, t1, capsule, t2));
+		TestCase.assertTrue(this.sap.detect(capsule, t2, rectangle, t1));
 		
 		// test overlap
 		t1.translate(-0.5, 0.0);
-		TestCase.assertTrue(this.aabb.detect(rectangle, t1, capsule, t2));
-		TestCase.assertTrue(this.aabb.detect(capsule, t2, rectangle, t1));
+		TestCase.assertTrue(this.sap.detect(rectangle, t1, capsule, t2));
+		TestCase.assertTrue(this.sap.detect(capsule, t2, rectangle, t1));
 		
 		// test only AABB overlap
 		t2.translate(0.35, -0.5);
-		TestCase.assertTrue(this.aabb.detect(rectangle, t1, capsule, t2));
-		TestCase.assertTrue(this.aabb.detect(capsule, t2, rectangle, t1));
+		TestCase.assertTrue(this.sap.detect(rectangle, t1, capsule, t2));
+		TestCase.assertTrue(this.sap.detect(capsule, t2, rectangle, t1));
 		
 		// test no overlap
 		t2.translate(1.0, 0.0);
-		TestCase.assertFalse(this.aabb.detect(rectangle, t1, capsule, t2));
-		TestCase.assertFalse(this.aabb.detect(capsule, t2, rectangle, t1));
+		TestCase.assertFalse(this.sap.detect(rectangle, t1, capsule, t2));
+		TestCase.assertFalse(this.sap.detect(capsule, t2, rectangle, t1));
 	}
 	
 	/**
@@ -108,98 +105,72 @@ public class RectangleCapsuleTest extends AbstractTest {
 		CollidableTest ct2 = new CollidableTest(capsule);
 		
 		// test containment
-		TestCase.assertTrue(this.aabb.detect(ct1, ct2));
-		TestCase.assertTrue(this.aabb.detect(ct2, ct1));
+		TestCase.assertTrue(this.sap.detect(ct1, ct2));
+		TestCase.assertTrue(this.sap.detect(ct2, ct1));
 		
 		// test overlap
 		ct1.translate(-0.5, 0.0);
-		TestCase.assertTrue(this.aabb.detect(ct1, ct2));
-		TestCase.assertTrue(this.aabb.detect(ct2, ct1));
+		TestCase.assertTrue(this.sap.detect(ct1, ct2));
+		TestCase.assertTrue(this.sap.detect(ct2, ct1));
 		
 		// test only AABB overlap
 		ct2.translate(0.35, -0.5);
-		TestCase.assertTrue(this.aabb.detect(ct1, ct2));
-		TestCase.assertTrue(this.aabb.detect(ct2, ct1));
+		TestCase.assertTrue(this.sap.detect(ct1, ct2));
+		TestCase.assertTrue(this.sap.detect(ct2, ct1));
 		
 		// test no overlap
 		ct2.translate(1.0, 0.0);
-		TestCase.assertFalse(this.aabb.detect(ct1, ct2));
-		TestCase.assertFalse(this.aabb.detect(ct2, ct1));
+		TestCase.assertFalse(this.sap.detect(ct1, ct2));
+		TestCase.assertFalse(this.sap.detect(ct2, ct1));
 	}
 	
 	/**
-	 * Tests {@link SapIncremental}.
+	 * Tests the broadphase.
 	 */
 	@Test
 	public void detectBroadphase() {
-		List<BroadphasePair<CollidableTest>> pairs;
+		List<BroadphasePair<CollidableTest, Fixture>> pairs;
 		
 		// create some collidables
 		CollidableTest ct1 = new CollidableTest(rectangle);
 		CollidableTest ct2 = new CollidableTest(capsule);
 		
-		this.sapI.add(ct1);
-		this.sapI.add(ct2);
-		this.sapBF.add(ct1);
-		this.sapBF.add(ct2);
-		this.sapT.add(ct1);
-		this.sapT.add(ct2);
-		this.dynT.add(ct1);
-		this.dynT.add(ct2);
+		this.sap.add(ct1);
+		this.sap.add(ct2);
+		this.dyn.add(ct1);
+		this.dyn.add(ct2);
 		
 		// test containment
-		pairs = this.sapI.detect();
+		pairs = this.sap.detect();
 		TestCase.assertEquals(1, pairs.size());
-		pairs = this.sapBF.detect();
-		TestCase.assertEquals(1, pairs.size());
-		pairs = this.sapT.detect();
-		TestCase.assertEquals(1, pairs.size());
-		pairs = this.dynT.detect();
+		pairs = this.dyn.detect();
 		TestCase.assertEquals(1, pairs.size());
 		
 		// test overlap
 		ct1.translate(-0.5, 0.0);
-		this.sapI.update(ct1);
-		this.sapBF.update(ct1);
-		this.sapT.update(ct1);
-		this.dynT.update(ct1);
-		pairs = this.sapI.detect();
+		this.sap.update(ct1);
+		this.dyn.update(ct1);
+		pairs = this.sap.detect();
 		TestCase.assertEquals(1, pairs.size());
-		pairs = this.sapBF.detect();
-		TestCase.assertEquals(1, pairs.size());
-		pairs = this.sapT.detect();
-		TestCase.assertEquals(1, pairs.size());
-		pairs = this.dynT.detect();
+		pairs = this.dyn.detect();
 		TestCase.assertEquals(1, pairs.size());
 		
 		// test only AABB overlap
 		ct2.translate(0.35, -0.5);
-		this.sapI.update(ct2);
-		this.sapBF.update(ct2);
-		this.sapT.update(ct2);
-		this.dynT.update(ct2);
-		pairs = this.sapI.detect();
+		this.sap.update(ct2);
+		this.dyn.update(ct2);
+		pairs = this.sap.detect();
 		TestCase.assertEquals(1, pairs.size());
-		pairs = this.sapBF.detect();
-		TestCase.assertEquals(1, pairs.size());
-		pairs = this.sapT.detect();
-		TestCase.assertEquals(1, pairs.size());
-		pairs = this.dynT.detect();
+		pairs = this.dyn.detect();
 		TestCase.assertEquals(1, pairs.size());
 		
 		// test no overlap
 		ct2.translate(1.0, 0.0);
-		this.sapI.update(ct2);
-		this.sapBF.update(ct2);
-		this.sapT.update(ct2);
-		this.dynT.update(ct2);
-		pairs = this.sapI.detect();
+		this.sap.update(ct2);
+		this.dyn.update(ct2);
+		pairs = this.sap.detect();
 		TestCase.assertEquals(0, pairs.size());
-		pairs = this.sapBF.detect();
-		TestCase.assertEquals(0, pairs.size());
-		pairs = this.sapT.detect();
-		TestCase.assertEquals(0, pairs.size());
-		pairs = this.dynT.detect();
+		pairs = this.dyn.detect();
 		TestCase.assertEquals(0, pairs.size());
 	}
 	

@@ -381,8 +381,7 @@ public class ContactManagerTest {
 	 * Tests the creation of the contact manager with a null capacity.
 	 * @since 3.1.1
 	 */
-	@Test(expected = NullPointerException.class)
-	public void createFailureNullCapacity() {
+	public void createSuccessNullCapacity() {
 		new ContactManager(new World(), null);
 	}
 	

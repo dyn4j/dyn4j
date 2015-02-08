@@ -72,16 +72,47 @@ public class BroadphaseTest {
 		CollidableTest ct = new CollidableTest(Geometry.createCircle(1.0));
 		
 		// make sure its not there first
-		TestCase.assertNull(this.sap.getAABB(ct));
-		TestCase.assertNull(this.dyn.getAABB(ct));
+		TestCase.assertFalse(this.sap.contains(ct));
+		TestCase.assertFalse(this.dyn.contains(ct));
 		
 		// add the item to the broadphases
 		this.sap.add(ct);
 		this.dyn.add(ct);
 		
 		// make sure they are there
-		TestCase.assertNotNull(this.sap.getAABB(ct));
-		TestCase.assertNotNull(this.dyn.getAABB(ct));
+		TestCase.assertTrue(this.sap.contains(ct));
+		TestCase.assertTrue(this.dyn.contains(ct));
+	}
+	
+	/**
+	 * Tests the add method with fixtures.
+	 */
+	@Test
+	public void add2() {
+		CollidableTest ct = new CollidableTest(Geometry.createCircle(1.0));
+		ct.addFixture(Geometry.createCircle(0.5));
+		
+		// make sure its not there first
+		TestCase.assertFalse(this.sap.contains(ct));
+		TestCase.assertFalse(this.dyn.contains(ct));
+		
+		// add the item to the broadphases
+		this.sap.add(ct);
+		this.dyn.add(ct);
+		
+		// make sure they are there
+		TestCase.assertTrue(this.sap.contains(ct));
+		TestCase.assertTrue(this.dyn.contains(ct));
+		TestCase.assertTrue(this.sap.contains(ct, ct.getFixture(0)));
+		TestCase.assertTrue(this.dyn.contains(ct, ct.getFixture(0)));
+		
+		this.sap.remove(ct, ct.getFixture(1));
+		this.dyn.remove(ct, ct.getFixture(1));
+		
+		TestCase.assertFalse(this.sap.contains(ct));
+		TestCase.assertFalse(this.dyn.contains(ct));
+		TestCase.assertTrue(this.sap.contains(ct, ct.getFixture(0)));
+		TestCase.assertTrue(this.dyn.contains(ct, ct.getFixture(0)));
 	}
 	
 	/**
@@ -90,6 +121,7 @@ public class BroadphaseTest {
 	@Test
 	public void remove() {
 		CollidableTest ct1 = new CollidableTest(Geometry.createCircle(1.0));
+		ct1.addFixture(Geometry.createCircle(3.0));
 		CollidableTest ct2 = new CollidableTest(Geometry.createCircle(2.0));
 		
 		// add the item to the broadphases
@@ -111,35 +143,67 @@ public class BroadphaseTest {
 		// make sure they aren't there any more
 		TestCase.assertFalse(this.sap.contains(ct1));
 		TestCase.assertFalse(this.dyn.contains(ct1));
+		TestCase.assertFalse(this.sap.contains(ct1, ct1.getFixture(0)));
+		TestCase.assertFalse(this.dyn.contains(ct1, ct1.getFixture(0)));
+		TestCase.assertFalse(this.sap.contains(ct1, ct1.getFixture(1)));
+		TestCase.assertFalse(this.dyn.contains(ct1, ct1.getFixture(1)));
 	}
 	
 	/**
-	 * Tests the update method where the collidable moves very little.
+	 * Tests the add method with fixtures.
 	 */
 	@Test
-	public void updateSmall() {
+	public void remove2() {
 		CollidableTest ct = new CollidableTest(Geometry.createCircle(1.0));
+		ct.addFixture(Geometry.createCircle(0.5));
 		
 		// add the item to the broadphases
 		this.sap.add(ct);
 		this.dyn.add(ct);
 		
 		// make sure they are there
-		AABB aabbSap = this.sap.getAABB(ct);
-		AABB aabbDyn = this.dyn.getAABB(ct);
-		TestCase.assertNotNull(aabbSap);
-		TestCase.assertNotNull(aabbDyn);
+		TestCase.assertTrue(this.sap.contains(ct));
+		TestCase.assertTrue(this.dyn.contains(ct));
+		TestCase.assertTrue(this.sap.contains(ct, ct.getFixture(0)));
+		TestCase.assertTrue(this.dyn.contains(ct, ct.getFixture(0)));
+		
+		this.sap.remove(ct, ct.getFixture(1));
+		this.dyn.remove(ct, ct.getFixture(1));
+		
+		TestCase.assertFalse(this.sap.contains(ct));
+		TestCase.assertFalse(this.dyn.contains(ct));
+		TestCase.assertFalse(this.sap.contains(ct, ct.getFixture(1)));
+		TestCase.assertFalse(this.dyn.contains(ct, ct.getFixture(1)));
+		TestCase.assertTrue(this.sap.contains(ct, ct.getFixture(0)));
+		TestCase.assertTrue(this.dyn.contains(ct, ct.getFixture(0)));
+	}
+		
+	/**
+	 * Tests the update method where the collidable moves very little.
+	 */
+	@Test
+	public void updateSmall() {
+		CollidableTest ct = new CollidableTest(Geometry.createCircle(1.0));
+		Fixture f = ct.getFixture(0);
+		
+		// add the item to the broadphases
+		this.sap.add(ct);
+		this.dyn.add(ct);
+		
+		// get the current aabb
+		AABB aabbSap = this.sap.getAABB(ct, f);
+		AABB aabbDyn = this.dyn.getAABB(ct, f);
 		
 		// move the collidable a bit
 		ct.translate(0.05, 0.0);
 		
 		// update the broadphases
-		this.sap.update(ct);
-		this.dyn.update(ct);
+		this.sap.update(ct, f);
+		this.dyn.update(ct, f);
 		
 		// the aabbs should not have been updated because of the expansion code
-		TestCase.assertSame(aabbSap, this.sap.getAABB(ct));
-		TestCase.assertSame(aabbDyn, this.dyn.getAABB(ct));
+		TestCase.assertSame(aabbSap, this.sap.getAABB(ct, f));
+		TestCase.assertSame(aabbDyn, this.dyn.getAABB(ct, f));
 	}
 	
 	/**
@@ -148,16 +212,15 @@ public class BroadphaseTest {
 	@Test
 	public void updateLarge() {
 		CollidableTest ct = new CollidableTest(Geometry.createCircle(1.0));
+		Fixture f = ct.getFixture(0);
 		
 		// add the item to the broadphases
 		this.sap.add(ct);
 		this.dyn.add(ct);
 		
 		// make sure they are there
-		AABB aabbSap = this.sap.getAABB(ct);
-		AABB aabbDyn = this.dyn.getAABB(ct);
-		TestCase.assertNotNull(aabbSap);
-		TestCase.assertNotNull(aabbDyn);
+		AABB aabbSap = this.sap.getAABB(ct, f);
+		AABB aabbDyn = this.dyn.getAABB(ct, f);
 		
 		// move the collidable a bit
 		ct.translate(0.5, 0.0);
@@ -167,8 +230,8 @@ public class BroadphaseTest {
 		this.dyn.update(ct);
 		
 		// the aabbs should not have been updated because of the expansion code
-		TestCase.assertNotSame(aabbSap, this.sap.getAABB(ct));
-		TestCase.assertNotSame(aabbDyn, this.dyn.getAABB(ct));
+		TestCase.assertNotSame(aabbSap, this.sap.getAABB(ct, f));
+		TestCase.assertNotSame(aabbDyn, this.dyn.getAABB(ct, f));
 	}
 	
 	/**
@@ -182,13 +245,16 @@ public class BroadphaseTest {
 		this.sap.add(ct);
 		this.dyn.add(ct);
 		
+		TestCase.assertEquals(1, this.sap.size());
+		TestCase.assertEquals(1, this.dyn.size());
+		
 		// clear all the broadphases
 		this.sap.clear();
 		this.dyn.clear();
 		
 		// check for the aabb
-		TestCase.assertNull(this.sap.getAABB(ct));
-		TestCase.assertNull(this.dyn.getAABB(ct));
+		TestCase.assertEquals(0, this.sap.size());
+		TestCase.assertEquals(0, this.dyn.size());
 	}
 	
 	/**
@@ -202,7 +268,6 @@ public class BroadphaseTest {
 		this.sap.add(ct);
 		this.dyn.add(ct);
 		
-		// make sure they are there
 		AABB aabbSap = this.sap.getAABB(ct);
 		AABB aabbDyn = this.dyn.getAABB(ct);
 		
@@ -298,12 +363,12 @@ public class BroadphaseTest {
 		
 		list = this.sap.detect(aabb);
 		TestCase.assertEquals(2, list.size());
-		TestCase.assertTrue(list.contains(ct3));
-		TestCase.assertTrue(list.contains(ct4));
+		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct3, ct3.getFixture(0))));
+		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct4, ct4.getFixture(0))));
 		list = this.dyn.detect(aabb);
 		TestCase.assertEquals(2, list.size());
-		TestCase.assertTrue(list.contains(ct3));
-		TestCase.assertTrue(list.contains(ct4));
+		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct3, ct3.getFixture(0))));
+		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct4, ct4.getFixture(0))));
 		
 		// should include:
 		// ct2, ct3, and ct4
@@ -311,14 +376,14 @@ public class BroadphaseTest {
 		
 		list = this.sap.detect(aabb);
 		TestCase.assertEquals(3, list.size());
-		TestCase.assertTrue(list.contains(ct2));
-		TestCase.assertTrue(list.contains(ct3));
-		TestCase.assertTrue(list.contains(ct4));
+		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct2, ct2.getFixture(0))));
+		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct3, ct3.getFixture(0))));
+		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct4, ct4.getFixture(0))));
 		list = this.dyn.detect(aabb);
 		TestCase.assertEquals(3, list.size());
-		TestCase.assertTrue(list.contains(ct2));
-		TestCase.assertTrue(list.contains(ct3));
-		TestCase.assertTrue(list.contains(ct4));
+		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct2, ct2.getFixture(0))));
+		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct3, ct3.getFixture(0))));
+		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct4, ct4.getFixture(0))));
 	}
 	
 	/**
@@ -356,27 +421,25 @@ public class BroadphaseTest {
 		r = new Ray(new Vector2(-3.0, 0.75), new Vector2(1.0, 0.0));
 		list = this.sap.raycast(r, l);
 		TestCase.assertEquals(3, list.size());
-		TestCase.assertTrue(list.contains(ct1));
-		TestCase.assertTrue(list.contains(ct2));
-		TestCase.assertTrue(list.contains(ct4));
+		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct1, ct1.getFixture(0))));
+		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct2, ct2.getFixture(0))));
+		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct4, ct4.getFixture(0))));
 		list = this.dyn.raycast(r, l);
 		TestCase.assertEquals(3, list.size());
-		TestCase.assertTrue(list.contains(ct1));
-		TestCase.assertTrue(list.contains(ct2));
-		TestCase.assertTrue(list.contains(ct4));
+		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct1, ct1.getFixture(0))));
+		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct2, ct2.getFixture(0))));
+		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct4, ct4.getFixture(0))));
 		
 		// try one more ray
-		r = new Ray(new Vector2(-1.0, -1.0), new Vector2(0.85, 0.35));
+		r = new Ray(new Vector2(-3.0, -2.0), new Vector2(1.0, 2.0).getNormalized());
 		list = this.sap.raycast(r, l);
-		TestCase.assertEquals(3, list.size());
-		TestCase.assertTrue(list.contains(ct1));
-		TestCase.assertTrue(list.contains(ct2));
-		TestCase.assertTrue(list.contains(ct4));
+		TestCase.assertEquals(2, list.size());
+		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct1, ct1.getFixture(0))));
+		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct2, ct2.getFixture(0))));
 		list = this.dyn.raycast(r, l);
-		TestCase.assertEquals(3, list.size());
-		TestCase.assertTrue(list.contains(ct1));
-		TestCase.assertTrue(list.contains(ct2));
-		TestCase.assertTrue(list.contains(ct4));
+		TestCase.assertEquals(2, list.size());
+		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct1, ct1.getFixture(0))));
+		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct2, ct2.getFixture(0))));
 	}
 	
 	/**
@@ -401,7 +464,6 @@ public class BroadphaseTest {
 		this.sap.add(ct);
 		this.dyn.add(ct);
 		
-		// make sure they are there
 		AABB aabbSap = this.sap.getAABB(ct);
 		AABB aabbDyn = this.dyn.getAABB(ct);
 		

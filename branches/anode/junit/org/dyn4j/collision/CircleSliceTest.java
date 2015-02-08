@@ -246,15 +246,15 @@ public class CircleSliceTest extends AbstractTest {
 		TestCase.assertTrue(this.gjk.detect(circle, t1, slice, t2, p));
 		TestCase.assertTrue(this.gjk.detect(circle, t1, slice, t2));
 		n = p.getNormal();
-		TestCase.assertEquals( 0.737, n.x, 1.0e-3);
-		TestCase.assertEquals(-0.674, n.y, 1.0e-3);
+		TestCase.assertEquals( 0.654, n.x, 1.0e-3);
+		TestCase.assertEquals( 0.755, n.y, 1.0e-3);
 		TestCase.assertEquals( 0.500, p.getDepth(), 1.0e-3);
 		// try reversing the shapes
 		TestCase.assertTrue(this.gjk.detect(slice, t2, circle, t1, p));
 		TestCase.assertTrue(this.gjk.detect(slice, t2, circle, t1));
 		n = p.getNormal();
-		TestCase.assertEquals(-0.737, n.x, 1.0e-3);
-		TestCase.assertEquals( 0.674, n.y, 1.0e-3);
+		TestCase.assertEquals(-0.654, n.x, 1.0e-3);
+		TestCase.assertEquals(-0.755, n.y, 1.0e-3);
 		TestCase.assertEquals( 0.500, p.getDepth(), 1.0e-3);
 		
 		// test overlap
