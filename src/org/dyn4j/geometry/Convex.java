@@ -24,6 +24,8 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.DataContainer;
+
 /**
  * Represents a {@link Convex} {@link Shape}.
  * <p>
@@ -33,7 +35,7 @@ package org.dyn4j.geometry;
  * @version 1.0.3
  * @since 1.0.0
  */
-public interface Convex extends Shape, Transformable {
+public interface Convex extends Shape, Transformable, DataContainer {
 	/**
 	 * Returns an array of separating axes to test for this {@link Shape}.
 	 * <p>

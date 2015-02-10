@@ -24,7 +24,7 @@
  */
 package org.dyn4j.dynamics;
 
-import org.dyn4j.dynamics.joint.Joint;
+import org.dyn4j.DataContainer;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.resources.Messages;
 
@@ -35,7 +35,7 @@ import org.dyn4j.resources.Messages;
  * @since 1.0.0
  */
 // TODO split into constraint interface, unary constraint, binary constraint
-public abstract class Constraint implements Shiftable {
+public abstract class Constraint implements Shiftable, DataContainer {
 	/** The world that contains this constraint */
 	protected World world;
 	
@@ -149,17 +149,15 @@ public abstract class Constraint implements Shiftable {
 		return this.onIsland;
 	}
 	
-	/**
-	 * Returns the user data for this {@link Joint}.
-	 * @return Object
+	/* (non-Javadoc)
+	 * @see org.dyn4j.DataContainer#getUserData()
 	 */
 	public Object getUserData() {
 		return this.userData;
 	}
 	
-	/**
-	 * Sets the user data for this {@link Joint}.
-	 * @param userData the user data
+	/* (non-Javadoc)
+	 * @see org.dyn4j.DataContainer#setUserData(java.lang.Object)
 	 */
 	public void setUserData(Object userData) {
 		this.userData = userData;

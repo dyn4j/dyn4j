@@ -24,6 +24,7 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.DataContainer;
 import org.dyn4j.resources.Messages;
 
 /**
@@ -39,10 +40,10 @@ import org.dyn4j.resources.Messages;
  * {@link Polygon} approximation. Another option is to use the GJK or your own collision detection
  * algorithm for this shape only and use SAT on others (fallback).
  * @author William Bittle
- * @since 3.1.5
+ * @since 4.0.0
  * @version 3.1.7
  */
-public class HalfEllipse extends AbstractShape implements Convex, Shape, Transformable {
+public class HalfEllipse extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
 	/** The half ellipse inertia constant. See http://www.efunda.com/math/areas/ellipticalhalf.cfm */
 	private static final double INERTIA_CONSTANT = Math.PI / 8.0 - 8.0 / (9.0 * Math.PI);
 	
@@ -53,7 +54,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	protected double height;
 	
 	/** The half-width */
-	protected double a;
+	protected double halfWidth;
 	
 	/** A local vector to  */
 	protected Vector2 localXAxis;
@@ -83,7 +84,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		
 		// compute the major and minor axis lengths
 		// (the x,y radii)
-		this.a = width * 0.5;
+		this.halfWidth = width * 0.5;
 
 		// set the ellipse center
 		this.ellipseCenter = new Vector2();
@@ -97,9 +98,9 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		// setup the vertices
 		this.vertices = new Vector2[] {
 			// the left point
-			new Vector2(-this.a, 0),
+			new Vector2(-this.halfWidth, 0),
 			// the right point
-			new Vector2( this.a, 0)
+			new Vector2( this.halfWidth, 0)
 		};
 
 		// set the rotation radius
@@ -152,7 +153,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		// an ellipse is a circle with a non-uniform scaling transformation applied
 		// so we can achieve that by scaling the input axis by the major and minor
 		// axis lengths
-		localAxis.x *= this.a;
+		localAxis.x *= this.halfWidth;
 		localAxis.y *= this.height;
 		// then normalize it
 		localAxis.normalize();
@@ -164,7 +165,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 			return transform.getTransformed(this.vertices[0]);
 		} else {
 			// add the radius along the vector to the center to get the farthest point
-			p = new Vector2(localAxis.x * this.a, localAxis.y  * this.height);
+			p = new Vector2(localAxis.x * this.halfWidth, localAxis.y  * this.height);
 		}
 		
 		// include local rotation
@@ -223,10 +224,10 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	 */
 	@Override
 	public Mass createMass(double density) {
-		double area = Math.PI * this.a * this.height;
+		double area = Math.PI * this.halfWidth * this.height;
 		double m = area * density * 0.5;
 		// moment of inertia given by: http://www.efunda.com/math/areas/ellipticalhalf.cfm
-		double I = m * (this.a * this.a + this.height * this.height) * INERTIA_CONSTANT;
+		double I = m * (this.halfWidth * this.halfWidth + this.height * this.height) * INERTIA_CONSTANT;
 		return new Mass(this.center, m, I);
 	}
 
@@ -264,7 +265,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		
 		double x2 = x * x;
 		double y2 = y * y;
-		double a2 = this.a * this.a;
+		double a2 = this.halfWidth * this.halfWidth;
 		double b2 = this.height * this.height;
 		double value = x2 / a2 + y2 / b2;
 		
@@ -334,7 +335,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	 * @return double
 	 */
 	public double getHalfWidth() {
-		return this.a;
+		return this.halfWidth;
 	}
 	
 	/**

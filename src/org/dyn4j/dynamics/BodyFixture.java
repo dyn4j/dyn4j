@@ -24,6 +24,7 @@
  */
 package org.dyn4j.dynamics;
 
+import org.dyn4j.DataContainer;
 import org.dyn4j.collision.Fixture;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Mass;
@@ -36,7 +37,7 @@ import org.dyn4j.resources.Messages;
  * @version 4.0.0
  * @since 2.0.0
  */
-public class BodyFixture extends Fixture {
+public class BodyFixture extends Fixture implements DataContainer {
 	/** The default coefficient of friction; value = {@value #DEFAULT_FRICTION} */
 	public static final double DEFAULT_FRICTION = 0.2;
 	

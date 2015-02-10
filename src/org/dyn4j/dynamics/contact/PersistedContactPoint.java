@@ -45,9 +45,6 @@ public class PersistedContactPoint extends ContactPoint {
 	/** The previous penetration depth */
 	protected double oldDepth;
 	
-	/** Default constructor */
-	public PersistedContactPoint() {}
-	
 	/**
 	 * Full constructor.
 	 * @param id the contact point id

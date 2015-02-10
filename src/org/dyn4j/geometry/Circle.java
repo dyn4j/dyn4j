@@ -24,6 +24,7 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.DataContainer;
 import org.dyn4j.resources.Messages;
 
 /**
@@ -34,7 +35,7 @@ import org.dyn4j.resources.Messages;
  * @version 3.1.11
  * @since 1.0.0
  */
-public class Circle extends AbstractShape implements Convex, Shape, Transformable {
+public class Circle extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
 	/**
 	 * Full constructor.
 	 * <p>

@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
 import org.dyn4j.collision.AbstractCollidable;
 import org.dyn4j.collision.Collidable;
@@ -86,7 +87,7 @@ import org.dyn4j.resources.Messages;
  * @version 4.0.0
  * @since 1.0.0
  */
-public class Body extends AbstractCollidable<BodyFixture> implements Collidable<BodyFixture>, Transformable {
+public class Body extends AbstractCollidable<BodyFixture> implements Collidable<BodyFixture>, Transformable, DataContainer {
 	/** The default linear damping; value = {@value #DEFAULT_LINEAR_DAMPING} */
 	public static final double DEFAULT_LINEAR_DAMPING = 0.0;
 	

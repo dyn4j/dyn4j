@@ -26,10 +26,12 @@ package org.dyn4j.dynamics;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 
+import org.dyn4j.DataContainer;
 import org.dyn4j.Listener;
 import org.dyn4j.collision.Bounds;
 import org.dyn4j.collision.BoundsListener;
@@ -90,8 +92,7 @@ import org.dyn4j.resources.Messages;
  */
 // TODO look for places for member variables to be final
 // TODO look for clean up in the contact solving code
-// TODO add interface for userdata
-public class World implements Shiftable {
+public class World implements Shiftable, DataContainer {
 	/** Earths gravity constant */
 	public static final Vector2 EARTH_GRAVITY = new Vector2(0.0, -9.8);
 	
@@ -3429,7 +3430,7 @@ public class World implements Shiftable {
 	 * @see #setCoefficientMixer(CoefficientMixer)
 	 */
 	public CoefficientMixer getCoefficientMixer() {
-		return coefficientMixer;
+		return this.coefficientMixer;
 	}
 	
 	/**
@@ -3466,17 +3467,15 @@ public class World implements Shiftable {
 		return this.contactManager;
 	}
 	
-	/**
-	 * Returns the custom application data associated with this {@link World}.
-	 * @return Object
+	/* (non-Javadoc)
+	 * @see org.dyn4j.DataContainer#getUserData()
 	 */
 	public Object getUserData() {
 		return this.userData;
 	}
 	
-	/**
-	 * Sets the custom application data associated with this {@link World}.
-	 * @param userData the application data
+	/* (non-Javadoc)
+	 * @see org.dyn4j.DataContainer#setUserData(java.lang.Object)
 	 */
 	public void setUserData(Object userData) {
 		this.userData = userData;
@@ -3500,14 +3499,12 @@ public class World implements Shiftable {
 	}
 	
 	/**
-	 * Returns a new list containing all the bodies in this world.
+	 * Returns an unmodifiable list containing all the bodies in this world.
 	 * @return List&lt;{@link Body}&gt;
 	 * @since 3.1.5
 	 */
 	public List<Body> getBodies() {
-		List<Body> bodies = new ArrayList<Body>(this.bodies.size());
-		bodies.addAll(this.bodies);
-		return bodies;
+		return Collections.unmodifiableList(this.bodies);
 	}
 	
 	/**
@@ -3528,14 +3525,12 @@ public class World implements Shiftable {
 	}
 	
 	/**
-	 * Returns a new list containing all the joints in this world.
+	 * Returns an unmodifiable list containing all the joints in this world.
 	 * @return List&lt;{@link Joint}&gt;
 	 * @since 3.1.5
 	 */
 	public List<Joint> getJoints() {
-		List<Joint> joints = new ArrayList<Joint>(this.joints.size());
-		joints.addAll(this.joints);
-		return joints;
+		return Collections.unmodifiableList(this.joints);
 	}
 	
 	/**

@@ -24,6 +24,7 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
 import org.dyn4j.resources.Messages;
 
@@ -39,7 +40,7 @@ import org.dyn4j.resources.Messages;
  * @version 3.1.5
  * @since 3.1.5
  */
-public class Capsule extends AbstractShape implements Convex, Shape, Transformable {
+public class Capsule extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
 	/** 
 	 * The Capsule shape has two edge features which could be returned from the {@link #getFarthestFeature(Vector2, Transform)}
 	 * method. Under normal floating point conditions the edges will never be selected as the farthest features. Due to this,
