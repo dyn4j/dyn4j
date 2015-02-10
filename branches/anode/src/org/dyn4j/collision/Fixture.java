@@ -26,6 +26,7 @@ package org.dyn4j.collision;
 
 import java.util.UUID;
 
+import org.dyn4j.DataContainer;
 import org.dyn4j.collision.Filter;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Shape;
@@ -40,7 +41,7 @@ import org.dyn4j.resources.Messages;
  * @version 4.0.0
  * @since 2.0.0
  */
-public class Fixture {
+public class Fixture implements DataContainer {
 	/** The id for the fixture */
 	protected final UUID id = UUID.randomUUID();
 	
@@ -159,17 +160,15 @@ public class Fixture {
 		this.sensor = flag;
 	}
 	
-	/**
-	 * Returns the user data associated with this fixture.
-	 * @return Object
+	/* (non-Javadoc)
+	 * @see org.dyn4j.DataContainer#getUserData()
 	 */
 	public Object getUserData() {
 		return this.userData;
 	}
 	
-	/**
-	 * Sets the user data associated with this fixture.
-	 * @param userData the user data
+	/* (non-Javadoc)
+	 * @see org.dyn4j.DataContainer#setUserData(java.lang.Object)
 	 */
 	public void setUserData(Object userData) {
 		this.userData = userData;

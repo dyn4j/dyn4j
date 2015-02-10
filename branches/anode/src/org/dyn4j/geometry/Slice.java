@@ -24,6 +24,7 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.DataContainer;
 import org.dyn4j.resources.Messages;
 
 /**
@@ -34,7 +35,7 @@ import org.dyn4j.resources.Messages;
  * @since 3.1.5
  * @version 3.1.5
  */
-public class Slice extends AbstractShape implements Convex, Shape, Transformable {
+public class Slice extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
 	/** The total circular section in radians */
 	protected double theta;
 	

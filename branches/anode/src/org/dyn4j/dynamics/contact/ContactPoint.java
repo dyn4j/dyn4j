@@ -32,12 +32,12 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents a contact point and used to report events via the {@link ContactListener}.
  * @author William Bittle
- * @version 3.1.2
+ * @version 4.0.0
  * @since 1.0.0
  */
 public class ContactPoint {
 	/** The contact point id */
-	protected ContactPointId id;
+	protected final ContactPointId id;
 	
 	/** The first {@link Body} in contact */
 	protected Body body1;
@@ -62,9 +62,6 @@ public class ContactPoint {
 	
 	/** The penetration depth */
 	protected double depth;
-	
-	/** Default constructor */
-	public ContactPoint() {}
 	
 	/**
 	 * Full constructor.

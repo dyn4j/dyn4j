@@ -26,13 +26,15 @@ package org.dyn4j.geometry;
 
 import java.util.UUID;
 
+import org.dyn4j.DataContainer;
+
 /**
  * Base implementation of the {@link Shape} interface.
  * @author William Bittle
  * @version 4.0.0
  * @since 1.0.0
  */
-public abstract class AbstractShape implements Shape, Transformable {
+public abstract class AbstractShape implements Shape, Transformable, DataContainer {
 	/** The shape's unique identifier */
 	protected final UUID id = UUID.randomUUID();
 	
@@ -90,7 +92,7 @@ public abstract class AbstractShape implements Shape, Transformable {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Shape#getUserData()
+	 * @see org.dyn4j.DataContainer#getUserData()
 	 */
 	@Override
 	public Object getUserData() {
@@ -98,7 +100,7 @@ public abstract class AbstractShape implements Shape, Transformable {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Shape#setUserData(java.lang.Object)
+	 * @see org.dyn4j.DataContainer#setUserData(java.lang.Object)
 	 */
 	@Override
 	public void setUserData(Object userData) {

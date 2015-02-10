@@ -24,13 +24,15 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.DataContainer;
+
 /**
  * Represents an object that is defined by vertices, and has counter-clockwise winding.
  * @author William Bittle
  * @version 3.0.2
  * @since 1.0.0
  */
-public abstract class Wound extends AbstractShape implements Shape, Transformable {
+public abstract class Wound extends AbstractShape implements Shape, Transformable, DataContainer {
 	/** The array of vertices */
 	protected Vector2[] vertices;
 	

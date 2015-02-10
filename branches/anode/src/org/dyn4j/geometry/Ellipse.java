@@ -24,6 +24,7 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.DataContainer;
 import org.dyn4j.resources.Messages;
 
 /**
@@ -38,10 +39,10 @@ import org.dyn4j.resources.Messages;
  * {@link Polygon} approximation. Another option is to use the GJK or your own collision detection
  * algorithm for this shape only and use SAT on others (fallback).
  * @author William Bittle
- * @since 3.1.5
+ * @since 4.0.0
  * @version 3.1.7
  */
-public class Ellipse extends AbstractShape implements Convex, Shape, Transformable {
+public class Ellipse extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
 	/** The ellipse width */
 	protected double width;
 	
@@ -49,10 +50,10 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	protected double height;
 	
 	/** The half-width */
-	protected double a;
+	protected double halfWidth;
 	
 	/** The half-height */
-	protected double b;
+	protected double halfHeight;
 	
 	/** A local vector to  */
 	protected Vector2 localXAxis;
@@ -78,12 +79,12 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		
 		// compute the major and minor axis lengths
 		// (the x,y radii)
-		this.a = width * 0.5;
-		this.b = height * 0.5;
+		this.halfWidth = width * 0.5;
+		this.halfHeight = height * 0.5;
 		
 		// the rotation radius of the entire shape is the maximum
 		// of the radii
-		this.radius = Math.max(this.a, this.b);
+		this.radius = Math.max(this.halfWidth, this.halfHeight);
 		
 		// since we create ellipses as axis aligned we set the local x axis
 		// to the world space x axis
@@ -136,12 +137,12 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		// an ellipse is a circle with a non-uniform scaling transformation applied
 		// so we can achieve that by scaling the input axis by the major and minor
 		// axis lengths
-		localAxis.x *= this.a;
-		localAxis.y *= this.b;
+		localAxis.x *= this.halfWidth;
+		localAxis.y *= this.halfHeight;
 		// then normalize it
 		localAxis.normalize();
 		// add the radius along the vector to the center to get the farthest point
-		Vector2 p = new Vector2(localAxis.x * this.a, localAxis.y  * this.b);
+		Vector2 p = new Vector2(localAxis.x * this.halfWidth, localAxis.y  * this.halfHeight);
 		// include local rotation
 		// invert the local rotation
 		p.rotate(r);
@@ -195,10 +196,10 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 */
 	@Override
 	public Mass createMass(double density) {
-		double area = Math.PI * this.a * this.b;
+		double area = Math.PI * this.halfWidth * this.halfHeight;
 		double m = area * density;
 		// inertia about the z see http://math.stackexchange.com/questions/152277/moment-of-inertia-of-an-ellipse-in-2d
-		double I = m * (this.a * this.a + this.b * this.b) / 4.0;
+		double I = m * (this.halfWidth * this.halfWidth + this.halfHeight * this.halfHeight) / 4.0;
 		return new Mass(this.center, m, I);
 	}
 
@@ -231,8 +232,8 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		double y = (localPoint.y - this.center.y);
 		double x2 = x * x;
 		double y2 = y * y;
-		double a2 = this.a * this.a;
-		double b2 = this.b * this.b;
+		double a2 = this.halfWidth * this.halfWidth;
+		double b2 = this.halfHeight * this.halfHeight;
 		double value = x2 / a2 + y2 / b2;
 		
 		if (value <= 1.0) {
@@ -280,7 +281,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 * @return double
 	 */
 	public double getHalfWidth() {
-		return this.a;
+		return this.halfWidth;
 	}
 
 	/**
@@ -288,6 +289,6 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 * @return double
 	 */
 	public double getHalfHeight() {
-		return this.b;
+		return this.halfHeight;
 	}
 }

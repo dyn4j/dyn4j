@@ -26,6 +26,8 @@ package org.dyn4j.geometry;
 
 import java.util.UUID;
 
+import org.dyn4j.DataContainer;
+
 /**
  * Represents a geometric {@link Shape}.
  * <p>
@@ -36,7 +38,7 @@ import java.util.UUID;
  * @version 3.1.4
  * @since 1.0.0
  */
-public interface Shape extends Transformable {	
+public interface Shape extends Transformable, DataContainer {	
 	/**
 	 * Returns the unique identifier for this shape instance.
 	 * @return UUID
@@ -64,18 +66,6 @@ public interface Shape extends Transformable {
 	 * @since 3.0.2
 	 */
 	public abstract double getRadius(Vector2 center);
-	
-	/**
-	 * Returns the user data.
-	 * @return Object
-	 */
-	public abstract Object getUserData();
-	
-	/**
-	 * Sets the user data.
-	 * @param userData the user data
-	 */
-	public abstract void setUserData(Object userData);
 	
 	/**
 	 * Rotates the {@link Shape} about it's center.

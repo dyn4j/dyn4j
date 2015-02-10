@@ -25,10 +25,12 @@
 package org.dyn4j.collision;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import org.dyn4j.DataContainer;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Transform;
@@ -42,7 +44,7 @@ import org.dyn4j.geometry.Vector2;
  * @since 4.0.0
  * @param <T> the {@link Fixture} type
  */
-public abstract class AbstractCollidable<T extends Fixture> implements Collidable<T>, Transformable {
+public abstract class AbstractCollidable<T extends Fixture> implements Collidable<T>, Transformable, DataContainer {
 	/** Number of fixtures typically added to a {@link Collidable} */
 	protected static final int TYPICAL_FIXTURE_COUNT = 1;
 	
@@ -315,9 +317,7 @@ public abstract class AbstractCollidable<T extends Fixture> implements Collidabl
 	 * @see org.dyn4j.collision.Collidable#getFixtures()
 	 */
 	public List<T> getFixtures() {
-		List<T> fixtures = new ArrayList<T>(this.fixtures.size());
-		fixtures.addAll(this.fixtures);
-		return fixtures;
+		return Collections.unmodifiableList(this.fixtures);
 	}
 	
 	/* (non-Javadoc)
@@ -343,14 +343,14 @@ public abstract class AbstractCollidable<T extends Fixture> implements Collidabl
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.Collidable#getUserData()
+	 * @see org.dyn4j.DataContainer#getUserData()
 	 */
 	public Object getUserData() {
 		return this.userData;
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.Collidable#setUserData(java.lang.Object)
+	 * @see org.dyn4j.DataContainer#setUserData(java.lang.Object)
 	 */
 	public void setUserData(Object userData) {
 		this.userData = userData;

@@ -24,6 +24,7 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.DataContainer;
 import org.dyn4j.resources.Messages;
 
 /**
@@ -34,7 +35,7 @@ import org.dyn4j.resources.Messages;
  * @version 3.0.2
  * @since 1.0.0
  */
-public class Rectangle extends Polygon implements Shape, Transformable {
+public class Rectangle extends Polygon implements Shape, Transformable, DataContainer {
 	/** The {@link Rectangle}'s width */
 	protected double width;
 	

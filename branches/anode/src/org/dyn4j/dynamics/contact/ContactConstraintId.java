@@ -35,21 +35,21 @@ import org.dyn4j.geometry.Shape;
  * Represents and id for a contact constraint between two {@link Convex}
  * {@link Shape}s on two {@link Body}s.
  * @author William Bittle
- * @version 3.1.4
+ * @version 4.0.0
  * @since 1.0.0
  */
 public class ContactConstraintId {
 	/** The first {@link Body}'s id */
-	protected UUID body1Id;
+	protected final UUID body1Id;
 	
 	/** The second {@link Body}'s id */
-	protected UUID body2Id;
+	protected final UUID body2Id;
 	
 	/** The first {@link Body}'s {@link Convex} {@link Shape} id */
-	protected UUID fixture1Id;
+	protected final UUID fixture1Id;
 	
 	/** The second {@link Body}'s {@link Convex} {@link Shape} id */
-	protected UUID fixture2Id;
+	protected final UUID fixture2Id;
 	
 	/**
 	 * Full constructor.

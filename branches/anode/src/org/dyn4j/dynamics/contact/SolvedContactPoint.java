@@ -42,9 +42,6 @@ public class SolvedContactPoint extends ContactPoint {
 	/** The accumulated tangential impulse */
 	protected double tangentialImpulse;
 	
-	/** Default constructor */
-	public SolvedContactPoint() {}
-	
 	/**
 	 * Full constructor.
 	 * @param id the contact point id

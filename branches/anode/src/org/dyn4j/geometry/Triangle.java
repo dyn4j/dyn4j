@@ -24,6 +24,8 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.DataContainer;
+
 /**
  * Represents a {@link Triangle}.
  * <p>
@@ -35,7 +37,7 @@ package org.dyn4j.geometry;
  * @version 3.1.5
  * @since 1.0.0
  */
-public class Triangle extends Polygon implements Convex, Shape, Transformable {
+public class Triangle extends Polygon implements Convex, Shape, Transformable, DataContainer {
 	/**
 	 * Full constructor.
 	 * <p>

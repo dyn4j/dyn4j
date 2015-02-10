@@ -27,6 +27,7 @@ package org.dyn4j.collision;
 import java.util.List;
 import java.util.UUID;
 
+import org.dyn4j.DataContainer;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Shape;
@@ -42,27 +43,13 @@ import org.dyn4j.geometry.Vector2;
  * @since 1.0.0
  * @param <T> the {@link Fixture} type
  */
-public interface Collidable<T extends Fixture> extends Transformable, Shiftable {
+public interface Collidable<T extends Fixture> extends Transformable, Shiftable, DataContainer {
 	/**
 	 * Returns a unique identifier for this {@link Collidable}.
 	 * @return UUID the unique id
 	 * @since 3.0.0
 	 */
 	public abstract UUID getId();
-	
-	/**
-	 * Returns the user data associated to this {@link Collidable}.
-	 * @return Object
-	 * @since 4.0.0
-	 */
-	public abstract Object getUserData();
-
-	/**
-	 * Sets the user data associated to this {@link Collidable}.
-	 * @param data the user data
-	 * @since 4.0.0
-	 */
-	public abstract void setUserData(Object data);
 	
 	/**
 	 * Creates an {@link AABB} from this {@link Collidable}.
@@ -208,7 +195,7 @@ public interface Collidable<T extends Fixture> extends Transformable, Shiftable 
 	public abstract int getFixtureCount();
 	
 	/**
-	 * Returns a new list containing the fixtures attached to this {@link Collidable}.
+	 * Returns an unmodifiable list containing the fixtures attached to this {@link Collidable}.
 	 * @return List&lt;T&gt;
 	 * @since 3.1.5
 	 */
