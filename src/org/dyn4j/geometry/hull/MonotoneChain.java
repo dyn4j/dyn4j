@@ -26,7 +26,6 @@ package org.dyn4j.geometry.hull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import org.dyn4j.geometry.Segment;
@@ -45,31 +44,6 @@ import org.dyn4j.resources.Messages;
  * @since 2.2.0
  */
 public class MonotoneChain implements HullGenerator {
-	/**
-	 * Represents a comparator that sorts points by their x coordinate
-	 * lowest to highest then by the y coordinate.
-	 * @author William Bittle
-	 * @version 2.2.0
-	 * @since 2.2.0
-	 */
-	private class PointComparator implements Comparator<Vector2> {
-		/* (non-Javadoc)
-		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-		 */
-		@Override
-		public int compare(Vector2 p1, Vector2 p2) {
-			// first sort on the x coordinate
-			int value = (int) Math.signum(p1.x - p2.x);
-			// check for equal
-			if (value == 0) {
-				// if they are equal then sort on the y coordinate
-				return (int) Math.signum(p1.y - p2.y);
-			} else {
-				return value;
-			}
-		}
-	}
-	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.hull.HullGenerator#generate(org.dyn4j.geometry.Vector2[])
 	 */
@@ -85,7 +59,7 @@ public class MonotoneChain implements HullGenerator {
 		
 		try {
 			// sort the points
-			Arrays.sort(points, new PointComparator());
+			Arrays.sort(points, new MinXYPointComparator());
 		} catch (NullPointerException e) {
 			// if any comparison generates a null pointer exception
 			// throw a null pointer exception with a good message

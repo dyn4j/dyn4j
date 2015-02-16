@@ -26,7 +26,6 @@ package org.dyn4j.geometry.hull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import org.dyn4j.geometry.Segment;
@@ -45,41 +44,6 @@ import org.dyn4j.resources.Messages;
  * @since 2.2.0
  */
 public class GrahamScan implements HullGenerator {
-	/**
-	 * Comparator class to compare points by their angle from the positive
-	 * x-axis with reference from a given point.
-	 * @author William Bittle
-	 * @version 2.2.0
-	 * @since 2.2.0
-	 */
-	private class PointComparator implements Comparator<Vector2> {
-		/** The positive x-axis */
-		private final Vector2 x = new Vector2(1.0, 0.0);
-		
-		/** The reference point for testing polar angles */
-		private Vector2 reference;
-		
-		/**
-		 * Full constructor.
-		 * @param reference the reference point for finding angles
-		 */
-		public PointComparator(Vector2 reference) {
-			this.reference = reference;
-		}
-		
-		/* (non-Javadoc)
-		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-		 */
-		@Override
-		public int compare(Vector2 o1, Vector2 o2) {
-			// get the vectors from p to the points
-			Vector2 v1 = reference.to(o1);
-			Vector2 v2 = reference.to(o2);
-			// compare the vector's angles with the x-axis
-			return (int) Math.signum(v2.getAngleBetween(x) - v1.getAngleBetween(x));
-		}
-	}
-	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.hull.HullGenerator#generate(org.dyn4j.geometry.Vector2[])
 	 */
@@ -109,7 +73,7 @@ public class GrahamScan implements HullGenerator {
 		}
 		
 		// create the comparator for the array
-		PointComparator pc = new PointComparator(minY);
+		ReferencePointComparator pc = new ReferencePointComparator(minY);
 		// sort the array by angle
 		Arrays.sort(points, pc);
 		
