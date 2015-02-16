@@ -25,7 +25,6 @@
 package org.dyn4j.geometry.hull;
 
 import java.util.Arrays;
-import java.util.Comparator;
 
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
@@ -79,23 +78,6 @@ public class DivideAndConquer implements HullGenerator {
 		public int size;
 	}
 	
-	/**
-	 * Represents a comparator that sorts points by their x coordinate
-	 * lowest to highest.
-	 * @author William Bittle
-	 * @version 2.2.0
-	 * @since 2.2.0
-	 */
-	private class PointComparator implements Comparator<Vector2> {
-		/* (non-Javadoc)
-		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-		 */
-		@Override
-		public int compare(Vector2 p1, Vector2 p2) {
-			return (int) Math.signum(p1.x - p2.x);
-		}
-	}
-	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.hull.HullGenerator#generate(org.dyn4j.geometry.Vector2[])
 	 */
@@ -111,7 +93,7 @@ public class DivideAndConquer implements HullGenerator {
 		
 		try {
 			// sort the points by the x coordinate
-			Arrays.sort(points, new PointComparator());
+			Arrays.sort(points, new MinXPointComparator());
 		} catch (NullPointerException e) {
 			// this will be hit if any of the points are null
 			throw new NullPointerException(Messages.getString("geometry.hull.nullPoints"));
