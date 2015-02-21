@@ -39,7 +39,7 @@ import org.dyn4j.resources.Messages;
  * {@link Polygon} approximation. Another option is to use the GJK or your own collision detection
  * algorithm for this shape only and use SAT on others (fallback).
  * @author William Bittle
- * @since 4.0.0
+ * @since 3.2.0
  * @version 3.1.7
  */
 public class Ellipse extends AbstractShape implements Convex, Shape, Transformable, DataContainer {

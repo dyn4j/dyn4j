@@ -29,7 +29,7 @@ import org.dyn4j.collision.manifold.ManifoldPointId;
 /**
  * Represents a contact point id to identify contacts from frame to frame.
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 3.1.2
  */
 public class ContactPointId {

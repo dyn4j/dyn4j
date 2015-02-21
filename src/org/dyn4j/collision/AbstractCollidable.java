@@ -40,8 +40,8 @@ import org.dyn4j.geometry.Vector2;
 /**
  * A base implementation of the {@link Collidable} interface.
  * @author William Bittle
- * @version 4.0.0
- * @since 4.0.0
+ * @version 3.2.0
+ * @since 3.2.0
  * @param <T> the {@link Fixture} type
  */
 public abstract class AbstractCollidable<T extends Fixture> implements Collidable<T>, Transformable, DataContainer {

@@ -54,7 +54,7 @@ import org.dyn4j.geometry.Shape;
  * Modification of the {@link World} is permitted in these methods.  Modification of the {@link Body}'s
  * fixtures is not permitted (adding/removing will cause a runtime exception).
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 1.0.0
  */
 public interface CollisionListener extends Listener {
@@ -77,7 +77,7 @@ public interface CollisionListener extends Listener {
 	 * @param body2 the second {@link Body}
 	 * @param fixture2 the second {@link Body}'s {@link BodyFixture}
 	 * @return boolean true if processing should continue for this collision
-	 * @since 4.0.0
+	 * @since 3.2.0
 	 */
 	public abstract boolean collision(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2);
 	

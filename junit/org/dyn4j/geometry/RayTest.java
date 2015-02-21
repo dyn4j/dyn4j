@@ -29,7 +29,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Ray} class.
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 3.0.2
  */
 public class RayTest {

@@ -58,7 +58,7 @@ import org.dyn4j.resources.Messages;
  * {@link Epa} will terminate in a finite number of iterations if the two shapes are {@link Polygon}s.
  * If either shape has curved surfaces the algorithm requires an expected accuracy epsilon.
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 1.0.0
  */
 public class Epa implements MinkowskiPenetrationSolver {

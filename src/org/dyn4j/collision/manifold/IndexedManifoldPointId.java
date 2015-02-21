@@ -27,7 +27,7 @@ package org.dyn4j.collision.manifold;
 /**
  * Represents a {@link ManifoldPointId} that uses indexing.
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 1.0.0
  */
 public class IndexedManifoldPointId implements ManifoldPointId {

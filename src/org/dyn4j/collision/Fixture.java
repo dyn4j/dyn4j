@@ -38,7 +38,7 @@ import org.dyn4j.resources.Messages;
  * A {@link Fixture} has a one-to-one relationship with a {@link Convex} {@link Shape}.
  * Each {@link Collidable} can have any number of {@link Fixture}s attached.
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 2.0.0
  */
 public class Fixture implements DataContainer {

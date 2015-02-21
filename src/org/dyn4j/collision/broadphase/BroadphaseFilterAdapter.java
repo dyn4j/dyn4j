@@ -33,8 +33,8 @@ import org.dyn4j.geometry.Ray;
  * Helper class to avoid having to override all the methods of the {@link BroadphaseFilter}
  * interface
  * @author William Bittle
- * @version 4.0.0
- * @since 4.0.0
+ * @version 3.2.0
+ * @since 3.2.0
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
  */

@@ -36,8 +36,8 @@ import org.dyn4j.geometry.Ray;
  * @author William Bittle
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
- * @version 4.0.0
- * @since 4.0.0
+ * @version 3.2.0
+ * @since 3.2.0
  */
 public class DefaultBroadphaseFilter<E extends Collidable<T>, T extends Fixture> implements BroadphaseFilter<E, T> {
 	/* (non-Javadoc)

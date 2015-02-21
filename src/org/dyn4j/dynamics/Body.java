@@ -84,7 +84,7 @@ import org.dyn4j.resources.Messages;
  * setting in the world's {@link Settings}.  Use this if the body is a fast moving
  * body, but be careful as this will incur a performance hit.
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 1.0.0
  */
 public class Body extends AbstractCollidable<BodyFixture> implements Collidable<BodyFixture>, Transformable, DataContainer {
@@ -396,14 +396,14 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * This method will calculate a total mass for the body 
 	 * given the masses of the fixtures.
 	 * <p>
-	 * This method will always set this body's mass type to Normal.
+	 * This method will use the current mass type.
 	 * @return {@link Body} this body
-	 * @since 4.0.0
+	 * @since 3.2.0
 	 * @see #update(Mass.Type)
 	 */
 	@Override
 	public Body update() {
-		return this.update(Mass.Type.NORMAL);
+		return this.update(this.mass.getType());
 	}
 	
 	/**
@@ -417,7 +417,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * types.  If the mass type is null, the method will immediately return.
 	 * @param type the {@link org.dyn4j.geometry.Mass.Type}
 	 * @return {@link Body} this body
-	 * @since 4.0.0
+	 * @since 3.2.0
 	 */
 	public Body update(Mass.Type type) {
 		// check for null

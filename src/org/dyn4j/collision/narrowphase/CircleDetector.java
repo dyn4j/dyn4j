@@ -34,7 +34,7 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * Renamed from CircleCircleDetector
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 2.0.0
  */
 public final class CircleDetector {

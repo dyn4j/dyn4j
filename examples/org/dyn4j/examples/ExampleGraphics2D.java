@@ -58,7 +58,7 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * This class can be used as a starting point for projects.
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 3.0.0
  */
 public class ExampleGraphics2D extends JFrame {

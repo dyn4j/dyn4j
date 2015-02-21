@@ -31,7 +31,7 @@ import org.dyn4j.collision.continuous.TimeOfImpact;
  * <p>
  * Note: this class has a natural ordering that is inconsistent with equals.
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 3.1.5
  */
 public class ConvexCastResult implements Comparable<ConvexCastResult> {

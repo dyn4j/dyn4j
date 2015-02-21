@@ -55,7 +55,7 @@ import org.dyn4j.geometry.Vector2;
  * are sorted by their minimum value.  Doing so will allow the detector to ignore any projections
  * after the first {@link Interval} that does not overlap.
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 1.0.0
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type

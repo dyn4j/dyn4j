@@ -27,15 +27,15 @@ package org.dyn4j;
 /**
  * The version of the engine.
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 1.0.0
  */
 public final class Version {
 	/** The major version number; high impact changes; major API changes, major enhancements, etc. */
-	private static final int MAJOR = 4;
+	private static final int MAJOR = 3;
 	
 	/** The minor version number; medium impact changes; minor API changes, minor enhancements, major bug fixes, etc. */
-	private static final int MINOR = 0;
+	private static final int MINOR = 2;
 	
 	/** The revision number; low impact changes; deprecating API changes, minor bug fixes, etc. */
 	private static final int REVISION = 0;
