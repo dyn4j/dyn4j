@@ -29,7 +29,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents an axis aligned bounding box.
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 3.0.0
  */
 public class AABB implements Translatable {

@@ -29,7 +29,7 @@ package org.dyn4j.collision.narrowphase;
  * <p>
  * By default conditions will be remain in the order they are added unless alternate sort indices are supplied.
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 3.1.5
  */
 public abstract class AbstractFallbackCondition implements FallbackCondition, Comparable<FallbackCondition> {

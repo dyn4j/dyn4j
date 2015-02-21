@@ -36,7 +36,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Test {@link Collidable} class for junit test cases.
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 1.0.0
  */
 public class CollidableTest extends AbstractCollidable<Fixture> implements Collidable<Fixture>, Transformable {

@@ -27,8 +27,8 @@ package org.dyn4j;
 /**
  * Represents an object that can store an arbitrary user data object.
  * @author William Bittle
- * @version 4.0.0
- * @since 4.0.0
+ * @version 3.2.0
+ * @since 3.2.0
  */
 public interface DataContainer {
 	/**

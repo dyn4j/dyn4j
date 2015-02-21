@@ -31,7 +31,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents some physical constraint between a pair of {@link Body}s.
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 1.0.0
  */
 // TODO split into constraint interface, unary constraint, binary constraint

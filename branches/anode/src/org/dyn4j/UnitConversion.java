@@ -27,10 +27,10 @@ package org.dyn4j;
 /**
  * Class used to convert units.
  * <p>
- * Dyn4j by default uses meters-kilograms-seconds (MKS) units.  This class can be used
+ * dyn4j uses meters-kilograms-seconds (MKS) units by default.  This class can be used
  * to convert to and from MKS.
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 1.0.0
  */
 public final class UnitConversion {

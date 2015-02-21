@@ -27,8 +27,8 @@ package org.dyn4j.geometry;
 /**
  * Interface representing an object that can be rotated.
  * @author William Bittle
- * @version 4.0.0
- * @since 4.0.0
+ * @version 3.2.0
+ * @since 3.2.0
  */
 public interface Rotatable {
 	/**

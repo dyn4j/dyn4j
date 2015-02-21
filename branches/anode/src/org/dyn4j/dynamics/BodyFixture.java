@@ -34,7 +34,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents a part of a {@link Body}.
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 2.0.0
  */
 public class BodyFixture extends Fixture implements DataContainer {

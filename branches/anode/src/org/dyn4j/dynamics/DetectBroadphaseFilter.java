@@ -31,8 +31,8 @@ import org.dyn4j.collision.broadphase.DefaultBroadphaseFilter;
 /**
  * Represents a {@link BroadphaseFilter} for the {@link BroadphaseDetector#detect(BroadphaseFilter)} method.
  * @author William Bittle
- * @version 4.0.0
- * @since 4.0.0
+ * @version 3.2.0
+ * @since 3.2.0
  */
 public class DetectBroadphaseFilter extends DefaultBroadphaseFilter<Body, BodyFixture> implements BroadphaseFilter<Body, BodyFixture> {
 	/* (non-Javadoc)

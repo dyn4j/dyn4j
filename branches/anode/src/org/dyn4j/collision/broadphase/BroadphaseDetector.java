@@ -60,7 +60,7 @@ import org.dyn4j.geometry.Transform;
  * The {@link #detect(Collidable, Collidable)} and {@link #detect(Convex, Transform, Convex, Transform)} methods do not
  * use the current state of the broadphase.
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 1.0.0
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
@@ -93,7 +93,7 @@ public interface BroadphaseDetector<E extends Collidable<T>, T extends Fixture> 
 	 * added for the given collidable.
 	 * @param collidable the collidable
 	 * @param fixture the fixture to add
-	 * @since 4.0.0
+	 * @since 3.2.0
 	 */
 	public abstract void add(E collidable, T fixture);
 	
@@ -118,7 +118,7 @@ public interface BroadphaseDetector<E extends Collidable<T>, T extends Fixture> 
 	 * @param collidable the collidable
 	 * @param fixture the fixture to remove
 	 * @return boolean true if the fixture was found and removed
-	 * @since 4.0.0
+	 * @since 3.2.0
 	 */
 	public abstract boolean remove(E collidable, T fixture);
 	
@@ -131,7 +131,7 @@ public interface BroadphaseDetector<E extends Collidable<T>, T extends Fixture> 
 	 * given {@link Collidable} from the broadphase, if they exist.  If they
 	 * do not exist in the broadphase they will not be added or updated.
 	 * @param collidable the {@link Collidable}
-	 * @since 4.0.0
+	 * @since 3.2.0
 	 */
 	public abstract void update(E collidable);
 	
@@ -141,7 +141,7 @@ public interface BroadphaseDetector<E extends Collidable<T>, T extends Fixture> 
 	 * Used when a fixture on a {@link Collidable} has moved or rotated.
 	 * @param collidable the {@link Collidable}
 	 * @param fixture the {@link Fixture} that has moved
-	 * @since 4.0.0
+	 * @since 3.2.0
 	 */
 	public abstract void update(E collidable, T fixture);
 	
@@ -156,7 +156,7 @@ public interface BroadphaseDetector<E extends Collidable<T>, T extends Fixture> 
 	 * AABB is returned.
 	 * @param collidable the {@link Collidable}
 	 * @return {@link AABB}
-	 * @since 4.0.0
+	 * @since 3.2.0
 	 */
 	public abstract AABB getAABB(E collidable);
 	
@@ -168,7 +168,7 @@ public interface BroadphaseDetector<E extends Collidable<T>, T extends Fixture> 
 	 * @param collidable the {@link Collidable}
 	 * @param fixture the {@link Fixture}
 	 * @return {@link AABB}
-	 * @since 4.0.0
+	 * @since 3.2.0
 	 */
 	public abstract AABB getAABB(E collidable, T fixture);
 	
@@ -181,7 +181,7 @@ public interface BroadphaseDetector<E extends Collidable<T>, T extends Fixture> 
 	 * broadphase.
 	 * @param collidable the {@link Collidable}
 	 * @return boolean
-	 * @since 4.0.0
+	 * @since 3.2.0
 	 */
 	public abstract boolean contains(E collidable);
 	
@@ -191,7 +191,7 @@ public interface BroadphaseDetector<E extends Collidable<T>, T extends Fixture> 
 	 * @param collidable the {@link Collidable}
 	 * @param fixture the {@link Fixture}
 	 * @return boolean
-	 * @since 4.0.0
+	 * @since 3.2.0
 	 */
 	public abstract boolean contains(E collidable, T fixture);
 	
@@ -223,7 +223,7 @@ public interface BroadphaseDetector<E extends Collidable<T>, T extends Fixture> 
 	 * send to the narrowphase.
 	 * @param filter the broadphase filter
 	 * @return List&lt;{@link BroadphasePair}&gt;
-	 * @since 4.0.0
+	 * @since 3.2.0
 	 * @see #detect()
 	 */
 	public abstract List<BroadphasePair<E, T>> detect(BroadphaseFilter<E, T> filter);
@@ -244,7 +244,7 @@ public interface BroadphaseDetector<E extends Collidable<T>, T extends Fixture> 
 	 * @param aabb the {@link AABB} to test
 	 * @param filter the broadphase filter
 	 * @return List&lt;{@link BroadphaseItem}&gt;
-	 * @since 4.0.0
+	 * @since 3.2.0
 	 * @see #detect(AABB)
 	 */
 	public abstract List<BroadphaseItem<E, T>> detect(AABB aabb, BroadphaseFilter<E, T> filter);
@@ -269,7 +269,7 @@ public interface BroadphaseDetector<E extends Collidable<T>, T extends Fixture> 
 	 * @param length the length of the ray; 0.0 for infinite length
 	 * @param filter the broadphase filter
 	 * @return List&lt;{@link BroadphaseItem}&gt;
-	 * @since 4.0.0
+	 * @since 3.2.0
 	 * @see #raycast(Ray, double)
 	 */
 	public abstract List<BroadphaseItem<E, T>> raycast(Ray ray, double length, BroadphaseFilter<E, T> filter);

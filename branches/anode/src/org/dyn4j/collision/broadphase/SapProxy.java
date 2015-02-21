@@ -33,8 +33,8 @@ import org.dyn4j.geometry.AABB;
  * <p>
  * Note: This class has a natural ordering that is inconsistent with equals.
  * @author William Bittle
- * @since 4.0.0
- * @version 4.0.0
+ * @since 3.2.0
+ * @version 3.2.0
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
  */

@@ -29,8 +29,8 @@ import org.dyn4j.geometry.AABB;
 /**
  * Represents a node in a Dynamic AABB Tree.
  * @author William Bittle
- * @version 4.0.0
- * @since 4.0.0
+ * @version 3.2.0
+ * @since 3.2.0
  */
 public class DynamicAABBTreeNode {
 	/** The left child */

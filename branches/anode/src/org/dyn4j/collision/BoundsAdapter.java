@@ -32,7 +32,7 @@ import org.dyn4j.Listener;
  * This class can be used to implement only the methods desired instead of all
  * the methods contained in the {@link BoundsListener} interface.
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 1.0.0
  */
 public class BoundsAdapter implements BoundsListener, Listener {

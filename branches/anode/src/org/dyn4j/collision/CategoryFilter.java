@@ -90,7 +90,7 @@ package org.dyn4j.collision;
  * Basically the filter from <a href="http://www.box2d.org">Box2d</a>.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 1.0.0
  */
 public class CategoryFilter implements Filter {

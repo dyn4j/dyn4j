@@ -39,7 +39,7 @@ import org.dyn4j.resources.Messages;
  * Use the {@link #isSelfBalancing()} and {@link #setSelfBalancing(boolean)} methods to 
  * make the tree an AVL tree.
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 2.2.0
  * @param <E> Comparable
  */

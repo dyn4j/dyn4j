@@ -87,7 +87,7 @@ import org.dyn4j.resources.Messages;
  * Employs the same {@link Island} solving technique as <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 1.0.0
  */
 // TODO look for places for member variables to be final
@@ -2523,7 +2523,7 @@ public class World implements Shiftable, DataContainer {
 	 * <p>
 	 * This method does <b>NOT</b> require a call to {@link #setUpdateRequired(boolean)}.
 	 * @param shift the distance to shift along the x and y axes
-	 * @since 4.0.0
+	 * @since 3.2.0
 	 */
 	public void shift(Vector2 shift) {
 		// update the bodies

@@ -33,8 +33,8 @@ import org.dyn4j.geometry.Vector2;
  * Represents a simplex that is progressively expanded by splitting
  * the closest edge to the origin by adding new points.
  * @author William Bittle 
- * @version 4.0.0
- * @since 4.0.0
+ * @version 3.2.0
+ * @since 3.2.0
  */
 public class ExpandingSimplex {
 	/** The winding direction of the simplex */

@@ -35,7 +35,7 @@ import org.dyn4j.geometry.Shape;
  * Represents and id for a contact constraint between two {@link Convex}
  * {@link Shape}s on two {@link Body}s.
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 1.0.0
  */
 public class ContactConstraintId {

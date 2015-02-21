@@ -33,7 +33,7 @@ import org.dyn4j.collision.Fixture;
  * @author William Bittle
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
- * @version 4.0.0
+ * @version 3.2.0
  * @since 1.0.0
  */
 public class BroadphasePair<E extends Collidable<T>, T extends Fixture> {

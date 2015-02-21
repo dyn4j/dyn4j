@@ -33,8 +33,8 @@ import org.dyn4j.dynamics.joint.Joint;
  * This class is used to initially size internal structures to improve performance.
  * These same structures will grow larger than the given sizes if necessary.
  * @author William Bittle
- * @version 4.0.0
- * @since 4.0.0
+ * @version 3.2.0
+ * @since 3.2.0
  */
 public class Capacity {
 	/** The default {@link Body} count */

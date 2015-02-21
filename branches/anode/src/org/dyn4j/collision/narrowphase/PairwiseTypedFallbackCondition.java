@@ -33,7 +33,7 @@ import org.dyn4j.geometry.Convex;
  * <p>
  * Note: this class has a natural ordering that is inconsistent with equals.
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 3.1.5
  */
 public class PairwiseTypedFallbackCondition extends TypedFallbackCondition implements FallbackCondition, Comparable<FallbackCondition> {

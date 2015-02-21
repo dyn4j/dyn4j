@@ -38,7 +38,7 @@
  * but are expected to be conservative.  Meaning, its acceptable for a 
  * {@link org.dyn4j.collision.broadphase.BroadphaseDetector} to return false positives.
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 1.0.0
  */
 package org.dyn4j.collision.broadphase;

@@ -34,7 +34,7 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * This class is used by the {@link Gjk} and {@link Epa} classes.
  * @author William Bittle
- * @version 4.0.0
+ * @version 3.2.0
  * @since 1.0.0
  */
 public class MinkowskiSum {

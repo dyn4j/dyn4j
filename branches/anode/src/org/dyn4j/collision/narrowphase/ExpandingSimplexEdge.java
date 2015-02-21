@@ -31,8 +31,8 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * Note: this class has a natural ordering that is inconsistent with equals.
  * @author William Bittle
- * @version 4.0.0
- * @since 4.0.0
+ * @version 3.2.0
+ * @since 3.2.0
  */
 public class ExpandingSimplexEdge implements Comparable<ExpandingSimplexEdge> {
 	/** The first point of the edge */
