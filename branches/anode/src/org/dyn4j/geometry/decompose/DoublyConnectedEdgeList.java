@@ -56,6 +56,8 @@ import org.dyn4j.resources.Messages;
  * @version 3.1.9
  * @since 2.2.0
  */
+// TODO package private appropriate classes
+// TODO better design for contained classes and classes that use the dcel
 public class DoublyConnectedEdgeList {
 	/**
 	 * Represents a node in the Doubly-Connected Edge List.

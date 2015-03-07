@@ -45,7 +45,7 @@ import org.dyn4j.resources.Messages;
  * @version 3.1.5
  * @since 1.0.0
  */
-public class Island {
+class Island {
 	/** The world this island belongs to */
 	protected World world;
 	
@@ -119,6 +119,7 @@ public class Island {
 		// at the end of the list
 		Body b1 = contactConstraint.getBody1();
 		Body b2 = contactConstraint.getBody2();
+		// TODO evaluate order constraints are solved
 		if (b1.isStatic() || b2.isStatic()) {
 			this.contactConstraints.add(0, contactConstraint);
 		} else {

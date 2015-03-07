@@ -37,7 +37,7 @@ import org.dyn4j.geometry.Vector2;
  * @version 3.2.0
  * @since 1.0.0
  */
-public class MinkowskiSum {
+class MinkowskiSum {
 	/** The first {@link Convex} */
 	protected final Convex convex1;
 	

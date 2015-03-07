@@ -35,7 +35,7 @@ import org.dyn4j.collision.Fixture;
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
  */
-public class DynamicAABBTreeLeaf<E extends Collidable<T>, T extends Fixture> extends DynamicAABBTreeNode {
+class DynamicAABBTreeLeaf<E extends Collidable<T>, T extends Fixture> extends DynamicAABBTreeNode {
 	/** The {@link Collidable} */
 	protected final E collidable;
 	

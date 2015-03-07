@@ -38,7 +38,7 @@ import org.dyn4j.geometry.AABB;
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
  */
-public class SapProxy<E extends Collidable<T>, T extends Fixture> implements Comparable<SapProxy<E, T>> {
+class SapProxy<E extends Collidable<T>, T extends Fixture> implements Comparable<SapProxy<E, T>> {
 	/** The collidable */
 	protected final E collidable;
 	

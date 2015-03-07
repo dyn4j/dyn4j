@@ -182,7 +182,7 @@ public class ContactConstraintSolver {
 				} else {
 					// otherwise the matrix is ill conditioned
 					
-					// it looks like this will only be the case if the points are the
+					// it looks like this will only be the case if the points are
 					// close to being the same point.  If they were the same point
 					// then the constraints would be redundant
 					// just choose one of the points as the point to solve

@@ -16,13 +16,15 @@ Breaking Changes:
   - The Body.setMass methods have been replaced by an update methods to more 
     accurately describe the desired functional use.
   - The Body.update() method will now use the current body's mass type rather
-    than using Mass.Type.NORMAL.
+    than using Mass.Type.NORMAL.  NOTE that the default mass type of bodies
+    is Mass.Type.INFINITE.
   - The Body.getFixtures() method now returns an unmodifiable list.
   - The World.getBodies() and World.getJoints() methods now return unmodifiable
     lists.
   - The Bounds interface changed to only include the Translatable
     interface due to the some bounds not supporting rotation.
   - Many member variables have been made final.
+  - Made a few internal classes package private.
   - Deprecated methods and classes have been removed.
     
 Other:

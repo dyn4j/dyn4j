@@ -35,7 +35,7 @@ import org.dyn4j.geometry.Vector2;
  * @version 3.2.0
  * @since 2.2.0
  */
-public class ReferencePointComparator implements Comparator<Vector2> {
+class ReferencePointComparator implements Comparator<Vector2> {
 	/** The positive x-axis */
 	private static final Vector2 X_AXIS = new Vector2(1.0, 0.0);
 	
