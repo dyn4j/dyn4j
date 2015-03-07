@@ -22,29 +22,31 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.collision.broadphase;
+package org.dyn4j.geometry.hull;
 
-import org.dyn4j.collision.Collidable;
-import org.dyn4j.collision.Filter;
-import org.dyn4j.collision.Fixture;
+import org.dyn4j.geometry.Vector2;
 
 /**
- * A default filter for the {@link BroadphaseDetector#detect(BroadphaseFilter)} method that 
- * filters {@link Fixture}s by their {@link Filter}s.
+ * Represents a vertex that is linked to its next and previous vertices.
  * @author William Bittle
- * @param <E> the {@link Collidable} type
- * @param <T> the {@link Fixture} type
  * @version 3.2.0
  * @since 3.2.0
  */
-public class DefaultBroadphaseFilter<E extends Collidable<T>, T extends Fixture> extends BroadphaseFilterAdapter<E, T> implements BroadphaseFilter<E, T> {
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseFilter#isAllowed(org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture, org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
+class LinkedVertex {
+	/** The vertex point */
+	protected final Vector2 point;
+	
+	/** The next vertex */
+	protected LinkedVertex next;
+	
+	/** The previous vertex */
+	protected LinkedVertex prev;
+	
+	/**
+	 * Minimal constructor.
+	 * @param point the point
 	 */
-	@Override
-	public boolean isAllowed(E collidable1, T fixture1, E collidable2, T fixture2) {
-		Filter filter1 = fixture1.getFilter();
-		Filter filter2 = fixture2.getFilter();
-		return filter1.isAllowed(filter2);
+	public LinkedVertex(Vector2 point) {
+		this.point = point;
 	}
 }

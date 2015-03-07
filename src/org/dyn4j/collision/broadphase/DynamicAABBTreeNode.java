@@ -32,7 +32,7 @@ import org.dyn4j.geometry.AABB;
  * @version 3.2.0
  * @since 3.2.0
  */
-public class DynamicAABBTreeNode {
+class DynamicAABBTreeNode {
 	/** The left child */
 	protected DynamicAABBTreeNode left;
 	

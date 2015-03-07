@@ -50,6 +50,7 @@ import org.dyn4j.dynamics.joint.MouseJoint;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
+import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
 
@@ -329,8 +330,8 @@ public class WorldTest {
 		// setup the bodies
 		Convex c1 = Geometry.createCircle(1.0);
 		Convex c2 = Geometry.createEquilateralTriangle(0.5);
-		Body b1 = new Body(); b1.addFixture(c1); b1.update();
-		Body b2 = new Body(); b2.addFixture(c2); b2.update();
+		Body b1 = new Body(); b1.addFixture(c1); b1.update(Mass.Type.NORMAL);
+		Body b2 = new Body(); b2.addFixture(c2); b2.update(Mass.Type.NORMAL);
 		
 		// add them to the world
 		w.addBody(b1);
@@ -395,8 +396,8 @@ public class WorldTest {
 		// setup the bodies
 		Convex c1 = Geometry.createCircle(1.0);
 		Convex c2 = Geometry.createEquilateralTriangle(0.5);
-		Body b1 = new Body(); b1.addFixture(c1); b1.update();
-		Body b2 = new Body(); b2.addFixture(c2); b2.update();
+		Body b1 = new Body(); b1.addFixture(c1); b1.update(Mass.Type.NORMAL);
+		Body b2 = new Body(); b2.addFixture(c2); b2.update(Mass.Type.NORMAL);
 		
 		// add them to the world
 		w.addBody(b1);
@@ -640,8 +641,8 @@ public class WorldTest {
 		// setup the bodies
 		Convex c1 = Geometry.createCircle(1.0);
 		Convex c2 = Geometry.createEquilateralTriangle(0.5);
-		Body b1 = new Body(); b1.addFixture(c1); b1.update();
-		Body b2 = new Body(); b2.addFixture(c2); b2.update();
+		Body b1 = new Body(); b1.addFixture(c1); b1.update(Mass.Type.NORMAL);
+		Body b2 = new Body(); b2.addFixture(c2); b2.update(Mass.Type.NORMAL);
 		
 		// setup the joint
 		Joint j = new DistanceJoint(b1, b2, new Vector2(), new Vector2());
@@ -688,8 +689,8 @@ public class WorldTest {
 		// setup the bodies
 		Convex c1 = Geometry.createCircle(1.0);
 		Convex c2 = Geometry.createEquilateralTriangle(0.5);
-		Body b1 = new Body(); b1.addFixture(c1); b1.update();
-		Body b2 = new Body(); b2.addFixture(c2); b2.update();
+		Body b1 = new Body(); b1.addFixture(c1); b1.update(Mass.Type.NORMAL);
+		Body b2 = new Body(); b2.addFixture(c2); b2.update(Mass.Type.NORMAL);
 		
 		// setup the joint
 		Joint j = new DistanceJoint(b1, b2, new Vector2(), new Vector2());

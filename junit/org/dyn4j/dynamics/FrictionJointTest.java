@@ -142,7 +142,7 @@ public class FrictionJointTest {
 		Body b = new Body();
 		BodyFixture bf = b.addFixture(Geometry.createCircle(0.5));
 		bf.setFriction(0.0);
-		b.update();
+		b.update(Mass.Type.NORMAL);
 		b.translate(0.0, 2.0);
 		// 5 meters/second
 		b.setLinearVelocity(new Vector2(4.0, 3.0));

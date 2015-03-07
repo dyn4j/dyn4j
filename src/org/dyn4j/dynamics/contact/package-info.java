@@ -35,7 +35,7 @@
  * {@link org.dyn4j.dynamics.contact.ContactConstraint}s have been gathered the 
  * {@link org.dyn4j.dynamics.World} object will perform a depth first search on the 
  * {@link org.dyn4j.dynamics.contact.ContactConstraint} graph to yield 
- * {@link org.dyn4j.dynamics.Island}s.  The {@link org.dyn4j.dynamics.Island}s will 
+ * islands.  The islands will 
  * use the {@link org.dyn4j.dynamics.contact.ContactManager} to warm start the 
  * {@link org.dyn4j.dynamics.contact.ContactConstraint}s and then use the 
  * {@link org.dyn4j.dynamics.contact.ContactConstraintSolver} to solve them.

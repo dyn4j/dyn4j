@@ -35,7 +35,7 @@ import org.dyn4j.collision.Fixture;
  * @version 3.2.0
  * @since 3.2.0
  */
-public class BroadphaseKey {
+class BroadphaseKey {
 	/** The {@link Collidable}s id */
 	public final UUID collidable;
 	

@@ -34,7 +34,7 @@ import org.dyn4j.geometry.Vector2;
  * @version 3.2.0
  * @since 1.0.0
  */
-public class MinkowskiSumPoint {
+class MinkowskiSumPoint {
 	/** The support point in the first {@link Convex} {@link Shape} */
 	protected Vector2 supportPoint1;
 	

@@ -328,7 +328,7 @@ public class BodyTest {
 		b.update();
 		TestCase.assertNotNull(b.mass);
 		// make sure its not infinite (the mass and inertia will still be zero however)
-		TestCase.assertTrue(!b.mass.isInfinite());
+		TestCase.assertTrue(b.mass.isInfinite());
 		TestCase.assertTrue(b.mass.getCenter().isZero());
 		TestCase.assertEquals(0.0, b.mass.getMass());
 		TestCase.assertEquals(0.0, b.mass.getInverseMass());
@@ -338,7 +338,7 @@ public class BodyTest {
 		// test setting with one fixture
 		// it should not be infinite
 		BodyFixture f1 = b.addFixture(Geometry.createUnitCirclePolygon(5, 0.5));
-		b.update();
+		b.update(Mass.Type.NORMAL);
 		TestCase.assertNotNull(b.mass);
 		TestCase.assertFalse(b.mass.isInfinite());
 		
@@ -439,7 +439,7 @@ public class BodyTest {
 	public void apply() {
 		Body b = new Body();
 		b.addFixture(Geometry.createCircle(1.0));
-		b.update();
+		b.update(Mass.Type.NORMAL);
 		
 		// all the methods should add forces/torques to
 		// an accumulator, wake up the body, and not
@@ -561,7 +561,7 @@ public class BodyTest {
 	public void accumulate() {
 		Body b = new Body();
 		b.addFixture(Geometry.createCircle(1.0));
-		b.update();
+		b.update(Mass.Type.NORMAL);
 		
 		b.applyForce(new Vector2(0.0, -2.0), new Vector2(1.0, -0.3));
 		// just use the default elapsed time
@@ -581,7 +581,7 @@ public class BodyTest {
 	public void isDynamic() {
 		Body b = new Body();
 		b.addFixture(Geometry.createIsoscelesTriangle(2.0, 1.0));
-		b.update();
+		b.update(Mass.Type.NORMAL);
 		
 		TestCase.assertTrue(b.isDynamic());
 		TestCase.assertFalse(b.isKinematic());
@@ -1101,7 +1101,7 @@ public class BodyTest {
 	public void getAccumulatedForce() {
 		Body b = new Body();
 		b.addFixture(Geometry.createCircle(1.0));
-		b.update();
+		b.update(Mass.Type.NORMAL);
 		
 		// no force applied yet
 		Vector2 f = b.getAccumulatedForce();
@@ -1212,13 +1212,13 @@ public class BodyTest {
 		Body b2 = new Body();
 		
 		b1.addFixture(Geometry.createRectangle(15.0, 1.0));
-		b1.update();
+		b1.update(Mass.Type.NORMAL);
 		
 		b2.addFixture(Geometry.createSquare(1.0));
 		Convex c = Geometry.createSquare(1.0);
 		c.translate(-0.5, 0.0);
 		b2.addFixture(c);
-		b2.update();
+		b2.update(Mass.Type.NORMAL);
 		b2.translate(0.0, 0.75);
 		
 		w.addBody(b1);
@@ -1264,7 +1264,7 @@ public class BodyTest {
 	public void applyImpulse() {
 		Body b = new Body();
 		b.addFixture(Geometry.createRectangle(1.0, 1.0));
-		b.update();
+		b.update(Mass.Type.NORMAL);
 		
 		double m = b.getMass().getMass();
 		double i = b.getMass().getInertia();
