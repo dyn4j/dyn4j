@@ -16,6 +16,7 @@ Latest versions of dyn4j can be found on [Maven Central](http://search.maven.org
 Getting started is easy.  Just grab the latest compiled binary and add it to your project's classpath, then take a look at the [example applications](https://github.com/wnbittle/dyn4j/tree/master/examples/org/dyn4j/examples) for a quick start.  For a little more detail see [Getting Started](http://www.dyn4j.org/getting-started/).
 
 ### Links
+* [www.dyn4j.org](http://www.dyn4j.org)
 * [Latest Release Notes](https://github.com/wnbittle/dyn4j/blob/master/release-notes.txt)
 * [Latest Javadocs](http://docs.dyn4j.org)
 * [Forum](forum.dyn4j.org)
