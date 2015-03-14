@@ -170,11 +170,11 @@ public class SweepLine implements Decomposer, Triangulator {
 		/** The tree this edge will be added to */
 		protected EdgeBinaryTree tree;
 		
-		/** The next edge in Counter-Clockwise order */
-		protected Edge next;
-		
-		/** The previous edge in Counter-Clockwise order */
-		protected Edge prev;
+//		/** The next edge in Counter-Clockwise order */
+//		protected Edge next;
+//		
+//		/** The previous edge in Counter-Clockwise order */
+//		protected Edge prev;
 		
 		/** The first vertex of the edge in Counter-Clockwise order */
 		protected Vertex v0;
@@ -491,7 +491,7 @@ public class SweepLine implements Decomposer, Triangulator {
 			// create the next edge
 			Edge e = new Edge();
 			e.tree = tree;
-			e.prev = prevEdge;
+//			e.prev = prevEdge;
 			// the first vertex is this vertex
 			e.v0 = vertex;
 			
@@ -508,7 +508,7 @@ public class SweepLine implements Decomposer, Triangulator {
 			// next edge pointers
 			if (prevEdge != null) {
 				prevEdge.v1 = vertex;
-				prevEdge.next = e;
+//				prevEdge.next = e;
 			}
 			
 			// make sure we save the first edge so we
@@ -530,10 +530,10 @@ public class SweepLine implements Decomposer, Triangulator {
 		
 		// connect the first edge's previous pointer
 		// to the last edge we created
-		rootEdge.prev = prevEdge;
+//		rootEdge.prev = prevEdge;
 		// set the last edge's next pointer to the
 		// first edge
-		prevEdge.next = rootEdge;
+//		prevEdge.next = rootEdge;
 		// set the last edge's end vertex pointer to
 		// the first edge's start vertex
 		prevEdge.v1 = rootEdge.v0;

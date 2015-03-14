@@ -25,38 +25,25 @@
 package org.dyn4j.geometry.decompose;
 
 /**
- * Represents a monotone chain.
+ * Enumeration of monotone chain types.
  * <p>
  * A monotone chain is a group of vertices that are monotone with respect to
  * some axis.  Typically x or y monotone chains are created.
  * <p>
  * A monotone polygon will always contain two monotone chains.  For a y-monotone
- * polygon, {@link MonotoneChain.Type#LEFT} and {@link MonotoneChain.Type#RIGHT}.  For
- * a x-monotone polygon, {@link MonotoneChain.Type#TOP} and {@link MonotoneChain.Type#BOTTOM}.
+ * polygon, a {@link MonotoneChainType#LEFT} and {@link MonotoneChainType#RIGHT}.  For
+ * a x-monotone polygon, a {@link MonotoneChainType#TOP} and {@link MonotoneChainType#BOTTOM}.
  * @author William Bittle
- * @version 2.2.0
- * @since 2.2.0
+ * @version 3.2.0
+ * @since 3.2.0
  */
-public class MonotoneChain {
-	/**
-	 * Constructor only for subclasses.
-	 */
-	protected MonotoneChain() {}
-	
-	/**
-	 * Enumeration of monotone chain types.
-	 * @author William Bittle
-	 * @version 2.2.0
-	 * @since 2.2.0
-	 */
-	public enum Type {
-		/** Indicates that the vertex is on the left chain of a y-monotone polygon */
-		LEFT,
-		/** Indicates that the vertex is on the right chain of a y-monotone polygon */
-		RIGHT,
-		/** Indicates that the vertex is on the top chain of a x-monotone polygon */
-		TOP,
-		/** Indicates that the vertex is on the bottom chain of a x-monotone polygon */
-		BOTTOM
-	}
+enum MonotoneChainType {
+	/** Indicates that the vertex is on the left chain of a y-monotone polygon */
+	LEFT,
+	/** Indicates that the vertex is on the right chain of a y-monotone polygon */
+	RIGHT,
+	/** Indicates that the vertex is on the top chain of a x-monotone polygon */
+	TOP,
+	/** Indicates that the vertex is on the bottom chain of a x-monotone polygon */
+	BOTTOM
 }
