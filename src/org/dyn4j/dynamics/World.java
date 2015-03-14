@@ -87,7 +87,7 @@ import org.dyn4j.resources.Messages;
  * Employs the same {@link Island} solving technique as <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
  * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.1.11
  * @since 1.0.0
  */
 // TODO look for places for member variables to be final
@@ -992,7 +992,7 @@ public class World implements Shiftable, DataContainer {
 	 * @since 2.0.0
 	 */
 	public boolean raycast(Vector2 start, Vector2 end, boolean ignoreSensors, boolean all, List<RaycastResult> results) {
-		return this.raycast(start, end, ignoreSensors, true, all, results);
+		return this.raycast(start, end, null, ignoreSensors, true, all, results);
 	}
 	
 	/**
@@ -1094,7 +1094,7 @@ public class World implements Shiftable, DataContainer {
 	 * @since 2.0.0
 	 */
 	public boolean raycast(Ray ray, double maxLength, boolean ignoreSensors, boolean all, List<RaycastResult> results) {
-		return this.raycast(ray, maxLength, ignoreSensors, true, all, results);
+		return this.raycast(ray, maxLength, null, ignoreSensors, true, all, results);
 	}
 
 	/**
