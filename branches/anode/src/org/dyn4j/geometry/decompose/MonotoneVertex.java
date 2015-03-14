@@ -27,22 +27,22 @@ package org.dyn4j.geometry.decompose;
 /**
  * Represents a vertex of a monotone polygon.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.2.0
  * @since 2.2.0
  * @param <E> the vertex data type
  */
-public class MonotoneVertex<E> {
+class MonotoneVertex<E> {
 	/** The vertex data */
 	protected E data;
 	
 	/** The next vertex in CCW winding */
 	protected MonotoneVertex<E> next;
 	
-	/** The prev vertex in CCW winding */
-	protected MonotoneVertex<E> prev;
+	/** The previous vertex in CCW winding */
+	protected MonotoneVertex<E> previous;
 	
-	/** The monotone chain indicator */
-	protected MonotoneChain.Type chain;
+	/** The monotone chain type indicator */
+	protected MonotoneChainType chainType;
 	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
@@ -51,7 +51,7 @@ public class MonotoneVertex<E> {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("MonotoneVertex[Data=").append(this.data)
-		.append("|ChainType=").append(this.chain)
+		.append("|ChainType=").append(this.chainType)
 		.append("]");
 		return sb.toString();
 	}
@@ -62,7 +62,7 @@ public class MonotoneVertex<E> {
 	 * @return boolean
 	 */
 	public boolean isAdjacent(MonotoneVertex<E> vertex) {
-		return vertex == prev || vertex == next;
+		return vertex == this.previous || vertex == this.next;
 	}
 	
 	/**
@@ -86,7 +86,7 @@ public class MonotoneVertex<E> {
 	 * @return {@link MonotoneVertex}
 	 */
 	public MonotoneVertex<E> getNext() {
-		return next;
+		return this.next;
 	}
 	
 	/**
@@ -101,31 +101,31 @@ public class MonotoneVertex<E> {
 	 * Returns the previous vertex in CCW winding order.
 	 * @return {@link MonotoneVertex}
 	 */
-	public MonotoneVertex<E> getPrev() {
-		return prev;
+	public MonotoneVertex<E> getPrevious() {
+		return this.previous;
 	}
 	
 	/**
 	 * Sets the previous vertex in CCW winding order.
 	 * @param prev the previous vertex
 	 */
-	public void setPrev(MonotoneVertex<E> prev) {
-		this.prev = prev;
+	public void setPrevious(MonotoneVertex<E> prev) {
+		this.previous = prev;
 	}
 	
 	/**
 	 * Returns the monotone chain type.
-	 * @return {@link MonotoneChain.Type}
+	 * @return {@link MonotoneChainType}
 	 */
-	public MonotoneChain.Type getChain() {
-		return chain;
+	public MonotoneChainType getChainType() {
+		return this.chainType;
 	}
 	
 	/**
 	 * Sets the monotone chain type.
-	 * @param chain the monotone chain type
+	 * @param chainType the monotone chain type
 	 */
-	public void setChain(MonotoneChain.Type chain) {
-		this.chain = chain;
+	public void setChainType(MonotoneChainType chainType) {
+		this.chainType = chainType;
 	}
 }

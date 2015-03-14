@@ -661,7 +661,7 @@ public class DoublyConnectedEdgeList {
 				// create a new vertex
 				curr = new MonotoneVertex<Vertex>();
 				curr.data = left.origin;
-				curr.prev = prev;
+				curr.previous = prev;
 				
 				// set the previous vertex's next pointer to the new one
 				prev.next = curr;
@@ -690,7 +690,7 @@ public class DoublyConnectedEdgeList {
 			}
 			
 			// wire up the last and first vertices
-			root.prev = curr;
+			root.previous = curr;
 			curr.next = root;
 			
 			// create a sorted array of Vertices
@@ -699,12 +699,12 @@ public class DoublyConnectedEdgeList {
 			// the first point is the vertex with maximum y
 			sorted.add(max);
 			// default the location to the left chain
-			max.chain = MonotoneChain.Type.LEFT;
+			max.chainType = MonotoneChainType.LEFT;
 			
 			// perform a O(n) sorting routine starting from the
 			// maximum y vertex
 			MonotoneVertex<Vertex> currLeft = max.next;
-			MonotoneVertex<Vertex> currRight = max.prev;
+			MonotoneVertex<Vertex> currRight = max.previous;
 			int j = 1;
 			while (j < size) {
 				// get the left and right chain points
@@ -714,18 +714,18 @@ public class DoublyConnectedEdgeList {
 				// which has the smaller y?
 				if (l.y > r.y) {
 					sorted.add(currLeft);
-					currLeft.chain = MonotoneChain.Type.LEFT;
+					currLeft.chainType = MonotoneChainType.LEFT;
 					currLeft = currLeft.next;
 				} else {
 					sorted.add(currRight);
-					currRight.chain = MonotoneChain.Type.RIGHT;
-					currRight = currRight.prev;
+					currRight.chainType = MonotoneChainType.RIGHT;
+					currRight = currRight.previous;
 				}
 				
 				j++;
 			}
 			// set the last point's chain to the right
-			sorted.get(size - 1).chain = MonotoneChain.Type.RIGHT;
+			sorted.get(size - 1).chainType = MonotoneChainType.RIGHT;
 			
 			// add a new y-monotone polygon to the list
 			yMonotonePolygons.add(new MonotonePolygon<Vertex>(MonotonePolygon.Type.Y, sorted));
@@ -790,7 +790,7 @@ public class DoublyConnectedEdgeList {
 					Vector2 p3 = vt1.data.point;
 					
 					// what chain is the current vertex on
-					if (v.chain == MonotoneChain.Type.LEFT || v.chain == MonotoneChain.Type.BOTTOM) {
+					if (v.chainType == MonotoneChainType.LEFT || v.chainType == MonotoneChainType.BOTTOM) {
 						Vector2 v1 = p2.to(p3);
 						Vector2 v2 = p2.to(p1);
 						cross = v1.cross(v2);
