@@ -108,7 +108,7 @@ public class SweepLineTest extends AbstractDecomposeTest {
 		vertices[9] = new Vector2(0.25, -0.5);
 		
 		// decompose the poly
-		List<Convex> result = this.algo.decompose(vertices);
+		List<Triangle> result = this.algo.triangulate(vertices);
 		
 		// the result should have less than or equal to n - 2 convex shapes
 		TestCase.assertTrue(result.size() <= vertices.length - 2);

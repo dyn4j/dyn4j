@@ -49,11 +49,7 @@ class MonotoneVertex<E> {
 	 */
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("MonotoneVertex[Data=").append(this.data)
-		.append("|ChainType=").append(this.chainType)
-		.append("]");
-		return sb.toString();
+		return this.data.toString();
 	}
 	
 	/**
@@ -63,69 +59,5 @@ class MonotoneVertex<E> {
 	 */
 	public boolean isAdjacent(MonotoneVertex<E> vertex) {
 		return vertex == this.previous || vertex == this.next;
-	}
-	
-	/**
-	 * Returns the vertex data.
-	 * @return E
-	 */
-	public E getData() {
-		return this.data;
-	}
-	
-	/**
-	 * Sets the data for this vertex.
-	 * @param data the vertex data
-	 */
-	public void setData(E data) {
-		this.data = data;
-	}
-	
-	/**
-	 * Returns the next vertex in CCW winding order.
-	 * @return {@link MonotoneVertex}
-	 */
-	public MonotoneVertex<E> getNext() {
-		return this.next;
-	}
-	
-	/**
-	 * Sets the next vertex in CCW winding order.
-	 * @param next the next vertex
-	 */
-	public void setNext(MonotoneVertex<E> next) {
-		this.next = next;
-	}
-	
-	/**
-	 * Returns the previous vertex in CCW winding order.
-	 * @return {@link MonotoneVertex}
-	 */
-	public MonotoneVertex<E> getPrevious() {
-		return this.previous;
-	}
-	
-	/**
-	 * Sets the previous vertex in CCW winding order.
-	 * @param prev the previous vertex
-	 */
-	public void setPrevious(MonotoneVertex<E> prev) {
-		this.previous = prev;
-	}
-	
-	/**
-	 * Returns the monotone chain type.
-	 * @return {@link MonotoneChainType}
-	 */
-	public MonotoneChainType getChainType() {
-		return this.chainType;
-	}
-	
-	/**
-	 * Sets the monotone chain type.
-	 * @param chainType the monotone chain type
-	 */
-	public void setChainType(MonotoneChainType chainType) {
-		this.chainType = chainType;
 	}
 }

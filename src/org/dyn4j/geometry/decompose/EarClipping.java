@@ -53,56 +53,12 @@ import org.dyn4j.resources.Messages;
  * <p>
  * This algorithm is O(n<sup>2</sup>).
  * @author William Bittle
- * @version 3.1.10
+ * @version 3.2.0
  * @since 2.2.0
  */
 public class EarClipping implements Decomposer, Triangulator {
 	/** Epsilon for checking for near containment of vertices within triangles */
 	private static final double CONTAINS_EPSILON = Math.sqrt(Epsilon.E);
-	
-	/**
-	 * Node class for a vertex within the simple polygon.
-	 * @author William Bittle
-	 * @version 3.0.2
-	 * @since 2.2.0
-	 */
-	public class Vertex {
-		/** The vertex point */
-		protected Vector2 point;
-		
-		/** The previous vertex */
-		protected Vertex prev;
-		
-		/** The next vertex */
-		protected Vertex next;
-		
-		/** Whether this vertex is an ear vertex */
-		protected boolean ear;
-		
-		/** Whether this vertex is a reflex vertex */
-		protected boolean reflex;
-		
-		/** The DCEL vertex reference */
-		protected DoublyConnectedEdgeList.Vertex reference;
-		
-		/**
-		 * Default constructor.
-		 */
-		public Vertex() {}
-		
-		/* (non-Javadoc)
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			StringBuilder sb = new StringBuilder();
-			sb.append("EarClipping.Vertex[Point=").append(this.point)
-			.append("|Reflex=").append(this.reflex)
-			.append("|IsEar=").append(this.ear)
-			.append("]");
-			return sb.toString();
-		}
-	}
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.decompose.Decomposer#decompose(org.dyn4j.geometry.Vector2[])
@@ -110,7 +66,7 @@ public class EarClipping implements Decomposer, Triangulator {
 	@Override
 	public List<Convex> decompose(Vector2... points) {
 		// triangulate
-		DoublyConnectedEdgeList dcel = this.createTriangulation(points);
+		DoubleEdgeList dcel = this.createTriangulation(points);
 				
 		// perform the Hertel-Mehlhorn algorithm to reduce the number
 		// of convex pieces
@@ -126,7 +82,7 @@ public class EarClipping implements Decomposer, Triangulator {
 	@Override
 	public List<Triangle> triangulate(Vector2... points) {
 		// triangulate
-		DoublyConnectedEdgeList dcel = this.createTriangulation(points);
+		DoubleEdgeList dcel = this.createTriangulation(points);
 		
 		// return the triangulation
 		return dcel.getTriangulation();
@@ -136,10 +92,10 @@ public class EarClipping implements Decomposer, Triangulator {
 	 * Creates a triangulation of the given simple polygon and places it into the returned
 	 * doubly-connected edge list (DCEL).
 	 * @param points the simple polygon vertices
-	 * @return {@link DoublyConnectedEdgeList}
+	 * @return {@link DoubleEdgeList}
 	 * @since 3.1.9
 	 */
-	protected DoublyConnectedEdgeList createTriangulation(Vector2... points) {
+	protected DoubleEdgeList createTriangulation(Vector2... points) {
 		// check for null array
 		if (points == null) throw new NullPointerException(Messages.getString("geometry.decompose.nullArray"));
 		// get the number of points
@@ -156,12 +112,12 @@ public class EarClipping implements Decomposer, Triangulator {
 		}
 		
 		// create a DCEL to store the decomposition
-		DoublyConnectedEdgeList dcel = new DoublyConnectedEdgeList(points);
+		DoubleEdgeList dcel = new DoubleEdgeList(points);
 		
 		// create a doubly link list for the vertices
-		Vertex root = new Vertex();
-		Vertex curr = root;
-		Vertex prev = null;
+		EarClippingVertex root = new EarClippingVertex();
+		EarClippingVertex curr = root;
+		EarClippingVertex prev = null;
 		for (int i = 0; i < size; i++) {
 			// get the current point
 			Vector2 p = points[i];
@@ -192,18 +148,18 @@ public class EarClipping implements Decomposer, Triangulator {
 				prev.next = curr;
 			}
 			// set the current point's reference vertex
-			curr.reference = dcel.vertices.get(i);
+			curr.index = i;
 			// set the new previous to the current
 			prev = curr;
 			// create a new vertex for the current node
-			curr = new Vertex();
+			curr = new EarClippingVertex();
 		}
 		// finally wire up the first and last nodes
 		root.prev = prev;
 		prev.next = root;
 		
 		// set the ear flag
-		Vertex node = root;
+		EarClippingVertex node = root;
 		for (int i = 0; i < size; i++) {
 			// set the ear flag
 			node.ear = this.isEar(node, size);
@@ -219,10 +175,10 @@ public class EarClipping implements Decomposer, Triangulator {
 			// is the node an ear node?
 			if (node.ear) {
 				// create a diagonal for this ear
-				dcel.addHalfEdges(node.next.reference, node.prev.reference);
+				dcel.addHalfEdges(node.next.index, node.prev.index);
 				// get the previous and next nodes
-				Vertex pNode = node.prev;
-				Vertex nNode = node.next;
+				EarClippingVertex pNode = node.prev;
+				EarClippingVertex nNode = node.next;
 				// remove this node from the list
 				pNode.next = node.next;
 				nNode.prev = node.prev;
@@ -261,7 +217,7 @@ public class EarClipping implements Decomposer, Triangulator {
 	 * @param vertex the vertex to test
 	 * @return boolean true if the given vertex is considered a reflex vertex
 	 */
-	protected boolean isReflex(Vertex vertex) {
+	protected boolean isReflex(EarClippingVertex vertex) {
 		// get the triangle points
 		Vector2 p = vertex.point;
 		Vector2 p0 = vertex.prev.point;
@@ -289,7 +245,7 @@ public class EarClipping implements Decomposer, Triangulator {
 	 * @param n the number of vertices
 	 * @return boolean true if the given vertex is considered an ear vertex
 	 */
-	protected boolean isEar(Vertex vertex, int n) {
+	protected boolean isEar(EarClippingVertex vertex, int n) {
 		// reflex vertices cannot be ears
 		if (vertex.reflex) return false;
 		
@@ -303,7 +259,7 @@ public class EarClipping implements Decomposer, Triangulator {
 		// this triangle
 		
 		// don't check any points on the triangle for containment
-		Vertex tNode = vertex.next.next;
+		EarClippingVertex tNode = vertex.next.next;
 		for (int j = 0; j < n - 3; j++) {
 			// we only need to test reflex nodes
 			if (tNode.reflex) {

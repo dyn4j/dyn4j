@@ -24,12 +24,7 @@
  */
 package org.dyn4j;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
-
-import org.dyn4j.resources.Messages;
 
 /**
  * Represents an Binary Search Tree.
@@ -44,192 +39,8 @@ import org.dyn4j.resources.Messages;
  * @param <E> Comparable
  */
 public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
-	/**
-	 * Node class for a {@link BinarySearchTree}.
-	 * @author William Bittle
-	 * @version 3.1.9
-	 * @since 2.2.0
-	 */
-	protected class Node {
-		/** The comparable data */
-		public final E comparable;
-		
-		/** The parent node of this node */
-		public Node parent;
-		
-		/** The node to the left; the left node is greater than this node */
-		public Node left;
-		
-		/** The node to the right; the right node is greater than this node */
-		public Node right;
-		
-		/**
-		 * Minimal constructor.
-		 * @param comparable the comparable object
-		 */
-		public Node(E comparable) {
-			this(comparable, null, null, null);
-		}
-		
-		/**
-		 * Full constructor.
-		 * @param comparable the comparable object
-		 * @param parent the parent node
-		 * @param left the left node
-		 * @param right the right node
-		 * @throws NullPointerException if comparable is null
-		 */
-		public Node(E comparable, Node parent, Node left, Node right) {
-			if (comparable == null) throw new NullPointerException(Messages.getString("binarySearchTree.nullComparable"));
-			this.comparable = comparable;
-			this.parent = parent;
-			this.left = left;
-			this.right = right;
-		}
-		
-		/* (non-Javadoc)
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			return this.comparable.toString();
-		}
-		
-		/**
-		 * Returns true if this node is the left child of
-		 * its parent node.
-		 * <p>
-		 * Returns false if this node does not have a parent.
-		 * @return boolean
-		 */
-		public boolean isLeftChild() {
-			if (this.parent == null) return false;
-			return (this.parent.left == this);
-		}
-	}
-	
-	/**
-	 * Enumeration of the traversal orders.
-	 * @author William Bittle
-	 * @version 3.0.0
-	 * @since 2.2.0
-	 */
-	public static enum Direction {
-		/** Traverses the nodes in order */
-		ASCENDING,
-		/** Traverses the node in reverse order */
-		DESCENDING
-	}
-	
-	/**
-	 * Iterator class for looping through the elements in order or in reverse order.
-	 * <p>
-	 * The {@link #remove()} method is unsupported.
-	 * @author William Bittle
-	 * @version 3.0.0
-	 * @since 2.2.0
-	 */
-	public final class TreeIterator implements Iterator<E> {
-		/** The node stack for iterative traversal */
-		protected final Deque<Node> stack;
-		
-		/** The traversal direction */
-		protected final Direction direction;
-		
-		/**
-		 * Default constructor using {@link Direction#ASCENDING}.
-		 * @param node the root node of the subtree to traverse
-		 */
-		public TreeIterator(Node node) {
-			this(node, Direction.ASCENDING);
-		}
-		
-		/**
-		 * Full constructor.
-		 * @param node the root node of the subtree to traverse
-		 * @param direction the direction of the traversal
-		 * @throws NullPointerException if node or direction is null
-		 */
-		public TreeIterator(Node node, Direction direction) {
-			// check for null
-			if (node == null) throw new NullPointerException(Messages.getString("binarySearchTree.nullSubTreeForIterator"));
-			if (direction == null) throw new NullPointerException(Messages.getString("binarySearchTree.nullTraversalDirection"));
-			// set the direction
-			this.direction = direction;
-			// create the node stack and initialize it
-			this.stack = new ArrayDeque<Node>();
-			// check the direction to determine how to initialize it
-			if (direction == Direction.ASCENDING) {
-				this.pushLeft(node);
-			} else {
-				this.pushRight(node);
-			}
-			
-		}
-		
-		/**
-		 * Pushes the left most nodes of the given subtree onto the stack.
-		 * @param node the root node of the subtree
-		 */
-		protected void pushLeft(Node node) {
-			// loop until we don't have any more left nodes
-			while (node != null) {
-				this.stack.push(node);
-				node = node.left;
-			}
-		}
-		
-		/**
-		 * Pushes the right most nodes of the given subtree onto the stack.
-		 * @param node the root node of the subtree
-		 */
-		protected void pushRight(Node node) {
-			// loop until we don't have any more right nodes
-			while (node != null) {
-				this.stack.push(node);
-				node = node.right;
-			}
-		}
-		
-		/* (non-Javadoc)
-		 * @see java.util.Iterator#hasNext()
-		 */
-		@Override
-		public boolean hasNext() {
-			return !this.stack.isEmpty();
-		}
-		
-		/* (non-Javadoc)
-		 * @see java.util.Iterator#next()
-		 */
-		@Override
-		public E next() {
-			// if the stack is empty throw an exception
-			if (this.stack.isEmpty()) throw new NoSuchElementException();
-			// get an element off the stack
-			Node node = this.stack.pop();
-			if (this.direction == Direction.ASCENDING) {
-				// add all the left most nodes of the right subtree of this element 
-				this.pushLeft(node.right);
-			} else {
-				// add all the right most nodes of the left subtree of this element 
-				this.pushRight(node.left);
-			}
-			// return the comparable object
-			return node.comparable;
-		}
-		
-		/**
-		 * Currently unsupported.
-		 */
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
-	}
-	
 	/** The root node of the tree */
-	protected Node root;
+	protected BinarySearchTreeNode<E> root;
 	
 	/** The current size of the tree */
 	protected int size;
@@ -325,7 +136,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 		// check for null
 		if (comparable == null) return false;
 		// create a node for this object
-		Node node = new Node(comparable);
+		BinarySearchTreeNode<E> node = new BinarySearchTreeNode<E>(comparable);
 		// otherwise we need to find where to insert this node
 		this.insert(node);
 		// return a success
@@ -345,7 +156,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 		if (this.root == null) return false;
 		// otherwise we need to find and remove the node
 		// retaining any children of the removed node
-		Node node = this.remove(comparable, this.root);
+		BinarySearchTreeNode<E> node = this.remove(comparable, this.root);
 		// see if it was found
 		return node != null;
 	}
@@ -405,13 +216,39 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 		// check for empty tree
 		if (this.root == null) return false;
 		// attempt to find the comparable
-		Node node = this.contains(this.root, comparable);
+		BinarySearchTreeNode<E> node = this.contains(this.root, comparable);
 		// check for null
 		if (node == null) {
 			return false;
 		} else {
 			return true;
 		}
+	}
+	
+	/**
+	 * Performs a binary search on this tree given the criteria.
+	 * @param criteria the criteria
+	 * @return the criteria for chaining
+	 * @since 3.2.0
+	 */
+	public <T extends BinarySearchTreeSearchCriteria<E>> T search(T criteria) {
+		// check for a null root node
+		if (this.root == null) return criteria;
+		// set the current node to the root
+		BinarySearchTreeNode<E> node = this.root;
+		// loop until the current node is null
+		while (node != null) {
+			// perform the search criteria 
+			int result = criteria.evaluate(node.comparable);
+			if (result < 0) {
+				node = node.left;
+			} else if (result > 0) {
+				node = node.right;
+			} else {
+				break;
+			}
+		}
+		return criteria;
 	}
 	
 	/**
@@ -473,7 +310,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * @return Iterator&lt;E&gt;
 	 */
 	public Iterator<E> inOrderIterator() {
-		return new TreeIterator(this.root, Direction.ASCENDING);
+		return new BinarySearchTreeIterator<E>(this.root, true);
 	}
 	
 	/**
@@ -481,15 +318,15 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * @return Iterator&lt;E&gt;
 	 */
 	public Iterator<E> reverseOrderIterator() {
-		return new TreeIterator(this.root, Direction.DESCENDING);
+		return new BinarySearchTreeIterator<E>(this.root, false);
 	}
 	
 	/**
 	 * Returns the minimum value of the subtree of the given node.
 	 * @param node the subtree root node
-	 * @return {@link Node} the node found; null if subtree is empty
+	 * @return {@link BinarySearchTreeNode} the node found; null if subtree is empty
 	 */
-	protected Node getMinimum(Node node) {
+	protected BinarySearchTreeNode<E> getMinimum(BinarySearchTreeNode<E> node) {
 		// check for a null node
 		if (node == null) return null;
 		// loop until we find the minimum
@@ -505,9 +342,9 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	/**
 	 * Returns the maximum value of the subtree of the given node.
 	 * @param node the subtree root node
-	 * @return {@link Node} the node found; null if subtree is empty
+	 * @return {@link BinarySearchTreeNode} the node found; null if subtree is empty
 	 */
-	protected Node getMaximum(Node node) {
+	protected BinarySearchTreeNode<E> getMaximum(BinarySearchTreeNode<E> node) {
 		// check for a null node
 		if (node == null) return null;
 		// loop until we find the maximum
@@ -519,22 +356,13 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 		// the maximum will be last node traversed
 		return node;
 	}
-	
-	/**
-	 * Returns the root node of this tree.
-	 * @return {@link Node}
-	 * @since 3.0.0
-	 */
-	protected Node getRootNode() {
-		return this.root;
-	}
-	
+		
 	/**
 	 * Removes the minimum value node from the subtree of the given node.
 	 * @param node the subtree root node
-	 * @return {@link Node} the node removed
+	 * @return {@link BinarySearchTreeNode} the node removed
 	 */
-	protected Node removeMinimum(Node node) {
+	protected BinarySearchTreeNode<E> removeMinimum(BinarySearchTreeNode<E> node) {
 		// find the minimum
 		node = this.getMinimum(node);
 		// check if the given subtree root node is null
@@ -564,9 +392,9 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	/**
 	 * Removes the maximum value node from the subtree of the given node.
 	 * @param node the subtree root node
-	 * @return {@link Node} the node removed
+	 * @return {@link BinarySearchTreeNode} the node removed
 	 */
-	protected Node removeMaximum(Node node) {
+	protected BinarySearchTreeNode<E> removeMaximum(BinarySearchTreeNode<E> node) {
 		// find the maximum
 		node = this.getMaximum(node);
 		// check if the given subtree root node is null
@@ -599,7 +427,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * @return int the maximum depth
 	 * @since 3.0.0
 	 */
-	protected int getHeight(Node node) {
+	protected int getHeight(BinarySearchTreeNode<E> node) {
 		// check for null node
 		if (node == null) return 0;
 		// check for the leaf node
@@ -613,7 +441,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * @param node the root node of the subtree
 	 * @return int
 	 */
-	protected int size(Node node) {
+	protected int size(BinarySearchTreeNode<E> node) {
 		// check for null node
 		if (node == null) return 0;
 		// check for the leaf node
@@ -627,7 +455,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * @param node the node to find
 	 * @return boolean
 	 */
-	protected boolean contains(Node node) {
+	protected boolean contains(BinarySearchTreeNode<E> node) {
 		// check for null
 		if (node == null) return false;
 		// check for empty tree
@@ -635,7 +463,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 		// check for root node
 		if (node == this.root) return true;
 		// start at the root node
-		Node curr = this.root;
+		BinarySearchTreeNode<E> curr = this.root;
 		// make sure the node is not null
 		while (curr != null) {
 			// check for reference equality
@@ -667,9 +495,9 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * Returns the node that contains the given value or null if the
 	 * value is not found.
 	 * @param comparable the comparable value
-	 * @return {@link Node} the node containing the given value; null if its not found
+	 * @return {@link BinarySearchTreeNode} the node containing the given value; null if its not found
 	 */
-	protected Node get(E comparable) {
+	protected BinarySearchTreeNode<E> get(E comparable) {
 		// check for null comparable
 		if (comparable == null) return null;
 		// check for empty tree
@@ -685,15 +513,15 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * @return boolean true if the insertion was successful
 	 * @param node the subtree root node
 	 */
-	protected boolean insertSubtree(Node node) {
+	protected boolean insertSubtree(BinarySearchTreeNode<E> node) {
 		// check for null
 		if (node == null) return false;
 		// get an iterator to go through all the nodes
-		Iterator<E> iterator = new TreeIterator(node);
+		Iterator<E> iterator = new BinarySearchTreeIterator<E>(node);
 		// iterate over the nodes
 		while (iterator.hasNext()) {
 			// create a copy of the node
-			Node newNode = new Node(iterator.next());
+			BinarySearchTreeNode<E> newNode = new BinarySearchTreeNode<E>(iterator.next());
 			// insert the node
 			this.insert(newNode);
 		}
@@ -718,7 +546,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 		// iterate over the nodes
 		while (iterator.hasNext()) {
 			// create a copy of the node
-			Node newNode = new Node(iterator.next());
+			BinarySearchTreeNode<E> newNode = new BinarySearchTreeNode<E>(iterator.next());
 			// insert the node
 			this.insert(newNode);
 		}
@@ -738,7 +566,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 		// check for empty tree
 		if (this.root == null) return false;
 		// attempt to find the node
-		Node node = this.root;
+		BinarySearchTreeNode<E> node = this.root;
 		while (node != null) {
 			// compare the data to the current node
 			int diff = comparable.compareTo(node.comparable);
@@ -775,7 +603,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * @param node the node and subtree to remove
 	 * @return boolean true if the node was found and removed successfully
 	 */
-	protected boolean removeSubtree(Node node) {
+	protected boolean removeSubtree(BinarySearchTreeNode<E> node) {
 		// check for null input
 		if (node == null) return false;
 		// check for empty tree
@@ -813,7 +641,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * @return boolean true if the insertion was successful
 	 * @since 3.0.0
 	 */
-	protected boolean insert(Node item) {
+	protected boolean insert(BinarySearchTreeNode<E> item) {
 		// check for an empty tree
 		if (this.root == null) {
 			// set the root to the new item
@@ -832,13 +660,13 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * Internal insertion method.
 	 * <p>
 	 * This method cannot insert into the tree if the given node parameter is null.  Use the
-	 * {@link #insert(Node)} method instead to ensure that the node is inserted.
+	 * {@link #insert(BinarySearchTreeNode)} method instead to ensure that the node is inserted.
 	 * @param item the node to insert
 	 * @param node the subtree root node to start the search
 	 * @return true if the insertion was successful
-	 * @see #insert(Node)
+	 * @see #insert(BinarySearchTreeNode)
 	 */
-	protected boolean insert(Node item, Node node) {
+	protected boolean insert(BinarySearchTreeNode<E> item, BinarySearchTreeNode<E> node) {
 		// make sure the given node is not null
 		if (node == null) return false;
 		// loop until we find where the node should be placed
@@ -895,7 +723,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * @param node the node to remove
 	 * @return boolean
 	 */
-	protected boolean remove(Node node) {
+	protected boolean remove(BinarySearchTreeNode<E> node) {
 		// check for null
 		if (node == null) return false;
 		// check for empty tree
@@ -915,9 +743,9 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * Returns the node removed if the comparable is found, null otherwise.
 	 * @param comparable the comparable object to remove
 	 * @param node the subtree node to start the search
-	 * @return {@link Node} null if the given comparable was not found
+	 * @return {@link BinarySearchTreeNode} null if the given comparable was not found
 	 */
-	protected Node remove(E comparable, Node node) {
+	protected BinarySearchTreeNode<E> remove(E comparable, BinarySearchTreeNode<E> node) {
 		// perform an iterative version of the remove method so that
 		// we can return a boolean result about removal
 		while (node != null) {
@@ -952,13 +780,13 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * This method assumes that the node is contained in this tree.
 	 * @param node the node to remove
 	 */
-	protected void removeNode(Node node) {
+	protected void removeNode(BinarySearchTreeNode<E> node) {
 		boolean isLeftChild = node.isLeftChild();
 		// check how many children it has
 		if (node.left != null && node.right != null) {
 			// find the minimum node in the right subtree and
 			// use it as a replacement for the node we are removing
-			Node min = this.getMinimum(node.right);
+			BinarySearchTreeNode<E> min = this.getMinimum(node.right);
 			
 			// remove the minimum node from the tree
 			if (min != node.right) {
@@ -1069,9 +897,9 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * Internal recursive method to find an item in the tree.
 	 * @param node the subtree root node
 	 * @param comparable the comparable to find
-	 * @return {@link Node} the node found; null if not found
+	 * @return {@link BinarySearchTreeNode} the node found; null if not found
 	 */
-	protected Node contains(Node node, E comparable) {
+	protected BinarySearchTreeNode<E> contains(BinarySearchTreeNode<E> node, E comparable) {
 		// make sure the node is not null
 		while (node != null) {
 			// compare the comparable
@@ -1100,16 +928,16 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 */
 	protected void balanceTree() {
 		// save the current tree
-		Node root = this.root;
+		BinarySearchTreeNode<E> root = this.root;
 		// empty the tree
 		this.root = null;
 		this.size = 0;
 		// create an iterator for the old tree
-		Iterator<E> iterator = new TreeIterator(root);
+		Iterator<E> iterator = new BinarySearchTreeIterator<E>(root);
 		// add all the elements from the old tree into the new tree
 		while (iterator.hasNext()) {
 			// create a new node for each old node
-			Node node = new Node(iterator.next());
+			BinarySearchTreeNode<E> node = new BinarySearchTreeNode<E>(iterator.next());
 			// add the new node to this tree
 			this.insert(node);
 		}
@@ -1120,7 +948,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * @param node the node to begin balancing
 	 * @since 3.0.0
 	 */
-	protected void balanceTree(Node node) {
+	protected void balanceTree(BinarySearchTreeNode<E> node) {
 		// loop until we reach the root node
 		while (node != null) {
 			// balance the tree; this can return a new root
@@ -1135,19 +963,19 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	/**
 	 * Balances the given node's subtree.
 	 * @param node the root node of the subtree
-	 * @return {@link Node} the new root
+	 * @return {@link BinarySearchTreeNode} the new root
 	 * @since 3.0.0
 	 */
-	protected Node balance(Node node) {
+	protected BinarySearchTreeNode<E> balance(BinarySearchTreeNode<E> node) {
 		// check if the node is null
 		if (node == null) return null;
 		// check if the node has a height of 2 or more
 		if (this.getHeight(node) < 2) return node;
 		
 		// get the child nodes
-		Node p = node.parent;
-		Node a = node.left;
-		Node b = node.right;
+		BinarySearchTreeNode<E> p = node.parent;
+		BinarySearchTreeNode<E> a = node.left;
+		BinarySearchTreeNode<E> b = node.right;
 		// get the heights of the children
 		int ah = this.getHeight(a);
 		int bh = this.getHeight(b);
@@ -1168,7 +996,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 			if (ach > 1) {
 				// the subtree of node is left-right
 				// change it to be left-left
-				Node c = a.right;
+				BinarySearchTreeNode<E> c = a.right;
 				a.right = c.left; if (c.left != null) c.left.parent = a;
 				c.left = a;
 				a.parent = c;
@@ -1182,7 +1010,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 			//   /
 			//  a
 			
-			Node c = node.left;
+			BinarySearchTreeNode<E> c = node.left;
 			node.left = c.right; if (c.right != null) c.right.parent = node;
 			c.right = node;
 			c.parent = node.parent;
@@ -1215,7 +1043,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 			int bch = this.getHeight(b.left);
 			
 			if (bch > 1) {
-				Node d = b.left;
+				BinarySearchTreeNode<E> d = b.left;
 				b.left = d.right; if (d.right != null) d.right.parent = b;
 				d.right = b;
 				b.parent = d;
@@ -1229,7 +1057,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 			//       \
 			//        b
 			
-			Node d = node.right;
+			BinarySearchTreeNode<E> d = node.right;
 			node.right = d.left; if (d.left != null) d.left.parent = node;
 			d.left = node;
 			d.parent = node.parent;

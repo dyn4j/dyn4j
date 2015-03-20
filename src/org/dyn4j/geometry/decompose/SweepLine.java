@@ -27,10 +27,8 @@ package org.dyn4j.geometry.decompose;
 import java.util.List;
 import java.util.PriorityQueue;
 
-import org.dyn4j.BinarySearchTree;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
-import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
@@ -51,297 +49,13 @@ import org.dyn4j.resources.Messages;
  * @since 2.2.0
  */
 public class SweepLine implements Decomposer, Triangulator {
-	/**
-	 * Represents a vertex on a polygon that stores information
-	 * about the left and right edges and left and right vertices.
-	 * @author William Bittle
-	 * @version 3.0.2
-	 * @since 2.2.0
-	 */
-	protected static class Vertex implements Comparable<Vertex> {
-		/**
-		 * Enumeration of the {@link Vertex} types.
-		 * @author William Bittle
-		 * @version 2.2.0
-		 * @since 2.2.0
-		 */
-		protected enum Type {
-			/** Vertex above both its neighbors and the internal angle is less than &pi; */
-			START,
-			/** Vertex above both its neighbors and the internal angle is greater than &pi; */
-			SPLIT,
-			/** Vertex below both its neighbors and the internal angle is less than &pi; */
-			END,
-			/** Vertex below both its neighbors and the internal angle is greater than &pi; */
-			MERGE,
-			/** Vertex between both of its neighbors */
-			REGULAR,
-		}
-		
-		/** The vertex point */
-		protected Vector2 point;
-		
-		/** The vertex type */
-		protected Type type;
-		
-		/** The next vertex in Counter-Clockwise order */
-		protected Vertex next;
-		
-		/** The previous vertex in Counter-Clockwise order */
-		protected Vertex prev;
-		
-		/** The next edge in Counter-Clockwise order */
-		protected Edge left;
-		
-		/** The previous edge in Counter-Clockwise order */
-		protected Edge right;
-		
-		/** The reference to the vertex in the DCEL */
-		protected DoublyConnectedEdgeList.Vertex dcelReference;
-		
-		/* (non-Javadoc)
-		 * @see java.lang.Comparable#compareTo(java.lang.Object)
-		 */
-		@Override
-		public int compareTo(Vertex other) {
-			// sort by the y first then by x if the y's are equal
-			Vector2 p = this.point;
-			Vector2 q = other.point;
-			double diff = q.y - p.y;
-			if (diff == 0.0) {
-				// if the difference is near equal then compare the x values
-				return (int) Math.signum(p.x - q.x);
-			} else {
-				return (int) Math.signum(diff);
-			}
-		}
-		
-		/* (non-Javadoc)
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			StringBuilder sb = new StringBuilder();
-			sb.append("SweepLine.Vertex[Point=").append(this.point)
-			.append("|Type=").append(this.type)
-			.append("]");
-			return sb.toString();
-		}
-		
-		/**
-		 * Returns true if this {@link Vertex} is left of the given {@link Edge}.
-		 * @param edge the {@link Edge}
-		 * @return boolean true if this {@link Vertex} is to the left of the given {@link Edge}
-		 */
-		public boolean isLeft(Edge edge) {
-			// its in between the min and max x so we need to 
-			// do a side of line test
-			double location = Segment.getLocation(this.point, edge.v0.point, edge.v1.point);
-			if (location < 0.0) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-		
-		/**
-		 * Returns true if the interior is to the right of this vertex.
-		 * <p>
-		 * The left edge of this vertex is used to determine where the
-		 * interior of the polygon is.
-		 * @return boolean
-		 */
-		public boolean isInteriorRight() {
-			return this.left.isInteriorRight();
-		}
-	}
-	
-	/**
-	 * Represents an edge of a polygon storing the next and previous edges
-	 * and the vertices that make up this edge.
-	 * <p>
-	 * The edge also stores a helper vertex which is used during y-monotone
-	 * decomposition.
-	 * @author William Bittle
-	 * @version 3.0.2
-	 * @since 2.2.0
-	 */
-	protected class Edge implements Comparable<Edge> {
-		/** The tree this edge will be added to */
-		protected EdgeBinaryTree tree;
-		
-//		/** The next edge in Counter-Clockwise order */
-//		protected Edge next;
-//		
-//		/** The previous edge in Counter-Clockwise order */
-//		protected Edge prev;
-		
-		/** The first vertex of the edge in Counter-Clockwise order */
-		protected Vertex v0;
-		
-		/** The second vertex of the edge in Counter-Clockwise order */
-		protected Vertex v1;
-		
-		/** The helper vertex of this edge */
-		protected Vertex helper;
-		
-		/** 
-		 * The inverted slope of the edge (run/rise); This will be 
-		 * Double.POSITIVE_INFINITY if its a horizontal edge
-		 */
-		protected double slope;
-		
-		/* (non-Javadoc)
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			StringBuilder sb = new StringBuilder();
-			sb.append("SweepLine.Edge[V0=").append(this.v0)
-			.append("|V1=").append(this.v1)
-			.append("]");
-			return sb.toString();
-		}
-		
-		/* (non-Javadoc)
-		 * @see java.lang.Comparable#compareTo(java.lang.Object)
-		 */
-		@Override
-		public int compareTo(Edge o) {
-			// check for equality
-			if (this == o) return 0;
-			
-			// compare the intersection of the sweep line and the edges
-			// to see which is to the left or right
-			double y = this.tree.referenceY;
-			
-			double x1 = this.getSortValue(y);
-			double x2 = o.getSortValue(y);
-			
-			if (x1 < x2) {
-				return -1;
-			} else {
-				return 1;
-			}
-		}
-		
-		/**
-		 * Returns the intersection point of the given y value (horizontal
-		 * sweep line) with this edge.
-		 * <p>
-		 * Returns the x value of the corresponding intersection point.
-		 * @param y the horizontal line y value
-		 * @return double
-		 */
-		public double getSortValue(double y) {
-			// get the minimum x vertex
-			// (if we use the min x vertex rather than an 
-			// arbitrary one, we can save a step to check
-			// if the edge is vertical)
-			Vector2 min = this.v0.point;
-			if (this.v1.point.x < this.v0.point.x) {
-				min = this.v1.point;
-			}
-			// check for a horizontal line
-			if (this.slope == Double.POSITIVE_INFINITY) {
-				// for horizontal lines, use the min x
-				return min.x;
-			} else {
-				// otherwise compute the intersection point
-				return min.x + (y - min.y) * this.slope;
-			}
-		}
-		
-		/**
-		 * Returns true if the interior of the polygon is
-		 * to the right of this edge.
-		 * <p>
-		 * Given that the polygon's vertex winding is Counter-
-		 * Clockwise, if the vertices that make this edge
-		 * decrease along the y axis then the interior of the
-		 * polygon is to the right, otherwise its to the
-		 * left.
-		 * @return boolean
-		 */
-		public boolean isInteriorRight() {
-			double diff = v0.point.y - v1.point.y;
-			// check if the points have the same y value
-			if (diff == 0.0) {
-				// if they do, is the vector of the
-				// two points to the right or to the left
-				if (v0.point.x < v1.point.x) {
-					return true;
-				} else {
-					return false;
-				}
-			// otherwise just compare the y values
-			} else if (diff > 0.0) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-	}
-	
-	/**
-	 * Class to extend the {@link BinarySearchTree} to add a method for
-	 * finding the {@link Edge} closest to a given {@link Vertex}.
-	 * @author William Bittle
-	 * @version 2.2.0
-	 * @since 2.2.0
-	 */
-	protected static class EdgeBinaryTree extends BinarySearchTree<Edge> {
-		/**
-		 * Default constructor.
-		 */
-		public EdgeBinaryTree() {
-			super(true);
-		}
-		
-		/** The current position of the sweep line */
-		protected double referenceY = 0.0;
-		
-		/**
-		 * Performs a search to find the right most {@link Edge}
-		 * who is left of the given {@link Vertex}.
-		 * <p>
-		 * If the tree is empty null is returned.
-		 * @param vertex the {@link Vertex}
-		 * @return {@link Edge} the closest edge
-		 */
-		public Edge findClosest(Vertex vertex) {
-			// check for a null root node
-			if (this.root == null) return null;
-			// set the current node to the root
-			Node node = this.root;
-			// initialize the best edge to the root
-			Node best = node;
-			// loop until the current node is null
-			while (node != null) {
-				// get the left edge
-				Edge edge = node.comparable;
-				if (vertex.isLeft(edge)) {
-					// if e is left of the current edge then go left in the tree
-					node = node.left;
-				} else {
-					// otherwise e is right of the current edge so go right
-					// and save the current edge as the best
-					best = node;
-					node = node.right;
-				}
-			}
-			// return the best node's comparable (edge)
-			return best.comparable;
-		}
-	}
-	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.decompose.Decomposer#decompose(org.dyn4j.geometry.Vector2[])
 	 */
 	@Override
 	public List<Convex> decompose(Vector2... points) {
 		// triangulate
-		DoublyConnectedEdgeList dcel = this.createTriangulation(points);
+		DoubleEdgeList dcel = this.createTriangulation(points);
 		
 		// the DCEL now contains a valid triangulation
 		// next we perform the Hertel-Mehlhorn algorithm to
@@ -359,7 +73,7 @@ public class SweepLine implements Decomposer, Triangulator {
 	@Override
 	public List<Triangle> triangulate(Vector2... points) {
 		// triangulate
-		DoublyConnectedEdgeList dcel = this.createTriangulation(points);
+		DoubleEdgeList dcel = this.createTriangulation(points);
 		// return the triangulation
 		return dcel.getTriangulation();
 	}
@@ -368,10 +82,10 @@ public class SweepLine implements Decomposer, Triangulator {
 	 * Creates a triangulation of the given simple polygon and places it in the
 	 * returned doubly-connected edge list (DCEL).
 	 * @param points the vertices of the simple polygon to triangulate
-	 * @return {@link DoublyConnectedEdgeList}
+	 * @return {@link DoubleEdgeList}
 	 * @since 3.1.9
 	 */
-	protected DoublyConnectedEdgeList createTriangulation(Vector2... points) {
+	protected DoubleEdgeList createTriangulation(Vector2... points) {
 		// check for a null list
 		if (points == null) throw new NullPointerException(Messages.getString("geometry.decompose.nullArray"));
 		// get the number of points
@@ -387,378 +101,160 @@ public class SweepLine implements Decomposer, Triangulator {
 			Geometry.reverseWinding(points);
 		}
 		
-		// create a DCEL to efficiently store the resulting y-monotone polygons
-		DoublyConnectedEdgeList dcel = new DoublyConnectedEdgeList(points);
-		
-		// create a binary tree to store edges
-		EdgeBinaryTree tree = new EdgeBinaryTree();
+		// create a new sweep state
+		// this is the container for the algorithms acceleration structures
+		SweepState sweepstate = new SweepState();
 		
 		// create the priority queue (sorted queue by largest y value) and
 		// the cyclical lists
-		PriorityQueue<Vertex> queue = this.initialize(points, dcel, tree);
+		PriorityQueue<SweepLineVertex> queue = sweepstate.initialize(points);
 		
 		// Find all edges that need to be added to the polygon
 		// to create a y-monotone decomposition
 		while (!queue.isEmpty()) {
-			Vertex v = queue.poll();
-			if (v.type == Vertex.Type.START) {
-				this.start(v, tree);
-			} else if (v.type == Vertex.Type.END) {
-				this.end(v, tree, dcel);
-			} else if (v.type == Vertex.Type.SPLIT) {
-				this.split(v, tree, dcel);
-			} else if (v.type == Vertex.Type.MERGE) {
-				this.merge(v, tree, dcel);
-			} else if (v.type == Vertex.Type.REGULAR) {
-				this.regular(v, tree, dcel);
+			SweepLineVertex vertex = queue.poll();
+			if (vertex.type == SweepLineVertexType.START) {
+				this.start(vertex, sweepstate);
+			} else if (vertex.type == SweepLineVertexType.END) {
+				this.end(vertex, sweepstate);
+			} else if (vertex.type == SweepLineVertexType.SPLIT) {
+				this.split(vertex, sweepstate);
+			} else if (vertex.type == SweepLineVertexType.MERGE) {
+				this.merge(vertex, sweepstate);
+			} else if (vertex.type == SweepLineVertexType.REGULAR) {
+				this.regular(vertex, sweepstate);
 			}
 		}
 		
 		// the DCEL now contains a valid y-monotone polygon decomposition
 		// next we need to triangulate all the y-monotone polygons
-		List<MonotonePolygon<DoublyConnectedEdgeList.Vertex>> polygons = dcel.getYMonotonePolygons();
-		
-		// triangulate each monotone polygon
-		int ympSize = polygons.size();
-		for (int i = 0; i < ympSize; i++) {
-			dcel.triangulateMonotoneY(polygons.get(i));
-		}
+		sweepstate.dcel.triangulateYMonotonePolygons();
 		
 		// return the triangulation
-		return dcel;
+		return sweepstate.dcel;
 	}
 	
 	/**
-	 * Returns a priority queue of the points in the given array.
-	 * <p>
-	 * This method also builds the cyclic doubly-linked list of vertices
-	 * and edges used to neighbor features in constant time.
-	 * @param points the array of polygon points
-	 * @param dcel the DCEL object to add references to the priority queue vertices
-	 * @param tree the binary tree to store edges
-	 * @return PriorityQueue&lt;{@link Vertex}&gt;
-	 */
-	protected PriorityQueue<Vertex> initialize(Vector2[] points, DoublyConnectedEdgeList dcel, EdgeBinaryTree tree) {
-		// get the number points
-		int size = points.length;
-		
-		// create a priority queue for the vertices
-		PriorityQueue<Vertex> queue = new PriorityQueue<Vertex>(size);
-		
-		Vertex rootVertex = null;
-		Vertex prevVertex = null;
-		
-		Edge rootEdge = null;
-		Edge prevEdge = null;
-		
-		// build the vertices and edges
-		for (int i = 0; i < size; i++) {
-			// get this vertex point
-			Vector2 point = points[i];
-			
-			// create the vertex for this point
-			Vertex vertex = new Vertex();
-			vertex.point = point;
-			// default the type to regular
-			vertex.type = Vertex.Type.REGULAR;
-			vertex.prev = prevVertex;
-			vertex.dcelReference = dcel.vertices.get(i);			
-			
-			// set the previous vertex's next pointer
-			if (prevVertex != null) {
-				prevVertex.next = vertex;
-			}
-			
-			// make sure we save the first vertex so we
-			// can wire up the last and first to create
-			// a cyclic list
-			if (rootVertex == null) {
-				rootVertex = vertex;
-			}
-			
-			// get the neighboring points
-			Vector2 point1 = points[i + 1 == size ? 0 : i + 1];
-			Vector2 point0 = points[i == 0 ? size - 1 : i - 1];
-			
-			// get the vertex type
-			vertex.type = this.getType(point0, point, point1);
-			
-			// set the previous vertex to this vertex
-			prevVertex = vertex;
-			// add the vertex to the priority queue
-			queue.offer(vertex);
-			
-			// create the next edge
-			Edge e = new Edge();
-			e.tree = tree;
-//			e.prev = prevEdge;
-			// the first vertex is this vertex
-			e.v0 = vertex;
-			
-			// compute the slope
-			double my = point.y - point1.y;
-			if (my == 0.0) {
-				e.slope = Double.POSITIVE_INFINITY;
-			} else {
-				double mx = point.x - point1.x;
-				e.slope = (mx / my);
-			}
-			
-			// set the previous edge's end vertex and
-			// next edge pointers
-			if (prevEdge != null) {
-				prevEdge.v1 = vertex;
-//				prevEdge.next = e;
-			}
-			
-			// make sure we save the first edge so we
-			// can wire up the last and first to create
-			// a cyclic list
-			if (rootEdge == null) {
-				rootEdge = e;
-			}
-			
-			// set the vertex's left and right edges
-			vertex.left = e;
-			vertex.right = prevEdge;
-			
-			// set the previous edge to this edge
-			prevEdge = e;
-		}
-		
-		// finally complete the cyclical lists
-		
-		// connect the first edge's previous pointer
-		// to the last edge we created
-//		rootEdge.prev = prevEdge;
-		// set the last edge's next pointer to the
-		// first edge
-//		prevEdge.next = rootEdge;
-		// set the last edge's end vertex pointer to
-		// the first edge's start vertex
-		prevEdge.v1 = rootEdge.v0;
-		
-		// set the previous edge of the first vertex
-		rootVertex.right = prevEdge;
-		// set the previous vertex of the first vertex
-		rootVertex.prev = prevVertex;
-		// set the last vertex's next pointer to the
-		// first vertex
-		prevVertex.next = rootVertex;
-		
-		// return the priority queue
-		return queue;
-	}
-	
-	/**
-	 * Returns the vertex type given the previous and next points.
-	 * @param point0 the previous point
-	 * @param point the vertex point
-	 * @param point1 the next point
-	 * @return {@link Vertex.Type}
-	 */
-	protected Vertex.Type getType(Vector2 point0, Vector2 point, Vector2 point1) {
-		// create the edge vectors
-		Vector2 v1 = point0.to(point);
-		Vector2 v2 = point.to(point1);
-		
-		// check for coincident points
-		if (v1.isZero() || v2.isZero()) throw new IllegalArgumentException(Messages.getString("geometry.decompose.coincident"));
-		
-		// get the angle between the two edges (we assume CCW winding)
-		double cross = v1.cross(v2);
-		
-		boolean pBelowP0 = this.isBelow(point, point0);
-		boolean pBelowP1 = this.isBelow(point, point1);
-		
-		// where is p relative to its neighbors?
-		if (pBelowP0 && pBelowP1) {
-			// then check if the 
-			// if its below both of them then we need
-			// to check the interior angle
-			if (cross > 0.0) {
-				// if the cross product is greater than zero
-				// this indicates that the angle is < pi
-				
-				// this vertex is an end vertex
-				return Vertex.Type.END;
-			} else {
-				// this indicates that the angle is pi or greater
-				
-				// this vertex is a merge vertex
-				return Vertex.Type.MERGE;
-			}
-		} else if (!pBelowP0 && !pBelowP1) {
-			// if its above both of them then we need
-			// to check the interior angle
-			if (cross > 0.0) {
-				// if the cross product is greater than zero
-				// this indicates that the angle is < pi
-				
-				// this vertex is a start vertex
-				return Vertex.Type.START;
-			} else {
-				// this indicates that the angle is pi or greater
-				
-				// this vertex is a split vertex
-				return Vertex.Type.SPLIT;
-			}
-		}
-		
-		return Vertex.Type.REGULAR;
-	}
-	
-	/**
-	 * Returns true if the given point p is below the given point q.
-	 * <p>
-	 * If the point p and q form a horizontal line then p is considered
-	 * below if its x coordinate is greater than q's x coordinate.
-	 * @param p the point
-	 * @param q another point
-	 * @return boolean true if p is below q; false if p is above q
-	 */
-	protected boolean isBelow(Vector2 p, Vector2 q) {
-		double diff = p.y - q.y;
-		if (diff == 0.0) {
-			if (p.x > q.x) {
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			if (diff < 0.0) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-	}
-	
-	/**
-	 * Handles a {@link Vertex.Type#START} event.
+	 * Handles a {@link SweepLineVertexType#START} event.
 	 * @param vertex the vertex
-	 * @param tree the tree holding the current edges intersecting the sweep line
+	 * @param sweepstate the current state of the SweepLine algorithm
 	 */
-	protected void start(Vertex vertex, EdgeBinaryTree tree) {
+	protected void start(SweepLineVertex vertex, SweepState sweepstate) {
 		// we need to add the edge to the left to the tree
 		// since the line in the next event may be intersecting it
-		Edge leftEdge = vertex.left;
+		SweepLineEdge leftEdge = vertex.left;
 		// set the reference y to the current vertex's y
-		tree.referenceY = vertex.point.y;
-		tree.insert(leftEdge);
+		sweepstate.referenceY.value = vertex.point.y;
+		sweepstate.tree.insert(leftEdge);
 		// set the left edge's helper to this vertex
 		leftEdge.helper = vertex;
 	}
 	
 	/**
-	 * Handles a {@link Vertex.Type#END} event.
+	 * Handles a {@link SweepLineVertexType#END} event.
 	 * @param vertex the vertex
-	 * @param tree the tree holding the current edges intersecting the sweep line
-	 * @param dcel the DCEL object to add edges to if necessary
+	 * @param sweepstate the current state of the SweepLine algorithm
 	 */
-	protected void end(Vertex vertex, EdgeBinaryTree tree, DoublyConnectedEdgeList dcel) {
+	protected void end(SweepLineVertex vertex, SweepState sweepstate) {
 		// if the vertex type is an end vertex then we
 		// know that we need to remove the right edge
 		// since the sweep line no longer intersects it
-		Edge rightEdge = vertex.right;
+		SweepLineEdge rightEdge = vertex.right;
 		// before we remove the edge we need to make sure
 		// that we don't forget to link up MERGE vertices
-		if (rightEdge.helper.type == Vertex.Type.MERGE) {
+		if (rightEdge.helper.type == SweepLineVertexType.MERGE) {
 			// connect v to v.right.helper
-			dcel.addHalfEdges(vertex.dcelReference, rightEdge.helper.dcelReference);
+			sweepstate.dcel.addHalfEdges(vertex.index, rightEdge.helper.index);
 		}
 		// set the reference y to the current vertex's y
-		tree.referenceY = vertex.point.y;
+		sweepstate.referenceY.value = vertex.point.y;
 		// remove v.right from T
-		tree.remove(rightEdge);
+		sweepstate.tree.remove(rightEdge);
 	}
 	
 	/**
-	 * Handles a {@link Vertex.Type#SPLIT} event.
+	 * Handles a {@link SweepLineVertexType#SPLIT} event.
 	 * @param vertex the vertex
-	 * @param tree the tree holding the current edges intersecting the sweep line
-	 * @param dcel the DCEL object to add edges to if necessary
+	 * @param sweepstate the current state of the SweepLine algorithm
 	 */
-	protected void split(Vertex vertex, EdgeBinaryTree tree, DoublyConnectedEdgeList dcel) {
+	protected void split(SweepLineVertex vertex, SweepState sweepstate) {
 		// if we have a split vertex then we can find
 		// the closest edge to the left side of the vertex
 		// and attach its helper to this vertex
-		Edge ej = tree.findClosest(vertex);
+		SweepLineEdge ej = sweepstate.tree.search(new ClosestEdgeToVertexSearchCriteria(vertex)).closest;
 		
 		// connect v to ej.helper
-		dcel.addHalfEdges(vertex.dcelReference, ej.helper.dcelReference);
+		sweepstate.dcel.addHalfEdges(vertex.index, ej.helper.index);
 		
 		// set the new helper for the edge
 		ej.helper = vertex;
 		// set the reference y to the current vertex's y
-				tree.referenceY = vertex.point.y;
+		sweepstate.referenceY.value = vertex.point.y;
 		// insert the edge to the left of this vertex
-		tree.insert(vertex.left);
+		sweepstate.tree.insert(vertex.left);
 		// set the left edge's helper
 		vertex.left.helper = vertex;
 	}
 	
 	/**
-	 * Handles a {@link Vertex.Type#MERGE} event.
+	 * Handles a {@link SweepLineVertexType#MERGE} event.
 	 * @param vertex the vertex
-	 * @param tree the tree holding the current edges intersecting the sweep line
-	 * @param dcel the DCEL object to add edges to if necessary
+	 * @param sweepstate the current state of the SweepLine algorithm
 	 */
-	protected void merge(Vertex vertex, EdgeBinaryTree tree, DoublyConnectedEdgeList dcel) {
+	protected void merge(SweepLineVertex vertex, SweepState sweepstate) {
 		// get the previous edge
-		Edge eiPrev = vertex.right;
+		SweepLineEdge eiPrev = vertex.right;
 		// check if its helper is a merge vertex
-		if (eiPrev.helper.type == Vertex.Type.MERGE) {
+		if (eiPrev.helper.type == SweepLineVertexType.MERGE) {
 			// connect v to v.right.helper
-			dcel.addHalfEdges(vertex.dcelReference, eiPrev.helper.dcelReference);
+			sweepstate.dcel.addHalfEdges(vertex.index, eiPrev.helper.index);
 		}
 		// set the reference y to the current vertex's y
-				tree.referenceY = vertex.point.y;
+		sweepstate.referenceY.value = vertex.point.y;
 		// remove the previous edge since the sweep 
 		// line no longer intersects with it
-		tree.remove(eiPrev);
+		sweepstate.tree.remove(eiPrev);
 		// find the edge closest to the given vertex
-		Edge ej = tree.findClosest(vertex);
+		SweepLineEdge ej = sweepstate.tree.search(new ClosestEdgeToVertexSearchCriteria(vertex)).closest;
 		// is the edge's helper a merge vertex
-		if (ej.helper.type == Vertex.Type.MERGE) {
+		if (ej.helper.type == SweepLineVertexType.MERGE) {
 			// connect v to ej.helper
-			dcel.addHalfEdges(vertex.dcelReference, ej.helper.dcelReference);
+			sweepstate.dcel.addHalfEdges(vertex.index, ej.helper.index);
 		}
 		// set the closest edge's helper to this vertex
 		ej.helper = vertex;
 	}
 	
 	/**
-	 * Handles a {@link Vertex.Type#MERGE} event.
+	 * Handles a {@link SweepLineVertexType#MERGE} event.
 	 * @param vertex the vertex
-	 * @param tree the tree holding the current edges intersecting the sweep line
-	 * @param dcel the DCEL object to add edges to if necessary
+	 * @param sweepstate the current state of the SweepLine algorithm
 	 */
-	protected void regular(Vertex vertex, EdgeBinaryTree tree, DoublyConnectedEdgeList dcel) {
+	protected void regular(SweepLineVertex vertex, SweepState sweepstate) {
 		// check if the interior is to the right of this vertex
 		if (vertex.isInteriorRight()) {
 			// if so, check the previous edge's helper to see
 			// if its a merge vertex
-			if (vertex.right.helper.type == Vertex.Type.MERGE) {
+			if (vertex.right.helper.type == SweepLineVertexType.MERGE) {
 				// connect v to v.right.helper
-				dcel.addHalfEdges(vertex.dcelReference, vertex.right.helper.dcelReference);
+				sweepstate.dcel.addHalfEdges(vertex.index, vertex.right.helper.index);
 			}
 			// set the reference y to the current vertex's y
-			tree.referenceY = vertex.point.y;
+			sweepstate.referenceY.value = vertex.point.y;
 			// remove the previous edge since the sweep 
 			// line no longer intersects with it
-			tree.remove(vertex.right);
+			sweepstate.tree.remove(vertex.right);
 			// add the next edge
-			tree.insert(vertex.left);
+			sweepstate.tree.insert(vertex.left);
 			// set the helper
 			vertex.left.helper = vertex;
 		} else {
 			// otherwise find the closest edge
-			Edge ej = tree.findClosest(vertex);
+			SweepLineEdge ej = sweepstate.tree.search(new ClosestEdgeToVertexSearchCriteria(vertex)).closest;
 			// check the helper type
-			if (ej.helper.type == Vertex.Type.MERGE) {
+			if (ej.helper.type == SweepLineVertexType.MERGE) {
 				// connect v to ej.helper
-				dcel.addHalfEdges(vertex.dcelReference, ej.helper.dcelReference);
+				sweepstate.dcel.addHalfEdges(vertex.index, ej.helper.index);
 			}
 			// set the new helper
 			ej.helper = vertex;

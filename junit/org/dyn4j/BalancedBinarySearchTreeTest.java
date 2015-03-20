@@ -130,7 +130,7 @@ public class BalancedBinarySearchTreeTest {
 		TestCase.assertFalse(tree.contains(-4));
 		TestCase.assertEquals(size - 1, tree.size());
 		
-		BinarySearchTree<Integer>.Node node = tree.get(10);
+		BinarySearchTreeNode<Integer> node = tree.get(10);
 		tree.removeMinimum(node);
 		TestCase.assertFalse(tree.contains(4));
 		TestCase.assertEquals(size - 2, tree.size());
@@ -165,7 +165,7 @@ public class BalancedBinarySearchTreeTest {
 	public void removeNotFound() {
 		TestCase.assertFalse(tree.remove(7));
 		
-		BinarySearchTree<Integer>.Node node = tree.new Node(-3);
+		BinarySearchTreeNode<Integer> node = new BinarySearchTreeNode<Integer>(-3);
 		TestCase.assertFalse(tree.remove(node));
 	}
 	
@@ -176,7 +176,7 @@ public class BalancedBinarySearchTreeTest {
 	public void getDepth() {
 		TestCase.assertEquals(4, tree.getHeight());
 		
-		BinarySearchTree<Integer>.Node node = tree.get(-3);
+		BinarySearchTreeNode<Integer> node = tree.get(-3);
 		TestCase.assertEquals(2, tree.getHeight(node));
 	}
 	
@@ -187,7 +187,7 @@ public class BalancedBinarySearchTreeTest {
 	public void getMinimum() {
 		TestCase.assertEquals(-4, (int) tree.getMinimum());
 		
-		BinarySearchTree<Integer>.Node node = tree.get(10);
+		BinarySearchTreeNode<Integer> node = tree.get(10);
 		TestCase.assertEquals(4, (int) tree.getMinimum(node).comparable);
 		
 		node = tree.get(1);
@@ -201,7 +201,7 @@ public class BalancedBinarySearchTreeTest {
 	public void getMaximum() {
 		TestCase.assertEquals(19, (int) tree.getMaximum());
 		
-		BinarySearchTree<Integer>.Node node = tree.get(-3);
+		BinarySearchTreeNode<Integer> node = tree.get(-3);
 		TestCase.assertEquals(-1, (int) tree.getMaximum(node).comparable);
 		
 		node = tree.get(6);
@@ -241,10 +241,10 @@ public class BalancedBinarySearchTreeTest {
 		TestCase.assertTrue(tree.contains(9));
 		TestCase.assertFalse(tree.contains(14));
 		
-		BinarySearchTree<Integer>.Node node = tree.get(-3);
+		BinarySearchTreeNode<Integer> node = tree.get(-3);
 		TestCase.assertTrue(tree.contains(node));
 		
-		node = tree.new Node(-3);
+		node = new BinarySearchTreeNode<Integer>(-3);
 		TestCase.assertFalse(tree.contains(node));
 	}
 	
@@ -264,7 +264,7 @@ public class BalancedBinarySearchTreeTest {
 	public void size() {
 		TestCase.assertEquals(13, tree.size());
 		
-		BinarySearchTree<Integer>.Node node = tree.get(-3);
+		BinarySearchTreeNode<Integer> node = tree.get(-3);
 		TestCase.assertEquals(3, tree.size(node));
 	}
 	

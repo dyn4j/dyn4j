@@ -32,29 +32,13 @@ import java.util.List;
  * A monotone polygon can be triangulated in O(n) time.  Algorithms within this package may decompose
  * a polygon into monotone pieces, which are then used to decompose into triangles.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.2.0
  * @since 2.2.0
  * @param <E> the vertex data type
  */
-public class MonotonePolygon<E> {
-	/**
-	 * Enumeration of the types of monotone polygons supported.
-	 * <p>
-	 * The type of monotone polygon is the axis in which the polygon
-	 * is monotone with respect to.
-	 * @author William Bittle
-	 * @version 2.2.0
-	 * @since 2.2.0
-	 */
-	public enum Type {
-		/** Represents a y-monotone polygon */
-		Y,
-		/** Represents a x-monotone polygon */
-		X
-	}
-	
+class MonotonePolygon<E> {
 	/** The type of monotone polygon */
-	protected MonotonePolygon.Type type;
+	protected MonotonePolygonType type;
 	
 	/** The sorted array of vertices */
 	protected List<MonotoneVertex<E>> vertices;
@@ -64,7 +48,7 @@ public class MonotonePolygon<E> {
 	 * @param type the monotone polygon type
 	 * @param vertices the sorted array of vertices; descending order
 	 */
-	public MonotonePolygon(MonotonePolygon.Type type, List<MonotoneVertex<E>> vertices) {
+	public MonotonePolygon(MonotonePolygonType type, List<MonotoneVertex<E>> vertices) {
 		this.type = type;
 		this.vertices = vertices;
 	}
@@ -100,29 +84,5 @@ public class MonotonePolygon<E> {
 	 */
 	public MonotoneVertex<E> getMinimum() {
 		return this.vertices.get(this.vertices.size() - 1);
-	}
-	
-	/**
-	 * Returns the type of monotone polygon.
-	 * @return {@link MonotonePolygon.Type}
-	 */
-	public MonotonePolygon.Type getType() {
-		return this.type;
-	}
-	
-	/**
-	 * Returns the sorted list of vertices.
-	 * @return List&lt;{@link MonotoneVertex}&gt;
-	 */
-	public List<MonotoneVertex<E>> getVertices() {
-		return this.vertices;
-	}
-	
-	/**
-	 * Sets the sorted list of vertices.
-	 * @param vertices the sorted list of vertices; descending order
-	 */
-	public void setVertices(List<MonotoneVertex<E>> vertices) {
-		this.vertices = vertices;
 	}
 }

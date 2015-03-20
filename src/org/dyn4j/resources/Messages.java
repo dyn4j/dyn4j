@@ -24,6 +24,7 @@
  */
 package org.dyn4j.resources;
 
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 /**
@@ -42,6 +43,10 @@ public class Messages {
 	 * @return String
 	 */
 	public static final String getString(String key) {
-		return BUNDLE.getString(key);
+		try {
+			return BUNDLE.getString(key);
+		} catch (MissingResourceException ex) {
+			return String.format("Key %1$ not found.", key);
+		}
 	}
 }
