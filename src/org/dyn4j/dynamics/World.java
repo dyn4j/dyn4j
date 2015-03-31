@@ -3087,6 +3087,7 @@ public class World implements Shiftable, DataContainer {
 	/**
 	 * Sets the dynamics settings for this world.
 	 * @param settings the desired settings
+	 * @throws NullPointerException if the given settings is null
 	 * @since 3.0.3
 	 */
 	public void setSettings(Settings settings) {

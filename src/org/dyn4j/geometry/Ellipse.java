@@ -127,9 +127,9 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 * @see org.dyn4j.geometry.Convex#getFarthestPoint(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform)
 	 */
 	@Override
-	public Vector2 getFarthestPoint(Vector2 n, Transform transform) {
+	public Vector2 getFarthestPoint(Vector2 vector, Transform transform) {
 		// convert the world space vector(n) to local space
-		Vector2 localAxis = transform.getInverseTransformedR(n);
+		Vector2 localAxis = transform.getInverseTransformedR(vector);
 		// include local rotation
 		double r = this.getRotation();
 		// invert the local rotation
@@ -156,9 +156,9 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 * @see org.dyn4j.geometry.Convex#getFarthestFeature(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform)
 	 */
 	@Override
-	public Feature getFarthestFeature(Vector2 n, Transform transform) {
+	public Feature getFarthestFeature(Vector2 vector, Transform transform) {
 		// obtain the farthest point along the given vector
-		Vector2 farthest = this.getFarthestPoint(n, transform);
+		Vector2 farthest = this.getFarthestPoint(vector, transform);
 		// for an ellipse the farthest feature along a vector will always be a vertex
 		return new Vertex(farthest);
 	}
@@ -167,15 +167,15 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 * @see org.dyn4j.geometry.Shape#project(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform)
 	 */
 	@Override
-	public Interval project(Vector2 n, Transform transform) {
+	public Interval project(Vector2 vector, Transform transform) {
 		// get the world space farthest point
-		Vector2 p1 = this.getFarthestPoint(n, transform);
+		Vector2 p1 = this.getFarthestPoint(vector, transform);
 		// get the center in world space
 		Vector2 center = transform.getTransformed(this.center);
 		// project the center onto the axis
-		double c = center.dot(n);
+		double c = center.dot(vector);
 		// project the point onto the axis
-		double d = p1.dot(n);
+		double d = p1.dot(vector);
 		// get the interval along the axis
 		return new Interval(2 * c - d, d);
 	}

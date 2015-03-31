@@ -157,7 +157,7 @@ public abstract class AbstractCollidable<T extends Fixture> implements Collidabl
 		// return the current list
 		List<T> fixtures = this.fixtures;
 		// create a new list to replace the current list
-		this.fixtures = new ArrayList<T>(AbstractCollidable.TYPICAL_FIXTURE_COUNT);
+		this.fixtures = new ArrayList<T>(fixtures.size());
 		// return the current list
 		return fixtures;
 	}
@@ -166,6 +166,7 @@ public abstract class AbstractCollidable<T extends Fixture> implements Collidabl
 	 * @see org.dyn4j.collision.Collidable#containsFixture(org.dyn4j.collision.Fixture)
 	 */
 	public boolean containsFixture(T fixture) {
+		if (fixture == null) return false;
 		return this.fixtures.contains(fixture);
 	}
 	

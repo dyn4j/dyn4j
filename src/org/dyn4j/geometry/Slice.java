@@ -185,8 +185,8 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	 * @see org.dyn4j.geometry.Convex#getFarthestPoint(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform)
 	 */
 	@Override
-	public Vector2 getFarthestPoint(Vector2 n, Transform transform) {
-		Vector2 localn = transform.getInverseTransformedR(n);
+	public Vector2 getFarthestPoint(Vector2 vector, Transform transform) {
+		Vector2 localn = transform.getInverseTransformedR(vector);
 		
 		// project the origin and two end points first
 		if (Math.abs(localn.getAngleBetween(this.localXAxis)) > this.alpha) {
@@ -227,25 +227,25 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	 * @see org.dyn4j.geometry.Convex#getFarthestFeature(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform)
 	 */
 	@Override
-	public Feature getFarthestFeature(Vector2 n, Transform transform) {
-		Vector2 localAxis = transform.getInverseTransformedR(n);
+	public Feature getFarthestFeature(Vector2 vector, Transform transform) {
+		Vector2 localAxis = transform.getInverseTransformedR(vector);
 		if (Math.abs(localAxis.getAngleBetween(this.localXAxis)) <= this.alpha) {
 			// then its the farthest point
-			Vector2 point = this.getFarthestPoint(n, transform);
+			Vector2 point = this.getFarthestPoint(vector, transform);
 			return new Vertex(point);
 		} else {
 			// check if this section is nearly a half circle
 			if ((Math.PI - this.theta) <= 1.0e-6) {
 				// if so, we want to return the full back side
-				return Segment.getFarthestFeature(this.vertices[1], this.vertices[2], n, transform);
+				return Segment.getFarthestFeature(this.vertices[1], this.vertices[2], vector, transform);
 			}
 			// otherwise check which side its on
 			if (localAxis.y > 0) {
 				// then its the top segment
-				return Segment.getFarthestFeature(this.vertices[0], this.vertices[1], n, transform);
+				return Segment.getFarthestFeature(this.vertices[0], this.vertices[1], vector, transform);
 			} else if (localAxis.y < 0) {
 				// then its the bottom segment
-				return Segment.getFarthestFeature(this.vertices[0], this.vertices[2], n, transform);
+				return Segment.getFarthestFeature(this.vertices[0], this.vertices[2], vector, transform);
 			} else {
 				// then its the tip point
 				return new Vertex(transform.getTransformed(this.vertices[0]));
@@ -257,13 +257,13 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	 * @see org.dyn4j.geometry.Shape#project(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform)
 	 */
 	@Override
-	public Interval project(Vector2 n, Transform transform) {
+	public Interval project(Vector2 vector, Transform transform) {
 		// get the world space farthest point
-		Vector2 p1 = this.getFarthestPoint(n, transform);
-		Vector2 p2 = this.getFarthestPoint(n.getNegative(), transform);
+		Vector2 p1 = this.getFarthestPoint(vector, transform);
+		Vector2 p2 = this.getFarthestPoint(vector.getNegative(), transform);
 		// project the point onto the axis
-		double d1 = p1.dot(n);
-		double d2 = p2.dot(n);
+		double d1 = p1.dot(vector);
+		double d2 = p2.dot(vector);
 		// get the interval along the axis
 		return new Interval(d2, d1);
 	}

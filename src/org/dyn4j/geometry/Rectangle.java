@@ -206,18 +206,18 @@ public class Rectangle extends Polygon implements Shape, Transformable, DataCont
 	}
 
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Polygon#project(org.dyn4j.geometry.Vector, org.dyn4j.geometry.Transform)
+	 * @see org.dyn4j.geometry.Polygon#project(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform)
 	 */
 	@Override
-	public Interval project(Vector2 axis, Transform transform) {
+	public Interval project(Vector2 vector, Transform transform) {
 		// get the center and vertices
 		Vector2 center = transform.getTransformed(this.center);
 		// create the project axes
 		Vector2 projectAxis0 = transform.getTransformedR(this.normals[1]);
 		Vector2 projectAxis1 = transform.getTransformedR(this.normals[2]);
 		// project the shape on the axis
-		double c = center.dot(axis);
-		double e = (this.width * 0.5) * Math.abs(projectAxis0.dot(axis)) + (this.height * 0.5) * Math.abs(projectAxis1.dot(axis));
+		double c = center.dot(vector);
+		double e = (this.width * 0.5) * Math.abs(projectAxis0.dot(vector)) + (this.height * 0.5) * Math.abs(projectAxis1.dot(vector));
         return new Interval(c - e, c + e);
 	}
 	

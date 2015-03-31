@@ -69,6 +69,7 @@ public interface Collidable<T extends Fixture> extends Transformable, Shiftable,
 	 * for {@link Collidable}s that have no fixtures.
 	 * @param transform the world space {@link Transform}
 	 * @return {@link AABB}
+	 * @throws NullPointerException if the given transform is null
 	 * @since 3.2.0
 	 */
 	public abstract AABB createAABB(Transform transform);
@@ -78,6 +79,7 @@ public interface Collidable<T extends Fixture> extends Transformable, Shiftable,
 	 * @param fixture the {@link Fixture}
 	 * @return {@link Collidable} this collidable
 	 * @since 3.2.0
+	 * @throws NullPointerException if fixture is null
 	 */
 	public abstract Collidable<T> addFixture(T fixture);
 	
@@ -87,6 +89,7 @@ public interface Collidable<T extends Fixture> extends Transformable, Shiftable,
 	 * @param convex the {@link Convex} {@link Shape} to add
 	 * @return T the fixture created
 	 * @since 3.2.0
+	 * @throws NullPointerException if convex is null
 	 */
 	public abstract T addFixture(Convex convex);
 	
@@ -96,6 +99,7 @@ public interface Collidable<T extends Fixture> extends Transformable, Shiftable,
 	 * Renamed from getShape(int).
 	 * @param index the index of the {@link Fixture}
 	 * @return T the fixture
+	 * @throws IndexOutOfBoundsException if index is out of bounds
 	 * @since 2.0.0
 	 */
 	public abstract T getFixture(int index);
@@ -115,6 +119,7 @@ public interface Collidable<T extends Fixture> extends Transformable, Shiftable,
 	 * Returns null if the point is not contained in any fixture in this {@link Collidable}.
 	 * @param point a world space point
 	 * @return T the fixture
+	 * @throws NullPointerException if point is null
 	 * @since 3.2.0
 	 */
 	public abstract T getFixture(Vector2 point);
@@ -150,6 +155,7 @@ public interface Collidable<T extends Fixture> extends Transformable, Shiftable,
 	 * Returns null if the point is not contained in any fixture in this {@link Collidable}.
 	 * @param point a world space point
 	 * @return T the fixture
+	 * @throws NullPointerException if point is null
 	 * @since 3.2.0
 	 */
 	public abstract T removeFixture(Vector2 point);
@@ -160,6 +166,7 @@ public interface Collidable<T extends Fixture> extends Transformable, Shiftable,
 	 * Returns an empty list if the point is not contained in any fixture in this {@link Collidable}.
 	 * @param point a world space point
 	 * @return List&lt;T&gt;
+	 * @throws NullPointerException if point is null
 	 * @since 3.2.0
 	 */
 	public abstract List<T> removeFixtures(Vector2 point);
@@ -180,6 +187,7 @@ public interface Collidable<T extends Fixture> extends Transformable, Shiftable,
 	 * Returns an empty list if the point is not contained in any fixture in this {@link Collidable}.
 	 * @param point a world space point
 	 * @return List&lt;T&gt;
+	 * @throws NullPointerException if point is null
 	 * @since 3.2.0
 	 */
 	public abstract List<T> getFixtures(Vector2 point);
@@ -205,6 +213,7 @@ public interface Collidable<T extends Fixture> extends Transformable, Shiftable,
 	 * Returns true if the given world space point is contained in this collidable.
 	 * @param point the world space test point
 	 * @return boolean
+	 * @throws NullPointerException if point is null
 	 * @since 3.2.0
 	 */
 	public abstract boolean contains(Vector2 point);
@@ -228,6 +237,7 @@ public interface Collidable<T extends Fixture> extends Transformable, Shiftable,
 	 * a point in world coordinates.
 	 * @param worldPoint a world space point
 	 * @return {@link Vector2} local space point
+	 * @throws NullPointerException if the given point is null
 	 * @since 3.2.0
 	 */
 	public abstract Vector2 getLocalPoint(Vector2 worldPoint);
@@ -237,6 +247,7 @@ public interface Collidable<T extends Fixture> extends Transformable, Shiftable,
 	 * local coordinates of this {@link Collidable}.
 	 * @param localPoint a point in the local coordinates of this {@link Collidable}
 	 * @return {@link Vector2} world space point
+	 * @throws NullPointerException if the given point is null
 	 * @since 3.2.0
 	 */
 	public abstract Vector2 getWorldPoint(Vector2 localPoint);
@@ -246,6 +257,7 @@ public interface Collidable<T extends Fixture> extends Transformable, Shiftable,
 	 * a vector in world coordinates.
 	 * @param worldVector a world space vector
 	 * @return {@link Vector2} local space vector
+	 * @throws NullPointerException if the given vector is null
 	 * @since 3.2.0
 	 */
 	public abstract Vector2 getLocalVector(Vector2 worldVector);
@@ -255,6 +267,7 @@ public interface Collidable<T extends Fixture> extends Transformable, Shiftable,
 	 * local coordinates of this {@link Collidable}.
 	 * @param localVector a vector in the local coordinates of this {@link Collidable}
 	 * @return {@link Vector2} world space vector
+	 * @throws NullPointerException if the given vector is null
 	 * @since 3.2.0
 	 */
 	public abstract Vector2 getWorldVector(Vector2 localVector);

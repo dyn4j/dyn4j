@@ -63,6 +63,7 @@ public interface Shape extends Transformable, DataContainer {
 	 * center for this shape.
 	 * @param center the center point
 	 * @return double
+	 * @throws NullPointerException if the given point is null
 	 * @since 3.0.2
 	 */
 	public abstract double getRadius(Vector2 center);
@@ -82,20 +83,22 @@ public interface Shape extends Transformable, DataContainer {
 	 * given the {@link Transform}.
 	 * <p>
 	 * This is the same as calling {@link #project(Vector2, Transform)} and passing {@link Transform#IDENTITY}.
-	 * @param n {@link Vector2} to project onto
+	 * @param vector {@link Vector2} to project onto
 	 * @return {@link Interval}
+	 * @throws NullPointerException if the given vector is null
 	 * @since 3.1.5
 	 */
-	public abstract Interval project(Vector2 n);
+	public abstract Interval project(Vector2 vector);
 	
 	/**
 	 * Returns the {@link Interval} of this {@link Shape} projected onto the given {@link Vector2} 
 	 * given the {@link Transform}.
-	 * @param n {@link Vector2} to project onto
+	 * @param vector {@link Vector2} to project onto
 	 * @param transform {@link Transform} for this {@link Shape}
 	 * @return {@link Interval}
+	 * @throws NullPointerException if the given vector or transform is null
 	 */
-	public abstract Interval project(Vector2 n, Transform transform);
+	public abstract Interval project(Vector2 vector, Transform transform);
 
 	/**
 	 * Returns true if the given point is inside this {@link Shape}.
@@ -108,6 +111,7 @@ public interface Shape extends Transformable, DataContainer {
 	 * This is the same as calling {@link #contains(Vector2, Transform)} and passing {@link Transform#IDENTITY}.
 	 * @param point world space point
 	 * @return boolean
+	 * @throws NullPointerException if the given point is null
 	 * @since 3.1.5
 	 */
 	public abstract boolean contains(Vector2 point);
@@ -121,6 +125,7 @@ public interface Shape extends Transformable, DataContainer {
 	 * The given point is assumed to be in world space.
 	 * @param point world space point
 	 * @param transform {@link Transform} for this {@link Shape}
+	 * @throws NullPointerException if the given point or transform is null
 	 * @return boolean
 	 */
 	public abstract boolean contains(Vector2 point, Transform transform);
@@ -147,6 +152,7 @@ public interface Shape extends Transformable, DataContainer {
 	 * transformation to the shape.
 	 * @param transform the {@link Transform} for this {@link Shape}
 	 * @return {@link AABB} the {@link AABB} enclosing this {@link Shape}
+	 * @throws NullPointerException if the given transform is null
 	 * @since 3.0.0
 	 */
 	public abstract AABB createAABB(Transform transform);

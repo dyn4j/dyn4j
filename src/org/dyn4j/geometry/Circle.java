@@ -87,14 +87,14 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 	}
 
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Shape#project(org.dyn4j.geometry.Vector, org.dyn4j.geometry.Transform)
+	 * @see org.dyn4j.geometry.Shape#project(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform)
 	 */
 	@Override
-	public Interval project(Vector2 axis, Transform transform) {
+	public Interval project(Vector2 vector, Transform transform) {
 		// if the transform is not null then transform the center
 		Vector2 center = transform.getTransformed(this.center);
 		// project the center onto the given axis
-		double c = center.dot(axis);
+		double c = center.dot(vector);
 		// the interval is defined by the radius
 		return new Interval(c - this.radius, c + this.radius);
 	}
@@ -103,25 +103,25 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 	 * Returns the feature farthest in the given direction.
 	 * <p>
 	 * For a {@link Circle} this is always a point.
-	 * @param n the direction
+	 * @param vector the direction
 	 * @param transform the local to world space {@link Transform} of this {@link Convex} {@link Shape}
 	 * @return {@link Vertex}
 	 */
 	@Override
-	public Vertex getFarthestFeature(Vector2 n, Transform transform) {
+	public Vertex getFarthestFeature(Vector2 vector, Transform transform) {
 		// obtain the farthest point along the given vector
-		Vector2 farthest = this.getFarthestPoint(n, transform);
+		Vector2 farthest = this.getFarthestPoint(vector, transform);
 		// for a circle the farthest feature along a vector will always be a vertex
 		return new Vertex(farthest);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Convex#getFarthestPoint(org.dyn4j.geometry.Vector, org.dyn4j.geometry.Transform)
+	 * @see org.dyn4j.geometry.Convex#getFarthestPoint(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform)
 	 */
 	@Override
-	public Vector2 getFarthestPoint(Vector2 n, Transform transform) {
+	public Vector2 getFarthestPoint(Vector2 vector, Transform transform) {
 		// make sure the axis is normalized
-		Vector2 nAxis = n.getNormalized();
+		Vector2 nAxis = vector.getNormalized();
 		// get the transformed center
 		Vector2 center = transform.getTransformed(this.center);
 		// add the radius along the vector to the center to get the farthest point

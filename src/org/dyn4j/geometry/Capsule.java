@@ -198,23 +198,23 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 	 * @see org.dyn4j.geometry.Convex#getFarthestPoint(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform)
 	 */
 	@Override
-	public Vector2 getFarthestPoint(Vector2 n, Transform transform) {
+	public Vector2 getFarthestPoint(Vector2 vector, Transform transform) {
 		// make sure the given direction is normalized
-		n.normalize();
+		vector.normalize();
 		// a capsule is just a radially expanded line segment
-		Vector2 p = Segment.getFarthestPoint(this.foci[0], this.foci[1], n, transform);
+		Vector2 p = Segment.getFarthestPoint(this.foci[0], this.foci[1], vector, transform);
 		// apply the radial expansion
-		return p.add(n.product(this.capRadius));
+		return p.add(vector.product(this.capRadius));
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Convex#getFarthestFeature(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform)
 	 */
 	@Override
-	public Feature getFarthestFeature(Vector2 n, Transform transform) {
+	public Feature getFarthestFeature(Vector2 vector, Transform transform) {
 		// test whether the given direction is within a certain angle of the
 		// local x axis. if so, use the edge feature rather than the point
-		Vector2 localAxis = transform.getInverseTransformedR(n);
+		Vector2 localAxis = transform.getInverseTransformedR(vector);
 		Vector2 n1 = this.localXAxis.getLeftHandOrthogonalVector();
 		
 		// get the squared length of the localaxis and add the fudge factor
@@ -227,7 +227,7 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 		// we can later determine which direction by the sign of the projection
 		if (Math.abs(d1) < d) {
 			// then its the farthest point
-			Vector2 point = this.getFarthestPoint(n, transform);
+			Vector2 point = this.getFarthestPoint(vector, transform);
 			return new Vertex(point);
 		} else {
 			// compute the vector to add/sub from the foci
@@ -238,11 +238,11 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 				Vector2 p1 = this.foci[0].sum(v).subtract(e);
 				Vector2 p2 = this.foci[1].sum(v).add(e);
 				// return the full bottom side
-				return Segment.getFarthestFeature(p1, p2, n, transform);
+				return Segment.getFarthestFeature(p1, p2, vector, transform);
 			} else {
 				Vector2 p1 = this.foci[0].difference(v).subtract(e);
 				Vector2 p2 = this.foci[1].difference(v).add(e);
-				return Segment.getFarthestFeature(p1, p2, n, transform);
+				return Segment.getFarthestFeature(p1, p2, vector, transform);
 			}
 		}
 	}
@@ -251,15 +251,15 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 	 * @see org.dyn4j.geometry.Shape#project(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform)
 	 */
 	@Override
-	public Interval project(Vector2 n, Transform transform) {
+	public Interval project(Vector2 vector, Transform transform) {
 		// get the world space farthest point
-		Vector2 p1 = this.getFarthestPoint(n, transform);
+		Vector2 p1 = this.getFarthestPoint(vector, transform);
 		// get the center in world space
 		Vector2 center = transform.getTransformed(this.center);
 		// project the center onto the axis
-		double c = center.dot(n);
+		double c = center.dot(vector);
 		// project the point onto the axis
-		double d = p1.dot(n);
+		double d = p1.dot(vector);
 		// get the interval along the axis
 		return new Interval(2 * c - d, d);
 	}

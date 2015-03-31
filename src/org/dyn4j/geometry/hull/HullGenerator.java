@@ -45,7 +45,7 @@ public interface HullGenerator {
 	 * Returns the array unchanged if the length is less than or equal to 2.
 	 * @param points the point set
 	 * @return {@link Vector2}[] the convex hull vertices
-	 * @throws NullPointerException if the points array contains null points
+	 * @throws NullPointerException if the points array is null or contains null points
 	 */
 	public abstract Vector2[] generate(Vector2... points);
 }

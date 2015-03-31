@@ -130,6 +130,7 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 	 * @param point the point
 	 * @param linePoint1 the first point of the line
 	 * @param linePoint2 the second point of the line
+	 * @throws NullPointerException if point, linePoint1, or linePoint2 is null
 	 * @return double
 	 */
 	public static double getLocation(Vector2 point, Vector2 linePoint1, Vector2 linePoint2) {
@@ -151,6 +152,7 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 	 * @param point the point
 	 * @param linePoint1 the first point of the line
 	 * @param linePoint2 the second point of the line
+	 * @throws NullPointerException if point, linePoint1, or linePoint2 is null
 	 * @return {@link Vector2}
 	 */
 	public static Vector2 getPointOnLineClosestToPoint(Vector2 point, Vector2 linePoint1, Vector2 linePoint2) {
@@ -177,6 +179,7 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 	 * This method works in this {@link Segment}'s local space.
 	 * @param point the local space point
 	 * @return {@link Vector2}
+	 * @throws NullPointerException if the given point is null
 	 * @since 3.1.5
 	 * @see #getPointOnLineClosestToPoint(Vector2, Vector2, Vector2)
 	 */
@@ -197,6 +200,7 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 	 * @param linePoint1 the first point of the line
 	 * @param linePoint2 the second point of the line
 	 * @return {@link Vector2}
+	 * @throws NullPointerException if point, linePoint1, or linePoint2 is null
 	 */
 	public static Vector2 getPointOnSegmentClosestToPoint(Vector2 point, Vector2 linePoint1, Vector2 linePoint2) {
 		// create a vector from the point to the first line point
@@ -223,6 +227,7 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 	 * This method works in this {@link Segment}'s local space.
 	 * @param point the local space point
 	 * @return {@link Vector2}
+	 * @throws NullPointerException if the given point is null
 	 * @since 3.1.5
 	 * @see #getPointOnSegmentClosestToPoint(Vector2, Vector2, Vector2)
 	 */
@@ -264,6 +269,7 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 	 * @param bp2 the second point of the second line
 	 * @return Vector2 the intersection point; null if the lines are parallel or coincident
 	 * @see #getSegmentIntersection(Vector2, Vector2, Vector2, Vector2)
+	 * @throws NullPointerException if ap1, ap2, bp1 or bp2 is null
 	 * @since 3.1.1
 	 */
 	public static Vector2 getLineIntersection(Vector2 ap1, Vector2 ap2, Vector2 bp1, Vector2 bp2) {
@@ -301,6 +307,7 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 	 * If the lines are parallel or coincident, null is returned.
 	 * @param segment the other segment
 	 * @return {@link Vector2}
+	 * @throws NullPointerException if the given segment is null
 	 * @since 3.1.5
 	 * @see #getLineIntersection(Vector2, Vector2, Vector2, Vector2)
 	 */
@@ -345,6 +352,7 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 	 * @param bp2 the second point of the second line segment
 	 * @return Vector2 the intersection point; null if the line segments don't intersect, are parallel, or are coincident
 	 * @see #getLineIntersection(Vector2, Vector2, Vector2, Vector2)
+	 * @throws NullPointerException if ap1, ap2, bp1, or bp2 is null
 	 * @since 3.1.1
 	 */
 	public static Vector2 getSegmentIntersection(Vector2 ap1, Vector2 ap2, Vector2 bp1, Vector2 bp2) {
@@ -396,6 +404,7 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 	 * If the segments do not intersect, are parallel, or are coincident, null is returned.
 	 * @param segment the other segment
 	 * @return {@link Vector2}
+	 * @throws NullPointerException if the given segment is null
 	 * @since 3.1.5
 	 * @see #getSegmentIntersection(Vector2, Vector2, Vector2, Vector2)
 	 */
@@ -410,20 +419,21 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 	 * and the correct maximum.
 	 * @param v1 the first segment vertex
 	 * @param v2 the second segment vertex
-	 * @param n the direction
+	 * @param vector the direction
 	 * @param transform the local to world space {@link Transform} of this {@link Convex} {@link Shape}
 	 * @return {@link Edge}
+	 * @throws NullPointerException if v1, v2, vector, or transform is null
 	 * @since 3.1.5
 	 */
-	public static final Edge getFarthestFeature(Vector2 v1, Vector2 v2, Vector2 n, Transform transform) {
+	public static final Edge getFarthestFeature(Vector2 v1, Vector2 v2, Vector2 vector, Transform transform) {
 		// the farthest feature for a line is always the line itself
 		Vector2 max = null;
 		// get the vertices
 		Vector2 p1 = transform.getTransformed(v1);
 		Vector2 p2 = transform.getTransformed(v2);
 		// project them onto the vector
-		double dot1 = n.dot(p1);
-		double dot2 = n.dot(p2);
+		double dot1 = vector.dot(p1);
+		double dot2 = vector.dot(p2);
 		// find the greatest projection
 		int index = 0;
 		if (dot1 >= dot2) {
@@ -439,7 +449,7 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 		Vertex vp2 = new Vertex(p2, 1);
 		Vertex vm = new Vertex(max, index);
 		// make sure the edge is the right winding
-		if (p1.to(p2).right().dot(n) > 0) {
+		if (p1.to(p2).right().dot(vector) > 0) {
 			return new Edge(vp2, vp1, vm, p2.to(p1), 0);
 		} else {
 			return new Edge(vp1, vp2, vm, p1.to(p2), 0);
@@ -450,18 +460,19 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 	 * Returns the farthest point on the given segment.
 	 * @param v1 the first point of the segment
 	 * @param v2 the second point of the segment
-	 * @param n the direction
+	 * @param vector the direction
 	 * @param transform the local to world space {@link Transform} of this {@link Convex} {@link Shape}
 	 * @return {@link Vector2}
+	 * @throws NullPointerException if v1, v2, vector, or transform is null
 	 * @since 3.1.5
 	 */
-	public static final Vector2 getFarthestPoint(Vector2 v1, Vector2 v2, Vector2 n, Transform transform) {
+	public static final Vector2 getFarthestPoint(Vector2 v1, Vector2 v2, Vector2 vector, Transform transform) {
 		// get the vertices and the center
 		Vector2 p1 = transform.getTransformed(v1);
 		Vector2 p2 = transform.getTransformed(v2);
 		// project them onto the vector
-		double dot1 = n.dot(p1);
-		double dot2 = n.dot(p2);
+		double dot1 = vector.dot(p1);
+		double dot2 = vector.dot(p2);
 		// find the greatest projection
 		if (dot1 >= dot2) {
 			return p1;
@@ -586,19 +597,19 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 	}
 
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Shape#project(org.dyn4j.geometry.Vector, org.dyn4j.geometry.Transform)
+	 * @see org.dyn4j.geometry.Shape#project(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform)
 	 */
 	@Override
-	public Interval project(Vector2 n, Transform transform) {
+	public Interval project(Vector2 vector, Transform transform) {
 		double v = 0.0;
 		// get the vertices
 		Vector2 p1 = transform.getTransformed(this.vertices[0]);
 		Vector2 p2 = transform.getTransformed(this.vertices[1]);
 		// project the first
-    	double min = n.dot(p1);
+    	double min = vector.dot(p1);
     	double max = min;
     	// project the second
-        v = n.dot(p2);
+        v = vector.dot(p2);
         if (v < min) { 
             min = v;
         } else if (v > max) { 
@@ -612,21 +623,21 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 	 * @see org.dyn4j.geometry.Convex#getFurthestPoint(org.dyn4j.geometry.Vector, org.dyn4j.geometry.Transform)
 	 */
 	@Override
-	public Vector2 getFarthestPoint(Vector2 n, Transform transform) {
-		return Segment.getFarthestPoint(this.vertices[0], this.vertices[1], n, transform);
+	public Vector2 getFarthestPoint(Vector2 vector, Transform transform) {
+		return Segment.getFarthestPoint(this.vertices[0], this.vertices[1], vector, transform);
 	}
 	
 	/**
 	 * Returns the feature farthest in the direction of n.
 	 * <p>
 	 * For a {@link Segment} it's always the {@link Segment} itself.
-	 * @param n the direction
+	 * @param vector the direction
 	 * @param transform the local to world space {@link Transform} of this {@link Convex} {@link Shape}
 	 * @return {@link Edge}
 	 */
 	@Override
-	public Edge getFarthestFeature(Vector2 n, Transform transform) {
-		return Segment.getFarthestFeature(this.vertices[0], this.vertices[1], n, transform);
+	public Edge getFarthestFeature(Vector2 vector, Transform transform) {
+		return Segment.getFarthestFeature(this.vertices[0], this.vertices[1], vector, transform);
 	}
 	
 	/* (non-Javadoc)

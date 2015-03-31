@@ -269,15 +269,15 @@ public class Polygon extends Wound implements Convex, Shape, Transformable, Data
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Shape#project(org.dyn4j.geometry.Vector, org.dyn4j.geometry.Transform)
+	 * @see org.dyn4j.geometry.Shape#project(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform)
 	 */
 	@Override
-	public Interval project(Vector2 n, Transform transform) {
+	public Interval project(Vector2 vector, Transform transform) {
 		double v = 0.0;
     	// get the first point
 		Vector2 p = transform.getTransformed(this.vertices[0]);
 		// project the point onto the vector
-    	double min = n.dot(p);
+    	double min = vector.dot(p);
     	double max = min;
     	// loop over the rest of the vertices
     	int size = this.vertices.length;
@@ -285,7 +285,7 @@ public class Polygon extends Wound implements Convex, Shape, Transformable, Data
     		// get the next point
     		p = transform.getTransformed(this.vertices[i]);
     		// project it onto the vector
-            v = n.dot(p);
+            v = vector.dot(p);
             if (v < min) { 
                 min = v;
             } else if (v > max) { 
@@ -296,12 +296,12 @@ public class Polygon extends Wound implements Convex, Shape, Transformable, Data
 	}
 
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Convex#getFarthestFeature(org.dyn4j.geometry.Vector, org.dyn4j.geometry.Transform)
+	 * @see org.dyn4j.geometry.Convex#getFarthestFeature(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform)
 	 */
 	@Override
-	public Edge getFarthestFeature(Vector2 n, Transform transform) {
+	public Edge getFarthestFeature(Vector2 vector, Transform transform) {
 		// transform the normal into local space
-		Vector2 localn = transform.getInverseTransformedR(n);
+		Vector2 localn = transform.getInverseTransformedR(vector);
 		Vector2 maximum = new Vector2();
 		double max = -Double.MAX_VALUE;
 		int index = 0;
@@ -347,12 +347,12 @@ public class Polygon extends Wound implements Convex, Shape, Transformable, Data
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Convex#getFarthestPoint(org.dyn4j.geometry.Vector, org.dyn4j.geometry.Transform)
+	 * @see org.dyn4j.geometry.Convex#getFarthestPoint(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform)
 	 */
 	@Override
-	public Vector2 getFarthestPoint(Vector2 n, Transform transform) {
+	public Vector2 getFarthestPoint(Vector2 vector, Transform transform) {
 		// transform the normal into local space
-		Vector2 localn = transform.getInverseTransformedR(n);
+		Vector2 localn = transform.getInverseTransformedR(vector);
 		Vector2 point = new Vector2();
 		// set the farthest point to the first one
 		point.set(this.vertices[0]);

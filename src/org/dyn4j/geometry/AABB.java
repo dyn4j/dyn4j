@@ -54,6 +54,7 @@ public class AABB implements Translatable {
 	 * Full constructor.
 	 * @param min the minimum extent
 	 * @param max the maximum extent
+	 * @throws IllegalArgumentException if either coordinate of the given min is greater than the given max
 	 */
 	public AABB(Vector2 min, Vector2 max) {
 		// check the min and max
@@ -78,6 +79,7 @@ public class AABB implements Translatable {
 	 * @param center the center of the circle
 	 * @param radius the radius of the circle
 	 * @since 3.1.5
+	 * @throws IllegalArgumentException if the given radius is less than zero
 	 */
 	public AABB(Vector2 center, double radius) {
 		if (radius < 0) throw new IllegalArgumentException(Messages.getString("geometry.aabb.invalidRadius"));

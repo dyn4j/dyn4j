@@ -49,6 +49,7 @@ public interface Convex extends Shape, Transformable, DataContainer {
 	 * @param foci the world space points representing foci of curved {@link Shape}s; can be null
 	 * @param transform the local to world space {@link Transform} of this {@link Convex} {@link Shape}
 	 * @return {@link Vector2}[]
+	 * @throws UnsupportedOperationException if this shape doesn't support this method
 	 */
 	public abstract Vector2[] getAxes(Vector2[] foci, Transform transform);
 	
@@ -58,26 +59,27 @@ public interface Convex extends Shape, Transformable, DataContainer {
 	 * This method returns null if the {@link Shape} has zero curved edges.
 	 * @param transform the local to world space {@link Transform} of this {@link Convex} {@link Shape}
 	 * @return {@link Vector2}[]
+	 * @throws UnsupportedOperationException if this shape doesn't support this method
 	 */
 	public abstract Vector2[] getFoci(Transform transform);
 	
 	/**
-	 * Returns the feature farthest in the direction of n.
-	 * @param n the direction
+	 * Returns the feature farthest in the direction of the given vector.
+	 * @param vector the direction
 	 * @param transform the local to world space {@link Transform} of this {@link Convex} {@link Shape}
 	 * @return {@link Feature}
 	 */
-	public abstract Feature getFarthestFeature(Vector2 n, Transform transform);
+	public abstract Feature getFarthestFeature(Vector2 vector, Transform transform);
 	
 	/**
-	 * Returns the point farthest in the direction of n.  If two points are 
+	 * Returns the point farthest in the direction of the given vector.  If two points are 
 	 * equally distant along the given {@link Vector2} the first one in the vertex 
 	 * list is used.
 	 * <p>
 	 * The returned point is in world space.
-	 * @param n the direction
+	 * @param vector the direction
 	 * @param transform the local to world space {@link Transform} of this {@link Convex} {@link Shape}
 	 * @return {@link Vector2}
 	 */
-	public abstract Vector2 getFarthestPoint(Vector2 n, Transform transform);
+	public abstract Vector2 getFarthestPoint(Vector2 vector, Transform transform);
 }

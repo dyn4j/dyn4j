@@ -143,9 +143,9 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	 * @see org.dyn4j.geometry.Convex#getFarthestPoint(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform)
 	 */
 	@Override
-	public Vector2 getFarthestPoint(Vector2 n, Transform transform) {
+	public Vector2 getFarthestPoint(Vector2 vector, Transform transform) {
 		// convert the world space vector(n) to local space
-		Vector2 localAxis = transform.getInverseTransformedR(n);
+		Vector2 localAxis = transform.getInverseTransformedR(vector);
 		// include local rotation
 		double r = this.getRotation();
 		// invert the local rotation
@@ -181,15 +181,15 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	 * @see org.dyn4j.geometry.Convex#getFarthestFeature(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform)
 	 */
 	@Override
-	public Feature getFarthestFeature(Vector2 n, Transform transform) {
-		Vector2 localAxis = transform.getInverseTransformedR(n);
+	public Feature getFarthestFeature(Vector2 vector, Transform transform) {
+		Vector2 localAxis = transform.getInverseTransformedR(vector);
 		if (localAxis.getAngleBetween(this.localXAxis) < 0) {
 			// then its the farthest point
-			Vector2 point = this.getFarthestPoint(n, transform);
+			Vector2 point = this.getFarthestPoint(vector, transform);
 			return new Vertex(point);
 		} else {
 			// return the full bottom side
-			return Segment.getFarthestFeature(this.vertices[0], this.vertices[1], n, transform);
+			return Segment.getFarthestFeature(this.vertices[0], this.vertices[1], vector, transform);
 		}
 	}
 	
@@ -197,13 +197,13 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	 * @see org.dyn4j.geometry.Shape#project(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform)
 	 */
 	@Override
-	public Interval project(Vector2 n, Transform transform) {
+	public Interval project(Vector2 vector, Transform transform) {
 		// get the world space farthest point
-		Vector2 p1 = this.getFarthestPoint(n, transform);
-		Vector2 p2 = this.getFarthestPoint(n.getNegative(), transform);
+		Vector2 p1 = this.getFarthestPoint(vector, transform);
+		Vector2 p2 = this.getFarthestPoint(vector.getNegative(), transform);
 		// project the point onto the axis
-		double d1 = p1.dot(n);
-		double d2 = p2.dot(n);
+		double d1 = p1.dot(vector);
+		double d2 = p2.dot(vector);
 		// get the interval along the axis
 		return new Interval(d2, d1);
 	}

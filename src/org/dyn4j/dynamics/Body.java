@@ -413,10 +413,27 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * This method will calculate a total mass for the body 
 	 * given the masses of the fixtures.
 	 * <p>
+	 * This method will always set this body's mass type to Normal.
+	 * @return {@link Body} this body
+	 * @deprecated replaced by {@link Body#update()} in 3.2.0
+	 */
+	@Deprecated
+	public Body setMass() {
+		return this.update(Mass.Type.NORMAL);
+	}
+	
+	/**
+	 * This method should be called after fixture modification
+	 * is complete.
+	 * <p>
+	 * This method will calculate a total mass for the body 
+	 * given the masses of the fixtures.
+	 * <p>
 	 * A {@link org.dyn4j.geometry.Mass.Type} can be used to create special mass
 	 * types.  If the mass type is null, the method will immediately return.
 	 * @param type the {@link org.dyn4j.geometry.Mass.Type}
 	 * @return {@link Body} this body
+	 * @throws NullPointerException if the given mass type is null
 	 * @since 3.2.0
 	 */
 	public Body update(Mass.Type type) {
@@ -448,16 +465,34 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 		// return this body to facilitate chaining
 		return this;
 	}
+
+	/**
+	 * This method should be called after fixture modification
+	 * is complete.
+	 * <p>
+	 * This method will calculate a total mass for the body 
+	 * given the masses of the fixtures.
+	 * <p>
+	 * A {@link org.dyn4j.geometry.Mass.Type} can be used to create special mass
+	 * types.
+	 * @param type the mass type
+	 * @return {@link Body} this body
+	 * @deprecated replaced by {@link Body#update(Mass.Type)} in 3.2.0
+	 */
+	@Deprecated
+	public Body setMass(Mass.Type type) {
+		return this.update(type);
+	}
 	
 	/**
 	 * Sets this {@link Body}'s mass information.
 	 * <p>
-	 * This method can be used to set the mass of the body explicitly. Immediately
-	 * returns if the mass is null.
+	 * This method can be used to set the mass of the body explicitly.
 	 * <p>
 	 * This method will automatically update the body.
 	 * @param mass the new {@link Mass}
 	 * @return {@link Body} this body
+	 * @throws NullPointerException if the given mass is null
 	 */
 	public Body update(Mass mass) {
 		// make sure the mass is not null
@@ -473,10 +508,10 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	/**
 	 * Sets this {@link Body}'s mass information.
 	 * <p>
-	 * This method can be used to set the mass of the body explicitly. Immediately
-	 * returns if the mass is null.
+	 * This method does not recompute the rotation disc radius.
 	 * @param mass the new {@link Mass}
 	 * @return {@link Body} this body
+	 * @throws NullPointerException if the given mass is null
 	 */
 	public Body setMass(Mass mass) {
 		// make sure the mass is not null
@@ -501,6 +536,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * to something other than Mass.Type.INFINITE can have undefined results.
 	 * @param type the desired type
 	 * @return {@link Body} this body
+	 * @throws NullPointerException if the given mass type is null
 	 * @since 2.2.3
 	 */
 	public Body setMassType(Mass.Type type) {
