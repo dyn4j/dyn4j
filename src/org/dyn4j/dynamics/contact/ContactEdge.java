@@ -34,10 +34,10 @@ import org.dyn4j.dynamics.Body;
  */
 public class ContactEdge {
 	/** The connected body */
-	protected Body other;
+	protected final Body other;
 	
 	/** The {@link ContactConstraint} between the bodies */
-	protected ContactConstraint contactConstraint;
+	protected final ContactConstraint contactConstraint;
 	
 	/**
 	 * Full constructor.

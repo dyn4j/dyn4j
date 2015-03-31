@@ -34,10 +34,10 @@ import org.dyn4j.dynamics.Body;
  */
 public class JointEdge {
 	/** The linked body */
-	protected Body other;
+	protected final Body other;
 	
 	/** The {@link Joint} */
-	protected Joint joint;
+	protected final Joint joint;
 	
 	/**
 	 * Full constructor.
@@ -65,7 +65,7 @@ public class JointEdge {
 	 * @return {@link Body}
 	 */
 	public Body getOther() {
-		return other;
+		return this.other;
 	}
 	
 	/**
@@ -73,6 +73,6 @@ public class JointEdge {
 	 * @return {@link Joint}
 	 */
 	public Joint getJoint() {
-		return joint;
+		return this.joint;
 	}
 }
