@@ -7,6 +7,8 @@ New Features:
 Bug Fixes:
     
 Deprecated:
+  - The Body.setMass methods have been replaced by their respective update 
+    method.
   
 Breaking Changes:
   - The BroadphaseDetector interface has changed drastically.
@@ -28,6 +30,9 @@ Breaking Changes:
   - Deprecated methods and classes have been removed.
     
 Other:
+  - Cleaner API (less classes to sift through).
+  - More Javadoc comments.
+  - More maintainable.
 
 ===============================================================================
 Version 3.1.11
