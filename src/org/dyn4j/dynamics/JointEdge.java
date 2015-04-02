@@ -22,31 +22,31 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.dynamics.contact;
+package org.dyn4j.dynamics;
 
-import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.joint.Joint;
 
 /**
- * Represents a contact edge connecting two bodies.
+ * Represents a link from one {@link Body} to another over a {@link Joint}.
  * @author William Bittle
  * @version 3.0.2
  * @since 1.0.0
  */
-public class ContactEdge {
-	/** The connected body */
+class JointEdge {
+	/** The linked body */
 	protected final Body other;
 	
-	/** The {@link ContactConstraint} between the bodies */
-	protected final ContactConstraint contactConstraint;
+	/** The {@link Joint} */
+	protected final Joint joint;
 	
 	/**
 	 * Full constructor.
-	 * @param other the other {@link Body} in contact
-	 * @param contactConstraint the {@link ContactConstraint} between the {@link Body}s
+	 * @param other the linked {@link Body}
+	 * @param joint the {@link Joint}
 	 */
-	public ContactEdge(Body other, ContactConstraint contactConstraint) {
+	public JointEdge(Body other, Joint joint) {
 		this.other = other;
-		this.contactConstraint = contactConstraint;
+		this.joint = joint;
 	}
 	
 	/* (non-Javadoc)
@@ -54,14 +54,14 @@ public class ContactEdge {
 	 */
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("ContactEdge[ContactConstraint=").append(this.contactConstraint)
+		sb.append("JointEdge[Joint=").append(this.joint)
 		.append("|ConnectedBody=").append(this.other)
 		.append("]");
 		return sb.toString();
 	}
 	
 	/**
-	 * Returns the other body connected in the contact constraint.
+	 * Returns the linked {@link Body}.
 	 * @return {@link Body}
 	 */
 	public Body getOther() {
@@ -69,10 +69,10 @@ public class ContactEdge {
 	}
 	
 	/**
-	 * Returns the contact constraint.
-	 * @return {@link ContactConstraint}
+	 * Returns the {@link Joint}.
+	 * @return {@link Joint}
 	 */
-	public ContactConstraint getContactConstraint() {
-		return this.contactConstraint;
+	public Joint getJoint() {
+		return this.joint;
 	}
 }
