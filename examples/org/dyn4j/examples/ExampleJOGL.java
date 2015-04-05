@@ -224,7 +224,7 @@ public class ExampleJOGL extends JFrame implements GLEventListener {
 				new Vector2(0.5, -0.5));
 		GameObject triangle = new GameObject();
 		triangle.addFixture(triShape);
-		triangle.update();
+		triangle.update(Mass.Type.NORMAL);
 		triangle.translate(-1.0, 2.0);
 		// test having a velocity
 		triangle.getLinearVelocity().set(5.0, 0.0);
@@ -234,7 +234,7 @@ public class ExampleJOGL extends JFrame implements GLEventListener {
 		Rectangle rectShape = new Rectangle(1.0, 1.0);
 		GameObject rectangle = new GameObject();
 		rectangle.addFixture(rectShape);
-		rectangle.update();
+		rectangle.update(Mass.Type.NORMAL);
 		rectangle.translate(0.0, 2.0);
 		rectangle.getLinearVelocity().set(-5.0, 0.0);
 		this.world.addBody(rectangle);
@@ -243,7 +243,7 @@ public class ExampleJOGL extends JFrame implements GLEventListener {
 		Polygon polyShape = Geometry.createUnitCirclePolygon(10, 1.0);
 		GameObject polygon = new GameObject();
 		polygon.addFixture(polyShape);
-		polygon.update();
+		polygon.update(Mass.Type.NORMAL);
 		polygon.translate(-2.5, 2.0);
 		// set the angular velocity
 		polygon.setAngularVelocity(Math.toRadians(-20.0));
@@ -251,19 +251,19 @@ public class ExampleJOGL extends JFrame implements GLEventListener {
 		
 		GameObject issTri = new GameObject();
 		issTri.addFixture(Geometry.createIsoscelesTriangle(1.0, 3.0));
-		issTri.update();
+		issTri.update(Mass.Type.NORMAL);
 		issTri.translate(2.0, 3.0);
 		this.world.addBody(issTri);
 		
 		GameObject equTri = new GameObject();
 		equTri.addFixture(Geometry.createEquilateralTriangle(2.0));
-		equTri.update();
+		equTri.update(Mass.Type.NORMAL);
 		equTri.translate(3.0, 3.0);
 		this.world.addBody(equTri);
 		
 		GameObject rightTri = new GameObject();
 		rightTri.addFixture(Geometry.createRightTriangle(2.0, 1.0));
-		rightTri.update();
+		rightTri.update(Mass.Type.NORMAL);
 		rightTri.translate(4.0, 3.0);
 		this.world.addBody(rightTri);
 	}
