@@ -26,8 +26,8 @@ package org.dyn4j.sandbox.utilities;
 
 import java.text.MessageFormat;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
 
 import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.collision.Bounds;

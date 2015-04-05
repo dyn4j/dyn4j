@@ -26,13 +26,13 @@ package org.dyn4j.examples;
 
 import java.awt.Dimension;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLProfile;
-import javax.media.opengl.awt.GLCanvas;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.awt.GLCanvas;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -285,7 +285,7 @@ public class ExampleJOGL extends JFrame implements GLEventListener {
 	}
 	
 	/* (non-Javadoc)
-	 * @see javax.media.opengl.GLEventListener#init(javax.media.opengl.GLAutoDrawable)
+	 * @see com.jogamp.opengl.GLEventListener#init(com.jogamp.opengl.GLAutoDrawable)
 	 */
 	@Override
 	public void init(GLAutoDrawable glDrawable) {
@@ -312,7 +312,7 @@ public class ExampleJOGL extends JFrame implements GLEventListener {
 	}
 	
 	/* (non-Javadoc)
-	 * @see javax.media.opengl.GLEventListener#display(javax.media.opengl.GLAutoDrawable)
+	 * @see com.jogamp.opengl.GLEventListener#display(com.jogamp.opengl.GLAutoDrawable)
 	 */
 	@Override
 	public void display(GLAutoDrawable glDrawable) {
@@ -335,7 +335,7 @@ public class ExampleJOGL extends JFrame implements GLEventListener {
 	}
 	
 	/* (non-Javadoc)
-	 * @see javax.media.opengl.GLEventListener#dispose(javax.media.opengl.GLAutoDrawable)
+	 * @see com.jogamp.opengl.GLEventListener#dispose(com.jogamp.opengl.GLAutoDrawable)
 	 */
 	@Override
 	public void dispose(GLAutoDrawable glDrawable) {
@@ -343,7 +343,7 @@ public class ExampleJOGL extends JFrame implements GLEventListener {
 	}
 	
 	/* (non-Javadoc)
-	 * @see javax.media.opengl.GLEventListener#reshape(javax.media.opengl.GLAutoDrawable, int, int, int, int)
+	 * @see com.jogamp.opengl.GLEventListener#reshape(com.jogamp.opengl.GLAutoDrawable, int, int, int, int)
 	 */
 	@Override
 	public void reshape(GLAutoDrawable glDrawable, int x, int y, int width, int height) {
