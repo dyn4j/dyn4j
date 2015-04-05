@@ -50,13 +50,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLException;
-import javax.media.opengl.GLProfile;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.GLException;
+import com.jogamp.opengl.GLProfile;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
@@ -1209,7 +1209,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	}
 	
 	/* (non-Javadoc)
-	 * @see javax.media.opengl.GLEventListener#init(javax.media.opengl.GLAutoDrawable)
+	 * @see com.jogamp.opengl.GLEventListener#init(com.jogamp.opengl.GLAutoDrawable)
 	 */
 	@Override
 	public void init(GLAutoDrawable glDrawable) {
@@ -1257,7 +1257,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	}
 	
 	/* (non-Javadoc)
-	 * @see javax.media.opengl.GLEventListener#display(javax.media.opengl.GLAutoDrawable)
+	 * @see com.jogamp.opengl.GLEventListener#display(com.jogamp.opengl.GLAutoDrawable)
 	 */
 	@Override
 	public void display(GLAutoDrawable glDrawable) {
@@ -1300,7 +1300,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	}
 	
 	/* (non-Javadoc)
-	 * @see javax.media.opengl.GLEventListener#dispose(javax.media.opengl.GLAutoDrawable)
+	 * @see com.jogamp.opengl.GLEventListener#dispose(com.jogamp.opengl.GLAutoDrawable)
 	 */
 	@Override
 	public void dispose(GLAutoDrawable glDrawable) {
@@ -1308,7 +1308,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	}
 	
 	/* (non-Javadoc)
-	 * @see javax.media.opengl.GLEventListener#reshape(javax.media.opengl.GLAutoDrawable, int, int, int, int)
+	 * @see com.jogamp.opengl.GLEventListener#reshape(com.jogamp.opengl.GLAutoDrawable, int, int, int, int)
 	 */
 	@Override
 	public void reshape(GLAutoDrawable glDrawable, int x, int y, int width, int height) {

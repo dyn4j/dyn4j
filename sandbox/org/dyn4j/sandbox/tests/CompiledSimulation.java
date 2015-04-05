@@ -24,7 +24,7 @@
  */
 package org.dyn4j.sandbox.tests;
 
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 import org.dyn4j.sandbox.Simulation;
 

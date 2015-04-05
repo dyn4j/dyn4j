@@ -26,7 +26,7 @@ package org.dyn4j.sandbox.tests;
 
 import java.util.Arrays;
 
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.contact.ContactAdapter;
@@ -218,7 +218,7 @@ public class Destructible extends CompiledSimulation {
 	public void update(double elapsedTime, boolean stepped) {}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.sandbox.tests.CompiledSimulation#render(javax.media.opengl.GL2)
+	 * @see org.dyn4j.sandbox.tests.CompiledSimulation#render(com.jogamp.opengl.GL2)
 	 */
 	@Override
 	public void render(GL2 gl) {}
