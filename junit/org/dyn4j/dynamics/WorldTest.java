@@ -46,7 +46,6 @@ import org.dyn4j.dynamics.contact.ContactAdapter;
 import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
-import org.dyn4j.dynamics.joint.MouseJoint;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
@@ -281,8 +280,6 @@ public class WorldTest {
 		TestCase.assertFalse(w.joints.isEmpty());
 		TestCase.assertFalse(b1.joints.isEmpty());
 		TestCase.assertFalse(b2.joints.isEmpty());
-		// make sure the world object is not null
-		TestCase.assertNotNull(j.world);
 	}
 
 	/**
@@ -295,25 +292,12 @@ public class WorldTest {
 	}
 	
 	/**
-	 * Tests the add body method attempting to add the
-	 * same body more than once.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void addSameJoint() {
-		World w = new World();
-		Body b1 = new Body();
-		Body b2 = new Body();
-		Joint j = new DistanceJoint(b1, b2, new Vector2(), new Vector2());
-		w.addJoint(j);
-		w.addJoint(j);
-	}
-	
-	/**
 	 * Tests the remove body method.
 	 */
 	@Test
 	public void removeBody() {
 		World w = new World();
+		w.setContactManager(new TestContactManager());
 		
 		// setup the destruction listener
 		WTDestructionListener dl = new WTDestructionListener();
@@ -379,7 +363,7 @@ public class WorldTest {
 		// joint and one contact
 		TestCase.assertEquals(2, dl.called);
 		// the contact manager should not have anything in the cache
-		TestCase.assertTrue(w.contactManager.isCacheEmpty());
+		TestCase.assertTrue(((TestContactManager)w.contactManager).cacheSize() == 0);
 	}
 	
 	/**
@@ -432,7 +416,6 @@ public class WorldTest {
 		TestCase.assertTrue(b2.joints.isEmpty());
 		// make sure that no contacts were removed
 		TestCase.assertFalse(b2.contacts.isEmpty());
-		TestCase.assertNull(j.world);
 	}
 	
 	/**
@@ -633,6 +616,7 @@ public class WorldTest {
 	@Test
 	public void removeAll() {
 		World w = new World();
+		w.setContactManager(new TestContactManager());
 		
 		// setup the listener
 		WTDestructionListener dl = new WTDestructionListener();
@@ -667,11 +651,10 @@ public class WorldTest {
 		TestCase.assertTrue(w.bodies.isEmpty());
 		TestCase.assertNull(b1.world);
 		TestCase.assertNull(b2.world);
-		TestCase.assertNull(j.world);
 		// one contact, one joint, and two bodies
 		TestCase.assertEquals(4, dl.called);
 		// the contact manager should not have anything in the cache
-		TestCase.assertTrue(w.contactManager.isCacheEmpty());
+		TestCase.assertTrue(((TestContactManager)w.contactManager).cacheSize() == 0);
 	}
 	
 	/**
@@ -681,6 +664,7 @@ public class WorldTest {
 	@Test
 	public void removeAllBodies() {
 		World w = new World();
+		w.setContactManager(new TestContactManager());
 		
 		// setup the listener
 		WTDestructionListener dl = new WTDestructionListener();
@@ -721,7 +705,7 @@ public class WorldTest {
 		// one contact, one joint, and two bodies
 		TestCase.assertEquals(4, dl.called);
 		// the contact manager should not have anything in the cache
-		TestCase.assertTrue(w.contactManager.isCacheEmpty());
+		TestCase.assertTrue(((TestContactManager)w.contactManager).cacheSize() == 0);
 	}
 	
 	/**
@@ -761,7 +745,6 @@ public class WorldTest {
 		TestCase.assertTrue(b1.joints.isEmpty());
 		TestCase.assertTrue(b2.joints.isEmpty());
 		TestCase.assertTrue(w.joints.isEmpty());
-		TestCase.assertNull(j.world);
 		// one contact, one joint, and two bodies
 		TestCase.assertEquals(1, dl.called);
 	}
@@ -831,22 +814,6 @@ public class WorldTest {
 		w1.addBody(b);
 		
 		w2.addBody(b);
-	}
-	
-	/**
-	 * Tests adding a body to a world that has already been added to a different world.
-	 * @since 3.1.0
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void addJointFromAnotherWorld() {
-		World w1 = new World();
-		World w2 = new World();
-		
-		Joint j = new MouseJoint(new Body(), new Vector2(), 0.8, 0.8, 100);
-		
-		w1.addJoint(j);
-		
-		w2.addJoint(j);
 	}
 	
 	/**

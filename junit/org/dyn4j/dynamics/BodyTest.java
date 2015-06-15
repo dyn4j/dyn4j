@@ -859,7 +859,6 @@ public class BodyTest {
 	 */
 	@Test
 	public void getInContactBodies() {
-		World world = new World();
 		Convex c1 = Geometry.createCircle(1.0);
 		Convex c2 = Geometry.createEquilateralTriangle(0.5);
 		
@@ -883,7 +882,7 @@ public class BodyTest {
 		ClippingManifoldSolver cms = new ClippingManifoldSolver();
 		Manifold m = new Manifold();
 		cms.getManifold(p, c1, b1.getTransform(), c2, b2.getTransform(), m);
-		ContactConstraint cc = new ContactConstraint(b1, f1, b2, f2, m, world);
+		ContactConstraint cc = new ContactConstraint(b1, f1, b2, f2, m, 0, 0);
 		ContactEdge ce1 = new ContactEdge(b2, cc);
 		ContactEdge ce2 = new ContactEdge(b1, cc);
 		
@@ -899,7 +898,7 @@ public class BodyTest {
 		b2.contacts.clear();
 		
 		f1.setSensor(true);
-		cc = new ContactConstraint(b1, f1, b2, f2, m, world);
+		cc = new ContactConstraint(b1, f1, b2, f2, m, 0, 0);
 		ce1 = new ContactEdge(b2, cc);
 		ce2 = new ContactEdge(b1, cc);
 		b1.contacts.add(ce1);
@@ -920,7 +919,6 @@ public class BodyTest {
 	 */
 	@Test
 	public void getContacts() {
-		World world = new World();
 		Convex c1 = Geometry.createCircle(1.0);
 		Convex c2 = Geometry.createEquilateralTriangle(0.5);
 		
@@ -944,7 +942,7 @@ public class BodyTest {
 		ClippingManifoldSolver cms = new ClippingManifoldSolver();
 		Manifold m = new Manifold();
 		cms.getManifold(p, c1, b1.getTransform(), c2, b2.getTransform(), m);
-		ContactConstraint cc = new ContactConstraint(b1, f1, b2, f2, m, world);
+		ContactConstraint cc = new ContactConstraint(b1, f1, b2, f2, m, 0, 0);
 		ContactEdge ce1 = new ContactEdge(b2, cc);
 		ContactEdge ce2 = new ContactEdge(b1, cc);
 		
@@ -959,7 +957,7 @@ public class BodyTest {
 		b2.contacts.clear();
 		
 		f1.setSensor(true);
-		cc = new ContactConstraint(b1, f1, b2, f2, m, world);
+		cc = new ContactConstraint(b1, f1, b2, f2, m, 0, 0);
 		ce1 = new ContactEdge(b2, cc);
 		ce2 = new ContactEdge(b1, cc);
 		b1.contacts.add(ce1);

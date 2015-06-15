@@ -24,52 +24,28 @@
  */
 package org.dyn4j.dynamics;
 
-import junit.framework.TestCase;
-
-import org.dyn4j.geometry.Shiftable;
-import org.dyn4j.geometry.Vector2;
-import org.junit.Test;
+import org.dyn4j.dynamics.contact.WarmStartingContactManager;
 
 /**
- * Class to test the {@link Constraint} class.
+ * A custom contact manager for testing.
  * @author William Bittle
- * @version 3.1.1
- * @since 3.1.1
+ * @version 3.2.0
+ * @since 3.2.0
  */
-public class ConstraintTest {
+public class TestContactManager extends WarmStartingContactManager {
 	/**
-	 * Class for testing the {@link Constraint} classes methods.
-	 * @author William Bittle
-	 * @version 3.1.1
-	 * @since 3.1.1
+	 * Returns the queue size.
+	 * @return int
 	 */
-	private class TestConstraint extends Constraint implements Shiftable {
-		/**
-		 * Full constructor.
-		 * @param b1 the first body
-		 * @param b2 the second body
-		 */
-		public TestConstraint(Body b1, Body b2) {
-			super(b1, b2);
-		}
-		@Override
-		public void shift(Vector2 shift) {}
+	public int queueSize() {
+		return this.constraintQueue.size();
 	}
 	
 	/**
-	 * Tests the get/set user data.
+	 * Returns the cache size.
+	 * @return int
 	 */
-	@Test
-	public void getUserData() {
-		String obj = "hello";
-		Body b1 = new Body();
-		Body b2 = new Body();
-		TestConstraint tc = new TestConstraint(b1, b2);
-		
-		TestCase.assertNull(tc.getUserData());
-		
-		tc.setUserData(obj);
-		TestCase.assertNotNull(tc.getUserData());
-		TestCase.assertSame(obj, tc.getUserData());
+	public int cacheSize() {
+		return this.constraints.size();
 	}
 }

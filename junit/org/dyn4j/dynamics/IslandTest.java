@@ -48,44 +48,31 @@ public class IslandTest {
 	 */
 	@Test
 	public void createSuccess() {
-		World w = new World();
-		Island island = new Island(w);
-		island = new Island(w, Capacity.DEFAULT_CAPACITY);
+		Island island = new Island();
+		island = new Island(Capacity.DEFAULT_CAPACITY);
 		
 		TestCase.assertNotNull(island.bodies);
-		TestCase.assertNotNull(island.world);
 		TestCase.assertNotNull(island.contactConstraints);
-		TestCase.assertNotNull(island.contactConstraintSolver);
 		TestCase.assertNotNull(island.joints);
-		TestCase.assertEquals(w, island.world);
 	}
 	
 	/**
 	 * Tests the failed creation of an island.
 	 */
 	public void createSuccessNullCapacity() {
-		new Island(new World(), null);
+		new Island(null);
 	}
 
-	/**
-	 * Tests the failed creation of an island.
-	 */
-	@Test(expected = NullPointerException.class)
-	public void createFailNullWorld() {
-		new Island(null, Capacity.DEFAULT_CAPACITY);
-	}
-	
 	/**
 	 * Tests the add methods.
 	 */
 	@Test
 	public void add() {
-		World w = new World();
-		Island i = new Island(w);
+		Island i = new Island();
 		
 		i.add(new Body());
 		i.add(new AngleJoint(new Body(), new Body()));
-		i.add(new ContactConstraint(new Body(), new BodyFixture(Geometry.createCircle(1.0)), new Body(), new BodyFixture(Geometry.createCircle(1.0)), new Manifold(new ArrayList<ManifoldPoint>(), new Vector2()), w));
+		i.add(new ContactConstraint(new Body(), new BodyFixture(Geometry.createCircle(1.0)), new Body(), new BodyFixture(Geometry.createCircle(1.0)), new Manifold(new ArrayList<ManifoldPoint>(), new Vector2()), 0, 0));
 		
 		TestCase.assertEquals(1, i.bodies.size());
 		TestCase.assertEquals(1, i.joints.size());
@@ -97,12 +84,11 @@ public class IslandTest {
 	 */
 	@Test
 	public void clear() {
-		World w = new World();
-		Island i = new Island(w);
+		Island i = new Island();
 		
 		i.add(new Body());
 		i.add(new AngleJoint(new Body(), new Body()));
-		i.add(new ContactConstraint(new Body(), new BodyFixture(Geometry.createCircle(1.0)), new Body(), new BodyFixture(Geometry.createCircle(1.0)), new Manifold(new ArrayList<ManifoldPoint>(), new Vector2()), w));
+		i.add(new ContactConstraint(new Body(), new BodyFixture(Geometry.createCircle(1.0)), new Body(), new BodyFixture(Geometry.createCircle(1.0)), new Manifold(new ArrayList<ManifoldPoint>(), new Vector2()), 0, 0));
 		
 		TestCase.assertEquals(1, i.bodies.size());
 		TestCase.assertEquals(1, i.joints.size());

@@ -27,13 +27,12 @@ package org.dyn4j.dynamics.contact;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.dyn4j.DataContainer;
 import org.dyn4j.collision.manifold.Manifold;
 import org.dyn4j.collision.manifold.ManifoldPoint;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
-import org.dyn4j.dynamics.CoefficientMixer;
 import org.dyn4j.dynamics.Constraint;
-import org.dyn4j.dynamics.World;
 import org.dyn4j.geometry.Matrix22;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Vector2;
@@ -41,18 +40,18 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents a {@link Contact} constraint for each {@link Body} pair.  
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.2.0
  * @since 1.0.0
  */
-public class ContactConstraint extends Constraint implements Shiftable {
+public class ContactConstraint extends Constraint implements Shiftable, DataContainer {
 	/** The unique contact id */
-	protected ContactConstraintId id;
+	protected final ContactConstraintId id;
 	
 	/** The first {@link Body}'s {@link BodyFixture} */
-	protected BodyFixture fixture1;
+	protected final BodyFixture fixture1;
 	
 	/** The second {@link Body}'s {@link BodyFixture} */
-	protected BodyFixture fixture2;
+	protected final BodyFixture fixture2;
 	
 	/** The {@link Contact}s */
 	protected List<Contact> contacts;
@@ -88,9 +87,10 @@ public class ContactConstraint extends Constraint implements Shiftable {
 	 * @param body2 the second {@link Body}
 	 * @param fixture2 the second {@link Body}'s {@link BodyFixture}
 	 * @param manifold the contact {@link Manifold}
-	 * @param world the {@link World} this contact constraint belongs to
+	 * @param friction the friction for the contact constraint
+	 * @param restitution the restitution for the contact constraint
 	 */
-	public ContactConstraint(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2, Manifold manifold, World world) {
+	public ContactConstraint(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2, Manifold manifold, double friction, double restitution) {
 		super(body1, body2);
 		// set the involved convex shapes
 		this.fixture1 = fixture1;
@@ -120,12 +120,9 @@ public class ContactConstraint extends Constraint implements Shiftable {
 		this.normal = manifold.getNormal();
 		// set the tangent
 		this.tangent = this.normal.cross(1.0);
-		// set the world
-		this.world = world;
-		// compute the coefficients
-		CoefficientMixer mixer = world.getCoefficientMixer();
-		this.friction = mixer.mixFriction(fixture1.getFriction(), fixture2.getFriction());
-		this.restitution = mixer.mixRestitution(fixture1.getRestitution(), fixture2.getRestitution());
+		// set coefficients
+		this.friction = friction;
+		this.restitution = restitution;
 		// set the sensor flag (if either fixture is a sensor then the
 		// contact constraint between the fixtures is a sensor)
 		this.sensor = fixture1.isSensor() || fixture2.isSensor();

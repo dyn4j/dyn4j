@@ -24,6 +24,7 @@
  */
 package org.dyn4j.dynamics.joint;
 
+import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Settings;
@@ -41,14 +42,12 @@ import org.dyn4j.resources.Messages;
  * to simulate a vehicle's wheel and suspension.
  * <p>
  * This class replaced the hard to use LineJoint class.
- * <p>
- * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
- * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.2.0
  * @since 3.0.0
+ * @see <a href="http://www.dyn4j.org/documentation/joints/#Wheel_Joint">Documentation</a>
  */
-public class WheelJoint extends Joint implements Shiftable {
+public class WheelJoint extends Joint implements Shiftable, DataContainer {
 	/** The local anchor point on the first {@link Body} */
 	protected Vector2 localAnchor1;
 	
@@ -186,12 +185,10 @@ public class WheelJoint extends Joint implements Shiftable {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints()
+	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void initializeConstraints() {
-		Step step = this.world.getStep();
-		
+	public void initializeConstraints(Step step, Settings settings) {
 		Transform t1 = this.body1.getTransform();
 		Transform t2 = this.body2.getTransform();
 		
@@ -304,12 +301,10 @@ public class WheelJoint extends Joint implements Shiftable {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints()
+	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void solveVelocityConstraints() {
-		Step step = this.world.getStep();
-		
+	public void solveVelocityConstraints(Step step, Settings settings) {
 		Mass m1 = this.body1.getMass();
 		Mass m2 = this.body2.getMass();
 		
@@ -386,12 +381,10 @@ public class WheelJoint extends Joint implements Shiftable {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints()
+	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public boolean solvePositionConstraints() {
-		Settings settings = this.world.getSettings();
-		
+	public boolean solvePositionConstraints(Step step, Settings settings) {
 		double linearTolerance = settings.getLinearTolerance();
 		
 		Transform t1 = this.body1.getTransform();

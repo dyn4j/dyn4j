@@ -24,8 +24,6 @@
  */
 package org.dyn4j.collision;
 
-import org.dyn4j.collision.Collidable;
-
 /**
  * Class used to estimate collision counts and other one-off collision tasks.
  * @author William Bittle
@@ -37,61 +35,58 @@ public final class Collisions {
 	private Collisions() {}
 	
 	/**
-	 * The estimated collisions per body.
+	 * The estimated collisions per object.
 	 * <p>
 	 * Worst Case:
-	 * <pre>size * size(every body colliding with every body) - size(remove self collisions)</pre>
+	 * <pre>size * size(every object colliding with every object) - size(remove self collisions)</pre>
 	 * Which is just way too large.  Dividing by a factor is still grossly over estimated so
 	 * I opted to do an estimate on the test results found in the Sandbox application.
 	 * <p>
 	 * Test Results:
 	 * <pre>
-	 * +----------+------------+-----------------+-----------------+
-	 * | Test     | Body Count | Collision Pairs | Collisions/Body |
-	 * +----------+------------+-----------------+-----------------+
-	 * | Bucket   |        200 |            ~500 |             2.5 |
-	 * | Funnel   |        200 |            ~400 |             2.0 |
-	 * | Parallel |        300 |             600 |             2.0 |
-	 * +----------+------------+-----------------+-----------------+</pre>
-	 * Therefore a good estimate could be 4 collisions per body.
-	 * <p>
-	 * Unfortunately a better estimate would be to also count the number of fixtures among all bodies since
-	 * each fixture on each body could be in contact with one other fixture of another body.
+	 * +----------+--------------+-----------------+-------------------+
+	 * | Test     | Object Count | Collision Pairs | Collisions/Object |
+	 * +----------+--------------+-----------------+-------------------+
+	 * | Bucket   |          200 |            ~500 |               2.5 |
+	 * | Funnel   |          200 |            ~400 |               2.0 |
+	 * | Parallel |          300 |             600 |               2.0 |
+	 * +----------+--------------+-----------------+-------------------+</pre>
+	 * Therefore a good estimate could be 4 collisions per object.
 	 * <p>
 	 * This field may not exist (may get deprecated) in future versions if a better estimate technique is found.
 	 */
-	protected static final int ESTIMATED_COLLISIONS_PER_BODY = 4;
+	protected static final int ESTIMATED_COLLISIONS_PER_OBJECT = 4;
 	
 	/**
-	 * An estimate of the number of bodies that will be hit when raycasting assuming uniform
-	 * distribution of bodies.
+	 * An estimate of the number of objects that will be hit when raycasting assuming uniform
+	 * distribution of objects.
 	 */
 	protected static final double ESTIMATED_RAYCAST_DENSITY = 0.02;
 	
 	/**
-	 * Returns an estimate on the number of collision pairs given the number of collidables.
-	 * @param n the number of {@link Collidable}s
+	 * Returns an estimate on the number of collision pairs based on the number objects being simulated.
+	 * @param n the number of objects
 	 * @return int
 	 */
 	public static final int getEstimatedCollisionPairs(int n) {
-		return n * Collisions.ESTIMATED_COLLISIONS_PER_BODY;
+		return n * Collisions.ESTIMATED_COLLISIONS_PER_OBJECT;
 	}
 	
 	/**
-	 * Returns an estimate on the number of collisions per collidable.
+	 * Returns an estimate on the number of collisions per object.
 	 * @return int
 	 */
-	public static final int getEstimatedCollisions() {
+	public static final int getEstimatedCollisionsPerObject() {
 		// at this time it just returns the static field above
 		// this could change at any time so we keep the original method
 		// and make the static field private
-		return Collisions.ESTIMATED_COLLISIONS_PER_BODY;
+		return Collisions.ESTIMATED_COLLISIONS_PER_OBJECT;
 	}
 	
 	/**
 	 * Returns an estimate on the number of raycast collisions given the total number
 	 * of objects to collide with.
-	 * @param n the number of {@link Collidable}s
+	 * @param n the number of objects
 	 * @return int
 	 * @since 3.2.0
 	 */

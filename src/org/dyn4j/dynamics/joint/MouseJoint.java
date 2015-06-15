@@ -24,8 +24,10 @@
  */
 package org.dyn4j.dynamics.joint;
 
+import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
 import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.Step;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
@@ -36,15 +38,13 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents a joint attached to a body and the mouse.
- * <p>
- * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
- * @see <a href="http://www.box2d.org">Box2d</a>
+ * Represents a joint attached to a body and a single world space point.
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.2.0
  * @since 1.0.0
+ * @see <a href="http://www.dyn4j.org/documentation/joints/#Mouse_Joint">Documentation</a>
  */
-public class MouseJoint extends Joint implements Shiftable {
+public class MouseJoint extends Joint implements Shiftable, DataContainer {
 	/** The world space target point */
 	protected Vector2 target;
 	
@@ -119,12 +119,10 @@ public class MouseJoint extends Joint implements Shiftable {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints()
+	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void initializeConstraints() {
-		Step step = this.world.getStep();
-		
+	public void initializeConstraints(Step step, Settings settings) {
 		Body body = this.body2;
 		Transform transform = body.getTransform();
 		
@@ -182,12 +180,10 @@ public class MouseJoint extends Joint implements Shiftable {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints()
+	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void solveVelocityConstraints() {
-		Step step = this.world.getStep();
-		
+	public void solveVelocityConstraints(Step step, Settings settings) {
 		Body body = this.body2;
 		Transform transform = body.getTransform();
 		
@@ -223,10 +219,10 @@ public class MouseJoint extends Joint implements Shiftable {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints()
+	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public boolean solvePositionConstraints() {
+	public boolean solvePositionConstraints(Step step, Settings settings) {
 		// nothing to do here for this joint
 		return true;
 	}

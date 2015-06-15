@@ -24,8 +24,10 @@
  */
 package org.dyn4j.dynamics.joint;
 
+import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
 import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.Step;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Interval;
@@ -46,13 +48,12 @@ import org.dyn4j.resources.Messages;
  * body static to achieve this effect.
  * <p>
  * NOTE: The linear and angular targets are relative to body1.
- * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
- * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.2.0
  * @since 3.1.0
+ * @see <a href="http://www.dyn4j.org/documentation/joints/#Motor_Joint">Documentation</a>
  */
-public class MotorJoint extends Joint implements Shiftable {
+public class MotorJoint extends Joint implements Shiftable, DataContainer {
 	/** The linear target distance from body1's world space center */
 	protected Vector2 linearTarget;
 	
@@ -126,12 +127,10 @@ public class MotorJoint extends Joint implements Shiftable {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints()
+	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void initializeConstraints() {
-		Step step = this.world.getStep();
-		
+	public void initializeConstraints(Step step, Settings settings) {
 		Transform t1 = this.body1.getTransform();
 		Transform t2 = this.body2.getTransform();
 		
@@ -179,11 +178,10 @@ public class MotorJoint extends Joint implements Shiftable {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints()
+	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void solveVelocityConstraints() {
-		Step step = this.world.getStep();
+	public void solveVelocityConstraints(Step step, Settings settings) {
 		double dt = step.getDeltaTime();
 		double invdt = step.getInverseDeltaTime();
 		
@@ -246,10 +244,10 @@ public class MotorJoint extends Joint implements Shiftable {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints()
+	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public boolean solvePositionConstraints() {
+	public boolean solvePositionConstraints(Step step, Settings settings) {
 		// nothing to do here for this joint since there is no "hard" constraint
 		return true;
 	}

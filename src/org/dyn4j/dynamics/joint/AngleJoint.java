@@ -24,6 +24,7 @@
  */
 package org.dyn4j.dynamics.joint;
 
+import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Settings;
@@ -69,10 +70,11 @@ import org.dyn4j.resources.Messages;
  * When the angle between the bodies reaches a limit, if limits are enabled, the ratio is 
  * effectively turned off.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.2.0
  * @since 2.2.2
+ * @see <a href="http://www.dyn4j.org/documentation/joints/#Angle_Joint">Documentation</a>
  */
-public class AngleJoint extends Joint implements Shiftable {
+public class AngleJoint extends Joint implements Shiftable, DataContainer {
 	/** The angular velocity ratio */
 	protected double ratio;
 	
@@ -141,13 +143,10 @@ public class AngleJoint extends Joint implements Shiftable {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints()
+	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void initializeConstraints() {
-		Step step = this.world.getStep();
-		Settings settings = this.world.getSettings();
-		
+	public void initializeConstraints(Step step, Settings settings) {
 		double angularTolerance = settings.getAngularTolerance();
 		
 		Mass m1 = this.body1.getMass();
@@ -220,10 +219,10 @@ public class AngleJoint extends Joint implements Shiftable {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints()
+	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void solveVelocityConstraints() {
+	public void solveVelocityConstraints(Step step, Settings settings) {
 		Mass m1 = this.body1.getMass();
 		Mass m2 = this.body2.getMass();
 		
@@ -272,14 +271,12 @@ public class AngleJoint extends Joint implements Shiftable {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints()
+	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public boolean solvePositionConstraints() {
+	public boolean solvePositionConstraints(Step step, Settings settings) {
 		// check if the constraint needs to be applied
 		if (this.limitState != Joint.LimitState.INACTIVE) {
-			Settings settings = this.world.getSettings();
-			
 			double angularTolerance = settings.getAngularTolerance();
 			double maxAngularCorrection = settings.getMaximumAngularCorrection();
 			

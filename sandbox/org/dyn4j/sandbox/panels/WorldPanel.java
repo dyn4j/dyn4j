@@ -67,10 +67,7 @@ public class WorldPanel extends JPanel {
 
 	/** The list of available broadphase algorithms */
 	private static final ComboItem[] BROADPHASE_ALGORITHMS = new ComboItem[] {
-		// TODO remove
-//		new ComboItem(Messages.getString("panel.world.broad.algorithm.sapBruteForce"), SapBruteForce.class),
-//		new ComboItem(Messages.getString("panel.world.broad.algorithm.sapIncremental"), SapIncremental.class),
-		new ComboItem(Messages.getString("panel.world.broad.algorithm.sapTree"), Sap.class),
+		new ComboItem(Messages.getString("panel.world.broad.algorithm.sap"), Sap.class),
 		new ComboItem(Messages.getString("panel.world.broad.algorithm.dynamicAABBTree"), DynamicAABBTree.class),
 	};
 	

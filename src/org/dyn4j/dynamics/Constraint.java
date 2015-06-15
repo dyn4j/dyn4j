@@ -34,16 +34,12 @@ import org.dyn4j.resources.Messages;
  * @version 3.2.0
  * @since 1.0.0
  */
-// TODO split into constraint interface, unary constraint, binary constraint
 public abstract class Constraint implements Shiftable, DataContainer {
-	/** The world that contains this constraint */
-	protected World world;
-	
 	/** The first {@link Body} */
-	protected Body body1;
+	protected final Body body1;
 	
 	/** The second {@link Body} */
-	protected Body body2;
+	protected final Body body2;
 	
 	/** Whether the {@link Constraint} has been added to an {@link Island} or not */
 	protected boolean onIsland;
@@ -95,44 +91,6 @@ public abstract class Constraint implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Sets the first {@link Body}.
-	 * @param body1 the first {@link Body}
-	 * @throws NullPointerException if body1 is null
-	 */
-	public void setBody1(Body body1) {
-		if (body1 == null) throw new NullPointerException(Messages.getString("dynamics.constraint.nullBody1"));
-		this.body1 = body1;
-	}
-	
-	/**
-	 * Sets the second {@link Body}.
-	 * @param body2 the second {@link Body}
-	 * @throws NullPointerException if body2 is null
-	 */
-	public void setBody2(Body body2) {
-		if (body2 == null) throw new NullPointerException(Messages.getString("dynamics.constraint.nullBody2"));
-		this.body2 = body2;
-	}
-	
-	/**
-	 * Sets the world that contains this constraint.
-	 * @param world the world
-	 * @since 3.0.3
-	 */
-	protected void setWorld(World world) {
-		this.world = world;
-	}
-	
-	/**
-	 * Returns the world that this constraint belongs to.
-	 * @return {@link World}
-	 * @since 3.0.3
-	 */
-	public World getWorld() {
-		return this.world;
-	}
-	
-	/**
 	 * Sets the on {@link Island} flag to the given value.
 	 * @param onIsland true if the {@link Constraint} has been added to an {@link Island}
 	 */
@@ -162,5 +120,4 @@ public abstract class Constraint implements Shiftable, DataContainer {
 	public void setUserData(Object userData) {
 		this.userData = userData;
 	}
-	
 }

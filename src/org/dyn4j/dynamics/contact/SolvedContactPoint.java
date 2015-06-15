@@ -32,7 +32,7 @@ import org.dyn4j.geometry.Vector2;
  * Represents a solved contact point.
  * @author William Bittle
  * @see ContactPoint
- * @version 3.1.5
+ * @version 3.2.0
  * @since 1.0.0
  */
 public class SolvedContactPoint extends ContactPoint {
@@ -49,7 +49,6 @@ public class SolvedContactPoint extends ContactPoint {
 	 * @param fixture1 the first {@link Body}'s {@link BodyFixture}
 	 * @param body2 the second {@link Body} in contact
 	 * @param fixture2 the second {@link Body}'s {@link BodyFixture}
-	 * @param enabled true if this contact is enabled
 	 * @param point the world space contact point
 	 * @param normal the world space contact normal
 	 * @param depth the penetration depth
@@ -58,9 +57,9 @@ public class SolvedContactPoint extends ContactPoint {
 	 */
 	public SolvedContactPoint(ContactPointId id,
 			Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2, 
-			boolean enabled, Vector2 point, Vector2 normal, double depth,
+			Vector2 point, Vector2 normal, double depth,
 			double normalImpulse, double tangentialImpulse) {
-		super(id, body1, fixture1, body2, fixture2, enabled, point, normal, depth);
+		super(id, body1, fixture1, body2, fixture2, point, normal, depth);
 		this.normalImpulse = normalImpulse;
 		this.tangentialImpulse = tangentialImpulse;
 	}
@@ -75,7 +74,6 @@ public class SolvedContactPoint extends ContactPoint {
 		.append("|Fixture1=").append(this.fixture1)
 		.append("|Body2=").append(this.body2)
 		.append("|Fixture2=").append(this.fixture2)
-		.append("|IsEnabled=").append(this.enabled)
 		.append("|Point=").append(this.point)
 		.append("|Normal=").append(this.normal)
 		.append("|Depth=").append(this.depth)

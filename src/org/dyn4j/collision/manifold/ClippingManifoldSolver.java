@@ -46,7 +46,6 @@ import org.dyn4j.geometry.Vertex;
  * <p>
  * Uses Sutherland–Hodgman clipping to clip the closest features of the two {@link Convex} {@link Shape}s to obtain
  * a contact {@link Manifold}.
- * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
  * @version 3.0.2
  * @since 1.0.0

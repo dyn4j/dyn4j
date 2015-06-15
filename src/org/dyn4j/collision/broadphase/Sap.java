@@ -282,7 +282,7 @@ public class Sap<E extends Collidable<T>, T extends Fixture> extends AbstractBro
 			return Collections.emptyList();
 		}
 		
-		List<BroadphaseItem<E, T>> list = new ArrayList<BroadphaseItem<E, T>>(Collisions.getEstimatedCollisions());
+		List<BroadphaseItem<E, T>> list = new ArrayList<BroadphaseItem<E, T>>(Collisions.getEstimatedCollisionsPerObject());
 		
 		// create a proxy for the aabb
 		SapProxy<E, T> p = new SapProxy<E, T>(null, null, aabb);

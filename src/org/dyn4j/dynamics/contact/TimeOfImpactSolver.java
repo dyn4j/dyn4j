@@ -28,7 +28,6 @@ import org.dyn4j.collision.continuous.TimeOfImpact;
 import org.dyn4j.collision.narrowphase.Separation;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Settings;
-import org.dyn4j.dynamics.World;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Vector2;
@@ -40,39 +39,27 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * This class will translate and rotate the {@link Body}s into a collision.
  * @author William Bittle
- * @version 3.0.3
+ * @version 3.2.0
  * @since 2.0.0
  */
 public class TimeOfImpactSolver {
-	/** The world this solver belongs to */
-	protected World world;
-	
-	/**
-	 * Full constructor.
-	 * @param world the {@link World} this solver belongs to
-	 * @since 3.0.3
-	 */
-	public TimeOfImpactSolver(World world) {
-		this.world = world;
-	}
-	
 	/**
 	 * Moves the given {@link Body}s into collision given the {@link TimeOfImpact}
 	 * information.
-	 * @param b1 the first {@link Body}
-	 * @param b2 the second {@link Body}
-	 * @param toi the {@link TimeOfImpact}
+	 * @param body1 the first {@link Body}
+	 * @param body2 the second {@link Body}
+	 * @param timeOfImpact the {@link TimeOfImpact}
+	 * @param settings the current world settings
 	 */
-	public void solve(Body b1, Body b2, TimeOfImpact toi) {
-		Settings settings = this.world.getSettings();
+	public void solve(Body body1, Body body2, TimeOfImpact timeOfImpact, Settings settings) {
 		double linearTolerance = settings.getLinearTolerance();
 		double maxLinearCorrection = settings.getMaximumLinearCorrection();
 		
-		Vector2 c1 = b1.getWorldCenter();
-		Vector2 c2 = b2.getWorldCenter();
+		Vector2 c1 = body1.getWorldCenter();
+		Vector2 c2 = body2.getWorldCenter();
 		
-		Mass m1 = b1.getMass();
-		Mass m2 = b2.getMass();
+		Mass m1 = body1.getMass();
+		Mass m2 = body2.getMass();
 		
 		double mass1 = m1.getMass();
 		double mass2 = m2.getMass();
@@ -82,7 +69,7 @@ public class TimeOfImpactSolver {
 		double invMass2 = mass2 * m2.getInverseMass();
 		double invI2 = mass2 * m2.getInverseInertia();
 		
-		Separation separation = toi.getSeparation();
+		Separation separation = timeOfImpact.getSeparation();
 		
 		// solve the constraint
 		Vector2 p1w = separation.getPoint1();
@@ -109,10 +96,10 @@ public class TimeOfImpactSolver {
 		Vector2 J = n.product(impulse);
 
 		// translate and rotate the objects
-		b1.translate(J.product(invMass1));
-		b1.rotate(invI1 * r1.cross(J), c1.x, c1.y);
+		body1.translate(J.product(invMass1));
+		body1.rotate(invI1 * r1.cross(J), c1.x, c1.y);
 		
-		b2.translate(J.product(-invMass2));
-		b2.rotate(-invI2 * r2.cross(J), c2.x, c2.y);
+		body2.translate(J.product(-invMass2));
+		body2.rotate(-invI2 * r2.cross(J), c2.x, c2.y);
 	}
 }

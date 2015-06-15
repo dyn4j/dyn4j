@@ -506,7 +506,7 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 	 */
 	protected List<BroadphaseItem<E, T>> detectNonRecursive(AABB aabb, DynamicAABBTreeNode node, BroadphaseFilter<E, T> filter) {
 		// get the estimated collision count
-		int eSize = Collisions.getEstimatedCollisions();
+		int eSize = Collisions.getEstimatedCollisionsPerObject();
 		List<BroadphaseItem<E, T>> list = new ArrayList<BroadphaseItem<E, T>>(eSize);
 		// perform a iterative, stack-less, traversal of the tree
 		while (node != null) {

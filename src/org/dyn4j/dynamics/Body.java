@@ -195,7 +195,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 		this.linearDamping = Body.DEFAULT_LINEAR_DAMPING;
 		this.angularDamping = Body.DEFAULT_ANGULAR_DAMPING;
 		this.gravityScale = 1.0;
-		this.contacts = new ArrayList<ContactEdge>(Collisions.getEstimatedCollisions());
+		this.contacts = new ArrayList<ContactEdge>(Collisions.getEstimatedCollisionsPerObject());
 		this.joints = new ArrayList<JointEdge>(2);
 	}
 	
@@ -1007,18 +1007,6 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	}
 	
 	/**
-	 * Returns the world this body belongs to.
-	 * <p>
-	 * Returns null if the body has not been added to a world
-	 * or has been removed.
-	 * @return {@link World}
-	 * @since 3.0.3
-	 */
-	public World getWorld() {
-		return this.world;
-	}
-	
-	/**
 	 * Sets the {@link Body} to allow or disallow automatic sleeping.
 	 * @param flag true if the {@link Body} is allowed to sleep
 	 * @since 1.2.0
@@ -1671,9 +1659,8 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 					// create the contact point
 					ContactPoint contactPoint = new ContactPoint(
 							new ContactPointId(constraint.getId(), contact.getId()),
-							constraint.body1, constraint.getFixture1(),
-							constraint.body2, constraint.getFixture2(),
-							contact.isEnabled(),
+							constraint.getBody1(), constraint.getFixture1(),
+							constraint.getBody2(), constraint.getFixture2(),
 							contact.getPoint(),
 							constraint.getNormal(),
 							contact.getDepth());

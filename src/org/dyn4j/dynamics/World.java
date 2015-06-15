@@ -56,11 +56,14 @@ import org.dyn4j.collision.narrowphase.RaycastDetector;
 import org.dyn4j.dynamics.Settings.ContinuousDetectionMode;
 import org.dyn4j.dynamics.contact.Contact;
 import org.dyn4j.dynamics.contact.ContactConstraint;
+import org.dyn4j.dynamics.contact.ContactConstraintSolver;
 import org.dyn4j.dynamics.contact.ContactListener;
 import org.dyn4j.dynamics.contact.ContactManager;
 import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.dynamics.contact.ContactPointId;
+import org.dyn4j.dynamics.contact.SequentialImpulses;
 import org.dyn4j.dynamics.contact.TimeOfImpactSolver;
+import org.dyn4j.dynamics.contact.WarmStartingContactManager;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
@@ -81,15 +84,10 @@ import org.dyn4j.resources.Messages;
  * Some listener types return a boolean to indicate continuing or allowing something, like {@link CollisionListener}.  If, for example,
  * there are multiple {@link CollisionListener}s and <b>any</b> one of them returns false for an event, the collision is skipped.  However,
  * all listeners will still be called no matter if the first returned false.
- * <p>
- * Employs the same {@link Island} solving technique as <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
- * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.1.11
+ * @version 3.2.0
  * @since 1.0.0
  */
-// TODO look for places for member variables to be final
-// TODO look for clean up in the contact solving code
 public class World implements Shiftable, DataContainer {
 	/** Earths gravity constant */
 	public static final Vector2 EARTH_GRAVITY = new Vector2(0.0, -9.8);
@@ -133,6 +131,9 @@ public class World implements Shiftable, DataContainer {
 
 	/** The {@link CoefficientMixer} */
 	protected CoefficientMixer coefficientMixer;
+	
+	/** The {@link ContactConstraintSolver} */
+	protected ContactConstraintSolver contactConstraintSolver;
 	
 	/** The {@link TimeOfImpactSolver} */
 	protected TimeOfImpactSolver timeOfImpactSolver;
@@ -222,25 +223,28 @@ public class World implements Shiftable, DataContainer {
 	public World(Capacity initialCapacity, Bounds bounds) {
 		// check for null capacity
 		if (initialCapacity == null) initialCapacity = new Capacity();
+		
 		// initialize all the classes with default values
 		this.settings = new Settings();
 		this.step = new Step(this.settings.getStepFrequency());
 		this.gravity = World.EARTH_GRAVITY;
 		this.bounds = bounds;
+		
 		this.broadphaseDetector = new DynamicAABBTree<Body, BodyFixture>(initialCapacity.getBodyCount());
 		this.narrowphaseDetector = new Gjk();
 		this.manifoldSolver = new ClippingManifoldSolver();
 		this.timeOfImpactDetector = new ConservativeAdvancement();
 		this.raycastDetector = new Gjk();
 		this.coefficientMixer = CoefficientMixer.DEFAULT_MIXER;
+		this.contactManager = new WarmStartingContactManager(initialCapacity);
+		this.contactConstraintSolver = new SequentialImpulses();
+		this.timeOfImpactSolver = new TimeOfImpactSolver();
+		
 		this.bodies = new ArrayList<Body>(initialCapacity.getBodyCount());
 		this.joints = new ArrayList<Joint>(initialCapacity.getJointCount());
 		this.listeners = new ArrayList<Listener>(initialCapacity.getListenerCount());
 		
-		// create anything that requires a reference to this world last
-		this.timeOfImpactSolver = new TimeOfImpactSolver(this);
-		this.contactManager = new ContactManager(this, initialCapacity);
-		this.island = new Island(this, initialCapacity);
+		this.island = new Island(initialCapacity);
 		
 		this.time = 0.0;
 		this.updateRequired = true;
@@ -402,10 +406,14 @@ public class World implements Shiftable, DataContainer {
 	 */
 	protected void step() {
 		// get all the step listeners
-		List<StepListener> listeners = this.getListeners(StepListener.class);
+		List<StepListener> stepListeners = this.getListeners(StepListener.class);
+		List<ContactListener> contactListeners = this.getListeners(ContactListener.class);
+		
+		int sSize = stepListeners.size();
 		
 		// notify the step listeners
-		for (StepListener sl : listeners) {
+		for (int i = 0; i < sSize; i++) {
+			StepListener sl = stepListeners.get(i);
 			sl.begin(this.step, this);
 		}
 		
@@ -414,7 +422,8 @@ public class World implements Shiftable, DataContainer {
 			// if so then update the contacts
 			this.detect();
 			// notify that an update was performed
-			for (StepListener sl : listeners) {
+			for (int i = 0; i < sSize; i++) {
+				StepListener sl = stepListeners.get(i);
 				sl.updatePerformed(this.step, this);
 			}
 			// set the update required flag to false
@@ -422,7 +431,7 @@ public class World implements Shiftable, DataContainer {
 		}
 		
 		// notify of all the contacts that will be solved and all the sensed contacts
-		this.contactManager.preSolveNotify();
+		this.contactManager.preSolveNotify(contactListeners);
 		
 		// check for CCD
 		ContinuousDetectionMode continuousDetectionMode = this.settings.getContinuousDetectionMode();
@@ -534,7 +543,7 @@ public class World implements Shiftable, DataContainer {
 			}
 			
 			// solve the island
-			island.solve();
+			island.solve(this.contactConstraintSolver, this.gravity, this.step, this.settings);
 			
 			// allow static bodies to participate in other islands
 			for (int j = 0; j < size; j++) {
@@ -545,8 +554,12 @@ public class World implements Shiftable, DataContainer {
 			}
 		}
 		
+		// allow memory to be reclaimed
+		stack.clear();
+		this.island.clear();
+		
 		// notify of the all solved contacts
-		this.contactManager.postSolveNotify();
+		this.contactManager.postSolveNotify(contactListeners);
 		
 		// make sure CCD is enabled
 		if (continuousDetectionMode != ContinuousDetectionMode.NONE) {
@@ -563,7 +576,8 @@ public class World implements Shiftable, DataContainer {
 		this.updateRequired = false;
 		
 		// notify the step listener
-		for (StepListener sl : listeners) {
+		for (int i = 0; i < sSize; i++) {
+			StepListener sl = stepListeners.get(i);
 			sl.end(this.step, this);
 		}
 	}
@@ -596,12 +610,10 @@ public class World implements Shiftable, DataContainer {
 		List<BoundsListener> boundsListeners = this.getListeners(BoundsListener.class);
 		List<CollisionListener> collisionListeners = this.getListeners(CollisionListener.class);
 		
-		// clear the old contact list (does NOT clear the contact map
-		// which is used to warm start)
-		this.contactManager.clear();
-		
 		// get the number of bodies
 		int size = this.bodies.size();
+		int blSize = boundsListeners.size();
+		int clSize = collisionListeners.size();
 		
 		// test for out of bounds objects
 		// clear the body contacts
@@ -619,7 +631,8 @@ public class World implements Shiftable, DataContainer {
 					// set the body to inactive
 					body.setActive(false);
 					// if so, notify via the listeners
-					for (BoundsListener bl : boundsListeners) {
+					for (int j = 0; j < blSize; j++) {
+						BoundsListener bl = boundsListeners.get(j);
 						bl.outside(body);
 					}
 				}
@@ -647,7 +660,8 @@ public class World implements Shiftable, DataContainer {
 				BodyFixture fixture2 = pair.fixture2;
 				
 				allow = true;
-				for (CollisionListener cl : collisionListeners) {
+				for (int j = 0; j < clSize; j++) {
+					CollisionListener cl = collisionListeners.get(j);
 					if (!cl.collision(body1, fixture1, body2, fixture2)) {
 						// if any collision listener returned false then skip this collision
 						// we must allow all the listeners to get notified first, then skip
@@ -674,7 +688,8 @@ public class World implements Shiftable, DataContainer {
 					}
 					// notify of the narrow-phase collision
 					allow = true;
-					for (CollisionListener cl : collisionListeners) {
+					for (int j = 0; j < clSize; j++) {
+						CollisionListener cl = collisionListeners.get(j);
 						if (!cl.collision(body1, fixture1, body2, fixture2, penetration)) {
 							// if any collision listener returned false then skip this collision
 							// we must allow all the listeners to get notified first, then skip
@@ -694,7 +709,8 @@ public class World implements Shiftable, DataContainer {
 						}
 						// notify of the manifold solving result
 						allow = true;
-						for (CollisionListener cl : collisionListeners) {
+						for (int j = 0; j < clSize; j++) {
+							CollisionListener cl = collisionListeners.get(j);
 							if (!cl.collision(body1, fixture1, body2, fixture2, manifold)) {
 								// if any collision listener returned false then skip this collision
 								// we must allow all the listeners to get notified first, then skip
@@ -706,11 +722,14 @@ public class World implements Shiftable, DataContainer {
 						// create a contact constraint
 						ContactConstraint contactConstraint = new ContactConstraint(body1, fixture1, 
 								                                                    body2, fixture2, 
-								                                                    manifold, this);
+								                                                    manifold,
+								                                                    this.coefficientMixer.mixFriction(fixture1.getFriction(), fixture2.getFriction()),
+								                                                    this.coefficientMixer.mixRestitution(fixture1.getRestitution(), fixture2.getRestitution()));
 						
 						allow = true;
 						// notify of the created contact constraint
-						for (CollisionListener cl : collisionListeners) {
+						for (int j = 0; j < clSize; j++) {
+							CollisionListener cl = collisionListeners.get(j);
 							if (!cl.collision(contactConstraint)) {
 								// if any collision listener returned false then skip this collision
 								// we must allow all the listeners to get notified first, then skip
@@ -726,14 +745,14 @@ public class World implements Shiftable, DataContainer {
 						body1.contacts.add(contactEdge1);
 						body2.contacts.add(contactEdge2);
 						// add the contact constraint to the contact manager
-						this.contactManager.add(contactConstraint);
+						this.contactManager.queue(contactConstraint);
 					}
 				}
 			}
 		}
 		
 		// warm start the contact constraints
-		this.contactManager.updateContacts();
+		this.contactManager.updateAndNotify(this.getListeners(ContactListener.class), this.settings);
 	}
 	
 	/**
@@ -955,7 +974,7 @@ public class World implements Shiftable, DataContainer {
 			
 			// performs position correction on the body/bodies so that they are
 			// in collision and will be detected in the next time step
-			this.timeOfImpactSolver.solve(body1, minBody, minToi);
+			this.timeOfImpactSolver.solve(body1, minBody, minToi, this.settings);
 			
 			// this method does not conserve time
 		}
@@ -1160,6 +1179,7 @@ public class World implements Shiftable, DataContainer {
 	 */
 	public boolean raycast(Ray ray, double maxLength, Filter filter, boolean ignoreSensors, boolean ignoreInactive, boolean all, List<RaycastResult> results) {
 		List<RaycastListener> listeners = this.getListeners(RaycastListener.class);
+		int rlSize = listeners.size();
 		// check for the desired length
 		double max = 0.0;
 		if (maxLength > 0.0) {
@@ -1186,7 +1206,8 @@ public class World implements Shiftable, DataContainer {
 
 			// notify the listeners to see if we should test this fixture
 			allow = true;
-			for (RaycastListener rl : listeners) {
+			for (int j = 0; j < rlSize; j++) {
+				RaycastListener rl = listeners.get(j);
 				// see if we should test this fixture
 				if (!rl.allow(ray, body, fixture)) {
 					allow = false;
@@ -1199,7 +1220,8 @@ public class World implements Shiftable, DataContainer {
 			if (this.raycastDetector.raycast(ray, max, convex, transform, raycast)) {
 				// notify the listeners to see if we should allow this result
 				allow = true;
-				for (RaycastListener rl : listeners) {
+				for (int j = 0; j < rlSize; j++) {
+					RaycastListener rl = listeners.get(j);
 					// see if we should test this fixture
 					if (!rl.allow(ray, body, fixture, raycast)) {
 						allow = false;
@@ -1344,6 +1366,7 @@ public class World implements Shiftable, DataContainer {
 	 */
 	public boolean raycast(Ray ray, Body body, double maxLength, Filter filter, boolean ignoreSensors, RaycastResult result) {
 		List<RaycastListener> listeners = this.getListeners(RaycastListener.class);
+		int rlSize = listeners.size();
 		boolean allow = true;
 		// get the number of fixtures
 		int size = body.getFixtureCount();
@@ -1372,7 +1395,8 @@ public class World implements Shiftable, DataContainer {
 			}
 			// notify the listeners to see if we should test this fixture
 			allow = true;
-			for (RaycastListener rl : listeners) {
+			for (int j = 0; j < rlSize; j++) {
+				RaycastListener rl = listeners.get(j);
 				// see if we should test this fixture
 				if (!rl.allow(ray, body, fixture)) {
 					allow = false;
@@ -1385,7 +1409,8 @@ public class World implements Shiftable, DataContainer {
 			if (this.raycastDetector.raycast(ray, max, convex, transform, raycast)) {
 				// notify the listeners to see if we should allow this result
 				allow = true;
-				for (RaycastListener rl : listeners) {
+				for (int j = 0; j < rlSize; j++) {
+					RaycastListener rl = listeners.get(j);
 					// see if we should test this fixture
 					if (!rl.allow(ray, body, fixture, raycast)) {
 						allow = false;
@@ -1597,6 +1622,7 @@ public class World implements Shiftable, DataContainer {
 	public boolean convexCast(Convex convex, Transform transform, Vector2 deltaPosition, double deltaAngle, Filter filter, boolean ignoreSensors, boolean ignoreInactive, boolean all, List<ConvexCastResult> results) {
 		// get the listeners
 		List<ConvexCastListener> listeners = this.getListeners(ConvexCastListener.class);
+		int clSize = listeners.size();
 		
 		// compute a conservative AABB for the motion of the convex
 		double radius = convex.getRadius();
@@ -1634,7 +1660,8 @@ public class World implements Shiftable, DataContainer {
 			
 			// notify the listeners to see if we should test this fixture
 			allow = true;
-			for (ConvexCastListener ccl : listeners) {
+			for (int j = 0; j < clSize; j++) {
+				ConvexCastListener ccl = listeners.get(j);
 				// see if we should test this fixture
 				if (!ccl.allow(convex, body, fixture)) {
 					allow = false;
@@ -1650,7 +1677,8 @@ public class World implements Shiftable, DataContainer {
 			if (this.timeOfImpactDetector.getTimeOfImpact(convex, transform, deltaPosition, deltaAngle, c, bodyTransform, dp2, 0.0, 0.0, ft2, timeOfImpact)) {
 				// notify the listeners to see if we should test this fixture
 				allow = true;
-				for (ConvexCastListener ccl : listeners) {
+				for (int j = 0; j < clSize; j++) {
+					ConvexCastListener ccl = listeners.get(j);
 					// see if we should test this fixture
 					if (!ccl.allow(convex, body, fixture, timeOfImpact)) {
 						allow = false;
@@ -1774,6 +1802,7 @@ public class World implements Shiftable, DataContainer {
 	public boolean convexCast(Convex convex, Transform transform, Vector2 deltaPosition, double deltaAngle, Body body, Filter filter, boolean ignoreSensors, ConvexCastResult result) {
 		// get the listeners
 		List<ConvexCastListener> listeners = this.getListeners(ConvexCastListener.class);
+		int clSize = listeners.size();
 		
 		boolean allow = true;
 		boolean found = false;
@@ -1795,7 +1824,8 @@ public class World implements Shiftable, DataContainer {
 			if (filter != null && !filter.isAllowed(bodyFixture.getFilter())) continue;
 			
 			allow = true;
-			for (ConvexCastListener ccl : listeners) {
+			for (int j = 0; j < clSize; j++) {
+				ConvexCastListener ccl = listeners.get(j);
 				// see if we should test this body
 				if (!ccl.allow(convex, body, bodyFixture)) {
 					allow = false;
@@ -1811,7 +1841,8 @@ public class World implements Shiftable, DataContainer {
 			if (this.timeOfImpactDetector.getTimeOfImpact(convex, transform, deltaPosition, deltaAngle, c, bodyTransform, dp2, 0.0, 0.0, t2, toi)) {
 				// notify the listeners to see if we should test this fixture
 				allow = true;
-				for (ConvexCastListener ccl : listeners) {
+				for (int j = 0; j < clSize; j++) {
+					ConvexCastListener ccl = listeners.get(j);
 					// see if we should test this fixture
 					if (!ccl.allow(convex, body, bodyFixture, toi)) {
 						allow = false;
@@ -1906,6 +1937,7 @@ public class World implements Shiftable, DataContainer {
 	 */
 	public boolean detect(AABB aabb, Filter filter, boolean ignoreSensors, boolean ignoreInactive, List<DetectResult> results) {
 		List<DetectListener> listeners = this.getListeners(DetectListener.class);
+		int dlSize = listeners.size();
 		
 		AABBBroadphaseFilter bpFilter = new AABBBroadphaseFilter(ignoreInactive, ignoreSensors, filter);
 		List<BroadphaseItem<Body, BodyFixture>> collisions = this.broadphaseDetector.detect(aabb, bpFilter);
@@ -1921,8 +1953,9 @@ public class World implements Shiftable, DataContainer {
 			Transform transform = body.getTransform();
 			// pass through the listeners
 			allow = true;
-			for (DetectListener listener : listeners) {
-				if (!listener.allow(aabb, body, fixture)) {
+			for (int j = 0; j < dlSize; j++) {
+				DetectListener dl = listeners.get(j);
+				if (!dl.allow(aabb, body, fixture)) {
 					allow = false;
 				}
 			}
@@ -2178,6 +2211,7 @@ public class World implements Shiftable, DataContainer {
 	 */
 	public boolean detect(Convex convex, Transform transform, Filter filter, boolean ignoreSensors, boolean ignoreInactive, boolean includeCollisionData, List<DetectResult> results) {
 		List<DetectListener> listeners = this.getListeners(DetectListener.class);
+		int dlSize = listeners.size();
 		boolean allow = true;
 		
 		// create an aabb for the given convex
@@ -2197,8 +2231,9 @@ public class World implements Shiftable, DataContainer {
 			
 			// pass through the listeners
 			allow = true;
-			for (DetectListener listener : listeners) {
-				if (!listener.allow(convex, transform, body, fixture)) {
+			for (int j = 0; j < dlSize; j++) {
+				DetectListener dl = listeners.get(j);
+				if (!dl.allow(convex, transform, body, fixture)) {
 					allow = false;
 				}
 			}
@@ -2264,6 +2299,7 @@ public class World implements Shiftable, DataContainer {
 	 */
 	public boolean detect(AABB aabb, Body body, Filter filter, boolean ignoreSensors, List<DetectResult> results) {
 		List<DetectListener> listeners = this.getListeners(DetectListener.class);
+		int dlSize = listeners.size();
 		boolean allow = true;
 		// test the AABBs
 		boolean found = false;
@@ -2283,8 +2319,9 @@ public class World implements Shiftable, DataContainer {
 				if (filter != null && !filter.isAllowed(fixture.getFilter())) continue;
 				// pass through the listeners
 				allow = true;
-				for (DetectListener listener : listeners) {
-					if (!listener.allow(aabb, body, fixture)) {
+				for (int k = 0; k < dlSize; k++) {
+					DetectListener dl = listeners.get(k);
+					if (!dl.allow(aabb, body, fixture)) {
 						allow = false;
 					}
 				}
@@ -2441,10 +2478,12 @@ public class World implements Shiftable, DataContainer {
 	 */
 	public boolean detect(Convex convex, Transform transform, Body body, Filter filter, boolean ignoreSensors, boolean includeCollisionData, List<DetectResult> results) {
 		List<DetectListener> listeners = this.getListeners(DetectListener.class);
+		int dlSize = listeners.size();
 		// make sure we can test the body
 		boolean allow = true;
-		for (DetectListener listener : listeners) {
-			if (!listener.allow(convex, transform, body)) {
+		for (int i = 0; i < dlSize; i++) {
+			DetectListener dl = listeners.get(i);
+			if (!dl.allow(convex, transform, body)) {
 				allow = false;
 			}
 		}
@@ -2463,8 +2502,8 @@ public class World implements Shiftable, DataContainer {
 			Transform bt = body.getTransform();
 			// test all the fixtures
 			int fSize = body.getFixtureCount();
-			for (int j = 0; j < fSize; j++) {
-				BodyFixture fixture = body.getFixture(j);
+			for (int i = 0; i < fSize; i++) {
+				BodyFixture fixture = body.getFixture(i);
 				// check against the sensor flag
 				if (ignoreSensors && fixture.isSensor()) continue;
 				// check against the filter if given
@@ -2473,8 +2512,9 @@ public class World implements Shiftable, DataContainer {
 
 				// pass through the listeners
 				allow = true;
-				for (DetectListener listener : listeners) {
-					if (!listener.allow(convex, transform, body, fixture)) {
+				for (int j = 0; j < dlSize; j++) {
+					DetectListener dl = listeners.get(j);
+					if (!dl.allow(convex, transform, body, fixture)) {
 						allow = false;
 					}
 				}
@@ -2578,14 +2618,8 @@ public class World implements Shiftable, DataContainer {
 	public void addJoint(Joint joint) {
 		// check for null joint
 		if (joint == null) throw new NullPointerException(Messages.getString("dynamics.world.addNullJoint"));
-		// dont allow adding it twice
-		if (joint.world == this) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingJoint"));
-		// dont allow a joint that already is assigned to another world
-		if (joint.world != null) throw new IllegalArgumentException(Messages.getString("dynamics.world.addOtherWorldJoint"));
 		// add the joint to the joint list
 		this.joints.add(joint);
-		// set the world property on the joint
-		joint.setWorld(this);
 		// get the associated bodies
 		Body body1 = joint.getBody1();
 		Body body2 = joint.getBody2();
@@ -2637,6 +2671,9 @@ public class World implements Shiftable, DataContainer {
 	 * When a body is removed, joints and contacts may be implicitly destroyed.
 	 * Pass true to the notify parameter to be notified the destruction of these objects
 	 * via the {@link DestructionListener}s.
+	 * <p>
+	 * As of 3.2.0 this will always trigger {@link ContactListener#end(ContactPoint)} events
+	 * for the contacts that are being removed.
 	 * @param body the {@link Body} to remove
 	 * @param notify true if implicit destruction should be notified
 	 * @return boolean true if the body was removed
@@ -2698,8 +2735,6 @@ public class World implements Shiftable, DataContainer {
 				}
 				// remove the joint from the world
 				this.joints.remove(joint);
-				// set the world property to null
-				joint.world = null;
 			}
 			
 			// remove any contacts this body had with any other body
@@ -2732,9 +2767,7 @@ public class World implements Shiftable, DataContainer {
 					}
 				}
 				// remove the contact constraint from the contact manager
-				this.contactManager.remove(contactConstraint);
-				// set the world property to null
-				contactConstraint.world = null;
+				this.contactManager.end(contactConstraint);
 				// loop over the contact points
 				List<Contact> contacts = contactConstraint.getContacts();
 				int size = contacts.size();
@@ -2748,7 +2781,6 @@ public class World implements Shiftable, DataContainer {
 							contactConstraint.getFixture1(), 
 							contactConstraint.getBody2(), 
 							contactConstraint.getFixture2(),
-							contact.isEnabled(),
 							contact.getPoint(), 
 							contactConstraint.getNormal(), 
 							contact.getDepth());
@@ -2780,9 +2812,6 @@ public class World implements Shiftable, DataContainer {
 		
 		// see if the given joint was removed
 		if (removed) {
-			// set the world property to null
-			joint.world = null;
-			
 			// get the involved bodies
 			Body body1 = joint.getBody1();
 			Body body2 = joint.getBody2();
@@ -2880,8 +2909,6 @@ public class World implements Shiftable, DataContainer {
 							break;
 						}
 					}
-					// set the world to null
-					contactConstraint.world = null;
 					// notify of all the contacts on the contact constraint
 					List<Contact> contacts = contactConstraint.getContacts();
 					int csize = contacts.size();
@@ -2894,7 +2921,6 @@ public class World implements Shiftable, DataContainer {
 								contactConstraint.getFixture1(), 
 								contactConstraint.getBody2(), 
 								contactConstraint.getFixture2(),
-								contact.isEnabled(),
 								contact.getPoint(), 
 								contactConstraint.getNormal(), 
 								contact.getDepth());
@@ -2926,8 +2952,6 @@ public class World implements Shiftable, DataContainer {
 				for (DestructionListener dl : listeners) {
 					dl.destroyed(joint);
 				}
-				// set the world to null
-				joint.world = null;
 			}
 		}
 		// clear all the broadphase bodies
@@ -2937,7 +2961,7 @@ public class World implements Shiftable, DataContainer {
 		// clear all the bodies
 		this.bodies.clear();
 		// clear the contact manager of cached contacts
-		this.contactManager.reset();
+		this.contactManager.clear();
 	}
 	
 	/**
@@ -3031,9 +3055,6 @@ public class World implements Shiftable, DataContainer {
 					dl.destroyed(joint);
 				}
 			}
-			
-			// set the world to null
-			joint.world = null;
 		}
 		
 		// remove all the joints from the joint list
@@ -3155,7 +3176,9 @@ public class World implements Shiftable, DataContainer {
 		if (clazz == null) return null;
 		// create a new list and loop over the listeners
 		List<T> listeners = new ArrayList<T>();
-		for (Listener listener : this.listeners) {
+		int lSize = this.listeners.size();
+		for (int i = 0; i < lSize; i++) {
+			Listener listener = this.listeners.get(i);
 			// check if the listener is of the given type
 			if (clazz.isInstance(listener)) {
 				// if so, add it to the new list
@@ -3188,7 +3211,9 @@ public class World implements Shiftable, DataContainer {
 		// check for null
 		if (clazz == null || listeners == null) return;
 		// create a new list and loop over the listeners
-		for (Listener listener : this.listeners) {
+		int lSize = this.listeners.size();
+		for (int i = 0; i < lSize; i++) {
+			Listener listener = this.listeners.get(i);
 			// check if the listener is of the given type
 			if (clazz.isInstance(listener)) {
 				// if so, add it to the new list
@@ -3306,7 +3331,9 @@ public class World implements Shiftable, DataContainer {
 		if (clazz == null) return 0;
 		// loop over the listeners
 		int count = 0;
-		for (Listener listener : this.listeners) {
+		int lSize = this.listeners.size();
+		for (int i = 0; i < lSize; i++) {
+			Listener listener = this.listeners.get(i);
 			// check if the listener is of the given type
 			if (clazz.isInstance(listener)) {
 				// if so, increment
@@ -3452,18 +3479,60 @@ public class World implements Shiftable, DataContainer {
 	}
 	
 	/**
+	 * Sets the {@link ContactManager}.
+	 * <p>
+	 * A {@link ContactManager} manages the contacts detected in the {@link World#detect()} method
+	 * and performs notification of {@link ContactListener}s.  {@link ContactManager}s can also contain
+	 * specialized logic for improving performance and simulation quality.
+	 * <p>
+	 * Changing the contact manager requires an update to be performed on the next update of this
+	 * world and any cached information will be lost.
+	 * <p>
+	 * The default is the {@link WarmStartingContactManager}.
+	 * @param contactManager the contact manager
+	 * @throws NullPointerException if contactManager is null
+	 * @see ContactManager
+	 * @since 3.2.0
+	 */
+	public void setContactManager(ContactManager contactManager) {
+		if (contactManager == null) throw new NullPointerException(Messages.getString("dynamics.world.nullContactManager"));
+		this.contactManager = contactManager;
+		this.updateRequired = true;
+	}
+	
+	/**
 	 * Returns the {@link ContactManager}.
 	 * <p>
 	 * The contact manager is used to store contacts for the purpose of notifications
-	 * via the {@link ContactListener} and to warm start contacts for better simulation
-	 * speed and accuracy.
-	 * <p>
-	 * This method should rarely be used by application code.
+	 * via the {@link ContactListener}.
 	 * @return {@link ContactManager}
 	 * @since 1.0.2
+	 * @see #setContactManager(ContactManager)
 	 */
 	public ContactManager getContactManager() {
 		return this.contactManager;
+	}
+	
+	/**
+	 * Sets the {@link ContactConstraintSolver} for this world.
+	 * @param constraintSolver the contact constraint solver
+	 * @throws NullPointerException if contactManager is null
+	 * @see ContactConstraintSolver
+	 * @since 3.2.0
+	 */
+	public void setContactConstraintSolver(ContactConstraintSolver constraintSolver) {
+		if (constraintSolver == null) throw new NullPointerException(Messages.getString("dynamics.world.nullContactConstraintSolver"));
+		this.contactConstraintSolver = constraintSolver;
+	}
+	
+	/**
+	 * Returns the {@link ContactConstraintSolver}.
+	 * @return {@link ContactConstraintSolver}
+	 * @since 3.2.0
+	 * @see #setContactConstraintSolver(ContactConstraintSolver)
+	 */
+	public ContactConstraintSolver getContactConstraintSolver() {
+		return this.contactConstraintSolver;
 	}
 	
 	/* (non-Javadoc)

@@ -36,14 +36,14 @@
  * {@link org.dyn4j.dynamics.World} object will perform a depth first search on the 
  * {@link org.dyn4j.dynamics.contact.ContactConstraint} graph to yield 
  * islands.  The islands will 
- * use the {@link org.dyn4j.dynamics.contact.ContactManager} to warm start the 
+ * use the {@link org.dyn4j.dynamics.contact.WarmStartingContactManager} to warm start the 
  * {@link org.dyn4j.dynamics.contact.ContactConstraint}s and then use the 
- * {@link org.dyn4j.dynamics.contact.ContactConstraintSolver} to solve them.
+ * {@link org.dyn4j.dynamics.contact.SequentialImpulses} to solve them.
  * <p>
  * The {@link org.dyn4j.dynamics.contact.ContactListener} can be used to receive 
  * notifications of sensed, begin, end, persisted, and pre/post solve events.
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.2.0
  * @since 1.0.0
  */
 package org.dyn4j.dynamics.contact;

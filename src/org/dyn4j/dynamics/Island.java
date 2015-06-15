@@ -38,20 +38,11 @@ import org.dyn4j.resources.Messages;
 
 /**
  * Used to solve the contact constraints and joints for a group of interconnected bodies.
- * <p>
- * Nearly identitcal to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
- * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.2.0
  * @since 1.0.0
  */
 class Island {
-	/** The world this island belongs to */
-	protected World world;
-	
-	/** The {@link ContactConstraintSolver} */
-	protected ContactConstraintSolver contactConstraintSolver;
-	
 	/** The list of {@link Body}s on this {@link Island} */
 	protected List<Body> bodies;
 	
@@ -62,32 +53,26 @@ class Island {
 	protected List<Joint> joints;
 	
 	/**
-	 * Optional constructor.
+	 * Default constructor.
 	 * <p>
 	 * Uses a default {@link Capacity} for the initial capacity.
-	 * @param world the {@link World} this island belongs to
-	 * @throws NullPointerException if world is null
+	 * @since 3.2.0
 	 */
-	public Island(World world) {
-		this(world, Capacity.DEFAULT_CAPACITY);
+	public Island() {
+		this(Capacity.DEFAULT_CAPACITY);
 	}
 	
 	/**
 	 * Full constructor.
-	 * @param world the {@link World} this island belongs to
 	 * @param initialCapacity the initial capacity of the island
-	 * @throws NullPointerException if world or initialCapacity is null
-	 * @since 3.1.1
+	 * @throws NullPointerException if initialCapacity is null
+	 * @since 3.2.0
 	 */
-	public Island(World world, Capacity initialCapacity) {
-		// check for null world
-		if (world == null) throw new NullPointerException(Messages.getString("dynamics.nullWorld"));
+	public Island(Capacity initialCapacity) {
 		// check for null capacity
 		if (initialCapacity == null) throw new NullPointerException(Messages.getString("dynamics.nullCapacity"));
-		this.world = world;
 		this.bodies = new ArrayList<Body>(initialCapacity.getBodyCount());
 		this.joints = new ArrayList<Joint>(initialCapacity.getJointCount());
-		this.contactConstraintSolver = new ContactConstraintSolver(world);
 		// estimated the number of contacts
 		int eSize = Collisions.getEstimatedCollisionPairs(initialCapacity.getBodyCount());
 		this.contactConstraints = new ArrayList<ContactConstraint>(eSize);
@@ -115,16 +100,7 @@ class Island {
 	 * @param contactConstraint the {@link ContactConstraint}
 	 */
 	public void add(ContactConstraint contactConstraint) {
-		// add static constraints to the beginning of the list and normal constraints
-		// at the end of the list
-		Body b1 = contactConstraint.getBody1();
-		Body b2 = contactConstraint.getBody2();
-		// TODO evaluate order constraints are solved
-		if (b1.isStatic() || b2.isStatic()) {
-			this.contactConstraints.add(0, contactConstraint);
-		} else {
-			this.contactConstraints.add(contactConstraint);
-		}
+		this.contactConstraints.add(contactConstraint);
 	}
 	
 	/**
@@ -138,12 +114,12 @@ class Island {
 	/**
 	 * Integrates the {@link Body}s, solves all {@link ContactConstraint}s and
 	 * {@link Joint}s, and attempts to sleep motionless {@link Body}s.
+	 * @param solver the contact constraint solver
+	 * @param gravity the gravity vector
+	 * @param step the time step information
+	 * @param settings the current world settings
 	 */
-	public void solve() {
-		Vector2 gravity = this.world.gravity;
-		Step step = this.world.step;
-		Settings settings = this.world.settings;
-		
+	public void solve(ContactConstraintSolver solver, Vector2 gravity, Step step, Settings settings) {
 		// the number of solver iterations
 		int velocitySolverIterations = settings.getVelocityConstraintSolverIterations();
 		int positionSolverIterations = settings.getPositionConstraintSolverIterations();
@@ -194,16 +170,13 @@ class Island {
 			body.angularVelocity *= angular;
 		}
 		
-		// set the contact constraints
-		this.contactConstraintSolver.setup(this.contactConstraints);
-		
-		// initialize the constraints
-		this.contactConstraintSolver.initializeConstraints(step);
+		// initialize the solver
+		solver.initialize(this.contactConstraints, step, settings);
 		
 		// initialize joint constraints
 		for (int i = 0; i < jSize; i++) {
 			Joint joint = this.joints.get(i);
-			joint.initializeConstraints();
+			joint.initializeConstraints(step, settings);
 		}
 
 		// solve the velocity constraints
@@ -211,10 +184,10 @@ class Island {
 			// solve the joint velocity constraints
 			for (int j = 0; j < jSize; j++) {
 				Joint joint = this.joints.get(j);
-				joint.solveVelocityConstraints();
+				joint.solveVelocityConstraints(step, settings);
 			}
 			
-			this.contactConstraintSolver.solveVelocityContraints();
+			solver.solveVelocityContraints(this.contactConstraints, step, settings);
 		}
 		
 		// the max settings
@@ -254,13 +227,13 @@ class Island {
 		// solve the position constraints
 		boolean positionConstraintsSolved = false;
 		for (int i = 0; i < positionSolverIterations; i++) {
-			boolean contactsSolved = this.contactConstraintSolver.solvePositionContraints();
+			boolean contactsSolved = solver.solvePositionContraints(this.contactConstraints, step, settings);
 			
 			// solve the joint position constraints
 			boolean jointsSolved = true;
 			for (int j = 0; j < jSize; j++) {
 				Joint joint = this.joints.get(j);
-				boolean jointSolved = joint.solvePositionConstraints();
+				boolean jointSolved = joint.solvePositionConstraints(step, settings);
 				jointsSolved = jointsSolved && jointSolved;
 			}
 			

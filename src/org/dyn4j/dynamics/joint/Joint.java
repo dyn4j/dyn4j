@@ -26,24 +26,28 @@ package org.dyn4j.dynamics.joint;
 
 import java.util.UUID;
 
+import org.dyn4j.DataContainer;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Constraint;
+import org.dyn4j.dynamics.Settings;
+import org.dyn4j.dynamics.Step;
+import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Vector2;
 
 /**
  * Represents constrained motion between two {@link Body}s.
  * @author William Bittle
- * @version 3.1.4
+ * @version 3.2.0
  * @since 1.0.0
  */
-public abstract class Joint extends Constraint {
+public abstract class Joint extends Constraint implements Shiftable, DataContainer {
 	/**
 	 * Enumeration for the limit states a joint can have.
 	 * @author William Bittle
 	 * @version 1.0.3
 	 * @since 1.0.0
 	 */
-	public static enum LimitState {
+	protected static enum LimitState {
 		/** The state if the upper and lower limits are equal within tolerance */
 		EQUAL,
 		/** The state if the joint has reached or passed the lower limit */
@@ -55,7 +59,7 @@ public abstract class Joint extends Constraint {
 	}
 	
 	/** The joint's unique identifier */
-	protected UUID id = UUID.randomUUID();
+	protected final UUID id = UUID.randomUUID();
 	
 	/** Whether the pair of bodies joined together can collide with each other */
 	protected boolean collisionAllowed;
@@ -99,19 +103,25 @@ public abstract class Joint extends Constraint {
 	
 	/**
 	 * Performs any initialization of the velocity and position constraints.
+	 * @param step the time step information
+	 * @param settings the current world settings
 	 */
-	public abstract void initializeConstraints();
+	public abstract void initializeConstraints(Step step, Settings settings);
 	
 	/**
 	 * Solves the velocity constraints.
+	 * @param step the time step information
+	 * @param settings the current world settings
 	 */
-	public abstract void solveVelocityConstraints();
+	public abstract void solveVelocityConstraints(Step step, Settings settings);
 	
 	/**
 	 * Solves the position constraints.
+	 * @param step the time step information
+	 * @param settings the current world settings
 	 * @return boolean true if the position constraints were solved
 	 */
-	public abstract boolean solvePositionConstraints();
+	public abstract boolean solvePositionConstraints(Step step, Settings settings);
 	
 	/**
 	 * Returns the anchor point on the first {@link Body} in

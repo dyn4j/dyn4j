@@ -40,6 +40,7 @@ import org.dyn4j.dynamics.contact.ContactListener;
 import org.dyn4j.dynamics.contact.ContactManager;
 import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.dynamics.contact.PersistedContactPoint;
+import org.dyn4j.dynamics.contact.SimpleContactManager;
 import org.dyn4j.dynamics.contact.SolvedContactPoint;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
@@ -48,12 +49,15 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Used to test the {@link ContactManager} class.
+ * Used to test the {@link SimpleContactManager} class.
  * @author William Bittle
  * @version 3.1.5
  * @since 1.0.2
  */
 public class ContactManagerTest {
+	/** The world */
+	private World world;
+	
 	/** The contact manager */
 	private ContactManager contactManager;
 	
@@ -111,11 +115,11 @@ public class ContactManagerTest {
 	 */
 	@Before
 	public void setup() {
-		World world = new World();
-		this.contactManager = world.getContactManager();
+		this.world = new World();
+		this.contactManager = this.world.getContactManager();
 		
 		this.contactListener = new CMTContactListener();
-		world.addListener(this.contactListener);
+		this.world.addListener(this.contactListener);
 		
 		Gjk gjk = new Gjk();
 		ClippingManifoldSolver cms = new ClippingManifoldSolver();
@@ -151,51 +155,50 @@ public class ContactManagerTest {
 		// b1 - b2 (2 contacts)
 		if (gjk.detect(c1, b1.getTransform(), c2, b2.getTransform(), p)) {
 			cms.getManifold(p, c1, b1.getTransform(), c2, b2.getTransform(), m);
-			cc = new ContactConstraint(b1, f1, b2, f2, m, world);
-			this.contactManager.add(cc);
+			cc = new ContactConstraint(b1, f1, b2, f2, m, 0, 0);
+			this.contactManager.queue(cc);
 		}
 		
 		// b1 - b3 (2 contacts)
 		if (gjk.detect(c1, b1.getTransform(), c3, b3.getTransform(), p)) {
 			cms.getManifold(p, c1, b1.getTransform(), c3, b3.getTransform(), m);
-			cc = new ContactConstraint(b1, f1, b3, f3, m, world);
-			this.contactManager.add(cc);
+			cc = new ContactConstraint(b1, f1, b3, f3, m, 0, 0);
+			this.contactManager.queue(cc);
 		}
 		
 		// b1 - b4 (2 contacts)
 		if (gjk.detect(c1, b1.getTransform(), c4, b4.getTransform(), p)) {
 			cms.getManifold(p, c1, b1.getTransform(), c4, b4.getTransform(), m);
-			cc = new ContactConstraint(b1, f1, b4, f4, m, world);
-			this.contactManager.add(cc);
+			cc = new ContactConstraint(b1, f1, b4, f4, m, 0, 0);
+			this.contactManager.queue(cc);
 		}
 		
 		// b2 - b3 (1 contact)
 		p.clear(); m.clear();
 		if (gjk.detect(c2, b2.getTransform(), c3, b3.getTransform(), p)) {
 			cms.getManifold(p, c2, b2.getTransform(), c3, b3.getTransform(), m);
-			cc = new ContactConstraint(b2, f2, b3, f3, m, world);
-			this.contactManager.add(cc);
+			cc = new ContactConstraint(b2, f2, b3, f3, m, 0, 0);
+			this.contactManager.queue(cc);
 		}
 		
 		// b2 - b4 (1 contact)
 		p.clear(); m.clear();
 		if (gjk.detect(c2, b2.getTransform(), c4, b4.getTransform(), p)) {
 			cms.getManifold(p, c2, b2.getTransform(), c4, b4.getTransform(), m);
-			cc = new ContactConstraint(b2, f2, b4, f4, m, world);
-			this.contactManager.add(cc);
+			cc = new ContactConstraint(b2, f2, b4, f4, m, 0, 0);
+			this.contactManager.queue(cc);
 		}
 		
 		// b3 - b4 (1 contact)
 		p.clear(); m.clear();
 		if (gjk.detect(c3, b3.getTransform(), c4, b4.getTransform(), p)) {
 			cms.getManifold(p, c3, b3.getTransform(), c4, b4.getTransform(), m);
-			cc = new ContactConstraint(b3, f3, b4, f4, m, world);
-			this.contactManager.add(cc);
+			cc = new ContactConstraint(b3, f3, b4, f4, m, 0, 0);
+			this.contactManager.queue(cc);
 		}
 		
 		// perform one update (since there is nothing yet)
-		this.contactManager.updateContacts();
-		this.contactManager.clear();
+		this.contactManager.updateAndNotify(this.world.getListeners(ContactListener.class), this.world.getSettings());
 		this.contactListener.clear();
 		
 		// now move some objects so that some objects are sensed, some are
@@ -206,73 +209,74 @@ public class ContactManagerTest {
 		// b1 - b2 (2 contacts)
 		if (gjk.detect(c1, b1.getTransform(), c2, b2.getTransform(), p)) {
 			cms.getManifold(p, c1, b1.getTransform(), c2, b2.getTransform(), m);
-			cc = new ContactConstraint(b1, f1, b2, f2, m, world);
-			this.contactManager.add(cc);
+			cc = new ContactConstraint(b1, f1, b2, f2, m, 0, 0);
+			this.contactManager.queue(cc);
 		}
 		
 		// b1 - b3 (2 contacts)
 		if (gjk.detect(c1, b1.getTransform(), c3, b3.getTransform(), p)) {
 			cms.getManifold(p, c1, b1.getTransform(), c3, b3.getTransform(), m);
-			cc = new ContactConstraint(b1, f1, b3, f3, m, world);
-			this.contactManager.add(cc);
+			cc = new ContactConstraint(b1, f1, b3, f3, m, 0, 0);
+			this.contactManager.queue(cc);
 		}
 		
 		// b1 - b4 (2 contacts)
 		if (gjk.detect(c1, b1.getTransform(), c4, b4.getTransform(), p)) {
 			cms.getManifold(p, c1, b1.getTransform(), c4, b4.getTransform(), m);
-			cc = new ContactConstraint(b1, f1, b4, f4, m, world);
-			this.contactManager.add(cc);
+			cc = new ContactConstraint(b1, f1, b4, f4, m, 0, 0);
+			this.contactManager.queue(cc);
 		}
 		
 		// b2 - b3 (1 contact)
 		p.clear(); m.clear();
 		if (gjk.detect(c2, b2.getTransform(), c3, b3.getTransform(), p)) {
 			cms.getManifold(p, c2, b2.getTransform(), c3, b3.getTransform(), m);
-			cc = new ContactConstraint(b2, f2, b3, f3, m, world);
-			this.contactManager.add(cc);
+			cc = new ContactConstraint(b2, f2, b3, f3, m, 0, 0);
+			this.contactManager.queue(cc);
 		}
 		
 		// b2 - b4 (1 contact)
 		p.clear(); m.clear();
 		if (gjk.detect(c2, b2.getTransform(), c4, b4.getTransform(), p)) {
 			cms.getManifold(p, c2, b2.getTransform(), c4, b4.getTransform(), m);
-			cc = new ContactConstraint(b2, f2, b4, f4, m, world);
-			this.contactManager.add(cc);
+			cc = new ContactConstraint(b2, f2, b4, f4, m, 0, 0);
+			this.contactManager.queue(cc);
 		}
 		
 		// b3 - b4 (1 contact)
 		p.clear(); m.clear();
 		if (gjk.detect(c3, b3.getTransform(), c4, b4.getTransform(), p)) {
 			cms.getManifold(p, c3, b3.getTransform(), c4, b4.getTransform(), m);
-			cc = new ContactConstraint(b3, f3, b4, f4, m, world);
-			this.contactManager.add(cc);
+			cc = new ContactConstraint(b3, f3, b4, f4, m, 0, 0);
+			this.contactManager.queue(cc);
 		}
 	}
 	
 	/**
-	 * Tests the add and remove methods.
+	 * Tests the queue and end methods.
 	 */
 	@Test
 	public void addRemove() {
-		World w = new World();
+		ArrayList<ManifoldPoint> points = new ArrayList<ManifoldPoint>();
+		points.add(new ManifoldPoint(ManifoldPointId.DISTANCE, new Vector2(), 1));
 		ContactConstraint cc = new ContactConstraint(
 				new Body(), 
 				new BodyFixture(Geometry.createCircle(1.0)), 
 				new Body(), 
 				new BodyFixture(Geometry.createCircle(1.0)), 
-				new Manifold(new ArrayList<ManifoldPoint>(), new Vector2()), 
-				w);
+				new Manifold(points, new Vector2()), 
+				0, 0);
 		
-		ContactManager cm = new ContactManager(w);
-		cm.add(cc);
-		cm.updateContacts();
+		TestContactManager cm = new TestContactManager();
+		cm.queue(cc);
+		cm.updateAndNotify(null, new Settings());
 		
-		TestCase.assertFalse(cm.isCacheEmpty());
+		TestCase.assertFalse(cm.cacheSize() == 0);
 		// remove should remove the contact from the cache
-		TestCase.assertTrue(cm.remove(cc));
-		TestCase.assertTrue(cm.isCacheEmpty());
+		TestCase.assertTrue(cm.end(cc));
+		TestCase.assertTrue(cm.cacheSize() == 0);
 		
-		TestCase.assertFalse(cm.remove(cc));
+		TestCase.assertFalse(cm.end(cc));
 	}
 	
 	/**
@@ -280,7 +284,6 @@ public class ContactManagerTest {
 	 */
 	@Test
 	public void shiftCoordinates() {
-		World w = new World();
 		List<ManifoldPoint> points = new ArrayList<ManifoldPoint>(2);
 		points.add(new ManifoldPoint(ManifoldPointId.DISTANCE, new Vector2(2.0, 0.0), 1.0));
 		ContactConstraint cc = new ContactConstraint(
@@ -289,11 +292,11 @@ public class ContactManagerTest {
 				new Body(), 
 				new BodyFixture(Geometry.createCircle(1.0)), 
 				new Manifold(points, new Vector2(1.0, 0.0)), 
-				w);
+				0, 0);
 		
-		ContactManager cm = new ContactManager(w);
-		cm.add(cc);
-		cm.updateContacts();
+		TestContactManager cm = new TestContactManager();
+		cm.queue(cc);
+		cm.updateAndNotify(null, new Settings());
 		
 		cm.shift(new Vector2(2.0, -1.0));
 		
@@ -307,50 +310,36 @@ public class ContactManagerTest {
 	 */
 	@Test
 	public void clear() {
-		World w = new World();
+		ArrayList<ManifoldPoint> points = new ArrayList<ManifoldPoint>();
+		points.add(new ManifoldPoint(ManifoldPointId.DISTANCE, new Vector2(), 1));
 		ContactConstraint cc = new ContactConstraint(
 				new Body(), 
 				new BodyFixture(Geometry.createCircle(1.0)), 
 				new Body(), 
 				new BodyFixture(Geometry.createCircle(1.0)), 
-				new Manifold(new ArrayList<ManifoldPoint>(), new Vector2()), 
-				w);
+				new Manifold(points, new Vector2()), 
+				0, 0);
 		
-		ContactManager cm = new ContactManager(w);
-		cm.add(cc);
+		TestContactManager cm = new TestContactManager();
+		cm.queue(cc);
 		
-		TestCase.assertFalse(cm.isListEmpty());
+		TestCase.assertTrue(cm.queueSize() == 1);
+		TestCase.assertTrue(cm.cacheSize() == 0);
+		
+		cm.updateAndNotify(null, new Settings());
+		
+		TestCase.assertTrue(cm.queueSize() == 0);
+		TestCase.assertTrue(cm.cacheSize() == 1);
+		
+		cm.queue(cc);
+		
+		TestCase.assertTrue(cm.queueSize() == 1);
+		TestCase.assertTrue(cm.cacheSize() == 1);
 		
 		cm.clear();
 		
-		TestCase.assertTrue(cm.isListEmpty());
-	}
-	
-	/**
-	 * Tests the reset method.
-	 */
-	@Test
-	public void reset() {
-		World w = new World();
-		ContactConstraint cc = new ContactConstraint(
-				new Body(), 
-				new BodyFixture(Geometry.createCircle(1.0)), 
-				new Body(), 
-				new BodyFixture(Geometry.createCircle(1.0)), 
-				new Manifold(new ArrayList<ManifoldPoint>(), new Vector2()), 
-				w);
-		
-		ContactManager cm = new ContactManager(w);
-		cm.add(cc);
-		cm.updateContacts();
-		
-		TestCase.assertFalse(cm.isListEmpty());
-		TestCase.assertFalse(cm.isCacheEmpty());
-		
-		cm.reset();
-		
-		TestCase.assertTrue(cm.isListEmpty());
-		TestCase.assertTrue(cm.isCacheEmpty());
+		TestCase.assertTrue(cm.queueSize() == 0);
+		TestCase.assertTrue(cm.cacheSize() == 0);
 	}
 	
 	/**
@@ -359,9 +348,9 @@ public class ContactManagerTest {
 	@Test
 	public void updateContacts() {
 		// call the update contacts method
-		this.contactManager.updateContacts();
-		this.contactManager.preSolveNotify();
-		this.contactManager.postSolveNotify();
+		this.contactManager.updateAndNotify(this.world.getListeners(ContactListener.class), this.world.getSettings());
+		this.contactManager.preSolveNotify(this.world.getListeners(ContactListener.class));
+		this.contactManager.postSolveNotify(this.world.getListeners(ContactListener.class));
 		
 		// verify that the contact listener received the correct events
 		// the one between b1 and b4
@@ -382,15 +371,6 @@ public class ContactManagerTest {
 	 * @since 3.1.1
 	 */
 	public void createSuccessNullCapacity() {
-		new ContactManager(new World(), null);
-	}
-	
-	/**
-	 * Tests the creation of the contact manager with a null world.
-	 * @since 3.1.1
-	 */
-	@Test(expected = NullPointerException.class)
-	public void createFailureNullWorld() {
-		new ContactManager(null, Capacity.DEFAULT_CAPACITY);
+		new SimpleContactManager(null);
 	}
 }

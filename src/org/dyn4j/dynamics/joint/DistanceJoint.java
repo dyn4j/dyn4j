@@ -24,6 +24,7 @@
  */
 package org.dyn4j.dynamics.joint;
 
+import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Settings;
@@ -45,14 +46,12 @@ import org.dyn4j.resources.Messages;
  * This joint doubles as a spring/damper distance joint where the length can
  * change but is constantly approaching the target distance.  Enable the
  * spring/damper by setting the frequency to a value greater than zero.
- * <p>
- * Nearly identical to <a href="http://www.box2d.org">Box2d</a>'s equivalent class.
- * @see <a href="http://www.box2d.org">Box2d</a>
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.2.0
  * @since 1.0.0
+ * @see <a href="http://www.dyn4j.org/documentation/joints/#Distance_Joint">Documentation</a>
  */
-public class DistanceJoint extends Joint implements Shiftable {
+public class DistanceJoint extends Joint implements Shiftable, DataContainer {
 	/** The local anchor point on the first {@link Body} */
 	protected Vector2 localAnchor1;
 	
@@ -128,13 +127,10 @@ public class DistanceJoint extends Joint implements Shiftable {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints()
+	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void initializeConstraints() {
-		Step step = this.world.getStep();
-		Settings settings = this.world.getSettings();
-		
+	public void initializeConstraints(Step step, Settings settings) {
 		double linearTolerance = settings.getLinearTolerance();
 		
 		Transform t1 = body1.getTransform();
@@ -210,10 +206,10 @@ public class DistanceJoint extends Joint implements Shiftable {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints()
+	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void solveVelocityConstraints() {
+	public void solveVelocityConstraints(Step step, Settings settings) {
 		Transform t1 = body1.getTransform();
 		Transform t2 = body2.getTransform();
 		Mass m1 = body1.getMass();
@@ -248,18 +244,15 @@ public class DistanceJoint extends Joint implements Shiftable {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints()
+	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public boolean solvePositionConstraints() {
+	public boolean solvePositionConstraints(Step step, Settings settings) {
 		// check if this is a spring damper
 		if (this.frequency > 0.0) {
 			// don't solve position constraints for spring damper
 			return true;
 		}
-		
-		// get the current settings
-		Settings settings = this.world.getSettings();
 		
 		double linearTolerance = settings.getLinearTolerance();
 		double maxLinearCorrection = settings.getMaximumLinearCorrection();

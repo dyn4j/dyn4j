@@ -31,15 +31,12 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents a contact point between two {@link Body} objects.
  * @author William Bittle
- * @version 3.1.2
+ * @version 3.2.0
  * @since 1.0.0
  */
 public class Contact {
 	/** The manifold point id for warm starting */
-	protected ManifoldPointId id;
-	
-	/** Whether the contact is enabled or not */
-	protected boolean enabled;
+	protected final ManifoldPointId id;
 	
 	/** The contact point in world space */
 	protected Vector2 p;
@@ -87,7 +84,6 @@ public class Contact {
 	 */
 	public Contact(ManifoldPointId id, Vector2 point, double depth, Vector2 p1, Vector2 p2) {
 		this.id = id;
-		this.enabled = true;
 		this.p = point;
 		this.depth = depth;
 		this.p1 = p1;
@@ -101,7 +97,6 @@ public class Contact {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Contact[Id=").append(this.id)
-		.append("|IsEnabled=").append(this.enabled)
 		.append("|Point=").append(this.p)
 		.append("|PointInBody1=").append(this.p1)
 		.append("|PointInBody2=").append(this.p2)
@@ -125,14 +120,6 @@ public class Contact {
 	 */
 	public ManifoldPointId getId() {
 		return this.id;
-	}
-	
-	/**
-	 * Returns true if this contact is enabled.
-	 * @return boolean
-	 */
-	public boolean isEnabled() {
-		return this.enabled;
 	}
 	
 	/**

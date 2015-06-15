@@ -63,7 +63,7 @@ public class ContactProfiler {
 		
 		// wait for profiler to attach
 		System.out.println("Attach profiler and then press any key to continue...");
-		System.in.read();
+		//System.in.read();
 		
 //		long[][] metrics = new long[iterations*2][2];
 		

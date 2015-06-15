@@ -40,19 +40,16 @@ public class ContactPoint {
 	protected final ContactPointId id;
 	
 	/** The first {@link Body} in contact */
-	protected Body body1;
+	protected final Body body1;
 	
 	/** The second {@link Body} in contact */
-	protected Body body2;
+	protected final Body body2;
 	
 	/** The first {@link Body}'s {@link BodyFixture} */
-	protected BodyFixture fixture1;
+	protected final BodyFixture fixture1;
 	
 	/** The second {@link Body}'s {@link BodyFixture} */
-	protected BodyFixture fixture2;
-	
-	/** Whether this contact point is enabled or not */
-	protected boolean enabled;
+	protected final BodyFixture fixture2;
 	
 	/** The world space contact point */
 	protected Vector2 point;
@@ -70,19 +67,17 @@ public class ContactPoint {
 	 * @param fixture1 the first {@link Body}'s {@link BodyFixture}
 	 * @param body2 the second {@link Body} in contact
 	 * @param fixture2 the second {@link Body}'s {@link BodyFixture}
-	 * @param enabled true if this contact point is enabled
 	 * @param point the world space contact point
 	 * @param normal the world space contact normal
 	 * @param depth the penetration depth
 	 */
 	public ContactPoint(ContactPointId id, Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2,
-			boolean enabled, Vector2 point, Vector2 normal, double depth) {
+			Vector2 point, Vector2 normal, double depth) {
 		this.id = id;
 		this.body1 = body1;
 		this.fixture1 = fixture1;
 		this.body2 = body2;
 		this.fixture2 = fixture2;
-		this.enabled = enabled;
 		this.point = point;
 		this.normal = normal;
 		this.depth = depth;
@@ -100,7 +95,6 @@ public class ContactPoint {
 		this.fixture1 = contactPoint.fixture1;
 		this.body2 = contactPoint.body2;
 		this.fixture2 = contactPoint.fixture2;
-		this.enabled = contactPoint.enabled;
 		this.point = contactPoint.point;
 		this.normal = contactPoint.normal;
 		this.depth = contactPoint.depth;
@@ -117,7 +111,6 @@ public class ContactPoint {
 		.append("|Fixture1=").append(this.fixture1)
 		.append("|Body2=").append(this.body2)
 		.append("|Fixture2=").append(this.fixture2)
-		.append("|IsEnabled=").append(this.enabled)
 		.append("|Point=").append(this.point)
 		.append("|Normal=").append(this.normal)
 		.append("|Depth=").append(this.depth)
@@ -132,14 +125,6 @@ public class ContactPoint {
 	 */
 	public ContactPointId getId() {
 		return this.id;
-	}
-	
-	/**
-	 * Returns true if this contact point is enabled.
-	 * @return boolean
-	 */
-	public boolean isEnabled() {
-		return this.enabled;
 	}
 	
 	/**
