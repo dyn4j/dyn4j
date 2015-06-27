@@ -75,11 +75,6 @@ public class CollidableTest extends AbstractCollidable<Fixture> implements Colli
 	}
 
 	@Override
-	public Collidable<Fixture> update() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public Vector2 getLocalCenter() {
 		throw new UnsupportedOperationException();
 	}

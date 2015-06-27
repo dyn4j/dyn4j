@@ -197,7 +197,7 @@ public class ExampleGraphics2D extends JFrame {
 		Rectangle floorRect = new Rectangle(15.0, 1.0);
 		GameObject floor = new GameObject();
 		floor.addFixture(new BodyFixture(floorRect));
-		floor.update(Mass.Type.INFINITE);
+		floor.setMass(Mass.Type.INFINITE);
 		// move the floor down a bit
 		floor.translate(0.0, -4.0);
 		this.world.addBody(floor);
@@ -209,7 +209,7 @@ public class ExampleGraphics2D extends JFrame {
 				new Vector2(0.5, -0.5));
 		GameObject triangle = new GameObject();
 		triangle.addFixture(triShape);
-		triangle.update(Mass.Type.NORMAL);
+		triangle.setMass(Mass.Type.NORMAL);
 		triangle.translate(-1.0, 2.0);
 		// test having a velocity
 		triangle.getLinearVelocity().set(5.0, 0.0);
@@ -219,7 +219,7 @@ public class ExampleGraphics2D extends JFrame {
 		Circle cirShape = new Circle(0.5);
 		GameObject circle = new GameObject();
 		circle.addFixture(cirShape);
-		circle.update(Mass.Type.NORMAL);
+		circle.setMass(Mass.Type.NORMAL);
 		circle.translate(2.0, 2.0);
 		// test adding some force
 		circle.applyForce(new Vector2(-100.0, 0.0));
@@ -231,7 +231,7 @@ public class ExampleGraphics2D extends JFrame {
 		Rectangle rectShape = new Rectangle(1.0, 1.0);
 		GameObject rectangle = new GameObject();
 		rectangle.addFixture(rectShape);
-		rectangle.update(Mass.Type.NORMAL);
+		rectangle.setMass(Mass.Type.NORMAL);
 		rectangle.translate(0.0, 2.0);
 		rectangle.getLinearVelocity().set(-5.0, 0.0);
 		this.world.addBody(rectangle);
@@ -240,7 +240,7 @@ public class ExampleGraphics2D extends JFrame {
 		Polygon polyShape = Geometry.createUnitCirclePolygon(10, 1.0);
 		GameObject polygon = new GameObject();
 		polygon.addFixture(polyShape);
-		polygon.update(Mass.Type.NORMAL);
+		polygon.setMass(Mass.Type.NORMAL);
 		polygon.translate(-2.5, 2.0);
 		// set the angular velocity
 		polygon.setAngularVelocity(Math.toRadians(-20.0));
@@ -261,37 +261,37 @@ public class ExampleGraphics2D extends JFrame {
 		capsule.addFixture(c1Fixture);
 		capsule.addFixture(c2Fixture);
 		capsule.addFixture(rm);
-		capsule.update(Mass.Type.NORMAL);
+		capsule.setMass(Mass.Type.NORMAL);
 		capsule.translate(0.0, 4.0);
 		this.world.addBody(capsule);
 		
 		GameObject issTri = new GameObject();
 		issTri.addFixture(Geometry.createIsoscelesTriangle(1.0, 3.0));
-		issTri.update(Mass.Type.NORMAL);
+		issTri.setMass(Mass.Type.NORMAL);
 		issTri.translate(2.0, 3.0);
 		this.world.addBody(issTri);
 		
 		GameObject equTri = new GameObject();
 		equTri.addFixture(Geometry.createEquilateralTriangle(2.0));
-		equTri.update(Mass.Type.NORMAL);
+		equTri.setMass(Mass.Type.NORMAL);
 		equTri.translate(3.0, 3.0);
 		this.world.addBody(equTri);
 		
 		GameObject rightTri = new GameObject();
 		rightTri.addFixture(Geometry.createRightTriangle(2.0, 1.0));
-		rightTri.update(Mass.Type.NORMAL);
+		rightTri.setMass(Mass.Type.NORMAL);
 		rightTri.translate(4.0, 3.0);
 		this.world.addBody(rightTri);
 		
 		GameObject cap = new GameObject();
 		cap.addFixture(new Capsule(1.0, 0.5));
-		cap.update(Mass.Type.NORMAL);
+		cap.setMass(Mass.Type.NORMAL);
 		cap.translate(-3.0, 3.0);
 		this.world.addBody(cap);
 		
 		GameObject slice = new GameObject();
 		slice.addFixture(new Slice(0.5, Math.toRadians(120)));
-		slice.update(Mass.Type.NORMAL);
+		slice.setMass(Mass.Type.NORMAL);
 		slice.translate(-3.0, 3.0);
 		this.world.addBody(slice);
 	}

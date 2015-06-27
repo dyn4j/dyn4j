@@ -172,16 +172,6 @@ public interface Collidable<T extends Fixture> extends Transformable, Shiftable,
 	public abstract List<T> removeFixtures(Vector2 point);
 	
 	/**
-	 * Updates any internally cached information about the attached {@link Fixture}s.
-	 * <p>
-	 * This method should be used after adding, removing, or updating any fixtures
-	 * on a {@link Collidable} since these operations can affect information such
-	 * as the collidable center.
-	 * @return {@link Collidable} this collidable
-	 */
-	public abstract Collidable<T> update();
-	
-	/**
 	 * Returns all the {@link Fixture}s that contain the given point.
 	 * <p>
 	 * Returns an empty list if the point is not contained in any fixture in this {@link Collidable}.

@@ -7,32 +7,26 @@ New Features:
 Bug Fixes:
     
 Deprecated:
-  - The Body.setMass methods have been replaced by their respective update 
-    method.
+  - Body.setMass() it was odd that it set the mass type to Mass.Type.INFINITE.
   
 Breaking Changes:
   - The BroadphaseDetector interface has changed drastically.
   - The three SAP algorithms have been replaced by one.
   - Due to changes in the BroadphaseDetector interface and output, some 
     listener methods no longer exist.
-  - The Body.setMass methods have been replaced by an update methods to more 
-    accurately describe the desired functional use.
-  - The Body.update() method will now use the current body's mass type rather
-    than using Mass.Type.NORMAL.  NOTE that the default mass type of bodies
-    is Mass.Type.INFINITE.
   - The Body.getFixtures() method now returns an unmodifiable list.
   - The World.getBodies() and World.getJoints() methods now return unmodifiable
     lists.
   - The Bounds interface changed to only include the Translatable
-    interface due to the some bounds not supporting rotation.
+    interface due to the some bounds types not supporting rotation.
   - Many member variables have been made final.
-  - Made a few internal classes package private.
-  - Deprecated methods and classes have been removed.
+  - Made a few internal classes package private to clean up the API.
+  - Many deprecated methods and classes have been removed.
     
 Other:
-  - Cleaner API (less classes to sift through).
+  - Cleaner API with less classes to sift through and more interface options
+  	for extensibility.
   - More Javadoc comments.
-  - More maintainable.
 
 ===============================================================================
 Version 3.1.11

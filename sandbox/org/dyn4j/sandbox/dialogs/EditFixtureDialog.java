@@ -205,7 +205,7 @@ public class EditFixtureDialog extends JDialog implements ActionListener {
 			if (!body.isMassExplicit()) {
 				// recompute the mass
 				// we must do this if the density or position of the fixture has changed
-				body.update(body.getMass().getType());
+				body.updateMass();
 			}
 		}
 	}

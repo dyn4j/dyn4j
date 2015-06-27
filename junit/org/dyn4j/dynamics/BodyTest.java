@@ -323,7 +323,7 @@ public class BodyTest {
 		Body b = new Body();
 		
 		// test setting the mass with no fixtures
-		b.update();
+		b.setMass(Mass.Type.INFINITE);
 		TestCase.assertNotNull(b.mass);
 		// make sure its not infinite (the mass and inertia will still be zero however)
 		TestCase.assertTrue(b.mass.isInfinite());
@@ -336,7 +336,7 @@ public class BodyTest {
 		// test setting with one fixture
 		// it should not be infinite
 		BodyFixture f1 = b.addFixture(Geometry.createUnitCirclePolygon(5, 0.5));
-		b.update(Mass.Type.NORMAL);
+		b.setMass(Mass.Type.NORMAL);
 		TestCase.assertNotNull(b.mass);
 		TestCase.assertFalse(b.mass.isInfinite());
 		
@@ -344,7 +344,7 @@ public class BodyTest {
 		// it should not be infinite and should not be
 		// equal to either shapes mass
 		BodyFixture f2 = b.addFixture(Geometry.createIsoscelesTriangle(1.0, 1.0));
-		b.update();
+		b.setMass(Mass.Type.NORMAL);
 		TestCase.assertNotNull(b.mass);
 		TestCase.assertFalse(b.mass.isInfinite());
 		Mass m1 = f1.createMass();
@@ -355,25 +355,25 @@ public class BodyTest {
 		// test setting the mass with a flag
 		// make sure the type of mass is correct but the
 		// values of the mass and 
-		b.update(Mass.Type.INFINITE);
+		b.setMass(Mass.Type.INFINITE);
 		TestCase.assertNotNull(b.mass);
 		TestCase.assertTrue(b.mass.isInfinite());
 		TestCase.assertEquals(0.0, b.mass.getMass());
 		TestCase.assertEquals(0.0, b.mass.getInverseMass());
 		TestCase.assertEquals(0.0, b.mass.getInertia());
 		TestCase.assertEquals(0.0, b.mass.getInverseInertia());
-		b.update(Mass.Type.FIXED_ANGULAR_VELOCITY);
+		b.setMass(Mass.Type.FIXED_ANGULAR_VELOCITY);
 		TestCase.assertNotNull(b.mass);
 		TestCase.assertEquals(0.0, b.mass.getInertia());
 		TestCase.assertEquals(0.0, b.mass.getInverseInertia());
-		b.update(Mass.Type.FIXED_LINEAR_VELOCITY);
+		b.setMass(Mass.Type.FIXED_LINEAR_VELOCITY);
 		TestCase.assertNotNull(b.mass);
 		TestCase.assertEquals(0.0, b.mass.getMass());
 		TestCase.assertEquals(0.0, b.mass.getInverseMass());
 		
 		// test setting the mass directly
 		Mass mass = new Mass(f2.getShape().getCenter(), 2.3, 20.3);
-		b.update(mass);
+		b.setMass(mass);
 		TestCase.assertSame(mass, b.mass);
 		
 		// test only setting the type
@@ -417,19 +417,9 @@ public class BodyTest {
 	@Test(expected = NullPointerException.class)
 	public void setNullMass() {
 		Body b = new Body();
-		b.update((Mass)null);
+		b.setMass((Mass)null);
 	}
 
-	/**
-	 * Tests setting the mass type to null.
-	 * @since 3.1.0
-	 */
-	@Test(expected = NullPointerException.class)
-	public void setNullMassType2() {
-		Body b = new Body();
-		b.update((Mass.Type)null);
-	}
-	
 	/**
 	 * Tests the apply methods for forces and torques.
 	 */
@@ -437,7 +427,7 @@ public class BodyTest {
 	public void apply() {
 		Body b = new Body();
 		b.addFixture(Geometry.createCircle(1.0));
-		b.update(Mass.Type.NORMAL);
+		b.setMass(Mass.Type.NORMAL);
 		
 		// all the methods should add forces/torques to
 		// an accumulator, wake up the body, and not
@@ -559,7 +549,7 @@ public class BodyTest {
 	public void accumulate() {
 		Body b = new Body();
 		b.addFixture(Geometry.createCircle(1.0));
-		b.update(Mass.Type.NORMAL);
+		b.setMass(Mass.Type.NORMAL);
 		
 		b.applyForce(new Vector2(0.0, -2.0), new Vector2(1.0, -0.3));
 		// just use the default elapsed time
@@ -579,7 +569,7 @@ public class BodyTest {
 	public void isDynamic() {
 		Body b = new Body();
 		b.addFixture(Geometry.createIsoscelesTriangle(2.0, 1.0));
-		b.update(Mass.Type.NORMAL);
+		b.setMass(Mass.Type.NORMAL);
 		
 		TestCase.assertTrue(b.isDynamic());
 		TestCase.assertFalse(b.isKinematic());
@@ -984,7 +974,7 @@ public class BodyTest {
 		b.addFixture(Geometry.createSquare(1.0));
 		f = b.addFixture(Geometry.createUnitCirclePolygon(5, 1.0));
 		f.getShape().translate(1.0, -3.0);
-		b.update();
+		b.setMass(Mass.Type.INFINITE);
 		
 		double rdr = b.getRotationDiscRadius();
 		
@@ -1017,7 +1007,7 @@ public class BodyTest {
 		b.addFixture(four2);
 		
 		// setup the body
-		b.update();
+		b.setMass(Mass.Type.INFINITE);
 		
 		// make sure the center of mass is not at the origin
 		Vector2 p = b.getWorldCenter();
@@ -1045,7 +1035,7 @@ public class BodyTest {
 		b.addFixture(Geometry.createEquilateralTriangle(2.0));
 		BodyFixture bf = b.addFixture(Geometry.createUnitCirclePolygon(5, 1.0));
 		bf.getShape().translate(-1.0, 1.0);
-		b.update();
+		b.setMass(Mass.Type.INFINITE);
 		b.translateToOrigin();
 		
 		Vector2 p = new Vector2(-2.0, 1.0);
@@ -1097,7 +1087,7 @@ public class BodyTest {
 	public void getAccumulatedForce() {
 		Body b = new Body();
 		b.addFixture(Geometry.createCircle(1.0));
-		b.update(Mass.Type.NORMAL);
+		b.setMass(Mass.Type.NORMAL);
 		
 		// no force applied yet
 		Vector2 f = b.getAccumulatedForce();
@@ -1208,13 +1198,13 @@ public class BodyTest {
 		Body b2 = new Body();
 		
 		b1.addFixture(Geometry.createRectangle(15.0, 1.0));
-		b1.update(Mass.Type.NORMAL);
+		b1.setMass(Mass.Type.NORMAL);
 		
 		b2.addFixture(Geometry.createSquare(1.0));
 		Convex c = Geometry.createSquare(1.0);
 		c.translate(-0.5, 0.0);
 		b2.addFixture(c);
-		b2.update(Mass.Type.NORMAL);
+		b2.setMass(Mass.Type.NORMAL);
 		b2.translate(0.0, 0.75);
 		
 		w.addBody(b1);
@@ -1260,7 +1250,7 @@ public class BodyTest {
 	public void applyImpulse() {
 		Body b = new Body();
 		b.addFixture(Geometry.createRectangle(1.0, 1.0));
-		b.update(Mass.Type.NORMAL);
+		b.setMass(Mass.Type.NORMAL);
 		
 		double m = b.getMass().getMass();
 		double i = b.getMass().getInertia();
@@ -1373,7 +1363,7 @@ public class BodyTest {
 		b.addFixture(Geometry.createCircle(0.5));
 		b.rotate(Math.toRadians(30));
 		b.setAngularVelocity(Math.toRadians(1));
-		b.update();
+		b.setMass(Mass.Type.INFINITE);
 		
 		b.getInitialTransform().set(b.getTransform());
 		

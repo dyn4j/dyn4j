@@ -887,7 +887,7 @@ public class XmlReader extends DefaultHandler {
 			} else {
 				throw new SAXException(MessageFormat.format(Messages.getString("exception.persist.unknownMassType"), this.massType));
 			}
-			this.body.update(mass);
+			this.body.setMass(mass);
 			this.body.setMassExplicit(this.massExplicit);
 			
 			this.massExplicit = false;

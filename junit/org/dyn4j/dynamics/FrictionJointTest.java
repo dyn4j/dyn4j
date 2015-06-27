@@ -134,7 +134,7 @@ public class FrictionJointTest {
 		Body g = new Body();
 		BodyFixture gf = g.addFixture(Geometry.createRectangle(10.0, 0.5));
 		gf.setFriction(0.0);
-		g.update(Mass.Type.INFINITE);
+		g.setMass(Mass.Type.INFINITE);
 		g.setLinearDamping(0.0);
 		g.setAngularDamping(0.0);
 		w.addBody(g);
@@ -142,7 +142,7 @@ public class FrictionJointTest {
 		Body b = new Body();
 		BodyFixture bf = b.addFixture(Geometry.createCircle(0.5));
 		bf.setFriction(0.0);
-		b.update(Mass.Type.NORMAL);
+		b.setMass(Mass.Type.NORMAL);
 		b.translate(0.0, 2.0);
 		// 5 meters/second
 		b.setLinearVelocity(new Vector2(4.0, 3.0));

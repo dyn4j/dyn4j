@@ -45,7 +45,7 @@ public class CoordinateShift extends CompiledSimulation {
 	/** The current origin */
 	private Vector2 origin = new Vector2(1.0, 1.0);
 	
-	/** The time since the last update */
+	/** The time since the last setMass */
 	private double time;
 	
 	/* (non-Javadoc)
@@ -58,7 +58,7 @@ public class CoordinateShift extends CompiledSimulation {
 		// create the floor
 		SandboxBody floor = new SandboxBody();
 		floor.addFixture(Geometry.createRectangle(30.0, 1.0));
-		floor.update(Mass.Type.INFINITE);
+		floor.setMass(Mass.Type.INFINITE);
 		floor.setUserData("Floor");
 		this.world.addBody(floor);
 		
@@ -68,7 +68,7 @@ public class CoordinateShift extends CompiledSimulation {
 				new Vector2(0.0, 0.5), 
 				new Vector2(-0.5, -0.5), 
 				new Vector2(0.5, -0.5)));
-		triangle.update();
+		triangle.setMass(Mass.Type.NORMAL);
 		triangle.translate(-1.0, 2.0);
 		triangle.setUserData("Triangle");
 		this.world.addBody(triangle);
@@ -76,7 +76,7 @@ public class CoordinateShift extends CompiledSimulation {
 		// create a circle
 		SandboxBody circle = new SandboxBody();
 		circle.addFixture(Geometry.createCircle(1.0));
-		circle.update();
+		circle.setMass(Mass.Type.NORMAL);
 		circle.translate(2.0, 2.0);
 		circle.setUserData("Circle");
 		this.world.addBody(circle);
@@ -84,7 +84,7 @@ public class CoordinateShift extends CompiledSimulation {
 		// create a line segment
 		SandboxBody segment = new SandboxBody();
 		segment.addFixture(Geometry.createSegment(new Vector2(0.5, 0.5), new Vector2(-0.5, -0.5)));
-		segment.update();
+		segment.setMass(Mass.Type.NORMAL);
 		segment.translate(1.0, 6.0);
 		segment.setUserData("Segment");
 		this.world.addBody(segment);
@@ -92,7 +92,7 @@ public class CoordinateShift extends CompiledSimulation {
 		// try a rectangle
 		SandboxBody rectangle = new SandboxBody();
 		rectangle.addFixture(Geometry.createRectangle(1.0, 1.0));
-		rectangle.update();
+		rectangle.setMass(Mass.Type.NORMAL);
 		rectangle.translate(0.0, 2.0);
 		rectangle.setUserData("Rectangle");
 		this.world.addBody(rectangle);
@@ -100,7 +100,7 @@ public class CoordinateShift extends CompiledSimulation {
 		// try a polygon with lots of vertices
 		SandboxBody polygon = new SandboxBody();
 		polygon.addFixture(Geometry.createUnitCirclePolygon(10, 1.0));
-		polygon.update();
+		polygon.setMass(Mass.Type.NORMAL);
 		polygon.translate(-2.5, 2.0);
 		polygon.setUserData("Polygon");
 		this.world.addBody(polygon);
@@ -117,7 +117,7 @@ public class CoordinateShift extends CompiledSimulation {
 		capsule.addFixture(c1Fixture);
 		capsule.addFixture(c2Fixture);
 		capsule.addFixture(Geometry.createRectangle(2.0, 1.0));
-		capsule.update();
+		capsule.setMass(Mass.Type.NORMAL);
 		capsule.translate(0.0, 2.0);
 		capsule.setUserData("Capsule");
 		this.world.addBody(capsule);
@@ -126,7 +126,7 @@ public class CoordinateShift extends CompiledSimulation {
 		{
 			SandboxBody box = new SandboxBody();
 			box.addFixture(Geometry.createRectangle(1.0, 1.0));
-			box.update();
+			box.setMass(Mass.Type.NORMAL);
 			box.translate(-4.0, 2.5);
 			box.setUserData("MouseJoint Box");
 			
@@ -153,13 +153,13 @@ public class CoordinateShift extends CompiledSimulation {
 			
 			SandboxBody obj1 = new SandboxBody();
 			obj1.addFixture(r);
-			obj1.update();
+			obj1.setMass(Mass.Type.NORMAL);
 			obj1.translate(-x, y);
 			obj1.setUserData("PulleyJoint Box1");
 			
 			SandboxBody obj2 = new SandboxBody();
 			obj2.addFixture(r);
-			obj2.update();
+			obj2.setMass(Mass.Type.NORMAL);
 			obj2.translate(x, y);
 			obj2.setUserData("PulleyJoint Box2");
 			
@@ -187,7 +187,7 @@ public class CoordinateShift extends CompiledSimulation {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.sandbox.tests.CompiledSimulation#update(double, boolean)
+	 * @see org.dyn4j.sandbox.tests.CompiledSimulation#setMass(double, boolean)
 	 */
 	@Override
 	public void update(double elapsedTime, boolean stepped) {

@@ -1144,7 +1144,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 						// check if the mass is set explicitly or not
 						if (!body.isMassExplicit()) {
 							// reset the mass using the type it was before
-							body.update(body.getMass().getType());
+							body.updateMass();
 						}
 					}
 					// add the node to the tree
@@ -1183,7 +1183,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 						// check if the mass is set explicitly or not
 						if (!body.isMassExplicit()) {
 							// reset the mass using the type it was before
-							body.update(body.getMass().getType());
+							body.updateMass();
 						}
 					}
 					// add the node to the tree
@@ -1231,7 +1231,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 						// check if the mass is set explicitly or not
 						if (!body.isMassExplicit()) {
 							// reset the mass using the type it was before
-							body.update(body.getMass().getType());
+							body.updateMass();
 						}
 					}
 					// remove the node from the tree
@@ -1295,7 +1295,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 						// check if the mass is set explicitly or not
 						if (!body.isMassExplicit()) {
 							// reset the mass using the type it was before
-							body.update(body.getMass().getType());
+							body.updateMass();
 						}
 					}
 					// remove the nodes
@@ -1464,7 +1464,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 						// check if the mass is set explicitly or not
 						if (!body.isMassExplicit()) {
 							// reset the mass using the type it was before
-							body.update(body.getMass().getType());
+							body.updateMass();
 						}
 					}
 					for (BodyFixture fixture : fixtures) {

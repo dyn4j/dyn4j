@@ -93,7 +93,7 @@ public class EditBodyDialog extends JDialog implements ActionListener {
 			this.body.addFixture(bf);
 		}
 		
-		this.body.update(new Mass(body.getMass()));
+		this.body.setMass(new Mass(body.getMass()));
 		
 		this.body.setOutlineColor(body.getOutlineColor());
 		this.body.setFillColor(body.getFillColor());
@@ -193,7 +193,7 @@ public class EditBodyDialog extends JDialog implements ActionListener {
 			body.setBullet(bodyChanges.isBullet());
 			body.setGravityScale(bodyChanges.getGravityScale());
 			body.setLinearDamping(bodyChanges.getLinearDamping());
-			body.update(new Mass(bodyChanges.getMass()));
+			body.setMass(new Mass(bodyChanges.getMass()));
 			body.setName(bodyChanges.getName());
 			body.setLinearVelocity(bodyChanges.getLinearVelocity().copy());
 			body.setMassExplicit(bodyChanges.isMassExplicit());

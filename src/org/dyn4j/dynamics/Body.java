@@ -56,9 +56,9 @@ import org.dyn4j.resources.Messages;
  * are no {@link BodyFixture}s attached.  Concave {@link Body}s can be created
  * by attaching multiple {@link Convex} {@link BodyFixture}s.
  * <p>
- * Use the {@link #update()} or {@link #update(org.dyn4j.geometry.Mass.Type)}
+ * Use the {@link #setMass(org.dyn4j.geometry.Mass.Type)}
  * methods to set the mass of the entire {@link Body} given the currently attached
- * {@link BodyFixture}s.  The {@link #update(Mass)} method can be used to set
+ * {@link BodyFixture}s.  The {@link #setMass(Mass)} method can be used to set
  * the mass directly.  Use the {@link #setMassType(org.dyn4j.geometry.Mass.Type)}
  * method to toggle the mass type between the special types.
  * <p>
@@ -246,8 +246,8 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * Creates a {@link BodyFixture} for the given {@link Convex} {@link Shape},
 	 * adds it to the {@link Body}, and returns it for configuration.
 	 * <p>
-	 * After adding or removing fixtures make sure to call the {@link #update()}
-	 * or {@link #update(Mass.Type)} method to compute the new total
+	 * After adding or removing fixtures make sure to call the {@link #updateMass()}
+	 * or {@link #setMass(Mass.Type)} method to compute the new total
 	 * {@link Mass} for the body.
 	 * <p>
 	 * This is a convenience method for setting the density of a {@link BodyFixture}.
@@ -268,8 +268,8 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * Creates a {@link BodyFixture} for the given {@link Convex} {@link Shape},
 	 * adds it to the {@link Body}, and returns it for configuration.
 	 * <p>
-	 * After adding or removing fixtures make sure to call the {@link #update()}
-	 * or {@link #update(Mass.Type)} method to compute the new total
+	 * After adding or removing fixtures make sure to call the {@link #updateMass()}
+	 * or {@link #setMass(Mass.Type)} method to compute the new total
 	 * {@link Mass} for the body.
 	 * <p>
 	 * This is a convenience method for setting the properties of a {@link BodyFixture}.
@@ -394,30 +394,25 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * This method will calculate a total mass for the body 
 	 * given the masses of the fixtures.
 	 * <p>
-	 * This method will use the current mass type.
-	 * @return {@link Body} this body
-	 * @since 3.2.0
-	 * @see #update(Mass.Type)
-	 */
-	@Override
-	public Body update() {
-		return this.update(this.mass.getType());
-	}
-	
-	/**
-	 * This method should be called after fixture modification
-	 * is complete.
-	 * <p>
-	 * This method will calculate a total mass for the body 
-	 * given the masses of the fixtures.
-	 * <p>
 	 * This method will always set this body's mass type to Normal.
 	 * @return {@link Body} this body
-	 * @deprecated replaced by {@link Body#update()} in 3.2.0
+	 * @deprecated removed in 3.2.0
 	 */
 	@Deprecated
 	public Body setMass() {
-		return this.update(Mass.Type.NORMAL);
+		return this.setMass(Mass.Type.NORMAL);
+	}
+	
+	/**
+	 * This is a shortcut method for the {@link #setMass(org.dyn4j.geometry.Mass.Type)}
+	 * method that will use the current mass type as the mass type and
+	 * then recompute the mass from the body's fixtures.
+	 * @return {@link Body} this body
+	 * @since 3.2.0
+	 * @see #setMass(org.dyn4j.geometry.Mass.Type)
+	 */
+	public Body updateMass() {
+		return this.setMass(this.mass.getType());
 	}
 	
 	/**
@@ -428,15 +423,15 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * given the masses of the fixtures.
 	 * <p>
 	 * A {@link org.dyn4j.geometry.Mass.Type} can be used to create special mass
-	 * types.  If the mass type is null, the method will immediately return.
-	 * @param type the {@link org.dyn4j.geometry.Mass.Type}
+	 * types.
+	 * @param type the mass type
 	 * @return {@link Body} this body
-	 * @throws NullPointerException if the given mass type is null
-	 * @since 3.2.0
 	 */
-	public Body update(Mass.Type type) {
+	public Body setMass(Mass.Type type) {
 		// check for null
-		if (type == null) throw new NullPointerException(Messages.getString("dynamics.body.nullMassType"));
+		if (type == null) {
+			type = this.mass.getType();
+		}
 		// get the size
 		int size = this.fixtures.size();
 		// check the size
@@ -463,46 +458,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 		// return this body to facilitate chaining
 		return this;
 	}
-
-	/**
-	 * This method should be called after fixture modification
-	 * is complete.
-	 * <p>
-	 * This method will calculate a total mass for the body 
-	 * given the masses of the fixtures.
-	 * <p>
-	 * A {@link org.dyn4j.geometry.Mass.Type} can be used to create special mass
-	 * types.
-	 * @param type the mass type
-	 * @return {@link Body} this body
-	 * @deprecated replaced by {@link Body#update(Mass.Type)} in 3.2.0
-	 */
-	@Deprecated
-	public Body setMass(Mass.Type type) {
-		return this.update(type);
-	}
 	
-	/**
-	 * Sets this {@link Body}'s mass information.
-	 * <p>
-	 * This method can be used to set the mass of the body explicitly.
-	 * <p>
-	 * This method will automatically update the body.
-	 * @param mass the new {@link Mass}
-	 * @return {@link Body} this body
-	 * @throws NullPointerException if the given mass is null
-	 */
-	public Body update(Mass mass) {
-		// make sure the mass is not null
-		if (mass == null) throw new NullPointerException(Messages.getString("dynamics.body.nullMass"));
-		// set the mass
-		this.mass = mass;
-		// compute the rotation disc radius
-		this.setRotationDiscRadius();
-		// return this body to facilitate chaining
-		return this;
-	}
-
 	/**
 	 * Sets this {@link Body}'s mass information.
 	 * <p>
@@ -526,7 +482,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * sets the mass type to one of the special types.  If the given type is null,
 	 * the method immediately returns.
 	 * <p>
-	 * If the mass of this body has not been set previously by one of the {@link #update()}
+	 * If the mass of this body has not been set previously by one of the {@link #setMass()}
 	 * methods, then this method will compute the mass.
 	 * <p>
 	 * Since its possible to create a {@link Mass} object with zero mass and/or
@@ -543,7 +499,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 		// make sure the current mass is not null
 		if (this.mass == null) {
 			// if its null then just compute it for the first time
-			this.update(type);
+			this.setMass(type);
 		} else {
 			// otherwise just set the type
 			this.mass.setType(type);

@@ -77,12 +77,12 @@ public class Conveyor extends CompiledSimulation {
 		
 		this.floor = new SandboxBody();
 		this.floor.addFixture(Geometry.createRectangle(15.0, 1.0));
-		this.floor.update(Mass.Type.INFINITE);
+		this.floor.setMass(Mass.Type.INFINITE);
 		this.floor.setUserData("Floor");
 		
 		SandboxBody box = new SandboxBody();
 		box.addFixture(Geometry.createSquare(1.0));
-		box.update();
+		box.setMass(Mass.Type.NORMAL);
 		box.translate(0.0, 2.0);
 		box.setUserData("Box");
 		

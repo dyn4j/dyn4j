@@ -137,7 +137,7 @@ public class ForceTest {
 		World w = new World();
 		Body b = new Body();
 		b.addFixture(Geometry.createCircle(1.0));
-		b.update(Mass.Type.NORMAL);
+		b.setMass(Mass.Type.NORMAL);
 		
 		Force f = new Force() {
 			private double time = 0;

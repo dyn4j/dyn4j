@@ -2061,7 +2061,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 					// move the body with the mouse
 					bf.getShape().translate(tx);
 					// update the mass since the inertia, COM, and rotation disc may change
-					body.update(body.getMass().getType());
+					body.updateMass();
 					// update the broadphase to update the AABB
 					// this is only done here to show a valid AABB to the user while they are editing
 					// the AABB is updated every frame so typically you wouldnt need to do this
@@ -2159,7 +2159,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 					// rotate the fixture about the local center
 					bf.getShape().rotate(theta, convex.getCenter());
 					// update the mass since the inertia, COM, and rotation disc may change
-					body.update(body.getMass().getType());
+					body.updateMass();
 					// update the broadphase to update the AABB
 					// this is only done here to show a valid AABB to the user while they are editing
 					// the AABB is updated every frame so typically you wouldnt need to do this
@@ -2213,7 +2213,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 			if (this.moveFixtureAction.isActive()) {
 				SandboxBody body = this.editBodyAction.getObject();
 				// recompute the mass if the position changes
-				body.update(body.getMass().getType());
+				body.updateMass();
 				this.moveFixtureAction.end();
 			}
 			if (this.moveWorldAction.isActive()) {

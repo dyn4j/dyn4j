@@ -84,7 +84,7 @@ public class Destructible extends CompiledSimulation {
 					
 					this.removed = true;
 
-					// make sure the sanbox updates the jtree
+					// make sure the sanbox setMasss the jtree
 					changed = true;
 				}
 			}
@@ -125,7 +125,7 @@ public class Destructible extends CompiledSimulation {
 						b.setFillColor(Arrays.copyOf(fcolor, fcolor.length));
 						b.setOutlineColor(Arrays.copyOf(ocolor, ocolor.length));
 						b.addFixture(Geometry.createTriangle(p1, p2, center));
-						b.update();
+						b.setMass(Mass.Type.NORMAL);
 						// copy over the transform
 						b.setTransform(tx.copy());
 						// copy over the velocity
@@ -137,10 +137,10 @@ public class Destructible extends CompiledSimulation {
 					
 					this.broken = true;
 					
-					// set the requires update flag
+					// set the requires setMass flag
 					world.setUpdateRequired(true);
 					
-					// make sure the sanbox updates the jtree
+					// make sure the sanbox setMasss the jtree
 					changed = true;
 					
 					// don't allow the contact
@@ -175,20 +175,20 @@ public class Destructible extends CompiledSimulation {
 		// create the floor
 		this.floor = new SandboxBody();
 		this.floor.addFixture(Geometry.createRectangle(15.0, 1.0));
-		this.floor.update(Mass.Type.INFINITE);
+		this.floor.setMass(Mass.Type.INFINITE);
 		this.floor.setUserData("Floor");
 		
 		// create the weld joint bodies
 		SandboxBody top = new SandboxBody();
 		top.addFixture(Geometry.createRectangle(0.5, 1.0));
-		top.update();
+		top.setMass(Mass.Type.NORMAL);
 		top.translate(0.0, 3.0);
 		top.getLinearVelocity().set(2.0, 0.0);
 		top.setUserData("Top");
 		
 		SandboxBody bot = new SandboxBody();
 		bot.addFixture(Geometry.createRectangle(0.5, 1.0));
-		bot.update();
+		bot.setMass(Mass.Type.NORMAL);
 		bot.translate(0.0, 2.0);
 		bot.setUserData("Bottom");
 		
@@ -197,7 +197,7 @@ public class Destructible extends CompiledSimulation {
 		
 		this.icosigon = new SandboxBody();
 		this.icosigon.addFixture(Geometry.createUnitCirclePolygon(20, 1.0));
-		this.icosigon.update();
+		this.icosigon.setMass(Mass.Type.NORMAL);
 		this.icosigon.translate(-2.5, 2.0);
 		this.icosigon.setUserData("Icosigon");
 		
@@ -212,7 +212,7 @@ public class Destructible extends CompiledSimulation {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.sandbox.tests.CompiledSimulation#update(double, boolean)
+	 * @see org.dyn4j.sandbox.tests.CompiledSimulation#setMass(double, boolean)
 	 */
 	@Override
 	public void update(double elapsedTime, boolean stepped) {}

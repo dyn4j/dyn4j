@@ -55,14 +55,14 @@ public class Animate extends CompiledSimulation {
 		
 		SandboxBody floor = new SandboxBody();
 		floor.addFixture(Geometry.createRectangle(40.0, 0.5));
-		floor.update(Mass.Type.INFINITE);
+		floor.setMass(Mass.Type.INFINITE);
 		floor.setUserData("Floor");
 		
 		SandboxBody character = new SandboxBody();
 		BodyFixture bf = character.addFixture(Geometry.createRectangle(2.0, 0.5));
 		bf.setDensity(2.0);
 		bf.setFriction(0.6);
-		character.update();
+		character.setMass(Mass.Type.NORMAL);
 		character.translate(0.0, 0.5);
 		character.setUserData("Character");
 		

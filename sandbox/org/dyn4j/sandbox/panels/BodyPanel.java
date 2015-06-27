@@ -333,7 +333,7 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 				} else {
 					body.setMassExplicit(false);
 					// recompute the mass and set the current mass type
-					body.update(body.getMass().getType());
+					body.updateMass();
 					// set the new values after computing the mass
 					Mass m = body.getMass();
 					txtX.setValue(m.getCenter().x);
@@ -367,7 +367,7 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 					// create a new mass using the new x value
 					Mass nm = new Mass(new Vector2(number.doubleValue(), cm.getCenter().y), cm.getMass(), cm.getInertia());
 					nm.setType(((MassTypeItem)cmbMassType.getSelectedItem()).type);
-					body.update(nm);
+					body.setMass(nm);
 				}
 			}
 		});
@@ -385,7 +385,7 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 					// create a new mass using the new y value
 					Mass nm = new Mass(new Vector2(cm.getCenter().x, number.doubleValue()), cm.getMass(), cm.getInertia());
 					nm.setType(((MassTypeItem)cmbMassType.getSelectedItem()).type);
-					body.update(nm);
+					body.setMass(nm);
 				}
 			}
 		});
@@ -405,7 +405,7 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 					// create a new mass using the new mass value
 					Mass nm = new Mass(cm.getCenter(), number.doubleValue(), cm.getInertia());
 					nm.setType(((MassTypeItem)cmbMassType.getSelectedItem()).type);
-					body.update(nm);
+					body.setMass(nm);
 				}
 			}
 		});
@@ -425,7 +425,7 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 					// create a new mass using the new inertia value
 					Mass nm = new Mass(cm.getCenter(), cm.getMass(), number.doubleValue());
 					nm.setType(((MassTypeItem)cmbMassType.getSelectedItem()).type);
-					body.update(nm);
+					body.setMass(nm);
 				}
 			}
 		});

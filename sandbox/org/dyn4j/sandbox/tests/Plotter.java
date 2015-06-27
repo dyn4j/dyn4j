@@ -112,7 +112,7 @@ public class Plotter extends CompiledSimulation {
 			body.translate(-1.0, -1.5);
 		}
 		// set the mass to infinite
-		body.update(Mass.Type.INFINITE);
+		body.setMass(Mass.Type.INFINITE);
 		body.setUserData("Body" + (index + 1));
 		// return the entity
 		return body;
