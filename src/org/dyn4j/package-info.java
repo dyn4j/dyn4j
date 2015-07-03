@@ -30,10 +30,25 @@
  * currently running.
  * <p>
  * The {@link org.dyn4j.Epsilon} class can be used to test near zero values (using an estimated
- * double precision value)
+ * double precision value).
  * <p>
- * The {@link org.dyn4j.UnitConversion} class can be used to convert to and from various units 
- * to MKS.  Its recommended that this be used instead of using a different system and reconfiguring.
+ * The library is designed to work with MKS (meters-kilograms-seconds) units.  Many default settings
+ * in a variety of classes are defined based on the MKS unit system.  Use the {@link org.dyn4j.UnitConversion}
+ * class to help convert from other units to MKS.
+ * <p>
+ * The {@link org.dyn4j.Listener} interface is a marker interface for a variety of listeners used
+ * in the library.
+ * <p>
+ * Many classes in the library implement the {@link org.dyn4j.DataContainer} interface.  This interface defines
+ * a simple set of methods for store custom data along with the objects in the library.
+ * <p>
+ * The {@link org.dyn4j.BinarySearchTree} class is a generic implementation of an optionally self-balanced
+ * binary tree and a supporting class to the library. Use the {@link org.dyn4j.BinarySearchTreeSearchCriteria} 
+ * interface to perform custom searches on the tree.
+ * <p>
+ * The {@link org.dyn4j.Reference} class is another supporting class. This class is typically used
+ * to create a member variable which encapsulates a reference to another piece of data, a primitive for
+ * example to provide mutability on a single reference.
  * @author William Bittle
  * @version 2.2.2
  * @since 2.2.2

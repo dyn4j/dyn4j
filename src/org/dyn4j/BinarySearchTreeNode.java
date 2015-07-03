@@ -27,24 +27,26 @@ package org.dyn4j;
 import org.dyn4j.resources.Messages;
 
 /**
- * Node class for a {@link BinarySearchTree}.
+ * Node class for the {@link BinarySearchTree}.
  * @author William Bittle
  * @version 3.1.9
  * @since 2.2.0
  * @param <E> the comparable type
  */
-class BinarySearchTreeNode<E extends Comparable<E>> {
+final class BinarySearchTreeNode<E extends Comparable<E>> implements Comparable<BinarySearchTreeNode<E>> {
 	/** The comparable data */
-	protected final E comparable;
+	final E comparable;
+	
+	// the parent and children will change as the tree evolves
 	
 	/** The parent node of this node */
-	protected BinarySearchTreeNode<E> parent;
+	BinarySearchTreeNode<E> parent;
 	
 	/** The node to the left; the left node is greater than this node */
-	protected BinarySearchTreeNode<E> left;
+	BinarySearchTreeNode<E> left;
 	
 	/** The node to the right; the right node is greater than this node */
-	protected BinarySearchTreeNode<E> right;
+	BinarySearchTreeNode<E> right;
 	
 	/**
 	 * Minimal constructor.
@@ -78,6 +80,36 @@ class BinarySearchTreeNode<E extends Comparable<E>> {
 		return this.comparable.toString();
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
+	@Override
+	public int compareTo(BinarySearchTreeNode<E> other) {
+		return this.comparable.compareTo(other.comparable);
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (obj == this) return true;
+		if (obj instanceof BinarySearchTreeNode) {
+			BinarySearchTreeNode<?> node = (BinarySearchTreeNode<?>)obj;
+			return node.comparable.equals(this.comparable);
+		}
+		return false;
+	}
+	
+	/**
+	 * Returns the comparable object.
+	 * @return E
+	 */
+	public E getComparable() {
+		return this.comparable;
+	}
+	
 	/**
 	 * Returns true if this node is the left child of
 	 * its parent node.
@@ -85,7 +117,7 @@ class BinarySearchTreeNode<E extends Comparable<E>> {
 	 * Returns false if this node does not have a parent.
 	 * @return boolean
 	 */
-	public boolean isLeftChild() {
+	boolean isLeftChild() {
 		if (this.parent == null) return false;
 		return (this.parent.left == this);
 	}

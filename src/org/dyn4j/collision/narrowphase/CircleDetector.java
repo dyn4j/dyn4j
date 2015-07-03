@@ -30,9 +30,7 @@ import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Class devoted to improving performance of {@link Circle} detection queries.
- * <p>
- * Renamed from CircleCircleDetector
+ * Class devoted to {@link Circle} detection queries.
  * @author William Bittle
  * @version 3.2.0
  * @since 2.0.0
@@ -60,7 +58,7 @@ public final class CircleDetector {
 	 * @param penetration the {@link Penetration} object to fill
 	 * @return boolean
 	 */
-	public static boolean detect(Circle circle1, Transform transform1, Circle circle2, Transform transform2, Penetration penetration) {
+	public static final boolean detect(Circle circle1, Transform transform1, Circle circle2, Transform transform2, Penetration penetration) {
 		// get their world centers
 		Vector2 ce1 = transform1.getTransformed(circle1.getCenter());
 		Vector2 ce2 = transform2.getTransformed(circle2.getCenter());
@@ -82,13 +80,15 @@ public final class CircleDetector {
 	
 	/**
 	 * Fast method for determining a collision between two {@link Circle}s.
+	 * <p>
+	 * Returns true if the given {@link Circle}s are intersecting.
 	 * @param circle1 the first {@link Circle}
 	 * @param transform1 the first {@link Circle}'s {@link Transform}
 	 * @param circle2 the second {@link Circle}
 	 * @param transform2 the second {@link Circle}'s {@link Transform}
 	 * @return boolean true if the two circles intersect
 	 */
-	public static boolean detect(Circle circle1, Transform transform1, Circle circle2, Transform transform2) {
+	public static final boolean detect(Circle circle1, Transform transform1, Circle circle2, Transform transform2) {
 		// get their world centers
 		Vector2 ce1 = transform1.getTransformed(circle1.getCenter());
 		Vector2 ce2 = transform2.getTransformed(circle2.getCenter());
@@ -118,7 +118,7 @@ public final class CircleDetector {
 	 * @param separation the {@link Separation} object to fill
 	 * @return boolean
 	 */
-	public static boolean distance(Circle circle1, Transform transform1, Circle circle2, Transform transform2, Separation separation) {
+	public static final boolean distance(Circle circle1, Transform transform1, Circle circle2, Transform transform2, Separation separation) {
 		// get their world centers
 		Vector2 ce1 = transform1.getTransformed(circle1.getCenter());
 		Vector2 ce2 = transform2.getTransformed(circle2.getCenter());
@@ -153,7 +153,7 @@ public final class CircleDetector {
 	 * @return boolean true if the ray intersects the circle
 	 * @since 2.0.0
 	 */
-	public static boolean raycast(Ray ray, double maxLength, Circle circle, Transform transform, Raycast raycast) {
+	public static final boolean raycast(Ray ray, double maxLength, Circle circle, Transform transform, Raycast raycast) {
 		// solve the problem algebraically
 		Vector2 s = ray.getStart();
 		Vector2 d = ray.getDirectionVector();

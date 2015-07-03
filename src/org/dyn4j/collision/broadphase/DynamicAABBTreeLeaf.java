@@ -28,22 +28,24 @@ import org.dyn4j.collision.Collidable;
 import org.dyn4j.collision.Fixture;
 
 /**
- * Represents a leaf node in a Dynamic AABB Tree.
+ * Represents a leaf node in a {@link DynamicAABBTree}.
+ * <p>
+ * The leaf nodes in a {@link DynamicAABBTree} are the nodes that contain the {@link Fixture} AABBs.
  * @author William Bittle
  * @version 3.2.0
  * @since 3.2.0
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
  */
-class DynamicAABBTreeLeaf<E extends Collidable<T>, T extends Fixture> extends DynamicAABBTreeNode {
+final class DynamicAABBTreeLeaf<E extends Collidable<T>, T extends Fixture> extends DynamicAABBTreeNode {
 	/** The {@link Collidable} */
-	protected final E collidable;
+	final E collidable;
 	
 	/** The {@link Fixture} */
-	protected final T fixture;
+	final T fixture;
 	
 	/** Flag used to determine if a node has been tested before */
-	protected boolean tested = false;
+	boolean tested = false;
 	
 	/**
 	 * Minimal constructor.

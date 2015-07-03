@@ -24,16 +24,29 @@
  */
 package org.dyn4j.collision.manifold;
 
+import org.dyn4j.geometry.Convex;
+import org.dyn4j.geometry.Feature;
+import org.dyn4j.geometry.Shape;
+import org.dyn4j.geometry.Vertex;
+
 /**
- * Represents the identification of a specific point of a {@link Manifold}.
+ * Represents the identification of a specific contact point of a {@link Manifold}.
+ * <p>
+ * The id is relative to the {@link Convex} {@link Shape}s in a particular collision.
+ * <p>
+ * For {@link Convex} {@link Shape}s that return {@link Vertex} {@link Feature}s the id
+ * will always be {@link #DISTANCE}. The {@link #DISTANCE} id relays to any caching mechanism
+ * that a distance check should be done rather than an id comparison to determine whether
+ * to use a cached value or not. 
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.2.0
  * @since 1.0.0
+ * @see IndexedManifoldPointId
  */
 public interface ManifoldPointId {
 	/**
 	 * The default {@link ManifoldPointId}.  Flags that the points should be
-	 * tested for equality by performing a distance check.
+	 * tested by performing a distance check.
 	 */
 	public static final ManifoldPointId DISTANCE = new ManifoldPointId() {
 		/* (non-Javadoc)

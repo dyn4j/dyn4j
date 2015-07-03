@@ -29,7 +29,7 @@ import org.dyn4j.collision.Fixture;
 import org.dyn4j.geometry.AABB;
 
 /**
- * Represents a sortable proxy for a collidable fixture in the broad phase.
+ * Represents a sortable proxy for a {@link Collidable} {@link Fixture} in the {@link Sap} {@link BroadphaseDetector}.
  * <p>
  * Note: This class has a natural ordering that is inconsistent with equals.
  * @author William Bittle
@@ -38,18 +38,18 @@ import org.dyn4j.geometry.AABB;
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
  */
-class SapProxy<E extends Collidable<T>, T extends Fixture> implements Comparable<SapProxy<E, T>> {
+final class SapProxy<E extends Collidable<T>, T extends Fixture> implements Comparable<SapProxy<E, T>> {
 	/** The collidable */
-	protected final E collidable;
+	final E collidable;
 	
 	/** The fixture */
-	protected final T fixture;
+	final T fixture;
 	
 	/** The collidable's aabb */
-	protected AABB aabb;
+	AABB aabb;
 	
 	/** Whether the proxy has been tested or not */
-	protected boolean tested;
+	boolean tested;
 	
 	/**
 	 * Full constructor.
@@ -144,7 +144,7 @@ class SapProxy<E extends Collidable<T>, T extends Fixture> implements Comparable
 	 * instead used to do searching.
 	 * @return boolean
 	 */
-	protected boolean isSearch() {
+	public final boolean isSearch() {
 		return (this.collidable == null ||
 				this.fixture == null);
 	}

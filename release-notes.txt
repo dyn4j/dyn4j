@@ -7,7 +7,7 @@ New Features:
 Bug Fixes:
     
 Deprecated:
-  - Body.setMass() it was odd that it set the mass type to Mass.Type.INFINITE.
+  - Body.setMass() it was odd that it set the mass type to Mass.Type.NORMAL.
   
 Breaking Changes:
   - The BroadphaseDetector interface has changed drastically.
@@ -26,7 +26,7 @@ Breaking Changes:
 Other:
   - Cleaner API with less classes to sift through and more interface options
   	for extensibility.
-  - More Javadoc comments.
+  - More & revised Javadoc comments.
 
 ===============================================================================
 Version 3.1.11

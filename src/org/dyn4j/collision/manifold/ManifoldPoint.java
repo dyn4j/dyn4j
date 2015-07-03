@@ -27,14 +27,18 @@ package org.dyn4j.collision.manifold;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Represents a collision point.
+ * Represents a single contact point in a contact {@link Manifold}.
+ * <p>
+ * The depth represents the distance along the {@link Manifold} normal to this
+ * contact point. This can vary for every {@link ManifoldPoint} in a {@link Manifold}.
  * @author William Bittle
  * @version 3.1.5
  * @since 1.0.0
+ * @see Manifold
  */
 public class ManifoldPoint {
 	/** The id for this manifold point */
-	protected ManifoldPointId id;
+	protected final ManifoldPointId id;
 	
 	/** The point in world coordinates */
 	protected Vector2 point;
@@ -43,9 +47,12 @@ public class ManifoldPoint {
 	protected double depth;
 	
 	/**
-	 * Default constructor.
+	 * Minimal constructor.
+	 * @param id the id for this manifold point
 	 */
-	public ManifoldPoint() {}
+	public ManifoldPoint(ManifoldPointId id) {
+		this.id = id;
+	}
 	
 	/**
 	 * Full constructor.
@@ -81,16 +88,7 @@ public class ManifoldPoint {
 	}
 
 	/**
-	 * Sets the manifold point id.
-	 * @param id the id
-	 * @since 3.1.5
-	 */
-	public void setId(ManifoldPointId id) {
-		this.id = id;
-	}
-
-	/**
-	 * Returns the point.
+	 * Returns the contact point.
 	 * @return {@link Vector2} the point in world coordinates
 	 */
 	public Vector2 getPoint() {
@@ -98,8 +96,8 @@ public class ManifoldPoint {
 	}
 
 	/**
-	 * Sets the point.
-	 * @param point the point
+	 * Sets the contact point.
+	 * @param point the point in world coordinates
 	 * @since 3.1.5
 	 */
 	public void setPoint(Vector2 point) {
@@ -107,7 +105,7 @@ public class ManifoldPoint {
 	}
 
 	/**
-	 * Returns the depth.
+	 * Returns the collision depth of the manifold point.
 	 * @return double
 	 */
 	public double getDepth() {
@@ -115,7 +113,7 @@ public class ManifoldPoint {
 	}
 
 	/**
-	 * Sets the depth.
+	 * Sets the collision depth of the manifold point.
 	 * @param depth the depth
 	 * @since 3.1.5
 	 */

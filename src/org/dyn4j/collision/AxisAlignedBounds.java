@@ -40,7 +40,7 @@ import org.dyn4j.resources.Messages;
  */
 public class AxisAlignedBounds extends AbstractBounds implements Bounds, Translatable {
 	/** The local coordinates AABB */
-	protected final AABB aabb;
+	private final AABB aabb;
 	
 	/**
 	 * Minimal constructor.

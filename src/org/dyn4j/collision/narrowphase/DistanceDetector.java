@@ -29,22 +29,27 @@ import org.dyn4j.geometry.Shape;
 import org.dyn4j.geometry.Transform;
 
 /**
- * Interface representing an algorithm to detect the distance between two convex shapes.
+ * Interface representing an algorithm to detect the distance between two {@link Convex} {@link Shape}s.
  * @author William Bittle
  * @version 1.2.0
  * @since 1.2.0
  */
 public interface DistanceDetector {
 	/**
-	 * Returns true if the two shapes are separated and fills the given
+	 * Returns true if the two {@link Convex} {@link Shape}s are separated and fills the given
 	 * {@link Separation} object with the minimum distance vector, distance,
 	 * and closest points.
+	 * <p>
+	 * Returns false if the given {@link Convex} {@link Shape}s are overlapping.
+	 * <p>
+	 * The {@link Separation} object will be cleared using the {@link Separation#clear()} method when this method
+	 * is called which facilitates reuse of the same {@link Separation} object for many calls.
 	 * @param convex1 the first {@link Shape}
 	 * @param transform1 the first {@link Shape}'s {@link Transform}
 	 * @param convex2 the second {@link Shape}
 	 * @param transform2 the second {@link Shape}'s {@link Transform}
 	 * @param separation the {@link Separation} object to fill
-	 * @return boolean
+	 * @return boolean true if the {@link Convex} {@link Shape}s are separated
 	 */
 	public boolean distance(Convex convex1, Transform transform1, Convex convex2, Transform transform2, Separation separation);
 }

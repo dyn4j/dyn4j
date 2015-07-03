@@ -30,8 +30,9 @@ import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Ray;
 
 /**
- * Helper class to avoid having to override all the methods of the {@link BroadphaseFilter}
- * interface
+ * Helper class to avoid having to override all the methods of the {@link BroadphaseFilter} interface.
+ * <p>
+ * By default all the methods return true to allow all results to be returned.
  * @author William Bittle
  * @version 3.2.0
  * @since 3.2.0

@@ -27,18 +27,21 @@ package org.dyn4j.collision;
 import org.dyn4j.Listener;
 
 /**
- * Represents an object that is notified when a {@link Collidable} 
+ * Represents a {@link Listener} object that is notified when a {@link Collidable} 
  * goes out of {@link Bounds}.
  * <p>
- * Modification of the World object is not permitted in these methods.
+ * NOTE: Modification of the simulation in these methods can cause unexpected behavior.
  * @author William Bittle
  * @version 3.2.0
  * @since 1.0.0
+ * @see Bounds
  */
 public interface BoundsListener extends Listener {
 	/**
-	 * Method called when a {@link Collidable} is outside the {@link Bounds}.
+	 * Method called when a {@link Collidable} is outside the {@link Bounds} of a simulation.
 	 * @param collidable the {@link Collidable} outside the {@link Bounds}
+	 * @param <E> the {@link Collidable} type
+	 * @param <T> the {@link Fixture} type
 	 */
 	public abstract <E extends Collidable<T>, T extends Fixture> void outside(E collidable);
 }

@@ -29,14 +29,14 @@ import org.dyn4j.collision.Fixture;
 
 /**
  * Represents a pair of {@link Collidable} {@link Fixture}s that have been detected as
- * colliding in the {@link BroadphaseDetector}.
+ * colliding in a {@link BroadphaseDetector}.
  * @author William Bittle
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
  * @version 3.2.0
  * @since 1.0.0
  */
-public class BroadphasePair<E extends Collidable<T>, T extends Fixture> {
+public final class BroadphasePair<E extends Collidable<T>, T extends Fixture> {
 	/** The first {@link Collidable} */
 	public final E collidable1;
 	

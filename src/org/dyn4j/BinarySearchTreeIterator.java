@@ -32,7 +32,8 @@ import java.util.NoSuchElementException;
 import org.dyn4j.resources.Messages;
 
 /**
- * Iterator class for looping through the elements in order or in reverse order.
+ * An iterator class for looping through the elements of a {@link BinarySearchTree} 
+ * in order or in reverse order.
  * <p>
  * The {@link #remove()} method is unsupported.
  * @author William Bittle
@@ -40,7 +41,7 @@ import org.dyn4j.resources.Messages;
  * @since 2.2.0
  * @param <E> the comparable type
  */
-class BinarySearchTreeIterator<E extends Comparable<E>> implements Iterator<E> {
+final class BinarySearchTreeIterator<E extends Comparable<E>> implements Iterator<E> {
 	/** The node stack for iterative traversal */
 	protected final Deque<BinarySearchTreeNode<E>> stack;
 	

@@ -155,10 +155,11 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 	/**
 	 * Creates a {@link Mass} object using the geometric properties of
 	 * this {@link Circle} and the given density.
-	 * <pre>
-	 * m = d * &pi; * r<sup>2</sup>
+	 * <p>
+	 * <code>
+	 * m = d * &pi; * r<sup>2</sup><br>
 	 * I = m * r<sup>2</sup> / 2
-	 * </pre>
+	 * </code>
 	 * @param density the density in kg/m<sup>2</sup>
 	 * @return {@link Mass} the {@link Mass} of this {@link Circle}
 	 */

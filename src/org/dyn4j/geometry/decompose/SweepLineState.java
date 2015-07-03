@@ -40,7 +40,7 @@ import org.dyn4j.resources.Messages;
  * @version 3.2.0
  * @since 3.2.0
  */
-class SweepState {
+class SweepLineState {
 	/** The current sweepline y-intercept value */
 	protected Reference<Double> referenceY;
 	
@@ -113,8 +113,7 @@ class SweepState {
 			queue.offer(vertex);
 			
 			// create the next edge
-			SweepLineEdge e = new SweepLineEdge();
-			e.referenceY = this.referenceY;
+			SweepLineEdge e = new SweepLineEdge(this.referenceY);
 			// the first vertex is this vertex
 			e.v0 = vertex;
 			

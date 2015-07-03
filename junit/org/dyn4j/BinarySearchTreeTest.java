@@ -84,7 +84,7 @@ public class BinarySearchTreeTest {
 		TestCase.assertFalse(tree.contains(16));
 		TestCase.assertFalse(tree.contains(15));
 		
-		tree.insertSubtree(t2.root);
+		tree.insertSubtree(t2);
 		TestCase.assertTrue(tree.contains(14));
 		TestCase.assertTrue(tree.contains(8));
 		TestCase.assertTrue(tree.contains(16));

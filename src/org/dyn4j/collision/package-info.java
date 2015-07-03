@@ -24,14 +24,15 @@
  */
 
 /**
- * Package containing classes to detect collisions between 
+ * Package containing supporting classes to detect collisions between 
  * {@link org.dyn4j.geometry.Convex} {@link org.dyn4j.geometry.Shape}s.
  * <p>
  * Collision detection can be an expensive process.  To avoid unnecessary processing
  * a two phase approach to collision detection is used.  First a inaccurate, yet
  * conservative, algorithm is used to detect possible collision pairs.  This process is
  * called the broad-phase.  Next, after obtaining all the possible collision pairs, each
- * pair is tested using an accurate algorithm.  This is called the narrow-phase.
+ * pair is tested using an accurate algorithm.  This is called the narrow-phase.  After
+ * the narrow-phase is complete, another phase, Manifold generation, generates the contact points.
  * <p>
  * <b>Broad-phase</b>
  * <p>
@@ -49,6 +50,11 @@
  * A {@link org.dyn4j.collision.narrowphase.Penetration} object represents the minimum distance 
  * along some vector required to push the {@link org.dyn4j.geometry.Shape}s out of the penetration.
  * <p>
+ * The narrow-phase also contains classes for supporting multiple detectors at once via the
+ * {@link org.dyn4j.collision.narrowphase.FallbackNarrowphaseDetector} class. Using the 
+ * {@link org.dyn4j.collision.narrowphase.FallbackCondition}s the detector will determine whether to
+ * use the primary {@link org.dyn4j.collision.narrowphase.NarrowphaseDetector} or the fallback.
+ * <p>
  * <b>Manifold Generation</b>
  * <p>
  * Once a {@link org.dyn4j.collision.narrowphase.Penetration} object is obtained, it should be passed
@@ -58,8 +64,20 @@
  * {@link org.dyn4j.geometry.Convex} {@link org.dyn4j.geometry.Shape}s to create a collision 
  * {@link org.dyn4j.collision.manifold.Manifold}.
  * <p>
- * A collision {@link org.dyn4j.collision.manifold.Manifold} represents the collision points between 
+ * A collision {@link org.dyn4j.collision.manifold.Manifold} represents the collision point(s) between 
  * the two {@link org.dyn4j.geometry.Convex} {@link org.dyn4j.geometry.Shape}s.
+ * <p>
+ * <b>CCD and Raycasting</b>
+ * <p>
+ * Outside of what's called discrete collision detection, there's continuous collision detection.
+ * This is the process of detecting (would be) missed collisions in the discrete process since it's only
+ * checking for collisions at instants in time.  These detectors implement the {@link org.dyn4j.collision.continuous.TimeOfImpactDetector}
+ * interface and return a {@link org.dyn4j.collision.continuous.TimeOfImpact} object when a collision is
+ * detected.
+ * <p>
+ * This package also supports raycasting for both the broad and narrow phases.  These detectors implement
+ * the {@link org.dyn4j.collision.narrowphase.RaycastDetector} interface and return {@link org.dyn4j.collision.narrowphase.Raycast}
+ * objects when a ray hits a {@link org.dyn4j.collision.Fixture}.
  * <p>
  * The following is a list of implementations of the above interfaces:
  * <ul>
@@ -78,6 +96,16 @@
  * <li>{@link org.dyn4j.collision.manifold.ManifoldSolver}
  * 	<ul>
  * 	<li>{@link org.dyn4j.collision.manifold.ClippingManifoldSolver}</li>
+ * 	</ul>
+ * </li>
+ * <li>{@link org.dyn4j.collision.continuous.TimeOfImpactDetector}
+ * 	<ul>
+ * 	<li>{@link org.dyn4j.collision.continuous.ConservativeAdvancement}</li>
+ * 	</ul>
+ * </li>
+ * <li>{@link org.dyn4j.collision.narrowphase.RaycastDetector}
+ * 	<ul>
+ * 	<li>{@link org.dyn4j.collision.narrowphase.Gjk}</li>
  * 	</ul>
  * </li>
  * </ul>

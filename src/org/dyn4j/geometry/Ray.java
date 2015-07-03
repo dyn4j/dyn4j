@@ -103,7 +103,7 @@ public class Ray {
 	
 	/**
 	 * Returns the direction of this ray in radians.
-	 * @return double the direction in radians between [-&pi;, &pi]
+	 * @return double the direction in radians between [-&pi;, &pi;]
 	 * @since 3.0.2
 	 */
 	public double getDirection() {

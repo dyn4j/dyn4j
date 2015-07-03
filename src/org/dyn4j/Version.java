@@ -49,7 +49,7 @@ public final class Version {
 	 * Returns the version as a string.
 	 * @return String
 	 */
-	public static String getVersion() {
+	public static final String getVersion() {
 		return MAJOR + "." + MINOR + "." + REVISION;
 	}
 	
@@ -61,7 +61,7 @@ public final class Version {
 	 * @return int[] the major, minor, and revision numbers
 	 * @since 3.1.0
 	 */
-	public static int[] getVersionNumbers() {
+	public static final int[] getVersionNumbers() {
 		return new int[] { MAJOR, MINOR, REVISION };
 	}
 	
@@ -70,7 +70,7 @@ public final class Version {
 	 * @return int
 	 * @since 3.1.0
 	 */
-	public static int getMajorNumber() {
+	public static final int getMajorNumber() {
 		return MAJOR;
 	}
 	
@@ -79,7 +79,7 @@ public final class Version {
 	 * @return int
 	 * @since 3.1.0
 	 */
-	public static int getMinorNumber() {
+	public static final int getMinorNumber() {
 		return MINOR;
 	}
 	
@@ -88,7 +88,7 @@ public final class Version {
 	 * @return int
 	 * @since 3.1.0
 	 */
-	public static int getRevisionNumber() {
+	public static final int getRevisionNumber() {
 		return REVISION;
 	}
 	

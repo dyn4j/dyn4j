@@ -37,7 +37,6 @@ import org.dyn4j.collision.Collidable;
 import org.dyn4j.collision.Collisions;
 import org.dyn4j.collision.Fixture;
 import org.dyn4j.geometry.AABB;
-import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Ray;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
@@ -45,15 +44,11 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Implementation of the Sweep and Prune broad-phase collision detection algorithm.
  * <p>
- * This implementation maintains a red-black tree of {@link Collidable}s where each update
- * will reposition the respective {@link Collidable} in the tree.
+ * This implementation maintains a red-black tree of {@link Collidable} {@link Fixture}s where each update
+ * will reposition the respective {@link Collidable} {@link Fixture} in the tree.
  * <p>
- * Projects all {@link Collidable}s on both the x and y axes and performs overlap checks
+ * Projects all {@link Collidable} {@link Fixture}s on both the x and y axes and performs overlap checks
  * on all the projections to test for possible collisions (AABB tests).
- * <p>
- * The overlap checks are performed faster when the {@link Interval}s created by the projections
- * are sorted by their minimum value.  Doing so will allow the detector to ignore any projections
- * after the first {@link Interval} that does not overlap.
  * @author William Bittle
  * @version 3.2.0
  * @since 1.0.0
@@ -62,10 +57,10 @@ import org.dyn4j.geometry.Vector2;
  */
 public class Sap<E extends Collidable<T>, T extends Fixture> extends AbstractBroadphaseDetector<E, T> implements BroadphaseDetector<E, T> {
 	/** Sorted tree set of proxies */
-	protected TreeSet<SapProxy<E, T>> tree;
+	TreeSet<SapProxy<E, T>> tree;
 	
 	/** Id to proxy map for fast lookup */
-	protected Map<BroadphaseKey, SapProxy<E, T>> map;
+	Map<BroadphaseKey, SapProxy<E, T>> map;
 
 	/** Default constructor. */
 	public Sap() {
@@ -94,6 +89,24 @@ public class Sap<E extends Collidable<T>, T extends Fixture> extends AbstractBro
 	@Override
 	public void add(E collidable, T fixture) {
 		BroadphaseKey key = BroadphaseKey.get(collidable, fixture);
+		SapProxy<E, T> proxy = this.map.get(key);
+		if (proxy == null) {
+			this.add(key, collidable, fixture);
+		} else {
+			this.update(key, proxy, collidable, fixture);
+		}
+	}
+	
+	/**
+	 * Internal add method.
+	 * <p>
+	 * This method assumes the given arguments are all non-null and that the
+	 * {@link Collidable} {@link Fixture} is not currently in this broad-phase.
+	 * @param key the key for the collidable-fixture pair
+	 * @param collidable the collidable
+	 * @param fixture the fixture
+	 */
+	void add(BroadphaseKey key, E collidable, T fixture) {
 		Transform tx = collidable.getTransform();
 		AABB aabb = fixture.getShape().createAABB(tx);
 		// expand the aabb
@@ -129,27 +142,40 @@ public class Sap<E extends Collidable<T>, T extends Fixture> extends AbstractBro
 	@Override
 	public void update(E collidable, T fixture) {
 		BroadphaseKey key = BroadphaseKey.get(collidable, fixture);
-		Transform tx = collidable.getTransform();
-		// get the proxy from the map
 		SapProxy<E, T> proxy = this.map.get(key);
+		if (proxy != null) {
+			this.update(key, proxy, collidable, fixture);
+		} else {
+			this.add(key, collidable, fixture);
+		}
+	}
+	
+	/**
+	 * Internal update method.
+	 * <p>
+	 * This method assumes the given arguments are all non-null.
+	 * @param key the key for the collidable-fixture pair
+	 * @param proxy the current node in the tree
+	 * @param collidable the collidable
+	 * @param fixture the fixture
+	 */
+	void update(BroadphaseKey key, SapProxy<E, T> proxy, E collidable, T fixture) {
+		Transform tx = collidable.getTransform();
 		// create the new aabb
 		AABB aabb = fixture.getShape().createAABB(tx);
-		// make sure we found it
-		if (proxy != null) {
-			// see if the old aabb contains the new one
-			if (proxy.aabb.contains(aabb)) {
-				// if so, don't do anything
-				return;
-			}
-			// otherwise expand the new aabb
-			aabb.expand(this.expansion);
-			// remove the current proxy from the tree
-			this.tree.remove(proxy);
-			// set the new aabb
-			proxy.aabb = aabb;
-			// reinsert the proxy
-			this.tree.add(proxy);
+		// see if the old aabb contains the new one
+		if (proxy.aabb.contains(aabb)) {
+			// if so, don't do anything
+			return;
 		}
+		// otherwise expand the new aabb
+		aabb.expand(this.expansion);
+		// remove the current proxy from the tree
+		this.tree.remove(proxy);
+		// set the new aabb
+		proxy.aabb = aabb;
+		// reinsert the proxy
+		this.tree.add(proxy);
 	}
 
 	/* (non-Javadoc)
@@ -284,12 +310,12 @@ public class Sap<E extends Collidable<T>, T extends Fixture> extends AbstractBro
 		
 		List<BroadphaseItem<E, T>> list = new ArrayList<BroadphaseItem<E, T>>(Collisions.getEstimatedCollisionsPerObject());
 		
-		// create a proxy for the aabb
-		SapProxy<E, T> p = new SapProxy<E, T>(null, null, aabb);
+		// create a search proxy for the aabb
+		SapProxy<E, T> search = new SapProxy<E, T>(null, null, aabb);
 		
 		// find the proxy in the tree that is least of all the
 		// proxies greater than this one
-		SapProxy<E, T> least = this.tree.ceiling(p);
+		SapProxy<E, T> least = this.tree.ceiling(search);
 		
 		if (least == null) {
 			return Collections.emptyList();
@@ -374,12 +400,12 @@ public class Sap<E extends Collidable<T>, T extends Fixture> extends AbstractBro
 		int eSize = Collisions.getEstimatedRaycastCollisions(this.map.size());
 		List<BroadphaseItem<E, T>> list = new ArrayList<BroadphaseItem<E, T>>(eSize);
 		
-		// create a proxy for the aabb
-		SapProxy<E, T> p = new SapProxy<E, T>(null, null, aabb);
+		// create a search proxy for the aabb
+		SapProxy<E, T> search = new SapProxy<E, T>(null, null, aabb);
 		
 		// find the proxy in the tree that is least of all the
 		// proxies greater than this one
-		SapProxy<E, T> ceil = this.tree.ceiling(p);
+		SapProxy<E, T> ceil = this.tree.ceiling(search);
 		
 		// we must check all aabbs up to the found proxy
 		// from which point the first aabb to not intersect

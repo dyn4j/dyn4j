@@ -39,16 +39,23 @@ import org.dyn4j.geometry.Vertex;
 
 /**
  * Represents an {@link ManifoldSolver} that uses a clipping method to determine
- * the contact manifold.
+ * the contact manifold (the contact points of a collision).
  * <p>
  * A {@link NarrowphaseDetector} should return a penetration normal and depth when two {@link Convex} {@link Shape}s are
  * intersecting.  The penetration normal should always point from the first {@link Shape} to the second.
  * <p>
  * Uses Sutherland–Hodgman clipping to clip the closest features of the two {@link Convex} {@link Shape}s to obtain
  * a contact {@link Manifold}.
+ * <p>
+ * In the case that a {@link Convex} {@link Shape} returns a {@link Vertex} {@link Feature}, that feature will always
+ * take precedence.
+ * <p>
+ * It's possible that no contact points are returned, in which case the {@link #getManifold(Penetration, Convex, Transform, Convex, Transform, Manifold)}
+ * method will return false.
  * @author William Bittle
  * @version 3.0.2
  * @since 1.0.0
+ * @see <a href="http://www.dyn4j.org/2011/11/contact-points-using-clipping/">Contact Points Using Clipping</a>
  */
 public class ClippingManifoldSolver implements ManifoldSolver {
 	/* (non-Javadoc)

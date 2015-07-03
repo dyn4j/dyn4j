@@ -24,12 +24,19 @@
  */
 package org.dyn4j.collision;
 
+import org.dyn4j.geometry.Rotatable;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Translatable;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Represents the {@link Bounds} of the simulation/world.
+ * Represents the {@link Bounds} of the simulation or world.
+ * <p>
+ * By default all bounds are {@link Translatable} but not {@link Rotatable}.
+ * <p>
+ * Though not part of the bounds contract, a bounds object should only return true
+ * from the {@link #isOutside(Collidable)} method when a {@link Collidable} is
+ * <strong>fully</strong> outside the bounds.
  * @author William Bittle
  * @version 3.2.0
  * @since 1.0.0
@@ -43,7 +50,7 @@ public interface Bounds extends Translatable, Shiftable {
 	public abstract Vector2 getTranslation();
 	
 	/**
-	 * Returns true if the given {@link Collidable} is outside the bounds.
+	 * Returns true if the given {@link Collidable} is <strong>fully</strong> outside the bounds.
 	 * <p>
 	 * If the {@link Collidable} contains zero {@link Fixture}s then 
 	 * {@link Collidable} is considered to be outside the bounds.

@@ -24,22 +24,38 @@
  */
 package org.dyn4j.collision.manifold;
 
+import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.collision.narrowphase.Penetration;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Shape;
 import org.dyn4j.geometry.Transform;
 
 /**
- * Finds a contact {@link Manifold} for two given {@link Shape}s.
+ * Finds a contact {@link Manifold} for two given {@link Convex} {@link Shape}s that are in collision.
+ * <p>
+ * A contact {@link Manifold} is a collection of contact points for a collision. For two dimensions, this will never
+ * be more than two contacts.
+ * <p>
+ * A {@link ManifoldSolver} relies on the {@link Penetration} object returned from a {@link NarrowphaseDetector} to
+ * determine the contact {@link Manifold}. The {@link Manifold}s have ids to facilitate caching of contact information.
+ * <p>
+ * It's possible that no contact points are returned, in which case the {@link #getManifold(Penetration, Convex, Transform, Convex, Transform, Manifold)}
+ * method will return false.
  * @author William Bittle
- * @version 1.0.3
+ * @version 3.2.0
  * @since 1.0.0
+ * @see Manifold
  */
 public interface ManifoldSolver {
 	/**
-	 * Returns true if there exists a valid contact manifold between the two
-	 * {@link Convex} {@link Shape}s and fills in the {@link Manifold} object
-	 * with the points, depths, and normal.
+	 * Returns true if there exists a valid contact manifold between the two {@link Convex} {@link Shape}s. 
+	 * <p>
+	 * When returning true, this method fills in the {@link Manifold} object with the points, depth, and normal.
+	 * <p>
+	 * The given {@link Manifold} object will be cleared using the {@link Manifold#clear()} method. This allows reuse of the
+	 * {@link Manifold} if desired.
+	 * <p>
+	 * The {@link Penetration} object will be left unchanged by this method.
 	 * @param penetration the {@link Penetration}
 	 * @param convex1 the first {@link Convex} {@link Shape}
 	 * @param transform1 the first {@link Shape}'s {@link Transform}

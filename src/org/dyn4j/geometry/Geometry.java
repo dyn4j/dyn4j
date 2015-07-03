@@ -1395,6 +1395,7 @@ public class Geometry {
 	 * rather than a polygon).
 	 * @param convex1 the first convex
 	 * @param convex2 the second convex
+	 * @param <E> either a {@link Wound} or {@link Convex} type
 	 * @return {@link Polygon}
 	 * @throws NullPointerException if convex1 or convex2 are null
 	 * @throws IllegalArgumentException if both convex1 and convex2 are {@link Segment}s and are colinear

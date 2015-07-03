@@ -25,7 +25,9 @@
 package org.dyn4j.collision;
 
 /**
- * Class used to estimate collision counts and other one-off collision tasks.
+ * Class used to estimate collision counts and other one-off collision methods and values.
+ * <p>
+ * This class is transient and may get deprecated at any time.
  * @author William Bittle
  * @version 3.2.0
  * @since 3.1.1
@@ -52,14 +54,14 @@ public final class Collisions {
 	 * | Parallel |          300 |             600 |               2.0 |
 	 * +----------+--------------+-----------------+-------------------+</pre>
 	 * Therefore a good estimate could be 4 collisions per object.
-	 * <p>
-	 * This field may not exist (may get deprecated) in future versions if a better estimate technique is found.
 	 */
 	protected static final int ESTIMATED_COLLISIONS_PER_OBJECT = 4;
 	
 	/**
 	 * An estimate of the number of objects that will be hit when raycasting assuming uniform
 	 * distribution of objects.
+	 * <p>
+	 * This was computed from the Sandbox's Raycast Performance test.
 	 */
 	protected static final double ESTIMATED_RAYCAST_DENSITY = 0.02;
 	

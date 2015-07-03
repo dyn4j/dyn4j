@@ -27,7 +27,7 @@ package org.dyn4j.collision;
 /**
  * Represents a class typed filter.
  * <p>
- * This filter is designed to allow a hierarchy of categories in which nodes can only interact with
+ * This filter is designed to allow a <strong>hierarchy</strong> of categories in which nodes can only interact with
  * their parents or nodes of the same type.
  * <p>
  * For example, imagine we have the following hierarchy of categories:

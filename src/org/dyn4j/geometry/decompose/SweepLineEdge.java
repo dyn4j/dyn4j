@@ -38,8 +38,8 @@ import org.dyn4j.geometry.Vector2;
  * @since 2.2.0
  */
 class SweepLineEdge implements Comparable<SweepLineEdge> {
-	/** The current state of the sweep */
-	protected Reference<Double> referenceY;
+	/** The current state of the sweep; a reference value shared between all edges (for context when sorting) */
+	protected final Reference<Double> referenceY;
 	
 	/** The first vertex of the edge in Counter-Clockwise order */
 	protected SweepLineVertex v0;
@@ -55,6 +55,14 @@ class SweepLineEdge implements Comparable<SweepLineEdge> {
 	 * Double.POSITIVE_INFINITY if its a horizontal edge
 	 */
 	protected double slope;
+	
+	/**
+	 * Minimal constructor.
+	 * @param referenceY the current sweep position
+	 */
+	public SweepLineEdge(Reference<Double> referenceY) {
+		this.referenceY = referenceY;
+	}
 	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
@@ -88,6 +96,20 @@ class SweepLineEdge implements Comparable<SweepLineEdge> {
 		} else {
 			return 1;
 		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (obj == this) return true;
+		if (obj instanceof SweepLineEdge) {
+			SweepLineEdge e = (SweepLineEdge)obj;
+			return e.v0 == this.v0 && e.v1 == this.v1;
+		}
+		return false;
 	}
 	
 	/**

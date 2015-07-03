@@ -28,6 +28,9 @@ import org.dyn4j.collision.narrowphase.Separation;
 
 /**
  * Represents the time of impact information between two objects.
+ * <p>
+ * The {@link #getTime()} is in the range of [0, 1] and represents the time within the current
+ * timestep that the collision occurred.
  * @author William Bittle
  * @version 3.1.5
  * @since 1.2.0

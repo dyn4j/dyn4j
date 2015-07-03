@@ -30,17 +30,19 @@ import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Ray;
 
 /**
- * Represents a class that defines rules to exclude results from broadphase methods, namely
- * the detect, raycast and AABB checks.
+ * Represents a class that defines rules to exclude results from a {@link BroadphaseDetector}'s query methods. Some examples
+ * include the {@link BroadphaseDetector#detect(BroadphaseFilter)}, {@link BroadphaseDetector#raycast(Ray, double, BroadphaseFilter)} 
+ * and {@link BroadphaseDetector#detect(AABB, BroadphaseFilter)} methods.
  * @author William Bittle
  * @version 3.2.0
  * @since 3.2.0
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
+ * @see DefaultBroadphaseFilter
  */
 public interface BroadphaseFilter<E extends Collidable<T>, T extends Fixture> {
 	/**
-	 * Return true to allow this result to be added to the results list.
+	 * Returns true if this result should be added to the results list.
 	 * <p>
 	 * This method is called from the {@link BroadphaseDetector#detect()} and
 	 * {@link BroadphaseDetector#detect(BroadphaseFilter)} methods.
@@ -53,7 +55,7 @@ public interface BroadphaseFilter<E extends Collidable<T>, T extends Fixture> {
 	public abstract boolean isAllowed(E collidable1, T fixture1, E collidable2, T fixture2);
 	
 	/**
-	 * Return true to allow this result to be added to the results list.
+	 * Returns true if this result should be added to the results list.
 	 * <p>
 	 * This method is called from the {@link BroadphaseDetector#detect(AABB)} and
 	 * {@link BroadphaseDetector#detect(AABB, BroadphaseFilter)} methods.
@@ -65,7 +67,7 @@ public interface BroadphaseFilter<E extends Collidable<T>, T extends Fixture> {
 	public abstract boolean isAllowed(AABB aabb, E collidable, T fixture);
 	
 	/**
-	 * Return true to allow this result to be added to the results list.
+	 * Returns true if this result should be added to the results list.
 	 * <p>
 	 * This method is called from the {@link BroadphaseDetector#raycast(Ray, double)} and
 	 * {@link BroadphaseDetector#raycast(Ray, double, BroadphaseFilter)} methods.

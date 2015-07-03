@@ -28,14 +28,16 @@ import org.dyn4j.collision.Collidable;
 import org.dyn4j.collision.Fixture;
 
 /**
- * Represents an individual broadphase item.
+ * Represents an individual broad-phase item.
+ * <p>
+ * A broad-phase item is a {@link Collidable}-{@link Fixture} pair.
  * @author William Bittle
  * @version 3.2.0
  * @since 3.2.0
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
  */
-public class BroadphaseItem<E extends Collidable<T>, T extends Fixture> {
+public final class BroadphaseItem<E extends Collidable<T>, T extends Fixture> {
 	/** The {@link Collidable} */
 	public final E collidable;
 	

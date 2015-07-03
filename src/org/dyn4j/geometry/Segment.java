@@ -121,10 +121,10 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 	 * Set P = point - linePoint1
 	 * location = L.cross(P)
 	 * </pre>
-	 * Returns 0 if the point lies on the line created from the line segment.<br />
-	 * Assuming a right handed coordinate system:<br />
-	 * Returns < 0 if the point lies on the right side of the line<br />
-	 * Returns > 0 if the point lies on the left side of the line
+	 * Returns 0 if the point lies on the line created from the line segment.<br>
+	 * Assuming a right handed coordinate system:<br>
+	 * Returns &lt; 0 if the point lies on the right side of the line<br>
+	 * Returns &gt; 0 if the point lies on the left side of the line
 	 * <p>
 	 * Assumes all points are in world space.
 	 * @param point the point

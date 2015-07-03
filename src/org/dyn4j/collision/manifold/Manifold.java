@@ -27,14 +27,18 @@ package org.dyn4j.collision.manifold;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.dyn4j.collision.narrowphase.Penetration;
+import org.dyn4j.geometry.Convex;
+import org.dyn4j.geometry.Shape;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Represents a collision {@link Manifold}.
+ * Represents a contact {@link Manifold} for a collision between two {@link Convex} {@link Shape}s.
  * <p>
- * A {@link Manifold} has a list of {@link ManifoldPoint}s for a given penetration normal.
+ * A {@link Manifold} has a list of {@link ManifoldPoint}s for a given {@link Penetration} normal. In
+ * two dimensions there will only be 1 or 2 contact points.
  * <p>
- * All {@link ManifoldPoint}s are in world space.
+ * All {@link ManifoldPoint}s are in world space coordinates.
  * @author William Bittle
  * @version 3.0.2
  * @since 1.0.0

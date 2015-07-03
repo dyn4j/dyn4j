@@ -33,17 +33,36 @@ import org.dyn4j.geometry.Shape;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents a part of a {@link Collidable}.
+ * Represents a geometric piece of a {@link Collidable}.
  * <p>
- * A {@link Fixture} has a one-to-one relationship with a {@link Convex} {@link Shape}.
- * Each {@link Collidable} can have any number of {@link Fixture}s attached.
+ * A {@link Fixture} has a one-to-one relationship with a {@link Convex} {@link Shape}, storing
+ * additional collision specific information.
+ * <p>
+ * A {@link Collidable} is composed of many {@link Fixture}s to represent its physical shape. While
+ * the only shapes supported by the collision detection system are {@link Convex} shapes, the composition
+ * of multiple {@link Fixture}s in a {@link Collidable} allows the collidables to be non-convex.
+ * <p>
+ * The {@link Fixture}'s {@link Shape} should be translated and rotated using the {@link Shape}'s methods
+ * to move the shape relative to the containing {@link Collidable}.  Other modifications to the shape is
+ * not recommended after adding it to a {@link Fixture}. To change the shape of a fixture, remove the existing 
+ * {@link Fixture} from the {@link Collidable} and add a new {@link Fixture} with an updated shape instead.
+ * <p>
+ * There's no restriction on reusing {@link Shape}s and {@link Fixture}s between {@link Collidable}s, but 
+ * this is also discouraged to reduce confusion and unexpected behavior (primarily local translations and
+ * rotations).
+ * <p>
+ * A {@link Fixture} can have a {@link Filter} assigned to enable filtering of collisions between it
+ * and other fixtures.
+ * <p>
+ * A {@link Fixture} can be flagged as a sensor fixture to enable standard collision detection, but disable
+ * collision resolution (response).
  * @author William Bittle
  * @version 3.2.0
  * @since 2.0.0
  */
 public class Fixture implements DataContainer {
 	/** The id for the fixture */
-	protected final UUID id = UUID.randomUUID();
+	protected final UUID id;
 	
 	/** The convex shape for this fixture */
 	protected final Convex shape;
@@ -64,6 +83,7 @@ public class Fixture implements DataContainer {
 	 */
 	public Fixture(Convex shape) {
 		if (shape == null) throw new NullPointerException(Messages.getString("collision.fixture.nullShape"));
+		this.id = UUID.randomUUID();
 		this.shape = shape;
 		this.filter = Filter.DEFAULT_FILTER;
 		this.sensor = false;
@@ -107,6 +127,8 @@ public class Fixture implements DataContainer {
 	
 	/**
 	 * Returns the id for this fixture.
+	 * <p>
+	 * This identifier is constant for the life of this {@link Fixture}.
 	 * @return UUID
 	 */
 	public UUID getId() {
@@ -114,8 +136,7 @@ public class Fixture implements DataContainer {
 	}
 	
 	/**
-	 * The {@link Convex} {@link Shape} representing the
-	 * geometry of this fixture.
+	 * The {@link Convex} {@link Shape} representing the geometry of this fixture.
 	 * @return {@link Convex}
 	 */
 	public Convex getShape() {
@@ -143,8 +164,10 @@ public class Fixture implements DataContainer {
 	}
 	
 	/**
-	 * Returns true if this fixture only senses contact and
-	 * does not react to contact.
+	 * Returns true if this fixture is a sensor.
+	 * <p>
+	 * A sensor fixture is a fixture that participates in collision detection but does not
+	 * participate in collision resolution (response).
 	 * @return boolean
 	 */
 	public boolean isSensor() {
@@ -152,8 +175,10 @@ public class Fixture implements DataContainer {
 	}
 	
 	/**
-	 * Sets this fixture to only sense contacts if the given
-	 * flag is true.
+	 * Toggles this fixture as a sensor fixture.
+	 * <p>
+	 * A sensor fixture is a fixture that participates in collision detection but does not
+	 * participate in collision resolution (response).
 	 * @param flag true if this fixture should only sense contacts
 	 */
 	public void setSensor(boolean flag) {

@@ -27,51 +27,37 @@ package org.dyn4j.collision.broadphase;
 import org.dyn4j.geometry.AABB;
 
 /**
- * Represents a node in a Dynamic AABB Tree.
+ * Represents a basic node in a {@link DynamicAABBTree}.
+ * <p>
+ * The AABB of the node should be the union of all the AABBs below this node.
  * @author William Bittle
  * @version 3.2.0
  * @since 3.2.0
  */
 class DynamicAABBTreeNode {
 	/** The left child */
-	protected DynamicAABBTreeNode left;
+	DynamicAABBTreeNode left;
 	
 	/** The right child */
-	protected DynamicAABBTreeNode right;
+	DynamicAABBTreeNode right;
 	
 	/** The parent node */
-	protected DynamicAABBTreeNode parent;
+	DynamicAABBTreeNode parent;
 	
 	/** The height of this subtree */
-	protected int height;
+	int height;
 	
 	/** The aabb containing all children */
-	protected AABB aabb;
+	AABB aabb;
 	
 	/**
 	 * Returns true if this node is a leaf node.
 	 * @return boolean true if this node is a leaf node
 	 */
 	public boolean isLeaf() {
-		return left == null;
+		return this.left == null;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) return false;
-		if (obj == this) return true;
-		if (obj instanceof DynamicAABBTreeLeaf) {
-			DynamicAABBTreeNode node = (DynamicAABBTreeNode)obj;
-			if (node.aabb.equals(this.aabb)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

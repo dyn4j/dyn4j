@@ -32,23 +32,23 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents the Minkowski sum of the given {@link Convex} {@link Shape}s.
  * <p>
- * This class is used by the {@link Gjk} and {@link Epa} classes.
+ * This class is used by the {@link Gjk} and {@link Epa} classes to compute {@link #support(Vector2)} points.
  * @author William Bittle
  * @version 3.2.0
  * @since 1.0.0
  */
-class MinkowskiSum {
+public final class MinkowskiSum {
 	/** The first {@link Convex} */
-	protected final Convex convex1;
+	public final Convex convex1;
 	
 	/** The second {@link Convex} */
-	protected final Convex convex2;
+	public final Convex convex2;
 	
 	/** The first {@link Convex}'s {@link Transform} */
-	protected final Transform transform1;
+	public final Transform transform1;
 	
 	/** The second {@link Convex}'s {@link Transform} */
-	protected final Transform transform2;
+	public final Transform transform2;
 		
 	/**
 	 * Full constructor.
@@ -83,7 +83,7 @@ class MinkowskiSum {
 	 * @param direction the search direction
 	 * @return {@link Vector2} the point farthest in the given direction
 	 */
-	public Vector2 support(Vector2 direction) {
+	public final Vector2 support(Vector2 direction) {
 		// get the farthest point in the given direction in convex1
 		Vector2 point1 = this.convex1.getFarthestPoint(direction, this.transform1);
 		direction.negate();
@@ -100,7 +100,7 @@ class MinkowskiSum {
 	 * @param direction the search direction
 	 * @param p the {@link MinkowskiSumPoint} object to fill
 	 */
-	public void support(Vector2 direction, MinkowskiSumPoint p) {
+	final void support(Vector2 direction, MinkowskiSumPoint p) {
 		// get the farthest point in the given direction in convex1
 		Vector2 point1 = this.convex1.getFarthestPoint(direction, this.transform1);
 		direction.negate();
@@ -109,37 +109,5 @@ class MinkowskiSum {
 		direction.negate();
 		// set the Minkowski sum point given the support points
 		p.set(point1, point2);
-	}
-	
-	/**
-	 * Returns the first {@link Convex}.
-	 * @return {@link Convex}
-	 */
-	public Convex getConvex1() {
-		return this.convex1;
-	}
-	
-	/**
-	 * Returns the second {@link Convex}.
-	 * @return {@link Convex}
-	 */
-	public Convex getConvex2() {
-		return this.convex2;
-	}
-	
-	/**
-	 * Returns the first {@link Convex}'s {@link Transform}.
-	 * @return {@link Transform}
-	 */
-	public Transform getTransform1() {
-		return this.transform1;
-	}
-	
-	/**
-	 * Returns the second {@link Convex}'s {@link Transform}.
-	 * @return {@link Transform}
-	 */
-	public Transform getTransform2() {
-		return this.transform2;
 	}
 }

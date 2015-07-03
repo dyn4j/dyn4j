@@ -35,20 +35,23 @@ import org.dyn4j.geometry.Transform;
  * Represents a delegating {@link NarrowphaseDetector} that uses a primary {@link NarrowphaseDetector} and
  * fallback {@link NarrowphaseDetector}.
  * <p>
- * The fallback {@link NarrowphaseDetector} is used when any of the {@link FallbackCondition}s added to this
- * detector have been met.
+ * The fallback {@link NarrowphaseDetector} is used when <strong>any</strong> of the {@link FallbackCondition}s 
+ * added have been met.
  * <p>
- * Conditions will be checked in order and will stop on the first matched condition. By default the conditions
+ * {@link FallbackCondition}s will be checked in order and will stop on the first matched condition. By default the conditions
  * are ordered in the order they are added unless a condition specifies a sortIndex.
  * <p>
- * For example, when the SAT algorithm is used, some shapes are not supported. A {@link TypedFallbackCondition} can be
- * used to fallback to GJK:
+ * For example, when the {@link Sat} algorithm is used, some shapes are not supported. A {@link TypedFallbackCondition} can be
+ * used to fallback to the {@link Gjk} algorithm:
  * <pre>
  * FallbackNarrowphaseDetector detector = new FallbackNarrowphaseDetector(new Sat(), new Gjk());
- * // any CircularSection collisions will be handled by Gjk instead of Sat
- * detector.addCondition(new SingleTypedFallbackCondition(CircularSection.class));</pre>
+ * // any Slice collisions will be handled by Gjk instead of Sat
+ * detector.addCondition(new SingleTypedFallbackCondition(Slice.class));</pre>
  * New condition types can be added by implementing the {@link FallbackCondition} interface. Doing so can lead to
  * interesting options like custom collision detectors for specific cases or custom shapes.
+ * <p>
+ * The primary and fallback detectors can also be {@link FallbackNarrowphaseDetector}s as well allowing for a chain of 
+ * fallbacks.
  * @author William Bittle
  * @version 3.2.0
  * @since 3.1.5

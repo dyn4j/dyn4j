@@ -25,7 +25,7 @@
 package org.dyn4j;
 
 /**
- * Represents the criteria for performing a binary search on a {@link BinarySearchTree}.
+ * Represents criteria for performing a binary search on a {@link BinarySearchTree}.
  * @author William Bittle
  * @version 3.2.0
  * @since 3.2.0

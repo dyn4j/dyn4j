@@ -24,24 +24,39 @@
  */
 package org.dyn4j.collision.manifold;
 
+import org.dyn4j.geometry.Convex;
+import org.dyn4j.geometry.Shape;
+
 /**
- * Represents a {@link ManifoldPointId} that uses indexing.
+ * Represents a {@link ManifoldPointId} that uses edge indexing.
+ * <p>
+ * The the edge and vertex indicies are the indicies of the edges
+ * and verticies in the reference and incident {@link Convex} {@link Shape}s in
+ * the collision.
+ * <p>
+ * The flipped flag is set when the default reference edge is swapped
+ * to be the incident edge.
+ * <p>
+ * For a given {@link Convex} {@link Shape} the indicies should not change, although
+ * there is no mechanism preventing this. In the case they change, this should only
+ * affect any caching of this information.
  * @author William Bittle
  * @version 3.2.0
  * @since 1.0.0
+ * @see ManifoldPointId#DISTANCE
  */
 public class IndexedManifoldPointId implements ManifoldPointId {
 	/** The reference edge index */
-	protected final int referenceEdge;
+	public final int referenceEdge;
 	
 	/** The incident edge index */
-	protected final int incidentEdge;
+	public final int incidentEdge;
 	
 	/** The index of the incident vertex */
-	protected final int incidentVertex;
+	public final int incidentVertex;
 	
 	/** Whether the reference and incident features flipped */
-	protected final boolean flipped;
+	public final boolean flipped;
 	
 	/**
 	 * Optional constructor.
@@ -111,40 +126,5 @@ public class IndexedManifoldPointId implements ManifoldPointId {
 		.append("|IsFlipped=").append(this.flipped)
 		.append("]");
 		return sb.toString();
-	}
-	
-	/**
-	 * Returns the index of the reference edge.
-	 * @return int
-	 */
-	public int getReferenceEdge() {
-		return this.referenceEdge;
-	}
-	
-	/**
-	 * Returns the index of the incident edge.
-	 * @return int
-	 */
-	public int getIncidentEdge() {
-		return this.incidentEdge;
-	}
-	
-	/**
-	 * Returns the index of the incident vertex.
-	 * @return int
-	 */
-	public int getIncidentVertex() {
-		return this.incidentVertex;
-	}
-	
-	/**
-	 * Returns true if the reference and incident edges flipped.
-	 * <p>
-	 * Renamed from <code>flipped</code> in 3.0.2.
-	 * @return boolean
-	 * @since 3.0.2
-	 */
-	public boolean isFlipped() {
-		return this.flipped;
 	}
 }

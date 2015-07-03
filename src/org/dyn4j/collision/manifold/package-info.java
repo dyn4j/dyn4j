@@ -26,22 +26,26 @@
 /**
  * Sub package of the Collision package handling contact manifold generation.
  * <p>
- * Once a penetration vector and depth have been found between two 
- * {@link org.dyn4j.collision.Collidable}s, the next step is to find where the collision occurred.
+ * Once a {@link org.dyn4j.collision.narrowphase.Penetration} object has been found between two 
+ * {@link org.dyn4j.geometry.Convex} {@link org.dyn4j.geometry.Shape}s using a 
+ * {@link org.dyn4j.collision.narrowphase.NarrowphaseDetector}, the next step is to find where the 
+ * collision occurred by using a {@link org.dyn4j.collision.manifold.ManifoldSolver}.
+ * <p>
+ * A {@link org.dyn4j.collision.manifold.ManifoldSolver} is an algorithm that generates a contact
+ * {@link org.dyn4j.collision.manifold.Manifold} for a collision.
  * <p>
  * A contact {@link org.dyn4j.collision.manifold.Manifold} is an object representing the surface 
- * where the two {@link org.dyn4j.collision.Collidable}s are colliding.
+ * or point where the two {@link org.dyn4j.geometry.Convex} {@link org.dyn4j.geometry.Shape}s are 
+ * in contact in a collision.
  * <p>
- * {@link org.dyn4j.collision.manifold.Manifold}s have been designed to represent two types of 
- * surfaces: edge and point.
+ * {@link org.dyn4j.collision.manifold.Manifold}s are currently one or two points and represent either
+ * a single point or a straight edge respectively. Curved edges are not represented and instead use the single
+ * point representation. In two dimensions the {@link org.dyn4j.collision.manifold.Manifold} will always
+ * have two or less contact points.
  * <p>
- * A {@link org.dyn4j.collision.manifold.Manifold} contains a number of 
- * {@link org.dyn4j.collision.manifold.ManifoldPoint}s who represent the surface. For 2D this will 
- * either be 1 or 2 points.
- * <p>
- * A {@link org.dyn4j.collision.manifold.ManifoldSolver} is used to obtain a collision 
- * {@link org.dyn4j.collision.manifold.Manifold} from a 
- * {@link org.dyn4j.collision.narrowphase.Penetration} object.
+ * A {@link org.dyn4j.collision.manifold.Manifold} is made up of one or more {@link org.dyn4j.collision.manifold.ManifoldPoint}s
+ * which describe the information for each contact point in the collision. The {@link org.dyn4j.collision.manifold.ManifoldPoint}s
+ * have a {@link org.dyn4j.collision.manifold.ManifoldPointId} associated with them to facilitate caching.
  * <p>
  * Only one implementation of the {@link org.dyn4j.collision.manifold.ManifoldSolver} is provided: 
  * {@link org.dyn4j.collision.manifold.ClippingManifoldSolver}.

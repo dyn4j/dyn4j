@@ -429,7 +429,7 @@ public class AABB implements Translatable {
 	 * the specified error.
 	 * <p>
 	 * An {@link AABB} is degenerate given some error if
-	 * max - min <= error for either the x or y coordinate.
+	 * max - min &lt;= error for either the x or y coordinate.
 	 * @param error the allowed error
 	 * @return boolean
 	 * @since 3.1.1

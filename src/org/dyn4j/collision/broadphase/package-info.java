@@ -26,17 +26,19 @@
 /**
  * Sub package of the Collision package handling broad-phase collision detection.
  * <p>
- * Currently there are two broadphase implementations:
- * {@link org.dyn4j.collision.broadphase.Sap} and
- * {@link org.dyn4j.collision.broadphase.DynamicAABBTree}.
+ * Broad-phase collision detection is the process of detecting collision between all the {@link org.dyn4j.collision.Collidable}
+ * {@link org.dyn4j.collision.Fixture}s. The broad-phase attempts to reduce the O(n<sup>2</sup>) complexity of
+ * this process by using specialized data structures.  The broad-phase is not exact, but instead finds pairs of
+ * {@link org.dyn4j.collision.Fixture}s that could be colliding.  While not exact, the broad-phase is conservative.
+ * In other words, the broad-phase will never miss collisions, but will detect false positives.
  * <p>
- * A {@link org.dyn4j.collision.broadphase.BroadphaseDetector} should accept a list of 
- * {@link org.dyn4j.collision.Collidable}s and return those pairs who may be penetrating in a
- * list of {@link org.dyn4j.collision.broadphase.BroadphasePair}s.
+ * There are two broad-phase implementations, {@link org.dyn4j.collision.broadphase.Sap} and 
+ * {@link org.dyn4j.collision.broadphase.DynamicAABBTree}, both with their own merits. Generally, they have similar
+ * performance.
  * <p>
- * {@link org.dyn4j.collision.broadphase.BroadphaseDetector}s are not expected to be accurate, 
- * but are expected to be conservative.  Meaning, its acceptable for a 
- * {@link org.dyn4j.collision.broadphase.BroadphaseDetector} to return false positives.
+ * This package also contains an interface for filtering the results of the {@link org.dyn4j.collision.broadphase.BroadphaseDetector}s
+ * methods: {@link org.dyn4j.collision.broadphase.BroadphaseFilter}s.  These can be useful in both logic and performance to pre-filter
+ * results before performing more expensive logic.
  * @author William Bittle
  * @version 3.2.0
  * @since 1.0.0

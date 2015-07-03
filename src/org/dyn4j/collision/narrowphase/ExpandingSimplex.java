@@ -32,11 +32,17 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents a simplex that is progressively expanded by splitting
  * the closest edge to the origin by adding new points.
+ * <p>
+ * This class is used with the {@link Epa} class to maintain the state
+ * of the algorithm.
+ * <p>
+ * Given the way the simplex is expanded, the winding can be computed initially
+ * and will never change.
  * @author William Bittle 
  * @version 3.2.0
  * @since 3.2.0
  */
-class ExpandingSimplex {
+final class ExpandingSimplex {
 	/** The winding direction of the simplex */
 	protected final int winding;
 	
@@ -79,7 +85,7 @@ class ExpandingSimplex {
 	 * @param simplex the simplex
 	 * @return int the winding
 	 */
-	protected int getWinding(List<Vector2> simplex) {
+	protected final int getWinding(List<Vector2> simplex) {
 		int size = simplex.size();
 		for (int i = 0; i < size; i++) {
 			int j = i + 1 == size ? 0 : i + 1;
@@ -98,7 +104,7 @@ class ExpandingSimplex {
 	 * Returns the edge on the simplex that is closest to the origin.
 	 * @return {@link ExpandingSimplexEdge} the closest edge to the origin
 	 */
-	public ExpandingSimplexEdge getClosestEdge() {
+	public final ExpandingSimplexEdge getClosestEdge() {
 		return this.queue.peek(); // O(1)
 	}
 	
@@ -110,7 +116,7 @@ class ExpandingSimplex {
 	 * edge's vertices.
 	 * @param point the new point
 	 */
-	public void expand(Vector2 point) {
+	public final void expand(Vector2 point) {
 		// remove the edge we are splitting
 		ExpandingSimplexEdge edge = this.queue.poll(); // O(log n)
 		// create two new edges

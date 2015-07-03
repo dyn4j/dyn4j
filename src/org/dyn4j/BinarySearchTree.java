@@ -27,29 +27,36 @@ package org.dyn4j;
 import java.util.Iterator;
 
 /**
- * Represents an Binary Search Tree.
+ * Represents an (optionally balanced) Binary Search Tree.
  * <p>
- * Null elements are not allowed and duplicates can have unexpected behavior.
+ * This class used in conjunction with the {@link BinarySearchTreeSearchCriteria} interface can
+ * be used to perform arbitrary searches on the tree given the stored data. 
  * <p>
- * Use the {@link #isSelfBalancing()} and {@link #setSelfBalancing(boolean)} methods to 
- * make the tree an AVL tree.
+ * Null elements are not allowed and duplicates can have unexpected behavior. Changing the value
+ * of the elements after being inserted into the tree is undefined. It's also undefined behavior
+ * if the elements are not consistent with equals.
+ * <p>
+ * Use the {@link #isSelfBalancing()} and {@link #setSelfBalancing(boolean)} methods to enable
+ * or disable self balancing. A balanced tree minimizes the tree depth and improves search 
+ * performance. When self balancing is enabled, each insert or removal rebalances the tree
+ * as necessary.
  * @author William Bittle
  * @version 3.2.0
  * @since 2.2.0
  * @param <E> Comparable
  */
 public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
-	/** The root node of the tree */
-	protected BinarySearchTreeNode<E> root;
+	/** The root node of the tree; null when empty */
+	BinarySearchTreeNode<E> root;
 	
 	/** The current size of the tree */
-	protected int size;
+	int size;
 	
 	/** Whether to keep the tree balanced or not */
-	protected boolean selfBalancing = true;
+	boolean selfBalancing;
 	
 	/**
-	 * Creates a new unbalanced binary search tree.
+	 * Creates a new binary search tree with automatic balancing off.
 	 */
 	public BinarySearchTree() {
 		this.root = null;
@@ -59,7 +66,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	
 	/**
 	 * Creates a new binary search tree.
-	 * @param selfBalancing true if the tree should self balance
+	 * @param selfBalancing true if the tree should automatically balance
 	 */
 	public BinarySearchTree(boolean selfBalancing) {
 		this.root = null;
@@ -106,7 +113,12 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	/**
 	 * Sets whether this tree should self balance.
 	 * <p>
-	 * If the tree already contains elements the tree is reconstructed and balanced.
+	 * When self balancing is enabled, adding and removing elements will perform a post
+	 * step to make sure the tree stays balanced. Balancing minimizes the tree's depth, 
+	 * thereby increasing search performance.
+	 * <p>
+	 * If enabled and the tree contains more than 2 elements, the tree will be balanced
+	 * before this method returns.
 	 * @param flag true if the tree should self balance
 	 * @since 3.0.0
 	 */
@@ -114,8 +126,6 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 		// check if the flag is true (indicating the tree should self balance) and
 		// check if the tree is not already self balancing
 		if (flag && !this.selfBalancing) {
-			// set the local flag
-			this.selfBalancing = true;
 			// check for elements (0, 1, or 2 element trees don't have to be re-balanced)
 			if (this.size > 2) {
 				// if the tree was not already self balancing and the new flag is to have
@@ -128,7 +138,9 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	}
 	
 	/**
-	 * Inserts the given comparable object into this binary tree.
+	 * Inserts the given comparable into this binary tree.
+	 * <p>
+	 * Returns false if the given comparable is null.
 	 * @param comparable the comparable object to insert
 	 * @return boolean true if the insert was successful
 	 */
@@ -138,14 +150,14 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 		// create a node for this object
 		BinarySearchTreeNode<E> node = new BinarySearchTreeNode<E>(comparable);
 		// otherwise we need to find where to insert this node
-		this.insert(node);
-		// return a success
-		return true;
+		return this.insert(node);
 	}
 	
 	/**
-	 * Removes the comparable object from the tree returning the node or
-	 * null if the comparable object was not found.
+	 * Removes the comparable object from the tree returning true
+	 * if the comparable was found and removed
+	 * <p>
+	 * If the given comparable is null, false is returned.
 	 * @param comparable the comparable object
 	 * @return boolean true if the element was found and removed
 	 */
@@ -156,14 +168,14 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 		if (this.root == null) return false;
 		// otherwise we need to find and remove the node
 		// retaining any children of the removed node
-		BinarySearchTreeNode<E> node = this.remove(comparable, this.root);
-		// see if it was found
-		return node != null;
+		return this.remove(this.root, comparable) != null;
 	}
 
 	/**
 	 * Removes the minimum value node from this tree.
-	 * @return E the minimum value; null if the tree is empty
+	 * <p>
+	 * Returns null if the tree is empty.
+	 * @return E the minimum value
 	 */
 	public E removeMinimum() {
 		// check for an empty tree
@@ -174,7 +186,9 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	
 	/**
 	 * Removes the maximum value node from this tree.
-	 * @return E the maximum value; null if the tree is empty
+	 * <p>
+	 * Returns null if the tree is empty.
+	 * @return E the maximum value
 	 */
 	public E removeMaximum() {
 		// check for an empty tree
@@ -185,7 +199,9 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	
 	/**
 	 * Returns the minimum value of the tree.
-	 * @return E the minimum value; null if the tree is empty
+	 * <p>
+	 * Returns null if the tree is empty.
+	 * @return E the minimum value
 	 */
 	public E getMinimum() {
 		// check for an empty tree
@@ -196,7 +212,9 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	
 	/**
 	 * Returns the maximum value of the tree.
-	 * @return E the maximum value; null if the tree is empty
+	 * <p>
+	 * Returns null if the tree is empty.
+	 * @return E the maximum value
 	 */
 	public E getMaximum() {
 		// check for an empty tree
@@ -216,18 +234,14 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 		// check for empty tree
 		if (this.root == null) return false;
 		// attempt to find the comparable
-		BinarySearchTreeNode<E> node = this.contains(this.root, comparable);
-		// check for null
-		if (node == null) {
-			return false;
-		} else {
-			return true;
-		}
+		// if its not found then null will be returned
+		return this.contains(this.root, comparable) != null;
 	}
 	
 	/**
 	 * Performs a binary search on this tree given the criteria.
 	 * @param criteria the criteria
+	 * @param <T> the {@link BinarySearchTreeSearchCriteria} type
 	 * @return the criteria for chaining
 	 * @since 3.2.0
 	 */
@@ -326,7 +340,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * @param node the subtree root node
 	 * @return {@link BinarySearchTreeNode} the node found; null if subtree is empty
 	 */
-	protected BinarySearchTreeNode<E> getMinimum(BinarySearchTreeNode<E> node) {
+	BinarySearchTreeNode<E> getMinimum(BinarySearchTreeNode<E> node) {
 		// check for a null node
 		if (node == null) return null;
 		// loop until we find the minimum
@@ -344,7 +358,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * @param node the subtree root node
 	 * @return {@link BinarySearchTreeNode} the node found; null if subtree is empty
 	 */
-	protected BinarySearchTreeNode<E> getMaximum(BinarySearchTreeNode<E> node) {
+	BinarySearchTreeNode<E> getMaximum(BinarySearchTreeNode<E> node) {
 		// check for a null node
 		if (node == null) return null;
 		// loop until we find the maximum
@@ -362,7 +376,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * @param node the subtree root node
 	 * @return {@link BinarySearchTreeNode} the node removed
 	 */
-	protected BinarySearchTreeNode<E> removeMinimum(BinarySearchTreeNode<E> node) {
+	BinarySearchTreeNode<E> removeMinimum(BinarySearchTreeNode<E> node) {
 		// find the minimum
 		node = this.getMinimum(node);
 		// check if the given subtree root node is null
@@ -394,7 +408,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * @param node the subtree root node
 	 * @return {@link BinarySearchTreeNode} the node removed
 	 */
-	protected BinarySearchTreeNode<E> removeMaximum(BinarySearchTreeNode<E> node) {
+	BinarySearchTreeNode<E> removeMaximum(BinarySearchTreeNode<E> node) {
 		// find the maximum
 		node = this.getMaximum(node);
 		// check if the given subtree root node is null
@@ -427,7 +441,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * @return int the maximum depth
 	 * @since 3.0.0
 	 */
-	protected int getHeight(BinarySearchTreeNode<E> node) {
+	int getHeight(BinarySearchTreeNode<E> node) {
 		// check for null node
 		if (node == null) return 0;
 		// check for the leaf node
@@ -441,7 +455,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * @param node the root node of the subtree
 	 * @return int
 	 */
-	protected int size(BinarySearchTreeNode<E> node) {
+	int size(BinarySearchTreeNode<E> node) {
 		// check for null node
 		if (node == null) return 0;
 		// check for the leaf node
@@ -451,11 +465,14 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	}
 	
 	/**
-	 * Returns true if the given node is contained in this tree.
+	 * Returns true if the given node (not the node's comparable) is contained in this tree.
+	 * <p>
+	 * This method performs a reference equals comparison on the nodes
+	 * rather than a comparison on the node's comparable.
 	 * @param node the node to find
 	 * @return boolean
 	 */
-	protected boolean contains(BinarySearchTreeNode<E> node) {
+	boolean contains(BinarySearchTreeNode<E> node) {
 		// check for null
 		if (node == null) return false;
 		// check for empty tree
@@ -470,13 +487,12 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 			if (curr == node) return true;
 			// otherwise pick the direction to search
 			// by comparing the data in the nodes
-			int diff = node.comparable.compareTo(curr.comparable);
+			int diff = node.compareTo(curr);
 			// check the difference
 			if (diff == 0) {
-				// we have found an item exactly like this
-				// node but not the same reference so return
-				// false
-				return false;
+				// we have found where the item should be
+				// now compare by reference
+				return curr == node;
 			} else if (diff < 0) {
 				// the comparable must be to the left of this node
 				// since its less than this node
@@ -497,7 +513,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * @param comparable the comparable value
 	 * @return {@link BinarySearchTreeNode} the node containing the given value; null if its not found
 	 */
-	protected BinarySearchTreeNode<E> get(E comparable) {
+	BinarySearchTreeNode<E> get(E comparable) {
 		// check for null comparable
 		if (comparable == null) return null;
 		// check for empty tree
@@ -513,7 +529,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * @return boolean true if the insertion was successful
 	 * @param node the subtree root node
 	 */
-	protected boolean insertSubtree(BinarySearchTreeNode<E> node) {
+	boolean insertSubtree(BinarySearchTreeNode<E> node) {
 		// check for null
 		if (node == null) return false;
 		// get an iterator to go through all the nodes
@@ -580,18 +596,24 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 				// node then go to the right on the tree
 				node = node.right;
 			} else {
-				// we found the node, now remove it
-				if (node.isLeftChild()) {
-					node.parent.left = null;
+				// we found where the value should be, now check for equality
+				if (node.comparable.equals(comparable)) {
+					// we found the node, now remove it
+					if (node.isLeftChild()) {
+						node.parent.left = null;
+					} else {
+						node.parent.right = null;
+					}
+					// decrement the size by the size of the removed subtree
+					this.size -= this.size(node);
+					// re-balance the tree
+					if (this.selfBalancing) this.balanceTree(node.parent);
+					// return success
+					return true;
 				} else {
-					node.parent.right = null;
+					// wasn't found
+					return false;
 				}
-				// decrement the size by the size of the removed subtree
-				this.size -= this.size(node);
-				// re-balance the tree
-				if (this.selfBalancing) this.balanceTree(node.parent);
-				// return success
-				return true;
 			}
 		}
 		// if we get here the node was not found
@@ -599,11 +621,11 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	}
 	
 	/**
-	 * Removes the given node and the corresponding subtree from this tree.
+	 * Removes the given node (not the node's comparable) and the corresponding subtree from this tree.
 	 * @param node the node and subtree to remove
 	 * @return boolean true if the node was found and removed successfully
 	 */
-	protected boolean removeSubtree(BinarySearchTreeNode<E> node) {
+	boolean removeSubtree(BinarySearchTreeNode<E> node) {
 		// check for null input
 		if (node == null) return false;
 		// check for empty tree
@@ -635,13 +657,11 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	
 	/**
 	 * Inserts the given node into the tree.
-	 * <p>
-	 * This method will work for an empty tree.
 	 * @param item the new node to insert
 	 * @return boolean true if the insertion was successful
 	 * @since 3.0.0
 	 */
-	protected boolean insert(BinarySearchTreeNode<E> item) {
+	boolean insert(BinarySearchTreeNode<E> item) {
 		// check for an empty tree
 		if (this.root == null) {
 			// set the root to the new item
@@ -666,13 +686,13 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * @return true if the insertion was successful
 	 * @see #insert(BinarySearchTreeNode)
 	 */
-	protected boolean insert(BinarySearchTreeNode<E> item, BinarySearchTreeNode<E> node) {
+	boolean insert(BinarySearchTreeNode<E> item, BinarySearchTreeNode<E> node) {
 		// make sure the given node is not null
 		if (node == null) return false;
 		// loop until we find where the node should be placed
 		while (node != null) {
 			// compare the item to the current item
-			if (item.comparable.compareTo(node.comparable) < 0) {
+			if (item.compareTo(node) < 0) {
 				// if the new item is less than the current item,
 				// then check the left node of the current item
 				if (node.left == null) {
@@ -719,11 +739,11 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 
 	/**
 	 * Removes the given node from this tree and returns
-	 * true if the node existed and was removed.
+	 * true if the node (not the node's comparable) existed and was removed.
 	 * @param node the node to remove
 	 * @return boolean
 	 */
-	protected boolean remove(BinarySearchTreeNode<E> node) {
+	boolean remove(BinarySearchTreeNode<E> node) {
 		// check for null
 		if (node == null) return false;
 		// check for empty tree
@@ -741,11 +761,11 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	
 	/**
 	 * Returns the node removed if the comparable is found, null otherwise.
-	 * @param comparable the comparable object to remove
 	 * @param node the subtree node to start the search
+	 * @param comparable the comparable object to remove
 	 * @return {@link BinarySearchTreeNode} null if the given comparable was not found
 	 */
-	protected BinarySearchTreeNode<E> remove(E comparable, BinarySearchTreeNode<E> node) {
+	BinarySearchTreeNode<E> remove(BinarySearchTreeNode<E> node, E comparable) {
 		// perform an iterative version of the remove method so that
 		// we can return a boolean result about removal
 		while (node != null) {
@@ -761,11 +781,15 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 				// in the right subtree
 				node = node.right;
 			} else {
-				// if we got here we know that we found the
-				// node that contains the given comparable
-				this.removeNode(node);
-				// return the node removed
-				return node;
+				// if we got here we know that we found where
+				// the comparable would be, now check equallity
+				if (node.comparable.equals(comparable)) {
+					this.removeNode(node);
+					// return the node removed
+					return node;
+				} else {
+					return null;
+				}
 			}
 		}
 		
@@ -780,7 +804,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * This method assumes that the node is contained in this tree.
 	 * @param node the node to remove
 	 */
-	protected void removeNode(BinarySearchTreeNode<E> node) {
+	void removeNode(BinarySearchTreeNode<E> node) {
 		boolean isLeftChild = node.isLeftChild();
 		// check how many children it has
 		if (node.left != null && node.right != null) {
@@ -894,20 +918,25 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	}
 	
 	/**
-	 * Internal recursive method to find an item in the tree.
+	 * Internal iterative method to find an item in the tree.
 	 * @param node the subtree root node
 	 * @param comparable the comparable to find
 	 * @return {@link BinarySearchTreeNode} the node found; null if not found
 	 */
-	protected BinarySearchTreeNode<E> contains(BinarySearchTreeNode<E> node, E comparable) {
+	BinarySearchTreeNode<E> contains(BinarySearchTreeNode<E> node, E comparable) {
 		// make sure the node is not null
 		while (node != null) {
 			// compare the comparable
 			E nodeData = node.comparable;
 			int diff = comparable.compareTo(nodeData);
 			if (diff == 0) {
-				// we found the item and we can stop
-				return node;
+				// we found where the item should be now we to test
+				// for equality
+				if (node.comparable.equals(comparable)) {
+					return node;
+				} else {
+					return null;
+				}
 			} else if (diff < 0) {
 				// the comparable must be to the left of this node
 				// since its less than this node
@@ -929,9 +958,11 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	protected void balanceTree() {
 		// save the current tree
 		BinarySearchTreeNode<E> root = this.root;
+		boolean balancing = this.selfBalancing;
 		// empty the tree
 		this.root = null;
 		this.size = 0;
+		this.selfBalancing = true;
 		// create an iterator for the old tree
 		Iterator<E> iterator = new BinarySearchTreeIterator<E>(root);
 		// add all the elements from the old tree into the new tree
@@ -941,14 +972,15 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 			// add the new node to this tree
 			this.insert(node);
 		}
+		this.selfBalancing = balancing;
 	}
 	
 	/**
-	 * Balances the tree recursively to the root starting at the given node.
+	 * Balances the tree iteratively to the root starting at the given node.
 	 * @param node the node to begin balancing
 	 * @since 3.0.0
 	 */
-	protected void balanceTree(BinarySearchTreeNode<E> node) {
+	void balanceTree(BinarySearchTreeNode<E> node) {
 		// loop until we reach the root node
 		while (node != null) {
 			// balance the tree; this can return a new root
@@ -966,7 +998,7 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	 * @return {@link BinarySearchTreeNode} the new root
 	 * @since 3.0.0
 	 */
-	protected BinarySearchTreeNode<E> balance(BinarySearchTreeNode<E> node) {
+	BinarySearchTreeNode<E> balance(BinarySearchTreeNode<E> node) {
 		// check if the node is null
 		if (node == null) return null;
 		// check if the node has a height of 2 or more

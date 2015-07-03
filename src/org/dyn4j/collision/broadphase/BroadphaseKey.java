@@ -30,17 +30,18 @@ import org.dyn4j.collision.Collidable;
 import org.dyn4j.collision.Fixture;
 
 /**
- * Represents a key for a broadphase item.
+ * Represents a key for a {@link BroadphaseItem} used for fast look ups in
+ * the {@link BroadphaseDetector}s.
  * @author William Bittle
  * @version 3.2.0
  * @since 3.2.0
  */
-class BroadphaseKey {
+final class BroadphaseKey {
 	/** The {@link Collidable}s id */
-	public final UUID collidable;
+	final UUID collidable;
 	
 	/** The {@link Fixture}s id */
-	public final UUID fixture;
+	final UUID fixture;
 	
 	/** The pre-computed hashcode */
 	private final int hashCode;
@@ -63,7 +64,7 @@ class BroadphaseKey {
 	 * @param fixture the fixture
 	 * @return {@link BroadphaseKey}
 	 */
-	public static BroadphaseKey get(Collidable<?> collidable, Fixture fixture) {
+	public static final BroadphaseKey get(Collidable<?> collidable, Fixture fixture) {
 		return new BroadphaseKey(collidable.getId(), fixture.getId());
 	}
 	
@@ -86,7 +87,7 @@ class BroadphaseKey {
 	 * Computes the hashcode from the collidable and fixture ids.
 	 * @return int
 	 */
-	protected int computeHashCode() {
+	protected final int computeHashCode() {
 		int hash = 17;
 		hash = hash * 31 + this.collidable.hashCode();
 		hash = hash * 31 + this.fixture.hashCode();

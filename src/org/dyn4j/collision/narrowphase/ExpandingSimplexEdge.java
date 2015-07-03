@@ -27,14 +27,17 @@ package org.dyn4j.collision.narrowphase;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Represents an edge of an expanding simplex.
+ * Represents an edge of an {@link ExpandingSimplex}.
+ * <p>
+ * An {@link ExpandingSimplexEdge} tracks its vertices, the edge normal, and the
+ * distance to the origin.
  * <p>
  * Note: this class has a natural ordering that is inconsistent with equals.
  * @author William Bittle
  * @version 3.2.0
  * @since 3.2.0
  */
-class ExpandingSimplexEdge implements Comparable<ExpandingSimplexEdge> {
+final class ExpandingSimplexEdge implements Comparable<ExpandingSimplexEdge> {
 	/** The first point of the edge */
 	protected final Vector2 point1;
 	

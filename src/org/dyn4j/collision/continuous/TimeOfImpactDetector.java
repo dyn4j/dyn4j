@@ -31,6 +31,12 @@ import org.dyn4j.geometry.Vector2;
 
 /**
  * Interface representing a time of impact algorithm.
+ * <p>
+ * Sometimes called Continuous Collision Detection, implementing classes are used to detect collisions
+ * between {@link Convex} {@link Shape}s given their initial and final state of a time step. This information 
+ * can then be used to solve a collision that was missed during that period.
+ * <p>
+ * These algorithms are generally very computationally expensive.
  * @author William Bittle
  * @version 3.1.5
  * @since 1.2.0

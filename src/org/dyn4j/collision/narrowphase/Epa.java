@@ -27,39 +27,44 @@ package org.dyn4j.collision.narrowphase;
 import java.util.List;
 
 import org.dyn4j.Epsilon;
+import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Polygon;
+import org.dyn4j.geometry.Shape;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
 /**
- * {@link Epa} stands for Expanding Polytope Algorithm and is used to find the 
- * penetration depth and vector given a resulting {@link Gjk} simplex.
+ * {@link Epa}, or Expanding Polytope Algorithm, is used to find the 
+ * penetration depth and vector given the final simplex of {@link Gjk}.
  * <p>
  * {@link Epa} expands the given simplex in the direction of the origin until it cannot
  * be expanded any further.  {@link Gjk} guarantees that the simplex points are on the
- * edge of the Minkowski sum which creates a convex polytope.
+ * edge of the Minkowski sum which creates a convex polytope from which to start the
+ * {@link Epa} algorithm.
  * <p> 
  * Expansion is achieved by breaking edges of the simplex.  Find the edge on the simplex
- * closest to the origin.  Then use that edge's normal to find another support point (using 
+ * closest to the origin, then use that edge's normal to find another support point (using 
  * the same support method that {@link Gjk} uses).  Add the new support point to 
  * the simplex between the points that made the closest edge.  Repeat this process until
- * the polytope cannot be expanded any more.
+ * the polytope cannot be expanded further.
  * <p>
  * This implementation has three termination cases:
  * <ul>
  * <li>If the new support point is not past the edge along the edge normal given some epsilon.</li>
- * <li>If the distance between the last support point and the new support point 
- * is below a given epsilon.</li>
+ * <li>If the distance between the last support point and the new support point is below a given epsilon.</li>
  * <li>Maximum iteration count.</li>
  * </ul>
- * Once {@link Epa} terminates the penetration vector is the current closest edge normal
+ * Once {@link Epa} terminates, the penetration vector is the current closest edge normal
  * and the penetration depth is the distance from the origin to the edge along the normal.
  * <p>
  * {@link Epa} will terminate in a finite number of iterations if the two shapes are {@link Polygon}s.
- * If either shape has curved surfaces the algorithm requires an expected accuracy epsilon.
+ * If either shape has curved surfaces the algorithm requires an expected accuracy epsilon: {@link #distanceEpsilon}.
+ * In the case that the {@link #distanceEpsilon} is too small, the {@link #maxIterations} will prevent the
+ * algorithm from running forever.
  * @author William Bittle
  * @version 3.2.0
  * @since 1.0.0
+ * @see <a href="http://www.dyn4j.org/2010/05/epa-expanding-polytope-algorithm/">EPA (Expanding Polytope Algorithm)</a>
  */
 public class Epa implements MinkowskiPenetrationSolver {
 	/** The default {@link Epa} maximum iterations */
@@ -74,12 +79,8 @@ public class Epa implements MinkowskiPenetrationSolver {
 	/** The {@link Epa} distance epsilon in meters */
 	protected double distanceEpsilon = Epa.DEFAULT_DISTANCE_EPSILON;
 	
-	/**
-	 * Returns the penetration in the given penetration object given the simplex
-	 * created by {@link Gjk} and the {@link MinkowskiSum}.
-	 * @param simplex the simplex
-	 * @param minkowskiSum the {@link MinkowskiSum}
-	 * @param penetration the {@link Penetration} object to fill
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.narrowphase.MinkowskiPenetrationSolver#getPenetration(java.util.List, org.dyn4j.collision.narrowphase.MinkowskiSum, org.dyn4j.collision.narrowphase.Penetration)
 	 */
 	public void getPenetration(List<Vector2> simplex, MinkowskiSum minkowskiSum, Penetration penetration) {
 		ExpandingSimplex smplx = new ExpandingSimplex(simplex);
@@ -117,8 +118,8 @@ public class Epa implements MinkowskiPenetrationSolver {
 	}
 	
 	/**
-	 * Returns the maximum number of EPA iterations.
-	 * @return int the maximum number of EPA iterations
+	 * Returns the maximum number of iterations the algorithm will perform before exiting.
+	 * @return int
 	 * @see #setMaxIterations(int)
 	 */
 	public int getMaxIterations() {
@@ -126,10 +127,8 @@ public class Epa implements MinkowskiPenetrationSolver {
 	}
 
 	/**
-	 * Sets the maximum number of EPA iterations.
-	 * <p>
-	 * Valid values are in the range [5, &infin;].
-	 * @param maxIterations the maximum number of EPA iterations
+	 * Sets the maximum number of iterations the algorithm will perform before exiting.
+	 * @param maxIterations the maximum number of iterations in the range [5, &infin;]
 	 * @throws IllegalArgumentException if maxIterations is less than 5
 	 */
 	public void setMaxIterations(int maxIterations) {
@@ -138,8 +137,8 @@ public class Epa implements MinkowskiPenetrationSolver {
 	}
 
 	/**
-	 * Returns the EPA distance epsilon.
-	 * @return double the EPA distance epsilon
+	 * Returns the distance epsilon.
+	 * @return double
 	 * @see #setDistanceEpsilon(double)
 	 */
 	public double getDistanceEpsilon() {
@@ -147,10 +146,12 @@ public class Epa implements MinkowskiPenetrationSolver {
 	}
 
 	/**
-	 * The minimum distance between two iterations of the EPA algorithm.
+	 * The minimum distance between two iterations of the algorithm.
 	 * <p>
-	 * Valid values are in the range (0, &infin;].
-	 * @param distanceEpsilon the EPA distance epsilon
+	 * The distance epsilon is used to determine when the algorithm is close enough to the
+	 * edge of the minkowski sum to conclude that it can no longer expand.  This is primarily
+	 * used when one of the {@link Convex} {@link Shape}s in question has a curved shape.
+	 * @param distanceEpsilon the distance epsilon in the range (0, &infin;]
 	 * @throws IllegalArgumentException if distanceEpsilon is less than or equal to zero
 	 */
 	public void setDistanceEpsilon(double distanceEpsilon) {

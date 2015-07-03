@@ -43,11 +43,11 @@ import org.dyn4j.geometry.Vector2;
  * @param <T> the {@link Fixture} type
  */
 public abstract class AbstractBroadphaseDetector<E extends Collidable<T>, T extends Fixture> implements BroadphaseDetector<E, T> {
-	/** The {@link AABB} expansion value */
-	protected double expansion = BroadphaseDetector.DEFAULT_AABB_EXPANSION;
-	
 	/** The default broadphase filter object */
 	protected final BroadphaseFilter<E, T> defaultFilter = new DefaultBroadphaseFilter<E, T>();
+	
+	/** The {@link AABB} expansion value */
+	protected double expansion = BroadphaseDetector.DEFAULT_AABB_EXPANSION;
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#add(org.dyn4j.collision.Collidable)
