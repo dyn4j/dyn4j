@@ -49,20 +49,20 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents some physical {@link Body}.
+ * Represents a physical {@link Body}.
  * <p>
- * A {@link Body} requires that at least one {@link BodyFixture} represent it, but 
- * allows any number of {@link BodyFixture}s.  When a {@link Body} is created there
- * are no {@link BodyFixture}s attached.  Concave {@link Body}s can be created
- * by attaching multiple {@link Convex} {@link BodyFixture}s.
+ * A {@link Body} typically has at least one {@link BodyFixture} attached to it. 
+ * the {@link BodyFixture}s represent the shape of the body.  When a body 
+ * is first created the body is a shapeless infinite mass body.  Add fixtures to
+ * the body using the <code>addFixture</code> methods.
  * <p>
- * Use the {@link #setMass(org.dyn4j.geometry.Mass.Type)}
- * methods to set the mass of the entire {@link Body} given the currently attached
+ * Use the {@link #setMass(org.dyn4j.geometry.Mass.Type)} methods to calculate the 
+ * mass of the entire {@link Body} given the currently attached
  * {@link BodyFixture}s.  The {@link #setMass(Mass)} method can be used to set
  * the mass directly.  Use the {@link #setMassType(org.dyn4j.geometry.Mass.Type)}
  * method to toggle the mass type between the special types.
  * <p>
- * The coefficient of friction and restitution and linear and angular damping
+ * The coefficient of friction and restitution and the linear and angular damping
  * are all defaulted but can be changed via the accessor and mutator methods.
  * <p>
  * By default {@link Body}s are allowed to be put to sleep automatically. {@link Body}s are 
@@ -460,9 +460,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	}
 	
 	/**
-	 * Sets this {@link Body}'s mass information.
-	 * <p>
-	 * This method does not recompute the rotation disc radius.
+	 * Explicitly sets this {@link Body}'s mass information.
 	 * @param mass the new {@link Mass}
 	 * @return {@link Body} this body
 	 * @throws NullPointerException if the given mass is null
@@ -472,6 +470,8 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 		if (mass == null) throw new NullPointerException(Messages.getString("dynamics.body.nullMass"));
 		// set the mass
 		this.mass = mass;
+		// compute the rotation disc radius
+		this.setRotationDiscRadius();
 		return this;
 	}
 	
@@ -479,11 +479,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * Sets the {@link org.dyn4j.geometry.Mass.Type} of this {@link Body}.
 	 * <p>
 	 * This method does not compute/recompute the mass of the body but solely
-	 * sets the mass type to one of the special types.  If the given type is null,
-	 * the method immediately returns.
-	 * <p>
-	 * If the mass of this body has not been set previously by one of the {@link #setMass()}
-	 * methods, then this method will compute the mass.
+	 * sets the mass type to one of the special types.
 	 * <p>
 	 * Since its possible to create a {@link Mass} object with zero mass and/or
 	 * zero inertia (<code>Mass m = new Mass(new Vector2(), 0, 0);</code> for example), setting the type 
@@ -496,14 +492,8 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	public Body setMassType(Mass.Type type) {
 		// check for null type
 		if (type == null) throw new NullPointerException(Messages.getString("dynamics.body.nullMassType"));
-		// make sure the current mass is not null
-		if (this.mass == null) {
-			// if its null then just compute it for the first time
-			this.setMass(type);
-		} else {
-			// otherwise just set the type
-			this.mass.setType(type);
-		}
+		// otherwise just set the type
+		this.mass.setType(type);
 		// return this body
 		return this;
 	}
@@ -511,8 +501,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	/**
 	 * Computes the rotation disc for this {@link Body}.
 	 * <p>
-	 * This method requires that the center of mass be
-	 * computed first.
+	 * This method requires that the center of mass be computed first.
 	 * <p>
 	 * The rotation disc radius is the radius, from the center of mass,
 	 * of the disc that encompasses the entire body as if it was rotated

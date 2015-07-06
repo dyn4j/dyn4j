@@ -41,7 +41,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Implementation of the {@link Gjk} algorithm.
  * <p>
- * The {@link Gjk} algorithm is an algorithm used to find minimum distance from 
+ * {@link Gjk} algorithm is an algorithm used to find minimum distance from 
  * one {@link Convex} {@link Shape} to another, but can also be used to determine 
  * whether or not they intersect.
  * <p>
@@ -54,13 +54,14 @@ import org.dyn4j.resources.Messages;
  * If we take the difference of every point in A and every point in B, we still end up with a 
  * {@link Convex} {@link Shape}, however with an interesting property:  If the two {@link Convex} 
  * {@link Shape}s are penetrating one another then the {@link MinkowskiSum} (using the difference
- * operator) will contain the origin.  It is not necessary to compute the {@link MinkowskiSum} however.
+ * operator) will contain the origin.  It is not necessary to compute the {@link MinkowskiSum},
+ * which would be expensive.
  * <p>
- * To determine whether the origin is contained in the {@link MinkowskiSum} we must iteratively 
+ * To determine whether the origin is contained in the {@link MinkowskiSum} we iteratively 
  * create a {@link Shape} inside the {@link MinkowskiSum} that encloses the origin.  This is called
- * the simplex and for 2D its a triangle.
+ * the simplex and for 2D it will be a triangle.
  * <p>
- * To create a triangle in the {@link MinkowskiSum}, we will use what is called a support function.
+ * To create a triangle in the {@link MinkowskiSum}, we use what is called a support function.
  * <p>
  * The support function's purpose is to return a point on the {@link MinkowskiSum} farthest in a 
  * given direction.  This can be obtained by taking the farthest point in object A minus the farthest 
@@ -70,13 +71,12 @@ import org.dyn4j.resources.Messages;
  * <pre>
  * A - B
  * </pre>
- * the support would be:
+ * then the support function would be:
  * <pre>
  * (farthest point in direction D in A) - (farthest point in direction -D in B)
  * </pre>
- * Using this we can obtain a point which is on the edge of the {@link MinkowskiSum} shape in
- * any direction.  Next we need a way to iteratively create these points so that we enclose the
- * origin.
+ * With this we can obtain a point which is on the edge of the {@link MinkowskiSum} shape in
+ * any direction.  Next we iteratively create these points so that we enclose the origin.
  * <p>
  * The algorithm:
  * <pre>
@@ -108,16 +108,20 @@ import org.dyn4j.resources.Messages;
  * to the source documentation on {@link Gjk#checkSimplex(List, Vector2)}.
  * <p>
  * Once {@link Gjk} has found that the two {@link Collidable}s are penetrating it will exit 
- * and hand off the resulting simplex to a {@link MinkowskiPenetrationSolver}.
+ * and hand off the resulting simplex to a {@link MinkowskiPenetrationSolver} to find the
+ * collision depth and normal.
  * <p>
  * {@link Gjk}'s default {@link MinkowskiPenetrationSolver} is {@link Epa}.
  * <p>
- * {@link Gjk}'s original intent was to find the minimum distance between two {@link Convex}
+ * the {@link Gjk} algorithm's original intent was to find the minimum distance between two {@link Convex}
  * {@link Shape}s.  Refer to {@link Gjk#distance(Convex, Transform, Convex, Transform, Separation)}
  * for details on the implementation.
  * @author William Bittle
  * @version 3.1.11
  * @since 1.0.0
+ * @see Epa
+ * @see <a href="http://www.dyn4j.org/2010/04/gjk-gilbert-johnson-keerthi/">GJK (Gilbert–Johnson–Keerthi)</a>
+ * @see <a href="http://www.dyn4j.org/2010/04/gjk-distance-closest-points/">GJK – Distance & Closest Points</a>
  */
 public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetector {
 	/** The origin point */
@@ -207,7 +211,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	}
 	
 	/**
-	 * Returns a vector for the initial direction for the GJK algorithm.
+	 * Returns a vector for the initial direction for the GJK algorithm in world coordinates.
 	 * <p>
 	 * This implementation returns the vector from the center of the first convex to the center of the second.
 	 * @param convex1 the first convex
@@ -225,7 +229,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	}
 	
 	/**
-	 * The main GJK algorithm loop.
+	 * The main {@link Gjk} algorithm loop.
 	 * <p>
 	 * Returns true if a collision was detected and false otherwise.
 	 * <p>

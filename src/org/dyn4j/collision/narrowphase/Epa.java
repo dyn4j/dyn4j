@@ -64,6 +64,7 @@ import org.dyn4j.resources.Messages;
  * @author William Bittle
  * @version 3.2.0
  * @since 1.0.0
+ * @see Gjk
  * @see <a href="http://www.dyn4j.org/2010/05/epa-expanding-polytope-algorithm/">EPA (Expanding Polytope Algorithm)</a>
  */
 public class Epa implements MinkowskiPenetrationSolver {
