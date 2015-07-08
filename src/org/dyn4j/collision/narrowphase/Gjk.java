@@ -41,31 +41,32 @@ import org.dyn4j.resources.Messages;
 /**
  * Implementation of the {@link Gjk} algorithm.
  * <p>
- * {@link Gjk} algorithm is an algorithm used to find minimum distance from 
- * one {@link Convex} {@link Shape} to another, but can also be used to determine 
- * whether or not they intersect.
+ * {@link Gjk} is an algorithm used to find minimum distance from one {@link Convex} {@link Shape} 
+ * to another, but can also be used to determine whether or not they intersect.
  * <p>
  * {@link Gjk} uses a specific mathematical construct called the {@link MinkowskiSum}.  The 
  * {@link MinkowskiSum} of two {@link Convex} {@link Shape}s create another {@link Convex} 
- * shape.  The new {@link Convex} {@link Shape} is defined as adding every point in A to 
- * every point in B.
+ * {@link Shape}.  If the shapes are labeled A and B, the {@link MinkowskiSum} is the convex hull
+ * of adding every point in A to every point in B.
+ * <p>  
+ * Now, if we subtract every point in A and every point in B, we still end up with a 
+ * {@link Convex} {@link Shape}, but we also get another interesting property.  If the two {@link Convex} 
+ * {@link Shape}s are penetrating one another (overlapping) then the {@link MinkowskiSum}, using the difference
+ * operator, will contain the origin.
  * <p>
- * This is useful if we do the opposite operation in the {@link MinkowskiSum}, the difference.  
- * If we take the difference of every point in A and every point in B, we still end up with a 
- * {@link Convex} {@link Shape}, however with an interesting property:  If the two {@link Convex} 
- * {@link Shape}s are penetrating one another then the {@link MinkowskiSum} (using the difference
- * operator) will contain the origin.  It is not necessary to compute the {@link MinkowskiSum},
- * which would be expensive.
+ * Computing the {@link MinkowskiSum} directly would not be very efficient and performance would be directly linked
+ * to the number of vertices each shape contained (n*m subtractions).  In addition, curved shapes have an infinite 
+ * number of vertices.
  * <p>
- * To determine whether the origin is contained in the {@link MinkowskiSum} we iteratively 
- * create a {@link Shape} inside the {@link MinkowskiSum} that encloses the origin.  This is called
- * the simplex and for 2D it will be a triangle.
+ * That said, it's not necessary to compute the {@link MinkowskiSum}. Instead, to determine whether the origin is 
+ * contained in the {@link MinkowskiSum} we iteratively create a {@link Shape} inside the {@link MinkowskiSum} that 
+ * encloses the origin.  This is called the simplex and for 2D it will be a triangle.  If we can enclose the origin
+ * using a shape contained within the {@link MinkowskiSum}, then we can conclude that the origin is contained within
+ * the {@link MinkowskiSum}, and that the two shapes are penetrating. If we cannot, then the shapes are separated.
  * <p>
- * To create a triangle in the {@link MinkowskiSum}, we use what is called a support function.
- * <p>
- * The support function's purpose is to return a point on the {@link MinkowskiSum} farthest in a 
- * given direction.  This can be obtained by taking the farthest point in object A minus the farthest 
- * point in object B in the opposite direction.
+ * To create a shape inside the {@link MinkowskiSum}, we use what is called a support function. The support function
+ * returns a point on the edge of the {@link MinkowskiSum} farthest in a given direction.  This can be obtained by taking 
+ * the farthest point in shape A minus the farthest point in shape B in the opposite direction.
  * <p>
  * If the {@link MinkowskiSum} is:
  * <pre>
@@ -75,10 +76,10 @@ import org.dyn4j.resources.Messages;
  * <pre>
  * (farthest point in direction D in A) - (farthest point in direction -D in B)
  * </pre>
- * With this we can obtain a point which is on the edge of the {@link MinkowskiSum} shape in
- * any direction.  Next we iteratively create these points so that we enclose the origin.
+ * With this we can obtain a point which is on the edge of the {@link MinkowskiSum} shape in any direction.  Next we 
+ * iteratively create these points so that we create a shape (triangle in the 2d case) that encloses the origin.
  * <p>
- * The algorithm:
+ * Algorithm psuedo-code:
  * <pre>
  * // get a point farthest in the direction
  * // choose some random direction (selection of the initial direction can
@@ -91,8 +92,8 @@ import org.dyn4j.resources.Messages;
  * // make sure the point we are about to add is actually past the origin
  * // if its not past the origin then that means we can never enclose the origin
  * // therefore its not in the Minkowski sum and therefore there is no penetration.
- * while (p = support(A, B, direction).dot(direction) > 0) {
- * 	// if the p is past the origin then add it to the simplex
+ * while (p = support(A, B, direction).dot(direction) &gt; 0) {
+ * 	// if the point is past the origin then add it to the simplex
  * 	simplex.add(p);
  *	// then check to see if the simplex contains the origin
  *	// passing back a new search direction if it does not
@@ -102,8 +103,8 @@ import org.dyn4j.resources.Messages;
  * }
  * return false;
  * </pre>
- * The last method to discuss is the method, check.  This method can be implemented in
- * any fashion, however, if the simplex is stored in a way that we always know what point
+ * The last method to discuss is the check method.  This method can be implemented in
+ * any fashion, however, if the simplex points are stored in a way that we always know what point
  * was added last, many optimizations can be done.  For these optimizations please refer
  * to the source documentation on {@link Gjk#checkSimplex(List, Vector2)}.
  * <p>
@@ -113,7 +114,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * {@link Gjk}'s default {@link MinkowskiPenetrationSolver} is {@link Epa}.
  * <p>
- * the {@link Gjk} algorithm's original intent was to find the minimum distance between two {@link Convex}
+ * The {@link Gjk} algorithm's original intent was to find the minimum distance between two {@link Convex}
  * {@link Shape}s.  Refer to {@link Gjk#distance(Convex, Transform, Convex, Transform, Separation)}
  * for details on the implementation.
  * @author William Bittle
@@ -121,7 +122,7 @@ import org.dyn4j.resources.Messages;
  * @since 1.0.0
  * @see Epa
  * @see <a href="http://www.dyn4j.org/2010/04/gjk-gilbert-johnson-keerthi/">GJK (Gilbert–Johnson–Keerthi)</a>
- * @see <a href="http://www.dyn4j.org/2010/04/gjk-distance-closest-points/">GJK – Distance & Closest Points</a>
+ * @see <a href="http://www.dyn4j.org/2010/04/gjk-distance-closest-points/">GJK – Distance &amp; Closest Points</a>
  */
 public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetector {
 	/** The origin point */
@@ -281,7 +282,8 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * simplex and also the given search direction.
 	 * <p>
 	 * This method only handles the line segment and triangle simplex cases, however, these two cases
-	 * should be the only ones needed for 2 dimensional {@link Gjk}.
+	 * should be the only ones needed for 2 dimensional {@link Gjk}.  The single point case is handled
+	 * in {@link #detect(MinkowskiSum, List, Vector2)}.
 	 * <p>
 	 * This method also assumes that the last point in the simplex is the most recently added point.
 	 * This matters because optimizations are available when you know this information.
@@ -532,7 +534,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * @param b the second simplex point
 	 * @param s the {@link Separation} object to populate
 	 */
-	protected void findClosestPoints(MinkowskiSumPoint a, MinkowskiSumPoint b, Separation s) {
+	void findClosestPoints(MinkowskiSumPoint a, MinkowskiSumPoint b, Separation s) {
 		Vector2 p1 = new Vector2();
 		Vector2 p2 = new Vector2();
 		
