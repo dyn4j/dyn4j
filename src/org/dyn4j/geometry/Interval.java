@@ -27,7 +27,7 @@ package org.dyn4j.geometry;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents a numeric {@link Interval}.
+ * Represents a one dimensional numeric {@link Interval}.
  * @author William Bittle
  * @version 3.1.9
  * @since 1.0.0
@@ -217,7 +217,7 @@ public class Interval {
 	 * given the allowed error.
 	 * <p>
 	 * An {@link Interval} is degenerate given some error if
-	 * max - min <= error.
+	 * max - min &lt;= error.
 	 * @param error the allowed error
 	 * @return boolean
 	 */

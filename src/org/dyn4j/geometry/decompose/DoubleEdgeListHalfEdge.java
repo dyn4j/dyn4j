@@ -25,23 +25,23 @@
 package org.dyn4j.geometry.decompose;
 
 /**
- * Represents a half edge of the Doubly-Connected Edge List.
+ * Represents a half edge of the {@link DoubleEdgeList}.
  * @author William Bittle
  * @version 3.2.0
  * @since 2.2.0
  */
-class DoubleEdgeListHalfEdge {
+final class DoubleEdgeListHalfEdge {
 	/** The half edge origin */
-	protected DoubleEdgeListVertex origin;
+	DoubleEdgeListVertex origin;
 	
 	/** The adjacent twin of this half edge */
-	protected DoubleEdgeListHalfEdge twin;
+	DoubleEdgeListHalfEdge twin;
 	
 	/** The adjacent edge next in the list having the same face */
-	protected DoubleEdgeListHalfEdge next;
+	DoubleEdgeListHalfEdge next;
 	
 	/** The adjacent face of this half edge */
-	protected DoubleEdgeListFace face;
+	DoubleEdgeListFace face;
 	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
@@ -56,35 +56,11 @@ class DoubleEdgeListHalfEdge {
 	}
 	
 	/**
-	 * Returns this half edge's origin.
-	 * @return {@link DoubleEdgeListVertex}
-	 */
-	public DoubleEdgeListVertex getOrigin() {
-		return this.origin;
-	}
-	
-	/**
 	 * Returns this half edge's destination.
 	 * @return {@link DoubleEdgeListVertex}
 	 */
 	public DoubleEdgeListVertex getDestination() {
 		return this.next.origin;
-	}
-	
-	/**
-	 * Returns this half edge's twin half edge.
-	 * @return {@link DoubleEdgeListHalfEdge}
-	 */
-	public DoubleEdgeListHalfEdge getTwin() {
-		return this.twin;
-	}
-	
-	/**
-	 * Returns this half edge's next half edge.
-	 * @return {@link DoubleEdgeListHalfEdge}
-	 */
-	public DoubleEdgeListHalfEdge getNext() {
-		return this.next;
 	}
 	
 	/**

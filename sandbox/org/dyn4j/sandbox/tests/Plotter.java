@@ -26,9 +26,6 @@ package org.dyn4j.sandbox.tests;
 
 import java.util.List;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
-
 import org.dyn4j.collision.manifold.Manifold;
 import org.dyn4j.collision.manifold.ManifoldPoint;
 import org.dyn4j.collision.manifold.ManifoldSolver;
@@ -42,7 +39,7 @@ import org.dyn4j.dynamics.World;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
-import org.dyn4j.geometry.Mass;
+import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Transform;
@@ -50,6 +47,9 @@ import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.utilities.RenderUtilities;
+
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
 
 /**
  * Compiled test for the collision detection pipeline.
@@ -112,7 +112,7 @@ public class Plotter extends CompiledSimulation {
 			body.translate(-1.0, -1.5);
 		}
 		// set the mass to infinite
-		body.setMass(Mass.Type.INFINITE);
+		body.setMass(MassType.INFINITE);
 		body.setUserData("Body" + (index + 1));
 		// return the entity
 		return body;

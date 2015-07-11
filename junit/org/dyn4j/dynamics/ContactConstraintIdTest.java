@@ -26,8 +26,6 @@ package org.dyn4j.dynamics;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.dynamics.Body;
-import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.contact.ContactConstraintId;
 import org.dyn4j.geometry.Rectangle;
 import org.junit.Test;

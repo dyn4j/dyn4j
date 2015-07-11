@@ -40,15 +40,23 @@ import org.dyn4j.resources.Messages;
  * @version 3.2.0
  * @since 3.2.0
  */
-class SweepLineState {
+final class SweepLineState {
 	/** The current sweepline y-intercept value */
-	protected Reference<Double> referenceY;
+	final Reference<Double> referenceY;
 	
 	/** The edge binary tree */
-	protected BinarySearchTree<SweepLineEdge> tree;
+	final BinarySearchTree<SweepLineEdge> tree;
 	
 	/** The DCEL */
-	protected DoubleEdgeList dcel;
+	DoubleEdgeList dcel;
+	
+	/**
+	 * Default constructor.
+	 */
+	public SweepLineState() {
+		this.referenceY = new Reference<Double>(0.0);
+		this.tree = new BinarySearchTree<SweepLineEdge>(true);
+	}
 	
 	/**
 	 * Returns a priority queue of the points in the given array and initializes
@@ -56,10 +64,7 @@ class SweepLineState {
 	 * @param points the array of polygon points
 	 * @return PriorityQueue&lt;{@link SweepLineVertex}&gt;
 	 */
-	public PriorityQueue<SweepLineVertex> initialize(Vector2[] points) {
-		this.referenceY = new Reference<Double>(0.0);
-		this.tree = new BinarySearchTree<SweepLineEdge>(true);
-		
+	final PriorityQueue<SweepLineVertex> initialize(Vector2[] points) {
 		// initialize the DCEL
 		this.dcel = new DoubleEdgeList(points);
 		
@@ -81,12 +86,10 @@ class SweepLineState {
 			Vector2 point = points[i];
 			
 			// create the vertex for this point
-			SweepLineVertex vertex = new SweepLineVertex();
-			vertex.point = point;
+			SweepLineVertex vertex = new SweepLineVertex(point, i);
 			// default the type to regular
 			vertex.type = SweepLineVertexType.REGULAR;
 			vertex.prev = prevVertex;
-			vertex.index = i;		
 			
 			// set the previous vertex's next pointer
 			if (prevVertex != null) {
@@ -170,7 +173,7 @@ class SweepLineState {
 	 * @param point1 the next point
 	 * @return {@link SweepLineVertexType}
 	 */
-	protected SweepLineVertexType getType(Vector2 point0, Vector2 point, Vector2 point1) {
+	final SweepLineVertexType getType(Vector2 point0, Vector2 point, Vector2 point1) {
 		// create the edge vectors
 		Vector2 v1 = point0.to(point);
 		Vector2 v2 = point.to(point1);
@@ -230,7 +233,7 @@ class SweepLineState {
 	 * @param q another point
 	 * @return boolean true if p is below q; false if p is above q
 	 */
-	protected boolean isBelow(Vector2 p, Vector2 q) {
+	public boolean isBelow(Vector2 p, Vector2 q) {
 		double diff = p.y - q.y;
 		if (diff == 0.0) {
 			if (p.x > q.x) {

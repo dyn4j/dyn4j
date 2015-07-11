@@ -61,10 +61,11 @@ import org.dyn4j.resources.Messages;
  * // this is the same as the limits [-60, 170] if the reference angle is 90
  * setLimits(Math.toRadians(-60), Math.toRadians(170));
  * setReferenceAngle(Math.toRadians(90));
+ * </pre>
  * @author William Bittle
  * @version 3.2.0
  * @since 1.0.0
- * @see <a href="http://www.dyn4j.org/documentation/joints/#Revolute_Joint">Documentation</a>
+ * @see <a href="http://www.dyn4j.org/documentation/joints/#Revolute_Joint" target="_blank">Documentation</a>
  */
 public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 	/** The local anchor point on the first {@link Body} */

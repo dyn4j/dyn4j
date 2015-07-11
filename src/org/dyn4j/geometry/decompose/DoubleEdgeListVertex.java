@@ -27,17 +27,25 @@ package org.dyn4j.geometry.decompose;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Represents a node in the Doubly-Connected Edge List.
+ * Represents a vertex in the {@link DoubleEdgeList}.
  * @author William Bittle
  * @version 3.2.0
  * @since 2.2.0
  */
-class DoubleEdgeListVertex {
+final class DoubleEdgeListVertex {
 	/** The comparable data for this node */
-	protected Vector2 point;
+	final Vector2 point;
 	
 	/** The the leaving edge */
-	protected DoubleEdgeListHalfEdge leaving;
+	DoubleEdgeListHalfEdge leaving;
+	
+	/**
+	 * Minimal constructor.
+	 * @param point the vertex point
+	 */
+	public DoubleEdgeListVertex(Vector2 point) {
+		this.point = point;
+	}
 	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
@@ -46,23 +54,7 @@ class DoubleEdgeListVertex {
 	public String toString() {
 		return this.point.toString();
 	}
-	
-	/**
-	 * Returns the vertex's coordinates.
-	 * @return {@link Vector2}
-	 */
-	public Vector2 getPoint() {
-		return this.point;
-	}
-	
-	/**
-	 * Returns the leaving edge for this node.
-	 * @return {@link DoubleEdgeListHalfEdge}
-	 */
-	public DoubleEdgeListHalfEdge getLeaving() {
-		return this.leaving;
-	}
-	
+
 	/**
 	 * Returns the edge from this node to the given node.
 	 * @param node the node to find an edge to

@@ -33,12 +33,12 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
 /**
- * Implementation of Graham's Scan convex hull algorithm.
+ * Implementation of the Graham Scan convex hull algorithm.
  * <p>
  * This implementation is not sensitive to colinear points and returns only
  * the points of the convex hull.
  * <p>
- * This algorithm is O(n log n) where n is the number of points.
+ * This algorithm is O(n log n) where n is the number of input points.
  * @author William Bittle
  * @version 3.1.1
  * @since 2.2.0
@@ -50,7 +50,7 @@ public class GrahamScan implements HullGenerator {
 	@Override
 	public Vector2[] generate(Vector2... points) {
 		// check for null points array
-		if (points == null) return null;
+		if (points == null) throw new NullPointerException(Messages.getString("geometry.hull.nullArray"));
 		
 		// get the size
 		int size = points.length;

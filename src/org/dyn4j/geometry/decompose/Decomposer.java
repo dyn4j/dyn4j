@@ -30,16 +30,15 @@ import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Represents an algorithm to decompose a given list of points representing
- * a polygon into a list of convex pieces.
+ * Represents an algorithm to decompose a given polygon (as a list of points) into {@link Convex} pieces.
  * @author William Bittle
  * @version 2.2.3
  * @since 2.2.0
  */
 public interface Decomposer {
 	/**
-	 * Performs the decomposition on the given list of polygon points returning a list of convex shapes.
-	 * @param points the list of points
+	 * Performs the decomposition on the given polygon returning a list of {@link Convex} shapes.
+	 * @param points the polygon vertices
 	 * @return List&lt;{@link Convex}&gt;
 	 * @throws NullPointerException if points is null or contains null points
 	 * @throws IllegalArgumentException if points contains less than 4 points

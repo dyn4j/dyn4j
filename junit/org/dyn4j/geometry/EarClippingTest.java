@@ -28,8 +28,6 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.geometry.Convex;
-import org.dyn4j.geometry.Vector2;
 import org.dyn4j.geometry.decompose.EarClipping;
 import org.junit.Test;
 

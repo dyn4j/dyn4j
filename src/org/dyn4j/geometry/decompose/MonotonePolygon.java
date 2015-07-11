@@ -36,12 +36,12 @@ import java.util.List;
  * @since 2.2.0
  * @param <E> the vertex data type
  */
-class MonotonePolygon<E> {
+final class MonotonePolygon<E> {
 	/** The type of monotone polygon */
-	protected MonotonePolygonType type;
+	final MonotonePolygonType type;
 	
 	/** The sorted array of vertices */
-	protected List<MonotoneVertex<E>> vertices;
+	final List<MonotoneVertex<E>> vertices;
 	
 	/**
 	 * Full constructor.

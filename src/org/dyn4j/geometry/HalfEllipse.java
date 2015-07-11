@@ -28,23 +28,26 @@ import org.dyn4j.DataContainer;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents a half ellipse shape.
+ * Implementation of an Half-Ellipse {@link Convex} {@link Shape}.
  * <p>
- * A half ellipse must have a width and height greater than zero. 
- * The height parameter is the height of the half.
+ * A half ellipse must have a width and height greater than zero and the height parameter is the height of the half.
  * <p>
- * <b>This shape is only supported by the GJK collision detection algorithm</b>. An 
- * <code>UnsupportedOperationException</code> is thrown when this shape is used with SAT.  If you are using
+ * <b>This shape is only supported by the GJK collision detection algorithm</b>.
+ * <p>
+ * An <code>UnsupportedOperationException</code> is thrown when this shape is used with SAT.  If you are using
  * or are planning on using the SAT collision detection algorithm, you can use the 
  * {@link Geometry#createPolygonalHalfEllipse(int, double, double)} method to create a half ellipse
  * {@link Polygon} approximation. Another option is to use the GJK or your own collision detection
- * algorithm for this shape only and use SAT on others (fallback).
+ * algorithm for this shape only and use SAT on others.
  * @author William Bittle
  * @since 3.2.0
  * @version 3.1.7
  */
 public class HalfEllipse extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
-	/** The half ellipse inertia constant. See http://www.efunda.com/math/areas/ellipticalhalf.cfm */
+	/** 
+	 * The half ellipse inertia constant. 
+	 * @see <a href="http://www.efunda.com/math/areas/ellipticalhalf.cfm" target="_blank">Elliptical Half</a>
+	 */
 	private static final double INERTIA_CONSTANT = Math.PI / 8.0 - 8.0 / (9.0 * Math.PI);
 	
 	/** The ellipse width */
@@ -186,7 +189,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		if (localAxis.getAngleBetween(this.localXAxis) < 0) {
 			// then its the farthest point
 			Vector2 point = this.getFarthestPoint(vector, transform);
-			return new Vertex(point);
+			return new PointFeature(point);
 		} else {
 			// return the full bottom side
 			return Segment.getFarthestFeature(this.vertices[0], this.vertices[1], vector, transform);

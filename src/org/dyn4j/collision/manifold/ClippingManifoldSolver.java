@@ -30,24 +30,22 @@ import java.util.List;
 import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.collision.narrowphase.Penetration;
 import org.dyn4j.geometry.Convex;
-import org.dyn4j.geometry.Edge;
+import org.dyn4j.geometry.EdgeFeature;
 import org.dyn4j.geometry.Feature;
+import org.dyn4j.geometry.PointFeature;
 import org.dyn4j.geometry.Shape;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.geometry.Vertex;
 
 /**
- * Represents an {@link ManifoldSolver} that uses a clipping method to determine
- * the contact manifold (the contact points of a collision).
+ * Implementation of a Sutherland–Hodgman clipping {@link ManifoldSolver} algorithm.
  * <p>
  * A {@link NarrowphaseDetector} should return a penetration normal and depth when two {@link Convex} {@link Shape}s are
- * intersecting.  The penetration normal should always point from the first {@link Shape} to the second.
- * <p>
- * Uses Sutherland–Hodgman clipping to clip the closest features of the two {@link Convex} {@link Shape}s to obtain
+ * intersecting.  The penetration normal should always point from the first {@link Shape} to the second.  Using the
+ * {@link Penetration}, this class will find the closest features and perform a series of clipping operations to build
  * a contact {@link Manifold}.
  * <p>
- * In the case that a {@link Convex} {@link Shape} returns a {@link Vertex} {@link Feature}, that feature will always
+ * In the case that a {@link Convex} {@link Shape} returns a {@link PointFeature} {@link Feature}, that feature will always
  * take precedence.
  * <p>
  * It's possible that no contact points are returned, in which case the {@link #getManifold(Penetration, Convex, Transform, Convex, Transform, Manifold)}
@@ -55,7 +53,7 @@ import org.dyn4j.geometry.Vertex;
  * @author William Bittle
  * @version 3.0.2
  * @since 1.0.0
- * @see <a href="http://www.dyn4j.org/2011/11/contact-points-using-clipping/">Contact Points Using Clipping</a>
+ * @see <a href="http://www.dyn4j.org/2011/11/contact-points-using-clipping/" target="_blank">Contact Points Using Clipping</a>
  */
 public class ClippingManifoldSolver implements ManifoldSolver {
 	/* (non-Javadoc)
@@ -72,9 +70,9 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 		// get the reference feature for the first convex shape
 		Feature feature1 = convex1.getFarthestFeature(n, transform1);
 		// check for vertex
-		if (feature1.isVertex()) {
+		if (feature1 instanceof PointFeature) {
 			// if the maximum
-			Vertex vertex = (Vertex) feature1;
+			PointFeature vertex = (PointFeature) feature1;
 			ManifoldPoint mp = new ManifoldPoint(ManifoldPointId.DISTANCE, vertex.getPoint(), penetration.getDepth());
 			manifold.points.add(mp);
 			manifold.normal = n.negate();
@@ -84,8 +82,8 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 		// get the reference feature for the second convex shape
 		Feature feature2 = convex2.getFarthestFeature(n.getNegative(), transform2);
 		// check for vertex
-		if (feature2.isVertex()) {
-			Vertex vertex = (Vertex) feature2;
+		if (feature2 instanceof PointFeature) {
+			PointFeature vertex = (PointFeature) feature2;
 			ManifoldPoint mp = new ManifoldPoint(ManifoldPointId.DISTANCE, vertex.getPoint(), penetration.getDepth());
 			manifold.points.add(mp);
 			manifold.normal = n.negate();
@@ -93,8 +91,8 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 		}
 		
 		// both features are edge features
-		Edge reference = (Edge) feature1;
-		Edge incident = (Edge) feature2;
+		EdgeFeature reference = (EdgeFeature) feature1;
+		EdgeFeature incident = (EdgeFeature) feature2;
 		
 		// choose the reference and incident edges
 		boolean flipped = false;
@@ -104,7 +102,7 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 		if (Math.abs(e1.dot(n)) > Math.abs(e2.dot(n))) {
 			// shape2's edge is more perpendicular
 			// so swap the reference and incident edges
-			Edge e = reference;
+			EdgeFeature e = reference;
 			reference = incident;
 			incident = e;
 			// flag that the features flipped
@@ -121,14 +119,14 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 		double offset2 = refev.dot(reference.getVertex2().getPoint());
 		
 		// clip the incident edge by the reference edge's left edge
-		List<Vertex> clip1 = this.clip(incident.getVertex1(), incident.getVertex2(), refev.getNegative(), offset1);
+		List<PointFeature> clip1 = this.clip(incident.getVertex1(), incident.getVertex2(), refev.getNegative(), offset1);
 		// check the number of points
 		if (clip1.size() < 2) {
 			return false;
 		}
 		
 		// clip the clip1 edge by the reference edge's right edge
-		List<Vertex> clip2 = this.clip(clip1.get(0), clip1.get(1), refev, offset2);
+		List<PointFeature> clip2 = this.clip(clip1.get(0), clip1.get(1), refev, offset2);
 		// check the number of points
 		if (clip2.size() < 2) {
 			return false;
@@ -145,7 +143,7 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 		
 		// test if the clip points are behind the reference edge
 		for (int i = 0; i < clip2.size(); i++) {
-			Vertex vertex = clip2.get(i);
+			PointFeature vertex = clip2.get(i);
 			Vector2 point = vertex.getPoint();
 			double depth = frontNormal.dot(point) - frontOffset;
 			// make sure the point is behind the front normal
@@ -172,8 +170,8 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 	 * @param offset the offset of the end point of the segment to be clipped
 	 * @return List&lt;{@link Vector2}&gt; the clipped segment
 	 */
-	protected List<Vertex> clip(Vertex v1, Vertex v2, Vector2 n, double offset) {
-		List<Vertex> points = new ArrayList<Vertex>(2);
+	protected List<PointFeature> clip(PointFeature v1, PointFeature v2, Vector2 n, double offset) {
+		List<PointFeature> points = new ArrayList<PointFeature>(2);
 		Vector2 p1 = v1.getPoint();
 		Vector2 p2 = v2.getPoint();
 		
@@ -194,9 +192,9 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 			e.multiply(u);
 			e.add(p1);
 			if (d1 > 0.0) {
-				points.add(new Vertex(e, v1.getIndex()));
+				points.add(new PointFeature(e, v1.getIndex()));
 			} else {
-				points.add(new Vertex(e, v2.getIndex()));
+				points.add(new PointFeature(e, v2.getIndex()));
 			}
 		}
 		return points;

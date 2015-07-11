@@ -28,9 +28,11 @@ import org.dyn4j.DataContainer;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents a {@link Rectangle} (either axis aligned or oriented).
+ * Implementation of a Rectangle {@link Convex} {@link Shape}.
  * <p>
- * A {@link Rectangle} cannot have a width or height of zero.
+ * This class represents both axis-aligned and oriented rectangles and squares.
+ * <p>
+ * A {@link Rectangle} must have a width and height greater than zero.
  * @author William Bittle
  * @version 3.0.2
  * @since 1.0.0
@@ -224,10 +226,8 @@ public class Rectangle extends Polygon implements Shape, Transformable, DataCont
 	/**
 	 * Creates a {@link Mass} object using the geometric properties of
 	 * this {@link Rectangle} and the given density.
-	 * <pre>
-	 * m = d * h * w
-	 * I = m * (h<sup>2</sup> + w<sup>2</sup>) / 12
-	 * </pre>
+	 * <p style="white-space: pre;"> m = d * h * w
+	 * I = m * (h<sup>2</sup> + w<sup>2</sup>) / 12</p>
 	 * @param density the density in kg/m<sup>2</sup>
 	 * @return {@link Mass} the {@link Mass} of this {@link Rectangle}
 	 */

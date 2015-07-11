@@ -27,8 +27,6 @@ package org.dyn4j.geometry;
 import junit.framework.TestCase;
 
 import org.dyn4j.Epsilon;
-import org.dyn4j.geometry.AABB;
-import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
 
 /**

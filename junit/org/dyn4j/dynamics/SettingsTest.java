@@ -26,8 +26,6 @@ package org.dyn4j.dynamics;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.dynamics.Settings;
-import org.dyn4j.dynamics.Settings.ContinuousDetectionMode;
 import org.junit.Before;
 import org.junit.Test;
 

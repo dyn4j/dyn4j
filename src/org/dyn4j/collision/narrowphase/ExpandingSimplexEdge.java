@@ -39,16 +39,16 @@ import org.dyn4j.geometry.Vector2;
  */
 final class ExpandingSimplexEdge implements Comparable<ExpandingSimplexEdge> {
 	/** The first point of the edge */
-	protected final Vector2 point1;
+	final Vector2 point1;
 	
 	/** The second point of the edge */
-	protected final Vector2 point2;
+	final Vector2 point2;
 	
 	/** The normal of the edge */
-	protected final Vector2 normal;
+	final Vector2 normal;
 	
 	/** The perpendicular distance from the edge to the origin */
-	protected final double distance;
+	final double distance;
 
 	/**
 	 * Minimal constructor.

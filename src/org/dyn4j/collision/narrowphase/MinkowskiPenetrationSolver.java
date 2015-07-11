@@ -30,8 +30,10 @@ import org.dyn4j.geometry.Vector2;
 
 /**
  * Interface representing a sub algorithm for finding the penetration vector
- * and depth using properties of the {@link MinkowskiSum} and {@link Gjk} 
+ * and depth using properties of the {@link MinkowskiSum} and the {@link Gjk} 
  * termination information.
+ * <p>
+ * This interface is primarily designed to work with {@link Gjk}.
  * @author William Bittle
  * @version 1.0.3
  * @since 1.0.0
@@ -39,7 +41,7 @@ import org.dyn4j.geometry.Vector2;
 public interface MinkowskiPenetrationSolver {
 	/**
 	 * Returns the penetration vector and depth in the given {@link Penetration} object
-	 * given the created simplex and {@link MinkowskiSum}. 
+	 * given the final simplex from {@link Gjk} and {@link MinkowskiSum}. 
 	 * @param simplex the simplex containing the origin
 	 * @param minkowskiSum the {@link MinkowskiSum}
 	 * @param penetration the {@link Penetration} object to fill

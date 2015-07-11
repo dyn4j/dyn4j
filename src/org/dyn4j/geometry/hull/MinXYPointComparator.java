@@ -35,7 +35,7 @@ import org.dyn4j.geometry.Vector2;
  * @version 3.2.0
  * @since 2.2.0
  */
-class MinXYPointComparator implements Comparator<Vector2> {
+final class MinXYPointComparator implements Comparator<Vector2> {
 	/* (non-Javadoc)
 	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 	 */

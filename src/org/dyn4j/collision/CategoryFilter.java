@@ -92,10 +92,10 @@ package org.dyn4j.collision;
  */
 public class CategoryFilter implements Filter {
 	/** The category this object is in */
-	protected long category;
+	protected final long category;
 	
 	/** The categories this object can collide with */
-	protected long mask;
+	protected final long mask;
 	
 	/**
 	 * Default constructor.
@@ -184,21 +184,5 @@ public class CategoryFilter implements Filter {
 	 */
 	public long getMask() {
 		return this.mask;
-	}
-	
-	/**
-	 * Sets the category bits.
-	 * @param category the category bits
-	 */
-	public void setCategory(long category) {
-		this.category = category;
-	}
-	
-	/**
-	 * Sets the mask bits.
-	 * @param mask the mask bits
-	 */
-	public void setMask(long mask) {
-		this.mask = mask;
 	}
 }

@@ -27,7 +27,7 @@ package org.dyn4j.geometry;
 import org.dyn4j.Epsilon;
 
 /**
- * This class represents a vector in 3D space.
+ * This class represents a vector or point in 3D space.
  * <p>
  * Used to solve 3x3 systems of equations.
  * @see Vector2

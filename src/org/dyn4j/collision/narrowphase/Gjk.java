@@ -39,7 +39,7 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
 /**
- * Implementation of the {@link Gjk} algorithm.
+ * Implementation of the Gilbert–Johnson–Keerthi (GJK) algorithm for collision detection.
  * <p>
  * {@link Gjk} is an algorithm used to find minimum distance from one {@link Convex} {@link Shape} 
  * to another, but can also be used to determine whether or not they intersect.
@@ -121,12 +121,12 @@ import org.dyn4j.resources.Messages;
  * @version 3.1.11
  * @since 1.0.0
  * @see Epa
- * @see <a href="http://www.dyn4j.org/2010/04/gjk-gilbert-johnson-keerthi/">GJK (Gilbert–Johnson–Keerthi)</a>
- * @see <a href="http://www.dyn4j.org/2010/04/gjk-distance-closest-points/">GJK – Distance &amp; Closest Points</a>
+ * @see <a href="http://www.dyn4j.org/2010/04/gjk-gilbert-johnson-keerthi/" target="_blank">GJK (Gilbert–Johnson–Keerthi)</a>
+ * @see <a href="http://www.dyn4j.org/2010/04/gjk-distance-closest-points/" target="_blank">GJK – Distance &amp; Closest Points</a>
  */
 public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetector {
 	/** The origin point */
-	protected static final Vector2 ORIGIN = new Vector2();
+	private static final Vector2 ORIGIN = new Vector2();
 	
 	/** The default {@link Gjk} maximum iterations */
 	public static final int DEFAULT_MAX_ITERATIONS = 30;
@@ -246,7 +246,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 		// check for a zero direction vector
 		if (d.isZero()) d.set(1.0, 0.0);
 		// add the first point
-		simplex.add(ms.support(d));
+		simplex.add(ms.getSupportPoint(d));
 		// is the support point past the origin along d?
 		if (simplex.get(0).dot(d) <= 0.0) {
 			return false;
@@ -256,7 +256,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 		// start the loop
 		while (true) {
 			// always add another point to the simplex at the beginning of the loop
-			simplex.add(ms.support(d));
+			simplex.add(ms.getSupportPoint(d));
 			// make sure that the last point we added was past the origin
 			if (simplex.get(simplex.size() - 1).dot(d) <= 0.0) {
 				// a is not past the origin so therefore the shapes do not intersect
@@ -370,10 +370,10 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 		}
 		// create a Minkowski sum
 		MinkowskiSum ms = new MinkowskiSum(convex1, transform1, convex2, transform2);
-		// create some Minkowski points
-		MinkowskiSumPoint a = new MinkowskiSumPoint();
-		MinkowskiSumPoint b = new MinkowskiSumPoint();
-		MinkowskiSumPoint c = new MinkowskiSumPoint();
+		// define some Minkowski points
+		MinkowskiSumPoint a = null;
+		MinkowskiSumPoint b = null;
+		MinkowskiSumPoint c = null;
 		// transform into world space if transform is not null
 		Vector2 c1 = transform1.getTransformed(convex1.getCenter());
 		Vector2 c2 = transform2.getTransformed(convex2.getCenter());
@@ -384,11 +384,11 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 		// which guarantees that the convex shapes are overlapping
 		if (d.isZero()) return false;
 		// add the first point 
-		ms.support(d, a);
+		a = ms.getSupportPoints(d);
 		// negate the direction
 		d.negate();
 		// get a second support point
-		ms.support(d, b);
+		b = ms.getSupportPoints(d);
 		// find the point on the simplex (segment) closest to the origin
 		// and use that as the new search direction
 		d = Segment.getPointOnSegmentClosestToPoint(ORIGIN, b.point, a.point);
@@ -402,7 +402,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			}
 			
 			// get the farthest point along d
-			ms.support(d, c);
+			c = ms.getSupportPoints(d);
 			
 			// test if the triangle made by a, b, and c contains the origin
 			if (this.containsOrigin(a.point, b.point, c.point)){
@@ -457,11 +457,11 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			// with the new point c and set the new search direction
 			if (p1Mag < p2Mag) {
 				// a was closest so replace b with c
-				b.set(c);
+				b = c;
 				d = p1;
 			} else {
 				// b was closest so replace a with c
-				a.set(c);
+				a = c;
 				d = p2;
 			}
 		}
@@ -480,61 +480,15 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * Finds the closest points on A and B given the termination simplex and places 
 	 * them into point1 and point2 of the given {@link Separation} object.
 	 * <p>
-	 * NOTE: The support points used to obtain A and B are not good enough since the support
-	 * methods of {@link Convex} {@link Shape}s only return the farthest vertex, not
-	 * the farthest point.
-	 * <p>
-	 * This method is a 2D implementation of Johnson's sub algorithm.
-	 * <p>
-	 * A convex hull is defined as:
-	 * <pre> CH(S) = &sum;<sub>i=1&hellip;n</sub> &lambda;<sub>i</sub>P<sub>i</sub> = &lambda;<sub>1</sub>P<sub>1</sub> + &hellip; + &lambda;<sub>n</sub>P<sub>n</sub>
-	 * where P<sub>i</sub>&isin;S, &lambda;<sub>i</sub>&isin;R
-	 * and &sum;<sub>i&hellip;n</sub> &lambda;<sub>i</sub> = 1
-	 * where &lambda;<sub>i</sub> >= 0</pre>
-	 * Meaning that any point in the convex hull can be defined by all the points
-	 * that make up the convex hull multiplied by some &lambda; value.
-	 * <pre> Q = &lambda;<sub>1</sub>P<sub>1</sub> + &hellip; + &lambda;<sub>n</sub>P<sub>n</sub></pre>
-	 * From here we will focus on the 2D case.
-	 * <p>
-	 * Let Q be the closest point to the origin on the termination simplex S.
-	 * Q will be closest to the origin if the vector from the origin to
-	 * Q is perpendicular to the edge made by the simplex points A and B.
-	 * <pre> Let L = (B - A)
-	 * Q &middot; L = 0
-	 * where a,b &isin; S</pre>
-	 * If we substitute for Q we obtain
-	 * <pre> (&lambda;<sub>1</sub>P<sub>1</sub> + &hellip; + &lambda;<sub>n</sub>P<sub>n</sub>) &middot; L = 0</pre>
-	 * Since the termination simplex only contains 2 points we can reduce to
-	 * <pre> (&lambda;<sub>1</sub>A + &lambda;<sub>2</sub>B) &middot; L = 0</pre>
-	 * We need to solve for &lambda;<sub>1</sub> and &lambda;<sub>2</sub> which requires two
-	 * equations.  We can use the equation above and also the other equation for the 
-	 * definition of a convex hull.
-	 * <pre> (&lambda;<sub>1</sub>A + &lambda;<sub>2</sub>B) &middot; L = 0
-	 * &lambda;<sub>1</sub> + &lambda;<sub>2</sub> = 1</pre>
-	 * Solving this system of linear equations yeilds
-	 * <pre> &lambda;<sub>2</sub> = -L &middot; A / (L &middot; L)
-	 * &lambda;<sub>1</sub> = 1 - &lambda;<sub>2</sub></pre>
-	 * Using &lambda;<sub>1</sub> and &lambda;<sub>2</sub> and the same convex hull
-	 * definition we can find the closest points CP<sub>1</sub> and CP<sub>2</sub> on 
-	 * the convex shapes C<sub>1</sub> and C<sub>2</sub>
-	 * <pre> CP<sub>1</sub> = &lambda;<sub>1</sub>A<sub>1</sub> + &lambda;<sub>2</sub>B<sub>1</sub>
-	 * CP<sub>2</sub> = &lambda;<sub>1</sub>A<sub>2</sub> + &lambda;<sub>2</sub>B<sub>2</sub>
-	 * where A,B &isin; S</pre>
-	 * Where A<sub>1</sub> and A<sub>2</sub> are the support points used to create the
-	 * point A in the simplex S and where B<sub>1</sub> and B<sub>2</sub> are the support
-	 * points used to create the point B in the simplex S.
-	 * <pre> A<sub>1</sub>,A<sub>2</sub> &isin; C<sub>1</sub>
-	 * B<sub>1</sub>,B<sub>2</sub> &isin; C<sub>2</sub></pre>
-	 * If &lambda;<sub>1</sub> or &lambda;<sub>2</sub> is less than zero then this indicates
-	 * that the closest points lie at a vertex.  In the case where &lambda;<sub>1</sub> is negative
-	 * the closest points are the points, p1 and p2 that made the {@link MinkowskiSumPoint} B.
-	 * In the case where &lambda;<sub>2</sub> is negative the closest points are the points, p1
-	 * and p2 that made the {@link MinkowskiSumPoint} A.
+	 * The support points used to obtain a and b are not good enough since the support
+	 * methods of {@link Convex} {@link Shape}s only return the farthest <em>vertex</em>, not
+	 * necessarily the farthest point.
 	 * @param a the first simplex point
 	 * @param b the second simplex point
-	 * @param s the {@link Separation} object to populate
+	 * @param separation the {@link Separation} object to populate
+	 * @see <a href="http://www.dyn4j.org/2010/04/gjk-distance-closest-points/" target="_blank">GJK – Distance &amp; Closest Points</a>
 	 */
-	void findClosestPoints(MinkowskiSumPoint a, MinkowskiSumPoint b, Separation s) {
+	protected void findClosestPoints(MinkowskiSumPoint a, MinkowskiSumPoint b, Separation separation) {
 		Vector2 p1 = new Vector2();
 		Vector2 p2 = new Vector2();
 		
@@ -577,8 +531,8 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			}
 		}
 		// set the new points in the separation object
-		s.point1 = p1;
-		s.point2 = p2;
+		separation.point1 = p1;
+		separation.point2 = p2;
 	}
 	
 	/**

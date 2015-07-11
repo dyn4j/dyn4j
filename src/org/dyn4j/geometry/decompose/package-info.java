@@ -24,25 +24,34 @@
  */
 
 /**
- * This package contains algorithms to decompose polygons into 
- * {@link org.dyn4j.geometry.Convex} pieces.
+ * This package contains algorithms to decompose polygons into {@link org.dyn4j.geometry.Convex} pieces.
  * <p>
  * Three implementations of the {@link org.dyn4j.geometry.decompose.Decomposer} 
  * interface are provided: {@link org.dyn4j.geometry.decompose.Bayazit}, 
  * {@link org.dyn4j.geometry.decompose.EarClipping}, and 
  * {@link org.dyn4j.geometry.decompose.SweepLine}.
  * <p>
- * The {@link org.dyn4j.geometry.decompose.Bayazit} algorithm is O(nr) and finds a non-optimal 
- * convex decomposition.
+ * All three {@link org.dyn4j.geometry.decompose.Decomposer} algorithms are non-optimal, meaning they do
+ * not always produce a decomposition with the minimum number of convex pieces.  Instead, they get close
+ * in exchange for performance.
  * <p>
- * The {@link org.dyn4j.geometry.decompose.EarClipping} algorithm is O(n<sup>2</sup>) and finds 
- * a valid triangulation, then uses the Hertel-Mehlhorn algorithm to combine triangles into convex pieces.  
- * This is also an non-optimal decomposition.
+ * <strong>NOTE: All three {@link org.dyn4j.geometry.decompose.Decomposer} algorithms operate on simple
+ * polygons <u>without holes</u>.</strong>
  * <p>
- * The {@link org.dyn4j.geometry.decompose.SweepLine} algorithm is O(n log n) and, like 
- * {@link org.dyn4j.geometry.decompose.EarClipping}, finds a valid triangulation,
- * then uses the Hertel-Mehlhorn algorithm to combine triangles into convex pieces.  This is also a
- * non-optimal decomposition.
+ * The {@link org.dyn4j.geometry.decompose.EarClipping} and {@link org.dyn4j.geometry.decompose.SweepLine}
+ * algorithms both triangulate the simple polygon first, then run Hertel-Mehlhorn to recombine triangles
+ * into convex pieces.  Hertel-Mehlhorn is guarenteed to produce a convex decomposition with no more than
+ * 4 times the minimum number of convex pieces.
+ * <p>
+ * The {@link org.dyn4j.geometry.decompose.EarClipping} and {@link org.dyn4j.geometry.decompose.SweepLine}
+ * algorithms also implement the {@link org.dyn4j.geometry.decompose.Triangulator} interface to provide
+ * the ability to get a triangulation as well.
+ * <p>
+ * The {@link org.dyn4j.geometry.decompose.Bayazit} algorithm has O(nr) time-complexity.
+ * <p>
+ * The {@link org.dyn4j.geometry.decompose.EarClipping} algorithm has O(n<sup>2</sup>) time-complexity.  
+ * <p>
+ * The {@link org.dyn4j.geometry.decompose.SweepLine} algorithm has O(n log n) time-complexity.
  * <p>
  * In general the algorithms will generate different decompositions.  If used for pre-processing just
  * choose the best result, for runtime generation, the {@link org.dyn4j.geometry.decompose.Bayazit} 

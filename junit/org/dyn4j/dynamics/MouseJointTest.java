@@ -26,10 +26,9 @@ package org.dyn4j.dynamics;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.joint.MouseJoint;
 import org.dyn4j.geometry.Geometry;
-import org.dyn4j.geometry.Mass;
+import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Before;
 import org.junit.Test;
@@ -232,7 +231,7 @@ public class MouseJointTest {
 		
 		Body body = new Body();
 		body.addFixture(Geometry.createCircle(1.0));
-		body.setMass(Mass.Type.FIXED_LINEAR_VELOCITY);
+		body.setMass(MassType.FIXED_LINEAR_VELOCITY);
 		w.addBody(body);
 		
 		MouseJoint mj = new MouseJoint(body, new Vector2(0.5, 0.0), 8.0, 0.3, 1000.0);

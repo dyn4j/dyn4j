@@ -34,8 +34,11 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
 /**
- * Performs the Sweep Line algorithm to decompose the given polygon into y-monotone pieces which are
- * then used to triangulate the original polygon.
+ * Implementation of the Sweep convex decomposition algorithm for simple polygons.
+ * <p>
+ * This algorithm first decomposes the polygon into y-monotone polygons, then decomposes the y-monotone
+ * polygons into triangles, finally using the Hertel-Mehlhorn algorithm to recombine the triangles
+ * into convex pieces.
  * <p>
  * This algorithm is O(n log n) complexity in the y-monotone decomposition phase and O(n) in the
  * triangulation phase yielding a total complexity of O(n log n).
@@ -85,7 +88,7 @@ public class SweepLine implements Decomposer, Triangulator {
 	 * @return {@link DoubleEdgeList}
 	 * @since 3.1.9
 	 */
-	protected DoubleEdgeList createTriangulation(Vector2... points) {
+	final DoubleEdgeList createTriangulation(Vector2... points) {
 		// check for a null list
 		if (points == null) throw new NullPointerException(Messages.getString("geometry.decompose.nullArray"));
 		// get the number of points
@@ -139,7 +142,7 @@ public class SweepLine implements Decomposer, Triangulator {
 	 * @param vertex the vertex
 	 * @param sweepstate the current state of the SweepLine algorithm
 	 */
-	protected void start(SweepLineVertex vertex, SweepLineState sweepstate) {
+	final void start(SweepLineVertex vertex, SweepLineState sweepstate) {
 		// we need to add the edge to the left to the tree
 		// since the line in the next event may be intersecting it
 		SweepLineEdge leftEdge = vertex.left;
@@ -155,7 +158,7 @@ public class SweepLine implements Decomposer, Triangulator {
 	 * @param vertex the vertex
 	 * @param sweepstate the current state of the SweepLine algorithm
 	 */
-	protected void end(SweepLineVertex vertex, SweepLineState sweepstate) {
+	final void end(SweepLineVertex vertex, SweepLineState sweepstate) {
 		// if the vertex type is an end vertex then we
 		// know that we need to remove the right edge
 		// since the sweep line no longer intersects it
@@ -177,7 +180,7 @@ public class SweepLine implements Decomposer, Triangulator {
 	 * @param vertex the vertex
 	 * @param sweepstate the current state of the SweepLine algorithm
 	 */
-	protected void split(SweepLineVertex vertex, SweepLineState sweepstate) {
+	final void split(SweepLineVertex vertex, SweepLineState sweepstate) {
 		// if we have a split vertex then we can find
 		// the closest edge to the left side of the vertex
 		// and attach its helper to this vertex
@@ -201,7 +204,7 @@ public class SweepLine implements Decomposer, Triangulator {
 	 * @param vertex the vertex
 	 * @param sweepstate the current state of the SweepLine algorithm
 	 */
-	protected void merge(SweepLineVertex vertex, SweepLineState sweepstate) {
+	final void merge(SweepLineVertex vertex, SweepLineState sweepstate) {
 		// get the previous edge
 		SweepLineEdge eiPrev = vertex.right;
 		// check if its helper is a merge vertex
@@ -230,7 +233,7 @@ public class SweepLine implements Decomposer, Triangulator {
 	 * @param vertex the vertex
 	 * @param sweepstate the current state of the SweepLine algorithm
 	 */
-	protected void regular(SweepLineVertex vertex, SweepLineState sweepstate) {
+	final void regular(SweepLineVertex vertex, SweepLineState sweepstate) {
 		// check if the interior is to the right of this vertex
 		if (vertex.isInteriorRight()) {
 			// if so, check the previous edge's helper to see

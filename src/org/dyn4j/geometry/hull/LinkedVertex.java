@@ -32,15 +32,15 @@ import org.dyn4j.geometry.Vector2;
  * @version 3.2.0
  * @since 3.2.0
  */
-class LinkedVertex {
+final class LinkedVertex {
 	/** The vertex point */
-	protected final Vector2 point;
+	final Vector2 point;
 	
 	/** The next vertex */
-	protected LinkedVertex next;
+	LinkedVertex next;
 	
 	/** The previous vertex */
-	protected LinkedVertex prev;
+	LinkedVertex prev;
 	
 	/**
 	 * Minimal constructor.

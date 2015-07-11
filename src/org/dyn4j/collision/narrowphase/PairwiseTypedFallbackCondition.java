@@ -29,7 +29,7 @@ import org.dyn4j.geometry.Convex;
 /**
  * Represents a {@link TypedFallbackCondition} that filters on a particular pair of types.
  * <p>
- * If the pair {@link Convex} types match this pair, then the condition is met.
+ * If the pair of {@link Convex} types match this pair, then the condition is met.
  * <p>
  * Note: this class has a natural ordering that is inconsistent with equals.
  * @author William Bittle
@@ -50,7 +50,7 @@ public class PairwiseTypedFallbackCondition extends TypedFallbackCondition imple
 	protected final boolean strict2;
 	
 	/**
-	 * Default constructor.
+	 * Minimal constructor.
 	 * <p>
 	 * The ordering of the types doesn't matter.
 	 * <p>

@@ -31,18 +31,26 @@ package org.dyn4j.geometry.decompose;
  * @since 2.2.0
  * @param <E> the vertex data type
  */
-class MonotoneVertex<E> {
+final class MonotoneVertex<E> {
 	/** The vertex data */
-	protected E data;
+	final E data;
 	
 	/** The next vertex in CCW winding */
-	protected MonotoneVertex<E> next;
+	MonotoneVertex<E> next;
 	
 	/** The previous vertex in CCW winding */
-	protected MonotoneVertex<E> previous;
+	MonotoneVertex<E> previous;
 	
 	/** The monotone chain type indicator */
-	protected MonotoneChainType chainType;
+	MonotoneChainType chainType;
+	
+	/**
+	 * Minimal constructor.
+	 * @param data the vertex data
+	 */
+	public MonotoneVertex(E data) {
+		this.data = data;
+	}
 	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()

@@ -29,13 +29,18 @@ import java.util.ResourceBundle;
 
 /**
  * Helper class that returns messages from the property file.
+ * <p>
+ * Primarily used for exception messages.
  * @author William Bittle
  * @version 3.0.2
  * @since 3.0.2
  */
-public class Messages {
+public final class Messages {
 	/** The resource bundle for the current locale */
 	private static final ResourceBundle BUNDLE = ResourceBundle.getBundle("org.dyn4j.resources.messages");
+	
+	/** Hidden default constructor */
+	private Messages() {}
 	
 	/**
 	 * Returns the value for the specified key.

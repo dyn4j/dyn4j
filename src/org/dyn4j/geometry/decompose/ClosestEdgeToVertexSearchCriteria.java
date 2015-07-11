@@ -27,18 +27,18 @@ package org.dyn4j.geometry.decompose;
 import org.dyn4j.BinarySearchTreeSearchCriteria;
 
 /**
- * Represents criteria for performing a binary search for the closest edge to the left of
+ * Represents a {@link BinarySearchTreeSearchCriteria} for finding the closest edge to the left of
  * a given vertex.
  * @author William Bittle
  * @version 3.2.0
  * @since 3.2.0
  */
-class ClosestEdgeToVertexSearchCriteria implements BinarySearchTreeSearchCriteria<SweepLineEdge> {
+final class ClosestEdgeToVertexSearchCriteria implements BinarySearchTreeSearchCriteria<SweepLineEdge> {
 	/** The vertex */
-	protected SweepLineVertex vertex;
+	final SweepLineVertex vertex;
 	
 	/** The closest edge to the left of the vertex */
-	protected SweepLineEdge closest;
+	SweepLineEdge closest;
 	
 	/**
 	 * Minimal constructor.

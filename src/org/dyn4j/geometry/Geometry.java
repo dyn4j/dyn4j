@@ -34,19 +34,26 @@ import org.dyn4j.resources.Messages;
 
 /**
  * Contains static methods to perform standard geometric operations.
+ * <p>
+ * This class can be used to create {@link Shape}s of varying types via the <code>create</code>* methods.
+ * While {@link Shape}s can be created using their constructors as well, the methods here can place their
+ * centers on the origin and also make copies of the given input to avoid reuse issues.
+ * <p>
+ * This class also contains various helper methods for cleaning vector arrays and lists and performing
+ * various operations on {@link Shape}s.
  * @author William Bittle
  * @version 3.1.5
  * @since 1.0.0
  */
-public class Geometry {
+public final class Geometry {
 	/** 2 * PI constant */
 	public static final double TWO_PI = 2.0 * Math.PI;
 	
 	/** The value of 1/3 */
-	private static final double INV_3 = 1.0 / 3.0;
+	public static final double INV_3 = 1.0 / 3.0;
 	
 	/** The value of the inverse of the square root of 3; 1/sqrt(3) */
-	private static final double INV_SQRT_3 = 1.0 / Math.sqrt(3.0);
+	public static final double INV_SQRT_3 = 1.0 / Math.sqrt(3.0);
 	
 	/**
 	 * Returns the winding, Clockwise or Counter-Clockwise, for the given
@@ -239,14 +246,10 @@ public class Geometry {
 	 * <p>
 	 * Finding the area of a {@link Polygon} can be done by using the following
 	 * summation:
-	 * <pre>
-	 * 0.5 * &sum;(x<sub>i</sub> * y<sub>i + 1</sub> - x<sub>i + 1</sub> * y<sub>i</sub>)
-	 * </pre>
+	 * <p style="white-space: pre;"> 0.5 * &sum;(x<sub>i</sub> * y<sub>i + 1</sub> - x<sub>i + 1</sub> * y<sub>i</sub>)</p>
 	 * Finding the area weighted centroid can be done by using the following
 	 * summation:
-	 * <pre>
-	 * 1 / (6 * A) * &sum;(p<sub>i</sub> + p<sub>i + 1</sub>) * (x<sub>i</sub> * y<sub>i + 1</sub> - x<sub>i + 1</sub> * y<sub>i</sub>)
-	 * </pre>
+	 * <p style="white-space: pre;"> 1 / (6 * A) * &sum;(p<sub>i</sub> + p<sub>i + 1</sub>) * (x<sub>i</sub> * y<sub>i + 1</sub> - x<sub>i + 1</sub> * y<sub>i</sub>)</p>
 	 * @param points the {@link Polygon} points
 	 * @return {@link Vector2} the area weighted centroid
 	 * @throws NullPointerException if points is null or an element of points is null
@@ -443,7 +446,7 @@ public class Geometry {
 	}
 	
 	/**
-	 * Returns a new {@link Polygon} object with count number of points, where the
+	 * Returns a new {@link Polygon} with count number of points, where the
 	 * points are evenly distributed around the unit circle.  The resulting {@link Polygon}
 	 * will be centered on the origin.
 	 * <p>
@@ -461,7 +464,7 @@ public class Geometry {
 	}
 	
 	/**
-	 * Returns a new {@link Polygon} object with count number of points, where the
+	 * Returns a new {@link Polygon} with count number of points, where the
 	 * points are evenly distributed around the unit circle.  The resulting {@link Polygon}
 	 * will be centered on the origin.
 	 * <p>
@@ -545,7 +548,7 @@ public class Geometry {
 	}
 	
 	/**
-	 * Creates a right {@link Triangle} with the center at the origin.
+	 * Creates a right angle {@link Triangle} with the center at the origin.
 	 * @param width the width of the base in meters
 	 * @param height the height in meters
 	 * @return {@link Triangle}
@@ -556,7 +559,7 @@ public class Geometry {
 	}
 	
 	/**
-	 * Creates a right {@link Triangle} with the center at the origin.
+	 * Creates a right angle {@link Triangle} with the center at the origin.
 	 * @param width the width of the base in meters
 	 * @param height the height in meters
 	 * @param mirror true if the triangle should be mirrored along the y-axis

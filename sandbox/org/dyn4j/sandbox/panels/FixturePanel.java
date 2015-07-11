@@ -492,8 +492,8 @@ public class FixturePanel extends JPanel implements InputPanel {
 			CategoryFilter cf = new CategoryFilter(category, Integer.MAX_VALUE);
 			bodyFixture.setFilter(cf);
 		} else {
-			CategoryFilter cf = (CategoryFilter)filter;
-			cf.setCategory(category);
+			CategoryFilter cf = new CategoryFilter(category, ((CategoryFilter)filter).getMask());
+			bodyFixture.setFilter(cf);
 		}
 	}
 	
@@ -507,8 +507,8 @@ public class FixturePanel extends JPanel implements InputPanel {
 			CategoryFilter cf = new CategoryFilter(Integer.MAX_VALUE, mask);
 			bodyFixture.setFilter(cf);
 		} else {
-			CategoryFilter cf = (CategoryFilter)filter;
-			cf.setMask(mask);
+			CategoryFilter cf = new CategoryFilter(((CategoryFilter)filter).getCategory(), mask);
+			bodyFixture.setFilter(cf);
 		}
 	}
 	

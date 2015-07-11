@@ -22,31 +22,23 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.collision.narrowphase;
-
-import org.dyn4j.geometry.Convex;
-import org.dyn4j.geometry.Shape;
-import org.dyn4j.geometry.Transform;
+package org.dyn4j.geometry;
 
 /**
- * Interface representing an algorithm to detect the distance between two {@link Convex} {@link Shape}s.
+ * Enumeration for special {@link Mass} types.
  * @author William Bittle
- * @version 1.2.0
- * @since 1.2.0
+ * @version 1.0.3
+ * @since 1.0.0
+ * @see Mass
  */
-public interface DistanceDetector {
-	/**
-	 * Returns true if the two {@link Convex} {@link Shape}s are separated and fills the given
-	 * {@link Separation} object with the minimum distance vector, distance,
-	 * and closest points.
-	 * <p>
-	 * Returns false if the given {@link Convex} {@link Shape}s are overlapping.
-	 * @param convex1 the first {@link Shape}
-	 * @param transform1 the first {@link Shape}'s {@link Transform}
-	 * @param convex2 the second {@link Shape}
-	 * @param transform2 the second {@link Shape}'s {@link Transform}
-	 * @param separation the {@link Separation} object to fill
-	 * @return boolean true if the {@link Convex} {@link Shape}s are separated
-	 */
-	public boolean distance(Convex convex1, Transform transform1, Convex convex2, Transform transform2, Separation separation);
+public enum MassType {
+	/** Indicates a normal mass */
+	NORMAL,
+	/** Indicates that the mass is infinite (rate of rotation and translation should not change) */
+	INFINITE,
+	/** Indicates that the mass's rate of rotation should not change */
+	FIXED_ANGULAR_VELOCITY,
+	/** Indicates that the mass's rate of translation should not change */
+	FIXED_LINEAR_VELOCITY,
 }
+

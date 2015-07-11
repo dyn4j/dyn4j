@@ -36,13 +36,14 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
 /**
- * Implementation of the <a href="http://mnbayazit.com/406/bayazit">Bayazit</a> convex decomposition algorithm.
+ * Implementation of the Bayazit convex decomposition algorithm for simple polygons.
  * <p>
  * This algorithm is a O(nr) complexity algorithm where n is the number of input vertices and r is the number of
  * output convex polygons.  This algorithm can achieve optimal decompositions, however this is not guaranteed.
  * @author William Bittle
  * @version 3.1.10
  * @since 2.2.0
+ * @see <a href="http://mnbayazit.com/406/bayazit" target="_blank">Bayazit</a>
  */
 public class Bayazit implements Decomposer {
 	/* (non-Javadoc)

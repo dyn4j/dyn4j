@@ -37,9 +37,9 @@ import org.dyn4j.resources.Messages;
 
 /**
  * Highly specialized Doubly Connected Edge List (DCEL) used to store vertices of a simple polygon and then be used
- * to create and store triangulations and convex decompositions.
+ * to create and store triangulations and convex decompositions of that same polygon.
  * <p>
- * Upon creation, the {@link #vertices}, {@link #edges}, and {@link #faces} lists are
+ * Upon creation and initialization, the {@link #vertices}, {@link #edges}, and {@link #faces} lists are
  * populated.  The {@link #vertices} list will have the same indexing as the source {@link Vector2}[].
  * The {@link #edges} list will have edges with the same indexing as the source {@link Vector2}[]
  * with the exception that twin vertices are stored in odd indices.
@@ -56,15 +56,15 @@ import org.dyn4j.resources.Messages;
  * @version 3.1.9
  * @since 2.2.0
  */
-class DoubleEdgeList {
+final class DoubleEdgeList {
 	/** The list of nodes */
-	protected List<DoubleEdgeListVertex> vertices;
+	final List<DoubleEdgeListVertex> vertices;
 	
 	/** The list of half edges */
-	protected List<DoubleEdgeListHalfEdge> edges;
+	final List<DoubleEdgeListHalfEdge> edges;
 	
 	/** The list of faces */
-	protected List<DoubleEdgeListFace> faces;
+	final List<DoubleEdgeListFace> faces;
 	
 	/**
 	 * Full constructor.
@@ -81,7 +81,7 @@ class DoubleEdgeList {
 	 * Initializes the DCEL class given the points of the polygon.
 	 * @param points the points of the polygon
 	 */
-	protected void initialize(Vector2[] points) {
+	public void initialize(Vector2[] points) {
 		// get the number of points
 		int size = points.length;
 		
@@ -97,7 +97,7 @@ class DoubleEdgeList {
 		for (int i = 0; i < size; i++) {
 			Vector2 point = points[i];
 			
-			DoubleEdgeListVertex vertex = new DoubleEdgeListVertex();
+			DoubleEdgeListVertex vertex = new DoubleEdgeListVertex(point);
 			DoubleEdgeListHalfEdge left = new DoubleEdgeListHalfEdge();
 			DoubleEdgeListHalfEdge right = new DoubleEdgeListHalfEdge();
 			
@@ -119,7 +119,6 @@ class DoubleEdgeList {
 			
 			// populate the vertex
 			vertex.leaving = left;
-			vertex.point = point;
 			
 			// add the vertex to the vertices list
 			this.vertices.add(vertex);
@@ -179,7 +178,7 @@ class DoubleEdgeList {
 	 * @param v1 the first vertex
 	 * @param v2 the second vertex
 	 */
-	protected void addHalfEdges(DoubleEdgeListVertex v1, DoubleEdgeListVertex v2) {
+	final void addHalfEdges(DoubleEdgeListVertex v1, DoubleEdgeListVertex v2) {
 		// adding an edge splits the current face into two faces
 		// so we need to create a new face
 		DoubleEdgeListFace face = new DoubleEdgeListFace();
@@ -240,7 +239,7 @@ class DoubleEdgeList {
 	 * @param face the face the edge should lie on
 	 * @return {@link DoubleEdgeListHalfEdge} the previous edge
 	 */
-	protected DoubleEdgeListHalfEdge getPreviousEdge(DoubleEdgeListVertex vertex, DoubleEdgeListFace face) {
+	final DoubleEdgeListHalfEdge getPreviousEdge(DoubleEdgeListVertex vertex, DoubleEdgeListFace face) {
 		// find the vertex on the given face and return the
 		// edge that points to it
 		DoubleEdgeListHalfEdge twin = vertex.leaving.twin;
@@ -273,7 +272,7 @@ class DoubleEdgeList {
 	 * @param v2 the second vertex
 	 * @return {@link DoubleEdgeListFace} the face on which both vertices lie
 	 */
-	protected DoubleEdgeListFace getReferenceFace(DoubleEdgeListVertex v1, DoubleEdgeListVertex v2) {
+	final DoubleEdgeListFace getReferenceFace(DoubleEdgeListVertex v1, DoubleEdgeListVertex v2) {
 		// find the face that both vertices are on
 		
 		// if the leaving edge faces are already the same then just return
@@ -302,7 +301,7 @@ class DoubleEdgeList {
 	 * This method removes both halves of the edge.
 	 * @param index the index of the interior half edge to remove
 	 */
-	protected void removeHalfEdges(int index) {
+	public void removeHalfEdges(int index) {
 		DoubleEdgeListHalfEdge e = this.edges.get(index);
 		this.removeHalfEdges(index, e);
 	}
@@ -311,7 +310,7 @@ class DoubleEdgeList {
 	 * Removes the given half edge and its twin.
 	 * @param edge the half edge to remove
 	 */
-	protected void removeHalfEdges(DoubleEdgeListHalfEdge edge) {
+	final void removeHalfEdges(DoubleEdgeListHalfEdge edge) {
 		int index = this.edges.indexOf(edge);
 		this.removeHalfEdges(index, edge);
 	}
@@ -321,7 +320,7 @@ class DoubleEdgeList {
 	 * @param index the index of the given edge
 	 * @param edge the half edge to remove
 	 */
-	protected void removeHalfEdges(int index, DoubleEdgeListHalfEdge edge) {
+	final void removeHalfEdges(int index, DoubleEdgeListHalfEdge edge) {
 		// wire up the two end points to remove the edge
 		DoubleEdgeListFace face = edge.twin.face;
 		
@@ -457,7 +456,7 @@ class DoubleEdgeList {
 	 * Triangulates the given y-monotone polygon adding the new diagonals to this DCEL.
 	 * @param monotonePolygon the monotone polygon (x or y) to triangulate
 	 */
-	protected void triangulateYMonotonePolygon(MonotonePolygon<DoubleEdgeListVertex> monotonePolygon) {
+	final void triangulateYMonotonePolygon(MonotonePolygon<DoubleEdgeListVertex> monotonePolygon) {
 		// create a stack to support triangulation
 		List<MonotoneVertex<DoubleEdgeListVertex>> stack = new ArrayList<MonotoneVertex<DoubleEdgeListVertex>>();
 		
@@ -560,7 +559,7 @@ class DoubleEdgeList {
 	 * perform any verification of this assumption.
 	 * @return List&lt;{@link MonotonePolygon}&gt;
 	 */
-	protected List<MonotonePolygon<DoubleEdgeListVertex>> getYMonotonePolygons() {
+	final List<MonotonePolygon<DoubleEdgeListVertex>> getYMonotonePolygons() {
 		// get the number of faces
 		int fSize = this.faces.size();
 		
@@ -585,8 +584,7 @@ class DoubleEdgeList {
 			DoubleEdgeListHalfEdge left = face.edge;
 			
 			// create the first vertex
-			MonotoneVertex<DoubleEdgeListVertex> root = new MonotoneVertex<DoubleEdgeListVertex>();
-			root.data = left.origin;
+			MonotoneVertex<DoubleEdgeListVertex> root = new MonotoneVertex<DoubleEdgeListVertex>(left.origin);
 			
 			// move to the next origin
 			left = left.next;
@@ -597,8 +595,7 @@ class DoubleEdgeList {
 			MonotoneVertex<DoubleEdgeListVertex> max  = root;
 			while (left != face.edge) {
 				// create a new vertex
-				curr = new MonotoneVertex<DoubleEdgeListVertex>();
-				curr.data = left.origin;
+				curr = new MonotoneVertex<DoubleEdgeListVertex>(left.origin);
 				curr.previous = prev;
 				
 				// set the previous vertex's next pointer to the new one
@@ -739,7 +736,7 @@ class DoubleEdgeList {
 	 * @param v2 the next vertex
 	 * @return boolean
 	 */
-	protected boolean isReflex(DoubleEdgeListVertex v0, DoubleEdgeListVertex v1, DoubleEdgeListVertex v2) {
+	boolean isReflex(DoubleEdgeListVertex v0, DoubleEdgeListVertex v1, DoubleEdgeListVertex v2) {
 		Vector2 p0 = v0.point;
 		Vector2 p1 = v1.point;
 		Vector2 p2 = v2.point;

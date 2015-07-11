@@ -38,8 +38,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
+import org.dyn4j.dynamics.ContinuousDetectionMode;
 import org.dyn4j.dynamics.Settings;
-import org.dyn4j.dynamics.Settings.ContinuousDetectionMode;
 import org.dyn4j.sandbox.controls.ComboItem;
 import org.dyn4j.sandbox.icons.Icons;
 import org.dyn4j.sandbox.listeners.SelectTextFocusListener;
@@ -58,9 +58,9 @@ public class SettingsPanel extends JPanel implements InputPanel {
 	
 	/** The list of continuous collision detection modes */
 	private static final ComboItem[] CCD_MODES = new ComboItem[] {
-		new ComboItem(Messages.getString("ccd.mode.all"), Settings.ContinuousDetectionMode.ALL),
-		new ComboItem(Messages.getString("ccd.mode.bulletsOnly"), Settings.ContinuousDetectionMode.BULLETS_ONLY),
-		new ComboItem(Messages.getString("ccd.mode.none"), Settings.ContinuousDetectionMode.NONE)
+		new ComboItem(Messages.getString("ccd.mode.all"), ContinuousDetectionMode.ALL),
+		new ComboItem(Messages.getString("ccd.mode.bulletsOnly"), ContinuousDetectionMode.BULLETS_ONLY),
+		new ComboItem(Messages.getString("ccd.mode.none"), ContinuousDetectionMode.NONE)
 	};
 	
 	// general

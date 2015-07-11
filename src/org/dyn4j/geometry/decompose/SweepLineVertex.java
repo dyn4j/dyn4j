@@ -34,27 +34,37 @@ import org.dyn4j.geometry.Vector2;
  * @version 3.2.0
  * @since 2.2.0
  */
-class SweepLineVertex implements Comparable<SweepLineVertex> {
+final class SweepLineVertex implements Comparable<SweepLineVertex> {
 	/** The vertex point */
-	protected Vector2 point;
+	final Vector2 point;
 	
 	/** The index in the original simple polygon */
-	protected int index;
+	final int index;
 	
 	/** The vertex type */
-	protected SweepLineVertexType type;
+	SweepLineVertexType type;
 	
 	/** The next vertex in Counter-Clockwise order */
-	protected SweepLineVertex next;
+	SweepLineVertex next;
 	
 	/** The previous vertex in Counter-Clockwise order */
-	protected SweepLineVertex prev;
+	SweepLineVertex prev;
 	
 	/** The next edge in Counter-Clockwise order */
-	protected SweepLineEdge left;
+	SweepLineEdge left;
 	
 	/** The previous edge in Counter-Clockwise order */
-	protected SweepLineEdge right;
+	SweepLineEdge right;
+	
+	/**
+	 * Minimal constructor.
+	 * @param point the vertex point
+	 * @param index the index in the original simple polygon
+	 */
+	public SweepLineVertex(Vector2 point, int index) {
+		this.point = point;
+		this.index = index;
+	}
 	
 	/* (non-Javadoc)
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
@@ -86,7 +96,7 @@ class SweepLineVertex implements Comparable<SweepLineVertex> {
 	 * @param edge the {@link SweepLineEdge}
 	 * @return boolean true if this {@link SweepLineVertex} is to the left of the given {@link SweepLineEdge}
 	 */
-	public boolean isLeft(SweepLineEdge edge) {
+	final boolean isLeft(SweepLineEdge edge) {
 		// its in between the min and max x so we need to 
 		// do a side of line test
 		double location = Segment.getLocation(this.point, edge.v0.point, edge.v1.point);

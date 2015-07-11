@@ -42,6 +42,7 @@ import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Mass;
+import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Shape;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Transformable;
@@ -56,10 +57,10 @@ import org.dyn4j.resources.Messages;
  * is first created the body is a shapeless infinite mass body.  Add fixtures to
  * the body using the <code>addFixture</code> methods.
  * <p>
- * Use the {@link #setMass(org.dyn4j.geometry.Mass.Type)} methods to calculate the 
+ * Use the {@link #setMass(org.dyn4j.geometry.MassType)} methods to calculate the 
  * mass of the entire {@link Body} given the currently attached
  * {@link BodyFixture}s.  The {@link #setMass(Mass)} method can be used to set
- * the mass directly.  Use the {@link #setMassType(org.dyn4j.geometry.Mass.Type)}
+ * the mass directly.  Use the {@link #setMassType(org.dyn4j.geometry.MassType)}
  * method to toggle the mass type between the special types.
  * <p>
  * The coefficient of friction and restitution and the linear and angular damping
@@ -247,7 +248,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * adds it to the {@link Body}, and returns it for configuration.
 	 * <p>
 	 * After adding or removing fixtures make sure to call the {@link #updateMass()}
-	 * or {@link #setMass(Mass.Type)} method to compute the new total
+	 * or {@link #setMass(MassType)} method to compute the new total
 	 * {@link Mass} for the body.
 	 * <p>
 	 * This is a convenience method for setting the density of a {@link BodyFixture}.
@@ -269,7 +270,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * adds it to the {@link Body}, and returns it for configuration.
 	 * <p>
 	 * After adding or removing fixtures make sure to call the {@link #updateMass()}
-	 * or {@link #setMass(Mass.Type)} method to compute the new total
+	 * or {@link #setMass(MassType)} method to compute the new total
 	 * {@link Mass} for the body.
 	 * <p>
 	 * This is a convenience method for setting the properties of a {@link BodyFixture}.
@@ -400,16 +401,16 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 */
 	@Deprecated
 	public Body setMass() {
-		return this.setMass(Mass.Type.NORMAL);
+		return this.setMass(MassType.NORMAL);
 	}
 	
 	/**
-	 * This is a shortcut method for the {@link #setMass(org.dyn4j.geometry.Mass.Type)}
+	 * This is a shortcut method for the {@link #setMass(org.dyn4j.geometry.MassType)}
 	 * method that will use the current mass type as the mass type and
 	 * then recompute the mass from the body's fixtures.
 	 * @return {@link Body} this body
 	 * @since 3.2.0
-	 * @see #setMass(org.dyn4j.geometry.Mass.Type)
+	 * @see #setMass(org.dyn4j.geometry.MassType)
 	 */
 	public Body updateMass() {
 		return this.setMass(this.mass.getType());
@@ -422,12 +423,12 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * This method will calculate a total mass for the body 
 	 * given the masses of the fixtures.
 	 * <p>
-	 * A {@link org.dyn4j.geometry.Mass.Type} can be used to create special mass
+	 * A {@link org.dyn4j.geometry.MassType} can be used to create special mass
 	 * types.
 	 * @param type the mass type
 	 * @return {@link Body} this body
 	 */
-	public Body setMass(Mass.Type type) {
+	public Body setMass(MassType type) {
 		// check for null
 		if (type == null) {
 			type = this.mass.getType();
@@ -476,20 +477,20 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	}
 	
 	/**
-	 * Sets the {@link org.dyn4j.geometry.Mass.Type} of this {@link Body}.
+	 * Sets the {@link org.dyn4j.geometry.MassType} of this {@link Body}.
 	 * <p>
 	 * This method does not compute/recompute the mass of the body but solely
 	 * sets the mass type to one of the special types.
 	 * <p>
 	 * Since its possible to create a {@link Mass} object with zero mass and/or
 	 * zero inertia (<code>Mass m = new Mass(new Vector2(), 0, 0);</code> for example), setting the type 
-	 * to something other than Mass.Type.INFINITE can have undefined results.
+	 * to something other than MassType.INFINITE can have undefined results.
 	 * @param type the desired type
 	 * @return {@link Body} this body
 	 * @throws NullPointerException if the given mass type is null
 	 * @since 2.2.3
 	 */
-	public Body setMassType(Mass.Type type) {
+	public Body setMassType(MassType type) {
 		// check for null type
 		if (type == null) throw new NullPointerException(Messages.getString("dynamics.body.nullMassType"));
 		// otherwise just set the type
@@ -939,7 +940,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * @return boolean
 	 */
 	public boolean isDynamic() {
-		return this.mass.getType() != Mass.Type.INFINITE;
+		return this.mass.getType() != MassType.INFINITE;
 	}
 	
 	/**

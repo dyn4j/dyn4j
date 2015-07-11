@@ -25,7 +25,7 @@
 package org.dyn4j.geometry;
 
 /**
- * Represents an object that can be translated.
+ * Represents an object that can be translated or moved in the x-y plane.
  * @author William Bittle
  * @version 3.2.0
  * @since 3.2.0

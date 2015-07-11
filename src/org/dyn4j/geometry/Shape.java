@@ -31,9 +31,12 @@ import org.dyn4j.DataContainer;
 /**
  * Represents a geometric {@link Shape}.
  * <p>
- * {@link Shape}s are {@link Transformable}, however, in general a {@link Transform} object should
- * be used instead of directly transforming the {@link Shape}.  Doing so will allow reuse of
- * the same {@link Shape} object in multiple places, where only the {@link Transform} differs.
+ * The {@link Shape} class implements the {@link Transformable} interface and modifies the 
+ * internal state of the {@link Shape} directly (translating the vertices for example).
+ * <p>
+ * The various implementing classes may allow mutation of the shape indirectly by returning
+ * mutable objects.  It's recommended that a {@link Shape}, after creation and use, remain
+ * unchanged and instead be replaced with a new {@link Shape} if modification is necessary.
  * @author William Bittle
  * @version 3.1.4
  * @since 1.0.0

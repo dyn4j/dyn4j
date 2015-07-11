@@ -53,7 +53,6 @@ import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.collision.narrowphase.Penetration;
 import org.dyn4j.collision.narrowphase.Raycast;
 import org.dyn4j.collision.narrowphase.RaycastDetector;
-import org.dyn4j.dynamics.Settings.ContinuousDetectionMode;
 import org.dyn4j.dynamics.contact.Contact;
 import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.dynamics.contact.ContactConstraintSolver;
@@ -654,10 +653,10 @@ public class World implements Shiftable, DataContainer {
 				BroadphasePair<Body, BodyFixture> pair = pairs.get(i);
 				
 				// get the bodies
-				Body body1 = pair.collidable1;
-				Body body2 = pair.collidable2;
-				BodyFixture fixture1 = pair.fixture1;
-				BodyFixture fixture2 = pair.fixture2;
+				Body body1 = pair.getCollidable1();
+				Body body2 = pair.getCollidable2();
+				BodyFixture fixture1 = pair.getFixture1();
+				BodyFixture fixture2 = pair.getFixture2();
 				
 				allow = true;
 				for (int j = 0; j < clSize; j++) {
@@ -772,7 +771,7 @@ public class World implements Shiftable, DataContainer {
 	 * <li>Sensor fixtures</li>
 	 * </ul>
 	 * @param mode the continuous collision detection mode
-	 * @see Settings.ContinuousDetectionMode
+	 * @see ContinuousDetectionMode
 	 * @since 1.2.0
 	 */
 	protected void solveTOI(ContinuousDetectionMode mode) {
@@ -1197,8 +1196,8 @@ public class World implements Shiftable, DataContainer {
 		for (int i = 0; i < size; i++) {
 			// get a body to test
 			BroadphaseItem<Body, BodyFixture> item = items.get(i);
-			Body body = item.collidable;
-			BodyFixture fixture = item.fixture;
+			Body body = item.getCollidable();
+			BodyFixture fixture = item.getFixture();
 			Transform transform = body.getTransform();
 
 			// create a raycast object to store the result
@@ -1647,8 +1646,8 @@ public class World implements Shiftable, DataContainer {
 		List<BroadphaseItem<Body, BodyFixture>> items = this.broadphaseDetector.detect(aabb, bpFilter);
 		// loop over the potential collisions
 		for (BroadphaseItem<Body, BodyFixture> item : items) {
-			Body body = item.collidable;
-			BodyFixture fixture = item.fixture;
+			Body body = item.getCollidable();
+			BodyFixture fixture = item.getFixture();
 			
 			// only get the minimum fixture
 			double ft2 = t2;
@@ -1947,8 +1946,8 @@ public class World implements Shiftable, DataContainer {
 		boolean allow;
 		for (int i = 0; i < bSize; i++) {
 			BroadphaseItem<Body, BodyFixture> item = collisions.get(i);
-			Body body = item.collidable;
-			BodyFixture fixture = item.fixture;
+			Body body = item.getCollidable();
+			BodyFixture fixture = item.getFixture();
 			// check body's fixtures next
 			Transform transform = body.getTransform();
 			// pass through the listeners
@@ -2224,8 +2223,8 @@ public class World implements Shiftable, DataContainer {
 		boolean found = false;
 		for (int i = 0; i < bSize; i++) {
 			BroadphaseItem<Body, BodyFixture> item = items.get(i);
-			Body body = item.collidable;
-			BodyFixture fixture = item.fixture;
+			Body body = item.getCollidable();
+			BodyFixture fixture = item.getFixture();
 			// get the body transform
 			Transform bt = body.getTransform();
 			

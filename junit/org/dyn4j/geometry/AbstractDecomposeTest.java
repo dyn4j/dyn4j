@@ -29,8 +29,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.dyn4j.geometry.Vector2;
-
 /**
  * Test case for the decomposition classes.
  * @author William Bittle

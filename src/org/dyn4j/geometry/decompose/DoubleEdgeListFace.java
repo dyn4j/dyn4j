@@ -25,14 +25,14 @@
 package org.dyn4j.geometry.decompose;
 
 /**
- * Represents a face in the Doubly-Connected Edge List.
+ * Represents a face in the {@link DoubleEdgeList}.
  * @author William Bittle
  * @version 3.2.0
  * @since 2.2.0
  */
-class DoubleEdgeListFace {
+final class DoubleEdgeListFace {
 	/** An edge of the edge list enclosing this face */
-	protected DoubleEdgeListHalfEdge edge;
+	DoubleEdgeListHalfEdge edge;
 	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()

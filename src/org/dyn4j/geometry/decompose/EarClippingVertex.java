@@ -27,29 +27,37 @@ package org.dyn4j.geometry.decompose;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Node class for a vertex within the simple polygon.
+ * Node class for a vertex within a simple polygon for the {@link EarClipping} algorithm.
  * @author William Bittle
  * @version 3.2.0
  * @since 3.2.0
  */
-class EarClippingVertex {
+final class EarClippingVertex {
 	/** The vertex point */
-	protected Vector2 point;
+	final Vector2 point;
 	
 	/** The previous vertex */
-	protected EarClippingVertex prev;
+	EarClippingVertex prev;
 	
 	/** The next vertex */
-	protected EarClippingVertex next;
+	EarClippingVertex next;
 	
 	/** Whether this vertex is an ear vertex */
-	protected boolean ear;
+	boolean ear;
 	
 	/** Whether this vertex is a reflex vertex */
-	protected boolean reflex;
+	boolean reflex;
 	
 	/** The index in the original simple polygon */
-	protected int index;
+	int index;
+	
+	/**
+	 * Minimal constructor.
+	 * @param point the point for the vertex
+	 */
+	public EarClippingVertex(Vector2 point) {
+		this.point = point;
+	}
 	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()

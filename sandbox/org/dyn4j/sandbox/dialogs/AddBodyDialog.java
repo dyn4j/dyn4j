@@ -39,7 +39,7 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
-import org.dyn4j.geometry.Mass;
+import org.dyn4j.geometry.MassType;
 import org.dyn4j.sandbox.Preferences;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.controls.BottomButtonPanel;
@@ -82,7 +82,7 @@ public class AddBodyDialog extends JDialog implements ActionListener {
 		super(owner, Messages.getString("dialog.body.add.title"), ModalityType.APPLICATION_MODAL);
 		
 		this.body = new SandboxBody();
-		this.body.getMass().setType(Mass.Type.NORMAL);
+		this.body.getMass().setType(MassType.NORMAL);
 		this.body.setName(MessageFormat.format(Messages.getString("dialog.body.add.name.default"), N));
 		
 		// check if we need to randomize colors

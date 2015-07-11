@@ -33,38 +33,6 @@ import org.dyn4j.resources.Messages;
  * @since 1.0.0
  */
 public class Settings {
-	/**
-	 * Enumeration of Continuous Collision Detection modes.
-	 * @author William Bittle
-	 * @version 2.2.3
-	 * @since 2.2.3
-	 */
-	public static enum ContinuousDetectionMode {
-		/** CCD is not performed at all */
-		NONE,
-		/** 
-		 * CCD is performed on bodies flagged as bullets only.
-		 * <p>
-		 * More precisely, the following pairs are tested:
-		 * <ul>
-		 * <li>Bullet vs. Dynamic</li>
-		 * <li>Bullet vs. Static</li>
-		 * </ul>
-		 */
-		BULLETS_ONLY,
-		/** 
-		 * CCD is performed on all bodies against static bodies.
-		 * <p>
-		 * More precisely, the following pairs are tested:
-		 * <ul>
-		 * <li>Dynamic vs. Static</li>
-		 * <li>Bullet vs. Static</li>
-		 * <li>Bullet vs. Dynamic</li>
-		 * </ul> 
-		 */
-		ALL
-	}
-	
 	/** The default step frequency of the dynamics engine; in seconds */
 	public static final double DEFAULT_STEP_FREQUENCY = 1.0 / 60.0;
 	

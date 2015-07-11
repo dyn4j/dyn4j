@@ -26,11 +26,6 @@ package org.dyn4j.geometry;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.geometry.Circle;
-import org.dyn4j.geometry.Interval;
-import org.dyn4j.geometry.Transform;
-import org.dyn4j.geometry.Vector2;
-import org.dyn4j.geometry.Vertex;
 import org.junit.Test;
 
 /**
@@ -123,8 +118,8 @@ public class CircleTest {
 		Transform t = new Transform();
 		Vector2 y = new Vector2(0.0, -1.0);
 		
-		Vertex f = c.getFarthestFeature(y, t);
-		TestCase.assertTrue(f.isVertex());
+		PointFeature f = c.getFarthestFeature(y, t);
+		TestCase.assertTrue(f instanceof PointFeature);
 		TestCase.assertEquals( 0.000, f.point.x, 1.0e-3);
 		TestCase.assertEquals(-1.500, f.point.y, 1.0e-3);
 		
@@ -136,7 +131,7 @@ public class CircleTest {
 		t.translate(0.0, -0.5);
 		
 		f = c.getFarthestFeature(y.getNegative(), t);
-		TestCase.assertTrue(f.isVertex());
+		TestCase.assertTrue(f instanceof PointFeature);
 		TestCase.assertEquals(0.000, f.point.x, 1.0e-3);
 		TestCase.assertEquals(1.000, f.point.y, 1.0e-3);
 		

@@ -26,7 +26,6 @@ package org.dyn4j.geometry;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.geometry.Vector3;
 import org.junit.Test;
 
 /**

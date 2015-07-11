@@ -27,7 +27,7 @@ package org.dyn4j.geometry;
 import org.dyn4j.DataContainer;
 
 /**
- * Represents a {@link Triangle}.
+ * Implementation of a Triangle {@link Convex} {@link Shape}.
  * <p>
  * A {@link Triangle} must have one vertex which is not colinear with the other two.
  * <p>
@@ -70,59 +70,37 @@ public class Triangle extends Polygon implements Convex, Shape, Transformable, D
 	 * Returns true if the point is inside the {@link Triangle}.
 	 * <p>
 	 * The equation of a plane is:
-	 * <pre>
-	 * N &middot; (P - A) = 0
-	 * </pre>
-	 * Where A is any point on the plane. <br />
+	 * <p style="white-space: pre;"> N &middot; (P - A) = 0</p>
+	 * Where A is any point on the plane. <br>
 	 * Create two axes ({@link Vector2}s), we will choose V<sub>ab</sub> and V<sub>ac</sub>.
-	 * <pre>
-	 * V<sub>ac</sub> = C - A
-	 * V<sub>ab</sub> = B - A
-	 * </pre>
-	 * Where A, B, and C are the vertices of the {@link Triangle}.<Br />
+	 * <p style="white-space: pre;"> V<sub>ac</sub> = C - A
+	 * V<sub>ab</sub> = B - A</p>
+	 * Where A, B, and C are the vertices of the {@link Triangle}.<br>
 	 * From this we can say that you can get to any point on the
 	 * plane by going some u distance on V<sub>ac</sub> and some v distance on V<sub>ab</sub>
 	 * where A is the origin.
-	 * <pre>
-	 * P = A + u * V<sub>ac</sub> + v * V<sub>ab</sub>
-	 * </pre>
+	 * <p style="white-space: pre;"> P = A + u * V<sub>ac</sub> + v * V<sub>ab</sub></p>
 	 * Simplifing P - A
-	 * <pre>
-	 * V<sub>pa</sub> = u * V<sub>ac</sub> + v * V<sub>ab</sub>
-	 * </pre>
-	 * We still need another equation to solve for u and v:<br />
+	 * <p style="white-space: pre;"> V<sub>pa</sub> = u * V<sub>ac</sub> + v * V<sub>ab</sub></p>
+	 * We still need another equation to solve for u and v:<br>
 	 * Dot the equation by V<sub>ac</sub> to get
-	 * <pre>
-	 * V<sub>pa</sub> &middot; V<sub>ac</sub> = (u * V<sub>ac</sub> + v * V<sub>ab</sub>) &middot; V<sub>ac</sub>
-	 * </pre>
+	 * <p style="white-space: pre;"> V<sub>pa</sub> &middot; V<sub>ac</sub> = (u * V<sub>ac</sub> + v * V<sub>ab</sub>) &middot; V<sub>ac</sub></p>
 	 * Dot the equation by V<sub>ab</sub> to get the other
-	 * <pre>
-	 * V<sub>pa</sub> &middot; V<sub>ab</sub> = (u * V<sub>ac</sub> + v * V<sub>ab</sub>) &middot; V<sub>ab</sub>
-	 * </pre>
+	 * <p style="white-space: pre;"> V<sub>pa</sub> &middot; V<sub>ab</sub> = (u * V<sub>ac</sub> + v * V<sub>ab</sub>) &middot; V<sub>ab</sub></p>
 	 * Distribute out both equations
-	 * <pre>
-	 * V<sub>pa</sub> &middot; V<sub>ac</sub> = u * V<sub>ac</sub> &middot; V<sub>ac</sub> + v * V<sub>ab</sub> &middot; V<sub>ac</sub>
-	 * V<sub>pa</sub> &middot; V<sub>ab</sub> = u * V<sub>ac</sub> &middot; V<sub>ab</sub> + v * V<sub>ab</sub> &middot; V<sub>ab</sub>
-	 * </pre>
+	 * <p style="white-space: pre;"> V<sub>pa</sub> &middot; V<sub>ac</sub> = u * V<sub>ac</sub> &middot; V<sub>ac</sub> + v * V<sub>ab</sub> &middot; V<sub>ac</sub>
+	 * V<sub>pa</sub> &middot; V<sub>ab</sub> = u * V<sub>ac</sub> &middot; V<sub>ab</sub> + v * V<sub>ab</sub> &middot; V<sub>ab</sub></p>
 	 * Solving the first equation for u:
-	 * <pre>
-	 * u = (V<sub>pa</sub> &middot; V<sub>ac</sub> - v * V<sub>ab</sub> &middot; V<sub>ac</sub>) / (V<sub>ac</sub> &middot; V<sub>ac</sub>)
-	 * </pre>
+	 * <p style="white-space: pre;"> u = (V<sub>pa</sub> &middot; V<sub>ac</sub> - v * V<sub>ab</sub> &middot; V<sub>ac</sub>) / (V<sub>ac</sub> &middot; V<sub>ac</sub>)</p>
 	 * Substitute one into the other:
-	 * <pre>
-	 * V<sub>pa</sub> &middot; V<sub>ab</sub> = (V<sub>pa</sub> &middot; V<sub>ac</sub> - v * V<sub>ab</sub> &middot; V<sub>ac</sub>) / (V<sub>ac</sub> &middot; V<sub>ac</sub>) * V<sub>ac</sub> &middot; V<sub>ab</sub> + v * V<sub>ab</sub> &middot; V<sub>ab</sub>
+	 * <p style="white-space: pre;"> V<sub>pa</sub> &middot; V<sub>ab</sub> = (V<sub>pa</sub> &middot; V<sub>ac</sub> - v * V<sub>ab</sub> &middot; V<sub>ac</sub>) / (V<sub>ac</sub> &middot; V<sub>ac</sub>) * V<sub>ac</sub> &middot; V<sub>ab</sub> + v * V<sub>ab</sub> &middot; V<sub>ab</sub>
 	 * V<sub>pa</sub> &middot; V<sub>ab</sub> = (V<sub>pa</sub> &middot; V<sub>ac</sub> / V<sub>ac</sub> &middot; V<sub>ac</sub>) * V<sub>ac</sub> &middot; V<sub>ab</sub> - v * (V<sub>ab</sub> &middot; V<sub>ac</sub> / V<sub>ac</sub> &middot; V<sub>ac</sub>) * V<sub>ac</sub> &middot; V<sub>ab</sub> + v * V<sub>ab</sub> &middot; V<sub>ab</sub>
 	 * V<sub>pa</sub> &middot; V<sub>ab</sub> = (V<sub>pa</sub> &middot; V<sub>ac</sub> / V<sub>ac</sub> &middot; V<sub>ac</sub>) * V<sub>ac</sub> &middot; V<sub>ab</sub> + v * (V<sub>ab</sub> &middot; V<sub>ab</sub> - (V<sub>ab</sub> &middot; V<sub>ac</sub> / V<sub>ac</sub> &middot; V<sub>ac</sub>) * V<sub>ac</sub> &middot; V<sub>ab</sub>)
-	 * v = (V<sub>pa</sub> &middot; V<sub>ab</sub> - (V<sub>pa</sub> &middot; V<sub>ac</sub> / V<sub>ac</sub> &middot; V<sub>ac</sub>) * V<sub>ac</sub> &middot; V<sub>ab</sub>) / (V<sub>ab</sub> &middot; V<sub>ab</sub> - (V<sub>ab</sub> &middot; V<sub>ac</sub> / V<sub>ac</sub> &middot; V<sub>ac</sub>) * V<sub>ac</sub> &middot; V<sub>ab</sub>)
-	 * </pre>
+	 * v = (V<sub>pa</sub> &middot; V<sub>ab</sub> - (V<sub>pa</sub> &middot; V<sub>ac</sub> / V<sub>ac</sub> &middot; V<sub>ac</sub>) * V<sub>ac</sub> &middot; V<sub>ab</sub>) / (V<sub>ab</sub> &middot; V<sub>ab</sub> - (V<sub>ab</sub> &middot; V<sub>ac</sub> / V<sub>ac</sub> &middot; V<sub>ac</sub>) * V<sub>ac</sub> &middot; V<sub>ab</sub>)</p>
 	 * Which reduces to:
-	 * <pre>
-	 * v = ((V<sub>pa</sub> &middot; V<sub>ab</sub>) * (V<sub>ac</sub> &middot; V<sub>ac</sub>) - (V<sub>pa</sub> &middot; V<sub>ac</sub>) * (V<sub>ac</sub> &middot; V<sub>ab</sub>)) / ((V<sub>ab</sub> &middot; V<sub>ab</sub>) * (V<sub>ac</sub> &middot; V<sub>ac</sub>) - (V<sub>ab</sub> &middot; V<sub>ac</sub>) * (V<sub>ac</sub> &middot; V<sub>ab</sub>))
-	 * </pre>
+	 * <p style="white-space: pre;"> v = ((V<sub>pa</sub> &middot; V<sub>ab</sub>) * (V<sub>ac</sub> &middot; V<sub>ac</sub>) - (V<sub>pa</sub> &middot; V<sub>ac</sub>) * (V<sub>ac</sub> &middot; V<sub>ab</sub>)) / ((V<sub>ab</sub> &middot; V<sub>ab</sub>) * (V<sub>ac</sub> &middot; V<sub>ac</sub>) - (V<sub>ab</sub> &middot; V<sub>ac</sub>) * (V<sub>ac</sub> &middot; V<sub>ab</sub>))</p>
 	 * Once v is obtained use either equation to obtain u:
-	 * <pre>
-	 * u = (v * V<sub>ab</sub> &middot; V<sub>ab</sub> - V<sub>pa</sub> &middot; V<sub>ab</sub>) / V<sub>ac</sub> &middot; V<sub>ab</sub>
-	 * </pre>
+	 * <p style="white-space: pre;"> u = (v * V<sub>ab</sub> &middot; V<sub>ab</sub> - V<sub>pa</sub> &middot; V<sub>ab</sub>) / V<sub>ac</sub> &middot; V<sub>ab</sub></p>
 	 * We know that the point is inside the {@link Triangle} if u and v are greater than
 	 * zero and u + v is less than one.
 	 * @param point world space point
@@ -154,8 +132,12 @@ public class Triangle extends Polygon implements Convex, Shape, Transformable, D
 		double denominator = dot00 * dot11 - dot01 * dot01;
 		double invD = 1.0 / denominator;
 		u = (dot11 * dot02 - dot01 * dot12) * invD;
+		
+		// don't bother going any farther if u is less than zero
+		if (u <= 0) return false;
+		
 		v = (dot00 * dot12 - dot01 * dot02) * invD;
 		
-		return u > 0 && v > 0 && (u + v <= 1);
+		return /*u > 0 && */v > 0 && (u + v <= 1);
 	}
 }

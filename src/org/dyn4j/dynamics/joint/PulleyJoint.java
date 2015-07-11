@@ -45,7 +45,7 @@ import org.dyn4j.resources.Messages;
  * @author William Bittle
  * @version 3.2.0
  * @since 2.1.0
- * @see <a href="http://www.dyn4j.org/documentation/joints/#Pulley_Joint">Documentation</a>
+ * @see <a href="http://www.dyn4j.org/documentation/joints/#Pulley_Joint" target="_blank">Documentation</a>
  */
 public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 	/** The world space pulley anchor point for the first {@link Body} */

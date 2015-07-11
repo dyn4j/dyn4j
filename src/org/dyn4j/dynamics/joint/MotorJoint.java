@@ -51,7 +51,7 @@ import org.dyn4j.resources.Messages;
  * @author William Bittle
  * @version 3.2.0
  * @since 3.1.0
- * @see <a href="http://www.dyn4j.org/documentation/joints/#Motor_Joint">Documentation</a>
+ * @see <a href="http://www.dyn4j.org/documentation/joints/#Motor_Joint" target="_blank">Documentation</a>
  */
 public class MotorJoint extends Joint implements Shiftable, DataContainer {
 	/** The linear target distance from body1's world space center */

@@ -22,37 +22,46 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.collision.narrowphase;
-
-import org.dyn4j.geometry.Convex;
-import org.dyn4j.geometry.Shape;
-import org.dyn4j.geometry.Vector2;
+package org.dyn4j.geometry;
 
 /**
- * Represents a point in the {@link MinkowskiSum}.
+ * Implementation of an edge {@link Feature} of a {@link Shape}.
+ * <p>
+ * An {@link EdgeFeature} represents a <strong>linear</strong> edge of a {@link Shape} connecting
+ * two vertices.  It's not the intent of this class to represent curved edges.
+ * <p>
+ * The index is the index of the edge in the {@link Shape}.
  * @author William Bittle
  * @version 3.2.0
  * @since 1.0.0
  */
-public class MinkowskiSumPoint {
-	/** The support point in the first {@link Convex} {@link Shape} */
-	protected final Vector2 supportPoint1;
+public final class EdgeFeature extends Feature {
+	/** The first vertex of the edge */
+	protected final PointFeature vertex1;
 	
-	/** The support point in the second {@link Convex} {@link Shape} */
-	protected final Vector2 supportPoint2;
+	/** The second vertex of the edge */
+	protected final PointFeature vertex2;
 	
-	/** The Minkowski sum point */
-	protected final Vector2 point;
+	/** The vertex of maximum projection along a {@link Vector2} */
+	protected final PointFeature max;
+
+	/** The edge vector */
+	protected final Vector2 edge;
 	
 	/**
-	 * Full constructor.
-	 * @param supportPoint1 the support point in the first {@link Convex} {@link Shape}
-	 * @param supportPoint2 the support point in the second {@link Convex} {@link Shape}
+	 * Creates an edge feature.
+	 * @param vertex1 the first vertex of the edge
+	 * @param vertex2 the second vertex of the edge
+	 * @param max the maximum point
+	 * @param edge the vector representing the edge
+	 * @param index the index of the edge
 	 */
-	public MinkowskiSumPoint(Vector2 supportPoint1, Vector2 supportPoint2) {
-		this.supportPoint1 = supportPoint1;
-		this.supportPoint2 = supportPoint2;
-		this.point = supportPoint1.difference(supportPoint2);
+	public EdgeFeature(PointFeature vertex1, PointFeature vertex2, PointFeature max, Vector2 edge, int index) {
+		super(index);
+		this.vertex1 = vertex1;
+		this.vertex2 = vertex2;
+		this.edge = edge;
+		this.max = max;
 	}
 	
 	/* (non-Javadoc)
@@ -61,35 +70,44 @@ public class MinkowskiSumPoint {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("MinkowskiSum.Point[Point=").append(this.point)
-		.append("|SupportPoint1=").append(this.supportPoint1)
-		.append("|SupportPoint2=").append(this.supportPoint2)
+		sb.append("EdgeFeature[Vertex1=").append(this.vertex1)
+		.append("|Vertex2=").append(this.vertex2)
+		.append("|Edge=").append(this.edge)
+		.append("|Max=").append(this.max)
+		.append("|Index=").append(this.index)
 		.append("]");
 		return sb.toString();
 	}
-
+	
 	/**
-	 * Returns the support point for the first {@link Convex} {@link Shape}.
-	 * @return {@link Vector2}
+	 * Returns the first vertex of the edge.
+	 * @return {@link PointFeature}
 	 */
-	public Vector2 getSupportPoint1() {
-		return this.supportPoint1;
+	public PointFeature getVertex1() {
+		return this.vertex1;
 	}
-
+	
 	/**
-	 * Returns the support point for the second {@link Convex} {@link Shape}.
-	 * @return {@link Vector2}
+	 * Returns the second vertex of the edge.
+	 * @return {@link PointFeature}
 	 */
-	public Vector2 getSupportPoint2() {
-		return this.supportPoint2;
+	public PointFeature getVertex2() {
+		return this.vertex2;
 	}
-
+	
 	/**
-	 * Returns the Minkowski sum point given the two support points.
+	 * Returns the vector representing this edge.
 	 * @return {@link Vector2}
 	 */
-	public Vector2 getPoint() {
-		return this.point;
+	public Vector2 getEdge() {
+		return this.edge;
+	}
+	
+	/**
+	 * Returns the maximum point.
+	 * @return {@link PointFeature}
+	 */
+	public PointFeature getMaximum() {
+		return this.max;
 	}
 }
-	

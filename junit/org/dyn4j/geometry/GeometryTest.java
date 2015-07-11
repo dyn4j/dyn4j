@@ -30,12 +30,6 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.geometry.Geometry;
-import org.dyn4j.geometry.Polygon;
-import org.dyn4j.geometry.Rectangle;
-import org.dyn4j.geometry.Segment;
-import org.dyn4j.geometry.Triangle;
-import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
 
 /**

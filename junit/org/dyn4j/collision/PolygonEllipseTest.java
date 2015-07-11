@@ -28,7 +28,6 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.collision.Collidable;
 import org.dyn4j.collision.broadphase.BroadphasePair;
 import org.dyn4j.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.collision.manifold.Manifold;

@@ -32,23 +32,25 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents the Minkowski sum of the given {@link Convex} {@link Shape}s.
  * <p>
- * This class is used by the {@link Gjk} and {@link Epa} classes to compute {@link #support(Vector2)} points.
+ * This class is used by the {@link Gjk} and {@link Epa} classes to compute support points.
+ * <p>
+ * This class doesn't actually compute the Minkowski sum.
  * @author William Bittle
  * @version 3.2.0
  * @since 1.0.0
  */
-public final class MinkowskiSum {
+public class MinkowskiSum {
 	/** The first {@link Convex} */
-	public final Convex convex1;
+	protected final Convex convex1;
 	
 	/** The second {@link Convex} */
-	public final Convex convex2;
+	protected final Convex convex2;
 	
 	/** The first {@link Convex}'s {@link Transform} */
-	public final Transform transform1;
+	protected final Transform transform1;
 	
 	/** The second {@link Convex}'s {@link Transform} */
-	public final Transform transform2;
+	protected final Transform transform2;
 		
 	/**
 	 * Full constructor.
@@ -81,9 +83,9 @@ public final class MinkowskiSum {
 	/**
 	 * Returns the farthest point in the Minkowski sum given the direction.
 	 * @param direction the search direction
-	 * @return {@link Vector2} the point farthest in the given direction
+	 * @return {@link Vector2} the point farthest in the Minkowski sum in the given direction 
 	 */
-	public final Vector2 support(Vector2 direction) {
+	public final Vector2 getSupportPoint(Vector2 direction) {
 		// get the farthest point in the given direction in convex1
 		Vector2 point1 = this.convex1.getFarthestPoint(direction, this.transform1);
 		direction.negate();
@@ -95,12 +97,11 @@ public final class MinkowskiSum {
 	}
 	
 	/**
-	 * Returns the farthest point in the Minkowski sum given the direction
-	 * in the given {@link MinkowskiSumPoint} object.
+	 * Returns the farthest point, and the support points in the shapes, in the Minkowski sum given the direction.
 	 * @param direction the search direction
-	 * @param p the {@link MinkowskiSumPoint} object to fill
+	 * @return {@link MinkowskiSumPoint} the point farthest in the Minkowski sum in the given direction 
 	 */
-	final void support(Vector2 direction, MinkowskiSumPoint p) {
+	public final MinkowskiSumPoint getSupportPoints(Vector2 direction) {
 		// get the farthest point in the given direction in convex1
 		Vector2 point1 = this.convex1.getFarthestPoint(direction, this.transform1);
 		direction.negate();
@@ -108,6 +109,38 @@ public final class MinkowskiSum {
 		Vector2 point2 = this.convex2.getFarthestPoint(direction, this.transform2);
 		direction.negate();
 		// set the Minkowski sum point given the support points
-		p.set(point1, point2);
+		return new MinkowskiSumPoint(point1, point2);
+	}
+
+	/**
+	 * Returns the first {@link Convex} {@link Shape}.
+	 * @return {@link Convex}
+	 */
+	public Convex getConvex1() {
+		return this.convex1;
+	}
+
+	/**
+	 * Returns the second {@link Convex} {@link Shape}.
+	 * @return {@link Convex}
+	 */
+	public Convex getConvex2() {
+		return this.convex2;
+	}
+
+	/**
+	 * Returns the first {@link Convex} {@link Shape}'s {@link Transform}.
+	 * @return {@link Transform}
+	 */
+	public Transform getTransform1() {
+		return this.transform1;
+	}
+
+	/**
+	 * Returns the second {@link Convex} {@link Shape}'s {@link Transform}.
+	 * @return {@link Transform}
+	 */
+	public Transform getTransform2() {
+		return this.transform2;
 	}
 }

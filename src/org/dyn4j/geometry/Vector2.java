@@ -27,29 +27,27 @@ package org.dyn4j.geometry;
 import org.dyn4j.Epsilon;
 
 /**
- * This class represents a vector in 2D space.
+ * This class represents a vector or point in 2D space.
  * <p>
  * The operations {@link Vector2#setMagnitude(double)}, {@link Vector2#getNormalized()},
  * {@link Vector2#project(Vector2)}, and {@link Vector2#normalize()} require the {@link Vector2}
  * to be non-zero in length.
  * <p>
- * Some methods that modify the vector will also return the vector.  This is to facilitate 
- * operations like:
+ * Some methods also return the vector to facilitate chaining.  For example:
  * <pre>
  * Vector a = new Vector();
  * a.zero().add(1, 2).multiply(2);
  * </pre>
- * This can decrease the number of temporary vectors.
  * @author William Bittle
  * @version 3.1.11
  * @since 1.0.0
  */
 public class Vector2 {
 	/** A vector representing the x-axis; this vector should not be changed at runtime; used internally */
-	protected static final Vector2 X_AXIS = new Vector2(1.0, 0.0);
+	static final Vector2 X_AXIS = new Vector2(1.0, 0.0);
 	
 	/** A vector representing the y-axis; this vector should not be changed at runtime; used internally */
-	protected static final Vector2 Y_AXIS = new Vector2(0.0, 1.0);
+	static final Vector2 Y_AXIS = new Vector2(0.0, 1.0);
 	
 	/** The magnitude of the x component of this {@link Vector2} */
 	public double x;

@@ -49,7 +49,7 @@ import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
-import org.dyn4j.geometry.Mass;
+import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
 
@@ -314,8 +314,8 @@ public class WorldTest {
 		// setup the bodies
 		Convex c1 = Geometry.createCircle(1.0);
 		Convex c2 = Geometry.createEquilateralTriangle(0.5);
-		Body b1 = new Body(); b1.addFixture(c1); b1.setMass(Mass.Type.NORMAL);
-		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(Mass.Type.NORMAL);
+		Body b1 = new Body(); b1.addFixture(c1); b1.setMass(MassType.NORMAL);
+		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(MassType.NORMAL);
 		
 		// add them to the world
 		w.addBody(b1);
@@ -380,8 +380,8 @@ public class WorldTest {
 		// setup the bodies
 		Convex c1 = Geometry.createCircle(1.0);
 		Convex c2 = Geometry.createEquilateralTriangle(0.5);
-		Body b1 = new Body(); b1.addFixture(c1); b1.setMass(Mass.Type.NORMAL);
-		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(Mass.Type.NORMAL);
+		Body b1 = new Body(); b1.addFixture(c1); b1.setMass(MassType.NORMAL);
+		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(MassType.NORMAL);
 		
 		// add them to the world
 		w.addBody(b1);
@@ -625,8 +625,8 @@ public class WorldTest {
 		// setup the bodies
 		Convex c1 = Geometry.createCircle(1.0);
 		Convex c2 = Geometry.createEquilateralTriangle(0.5);
-		Body b1 = new Body(); b1.addFixture(c1); b1.setMass(Mass.Type.NORMAL);
-		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(Mass.Type.NORMAL);
+		Body b1 = new Body(); b1.addFixture(c1); b1.setMass(MassType.NORMAL);
+		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(MassType.NORMAL);
 		
 		// setup the joint
 		Joint j = new DistanceJoint(b1, b2, new Vector2(), new Vector2());
@@ -673,8 +673,8 @@ public class WorldTest {
 		// setup the bodies
 		Convex c1 = Geometry.createCircle(1.0);
 		Convex c2 = Geometry.createEquilateralTriangle(0.5);
-		Body b1 = new Body(); b1.addFixture(c1); b1.setMass(Mass.Type.NORMAL);
-		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(Mass.Type.NORMAL);
+		Body b1 = new Body(); b1.addFixture(c1); b1.setMass(MassType.NORMAL);
+		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(MassType.NORMAL);
 		
 		// setup the joint
 		Joint j = new DistanceJoint(b1, b2, new Vector2(), new Vector2());
@@ -723,8 +723,8 @@ public class WorldTest {
 		// setup the bodies
 		Convex c1 = Geometry.createCircle(1.0);
 		Convex c2 = Geometry.createEquilateralTriangle(0.5);
-		Body b1 = new Body(); b1.addFixture(c1); b1.setMass(Mass.Type.INFINITE);
-		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(Mass.Type.INFINITE);
+		Body b1 = new Body(); b1.addFixture(c1); b1.setMass(MassType.INFINITE);
+		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(MassType.INFINITE);
 		
 		// setup the joint
 		Joint j = new DistanceJoint(b1, b2, new Vector2(), new Vector2());

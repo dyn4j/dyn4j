@@ -363,9 +363,7 @@ public class Matrix33 {
 	/**
 	 * Multiplies the given {@link Vector3} by this {@link Matrix33} and
 	 * places the result in the given {@link Vector3}.
-	 * <pre>
-	 * v = v<sup>T</sup> * this
-	 * </pre>
+	 * <p style="white-space: pre;"> v = v<sup>T</sup> * this</p>
 	 * @param vector the {@link Vector3} to multiply
 	 * @return {@link Vector3} the vector result
 	 */
@@ -382,9 +380,7 @@ public class Matrix33 {
 	/**
 	 * Multiplies the given {@link Vector3} by this {@link Matrix33} returning
 	 * the result in a new {@link Vector3}.
-	 * <pre>
-	 * r = v<sup>T</sup> * this
-	 * </pre>
+	 * <p style="white-space: pre;"> r = v<sup>T</sup> * this</p>
 	 * @param vector the {@link Vector3} to multiply
 	 * @return {@link Vector3} the vector result
 	 */
@@ -563,11 +559,9 @@ public class Matrix33 {
 
 	/**
 	 * Solves the system of linear equations:
-	 * <pre>
-	 * Ax = b
+	 * <p style="white-space: pre;"> Ax = b
 	 * Multiply by A<sup>-1</sup> on both sides
-	 * x = A<sup>-1</sup>b
-	 * </pre>
+	 * x = A<sup>-1</sup>b</p>
 	 * @param b the b {@link Vector3}
 	 * @return {@link Vector3} the x vector
 	 */
@@ -601,11 +595,9 @@ public class Matrix33 {
 	
 	/**
 	 * Solves the system of linear equations:
-	 * <pre>
-	 * Ax = b
+	 * <p style="white-space: pre;"> Ax = b
 	 * Multiply by A<sup>-1</sup> on both sides
-	 * x = A<sup>-1</sup>b
-	 * </pre>
+	 * x = A<sup>-1</sup>b</p>
 	 * @param b the b {@link Vector2}
 	 * @return {@link Vector2} the x vector
 	 */

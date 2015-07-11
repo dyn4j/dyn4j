@@ -44,10 +44,10 @@ import org.dyn4j.geometry.Vector2;
  */
 final class ExpandingSimplex {
 	/** The winding direction of the simplex */
-	protected final int winding;
+	final int winding;
 	
 	/** The priority queue of simplex edges */
-	protected final PriorityQueue<ExpandingSimplexEdge> queue;
+	final PriorityQueue<ExpandingSimplexEdge> queue;
 	
 	/**
 	 * Minimal constructor.
@@ -73,7 +73,7 @@ final class ExpandingSimplex {
 	/**
 	 * Returns the winding of the given simplex.
 	 * <p>
-	 * Returns -1 if the winding is Clockwise.<br />
+	 * Returns -1 if the winding is Clockwise.<br>
 	 * Returns 1 if the winding is Counter-Clockwise.
 	 * <p>
 	 * This method will continue checking all edges until

@@ -29,13 +29,16 @@ import org.dyn4j.Epsilon;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents a Capsule shape.
+ * Implementation of a Capsule {@link Convex} {@link Shape}.
  * <p>
- * A capsule shape is a rectangle with two circular caps on the opposing ends. A capsule is created
- * by specifying the bounding rectangle.
+ * A capsule can be described as a rectangle with two half circle caps on both ends. A capsule is created
+ * by specifying the bounding rectangle of the entire {@link Shape}.
  * <p>
- * If the height is larger than the width the caps are on the top and bottom of the shape. Otherwise
+ * If the height is larger than the width the caps will be on the top and bottom of the shape. Otherwise
  * the caps are on the left and right ends of the shape.
+ * <p>
+ * A capsule's width and height must be larger than zero and cannot be equal.  A {@link Circle} should be used
+ * instead of an equal width/height capsule for both performance and stability.
  * @author William Bittle
  * @version 3.1.5
  * @since 3.1.5
@@ -228,7 +231,7 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 		if (Math.abs(d1) < d) {
 			// then its the farthest point
 			Vector2 point = this.getFarthestPoint(vector, transform);
-			return new Vertex(point);
+			return new PointFeature(point);
 		} else {
 			// compute the vector to add/sub from the foci
 			Vector2 v = n1.multiply(this.capRadius);

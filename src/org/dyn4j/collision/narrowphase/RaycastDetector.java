@@ -31,8 +31,8 @@ import org.dyn4j.geometry.Transform;
 
 /**
  * Represents an algorithm for determining whether a {@link Ray} and a {@link Convex}
- * {@link Shape} intersect, given the ray's maximum length and the convex shape's
- * transform.
+ * {@link Shape} intersect, given the ray's maximum length and the {@link Convex} {@link Shape}'s
+ * {@link Transform}.
  * @author William Bittle
  * @version 3.1.5
  * @since 2.0.0
@@ -42,8 +42,7 @@ public interface RaycastDetector {
 	 * Performs a ray cast given a {@link Ray} and a {@link Convex} {@link Shape} returning
 	 * true if the ray passes through the convex shape.
 	 * <p>
-	 * The raycast parameter is used to stored the results of the raycast upon a successful
-	 * or true return.
+	 * The raycast parameter is used to stored the results of the raycast when returning true.
 	 * <p>
 	 * Returns false if the start position of the ray lies inside the given convex.
 	 * @param ray the {@link Ray}

@@ -55,6 +55,7 @@ import org.dyn4j.collision.narrowphase.Sat;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.Capacity;
+import org.dyn4j.dynamics.ContinuousDetectionMode;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.joint.AngleJoint;
@@ -71,6 +72,7 @@ import org.dyn4j.dynamics.joint.WheelJoint;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
+import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.Camera;
@@ -731,12 +733,12 @@ public class XmlReader extends DefaultHandler {
 		} else if ("MaximumRotation".equalsIgnoreCase(this.tagName)) {
 			this.settings.setMaximumRotation(Math.toRadians(Double.parseDouble(s)));
 		} else if ("ContinuousCollisionDetectionMode".equalsIgnoreCase(this.tagName)) {
-			if (Settings.ContinuousDetectionMode.ALL.toString().equalsIgnoreCase(s)) {
-				this.settings.setContinuousDetectionMode(Settings.ContinuousDetectionMode.ALL);
-			} else if (Settings.ContinuousDetectionMode.BULLETS_ONLY.toString().equalsIgnoreCase(s)) {
-				this.settings.setContinuousDetectionMode(Settings.ContinuousDetectionMode.BULLETS_ONLY);
-			} else if (Settings.ContinuousDetectionMode.NONE.toString().equalsIgnoreCase(s)) {
-				this.settings.setContinuousDetectionMode(Settings.ContinuousDetectionMode.NONE);
+			if (ContinuousDetectionMode.ALL.toString().equalsIgnoreCase(s)) {
+				this.settings.setContinuousDetectionMode(ContinuousDetectionMode.ALL);
+			} else if (ContinuousDetectionMode.BULLETS_ONLY.toString().equalsIgnoreCase(s)) {
+				this.settings.setContinuousDetectionMode(ContinuousDetectionMode.BULLETS_ONLY);
+			} else if (ContinuousDetectionMode.NONE.toString().equalsIgnoreCase(s)) {
+				this.settings.setContinuousDetectionMode(ContinuousDetectionMode.NONE);
 			} else {
 				throw new SAXException(MessageFormat.format(Messages.getString("exception.persist.unknownCCDMode"), s));
 			}
@@ -863,11 +865,8 @@ public class XmlReader extends DefaultHandler {
 			this.fixture = new BodyFixture(this.shape);
 			this.fixture.setUserData(this.fixtureName);
 		} else if ("Filter".equalsIgnoreCase(qName)) {
-			if (this.filter != null) {
-				this.filter.setCategory(this.category);
-				this.filter.setMask(this.mask);
-				this.fixture.setFilter(this.filter);
-			}
+			this.filter = new CategoryFilter(this.category, this.mask);
+			this.fixture.setFilter(this.filter);
 		} else if ("PartOfGroups".equalsIgnoreCase(qName)) {
 			this.partOfGroupsFlag = false;
 		} else if ("CollideWithGroups".equalsIgnoreCase(qName)) {
@@ -876,14 +875,14 @@ public class XmlReader extends DefaultHandler {
 			this.massFlag = false;
 			Mass mass = new Mass(this.localCenter, this.massMass, this.massInertia);
 			// set the type
-			if (Mass.Type.NORMAL.toString().equalsIgnoreCase(this.massType)) {
-				mass.setType(Mass.Type.NORMAL);
-			} else if (Mass.Type.INFINITE.toString().equalsIgnoreCase(this.massType)) {
-				mass.setType(Mass.Type.INFINITE);
-			} else if (Mass.Type.FIXED_LINEAR_VELOCITY.toString().equalsIgnoreCase(this.massType)) {
-				mass.setType(Mass.Type.FIXED_LINEAR_VELOCITY);
-			} else if (Mass.Type.FIXED_ANGULAR_VELOCITY.toString().equalsIgnoreCase(this.massType)) {
-				mass.setType(Mass.Type.FIXED_ANGULAR_VELOCITY);
+			if (MassType.NORMAL.toString().equalsIgnoreCase(this.massType)) {
+				mass.setType(MassType.NORMAL);
+			} else if (MassType.INFINITE.toString().equalsIgnoreCase(this.massType)) {
+				mass.setType(MassType.INFINITE);
+			} else if (MassType.FIXED_LINEAR_VELOCITY.toString().equalsIgnoreCase(this.massType)) {
+				mass.setType(MassType.FIXED_LINEAR_VELOCITY);
+			} else if (MassType.FIXED_ANGULAR_VELOCITY.toString().equalsIgnoreCase(this.massType)) {
+				mass.setType(MassType.FIXED_ANGULAR_VELOCITY);
 			} else {
 				throw new SAXException(MessageFormat.format(Messages.getString("exception.persist.unknownMassType"), this.massType));
 			}

@@ -26,8 +26,6 @@ package org.dyn4j.sandbox.tests;
 
 import java.util.Arrays;
 
-import com.jogamp.opengl.GL2;
-
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.contact.ContactAdapter;
 import org.dyn4j.dynamics.contact.ContactListener;
@@ -35,11 +33,13 @@ import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.dynamics.joint.WeldJoint;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
-import org.dyn4j.geometry.Mass;
+import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.geometry.Wound;
 import org.dyn4j.sandbox.SandboxBody;
+
+import com.jogamp.opengl.GL2;
 
 /**
  * Compiled test for testing destruction of bodies.
@@ -125,7 +125,7 @@ public class Destructible extends CompiledSimulation {
 						b.setFillColor(Arrays.copyOf(fcolor, fcolor.length));
 						b.setOutlineColor(Arrays.copyOf(ocolor, ocolor.length));
 						b.addFixture(Geometry.createTriangle(p1, p2, center));
-						b.setMass(Mass.Type.NORMAL);
+						b.setMass(MassType.NORMAL);
 						// copy over the transform
 						b.setTransform(tx.copy());
 						// copy over the velocity
@@ -175,20 +175,20 @@ public class Destructible extends CompiledSimulation {
 		// create the floor
 		this.floor = new SandboxBody();
 		this.floor.addFixture(Geometry.createRectangle(15.0, 1.0));
-		this.floor.setMass(Mass.Type.INFINITE);
+		this.floor.setMass(MassType.INFINITE);
 		this.floor.setUserData("Floor");
 		
 		// create the weld joint bodies
 		SandboxBody top = new SandboxBody();
 		top.addFixture(Geometry.createRectangle(0.5, 1.0));
-		top.setMass(Mass.Type.NORMAL);
+		top.setMass(MassType.NORMAL);
 		top.translate(0.0, 3.0);
 		top.getLinearVelocity().set(2.0, 0.0);
 		top.setUserData("Top");
 		
 		SandboxBody bot = new SandboxBody();
 		bot.addFixture(Geometry.createRectangle(0.5, 1.0));
-		bot.setMass(Mass.Type.NORMAL);
+		bot.setMass(MassType.NORMAL);
 		bot.translate(0.0, 2.0);
 		bot.setUserData("Bottom");
 		
@@ -197,7 +197,7 @@ public class Destructible extends CompiledSimulation {
 		
 		this.icosigon = new SandboxBody();
 		this.icosigon.addFixture(Geometry.createUnitCirclePolygon(20, 1.0));
-		this.icosigon.setMass(Mass.Type.NORMAL);
+		this.icosigon.setMass(MassType.NORMAL);
 		this.icosigon.translate(-2.5, 2.0);
 		this.icosigon.setUserData("Icosigon");
 		

@@ -32,49 +32,36 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents {@link Mass} data for an object about a given point.
  * <p>
- * Stores the center of mass, mass, and inertia tensor.
+ * Stores the center of mass, the mass, and inertia.
  * <p>
  * The center point may be something other than the origin (0, 0).  In this case, the mass and
  * inertia are about this point, not the origin.
+ * <p>
+ * A {@link Mass} can also take on special {@link MassType}s.  These mass types allow for interesting
+ * effects during interaction.
  * @author William Bittle
  * @version 3.1.5
  * @since 1.0.0
+ * @see MassType
  */
 public class Mass {
-	/**
-	 * Enumeration for special mass types.
-	 * @author William Bittle
-	 * @version 1.0.3
-	 * @since 1.0.0
-	 */
-	public static enum Type {
-		/** Indicates a normal mass */
-		NORMAL,
-		/** Indicates that the mass is infinite */
-		INFINITE,
-		/** Indicates that the mass's rate of rotation should not change */
-		FIXED_ANGULAR_VELOCITY,
-		/** Indicates that the mass's rate of translation should not change */
-		FIXED_LINEAR_VELOCITY,
-	}
-	
 	/** The mass type */
-	protected Mass.Type type;
+	protected MassType type;
 	
 	/** The center of mass */
-	protected Vector2 center;
+	protected final Vector2 center;
 	
 	/** The mass in kg */
-	protected double mass;
+	protected final double mass;
 	
 	/** The inertia tensor in kg &middot; m<sup>2</sup> */
-	protected double inertia;
+	protected final double inertia;
 	
 	/** The inverse mass */
-	protected double invMass;
+	protected final double invMass;
 		
 	/** The inverse inertia tensor */
-	protected double invInertia;
+	protected final double invInertia;
 	
 	/**
 	 * Default constructor.
@@ -82,7 +69,7 @@ public class Mass {
 	 * Creates an infinite mass centered at the origin.
 	 */
 	public Mass() {
-		this.type = Mass.Type.INFINITE;
+		this.type = MassType.INFINITE;
 		this.center = new Vector2();
 		this.mass = 0.0;
 		this.inertia = 0.0;
@@ -92,6 +79,8 @@ public class Mass {
 	
 	/**
 	 * Full Constructor.
+	 * <p>
+	 * The <code>center</code> parameter will be copied.
 	 * @param center center of {@link Mass} in local coordinates
 	 * @param mass mass in kg
 	 * @param inertia inertia tensor in kg &middot; m<sup>2</sup>
@@ -104,7 +93,7 @@ public class Mass {
 		if (mass < 0.0) throw new IllegalArgumentException(Messages.getString("geometry.mass.invalidMass"));
 		if (inertia < 0.0) throw new IllegalArgumentException(Messages.getString("geometry.mass.invalidInertia"));
 		// create the mass
-		this.type = Mass.Type.NORMAL;
+		this.type = MassType.NORMAL;
 		this.center = center.copy();
 		this.mass = mass;
 		this.inertia = inertia;
@@ -113,18 +102,18 @@ public class Mass {
 			this.invMass = 1.0 / mass;
 		} else {
 			this.invMass = 0.0;
-			this.type = Mass.Type.FIXED_LINEAR_VELOCITY;
+			this.type = MassType.FIXED_LINEAR_VELOCITY;
 		}
 		// set the inverse inertia
 		if (inertia > Epsilon.E) {
 			this.invInertia = 1.0 / inertia;
 		} else {
 			this.invInertia = 0.0;
-			this.type = Mass.Type.FIXED_ANGULAR_VELOCITY;
+			this.type = MassType.FIXED_ANGULAR_VELOCITY;
 		}
 		// check if both the mass and inertia are zero
 		if (mass <= Epsilon.E && inertia <= Epsilon.E) {
-			this.type = Mass.Type.INFINITE;
+			this.type = MassType.INFINITE;
 		}
 	}
 	
@@ -205,10 +194,8 @@ public class Mass {
 	 * <p>
 	 * Uses the Parallel Axis Theorem to obtain the inertia tensor about
 	 * the center of all the given masses:
-	 * <pre>
-	 * I<sub>dis</sub> = I<sub>cm</sub> + mr<sup>2</sup>
-	 * I<sub>total</sub> = &sum; I<sub>dis</sub>
-	 * </pre>
+	 * <p style="white-space: pre;"> I<sub>dis</sub> = I<sub>cm</sub> + mr<sup>2</sup>
+	 * I<sub>total</sub> = &sum; I<sub>dis</sub></p>
 	 * The center for the resulting mass will be a mass weighted center.
 	 * <p>
 	 * This method will produce unexpected results if any mass contained in the
@@ -286,7 +273,7 @@ public class Mass {
 	 * @return boolean
 	 */
 	public boolean isInfinite() {
-		return this.type == Mass.Type.INFINITE;
+		return this.type == MassType.INFINITE;
 	}
 	
 	/**
@@ -294,16 +281,16 @@ public class Mass {
 	 * @param type the mass type
 	 * @throws NullPointerException if type is null
 	 */
-	public void setType(Mass.Type type) {
+	public void setType(MassType type) {
 		if (type == null) throw new NullPointerException(Messages.getString("geometry.mass.nullMassType"));
 		this.type = type;
 	}
 	
 	/**
 	 * Returns the mass type.
-	 * @return {@link Mass.Type}
+	 * @return {@link MassType}
 	 */
-	public Mass.Type getType() {
+	public MassType getType() {
 		return this.type;
 	}
 	
@@ -320,7 +307,7 @@ public class Mass {
 	 * @return double
 	 */
 	public double getMass() {
-		if (this.type == Mass.Type.INFINITE || this.type == Mass.Type.FIXED_LINEAR_VELOCITY) {
+		if (this.type == MassType.INFINITE || this.type == MassType.FIXED_LINEAR_VELOCITY) {
 			return 0.0;
 		} else {
 			return this.mass;
@@ -332,7 +319,7 @@ public class Mass {
 	 * @return double
 	 */
 	public double getInertia() {
-		if (this.type == Mass.Type.INFINITE || this.type == Mass.Type.FIXED_ANGULAR_VELOCITY) {
+		if (this.type == MassType.INFINITE || this.type == MassType.FIXED_ANGULAR_VELOCITY) {
 			return 0.0;
 		} else {
 			return this.inertia;
@@ -344,7 +331,7 @@ public class Mass {
 	 * @return double
 	 */
 	public double getInverseMass() {
-		if (this.type == Mass.Type.INFINITE || this.type == Mass.Type.FIXED_LINEAR_VELOCITY) {
+		if (this.type == MassType.INFINITE || this.type == MassType.FIXED_LINEAR_VELOCITY) {
 			return 0.0;
 		} else {
 			return this.invMass;
@@ -356,7 +343,7 @@ public class Mass {
 	 * @return double
 	 */
 	public double getInverseInertia() {
-		if (this.type == Mass.Type.INFINITE || this.type == Mass.Type.FIXED_ANGULAR_VELOCITY) {
+		if (this.type == MassType.INFINITE || this.type == MassType.FIXED_ANGULAR_VELOCITY) {
 			return 0.0;
 		} else {
 			return this.invInertia;

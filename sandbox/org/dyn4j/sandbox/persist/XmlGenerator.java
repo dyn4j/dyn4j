@@ -47,6 +47,7 @@ import org.dyn4j.dynamics.joint.WeldJoint;
 import org.dyn4j.dynamics.joint.WheelJoint;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Mass;
+import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Segment;
@@ -392,7 +393,7 @@ public class XmlGenerator {
 		// so that we can get the mass and inertia values for masses with infinite
 		// or fixed types
 		Mass m = new Mass(mass);
-		m.setType(Mass.Type.NORMAL);
+		m.setType(MassType.NORMAL);
 		
 		sb.append("<Mass>")
 		.append(XmlGenerator.toXml(mass.getCenter(), "LocalCenter"))

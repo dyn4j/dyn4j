@@ -25,6 +25,7 @@
 package org.dyn4j.dynamics;
 
 import org.dyn4j.collision.Filter;
+import org.dyn4j.collision.Fixture;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.collision.broadphase.BroadphaseFilter;
 import org.dyn4j.collision.broadphase.BroadphaseFilterAdapter;
@@ -38,13 +39,13 @@ import org.dyn4j.geometry.AABB;
  */
 public class AABBBroadphaseFilter extends BroadphaseFilterAdapter<Body, BodyFixture> implements BroadphaseFilter<Body, BodyFixture> {
 	/** True to ignore inactive bodies */
-	public final boolean ignoreInactive;
+	protected final boolean ignoreInactive;
 	
 	/** True to ignore sensor fixtures */
-	public final boolean ignoreSensors;
+	protected final boolean ignoreSensors;
 	
 	/** The fixture filter */
-	public final Filter filter;
+	protected final Filter filter;
 	
 	/**
 	 * Full constructor.
@@ -75,5 +76,29 @@ public class AABBBroadphaseFilter extends BroadphaseFilterAdapter<Body, BodyFixt
 			return false;
 		}
 		return super.isAllowed(aabb, body, fixture);
+	}
+
+	/**
+	 * Returns true if inactive bodies are ignored.
+	 * @return boolean
+	 */
+	public boolean isIgnoreInactive() {
+		return this.ignoreInactive;
+	}
+
+	/**
+	 * Returns true if sensor fixtures are ignored.
+	 * @return boolean
+	 */
+	public boolean isIgnoreSensors() {
+		return this.ignoreSensors;
+	}
+
+	/**
+	 * Returns the filter used in filtering {@link Fixture}s.
+	 * @return {@link Filter}
+	 */
+	public Filter getFilter() {
+		return this.filter;
 	}
 }

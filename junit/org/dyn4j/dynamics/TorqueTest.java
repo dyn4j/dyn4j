@@ -26,10 +26,8 @@ package org.dyn4j.dynamics;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.dynamics.Body;
-import org.dyn4j.dynamics.Torque;
 import org.dyn4j.geometry.Geometry;
-import org.dyn4j.geometry.Mass;
+import org.dyn4j.geometry.MassType;
 import org.junit.Test;
 
 /**
@@ -107,7 +105,7 @@ public class TorqueTest {
 		World w = new World();
 		Body b = new Body();
 		b.addFixture(Geometry.createCircle(1.0));
-		b.setMass(Mass.Type.NORMAL);
+		b.setMass(MassType.NORMAL);
 		
 		Torque t = new Torque() {
 			private double time = 0;

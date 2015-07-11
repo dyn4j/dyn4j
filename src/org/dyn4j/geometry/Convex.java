@@ -39,13 +39,12 @@ public interface Convex extends Shape, Transformable, DataContainer {
 	/**
 	 * Returns an array of separating axes to test for this {@link Shape}.
 	 * <p>
-	 * Given some points, this method will return the separating axes for 
-	 * this {@link Shape}'s voronoi regions also.  The voronoi axes will not be included
-	 * if the foci array is null.
+	 * The <code>foci</code> parameter is an array of <strong>cicular</strong> focal points of the other {@link Shape}.
 	 * <p>
-	 * The points in the foci array are assumed to be in world space.
+	 * If foci points are given, this method will return the separating axes for this {@link Shape}'s voronoi regions 
+	 * also.  The points in the foci array are assumed to be in world space.
 	 * <p>
-	 * The returned axes are normalized.
+	 * The returned axes are normalized and in world space.
 	 * @param foci the world space points representing foci of curved {@link Shape}s; can be null
 	 * @param transform the local to world space {@link Transform} of this {@link Convex} {@link Shape}
 	 * @return {@link Vector2}[]
@@ -54,9 +53,11 @@ public interface Convex extends Shape, Transformable, DataContainer {
 	public abstract Vector2[] getAxes(Vector2[] foci, Transform transform);
 	
 	/**
-	 * Returns an array of world space foci points for circular curved edges.
+	 * Returns an array of world space foci points for <strong>cicular</strong> curved edges.
 	 * <p>
 	 * This method returns null if the {@link Shape} has zero curved edges.
+	 * <p>
+	 * The returned points are in world space.
 	 * @param transform the local to world space {@link Transform} of this {@link Convex} {@link Shape}
 	 * @return {@link Vector2}[]
 	 * @throws UnsupportedOperationException if this shape doesn't support this method
@@ -64,7 +65,9 @@ public interface Convex extends Shape, Transformable, DataContainer {
 	public abstract Vector2[] getFoci(Transform transform);
 	
 	/**
-	 * Returns the feature farthest in the direction of the given vector.
+	 * Returns the {@link Feature} farthest in the direction of the given vector.
+	 * <p>
+	 * The returned feature is in world space.
 	 * @param vector the direction
 	 * @param transform the local to world space {@link Transform} of this {@link Convex} {@link Shape}
 	 * @return {@link Feature}
@@ -73,8 +76,7 @@ public interface Convex extends Shape, Transformable, DataContainer {
 	
 	/**
 	 * Returns the point farthest in the direction of the given vector.  If two points are 
-	 * equally distant along the given {@link Vector2} the first one in the vertex 
-	 * list is used.
+	 * equally distant along the given {@link Vector2} the first one is used.
 	 * <p>
 	 * The returned point is in world space.
 	 * @param vector the direction

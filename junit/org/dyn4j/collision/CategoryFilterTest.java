@@ -26,8 +26,6 @@ package org.dyn4j.collision;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.collision.CategoryFilter;
-import org.dyn4j.collision.Filter;
 import org.junit.Test;
 
 /**
@@ -42,18 +40,15 @@ public class CategoryFilterTest {
 	 */
 	@Test
 	public void filter() {
-		CategoryFilter f1 = new CategoryFilter();
-		CategoryFilter f2 = new CategoryFilter();
-		CategoryFilter f3 = new CategoryFilter();
-		
-		f1.category = 1; // category 1
-		f1.mask = Integer.MAX_VALUE; // can collide with any category
-		
-		f2.category = 2; // category 2
-		f2.mask = 3;     // can collide with category 1 and 2
-		
-		f3.category = 4; // category 3
-		f3.mask = 7;     // can collide with category 1, 2, and 3
+		// category 1
+		// can collide with any category
+		CategoryFilter f1 = new CategoryFilter(1, Long.MAX_VALUE);
+		// category 2
+		// can collide with category 1 and 2
+		CategoryFilter f2 = new CategoryFilter(2, 3);
+		// category 3
+		// can collide with category 1, 2, and 3
+		CategoryFilter f3 = new CategoryFilter(4, 7);
 		
 		// allowed
 		TestCase.assertTrue(f1.isAllowed(f2));

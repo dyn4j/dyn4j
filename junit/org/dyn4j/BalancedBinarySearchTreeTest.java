@@ -28,7 +28,6 @@ import java.util.Iterator;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.BinarySearchTree;
 import org.junit.Before;
 import org.junit.Test;
 

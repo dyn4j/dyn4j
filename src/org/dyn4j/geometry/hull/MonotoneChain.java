@@ -50,7 +50,7 @@ public class MonotoneChain implements HullGenerator {
 	@Override
 	public Vector2[] generate(Vector2... points) {
 		// check for a null array
-		if (points == null) return null;
+		if (points == null) throw new NullPointerException(Messages.getString("geometry.hull.nullArray"));
 		
 		// get the size
 		int size = points.length;

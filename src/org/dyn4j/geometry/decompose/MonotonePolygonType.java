@@ -33,7 +33,7 @@ package org.dyn4j.geometry.decompose;
  * @version 3.2.0
  * @since 2.2.0
  */
-public enum MonotonePolygonType {
+enum MonotonePolygonType {
 	/** Represents a y-monotone polygon */
 	Y,
 	

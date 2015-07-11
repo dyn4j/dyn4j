@@ -30,16 +30,15 @@ import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Represents an algorithm to triangulate a given list of points representing
- * a polygon into a list of triangle pieces.
+ * Represents an algorithm to triangulate a given polygon (as a list of points) into {@link Triangle}s.
  * @author William Bittle
  * @version 3.1.9
  * @since 3.1.9
  */
 public interface Triangulator {
 	/**
-	 * Performs the triangulation on the given list of polygon points returning a list of triangle shapes.
-	 * @param points the list of points
+	 * Performs the triangulation on the given polygon returning a list of {@link Triangle}s.
+	 * @param points the polygon vertices
 	 * @return List&lt;{@link Triangle}&gt;
 	 * @throws NullPointerException if points is null or contains null points
 	 * @throws IllegalArgumentException if points contains less than 4 points

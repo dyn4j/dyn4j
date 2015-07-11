@@ -24,10 +24,9 @@
  */
 package org.dyn4j;
 
-import org.dyn4j.UnitConversion;
-import org.junit.Test;
-
 import junit.framework.TestCase;
+
+import org.junit.Test;
 
 /**
  * Test case for the {@link UnitConversion} class.

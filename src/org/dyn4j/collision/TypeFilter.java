@@ -25,7 +25,9 @@
 package org.dyn4j.collision;
 
 /**
- * Represents a class typed filter.
+ * A base implementation of a class hierarchy {@link Fixture} {@link Filter}.
+ * <p>
+ * This class is not used directly but instead extended by marker classes (see example below).
  * <p>
  * This filter is designed to allow a <strong>hierarchy</strong> of categories in which nodes can only interact with
  * their parents or nodes of the same type.

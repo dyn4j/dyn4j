@@ -26,15 +26,15 @@ package org.dyn4j.collision.manifold;
 
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Feature;
+import org.dyn4j.geometry.PointFeature;
 import org.dyn4j.geometry.Shape;
-import org.dyn4j.geometry.Vertex;
 
 /**
  * Represents the identification of a specific contact point of a {@link Manifold}.
  * <p>
  * The id is relative to the {@link Convex} {@link Shape}s in a particular collision.
  * <p>
- * For {@link Convex} {@link Shape}s that return {@link Vertex} {@link Feature}s the id
+ * For {@link Convex} {@link Shape}s that return {@link PointFeature} {@link Feature}s the id
  * will always be {@link #DISTANCE}. The {@link #DISTANCE} id relays to any caching mechanism
  * that a distance check should be done rather than an id comparison to determine whether
  * to use a cached value or not. 

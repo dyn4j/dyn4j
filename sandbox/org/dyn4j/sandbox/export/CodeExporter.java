@@ -43,6 +43,7 @@ import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.collision.narrowphase.Sat;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.ContinuousDetectionMode;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.joint.AngleJoint;
@@ -60,6 +61,7 @@ import org.dyn4j.dynamics.joint.WheelJoint;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Mass;
+import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Segment;
@@ -280,9 +282,9 @@ public class CodeExporter {
 			if (body.isMassExplicit()) {
 				sb.append(TAB2).append("body").append(i).append(".setMass(").append(export(mass)).append(");").append(NEW_LINE)
 				// set the mass type
-				.append(TAB2).append("body").append(i).append(".setMassType(Mass.Type.").append(mass.getType()).append(");").append(NEW_LINE);
+				.append(TAB2).append("body").append(i).append(".setMassType(MassType.").append(mass.getType()).append(");").append(NEW_LINE);
 			} else {
-				sb.append(TAB2).append("body").append(i).append(".setMass(Mass.Type.").append(mass.getType()).append(");").append(NEW_LINE);
+				sb.append(TAB2).append("body").append(i).append(".setMass(MassType.").append(mass.getType()).append(");").append(NEW_LINE);
 			}
 			// add the body to the world
 			sb.append(TAB2).append("world.addBody(body").append(i).append(");").append(NEW_LINE).append(NEW_LINE);
@@ -450,7 +452,7 @@ public class CodeExporter {
 		if (settings.getBaumgarte() != Settings.DEFAULT_BAUMGARTE) {
 			sb.append(TAB2).append("settings.setBaumgarte(").append(settings.getBaumgarte()).append(");").append(NEW_LINE);
 		}
-		if (settings.getContinuousDetectionMode() != Settings.ContinuousDetectionMode.ALL) {
+		if (settings.getContinuousDetectionMode() != ContinuousDetectionMode.ALL) {
 			sb.append(TAB2).append("settings.setContinuousDetectionMode(Settings.ContinuousDetectionMode.").append(settings.getContinuousDetectionMode()).append(");").append(NEW_LINE);
 		}
 		return sb.toString();
@@ -471,7 +473,7 @@ public class CodeExporter {
 		// create a temporary mass so we can set the
 		// mass type and get the correct mass and inertia values
 		Mass temp = new Mass(mass);
-		temp.setType(Mass.Type.NORMAL);
+		temp.setType(MassType.NORMAL);
 		sb.append("new Mass(new Vector2(").append(temp.getCenter().x).append(", ").append(temp.getCenter().y).append("), ").append(temp.getMass()).append(", ").append(temp.getInertia()).append(")");
 		return sb.toString();
 	}

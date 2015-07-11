@@ -26,6 +26,11 @@ package org.dyn4j.geometry;
 
 /**
  * Represents an object that can be shifted in the x and y plane.
+ * <p>
+ * Shifting is defined as repositioning for better accuracy. In floating point as an
+ * object's position drifts farther from the origin, the accuracy of calculations begin to
+ * suffer. One way to mitigate this problem is to shift all coordinates back to a reasonable
+ * place.  Classes that implement this interface support this process.
  * @author William Bittle
  * @version 3.2.0
  * @since 3.2.0

@@ -26,10 +26,8 @@ package org.dyn4j.dynamics;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.dynamics.Body;
-import org.dyn4j.dynamics.Force;
 import org.dyn4j.geometry.Geometry;
-import org.dyn4j.geometry.Mass;
+import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
 
@@ -137,7 +135,7 @@ public class ForceTest {
 		World w = new World();
 		Body b = new Body();
 		b.addFixture(Geometry.createCircle(1.0));
-		b.setMass(Mass.Type.NORMAL);
+		b.setMass(MassType.NORMAL);
 		
 		Force f = new Force() {
 			private double time = 0;

@@ -35,9 +35,6 @@ import org.dyn4j.resources.Messages;
  * @since 1.0.0
  */
 public class Transform implements Transformable {
-	/** Two times &pi; */
-	private static final double TWO_PI = Math.PI * 2.0;
-	
 	/**
 	 * An immutable identity transform.
 	 * <p>
@@ -49,13 +46,13 @@ public class Transform implements Transformable {
 		 * @see org.dyn4j.geometry.Transform#identity()
 		 */
 		@Override
-		public void identity() {}
+		public final void identity() {}
 		
 		/* (non-Javadoc)
 		 * @see org.dyn4j.geometry.Transform#rotate(double)
 		 */
 		@Override
-		public void rotate(double theta) {
+		public final void rotate(double theta) {
 			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
 		}
 		
@@ -63,7 +60,7 @@ public class Transform implements Transformable {
 		 * @see org.dyn4j.geometry.Transform#rotate(double, double, double)
 		 */
 		@Override
-		public void rotate(double theta, double x, double y) {
+		public final void rotate(double theta, double x, double y) {
 			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
 		}
 		
@@ -71,7 +68,7 @@ public class Transform implements Transformable {
 		 * @see org.dyn4j.geometry.Transform#rotate(double, org.dyn4j.geometry.Vector)
 		 */
 		@Override
-		public void rotate(double theta, Vector2 point) {
+		public final void rotate(double theta, Vector2 point) {
 			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
 		}
 		
@@ -79,7 +76,7 @@ public class Transform implements Transformable {
 		 * @see org.dyn4j.geometry.Transform#translate(double, double)
 		 */
 		@Override
-		public void translate(double x, double y) {
+		public final void translate(double x, double y) {
 			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
 		}
 		
@@ -87,56 +84,56 @@ public class Transform implements Transformable {
 		 * @see org.dyn4j.geometry.Transform#translate(org.dyn4j.geometry.Vector)
 		 */
 		@Override
-		public void translate(Vector2 vector) {
+		public final void translate(Vector2 vector) {
 			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
 		}
 		
 		/* (non-Javadoc)
 		 * @see org.dyn4j.geometry.Transform#set(org.dyn4j.geometry.Transform)
 		 */
-		public void set(Transform transform) {
+		public final void set(Transform transform) {
 			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
 		}
 		
 		/* (non-Javadoc)
 		 * @see org.dyn4j.geometry.Transform#setTranslation(double, double)
 		 */
-		public void setTranslation(double x, double y) {
+		public final void setTranslation(double x, double y) {
 			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
 		}
 		
 		/* (non-Javadoc)
 		 * @see org.dyn4j.geometry.Transform#setTranslationX(double)
 		 */
-		public void setTranslationX(double x) {
+		public final void setTranslationX(double x) {
 			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
 		}
 		
 		/* (non-Javadoc)
 		 * @see org.dyn4j.geometry.Transform#setTranslationY(double)
 		 */
-		public void setTranslationY(double y) {
+		public final void setTranslationY(double y) {
 			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
 		}
 		
 		/* (non-Javadoc)
 		 * @see org.dyn4j.geometry.Transform#setTranslation(org.dyn4j.geometry.Vector2)
 		 */
-		public void setTranslation(Vector2 translation) {
+		public final void setTranslation(Vector2 translation) {
 			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
 		}
 		
 		/* (non-Javadoc)
 		 * @see org.dyn4j.geometry.Transform#setRotation(double)
 		 */
-		public double setRotation(double theta) {
+		public final double setRotation(double theta) {
 			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
 		}
 		
 		/* (non-Javadoc)
 		 * @see org.dyn4j.geometry.Transform#lerp(org.dyn4j.geometry.Transform, double)
 		 */
-		public void lerp(Transform end, double alpha) {
+		public final void lerp(Transform end, double alpha) {
 			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
 		}
 	};
@@ -378,18 +375,6 @@ public class Transform implements Transformable {
 	 * destination {@link Vector2}.
 	 * @param vector the {@link Vector2} to transform
 	 * @param destination the {@link Vector2} containing the result
-	 * @deprecated replaced with {@link #getTransformedR(Vector2, Vector2)} in 3.1.5
-	 */
-	@Deprecated
-	public void transformR(Vector2 vector, Vector2 destination) {
-		this.getTransformedR(vector, destination);
-	}
-	
-	/**
-	 * Transforms the given {@link Vector2} only by the rotation and returns the result in the
-	 * destination {@link Vector2}.
-	 * @param vector the {@link Vector2} to transform
-	 * @param destination the {@link Vector2} containing the result
 	 * @since 3.1.5
 	 */
 	public void getTransformedR(Vector2 vector, Vector2 destination) {
@@ -425,18 +410,6 @@ public class Transform implements Transformable {
 		v.x = this.m00 * x + this.m10 * y;
 		v.y = this.m01 * x + this.m11 * y;
 		return v;
-	}
-	
-	/**
-	 * Transforms the given {@link Vector2} only by the rotation and returns the result in the
-	 * destination {@link Vector2}.
-	 * @param vector the {@link Vector2} to transform
-	 * @param destination the {@link Vector2} containing the result
-	 * @deprecated replaced with {@link #getInverseTransformedR(Vector2, Vector2)} in 3.1.5
-	 */
-	@Deprecated
-	public void inverseTransformR(Vector2 vector, Vector2 destination) {
-		this.getInverseTransformedR(vector, destination);
 	}
 	
 	/**
@@ -619,8 +592,8 @@ public class Transform implements Transformable {
 		// are two possible rotations depending on the
 		// direction, we always choose the smaller
 		double diff = re - rs;
-		if (diff < -Math.PI) diff += TWO_PI;
-		if (diff > Math.PI) diff -= TWO_PI;
+		if (diff < -Math.PI) diff += Geometry.TWO_PI;
+		if (diff > Math.PI) diff -= Geometry.TWO_PI;
 		// interpolate
 		// its ok if this method produces an angle
 		// outside the range of -pi < theta < pi
@@ -666,8 +639,8 @@ public class Transform implements Transformable {
 		// are two possible rotations depending on the
 		// direction, we always choose the smaller
 		double diff = re - rs;
-		if (diff < -Math.PI) diff += TWO_PI;
-		if (diff > Math.PI) diff -= TWO_PI;
+		if (diff < -Math.PI) diff += Geometry.TWO_PI;
+		if (diff > Math.PI) diff -= Geometry.TWO_PI;
 		// interpolate
 		// its ok if this method produces an angle
 		// outside the range of -pi < theta < pi
@@ -758,8 +731,8 @@ public class Transform implements Transformable {
 		// are two possible rotations depending on the
 		// direction, we always choose the smaller
 		double diff = re - rs;
-		if (diff < -Math.PI) diff += TWO_PI;
-		if (diff > Math.PI) diff -= TWO_PI;
+		if (diff < -Math.PI) diff += Geometry.TWO_PI;
+		if (diff > Math.PI) diff -= Geometry.TWO_PI;
 		// interpolate
 		// its ok if this method produces an angle
 		// outside the range of -pi < theta < pi

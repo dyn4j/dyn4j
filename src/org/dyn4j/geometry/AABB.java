@@ -27,7 +27,19 @@ package org.dyn4j.geometry;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents an axis aligned bounding box.
+ * Implementation of an Axis-Align Bounding Box.
+ * <p>
+ * An {@link AABB} has minimum and maximum coordinates that define the box.
+ * <p>
+ * An {@link AABB} can be unioned or intersected with other {@link AABB}s to combine
+ * them into another {@link AABB}.  If an intersection produces no result, a degenerate {@link AABB}
+ * is returned.  A degenerate {@link AABB} can be tested by the {@link #isDegenerate()} methods and 
+ * is defined as an {@link AABB} who's maximum and minimum are equal.
+ * <p>
+ * {@link AABB}s can also be tested for overlap and (full) containment using the {@link #overlaps(AABB)} 
+ * and {@link #contains(AABB)} method.
+ * <p>
+ * The {@link #expand(double)} method can be used to expand the bounds of the {@link AABB} by some amount.
  * @author William Bittle
  * @version 3.2.0
  * @since 3.0.0

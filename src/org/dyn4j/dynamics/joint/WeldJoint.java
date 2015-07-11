@@ -48,7 +48,7 @@ import org.dyn4j.resources.Messages;
  * @author William Bittle
  * @version 3.2.0
  * @since 1.0.0
- * @see <a href="http://www.dyn4j.org/documentation/joints/#Weld_Joint">Documentation</a>
+ * @see <a href="http://www.dyn4j.org/documentation/joints/#Weld_Joint" target="_blank">Documentation</a>
  */
 public class WeldJoint extends Joint implements Shiftable, DataContainer {
 	/** The local anchor point on the first {@link Body} */

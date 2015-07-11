@@ -28,16 +28,17 @@ import org.dyn4j.DataContainer;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents an ellipse shape.
+ * Implementation of an Ellipse {@link Convex} {@link Shape}.
  * <p>
  * An ellipse must have a width and height greater than zero.
  * <p>
- * <b>This shape is only supported by the GJK collision detection algorithm</b>. An 
- * <code>UnsupportedOperationException</code> is thrown when this shape is used with SAT.  If you are using
- * or are planning on using the SAT collision detection algorithm, you can use the 
+ * <b>This shape is only supported by the GJK collision detection algorithm</b>
+ * <p>
+ * An <code>UnsupportedOperationException</code> is thrown when this shape is used with SAT.  If you 
+ * are using or are planning on using the SAT collision detection algorithm, you can use the 
  * {@link Geometry#createPolygonalEllipse(int, double, double)} method to create a half ellipse
  * {@link Polygon} approximation. Another option is to use the GJK or your own collision detection
- * algorithm for this shape only and use SAT on others (fallback).
+ * algorithm for this shape only and use SAT on others.
  * @author William Bittle
  * @since 3.2.0
  * @version 3.1.7
@@ -61,8 +62,8 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	/**
 	 * Minimal constructor.
 	 * <p>
-	 * This creates an axis-aligned ellipse fitting inside a rectangle
-	 * of the given width and height.
+	 * This creates an axis-aligned ellipse fitting inside a rectangle of the given width and 
+	 * height centered at the origin.
 	 * @param width the width
 	 * @param height the height
 	 * @throws IllegalArgumentException if either the width or height is less than or equal to zero
@@ -160,7 +161,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		// obtain the farthest point along the given vector
 		Vector2 farthest = this.getFarthestPoint(vector, transform);
 		// for an ellipse the farthest feature along a vector will always be a vertex
-		return new Vertex(farthest);
+		return new PointFeature(farthest);
 	}
 	
 	/* (non-Javadoc)

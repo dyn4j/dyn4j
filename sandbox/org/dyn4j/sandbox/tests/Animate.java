@@ -24,14 +24,14 @@
  */
 package org.dyn4j.sandbox.tests;
 
-import com.jogamp.opengl.GL2;
-
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.joint.MotorJoint;
 import org.dyn4j.geometry.Geometry;
-import org.dyn4j.geometry.Mass;
+import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
+
+import com.jogamp.opengl.GL2;
 
 /**
  * Compiled test for the MotorJoint class.
@@ -55,14 +55,14 @@ public class Animate extends CompiledSimulation {
 		
 		SandboxBody floor = new SandboxBody();
 		floor.addFixture(Geometry.createRectangle(40.0, 0.5));
-		floor.setMass(Mass.Type.INFINITE);
+		floor.setMass(MassType.INFINITE);
 		floor.setUserData("Floor");
 		
 		SandboxBody character = new SandboxBody();
 		BodyFixture bf = character.addFixture(Geometry.createRectangle(2.0, 0.5));
 		bf.setDensity(2.0);
 		bf.setFriction(0.6);
-		character.setMass(Mass.Type.NORMAL);
+		character.setMass(MassType.NORMAL);
 		character.translate(0.0, 0.5);
 		character.setUserData("Character");
 		

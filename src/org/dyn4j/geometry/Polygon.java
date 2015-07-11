@@ -29,10 +29,10 @@ import org.dyn4j.Epsilon;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents a {@link Convex} {@link Polygon}.
+ * Implementation of an arbitrary polygon {@link Convex} {@link Shape}.
  * <p>
- * A {@link Polygon} must have at least 3 vertices where one of which is not colinear with the other two
- * simultaneously.  A {@link Polygon} must also be {@link Convex} and have anti-clockwise winding of points.
+ * A {@link Polygon} must have at least 3 vertices where one of which is not colinear with the other two.
+ * A {@link Polygon} must also be {@link Convex} and have counter-clockwise winding of points.
  * <p>
  * A polygon cannot have coincident vertices.
  * @author William Bittle
@@ -40,9 +40,6 @@ import org.dyn4j.resources.Messages;
  * @since 1.0.0
  */
 public class Polygon extends Wound implements Convex, Shape, Transformable, DataContainer {
-	/** Inverse of 3 */
-	private static final double INV3 = 1.0 / 3.0;
-	
 	/**
 	 * Default constructor for sub classes.
 	 */
@@ -58,7 +55,7 @@ public class Polygon extends Wound implements Convex, Shape, Transformable, Data
 	 * <p>
 	 * A polygon must have 3 or more vertices, of which one is not colinear with the other two.
 	 * <p>
-	 * A polygon must also be convex and have anti-clockwise winding.
+	 * A polygon must also be convex and have counter-clockwise winding.
 	 * @param vertices the array of vertices
 	 * @throws NullPointerException if vertices is null or contains a null element
 	 * @throws IllegalArgumentException if vertices contains less than 3 points, contains coincident points, is not convex, or has clockwise winding
@@ -299,7 +296,7 @@ public class Polygon extends Wound implements Convex, Shape, Transformable, Data
 	 * @see org.dyn4j.geometry.Convex#getFarthestFeature(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform)
 	 */
 	@Override
-	public Edge getFarthestFeature(Vector2 vector, Transform transform) {
+	public EdgeFeature getFarthestFeature(Vector2 vector, Transform transform) {
 		// transform the normal into local space
 		Vector2 localn = transform.getInverseTransformedR(vector);
 		Vector2 maximum = new Vector2();
@@ -331,18 +328,18 @@ public class Polygon extends Wound implements Convex, Shape, Transformable, Data
 		Vector2 rightN = this.normals[index];
 		// create the maximum point for the feature (transform the maximum into world space)
 		transform.transform(maximum);
-		Vertex vm = new Vertex(maximum, index);
+		PointFeature vm = new PointFeature(maximum, index);
 		// is the left or right edge more perpendicular?
 		if (leftN.dot(localn) < rightN.dot(localn)) {
 			Vector2 left = transform.getTransformed(this.vertices[l]);
-			Vertex vl = new Vertex(left, l);
+			PointFeature vl = new PointFeature(left, l);
 			// make sure the edge is the right winding
-			return new Edge(vm, vl, vm, maximum.to(left), index + 1);
+			return new EdgeFeature(vm, vl, vm, maximum.to(left), index + 1);
 		} else {
 			Vector2 right = transform.getTransformed(this.vertices[r]);
-			Vertex vr = new Vertex(right, r);
+			PointFeature vr = new PointFeature(right, r);
 			// make sure the edge is the right winding
-			return new Edge(vr, vm, vm, right.to(maximum), index);
+			return new EdgeFeature(vr, vm, vm, right.to(maximum), index);
 		}
 	}
 	
@@ -388,24 +385,18 @@ public class Polygon extends Wound implements Convex, Shape, Transformable, Data
 	 * <p>
 	 * Finding the area of a {@link Polygon} can be done by using the following
 	 * summation:
-	 * <pre>
-	 * 0.5 * &sum;(x<sub>i</sub> * y<sub>i + 1</sub> - x<sub>i + 1</sub> * y<sub>i</sub>)
-	 * </pre>
+	 * <p style="white-space: pre;"> 0.5 * &sum;(x<sub>i</sub> * y<sub>i + 1</sub> - x<sub>i + 1</sub> * y<sub>i</sub>)</p>
 	 * Finding the area weighted centroid can be done by using the following
 	 * summation:
-	 * <pre>
-	 * 1 / (6 * A) * &sum;(p<sub>i</sub> + p<sub>i + 1</sub>) * (x<sub>i</sub> * y<sub>i + 1</sub> - x<sub>i + 1</sub> * y<sub>i</sub>)
-	 * </pre>
+	 * <p style="white-space: pre;"> 1 / (6 * A) * &sum;(p<sub>i</sub> + p<sub>i + 1</sub>) * (x<sub>i</sub> * y<sub>i + 1</sub> - x<sub>i + 1</sub> * y<sub>i</sub>)</p>
 	 * Finding the inertia tensor can by done by using the following equation:
-	 * <pre>
+	 * <p style="white-space: pre;">
 	 *          &sum;(p<sub>i + 1</sub> x p<sub>i</sub>) * (p<sub>i</sub><sup>2</sup> + p<sub>i</sub> &middot; p<sub>i + 1</sub> + p<sub>i + 1</sub><sup>2</sup>)
 	 * m / 6 * -------------------------------------------
 	 *                        &sum;(p<sub>i + 1</sub> x p<sub>i</sub>)
-	 * </pre>
+	 * </p>
 	 * Where the mass is computed by:
-	 * <pre>
-	 * d * area
-	 * </pre>
+	 * <p style="white-space: pre;"> d * area</p>
 	 * @param density the density in kg/m<sup>2</sup>
 	 * @return {@link Mass} the {@link Mass} of this {@link Polygon}
 	 */
@@ -442,8 +433,8 @@ public class Polygon extends Wound implements Convex, Shape, Transformable, Data
 			// (p1 + p2) * (D / 6)
 			// = (x1 + x2) * (yi * x(i+1) - y(i+1) * xi) / 6
 			// we will divide by the total area later
-			center.x += (p1.x + p2.x) * Polygon.INV3 * triangleArea;
-			center.y += (p1.y + p2.y) * Polygon.INV3 * triangleArea;
+			center.x += (p1.x + p2.x) * Geometry.INV_3 * triangleArea;
+			center.y += (p1.y + p2.y) * Geometry.INV_3 * triangleArea;
 
 			// (yi * x(i+1) - y(i+1) * xi) * (p2^2 + p2 . p1 + p1^2)
 			I += triangleArea * (p2.dot(p2) + p2.dot(p1) + p1.dot(p1));
@@ -487,14 +478,17 @@ public class Polygon extends Wound implements Convex, Shape, Transformable, Data
             vx = Vector2.X_AXIS.dot(p);
             vy = Vector2.Y_AXIS.dot(p);
             // compare the x values
-            if (vx < minX) minX = vx;
-            else if (vx > maxX) maxX = vx;
-            if (vy < minY) minY = vy;
-            else if (vy > maxY) maxY = vy;
-//            minX = Math.min(minX, vx);
-//            maxX = Math.max(maxX, vx);
-//            minY = Math.min(minY, vy);
-//            maxY = Math.max(maxY, vy);
+            if (vx < minX) {
+            	minX = vx;
+            } else if (vx > maxX) {
+            	maxX = vx;
+            }
+            // compare the y values
+            if (vy < minY) {
+            	minY = vy;
+            } else if (vy > maxY) {
+            	maxY = vy;
+            }
         }
 		// create the aabb
 		return new AABB(minX, minY, maxX, maxY);

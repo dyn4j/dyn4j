@@ -31,8 +31,8 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents a {@link Penetration} of one {@link Convex} {@link Shape} into another.
  * <p>
- * The penetration axis should always be normalized and point from {@link Convex}1
- * to {@link Convex}2.
+ * The penetration normal should always be a normalized vector that points from the first
+ * {@link Convex} {@link Shape} to the second.
  * @author William Bittle
  * @version 3.0.2
  * @since 1.0.0

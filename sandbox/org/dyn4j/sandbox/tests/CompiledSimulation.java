@@ -24,9 +24,9 @@
  */
 package org.dyn4j.sandbox.tests;
 
-import com.jogamp.opengl.GL2;
-
 import org.dyn4j.sandbox.Simulation;
+
+import com.jogamp.opengl.GL2;
 
 /**
  * Represents a simulation that is pre-compiled and therefore should not be edited.

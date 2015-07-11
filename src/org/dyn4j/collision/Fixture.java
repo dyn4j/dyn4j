@@ -27,7 +27,6 @@ package org.dyn4j.collision;
 import java.util.UUID;
 
 import org.dyn4j.DataContainer;
-import org.dyn4j.collision.Filter;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Shape;
 import org.dyn4j.resources.Messages;

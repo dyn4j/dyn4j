@@ -29,13 +29,6 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.geometry.Circle;
-import org.dyn4j.geometry.Geometry;
-import org.dyn4j.geometry.Mass;
-import org.dyn4j.geometry.Polygon;
-import org.dyn4j.geometry.Rectangle;
-import org.dyn4j.geometry.Segment;
-import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
 
 /**
@@ -108,7 +101,7 @@ public class MassTest {
 	public void createFixedLinearVelocity() {
 		Mass m = new Mass(new Vector2(), 0, 1.0);
 		TestCase.assertFalse(m.isInfinite());
-		TestCase.assertEquals(Mass.Type.FIXED_LINEAR_VELOCITY, m.getType());
+		TestCase.assertEquals(MassType.FIXED_LINEAR_VELOCITY, m.getType());
 		TestCase.assertTrue(m.getCenter().equals(new Vector2()));
 		TestCase.assertEquals(m.getMass(), 0.0);
 		TestCase.assertEquals(m.getInertia(), 1.0);
@@ -122,7 +115,7 @@ public class MassTest {
 	public void createFixedAngularVelocity() {
 		Mass m = new Mass(new Vector2(), 1.0, 0.0);
 		TestCase.assertFalse(m.isInfinite());
-		TestCase.assertEquals(Mass.Type.FIXED_ANGULAR_VELOCITY, m.getType());
+		TestCase.assertEquals(MassType.FIXED_ANGULAR_VELOCITY, m.getType());
 		TestCase.assertTrue(m.getCenter().equals(new Vector2()));
 		TestCase.assertEquals(m.getMass(), 1.0);
 		TestCase.assertEquals(m.getInertia(), 0.0);
@@ -329,7 +322,7 @@ public class MassTest {
 		
 		// setting the type should not alter the
 		// mass values
-		mi.setType(Mass.Type.INFINITE);
+		mi.setType(MassType.INFINITE);
 		TestCase.assertTrue(mi.isInfinite());
 		TestCase.assertFalse(0.0 == mi.mass);
 		TestCase.assertFalse(0.0 == mi.invMass);
@@ -341,7 +334,7 @@ public class MassTest {
 		TestCase.assertEquals(0.0, mi.getInertia());
 		TestCase.assertEquals(0.0, mi.getInverseInertia());
 		
-		mi.setType(Mass.Type.FIXED_ANGULAR_VELOCITY);
+		mi.setType(MassType.FIXED_ANGULAR_VELOCITY);
 		TestCase.assertFalse(0.0 == mi.mass);
 		TestCase.assertFalse(0.0 == mi.invMass);
 		TestCase.assertFalse(0.0 == mi.inertia);
@@ -349,7 +342,7 @@ public class MassTest {
 		TestCase.assertEquals(0.0, mi.getInertia());
 		TestCase.assertEquals(0.0, mi.getInverseInertia());
 		
-		mi.setType(Mass.Type.FIXED_LINEAR_VELOCITY);
+		mi.setType(MassType.FIXED_LINEAR_VELOCITY);
 		TestCase.assertFalse(0.0 == mi.mass);
 		TestCase.assertFalse(0.0 == mi.invMass);
 		TestCase.assertFalse(0.0 == mi.inertia);

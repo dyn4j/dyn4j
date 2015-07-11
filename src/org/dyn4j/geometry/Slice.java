@@ -28,7 +28,9 @@ import org.dyn4j.DataContainer;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents a section or slice of a Circle shape.
+ * Implementation of a Slice {@link Convex} {@link Shape}.
+ * <p>
+ * A slice is a piece of a {@link Circle}.
  * <p>
  * This shape can represent any slice of a circle up to 180 degrees (half circle).
  * @author William Bittle
@@ -232,7 +234,7 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 		if (Math.abs(localAxis.getAngleBetween(this.localXAxis)) <= this.alpha) {
 			// then its the farthest point
 			Vector2 point = this.getFarthestPoint(vector, transform);
-			return new Vertex(point);
+			return new PointFeature(point);
 		} else {
 			// check if this section is nearly a half circle
 			if ((Math.PI - this.theta) <= 1.0e-6) {
@@ -248,7 +250,7 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 				return Segment.getFarthestFeature(this.vertices[0], this.vertices[2], vector, transform);
 			} else {
 				// then its the tip point
-				return new Vertex(transform.getTransformed(this.vertices[0]));
+				return new PointFeature(transform.getTransformed(this.vertices[0]));
 			}
 		}
 	}

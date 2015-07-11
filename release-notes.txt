@@ -10,6 +10,8 @@ Deprecated:
   - Body.setMass() it was odd that it set the mass type to Mass.Type.NORMAL.
   
 Breaking Changes:
+  - The Mass.Type enumeration has been moved to its own class file
+    and renamed to MassType.
   - The BroadphaseDetector interface has changed drastically.
   - The three SAP algorithms have been replaced by one.
   - Due to changes in the BroadphaseDetector interface and output, some 
@@ -19,10 +21,12 @@ Breaking Changes:
     lists.
   - The Bounds interface changed to only include the Translatable
     interface due to the some bounds types not supporting rotation.
-  - Many member variables have been made final.
+  - Many member variables and methods have been made final.
   - Made a few internal classes package private to clean up the API.
   - Many deprecated methods and classes have been removed.
-    
+  - The Settings.ContinuousDetectionMode enumeration has been moved to its own
+    class file with the same name.
+  
 Other:
   - Cleaner API with less classes to sift through and more interface options
   	for extensibility.

@@ -27,26 +27,28 @@ package org.dyn4j.geometry.hull;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Represents a convex hull of linked vertices.
+ * Represents a convex hull of {@link LinkedVertex}es.
+ * <p>
+ * The root vertex can be any point on the hull.
  * @author William Bittle
  * @version 3.2.0
  * @since 3.2.0
  */
-class LinkedVertexHull {
+final class LinkedVertexHull {
 	/** The hull's root vertex */
-	private LinkedVertex root;
+	LinkedVertex root;
 
 	/** The vertex that has the smallest x coordinate */
-	private LinkedVertex leftMost;
+	LinkedVertex leftMost;
 	
 	/** The vertex that has the largest x coordinate */
-	private LinkedVertex rightMost;
+	LinkedVertex rightMost;
 	
 	/** The total number of vertices on the hull */
-	private int size;
+	int size;
 	
-	/** Hidden default constructor */
-	private LinkedVertexHull() {}
+	/** Default constructor */
+	public LinkedVertexHull() {}
 	
 	/**
 	 * Create a convex {@link LinkedVertexHull} of one point.
@@ -75,7 +77,7 @@ class LinkedVertexHull {
 	 * Returns a new array representing this convex hull.
 	 * @return {@link Vector2}[]
 	 */
-	public Vector2[] toArray() {
+	public final Vector2[] toArray() {
 		Vector2[] points = new Vector2[this.size];
 		LinkedVertex vertex = this.root;
 		for (int i = 0; i < this.size; i++) {
@@ -94,7 +96,7 @@ class LinkedVertexHull {
 	 * @param right the right convex {@link LinkedVertexHull}
 	 * @return {@link LinkedVertexHull} the merged convex hull
 	 */
-	public static LinkedVertexHull merge(LinkedVertexHull left, LinkedVertexHull right) {
+	public static final LinkedVertexHull merge(LinkedVertexHull left, LinkedVertexHull right) {
 		// check the size of the hulls
 		if (left.size == 1 && right.size == 1) {
 			// the 1,1 case
@@ -114,7 +116,7 @@ class LinkedVertexHull {
 	 * @param right the right hull
 	 * @return {@link LinkedVertexHull} a line segment hull
 	 */
-	private static LinkedVertexHull mergePointPoint(LinkedVertexHull left, LinkedVertexHull right) {
+	static final LinkedVertexHull mergePointPoint(LinkedVertexHull left, LinkedVertexHull right) {
 		LinkedVertex leftRoot = left.root;
 		LinkedVertex rightRoot = right.root;
 		// wire up the hulls
@@ -138,7 +140,7 @@ class LinkedVertexHull {
 	 * @param right the right hull
 	 * @return {@link LinkedVertexHull} a triangular hull
 	 */
-	private static LinkedVertexHull mergePointSegment(LinkedVertexHull left, LinkedVertexHull right) {
+	static final LinkedVertexHull mergePointSegment(LinkedVertexHull left, LinkedVertexHull right) {
 		// the 1,2 or 2,1 case
 		LinkedVertexHull hull = new LinkedVertexHull();
 		hull.size = 3;
@@ -195,7 +197,7 @@ class LinkedVertexHull {
 	 * @param right the right hull
 	 * @return {@link LinkedVertexHull} a convex hull
 	 */
-	private static LinkedVertexHull mergeHulls(LinkedVertexHull left, LinkedVertexHull right) {
+	static final LinkedVertexHull mergeHulls(LinkedVertexHull left, LinkedVertexHull right) {
 		// otherwise we need to run the algorithm to find the upper and lower edges
 		// that connect the two hulls such that the resulting hull remains convex
 		LinkedVertexHull hull = new LinkedVertexHull();

@@ -27,17 +27,19 @@ package org.dyn4j.geometry;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents a ray.
+ * Implementation of a ray.
+ * <p>
+ * A ray is a vector with a start point.
  * @author William Bittle
  * @version 3.2.0
  * @since 2.0.0
  */
 public class Ray {
 	/** The start point */
-	protected final Vector2 start;
+	protected Vector2 start;
 	
 	/** The direction */
-	protected final Vector2 direction;
+	protected Vector2 direction;
 	
 	/**
 	 * Creates a ray from the origin in the given direction.
@@ -100,6 +102,25 @@ public class Ray {
 	public Vector2 getStart() {
 		return this.start;
 	}
+
+	/**
+	 * Sets the start point.
+	 * @param start the start point
+	 * @throws NullPointerException if start is null
+	 */
+	public void setStart(Vector2 start) {
+		if (start == null) throw new NullPointerException(Messages.getString("geometry.ray.nullStart"));
+		this.start = start;
+	}
+	
+	/**
+	 * Sets the direction of this ray in radians.
+	 * @param direction the direction in radians
+	 * @since 3.0.2
+	 */
+	public void setDirection(double direction) {
+		this.direction = new Vector2(direction);
+	}
 	
 	/**
 	 * Returns the direction of this ray in radians.
@@ -108,6 +129,18 @@ public class Ray {
 	 */
 	public double getDirection() {
 		return this.direction.getDirection();
+	}
+
+	/**
+	 * Sets the direction.
+	 * @param direction the direction; should be normalized
+	 * @throws NullPointerException if direction is null
+	 * @throws IllegalArgumentException if direction is the zero vector
+	 */
+	public void setDirection(Vector2 direction) {
+		if (direction == null) throw new NullPointerException(Messages.getString("geometry.ray.nullDirection"));
+		if (direction.isZero()) throw new IllegalArgumentException(Messages.getString("geometry.ray.zeroDirection"));
+		this.direction = direction;
 	}
 
 	/**

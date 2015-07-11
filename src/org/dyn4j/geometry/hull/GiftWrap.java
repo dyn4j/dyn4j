@@ -38,7 +38,7 @@ import org.dyn4j.resources.Messages;
  * the points of the convex hull.
  * <p>
  * This algorithm is O(nh) worst case where n is the number of points and h is the
- * number of sides in the convex hull.
+ * number of sides in the resulting convex hull.
  * @author William Bittle
  * @version 2.2.3
  * @since 2.2.0
@@ -50,7 +50,7 @@ public class GiftWrap implements HullGenerator {
 	@Override
 	public Vector2[] generate(Vector2... points) {
 		// check for null array
-		if (points == null) return null;
+		if (points == null) throw new NullPointerException(Messages.getString("geometry.hull.nullArray"));
 		
 		// get the size
 		int size = points.length;

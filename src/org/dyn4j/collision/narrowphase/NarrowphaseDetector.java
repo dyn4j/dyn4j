@@ -38,7 +38,7 @@ import org.dyn4j.geometry.Transform;
  * <p>
  * All {@link NarrowphaseDetector}s are only required to perform tests on {@link Convex}
  * {@link Shape}s.  Doing so allows for faster and simpler code.  Concave objects can also
- * be supported by performing a convex decomposition.
+ * be supported by performing a convex decomposition and testing the convex pieces individually.
  * @author William Bittle
  * @version 1.0.3
  * @since 1.0.0

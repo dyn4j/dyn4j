@@ -26,9 +26,6 @@ package org.dyn4j.sandbox;
 
 import java.awt.Color;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
-
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Convex;
@@ -36,6 +33,9 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.geometry.Wound;
 import org.dyn4j.sandbox.utilities.ColorUtilities;
 import org.dyn4j.sandbox.utilities.RenderUtilities;
+
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
 
 /**
  * Custom body class used to store colors and a name.

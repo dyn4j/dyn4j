@@ -31,7 +31,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents a {@link Separation} of one {@link Convex} {@link Shape} between another.
  * <p>
- * The separation axis should always be normalized.
+ * The separation normal should always be normalized.
  * @author William Bittle
  * @version 3.0.2
  * @since 1.0.0

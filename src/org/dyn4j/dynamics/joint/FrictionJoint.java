@@ -45,7 +45,7 @@ import org.dyn4j.resources.Messages;
  * @author William Bittle
  * @version 3.2.0
  * @since 1.0.0
- * @see <a href="http://www.dyn4j.org/documentation/joints/#Friction_Joint">Documentation</a>
+ * @see <a href="http://www.dyn4j.org/documentation/joints/#Friction_Joint" target="_blank">Documentation</a>
  */
 public class FrictionJoint extends Joint implements Shiftable, DataContainer {
 	/** The local anchor point on the first {@link Body} */

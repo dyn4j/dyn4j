@@ -26,9 +26,6 @@ package org.dyn4j.sandbox.utilities;
 
 import java.text.MessageFormat;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
-
 import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.collision.Bounds;
 import org.dyn4j.dynamics.Body;
@@ -56,6 +53,9 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.geometry.Wound;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.resources.Messages;
+
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
 
 /**
  * Utility class used to perform common rendering operations.

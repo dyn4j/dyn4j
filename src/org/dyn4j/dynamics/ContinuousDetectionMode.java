@@ -22,67 +22,36 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.geometry;
+package org.dyn4j.dynamics;
 
 /**
- * Represents a point on the edge of a {@link Shape}.
+ * Enumeration of Continuous Collision Detection modes.
  * @author William Bittle
- * @version 3.2.0
- * @since 1.0.0
+ * @version 2.2.3
+ * @since 2.2.3
  */
-public class Vertex extends Feature {
-	/** The vertex or point */
-	protected final Vector2 point;
-	
-	/** The index in the  */
-	protected final int index;
-	
-	/**
-	 * Optional constructor.
+public enum ContinuousDetectionMode {
+	/** CCD is not performed at all */
+	NONE,
+	/** 
+	 * CCD is performed on bodies flagged as bullets only.
 	 * <p>
-	 * Assumes the given point is not indexed.
-	 * @param point the vertex point
+	 * More precisely, the following pairs are tested:
+	 * <ul>
+	 * <li>Bullet vs. Dynamic</li>
+	 * <li>Bullet vs. Static</li>
+	 * </ul>
 	 */
-	public Vertex(Vector2 point) {
-		this(point, Feature.NOT_INDEXED);
-	}
-	
-	/**
-	 * Full constructor.
-	 * @param point the vertex point
-	 * @param index the index 
+	BULLETS_ONLY,
+	/** 
+	 * CCD is performed on all bodies against static bodies.
+	 * <p>
+	 * More precisely, the following pairs are tested:
+	 * <ul>
+	 * <li>Dynamic vs. Static</li>
+	 * <li>Bullet vs. Static</li>
+	 * <li>Bullet vs. Dynamic</li>
+	 * </ul> 
 	 */
-	public Vertex(Vector2 point, int index) {
-		super(Feature.Type.VERTEX);
-		this.point = point;
-		this.index = index;
-	}
-	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("Vertex[Point=").append(this.point)
-		.append("|Index=").append(this.index)
-		.append("]");
-		return sb.toString();
-	}
-	
-	/**
-	 * Returns the point.
-	 * @return {@link Vector2}
-	 */
-	public Vector2 getPoint() {
-		return this.point;
-	}
-	
-	/**
-	 * Returns the index of this vertex.
-	 * @return int
-	 */
-	public int getIndex() {
-		return this.index;
-	}
+	ALL
 }

@@ -29,7 +29,9 @@ import org.dyn4j.Epsilon;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents a line {@link Segment}.
+ * Implementation of a Line Segment {@link Convex} {@link Shape}.
+ * <p>
+ * This class represents a line segment that is infinitely thin.
  * @author William Bittle
  * @version 3.1.6
  * @since 1.0.0
@@ -116,11 +118,9 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 	
 	/**
 	 * Determines where the point is relative to the given line.
-	 * <pre>
-	 * Set L = linePoint2 - linePoint1
+	 * <p style="white-space: pre;"> Set L = linePoint2 - linePoint1
 	 * Set P = point - linePoint1
-	 * location = L.cross(P)
-	 * </pre>
+	 * location = L.cross(P)</p>
 	 * Returns 0 if the point lies on the line created from the line segment.<br>
 	 * Assuming a right handed coordinate system:<br>
 	 * Returns &lt; 0 if the point lies on the right side of the line<br>
@@ -142,11 +142,9 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 	 * Returns the point on the given line closest to the given point.
 	 * <p>
 	 * Project the point onto the line:
-	 * <pre>
-	 * V<sub>line</sub> = P<sub>1</sub> - P<sub>0</sub>
+	 * <p style="white-space: pre;"> V<sub>line</sub> = P<sub>1</sub> - P<sub>0</sub>
 	 * V<sub>point</sub> = P<sub>0</sub> - P
-	 * P<sub>closest</sub> = V<sub>point</sub>.project(V<sub>line</sub>)
-	 * </pre>
+	 * P<sub>closest</sub> = V<sub>point</sub>.project(V<sub>line</sub>)</p>
 	 * Assumes all points are in world space.
 	 * @see Vector2#project(Vector2)
 	 * @param point the point
@@ -239,26 +237,18 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 	 * Returns the intersection point of the two lines or null if they are parallel or coincident.
 	 * <p>
 	 * If we let:
-	 * <pre>
-	 * A = A<sub>p2</sub> - A<sub>p1</sub>
-	 * B = B<sub>p2</sub> - B<sub>p1</sub>
-	 * </pre>
+	 * <p style="white-space: pre;"> A = A<sub>p2</sub> - A<sub>p1</sub>
+	 * B = B<sub>p2</sub> - B<sub>p1</sub></p>
 	 * we can create two parametric equations:
-	 * <pre>
-	 * Q = A<sub>p1</sub> + t<sub>a</sub>A
-	 * Q = B<sub>p1</sub> + t<sub>b</sub>B
-	 * </pre>
+	 * <p style="white-space: pre;"> Q = A<sub>p1</sub> + t<sub>a</sub>A
+	 * Q = B<sub>p1</sub> + t<sub>b</sub>B</p>
 	 * Where Q is the intersection point:
-	 * <pre>
-	 * A<sub>p1</sub> + t<sub>a</sub>A = B<sub>p1</sub> + t<sub>b</sub>B
-	 * </pre>
+	 * <p style="white-space: pre;"> A<sub>p1</sub> + t<sub>a</sub>A = B<sub>p1</sub> + t<sub>b</sub>B</p>
 	 * We can solve for t<sub>b</sub> by applying the cross product with A on both sides:
-	 * <pre>
-	 * (A<sub>p1</sub> + t<sub>a</sub>A) x A = (B<sub>p1</sub> + t<sub>b</sub>B) x A
+	 * <p style="white-space: pre;"> (A<sub>p1</sub> + t<sub>a</sub>A) x A = (B<sub>p1</sub> + t<sub>b</sub>B) x A
 	 * A<sub>p1</sub> x A = B<sub>p1</sub> x A + t<sub>b</sub>B x A
 	 * (A<sub>p1</sub> - B<sub>p1</sub>) x A = t<sub>b</sub>B x A
-	 * t<sub>b</sub> = ((A<sub>p1</sub> - B<sub>p1</sub>) x A) / (B x A)
-	 * </pre>
+	 * t<sub>b</sub> = ((A<sub>p1</sub> - B<sub>p1</sub>) x A) / (B x A)</p>
 	 * If B x A == 0 then the lines are parallel.  If both the top and bottom are zero 
 	 * then the lines are coincident.
 	 * <p>
@@ -320,26 +310,18 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 	 * or don't intersect.
 	 * <p>
 	 * If we let:
-	 * <pre>
-	 * A = A<sub>p2</sub> - A<sub>p1</sub>
-	 * B = B<sub>p2</sub> - B<sub>p1</sub>
-	 * </pre>
+	 * <p style="white-space: pre;"> A = A<sub>p2</sub> - A<sub>p1</sub>
+	 * B = B<sub>p2</sub> - B<sub>p1</sub></p>
 	 * we can create two parametric equations:
-	 * <pre>
-	 * Q = A<sub>p1</sub> + t<sub>a</sub>A
-	 * Q = B<sub>p1</sub> + t<sub>b</sub>B
-	 * </pre>
+	 * <p style="white-space: pre;"> Q = A<sub>p1</sub> + t<sub>a</sub>A
+	 * Q = B<sub>p1</sub> + t<sub>b</sub>B</p>
 	 * Where Q is the intersection point:
-	 * <pre>
-	 * A<sub>p1</sub> + t<sub>a</sub>A = B<sub>p1</sub> + t<sub>b</sub>B
-	 * </pre>
+	 * <p style="white-space: pre;"> A<sub>p1</sub> + t<sub>a</sub>A = B<sub>p1</sub> + t<sub>b</sub>B</p>
 	 * We can solve for t<sub>b</sub> by applying the cross product with A on both sides:
-	 * <pre>
-	 * (A<sub>p1</sub> + t<sub>a</sub>A) x A = (B<sub>p1</sub> + t<sub>b</sub>B) x A
+	 * <p style="white-space: pre;"> (A<sub>p1</sub> + t<sub>a</sub>A) x A = (B<sub>p1</sub> + t<sub>b</sub>B) x A
 	 * A<sub>p1</sub> x A = B<sub>p1</sub> x A + t<sub>b</sub>B x A
 	 * (A<sub>p1</sub> - B<sub>p1</sub>) x A = t<sub>b</sub>B x A
-	 * t<sub>b</sub> = ((A<sub>p1</sub> - B<sub>p1</sub>) x A) / (B x A)
-	 * </pre>
+	 * t<sub>b</sub> = ((A<sub>p1</sub> - B<sub>p1</sub>) x A) / (B x A)</p>
 	 * If B x A == 0 then the segments are parallel.  If the top == 0 then they don't intersect.  If both the
 	 * top and bottom are zero then the segments are coincident.
 	 * <p>
@@ -421,11 +403,11 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 	 * @param v2 the second segment vertex
 	 * @param vector the direction
 	 * @param transform the local to world space {@link Transform} of this {@link Convex} {@link Shape}
-	 * @return {@link Edge}
+	 * @return {@link EdgeFeature}
 	 * @throws NullPointerException if v1, v2, vector, or transform is null
 	 * @since 3.1.5
 	 */
-	public static final Edge getFarthestFeature(Vector2 v1, Vector2 v2, Vector2 vector, Transform transform) {
+	public static final EdgeFeature getFarthestFeature(Vector2 v1, Vector2 v2, Vector2 vector, Transform transform) {
 		// the farthest feature for a line is always the line itself
 		Vector2 max = null;
 		// get the vertices
@@ -445,14 +427,14 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 		}
 		// return the points of the segment in the
 		// opposite direction as the other shape
-		Vertex vp1 = new Vertex(p1, 0);
-		Vertex vp2 = new Vertex(p2, 1);
-		Vertex vm = new Vertex(max, index);
+		PointFeature vp1 = new PointFeature(p1, 0);
+		PointFeature vp2 = new PointFeature(p2, 1);
+		PointFeature vm = new PointFeature(max, index);
 		// make sure the edge is the right winding
 		if (p1.to(p2).right().dot(vector) > 0) {
-			return new Edge(vp2, vp1, vm, p2.to(p1), 0);
+			return new EdgeFeature(vp2, vp1, vm, p2.to(p1), 0);
 		} else {
-			return new Edge(vp1, vp2, vm, p1.to(p2), 0);
+			return new EdgeFeature(vp1, vp2, vm, p1.to(p2), 0);
 		}
 	}
 	
@@ -633,10 +615,10 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 	 * For a {@link Segment} it's always the {@link Segment} itself.
 	 * @param vector the direction
 	 * @param transform the local to world space {@link Transform} of this {@link Convex} {@link Shape}
-	 * @return {@link Edge}
+	 * @return {@link EdgeFeature}
 	 */
 	@Override
-	public Edge getFarthestFeature(Vector2 vector, Transform transform) {
+	public EdgeFeature getFarthestFeature(Vector2 vector, Transform transform) {
 		return Segment.getFarthestFeature(this.vertices[0], this.vertices[1], vector, transform);
 	}
 	
@@ -665,10 +647,8 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 	/**
 	 * Creates a {@link Mass} object using the geometric properties of
 	 * this {@link Segment} and the given density.
-	 * <pre>
-	 * m = d * length
-	 * I = l<sup>2</sup> * m / 12
-	 * </pre>
+	 * <p style="white-space: pre;"> m = d * length
+	 * I = l<sup>2</sup> * m / 12</p>
 	 * @param density the density in kg/m<sup>2</sup>
 	 * @return {@link Mass} the {@link Mass} of this {@link Segment}
 	 */

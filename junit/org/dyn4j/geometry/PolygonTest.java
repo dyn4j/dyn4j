@@ -26,11 +26,6 @@ package org.dyn4j.geometry;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.geometry.Edge;
-import org.dyn4j.geometry.Interval;
-import org.dyn4j.geometry.Polygon;
-import org.dyn4j.geometry.Transform;
-import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
 
 /**
@@ -209,9 +204,9 @@ public class PolygonTest {
 		Transform t = new Transform();
 		Vector2 y = new Vector2(0.0, -1.0);
 		
-		Edge f = p.getFarthestFeature(y, t);
+		EdgeFeature f = p.getFarthestFeature(y, t);
 		// should always get an edge
-		TestCase.assertTrue(f.isEdge());
+		TestCase.assertTrue(f instanceof EdgeFeature);
 		TestCase.assertEquals(-1.000, f.max.point.x, 1.0e-3);
 		TestCase.assertEquals(-1.000, f.max.point.y, 1.0e-3);
 		TestCase.assertEquals(-1.000, f.vertex1.point.x, 1.0e-3);

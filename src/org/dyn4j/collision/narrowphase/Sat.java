@@ -32,22 +32,23 @@ import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Implementation of the Separating Axis Theorem (SAT) for penetration detection.
+ * Implementation of the Separating Axis Theorem (SAT) for collision detection.
  * <p>
- * {@link Sat} states that &quot;if two {@link Convex} objects are not penetrating, there exists an axis 
+ * {@link Sat} states that &quot;if two {@link Convex} objects are not penetrating, there exists an axis (vector) 
  * for which the projection of the objects does not overlap.&quot;
  * <p>
- * Get all the separating axes for the first {@link Shape}, which are given by retrieving the normal (
- * or perpendicular {@link Vector2}) of each edge of the {@link Shape}.  Project both {@link Shape}s onto 
- * each axis, if any projection does not overlap, then there is no collision.<br />
- * If none of the above axes fail, then do the same process on the second {@link Shape}.<br />
- * If both of the above do not fail then there is a collision.
+ * The axes that must be tested are <strong>all</strong> the edge normals of both {@link Convex} {@link Shape}s.  For each 
+ * edge normal we project the {@link Convex} {@link Shape}s onto it yielding a 1 dimensional {@link Interval}.  If any 
+ * {@link Interval} doesn't overlap, then we can conclude the {@link Convex} {@link Shape}s do not intersect.  If all the
+ * {@link Interval}s overlap, then we can conclude that the {@link Convex} {@link Shape}s intersect.
  * <p>
- * If there is a collision, one can obtain the penetration {@link Vector2} and depth from scaling the axis
- * by the projection overlap.
+ * If the {@link Convex} {@link Shape}s are penetrating, a {@link Penetration} object can be built from the {@link Interval}s
+ * with the least overlap.  The normal will be the edge normal of the {@link Interval} and the depth will be the {@link Interval}
+ * overlap.
  * @author William Bittle
  * @version 3.0.2
  * @since 1.0.0
+ * @see <a href="http://www.dyn4j.org/2010/01/sat/" target="_blank">SAT (Separating Axis Theorem)</a>
  */
 public class Sat implements NarrowphaseDetector {
 	/* (non-Javadoc)
@@ -61,6 +62,7 @@ public class Sat implements NarrowphaseDetector {
 			return CircleDetector.detect((Circle) convex1, transform1, (Circle) convex2, transform2, penetration);
 		}
 		
+		penetration.clear();
 		Vector2 n = null;
 		double overlap = Double.MAX_VALUE;
 		

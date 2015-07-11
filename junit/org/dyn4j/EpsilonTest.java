@@ -26,7 +26,6 @@ package org.dyn4j;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.Epsilon;
 import org.junit.Test;
 
 /**

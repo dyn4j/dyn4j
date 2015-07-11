@@ -37,17 +37,22 @@ import org.dyn4j.collision.Fixture;
  * @since 1.0.0
  */
 public final class BroadphasePair<E extends Collidable<T>, T extends Fixture> {
+	
+	// the first
+	
 	/** The first {@link Collidable} */
-	public final E collidable1;
+	protected final E collidable1;
 	
 	/** The first {@link Collidable}'s {@link Fixture} */
-	public final T fixture1;
+	protected final T fixture1;
+	
+	// the second
 	
 	/** The second {@link Collidable} */
-	public final E collidable2;
+	protected final E collidable2;
 	
 	/** The second {@link Collidable}'s {@link Fixture} */
-	public final T fixture2;
+	protected final T fixture2;
 	
 	/**
 	 * Minimal constructor.
@@ -107,5 +112,37 @@ public final class BroadphasePair<E extends Collidable<T>, T extends Fixture> {
 		.append("|Fixture2=").append(this.fixture2.getId())
 		.append("]");
 		return sb.toString();
+	}
+
+	/**
+	 * Returns the first {@link Collidable}.
+	 * @return E
+	 */
+	public E getCollidable1() {
+		return this.collidable1;
+	}
+
+	/**
+	 * Returns the first {@link Fixture}.
+	 * @return T
+	 */
+	public T getFixture1() {
+		return this.fixture1;
+	}
+	
+	/**
+	 * Returns the second {@link Collidable}.
+	 * @return E
+	 */
+	public E getCollidable2() {
+		return this.collidable2;
+	}
+
+	/**
+	 * Returns the second {@link Fixture}.
+	 * @return T
+	 */
+	public T getFixture2() {
+		return this.fixture2;
 	}
 }

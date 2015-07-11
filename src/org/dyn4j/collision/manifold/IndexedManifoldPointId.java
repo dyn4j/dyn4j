@@ -47,16 +47,16 @@ import org.dyn4j.geometry.Shape;
  */
 public class IndexedManifoldPointId implements ManifoldPointId {
 	/** The reference edge index */
-	public final int referenceEdge;
+	protected final int referenceEdge;
 	
 	/** The incident edge index */
-	public final int incidentEdge;
+	protected final int incidentEdge;
 	
 	/** The index of the incident vertex */
-	public final int incidentVertex;
+	protected final int incidentVertex;
 	
 	/** Whether the reference and incident features flipped */
-	public final boolean flipped;
+	protected final boolean flipped;
 	
 	/**
 	 * Optional constructor.
@@ -126,5 +126,42 @@ public class IndexedManifoldPointId implements ManifoldPointId {
 		.append("|IsFlipped=").append(this.flipped)
 		.append("]");
 		return sb.toString();
+	}
+
+	/**
+	 * Returns the reference edge index of this manifold
+	 * on the {@link Shape}.
+	 * <p>
+	 * The reference edge is the edge that is most perpendicular to the collision normal.
+	 * @return int
+	 */
+	public int getReferenceEdge() {
+		return this.referenceEdge;
+	}
+
+	/**
+	 * Returns the incident edge index of this manifold
+	 * on the other {@link Shape}.
+	 * @return int
+	 */
+	public int getIncidentEdge() {
+		return this.incidentEdge;
+	}
+
+	/**
+	 * Returns the index of the deepest collision point of the incident edge of this manifold on
+	 * the other {@link Shape}.
+	 * @return int
+	 */
+	public int getIncidentVertex() {
+		return this.incidentVertex;
+	}
+
+	/**
+	 * Returns true if the reference edge and incident edges were swapped.
+	 * @return boolean
+	 */
+	public boolean isFlipped() {
+		return this.flipped;
 	}
 }

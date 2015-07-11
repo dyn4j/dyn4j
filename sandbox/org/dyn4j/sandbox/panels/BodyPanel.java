@@ -51,6 +51,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import org.dyn4j.geometry.Mass;
+import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.controls.JSliderWithTextField;
@@ -238,7 +239,7 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		
 		// get the other properties
 		Mass mass = body.getMass();
-		Mass.Type massType = mass.getType();
+		MassType massType = mass.getType();
 		double linearDamping = body.getLinearDamping();
 		double angularDamping = body.getAngularDamping();
 		Vector2 velocity = body.getLinearVelocity().copy();
@@ -297,8 +298,8 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		this.btnFillColor.addActionListener(this);
 		
 		// mass type
-		this.lblMassType = new JLabel(Messages.getString("panel.body.mass.type"), Icons.INFO, JLabel.LEFT);
-		this.lblMassType.setToolTipText(Messages.getString("panel.body.mass.type.tooltip"));
+		this.lblMassType = new JLabel(Messages.getString("panel.body.MassType"), Icons.INFO, JLabel.LEFT);
+		this.lblMassType.setToolTipText(Messages.getString("panel.body.MassType.tooltip"));
 		this.cmbMassType = new JComboBox(ITEMS);
 		this.cmbMassType.setSelectedItem(this.getMassTypeItem(massType));
 		this.cmbMassType.addActionListener(new ActionListener() {
@@ -311,9 +312,9 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		
 		// mass
 		Mass showMass = mass;
-		if (mass.getType() != Mass.Type.NORMAL) {
+		if (mass.getType() != MassType.NORMAL) {
 			showMass = new Mass(mass);
-			showMass.setType(Mass.Type.NORMAL);
+			showMass.setType(MassType.NORMAL);
 		}
 		
 		this.lblMassExplicit = new JLabel(Messages.getString("panel.body.mass.manual"), Icons.INFO, JLabel.LEFT);
@@ -874,16 +875,16 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 	public void showInvalidInputMessage(Window owner) {}
 	
 	/** The normal mass type option */
-	private static final MassTypeItem NORMAL = new MassTypeItem(Messages.getString("mass.type.normal"), Mass.Type.NORMAL);
+	private static final MassTypeItem NORMAL = new MassTypeItem(Messages.getString("MassType.normal"), MassType.NORMAL);
 	
 	/** The infinite mass type option */
-	private static final MassTypeItem INFINITE = new MassTypeItem(Messages.getString("mass.type.infinite"), Mass.Type.INFINITE);
+	private static final MassTypeItem INFINITE = new MassTypeItem(Messages.getString("MassType.infinite"), MassType.INFINITE);
 	
 	/** The fixed linear velocity option */
-	private static final MassTypeItem FIXED_LINEAR_VELOCITY = new MassTypeItem(Messages.getString("mass.type.fixedLinearVelocity"), Mass.Type.FIXED_LINEAR_VELOCITY);
+	private static final MassTypeItem FIXED_LINEAR_VELOCITY = new MassTypeItem(Messages.getString("MassType.fixedLinearVelocity"), MassType.FIXED_LINEAR_VELOCITY);
 	
 	/** The fixed angular velocity option */
-	private static final MassTypeItem FIXED_ANGULAR_VELOCITY = new MassTypeItem(Messages.getString("mass.type.fixedAngularVelocity"), Mass.Type.FIXED_ANGULAR_VELOCITY);
+	private static final MassTypeItem FIXED_ANGULAR_VELOCITY = new MassTypeItem(Messages.getString("MassType.fixedAngularVelocity"), MassType.FIXED_ANGULAR_VELOCITY);
 	
 	/** The list of mass type items for the mass type drop down */
 	private static final MassTypeItem[] ITEMS = new MassTypeItem[] {
@@ -898,7 +899,7 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 	 * @param type the mass type
 	 * @return MassTypeItem null if the mass type is not found
 	 */
-	private MassTypeItem getMassTypeItem(Mass.Type type) {
+	private MassTypeItem getMassTypeItem(MassType type) {
 		for (MassTypeItem item : ITEMS) {
 			if (item.type == type) {
 				return item;
@@ -908,7 +909,7 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 	}
 	
 	/**
-	 * List item class to store a name for a Mass.Type.
+	 * List item class to store a name for a MassType.
 	 * @author William Bittle
 	 * @version 1.0.0
 	 * @since 1.0.0
@@ -918,14 +919,14 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		public String name;
 		
 		/** The mass type */
-		public Mass.Type type;
+		public MassType type;
 		
 		/**
 		 * Full constructor.
 		 * @param name the display name of the mass type
 		 * @param type the mass type
 		 */
-		public MassTypeItem(String name, Mass.Type type) {
+		public MassTypeItem(String name, MassType type) {
 			this.name = name;
 			this.type = type;
 		}

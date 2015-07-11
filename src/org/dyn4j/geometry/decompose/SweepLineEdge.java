@@ -37,24 +37,24 @@ import org.dyn4j.geometry.Vector2;
  * @version 3.2.0
  * @since 2.2.0
  */
-class SweepLineEdge implements Comparable<SweepLineEdge> {
+final class SweepLineEdge implements Comparable<SweepLineEdge> {
 	/** The current state of the sweep; a reference value shared between all edges (for context when sorting) */
-	protected final Reference<Double> referenceY;
+	final Reference<Double> referenceY;
 	
 	/** The first vertex of the edge in Counter-Clockwise order */
-	protected SweepLineVertex v0;
+	SweepLineVertex v0;
 	
 	/** The second vertex of the edge in Counter-Clockwise order */
-	protected SweepLineVertex v1;
+	SweepLineVertex v1;
 	
 	/** The helper vertex of this edge */
-	protected SweepLineVertex helper;
+	SweepLineVertex helper;
 	
 	/** 
 	 * The inverted slope of the edge (run/rise); This will be 
 	 * Double.POSITIVE_INFINITY if its a horizontal edge
 	 */
-	protected double slope;
+	double slope;
 	
 	/**
 	 * Minimal constructor.

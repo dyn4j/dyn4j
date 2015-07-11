@@ -25,42 +25,39 @@
 package org.dyn4j.geometry;
 
 /**
- * Represents an edge feature of a {@link Shape}.
+ * Implementation of a point {@link Feature} of a {@link Shape}.
+ * <p>
+ * A {@link PointFeature} can represent either a vertex or an arbitrary point
+ * on a {@link Shape}'s edge.
+ * <p>
+ * The index of a {@link PointFeature} is the index of the vertex in the {@link Shape}
+ * or {@link Feature#NOT_INDEXED} if its an arbitrary point.
  * @author William Bittle
  * @version 3.2.0
  * @since 1.0.0
  */
-public class Edge extends Feature {
-	/** The first vertex of the edge */
-	protected final Vertex vertex1;
-	
-	/** The second vertex of the edge */
-	protected final Vertex vertex2;
-	
-	/** The edge vector */
-	protected final Vector2 edge;
-	
-	/** The vertex of maximum projection along a {@link Vector2} */
-	protected final Vertex max;
-	
-	/** The index of the edge on the shape */
-	protected final int index;
+public final class PointFeature extends Feature {
+	/** The vertex or point */
+	protected final Vector2 point;
 	
 	/**
-	 * Creates an edge feature.
-	 * @param vertex1 the first vertex of the edge
-	 * @param vertex2 the second vertex of the edge
-	 * @param max the maximum point
-	 * @param edge the vector representing the edge
-	 * @param index the index of the edge
+	 * Optional constructor.
+	 * <p>
+	 * Assumes the given point is not indexed.
+	 * @param point the vertex point
 	 */
-	public Edge(Vertex vertex1, Vertex vertex2, Vertex max, Vector2 edge, int index) {
-		super(Feature.Type.EDGE);
-		this.vertex1 = vertex1;
-		this.vertex2 = vertex2;
-		this.edge = edge;
-		this.max = max;
-		this.index = index;
+	public PointFeature(Vector2 point) {
+		this(point, Feature.NOT_INDEXED);
+	}
+	
+	/**
+	 * Full constructor.
+	 * @param point the vertex point
+	 * @param index the index 
+	 */
+	public PointFeature(Vector2 point, int index) {
+		super(index);
+		this.point = point;
 	}
 	
 	/* (non-Javadoc)
@@ -69,52 +66,17 @@ public class Edge extends Feature {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Edge[Vertex1=").append(this.vertex1)
-		.append("|Vertex2=").append(this.vertex2)
-		.append("|Edge=").append(this.edge)
-		.append("|Max=").append(this.max)
+		sb.append("PointFeature[Point=").append(this.point)
 		.append("|Index=").append(this.index)
 		.append("]");
 		return sb.toString();
 	}
 	
 	/**
-	 * Returns the first vertex of the edge.
-	 * @return {@link Vertex}
-	 */
-	public Vertex getVertex1() {
-		return this.vertex1;
-	}
-	
-	/**
-	 * Returns the second vertex of the edge.
-	 * @return {@link Vertex}
-	 */
-	public Vertex getVertex2() {
-		return this.vertex2;
-	}
-	
-	/**
-	 * Returns the vector representing this edge.
+	 * Returns the point.
 	 * @return {@link Vector2}
 	 */
-	public Vector2 getEdge() {
-		return this.edge;
-	}
-	
-	/**
-	 * Returns the maximum point.
-	 * @return {@link Vertex}
-	 */
-	public Vertex getMaximum() {
-		return this.max;
-	}
-	
-	/**
-	 * Returns the edge index.
-	 * @return int
-	 */
-	public int getIndex() {
-		return this.index;
+	public Vector2 getPoint() {
+		return this.point;
 	}
 }

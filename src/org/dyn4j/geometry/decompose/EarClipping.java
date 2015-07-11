@@ -34,7 +34,7 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
 /**
- * Implementation of the Ear Clipping algorithm.
+ * Implementation of the Ear Clipping convex decomposition algorithm for simple polygons.
  * <p>
  * This algorithm operates only on simple polygons.  A simple polygon is a polygon that
  * has vertices that are connected by edges where:
@@ -43,8 +43,8 @@ import org.dyn4j.resources.Messages;
  * <li>Vertices have at most two edge connections</li>
  * </ul>
  * <p>
- * This implementation does not handle polygons with holes, but accepts both Counter-Clockwise
- * and Clockwise polygons.
+ * This implementation does not handle polygons with holes, but accepts both counter-clockwise
+ * and clockwise polygons.
  * <p>
  * The polygon to decompose must be 4 or more vertices.
  * <p>
@@ -95,7 +95,7 @@ public class EarClipping implements Decomposer, Triangulator {
 	 * @return {@link DoubleEdgeList}
 	 * @since 3.1.9
 	 */
-	protected DoubleEdgeList createTriangulation(Vector2... points) {
+	final DoubleEdgeList createTriangulation(Vector2... points) {
 		// check for null array
 		if (points == null) throw new NullPointerException(Messages.getString("geometry.decompose.nullArray"));
 		// get the number of points
@@ -115,12 +115,14 @@ public class EarClipping implements Decomposer, Triangulator {
 		DoubleEdgeList dcel = new DoubleEdgeList(points);
 		
 		// create a doubly link list for the vertices
-		EarClippingVertex root = new EarClippingVertex();
-		EarClippingVertex curr = root;
+		EarClippingVertex root = null;
+		EarClippingVertex curr = null;
 		EarClippingVertex prev = null;
 		for (int i = 0; i < size; i++) {
 			// get the current point
 			Vector2 p = points[i];
+			// create the vertex
+			curr = new EarClippingVertex(p);
 			// get the vertices around the current point
 			Vector2 p0 = points[i == 0 ? size - 1 : i - 1];
 			Vector2 p1 = points[i + 1 == size ? 0 : i + 1];
@@ -139,8 +141,6 @@ public class EarClipping implements Decomposer, Triangulator {
 				// otherwise its a convex vertex
 				curr.reflex = false;
 			}
-			// set the point
-			curr.point = p;
 			// set the previous
 			curr.prev = prev;
 			// set the previous node's next to the current node
@@ -151,8 +151,10 @@ public class EarClipping implements Decomposer, Triangulator {
 			curr.index = i;
 			// set the new previous to the current
 			prev = curr;
-			// create a new vertex for the current node
-			curr = new EarClippingVertex();
+			
+			if (root == null) {
+				root = curr;
+			}
 		}
 		// finally wire up the first and last nodes
 		root.prev = prev;
@@ -217,7 +219,7 @@ public class EarClipping implements Decomposer, Triangulator {
 	 * @param vertex the vertex to test
 	 * @return boolean true if the given vertex is considered a reflex vertex
 	 */
-	protected boolean isReflex(EarClippingVertex vertex) {
+	final boolean isReflex(EarClippingVertex vertex) {
 		// get the triangle points
 		Vector2 p = vertex.point;
 		Vector2 p0 = vertex.prev.point;
@@ -245,7 +247,7 @@ public class EarClipping implements Decomposer, Triangulator {
 	 * @param n the number of vertices
 	 * @return boolean true if the given vertex is considered an ear vertex
 	 */
-	protected boolean isEar(EarClippingVertex vertex, int n) {
+	final boolean isEar(EarClippingVertex vertex, int n) {
 		// reflex vertices cannot be ears
 		if (vertex.reflex) return false;
 		

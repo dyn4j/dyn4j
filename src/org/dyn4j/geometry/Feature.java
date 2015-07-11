@@ -25,54 +25,31 @@
 package org.dyn4j.geometry;
 
 /**
- * Represents a feature of a {@link Shape}. In two dimensions there are 
- * two types of features: vertex and edge.
- * <p>
- * This class does not handle curved edges.
+ * Represents an indexed feature of a {@link Shape}.
  * @author William Bittle
  * @version 3.2.0
  * @since 1.0.0
  */
 public abstract class Feature {
-	/**
-	 * Enumeration of {@link Feature} types.
-	 * @author William Bittle
-	 * @version $Revision: 440 $
-	 */
-	protected static enum Type {
-		/** A vertex feature */
-		VERTEX,
-		/** An edge feature */
-		EDGE
-	}
-	
 	/** Index for non-indexed vertices */
 	public static final int NOT_INDEXED = -1;
-	
-	/** The {@link Feature.Type} */
-	protected final Feature.Type type;
+
+	/** The index of the edge on the shape */
+	protected final int index;
 	
 	/**
-	 * Full constructor.
-	 * @param type the feature type
+	 * Minimal constructor.
+	 * @param index the index of the feature in the {@link Shape}
 	 */
-	public Feature(Feature.Type type) {
-		this.type = type;
+	public Feature(int index) {
+		this.index = index;
 	}
-	
+
 	/**
-	 * Returns true if this {@link Feature} is an edge.
-	 * @return boolean
+	 * Returns the edge index.
+	 * @return int
 	 */
-	public boolean isEdge() {
-		return this.type == Feature.Type.EDGE;
-	}
-	
-	/**
-	 * Returns true if this {@link Feature} is a vertex.
-	 * @return boolean
-	 */
-	public boolean isVertex() {
-		return this.type == Feature.Type.VERTEX;
+	public int getIndex() {
+		return this.index;
 	}
 }

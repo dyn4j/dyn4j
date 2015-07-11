@@ -40,7 +40,7 @@ import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Implementation of an axis-aligned bounding box tree.
+ * Implementation of a self-balancing axis-aligned bounding box tree broad-phase collision detection algorithm.
  * <p>
  * This class uses a self-balancing binary tree to store the AABBs.  The AABBs are sorted using the perimeter.
  * The perimeter hueristic is better than area for 2D because axis aligned segments would have zero area.

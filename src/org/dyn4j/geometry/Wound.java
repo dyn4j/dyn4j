@@ -27,7 +27,7 @@ package org.dyn4j.geometry;
 import org.dyn4j.DataContainer;
 
 /**
- * Represents an object that is defined by vertices, and has counter-clockwise winding.
+ * Represents an object that is defined by vertices with counter-clockwise winding.
  * @author William Bittle
  * @version 3.0.2
  * @since 1.0.0

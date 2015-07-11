@@ -65,7 +65,7 @@ import org.dyn4j.resources.Messages;
  * @version 3.2.0
  * @since 1.0.0
  * @see Gjk
- * @see <a href="http://www.dyn4j.org/2010/05/epa-expanding-polytope-algorithm/">EPA (Expanding Polytope Algorithm)</a>
+ * @see <a href="http://www.dyn4j.org/2010/05/epa-expanding-polytope-algorithm/" target="_blank">EPA (Expanding Polytope Algorithm)</a>
  */
 public class Epa implements MinkowskiPenetrationSolver {
 	/** The default {@link Epa} maximum iterations */
@@ -84,6 +84,7 @@ public class Epa implements MinkowskiPenetrationSolver {
 	 * @see org.dyn4j.collision.narrowphase.MinkowskiPenetrationSolver#getPenetration(java.util.List, org.dyn4j.collision.narrowphase.MinkowskiSum, org.dyn4j.collision.narrowphase.Penetration)
 	 */
 	public void getPenetration(List<Vector2> simplex, MinkowskiSum minkowskiSum, Penetration penetration) {
+		// create an expandable simplex
 		ExpandingSimplex smplx = new ExpandingSimplex(simplex);
 		ExpandingSimplexEdge edge = null;
 		Vector2 point = null;
@@ -91,7 +92,7 @@ public class Epa implements MinkowskiPenetrationSolver {
 			// get the closest edge to the origin
 			edge = smplx.getClosestEdge();
 			// get a new support point in the direction of the edge normal
-			point = minkowskiSum.support(edge.normal);
+			point = minkowskiSum.getSupportPoint(edge.normal);
 			
 			// see if the new point is significantly past the edge
 			double projection = point.dot(edge.normal);

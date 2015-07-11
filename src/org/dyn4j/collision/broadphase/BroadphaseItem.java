@@ -28,7 +28,8 @@ import org.dyn4j.collision.Collidable;
 import org.dyn4j.collision.Fixture;
 
 /**
- * Represents an individual broad-phase item.
+ * Represents a single {@link Collidable} {@link Fixture} that has been detected by a 
+ * {@link BroadphaseDetector}.
  * <p>
  * A broad-phase item is a {@link Collidable}-{@link Fixture} pair.
  * @author William Bittle
@@ -39,10 +40,10 @@ import org.dyn4j.collision.Fixture;
  */
 public final class BroadphaseItem<E extends Collidable<T>, T extends Fixture> {
 	/** The {@link Collidable} */
-	public final E collidable;
+	protected final E collidable;
 	
 	/** The {@link Fixture} */
-	public final T fixture;
+	protected final T fixture;
 	
 	/**
 	 * Minimal constructor.
@@ -92,5 +93,21 @@ public final class BroadphaseItem<E extends Collidable<T>, T extends Fixture> {
 		.append("|Fixture=").append(this.fixture.getId())
 		.append("]");
 		return sb.toString();
+	}
+
+	/**
+	 * Returns the {@link Collidable}.
+	 * @return E
+	 */
+	public E getCollidable() {
+		return this.collidable;
+	}
+
+	/**
+	 * Returns the {@link Fixture}.
+	 * @return T
+	 */
+	public T getFixture() {
+		return this.fixture;
 	}
 }

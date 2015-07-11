@@ -30,8 +30,11 @@ import org.dyn4j.geometry.Shape;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Represents the result of a {@link Ray} cast against a 
+ * Represents the result of a {@link Ray} cast against (intersecting with) a 
  * {@link Convex} {@link Shape}.
+ * <p>
+ * The point is the point on the {@link Convex} {@link Shape} where the ray
+ * intersects. The normal is the normal of the edge the {@link Ray} intersects.
  * @author William Bittle
  * @version 3.0.2
  * @since 2.0.0

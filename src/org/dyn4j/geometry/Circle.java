@@ -28,9 +28,9 @@ import org.dyn4j.DataContainer;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents a {@link Circle}.
+ * Implementation of a Circle {@link Convex} {@link Shape}.
  * <p>
- * A {@link Circle}'s radius must be larger than zero.
+ * A {@link Circle}'s radius must be greater than zero.
  * @author William Bittle
  * @version 3.1.11
  * @since 1.0.0
@@ -100,19 +100,16 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 	}
 	
 	/**
-	 * Returns the feature farthest in the given direction.
+	 * {@inheritDoc}
 	 * <p>
-	 * For a {@link Circle} this is always a point.
-	 * @param vector the direction
-	 * @param transform the local to world space {@link Transform} of this {@link Convex} {@link Shape}
-	 * @return {@link Vertex}
+	 * For a {@link Circle} this will always return a {@link PointFeature}.
 	 */
 	@Override
-	public Vertex getFarthestFeature(Vector2 vector, Transform transform) {
+	public PointFeature getFarthestFeature(Vector2 vector, Transform transform) {
 		// obtain the farthest point along the given vector
 		Vector2 farthest = this.getFarthestPoint(vector, transform);
 		// for a circle the farthest feature along a vector will always be a vertex
-		return new Vertex(farthest);
+		return new PointFeature(farthest);
 	}
 	
 	/* (non-Javadoc)
@@ -153,15 +150,9 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 	}
 	
 	/**
-	 * Creates a {@link Mass} object using the geometric properties of
-	 * this {@link Circle} and the given density.
-	 * <p>
-	 * <code>
-	 * m = d * &pi; * r<sup>2</sup><br>
-	 * I = m * r<sup>2</sup> / 2
-	 * </code>
-	 * @param density the density in kg/m<sup>2</sup>
-	 * @return {@link Mass} the {@link Mass} of this {@link Circle}
+	 * {@inheritDoc}
+	 * <p style="white-space: pre;"> m = d * &pi; * r<sup>2</sup>
+	 * I = m * r<sup>2</sup> / 2</p>
 	 */
 	@Override
 	public Mass createMass(double density) {

@@ -24,13 +24,13 @@
  */
 package org.dyn4j.sandbox.tests;
 
-import com.jogamp.opengl.GL2;
-
 import org.dyn4j.dynamics.CollisionAdapter;
 import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.geometry.Geometry;
-import org.dyn4j.geometry.Mass;
+import org.dyn4j.geometry.MassType;
 import org.dyn4j.sandbox.SandboxBody;
+
+import com.jogamp.opengl.GL2;
 
 /**
  * Compiled test for the contact tangent speed feature.
@@ -77,12 +77,12 @@ public class Conveyor extends CompiledSimulation {
 		
 		this.floor = new SandboxBody();
 		this.floor.addFixture(Geometry.createRectangle(15.0, 1.0));
-		this.floor.setMass(Mass.Type.INFINITE);
+		this.floor.setMass(MassType.INFINITE);
 		this.floor.setUserData("Floor");
 		
 		SandboxBody box = new SandboxBody();
 		box.addFixture(Geometry.createSquare(1.0));
-		box.setMass(Mass.Type.NORMAL);
+		box.setMass(MassType.NORMAL);
 		box.translate(0.0, 2.0);
 		box.setUserData("Box");
 		

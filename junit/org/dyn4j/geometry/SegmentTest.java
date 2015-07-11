@@ -26,11 +26,6 @@ package org.dyn4j.geometry;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.geometry.Edge;
-import org.dyn4j.geometry.Interval;
-import org.dyn4j.geometry.Segment;
-import org.dyn4j.geometry.Transform;
-import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
 
 /**
@@ -308,8 +303,8 @@ public class SegmentTest {
 		Transform t = new Transform();
 		Vector2 n = new Vector2(1.0, 0.0);
 		
-		Edge f = s.getFarthestFeature(n, t);
-		TestCase.assertTrue(f.isEdge());
+		EdgeFeature f = s.getFarthestFeature(n, t);
+		TestCase.assertTrue(f instanceof EdgeFeature);
 		TestCase.assertEquals(1.500, f.max.point.x, 1.0e-3);
 		TestCase.assertEquals(3.000, f.max.point.y, 1.0e-3);
 		
