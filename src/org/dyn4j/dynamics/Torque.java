@@ -81,14 +81,6 @@ public class Torque {
 	}
 	
 	/**
-	 * Applies this {@link Torque} to the given {@link Body}.
-	 * @param body the {@link Body} to apply the {@link Torque} to
-	 */
-	public void apply(Body body) {
-		body.torque += this.torque;
-	}
-
-	/**
 	 * Returns true if this torque should be removed.
 	 * <p>
 	 * Implement this method to create {@link Torque} objects

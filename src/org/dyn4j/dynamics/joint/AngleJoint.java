@@ -94,7 +94,7 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 	protected double invK;
 	
 	/** The current state of the joint limits */
-	protected Joint.LimitState limitState;
+	protected LimitState limitState;
 	
 	/** The impulse applied to reduce angular motion */
 	protected double impulse;
@@ -122,7 +122,7 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 		// set enabled
 		this.limitEnabled = true;
 		// default the limit state
-		this.limitState = Joint.LimitState.EQUAL;
+		this.limitState = LimitState.EQUAL;
 		
 	}
 	
@@ -163,40 +163,40 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 			// if they are enabled check if they are equal
 			if (Math.abs(this.upperLimit - this.lowerLimit) < 2.0 * angularTolerance) {
 				// if so then set the state to equal
-				this.limitState = Joint.LimitState.EQUAL;
+				this.limitState = LimitState.EQUAL;
 			} else {
 				// make sure we have valid settings
 				if (this.upperLimit > this.lowerLimit) {
 					// check against the max and min distances
 					if (angle >= this.upperLimit) {
 						// is the limit already at the upper limit
-						if (this.limitState != Joint.LimitState.AT_UPPER) {
+						if (this.limitState != LimitState.AT_UPPER) {
 							this.impulse = 0;
 						}
 						// set the state to at upper
-						this.limitState = Joint.LimitState.AT_UPPER;
+						this.limitState = LimitState.AT_UPPER;
 					} else if (angle <= this.lowerLimit) {
 						// is the limit already at the lower limit
-						if (this.limitState != Joint.LimitState.AT_LOWER) {
+						if (this.limitState != LimitState.AT_LOWER) {
 							this.impulse = 0;
 						}
 						// set the state to at lower
-						this.limitState = Joint.LimitState.AT_LOWER;
+						this.limitState = LimitState.AT_LOWER;
 					} else {
 						// set the state to inactive
-						this.limitState = Joint.LimitState.INACTIVE;
+						this.limitState = LimitState.INACTIVE;
 						this.impulse = 0;
 					}
 				}
 			}
 		} else {
 			// neither is enabled so no constraint needed at this time
-			this.limitState = Joint.LimitState.INACTIVE;
+			this.limitState = LimitState.INACTIVE;
 			this.impulse = 0;
 		}
 		
 		// compute the mass
-		if (this.limitState == Joint.LimitState.INACTIVE) {
+		if (this.limitState == LimitState.INACTIVE) {
 			// compute the angular mass including the ratio
 			this.invK = invI1 + this.ratio * this.ratio * invI2;
 		} else {
@@ -215,7 +215,7 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 		this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * this.impulse);
 		// we only want to apply the ratio to the impulse if the limits are not active.  When the
 		// limits are active we effectively disable the ratio
-		this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * this.impulse * (this.limitState == Joint.LimitState.INACTIVE ? this.ratio : 1.0));
+		this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * this.impulse * (this.limitState == LimitState.INACTIVE ? this.ratio : 1.0));
 	}
 	
 	/* (non-Javadoc)
@@ -231,22 +231,22 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 		
 		// check if the limit needs to be applied (if we are at one of the limits
 		// then we ignore the ratio)
-		if (this.limitState != Joint.LimitState.INACTIVE) {
+		if (this.limitState != LimitState.INACTIVE) {
 			// solve the angular constraint
 			// get the relative velocity
 			double C = this.body1.getAngularVelocity() - this.body2.getAngularVelocity();
 			// get the impulse required to obtain the speed
 			double impulse = this.invK * -C;
 			
-			if (this.limitState == Joint.LimitState.EQUAL) {
+			if (this.limitState == LimitState.EQUAL) {
 				this.impulse += impulse;
-			}else if (this.limitState == Joint.LimitState.AT_LOWER) {
+			}else if (this.limitState == LimitState.AT_LOWER) {
 				double newImpulse = this.impulse + impulse;
 				if (newImpulse < 0.0) {
 					impulse = -this.impulse;
 					this.impulse = 0.0;
 				}
-			} else if (this.limitState == Joint.LimitState.AT_UPPER) {
+			} else if (this.limitState == LimitState.AT_UPPER) {
 				double newImpulse = this.impulse + impulse;
 				if (newImpulse > 0.0) {
 					impulse = -this.impulse;
@@ -276,7 +276,7 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 	@Override
 	public boolean solvePositionConstraints(Step step, Settings settings) {
 		// check if the constraint needs to be applied
-		if (this.limitState != Joint.LimitState.INACTIVE) {
+		if (this.limitState != LimitState.INACTIVE) {
 			double angularTolerance = settings.getAngularTolerance();
 			double maxAngularCorrection = settings.getMaximumAngularCorrection();
 			
@@ -291,19 +291,19 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 			double impulse = 0.0;
 			double angularError = 0.0;
 			// check the limit state
-			if (this.limitState == Joint.LimitState.EQUAL) {
+			if (this.limitState == LimitState.EQUAL) {
 				// if the limits are equal then clamp the impulse to maintain
 				// the constraint between the maximum
 				double j = Interval.clamp(angle - this.lowerLimit, -maxAngularCorrection, maxAngularCorrection);
 				impulse = -j * this.invK;
 				angularError = Math.abs(j);
-			} else if (this.limitState == Joint.LimitState.AT_LOWER) {
+			} else if (this.limitState == LimitState.AT_LOWER) {
 				// if the joint is at the lower limit then clamp only the lower value
 				double j = angle - this.lowerLimit;
 				angularError = -j;
 				j = Interval.clamp(j + angularTolerance, -maxAngularCorrection, 0.0);
 				impulse = -j * this.invK;
-			} else if (this.limitState == Joint.LimitState.AT_UPPER) {
+			} else if (this.limitState == LimitState.AT_UPPER) {
 				// if the joint is at the upper limit then clamp only the upper value
 				double j = angle - this.upperLimit;
 				angularError = j;
@@ -564,5 +564,14 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 	 */
 	public void setReferenceAngle(double angle) {
 		this.referenceAngle = angle;
+	}
+
+	/**
+	 * Returns the current state of the limit.
+	 * @return {@link LimitState}
+	 * @since 3.2.0
+	 */
+	public LimitState getLimitState() {
+		return this.limitState;
 	}
 }

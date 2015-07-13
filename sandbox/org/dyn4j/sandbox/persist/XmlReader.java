@@ -231,10 +231,10 @@ public class XmlReader extends DefaultHandler {
 	private CategoryFilter filter;
 	
 	/** Storage for the PartOfGroup GroupX/All tags tag */
-	private int category;
+	private long category;
 	
 	/** Storage for the CollidesWithGroups GroupX/All tags tag */
-	private int mask;
+	private long mask;
 	
 	// mass
 	
@@ -534,8 +534,8 @@ public class XmlReader extends DefaultHandler {
 		} else if ("Filter".equalsIgnoreCase(qName)) {
 			String type = attributes.getValue("xsi:type");
 			if ("CategoryFilter".equalsIgnoreCase(type)) {
-				this.category = 0;
-				this.mask = 0;
+				this.category = 1;
+				this.mask = Long.MAX_VALUE;
 				this.filter = new CategoryFilter();
 			} else if ("DefaultFilter".equalsIgnoreCase(type)) {
 				// otherwise always use the default filter
@@ -865,8 +865,10 @@ public class XmlReader extends DefaultHandler {
 			this.fixture = new BodyFixture(this.shape);
 			this.fixture.setUserData(this.fixtureName);
 		} else if ("Filter".equalsIgnoreCase(qName)) {
-			this.filter = new CategoryFilter(this.category, this.mask);
-			this.fixture.setFilter(this.filter);
+			if (this.filter != null) {
+				this.filter = new CategoryFilter(this.category, this.mask);
+				this.fixture.setFilter(this.filter);
+			}
 		} else if ("PartOfGroups".equalsIgnoreCase(qName)) {
 			this.partOfGroupsFlag = false;
 		} else if ("CollideWithGroups".equalsIgnoreCase(qName)) {

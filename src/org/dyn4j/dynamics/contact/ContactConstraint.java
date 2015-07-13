@@ -27,7 +27,6 @@ package org.dyn4j.dynamics.contact;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dyn4j.DataContainer;
 import org.dyn4j.collision.manifold.Manifold;
 import org.dyn4j.collision.manifold.ManifoldPoint;
 import org.dyn4j.dynamics.Body;
@@ -43,7 +42,7 @@ import org.dyn4j.geometry.Vector2;
  * @version 3.2.0
  * @since 1.0.0
  */
-public class ContactConstraint extends Constraint implements Shiftable, DataContainer {
+public class ContactConstraint extends Constraint implements Shiftable {
 	/** The unique contact id */
 	protected final ContactConstraintId id;
 	
@@ -54,7 +53,7 @@ public class ContactConstraint extends Constraint implements Shiftable, DataCont
 	protected final BodyFixture fixture2;
 	
 	/** The {@link Contact}s */
-	protected List<Contact> contacts;
+	protected final List<Contact> contacts;
 	
 	/** The penetration normal */
 	protected Vector2 normal;
@@ -128,8 +127,6 @@ public class ContactConstraint extends Constraint implements Shiftable, DataCont
 		this.sensor = fixture1.isSensor() || fixture2.isSensor();
 		// by default the tangent speed is zero
 		this.tangentSpeed = 0;
-		// default to false
-		this.onIsland = false;
 	}
 	
 	/* (non-Javadoc)

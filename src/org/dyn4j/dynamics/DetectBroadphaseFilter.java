@@ -30,6 +30,11 @@ import org.dyn4j.collision.broadphase.DefaultBroadphaseFilter;
 
 /**
  * Represents a {@link BroadphaseFilter} for the {@link BroadphaseDetector#detect(BroadphaseFilter)} method.
+ * <p>
+ * This filter extends the {@link DefaultBroadphaseFilter} class and adds filtering for the additional information
+ * in the {@link Body} class.
+ * <p>
+ * Extend this class to add additional filtering capabilities to the broad-phase.
  * @author William Bittle
  * @version 3.2.0
  * @since 3.2.0

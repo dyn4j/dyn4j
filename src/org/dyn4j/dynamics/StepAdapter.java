@@ -27,7 +27,7 @@ package org.dyn4j.dynamics;
 import org.dyn4j.Listener;
 
 /**
- * Convience class for implementing the {@link StepListener} interface.
+ * Convenience class for implementing the {@link StepListener} interface.
  * @author William Bittle
  * @version 3.1.0
  * @since 1.0.0
@@ -44,6 +44,12 @@ public class StepAdapter implements StepListener, Listener {
 	 */
 	@Override
 	public void updatePerformed(Step step, World world) {}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.StepListener#postSolve(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.World)
+	 */
+	@Override
+	public void postSolve(Step step, World world) {}
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.StepListener#end(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.World)

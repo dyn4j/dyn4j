@@ -114,20 +114,6 @@ public class ForceTest {
 	}
 	
 	/**
-	 * Tests the apply method.
-	 */
-	@Test
-	public void apply() {
-		Body b = new Body();
-		Force f = new Force(2.0, 1.0);
-		
-		f.apply(b);
-		
-		TestCase.assertEquals(2.0, b.force.x);
-		TestCase.assertEquals(1.0, b.force.y);
-	}
-	
-	/**
 	 * Tests the apply method where the force is retained for two steps.
 	 */
 	@Test

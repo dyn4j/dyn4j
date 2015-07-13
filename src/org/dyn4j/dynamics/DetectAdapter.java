@@ -30,7 +30,7 @@ import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Transform;
 
 /**
- * Convience class for implementing the {@link DetectListener} interface.
+ * Convenience class for implementing the {@link DetectListener} interface.
  * <p>
  * This class can be used to implement only the methods desired instead of all
  * the methods contained in the {@link DetectListener} interface.

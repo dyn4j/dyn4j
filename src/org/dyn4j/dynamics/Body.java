@@ -76,10 +76,7 @@ import org.dyn4j.resources.Messages;
  * A {@link Body} is dynamic if either its inertia or mass is greater than zero.
  * A {@link Body} is static if both its inertia and mass are zero.
  * <p>
- * A {@link Body} that is a sensor will not be handled in the collision
- * resolution but is handled in collision detection.
- * <p>
- * A {@link Body} flagged as a Bullet will be check for tunneling depending on the CCD
+ * A {@link Body} flagged as a Bullet will be checked for tunneling depending on the CCD
  * setting in the world's {@link Settings}.  Use this if the body is a fast moving
  * body, but be careful as this will incur a performance hit.
  * @author William Bittle
@@ -94,22 +91,19 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	public static final double DEFAULT_ANGULAR_DAMPING 	= 0.01;
 	
 	/** The state flag for allowing automatic sleeping */
-	protected static final int AUTO_SLEEP = 1;
+	private static final int AUTO_SLEEP = 1;
 	
 	/** The state flag for the {@link Body} being asleep */
-	protected static final int ASLEEP = 2;
+	private static final int ASLEEP = 2;
 	
 	/** The state flag for the {@link Body} being active (out of bounds for example) */
-	protected static final int ACTIVE = 4;
+	private static final int ACTIVE = 4;
 	
 	/** The state flag indicating the {@link Body} has been added to an {@link Island} */
-	protected static final int ISLAND = 8;
+	private static final int ISLAND = 8;
 	
 	/** The state flag indicating the {@link Body} is a really fast object and requires CCD */
-	protected static final int BULLET = 16;
-	
-	/** The world this body belongs to */
-	protected World world;
+	private static final int BULLET = 16;
 	
 	/** The beginning transform for CCD */
 	protected Transform transform0;
@@ -123,24 +117,6 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	/** The current angular velocity */
 	protected double angularVelocity;
 
-	/** The current force */
-	protected Vector2 force;
-	
-	/** The current torque */
-	protected double torque;
-	
-	/** The force accumulator */
-	protected final List<Force> forces;
-	
-	/** The torque accumulator */
-	protected final List<Torque> torques;
-	
-	/** The {@link Body}'s state */
-	protected int state;
-	
-	/** The time that the {@link Body} has been waiting to be put sleep */
-	protected double sleepTime;
-
 	/** The {@link Body}'s linear damping */
 	protected double linearDamping;
 	
@@ -149,12 +125,41 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	
 	/** The per body gravity scale factor */
 	protected double gravityScale;
+
+	// internal
+
+	/** The {@link Body}'s state */
+	private int state;
+	
+	/** The world this body belongs to */
+	World world;
+	
+	/** The time that the {@link Body} has been waiting to be put sleep */
+	double sleepTime;
+
+	// last iteration accumulated force/torque
+
+	/** The current force */
+	Vector2 force;
+	
+	/** The current torque */
+	double torque;
+	
+	// force/torque accumulators
+	
+	/** The force accumulator */
+	final List<Force> forces;
+	
+	/** The torque accumulator */
+	final List<Torque> torques;
+	
+	// interaction graph
 	
 	/** The {@link Body}'s contacts */
-	protected final List<ContactEdge> contacts;
+	final List<ContactEdge> contacts;
 	
 	/** The {@link Body}'s joints */
-	protected final List<JointEdge> joints;
+	final List<JointEdge> joints;
 	
 	/**
 	 * Default constructor.
@@ -184,8 +189,10 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 		this.angularVelocity = 0.0;
 		this.force = new Vector2();
 		this.torque = 0.0;
-		this.forces = new ArrayList<Force>(8);
-		this.torques = new ArrayList<Torque>(8);
+		// its common to apply a force or two to a body during a timestep
+		// so 1 is a good trade off
+		this.forces = new ArrayList<Force>(1);
+		this.torques = new ArrayList<Torque>(1);
 		// initialize the state
 		this.state = 0;
 		// allow sleeping
@@ -197,7 +204,10 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 		this.angularDamping = Body.DEFAULT_ANGULAR_DAMPING;
 		this.gravityScale = 1.0;
 		this.contacts = new ArrayList<ContactEdge>(Collisions.getEstimatedCollisionsPerObject());
-		this.joints = new ArrayList<JointEdge>(2);
+		// its more common that bodies do not have joints attached
+		// then they do, so by default don't allocate anything
+		// for the joints list
+		this.joints = new ArrayList<JointEdge>(0);
 	}
 	
 	/* (non-Javadoc)
@@ -226,9 +236,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 		.append("|IsAutoSleepingEnabled=").append(this.isAutoSleepingEnabled())
 		.append("|IsAsleep=").append(this.isAsleep())
 		.append("|IsActive=").append(this.isActive())
-		.append("|IsOnIsland=").append(this.isOnIsland())
 		.append("|IsBullet=").append(this.isBullet())
-		.append("|SleepTime=").append(this.sleepTime)
 		.append("|LinearDamping=").append(this.linearDamping)
 		.append("|AngularDamping").append(this.angularDamping)
 		.append("|GravityScale=").append(this.gravityScale)
@@ -421,7 +429,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * is complete.
 	 * <p>
 	 * This method will calculate a total mass for the body 
-	 * given the masses of the fixtures.
+	 * given the masses of the attached fixtures.
 	 * <p>
 	 * A {@link org.dyn4j.geometry.MassType} can be used to create special mass
 	 * types.
@@ -880,7 +888,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * @param elapsedTime the elapsed time since the last call
 	 * @since 3.1.0
 	 */
-	protected void accumulate(double elapsedTime) {
+	void accumulate(double elapsedTime) {
 		// set the current force to zero
 		this.force.zero();
 		// get the number of forces
@@ -891,7 +899,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 			Iterator<Force> it = this.forces.iterator();
 			while(it.hasNext()) {
 				Force force = it.next();
-				force.apply(this);
+				this.force.add(force.force);
 				// see if we should remove the force
 				if (force.isComplete(elapsedTime)) {
 					it.remove();
@@ -908,7 +916,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 			Iterator<Torque> it = this.torques.iterator();
 			while(it.hasNext()) {
 				Torque torque = it.next();
-				torque.apply(this);
+				this.torque += torque.torque;
 				// see if we should remove the torque
 				if (torque.isComplete(elapsedTime)) {
 					it.remove();
@@ -941,15 +949,6 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 */
 	public boolean isDynamic() {
 		return this.mass.getType() != MassType.INFINITE;
-	}
-	
-	/**
-	 * Sets the world that this body belongs to.
-	 * @param world the world
-	 * @since 3.0.3
-	 */
-	protected void setWorld(World world) {
-		this.world = world;
 	}
 	
 	/**
@@ -1010,16 +1009,6 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	}
 	
 	/**
-	 * Returns the duration the body has been attempting to sleep.
-	 * <p>
-	 * Once a body is asleep the sleep time is reset to zero.
-	 * @return double
-	 */
-	protected double getSleepTime() {
-		return this.sleepTime;
-	}
-	
-	/**
 	 * Returns true if this {@link Body} is active.
 	 * @return boolean
 	 */
@@ -1043,7 +1032,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * Returns true if this {@link Body} has been added to an {@link Island}.
 	 * @return boolean true if this {@link Body} has been added to an {@link Island} 
 	 */
-	protected boolean isOnIsland() {
+	boolean isOnIsland() {
 		return (this.state & Body.ISLAND) == Body.ISLAND;
 	}
 	
@@ -1051,7 +1040,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * Sets the flag indicating that the {@link Body} has been added to an {@link Island}.
 	 * @param flag true if the {@link Body} has been added to an {@link Island}
 	 */
-	protected void setOnIsland(boolean flag) {
+	void setOnIsland(boolean flag) {
 		if (flag) {
 			this.state |= Body.ISLAND;
 		} else {
@@ -1104,7 +1093,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 		for (int i = 0; i < size; i++) {
 			JointEdge je = this.joints.get(i);
 			// testing object references should be sufficient
-			if (je.getOther() == body) {
+			if (je.other == body) {
 				// if it is then return true
 				return true;
 			}
@@ -1143,9 +1132,9 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 		for (int i = 0; i < size; i++) {
 			JointEdge je = this.joints.get(i);
 			// testing object references should be sufficient
-			if (je.getOther() == body) {
+			if (je.other == body) {
 				// get the joint
-				Joint joint = je.getJoint();
+				Joint joint = je.interaction;
 				// set that they are connected
 				connected = true;
 				// check if collision is allowed
@@ -1186,7 +1175,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 		for (int i = 0; i < size; i++) {
 			ContactEdge ce = this.contacts.get(i);
 			// is the other body equal to the given body?
-			if (ce.getOther() == body) {
+			if (ce.other == body) {
 				// if so then return true
 				return true;
 			}
@@ -1371,11 +1360,11 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	}
 
 	/**
-	 * Sets the angular velocity.
+	 * Sets the angular velocity in radians per second
 	 * <p>
 	 * Call the {@link #setAsleep(boolean)} method to wake up the {@link Body}
 	 * if the {@link Body} is asleep and the velocity is not zero.
-	 * @param angularVelocity the angular velocity
+	 * @param angularVelocity the angular velocity in radians per second
 	 */
 	public void setAngularVelocity(double angularVelocity) {
 		this.angularVelocity = angularVelocity;
@@ -1383,10 +1372,12 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	
 	/**
 	 * Returns the force applied in the last iteration.
+	 * <p>
+	 * This is the accumulated force from the last iteration.
 	 * @return {@link Vector2}
 	 */
 	public Vector2 getForce() {
-		return this.force;
+		return this.force.copy();
 	}
 	
 	/**
@@ -1406,6 +1397,8 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	
 	/**
 	 * Returns the torque applied in the last iteration.
+	 * <p>
+	 * This is the accumulated torque from the last iteration.
 	 * @return double
 	 */
 	public double getTorque() {
@@ -1429,6 +1422,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	/**
 	 * Returns the linear damping.
 	 * @return double
+	 * @see #setLinearDamping(double)
 	 */
 	public double getLinearDamping() {
 		return this.linearDamping;
@@ -1436,7 +1430,10 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 
 	/**
 	 * Sets the linear damping.
-	 * @param linearDamping the linear damping
+	 * <p>
+	 * Linear damping is used to reduce the linear velocity over time.  The default is
+	 * zero and larger values will cause the linear velocity to reduce faster.
+	 * @param linearDamping the linear damping; must be greater than or equal to zero
 	 * @throws IllegalArgumentException if linearDamping is less than zero
 	 */
 	public void setLinearDamping(double linearDamping) {
@@ -1447,6 +1444,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	/**
 	 * Returns the angular damping.
 	 * @return double
+	 * @see #setAngularDamping(double)
 	 */
 	public double getAngularDamping() {
 		return this.angularDamping;
@@ -1454,7 +1452,10 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	
 	/**
 	 * Sets the angular damping.
-	 * @param angularDamping the angular damping
+	 * <p>
+	 * Angular damping is used to reduce the angular velocity over time.  The default is
+	 * zero and larger values will cause the angular velocity to reduce faster.
+	 * @param angularDamping the angular damping; must be greater than or equal to zero
 	 * @throws IllegalArgumentException if angularDamping is less than zero
 	 */
 	public void setAngularDamping(double angularDamping) {
@@ -1466,6 +1467,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * Returns the gravity scale.
 	 * @return double
 	 * @since 3.0.0
+	 * @see #setGravityScale(double)
 	 */
 	public double getGravityScale() {
 		return this.gravityScale;
@@ -1473,6 +1475,10 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	
 	/**
 	 * Sets the gravity scale.
+	 * <p>
+	 * The gravity scale is a multiplier applied to the acceleration due to
+	 * gravity before applying the force of gravity to the body.  This allows
+	 * bodies to be affected differently under the same gravity.
 	 * @param scale the gravity scale for this body
 	 * @since 3.0.0
 	 */
@@ -1498,7 +1504,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 		for (int i = 0; i < size; i++) {
 			JointEdge je = this.joints.get(i);
 			// get the other body
-			Body other = je.getOther();
+			Body other = je.other;
 			// make sure that the body hasn't been added
 			// to the list already
 			if (!bodies.contains(other)) {
@@ -1522,7 +1528,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 		// add all the joints
 		for (int i = 0; i < size; i++) {
 			JointEdge je = this.joints.get(i);
-			joints.add(je.getJoint());
+			joints.add(je.interaction);
 		}
 		// return the connected joints
 		return joints;
@@ -1554,10 +1560,10 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 		for (int i = 0; i < size; i++) {
 			ContactEdge ce = this.contacts.get(i);
 			// check for sensor contact
-			ContactConstraint constraint = ce.getContactConstraint();
+			ContactConstraint constraint = ce.interaction;
 			if (sensed == constraint.isSensor()) {
 				// get the other body
-				Body other = ce.getOther();
+				Body other = ce.other;
 				// make sure the body hasn't been added to 
 				// the list already
 				if (!bodies.contains(other)) {
@@ -1594,7 +1600,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 		for (int i = 0; i < size; i++) {
 			ContactEdge ce = this.contacts.get(i);
 			// check for sensor contact
-			ContactConstraint constraint = ce.getContactConstraint();
+			ContactConstraint constraint = ce.interaction;
 			if (sensed == constraint.isSensor()) {
 				// loop over the contacts
 				List<Contact> contacts = constraint.getContacts();

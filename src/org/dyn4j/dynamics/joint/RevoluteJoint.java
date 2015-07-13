@@ -96,7 +96,7 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 	protected double referenceAngle;
 	
 	/** The current state of the {@link Joint} limit */
-	protected Joint.LimitState limitState;
+	protected LimitState limitState;
 	
 	/** The pivot mass; K = J * Minv * Jtrans */
 	protected Matrix33 K;
@@ -131,7 +131,7 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 		// get the initial reference angle for the joint limits
 		this.referenceAngle = body1.getTransform().getRotation() - body2.getTransform().getRotation();
 		// initialize
-		this.limitState = Joint.LimitState.INACTIVE;
+		this.limitState = LimitState.INACTIVE;
 		this.impulse = new Vector3();
 		this.K = new Matrix33();
 		this.motorEnabled = false;
@@ -221,28 +221,28 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 			// see if the limits are close enough to be equal
 			if (Math.abs(this.upperLimit - this.lowerLimit) < 2.0 * angularTolerance) {
 				// if they are close enough then they are equal
-				this.limitState = Joint.LimitState.EQUAL;
+				this.limitState = LimitState.EQUAL;
 			} else if (angle <= this.lowerLimit) {
 				// is it currently at the lower limit?
-				if (this.limitState != Joint.LimitState.AT_LOWER) {
+				if (this.limitState != LimitState.AT_LOWER) {
 					// if not then make the limit impulse zero
 					this.impulse.z = 0.0;
 				}
-				this.limitState = Joint.LimitState.AT_LOWER;
+				this.limitState = LimitState.AT_LOWER;
 			} else if (angle >= this.upperLimit) {
 				// is it currently at the upper limit?
-				if (this.limitState == Joint.LimitState.AT_UPPER) {
+				if (this.limitState == LimitState.AT_UPPER) {
 					// if not then make the limit impulse zero
 					this.impulse.z = 0.0;
 				}
-				this.limitState = Joint.LimitState.AT_UPPER;
+				this.limitState = LimitState.AT_UPPER;
 			} else {
 				// otherwise the limit constraint is inactive
 				this.impulse.z = 0.0;
-				this.limitState = Joint.LimitState.INACTIVE;
+				this.limitState = LimitState.INACTIVE;
 			}
 		} else {
-			this.limitState = Joint.LimitState.INACTIVE;
+			this.limitState = LimitState.INACTIVE;
 		}
 		
 		// account for variable time step
@@ -274,7 +274,7 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 		double invI2 = m2.getInverseInertia();
 		
 		// solve the motor constraint
-		if (this.motorEnabled && this.limitState != Joint.LimitState.EQUAL) {
+		if (this.motorEnabled && this.limitState != LimitState.EQUAL) {
 			// get the relative velocity - the target motor speed
 			double C = this.body1.getAngularVelocity() - this.body2.getAngularVelocity() - this.motorSpeed;
 			// get the impulse required to obtain the speed
@@ -300,7 +300,7 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 		Vector2 Jvb2 = v1.subtract(v2);
 		
 		// check if the limit constraint is enabled
-		if (this.limitEnabled && this.limitState != Joint.LimitState.INACTIVE) {
+		if (this.limitEnabled && this.limitState != LimitState.INACTIVE) {
 			// solve the point to point constraint including the limit constraint
 			double pivotW = this.body1.getAngularVelocity() - this.body2.getAngularVelocity();
 			// the 3x3 version of Jv + b
@@ -308,12 +308,12 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 			
 			Vector3 impulse3 = this.K.solve33(Jvb3.negate());
 			// check the state to determine how to apply the impulse
-			if (this.limitState == Joint.LimitState.EQUAL) {
+			if (this.limitState == LimitState.EQUAL) {
 				// if its equal limits then this is basically a weld joint
 				// so add all the impulse to satisfy the point-to-point and
 				// angle constraints
 				this.impulse.add(impulse3);
-			} else if (this.limitState == Joint.LimitState.AT_LOWER) {
+			} else if (this.limitState == LimitState.AT_LOWER) {
 				// if its at the lower limit then clamp the rotational impulse
 				// and solve the point-to-point constraint alone
 				double newImpulse = this.impulse.z + impulse3.z;
@@ -326,7 +326,7 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 					this.impulse.y += reduced.y;
 					this.impulse.z = 0.0;
 				}
-			} else if (this.limitState == Joint.LimitState.AT_UPPER) {
+			} else if (this.limitState == LimitState.AT_UPPER) {
 				// if its at the upper limit then clamp the rotational impulse
 				// and solve the point-to-point constraint alone
 				double newImpulse = this.impulse.z + impulse3.z;
@@ -384,24 +384,24 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 		double angularError = 0.0;
 
 		// solve the angular constraint if the limits are active
-		if (this.limitEnabled && this.limitState != Joint.LimitState.INACTIVE) {
+		if (this.limitEnabled && this.limitState != LimitState.INACTIVE) {
 			// get the current angle between the bodies
 			double angle = this.getRelativeRotation();
 			double impulse = 0.0;
 			// check the limit state
-			if (this.limitState == Joint.LimitState.EQUAL) {
+			if (this.limitState == LimitState.EQUAL) {
 				// if the limits are equal then clamp the impulse to maintain
 				// the constraint between the maximum
 				double j = Interval.clamp(angle - this.lowerLimit, -maxAngularCorrection, maxAngularCorrection);
 				impulse = -j * this.motorMass;
 				angularError = Math.abs(j);
-			} else if (this.limitState == Joint.LimitState.AT_LOWER) {
+			} else if (this.limitState == LimitState.AT_LOWER) {
 				// if the joint is at the lower limit then clamp only the lower value
 				double j = angle - this.lowerLimit;
 				angularError = -j;
 				j = Interval.clamp(j + angularTolerance, -maxAngularCorrection, 0.0);
 				impulse = -j * this.motorMass;
-			} else if (this.limitState == Joint.LimitState.AT_UPPER) {
+			} else if (this.limitState == LimitState.AT_UPPER) {
 				// if the joint is at the upper limit then clamp only the upper value
 				double j = angle - this.upperLimit;
 				angularError = j;
@@ -739,5 +739,14 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 	 */
 	public void setReferenceAngle(double angle) {
 		this.referenceAngle = angle;
+	}
+
+	/**
+	 * Returns the current state of the limit.
+	 * @return {@link LimitState}
+	 * @since 3.2.0
+	 */
+	public LimitState getLimitState() {
+		return this.limitState;
 	}
 }

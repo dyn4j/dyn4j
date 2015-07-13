@@ -82,7 +82,7 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 	protected double motorMass;
 	
 	/** The current state of the limit */
-	protected Joint.LimitState limitState;
+	protected LimitState limitState;
 	
 	/** The accumulated impulse for warm starting */
 	protected Vector3 impulse;
@@ -149,7 +149,7 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 		this.impulse = new Vector3();
 		this.limitEnabled = false;
 		this.motorEnabled = false;
-		this.limitState = Joint.LimitState.INACTIVE;
+		this.limitState = LimitState.INACTIVE;
 	}
 	
 	/* (non-Javadoc)
@@ -244,37 +244,37 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 			double dist = this.axis.dot(d);
 			if (Math.abs(this.upperLimit - this.lowerLimit) < 2.0 * linearTolerance) {
 				// if the limits are close enough then they are basically equal
-				this.limitState = Joint.LimitState.EQUAL;
+				this.limitState = LimitState.EQUAL;
 			} else if (dist <= this.lowerLimit) {
 				// if the current distance along the axis is less than the limit
 				// then the joint is at the lower limit
 				// check if its already at the lower limit
-				if (this.limitState != Joint.LimitState.AT_LOWER) {
+				if (this.limitState != LimitState.AT_LOWER) {
 					// if its not already at the lower limit then
 					// set the state and clear the impulse for the
 					// joint limit
-					this.limitState = Joint.LimitState.AT_LOWER;
+					this.limitState = LimitState.AT_LOWER;
 					this.impulse.z = 0.0;
 				}
 			} else if (dist >= this.upperLimit) {
 				// if the current distance along the axis is greater than the limit
 				// then the joint is at the upper limit
 				// check if its already at the upper limit
-				if (this.limitState != Joint.LimitState.AT_UPPER) {
+				if (this.limitState != LimitState.AT_UPPER) {
 					// if its not already at the upper limit then
 					// set the state and clear the impulse for the
 					// joint limit
-					this.limitState = Joint.LimitState.AT_UPPER;
+					this.limitState = LimitState.AT_UPPER;
 					this.impulse.z = 0.0;
 				}
 			} else {
 				// otherwise the joint is currently within the limits
 				// so set the limit to inactive
-				this.limitState = Joint.LimitState.INACTIVE;
+				this.limitState = LimitState.INACTIVE;
 				this.impulse.z = 0.0;
 			}
 		} else {
-			this.limitState = Joint.LimitState.INACTIVE;
+			this.limitState = LimitState.INACTIVE;
 			this.impulse.z = 0.0;
 		}
 		
@@ -327,7 +327,7 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 		double w2 = this.body2.getAngularVelocity();
 		
 		// solve the motor constraint
-		if (this.motorEnabled && this.limitState != Joint.LimitState.EQUAL) {
+		if (this.motorEnabled && this.limitState != LimitState.EQUAL) {
 			// compute Jv + b
 			double Cdt = this.axis.dot(v1.difference(v2)) + this.a1 * w1 - this.a2 * w2;
 			// compute lambda = Kinv * (Jv + b)
@@ -355,7 +355,7 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 		Cdt.y = w1 - w2;
 		
 		// is the limit enabled?
-		if (this.limitEnabled && this.limitState != Joint.LimitState.INACTIVE) {
+		if (this.limitEnabled && this.limitState != LimitState.INACTIVE) {
 			// solve the linear and angular constraints with the limit constraint
 			double Cdtl = this.axis.dot(v1.difference(v2)) + this.a1 * w1 - this.a2 * w2;
 			Vector3 b = new Vector3(Cdt.x, Cdt.y, Cdtl);
@@ -367,11 +367,11 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 			this.impulse.add(impulse);
 			
 			// check the limit state
-			if (this.limitState == Joint.LimitState.AT_LOWER) {
+			if (this.limitState == LimitState.AT_LOWER) {
 				// if the joint is at the lower limit then clamp
 				// the accumulated impulse applied by the limit constraint
 				this.impulse.z = Math.max(this.impulse.z, 0.0);
-			} else if (this.limitState == Joint.LimitState.AT_UPPER) {
+			} else if (this.limitState == LimitState.AT_UPPER) {
 				// if the joint is at the upper limit then clamp
 				// the accumulated impulse applied by the limit constraint
 				this.impulse.z = Math.min(this.impulse.z, 0.0);
@@ -890,5 +890,14 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 	 */
 	public void setReferenceAngle(double angle) {
 		this.referenceAngle = angle;
+	}
+
+	/**
+	 * Returns the current state of the limit.
+	 * @return {@link LimitState}
+	 * @since 3.2.0
+	 */
+	public LimitState getLimitState() {
+		return this.limitState;
 	}
 }

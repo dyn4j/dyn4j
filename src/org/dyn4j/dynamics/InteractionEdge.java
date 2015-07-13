@@ -24,21 +24,38 @@
  */
 package org.dyn4j.dynamics;
 
-import org.dyn4j.dynamics.contact.ContactConstraint;
-
 /**
- * Represents an interaction of a body in an interaction graph via a {@link ContactConstraint}.
+ * Represents an interaction of a body in an interaction graph.
  * @author William Bittle
  * @version 3.2.0
- * @since 1.0.0
+ * @since 3.2.0
+ * @param <T> the interaction type
  */
-final class ContactEdge extends InteractionEdge<ContactConstraint> {
+abstract class InteractionEdge<T> {
+	/** The connected body */
+	protected final Body other;
+	
+	/** The interaction between the bodies */
+	protected final T interaction;
+	
 	/**
 	 * Full constructor.
 	 * @param other the other {@link Body} in contact
-	 * @param contactConstraint the {@link ContactConstraint} between the {@link Body}s
+	 * @param interaction the interaction
 	 */
-	public ContactEdge(Body other, ContactConstraint contactConstraint) {
-		super(other, contactConstraint);
+	public InteractionEdge(Body other, T interaction) {
+		this.other = other;
+		this.interaction = interaction;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("InteractionGraphEdge[Interaction=").append(this.interaction)
+		.append("|Body=").append(this.other)
+		.append("]");
+		return sb.toString();
 	}
 }

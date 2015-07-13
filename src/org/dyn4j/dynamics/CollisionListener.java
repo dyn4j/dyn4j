@@ -59,9 +59,12 @@ import org.dyn4j.geometry.Shape;
  */
 public interface CollisionListener extends Listener {
 	/**
-	 * Called when two {@link Body}s are colliding as determined by the {@link BroadphaseDetector}.
+	 * Called when two {@link BodyFixture}s are colliding as determined by the {@link BroadphaseDetector}.
+	 * 	 * <p>
+	 * {@link Body} objects can have many {@link Convex} {@link Shape}s that make up their geometry.  Because
+	 * of this, this method may be called multiple times if two multi-fixtured {@link Body}s are colliding.
 	 * <p>
-	 * This method is called when the two {@link Body}'s expanded {@link AABB}s are overlapping.
+	 * This method is called when the two {@link BodyFixture}'s expanded {@link AABB}s are overlapping.
 	 * Visually the bodies may not appear to be colliding (which is a valid case).  If you need to 
 	 * make sure the {@link Body}s are colliding, and not just their AABBs, use the 
 	 * {@link #collision(Body, BodyFixture, Body, BodyFixture, Penetration)} method.
@@ -82,7 +85,7 @@ public interface CollisionListener extends Listener {
 	public abstract boolean collision(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2);
 	
 	/**
-	 * Called when two {@link Body}s are colliding as determined by the {@link NarrowphaseDetector}.
+	 * Called when two {@link BodyFixture}s are colliding as determined by the {@link NarrowphaseDetector}.
 	 * <p>
 	 * {@link Body} objects can have many {@link Convex} {@link Shape}s that make up their geometry.  Because
 	 * of this, this method may be called multiple times if two multi-fixtured {@link Body}s are colliding.
@@ -106,7 +109,7 @@ public interface CollisionListener extends Listener {
 	public abstract boolean collision(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2, Penetration penetration);
 	
 	/**
-	 * Called when two {@link Body}s are colliding and a contact {@link Manifold} has been found.
+	 * Called when two {@link BodyFixture}s are colliding and a contact {@link Manifold} has been found.
 	 * <p>
 	 * {@link Body} objects can have many {@link Convex} {@link Shape}s that make up their geometry.  Because
 	 * of this, this method may be called multiple times if two multi-fixtured {@link Body}s are colliding.

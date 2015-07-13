@@ -22,23 +22,25 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.dynamics;
-
-import org.dyn4j.dynamics.contact.ContactConstraint;
+package org.dyn4j.dynamics.joint;
 
 /**
- * Represents an interaction of a body in an interaction graph via a {@link ContactConstraint}.
+ * Enumeration for the limit states a joint can have.
  * @author William Bittle
- * @version 3.2.0
+ * @version 1.0.3
  * @since 1.0.0
  */
-final class ContactEdge extends InteractionEdge<ContactConstraint> {
-	/**
-	 * Full constructor.
-	 * @param other the other {@link Body} in contact
-	 * @param contactConstraint the {@link ContactConstraint} between the {@link Body}s
-	 */
-	public ContactEdge(Body other, ContactConstraint contactConstraint) {
-		super(other, contactConstraint);
-	}
+public enum LimitState {
+	/** The state if the upper and lower limits are equal within tolerance */
+	EQUAL,
+	
+	/** The state if the joint has reached or passed the lower limit */
+	AT_LOWER,
+	
+	/** The state if the joint has reached or passed the upper limit */
+	AT_UPPER,
+	
+	/** The state if the joint limits are disabled or if the joint is between the limits */
+	INACTIVE;
 }
+

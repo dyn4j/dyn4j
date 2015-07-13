@@ -80,7 +80,7 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 	protected Vector2 n;
 	
 	/** The current state of the joint limits */
-	protected Joint.LimitState limitState;
+	protected LimitState limitState;
 	
 	/** The accumulated impulse from the previous time step */
 	protected double impulse;
@@ -171,20 +171,20 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 			// if both are enabled check if they are equal
 			if (Math.abs(this.upperLimit - this.lowerLimit) < 2.0 * linearTolerance) {
 				// if so then set the state to equal
-				this.limitState = Joint.LimitState.EQUAL;
+				this.limitState = LimitState.EQUAL;
 			} else {
 				// make sure we have valid settings
 				if (this.upperLimit > this.lowerLimit) {
 					// check against the max and min distances
 					if (length > this.upperLimit) {
 						// set the state to at upper
-						this.limitState = Joint.LimitState.AT_UPPER;
+						this.limitState = LimitState.AT_UPPER;
 					} else if (length < this.lowerLimit) {
 						// set the state to at lower
-						this.limitState = Joint.LimitState.AT_LOWER;
+						this.limitState = LimitState.AT_LOWER;
 					} else {
 						// set the state to inactive
-						this.limitState = Joint.LimitState.INACTIVE;
+						this.limitState = LimitState.INACTIVE;
 					}
 				}
 			}
@@ -192,27 +192,27 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 			// check the maximum against the current length
 			if (length > this.upperLimit) {
 				// set the state to at upper
-				this.limitState = Joint.LimitState.AT_UPPER;
+				this.limitState = LimitState.AT_UPPER;
 			} else {
 				// no constraint needed at this time
-				this.limitState = Joint.LimitState.INACTIVE;
+				this.limitState = LimitState.INACTIVE;
 			}
 		} else if (this.lowerLimitEnabled) {
 			// check the minimum against the current length
 			if (length < this.lowerLimit) {
 				// set the state to at lower
-				this.limitState = Joint.LimitState.AT_LOWER;
+				this.limitState = LimitState.AT_LOWER;
 			} else {
 				// no constraint needed at this time
-				this.limitState = Joint.LimitState.INACTIVE;
+				this.limitState = LimitState.INACTIVE;
 			}
 		} else {
 			// neither is enabled so no constraint needed at this time
-			this.limitState = Joint.LimitState.INACTIVE;
+			this.limitState = LimitState.INACTIVE;
 		}
 		
 		// check the length to see if we need to apply the constraint
-		if (this.limitState != Joint.LimitState.INACTIVE) {
+		if (this.limitState != LimitState.INACTIVE) {
 			// compute K inverse
 			double cr1n = r1.cross(this.n);
 			double cr2n = r2.cross(this.n);
@@ -242,7 +242,7 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 	@Override
 	public void solveVelocityConstraints(Step step, Settings settings) {
 		// check if the constraint need to be applied
-		if (this.limitState != Joint.LimitState.INACTIVE) {
+		if (this.limitState != LimitState.INACTIVE) {
 			Transform t1 = this.body1.getTransform();
 			Transform t2 = this.body2.getTransform();
 			Mass m1 = this.body1.getMass();
@@ -283,12 +283,12 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 	@Override
 	public boolean solvePositionConstraints(Step step, Settings settings) {
 		// check if the constraint need to be applied
-		if (this.limitState != Joint.LimitState.INACTIVE) {
+		if (this.limitState != LimitState.INACTIVE) {
 			// if the limits are equal it doesn't matter if we
 			// use the maximum or minimum setting
 			double targetDistance = this.upperLimit;
 			// determine the target distance
-			if (this.limitState == Joint.LimitState.AT_LOWER) {
+			if (this.limitState == LimitState.AT_LOWER) {
 				// use the minimum distance as the target
 				targetDistance = this.lowerLimit;
 			}
@@ -560,5 +560,14 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 		this.lowerLimitEnabled = true;
 		// set the values
 		this.setLimits(limit);
+	}
+
+	/**
+	 * Returns the current state of the limit.
+	 * @return {@link LimitState}
+	 * @since 3.2.0
+	 */
+	public LimitState getLimitState() {
+		return this.limitState;
 	}
 }

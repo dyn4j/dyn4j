@@ -42,15 +42,15 @@ import org.dyn4j.resources.Messages;
  * @version 3.2.0
  * @since 1.0.0
  */
-class Island {
+final class Island {
 	/** The list of {@link Body}s on this {@link Island} */
-	protected List<Body> bodies;
+	protected final List<Body> bodies;
+
+	/** The list of {@link Joint}s on this {@link Island} */
+	protected final List<Joint> joints;
 	
 	/** The list of {@link ContactConstraint}s on this {@link Island} */
-	protected List<ContactConstraint> contactConstraints;
-	
-	/** The list of {@link Joint}s on this {@link Island} */
-	protected List<Joint> joints;
+	protected final List<ContactConstraint> contactConstraints;
 	
 	/**
 	 * Default constructor.
@@ -79,7 +79,7 @@ class Island {
 	}
 
 	/**
-	 * Clears the {@link Body} and {@link ContactConstraint} lists.
+	 * Clears the island.
 	 */
 	public void clear() {
 		this.bodies.clear();
@@ -262,7 +262,7 @@ class Island {
 					} else {
 						// then increment the sleep time
 						body.sleepTime += step.dt;
-						minSleepTime = Math.min(minSleepTime, body.getSleepTime());
+						minSleepTime = Math.min(minSleepTime, body.sleepTime);
 					}
 				} else {
 					body.sleepTime = 0.0;

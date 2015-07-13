@@ -33,6 +33,7 @@ package org.dyn4j.dynamics;
 public enum ContinuousDetectionMode {
 	/** CCD is not performed at all */
 	NONE,
+	
 	/** 
 	 * CCD is performed on bodies flagged as bullets only.
 	 * <p>
@@ -43,6 +44,7 @@ public enum ContinuousDetectionMode {
 	 * </ul>
 	 */
 	BULLETS_ONLY,
+	
 	/** 
 	 * CCD is performed on all bodies against static bodies.
 	 * <p>

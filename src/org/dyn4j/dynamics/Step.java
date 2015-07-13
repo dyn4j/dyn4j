@@ -25,8 +25,11 @@
 package org.dyn4j.dynamics;
 
 /**
- * Contains the current and previous time step information
- * used to update the {@link World}.
+ * Class encapsulating the timestep information.
+ * <p>
+ * The {@link World} class maintains an instance of this class to perform various functions.
+ * <p>
+ * A time step represents the elapsed time since the last update.
  * @author William Bittle
  * @version 3.2.0
  * @since 1.0.0

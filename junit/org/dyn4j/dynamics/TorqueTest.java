@@ -85,19 +85,6 @@ public class TorqueTest {
 	}
 	
 	/**
-	 * Tests the apply method.
-	 */
-	@Test
-	public void apply() {
-		Body b = new Body();
-		Torque t = new Torque(-0.2);
-		
-		t.apply(b);
-		
-		TestCase.assertEquals(-0.2, b.torque);
-	}
-
-	/**
 	 * Tests the apply method where the torque is retained for two steps.
 	 */
 	@Test

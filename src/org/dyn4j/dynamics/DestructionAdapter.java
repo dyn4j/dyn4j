@@ -29,7 +29,7 @@ import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.dynamics.joint.Joint;
 
 /**
- * Convience class for implementing the {@link DestructionListener} interface.
+ * Convenience class for implementing the {@link DestructionListener} interface.
  * <p>
  * This class can be used to implement only the methods desired instead of all
  * the methods contained in the {@link DestructionListener} interface.

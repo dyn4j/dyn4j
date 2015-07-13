@@ -44,6 +44,11 @@ public class ConvexCastResult implements Comparable<ConvexCastResult> {
 	/** The time of impact information */
 	protected TimeOfImpact timeOfImpact;
 	
+	/**
+	 * Default constructor.
+	 */
+	public ConvexCastResult() {}
+	
 	/** 
 	 * Full constructor.
 	 * @param body the body
@@ -100,7 +105,15 @@ public class ConvexCastResult implements Comparable<ConvexCastResult> {
 	public Body getBody() {
 		return this.body;
 	}
-	
+
+	/**
+	 * Sets the body.
+	 * @param body the {@link Body}
+	 */
+	public void setBody(Body body) {
+		this.body = body;
+	}
+
 	/**
 	 * Returns the fixture on the body with the smallest
 	 * time of impact.
@@ -116,5 +129,21 @@ public class ConvexCastResult implements Comparable<ConvexCastResult> {
 	 */
 	public TimeOfImpact getTimeOfImpact() {
 		return this.timeOfImpact;
+	}
+
+	/**
+	 * Sets the fixture with the smallest time of impact.
+	 * @param fixture the fixture
+	 */
+	public void setFixture(BodyFixture fixture) {
+		this.fixture = fixture;
+	}
+
+	/**
+	 * Sets the time of impact information.
+	 * @param timeOfImpact the time of impact
+	 */
+	public void setTimeOfImpact(TimeOfImpact timeOfImpact) {
+		this.timeOfImpact = timeOfImpact;
 	}
 }

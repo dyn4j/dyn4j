@@ -41,28 +41,14 @@ import org.dyn4j.geometry.Vector2;
  * @since 1.0.0
  */
 public abstract class Joint extends Constraint implements Shiftable, DataContainer {
-	/**
-	 * Enumeration for the limit states a joint can have.
-	 * @author William Bittle
-	 * @version 1.0.3
-	 * @since 1.0.0
-	 */
-	protected static enum LimitState {
-		/** The state if the upper and lower limits are equal within tolerance */
-		EQUAL,
-		/** The state if the joint has reached or passed the lower limit */
-		AT_LOWER,
-		/** The state if the joint has reached or passed the upper limit */
-		AT_UPPER,
-		/** The state if the joint limits are disabled or if the joint is between the limits */
-		INACTIVE;
-	}
-	
 	/** The joint's unique identifier */
 	protected final UUID id = UUID.randomUUID();
 	
 	/** Whether the pair of bodies joined together can collide with each other */
 	protected boolean collisionAllowed;
+
+	/** The user data */
+	protected Object userData;
 	
 	/**
 	 * Optional constructor.
@@ -193,5 +179,19 @@ public abstract class Joint extends Constraint implements Shiftable, DataContain
 			// set the new value
 			this.collisionAllowed = flag;
 		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.DataContainer#getUserData()
+	 */
+	public Object getUserData() {
+		return this.userData;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.DataContainer#setUserData(java.lang.Object)
+	 */
+	public void setUserData(Object userData) {
+		this.userData = userData;
 	}
 }

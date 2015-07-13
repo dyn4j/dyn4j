@@ -24,7 +24,6 @@
  */
 package org.dyn4j.dynamics;
 
-import org.dyn4j.DataContainer;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.resources.Messages;
 
@@ -34,7 +33,7 @@ import org.dyn4j.resources.Messages;
  * @version 3.2.0
  * @since 1.0.0
  */
-public abstract class Constraint implements Shiftable, DataContainer {
+public abstract class Constraint implements Shiftable {
 	/** The first {@link Body} */
 	protected final Body body1;
 	
@@ -42,11 +41,8 @@ public abstract class Constraint implements Shiftable, DataContainer {
 	protected final Body body2;
 	
 	/** Whether the {@link Constraint} has been added to an {@link Island} or not */
-	protected boolean onIsland;
+	boolean onIsland;
 
-	/** The user data */
-	protected Object userData;
-	
 	/**
 	 * Full constructor.
 	 * @param body1 the first participating {@link Body}
@@ -69,8 +65,7 @@ public abstract class Constraint implements Shiftable, DataContainer {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Body1=").append(this.body1)
-		.append("|Body2=").append(this.body2)
-		.append("|IsOnIsland=").append(this.onIsland);
+		.append("|Body2=").append(this.body2);
 		return sb.toString();
 	}
 	
@@ -94,7 +89,7 @@ public abstract class Constraint implements Shiftable, DataContainer {
 	 * Sets the on {@link Island} flag to the given value.
 	 * @param onIsland true if the {@link Constraint} has been added to an {@link Island}
 	 */
-	protected void setOnIsland(boolean onIsland) {
+	void setOnIsland(boolean onIsland) {
 		this.onIsland = onIsland;
 	}
 	
@@ -103,21 +98,7 @@ public abstract class Constraint implements Shiftable, DataContainer {
 	 * to an {@link Island}
 	 * @return boolean
 	 */
-	protected boolean isOnIsland() {
+	boolean isOnIsland() {
 		return this.onIsland;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.DataContainer#getUserData()
-	 */
-	public Object getUserData() {
-		return this.userData;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.DataContainer#setUserData(java.lang.Object)
-	 */
-	public void setUserData(Object userData) {
-		this.userData = userData;
 	}
 }

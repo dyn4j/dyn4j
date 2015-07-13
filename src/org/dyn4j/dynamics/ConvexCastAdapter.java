@@ -28,7 +28,7 @@ import org.dyn4j.collision.continuous.TimeOfImpact;
 import org.dyn4j.geometry.Convex;
 
 /**
- * Default implemenation of the {@link ConvexCastListener} interface.
+ * Default implementation of the {@link ConvexCastListener} interface.
  * <p>
  * Inherit from this class to only implement the desired methods.
  * <p>

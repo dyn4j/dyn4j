@@ -126,6 +126,12 @@ public class ContactCounter implements ContactListener, StepListener {
 	}
 	
 	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.StepListener#postSolve(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.World)
+	 */
+	@Override
+	public void postSolve(Step step, World world) {}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.StepListener#end(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.World)
 	 */
 	@Override

@@ -31,7 +31,7 @@ import org.dyn4j.collision.continuous.TimeOfImpact;
  * Interface to listen for time of impact events.
  * <p>
  * Time of impact events are events fired when a collision was missed by
- * the static collision detection routines, and then caught by the continuous
+ * the discrete collision detection routines, and then caught by the continuous
  * collision detection routines.
  * <p>
  * Modification of the {@link World} is not permitted during these methods.

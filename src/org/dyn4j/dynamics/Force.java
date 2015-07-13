@@ -103,14 +103,6 @@ public class Force {
 	}
 	
 	/**
-	 * Applies this {@link Force} to the {@link Body}.
-	 * @param body the {@link Body} to apply the {@link Force} to
-	 */
-	public void apply(Body body) {
-		body.force.add(this.force);
-	}
-	
-	/**
 	 * Returns true if this force should be removed.
 	 * <p>
 	 * Implement this method to create {@link Force} objects

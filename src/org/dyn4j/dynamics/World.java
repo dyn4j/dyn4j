@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Listener;
@@ -94,6 +95,9 @@ public class World implements Shiftable, DataContainer {
 	/** Zero gravity constant */
 	public static final Vector2 ZERO_GRAVITY = new Vector2(0.0, 0.0);
 
+	/** The world id */
+	protected final UUID id = UUID.randomUUID();
+	
 	// settings
 	
 	/** The dynamics settings for this world */
@@ -137,32 +141,34 @@ public class World implements Shiftable, DataContainer {
 	/** The {@link TimeOfImpactSolver} */
 	protected TimeOfImpactSolver timeOfImpactSolver;
 
+	/** The application data associated */
+	protected Object userData;
+	
+	// internal
+	
 	// listeners and config
 	
 	/** The list of listeners for this world */
-	protected final List<Listener> listeners;
+	private final List<Listener> listeners;
 	
 	// bodies/joints
 	
 	/** The {@link Body} list */
-	protected final List<Body> bodies;
+	private final List<Body> bodies;
 	
 	/** The {@link Joint} list */
-	protected final List<Joint> joints;
-	
-	/** The application data associated */
-	protected Object userData;
+	private final List<Joint> joints;
 	
 	// temp data
 	
 	/** The reusable island */
-	protected Island island;
+	private Island island;
 	
 	/** The accumulated time */
-	protected double time;
+	private double time;
 	
 	/** Flag to find new contacts */
-	protected boolean updateRequired;
+	private boolean updateRequired;
 	
 	/**
 	 * Default constructor.
@@ -257,7 +263,7 @@ public class World implements Shiftable, DataContainer {
 	 * to listen for when a step is actually performed.  In addition, this method will
 	 * return true if a step was performed.
 	 * <p>
-	 * This method performs at maximum one simulation step.  Any remaining time from 
+	 * This method performs, at maximum, one simulation step.  Any remaining time from 
 	 * the previous call of this method is added to the given elapsed time to determine
 	 * if a step needs to be performed.  If the given elapsed time is usually greater 
 	 * than the step frequency, consider using the {@link #update(double, int)} method
@@ -342,7 +348,7 @@ public class World implements Shiftable, DataContainer {
 	 * <p>
 	 * This method will update the world on every call.  Unlike the {@link #update(double)}
 	 * method, this method uses the given elapsed time and does not attempt to update the world
-	 * in a set interval.
+	 * on a set interval.
 	 * <p>
 	 * This method immediately returns if the given elapsedTime is less than or equal to
 	 * zero.
@@ -361,6 +367,9 @@ public class World implements Shiftable, DataContainer {
 	
 	/**
 	 * Performs the given number of simulation steps using the step frequency in {@link Settings}.
+	 * <p>
+	 * This method immediately returns if the given step count is less than or equal to
+	 * zero.
 	 * @param steps the number of simulation steps to perform
 	 */
 	public void step(int steps) {
@@ -373,7 +382,7 @@ public class World implements Shiftable, DataContainer {
 	/**
 	 * Performs the given number of simulation steps using the given elapsed time for each step.
 	 * <p>
-	 * This method immediately returns if the given elapsedTime is less than or equal to
+	 * This method immediately returns if the given elapsedTime or step count is less than or equal to
 	 * zero.
 	 * @param steps the number of simulation steps to perform
 	 * @param elapsedTime the elapsed time for each step
@@ -393,15 +402,26 @@ public class World implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Steps the {@link World} using the current {@link Step}.
+	 * Performs one time step of the {@link World} using the current {@link Step}.
 	 * <p>
-	 * Performs collision detection and resolution.
+	 * This method advances the world by the elapsed time in the {@link Step} object
+	 * and performs collision resolution and constraint solving.
+	 * <p>
+	 * This method will perform a collision detection sweep at the end to ensure that
+	 * callers of the world have the latest collision information. If the {@link #isUpdateRequired()}
+	 * method returns true, a collision detection sweep will be performed before doing
+	 * collision resolution.  See the {@link #setUpdateRequired(boolean)} method for details
+	 * on when this flag should be set.
 	 * <p>
 	 * Use the various listeners to listen for events during the execution of
 	 * this method.
 	 * <p>
-	 * Take care when performing methods on the {@link World} object in any
-	 * event listeners tied to this method.
+	 * If possible use the {@link StepListener#postSolve(Step, World)} method to update any
+	 * bodies or joints to increase performance.
+	 * <p>
+	 * Most {@link Listener}s do not allow modification of the world, bodies, joints, etc in
+	 * there methods. It's recommended that any of modification be performed in a {@link StepListener}
+	 * or after this method has returned.
 	 */
 	protected void step() {
 		// get all the step listeners
@@ -458,7 +478,7 @@ public class World implements Shiftable, DataContainer {
 		int jSize = this.joints.size();
 		for (int i = 0; i < jSize; i++) {
 			// get the joint
-			Joint joint = this.joints.get(i);
+			Constraint joint = this.joints.get(i);
 			// set the island flag to false
 			joint.setOnIsland(false);
 		}
@@ -466,6 +486,15 @@ public class World implements Shiftable, DataContainer {
 		// perform a depth first search of the contact graph
 		// to create islands for constraint solving
 		Deque<Body> stack = new ArrayDeque<Body>(size);
+
+		// temp storage
+		// we put these here so we can implicitly convert from joint and
+		// contact constraint to constraint so that we have package private
+		// access to the isOnIsland and setOnIsland methods
+		Joint joint;
+		ContactConstraint contactConstraint;
+		Constraint constraint;
+		
 		// loop over the bodies and their contact edges to create the islands
 		for (int i = 0; i < size; i++) {
 			Body seed = this.bodies.get(i);
@@ -478,6 +507,7 @@ public class World implements Shiftable, DataContainer {
 			island.clear();
 			stack.clear();
 			stack.push(seed);
+			
 			while (stack.size() > 0) {
 				// get the next body
 				Body body = stack.pop();
@@ -496,17 +526,17 @@ public class World implements Shiftable, DataContainer {
 				for (int j = 0; j < ceSize; j++) {
 					ContactEdge contactEdge = body.contacts.get(j);
 					// get the contact constraint
-					ContactConstraint contactConstraint = contactEdge.getContactConstraint();
+					constraint = contactConstraint = contactEdge.interaction;
 					// skip sensor contacts
 					if (contactConstraint.isSensor()) continue;
 					// get the other body
-					Body other = contactEdge.getOther();
+					Body other = contactEdge.other;
 					// check if the contact constraint has already been added to an island
-					if (contactConstraint.isOnIsland()) continue;
+					if (constraint.isOnIsland()) continue;
 					// add the contact constraint to the island list
 					island.add(contactConstraint);
 					// set the island flag on the contact constraint
-					contactConstraint.setOnIsland(true);
+					constraint.setOnIsland(true);
 					// has the other body been added to an island yet?
 					if (!other.isOnIsland()) {
 						// if not then add this body to the stack
@@ -520,18 +550,18 @@ public class World implements Shiftable, DataContainer {
 					// get the joint edge
 					JointEdge jointEdge = body.joints.get(j);
 					// get the joint
-					Joint joint = jointEdge.getJoint();
+					constraint = joint = jointEdge.interaction;
 					// check if the joint is inactive
 					if (!joint.isActive()) continue;
 					// get the other body
-					Body other = jointEdge.getOther();
+					Body other = jointEdge.other;
 					// check if the joint has already been added to an island
 					// or if the other body is not active
-					if (joint.isOnIsland() || !other.isActive()) continue;
+					if (constraint.isOnIsland() || !other.isActive()) continue;
 					// add the joint to the island
 					island.add(joint);
 					// set the island flag on the joint
-					joint.setOnIsland(true);
+					constraint.setOnIsland(true);
 					// check if the other body has been added to an island
 					if (!other.isOnIsland()) {
 						// if not then add the body to the stack
@@ -566,6 +596,12 @@ public class World implements Shiftable, DataContainer {
 			this.solveTOI(continuousDetectionMode);
 		}
 		
+		// notify the step listener
+		for (int i = 0; i < sSize; i++) {
+			StepListener sl = stepListeners.get(i);
+			sl.postSolve(this.step, this);
+		}
+		
 		// after all has been updated find new contacts
 		// this is done so that the user has the latest contacts
 		// and the broadphase has the latest AABBs, etc.
@@ -587,9 +623,9 @@ public class World implements Shiftable, DataContainer {
 	 * This method performs the following:
 	 * <ol>
 	 * 	<li>Checks for out of bound bodies</li>
-	 * 	<li>Updates the broadphase using the current body positions</li>
-	 * 	<li>Performs broadphase collision detection</li>
-	 * 	<li>Performs narrowphase collision detection</li>
+	 * 	<li>Updates the broad-phase using the current body positions</li>
+	 * 	<li>Performs broad-phase collision detection</li>
+	 * 	<li>Performs narrow-phase collision detection</li>
 	 * 	<li>Performs manifold solving</li>
 	 * 	<li>Adds contacts to the contact manager</li>
 	 * 	<li>Warm starts the contacts</li>
@@ -598,10 +634,7 @@ public class World implements Shiftable, DataContainer {
 	 * This method will notify all bounds and collision listeners.  If any {@link CollisionListener}
 	 * returns false, the collision is ignored.
 	 * <p>
-	 * This method also notifies using the {@link ContactListener#sensed(ContactPoint)},
-	 * {@link ContactListener#begin(ContactPoint)}, 
-	 * {@link ContactListener#persist(org.dyn4j.dynamics.contact.PersistedContactPoint)}, and
-	 * {@link ContactListener#end(ContactPoint)} methods.
+	 * This method also notifies any {@link ContactListener}s.
 	 * @since 3.0.0
 	 */
 	protected void detect() {
@@ -819,7 +852,7 @@ public class World implements Shiftable, DataContainer {
 	 * This method will find the first {@link Body} that the given {@link Body}
 	 * collides with unless ignored via the {@link TimeOfImpactListener}.
 	 * <p>
-	 * If any {@link TimeOfImpactListener} doesn't allow the collision the collision
+	 * If any {@link TimeOfImpactListener} doesn't allow the collision then the collision
 	 * is ignored.
 	 * <p>
 	 * After the first {@link Body} is found the two {@link Body}s are interpolated
@@ -1443,7 +1476,7 @@ public class World implements Shiftable, DataContainer {
 	 * This method does a static test of bodies (in other words, does not take into account the bodies linear
 	 * or angular velocity, but rather assumes they are stationary).
 	 * <p>
-	 * The <code>dp</code> parameter is the linear cast vector determining the direction and magnitude of the cast.
+	 * The <code>deltaPosition</code> parameter is the linear cast vector determining the direction and magnitude of the cast.
 	 * <p>
 	 * The {@link ConvexCastResult} class implements the Comparable interface to allow sorting by
 	 * the time of impact.
@@ -1456,7 +1489,7 @@ public class World implements Shiftable, DataContainer {
 	 * For multi-fixtured bodies, only the fixture that has the minimum time of impact will be added to the
 	 * results list.
 	 * <p>
-	 * Bodies in collision with the given convex at the begining of the cast are not included in the results.
+	 * Bodies in collision with the given convex at the beginning of the cast are not included in the results.
 	 * <p>
 	 * Inactive bodies are ignored in this test.
 	 * @param convex the convex to cast
@@ -1479,7 +1512,7 @@ public class World implements Shiftable, DataContainer {
 	 * This method does a static test of bodies (in other words, does not take into account the bodies linear
 	 * or angular velocity, but rather assumes they are stationary).
 	 * <p>
-	 * The <code>dp</code> parameter is the linear cast vector determining the direction and magnitude of the cast.
+	 * The <code>deltaPosition</code> parameter is the linear cast vector determining the direction and magnitude of the cast.
 	 * <p>
 	 * The {@link ConvexCastResult} class implements the Comparable interface to allow sorting by
 	 * the time of impact.
@@ -1492,7 +1525,7 @@ public class World implements Shiftable, DataContainer {
 	 * For multi-fixtured bodies, only the fixture that has the minimum time of impact will be added to the
 	 * results list.
 	 * <p>
-	 * Bodies in collision with the given convex at the begining of the cast are not included in the results.
+	 * Bodies in collision with the given convex at the beginning of the cast are not included in the results.
 	 * @param convex the convex to cast
 	 * @param transform the initial position and orientation of the convex
 	 * @param deltaPosition &Delta;position; the change in position (the cast length and direction basically)
@@ -1514,8 +1547,8 @@ public class World implements Shiftable, DataContainer {
 	 * This method does a static test of bodies (in other words, does not take into account the bodies linear
 	 * or angular velocity, but rather assumes they are stationary).
 	 * <p>
-	 * The <code>dp</code> parameter is the linear cast vector determining the direction and magnitude of the cast.  
-	 * The <code>da</code> parameter is the change in angle over the linear cast and is interpolated linearly 
+	 * The <code>deltaPosition</code> parameter is the linear cast vector determining the direction and magnitude of the cast.  
+	 * The <code>deltaAngle</code> parameter is the change in angle over the linear cast and is interpolated linearly 
 	 * during detection.
 	 * <p>
 	 * The {@link ConvexCastResult} class implements the Comparable interface to allow sorting by
@@ -1529,7 +1562,7 @@ public class World implements Shiftable, DataContainer {
 	 * For multi-fixtured bodies, only the fixture that has the minimum time of impact will be added to the
 	 * results list.
 	 * <p>
-	 * Bodies in collision with the given convex at the begining of the cast are not included in the results.
+	 * Bodies in collision with the given convex at the beginning of the cast are not included in the results.
 	 * <p>
 	 * Inactive bodies are ignored in this test.
 	 * @param convex the convex to cast
@@ -1553,8 +1586,8 @@ public class World implements Shiftable, DataContainer {
 	 * This method does a static test of bodies (in other words, does not take into account the bodies linear
 	 * or angular velocity, but rather assumes they are stationary).
 	 * <p>
-	 * The <code>dp</code> parameter is the linear cast vector determining the direction and magnitude of the cast.  
-	 * The <code>da</code> parameter is the change in angle over the linear cast and is interpolated linearly 
+	 * The <code>deltaPosition</code> parameter is the linear cast vector determining the direction and magnitude of the cast.  
+	 * The <code>deltaAngle</code> parameter is the change in angle over the linear cast and is interpolated linearly 
 	 * during detection.
 	 * <p>
 	 * The {@link ConvexCastResult} class implements the Comparable interface to allow sorting by
@@ -1568,7 +1601,7 @@ public class World implements Shiftable, DataContainer {
 	 * For multi-fixtured bodies, only the fixture that has the minimum time of impact will be added to the
 	 * results list.
 	 * <p>
-	 * Bodies in collision with the given convex at the begining of the cast are not included in the results.
+	 * Bodies in collision with the given convex at the beginning of the cast are not included in the results.
 	 * @param convex the convex to cast
 	 * @param transform the initial position and orientation of the convex
 	 * @param deltaPosition &Delta;position; the change in position (the cast length and direction basically)
@@ -1590,8 +1623,8 @@ public class World implements Shiftable, DataContainer {
 	 * This method does a static test of bodies (in other words, does not take into account the bodies linear
 	 * or angular velocity, but rather assumes they are stationary).
 	 * <p>
-	 * The <code>dp</code> parameter is the linear cast vector determining the direction and magnitude of the cast.  
-	 * The <code>da</code> parameter is the change in angle over the linear cast and is interpolated linearly 
+	 * The <code>deltaPosition</code> parameter is the linear cast vector determining the direction and magnitude of the cast.  
+	 * The <code>deltaAngle</code> parameter is the change in angle over the linear cast and is interpolated linearly 
 	 * during detection.
 	 * <p>
 	 * The {@link ConvexCastResult} class implements the Comparable interface to allow sorting by
@@ -1605,7 +1638,7 @@ public class World implements Shiftable, DataContainer {
 	 * For multi-fixtured bodies, only the fixture that has the minimum time of impact will be added to the
 	 * results list.
 	 * <p>
-	 * Bodies in collision with the given convex at the begining of the cast are not included in the results.
+	 * Bodies in collision with the given convex at the beginning of the cast are not included in the results.
 	 * @param convex the convex to cast
 	 * @param transform the initial position and orientation of the convex
 	 * @param deltaPosition &Delta;position; the change in position (the cast length and direction basically)
@@ -1720,7 +1753,7 @@ public class World implements Shiftable, DataContainer {
 	 * This method does a static test of the body (in other words, does not take into account the body's linear
 	 * or angular velocity, but rather assumes it is stationary).
 	 * <p>
-	 * The <code>dp</code> parameter is the linear cast vector determining the direction and magnitude of the cast.
+	 * The <code>deltaPosition</code> parameter is the linear cast vector determining the direction and magnitude of the cast.
 	 * <p>
 	 * All convex casts pass through the {@link ConvexCastListener}s before being tested.  If <b>any</b>
 	 * {@link ConvexCastListener} doesn't allow the convex cast, then the body will not be tested.
@@ -1747,8 +1780,8 @@ public class World implements Shiftable, DataContainer {
 	 * This method does a static test of the body (in other words, does not take into account the body's linear
 	 * or angular velocity, but rather assumes it is stationary).
 	 * <p>
-	 * The <code>dp</code> parameter is the linear cast vector determining the direction and magnitude of the cast.  
-	 * The <code>da</code> parameter is the change in angle over the linear cast and is interpolated linearly 
+	 * The <code>deltaPosition</code> parameter is the linear cast vector determining the direction and magnitude of the cast.  
+	 * The <code>deltaAngle</code> parameter is the change in angle over the linear cast and is interpolated linearly 
 	 * during detection.
 	 * <p>
 	 * All convex casts pass through the {@link ConvexCastListener}s before being tested.  If <b>any</b>
@@ -1777,8 +1810,8 @@ public class World implements Shiftable, DataContainer {
 	 * This method does a static test of the body (in other words, does not take into account the body's linear
 	 * or angular velocity, but rather assumes it is stationary).
 	 * <p>
-	 * The <code>dp</code> parameter is the linear cast vector determining the direction and magnitude of the cast.  
-	 * The <code>da</code> parameter is the change in angle over the linear cast and is interpolated linearly 
+	 * The <code>deltaPosition</code> parameter is the linear cast vector determining the direction and magnitude of the cast.  
+	 * The <code>deltaAngle</code> parameter is the change in angle over the linear cast and is interpolated linearly 
 	 * during detection.
 	 * <p>
 	 * All convex casts pass through the {@link ConvexCastListener}s before being tested.  If <b>any</b>
@@ -1906,8 +1939,6 @@ public class World implements Shiftable, DataContainer {
 	 * <p>
 	 * If this method returns true, the results list will contain the bodies and
 	 * fixtures that the convex overlaps.
-	 * <p>
-	 * This may return bodies who only have sensor fixtures overlapping.
 	 * @param aabb the world space {@link AABB}
 	 * @param ignoreSensors true if sensor fixtures should be ignored
 	 * @param ignoreInactive true if inactive bodies should be ignored
@@ -1924,8 +1955,6 @@ public class World implements Shiftable, DataContainer {
 	 * <p>
 	 * If this method returns true, the results list will contain the bodies and
 	 * fixtures that the convex overlaps.
-	 * <p>
-	 * This may return bodies who only have sensor fixtures overlapping.
 	 * @param aabb the world space {@link AABB}
 	 * @param filter the {@link Filter} to use against the fixtures; can be null
 	 * @param ignoreSensors true if sensor fixtures should be ignored
@@ -1976,7 +2005,7 @@ public class World implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Returns true if the given convex overlaps a body in the world.
+	 * Returns true if the given {@link Convex} overlaps a body in the world.
 	 * <p>
 	 * If this method returns true, the results list will contain the bodies and
 	 * fixtures that the convex overlaps.
@@ -2000,7 +2029,7 @@ public class World implements Shiftable, DataContainer {
 	}
 
 	/**
-	 * Returns true if the given convex overlaps a body in the world.
+	 * Returns true if the given {@link Convex} overlaps a body in the world.
 	 * <p>
 	 * If this method returns true, the results list will contain the bodies and
 	 * fixtures that the convex overlaps.
@@ -2023,7 +2052,7 @@ public class World implements Shiftable, DataContainer {
 	}
 
 	/**
-	 * Returns true if the given convex overlaps a body in the world.
+	 * Returns true if the given {@link Convex} overlaps a body in the world.
 	 * <p>
 	 * If this method returns true, the results list will contain the bodies and
 	 * fixtures that the convex overlaps.
@@ -2045,7 +2074,7 @@ public class World implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Returns true if the given convex overlaps a body in the world.
+	 * Returns true if the given {@link Convex} overlaps a body in the world.
 	 * <p>
 	 * If this method returns true, the results list will contain the bodies and
 	 * fixtures that the convex overlaps.
@@ -2068,7 +2097,7 @@ public class World implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Returns true if the given convex overlaps a body in the world.
+	 * Returns true if the given {@link Convex} overlaps a body in the world.
 	 * <p>
 	 * If this method returns true, the results list will contain the bodies and
 	 * fixtures that the convex overlaps.
@@ -2077,7 +2106,7 @@ public class World implements Shiftable, DataContainer {
 	 * are colliding.
 	 * <p>
 	 * Use the <code>includeCollisionData</code> parameter to have the {@link Penetration} object
-	 * filled in the {@link DetectResult}s.  Including this information negatively impacts performance.
+	 * filled in the {@link DetectResult}s.  Including this information will have a performance impact.
 	 * @param convex the convex shape in world coordinates
 	 * @param filter the {@link Filter} to use against the fixtures; can be null
 	 * @param ignoreSensors true if sensor fixtures should be ignored
@@ -2092,7 +2121,7 @@ public class World implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Returns true if the given convex overlaps a body in the world.
+	 * Returns true if the given {@link Convex} overlaps a body in the world.
 	 * <p>
 	 * If this method returns true, the results list will contain the bodies and
 	 * fixtures that the convex overlaps.
@@ -2117,7 +2146,7 @@ public class World implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Returns true if the given convex overlaps a body in the world.
+	 * Returns true if the given {@link Convex} overlaps a body in the world.
 	 * <p>
 	 * If this method returns true, the results list will contain the bodies and
 	 * fixtures that the convex overlaps.
@@ -2141,7 +2170,7 @@ public class World implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Returns true if the given convex overlaps a body in the world.
+	 * Returns true if the given {@link Convex} overlaps a body in the world.
 	 * <p>
 	 * If this method returns true, the results list will contain the bodies and
 	 * fixtures that the convex overlaps.
@@ -2164,7 +2193,7 @@ public class World implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Returns true if the given convex overlaps a body in the world.
+	 * Returns true if the given {@link Convex} overlaps a body in the world.
 	 * <p>
 	 * If this method returns true, the results list will contain the bodies and
 	 * fixtures that the convex overlaps.
@@ -2188,7 +2217,7 @@ public class World implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Returns true if the given convex overlaps a body in the world.
+	 * Returns true if the given {@link Convex} overlaps a body in the world.
 	 * <p>
 	 * If this method returns true, the results list will contain the bodies and
 	 * fixtures that the convex overlaps.
@@ -2197,7 +2226,7 @@ public class World implements Shiftable, DataContainer {
 	 * are colliding.
 	 * <p>
 	 * Use the <code>includeCollisionData</code> parameter to have the {@link Penetration} object
-	 * filled in the {@link DetectResult}s.  Including this information negatively impacts performance.
+	 * filled in the {@link DetectResult}s.  Including this information will have a performance impact.
 	 * @param convex the convex shape in local coordinates
 	 * @param transform the convex shape's world transform
 	 * @param filter the {@link Filter} to use against the fixtures; can be null
@@ -2262,7 +2291,7 @@ public class World implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Returns true if the given AABB overlaps the given body in the world.
+	 * Returns true if the given {@link AABB} overlaps the given body in the world.
 	 * <p>
 	 * If this method returns true, the results list will contain the bodies and
 	 * fixtures that the AABB overlaps.
@@ -2281,7 +2310,7 @@ public class World implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Returns true if the given AABB overlaps the given body in the world.
+	 * Returns true if the given {@link AABB} overlaps the given body in the world.
 	 * <p>
 	 * If this method returns true, the results list will contain the bodies and
 	 * fixtures that the AABB overlaps.
@@ -2346,7 +2375,7 @@ public class World implements Shiftable, DataContainer {
 	 * Returns true if the given {@link Convex} overlaps the given body in the world.
 	 * <p>
 	 * If this method returns true, the results list will contain the bodies and
-	 * fixtures that the AABB overlaps.
+	 * fixtures that the convex overlaps.
 	 * <p>
 	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
 	 * are colliding.
@@ -2367,7 +2396,7 @@ public class World implements Shiftable, DataContainer {
 	 * Returns true if the given {@link Convex} overlaps the given body in the world.
 	 * <p>
 	 * If this method returns true, the results list will contain the bodies and
-	 * fixtures that the AABB overlaps.
+	 * fixtures that the convex overlaps.
 	 * <p>
 	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
 	 * are colliding.
@@ -2389,7 +2418,7 @@ public class World implements Shiftable, DataContainer {
 	 * Returns true if the given {@link Convex} overlaps the given body in the world.
 	 * <p>
 	 * If this method returns true, the results list will contain the bodies and
-	 * fixtures that the AABB overlaps.
+	 * fixtures that the convex overlaps.
 	 * <p>
 	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
 	 * are colliding.
@@ -2413,7 +2442,7 @@ public class World implements Shiftable, DataContainer {
 	 * Returns true if the given {@link Convex} overlaps the given body in the world.
 	 * <p>
 	 * If this method returns true, the results list will contain the bodies and
-	 * fixtures that the AABB overlaps.
+	 * fixtures that the convex overlaps.
 	 * <p>
 	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
 	 * are colliding.
@@ -2435,7 +2464,7 @@ public class World implements Shiftable, DataContainer {
 	 * Returns true if the given {@link Convex} overlaps the given body in the world.
 	 * <p>
 	 * If this method returns true, the results list will contain the bodies and
-	 * fixtures that the AABB overlaps.
+	 * fixtures that the convex overlaps.
 	 * <p>
 	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
 	 * are colliding.
@@ -2458,7 +2487,7 @@ public class World implements Shiftable, DataContainer {
 	 * Returns true if the given {@link Convex} overlaps the given body in the world.
 	 * <p>
 	 * If this method returns true, the results list will contain the bodies and
-	 * fixtures that the AABB overlaps.
+	 * fixtures that the convex overlaps.
 	 * <p>
 	 * Use the {@link Body#isInContact(Body)} method instead if you want to test if two bodies
 	 * are colliding.
@@ -2586,7 +2615,7 @@ public class World implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Adds a {@link Body} to the {@link World}.
+	 * Adds the given {@link Body} to the {@link World}.
 	 * @param body the {@link Body} to add
 	 * @throws NullPointerException if body is null
 	 * @throws IllegalArgumentException if body has already been added to this world or if its a member of another world instance
@@ -2602,13 +2631,13 @@ public class World implements Shiftable, DataContainer {
 		// add it to the world
 		this.bodies.add(body);
 		// set the world property on the body
-		body.setWorld(this);
+		body.world = this;
 		// add it to the broadphase
 		this.broadphaseDetector.add(body);
 	}
 	
 	/**
-	 * Adds a {@link Joint} to the {@link World}.
+	 * Adds the given {@link Joint} to the {@link World}.
 	 * @param joint the {@link Joint} to add
 	 * @throws NullPointerException if joint is null
 	 * @throws IllegalArgumentException if joint has already been added to this world or if its a member of another world instance
@@ -2617,6 +2646,11 @@ public class World implements Shiftable, DataContainer {
 	public void addJoint(Joint joint) {
 		// check for null joint
 		if (joint == null) throw new NullPointerException(Messages.getString("dynamics.world.addNullJoint"));
+		// dont allow adding it twice
+		// TODO fix
+//		if (joint.world == this) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingBody"));
+//		// dont allow a joint that already is assigned to another world
+//		if (joint.world != null) throw new IllegalArgumentException(Messages.getString("dynamics.world.addOtherWorldBody"));
 		// add the joint to the joint list
 		this.joints.add(joint);
 		// get the associated bodies
@@ -2653,7 +2687,7 @@ public class World implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Removes the given {@link Body} from the {@link World}.
+	 * Removes the given {@link Body} from this {@link World}.
 	 * <p>
 	 * Use the {@link #removeBody(Body, boolean)} method to enable implicit
 	 * destruction notification.
@@ -2665,13 +2699,13 @@ public class World implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Removes the given {@link Body} from the {@link World}.
+	 * Removes the given {@link Body} from this {@link World}.
 	 * <p>
 	 * When a body is removed, joints and contacts may be implicitly destroyed.
-	 * Pass true to the notify parameter to be notified the destruction of these objects
+	 * Pass true to the notify parameter to be notified of the destruction of these objects
 	 * via the {@link DestructionListener}s.
 	 * <p>
-	 * As of 3.2.0 this will always trigger {@link ContactListener#end(ContactPoint)} events
+	 * This method does not trigger {@link ContactListener#end(ContactPoint)} events
 	 * for the contacts that are being removed.
 	 * @param body the {@link Body} to remove
 	 * @param notify true if implicit destruction should be notified
@@ -2705,9 +2739,9 @@ public class World implements Shiftable, DataContainer {
 				// remove the joint edge from the given body
 				aIterator.remove();
 				// get the joint
-				Joint joint = jointEdge.getJoint();
+				Joint joint = jointEdge.interaction;
 				// get the other body
-				Body other = jointEdge.getOther();
+				Body other = jointEdge.other;
 				// wake up the other body
 				other.setAsleep(false);
 				// remove the joint edge from the other body
@@ -2716,7 +2750,7 @@ public class World implements Shiftable, DataContainer {
 					// get the joint edge
 					JointEdge otherJointEdge = bIterator.next();
 					// get the joint
-					Joint otherJoint = otherJointEdge.getJoint();
+					Joint otherJoint = otherJointEdge.interaction;
 					// are the joints the same object reference
 					if (otherJoint == joint) {
 						// remove the joint edge
@@ -2744,9 +2778,9 @@ public class World implements Shiftable, DataContainer {
 				// remove the contact edge from the given body
 				acIterator.remove();
 				// get the contact constraint
-				ContactConstraint contactConstraint = contactEdge.getContactConstraint();
+				ContactConstraint contactConstraint = contactEdge.interaction;
 				// get the other body
-				Body other = contactEdge.getOther();
+				Body other = contactEdge.other;
 				// wake up the other body
 				other.setAsleep(false);
 				// remove the contact edge connected from the other body
@@ -2755,7 +2789,7 @@ public class World implements Shiftable, DataContainer {
 				while (iterator.hasNext()) {
 					ContactEdge otherContactEdge = iterator.next();
 					// get the contact constraint
-					ContactConstraint otherContactConstraint = otherContactEdge.getContactConstraint();
+					ContactConstraint otherContactConstraint = otherContactEdge.interaction;
 					// check if the contact constraint is the same reference
 					if (otherContactConstraint == contactConstraint) {
 						// remove the contact edge
@@ -2797,9 +2831,9 @@ public class World implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Removes the given {@link Joint} from the {@link World}.
+	 * Removes the given {@link Joint} from this {@link World}.
 	 * <p>
-	 * When joints are removed no other objects are implicitly destroyed.
+	 * No other objects are implicitly destroyed with joints are removed.
 	 * @param joint the {@link Joint} to remove
 	 * @return boolean true if the {@link Joint} was removed
 	 */
@@ -2820,7 +2854,7 @@ public class World implements Shiftable, DataContainer {
 			while (iterator.hasNext()) {
 				// see if this is the edge we want to remove
 				JointEdge jointEdge = iterator.next();
-				if (jointEdge.getJoint() == joint) {
+				if (jointEdge.interaction == joint) {
 					// then remove this joint edge
 					iterator.remove();
 					// joints should only have one joint edge
@@ -2833,7 +2867,7 @@ public class World implements Shiftable, DataContainer {
 			while (iterator.hasNext()) {
 				// see if this is the edge we want to remove
 				JointEdge jointEdge = iterator.next();
-				if (jointEdge.getJoint() == joint) {
+				if (jointEdge.interaction == joint) {
 					// then remove this joint edge
 					iterator.remove();
 					// joints should only have one joint edge
@@ -2851,7 +2885,7 @@ public class World implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Removes all the joints and bodies from the world.
+	 * Removes all the joints and bodies from this world.
 	 * <p>
 	 * This method does <b>not</b> notify of destroyed objects.
 	 * @see #removeAllBodiesAndJoints(boolean)
@@ -2862,9 +2896,7 @@ public class World implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Removes all the joints and bodies from the world.
-	 * <p>
-	 * This method will remove the joints and contacts from all {@link Body}s.
+	 * Removes all the joints and bodies from this world.
 	 * @param notify true if destruction of joints and contacts should be notified of by the {@link DestructionListener}
 	 * @since 3.1.1
 	 */
@@ -2889,16 +2921,16 @@ public class World implements Shiftable, DataContainer {
 					// get the contact edge
 					ContactEdge contactEdge = aIterator.next();
 					// get the other body involved
-					Body other = contactEdge.getOther();
+					Body other = contactEdge.other;
 					// get the contact constraint
-					ContactConstraint contactConstraint = contactEdge.getContactConstraint();
+					ContactConstraint contactConstraint = contactEdge.interaction;
 					// find the other contact edge
 					Iterator<ContactEdge> bIterator = other.contacts.iterator();
 					while (bIterator.hasNext()) {
 						// get the contact edge
 						ContactEdge otherContactEdge = bIterator.next();
 						// get the contact constraint on the edge
-						ContactConstraint otherContactConstraint = otherContactEdge.getContactConstraint();
+						ContactConstraint otherContactConstraint = otherContactEdge.interaction;
 						// are the constraints the same object reference
 						if (otherContactConstraint == contactConstraint) {
 							// if so then remove it
@@ -2965,7 +2997,7 @@ public class World implements Shiftable, DataContainer {
 	
 	/**
 	 * This is a convenience method for the {@link #removeAllBodiesAndJoints()} method since all joints will be removed
-	 * when all bodies are removed.
+	 * when all bodies are removed anyway.
 	 * <p>
 	 * This method does not notify of the destroyed contacts, joints, etc.
 	 * @see #removeAllBodies(boolean)
@@ -2977,7 +3009,7 @@ public class World implements Shiftable, DataContainer {
 	
 	/**
 	 * This is a convenience method for the {@link #removeAllBodiesAndJoints(boolean)} method since all joints will be removed
-	 * when all bodies are removed.
+	 * when all bodies are removed anyway.
 	 * @param notify true if destruction of joints and contacts should be notified of by the {@link DestructionListener}
 	 * @since 3.0.1
 	 */
@@ -3022,7 +3054,7 @@ public class World implements Shiftable, DataContainer {
 			while (iterator.hasNext()) {
 				// see if this is the edge we want to remove
 				JointEdge jointEdge = iterator.next();
-				if (jointEdge.getJoint() == joint) {
+				if (jointEdge.interaction == joint) {
 					// then remove this joint edge
 					iterator.remove();
 					// joints should only have one joint edge
@@ -3035,7 +3067,7 @@ public class World implements Shiftable, DataContainer {
 			while (iterator.hasNext()) {
 				// see if this is the edge we want to remove
 				JointEdge jointEdge = iterator.next();
-				if (jointEdge.getJoint() == joint) {
+				if (jointEdge.interaction == joint) {
 					// then remove this joint edge
 					iterator.remove();
 					// joints should only have one joint edge
@@ -3062,6 +3094,9 @@ public class World implements Shiftable, DataContainer {
 	
 	/**
 	 * Returns true if upon the next time step the contacts must be updated.
+	 * <p>
+	 * This is typically set via user code when something about the simulation changes
+	 * that can affect collision detection.
 	 * @return boolean
 	 * @see #setUpdateRequired(boolean)
 	 */
@@ -3094,6 +3129,15 @@ public class World implements Shiftable, DataContainer {
 	}
 	
 	/**
+	 * Returns the world id.
+	 * @return UUID
+	 * @since 3.2.0
+	 */
+	public UUID getId() {
+		return this.id;
+	}
+	
+	/**
 	 * Returns the settings for this world.
 	 * @return {@link Settings}
 	 * @since 3.0.3
@@ -3114,9 +3158,7 @@ public class World implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Sets the gravity.
-	 * <p>
-	 * Setting the gravity vector to the zero vector eliminates gravity.
+	 * Sets the acceleration due to gravity.
 	 * @param gravity the gravity in meters/second<sup>2</sup>
 	 * @throws NullPointerException if gravity is null
 	 */
@@ -3126,7 +3168,7 @@ public class World implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Returns the gravity.
+	 * Returns the acceleration due to gravity.
 	 * @return {@link Vector2} the gravity in meters/second<sup>2</sup>
 	 */
 	public Vector2 getGravity() {
@@ -3134,7 +3176,7 @@ public class World implements Shiftable, DataContainer {
 	}
 
 	/**
-	 * Sets the bounds of the {@link World}.
+	 * Sets the bounds of this {@link World}.
 	 * @param bounds the bounds; can be null
 	 */
 	public void setBounds(Bounds bounds) {
@@ -3142,20 +3184,20 @@ public class World implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Returns the bounds of the world.
+	 * Returns the bounds of this world.
 	 * <p>
 	 * This will return null if no bounds were initially set
 	 * or if it was set to null via the {@link #setBounds(Bounds)}
 	 * method.
-	 * @return {@link Bounds} the bounds
+	 * @return {@link Bounds} the bounds or null
 	 */
 	public Bounds getBounds() {
 		return this.bounds;
 	}
 	
 	/**
-	 * Returns the listeners that are of the given type 
-	 * or sub types of the given type.
+	 * Returns the listeners that are of the given type (or sub types)
+	 * of the given type.
 	 * <p>
 	 * Returns an empty list if no listeners for the given type are found.
 	 * <p>
@@ -3248,7 +3290,7 @@ public class World implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Removes the given listener.
+	 * Removes the given listener from this world.
 	 * @param listener the listener to remove
 	 * @return boolean true if the listener was removed
 	 * @since 3.1.0
@@ -3269,7 +3311,7 @@ public class World implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Removes all the listeners of the specified type.
+	 * Removes all the listeners of the specified type (or sub types).
 	 * <p>
 	 * Returns zero if the given type is null or there are zero listeners
 	 * attached.
@@ -3311,8 +3353,8 @@ public class World implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Returns the total number of listeners of the given type attached
-	 * to this world.
+	 * Returns the total number of listeners of the given type (or sub types) 
+	 * attached to this world.
 	 * <p>
 	 * Returns zero if the given class type is null.
 	 * <p>
@@ -3345,14 +3387,11 @@ public class World implements Shiftable, DataContainer {
 	
 	/**
 	 * Sets the broad-phase collision detection algorithm.
-	 * {@link BroadphaseDetector} is set as the current broad phase.
 	 * @param broadphaseDetector the broad-phase collision detection algorithm
 	 * @throws NullPointerException if broadphaseDetector is null
 	 */
 	public void setBroadphaseDetector(BroadphaseDetector<Body, BodyFixture> broadphaseDetector) {
 		if (broadphaseDetector == null) throw new NullPointerException(Messages.getString("dynamics.world.nullBroadphaseDetector"));
-		// clear the broadphase
-		this.broadphaseDetector.clear();
 		// set the new broadphase
 		this.broadphaseDetector = broadphaseDetector;
 		// re-add all bodies to the broadphase
@@ -3372,9 +3411,6 @@ public class World implements Shiftable, DataContainer {
 	
 	/**
 	 * Sets the narrow-phase collision detection algorithm.
-	 * <p>
-	 * If the given detector is null then the default {@link Gjk}
-	 * {@link NarrowphaseDetector} is set as the current narrow phase.
 	 * @param narrowphaseDetector the narrow-phase collision detection algorithm
 	 * @throws NullPointerException if narrowphaseDetector is null
 	 */
@@ -3467,7 +3503,7 @@ public class World implements Shiftable, DataContainer {
 	 * coefficients, the {@link CoefficientMixer} is used to mathematically combine them
 	 * into one coefficient to be used in contact resolution.
 	 * <p>
-	 * Uses {@link CoefficientMixer#DEFAULT_MIXER} by default.
+	 * {@link CoefficientMixer#DEFAULT_MIXER} is the default.
 	 * @param coefficientMixer the coefficient mixer
 	 * @throws NullPointerException if coefficientMixer is null
 	 * @see CoefficientMixer
@@ -3501,9 +3537,6 @@ public class World implements Shiftable, DataContainer {
 	
 	/**
 	 * Returns the {@link ContactManager}.
-	 * <p>
-	 * The contact manager is used to store contacts for the purpose of notifications
-	 * via the {@link ContactListener}.
 	 * @return {@link ContactManager}
 	 * @since 1.0.2
 	 * @see #setContactManager(ContactManager)

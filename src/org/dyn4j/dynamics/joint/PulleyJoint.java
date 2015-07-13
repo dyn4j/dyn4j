@@ -131,7 +131,7 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 		this.impulse = 0.0;
 		// initialize the slack parameters
 		this.slackEnabled = false;
-		this.limitState = Joint.LimitState.AT_UPPER;
+		this.limitState = LimitState.AT_UPPER;
 	}
 	
 	/* (non-Javadoc)
@@ -194,7 +194,7 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 		
 		// check if we need to solve the constraint
 		if (l > this.length || !this.slackEnabled) {
-			this.limitState = Joint.LimitState.AT_UPPER;
+			this.limitState = LimitState.AT_UPPER;
 			
 			// check for near zero length
 			if (l1 <= 10.0 * linearTolerance) {
@@ -238,7 +238,7 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 		} else {
 			// clear the impulse and don't solve anything
 			this.impulse = 0;
-			this.limitState = Joint.LimitState.INACTIVE;
+			this.limitState = LimitState.INACTIVE;
 		}
 	}
 	
@@ -247,7 +247,7 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 	 */
 	@Override
 	public void solveVelocityConstraints(Step step, Settings settings) {
-		if (this.limitState != Joint.LimitState.INACTIVE) {
+		if (this.limitState != LimitState.INACTIVE) {
 			Transform t1 = this.body1.getTransform();
 			Transform t2 = this.body2.getTransform();
 			Mass m1 = this.body1.getMass();
@@ -289,7 +289,7 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 	 */
 	@Override
 	public boolean solvePositionConstraints(Step step, Settings settings) {
-		if (this.limitState != Joint.LimitState.INACTIVE) {
+		if (this.limitState != LimitState.INACTIVE) {
 			double linearTolerance = settings.getLinearTolerance();
 //			double maxLinearCorrection = settings.getMaximumLinearCorrection();
 			
@@ -515,5 +515,14 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 	 */
 	public void setSlackEnabled(boolean flag) {
 		this.slackEnabled = flag;
+	}
+
+	/**
+	 * Returns the current state of the limit.
+	 * @return {@link LimitState}
+	 * @since 3.2.0
+	 */
+	public LimitState getLimitState() {
+		return this.limitState;
 	}
 }

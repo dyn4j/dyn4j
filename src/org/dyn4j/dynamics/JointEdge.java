@@ -27,52 +27,19 @@ package org.dyn4j.dynamics;
 import org.dyn4j.dynamics.joint.Joint;
 
 /**
- * Represents a link from one {@link Body} to another over a {@link Joint}.
+ * Represents an interaction of a body in an interaction graph via a {@link Joint}.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.2.0
  * @since 1.0.0
  */
-class JointEdge {
-	/** The linked body */
-	protected final Body other;
-	
-	/** The {@link Joint} */
-	protected final Joint joint;
-	
+final class JointEdge extends InteractionEdge<Joint> {
+
 	/**
 	 * Full constructor.
 	 * @param other the linked {@link Body}
 	 * @param joint the {@link Joint}
 	 */
 	public JointEdge(Body other, Joint joint) {
-		this.other = other;
-		this.joint = joint;
-	}
-	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("JointEdge[Joint=").append(this.joint)
-		.append("|ConnectedBody=").append(this.other)
-		.append("]");
-		return sb.toString();
-	}
-	
-	/**
-	 * Returns the linked {@link Body}.
-	 * @return {@link Body}
-	 */
-	public Body getOther() {
-		return this.other;
-	}
-	
-	/**
-	 * Returns the {@link Joint}.
-	 * @return {@link Joint}
-	 */
-	public Joint getJoint() {
-		return this.joint;
+		super(other, joint);
 	}
 }

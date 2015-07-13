@@ -40,7 +40,7 @@ public interface StepListener extends Listener {
 	 * @param step the step information
 	 * @param world the simulation {@link World}
 	 */
-	public void begin(Step step, World world);
+	public abstract void begin(Step step, World world);
 	
 	/**
 	 * Called after collision detection and contact updates have been performed due
@@ -50,12 +50,20 @@ public interface StepListener extends Listener {
 	 * @since 3.0.1
 	 * @see World#setUpdateRequired(boolean)
 	 */
-	public void updatePerformed(Step step, World world);
+	public abstract void updatePerformed(Step step, World world);
+	
+	/**
+	 * Called after the world has been solved but before new contacts are found.
+	 * @param step the step information
+	 * @param world the simulation {@link World}
+	 * @since 3.2.0
+	 */
+	public abstract void postSolve(Step step, World world);
 	
 	/**
 	 * Called after a simulation step has been performed.
 	 * @param step the step information
 	 * @param world the simulation {@link World}
 	 */
-	public void end(Step step, World world);
+	public abstract void end(Step step, World world);
 }

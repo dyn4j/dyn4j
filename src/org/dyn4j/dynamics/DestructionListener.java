@@ -30,7 +30,7 @@ import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.dynamics.joint.Joint;
 
 /**
- * Listens for implicit destruction events.
+ * Interface to listen for implicit destruction events.
  * <p>
  * These events can happen when, for example, a {@link Body} is removed from a {@link World}
  * where it was attached to a {@link Joint}.  The joint must be removed as well.  These methods

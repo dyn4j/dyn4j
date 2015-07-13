@@ -104,7 +104,15 @@ public class RaycastResult implements Comparable<RaycastResult> {
 	public Body getBody() {
 		return this.body;
 	}
-	
+
+	/**
+	 * Sets the {@link Body} detected.
+	 * @param body the {@link Body}
+	 */
+	public void setBody(Body body) {
+		this.body = body;
+	}
+
 	/**
 	 * Returns the {@link BodyFixture} of the {@link Body} detected.
 	 * @return {@link BodyFixture}
@@ -114,10 +122,26 @@ public class RaycastResult implements Comparable<RaycastResult> {
 	}
 
 	/**
+	 * Sets the {@link BodyFixture} of the {@link Body} detected.
+	 * @param fixture the {@link BodyFixture}
+	 */
+	public void setFixture(BodyFixture fixture) {
+		this.fixture = fixture;
+	}
+
+	/**
 	 * Returns the {@link Raycast} result information.
 	 * @return {@link Raycast}
 	 */
 	public Raycast getRaycast() {
 		return this.raycast;
+	}
+
+	/**
+	 * Sets the {@link Raycast} result information.
+	 * @param raycast the {@link Raycast}
+	 */
+	public void setRaycast(Raycast raycast) {
+		this.raycast = raycast;
 	}
 }

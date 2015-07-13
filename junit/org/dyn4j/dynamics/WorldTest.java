@@ -75,6 +75,8 @@ public class WorldTest {
 		public void end(Step step, World world) { steps++; }
 		@Override
 		public void updatePerformed(Step step, World world) {}
+		@Override
+		public void postSolve(Step step, World world) {}
 	}
 	
 	/**
@@ -104,21 +106,19 @@ public class WorldTest {
 		w = new World(new AxisAlignedBounds(1.0, 1.0));
 		// make sure all the other junk is not null
 		TestCase.assertNotNull(w.settings);
-		TestCase.assertNotNull(w.bodies);
+		TestCase.assertEquals(0, w.getBodyCount());
 		TestCase.assertNotNull(w.bounds);
 		TestCase.assertNotNull(w.broadphaseDetector);
 		TestCase.assertNotNull(w.coefficientMixer);
 		TestCase.assertNotNull(w.contactManager);
 		TestCase.assertNotNull(w.gravity);
-		TestCase.assertNotNull(w.island);
-		TestCase.assertNotNull(w.joints);
+		TestCase.assertEquals(0, w.getJointCount());
 		TestCase.assertNotNull(w.manifoldSolver);
 		TestCase.assertNotNull(w.narrowphaseDetector);
 		TestCase.assertNotNull(w.step);
 		TestCase.assertNotNull(w.raycastDetector);
 		TestCase.assertNotNull(w.timeOfImpactDetector);
-		TestCase.assertNotNull(w.listeners);
-		TestCase.assertEquals(0, w.listeners.size());
+		TestCase.assertEquals(0, w.getListenerCount());
 	}
 	
 	/**
@@ -233,7 +233,7 @@ public class WorldTest {
 		Body b = new Body();
 		b.addFixture(Geometry.createCapsule(1.0, 0.5));
 		w.addBody(b);
-		TestCase.assertFalse(w.bodies.isEmpty());
+		TestCase.assertFalse(0 == w.getBodyCount());
 		// make sure the body's world reference is there
 		TestCase.assertNotNull(b.world);
 		// make sure it was added to the broadphase
@@ -277,7 +277,7 @@ public class WorldTest {
 		w.addBody(b2);
 		w.addJoint(j);
 		
-		TestCase.assertFalse(w.joints.isEmpty());
+		TestCase.assertTrue(w.getJointCount() > 0);
 		TestCase.assertFalse(b1.joints.isEmpty());
 		TestCase.assertFalse(b2.joints.isEmpty());
 	}
@@ -323,7 +323,7 @@ public class WorldTest {
 		// remove one of them
 		success = w.removeBody(b1, true);
 		TestCase.assertTrue(success);
-		TestCase.assertFalse(w.bodies.isEmpty());
+		TestCase.assertTrue(w.getBodyCount() > 0);
 		TestCase.assertNull(b1.world);
 		
 		// make sure it was added to the broadphase
@@ -345,12 +345,12 @@ public class WorldTest {
 		// make sure it was added to the broadphase
 		TestCase.assertFalse(w.broadphaseDetector.contains(b2));
 		// make sure the world has zero joints
-		TestCase.assertTrue(w.joints.isEmpty());
+		TestCase.assertEquals(0, w.getJointCount());
 		// make sure the world still has the first body
-		TestCase.assertFalse(w.bodies.isEmpty());
-		TestCase.assertEquals(1, w.bodies.size());
+		TestCase.assertTrue(w.getBodyCount() > 0);
+		TestCase.assertEquals(1, w.getBodyCount());
 		// make sure it really is the first body
-		TestCase.assertSame(b1, w.bodies.get(0));
+		TestCase.assertSame(b1, w.getBody(0));
 		// make sure that the remaining body has no joints attached
 		TestCase.assertTrue(b1.joints.isEmpty());
 		// make sure that the remaining body has no contacts attached
@@ -389,7 +389,7 @@ public class WorldTest {
 		// remove one of them
 		success = w.removeBody(b1);
 		TestCase.assertTrue(success);
-		TestCase.assertFalse(w.bodies.isEmpty());
+		TestCase.assertTrue(w.getBodyCount() > 0);
 		
 		// add that one back
 		w.addBody(b1);
@@ -404,10 +404,10 @@ public class WorldTest {
 		// remove a body and make sure destruction events are called
 		w.removeJoint(j);
 		// make sure the world has zero joints
-		TestCase.assertTrue(w.joints.isEmpty());
+		TestCase.assertEquals(0, w.getJointCount());
 		// make sure the world still has both bodies
-		TestCase.assertFalse(w.bodies.isEmpty());
-		TestCase.assertEquals(2, w.bodies.size());
+		TestCase.assertTrue(w.getBodyCount() > 0);
+		TestCase.assertEquals(2, w.getBodyCount());
 		// make sure that the remaining body has no joints attached
 		TestCase.assertTrue(b1.joints.isEmpty());
 		// make sure that no contacts were removed
@@ -647,8 +647,8 @@ public class WorldTest {
 		TestCase.assertTrue(b1.joints.isEmpty());
 		TestCase.assertTrue(b2.contacts.isEmpty());
 		TestCase.assertTrue(b2.joints.isEmpty());
-		TestCase.assertTrue(w.joints.isEmpty());
-		TestCase.assertTrue(w.bodies.isEmpty());
+		TestCase.assertEquals(0, w.getJointCount());
+		TestCase.assertEquals(0, w.getBodyCount());
 		TestCase.assertNull(b1.world);
 		TestCase.assertNull(b2.world);
 		// one contact, one joint, and two bodies
@@ -698,8 +698,8 @@ public class WorldTest {
 		TestCase.assertTrue(b1.joints.isEmpty());
 		TestCase.assertTrue(b2.contacts.isEmpty());
 		TestCase.assertTrue(b2.joints.isEmpty());
-		TestCase.assertTrue(w.joints.isEmpty());
-		TestCase.assertTrue(w.bodies.isEmpty());
+		TestCase.assertEquals(0, w.getJointCount());
+		TestCase.assertEquals(0, w.getBodyCount());
 		TestCase.assertNull(b1.world);
 		TestCase.assertNull(b2.world);
 		// one contact, one joint, and two bodies
@@ -744,7 +744,7 @@ public class WorldTest {
 		// and made all the callbacks
 		TestCase.assertTrue(b1.joints.isEmpty());
 		TestCase.assertTrue(b2.joints.isEmpty());
-		TestCase.assertTrue(w.joints.isEmpty());
+		TestCase.assertEquals(0, w.getJointCount());
 		// one contact, one joint, and two bodies
 		TestCase.assertEquals(1, dl.called);
 	}

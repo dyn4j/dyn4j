@@ -27,7 +27,7 @@ package org.dyn4j.dynamics;
 import org.dyn4j.collision.narrowphase.Penetration;
 
 /**
- * Represents the result of a static detect of the world.
+ * Represents the result of a static detection of the world.
  * @author William Bittle
  * @version 3.2.0
  * @since 3.1.9
@@ -99,7 +99,15 @@ public class DetectResult {
 	public Body getBody() {
 		return this.body;
 	}
-	
+
+	/**
+	 * Sets the overlapping body.
+	 * @param body the {@link Body}
+	 */
+	public void setBody(Body body) {
+		this.body = body;
+	}
+
 	/**
 	 * Returns the overlapping fixture.
 	 * @return {@link BodyFixture}
@@ -107,7 +115,15 @@ public class DetectResult {
 	public BodyFixture getFixture() {
 		return this.fixture;
 	}
-	
+
+	/**
+	 * Sets the overlapping fixture.
+	 * @param fixture the {@link BodyFixture}
+	 */
+	public void setFixture(BodyFixture fixture) {
+		this.fixture = fixture;
+	}
+
 	/**
 	 * Returns the overlap penetration (collision data).
 	 * <p>
@@ -116,5 +132,13 @@ public class DetectResult {
 	 */
 	public Penetration getPenetration() {
 		return this.penetration;
+	}
+
+	/**
+	 * Sets the overlap penetration (collision data).
+	 * @param penetration the {@link Penetration}; can be null
+	 */
+	public void setPenetration(Penetration penetration) {
+		this.penetration = penetration;
 	}
 }
