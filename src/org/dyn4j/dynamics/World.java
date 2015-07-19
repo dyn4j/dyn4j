@@ -2646,13 +2646,16 @@ public class World implements Shiftable, DataContainer {
 	public void addJoint(Joint joint) {
 		// check for null joint
 		if (joint == null) throw new NullPointerException(Messages.getString("dynamics.world.addNullJoint"));
+		// implicitly cast to constraint
+		Constraint constraint = joint;
 		// dont allow adding it twice
-		// TODO fix
-//		if (joint.world == this) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingBody"));
-//		// dont allow a joint that already is assigned to another world
-//		if (joint.world != null) throw new IllegalArgumentException(Messages.getString("dynamics.world.addOtherWorldBody"));
+		if (constraint.world == this) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingBody"));
+		// dont allow a joint that already is assigned to another world
+		if (constraint.world != null) throw new IllegalArgumentException(Messages.getString("dynamics.world.addOtherWorldBody"));
 		// add the joint to the joint list
 		this.joints.add(joint);
+		// set that its attached to this world
+		constraint.world = this;
 		// get the associated bodies
 		Body body1 = joint.getBody1();
 		Body body2 = joint.getBody2();

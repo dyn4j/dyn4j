@@ -40,9 +40,19 @@ public abstract class Constraint implements Shiftable {
 	/** The second {@link Body} */
 	protected final Body body2;
 	
+	// internal
+	
 	/** Whether the {@link Constraint} has been added to an {@link Island} or not */
 	boolean onIsland;
 
+	/** 
+	 * The world the constraint has been added to
+	 * <p>
+	 * This is really only used for Joints to determine if they have been added
+	 * to a world already. 
+	 */
+	World world;
+	
 	/**
 	 * Full constructor.
 	 * @param body1 the first participating {@link Body}
