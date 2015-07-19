@@ -8,28 +8,30 @@ Bug Fixes:
     
 Deprecated:
   - Body.setMass() it was odd that it set the mass type to Mass.Type.NORMAL.
+    use the Body.setMass(MassType) method instead.
   
 Breaking Changes:
-  - The Mass.Type enumeration has been moved to its own class file
-    and renamed to MassType.
+  - The Mass.Type enumeration has been renamed to MassType.
   - The BroadphaseDetector interface has changed drastically.
   - The three SAP algorithms have been replaced by one.
-  - Due to changes in the BroadphaseDetector interface and output, some 
-    listener methods no longer exist.
+  - The CollisionListener.collision(Body,Body) method has been removed due
+    to changes made to the broad-phase.
   - The Body.getFixtures() method now returns an unmodifiable list.
   - The World.getBodies() and World.getJoints() methods now return unmodifiable
     lists.
   - The Bounds interface changed to only include the Translatable
     interface due to the some bounds types not supporting rotation.
-  - Many member variables and methods have been made final.
-  - Made a few internal classes package private to clean up the API.
+  - Many member variables and methods have been made final, package private and
+    private.
+  - Made a few internal classes package private.
   - Many deprecated methods and classes have been removed.
   - The Settings.ContinuousDetectionMode enumeration has been moved to its own
     class file with the same name.
+  - Renamed the MouseJoint to PinJoint.
   
 Other:
-  - Cleaner API with less classes to sift through and more interface options
-  	for extensibility.
+  - Cleaner API with less classes, methods and members to sift through and more 
+    interface options for extensibility.
   - More & revised Javadoc comments.
 
 ===============================================================================
