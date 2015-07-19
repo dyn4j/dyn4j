@@ -39,16 +39,19 @@ import org.dyn4j.geometry.Vector3;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents a weld joint.
+ * Implementation of a weld joint.
  * <p>
- * A weld joint joins two {@link Body}s together as if they were one {@link Body}.
+ * A weld joint joins two {@link Body}s together as if they were one {@link Body}.  Both their
+ * relative linear and angular motion are constrained to keep them together.  The system as a
+ * whole can rotate and translate freely.
  * <p>
  * Using the {@link #setFrequency(double)} and {@link #setDampingRatio(double)} methods,
- * the joint will have a rotational spring/damper about the anchor point. 
+ * the joint will have an angular spring/damper about the anchor point.
  * @author William Bittle
  * @version 3.2.0
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Weld_Joint" target="_blank">Documentation</a>
+ * @see <a href="http://www.dyn4j.org/2010/12/weld-constraint/" target="_blank">Weld Constraint</a>
  */
 public class WeldJoint extends Joint implements Shiftable, DataContainer {
 	/** The local anchor point on the first {@link Body} */
@@ -60,24 +63,28 @@ public class WeldJoint extends Joint implements Shiftable, DataContainer {
 	/** The initial angle between the two {@link Body}s */
 	protected double referenceAngle;
 	
-	/** The constraint mass; K = J * Minv * Jtrans */
-	protected Matrix33 K;
-	
-	/** The accumulated impulse for warm starting */
-	protected Vector3 impulse;
-
 	/** The oscillation frequency in hz */
 	protected double frequency;
 	
 	/** The damping ratio */
 	protected double dampingRatio;
 
+	// current state
+	
+	/** The constraint mass; K = J * Minv * Jtrans */
+	private Matrix33 K;
+	
 	/** The bias for adding work to the constraint (simulating a spring) */
-	protected double bias;
+	private double bias;
 	
 	/** The damping portion of the constraint */
-	protected double gamma;
+	private double gamma;
+
+	// output
 	
+	/** The accumulated impulse for warm starting */
+	private Vector3 impulse;
+
 	/**
 	 * Minimal constructor.
 	 * @param body1 the first {@link Body}
@@ -113,13 +120,11 @@ public class WeldJoint extends Joint implements Shiftable, DataContainer {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("WeldJoint[").append(super.toString())
-		.append("|LocalAnchor1=").append(this.localAnchor1)
-		.append("|LocalAnchor2=").append(this.localAnchor2)
-		.append("|WorldAnchor=").append(this.getAnchor1())
-		.append("|ReferenceAngle=").append(this.referenceAngle)
-		.append("|Frequency=").append(this.frequency)
-		.append("|DampingRatio=").append(this.dampingRatio)
-		.append("]");
+		  .append("|Anchor=").append(this.getAnchor1())
+		  .append("|ReferenceAngle=").append(this.referenceAngle)
+		  .append("|Frequency=").append(this.frequency)
+		  .append("|DampingRatio=").append(this.dampingRatio)
+		  .append("]");
 		return sb.toString();
 	}
 	

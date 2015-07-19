@@ -86,17 +86,18 @@ public class PersistedContactPoint extends ContactPoint {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("PersistedContactPoint[Body1=").append(this.body1)
-		.append("|Fixture1=").append(this.fixture1)
-		.append("|Body2=").append(this.body2)
-		.append("|Fixture2=").append(this.fixture2)
-		.append("|Point=").append(this.point)
-		.append("|Normal=").append(this.normal)
-		.append("|Depth=").append(this.depth)
-		.append("|PreviousPoint=").append(this.oldPoint)
-		.append("|PreviousNormal=").append(this.oldNormal)
-		.append("|PreviousDepth=").append(this.oldDepth)
-		.append("]");
+		sb.append("PersistedContactPoint[Id=").append(this.id)
+		  .append("|Body1=").append(this.body1.getId())
+		  .append("|Fixture1=").append(this.fixture1.getId())
+		  .append("|Body2=").append(this.body2.getId())
+		  .append("|Fixture2=").append(this.fixture2.getId())
+		  .append("|Point=").append(this.point)
+		  .append("|Normal=").append(this.normal)
+		  .append("|Depth=").append(this.depth)
+		  .append("|PreviousPoint=").append(this.oldPoint)
+		  .append("|PreviousNormal=").append(this.oldNormal)
+		  .append("|PreviousDepth=").append(this.oldDepth)
+		  .append("]");
 		return sb.toString();
 	}
 	

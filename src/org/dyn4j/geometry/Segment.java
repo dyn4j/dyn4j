@@ -87,7 +87,6 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 		StringBuilder sb = new StringBuilder();
 		sb.append("Segment[").append(super.toString())
 		.append("|Length=").append(this.length)
-		.append("|UserData=").append(this.userData)
 		.append("]");
 		return sb.toString();
 	}

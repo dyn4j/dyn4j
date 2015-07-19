@@ -36,16 +36,23 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents a pulley between two {@link Body}s.
+ * Implementation of a pulley joint.
  * <p>
- * The pulley anchor points represent the "hanging" points for the respective
- * {@link Body}s.
+ * A pulley joint joins two bodies in a pulley system with a fixed length zero-mass rope.
  * <p>
- * The ratio allows this joint to act like a block-and-tackle.
+ * The pulley anchor points represent the "hanging" points for the respective {@link Body}s.
+ * <p>
+ * The ratio allows this joint to act like a block-and-tackle system.  The ratio should always
+ * be greater than zero.  A value of 1.0 indicates that the ratio is turned off.
+ * <p>
+ * By default this joint acts very similar to two {@link DistanceJoint}s. Using the 
+ * {@link #setSlackEnabled(boolean)} method, you can toggle the behavior between a {@link DistanceJoint}
+ * and {@link RopeJoint}.
  * @author William Bittle
  * @version 3.2.0
  * @since 2.1.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Pulley_Joint" target="_blank">Documentation</a>
+ * @see <a href="http://www.dyn4j.org/2010/12/pulley-constraint/" target="_blank">Pulley Constraint</a>
  */
 public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 	/** The world space pulley anchor point for the first {@link Body} */
@@ -62,33 +69,37 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 	
 	/** The pulley ratio for modeling a block-and-tackle */
 	protected double ratio;
-	
-	/** The original length of the first side of the pulley */
-	protected final double length1;
-	
-	/** The original length of the second side of the pulley */
-	protected final double length2;
-	
-	/** The total length of the pulley system */
-	protected double length;
-	
-	/** The normal from the first pulley anchor to the first {@link Body} anchor */
-	protected Vector2 n1;
-	
-	/** The normal from the second pulley anchor to the second {@link Body} anchor */
-	protected Vector2 n2;
-	
-	/** The effective mass of the two body system (Kinv = J * Minv * Jtrans) */
-	protected double invK;
-	
-	/** The accumulated impulse from the previous time step */
-	protected double impulse;
-	
+
 	/** True if slack in the rope is enabled */
 	protected boolean slackEnabled;
+
+	// current state
 	
 	/** The state of the limit (only used for slack) */
-	protected LimitState limitState;
+	private LimitState limitState;
+	
+	/** The original length of the first side of the pulley */
+	private final double length1;
+	
+	/** The original length of the second side of the pulley */
+	private final double length2;
+	
+	/** The total length of the pulley system */
+	private double length;
+	
+	/** The normal from the first pulley anchor to the first {@link Body} anchor */
+	private Vector2 n1;
+	
+	/** The normal from the second pulley anchor to the second {@link Body} anchor */
+	private Vector2 n2;
+	
+	/** The effective mass of the two body system (Kinv = J * Minv * Jtrans) */
+	private double invK;
+	
+	// output
+	
+	/** The accumulated impulse from the previous time step */
+	private double impulse;
 	
 	/**
 	 * Minimal constructor.
@@ -140,18 +151,14 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("PulleyJoint[").append(super.toString())
-		.append("|PulleyAnchor1=").append(this.pulleyAnchor1)
-		.append("|PulleyAnchor2=").append(this.pulleyAnchor2)
-		.append("|LocalAnchor1=").append(this.localAnchor1)
-		.append("|LocalAnchor2=").append(this.localAnchor2)
-		.append("|WorldAnchor1=").append(this.getAnchor1())
-		.append("|WorldAnchor2=").append(this.getAnchor2())
-		.append("|Ratio=").append(this.ratio)
-		.append("|Length1=").append(this.length1)
-		.append("|Length2=").append(this.length2)
-		.append("|Length=").append(this.length)
-		.append("|SlackEnabled=").append(this.slackEnabled)
-		.append("]");
+		  .append("|PulleyAnchor1=").append(this.pulleyAnchor1)
+		  .append("|PulleyAnchor2=").append(this.pulleyAnchor2)
+		  .append("|Anchor1=").append(this.getAnchor1())
+		  .append("|Anchor2=").append(this.getAnchor2())
+		  .append("|Ratio=").append(this.ratio)
+		  .append("|Length=").append(this.length)
+		  .append("|SlackEnabled=").append(this.slackEnabled)
+		  .append("]");
 		return sb.toString();
 	}
 	

@@ -84,7 +84,6 @@ public class BodyFixture extends Fixture implements DataContainer {
 		.append("|Density=").append(this.density)
 		.append("|Friction=").append(this.friction)
 		.append("|Restitution=").append(this.restitution)
-		.append("|UserData=").append(this.userData)
 		.append("]");
 		return sb.toString();
 	}

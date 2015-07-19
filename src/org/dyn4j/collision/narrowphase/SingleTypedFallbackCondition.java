@@ -113,6 +113,19 @@ public class SingleTypedFallbackCondition extends TypedFallbackCondition impleme
 	}
 
 	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("SingleTypedFallbackCondition[")
+		  .append("Type=").append(this.type.getName())
+		  .append("|IsStrict=").append(this.strict)
+		  .append("]");
+		return sb.toString();
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.extras.TypedFallbackCondition#isMatch(java.lang.Class, java.lang.Class)
 	 */
 	@Override

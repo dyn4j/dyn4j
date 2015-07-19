@@ -39,13 +39,18 @@ import org.dyn4j.geometry.Vector3;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents a prismatic joint.
+ * Implementation of a prismatic joint.
  * <p>
- * A line joint constrains motion between two {@link Body}s to a line.
+ * A prismatic joint constrains the linear motion of two bodies along an axis and prevents
+ * relative rotation.  The whole system can still rotate and translate freely.
+ * <p>
+ * This joint can also enable a motor to push the bodies along the axis along with upper and
+ * lower limits.  The limits are limits along the axis. 
  * @author William Bittle
  * @version 3.2.0
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Prismatic_Joint" target="_blank">Documentation</a>
+ * @see <a href="http://www.dyn4j.org/2011/03/prismatic-constraint/" target="_blank">Prismatic Constraint</a>
  */
 public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 	/** The local anchor point on the first {@link Body} */
@@ -74,47 +79,51 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 	
 	/** The initial angle between the two {@link Body}s */
 	protected double referenceAngle;
+
+	/** The axis representing the allowed line of motion */
+	private final Vector2 xAxis;
 	
-	/** The constraint mass; K = J * Minv * Jtrans */
-	protected Matrix33 K;
+	/** The perpendicular axis of the line of motion */
+	private final Vector2 yAxis;
 	
-	/** The mass of the motor */
-	protected double motorMass;
+	// current state
 	
 	/** The current state of the limit */
-	protected LimitState limitState;
+	private LimitState limitState;
+
+	/** The constraint mass; K = J * Minv * Jtrans */
+	private Matrix33 K;
 	
-	/** The accumulated impulse for warm starting */
-	protected Vector3 impulse;
-	
-	/** The impulse applied by the motor */
-	protected double motorImpulse;
+	/** The mass of the motor */
+	private double motorMass;
 	
 	// pre-computed values for J, recalculated each time step
 	
-	/** The axis representing the allowed line of motion */
-	protected Vector2 xAxis;
-	
-	/** The perpendicular axis of the line of motion */
-	protected Vector2 yAxis;
-	
 	/** The world space yAxis  */
-	protected Vector2 perp;
+	private Vector2 perp;
 	
 	/** The world space xAxis */
-	protected Vector2 axis;
+	private Vector2 axis;
 	
 	/** s1 = (r1 + d).cross(perp) */
-	protected double s1;
+	private double s1;
 	
 	/** s2 = r2.cross(perp) */
-	protected double s2;
+	private double s2;
 	
 	/** a1 = (r1 + d).cross(axis) */
-	protected double a1;
+	private double a1;
 
 	/** a2 = r2.cross(axis) */
-	protected double a2;
+	private double a2;
+
+	// output
+	
+	/** The accumulated impulse for warm starting */
+	private Vector3 impulse;
+	
+	/** The impulse applied by the motor */
+	private double motorImpulse;
 	
 	/**
 	 * Minimal constructor.
@@ -159,20 +168,16 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("PrismaticJoint[").append(super.toString())
-		.append("|LocalAnchor1=").append(this.localAnchor1)
-		.append("|LocalAnchor2=").append(this.localAnchor2)
-		.append("|WorldAnchor=").append(this.getAnchor1())
-		.append("|XAxis=").append(this.xAxis)
-		.append("|YAxis=").append(this.yAxis)
-		.append("|Axis=").append(this.getAxis())
-		.append("|IsMotorEnabled=").append(this.motorEnabled)
-		.append("|MotorSpeed=").append(this.motorSpeed)
-		.append("|MaximumMotorForce=").append(this.maximumMotorForce)
-		.append("|ReferenceAngle=").append(this.referenceAngle)
-		.append("|IsLimitEnabled=").append(this.limitEnabled)
-		.append("|LowerLimit=").append(this.lowerLimit)
-		.append("|UpperLimit=").append(this.upperLimit)
-		.append("]");
+		  .append("|Anchor=").append(this.getAnchor1())
+		  .append("|Axis=").append(this.getAxis())
+		  .append("|IsMotorEnabled=").append(this.motorEnabled)
+		  .append("|MotorSpeed=").append(this.motorSpeed)
+		  .append("|MaximumMotorForce=").append(this.maximumMotorForce)
+		  .append("|ReferenceAngle=").append(this.referenceAngle)
+		  .append("|IsLimitEnabled=").append(this.limitEnabled)
+		  .append("|LowerLimit=").append(this.lowerLimit)
+		  .append("|UpperLimit=").append(this.upperLimit)
+		  .append("]");
 		return sb.toString();
 	}
 	

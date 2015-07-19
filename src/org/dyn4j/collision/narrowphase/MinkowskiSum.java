@@ -72,9 +72,9 @@ public class MinkowskiSum {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("MinkowskiSum[Convex1=").append(this.convex1)
+		sb.append("MinkowskiSum[Convex1=").append(this.convex1.getId())
 		.append("|Transform1=").append(this.transform1)
-		.append("|Convex2=").append(this.convex2)
+		.append("|Convex2=").append(this.convex2.getId())
 		.append("|Transform2=").append(this.transform2)
 		.append("]");
 		return sb.toString();

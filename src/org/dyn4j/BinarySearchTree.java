@@ -335,6 +335,23 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 		return new BinarySearchTreeIterator<E>(this.root, false);
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		Iterator<E> iterator = this.inOrderIterator();
+		sb.append("BinarySearchTree[");
+		while (iterator.hasNext()) {
+			sb.append(iterator.next());
+			if (iterator.hasNext()) {
+				sb.append(",");
+			}
+		}
+		sb.append("]");
+		return sb.toString();
+	}
+	
 	/**
 	 * Returns the minimum value of the subtree of the given node.
 	 * @param node the subtree root node

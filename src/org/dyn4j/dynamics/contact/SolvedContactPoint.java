@@ -70,16 +70,17 @@ public class SolvedContactPoint extends ContactPoint {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("SolvedContactPoint[Body1=").append(this.body1)
-		.append("|Fixture1=").append(this.fixture1)
-		.append("|Body2=").append(this.body2)
-		.append("|Fixture2=").append(this.fixture2)
-		.append("|Point=").append(this.point)
-		.append("|Normal=").append(this.normal)
-		.append("|Depth=").append(this.depth)
-		.append("|NormalImpulse=").append(this.normalImpulse)
-		.append("|TangentImpulse=").append(this.tangentialImpulse)
-		.append("]");
+		sb.append("SolvedContactPoint[Id=").append(this.id)
+		  .append("|Body1=").append(this.body1.getId())
+		  .append("|Fixture1=").append(this.fixture1.getId())
+		  .append("|Body2=").append(this.body2.getId())
+		  .append("|Fixture2=").append(this.fixture2.getId())
+		  .append("|Point=").append(this.point)
+		  .append("|Normal=").append(this.normal)
+		  .append("|Depth=").append(this.depth)
+		  .append("|NormalImpulse=").append(this.normalImpulse)
+		  .append("|TangentImpulse=").append(this.tangentialImpulse)
+		  .append("]");
 		return sb.toString();
 	}
 	

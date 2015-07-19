@@ -41,7 +41,12 @@ import org.dyn4j.geometry.Vector3;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents a pivot joint.
+ * Implementation of a pivot joint.
+ * <p>
+ * A pivot joint allows two bodies to rotate about a common point, but does not allow
+ * them to translate.  The system as a whole can still translate and rotate freely.
+ * <p>
+ * This joint allows enabling of a angular motor along with angular lower and upper limits.
  * <p>
  * The limits that a revolute joint can place on the bodies are world space limits, not 
  * relative angle limits (although the limits are relative to the initial angle of the 
@@ -66,6 +71,7 @@ import org.dyn4j.resources.Messages;
  * @version 3.2.0
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Revolute_Joint" target="_blank">Documentation</a>
+ * @see <a href="http://www.dyn4j.org/2010/07/point-to-point-constraint/" target="_blank">Point-to-Point Constraint</a>
  */
 public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 	/** The local anchor point on the first {@link Body} */
@@ -95,20 +101,24 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 	/** The initial angle between the two {@link Body}s */
 	protected double referenceAngle;
 	
+	// current state
+	
 	/** The current state of the {@link Joint} limit */
-	protected LimitState limitState;
+	private LimitState limitState;
 	
 	/** The pivot mass; K = J * Minv * Jtrans */
-	protected Matrix33 K;
+	private Matrix33 K;
 	
 	/** The motor mass that resists motion */
-	protected double motorMass;
+	private double motorMass;
+	
+	// output
 	
 	/** The accumulated impulse for warm starting */
-	protected Vector3 impulse;
+	private Vector3 impulse;
 		
 	/** The impulse applied by the motor */
-	protected double motorImpulse;
+	private double motorImpulse;
 	
 	/**
 	 * Minimal constructor.
@@ -145,17 +155,15 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("RevoluteJoint[").append(super.toString())
-		.append("|LocalAnchor1=").append(this.localAnchor1)
-		.append("|LocalAnchor2=").append(this.localAnchor2)
-		.append("|WorldAnchor=").append(this.getAnchor1())
-		.append("|IsMotorEnabled=").append(this.motorEnabled)
-		.append("|MotorSpeed=").append(this.motorSpeed)
-		.append("|MaximumMotorTorque=").append(this.maximumMotorTorque)
-		.append("|IsLimitEnabled=").append(this.limitEnabled)
-		.append("|LowerLimit=").append(this.lowerLimit)
-		.append("|UpperLimit=").append(this.upperLimit)
-		.append("|ReferenceAngle=").append(this.referenceAngle)
-		.append("]");
+		  .append("|Anchor=").append(this.getAnchor1())
+		  .append("|IsMotorEnabled=").append(this.motorEnabled)
+		  .append("|MotorSpeed=").append(this.motorSpeed)
+		  .append("|MaximumMotorTorque=").append(this.maximumMotorTorque)
+		  .append("|IsLimitEnabled=").append(this.limitEnabled)
+		  .append("|LowerLimit=").append(this.lowerLimit)
+		  .append("|UpperLimit=").append(this.upperLimit)
+		  .append("|ReferenceAngle=").append(this.referenceAngle)
+		  .append("]");
 		return sb.toString();
 	}
 	

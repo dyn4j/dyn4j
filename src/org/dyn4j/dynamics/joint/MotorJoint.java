@@ -39,7 +39,7 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents a motor joint.
+ * Implementation a motor joint.
  * <p>
  * A motor joint uses motors to move two bodies relative to one another.
  * <p>
@@ -69,23 +69,27 @@ public class MotorJoint extends Joint implements Shiftable, DataContainer {
 	/** The maximum torque the constraint can apply */
 	protected double maximumTorque;
 	
+	// current state
+	
 	/** The pivot mass; K = J * Minv * Jtrans */
-	protected Matrix22 K;
+	private Matrix22 K;
 	
 	/** The mass for the angular constraint */
-	protected double angularMass;
+	private double angularMass;
 	
 	/** The calculated linear error in the target distance */
-	protected Vector2 linearError;
+	private Vector2 linearError;
 	
 	/** The calculated angular error in the target angle */
-	protected double angularError;
+	private double angularError;
+
+	// output
 	
 	/** The impulse applied to reduce linear motion */
-	protected Vector2 linearImpulse;
+	private Vector2 linearImpulse;
 	
 	/** The impulse applied to reduce angular motion */
-	protected double angularImpulse;
+	private double angularImpulse;
 	
 	/**
 	 * Minimal constructor.
@@ -117,12 +121,12 @@ public class MotorJoint extends Joint implements Shiftable, DataContainer {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("MotorJoint[").append(super.toString())
-		.append("|LinearTarget=").append(this.linearTarget)
-		.append("|AngularTarget=").append(this.angularTarget)
-		.append("|CorrectionFactor=").append(this.correctionFactor)
-		.append("|MaximumForce=").append(this.maximumForce)
-		.append("|MaximumTorque=").append(this.maximumTorque)
-		.append("]");
+		  .append("|LinearTarget=").append(this.linearTarget)
+		  .append("|AngularTarget=").append(this.angularTarget)
+		  .append("|CorrectionFactor=").append(this.correctionFactor)
+		  .append("|MaximumForce=").append(this.maximumForce)
+		  .append("|MaximumTorque=").append(this.maximumTorque)
+		  .append("]");
 		return sb.toString();
 	}
 	

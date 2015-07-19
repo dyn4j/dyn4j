@@ -37,14 +37,15 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents a angle joint.
+ * Implementation of an angle joint.
  * <p>
- * A angle joint constrains the relative rotation between [-&pi;, &pi;].
+ * A angle joint constrains the relative rotation of two bodies between [-&pi;, &pi;].
  * <p>
  * NOTE: The {@link #getAnchor1()} and {@link #getAnchor2()} methods return
- * the world space center points for the joined bodies.
+ * the world space center points for the joined bodies.  This constraint doesn't need
+ * anchor points.
  * <p>
- * Defaults the min and max angles to the current angle (allowing no angular movement).
+ * Defaults the min and max angles to the current angle, allowing no relative angular movement.
  * <p>
  * The joint limits must match the following restrictions:
  * <ul>
@@ -73,6 +74,7 @@ import org.dyn4j.resources.Messages;
  * @version 3.2.0
  * @since 2.2.2
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Angle_Joint" target="_blank">Documentation</a>
+ * @see <a href="http://www.dyn4j.org/2010/12/angle-constraint/" target="_blank">Angle Constraint</a>
  */
 public class AngleJoint extends Joint implements Shiftable, DataContainer {
 	/** The angular velocity ratio */
@@ -90,15 +92,19 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 	/** The initial angle between the two bodies */
 	protected double referenceAngle;
 	
-	/** The inverse effective mass */
-	protected double invK;
+	// current state
 	
 	/** The current state of the joint limits */
-	protected LimitState limitState;
+	private LimitState limitState;
+	
+	/** The inverse effective mass */
+	private double invK;
+
+	// output
 	
 	/** The impulse applied to reduce angular motion */
-	protected double impulse;
-	
+	private double impulse;
+
 	/**
 	 * Minimal constructor.
 	 * @param body1 the first {@link Body}
@@ -133,12 +139,12 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("AngleJoint[").append(super.toString())
-		.append("|Ratio=").append(this.ratio)
-		.append("|LowerLimit=").append(this.lowerLimit)
-		.append("|UpperLimit=").append(this.upperLimit)
-		.append("|IsLimitEnabled=").append(this.limitEnabled)
-		.append("|ReferenceAngle=").append(this.referenceAngle)
-		.append("]");
+		  .append("|Ratio=").append(this.ratio)
+		  .append("|LowerLimit=").append(this.lowerLimit)
+		  .append("|UpperLimit=").append(this.upperLimit)
+		  .append("|IsLimitEnabled=").append(this.limitEnabled)
+		  .append("|ReferenceAngle=").append(this.referenceAngle)
+		  .append("]");
 		return sb.toString();
 	}
 	

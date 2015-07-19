@@ -74,10 +74,10 @@ public class ContactConstraint extends Constraint implements Shiftable {
 	protected double tangentSpeed;
 	
 	/** The K matrix for block solving a contact pair */
-	protected Matrix22 K;
+	Matrix22 K;
 	
 	/** The inverse of the {@link #K} matrix */
-	protected Matrix22 invK;
+	Matrix22 invK;
 	
 	/**
 	 * Full constructor.
@@ -136,15 +136,17 @@ public class ContactConstraint extends Constraint implements Shiftable {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("ContactConstraint[").append(super.toString())
-		.append("|Fixture1=").append(this.fixture1)
-		.append("|Fixture2=").append(this.fixture2)
-		.append("|Normal=").append(this.normal)
-		.append("|Tangent=").append(this.tangent)
-		.append("|Friction=").append(this.friction)
-		.append("|Restitution=").append(this.restitution)
-		.append("|IsSensor=").append(this.sensor)
-		.append("|TangentSpeed=").append(this.tangentSpeed)
-		.append("|Contacts={");
+		  .append("|Body1=").append(this.body1.getId())
+		  .append("|Fixture1=").append(this.fixture1.getId())
+		  .append("|Body2=").append(this.body2.getId())
+		  .append("|Fixture2=").append(this.fixture2.getId())
+		  .append("|Normal=").append(this.normal)
+		  .append("|Tangent=").append(this.tangent)
+		  .append("|Friction=").append(this.friction)
+		  .append("|Restitution=").append(this.restitution)
+		  .append("|IsSensor=").append(this.sensor)
+		  .append("|TangentSpeed=").append(this.tangentSpeed)
+		  .append("|Contacts={");
 		int size = contacts.size();
 		for (int i = 0; i < size; i++) {
 			if (i != 0) sb.append(",");

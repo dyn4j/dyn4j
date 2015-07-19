@@ -38,7 +38,18 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents a joint attached to a body and a single world space point.
+ * Implementation of a pin joint.
+ * <p>
+ * A pin joint is a joint that pins a body to a specified world space point.
+ * <p>
+ * The pinning can also use a spring damper to represent a rubber-band like effect.
+ * <p>
+ * Use the {@link #setTarget(Vector2)} method to set the position of the pin.
+ * <p>
+ * The {@link #getAnchor1()} method returns the current target and the {@link #getAnchor2()}
+ * method returns the anchor point on the body.
+ * <p>
+ * Both the {@link #getBody1()} and {@link #getBody2()} methods return the same body.
  * @author William Bittle
  * @version 3.2.0
  * @since 1.0.0
@@ -60,17 +71,21 @@ public class MouseJoint extends Joint implements Shiftable, DataContainer {
 	/** The maximum force this constraint can apply */
 	protected double maximumForce;
 	
+	// current state
+	
 	/** The constraint mass; K = J * Minv * Jtrans */
-	protected Matrix22 K;
+	private Matrix22 K;
 	
 	/** The bias for adding work to the constraint (simulating a spring) */
-	protected Vector2 bias;
+	private Vector2 bias;
 	
 	/** The damping portion of the constraint */
-	protected double gamma;
+	private double gamma;
+
+	// output
 	
 	/** The impulse applied to the body to satisfy the constraint */
-	protected Vector2 impulse;
+	private Vector2 impulse;
 	
 	/**
 	 * Full constructor.
@@ -109,12 +124,12 @@ public class MouseJoint extends Joint implements Shiftable, DataContainer {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("MouseJoint[").append(super.toString())
-		.append("|Target=").append(this.target)
-		.append("|Anchor=").append(this.anchor)
-		.append("|Frequency=").append(this.frequency)
-		.append("|DampingRatio=").append(this.dampingRatio)
-		.append("|MaximumForce=").append(this.maximumForce)
-		.append("]");
+		  .append("|Target=").append(this.target)
+		  .append("|Anchor=").append(this.anchor)
+		  .append("|Frequency=").append(this.frequency)
+		  .append("|DampingRatio=").append(this.dampingRatio)
+		  .append("|MaximumForce=").append(this.maximumForce)
+		  .append("]");
 		return sb.toString();
 	}
 	

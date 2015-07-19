@@ -49,4 +49,12 @@ final class LinkedVertex {
 	public LinkedVertex(Vector2 point) {
 		this.point = point;
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return this.point.toString();
+	}
 }

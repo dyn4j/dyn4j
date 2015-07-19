@@ -114,7 +114,6 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 		sb.append("Slice[").append(super.toString())
 		.append("|Radius=").append(this.sliceRadius)
 		.append("|Theta=").append(this.theta)
-		.append("|UserData=").append(this.userData)
 		.append("]");
 		return sb.toString();
 	}

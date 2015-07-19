@@ -38,10 +38,13 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents a revolute joint attached to a prismatic joint typically used
+ * Implementation of a wheel joint.
+ * <p>
+ * A wheel joint is a revolute joint attached to a prismatic joint that is typically used
  * to simulate a vehicle's wheel and suspension.
  * <p>
- * This class replaced the hard to use LineJoint class.
+ * The frequency and damping ratio setup a spring-damper for the suspension and the motor
+ * options setup an angular motor.
  * @author William Bittle
  * @version 3.2.0
  * @since 3.0.0
@@ -69,53 +72,57 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 	/** The damping ratio */
 	protected double dampingRatio;
 
-	/** The bias for adding work to the constraint (simulating a spring) */
-	protected double bias;
-	
-	/** The damping portion of the constraint */
-	protected double gamma;
-	
-	/** The point-on-line constraint mass; K = J * Minv * Jtrans */
-	protected double invK;
-	
-	/** The spring/damper constraint mass */
-	protected double springMass;
-	
-	/** The mass of the motor */
-	protected double motorMass;
-	
-	/** The accumulated impulse for warm starting */
-	protected double impulse;
-	
-	/** The impulse applied by the spring/damper */
-	protected double springImpulse;
-	
-	/** The impulse applied by the motor */
-	protected double motorImpulse;
-	
 	/** The axis representing the allowed line of motion */
-	protected Vector2 xAxis;
+	private final Vector2 xAxis;
 	
 	/** The perpendicular axis of the line of motion */
-	protected Vector2 yAxis;
+	private final Vector2 yAxis;
+	
+	// current state
+	
+	/** The bias for adding work to the constraint (simulating a spring) */
+	private double bias;
+	
+	/** The damping portion of the constraint */
+	private double gamma;
+	
+	/** The point-on-line constraint mass; K = J * Minv * Jtrans */
+	private double invK;
+	
+	/** The spring/damper constraint mass */
+	private double springMass;
+	
+	/** The mass of the motor */
+	private double motorMass;
 	
 	/** The world space yAxis  */
-	protected Vector2 perp;
+	private Vector2 perp;
 	
 	/** The world space xAxis */
-	protected Vector2 axis;
+	private Vector2 axis;
 	
 	/** s1 = (r1 + d).cross(perp) */
-	protected double s1;
+	private double s1;
 	
 	/** s2 = r2.cross(perp) */
-	protected double s2;
+	private double s2;
 	
 	/** a1 = (r1 + d).cross(axis) */
-	protected double a1;
+	private double a1;
 
 	/** a2 = r2.cross(axis) */
-	protected double a2;
+	private double a2;
+
+	// output
+	
+	/** The accumulated impulse for warm starting */
+	private double impulse;
+	
+	/** The impulse applied by the spring/damper */
+	private double springImpulse;
+	
+	/** The impulse applied by the motor */
+	private double motorImpulse;
 	
 	/**
 	 * Minimal constructor.
@@ -169,18 +176,14 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("WheelJoint[").append(super.toString())
-		.append("|LocalAnchor1=").append(this.localAnchor1)
-		.append("|LocalAnchor2=").append(this.localAnchor2)
-		.append("|WorldAnchor=").append(this.getAnchor1())
-		.append("|XAxis=").append(this.xAxis)
-		.append("|YAxis=").append(this.yAxis)
-		.append("|Axis=").append(this.getAxis())
-		.append("|IsMotorEnabled=").append(this.motorEnabled)
-		.append("|MotorSpeed=").append(this.motorSpeed)
-		.append("|MaximumMotorTorque=").append(this.maximumMotorTorque)
-		.append("|Frequency=").append(this.frequency)
-		.append("|DampingRatio=").append(this.dampingRatio)
-		.append("]");
+		  .append("|WorldAnchor=").append(this.getAnchor1())
+		  .append("|Axis=").append(this.getAxis())
+		  .append("|IsMotorEnabled=").append(this.motorEnabled)
+		  .append("|MotorSpeed=").append(this.motorSpeed)
+		  .append("|MaximumMotorTorque=").append(this.maximumMotorTorque)
+		  .append("|Frequency=").append(this.frequency)
+		  .append("|DampingRatio=").append(this.dampingRatio)
+		  .append("]");
 		return sb.toString();
 	}
 	

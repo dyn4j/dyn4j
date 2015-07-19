@@ -140,7 +140,6 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 		sb.append("Capsule[").append(super.toString())
 		.append("|Width=").append(this.length)
 		.append("|CapRadius=").append(this.capRadius)
-		.append("|UserData=").append(this.userData)
 		.append("]");
 		return sb.toString();
 	}

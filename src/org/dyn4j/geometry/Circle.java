@@ -64,7 +64,6 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Circle[").append(super.toString())
-		.append("|UserData=").append(this.userData)
 		.append("]");
 		return sb.toString();
 	}

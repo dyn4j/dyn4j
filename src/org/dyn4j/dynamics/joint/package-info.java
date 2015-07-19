@@ -24,20 +24,22 @@
  */
 
 /**
- * Sub package of the Dynamics package handling joints.
+ * Sub package of the Dynamics package containing joints.
+ * <p>
+ * Joints are connections between bodies that limit their relative motion.  
  * <p>
  * Joints are solved using an iterative constraint based approach in the same manner as contacts.
  * <p>
- * All joints, with exception of the {@link org.dyn4j.dynamics.joint.MouseJoint} joint a pair
+ * All joints, with exception of the {@link org.dyn4j.dynamics.joint.MouseJoint} join a pair
  * of {@link org.dyn4j.dynamics.Body}s.
  * <p>
- * Current listing of joints:
+ * Current joint implementations:
  * <ul>
  * <li>{@link org.dyn4j.dynamics.joint.AngleJoint} for constraining the rotation of two bodies</li>
  * <li>{@link org.dyn4j.dynamics.joint.DistanceJoint} for fixed length distance and spring/damper</li>
  * <li>{@link org.dyn4j.dynamics.joint.FrictionJoint} for applying friction, air resistance, joint
  * friction, etc</li>
- * <li>{@link org.dyn4j.dynamics.joint.MotorJoint} for character control</li>
+ * <li>{@link org.dyn4j.dynamics.joint.MotorJoint} primarily for character control</li>
  * <li>{@link org.dyn4j.dynamics.joint.MouseJoint} specifically to connect a distance joint with
  * spring/damper to one body</li>
  * <li>{@link org.dyn4j.dynamics.joint.PrismaticJoint} for only allowing relative linear motion
@@ -46,7 +48,7 @@
  * tackle</li>
  * <li>{@link org.dyn4j.dynamics.joint.RevoluteJoint} for only allowing relative rotation with or
  * without a motor</li>
- * <li>{@link org.dyn4j.dynamics.joint.RopeJoint} for min/max distance</li>
+ * <li>{@link org.dyn4j.dynamics.joint.RopeJoint} for min/max distance between bodies</li>
  * <li>{@link org.dyn4j.dynamics.joint.WeldJoint} for connecting two bodies together completely</li>
  * <li>{@link org.dyn4j.dynamics.joint.WheelJoint} for connecting two bodies in a frame-wheel type
  * configuration with linear spring/damper and angular motor</li>

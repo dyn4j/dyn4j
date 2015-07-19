@@ -169,6 +169,21 @@ public class PairwiseTypedFallbackCondition extends TypedFallbackCondition imple
 	}
 	
 	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("PairwiseTypedFallbackCondition[")
+		  .append("Type1=").append(this.type1.getName())
+		  .append("|IsStrict1=").append(this.strict1)
+		  .append("|Type2=").append(this.type2.getName())
+		  .append("|IsStrict2=").append(this.strict2)
+		  .append("]");
+		return sb.toString();
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.extras.TypedFallbackCondition#isMatch(java.lang.Class, java.lang.Class)
 	 */
 	public boolean isMatch(Class<? extends Convex> type1, Class<? extends Convex> type2) {

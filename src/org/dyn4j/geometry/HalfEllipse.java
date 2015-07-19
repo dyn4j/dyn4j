@@ -119,7 +119,6 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		sb.append("HalfEllipse[").append(super.toString())
 		.append("|Width=").append(this.width)
 		.append("|Height=").append(this.height)
-		.append("|UserData=").append(this.userData)
 		.append("]");
 		return sb.toString();
 	}

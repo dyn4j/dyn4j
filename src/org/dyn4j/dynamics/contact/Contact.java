@@ -98,17 +98,9 @@ public class Contact {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Contact[Id=").append(this.id)
 		.append("|Point=").append(this.p)
-		.append("|PointInBody1=").append(this.p1)
-		.append("|PointInBody2=").append(this.p2)
 		.append("|Depth=").append(this.depth)
-		.append("|R1=").append(this.r1)
-		.append("|R2=").append(this.r2)
 		.append("|NormalImpulse=").append(this.jn)
 		.append("|TangentImpulse=").append(this.jt)
-		.append("|PositionImpulse=").append(this.jp)
-		.append("|NormalMass=").append(this.massN)
-		.append("|TangentMass=").append(this.massT)
-		.append("|VelocityBias=").append(this.vb)
 		.append("]");
 		return sb.toString();
 	}

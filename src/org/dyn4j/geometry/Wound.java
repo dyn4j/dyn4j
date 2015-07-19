@@ -63,12 +63,12 @@ public abstract class Wound extends AbstractShape implements Shape, Transformabl
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(super.toString());
-		sb.append("|Vertices{");
+		sb.append("|Vertices={");
 		for (int i = 0; i < this.vertices.length; i++) {
 			if (i != 0) sb.append(",");
 			sb.append(this.vertices[i]);
 		}
-		sb.append("}|Normals{");
+		sb.append("}|Normals={");
 		for (int i = 0; i < this.normals.length; i++) {
 			if (i != 0) sb.append(",");
 			sb.append(this.normals[i]);

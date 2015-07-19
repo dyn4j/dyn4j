@@ -38,10 +38,16 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents a friction joint.
+ * Implementation of a friction joint.
  * <p>
  * A friction joint is a constraint that drives both linear
  * and angular velocities to zero.
+ * <p>
+ * This joint is typically used with one dynamic and one static body.  In this
+ * context, the joint will apply linear and angular friction to stop the body's motion.
+ * <p>
+ * Setting the maximum force and torque values will determine the rate at which the motion
+ * is stopped.
  * @author William Bittle
  * @version 3.2.0
  * @since 1.0.0
@@ -60,17 +66,21 @@ public class FrictionJoint extends Joint implements Shiftable, DataContainer {
 	/** The maximum torque the constraint can apply */
 	protected double maximumTorque;
 	
+	// current state
+	
 	/** The pivot mass; K = J * Minv * Jtrans */
-	protected Matrix22 K;
+	private Matrix22 K;
 	
 	/** The mass for the angular constraint */
-	protected double angularMass;
+	private double angularMass;
+
+	// output
 	
 	/** The impulse applied to reduce linear motion */
-	protected Vector2 linearImpulse;
+	private Vector2 linearImpulse;
 	
 	/** The impulse applied to reduce angular motion */
-	protected double angularImpulse;
+	private double angularImpulse;
 	
 	/**
 	 * Minimal constructor.
@@ -103,12 +113,10 @@ public class FrictionJoint extends Joint implements Shiftable, DataContainer {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("FrictionJoint[").append(super.toString())
-		.append("|LocalAnchor1=").append(this.localAnchor1)
-		.append("|LocalAnchor2=").append(this.localAnchor2)
-		.append("|WorldAnchor=").append(this.getAnchor1())
-		.append("|MaximumForce=").append(this.maximumForce)
-		.append("|MaximumTorque=").append(this.maximumTorque)
-		.append("]");
+		  .append("|Anchor=").append(this.getAnchor1())
+		  .append("|MaximumForce=").append(this.maximumForce)
+		  .append("|MaximumTorque=").append(this.maximumTorque)
+		  .append("]");
 		return sb.toString();
 	}
 	

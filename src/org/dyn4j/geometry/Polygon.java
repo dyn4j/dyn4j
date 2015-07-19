@@ -134,7 +134,6 @@ public class Polygon extends Wound implements Convex, Shape, Transformable, Data
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Polygon[").append(super.toString())
-		.append("|UserData=").append(this.userData)
 		.append("]");
 		return sb.toString();
 	}

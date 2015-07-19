@@ -119,7 +119,6 @@ public class Fixture implements DataContainer {
 		.append("|Shape=").append(this.shape)
 		.append("|Filter=").append(this.filter)
 		.append("|IsSensor=").append(this.sensor)
-		.append("|UserData=").append(this.userData)
 		.append("]");
 		return sb.toString();
 	}

@@ -37,11 +37,14 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents a maximum/minimum length distance joint.
+ * Implementation a maximum/minimum length distance joint.
  * <p>
- * Given the two world space anchor points, the {@link Body}s are not allowed to 
- * separate past the maximum distance and not allowed to approach past the 
- * minimum distance.
+ * A rope joint contains the distance between two bodies.  The bodies can rotate freely
+ * about the anchor points.  The system as a whole can rotate and translate freely as well.
+ * <p>
+ * This joint differs from the {@link DistanceJoint} in that it provides an upper and lower
+ * limit.  The bodies are allowed to move completely free when between the limits and then
+ * are constrained like a {@link DistanceJoint} when at either limit.
  * <p>
  * NOTE: The respective {@link #setLimits(double)}, {@link #setLimits(double, double)},
  * {@link #setLimitsEnabled(boolean)}, {@link #setLimitsEnabled(double)}, 
@@ -49,10 +52,14 @@ import org.dyn4j.resources.Messages;
  * {@link #setLowerLimitEnabled(boolean)}, {@link #setUpperLimit(double)}, and
  * {@link #setUpperLimitEnabled(boolean)} methods must be called to setup the maximum 
  * and minimum limits, otherwise this joint acts like a {@link DistanceJoint}.
+ * <p>
+ * This joint does not provide spring-damper options.
  * @author William Bittle
  * @version 3.2.0
  * @since 2.2.1
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Rope_Joint" target="_blank">Documentation</a>
+ * @see <a href="http://www.dyn4j.org/2010/09/distance-constraint/" target="_blank">Distance Constraint</a>
+ * @see <a href="http://www.dyn4j.org/2010/12/max-distance-constraint/" target="_blank">Max Distance Constraint</a>
  */
 public class RopeJoint extends Joint implements Shiftable, DataContainer {
 	/** The local anchor point on the first {@link Body} */
@@ -73,17 +80,21 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 	/** Whether the minimum distance is enabled */
 	protected boolean lowerLimitEnabled;
 	
+	// current state
+	
 	/** The effective mass of the two body system (Kinv = J * Minv * Jtrans) */
-	protected double invK;
+	private double invK;
 	
 	/** The normal */
-	protected Vector2 n;
+	private Vector2 n;
 	
 	/** The current state of the joint limits */
-	protected LimitState limitState;
+	private LimitState limitState;
+	
+	// output
 	
 	/** The accumulated impulse from the previous time step */
-	protected double impulse;
+	private double impulse;
 	
 	/**
 	 * Minimal constructor.
@@ -121,15 +132,13 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("RopeJoint[").append(super.toString())
-		.append("|LocalAnchor1=").append(this.localAnchor1)
-		.append("|LocalAnchor2=").append(this.localAnchor2)
-		.append("|WorldAnchor1=").append(this.getAnchor1())
-		.append("|WorldAnchor2=").append(this.getAnchor2())
-		.append("|IsLowerLimitEnabled=").append(this.lowerLimitEnabled)
-		.append("|LowerLimit").append(this.lowerLimit)
-		.append("|IsUpperLimitEnabled=").append(this.upperLimitEnabled)
-		.append("|UpperLimit=").append(this.upperLimit)
-		.append("]");
+		  .append("|Anchor1=").append(this.getAnchor1())
+		  .append("|Anchor2=").append(this.getAnchor2())
+	 	  .append("|IsLowerLimitEnabled=").append(this.lowerLimitEnabled)
+		  .append("|LowerLimit").append(this.lowerLimit)
+		  .append("|IsUpperLimitEnabled=").append(this.upperLimitEnabled)
+		  .append("|UpperLimit=").append(this.upperLimit)
+		  .append("]");
 		return sb.toString();
 	}
 	

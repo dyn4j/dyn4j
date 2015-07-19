@@ -88,26 +88,6 @@ public abstract class AbstractCollidable<T extends Fixture> implements Collidabl
 	}
 	
 	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("AbstractCollidable[Id=").append(id)
-		  .append("|Fixtures={");
-		// append all the shapes
-		int size = this.fixtures.size();
-		for (int i = 0; i < size; i++) {
-			if (i != 0) sb.append(",");
-			sb.append(this.fixtures.get(i));
-		}
-		sb.append("|Transform=").append(this.transform)
-		  .append("|RotationDiscRadius=").append(this.radius)
-		  .append("]");
-		return sb.toString();
-	}
-	
-	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override

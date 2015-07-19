@@ -38,18 +38,22 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents a fixed length distance joint.
+ * Implementation of a fixed length distance joint.
  * <p>
  * Given the two world space anchor points a distance is computed and used
- * to constrain the attached {@link Body}s.
+ * to constrain the attached {@link Body}s at that distance.  The bodies can rotate
+ * freely about the anchor points and the whole system can move and rotate freely, but
+ * the distance between the two anchor points is fixed.
  * <p>
  * This joint doubles as a spring/damper distance joint where the length can
  * change but is constantly approaching the target distance.  Enable the
- * spring/damper by setting the frequency to a value greater than zero.
+ * spring/damper by setting the frequency and damping ratio to values greater than
+ * zero.  A good starting point is a frequecy of 8.0 and damping ratio of 0.3.
  * @author William Bittle
  * @version 3.2.0
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Distance_Joint" target="_blank">Documentation</a>
+ * @see <a href="http://www.dyn4j.org/2010/09/distance-constraint/" target="_blank">Distance Constraint</a>
  */
 public class DistanceJoint extends Joint implements Shiftable, DataContainer {
 	/** The local anchor point on the first {@link Body} */
@@ -67,20 +71,24 @@ public class DistanceJoint extends Joint implements Shiftable, DataContainer {
 	/** The computed distance between the two world space anchor points */
 	protected double distance;
 	
+	// current state
+	
 	/** The effective mass of the two body system (Kinv = J * Minv * Jtrans) */
-	protected double invK;
+	private double invK;
 	
 	/** The normal */
-	protected Vector2 n;
+	private Vector2 n;
 	
 	/** The bias for adding work to the constraint (simulating a spring) */
-	protected double bias;
+	private double bias;
 	
 	/** The damping portion of the constraint */
-	protected double gamma;
+	private double gamma;
+
+	// output
 	
 	/** The accumulated impulse from the previous time step */
-	protected double impulse;
+	private double impulse;
 	
 	/**
 	 * Minimal constructor.
@@ -115,14 +123,12 @@ public class DistanceJoint extends Joint implements Shiftable, DataContainer {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("DistanceJoint[").append(super.toString())
-		.append("|LocalAnchor1=").append(this.localAnchor1)
-		.append("|LocalAnchor2=").append(this.localAnchor2)
-		.append("|WorldAnchor1=").append(this.getAnchor1())
-		.append("|WorldAnchor2=").append(this.getAnchor2())
-		.append("|Frequency=").append(this.frequency)
-		.append("|DampingRatio=").append(this.dampingRatio)
-		.append("|Distance=").append(this.distance)
-		.append("]");
+		  .append("|Anchor1=").append(this.getAnchor1())
+		  .append("|Anchor2=").append(this.getAnchor2())
+		  .append("|Frequency=").append(this.frequency)
+		  .append("|DampingRatio=").append(this.dampingRatio)
+		  .append("|Distance=").append(this.distance)
+		  .append("]");
 		return sb.toString();
 	}
 	

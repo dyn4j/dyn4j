@@ -101,7 +101,6 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		sb.append("Ellipse[").append(super.toString())
 		.append("|Width=").append(this.width)
 		.append("|Height=").append(this.height)
-		.append("|UserData=").append(this.userData)
 		.append("]");
 		return sb.toString();
 	}

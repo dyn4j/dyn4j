@@ -53,7 +53,7 @@ abstract class InteractionEdge<T> {
 	 */
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("InteractionGraphEdge[Interaction=").append(this.interaction)
+		sb.append("InteractionEdge[Interaction=").append(this.interaction)
 		.append("|Body=").append(this.other)
 		.append("]");
 		return sb.toString();
