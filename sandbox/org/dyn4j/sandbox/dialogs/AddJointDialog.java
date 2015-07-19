@@ -47,7 +47,7 @@ import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.FrictionJoint;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.MotorJoint;
-import org.dyn4j.dynamics.joint.MouseJoint;
+import org.dyn4j.dynamics.joint.PinJoint;
 import org.dyn4j.dynamics.joint.PrismaticJoint;
 import org.dyn4j.dynamics.joint.PulleyJoint;
 import org.dyn4j.dynamics.joint.RevoluteJoint;
@@ -146,9 +146,9 @@ public class AddJointDialog extends JDialog implements ActionListener {
 			this.setIconImage(Icons.ADD_FRICTION_JOINT.getImage());
 			this.setTitle(Messages.getString("dialog.joint.add.friction.title"));
 			pneInfo.setText(Messages.getString("panel.joint.friction.description"));
-		} else if (clazz == MouseJoint.class) {
+		} else if (clazz == PinJoint.class) {
 			// create the joint
-			MouseJoint mj = new MouseJoint(b1, b1.getWorldCenter(), 8.0, 0.3, 100.0);
+			PinJoint mj = new PinJoint(b1, b1.getWorldCenter(), 8.0, 0.3, 100.0);
 			// set the name
 			mj.setUserData(MessageFormat.format(Messages.getString("dialog.joint.add.mouse.name.default"), this.getCounter(clazz)));
 			// create the panel

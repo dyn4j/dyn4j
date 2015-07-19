@@ -62,7 +62,7 @@ import org.dyn4j.dynamics.joint.AngleJoint;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.FrictionJoint;
 import org.dyn4j.dynamics.joint.Joint;
-import org.dyn4j.dynamics.joint.MouseJoint;
+import org.dyn4j.dynamics.joint.PinJoint;
 import org.dyn4j.dynamics.joint.PrismaticJoint;
 import org.dyn4j.dynamics.joint.PulleyJoint;
 import org.dyn4j.dynamics.joint.RevoluteJoint;
@@ -926,9 +926,10 @@ public class XmlReader extends DefaultHandler {
 				fj.setMaximumForce(this.maximumForce);
 				fj.setMaximumTorque(this.maximumTorque);
 				joint = fj;
-			} else if ("MouseJoint".equalsIgnoreCase(this.jointType)) {
+			} else if ("MouseJoint".equalsIgnoreCase(this.jointType) ||
+					   "PinJoint".equalsIgnoreCase(this.jointType)) {
 				SandboxBody b1 = this.idMap.get(this.bodyId1);
-				MouseJoint mj = new MouseJoint(b1, this.anchor, this.frequency, this.dampingRatio, this.maximumForce);
+				PinJoint mj = new PinJoint(b1, this.anchor, this.frequency, this.dampingRatio, this.maximumForce);
 				mj.setTarget(this.target);
 				joint = mj;
 			} else if ("PrismaticJoint".equalsIgnoreCase(this.jointType)) {

@@ -35,7 +35,7 @@ import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.FrictionJoint;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.MotorJoint;
-import org.dyn4j.dynamics.joint.MouseJoint;
+import org.dyn4j.dynamics.joint.PinJoint;
 import org.dyn4j.dynamics.joint.PrismaticJoint;
 import org.dyn4j.dynamics.joint.PulleyJoint;
 import org.dyn4j.dynamics.joint.RevoluteJoint;
@@ -856,8 +856,8 @@ public final class RenderUtilities {
 			// no rendering available
 		} else if (joint instanceof MotorJoint) {
 			RenderUtilities.drawMotorJoint(gl, (MotorJoint)joint);
-		} else if (joint instanceof MouseJoint) {
-			RenderUtilities.drawMouseJoint(gl, (MouseJoint)joint, invdt);
+		} else if (joint instanceof PinJoint) {
+			RenderUtilities.drawMouseJoint(gl, (PinJoint)joint, invdt);
 		} else if (joint instanceof PrismaticJoint) {
 			RenderUtilities.drawPrismaticJoint(gl, (PrismaticJoint)joint);
 		} else if (joint instanceof PulleyJoint) {
@@ -988,7 +988,7 @@ public final class RenderUtilities {
 	 * @param joint the joint
 	 * @param invdt the inverse of the delta time of the last world step
 	 */
-	public static final void drawMouseJoint(GL2 gl, MouseJoint joint, double invdt) {
+	public static final void drawMouseJoint(GL2 gl, PinJoint joint, double invdt) {
 		// set the color
 		gl.glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
 		// draw the anchor point

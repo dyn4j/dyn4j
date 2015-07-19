@@ -84,7 +84,7 @@ import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.dynamics.contact.SolvedContactPoint;
 import org.dyn4j.dynamics.joint.Joint;
-import org.dyn4j.dynamics.joint.MouseJoint;
+import org.dyn4j.dynamics.joint.PinJoint;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Segment;
@@ -356,7 +356,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 	private MoveAction moveBodyAction = new MoveAction();
 	
 	/** The joint used to move bodies when the simulation is running */
-	private MouseJoint selectedBodyJoint;
+	private PinJoint selectedBodyJoint;
 	
 	/** The rotate body action */
 	private RotateAction rotateBodyAction = new RotateAction();
@@ -2029,7 +2029,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 							// if the mass is zero, attempt to use the inertia
 							mass = body.getMass().getInertia();
 						}
-						this.selectedBodyJoint = new MouseJoint(body, pw, 4.0, 0.7, 1000.0 * mass);
+						this.selectedBodyJoint = new PinJoint(body, pw, 4.0, 0.7, 1000.0 * mass);
 						synchronized (Simulation.LOCK) {
 							world.addJoint(this.selectedBodyJoint);
 						}

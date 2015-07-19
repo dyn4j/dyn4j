@@ -298,8 +298,8 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 		this.btnFillColor.addActionListener(this);
 		
 		// mass type
-		this.lblMassType = new JLabel(Messages.getString("panel.body.MassType"), Icons.INFO, JLabel.LEFT);
-		this.lblMassType.setToolTipText(Messages.getString("panel.body.MassType.tooltip"));
+		this.lblMassType = new JLabel(Messages.getString("panel.body.mass.type"), Icons.INFO, JLabel.LEFT);
+		this.lblMassType.setToolTipText(Messages.getString("panel.body.mass.type.tooltip"));
 		this.cmbMassType = new JComboBox(ITEMS);
 		this.cmbMassType.setSelectedItem(this.getMassTypeItem(massType));
 		this.cmbMassType.addActionListener(new ActionListener() {
@@ -875,16 +875,16 @@ public class BodyPanel extends JPanel implements InputPanel, ActionListener {
 	public void showInvalidInputMessage(Window owner) {}
 	
 	/** The normal mass type option */
-	private static final MassTypeItem NORMAL = new MassTypeItem(Messages.getString("MassType.normal"), MassType.NORMAL);
+	private static final MassTypeItem NORMAL = new MassTypeItem(Messages.getString("mass.type.normal"), MassType.NORMAL);
 	
 	/** The infinite mass type option */
-	private static final MassTypeItem INFINITE = new MassTypeItem(Messages.getString("MassType.infinite"), MassType.INFINITE);
+	private static final MassTypeItem INFINITE = new MassTypeItem(Messages.getString("mass.type.infinite"), MassType.INFINITE);
 	
 	/** The fixed linear velocity option */
-	private static final MassTypeItem FIXED_LINEAR_VELOCITY = new MassTypeItem(Messages.getString("MassType.fixedLinearVelocity"), MassType.FIXED_LINEAR_VELOCITY);
+	private static final MassTypeItem FIXED_LINEAR_VELOCITY = new MassTypeItem(Messages.getString("mass.type.fixedLinearVelocity"), MassType.FIXED_LINEAR_VELOCITY);
 	
 	/** The fixed angular velocity option */
-	private static final MassTypeItem FIXED_ANGULAR_VELOCITY = new MassTypeItem(Messages.getString("MassType.fixedAngularVelocity"), MassType.FIXED_ANGULAR_VELOCITY);
+	private static final MassTypeItem FIXED_ANGULAR_VELOCITY = new MassTypeItem(Messages.getString("mass.type.fixedAngularVelocity"), MassType.FIXED_ANGULAR_VELOCITY);
 	
 	/** The list of mass type items for the mass type drop down */
 	private static final MassTypeItem[] ITEMS = new MassTypeItem[] {

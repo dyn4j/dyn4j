@@ -41,7 +41,7 @@ import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
 import org.dyn4j.dynamics.joint.Joint;
-import org.dyn4j.dynamics.joint.MouseJoint;
+import org.dyn4j.dynamics.joint.PinJoint;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.sandbox.SandboxBody;
 import org.dyn4j.sandbox.icons.Icons;
@@ -126,7 +126,7 @@ public class MouseJointPanel extends JointPanel implements InputPanel, ActionLis
 	 * @param bodies the list of bodies to choose from
 	 * @param edit true if the joint is being edited
 	 */
-	public MouseJointPanel(MouseJoint joint, SandboxBody[] bodies, boolean edit) {
+	public MouseJointPanel(PinJoint joint, SandboxBody[] bodies, boolean edit) {
 		super();
 		
 		// get initial values
@@ -346,8 +346,8 @@ public class MouseJointPanel extends JointPanel implements InputPanel, ActionLis
 	 */
 	@Override
 	public void setJoint(Joint joint) {
-		if (joint instanceof MouseJoint) {
-			MouseJoint mj = (MouseJoint)joint;
+		if (joint instanceof PinJoint) {
+			PinJoint mj = (PinJoint)joint;
 			// set the super class properties
 			mj.setUserData(this.txtName.getText());
 			// set the properties that can change
@@ -381,7 +381,7 @@ public class MouseJointPanel extends JointPanel implements InputPanel, ActionLis
 		double d = ControlUtilities.getDoubleValue(this.txtRatio);
 		double mf = ControlUtilities.getDoubleValue(this.txtMaxForce);
 		
-		MouseJoint mj = new MouseJoint(body, a, f, d, mf);
+		PinJoint mj = new PinJoint(body, a, f, d, mf);
 		// set the super class properties
 		mj.setUserData(this.txtName.getText());
 		// set the target

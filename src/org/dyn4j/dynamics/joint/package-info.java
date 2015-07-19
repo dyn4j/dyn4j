@@ -30,7 +30,7 @@
  * <p>
  * Joints are solved using an iterative constraint based approach in the same manner as contacts.
  * <p>
- * All joints, with exception of the {@link org.dyn4j.dynamics.joint.MouseJoint} join a pair
+ * All joints, with exception of the {@link org.dyn4j.dynamics.joint.PinJoint} join a pair
  * of {@link org.dyn4j.dynamics.Body}s.
  * <p>
  * Current joint implementations:
@@ -40,7 +40,7 @@
  * <li>{@link org.dyn4j.dynamics.joint.FrictionJoint} for applying friction, air resistance, joint
  * friction, etc</li>
  * <li>{@link org.dyn4j.dynamics.joint.MotorJoint} primarily for character control</li>
- * <li>{@link org.dyn4j.dynamics.joint.MouseJoint} specifically to connect a distance joint with
+ * <li>{@link org.dyn4j.dynamics.joint.PinJoint} specifically to connect a distance joint with
  * spring/damper to one body</li>
  * <li>{@link org.dyn4j.dynamics.joint.PrismaticJoint} for only allowing relative linear motion
  * along an axis with or without a motor and limits</li>

@@ -50,12 +50,14 @@ import org.dyn4j.resources.Messages;
  * method returns the anchor point on the body.
  * <p>
  * Both the {@link #getBody1()} and {@link #getBody2()} methods return the same body.
+ * <p>
+ * Renamed from MouseJoint in 3.2.0.
  * @author William Bittle
  * @version 3.2.0
  * @since 1.0.0
- * @see <a href="http://www.dyn4j.org/documentation/joints/#Mouse_Joint" target="_blank">Documentation</a>
+ * @see <a href="http://www.dyn4j.org/documentation/joints/#Pin_Joint" target="_blank">Documentation</a>
  */
-public class MouseJoint extends Joint implements Shiftable, DataContainer {
+public class PinJoint extends Joint implements Shiftable, DataContainer {
 	/** The world space target point */
 	protected Vector2 target;
 	
@@ -97,16 +99,16 @@ public class MouseJoint extends Joint implements Shiftable, DataContainer {
 	 * @throws NullPointerException if body or anchor is null
 	 * @throws IllegalArgumentException if frequency is less than or equal to zero, or if dampingRatio is less than zero or greater than one, or if maxForce is less than zero
 	 */
-	public MouseJoint(Body body, Vector2 anchor, double frequency, double dampingRatio, double maximumForce) {
+	public PinJoint(Body body, Vector2 anchor, double frequency, double dampingRatio, double maximumForce) {
 		super(body, body, false);
 		// check for a null anchor
-		if (anchor == null) throw new NullPointerException(Messages.getString("dynamics.joint.mouse.nullAnchor"));
+		if (anchor == null) throw new NullPointerException(Messages.getString("dynamics.joint.pin.nullAnchor"));
 		// verify the frequency
 		if (frequency <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidFrequency"));
 		// verify the damping ratio
 		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidDampingRatio"));
 		// verity the max force
-		if (maximumForce < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.mouse.invalidMaximumForce"));
+		if (maximumForce < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.pin.invalidMaximumForce"));
 		this.target = anchor;
 		this.anchor = body.getLocalPoint(anchor);
 		this.frequency = frequency;
@@ -123,7 +125,7 @@ public class MouseJoint extends Joint implements Shiftable, DataContainer {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("MouseJoint[").append(super.toString())
+		sb.append("PinJoint[").append(super.toString())
 		  .append("|Target=").append(this.target)
 		  .append("|Anchor=").append(this.anchor)
 		  .append("|Frequency=").append(this.frequency)
@@ -150,7 +152,7 @@ public class MouseJoint extends Joint implements Shiftable, DataContainer {
 		// check if the mass is zero
 		if (m <= Epsilon.E) {
 			// if the mass is zero, use the inertia
-			// this will allow the mouse joint to work with
+			// this will allow the pin joint to work with
 			// all mass types other than INFINITE
 			m = mass.getInertia();
 		}
@@ -299,7 +301,7 @@ public class MouseJoint extends Joint implements Shiftable, DataContainer {
 	 */
 	public void setTarget(Vector2 target) {
 		// make sure the target is non null
-		if (target == null) throw new NullPointerException(Messages.getString("dynamics.joint.mouse.nullTarget"));
+		if (target == null) throw new NullPointerException(Messages.getString("dynamics.joint.pin.nullTarget"));
 		// wake up the body
 		this.body2.setAsleep(false);
 		// set the new target
@@ -329,7 +331,7 @@ public class MouseJoint extends Joint implements Shiftable, DataContainer {
 	 */
 	public void setMaximumForce(double maximumForce) {
 		// make sure the max force is non negative
-		if (maximumForce < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.mouse.invalidMaximumForce"));
+		if (maximumForce < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.pin.invalidMaximumForce"));
 		// set the new max force
 		this.maximumForce = maximumForce;
 	}

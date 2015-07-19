@@ -51,7 +51,7 @@ import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.FrictionJoint;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.MotorJoint;
-import org.dyn4j.dynamics.joint.MouseJoint;
+import org.dyn4j.dynamics.joint.PinJoint;
 import org.dyn4j.dynamics.joint.PrismaticJoint;
 import org.dyn4j.dynamics.joint.PulleyJoint;
 import org.dyn4j.dynamics.joint.RevoluteJoint;
@@ -317,9 +317,9 @@ public class CodeExporter {
 				sb.append(TAB2).append("FrictionJoint joint").append(i).append(" = new FrictionJoint(").append(idNameMap.get(body1.getId())).append(", ").append(idNameMap.get(body2.getId())).append(", ").append(export(fj.getAnchor1())).append(");").append(NEW_LINE)
 				.append(TAB2).append("joint").append(i).append(".setMaximumForce(").append(fj.getMaximumForce()).append(");").append(NEW_LINE)
 				.append(TAB2).append("joint").append(i).append(".setMaximumTorque(").append(fj.getMaximumTorque()).append(");").append(NEW_LINE);
-			} else if (joint instanceof MouseJoint) {
-				MouseJoint mj = (MouseJoint)joint;
-				sb.append(TAB2).append("MouseJoint joint").append(i).append(" = new MouseJoint(").append(idNameMap.get(body1.getId())).append(", ").append(export(mj.getAnchor2())).append(", ").append(mj.getFrequency()).append(", ").append(mj.getDampingRatio()).append(", ").append(mj.getMaximumForce()).append(");").append(NEW_LINE)
+			} else if (joint instanceof PinJoint) {
+				PinJoint mj = (PinJoint)joint;
+				sb.append(TAB2).append("PinJoint joint").append(i).append(" = new PinJoint(").append(idNameMap.get(body1.getId())).append(", ").append(export(mj.getAnchor2())).append(", ").append(mj.getFrequency()).append(", ").append(mj.getDampingRatio()).append(", ").append(mj.getMaximumForce()).append(");").append(NEW_LINE)
 				.append(TAB2).append("joint").append(i).append(".setTarget(").append(export(mj.getAnchor1())).append(");").append(NEW_LINE);
 			} else if (joint instanceof PrismaticJoint) {
 				PrismaticJoint pj = (PrismaticJoint)joint;

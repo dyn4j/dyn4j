@@ -26,7 +26,7 @@ package org.dyn4j.dynamics;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.dynamics.joint.MouseJoint;
+import org.dyn4j.dynamics.joint.PinJoint;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
@@ -34,12 +34,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Used to test the {@link MouseJoint} class.
+ * Used to test the {@link PinJoint} class.
  * @author William Bittle
  * @version 3.1.1
  * @since 1.0.2
  */
-public class MouseJointTest {
+public class PinJointTest {
 	/** The body used for testing */
 	private Body b;
 	
@@ -56,7 +56,7 @@ public class MouseJointTest {
 	 */
 	@Test
 	public void createSuccess() {
-		new MouseJoint(b, new Vector2(), 4.0, 0.4, 10.0);
+		new PinJoint(b, new Vector2(), 4.0, 0.4, 10.0);
 	}
 	
 	/**
@@ -64,7 +64,7 @@ public class MouseJointTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createNullTarget() {
-		new MouseJoint(b, null, 4.0, 0.4, 10.0);
+		new PinJoint(b, null, 4.0, 0.4, 10.0);
 	}
 	
 	/**
@@ -72,7 +72,7 @@ public class MouseJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createZeroFrequency() {
-		new MouseJoint(b, new Vector2(), 0.0, 0.4, 10.0);
+		new PinJoint(b, new Vector2(), 0.0, 0.4, 10.0);
 	}
 	
 	/**
@@ -80,7 +80,7 @@ public class MouseJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createNegativeFrequency() {
-		new MouseJoint(b, new Vector2(), -2.0, 0.4, 10.0);
+		new PinJoint(b, new Vector2(), -2.0, 0.4, 10.0);
 	}
 	
 	/**
@@ -88,7 +88,7 @@ public class MouseJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createGreaterThan1DampingRatio() {
-		new MouseJoint(b, new Vector2(), 4.0, 1.0001, 10.0);
+		new PinJoint(b, new Vector2(), 4.0, 1.0001, 10.0);
 	}
 	
 	/**
@@ -96,7 +96,7 @@ public class MouseJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createNegativeDampingRatio() {
-		new MouseJoint(b, new Vector2(), 4.0, -0.4, 10.0);
+		new PinJoint(b, new Vector2(), 4.0, -0.4, 10.0);
 	}
 	
 	/**
@@ -104,7 +104,7 @@ public class MouseJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createNegativeMaxForce() {
-		new MouseJoint(b, new Vector2(), 4.0, 0.4, -10.0);
+		new PinJoint(b, new Vector2(), 4.0, 0.4, -10.0);
 	}
 	
 	/**
@@ -112,7 +112,7 @@ public class MouseJointTest {
 	 */
 	@Test
 	public void setTarget() {
-		MouseJoint mj = new MouseJoint(b, new Vector2(), 4.0, 0.4, 10.0);
+		PinJoint mj = new PinJoint(b, new Vector2(), 4.0, 0.4, 10.0);
 		mj.setTarget(new Vector2());
 		mj.setTarget(new Vector2(2.0, 1.032));
 	}
@@ -122,7 +122,7 @@ public class MouseJointTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void setNullTarget() {
-		MouseJoint mj = new MouseJoint(b, new Vector2(), 4.0, 0.4, 10.0);
+		PinJoint mj = new PinJoint(b, new Vector2(), 4.0, 0.4, 10.0);
 		mj.setTarget(null);
 	}
 	
@@ -131,7 +131,7 @@ public class MouseJointTest {
 	 */
 	@Test
 	public void setMaxForce() {
-		MouseJoint mj = new MouseJoint(b, new Vector2(), 4.0, 0.4, 10.0);
+		PinJoint mj = new PinJoint(b, new Vector2(), 4.0, 0.4, 10.0);
 		mj.setMaximumForce(0.0);
 		mj.setMaximumForce(10.0);
 		mj.setMaximumForce(2548.0);
@@ -142,7 +142,7 @@ public class MouseJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setNegativeMaxForce() {
-		MouseJoint mj = new MouseJoint(b, new Vector2(), 4.0, 0.4, 10.0);
+		PinJoint mj = new PinJoint(b, new Vector2(), 4.0, 0.4, 10.0);
 		mj.setMaximumForce(-2.0);
 	}
 	
@@ -151,7 +151,7 @@ public class MouseJointTest {
 	 */
 	@Test
 	public void setDampingRatio() {
-		MouseJoint mj = new MouseJoint(b, new Vector2(), 4.0, 0.4, 10.0);
+		PinJoint mj = new PinJoint(b, new Vector2(), 4.0, 0.4, 10.0);
 		mj.setDampingRatio(0.0);
 		mj.setDampingRatio(1.0);
 		mj.setDampingRatio(0.2);
@@ -162,7 +162,7 @@ public class MouseJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setNegativeDampingRatio() {
-		MouseJoint mj = new MouseJoint(b, new Vector2(), 4.0, 0.4, 10.0);
+		PinJoint mj = new PinJoint(b, new Vector2(), 4.0, 0.4, 10.0);
 		mj.setDampingRatio(-1.0);
 	}
 	
@@ -171,7 +171,7 @@ public class MouseJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setGreaterThan1DampingRatio() {
-		MouseJoint mj = new MouseJoint(b, new Vector2(), 4.0, 0.4, 10.0);
+		PinJoint mj = new PinJoint(b, new Vector2(), 4.0, 0.4, 10.0);
 		mj.setDampingRatio(2.0);
 	}
 	
@@ -180,7 +180,7 @@ public class MouseJointTest {
 	 */
 	@Test
 	public void setFrequency() {
-		MouseJoint mj = new MouseJoint(b, new Vector2(), 4.0, 0.4, 10.0);
+		PinJoint mj = new PinJoint(b, new Vector2(), 4.0, 0.4, 10.0);
 		mj.setFrequency(1.0);
 		mj.setFrequency(29.0);
 	}
@@ -190,7 +190,7 @@ public class MouseJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setNegativeFrequency() {
-		MouseJoint mj = new MouseJoint(b, new Vector2(), 4.0, 0.4, 10.0);
+		PinJoint mj = new PinJoint(b, new Vector2(), 4.0, 0.4, 10.0);
 		mj.setFrequency(-0.3);
 	}
 	
@@ -199,7 +199,7 @@ public class MouseJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setZeroFrequency() {
-		MouseJoint mj = new MouseJoint(b, new Vector2(), 4.0, 0.4, 10.0);
+		PinJoint mj = new PinJoint(b, new Vector2(), 4.0, 0.4, 10.0);
 		mj.setFrequency(0.0);
 	}
 
@@ -210,7 +210,7 @@ public class MouseJointTest {
 	@Test
 	public void shiftCoordinates() {
 		World w = new World();
-		MouseJoint mj = new MouseJoint(b, new Vector2(), 4.0, 0.4, 10.0);
+		PinJoint mj = new PinJoint(b, new Vector2(), 4.0, 0.4, 10.0);
 		mj.setTarget(new Vector2(1.0, -1.0));
 		
 		w.addJoint(mj);
@@ -221,8 +221,8 @@ public class MouseJointTest {
 	}
 	
 	/**
-	 * Tests the MouseJoint with a body who has FIXED_LINEAR_VELOCITY as its
-	 * mass type.  The mouse joint applied at a point on the body should rotate
+	 * Tests the pin joint with a body who has FIXED_LINEAR_VELOCITY as its
+	 * mass type.  The pin joint applied at a point on the body should rotate
 	 * the body (before it wasn't doing anything).
 	 */
 	@Test
@@ -234,7 +234,7 @@ public class MouseJointTest {
 		body.setMass(MassType.FIXED_LINEAR_VELOCITY);
 		w.addBody(body);
 		
-		MouseJoint mj = new MouseJoint(body, new Vector2(0.5, 0.0), 8.0, 0.3, 1000.0);
+		PinJoint mj = new PinJoint(body, new Vector2(0.5, 0.0), 8.0, 0.3, 1000.0);
 		w.addJoint(mj);
 		
 		mj.setTarget(new Vector2(0.7, -0.5));

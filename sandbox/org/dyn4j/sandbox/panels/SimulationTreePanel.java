@@ -61,7 +61,7 @@ import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.FrictionJoint;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.MotorJoint;
-import org.dyn4j.dynamics.joint.MouseJoint;
+import org.dyn4j.dynamics.joint.PinJoint;
 import org.dyn4j.dynamics.joint.PrismaticJoint;
 import org.dyn4j.dynamics.joint.PulleyJoint;
 import org.dyn4j.dynamics.joint.RevoluteJoint;
@@ -754,7 +754,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 					} else if (joint instanceof MotorJoint) {
 						((JMenuItem)this.popJoint.getComponent(0)).setIcon(Icons.EDIT_MOTOR_JOINT);
 						((JMenuItem)this.popJoint.getComponent(1)).setIcon(Icons.REMOVE_MOTOR_JOINT);
-					} else if (joint instanceof MouseJoint) {
+					} else if (joint instanceof PinJoint) {
 						((JMenuItem)this.popJoint.getComponent(0)).setIcon(Icons.EDIT_MOUSE_JOINT);
 						((JMenuItem)this.popJoint.getComponent(1)).setIcon(Icons.REMOVE_MOUSE_JOINT);
 					} else if (joint instanceof PrismaticJoint) {
@@ -859,7 +859,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 		} else if ("addMotorJoint".equals(command)) {
 			this.addJointAction(MotorJoint.class);
 		} else if ("addMouseJoint".equals(command)) {
-			this.addJointAction(MouseJoint.class);
+			this.addJointAction(PinJoint.class);
 		} else if ("editJoint".equals(command)) {
 			this.editJointAction();
 		} else if ("removeJoint".equals(command)) {
@@ -1355,7 +1355,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 		synchronized (Simulation.LOCK) {
 			SandboxBody[] bodies = this.getBodies();
 			// check the joint class type
-			if (bodies == null || bodies.length == 0 || (clazz != MouseJoint.class && bodies.length == 1)) {
+			if (bodies == null || bodies.length == 0 || (clazz != PinJoint.class && bodies.length == 1)) {
 				JOptionPane.showMessageDialog(ControlUtilities.getParentWindow(this),
 						Messages.getString("menu.context.joint.add.warning"), 
 						Messages.getString("menu.context.joint.add.warning.title"), 
@@ -1859,7 +1859,7 @@ public class SimulationTreePanel extends JPanel implements MouseListener, Action
 				} else if (data instanceof MotorJoint) {
 					this.setIcon(Icons.MOTOR_JOINT);
 					this.setDisabledIcon(Icons.DISABLED_MOTOR_JOINT);
-				} else if (data instanceof MouseJoint) {
+				} else if (data instanceof PinJoint) {
 					this.setIcon(Icons.MOUSE_JOINT);
 					this.setDisabledIcon(Icons.DISABLED_MOUSE_JOINT);
 				} else if (data instanceof PrismaticJoint) {

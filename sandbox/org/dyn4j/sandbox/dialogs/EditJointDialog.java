@@ -44,7 +44,7 @@ import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.FrictionJoint;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.MotorJoint;
-import org.dyn4j.dynamics.joint.MouseJoint;
+import org.dyn4j.dynamics.joint.PinJoint;
 import org.dyn4j.dynamics.joint.PrismaticJoint;
 import org.dyn4j.dynamics.joint.PulleyJoint;
 import org.dyn4j.dynamics.joint.RevoluteJoint;
@@ -118,8 +118,8 @@ public class EditJointDialog extends JDialog implements ActionListener {
 			this.setIconImage(Icons.EDIT_FRICTION_JOINT.getImage());
 			this.setTitle(Messages.getString("dialog.joint.edit.friction.title"));
 			pneInfo.setText(Messages.getString("panel.joint.friction.description"));
-		} else if (joint instanceof MouseJoint) {
-			this.pnlJoint = new MouseJointPanel((MouseJoint)joint, bodies, true);
+		} else if (joint instanceof PinJoint) {
+			this.pnlJoint = new MouseJointPanel((PinJoint)joint, bodies, true);
 			this.setIconImage(Icons.EDIT_MOUSE_JOINT.getImage());
 			this.setTitle(Messages.getString("dialog.joint.edit.mouse.title"));
 			pneInfo.setText(Messages.getString("panel.joint.mouse.description"));

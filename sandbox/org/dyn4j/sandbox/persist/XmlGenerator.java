@@ -38,7 +38,7 @@ import org.dyn4j.dynamics.joint.AngleJoint;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.FrictionJoint;
 import org.dyn4j.dynamics.joint.Joint;
-import org.dyn4j.dynamics.joint.MouseJoint;
+import org.dyn4j.dynamics.joint.PinJoint;
 import org.dyn4j.dynamics.joint.PrismaticJoint;
 import org.dyn4j.dynamics.joint.PulleyJoint;
 import org.dyn4j.dynamics.joint.RevoluteJoint;
@@ -513,8 +513,8 @@ public class XmlGenerator {
 			sb.append(XmlGenerator.toXml(fj.getAnchor1(), "Anchor"));
 			sb.append("<MaximumForce>").append(fj.getMaximumForce()).append("</MaximumForce>");
 			sb.append("<MaximumTorque>").append(fj.getMaximumTorque()).append("</MaximumTorque>");
-		} else if (joint instanceof MouseJoint) {
-			MouseJoint mj = (MouseJoint)joint;
+		} else if (joint instanceof PinJoint) {
+			PinJoint mj = (PinJoint)joint;
 			sb.append(XmlGenerator.toXml(mj.getAnchor2(), "Anchor"));
 			sb.append(XmlGenerator.toXml(mj.getAnchor1(), "Target"));
 			sb.append("<Frequency>").append(mj.getFrequency()).append("</Frequency>");

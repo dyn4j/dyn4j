@@ -25,7 +25,7 @@
 package org.dyn4j.sandbox.tests;
 
 import org.dyn4j.dynamics.BodyFixture;
-import org.dyn4j.dynamics.joint.MouseJoint;
+import org.dyn4j.dynamics.joint.PinJoint;
 import org.dyn4j.dynamics.joint.PulleyJoint;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.MassType;
@@ -132,7 +132,7 @@ public class CoordinateShift extends CompiledSimulation {
 			
 			this.world.addBody(box);
 			
-			MouseJoint mj = new MouseJoint(box, new Vector2(-4.0, 2.75), 5.0, 0.3, 100);
+			PinJoint mj = new PinJoint(box, new Vector2(-4.0, 2.75), 5.0, 0.3, 100);
 			// pin it to a arbitrary point
 			mj.setTarget(new Vector2(-4.0, 4.0));
 			mj.setUserData("MouseJoint");
