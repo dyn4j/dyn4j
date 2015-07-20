@@ -43,7 +43,12 @@ public class DetectResult {
 	protected Penetration penetration;
 	
 	/**
-	 * Minimal constructor.
+	 * Default constructor.
+	 */
+	public DetectResult() {}
+	
+	/**
+	 * Optional constructor.
 	 * @param body the body 
 	 * @param fixture the fixture
 	 */

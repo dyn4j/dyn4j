@@ -47,6 +47,11 @@ public class RaycastResult implements Comparable<RaycastResult> {
 	protected Raycast raycast;
 	
 	/**
+	 * Default constructor.
+	 */
+	public RaycastResult() {}
+	
+	/**
 	 * Full constructor.
 	 * @param body the body
 	 * @param fixture the fixture
