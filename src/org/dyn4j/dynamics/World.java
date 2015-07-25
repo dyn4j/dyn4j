@@ -2690,6 +2690,38 @@ public class World implements Shiftable, DataContainer {
 	}
 	
 	/**
+	 * Removes the {@link Body} at the given index from this {@link World}.
+	 * <p>
+	 * Use the {@link #removeBody(int, boolean)} method to enable implicit
+	 * destruction notification.
+	 * @param index the index of the body to remove.
+	 * @return boolean true if the body was removed
+	 * @since 3.2.0
+	 */
+	public boolean removeBody(int index) {
+		return removeBody(index, false);
+	}
+
+	/**
+	 * Removes the {@link Body} at the given index from this {@link World}.
+	 * <p>
+	 * When a body is removed, joints and contacts may be implicitly destroyed.
+	 * Pass true to the notify parameter to be notified of the destruction of these objects
+	 * via the {@link DestructionListener}s.
+	 * <p>
+	 * This method does not trigger {@link ContactListener#end(ContactPoint)} events
+	 * for the contacts that are being removed.
+	 * @param index the index of the body to remove.
+	 * @param notify true if implicit destruction should be notified
+	 * @return boolean true if the body was removed
+	 * @since 3.2.0
+	 */
+	public boolean removeBody(int index, boolean notify) {
+		Body body = this.bodies.get(index);
+		return removeBody(body, notify);
+	}
+	
+	/**
 	 * Removes the given {@link Body} from this {@link World}.
 	 * <p>
 	 * Use the {@link #removeBody(Body, boolean)} method to enable implicit
@@ -2831,6 +2863,17 @@ public class World implements Shiftable, DataContainer {
 		}
 		
 		return removed;
+	}
+
+	/**
+	 * Removes the {@link Joint} at the given index from this {@link World}.
+	 * @param index the index of the {@link Joint} to remove
+	 * @return boolean true if the {@link Joint} was removed
+	 * @since 3.2.0
+	 */
+	public boolean removeJoint(int index) {
+		Joint joint = this.joints.get(index);
+		return removeJoint(joint);
 	}
 	
 	/**
@@ -3607,7 +3650,7 @@ public class World implements Shiftable, DataContainer {
 	 * @since 3.1.5
 	 */
 	public List<Body> getBodies() {
-		return Collections.unmodifiableList(this.bodies);
+		return Collections.unmodifiableList(new ArrayList<Body>(this.bodies));
 	}
 	
 	/**
@@ -3633,7 +3676,7 @@ public class World implements Shiftable, DataContainer {
 	 * @since 3.1.5
 	 */
 	public List<Joint> getJoints() {
-		return Collections.unmodifiableList(this.joints);
+		return Collections.unmodifiableList(new ArrayList<Joint>(this.joints));
 	}
 	
 	/**
