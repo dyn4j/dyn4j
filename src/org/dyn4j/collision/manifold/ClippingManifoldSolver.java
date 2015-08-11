@@ -38,7 +38,7 @@ import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Implementation of a Sutherland–Hodgman clipping {@link ManifoldSolver} algorithm.
+ * Implementation of a Sutherland-Hodgman clipping {@link ManifoldSolver} algorithm.
  * <p>
  * A {@link NarrowphaseDetector} should return a penetration normal and depth when two {@link Convex} {@link Shape}s are
  * intersecting.  The penetration normal should always point from the first {@link Shape} to the second.  Using the
