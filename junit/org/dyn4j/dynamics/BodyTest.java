@@ -24,6 +24,7 @@
  */
 package org.dyn4j.dynamics;
 
+import java.util.Iterator;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -75,6 +76,40 @@ public class BodyTest {
 		TestCase.assertNotNull(b.transform0);
 		TestCase.assertNotNull(b.velocity);
 		TestCase.assertNull(b.world);
+	}
+	
+	/**
+	 * Makes sure the returned list is unmodifiable.
+	 */
+	@Test(expected = UnsupportedOperationException.class)
+	public void getFixtures() {
+		Body b = new Body();
+		b.getFixtures().add(new BodyFixture(Geometry.createCircle(0.5)));
+	}
+
+	/**
+	 * Tests the fixture iterator.
+	 */
+	@Test
+	public void fixtureIterator() {
+		Body b = new Body();
+		b.addFixture(Geometry.createCircle(0.5));
+		b.addFixture(Geometry.createCircle(0.4));
+		b.addFixture(Geometry.createCircle(0.3));
+		b.addFixture(Geometry.createCircle(0.2));
+		
+		Iterator<BodyFixture> it = b.getFixtureIterator();
+		while (it.hasNext()) {
+			it.next();
+		}
+		
+		it = b.getFixtureIterator();
+		while (it.hasNext()) {
+			it.next();
+			it.remove();
+		}
+		
+		TestCase.assertEquals(0, b.getFixtureCount());
 	}
 	
 	/**

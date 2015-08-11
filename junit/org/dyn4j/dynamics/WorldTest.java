@@ -25,6 +25,7 @@
 package org.dyn4j.dynamics;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -44,6 +45,7 @@ import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.dynamics.contact.ContactAdapter;
 import org.dyn4j.dynamics.contact.ContactPoint;
+import org.dyn4j.dynamics.joint.AngleJoint;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.Circle;
@@ -935,5 +937,75 @@ public class WorldTest {
 	   if (!world.detect(c, new CategoryFilter(2,15), true, false, result)) {
 		   TestCase.fail();
 	   }
+	}
+
+	/**
+	 * Makes sure the returned list is unmodifiable.
+	 */
+	@Test(expected = UnsupportedOperationException.class)
+	public void getBodies() {
+		World w = new World();
+		w.getBodies().add(new Body());
+	}
+
+	/**
+	 * Makes sure the returned list is unmodifiable.
+	 */
+	@Test(expected = UnsupportedOperationException.class)
+	public void getJoints() {
+		World w = new World();
+		w.getJoints().add(new AngleJoint(new Body(), new Body()));
+	}
+
+	/**
+	 * Tests the body iterator.
+	 */
+	@Test
+	public void bodyIterator() {
+		World w = new World();
+		
+		w.addBody(new Body());
+		w.addBody(new Body());
+		w.addBody(new Body());
+		w.addBody(new Body());
+		
+		Iterator<Body> it = w.getBodyIterator();
+		while (it.hasNext()) {
+			it.next();
+		}
+		
+		it = w.getBodyIterator();
+		while (it.hasNext()) {
+			it.next();
+			it.remove();
+		}
+		
+		TestCase.assertEquals(0, w.getBodyCount());
+	}
+	
+	/**
+	 * Tests the joint iterator.
+	 */
+	@Test
+	public void jointIterator() {
+		World w = new World();
+		
+		w.addJoint(new AngleJoint(new Body(), new Body()));
+		w.addJoint(new AngleJoint(new Body(), new Body()));
+		w.addJoint(new AngleJoint(new Body(), new Body()));
+		w.addJoint(new AngleJoint(new Body(), new Body()));
+		
+		Iterator<Joint> it = w.getJointIterator();
+		while (it.hasNext()) {
+			it.next();
+		}
+		
+		it = w.getJointIterator();
+		while (it.hasNext()) {
+			it.next();
+			it.remove();
+		}
+		
+		TestCase.assertEquals(0, w.getJointCount());
 	}
 }

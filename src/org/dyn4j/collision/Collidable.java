@@ -24,6 +24,7 @@
  */
 package org.dyn4j.collision;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -194,10 +195,24 @@ public interface Collidable<T extends Fixture> extends Transformable, Shiftable,
 	
 	/**
 	 * Returns an unmodifiable list containing the {@link Fixture}s attached to this {@link Collidable}.
+	 * <p>
+	 * The returned list is backed by the internal list, therefore adding or removing fixtures while 
+	 * iterating through the returned list is not permitted.  Use the {@link #getFixtureIterator()}
+	 * method instead.
 	 * @return List&lt;T&gt;
 	 * @since 3.1.5
+	 * @see #getFixtureIterator()
 	 */
 	public abstract List<T> getFixtures();
+	
+	/**
+	 * Returns an iterator for the fixtures.
+	 * <p>
+	 * The returned iterator supports the <code>remove</code> method.
+	 * @return Iterator&lt;T&gt;
+	 * @since 3.2.0
+	 */
+	public abstract Iterator<T> getFixtureIterator();
 	
 	/**
 	 * Returns true if the given world space point is contained in this {@link Collidable}.

@@ -3646,11 +3646,27 @@ public class World implements Shiftable, DataContainer {
 	
 	/**
 	 * Returns an unmodifiable list containing all the bodies in this world.
+	 * <p>
+	 * The returned list is backed by the internal list, therefore adding or removing bodies while 
+	 * iterating through the returned list is not permitted.  Use the {@link #getBodyIterator()}
+	 * method instead.
 	 * @return List&lt;{@link Body}&gt;
 	 * @since 3.1.5
+	 * @see #getBodyIterator()
 	 */
 	public List<Body> getBodies() {
-		return Collections.unmodifiableList(new ArrayList<Body>(this.bodies));
+		return Collections.unmodifiableList(this.bodies);
+	}
+
+	/**
+	 * Returns an iterator for iterating over the bodies in this world.
+	 * <p>
+	 * The returned iterator supports the <code>remove</code> method.
+	 * @return Iterator&lt;{@link Body}&gt;
+	 * @since 3.2.0
+	 */
+	public Iterator<Body> getBodyIterator() {
+		return new BodyIterator(this);
 	}
 	
 	/**
@@ -3672,11 +3688,27 @@ public class World implements Shiftable, DataContainer {
 	
 	/**
 	 * Returns an unmodifiable list containing all the joints in this world.
+	 * <p>
+	 * The returned list is backed by the internal list, therefore adding or removing joints while 
+	 * iterating through the returned list is not permitted.  Use the {@link #getJointIterator()}
+	 * method instead.
 	 * @return List&lt;{@link Joint}&gt;
 	 * @since 3.1.5
+	 * @see #getJointIterator()
 	 */
 	public List<Joint> getJoints() {
-		return Collections.unmodifiableList(new ArrayList<Joint>(this.joints));
+		return Collections.unmodifiableList(this.joints);
+	}
+
+	/**
+	 * Returns an iterator for iterating over the joints in this world.
+	 * <p>
+	 * The returned iterator supports the <code>remove</code> method.
+	 * @return Iterator&lt;{@link Joint}&gt;
+	 * @since 3.2.0
+	 */
+	public Iterator<Joint> getJointIterator() {
+		return new JointIterator(this);
 	}
 	
 	/**

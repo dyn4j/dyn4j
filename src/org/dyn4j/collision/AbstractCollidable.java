@@ -302,6 +302,14 @@ public abstract class AbstractCollidable<T extends Fixture> implements Collidabl
 	}
 	
 	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.Collidable#getFixtureIterator()
+	 */
+	@Override
+	public Iterator<T> getFixtureIterator() {
+		return new FixtureIterator<T>(this);
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.Collidable#getTransform()
 	 */
 	public Transform getTransform() {
