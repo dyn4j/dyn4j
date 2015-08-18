@@ -51,22 +51,22 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	private static final double INERTIA_CONSTANT = Math.PI / 8.0 - 8.0 / (9.0 * Math.PI);
 	
 	/** The ellipse width */
-	protected double width;
+	final double width;
 	
 	/** The ellipse height */
-	protected double height;
+	final double height;
 	
 	/** The half-width */
-	protected double halfWidth;
+	private final double halfWidth;
 	
 	/** A local vector to  */
-	protected Vector2 localXAxis;
+	final Vector2 localXAxis;
 
 	/** The ellipse center */
-	protected Vector2 ellipseCenter;
+	private final Vector2 ellipseCenter;
 	
 	/** The vertices of the bottom */
-	protected Vector2[] vertices;
+	private final Vector2[] vertices;
 
 	/**
 	 * Minimal constructor.

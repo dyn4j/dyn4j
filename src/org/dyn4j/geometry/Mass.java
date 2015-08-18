@@ -46,22 +46,22 @@ import org.dyn4j.resources.Messages;
  */
 public class Mass {
 	/** The mass type */
-	protected MassType type;
+	MassType type;
 	
 	/** The center of mass */
-	protected final Vector2 center;
+	final Vector2 center;
 	
 	/** The mass in kg */
-	protected final double mass;
+	final double mass;
 	
 	/** The inertia tensor in kg &middot; m<sup>2</sup> */
-	protected final double inertia;
+	final double inertia;
 	
 	/** The inverse mass */
-	protected final double invMass;
+	final double invMass;
 		
 	/** The inverse inertia tensor */
-	protected final double invInertia;
+	final double invInertia;
 	
 	/**
 	 * Default constructor.

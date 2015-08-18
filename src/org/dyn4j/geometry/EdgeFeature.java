@@ -37,16 +37,16 @@ package org.dyn4j.geometry;
  */
 public final class EdgeFeature extends Feature {
 	/** The first vertex of the edge */
-	protected final PointFeature vertex1;
+	final PointFeature vertex1;
 	
 	/** The second vertex of the edge */
-	protected final PointFeature vertex2;
+	final PointFeature vertex2;
 	
 	/** The vertex of maximum projection along a {@link Vector2} */
-	protected final PointFeature max;
+	final PointFeature max;
 
 	/** The edge vector */
-	protected final Vector2 edge;
+	final Vector2 edge;
 	
 	/**
 	 * Creates an edge feature.

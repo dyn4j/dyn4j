@@ -43,10 +43,10 @@ import org.dyn4j.resources.Messages;
  */
 final class BinarySearchTreeIterator<E extends Comparable<E>> implements Iterator<E> {
 	/** The node stack for iterative traversal */
-	protected final Deque<BinarySearchTreeNode<E>> stack;
+	final Deque<BinarySearchTreeNode<E>> stack;
 	
 	/** The traversal direction */
-	protected final boolean inOrder;
+	final boolean inOrder;
 	
 	/**
 	 * Default constructor using in-order traversal.

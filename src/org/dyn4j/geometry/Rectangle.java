@@ -39,10 +39,10 @@ import org.dyn4j.resources.Messages;
  */
 public class Rectangle extends Polygon implements Shape, Transformable, DataContainer {
 	/** The {@link Rectangle}'s width */
-	protected double width;
+	final double width;
 	
 	/** The {@link Rectangle}'s height */
-	protected double height;
+	final double height;
 
 	/**
 	 * Full constructor.

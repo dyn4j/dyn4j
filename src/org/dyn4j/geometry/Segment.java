@@ -38,7 +38,7 @@ import org.dyn4j.resources.Messages;
  */
 public class Segment extends Wound implements Convex, Shape, Transformable, DataContainer {
 	/** The segment length */
-	protected double length;
+	final double length;
 	
 	/**
 	 * Full constructor.

@@ -60,16 +60,16 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 	protected static final double EDGE_FEATURE_EXPANSION_FACTOR = 0.1;
 	
 	/** The bounding rectangle width */
-	protected double length;
+	final double length;
 	
 	/** The end cap radius */
-	protected double capRadius;
+	final double capRadius;
 	
 	/** The focal points for the caps */
-	protected Vector2[] foci;
+	private final Vector2[] foci;
 	
 	/** The local x-axis */
-	protected Vector2 localXAxis;
+	final Vector2 localXAxis;
 	
 	/**
 	 * Minimal constructor.

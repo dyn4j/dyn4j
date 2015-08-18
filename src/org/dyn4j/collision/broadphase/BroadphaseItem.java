@@ -40,10 +40,10 @@ import org.dyn4j.collision.Fixture;
  */
 public final class BroadphaseItem<E extends Collidable<T>, T extends Fixture> {
 	/** The {@link Collidable} */
-	protected final E collidable;
+	final E collidable;
 	
 	/** The {@link Fixture} */
-	protected final T fixture;
+	final T fixture;
 	
 	/**
 	 * Minimal constructor.

@@ -38,7 +38,7 @@ package org.dyn4j.geometry;
  */
 public final class PointFeature extends Feature {
 	/** The vertex or point */
-	protected final Vector2 point;
+	final Vector2 point;
 	
 	/**
 	 * Optional constructor.

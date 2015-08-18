@@ -41,18 +41,18 @@ public final class BroadphasePair<E extends Collidable<T>, T extends Fixture> {
 	// the first
 	
 	/** The first {@link Collidable} */
-	protected final E collidable1;
+	final E collidable1;
 	
 	/** The first {@link Collidable}'s {@link Fixture} */
-	protected final T fixture1;
+	final T fixture1;
 	
 	// the second
 	
 	/** The second {@link Collidable} */
-	protected final E collidable2;
+	final E collidable2;
 	
 	/** The second {@link Collidable}'s {@link Fixture} */
-	protected final T fixture2;
+	final T fixture2;
 	
 	/**
 	 * Minimal constructor.

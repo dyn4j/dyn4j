@@ -45,9 +45,6 @@ import org.dyn4j.geometry.Vector2;
  * @param <T> the {@link Fixture} type
  */
 public abstract class AbstractCollidable<T extends Fixture> implements Collidable<T>, Transformable, DataContainer {
-	/** Number of fixtures typically added to a {@link Collidable} */
-	protected static final int TYPICAL_FIXTURE_COUNT = 1;
-	
 	/** The {@link Collidable}'s unique identifier */
 	protected final UUID id;
 	
@@ -67,7 +64,7 @@ public abstract class AbstractCollidable<T extends Fixture> implements Collidabl
 	 * Default constructor.
 	 */
 	public AbstractCollidable() {
-		this(AbstractCollidable.TYPICAL_FIXTURE_COUNT);
+		this(Collidable.TYPICAL_FIXTURE_COUNT);
 	}
 	
 	/**
@@ -80,7 +77,7 @@ public abstract class AbstractCollidable<T extends Fixture> implements Collidabl
 	 * @param fixtureCount the estimated number of fixtures
 	 */
 	public AbstractCollidable(int fixtureCount) {
-		int size = fixtureCount <= 0 ? AbstractCollidable.TYPICAL_FIXTURE_COUNT : fixtureCount;
+		int size = fixtureCount <= 0 ? Collidable.TYPICAL_FIXTURE_COUNT : fixtureCount;
 		this.id = UUID.randomUUID();
 		this.fixtures = new ArrayList<T>(size);
 		this.radius = 0.0;

@@ -45,19 +45,19 @@ import org.dyn4j.resources.Messages;
  */
 public class Ellipse extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
 	/** The ellipse width */
-	protected double width;
+	final double width;
 	
 	/** The ellipse height */
-	protected double height;
+	final double height;
 	
 	/** The half-width */
-	protected double halfWidth;
+	private final double halfWidth;
 	
 	/** The half-height */
-	protected double halfHeight;
+	private final double halfHeight;
 	
 	/** A local vector to  */
-	protected Vector2 localXAxis;
+	final Vector2 localXAxis;
 	
 	/**
 	 * Minimal constructor.

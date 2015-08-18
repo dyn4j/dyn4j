@@ -46,6 +46,9 @@ import org.dyn4j.geometry.Vector2;
  * @see AbstractCollidable
  */
 public interface Collidable<T extends Fixture> extends Transformable, Shiftable, DataContainer {
+	/** Number of fixtures typically attached to a {@link Collidable} */
+	public static final int TYPICAL_FIXTURE_COUNT = 1;
+	
 	/**
 	 * Returns a unique identifier for this {@link Collidable}.
 	 * <p>

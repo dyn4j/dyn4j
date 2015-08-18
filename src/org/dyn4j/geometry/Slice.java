@@ -39,22 +39,22 @@ import org.dyn4j.resources.Messages;
  */
 public class Slice extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
 	/** The total circular section in radians */
-	protected double theta;
+	final double theta;
 	
 	/** Half of theta */
-	protected double alpha;
+	private final double alpha;
 	
 	/** The maximum radius of this shape rotated about its center */
-	protected double sliceRadius;
+	final double sliceRadius;
 	
 	/** The vertices of the slice */
-	protected Vector2[] vertices;
+	private final Vector2[] vertices;
 	
 	/** The normals of the polygonal sides */
-	protected Vector2[] normals;
+	private final Vector2[] normals;
 	
 	/** The local x axis to track local rotation */
-	protected Vector2 localXAxis;
+	final Vector2 localXAxis;
 	
 	/**
 	 * Full constructor.

@@ -1660,7 +1660,7 @@ public final class Geometry {
 	public static final Capsule scale(Capsule capsule, double scale) {
 		if (capsule == null) throw new NullPointerException(Messages.getString("geometry.nullShape"));
 		if (scale <= 0) throw new IllegalArgumentException(Messages.getString("geometry.invalidScale"));
-		return new Capsule(capsule.length * scale, capsule.capRadius * 2.0 * scale);
+		return new Capsule(capsule.getLength() * scale, capsule.getCapRadius() * 2.0 * scale);
 	}
 	
 	/**
@@ -1675,7 +1675,7 @@ public final class Geometry {
 	public static final Ellipse scale(Ellipse ellipse, double scale) {
 		if (ellipse == null) throw new NullPointerException(Messages.getString("geometry.nullShape"));
 		if (scale <= 0) throw new IllegalArgumentException(Messages.getString("geometry.invalidScale"));
-		return new Ellipse(ellipse.width * scale, ellipse.height * scale);
+		return new Ellipse(ellipse.getWidth() * scale, ellipse.getHeight() * scale);
 	}
 
 	/**
@@ -1690,7 +1690,7 @@ public final class Geometry {
 	public static final HalfEllipse scale(HalfEllipse halfEllipse, double scale) {
 		if (halfEllipse == null) throw new NullPointerException(Messages.getString("geometry.nullShape"));
 		if (scale <= 0) throw new IllegalArgumentException(Messages.getString("geometry.invalidScale"));
-		return new HalfEllipse(halfEllipse.width * scale, halfEllipse.height * scale);
+		return new HalfEllipse(halfEllipse.getWidth() * scale, halfEllipse.getHeight() * scale);
 	}
 	
 	/**
@@ -1705,7 +1705,7 @@ public final class Geometry {
 	public static final Slice scale(Slice slice, double scale) {
 		if (slice == null) throw new NullPointerException(Messages.getString("geometry.nullShape"));
 		if (scale <= 0) throw new IllegalArgumentException(Messages.getString("geometry.invalidScale"));
-		return new Slice(slice.sliceRadius * scale, slice.theta);
+		return new Slice(slice.getSliceRadius() * scale, slice.getTheta());
 	}
 	
 	/**

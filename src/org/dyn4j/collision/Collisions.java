@@ -55,7 +55,7 @@ public final class Collisions {
 	 * +----------+--------------+-----------------+-------------------+</pre>
 	 * Therefore a good estimate could be 4 collisions per object.
 	 */
-	protected static final int ESTIMATED_COLLISIONS_PER_OBJECT = 4;
+	private static final int ESTIMATED_COLLISIONS_PER_OBJECT = 4;
 	
 	/**
 	 * An estimate of the number of objects that will be hit when raycasting assuming uniform
@@ -63,7 +63,7 @@ public final class Collisions {
 	 * <p>
 	 * This was computed from the Sandbox's Raycast Performance test.
 	 */
-	protected static final double ESTIMATED_RAYCAST_DENSITY = 0.02;
+	private static final double ESTIMATED_RAYCAST_DENSITY = 0.02;
 	
 	/**
 	 * Returns an estimate on the number of collision pairs based on the number objects being simulated.

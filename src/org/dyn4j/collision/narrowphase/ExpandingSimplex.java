@@ -44,10 +44,10 @@ import org.dyn4j.geometry.Vector2;
  */
 final class ExpandingSimplex {
 	/** The winding direction of the simplex */
-	final int winding;
+	private final int winding;
 	
 	/** The priority queue of simplex edges */
-	final PriorityQueue<ExpandingSimplexEdge> queue;
+	private final PriorityQueue<ExpandingSimplexEdge> queue;
 	
 	/**
 	 * Minimal constructor.
