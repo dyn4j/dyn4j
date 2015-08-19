@@ -57,17 +57,49 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	final double height;
 	
 	/** The half-width */
-	private final double halfWidth;
+	final double halfWidth;
 	
 	/** A local vector to  */
 	final Vector2 localXAxis;
 
 	/** The ellipse center */
-	private final Vector2 ellipseCenter;
+	final Vector2 ellipseCenter;
 	
 	/** The vertices of the bottom */
-	private final Vector2[] vertices;
+	final Vector2[] vertices;
 
+	/**
+	 * Validated constructor.
+	 * <p>
+	 * This creates an axis-aligned half ellipse fitting inside a rectangle
+	 * of the given width and height.
+	 * @param valid always true or this constructor would not be called
+	 * @param width the width
+	 * @param center the center
+	 * @param vertices the vertices
+	 */
+	private HalfEllipse(boolean valid, double width, double height, Vector2 center, Vector2[] vertices) {
+		super(center, center.distance(vertices[1]));
+		
+		// set width and height
+		this.width = width;
+		this.height = height;
+		
+		// compute the major and minor axis lengths
+		// (the x,y radii)
+		this.halfWidth = width * 0.5;
+
+		// set the ellipse center
+		this.ellipseCenter = new Vector2();
+		
+		// since we create ellipses as axis aligned we set the local x axis
+		// to the world space x axis
+		this.localXAxis = new Vector2(1.0, 0.0);
+		
+		// setup the vertices
+		this.vertices = vertices;
+	}
+	
 	/**
 	 * Minimal constructor.
 	 * <p>
@@ -78,36 +110,32 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	 * @throws IllegalArgumentException if either the width or height is less than or equal to zero
 	 */
 	public HalfEllipse(double width, double height) {
+		this(
+			validate(width, height), 
+			width, 
+			height, 
+			new Vector2(0, (4.0 * height) / (3.0 * Math.PI)), 
+			new Vector2[] {
+				// the left point
+				new Vector2(-width * 0.5, 0),
+				// the right point
+				new Vector2( width * 0.5, 0)
+			 });
+	}
+	
+	/**
+	 * Validates the constructor input returning true if valid or throwing an exception if invalid.
+	 * @param width the bounding rectangle width
+	 * @param height the bounding rectangle height
+	 * @return boolean true
+	 * @throws IllegalArgumentException if either the width or height is less than or equal to zero
+	 */
+	private static final boolean validate(double width, double height) {
 		// validate the width and height
 		if (width <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.halfEllipse.invalidWidth"));
 		if (height <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.halfEllipse.invalidHeight"));
 		
-		this.width = width;
-		this.height = height;
-		
-		// compute the major and minor axis lengths
-		// (the x,y radii)
-		this.halfWidth = width * 0.5;
-
-		// set the ellipse center
-		this.ellipseCenter = new Vector2();
-		// compute the real center
-		this.center = new Vector2(0, (4.0 * height) / (3.0 * Math.PI));
-		
-		// since we create ellipses as axis aligned we set the local x axis
-		// to the world space x axis
-		this.localXAxis = new Vector2(1.0, 0.0);
-		
-		// setup the vertices
-		this.vertices = new Vector2[] {
-			// the left point
-			new Vector2(-this.halfWidth, 0),
-			// the right point
-			new Vector2( this.halfWidth, 0)
-		};
-
-		// set the rotation radius
-		this.radius = this.center.distance(this.vertices[1]);
+		return true;
 	}
 	
 	/* (non-Javadoc)

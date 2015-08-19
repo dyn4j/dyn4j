@@ -39,12 +39,42 @@ import org.dyn4j.resources.Messages;
  * @version 3.1.11
  * @since 1.0.0
  */
-public class Polygon extends Wound implements Convex, Shape, Transformable, DataContainer {
+public class Polygon extends AbstractShape implements Convex, Wound, Shape, Transformable, DataContainer {
+	/** The polygon vertices */
+	final Vector2[] vertices;
+	
+	/** The polygon normals */
+	final Vector2[] normals;
+	
 	/**
-	 * Default constructor for sub classes.
+	 * Full constructor for sub classes.
+	 * @param center the center
+	 * @param radius the rotation radius
+	 * @param vertices the vertices
+	 * @param normals the normals
 	 */
-	protected Polygon() {
-		super();
+	Polygon(Vector2 center, double radius, Vector2[] vertices, Vector2[] normals) {
+		super(center, radius);
+		this.vertices = vertices;
+		this.normals = normals;
+	}
+	
+	/**
+	 * Validated constructor.
+	 * <p>
+	 * Creates a new {@link Polygon} using the given vertices.  The center of the polygon
+	 * is calculated using an area weighted method.
+	 * @param valid always true or this constructor would not be called
+	 * @param vertices the polygon vertices
+	 * @param center the center of the polygon
+	 */
+	private Polygon(boolean valid, Vector2[] vertices, Vector2 center) {
+		super(center, Geometry.getRotationRadius(center, vertices));
+			
+		// set the vertices
+		this.vertices = vertices;
+		// create the normals
+		this.normals = Geometry.getEdgeNormals(vertices);
 	}
 	
 	/**
@@ -61,7 +91,17 @@ public class Polygon extends Wound implements Convex, Shape, Transformable, Data
 	 * @throws IllegalArgumentException if vertices contains less than 3 points, contains coincident points, is not convex, or has clockwise winding
 	 */
 	public Polygon(Vector2... vertices) {
-		super();
+		this(validate(vertices), vertices, Geometry.getAreaWeightedCenter(vertices));
+	}
+	
+	/**
+	 * Validates the constructor input returning true if valid or throwing an exception if invalid.
+	 * @param vertices the array of vertices
+	 * @return boolean true
+	 * @throws NullPointerException if vertices is null or contains a null element
+	 * @throws IllegalArgumentException if vertices contains less than 3 points, contains coincident points, is not convex, or has clockwise winding
+	 */
+	private static final boolean validate(Vector2... vertices) {
 		// check the vertex array
 		if (vertices == null) throw new NullPointerException(Messages.getString("geometry.polygon.nullArray"));
 		// get the size
@@ -100,31 +140,8 @@ public class Polygon extends Wound implements Convex, Shape, Transformable, Data
 		if (area < 0.0) {
 			throw new IllegalArgumentException(Messages.getString("geometry.polygon.invalidWinding"));
 		}
-		// set the vertices
-		this.vertices = vertices;
-		// create the normals
-		this.normals = new Vector2[size];
-		for (int i = 0; i < size; i++) {
-			// get the edge points
-			Vector2 p1 = vertices[i];
-			Vector2 p2 = (i + 1 == size) ? vertices[0] : vertices[i + 1];
-			// create the edge and get its left perpedicular vector
-			Vector2 n = p1.to(p2).left();
-			// normalize it
-			n.normalize();
-			this.normals[i] = n;
-		}
-		// perform the area weighted center to otain the center
-		this.center = Geometry.getAreaWeightedCenter(this.vertices);
-		// find the maximum radius from the center
-		double r2 = 0.0;
-		for (int i = 0; i < size; i++) {
-			double r2t = this.center.distanceSquared(vertices[i]);
-			// keep the largest
-			r2 = Math.max(r2, r2t);
-		}
-		// set the radius
-		this.radius = Math.sqrt(r2);
+		// if we've made it this far then continue;
+		return true;
 	}
 	
 	/* (non-Javadoc)
@@ -134,8 +151,29 @@ public class Polygon extends Wound implements Convex, Shape, Transformable, Data
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Polygon[").append(super.toString())
-		.append("]");
+		  .append("|Vertices={");
+		for (int i = 0; i < this.vertices.length; i++) {  
+			if (i != 0) sb.append(",");
+			sb.append(this.vertices[i]);
+		}
+		sb.append("}")
+		  .append("]");
 		return sb.toString();
+	}
+	
+	@Override
+	public Vector2[] getVertices() {
+		return this.vertices;
+	}
+	
+	@Override
+	public Vector2[] getNormals() {
+		return this.normals;
+	}
+	
+	@Override
+	public double getRadius(Vector2 center) {
+		return Geometry.getRotationRadius(center, this.vertices);
 	}
 	
 	/* (non-Javadoc)

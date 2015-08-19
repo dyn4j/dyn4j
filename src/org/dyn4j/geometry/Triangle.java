@@ -37,7 +37,7 @@ import org.dyn4j.DataContainer;
  * @version 3.1.5
  * @since 1.0.0
  */
-public class Triangle extends Polygon implements Convex, Shape, Transformable, DataContainer {
+public class Triangle extends Polygon implements Convex, Wound, Shape, Transformable, DataContainer {
 	/**
 	 * Full constructor.
 	 * <p>

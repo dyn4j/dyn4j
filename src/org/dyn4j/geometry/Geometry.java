@@ -383,6 +383,83 @@ public final class Geometry {
 		// return the center
 		return center;
 	}
+
+	/**
+	 * Returns the maximum radius of the given vertices rotated about the origin.
+	 * <p>
+	 * If the vertices array is null or empty, zero is returned.
+	 * @param vertices the polygon vertices
+	 * @return double
+	 * @see #getRotationRadius(Vector2, Vector2...)
+	 * @since 3.2.0
+	 */
+	public static final double getRotationRadius(Vector2... vertices) {
+		return Geometry.getRotationRadius(new Vector2(), vertices);
+	}
+	
+	/**
+	 * Returns the maximum radius of the given vertices rotated about the given center.
+	 * <p>
+	 * If the vertices array is null or empty, zero is returned.  If center is null
+	 * the origin will be used instead.
+	 * @param center the center point
+	 * @param vertices the polygon vertices
+	 * @return double
+	 * @since 3.2.0
+	 */
+	public static final double getRotationRadius(Vector2 center, Vector2... vertices) {
+		// validate the vertices
+		if (vertices == null) return 0.0;
+		// validate the center
+		if (center == null) center = new Vector2();
+		// validate the length
+		int size = vertices.length;
+		if (size == 0) return 0.0;
+		// find the maximum radius from the center
+		double r2 = 0.0;
+		for (int i = 0; i < size; i++) {
+			Vector2 v = vertices[i];
+			// validate each vertex
+			if (v == null) continue;
+			double r2t = center.distanceSquared(v);
+			// keep the largest
+			r2 = Math.max(r2, r2t);
+		}
+		// set the radius
+		return Math.sqrt(r2);
+	}
+	
+	/**
+	 * Returns an array of normalized vectors representing the normals of all the
+	 * edges given the vertices.
+	 * <p>
+	 * This method assumes counter-clockwise ordering.
+	 * <p>
+	 * Returns null if the given vertices array is null or empty.
+	 * @param vertices the vertices
+	 * @return {@link Vector2}[]
+	 * @throws NullPointerException if vertices contains a null element
+	 */
+	public static final Vector2[] getEdgeNormals(Vector2... vertices) {
+		if (vertices == null) return null;
+		
+		int size = vertices.length;
+		if (size == 0) return null;
+		
+		Vector2[] normals = new Vector2[size];
+		for (int i = 0; i < size; i++) {
+			// get the edge points
+			Vector2 p1 = vertices[i];
+			Vector2 p2 = (i + 1 == size) ? vertices[0] : vertices[i + 1];
+			// create the edge and get its left perpedicular vector
+			Vector2 n = p1.to(p2).left();
+			// normalize it
+			n.normalize();
+			normals[i] = n;
+		}
+		
+		return normals;
+	}
 	
 	/**
 	 * Returns a new {@link Circle} with the given radius centered on the origin.
@@ -1408,18 +1485,19 @@ public final class Geometry {
 		if (convex1 == null) throw new NullPointerException(Messages.getString("geometry.nullMinkowskiSumConvex"));
 		if (convex2 == null) throw new NullPointerException(Messages.getString("geometry.nullMinkowskiSumConvex"));
 		
+		Vector2[] p1v = convex1.getVertices();
+		Vector2[] p2v = convex2.getVertices();
+		
 		// check for two segments
 		if (convex1 instanceof Segment && convex2 instanceof Segment) {
 			// check if they are colinear
-			Vector2 s1 = convex1.vertices[0].to(convex1.vertices[1]);
-			Vector2 s2 = convex2.vertices[0].to(convex2.vertices[1]);
+			Vector2 s1 = p1v[0].to(p1v[1]);
+			Vector2 s2 = p2v[0].to(p2v[1]);
 			if (s1.cross(s2) <= Epsilon.E) {
 				throw new IllegalArgumentException(Messages.getString("geometry.invalidMinkowskiSumSegments"));
 			}
 		}
 		
-		Vector2[] p1v = convex1.vertices;
-		Vector2[] p2v = convex2.vertices;
 		int c1 = p1v.length;
 		int c2 = p2v.length;
 		

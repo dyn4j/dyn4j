@@ -42,42 +42,36 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	final double theta;
 	
 	/** Half of theta */
-	private final double alpha;
+	final double alpha;
 	
 	/** The maximum radius of this shape rotated about its center */
 	final double sliceRadius;
 	
 	/** The vertices of the slice */
-	private final Vector2[] vertices;
+	final Vector2[] vertices;
 	
 	/** The normals of the polygonal sides */
-	private final Vector2[] normals;
+	final Vector2[] normals;
 	
 	/** The local x axis to track local rotation */
 	final Vector2 localXAxis;
 	
 	/**
-	 * Full constructor.
+	 * Validated constructor.
 	 * <p>
 	 * This method creates a slice of a circle with the <b>circle center</b> at the origin
 	 * and half of theta below the x-axis and half above.
+	 * @param valid always true or this constructor would not be called
 	 * @param radius the radius of the circular section
 	 * @param theta the angular extent in radians; must be greater than zero and less than or equal to &pi;
-	 * @throws IllegalArgumentException throw if 1) radius is less than or equal to zero or 2) theta is less than or equal to zero or 3) theta is greater than 180 degrees
+	 * @param center the center
 	 */
-	public Slice(double radius, double theta) {
-		// check the radius
-		if (radius <= 0) throw new IllegalArgumentException(Messages.getString("geometry.slice.invalidRadius"));
-		// check the theta
-		if (theta <= 0 || theta > Math.PI) throw new IllegalArgumentException(Messages.getString("geometry.slice.invalidTheta"));
+	private Slice(boolean valid, double radius, double theta, Vector2 center) {
+		super(center, Math.max(center.x, radius - center.x));
 		
 		this.sliceRadius = radius;
 		this.theta = theta;
 		this.alpha = theta * 0.5;
-		
-		// compute the centroid
-		double cx = 2.0 * radius * Math.sin(this.alpha) / (3.0 * this.alpha);
-		this.center = new Vector2(cx, 0);
 		
 		// compute the triangular section of the pie
 		double x = radius * Math.cos(this.alpha);
@@ -97,14 +91,38 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 		v2.left().normalize();
 		this.normals = new Vector2[] { v1, v2 };
 
-		// compute the rotation disc radius
-		double cToOrigin = this.center.getMagnitudeSquared();
-		double cToTop = this.center.distanceSquared(this.vertices[1]);
-		this.radius = Math.sqrt(Math.max(cToOrigin, cToTop));
-		
 		this.localXAxis = new Vector2(1.0, 0.0);
 	}
+	
+	/**
+	 * Full constructor.
+	 * <p>
+	 * This method creates a slice of a circle with the <b>circle center</b> at the origin
+	 * and half of theta below the x-axis and half above.
+	 * @param radius the radius of the circular section
+	 * @param theta the angular extent in radians; must be greater than zero and less than or equal to &pi;
+	 * @throws IllegalArgumentException throw if 1) radius is less than or equal to zero or 2) theta is less than or equal to zero or 3) theta is greater than 180 degrees
+	 */
+	public Slice(double radius, double theta) {
+		this(validate(radius, theta), radius, theta, new Vector2(2.0 * radius * Math.sin(theta * 0.5) / (1.5 * theta), 0));
+	}
 
+	/**
+	 * Validates the constructor input returning true if valid or throwing an exception if invalid.
+	 * @param radius the radius of the circular section
+	 * @param theta the angular extent in radians; must be greater than zero and less than or equal to &pi;
+	 * return true
+	 * @throws IllegalArgumentException throw if 1) radius is less than or equal to zero or 2) theta is less than or equal to zero or 3) theta is greater than 180 degrees
+	 */
+	private static final boolean validate(double radius, double theta) {
+		// check the radius
+		if (radius <= 0) throw new IllegalArgumentException(Messages.getString("geometry.slice.invalidRadius"));
+		// check the theta
+		if (theta <= 0 || theta > Math.PI) throw new IllegalArgumentException(Messages.getString("geometry.slice.invalidTheta"));
+		
+		return true;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Wound#toString()
 	 */

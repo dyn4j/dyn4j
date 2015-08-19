@@ -36,9 +36,38 @@ import org.dyn4j.resources.Messages;
  * @version 3.1.6
  * @since 1.0.0
  */
-public class Segment extends Wound implements Convex, Shape, Transformable, DataContainer {
+public class Segment extends AbstractShape implements Convex, Wound, Shape, Transformable, DataContainer {
+	/** The segment vertices */
+	final Vector2[] vertices;
+	
+	/** The segment normals */
+	final Vector2[] normals;
+	
 	/** The segment length */
 	final double length;
+	
+	/**
+	 * Validated constructor.
+	 * <p>
+	 * Creates a new segment using the given points.  The center will be the 
+	 * average of the points.
+	 * @param valid always true or this constructor would not be called
+	 * @param point1 the first point
+	 * @param point2 the second point
+	 */
+	private Segment(boolean valid, Vector2[] vertices, Vector2 segment, double length) {
+		super(Geometry.getAverageCenter(vertices), length * 0.5);
+		// assign the verices
+		this.vertices = vertices;
+		// create the normals
+		this.normals = new Vector2[2];
+		this.normals[0] = segment.right();
+		this.normals[0].normalize();
+		this.normals[1] = segment.getNegative();
+		this.normals[1].normalize();
+		// compute the length
+		this.length = length;
+	}
 	
 	/**
 	 * Full constructor.
@@ -53,7 +82,24 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 	 * @throws IllegalArgumentException if point1 == point2
 	 */
 	public Segment(Vector2 point1, Vector2 point2) {
-		super();
+		this(validate(point1, point2),
+			 new Vector2[] {
+				point1,
+				point2
+			 },
+			 point1.to(point2),
+			 point1.distance(point2));
+	}
+	
+	/**
+	 * Validates the constructor input returning true if valid or throwing an exception if invalid.
+	 * @param point1 the first point
+	 * @param point2 the second point
+	 * @return boolean true
+	 * @throws NullPointerException if point1 or point2 is null
+	 * @throws IllegalArgumentException if point1 == point2
+	 */
+	private static final boolean validate(Vector2 point1, Vector2 point2) {
 		// make sure either point is not null
 		if (point1 == null) throw new NullPointerException(Messages.getString("geometry.segment.nullPoint1"));
 		if (point2 == null) throw new NullPointerException(Messages.getString("geometry.segment.nullPoint2"));
@@ -61,22 +107,8 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 		if (point1.equals(point2)) {
 			throw new IllegalArgumentException(Messages.getString("geometry.segment.samePoint"));
 		}
-		// assign the verices
-		this.vertices = new Vector2[2];
-		this.vertices[0] = point1;
-		this.vertices[1] = point2;
-		// create the normals
-		this.normals = new Vector2[2];
-		this.normals[0] = point1.to(point2).right();
-		this.normals[0].normalize();
-		this.normals[1] = point1.to(point2).left();
-		this.normals[1].normalize();
-		// get the center
-		this.center = Geometry.getAverageCenter(this.vertices);
-		// compute the length
-		this.length = point1.distance(point2);
-		// compute the radius
-		this.radius = this.length * 0.5;
+		
+		return true;
 	}
 	
 	/* (non-Javadoc)
@@ -89,6 +121,30 @@ public class Segment extends Wound implements Convex, Shape, Transformable, Data
 		.append("|Length=").append(this.length)
 		.append("]");
 		return sb.toString();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Wound#getVertices()
+	 */
+	@Override
+	public Vector2[] getVertices() {
+		return this.vertices;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Wound#getNormals()
+	 */
+	@Override
+	public Vector2[] getNormals() {
+		return this.normals;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Shape#getRadius(org.dyn4j.geometry.Vector2)
+	 */
+	@Override
+	public double getRadius(Vector2 center) {
+		return Geometry.getRotationRadius(center, this.vertices);
 	}
 	
 	/**

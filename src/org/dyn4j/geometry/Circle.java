@@ -37,6 +37,17 @@ import org.dyn4j.resources.Messages;
  */
 public class Circle extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
 	/**
+	 * Validated constructor.
+	 * <p>
+	 * Creates a new {@link Circle} centered on the origin with the given radius.
+	 * @param valid always true or this constructor would not be called
+	 * @param radius the radius
+	 */
+	private Circle(boolean valid, double radius) {
+		super(radius);
+	}
+	
+	/**
 	 * Full constructor.
 	 * <p>
 	 * Creates a new {@link Circle} centered on the origin with the given radius.
@@ -44,9 +55,18 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 	 * @throws IllegalArgumentException if the given radius is less than or equal to zero
 	 */
 	public Circle(double radius) {
+		this(validate(radius), radius);
+	}
+	
+	/**
+	 * Validates the constructor input returning true if valid or throwing an exception if invalid.
+	 * @param radius the radius
+	 * @return boolean true
+	 * @throws IllegalArgumentException if the given radius is less than or equal to zero
+	 */
+	private static final boolean validate(double radius) {
 		if (radius <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.circle.invalidRadius"));
-		this.center = new Vector2();
-		this.radius = radius;
+		return true;
 	}
 	
 	/* (non-Javadoc)

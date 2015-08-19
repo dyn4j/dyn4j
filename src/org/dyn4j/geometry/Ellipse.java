@@ -51,13 +51,38 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	final double height;
 	
 	/** The half-width */
-	private final double halfWidth;
+	final double halfWidth;
 	
 	/** The half-height */
-	private final double halfHeight;
+	final double halfHeight;
 	
 	/** A local vector to  */
 	final Vector2 localXAxis;
+	
+	/**
+	 * Validated constructor.
+	 * <p>
+	 * This creates an axis-aligned ellipse fitting inside a rectangle of the given width and 
+	 * height centered at the origin.
+	 * @param valid always true or this constructor would not be called
+	 * @param width the width
+	 * @param height the height
+	 */
+	private Ellipse(boolean valid, double width, double height) {
+		super(Math.max(width, height) * 0.5);
+		
+		this.width = width;
+		this.height = height;
+		
+		// compute the major and minor axis lengths
+		// (the x,y radii)
+		this.halfWidth = width * 0.5;
+		this.halfHeight = height * 0.5;
+		
+		// since we create ellipses as axis aligned we set the local x axis
+		// to the world space x axis
+		this.localXAxis = new Vector2(1.0, 0.0);
+	}
 	
 	/**
 	 * Minimal constructor.
@@ -69,27 +94,22 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 * @throws IllegalArgumentException if either the width or height is less than or equal to zero
 	 */
 	public Ellipse(double width, double height) {
+		this(validate(width, height), width, height);
+	}
+	
+	/**
+	 * Validates the constructor input returning true if valid or throwing an exception if invalid.
+	 * @param width the bounding rectangle width
+	 * @param height the bounding rectangle height
+	 * @return boolean true
+	 * @throws IllegalArgumentException if either the width or height is less than or equal to zero
+	 */
+	private static final boolean validate(double width, double height) {
 		// validate the width and height
 		if (width <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.ellipse.invalidWidth"));
 		if (height <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.ellipse.invalidHeight"));
-		
-		this.center = new Vector2();
-		
-		this.width = width;
-		this.height = height;
-		
-		// compute the major and minor axis lengths
-		// (the x,y radii)
-		this.halfWidth = width * 0.5;
-		this.halfHeight = height * 0.5;
-		
-		// the rotation radius of the entire shape is the maximum
-		// of the radii
-		this.radius = Math.max(this.halfWidth, this.halfHeight);
-		
-		// since we create ellipses as axis aligned we set the local x axis
-		// to the world space x axis
-		this.localXAxis = new Vector2(1.0, 0.0);
+				
+		return true;
 	}
 	
 	/* (non-Javadoc)

@@ -42,6 +42,9 @@ public class AbstractShapeTest {
 	 * @since 3.1.1
 	 */
 	private class TestShape extends AbstractShape {
+		public TestShape() {
+			super(new Vector2(), 0);
+		}
 		@Override
 		public boolean contains(Vector2 point, Transform transform) { return false; }
 		@Override

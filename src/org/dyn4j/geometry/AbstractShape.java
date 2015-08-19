@@ -39,13 +39,36 @@ public abstract class AbstractShape implements Shape, Transformable, DataContain
 	protected final UUID id = UUID.randomUUID();
 	
 	/** The center of this {@link Shape} */
-	protected Vector2 center;
+	final Vector2 center;
 	
 	/** The maximum radius */
-	protected double radius;
+	final double radius;
 	
 	/** Custom user data object */
 	protected Object userData;
+	
+	
+	/**
+	 * Minimal constructor.
+	 * @param radius the rotation radius; must be greater than zero
+	 * @throws IllegalArgumentException if radius is zero or less
+	 */
+	public AbstractShape(double radius) {
+		this(new Vector2(), radius);
+	}
+	
+	/**
+	 * Full constructor.
+	 * @param center the center
+	 * @param radius the rotation radius; must be greater than zero
+	 * @throws IllegalArgumentException if radius is zero or less
+	 * @throws NullPointerException if center is null
+	 */
+	public AbstractShape(Vector2 center, double radius) {
+		// TODO validation
+		this.center = center;
+		this.radius = radius;
+	}
 	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()

@@ -37,13 +37,35 @@ import org.dyn4j.resources.Messages;
  * @version 3.0.2
  * @since 1.0.0
  */
-public class Rectangle extends Polygon implements Shape, Transformable, DataContainer {
+public class Rectangle extends Polygon implements Convex, Wound, Shape, Transformable, DataContainer {
 	/** The {@link Rectangle}'s width */
 	final double width;
 	
 	/** The {@link Rectangle}'s height */
 	final double height;
 
+	/**
+	 * Validated constructor.
+	 * <p>
+	 * The center of the rectangle will be the origin.
+	 * @param valid always true or this constructor would not be called 
+	 * @param width the width
+	 * @param height the height
+	 * @param vertices the rectangle vertices
+	 */
+	private Rectangle(boolean valid, double width, double height, Vector2[] vertices) {
+		super(new Vector2(), vertices[0].getMagnitude(), vertices, new Vector2[] {
+			new Vector2(0.0, -1.0),
+			new Vector2(1.0, 0.0),
+			new Vector2(0.0, 1.0),
+			new Vector2(-1.0, 0.0)
+		});
+
+		// set the width and height
+		this.width = width;
+		this.height = height;
+	}
+	
 	/**
 	 * Full constructor.
 	 * <p>
@@ -55,29 +77,26 @@ public class Rectangle extends Polygon implements Shape, Transformable, DataCont
 	 * @throws IllegalArgumentException if width or height is less than or equal to zero
 	 */
 	public Rectangle(double width, double height) {
-		if (width <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.rectangle.invalidWidth"));
-		if (height <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.rectangle.invalidHeight"));
-		// set the vertices
-		this.vertices = new Vector2[] {
+		this(validate(width, height), width, height, new Vector2[] {
 			new Vector2(-width * 0.5, -height * 0.5),
 			new Vector2( width * 0.5, -height * 0.5),
 			new Vector2( width * 0.5,  height * 0.5),
 			new Vector2(-width * 0.5,  height * 0.5)	
-		};
-		// set the normals
-		this.normals = new Vector2[] {
-			new Vector2(0.0, -1.0),
-			new Vector2(1.0, 0.0),
-			new Vector2(0.0, 1.0),
-			new Vector2(-1.0, 0.0)
-		};
-		// use the average method for the centroid
-		this.center = Geometry.getAverageCenter(this.vertices);
-		// compute the max radius
-		this.radius = this.center.distance(this.vertices[0]);
-		// set the width and height
-		this.width = width;
-		this.height = height;
+		});
+	}
+	
+	/**
+	 * Validates the constructor input returning true if valid or throwing an exception if invalid.
+	 * @param width the width
+	 * @param height the height
+	 * @return boolean true
+	 * @throws IllegalArgumentException if width or height is less than or equal to zero
+	 */
+	private static final boolean validate(double width, double height) {
+		if (width <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.rectangle.invalidWidth"));
+		if (height <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.rectangle.invalidHeight"));
+		
+		return true;
 	}
 	
 	/* (non-Javadoc)

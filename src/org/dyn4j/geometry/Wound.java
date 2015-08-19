@@ -32,64 +32,16 @@ import org.dyn4j.DataContainer;
  * @version 3.0.2
  * @since 1.0.0
  */
-public abstract class Wound extends AbstractShape implements Shape, Transformable, DataContainer {
-	/** The array of vertices */
-	protected Vector2[] vertices;
-	
-	/** The edge normals */
-	protected Vector2[] normals;
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Shape#getRadius(org.dyn4j.geometry.Vector2)
-	 */
-	@Override
-	public double getRadius(Vector2 center) {
-		// find the maximum radius from the center
-		int size = this.vertices.length;
-		double r2 = 0.0;
-		for (int i = 0; i < size; i++) {
-			double r2t = center.distanceSquared(this.vertices[i]);
-			// keep the largest
-			r2 = Math.max(r2, r2t);
-		}
-		// set the radius
-		return Math.sqrt(r2);
-	}
-	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(super.toString());
-		sb.append("|Vertices={");
-		for (int i = 0; i < this.vertices.length; i++) {
-			if (i != 0) sb.append(",");
-			sb.append(this.vertices[i]);
-		}
-		sb.append("}|Normals={");
-		for (int i = 0; i < this.normals.length; i++) {
-			if (i != 0) sb.append(",");
-			sb.append(this.normals[i]);
-		}
-		sb.append("}");
-		return sb.toString();
-	}
-
+public interface Wound extends Shape, Transformable, DataContainer {
 	/**
 	 * Returns the array of vertices in local coordinates.
 	 * @return {@link Vector2}[]
 	 */
-	public Vector2[] getVertices() {
-		return this.vertices;
-	}
+	public abstract Vector2[] getVertices();
 	
 	/**
 	 * Returns the array of edge normals in local coordinates.
 	 * @return {@link Vector2}[]
 	 */
-	public Vector2[] getNormals() {
-		return this.normals;
-	}
+	public abstract Vector2[] getNormals();
 }

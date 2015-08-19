@@ -35,7 +35,7 @@ public abstract class Feature {
 	public static final int NOT_INDEXED = -1;
 
 	/** The index of the edge on the shape */
-	protected final int index;
+	final int index;
 	
 	/**
 	 * Minimal constructor.

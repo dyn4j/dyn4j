@@ -66,28 +66,23 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 	final double capRadius;
 	
 	/** The focal points for the caps */
-	private final Vector2[] foci;
+	final Vector2[] foci;
 	
 	/** The local x-axis */
 	final Vector2 localXAxis;
 	
 	/**
-	 * Minimal constructor.
+	 * Validated constructor.
 	 * <p>
 	 * Creates an axis-aligned capsule centered on the origin with the caps on
 	 * ends of the larger dimension.
+	 * @param valid always true or this constructor would not be called
 	 * @param width the bounding rectangle width
 	 * @param height the bounding rectangle height
-	 * @throws IllegalArgumentException thrown if width or height are less than or equal to zero or if the width and height are near equal
 	 */
-	public Capsule(double width, double height) {
-		// validate the width and height
-		if (width <= 0) throw new IllegalArgumentException(Messages.getString("geometry.capsule.invalidWidth"));
-		if (height <= 0) throw new IllegalArgumentException(Messages.getString("geometry.capsule.invalidHeight"));
-		
-		// check for basically a circle
-		if (Math.abs(width - height) < Epsilon.E) throw new IllegalArgumentException(Messages.getString("geometry.capsule.degenerate"));
-		
+	private Capsule(boolean valid, double width, double height) {
+		super(Math.max(width, height) * 0.5);
+
 		// determine the major and minor axis
 		double major = width;
 		double minor = height;
@@ -103,32 +98,54 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 		// the cap radius is half the height
 		this.capRadius = minor * 0.5;
 		
-		// set the maximum rotation radius
-		this.radius = major * 0.5;
-
-		// the center will always be (0,0) initially
-		this.center = new Vector2();
-		
 		// generate the cap focal points on the
 		// major axis
 		double f = (major - minor) * 0.5;
+		this.foci = new Vector2[2];
 		if (vertical) {
-			this.foci = new Vector2[] {
-				new Vector2(0, -f),
-				new Vector2(0,  f)
-			};
+			this.foci[0] = new Vector2(0, -f);
+			this.foci[1] = new Vector2(0,  f);
 			
 			// set the local x-axis (to the y-axis)
 			this.localXAxis = new Vector2(0.0, 1.0);
 		} else {
-			this.foci = new Vector2[] {
-				new Vector2(-f, 0),
-				new Vector2( f, 0)
-			};
+			this.foci[0] = new Vector2(-f, 0);
+			this.foci[1] = new Vector2( f, 0);
 			
 			// set the local x-axis
 			this.localXAxis = new Vector2(1.0, 0.0);
 		}
+	}
+	
+	/**
+	 * Minimal constructor.
+	 * <p>
+	 * Creates an axis-aligned capsule centered on the origin with the caps on
+	 * ends of the larger dimension.
+	 * @param width the bounding rectangle width
+	 * @param height the bounding rectangle height
+	 * @throws IllegalArgumentException thrown if width or height are less than or equal to zero or if the width and height are near equal
+	 */
+	public Capsule(double width, double height) {
+		this(validate(width, height), width, height);
+	}
+	
+	/**
+	 * Validates the constructor input returning true if valid or throwing an exception if invalid.
+	 * @param width the bounding rectangle width
+	 * @param height the bounding rectangle height
+	 * @return boolean true
+	 * @throws IllegalArgumentException thrown if width or height are less than or equal to zero or if the width and height are near equal
+	 */
+	private static final boolean validate(double width, double height) {
+		// validate the width and height
+		if (width <= 0) throw new IllegalArgumentException(Messages.getString("geometry.capsule.invalidWidth"));
+		if (height <= 0) throw new IllegalArgumentException(Messages.getString("geometry.capsule.invalidHeight"));
+		
+		// check for basically a circle
+		if (Math.abs(width - height) < Epsilon.E) throw new IllegalArgumentException(Messages.getString("geometry.capsule.degenerate"));
+		
+		return true;
 	}
 	
 	/* (non-Javadoc)
