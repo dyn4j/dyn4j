@@ -38,13 +38,13 @@ import org.dyn4j.geometry.Ray;
  */
 public class RaycastBroadphaseFilter extends BroadphaseFilterAdapter<Body, BodyFixture> implements BroadphaseFilter<Body, BodyFixture> {
 	/** True to ignore inactive bodies */
-	protected final boolean ignoreInactive;
+	private final boolean ignoreInactive;
 	
 	/** True to ignore sensor fixtures */
-	protected final boolean ignoreSensors;
+	private final boolean ignoreSensors;
 	
 	/** The fixture filter */
-	protected final Filter filter;
+	private final Filter filter;
 	
 	/**
 	 * Full constructor.

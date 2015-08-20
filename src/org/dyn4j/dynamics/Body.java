@@ -105,9 +105,6 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	/** The state flag indicating the {@link Body} is a really fast object and requires CCD */
 	private static final int BULLET = 16;
 	
-	/** The beginning transform for CCD */
-	protected Transform transform0;
-	
 	/** The {@link Mass} information */
 	protected Mass mass;
 	
@@ -128,6 +125,9 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 
 	// internal
 
+	/** The beginning transform for CCD */
+	Transform transform0;
+	
 	/** The {@link Body}'s state */
 	private int state;
 	

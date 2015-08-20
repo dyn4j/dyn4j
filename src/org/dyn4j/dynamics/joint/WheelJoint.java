@@ -72,6 +72,8 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 	/** The damping ratio */
 	protected double dampingRatio;
 
+	// internal
+	
 	/** The axis representing the allowed line of motion */
 	private final Vector2 xAxis;
 	

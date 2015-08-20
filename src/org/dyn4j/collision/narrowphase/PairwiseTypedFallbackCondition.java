@@ -38,16 +38,16 @@ import org.dyn4j.geometry.Convex;
  */
 public class PairwiseTypedFallbackCondition extends TypedFallbackCondition implements FallbackCondition, Comparable<FallbackCondition> {
 	/** The first type to compare to */
-	protected final Class<? extends Convex> type1;
+	private final Class<? extends Convex> type1;
 	
 	/** True if strict type matching should be performed on the first type */
-	protected final boolean strict1;
+	private final boolean strict1;
 	
 	/** The second type to compare to */
-	protected final Class<? extends Convex> type2;
+	private final Class<? extends Convex> type2;
 
 	/** True if strict type matching should be performed on the second type */
-	protected final boolean strict2;
+	private final boolean strict2;
 	
 	/**
 	 * Minimal constructor.

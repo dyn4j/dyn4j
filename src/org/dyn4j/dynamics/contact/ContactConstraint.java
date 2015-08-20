@@ -198,6 +198,8 @@ public class ContactConstraint extends Constraint implements Shiftable {
 	
 	/**
 	 * Returns the list of {@link Contact}s.
+	 * <p>
+	 * Modification of the list is permitted.
 	 * @return List&lt;{@link Contact}&gt; the list of {@link Contact}s
 	 */
 	public List<Contact> getContacts() {

@@ -24,24 +24,65 @@
  */
 package org.dyn4j.geometry;
 
+import java.util.Iterator;
+
 import org.dyn4j.DataContainer;
 
 /**
- * Represents an object that is defined by vertices with counter-clockwise winding.
+ * Represents a shape that is defined by vertices with line segment connections
+ * with counter-clockwise winding.
  * @author William Bittle
  * @version 3.0.2
  * @since 1.0.0
  */
 public interface Wound extends Shape, Transformable, DataContainer {
 	/**
+	 * Returns an iterator for the vertices.
+	 * <p>
+	 * The iterator does not support the remove method and will return a new
+	 * {@link Vector2} in the next method.
+	 * <p>
+	 * This method is safer than the {@link #getVertices()} since its not
+	 * possible to modify the array or its elements.
+	 * @return Iterator&lt;{@link Vector2}&gt;
+	 */
+	public abstract Iterator<Vector2> getVertexIterator();
+	
+	/**
+	 * Returns an iterator for the normals.
+	 * <p>
+	 * The iterator does not support the remove method and will return a new
+	 * {@link Vector2} in the next method rather than the underlying value.
+	 * <p>
+	 * This method is safer than the {@link #getNormals()} since its not
+	 * possible to modify the array or its elements.
+	 * @return Iterator&lt;{@link Vector2}&gt;
+	 */
+	public abstract Iterator<Vector2> getNormalIterator();
+	
+	/**
 	 * Returns the array of vertices in local coordinates.
+	 * <p>
+	 * For performance, this array may be the internal storage array of the shape.
+	 * Both the array elements and their properties should not be modified via this
+	 * method.
+	 * <p>
+	 * It's possible that this method will be deprecated and/or removed in later versions.
 	 * @return {@link Vector2}[]
+	 * @see #getVertexIterator()
 	 */
 	public abstract Vector2[] getVertices();
 	
 	/**
 	 * Returns the array of edge normals in local coordinates.
+	 * <p>
+	 * For performance, this array may be the internal storage array of the shape.
+	 * Both the array elements and their properties should not be modified via this
+	 * method.
+	 * <p>
+	 * It's possible that this method will be deprecated and/or removed in later versions.
 	 * @return {@link Vector2}[]
+	 * @see #getNormalIterator()
 	 */
 	public abstract Vector2[] getNormals();
 }

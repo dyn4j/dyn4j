@@ -32,12 +32,12 @@ import org.dyn4j.collision.manifold.ManifoldPointId;
  * @version 3.2.0
  * @since 3.1.2
  */
-public class ContactPointId {
+public final class ContactPointId {
 	/** The contact constraint id */
-	protected final ContactConstraintId contactConstraintId;
+	private final ContactConstraintId contactConstraintId;
 	
 	/** The manifold point id */
-	protected final ManifoldPointId manifoldPointId;
+	private final ManifoldPointId manifoldPointId;
 	
 	/**
 	 * Full constructor.

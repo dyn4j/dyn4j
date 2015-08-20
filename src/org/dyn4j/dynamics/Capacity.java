@@ -52,13 +52,13 @@ public class Capacity {
 	// counts
 	
 	/** The estimated {@link Body} count */
-	protected final int bodyCount;
+	private final int bodyCount;
 	
 	/** The estimated {@link Joint} count */
-	protected final int jointCount;
+	private final int jointCount;
 	
 	/** The estimated {@link Listener} (all listener types) count */
-	protected final int listenerCount;
+	private final int listenerCount;
 	
 	/**
 	 * Default constructor.

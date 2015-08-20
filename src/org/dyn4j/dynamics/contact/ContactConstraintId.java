@@ -38,18 +38,18 @@ import org.dyn4j.geometry.Shape;
  * @version 3.2.0
  * @since 1.0.0
  */
-public class ContactConstraintId {
+public final class ContactConstraintId {
 	/** The first {@link Body}'s id */
-	protected final UUID body1Id;
+	private final UUID body1Id;
 	
 	/** The second {@link Body}'s id */
-	protected final UUID body2Id;
+	private final UUID body2Id;
 	
 	/** The first {@link Body}'s {@link Convex} {@link Shape} id */
-	protected final UUID fixture1Id;
+	private final UUID fixture1Id;
 	
 	/** The second {@link Body}'s {@link Convex} {@link Shape} id */
-	protected final UUID fixture2Id;
+	private final UUID fixture2Id;
 	
 	/**
 	 * Full constructor.

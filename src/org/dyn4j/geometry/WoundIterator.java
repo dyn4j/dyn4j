@@ -22,67 +22,63 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.collision.narrowphase;
+package org.dyn4j.geometry;
+
+import java.util.ConcurrentModificationException;
+import java.util.Iterator;
 
 /**
- * Abstract implementation of the {@link FallbackCondition} interface.
- * <p>
- * By default conditions will be remain in the order they are added unless alternate sort indices are supplied.
+ * Represents an iterator of {@link Vector2}s for the vertices and normals
+ * of a {@link Wound} shape.
  * @author William Bittle
  * @version 3.2.0
- * @since 3.1.5
+ * @since 3.2.0
  */
-public abstract class AbstractFallbackCondition implements FallbackCondition, Comparable<FallbackCondition> {
-	/** The sort index */
-	final int sortIndex;
+class WoundIterator implements Iterator<Vector2> {
+	/** The array to iterate over */
+	final Vector2[] vectors;
+	
+	/** The current index */
+	int index;
 	
 	/**
 	 * Minimal constructor.
-	 * @param sortIndex the sort index
+	 * @param vectors the array to iterate over
 	 */
-	public AbstractFallbackCondition(int sortIndex) {
-		this.sortIndex = sortIndex;
+	public WoundIterator(Vector2[] vectors) {
+		this.vectors = vectors;
 	}
 	
 	/* (non-Javadoc)
-	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 * @see java.util.Iterator#hasNext()
 	 */
 	@Override
-	public int compareTo(FallbackCondition o) {
-		return this.getSortIndex() - o.getSortIndex();
-	}
-	
-	/* (non-Javadoc)
-	 * @see java.lang.hashCode#equals()
-	 */
-	@Override
-	public int hashCode() {
-		int result = 1;
-		result = 31 * result + sortIndex;
-		return result;
-	}
-	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (obj instanceof AbstractFallbackCondition) {
-			AbstractFallbackCondition other = (AbstractFallbackCondition) obj;
-			if (this.sortIndex == other.sortIndex) {
-				return true;
-			}
-		}
-		return false;
+	public boolean hasNext() {
+		return this.index + 1 < this.vectors.length;
 	}
 
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.narrowphase.FallbackCondition#getSortIndex()
+	 * @see java.util.Iterator#next()
 	 */
 	@Override
-	public int getSortIndex() {
-		return this.sortIndex;
+	public Vector2 next() {
+		if (this.index >= this.vectors.length) {
+			throw new IndexOutOfBoundsException();
+		}
+		try {
+			this.index++;
+			Vector2 v = this.vectors[this.index];
+			return v.copy();
+		} catch (IndexOutOfBoundsException ex) {
+			throw new ConcurrentModificationException();
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.util.Iterator#remove()
+	 */
+	@Override
+	public void remove() {
+		throw new UnsupportedOperationException();
 	}
 }
