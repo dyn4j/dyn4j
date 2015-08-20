@@ -38,10 +38,10 @@ import org.dyn4j.geometry.Convex;
  */
 public class SingleTypedFallbackCondition extends TypedFallbackCondition implements FallbackCondition, Comparable<FallbackCondition> {
 	/** The type to compare to */
-	protected final Class<? extends Convex> type;
+	private final Class<? extends Convex> type;
 	
 	/** True if a strict class equals should be used */
-	protected final boolean strict;
+	private final boolean strict;
 	
 	/**
 	 * Minimal constructor.

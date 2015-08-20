@@ -80,6 +80,8 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 	/** The initial angle between the two {@link Body}s */
 	protected double referenceAngle;
 
+	// internal
+	
 	/** The axis representing the allowed line of motion */
 	private final Vector2 xAxis;
 	

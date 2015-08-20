@@ -36,13 +36,13 @@ import org.dyn4j.geometry.Vector2;
  */
 public class MinkowskiSumPoint {
 	/** The support point in the first {@link Convex} {@link Shape} */
-	protected final Vector2 supportPoint1;
+	final Vector2 supportPoint1;
 	
 	/** The support point in the second {@link Convex} {@link Shape} */
-	protected final Vector2 supportPoint2;
+	final Vector2 supportPoint2;
 	
 	/** The Minkowski sum point */
-	protected final Vector2 point;
+	final Vector2 point;
 	
 	/**
 	 * Full constructor.

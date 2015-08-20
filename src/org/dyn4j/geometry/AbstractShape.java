@@ -47,13 +47,12 @@ public abstract class AbstractShape implements Shape, Transformable, DataContain
 	/** Custom user data object */
 	protected Object userData;
 	
-	
 	/**
 	 * Minimal constructor.
 	 * @param radius the rotation radius; must be greater than zero
 	 * @throws IllegalArgumentException if radius is zero or less
 	 */
-	public AbstractShape(double radius) {
+	protected AbstractShape(double radius) {
 		this(new Vector2(), radius);
 	}
 	
@@ -64,8 +63,7 @@ public abstract class AbstractShape implements Shape, Transformable, DataContain
 	 * @throws IllegalArgumentException if radius is zero or less
 	 * @throws NullPointerException if center is null
 	 */
-	public AbstractShape(Vector2 center, double radius) {
-		// TODO validation
+	protected AbstractShape(Vector2 center, double radius) {
 		this.center = center;
 		this.radius = radius;
 	}

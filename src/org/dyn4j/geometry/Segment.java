@@ -24,6 +24,8 @@
  */
 package org.dyn4j.geometry;
 
+import java.util.Iterator;
+
 import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
 import org.dyn4j.resources.Messages;
@@ -137,6 +139,22 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 	@Override
 	public Vector2[] getNormals() {
 		return this.normals;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Wound#getVertexIterator()
+	 */
+	@Override
+	public Iterator<Vector2> getVertexIterator() {
+		return new WoundIterator(this.vertices);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Wound#getNormalIterator()
+	 */
+	@Override
+	public Iterator<Vector2> getNormalIterator() {
+		return new WoundIterator(this.normals);
 	}
 	
 	/* (non-Javadoc)

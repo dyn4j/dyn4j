@@ -33,10 +33,10 @@ package org.dyn4j.dynamics;
  */
 abstract class InteractionEdge<T> {
 	/** The connected body */
-	protected final Body other;
+	final Body other;
 	
 	/** The interaction between the bodies */
-	protected final T interaction;
+	final T interaction;
 	
 	/**
 	 * Full constructor.

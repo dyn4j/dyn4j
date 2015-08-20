@@ -41,16 +41,16 @@ import org.dyn4j.geometry.Vector2;
  */
 public class MinkowskiSum {
 	/** The first {@link Convex} */
-	protected final Convex convex1;
+	final Convex convex1;
 	
 	/** The second {@link Convex} */
-	protected final Convex convex2;
+	final Convex convex2;
 	
 	/** The first {@link Convex}'s {@link Transform} */
-	protected final Transform transform1;
+	final Transform transform1;
 	
 	/** The second {@link Convex}'s {@link Transform} */
-	protected final Transform transform2;
+	final Transform transform2;
 		
 	/**
 	 * Full constructor.

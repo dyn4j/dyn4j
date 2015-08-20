@@ -44,13 +44,13 @@ import org.dyn4j.resources.Messages;
  */
 final class Island {
 	/** The list of {@link Body}s on this {@link Island} */
-	protected final List<Body> bodies;
+	final List<Body> bodies;
 
 	/** The list of {@link Joint}s on this {@link Island} */
-	protected final List<Joint> joints;
+	final List<Joint> joints;
 	
 	/** The list of {@link ContactConstraint}s on this {@link Island} */
-	protected final List<ContactConstraint> contactConstraints;
+	final List<ContactConstraint> contactConstraints;
 	
 	/**
 	 * Default constructor.

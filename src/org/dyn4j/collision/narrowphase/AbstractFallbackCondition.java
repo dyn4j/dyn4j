@@ -34,7 +34,7 @@ package org.dyn4j.collision.narrowphase;
  */
 public abstract class AbstractFallbackCondition implements FallbackCondition, Comparable<FallbackCondition> {
 	/** The sort index */
-	protected final int sortIndex;
+	final int sortIndex;
 	
 	/**
 	 * Minimal constructor.

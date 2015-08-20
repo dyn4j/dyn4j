@@ -47,16 +47,16 @@ import org.dyn4j.geometry.Shape;
  */
 public class IndexedManifoldPointId implements ManifoldPointId {
 	/** The reference edge index */
-	protected final int referenceEdge;
+	private final int referenceEdge;
 	
 	/** The incident edge index */
-	protected final int incidentEdge;
+	private final int incidentEdge;
 	
 	/** The index of the incident vertex */
-	protected final int incidentVertex;
+	private final int incidentVertex;
 	
 	/** Whether the reference and incident features flipped */
-	protected final boolean flipped;
+	private final boolean flipped;
 	
 	/**
 	 * Optional constructor.

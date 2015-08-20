@@ -34,45 +34,45 @@ import org.dyn4j.geometry.Vector2;
  * @version 3.2.0
  * @since 1.0.0
  */
-public class Contact {
+public final class Contact {
 	/** The manifold point id for warm starting */
-	protected final ManifoldPointId id;
+	final ManifoldPointId id;
 	
 	/** The contact point in world space */
-	protected Vector2 p;
+	final Vector2 p;
 	
 	/** The contact penetration depth */
-	protected double depth;
+	final double depth;
 	
 	/** The contact point in {@link Body}1 space */
-	protected Vector2 p1;
+	final Vector2 p1;
 	
 	/** The contact point in {@link Body}2 space */
-	protected Vector2 p2;
+	final Vector2 p2;
 	
 	/** The {@link Vector2} from the center of {@link Body}1 to the contact point */
-	protected Vector2 r1;
+	Vector2 r1;
 	
 	/** The {@link Vector2} from the center of {@link Body}2 to the contact point */
-	protected Vector2 r2;
+	Vector2 r2;
 	
 	/** The accumulated normal impulse */
-	protected double jn;
+	double jn;
 	
 	/** The accumulated tangent impulse */
-	protected double jt;
+	double jt;
 	
 	/** The accumulated position impulse */
-	protected double jp;
+	double jp;
 	
 	/** The mass normal */
-	protected double massN;
+	double massN;
 	
 	/** The mass tangent */
-	protected double massT;
+	double massT;
 	
 	/** The velocity bias */
-	protected double vb;
+	double vb;
 	
 	/**
 	 * Full constructor.
