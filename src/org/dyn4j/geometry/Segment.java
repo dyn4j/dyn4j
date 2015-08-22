@@ -572,16 +572,23 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 		return axes;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Convex#getFoci(org.dyn4j.geometry.Transform)
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Not applicable to this shape.
+	 * @returns null
 	 */
 	@Override
 	public Vector2[] getFoci(Transform transform) {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Shape#contains(org.dyn4j.geometry.Vector, org.dyn4j.geometry.Transform)
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Should almost always return false since this shape represents an infinitely
+	 * thin line segment. Use the {@link #contains(Vector2, Transform, double)}
+	 * method instead for better, though technically inaccurate, results.
 	 */
 	@Override
 	public boolean contains(Vector2 point, Transform transform) {
@@ -737,8 +744,11 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 		return new Mass(this.center, mass, inertia);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Shape#createAABB(org.dyn4j.geometry.Transform)
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Be aware that this method could produce an infinitely thin
+	 * AABB if this segment is aligned to either the x or y-axis.
 	 */
 	@Override
 	public AABB createAABB(Transform transform) {

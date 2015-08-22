@@ -31,6 +31,10 @@ import org.dyn4j.DataContainer;
  * <p>
  * A {@link Convex} {@link Shape} is a {@link Shape} that given a line, the line will only 
  * intersect at most 2 non-coincident non-colinear edges.
+ * <p>
+ * Working with convex shapes specifically allows collision detection algorithms to be very
+ * fast.  If non-convex shapes are required, they are typically handled by attaching multiple
+ * convex shapes together.
  * @author William Bittle
  * @version 1.0.3
  * @since 1.0.0
@@ -39,7 +43,7 @@ public interface Convex extends Shape, Transformable, DataContainer {
 	/**
 	 * Returns an array of separating axes to test for this {@link Shape}.
 	 * <p>
-	 * The <code>foci</code> parameter is an array of <strong>cicular</strong> focal points of the other {@link Shape}.
+	 * The <code>foci</code> parameter is an array of <strong>circular</strong> focal points of the other {@link Shape}.
 	 * <p>
 	 * If foci points are given, this method will return the separating axes for this {@link Shape}'s voronoi regions 
 	 * also.  The points in the foci array are assumed to be in world space.
@@ -53,7 +57,7 @@ public interface Convex extends Shape, Transformable, DataContainer {
 	public abstract Vector2[] getAxes(Vector2[] foci, Transform transform);
 	
 	/**
-	 * Returns an array of world space foci points for <strong>cicular</strong> curved edges.
+	 * Returns an array of world space foci points for <strong>circular</strong> curved edges.
 	 * <p>
 	 * This method returns null if the {@link Shape} has zero curved edges.
 	 * <p>

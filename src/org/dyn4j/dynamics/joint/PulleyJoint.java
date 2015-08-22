@@ -298,7 +298,6 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 	public boolean solvePositionConstraints(Step step, Settings settings) {
 		if (this.limitState != LimitState.INACTIVE) {
 			double linearTolerance = settings.getLinearTolerance();
-//			double maxLinearCorrection = settings.getMaximumLinearCorrection();
 			
 			Transform t1 = this.body1.getTransform();
 			Transform t2 = this.body2.getTransform();
@@ -398,8 +397,11 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 		return this.n2.product(this.impulse * invdt);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getReactionTorque(double)
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Not applicable to this joint.
+	 * Always returns zero.
 	 */
 	@Override
 	public double getReactionTorque(double invdt) {

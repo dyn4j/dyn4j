@@ -39,6 +39,9 @@ import org.dyn4j.resources.Messages;
  * <p>
  * A {@link Mass} can also take on special {@link MassType}s.  These mass types allow for interesting
  * effects during interaction.
+ * <p>
+ * When the mass type is changed, the original mass and inertia values are not lost. This allows the
+ * swapping of mass types without recomputing the mass.
  * @author William Bittle
  * @version 3.1.5
  * @since 1.0.0
@@ -269,7 +272,10 @@ public class Mass {
 	}
 	
 	/**
-	 * Returns true if this {@link Mass} object has infinite mass.
+	 * Returns true if this {@link Mass} object is of type {@link MassType#INFINITE}.
+	 * <p>
+	 * A mass will still be treated as an infinite mass in physical modeling if the
+	 * mass and inertia are zero. This method simply checks the mass type.
 	 * @return boolean
 	 */
 	public boolean isInfinite() {

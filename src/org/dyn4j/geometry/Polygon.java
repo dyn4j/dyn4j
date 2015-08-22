@@ -258,8 +258,11 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		return axes;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Convex#getFoci(org.dyn4j.geometry.Transform)
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Not applicable to this shape.
+	 * @return null
 	 */
 	@Override
 	public Vector2[] getFoci(Transform transform) {

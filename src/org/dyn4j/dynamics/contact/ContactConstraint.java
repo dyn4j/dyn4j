@@ -274,6 +274,10 @@ public class ContactConstraint extends Constraint implements Shiftable {
 	
 	/**
 	 * Returns true if this {@link ContactConstraint} is a sensor.
+	 * <p>
+	 * By default a contact constraint is a sensor if either of the
+	 * two {@link BodyFixture}s are sensor fixtures.  This can be
+	 * overridden using the {@link #setSensor(boolean)} method.
 	 * @return boolean
 	 * @since 1.0.1
 	 */
@@ -295,7 +299,9 @@ public class ContactConstraint extends Constraint implements Shiftable {
 	/**
 	 * Returns the surface speed of the contact manifold.
 	 * <p>
-	 * This can be used to simulate a conveyor belt.
+	 * This will always be zero unless specified manually. This can
+	 * be used to set the target velocity at the contact to simulate
+	 * a conveyor belt type effect.
 	 * @return double
 	 * @since 3.0.2
 	 */
@@ -304,7 +310,7 @@ public class ContactConstraint extends Constraint implements Shiftable {
 	}
 	
 	/**
-	 * Sets the surface speed of the contact manifold.
+	 * Sets the target surface speed of the contact manifold.
 	 * <p>
 	 * The surface speed, in meters / second, is used to simulate a
 	 * conveyor belt.

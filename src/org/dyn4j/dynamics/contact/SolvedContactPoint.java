@@ -30,6 +30,10 @@ import org.dyn4j.geometry.Vector2;
 
 /**
  * Represents a solved contact point.
+ * <p>
+ * A solved contact point is a contact that has been handled by the
+ * contact constraint solver and therefore has the normal and tangential
+ * impulses computed.
  * @author William Bittle
  * @see ContactPoint
  * @version 3.2.0

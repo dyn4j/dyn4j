@@ -125,8 +125,11 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		return sb.toString();
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Convex#getAxes(org.dyn4j.geometry.Vector2[], org.dyn4j.geometry.Transform)
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This method is not supported by this shape.
+	 * @throws UnsupportedOperationException when called
 	 */
 	@Override
 	public Vector2[] getAxes(Vector2[] foci, Transform transform) {
@@ -134,8 +137,11 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		throw new UnsupportedOperationException(Messages.getString("geometry.ellipse.satNotSupported"));
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Convex#getFoci(org.dyn4j.geometry.Transform)
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This method is not supported by this shape.
+	 * @throws UnsupportedOperationException when called
 	 */
 	@Override
 	public Vector2[] getFoci(Transform transform) {

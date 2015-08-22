@@ -76,14 +76,14 @@ public interface ContactListener extends Listener {
 	public abstract boolean persist(PersistedContactPoint point);
 	
 	/**
-	 * Called before a contact constraint is solved.
+	 * Called before contact constraints are solved.
 	 * @param point the contact point
 	 * @return boolean true if the contact should remain enabled
 	 */
 	public abstract boolean preSolve(ContactPoint point);
 	
 	/**
-	 * Called after a contact has been solved.
+	 * Called after contacts have been solved.
 	 * @param point the contact point that was solved
 	 */
 	public abstract void postSolve(SolvedContactPoint point);

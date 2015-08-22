@@ -368,8 +368,11 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 		return this.n.product(this.impulse * invdt);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getReactionTorque(double)
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Not applicable to this joint.
+	 * Always returns zero.
 	 */
 	@Override
 	public double getReactionTorque(double invdt) {

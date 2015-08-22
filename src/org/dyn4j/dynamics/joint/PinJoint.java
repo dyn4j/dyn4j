@@ -244,16 +244,20 @@ public class PinJoint extends Joint implements Shiftable, DataContainer {
 		return true;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getAnchor1()
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Returns the target point in world space.
 	 */
 	@Override
 	public Vector2 getAnchor1() {
 		return this.target;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getAnchor2()
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Returns the anchor point on the body in world space.
 	 */
 	@Override
 	public Vector2 getAnchor2() {
@@ -268,8 +272,11 @@ public class PinJoint extends Joint implements Shiftable, DataContainer {
 		return this.impulse.product(invdt);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getReactionTorque(double)
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Not applicable to this joint.
+	 * Always returns zero.
 	 */
 	@Override
 	public double getReactionTorque(double invdt) {

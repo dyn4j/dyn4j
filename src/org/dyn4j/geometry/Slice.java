@@ -190,8 +190,10 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 		return axes;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Convex#getFoci(org.dyn4j.geometry.Transform)
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Returns a single point, the circle center.
 	 */
 	@Override
 	public Vector2[] getFoci(Transform transform) {

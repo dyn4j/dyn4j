@@ -96,7 +96,8 @@ public final class EdgeFeature extends Feature {
 	}
 	
 	/**
-	 * Returns the vector representing this edge.
+	 * Returns the vector representing this edge in
+	 * counter-clockwise winding.
 	 * @return {@link Vector2}
 	 */
 	public Vector2 getEdge() {

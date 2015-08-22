@@ -338,24 +338,32 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 		return rr;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getAnchor1()
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Not applicable to this joint. 
+	 * This method returns the first body's world center.
 	 */
 	@Override
 	public Vector2 getAnchor1() {
 		return this.body1.getWorldCenter();
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getAnchor2()
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Not applicable to this joint.
+	 * This method returns the first body's world center.
 	 */
 	@Override
 	public Vector2 getAnchor2() {
 		return this.body2.getWorldCenter();
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getReactionForce(double)
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Not applicable to this joint. Returns a new zero {@link Vector2}.
 	 */
 	@Override
 	public Vector2 getReactionForce(double invdt) {

@@ -47,6 +47,9 @@ public abstract class Feature {
 
 	/**
 	 * Returns the edge index.
+	 * <p>
+	 * If the index == {@link #NOT_INDEXED} then
+	 * this feature represents a curved shape feature.
 	 * @return int
 	 */
 	public int getIndex() {

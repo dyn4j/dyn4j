@@ -267,16 +267,22 @@ public class MotorJoint extends Joint implements Shiftable, DataContainer {
 		return rr;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getAnchor1()
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Not applicable to this joint.
+	 * Returns the first body's world center.
 	 */
 	@Override
 	public Vector2 getAnchor1() {
 		return this.body1.getWorldCenter();
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getAnchor2()
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Not applicable to this joint.
+	 * Returns the second body's world center.
 	 */
 	@Override
 	public Vector2 getAnchor2() {

@@ -147,8 +147,13 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 		return center;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Convex#getAxes(java.util.List, org.dyn4j.geometry.Transform)
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Circular shapes are handled specifically in the SAT algorithm since
+	 * they have an infinite number of axes. As a result this method returns
+	 * null.
+	 * @return null
 	 */
 	@Override
 	public Vector2[] getAxes(Vector2[] foci, Transform transform) {

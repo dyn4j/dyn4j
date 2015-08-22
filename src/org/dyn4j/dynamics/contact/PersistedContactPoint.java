@@ -30,6 +30,10 @@ import org.dyn4j.geometry.Vector2;
 
 /**
  * Represents a persisted contact point.
+ * <p>
+ * A persisted contact point is a contact point that was retained
+ * from the last iteration and therefore contains the previous point,
+ * normal, and depth.
  * @author William Bittle
  * @see ContactPoint
  * @version 3.2.0
