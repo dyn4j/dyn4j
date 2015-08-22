@@ -7,8 +7,7 @@ A 100% Java 2D collision detection and physics engine.  Designed to be fast, sta
 The project comprises over 1,000 JUnit test cases, a GUI test application called Sandbox, two example applications (ExampleGraphics2D and ExampleJOGL), Javadocs, forum, and more!
 
 ### Requirements
-* Java 1.6
-* Nothing else!
+* Java 1.6+
 
 ### Compiled Binaries
 Latest versions of dyn4j can be found on [Maven Central](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.dyn4j%22%20AND%20a%3A%22dyn4j%22).
