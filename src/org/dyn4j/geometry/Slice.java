@@ -34,7 +34,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * This shape can represent any slice of a circle up to 180 degrees (half circle).
  * @author William Bittle
- * @since 3.1.5
+ * @since 3.2.0
  * @version 3.1.5
  */
 public class Slice extends AbstractShape implements Convex, Shape, Transformable, DataContainer {

@@ -71,7 +71,7 @@
  * modification is needed.  Refer to the source of {@link org.dyn4j.dynamics.Settings} and the 
  * Sandbox for details on what each individual setting controls.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.2.0
  * @since 1.0.0
  */
 package org.dyn4j.dynamics;

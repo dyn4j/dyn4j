@@ -42,7 +42,7 @@ import org.dyn4j.resources.Messages;
  * This class also contains various helper methods for cleaning vector arrays and lists and performing
  * various operations on {@link Shape}s.
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.2.0
  * @since 1.0.0
  */
 public final class Geometry {
@@ -439,8 +439,9 @@ public final class Geometry {
 	 * @param vertices the vertices
 	 * @return {@link Vector2}[]
 	 * @throws NullPointerException if vertices contains a null element
+	 * @since 3.2.0
 	 */
-	public static final Vector2[] getEdgeNormals(Vector2... vertices) {
+	public static final Vector2[] getCounterClockwiseEdgeNormals(Vector2... vertices) {
 		if (vertices == null) return null;
 		
 		int size = vertices.length;

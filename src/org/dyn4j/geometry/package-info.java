@@ -57,7 +57,7 @@
  * <p>
  * Vectors, points and vertices are all represented by the {@link org.dyn4j.geometry.Vector2} class.
  * @author William Bittle 
- * @version 2.2.2
+ * @version 3.2.0
  * @since 1.0.0
  */
 package org.dyn4j.geometry;

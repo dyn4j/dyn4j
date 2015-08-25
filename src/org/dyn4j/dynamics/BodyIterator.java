@@ -33,7 +33,7 @@ import java.util.Iterator;
  * @version 3.2.0
  * @since 3.2.0
  */
-class BodyIterator implements Iterator<Body> {
+final class BodyIterator implements Iterator<Body> {
 	/** The world to iterate over */
 	private final World world;
 	

@@ -405,7 +405,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * <p>
 	 * This method will always set this body's mass type to Normal.
 	 * @return {@link Body} this body
-	 * @deprecated removed in 3.2.0
+	 * @deprecated removed in 3.2.0 use {@link #setMass(MassType)} instead
 	 */
 	@Deprecated
 	public Body setMass() {

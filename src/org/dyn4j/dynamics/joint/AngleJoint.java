@@ -353,7 +353,7 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 	 * {@inheritDoc}
 	 * <p>
 	 * Not applicable to this joint.
-	 * This method returns the first body's world center.
+	 * This method returns the second body's world center.
 	 */
 	@Override
 	public Vector2 getAnchor2() {

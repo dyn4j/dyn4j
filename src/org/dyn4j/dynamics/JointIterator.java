@@ -35,7 +35,7 @@ import org.dyn4j.dynamics.joint.Joint;
  * @version 3.2.0
  * @since 3.2.0
  */
-class JointIterator implements Iterator<Joint> {
+final class JointIterator implements Iterator<Joint> {
 	/** The world to iterate over */
 	private final World world;
 	

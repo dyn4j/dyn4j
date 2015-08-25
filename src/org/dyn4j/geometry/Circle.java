@@ -32,7 +32,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * A {@link Circle}'s radius must be greater than zero.
  * @author William Bittle
- * @version 3.1.11
+ * @version 3.2.0
  * @since 1.0.0
  */
 public class Circle extends AbstractShape implements Convex, Shape, Transformable, DataContainer {

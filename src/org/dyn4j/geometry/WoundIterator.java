@@ -34,7 +34,7 @@ import java.util.Iterator;
  * @version 3.2.0
  * @since 3.2.0
  */
-class WoundIterator implements Iterator<Vector2> {
+final class WoundIterator implements Iterator<Vector2> {
 	/** The array to iterate over */
 	final Vector2[] vectors;
 	

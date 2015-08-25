@@ -54,7 +54,7 @@
  * configuration with linear spring/damper and angular motor</li>
  * </ul>
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.2.0
  * @since 1.0.0
  */
 package org.dyn4j.dynamics.joint;

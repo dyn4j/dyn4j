@@ -29,7 +29,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents a torque about the z-axis.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.2.0
  * @since 1.0.0
  */
 public class Torque {

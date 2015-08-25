@@ -43,7 +43,7 @@ import org.dyn4j.resources.Messages;
  * When the mass type is changed, the original mass and inertia values are not lost. This allows the
  * swapping of mass types without recomputing the mass.
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.2.0
  * @since 1.0.0
  * @see MassType
  */

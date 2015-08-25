@@ -60,7 +60,7 @@
  * A "better" decomposition is one that contains fewer convex pieces and the convex pieces that are created
  * are of better quality for simulation.
  * @author William Bittle 
- * @version 2.2.2
+ * @version 3.2.0
  * @since 2.2.0
  */
 package org.dyn4j.geometry.decompose;

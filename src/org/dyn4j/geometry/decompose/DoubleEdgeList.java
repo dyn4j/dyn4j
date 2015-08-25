@@ -53,7 +53,7 @@ import org.dyn4j.resources.Messages;
  * can be achieved since the indexing of the {@link #vertices} list is the same as the source {@link Vector2}[].
  * No check is performed to ensure that a pair of {@link DoubleEdgeListHalfEdge}s are added that already exist.
  * @author William Bittle
- * @version 3.1.9
+ * @version 3.2.0
  * @since 2.2.0
  */
 final class DoubleEdgeList {

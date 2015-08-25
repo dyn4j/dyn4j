@@ -76,7 +76,7 @@
  * distance.  For raycasting, it's also advisable to perform a raycast against a {@link org.dyn4j.collision.broadphase.BroadphaseDetector}
  * first to rule out the obvious failures.
  * @author William Bittle
- * @version 2.2.2
+ * @version 3.2.0
  * @since 1.0.0
  */
 package org.dyn4j.collision.narrowphase;

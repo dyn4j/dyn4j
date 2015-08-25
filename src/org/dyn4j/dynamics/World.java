@@ -2867,6 +2867,8 @@ public class World implements Shiftable, DataContainer {
 
 	/**
 	 * Removes the {@link Joint} at the given index from this {@link World}.
+	 * <p>
+	 * No other objects are implicitly destroyed with joints are removed.
 	 * @param index the index of the {@link Joint} to remove
 	 * @return boolean true if the {@link Joint} was removed
 	 * @since 3.2.0

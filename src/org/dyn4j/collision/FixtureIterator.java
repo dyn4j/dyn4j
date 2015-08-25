@@ -34,7 +34,7 @@ import java.util.Iterator;
  * @since 3.2.0
  * @param <T> the {@link Fixture} type
  */
-class FixtureIterator<T extends Fixture> implements Iterator<T> {
+final class FixtureIterator<T extends Fixture> implements Iterator<T> {
 	/** The collidable to iterate over */
 	private final Collidable<T> collidable;
 	
