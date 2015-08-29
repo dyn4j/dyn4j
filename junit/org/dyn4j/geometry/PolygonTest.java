@@ -206,7 +206,6 @@ public class PolygonTest {
 		
 		EdgeFeature f = p.getFarthestFeature(y, t);
 		// should always get an edge
-		TestCase.assertTrue(f instanceof EdgeFeature);
 		TestCase.assertEquals(-1.000, f.max.point.x, 1.0e-3);
 		TestCase.assertEquals(-1.000, f.max.point.y, 1.0e-3);
 		TestCase.assertEquals(-1.000, f.vertex1.point.x, 1.0e-3);

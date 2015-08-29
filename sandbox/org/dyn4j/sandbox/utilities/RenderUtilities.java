@@ -71,7 +71,7 @@ public final class RenderUtilities {
 	private static final int N = 20;
 	
 	/** The angle of each side */
-	private static final double THETA = 2.0 * Math.PI / (double)N;
+	private static final double THETA = 2.0 * Math.PI / N;
 	
 	/** The pre-computed value of cosine */
 	private static final double COS = Math.cos(THETA);

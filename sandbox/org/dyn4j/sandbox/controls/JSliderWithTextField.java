@@ -160,7 +160,7 @@ public class JSliderWithTextField extends JPanel implements PropertyChangeListen
 	@Override
 	public void stateChanged(ChangeEvent event) {
 		JSlider slider = (JSlider)event.getSource();
-		double value = (double)slider.getValue() * this.scale;
+		double value = slider.getValue() * this.scale;
 		// update the text box
 		if (!slider.getValueIsAdjusting()) {
 			this.textField.setValue(value);

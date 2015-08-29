@@ -33,7 +33,6 @@ import org.dyn4j.dynamics.joint.Joint;
  * @since 1.0.0
  */
 final class JointEdge extends InteractionEdge<Joint> {
-
 	/**
 	 * Full constructor.
 	 * @param other the linked {@link Body}

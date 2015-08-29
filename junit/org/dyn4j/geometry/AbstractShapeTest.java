@@ -50,9 +50,9 @@ public class AbstractShapeTest {
 		@Override
 		public AABB createAABB(Transform transform) { return null; }		
 		@Override
-		public Mass createMass(double density) { return new Mass(); };
+		public Mass createMass(double density) { return new Mass(); }
 		@Override
-		public double getRadius(Vector2 center) { return 0.0; };
+		public double getRadius(Vector2 center) { return 0.0; }
 		@Override
 		public Interval project(Vector2 n, Transform transform) { return null; }
 	}

@@ -39,7 +39,7 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
 /**
- * Implementation of the Gilbert–Johnson–Keerthi (GJK) algorithm for collision detection.
+ * Implementation of the Gilbert-Johnson-Keerthi (GJK) algorithm for collision detection.
  * <p>
  * {@link Gjk} is an algorithm used to find minimum distance from one {@link Convex} {@link Shape} 
  * to another, but can also be used to determine whether or not they intersect.
@@ -121,8 +121,8 @@ import org.dyn4j.resources.Messages;
  * @version 3.1.11
  * @since 1.0.0
  * @see Epa
- * @see <a href="http://www.dyn4j.org/2010/04/gjk-gilbert-johnson-keerthi/" target="_blank">GJK (Gilbert–Johnson–Keerthi)</a>
- * @see <a href="http://www.dyn4j.org/2010/04/gjk-distance-closest-points/" target="_blank">GJK – Distance &amp; Closest Points</a>
+ * @see <a href="http://www.dyn4j.org/2010/04/gjk-gilbert-johnson-keerthi/" target="_blank">GJK (Gilbert-Johnson-Keerthi)</a>
+ * @see <a href="http://www.dyn4j.org/2010/04/gjk-distance-closest-points/" target="_blank">GJK - Distance &amp; Closest Points</a>
  */
 public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetector {
 	/** The origin point */
@@ -486,7 +486,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * @param a the first simplex point
 	 * @param b the second simplex point
 	 * @param separation the {@link Separation} object to populate
-	 * @see <a href="http://www.dyn4j.org/2010/04/gjk-distance-closest-points/" target="_blank">GJK – Distance &amp; Closest Points</a>
+	 * @see <a href="http://www.dyn4j.org/2010/04/gjk-distance-closest-points/" target="_blank">GJK - Distance &amp; Closest Points</a>
 	 */
 	protected void findClosestPoints(MinkowskiSumPoint a, MinkowskiSumPoint b, Separation separation) {
 		Vector2 p1 = new Vector2();

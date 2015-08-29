@@ -361,7 +361,7 @@ public class ExampleJOGL extends JFrame implements GLEventListener {
         // set the last time
         this.last = time;
     	// convert from nanoseconds to seconds
-    	double elapsedTime = (double)diff / NANO_TO_BASE;
+    	double elapsedTime = diff / NANO_TO_BASE;
         // update the world with the elapsed time
         this.world.update(elapsedTime);
 	}

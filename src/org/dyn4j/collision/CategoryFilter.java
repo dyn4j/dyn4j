@@ -159,6 +159,17 @@ public class CategoryFilter implements Filter {
 	}
 	
 	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		int hash = 17;
+		hash = hash * 31 + (int)((this.category >>> 32) ^ this.category);
+		hash = hash * 31 + (int)((this.mask >>> 32) ^ this.mask);
+		return hash;
+	}
+	
+	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override

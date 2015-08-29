@@ -119,7 +119,6 @@ public class CircleTest {
 		Vector2 y = new Vector2(0.0, -1.0);
 		
 		PointFeature f = c.getFarthestFeature(y, t);
-		TestCase.assertTrue(f instanceof PointFeature);
 		TestCase.assertEquals( 0.000, f.point.x, 1.0e-3);
 		TestCase.assertEquals(-1.500, f.point.y, 1.0e-3);
 		
@@ -131,7 +130,6 @@ public class CircleTest {
 		t.translate(0.0, -0.5);
 		
 		f = c.getFarthestFeature(y.getNegative(), t);
-		TestCase.assertTrue(f instanceof PointFeature);
 		TestCase.assertEquals(0.000, f.point.x, 1.0e-3);
 		TestCase.assertEquals(1.000, f.point.y, 1.0e-3);
 		

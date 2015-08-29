@@ -72,24 +72,6 @@ public class RaycastResult implements Comparable<RaycastResult> {
 	}
 	
 	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) return false;
-		if (obj == this) return true;
-		if (obj instanceof RaycastResult) {
-			RaycastResult result = (RaycastResult)obj;
-			if (result.body == this.body &&
-				result.fixture == this.fixture &&
-				result.raycast == this.raycast) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override

@@ -304,7 +304,6 @@ public class SegmentTest {
 		Vector2 n = new Vector2(1.0, 0.0);
 		
 		EdgeFeature f = s.getFarthestFeature(n, t);
-		TestCase.assertTrue(f instanceof EdgeFeature);
 		TestCase.assertEquals(1.500, f.max.point.x, 1.0e-3);
 		TestCase.assertEquals(3.000, f.max.point.y, 1.0e-3);
 		

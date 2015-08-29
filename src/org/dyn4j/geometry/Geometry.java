@@ -200,7 +200,7 @@ public final class Geometry {
 			x += point.x;
 			y += point.y;
 		}
-		return new Vector2(x / (double) size, y / (double) size);
+		return new Vector2(x / size, y / size);
 	}
 	
 	/**
@@ -234,7 +234,7 @@ public final class Geometry {
 			x += point.x;
 			y += point.y;
 		}
-		return new Vector2(x / (double) size, y / (double) size);
+		return new Vector2(x / size, y / size);
 	}
 	
 	/**
@@ -277,7 +277,7 @@ public final class Geometry {
 			if (p == null) throw new NullPointerException(Messages.getString("geometry.nullPointListElements"));
 			ac.add(p);
 		}
-		ac.multiply(1.0 / (double) size);
+		ac.multiply(1.0 / size);
 		
 		// otherwise perform the computation
 		Vector2 center = new Vector2();
@@ -347,7 +347,7 @@ public final class Geometry {
 			if (p == null) throw new NullPointerException(Messages.getString("geometry.nullPointArrayElements"));
 			ac.add(p);
 		}
-		ac.multiply(1.0 / (double) size);
+		ac.multiply(1.0 / size);
 		
 		Vector2 center = new Vector2();
 		double area = 0.0;

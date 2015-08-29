@@ -70,22 +70,6 @@ public class ConvexCastResult implements Comparable<ConvexCastResult> {
 	}
 	
 	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) return false;
-		if (obj == this) return true;
-		if (obj instanceof ConvexCastResult) {
-			ConvexCastResult result = (ConvexCastResult)obj;
-			return (result.body == this.body &&
-					result.fixture == this.fixture &&
-					result.timeOfImpact == this.timeOfImpact);
-		}
-		return false;
-	}
-	
-	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override

@@ -115,23 +115,6 @@ public class AABB implements Translatable {
 	}
 	
 	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) return false;
-		if (obj == this) return true;
-		if (obj instanceof AABB) {
-			AABB aabb = (AABB)obj;
-			if (aabb.min.equals(this.min) &&
-				aabb.max.equals(this.max)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override

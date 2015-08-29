@@ -47,19 +47,19 @@ public class TypeFilterTest {
 	// the list of categories and their tree
 	
 	/** The root node of the categories (allowed with all) */
-	private static class All extends TypeFilter {};
+	private static class All extends TypeFilter {}
 	
 	/** Category 1 (allowed with Category 1 and All) */
-	private static class Category1 extends All {};
+	private static class Category1 extends All {}
 	
 	/** Category 2 (allowed with Category 2 and All) */
-	private static class Category2 extends All {};
+	private static class Category2 extends All {}
 	
 	/** Category 3 (allowed with Category 3, Category 1, and All) */
-	private static class Category3 extends Category1 {};
+	private static class Category3 extends Category1 {}
 	
 	/** Category 4 (allowed with Category 4, Category 1, and All) */
-	private static class Category4 extends Category1 {};
+	private static class Category4 extends Category1 {}
 	
 	// static instances of the classes
 	

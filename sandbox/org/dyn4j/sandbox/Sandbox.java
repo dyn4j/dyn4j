@@ -1354,7 +1354,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 		// check if the state is paused
 		if (!this.isPaused()) {
 	    	// convert from nanoseconds to seconds
-	    	double elapsedTime = (double)diff / NANO_TO_BASE;
+	    	double elapsedTime = diff / NANO_TO_BASE;
 	        // update the world with the elapsed time
 	    	boolean stepped = this.simulation.getWorld().update(elapsedTime);
 	    	// see if its a compiled simulation
@@ -1697,7 +1697,7 @@ public class Sandbox extends JFrame implements GLEventListener, ActionListener, 
 			
 			// compute the offset due to the line width
 			final int o = (lw - 1) / 2;
-			double d = (double)w / scale;
+			double d = w / scale;
 			
 			// draw a line downward
 			gl.glColor4f(0.0f, 0.0f, 0.0f, 1.0f);

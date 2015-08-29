@@ -65,26 +65,6 @@ public class Step {
 	}
 	
 	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) return false;
-		if (obj == this) return true;
-		if (obj instanceof Step) {
-			Step step = (Step)obj;
-			if (step.dt == this.dt &&
-				step.dt0 == this.dt0 &&
-				step.dtRatio == this.dtRatio &&
-				step.invdt == this.invdt &&
-				step.invdt0 == this.invdt0) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override

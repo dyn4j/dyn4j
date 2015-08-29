@@ -39,5 +39,5 @@ public class BoundsAdapter implements BoundsListener, Listener {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.BoundsListener#outside(org.dyn4j.collision.Collidable)
 	 */
-	public <E extends Collidable<T>, T extends Fixture> void outside(E collidable) {};
+	public <E extends Collidable<T>, T extends Fixture> void outside(E collidable) {}
 }

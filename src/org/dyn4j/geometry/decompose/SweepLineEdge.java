@@ -98,20 +98,6 @@ final class SweepLineEdge implements Comparable<SweepLineEdge> {
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) return false;
-		if (obj == this) return true;
-		if (obj instanceof SweepLineEdge) {
-			SweepLineEdge e = (SweepLineEdge)obj;
-			return e.v0 == this.v0 && e.v1 == this.v1;
-		}
-		return false;
-	}
-	
 	/**
 	 * Returns the intersection point of the given y value (horizontal
 	 * sweep line) with this edge.

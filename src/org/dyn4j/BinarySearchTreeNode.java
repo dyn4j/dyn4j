@@ -88,20 +88,6 @@ final class BinarySearchTreeNode<E extends Comparable<E>> implements Comparable<
 		return this.comparable.compareTo(other.comparable);
 	}
 	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) return false;
-		if (obj == this) return true;
-		if (obj instanceof BinarySearchTreeNode) {
-			BinarySearchTreeNode<?> node = (BinarySearchTreeNode<?>)obj;
-			return node.comparable.equals(this.comparable);
-		}
-		return false;
-	}
-	
 	/**
 	 * Returns the comparable object.
 	 * @return E

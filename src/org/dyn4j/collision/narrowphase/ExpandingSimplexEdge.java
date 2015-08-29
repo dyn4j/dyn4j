@@ -92,38 +92,6 @@ final class ExpandingSimplexEdge implements Comparable<ExpandingSimplexEdge> {
 	}
 	
 	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) return false;
-		if (obj == this) return true;
-		if (obj instanceof ExpandingSimplexEdge) {
-			ExpandingSimplexEdge edge = (ExpandingSimplexEdge)obj;
-			if (edge.point1.equals(this.point1) &&
-				edge.point2.equals(this.point2) &&
-				edge.normal.equals(this.normal) &&
-				edge.distance == this.distance) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		int hash = 17;
-		hash = hash * 31 + this.point1.hashCode();
-		hash = hash * 31 + this.point2.hashCode();
-		hash = hash * 31 + this.normal.hashCode();
-		hash = hash * 31 + (new Double(this.distance)).hashCode();
-		return hash;
-	}
-	
-	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override

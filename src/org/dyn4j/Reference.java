@@ -68,11 +68,20 @@ public class Reference<T> {
 		if (obj == this) return true;
 		if (obj instanceof Reference) {
 			Reference<?> ref = (Reference<?>)obj;
+			if (ref.value == null && this.value != null) return false;
 			if (ref.value == this.value ||
 			    ref.value.equals(this.value)) {
 				return true;
 			}
 		}
 		return false;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return this.value == null ? 0 : this.value.hashCode();
 	}
 }

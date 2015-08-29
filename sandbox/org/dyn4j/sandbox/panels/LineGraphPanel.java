@@ -321,7 +321,7 @@ public class LineGraphPanel extends JPanel {
 		for (int i = slSize - 1; i >= 0; i--) {
 			Series seriesI = this.series.get(i);
 			// compute the x increment
-			double xi = (mw) / (double)(sSize - 1);
+			double xi = (mw) / (sSize - 1);
 			
 			double x = this.paddingLeft;
 			int j = 0;

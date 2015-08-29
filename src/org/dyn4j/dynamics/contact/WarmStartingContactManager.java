@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.dyn4j.collision.Collisions;
 import org.dyn4j.collision.manifold.ManifoldPointId;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Capacity;
@@ -43,6 +44,9 @@ import org.dyn4j.geometry.Shiftable;
  * @since 3.2.0
  */
 public class WarmStartingContactManager extends SimpleContactManager implements ContactManager, Shiftable {
+	/** Another map that will be reused */
+	Map<ContactConstraintId, ContactConstraint> constraints1 = null;
+	
 	/**
 	 * Default constructor.
 	 * @since 3.2.0
@@ -64,6 +68,9 @@ public class WarmStartingContactManager extends SimpleContactManager implements 
 	 */
 	public WarmStartingContactManager(Capacity initialCapacity)  {
 		super(initialCapacity);
+		// estimate the number of contact constraints
+		int eSize = Collisions.getEstimatedCollisionPairs(initialCapacity.getBodyCount());
+		this.constraints1 = new HashMap<ContactConstraintId, ContactConstraint>(eSize * 4 / 3 + 1, 0.75f);
 	}
 	
 	/* (non-Javadoc)
@@ -78,16 +85,7 @@ public class WarmStartingContactManager extends SimpleContactManager implements 
 		double warmStartDistanceSquared = settings.getWarmStartDistanceSquared();
 		
 		// create a new map for the new contacts constraints
-		Map<ContactConstraintId, ContactConstraint> newMap = null;
-		
-		// check if any new contact constraints were found
-		if (size > 0) {
-			// if so then create a new map to contain the new contacts
-			// 0.75 = 3/4, we can garuantee that the hashmap will not need to be rehashed
-			// if we take capacity / load factor
-			// the default load factor is 0.75 according to the javadocs, but lets assign it to be sure
-			newMap = new HashMap<ContactConstraintId, ContactConstraint>(size * 4 / 3 + 1, 0.75f);
-		}
+		Map<ContactConstraintId, ContactConstraint> newMap = this.constraints1;
 		
 		// loop over the new contact constraints
 		// and attempt to persist contacts
@@ -311,6 +309,9 @@ public class WarmStartingContactManager extends SimpleContactManager implements 
 		
 		// finally overwrite the contact constraint map with the new map
 		if (size > 0) {
+			// swap the maps so we can reuse
+			this.constraints.clear();
+			this.constraints1 = this.constraints;
 			this.constraints = newMap;
 		} else {
 			// if no contact constraints exist, just clear the old map
