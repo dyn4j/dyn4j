@@ -72,7 +72,7 @@
  * object which contains the separation normal, distance and closest points.
  * <p>
  * The {@link org.dyn4j.collision.narrowphase.RaycastDetector}s can return a {@link org.dyn4j.collision.narrowphase.Raycast}
- * object which contains the point the {@link com.jogamp.opengl.math.Ray} intersects the shape, the normal and the
+ * object which contains the point the {@link org.dyn4j.geometry.Ray} intersects the shape, the normal and the
  * distance.  For raycasting, it's also advisable to perform a raycast against a {@link org.dyn4j.collision.broadphase.BroadphaseDetector}
  * first to rule out the obvious failures.
  * @author William Bittle
