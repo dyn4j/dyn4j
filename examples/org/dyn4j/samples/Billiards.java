@@ -133,7 +133,7 @@ public class Billiards extends JFrame {
 	 * Default constructor for the window
 	 */
 	public Billiards() {
-		super("BilliardCollision");
+		super("Billiards");
 		// setup the JFrame
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		

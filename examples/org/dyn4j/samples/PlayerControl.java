@@ -169,7 +169,7 @@ public class PlayerControl extends JFrame {
 	 * Default constructor for the window
 	 */
 	public PlayerControl() {
-		super("Graphics2D Example");
+		super("Player Control");
 		// setup the JFrame
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		

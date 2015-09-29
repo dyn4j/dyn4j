@@ -182,7 +182,7 @@ public class TrackingContactIds extends JFrame implements ContactListener {
 	 * Default constructor for the window
 	 */
 	public TrackingContactIds() {
-		super("Graphics2D Example");
+		super("Tracking Contact IDs");
 		// setup the JFrame
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		

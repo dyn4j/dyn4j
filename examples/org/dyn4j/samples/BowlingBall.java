@@ -142,7 +142,7 @@ public class BowlingBall extends JFrame {
 	 * Default constructor for the window
 	 */
 	public BowlingBall() {
-		super("Graphics2D Example");
+		super("Bowling Ball");
 		// setup the JFrame
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		

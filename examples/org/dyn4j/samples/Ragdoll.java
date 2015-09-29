@@ -132,7 +132,7 @@ public class Ragdoll extends JFrame {
 	 * Default constructor for the window
 	 */
 	public Ragdoll() {
-		super("Graphics2D Example");
+		super("Ragdoll");
 		// setup the JFrame
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		

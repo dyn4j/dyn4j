@@ -136,7 +136,7 @@ public class Raycast extends JFrame {
 	 * Default constructor for the window
 	 */
 	public Raycast() {
-		super("Graphics2D Example");
+		super("Raycast");
 		// setup the JFrame
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		

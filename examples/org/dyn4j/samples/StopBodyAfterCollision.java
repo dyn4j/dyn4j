@@ -209,7 +209,7 @@ public class StopBodyAfterCollision extends JFrame {
 	 * Default constructor for the window
 	 */
 	public StopBodyAfterCollision() {
-		super("Graphics2D Example");
+		super("Stop Body After Collision");
 		// setup the JFrame
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		

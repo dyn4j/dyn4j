@@ -154,7 +154,7 @@ public class Picking extends JFrame {
 	 * Default constructor for the window
 	 */
 	public Picking() {
-		super("Graphics2D Example");
+		super("Picking");
 		// setup the JFrame
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		

@@ -149,7 +149,7 @@ public class MouseInteraction extends JFrame {
 	 * Default constructor for the window
 	 */
 	public MouseInteraction() {
-		super("Graphics2D Example");
+		super("Mouse Interaction");
 		// setup the JFrame
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		

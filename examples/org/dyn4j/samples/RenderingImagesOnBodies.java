@@ -190,7 +190,7 @@ public class RenderingImagesOnBodies extends JFrame {
 	 * Default constructor for the window
 	 */
 	public RenderingImagesOnBodies() {
-		super("Graphics2D Example");
+		super("Rendering Images on Bodies");
 		// setup the JFrame
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		

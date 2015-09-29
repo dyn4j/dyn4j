@@ -73,11 +73,6 @@ public class MouseDrag extends JFrame {
 	private Point point = null;
 	
 	private final class CustomMouseAdapter extends MouseAdapter {
-//		@Override
-//		public void mouseMoved(MouseEvent e) {
-//			point = new Point(e.getX(), e.getY());
-//			super.mouseMoved(e);
-//		}
 		@Override
 		public void mouseDragged(MouseEvent e) {
 			point = new Point(e.getX(), e.getY());
@@ -154,7 +149,7 @@ public class MouseDrag extends JFrame {
 	 * Default constructor for the window
 	 */
 	public MouseDrag() {
-		super("Graphics2D Example");
+		super("Mouse Drag");
 		// setup the JFrame
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
