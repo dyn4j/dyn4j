@@ -37,25 +37,21 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
 /**
- * Implementation a maximum/minimum length distance joint.
+ * Implementation a maximum and/or minimum length distance joint.
  * <p>
- * A rope joint contains the distance between two bodies.  The bodies can rotate freely
- * about the anchor points.  The system as a whole can rotate and translate freely as well.
+ * A rope joint contains the distance between two bodies.  The bodies can 
+ * rotate freely about the anchor points.  The system as a whole can rotate and
+ * translate freely as well.
  * <p>
- * This joint differs from the {@link DistanceJoint} in that it provides an upper and lower
- * limit.  The bodies are allowed to move completely free when between the limits and then
- * are constrained like a {@link DistanceJoint} when at either limit.
+ * This joint is like the {@link DistanceJoint}, but includes an upper and 
+ * lower limit and does not include a spring-damper system.
  * <p>
- * NOTE: The respective {@link #setLimits(double)}, {@link #setLimits(double, double)},
- * {@link #setLimitsEnabled(boolean)}, {@link #setLimitsEnabled(double)}, 
- * {@link #setLimitsEnabled(double, double)}, {@link #setLowerLimit(double)},
- * {@link #setLowerLimitEnabled(boolean)}, {@link #setUpperLimit(double)}, and
- * {@link #setUpperLimitEnabled(boolean)} methods must be called to setup the maximum 
- * and minimum limits, otherwise this joint acts like a {@link DistanceJoint}.
- * <p>
- * This joint does not provide spring-damper options.
+ * By default the lower and upper limits are set to the current distance
+ * between the given anchor points and will function identically like a
+ * {@link DistanceJoint}.  The upper and lower limits can be enabled
+ * separately.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.2.1
  * @since 2.2.1
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Rope_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/09/distance-constraint/" target="_blank">Distance Constraint</a>

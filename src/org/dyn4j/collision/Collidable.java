@@ -59,21 +59,19 @@ public interface Collidable<T extends Fixture> extends Transformable, Shiftable,
 	public abstract UUID getId();
 	
 	/**
-	 * Creates an {@link AABB} from this {@link Collidable}.
+	 * Creates an {@link AABB} from this {@link Collidable}'s attached {@link Fixture}s.
 	 * <p>
-	 * This method returns a degenerate AABB, (0.0, 0.0) to (0.0, 0.0),
-	 * for {@link Collidable}s that have no {@link Fixture}s.
+	 * If there are no fixtures attached, a degenerate AABB, (0.0, 0.0) to (0.0, 0.0), is returned.
 	 * @return {@link AABB}
 	 * @since 3.0.0
 	 */
 	public abstract AABB createAABB();
 	
 	/**
-	 * Creates an {@link AABB} from this {@link Collidable} using the given 
+	 * Creates an {@link AABB} from this {@link Collidable}'s attached {@link Fixture}s using the given 
 	 * world space {@link Transform}.
 	 * <p>
-	 * This method returns a degenerate AABB, (0.0, 0.0) to (0.0, 0.0),
-	 * for {@link Collidable}s that have no {@link Fixture}s.
+	 * If there are no fixtures attached, a degenerate AABB, (0.0, 0.0) to (0.0, 0.0), is returned.
 	 * @param transform the world space {@link Transform}
 	 * @return {@link AABB}
 	 * @throws NullPointerException if the given transform is null
@@ -130,6 +128,17 @@ public interface Collidable<T extends Fixture> extends Transformable, Shiftable,
 	public abstract T getFixture(Vector2 point);
 
 	/**
+	 * Returns all the {@link Fixture}s in this {@link Collidable} that contain the given point.
+	 * <p>
+	 * Returns an empty list if the point is not contained in any fixture in this {@link Collidable}.
+	 * @param point a world space point
+	 * @return List&lt;T&gt;
+	 * @throws NullPointerException if point is null
+	 * @since 3.2.0
+	 */
+	public abstract List<T> getFixtures(Vector2 point);
+	
+	/**
 	 * Removes the given {@link Fixture} from this {@link Collidable}.
 	 * @param fixture the {@link Fixture}
 	 * @return boolean true if the {@link Fixture} was removed from this {@link Collidable}
@@ -178,17 +187,6 @@ public interface Collidable<T extends Fixture> extends Transformable, Shiftable,
 	public abstract List<T> removeFixtures(Vector2 point);
 	
 	/**
-	 * Returns all the {@link Fixture}s in this {@link Collidable} that contain the given point.
-	 * <p>
-	 * Returns an empty list if the point is not contained in any fixture in this {@link Collidable}.
-	 * @param point a world space point
-	 * @return List&lt;T&gt;
-	 * @throws NullPointerException if point is null
-	 * @since 3.2.0
-	 */
-	public abstract List<T> getFixtures(Vector2 point);
-	
-	/**
 	 * Returns the number of {@link Fixture}s attached
 	 * to this {@link Collidable} object.
 	 * @return int
@@ -209,7 +207,7 @@ public interface Collidable<T extends Fixture> extends Transformable, Shiftable,
 	public abstract List<T> getFixtures();
 	
 	/**
-	 * Returns an iterator for the fixtures.
+	 * Returns an iterator for this collidable's fixtures.
 	 * <p>
 	 * The returned iterator supports the <code>remove</code> method.
 	 * @return Iterator&lt;T&gt;

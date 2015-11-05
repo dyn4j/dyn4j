@@ -43,32 +43,38 @@ import org.dyn4j.resources.Messages;
 /**
  * Implementation of a pivot joint.
  * <p>
- * A pivot joint allows two bodies to rotate about a common point, but does not allow
- * them to translate.  The system as a whole can still translate and rotate freely.
+ * A pivot joint allows two bodies to rotate freely about a common point, but 
+ * does not allow them to translate relative to one another.  The system as a
+ * whole can translate and rotate freely.
  * <p>
- * This joint allows enabling of a angular motor along with angular lower and upper limits.
+ * By default the lower and upper limit angles are set to the current angle 
+ * between the bodies.  When the lower and upper limits are equal, the bodies 
+ * rotate together and are not allowed rotate relative to one another.  By
+ * default the limits are disabled.
  * <p>
- * The limits that a revolute joint can place on the bodies are world space limits, not 
- * relative angle limits (although the limits are relative to the initial angle of the 
- * bodies given at joint creation time).  Therefore its recommended to only use the limits 
- * when one body is fixed.
- * <p>
- * The joint limits must match the following restrictions:
+ * If the lower and upper limits are set explicitly, the values must follow 
+ * these restrictions:
  * <ul>
  * <li>lower limit &le; upper limit</li>
- * <li>lower limit &ge; -180</li>
- * <li>upper limit &le; 180</li>
+ * <li>lower limit &gt; -180</li>
+ * <li>upper limit &lt; 180</li>
  * </ul> 
- * To create a joint with limits other than this format use the {@link #setReferenceAngle(double)}
- * method.  For example:
+ * To create a joint with limits outside of this range use the 
+ * {@link #setReferenceAngle(double)} method.  This method sets the baseline 
+ * angle for the joint, which represents 0 radians in the context of the 
+ * limits.  For example:
  * <pre>
  * // we would like the joint limits to be [30, 260]
  * // this is the same as the limits [-60, 170] if the reference angle is 90
- * setLimits(Math.toRadians(-60), Math.toRadians(170));
- * setReferenceAngle(Math.toRadians(90));
+ * joint.setLimits(Math.toRadians(-60), Math.toRadians(170));
+ * joint.setReferenceAngle(Math.toRadians(90));
  * </pre>
+ * This joint also supports a motor.  The motor is an angular motor about the
+ * anchor point.  The motor speed can be positive or negative to indicate a
+ * clockwise or counter-clockwise rotation.  The maximum motor torque must be 
+ * greater than zero for the motor to apply any motion.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.2.1
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Revolute_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/07/point-to-point-constraint/" target="_blank">Point-to-Point Constraint</a>
@@ -140,12 +146,17 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 		this.localAnchor2 = body2.getLocalPoint(anchor);
 		// get the initial reference angle for the joint limits
 		this.referenceAngle = body1.getTransform().getRotation() - body2.getTransform().getRotation();
+		
+		// default limits
+		this.lowerLimit = this.referenceAngle;
+		this.upperLimit = this.referenceAngle;
+		this.limitEnabled = false;
+		
 		// initialize
 		this.limitState = LimitState.INACTIVE;
 		this.impulse = new Vector3();
 		this.K = new Matrix33();
 		this.motorEnabled = false;
-		this.limitEnabled = false;
 	}
 	
 	/* (non-Javadoc)
@@ -577,6 +588,7 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 	 * Sets the maximum torque this motor will apply in newton-meters.
 	 * @param maximumMotorTorque the maximum motor torque in newton-meters; must be greater than or equal to zero
 	 * @throws IllegalArgumentException if maxMotorTorque is less than zero
+	 * @see #setMotorSpeed(double)
 	 */
 	public void setMaximumMotorTorque(double maximumMotorTorque) {
 		// make sure its positive
@@ -594,8 +606,9 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Sets the target motor speed in radians/second
+	 * Sets the target motor speed in radians/second.
 	 * @param motorSpeed the motor speed desired in radians/second
+	 * @see #setMaximumMotorTorque(double)
 	 */
 	public void setMotorSpeed(double motorSpeed) {
 		// only wake the bodies if the motor is enabled

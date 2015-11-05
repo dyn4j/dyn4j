@@ -40,13 +40,22 @@ import org.dyn4j.resources.Messages;
 /**
  * Implementation of a wheel joint.
  * <p>
- * A wheel joint is a revolute joint attached to a prismatic joint that is typically used
- * to simulate a vehicle's wheel and suspension.
+ * A wheel joint is used to simulate a vehicle's wheel and suspension.  The 
+ * wheel is allowed to rotate freely about the given anchor point.  The 
+ * suspension is allowed to translate freely along the given axis.  The whole
+ * system can translate and rotate freely.
  * <p>
- * The frequency and damping ratio setup a spring-damper for the suspension and the motor
- * options setup an angular motor.
+ * By default the frequency and damping ratio are set to 8.0 and 0.0 
+ * respectively.  By definition this joint requires a frequency greater than 
+ * zero to perform properly.  If a wheel without suspension is required, use 
+ * a {@link RevoluteJoint} instead.
+ * <p>
+ * This joint also supports a motor.  The motor is an angular motor about the
+ * anchor point.  The motor speed can be positive or negative to indicate a
+ * clockwise or counter-clockwise rotation.  The maximum motor torque must be 
+ * greater than zero for the motor to apply any motion.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.2.1
  * @since 3.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Wheel_Joint" target="_blank">Documentation</a>
  */
@@ -160,11 +169,14 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 		this.motorImpulse = 0.0;
 		this.springMass = 0.0;
 		this.springImpulse = 0.0;
-		// no spring damper
-		this.frequency = 0.0;
+		
+		// requires a spring damper by definition of the constraint.
+		// if a spring/damper isn't needed, then use the RevoluteJoint instead.
+		this.frequency = 8.0;
 		this.dampingRatio = 0.0;
 		this.gamma = 0.0;
 		this.bias = 0.0;
+		
 		// no motor
 		this.motorEnabled = false;
 		this.maximumMotorTorque = 0.0;
@@ -208,10 +220,10 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 		Vector2 r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
 		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
 		
-		// compute the 
+		// compute the vector between the two world space anchor points
 		Vector2 d = this.body1.getWorldCenter().sum(r1).subtract(this.body2.getWorldCenter().sum(r2));
 		
-		// get the world vectors of the line
+		// get the world vectors of the axes
 		this.axis = this.body2.getWorldVector(this.xAxis);
 		this.perp = this.body2.getWorldVector(this.yAxis);
 		
@@ -492,8 +504,42 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 	/**
 	 * Returns the current joint speed.
 	 * @return double
+	 * @deprecated Replaced by {@link #getAngularSpeed()} in 3.2.1
 	 */
+	@Deprecated
 	public double getJointSpeed() {
+		return this.getAngularSpeed();
+	}
+	
+	/**
+	 * Returns the linear speed along the axis between the two joined bodies
+	 * @return double
+	 * @since 3.2.1
+	 */
+	public double getLinearSpeed() {
+		Transform t1 = this.body1.getTransform();
+		Transform t2 = this.body2.getTransform();
+		
+		Vector2 r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
+		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
+		
+		// get the world vectors of the axis
+		Vector2 axis = this.body2.getWorldVector(this.xAxis);
+		
+		// compute the velocities along the vectors pointing to the world space anchor points
+		Vector2 v1 = r1.cross(this.body1.getAngularVelocity()).add(this.body1.getLinearVelocity());
+		Vector2 v2 = r2.cross(this.body2.getAngularVelocity()).add(this.body2.getLinearVelocity());
+		
+		// project them onto the joint axis
+		return v2.dot(axis) - v1.dot(axis);
+	}
+	
+	/**
+	 * Returns the current angular speed between the two joined bodies.
+	 * @return double
+	 * @since 3.2.1
+	 */
+	public double getAngularSpeed() {
 		double a1 = this.body1.getAngularVelocity();
 		double a2 = this.body2.getAngularVelocity();
 		return a2 - a1;
@@ -502,8 +548,19 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 	/**
 	 * Returns the current joint translation.
 	 * @return double
+	 * @deprecated Replaced by {@link #getLinearTranslation()} in 3.2.1
 	 */
+	@Deprecated
 	public double getJointTranslation() {
+		return this.getLinearTranslation();
+	}
+	
+	/**
+	 * Returns the current linear translation along the joint axis.
+	 * @return double
+	 * @since 3.2.1
+	 */
+	public double getLinearTranslation() {
 		Vector2 p1 = this.body1.getWorldPoint(this.localAnchor1);
 		Vector2 p2 = this.body2.getWorldPoint(this.localAnchor2);
 		Vector2 d = p2.difference(p1);
@@ -511,6 +568,16 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 		return d.dot(axis);
 	}
 	
+	/**
+	 * Returns the current angular translation between the joined bodies.
+	 * @return double
+	 * @since 3.2.1
+	 */
+	public double getAngularTranslation() {
+		double a1 = this.body1.getTransform().getRotation();
+		double a2 = this.body2.getTransform().getRotation();
+		return a2 - a1;
+	}
 
 	/**
 	 * Returns true if this wheel joint is a spring wheel joint.
@@ -539,6 +606,8 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 	
 	/**
 	 * Sets the damping ratio.
+	 * <p>
+	 * Larger values reduce the oscillation of the spring.
 	 * @param dampingRatio the damping ratio; in the range [0, 1]
 	 * @throws IllegalArgumentException if damping ration is less than zero or greater than 1
 	 */
@@ -562,12 +631,14 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 	
 	/**
 	 * Sets the spring frequency.
-	 * @param frequency the spring frequency in hz; must be greater than or equal to zero
-	 * @throws IllegalArgumentException if frequency is less than zero
+	 * <p>
+	 * Larger values increase the stiffness of the spring.
+	 * @param frequency the spring frequency in hz; must be greater than zero
+	 * @throws IllegalArgumentException if frequency is less than or equal to zero
 	 */
 	public void setFrequency(double frequency) {
 		// check for valid value
-		if (frequency < 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidFrequency"));
+		if (frequency <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidFrequencyZero"));
 		// wake up both bodies
 		this.body1.setAsleep(false);
 		this.body2.setAsleep(false);
@@ -606,6 +677,7 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 	/**
 	 * Sets the target motor speed.
 	 * @param motorSpeed the target motor speed in radians / second
+	 * @see #setMaximumMotorTorque(double)
 	 */
 	public void setMotorSpeed(double motorSpeed) {
 		// wake up the joined bodies
@@ -629,6 +701,7 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 	 * to achieve the target speed.
 	 * @param maximumMotorTorque the maximum torque in newtons-meters; in the range [0, &infin;]
 	 * @throws IllegalArgumentException if maxMotorTorque is less than zero
+	 * @see #setMotorSpeed(double)
 	 */
 	public void setMaximumMotorTorque(double maximumMotorTorque) {
 		// make sure its greater than or equal to zero

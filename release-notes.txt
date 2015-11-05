@@ -1,4 +1,29 @@
 ===============================================================================
+Version 3.2.1
+===============================================================================
+New Features:
+  - Added getAngularTranslation and getLinearSpeed methods to the WheelJoint
+    class.
+  - Added setLength method to the PulleyJoint class.
+
+Bug Fixes:
+    
+Deprecated:
+  - getJointTranslation and getJointSpeed on the WheelJoint class for
+    getLinearTranslation and getAngularSpeed.
+  
+Breaking Changes:
+  
+Other:
+  - Updated samples to use a common base class for rendering and other stuff
+    to make the samples contain mostly dyn4j usage code.
+  - The WheelJoint's default frequency is now set to 8.0 by default for easier 
+    use.
+  - The RevoluteJoint's default limits are set to the initial angle between
+    the bodies (the limit is still disabled by default).
+  - More javadoc updates.
+
+===============================================================================
 Version 3.2.0
 ===============================================================================
 New Features:

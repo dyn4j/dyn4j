@@ -25,7 +25,7 @@
 package org.dyn4j;
 
 /**
- * A generic mutable wrapper primarily for mutable referenced primitive types.
+ * A generic mutable wrapper for primitive types.
  * <p>
  * Due to the value being public and mutable, this class does not override the
  * behavior of the hashcode method and instead relies on the JVMs implementation

@@ -40,20 +40,30 @@ import org.dyn4j.resources.Messages;
 /**
  * Implementation of a pin joint.
  * <p>
- * A pin joint is a joint that pins a body to a specified world space point.
+ * A pin joint is a joint that pins a body to a specified world space point
+ * using a spring-damper system.  This joint will attempt to place the given
+ * anchor point at the target position.
  * <p>
- * The pinning can also use a spring damper to represent a rubber-band like effect.
+ * NOTE: The anchor point does not have to be within the bounds of the body.
  * <p>
- * Use the {@link #setTarget(Vector2)} method to set the position of the pin.
+ * By default the target position will be the given world space anchor. Use 
+ * the {@link #setTarget(Vector2)} method to set a different target.
  * <p>
- * The {@link #getAnchor1()} method returns the current target and the {@link #getAnchor2()}
- * method returns the anchor point on the body.
+ * The pin joint requires the spring-damper system to function properly and
+ * as such the frequency value must be greater than zero.  Use a 
+ * {@link RevoluteJoint} instead if a spring-damper system is not desired.
+ * A good starting point is a frequency of 8.0 and damping ratio of 0.3
+ * then adjust as necessary.
  * <p>
- * Both the {@link #getBody1()} and {@link #getBody2()} methods return the same body.
+ * The {@link #getAnchor1()} method returns the target and the 
+ * {@link #getAnchor2()} method returns the world space anchor point.
+ * <p>
+ * Both the {@link #getBody1()} and {@link #getBody2()} methods return the same
+ * body.
  * <p>
  * Renamed from MouseJoint in 3.2.0.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.2.1
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Pin_Joint" target="_blank">Documentation</a>
  */
@@ -104,16 +114,18 @@ public class PinJoint extends Joint implements Shiftable, DataContainer {
 		// check for a null anchor
 		if (anchor == null) throw new NullPointerException(Messages.getString("dynamics.joint.pin.nullAnchor"));
 		// verify the frequency
-		if (frequency <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidFrequency"));
+		if (frequency <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidFrequencyZero"));
 		// verify the damping ratio
 		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidDampingRatio"));
 		// verity the max force
 		if (maximumForce < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.pin.invalidMaximumForce"));
+		
 		this.target = anchor;
 		this.anchor = body.getLocalPoint(anchor);
 		this.frequency = frequency;
 		this.dampingRatio = dampingRatio;
 		this.maximumForce = maximumForce;
+		
 		// initialize
 		this.K = new Matrix22();
 		this.impulse = new Vector2();
@@ -378,7 +390,7 @@ public class PinJoint extends Joint implements Shiftable, DataContainer {
 	 */
 	public void setFrequency(double frequency) {
 		// check for valid value
-		if (frequency <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidFrequency"));
+		if (frequency <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidFrequencyZero"));
 		// set the new value
 		this.frequency = frequency;
 	}

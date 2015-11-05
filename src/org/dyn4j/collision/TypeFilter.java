@@ -29,12 +29,12 @@ package org.dyn4j.collision;
  * <p>
  * This class is not used directly but instead extended by marker classes (see example below).
  * <p>
- * This filter is designed to allow a <strong>hierarchy</strong> of categories in which nodes can only interact with
- * their parents or nodes of the same type.
+ * This filter is designed to allow a <strong>hierarchy</strong> of categories where each category
+ * can collide with it's parents and it's descendants, but not it's siblings.
  * <p>
  * For example, imagine we have the following hierarchy of categories:
  * <pre>
- *             All Categories
+ *             Root Category
  *             /           \
  *        Category1     Category2
  *        /      \
@@ -42,31 +42,31 @@ package org.dyn4j.collision;
  * </pre>
  * This hierarchy allows the following:
  * <ul>
- * <li>A fixture with the All category can collide with anything.</li>
- * <li>A fixture with the Category1 category can collide with the Category1, Category3, Category4, and All categories. (i.e. not Category2)</li>
- * <li>A fixture with the Category2 category can collide with the Category2 and All categories only.</li>
- * <li>A fixture with the Category3 category can collide with the Category3, Category1, and All categories.</li>
- * <li>A fixture with the Category4 category can collide with the Category4, Category1, and All categories.</li>
+ * <li>A fixture with the Root category can collide with anything.</li>
+ * <li>A fixture with the Category1 category can collide with the Category1, Category3, Category4, and Root categories. (i.e. not Category2)</li>
+ * <li>A fixture with the Category2 category can collide with the Category2 and Root categories only.</li>
+ * <li>A fixture with the Category3 category can collide with the Category3, Category1, and Root categories.</li>
+ * <li>A fixture with the Category4 category can collide with the Category4, Category1, and Root categories.</li>
  * </ul>
  * <p>
  * To implement this you create a class for each category (you could put these in
  * their own class file, its done this way for brevity):
  * <pre>
  * public final class Categories {
- *	private static class All extends TypeFilter {}
- *	private static class Category1 extends All {}
- *	private static class Category2 extends All {}
+ *	private static class Root extends TypeFilter {}
+ *	private static class Category1 extends Root {}
+ *	private static class Category2 extends Root {}
  *	private static class Category3 extends Category1 {}
  *	private static class Category4 extends Category1 {}
  *	
- *	public static final TypeFilter ALL = new All();
+ *	public static final TypeFilter ROOT = new Root();
  *	public static final TypeFilter CATEGORY1 = new Category1();
  *	public static final TypeFilter CATEGORY2 = new Category2();
  *	public static final TypeFilter CATEGORY3 = new Category3();
  *	public static final TypeFilter CATEGORY4 = new Category4();
  * }
  * // then set the filter on the fixtures
- * fixture.setFilter(Categories.ALL);
+ * fixture.setFilter(Categories.ROOT);
  * // or
  * fixture.setFilter(Categories.CATEGORY1);
  * </pre>

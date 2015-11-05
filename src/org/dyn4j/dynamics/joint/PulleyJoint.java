@@ -38,18 +38,32 @@ import org.dyn4j.resources.Messages;
 /**
  * Implementation of a pulley joint.
  * <p>
- * A pulley joint joins two bodies in a pulley system with a fixed length zero-mass rope.
+ * A pulley joint joins two bodies in a pulley system with a fixed length zero
+ * mass rope.  The bodies are allowed to rotate freely.  The bodies are allowed
+ * to translate freely up to the total length of the "rope."
  * <p>
- * The pulley anchor points represent the "hanging" points for the respective {@link Body}s.
+ * The length of the "rope" connecting the two bodies is computed by distance
+ * from the pulley anchors to the body anchors including the ratio (if any)
+ * when the joint is created.  The length can be changed dynamically by calling
+ * the {@link #setLength(double)} method.
  * <p>
- * The ratio allows this joint to act like a block-and-tackle system.  The ratio should always
- * be greater than zero.  A value of 1.0 indicates that the ratio is turned off.
+ * The pulley anchor points represent the "hanging" points for the respective 
+ * bodies and can be any world space point.
  * <p>
- * By default this joint acts very similar to two {@link DistanceJoint}s. Using the 
- * {@link #setSlackEnabled(boolean)} method, you can toggle the behavior between a {@link DistanceJoint}
- * and {@link RopeJoint}.
+ * This joint can also model a block-and-tackle system by setting the ratio
+ * using the {@link #setRatio(double)} method.  A value of 1.0 indicates no
+ * ratio.  Values between 0 and 1 exclusive indicate that the first body's
+ * rope length will be 1/x times longer than the second body's rope length.
+ * Values between 1 and infinity indicate that the second body's rope length
+ * will be x times longer than the first body's rope length.
+ * <p>
+ * By default this joint acts very similar to two {@link DistanceJoint}s in
+ * that the bodies are forced to be their respective rope-distance away from 
+ * the pulley anchors (i.e. not behaving like a rope).  To have the bodies 
+ * behave as if connected by flexible rope pass in <code>true</code> to the 
+ * {@link #setSlackEnabled(boolean)} method.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.2.1
  * @since 2.1.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Pulley_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/12/pulley-constraint/" target="_blank">Pulley Constraint</a>
@@ -437,16 +451,29 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Returns the total length of the pulley.
+	 * Returns the total length of the pulley "rope."
+	 * @since 3.0.1
+	 * @return double
+	 * @see #setLength(double)
+	 */
+	public double getLength() {
+		return this.length;
+	}
+	
+	/**
+	 * Sets the total length of the pulley "rope."
 	 * <p>
 	 * Typically this is computed when the joint is created by adding the distance from the
 	 * first body anchor to the first pulley anchor with the distance from the second body anchor
 	 * to the second pulley anchor.
-	 * @since 3.0.1
-	 * @return double
+	 * @param length the length
+	 * @since 3.2.1
 	 */
-	public double getLength() {
-		return this.length;
+	public void setLength(double length) {
+		this.length = length;
+		// wake up both bodies
+		this.body1.setAsleep(false);
+		this.body2.setAsleep(false);
 	}
 	
 	/**
@@ -466,6 +493,9 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 	/**
 	 * Returns the current length from the second pulley anchor point to the
 	 * anchor point on the second {@link Body}.
+	 * <p>
+	 * This is used, in conjunction with length1, to compute the total length
+	 * when the ratio is changed.
 	 * @return double
 	 */
 	public double getLength2() {

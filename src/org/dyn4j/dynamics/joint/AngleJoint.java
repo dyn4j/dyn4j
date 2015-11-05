@@ -39,39 +39,46 @@ import org.dyn4j.resources.Messages;
 /**
  * Implementation of an angle joint.
  * <p>
- * A angle joint constrains the relative rotation of two bodies between [-&pi;, &pi;].
+ * A angle joint constrains the relative rotation of two bodies.  The bodies 
+ * will continue to translate freely.
  * <p>
- * NOTE: The {@link #getAnchor1()} and {@link #getAnchor2()} methods return
- * the world space center points for the joined bodies.  This constraint doesn't need
- * anchor points.
+ * By default the lower and upper limit angles are set to the current angle 
+ * between the bodies.  When the lower and upper limits are equal, the bodies 
+ * rotate together and are not allowed rotate relative to one another.  By
+ * default the limits are disabled.
  * <p>
- * Defaults the min and max angles to the current angle, allowing no relative angular movement.
- * <p>
- * The joint limits must match the following restrictions:
+ * If the lower and upper limits are set explicitly, the values must follow 
+ * these restrictions:
  * <ul>
  * <li>lower limit &le; upper limit</li>
- * <li>lower limit &ge; -180</li>
- * <li>upper limit &le; 180</li>
+ * <li>lower limit &gt; -180</li>
+ * <li>upper limit &lt; 180</li>
  * </ul> 
- * To create a joint with limits other than this format use the {@link #setReferenceAngle(double)}
- * method.  For example:
+ * To create a joint with limits outside of this range use the 
+ * {@link #setReferenceAngle(double)} method.  This method sets the baseline 
+ * angle for the joint, which represents 0 radians in the context of the 
+ * limits.  For example:
  * <pre>
  * // we would like the joint limits to be [30, 260]
  * // this is the same as the limits [-60, 170] if the reference angle is 90
- * angleJoint.setLimits(Math.toRadians(-60), Math.toRadians(170));
- * angleJoint.setReferenceAngle(Math.toRadians(90));
+ * joint.setLimits(Math.toRadians(-60), Math.toRadians(170));
+ * joint.setReferenceAngle(Math.toRadians(90));
  * </pre>
- * The angle joint also allows a ratio value that allow the bodies to rotate at a specified
- * value relative to the other.  This can be used to simulate gears.
+ * The angle joint also allows a ratio value that allow the bodies to rotate at
+ * a specified value relative to the other.  This can be used to simulate gears.
  * <p>
- * Since the AngleJoint class defaults the upper and lower limits to the same value and
- * by default the limits are enabled, you will need to modify the limits, or disable
- * the limit to see the effect of the ratio.
+ * Since the AngleJoint class defaults the upper and lower limits to the same 
+ * value and by default the limits are enabled, you will need to modify the 
+ * limits, or disable the limit to see the effect of the ratio.
  * <p>
- * When the angle between the bodies reaches a limit, if limits are enabled, the ratio is 
- * effectively turned off.
+ * When the angle between the bodies reaches a limit, and limits are enabled, 
+ * the ratio will be turned off.
+ * <p>
+ * NOTE: The {@link #getAnchor1()} and {@link #getAnchor2()} methods return
+ * the world space center points for the joined bodies.  This constraint 
+ * doesn't need anchor points.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.2.1
  * @since 2.2.2
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Angle_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/12/angle-constraint/" target="_blank">Angle Constraint</a>

@@ -24,220 +24,86 @@
  */
 package org.dyn4j.samples;
 
-import java.awt.BorderLayout;
-import java.awt.Canvas;
 import java.awt.Color;
-import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferStrategy;
-import java.text.DecimalFormat;
 
-import javax.swing.JFrame;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-
-import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.joint.MotorJoint;
-import org.dyn4j.examples.Graphics2DRenderer;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.MassType;
+import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 
 /**
  * A moderately complex scene where one body is controlled using a motor joint
  * by another body that is directly rotated.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.2.1
  * @since 3.2.0
  */
-public class PlayerControl extends JFrame {
+public class PlayerControl extends SimulationFrame {
 	/** The serial version id */
-	private static final long serialVersionUID = 5663760293144882635L;
+	private static final long serialVersionUID = -805418642620588619L;
 	
-	/** The scale 45 pixels per meter */
-	public static final double SCALE = 45.0;
+	/** Stored point for mouse moves */
+	private Point movedPoint;
 	
-	/** The conversion factor from nano to base */
-	public static final double NANO_TO_BASE = 1.0e9;
-
-	private Point point;
+	/** Stored point for mouse drags */
+	private Point draggedPoint;
 	
+	/**
+	 * Custom mouse adapter to track mouse moves and drags.
+	 * @author William Bittle
+	 * @version 3.2.1
+	 * @since 3.2.0
+	 */
 	private final class CustomMouseAdapter extends MouseAdapter {
 		@Override
 		public void mouseDragged(MouseEvent e) {
-			this.mouseMoved(e);
+			// get the panel-space point
+			draggedPoint = e.getLocationOnScreen();
 		}
 		
 		@Override
 		public void mouseMoved(MouseEvent e) {
-			// set the controller body's angle
-			if (controller != null) {
-				// get the panel-space point
-				point = e.getLocationOnScreen();
-			}
+			// get the panel-space point
+			movedPoint = e.getLocationOnScreen();
 		}
 	}
 	
-	/**
-	 * Custom Body class to add drawing functionality.
-	 * @author William Bittle
-	 * @version 3.0.2
-	 * @since 3.0.0
-	 */
-	public static class GameObject extends Body {
-		/** The color of the object */
-		protected Color color;
-		
-		private final DecimalFormat format = new DecimalFormat("0.00");
-		
-		/**
-		 * Default constructor.
-		 */
-		public GameObject() {
-			// randomly generate the color
-			this.color = new Color(
-					(float)Math.random() * 0.5f + 0.5f,
-					(float)Math.random() * 0.5f + 0.5f,
-					(float)Math.random() * 0.5f + 0.5f);
-		}
-		
-		/**
-		 * Draws the body.
-		 * <p>
-		 * Only coded for polygons and circles.
-		 * @param g the graphics object to render to
-		 */
-		public void render(Graphics2D g) {
-			// save the original transform
-			AffineTransform ot = g.getTransform();
-			
-			// transform the coordinate system from world coordinates to local coordinates
-			AffineTransform lt = new AffineTransform();
-			lt.translate(this.transform.getTranslationX() * SCALE, this.transform.getTranslationY() * SCALE);
-			lt.rotate(this.transform.getRotation());
-			
-			// apply the transform
-			g.transform(lt);
-			
-			// loop over all the body fixtures for this body
-			for (BodyFixture fixture : this.fixtures) {
-				// get the shape on the fixture
-				Convex convex = fixture.getShape();
-				Graphics2DRenderer.render(g, convex, SCALE, this.color);
-			}
-			
-			// set the original transform
-			g.setTransform(ot);
-			
-			lt = new AffineTransform();
-			lt.translate(this.transform.getTranslationX() * SCALE, this.transform.getTranslationY() * SCALE);
-			lt.scale(1.0, -1.0);
-			g.transform(lt);
-			g.setColor(Color.BLACK);
-			g.drawString("AV = " + format.format(Math.toDegrees(this.getAngularVelocity())), 0, 0);
-			
-			g.setTransform(ot);
-		}
-	}
-	
-	/** The canvas to draw to */
-	protected Canvas canvas;
-	
-	/** The dynamics engine */
-	protected World world;
-	
-	/** Wether the example is stopped or not */
-	protected boolean stopped;
-	
-	/** The time stamp for the last iteration */
-	protected long last;
-	
-	private GameObject controller;
+	/** The controller body */
+	private SimulationBody controller;
 	
 	/**
-	 * Default constructor for the window
+	 * Default constructor.
 	 */
 	public PlayerControl() {
-		super("Player Control");
-		// setup the JFrame
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		// add a window listener
-		this.addWindowListener(new WindowAdapter() {
-			/* (non-Javadoc)
-			 * @see java.awt.event.WindowAdapter#windowClosing(java.awt.event.WindowEvent)
-			 */
-			@Override
-			public void windowClosing(WindowEvent e) {
-				// before we stop the JVM stop the example
-				stop();
-				super.windowClosing(e);
-			}
-		});
-		
-		// create the size of the window
-		Dimension size = new Dimension(800, 600);
-		
-		// create a canvas to paint to 
-		this.canvas = new Canvas();
-		this.canvas.setPreferredSize(size);
-		this.canvas.setMinimumSize(size);
-		this.canvas.setMaximumSize(size);
-		
-		// add the canvas to the JFrame
-		Container container = this.getContentPane();
-		container.setLayout(new BorderLayout());
-		this.add(this.canvas, BorderLayout.CENTER);
-		
-		// make the JFrame not resizable
-		// (this way I dont have to worry about resize events)
-		this.setResizable(false);
+		super("Player Control", 45.0);
 		
 		MouseAdapter ml = new CustomMouseAdapter();
 		this.canvas.addMouseMotionListener(ml);
-		
-		// size everything
-		this.pack();
-		
-		// make sure we are not stopped
-		this.stopped = false;
-		
-		// setup the world
-		this.initializeWorld();
+		this.canvas.addMouseWheelListener(ml);
+		this.canvas.addMouseListener(ml);
 	}
 	
 	/**
 	 * Creates game objects and adds them to the world.
-	 * <p>
-	 * Basically the same shapes from the Shapes test in
-	 * the TestBed.
 	 */
 	protected void initializeWorld() {
-		// create the world
-		this.world = new World();
-		
-	    world.setGravity(World.ZERO_GRAVITY);
+	    this.world.setGravity(World.ZERO_GRAVITY);
+	    
 	    // Player
-	    GameObject body1 = new GameObject();
+	    SimulationBody body1 = new SimulationBody(Color.CYAN);
 	    {// Fixture1
-	      Convex c = Geometry.createSquare(1.0);
-	      BodyFixture bf = new BodyFixture(c);
-	      body1.addFixture(bf);
+			Convex c = Geometry.createSquare(1.0);
+			BodyFixture bf = new BodyFixture(c);
+			body1.addFixture(bf);
 	    }
-	    body1.color = Color.CYAN;
-	    body1.rotate(Math.toRadians(-60.0));
-	    body1.translate(new Vector2(6.0, 0.0));
 	    body1.setLinearVelocity(new Vector2(0.0, 0.0));
 	    body1.setAngularVelocity(0.0);
 	    body1.setMass(MassType.NORMAL);
@@ -250,18 +116,16 @@ public class PlayerControl extends JFrame {
 	    world.addBody(body1);
 
 	    // Controller
-	    controller = new GameObject();
+	    controller = new SimulationBody(new Color(100, 100, 100, 50));
 	    {// Fixture1
-	      Convex c = Geometry.createSquare(1.0);
-	      BodyFixture bf = new BodyFixture(c);
-	      // make sure the controller body doesn't participate in
-	      // collision.  A better way would go the route of using 
-	      // collision filters, but doing this made the sample smaller.
-	      bf.setSensor(true);
-	      controller.addFixture(bf);
+		    Convex c = Geometry.createSquare(1.0);
+		    BodyFixture bf = new BodyFixture(c);
+		    // make sure the controller body doesn't participate in
+		    // collision.  A better way would go the route of using 
+		    // collision filters, but doing this made the sample smaller.
+		    bf.setSensor(true);
+		    controller.addFixture(bf);
 	    }
-	    controller.color = Color.LIGHT_GRAY;
-	    controller.translate(new Vector2(-3.0, 3.0));
 	    controller.setAngularVelocity(0.0);
 	    // make sure the controller body cannot be moved by anything
 	    // even though the body is mass type infinite, you can still
@@ -270,16 +134,14 @@ public class PlayerControl extends JFrame {
 	    controller.setMass(MassType.INFINITE);
 	    world.addBody(controller);
 
-	    // MotorJoint2
+	    // the controller joint
 	    MotorJoint joint1 = new MotorJoint(controller, body1);
-	    joint1.setLinearTarget(new Vector2(0.0, 0.0));
-	    joint1.setAngularTarget(Math.toRadians(0.0));
+	    joint1.setLinearTarget(new Vector2(0.5, 0.5));
+	    joint1.setAngularTarget(Math.PI * 0.25);
 	    joint1.setCorrectionFactor(0.3);
-	    // we dont want the motor joint to move the player to the controller
-	    // we just want it to rotate it.  So we turn that feature off by setting
-	    // the maximum force to 0.0.  In other words, no force will ever be applied
-	    // to the bodies to move them.
-	    joint1.setMaximumForce(0.0);
+	    // allow translational changes (change this depending on how fast you
+	    // want the player body to react to changes in the controller body)
+	    joint1.setMaximumForce(1000.0);
 	    // allow rotational changes (change this depending on how fast you want
 	    // the player body to react to changes in the controller body)
 	    joint1.setMaximumTorque(7.0);
@@ -287,157 +149,59 @@ public class PlayerControl extends JFrame {
 	    world.addJoint(joint1);
 	}
 	
-	/**
-	 * Start active rendering the example.
-	 * <p>
-	 * This should be called after the JFrame has been shown.
+	/* (non-Javadoc)
+	 * @see org.dyn4j.samples.SimulationFrame#update(java.awt.Graphics2D, double)
 	 */
-	public void start() {
-		// initialize the last update time
-		this.last = System.nanoTime();
-		// don't allow AWT to paint the canvas since we are
-		this.canvas.setIgnoreRepaint(true);
-		// enable double buffering (the JFrame has to be
-		// visible before this can be done)
-		this.canvas.createBufferStrategy(2);
-		// run a separate thread to do active rendering
-		// because we don't want to do it on the EDT
-		Thread thread = new Thread() {
-			public void run() {
-				// perform an infinite loop stopped
-				// render as fast as possible
-				while (!isStopped()) {
-					gameLoop();
-					// you could add a Thread.yield(); or
-					// Thread.sleep(long) here to give the
-					// CPU some breathing room
+	@Override
+	protected void update(Graphics2D g, double elapsedTime) {
+		// make sure the controller exists
+		if (this.controller != null) {
+			// check if the mouse has moved
+			if (this.movedPoint != null) {
+				Vector2 p = this.toWorldCoordinates(this.movedPoint);
+				
+				// set the desired position
+				double angle = this.controller.getTransform().getRotation();
+				Transform tx = new Transform();
+				tx.translate(p);
+				tx.rotate(angle, p);
+				this.controller.setTransform(tx);
+				
+				// clear the point
+				this.movedPoint = null;
+			}
+			
+			// check if the mouse has dragged
+			if (this.draggedPoint != null) {
+				Vector2 v = this.toWorldCoordinates(this.draggedPoint);
+				Vector2 c = this.controller.getWorldCenter();
+				
+				// set the desired rotation
+				Vector2 xAxis = new Vector2(1.0, 0.0);
+				double angle = xAxis.getAngleBetween(c.to(v));
+				// account for negative angles
+				if (angle < 0) {
+					angle += 2.0 * Math.PI;
 				}
+				this.controller.getTransform().setRotation(angle);
+				
+				// clear the point
+				this.draggedPoint = null;
 			}
-		};
-		// set the game loop thread to a daemon thread so that
-		// it cannot stop the JVM from exiting
-		thread.setDaemon(true);
-		// start the game loop
-		thread.start();
-	}
-	
-	/**
-	 * The method calling the necessary methods to update
-	 * the game, graphics, and poll for input.
-	 */
-	protected void gameLoop() {
-		// get the graphics object to render to
-		Graphics2D g = (Graphics2D)this.canvas.getBufferStrategy().getDrawGraphics();
-		
-		// before we render everything im going to flip the y axis and move the
-		// origin to the center (instead of it being in the top left corner)
-		AffineTransform yFlip = AffineTransform.getScaleInstance(1, -1);
-		AffineTransform move = AffineTransform.getTranslateInstance(400, -300);
-		g.transform(yFlip);
-		g.transform(move);
-		
-		// now (0, 0) is in the center of the screen with the positive x axis
-		// pointing right and the positive y axis pointing up
-		
-		// render anything about the Example (will render the World objects)
-		this.render(g);
-		
-		// dispose of the graphics object
-		g.dispose();
-		
-		// blit/flip the buffer
-		BufferStrategy strategy = this.canvas.getBufferStrategy();
-		if (!strategy.contentsLost()) {
-			strategy.show();
 		}
 		
-		// Sync the display on some systems.
-        // (on Linux, this fixes event queue problems)
-        Toolkit.getDefaultToolkit().sync();
-        
-        // update the World
-        
-        // check for input
-        this.input();
-        
-        // get the current time
-        long time = System.nanoTime();
-        // get the elapsed time from the last iteration
-        long diff = time - this.last;
-        // set the last time
-        this.last = time;
-    	// convert from nanoseconds to seconds
-    	double elapsedTime = (double)diff / NANO_TO_BASE;
-        // update the world with the elapsed time
-        this.world.update(elapsedTime);
-	}
-
-	/**
-	 * Renders the example.
-	 * @param g the graphics object to render to
-	 */
-	protected void render(Graphics2D g) {
-		// lets draw over everything with a white background
-		g.setColor(Color.WHITE);
-		g.fillRect(-400, -300, 800, 600);
-		
-		// lets move the view up some
-		AffineTransform tx = g.getTransform();
-		g.translate(0.0, -1.0 * SCALE);
-		
-		// draw all the objects in the world
-		for (int i = 0; i < this.world.getBodyCount(); i++) {
-			// get the object
-			GameObject go = (GameObject) this.world.getBody(i);
-			// draw the object
-			go.render(g);
-		}
-		
-		g.setTransform(tx);
-		g.setColor(Color.MAGENTA);
-		g.drawLine(0, 0, (int)Math.ceil(oToMouse.x * SCALE), (int)Math.ceil(oToMouse.y * SCALE));
-		
-		g.scale(1.0, -1.0);
-		g.setColor(Color.BLACK);
-		g.drawString("Angle(from origin) = " + Math.toDegrees(angle), -20, 10);
-		g.setTransform(tx);
-	}
-	
-	private Vector2 oToMouse = new Vector2();
-	private double angle = 0.0;
-	
-	private void input() {
-		// convert it to world space (not really needed since we only need the angle, but a good exercise)
-		// 1m = 45px from our SCALE factor above
-		// the panel-space point also needs to be translated as well
-		if (point != null && controller != null) {
-			double x = ((double)point.x - (double)getWidth() * 0.5) / SCALE;
-			double y = ((double)getHeight() * 0.5 - (double)point.y) / SCALE;
-			Vector2 v = new Vector2(x, y);
-			oToMouse = v;
-			Vector2 xAxis = new Vector2(1.0, 0.0);
-			angle = xAxis.getAngleBetween(v);
-			// account for negative angles
-			if (angle < 0) {
-				angle += 2.0 * Math.PI;
-			}
-			controller.getTransform().setRotation(angle);
-		}
+		super.update(g, elapsedTime);
 	}
 	
 	/**
-	 * Stops the example.
+	 * Converts from screen space to world space.
+	 * @param point the screen space point
+	 * @return {@link Vector2}
 	 */
-	public synchronized void stop() {
-		this.stopped = true;
-	}
-	
-	/**
-	 * Returns true if the example is stopped.
-	 * @return boolean true if stopped
-	 */
-	public synchronized boolean isStopped() {
-		return this.stopped;
+	private Vector2 toWorldCoordinates(Point point) {
+		double x =  (point.getX() - this.canvas.getWidth() / 2.0) / this.scale;
+		double y = -(point.getY() - this.canvas.getHeight() / 2.0) / this.scale;
+		return new Vector2(x, y);
 	}
 	
 	/**
@@ -445,26 +209,7 @@ public class PlayerControl extends JFrame {
 	 * @param args command line arguments
 	 */
 	public static void main(String[] args) {
-		// set the look and feel to the system look and feel
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (UnsupportedLookAndFeelException e) {
-			e.printStackTrace();
-		}
-		
-		// create the example JFrame
-		PlayerControl window = new PlayerControl();
-		
-		// show it
-		window.setVisible(true);
-		
-		// start it
-		window.start();
+		PlayerControl simulation = new PlayerControl();
+		simulation.run();
 	}
 }

@@ -41,15 +41,35 @@ import org.dyn4j.resources.Messages;
 /**
  * Implementation a motor joint.
  * <p>
- * A motor joint uses motors to move two bodies relative to one another.
+ * A motor joint uses a motor to apply forces and torques to move the joined 
+ * bodies together.
  * <p>
- * This joint is ideal for character movement as it allows direct control of the motion
- * using targets, but yet still allows interaction with the environment.  Make one
- * body static to achieve this effect.
+ * The motor is limited by a maximum force and torque.  By default these are
+ * zero and will need to be set before the joint will function properly.
+ * Larger values will allow the motor to apply more force and torque to the
+ * bodies.  This can have two effects.  The first is that the bodies will
+ * move to their correct positions faster.  The second is that the bodies
+ * will be moving faster and may overshoot more causing more oscillation.
+ * Use the {@link #setCorrectionFactor(double)} method to help reduce the
+ * oscillation. 
  * <p>
- * NOTE: The linear and angular targets are relative to body1.
+ * The linear and angular targets are the target distance and angle that the 
+ * bodies should achieve relative to each other's position and rotation.  By 
+ * default, the linear target will be the distance between the two body centers
+ * and the angular target will be the relative rotation of the bodies.  Use the
+ * {@link #setLinearTarget(Vector2)} and {@link #setAngularTarget(double)} 
+ * methods to set the desired relative translation and rotate between the 
+ * bodies.
+ * <p>
+ * This joint is ideal for character movement as it allows direct control of 
+ * the motion using targets, but yet still allows interaction with the 
+ * environment.  The best way to achieve this effect is to have the second body
+ * be an infinite mass body that doesn't collide with anything.  Then, simply 
+ * set the current position and rotation of the infinite mass body.  The 
+ * character body will move and rotate smoothly, participating in any collision
+ * or with other joints to match the infinite mass body.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.2.1
  * @since 3.1.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Motor_Joint" target="_blank">Documentation</a>
  */
@@ -257,7 +277,8 @@ public class MotorJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Returns error in the angle between the joined bodies given the target angle.
+	 * Returns error in the angle between the joined bodies given the target 
+	 * angle.
 	 * @return double
 	 */
 	private double getAngularError() {
@@ -315,7 +336,8 @@ public class MotorJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Returns the desired linear distance along the x and y coordinates from body1's world center.
+	 * Returns the desired linear distance along the x and y coordinates from 
+	 * body1's world center.
 	 * <p>
 	 * To get the world linear target:
 	 * <pre>
@@ -328,7 +350,8 @@ public class MotorJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Sets the desired linear distance along the x and y coordinates from body1's world center.
+	 * Sets the desired linear distance along the x and y coordinates from 
+	 * body1's world center.
 	 * @param target the desired distance along the x and y coordinates
 	 */
 	public void setLinearTarget(Vector2 target) {
@@ -370,7 +393,8 @@ public class MotorJoint extends Joint implements Shiftable, DataContainer {
 	/**
 	 * Sets the correction factor.
 	 * <p>
-	 * The correction factor controls the rate at which the bodies perform the desired actions.
+	 * The correction factor controls the rate at which the bodies perform the
+	 * desired actions.  The default is 0.3.
 	 * <p>
 	 * A value of zero means that the bodies do not perform any action.
 	 * @param correctionFactor the correction factor in the range [0, 1]

@@ -40,8 +40,8 @@ import org.dyn4j.resources.Messages;
 /**
  * Implementation of a friction joint.
  * <p>
- * A friction joint is a constraint that drives both linear
- * and angular velocities to zero.
+ * A friction joint is a constraint that drives both linear and angular 
+ * velocities to zero.
  * <p>
  * This joint is typically used with one dynamic and one static body.  In this
  * context, the joint will apply linear and angular friction to stop the body's motion.

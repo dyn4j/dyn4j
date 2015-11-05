@@ -41,13 +41,33 @@ import org.dyn4j.resources.Messages;
 /**
  * Implementation of a prismatic joint.
  * <p>
- * A prismatic joint constrains the linear motion of two bodies along an axis and prevents
- * relative rotation.  The whole system can still rotate and translate freely.
+ * A prismatic joint constrains the linear motion of two bodies along an axis
+ * and prevents relative rotation.  The whole system can rotate and translate 
+ * freely.
  * <p>
- * This joint can also enable a motor to push the bodies along the axis along with upper and
- * lower limits.  The limits are limits along the axis. 
+ * The initial relative rotation of the bodies will remain unchanged unless 
+ * updated by calling {@link #setReferenceAngle(double)} method.  The bodies
+ * are not required to be aligned in any particular way.
+ * <p>
+ * The world space anchor point can be any point but is typically a point on
+ * the axis of allowed motion, usually the world center of either of the joined
+ * bodies.
+ * <p>
+ * The limits are linear limits along the axis.  The limits are checked against
+ * the separation of the local anchor points, rather than the separation of the
+ * bodies.  This can have the effect of offsetting the limit values.  The best
+ * way to describe the effect is to examine the "0 to 0" limit case.  This case
+ * specifies that the bodies should not move along the axis, forcing them to 
+ * stay at their <em>initial location</em> along the axis.  So if the bodies 
+ * were initially separated when they were joined, they will stay separated at
+ * that initial distance.
+ * <p>
+ * This joint also supports a motor.  The motor is a linear motor along the
+ * axis.  The motor speed can be positive or negative to indicate motion along
+ * or opposite the axis direction.  The maximum motor force must be greater 
+ * than zero for the motor to apply any motion.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.2.1
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Prismatic_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2011/03/prismatic-constraint/" target="_blank">Prismatic Constraint</a>
@@ -204,7 +224,6 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 		Vector2 r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
 		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
 		
-		// compute the 
 		Vector2 d = this.body1.getWorldCenter().sum(r1).subtract(this.body2.getWorldCenter().sum(r2));
 		this.axis = this.body2.getWorldVector(this.xAxis);
 		this.perp = this.body2.getWorldVector(this.yAxis);
@@ -698,6 +717,7 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 	/**
 	 * Sets the target motor speed.
 	 * @param motorSpeed the target motor speed in meters / second
+	 * @see #setMaximumMotorForce(double)
 	 */
 	public void setMotorSpeed(double motorSpeed) {
 		// only wake up the bodies if the motor is currently enabled
@@ -724,6 +744,7 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 	 * to achieve the target speed.
 	 * @param maximumMotorForce the maximum force in newtons; must be greater than zero
 	 * @throws IllegalArgumentException if maxMotorForce is less than zero
+	 * @see #setMotorSpeed(double)
 	 */
 	public void setMaximumMotorForce(double maximumMotorForce) {
 		// make sure its greater than or equal to zero

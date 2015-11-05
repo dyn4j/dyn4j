@@ -48,9 +48,10 @@ import org.dyn4j.resources.Messages;
  * This joint doubles as a spring/damper distance joint where the length can
  * change but is constantly approaching the target distance.  Enable the
  * spring/damper by setting the frequency and damping ratio to values greater than
- * zero.  A good starting point is a frequecy of 8.0 and damping ratio of 0.3.
+ * zero.  A good starting point is a frequency of 8.0 and damping ratio of 0.3
+ * then adjust as necessary.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.2.1
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Distance_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/09/distance-constraint/" target="_blank">Distance Constraint</a>
@@ -391,6 +392,8 @@ public class DistanceJoint extends Joint implements Shiftable, DataContainer {
 	
 	/**
 	 * Sets the damping ratio.
+	 * <p>
+	 * Larger values reduce the oscillation of the spring.
 	 * @param dampingRatio the damping ratio; in the range [0, 1]
 	 * @throws IllegalArgumentException if damping ration is less than zero or greater than 1
 	 */
@@ -411,6 +414,8 @@ public class DistanceJoint extends Joint implements Shiftable, DataContainer {
 	
 	/**
 	 * Sets the spring frequency.
+	 * <p>
+	 * Larger values increase the stiffness of the spring.
 	 * @param frequency the spring frequency in hz; must be greater than or equal to zero
 	 * @throws IllegalArgumentException if frequency is less than zero
 	 */

@@ -26,6 +26,13 @@ package org.dyn4j;
 
 /**
  * Represents criteria for performing a binary search on a {@link BinarySearchTree}.
+ * <p>
+ * The {@link BinarySearchTree#search(BinarySearchTreeSearchCriteria)} method performs a 
+ * binary search and requires some criteria to determine whether to traverse to the left 
+ * (smaller) or right (larger) child.
+ * <p>
+ * The {@link #evaluate(Comparable)} method is called for each node visited starting
+ * at the root of the tree.
  * @author William Bittle
  * @version 3.2.0
  * @since 3.2.0
@@ -33,11 +40,12 @@ package org.dyn4j;
  */
 public interface BinarySearchTreeSearchCriteria<E extends Comparable<E>> {
 	/**
-	 * Evaluates the current value returning one of the following values:
+	 * Evaluates the current comparable determining which child to navigate
+	 * to next.
 	 * <ul>
-	 * <li>0: indicating to stop the search.</li>
-	 * <li>Less than zero: continue searching to the left.</li>
-	 * <li>greater than zero: continue searching to the right</li>
+	 * <li>Return zero to stop the search.</li>
+	 * <li>Return less than zero to continue searching to the left.</li>
+	 * <li>Return greater than zero to continue searching to the right</li>
 	 * </ul>
 	 * @param comparable the current comparable
 	 * @return int

@@ -30,7 +30,7 @@ import org.dyn4j.geometry.Translatable;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Represents the {@link Bounds} of the simulation or world.
+ * Represents the {@link Bounds} of a simulation.
  * <p>
  * By default all bounds are {@link Translatable} but not {@link Rotatable}.
  * <p>

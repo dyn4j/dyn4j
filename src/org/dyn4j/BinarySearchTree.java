@@ -29,9 +29,6 @@ import java.util.Iterator;
 /**
  * Represents an (optionally balanced) Binary Search Tree.
  * <p>
- * This class used in conjunction with the {@link BinarySearchTreeSearchCriteria} interface can
- * be used to perform arbitrary searches on the tree given the stored data. 
- * <p>
  * Null elements are not allowed and duplicates can have unexpected behavior. Changing the value
  * of the elements after being inserted into the tree is undefined. It's also undefined behavior
  * if the elements are not consistent with equals.
@@ -40,6 +37,9 @@ import java.util.Iterator;
  * or disable self balancing. A balanced tree minimizes the tree depth and improves search 
  * performance. When self balancing is enabled, each insert or removal rebalances the tree
  * as necessary.
+ * <p>
+ * This class can be used in conjunction with the {@link BinarySearchTreeSearchCriteria} interface 
+ * to perform arbitrary searches on the tree.
  * @author William Bittle
  * @version 3.2.0
  * @since 2.2.0
