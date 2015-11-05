@@ -576,7 +576,7 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 	 * {@inheritDoc}
 	 * <p>
 	 * Not applicable to this shape.  Always returns null.
-	 * @returns null
+	 * @return null
 	 */
 	@Override
 	public Vector2[] getFoci(Transform transform) {
