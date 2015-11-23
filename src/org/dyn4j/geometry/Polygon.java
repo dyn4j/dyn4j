@@ -316,7 +316,7 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		int size = this.vertices.length;
 		for (int i = 0; i < size; i++) {
 			this.vertices[i].rotate(theta, x, y);
-			this.normals[i].rotate(theta, x, y);
+			this.normals[i].rotate(theta);
 		}
 	}
 

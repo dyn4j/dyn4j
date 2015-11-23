@@ -371,7 +371,7 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 	}
 
 	/**
-	 * Returns the rotation about the local center in radians.
+	 * Returns the rotation about the local center in radians in the range [-&pi;, &pi;].
 	 * @return double the rotation in radians
 	 */
 	public double getRotation() {

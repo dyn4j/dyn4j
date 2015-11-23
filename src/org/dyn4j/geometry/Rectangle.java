@@ -129,7 +129,7 @@ public class Rectangle extends Polygon implements Convex, Wound, Shape, Transfor
 	}
 	
 	/**
-	 * Returns the rotation about the local center in radians.
+	 * Returns the rotation about the local center in radians in the range [-&pi;, &pi;].
 	 * @return double the rotation in radians
 	 * @since 3.0.1
 	 */
@@ -138,7 +138,7 @@ public class Rectangle extends Polygon implements Convex, Wound, Shape, Transfor
 		// we can get the rotation by comparing it to the positive x-axis
 		// since the normal vectors are rotated with the vertices when
 		// a shape is rotated
-		return this.normals[1].getAngleBetween(Vector2.X_AXIS);
+		return Vector2.X_AXIS.getAngleBetween(this.normals[1]);
 	}
 	
 	/* (non-Javadoc)

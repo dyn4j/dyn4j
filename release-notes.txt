@@ -7,6 +7,10 @@ New Features:
   - Added setLength method to the PulleyJoint class.
 
 Bug Fixes:
+  - Fixed a bug where the normals were rotated improperly for Polygon and
+    Segment shapes for local rotations.
+  - Fixed a bug with the Rectangle.getRotation method where it would report
+  	the angle negative.
     
 Deprecated:
   - getJointTranslation and getJointSpeed on the WheelJoint class for

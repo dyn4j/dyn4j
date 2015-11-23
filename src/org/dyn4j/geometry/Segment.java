@@ -710,8 +710,8 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 		super.rotate(theta, x, y);
 		this.vertices[0].rotate(theta, x, y);
 		this.vertices[1].rotate(theta, x, y);
-		this.normals[0].rotate(theta, x, y);
-		this.normals[1].rotate(theta, x, y);
+		this.normals[0].rotate(theta);
+		this.normals[1].rotate(theta);
 	}
 
 	/* (non-Javadoc)

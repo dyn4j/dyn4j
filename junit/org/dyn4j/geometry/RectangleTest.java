@@ -159,4 +159,16 @@ public class RectangleTest {
 		TestCase.assertEquals(0.066, i.min, 1.0e-3);
 		TestCase.assertEquals(1.933, i.max, 1.0e-3);
 	}
+	
+	/**
+	 * Tests the getRotation method.
+	 */
+	@Test
+	public void getRotation() {
+		Rectangle r = Geometry.createRectangle(1, 1);
+		r.translate(1, 1);
+		r.rotate(Math.toRadians(30));
+		
+		TestCase.assertEquals(30, Math.toDegrees(r.getRotation()), 1.0e-3);
+	}
 }
