@@ -155,9 +155,7 @@ public abstract class SimulationFrame extends JFrame {
 				// perform an infinite loop stopped
 				// render as fast as possible
 				while (!isStopped()) {
-					if (!paused) {
-						gameLoop();
-					}
+					gameLoop();
 					// you could add a Thread.yield(); or
 					// Thread.sleep(long) here to give the
 					// CPU some breathing room
@@ -201,8 +199,10 @@ public abstract class SimulationFrame extends JFrame {
 		// render anything about the simulation (will render the World objects)
 		this.render(g, elapsedTime);
         
-        // update the World
-        this.update(g, elapsedTime);
+		if (!paused) {
+	        // update the World
+	        this.update(g, elapsedTime);
+		}
 		
 		// dispose of the graphics object
 		g.dispose();

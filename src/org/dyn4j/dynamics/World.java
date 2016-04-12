@@ -50,6 +50,7 @@ import org.dyn4j.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.collision.manifold.Manifold;
 import org.dyn4j.collision.manifold.ManifoldSolver;
 import org.dyn4j.collision.narrowphase.Gjk;
+import org.dyn4j.collision.narrowphase.LinkPostProcessor;
 import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.collision.narrowphase.Penetration;
 import org.dyn4j.collision.narrowphase.Raycast;
@@ -67,6 +68,7 @@ import org.dyn4j.dynamics.contact.WarmStartingContactManager;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
+import org.dyn4j.geometry.Link;
 import org.dyn4j.geometry.Ray;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Transform;
@@ -713,6 +715,13 @@ public class World implements Shiftable, DataContainer {
 				Penetration penetration = new Penetration();
 				// test the two convex shapes
 				if (this.narrowphaseDetector.detect(convex1, transform1, convex2, transform2, penetration)) {
+					// do post processing for Link shapes to avoid internal
+					// edge collisions
+					if (convex1 instanceof Link) {
+						LinkPostProcessor.process(penetration, (Link)convex1, transform1, convex2, transform2);
+					} else if (convex2 instanceof Link) {
+						LinkPostProcessor.process(penetration, convex1, transform1, (Link)convex2, transform2);
+					}
 					// check for zero penetration
 					if (penetration.getDepth() == 0.0) {
 						// this should only happen if numerical error occurs
