@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Link;
@@ -111,11 +112,28 @@ public class LinkTerrain extends SimulationFrame {
 		floor.setMass(MassType.INFINITE);
 		this.world.addBody(floor);
 		
+//		List<Link> links = getLinks(
+//	    		new Vector2(-5.0,  0.5),
+//	    		new Vector2(-0.0,  0.0),
+//	    		new Vector2( 1.0,  0.0),
+//	    		new Vector2( 1.5,  0.2),
+//	    		new Vector2( 2.5,  0.0),
+//	    		new Vector2( 3.5, -0.5),
+//	    		new Vector2( 6.0, -0.4),
+//	    		new Vector2( 7.0, -0.3));
+//	    Body terrain = new SimulationBody();
+//	    for (Link link : links) {
+//	    	terrain.addFixture(link);
+//	    }
+//	    terrain.setMass(MassType.INFINITE);
+//	    this.world.addBody(terrain);
+		
+		
 		// the body
 		SimulationBody slider = new SimulationBody();
 		slider.addFixture(Geometry.createSquare(0.25));
 		slider.setMass(MassType.NORMAL);
-		slider.setLinearVelocity(7, 0);
+		slider.setLinearVelocity(6.2, 0);
 		slider.translate(-5.5, 1.0);
 		this.world.addBody(slider);
 	}
