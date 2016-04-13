@@ -311,6 +311,13 @@ public abstract class SimulationFrame extends JFrame {
 	}
 	
 	/**
+	 * Pauses the simulation.
+	 */
+	public synchronized void resume() {
+		this.paused = false;
+	}
+	
+	/**
 	 * Returns true if the simulation is paused.
 	 * @return boolean true if paused
 	 */

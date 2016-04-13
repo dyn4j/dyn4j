@@ -59,8 +59,8 @@ public class LinkTerrain extends SimulationFrame {
 	 * Default constructor for the window
 	 */
 	public LinkTerrain() {
-		super("Simple Platformer", 64.0);
-//		this.pause();
+		super("Internal Edge - Without Links", 64.0);
+		this.pause();
 		
 		KeyListener listener = new CustomKeyListener();
 		this.addKeyListener(listener);
@@ -78,7 +78,11 @@ public class LinkTerrain extends SimulationFrame {
 		public void keyPressed(KeyEvent e) {
 			switch (e.getKeyCode()) {
 				case KeyEvent.VK_SPACE:
-					stepPressed.set(true);
+					if (isPaused()) {
+						resume();
+					} else {
+						pause();
+					}
 					break;
 			}
 			
@@ -93,18 +97,36 @@ public class LinkTerrain extends SimulationFrame {
 		
 		// the terrain
 		List<Link> links = getLinks(
-				new Vector2(-6.0,  0.5),
-				new Vector2( 0.0,  0.0),
-				new Vector2( 2.0,  0.0),
-				new Vector2( 4.0,  0.2),
-				new Vector2( 4.5,  0.3),
-				new Vector2( 6.0, -0.5));
+				// normal
+//				new Vector2(-6.0,  0.5),
+//				new Vector2( 0.0,  0.0),
+//				new Vector2( 2.0,  0.0),
+//				new Vector2( 4.0,  0.2),
+//				new Vector2( 4.5,  0.3),
+//				new Vector2( 6.0, -0.5));
+				// upside down
 //				new Vector2(-6.0, -0.5),
 //				new Vector2( 0.0, -0.0),
 //				new Vector2( 2.0, -0.0),
 //				new Vector2( 4.0, -0.2),
 //				new Vector2( 4.5, -0.3),
 //				new Vector2( 6.0,  0.5));
+				// reverse winding
+//				new Vector2( 6.0, -0.5),
+//				new Vector2( 4.5,  0.3),
+//				new Vector2( 4.0,  0.2),
+//				new Vector2( 2.0,  0.0),
+//				new Vector2( 0.0,  0.0),
+//				new Vector2(-6.0,  0.5));
+				// another terrain
+				new Vector2(-5.0,  0.5),
+	    		new Vector2(-0.0,  0.0),
+	    		new Vector2( 1.0,  0.0),
+	    		new Vector2( 1.5,  0.2),
+	    		new Vector2( 2.5,  0.0),
+	    		new Vector2( 3.5, -0.5),
+	    		new Vector2( 6.0, -0.4),
+	    		new Vector2( 7.0, -0.3));
 		SimulationBody floor = new SimulationBody();
 		for (Link link : links) {
 			floor.addFixture(link);
@@ -156,10 +178,6 @@ public class LinkTerrain extends SimulationFrame {
 	protected void render(Graphics2D g, double elapsedTime) {
 		g.translate(-3.0 * this.scale, 0.0);
 		
-		if (this.stepPressed.get()) {
-			this.stepPressed.set(false);
-			this.world.step(1);
-		}
 		super.render(g, elapsedTime);
 	}
 	
