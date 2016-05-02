@@ -52,6 +52,7 @@ import org.dyn4j.collision.manifold.ManifoldSolver;
 import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.LinkPostProcessor;
 import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
+import org.dyn4j.collision.narrowphase.NarrowphasePostProcessor;
 import org.dyn4j.collision.narrowphase.Penetration;
 import org.dyn4j.collision.narrowphase.Raycast;
 import org.dyn4j.collision.narrowphase.RaycastDetector;
@@ -68,7 +69,6 @@ import org.dyn4j.dynamics.contact.WarmStartingContactManager;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
-import org.dyn4j.geometry.Link;
 import org.dyn4j.geometry.Ray;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Transform;
@@ -87,7 +87,7 @@ import org.dyn4j.resources.Messages;
  * there are multiple {@link CollisionListener}s and <b>any</b> one of them returns false for an event, the collision is skipped.  However,
  * all listeners will still be called no matter if the first returned false.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.2.2
  * @since 1.0.0
  */
 public class World implements Shiftable, DataContainer {
@@ -121,6 +121,9 @@ public class World implements Shiftable, DataContainer {
 	
 	/** The {@link NarrowphaseDetector} */
 	protected NarrowphaseDetector narrowphaseDetector;
+	
+	/** The {@link NarrowphasePostProcessor} */
+	protected NarrowphasePostProcessor narrowphasePostProcessor;
 	
 	/** The {@link ManifoldSolver} */
 	protected ManifoldSolver manifoldSolver;
@@ -239,6 +242,7 @@ public class World implements Shiftable, DataContainer {
 		
 		this.broadphaseDetector = new DynamicAABBTree<Body, BodyFixture>(initialCapacity.getBodyCount());
 		this.narrowphaseDetector = new Gjk();
+		this.narrowphasePostProcessor = new LinkPostProcessor();
 		this.manifoldSolver = new ClippingManifoldSolver();
 		this.timeOfImpactDetector = new ConservativeAdvancement();
 		this.raycastDetector = new Gjk();
@@ -715,17 +719,14 @@ public class World implements Shiftable, DataContainer {
 				Penetration penetration = new Penetration();
 				// test the two convex shapes
 				if (this.narrowphaseDetector.detect(convex1, transform1, convex2, transform2, penetration)) {
-					// do post processing for Link shapes to avoid internal
-					// edge collisions
-					if (convex1 instanceof Link) {
-						LinkPostProcessor.process(penetration, (Link)convex1, transform1, convex2, transform2);
-					} else if (convex2 instanceof Link) {
-						LinkPostProcessor.process(penetration, convex1, transform1, (Link)convex2, transform2);
-					}
 					// check for zero penetration
 					if (penetration.getDepth() == 0.0) {
 						// this should only happen if numerical error occurs
 						continue;
+					}
+					// perform post processing
+					if (this.narrowphasePostProcessor != null) {
+						this.narrowphasePostProcessor.process(convex1, transform1, convex2, transform2, penetration);
 					}
 					// notify of the narrow-phase collision
 					allow = true;
@@ -748,6 +749,7 @@ public class World implements Shiftable, DataContainer {
 							// this should only happen if numerical error occurs
 							continue;
 						}
+//						new org.dyn4j.collision.manifold.LinkPostProcessor().process(manifold, convex1, transform1, convex2, transform2);
 						// notify of the manifold solving result
 						allow = true;
 						for (int j = 0; j < clSize; j++) {

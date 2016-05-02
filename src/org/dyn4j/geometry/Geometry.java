@@ -42,7 +42,7 @@ import org.dyn4j.resources.Messages;
  * This class also contains various helper methods for cleaning vector arrays and lists and performing
  * various operations on {@link Shape}s.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.2.2
  * @since 1.0.0
  */
 public final class Geometry {
@@ -1830,5 +1830,50 @@ public final class Geometry {
 		n.normalize();
 		n.multiply(length);
 		return new Segment(segment.center.sum(n.x, n.y), segment.center.difference(n.x, n.y));
+	}
+	
+	/**
+	 * Creates a list of {@link Link}s for the given vertices.
+	 * @param vertices the poly-line vertices
+	 * @param closed true if the last vertex and first vertex are identical and shape should be enclosed
+	 * @return List&lt;{@link Link}&gt;
+	 * @throws NullPointerException if the list of vertices is null or an element of the vertex list is null
+	 * @throws IllegalArgumentException if the list of vertices doesn't contain 2 or more elements
+	 * @since 3.2.2
+	 */
+	public static final List<Link> createLinks(List<Vector2> vertices, boolean closed) {
+		return Geometry.createLinks(vertices.toArray(new Vector2[0]), closed);
+	}
+	
+	/**
+	 * Creates a list of {@link Link}s for the given vertices.
+	 * @param vertices the poly-line vertices
+	 * @param closed true if the last vertex and first vertex are identical and shape should be enclosed
+	 * @return List&lt;{@link Link}&gt;
+	 * @throws NullPointerException if the array of vertices is null or an element of the vertex array is null
+	 * @throws IllegalArgumentException if the array of vertices doesn't contain 2 or more elements
+	 * @since 3.2.2
+	 */
+	public static final List<Link> createLinks(Vector2[] vertices, boolean closed) {
+		// check the vertex array
+		if (vertices == null) throw new NullPointerException(Messages.getString("geometry.nullPointArray"));
+		// get the vertex length
+		int size = vertices.length;
+		// the size must be larger than 1 (2 or more)
+		if (size < 2) throw new IllegalArgumentException(Messages.getString("geometry.invalidSizePointList2"));
+		// generate the links
+		List<Link> links = new ArrayList<Link>();
+		for (int i = 0; i < size - 1; i++) {
+			Vector2 p0 = (i != 0 ? vertices[i - 1].copy() : (closed ? vertices[size - 1].copy() : null));
+			Vector2 p1 = vertices[i].copy();
+			Vector2 p2 = vertices[i + 1].copy();
+			// check for null segment vertices
+			if (p1 == null || p2 == null)  {
+				throw new NullPointerException(Messages.getString("geometry.nullPointListElements"));
+			}
+			Vector2 p3 = (i + 2 < size ? vertices[i + 2].copy() : (closed ? vertices[0].copy() : null));
+			links.add(new Link(p0, p1, p2, p3));
+		}
+		return links;
 	}
 }
