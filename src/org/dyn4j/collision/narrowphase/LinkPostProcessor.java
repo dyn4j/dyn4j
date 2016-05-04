@@ -308,8 +308,6 @@ public final class LinkPostProcessor implements NarrowphasePostProcessor {
 			}
 		}
 		
-		//System.out.println("n: " + n + " nn: " + normal + " l: " + lower + " u: " + upper);
-		
 		// determine which normal, the upper or the lower, we should rotate the
 		// collision normal towards
 		Vector2 perp = normal.getRightHandOrthogonalVector();

@@ -31,11 +31,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Link;
@@ -46,20 +44,25 @@ import org.dyn4j.geometry.Vector2;
  * A simple scene of a terrain made using the {@link Link}s to avoid
  * the internal edge collision problem.
  * @author William Bittle
- * @since 3.2.1
- * @version 3.2.0
+ * @version 3.2.2
+ * @since 3.2.2
  */
 public class LinkTerrain extends SimulationFrame {
 	/** The serial version id */
 	private static final long serialVersionUID = -3675099977835892473L;
 
+	/** True if a step should be performed */
 	private final AtomicBoolean stepPressed = new AtomicBoolean(false);
+	
+	/** The manual step count */
+	private int step = 0;
 	
 	/**
 	 * Default constructor for the window
 	 */
 	public LinkTerrain() {
-		super("Internal Edge - Without Links", 64.0);
+		super("Link Terrain", 64.0);
+		
 		this.pause();
 		
 		KeyListener listener = new CustomKeyListener();
@@ -84,6 +87,11 @@ public class LinkTerrain extends SimulationFrame {
 						pause();
 					}
 					break;
+				case KeyEvent.VK_ENTER:
+					if (isPaused()) {
+						// only allow manual stepping if paused
+						stepPressed.set(true);
+					}
 			}
 			
 		}
@@ -96,37 +104,56 @@ public class LinkTerrain extends SimulationFrame {
 //		this.world.setGravity(this.world.getGravity().negate());
 		
 		// the terrain
-		List<Link> links = getLinks(
-				// normal
-//				new Vector2(-6.0,  0.5),
-//				new Vector2( 0.0,  0.0),
-//				new Vector2( 2.0,  0.0),
-//				new Vector2( 4.0,  0.2),
-//				new Vector2( 4.5,  0.3),
-//				new Vector2( 6.0, -0.5));
-				// upside down
-//				new Vector2(-6.0, -0.5),
-//				new Vector2( 0.0, -0.0),
-//				new Vector2( 2.0, -0.0),
-//				new Vector2( 4.0, -0.2),
-//				new Vector2( 4.5, -0.3),
-//				new Vector2( 6.0,  0.5));
-				// reverse winding
-//				new Vector2( 6.0, -0.5),
-//				new Vector2( 4.5,  0.3),
-//				new Vector2( 4.0,  0.2),
-//				new Vector2( 2.0,  0.0),
-//				new Vector2( 0.0,  0.0),
-//				new Vector2(-6.0,  0.5));
-				// another terrain
-				new Vector2(-5.0,  0.5),
-	    		new Vector2(-0.0,  0.0),
-	    		new Vector2( 1.0,  0.0),
-	    		new Vector2( 1.5,  0.2),
-	    		new Vector2( 2.5,  0.0),
-	    		new Vector2( 3.5, -0.5),
-	    		new Vector2( 6.0, -0.4),
-	    		new Vector2( 7.0, -0.3));
+		List<Link> links = Geometry.createLinks(
+				new Vector2[] {
+					// clockwise winding
+					new Vector2(-6.0,  0.5),
+					new Vector2( 0.0,  0.0),
+					new Vector2( 2.0,  0.0),
+					new Vector2( 4.0,  0.2),
+					new Vector2( 4.5,  0.3),
+					new Vector2( 6.0, -0.5)
+					// upside down
+//					new Vector2(-6.0, -0.5),
+//					new Vector2( 0.0, -0.0),
+//					new Vector2( 2.0, -0.0),
+//					new Vector2( 4.0, -0.2),
+//					new Vector2( 4.5, -0.3),
+//					new Vector2( 6.0,  0.5)
+					// counter-clockwise winding
+//					new Vector2( 6.0, -0.5),
+//					new Vector2( 4.5,  0.3),
+//					new Vector2( 4.0,  0.2),
+//					new Vector2( 2.0,  0.0),
+//					new Vector2( 0.0,  0.0),
+//					new Vector2(-6.0,  0.5)
+					// another terrain
+//					new Vector2(-5.0,  0.5),
+//		    		new Vector2(-0.0,  0.0),
+//		    		new Vector2( 1.0,  0.0),
+//		    		new Vector2( 1.5,  0.2),
+//		    		new Vector2( 2.5,  0.0),
+//		    		new Vector2( 3.5, -0.5),
+//		    		new Vector2( 6.0, -0.4),
+//		    		new Vector2( 7.0, -0.3)
+		    		// reverse winding
+//					new Vector2( 7.0, -0.3),
+//					new Vector2( 6.0, -0.4),
+//					new Vector2( 3.5, -0.5),
+//					new Vector2( 2.5,  0.0),
+//					new Vector2( 1.5,  0.2),
+//					new Vector2( 1.0,  0.0),
+//					new Vector2(-0.0,  0.0),
+//		    		new Vector2(-5.0,  0.5)
+		    		// cliff
+//					new Vector2(-5.0,  0.0),
+//		    		new Vector2( 1.0,  0.0),
+//		    		new Vector2(-3.0, -1.0)
+					// cliff (reversed winding)
+//					new Vector2(-5.0,  0.0),
+//		    		new Vector2( 1.0,  0.0),
+//		    		new Vector2(-3.0, -1.0)
+				}, false);
 		SimulationBody floor = new SimulationBody();
 		for (Link link : links) {
 			floor.addFixture(link);
@@ -134,53 +161,33 @@ public class LinkTerrain extends SimulationFrame {
 		floor.setMass(MassType.INFINITE);
 		this.world.addBody(floor);
 		
-//		List<Link> links = getLinks(
-//	    		new Vector2(-5.0,  0.5),
-//	    		new Vector2(-0.0,  0.0),
-//	    		new Vector2( 1.0,  0.0),
-//	    		new Vector2( 1.5,  0.2),
-//	    		new Vector2( 2.5,  0.0),
-//	    		new Vector2( 3.5, -0.5),
-//	    		new Vector2( 6.0, -0.4),
-//	    		new Vector2( 7.0, -0.3));
-//	    Body terrain = new SimulationBody();
-//	    for (Link link : links) {
-//	    	terrain.addFixture(link);
-//	    }
-//	    terrain.setMass(MassType.INFINITE);
-//	    this.world.addBody(terrain);
-		
-		
 		// the body
 		SimulationBody slider = new SimulationBody();
 		slider.addFixture(Geometry.createSquare(0.25));
 		slider.setMass(MassType.NORMAL);
 		slider.setLinearVelocity(6.2, 0);
 		slider.translate(-5.5, 1.0);
+//		slider.translate(-5.5, -1.0);
 		this.world.addBody(slider);
 	}
 
-	private static final List<Link> getLinks(Vector2... vertices) {
-		List<Link> links = new ArrayList<Link>();
-		if (vertices != null) {
-			for (int i = 0; i < vertices.length - 1; i++) {
-				Vector2 p0 = (i != 0 ? vertices[i - 1] : null);
-				Vector2 p1 = vertices[i];
-				Vector2 p2 = (i + 1 < vertices.length ? vertices[i + 1] : null);
-				Vector2 p3 = (i + 2 < vertices.length ? vertices[i + 2] : null);
-				links.add(new Link(p0, p1, p2, p3));
-			}
-		}
-		return links;
-	}
-	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.samples.SimulationFrame#render(java.awt.Graphics2D, double)
+	 */
 	@Override
 	protected void render(Graphics2D g, double elapsedTime) {
-		g.translate(-3.0 * this.scale, 0.0);
+		if (this.stepPressed.get()) {
+			System.out.println(++step);
+			this.stepPressed.set(false);
+			this.world.step(1);
+		}
 		
 		super.render(g, elapsedTime);
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.samples.SimulationFrame#render(java.awt.Graphics2D, double, org.dyn4j.samples.SimulationBody)
+	 */
 	@Override
 	protected void render(Graphics2D g, double elapsedTime, SimulationBody body) {
 		super.render(g, elapsedTime, body);
@@ -196,7 +203,7 @@ public class LinkTerrain extends SimulationFrame {
 			// draw the contact normal
 			Line2D.Double vn = new Line2D.Double(
 					c.getPoint().x * this.scale, c.getPoint().y * this.scale, 
-					(c.getPoint().x + c.getNormal().x * c.getDepth() * 100) * this.scale, (c.getPoint().y + c.getNormal().y * c.getDepth() * 100) * this.scale);
+					(c.getPoint().x + -c.getNormal().x * c.getDepth() * 100) * this.scale, (c.getPoint().y + -c.getNormal().y * c.getDepth() * 100) * this.scale);
 			g.setColor(Color.BLUE);
 			g.draw(vn);
 		}
