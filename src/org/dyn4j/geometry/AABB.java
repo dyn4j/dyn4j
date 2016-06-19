@@ -356,15 +356,15 @@ public class AABB implements Translatable {
 		if (this.min.x > aabb.max.x || this.max.x < aabb.min.x) {
 			// the aabbs do not overlap along the x-axis
 			return false;
-		} else {
-			// check for overlap along the y-axis
-			if (this.min.y > aabb.max.y || this.max.y < aabb.min.y) {
-				// the aabbs do not overlap along the y-axis
-				return false;
-			} else {
-				return true;
-			}
 		}
+		
+		// check for overlap along the y-axis
+		if (this.min.y > aabb.max.y || this.max.y < aabb.min.y) {
+			// the aabbs do not overlap along the y-axis
+			return false;
+		}
+		
+		return true;
 	}
 	
 	/**

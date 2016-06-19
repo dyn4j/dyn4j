@@ -119,6 +119,9 @@ public class World implements Shiftable, DataContainer {
 	/** The {@link BroadphaseDetector} */
 	protected BroadphaseDetector<Body, BodyFixture> broadphaseDetector;
 	
+	/** The {@link BroadphaseFilter} for detection */
+	protected BroadphaseFilter<Body, BodyFixture> detectBroadphaseFilter;
+	
 	/** The {@link NarrowphaseDetector} */
 	protected NarrowphaseDetector narrowphaseDetector;
 	
@@ -133,7 +136,7 @@ public class World implements Shiftable, DataContainer {
 	
 	/** The {@link RaycastDetector} */
 	protected RaycastDetector raycastDetector;
-	
+
 	/** The {@link ContactManager} */
 	protected ContactManager contactManager;
 
@@ -241,6 +244,7 @@ public class World implements Shiftable, DataContainer {
 		this.bounds = bounds;
 		
 		this.broadphaseDetector = new DynamicAABBTree<Body, BodyFixture>(initialCapacity.getBodyCount());
+		this.detectBroadphaseFilter = new DetectBroadphaseFilter();
 		this.narrowphaseDetector = new Gjk();
 		this.narrowphasePostProcessor = new LinkPostProcessor();
 		this.manifoldSolver = new ClippingManifoldSolver();
@@ -534,11 +538,10 @@ public class World implements Shiftable, DataContainer {
 					// get the contact constraint
 					constraint = contactConstraint = contactEdge.interaction;
 					// skip sensor contacts
-					if (contactConstraint.isSensor()) continue;
+					// check if the contact constraint has already been added to an island
+					if (contactConstraint.isSensor() || constraint.isOnIsland()) continue;
 					// get the other body
 					Body other = contactEdge.other;
-					// check if the contact constraint has already been added to an island
-					if (constraint.isOnIsland()) continue;
 					// add the contact constraint to the island list
 					island.add(contactConstraint);
 					// set the island flag on the contact constraint
@@ -558,12 +561,12 @@ public class World implements Shiftable, DataContainer {
 					// get the joint
 					constraint = joint = jointEdge.interaction;
 					// check if the joint is inactive
-					if (!joint.isActive()) continue;
+					if (!joint.isActive() || constraint.isOnIsland()) continue;
 					// get the other body
 					Body other = jointEdge.other;
 					// check if the joint has already been added to an island
 					// or if the other body is not active
-					if (constraint.isOnIsland() || !other.isActive()) continue;
+					if (!other.isActive()) continue;
 					// add the joint to the island
 					island.add(joint);
 					// set the island flag on the joint
@@ -663,16 +666,14 @@ public class World implements Shiftable, DataContainer {
 			// clear all the old contacts
 			body.contacts.clear();
 			// check if bounds have been set
-			if (this.bounds != null) {
-				// check if the body is out of bounds
-				if (this.bounds.isOutside(body)) {
-					// set the body to inactive
-					body.setActive(false);
-					// if so, notify via the listeners
-					for (int j = 0; j < blSize; j++) {
-						BoundsListener bl = boundsListeners.get(j);
-						bl.outside(body);
-					}
+			// check if the body is out of bounds
+			if (this.bounds != null && this.bounds.isOutside(body)) {
+				// set the body to inactive
+				body.setActive(false);
+				// if so, notify via the listeners
+				for (int j = 0; j < blSize; j++) {
+					BoundsListener bl = boundsListeners.get(j);
+					bl.outside(body);
 				}
 			}
 			// update the broadphase with the new position/orientation
@@ -682,8 +683,7 @@ public class World implements Shiftable, DataContainer {
 		// make sure there are some bodies
 		if (size > 0) {
 			// test for collisions via the broad-phase
-			BroadphaseFilter<Body, BodyFixture> filter = new DetectBroadphaseFilter();
-			List<BroadphasePair<Body, BodyFixture>> pairs = this.broadphaseDetector.detect(filter);
+			List<BroadphasePair<Body, BodyFixture>> pairs = this.broadphaseDetector.detect(this.detectBroadphaseFilter);
 			int pSize = pairs.size();
 			boolean allow = true;
 			
@@ -749,7 +749,6 @@ public class World implements Shiftable, DataContainer {
 							// this should only happen if numerical error occurs
 							continue;
 						}
-//						new org.dyn4j.collision.manifold.LinkPostProcessor().process(manifold, convex1, transform1, convex2, transform2);
 						// notify of the manifold solving result
 						allow = true;
 						for (int j = 0; j < clSize; j++) {
@@ -3466,6 +3465,31 @@ public class World implements Shiftable, DataContainer {
 	 */
 	public BroadphaseDetector<Body, BodyFixture> getBroadphaseDetector() {
 		return this.broadphaseDetector;
+	}
+	
+	/**
+	 * Sets the {@link BroadphaseFilter} used when detecting collisions for each time step.
+	 * <p>
+	 * This should always be an instance of a class that extends the {@link DetectBroadphaseFilter}
+	 * so that the standard filters are retained.
+	 * @param filter the filter
+	 * @since 3.2.2
+	 */
+	public void setDetectBroadphaseFilter(BroadphaseFilter<Body, BodyFixture> filter) {
+		if (filter == null) {
+			this.detectBroadphaseFilter = new DetectBroadphaseFilter();
+		} else {
+			this.detectBroadphaseFilter = filter;
+		}
+	}
+	
+	/**
+	 * Returns the {@link BroadphaseFilter} used when detecting collisions for each time step.
+	 * @return {@link BroadphaseFilter}
+	 * @since 3.2.2
+	 */
+	public BroadphaseFilter<Body, BodyFixture> getDetectBroadphaseFilter() {
+		return this.detectBroadphaseFilter;
 	}
 	
 	/**
