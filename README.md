@@ -11,6 +11,13 @@ The project comprises over 1,000 JUnit test cases, a GUI test application called
 
 ### Compiled Binaries
 Latest versions of dyn4j can be found on [Maven Central](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.dyn4j%22%20AND%20a%3A%22dyn4j%22).
+```xml
+<dependency>
+    <groupId>org.dyn4j</groupId>
+    <artifactId>dyn4j</artifactId>
+    <version>3.2.2</version>
+</dependency>
+```
 
 ### Getting Started
 Getting started is easy.  Just grab the latest compiled binary and add it to your project's classpath, then take a look at the [example applications](https://github.com/wnbittle/dyn4j/tree/master/examples/org/dyn4j/examples) for a quick start.  For a little more detail see [Getting Started](http://www.dyn4j.org/getting-started/).

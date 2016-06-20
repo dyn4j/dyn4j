@@ -1,4 +1,25 @@
 ===============================================================================
+Version 3.2.2
+===============================================================================
+New Features:
+  - Added the Link shape class to fix the internal edge problem
+  - Exposed a set/get method for the BroadphaseFilter that is being used in the
+    World.detect method to give more control over the filtering during the
+    broadphase.
+
+Bug Fixes:
+  - Fixed a small bug in the Segment class where the second normal was
+    incorrect, but was changed to the correct one during collision detection.
+    
+Deprecated:
+  
+Breaking Changes:
+  
+Other:
+  - Small code clean up here and there.
+  - Updated copyright dates.
+
+===============================================================================
 Version 3.2.1
 ===============================================================================
 New Features:

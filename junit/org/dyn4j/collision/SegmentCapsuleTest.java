@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2015 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -188,15 +188,15 @@ public class SegmentCapsuleTest extends AbstractTest {
 		TestCase.assertTrue(this.sat.detect(segment, t1, capsule, t2, p));
 		TestCase.assertTrue(this.sat.detect(segment, t1, capsule, t2));
 		n = p.getNormal();
-		TestCase.assertEquals(-0.554, n.x, 1.0e-3);
-		TestCase.assertEquals(-0.832, n.y, 1.0e-3);
+		TestCase.assertEquals( 0.554, n.x, 1.0e-3);
+		TestCase.assertEquals( 0.832, n.y, 1.0e-3);
 		TestCase.assertEquals( 0.388, p.getDepth(), 1.0e-3);
 		// try reversing the shapes
 		TestCase.assertTrue(this.sat.detect(capsule, t2, segment, t1, p));
 		TestCase.assertTrue(this.sat.detect(capsule, t2, segment, t1));
 		n = p.getNormal();
-		TestCase.assertEquals(-0.554, n.x, 1.0e-3);
-		TestCase.assertEquals(-0.832, n.y, 1.0e-3);
+		TestCase.assertEquals( 0.554, n.x, 1.0e-3);
+		TestCase.assertEquals( 0.832, n.y, 1.0e-3);
 		TestCase.assertEquals( 0.388, p.getDepth(), 1.0e-3);
 		
 		// test overlap

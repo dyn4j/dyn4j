@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2015 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -551,7 +551,7 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 		Vector2 p2 = transform.getTransformed(this.vertices[1]);
 		// use both the edge and its normal
 		axes[n++] = transform.getTransformedR(this.normals[1]);
-		axes[n++] = transform.getTransformedR(this.normals[0].getLeftHandOrthogonalVector());
+		axes[n++] = transform.getTransformedR(this.normals[0]);
 		Vector2 axis;
 		// add the voronoi region axes if point is supplied
 		for (int i = 0; i < size; i++) {

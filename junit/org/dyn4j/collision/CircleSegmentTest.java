@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2015 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -189,14 +189,14 @@ public class CircleSegmentTest extends AbstractTest {
 		TestCase.assertTrue(this.sat.detect(circ, t1, seg, t2));
 		n = p.getNormal();
 		TestCase.assertEquals(0.0, n.x, 1.0e-10);
-		TestCase.assertEquals(-1.0, n.y, 1.0e-10);
+		TestCase.assertEquals(1.0, n.y, 1.0e-10);
 		TestCase.assertEquals(1.0, p.getDepth(), 1.0e-10);
 		// try reversing the shapes
 		TestCase.assertTrue(this.sat.detect(seg, t2, circ, t1, p));
 		TestCase.assertTrue(this.sat.detect(seg, t2, circ, t1));
 		n = p.getNormal();
 		TestCase.assertEquals(0.0, n.x, 1.0e-10);
-		TestCase.assertEquals(-1.0, n.y, 1.0e-10);
+		TestCase.assertEquals(1.0, n.y, 1.0e-10);
 		TestCase.assertEquals(1.0, p.getDepth(), 1.0e-10);
 		
 		// test overlap
