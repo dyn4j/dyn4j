@@ -34,6 +34,7 @@ import java.awt.geom.Line2D;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.dyn4j.collision.narrowphase.Sat;
 import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Link;
@@ -102,6 +103,7 @@ public class LinkTerrain extends SimulationFrame {
 	 */
 	protected void initializeWorld() {
 //		this.world.setGravity(this.world.getGravity().negate());
+		this.world.setNarrowphaseDetector(new Sat());
 		
 		// the terrain
 		List<Link> links = Geometry.createLinks(
@@ -154,6 +156,7 @@ public class LinkTerrain extends SimulationFrame {
 //		    		new Vector2( 1.0,  0.0),
 //		    		new Vector2(-3.0, -1.0)
 				}, false);
+		
 		SimulationBody floor = new SimulationBody();
 		for (Link link : links) {
 			floor.addFixture(link);
@@ -164,8 +167,17 @@ public class LinkTerrain extends SimulationFrame {
 		// the body
 		SimulationBody slider = new SimulationBody();
 		slider.addFixture(Geometry.createSquare(0.25));
+//		List<Link> sLinks = Geometry.createLinks(new Vector2[] {
+//				new Vector2(0.5, 0.0),
+//				new Vector2(0.0, 1.0),
+//				new Vector2(-0.5, 0.0)
+//		}, true);
+//		for (Link link : sLinks) {
+//			slider.addFixture(link);
+//		}
 		slider.setMass(MassType.NORMAL);
 		slider.setLinearVelocity(6.2, 0);
+//		slider.setLinearVelocity(5, 0);
 		slider.translate(-5.5, 1.0);
 //		slider.translate(-5.5, -1.0);
 		this.world.addBody(slider);

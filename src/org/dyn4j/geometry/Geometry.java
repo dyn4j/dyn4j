@@ -1834,8 +1834,11 @@ public final class Geometry {
 	
 	/**
 	 * Creates a list of {@link Link}s for the given vertices.
+	 * <p>
+	 * If the closed parameter is true, an extra link is created joining the last and first
+	 * vertices in the list.
 	 * @param vertices the poly-line vertices
-	 * @param closed true if the last vertex and first vertex are identical and shape should be enclosed
+	 * @param closed true if the shape should be enclosed
 	 * @return List&lt;{@link Link}&gt;
 	 * @throws NullPointerException if the list of vertices is null or an element of the vertex list is null
 	 * @throws IllegalArgumentException if the list of vertices doesn't contain 2 or more elements
@@ -1846,9 +1849,12 @@ public final class Geometry {
 	}
 	
 	/**
-	 * Creates a list of {@link Link}s for the given vertices.
+	 * Creates a {@link Link} chain for the given vertices.
+	 * <p>
+	 * If the closed parameter is true, an extra link is created joining the last and first
+	 * vertices in the array.
 	 * @param vertices the poly-line vertices
-	 * @param closed true if the last vertex and first vertex are identical and shape should be enclosed
+	 * @param closed true if the shape should be enclosed
 	 * @return List&lt;{@link Link}&gt;
 	 * @throws NullPointerException if the array of vertices is null or an element of the vertex array is null
 	 * @throws IllegalArgumentException if the array of vertices doesn't contain 2 or more elements
@@ -1864,16 +1870,35 @@ public final class Geometry {
 		// generate the links
 		List<Link> links = new ArrayList<Link>();
 		for (int i = 0; i < size - 1; i++) {
-			Vector2 p0 = (i != 0 ? vertices[i - 1].copy() : (closed ? vertices[size - 1].copy() : null));
 			Vector2 p1 = vertices[i].copy();
 			Vector2 p2 = vertices[i + 1].copy();
 			// check for null segment vertices
 			if (p1 == null || p2 == null)  {
 				throw new NullPointerException(Messages.getString("geometry.nullPointListElements"));
 			}
-			Vector2 p3 = (i + 2 < size ? vertices[i + 2].copy() : (closed ? vertices[0].copy() : null));
-			links.add(new Link(p0, p1, p2, p3));
+			Link link = new Link(p1, p2);
+			// link up the previous and this link
+			if (i > 0) {
+				Link prev = links.get(i - 1);
+				link.setPrevious(prev);
+			}
+			// add link to the list of links
+			links.add(link);
 		}
+		
+		if (closed) {
+			// create a link to span the first and last vertex
+			Vector2 p1 = vertices[0].copy();
+			Vector2 p2 = vertices[size - 1].copy();
+			Link link = new Link(p1, p2);
+			// wire it up
+			Link prev = links.get(links.size() - 1);
+			Link next = links.get(0);
+			link.setPrevious(prev);
+			link.setNext(next);
+			links.add(link);
+		}
+		
 		return links;
 	}
 }

@@ -46,7 +46,7 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 	final Vector2[] normals;
 	
 	/** The segment length */
-	final double length;
+	double length;
 	
 	/**
 	 * Validated constructor.
@@ -63,9 +63,9 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 		this.vertices = vertices;
 		// create the normals
 		this.normals = new Vector2[2];
-		this.normals[0] = segment.right();
+		this.normals[0] = segment.copy();
 		this.normals[0].normalize();
-		this.normals[1] = segment.getNegative();
+		this.normals[1] = segment.right();
 		this.normals[1].normalize();
 		// compute the length
 		this.length = length;

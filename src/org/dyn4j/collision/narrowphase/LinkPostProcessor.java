@@ -35,6 +35,7 @@ import org.dyn4j.geometry.Vector2;
  * @author Willima Bittle
  * @version 3.2.2
  * @since 3.2.2
+ * @see <a href="https://bullet.googlecode.com/files/GDC10_Coumans_Erwin_Contact.pdf">Slides 46-54</a>
  */
 public final class LinkPostProcessor implements NarrowphasePostProcessor {
 	/* (non-Javadoc)
@@ -327,12 +328,6 @@ public final class LinkPostProcessor implements NarrowphasePostProcessor {
 				// adjust the depth
 				penetration.depth = lower.dot(n) * penetration.depth;
 			}
-		}
-		
-		// make sure the adjusted normal is pointing in
-		// the same direction as the collision normal
-		if (n.dot(penetration.normal) < 0) {
-			penetration.normal.negate();
 		}
 	}
 }

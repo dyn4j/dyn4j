@@ -42,7 +42,7 @@ public abstract class AbstractShape implements Shape, Transformable, DataContain
 	final Vector2 center;
 	
 	/** The maximum radius */
-	final double radius;
+	double radius;
 	
 	/** Custom user data object */
 	protected Object userData;
