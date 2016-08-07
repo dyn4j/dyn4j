@@ -39,10 +39,10 @@ public abstract class AbstractShape implements Shape, Transformable, DataContain
 	protected final UUID id = UUID.randomUUID();
 	
 	/** The center of this {@link Shape} */
-	final Vector2 center;
+	protected Vector2 center;
 	
 	/** The maximum radius */
-	double radius;
+	protected double radius;
 	
 	/** Custom user data object */
 	protected Object userData;

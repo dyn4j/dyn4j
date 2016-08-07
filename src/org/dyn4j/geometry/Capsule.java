@@ -41,7 +41,7 @@ import org.dyn4j.resources.Messages;
  * instead of an equal width/height capsule for both performance and stability.
  * @author William Bittle
  * @version 3.2.0
- * @since 3.1.5
+ * @since 3.2.3
  */
 public class Capsule extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
 	/** 
@@ -331,7 +331,7 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 	 */
 	@Override
 	public double getRadius(Vector2 center) {
-		return this.radius + this.center.distance(center);
+		return Geometry.getRotationRadius(center, this.foci) + this.capRadius;
 	}
 
 	/* (non-Javadoc)

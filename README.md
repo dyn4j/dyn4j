@@ -15,7 +15,7 @@ Latest versions of dyn4j can be found on [Maven Central](http://search.maven.org
 <dependency>
     <groupId>org.dyn4j</groupId>
     <artifactId>dyn4j</artifactId>
-    <version>3.2.2</version>
+    <version>3.2.3</version>
 </dependency>
 ```
 

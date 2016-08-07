@@ -1,4 +1,19 @@
 ===============================================================================
+Version 3.2.3
+===============================================================================
+New Features:
+
+Bug Fixes:
+  - Fixed a few critical bugs with the Slice, Capsule, Ellipse and HalfElipse 
+    shapes. See http://forum.dyn4j.org/viewtopic.php?f=3&t=287
+    
+Deprecated:
+  
+Breaking Changes:
+  
+Other:
+
+===============================================================================
 Version 3.2.2
 ===============================================================================
 New Features:

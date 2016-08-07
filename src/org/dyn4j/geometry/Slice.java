@@ -35,7 +35,7 @@ import org.dyn4j.resources.Messages;
  * This shape can represent any slice of a circle up to 180 degrees (half circle).
  * @author William Bittle
  * @since 3.2.0
- * @version 3.1.5
+ * @version 3.2.3
  */
 public class Slice extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
 	/** The total circular section in radians */
@@ -44,7 +44,7 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	/** Half of theta */
 	final double alpha;
 	
-	/** The maximum radius of this shape rotated about its center */
+	/** The radius passed in at creation */
 	final double sliceRadius;
 	
 	/** The vertices of the slice */
@@ -67,7 +67,7 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	 * @param center the center
 	 */
 	private Slice(boolean valid, double radius, double theta, Vector2 center) {
-		super(center, Math.max(center.x, radius - center.x));
+		super(center, Math.max(center.x, center.distance(new Vector2(radius, 0).rotate(0.5*theta))));
 		
 		this.sliceRadius = radius;
 		this.theta = theta;
@@ -260,6 +260,11 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 				// if so, we want to return the full back side
 				return Segment.getFarthestFeature(this.vertices[1], this.vertices[2], vector, transform);
 			}
+			
+			// include local rotation
+			double r = this.getRotation();
+			// invert the local rotation
+			localAxis.rotate(-r);
 			// otherwise check which side its on
 			if (localAxis.y > 0) {
 				// then its the top segment
@@ -319,7 +324,22 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	 */
 	@Override
 	public double getRadius(Vector2 center) {
-		return this.radius + center.distance(this.center);
+		// is the given center in region A?
+		// \    /)
+		//  \  /  )
+		//   \/    )
+		//A  /\    )
+		//  /  \  )
+		// /    \)
+		if (Segment.getLocation(center, this.vertices[1], this.vertices[0]) <= 0 &&
+			Segment.getLocation(center, this.vertices[2], this.vertices[0]) >= 0) {
+			// if so, its the slice radius plus the distance from the
+			// center to the tip of the slice
+			return this.sliceRadius + center.distance(this.vertices[0]);
+		} else {
+			// otherwise its the rotation radius of the triangular section
+			return Geometry.getRotationRadius(center, this.vertices);
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -396,9 +416,7 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	/**
 	 * Returns the slice radius.
 	 * <p>
-	 * This differs from the {@link #getRadius()} since it returns the 
-	 * maximum rotation radius of the shape about its center. This method
-	 * returns the radius passed in at creation.
+	 * This is the radius passed in at creation.
 	 * @return double
 	 */
 	public double getSliceRadius() {

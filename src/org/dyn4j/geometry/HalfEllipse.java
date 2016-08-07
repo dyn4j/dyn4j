@@ -272,7 +272,9 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	 */
 	@Override
 	public double getRadius(Vector2 center) {
-		return this.radius + center.distance(this.center);
+		// decent approximation
+		Vector2 v3 = this.getFarthestPoint(center.to(this.center).getNormalized(), Transform.IDENTITY);
+		return Geometry.getRotationRadius(center, new Vector2[] { v3, this.vertices[0], this.vertices[1] });
 	}
 	
 	/* (non-Javadoc)

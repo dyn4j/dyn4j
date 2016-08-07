@@ -234,7 +234,17 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 */
 	@Override
 	public double getRadius(Vector2 center) {
-		return this.radius + center.distance(this.center);
+		// decent approximation
+		Vector2 n = null;
+		if (this.halfHeight > this.halfWidth) {
+			n = this.localXAxis.getLeftHandOrthogonalVector().multiply(this.halfHeight);
+		} else {
+			n = this.localXAxis.product(this.halfWidth);
+		}
+		Vector2 v1 = n.sum(this.center);
+		Vector2 v2 = n.multiply(-1).sum(this.center);
+		Vector2 v3 = this.getFarthestPoint(center.to(this.center).getNormalized(), Transform.IDENTITY);
+		return Geometry.getRotationRadius(center, new Vector2[] { v1, v2, v3 });
 	}
 	
 	/* (non-Javadoc)
