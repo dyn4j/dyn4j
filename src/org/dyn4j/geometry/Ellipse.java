@@ -40,8 +40,8 @@ import org.dyn4j.resources.Messages;
  * {@link Polygon} approximation. Another option is to use the GJK or your own collision detection
  * algorithm for this shape only and use SAT on others.
  * @author William Bittle
- * @since 3.2.0
- * @version 3.1.7
+ * @since 3.1.7
+ * @version 3.2.3
  */
 public class Ellipse extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
 	/** The ellipse width */
@@ -234,17 +234,140 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 */
 	@Override
 	public double getRadius(Vector2 center) {
-		// decent approximation
-		Vector2 n = null;
-		if (this.halfHeight > this.halfWidth) {
-			n = this.localXAxis.getLeftHandOrthogonalVector().multiply(this.halfHeight);
-		} else {
-			n = this.localXAxis.product(this.halfWidth);
+		// annoyingly, finding the radius of a rotated/translated ellipse
+		// about another point is the same as finding the farthest point
+		// from an arbitrary point. The solution to this is a quartic function
+		// that has no analytic solution, so we are stuck with root finding.
+		// Thankfully, this method shouldn't be called that often, in fact
+		// it should only be called when the user modifies the shapes on a body.
+		
+		// we need to translate/rotate the point so that this ellipse is
+		// considered centered at the origin with it's semi-major axis aligned
+		// with the x-axis and its semi-minor axis aligned with the y-axis
+		Vector2 p = center.difference(this.center).rotate(-this.getRotation());
+		
+		// get the farthest point.
+		Vector2 fp = Ellipse.getFarthestPoint(this.halfWidth, this.halfHeight, p);
+		
+		// get the distance between the two points. The distance will be the
+		// same if we translate/rotate the points back to the real position
+		// and rotation, so don't bother
+		return p.distance(fp);
+	}
+	
+	/**
+	 * Returns the point on this ellipse farthest from the given point.
+	 * <p>
+	 * This method assumes that this ellipse is centered on the origin and 
+	 * has it's semi-major axis aligned with the x-axis and its semi-minor 
+	 * axis aligned with the y-axis.
+	 * @param point the query point
+	 * @param a the half width of the ellipse
+	 * @param b the half height of the ellipse
+	 * @return {@link Vector2}
+	 * @since 3.2.3
+	 */
+	static Vector2 getFarthestPoint(double a, double b, Vector2 point) 
+	{
+		final int maxIterations = 50;
+		double px = point.x;
+		double py = point.y;
+		
+		boolean flipped = false;
+		if (a < b) {
+			double t = a;
+			a = b;
+			b = t;
+			flipped = true;
+			
+			t = px;
+			px = -py;
+			py = t;
 		}
-		Vector2 v1 = n.sum(this.center);
-		Vector2 v2 = n.multiply(-1).sum(this.center);
-		Vector2 v3 = this.getFarthestPoint(center.to(this.center).getNormalized(), Transform.IDENTITY);
-		return Geometry.getRotationRadius(center, new Vector2[] { v1, v2, v3 });
+		
+		// solve as if point is in 3rd quadrant
+		int quadrant = 3;
+		if (px >= 0 && py >= 0) {
+			quadrant = 1;
+			px = -px;
+			py = -py;
+		} else if (px >= 0 && py <= 0) {
+			quadrant = 4;
+			px = -px;
+		} else if (px <= 0 && py >= 0) {
+			quadrant = 2;
+			py = -py;
+		}
+		
+		double x0 = 0;
+		double x1 = a;
+		double y0 = b;
+
+		double xx = (px - x0);
+		double yy = (py - y0);
+		double max = xx * xx + yy * yy;
+		
+		double x = 0;
+		double y = 0;
+		
+		for (int i = 0; i < maxIterations; i++) {
+			// get the mid point (bisection)
+			x = (x0 + x1) * 0.5;
+			
+			// compute the y value for the mid point
+			// y = sqrt((1 - x^2/a^2) / b^2)
+			double xa = 1 - (x * x) / (a * a);
+			if (xa < 0) {
+				// this should never happen, but just in case of numeric instability
+				// we'll just set it to zero
+				xa = 0;
+				// x^2/a^2 can never be greater than 1 since a must always be
+				// greater than or equal to the largest x value on the ellipse
+			}
+			y = Math.sqrt(xa) * b;
+			
+			// get the squared distance from the point
+			xx = (px - x);
+			yy = (py - y);
+			double d = xx * xx + yy * yy;
+			
+			// are we close enough?
+			if (Math.abs(max - d) <= 1e-8) {
+				// translate the point to the correct quadrant
+				if (quadrant == 1) {
+					x *= -1;
+					y *= -1;
+				} else if (quadrant == 2) {
+					y *= -1;
+				} else if (quadrant == 4) {
+					x *= -1;
+				}
+				
+				// flip the point's coorindates if the
+				// semi-major/minor axes were flipped
+				if (flipped) {
+					double temp = x;
+					x = y;
+					y = -temp;
+				}
+				max = d;
+				break;
+			}
+			
+			// how do we need to update the bounds
+			if (max - d < 0) {
+				x0 = x;
+			} else {
+				x1 = x;
+			}
+			
+			// set the new maximum
+			if (max < d) {
+				max = d;
+			}
+		}
+		
+		return new Vector2(x, y);
 	}
 	
 	/* (non-Javadoc)

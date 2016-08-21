@@ -60,7 +60,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	final double halfWidth;
 	
 	/** A local vector to  */
-	final Vector2 localXAxis;
+	public final Vector2 localXAxis;
 
 	/** The ellipse center */
 	final Vector2 ellipseCenter;
@@ -272,9 +272,36 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	 */
 	@Override
 	public double getRadius(Vector2 center) {
-		// decent approximation
-		Vector2 v3 = this.getFarthestPoint(center.to(this.center).getNormalized(), Transform.IDENTITY);
-		return Geometry.getRotationRadius(center, new Vector2[] { v3, this.vertices[0], this.vertices[1] });
+//		// decent approximation
+//		Vector2 v3 = this.getFarthestPoint(center.to(this.center).getNormalized(), Transform.IDENTITY);
+//		Vector2 v4 = this.localXAxis.getLeftHandOrthogonalVector().multiply(-this.height).add(this.ellipseCenter);
+//		return Geometry.getRotationRadius(center, new Vector2[] { v4, v3, this.vertices[0], this.vertices[1] });
+		// annoyingly, finding the radius of a rotated/translated ellipse
+		// about another point is the same as finding the farthest point
+		// from an arbitrary point. The solution to this is a quartic function
+		// that has no analytic solution, so we are stuck with root finding.
+		// Thankfully, this method shouldn't be called that often, in fact
+		// it should only be called when the user modifies the shapes on a body.
+		
+		// in the half ellipse case, if the point is on the side of the flat edge
+		// then we do the ellipse code, else we can just return the farthest of the
+		// two points that make up the flat side
+		if (Segment.getLocation(center, this.vertices[0], this.vertices[1]) > 0) {
+			return Geometry.getRotationRadius(center, vertices);
+		} else {		
+			// we need to translate/rotate the point so that this ellipse is
+			// considered centered at the origin with it's semi-major axis aligned
+			// with the x-axis and its semi-minor axis aligned with the y-axis
+			Vector2 p = center.difference(this.ellipseCenter).rotate(-this.getRotation());
+			
+			// get the farthest point.
+			Vector2 fp = Ellipse.getFarthestPoint(this.halfWidth, this.height, p);
+			
+			// get the distance between the two points. The distance will be the
+			// same if we translate/rotate the points back to the real position
+			// and rotation, so don't bother
+			return p.distance(fp);
+		}
 	}
 	
 	/* (non-Javadoc)
