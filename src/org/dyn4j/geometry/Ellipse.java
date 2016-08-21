@@ -40,8 +40,8 @@ import org.dyn4j.resources.Messages;
  * {@link Polygon} approximation. Another option is to use the GJK or your own collision detection
  * algorithm for this shape only and use SAT on others.
  * @author William Bittle
- * @since 3.1.7
  * @version 3.2.3
+ * @since 3.1.7
  */
 public class Ellipse extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
 	/** The ellipse width */

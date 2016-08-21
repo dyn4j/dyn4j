@@ -40,8 +40,8 @@ import org.dyn4j.resources.Messages;
  * A capsule's width and height must be larger than zero and cannot be equal.  A {@link Circle} should be used
  * instead of an equal width/height capsule for both performance and stability.
  * @author William Bittle
- * @version 3.2.0
- * @since 3.2.3
+ * @version 3.2.3
+ * @since 3.1.5
  */
 public class Capsule extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
 	/** 

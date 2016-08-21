@@ -40,8 +40,8 @@ import org.dyn4j.resources.Messages;
  * {@link Polygon} approximation. Another option is to use the GJK or your own collision detection
  * algorithm for this shape only and use SAT on others.
  * @author William Bittle
- * @since 3.2.0
- * @version 3.1.7
+ * @version 3.2.3
+ * @since 3.1.7
  */
 public class HalfEllipse extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
 	/** 
@@ -272,10 +272,6 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	 */
 	@Override
 	public double getRadius(Vector2 center) {
-//		// decent approximation
-//		Vector2 v3 = this.getFarthestPoint(center.to(this.center).getNormalized(), Transform.IDENTITY);
-//		Vector2 v4 = this.localXAxis.getLeftHandOrthogonalVector().multiply(-this.height).add(this.ellipseCenter);
-//		return Geometry.getRotationRadius(center, new Vector2[] { v4, v3, this.vertices[0], this.vertices[1] });
 		// annoyingly, finding the radius of a rotated/translated ellipse
 		// about another point is the same as finding the farthest point
 		// from an arbitrary point. The solution to this is a quartic function
