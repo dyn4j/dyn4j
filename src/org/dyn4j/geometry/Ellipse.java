@@ -267,25 +267,36 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 * @return {@link Vector2}
 	 * @since 3.2.3
 	 */
-	static Vector2 getFarthestPoint(double a, double b, Vector2 point) 
+	static final Vector2 getFarthestPoint(double a, double b, Vector2 point) 
 	{
 		final int maxIterations = 50;
+		final double epsilon = 1e-8;
+		
 		double px = point.x;
 		double py = point.y;
 		
+		// check the semi-major/minor axes
 		boolean flipped = false;
 		if (a < b) {
-			double t = a;
+			// swap the semi-major/minor axes
+			double temp = a;
 			a = b;
-			b = t;
-			flipped = true;
-			
-			t = px;
+			b = temp;
+
+			// if we swap the axes, then we needt
+			// also rotate our point
+			temp = px;
 			px = -py;
-			py = t;
+			py = temp;
+			
+			flipped = true;
 		}
 		
 		// solve as if point is in 3rd quadrant
+		// due to the symmetry of the ellipse we only have
+		// to solve this problem in one quadrant and then
+		// just flip signs to get the anwser in the original
+		// quadrant
 		int quadrant = 3;
 		if (px >= 0 && py >= 0) {
 			quadrant = 1;
@@ -299,72 +310,81 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 			py = -py;
 		}
 		
+		// our root finding bounds will be [x0, x1]
 		double x0 = 0;
 		double x1 = a;
-		double y0 = b;
+		final double y0 = b;
 
+		// compute the initial maximum distance
 		double xx = (px - x0);
 		double yy = (py - y0);
 		double max = xx * xx + yy * yy;
 		
+		// this will store our output
 		double x = 0;
 		double y = 0;
 		
+		// begin the root finding
+		final double a2 = a * a;
 		for (int i = 0; i < maxIterations; i++) {
-			// get the mid point (bisection)
+			// get the mid point (bisection) of our [x0, x1] interval
 			x = (x0 + x1) * 0.5;
 			
 			// compute the y value for the mid point
+			// x^2/a^2 + y^2/b^2 = 1
+			// y^2/b^2 = 1 - x^2/a^2
+			// y^2 = (1 - x^2/a^2)b^2
 			// y = sqrt((1 - x^2/a^2) / b^2)
-			double xa = 1 - (x * x) / (a * a);
-			if (xa < 0) {
+			// y = b * sqrt(1 - x^2/a^2)
+			double txa = 1.0 - (x * x) / a2;
+			if (txa < 0) {
 				// this should never happen, but just in case of numeric instability
 				// we'll just set it to zero
-				xa = 0;
+				txa = 0;
 				// x^2/a^2 can never be greater than 1 since a must always be
 				// greater than or equal to the largest x value on the ellipse
 			}
-			y = Math.sqrt(xa) * b;
+			y = Math.sqrt(txa) * b;
 			
 			// get the squared distance from the point
 			xx = (px - x);
 			yy = (py - y);
 			double d = xx * xx + yy * yy;
-			
+
 			// are we close enough?
-			if (Math.abs(max - d) <= 1e-8) {
-				// translate the point to the correct quadrant
-				if (quadrant == 1) {
-					x *= -1;
-					y *= -1;
-				} else if (quadrant == 2) {
-					y *= -1;
-				} else if (quadrant == 4) {
-					x *= -1;
-				}
-				
-				// flip the point's coorindates if the
-				// semi-major/minor axes were flipped
-				if (flipped) {
-					double temp = x;
-					x = y;
-					y = -temp;
-				}
-				max = d;
+			if (Math.abs(max - d) <= epsilon) {
 				break;
 			}
-			
+						
 			// how do we need to update the bounds
 			if (max - d < 0) {
 				x0 = x;
 			} else {
 				x1 = x;
 			}
-			
+
 			// set the new maximum
 			if (max < d) {
 				max = d;
 			}
+		}
+		
+		// translate the point to the correct quadrant
+		if (quadrant == 1) {
+			x *= -1;
+			y *= -1;
+		} else if (quadrant == 2) {
+			y *= -1;
+		} else if (quadrant == 4) {
+			x *= -1;
+		}
+		
+		// flip the point's coorindates if the
+		// semi-major/minor axes were flipped
+		if (flipped) {
+			double temp = x;
+			x = y;
+			y = -temp;
 		}
 		
 		return new Vector2(x, y);
