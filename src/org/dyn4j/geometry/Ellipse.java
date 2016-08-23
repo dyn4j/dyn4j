@@ -255,6 +255,22 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		return p.distance(fp);
 	}
 	
+	public Vector2 getFarthestPointFromPoint(Vector2 p, Transform transform) {
+		// local coordinates
+		Vector2 pLocal = transform.getInverseTransformed(p);
+		
+		// unrotated/translated coordinates
+		Vector2 po = pLocal.difference(this.center).rotate(-this.getRotation());
+		
+		// get the farthest point
+		Vector2 fp = Ellipse.getFarthestPoint(this.halfWidth, this.halfHeight, po);
+		
+		// rotate/translate back
+		Vector2 pn = fp.rotate(this.getRotation()).add(this.center);
+		
+		return transform.getTransformed(pn);
+	}
+	
 	/**
 	 * Returns the point on this ellipse farthest from the given point.
 	 * <p>
@@ -319,32 +335,91 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		double xx = (px - x0);
 		double yy = (py - y0);
 		double max = xx * xx + yy * yy;
+		double m1 = max;
+		double m2 = (px - x1) * (px - x1) + (py * py);
 		
 		// this will store our output
 		double x = 0;
 		double y = 0;
 		
 		// begin the root finding
+		final double gr = 1 / (Math.sqrt(5) + 1) * 0.5;
 		final double a2 = a * a;
+		final double ba = b / a;
+		
+		double x2 = x1 - (x1 - x0) * gr;
+		double y2 = 0;
+		double x3 = x0 + (x1 - x0) * gr;
+		
 		for (int i = 0; i < maxIterations; i++) {
-			// get the mid point (bisection) of our [x0, x1] interval
-			x = (x0 + x1) * 0.5;
+			if (Math.abs(x2 - x3) <= epsilon) {
+				x = x2;
+				y = y2;
+				break;
+			}
 			
-			// compute the y value for the mid point
-			// x^2/a^2 + y^2/b^2 = 1
-			// y^2/b^2 = 1 - x^2/a^2
-			// y^2 = (1 - x^2/a^2)b^2
-			// y = sqrt((1 - x^2/a^2) / b^2)
-			// y = b * sqrt(1 - x^2/a^2)
-			double txa = 1.0 - (x * x) / a2;
-			if (txa < 0) {
+			double a2x2 = a2 - x2 * x2;
+			if (a2x2 < 0) {
 				// this should never happen, but just in case of numeric instability
 				// we'll just set it to zero
-				txa = 0;
+				a2x2 = 0;
 				// x^2/a^2 can never be greater than 1 since a must always be
 				// greater than or equal to the largest x value on the ellipse
 			}
-			y = Math.sqrt(txa) * b;
+			double sa2x2 = Math.sqrt(a2x2);
+			y2 = ba * sa2x2;
+			xx = (px - x2);
+			yy = (py - y2);
+			double fx2 = xx * xx + yy * yy;
+			
+			a2x2 = a2 - x3 * x3;
+			if (a2x2 < 0) {
+				// this should never happen, but just in case of numeric instability
+				// we'll just set it to zero
+				a2x2 = 0;
+				// x^2/a^2 can never be greater than 1 since a must always be
+				// greater than or equal to the largest x value on the ellipse
+			}
+			sa2x2 = Math.sqrt(a2x2);
+			double y3 = ba * sa2x2;
+			xx = (px - x3);
+			yy = (py - y3);
+			double fx3 = xx * xx + yy * yy;
+			
+			if (fx2 < fx3) {
+				x1 = x3;
+			} else {
+				x0 = x2;
+			}
+			
+			x2 = x1 - (x1 - x0) * gr;
+			x3 = x0 + (x1 - x0) * gr;
+			
+			
+			// get the mid point (bisection) of our [x0, x1] interval
+			x = (x0 + x1) * 0.5;
+			
+//			// compute the y value for the mid point
+//			// x^2/a^2 + y^2/b^2 = 1
+//			// y^2/b^2 = 1 - x^2/a^2
+//			// y^2 = (1 - x^2/a^2)b^2
+//			// y = sqrt((1 - x^2/a^2) / b^2)
+//			// y = b * sqrt(1 - x^2/a^2)
+//			// y = b/a * sqrt(a^2 - x^2)
+//			double a2x2 = a2 - x * x;
+//			if (a2x2 < 0) {
+//				// this should never happen, but just in case of numeric instability
+//				// we'll just set it to zero
+//				a2x2 = 0;
+//				// x^2/a^2 can never be greater than 1 since a must always be
+//				// greater than or equal to the largest x value on the ellipse
+//			}
+//			double sa2x2 = Math.sqrt(a2x2);
+//			y = ba * sa2x2;
+			
+//			Vector2 v = new Vector2(x - px, y - py);
+//			Vector2 t = new Vector2(a * sa2x2, x * b);
+//			double perp = v.cross(t);
 			
 			// get the squared distance from the point
 			xx = (px - x);
@@ -352,16 +427,29 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 			double d = xx * xx + yy * yy;
 
 			// are we close enough?
-			if (Math.abs(max - d) <= epsilon) {
-				break;
-			}
-						
-			// how do we need to update the bounds
-			if (max - d < 0) {
-				x0 = x;
-			} else {
-				x1 = x;
-			}
+//			if (Math.abs(x0-x1) <= epsilon) {
+//				break;
+//			}
+//						
+//			// how do we need to update the bounds
+//			if (d > m2 && d > m1) {
+//				m1 = m2;
+//				m2 = d;
+//				x0 = x1;
+//				x1 = x;
+//			} else if (d > m1) {
+//				m1 = d;
+//				x0 = x;
+//			} 
+//			else if (d > m2) {
+//				m2 = d;
+//				x1 = x;
+//			}
+//			if (d > m2) {
+//				x1 = x;
+//			} else {
+//				x0 = x;
+//			}
 
 			// set the new maximum
 			if (max < d) {
