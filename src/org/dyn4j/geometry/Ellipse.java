@@ -326,78 +326,192 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 			py = -py;
 		}
 		
+		Vector2 r = root(a, b, px, py);
+		
 		// our root finding bounds will be [x0, x1]
 		double x0 = 0;
 		double x1 = a;
-		final double y0 = b;
+		double y0 = b;
+		double y1 = 0;
 
 		// compute the initial maximum distance
 		double xx = (px - x0);
 		double yy = (py - y0);
-		double max = xx * xx + yy * yy;
-		double m1 = max;
-		double m2 = (px - x1) * (px - x1) + (py * py);
+//		double max = xx * xx + yy * yy;
+//		double m1 = max;
+//		double m2 = (px - x1) * (px - x1) + (py * py);
 		
 		// this will store our output
 		double x = 0;
 		double y = 0;
 		
 		// begin the root finding
-		final double gr = 1 / (Math.sqrt(5) + 1) * 0.5;
+		final double gr = 1 / ((Math.sqrt(5) + 1) * 0.5);
 		final double a2 = a * a;
 		final double ba = b / a;
 		
 		double x2 = x1 - (x1 - x0) * gr;
-		double y2 = 0;
 		double x3 = x0 + (x1 - x0) * gr;
 		
-		for (int i = 0; i < maxIterations; i++) {
-			if (Math.abs(x2 - x3) <= epsilon) {
-				x = x2;
-				y = y2;
-				break;
-			}
+		final Vector2 q = new Vector2(px, py);
+		final Vector2 p2 = new Vector2();
+		final Vector2 p3 = new Vector2();
+		double fx0 = b;
+		double fx1 = 0;
+		double fx2 = eval(a, b, x2, q, p2);
+		double fx3 = eval(a, b, x3, q, p3);
+		
+		Vector2 p = new Vector2();
+		
+//		final int n = 50;
+//		for (int i = 0; i <= n; i++) {
+//			// get the mid point (bisection) of our [x0, x1] interval
+//			x = x0 + (a / n) * i;
+//			
+//			// compute the y value for the mid point
+//			// x^2/a^2 + y^2/b^2 = 1
+//			// y^2/b^2 = 1 - x^2/a^2
+//			// y^2 = (1 - x^2/a^2)b^2
+//			// y = sqrt((1 - x^2/a^2) / b^2)
+//			// y = b * sqrt(1 - x^2/a^2)
+//			// y = b/a * sqrt(a^2 - x^2)
+//			double a2x2 = a2 - x * x;
+//			if (a2x2 < 0) {
+//				// this should never happen, but just in case of numeric instability
+//				// we'll just set it to zero
+//				a2x2 = 0;
+//				// x^2/a^2 can never be greater than 1 since a must always be
+//				// greater than or equal to the largest x value on the ellipse
+//			}
+//			double sa2x2 = Math.sqrt(a2x2);
+//			y = ba * sa2x2;
+//			
+//			xx = (px - x);
+//			yy = (py - y);
+//			double d2 = xx * xx + yy * yy;
+//			
+//			System.out.println("(" + x + ", " + y + ") = " + Math.sqrt(d2));
+//		}
+//		
+		
+		double xp = (x0 + x1) * 0.5;
+		int i = 0;
+		for (; i < maxIterations; i++) {
+//			// Newton
+//			double fx = eval(a, b, xp, q, p);
+//			
+////			double dx = x0 - px - (a * a) / (b * b) * x0 + (x0 * (b / a) * py) / (a * Math.sqrt(a * a + x0 * x0));
+//			double dx = (-b * xp) / (a * Math.sqrt(a * a - xp * xp));
+//			Vector2 v1 = q.to(xp, fx).multiply(2);
+//			Vector2 v2 = new Vector2(b * xp, a * Math.sqrt(a * a - xp * xp));
+//			double fdx = v1.dot(v2);
+//			
+//			if (Math.abs(fdx) < 1e-16) {
+//				// denominator too small
+//				break;
+//			}
+//			
+//			double xn = x0 + fx / fdx;
+//			if (Math.abs(xn - x0) <= epsilon * Math.abs(xn)) {
+//				// found
+//				x = x0;
+//				y = fx;
+//				break;
+//			}
+//			
+//			x0 = xn;
 			
-			double a2x2 = a2 - x2 * x2;
-			if (a2x2 < 0) {
-				// this should never happen, but just in case of numeric instability
-				// we'll just set it to zero
-				a2x2 = 0;
-				// x^2/a^2 can never be greater than 1 since a must always be
-				// greater than or equal to the largest x value on the ellipse
-			}
-			double sa2x2 = Math.sqrt(a2x2);
-			y2 = ba * sa2x2;
-			xx = (px - x2);
-			yy = (py - y2);
-			double fx2 = xx * xx + yy * yy;
+			double bafbfc = (x1 - x0) * (fx1 - fx0);
+			double bcfbfa = (x1 - x2) * (fx1 - fx2);
+			double bcqbap = (x1 - x2) * bcfbfa - (x1 - x0) * bafbfc;
+			double pq = 2.0 * (bafbfc - bcfbfa);
 			
-			a2x2 = a2 - x3 * x3;
-			if (a2x2 < 0) {
-				// this should never happen, but just in case of numeric instability
-				// we'll just set it to zero
-				a2x2 = 0;
-				// x^2/a^2 can never be greater than 1 since a must always be
-				// greater than or equal to the largest x value on the ellipse
-			}
-			sa2x2 = Math.sqrt(a2x2);
-			double y3 = ba * sa2x2;
-			xx = (px - x3);
-			yy = (py - y3);
-			double fx3 = xx * xx + yy * yy;
-			
-			if (fx2 < fx3) {
-				x1 = x3;
+			if (Math.abs(pq) > 1e-10) {
+				double xn = x1 + bcqbap / pq;
+				if (x0 < xn && xn < x1) {
+				System.out.println(x0 + ", " + xn + ", " + x1);
+				}
 			} else {
-				x0 = x2;
+				
 			}
 			
-			x2 = x1 - (x1 - x0) * gr;
-			x3 = x0 + (x1 - x0) * gr;
+			
+			
+			// Golden Section search
+			// ====================================
+			if (fx2 < fx3) {
+				if (Math.abs(x1 - x2) <= epsilon) {
+					x = p3.x;
+					y = p3.y;
+					break;
+				}
+				x0 = x2;
+				fx0 = fx2;
+				x2 = x3;
+				fx2 = fx3;
+				x3 = x0 + (x1 - x0) * gr;
+				fx3 = eval(a, b, x3, q, p3);
+			} else {
+				if (Math.abs(x3 - x0) <= epsilon) {
+					x = p2.x;
+					y = p2.y;
+					break;
+				}
+				x1 = x3;
+				fx1 = fx3;
+				x3 = x2;
+				fx3 = fx2;
+				x2 = x1 - (x1 - x0) * gr;
+				fx2 = eval(a, b, x2, q, p2);
+			}
+			// ====================================
+			
+//			if (Math.abs(x2 - x3) <= epsilon) {
+//				x = x2;
+//				y = y2;
+//				break;
+//			}
+//			
+//			double a2x2 = a2 - x2 * x2;
+//			if (a2x2 < 0) {
+//				// this should never happen, but just in case of numeric instability
+//				// we'll just set it to zero
+//				a2x2 = 0;
+//				// x^2/a^2 can never be greater than 1 since a must always be
+//				// greater than or equal to the largest x value on the ellipse
+//			}
+//			double sa2x2 = Math.sqrt(a2x2);
+//			y2 = ba * sa2x2;
+//			xx = (px - x2);
+//			yy = (py - y2);
+//			double fx2 = xx * xx + yy * yy;
+//			
+//			a2x2 = a2 - x3 * x3;
+//			if (a2x2 < 0) {
+//				// this should never happen, but just in case of numeric instability
+//				// we'll just set it to zero
+//				a2x2 = 0;
+//				// x^2/a^2 can never be greater than 1 since a must always be
+//				// greater than or equal to the largest x value on the ellipse
+//			}
+//			sa2x2 = Math.sqrt(a2x2);
+//			y3 = ba * sa2x2;
+//			xx = (px - x3);
+//			yy = (py - y3);
+//			double fx3 = xx * xx + yy * yy;
+//			
+//			if (fx2 < fx3) {
+//				x0 = x2;
+//			} else {
+//				x1 = x3;
+//			}
+//			
+//			x2 = x1 - (x1 - x0) * gr;
+//			x3 = x0 + (x1 - x0) * gr;
 			
 			
 			// get the mid point (bisection) of our [x0, x1] interval
-			x = (x0 + x1) * 0.5;
+//			x = (x0 + x1) * 0.5;
 			
 //			// compute the y value for the mid point
 //			// x^2/a^2 + y^2/b^2 = 1
@@ -422,9 +536,9 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 //			double perp = v.cross(t);
 			
 			// get the squared distance from the point
-			xx = (px - x);
-			yy = (py - y);
-			double d = xx * xx + yy * yy;
+//			xx = (px - x);
+//			yy = (py - y);
+//			double d = xx * xx + yy * yy;
 
 			// are we close enough?
 //			if (Math.abs(x0-x1) <= epsilon) {
@@ -452,10 +566,12 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 //			}
 
 			// set the new maximum
-			if (max < d) {
-				max = d;
-			}
+//			if (max < d) {
+//				max = d;
+//			}
 		}
+		
+		System.out.println(i);
 		
 		// translate the point to the correct quadrant
 		if (quadrant == 1) {
@@ -476,6 +592,56 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		}
 		
 		return new Vector2(x, y);
+	}
+	
+	private static Vector2 root(double a, double b, double px, double py) {
+		final double ab = a/b;
+		final double abab = ab * ab; // r0
+		final double pxa = px / a;  // z0
+		final double pyb = py / b;  // z1
+		double fx = pxa * pxa + pyb * pyb - 1;  // g = (px / a)^2 + (py / b)^2 - 1 = 0
+		final double n0 = abab * pxa;
+		double s0 = pyb - 1;
+		double s1 = fx < 0 ? 0 : Math.sqrt(n0 * n0 + pyb * pyb); // sqrt( ((a/b)^2 * (px/a))^2 + (py/b)^2 )
+		double s = 0;
+		for (int i = 0; i < 50; i++) {
+			s = (s0 + s1) * 0.5;
+			double x0 = n0 / (s + abab);
+			double y0 = pyb / (s + 1);
+			
+			fx = x0 * x0 + y0 * y0 - 1;
+			if (fx > 0) {
+				s0 = s;
+			} else if (fx < 0) {
+				s1 = s;
+			} else {
+				break;
+			}
+		}
+
+		double x = (abab * px) / (s + abab);
+		double y = (py) / (s + 1);
+
+		return new Vector2(x, y);
+	}
+	
+	private static double eval(double a, double b, double x, Vector2 q, Vector2 p) {
+		double a2x2 = (a * a) - (x * x);
+		if (a2x2 < 0) {
+			// this should never happen, but just in case of numeric instability
+			// we'll just set it to zero
+			a2x2 = 0;
+			// x^2/a^2 can never be greater than 1 since a must always be
+			// greater than or equal to the largest x value on the ellipse
+		}
+		double sa2x2 = Math.sqrt(a2x2);
+		double y = (b / a) * sa2x2;
+		double xx = (q.x - x);
+		double yy = (q.y - y);
+		double d2 = xx * xx + yy * yy;
+		p.x = x;
+		p.y = y;
+		return d2;
 	}
 	
 	/* (non-Javadoc)
