@@ -44,6 +44,15 @@ import org.dyn4j.resources.Messages;
  * @since 3.1.7
  */
 public class Ellipse extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
+	/** The inverse of the golden ratio */
+	private static final double INV_GOLDEN_RATIO = 1.0 / ((Math.sqrt(5.0) + 1.0) * 0.5);
+	
+	/** The maximum number of iterations to perform when finding the farthest point */
+	private static final int FARTHEST_POINT_MAX_ITERATIONS = 50;
+	
+	/** The desired accuracy for the farthest point */
+	private static final double FARTHEST_POINT_EPSILON = 1.0e-8;
+	
 	/** The ellipse width */
 	final double width;
 	
@@ -237,7 +246,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		// annoyingly, finding the radius of a rotated/translated ellipse
 		// about another point is the same as finding the farthest point
 		// from an arbitrary point. The solution to this is a quartic function
-		// that has no analytic solution, so we are stuck with root finding.
+		// that has no analytic solution, so we are stuck with a maximization problem.
 		// Thankfully, this method shouldn't be called that often, in fact
 		// it should only be called when the user modifies the shapes on a body.
 		
@@ -255,28 +264,15 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		return p.distance(fp);
 	}
 	
-	public Vector2 getFarthestPointFromPoint(Vector2 p, Transform transform) {
-		// local coordinates
-		Vector2 pLocal = transform.getInverseTransformed(p);
-		
-		// unrotated/translated coordinates
-		Vector2 po = pLocal.difference(this.center).rotate(-this.getRotation());
-		
-		// get the farthest point
-		Vector2 fp = Ellipse.getFarthestPoint(this.halfWidth, this.halfHeight, po);
-		
-		// rotate/translate back
-		Vector2 pn = fp.rotate(this.getRotation()).add(this.center);
-		
-		return transform.getTransformed(pn);
-	}
-	
 	/**
 	 * Returns the point on this ellipse farthest from the given point.
 	 * <p>
 	 * This method assumes that this ellipse is centered on the origin and 
 	 * has it's semi-major axis aligned with the x-axis and its semi-minor 
 	 * axis aligned with the y-axis.
+	 * <p>
+	 * This method performs a Golden Section Search to find the point of
+	 * maximum distance from the given point.
 	 * @param point the query point
 	 * @param a the half width of the ellipse
 	 * @param b the half height of the ellipse
@@ -285,9 +281,6 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 */
 	static final Vector2 getFarthestPoint(double a, double b, Vector2 point) 
 	{
-		final int maxIterations = 50;
-		final double epsilon = 1e-8;
-		
 		double px = point.x;
 		double py = point.y;
 		
@@ -326,307 +319,89 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 			py = -py;
 		}
 		
-		Vector2 r = root(a, b, px, py);
-		
-		// our root finding bounds will be [x0, x1]
+		// our bracketing bounds will be [x0, x1]
 		double x0 = 0;
 		double x1 = a;
-		double y0 = b;
-		double y1 = 0;
 
-		// compute the initial maximum distance
-		double xx = (px - x0);
-		double yy = (py - y0);
-//		double max = xx * xx + yy * yy;
-//		double m1 = max;
-//		double m2 = (px - x1) * (px - x1) + (py * py);
+		final Vector2 q = new Vector2(px, py);
+		final Vector2 p = new Vector2();
 		
-		// this will store our output
-		double x = 0;
-		double y = 0;
-		
-		// begin the root finding
-		final double gr = 1 / ((Math.sqrt(5) + 1) * 0.5);
-		final double a2 = a * a;
+		final double aa = a * a;
 		final double ba = b / a;
 		
-		double x2 = x1 - (x1 - x0) * gr;
-		double x3 = x0 + (x1 - x0) * gr;
-		
-		final Vector2 q = new Vector2(px, py);
-		final Vector2 p2 = new Vector2();
-		final Vector2 p3 = new Vector2();
-		double fx0 = b;
-		double fx1 = 0;
-		double fx2 = eval(a, b, x2, q, p2);
-		double fx3 = eval(a, b, x3, q, p3);
-		
-		Vector2 p = new Vector2();
-		
-//		final int n = 50;
-//		for (int i = 0; i <= n; i++) {
-//			// get the mid point (bisection) of our [x0, x1] interval
-//			x = x0 + (a / n) * i;
-//			
-//			// compute the y value for the mid point
-//			// x^2/a^2 + y^2/b^2 = 1
-//			// y^2/b^2 = 1 - x^2/a^2
-//			// y^2 = (1 - x^2/a^2)b^2
-//			// y = sqrt((1 - x^2/a^2) / b^2)
-//			// y = b * sqrt(1 - x^2/a^2)
-//			// y = b/a * sqrt(a^2 - x^2)
-//			double a2x2 = a2 - x * x;
-//			if (a2x2 < 0) {
-//				// this should never happen, but just in case of numeric instability
-//				// we'll just set it to zero
-//				a2x2 = 0;
-//				// x^2/a^2 can never be greater than 1 since a must always be
-//				// greater than or equal to the largest x value on the ellipse
-//			}
-//			double sa2x2 = Math.sqrt(a2x2);
-//			y = ba * sa2x2;
-//			
-//			xx = (px - x);
-//			yy = (py - y);
-//			double d2 = xx * xx + yy * yy;
-//			
-//			System.out.println("(" + x + ", " + y + ") = " + Math.sqrt(d2));
-//		}
-//		
-		
-		double xp = (x0 + x1) * 0.5;
-		int i = 0;
-		for (; i < maxIterations; i++) {
-//			// Newton
-//			double fx = eval(a, b, xp, q, p);
-//			
-////			double dx = x0 - px - (a * a) / (b * b) * x0 + (x0 * (b / a) * py) / (a * Math.sqrt(a * a + x0 * x0));
-//			double dx = (-b * xp) / (a * Math.sqrt(a * a - xp * xp));
-//			Vector2 v1 = q.to(xp, fx).multiply(2);
-//			Vector2 v2 = new Vector2(b * xp, a * Math.sqrt(a * a - xp * xp));
-//			double fdx = v1.dot(v2);
-//			
-//			if (Math.abs(fdx) < 1e-16) {
-//				// denominator too small
-//				break;
-//			}
-//			
-//			double xn = x0 + fx / fdx;
-//			if (Math.abs(xn - x0) <= epsilon * Math.abs(xn)) {
-//				// found
-//				x = x0;
-//				y = fx;
-//				break;
-//			}
-//			
-//			x0 = xn;
-			
-			double bafbfc = (x1 - x0) * (fx1 - fx0);
-			double bcfbfa = (x1 - x2) * (fx1 - fx2);
-			double bcqbap = (x1 - x2) * bcfbfa - (x1 - x0) * bafbfc;
-			double pq = 2.0 * (bafbfc - bcfbfa);
-			
-			if (Math.abs(pq) > 1e-10) {
-				double xn = x1 + bcqbap / pq;
-				if (x0 < xn && xn < x1) {
-				System.out.println(x0 + ", " + xn + ", " + x1);
-				}
-			} else {
-				
-			}
-			
-			
-			
-			// Golden Section search
-			// ====================================
-			if (fx2 < fx3) {
-				if (Math.abs(x1 - x2) <= epsilon) {
-					x = p3.x;
-					y = p3.y;
-					break;
-				}
-				x0 = x2;
-				fx0 = fx2;
-				x2 = x3;
-				fx2 = fx3;
-				x3 = x0 + (x1 - x0) * gr;
-				fx3 = eval(a, b, x3, q, p3);
-			} else {
-				if (Math.abs(x3 - x0) <= epsilon) {
-					x = p2.x;
-					y = p2.y;
-					break;
-				}
-				x1 = x3;
-				fx1 = fx3;
-				x3 = x2;
-				fx3 = fx2;
-				x2 = x1 - (x1 - x0) * gr;
-				fx2 = eval(a, b, x2, q, p2);
-			}
-			// ====================================
-			
-//			if (Math.abs(x2 - x3) <= epsilon) {
-//				x = x2;
-//				y = y2;
-//				break;
-//			}
-//			
-//			double a2x2 = a2 - x2 * x2;
-//			if (a2x2 < 0) {
-//				// this should never happen, but just in case of numeric instability
-//				// we'll just set it to zero
-//				a2x2 = 0;
-//				// x^2/a^2 can never be greater than 1 since a must always be
-//				// greater than or equal to the largest x value on the ellipse
-//			}
-//			double sa2x2 = Math.sqrt(a2x2);
-//			y2 = ba * sa2x2;
-//			xx = (px - x2);
-//			yy = (py - y2);
-//			double fx2 = xx * xx + yy * yy;
-//			
-//			a2x2 = a2 - x3 * x3;
-//			if (a2x2 < 0) {
-//				// this should never happen, but just in case of numeric instability
-//				// we'll just set it to zero
-//				a2x2 = 0;
-//				// x^2/a^2 can never be greater than 1 since a must always be
-//				// greater than or equal to the largest x value on the ellipse
-//			}
-//			sa2x2 = Math.sqrt(a2x2);
-//			y3 = ba * sa2x2;
-//			xx = (px - x3);
-//			yy = (py - y3);
-//			double fx3 = xx * xx + yy * yy;
-//			
-//			if (fx2 < fx3) {
-//				x0 = x2;
-//			} else {
-//				x1 = x3;
-//			}
-//			
-//			x2 = x1 - (x1 - x0) * gr;
-//			x3 = x0 + (x1 - x0) * gr;
-			
-			
-			// get the mid point (bisection) of our [x0, x1] interval
-//			x = (x0 + x1) * 0.5;
-			
-//			// compute the y value for the mid point
-//			// x^2/a^2 + y^2/b^2 = 1
-//			// y^2/b^2 = 1 - x^2/a^2
-//			// y^2 = (1 - x^2/a^2)b^2
-//			// y = sqrt((1 - x^2/a^2) / b^2)
-//			// y = b * sqrt(1 - x^2/a^2)
-//			// y = b/a * sqrt(a^2 - x^2)
-//			double a2x2 = a2 - x * x;
-//			if (a2x2 < 0) {
-//				// this should never happen, but just in case of numeric instability
-//				// we'll just set it to zero
-//				a2x2 = 0;
-//				// x^2/a^2 can never be greater than 1 since a must always be
-//				// greater than or equal to the largest x value on the ellipse
-//			}
-//			double sa2x2 = Math.sqrt(a2x2);
-//			y = ba * sa2x2;
-			
-//			Vector2 v = new Vector2(x - px, y - py);
-//			Vector2 t = new Vector2(a * sa2x2, x * b);
-//			double perp = v.cross(t);
-			
-			// get the squared distance from the point
-//			xx = (px - x);
-//			yy = (py - y);
-//			double d = xx * xx + yy * yy;
+		if (py == 0.0) {
+			// then its on the x-axis and the farthest point is easy to calculate
+			p.x = px < 0 ? a : -a;
+			p.y = 0;
+		} else {
+			// compute the golden ratio test points
+			double x2 = x1 - (x1 - x0) * INV_GOLDEN_RATIO;
+			double x3 = x0 + (x1 - x0) * INV_GOLDEN_RATIO;
+			double fx2 = getDistance(aa, ba, x2, q, p);
+			double fx3 = getDistance(aa, ba, x3, q, p);
 
-			// are we close enough?
-//			if (Math.abs(x0-x1) <= epsilon) {
-//				break;
-//			}
-//						
-//			// how do we need to update the bounds
-//			if (d > m2 && d > m1) {
-//				m1 = m2;
-//				m2 = d;
-//				x0 = x1;
-//				x1 = x;
-//			} else if (d > m1) {
-//				m1 = d;
-//				x0 = x;
-//			} 
-//			else if (d > m2) {
-//				m2 = d;
-//				x1 = x;
-//			}
-//			if (d > m2) {
-//				x1 = x;
-//			} else {
-//				x0 = x;
-//			}
-
-			// set the new maximum
-//			if (max < d) {
-//				max = d;
-//			}
+			// our bracket is now: [x0, x2, x3, x1]
+			// iteratively reduce the bracket
+			for (int i = 0; i < FARTHEST_POINT_MAX_ITERATIONS; i++) {
+				if (fx2 < fx3) {
+					if (Math.abs(x1 - x2) <= FARTHEST_POINT_EPSILON) {
+						break;
+					}
+					x0 = x2;
+					x2 = x3;
+					fx2 = fx3;
+					x3 = x0 + (x1 - x0) * INV_GOLDEN_RATIO;
+					fx3 = getDistance(aa, ba, x3, q, p);
+				} else {
+					if (Math.abs(x3 - x0) <= FARTHEST_POINT_EPSILON) {
+						break;
+					}
+					x1 = x3;
+					x3 = x2;
+					fx3 = fx2;
+					x2 = x1 - (x1 - x0) * INV_GOLDEN_RATIO;
+					fx2 = getDistance(aa, ba, x2, q, p);
+				}
+			}
 		}
-		
-		System.out.println(i);
 		
 		// translate the point to the correct quadrant
 		if (quadrant == 1) {
-			x *= -1;
-			y *= -1;
+			p.x *= -1;
+			p.y *= -1;
 		} else if (quadrant == 2) {
-			y *= -1;
+			p.y *= -1;
 		} else if (quadrant == 4) {
-			x *= -1;
+			p.x *= -1;
 		}
 		
 		// flip the point's coorindates if the
 		// semi-major/minor axes were flipped
 		if (flipped) {
-			double temp = x;
-			x = y;
-			y = -temp;
+			double temp = p.x;
+			p.x = p.y;
+			p.y = -temp;
 		}
 		
-		return new Vector2(x, y);
+		return p;
 	}
 	
-	private static Vector2 root(double a, double b, double px, double py) {
-		final double ab = a/b;
-		final double abab = ab * ab; // r0
-		final double pxa = px / a;  // z0
-		final double pyb = py / b;  // z1
-		double fx = pxa * pxa + pyb * pyb - 1;  // g = (px / a)^2 + (py / b)^2 - 1 = 0
-		final double n0 = abab * pxa;
-		double s0 = pyb - 1;
-		double s1 = fx < 0 ? 0 : Math.sqrt(n0 * n0 + pyb * pyb); // sqrt( ((a/b)^2 * (px/a))^2 + (py/b)^2 )
-		double s = 0;
-		for (int i = 0; i < 50; i++) {
-			s = (s0 + s1) * 0.5;
-			double x0 = n0 / (s + abab);
-			double y0 = pyb / (s + 1);
-			
-			fx = x0 * x0 + y0 * y0 - 1;
-			if (fx > 0) {
-				s0 = s;
-			} else if (fx < 0) {
-				s1 = s;
-			} else {
-				break;
-			}
-		}
-
-		double x = (abab * px) / (s + abab);
-		double y = (py) / (s + 1);
-
-		return new Vector2(x, y);
-	}
-	
-	private static double eval(double a, double b, double x, Vector2 q, Vector2 p) {
-		double a2x2 = (a * a) - (x * x);
+	/**
+	 * Returns the distance from the ellipse at the given x to the given point q.
+	 * @param a2 the ellipse semi-major axis squared (a * a)
+	 * @param ba the ellipse semi-minor axis divided by the semi-major axis (b / a)
+	 * @param x the x of the point on the ellipse
+	 * @param q the query point
+	 * @param p output; the point on the ellipse
+	 * @return double
+	 */
+	private static double getDistance(double a2, double ba, double x, Vector2 q, Vector2 p) {
+		// compute the y value for the given x on the ellipse:
+		// (x^2/a^2) + (y^2/b^2) = 1
+		// y^2 = (1 - (x / a)^2) * b^2
+		// y^2 = b^2/a^2(a^2 - x^2)
+		// y = (b / a) * sqrt(a^2 - x^2)
+		double a2x2 = a2 - (x * x);
 		if (a2x2 < 0) {
 			// this should never happen, but just in case of numeric instability
 			// we'll just set it to zero
@@ -635,12 +410,16 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 			// greater than or equal to the largest x value on the ellipse
 		}
 		double sa2x2 = Math.sqrt(a2x2);
-		double y = (b / a) * sa2x2;
+		double y = ba * sa2x2;
+		
+		// compute the distance from the ellipse point to the query point
 		double xx = (q.x - x);
 		double yy = (q.y - y);
 		double d2 = xx * xx + yy * yy;
 		p.x = x;
 		p.y = y;
+		
+		// return the distance
 		return d2;
 	}
 	
