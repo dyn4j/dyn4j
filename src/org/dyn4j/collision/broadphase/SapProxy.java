@@ -33,7 +33,7 @@ import org.dyn4j.geometry.AABB;
  * <p>
  * Note: This class has a natural ordering that is inconsistent with equals.
  * @author William Bittle
- * @since 3.2.0
+ * @since 3.2.3
  * @version 3.2.0
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
@@ -79,11 +79,6 @@ final class SapProxy<E extends Collidable<T>, T extends Fixture> implements Comp
 			if (diff != 0) {
 				return (int)Math.signum(diff);
 			} else {
-				if (this.isSearch()) {
-					return -1;
-				} else if (o.isSearch()) {
-					return 1;
-				}
 				// finally if their y values are the same then compare on the ids
 				diff = this.collidable.getId().compareTo(o.collidable.getId());
 				if (diff == 0) {
@@ -134,18 +129,5 @@ final class SapProxy<E extends Collidable<T>, T extends Fixture> implements Comp
 		  .append("|Tested=").append(this.tested)
 		  .append("]");
 		return sb.toString();
-	}
-	
-	/**
-	 * Returns true if the given proxy is a search
-	 * proxy.
-	 * <p>
-	 * These should not be stored in the broad phase, but
-	 * instead used to do searching.
-	 * @return boolean
-	 */
-	public final boolean isSearch() {
-		return (this.collidable == null ||
-				this.fixture == null);
 	}
 }

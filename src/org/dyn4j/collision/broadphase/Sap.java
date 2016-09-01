@@ -30,9 +30,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
+import org.dyn4j.BinarySearchTree;
 import org.dyn4j.collision.Collidable;
 import org.dyn4j.collision.Collisions;
 import org.dyn4j.collision.Fixture;
@@ -50,14 +49,14 @@ import org.dyn4j.geometry.Vector2;
  * Projects all {@link Collidable} {@link Fixture}s on both the x and y axes and performs overlap checks
  * on all the projections to test for possible collisions (AABB tests).
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.2.3
  * @since 1.0.0
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
  */
 public class Sap<E extends Collidable<T>, T extends Fixture> extends AbstractBroadphaseDetector<E, T> implements BroadphaseDetector<E, T> {
 	/** Sorted tree set of proxies */
-	TreeSet<SapProxy<E, T>> tree;
+	BinarySearchTree<SapProxy<E, T>> tree;
 	
 	/** Id to proxy map for fast lookup */
 	Map<BroadphaseKey, SapProxy<E, T>> map;
@@ -76,7 +75,7 @@ public class Sap<E extends Collidable<T>, T extends Fixture> extends AbstractBro
 	 * @since 3.1.1
 	 */
 	public Sap(int initialCapacity) {
-		this.tree = new TreeSet<SapProxy<E, T>>();
+		this.tree = new BinarySearchTree<SapProxy<E, T>>();
 		// 0.75 = 3/4, we can garuantee that the hashmap will not need to be rehashed
 		// if we take capacity / load factor
 		// the default load factor is 0.75 according to the javadocs, but lets assign it to be sure
@@ -116,7 +115,7 @@ public class Sap<E extends Collidable<T>, T extends Fixture> extends AbstractBro
 		// add the proxy to the map
 		this.map.put(key, proxy);
 		// insert the node into the tree
-		this.tree.add(proxy);
+		this.tree.insert(proxy);
 	}
 	
 	/* (non-Javadoc)
@@ -175,7 +174,7 @@ public class Sap<E extends Collidable<T>, T extends Fixture> extends AbstractBro
 		// set the new aabb
 		proxy.aabb = aabb;
 		// reinsert the proxy
-		this.tree.add(proxy);
+		this.tree.insert(proxy);
 	}
 
 	/* (non-Javadoc)
@@ -263,8 +262,10 @@ public class Sap<E extends Collidable<T>, T extends Fixture> extends AbstractBro
 			// get the current proxy
 			SapProxy<E, T> current = ito.next();
 			// only check the ones greater than (or equal to) the current item
-			SortedSet<SapProxy<E, T>> set = this.tree.tailSet(current, false);
-			Iterator<SapProxy<E, T>> iti = set.iterator();
+//			SortedSet<SapProxy<E, T>> set = this.tree.tailSet(current, false);
+			
+			Iterator<SapProxy<E, T>> iti = this.tree.tailIterator(current);
+//			Iterator<SapProxy<E, T>> iti = this.tree.iterator();
 			while (iti.hasNext()) {
 				SapProxy<E, T> test = iti.next();
 				// dont compare objects against themselves
@@ -310,28 +311,19 @@ public class Sap<E extends Collidable<T>, T extends Fixture> extends AbstractBro
 		
 		List<BroadphaseItem<E, T>> list = new ArrayList<BroadphaseItem<E, T>>(Collisions.getEstimatedCollisionsPerObject());
 		
-		// create a search proxy for the aabb
-		SapProxy<E, T> search = new SapProxy<E, T>(null, null, aabb);
+		// find the starting proxy to begin testing
+		// this should be the first AABB who overlaps
+		// the given aabb O(log n)
+		SapQuerySearchCriteria<E, T> criteria = new SapQuerySearchCriteria<E, T>(aabb);
+		this.tree.search(criteria);
 		
-		// find the proxy in the tree that is least of all the
-		// proxies greater than this one
-		SapProxy<E, T> least = this.tree.ceiling(search);
-		
-		if (least == null) {
-			return Collections.emptyList();
-		}
-		
-		// we must check all aabbs up to the found proxy
+		// we must check all aabbs starting at the found proxy
 		// from which point the first aabb to not intersect
-		// flags us to stop
-		Iterator<SapProxy<E, T>> it = this.tree.iterator();
-		boolean found = false;
+		// flags us to stop O(log n)
+		Iterator<SapProxy<E, T>> it = this.tree.tailIterator(criteria.lowest);
 		while (it.hasNext()) {
 			SapProxy<E, T> proxy = it.next();
-			// see if we found the proxy
-			if (proxy == least) {
-				found = true;
-			}
+			// check for overlap
 			if (proxy.aabb.getMaxX() > aabb.getMinX()) {
 				if (proxy.aabb.overlaps(aabb)) {
 					if (filter.isAllowed(aabb, proxy.collidable, proxy.fixture)) {
@@ -340,9 +332,10 @@ public class Sap<E extends Collidable<T>, T extends Fixture> extends AbstractBro
 								proxy.fixture));
 					}
 				}
-			} else {
-				// check if we have passed the proxy
-				if (found) break;
+			} else if (aabb.getMaxX() < proxy.aabb.getMinX()) {
+				// if not overlapping, then nothing after this
+				// node will overlap either so we can exit the loop
+				break;
 			}
 		}
 		
@@ -400,24 +393,18 @@ public class Sap<E extends Collidable<T>, T extends Fixture> extends AbstractBro
 		int eSize = Collisions.getEstimatedRaycastCollisions(this.map.size());
 		List<BroadphaseItem<E, T>> list = new ArrayList<BroadphaseItem<E, T>>(eSize);
 		
-		// create a search proxy for the aabb
-		SapProxy<E, T> search = new SapProxy<E, T>(null, null, aabb);
-		
 		// find the proxy in the tree that is least of all the
 		// proxies greater than this one
-		SapProxy<E, T> ceil = this.tree.ceiling(search);
+		SapQuerySearchCriteria<E, T> criteria = new SapQuerySearchCriteria<E, T>(aabb);
+		this.tree.search(criteria);
 		
 		// we must check all aabbs up to the found proxy
 		// from which point the first aabb to not intersect
 		// flags us to stop
-		Iterator<SapProxy<E, T>> it = this.tree.iterator();
-		boolean found = false;
+		Iterator<SapProxy<E, T>> it = this.tree.tailIterator(criteria.lowest);
 		while (it.hasNext()) {
 			SapProxy<E, T> proxy = it.next();
-			// see if we found the proxy
-			if (proxy == ceil) {
-				found = true;
-			}
+			// check for overlap
 			if (proxy.aabb.getMaxX() > aabb.getMinX()) {
 				if (proxy.aabb.overlaps(aabb)) {
 					if (this.raycast(s, l, invDx, invDy, proxy.aabb)) {
@@ -428,9 +415,10 @@ public class Sap<E extends Collidable<T>, T extends Fixture> extends AbstractBro
 						}
 					}
 				}
-			} else {
-				// check if we have passed the proxy
-				if (found) break;
+			} else if (aabb.getMaxX() < proxy.aabb.getMinX()) {
+				// if not overlapping, then nothing after this
+				// node will overlap either so we can exit the loop
+				break;
 			}
 		}
 		

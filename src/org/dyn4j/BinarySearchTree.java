@@ -41,7 +41,7 @@ import java.util.Iterator;
  * This class can be used in conjunction with the {@link BinarySearchTreeSearchCriteria} interface 
  * to perform arbitrary searches on the tree.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.2.3
  * @since 2.2.0
  * @param <E> Comparable
  */
@@ -317,6 +317,34 @@ public class BinarySearchTree<E extends Comparable<E>> implements Iterable<E> {
 	@Override
 	public Iterator<E> iterator() {
 		return this.inOrderIterator();
+	}
+
+	/**
+	 * Returns the in-order (ascending) iterator starting from the given node.
+	 * @param from the starting value
+	 * @return Iterator&lt;E&gt;
+	 */
+	public Iterator<E> tailIterator(E from) {
+		return new BinarySearchTreeIterator<E>(this.root, from, null);
+	}
+	
+	/**
+	 * Returns the in-order (ascending) iterator.
+	 * @param to the ending value
+	 * @return Iterator&lt;E&gt;
+	 */
+	public Iterator<E> headIterator(E to) {
+		return new BinarySearchTreeIterator<E>(this.root, null, to);
+	}
+
+	/**
+	 * Returns the in-order (ascending) iterator.
+	 * @param from the starting value
+	 * @param to the ending value
+	 * @return Iterator&lt;E&gt;
+	 */
+	public Iterator<E> subsetIterator(E from, E to) {
+		return new BinarySearchTreeIterator<E>(this.root, from, to);
 	}
 	
 	/**

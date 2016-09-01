@@ -37,7 +37,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * The {@link #remove()} method is unsupported.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.2.3
  * @since 2.2.0
  * @param <E> the comparable type
  */
@@ -45,37 +45,102 @@ final class BinarySearchTreeIterator<E extends Comparable<E>> implements Iterato
 	/** The node stack for iterative traversal */
 	final Deque<BinarySearchTreeNode<E>> stack;
 	
+	/** The root of the tree */
+	final BinarySearchTreeNode<E> root;
+	
+	/** The value to start iteration from; can be null */
+	final E from;
+	
+	/** The value to end iteration; can be null */
+	final E to;
+
 	/** The traversal direction */
 	final boolean inOrder;
 	
 	/**
 	 * Default constructor using in-order traversal.
-	 * @param node the root node of the subtree to traverse
+	 * @param root the root node of the subtree to traverse
+	 * @throws NullPointerException if node is null
 	 */
-	public BinarySearchTreeIterator(BinarySearchTreeNode<E> node) {
-		this(node, true);
+	public BinarySearchTreeIterator(BinarySearchTreeNode<E> root) {
+		this(root, null, null, true);
 	}
 	
 	/**
 	 * Full constructor.
-	 * @param node the root node of the subtree to traverse
+	 * @param root the root node of the subtree to traverse
 	 * @param inOrder true to iterate in-order, false to iterate reverse order
-	 * @throws NullPointerException if node or direction is null
+	 * @throws NullPointerException if node is null
 	 */
-	public BinarySearchTreeIterator(BinarySearchTreeNode<E> node, boolean inOrder) {
+	public BinarySearchTreeIterator(BinarySearchTreeNode<E> root, boolean inOrder) {
+		this(root, null, null, inOrder);
+	}
+
+	/**
+	 * Full constructor.
+	 * @param root the root node of the subtree to traverse
+	 * @param from the value to start iterating from (inclusive)
+	 * @param to the value to stop iterating after (inclusive)
+	 * @throws NullPointerException if node is null
+	 * @since 3.2.3
+	 */
+	public BinarySearchTreeIterator(BinarySearchTreeNode<E> root, E from, E to) {
+		this(root, from, to, true);
+	}
+	
+	/**
+	 * Full constructor.
+	 * @param root the root node of the subtree to traverse
+	 * @param from the value to start iterating from (inclusive)
+	 * @param to the value to stop iterating after (inclusive)
+	 * @param inOrder true to iterate in-order, false to iterate reverse order
+	 * @throws NullPointerException if node is null
+	 * @since 3.2.3
+	 */
+	private BinarySearchTreeIterator(BinarySearchTreeNode<E> root, E from, E to, boolean inOrder) {
 		// check for null
-		if (node == null) throw new NullPointerException(Messages.getString("binarySearchTree.nullSubTreeForIterator"));
+		if (root == null) throw new NullPointerException(Messages.getString("binarySearchTree.nullSubTreeForIterator"));
 		// set the direction
 		this.inOrder = inOrder;
 		// create the node stack and initialize it
 		this.stack = new ArrayDeque<BinarySearchTreeNode<E>>();
+		this.root = root;
+		this.from = from;
+		this.to = to;
 		// check the direction to determine how to initialize it
 		if (inOrder) {
-			this.pushLeft(node);
+			if (this.from != null) {
+				this.pushLeftFrom(from);
+			} else {
+				this.pushLeft(root);
+			}
 		} else {
-			this.pushRight(node);
+			this.pushRight(root);
 		}
-		
+	}
+	
+	/**
+	 * Pushes the required nodes onto the stack to begin iterating
+	 * nodes in order starting from the given value.
+	 * @param from the value to start iterating from
+	 * @since 3.2.3
+	 */
+	protected void pushLeftFrom(E from) {
+		BinarySearchTreeNode<E> node = this.root;
+		while (node != null) {
+			int cmp = from.compareTo(node.comparable);
+			if (cmp < 0) {
+				// go left
+				this.stack.push(node);
+				node = node.left;
+			} else if (cmp > 0) {
+				// go right
+				node = node.right;
+			} else {
+				this.stack.push(node);
+				break;
+			}
+		}
 	}
 	
 	/**
@@ -85,7 +150,11 @@ final class BinarySearchTreeIterator<E extends Comparable<E>> implements Iterato
 	protected void pushLeft(BinarySearchTreeNode<E> node) {
 		// loop until we don't have any more left nodes
 		while (node != null) {
-			this.stack.push(node);
+			// if we have a iterate to node, then only push nodes
+			// to that are less than or equal to it
+			if (this.to == null || this.to.compareTo(node.comparable) >= 0) {
+				this.stack.push(node);
+			}
 			node = node.left;
 		}
 	}

@@ -34,7 +34,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link BinarySearchTree} class.
  * @author William Bittle
- * @version 2.2.0
+ * @version 3.2.3
  * @since 2.2.0
  */
 public class BalancedBinarySearchTreeTest {
@@ -292,5 +292,125 @@ public class BalancedBinarySearchTreeTest {
 			}
 			last = i;
 		}
+	}
+	
+	/**
+	 * Tests the tail iterator.
+	 * @since 3.2.3
+	 */
+	@Test
+	public void tailIterator() {
+		Iterator<Integer> it = tree.tailIterator(1);
+		int last = Integer.MIN_VALUE;
+		int n = 0;
+		while (it.hasNext()) {
+			int i = it.next();
+			if (i < last) {
+				TestCase.fail();
+			}
+			last = i;
+			n++;
+		}
+		TestCase.assertEquals(9, n);
+	}
+	
+	/**
+	 * Tests the head iterator.
+	 * @since 3.2.3
+	 */
+	@Test
+	public void headIterator() {
+		Iterator<Integer> it = tree.headIterator(6);
+		int last = Integer.MIN_VALUE;
+		int n = 0;
+		while (it.hasNext()) {
+			int i = it.next();
+			if (i < last) {
+				TestCase.fail();
+			}
+			last = i;
+			n++;
+		}
+		TestCase.assertEquals(9, n);
+	}
+	
+	/**
+	 * Tests the subset iterator.
+	 * @since 3.2.3
+	 */
+	@Test
+	public void subsetIterator() {
+		Iterator<Integer> it = tree.subsetIterator(1, 6);
+		int last = Integer.MIN_VALUE;
+		int n = 0;
+		while (it.hasNext()) {
+			int i = it.next();
+			if (i < last) {
+				TestCase.fail();
+			}
+			last = i;
+			n++;
+		}
+		TestCase.assertEquals(5, n);
+	}
+
+	/**
+	 * Tests the tail iterator with a value that's not in the tree.
+	 * @since 3.2.3
+	 */
+	@Test
+	public void tailIteratorMissing() {
+		Iterator<Integer> it = tree.tailIterator(5);
+		int last = Integer.MIN_VALUE;
+		int n = 0;
+		while (it.hasNext()) {
+			int i = it.next();
+			if (i < last) {
+				TestCase.fail();
+			}
+			last = i;
+			n++;
+		}
+		TestCase.assertEquals(5, n);
+	}
+	
+	/**
+	 * Tests the head iterator with a value that's not in the tree.
+	 * @since 3.2.3
+	 */
+	@Test
+	public void headIteratorMissing() {
+		Iterator<Integer> it = tree.headIterator(5);
+		int last = Integer.MIN_VALUE;
+		int n = 0;
+		while (it.hasNext()) {
+			int i = it.next();
+			if (i < last) {
+				TestCase.fail();
+			}
+			last = i;
+			n++;
+		}
+		TestCase.assertEquals(8, n);
+	}
+	
+	/**
+	 * Tests the subset iterator with values that are not in the tree.
+	 * @since 3.2.3
+	 */
+	@Test
+	public void subsetIteratorMissing() {
+		Iterator<Integer> it = tree.subsetIterator(-2, 5);
+		int last = Integer.MIN_VALUE;
+		int n = 0;
+		while (it.hasNext()) {
+			int i = it.next();
+			if (i < last) {
+				TestCase.fail();
+			}
+			last = i;
+			n++;
+		}
+		TestCase.assertEquals(6, n);
 	}
 }
