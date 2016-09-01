@@ -4,8 +4,11 @@ Version 3.2.3
 New Features:
 
 Bug Fixes:
-  - Fixed a few critical bugs with the Slice, Capsule, Ellipse and HalfElipse 
-    shapes. See http://forum.dyn4j.org/viewtopic.php?f=3&t=287
+  - Issue #20 - https://github.com/wnbittle/dyn4j/issues/20
+  	Sap.detect(aabb, filter) returns false when it should return true
+  - Issue #21 - https://github.com/wnbittle/dyn4j/issues/21
+  	Wrong values returned from getRadius(Vector2) methods for Slice, Capsule, 
+  	Ellipse, and HalfEllipse
     
 Deprecated:
   
