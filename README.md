@@ -10,7 +10,10 @@ The project comprises over 1,000 JUnit test cases, a GUI test application called
 * Java 1.6+
 
 ### Compiled Binaries
-Latest versions of dyn4j can be found on [Maven Central](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.dyn4j%22%20AND%20a%3A%22dyn4j%22).
+[Releases](https://github.com/wnbittle/dyn4j/releases)
+[Maven Central](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.dyn4j%22%20AND%20a%3A%22dyn4j%22)
+
+Maven configuration:
 ```xml
 <dependency>
     <groupId>org.dyn4j</groupId>
