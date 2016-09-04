@@ -11,6 +11,7 @@ The project comprises over 1,000 JUnit test cases, a GUI test application called
 
 ### Compiled Binaries
 [Releases](https://github.com/wnbittle/dyn4j/releases)
+
 [Maven Central](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.dyn4j%22%20AND%20a%3A%22dyn4j%22)
 
 Maven configuration:
