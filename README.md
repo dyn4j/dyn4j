@@ -26,5 +26,5 @@ Getting started is easy.  Just grab the latest compiled binary and add it to you
 * [www.dyn4j.org](http://www.dyn4j.org)
 * [Latest Release Notes](https://github.com/wnbittle/dyn4j/blob/master/release-notes.txt)
 * [Latest Javadocs](http://docs.dyn4j.org)
-* [Forum](forum.dyn4j.org)
+* [Forum](http://forum.dyn4j.org)
 * [Blog](http://www.dyn4j.org/category/blog/)
