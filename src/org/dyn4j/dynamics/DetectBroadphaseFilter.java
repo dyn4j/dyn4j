@@ -36,7 +36,7 @@ import org.dyn4j.collision.broadphase.DefaultBroadphaseFilter;
  * <p>
  * Extend this class to add additional filtering capabilities to the broad-phase.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.2.4
  * @since 3.2.0
  */
 public class DetectBroadphaseFilter extends DefaultBroadphaseFilter<Body, BodyFixture> implements BroadphaseFilter<Body, BodyFixture> {
@@ -47,8 +47,8 @@ public class DetectBroadphaseFilter extends DefaultBroadphaseFilter<Body, BodyFi
 	public boolean isAllowed(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2) {
 		// inactive objects don't have collision detection/response
 		if (!body1.isActive() || !body2.isActive()) return false;
-		// one body must be dynamic
-		if (!body1.isDynamic() && !body2.isDynamic()) return false;
+		// one body must be dynamic (unless one is a sensor)
+		if (!body1.isDynamic() && !body2.isDynamic() && !fixture1.isSensor() && !fixture2.isSensor()) return false;
 		// check for connected pairs who's collision is not allowed
 		if (body1.isConnected(body2, false)) return false;
 		

@@ -66,7 +66,7 @@ import org.dyn4j.geometry.Transform;
  * The {@link #detect(Collidable, Collidable)} and {@link #detect(Convex, Transform, Convex, Transform)} methods do not
  * use the current state of the broad-phase.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.2.4
  * @since 1.0.0
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
@@ -110,7 +110,7 @@ public interface BroadphaseDetector<E extends Collidable<T>, T extends Fixture> 
 	 * Removes the given {@link Collidable} from the broad-phase.
 	 * <p>
 	 * This method removes all the {@link Fixture}s attached to the
-	 * given {@link Collidable} from the broad-phase, if they exist.
+	 * given {@link Collidable} from the broad-phase.
 	 * <p>
 	 * If a fixture is removed from a {@link Collidable}, the calling code must
 	 * call the {@link #remove(Collidable, Fixture)} method for that fixture to 
@@ -137,8 +137,9 @@ public interface BroadphaseDetector<E extends Collidable<T>, T extends Fixture> 
 	 * Used when the collidable or its fixtures have moved or rotated.
 	 * <p>
 	 * This method updates all the {@link Fixture}s attached to the
-	 * given {@link Collidable} from the broad-phase, if they exist. If
-	 * new fixtures have been added this method add them to the broad-phase.
+	 * given {@link Collidable} from the broad-phase, if they exist. If the 
+	 * fixtures on the given collidable do not exist in the broad-phase, they are
+	 * added.
 	 * <p>
 	 * If a fixture is removed from a {@link Collidable}, the calling code must
 	 * call the {@link #remove(Collidable, Fixture)} method for that fixture to 
