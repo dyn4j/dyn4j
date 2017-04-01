@@ -9,6 +9,10 @@ The project comprises over 1,000 JUnit test cases, a GUI test application called
 ### Requirements
 * Java 1.6+
 
+### Building the JOGL code
+* Gluegen 2.3.1
+* JOGL 2.3.1
+
 ### Compiled Binaries
 [Releases](https://github.com/wnbittle/dyn4j/releases)
 
