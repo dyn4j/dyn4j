@@ -1,4 +1,25 @@
 ===============================================================================
+Version 3.2.4
+===============================================================================
+New Features:
+
+Bug Fixes:
+  - Issue #26 - https://github.com/wnbittle/dyn4j/issues/26
+  	Joint.world property not set to null when the joint is removed
+    
+Deprecated:
+  
+Breaking Changes:
+  
+Other:
+  - Small javadoc updates
+  - Changed the DefaultBroadphaseFilter to allow non-dynamic vs. non-dynamic
+    bodies to continue in the collision detection pipeline as long as one
+    of them is a sensor
+  - Changed the Sap broadphase detector to use a self-balancing binary tree
+    by default.
+
+===============================================================================
 Version 3.2.3
 ===============================================================================
 New Features:

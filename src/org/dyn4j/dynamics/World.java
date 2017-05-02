@@ -373,7 +373,7 @@ public class World implements Shiftable, DataContainer {
 	 * @see #updatev(double)
 	 * @see #getAccumulatedTime()
 	 * @param elapsedTime the elapsed time in seconds
-	 * @param stepElapsedTime the time, in seconds, that the simulation should be advanced
+	 * @param stepElapsedTime the time, in seconds, that the simulation should be advanced for each step; if less than or equal to zero {@link Settings#getStepFrequency()} will be used
 	 * @param maximumSteps the maximum number of steps to perform
 	 * @return boolean true if the {@link World} performed at least one simulation step
 	 * @since 3.2.4
