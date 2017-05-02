@@ -23,7 +23,7 @@ Maven configuration:
 <dependency>
     <groupId>org.dyn4j</groupId>
     <artifactId>dyn4j</artifactId>
-    <version>3.2.3</version>
+    <version>3.2.4</version>
 </dependency>
 ```
 
