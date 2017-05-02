@@ -49,7 +49,7 @@ import org.dyn4j.geometry.Vector2;
  * Projects all {@link Collidable} {@link Fixture}s on both the x and y axes and performs overlap checks
  * on all the projections to test for possible collisions (AABB tests).
  * @author William Bittle
- * @version 3.2.3
+ * @version 3.2.4
  * @since 1.0.0
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
@@ -75,7 +75,7 @@ public class Sap<E extends Collidable<T>, T extends Fixture> extends AbstractBro
 	 * @since 3.1.1
 	 */
 	public Sap(int initialCapacity) {
-		this.tree = new BinarySearchTree<SapProxy<E, T>>();
+		this.tree = new BinarySearchTree<SapProxy<E, T>>(true);
 		// 0.75 = 3/4, we can garuantee that the hashmap will not need to be rehashed
 		// if we take capacity / load factor
 		// the default load factor is 0.75 according to the javadocs, but lets assign it to be sure

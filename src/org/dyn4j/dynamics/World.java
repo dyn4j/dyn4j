@@ -87,7 +87,7 @@ import org.dyn4j.resources.Messages;
  * there are multiple {@link CollisionListener}s and <b>any</b> one of them returns false for an event, the collision is skipped.  However,
  * all listeners will still be called no matter if the first returned false.
  * @author William Bittle
- * @version 3.2.2
+ * @version 3.2.4
  * @since 1.0.0
  */
 public class World implements Shiftable, DataContainer {
@@ -288,26 +288,9 @@ public class World implements Shiftable, DataContainer {
 	 * @return boolean true if the {@link World} performed a simulation step
 	 */
 	public boolean update(double elapsedTime) {
-		// check for negative elapsed time
-		if (elapsedTime < 0.0) elapsedTime = 0.0;
-		// update the time
-		this.time += elapsedTime;
-		// check the frequency in settings
-		double invhz = this.settings.getStepFrequency();
-		// see if we should update or not
-		if (this.time >= invhz) {
-			// update the step
-			this.step.update(invhz);
-			// reset the time
-			this.time = this.time - invhz;
-			// step the world
-			this.step();
-			// return true indicating we performed a simulation step
-			return true;
-		}
-		return false;
+		return this.update(elapsedTime, -1.0, 1);
 	}
-	
+
 	/**
 	 * Updates the {@link World}.
 	 * <p>
@@ -332,6 +315,70 @@ public class World implements Shiftable, DataContainer {
 	 * @since 3.1.10
 	 */
 	public boolean update(double elapsedTime, int maximumSteps) {
+		return this.update(elapsedTime, -1.0, maximumSteps);
+	}
+	
+	/**
+	 * Updates the {@link World}.
+	 * <p>
+	 * This method will only update the world given the step frequency contained
+	 * in the {@link Settings} object.  You can use the {@link StepListener} interface
+	 * to listen for when a step is actually performed.  In addition, this method will
+	 * return true if a step was performed.
+	 * <p>
+	 * This method performs, at maximum, one simulation step.  Any remaining time from 
+	 * the previous call of this method is added to the given elapsed time to determine
+	 * if a step needs to be performed.  If the given elapsed time is usually greater 
+	 * than the step frequency, consider using the {@link #update(double, int)} method
+	 * instead.
+	 * <p>
+	 * The stepElapsedTime parameter provides a way for the {@link World} to continue to 
+	 * update at the frequency defined in the {@link Settings} object, but advance the
+	 * simulation by the given time.
+	 * <p>
+	 * Alternatively you can call the {@link #updatev(double)} method to use a variable
+	 * time step.
+	 * @see #update(double)
+	 * @see #updatev(double)
+	 * @see #getAccumulatedTime()
+	 * @param elapsedTime the elapsed time in seconds
+	 * @param stepElapsedTime the time, in seconds, that the simulation should be advanced
+	 * @return boolean true if the {@link World} performed at least one simulation step
+	 * @since 3.2.4
+	 */
+	public boolean update(double elapsedTime, double stepElapsedTime) {
+		return this.update(elapsedTime, stepElapsedTime, 1);
+	}
+	
+	/**
+	 * Updates the {@link World}.
+	 * <p>
+	 * This method will only update the world given the step frequency contained
+	 * in the {@link Settings} object.  You can use the {@link StepListener} interface
+	 * to listen for when a step is actually performed.
+	 * <p>
+	 * Unlike the {@link #update(double)} method, this method will perform more than one
+	 * step based on the given elapsed time.  For example, if the given elapsed time + the
+	 * remaining time from the last call of this method is 2 * step frequency, then 2 steps 
+	 * will be performed.  Use the maximumSteps parameter to put an upper bound on the 
+	 * number of steps performed.
+	 * <p>
+	 * The stepElapsedTime parameter provides a way for the {@link World} to continue to 
+	 * update at the frequency defined in the {@link Settings} object, but advance the
+	 * simulation by the given time.
+	 * <p>
+	 * Alternatively you can call the {@link #updatev(double)} method to use a variable
+	 * time step.
+	 * @see #update(double)
+	 * @see #updatev(double)
+	 * @see #getAccumulatedTime()
+	 * @param elapsedTime the elapsed time in seconds
+	 * @param stepElapsedTime the time, in seconds, that the simulation should be advanced
+	 * @param maximumSteps the maximum number of steps to perform
+	 * @return boolean true if the {@link World} performed at least one simulation step
+	 * @since 3.2.4
+	 */
+	public boolean update(double elapsedTime, double stepElapsedTime, int maximumSteps) {
 		// make sure the update time is greater than zero
 		if (elapsedTime < 0.0) elapsedTime = 0.0;
 		// update the time
@@ -342,7 +389,7 @@ public class World implements Shiftable, DataContainer {
 		int steps = 0;
 		while (this.time >= invhz && steps < maximumSteps) {
 			// update the step
-			this.step.update(invhz);
+			this.step.update(stepElapsedTime <= 0 ? invhz : stepElapsedTime);
 			// reset the time
 			this.time = this.time - invhz;
 			// step the world
@@ -2785,6 +2832,9 @@ public class World implements Shiftable, DataContainer {
 				aIterator.remove();
 				// get the joint
 				Joint joint = jointEdge.interaction;
+				// set the world property to null
+				Constraint constraint = joint;
+				constraint.world = null;
 				// get the other body
 				Body other = jointEdge.other;
 				// wake up the other body
@@ -2903,6 +2953,10 @@ public class World implements Shiftable, DataContainer {
 		
 		// see if the given joint was removed
 		if (removed) {
+			// set the world property to null
+			Constraint constraint = joint;
+			constraint.world = null;
+			
 			// get the involved bodies
 			Body body1 = joint.getBody1();
 			Body body2 = joint.getBody2();
@@ -3037,6 +3091,9 @@ public class World implements Shiftable, DataContainer {
 			for (int i = 0; i < jsize; i++) {
 				// get the joint
 				Joint joint = this.joints.get(i);
+				// set the world property to null
+				Constraint constraint = joint;
+				constraint.world = null;
 				// call the destruction listeners
 				for (DestructionListener dl : listeners) {
 					dl.destroyed(joint);
@@ -3102,6 +3159,9 @@ public class World implements Shiftable, DataContainer {
 		for (int i = 0; i < jSize; i++) {
 			// remove the joint from the joint list
 			Joint joint = this.joints.get(i);
+			// set the world property to null
+			Constraint constraint = joint;
+			constraint.world = null;
 			
 			// get the involved bodies
 			Body body1 = joint.getBody1();
