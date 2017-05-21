@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.dyn4j</groupId>
+    <artifactId>dyn4j-parent</artifactId>
+    <version>3.2.4</version>
+  </parent>
+  <artifactId>sandbox</artifactId>
+  <version>1.0.6</version>
+
+  <packaging>bundle</packaging>
+  <name>sandbox</name>
+  <description>A test environment for the dyn4j library.</description>
+  <url>http://www.dyn4j.org</url>
+
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>dyn4j</artifactId>
+      <version>${project.parent.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jogamp.jogl</groupId>
+      <artifactId>jogl-all-main</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jogamp.gluegen</groupId>
+      <artifactId>gluegen-rt-main</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <configuration>
+          <instructions>
+            <Implementation-Title>${project.description}</Implementation-Title>
+            <Permissions>all-permissions</Permissions>
+            <Codebase>*.dyn4j.org</Codebase>
+            <Application-Name>dyn4j - Sandbox</Application-Name>
+            <Trusted-Only>true</Trusted-Only>
+            <Main-Class>org.dyn4j.sandbox.Sandbox</Main-Class>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
