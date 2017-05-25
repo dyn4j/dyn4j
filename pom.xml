@@ -286,7 +286,7 @@
     </plugins>
   </build>
 
-  <!-- Sign artifacts when deploying to io7m -->
+  <!-- Sign artifacts when deploying to Central -->
   <profiles>
     <profile>
       <id>dyn4j-deployment</id>
