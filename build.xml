@@ -1,0 +1,67 @@
+<project name="dyn4j" default="compile" basedir=".">
+    <description>
+        ant build/run file
+    </description>
+
+    <path id="classpath">
+        <pathelement location="bin" />
+        <pathelement location="." />
+    </path>
+    
+    <target
+        name="clean"
+        description="removes all classes" >
+        <delete>
+            <fileset dir="bin" includes="**/*.class"/>
+        </delete>
+    </target>
+
+    <target 
+        name="compile"
+        description="compile the source " >
+		<mkdir dir="bin"/>
+		<!--<fileset dir="src" includes="**/*.class"/>-->
+
+        <javac 
+            destdir="bin"
+            includeantruntime="false"
+			debug="on"
+			debuglevel="lines,vars,source"
+        >
+			<src path="src" />
+			
+			<compilerarg value="-Xlint:all" />
+			<compilerarg value="-Werror" />
+            <!-- maxerrs param must be seperate or space is picked up as a param -->
+            <compilerarg value="-Xmaxerrs" />
+            <compilerarg value="1" />
+            <classpath refid="classpath"/>
+        </javac>
+    </target>
+    
+    <target
+		name="jar"
+		depends="compile"
+		description="creates a jar"
+	>
+		<jar destfile="dyn4j.jar"
+			basedir="bin/"
+			includes="**/*.class"
+		/>
+	</target>
+<!--	
+    <target
+        name="run"
+        depends="compile"
+        description="runs the project compiling if needed" >
+        <java
+            fork="true"
+            classname="test"
+        >
+            <classpath refid="classpath"/>
+
+            <sysproperty key="java.library.path" value=".:./jni/"/>
+        </java>
+    </target>
+-->
+</project>
