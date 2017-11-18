@@ -1,0 +1,42 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.dyn4j</groupId>
+  <artifactId>dyn4j</artifactId>
+  <version>3.2.5</version>
+  <build>
+    <sourceDirectory>src</sourceDirectory>
+    <resources>
+      <resource>
+        <directory>src</directory>
+        <excludes>
+          <exclude>**/*.java</exclude>
+        </excludes>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.6.1</version>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <name>dyn4j</name>
+  <url>http://www.dyn4j.org</url>
+  <description>Java Collision Detection and Physics Engine</description>
+  <inceptionYear>2010</inceptionYear>
+  <organization>
+  	<url>http://www.dyn4j.org</url>
+  	<name>dyn4j</name>
+  </organization>
+  <scm>
+  	<url>https://github.com/dyn4j/dyn4j</url>
+  </scm>
+  <issueManagement>
+  	<system>GitHub Issues</system>
+  	<url>https://github.com/dyn4j/dyn4j/issues</url>
+  </issueManagement>
+</project>
