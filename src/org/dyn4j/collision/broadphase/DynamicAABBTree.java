@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2017 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -45,7 +45,7 @@ import org.dyn4j.geometry.Vector2;
  * This class uses a self-balancing binary tree to store the AABBs.  The AABBs are sorted using the perimeter.
  * The perimeter hueristic is better than area for 2D because axis aligned segments would have zero area.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.2.5
  * @since 3.0.0
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
@@ -604,6 +604,8 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 			return;
 		}
 		
+		AABB temp = new AABB(0,0,0,0);
+		
 		// get the new node's aabb
 		AABB itemAABB = item.aabb;
 		
@@ -622,10 +624,8 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 			double perimeter = aabb.getPerimeter();
 			
 			// union the new node's aabb and the current aabb
-			AABB union = aabb.getUnion(itemAABB);
-			
 			// get the union's perimeter
-			double unionPerimeter = union.getPerimeter();
+			double unionPerimeter = temp.set(aabb).union(itemAABB).getPerimeter();
 			
 			// compute the cost of creating a new parent for the new
 			// node and the current node
@@ -641,23 +641,19 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 			// compute the cost of descending to the left
 			double costl = 0.0;
 			if (left.isLeaf()) {
-				AABB u = left.aabb.getUnion(itemAABB);
-				costl = u.getPerimeter() + descendCost;
+				costl = temp.set(left.aabb).union(itemAABB).getPerimeter() + descendCost;
 			} else {
-				AABB u = left.aabb.getUnion(itemAABB);
 				double oldPerimeter = left.aabb.getPerimeter();
-				double newPerimeter = u.getPerimeter();
+				double newPerimeter = temp.set(left.aabb).union(itemAABB).getPerimeter();
 				costl = newPerimeter - oldPerimeter + descendCost;
 			}
 			// compute the cost of descending to the right
 			double costr = 0.0;
 			if (right.isLeaf()) {
-				AABB u = right.aabb.getUnion(itemAABB);
-				costr = u.getPerimeter() + descendCost;
+				costr = temp.set(right.aabb).union(itemAABB).getPerimeter() + descendCost;
 			} else {
-				AABB u = right.aabb.getUnion(itemAABB);
 				double oldPerimeter = right.aabb.getPerimeter();
-				double newPerimeter = u.getPerimeter();
+				double newPerimeter = temp.set(right.aabb).union(itemAABB).getPerimeter();
 				costr = newPerimeter - oldPerimeter + descendCost;
 			}
 			
@@ -716,7 +712,8 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 			
 			// neither node should be null
 			node.height = 1 + Math.max(left.height, right.height);
-			node.aabb = left.aabb.getUnion(right.aabb);
+			//node.aabb = left.aabb.getUnion(right.aabb);
+			node.aabb.set(left.aabb).union(right.aabb);
 			
 			node = node.parent;
 		}
@@ -771,7 +768,8 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 				
 				// neither node should be null
 				n.height = 1 + Math.max(left.height, right.height);
-				n.aabb = left.aabb.getUnion(right.aabb);
+//				n.aabb = left.aabb.getUnion(right.aabb);
+				n.aabb.set(left.aabb).union(right.aabb);
 				
 				n = n.parent;
 			}
@@ -834,8 +832,10 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 				a.right = g;
 				g.parent = a;
 				// update the aabb
-				a.aabb = b.aabb.getUnion(g.aabb);
-				c.aabb = a.aabb.getUnion(f.aabb);
+//				a.aabb = b.aabb.getUnion(g.aabb);
+				a.aabb.set(b.aabb).union(g.aabb);
+//				c.aabb = a.aabb.getUnion(f.aabb);
+				c.aabb.set(a.aabb).union(f.aabb);
 				// update the heights
 				a.height = 1 + Math.max(b.height, g.height);
 				c.height = 1 + Math.max(a.height, f.height);
@@ -845,8 +845,10 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 				a.right = f;
 				f.parent = a;
 				// update the aabb
-				a.aabb = b.aabb.getUnion(f.aabb);
-				c.aabb = a.aabb.getUnion(g.aabb);
+//				a.aabb = b.aabb.getUnion(f.aabb);
+				a.aabb.set(b.aabb).union(f.aabb);
+//				c.aabb = a.aabb.getUnion(g.aabb);
+				c.aabb.set(a.aabb).union(g.aabb);
 				// update the heights
 				a.height = 1 + Math.max(b.height, f.height);
 				c.height = 1 + Math.max(a.height, g.height);
@@ -883,8 +885,10 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 				a.left = e;
 				e.parent = a;
 				// update the aabb
-				a.aabb = c.aabb.getUnion(e.aabb);
-				b.aabb = a.aabb.getUnion(d.aabb);
+//				a.aabb = c.aabb.getUnion(e.aabb);
+				a.aabb.set(c.aabb).union(e.aabb);
+//				b.aabb = a.aabb.getUnion(d.aabb);
+				b.aabb.set(a.aabb).union(d.aabb);
 				// update the heights
 				a.height = 1 + Math.max(c.height, e.height);
 				b.height = 1 + Math.max(a.height, d.height);
@@ -894,8 +898,10 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 				a.left = d;
 				d.parent = a;
 				// update the aabb
-				a.aabb = c.aabb.getUnion(d.aabb);
-				b.aabb = a.aabb.getUnion(e.aabb);
+//				a.aabb = c.aabb.getUnion(d.aabb);
+				a.aabb.set(c.aabb).union(d.aabb);
+//				b.aabb = a.aabb.getUnion(e.aabb);
+				b.aabb.set(a.aabb).union(e.aabb);
 				// update the heights
 				a.height = 1 + Math.max(c.height, d.height);
 				b.height = 1 + Math.max(a.height, e.height);

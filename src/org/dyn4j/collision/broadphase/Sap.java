@@ -261,11 +261,7 @@ public class Sap<E extends Collidable<T>, T extends Fixture> extends AbstractBro
 		while (ito.hasNext()) {
 			// get the current proxy
 			SapProxy<E, T> current = ito.next();
-			// only check the ones greater than (or equal to) the current item
-//			SortedSet<SapProxy<E, T>> set = this.tree.tailSet(current, false);
-			
 			Iterator<SapProxy<E, T>> iti = this.tree.tailIterator(current);
-//			Iterator<SapProxy<E, T>> iti = this.tree.iterator();
 			while (iti.hasNext()) {
 				SapProxy<E, T> test = iti.next();
 				// dont compare objects against themselves

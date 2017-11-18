@@ -67,9 +67,9 @@ public final class CircleDetector {
 		// check the magnitude against the sum of the radii
 		double radii = circle1.getRadius() + circle2.getRadius();
 		// get the magnitude squared
-		double mag = v.getMagnitude();
+		double mag = v.getMagnitudeSquared();
 		// check difference
-		if (mag < radii) {
+		if (mag < radii * radii) {
 			// then we have a collision
 			penetration.normal = v;
 			penetration.depth = radii - v.normalize();
@@ -97,9 +97,9 @@ public final class CircleDetector {
 		// check the magnitude against the sum of the radii
 		double radii = circle1.getRadius() + circle2.getRadius();
 		// get the magnitude squared
-		double mag = v.getMagnitude();
+		double mag = v.getMagnitudeSquared();
 		// check difference
-		if (mag < radii) {
+		if (mag < radii * radii) {
 			// then we have a collision
 			return true;
 		}
@@ -130,9 +130,9 @@ public final class CircleDetector {
 		// check the magnitude against the sum of the radii
 		double radii = r1 + r2;
 		// get the magnitude squared
-		double mag = v.getMagnitude();
+		double mag = v.getMagnitudeSquared();
 		// check difference
-		if (mag >= radii) {
+		if (mag >= radii * radii) {
 			// then the circles are separated
 			separation.normal = v;
 			separation.distance = v.normalize() - radii;

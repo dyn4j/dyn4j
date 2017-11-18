@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2017 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -41,7 +41,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * The {@link #expand(double)} method can be used to expand the bounds of the {@link AABB} by some amount.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.2.5
  * @since 3.0.0
  */
 public class AABB implements Translatable {
@@ -112,6 +112,21 @@ public class AABB implements Translatable {
 	public AABB(AABB aabb) {
 		this.min = aabb.min.copy();
 		this.max = aabb.max.copy();
+	}
+	
+	/**
+	 * Sets this aabb to the given aabb's value and returns
+	 * this AABB.
+	 * @param aabb the aabb to copy
+	 * @return {@link AABB}
+	 * @since 3.2.5
+	 */
+	public AABB set(AABB aabb) {
+		this.min.x = aabb.min.x;
+		this.min.y = aabb.min.y;
+		this.max.x = aabb.max.x;
+		this.max.y = aabb.max.y;
+		return this;
 	}
 	
 	/* (non-Javadoc)
@@ -192,14 +207,17 @@ public class AABB implements Translatable {
 	
 	/**
 	 * Performs a union of this {@link AABB} and the given {@link AABB} placing
-	 * the result of the union into this {@link AABB}.
+	 * the result of the union into this {@link AABB} and then returns
+	 * this {@link AABB}
 	 * @param aabb the {@link AABB} to union
+	 * @return {@link AABB}
 	 */
-	public void union(AABB aabb) {
+	public AABB union(AABB aabb) {
 		this.min.x = Math.min(this.min.x, aabb.min.x);
 		this.min.y = Math.min(this.min.y, aabb.min.y);
 		this.max.x = Math.max(this.max.x, aabb.max.x);
 		this.max.y = Math.max(this.max.y, aabb.max.y);
+		return this;
 	}
 	
 	/**
@@ -222,14 +240,15 @@ public class AABB implements Translatable {
 	
 	/**
 	 * Performs the intersection of this {@link AABB} and the given {@link AABB} placing
-	 * the result into this {@link AABB}.
+	 * the result into this {@link AABB} and then returns this {@link AABB}.
 	 * <p>
 	 * If the given {@link AABB} does not overlap this {@link AABB}, this {@link AABB} is
 	 * set to a zero {@link AABB}.
 	 * @param aabb the {@link AABB} to intersect
+	 * @return {@link AABB}
 	 * @since 3.1.1
 	 */
-	public void intersection(AABB aabb) {
+	public AABB intersection(AABB aabb) {
 		this.min.x = Math.max(this.min.x, aabb.min.x);
 		this.min.y = Math.max(this.min.y, aabb.min.y);
 		this.max.x = Math.min(this.max.x, aabb.max.x);
@@ -244,6 +263,8 @@ public class AABB implements Translatable {
 			this.max.x = 0.0;
 			this.max.y = 0.0;
 		}
+		
+		return this;
 	}
 	
 	/**
@@ -275,15 +296,17 @@ public class AABB implements Translatable {
 	}
 	
 	/**
-	 * Expands this {@link AABB} by half the given expansion in each direction.
+	 * Expands this {@link AABB} by half the given expansion in each direction and
+	 * then returns this {@link AABB}.
 	 * <p>
 	 * The expansion can be negative to shrink the {@link AABB}.  However, if the expansion is
 	 * greater than the current width/height, the {@link AABB} can become invalid.  In this 
 	 * case, the AABB will become a degenerate AABB at the mid point of the min and max for 
 	 * the respective coordinates.
 	 * @param expansion the expansion amount
+	 * @return {@link AABB}
 	 */
-	public void expand(double expansion) {
+	public AABB expand(double expansion) {
 		double e = expansion * 0.5;
 		this.min.x -= e;
 		this.min.y -= e;
@@ -305,6 +328,7 @@ public class AABB implements Translatable {
 				this.max.y = mid;
 			}
 		}
+		return this;
 	}
 	
 	/**
