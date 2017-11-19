@@ -280,8 +280,9 @@
     </plugins>
   </build>
 
-  <!-- Sign artifacts when deploying to Central -->
   <profiles>
+
+    <!-- Sign artifacts when deploying to Central -->
     <profile>
       <id>dyn4j-deployment</id>
       <activation>
@@ -313,6 +314,41 @@
 	              </configuration>
                 <goals>
                   <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!--
+      Enable the staging plugin for releases
+
+      This will deploy the code to Maven Central in a single command:
+
+      $ mvn clean deploy -Ddyn4j.release=true
+    -->
+    <profile>
+      <id>dyn4j-release</id>
+      <activation>
+        <property>
+          <name>dyn4j.release</name>
+        </property>
+      </activation>
+
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <extensions>true</extensions>
+            <executions>
+              <execution>
+                <id>deploy-packages</id>
+                <phase>deploy</phase>
+                <goals>
+                  <goal>deploy</goal>
                 </goals>
               </execution>
             </executions>
