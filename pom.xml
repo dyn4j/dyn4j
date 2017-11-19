@@ -3,40 +3,299 @@
   <groupId>org.dyn4j</groupId>
   <artifactId>dyn4j</artifactId>
   <version>3.2.5</version>
-  <build>
-    <sourceDirectory>src</sourceDirectory>
-    <resources>
-      <resource>
-        <directory>src</directory>
-        <excludes>
-          <exclude>**/*.java</exclude>
-        </excludes>
-      </resource>
-    </resources>
-    <plugins>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.6.1</version>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
   <name>dyn4j</name>
   <url>http://www.dyn4j.org</url>
   <description>Java Collision Detection and Physics Engine</description>
   <inceptionYear>2010</inceptionYear>
+  <packaging>bundle</packaging>
+  	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
   <organization>
   	<url>http://www.dyn4j.org</url>
   	<name>dyn4j</name>
   </organization>
   <scm>
   	<url>https://github.com/dyn4j/dyn4j</url>
+  	<connection>scm:git:https://github.com/dyn4j/dyn4j</connection>
+  	<developerConnection>scm:git:https://github.com/wnbittle</developerConnection>
   </scm>
   <issueManagement>
   	<system>GitHub Issues</system>
   	<url>https://github.com/dyn4j/dyn4j/issues</url>
   </issueManagement>
+  <licenses>
+    <license>
+      <name>BSD-3 License</name>
+      <url>http://www.opensource.org/licenses/BSD-3-Clause</url>
+    </license>
+  </licenses>
+    <developers>
+    <developer>
+      <id>wnbittle</id>
+      <name>William Bittle</name>
+      <email>wjbittle@gmail.com</email>
+      <url>http://www.dyn4j.org</url>
+    </developer>
+  </developers>
+  <distributionManagement>
+    <site>
+      <id>GitHub</id>
+      <name>GitHub</name>
+      <url>https://github.com/dyn4j/dyn4j</url>
+    </site>
+    <repository>
+      <id>sonatype-nexus-staging</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+    <snapshotRepository>
+      <id>sonatype-nexus-snapshots</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+    </snapshotRepository>
+  </distributionManagement>
+  
+  <build>
+    <pluginManagement>
+      <plugins>
+        <!--
+          Well-known core plugins used everywhere.
+        -->
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.0.0</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.8.2</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.2</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.0.0</version>
+        </plugin>
+
+        <!--
+        Maven Compiler plugin.
+        https://maven.apache.org/plugins/maven-compiler-plugin/
+        -->
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.5.1</version>
+          <configuration>
+            <!-- Require JDK >= 1.6 -->
+            <source>1.6</source>
+            <target>1.6</target>
+          </configuration>
+        </plugin>
+
+        <!--
+        Surefire plugin.
+        https://maven.apache.org/surefire/maven-surefire-plugin/
+        Used to execute unit tests.
+        -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.19.1</version>
+          <configuration>
+            <redirectTestOutputToFile>true</redirectTestOutputToFile>
+          </configuration>
+        </plugin>
+
+        <!--
+        Source plugin.
+        https://maven.apache.org/plugins/maven-source-plugin/
+        -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>3.0.1</version>
+          <executions>
+            <execution>
+              <phase>package</phase>
+              <goals>
+                <goal>jar-no-fork</goal>
+                <goal>test-jar-no-fork</goal>
+              </goals>
+              <configuration>
+                <archive>
+                  <manifestEntries>
+                    <Specification-Title>${project.name}</Specification-Title>
+                    <Specification-Version>${project.version}</Specification-Version>
+                    <Specification-Vendor>dyn4j.org</Specification-Vendor>
+                    <Implementation-Title>${project.name}</Implementation-Title>
+                    <Implementation-Version>${project.version}</Implementation-Version>
+                    <Implementation-Vendor>dyn4j.org</Implementation-Vendor>
+                    <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+                  </manifestEntries>
+                </archive>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
+        <!--
+        Bundle plugin.
+        https://felix.apache.org/documentation/subprojects/apache-felix-maven-bundle-plugin-bnd.html
+        Used to produce OSGi bundles.
+        -->
+        <plugin>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>maven-bundle-plugin</artifactId>
+          <version>3.3.0</version>
+          <extensions>true</extensions>
+          <configuration>
+          	<archive>
+          		<addMavenDescriptor>false</addMavenDescriptor>
+          		<compress>true</compress>
+          		<manifest>
+          			<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+          			<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+          			<addExtensions>true</addExtensions>
+          			<mainClass>org.dyn4j.Version</mainClass>
+          		</manifest>
+          		<manifestEntries>
+          			<Built-By>William Bittle</Built-By>
+          		</manifestEntries>
+          	</archive>
+            <instructions>
+              <Specification-Title>${project.name}</Specification-Title>
+              <Specification-Version>${project.version}</Specification-Version>
+              <Specification-Vendor>dyn4j.org</Specification-Vendor>
+              <Implementation-Title>${project.name}</Implementation-Title>
+              <Implementation-Version>${project.version}</Implementation-Version>
+              <Implementation-Vendor>dyn4j.org</Implementation-Vendor>
+              <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+              <Bundle-DocURL>${project.url}</Bundle-DocURL>
+            </instructions>
+          </configuration>
+        </plugin>
+
+        <!--
+        Maven Javadoc plugin.
+        https://maven.apache.org/plugins/maven-javadoc-plugin/
+        -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>2.10.3</version>
+          <executions>
+            <execution>
+              <id>attach-javadocs</id>
+              <phase>package</phase>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+              <configuration>
+                <archive>
+                  <manifestEntries>
+                    <Specification-Title>${project.name}</Specification-Title>
+                    <Specification-Version>${project.version}</Specification-Version>
+                    <Specification-Vendor>dyn4j.org</Specification-Vendor>
+                    <Implementation-Title>${project.name}</Implementation-Title>
+                    <Implementation-Version>${project.version}</Implementation-Version>
+                    <Implementation-Vendor>dyn4j.org</Implementation-Vendor>
+                    <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+                  </manifestEntries>
+                </archive>
+                <additionalparam>-Xdoclint:none</additionalparam>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
+        <!--
+          Nexus staging plugin.
+          https://github.com/sonatype/nexus-maven-plugins/tree/master/staging/maven-plugin
+          This allows for deployment to Maven Central via the command line.
+        -->
+        <plugin>
+          <groupId>org.sonatype.plugins</groupId>
+          <artifactId>nexus-staging-maven-plugin</artifactId>
+          <version>1.6.8</version>
+          <extensions>true</extensions>
+          <configuration>
+            <serverId>sonatype-nexus-staging</serverId>
+            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <!-- Produce a source jar -->
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+      </plugin>
+
+      <!-- Produce a javadoc jar -->
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+
+      <!-- Run tests -->
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+      </plugin>
+
+      <!-- Produce an OSGi bundle -->
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+
+  <!-- Sign artifacts when deploying to Central -->
+  <profiles>
+    <profile>
+      <id>dyn4j-deployment</id>
+      <activation>
+        <property>
+          <name>dyn4j.deployment</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+
+          <!--
+          Maven GPG plugin.
+          https://maven.apache.org/plugins/maven-gpg-plugin/
+          -->
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.6</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <configuration>
+	                <gpgArguments>
+	                    <arg>--pinentry-mode</arg>
+	                    <arg>loopback</arg>
+	                </gpgArguments>
+	            </configuration>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
