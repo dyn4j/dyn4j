@@ -1,16 +1,39 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <groupId>org.dyn4j</groupId>
   <artifactId>dyn4j</artifactId>
   <version>3.2.5</version>
+
   <name>dyn4j</name>
   <url>http://www.dyn4j.org</url>
   <description>Java Collision Detection and Physics Engine</description>
   <inceptionYear>2010</inceptionYear>
   <packaging>bundle</packaging>
-  	<properties>
+
+  <properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
+
+    <!--
+      Define plugin versions as properties so that the Maven Versions Plugin can update them.
+
+      See "versions:update-properties":
+      http://www.mojohaus.org/versions-maven-plugin/
+    -->
+
+    <dyn4j.maven-clean-plugin.version>3.0.0</dyn4j.maven-clean-plugin.version>
+    <dyn4j.maven-resources-plugin.version>3.0.0</dyn4j.maven-resources-plugin.version>
+    <dyn4j.maven-deploy-plugin.version>2.8.2</dyn4j.maven-deploy-plugin.version>
+    <dyn4j.maven-install-plugin.version>2.5.2</dyn4j.maven-install-plugin.version>
+    <dyn4j.maven-compiler-plugin.version>3.7.0</dyn4j.maven-compiler-plugin.version>
+    <dyn4j.maven-surefire-plugin.version>2.19.1</dyn4j.maven-surefire-plugin.version>
+    <dyn4j.maven-source-plugin.version>3.0.1</dyn4j.maven-source-plugin.version>
+    <dyn4j.maven-bundle-plugin.version>3.3.0</dyn4j.maven-bundle-plugin.version>
+    <dyn4j.maven-javadoc-plugin.version>3.0.0-M1</dyn4j.maven-javadoc-plugin.version>
+    <dyn4j.nexus-staging-maven-plugin.version>1.6.8</dyn4j.nexus-staging-maven-plugin.version>
+    <dyn4j.maven-gpg-plugin.version>1.6</dyn4j.maven-gpg-plugin.version>
+  </properties>
+
   <organization>
   	<url>http://www.dyn4j.org</url>
   	<name>dyn4j</name>
@@ -64,22 +87,22 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-clean-plugin</artifactId>
-          <version>3.0.0</version>
+          <version>${dyn4j.maven-clean-plugin.version}</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-deploy-plugin</artifactId>
-          <version>2.8.2</version>
+          <version>${dyn4j.maven-deploy-plugin.version}</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-install-plugin</artifactId>
-          <version>2.5.2</version>
+          <version>${dyn4j.maven-install-plugin.version}</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-resources-plugin</artifactId>
-          <version>3.0.0</version>
+          <version>${dyn4j.maven-resources-plugin.version}</version>
         </plugin>
 
         <!--
@@ -90,7 +113,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.5.1</version>
+          <version>${dyn4j.maven-compiler-plugin.version}</version>
           <configuration>
             <!-- Require JDK >= 1.6 -->
             <source>1.6</source>
@@ -106,7 +129,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.19.1</version>
+          <version>${dyn4j.maven-surefire-plugin.version}</version>
           <configuration>
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
           </configuration>
@@ -119,7 +142,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
-          <version>3.0.1</version>
+          <version>${dyn4j.maven-source-plugin.version}</version>
           <executions>
             <execution>
               <phase>package</phase>
@@ -152,7 +175,7 @@
         <plugin>
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
-          <version>3.3.0</version>
+          <version>${dyn4j.maven-bundle-plugin.version}</version>
           <extensions>true</extensions>
           <configuration>
           	<archive>
@@ -188,7 +211,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>2.10.3</version>
+          <version>${dyn4j.maven-javadoc-plugin.version}</version>
           <executions>
             <execution>
               <id>attach-javadocs</id>
@@ -222,7 +245,7 @@
         <plugin>
           <groupId>org.sonatype.plugins</groupId>
           <artifactId>nexus-staging-maven-plugin</artifactId>
-          <version>1.6.8</version>
+          <version>${dyn4j.nexus-staging-maven-plugin.version}</version>
           <extensions>true</extensions>
           <configuration>
             <serverId>sonatype-nexus-staging</serverId>
@@ -277,7 +300,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.6</version>
+            <version>${dyn4j.maven-gpg-plugin.version}</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -287,7 +310,7 @@
 	                    <arg>--pinentry-mode</arg>
 	                    <arg>loopback</arg>
 	                </gpgArguments>
-	            </configuration>
+	              </configuration>
                 <goals>
                   <goal>sign</goal>
                 </goals>
