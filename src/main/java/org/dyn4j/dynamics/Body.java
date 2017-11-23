@@ -84,10 +84,10 @@ import org.dyn4j.resources.Messages;
  * @since 1.0.0
  */
 public class Body extends AbstractCollidable<BodyFixture> implements Collidable<BodyFixture>, Transformable, DataContainer {
-	/** The default linear damping; value = {@value #DEFAULT_LINEAR_DAMPING} */
+	/** The default linear damping; value = {@link #DEFAULT_LINEAR_DAMPING} */
 	public static final double DEFAULT_LINEAR_DAMPING = 0.0;
 	
-	/** The default angular damping; value = {@value #DEFAULT_ANGULAR_DAMPING} */
+	/** The default angular damping; value = {@link #DEFAULT_ANGULAR_DAMPING} */
 	public static final double DEFAULT_ANGULAR_DAMPING 	= 0.01;
 	
 	/** The state flag for allowing automatic sleeping */

@@ -42,13 +42,13 @@ import org.dyn4j.resources.Messages;
  * @see Fixture
  */
 public class BodyFixture extends Fixture implements DataContainer {
-	/** The default coefficient of friction; value = {@value #DEFAULT_FRICTION} */
+	/** The default coefficient of friction; value = {@link #DEFAULT_FRICTION} */
 	public static final double DEFAULT_FRICTION = 0.2;
 	
-	/** The default coefficient of restitution; value = {@value #DEFAULT_RESTITUTION} */
+	/** The default coefficient of restitution; value = {@link #DEFAULT_RESTITUTION} */
 	public static final double DEFAULT_RESTITUTION = 0.0;
 
-	/** The default density in kg/m<sup>2</sup>; value = {@value #DEFAULT_DENSITY} */
+	/** The default density in kg/m<sup>2</sup>; value = {@link #DEFAULT_DENSITY} */
 	public static final double DEFAULT_DENSITY = 1.0;
 	
 	/** The density in kg/m<sup>2</sup> */

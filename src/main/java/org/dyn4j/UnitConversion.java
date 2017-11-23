@@ -34,34 +34,34 @@ package org.dyn4j;
  * @since 1.0.0
  */
 public final class UnitConversion {
-	/** 1 foot = {@value #FOOT_TO_METER} meters */
+	/** 1 foot = {@link #FOOT_TO_METER} meters */
 	public static final double FOOT_TO_METER = 0.0254 * 12.0;
 	
-	/** 1 meter = {@value #METER_TO_FOOT} feet */
+	/** 1 meter = {@link #METER_TO_FOOT} feet */
 	public static final double METER_TO_FOOT = 1.0 / FOOT_TO_METER;
 	
-	/** 1 slug = {@value #SLUG_TO_KILOGRAM} kilograms */
+	/** 1 slug = {@link #SLUG_TO_KILOGRAM} kilograms */
 	public static final double SLUG_TO_KILOGRAM = 14.5939029;
 	
-	/** 1 kilogram = {@value #KILOGRAM_TO_SLUG} slugs */
+	/** 1 kilogram = {@link #KILOGRAM_TO_SLUG} slugs */
 	public static final double KILOGRAM_TO_SLUG = 1.0 / SLUG_TO_KILOGRAM;
 	
-	/** 1 pound-mass = {@value #POUND_TO_KILOGRAM} kilograms */
+	/** 1 pound-mass = {@link #POUND_TO_KILOGRAM} kilograms */
 	public static final double POUND_TO_KILOGRAM = 0.45359237;
 	
-	/** 1 kilogram = {@value #KILOGRAM_TO_POUND} pounds */
+	/** 1 kilogram = {@link #KILOGRAM_TO_POUND} pounds */
 	public static final double KILOGRAM_TO_POUND = 1.0 / POUND_TO_KILOGRAM;
 	
-	/** 1 pound-force = {@value #POUND_TO_NEWTON} newtons */
+	/** 1 pound-force = {@link #POUND_TO_NEWTON} newtons */
 	public static final double POUND_TO_NEWTON = 4.448222;
 	
-	/** 1 newton = {@value #NEWTON_TO_POUND} pound-force */
+	/** 1 newton = {@link #NEWTON_TO_POUND} pound-force */
 	public static final double NEWTON_TO_POUND = 1.0 / POUND_TO_NEWTON;
 	
-	/** 1 foot-pound = {@value #FOOT_POUND_TO_NEWTON_METER} newton-meters */
+	/** 1 foot-pound = {@link #FOOT_POUND_TO_NEWTON_METER} newton-meters */
 	public static final double FOOT_POUND_TO_NEWTON_METER = 0.7375621;
 	
-	/** 1 newton-meter = {@value #NEWTON_METER_TO_FOOT_POUND} foot-pounds */
+	/** 1 newton-meter = {@link #NEWTON_METER_TO_FOOT_POUND} foot-pounds */
 	public static final double NEWTON_METER_TO_FOOT_POUND = 1.0 / FOOT_POUND_TO_NEWTON_METER;
 	
 	/**
