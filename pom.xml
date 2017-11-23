@@ -32,6 +32,7 @@
     <dyn4j.maven-javadoc-plugin.version>3.0.0-M1</dyn4j.maven-javadoc-plugin.version>
     <dyn4j.nexus-staging-maven-plugin.version>1.6.8</dyn4j.nexus-staging-maven-plugin.version>
     <dyn4j.maven-gpg-plugin.version>1.6</dyn4j.maven-gpg-plugin.version>
+    <dyn4.maven-enforcer-plugin.version>3.0.0-M1</dyn4.maven-enforcer-plugin.version>
   </properties>
 
   <organization>
@@ -106,6 +107,17 @@
         </plugin>
 
         <!--
+          Enforcer plugin.
+          https://maven.apache.org/enforcer/maven-enforcer-plugin/
+        -->
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <version>${dyn4.maven-enforcer-plugin.version}</version>
+        </plugin>
+
+        <!--
         Maven Compiler plugin.
         https://maven.apache.org/plugins/maven-compiler-plugin/
         -->
@@ -114,10 +126,42 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>${dyn4j.maven-compiler-plugin.version}</version>
+          <executions>
+
+            <!--
+              Compile everything as JDK 9 bytecode: This ensures that we get
+              decent compilation errors such as missing "requires" directives
+              in the module descriptor.
+            -->
+
+            <execution>
+              <id>default-compile</id>
+              <configuration>
+                <release>9</release>
+              </configuration>
+            </execution>
+
+            <!--
+              Recompile everything except for the module descriptor as JDK 6
+              bytecode.
+            -->
+
+            <execution>
+              <id>compile-6</id>
+              <goals>
+                <goal>compile</goal>
+              </goals>
+              <configuration>
+                <excludes>
+                  <exclude>module-info.java</exclude>
+                </excludes>
+              </configuration>
+            </execution>
+          </executions>
+
+          <!-- These are the default settings for all executions. -->
           <configuration>
-            <!-- Require JDK >= 1.6 -->
-            <source>1.6</source>
-            <target>1.6</target>
+            <release>6</release>
           </configuration>
         </plugin>
 
@@ -202,6 +246,16 @@
               <Bundle-DocURL>${project.url}</Bundle-DocURL>
             </instructions>
           </configuration>
+
+          <!-- Use a newer version of bndlib that supports Java 9    -->
+          <!-- See: https://issues.apache.org/jira/browse/FELIX-5698 -->
+          <dependencies>
+            <dependency>
+              <groupId>biz.aQute.bnd</groupId>
+              <artifactId>biz.aQute.bndlib</artifactId>
+              <version>3.5.0</version>
+            </dependency>
+          </dependencies>
         </plugin>
 
         <!--
@@ -257,6 +311,29 @@
     </pluginManagement>
 
     <plugins>
+
+      <!-- Check various preconditions for building. -->
+      <plugin>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+          <id>enforce-rules</id>
+          <phase>validate</phase>
+          <goals>
+            <goal>enforce</goal>
+          </goals>
+          <configuration>
+            <rules>
+              <!-- Require JDK 9+ -->
+              <requireJavaVersion>
+                <version>[9,)</version>
+              </requireJavaVersion>
+            </rules>
+          </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <!-- Produce a source jar -->
       <plugin>
         <artifactId>maven-source-plugin</artifactId>
