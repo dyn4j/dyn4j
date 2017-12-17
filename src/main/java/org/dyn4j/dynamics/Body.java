@@ -931,7 +931,11 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * @return boolean
 	 */
 	public boolean isStatic() {
-		return this.mass.isInfinite() && this.velocity.isZero() && Math.abs(this.angularVelocity) <= Epsilon.E;
+//		return this.mass.isInfinite() && this.velocity.isZero() && Math.abs(this.angularVelocity) <= Epsilon.E;
+		return this.mass.getType() == MassType.INFINITE &&
+			   Math.abs(this.velocity.x) <= Epsilon.E &&
+			   Math.abs(this.velocity.y) <= Epsilon.E &&
+			   Math.abs(this.angularVelocity) <= Epsilon.E;
 	}
 	
 	/**
@@ -940,7 +944,11 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * @return boolean
 	 */
 	public boolean isKinematic() {
-		return this.mass.isInfinite() && (!this.velocity.isZero() || Math.abs(this.angularVelocity) > Epsilon.E);
+//		return this.mass.isInfinite() && (!this.velocity.isZero() || Math.abs(this.angularVelocity) > Epsilon.E);
+		return this.mass.getType() == MassType.INFINITE &&
+				   (Math.abs(this.velocity.x) > Epsilon.E ||
+				    Math.abs(this.velocity.y) > Epsilon.E ||
+				    Math.abs(this.angularVelocity) > Epsilon.E);
 	}
 	
 	/**

@@ -887,7 +887,7 @@ public class World implements Shiftable, DataContainer {
 			// we don't process kinematic or static bodies except with
 			// dynamic bodies (in other words b1 must always be a dynamic
 			// body)
-			if (body.isKinematic() || body.isStatic()) continue;
+			if (body.mass.isInfinite()) continue;
 			
 			// don't bother with bodies that did not have their
 			// positions integrated, if they were not added to an island then
