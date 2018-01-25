@@ -36,18 +36,18 @@ import org.dyn4j.geometry.Vector2;
  * normal, and depth.
  * @author William Bittle
  * @see ContactPoint
- * @version 3.2.0
+ * @version 3.2.5
  * @since 1.0.0
  */
 public class PersistedContactPoint extends ContactPoint {
 	/** The previous contact point */
-	protected Vector2 oldPoint;
+	protected final Vector2 oldPoint;
 	
 	/** The previous contact normal */
-	protected Vector2 oldNormal;
+	protected final Vector2 oldNormal;
 	
 	/** The previous penetration depth */
-	protected double oldDepth;
+	protected final double oldDepth;
 	
 	/**
 	 * Full constructor.

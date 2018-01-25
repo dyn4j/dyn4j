@@ -40,7 +40,7 @@ import org.dyn4j.geometry.Shiftable;
  * Represents a {@link ContactManager} that performs warm starting of contacts
  * based on the previous iteration.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.2.5
  * @since 3.2.0
  */
 public class WarmStartingContactManager extends SimpleContactManager implements ContactManager, Shiftable {
@@ -181,7 +181,7 @@ public class WarmStartingContactManager extends SimpleContactManager implements 
 								}
 							}
 							if (!allow) {
-								contacts.remove(j);
+								newContactConstraint.enabled = false;
 							}
 							// flag that the contact was persisted
 							persisted[k] = true;
@@ -211,7 +211,7 @@ public class WarmStartingContactManager extends SimpleContactManager implements 
 							}
 						}
 						if (!allow) {
-							contacts.remove(j);
+							newContactConstraint.enabled = false;
 						}
 					}
 				}
@@ -267,7 +267,7 @@ public class WarmStartingContactManager extends SimpleContactManager implements 
 						}
 					}
 					if (!allow) {
-						contacts.remove(j);
+						newContactConstraint.enabled = false;
 					}
 				}
 			}

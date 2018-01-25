@@ -32,7 +32,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents a contact point and used to report events via the {@link ContactListener}.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.2.5
  * @since 1.0.0
  */
 public class ContactPoint {
@@ -52,13 +52,13 @@ public class ContactPoint {
 	protected final BodyFixture fixture2;
 	
 	/** The world space contact point */
-	protected Vector2 point;
+	protected final Vector2 point;
 	
 	/** The world space contact normal */
-	protected Vector2 normal;
+	protected final Vector2 normal;
 	
 	/** The penetration depth */
-	protected double depth;
+	protected final double depth;
 	
 	/**
 	 * Full constructor.

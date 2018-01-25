@@ -39,7 +39,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents a {@link Contact} constraint for each {@link Body} pair.  
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.2.5
  * @since 1.0.0
  */
 public class ContactConstraint extends Constraint implements Shiftable {
@@ -72,6 +72,9 @@ public class ContactConstraint extends Constraint implements Shiftable {
 	
 	/** The surface speed of the contact patch */
 	protected double tangentSpeed;
+	
+	/** True if the contact should be evaluated */
+	protected boolean enabled;
 	
 	/** The K matrix for block solving a contact pair */
 	Matrix22 K;
@@ -127,6 +130,7 @@ public class ContactConstraint extends Constraint implements Shiftable {
 		this.sensor = fixture1.isSensor() || fixture2.isSensor();
 		// by default the tangent speed is zero
 		this.tangentSpeed = 0;
+		this.enabled = true;
 	}
 	
 	/* (non-Javadoc)
@@ -146,6 +150,7 @@ public class ContactConstraint extends Constraint implements Shiftable {
 		  .append("|Restitution=").append(this.restitution)
 		  .append("|IsSensor=").append(this.sensor)
 		  .append("|TangentSpeed=").append(this.tangentSpeed)
+		  .append("|Enabled=").append(this.enabled)
 		  .append("|Contacts={");
 		int size = contacts.size();
 		for (int i = 0; i < size; i++) {
@@ -297,7 +302,7 @@ public class ContactConstraint extends Constraint implements Shiftable {
 	}
 	
 	/**
-	 * Returns the surface speed of the contact manifold.
+	 * Returns the surface speed of the contact constraint.
 	 * <p>
 	 * This will always be zero unless specified manually. This can
 	 * be used to set the target velocity at the contact to simulate
@@ -310,7 +315,7 @@ public class ContactConstraint extends Constraint implements Shiftable {
 	}
 	
 	/**
-	 * Sets the target surface speed of the contact manifold.
+	 * Sets the target surface speed of the contact constraint.
 	 * <p>
 	 * The surface speed, in meters / second, is used to simulate a
 	 * conveyor belt.
@@ -321,5 +326,30 @@ public class ContactConstraint extends Constraint implements Shiftable {
 	 */
 	public void setTangentSpeed(double speed) {
 		this.tangentSpeed = speed;
+	}
+	
+	/**
+	 * Sets the enabled flag.
+	 * <p>
+	 * A value of true would enable the contact to be processed by the
+	 * collision resolution step. A value of false would disable the
+	 * processing of this constraint for this step only.
+	 * <p>
+	 * True by default.
+	 * @param flag
+	 * @since 3.2.5
+	 */
+	public void setEnabled(boolean flag) {
+		this.enabled = flag;
+	}
+	
+	/**
+	 * Returns true if this contact constraint is enabled for processing
+	 * by the collision resolution step.
+	 * @return boolean
+	 * @since 3.2.5
+	 */
+	public boolean isEnabled() {
+		return this.enabled;
 	}
 }

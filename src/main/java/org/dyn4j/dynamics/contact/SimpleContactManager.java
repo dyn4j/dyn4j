@@ -41,7 +41,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents a basic {@link ContactManager} that reports new and old contacts.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.2.5
  * @since 3.2.0
  */
 public class SimpleContactManager implements ContactManager, Shiftable {
@@ -291,6 +291,8 @@ public class SimpleContactManager implements ContactManager, Shiftable {
 		
 		// loop through the list of contacts that were solved
 		for (ContactConstraint contactConstraint : this.constraints.values()) {
+			// don't report postSolve of disabled contact constraints
+			if (!contactConstraint.enabled) continue;
 			// loop over the contacts
 			int rsize = contactConstraint.contacts.size();
 			for (int j = 0; j < rsize; j++) {

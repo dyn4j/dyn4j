@@ -27,7 +27,6 @@ package org.dyn4j.dynamics.contact;
 import org.dyn4j.Listener;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
-import org.dyn4j.dynamics.CollisionListener;
 import org.dyn4j.dynamics.World;
 
 /**
@@ -39,12 +38,18 @@ import org.dyn4j.dynamics.World;
  * <p>
  * Modification of the {@link World} is permitted from any of these methods.
  * <p>
+ * Returning false from any of the listener methods will disable the whole contact
+ * constraint.  Other {@link ContactListener}s will still be notified of this event
+ * and other contact events for this constraint. A disabled contact constraint will 
+ * not be solved. Contact constraints disabled this way are only disabled for this 
+ * timestep.
+ * <p>
  * If a body is to be removed, make sure to return false to disable the contact.  Otherwise
  * the contact between the bodies will still be resolved even if the body has been removed.
  * If a body is removed you should check the remaining contacts for that body and return
- * false from the those methods as well.
+ * false from the those as well.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.2.5
  * @since 1.0.0
  */
 public interface ContactListener extends Listener {

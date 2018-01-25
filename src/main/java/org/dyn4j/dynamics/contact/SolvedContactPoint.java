@@ -36,15 +36,15 @@ import org.dyn4j.geometry.Vector2;
  * impulses computed.
  * @author William Bittle
  * @see ContactPoint
- * @version 3.2.0
+ * @version 3.2.5
  * @since 1.0.0
  */
 public class SolvedContactPoint extends ContactPoint {
 	/** The accumulated normal impulse */
-	protected double normalImpulse;
+	protected final double normalImpulse;
 	
 	/** The accumulated tangential impulse */
-	protected double tangentialImpulse;
+	protected final double tangentialImpulse;
 	
 	/**
 	 * Full constructor.
