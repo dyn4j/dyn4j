@@ -169,7 +169,7 @@ public class WarmStartingContactManager extends SimpleContactManager implements 
 								}
 							}
 							if (!allow) {
-								contacts.remove(j);
+								newContactConstraint.enabled = false;
 							}
 							// flag that the contact was persisted
 							persisted[k] = true;
@@ -190,7 +190,7 @@ public class WarmStartingContactManager extends SimpleContactManager implements 
 							}
 						}
 						if (!allow) {
-							contacts.remove(j);
+							newContactConstraint.enabled = false;
 						}
 					}
 				}
@@ -229,7 +229,7 @@ public class WarmStartingContactManager extends SimpleContactManager implements 
 						}
 					}
 					if (!allow) {
-						contacts.remove(j);
+						newContactConstraint.enabled = false;
 					}
 				}
 			}

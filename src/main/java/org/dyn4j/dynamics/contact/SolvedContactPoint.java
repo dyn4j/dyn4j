@@ -41,10 +41,10 @@ import org.dyn4j.geometry.Vector2;
  */
 public class SolvedContactPoint extends ContactPoint {
 	/** The accumulated normal impulse */
-	protected double normalImpulse;
+	protected final double normalImpulse;
 	
 	/** The accumulated tangential impulse */
-	protected double tangentialImpulse;
+	protected final double tangentialImpulse;
 	
 	/**
 	 * Full constructor.

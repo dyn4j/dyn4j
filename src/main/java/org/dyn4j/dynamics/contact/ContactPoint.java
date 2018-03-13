@@ -52,13 +52,13 @@ public class ContactPoint {
 	protected final BodyFixture fixture2;
 	
 	/** The world space contact point */
-	protected Vector2 point;
+	protected final Vector2 point;
 	
 	/** The world space contact normal */
-	protected Vector2 normal;
+	protected final Vector2 normal;
 	
 	/** The penetration depth */
-	protected double depth;
+	protected final double depth;
 	
 	/** True if the contact is a sensor */
 	protected boolean sensor;

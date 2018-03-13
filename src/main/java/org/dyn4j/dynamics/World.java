@@ -585,7 +585,7 @@ public class World implements Shiftable, DataContainer {
 					constraint = contactConstraint = contactEdge.interaction;
 					// skip sensor contacts
 					// check if the contact constraint has already been added to an island
-					if (contactConstraint.isSensor() || constraint.isOnIsland()) continue;
+					if (!contactConstraint.isEnabled() || contactConstraint.isSensor() || constraint.isOnIsland()) continue;
 					// get the other body
 					Body other = contactEdge.other;
 					// add the contact constraint to the island list

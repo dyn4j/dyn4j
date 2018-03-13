@@ -259,6 +259,8 @@ public class SimpleContactManager implements ContactManager, Shiftable {
 		
 		// loop through the list of contacts that were solved
 		for (ContactConstraint contactConstraint : this.constraints.values()) {
+			// don't report postSolve of disabled contact constraints
+			if (!contactConstraint.enabled) continue;
 			// loop over the contacts
 			int rsize = contactConstraint.contacts.size();
 			for (int j = 0; j < rsize; j++) {
