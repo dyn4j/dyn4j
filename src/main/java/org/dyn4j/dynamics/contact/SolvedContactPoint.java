@@ -36,7 +36,7 @@ import org.dyn4j.geometry.Vector2;
  * impulses computed.
  * @author William Bittle
  * @see ContactPoint
- * @version 3.2.0
+ * @version 3.3.0
  * @since 1.0.0
  */
 public class SolvedContactPoint extends ContactPoint {
@@ -63,9 +63,20 @@ public class SolvedContactPoint extends ContactPoint {
 			Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2, 
 			Vector2 point, Vector2 normal, double depth,
 			double normalImpulse, double tangentialImpulse) {
-		super(id, body1, fixture1, body2, fixture2, point, normal, depth);
+		super(id, body1, fixture1, body2, fixture2, point, normal, depth, false);
 		this.normalImpulse = normalImpulse;
 		this.tangentialImpulse = tangentialImpulse;
+	}
+
+	/**
+	 * Helper constructor for a contact constraint and contact.
+	 * @param constraint the constraint
+	 * @param contact the contact
+	 */
+	public SolvedContactPoint(ContactConstraint constraint, Contact contact) {
+		super(constraint, contact);
+		this.normalImpulse = contact.jn;
+		this.tangentialImpulse = contact.jt;
 	}
 	
 	/* (non-Javadoc)

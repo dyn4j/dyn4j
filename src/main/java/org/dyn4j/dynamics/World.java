@@ -62,7 +62,6 @@ import org.dyn4j.dynamics.contact.ContactConstraintSolver;
 import org.dyn4j.dynamics.contact.ContactListener;
 import org.dyn4j.dynamics.contact.ContactManager;
 import org.dyn4j.dynamics.contact.ContactPoint;
-import org.dyn4j.dynamics.contact.ContactPointId;
 import org.dyn4j.dynamics.contact.SequentialImpulses;
 import org.dyn4j.dynamics.contact.TimeOfImpactSolver;
 import org.dyn4j.dynamics.contact.WarmStartingContactManager;
@@ -87,7 +86,7 @@ import org.dyn4j.resources.Messages;
  * there are multiple {@link CollisionListener}s and <b>any</b> one of them returns false for an event, the collision is skipped.  However,
  * all listeners will still be called no matter if the first returned false.
  * @author William Bittle
- * @version 3.2.4
+ * @version 3.3.0
  * @since 1.0.0
  */
 public class World implements Shiftable, DataContainer {
@@ -2903,15 +2902,7 @@ public class World implements Shiftable, DataContainer {
 					// get the contact
 					Contact contact = contacts.get(j);
 					// create a contact point for notification
-					ContactPoint contactPoint = new ContactPoint(
-							new ContactPointId(contactConstraint.getId(), contact.getId()),
-							contactConstraint.getBody1(), 
-							contactConstraint.getFixture1(), 
-							contactConstraint.getBody2(), 
-							contactConstraint.getFixture2(),
-							contact.getPoint(), 
-							contactConstraint.getNormal(), 
-							contact.getDepth());
+					ContactPoint contactPoint = new ContactPoint(contactConstraint, contact);
 					// call the destruction listeners
 					if (notify) {
 						for (DestructionListener dl : listeners) {
@@ -3058,15 +3049,7 @@ public class World implements Shiftable, DataContainer {
 					for (int j = 0; j < csize; j++) {
 						Contact contact = contacts.get(j);
 						// create a contact point for notification
-						ContactPoint contactPoint = new ContactPoint(
-								new ContactPointId(contactConstraint.getId(), contact.getId()),
-								contactConstraint.getBody1(), 
-								contactConstraint.getFixture1(), 
-								contactConstraint.getBody2(), 
-								contactConstraint.getFixture2(),
-								contact.getPoint(), 
-								contactConstraint.getNormal(), 
-								contact.getDepth());
+						ContactPoint contactPoint = new ContactPoint(contactConstraint, contact);
 						// call the destruction listeners
 						for (DestructionListener dl : listeners) {
 							dl.destroyed(contactPoint);

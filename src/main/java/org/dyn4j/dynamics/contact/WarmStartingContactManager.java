@@ -40,7 +40,7 @@ import org.dyn4j.geometry.Shiftable;
  * Represents a {@link ContactManager} that performs warm starting of contacts
  * based on the previous iteration.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.3.0
  * @since 3.2.0
  */
 public class WarmStartingContactManager extends SimpleContactManager implements ContactManager, Shiftable {
@@ -98,36 +98,36 @@ public class WarmStartingContactManager extends SimpleContactManager implements 
 			List<Contact> contacts = newContactConstraint.contacts;
 			int nsize = contacts.size();
 			
-			// check if this contact constraint is a sensor
-			if (newContactConstraint.sensor) {
-				// notify of the sensed contacts
-				for (int j = 0; j < nsize; j++) {
-					// get the contact
-					Contact contact = contacts.get(j);
-					// notify of the sensed contact
-					ContactPoint point = new ContactPoint(
-							new ContactPointId(newContactConstraint.id, contact.id),
-							newContactConstraint.getBody1(),
-							newContactConstraint.fixture1,
-							newContactConstraint.getBody2(),
-							newContactConstraint.fixture2,
-							contact.p,
-							newContactConstraint.normal,
-							contact.depth);
-					// call the listeners
-					for (int l = 0; l < lsize; l++) {
-						ContactListener listener = listeners.get(l);
-						listener.sensed(point);
-					}
-				}
-				// we don't need to perform any warm starting for
-				// sensed contacts so continue to the next contact constraint
-				
-				// since sensed contact constraints are never added to the new
-				// map, they will not be warm starting if the fixtures ever
-				// change from sensors to normal fixtures
-				continue;
-			}
+//			// check if this contact constraint is a sensor
+//			if (newContactConstraint.sensor) {
+//				// notify of the sensed contacts
+//				for (int j = 0; j < nsize; j++) {
+//					// get the contact
+//					Contact contact = contacts.get(j);
+//					// notify of the sensed contact
+//					ContactPoint point = new ContactPoint(
+//							new ContactPointId(newContactConstraint.id, contact.id),
+//							newContactConstraint.getBody1(),
+//							newContactConstraint.fixture1,
+//							newContactConstraint.getBody2(),
+//							newContactConstraint.fixture2,
+//							contact.p,
+//							newContactConstraint.normal,
+//							contact.depth);
+//					// call the listeners
+//					for (int l = 0; l < lsize; l++) {
+//						ContactListener listener = listeners.get(l);
+//						listener.sensed(point);
+//					}
+//				}
+//				// we don't need to perform any warm starting for
+//				// sensed contacts so continue to the next contact constraint
+//				
+//				// since sensed contact constraints are never added to the new
+//				// map, they will not be warm starting if the fixtures ever
+//				// change from sensors to normal fixtures
+//				continue;
+//			}
 			
 			// get the old contact constraint
 			// doing a remove here will ensure that the remaining contact
@@ -159,19 +159,7 @@ public class WarmStartingContactManager extends SimpleContactManager implements 
 							newContact.jn = oldContact.jn;
 							newContact.jt = oldContact.jt;
 							// notify of a persisted contact
-							PersistedContactPoint point = new PersistedContactPoint(
-									new ContactPointId(newContactConstraint.id, newContact.id),
-									newContactConstraint.getBody1(),
-									newContactConstraint.fixture1,
-									newContactConstraint.getBody2(),
-									newContactConstraint.fixture2,
-									//true,
-									newContact.p,
-									newContactConstraint.normal,
-									newContact.depth,
-									oldContact.p,
-									oldContactConstraint.normal,
-									oldContact.depth);
+							PersistedContactPoint point = new PersistedContactPoint(newContactConstraint, newContact, oldContactConstraint, oldContact);
 							// call the listeners and set the enabled flag to the result
 							boolean allow = true;
 							for (int l = 0; l < lsize; l++) {
@@ -192,16 +180,7 @@ public class WarmStartingContactManager extends SimpleContactManager implements 
 					// check for persistence, if it wasn't persisted its a new contact
 					if (!found) {
 						// notify of new contact (begin of contact)
-						ContactPoint point = new ContactPoint(
-								new ContactPointId(newContactConstraint.id, newContact.id),
-								newContactConstraint.getBody1(),
-								newContactConstraint.fixture1,
-								newContactConstraint.getBody2(),
-								newContactConstraint.fixture2,
-								//false,
-								newContact.p,
-								newContactConstraint.normal,
-								newContact.depth);
+						ContactPoint point = new ContactPoint(newContactConstraint, newContact);
 						// call the listeners and set the enabled flag to the result
 						boolean allow = true;
 						for (int l = 0; l < lsize; l++) {
@@ -225,15 +204,7 @@ public class WarmStartingContactManager extends SimpleContactManager implements 
 						// get the contact
 						Contact contact = ocontacts.get(j);
 						// notify of new contact (begin of contact)
-						ContactPoint point = new ContactPoint(
-								new ContactPointId(newContactConstraint.id, contact.id),
-								newContactConstraint.getBody1(),
-								newContactConstraint.fixture1,
-								newContactConstraint.getBody2(),
-								newContactConstraint.fixture2,
-								contact.p,
-								newContactConstraint.normal,
-								contact.depth);
+						ContactPoint point = new ContactPoint(newContactConstraint, contact);
 						// call the listeners
 						for (int l = 0; l < lsize; l++) {
 							ContactListener listener = listeners.get(l);
@@ -248,16 +219,7 @@ public class WarmStartingContactManager extends SimpleContactManager implements 
 					// get the contact
 					Contact contact = contacts.get(j);
 					// notify of new contact (begin of contact)
-					ContactPoint point = new ContactPoint(
-							new ContactPointId(newContactConstraint.id, contact.id),
-							newContactConstraint.getBody1(),
-							newContactConstraint.fixture1,
-							newContactConstraint.getBody2(),
-							newContactConstraint.fixture2,
-							//false,
-							contact.p,
-							newContactConstraint.normal,
-							contact.depth);
+					ContactPoint point = new ContactPoint(newContactConstraint, contact);
 					// call the listeners and set the enabled flag to the result
 					boolean allow = true;
 					for (int l = 0; l < lsize; l++) {
@@ -289,15 +251,7 @@ public class WarmStartingContactManager extends SimpleContactManager implements 
 					// get the contact
 					Contact contact = contactConstraint.contacts.get(i);
 					// set the contact point values
-					ContactPoint point = new ContactPoint(
-							new ContactPointId(contactConstraint.id, contact.id),
-							contactConstraint.getBody1(),
-							contactConstraint.fixture1,
-							contactConstraint.getBody2(),
-							contactConstraint.fixture2,
-							contact.p,
-							contactConstraint.normal,
-							contact.depth);
+					ContactPoint point = new ContactPoint(contactConstraint, contact);
 					// call the listeners
 					for (int l = 0; l < lsize; l++) {
 						ContactListener listener = listeners.get(l);

@@ -37,7 +37,6 @@ import org.dyn4j.dynamics.contact.Contact;
 import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.dynamics.contact.ContactListener;
 import org.dyn4j.dynamics.contact.ContactPoint;
-import org.dyn4j.dynamics.contact.ContactPointId;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
@@ -80,7 +79,7 @@ import org.dyn4j.resources.Messages;
  * setting in the world's {@link Settings}.  Use this if the body is a fast moving
  * body, but be careful as this will incur a performance hit.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.3.0
  * @since 1.0.0
  */
 public class Body extends AbstractCollidable<BodyFixture> implements Collidable<BodyFixture>, Transformable, DataContainer {
@@ -1617,13 +1616,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 					// get the contact
 					Contact contact = contacts.get(j);
 					// create the contact point
-					ContactPoint contactPoint = new ContactPoint(
-							new ContactPointId(constraint.getId(), contact.getId()),
-							constraint.getBody1(), constraint.getFixture1(),
-							constraint.getBody2(), constraint.getFixture2(),
-							contact.getPoint(),
-							constraint.getNormal(),
-							contact.getDepth());
+					ContactPoint contactPoint = new ContactPoint(constraint, contact);
 					// add the point
 					contactPoints.add(contactPoint);
 				}

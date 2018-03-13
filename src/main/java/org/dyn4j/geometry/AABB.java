@@ -41,7 +41,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * The {@link #expand(double)} method can be used to expand the bounds of the {@link AABB} by some amount.
  * @author William Bittle
- * @version 3.2.5
+ * @version 3.3.0
  * @since 3.0.0
  */
 public class AABB implements Translatable {

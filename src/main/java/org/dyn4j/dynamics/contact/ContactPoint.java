@@ -32,7 +32,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents a contact point and used to report events via the {@link ContactListener}.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.3.0
  * @since 1.0.0
  */
 public class ContactPoint {
@@ -60,6 +60,9 @@ public class ContactPoint {
 	/** The penetration depth */
 	protected double depth;
 	
+	/** True if the contact is a sensor */
+	protected boolean sensor;
+	
 	/**
 	 * Full constructor.
 	 * @param id the contact point id
@@ -70,9 +73,10 @@ public class ContactPoint {
 	 * @param point the world space contact point
 	 * @param normal the world space contact normal
 	 * @param depth the penetration depth
+	 * @param sensor true if the contact is a sensor contact
 	 */
 	public ContactPoint(ContactPointId id, Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2,
-			Vector2 point, Vector2 normal, double depth) {
+			Vector2 point, Vector2 normal, double depth, boolean sensor) {
 		this.id = id;
 		this.body1 = body1;
 		this.fixture1 = fixture1;
@@ -81,6 +85,26 @@ public class ContactPoint {
 		this.point = point;
 		this.normal = normal;
 		this.depth = depth;
+		this.sensor = sensor;
+	}
+	
+	/**
+	 * Helper constructor for a contact constraint and contact.
+	 * @param constraint the constraint
+	 * @param contact the contact
+	 */
+	public ContactPoint(ContactConstraint constraint, Contact contact) {
+		this.id = new ContactPointId(constraint.id, contact.id);
+		this.body1 = constraint.getBody1();
+		this.fixture1 = constraint.fixture1;
+		this.body2 = constraint.getBody2();
+		this.fixture2 = constraint.fixture2;
+		
+		this.point = contact.p;
+		this.normal = constraint.normal;
+		this.depth = contact.depth;
+		
+		this.sensor = constraint.sensor;
 	}
 	
 	/**

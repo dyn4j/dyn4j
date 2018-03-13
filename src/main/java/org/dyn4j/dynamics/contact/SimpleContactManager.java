@@ -41,7 +41,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents a basic {@link ContactManager} that reports new and old contacts.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.3.0
  * @since 3.2.0
  */
 public class SimpleContactManager implements ContactManager, Shiftable {
@@ -138,15 +138,7 @@ public class SimpleContactManager implements ContactManager, Shiftable {
 				// get the contact
 				Contact contact = contactConstraint.contacts.get(i);
 				// set the contact point values
-				ContactPoint point = new ContactPoint(
-						new ContactPointId(contactConstraint.id, contact.id),
-						contactConstraint.getBody1(),
-						contactConstraint.fixture1,
-						contactConstraint.getBody2(),
-						contactConstraint.fixture2,
-						contact.p,
-						contactConstraint.normal,
-						contact.depth);
+				ContactPoint point = new ContactPoint(contactConstraint, contact);
 				// call the listeners
 				for (int l = 0; l < lsize; l++) {
 					ContactListener listener = listeners.get(l);
@@ -173,15 +165,7 @@ public class SimpleContactManager implements ContactManager, Shiftable {
 					// get the contact
 					Contact contact = contacts.get(j);
 					// notify of the sensed contact
-					ContactPoint point = new ContactPoint(
-							new ContactPointId(newContactConstraint.id, contact.id),
-							newContactConstraint.getBody1(),
-							newContactConstraint.fixture1,
-							newContactConstraint.getBody2(),
-							newContactConstraint.fixture2,
-							contact.p,
-							newContactConstraint.normal,
-							contact.depth);
+					ContactPoint point = new ContactPoint(newContactConstraint, contact);
 					// call the listeners
 					for (int l = 0; l < lsize; l++) {
 						ContactListener listener = listeners.get(l);
@@ -203,15 +187,7 @@ public class SimpleContactManager implements ContactManager, Shiftable {
 				// get the contact
 				Contact contact = contacts.get(j);
 				// notify of new contact (begin of contact)
-				ContactPoint point = new ContactPoint(
-						new ContactPointId(newContactConstraint.id, contact.id),
-						newContactConstraint.getBody1(),
-						newContactConstraint.fixture1,
-						newContactConstraint.getBody2(),
-						newContactConstraint.fixture2,
-						contact.p,
-						newContactConstraint.normal,
-						contact.depth);
+				ContactPoint point = new ContactPoint(newContactConstraint, contact);
 				// call the listeners and set the enabled flag to the result
 				boolean allow = true;
 				for (int l = 0; l < lsize; l++) {
@@ -252,15 +228,7 @@ public class SimpleContactManager implements ContactManager, Shiftable {
 				// get the contact
 				Contact contact = contactConstraint.contacts.get(j);
 				// notify of the contact that will be solved
-				ContactPoint point = new ContactPoint(
-						new ContactPointId(contactConstraint.id, contact.id),
-						contactConstraint.getBody1(),
-						contactConstraint.fixture1,
-						contactConstraint.getBody2(),
-						contactConstraint.fixture2,
-						contact.p,
-						contactConstraint.normal,
-						contact.depth);
+				ContactPoint point = new ContactPoint(contactConstraint, contact);
 				// call the listeners and set the enabled flag to the result
 				boolean allow = true;
 				for (int l = 0; l < lsize; l++) {
@@ -297,17 +265,7 @@ public class SimpleContactManager implements ContactManager, Shiftable {
 				// get the contact
 				Contact contact = contactConstraint.contacts.get(j);
 				// set the contact point values
-				SolvedContactPoint point = new SolvedContactPoint(
-						new ContactPointId(contactConstraint.id, contact.id),
-						contactConstraint.getBody1(),
-						contactConstraint.fixture1,
-						contactConstraint.getBody2(),
-						contactConstraint.fixture2,
-						contact.p,
-						contactConstraint.normal,
-						contact.depth,
-						contact.jn,
-						contact.jt);
+				SolvedContactPoint point = new SolvedContactPoint(contactConstraint, contact);
 				// notify of them being solved
 				for (int l = 0; l < lsize; l++) {
 					ContactListener listener = listeners.get(l);

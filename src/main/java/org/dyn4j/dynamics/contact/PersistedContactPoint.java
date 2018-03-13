@@ -36,7 +36,7 @@ import org.dyn4j.geometry.Vector2;
  * normal, and depth.
  * @author William Bittle
  * @see ContactPoint
- * @version 3.2.0
+ * @version 3.3.0
  * @since 1.0.0
  */
 public class PersistedContactPoint extends ContactPoint {
@@ -62,15 +62,31 @@ public class PersistedContactPoint extends ContactPoint {
 	 * @param oldPoint the previous world space contact point
 	 * @param oldNormal the previous world space contact normal
 	 * @param oldDepth the previous penetration depth
+	 * @param sensor true if the contact is a sensor contact
 	 */
 	public PersistedContactPoint(ContactPointId id, 
 			Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2, 
 			Vector2 point, Vector2 normal, double depth,
-			Vector2 oldPoint, Vector2 oldNormal, double oldDepth) {
-		super(id, body1, fixture1, body2, fixture2, point, normal, depth);
+			Vector2 oldPoint, Vector2 oldNormal, double oldDepth,
+			boolean sensor) {
+		super(id, body1, fixture1, body2, fixture2, point, normal, depth, sensor);
 		this.oldPoint = oldPoint;
 		this.oldNormal = oldNormal;
 		this.oldDepth = oldDepth;
+	}
+	
+	/**
+	 * Helper constructor for a contact constraint and contact.
+	 * @param newConstraint the new constraint
+	 * @param newContact the new contact
+	 * @param oldConstraint the old constraint
+	 * @param oldContact the old contact
+	 */
+	public PersistedContactPoint(ContactConstraint newConstraint, Contact newContact, ContactConstraint oldConstraint, Contact oldContact) {
+		super(newConstraint, newContact);
+		this.oldDepth = oldContact.depth;
+		this.oldNormal = oldConstraint.normal;
+		this.oldPoint = oldContact.p;
 	}
 	
 	/**

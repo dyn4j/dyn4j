@@ -45,7 +45,7 @@ import org.dyn4j.geometry.Vector2;
  * This class uses a self-balancing binary tree to store the AABBs.  The AABBs are sorted using the perimeter.
  * The perimeter hueristic is better than area for 2D because axis aligned segments would have zero area.
  * @author William Bittle
- * @version 3.2.5
+ * @version 3.3.0
  * @since 3.0.0
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type

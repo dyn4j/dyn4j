@@ -1,5 +1,5 @@
 ===============================================================================
-Version 3.2.5
+Version 3.3.0
 ===============================================================================
 New Features:
 
@@ -10,8 +10,10 @@ Deprecated:
 Breaking Changes:
   
 Other:
-  - Performance improvements for Android related to object allocation
+  - Performance improvements for Android, related to object allocation
   - Some other small performance enhancements
+  - Java 9 modules support
+  - OSGi support
 
 ===============================================================================
 Version 3.2.4
