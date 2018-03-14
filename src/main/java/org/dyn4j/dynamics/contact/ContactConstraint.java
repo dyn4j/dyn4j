@@ -336,8 +336,8 @@ public class ContactConstraint extends Constraint implements Shiftable {
 	 * processing of this constraint for this step only.
 	 * <p>
 	 * True by default.
-	 * @param flag
-	 * @since 3.2.5
+	 * @param flag true if the contact should be enabled
+	 * @since 3.3.0
 	 */
 	public void setEnabled(boolean flag) {
 		this.enabled = flag;
@@ -347,7 +347,7 @@ public class ContactConstraint extends Constraint implements Shiftable {
 	 * Returns true if this contact constraint is enabled for processing
 	 * by the collision resolution step.
 	 * @return boolean
-	 * @since 3.2.5
+	 * @since 3.3.0
 	 */
 	public boolean isEnabled() {
 		return this.enabled;

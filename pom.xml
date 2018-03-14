@@ -26,10 +26,10 @@
     <dyn4j.maven-deploy-plugin.version>2.8.2</dyn4j.maven-deploy-plugin.version>
     <dyn4j.maven-install-plugin.version>2.5.2</dyn4j.maven-install-plugin.version>
     <dyn4j.maven-compiler-plugin.version>3.7.0</dyn4j.maven-compiler-plugin.version>
-    <dyn4j.maven-surefire-plugin.version>2.19.1</dyn4j.maven-surefire-plugin.version>
+    <dyn4j.maven-surefire-plugin.version>2.21.0</dyn4j.maven-surefire-plugin.version>
     <dyn4j.maven-source-plugin.version>3.0.1</dyn4j.maven-source-plugin.version>
     <dyn4j.maven-bundle-plugin.version>3.3.0</dyn4j.maven-bundle-plugin.version>
-    <dyn4j.maven-javadoc-plugin.version>3.0.0-M1</dyn4j.maven-javadoc-plugin.version>
+    <dyn4j.maven-javadoc-plugin.version>3.0.0</dyn4j.maven-javadoc-plugin.version>
     <dyn4j.nexus-staging-maven-plugin.version>1.6.8</dyn4j.nexus-staging-maven-plugin.version>
     <dyn4j.maven-gpg-plugin.version>1.6</dyn4j.maven-gpg-plugin.version>
     <dyn4j.maven-enforcer-plugin.version>3.0.0-M1</dyn4j.maven-enforcer-plugin.version>
@@ -274,6 +274,9 @@
                 <goal>jar</goal>
               </goals>
               <configuration>
+                <sourceFileExcludes>
+                	<sourceFileExclude>module-info.java</sourceFileExclude>
+                </sourceFileExcludes>
                 <archive>
                   <manifestEntries>
                     <Specification-Title>${project.name}</Specification-Title>
@@ -434,4 +437,12 @@
       </build>
     </profile>
   </profiles>
+  <dependencies>
+  	<dependency>
+  		<groupId>junit</groupId>
+  		<artifactId>junit</artifactId>
+  		<version>4.12</version>
+  		<scope>test</scope>
+  	</dependency>
+  </dependencies>
 </project>

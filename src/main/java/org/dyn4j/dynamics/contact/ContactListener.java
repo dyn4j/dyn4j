@@ -27,6 +27,7 @@ package org.dyn4j.dynamics.contact;
 import org.dyn4j.Listener;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.CollisionListener;
 import org.dyn4j.dynamics.World;
 
 /**
@@ -57,7 +58,9 @@ public interface ContactListener extends Listener {
 	 * Called when a contact has been sensed between two {@link Body}s,
 	 * where one or both {@link Body}'s {@link BodyFixture}s are sensors.
 	 * @param point the contact point that was sensed
+	 * @deprecated As of 3.3.0 this is not called, use the other methods in the listener and check the sensor flag instead
 	 */
+	@Deprecated
 	public abstract void sensed(ContactPoint point);
 	
 	/**

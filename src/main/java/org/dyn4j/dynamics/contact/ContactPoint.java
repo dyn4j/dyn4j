@@ -138,6 +138,7 @@ public class ContactPoint {
 		.append("|Point=").append(this.point)
 		.append("|Normal=").append(this.normal)
 		.append("|Depth=").append(this.depth)
+		.append("|Sensor=").append(this.sensor)
 		.append("]");
 		return sb.toString();
 	}
@@ -205,5 +206,13 @@ public class ContactPoint {
 	 */
 	public BodyFixture getFixture2() {
 		return this.fixture2;
+	}
+	
+	/**
+	 * Returns true if this contact point is for a sensor.
+	 * @return boolean
+	 */
+	public boolean isSensor() {
+		return this.sensor;
 	}
 }
