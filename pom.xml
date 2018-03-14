@@ -228,7 +228,8 @@
           		<manifest>
           			<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
           			<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-          			<addExtensions>true</addExtensions>
+          			<!-- this is so that hamcrest and junit aren't added to the manifest -->
+          			<addExtensions>false</addExtensions>
           			<mainClass>org.dyn4j.Version</mainClass>
           		</manifest>
           		<manifestEntries>
@@ -244,6 +245,8 @@
               <Implementation-Vendor>dyn4j.org</Implementation-Vendor>
               <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
               <Bundle-DocURL>${project.url}</Bundle-DocURL>
+              <!-- override the JavaSE version to 1.6 -->
+              <Require-Capability><![CDATA[osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.6))"]]></Require-Capability>
             </instructions>
           </configuration>
 
