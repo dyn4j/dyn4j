@@ -41,7 +41,7 @@ import org.dyn4j.dynamics.contact.ContactListener;
 import org.dyn4j.dynamics.contact.ContactManager;
 import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.dynamics.contact.PersistedContactPoint;
-import org.dyn4j.dynamics.contact.SimpleContactManager;
+import org.dyn4j.dynamics.contact.DefaultContactManager;
 import org.dyn4j.dynamics.contact.SolvedContactPoint;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
@@ -50,9 +50,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Used to test the {@link SimpleContactManager} class.
+ * Used to test the {@link DefaultContactManager} class.
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.3.0
  * @since 1.0.2
  */
 public class ContactManagerTest {
@@ -86,17 +86,50 @@ public class ContactManagerTest {
 		public int postSolve;
 		
 		@Override
-		public boolean begin(ContactPoint point) { this.added++; return true; }
+		public boolean begin(ContactPoint point) {
+			if (point.isSensor()) this.sensed++;
+			this.added++; 
+			return true; 
+		}
+		
 		@Override
-		public void end(ContactPoint point) { this.removed++; }
+		public void end(ContactPoint point) {
+			if (point.isSensor()) this.sensed++;
+			this.removed++; 
+		}
+		
 		@Override
-		public boolean persist(PersistedContactPoint point) { this.persisted++; return true; }
+		public boolean persist(PersistedContactPoint point) {
+			if (point.isSensor()) this.sensed++;
+			this.persisted++; 
+			return true; 
+		}
+		
+		// this shouldn't be called for sensors
 		@Override
-		public void postSolve(SolvedContactPoint point) { this.postSolve++; }
+		public void postSolve(SolvedContactPoint point) {
+			if (point.isSensor()) {
+				throw new RuntimeException("This should not be called for sensor contacts.");
+			}
+			this.postSolve++; 
+		}
+		
+		// this shouldn't be called for sensors
 		@Override
-		public boolean preSolve(ContactPoint point) { this.preSolve++; return true; }
-//		@Override
-//		public void sensed(ContactPoint point) { this.sensed++; }
+		public boolean preSolve(ContactPoint point) {
+			if (point.isSensor()) {
+				throw new RuntimeException("This should not be called for sensor contacts.");
+			}
+			this.preSolve++; 
+			return true; 
+		}
+		
+		// this shouldn't be called anymore
+		@Deprecated
+		@Override
+		public void sensed(ContactPoint point) { 
+			throw new RuntimeException("This method should not be called."); 
+		}
 		
 		/**
 		 * Clears the counters.
@@ -268,14 +301,14 @@ public class ContactManagerTest {
 				new Manifold(points, new Vector2()), 
 				0, 0);
 		
-		TestContactManager cm = new TestContactManager();
+		ContactManager cm = new DefaultContactManager();
 		cm.queue(cc);
 		cm.updateAndNotify(null, new Settings());
 		
-		TestCase.assertFalse(cm.cacheSize() == 0);
+		TestCase.assertFalse(cm.getContactCount() == 0);
 		// remove should remove the contact from the cache
 		TestCase.assertTrue(cm.end(cc));
-		TestCase.assertTrue(cm.cacheSize() == 0);
+		TestCase.assertTrue(cm.getContactCount() == 0);
 		
 		TestCase.assertFalse(cm.end(cc));
 	}
@@ -295,7 +328,7 @@ public class ContactManagerTest {
 				new Manifold(points, new Vector2(1.0, 0.0)), 
 				0, 0);
 		
-		TestContactManager cm = new TestContactManager();
+		ContactManager cm = new DefaultContactManager();
 		cm.queue(cc);
 		cm.updateAndNotify(null, new Settings());
 		
@@ -321,26 +354,26 @@ public class ContactManagerTest {
 				new Manifold(points, new Vector2()), 
 				0, 0);
 		
-		TestContactManager cm = new TestContactManager();
+		ContactManager cm = new DefaultContactManager();
 		cm.queue(cc);
 		
-		TestCase.assertTrue(cm.queueSize() == 1);
-		TestCase.assertTrue(cm.cacheSize() == 0);
+		TestCase.assertTrue(cm.getQueueCount() == 1);
+		TestCase.assertTrue(cm.getContactCount() == 0);
 		
 		cm.updateAndNotify(null, new Settings());
 		
-		TestCase.assertTrue(cm.queueSize() == 0);
-		TestCase.assertTrue(cm.cacheSize() == 1);
+		TestCase.assertTrue(cm.getQueueCount() == 0);
+		TestCase.assertTrue(cm.getContactCount() == 1);
 		
 		cm.queue(cc);
 		
-		TestCase.assertTrue(cm.queueSize() == 1);
-		TestCase.assertTrue(cm.cacheSize() == 1);
+		TestCase.assertTrue(cm.getQueueCount() == 1);
+		TestCase.assertTrue(cm.getContactCount() == 1);
 		
 		cm.clear();
 		
-		TestCase.assertTrue(cm.queueSize() == 0);
-		TestCase.assertTrue(cm.cacheSize() == 0);
+		TestCase.assertTrue(cm.getQueueCount() == 0);
+		TestCase.assertTrue(cm.getContactCount() == 0);
 	}
 	
 	/**
@@ -362,7 +395,7 @@ public class ContactManagerTest {
 		TestCase.assertEquals(1, this.contactListener.removed);
 		// the ones between b2 and b1, b3, and b4
 		// this should be zero now that sensed contacts will come from the other notifications
-		TestCase.assertEquals(0, this.contactListener.sensed); 
+		TestCase.assertEquals(4, this.contactListener.sensed); 
 		// the one persisted and the one added
 		TestCase.assertEquals(2, this.contactListener.preSolve);
 		TestCase.assertEquals(2, this.contactListener.postSolve);
@@ -373,6 +406,6 @@ public class ContactManagerTest {
 	 * @since 3.1.1
 	 */
 	public void createSuccessNullCapacity() {
-		new SimpleContactManager(null);
+		new DefaultContactManager(null);
 	}
 }

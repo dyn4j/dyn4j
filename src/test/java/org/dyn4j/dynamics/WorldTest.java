@@ -58,7 +58,7 @@ import org.junit.Test;
 /**
  * Contains the test cases for the {@link World} class.
  * @author William Bittle
- * @version 3.1.10
+ * @version 3.3.0
  * @since 1.0.2
  */
 public class WorldTest {
@@ -299,7 +299,6 @@ public class WorldTest {
 	@Test
 	public void removeBody() {
 		World w = new World();
-		w.setContactManager(new TestContactManager());
 		
 		// setup the destruction listener
 		WTDestructionListener dl = new WTDestructionListener();
@@ -365,7 +364,7 @@ public class WorldTest {
 		// joint and one contact
 		TestCase.assertEquals(2, dl.called);
 		// the contact manager should not have anything in the cache
-		TestCase.assertTrue(((TestContactManager)w.contactManager).cacheSize() == 0);
+		TestCase.assertTrue(w.contactManager.getContactCount() == 0);
 	}
 	
 	/**
@@ -618,7 +617,6 @@ public class WorldTest {
 	@Test
 	public void removeAll() {
 		World w = new World();
-		w.setContactManager(new TestContactManager());
 		
 		// setup the listener
 		WTDestructionListener dl = new WTDestructionListener();
@@ -656,7 +654,7 @@ public class WorldTest {
 		// one contact, one joint, and two bodies
 		TestCase.assertEquals(4, dl.called);
 		// the contact manager should not have anything in the cache
-		TestCase.assertTrue(((TestContactManager)w.contactManager).cacheSize() == 0);
+		TestCase.assertTrue(w.contactManager.getContactCount() == 0);
 	}
 	
 	/**
@@ -666,7 +664,6 @@ public class WorldTest {
 	@Test
 	public void removeAllBodies() {
 		World w = new World();
-		w.setContactManager(new TestContactManager());
 		
 		// setup the listener
 		WTDestructionListener dl = new WTDestructionListener();
@@ -707,7 +704,7 @@ public class WorldTest {
 		// one contact, one joint, and two bodies
 		TestCase.assertEquals(4, dl.called);
 		// the contact manager should not have anything in the cache
-		TestCase.assertTrue(((TestContactManager)w.contactManager).cacheSize() == 0);
+		TestCase.assertTrue(w.contactManager.getContactCount() == 0);
 	}
 	
 	/**

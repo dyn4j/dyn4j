@@ -34,7 +34,7 @@ import org.dyn4j.geometry.Shiftable;
  * Maintains {@link ContactConstraint}s between {@link Body}s and notifies {@link ContactListener}s
  * of various events related to the life-cycle of a contact.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.3.0
  * @since 3.2.0
  */
 public interface ContactManager extends Shiftable {
@@ -101,4 +101,18 @@ public interface ContactManager extends Shiftable {
 	 * Clears the contact manager.
 	 */
 	public void clear();
+	
+	/**
+	 * Returns the number of contact constraints in the queue.
+	 * @return int
+	 * @since 3.3.0
+	 */
+	public int getQueueCount();
+	
+	/**
+	 * Returns the number of contact constraints in the manager.
+	 * @return int
+	 * @since 3.3.0
+	 */
+	public int getContactCount();
 }

@@ -62,9 +62,9 @@ import org.dyn4j.dynamics.contact.ContactConstraintSolver;
 import org.dyn4j.dynamics.contact.ContactListener;
 import org.dyn4j.dynamics.contact.ContactManager;
 import org.dyn4j.dynamics.contact.ContactPoint;
+import org.dyn4j.dynamics.contact.DefaultContactManager;
 import org.dyn4j.dynamics.contact.SequentialImpulses;
 import org.dyn4j.dynamics.contact.TimeOfImpactSolver;
-import org.dyn4j.dynamics.contact.WarmStartingContactManager;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
@@ -250,7 +250,7 @@ public class World implements Shiftable, DataContainer {
 		this.timeOfImpactDetector = new ConservativeAdvancement();
 		this.raycastDetector = new Gjk();
 		this.coefficientMixer = CoefficientMixer.DEFAULT_MIXER;
-		this.contactManager = new WarmStartingContactManager(initialCapacity);
+		this.contactManager = new DefaultContactManager(initialCapacity);
 		this.contactConstraintSolver = new SequentialImpulses();
 		this.timeOfImpactSolver = new TimeOfImpactSolver();
 		
@@ -3649,7 +3649,7 @@ public class World implements Shiftable, DataContainer {
 	 * Changing the contact manager requires an update to be performed on the next update of this
 	 * world and any cached information will be lost.
 	 * <p>
-	 * The default is the {@link WarmStartingContactManager}.
+	 * The default is the {@link DefaultContactManager}.
 	 * @param contactManager the contact manager
 	 * @throws NullPointerException if contactManager is null
 	 * @see ContactManager

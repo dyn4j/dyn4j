@@ -29,7 +29,7 @@ import org.dyn4j.Listener;
 /**
  * Convenience class for implementing the {@link ContactListener} interface.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.3.0
  * @since 1.0.0
  */
 public class ContactAdapter implements ContactListener, Listener {
@@ -37,6 +37,7 @@ public class ContactAdapter implements ContactListener, Listener {
 	 * @see org.dyn4j.dynamics.contact.ContactListener#sensed(org.dyn4j.dynamics.contact.SensedContactPoint)
 	 */
 	@Override
+	@Deprecated
 	public void sensed(ContactPoint point) {}
 	
 	/* (non-Javadoc)
