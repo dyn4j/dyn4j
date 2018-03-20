@@ -40,7 +40,8 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents a basic {@link ContactManager} that reports new and old contacts.
+ * Represents the default contact manager that reports beginning, persisted, and
+ * ending contacts and performs warm starting by default.
  * @author William Bittle
  * @version 3.3.0
  * @since 3.3.0
@@ -152,37 +153,6 @@ public class DefaultContactManager implements ContactManager, Shiftable {
 			
 			List<Contact> contacts = newContactConstraint.contacts;
 			int nsize = contacts.size();
-			
-//			// check if this contact constraint is a sensor
-//			if (newContactConstraint.sensor) {
-//				// notify of the sensed contacts
-//				for (int j = 0; j < nsize; j++) {
-//					// get the contact
-//					Contact contact = contacts.get(j);
-//					// notify of the sensed contact
-//					ContactPoint point = new ContactPoint(
-//							new ContactPointId(newContactConstraint.id, contact.id),
-//							newContactConstraint.getBody1(),
-//							newContactConstraint.fixture1,
-//							newContactConstraint.getBody2(),
-//							newContactConstraint.fixture2,
-//							contact.p,
-//							newContactConstraint.normal,
-//							contact.depth);
-//					// call the listeners
-//					for (int l = 0; l < lsize; l++) {
-//						ContactListener listener = listeners.get(l);
-//						listener.sensed(point);
-//					}
-//				}
-//				// we don't need to perform any warm starting for
-//				// sensed contacts so continue to the next contact constraint
-//				
-//				// since sensed contact constraints are never added to the new
-//				// map, they will not be warm starting if the fixtures ever
-//				// change from sensors to normal fixtures
-//				continue;
-//			}
 			
 			// get the old contact constraint
 			// doing a remove here will ensure that the remaining contact
@@ -331,96 +301,6 @@ public class DefaultContactManager implements ContactManager, Shiftable {
 		
 		this.constraintQueue.clear();
 	}
-	
-//	/* (non-Javadoc)
-//	 * @see org.dyn4j.dynamics.contact.ContactManager#updateAndNotify(java.util.List, org.dyn4j.dynamics.Settings)
-//	 */
-//	public void updateAndNotify(List<ContactListener> listeners, Settings settings) {
-//		// get the size of the list
-//		int size = this.constraintQueue.size();
-//		int lsize = listeners != null ? listeners.size() : 0;
-//		
-//		// notify of the removed contacts
-//		Iterator<ContactConstraint> icc = this.constraints.values().iterator();
-//		while (icc.hasNext()) {
-//			ContactConstraint contactConstraint = icc.next();
-//			// loop over the contact points
-//			int rsize = contactConstraint.contacts.size();
-//			for (int i = 0; i < rsize; i++) {
-//				// get the contact
-//				Contact contact = contactConstraint.contacts.get(i);
-//				// set the contact point values
-//				ContactPoint point = new ContactPoint(contactConstraint, contact);
-//				// call the listeners
-//				for (int l = 0; l < lsize; l++) {
-//					ContactListener listener = listeners.get(l);
-//					listener.end(point);
-//				}
-//			}
-//		}
-//		
-//		this.constraints.clear();
-//		
-//		// loop over the new contact constraints
-//		// and attempt to persist contacts
-//		for (int i = 0; i < size; i++) {
-//			// get the new contact constraint
-//			ContactConstraint newContactConstraint = this.constraintQueue.get(i);
-//			
-//			List<Contact> contacts = newContactConstraint.contacts;
-//			int nsize = contacts.size();
-//			
-//			// check if this contact constraint is a sensor
-//			if (newContactConstraint.sensor) {
-//				// notify of the sensed contacts
-//				for (int j = 0; j < nsize; j++) {
-//					// get the contact
-//					Contact contact = contacts.get(j);
-//					// notify of the sensed contact
-//					ContactPoint point = new ContactPoint(newContactConstraint, contact);
-//					// call the listeners
-//					for (int l = 0; l < lsize; l++) {
-//						ContactListener listener = listeners.get(l);
-//						listener.sensed(point);
-//					}
-//				}
-//				// we don't need to perform any warm starting for
-//				// sensed contacts so continue to the next contact constraint
-//				
-//				// since sensed contact constraints are never added to the new
-//				// map, they will not be warm starting if the fixtures ever
-//				// change from sensors to normal fixtures
-//				continue;
-//			}
-//			
-//			// notify new contacts
-//			// if the old contact point was not found notify of the new contact
-//			for (int j = nsize - 1; j >= 0; j--) {
-//				// get the contact
-//				Contact contact = contacts.get(j);
-//				// notify of new contact (begin of contact)
-//				ContactPoint point = new ContactPoint(newContactConstraint, contact);
-//				// call the listeners and set the enabled flag to the result
-//				boolean allow = true;
-//				for (int l = 0; l < lsize; l++) {
-//					ContactListener listener = listeners.get(l);
-//					if (!listener.begin(point)) {
-//						allow = false;
-//					}
-//				}
-//				if (!allow) {
-//					contacts.remove(j);
-//				}
-//			}
-//			// only add contact constraints that have contacts remaining
-//			if (newContactConstraint.contacts.size() > 0) {
-//				// add the contact constraint to the map
-//				this.constraints.put(newContactConstraint.id, newContactConstraint);
-//			}
-//		}
-//		
-//		this.constraintQueue.clear();
-//	}
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.contact.ContactManager#preSolveNotify(java.util.List)

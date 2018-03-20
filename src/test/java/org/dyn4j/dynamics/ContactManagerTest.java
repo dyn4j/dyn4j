@@ -109,7 +109,7 @@ public class ContactManagerTest {
 		@Override
 		public void postSolve(SolvedContactPoint point) {
 			if (point.isSensor()) {
-				throw new RuntimeException("This should not be called for sensor contacts.");
+				TestCase.fail("This should not be called for sensor contacts.");
 			}
 			this.postSolve++; 
 		}
@@ -118,7 +118,7 @@ public class ContactManagerTest {
 		@Override
 		public boolean preSolve(ContactPoint point) {
 			if (point.isSensor()) {
-				throw new RuntimeException("This should not be called for sensor contacts.");
+				TestCase.fail("This should not be called for sensor contacts.");
 			}
 			this.preSolve++; 
 			return true; 
@@ -128,7 +128,7 @@ public class ContactManagerTest {
 		@Deprecated
 		@Override
 		public void sensed(ContactPoint point) { 
-			throw new RuntimeException("This method should not be called."); 
+			TestCase.fail("This method should not be called.");
 		}
 		
 		/**

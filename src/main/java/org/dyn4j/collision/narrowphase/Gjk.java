@@ -118,7 +118,7 @@ import org.dyn4j.resources.Messages;
  * {@link Shape}s.  Refer to {@link Gjk#distance(Convex, Transform, Convex, Transform, Separation)}
  * for details on the implementation.
  * @author William Bittle
- * @version 3.1.11
+ * @version 3.3.0
  * @since 1.0.0
  * @see Epa
  * @see <a href="http://www.dyn4j.org/2010/04/gjk-gilbert-johnson-keerthi/" target="_blank">GJK (Gilbert-Johnson-Keerthi)</a>
@@ -254,11 +254,11 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 		// negate the search direction
 		d.negate();
 		// start the loop
-		while (true) {
+		for (int i = 0; i < this.maxIterations ;i++) {
 			// always add another point to the simplex at the beginning of the loop
 			simplex.add(ms.getSupportPoint(d));
 			// make sure that the last point we added was past the origin
-			if (simplex.get(simplex.size() - 1).dot(d) <= 0.0) {
+			if (simplex.get(simplex.size() - 1).dot(d) <= Epsilon.E) {
 				// a is not past the origin so therefore the shapes do not intersect
 				// here we treat the origin on the line as no intersection
 				// immediately return with null indicating no penetration
@@ -274,6 +274,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 				// search direction and simplex
 			}
 		}
+		return false;
 	}
 	
 	/**
@@ -305,8 +306,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			// get the edges
 			Vector2 ab = a.to(b);
 			Vector2 ac = a.to(c);
-			// get the edge normals
-			Vector2 abPerp = Vector2.tripleProduct(ac, ab, ab);
+			// get the edge normal
 			Vector2 acPerp = Vector2.tripleProduct(ab, ac, ac);
 			// see where the origin is at
 			double acLocation = acPerp.dot(ao);
@@ -322,6 +322,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 				// calculating ac's normal using b is more robust
 				direction.set(acPerp);
 			} else {
+				Vector2 abPerp = Vector2.tripleProduct(ac, ab, ab);
 				double abLocation = abPerp.dot(ao);
 				// the origin lies on the left side of A->C
 				if (abLocation < 0.0) {

@@ -28,8 +28,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import junit.framework.TestCase;
-
 import org.dyn4j.Listener;
 import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.collision.BoundsAdapter;
@@ -44,7 +42,9 @@ import org.dyn4j.collision.manifold.ManifoldSolver;
 import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.dynamics.contact.ContactAdapter;
+import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.dynamics.contact.ContactPoint;
+import org.dyn4j.dynamics.contact.SequentialImpulses;
 import org.dyn4j.dynamics.joint.AngleJoint;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
@@ -54,6 +54,8 @@ import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
+
+import junit.framework.TestCase;
 
 /**
  * Contains the test cases for the {@link World} class.
@@ -1004,5 +1006,73 @@ public class WorldTest {
 		}
 		
 		TestCase.assertEquals(0, w.getJointCount());
+	}
+	
+	/**
+	 * Make sure disabled or sensor contacts don't make it into
+	 * the solve stage.
+	 */
+	@Test
+	public void disabledAndSensor() {
+		World world = new World();
+		world.setGravity(World.ZERO_GRAVITY);
+		
+		Convex c1 = Geometry.createUnitCirclePolygon(6, 0.7);
+		Convex c2 = Geometry.createEquilateralTriangle(1.0);
+		Convex c3 = Geometry.createCircle(1.0);
+		Convex c4 = Geometry.createSquare(1.2);
+		
+		Body b1 = new Body();
+		b1.addFixture(c1);
+		b1.translate(-1.0, 0.25);
+		b1.setMass(MassType.NORMAL);
+		world.addBody(b1);
+		
+		Body b2 = new Body();
+		BodyFixture f2 = b2.addFixture(c2);
+		f2.setSensor(true);
+		b2.translate(-0.25, 0.25);
+		b2.setMass(MassType.NORMAL);
+		world.addBody(b2);
+		
+		Body b3 = new Body();
+		b3.addFixture(c3);
+		b3.translate(0.0, -0.75);
+		b3.setMass(MassType.NORMAL);
+		world.addBody(b3);
+		
+		Body b4 = new Body();
+		b4.addFixture(c4);
+		b4.translate(0.0, 1.0);
+		b4.setMass(MassType.NORMAL);
+		world.addBody(b4);
+		
+		// override the contact adapter to simulate a disabled contact
+		world.addListener(new ContactAdapter() {
+			@Override
+			public boolean begin(ContactPoint point) {
+				if ((point.getBody1() == b1 && point.getBody2() == b2) ||
+					(point.getBody1() == b2 && point.getBody2() == b1)) {
+					return false;
+				}
+				return super.begin(point);
+			}
+		});
+		
+		// override the contact constraint solver
+		// to check for any disabled or sensor contacts
+		world.setContactConstraintSolver(new SequentialImpulses() {
+			@Override
+			public void initialize(List<ContactConstraint> contactConstraints, Step step, Settings settings) {
+				for (ContactConstraint cc : contactConstraints) {
+					if (!cc.isEnabled() || cc.isSensor()) {
+						TestCase.fail();
+					}
+				}
+				super.initialize(contactConstraints, step, settings);
+			}
+		});
+		
+		world.step(1);
 	}
 }
