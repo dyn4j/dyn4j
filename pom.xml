@@ -136,9 +136,6 @@
 
             <execution>
               <id>default-compile</id>
-              <configuration>
-                <release>9</release>
-              </configuration>
             </execution>
 
             <!--
@@ -155,13 +152,14 @@
                 <excludes>
                   <exclude>module-info.java</exclude>
                 </excludes>
+                <release>6</release>
               </configuration>
             </execution>
           </executions>
 
           <!-- These are the default settings for all executions. -->
           <configuration>
-            <release>6</release>
+            <release>9</release>
           </configuration>
         </plugin>
 
