@@ -128,20 +128,42 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	/** The origin point */
 	private static final Vector2 ORIGIN = new Vector2();
 	
+	// defaults
+	
 	/** The default {@link Gjk} maximum iterations */
 	public static final int DEFAULT_MAX_ITERATIONS = 30;
 	
-	/** The default {@link Gjk} distance epsilon in meters; near 1E-8 */
+	/** The default epsilon in meters for collision detection */
+	public static final double DEFAULT_DETECT_EPSILON = 0.0;
+	
+	/** The default epsilon in meters for distance checks */
 	public static final double DEFAULT_DISTANCE_EPSILON = Math.sqrt(Epsilon.E);
+
+	/** The default epsilon in meters for raycast checks */
+	public static final double DEFAULT_RAYCAST_EPSILON = DEFAULT_DISTANCE_EPSILON;
+	
+	// members
 	
 	/** The penetration solver; defaults to {@link Epa} */
 	protected MinkowskiPenetrationSolver minkowskiPenetrationSolver = new Epa();
 	
-	/** The maximum number of {@link Gjk} iterations */
-	protected int maxIterations = Gjk.DEFAULT_MAX_ITERATIONS;
+	/** The maximum number of collision detection iterations */
+	protected int maxDetectIterations = Gjk.DEFAULT_MAX_ITERATIONS;
+
+	/** The maximum number of distance check iterations */
+	protected int maxDistanceIterations = Gjk.DEFAULT_MAX_ITERATIONS;
 	
-	/** The {@link Gjk} distance epsilon in meters */
+	/** The maximum number of raycast iterations */
+	protected int maxRaycastIterations = Gjk.DEFAULT_MAX_ITERATIONS;
+	
+	/** The collision detection epsilon in meters  */
+	protected double detectEpsilon = Gjk.DEFAULT_DETECT_EPSILON;
+	
+	/** The distance check epsilon in meters */
 	protected double distanceEpsilon = Gjk.DEFAULT_DISTANCE_EPSILON;
+	
+	/** The raycast check epsilon in meters */
+	protected double raycastEpsilon = Gjk.DEFAULT_DISTANCE_EPSILON;
 	
 	/**
 	 * Default constructor.
@@ -254,11 +276,11 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 		// negate the search direction
 		d.negate();
 		// start the loop
-		for (int i = 0; i < this.maxIterations ;i++) {
+		for (int i = 0; i < this.maxDetectIterations; i++) {
 			// always add another point to the simplex at the beginning of the loop
 			simplex.add(ms.getSupportPoint(d));
 			// make sure that the last point we added was past the origin
-			if (simplex.get(simplex.size() - 1).dot(d) <= Epsilon.E) {
+			if (simplex.get(simplex.size() - 1).dot(d) <= this.detectEpsilon) {
 				// a is not past the origin so therefore the shapes do not intersect
 				// here we treat the origin on the line as no intersection
 				// immediately return with null indicating no penetration
@@ -393,7 +415,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 		// find the point on the simplex (segment) closest to the origin
 		// and use that as the new search direction
 		d = Segment.getPointOnSegmentClosestToPoint(ORIGIN, b.point, a.point);
-		for (int i = 0; i < this.maxIterations; i++) {
+		for (int i = 0; i < this.maxDistanceIterations; i++) {
 			// the vector from the point we found to the origin is the new search direction
 			d.negate();
 			// check if d is zero
@@ -615,7 +637,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 		double distanceSqrd = Double.MAX_VALUE;
 		int iterations = 0;
 		// loop until we have found the correct distance
-		while (distanceSqrd > this.distanceEpsilon) {
+		while (distanceSqrd > this.raycastEpsilon) {
 			// get a point on the edge of the convex in the direction of d
 			Vector2 p = convex.getFarthestPoint(d, transform);
 			// get the vector from the current closest point to the edge point
@@ -687,7 +709,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			}
 			
 			// check for the maximum number of iterations
-			if (iterations == this.maxIterations) {
+			if (iterations == this.maxRaycastIterations) {
 				// we have hit the maximum number of iterations and
 				// still are not close enough to the ray, in this case
 				// just exit returning false
@@ -708,28 +730,126 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	}
 	
 	/**
-	 * Returns the maximum number of iterations the {@link Gjk} algorithm will perform when
-	 * computing the distance between two separated bodies.
-	 * @return int the number of {@link Gjk} distance iterations
-	 * @see #setMaxIterations(int)
+	 * Returns the maximum number of iterations the {@link Gjk} collision detection algorithm will perform
+	 * before returning that two convex shapes are not overlapping.
+	 * @return int the number of {@link Gjk} detect iterations
+	 * @see #setMaxDetectIterations(int)
+	 * @since 3.3.0
 	 */
-	public int getMaxIterations() {
-		return this.maxIterations;
+	public int getMaxDetectIterations() {
+		return this.maxDetectIterations;
+	}
+	
+	/**
+	 * Sets the maximum number of iterations the {@link Gjk} collision detection algorithm will perform when
+	 * before return that two convex shapes are not overlapping.
+	 * <p>
+	 * Valid values are in the range [5, &infin;].
+	 * @param maxIterations the maximum number of {@link Gjk} detect iterations
+	 * @throws IllegalArgumentException if maxIterations is less than 5
+	 * @since 3.3.0
+	 */
+	public void setMaxDetectIterations(int maxIterations) {
+		if (maxIterations < 5) throw new IllegalArgumentException(Messages.getString("collision.narrowphase.gjk.invalidMaximumIterations"));
+		this.maxDetectIterations = maxIterations;
+	}
+	
+	/**
+	 * Returns the maximum number of iterations the {@link Gjk} distance algorithm will perform
+	 * before returning the distance between two separated convex shapes.
+	 * @return int the number of {@link Gjk} distance iterations
+	 * @see #setMaxDistanceIterations(int)
+	 * @since 3.3.0
+	 */
+	public int getMaxDistanceIterations() {
+		return this.maxDistanceIterations;
+	}
+	
+	/**
+	 * Sets the maximum number of iterations the {@link Gjk} distance algorithm will perform when
+	 * determining the distance between two convex shapes.
+	 * <p>
+	 * Valid values are in the range [5, &infin;].
+	 * @param maxIterations the maximum number of {@link Gjk} distance iterations
+	 * @throws IllegalArgumentException if maxIterations is less than 5
+	 * @since 3.3.0
+	 */
+	public void setMaxDistanceIterations(int maxIterations) {
+		if (maxIterations < 5) throw new IllegalArgumentException(Messages.getString("collision.narrowphase.gjk.invalidMaximumIterations"));
+		this.maxDistanceIterations = maxIterations;
+	}
+	
+	/**
+	 * Returns the maximum number of iterations the {@link Gjk} raycast algorithm will perform
+	 * before returning that the ray and the convex are not overlapping.
+	 * @return int the number of {@link Gjk} raycast iterations
+	 * @see #setMaxRaycastIterations(int)
+	 * @since 3.3.0
+	 */
+	public int getMaxRaycastIterations() {
+		return this.maxRaycastIterations;
+	}
+	
+	/**
+	 * Sets the maximum number of iterations the {@link Gjk} raycast algorithm will perform when
+	 * checking whether the ray intersects the convex.
+	 * <p>
+	 * Valid values are in the range [5, &infin;].
+	 * @param maxIterations the maximum number of {@link Gjk} raycast iterations
+	 * @throws IllegalArgumentException if maxIterations is less than 5
+	 * @since 3.3.0
+	 */
+	public void setMaxRaycastIterations(int maxIterations) {
+		if (maxIterations < 5) throw new IllegalArgumentException(Messages.getString("collision.narrowphase.gjk.invalidMaximumIterations"));
+		this.maxRaycastIterations = maxIterations;
+	}
+	
+	/**
+	 * Returns the {@link Gjk} detect epsilon.
+	 * @return double the {@link Gjk} detect epsilon
+	 * @see #setDetectEpsilon(double)
+	 * @since 3.3.0
+	 */
+	public double getDetectEpsilon() {
+		return this.detectEpsilon;
+	}
+	
+	/**
+	 * The minimum distance to determine that two shapes are not colliding.
+	 * <p>
+	 * Valid values are in the range [0, &infin;].
+	 * @param detectEpsilon the {@link Gjk} detect epsilon
+	 * @throws IllegalArgumentException if detectEpsilon is less than zero
+	 * @since 3.3.0
+	 */
+	public void setDetectEpsilon(double detectEpsilon) {
+		if (detectEpsilon < 0) throw new IllegalArgumentException(Messages.getString("collision.narrowphase.gjk.invalidDetectEpsilon"));
+		this.detectEpsilon = detectEpsilon;
 	}
 
 	/**
-	 * Sets the maximum number of iterations the {@link Gjk} algorithm will perform when
-	 * computing the distance between two separated bodies.
-	 * <p>
-	 * Valid values are in the range [5, &infin;].
-	 * @param maxIterations the maximum number of {@link Gjk} iterations
-	 * @throws IllegalArgumentException if maxIterations is less than 5
+	 * Returns the {@link Gjk} raycast epsilon.
+	 * @return double the {@link Gjk} raycast epsilon
+	 * @see #setRaycastEpsilon(double)
+	 * @since 3.3.0
 	 */
-	public void setMaxIterations(int maxIterations) {
-		if (maxIterations < 5) throw new IllegalArgumentException(Messages.getString("collision.narrowphase.gjk.invalidMaximumIterations"));
-		this.maxIterations = maxIterations;
+	public double getRaycastEpsilon() {
+		return this.detectEpsilon;
 	}
-
+	
+	/**
+	 * The minimum distance between the ray and convex for the  {@link Gjk} raycast algorithm.
+	 * <p>
+	 * Valid values are in the range (0, &infin;].
+	 * @param raycastEpsilon the {@link Gjk} raycast epsilon
+	 * @throws IllegalArgumentException if raycastEpsilon is less than or equal to zero
+	 * @since 3.3.0
+	 */
+	public void setRaycastEpsilon(double raycastEpsilon) {
+		if (raycastEpsilon <= 0) throw new IllegalArgumentException(Messages.getString("collision.narrowphase.gjk.invalidDistanceEpsilon"));
+		this.raycastEpsilon = raycastEpsilon;
+	}
+	
 	/**
 	 * Returns the {@link Gjk} distance epsilon.
 	 * @return double the {@link Gjk} distance epsilon
@@ -769,5 +889,32 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	public void setMinkowskiPenetrationSolver(MinkowskiPenetrationSolver minkowskiPenetrationSolver) {
 		if (minkowskiPenetrationSolver == null) throw new NullPointerException(Messages.getString("collision.narrowphase.gjk.nullMinkowskiPenetrationSolver"));
 		this.minkowskiPenetrationSolver = minkowskiPenetrationSolver;
+	}
+
+	/**
+	 * Returns the maximum number of iterations the {@link Gjk} algorithm will perform when
+	 * computing the distance between two separated bodies.
+	 * @return int the number of {@link Gjk} distance iterations
+	 * @see #setMaxIterations(int)
+	 * @deprecated replaced with {@link #getMaxDistanceIterations()} since 3.3.0
+	 */
+	@Deprecated
+	public int getMaxIterations() {
+		return this.maxDistanceIterations;
+	}
+
+	/**
+	 * Sets the maximum number of iterations the {@link Gjk} algorithm will perform when
+	 * computing the distance between two separated bodies.
+	 * <p>
+	 * Valid values are in the range [5, &infin;].
+	 * @param maxIterations the maximum number of {@link Gjk} iterations
+	 * @throws IllegalArgumentException if maxIterations is less than 5
+	 * @deprecated replaced with {@link #setMaxDistanceIterations(int)} since 3.3.0
+	 */
+	@Deprecated
+	public void setMaxIterations(int maxIterations) {
+		if (maxIterations < 5) throw new IllegalArgumentException(Messages.getString("collision.narrowphase.gjk.invalidMaximumIterations"));
+		this.maxDistanceIterations = maxIterations;
 	}
 }
