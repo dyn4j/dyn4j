@@ -2,9 +2,12 @@
 Version 3.3.0
 ===============================================================================
 New Features:
-  - Performance improvements for Android, related to object allocation
+  - Performance improvements for Android
   - Java 9 modules support
   - OSGi support
+  - More control of iteration count and epsilon values in the GJK algorithm
+  - Proper Maven-ization of the project with automated building, testing, and
+    packaging
 
 Bug Fixes:
   - The GJK algorithm hanging in rare cases
@@ -13,7 +16,8 @@ Deprecated:
   - ContactListener.sensed method has been deprecated.  Sensor events are sent
     to the ContactListener.begin, ContactListener.persist, and 
     ContactListener.end methods instead with a sensor flag.
-    NOTE: The ContactListener.sensed method is no longer called.
+    NOTE: The ContactListener.sensed method still exists, but is no longer 
+    called.
   - SimpleContactManager was combined with WarmStartingContactManager into
     DefaultContactManager. You can turn off warm starting via the
     setWarmStartingEnabled(boolean) method.

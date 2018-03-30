@@ -68,3 +68,9 @@ From here you should take a look at the [dyn4j-samples](https://github.com/dyn4j
 * [Latest Javadocs](http://docs.dyn4j.org)
 * [Forum](http://forum.dyn4j.org)
 * [Blog](http://www.dyn4j.org/category/blog/)
+
+### Building
+* Maven build goals: clean package
+* Check artifact class version: 
+** javap -verbose -classpath /path/to/jar/dyn4j.jar org.dyn4j.Version 50
+** javap -verbose -classpath /path/to/jar/dyn4j.jar module-info 53+
