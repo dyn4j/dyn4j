@@ -8,6 +8,8 @@ New Features:
   - More control of iteration count and epsilon values in the GJK algorithm
   - Proper Maven-ization of the project with automated building, testing, and
     packaging
+  - Added an enabled flag for the ContactConstraint class to allow contacts
+    to be temporarily turned off, but still warm started and tracked.
 
 Bug Fixes:
   - The GJK algorithm hanging in rare cases
