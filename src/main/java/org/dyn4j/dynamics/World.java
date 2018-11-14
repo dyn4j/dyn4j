@@ -522,12 +522,8 @@ public class World implements Shiftable, DataContainer {
 			Body body = this.bodies.get(i);
 			// remove the island flag
 			body.setOnIsland(false);
-			// we only need to save the old transform for CCD so don't
-			// bother if its completely disabled
-			if (continuousDetectionMode != ContinuousDetectionMode.NONE) {
-				// save the current transform into the previous transform
-				body.transform0.set(body.getTransform());
-			}
+			// save the current transform into the previous transform
+			body.transform0.set(body.getTransform());
 		}
 		
 		// clear the joint island flags
@@ -630,8 +626,9 @@ public class World implements Shiftable, DataContainer {
 			island.solve(this.contactConstraintSolver, this.gravity, this.step, this.settings);
 			
 			// allow static bodies to participate in other islands
-			for (int j = 0; j < size; j++) {
-				Body body = this.bodies.get(j);
+			int isize = island.bodies.size();
+			for (int j = 0; j < isize; j++) {
+				Body body = island.bodies.get(j);
 				if (body.isStatic()) {
 					body.setOnIsland(false);
 				}
