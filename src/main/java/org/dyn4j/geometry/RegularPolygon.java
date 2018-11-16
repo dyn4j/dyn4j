@@ -148,6 +148,30 @@ public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Tra
 		return sb.toString();
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This method is not supported by this shape.
+	 * @throws UnsupportedOperationException when called
+	 */
+	@Override
+	public Vector2[] getAxes(Vector2[] foci, Transform transform) {
+		// this shape is not supported by SAT
+		throw new UnsupportedOperationException(Messages.getString("geometry.regularPolygon.satNotSupported"));
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This method is not supported by this shape.
+	 * @throws UnsupportedOperationException when called
+	 */
+	@Override
+	public Vector2[] getFoci(Transform transform) {
+		// this shape is not supported by SAT
+		throw new UnsupportedOperationException(Messages.getString("geometry.regularPolygon.satNotSupported"));
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.AbstractShape#rotate(double, double, double)
 	 */
