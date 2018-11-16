@@ -263,4 +263,35 @@ public class Rectangle extends Polygon implements Convex, Wound, Shape, Transfor
 		// for the centroid
 		return new Mass(this.center, mass, inertia);
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Shape#createAABB(org.dyn4j.geometry.Transform)
+	 */
+	@Override
+	public AABB createAABB(Transform transform) {
+		//Specialization of Polygon.createAABB
+		//Since we know that this is a rectangle we can get away with much fewer
+		//comparisons to find the correct AABB. Each vertex maps to one point of the
+		//AABB, we have to find in which of the four possible rotation states this
+		//rectangle currently is. This is done below by comparing the first two vertices
+		
+		Vector2 v0 = transform.getTransformed(this.vertices[0]);
+		Vector2 v1 = transform.getTransformed(this.vertices[1]);
+		Vector2 v2 = transform.getTransformed(this.vertices[2]);
+		Vector2 v3 = transform.getTransformed(this.vertices[3]);
+		
+		if (v0.y > v1.y) {
+			if (v0.x < v1.x) {
+				return new AABB(v0.x, v1.y, v2.x, v3.y);
+			} else {
+				return new AABB(v1.x, v2.y, v3.x, v0.y);
+			}
+		} else {
+			if (v0.x < v1.x) {
+				return new AABB(v3.x, v0.y, v1.x, v2.y);
+			} else {
+				return new AABB(v2.x, v3.y, v0.x, v1.y);
+			}
+		}
+	}
 }

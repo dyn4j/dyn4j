@@ -749,7 +749,7 @@ public class Vector2 {
 		//return 1.0 / m;
 		return magnitude;
 	}
-	
+
 	/**
 	 * Returns the smallest angle between the given {@link Vector2}s.
 	 * <p>
@@ -759,6 +759,20 @@ public class Vector2 {
 	 */
 	public double getAngleBetween(Vector2 vector) {
 		double a = Math.atan2(vector.y, vector.x) - Math.atan2(this.y, this.x);
+		if (a > Math.PI) return a - Geometry.TWO_PI;
+		if (a < -Math.PI) return a + Geometry.TWO_PI;
+		return a;
+	}
+	
+	/**
+	 * Returns the smallest angle between the given {@link Vector2} and the given angle.
+	 * <p>
+	 * Returns the angle in radians in the range -&pi; to &pi;.
+	 * @param otherAngle the angle. Must be in the range -&pi; to &pi
+	 * @return angle in radians [-&pi;, &pi;]
+	 */
+	public double getAngleBetween(double otherAngle) {
+		double a = otherAngle - Math.atan2(this.y, this.x);
 		if (a > Math.PI) return a - Geometry.TWO_PI;
 		if (a < -Math.PI) return a + Geometry.TWO_PI;
 		return a;

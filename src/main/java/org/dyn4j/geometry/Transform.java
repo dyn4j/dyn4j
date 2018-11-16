@@ -282,6 +282,40 @@ public class Transform implements Transformable {
 	}
 	
 	/**
+	 * Transforms only the x coordinate of the given {@link Vector2} and returns the result.
+	 * @param vector the {@link Vector2} to transform
+	 * @return the transformed x coordinate
+	 */
+	public double getTransformedX(Vector2 vector) {
+		return this.m00 * vector.x + this.m01 * vector.y + this.x;
+	}
+	
+	/**
+	 * Transforms only the y coordinate of the given {@link Vector2} and returns the result.
+	 * @param vector the {@link Vector2} to transform
+	 * @return the transformed y coordinate
+	 */
+	public double getTransformedY(Vector2 vector) {
+		return this.m10 * vector.x + this.m11 * vector.y + this.y;
+	}
+	
+	/**
+	 * Transforms only the x coordinate of the given {@link Vector2} and places the result in the x field of the given {@link Vector2}.
+	 * @param vector the {@link Vector2} to transform
+	 */
+	public void transformX(Vector2 vector) {
+		vector.x = this.m00 * vector.x + this.m01 * vector.y + this.x;
+	}
+	
+	/**
+	 * Transforms only the y coordinate of the given {@link Vector2} and places the result in the y field of the given {@link Vector2}.
+	 * @param vector the {@link Vector2} to transform
+	 */
+	public void transformY(Vector2 vector) {
+		vector.y = this.m10 * vector.x + this.m11 * vector.y + this.y;
+	}
+	
+	/**
 	 * Transforms the given {@link Vector2} and returns a new {@link Vector2} containing the result.
 	 * @param vector the {@link Vector2} to transform
 	 * @return {@link Vector2}
