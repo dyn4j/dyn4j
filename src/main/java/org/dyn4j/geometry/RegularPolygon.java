@@ -24,7 +24,10 @@
  */
 package org.dyn4j.geometry;
 
+import java.util.Iterator;
+
 import org.dyn4j.DataContainer;
+import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.resources.Messages;
 
 /**
@@ -40,6 +43,14 @@ import org.dyn4j.resources.Messages;
  * Also there is no need to store the normals array, saving half the memory.
  * (At the moment this comes at the cost of not having getAxes implemented)
  * <p>
+ * 
+ * This implementation uses on-demand normal calculation for memory efficiency reasons.
+ * Because in various scenarios the normals won't be needed (specifically if SAT is <b>not</not>
+ * used as a {@link NarrowphaseDetector} and the user does not ask for them) we will use half the
+ * memory without them, which is good for regular polygons with high vertex count.
+ * This comes at no performance penalty overall.
+ * <p>
+ * 
  * It should be noted that for small polygons this will probably perform slightly worse.
  * <p>
  * A {@link RegularPolygon} must have at least 3 vertices.
@@ -49,16 +60,21 @@ import org.dyn4j.resources.Messages;
  */
 public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Transformable, DataContainer {
 	
-	/** The number of vertices this regular has */
-	protected final int count;
-
-	/** The inverse of the angular increment */
-	protected final double invAngle;
-	
 	/** Rotation needed for computations (in radians)
-	 *  Note that this is used in a strange way to cancel out the rotation
-	 *  from the rotate(...) methods. Also contains an initial rotation constant (see constructor)*/
+	 *  Contains an initial rotation constant (see constructor)*/
+	protected final double initialRotationConstant;
+	
+	/** The local rotation in radians */
 	protected double rotation;
+	
+	/** The inverse regular polygon angle increment in radians. Used for normal calculation */	
+	protected final double invPin;
+	
+	/** The regular polygon normals 
+	 *  Note that we're not using the normals array from the Polygon class
+	 *  becuase we need those to be mutable
+	 */
+	protected Vector2[] normalsCache;
 	
 	/**
 	 * Validated constructor.
@@ -70,13 +86,13 @@ public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Tra
 	private RegularPolygon(boolean valid, int count, double radius) {
 		super(new Vector2(), radius, createRegularPolygonVertices(count, radius), null);
 		
+		this.normalsCache = null;
+		this.invPin = count / Geometry.TWO_PI;
+		
 		// This is the needed inital offset so that this polygon is aligned
 		// the same as the existing polygon creation of the Geometry class
 		// See getFarthestPoint
-		this.rotation = Geometry.TWO_PI + (Geometry.TWO_PI / count) / 2;
-		
-		this.count = count;
-		this.invAngle = count / Geometry.TWO_PI;
+		this.initialRotationConstant = Geometry.TWO_PI + (Geometry.TWO_PI / count) / 2;
 	}
 	
 	private static Vector2[] createRegularPolygonVertices(int count, double radius) {
@@ -136,7 +152,7 @@ public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Tra
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("RegularPolygon[").append(super.toString())
-			.append("|Count=").append(count)
+			.append("|Count=").append(vertices.length)
 			.append("|Radius=").append(radius)
 			.append("|Vertices={");
 		for (int i = 0; i < this.vertices.length; i++) {  
@@ -149,27 +165,132 @@ public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Tra
 	}
 	
 	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * This method is not supported by this shape.
-	 * @throws UnsupportedOperationException when called
+	 * Check whether the the nomralsCache array has been filled with the normals.
+	 * Used internally and possibly by subclasses.
+	 * 
+	 * @return true iff the normals are computed
+	 */
+	protected boolean normalsExist() {
+		return this.normalsCache != null;
+	}
+	
+	/**
+	 * If the normals have not yet been computed, do it now.
+	 * Used internally and possibly by subclasses.
+	 */
+	protected void ensureNormalsExist() {
+		if (!normalsExist()) {
+			int size = this.vertices.length;
+			
+			//calculate the normals at the current rotation
+			//this happens only when the normals are needed somewhere
+			//probably only when SAT is used as narrowphase
+			this.normalsCache = new Vector2[size];
+			double pin = Geometry.TWO_PI / size;
+			
+			double c = Math.cos(pin);
+			double s = Math.sin(pin);
+			
+			double x, y;
+			
+			//initial angles, size and rotation aware
+			if (size % 2 == 0) {
+				x = Math.cos(rotation + Math.PI + pin * 0.5);
+				y = Math.sin(rotation + Math.PI + pin * 0.5);	
+			} else {
+				x = Math.cos(rotation + Math.PI);
+				y = Math.sin(rotation + Math.PI);
+			}
+			
+			for (int i=0;i<size;i++) {
+				normalsCache[i] = new Vector2(x, y);
+				
+				//apply the rotation matrix
+				double t = x;
+				x = c * t - s * y;
+				y = s * t + c * y;
+			}
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Wound#getNormals()
+	 */
+	@Override
+	public Vector2[] getNormals() {
+		ensureNormalsExist();
+		
+		return this.normalsCache;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Convex#getAxes(java.util.List, org.dyn4j.geometry.Transform)
 	 */
 	@Override
 	public Vector2[] getAxes(Vector2[] foci, Transform transform) {
-		// this shape is not supported by SAT
-		throw new UnsupportedOperationException(Messages.getString("geometry.regularPolygon.satNotSupported"));
+		ensureNormalsExist();
+		
+		// get the size of the foci list
+		int fociSize = foci != null ? foci.length : 0;
+		// get the number of vertices this polygon has
+		int size = this.vertices.length;
+		// the axes of a polygon are created from the normal of the edges
+		// plus the closest point to each focus
+		Vector2[] axes = new Vector2[size + fociSize];
+		int n = 0;
+		
+		// loop over the edge normals and put them into world space
+		for (int i = 0; i < size; i++) {
+			// create references to the current points
+			Vector2 v = this.normalsCache[i];
+			// transform it into world space and add it to the list
+			axes[n++] = transform.getTransformedR(v);
+		}
+		
+		// loop over the focal points and find the closest
+		// points on the polygon to the focal points
+		for (int i = 0; i < fociSize; i++) {
+			// get the current focus
+			Vector2 f = foci[i];
+			// create a place for the closest point
+			Vector2 closest = transform.getTransformed(this.vertices[0]);
+			double d = f.distanceSquared(closest);
+			// find the minimum distance vertex
+			for (int j = 1; j < size; j++) {
+				// get the vertex
+				Vector2 p = this.vertices[j];
+				// transform it into world space
+				p = transform.getTransformed(p);
+				// get the squared distance to the focus
+				double dt = f.distanceSquared(p);
+				// compare with the last distance
+				if (dt < d) {
+					// if its closer then save it
+					closest = p;
+					d = dt;
+				}
+			}
+			// once we have found the closest point create 
+			// a vector from the focal point to the point
+			Vector2 axis = f.to(closest);
+			// normalize it
+			axis.normalize();
+			// add it to the array
+			axes[n++] = axis;
+		}
+		// return all the axes
+		return axes;
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * This method is not supported by this shape.
-	 * @throws UnsupportedOperationException when called
+	 * Not applicable to this shape. Always returns null.
+	 * @return null
 	 */
 	@Override
 	public Vector2[] getFoci(Transform transform) {
-		// this shape is not supported by SAT
-		throw new UnsupportedOperationException(Messages.getString("geometry.regularPolygon.satNotSupported"));
+		return null;
 	}
 	
 	/* (non-Javadoc)
@@ -184,14 +305,22 @@ public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Tra
 			this.center.rotate(theta, x, y);
 		}
 		
-		// omit the normals
-		int size = this.vertices.length;
-		for (int i = 0; i < size; i++) {
-			this.vertices[i].rotate(theta, x, y);
+		if (normalsExist()) {
+			int size = this.vertices.length;
+			for (int i = 0; i < size; i++) {
+				this.normalsCache[i].rotate(theta);
+				this.vertices[i].rotate(theta, x, y);
+			}
+		} else {
+			// omit the normals
+			int size = this.vertices.length;
+			for (int i = 0; i < size; i++) {
+				this.vertices[i].rotate(theta, x, y);
+			}	
 		}
 		
-		//cancel out the rotation for computations
-		rotation -= theta;
+		//keep track of local rotation
+		this.rotation += theta;
 	}
 	
 	/* (non-Javadoc)
@@ -201,29 +330,31 @@ public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Tra
 	public EdgeFeature getFarthestFeature(Vector2 vector, Transform transform) {
 		// transform the normal into local space
 		Vector2 localn = transform.getInverseTransformedR(vector);
-		
+	
+		int size = this.vertices.length;
+			
 		// See explanation in getFarthestPoint
-		double rot = Math.atan2(localn.y, localn.x) + rotation;
-		double select = rot * invAngle;
+		double rot = Math.atan2(localn.y, localn.x) + (this.initialRotationConstant - this.rotation);
+		double select = rot * invPin;
 		int fmax = (int) (select);
 		// this serves to find on which side this point lies
 		// if fmax == fother then the edge needed is the left of the max
 		// else if fmax < fother the right one is needed (fmax == fother - 1)
 		int fother = (int) (select + 0.5);
-		int maxIndex = fmax % count;
+		int maxIndex = fmax % size;
 		
 		Vector2 maximum = transform.getTransformed(this.vertices[maxIndex]);
 		PointFeature vm = new PointFeature(maximum, maxIndex);
 		
 		if (fmax < fother) {
-			int index1 = (fother) % count;
+			int index1 = (fother) % size;
 			Vector2 right = transform.getTransformed(this.vertices[index1]);
 			PointFeature vr = new PointFeature(right, index1);
 			
 			// make sure the edge is the right winding
 			return new EdgeFeature(vm, vr, vm, maximum.to(right), maxIndex + 1);
 		} else {
-			int index1 = (fmax - 1) % count;
+			int index1 = (fmax - 1) % size;
 			Vector2 left = transform.getTransformed(this.vertices[index1]);
 			PointFeature vl = new PointFeature(left, index1);
 			
@@ -245,12 +376,12 @@ public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Tra
 		// The rotation added is 2*pi in order to handle negative rotations plus
 		// (Geometry.TWO_PI / count) / 2 to get the closest vertice (rounding)
 		// and also cancels out any rotation applied from the rotate methods
-		double rot = Math.atan2(localn.y, localn.x) + rotation;
+		double rot = Math.atan2(localn.y, localn.x) + (this.initialRotationConstant - this.rotation);
 		// inverse of angles
-		double select = rot * invAngle;
+		double select = rot * invPin;
 		// cast to a specific index
 		// mod count because we added 2*pi etc
-		int maxIndex = ((int) (select)) % count;
+		int maxIndex = ((int) (select)) % this.vertices.length;
 		
 		//this is the needed vertice
 		localn = transform.getTransformed(this.vertices[maxIndex]);
@@ -277,7 +408,6 @@ public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Tra
 	 */
 	@Override
 	public Mass createMass(double density) {
-		System.out.println(super.createMass(density).getCenter());
 		int n = this.vertices.length;
 		
 		// get the average center
@@ -288,11 +418,11 @@ public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Tra
 		
 		ac.multiply(1.0 / n);
 		
-		double area = (radius * radius * count * Math.sin(Geometry.TWO_PI / count)) / 2;
+		double area = (radius * radius * n * Math.sin(Geometry.TWO_PI / n)) / 2;
 		double m = density * area;
 		
-		double sin = Math.sin(Math.PI / count);
-		double cos = Math.cos(Math.PI / count);
+		double sin = Math.sin(Math.PI / n);
+		double cos = Math.cos(Math.PI / n);
 		
 		double side = 2 * radius * sin;
 		double cot = cos / sin;
@@ -309,6 +439,16 @@ public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Tra
 		Vector2 center = transform.getTransformed(this.center);
 		// return a new aabb
 		return new AABB(center, this.radius);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Wound#getNormalIterator()
+	 */
+	@Override
+	public Iterator<Vector2> getNormalIterator() {
+		ensureNormalsExist();
+		
+		return new WoundIterator(this.normalsCache);
 	}
 	
 }
