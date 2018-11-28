@@ -72,7 +72,7 @@ public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Tra
 	
 	/** The regular polygon normals 
 	 *  Note that we're not using the normals array from the Polygon class
-	 *  becuase we need those to be mutable
+	 *  because we need those to be mutable
 	 */
 	protected Vector2[] normalsCache;
 	
@@ -293,29 +293,32 @@ public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Tra
 		return null;
 	}
 	
+
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.AbstractShape#rotate(double, double, double)
+	 * @see org.dyn4j.geometry.AbstractShape#rotate(double, double, double, double, double)
 	 */
 	@Override
-	public void rotate(double theta, double x, double y) {
+	public void rotate(double theta, double cos, double sin, double x, double y) {
 		// NOTE: copied from Polygon.rotate and AbstractShape.rotate
 		// only rotate the center if the point about which
 		// we are rotating is not the center
 		if (!this.center.equals(x, y)) {
-			this.center.rotate(theta, x, y);
+			this.center.rotate(cos, sin, x, y);
 		}
 		
 		if (normalsExist()) {
 			int size = this.vertices.length;
+			
 			for (int i = 0; i < size; i++) {
-				this.normalsCache[i].rotate(theta);
-				this.vertices[i].rotate(theta, x, y);
+				this.normalsCache[i].rotate(cos, sin);
+				this.vertices[i].rotate(cos, sin, x, y);
 			}
 		} else {
 			// omit the normals
 			int size = this.vertices.length;
+			
 			for (int i = 0; i < size; i++) {
-				this.vertices[i].rotate(theta, x, y);
+				this.vertices[i].rotate(cos, sin, x, y);
 			}	
 		}
 		
@@ -332,7 +335,7 @@ public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Tra
 		Vector2 localn = transform.getInverseTransformedR(vector);
 	
 		int size = this.vertices.length;
-			
+		
 		// See explanation in getFarthestPoint
 		double rot = Math.atan2(localn.y, localn.x) + (this.initialRotationConstant - this.rotation);
 		double select = rot * invPin;

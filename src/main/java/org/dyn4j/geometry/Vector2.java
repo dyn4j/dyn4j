@@ -560,7 +560,7 @@ public class Vector2 {
 	 * @return {@link Vector2}
 	 */
 	public Vector2 cross(double z) {
-		return new Vector2(-1.0 * this.y * z, this.x * z);
+		return new Vector2(-this.y * z, this.x * z);
 	}
 	
 	/**
@@ -573,7 +573,7 @@ public class Vector2 {
 	 * @return boolean
 	 */
 	public boolean isOrthogonal(Vector2 vector) {
-		return Math.abs(this.x * vector.x + this.y * vector.y) <= Epsilon.E ? true : false;
+		return Math.abs(this.x * vector.x + this.y * vector.y) <= Epsilon.E;
 	}
 	
 	/**
@@ -587,7 +587,7 @@ public class Vector2 {
 	 * @return boolean
 	 */
 	public boolean isOrthogonal(double x, double y) {
-		return Math.abs(this.x * x + this.y * y) <= Epsilon.E ? true : false;
+		return Math.abs(this.x * x + this.y * y) <= Epsilon.E;
 	}
 	
 	/**
@@ -603,8 +603,8 @@ public class Vector2 {
 	 * @return {@link Vector2} this vector
 	 */
 	public Vector2 negate() {
-		this.x *= -1.0;
-		this.y *= -1.0;
+		this.x = -this.x;
+		this.y = -this.y;
 		return this;
 	}
 	
@@ -628,6 +628,21 @@ public class Vector2 {
 	
 	/**
 	 * Rotates about the origin.
+	 * To be used with pre-calculated cosine and sine values for batch rotations
+	 * @param cos the cosine of the rotation angle in radians
+	 * @param sin the cosine of the rotation angle in radians
+	 * @return {@link Vector2} this vector
+	 */
+	protected Vector2 rotate(double cos, double sin) {
+		double x = this.x;
+		double y = this.y;
+		this.x = x * cos - y * sin;
+		this.y = x * sin + y * cos;
+		return this;
+	}
+	
+	/**
+	 * Rotates about the origin.
 	 * @param theta the rotation angle in radians
 	 * @return {@link Vector2} this vector
 	 */
@@ -638,6 +653,24 @@ public class Vector2 {
 		double y = this.y;
 		this.x = x * cos - y * sin;
 		this.y = x * sin + y * cos;
+		return this;
+	}
+	
+	/**
+	 * Rotates the {@link Vector2} about the given coordinates.
+	 * To be used with pre-calculated cosine and sine values for batch rotations
+	 * @param cos the cosine of the rotation angle in radians
+	 * @param sin the cosine of the rotation angle in radians
+	 * @param x the x coordinate to rotate about
+	 * @param y the y coordinate to rotate about
+	 * @return {@link Vector2} this vector
+	 */
+	protected Vector2 rotate(double cos, double sin, double x, double y) {
+		this.x -= x;
+		this.y -= y;
+		this.rotate(cos, sin);
+		this.x += x;
+		this.y += y;
 		return this;
 	}
 	
@@ -655,6 +688,18 @@ public class Vector2 {
 		this.x += x;
 		this.y += y;
 		return this;
+	}
+	
+	/**
+	 * Rotates the {@link Vector2} about the given point.
+	 * To be used with pre-calculated cosine and sine values for batch rotations
+	 * @param cos the cosine of the rotation angle in radians
+	 * @param sin the cosine of the rotation angle in radians
+	 * @param point the point to rotate about
+	 * @return {@link Vector2} this vector
+	 */
+	protected Vector2 rotate(double cos, double sin, Vector2 point) {
+		return this.rotate(cos, sin, point.x, point.y);
 	}
 	
 	/**

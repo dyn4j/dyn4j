@@ -138,7 +138,7 @@ public class Rectangle extends Polygon implements Convex, Wound, Shape, Transfor
 		// we can get the rotation by comparing it to the positive x-axis
 		// since the normal vectors are rotated with the vertices when
 		// a shape is rotated
-		return Vector2.X_AXIS.getAngleBetween(this.normals[1]);
+		return Math.atan2(this.normals[1].y, this.normals[1].x);
 	}
 	
 	/* (non-Javadoc)

@@ -155,10 +155,14 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	public Vector2 getFarthestPoint(Vector2 vector, Transform transform) {
 		// convert the world space vector(n) to local space
 		Vector2 localAxis = transform.getInverseTransformedR(vector);
+		
 		// include local rotation
-		double r = this.getRotation();
+		double cos = Math.cos(this.rotation);
+		double sin = Math.sin(this.rotation);
+		
 		// invert the local rotation
-		localAxis.rotate(-r);
+		// cos(-x) = cos(x), sin(-x) = -sin(x)
+		localAxis.rotate(cos, -sin);
 		// an ellipse is a circle with a non-uniform scaling transformation applied
 		// so we can achieve that by scaling the input axis by the major and minor
 		// axis lengths
@@ -170,7 +174,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		Vector2 p = new Vector2(localAxis.x * this.halfWidth, localAxis.y  * this.halfHeight);
 		// include local rotation
 		// invert the local rotation
-		p.rotate(r);
+		p.rotate(cos, sin);
 		p.add(this.center);
 		// then finally convert back into world space coordinates
 		transform.transform(p);
@@ -262,7 +266,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		// we need to translate/rotate the point so that this ellipse is
 		// considered centered at the origin with it's semi-major axis aligned
 		// with the x-axis and its semi-minor axis aligned with the y-axis
-		Vector2 p = center.difference(this.center).rotate(-this.getRotation());
+		Vector2 p = center.difference(this.center).rotate(-this.rotation);
 		
 		// get the farthest point.
 		Vector2 fp = Ellipse.getFarthestPoint(this.halfWidth, this.halfHeight, p);
@@ -446,8 +450,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		// get the world space point into local coordinates
 		Vector2 localPoint = transform.getInverseTransformed(point);
 		// account for local rotation
-		double r = this.getRotation();
-		localPoint.rotate(-r, this.center.x, this.center.y);
+		localPoint.rotate(-this.rotation, this.center.x, this.center.y);
 		
 		double x = (localPoint.x - this.center.x);
 		double y = (localPoint.y - this.center.y);

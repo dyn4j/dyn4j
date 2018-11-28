@@ -306,17 +306,19 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		}
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.AbstractShape#rotate(double, double, double)
+	 * @see org.dyn4j.geometry.AbstractShape#rotate(double, double, double, double, double)
 	 */
 	@Override
-	public void rotate(double theta, double x, double y) {
-		super.rotate(theta, x, y);
+	public void rotate(double theta, double cos, double sin, double x, double y) {
+		super.rotate(theta, cos, sin, x, y);
+		
 		int size = this.vertices.length;
+		
 		for (int i = 0; i < size; i++) {
-			this.vertices[i].rotate(theta, x, y);
-			this.normals[i].rotate(theta);
+			this.vertices[i].rotate(cos, sin, x, y);
+			this.normals[i].rotate(cos, sin);
 		}
 	}
 
@@ -337,6 +339,7 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 	 */
 	@Override
 	public Interval project(Vector2 vector, Transform transform) {
+		//System.out.println(1);
 		double v = 0.0;
     	// get the first point
 		Vector2 p = transform.getTransformed(this.vertices[0]);

@@ -177,10 +177,14 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	public Vector2 getFarthestPoint(Vector2 vector, Transform transform) {
 		// convert the world space vector(n) to local space
 		Vector2 localAxis = transform.getInverseTransformedR(vector);
+
 		// include local rotation
-		double r = this.getRotation();
+		double cos = Math.cos(this.rotation);
+		double sin = Math.sin(this.rotation);
+		
 		// invert the local rotation
-		localAxis.rotate(-r);
+		// cos(-x) = cos(x), sin(-x) = -sin(x)
+		localAxis.rotate(cos, -sin);
 		// an ellipse is a circle with a non-uniform scaling transformation applied
 		// so we can achieve that by scaling the input axis by the major and minor
 		// axis lengths
@@ -201,7 +205,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		
 		// include local rotation
 		// invert the local rotation
-		p.rotate(r);
+		p.rotate(cos, sin);
 		p.add(this.ellipseCenter);
 		// then finally convert back into world space coordinates
 		transform.transform(p);
@@ -339,18 +343,18 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.AbstractShape#rotate(double, double, double)
+	 * @see org.dyn4j.geometry.AbstractShape#rotate(double, double, double, double, double)
 	 */
 	@Override
-	public void rotate(double theta, double x, double y) {
-		super.rotate(theta, x, y);
+	public void rotate(double theta, double cos, double sin, double x, double y) {
+		super.rotate(theta, cos, sin, x, y);
+		
 		// rotate the local axis as well
 		this.rotation += theta;
-		// rotate the vertices
-		this.verticeLeft.rotate(theta, x, y);
-		this.verticeRight.rotate(theta, x, y);
-		// rotate the ellipse center
-		this.ellipseCenter.rotate(theta, x, y);
+		
+		this.verticeLeft.rotate(cos, sin, x, y);
+		this.verticeRight.rotate(cos, sin, x, y);
+		this.ellipseCenter.rotate(cos, sin, x, y);
 	}
 
 	/* (non-Javadoc)

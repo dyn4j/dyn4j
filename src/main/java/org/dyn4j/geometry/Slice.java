@@ -364,20 +364,22 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 		return false;
 	}
 	
+
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.AbstractShape#rotate(double, double, double)
+	 * @see org.dyn4j.geometry.AbstractShape#rotate(double, double, double, double, double)
 	 */
 	@Override
-	public void rotate(double theta, double x, double y) {
+	public void rotate(double theta, double cos, double sin, double x, double y) {
 		// rotate the centroid
-		super.rotate(theta, x, y);
+		super.rotate(theta, cos, sin, x, y);
+		
 		// rotate the pie vertices
 		for (int i = 0; i < this.vertices.length; i++) {
-			this.vertices[i].rotate(theta, x, y);
+			this.vertices[i].rotate(cos, sin, x, y);
 		}
 		// rotate the pie normals
 		for (int i = 0; i < this.normals.length; i++) {
-			this.normals[i].rotate(theta);
+			this.normals[i].rotate(cos, sin);
 		}
 		// rotate the local x axis
 		this.rotation += theta;
