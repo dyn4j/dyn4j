@@ -43,14 +43,12 @@ import org.dyn4j.resources.Messages;
  * Also there is no need to store the normals array, saving half the memory.
  * (At the moment this comes at the cost of not having getAxes implemented)
  * <p>
- * 
  * This implementation uses on-demand normal calculation for memory efficiency reasons.
  * Because in various scenarios the normals won't be needed (specifically if SAT is <b>not</not>
  * used as a {@link NarrowphaseDetector} and the user does not ask for them) we will use half the
  * memory without them, which is good for regular polygons with high vertex count.
  * This comes at no performance penalty overall.
  * <p>
- * 
  * It should be noted that for small polygons this will probably perform slightly worse.
  * <p>
  * A {@link RegularPolygon} must have at least 3 vertices.
@@ -58,35 +56,29 @@ import org.dyn4j.resources.Messages;
  * @version 3.3.0
  * @since 3.3.0
  */
-public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Transformable, DataContainer {
-	
-	/** Rotation needed for computations (in radians)
-	 *  Contains an initial rotation constant (see constructor)*/
-	protected final double initialRotationConstant;
+final class RegularPolygon extends Polygon implements Convex, Wound, Shape, Transformable, DataContainer {
+	/** 
+	 * Rotation needed for computations (in radians)
+	 * Contains an initial rotation constant (see constructor)
+	 */
+	private final double initialRotationConstant;
+
+	/** The inverse regular polygon angle increment in radians. Used for normal calculation */	
+	private final double invPin;
 	
 	/** The local rotation in radians */
-	protected double rotation;
-	
-	/** The inverse regular polygon angle increment in radians. Used for normal calculation */	
-	protected final double invPin;
-	
-	/** The regular polygon normals 
-	 *  Note that we're not using the normals array from the Polygon class
-	 *  because we need those to be mutable
-	 */
-	protected Vector2[] normalsCache;
+	double rotation;
 	
 	/**
 	 * Validated constructor.
 	 * <p>
-	 * Creates a new {@link RegularPolygon} with the given vertice count and angle.
+	 * Creates a new {@link RegularPolygon} with the given vertex count and angle.
 	 * @param count the number of vertices for this regular polygon
-	 * @param radius the radius of the circle in which this polygon is insribed
+	 * @param radius the radius of the circle in which this polygon is inscribed
 	 */
 	private RegularPolygon(boolean valid, int count, double radius) {
-		super(new Vector2(), radius, createRegularPolygonVertices(count, radius), null);
+		super(new Vector2(), radius, createRegularPolygonVertices(count, radius), new Vector2[count]);
 		
-		this.normalsCache = null;
 		this.invPin = count / Geometry.TWO_PI;
 		
 		// This is the needed inital offset so that this polygon is aligned
@@ -123,9 +115,9 @@ public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Tra
 	/**
 	 * Full constructor.
 	 * <p>
-	 * Creates a new {@link RegularPolygon} with the given vertice count and angle.
+	 * Creates a new {@link RegularPolygon} with the given vertex count and angle.
 	 * @param count the number of vertices for this regular polygon
-	 * @param radius the radius of the circle in which this polygon is insribed
+	 * @param radius the radius of the circle in which this polygon is inscribed
 	 */
 	public RegularPolygon(int count, double radius) {
 		this(validate(count, radius), count, radius);
@@ -165,51 +157,58 @@ public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Tra
 	}
 	
 	/**
-	 * Check whether the the nomralsCache array has been filled with the normals.
-	 * Used internally and possibly by subclasses.
-	 * 
-	 * @return true iff the normals are computed
+	 * Returns true if the normals have been generated.
+	 * <p>
+	 * The normals for this polygon are only generated when requested.
+	 * @return boolean
 	 */
-	protected boolean normalsExist() {
-		return this.normalsCache != null;
+	private boolean isNormalArrayPopulated() {
+		return this.normals[0] != null;
 	}
 	
 	/**
-	 * If the normals have not yet been computed, do it now.
-	 * Used internally and possibly by subclasses.
+	 * Populates the normal array based on the current rotation.
 	 */
-	protected void ensureNormalsExist() {
-		if (!normalsExist()) {
-			int size = this.vertices.length;
+	private void populateNormalArray() {
+		int size = this.vertices.length;
+		
+		// calculate the normals at the current rotation
+		// this happens only when the normals are needed somewhere
+		// probably only when SAT is used as narrowphase
+		double pin = Geometry.TWO_PI / size;
+		
+		double c = Math.cos(pin);
+		double s = Math.sin(pin);
+		
+		double x;
+		double y;
+		
+		// initial angles, size and rotation aware
+		if (size % 2 == 0) {
+			x = Math.cos(this.rotation + Math.PI + pin * 0.5);
+			y = Math.sin(this.rotation + Math.PI + pin * 0.5);	
+		} else {
+			x = Math.cos(this.rotation + Math.PI);
+			y = Math.sin(this.rotation + Math.PI);
+		}
+		
+		for (int i = 0; i < size; i++) {
+			this.normals[i] = new Vector2(x, y);
 			
-			//calculate the normals at the current rotation
-			//this happens only when the normals are needed somewhere
-			//probably only when SAT is used as narrowphase
-			this.normalsCache = new Vector2[size];
-			double pin = Geometry.TWO_PI / size;
-			
-			double c = Math.cos(pin);
-			double s = Math.sin(pin);
-			
-			double x, y;
-			
-			//initial angles, size and rotation aware
-			if (size % 2 == 0) {
-				x = Math.cos(rotation + Math.PI + pin * 0.5);
-				y = Math.sin(rotation + Math.PI + pin * 0.5);	
-			} else {
-				x = Math.cos(rotation + Math.PI);
-				y = Math.sin(rotation + Math.PI);
-			}
-			
-			for (int i=0;i<size;i++) {
-				normalsCache[i] = new Vector2(x, y);
-				
-				//apply the rotation matrix
-				double t = x;
-				x = c * t - s * y;
-				y = s * t + c * y;
-			}
+			// apply the rotation matrix
+			double t = x;
+			x = c * t - s * y;
+			y = s * t + c * y;
+		}
+	}
+
+	/**
+	 * Populates the set of normals for this shape if they have not been
+	 * populated already.
+	 */
+	private void populateNormalArrayIfEmpty() {
+		if (!this.isNormalArrayPopulated()) {
+			this.populateNormalArray();
 		}
 	}
 	
@@ -218,9 +217,9 @@ public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Tra
 	 */
 	@Override
 	public Vector2[] getNormals() {
-		ensureNormalsExist();
+		this.populateNormalArrayIfEmpty();
 		
-		return this.normalsCache;
+		return this.normals;
 	}
 	
 	/* (non-Javadoc)
@@ -228,7 +227,7 @@ public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Tra
 	 */
 	@Override
 	public Vector2[] getAxes(Vector2[] foci, Transform transform) {
-		ensureNormalsExist();
+		this.populateNormalArrayIfEmpty();
 		
 		// get the size of the foci list
 		int fociSize = foci != null ? foci.length : 0;
@@ -242,7 +241,7 @@ public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Tra
 		// loop over the edge normals and put them into world space
 		for (int i = 0; i < size; i++) {
 			// create references to the current points
-			Vector2 v = this.normalsCache[i];
+			Vector2 v = this.normals[i];
 			// transform it into world space and add it to the list
 			axes[n++] = transform.getTransformedR(v);
 		}
@@ -306,17 +305,14 @@ public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Tra
 			this.center.rotate(cos, sin, x, y);
 		}
 		
-		if (normalsExist()) {
-			int size = this.vertices.length;
-			
+		int size = this.vertices.length;
+		if (this.isNormalArrayPopulated()) {
 			for (int i = 0; i < size; i++) {
-				this.normalsCache[i].rotate(cos, sin);
+				this.normals[i].rotate(cos, sin);
 				this.vertices[i].rotate(cos, sin, x, y);
 			}
 		} else {
 			// omit the normals
-			int size = this.vertices.length;
-			
 			for (int i = 0; i < size; i++) {
 				this.vertices[i].rotate(cos, sin, x, y);
 			}	
@@ -377,26 +373,24 @@ public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Tra
 		// We will be choosing one of the vertices based on the angle of the vector
 		// since all the angles are the same
 		// The rotation added is 2*pi in order to handle negative rotations plus
-		// (Geometry.TWO_PI / count) / 2 to get the closest vertice (rounding)
+		// (Geometry.TWO_PI / count) / 2 to get the closest vertex (rounding)
 		// and also cancels out any rotation applied from the rotate methods
 		double rot = Math.atan2(localn.y, localn.x) + (this.initialRotationConstant - this.rotation);
 		// inverse of angles
-		double select = rot * invPin;
+		double select = rot * this.invPin;
 		// cast to a specific index
 		// mod count because we added 2*pi etc
 		int maxIndex = ((int) (select)) % this.vertices.length;
 		
-		//this is the needed vertice
-		localn = transform.getTransformed(this.vertices[maxIndex]);
-		
-		return localn;
+		// this is the needed vertex
+		return transform.getTransformed(this.vertices[maxIndex]);
 	}
 
 	/**	
 	 * Creates a {@link Mass} object using the geometric properties of
 	 * this {@link RegularPolygon} and the given density.
 	 * <p>
-	 * Finding the area of a {@link Polygon} can be done by using the following formula:
+	 * Finding the area of a {@link RegularPolygon} can be done by using the following formula:
 	 * <p style="white-space: pre;">
 	 * r<sup>2</sup> * n * sin(2&pi / n) / 2
 	 * </p>
@@ -421,13 +415,13 @@ public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Tra
 		
 		ac.multiply(1.0 / n);
 		
-		double area = (radius * radius * n * Math.sin(Geometry.TWO_PI / n)) / 2;
+		double area = (this.radius * this.radius * n * Math.sin(Geometry.TWO_PI / n)) / 2;
 		double m = density * area;
 		
 		double sin = Math.sin(Math.PI / n);
 		double cos = Math.cos(Math.PI / n);
 		
-		double side = 2 * radius * sin;
+		double side = 2 * this.radius * sin;
 		double cot = cos / sin;
 		double I = (1 + 3 * cot * cot) * m * side * side / 24.0;
 		
@@ -449,9 +443,9 @@ public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Tra
 	 */
 	@Override
 	public Iterator<Vector2> getNormalIterator() {
-		ensureNormalsExist();
+		this.populateNormalArrayIfEmpty();
 		
-		return new WoundIterator(this.normalsCache);
+		return new WoundIterator(this.normals);
 	}
 	
 }

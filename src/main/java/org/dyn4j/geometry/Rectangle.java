@@ -269,11 +269,10 @@ public class Rectangle extends Polygon implements Convex, Wound, Shape, Transfor
 	 */
 	@Override
 	public AABB createAABB(Transform transform) {
-		//Specialization of Polygon.createAABB
-		//Since we know that this is a rectangle we can get away with much fewer
-		//comparisons to find the correct AABB. Each vertex maps to one point of the
-		//AABB, we have to find in which of the four possible rotation states this
-		//rectangle currently is. This is done below by comparing the first two vertices
+		// since we know that this is a rectangle we can get away with much fewer
+		// comparisons to find the correct AABB. Each vertex maps to one point of the
+		// AABB, we have to find in which of the four possible rotation states this
+		// rectangle currently is. This is done below by comparing the first two vertices
 		
 		Vector2 v0 = transform.getTransformed(this.vertices[0]);
 		Vector2 v1 = transform.getTransformed(this.vertices[1]);

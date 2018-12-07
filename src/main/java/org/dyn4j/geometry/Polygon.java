@@ -311,7 +311,7 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 	 * @see org.dyn4j.geometry.AbstractShape#rotate(double, double, double, double, double)
 	 */
 	@Override
-	public void rotate(double theta, double cos, double sin, double x, double y) {
+	protected void rotate(double theta, double cos, double sin, double x, double y) {
 		super.rotate(theta, cos, sin, x, y);
 		
 		int size = this.vertices.length;
@@ -443,10 +443,8 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 			}
 		}
 		
-		Vector2 point = new Vector2(this.vertices[index]);
-		
 		// transform the point into world space and return
-		return transform.getTransformed(point);
+		return transform.getTransformed(this.vertices[index]);
 	}
 	
 	/**

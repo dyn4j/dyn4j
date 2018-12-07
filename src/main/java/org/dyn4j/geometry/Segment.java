@@ -707,7 +707,7 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 	 * @see org.dyn4j.geometry.AbstractShape#rotate(double, double, double, double, double)
 	 */
 	@Override
-	public void rotate(double theta, double cos, double sin, double x, double y) {
+	protected void rotate(double theta, double cos, double sin, double x, double y) {
 		super.rotate(theta, cos, sin, x, y);
 		
 		this.vertices[0].rotate(cos, sin, x, y);

@@ -208,7 +208,7 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 		Vector2 localn = transform.getInverseTransformedR(vector);
 		
 		// project the origin and two end points first
-		if (Math.abs(localn.getAngleBetween(rotation)) > this.alpha) {
+		if (Math.abs(localn.getAngleBetween(this.rotation)) > this.alpha) {
 			// NOTE: taken from Polygon.getFarthestPoint
 			// set the farthest point to the first one
 			int index = 0;
@@ -249,7 +249,7 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	@Override
 	public Feature getFarthestFeature(Vector2 vector, Transform transform) {
 		Vector2 localAxis = transform.getInverseTransformedR(vector);
-		if (Math.abs(localAxis.getAngleBetween(rotation)) <= this.alpha) {
+		if (Math.abs(localAxis.getAngleBetween(this.rotation)) <= this.alpha) {
 			// then its the farthest point
 			Vector2 point = this.getFarthestPoint(vector, transform);
 			return new PointFeature(point);
@@ -369,7 +369,7 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	 * @see org.dyn4j.geometry.AbstractShape#rotate(double, double, double, double, double)
 	 */
 	@Override
-	public void rotate(double theta, double cos, double sin, double x, double y) {
+	protected void rotate(double theta, double cos, double sin, double x, double y) {
 		// rotate the centroid
 		super.rotate(theta, cos, sin, x, y);
 		
@@ -403,7 +403,7 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	 * @return double the rotation in radians
 	 */
 	public double getRotation() {
-		return rotation;
+		return this.rotation;
 	}
 	
 	/**
