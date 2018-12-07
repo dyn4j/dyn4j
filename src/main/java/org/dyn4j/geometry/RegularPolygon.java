@@ -56,7 +56,7 @@ import org.dyn4j.resources.Messages;
  * @version 3.3.0
  * @since 3.3.0
  */
-final class RegularPolygon extends Polygon implements Convex, Wound, Shape, Transformable, DataContainer {
+public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Transformable, DataContainer {
 	/** 
 	 * Rotation needed for computations (in radians)
 	 * Contains an initial rotation constant (see constructor)
