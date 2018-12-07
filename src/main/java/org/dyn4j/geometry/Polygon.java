@@ -308,15 +308,17 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 	}
 
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.AbstractShape#rotate(double, double, double)
+	 * @see org.dyn4j.geometry.AbstractShape#rotate(double, double, double, double, double)
 	 */
 	@Override
-	public void rotate(double theta, double x, double y) {
-		super.rotate(theta, x, y);
+	protected void rotate(double theta, double cos, double sin, double x, double y) {
+		super.rotate(theta, cos, sin, x, y);
+		
 		int size = this.vertices.length;
+		
 		for (int i = 0; i < size; i++) {
-			this.vertices[i].rotate(theta, x, y);
-			this.normals[i].rotate(theta);
+			this.vertices[i].rotate(cos, sin, x, y);
+			this.normals[i].rotate(cos, sin);
 		}
 	}
 
@@ -337,6 +339,7 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 	 */
 	@Override
 	public Interval project(Vector2 vector, Transform transform) {
+		//System.out.println(1);
 		double v = 0.0;
     	// get the first point
 		Vector2 p = transform.getTransformed(this.vertices[0]);
@@ -366,20 +369,18 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 	public EdgeFeature getFarthestFeature(Vector2 vector, Transform transform) {
 		// transform the normal into local space
 		Vector2 localn = transform.getInverseTransformedR(vector);
-		Vector2 maximum = new Vector2();
-		double max = -Double.MAX_VALUE;
+		
+		double max = localn.dot(this.vertices[0]);
 		int index = 0;
 		// find the vertex on the polygon that is further along on the penetration axis
 		int count = this.vertices.length;
-		for (int i = 0; i < count; i++) {
+		for (int i = 1; i < count; i++) {
 			// get the current vertex
 			Vector2 v = this.vertices[i];
 			// get the scalar projection of v onto axis
 			double projection = localn.dot(v);
 			// keep the maximum projection point
 			if (projection > max) {
-				// set the max point
-				maximum.set(v);
 				// set the new maximum
 				max = projection;
 				// save the index
@@ -387,10 +388,10 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 			}
 		}
 		
+		Vector2 maximum = new Vector2(this.vertices[index]);
+		
 		// once we have the point of maximum
 		// see which edge is most perpendicular
-		int l = index + 1 == count ? 0 : index + 1;
-		int r = index - 1 < 0 ? count - 1 : index - 1;
 		Vector2 leftN = this.normals[index == 0 ? count - 1 : index - 1];
 		Vector2 rightN = this.normals[index];
 		// create the maximum point for the feature (transform the maximum into world space)
@@ -398,11 +399,15 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		PointFeature vm = new PointFeature(maximum, index);
 		// is the left or right edge more perpendicular?
 		if (leftN.dot(localn) < rightN.dot(localn)) {
+			int l = index + 1 == count ? 0 : index + 1;
+			
 			Vector2 left = transform.getTransformed(this.vertices[l]);
 			PointFeature vl = new PointFeature(left, l);
 			// make sure the edge is the right winding
 			return new EdgeFeature(vm, vl, vm, maximum.to(left), index + 1);
 		} else {
+			int r = index - 1 < 0 ? count - 1 : index - 1;
+			
 			Vector2 right = transform.getTransformed(this.vertices[r]);
 			PointFeature vr = new PointFeature(right, r);
 			// make sure the edge is the right winding
@@ -417,9 +422,9 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 	public Vector2 getFarthestPoint(Vector2 vector, Transform transform) {
 		// transform the normal into local space
 		Vector2 localn = transform.getInverseTransformedR(vector);
-		Vector2 point = new Vector2();
+		
 		// set the farthest point to the first one
-		point.set(this.vertices[0]);
+		int index = 0;
 		// prime the projection amount
 		double max = localn.dot(this.vertices[0]);
 		// loop through the rest of the vertices to find a further point along the axis
@@ -432,14 +437,14 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 			// check to see if the projection is greater than the last
 			if (projection > max) {
 				// otherwise this point is the farthest so far so clear the array and add it
-				point.set(v);
+				index = i;
 				// set the new maximum
 				max = projection;
 			}
 		}
-		// transform the point into world space
-		transform.transform(point);
-		return point;
+		
+		// transform the point into world space and return
+		return transform.getTransformed(this.vertices[index]);
 	}
 	
 	/**
@@ -519,6 +524,7 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		// (center is the vector from the average center to the area weighted center since
 		// the average center is used as the origin)
 		I -= m * center.getMagnitudeSquared();
+		
 		return new Mass(c, m, I);
 	}
 	
@@ -527,23 +533,21 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 	 */
 	@Override
 	public AABB createAABB(Transform transform) {
-		double vx = 0.0;
-		double vy = 0.0;
-    	// get the first point
+		// get the first point
 		Vector2 p = transform.getTransformed(this.vertices[0]);
 		// project the point onto the vector
-    	double minX = Vector2.X_AXIS.dot(p);
-    	double maxX = minX;
-    	double minY = Vector2.Y_AXIS.dot(p);
-    	double maxY = minY;
+    	double minX = p.x;
+    	double maxX = p.x;
+    	double minY = p.y;
+    	double maxY = p.y;
     	// loop over the rest of the vertices
     	int size = this.vertices.length;
         for(int i = 1; i < size; i++) {
     		// get the next point
     		p = transform.getTransformed(this.vertices[i]);
     		// project it onto the vector
-            vx = Vector2.X_AXIS.dot(p);
-            vy = Vector2.Y_AXIS.dot(p);
+            double vx = p.x;
+            double vy = p.y;
             // compare the x values
             if (vx < minX) {
             	minX = vx;

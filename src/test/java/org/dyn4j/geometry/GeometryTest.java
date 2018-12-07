@@ -1622,9 +1622,9 @@ public class GeometryTest {
 		TestCase.assertEquals(1.000, s1.radius, 1.0e-3);
 		TestCase.assertEquals(2.000, s2.length, 1.0e-3);
 		TestCase.assertEquals(1.000, s2.capRadius * 2.0, 1.0e-3);
-		TestCase.assertEquals(2.000, s3.width, 1.0e-3);
-		TestCase.assertEquals(1.000, s3.height, 1.0e-3);
-		TestCase.assertEquals(2.000, s4.width, 1.0e-3);
+		TestCase.assertEquals(2.000, s3.getWidth(), 1.0e-3);
+		TestCase.assertEquals(1.000, s3.getHeight(), 1.0e-3);
+		TestCase.assertEquals(2.000, s4.getWidth(), 1.0e-3);
 		TestCase.assertEquals(0.500, s4.height, 1.0e-3);
 		TestCase.assertEquals(1.000, s5.sliceRadius, 1.0e-3);
 		TestCase.assertEquals(1.000, s6.radius, 1.0e-3);
@@ -1641,9 +1641,9 @@ public class GeometryTest {
 		TestCase.assertEquals(0.250, s1.radius, 1.0e-3);
 		TestCase.assertEquals(0.500, s2.length, 1.0e-3);
 		TestCase.assertEquals(0.250, s2.capRadius * 2.0, 1.0e-3);
-		TestCase.assertEquals(0.500, s3.width, 1.0e-3);
-		TestCase.assertEquals(0.250, s3.height, 1.0e-3);
-		TestCase.assertEquals(0.500, s4.width, 1.0e-3);
+		TestCase.assertEquals(0.500, s3.getWidth(), 1.0e-3);
+		TestCase.assertEquals(0.250, s3.getHeight(), 1.0e-3);
+		TestCase.assertEquals(0.500, s4.getWidth(), 1.0e-3);
 		TestCase.assertEquals(0.125, s4.height, 1.0e-3);
 		TestCase.assertEquals(0.250, s5.sliceRadius, 1.0e-3);
 		TestCase.assertEquals(0.250, s6.radius, 1.0e-3);

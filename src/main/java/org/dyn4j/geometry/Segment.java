@@ -702,16 +702,18 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 		return Segment.getFarthestFeature(this.vertices[0], this.vertices[1], vector, transform);
 	}
 	
+
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.AbstractShape#rotate(double, double, double)
+	 * @see org.dyn4j.geometry.AbstractShape#rotate(double, double, double, double, double)
 	 */
 	@Override
-	public void rotate(double theta, double x, double y) {
-		super.rotate(theta, x, y);
-		this.vertices[0].rotate(theta, x, y);
-		this.vertices[1].rotate(theta, x, y);
-		this.normals[0].rotate(theta);
-		this.normals[1].rotate(theta);
+	protected void rotate(double theta, double cos, double sin, double x, double y) {
+		super.rotate(theta, cos, sin, x, y);
+		
+		this.vertices[0].rotate(cos, sin, x, y);
+		this.vertices[1].rotate(cos, sin, x, y);
+		this.normals[0].rotate(cos, sin);
+		this.normals[1].rotate(cos, sin);
 	}
 
 	/* (non-Javadoc)

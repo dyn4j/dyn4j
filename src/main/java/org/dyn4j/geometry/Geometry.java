@@ -922,6 +922,8 @@ public final class Geometry {
 		if (count < 3) throw new IllegalArgumentException(Messages.getString("geometry.circleInvalidCount"));
 		if (radius <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.circleInvalidRadius"));
 		
+		if (count > 10) return new RegularPolygon(count, radius);
+		
 		// compute the angular increment
 		final double pin = Geometry.TWO_PI / count;
 		// make sure the resulting output is an even number of vertices

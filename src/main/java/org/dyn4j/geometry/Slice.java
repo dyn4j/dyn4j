@@ -38,10 +38,8 @@ import org.dyn4j.resources.Messages;
  * @since 3.1.5
  */
 public class Slice extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
-	/** The total circular section in radians */
-	final double theta;
 	
-	/** Half of theta */
+	/** Half the total circular section in radians */
 	final double alpha;
 	
 	/** The radius passed in at creation */
@@ -53,8 +51,8 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	/** The normals of the polygonal sides */
 	final Vector2[] normals;
 	
-	/** The local x axis to track local rotation */
-	final Vector2 localXAxis;
+	/** The local rotation in radians */
+	double rotation;
 	
 	/**
 	 * Validated constructor.
@@ -70,7 +68,6 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 		super(center, Math.max(center.x, center.distance(new Vector2(radius, 0).rotate(0.5*theta))));
 		
 		this.sliceRadius = radius;
-		this.theta = theta;
 		this.alpha = theta * 0.5;
 		
 		// compute the triangular section of the pie
@@ -90,8 +87,9 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 		v1.left().normalize();
 		v2.left().normalize();
 		this.normals = new Vector2[] { v1, v2 };
-
-		this.localXAxis = new Vector2(1.0, 0.0);
+		
+		// initial rotation 0 means the slice is aligned to the world space x axis
+		this.rotation = 0;
 	}
 	
 	/**
@@ -131,7 +129,7 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 		StringBuilder sb = new StringBuilder();
 		sb.append("Slice[").append(super.toString())
 		.append("|Radius=").append(this.sliceRadius)
-		.append("|Theta=").append(this.theta)
+		.append("|Theta=").append(this.getTheta())
 		.append("]");
 		return sb.toString();
 	}
@@ -210,11 +208,10 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 		Vector2 localn = transform.getInverseTransformedR(vector);
 		
 		// project the origin and two end points first
-		if (Math.abs(localn.getAngleBetween(this.localXAxis)) > this.alpha) {
+		if (Math.abs(localn.getAngleBetween(this.rotation)) > this.alpha) {
 			// NOTE: taken from Polygon.getFarthestPoint
-			Vector2 point = new Vector2();
 			// set the farthest point to the first one
-			point.set(this.vertices[0]);
+			int index = 0;
 			// prime the projection amount
 			double max = localn.dot(this.vertices[0]);
 			// loop through the rest of the vertices to find a further point along the axis
@@ -227,11 +224,13 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 				// check to see if the projection is greater than the last
 				if (projection > max) {
 					// otherwise this point is the farthest so far so clear the array and add it
-					point.set(v);
+					index = i;
 					// set the new maximum
 					max = projection;
 				}
 			}
+			
+			Vector2 point = new Vector2(this.vertices[index]);
 			// transform the point into world space
 			transform.transform(point);
 			return point;
@@ -250,13 +249,13 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	@Override
 	public Feature getFarthestFeature(Vector2 vector, Transform transform) {
 		Vector2 localAxis = transform.getInverseTransformedR(vector);
-		if (Math.abs(localAxis.getAngleBetween(this.localXAxis)) <= this.alpha) {
+		if (Math.abs(localAxis.getAngleBetween(this.rotation)) <= this.alpha) {
 			// then its the farthest point
 			Vector2 point = this.getFarthestPoint(vector, transform);
 			return new PointFeature(point);
 		} else {
 			// check if this section is nearly a half circle
-			if ((Math.PI - this.theta) <= 1.0e-6) {
+			if ((Math.PI - this.getTheta()) <= 1.0e-6) {
 				// if so, we want to return the full back side
 				return Segment.getFarthestFeature(this.vertices[1], this.vertices[2], vector, transform);
 			}
@@ -293,7 +292,7 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 		// get the interval along the axis
 		return new Interval(d2, d1);
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Shape#createAABB(org.dyn4j.geometry.Transform)
 	 */
@@ -365,23 +364,25 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 		return false;
 	}
 	
+
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.AbstractShape#rotate(double, double, double)
+	 * @see org.dyn4j.geometry.AbstractShape#rotate(double, double, double, double, double)
 	 */
 	@Override
-	public void rotate(double theta, double x, double y) {
+	protected void rotate(double theta, double cos, double sin, double x, double y) {
 		// rotate the centroid
-		super.rotate(theta, x, y);
+		super.rotate(theta, cos, sin, x, y);
+		
 		// rotate the pie vertices
 		for (int i = 0; i < this.vertices.length; i++) {
-			this.vertices[i].rotate(theta, x, y);
+			this.vertices[i].rotate(cos, sin, x, y);
 		}
 		// rotate the pie normals
 		for (int i = 0; i < this.normals.length; i++) {
-			this.normals[i].rotate(theta);
+			this.normals[i].rotate(cos, sin);
 		}
 		// rotate the local x axis
-		this.localXAxis.rotate(theta);
+		this.rotation += theta;
 	}
 	
 	/* (non-Javadoc)
@@ -396,13 +397,13 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 			this.vertices[i].add(x, y);
 		}
 	}
-
+	
 	/**
 	 * Returns the rotation about the local center in radians.
 	 * @return double the rotation in radians
 	 */
 	public double getRotation() {
-		return Vector2.X_AXIS.getAngleBetween(this.localXAxis);
+		return this.rotation;
 	}
 	
 	/**
@@ -410,7 +411,7 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	 * @return double
 	 */
 	public double getTheta() {
-		return this.theta;
+		return this.alpha * 2;
 	}
 
 	/**

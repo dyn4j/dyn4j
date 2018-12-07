@@ -347,16 +347,17 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 	}
 
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.AbstractShape#rotate(double, double, double)
+	 * @see org.dyn4j.geometry.AbstractShape#rotate(double, double, double, double, double)
 	 */
 	@Override
-	public void rotate(double theta, double x, double y) {
-		super.rotate(theta, x, y);
+	protected void rotate(double theta, double cos, double sin, double x, double y) {
+		super.rotate(theta, cos, sin, x, y);
+		
 		// rotate the foci
-		this.foci[0].rotate(theta, x, y);
-		this.foci[1].rotate(theta, x, y);
+		this.foci[0].rotate(cos, sin, x, y);
+		this.foci[1].rotate(cos, sin, x, y);
 		// rotate the local x-axis
-		this.localXAxis.rotate(theta);
+		this.localXAxis.rotate(cos, sin);
 	}
 	
 	/* (non-Javadoc)
@@ -375,7 +376,7 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 	 * @return double the rotation in radians
 	 */
 	public double getRotation() {
-		return Vector2.X_AXIS.getAngleBetween(this.localXAxis);
+		return Math.atan2(this.localXAxis.y, this.localXAxis.x);
 	}
 	
 	/**

@@ -50,24 +50,24 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	 */
 	private static final double INERTIA_CONSTANT = Math.PI / 8.0 - 8.0 / (9.0 * Math.PI);
 	
-	/** The ellipse width */
-	final double width;
-	
 	/** The ellipse height */
 	final double height;
 	
 	/** The half-width */
 	final double halfWidth;
 	
-	/** A local vector to  */
-	public final Vector2 localXAxis;
-
+	/** The local rotation in radians */
+	double rotation;
+	
 	/** The ellipse center */
 	final Vector2 ellipseCenter;
 	
-	/** The vertices of the bottom */
-	final Vector2[] vertices;
-
+	/** The first vertex of the bottom */
+	final Vector2 vertexLeft;
+	
+	/** The second vertex of the bottom */
+	final Vector2 vertexRight;
+	
 	/**
 	 * Validated constructor.
 	 * <p>
@@ -76,13 +76,13 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	 * @param valid always true or this constructor would not be called
 	 * @param width the width
 	 * @param center the center
-	 * @param vertices the vertices
+	 * @param vertexLeft the first vertex
+	 * @param vertexRight the second vertex
 	 */
-	private HalfEllipse(boolean valid, double width, double height, Vector2 center, Vector2[] vertices) {
-		super(center, center.distance(vertices[1]));
+	private HalfEllipse(boolean valid, double width, double height, Vector2 center, Vector2 vertexLeft, Vector2 vertexRight) {
+		super(center, center.distance(vertexRight));
 		
-		// set width and height
-		this.width = width;
+		// set height. width can be computed as halfWidth * 2 when needed
 		this.height = height;
 		
 		// compute the major and minor axis lengths
@@ -92,12 +92,12 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		// set the ellipse center
 		this.ellipseCenter = new Vector2();
 		
-		// since we create ellipses as axis aligned we set the local x axis
-		// to the world space x axis
-		this.localXAxis = new Vector2(1.0, 0.0);
+		// initial rotation 0 means the half ellipse is aligned to the world space x axis
+		this.rotation = 0;
 		
 		// setup the vertices
-		this.vertices = vertices;
+		this.vertexLeft = vertexLeft;
+		this.vertexRight = vertexRight;
 	}
 	
 	/**
@@ -115,12 +115,11 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 			width, 
 			height, 
 			new Vector2(0, (4.0 * height) / (3.0 * Math.PI)), 
-			new Vector2[] {
-				// the left point
-				new Vector2(-width * 0.5, 0),
-				// the right point
-				new Vector2( width * 0.5, 0)
-			 });
+			// the left point
+			new Vector2(-width * 0.5, 0),
+			// the right point
+			new Vector2( width * 0.5, 0)
+			);
 	}
 	
 	/**
@@ -145,8 +144,8 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("HalfEllipse[").append(super.toString())
-		.append("|Width=").append(this.width)
-		.append("|Height=").append(this.height)
+		.append("|Width=").append(this.getWidth())
+		.append("|Height=").append(this.getHeight())
 		.append("]");
 		return sb.toString();
 	}
@@ -182,10 +181,14 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	public Vector2 getFarthestPoint(Vector2 vector, Transform transform) {
 		// convert the world space vector(n) to local space
 		Vector2 localAxis = transform.getInverseTransformedR(vector);
+
 		// include local rotation
-		double r = this.getRotation();
+		double cos = Math.cos(this.rotation);
+		double sin = Math.sin(this.rotation);
+		
 		// invert the local rotation
-		localAxis.rotate(-r);
+		// cos(-x) = cos(x), sin(-x) = -sin(x)
+		localAxis.rotate(cos, -sin);
 		// an ellipse is a circle with a non-uniform scaling transformation applied
 		// so we can achieve that by scaling the input axis by the major and minor
 		// axis lengths
@@ -196,9 +199,9 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		
 		Vector2 p = null;
 		if (localAxis.y <= 0 && localAxis.x >= 0) {
-			return transform.getTransformed(this.vertices[1]);
+			return transform.getTransformed(this.vertexRight);
 		} else if (localAxis.y <= 0 && localAxis.x <= 0) {
-			return transform.getTransformed(this.vertices[0]);
+			return transform.getTransformed(this.vertexLeft);
 		} else {
 			// add the radius along the vector to the center to get the farthest point
 			p = new Vector2(localAxis.x * this.halfWidth, localAxis.y  * this.height);
@@ -206,7 +209,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		
 		// include local rotation
 		// invert the local rotation
-		p.rotate(r);
+		p.rotate(cos, sin);
 		p.add(this.ellipseCenter);
 		// then finally convert back into world space coordinates
 		transform.transform(p);
@@ -219,13 +222,14 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	@Override
 	public Feature getFarthestFeature(Vector2 vector, Transform transform) {
 		Vector2 localAxis = transform.getInverseTransformedR(vector);
-		if (localAxis.getAngleBetween(this.localXAxis) < 0) {
+		
+		if (localAxis.getAngleBetween(rotation) < 0) {
 			// then its the farthest point
 			Vector2 point = this.getFarthestPoint(vector, transform);
 			return new PointFeature(point);
 		} else {
 			// return the full bottom side
-			return Segment.getFarthestFeature(this.vertices[0], this.vertices[1], vector, transform);
+			return Segment.getFarthestFeature(this.vertexLeft, this.vertexRight, vector, transform);
 		}
 	}
 	
@@ -282,8 +286,14 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		// in the half ellipse case, if the point is on the side of the flat edge
 		// then we do the ellipse code, else we can just return the farthest of the
 		// two points that make up the flat side
-		if (Segment.getLocation(center, this.vertices[0], this.vertices[1]) > 0) {
-			return Geometry.getRotationRadius(center, vertices);
+		if (Segment.getLocation(center, this.vertexLeft, this.vertexRight) > 0) {
+			// find the maximum radius from the center
+			double leftR = center.distanceSquared(this.vertexLeft);
+			double rightR = center.distanceSquared(this.vertexRight);
+			// keep the largest
+			double r2 = Math.max(leftR, rightR);
+			
+			return Math.sqrt(r2);
 		} else {		
 			// we need to translate/rotate the point so that this ellipse is
 			// considered centered at the origin with it's semi-major axis aligned
@@ -337,19 +347,18 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.AbstractShape#rotate(double, double, double)
+	 * @see org.dyn4j.geometry.AbstractShape#rotate(double, double, double, double, double)
 	 */
 	@Override
-	public void rotate(double theta, double x, double y) {
-		super.rotate(theta, x, y);
+	protected void rotate(double theta, double cos, double sin, double x, double y) {
+		super.rotate(theta, cos, sin, x, y);
+		
 		// rotate the local axis as well
-		this.localXAxis.rotate(theta);
-		// rotate the vertices
-		for (int i = 0; i < this.vertices.length; i++) {
-			this.vertices[i].rotate(theta, x, y);
-		}
-		// rotate the ellipse center
-		this.ellipseCenter.rotate(theta, x, y);
+		this.rotation += theta;
+		
+		this.vertexLeft.rotate(cos, sin, x, y);
+		this.vertexRight.rotate(cos, sin, x, y);
+		this.ellipseCenter.rotate(cos, sin, x, y);
 	}
 
 	/* (non-Javadoc)
@@ -360,9 +369,8 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		// translate the centroid
 		super.translate(x, y);
 		// translate the pie vertices
-		for (int i = 0; i < this.vertices.length; i++) {
-			this.vertices[i].add(x, y);
-		}
+		this.vertexLeft.add(x, y);
+		this.vertexRight.add(x, y);
 		// translate the ellipse center
 		this.ellipseCenter.add(x, y);
 	}
@@ -372,7 +380,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	 * @return double the rotation in radians
 	 */
 	public double getRotation() {
-		return Vector2.X_AXIS.getAngleBetween(this.localXAxis);
+		return this.rotation;
 	}
 	
 	/**
@@ -380,7 +388,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	 * @return double
 	 */
 	public double getWidth() {
-		return this.width;
+		return this.halfWidth * 2;
 	}
 	
 	/**

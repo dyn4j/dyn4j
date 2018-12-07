@@ -53,20 +53,14 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	/** The desired accuracy for the farthest point */
 	private static final double FARTHEST_POINT_EPSILON = 1.0e-8;
 	
-	/** The ellipse width */
-	final double width;
-	
-	/** The ellipse height */
-	final double height;
-	
 	/** The half-width */
 	final double halfWidth;
 	
 	/** The half-height */
 	final double halfHeight;
 	
-	/** A local vector to  */
-	final Vector2 localXAxis;
+	/** The local rotation in radians */
+	double rotation;
 	
 	/**
 	 * Validated constructor.
@@ -80,17 +74,13 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	private Ellipse(boolean valid, double width, double height) {
 		super(Math.max(width, height) * 0.5);
 		
-		this.width = width;
-		this.height = height;
-		
 		// compute the major and minor axis lengths
 		// (the x,y radii)
 		this.halfWidth = width * 0.5;
 		this.halfHeight = height * 0.5;
 		
-		// since we create ellipses as axis aligned we set the local x axis
-		// to the world space x axis
-		this.localXAxis = new Vector2(1.0, 0.0);
+		// initial rotation 0 means the ellipse is aligned to the world space x axis
+		this.rotation = 0;
 	}
 	
 	/**
@@ -128,8 +118,8 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Ellipse[").append(super.toString())
-		.append("|Width=").append(this.width)
-		.append("|Height=").append(this.height)
+		.append("|Width=").append(this.getWidth())
+		.append("|Height=").append(this.getHeight())
 		.append("]");
 		return sb.toString();
 	}
@@ -165,10 +155,14 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	public Vector2 getFarthestPoint(Vector2 vector, Transform transform) {
 		// convert the world space vector(n) to local space
 		Vector2 localAxis = transform.getInverseTransformedR(vector);
+		
 		// include local rotation
-		double r = this.getRotation();
+		double cos = Math.cos(this.rotation);
+		double sin = Math.sin(this.rotation);
+		
 		// invert the local rotation
-		localAxis.rotate(-r);
+		// cos(-x) = cos(x), sin(-x) = -sin(x)
+		localAxis.rotate(cos, -sin);
 		// an ellipse is a circle with a non-uniform scaling transformation applied
 		// so we can achieve that by scaling the input axis by the major and minor
 		// axis lengths
@@ -180,7 +174,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		Vector2 p = new Vector2(localAxis.x * this.halfWidth, localAxis.y  * this.halfHeight);
 		// include local rotation
 		// invert the local rotation
-		p.rotate(r);
+		p.rotate(cos, sin);
 		p.add(this.center);
 		// then finally convert back into world space coordinates
 		transform.transform(p);
@@ -220,10 +214,23 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 */
 	@Override
 	public AABB createAABB(Transform transform) {
-		Interval x = this.project(Vector2.X_AXIS, transform);
-		Interval y = this.project(Vector2.Y_AXIS, transform);
+		// because the vectors are the x and y axis we can perform various meaningful optimizations
 		
-		return new AABB(x.getMin(), y.getMin(), x.getMax(), y.getMax());
+		// inlined projection of x axis
+		// Interval x = this.project(Vector2.X_AXIS, transform);
+		Vector2 p1 = this.getFarthestPoint(Vector2.X_AXIS, transform);
+		double c = transform.getTransformedX(this.center);
+		double minx = 2 * c - p1.x;
+		double maxx = p1.x;
+		
+		// inlined projection of y axis
+		// Interval y = this.project(Vector2.Y_AXIS, transform);
+		p1 = this.getFarthestPoint(Vector2.Y_AXIS, transform);
+		c = transform.getTransformedY(this.center);
+		double miny = 2 * c - p1.y;
+		double maxy = p1.y;
+		
+		return new AABB(minx, miny, maxx, maxy);
 	}
 	
 	/* (non-Javadoc)
@@ -253,7 +260,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		// we need to translate/rotate the point so that this ellipse is
 		// considered centered at the origin with it's semi-major axis aligned
 		// with the x-axis and its semi-minor axis aligned with the y-axis
-		Vector2 p = center.difference(this.center).rotate(-this.getRotation());
+		Vector2 p = center.difference(this.center).rotate(-this.rotation);
 		
 		// get the farthest point.
 		Vector2 fp = Ellipse.getFarthestPoint(this.halfWidth, this.halfHeight, p);
@@ -437,8 +444,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		// get the world space point into local coordinates
 		Vector2 localPoint = transform.getInverseTransformed(point);
 		// account for local rotation
-		double r = this.getRotation();
-		localPoint.rotate(-r, this.center.x, this.center.y);
+		localPoint.rotate(-this.rotation, this.center.x, this.center.y);
 		
 		double x = (localPoint.x - this.center.x);
 		double y = (localPoint.y - this.center.y);
@@ -461,7 +467,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	public void rotate(double theta, double x, double y) {
 		super.rotate(theta, x, y);
 		// rotate the local axis as well
-		this.localXAxis.rotate(theta);
+		this.rotation += theta;
 	}
 	
 	/**
@@ -469,7 +475,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 * @return double the rotation in radians
 	 */
 	public double getRotation() {
-		return Vector2.X_AXIS.getAngleBetween(this.localXAxis);
+		return this.rotation;
 	}
 	
 	/**
@@ -477,7 +483,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 * @return double
 	 */
 	public double getWidth() {
-		return this.width;
+		return this.halfWidth * 2;
 	}
 	
 	/**
@@ -485,7 +491,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 * @return double
 	 */
 	public double getHeight() {
-		return this.height;
+		return this.halfHeight * 2;
 	}
 	
 	/**
