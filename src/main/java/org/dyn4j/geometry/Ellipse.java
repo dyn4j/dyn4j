@@ -214,23 +214,17 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 */
 	@Override
 	public AABB createAABB(Transform transform) {
-		/*
-		Below is an inlined optimized version of this:
+		// because the vectors are the x and y axis we can perform various meaningful optimizations
 		
-		Interval x = this.project(Vector2.X_AXIS, transform);
-		Interval y = this.project(Vector2.Y_AXIS, transform);
-		return new AABB(x.getMin(), y.getMin(), x.getMax(), y.getMax());
-		
-		Because the vectors are the x and y axis we can perform various meaningful optimizations
-		*/
-		
-		//inlined projection of x axis
+		// inlined projection of x axis
+		// Interval x = this.project(Vector2.X_AXIS, transform);
 		Vector2 p1 = this.getFarthestPoint(Vector2.X_AXIS, transform);
 		double c = transform.getTransformedX(this.center);
 		double minx = 2 * c - p1.x;
 		double maxx = p1.x;
 		
-		//inlined projection of y axis
+		// inlined projection of y axis
+		// Interval y = this.project(Vector2.Y_AXIS, transform);
 		p1 = this.getFarthestPoint(Vector2.Y_AXIS, transform);
 		c = transform.getTransformedY(this.center);
 		double miny = 2 * c - p1.y;
@@ -481,7 +475,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 * @return double the rotation in radians
 	 */
 	public double getRotation() {
-		return rotation;
+		return this.rotation;
 	}
 	
 	/**

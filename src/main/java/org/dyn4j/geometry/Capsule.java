@@ -350,7 +350,7 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 	 * @see org.dyn4j.geometry.AbstractShape#rotate(double, double, double, double, double)
 	 */
 	@Override
-	public void rotate(double theta, double cos, double sin, double x, double y) {
+	protected void rotate(double theta, double cos, double sin, double x, double y) {
 		super.rotate(theta, cos, sin, x, y);
 		
 		// rotate the foci

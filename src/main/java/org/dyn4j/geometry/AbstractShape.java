@@ -161,12 +161,12 @@ public abstract class AbstractShape implements Shape, Transformable, DataContain
 	}
 	
 	/**
-	 * This method should be overriden from shapes to facilitate the
+	 * This method should be overridden from shapes to facilitate the
 	 * calculated cosine and sine values.
 	 * Rotates the shape about the given coordinates.
 	 * @param theta the angle in radians
 	 * @param cos the cosine of the rotation angle in radians
-	 * @param sin the cosine of the rotation angle in radians
+	 * @param sin the sine of the rotation angle in radians
 	 * @param x the x coordinate to rotate about
 	 * @param y the y coordinate to rotate about
 	 */
