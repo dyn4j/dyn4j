@@ -138,17 +138,11 @@ public class Transform implements Transformable {
 		}
 	};
 	
-	/** The first row, first column entry */
-	protected double m00 = 1.0;
+	/** the cosine of the rotation angle */
+	protected double cost = 1.0;
 	
-	/** The first row, second column entry */
-	protected double m01 = 0.0;
-	
-	/** The second row, first column entry */
-	protected double m10 = 0.0;
-	
-	/** The second row, second column entry */
-	protected double m11 = 1.0;
+	/** the sine of the rotation angle */
+	protected double sint = 0.0;
 	
 	/** The x translation */
 	protected double x = 0.0;
@@ -156,14 +150,45 @@ public class Transform implements Transformable {
 	/** The y translation */
 	protected double y = 0.0;
 
+	/**
+	 * Default public constructor
+	 */
+	public Transform() {
+		
+	}
+	
+	/**
+	 * Public copy constructor constructor
+	 */
+	public Transform(Transform transform) {
+		this.cost = transform.cost;
+		this.sint = transform.sint;
+		this.x = transform.x;
+		this.y = transform.y;
+	}
+	
+	/**
+	 * Private constructor for some copy and internal operations
+	 * @param cost the cosine
+	 * @param sint the negative sine
+	 * @param x the x translation
+	 * @param y the y translation
+	 */
+	private Transform(double cost, double sint, double x, double y) {
+		this.cost = cost;
+		this.sint = sint;
+		this.x = x;
+		this.y = y;
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("[").append(this.m00).append(" ").append(this.m01).append(" | ").append(this.x).append("]")
-		  .append("[").append(this.m10).append(" ").append(this.m11).append(" | ").append(this.y).append("]");
+		sb.append("[").append(this.cost).append(" ").append(-this.sint).append(" | ").append(this.x).append("]")
+		  .append("[").append(this.sint).append(" ").append(this.cost).append(" | ").append(this.y).append("]");
 		return sb.toString();
 	}
 	
@@ -175,18 +200,16 @@ public class Transform implements Transformable {
 		// pre-compute cos/sin of the given angle
 		double cos = Math.cos(theta);
 		double sin = Math.sin(theta);
+		
 		// perform an optimized version of matrix multiplication
-		double m00 = cos * this.m00 - sin * this.m10;
-		double m01 = cos * this.m01 - sin * this.m11;
-		double m10 = sin * this.m00 + cos * this.m10;
-		double m11 = sin * this.m01 + cos * this.m11;
+		double cost = cos * this.cost - sin * this.sint;
+		double sint = sin * this.cost + cos * this.sint;
 		double x   = cos * this.x - sin * this.y;
 		double y   = sin * this.x + cos * this.y;
+		
 		// set the new values
-		this.m00 = m00;
-		this.m01 = m01;
-		this.m10 = m10;
-		this.m11 = m11;
+		this.cost = cost;
+		this.sint = sint;
 		this.x   = x;
 		this.y   = y;
 	}
@@ -196,30 +219,21 @@ public class Transform implements Transformable {
 	 */
 	@Override
 	public void rotate(double theta, double x, double y) {
-		// save the current transform value
-		double cm00 = this.m00;
-		double cm01 = this.m01;
-		double cx = this.x;
-		double cm10 = this.m10;
-		double cm11 = this.m11;
-		double cy = this.y;
-		
 		// pre-compute cos/sin of the given angle
 		double cos = Math.cos(theta);
 		double sin = Math.sin(theta);
-		// pre-compute rx and ry
-		double rx = x - cos * x + sin * y;
-		double ry = y - sin * x - cos * y;
 		
 		// perform an optimized version of the matrix multiplication:
 		// M(new) = inverse(T) * R * T * M(old)
-		this.m00 = cos * cm00 - sin * cm10;
-		this.m01 = cos * cm01 - sin * cm11;
-		this.x   = cos * cx - sin * cy + rx;
+		double cost = cos * this.cost - sin * this.sint;
+		double sint = sin * this.cost + cos * this.sint;
+		this.cost = cost;
+		this.sint = sint;
 		
-		this.m10 = sin * cm00 + cos * cm10;
-		this.m11 = sin * cm01 + cos * cm11;
-		this.y   = sin * cx + cos * cy + ry;
+		double cx = this.x - x;
+		double cy = this.y - y;
+		this.x = cos * cx - sin * cy + x;
+		this.y = sin * cx + cos * cy + y;
 	}
 	
 	/* (non-Javadoc)
@@ -253,10 +267,7 @@ public class Transform implements Transformable {
 	 * @return {@link Transform}
 	 */
 	public Transform copy() {
-		Transform t = new Transform();
-		t.m00 = this.m00; t.m01 = this.m01; t.x = this.x;
-		t.m10 = this.m10; t.m11 = this.m11; t.y = this.y;
-		return t;
+		return new Transform(this);
 	}
 	
 	/**
@@ -265,10 +276,8 @@ public class Transform implements Transformable {
 	 * @since 1.1.0
 	 */
 	public void set(Transform transform) {
-		this.m00 = transform.m00;
-		this.m01 = transform.m01;
-		this.m10 = transform.m10;
-		this.m11 = transform.m11;
+		this.cost = transform.cost;
+		this.sint = transform.sint;
 		this.x = transform.x;
 		this.y = transform.y;
 	}
@@ -277,8 +286,10 @@ public class Transform implements Transformable {
 	 * Sets this {@link Transform} to the identity.
 	 */
 	public void identity() {
-		this.m00 = 1; this.m01 = 0; this.x = 0; 
-		this.m10 = 0; this.m11 = 1; this.y = 0;
+		this.cost = 1;
+		this.sint = 0;
+		this.x = 0;
+		this.y = 0;
 	}
 	
 	/**
@@ -287,7 +298,7 @@ public class Transform implements Transformable {
 	 * @return the transformed x coordinate
 	 */
 	public double getTransformedX(Vector2 vector) {
-		return this.m00 * vector.x + this.m01 * vector.y + this.x;
+		return this.cost * vector.x - this.sint * vector.y + this.x;
 	}
 	
 	/**
@@ -296,7 +307,7 @@ public class Transform implements Transformable {
 	 * @return the transformed y coordinate
 	 */
 	public double getTransformedY(Vector2 vector) {
-		return this.m10 * vector.x + this.m11 * vector.y + this.y;
+		return this.sint * vector.x + this.cost * vector.y + this.y;
 	}
 	
 	/**
@@ -304,7 +315,7 @@ public class Transform implements Transformable {
 	 * @param vector the {@link Vector2} to transform
 	 */
 	public void transformX(Vector2 vector) {
-		vector.x = this.m00 * vector.x + this.m01 * vector.y + this.x;
+		vector.x = this.cost * vector.x - this.sint * vector.y + this.x;
 	}
 	
 	/**
@@ -312,7 +323,7 @@ public class Transform implements Transformable {
 	 * @param vector the {@link Vector2} to transform
 	 */
 	public void transformY(Vector2 vector) {
-		vector.y = this.m10 * vector.x + this.m11 * vector.y + this.y;
+		vector.y = this.sint * vector.x + this.cost * vector.y + this.y;
 	}
 	
 	/**
@@ -324,8 +335,9 @@ public class Transform implements Transformable {
 		Vector2 tv = new Vector2();
 		double x = vector.x;
 		double y = vector.y;
-		tv.x = this.m00 * x + this.m01 * y + this.x;
-		tv.y = this.m10 * x + this.m11 * y + this.y;
+		
+		tv.x = this.cost * x - this.sint * y + this.x;
+		tv.y = this.sint * x + this.cost * y + this.y;
 		return tv;
 	}
 	
@@ -337,8 +349,8 @@ public class Transform implements Transformable {
 	public void getTransformed(Vector2 vector, Vector2 destination) {
 		double x = vector.x;
 		double y = vector.y;
-		destination.x = this.m00 * x + this.m01 * y + this.x;
-		destination.y = this.m10 * x + this.m11 * y + this.y;
+		destination.x = this.cost * x - this.sint * y + this.x;
+		destination.y = this.sint * x + this.cost * y + this.y;
 	}
 	
 	/**
@@ -348,8 +360,8 @@ public class Transform implements Transformable {
 	public void transform(Vector2 vector) {
 		double x = vector.x;
 		double y = vector.y;
-		vector.x = this.m00 * x + this.m01 * y + this.x;
-		vector.y = this.m10 * x + this.m11 * y + this.y;
+		vector.x = this.cost * x - this.sint * y + this.x;
+		vector.y = this.sint * x + this.cost * y + this.y;
 	}
 
 	/**
@@ -361,8 +373,8 @@ public class Transform implements Transformable {
 		Vector2 tv = new Vector2();
 		double tx = vector.x - this.x;
 		double ty = vector.y - this.y;
-		tv.x = this.m00 * tx + this.m10 * ty;
-		tv.y = this.m01 * tx + this.m11 * ty;
+		tv.x = this.cost * tx + this.sint * ty;
+		tv.y = -this.sint * tx + this.cost * ty;
 		return tv;
 	}
 	
@@ -374,8 +386,8 @@ public class Transform implements Transformable {
 	public void getInverseTransformed(Vector2 vector, Vector2 destination) {
 		double tx = vector.x - this.x;
 		double ty = vector.y - this.y;
-		destination.x = this.m00 * tx + this.m10 * ty;
-		destination.y = this.m01 * tx + this.m11 * ty;
+		destination.x = this.cost * tx + this.sint * ty;
+		destination.y = -this.sint * tx + this.cost * ty;
 	}
 	
 	/**
@@ -385,8 +397,8 @@ public class Transform implements Transformable {
 	public void inverseTransform(Vector2 vector) {
 		double x = vector.x - this.x;
 		double y = vector.y - this.y;
-		vector.x = this.m00 * x + this.m10 * y;
-		vector.y = this.m01 * x + this.m11 * y;
+		vector.x = this.cost * x + this.sint * y;
+		vector.y = -this.sint * x + this.cost * y;
 	}
 
 	/**
@@ -399,8 +411,8 @@ public class Transform implements Transformable {
 		Vector2 v = new Vector2();
 		double x = vector.x;
 		double y = vector.y;
-		v.x = this.m00 * x + this.m01 * y;
-		v.y = this.m10 * x + this.m11 * y;
+		v.x = this.cost * x - this.sint * y;
+		v.y = this.sint * x + this.cost * y;
 		return v;
 	}
 	
@@ -414,8 +426,8 @@ public class Transform implements Transformable {
 	public void getTransformedR(Vector2 vector, Vector2 destination) {
 		double x = vector.x;
 		double y = vector.y;
-		destination.x = this.m00 * x + this.m01 * y;
-		destination.y = this.m10 * x + this.m11 * y;
+		destination.x = this.cost * x - this.sint * y;
+		destination.y = this.sint * x + this.cost * y;
 	}
 
 	/**
@@ -426,8 +438,8 @@ public class Transform implements Transformable {
 	public void transformR(Vector2 vector) {
 		double x = vector.x;
 		double y = vector.y;
-		vector.x = this.m00 * x + this.m01 * y;
-		vector.y = this.m10 * x + this.m11 * y;
+		vector.x = this.cost * x - this.sint * y;
+		vector.y = this.sint * x + this.cost * y;
 	}
 	
 	/**
@@ -441,8 +453,8 @@ public class Transform implements Transformable {
 		double x = vector.x;
 		double y = vector.y;
 		// since the transpose of a rotation matrix is the inverse
-		v.x = this.m00 * x + this.m10 * y;
-		v.y = this.m01 * x + this.m11 * y;
+		v.x = this.cost * x + this.sint * y;
+		v.y = -this.sint * x + this.cost * y;
 		return v;
 	}
 	
@@ -457,8 +469,8 @@ public class Transform implements Transformable {
 		double x = vector.x;
 		double y = vector.y;
 		// since the transpose of a rotation matrix is the inverse
-		destination.x = this.m00 * x + this.m10 * y;
-		destination.y = this.m01 * x + this.m11 * y;
+		destination.x = this.cost * x + this.sint * y;
+		destination.y = -this.sint * x + this.cost * y;
 	}
 
 	/**
@@ -470,8 +482,8 @@ public class Transform implements Transformable {
 		double x = vector.x;
 		double y = vector.y;
 		// since the transpose of a rotation matrix is the inverse
-		vector.x = this.m00 * x + this.m10 * y;
-		vector.y = this.m01 * x + this.m11 * y;
+		vector.x = this.cost * x + this.sint * y;
+		vector.y = -this.sint * x + this.cost * y;
 	}
 	
 	/**
@@ -542,8 +554,7 @@ public class Transform implements Transformable {
 	 * @return {@link Transform}
 	 */
 	public Transform getTranslationTransform() {
-		Transform t = new Transform();
-		t.translate(this.x, this.y);
+		Transform t = new Transform(1.0, 0.0, this.x, this.y);
 		return t;
 	}
 	
@@ -552,7 +563,7 @@ public class Transform implements Transformable {
 	 * @return double angle in the range [-&pi;, &pi;]
 	 */
 	public double getRotation() {
-		return Math.atan2(this.m10, this.m00);
+		return Math.atan2(this.sint, this.cost);
 	}
 	
 	/**
@@ -565,10 +576,11 @@ public class Transform implements Transformable {
 	public double setRotation(double theta) {
 		// get the current rotation
 		double r = this.getRotation();
-		// get rid of the current rotation
-		this.rotate(-r, this.x, this.y);
-		// rotate the given amount
-		this.rotate(theta, this.x, this.y);
+		
+		// get rid of the current rotation and rotate by the new theta
+		this.cost = Math.cos(theta);
+		this.sint = Math.sin(theta);
+		
 		// return the previous amount
 		return r;
 	}
@@ -579,8 +591,7 @@ public class Transform implements Transformable {
 	 * @return {@link Transform}
 	 */
 	public Transform getRotationTransform() {
-		Transform t = new Transform();
-		t.rotate(this.getRotation());
+		Transform t = new Transform(this.cost, this.sint, 0, 0);
 		return t;
 	}
 	
@@ -592,8 +603,8 @@ public class Transform implements Transformable {
 	 * @since 3.0.1
 	 */
 	public double[] getValues() {
-		return new double[] {this.m00, this.m01, this.x,
-				             this.m10, this.m11, this.y};
+		return new double[] {this.cost, -this.sint, this.x,
+				             this.sint, this.cost, this.y};
 	}
 	
 	/**
@@ -609,9 +620,8 @@ public class Transform implements Transformable {
 	 */
 	public void lerp(Transform end, double alpha) {
 		// interpolate the position
-		double a1 = 1.0 - alpha;
-		double x = a1 * this.x + alpha * end.x;
-		double y = a1 * this.y + alpha * end.y;
+		double x = this.x + alpha * (end.x - this.x);
+		double y = this.y + alpha * (end.y - this.y);
 		
 		// compute the angle
 		// get the start and end rotations
@@ -636,9 +646,15 @@ public class Transform implements Transformable {
 		double a = diff * alpha + rs;
 		
 		// set this transform to the interpolated transform
-		this.identity();
-		this.rotate(a);
-		this.translate(x, y);
+		// the following performs the following calculations:
+		// this.identity();
+		// this.rotate(a);
+		// this.translate(x, y);
+		
+		this.cost = Math.cos(a);
+		this.sint = Math.sin(a);
+		this.x   = x;
+		this.y   = y;
 	}
 	
 	/**
@@ -656,9 +672,8 @@ public class Transform implements Transformable {
 	 */
 	public void lerp(Transform end, double alpha, Transform result) {
 		// interpolate the position
-		double a1 = 1.0 - alpha;
-		double x = a1 * this.x + alpha * end.x;
-		double y = a1 * this.y + alpha * end.y;
+		double x = this.x + alpha * (end.x - this.x);
+		double y = this.y + alpha * (end.y - this.y);
 		
 		// compute the angle
 		// get the start and end rotations
@@ -683,9 +698,32 @@ public class Transform implements Transformable {
 		double a = diff * alpha + rs;
 		
 		// set the result transform to the interpolated transform
-		result.identity();
-		result.rotate(a);
-		result.translate(x, y);
+		// the following performs the following calculations:
+		// result.identity();
+		// result.rotate(a);
+		// result.translate(x, y);
+		
+		result.cost = Math.cos(a);
+		result.sint = Math.sin(a);
+		result.x   = x;
+		result.y   = y;
+	}
+	
+	/**
+	 * Helper method for the lerp methods below.
+	 * Performs rotation but leaves translation intact.
+	 * 
+	 * @param theta the angle of rotation in radians
+	 */
+	private void rotateOnly(double theta) {
+		//perform rotation by theta but leave x and y intact
+		double cos = Math.cos(theta);
+		double sin = Math.sin(theta);
+		
+		double cost = cos * this.cost - sin * this.sint;
+		double sint = sin * this.cost + cos * this.sint;
+		this.cost = cost;
+		this.sint = sint;
 	}
 	
 	/**
@@ -699,8 +737,8 @@ public class Transform implements Transformable {
 	 */
 	public void lerp(Vector2 dp, double da, double alpha, Transform result) {
 		result.set(this);
+		result.rotateOnly(da * alpha);
 		result.translate(dp.x * alpha, dp.y * alpha);
-		result.rotate(da * alpha, result.getTranslationX(), result.getTranslationY());
 	}
 	
 	/**
@@ -712,8 +750,8 @@ public class Transform implements Transformable {
 	 * @since 3.1.5
 	 */
 	public void lerp(Vector2 dp, double da, double alpha) {
+		this.rotateOnly(da * alpha);
 		this.translate(dp.x * alpha, dp.y * alpha);
-		this.rotate(da * alpha, this.getTranslationX(), this.getTranslationY());
 	}
 	
 	/**
@@ -726,10 +764,9 @@ public class Transform implements Transformable {
 	 * @since 3.1.5
 	 */
 	public Transform lerped(Vector2 dp, double da, double alpha) {
-		Transform result = new Transform();
-		result.set(this);
+		Transform result = new Transform(this);
+		result.rotateOnly(da * alpha);
 		result.translate(dp.x * alpha, dp.y * alpha);
-		result.rotate(da * alpha, result.getTranslationX(), result.getTranslationY());
 		return result;
 	}
 	
@@ -748,9 +785,8 @@ public class Transform implements Transformable {
 	 */
 	public Transform lerped(Transform end, double alpha) {
 		// interpolate the position
-		double a1 = 1.0 - alpha;
-		double x = a1 * this.x + alpha * end.x;
-		double y = a1 * this.y + alpha * end.y;
+		double x = this.x + alpha * (end.x - this.x);
+		double y = this.y + alpha * (end.y - this.y);
 		
 		// compute the angle
 		// get the start and end rotations
@@ -775,9 +811,10 @@ public class Transform implements Transformable {
 		double a = diff * alpha + rs;
 		
 		// create the interpolated transform
-		Transform tx = new Transform();
-		tx.rotate(a);
-		tx.translate(x, y);
+		// the following performs the following calculations:
+		// tx.rotate(a);
+		// tx.translate(x, y);
+		Transform tx = new Transform(Math.cos(a), Math.sin(a), x, y);
 		return tx;
 	}
 }

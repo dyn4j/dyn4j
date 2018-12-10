@@ -278,9 +278,11 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 		// start the loop
 		for (int i = 0; i < this.maxDetectIterations; i++) {
 			// always add another point to the simplex at the beginning of the loop
-			simplex.add(ms.getSupportPoint(d));
+			Vector2 supportPoint = ms.getSupportPoint(d);
+			simplex.add(supportPoint);
+			
 			// make sure that the last point we added was past the origin
-			if (simplex.get(simplex.size() - 1).dot(d) <= this.detectEpsilon) {
+			if (supportPoint.dot(d) <= this.detectEpsilon) {
 				// a is not past the origin so therefore the shapes do not intersect
 				// here we treat the origin on the line as no intersection
 				// immediately return with null indicating no penetration
@@ -329,7 +331,15 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			Vector2 ab = a.to(b);
 			Vector2 ac = a.to(c);
 			// get the edge normal
-			Vector2 acPerp = Vector2.tripleProduct(ab, ac, ac);
+			
+			// inline Vector2.tripleProduct(ab, ac, ac) so we can use the
+			// immidiate calculations for Vector2.tripleProduct(ac, ab, ab) too
+			
+			Vector2 acPerp = new Vector2();
+			double dot = ab.x * ac.y - ac.x * ab.y;
+			acPerp.x = -ac.y * dot;
+			acPerp.y = ac.x * dot;
+			
 			// see where the origin is at
 			double acLocation = acPerp.dot(ao);
 			if (acLocation >= 0.0) {
@@ -344,7 +354,13 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 				// calculating ac's normal using b is more robust
 				direction.set(acPerp);
 			} else {
-				Vector2 abPerp = Vector2.tripleProduct(ac, ab, ab);
+				// inlined Vector2.tripleProduct(ac, ab, ab) because
+				// it can use dot from the tripleProduct(ab, ab, ac) above
+				// see Vector2.tripleProduct implementation
+				Vector2 abPerp = new Vector2();
+				abPerp.x = ab.y * dot;
+				abPerp.y = -ab.x * dot;
+				
 				double abLocation = abPerp.dot(ao);
 				// the origin lies on the left side of A->C
 				if (abLocation < 0.0) {
@@ -527,10 +543,9 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			// otherwise compute lambda1 and lambda2
 			double ll = l.dot(l);
 			double l2 = -l.dot(a.point) / ll;
-			double l1 = 1 - l2;
 			
 			// check if either lambda1 or lambda2 is less than zero
-			if (l1 < 0) {
+			if (l2 > 1) {
 				// if lambda1 is less than zero then that means that
 				// the support points of the Minkowski point B are
 				// the closest points
@@ -545,12 +560,12 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			} else {
 				// compute the closest points using lambda1 and lambda2
 				// this is the expanded version of
-				// p1 = a.p1.multiply(l1).add(b.p1.multiply(l2));
-				// p2 = a.p2.multiply(l1).add(b.p2.multiply(l2));
-				p1.x = a.supportPoint1.x * l1 + b.supportPoint1.x * l2;
-				p1.y = a.supportPoint1.y * l1 + b.supportPoint1.y * l2;
-				p2.x = a.supportPoint2.x * l1 + b.supportPoint2.x * l2;
-				p2.y = a.supportPoint2.y * l1 + b.supportPoint2.y * l2;
+				// p1 = a.p1.multiply(1 - l2).add(b.p1.multiply(l2));
+				// p2 = a.p2.multiply(1 - l2).add(b.p2.multiply(l2));
+				p1.x = a.supportPoint1.x + l2 * (b.supportPoint1.x - a.supportPoint1.x);
+				p1.y = a.supportPoint1.y + l2 * (b.supportPoint1.y - a.supportPoint1.y);
+				p2.x = a.supportPoint2.x + l2 * (b.supportPoint2.x - a.supportPoint2.x);
+				p2.y = a.supportPoint2.y + l2 * (b.supportPoint2.y - a.supportPoint2.y);
 			}
 		}
 		// set the new points in the separation object

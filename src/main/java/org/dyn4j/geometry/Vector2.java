@@ -204,13 +204,21 @@ public class Vector2 {
 	public static Vector2 tripleProduct(Vector2 a, Vector2 b, Vector2 c) {
 		// expanded version of above formula
 		Vector2 r = new Vector2();
-		// perform a.dot(c)
-		double ac = a.x * c.x + a.y * c.y;
-		// perform b.dot(c)
-		double bc = b.x * c.x + b.y * c.y;
-		// perform b * a.dot(c) - a * b.dot(c)
-		r.x = b.x * ac - a.x * bc;
-		r.y = b.y * ac - a.y * bc;
+		
+		/*
+		 * In the following we can substitute ac and bc in r.x and r.y
+		 * and with some rearrangement get a much more efficient version
+		 * 
+		 * double ac = a.x * c.x + a.y * c.y;
+		 * double bc = b.x * c.x + b.y * c.y;
+		 * r.x = b.x * ac - a.x * bc;
+		 * r.y = b.y * ac - a.y * bc;
+		 */
+		
+		double dot = a.x * b.y - b.x * a.y;
+		r.x = -c.y * dot;
+		r.y = c.x * dot;
+		
 		return r;
 	}
 	

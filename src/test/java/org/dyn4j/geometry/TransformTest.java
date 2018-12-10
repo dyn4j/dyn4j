@@ -111,10 +111,10 @@ public class TransformTest {
 		
 		Transform tc = t.copy();
 		
-		TestCase.assertEquals(t.m00, tc.m00);
-		TestCase.assertEquals(t.m01, tc.m01);
-		TestCase.assertEquals(t.m10, tc.m10);
-		TestCase.assertEquals(t.m11, tc.m11);
+		TestCase.assertEquals(t.cost, tc.cost);
+		TestCase.assertEquals(t.sint, tc.sint);
+		//TestCase.assertEquals(t.m10, tc.m10);
+		//TestCase.assertEquals(t.m11, tc.m11);
 		TestCase.assertEquals(t.x,   tc.x);
 		TestCase.assertEquals(t.y,   tc.y);
 	}
@@ -199,10 +199,10 @@ public class TransformTest {
 		TestCase.assertNotSame(tx2, tx);
 		
 		// should be the same transformation
-		TestCase.assertEquals(tx.m00, tx2.m00);
-		TestCase.assertEquals(tx.m01, tx2.m01);
-		TestCase.assertEquals(tx.m10, tx2.m10);
-		TestCase.assertEquals(tx.m11, tx2.m11);
+		TestCase.assertEquals(tx.cost, tx2.cost);
+		TestCase.assertEquals(tx.sint, tx2.sint);
+		//TestCase.assertEquals(tx.m10, tx2.m10);
+		//TestCase.assertEquals(tx.m11, tx2.m11);
 		TestCase.assertEquals(tx.x, tx2.x);
 		TestCase.assertEquals(tx.y, tx2.y);
 	}
