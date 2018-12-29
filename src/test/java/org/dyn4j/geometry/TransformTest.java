@@ -316,7 +316,7 @@ public class TransformTest {
 		
 		double[] values = t.getValues();
 		TestCase.assertEquals(1.0, values[0]);
-		TestCase.assertEquals(0.0, values[1]);
+		TestCase.assertEquals(-0.0, values[1]);
 		TestCase.assertEquals(2.0, values[2]);
 		TestCase.assertEquals(0.0, values[3]);
 		TestCase.assertEquals(1.0, values[4]);
