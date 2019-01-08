@@ -275,14 +275,14 @@ public class TransformTest {
 		Vector2 m = mid.getTransformed(p);
 		// this test only works this way for the mid point
 		// otherwise we would have to replicate the lerp method
-		TestCase.assertEquals((s.x + e.x) * alpha, m.x);
-		TestCase.assertEquals((s.y + e.y) * alpha, m.y);
+		TestCase.assertEquals((s.x + e.x) * alpha, m.x, 1.0e-9);
+		TestCase.assertEquals((s.y + e.y) * alpha, m.y, 1.0e-9);
 		
 		m = start.getTransformed(p);
 		// this test only works this way for the mid point
 		// otherwise we would have to replicate the lerp method
-		TestCase.assertEquals((s.x + e.x) * alpha, m.x);
-		TestCase.assertEquals((s.y + e.y) * alpha, m.y);
+		TestCase.assertEquals((s.x + e.x) * alpha, m.x, 1.0e-9);
+		TestCase.assertEquals((s.y + e.y) * alpha, m.y, 1.0e-9);
 		
 		// test opposing sign angles
 		start.identity();
