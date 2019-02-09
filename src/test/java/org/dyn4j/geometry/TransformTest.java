@@ -111,10 +111,10 @@ public class TransformTest {
 		
 		Transform tc = t.copy();
 		
-		TestCase.assertEquals(t.m00, tc.m00);
-		TestCase.assertEquals(t.m01, tc.m01);
-		TestCase.assertEquals(t.m10, tc.m10);
-		TestCase.assertEquals(t.m11, tc.m11);
+		TestCase.assertEquals(t.cost, tc.cost);
+		TestCase.assertEquals(t.sint, tc.sint);
+		//TestCase.assertEquals(t.m10, tc.m10);
+		//TestCase.assertEquals(t.m11, tc.m11);
 		TestCase.assertEquals(t.x,   tc.x);
 		TestCase.assertEquals(t.y,   tc.y);
 	}
@@ -199,10 +199,10 @@ public class TransformTest {
 		TestCase.assertNotSame(tx2, tx);
 		
 		// should be the same transformation
-		TestCase.assertEquals(tx.m00, tx2.m00);
-		TestCase.assertEquals(tx.m01, tx2.m01);
-		TestCase.assertEquals(tx.m10, tx2.m10);
-		TestCase.assertEquals(tx.m11, tx2.m11);
+		TestCase.assertEquals(tx.cost, tx2.cost);
+		TestCase.assertEquals(tx.sint, tx2.sint);
+		//TestCase.assertEquals(tx.m10, tx2.m10);
+		//TestCase.assertEquals(tx.m11, tx2.m11);
 		TestCase.assertEquals(tx.x, tx2.x);
 		TestCase.assertEquals(tx.y, tx2.y);
 	}
@@ -275,14 +275,14 @@ public class TransformTest {
 		Vector2 m = mid.getTransformed(p);
 		// this test only works this way for the mid point
 		// otherwise we would have to replicate the lerp method
-		TestCase.assertEquals((s.x + e.x) * alpha, m.x);
-		TestCase.assertEquals((s.y + e.y) * alpha, m.y);
+		TestCase.assertEquals((s.x + e.x) * alpha, m.x, 1.0e-9);
+		TestCase.assertEquals((s.y + e.y) * alpha, m.y, 1.0e-9);
 		
 		m = start.getTransformed(p);
 		// this test only works this way for the mid point
 		// otherwise we would have to replicate the lerp method
-		TestCase.assertEquals((s.x + e.x) * alpha, m.x);
-		TestCase.assertEquals((s.y + e.y) * alpha, m.y);
+		TestCase.assertEquals((s.x + e.x) * alpha, m.x, 1.0e-9);
+		TestCase.assertEquals((s.y + e.y) * alpha, m.y, 1.0e-9);
 		
 		// test opposing sign angles
 		start.identity();
@@ -316,7 +316,7 @@ public class TransformTest {
 		
 		double[] values = t.getValues();
 		TestCase.assertEquals(1.0, values[0]);
-		TestCase.assertEquals(0.0, values[1]);
+		TestCase.assertEquals(-0.0, values[1]);
 		TestCase.assertEquals(2.0, values[2]);
 		TestCase.assertEquals(0.0, values[3]);
 		TestCase.assertEquals(1.0, values[4]);

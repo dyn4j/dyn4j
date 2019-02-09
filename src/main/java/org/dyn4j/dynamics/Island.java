@@ -124,7 +124,7 @@ final class Island {
 		int velocitySolverIterations = settings.getVelocityConstraintSolverIterations();
 		int positionSolverIterations = settings.getPositionConstraintSolverIterations();
 		// the sleep settings
-		double sleepAngularVelocitySquared = settings.getSleepAngularVelocitySquared();
+		double sleepAngularVelocity = settings.getSleepAngularVelocity();
 		double sleepLinearVelocitySquared = settings.getSleepLinearVelocitySquared();
 		double sleepTime = settings.getSleepTime();
 
@@ -194,7 +194,6 @@ final class Island {
 		double maxTranslation = settings.getMaximumTranslation();
 		double maxRotation = settings.getMaximumRotation();
 		double maxTranslationSqrd = settings.getMaximumTranslationSquared();
-		double maxRotationSqrd = settings.getMaximumRotationSquared();
 		
 		// integrate the positions
 		for (int i = 0; i < size; i++) {
@@ -203,25 +202,35 @@ final class Island {
 			if (body.isStatic()) continue;
 			
 			// compute the translation and rotation for this time step
-			Vector2 translation = body.velocity.product(dt);
-			double rotation = body.angularVelocity * dt;
+			double translationX = body.velocity.x * dt;
+			double translationY = body.velocity.y * dt;
+			double translationMagnitudeSquared = translationX * translationX + translationY * translationY;
 			
 			// make sure the translation is not over the maximum
-			if (translation.getMagnitudeSquared() > maxTranslationSqrd) {
-				double ratio = maxTranslation / translation.getMagnitude();
+			if (translationMagnitudeSquared > maxTranslationSqrd) {
+				double translationMagnitude = Math.sqrt(translationMagnitudeSquared);
+				double ratio = maxTranslation / translationMagnitude;
+				
 				body.velocity.multiply(ratio);
+
+				translationX *= ratio;
+				translationY *= ratio;
 			}
 			
+			double rotation = body.angularVelocity * dt;
+			
 			// make sure the rotation is not over the maximum
-			if (rotation * rotation > maxRotationSqrd) {
+			if (rotation > maxRotation) {
 				double ratio = maxRotation / Math.abs(rotation);
+				
 				body.angularVelocity *= ratio;
+				rotation *= ratio;
 			}
 			
 			// recompute the translation/rotation in case we hit the maximums
 			// inline body.translate(body.velocity.product(dt));
-			body.translate(body.velocity.x * dt, body.velocity.y * dt);
-			body.rotateAboutCenter(body.angularVelocity * dt);
+			body.translate(translationX, translationY);
+			body.rotateAboutCenter(rotation);
 		}
 		
 		// solve the position constraints
@@ -254,7 +263,7 @@ final class Island {
 				// see if the body is allowed to sleep
 				if (body.isAutoSleepingEnabled()) {
 					// check the linear and angular velocity
-					if (body.velocity.dot(body.velocity) > sleepLinearVelocitySquared || body.angularVelocity * body.angularVelocity > sleepAngularVelocitySquared) {
+					if (body.velocity.getMagnitudeSquared() > sleepLinearVelocitySquared || body.angularVelocity > sleepAngularVelocity) {
 						// if either the linear or angular velocity is above the 
 						// threshold then reset the sleep time
 						body.sleepTime = 0.0;

@@ -327,7 +327,7 @@ public class CircleSliceTest extends AbstractTest {
 		TestCase.assertEquals(-0.007, p1.x, 1.0e-3);
 		TestCase.assertEquals( 0.437, p1.y, 1.0e-3);
 		TestCase.assertEquals( 0.000, p2.x, 1.0e-3);
-		TestCase.assertEquals( 0.449, p2.y, 1.0e-3);
+		TestCase.assertEquals( 0.450, p2.y, 1.0e-3);
 		// try reversing the shapes
 		TestCase.assertTrue(this.gjk.distance(slice, t2, circle, t1, s));
 		n = s.getNormal();
@@ -337,7 +337,7 @@ public class CircleSliceTest extends AbstractTest {
 		TestCase.assertEquals(-0.485, n.x, 1.0e-3);
 		TestCase.assertEquals(-0.874, n.y, 1.0e-3);
 		TestCase.assertEquals( 0.000, p1.x, 1.0e-3);
-		TestCase.assertEquals( 0.449, p1.y, 1.0e-3);
+		TestCase.assertEquals( 0.450, p1.y, 1.0e-3);
 		TestCase.assertEquals(-0.007, p2.x, 1.0e-3);
 		TestCase.assertEquals( 0.437, p2.y, 1.0e-3);
 		
