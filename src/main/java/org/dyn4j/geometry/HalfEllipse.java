@@ -181,39 +181,51 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	public Vector2 getFarthestPoint(Vector2 vector, Transform transform) {
 		// convert the world space vector(n) to local space
 		Vector2 localAxis = transform.getInverseTransformedR(vector);
-
-		// include local rotation
-		double cos = Math.cos(this.rotation);
-		double sin = Math.sin(this.rotation);
 		
-		// invert the local rotation
-		// cos(-x) = cos(x), sin(-x) = -sin(x)
-		localAxis.rotate(cos, -sin);
+		// Unfortunately there's not a better way for this
+		// We can't make a helper because in some cases we return before completing
+		// all the calculations. But the performance gain is worth it
+		double cos = 0, sin = 0;
+		
+		if (this.rotation != 0) {
+			cos = Math.cos(this.rotation);
+			sin = Math.sin(this.rotation);
+			
+			// invert the local rotation
+			// cos(-x) = cos(x), sin(-x) = -sin(x)
+			localAxis.rotate(cos, -sin);
+		}
+		
 		// an ellipse is a circle with a non-uniform scaling transformation applied
 		// so we can achieve that by scaling the input axis by the major and minor
 		// axis lengths
 		localAxis.x *= this.halfWidth;
 		localAxis.y *= this.height;
-		// then normalize it
-		localAxis.normalize();
 		
-		Vector2 p = null;
-		if (localAxis.y <= 0 && localAxis.x >= 0) {
-			return transform.getTransformed(this.vertexRight);
-		} else if (localAxis.y <= 0 && localAxis.x <= 0) {
-			return transform.getTransformed(this.vertexLeft);
+		if (localAxis.y <= 0) {
+			if (localAxis.x >= 0) {
+				return transform.getTransformed(this.vertexRight);
+			} else {
+				return transform.getTransformed(this.vertexLeft);
+			}
 		} else {
-			// add the radius along the vector to the center to get the farthest point
-			p = new Vector2(localAxis.x * this.halfWidth, localAxis.y  * this.height);
+			// then normalize it
+			localAxis.normalize();
+			
+			localAxis.x *= this.halfWidth;
+			localAxis.y *= this.height;
 		}
 		
-		// include local rotation
-		// invert the local rotation
-		p.rotate(cos, sin);
-		p.add(this.ellipseCenter);
+		if (this.rotation != 0) {
+			// include local rotation
+			localAxis.rotate(cos, sin);	
+		}
+		
+		// add the radius along the vector to the center to get the farthest point
+		localAxis.add(this.ellipseCenter);
 		// then finally convert back into world space coordinates
-		transform.transform(p);
-		return p;
+		transform.transform(localAxis);
+		return localAxis;
 	}
 
 	/* (non-Javadoc)

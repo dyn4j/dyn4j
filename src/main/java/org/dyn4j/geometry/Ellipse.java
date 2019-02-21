@@ -156,13 +156,31 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		// convert the world space vector(n) to local space
 		Vector2 localAxis = transform.getInverseTransformedR(vector);
 		
-		// include local rotation
-		double cos = Math.cos(this.rotation);
-		double sin = Math.sin(this.rotation);
+		if (this.rotation == 0) {
+			getFarthestPointHelper(localAxis);
+		} else {
+			double cos = Math.cos(this.rotation);
+			double sin = Math.sin(this.rotation);
+			
+			// invert the local rotation
+			// cos(-x) = cos(x), sin(-x) = -sin(x)
+			localAxis.rotate(cos, -sin);	
+			
+			getFarthestPointHelper(localAxis);
+			
+			// include local rotation
+			localAxis.rotate(cos, sin);
+		}
 		
-		// invert the local rotation
-		// cos(-x) = cos(x), sin(-x) = -sin(x)
-		localAxis.rotate(cos, -sin);
+		// add the radius along the vector to the center to get the farthest point
+		localAxis.add(this.center);
+		// then finally convert back into world space coordinates
+		transform.transform(localAxis);
+		
+		return localAxis;
+	}
+
+	private void getFarthestPointHelper(Vector2 localAxis) {
 		// an ellipse is a circle with a non-uniform scaling transformation applied
 		// so we can achieve that by scaling the input axis by the major and minor
 		// axis lengths
@@ -170,15 +188,9 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		localAxis.y *= this.halfHeight;
 		// then normalize it
 		localAxis.normalize();
-		// add the radius along the vector to the center to get the farthest point
-		Vector2 p = new Vector2(localAxis.x * this.halfWidth, localAxis.y  * this.halfHeight);
-		// include local rotation
-		// invert the local rotation
-		p.rotate(cos, sin);
-		p.add(this.center);
-		// then finally convert back into world space coordinates
-		transform.transform(p);
-		return p;
+		// then scale again to get a point in the ellipse
+		localAxis.x *= this.halfWidth;
+		localAxis.y *= this.halfHeight;
 	}
 	
 	/* (non-Javadoc)
