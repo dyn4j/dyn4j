@@ -253,10 +253,17 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	 */
 	@Override
 	public AABB createAABB(Transform transform) {
-		Interval x = this.project(Vector2.X_AXIS, transform);
-		Interval y = this.project(Vector2.Y_AXIS, transform);
+		// Inlined projection of x axis
+		// Interval x = this.project(Vector2.X_AXIS, transform);
+		double minX = this.getFarthestPoint(Vector2.INV_X_AXIS, transform).x;
+		double maxX = this.getFarthestPoint(Vector2.X_AXIS, transform).x;
 		
-		return new AABB(x.getMin(), y.getMin(), x.getMax(), y.getMax());
+		// Inlined projection of y axis
+		// Interval y = this.project(Vector2.Y_AXIS, transform);
+		double minY = this.getFarthestPoint(Vector2.INV_Y_AXIS, transform).y;
+		double maxY = this.getFarthestPoint(Vector2.Y_AXIS, transform).y;
+		
+		return new AABB(minX, minY, maxX, maxY);
 	}
 	
 	/* (non-Javadoc)
