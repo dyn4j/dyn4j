@@ -23,7 +23,7 @@ Or by adding a Maven dependency:
 <dependency>
     <groupId>org.dyn4j</groupId>
     <artifactId>dyn4j</artifactId>
-    <version>3.2.4</version>
+    <version>3.3.0</version>
 </dependency>
 ```
 
@@ -31,7 +31,7 @@ Or by adding a Maven dependency:
 ```java
 World world = new World();
 ```
-This create a new simulation environment with default settings.  The default settings use the meter-kilogram-seconds system and include the default pipeline classes.
+This creates a new simulation environment with default settings.  The default settings use the meter-kilogram-seconds system and include the default pipeline classes.
 
 #### Step 3 Add Some Bodies
 ```java
@@ -41,7 +41,7 @@ body.translate(1.0, 0.0);
 body.setMass(MassType.Normal);
 world.addBody(body);
 ```
-A body is the primary unit of simulation and completely rigid.  A body is comprised of many fixtures or shapes.  While the shapes of dyn4j are all convex (and must be), a collection of these shapes can be used to create a body that is not.  A body can be initially placed in a scene by translating or rotating it.  Once the shape(s) of a body is defined, it must be given a mass.  The mass is typically MassType.NORMAL or MassType.INFINITE.  When set to NORMAL, the mass will be calculated based on the shapes.  An INFINITE mass body might represent a floor, ground, or something unmovable.
+A body is the primary unit of simulation and completely rigid.  A body is comprised of many fixtures or shapes.  While the shapes of dyn4j are all convex (and must be), a collection of these shapes can be used to create a body that is not.  A body can be initially placed in a scene by translating or rotating it.  Once the shape(s) of a body is defined, it must be given a mass by calling a setMass method.  The mass type is typically MassType.NORMAL or MassType.INFINITE.  When set to NORMAL, the mass will be calculated based on the shapes.  An INFINITE mass body might represent a floor, ground, or something unmovable.
 
 #### Step 4 Add Some Joints
 ```java
@@ -56,7 +56,7 @@ for (int i = 0; i < 100; i++) {
     world.step(1);
 }
 ```
-In a GUI based application you would call the World.update(elapsedTime) method.  Either way, each time the world is advanced forward in time (which may or may not occur when using the World.update(elapsedTime) methods) the bodies added to it will be moved based on the world gravity (if any) and will interact with other bodies placed in the world.
+Unlike this example, a GUI based application you would call the World.update(elapsedTime) method in it's render loop.  Either way, each time the world is advanced forward in time (which may or may not occur when using the World.update(elapsedTime) methods) the bodies added to it will be moved based on the world gravity (if any) and will interact with other bodies placed in the world.
 
 #### Next Steps
 From here you should take a look at the [dyn4j-samples](https://github.com/dyn4j/dyn4j-samples) sub project to get a jump start with a simple Java2D framework. You can also check out the documentation [here](http://www.dyn4j.org/documentation/).
@@ -65,11 +65,11 @@ From here you should take a look at the [dyn4j-samples](https://github.com/dyn4j
 * [www.dyn4j.org](http://www.dyn4j.org)
 * [Latest Release Notes](https://github.com/wnbittle/dyn4j/blob/master/release-notes.txt)
 * [Latest Javadocs](http://docs.dyn4j.org)
-* [Forum](http://forum.dyn4j.org)
+* [Forum](http://forum.dyn4j.org) - disabled but still a good resource
 * [Blog](http://www.dyn4j.org/category/blog/)
 
 ### Building
 * Maven build goals: clean package
 * Check artifact class version: 
-** javap -verbose -classpath /path/to/jar/dyn4j.jar org.dyn4j.Version 50
-** javap -verbose -classpath /path/to/jar/dyn4j.jar module-info 53+
+    * javap -verbose -classpath /path/to/jar/dyn4j.jar org.dyn4j.Version 50
+    * javap -verbose -classpath /path/to/jar/dyn4j.jar module-info 53+

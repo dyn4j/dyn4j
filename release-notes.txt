@@ -22,11 +22,11 @@ Version 3.3.0
 ===============================================================================
 New Features:
   - Performance improvements for Android
-  - Java 9 modules support
-  - OSGi support
+  - Java 9 modules support (by io7m)
+  - OSGi support (by io7m)
   - More control of iteration count and epsilon values in the GJK algorithm
   - Proper Maven-ization of the project with automated building, testing, and
-    packaging
+    packaging  (by io7m)
   - Added an enabled flag for the ContactConstraint class to allow contacts
     to be temporarily turned off, but still warm started and tracked.
 
