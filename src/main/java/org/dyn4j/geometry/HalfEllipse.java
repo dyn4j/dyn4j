@@ -279,19 +279,21 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	@Override
 	public AABB createAABB(Transform transform) {
 		// Inlined projection of x axis
+		
 		// Equivalent of transform.getInverseTransformedR(Vector2.X_AXIS)
 		Vector2 temp = new Vector2(transform.cost, -transform.sint);
 		double maxX = transform.getTransformedX(getFarthestPointImpl(temp));
 		// Equivalent of transform.getInverseTransformedR(Vector2.INV_X_AXIS)
-		temp.negate();
+		temp.set(-transform.cost, transform.sint);
 		double minX = transform.getTransformedX(getFarthestPointImpl(temp));
 		
 		// Inlined projection of y axis
+		
 		// Equivalent of transform.getInverseTransformedR(Vector2.Y_AXIS)
-		temp = new Vector2(transform.sint, transform.cost);
+		temp.set(transform.sint, transform.cost);
 		double maxY = transform.getTransformedY(getFarthestPointImpl(temp));
 		// Equivalent of transform.getInverseTransformedR(Vector2.INV_Y_AXIS)
-		temp.negate();
+		temp.set(-transform.sint, -transform.cost);
 		double minY = transform.getTransformedY(getFarthestPointImpl(temp));
 		
 		return new AABB(minX, minY, maxX, maxY);
