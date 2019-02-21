@@ -38,7 +38,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * A polygon cannot have coincident vertices.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.3.1
  * @since 1.0.0
  */
 public class Polygon extends AbstractShape implements Convex, Wound, Shape, Transformable, DataContainer {

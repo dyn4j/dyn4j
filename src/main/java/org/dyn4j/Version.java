@@ -27,7 +27,7 @@ package org.dyn4j;
 /**
  * The version of the engine.
  * @author William Bittle
- * @version 3.3.0
+ * @version 3.3.1
  * @since 1.0.0
  */
 public final class Version {
@@ -38,7 +38,7 @@ public final class Version {
 	private static final int MINOR = 3;
 	
 	/** The revision number; low impact changes; deprecating API changes, minor bug fixes, etc. */
-	private static final int REVISION = 0;
+	private static final int REVISION = 1;
 	
 	/**
 	 * Hide the constructor.

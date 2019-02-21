@@ -35,7 +35,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * This class represents a line segment that is infinitely thin.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.3.1
  * @since 1.0.0
  */
 public class Segment extends AbstractShape implements Convex, Wound, Shape, Transformable, DataContainer {

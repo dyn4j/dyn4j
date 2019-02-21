@@ -31,10 +31,25 @@ import org.junit.Test;
 /**
  * Test case for the {@link HalfEllipse} class.
  * @author William Bittle
- * @version 3.1.7
+ * @version 3.3.1
  * @since 3.1.5
  */
 public class HalfEllipseTest {
+	/**
+	 * Tests the getRadius method for a point above the x-axis but below the evolute
+	 * to ensure that we obtain the correct max distance.
+	 * @since 3.3.1
+	 */
+	@Test
+	public void getRadius() {
+		HalfEllipse he = new HalfEllipse(4.0, 4.0);
+		double x = 1;
+		double y = 0.25;
+		double d = he.getRadius(new Vector2(x, y));
+		
+		TestCase.assertEquals(3.927647520827677, d, 1e-3);
+	}
+	
 	/**
 	 * Tests a zero width.
 	 */

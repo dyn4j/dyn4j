@@ -39,7 +39,7 @@ import org.dyn4j.Epsilon;
  * a.zero().add(1, 2).multiply(2);
  * </pre>
  * @author William Bittle
- * @version 3.1.11
+ * @version 3.3.1
  * @since 1.0.0
  */
 public class Vector2 {
@@ -640,6 +640,7 @@ public class Vector2 {
 	 * @param cos the cosine of the rotation angle in radians
 	 * @param sin the cosine of the rotation angle in radians
 	 * @return {@link Vector2} this vector
+	 * @since 3.3.1
 	 */
 	protected Vector2 rotate(double cos, double sin) {
 		double x = this.x;
@@ -672,6 +673,7 @@ public class Vector2 {
 	 * @param x the x coordinate to rotate about
 	 * @param y the y coordinate to rotate about
 	 * @return {@link Vector2} this vector
+	 * @since 3.3.1
 	 */
 	protected Vector2 rotate(double cos, double sin, double x, double y) {
 		this.x -= x;
@@ -705,6 +707,7 @@ public class Vector2 {
 	 * @param sin the cosine of the rotation angle in radians
 	 * @param point the point to rotate about
 	 * @return {@link Vector2} this vector
+	 * @since 3.3.1
 	 */
 	protected Vector2 rotate(double cos, double sin, Vector2 point) {
 		return this.rotate(cos, sin, point.x, point.y);
@@ -823,6 +826,7 @@ public class Vector2 {
 	 * Returns the angle in radians in the range -&pi; to &pi;.
 	 * @param otherAngle the angle. Must be in the range -&pi; to &pi
 	 * @return angle in radians [-&pi;, &pi;]
+	 * @since 3.3.1
 	 */
 	public double getAngleBetween(double otherAngle) {
 		double a = otherAngle - Math.atan2(this.y, this.x);

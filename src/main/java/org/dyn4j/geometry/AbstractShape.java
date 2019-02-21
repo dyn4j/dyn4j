@@ -31,7 +31,7 @@ import org.dyn4j.DataContainer;
 /**
  * Base implementation of the {@link Shape} interface.
  * @author William Bittle
- * @version 3.2.3
+ * @version 3.3.1
  * @since 1.0.0
  */
 public abstract class AbstractShape implements Shape, Transformable, DataContainer {
@@ -169,6 +169,7 @@ public abstract class AbstractShape implements Shape, Transformable, DataContain
 	 * @param sin the sine of the rotation angle in radians
 	 * @param x the x coordinate to rotate about
 	 * @param y the y coordinate to rotate about
+	 * @since 3.3.1
 	 */
 	protected void rotate(double theta, double cos, double sin, double x, double y) {
 		// only rotate the center if the point about which

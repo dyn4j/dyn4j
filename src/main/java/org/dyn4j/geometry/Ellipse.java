@@ -40,7 +40,7 @@ import org.dyn4j.resources.Messages;
  * {@link Polygon} approximation. Another option is to use the GJK or your own collision detection
  * algorithm for this shape only and use SAT on others.
  * @author William Bittle
- * @version 3.2.3
+ * @version 3.3.1
  * @since 3.1.7
  */
 public class Ellipse extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
@@ -263,7 +263,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		Vector2 p = center.difference(this.center).rotate(-this.rotation);
 		
 		// get the farthest point.
-		Vector2 fp = Ellipse.getFarthestPoint(this.halfWidth, this.halfHeight, p);
+		Vector2 fp = Ellipse.getFarthestPointOnEllipse(this.halfWidth, this.halfHeight, p);
 		
 		// get the distance between the two points. The distance will be the
 		// same if we translate/rotate the points back to the real position
@@ -280,13 +280,13 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 * <p>
 	 * This method performs a Golden Section Search to find the point of
 	 * maximum distance from the given point.
-	 * @param point the query point
 	 * @param a the half width of the ellipse
 	 * @param b the half height of the ellipse
+	 * @param point the query point
 	 * @return {@link Vector2}
-	 * @since 3.2.3
+	 * @since 3.3.1
 	 */
-	static final Vector2 getFarthestPoint(double a, double b, Vector2 point) 
+	static final Vector2 getFarthestPointOnEllipse(double a, double b, Vector2 point) 
 	{
 		double px = point.x;
 		double py = point.y;
@@ -326,50 +326,12 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 			py = -py;
 		}
 		
-		// our bracketing bounds will be [x0, x1]
-		double x0 = 0;
-		double x1 = a;
-
-		final Vector2 q = new Vector2(px, py);
-		final Vector2 p = new Vector2();
-		
-		final double aa = a * a;
-		final double ba = b / a;
-		
+		Vector2 p = null;
 		if (py == 0.0) {
 			// then its on the x-axis and the farthest point is easy to calculate
-			p.x = px < 0 ? a : -a;
-			p.y = 0;
+			p = new Vector2(px < 0 ? a : -a, 0);
 		} else {
-			// compute the golden ratio test points
-			double x2 = x1 - (x1 - x0) * INV_GOLDEN_RATIO;
-			double x3 = x0 + (x1 - x0) * INV_GOLDEN_RATIO;
-			double fx2 = getDistance(aa, ba, x2, q, p);
-			double fx3 = getDistance(aa, ba, x3, q, p);
-
-			// our bracket is now: [x0, x2, x3, x1]
-			// iteratively reduce the bracket
-			for (int i = 0; i < FARTHEST_POINT_MAX_ITERATIONS; i++) {
-				if (fx2 < fx3) {
-					if (Math.abs(x1 - x2) <= FARTHEST_POINT_EPSILON) {
-						break;
-					}
-					x0 = x2;
-					x2 = x3;
-					fx2 = fx3;
-					x3 = x0 + (x1 - x0) * INV_GOLDEN_RATIO;
-					fx3 = getDistance(aa, ba, x3, q, p);
-				} else {
-					if (Math.abs(x3 - x0) <= FARTHEST_POINT_EPSILON) {
-						break;
-					}
-					x1 = x3;
-					x3 = x2;
-					fx3 = fx2;
-					x2 = x1 - (x1 - x0) * INV_GOLDEN_RATIO;
-					fx2 = getDistance(aa, ba, x2, q, p);
-				}
-			}
+			p = Ellipse.getFarthestPointOnBoundedEllipse(0, a, a, b, new Vector2(px, py));
 		}
 		
 		// translate the point to the correct quadrant
@@ -394,6 +356,69 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	}
 	
 	/**
+	 * Performs a golden section search of the ellipse bounded betwen the interval [xmin, xmax] for the farthest
+	 * point from the given point.
+	 * <p>
+	 * This method assumes that this ellipse is centered on the origin and 
+	 * has it's semi-major axis aligned with the x-axis and its semi-minor 
+	 * axis aligned with the y-axis.
+	 * @param xmin the minimum x value
+	 * @param xmax the maximum x value
+	 * @param a the half width of the ellipse
+	 * @param b the half height of the ellipse
+	 * @param point the query point
+	 * @return {@link Vector2}
+	 * @since 3.3.1
+	 */
+	static final Vector2 getFarthestPointOnBoundedEllipse(double xmin, double xmax, double a, double b, Vector2 point) 
+	{
+		double px = point.x;
+		double py = point.y;
+		
+		// our bracketing bounds will be [x0, x1]
+		double x0 = xmin;
+		double x1 = xmax;
+
+		final Vector2 q = new Vector2(px, py);
+		final Vector2 p = new Vector2();
+		
+		final double aa = a * a;
+		final double ba = b / a;
+
+		// compute the golden ratio test points
+		double x2 = x1 - (x1 - x0) * INV_GOLDEN_RATIO;
+		double x3 = x0 + (x1 - x0) * INV_GOLDEN_RATIO;
+		double fx2 = Ellipse.getSquaredDistance(aa, ba, x2, q, p);
+		double fx3 = Ellipse.getSquaredDistance(aa, ba, x3, q, p);
+
+		// our bracket is now: [x0, x2, x3, x1]
+		// iteratively reduce the bracket
+		for (int i = 0; i < FARTHEST_POINT_MAX_ITERATIONS; i++) {
+			if (fx2 < fx3) {
+				if (Math.abs(x1 - x2) <= FARTHEST_POINT_EPSILON) {
+					break;
+				}
+				x0 = x2;
+				x2 = x3;
+				fx2 = fx3;
+				x3 = x0 + (x1 - x0) * INV_GOLDEN_RATIO;
+				fx3 = Ellipse.getSquaredDistance(aa, ba, x3, q, p);
+			} else {
+				if (Math.abs(x3 - x0) <= FARTHEST_POINT_EPSILON) {
+					break;
+				}
+				x1 = x3;
+				x3 = x2;
+				fx3 = fx2;
+				x2 = x1 - (x1 - x0) * INV_GOLDEN_RATIO;
+				fx2 = Ellipse.getSquaredDistance(aa, ba, x2, q, p);
+			}
+		}
+			
+		return p;
+	}
+	
+	/**
 	 * Returns the distance from the ellipse at the given x to the given point q.
 	 * @param a2 the ellipse semi-major axis squared (a * a)
 	 * @param ba the ellipse semi-minor axis divided by the semi-major axis (b / a)
@@ -401,8 +426,9 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 * @param q the query point
 	 * @param p output; the point on the ellipse
 	 * @return double
+	 * @since 3.3.1
 	 */
-	private static double getDistance(double a2, double ba, double x, Vector2 q, Vector2 p) {
+	private static double getSquaredDistance(double a2, double ba, double x, Vector2 q, Vector2 p) {
 		// compute the y value for the given x on the ellipse:
 		// (x^2/a^2) + (y^2/b^2) = 1
 		// y^2 = (1 - (x / a)^2) * b^2

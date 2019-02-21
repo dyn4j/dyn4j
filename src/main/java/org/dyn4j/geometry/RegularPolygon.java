@@ -53,8 +53,8 @@ import org.dyn4j.resources.Messages;
  * <p>
  * A {@link RegularPolygon} must have at least 3 vertices.
  * @author Manolis Tsamis
- * @version 3.3.0
- * @since 3.3.0
+ * @version 3.3.1
+ * @since 3.3.1
  */
 public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Transformable, DataContainer {
 	/** 

@@ -40,7 +40,7 @@ import org.dyn4j.resources.Messages;
  * {@link Polygon} approximation. Another option is to use the GJK or your own collision detection
  * algorithm for this shape only and use SAT on others.
  * @author William Bittle
- * @version 3.2.3
+ * @version 3.3.1
  * @since 3.1.7
  */
 public class HalfEllipse extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
@@ -276,38 +276,165 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	 */
 	@Override
 	public double getRadius(Vector2 center) {
-		// annoyingly, finding the radius of a rotated/translated ellipse
-		// about another point is the same as finding the farthest point
-		// from an arbitrary point. The solution to this is a quartic function
-		// that has no analytic solution, so we are stuck with root finding.
-		// Thankfully, this method shouldn't be called that often, in fact
-		// it should only be called when the user modifies the shapes on a body.
+		// it turns out that a half ellipse is even more annoying than an ellipse
 		
-		// in the half ellipse case, if the point is on the side of the flat edge
-		// then we do the ellipse code, else we can just return the farthest of the
-		// two points that make up the flat side
-		if (Segment.getLocation(center, this.vertexLeft, this.vertexRight) > 0) {
-			// find the maximum radius from the center
-			double leftR = center.distanceSquared(this.vertexLeft);
-			double rightR = center.distanceSquared(this.vertexRight);
-			// keep the largest
-			double r2 = Math.max(leftR, rightR);
-			
-			return Math.sqrt(r2);
-		} else {		
-			// we need to translate/rotate the point so that this ellipse is
-			// considered centered at the origin with it's semi-major axis aligned
-			// with the x-axis and its semi-minor axis aligned with the y-axis
-			Vector2 p = center.difference(this.ellipseCenter).rotate(-this.getRotation());
-			
-			// get the farthest point.
-			Vector2 fp = Ellipse.getFarthestPoint(this.halfWidth, this.height, p);
-			
-			// get the distance between the two points. The distance will be the
-			// same if we translate/rotate the points back to the real position
-			// and rotation, so don't bother
-			return p.distance(fp);
+		// if the half ellipse is wider than it is tall
+		if (this.halfWidth >= this.height) {
+			// then we have two solutions based on the point location
+			// if the point is below the half ellipse, then we need to perform
+			// a golden section search like the ellipse code
+			if (Segment.getLocation(center, this.vertexLeft, this.vertexRight) <= 0) {
+				return this.getMaxDistanceEllipse(center);
+			} else {
+				// otherwise we can just take the greater distance of the vertices
+				return this.getMaxDistanceToVertices(center);
+			}
+		} else {
+			// otherwise we have even more conditions
+			return this.getMaxDistanceHalfEllipse(center);
 		}
+	}
+	
+	/**
+	 * Returns the maximum distance between the two vertices of the ellipse and the given point.
+	 * @param point the point
+	 * @return double
+	 * @since 3.3.1
+	 */
+	private double getMaxDistanceToVertices(Vector2 point) {
+		// find the maximum radius from the center
+		double leftR = point.distanceSquared(this.vertexLeft);
+		double rightR = point.distanceSquared(this.vertexRight);
+		// keep the largest
+		double r2 = Math.max(leftR, rightR);
+		return Math.sqrt(r2);
+	}
+	
+	/**
+	 * Returns the maximum distance from the given point to the ellipse.
+	 * @param point the point
+	 * @return double
+	 * @since 3.3.1
+	 */
+	private double getMaxDistanceEllipse(Vector2 point) {
+		// we need to translate/rotate the point so that this ellipse is
+		// considered centered at the origin with it's semi-major axis aligned
+		// with the x-axis and its semi-minor axis aligned with the y-axis
+		Vector2 p = point.difference(this.ellipseCenter).rotate(-this.getRotation());
+		
+		// get the farthest point
+		Vector2 fp = Ellipse.getFarthestPointOnEllipse(this.halfWidth, this.height, p);
+		
+		// get the distance between the two points. The distance will be the
+		// same if we translate/rotate the points back to the real position
+		// and rotation, so don't bother
+		return p.distance(fp);
+	}
+	
+	/**
+	 * Returns the maximum distance between the given point and the half ellipse.
+	 * @param point the point
+	 * @return double
+	 * @since 3.3.1
+	 */
+	private double getMaxDistanceHalfEllipse(Vector2 point) {
+		final double a = this.halfWidth;
+		final double b = this.height;
+		
+		// we need to translate/rotate the point so that this ellipse is
+		// considered centered at the origin with it's semi-major axis aligned
+		// with the x-axis and its semi-minor axis aligned with the y-axis
+		Vector2 p = point.difference(this.ellipseCenter).rotate(-this.getRotation());
+		
+		// if the point is below the x axis, then we only need to perform the ellipse code
+		if (p.y < 0) {
+			return this.getMaxDistanceEllipse(point);
+		}
+		
+		// move the point to the 1st quadrant to conform my formulation
+		if (p.x < 0) {
+			p.x = -p.x;
+		}
+		
+		// if the point is above the evolute, then we only need to evaluate
+		// the max distance of the two vertices
+		// evolute: (ax)^2/3 + (by)^2/3 = (a^2 - b^2)^2/3
+		
+		// compute the y coordinate of the point on the evolute at p.x
+		// ey = ((b^2 - a^2)^2/3 - (ax)^2/3)^3/2 / b
+		final double ab = (b * b - a * a);
+		final double ab2r3 = Math.cbrt(ab * ab);
+		final double ax = a * p.x;
+		final double ax2r3 = Math.cbrt(ax * ax);
+		double top = ab2r3 - ax2r3;
+		
+		if (top < 0) {
+			// the evolute isn't defined at p.x
+			return this.getMaxDistanceToVertices(point);
+		}
+		
+		top = Math.sqrt(top);
+		final double ey = (top * top * top) / b;
+		
+		if (p.y > ey) {
+			// the point is above the evolute
+			return this.getMaxDistanceToVertices(point);
+		}
+		
+		// check if p.x is close to zero (if it is, then m will be inifinity)
+		if (Math.abs(p.x) < 1e-16) {
+			// compare the distance to the points and the height
+			double d1 = this.height - p.y;
+			double d2 = this.getMaxDistanceToVertices(point);
+			return d1 > d2 ? d1 : d2;
+		}
+		
+		// else compute the bounds for the unimodal region for golden section to work
+		
+		// compute the slope of the evolute at x
+		// m = -a^2/3 * sqrt((b^2 - a^2)^2/3 - (ax)^2/3) / (bx^1/3)
+		final double xr3 = Math.cbrt(p.x);
+		final double a2r3 = Math.cbrt(a * a);
+		final double m = (-a2r3 * top) / (b * xr3);
+		
+		// then compute the ellipse intersect of m, ex, and ey
+		// y - ey = m(x - ex)
+		// (x / a)^2 + (y / b)^2 = 1
+		// solve for y then substitute
+		// then examine terms to get quadratic equation parameters
+		// qa = a^2m^2 + b^2
+		// qb = 2a^2mey - 2a^2m^2ex
+		// qc = a^2m^2ex^2 - 2a^2mexey + a^2ey^2 - b^2a^2
+		final double a2 = a * a;
+		final double b2 = b * b;
+		final double m2 = m * m;
+		final double x2 = p.x * p.x;
+		final double y2 = ey * ey;
+		
+		// compute quadratic equation parameters
+		final double qa = a2 * m2 + b2;
+		final double qb = 2 * a2 * m * ey - 2 * a2 * m2 * p.x;
+		final double qc = a2 * m2 * x2 - 2 * a2 * m * p.x * ey + a2 * y2 - b2 * a2;
+		
+		// use the quadratic equation to limit the search space
+		final double b24ac = qb * qb - 4 * qa * qc;
+		if (b24ac < 0) {
+			// this would mean that the line from the evolute at p.x doesn't
+			// intersect with the ellipse, which shouldn't be possible
+			return this.getMaxDistanceToVertices(point);
+		}
+		
+		final double xmin = (-qb - Math.sqrt(b24ac)) / (2 * qa);
+		final double xmax = 0; 
+		
+		// get the farthest point on the ellipse
+		Vector2 s = Ellipse.getFarthestPointOnBoundedEllipse(xmin, xmax, a, b, p);
+		
+		// then compare that with the farthest point of the two vertices
+		double d1 = s.distance(p);
+		double d2 = this.getMaxDistanceToVertices(point);
+		
+		return d1 > d2 ? d1 : d2;
 	}
 	
 	/* (non-Javadoc)

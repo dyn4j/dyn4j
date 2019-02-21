@@ -1,4 +1,23 @@
 ===============================================================================
+Version 3.3.1
+===============================================================================
+New Features:
+  - Arithmetic optimizations (by mtsamis)
+  - Small performance enhancement in the Island class (by mtsamis)
+  - Memory footprint improvements (by mtsamis)
+
+Bug Fixes:
+  - Bug fix for HalfEllipse.getRadius(Vector2) when the half width < half
+    height and the given point is below the evolute.
+  - Bug fix for the initial transform not updating if CCD is turned off
+    
+Deprecated:
+  
+Breaking Changes:
+  
+Other:
+
+===============================================================================
 Version 3.3.0
 ===============================================================================
 New Features:

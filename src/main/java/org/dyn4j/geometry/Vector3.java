@@ -32,7 +32,7 @@ import org.dyn4j.Epsilon;
  * Used to solve 3x3 systems of equations.
  * @see Vector2
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.3.1
  * @since 1.0.0
  */
 public class Vector3 {

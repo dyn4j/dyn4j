@@ -118,7 +118,7 @@ import org.dyn4j.resources.Messages;
  * {@link Shape}s.  Refer to {@link Gjk#distance(Convex, Transform, Convex, Transform, Separation)}
  * for details on the implementation.
  * @author William Bittle
- * @version 3.3.0
+ * @version 3.3.1
  * @since 1.0.0
  * @see Epa
  * @see <a href="http://www.dyn4j.org/2010/04/gjk-gilbert-johnson-keerthi/" target="_blank">GJK (Gilbert-Johnson-Keerthi)</a>
