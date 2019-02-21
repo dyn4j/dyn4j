@@ -156,6 +156,17 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		// convert the world space vector(n) to local space
 		Vector2 localAxis = transform.getInverseTransformedR(vector);
 		
+		// private implementation
+		localAxis = getFarthestPointImpl(localAxis);
+		
+		// then finally convert back into world space coordinates
+		transform.transform(localAxis);
+		
+		return localAxis;
+	}
+	
+	private Vector2 getFarthestPointImpl(Vector2 localAxis) {
+		// localAxis is already in local coordinates
 		if (this.rotation == 0) {
 			getFarthestPointHelper(localAxis);
 		} else {
@@ -174,12 +185,10 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		
 		// add the radius along the vector to the center to get the farthest point
 		localAxis.add(this.center);
-		// then finally convert back into world space coordinates
-		transform.transform(localAxis);
 		
 		return localAxis;
 	}
-
+	
 	private void getFarthestPointHelper(Vector2 localAxis) {
 		// an ellipse is a circle with a non-uniform scaling transformation applied
 		// so we can achieve that by scaling the input axis by the major and minor
@@ -228,19 +237,25 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	public AABB createAABB(Transform transform) {
 		// because the vectors are the x and y axis we can perform various meaningful optimizations
 		
-		// inlined projection of x axis
+		// Inlined projection of x axis
 		// Interval x = this.project(Vector2.X_AXIS, transform);
-		Vector2 p1 = this.getFarthestPoint(Vector2.X_AXIS, transform);
-		double c = transform.getTransformedX(this.center);
-		double minx = 2 * c - p1.x;
-		double maxx = p1.x;
 		
-		// inlined projection of y axis
+		// Equivalent of transform.getInverseTransformedR(Vector2.X_AXIS)
+		Vector2 temp = new Vector2(transform.cost, -transform.sint);
+		double p1x = transform.getTransformedX(getFarthestPointImpl(temp));	
+		double c = transform.getTransformedX(this.center);
+		double minx = 2 * c - p1x;
+		double maxx = p1x;
+		
+		// Inlined projection of y axis
 		// Interval y = this.project(Vector2.Y_AXIS, transform);
-		p1 = this.getFarthestPoint(Vector2.Y_AXIS, transform);
+		
+		// Equivalent of transform.getInverseTransformedR(Vector2.Y_AXIS)
+		temp = new Vector2(transform.sint, transform.cost);
+		double p1y = transform.getTransformedY(getFarthestPointImpl(temp));	
 		c = transform.getTransformedY(this.center);
-		double miny = 2 * c - p1.y;
-		double maxy = p1.y;
+		double miny = 2 * c - p1y;
+		double maxy = p1y;
 		
 		return new AABB(minx, miny, maxx, maxy);
 	}
