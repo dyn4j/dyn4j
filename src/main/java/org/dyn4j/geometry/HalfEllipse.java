@@ -191,6 +191,10 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		return localAxis;
 	}
 	
+	/*
+	 * Performs all the logic of getFarthestPoint except for the needed world space transformations.
+	 * Hence all calculations are in local axis
+	 */
 	private Vector2 getFarthestPointImpl(Vector2 localAxis) {
 		// localAxis is already in local coordinates
 		

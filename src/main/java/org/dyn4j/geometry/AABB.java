@@ -51,10 +51,26 @@ public class AABB implements Translatable {
 	/** The maximum extent */
 	protected double maxX, maxY;
 	
+	/**
+	 * Method to create the valid AABB defined by the two points point1 and point2.
+	 * 
+	 * @param point1 the first point
+	 * @param point2 the second point
+	 * @return The one and only one valid AABB formed by point1 and point2
+	 */
 	public static AABB createAABBFromPoints(Vector2 point1, Vector2 point2) {
 		return createAABBFromPoints(point1.x, point1.y, point2.x, point2.y);
 	}
 	
+	/**
+	 * Method to create the valid AABB defined by the two points A(point1x, point1y) and B(point2x, point2y).
+	 * 
+	 * @param point1x The x coordinate of point A
+	 * @param point1y The y coordinate of point A
+	 * @param point2x The x coordinate of point B
+	 * @param point2y The y coordinate of point B
+	 * @return The one and only one valid AABB formed by A and B
+	 */
 	public static AABB createAABBFromPoints(double point1x, double point1y, double point2x, double point2y) {
 		if (point2x < point1x) {
 			double temp = point1x;

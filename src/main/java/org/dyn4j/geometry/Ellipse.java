@@ -165,9 +165,14 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		return localAxis;
 	}
 	
+	/*
+	 * Performs all the logic of getFarthestPoint except for the needed world space transformations.
+	 * Hence all calculations are in local axis
+	 */
 	private Vector2 getFarthestPointImpl(Vector2 localAxis) {
 		// localAxis is already in local coordinates
 		if (this.rotation == 0) {
+			// This is the case most of the time, and saves a lot of computations
 			getFarthestPointHelper(localAxis);
 		} else {
 			double cos = Math.cos(this.rotation);
@@ -189,6 +194,10 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		return localAxis;
 	}
 	
+	/*
+	 * Finds the farthest point in the ellipse in the direction of localAxis
+	 * Used to avoid code duplication in getFarthestPointImpl
+	 */
 	private void getFarthestPointHelper(Vector2 localAxis) {
 		// an ellipse is a circle with a non-uniform scaling transformation applied
 		// so we can achieve that by scaling the input axis by the major and minor
