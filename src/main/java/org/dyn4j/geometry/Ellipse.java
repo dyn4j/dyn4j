@@ -251,7 +251,9 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		
 		// Equivalent of transform.getInverseTransformedR(Vector2.X_AXIS)
 		Vector2 temp = new Vector2(transform.cost, -transform.sint);
+		// Equivalent of p1x = this.getFarthestPoint(Vector2.X_AXIS, transform).x;
 		double p1x = transform.getTransformedX(getFarthestPointImpl(temp));	
+		
 		double c = transform.getTransformedX(this.center);
 		double minx = 2 * c - p1x;
 		double maxx = p1x;
@@ -261,7 +263,10 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		
 		// Equivalent of transform.getInverseTransformedR(Vector2.Y_AXIS)
 		temp = new Vector2(transform.sint, transform.cost);
+		// Equivalent of p1y = this.getFarthestPoint(Vector2.Y_AXIS, transform).y;
 		double p1y = transform.getTransformedY(getFarthestPointImpl(temp));	
+		
+		// Rest of projection code
 		c = transform.getTransformedY(this.center);
 		double miny = 2 * c - p1y;
 		double maxy = p1y;

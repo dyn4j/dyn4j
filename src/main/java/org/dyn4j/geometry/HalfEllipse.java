@@ -284,20 +284,26 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	public AABB createAABB(Transform transform) {
 		// Inlined projection of x axis
 		
-		// Equivalent of transform.getInverseTransformedR(Vector2.X_AXIS)
+		// Equivalent of temp = transform.getInverseTransformedR(Vector2.X_AXIS)
 		Vector2 temp = new Vector2(transform.cost, -transform.sint);
+		// Equivalent of maxX = this.project(Vector2.X_AXIS, transform).getMax();
 		double maxX = transform.getTransformedX(getFarthestPointImpl(temp));
-		// Equivalent of transform.getInverseTransformedR(Vector2.INV_X_AXIS)
+		
+		// Equivalent of temp = transform.getInverseTransformedR(Vector2.INV_X_AXIS)
 		temp.set(-transform.cost, transform.sint);
+		// Equivalent of minX = this.project(Vector2.X_AXIS, transform).getMin();
 		double minX = transform.getTransformedX(getFarthestPointImpl(temp));
 		
 		// Inlined projection of y axis
 		
-		// Equivalent of transform.getInverseTransformedR(Vector2.Y_AXIS)
+		// Equivalent of temp = transform.getInverseTransformedR(Vector2.Y_AXIS)
 		temp.set(transform.sint, transform.cost);
+		// Equivalent of maxY = this.project(Vector2.Y_AXIS, transform).getMax();
 		double maxY = transform.getTransformedY(getFarthestPointImpl(temp));
-		// Equivalent of transform.getInverseTransformedR(Vector2.INV_Y_AXIS)
+		
+		// Equivalent of temp = transform.getInverseTransformedR(Vector2.INV_Y_AXIS)
 		temp.set(-transform.sint, -transform.cost);
+		// Equivalent of minY = this.project(Vector2.Y_AXIS, transform).getMin();
 		double minY = transform.getTransformedY(getFarthestPointImpl(temp));
 		
 		return new AABB(minX, minY, maxX, maxY);
