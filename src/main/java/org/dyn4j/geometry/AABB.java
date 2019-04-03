@@ -46,10 +46,46 @@ import org.dyn4j.resources.Messages;
  */
 public class AABB implements Translatable {
 	/** The minimum extent */
-	protected final Vector2 min;
+	protected double minX, minY;
 	
 	/** The maximum extent */
-	protected final Vector2 max;
+	protected double maxX, maxY;
+	
+	/**
+	 * Method to create the valid AABB defined by the two points point1 and point2.
+	 * 
+	 * @param point1 the first point
+	 * @param point2 the second point
+	 * @return The one and only one valid AABB formed by point1 and point2
+	 */
+	public static AABB createAABBFromPoints(Vector2 point1, Vector2 point2) {
+		return createAABBFromPoints(point1.x, point1.y, point2.x, point2.y);
+	}
+	
+	/**
+	 * Method to create the valid AABB defined by the two points A(point1x, point1y) and B(point2x, point2y).
+	 * 
+	 * @param point1x The x coordinate of point A
+	 * @param point1y The y coordinate of point A
+	 * @param point2x The x coordinate of point B
+	 * @param point2y The y coordinate of point B
+	 * @return The one and only one valid AABB formed by A and B
+	 */
+	public static AABB createAABBFromPoints(double point1x, double point1y, double point2x, double point2y) {
+		if (point2x < point1x) {
+			double temp = point1x;
+			point1x = point2x;
+			point2x = temp;
+		}
+		
+		if (point2y < point1y) {
+			double temp = point1y;
+			point1y = point2y;
+			point2y = temp;
+		}
+		
+		return new AABB(point1x, point1y, point2x, point2y);
+	}
 	
 	/**
 	 * Full constructor.
@@ -59,7 +95,13 @@ public class AABB implements Translatable {
 	 * @param maxY the maximum y extent
 	 */
 	public AABB(double minX, double minY, double maxX, double maxY) {
-		this(new Vector2(minX, minY), new Vector2(maxX, maxY));
+		// check the min and max
+		if (minX > maxX || minY > maxY) throw new IllegalArgumentException(Messages.getString("geometry.aabb.invalidMinMax"));
+		
+		this.minX = minX;
+		this.minY = minY;
+		this.maxX = maxX;
+		this.maxY = maxY;
 	}
 	
 	/**
@@ -69,10 +111,7 @@ public class AABB implements Translatable {
 	 * @throws IllegalArgumentException if either coordinate of the given min is greater than the given max
 	 */
 	public AABB(Vector2 min, Vector2 max) {
-		// check the min and max
-		if (min.x > max.x || min.y > max.y) throw new IllegalArgumentException(Messages.getString("geometry.aabb.invalidMinMax"));
-		this.min = min;
-		this.max = max;
+		this(min.x, min.y, max.x, max.y);
 	}
 	
 	/**
@@ -95,12 +134,17 @@ public class AABB implements Translatable {
 	 */
 	public AABB(Vector2 center, double radius) {
 		if (radius < 0) throw new IllegalArgumentException(Messages.getString("geometry.aabb.invalidRadius"));
+		
 		if (center == null) {
-			this.min = new Vector2(-radius, -radius);
-			this.max = new Vector2( radius,  radius);
+			this.minX = -radius;
+			this.minY = -radius;
+			this.maxX =  radius;
+			this.maxY =  radius;
 		} else {
-			this.min = new Vector2(center.x - radius, center.y - radius);
-			this.max = new Vector2(center.x + radius, center.y + radius);
+			this.minX = center.x - radius;
+			this.minY = center.y - radius;
+			this.maxX = center.x + radius;
+			this.maxY = center.y + radius;
 		}
 	}
 	
@@ -110,8 +154,10 @@ public class AABB implements Translatable {
 	 * @since 3.1.1
 	 */
 	public AABB(AABB aabb) {
-		this.min = aabb.min.copy();
-		this.max = aabb.max.copy();
+		this.minX = aabb.minX;
+		this.minY = aabb.minY;
+		this.maxX = aabb.maxX;
+		this.maxY = aabb.maxY;
 	}
 	
 	/**
@@ -122,10 +168,10 @@ public class AABB implements Translatable {
 	 * @since 3.2.5
 	 */
 	public AABB set(AABB aabb) {
-		this.min.x = aabb.min.x;
-		this.min.y = aabb.min.y;
-		this.max.x = aabb.max.x;
-		this.max.y = aabb.max.y;
+		this.minX = aabb.minX;
+		this.minY = aabb.minY;
+		this.maxX = aabb.maxX;
+		this.maxY = aabb.maxY;
 		return this;
 	}
 	
@@ -135,8 +181,18 @@ public class AABB implements Translatable {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("AABB[Min=").append(this.min)
-		.append("|Max=").append(this.max)
+		sb.append("AABB[Min=")
+		.append("(")
+		.append(this.minX)
+		.append(", ")
+		.append(this.minY)
+		.append(")")
+		.append("|Max=")
+		.append("(")
+		.append(this.maxX)
+		.append(", ")
+		.append(this.maxY)
+		.append(")")
 		.append("]");
 		return sb.toString();
 	}
@@ -146,16 +202,17 @@ public class AABB implements Translatable {
 	 */
 	@Override
 	public void translate(double x, double y) {
-		this.max.add(x, y);
-		this.min.add(x, y);
+		this.minX += x;
+		this.minY += y;
+		this.maxX += x;
+		this.maxY += y;
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Translatable#translate(org.dyn4j.geometry.Vector2)
 	 */
 	public void translate(Vector2 translation) {
-		this.max.add(translation);
-		this.min.add(translation);
+		translate(translation.x, translation.y);
 	}
 	
 	/**
@@ -167,8 +224,10 @@ public class AABB implements Translatable {
 	 */
 	public AABB getTranslated(Vector2 translation) {
 		return new AABB(
-				this.min.sum(translation),
-				this.max.sum(translation));
+				this.minX + translation.x,
+				this.minY + translation.y,
+				this.maxX + translation.x,
+				this.maxY + translation.y);
 	}
 	
 	/**
@@ -177,7 +236,7 @@ public class AABB implements Translatable {
 	 * @since 3.0.1
 	 */
 	public double getWidth() {
-		return this.max.x - this.min.x;
+		return this.maxX - this.minX;
 	}
 	
 	/**
@@ -186,7 +245,7 @@ public class AABB implements Translatable {
 	 * @since 3.0.1
 	 */
 	public double getHeight() {
-		return this.max.y - this.min.y;
+		return this.maxY - this.minY;
 	}
 	
 	/**
@@ -194,7 +253,7 @@ public class AABB implements Translatable {
 	 * @return double
 	 */
 	public double getPerimeter() {
-		return 2 * (this.max.x - this.min.x + this.max.y - this.min.y);
+		return 2 * (this.maxX - this.minX + this.maxY - this.minY);
 	}
 	
 	/**
@@ -202,7 +261,7 @@ public class AABB implements Translatable {
 	 * @return double
 	 */
 	public double getArea() {
-		return (this.max.x - this.min.x) * (this.max.y - this.min.y);
+		return (this.maxX - this.minX) * (this.maxY - this.minY);
 	}
 	
 	/**
@@ -213,10 +272,10 @@ public class AABB implements Translatable {
 	 * @return {@link AABB}
 	 */
 	public AABB union(AABB aabb) {
-		this.min.x = Math.min(this.min.x, aabb.min.x);
-		this.min.y = Math.min(this.min.y, aabb.min.y);
-		this.max.x = Math.max(this.max.x, aabb.max.x);
-		this.max.y = Math.max(this.max.y, aabb.max.y);
+		this.minX = Math.min(this.minX, aabb.minX);
+		this.minY = Math.min(this.minY, aabb.minY);
+		this.maxX = Math.max(this.maxX, aabb.maxX);
+		this.maxY = Math.max(this.maxY, aabb.maxY);
 		return this;
 	}
 	
@@ -227,15 +286,11 @@ public class AABB implements Translatable {
 	 * @return {@link AABB} the resulting union
 	 */
 	public AABB getUnion(AABB aabb) {
-		Vector2 min = new Vector2();
-		Vector2 max = new Vector2();
-		
-		min.x = Math.min(this.min.x, aabb.min.x);
-		min.y = Math.min(this.min.y, aabb.min.y);
-		max.x = Math.max(this.max.x, aabb.max.x);
-		max.y = Math.max(this.max.y, aabb.max.y);
-		
-		return new AABB(min, max);
+		return new AABB(
+				Math.min(this.minX, aabb.minX),
+				Math.min(this.minY, aabb.minY),
+				Math.max(this.maxX, aabb.maxX),
+				Math.max(this.maxY, aabb.maxY));
 	}
 	
 	/**
@@ -249,19 +304,19 @@ public class AABB implements Translatable {
 	 * @since 3.1.1
 	 */
 	public AABB intersection(AABB aabb) {
-		this.min.x = Math.max(this.min.x, aabb.min.x);
-		this.min.y = Math.max(this.min.y, aabb.min.y);
-		this.max.x = Math.min(this.max.x, aabb.max.x);
-		this.max.y = Math.min(this.max.y, aabb.max.y);
+		this.minX = Math.max(this.minX, aabb.minX);
+		this.minY = Math.max(this.minY, aabb.minY);
+		this.maxX = Math.min(this.maxX, aabb.maxX);
+		this.maxY = Math.min(this.maxY, aabb.maxY);
 		
 		// check for a bad AABB
-		if (this.min.x > this.max.x || this.min.y > this.max.y) {
+		if (this.minX > this.maxX || this.minY > this.maxY) {
 			// the two AABBs were not overlapping
 			// set this AABB to a degenerate one
-			this.min.x = 0.0;
-			this.min.y = 0.0;
-			this.max.x = 0.0;
-			this.max.y = 0.0;
+			this.minX = 0.0;
+			this.minY = 0.0;
+			this.maxX = 0.0;
+			this.maxY = 0.0;
 		}
 		
 		return this;
@@ -278,21 +333,18 @@ public class AABB implements Translatable {
 	 * @since 3.1.1
 	 */
 	public AABB getIntersection(AABB aabb) {
-		Vector2 min = new Vector2();
-		Vector2 max = new Vector2();
-		
-		min.x = Math.max(this.min.x, aabb.min.x);
-		min.y = Math.max(this.min.y, aabb.min.y);
-		max.x = Math.min(this.max.x, aabb.max.x);
-		max.y = Math.min(this.max.y, aabb.max.y);
+		double minx = Math.max(this.minX, aabb.minX);
+		double miny = Math.max(this.minY, aabb.minY);
+		double maxx = Math.min(this.maxX, aabb.maxX);
+		double maxy = Math.min(this.maxY, aabb.maxY);
 		
 		// check for a bad AABB
-		if (min.x > max.x || min.y > max.y) {
+		if (minx > maxx || miny > maxy) {
 			// the two AABBs were not overlapping
 			// return a degenerate one
-			return new AABB(new Vector2(), new Vector2());
+			return new AABB(0.0, 0.0, 0.0, 0.0);
 		}
-		return new AABB(min, max);
+		return new AABB(minx, miny, maxx, maxy);
 	}
 	
 	/**
@@ -308,24 +360,24 @@ public class AABB implements Translatable {
 	 */
 	public AABB expand(double expansion) {
 		double e = expansion * 0.5;
-		this.min.x -= e;
-		this.min.y -= e;
-		this.max.x += e;
-		this.max.y += e;
+		this.minX -= e;
+		this.minY -= e;
+		this.maxX += e;
+		this.maxY += e;
 		// we only need to verify the new aabb if the expansion
 		// was inwardly
 		if (expansion < 0.0) {
 			// if the aabb is invalid then set the min/max(es) to
 			// the middle value of their current values
-			if (this.min.x > this.max.x) {
-				double mid = (this.min.x + this.max.x) * 0.5;
-				this.min.x = mid;
-				this.max.x = mid;
+			if (this.minX > this.maxX) {
+				double mid = (this.minX + this.maxX) * 0.5;
+				this.minX = mid;
+				this.maxX = mid;
 			}
-			if (this.min.y > this.max.y) {
-				double mid = (this.min.y + this.max.y) * 0.5;
-				this.min.y = mid;
-				this.max.y = mid;
+			if (this.minY > this.maxY) {
+				double mid = (this.minY + this.maxY) * 0.5;
+				this.minY = mid;
+				this.maxY = mid;
 			}
 		}
 		return this;
@@ -345,10 +397,10 @@ public class AABB implements Translatable {
 	 */
 	public AABB getExpanded(double expansion) {
 		double e = expansion * 0.5;
-		double minx = this.min.x - e;
-		double miny = this.min.y - e;
-		double maxx = this.max.x + e;
-		double maxy = this.max.y + e;
+		double minx = this.minX - e;
+		double miny = this.minY - e;
+		double maxx = this.maxX + e;
+		double maxy = this.maxY + e;
 		// we only need to verify the new aabb if the expansion
 		// was inwardly
 		if (expansion < 0.0) {
@@ -365,9 +417,7 @@ public class AABB implements Translatable {
 				maxy = mid;
 			}
 		}
-		return new AABB(
-				new Vector2(minx, miny), 
-				new Vector2(maxx, maxy));
+		return new AABB(minx, miny, maxx, maxy);
 	}
 	
 	/**
@@ -376,19 +426,10 @@ public class AABB implements Translatable {
 	 * @return boolean true if the {@link AABB}s overlap
 	 */
 	public boolean overlaps(AABB aabb) {
-		// check for overlap along the x-axis
-		if (this.min.x > aabb.max.x || this.max.x < aabb.min.x) {
-			// the aabbs do not overlap along the x-axis
-			return false;
-		}
-		
-		// check for overlap along the y-axis
-		if (this.min.y > aabb.max.y || this.max.y < aabb.min.y) {
-			// the aabbs do not overlap along the y-axis
-			return false;
-		}
-		
-		return true;
+		return this.minX <= aabb.maxX &&
+				this.maxX >= aabb.minX &&
+				this.minY <= aabb.maxY &&
+				this.maxY >= aabb.minY;
 	}
 	
 	/**
@@ -397,12 +438,10 @@ public class AABB implements Translatable {
 	 * @return boolean
 	 */
 	public boolean contains(AABB aabb) {
-		if (this.min.x <= aabb.min.x && this.max.x >= aabb.max.x) {
-			if (this.min.y <= aabb.min.y && this.max.y >= aabb.max.y) {
-				return true;
-			}
-		}
-		return false;
+		return this.minX <= aabb.minX &&
+				this.maxX >= aabb.maxX &&
+				this.minY <= aabb.minY &&
+				this.maxY >= aabb.maxY;
 	}
 	
 	/**
@@ -423,12 +462,10 @@ public class AABB implements Translatable {
 	 * @since 3.1.1
 	 */
 	public boolean contains(double x, double y) {
-		if (this.min.x <= x && this.max.x >= x) {
-			if (this.min.y <= y && this.max.y >= y) {
-				return true;
-			}
-		}
-		return false;
+		return this.minX <= x &&
+				this.maxX >= x &&
+				this.minY <= y &&
+				this.maxY >= y;
 	}
 	
 	/**
@@ -440,7 +477,7 @@ public class AABB implements Translatable {
 	 * @since 3.1.1
 	 */
 	public boolean isDegenerate() {
-		return this.min.x == this.max.x || this.min.y == this.max.y;
+		return this.minX == this.maxX || this.minY == this.maxY;
 	}
 	
 	/**
@@ -455,7 +492,7 @@ public class AABB implements Translatable {
 	 * @see #isDegenerate()
 	 */
 	public boolean isDegenerate(double error) {
-		return Math.abs(this.max.x - this.min.x) <= error || Math.abs(this.max.y - this.min.y) <= error;
+		return Math.abs(this.maxX - this.minX) <= error || Math.abs(this.maxY - this.minY) <= error;
 	}
 	
 	/**
@@ -463,7 +500,7 @@ public class AABB implements Translatable {
 	 * @return double
 	 */
 	public double getMinX() {
-		return this.min.x;
+		return this.minX;
 	}
 	
 	/**
@@ -471,7 +508,7 @@ public class AABB implements Translatable {
 	 * @return double
 	 */
 	public double getMaxX() {
-		return this.max.x;
+		return this.maxX;
 	}
 	
 	/**
@@ -479,7 +516,7 @@ public class AABB implements Translatable {
 	 * @return double
 	 */
 	public double getMaxY() {
-		return this.max.y;
+		return this.maxY;
 	}
 	
 	/**
@@ -487,6 +524,6 @@ public class AABB implements Translatable {
 	 * @return double
 	 */
 	public double getMinY() {
-		return this.min.y;
+		return this.minY;
 	}
 }

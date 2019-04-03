@@ -1237,13 +1237,11 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 		Vector2 fCenter = finalTransform.getTransformed(this.mass.getCenter());
 		// return an AABB containing both points (expanded into circles by the
 		// rotation disc radius)
-		return new AABB(
-				new Vector2(
-					Math.min(iCenter.x, fCenter.x) - this.radius,
-					Math.min(iCenter.y, fCenter.y) - this.radius),
-				new Vector2(
-					Math.max(iCenter.x, fCenter.x) + this.radius,
-					Math.max(iCenter.y, fCenter.y) + this.radius));
+		
+		AABB sweptAABB = AABB.createAABBFromPoints(iCenter, fCenter);
+		sweptAABB.expand(this.radius * 2);
+		
+		return sweptAABB;
 	}
 	
 	/**

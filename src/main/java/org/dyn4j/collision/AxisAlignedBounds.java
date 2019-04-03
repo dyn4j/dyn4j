@@ -79,11 +79,7 @@ public class AxisAlignedBounds extends AbstractBounds implements Bounds, Transla
 		AABB aabbBody = collidable.createAABB();
 		
 		// test the projections for overlap
-		if (aabbBounds.overlaps(aabbBody)) {
-			return false;
-		}
-		
-		return true;
+		return !aabbBounds.overlaps(aabbBody);
 	}
 	
 	/**

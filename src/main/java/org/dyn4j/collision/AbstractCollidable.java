@@ -377,7 +377,7 @@ public abstract class AbstractCollidable<T extends Fixture> implements Collidabl
 			// return the aabb
 			return aabb;
 		}
-		return new AABB(new Vector2(0.0, 0.0), new Vector2(0.0, 0.0));
+		return new AABB(0.0, 0.0, 0.0, 0.0);
 	}
 
 	/* (non-Javadoc)

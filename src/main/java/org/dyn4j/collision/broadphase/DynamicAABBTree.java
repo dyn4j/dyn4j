@@ -296,16 +296,8 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 		double y1 = s.y;
 		double y2 = s.y + d.y * l;
 		
-		// create the min and max points
-		Vector2 min = new Vector2(
-				Math.min(x1, x2),
-				Math.min(y1, y2));
-		Vector2 max = new Vector2(
-				Math.max(x1, x2),
-				Math.max(y1, y2));
-		
 		// create the aabb
-		AABB aabb = new AABB(min, max);
+		AABB aabb = AABB.createAABBFromPoints(x1, y1, x2, y2);
 		
 		// precompute
 		double invDx = 1.0 / d.x;

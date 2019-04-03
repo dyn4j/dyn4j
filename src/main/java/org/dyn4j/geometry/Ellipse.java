@@ -156,13 +156,49 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		// convert the world space vector(n) to local space
 		Vector2 localAxis = transform.getInverseTransformedR(vector);
 		
-		// include local rotation
-		double cos = Math.cos(this.rotation);
-		double sin = Math.sin(this.rotation);
+		// private implementation
+		localAxis = getFarthestPointImpl(localAxis);
 		
-		// invert the local rotation
-		// cos(-x) = cos(x), sin(-x) = -sin(x)
-		localAxis.rotate(cos, -sin);
+		// then finally convert back into world space coordinates
+		transform.transform(localAxis);
+		
+		return localAxis;
+	}
+	
+	/*
+	 * Performs all the logic of getFarthestPoint except for the needed world space transformations.
+	 * Hence all calculations are in local axis
+	 */
+	private Vector2 getFarthestPointImpl(Vector2 localAxis) {
+		// localAxis is already in local coordinates
+		if (this.rotation == 0) {
+			// This is the case most of the time, and saves a lot of computations
+			getFarthestPointHelper(localAxis);
+		} else {
+			double cos = Math.cos(this.rotation);
+			double sin = Math.sin(this.rotation);
+			
+			// invert the local rotation
+			// cos(-x) = cos(x), sin(-x) = -sin(x)
+			localAxis.rotate(cos, -sin);	
+			
+			getFarthestPointHelper(localAxis);
+			
+			// include local rotation
+			localAxis.rotate(cos, sin);
+		}
+		
+		// add the radius along the vector to the center to get the farthest point
+		localAxis.add(this.center);
+		
+		return localAxis;
+	}
+	
+	/*
+	 * Finds the farthest point in the ellipse in the direction of localAxis
+	 * Used to avoid code duplication in getFarthestPointImpl
+	 */
+	private void getFarthestPointHelper(Vector2 localAxis) {
 		// an ellipse is a circle with a non-uniform scaling transformation applied
 		// so we can achieve that by scaling the input axis by the major and minor
 		// axis lengths
@@ -170,15 +206,9 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		localAxis.y *= this.halfHeight;
 		// then normalize it
 		localAxis.normalize();
-		// add the radius along the vector to the center to get the farthest point
-		Vector2 p = new Vector2(localAxis.x * this.halfWidth, localAxis.y  * this.halfHeight);
-		// include local rotation
-		// invert the local rotation
-		p.rotate(cos, sin);
-		p.add(this.center);
-		// then finally convert back into world space coordinates
-		transform.transform(p);
-		return p;
+		// then scale again to get a point in the ellipse
+		localAxis.x *= this.halfWidth;
+		localAxis.y *= this.halfHeight;
 	}
 	
 	/* (non-Javadoc)
@@ -216,19 +246,30 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	public AABB createAABB(Transform transform) {
 		// because the vectors are the x and y axis we can perform various meaningful optimizations
 		
-		// inlined projection of x axis
+		// Inlined projection of x axis
 		// Interval x = this.project(Vector2.X_AXIS, transform);
-		Vector2 p1 = this.getFarthestPoint(Vector2.X_AXIS, transform);
-		double c = transform.getTransformedX(this.center);
-		double minx = 2 * c - p1.x;
-		double maxx = p1.x;
 		
-		// inlined projection of y axis
+		// Equivalent of transform.getInverseTransformedR(Vector2.X_AXIS)
+		Vector2 temp = new Vector2(transform.cost, -transform.sint);
+		// Equivalent of p1x = this.getFarthestPoint(Vector2.X_AXIS, transform).x;
+		double p1x = transform.getTransformedX(getFarthestPointImpl(temp));	
+		
+		double c = transform.getTransformedX(this.center);
+		double minx = 2 * c - p1x;
+		double maxx = p1x;
+		
+		// Inlined projection of y axis
 		// Interval y = this.project(Vector2.Y_AXIS, transform);
-		p1 = this.getFarthestPoint(Vector2.Y_AXIS, transform);
+		
+		// Equivalent of transform.getInverseTransformedR(Vector2.Y_AXIS)
+		temp = new Vector2(transform.sint, transform.cost);
+		// Equivalent of p1y = this.getFarthestPoint(Vector2.Y_AXIS, transform).y;
+		double p1y = transform.getTransformedY(getFarthestPointImpl(temp));	
+		
+		// Rest of projection code
 		c = transform.getTransformedY(this.center);
-		double miny = 2 * c - p1.y;
-		double maxy = p1.y;
+		double miny = 2 * c - p1y;
+		double maxy = p1y;
 		
 		return new AABB(minx, miny, maxx, maxy);
 	}

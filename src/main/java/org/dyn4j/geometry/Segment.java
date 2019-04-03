@@ -754,29 +754,11 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 	 */
 	@Override
 	public AABB createAABB(Transform transform) {
-		double vx = 0.0;
-		double vy = 0.0;
-    	// get the first point
-		Vector2 p = transform.getTransformed(this.vertices[0]);
-		// project the point onto the vector
-    	double minX = Vector2.X_AXIS.dot(p);
-    	double maxX = minX;
-    	double minY = Vector2.Y_AXIS.dot(p);
-    	double maxY = minY;
-
-		// get the other point
-		p = transform.getTransformed(this.vertices[1]);
-		// project it onto the vector
-        vx = Vector2.X_AXIS.dot(p);
-        vy = Vector2.Y_AXIS.dot(p);
-        
-        // compare the x values
-        minX = Math.min(minX, vx);
-        maxX = Math.max(maxX, vx);
-        minY = Math.min(minY, vy);
-        maxY = Math.max(maxY, vy);
-        
+    	// get the transformed points
+		Vector2 p0 = transform.getTransformed(this.vertices[0]);
+		Vector2 p1 = transform.getTransformed(this.vertices[1]);
+		
 		// create the aabb
-		return new AABB(minX, minY, maxX, maxY);
+		return AABB.createAABBFromPoints(p0, p1);
 	}
 }

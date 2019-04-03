@@ -288,10 +288,21 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 	 */
 	@Override
 	public AABB createAABB(Transform transform) {
-		Interval x = this.project(Vector2.X_AXIS, transform);
-		Interval y = this.project(Vector2.Y_AXIS, transform);
+		// Inlined projection of x axis
+		// Interval x = this.project(Vector2.X_AXIS, transform);
+		Vector2 p1 = this.getFarthestPoint(Vector2.X_AXIS, transform);
+		double c = transform.getTransformedX(this.center);
+		double minX = 2 * c - p1.x;
+		double maxX = p1.x;
 		
-		return new AABB(x.getMin(), y.getMin(), x.getMax(), y.getMax());
+		// Inlined projection of y axis
+		// Interval y = this.project(Vector2.Y_AXIS, transform);
+		p1 = this.getFarthestPoint(Vector2.Y_AXIS, transform);
+		c = transform.getTransformedY(this.center);
+		double minY = 2 * c - p1.y;
+		double maxY = p1.y;
+		
+		return new AABB(minX, minY, maxX, maxY);
 	}
 
 	/* (non-Javadoc)
