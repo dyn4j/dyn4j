@@ -297,19 +297,24 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		Vector2 p = transform.getInverseTransformed(point);
 		Vector2 p1 = this.vertices[0];
 		Vector2 p2 = this.vertices[1];
+		
 		// get the location of the point relative to the first two vertices
 		double last = Segment.getLocation(p, p1, p2);
-		int size = this.vertices.length;
+		
 		// loop through the rest of the vertices
+		int size = this.vertices.length;
 		for (int i = 1; i < size; i++) {
 			// p1 is now p2
 			p1 = p2;
+			
 			// p2 is the next point
 			p2 = this.vertices[(i + 1) == size ? 0 : i + 1];
+			
 			// check if they are equal (one of the vertices)
 			if (p.equals(p1)) {
 				return true;
 			}
+			
 			// do side of line test
 			// multiply the last location with this location
 			// if they are the same sign then the opertation will yield a positive result
@@ -318,6 +323,7 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 				return false;
 			}
 		}
+		
 		return true;
 	}
 
@@ -329,7 +335,6 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		super.rotate(theta, cos, sin, x, y);
 		
 		int size = this.vertices.length;
-		
 		for (int i = 0; i < size; i++) {
 			this.vertices[i].rotate(cos, sin, x, y);
 			this.normals[i].rotate(cos, sin);
@@ -342,6 +347,7 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 	@Override
 	public void translate(double x, double y) {
 		super.translate(x, y);
+		
 		int size = this.vertices.length;
 		for (int i = 0; i < size; i++) {
 			this.vertices[i].add(x, y);
@@ -353,26 +359,31 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 	 */
 	@Override
 	public Interval project(Vector2 vector, Transform transform) {
-		//System.out.println(1);
 		double v = 0.0;
-    	// get the first point
+    	
+		// get the first point
 		Vector2 p = transform.getTransformed(this.vertices[0]);
+		
 		// project the point onto the vector
     	double min = vector.dot(p);
     	double max = min;
+    	
     	// loop over the rest of the vertices
     	int size = this.vertices.length;
         for(int i = 1; i < size; i++) {
     		// get the next point
     		p = transform.getTransformed(this.vertices[i]);
+    		
     		// project it onto the vector
             v = vector.dot(p);
+            
             if (v < min) { 
                 min = v;
             } else if (v > max) { 
                 max = v;
             }
         }
+        
         return new Interval(min, max);
 	}
 
@@ -424,6 +435,7 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		// transform the normal into local space
 		Vector2 localn = transform.getInverseTransformedR(vector);
 		
+		// find the index of the farthest point
 		int index = maxIndex(localn);
 		
 		// transform the point into world space and return
@@ -745,7 +757,8 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
         // and then minY with INV_Y_AXIS
         yAxis.negate();
         double minY = transform.getTransformedY(this.vertices[maxIndexFast(yAxis)]);
-
+        
+		// create the aabb
         return new AABB(minX, minY, maxX, maxY);
 	}
 	
@@ -755,19 +768,19 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 	 * @see org.dyn4j.geometry.Shape#createAABB(org.dyn4j.geometry.Transform)
 	 */
 	AABB createAABBLinear(Transform transform) {
-		// get the first point
-		// project the point onto the vector
-    	double minX, maxX, minY, maxY;
+		double minX, maxX, minY, maxY;
     	
-    	Vector2 v = this.vertices[0];
+    	// get the first point
+		Vector2 v = this.vertices[0];
+    	
+		// project the point onto the vector
     	minX = maxX = transform.getTransformedX(v);
     	minY = maxY = transform.getTransformedY(v);
     	
     	// loop over the rest of the vertices
     	int size = this.vertices.length;
         for(int i = 1; i < size; i++) {
-    		// get the next point
-    		// project it onto the vector
+    		// get the next point and then project it onto the vector
         	v = this.vertices[i];
         	
         	// v = transform.getTransformed(v) allocates a new Vector2 for each loop
@@ -781,6 +794,7 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
             } else if (vx > maxX) {
             	maxX = vx;
             }
+            
             // compare the y values
             if (vy < minY) {
             	minY = vy;
