@@ -42,14 +42,22 @@ import org.dyn4j.resources.Messages;
  * @since 1.0.0
  */
 public class Polygon extends AbstractShape implements Convex, Wound, Shape, Transformable, DataContainer {
+	private static final int FAST_FARTHEST_POINT_THRESHOLD = 10;
+	private static final int FAST_AABB_THRESHOLD = 4 * FAST_FARTHEST_POINT_THRESHOLD;
+	
 	/** The polygon vertices */
 	final Vector2[] vertices;
 	
 	/** The polygon normals */
 	final Vector2[] normals;
 	
+	/** Precomputed step for optimized search
+	 * Because searchStep = sqrt(n) we want to avoid computing the square root every time. */
+	final int searchStep;
+	
 	/**
-	 * Full constructor for sub classes.
+	 * Full constructor. Assumes everything is valid.
+	 * Allows access to sub classes.
 	 * @param center the center
 	 * @param radius the rotation radius
 	 * @param vertices the vertices
@@ -59,6 +67,17 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		super(center, radius);
 		this.vertices = vertices;
 		this.normals = normals;
+		
+		int size = this.vertices.length;
+		if (size >= FAST_FARTHEST_POINT_THRESHOLD) {
+			// We can find the farthest point along a vector in O(n/step + step) steps
+			// so the optimal selection for step is sqrt(n) to get O(sqrt(n))
+			// Also note that this algorithm is more complex so we enable it only for sufficient vertex count
+			this.searchStep = (int) (Math.sqrt(size) + 0.5);
+		} else {
+			// If the polygon has few vertices switch to the linear search
+			this.searchStep = 1;
+		}
 	}
 	
 	/**
@@ -71,12 +90,7 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 	 * @param center the center of the polygon
 	 */
 	private Polygon(boolean valid, Vector2[] vertices, Vector2 center) {
-		super(center, Geometry.getRotationRadius(center, vertices));
-			
-		// set the vertices
-		this.vertices = vertices;
-		// create the normals
-		this.normals = Geometry.getCounterClockwiseEdgeNormals(vertices);
+		this(center, Geometry.getRotationRadius(center, vertices), vertices, Geometry.getCounterClockwiseEdgeNormals(vertices));
 	}
 	
 	/**
@@ -370,23 +384,8 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		// transform the normal into local space
 		Vector2 localn = transform.getInverseTransformedR(vector);
 		
-		double max = localn.dot(this.vertices[0]);
-		int index = 0;
-		// find the vertex on the polygon that is further along on the penetration axis
+		int index = maxIndex(localn);
 		int count = this.vertices.length;
-		for (int i = 1; i < count; i++) {
-			// get the current vertex
-			Vector2 v = this.vertices[i];
-			// get the scalar projection of v onto axis
-			double projection = localn.dot(v);
-			// keep the maximum projection point
-			if (projection > max) {
-				// set the new maximum
-				max = projection;
-				// save the index
-				index = i;
-			}
-		}
 		
 		Vector2 maximum = new Vector2(this.vertices[index]);
 		
@@ -394,10 +393,12 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		// see which edge is most perpendicular
 		Vector2 leftN = this.normals[index == 0 ? count - 1 : index - 1];
 		Vector2 rightN = this.normals[index];
+		
 		// create the maximum point for the feature (transform the maximum into world space)
 		transform.transform(maximum);
 		PointFeature vm = new PointFeature(maximum, index);
 		// is the left or right edge more perpendicular?
+		
 		if (leftN.dot(localn) < rightN.dot(localn)) {
 			int l = index + 1 == count ? 0 : index + 1;
 			
@@ -423,17 +424,29 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		// transform the normal into local space
 		Vector2 localn = transform.getInverseTransformedR(vector);
 		
-		// set the farthest point to the first one
+		int index = maxIndex(localn);
+		
+		// transform the point into world space and return
+		return transform.getTransformed(this.vertices[index]);
+	}
+	
+	/**
+	 * One of the implementations for the maxIndex functionality, runs in O(n) time.
+	 * 
+	 * @param vector the direction
+	 * @return the index of the farthest vertex in that direction
+	 */
+	private int maxIndexLinear(Vector2 vector) {
 		int index = 0;
 		// prime the projection amount
-		double max = localn.dot(this.vertices[0]);
+		double max = vector.dot(this.vertices[0]);
 		// loop through the rest of the vertices to find a further point along the axis
 		int size = this.vertices.length;
 		for (int i = 1; i < size; i++) {
 			// get the current vertex
 			Vector2 v = this.vertices[i];
 			// project the vertex onto the axis
-			double projection = localn.dot(v);
+			double projection = vector.dot(v);
 			// check to see if the projection is greater than the last
 			if (projection > max) {
 				// otherwise this point is the farthest so far so clear the array and add it
@@ -443,8 +456,169 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 			}
 		}
 		
-		// transform the point into world space and return
-		return transform.getTransformed(this.vertices[index]);
+		return index;
+	}
+	
+	/** Private variable that holds the current maxProjection while performing the maxIndexFast function calls.
+	 *  Unfortunately we can't return two variables (both index and max) so this is the only viable way. */
+	private double maxProjection;
+	
+	/**
+	 * Helper method to implement findMaxTwoWay. Performs half the search (only to the right)
+	 * and return the index of the vertex maximizing vector.dot(v) or -1 if no vertex with projection
+	 * greater than maxProjection found.
+	 * 
+	 * Checks only point from startRight and incrementing by step
+	 * @see findMaxTwoWay
+	 * 
+	 * @param startRight The starting point for the search
+	 * @param step The step that defines how many point will be skipped in each iteration
+	 * @param vector The direction
+	 * @return the index 
+	 */
+	private int findMaxToRight(int startRight, int step, Vector2 vector) {
+		double projection;
+		
+		// Check if there's at least one (the first) vertex with greater projection
+		// Also checks if startRight < this.vertices.length but assumes startRight >= 0
+		if (startRight < this.vertices.length && (projection = vector.dot(this.vertices[startRight])) > maxProjection) {
+			maxProjection = projection;
+			int maxIndex = startRight;
+			
+			// Keep searching to the right while we find more and more vertices that increase the projection.
+			// First increment the search index and check if it is a valid index (first in order to short circuit the condition if not valid).
+			while ((maxIndex = maxIndex + step) < this.vertices.length && (projection = vector.dot(this.vertices[maxIndex])) > maxProjection) {
+				maxProjection = projection;
+			}
+			
+			// Because we increment the index before checking and calculating we always end with one extra addition, so we cancel this here
+			return maxIndex - step;
+		}
+		
+		return -1;
+	}
+	
+	/**
+	 * Symmetric to findMaxToRight.
+	 * Helper method to implement findMaxTwoWay. Performs half the search (only to the left)
+	 * and return the index of the vertex maximizing vector.dot(v) or -1 if no vertex with projection
+	 * greater than maxProjection found.
+	 * 
+	 * Checks only point from startLeft and decrementing by step
+	 * @see findMaxTwoWay
+	 * 
+	 * @param startLeft The starting point for the search
+	 * @param step The step that defines how many point will be skipped in each iteration
+	 * @param vector The direction
+	 * @return the index 
+	 */
+	private int findMaxToLeft(int startLeft, int step, Vector2 vector) {
+		double projection;
+		
+		// Check if there's at least one (the first) vertex with greater projection
+		// Also checks if startLeft >= 0 but assumes startRight < this.vertices.length
+		if (startLeft >= 0 && (projection = vector.dot(this.vertices[startLeft])) > maxProjection) {
+			maxProjection = projection;
+			int maxIndex = startLeft;
+			
+			// Keep searching to the left while we find more and more vertices that increase the projection.
+			// First decrement the search index and check if it is a valid index (first in order to short circuit the condition if not valid).
+			while ((maxIndex = maxIndex - step) >= 0 && (projection = vector.dot(this.vertices[maxIndex])) > maxProjection) {
+				maxProjection = projection;
+			}
+			
+			// Because we decrement the index before checking and calculating we always end with one extra substraction, so we cancel this here
+			return maxIndex + step;
+		}
+		
+		return -1;
+	}
+	
+	/**
+	 * Helper method for maxIndexFast. Finds the vertex that maximize vector.dot(v) (affected by the local variable 'maxProjection')
+	 * but only checks the points indicated by startRight, startLeft and step.
+	 * Specifically this method will search either from startRight to the right, in the indices (startRight + k * step)
+	 * or if the maximum lies in the other side it will search from startLeft to the left, in the indices (startLeft - k * step)
+	 * 
+	 * Works because vertices are sorted by angle @see maxIndexFast
+	 * 
+	 * @param startRight The starting point for the search to the right
+	 * @param startLeft The starting point for the search to the left
+	 * @param step The step that defines how many point will be skipped in each iteration
+	 * @param initialMaxIndex The index to be returned if there where no vertices with product greater than 'maxProjection' (only when the max was in (startLeft, startRight))
+	 * @param vector The direction
+	 * @return The index of the resulting vertex 
+	 */
+	private int findMaxTwoWay(int startRight, int startLeft, int step, int initialMaxIndex, Vector2 vector) {
+		int searchIndex;
+		
+		if ((searchIndex = findMaxToRight(startRight, step, vector)) != -1) {
+			// If we found at least one vertex with projection > maxProjection
+			// then we don't need to search on the left; return the index found
+			return searchIndex;
+		} else if ((searchIndex = findMaxToLeft(startLeft, step, vector)) != -1) {
+			// This means than the first point had projection < maxProjection and the search to the right aborted
+			// so go to the left
+			return searchIndex;
+		} else {
+			// Left side search aborted as well, return initialMaxIndex
+			return initialMaxIndex;
+		}
+	}
+	
+	/**
+	 * One of the implementations for the maxIndex functionality, runs in O(sqrt(n)) time.
+	 * Since we have the vertices sorted by angle we can do better than linear search.
+	 * If we consider the function f(n) = vector.dot(vertices[n]) we can see that it will have one maximum and one minimum value
+	 * and also it will be monotonically increasing/decreasing between those points.
+	 * So we can perform the search in two phases: Choose a step 's' and find the max (let's say it's in position j) only in vertices with index = k * s for some natural number k.
+	 * After this point the real max will be near j, at most with distance s from it.
+	 * This means that we can find the real max in n/s + s steps, which is asymptotically better for s = sqrt(n).
+	 * Complete proof of correctness omitted from here. See additional comments below for more details.
+	 * 
+	 * @param vector the direction
+	 * @return the index of the farthest vertex in that direction
+	 */
+	private int maxIndexFast(Vector2 vector) {
+		// set the farthest point to the first one
+		int n = this.vertices.length;
+		
+		// Initialize maxProjection to the projection of the first vertex
+		maxProjection = vector.dot(this.vertices[0]);
+		
+		// As described, we first find a vertex that is 'close enough' to the max.
+		// Close enough here means that the real maximum won't be farthest away than (searchStep - 1) places to the left or right
+		int maxIndex = findMaxTwoWay(searchStep, n - searchStep, searchStep, 0, vector);
+		
+		// Now we need to find the exact place of the maximum, so we continue with the search near the last index found.
+		// We must be careful with the edge case where maxIndex is 0, because then we can't go to the left by substracting 1.
+		if (maxIndex == 0) {
+			// In this edge case the left index to start is (n - 1) and not (maxIndex - 1)
+			return findMaxTwoWay(1, n - 1, 1, maxIndex, vector);
+		} else {
+			// Correctness note: one may wonder what will happen when 0 < maxIndex < searchStep or maxIndex > n - searchStep because in that case the
+			// search will end prematurely due to index bounds [0, this.vertices.length).
+			// The only way for this to happen is if we find only an increasing (or decreasing) sequence of projections with this step and the last happens to be closer to n - step (or step for when going to the left).
+			// But in this case the indices that won't be checked will never contain an even greater projection value, because we made the whole loop and that wouldn't happen if a bigger projection existed near index 0.
+			
+			// The other case, safely search to left and right with step 1, until we hit the real max.
+			return findMaxTwoWay(maxIndex + 1, maxIndex - 1, 1, maxIndex, vector);
+		}
+	}
+	
+	/**
+	 * Internal helper method that returns the index of the point that is
+	 * farthest in direction of a vector. Chooses what algorithm to use based on vertex count.
+	 * 
+	 * @param vector the direction
+	 * @return the index of the farthest vertex in that direction
+	 */
+	int maxIndex(Vector2 vector) {
+		if (this.searchStep == 1) {
+			return maxIndexLinear(vector);
+		} else {
+			return maxIndexFast(vector);
+		}
 	}
 	
 	/**
@@ -531,23 +705,76 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Shape#createAABB(org.dyn4j.geometry.Transform)
 	 */
-	@Override
 	public AABB createAABB(Transform transform) {
+		if (this.vertices.length >= FAST_AABB_THRESHOLD) {
+			return createAABBFast(transform);
+		} else {
+			return createAABBLinear(transform);
+		}
+	}
+	
+	/**
+	 * Internal implementation of createAABB that runs in O(sqrt(n)) time
+	 * Only suitable for sufficiently large polygons. Used when vertexCount >= FAST_AABB_THRESHOLD
+	 * 
+	 * @see org.dyn4j.geometry.Shape#createAABB(org.dyn4j.geometry.Transform)
+	 */
+	AABB createAABBFast(Transform transform) {
+        // This is an alternative way of computing the AABB
+		// that can be used instead of the straightforward linear time algorithm
+		// Works by finding the farthest point in each of the four semi-axis using the fast maxIndexFast method
+		// Asymptotically faster time O(sqrt(n)) but involves larger constants so should be used only for polygons with really high vertex count
+		// Vertex count > 40 is a safe point from which this version performs always faster
+		// We also apply the matrix transformation after finding the vertices which is an extra benefit
+		
+		// Inline Vector2 xAxis = transform.getTransformedR(Vector2.X_AXIS)
+		Vector2 xAxis = new Vector2(transform.cost, -transform.sint);
+		// Inline Vector2 yAxis = transform.getTransformedR(Vector2.Y_AXIS)
+		Vector2 yAxis = new Vector2(transform.sint, transform.cost);
+        
+		// find maxX with X_AXIS
+        double maxX = transform.getTransformedX(this.vertices[maxIndexFast(xAxis)]);
+        
+		// and then minX with INV_X_AXIS
+        xAxis.negate();
+        double minX = transform.getTransformedX(this.vertices[maxIndexFast(xAxis)]);
+        
+        // find maxY with Y_AXIS
+        double maxY = transform.getTransformedY(this.vertices[maxIndexFast(yAxis)]);
+        
+        // and then minY with INV_Y_AXIS
+        yAxis.negate();
+        double minY = transform.getTransformedY(this.vertices[maxIndexFast(yAxis)]);
+
+        return new AABB(minX, minY, maxX, maxY);
+	}
+	
+	/**
+	 * Internal implementation of createAABB that runs in O(n) time, suitable for most uses unless vertex count is large.
+	 * 
+	 * @see org.dyn4j.geometry.Shape#createAABB(org.dyn4j.geometry.Transform)
+	 */
+	AABB createAABBLinear(Transform transform) {
 		// get the first point
-		Vector2 p = transform.getTransformed(this.vertices[0]);
 		// project the point onto the vector
-    	double minX = p.x;
-    	double maxX = p.x;
-    	double minY = p.y;
-    	double maxY = p.y;
+    	double minX, maxX, minY, maxY;
+    	
+    	Vector2 v = this.vertices[0];
+    	minX = maxX = transform.getTransformedX(v);
+    	minY = maxY = transform.getTransformedY(v);
+    	
     	// loop over the rest of the vertices
     	int size = this.vertices.length;
         for(int i = 1; i < size; i++) {
     		// get the next point
-    		p = transform.getTransformed(this.vertices[i]);
     		// project it onto the vector
-            double vx = p.x;
-            double vy = p.y;
+        	v = this.vertices[i];
+        	
+        	// v = transform.getTransformed(v) allocates a new Vector2 for each loop
+        	// but we can avoid this by transforming x and y separately
+            double vx = transform.getTransformedX(v);
+            double vy = transform.getTransformedY(v);
+            
             // compare the x values
             if (vx < minX) {
             	minX = vx;
@@ -561,7 +788,9 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
             	maxY = vy;
             }
         }
+        
 		// create the aabb
-		return new AABB(minX, minY, maxX, maxY);
+        return new AABB(minX, minY, maxX, maxY);
 	}
+	
 }
