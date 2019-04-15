@@ -648,42 +648,65 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 			return Collections.emptyList();
 		}
 		
+		// precompute
+		double invDx = 1.0 / d.x;
+		double invDy = 1.0 / d.y;
+		
 		// get the estimated collision count
 		int eSize = Collisions.getEstimatedRaycastCollisions(this.elementMap.size());
 		List<BroadphaseItem<E, T>> items = new ArrayList<BroadphaseItem<E, T>>(eSize);
+		LazyAABBTreeNode node = this.root;
 		
-		// prepare the recursion: recursion-wide constants
-		this.currentRaycastLength = length;
-		this.currentRaycastInvDx = 1.0 / d.x;
-		this.currentRaycastInvDy = 1.0 / d.y;
-		
-		raycastImpl(ray, aabb, root, filter, items);
-		
-		return items;
-	}
-	
-	// recursion-wide constants for raycasting
-	private double currentRaycastLength;
-	private double currentRaycastInvDx, currentRaycastInvDy;
-	
-	/**
-	 * Internal recursive method to implement BroadphaseDetector#raycast
-	 */
-	private void raycastImpl(Ray ray, AABB rayAABB, LazyAABBTreeNode root, BroadphaseFilter<E, T> filter, List<BroadphaseItem<E, T>> items) {
-		if (root.isLeaf()) {
-			@SuppressWarnings("unchecked")
-			LazyAABBTreeLeaf<E, T> leaf = (LazyAABBTreeLeaf<E, T>)root;
-			
-			if (this.raycast(ray.getStart(), currentRaycastLength, currentRaycastInvDx, currentRaycastInvDy, rayAABB)) {
-				if (filter.isAllowed(ray, currentRaycastLength, leaf.collidable, leaf.fixture)) {
-					items.add(new BroadphaseItem<E, T>(leaf.collidable, leaf.fixture));
+		// perform a iterative, stack-less, traversal of the tree
+		while (node != null) {
+			// check if the current node overlaps the desired node
+			if (aabb.overlaps(node.aabb)) {
+				// if they do overlap, then check the left child node
+				if (node.isLeaf()) {
+					if (this.raycast(s, length, invDx, invDy, node.aabb)) {
+						// if both are null, then this is a leaf node
+						@SuppressWarnings("unchecked")
+						LazyAABBTreeLeaf<E, T> leaf = (LazyAABBTreeLeaf<E, T>)node;
+						if (filter.isAllowed(ray, length, leaf.collidable, leaf.fixture)) {
+							items.add(new BroadphaseItem<E, T>(leaf.collidable, leaf.fixture));
+						}
+						// if its a leaf node then we need to go back up the
+						// tree and test nodes we haven't yet
+					}
+				} else {
+					// if the left is not null, then check that subtree
+					node = node.left;
+					continue;
 				}
 			}
-		} else {
-			// they overlap so descend into both children
-			if (rayAABB.overlaps(root.left.aabb)) raycastImpl(ray, rayAABB, root.left, filter, items);
-			if (rayAABB.overlaps(root.right.aabb)) raycastImpl(ray, rayAABB, root.right, filter, items);
+			
+			// if the current node is a leaf node or doesnt overlap the
+			// desired aabb, then we need to go back up the tree until we
+			// find the first left node who's right node is not null
+			boolean nextNodeFound = false;
+			while (node.parent != null) {
+				// check if the current node the left child of its parent
+				if (node == node.parent.left) {
+					// it is, so check if the right node is non-null
+					// NOTE: not need since the tree is a complete tree (every node has two children)
+					//if (node.parent.right != null) {
+					// it isn't so the sibling node is the next node
+					node = node.parent.right;
+					nextNodeFound = true;
+					break;
+					//}
+				}
+				
+				// if the current node isn't a left node or it is but its
+				// sibling is null, go to the parent node
+				node = node.parent;
+			}
+			
+			// if we didn't find it then we are done
+			if (!nextNodeFound) break;
 		}
+		
+		return items;
 	}
 	
 	/* (non-Javadoc)
