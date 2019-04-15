@@ -34,9 +34,9 @@ import java.util.Map;
 import org.dyn4j.collision.Collidable;
 import org.dyn4j.collision.Collisions;
 import org.dyn4j.collision.Fixture;
+import org.dyn4j.dynamics.World;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Ray;
-import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 
 /**
@@ -106,13 +106,13 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	
 	/**
 	 * Destroys the existing tree in O(n) time and prepares for batch-detection while
-	 * also invalidating all AABBs in order to be updated. Called by {@link World} in each step before detection.
+	 * also updating all AABBs. Called by {@link World} in each step before detection.
 	 */
 	@Override
 	public void batchUpdate() {
 		for (LazyAABBTreeLeaf<E, T> node : this.elements) {
 			node.setOnTree(false);
-			node.invalidateAABB();
+			node.updateAABB();
 		}
 		
 		this.root = null;
@@ -128,16 +128,18 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		LazyAABBTreeLeaf<E, T> existing = this.elementMap.get(key);
 		
 		if (existing != null) {
+			// update existing node
 			if (existing.isOnTree()) {
 				removeImpl(existing);
-				
 				existing.setOnTree(false);
-				existing.invalidateAABB();
-			} else {
-				return;
 			}
+			
+			existing.updateAABB();
 		} else {
+			// add new node
 			LazyAABBTreeLeaf<E, T> node = new LazyAABBTreeLeaf<E, T>(collidable, fixture);
+			node.updateAABB();
+			
 			this.elementMap.put(key, node);
 			
 			this.elements.add(node);
@@ -229,7 +231,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		BroadphaseKey key = BroadphaseKey.get(collidable, fixture);
 		LazyAABBTreeLeaf<E, T> node = this.elementMap.get(key);
 		
-		if (node != null && node.isOnTree() && !node.mustRemove()) {
+		if (node != null && !node.mustRemove()) {
 			return node.aabb;
 		}
 		
@@ -371,11 +373,8 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 			LazyAABBTreeLeaf<E, T> node = elements.get(i);
 			
 			if (!node.isOnTree()) {
-				if (node.aabb == null) {
-					// Update the AABB if needed
-					Transform transform = node.collidable.getTransform();
-					node.aabb = node.fixture.getShape().createAABB(transform);	
-				}
+				// Mark that this leaf is now on the tree
+				node.setOnTree(true);
 				
 				insert(node);
 			}
@@ -395,12 +394,6 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		
 		for (int i = 0; i < this.elements.size(); i++) {
 			LazyAABBTreeLeaf<E, T> node = elements.get(i);
-			
-			if (node.aabb == null) {
-				// Update the AABB if needed
-				Transform transform = node.collidable.getTransform();
-				node.aabb = node.fixture.getShape().createAABB(transform);	
-			}
 			
 			insertAndDetect(node, filter, pairs);
 		}
@@ -481,9 +474,6 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 			this.root = item;
 			return;
 		}
-		
-		// Mark that this leaf is now on the tree
-		item.setOnTree(true);
 		
 		// Get the new node's AABB
 		AABB itemAABB = item.aabb;
@@ -613,6 +603,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		// test the node itself
 		// check for leaf node
 		// non-leaf nodes always have a left child
+		
 		if (node.isLeaf()) {
 			@SuppressWarnings("unchecked")
 			LazyAABBTreeLeaf<E, T> leaf = (LazyAABBTreeLeaf<E, T>)node;

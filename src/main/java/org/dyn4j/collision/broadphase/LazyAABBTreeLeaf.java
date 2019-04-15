@@ -26,6 +26,7 @@ package org.dyn4j.collision.broadphase;
 
 import org.dyn4j.collision.Collidable;
 import org.dyn4j.collision.Fixture;
+import org.dyn4j.geometry.Transform;
 
 /**
  * Represents a leaf node in a {@link LazyAABBTree}.
@@ -60,10 +61,11 @@ final class LazyAABBTreeLeaf<E extends Collidable<T>, T extends Fixture> extends
 	}
 	
 	/**
-	 * Marks that the AABB of this leaf must be updated
+	 * Updates the AABB of this leaf
 	 */
-	public void invalidateAABB() {
-		this.aabb = null;
+	public void updateAABB() {
+		Transform transform = collidable.getTransform();
+		this.aabb = fixture.getShape().createAABB(transform);
 	}
 	
 	/**
