@@ -816,4 +816,35 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		// c is the new root node of the subtree
 	}
 	
+	/*
+	 * Ideally setAABBExpansion would throw an unsupported operation exception because we don't want to expand the AABBs in any case.
+	 * But this could break existing applications that explicitly set the expansion in the case that this broadphase is set as the default.
+	 * So we'll be transparent and just ignore the value.
+	 * 
+	 * @Override
+	 * public void setAABBExpansion(double expansion) {
+	 * 	throw new UnsupportedOperationException();
+	 * }
+	 */
+	
+	/*
+	 * But at least if the user asks, let them know that expansion is logically 0.
+	 * 
+	 * (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#getAABBExpansion()
+	 */
+	@Override
+	public double getAABBExpansion() {
+		return 0;
+	}
+	
+	/* 
+	 * (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#supportsAABBExpansion()
+	 */
+	@Override
+	public boolean supportsAABBExpansion() {
+		return false;
+	}
+	
 }
