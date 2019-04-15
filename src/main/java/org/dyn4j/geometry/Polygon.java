@@ -476,24 +476,27 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 	private double maxProjection;
 	
 	/**
-	 * Helper method to implement findMaxTwoWay. Performs half the search (only to the right)
-	 * and return the index of the vertex maximizing vector.dot(v) or -1 if no vertex with projection
-	 * greater than maxProjection found.
+	 * Helper method for maxIndexFast. Finds the vertex that maximizes vector.dot(v)
+	 * but only checks the points indicated by startRight, startLeft and step.
+	 * Specifically this method will search either from startRight to the right, in the indices (startRight + k * step)
+	 * or if the maximum lies in the other side it will search from startLeft to the left, in the indices (startLeft - k * step)
 	 * 
-	 * Checks only point from startRight and incrementing by step
-	 * @see findMaxTwoWay
+	 * Note: Uses the local variable 'maxProjection' to store the current max found.
+	 * Works because vertices are sorted by angle @see maxIndexFast
 	 * 
-	 * @param startRight The starting point for the search
+	 * @param startRight The starting point for the search to the right
+	 * @param startLeft The starting point for the search to the left
 	 * @param step The step that defines how many point will be skipped in each iteration
+	 * @param initialMaxIndex The index to be returned if there where no vertices with product greater than 'maxProjection' (only when the max was in (startLeft, startRight))
 	 * @param vector The direction
-	 * @return the index 
+	 * @return The index of the resulting vertex 
 	 */
-	private int findMaxToRight(int startRight, int step, Vector2 vector) {
+	private int findMaxTwoWay(int startRight, int startLeft, int step, int initialMaxIndex, Vector2 vector) {
 		double projection;
 		
-		// Check if there's at least one (the first) vertex with greater projection
-		// Also checks if startRight < this.vertices.length but assumes startRight >= 0
 		if (startRight < this.vertices.length && (projection = vector.dot(this.vertices[startRight])) > maxProjection) {
+			// If there's at least one vertex with greater projection at the right
+			// Also checks if startRight < this.vertices.length but assumes startRight >= 0
 			maxProjection = projection;
 			int maxIndex = startRight;
 			
@@ -505,31 +508,9 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 			
 			// Because we increment the index before checking and calculating we always end with one extra addition, so we cancel this here
 			return maxIndex - step;
-		}
-		
-		return -1;
-	}
-	
-	/**
-	 * Symmetric to findMaxToRight.
-	 * Helper method to implement findMaxTwoWay. Performs half the search (only to the left)
-	 * and return the index of the vertex maximizing vector.dot(v) or -1 if no vertex with projection
-	 * greater than maxProjection found.
-	 * 
-	 * Checks only point from startLeft and decrementing by step
-	 * @see findMaxTwoWay
-	 * 
-	 * @param startLeft The starting point for the search
-	 * @param step The step that defines how many point will be skipped in each iteration
-	 * @param vector The direction
-	 * @return the index 
-	 */
-	private int findMaxToLeft(int startLeft, int step, Vector2 vector) {
-		double projection;
-		
-		// Check if there's at least one (the first) vertex with greater projection
-		// Also checks if startLeft >= 0 but assumes startRight < this.vertices.length
-		if (startLeft >= 0 && (projection = vector.dot(this.vertices[startLeft])) > maxProjection) {
+		} else if (startLeft >= 0 && (projection = vector.dot(this.vertices[startLeft])) > maxProjection) {
+			// Else if there's at least one vertex with greater projection to the left
+			// Also checks if startLeft >= 0 but assumes startRight < this.vertices.lengthmaxProjection = projection;
 			maxProjection = projection;
 			int maxIndex = startLeft;
 			
@@ -541,39 +522,8 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 			
 			// Because we decrement the index before checking and calculating we always end with one extra substraction, so we cancel this here
 			return maxIndex + step;
-		}
-		
-		return -1;
-	}
-	
-	/**
-	 * Helper method for maxIndexFast. Finds the vertex that maximize vector.dot(v) (affected by the local variable 'maxProjection')
-	 * but only checks the points indicated by startRight, startLeft and step.
-	 * Specifically this method will search either from startRight to the right, in the indices (startRight + k * step)
-	 * or if the maximum lies in the other side it will search from startLeft to the left, in the indices (startLeft - k * step)
-	 * 
-	 * Works because vertices are sorted by angle @see maxIndexFast
-	 * 
-	 * @param startRight The starting point for the search to the right
-	 * @param startLeft The starting point for the search to the left
-	 * @param step The step that defines how many point will be skipped in each iteration
-	 * @param initialMaxIndex The index to be returned if there where no vertices with product greater than 'maxProjection' (only when the max was in (startLeft, startRight))
-	 * @param vector The direction
-	 * @return The index of the resulting vertex 
-	 */
-	private int findMaxTwoWay(int startRight, int startLeft, int step, int initialMaxIndex, Vector2 vector) {
-		int searchIndex;
-		
-		if ((searchIndex = findMaxToRight(startRight, step, vector)) != -1) {
-			// If we found at least one vertex with projection > maxProjection
-			// then we don't need to search on the left; return the index found
-			return searchIndex;
-		} else if ((searchIndex = findMaxToLeft(startLeft, step, vector)) != -1) {
-			// This means than the first point had projection < maxProjection and the search to the right aborted
-			// so go to the left
-			return searchIndex;
 		} else {
-			// Left side search aborted as well, return initialMaxIndex
+			// Else if both left and right search aborted, return initialMaxIndex
 			return initialMaxIndex;
 		}
 	}
@@ -606,7 +556,7 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		// We must be careful with the edge case where maxIndex is 0, because then we can't go to the left by substracting 1.
 		if (maxIndex == 0) {
 			// In this edge case the left index to start is (n - 1) and not (maxIndex - 1)
-			return findMaxTwoWay(1, n - 1, 1, maxIndex, vector);
+			return findMaxTwoWay(1, n - 1, 1, 0, vector);
 		} else {
 			// Correctness note: one may wonder what will happen when 0 < maxIndex < searchStep or maxIndex > n - searchStep because in that case the
 			// search will end prematurely due to index bounds [0, this.vertices.length).
