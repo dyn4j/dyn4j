@@ -49,7 +49,7 @@ import org.dyn4j.geometry.Vector2;
  * Projects all {@link Collidable} {@link Fixture}s on both the x and y axes and performs overlap checks
  * on all the projections to test for possible collisions (AABB tests).
  * @author William Bittle
- * @version 3.2.4
+ * @version 3.3.1
  * @since 1.0.0
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type

@@ -157,7 +157,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		Vector2 localAxis = transform.getInverseTransformedR(vector);
 		
 		// private implementation
-		localAxis = getFarthestPointImpl(localAxis);
+		localAxis = this.getFarthestPoint(localAxis);
 		
 		// then finally convert back into world space coordinates
 		transform.transform(localAxis);
@@ -165,15 +165,17 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		return localAxis;
 	}
 	
-	/*
-	 * Performs all the logic of getFarthestPoint except for the needed world space transformations.
-	 * Hence all calculations are in local axis
+	/**
+	 * Modifies the given local space axis into the farthest point along that axis and
+	 * additionally returns it.
+	 * @param localAxis the direction vector in local space
+	 * @return {@link Vector2}
 	 */
-	private Vector2 getFarthestPointImpl(Vector2 localAxis) {
+	private Vector2 getFarthestPoint(Vector2 localAxis) {
 		// localAxis is already in local coordinates
 		if (this.rotation == 0) {
 			// This is the case most of the time, and saves a lot of computations
-			getFarthestPointHelper(localAxis);
+			this.getFarthestPointOnAlignedEllipse(localAxis);
 		} else {
 			double cos = Math.cos(this.rotation);
 			double sin = Math.sin(this.rotation);
@@ -182,7 +184,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 			// cos(-x) = cos(x), sin(-x) = -sin(x)
 			localAxis.rotate(cos, -sin);	
 			
-			getFarthestPointHelper(localAxis);
+			this.getFarthestPointOnAlignedEllipse(localAxis);
 			
 			// include local rotation
 			localAxis.rotate(cos, sin);
@@ -194,11 +196,15 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		return localAxis;
 	}
 	
-	/*
-	 * Finds the farthest point in the ellipse in the direction of localAxis
-	 * Used to avoid code duplication in getFarthestPointImpl
+	/**
+	 * Returns the farthest point along the given local space axis assuming the
+	 * ellipse and the given axis are aligned.
+	 * <p>
+	 * Typically this means that the ellipse is axis-aligned, but it could also
+	 * mean that the ellipse is not axis-aligned, but the given local space axis
+	 * has been rotated to match the alignment of the ellipse.
 	 */
-	private void getFarthestPointHelper(Vector2 localAxis) {
+	private void getFarthestPointOnAlignedEllipse(Vector2 localAxis) {
 		// an ellipse is a circle with a non-uniform scaling transformation applied
 		// so we can achieve that by scaling the input axis by the major and minor
 		// axis lengths
@@ -252,7 +258,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		// Equivalent of transform.getInverseTransformedR(Vector2.X_AXIS)
 		Vector2 temp = new Vector2(transform.cost, -transform.sint);
 		// Equivalent of p1x = this.getFarthestPoint(Vector2.X_AXIS, transform).x;
-		double p1x = transform.getTransformedX(getFarthestPointImpl(temp));	
+		double p1x = transform.getTransformedX(this.getFarthestPoint(temp));	
 		
 		double c = transform.getTransformedX(this.center);
 		double minx = 2 * c - p1x;
@@ -264,7 +270,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		// Equivalent of transform.getInverseTransformedR(Vector2.Y_AXIS)
 		temp = new Vector2(transform.sint, transform.cost);
 		// Equivalent of p1y = this.getFarthestPoint(Vector2.Y_AXIS, transform).y;
-		double p1y = transform.getTransformedY(getFarthestPointImpl(temp));	
+		double p1y = transform.getTransformedY(this.getFarthestPoint(temp));	
 		
 		// Rest of projection code
 		c = transform.getTransformedY(this.center);

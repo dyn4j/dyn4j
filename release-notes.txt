@@ -5,6 +5,7 @@ New Features:
   - Arithmetic optimizations (by mtsamis)
   - Small performance enhancement in the Island class (by mtsamis)
   - Memory footprint improvements (by mtsamis)
+  - AABB unpack and performance enhancements (mtsamis)
 
 Bug Fixes:
   - Bug fix for HalfEllipse.getRadius(Vector2) when the half width < half

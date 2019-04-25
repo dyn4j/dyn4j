@@ -183,7 +183,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		Vector2 localAxis = transform.getInverseTransformedR(vector);
 		
 		// private implementation
-		localAxis = getFarthestPointImpl(localAxis);
+		localAxis = this.getFarthestPoint(localAxis);
 		
 		// then convert back into world space coordinates
 		transform.transform(localAxis);
@@ -191,11 +191,13 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		return localAxis;
 	}
 	
-	/*
-	 * Performs all the logic of getFarthestPoint except for the needed world space transformations.
-	 * Hence all calculations are in local axis
+	/**
+	 * Modifies the given local space axis into the farthest point along that axis and
+	 * additionally returns it.
+	 * @param localAxis the direction vector in local space
+	 * @return {@link Vector2}
 	 */
-	private Vector2 getFarthestPointImpl(Vector2 localAxis) {
+	private Vector2 getFarthestPoint(Vector2 localAxis) {
 		// localAxis is already in local coordinates
 		
 		// Unfortunately there's not a better way for this
@@ -287,24 +289,24 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		// Equivalent of temp = transform.getInverseTransformedR(Vector2.X_AXIS)
 		Vector2 temp = new Vector2(transform.cost, -transform.sint);
 		// Equivalent of maxX = this.project(Vector2.X_AXIS, transform).getMax();
-		double maxX = transform.getTransformedX(getFarthestPointImpl(temp));
+		double maxX = transform.getTransformedX(this.getFarthestPoint(temp));
 		
 		// Equivalent of temp = transform.getInverseTransformedR(Vector2.INV_X_AXIS)
 		temp.set(-transform.cost, transform.sint);
 		// Equivalent of minX = this.project(Vector2.X_AXIS, transform).getMin();
-		double minX = transform.getTransformedX(getFarthestPointImpl(temp));
+		double minX = transform.getTransformedX(this.getFarthestPoint(temp));
 		
 		// Inlined projection of y axis
 		
 		// Equivalent of temp = transform.getInverseTransformedR(Vector2.Y_AXIS)
 		temp.set(transform.sint, transform.cost);
 		// Equivalent of maxY = this.project(Vector2.Y_AXIS, transform).getMax();
-		double maxY = transform.getTransformedY(getFarthestPointImpl(temp));
+		double maxY = transform.getTransformedY(this.getFarthestPoint(temp));
 		
 		// Equivalent of temp = transform.getInverseTransformedR(Vector2.INV_Y_AXIS)
 		temp.set(-transform.sint, -transform.cost);
 		// Equivalent of minY = this.project(Vector2.Y_AXIS, transform).getMin();
-		double minY = transform.getTransformedY(getFarthestPointImpl(temp));
+		double minY = transform.getTransformedY(this.getFarthestPoint(temp));
 		
 		return new AABB(minX, minY, maxX, maxY);
 	}
