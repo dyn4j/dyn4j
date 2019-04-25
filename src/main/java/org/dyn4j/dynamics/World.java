@@ -38,6 +38,7 @@ import org.dyn4j.collision.Bounds;
 import org.dyn4j.collision.BoundsListener;
 import org.dyn4j.collision.Filter;
 import org.dyn4j.collision.Fixture;
+import org.dyn4j.collision.broadphase.BatchBroadphaseDetector;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.collision.broadphase.BroadphaseFilter;
 import org.dyn4j.collision.broadphase.BroadphaseItem;
@@ -702,25 +703,51 @@ public class World implements Shiftable, DataContainer {
 		// test for out of bounds objects
 		// clear the body contacts
 		// update the broadphase
-		for (int i = 0; i < size; i++) {
-			Body body = this.bodies.get(i);
-			// skip if already not active
-			if (!body.isActive()) continue;
-			// clear all the old contacts
-			body.contacts.clear();
-			// check if bounds have been set
-			// check if the body is out of bounds
-			if (this.bounds != null && this.bounds.isOutside(body)) {
-				// set the body to inactive
-				body.setActive(false);
-				// if so, notify via the listeners
-				for (int j = 0; j < blSize; j++) {
-					BoundsListener bl = boundsListeners.get(j);
-					bl.outside(body);
+		
+		// Check if the current broad-phase detector support batch updates, and use it if so
+		if (this.broadphaseDetector instanceof BatchBroadphaseDetector<?, ?>) {
+			for (int i = 0; i < size; i++) {
+				Body body = this.bodies.get(i);
+				// skip if already not active
+				if (!body.isActive()) continue;
+				// clear all the old contacts
+				body.contacts.clear();
+				// check if bounds have been set
+				// check if the body is out of bounds
+				if (this.bounds != null && this.bounds.isOutside(body)) {
+					// set the body to inactive
+					body.setActive(false);
+					// if so, notify via the listeners
+					for (int j = 0; j < blSize; j++) {
+						BoundsListener bl = boundsListeners.get(j);
+						bl.outside(body);
+					}
 				}
 			}
-			// update the broadphase with the new position/orientation
-			this.broadphaseDetector.update(body);
+			
+			((BatchBroadphaseDetector<?, ?>) this.broadphaseDetector).batchUpdate();
+		} else {
+			// Else update each body separately
+			for (int i = 0; i < size; i++) {
+				Body body = this.bodies.get(i);
+				// skip if already not active
+				if (!body.isActive()) continue;
+				// clear all the old contacts
+				body.contacts.clear();
+				// check if bounds have been set
+				// check if the body is out of bounds
+				if (this.bounds != null && this.bounds.isOutside(body)) {
+					// set the body to inactive
+					body.setActive(false);
+					// if so, notify via the listeners
+					for (int j = 0; j < blSize; j++) {
+						BoundsListener bl = boundsListeners.get(j);
+						bl.outside(body);
+					}
+				}
+				// update the broadphase with the new position/orientation
+				this.broadphaseDetector.update(body);
+			}
 		}
 		
 		// make sure there are some bodies

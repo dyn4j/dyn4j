@@ -315,7 +315,15 @@ public interface BroadphaseDetector<E extends Collidable<T>, T extends Fixture> 
 	public abstract boolean detect(Convex convex1, Transform transform1, Convex convex2, Transform transform2);
 	
 	/**
+	 * Returns whether this particular {@link BroadphaseDetector} supports expanding AABBs.
+	 * @return boolean
+	 */
+	public abstract boolean supportsAABBExpansion();
+	
+	/**
 	 * Returns the {@link AABB} expansion value used to improve performance of broad-phase updates.
+	 * <p>
+	 * If supportsAABBExpansion() returns false the value returned is unspecified and should not be taken into account.
 	 * @return double
 	 * @see #setAABBExpansion(double)
 	 */
@@ -326,6 +334,8 @@ public interface BroadphaseDetector<E extends Collidable<T>, T extends Fixture> 
 	 * <p>
 	 * Increasing this value will cause less updates to the broad-phase but will cause more pairs
 	 * to be sent to the narrow-phase.
+	 * <p>
+	 * Note that a broadphase implementation may ignore this value, if supportsAABBExpansion() returns false.
 	 * @param expansion the expansion
 	 */
 	public abstract void setAABBExpansion(double expansion);

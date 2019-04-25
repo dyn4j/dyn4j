@@ -196,6 +196,14 @@ public abstract class AbstractBroadphaseDetector<E extends Collidable<T>, T exte
 	}
 	
 	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#supportsAABBExpansion()
+	 */
+	@Override
+	public boolean supportsAABBExpansion() {
+		return true;
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#getAABBExpansion()
 	 */
 	@Override
