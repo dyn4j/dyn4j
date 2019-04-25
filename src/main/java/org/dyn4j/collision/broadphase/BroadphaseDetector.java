@@ -66,7 +66,7 @@ import org.dyn4j.geometry.Transform;
  * The {@link #detect(Collidable, Collidable)} and {@link #detect(Convex, Transform, Convex, Transform)} methods do not
  * use the current state of the broad-phase.
  * @author William Bittle
- * @version 3.2.4
+ * @version 3.3.1
  * @since 1.0.0
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type

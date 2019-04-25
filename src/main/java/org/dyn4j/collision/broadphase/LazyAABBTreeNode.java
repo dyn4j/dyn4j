@@ -30,11 +30,11 @@ import org.dyn4j.geometry.AABB;
  * Represents a basic node in a {@link DynamicAABBTree}.
  * <p>
  * The AABB of the node should be the union of all the AABBs below this node.
- * @author William Bittle
- * @version 3.2.0
- * @since 3.2.0
+ * @author Manolis Tsamis
+ * @version 3.3.1
+ * @since 3.3.1
  */
-public class LazyAABBTreeNode {
+class LazyAABBTreeNode {
 	/** The left child */
 	LazyAABBTreeNode left;
 	

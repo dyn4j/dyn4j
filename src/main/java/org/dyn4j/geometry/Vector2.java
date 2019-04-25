@@ -830,7 +830,7 @@ public class Vector2 {
 	 * Returns the smallest angle between the given {@link Vector2} and the given angle.
 	 * <p>
 	 * Returns the angle in radians in the range -&pi; to &pi;.
-	 * @param otherAngle the angle. Must be in the range -&pi; to &pi
+	 * @param otherAngle the angle. Must be in the range -&pi; to &pi;
 	 * @return angle in radians [-&pi;, &pi;]
 	 * @since 3.3.1
 	 */

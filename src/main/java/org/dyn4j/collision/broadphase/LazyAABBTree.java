@@ -55,6 +55,8 @@ import org.dyn4j.geometry.Vector2;
  * @author Manolis Tsamis
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
+ * @version 3.3.1
+ * @since 3.3.1
  */
 public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends AbstractBroadphaseDetector<E, T> implements BatchBroadphaseDetector<E, T> {
 	/** The root node of the tree */
@@ -88,8 +90,8 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 * @throws IllegalArgumentException if initialCapacity is less than zero
 	 */
 	public LazyAABBTree(int initialCapacity) {
-		this.elements = new ArrayList<>(initialCapacity);
-		this.elementMap = new HashMap<>(initialCapacity);
+		this.elements = new ArrayList<LazyAABBTreeLeaf<E, T>>(initialCapacity);
+		this.elementMap = new HashMap<BroadphaseKey, LazyAABBTreeLeaf<E, T>>(initialCapacity);
 	}
 	
 	/**
@@ -130,7 +132,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		if (existing != null) {
 			// update existing node
 			if (existing.isOnTree()) {
-				removeImpl(existing);
+				this.remove(existing);
 				existing.setOnTree(false);
 			}
 			
@@ -162,7 +164,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 				// remove the node from the tree
 				// since the node is on the tree we know that the root is not null
 				// so we can safely call removeImpl
-				this.removeImpl(node);
+				this.remove(node);
 			}
 			
 			node.markForRemoval();
@@ -180,7 +182,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 * 
 	 * @param leaf the leaf to remove
 	 */
-	void removeImpl(LazyAABBTreeLeaf<E, T> leaf) {
+	void remove(LazyAABBTreeLeaf<E, T> leaf) {
 		// check the root node
 		if (leaf == this.root) {
 			// set the root to null
@@ -347,7 +349,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 */
 	void ensureSorted() {
 		if (!this.sorted) {
-			elements.sort(new Comparator<LazyAABBTreeLeaf<E, T>>() {
+			Collections.sort(elements, new Comparator<LazyAABBTreeLeaf<E, T>>() {
 				@Override
 				public int compare(LazyAABBTreeLeaf<E, T> o1, LazyAABBTreeLeaf<E, T> o2) {
 					// Important heuristic: sort by size of fixtures.
@@ -356,6 +358,16 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 					return Double.compare(o1.fixture.getShape().getRadius(), o2.fixture.getShape().getRadius());
 				}
 			});
+			// NOTE: use this instead if dyn4j moves to Java 8+
+//			elements.sort(new Comparator<LazyAABBTreeLeaf<E, T>>() {
+//				@Override
+//				public int compare(LazyAABBTreeLeaf<E, T> o1, LazyAABBTreeLeaf<E, T> o2) {
+//					// Important heuristic: sort by size of fixtures.
+//					// Radius is used here because the AABBs are not yet computed,
+//					// but this works just as fine.
+//					return Double.compare(o1.fixture.getShape().getRadius(), o2.fixture.getShape().getRadius());
+//				}
+//			});
 			
 			this.sorted = true;
 		}
@@ -445,7 +457,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 * @param item the leaf to insert
 	 */
 	void insert(LazyAABBTreeLeaf<E, T> item) {
-		insertImpl(item, false, null, null);
+		this.insert(item, false, null, null);
 	}
 	
 	/**
@@ -454,7 +466,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 * @param item the leaf to insert
 	 */
 	void insertAndDetect(LazyAABBTreeLeaf<E, T> item, BroadphaseFilter<E, T> filter, List<BroadphasePair<E, T>> pairs) {
-		insertImpl(item, true, filter, pairs);
+		this.insert(item, true, filter, pairs);
 	}
 	
 	/**
@@ -467,7 +479,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 * @param filter the broadphase filter
 	 * @param pairs List a list containing the results
 	 */
-	void insertImpl(LazyAABBTreeLeaf<E, T> item, final boolean detect, BroadphaseFilter<E, T> filter, List<BroadphasePair<E, T>> pairs) {
+	void insert(LazyAABBTreeLeaf<E, T> item, final boolean detect, BroadphaseFilter<E, T> filter, List<BroadphasePair<E, T>> pairs) {
 		// Make sure the root is not null
 		if (this.root == null) {
 			// If it is then set this node as the root
@@ -590,7 +602,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		List<BroadphaseItem<E, T>> list = new ArrayList<BroadphaseItem<E, T>>(eSize);
 		
 		if (aabb.overlaps(this.root.aabb)) {
-			this.detectImpl(aabb, this.root, filter, list);	
+			this.detect(aabb, this.root, filter, list);	
 		}
 		
 		return list;
@@ -598,8 +610,12 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	
 	/**
 	 * Internal recursive method used to implement BroadphaseDetector#detect.
+	 * @param aabb the aabb to test with
+	 * @param node the node to begin at
+	 * @param filter the filter
+	 * @param list the results list
 	 */
-	private void detectImpl(AABB aabb, LazyAABBTreeNode node, BroadphaseFilter<E, T> filter, List<BroadphaseItem<E, T>> list) {
+	private void detect(AABB aabb, LazyAABBTreeNode node, BroadphaseFilter<E, T> filter, List<BroadphaseItem<E, T>> list) {
 		// test the node itself
 		// check for leaf node
 		// non-leaf nodes always have a left child
@@ -614,8 +630,8 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 			// return and check other limbs
 		} else {
 			// they overlap so descend into both children
-			if (aabb.overlaps(node.left.aabb)) detectImpl(aabb, node.left, filter, list);
-			if (aabb.overlaps(node.right.aabb)) detectImpl(aabb, node.right, filter, list);
+			if (aabb.overlaps(node.left.aabb)) this.detect(aabb, node.left, filter, list);
+			if (aabb.overlaps(node.right.aabb)) this.detect(aabb, node.right, filter, list);
 		}
 	}
 	

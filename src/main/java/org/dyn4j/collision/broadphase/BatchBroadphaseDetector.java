@@ -32,11 +32,13 @@ import org.dyn4j.collision.Fixture;
  * This is initially added because it makes a very big difference for the implementation of LazyAABBTree, but it can be useful in other future broadphase detectors as well.
  * When the World.java class uses a BatchBroadphaseDetector it will just call batchUpdate() once instead of updating each body seperately.
  * 
- * Note that operations of batch addition or deletion did not seem important or comonplace, so the interface just provides a batch update method.
+ * Note that operations of batch addition or deletion did not seem important or commonplace, so the interface just provides a batch update method.
  * 
  * @author Manolis Tsamis
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
+ * @version 3.3.1
+ * @since 3.3.1
  */
 public interface BatchBroadphaseDetector<E extends Collidable<T>, T extends Fixture> extends BroadphaseDetector<E, T> {
 	

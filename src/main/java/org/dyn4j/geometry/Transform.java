@@ -159,6 +159,7 @@ public class Transform implements Transformable {
 	
 	/**
 	 * Public copy constructor constructor
+	 * @param transform the transform to copy
 	 * @since 3.3.1
 	 */
 	public Transform(Transform transform) {

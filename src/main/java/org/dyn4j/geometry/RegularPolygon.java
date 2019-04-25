@@ -44,7 +44,7 @@ import org.dyn4j.resources.Messages;
  * (At the moment this comes at the cost of not having getAxes implemented)
  * <p>
  * This implementation uses on-demand normal calculation for memory efficiency reasons.
- * Because in various scenarios the normals won't be needed (specifically if SAT is <b>not</not>
+ * Because in various scenarios the normals won't be needed (specifically if SAT is <b>not</b>
  * used as a {@link NarrowphaseDetector} and the user does not ask for them) we will use half the
  * memory without them, which is good for regular polygons with high vertex count.
  * This comes at no performance penalty overall.
@@ -392,11 +392,11 @@ public class RegularPolygon extends Polygon implements Convex, Wound, Shape, Tra
 	 * <p>
 	 * Finding the area of a {@link RegularPolygon} can be done by using the following formula:
 	 * <p style="white-space: pre;">
-	 * r<sup>2</sup> * n * sin(2&pi / n) / 2
+	 * r<sup>2</sup> * n * sin(2&pi; / n) / 2
 	 * </p>
 	 * Finding the inertia tensor can by done by using the following equation:
 	 * <p style="white-space: pre;">
-	 * (1 + 3cot<sup>2</sup>(&pi / n)) * (M * side<sup>2</sup>) / 24
+	 * (1 + 3cot<sup>2</sup>(&pi; / n)) * (M * side<sup>2</sup>) / 24
 	 * </p>
 	 * Where the mass is computed by:
 	 * <p style="white-space: pre;"> d * area</p>
