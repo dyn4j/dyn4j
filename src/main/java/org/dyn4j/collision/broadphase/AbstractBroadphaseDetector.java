@@ -137,6 +137,24 @@ public abstract class AbstractBroadphaseDetector<E extends Collidable<T>, T exte
 		return false;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#contains(org.dyn4j.collision.Collidable)
+	 */
+	@Override
+	public boolean contains(E collidable) {
+		int size = collidable.getFixtureCount();
+		
+		for (int i = 0; i < size; i++) {
+			T fixture = collidable.getFixture(i);
+			
+			if (!this.contains(collidable, fixture)) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
 	/**
 	 * Returns true if the ray and AABB intersect.
 	 * <p>

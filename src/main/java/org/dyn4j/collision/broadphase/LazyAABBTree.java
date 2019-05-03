@@ -240,24 +240,6 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#contains(org.dyn4j.collision.Collidable)
-	 */
-	@Override
-	public boolean contains(E collidable) {
-		int size = collidable.getFixtureCount();
-		
-		for (int i = 0; i < size; i++) {
-			T fixture = collidable.getFixture(i);
-			
-			if (!this.contains(collidable, fixture)) {
-				return false;
-			}
-		}
-		
-		return true;
-	}
-	
-	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#contains(org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
 	 */
 	@Override
