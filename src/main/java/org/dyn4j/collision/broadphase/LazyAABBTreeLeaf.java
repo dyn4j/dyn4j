@@ -60,6 +60,9 @@ final class LazyAABBTreeLeaf<E extends Collidable<T>, T extends Fixture> extends
 	public LazyAABBTreeLeaf(E collidable, T fixture) {
 		this.collidable = collidable;
 		this.fixture = fixture;
+		
+		// calculate the initial AABB
+		this.updateAABB();
 	}
 	
 	/**

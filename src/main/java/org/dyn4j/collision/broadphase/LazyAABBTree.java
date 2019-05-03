@@ -140,7 +140,6 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		} else {
 			// add new node
 			LazyAABBTreeLeaf<E, T> node = new LazyAABBTreeLeaf<E, T>(collidable, fixture);
-			node.updateAABB();
 			
 			this.elementMap.put(key, node);
 			

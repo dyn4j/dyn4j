@@ -49,7 +49,7 @@ class PlainBroadphaseNode<E extends Collidable<T>, T extends Fixture> {
 		this.fixture = fixture;
 		
 		// calculate the initial AABB
-		updateAABB();
+		this.updateAABB();
 	}
 	
 	/**
