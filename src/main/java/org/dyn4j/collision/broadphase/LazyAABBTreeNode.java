@@ -27,7 +27,7 @@ package org.dyn4j.collision.broadphase;
 import org.dyn4j.geometry.AABB;
 
 /**
- * Represents a basic node in a {@link DynamicAABBTree}.
+ * Represents a basic node in a {@link LazyAABBTree}.
  * <p>
  * The AABB of the node should be the union of all the AABBs below this node.
  * @author Manolis Tsamis

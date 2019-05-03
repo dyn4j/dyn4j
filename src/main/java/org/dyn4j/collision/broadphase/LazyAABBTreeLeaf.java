@@ -31,7 +31,7 @@ import org.dyn4j.geometry.Transform;
 /**
  * Represents a leaf node in a {@link LazyAABBTree}.
  * <p>
- * The leaf nodes in a {@link DynamicAABBTree2} are the nodes that contain the {@link Fixture} AABBs.
+ * The leaf nodes in a {@link LazyAABBTree} are the nodes that contain the {@link Fixture} AABBs.
  * 
  * @author Manolis Tsamis
  * @param <E> the {@link Collidable} type
