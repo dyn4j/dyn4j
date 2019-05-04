@@ -369,25 +369,10 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 	public EdgeFeature getFarthestFeature(Vector2 vector, Transform transform) {
 		// transform the normal into local space
 		Vector2 localn = transform.getInverseTransformedR(vector);
-		
-		double max = localn.dot(this.vertices[0]);
-		int index = 0;
-		// find the vertex on the polygon that is further along on the penetration axis
+
+		int index = maxIndex(localn);
 		int count = this.vertices.length;
-		for (int i = 1; i < count; i++) {
-			// get the current vertex
-			Vector2 v = this.vertices[i];
-			// get the scalar projection of v onto axis
-			double projection = localn.dot(v);
-			// keep the maximum projection point
-			if (projection > max) {
-				// set the new maximum
-				max = projection;
-				// save the index
-				index = i;
-			}
-		}
-		
+
 		Vector2 maximum = new Vector2(this.vertices[index]);
 		
 		// once we have the point of maximum
@@ -422,29 +407,71 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 	public Vector2 getFarthestPoint(Vector2 vector, Transform transform) {
 		// transform the normal into local space
 		Vector2 localn = transform.getInverseTransformedR(vector);
-		
-		// set the farthest point to the first one
-		int index = 0;
-		// prime the projection amount
-		double max = localn.dot(this.vertices[0]);
-		// loop through the rest of the vertices to find a further point along the axis
-		int size = this.vertices.length;
-		for (int i = 1; i < size; i++) {
-			// get the current vertex
-			Vector2 v = this.vertices[i];
-			// project the vertex onto the axis
-			double projection = localn.dot(v);
-			// check to see if the projection is greater than the last
-			if (projection > max) {
-				// otherwise this point is the farthest so far so clear the array and add it
-				index = i;
-				// set the new maximum
-				max = projection;
-			}
-		}
-		
+
+		// find the index of the farthest point
+		int index = maxIndex(localn);
+
 		// transform the point into world space and return
 		return transform.getTransformed(this.vertices[index]);
+	}
+	
+	/**
+	 * Internal helper method that returns the index of the point that is
+	 * farthest in direction of a vector.
+	 * 
+	 * @param vector the direction
+	 * @return the index of the farthest vertex in that direction
+	 */
+	int maxIndex(Vector2 vector) {
+		/*
+		 * The sequence a(n) = vector.dot(vertices[n]) has a maximum, a minimum and is monotonic (though not strictly monotonic) between those extrema.
+		 * All indices are considered in modular arithmetic. I choose the initial index to be 0.
+		 * 
+		 * Based on that I follow this approach:
+		 * We start from an initial index n0. We want to an adjacent to n0 index n1 for which a(n1) > a(n0).
+		 * If no such index exists then n0 is the maximum. Else we start in direction of n1 (i.e. left or right of n0)
+		 * and while a(n) increases we continue to that direction. When the next number of the sequence does not increases anymore
+		 * we can stop and we have found max{a(n)}.
+		 * 
+		 * Although the idea is simple we need to be careful with some edge cases and the correctness of the algorithm in all cases.
+		 * Although the sequence is not strictly monotonic the absence of equalities is intentional and wields the correct answer (see below).
+		 * 
+		 * The correctness of this method relies on some properties:
+		 * 1) If n0 and n1 are two adjacent indices and a(n0) = a(n1) then a(n0) and a(n1) are either max{a(n)} or min{a(n)}.
+		 *    This holds for all convex polygons. This property can guarantee that if our initial index is n0 or n1 then it does not
+		 *    matter to which side (left or right) we start searching.
+		 * 2) The polygon has no coincident vertices.
+		 *    This guarantees us that there are no adjacent n0, n1, n2 for which a(n0) = a(n1) = a(n2)
+		 *    and that only two adjacent n0, n1 can exist with a(n0) = a(n1). This is important because if
+		 *    those adjacent n0, n1, n2 existed the code below would always return the initial index, without knowing if
+		 *    it's a minimum or maximum. But since only two adjacent indices can exist with a(n0) = a(n1) the code below
+		 *    will always start searching in one direction and because of 1) this will give us the correct answer.
+		 * 3) When there exist two indices with the same a(n), then either one of them can be returned as a correct answer.
+		 */
+		
+		// The initial starting index and the corresponding dot product
+		int maxIndex = 0;
+		int n = this.vertices.length;
+		double max = vector.dot(this.vertices[0]), candidateMax;
+		
+		if (max < (candidateMax = vector.dot(this.vertices[1]))) {
+			// Search to the right
+			do {
+				max = candidateMax;
+				maxIndex++;
+			} while (max < (candidateMax = vector.dot(this.vertices[maxIndex + 1])));
+		} else if (max < (candidateMax = vector.dot(this.vertices[n - 1]))) {
+			maxIndex = n; // n = 0 (mod n)
+			
+			// Search to the left
+			do {
+				max = candidateMax;
+				maxIndex--;
+			} while (max < (candidateMax = vector.dot(this.vertices[maxIndex - 1])));
+		}
+		// else maxIndex = 0, because if neither of the above conditions is met, then the initial index is the maximum
+		
+		return maxIndex;
 	}
 	
 	/**
