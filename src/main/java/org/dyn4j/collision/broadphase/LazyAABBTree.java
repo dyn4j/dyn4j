@@ -366,9 +366,6 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 			LazyAABBTreeLeaf<E, T> node = elements.get(i);
 			
 			if (!node.isOnTree()) {
-				// Mark that this leaf is now on the tree
-				node.setOnTree(true);
-				
 				insert(node);
 			}
 		}
@@ -461,6 +458,9 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 * @param pairs List a list containing the results
 	 */
 	void insert(LazyAABBTreeLeaf<E, T> item, final boolean detect, BroadphaseFilter<E, T> filter, List<BroadphasePair<E, T>> pairs) {
+		// Mark that this leaf is now on the tree
+		item.setOnTree(true);
+		
 		// Make sure the root is not null
 		if (this.root == null) {
 			// If it is then set this node as the root
