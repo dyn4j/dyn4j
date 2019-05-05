@@ -84,7 +84,7 @@ class LazyAABBTreeNode {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("DynamicAABBTreeNode[AABB=").append(this.aabb.toString())
+		sb.append("LazyAABBTreeNode[AABB=").append(this.aabb.toString())
 		  .append("|Height=").append(this.height)
 		  .append("]");
 		return sb.toString();
