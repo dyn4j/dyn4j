@@ -24,8 +24,11 @@
  */
 package org.dyn4j.collision;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 
 import org.dyn4j.collision.broadphase.AbstractBroadphaseDetector;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
@@ -33,10 +36,12 @@ import org.dyn4j.collision.broadphase.BroadphaseItem;
 import org.dyn4j.collision.broadphase.BroadphasePair;
 import org.dyn4j.collision.broadphase.DynamicAABBTree;
 import org.dyn4j.collision.broadphase.LazyAABBTree;
+import org.dyn4j.collision.broadphase.PlainBroadphase;
 import org.dyn4j.collision.broadphase.Sap;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Ray;
+import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,13 +64,15 @@ public class BroadphaseTest {
 	 */
 	@Parameters
     public static Collection<Object[]> data() {
-    	return List.of(
+    	return Arrays.asList(
     			/** The sap algorithm */
     			new Object[]{new Sap<CollidableTest, Fixture>()},
     			/** The dynamic aabb algorithm */
     			new Object[]{new DynamicAABBTree<CollidableTest, Fixture>()},
     			/** The lazy aabb algorithm */
-    			new Object[]{new LazyAABBTree<CollidableTest, Fixture>()}
+    			new Object[]{new LazyAABBTree<CollidableTest, Fixture>()},
+    			/** The plain brute-force broadphase */
+    			new Object[]{new PlainBroadphase<CollidableTest, Fixture>()}
     			);
     }
 	
@@ -259,8 +266,12 @@ public class BroadphaseTest {
 		AABB aabbSap = this.broadphase.getAABB(ct);
 		
 		AABB aabb = ct.createAABB();
-		// don't forget that the aabb is expanded
-		aabb.expand(this.broadphase.getAABBExpansion());
+		
+		if (this.broadphase.supportsAABBExpansion()) {
+			// don't forget that the aabb could be expanded
+			aabb.expand(this.broadphase.getAABBExpansion());	
+		}
+		
 		TestCase.assertTrue(isEqual(aabbSap, aabb));
 	}
 	
@@ -477,4 +488,135 @@ public class BroadphaseTest {
 	public void DynamicAABBTreeNegativeInitialCapacity() {
 		new DynamicAABBTree<CollidableTest, Fixture>(-10);
 	}
+	
+	/** Seed for the randomized test. Can be any value */
+	private static final int SEED = 0;
+	
+	/**
+	 * Deterministic randomized test, used to test various core functionalities of all broad-phase detectors, simulating some complex scenarios.
+	 * This test uses a {@link PlainBroadphase} for reference and tests the output of the broad-phase against the reference broad-phase.
+	 * For all queries (detect, detect(AABB) and raycast) the output of the broad-phase must contain all pairs/items returned by the reference broad-phase (and maybe some more),
+	 * because {@link PlainBroadphase} always returns the minimal answer set.
+	 * <p>
+	 * The {@link PlainBroadphase} implements only simple brute force algorithms so we can consider it's implementation bug free.
+	 */
+	@Test
+	public void randomizedTest() {
+		// The reference broad-phase is {@link PlainBroadphase}
+		BroadphaseDetector<CollidableTest, Fixture> reference = new PlainBroadphase<CollidableTest, Fixture>();
+		List<CollidableTest> collidables = new ArrayList<CollidableTest>();
+		
+		// Constant seed so we always get the same sequence of randoms
+		Random random = new Random(SEED);
+		
+		// Pick some iterations and query count
+		final int iterations = 100;
+		final int queries = 10;
+		
+		for (int i = 0; i < iterations; i++) {
+			// Create a random rectangle
+			Rectangle randomRectangle = Geometry.createRectangle(random.nextDouble() + 0.1, random.nextDouble() + 0.1);
+			CollidableTest collidable = new CollidableTest(randomRectangle);
+			
+			// And apply a random translation
+			collidable.translate(random.nextDouble() * 10 - 5, random.nextDouble() * 10 - 5);
+			
+			// Add the new collidable to both broadphases
+			collidables.add(collidable);
+			this.broadphase.add(collidable);
+			reference.add(collidable);
+			
+			// Also remove one existing collidable with 25% chance
+			if (random.nextDouble() <= 0.25) {
+				CollidableTest forRemoval = collidables.remove(random.nextInt(collidables.size()));
+				
+				this.broadphase.remove(forRemoval);
+				reference.remove(forRemoval);
+			}
+			
+			// Now start querying
+			// First test detect
+			List<BroadphasePair<CollidableTest, Fixture>> referenceDetect = reference.detect();
+			List<BroadphasePair<CollidableTest, Fixture>> otherDetect = this.broadphase.detect();
+			
+			// The pairs returned from {@link PlainBroadphase} are the minimum possible
+			// if any of those is missing from the broadphase being tested, something is wrong
+			for (BroadphasePair<CollidableTest, Fixture> pair : referenceDetect) {
+				// Be careful to have correct pair equality here. See pairExists
+				if (!pairExists(pair, otherDetect)) {
+					TestCase.fail("detect() is missing pairs");
+				}
+			}
+			
+			// Now test detect against 10 random AABBs
+			for (int d = 0; d < queries; d++) {
+				// Generate a random AABB inside the rectangle [(-5, -5), (5, -5), (5, 5), (-5, 5)]
+				double aabbWidth = random.nextDouble() * 9.5 + 0.5;
+				double aabbHeight = random.nextDouble() * 9.5 + 0.5;
+				double aabbX = -5 + random.nextDouble() * (10 - aabbWidth);
+				double aabbY = -5 + random.nextDouble() * (10 - aabbHeight);
+				
+				AABB aabb = new AABB(aabbX, aabbY, aabbX + aabbWidth, aabbY + aabbHeight);
+				List<BroadphaseItem<CollidableTest, Fixture>> referenceAABBDetect = reference.detect(aabb);
+				List<BroadphaseItem<CollidableTest, Fixture>> otherAABBDetect = this.broadphase.detect(aabb);
+				
+				// Again, because the items returned from {@link PlainBroadphase} are the minimum possible
+				// if any of those are missing from the broadphase being tested, something is wrong
+				for (BroadphaseItem<CollidableTest, Fixture> item : referenceAABBDetect) {
+					// Since we don't have pairs here we can rely on BroadphaseItem#equals
+					if (!otherAABBDetect.contains(item)) {
+						TestCase.fail("detect(AABB) is missing items");
+					}
+				}
+			}
+			
+			// and 10 random Rays
+			for (int d = 0; d < queries; d++) {
+				//choose either an infinite or finite ray with 50% chance
+				double rayLength = (random.nextBoolean())? (random.nextDouble() * 10) : 0.0;
+				
+				// Generate a random starting point in the interval [-5, -5)
+				Vector2 start = new Vector2(random.nextDouble() * 10 - 5, random.nextDouble() * 10 - 5);
+				Ray randomRay = new Ray(start, random.nextDouble() * Geometry.TWO_PI);
+				
+				List<BroadphaseItem<CollidableTest, Fixture>> referenceRaycast = reference.raycast(randomRay, rayLength);
+				List<BroadphaseItem<CollidableTest, Fixture>> otherRaycast = this.broadphase.raycast(randomRay, rayLength);
+				
+				for (BroadphaseItem<CollidableTest, Fixture> item : referenceRaycast) {
+					if (!otherRaycast.contains(item)) {
+						TestCase.fail("raycast() is missing items");
+					}
+				}
+			}
+		}
+	}
+	
+	private boolean pairExists(BroadphasePair<CollidableTest, Fixture> pair, List<BroadphasePair<CollidableTest, Fixture>> pairs) {
+		for (BroadphasePair<CollidableTest, Fixture> p : pairs) {
+			boolean equal = false;
+			
+			if (p.getCollidable1() == pair.getCollidable1() &&
+				p.getFixture1() == pair.getFixture1() &&
+				p.getCollidable2() == pair.getCollidable2() &&
+				p.getFixture2() == pair.getFixture2()) {
+				
+				equal =  true;
+			}
+			
+			if (p.getCollidable2() == pair.getCollidable1() &&
+				p.getFixture2() == pair.getFixture1() &&
+				p.getCollidable1() == pair.getCollidable2() &&
+				p.getFixture1() == pair.getFixture2()) {
+				
+				equal =  true;
+			}
+			
+			if (equal) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
 }
