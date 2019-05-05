@@ -591,32 +591,23 @@ public class BroadphaseTest {
 		}
 	}
 	
+	/**
+	 * Simple helper method that finds if a {@link BroadphasePair} or it's reverse pair is
+	 * contained in a list of {@link BroadphasePair}s.
+	 * 
+	 * @param pair The pair to search
+	 * @param pairs The list of pairs
+	 * @return true if pair or it's reverse is contained in the list, false otherwise
+	 */
 	private boolean pairExists(BroadphasePair<CollidableTest, Fixture> pair, List<BroadphasePair<CollidableTest, Fixture>> pairs) {
-		for (BroadphasePair<CollidableTest, Fixture> p : pairs) {
-			boolean equal = false;
+		if (pairs.contains(pair)) {
+			return true;
+		} else {
+			BroadphasePair<CollidableTest, Fixture> reversePair = new BroadphasePair<CollidableTest, Fixture>(
+					pair.getCollidable2(), pair.getFixture2(), pair.getCollidable1(), pair.getFixture1());
 			
-			if (p.getCollidable1() == pair.getCollidable1() &&
-				p.getFixture1() == pair.getFixture1() &&
-				p.getCollidable2() == pair.getCollidable2() &&
-				p.getFixture2() == pair.getFixture2()) {
-				
-				equal =  true;
-			}
-			
-			if (p.getCollidable2() == pair.getCollidable1() &&
-				p.getFixture2() == pair.getFixture1() &&
-				p.getCollidable1() == pair.getCollidable2() &&
-				p.getFixture1() == pair.getFixture2()) {
-				
-				equal =  true;
-			}
-			
-			if (equal) {
-				return true;
-			}
+			return pairs.contains(reversePair);
 		}
-		
-		return false;
 	}
 	
 }
