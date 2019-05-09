@@ -56,8 +56,8 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	/** The half-width */
 	final double halfWidth;
 	
-	/** The local rotation in radians */
-	double rotation;
+	/** The local rotation */
+	final Rotation rotation;
 	
 	/** The ellipse center */
 	final Vector2 ellipseCenter;
@@ -92,8 +92,8 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		// set the ellipse center
 		this.ellipseCenter = new Vector2();
 		
-		// initial rotation 0 means the half ellipse is aligned to the world space x axis
-		this.rotation = 0;
+		// Initially the half ellipse is aligned to the world space x axis
+		this.rotation = new Rotation();
 		
 		// setup the vertices
 		this.vertexLeft = vertexLeft;
@@ -200,19 +200,8 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	private Vector2 getFarthestPoint(Vector2 localAxis) {
 		// localAxis is already in local coordinates
 		
-		// Unfortunately there's not a better way for this
-		// We can't make a helper because in some cases we return before completing
-		// all the calculations. But the performance gain is worth it
-		double cos = 0, sin = 0;
-		
-		if (this.rotation != 0) {
-			cos = Math.cos(this.rotation);
-			sin = Math.sin(this.rotation);
-			
-			// invert the local rotation
-			// cos(-x) = cos(x), sin(-x) = -sin(x)
-			localAxis.rotate(cos, -sin);
-		}
+		// invert the local rotation
+		localAxis.rotateInv(this.rotation);
 		
 		if (localAxis.y <= 0) {
 			if (localAxis.x >= 0) {
@@ -224,6 +213,26 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 			return localAxis;
 		}
 		
+		getFarthestPointOnAlignedEllipse(localAxis);
+		
+		// include local rotation (inverse again to restore the original rotation)
+		localAxis.rotate(this.rotation);
+		
+		// add the radius along the vector to the center to get the farthest point
+		localAxis.add(this.ellipseCenter);
+		
+		return localAxis;
+	}
+	
+	/**
+	 * Returns the farthest point along the given local space axis assuming the
+	 * ellipse and the given axis are aligned.
+	 * <p>
+	 * Typically this means that the ellipse is axis-aligned, but it could also
+	 * mean that the ellipse is not axis-aligned, but the given local space axis
+	 * has been rotated to match the alignment of the ellipse.
+	 */
+	private void getFarthestPointOnAlignedEllipse(Vector2 localAxis) {
 		// an ellipse is a circle with a non-uniform scaling transformation applied
 		// so we can achieve that by scaling the input axis by the major and minor
 		// axis lengths
@@ -233,18 +242,9 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		// then normalize it
 		localAxis.normalize();
 		
+		// then scale again to get a point in the ellipse
 		localAxis.x *= this.halfWidth;
 		localAxis.y *= this.height;
-		
-		if (this.rotation != 0) {
-			// include local rotation
-			localAxis.rotate(cos, sin);	
-		}
-		
-		// add the radius along the vector to the center to get the farthest point
-		localAxis.add(this.ellipseCenter);
-		
-		return localAxis;
 	}
 	
 	/* (non-Javadoc)
@@ -254,13 +254,39 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	public Feature getFarthestFeature(Vector2 vector, Transform transform) {
 		Vector2 localAxis = transform.getInverseTransformedR(vector);
 		
-		if (localAxis.getAngleBetween(rotation) < 0) {
+		// invert the local rotation
+		localAxis.rotateInv(this.rotation);
+		
+		if (localAxis.y > 0) {
 			// then its the farthest point
-			Vector2 point = this.getFarthestPoint(vector, transform);
-			return new PointFeature(point);
+			getFarthestPointOnAlignedEllipse(localAxis);
+			
+			// include local rotation (inverse again to restore the original rotation)
+			localAxis.rotate(this.rotation);
+			// add the radius along the vector to the center to get the farthest point
+			localAxis.add(this.ellipseCenter);
+			
+			transform.transform(localAxis);
+			
+			return new PointFeature(localAxis);
 		} else {
-			// return the full bottom side
-			return Segment.getFarthestFeature(this.vertexLeft, this.vertexRight, vector, transform);
+			// Below code is equivalent to
+			// return Segment.getFarthestFeature(this.vertexLeft, this.vertexRight, vector, transform);
+			
+			// Transform the vertices to world space
+			Vector2 p1 = transform.getTransformed(this.vertexLeft);
+			Vector2 p2 = transform.getTransformed(this.vertexRight);
+			
+			// The vector p1->p2 is always CCW winding
+			PointFeature vp1 = new PointFeature(p1, 0);
+			PointFeature vp2 = new PointFeature(p2, 1);
+			
+			// Choose the vertex that maximizes v.dot(vector)
+			// localAxis is vector in local space and we can choose the correct vertex by
+			// checking if localAxis points to the left or right
+			PointFeature vmax = (localAxis.x <= 0)? vp1 : vp2;
+			
+			return new EdgeFeature(vp1, vp2, vmax, p1.to(p2), 0);
 		}
 	}
 	
@@ -525,19 +551,20 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		return false;
 	}
 	
+
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.AbstractShape#rotate(double, double, double, double, double)
+	 * @see org.dyn4j.geometry.AbstractShape#rotate(org.dyn4j.geometry.Rotation, double, double)
 	 */
 	@Override
-	protected void rotate(double theta, double cos, double sin, double x, double y) {
-		super.rotate(theta, cos, sin, x, y);
+	public void rotate(Rotation rotation, double x, double y) {
+		super.rotate(rotation, x, y);
 		
 		// rotate the local axis as well
-		this.rotation += theta;
+		this.rotation.rotate(rotation);
 		
-		this.vertexLeft.rotate(cos, sin, x, y);
-		this.vertexRight.rotate(cos, sin, x, y);
-		this.ellipseCenter.rotate(cos, sin, x, y);
+		this.vertexLeft.rotate(rotation, x, y);
+		this.vertexRight.rotate(rotation, x, y);
+		this.ellipseCenter.rotate(rotation, x, y);
 	}
 
 	/* (non-Javadoc)
@@ -559,7 +586,14 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	 * @return double the rotation in radians
 	 */
 	public double getRotation() {
-		return this.rotation;
+		return this.rotation.toRadians();
+	}
+	
+	/**
+	 * @return the {@link Rotation} object that represents the local rotation
+	 */
+	public Rotation getRotationObject() {
+		return this.rotation.copy();
 	}
 	
 	/**
