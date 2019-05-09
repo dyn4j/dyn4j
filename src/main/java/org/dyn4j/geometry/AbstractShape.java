@@ -137,6 +137,14 @@ public abstract class AbstractShape implements Shape, Transformable, DataContain
 	}
 	
 	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Shape#rotate(org.dyn4j.geometry.Rotation)
+	 */
+	@Override
+	public void rotate(Rotation rotation) {
+		this.rotate(rotation, 0.0, 0.0);
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Shape#rotateAboutCenter(double)
 	 */
 	@Override
@@ -153,29 +161,34 @@ public abstract class AbstractShape implements Shape, Transformable, DataContain
 	}
 	
 	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Transformable#rotate(org.dyn4j.geometry.Rotation, org.dyn4j.geometry.Vector)
+	 */
+	@Override
+	public void rotate(Rotation rotation, Vector2 point) {
+		this.rotate(rotation, point.x, point.y);
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Transformable#rotate(double, double, double)
 	 */
 	@Override
 	public void rotate(double theta, double x, double y) {
-		this.rotate(theta, Math.cos(theta), Math.sin(theta), x, y);
+		this.rotate(new Rotation(theta), x, y);
 	}
 	
-	/**
-	 * This method should be overridden from shapes to facilitate the
-	 * calculated cosine and sine values.
-	 * Rotates the shape about the given coordinates.
-	 * @param theta the angle in radians
-	 * @param cos the cosine of the rotation angle in radians
-	 * @param sin the sine of the rotation angle in radians
-	 * @param x the x coordinate to rotate about
-	 * @param y the y coordinate to rotate about
-	 * @since 3.3.1
+	/*
+	 * Subclasses of {@link AbstractShape} should override just this method
+	 * if they need to perform additional operations on rotations.
 	 */
-	protected void rotate(double theta, double cos, double sin, double x, double y) {
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Transformable#rotate(org.dyn4j.geometry.Rotation, double, double)
+	 */
+	@Override
+	public void rotate(Rotation rotation, double x, double y) {
 		// only rotate the center if the point about which
 		// we are rotating is not the center
 		if (!this.center.equals(x, y)) {
-			this.center.rotate(cos, sin, x, y);
+			this.center.rotate(rotation, x, y);
 		}
 	}
 	

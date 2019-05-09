@@ -33,6 +33,7 @@ import java.util.UUID;
 import org.dyn4j.DataContainer;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
+import org.dyn4j.geometry.Rotation;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Transformable;
 import org.dyn4j.geometry.Vector2;
@@ -154,6 +155,14 @@ public abstract class AbstractCollidable<T extends Fixture> implements Collidabl
 	public void rotate(double theta, double x, double y) {
 		this.transform.rotate(theta, x, y);
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Transformable#rotate(org.dyn4j.geometry.Rotation, double, double)
+	 */
+	@Override
+	public void rotate(Rotation rotation, double x, double y) {
+		this.transform.rotate(rotation, x, y);
+	}
 
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Transformable#rotate(double, org.dyn4j.geometry.Vector)
@@ -164,11 +173,27 @@ public abstract class AbstractCollidable<T extends Fixture> implements Collidabl
 	}
 
 	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Transformable#rotate(org.dyn4j.geometry.Rotation, org.dyn4j.geometry.Vector)
+	 */
+	@Override
+	public void rotate(Rotation rotation, Vector2 point) {
+		this.transform.rotate(rotation, point);
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Transformable#rotate(double)
 	 */
 	@Override
 	public void rotate(double theta) {
 		this.transform.rotate(theta);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Transformable#rotate(org.dyn4j.geometry.Rotation)
+	 */
+	@Override
+	public void rotate(Rotation rotation) {
+		this.transform.rotate(rotation);
 	}
 	
 	/**
