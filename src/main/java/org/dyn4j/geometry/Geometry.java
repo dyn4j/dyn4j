@@ -160,10 +160,8 @@ public final class Geometry {
 	public static final void reverseWinding(List<Vector2> points) {
 		// check for a null list
 		if (points == null) throw new NullPointerException(Messages.getString("geometry.nullPointList"));
-		// get the length
-		int size = points.size();
-		// check for a length of 1
-		if (size == 1 || size == 0) return;
+		// check for a length of 0 or 1
+		if (points.size() <= 1) return;
 		// otherwise reverse the list
 		Collections.reverse(points);
 	}
@@ -190,17 +188,17 @@ public final class Geometry {
 			// return a copy
 			return p.copy();
 		}
+		
 		// otherwise perform the average
-		double x = 0;
-		double y = 0;
+		Vector2 ac = new Vector2();
 		for (int i = 0; i < size; i++) {
 			Vector2 point = points.get(i);
 			// check for null
 			if (point == null) throw new NullPointerException(Messages.getString("geometry.nullPointListElements"));
-			x += point.x;
-			y += point.y;
+			ac.add(point);
 		}
-		return new Vector2(x / size, y / size);
+		
+		return ac.divide(size);
 	}
 	
 	/**
@@ -225,16 +223,17 @@ public final class Geometry {
 			if (p == null) throw new NullPointerException(Messages.getString("geometry.nullPointArrayElements"));
 			return p.copy();
 		}
-		double x = 0;
-		double y = 0;
+		
+		// otherwise perform the average
+		Vector2 ac = new Vector2();
 		for (int i = 0; i < size; i++) {
 			Vector2 point = points[i];
 			// check for null
 			if (point == null) throw new NullPointerException(Messages.getString("geometry.nullPointArrayElements"));
-			x += point.x;
-			y += point.y;
+			ac.add(point);
 		}
-		return new Vector2(x / size, y / size);
+		
+		return ac.divide(size);
 	}
 	
 	/**
@@ -256,28 +255,10 @@ public final class Geometry {
 	 * @throws IllegalArgumentException if points is empty
 	 */
 	public static final Vector2 getAreaWeightedCenter(List<Vector2> points) {
-		// check for null list
-		if (points == null) throw new NullPointerException(Messages.getString("geometry.nullPointList"));
-		// check for empty list
-		if (points.isEmpty()) throw new IllegalArgumentException(Messages.getString("geometry.invalidSizePointList1"));
-		// check for list of one point
+		// calculate the average center
+		// note that this also performs the necessary checks and throws any exceptions needed
+		Vector2 ac = Geometry.getAverageCenter(points);
 		int size = points.size();
-		if (size == 1) {
-			Vector2 p = points.get(0);
-			// check for null
-			if (p == null) throw new NullPointerException(Messages.getString("geometry.nullPointListElements"));
-			return p.copy();
-		}
-		
-		// get the average center
-		Vector2 ac = new Vector2();
-		for (int i = 0; i < size; i++) {
-			Vector2 p = points.get(i);
-			// check for null
-			if (p == null) throw new NullPointerException(Messages.getString("geometry.nullPointListElements"));
-			ac.add(p);
-		}
-		ac.multiply(1.0 / size);
 		
 		// otherwise perform the computation
 		Vector2 center = new Vector2();
@@ -309,8 +290,7 @@ public final class Geometry {
 			return points.get(0).copy();
 		}
 		// finish the centroid calculation by dividing by the total area
-		center.multiply(1.0 / area);
-		center.add(ac);
+		center.divide(area).add(ac);
 		// return the center
 		return center;
 	}
@@ -324,31 +304,11 @@ public final class Geometry {
 	 * @throws IllegalArgumentException if points is empty
 	 */
 	public static final Vector2 getAreaWeightedCenter(Vector2... points) {
-		// check for null array
-		if (points == null) throw new NullPointerException(Messages.getString("geometry.nullPointArray"));
-		// get the size
+		// calculate the average center
+		// note that this also performs the necessary checks and throws any exceptions needed
+		Vector2 ac = Geometry.getAverageCenter(points);
 		int size = points.length;
-		// check for empty array
-		if (size == 0) throw new IllegalArgumentException(Messages.getString("geometry.invalidSizePointArray1"));
-		// check for array of one point
-		if (size == 1) {
-			Vector2 p = points[0];
-			// check for null
-			if (p == null) throw new NullPointerException(Messages.getString("geometry.nullPointArrayElements"));
-			return p.copy();
-		}
-		// otherwise perform the computation
-		
-		// get the average center
-		Vector2 ac = new Vector2();
-		for (int i = 0; i < size; i++) {
-			Vector2 p = points[i];
-			// check for null
-			if (p == null) throw new NullPointerException(Messages.getString("geometry.nullPointArrayElements"));
-			ac.add(p);
-		}
-		ac.multiply(1.0 / size);
-		
+
 		Vector2 center = new Vector2();
 		double area = 0.0;
 		// loop through the vertices
@@ -378,8 +338,7 @@ public final class Geometry {
 			return points[0].copy();
 		}
 		// finish the centroid calculation by dividing by the total area
-		center.multiply(1.0 / area);
-		center.add(ac);
+		center.divide(area).add(ac);
 		// return the center
 		return center;
 	}
@@ -420,10 +379,11 @@ public final class Geometry {
 		for (int i = 0; i < size; i++) {
 			Vector2 v = vertices[i];
 			// validate each vertex
-			if (v == null) continue;
-			double r2t = center.distanceSquared(v);
-			// keep the largest
-			r2 = Math.max(r2, r2t);
+			if (v != null) {
+				double r2t = center.distanceSquared(v);
+				// keep the largest
+				r2 = Math.max(r2, r2t);
+			}
 		}
 		// set the radius
 		return Math.sqrt(r2);
