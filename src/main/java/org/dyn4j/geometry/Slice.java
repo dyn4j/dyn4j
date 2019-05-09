@@ -40,7 +40,7 @@ import org.dyn4j.resources.Messages;
 public class Slice extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
 	
 	/** Half the total circular section in radians */
-	final double alpha;
+	final double alpha, cosAlpha;
 	
 	/** The radius passed in at creation */
 	final double sliceRadius;
@@ -52,7 +52,7 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	final Vector2[] normals;
 	
 	/** The local rotation in radians */
-	double rotation;
+	final Rotation rotation;
 	
 	/**
 	 * Validated constructor.
@@ -70,8 +70,8 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 		this.sliceRadius = radius;
 		this.alpha = theta * 0.5;
 		
-		// compute the triangular section of the pie
-		double x = radius * Math.cos(this.alpha);
+		// compute the triangular section of the pie (and cache cos(alpha))
+		double x = radius * (this.cosAlpha = Math.cos(this.alpha));
 		double y = radius * Math.sin(this.alpha);
 		this.vertices = new Vector2[] {
 			// the origin
@@ -88,8 +88,8 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 		v2.left().normalize();
 		this.normals = new Vector2[] { v1, v2 };
 		
-		// initial rotation 0 means the slice is aligned to the world space x axis
-		this.rotation = 0;
+		// Initially the slice is aligned to the world space x axis
+		this.rotation = new Rotation();
 	}
 	
 	/**
@@ -206,39 +206,47 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	@Override
 	public Vector2 getFarthestPoint(Vector2 vector, Transform transform) {
 		Vector2 localn = transform.getInverseTransformedR(vector);
+		Vector2 localnRotated;
 		
-		// project the origin and two end points first
-		if (Math.abs(localn.getAngleBetween(this.rotation)) > this.alpha) {
-			// NOTE: taken from Polygon.getFarthestPoint
-			// set the farthest point to the first one
-			int index = 0;
-			// prime the projection amount
-			double max = localn.dot(this.vertices[0]);
-			// loop through the rest of the vertices to find a further point along the axis
-			int size = this.vertices.length;
-			for (int i = 1; i < size; i++) {
-				// get the current vertex
-				Vector2 v = this.vertices[i];
-				// project the vertex onto the axis
-				double projection = localn.dot(v);
-				// check to see if the projection is greater than the last
-				if (projection > max) {
-					// otherwise this point is the farthest so far so clear the array and add it
-					index = i;
-					// set the new maximum
-					max = projection;
+		// We need to normalize localn in order for localnRotated.x < cosAlpha to work
+		// and we also use that to compute the farthest point in the circle part of the slice
+		localn.normalize();
+		
+		// Include rotation if needed
+		// Note that the vertices are already rotated and we need both the rotated and not rotated localn vector
+		if (!this.rotation.isIdentity()) {
+			localnRotated = localn.copy().rotateInv(this.rotation);
+		} else {
+			localnRotated = localn;
+		}
+		
+		// if (abs(angleBetween(localn, rotation)) < alpha)
+		if (localnRotated.x < cosAlpha) {
+			double edge = this.vertices[0].dot(localn);
+			int maxIndex = 0;
+			
+			// Based on the sign of localnRotated.y we can rule out one vertex
+			if (localnRotated.y < 0) {
+				if (this.vertices[2].dot(localn) > edge) {
+					maxIndex = 2;
+				}
+			} else {
+				if (this.vertices[1].dot(localn) > edge) {
+					maxIndex = 1;
 				}
 			}
 			
-			Vector2 point = new Vector2(this.vertices[index]);
+			Vector2 point = new Vector2(this.vertices[maxIndex]);
+			
 			// transform the point into world space
 			transform.transform(point);
+			
 			return point;
 		} else {
 			// NOTE: taken from Circle.getFarthestPoint with some modifications
-			localn.normalize();
 			localn.multiply(this.sliceRadius).add(this.vertices[0]);
 			transform.transform(localn);
+			
 			return localn;
 		}
 	}
@@ -248,33 +256,46 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	 */
 	@Override
 	public Feature getFarthestFeature(Vector2 vector, Transform transform) {
-		Vector2 localAxis = transform.getInverseTransformedR(vector);
-		if (Math.abs(localAxis.getAngleBetween(this.rotation)) <= this.alpha) {
-			// then its the farthest point
-			Vector2 point = this.getFarthestPoint(vector, transform);
-			return new PointFeature(point);
+		Vector2 localn = transform.getInverseTransformedR(vector);
+		Vector2 localnRotated;
+		
+		// We need to normalize localn in order for localnRotated.x < cosAlpha to work
+		// and we also use that to compute the farthest point in the circle part of the slice
+		localn.normalize();
+		
+		// Include rotation if needed
+		// Note that the vertices are already rotated and we need both the rotated and not rotated localn vector
+		if (!this.rotation.isIdentity()) {
+			localnRotated = localn.copy().rotateInv(this.rotation);
 		} else {
+			localnRotated = localn;
+		}
+		
+		// if (abs(angleBetween(localn, rotation)) < alpha)
+		if (localnRotated.x < cosAlpha) {
 			// check if this section is nearly a half circle
-			if ((Math.PI - this.getTheta()) <= 1.0e-6) {
+			if (cosAlpha <= 1.0e-6) {
 				// if so, we want to return the full back side
 				return Segment.getFarthestFeature(this.vertices[1], this.vertices[2], vector, transform);
 			}
 			
-			// include local rotation
-			double r = this.getRotation();
-			// invert the local rotation
-			localAxis.rotate(-r);
 			// otherwise check which side its on
-			if (localAxis.y > 0) {
+			if (localnRotated.y > 0) {
 				// then its the top segment
 				return Segment.getFarthestFeature(this.vertices[0], this.vertices[1], vector, transform);
-			} else if (localAxis.y < 0) {
+			} else if (localnRotated.y < 0) {
 				// then its the bottom segment
 				return Segment.getFarthestFeature(this.vertices[0], this.vertices[2], vector, transform);
 			} else {
 				// then its the tip point
 				return new PointFeature(transform.getTransformed(this.vertices[0]));
 			}
+		} else {
+			// taken from Slice::getFarthestPoint
+			localn.multiply(this.sliceRadius).add(this.vertices[0]);
+			transform.transform(localn);
+			
+			return new PointFeature(localn);
 		}
 	}
 	
@@ -373,23 +394,24 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	
 
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.AbstractShape#rotate(double, double, double, double, double)
+	 * @see org.dyn4j.geometry.AbstractShape#rotate(org.dyn4j.geometry.Rotation, double, double)
 	 */
 	@Override
-	protected void rotate(double theta, double cos, double sin, double x, double y) {
-		// rotate the centroid
-		super.rotate(theta, cos, sin, x, y);
+	public void rotate(Rotation rotation, double x, double y) {
+		super.rotate(rotation, x, y);
 		
 		// rotate the pie vertices
 		for (int i = 0; i < this.vertices.length; i++) {
-			this.vertices[i].rotate(cos, sin, x, y);
+			this.vertices[i].rotate(rotation, x, y);
 		}
+		
 		// rotate the pie normals
 		for (int i = 0; i < this.normals.length; i++) {
-			this.normals[i].rotate(cos, sin);
+			this.normals[i].rotate(rotation);
 		}
+		
 		// rotate the local x axis
-		this.rotation += theta;
+		this.rotation.rotate(rotation);
 	}
 	
 	/* (non-Javadoc)
@@ -410,7 +432,14 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	 * @return double the rotation in radians
 	 */
 	public double getRotation() {
-		return this.rotation;
+		return this.rotation.toRadians();
+	}
+	
+	/**
+	 * @return the {@link Rotation} object that represents the local rotation
+	 */
+	public Rotation getRotationObject() {
+		return this.rotation.copy();
 	}
 	
 	/**
