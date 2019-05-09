@@ -446,7 +446,6 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		 *    those adjacent n0, n1, n2 existed the code below would always return the initial index, without knowing if
 		 *    it's a minimum or maximum. But since only two adjacent indices can exist with a(n0) = a(n1) the code below
 		 *    will always start searching in one direction and because of 1) this will give us the correct answer.
-		 * 3) When there exist two indices with the same a(n), then either one of them can be returned as a correct answer.
 		 */
 		
 		// The initial starting index and the corresponding dot product
@@ -459,7 +458,7 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 			do {
 				max = candidateMax;
 				maxIndex++;
-			} while (max < (candidateMax = vector.dot(this.vertices[maxIndex + 1])));
+			} while ((maxIndex + 1) < n && max < (candidateMax = vector.dot(this.vertices[maxIndex + 1])));
 		} else if (max < (candidateMax = vector.dot(this.vertices[n - 1]))) {
 			maxIndex = n; // n = 0 (mod n)
 			
@@ -467,7 +466,10 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 			do {
 				max = candidateMax;
 				maxIndex--;
-			} while (max < (candidateMax = vector.dot(this.vertices[maxIndex - 1])));
+			} while (maxIndex > 0 && max <= (candidateMax = vector.dot(this.vertices[maxIndex - 1])));
+			//				  ,----------^^
+			// The equality here makes this algorithm produce the same results with the old when there exist adjacent vertices
+			// with the same a(n).
 		}
 		// else maxIndex = 0, because if neither of the above conditions is met, then the initial index is the maximum
 		
@@ -562,32 +564,35 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 	public AABB createAABB(Transform transform) {
 		// get the first point
 		Vector2 p = transform.getTransformed(this.vertices[0]);
-		// project the point onto the vector
+		
+		// initialize min and max values
     	double minX = p.x;
     	double maxX = p.x;
     	double minY = p.y;
     	double maxY = p.y;
+    	
     	// loop over the rest of the vertices
     	int size = this.vertices.length;
         for(int i = 1; i < size; i++) {
-    		// get the next point
-    		p = transform.getTransformed(this.vertices[i]);
-    		// project it onto the vector
-            double vx = p.x;
-            double vy = p.y;
+    		// get the next point p = transform.getTransformed(this.vertices[i]);
+            double px = transform.getTransformedX(this.vertices[i]);
+            double py = transform.getTransformedY(this.vertices[i]);
+            
             // compare the x values
-            if (vx < minX) {
-            	minX = vx;
-            } else if (vx > maxX) {
-            	maxX = vx;
+            if (px < minX) {
+            	minX = px;
+            } else if (px > maxX) {
+            	maxX = px;
             }
+            
             // compare the y values
-            if (vy < minY) {
-            	minY = vy;
-            } else if (vy > maxY) {
-            	maxY = vy;
+            if (py < minY) {
+            	minY = py;
+            } else if (py > maxY) {
+            	maxY = py;
             }
         }
+        
 		// create the aabb
 		return new AABB(minX, minY, maxX, maxY);
 	}
