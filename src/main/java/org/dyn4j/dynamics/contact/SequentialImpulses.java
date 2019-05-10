@@ -43,6 +43,81 @@ import org.dyn4j.geometry.Vector2;
  * @since 3.2.0
  */
 public class SequentialImpulses implements ContactConstraintSolver {
+	
+	private double massCoeff(ContactConstraint contactConstraint, Contact contact, Vector2 n) {
+		return this.massCoeff(contactConstraint, contact.r1, contact.r2, n);
+	}
+	
+	private double massCoeff(ContactConstraint contactConstraint, Vector2 r1, Vector2 r2, Vector2 n) {
+		Mass m1 = contactConstraint.getBody1().getMass();
+		Mass m2 = contactConstraint.getBody2().getMass();
+		
+		double r1CrossN = r1.cross(n);
+		double r2CrossN = r2.cross(n);
+		
+		return m1.getInverseMass() + m2.getInverseMass() + m1.getInverseInertia() * r1CrossN * r1CrossN + m2.getInverseInertia() * r2CrossN * r2CrossN;
+	}
+	
+	private void updateBodies(ContactConstraint contactConstraint, Contact contact1, Contact contact2, Vector2 x, Vector2 a) {
+		Body b1 = contactConstraint.getBody1();
+		Body b2 = contactConstraint.getBody2();
+		Mass m1 = b1.getMass();
+		Mass m2 = b2.getMass();
+		
+		Vector2 N = contactConstraint.normal;
+		
+		// find the incremental impulse
+		// Vector2 d = x.difference(a);
+		// apply the incremental impulse
+		Vector2 J1 = N.product(x.x - a.x);
+		Vector2 J2 = N.product(x.y - a.y);
+
+		double Jx = J1.x + J2.x;
+		double Jy = J1.y + J2.y;
+		
+		// v1.add(J1.sum(J2).multiply(invM1));
+		b1.getLinearVelocity().add(Jx * m1.getInverseMass(), Jy * m1.getInverseMass());
+		b1.setAngularVelocity(b1.getAngularVelocity() + m1.getInverseInertia() * (contact1.r1.cross(J1) + contact2.r1.cross(J2)));
+		
+		// v2.subtract(J1.sum(J2).multiply(invM2));
+		b2.getLinearVelocity().subtract(Jx * m2.getInverseMass(), Jy * m2.getInverseMass());
+		b2.setAngularVelocity(b2.getAngularVelocity() - m2.getInverseInertia() * (contact1.r2.cross(J1) + contact2.r2.cross(J2)));
+		
+		// set the new incremental impulse
+		contact1.jn = x.x;
+		contact2.jn = x.y;
+	}
+	
+	private void updateBodies(ContactConstraint contactConstraint, Contact contact, Vector2 J) {
+		Body b1 = contactConstraint.getBody1();
+		Body b2 = contactConstraint.getBody2();
+		Mass m1 = b1.getMass();
+		Mass m2 = b2.getMass();
+		
+		// b1.getVelocity().add(J.product(invM1));
+		b1.getLinearVelocity().add(J.x * m1.getInverseMass(), J.y * m1.getInverseMass());
+		b1.setAngularVelocity(b1.getAngularVelocity() + m1.getInverseInertia() * contact.r1.cross(J));
+		
+		// b2.getVelocity().subtract(J.product(invM2));
+		b2.getLinearVelocity().subtract(J.x * m2.getInverseMass(), J.y * m2.getInverseMass());
+		b2.setAngularVelocity(b2.getAngularVelocity() - m2.getInverseInertia() * contact.r2.cross(J));
+	}
+	
+	private double computeRelativeVelocityToNormal(ContactConstraint contactConstraint, Contact contact) {
+		return contactConstraint.normal.dot(this.computeRelativeVelocity(contactConstraint, contact));
+	}
+	
+	private Vector2 computeRelativeVelocity(ContactConstraint contactConstraint, Contact contact) {
+		Body b1 = contactConstraint.getBody1();
+		Body b2 = contactConstraint.getBody2();
+		
+		Vector2 lv1 = contact.r1.cross(b1.getAngularVelocity()).add(b1.getLinearVelocity());
+		Vector2 lv2 = contact.r2.cross(b2.getAngularVelocity()).add(b2.getLinearVelocity());
+		Vector2 rv = lv1.subtract(lv2);
+		
+		return rv;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.contact.ContactConstraintSolver#initialize(java.util.List, org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
 	 */
@@ -54,6 +129,12 @@ public class SequentialImpulses implements ContactConstraintSolver {
 		int size = contactConstraints.size();
 		for (int i = 0; i < size; i++) {
 			ContactConstraint contactConstraint = contactConstraints.get(i);
+			
+			// get the contacts
+			List<Contact> contacts = contactConstraint.contacts;
+			// get the size
+			int cSize = contacts.size();
+			if (cSize == 0) return; 
 			
 			// get the bodies
 			Body b1 = contactConstraint.getBody1();
@@ -74,12 +155,6 @@ public class SequentialImpulses implements ContactConstraintSolver {
 			Vector2 c1 = t1.getTransformed(m1.getCenter());
 			Vector2 c2 = t2.getTransformed(m2.getCenter());
 			
-			// get the contacts
-			List<Contact> contacts = contactConstraint.contacts;
-			
-			// get the size
-			int cSize = contacts.size();
-			
 			// get the penetration axis
 			Vector2 N = contactConstraint.normal;
 			// get the tangent vector
@@ -89,32 +164,20 @@ public class SequentialImpulses implements ContactConstraintSolver {
 			for (int j = 0; j < cSize; j++) {
 				Contact contact = contacts.get(j);
 				
-				// get ra and rb
-				Vector2 r1 = c1.to(contact.p);
-				Vector2 r2 = c2.to(contact.p);
-				contact.r1 = r1;
-				contact.r2 = r2;
+				// calculate ra and rb
+				contact.r1 = c1.to(contact.p);
+				contact.r2 = c2.to(contact.p);
 				
 				// pre calculate the mass normal
-				double r1CrossN = r1.cross(N);
-				double r2CrossN = r2.cross(N);
-				contact.massN = 1.0 / (invM1 + invM2 + invI1 * r1CrossN * r1CrossN + invI2 * r2CrossN * r2CrossN);
-
+				contact.massN = 1.0 / this.massCoeff(contactConstraint, contact, N);
 				// pre calculate the mass tangent
-				double r1CrossT = r1.cross(T);
-				double r2CrossT = r2.cross(T);
-				contact.massT = 1.0 / (invM1 + invM2 + invI1 * r1CrossT * r1CrossT + invI2 * r2CrossT * r2CrossT);
-				
+				contact.massT = 1.0 / this.massCoeff(contactConstraint, contact, T);
 				// set the velocity bias
 				contact.vb = 0.0;
 				
-				// find the relative velocity
-				Vector2 lv1 = r1.cross(b1.getAngularVelocity()).add(b1.getLinearVelocity());
-				Vector2 lv2 = r2.cross(b2.getAngularVelocity()).add(b2.getLinearVelocity());
-				Vector2 rv = lv1.subtract(lv2);
+				// find the relative velocity and project it onto the penetration normal
+				double rvn = this.computeRelativeVelocityToNormal(contactConstraint, contact);
 				
-				// project the relative velocity onto the penetration normal
-				double rvn = N.dot(rv);
 				// if its negative then the bodies are moving away from one another
 				if (rvn < -restitutionVelocity) {
 					// use the coefficient of elasticity
@@ -188,18 +251,6 @@ public class SequentialImpulses implements ContactConstraintSolver {
 		for (int i = 0; i < size; i++) {
 			ContactConstraint contactConstraint = contactConstraints.get(i);
 			
-			// get the bodies
-			Body b1 = contactConstraint.getBody1();
-			Body b2 = contactConstraint.getBody2();
-			// get the body masses
-			Mass m1 = b1.getMass();
-			Mass m2 = b2.getMass();
-			
-			double invM1 = m1.getInverseMass();
-			double invM2 = m2.getInverseMass();
-			double invI1 = m1.getInverseInertia();
-			double invI2 = m2.getInverseInertia();
-			
 			// get the penetration axis
 			Vector2 N = contactConstraint.normal;
 			// get the tangent vector
@@ -208,7 +259,6 @@ public class SequentialImpulses implements ContactConstraintSolver {
 			// get the contacts and contact size
 			List<Contact> contacts = contactConstraint.getContacts();
 			int cSize = contacts.size();
-			if (cSize == 0) continue;
 			
 			for (int j = 0; j < cSize; j++) {
 				Contact contact = contacts.get(j);
@@ -218,19 +268,11 @@ public class SequentialImpulses implements ContactConstraintSolver {
 				contact.jt *= ratio;
 				
 				// apply accumulated impulses to warm start the solver
-
-//				Vector2 J = N.product(contact.jn).add(T.product(contact.jt));
 				Vector2 J = new Vector2(N.x * contact.jn + T.x * contact.jt, N.y * contact.jn + T.y * contact.jt);
-//				b1.getVelocity().add(J.product(invM1));
-				b1.getLinearVelocity().add(J.x * invM1, J.y * invM1);
-				b1.setAngularVelocity(b1.getAngularVelocity() + invI1 * contact.r1.cross(J));
-//				b2.getVelocity().subtract(J.product(invM2));
-				b2.getLinearVelocity().subtract(J.x * invM2, J.y * invM2);
-				b2.setAngularVelocity(b2.getAngularVelocity() - invI2 * contact.r2.cross(J));
+				this.updateBodies(contactConstraint, contact, J);
 			}
 		}
 	}
-	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.contact.ContactConstraintSolver#solveVelocityContraints(java.util.List, org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
 	 */
@@ -239,18 +281,7 @@ public class SequentialImpulses implements ContactConstraintSolver {
 		int size = contactConstraints.size();
 		for (int i = 0; i < size; i++) {
 			ContactConstraint contactConstraint = contactConstraints.get(i);
-			// get the bodies
-			Body b1 = contactConstraint.getBody1();
-			Body b2 = contactConstraint.getBody2();
-			// get the masses
-			Mass m1 = b1.getMass();
-			Mass m2 = b2.getMass();
 			
-			double invM1 = m1.getInverseMass();
-			double invM2 = m2.getInverseMass();
-			double invI1 = m1.getInverseInertia();
-			double invI2 = m2.getInverseInertia();
-
 			// get the contact list
 			List<Contact> contacts = contactConstraint.contacts;
 			int cSize = contacts.size();
@@ -266,14 +297,8 @@ public class SequentialImpulses implements ContactConstraintSolver {
 			for (int k = 0; k < cSize; k++) {
 				Contact contact = contacts.get(k);
 				
-				// get ra and rb
-				Vector2 r1 = contact.r1;
-				Vector2 r2 = contact.r2;
-				
 				// get the relative velocity
-				Vector2 lv1 = r1.cross(b1.getAngularVelocity()).add(b1.getLinearVelocity());
-				Vector2 lv2 = r2.cross(b2.getAngularVelocity()).add(b2.getLinearVelocity());
-				Vector2 rv = lv1.subtract(lv2);
+				Vector2 rv = this.computeRelativeVelocity(contactConstraint, contact);
 				
 				// project the relative velocity onto the tangent normal
 				double rvt = T.dot(rv) - tangentSpeed;
@@ -282,21 +307,15 @@ public class SequentialImpulses implements ContactConstraintSolver {
 				
 				// apply the coefficient of friction
 				double maxJt = contactConstraint.friction * contact.jn;
+				
 				// clamp the accumulated tangential impulse
 				double Jt0 = contact.jt;
 				contact.jt = Math.max(-maxJt, Math.min(Jt0 + jt, maxJt));
 				jt = contact.jt - Jt0;
 				
 				// apply to the bodies immediately
-
-//				Vector2 J = T.product(jt);
 				Vector2 J = new Vector2(T.x * jt, T.y * jt);
-//				b1.getVelocity().add(J.product(invM1));
-				b1.getLinearVelocity().add(J.x * invM1, J.y * invM1);
-				b1.setAngularVelocity(b1.getAngularVelocity() + invI1 * r1.cross(J));
-//				b2.getVelocity().subtract(J.product(invM2));
-				b2.getLinearVelocity().subtract(J.x * invM2, J.y * invM2);
-				b2.setAngularVelocity(b2.getAngularVelocity() - invI2 * r2.cross(J));
+				this.updateBodies(contactConstraint, contact, J);
 			}
 			
 			// evalutate the normal impulse
@@ -306,17 +325,8 @@ public class SequentialImpulses implements ContactConstraintSolver {
 				// if its one then solve the one contact
 				Contact contact = contacts.get(0);
 				
-				// get ra and rb
-				Vector2 r1 = contact.r1;
-				Vector2 r2 = contact.r2;
-				
-				// get the relative velocity
-				Vector2 lv1 = r1.cross(b1.getAngularVelocity()).add(b1.getLinearVelocity());
-				Vector2 lv2 = r2.cross(b2.getAngularVelocity()).add(b2.getLinearVelocity());
-				Vector2 rv = lv1.subtract(lv2);
-				
-				// project the relative velocity onto the penetration normal
-				double rvn = N.dot(rv);
+				// get the relative velocity and project it onto the penetration normal
+				double rvn = this.computeRelativeVelocityToNormal(contactConstraint, contact);
 				
 				// calculate the impulse using the velocity bias
 				double j = -contact.massN * (rvn - contact.vb);
@@ -327,15 +337,8 @@ public class SequentialImpulses implements ContactConstraintSolver {
 				j = contact.jn - j0;
 				
 				// only update the bodies after processing all the contacts
-				
-//				Vector2 J = N.product(j);
 				Vector2 J = new Vector2(N.x * j, N.y * j);
-//				b1.getVelocity().add(J.product(invM1));
-				b1.getLinearVelocity().add(J.x * invM1, J.y * invM1);
-				b1.setAngularVelocity(b1.getAngularVelocity() + invI1 * r1.cross(J));
-//				b2.getVelocity().subtract(J.product(invM2));
-				b2.getLinearVelocity().subtract(J.x * invM2, J.y * invM2);
-				b2.setAngularVelocity(b2.getAngularVelocity() - invI2 * r2.cross(J));
+				this.updateBodies(contactConstraint, contact, J);
 			} else {
 				// if its 2 then solve the contacts simultaneously using a mini-LCP
 				
@@ -375,39 +378,13 @@ public class SequentialImpulses implements ContactConstraintSolver {
 				Contact contact1 = contacts.get(0);
 				Contact contact2 = contacts.get(1);
 				
-				Vector2 r11 = contact1.r1;
-				Vector2 r21 = contact1.r2;
-				Vector2 r12 = contact2.r1;
-				Vector2 r22 = contact2.r2;
-				
-				Vector2 v1 = b1.getLinearVelocity();
-				Vector2 v2 = b2.getLinearVelocity();
-				double av1 = b1.getAngularVelocity();
-				double av2 = b2.getAngularVelocity();
-				
 				// create a vector containing the current accumulated impulses
 				Vector2 a = new Vector2(contact1.jn, contact2.jn);
 				
-				// get the relative velocity at both contacts
-//				Vector2 lv11 = contact1.r1.cross(b1.getAngularVelocity()).add(b1.getVelocity());
-//				Vector2 lv21 = contact1.r2.cross(b2.getAngularVelocity()).add(b2.getVelocity());
-//				Vector2 rv1 = lv11.subtract(lv21);
-				// inline the computation
-				Vector2 rv1 = new Vector2();
-				rv1.x = -r11.y * av1 + v1.x + r21.y * av2 - v2.x;
-				rv1.y =  r11.x * av1 + v1.y - r21.x * av2 - v2.y;
-				
-//				Vector2 lv12 = contact2.r1.cross(b1.getAngularVelocity()).add(b1.getVelocity());
-//				Vector2 lv22 = contact2.r2.cross(b2.getAngularVelocity()).add(b2.getVelocity());
-//				Vector2 rv2 = lv12.subtract(lv22);
-				// inline the computation
-				Vector2 rv2 = new Vector2();
-				rv2.x = -r12.y * av1 + v1.x + r22.y * av2 - v2.x;
-				rv2.y =  r12.x * av1 + v1.y - r22.x * av2 - v2.y; 
-				
+				// get the relative velocity at both contacts and
 				// compute the relative velocities along the collision normal
-				double rvn1 = N.dot(rv1);
-				double rvn2 = N.dot(rv2);
+				double rvn1 = this.computeRelativeVelocityToNormal(contactConstraint, contact1);
+				double rvn2 = this.computeRelativeVelocityToNormal(contactConstraint, contact2);
 				
 				// create the b vector
 				Vector2 b = new Vector2();
@@ -427,25 +404,8 @@ public class SequentialImpulses implements ContactConstraintSolver {
 					//
 					Vector2 x = contactConstraint.invK.product(b).negate();
 
-					if (x.x >= 0.0f && x.y >= 0.0f)
-					{
-						// find the incremental impulse
-						Vector2 d = x.difference(a);
-
-						// apply the incremental impulse
-						Vector2 J1 = N.product(d.x);
-						Vector2 J2 = N.product(d.y);
-						
-						//v1.add(J1.sum(J2).multiply(invM1));
-						v1.add((J1.x + J2.x) * invM1, (J1.y + J2.y) * invM1);
-						b1.setAngularVelocity(av1 + invI1 * (r11.cross(J1) + r12.cross(J2)));
-						v2.subtract((J1.x + J2.x) * invM2, (J1.y + J2.y) * invM2);
-						b2.setAngularVelocity(av2 - invI2 * (r21.cross(J1) + r22.cross(J2)));
-
-						// set the new accumulated impulse
-						contact1.jn = x.x;
-						contact2.jn = x.y;
-						
+					if (x.x >= 0.0 && x.y >= 0.0) {
+						this.updateBodies(contactConstraint, contact1, contact2, x, a);
 						break;
 					}
 
@@ -461,26 +421,8 @@ public class SequentialImpulses implements ContactConstraintSolver {
 					rvn1 = 0.0;
 					rvn2 = contactConstraint.K.m10 * x.x + b.y;
 
-					if (x.x >= 0.0f && rvn2 >= 0.0f)
-					{
-						// find the incremental impulse
-						Vector2 d = x.difference(a);
-
-						// apply the incremental impulse
-						Vector2 J1 = N.product(d.x);
-						Vector2 J2 = N.product(d.y);
-						
-						//v1.add(J1.sum(J2).multiply(invM1));
-						v1.add((J1.x + J2.x) * invM1, (J1.y + J2.y) * invM1);
-						b1.setAngularVelocity(av1 + invI1 * (r11.cross(J1) + r12.cross(J2)));
-						//v2.subtract(J1.sum(J2).multiply(invM2));
-						v2.subtract((J1.x + J2.x) * invM2, (J1.y + J2.y) * invM2);
-						b2.setAngularVelocity(av2 - invI2 * (r21.cross(J1) + r22.cross(J2)));
-						
-						// set the new incremental impulse
-						contact1.jn = x.x;
-						contact2.jn = x.y;
-						
+					if (x.x >= 0.0 && rvn2 >= 0.0) {
+						this.updateBodies(contactConstraint, contact1, contact2, x, a);
 						break;
 					}
 
@@ -497,26 +439,8 @@ public class SequentialImpulses implements ContactConstraintSolver {
 					rvn1 = contactConstraint.K.m01 * x.y + b.x;
 					rvn2 = 0.0;
 
-					if (x.y >= 0.0f && rvn1 >= 0.0f)
-					{
-						// find the incremental impulse
-						Vector2 d = x.difference(a);
-
-						// apply the incremental impulse
-						Vector2 J1 = N.product(d.x);
-						Vector2 J2 = N.product(d.y);
-						
-						//v1.add(J1.sum(J2).multiply(invM1));
-						v1.add((J1.x + J2.x) * invM1, (J1.y + J2.y) * invM1);
-						b1.setAngularVelocity(av1 + invI1 * (r11.cross(J1) + r12.cross(J2)));
-						//v2.subtract(J1.sum(J2).multiply(invM2));
-						v2.subtract((J1.x + J2.x) * invM2, (J1.y + J2.y) * invM2);
-						b2.setAngularVelocity(av2 - invI2 * (r21.cross(J1) + r22.cross(J2)));
-						
-						// set the new incremental impulse
-						contact1.jn = x.x;
-						contact2.jn = x.y;
-						
+					if (x.y >= 0.0 && rvn1 >= 0.0) {
+						this.updateBodies(contactConstraint, contact1, contact2, x, a);
 						break;
 					}
 
@@ -529,27 +453,9 @@ public class SequentialImpulses implements ContactConstraintSolver {
 					x.y = 0.0f;
 					rvn1 = b.x;
 					rvn2 = b.y;
-
-					if (rvn1 >= 0.0f && rvn2 >= 0.0f )
-					{
-						// find the incremental impulse
-						Vector2 d = x.difference(a);
-
-						// apply the incremental impulse
-						Vector2 J1 = N.product(d.x);
-						Vector2 J2 = N.product(d.y);
-						
-						//v1.add(J1.sum(J2).multiply(invM1));
-						v1.add((J1.x + J2.x) * invM1, (J1.y + J2.y) * invM1);
-						b1.setAngularVelocity(av1 + invI1 * (r11.cross(J1) + r12.cross(J2)));
-						//v2.subtract(J1.sum(J2).multiply(invM2));
-						v2.subtract((J1.x + J2.x) * invM2, (J1.y + J2.y) * invM2);
-						b2.setAngularVelocity(av2 - invI2 * (r21.cross(J1) + r22.cross(J2)));
-						
-						// set the new incremental impulse
-						contact1.jn = x.x;
-						contact2.jn = x.y;
-						
+					
+					if (rvn1 >= 0.0 && rvn2 >= 0.0) {
+						this.updateBodies(contactConstraint, contact1, contact2, x, a);
 						break;
 					}
 					
@@ -581,6 +487,11 @@ public class SequentialImpulses implements ContactConstraintSolver {
 		for (int i = 0; i < size; i++) {
 			ContactConstraint contactConstraint = contactConstraints.get(i);
 			
+			// get the contact list
+			List<Contact> contacts = contactConstraint.contacts;
+			int cSize = contacts.size();
+			if (cSize == 0) continue;
+			
 			// get the bodies
 			Body b1 = contactConstraint.getBody1();
 			Body b2 = contactConstraint.getBody2();
@@ -591,32 +502,18 @@ public class SequentialImpulses implements ContactConstraintSolver {
 			Mass m1 = b1.getMass();
 			Mass m2 = b2.getMass();
 			
-			double mass1 = m1.getMass();
-			double mass2 = m2.getMass();
-			
-			// get the contact list
-			List<Contact> contacts = contactConstraint.contacts;
-			int cSize = contacts.size();
-			if (cSize == 0) continue;
-			
 			// get the penetration axis
 			Vector2 N = contactConstraint.normal;
 			
-			// could be 1 or 0 if one object has infinite mass
-			double invMass1 = mass1 * m1.getInverseMass();
-			double invI1 = mass1 * m1.getInverseInertia();
-			// could be 1 or 0 if one object has infinite mass
-			double invMass2 = mass2 * m2.getInverseMass();
-			double invI2 = mass2 * m2.getInverseInertia();
+			// get the world centers of mass
+			Vector2 c1 = t1.getTransformed(m1.getCenter());
+			Vector2 c2 = t2.getTransformed(m2.getCenter());
+			Vector2 cdiff = c1.subtract(c2);
 			
 			// solve normal constraints
 			for (int k = 0; k < cSize; k++) {
 				Contact contact = contacts.get(k);
 				
-				// get the world centers of mass
-				Vector2 c1 = t1.getTransformed(m1.getCenter());
-				Vector2 c2 = t2.getTransformed(m2.getCenter());
-
 				// get r1 and r2
 				Vector2 r1 = contact.p1.difference(m1.getCenter());
 				t1.transformR(r1);
@@ -624,42 +521,35 @@ public class SequentialImpulses implements ContactConstraintSolver {
 				t2.transformR(r2);
 				
 				// get the world contact points
-				Vector2 p1 = c1.sum(r1);
-				Vector2 p2 = c2.sum(r2);
-				Vector2 dp = p1.subtract(p2);
-
+				Vector2 rdiff = r1.subtract(r2);
+				Vector2 dp = cdiff.subtract(rdiff);
+				
 				// estimate the current penetration
 				double penetration = dp.dot(N) - contact.depth;
 
 				// track the maximum error
 				minSeparation = Math.min(minSeparation, penetration);
-
+				
 				// allow for penetration to avoid jitter
 				double cp = baumgarte * Interval.clamp(penetration + allowedPenetration, -maxLinearCorrection, 0.0);
-
-				// compute the position impulse
-				double rn1 = r1.cross(N);
-				double rn2 = r2.cross(N);
-				double K = invMass1 + invMass2 + invI1 * rn1 * rn1 + invI2 * rn2 * rn2;
 				
-				double jp = 0.0;
-				if (K > Epsilon.E) {
-					jp = -cp / K;
-				}
+				// compute the position impulse
+				double K = this.massCoeff(contactConstraint, r1, r2, N);
+				double jp = (K > Epsilon.E)? (-cp / K) : 0.0;
 				
 				// clamp the accumulated position impulse
 				double jp0 = contact.jp;
 				contact.jp = Math.max(jp0 + jp, 0.0);
 				jp = contact.jp - jp0;
-
-				Vector2 J = N.product(jp);
-
-				// translate and rotate the objects
-				b1.translate(J.product(invMass1));
-				b1.rotate(invI1 * r1.cross(J), c1.x, c1.y);
 				
-				b2.translate(J.product(-invMass2));
-				b2.rotate(-invI2 * r2.cross(J), c2.x, c2.y);
+				Vector2 J = N.product(jp);
+				
+				// translate and rotate the objects
+				b1.translate(J.product(m1.getInverseMass()));
+				b1.rotate(m1.getInverseInertia() * r1.cross(J), c1.x, c1.y);
+				
+				b2.translate(J.product(-m2.getInverseMass()));
+				b2.rotate(-m2.getInverseInertia() * r2.cross(J), c2.x, c2.y);
 			}
 		}
 		// check if the minimum separation between all objects is still
