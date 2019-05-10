@@ -159,14 +159,22 @@ final class Island {
 				// a fixed angular velocity
 				body.angularVelocity += dt * invI * body.torque;
 			}
-			// apply damping
-			double linear = 1.0 - dt * body.linearDamping;
+			
+			// apply linear damping
+			if (body.linearDamping != 0.0) {
+				// Because DEFAULT_LINEAR_DAMPING is 0.0 apply linear damping only if needed
+				double linear = 1.0 - dt * body.linearDamping;
+				linear = Interval.clamp(linear, 0.0, 1.0);
+				
+				// inline body.velocity.multiply(linear);
+				body.velocity.x *= linear;
+				body.velocity.y *= linear;	
+			}
+			
+			// apply angular damping
 			double angular = 1.0 - dt * body.angularDamping;
-			linear = Interval.clamp(linear, 0.0, 1.0);
 			angular = Interval.clamp(angular, 0.0, 1.0);
-			// inline body.velocity.multiply(linear);
-			body.velocity.x *= linear;
-			body.velocity.y *= linear;
+			
 			body.angularVelocity *= angular;
 		}
 		
