@@ -5,18 +5,21 @@ New Features:
   - Arithmetic optimizations (by mtsamis)
   - Small performance enhancement in the Island class (by mtsamis)
   - Memory footprint improvements (by mtsamis)
-  - AABB unpack and performance enhancements (mtsamis)
+  - AABB unpack and performance enhancements (by mtsamis)
+  - New BruteForceBroadphase detector (by mtsamis)
 
 Bug Fixes:
   - Bug fix for HalfEllipse.getRadius(Vector2) when the half width < half
     height and the given point is below the evolute.
   - Bug fix for the initial transform not updating if CCD is turned off
+  - Bug fix for strange code in position solver
     
 Deprecated:
   
 Breaking Changes:
   
 Other:
+  - Updated broadphase tests (by mtsamis)
 
 ===============================================================================
 Version 3.3.0

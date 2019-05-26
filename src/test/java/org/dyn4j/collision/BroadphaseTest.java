@@ -36,7 +36,7 @@ import org.dyn4j.collision.broadphase.BroadphaseItem;
 import org.dyn4j.collision.broadphase.BroadphasePair;
 import org.dyn4j.collision.broadphase.DynamicAABBTree;
 import org.dyn4j.collision.broadphase.LazyAABBTree;
-import org.dyn4j.collision.broadphase.PlainBroadphase;
+import org.dyn4j.collision.broadphase.BruteForceBroadphase;
 import org.dyn4j.collision.broadphase.Sap;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Geometry;
@@ -72,7 +72,7 @@ public class BroadphaseTest {
     			/** The lazy aabb algorithm */
     			new Object[]{new LazyAABBTree<CollidableTest, Fixture>()},
     			/** The plain brute-force broadphase */
-    			new Object[]{new PlainBroadphase<CollidableTest, Fixture>()}
+    			new Object[]{new BruteForceBroadphase<CollidableTest, Fixture>()}
     			);
     }
 	
@@ -503,7 +503,7 @@ public class BroadphaseTest {
 	@Test
 	public void randomizedTest() {
 		// The reference broad-phase is {@link PlainBroadphase}
-		BroadphaseDetector<CollidableTest, Fixture> reference = new PlainBroadphase<CollidableTest, Fixture>();
+		BroadphaseDetector<CollidableTest, Fixture> reference = new BruteForceBroadphase<CollidableTest, Fixture>();
 		List<CollidableTest> collidables = new ArrayList<CollidableTest>();
 		
 		// Constant seed so we always get the same sequence of randoms

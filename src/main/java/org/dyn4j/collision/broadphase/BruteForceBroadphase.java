@@ -57,16 +57,16 @@ import org.dyn4j.geometry.Vector2;
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
  */
-public class PlainBroadphase<E extends Collidable<T>, T extends Fixture> extends AbstractBroadphaseDetector<E, T> implements BroadphaseDetector<E, T> {
+public class BruteForceBroadphase<E extends Collidable<T>, T extends Fixture> extends AbstractBroadphaseDetector<E, T> implements BroadphaseDetector<E, T> {
 	
 	/** Id to node map for fast lookup */
-	final Map<BroadphaseKey, PlainBroadphaseNode<E, T>> map;
+	final Map<BroadphaseKey, BruteForceBroadphaseNode<E, T>> map;
 	
 	/**
 	 * Default constructor.
 	 */
-	public PlainBroadphase() {
-		this.map = new LinkedHashMap<BroadphaseKey, PlainBroadphaseNode<E,T>>();
+	public BruteForceBroadphase() {
+		this.map = new LinkedHashMap<BroadphaseKey, BruteForceBroadphaseNode<E,T>>();
 	}
 	
 	/* (non-Javadoc)
@@ -75,14 +75,14 @@ public class PlainBroadphase<E extends Collidable<T>, T extends Fixture> extends
 	@Override
 	public void add(E collidable, T fixture) {
 		BroadphaseKey key = BroadphaseKey.get(collidable, fixture);
-		PlainBroadphaseNode<E, T> node = this.map.get(key);
+		BruteForceBroadphaseNode<E, T> node = this.map.get(key);
 		
 		if (node != null) {
 			// if the collidable-fixture has already been added just update it
 			node.updateAABB();
 		} else {
 			// else add the new node
-			this.map.put(key, new PlainBroadphaseNode<E, T>(collidable, fixture));
+			this.map.put(key, new BruteForceBroadphaseNode<E, T>(collidable, fixture));
 		}
 	}
 	
@@ -93,7 +93,7 @@ public class PlainBroadphase<E extends Collidable<T>, T extends Fixture> extends
 	public boolean remove(E collidable, T fixture) {
 		BroadphaseKey key = BroadphaseKey.get(collidable, fixture);
 		// find the node in the map
-		PlainBroadphaseNode<E, T> node = this.map.remove(key);
+		BruteForceBroadphaseNode<E, T> node = this.map.remove(key);
 		
 		return node != null;
 	}
@@ -112,7 +112,7 @@ public class PlainBroadphase<E extends Collidable<T>, T extends Fixture> extends
 	@Override
 	public AABB getAABB(E collidable, T fixture) {
 		BroadphaseKey key = BroadphaseKey.get(collidable, fixture);
-		PlainBroadphaseNode<E, T> node = this.map.get(key);
+		BruteForceBroadphaseNode<E, T> node = this.map.get(key);
 		
 		if (node != null) {
 			return node.aabb;
@@ -153,8 +153,8 @@ public class PlainBroadphase<E extends Collidable<T>, T extends Fixture> extends
 	public List<BroadphasePair<E, T>> detect(BroadphaseFilter<E, T> filter) {
 		// clear all the tested flags on the nodes
 		int size = this.map.size();
-		Collection<PlainBroadphaseNode<E, T>> nodes = this.map.values();
-		for (PlainBroadphaseNode<E, T> node : nodes) {
+		Collection<BruteForceBroadphaseNode<E, T>> nodes = this.map.values();
+		for (BruteForceBroadphaseNode<E, T> node : nodes) {
 			// reset the flag
 			node.tested = false;
 		}
@@ -164,8 +164,8 @@ public class PlainBroadphase<E extends Collidable<T>, T extends Fixture> extends
 		List<BroadphasePair<E, T>> pairs = new ArrayList<BroadphasePair<E, T>>(eSize);
 		
 		// test each collidable in the collection
-		for (PlainBroadphaseNode<E, T> node : nodes) {
-			for (PlainBroadphaseNode<E, T> other : nodes) {
+		for (BruteForceBroadphaseNode<E, T> node : nodes) {
+			for (BruteForceBroadphaseNode<E, T> other : nodes) {
 				if (node.aabb.overlaps(other.aabb) && !other.tested && other.collidable != node.collidable) {
 					// if they overlap and not already tested
 					if (filter.isAllowed(node.collidable, node.fixture, other.collidable, other.fixture)) {
@@ -197,10 +197,10 @@ public class PlainBroadphase<E extends Collidable<T>, T extends Fixture> extends
 		// the estimated size of the item list
 		int eSize = Collisions.getEstimatedCollisionsPerObject();
 		List<BroadphaseItem<E, T>> list = new ArrayList<BroadphaseItem<E, T>>(eSize);
-		Collection<PlainBroadphaseNode<E, T>> nodes = this.map.values();
+		Collection<BruteForceBroadphaseNode<E, T>> nodes = this.map.values();
 		
 		// test each collidable in the collection
-		for (PlainBroadphaseNode<E, T> node : nodes) {
+		for (BruteForceBroadphaseNode<E, T> node : nodes) {
 			if (aabb.overlaps(node.aabb)) {
 				if (filter.isAllowed(aabb, node.collidable, node.fixture)) {
 					list.add(new BroadphaseItem<E, T>(node.collidable, node.fixture));
@@ -246,9 +246,9 @@ public class PlainBroadphase<E extends Collidable<T>, T extends Fixture> extends
 		// get the estimated collision count
 		int eSize = Collisions.getEstimatedRaycastCollisions(this.map.size());
 		List<BroadphaseItem<E, T>> list = new ArrayList<BroadphaseItem<E, T>>(eSize);
-		Collection<PlainBroadphaseNode<E, T>> nodes = this.map.values();
+		Collection<BruteForceBroadphaseNode<E, T>> nodes = this.map.values();
 		
-		for (PlainBroadphaseNode<E, T> node : nodes) {
+		for (BruteForceBroadphaseNode<E, T> node : nodes) {
 			if (aabb.overlaps(node.aabb) && this.raycast(s, l, invDx, invDy, node.aabb)) {
 				if (filter.isAllowed(ray, length, node.collidable, node.fixture)) {
 					list.add(new BroadphaseItem<E, T>(node.collidable, node.fixture));
@@ -264,9 +264,9 @@ public class PlainBroadphase<E extends Collidable<T>, T extends Fixture> extends
 	 */
 	@Override
 	public void shift(Vector2 shift) {
-		Collection<PlainBroadphaseNode<E, T>> nodes = this.map.values();
+		Collection<BruteForceBroadphaseNode<E, T>> nodes = this.map.values();
 		
-		for (PlainBroadphaseNode<E, T> node : nodes) {
+		for (BruteForceBroadphaseNode<E, T> node : nodes) {
 			node.aabb.translate(shift);
 		}
 	}

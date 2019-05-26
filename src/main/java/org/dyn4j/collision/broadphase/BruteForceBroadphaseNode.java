@@ -38,13 +38,13 @@ import org.dyn4j.geometry.Transform;
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
  */
-class PlainBroadphaseNode<E extends Collidable<T>, T extends Fixture> {
+class BruteForceBroadphaseNode<E extends Collidable<T>, T extends Fixture> {
 	public final E collidable;
 	public final T fixture;
 	public AABB aabb;
 	boolean tested;
 
-	PlainBroadphaseNode(E collidable, T fixture) {
+	BruteForceBroadphaseNode(E collidable, T fixture) {
 		this.collidable = collidable;
 		this.fixture = fixture;
 		
