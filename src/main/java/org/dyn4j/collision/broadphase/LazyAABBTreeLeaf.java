@@ -31,7 +31,7 @@ import org.dyn4j.geometry.Transform;
 /**
  * Represents a leaf node in a {@link LazyAABBTree}.
  * <p>
- * The leaf nodes in a {@link DynamicAABBTree2} are the nodes that contain the {@link Fixture} AABBs.
+ * The leaf nodes in a {@link LazyAABBTree} are the nodes that contain the {@link Fixture} AABBs.
  * 
  * @author Manolis Tsamis
  * @param <E> the {@link Collidable} type
@@ -60,6 +60,9 @@ final class LazyAABBTreeLeaf<E extends Collidable<T>, T extends Fixture> extends
 	public LazyAABBTreeLeaf(E collidable, T fixture) {
 		this.collidable = collidable;
 		this.fixture = fixture;
+		
+		// calculate the initial AABB
+		this.updateAABB();
 	}
 	
 	/**
@@ -140,7 +143,7 @@ final class LazyAABBTreeLeaf<E extends Collidable<T>, T extends Fixture> extends
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("DynamicAABBTreeLeaf[Collidable=").append(this.collidable.getId())
+		sb.append("LazyAABBTreeLeaf[Collidable=").append(this.collidable.getId())
 		  .append("|Fixture=").append(this.fixture.getId())
 		  .append("|AABB=").append(this.aabb.toString())
 		  .append("|OnTree=").append(this.onTree)

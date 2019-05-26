@@ -194,21 +194,6 @@ public class DynamicAABBTree<E extends Collidable<T>, T extends Fixture> extends
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#contains(org.dyn4j.collision.Collidable)
-	 */
-	@Override
-	public boolean contains(E collidable) {
-		int size = collidable.getFixtureCount();
-		boolean result = true;
-		for (int i = 0; i < size; i++) {
-			T fixture = collidable.getFixture(i);
-			BroadphaseKey key = BroadphaseKey.get(collidable, fixture);
-			result &= this.map.containsKey(key);
-		}
-		return result;
-	}
-	
-	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#contains(org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
 	 */
 	@Override
