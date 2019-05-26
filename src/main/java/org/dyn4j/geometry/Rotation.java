@@ -80,10 +80,11 @@ public class Rotation {
 			return new Rotation();
 		}
 		
-		double m = 1.0 / magnitude;
+		// Avoid multipying by the inverse in order to achieve better numerical accuracy
+		// double m = 1.0 / magnitude;
 		
 		// The rotation is the normalized vector
-		return new Rotation(direction.x * m, direction.y * m);
+		return new Rotation(direction.x / magnitude, direction.y / magnitude);
 	}
 	
 	/**
