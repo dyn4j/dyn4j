@@ -591,9 +591,6 @@ public class SequentialImpulses implements ContactConstraintSolver {
 			Mass m1 = b1.getMass();
 			Mass m2 = b2.getMass();
 			
-			double mass1 = m1.getMass();
-			double mass2 = m2.getMass();
-			
 			// get the contact list
 			List<Contact> contacts = contactConstraint.contacts;
 			int cSize = contacts.size();
@@ -602,12 +599,10 @@ public class SequentialImpulses implements ContactConstraintSolver {
 			// get the penetration axis
 			Vector2 N = contactConstraint.normal;
 			
-			// could be 1 or 0 if one object has infinite mass
-			double invMass1 = mass1 * m1.getInverseMass();
-			double invI1 = mass1 * m1.getInverseInertia();
-			// could be 1 or 0 if one object has infinite mass
-			double invMass2 = mass2 * m2.getInverseMass();
-			double invI2 = mass2 * m2.getInverseInertia();
+			double invMass1 = m1.getInverseMass();
+			double invI1 = m1.getInverseInertia();
+			double invMass2 = m2.getInverseMass();
+			double invI2 = m2.getInverseInertia();
 			
 			// solve normal constraints
 			for (int k = 0; k < cSize; k++) {
