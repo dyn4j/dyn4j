@@ -541,6 +541,17 @@ public class Vector2 {
 	}
 	
 	/**
+	 * Divides this {@link Vector2} by the given scalar returning
+	 * a new {@link Vector2} containing the result.
+	 * @param scalar the scalar
+	 * @return {@link Vector2}
+	 * @since 3.3.1
+	 */
+	public Vector2 quotient(double scalar) {
+		return new Vector2(this.x / scalar, this.y / scalar);
+	}
+	
+	/**
 	 * Returns the dot product of the given {@link Vector2}
 	 * and this {@link Vector2}.
 	 * @param vector the {@link Vector2}
