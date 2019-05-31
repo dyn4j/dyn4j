@@ -24,9 +24,9 @@
  */
 package org.dyn4j.geometry;
 
-import junit.framework.TestCase;
-
 import org.junit.Test;
+
+import junit.framework.TestCase;
 
 /**
  * Test case for the {@link Vector2} class.
@@ -281,7 +281,7 @@ public class Vector2Test {
 		TestCase.assertEquals( 1.0, r.x);
 		TestCase.assertEquals(-1.0, r.y);
 	}
-	
+
 	/**
 	 * Tests the multiply and product methods.
 	 */
@@ -296,6 +296,22 @@ public class Vector2Test {
 		v1.multiply(-1.5);
 		TestCase.assertEquals(-3.0, v1.x);
 		TestCase.assertEquals(-1.5, v1.y);
+	}
+	
+	/**
+	 * Tests the divide and quotient methods.
+	 */
+	@Test
+	public void divide() {
+		Vector2 v1 = new Vector2(2.0, 1.0);
+
+		Vector2 r = v1.quotient(-2.0);
+		TestCase.assertEquals(-1.0, r.x);
+		TestCase.assertEquals(-0.5, r.y);
+		
+		v1.divide(-2.0);
+		TestCase.assertEquals(-1.0, r.x);
+		TestCase.assertEquals(-0.5, r.y);
 	}
 	
 	/**
@@ -412,9 +428,17 @@ public class Vector2Test {
 		TestCase.assertEquals(-1.000, v.x, 1.0e-3);
 		TestCase.assertEquals( 2.000, v.y, 1.0e-3);
 		
-		v.rotate(Math.toRadians(60), 0.0, 1.0);
+		v.rotate(new Rotation(Math.toRadians(60)), 0.0, 1.0);
 		TestCase.assertEquals(-1.366, v.x, 1.0e-3);
 		TestCase.assertEquals( 0.634, v.y, 1.0e-3);
+		
+		v.rotateInv(new Rotation(Math.toRadians(60)), 0.0, 1.0);
+		TestCase.assertEquals(-1.000, v.x, 1.0e-3);
+		TestCase.assertEquals( 2.000, v.y, 1.0e-3);
+		
+		v.rotateInv(Math.toRadians(90));
+		TestCase.assertEquals(2.0, v.x, 1.0e-3);
+		TestCase.assertEquals(1.0, v.y, 1.0e-3);
 	}
 	
 	/**
