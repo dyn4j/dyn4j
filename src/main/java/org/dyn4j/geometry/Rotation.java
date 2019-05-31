@@ -49,10 +49,10 @@ import org.dyn4j.Epsilon;
 public class Rotation {
 	
 	/** The cosine of the angle described by this Rotation */
-	double cost;
+	protected double cost;
 	
 	/** The sine of the angle described by this Rotation */
-	double sint;
+	protected double sint;
 	
 	/**
 	 * Alternative way to create a new {@link Rotation} from a given angle.
@@ -114,21 +114,21 @@ public class Rotation {
 	 * @return A new {@link Rotation} representing rotation by 90 degrees
 	 */
 	public static Rotation rotation90() {
-		return new Rotation(0, 1);
+		return new Rotation(0.0, 1.0);
 	}
 	
 	/**
 	 * @return A new {@link Rotation} representing rotation by 180 degrees
 	 */
 	public static Rotation rotation180() {
-		return new Rotation(-1, 0);
+		return new Rotation(-1.0, 0.0);
 	}
 	
 	/**
 	 * @return A new {@link Rotation} representing rotation by 270 degrees
 	 */
 	public static Rotation rotation270() {
-		return new Rotation(0, -1);
+		return new Rotation(0.0, -1.0);
 	}
 	
 	private static final double SQRT_2_INV = 1.0 / Math.sqrt(2);
@@ -301,6 +301,16 @@ public class Rotation {
 	}
 	
 	/**
+	 * Sets this {@link Rotation} to be the identity.
+	 * @return {@link Rotation} this rotation
+	 */
+	public Rotation setIdentity() {
+		this.cost = 1.0;
+		this.sint = 0.0;
+		return this;
+	}
+	
+	/**
 	 * Sets this {@link Rotation} to the given angle.
 	 * @param angle The angle in radians
 	 * @return {@link Rotation} this rotation
@@ -404,7 +414,7 @@ public class Rotation {
 	 * @return this {@link Rotation} after being rotated 90 degrees
 	 */
 	public Rotation rotate90() {
-		double temp = this.sint;
+		double temp = this.cost;
 		this.cost = -this.sint;
 		this.sint = temp;
 		return this;
@@ -469,7 +479,7 @@ public class Rotation {
 	 * @return this {@link Rotation} after being rotated 270 degrees
 	 */
 	public Rotation rotate270() {
-		double temp = this.sint;
+		double temp = this.cost;
 		this.cost = this.sint;
 		this.sint = -temp;
 		return this;
@@ -479,7 +489,7 @@ public class Rotation {
 	 * @return a new {@link Rotation} equal to this {@link Rotation} after being rotated 270 degrees
 	 */
 	public Rotation getRotated270() {
-		return new Rotation(-this.sint, this.cost);
+		return new Rotation(this.sint, -this.cost);
 	}
 	
 	/**
@@ -487,7 +497,7 @@ public class Rotation {
 	 */
 	public Rotation rotate315() {
 		// Rotate by 270 and another 45
-		return this.rotate45Helper(-this.sint, this.cost);
+		return this.rotate45Helper(this.sint, -this.cost);
 	}
 	
 	/**
@@ -495,7 +505,7 @@ public class Rotation {
 	 */
 	public Rotation getRotated315() {
 		// Rotate by 270 and another 45
-		return this.getRotated45Helper(-this.sint, this.cost);
+		return this.getRotated45Helper(this.sint, -this.cost);
 	}
 	
 	/**
