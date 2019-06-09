@@ -48,6 +48,8 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * Projects all {@link Collidable} {@link Fixture}s on both the x and y axes and performs overlap checks
  * on all the projections to test for possible collisions (AABB tests).
+ * <p>
+ * This algorithm is O(n) for all {@link #detect(AABB)} and {@link #raycast(Ray, double)} methods.
  * @author William Bittle
  * @version 3.3.1
  * @since 1.0.0
@@ -241,7 +243,7 @@ public class Sap<E extends Collidable<T>, T extends Fixture> extends AbstractBro
 			p.tested = false;
 		}
 		
-		// find all the possible pairs
+		// find all the possible pairs O(n*log(n))
 		Iterator<SapProxy<E, T>> ito = this.tree.iterator();
 		while (ito.hasNext()) {
 			// get the current proxy
@@ -292,16 +294,10 @@ public class Sap<E extends Collidable<T>, T extends Fixture> extends AbstractBro
 		
 		List<BroadphaseItem<E, T>> list = new ArrayList<BroadphaseItem<E, T>>(Collisions.getEstimatedCollisionsPerObject());
 		
-		// find the starting proxy to begin testing
-		// this should be the first AABB who overlaps
-		// the given aabb O(log n)
-		SapQuerySearchCriteria<E, T> criteria = new SapQuerySearchCriteria<E, T>(aabb);
-		this.tree.search(criteria);
-		
-		// we must check all aabbs starting at the found proxy
+		// we must check all aabbs starting at the root
 		// from which point the first aabb to not intersect
-		// flags us to stop O(log n)
-		Iterator<SapProxy<E, T>> it = this.tree.tailIterator(criteria.lowest);
+		// flags us to stop O(n)
+		Iterator<SapProxy<E, T>> it = this.tree.inOrderIterator();
 		while (it.hasNext()) {
 			SapProxy<E, T> proxy = it.next();
 			// check for overlap
@@ -366,15 +362,10 @@ public class Sap<E extends Collidable<T>, T extends Fixture> extends AbstractBro
 		int eSize = Collisions.getEstimatedRaycastCollisions(this.map.size());
 		List<BroadphaseItem<E, T>> list = new ArrayList<BroadphaseItem<E, T>>(eSize);
 		
-		// find the proxy in the tree that is least of all the
-		// proxies greater than this one
-		SapQuerySearchCriteria<E, T> criteria = new SapQuerySearchCriteria<E, T>(aabb);
-		this.tree.search(criteria);
-		
-		// we must check all aabbs up to the found proxy
+		// we must check all aabbs starting with the root
 		// from which point the first aabb to not intersect
-		// flags us to stop
-		Iterator<SapProxy<E, T>> it = this.tree.tailIterator(criteria.lowest);
+		// flags us to stop O(n)
+		Iterator<SapProxy<E, T>> it = this.tree.inOrderIterator();
 		while (it.hasNext()) {
 			SapProxy<E, T> proxy = it.next();
 			// check for overlap
