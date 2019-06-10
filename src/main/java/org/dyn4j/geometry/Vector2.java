@@ -706,7 +706,7 @@ public class Vector2 {
 	 * @return {@link Vector2} this vector
 	 * @since 3.3.1
 	 */
-	public Vector2 rotateInv(double theta) {
+	public Vector2 inverseRotate(double theta) {
 		return this.rotate(Math.cos(theta), -Math.sin(theta));
 	}
 	
@@ -716,7 +716,7 @@ public class Vector2 {
 	 * @return {@link Vector2} this vector
 	 * @since 3.3.1
 	 */
-	public Vector2 rotateInv(Rotation rotation) {
+	public Vector2 inverseRotate(Rotation rotation) {
 		return this.rotate(rotation.cost, -rotation.sint);
 	}
 	
@@ -769,7 +769,7 @@ public class Vector2 {
 	 * @return {@link Vector2} this vector
 	 * @since 3.3.1
 	 */
-	public Vector2 rotateInv(double theta, double x, double y) {
+	public Vector2 inverseRotate(double theta, double x, double y) {
 		return this.rotate(Math.cos(theta), -Math.sin(theta), x, y);
 	}
 	
@@ -779,7 +779,7 @@ public class Vector2 {
 	 * @return {@link Vector2} this vector
 	 * @since 3.3.1
 	 */
-	public Vector2 rotateInv(Rotation rotation, double x, double y) {
+	public Vector2 inverseRotate(Rotation rotation, double x, double y) {
 		return this.rotate(rotation.cost, -rotation.sint, x, y);
 	}
 
@@ -811,8 +811,8 @@ public class Vector2 {
 	 * @return {@link Vector2} this vector
 	 * @since 3.3.1
 	 */
-	public Vector2 rotateInv(double theta, Vector2 point) {
-		return this.rotateInv(theta, point.x, point.y);
+	public Vector2 inverseRotate(double theta, Vector2 point) {
+		return this.inverseRotate(theta, point.x, point.y);
 	}
 	
 	/**
@@ -822,8 +822,8 @@ public class Vector2 {
 	 * @return {@link Vector2} this vector
 	 * @since 3.3.1
 	 */
-	public Vector2 rotateInv(Rotation rotation, Vector2 point) {
-		return this.rotateInv(rotation, point.x, point.y);
+	public Vector2 inverseRotate(Rotation rotation, Vector2 point) {
+		return this.inverseRotate(rotation, point.x, point.y);
 	}
 	
 	/**

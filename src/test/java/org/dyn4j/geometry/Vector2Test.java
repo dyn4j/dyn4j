@@ -432,11 +432,11 @@ public class Vector2Test {
 		TestCase.assertEquals(-1.366, v.x, 1.0e-3);
 		TestCase.assertEquals( 0.634, v.y, 1.0e-3);
 		
-		v.rotateInv(new Rotation(Math.toRadians(60)), 0.0, 1.0);
+		v.inverseRotate(new Rotation(Math.toRadians(60)), 0.0, 1.0);
 		TestCase.assertEquals(-1.000, v.x, 1.0e-3);
 		TestCase.assertEquals( 2.000, v.y, 1.0e-3);
 		
-		v.rotateInv(Math.toRadians(90));
+		v.inverseRotate(Math.toRadians(90));
 		TestCase.assertEquals(2.0, v.x, 1.0e-3);
 		TestCase.assertEquals(1.0, v.y, 1.0e-3);
 	}
