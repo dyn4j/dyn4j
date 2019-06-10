@@ -178,7 +178,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 			this.getFarthestPointOnAlignedEllipse(localAxis);
 		} else {
 			// invert the local rotation
-			localAxis.rotateInv(rotation);	
+			localAxis.inverseRotate(rotation);	
 			
 			this.getFarthestPointOnAlignedEllipse(localAxis);
 			
@@ -303,7 +303,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		// we need to translate/rotate the point so that this ellipse is
 		// considered centered at the origin with it's semi-major axis aligned
 		// with the x-axis and its semi-minor axis aligned with the y-axis
-		Vector2 p = center.difference(this.center).rotateInv(this.rotation);
+		Vector2 p = center.difference(this.center).inverseRotate(this.rotation);
 		
 		// get the farthest point.
 		Vector2 fp = Ellipse.getFarthestPointOnEllipse(this.halfWidth, this.halfHeight, p);
@@ -513,7 +513,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		// get the world space point into local coordinates
 		Vector2 localPoint = transform.getInverseTransformed(point);
 		// account for local rotation
-		localPoint.rotateInv(this.rotation, this.center.x, this.center.y);
+		localPoint.inverseRotate(this.rotation, this.center.x, this.center.y);
 		
 		double x = (localPoint.x - this.center.x);
 		double y = (localPoint.y - this.center.y);

@@ -215,7 +215,7 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 		// Include rotation if needed
 		// Note that the vertices are already rotated and we need both the rotated and not rotated localn vector
 		if (!this.rotation.isIdentity()) {
-			localnRotated = localn.copy().rotateInv(this.rotation);
+			localnRotated = localn.copy().inverseRotate(this.rotation);
 		} else {
 			localnRotated = localn;
 		}
@@ -266,7 +266,7 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 		// Include rotation if needed
 		// Note that the vertices are already rotated and we need both the rotated and not rotated localn vector
 		if (!this.rotation.isIdentity()) {
-			localnRotated = localn.copy().rotateInv(this.rotation);
+			localnRotated = localn.copy().inverseRotate(this.rotation);
 		} else {
 			localnRotated = localn;
 		}

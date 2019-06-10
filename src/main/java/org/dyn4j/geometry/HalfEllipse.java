@@ -201,7 +201,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		// localAxis is already in local coordinates
 		
 		// invert the local rotation
-		localAxis.rotateInv(this.rotation);
+		localAxis.inverseRotate(this.rotation);
 		
 		if (localAxis.y <= 0) {
 			if (localAxis.x >= 0) {
@@ -255,7 +255,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		Vector2 localAxis = transform.getInverseTransformedR(vector);
 		
 		// invert the local rotation
-		localAxis.rotateInv(this.rotation);
+		localAxis.inverseRotate(this.rotation);
 		
 		if (localAxis.y > 0) {
 			// then its the farthest point
