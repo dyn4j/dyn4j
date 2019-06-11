@@ -65,6 +65,16 @@ public class Rotation {
 	}
 	
 	/**
+	 * Alternative way to create a new {@link Rotation} from a given angle, in degrees.
+	 * 
+	 * @param angle in degrees
+	 * @return A {@link Rotation} for that angle
+	 */
+	public static Rotation ofDegrees(double angle) {
+		return new Rotation(Math.toDegrees(angle));
+	}
+	
+	/**
 	 * Static method to create a {@link Rotation} object from the direction
 	 * of a given {@link Vector2}.
 	 * 
