@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Transform} object.
  * @author William Bittle
- * @version 3.1.0
+ * @version 3.3.1
  * @since 1.0.0
  */
 public class TransformTest {
@@ -69,11 +69,12 @@ public class TransformTest {
 	@Test
 	public void rotate() {
 		Transform t = new Transform();
+
 		t.rotate(Math.toRadians(30));
+		TestCase.assertEquals(Math.toRadians(30), t.getRotation(), 1.0e-3);
 		
-		double r = t.getRotation();
-		
-		TestCase.assertEquals(30.000, Math.floor(Math.toDegrees(r) + 0.5), 1.0e-3);
+		t.rotate(Rotation.ofDegrees(50));
+		TestCase.assertEquals(Math.toRadians(80), t.getRotation(), 1.0e-3);
 		
 		t.identity();
 		
@@ -84,7 +85,7 @@ public class TransformTest {
 		TestCase.assertEquals(-5.000, v.x, 1.0e-3);
 		TestCase.assertEquals( 5.000, v.y, 1.0e-3);
 		
-		t.rotate(Math.toRadians(90));
+		t.rotate(Rotation.ofDegrees(90));
 		v = t.getTranslation();
 		TestCase.assertEquals(-5.000, v.x, 1.0e-3);
 		TestCase.assertEquals(-5.000, v.y, 1.0e-3);
@@ -94,7 +95,7 @@ public class TransformTest {
 		TestCase.assertEquals(-5.000, v.x, 1.0e-3);
 		TestCase.assertEquals(-5.000, v.y, 1.0e-3);
 		
-		t.rotate(Math.toRadians(45), -1.0, -1.0);
+		t.rotate(Rotation.ofDegrees(45), -1.0, -1.0);
 		v = t.getTranslation();
 		TestCase.assertEquals(-1.000, v.x, 1.0e-3);
 		TestCase.assertEquals(-6.656, v.y, 1.0e-3);

@@ -31,7 +31,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link Vector2} class.
  * @author William Bittle
- * @version 3.1.8
+ * @version 3.3.1
  * @since 1.0.0
  */
 public class Vector2Test {
