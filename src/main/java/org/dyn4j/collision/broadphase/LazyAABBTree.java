@@ -48,7 +48,6 @@ import org.dyn4j.geometry.Vector2;
  * Insertion is O(1), update is O(logn) but batch update (update of all bodies) is O(n), remove is O(logn) average but O(n) worse.
  * <p>
  * The class will rebuild the whole tree at each detection and will detect the collisions at the same time in an efficient manner.
- * The cost function and balancing are the same as in {@link DynamicAABBTree}.
  * <p>
  * This structure keeps the bodies sorted by the radius of their fixtures and rebuilds the tree each time in order to construct better trees.
  * 
@@ -392,6 +391,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	/**
 	 * Cost function for descending to a particular node.
 	 * The cost equals the enlargement caused in the {@link AABB} of the node.
+	 * More specifically, descendCost(node, aabb) = (perimeter(union(node.aabb, aabb)) - perimeter(node.aabb)) / 2
 	 * 
 	 * @param node the node to descend
 	 * @param itemAABB the AABB of the item being inserted
@@ -456,7 +456,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		// Start looking for the insertion point at the root
 		LazyAABBTreeNode node = this.root;
 		
-		// loop until node is a leaf or we find a better location
+		// loop until node is a leaf
 		while (!node.isLeaf()) {
 			LazyAABBTreeNode other;
 			double costLeft = descendCost(node.left, itemAABB);

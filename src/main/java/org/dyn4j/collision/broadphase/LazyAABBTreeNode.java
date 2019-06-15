@@ -49,24 +49,39 @@ class LazyAABBTreeNode {
 	
 	/** The aabb containing all children */
 	public AABB aabb;
-
+	
+	/**
+	 * Replace oldChild with newChild. oldChild must be a child of this node before the replacement.
+	 * Children are compared with the equality operator.
+	 * 
+	 * @param oldChild The child to replace in this node
+	 * @param newChild The replacement
+	 * @throws IllegalArgumentException if oldChild is not a child of this node
+	 */
 	public void replaceChild(LazyAABBTreeNode oldChild, LazyAABBTreeNode newChild) {
 		if (left == oldChild) {
 			left = newChild;
 		} else if (right == oldChild) {
 			right = newChild;
 		} else {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException(oldChild.toString() + " is not a child of node " + this.toString());
 		}
 	}
 	
+	/**
+	 * Returns the sibling of this node, that is the other child of this node's parent.
+	 * 
+	 * @return The sibling node
+	 * @throws NullPointerException if this node has no parent
+	 * @throws IllegalStateException if this node is not a child of it's parent
+	 */
 	public LazyAABBTreeNode getSibling() {
 		if (parent.left == this) {
 			return parent.right;
 		} else if (parent.right == this) {
 			return parent.left;
 		} else {
-			throw new IllegalArgumentException();
+			throw new IllegalStateException("Invalid parent pointer for node " + this.toString());
 		}
 	}
 	
