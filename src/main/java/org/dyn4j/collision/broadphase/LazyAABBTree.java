@@ -388,45 +388,27 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 			insertAndDetect(node, filter, pairs);
 		}
 	}
-	
+
 	/**
-	 * The cost function for an AABB in the tree is it's perimeter.
-	 * We actually calculate half the perimeter to avoid one multiplication since the results don't change by doing this globally.
-	 * 
-	 * @param a an AABB
-	 * @return half it's perimeter, used as the cost in the tree
-	 */
-	double cost(AABB a) {
-		return a.getWidth() + a.getHeight();
-	}
-	
-	/**
-	 * Calculates cost(a.getUnion(b)) in a more efficient way
-	 * 
-	 * @param a the first AABB
-	 * @param b the second AABB
-	 * @return the cost function applied to their union
-	 */
-	double costOfUnion(AABB a, AABB b) {
-		double unionWidth = Math.max(a.getMaxX(), b.getMaxX()) - Math.min(a.getMinX(), b.getMinX());
-		double unionHeight = Math.max(a.getMaxY(), b.getMaxY()) - Math.min(a.getMinY(), b.getMinY());
-		
-		return unionWidth + unionHeight;
-	}
-	
-	/**
-	 * Taken from the original {@link DynamicAABBTree}
+	 * Cost function for descending to a particular node.
+	 * The cost equals the enlargement caused in the {@link AABB} of the node.
 	 * 
 	 * @param node the node to descend
 	 * @param itemAABB the AABB of the item being inserted
 	 * @return the cost of descending to node
 	 */
 	double descendCost(LazyAABBTreeNode node, AABB itemAABB) {
-		if (node.isLeaf()) {
-			return costOfUnion(node.aabb, itemAABB);
-		} else {
-			return costOfUnion(node.aabb, itemAABB) - cost(node.aabb);
-		}
+		AABB nodeAABB = node.aabb;
+		
+		// Calculate enlargement in x axis
+		double enlargementMinX = Math.max(nodeAABB.getMinX() - itemAABB.getMinX(), 0);
+		double enlargementMaxX = Math.max(itemAABB.getMaxX() - nodeAABB.getMaxX(), 0);
+		
+		// Calculate enlargement in y axis
+		double enlargementMinY = Math.max(nodeAABB.getMinY() - itemAABB.getMinY(), 0);
+		double enlargementMaxY = Math.max(itemAABB.getMaxY() - nodeAABB.getMaxY(), 0);
+		
+		return enlargementMinX + enlargementMaxX + enlargementMinY + enlargementMaxY;
 	}
 	
 	/**
