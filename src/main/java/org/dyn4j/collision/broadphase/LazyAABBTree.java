@@ -458,50 +458,56 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		
 		// loop until node is a leaf or we find a better location
 		while (!node.isLeaf()) {
-			// Compute cost of stopping here
-			double cost = 2 * cost(node.aabb);
-			
-			// Compute cost to descend left or right
-			double costLeft = descendCost(node.left, itemAABB);
-			double costRight = descendCost(node.right, itemAABB);
-			
-			if (cost < costLeft && cost < costRight) {
-				// Found a good spot, break
-				break;
-			}
-			
-			// Since we'll be descending either left or right, enlarge the AABB of this node as needed
-			// So we don't have to do this later
-			node.aabb.union(itemAABB);
-			
-			// Descend to one sub-tree and keep the other to perform collision detection if needed
 			LazyAABBTreeNode other;
+			double costLeft = descendCost(node.left, itemAABB);
 			
-			if (costLeft < costRight) {
+			if (costLeft == 0) {
+				// Fast path: if (costLeft == 0) then this means that
+				// itemAABB is contained inside node.left.aabb (zero enlargement).
+				// This is optimal so we don't need to check the right child.
+				// We also need not to enlarge node.aabb: since itemAABB is contained
+				// in one of node's children then node.aabb already contains itemAABB as well.
+				// This 'fast path' is beneficial because as the tree get's larger the first
+				// levels of the tree have comparably large AABBs so this helps sink in the tree faster.
+				
 				other = node.right;
 				node = node.left;
 			} else {
-				other = node.left;
-				node = node.right;
+				double costRight = descendCost(node.right, itemAABB);
+				// Although we could check if (costRight == 0) and make a similar case as above
+				// there are not many gains, one fast path is enough
+				
+				// Enlarge the AABB of this node as needed
+				node.aabb.union(itemAABB);
+				
+				if (costLeft < costRight) {
+					other = node.right;
+					node = node.left;
+				} else {
+					other = node.left;
+					node = node.right;
+				}
 			}
 			
+			// perform collision detection to the child that we did not descend if needed
 			if (detect && other.aabb.overlaps(itemAABB)) {
 				detectWhileBuilding(item, other, filter, pairs);	
 			}
 		}
 		
-		// We also need to perform collision detection where we ended, either a leaf or not
+		// We also need to perform collision detection for the leaf where we ended
 		if (detect && node.aabb.overlaps(itemAABB)) {
 			detectWhileBuilding(item, node, filter, pairs);	
 		}
 		
-		// Now that we have found a suitable place, insert a new root
-		// Node for node and item
+		// Now that we have found a suitable place, insert a new node here for the new item
 		LazyAABBTreeNode parent = node.parent;
 		LazyAABBTreeNode newParent = new LazyAABBTreeNode();
 		newParent.parent = parent;
 		newParent.aabb = node.aabb.getUnion(itemAABB);
-		newParent.height = node.height + 1;
+		
+		// Since node is always a leaf, newParent has height 1
+		newParent.height = 1;
 		
 		if (parent != null) {
 			// Node is not the root node
@@ -516,8 +522,8 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		node.parent = newParent;
 		item.parent = newParent;
 		
-		// Fix the heights
-		balanceAll(item.parent);
+		// Fix the heights and balance the tree
+		balanceAll(newParent.parent);
 	}
 	
 	/**
