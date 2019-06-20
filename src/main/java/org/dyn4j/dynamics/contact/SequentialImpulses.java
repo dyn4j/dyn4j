@@ -549,7 +549,7 @@ public class SequentialImpulses implements ContactConstraintSolver {
 			// get the masses
 			Mass m1 = b1.getMass();
 			Mass m2 = b2.getMass();
-			
+		  
 			// get the penetration axis
 			Vector2 N = contactConstraint.normal;
 			

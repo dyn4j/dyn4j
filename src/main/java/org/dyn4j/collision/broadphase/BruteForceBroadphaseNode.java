@@ -24,69 +24,52 @@
  */
 package org.dyn4j.collision.broadphase;
 
+import org.dyn4j.collision.Collidable;
+import org.dyn4j.collision.Fixture;
 import org.dyn4j.geometry.AABB;
+import org.dyn4j.geometry.Transform;
 
 /**
- * Represents a basic node in a {@link LazyAABBTree}.
- * <p>
- * The AABB of the node should be the union of all the AABBs below this node.
+ * Simple helper class that holds information for each item in the {@link PlainBroadphase}.
+ * 
  * @author Manolis Tsamis
  * @version 3.3.1
  * @since 3.3.1
+ * @param <E> the {@link Collidable} type
+ * @param <T> the {@link Fixture} type
  */
-class LazyAABBTreeNode {
-	/** The left child */
-	LazyAABBTreeNode left;
-	
-	/** The right child */
-	LazyAABBTreeNode right;
-	
-	/** The parent node */
-	LazyAABBTreeNode parent;
-	
-	/** The height of this subtree */
-	int height;
-	
-	/** The aabb containing all children */
+class BruteForceBroadphaseNode<E extends Collidable<T>, T extends Fixture> {
+	public final E collidable;
+	public final T fixture;
 	public AABB aabb;
+	boolean tested;
 
-	public void replaceChild(LazyAABBTreeNode oldChild, LazyAABBTreeNode newChild) {
-		if (left == oldChild) {
-			left = newChild;
-		} else if (right == oldChild) {
-			right = newChild;
-		} else {
-			throw new IllegalArgumentException();
-		}
-	}
-	
-	public LazyAABBTreeNode getSibling() {
-		if (parent.left == this) {
-			return parent.right;
-		} else if (parent.right == this) {
-			return parent.left;
-		} else {
-			throw new IllegalArgumentException();
-		}
+	BruteForceBroadphaseNode(E collidable, T fixture) {
+		this.collidable = collidable;
+		this.fixture = fixture;
+		
+		// calculate the initial AABB
+		this.updateAABB();
 	}
 	
 	/**
-	 * Returns true if this node is a leaf node.
-	 * @return boolean true if this node is a leaf node
+	 * Updates the AABB of this node
 	 */
-	public boolean isLeaf() {
-		return this.left == null;
+	void updateAABB() {
+		// Remember, we don't expand the AABB
+		Transform tx = collidable.getTransform();
+		this.aabb = fixture.getShape().createAABB(tx);
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("LazyAABBTreeNode[AABB=").append(this.aabb.toString())
-		  .append("|Height=").append(this.height)
-		  .append("]");
+		sb.append("PlainBroadphaseNode[AABB=").append(this.aabb.toString())
+		.append("|Fixture=").append(this.fixture.getId())
+		.append("]");
 		return sb.toString();
 	}
 }

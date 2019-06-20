@@ -140,7 +140,6 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		} else {
 			// add new node
 			LazyAABBTreeLeaf<E, T> node = new LazyAABBTreeLeaf<E, T>(collidable, fixture);
-			node.updateAABB();
 			
 			this.elementMap.put(key, node);
 			
@@ -238,24 +237,6 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		}
 		
 		return fixture.getShape().createAABB(collidable.getTransform());
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#contains(org.dyn4j.collision.Collidable)
-	 */
-	@Override
-	public boolean contains(E collidable) {
-		int size = collidable.getFixtureCount();
-		
-		for (int i = 0; i < size; i++) {
-			T fixture = collidable.getFixture(i);
-			
-			if (!this.contains(collidable, fixture)) {
-				return false;
-			}
-		}
-		
-		return true;
 	}
 	
 	/* (non-Javadoc)
@@ -385,9 +366,6 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 			LazyAABBTreeLeaf<E, T> node = elements.get(i);
 			
 			if (!node.isOnTree()) {
-				// Mark that this leaf is now on the tree
-				node.setOnTree(true);
-				
 				insert(node);
 			}
 		}
@@ -480,6 +458,9 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 * @param pairs List a list containing the results
 	 */
 	void insert(LazyAABBTreeLeaf<E, T> item, final boolean detect, BroadphaseFilter<E, T> filter, List<BroadphasePair<E, T>> pairs) {
+		// Mark that this leaf is now on the tree
+		item.setOnTree(true);
+		
 		// Make sure the root is not null
 		if (this.root == null) {
 			// If it is then set this node as the root
