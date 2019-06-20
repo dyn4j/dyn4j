@@ -400,15 +400,24 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	double descendCost(LazyAABBTreeNode node, AABB itemAABB) {
 		AABB nodeAABB = node.aabb;
 		
+		// The positive values indicate enlargement
+		double enlargement = 0;
+		
 		// Calculate enlargement in x axis
-		double enlargementMinX = Math.max(nodeAABB.getMinX() - itemAABB.getMinX(), 0);
-		double enlargementMaxX = Math.max(itemAABB.getMaxX() - nodeAABB.getMaxX(), 0);
+		double enlargementMinX = nodeAABB.getMinX() - itemAABB.getMinX();
+		double enlargementMaxX = itemAABB.getMaxX() - nodeAABB.getMaxX();
+		
+		if (enlargementMinX > 0) enlargement += enlargementMinX;
+		if (enlargementMaxX > 0) enlargement += enlargementMaxX; 
 		
 		// Calculate enlargement in y axis
-		double enlargementMinY = Math.max(nodeAABB.getMinY() - itemAABB.getMinY(), 0);
-		double enlargementMaxY = Math.max(itemAABB.getMaxY() - nodeAABB.getMaxY(), 0);
+		double enlargementMinY = nodeAABB.getMinY() - itemAABB.getMinY();
+		double enlargementMaxY = itemAABB.getMaxY() - nodeAABB.getMaxY();
 		
-		return enlargementMinX + enlargementMaxX + enlargementMinY + enlargementMaxY;
+		if (enlargementMinY > 0) enlargement += enlargementMinY;
+		if (enlargementMaxY > 0) enlargement += enlargementMaxY;
+		
+		return enlargement;
 	}
 	
 	/**
