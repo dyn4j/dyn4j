@@ -186,16 +186,18 @@ final class Island {
 			Joint joint = this.joints.get(i);
 			joint.initializeConstraints(step, settings);
 		}
-
-		// solve the velocity constraints
-		for (int i = 0; i < velocitySolverIterations; i++) {
-			// solve the joint velocity constraints
-			for (int j = 0; j < jSize; j++) {
-				Joint joint = this.joints.get(j);
-				joint.solveVelocityConstraints(step, settings);
+		
+		if (!this.contactConstraints.isEmpty() || !this.joints.isEmpty()) {
+			// solve the velocity constraints if needed
+			for (int i = 0; i < velocitySolverIterations; i++) {
+				// solve the joint velocity constraints
+				for (int j = 0; j < jSize; j++) {
+					Joint joint = this.joints.get(j);
+					joint.solveVelocityConstraints(step, settings);
+				}
+				
+				solver.solveVelocityContraints(this.contactConstraints, step, settings);
 			}
-			
-			solver.solveVelocityContraints(this.contactConstraints, step, settings);
 		}
 		
 		// the max settings
