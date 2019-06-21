@@ -303,12 +303,14 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 					if (this.elements.size() == 1) {
 						this.elements.remove(0);
 					} else {
+						int lastIndex = this.elements.size() - 1;
+						
 						// Swap with the last
-						this.elements.set(i, elements.get(elements.size() - 1));
+						this.elements.set(i, this.elements.get(lastIndex));
 						
 						// And remove the last
 						// No copying involved here, just a size decrease
-						this.elements.remove(elements.size() - 1);
+						this.elements.remove(lastIndex);
 						
 						i--;
 					}
@@ -329,7 +331,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 */
 	void ensureSorted() {
 		if (!this.sorted) {
-			Collections.sort(elements, new Comparator<LazyAABBTreeLeaf<E, T>>() {
+			Collections.sort(this.elements, new Comparator<LazyAABBTreeLeaf<E, T>>() {
 				@Override
 				public int compare(LazyAABBTreeLeaf<E, T> o1, LazyAABBTreeLeaf<E, T> o2) {
 					// Important heuristic: sort by size of fixtures.
@@ -362,7 +364,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		this.ensureSorted();
 		
 		for (int i = 0; i < this.elements.size(); i++) {
-			LazyAABBTreeLeaf<E, T> node = elements.get(i);
+			LazyAABBTreeLeaf<E, T> node = this.elements.get(i);
 			
 			if (!node.isOnTree()) {
 				this.insert(node);
@@ -382,7 +384,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		this.ensureSorted();
 		
 		for (int i = 0; i < this.elements.size(); i++) {
-			LazyAABBTreeLeaf<E, T> node = elements.get(i);
+			LazyAABBTreeLeaf<E, T> node = this.elements.get(i);
 			
 			this.insertAndDetect(node, filter, pairs);
 		}
@@ -468,7 +470,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		// loop until node is a leaf
 		while (!node.isLeaf()) {
 			LazyAABBTreeNode other;
-			double costLeft = descendCost(node.left, itemAABB);
+			double costLeft = this.descendCost(node.left, itemAABB);
 			
 			if (costLeft == 0) {
 				// Fast path: if (costLeft == 0) then this means that
@@ -482,7 +484,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 				other = node.right;
 				node = node.left;
 			} else {
-				double costRight = descendCost(node.right, itemAABB);
+				double costRight = this.descendCost(node.right, itemAABB);
 				// Although we could check if (costRight == 0) and make a similar case as above
 				// there are not many gains, one fast path is enough
 				
