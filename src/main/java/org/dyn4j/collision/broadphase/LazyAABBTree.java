@@ -166,7 +166,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 			}
 			
 			node.markForRemoval();
-			pendingRemoves = true;
+			this.pendingRemoves = true;
 			
 			return true;
 		}
@@ -204,7 +204,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 			other.parent = grandparent;
 			
 			// finally rebalance the tree
-			balanceAll(grandparent);
+			this.balanceAll(grandparent);
 		} else {
 			// the parent is the root so set the root to the sibling
 			this.root = other;
@@ -220,7 +220,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	public void update(E collidable, T fixture) {
 		// In the way the add and update are described in BroadphaseDetector, their functionallity is identical
 		// so just redirect the work to add for less duplication.
-		add(collidable, fixture);
+		this.add(collidable, fixture);
 	}
 	
 	/* (non-Javadoc)
@@ -276,10 +276,10 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		// this will not happen, unless the user makes more detect calls outside of the World class
 		// so it can be considered rare
 		if (this.root != null) {
-			batchRebuild();
+			this.batchRebuild();
 		}
 		
-		buildAndDetect(filter, pairs);
+		this.buildAndDetect(filter, pairs);
 		
 		return pairs;
 	}
@@ -304,11 +304,11 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 						this.elements.remove(0);
 					} else {
 						// Swap with the last
-						elements.set(i, elements.get(elements.size() - 1));
+						this.elements.set(i, elements.get(elements.size() - 1));
 						
 						// And remove the last
 						// No copying involved here, just a size decrease
-						elements.remove(elements.size() - 1);
+						this.elements.remove(elements.size() - 1);
 						
 						i--;
 					}
@@ -358,14 +358,14 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 * This is used to support raycasting and single AABB queries.
 	 */
 	void build() {
-		doPendingRemoves();
-		ensureSorted();
+		this.doPendingRemoves();
+		this.ensureSorted();
 		
 		for (int i = 0; i < this.elements.size(); i++) {
 			LazyAABBTreeLeaf<E, T> node = elements.get(i);
 			
 			if (!node.isOnTree()) {
-				insert(node);
+				this.insert(node);
 			}
 		}
 	}
@@ -378,13 +378,13 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 * @param pairs List a list containing the results
 	 */
 	void buildAndDetect(BroadphaseFilter<E, T> filter, List<BroadphasePair<E, T>> pairs) {
-		doPendingRemoves();
-		ensureSorted();
+		this.doPendingRemoves();
+		this.ensureSorted();
 		
 		for (int i = 0; i < this.elements.size(); i++) {
 			LazyAABBTreeLeaf<E, T> node = elements.get(i);
 			
-			insertAndDetect(node, filter, pairs);
+			this.insertAndDetect(node, filter, pairs);
 		}
 	}
 
@@ -500,13 +500,13 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 			
 			// perform collision detection to the child that we did not descend if needed
 			if (detect && other.aabb.overlaps(itemAABB)) {
-				detectWhileBuilding(item, other, filter, pairs);	
+				this.detectWhileBuilding(item, other, filter, pairs);	
 			}
 		}
 		
 		// We also need to perform collision detection for the leaf where we ended
 		if (detect && node.aabb.overlaps(itemAABB)) {
-			detectWhileBuilding(item, node, filter, pairs);	
+			this.detectWhileBuilding(item, node, filter, pairs);	
 		}
 		
 		// Now that we have found a suitable place, insert a new node here for the new item
@@ -532,7 +532,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		item.parent = newParent;
 		
 		// Fix the heights and balance the tree
-		balanceAll(newParent.parent);
+		this.balanceAll(newParent.parent);
 	}
 	
 	/**
@@ -560,8 +560,8 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 			}
 		} else {
 			// they overlap so descend into both children
-			if (node.aabb.overlaps(root.left.aabb)) detectWhileBuilding(node, root.left, filter, pairs);
-			if (node.aabb.overlaps(root.right.aabb)) detectWhileBuilding(node, root.right, filter, pairs);
+			if (node.aabb.overlaps(root.left.aabb)) this.detectWhileBuilding(node, root.left, filter, pairs);
+			if (node.aabb.overlaps(root.right.aabb)) this.detectWhileBuilding(node, root.right, filter, pairs);
 		}
 	}
 	
@@ -570,7 +570,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 */
 	@Override
 	public List<BroadphaseItem<E, T>> detect(AABB aabb, BroadphaseFilter<E, T> filter) {
-		build();
+		this.build();
 		
 		if (this.root == null) {
 			return Collections.emptyList();
@@ -618,7 +618,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 */
 	@Override
 	public List<BroadphaseItem<E, T>> raycast(Ray ray, double length, BroadphaseFilter<E, T> filter) {
-		build();
+		this.build();
 		
 		if (this.root == null) {
 			return Collections.emptyList();
@@ -753,7 +753,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	void balanceAll(LazyAABBTreeNode node) {
 		while (node != null) {
 			// balance the current tree
-			balance(node);
+			this.balance(node);
 			node = node.parent;
 		}
 	}
