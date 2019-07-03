@@ -48,7 +48,6 @@ import org.dyn4j.geometry.Vector2;
  * Insertion is O(1), update is O(logn) but batch update (update of all bodies) is O(n), remove is O(logn) average but O(n) worse.
  * <p>
  * The class will rebuild the whole tree at each detection and will detect the collisions at the same time in an efficient manner.
- * The cost function and balancing are the same as in {@link DynamicAABBTree}.
  * <p>
  * This structure keeps the bodies sorted by the radius of their fixtures and rebuilds the tree each time in order to construct better trees.
  * 
@@ -167,7 +166,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 			}
 			
 			node.markForRemoval();
-			pendingRemoves = true;
+			this.pendingRemoves = true;
 			
 			return true;
 		}
@@ -205,7 +204,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 			other.parent = grandparent;
 			
 			// finally rebalance the tree
-			balanceAll(grandparent);
+			this.balanceAll(grandparent);
 		} else {
 			// the parent is the root so set the root to the sibling
 			this.root = other;
@@ -221,7 +220,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	public void update(E collidable, T fixture) {
 		// In the way the add and update are described in BroadphaseDetector, their functionallity is identical
 		// so just redirect the work to add for less duplication.
-		add(collidable, fixture);
+		this.add(collidable, fixture);
 	}
 	
 	/* (non-Javadoc)
@@ -277,10 +276,10 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		// this will not happen, unless the user makes more detect calls outside of the World class
 		// so it can be considered rare
 		if (this.root != null) {
-			batchRebuild();
+			this.batchRebuild();
 		}
 		
-		buildAndDetect(filter, pairs);
+		this.buildAndDetect(filter, pairs);
 		
 		return pairs;
 	}
@@ -304,12 +303,14 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 					if (this.elements.size() == 1) {
 						this.elements.remove(0);
 					} else {
+						int lastIndex = this.elements.size() - 1;
+						
 						// Swap with the last
-						elements.set(i, elements.get(elements.size() - 1));
+						this.elements.set(i, this.elements.get(lastIndex));
 						
 						// And remove the last
 						// No copying involved here, just a size decrease
-						elements.remove(elements.size() - 1);
+						this.elements.remove(lastIndex);
 						
 						i--;
 					}
@@ -330,7 +331,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 */
 	void ensureSorted() {
 		if (!this.sorted) {
-			Collections.sort(elements, new Comparator<LazyAABBTreeLeaf<E, T>>() {
+			Collections.sort(this.elements, new Comparator<LazyAABBTreeLeaf<E, T>>() {
 				@Override
 				public int compare(LazyAABBTreeLeaf<E, T> o1, LazyAABBTreeLeaf<E, T> o2) {
 					// Important heuristic: sort by size of fixtures.
@@ -359,14 +360,14 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 * This is used to support raycasting and single AABB queries.
 	 */
 	void build() {
-		doPendingRemoves();
-		ensureSorted();
+		this.doPendingRemoves();
+		this.ensureSorted();
 		
 		for (int i = 0; i < this.elements.size(); i++) {
-			LazyAABBTreeLeaf<E, T> node = elements.get(i);
+			LazyAABBTreeLeaf<E, T> node = this.elements.get(i);
 			
 			if (!node.isOnTree()) {
-				insert(node);
+				this.insert(node);
 			}
 		}
 	}
@@ -379,54 +380,46 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 * @param pairs List a list containing the results
 	 */
 	void buildAndDetect(BroadphaseFilter<E, T> filter, List<BroadphasePair<E, T>> pairs) {
-		doPendingRemoves();
-		ensureSorted();
+		this.doPendingRemoves();
+		this.ensureSorted();
 		
 		for (int i = 0; i < this.elements.size(); i++) {
-			LazyAABBTreeLeaf<E, T> node = elements.get(i);
+			LazyAABBTreeLeaf<E, T> node = this.elements.get(i);
 			
-			insertAndDetect(node, filter, pairs);
+			this.insertAndDetect(node, filter, pairs);
 		}
 	}
-	
+
 	/**
-	 * The cost function for an AABB in the tree is it's perimeter.
-	 * We actually calculate half the perimeter to avoid one multiplication since the results don't change by doing this globally.
-	 * 
-	 * @param a an AABB
-	 * @return half it's perimeter, used as the cost in the tree
-	 */
-	double cost(AABB a) {
-		return a.getWidth() + a.getHeight();
-	}
-	
-	/**
-	 * Calculates cost(a.getUnion(b)) in a more efficient way
-	 * 
-	 * @param a the first AABB
-	 * @param b the second AABB
-	 * @return the cost function applied to their union
-	 */
-	double costOfUnion(AABB a, AABB b) {
-		double unionWidth = Math.max(a.getMaxX(), b.getMaxX()) - Math.min(a.getMinX(), b.getMinX());
-		double unionHeight = Math.max(a.getMaxY(), b.getMaxY()) - Math.min(a.getMinY(), b.getMinY());
-		
-		return unionWidth + unionHeight;
-	}
-	
-	/**
-	 * Taken from the original {@link DynamicAABBTree}
+	 * Cost function for descending to a particular node.
+	 * The cost equals the enlargement caused in the {@link AABB} of the node.
+	 * More specifically, descendCost(node, aabb) = (perimeter(union(node.aabb, aabb)) - perimeter(node.aabb)) / 2
 	 * 
 	 * @param node the node to descend
 	 * @param itemAABB the AABB of the item being inserted
 	 * @return the cost of descending to node
 	 */
 	double descendCost(LazyAABBTreeNode node, AABB itemAABB) {
-		if (node.isLeaf()) {
-			return costOfUnion(node.aabb, itemAABB);
-		} else {
-			return costOfUnion(node.aabb, itemAABB) - cost(node.aabb);
-		}
+		AABB nodeAABB = node.aabb;
+		
+		// The positive values indicate enlargement
+		double enlargement = 0;
+		
+		// Calculate enlargement in x axis
+		double enlargementMinX = nodeAABB.getMinX() - itemAABB.getMinX();
+		double enlargementMaxX = itemAABB.getMaxX() - nodeAABB.getMaxX();
+		
+		if (enlargementMinX > 0) enlargement += enlargementMinX;
+		if (enlargementMaxX > 0) enlargement += enlargementMaxX; 
+		
+		// Calculate enlargement in y axis
+		double enlargementMinY = nodeAABB.getMinY() - itemAABB.getMinY();
+		double enlargementMaxY = itemAABB.getMaxY() - nodeAABB.getMaxY();
+		
+		if (enlargementMinY > 0) enlargement += enlargementMinY;
+		if (enlargementMaxY > 0) enlargement += enlargementMaxY;
+		
+		return enlargement;
 	}
 	
 	/**
@@ -474,52 +467,58 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		// Start looking for the insertion point at the root
 		LazyAABBTreeNode node = this.root;
 		
-		// loop until node is a leaf or we find a better location
+		// loop until node is a leaf
 		while (!node.isLeaf()) {
-			// Compute cost of stopping here
-			double cost = 2 * cost(node.aabb);
-			
-			// Compute cost to descend left or right
-			double costLeft = descendCost(node.left, itemAABB);
-			double costRight = descendCost(node.right, itemAABB);
-			
-			if (cost < costLeft && cost < costRight) {
-				// Found a good spot, break
-				break;
-			}
-			
-			// Since we'll be descending either left or right, enlarge the AABB of this node as needed
-			// So we don't have to do this later
-			node.aabb.union(itemAABB);
-			
-			// Descend to one sub-tree and keep the other to perform collision detection if needed
 			LazyAABBTreeNode other;
+			double costLeft = this.descendCost(node.left, itemAABB);
 			
-			if (costLeft < costRight) {
+			if (costLeft == 0) {
+				// Fast path: if (costLeft == 0) then this means that
+				// itemAABB is contained inside node.left.aabb (zero enlargement).
+				// This is optimal so we don't need to check the right child.
+				// We also need not to enlarge node.aabb: since itemAABB is contained
+				// in one of node's children then node.aabb already contains itemAABB as well.
+				// This 'fast path' is beneficial because as the tree get's larger the first
+				// levels of the tree have comparably large AABBs so this helps sink in the tree faster.
+				
 				other = node.right;
 				node = node.left;
 			} else {
-				other = node.left;
-				node = node.right;
+				double costRight = this.descendCost(node.right, itemAABB);
+				// Although we could check if (costRight == 0) and make a similar case as above
+				// there are not many gains, one fast path is enough
+				
+				// Enlarge the AABB of this node as needed
+				node.aabb.union(itemAABB);
+				
+				if (costLeft < costRight) {
+					other = node.right;
+					node = node.left;
+				} else {
+					other = node.left;
+					node = node.right;
+				}
 			}
 			
+			// perform collision detection to the child that we did not descend if needed
 			if (detect && other.aabb.overlaps(itemAABB)) {
-				detectWhileBuilding(item, other, filter, pairs);	
+				this.detectWhileBuilding(item, other, filter, pairs);	
 			}
 		}
 		
-		// We also need to perform collision detection where we ended, either a leaf or not
+		// We also need to perform collision detection for the leaf where we ended
 		if (detect && node.aabb.overlaps(itemAABB)) {
-			detectWhileBuilding(item, node, filter, pairs);	
+			this.detectWhileBuilding(item, node, filter, pairs);	
 		}
 		
-		// Now that we have found a suitable place, insert a new root
-		// Node for node and item
+		// Now that we have found a suitable place, insert a new node here for the new item
 		LazyAABBTreeNode parent = node.parent;
 		LazyAABBTreeNode newParent = new LazyAABBTreeNode();
 		newParent.parent = parent;
 		newParent.aabb = node.aabb.getUnion(itemAABB);
-		newParent.height = node.height + 1;
+		
+		// Since node is always a leaf, newParent has height 1
+		newParent.height = 1;
 		
 		if (parent != null) {
 			// Node is not the root node
@@ -534,8 +533,8 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		node.parent = newParent;
 		item.parent = newParent;
 		
-		// Fix the heights
-		balanceAll(item.parent);
+		// Fix the heights and balance the tree
+		this.balanceAll(newParent.parent);
 	}
 	
 	/**
@@ -563,8 +562,8 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 			}
 		} else {
 			// they overlap so descend into both children
-			if (node.aabb.overlaps(root.left.aabb)) detectWhileBuilding(node, root.left, filter, pairs);
-			if (node.aabb.overlaps(root.right.aabb)) detectWhileBuilding(node, root.right, filter, pairs);
+			if (node.aabb.overlaps(root.left.aabb)) this.detectWhileBuilding(node, root.left, filter, pairs);
+			if (node.aabb.overlaps(root.right.aabb)) this.detectWhileBuilding(node, root.right, filter, pairs);
 		}
 	}
 	
@@ -573,7 +572,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 */
 	@Override
 	public List<BroadphaseItem<E, T>> detect(AABB aabb, BroadphaseFilter<E, T> filter) {
-		build();
+		this.build();
 		
 		if (this.root == null) {
 			return Collections.emptyList();
@@ -621,7 +620,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 */
 	@Override
 	public List<BroadphaseItem<E, T>> raycast(Ray ray, double length, BroadphaseFilter<E, T> filter) {
-		build();
+		this.build();
 		
 		if (this.root == null) {
 			return Collections.emptyList();
@@ -756,7 +755,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	void balanceAll(LazyAABBTreeNode node) {
 		while (node != null) {
 			// balance the current tree
-			balance(node);
+			this.balance(node);
 			node = node.parent;
 		}
 	}
