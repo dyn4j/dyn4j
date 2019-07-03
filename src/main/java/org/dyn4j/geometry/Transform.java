@@ -57,6 +57,14 @@ public class Transform implements Transformable {
 		}
 		
 		/* (non-Javadoc)
+		 * @see org.dyn4j.geometry.Transform#rotate(org.dyn4j.geometry.Rotation)
+		 */
+		@Override
+		public final void rotate(Rotation rotation) {
+			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
+		}
+
+		/* (non-Javadoc)
 		 * @see org.dyn4j.geometry.Transform#rotate(double, double, double)
 		 */
 		@Override
@@ -65,10 +73,26 @@ public class Transform implements Transformable {
 		}
 		
 		/* (non-Javadoc)
+		 * @see org.dyn4j.geometry.Transform#rotate(org.dyn4j.geometry.Rotation, double, double)
+		 */
+		@Override
+		public final void rotate(Rotation rotation, double x, double y) {
+			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
+		}
+
+		/* (non-Javadoc)
 		 * @see org.dyn4j.geometry.Transform#rotate(double, org.dyn4j.geometry.Vector)
 		 */
 		@Override
 		public final void rotate(double theta, Vector2 point) {
+			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.geometry.Transform#rotate(org.dyn4j.geometry.Rotation, org.dyn4j.geometry.Vector)
+		 */
+		@Override
+		public final void rotate(Rotation rotation, Vector2 point) {
 			throw new UnsupportedOperationException(Messages.getString("geometry.transform.immutable"));
 		}
 		
@@ -195,20 +219,18 @@ public class Transform implements Transformable {
 		return sb.toString();
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Transformable#rotate(double)
+	/**
+	 * Internal helper method to rotate this {@link Transform} by an angle &thetasym;
+	 * @param c cos(&thetasym;)
+	 * @param s sin(&thetasym;)
+	 * @since 3.3.1
 	 */
-	@Override
-	public void rotate(double theta) {
-		// pre-compute cos/sin of the given angle
-		double cos = Math.cos(theta);
-		double sin = Math.sin(theta);
-		
+	void rotate(double c, double s) {
 		// perform an optimized version of matrix multiplication
-		double cost = cos * this.cost - sin * this.sint;
-		double sint = sin * this.cost + cos * this.sint;
-		double x   = cos * this.x - sin * this.y;
-		double y   = sin * this.x + cos * this.y;
+		double cost = c * this.cost - s * this.sint;
+		double sint = s * this.cost + c * this.sint;
+		double x   = c * this.x - s * this.y;
+		double y   = s * this.x + c * this.y;
 		
 		// set the new values
 		this.cost = cost;
@@ -218,25 +240,56 @@ public class Transform implements Transformable {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Transformable#rotate(double, double, double)
+	 * @see org.dyn4j.geometry.Transformable#rotate(double)
 	 */
 	@Override
-	public void rotate(double theta, double x, double y) {
-		// pre-compute cos/sin of the given angle
-		double cos = Math.cos(theta);
-		double sin = Math.sin(theta);
-		
+	public void rotate(double theta) {
+		this.rotate(Math.cos(theta), Math.sin(theta));
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Transformable#rotate(org.dyn4j.geometry.Rotation)
+	 */
+	@Override
+	public void rotate(Rotation rotation) {
+		this.rotate(rotation.cost, rotation.sint);
+	}
+	
+	/**
+	 * Internal helper method to rotate this {@link Transform} by an angle &thetasym; around a point
+	 * @param c cos(&thetasym;)
+	 * @param s sin(&thetasym;)
+	 * @param x the x coordinate of the point
+	 * @param y the y coordinate of the point
+	 * @since 3.3.1
+	 */
+	void rotate(double c, double s, double x, double y) {
 		// perform an optimized version of the matrix multiplication:
 		// M(new) = inverse(T) * R * T * M(old)
-		double cost = cos * this.cost - sin * this.sint;
-		double sint = sin * this.cost + cos * this.sint;
+		double cost = c * this.cost - s * this.sint;
+		double sint = s * this.cost + c * this.sint;
 		this.cost = cost;
 		this.sint = sint;
 		
 		double cx = this.x - x;
 		double cy = this.y - y;
-		this.x = cos * cx - sin * cy + x;
-		this.y = sin * cx + cos * cy + y;
+		this.x = c * cx - s * cy + x;
+		this.y = s * cx + c * cy + y;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Transformable#rotate(double, double, double)
+	 */
+	@Override
+	public void rotate(double theta, double x, double y) {
+		this.rotate(Math.cos(theta), Math.sin(theta), x, y);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Transformable#rotate(org.dyn4j.geometry.Rotation, double, double)
+	 */
+	public void rotate(Rotation rotation, double x, double y) {
+		this.rotate(rotation.cost, rotation.sint, x, y);
 	}
 	
 	/* (non-Javadoc)
@@ -245,6 +298,14 @@ public class Transform implements Transformable {
 	@Override
 	public void rotate(double theta, Vector2 point) {
 		this.rotate(theta, point.x, point.y);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Transformable#rotate(org.dyn4j.geometry.Rotation, org.dyn4j.geometry.Vector)
+	 */
+	@Override
+	public void rotate(Rotation rotation, Vector2 point) {
+		this.rotate(rotation, point.x, point.y);
 	}
 	
 	/* (non-Javadoc)
@@ -574,6 +635,14 @@ public class Transform implements Transformable {
 	}
 	
 	/**
+	 * @return the {@link Rotation} object representing the rotation of this {@link Transform}
+	 * @since 3.3.1
+	 */
+	public Rotation getRotationObject() {
+		return Rotation.of(this);
+	}
+	
+	/**
 	 * Sets the rotation and returns the previous
 	 * rotation.
 	 * @param theta the angle in radians
@@ -589,6 +658,25 @@ public class Transform implements Transformable {
 		this.sint = Math.sin(theta);
 		
 		// return the previous amount
+		return r;
+	}
+	
+	/**
+	 * Sets the rotation and returns the previous
+	 * rotation.
+	 * @param rotation the {@link Rotation}
+	 * @return A new {@link Rotation} object representing the old rotation of this {@link Transform}
+	 * @since 3.3.1
+	 */
+	public Rotation setRotation(Rotation rotation) {
+		// get the current rotation
+		Rotation r = getRotationObject();
+		
+		// get rid of the current rotation and rotate by the new rotation
+		this.cost = rotation.cost;
+		this.sint = rotation.sint;
+		
+		// return the previous rotation object
 		return r;
 	}
 	

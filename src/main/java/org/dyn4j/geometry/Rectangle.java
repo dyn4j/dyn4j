@@ -141,6 +141,14 @@ public class Rectangle extends Polygon implements Convex, Wound, Shape, Transfor
 		return Math.atan2(this.normals[1].y, this.normals[1].x);
 	}
 	
+	/**
+	 * @return the {@link Rotation} object that represents the local rotation
+	 */
+	public Rotation getRotationObject() {
+		// normals[1] is already a unit vector representing the local axis so we can just return it as a {@link Rotation}
+		return new Rotation(this.normals[1].x, this.normals[1].y);
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Polygon#getAxes(java.util.List, org.dyn4j.geometry.Transform)
 	 */

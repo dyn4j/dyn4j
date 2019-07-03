@@ -341,7 +341,7 @@ public class Vector2 {
 	 * @return double
 	 */
 	public double getMagnitude() {
-		// the magnitude is just the pathagorean theorem
+		// the magnitude is just the pythagorean theorem
 		return Math.sqrt(this.x * this.x + this.y * this.y);
 	}
 	
@@ -519,6 +519,18 @@ public class Vector2 {
 	}
 	
 	/**
+	 * Divides this {@link Vector2} by the given scalar.
+	 * @param scalar the scalar
+	 * @return {@link Vector2} this vector
+	 * @since 3.3.1
+	 */
+	public Vector2 divide(double scalar) {
+		this.x /= scalar;
+		this.y /= scalar;
+		return this;
+	}
+	
+	/**
 	 * Multiplies this {@link Vector2} by the given scalar returning
 	 * a new {@link Vector2} containing the result.
 	 * @param scalar the scalar
@@ -526,6 +538,17 @@ public class Vector2 {
 	 */
 	public Vector2 product(double scalar) {
 		return new Vector2(this.x * scalar, this.y * scalar);
+	}
+	
+	/**
+	 * Divides this {@link Vector2} by the given scalar returning
+	 * a new {@link Vector2} containing the result.
+	 * @param scalar the scalar
+	 * @return {@link Vector2}
+	 * @since 3.3.1
+	 */
+	public Vector2 quotient(double scalar) {
+		return new Vector2(this.x / scalar, this.y / scalar);
 	}
 	
 	/**
@@ -641,18 +664,20 @@ public class Vector2 {
 	}
 	
 	/**
-	 * Rotates about the origin.
-	 * To be used with pre-calculated cosine and sine values for batch rotations
-	 * @param cos the cosine of the rotation angle in radians
-	 * @param sin the cosine of the rotation angle in radians
+	 * Internal helper method that rotates about the origin by an angle &thetasym;.
+	 * 
+	 * @param c cos(&thetasym;)
+	 * @param s sin(&thetasym;)
 	 * @return {@link Vector2} this vector
 	 * @since 3.3.1
 	 */
-	protected Vector2 rotate(double cos, double sin) {
+	Vector2 rotate(double cos, double sin) {
 		double x = this.x;
 		double y = this.y;
+		
 		this.x = x * cos - y * sin;
 		this.y = x * sin + y * cos;
+		
 		return this;
 	}
 	
@@ -662,31 +687,56 @@ public class Vector2 {
 	 * @return {@link Vector2} this vector
 	 */
 	public Vector2 rotate(double theta) {
-		double cos = Math.cos(theta);
-		double sin = Math.sin(theta);
-		double x = this.x;
-		double y = this.y;
-		this.x = x * cos - y * sin;
-		this.y = x * sin + y * cos;
-		return this;
+		return this.rotate(Math.cos(theta), Math.sin(theta));
 	}
 	
 	/**
-	 * Rotates the {@link Vector2} about the given coordinates.
-	 * To be used with pre-calculated cosine and sine values for batch rotations
-	 * @param cos the cosine of the rotation angle in radians
-	 * @param sin the cosine of the rotation angle in radians
+	 * Rotates about the origin.
+	 * @param rotation the {@link Rotation}
+	 * @return {@link Vector2} this vector
+	 * @since 3.3.1
+	 */
+	public Vector2 rotate(Rotation rotation) {
+		return this.rotate(rotation.cost, rotation.sint);
+	}
+	
+	/**
+	 * Rotates about the origin by the inverse angle -&thetasym;.
+	 * @param theta the rotation angle in radians
+	 * @return {@link Vector2} this vector
+	 * @since 3.3.1
+	 */
+	public Vector2 inverseRotate(double theta) {
+		return this.rotate(Math.cos(theta), -Math.sin(theta));
+	}
+	
+	/**
+	 * Rotates about the origin by the inverse angle -&thetasym;.
+	 * @param rotation the {@link Rotation}
+	 * @return {@link Vector2} this vector
+	 * @since 3.3.1
+	 */
+	public Vector2 inverseRotate(Rotation rotation) {
+		return this.rotate(rotation.cost, -rotation.sint);
+	}
+	
+	/**
+	 * Internal helper method that rotates about the given coordinates by an angle &thetasym;.
+	 * 
+	 * @param c cos(&thetasym;)
+	 * @param s sin(&thetasym;)
 	 * @param x the x coordinate to rotate about
 	 * @param y the y coordinate to rotate about
 	 * @return {@link Vector2} this vector
 	 * @since 3.3.1
 	 */
-	protected Vector2 rotate(double cos, double sin, double x, double y) {
-		this.x -= x;
-		this.y -= y;
-		this.rotate(cos, sin);
-		this.x += x;
-		this.y += y;
+	Vector2 rotate(double cos, double sin, double x, double y) {
+		double tx = (this.x - x);
+		double ty = (this.y - y);
+		
+		this.x = tx * cos - ty * sin + x;
+		this.y = tx * sin + ty * cos + y;
+		
 		return this;
 	}
 	
@@ -698,27 +748,41 @@ public class Vector2 {
 	 * @return {@link Vector2} this vector
 	 */
 	public Vector2 rotate(double theta, double x, double y) {
-		this.x -= x;
-		this.y -= y;
-		this.rotate(theta);
-		this.x += x;
-		this.y += y;
-		return this;
+		return this.rotate(Math.cos(theta), Math.sin(theta), x, y);
 	}
 	
 	/**
-	 * Rotates the {@link Vector2} about the given point.
-	 * To be used with pre-calculated cosine and sine values for batch rotations
-	 * @param cos the cosine of the rotation angle in radians
-	 * @param sin the cosine of the rotation angle in radians
-	 * @param point the point to rotate about
+	 * Rotates the {@link Vector2} about the given coordinates.
+	 * @param rotation the {@link Rotation}
+	 * @param x the x coordinate to rotate about
+	 * @param y the y coordinate to rotate about
 	 * @return {@link Vector2} this vector
 	 * @since 3.3.1
 	 */
-	protected Vector2 rotate(double cos, double sin, Vector2 point) {
-		return this.rotate(cos, sin, point.x, point.y);
+	public Vector2 rotate(Rotation rotation, double x, double y) {
+		return this.rotate(rotation.cost, rotation.sint, x, y);
 	}
 	
+	/**
+	 * Rotates about the given coordinates by the inverse angle -&thetasym;.
+	 * @param theta the rotation angle in radians
+	 * @return {@link Vector2} this vector
+	 * @since 3.3.1
+	 */
+	public Vector2 inverseRotate(double theta, double x, double y) {
+		return this.rotate(Math.cos(theta), -Math.sin(theta), x, y);
+	}
+	
+	/**
+	 * Rotates about the given coordinates by the inverse angle -&thetasym;.
+	 * @param rotation the {@link Rotation}
+	 * @return {@link Vector2} this vector
+	 * @since 3.3.1
+	 */
+	public Vector2 inverseRotate(Rotation rotation, double x, double y) {
+		return this.rotate(rotation.cost, -rotation.sint, x, y);
+	}
+
 	/**
 	 * Rotates the {@link Vector2} about the given point.
 	 * @param theta the rotation angle in radians
@@ -727,6 +791,39 @@ public class Vector2 {
 	 */
 	public Vector2 rotate(double theta, Vector2 point) {
 		return this.rotate(theta, point.x, point.y);
+	}
+	
+	/**
+	 * Rotates the {@link Vector2} about the given point.
+	 * @param rotation the {@link Rotation}
+	 * @param point the point to rotate about
+	 * @return {@link Vector2} this vector
+	 * @since 3.3.1
+	 */
+	public Vector2 rotate(Rotation rotation, Vector2 point) {
+		return this.rotate(rotation, point.x, point.y);
+	}
+	
+	/**
+	 * Rotates the {@link Vector2} about the given point by the inverse angle -&thetasym;.
+	 * @param theta the rotation angle in radians
+	 * @param point the point to rotate about
+	 * @return {@link Vector2} this vector
+	 * @since 3.3.1
+	 */
+	public Vector2 inverseRotate(double theta, Vector2 point) {
+		return this.inverseRotate(theta, point.x, point.y);
+	}
+	
+	/**
+	 * Rotates the {@link Vector2} about the given point by the inverse angle -&thetasym;.
+	 * @param rotation the {@link Rotation}
+	 * @param point the point to rotate about
+	 * @return {@link Vector2} this vector
+	 * @since 3.3.1
+	 */
+	public Vector2 inverseRotate(Rotation rotation, Vector2 point) {
+		return this.inverseRotate(rotation, point.x, point.y);
 	}
 	
 	/**
