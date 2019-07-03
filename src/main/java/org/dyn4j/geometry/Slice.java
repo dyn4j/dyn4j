@@ -431,14 +431,14 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	 * Returns the rotation about the local center in radians.
 	 * @return double the rotation in radians
 	 */
-	public double getRotation() {
+	public double getRotationAngle() {
 		return this.rotation.toRadians();
 	}
 	
 	/**
 	 * @return the {@link Rotation} object that represents the local rotation
 	 */
-	public Rotation getRotationObject() {
+	public Rotation getRotation() {
 		return this.rotation.copy();
 	}
 	

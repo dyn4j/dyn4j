@@ -126,7 +126,7 @@ public class MotorJoint extends Joint implements Shiftable, DataContainer {
 		// default the linear target to body2's position in body1's frame
 		this.linearTarget = body1.getLocalPoint(body2.getWorldCenter());
 		// get the angular target for the joint
-		this.angularTarget = body2.getTransform().getRotation() - body1.getTransform().getRotation();
+		this.angularTarget = body2.getTransform().getRotationAngle() - body1.getTransform().getRotationAngle();
 		// initialize
 		this.correctionFactor = 0.3;
 		this.K = new Matrix22();
@@ -282,7 +282,7 @@ public class MotorJoint extends Joint implements Shiftable, DataContainer {
 	 * @return double
 	 */
 	private double getAngularError() {
-		double rr = this.body2.getTransform().getRotation() - this.body1.getTransform().getRotation() - this.angularTarget;
+		double rr = this.body2.getTransform().getRotationAngle() - this.body1.getTransform().getRotationAngle() - this.angularTarget;
 		if (rr < -Math.PI) rr += Geometry.TWO_PI;
 		if (rr > Math.PI) rr -= Geometry.TWO_PI;
 		return rr;

@@ -432,7 +432,7 @@ public class ConservativeAdvancementTest {
 		// make sure the time of impact is small in this case
 		TestCase.assertEquals(0.039, toi.getTime(), 1.0e-3);
 		// the rotation shouldn't be much more than -40
-		TestCase.assertEquals(-0.643, tx1f.getRotation(), 1.0e-3);
+		TestCase.assertEquals(-0.643, tx1f.getRotationAngle(), 1.0e-3);
 	}
 	
 	/**
@@ -467,8 +467,8 @@ public class ConservativeAdvancementTest {
 		// make sure the time of impact is small in this case
 		TestCase.assertEquals(0.293, toi.getTime(), 1.0e-3);
 		// the rotation shouldn't be much more than -40
-		TestCase.assertEquals(-0.288, tx1f.getRotation(), 1.0e-3);
-		TestCase.assertEquals(-0.041, tx2f.getRotation(), 1.0e-3);
+		TestCase.assertEquals(-0.288, tx1f.getRotationAngle(), 1.0e-3);
+		TestCase.assertEquals(-0.041, tx2f.getRotationAngle(), 1.0e-3);
 	}
 	
 	/**

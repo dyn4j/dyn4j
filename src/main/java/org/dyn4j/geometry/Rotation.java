@@ -71,7 +71,7 @@ public class Rotation {
 	 * @return A {@link Rotation} for that angle
 	 */
 	public static Rotation ofDegrees(double angle) {
-		return new Rotation(Math.toDegrees(angle));
+		return new Rotation(Math.toRadians(angle));
 	}
 	
 	/**

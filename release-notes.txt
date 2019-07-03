@@ -6,7 +6,10 @@ New Features:
   - Small performance enhancement in the Island class (by mtsamis)
   - Memory footprint improvements (by mtsamis)
   - AABB unpack and performance enhancements (by mtsamis)
+  - New LazyAABBTree broadphase detector (by mtsamis)
   - New BruteForceBroadphase detector (by mtsamis)
+  - Geometry optimizations (by mtsamis)
+  - Dynamics optimizations (by mtsamis)
 
 Bug Fixes:
   - Bug fix for HalfEllipse.getRadius(Vector2) when the half width < half
@@ -17,6 +20,8 @@ Bug Fixes:
 Deprecated:
   
 Breaking Changes:
+  - double getRotation() methods were replaced with Rotation getRotation()
+    methods. Use the getRotationAngle() method instead.
   
 Other:
   - Updated broadphase tests (by mtsamis)

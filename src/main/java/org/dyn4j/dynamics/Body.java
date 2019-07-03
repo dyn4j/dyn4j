@@ -1268,8 +1268,8 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * @since 3.1.5
 	 */
 	public double getChangeInOrientation() {
-		double ri = this.transform0.getRotation();
-		double rf = this.transform.getRotation();
+		double ri = this.transform0.getRotationAngle();
+		double rf = this.transform.getRotationAngle();
 		
 		final double twopi = 2.0 * Math.PI;
 		

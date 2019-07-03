@@ -169,6 +169,6 @@ public class RectangleTest {
 		r.translate(1, 1);
 		r.rotate(Math.toRadians(30));
 		
-		TestCase.assertEquals(30, Math.toDegrees(r.getRotation()), 1.0e-3);
+		TestCase.assertEquals(30, Math.toDegrees(r.getRotationAngle()), 1.0e-3);
 	}
 }

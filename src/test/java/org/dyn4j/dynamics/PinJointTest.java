@@ -243,6 +243,6 @@ public class PinJointTest {
 		
 		TestCase.assertTrue(mj.getReactionForce(w.step.invdt).getMagnitude() > 0);
 		TestCase.assertTrue(mj.getReactionForce(w.step.invdt).getMagnitude() <= 1000.0);
-		TestCase.assertTrue(body.getTransform().getRotation() < 0);
+		TestCase.assertTrue(body.getTransform().getRotationAngle() < 0);
 	}
 }

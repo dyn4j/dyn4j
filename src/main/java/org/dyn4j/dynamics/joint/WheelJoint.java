@@ -574,8 +574,8 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 	 * @since 3.2.1
 	 */
 	public double getAngularTranslation() {
-		double a1 = this.body1.getTransform().getRotation();
-		double a2 = this.body2.getTransform().getRotation();
+		double a1 = this.body1.getTransform().getRotationAngle();
+		double a2 = this.body2.getTransform().getRotationAngle();
 		return a2 - a1;
 	}
 

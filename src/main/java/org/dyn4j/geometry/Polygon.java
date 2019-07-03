@@ -370,7 +370,7 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		// transform the normal into local space
 		Vector2 localn = transform.getInverseTransformedR(vector);
 
-		int index = maxIndex(localn);
+		int index = getFarthestVertexIndex(localn);
 		int count = this.vertices.length;
 
 		Vector2 maximum = new Vector2(this.vertices[index]);
@@ -409,7 +409,7 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		Vector2 localn = transform.getInverseTransformedR(vector);
 
 		// find the index of the farthest point
-		int index = maxIndex(localn);
+		int index = getFarthestVertexIndex(localn);
 
 		// transform the point into world space and return
 		return transform.getTransformed(this.vertices[index]);
@@ -421,8 +421,9 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 	 * 
 	 * @param vector the direction
 	 * @return the index of the farthest vertex in that direction
+	 * @since 3.3.1
 	 */
-	int maxIndex(Vector2 vector) {
+	int getFarthestVertexIndex(Vector2 vector) {
 		/*
 		 * The sequence a(n) = vector.dot(vertices[n]) has a maximum, a minimum and is monotonic (though not strictly monotonic) between those extrema.
 		 * All indices are considered in modular arithmetic. I choose the initial index to be 0.

@@ -145,7 +145,7 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 		this.localAnchor1 = body1.getLocalPoint(anchor);
 		this.localAnchor2 = body2.getLocalPoint(anchor);
 		// get the initial reference angle for the joint limits
-		this.referenceAngle = body1.getTransform().getRotation() - body2.getTransform().getRotation();
+		this.referenceAngle = body1.getTransform().getRotationAngle() - body2.getTransform().getRotationAngle();
 		
 		// default limits
 		this.lowerLimit = this.referenceAngle;
@@ -492,7 +492,7 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 	 * @return double
 	 */
 	private double getRelativeRotation() {
-		double rr = this.body1.getTransform().getRotation() - this.body2.getTransform().getRotation() - this.referenceAngle;
+		double rr = this.body1.getTransform().getRotationAngle() - this.body2.getTransform().getRotationAngle() - this.referenceAngle;
 		if (rr < -Math.PI) rr += Geometry.TWO_PI;
 		if (rr > Math.PI) rr -= Geometry.TWO_PI;
 		return rr;

@@ -42,7 +42,7 @@ import org.dyn4j.resources.Messages;
  * This class also contains various helper methods for cleaning vector arrays and lists and performing
  * various operations on {@link Shape}s.
  * @author William Bittle
- * @version 3.2.2
+ * @version 3.3.1
  * @since 1.0.0
  */
 public final class Geometry {

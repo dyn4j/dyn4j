@@ -174,7 +174,7 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 		// get the perpendicular axis
 		this.yAxis = this.xAxis.cross(1.0);
 		// get the initial rotation
-		this.referenceAngle = body1.getTransform().getRotation() - body2.getTransform().getRotation();
+		this.referenceAngle = body1.getTransform().getRotationAngle() - body2.getTransform().getRotationAngle();
 		// initialize
 		this.K = new Matrix33();
 		this.impulse = new Vector3();
@@ -491,7 +491,7 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 		
 		Vector2 C = new Vector2();
 		C.x = this.perp.dot(d);
-		C.y = t1.getRotation() - t2.getRotation() - this.referenceAngle;
+		C.y = t1.getRotationAngle() - t2.getRotationAngle() - this.referenceAngle;
 		double Cz = 0.0;
 		double linearError = 0.0;
 		double angularError = 0.0;

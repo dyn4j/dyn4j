@@ -630,7 +630,7 @@ public class Transform implements Transformable {
 	 * Returns the rotation.
 	 * @return double angle in the range [-&pi;, &pi;]
 	 */
-	public double getRotation() {
+	public double getRotationAngle() {
 		return Math.atan2(this.sint, this.cost);
 	}
 	
@@ -638,7 +638,7 @@ public class Transform implements Transformable {
 	 * @return the {@link Rotation} object representing the rotation of this {@link Transform}
 	 * @since 3.3.1
 	 */
-	public Rotation getRotationObject() {
+	public Rotation getRotation() {
 		return Rotation.of(this);
 	}
 	
@@ -651,7 +651,7 @@ public class Transform implements Transformable {
 	 */
 	public double setRotation(double theta) {
 		// get the current rotation
-		double r = this.getRotation();
+		double r = this.getRotationAngle();
 		
 		// get rid of the current rotation and rotate by the new theta
 		this.cost = Math.cos(theta);
@@ -670,7 +670,7 @@ public class Transform implements Transformable {
 	 */
 	public Rotation setRotation(Rotation rotation) {
 		// get the current rotation
-		Rotation r = getRotationObject();
+		Rotation r = getRotation();
 		
 		// get rid of the current rotation and rotate by the new rotation
 		this.cost = rotation.cost;
@@ -724,8 +724,8 @@ public class Transform implements Transformable {
 		// it ensures that the angles are always within
 		// the range -pi < theta < pi therefore no
 		// normalization has to be done
-		double rs = this.getRotation();
-		double re = end.getRotation();
+		double rs = this.getRotationAngle();
+		double re = end.getRotationAngle();
 		// make sure we use the smallest rotation
 		// as described in the comments above, there
 		// are two possible rotations depending on the
@@ -776,8 +776,8 @@ public class Transform implements Transformable {
 		// it ensures that the angles are always within
 		// the range -pi < theta < pi therefore no
 		// normalization has to be done
-		double rs = this.getRotation();
-		double re = end.getRotation();
+		double rs = this.getRotationAngle();
+		double re = end.getRotationAngle();
 		// make sure we use the smallest rotation
 		// as described in the comments above, there
 		// are two possible rotations depending on the
@@ -889,8 +889,8 @@ public class Transform implements Transformable {
 		// it ensures that the angles are always within
 		// the range -pi < theta < pi therefore no
 		// normalization has to be done
-		double rs = this.getRotation();
-		double re = end.getRotation();
+		double rs = this.getRotationAngle();
+		double re = end.getRotationAngle();
 		// make sure we use the smallest rotation
 		// as described in the comments above, there
 		// are two possible rotations depending on the

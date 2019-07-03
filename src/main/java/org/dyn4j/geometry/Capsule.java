@@ -386,14 +386,14 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 	 * Returns the rotation about the local center in radians in the range [-&pi;, &pi;].
 	 * @return double the rotation in radians
 	 */
-	public double getRotation() {
+	public double getRotationAngle() {
 		return Math.atan2(this.localXAxis.y, this.localXAxis.x);
 	}
 	
 	/**
 	 * @return the {@link Rotation} object that represents the local rotation
 	 */
-	public Rotation getRotationObject() {
+	public Rotation getRotation() {
 		// localXAxis is already a unit vector so we can just return it as a {@link Rotation}
 		return new Rotation(this.localXAxis.x, this.localXAxis.y);
 	}

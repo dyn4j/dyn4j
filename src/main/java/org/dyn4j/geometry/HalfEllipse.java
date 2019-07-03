@@ -231,6 +231,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	 * Typically this means that the ellipse is axis-aligned, but it could also
 	 * mean that the ellipse is not axis-aligned, but the given local space axis
 	 * has been rotated to match the alignment of the ellipse.
+	 * @since 3.3.1
 	 */
 	private void getFarthestPointOnAlignedEllipse(Vector2 localAxis) {
 		// an ellipse is a circle with a non-uniform scaling transformation applied
@@ -398,7 +399,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		// we need to translate/rotate the point so that this ellipse is
 		// considered centered at the origin with it's semi-major axis aligned
 		// with the x-axis and its semi-minor axis aligned with the y-axis
-		Vector2 p = point.difference(this.ellipseCenter).rotate(-this.getRotation());
+		Vector2 p = point.difference(this.ellipseCenter).rotate(-this.getRotationAngle());
 		
 		// get the farthest point
 		Vector2 fp = Ellipse.getFarthestPointOnEllipse(this.halfWidth, this.height, p);
@@ -422,7 +423,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		// we need to translate/rotate the point so that this ellipse is
 		// considered centered at the origin with it's semi-major axis aligned
 		// with the x-axis and its semi-minor axis aligned with the y-axis
-		Vector2 p = point.difference(this.ellipseCenter).rotate(-this.getRotation());
+		Vector2 p = point.difference(this.ellipseCenter).rotate(-this.getRotationAngle());
 		
 		// if the point is below the x axis, then we only need to perform the ellipse code
 		if (p.y < 0) {
@@ -529,7 +530,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		// get the world space point into local coordinates
 		Vector2 localPoint = transform.getInverseTransformed(point);
 		// account for local rotation
-		double r = this.getRotation();
+		double r = this.getRotationAngle();
 		localPoint.rotate(-r, this.ellipseCenter.x, this.ellipseCenter.y);
 		
 		// translate into local coordinates
@@ -585,14 +586,14 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	 * Returns the rotation about the local center in radians.
 	 * @return double the rotation in radians
 	 */
-	public double getRotation() {
+	public double getRotationAngle() {
 		return this.rotation.toRadians();
 	}
 	
 	/**
 	 * @return the {@link Rotation} object that represents the local rotation
 	 */
-	public Rotation getRotationObject() {
+	public Rotation getRotation() {
 		return this.rotation.copy();
 	}
 	

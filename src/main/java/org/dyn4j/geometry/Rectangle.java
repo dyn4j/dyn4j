@@ -133,7 +133,7 @@ public class Rectangle extends Polygon implements Convex, Wound, Shape, Transfor
 	 * @return double the rotation in radians
 	 * @since 3.0.1
 	 */
-	public double getRotation() {
+	public double getRotationAngle() {
 		// when the shape is created normals[1] will always be the positive x-axis
 		// we can get the rotation by comparing it to the positive x-axis
 		// since the normal vectors are rotated with the vertices when
@@ -144,7 +144,7 @@ public class Rectangle extends Polygon implements Convex, Wound, Shape, Transfor
 	/**
 	 * @return the {@link Rotation} object that represents the local rotation
 	 */
-	public Rotation getRotationObject() {
+	public Rotation getRotation() {
 		// normals[1] is already a unit vector representing the local axis so we can just return it as a {@link Rotation}
 		return new Rotation(this.normals[1].x, this.normals[1].y);
 	}

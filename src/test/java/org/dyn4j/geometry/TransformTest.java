@@ -71,10 +71,10 @@ public class TransformTest {
 		Transform t = new Transform();
 
 		t.rotate(Math.toRadians(30));
-		TestCase.assertEquals(Math.toRadians(30), t.getRotation(), 1.0e-3);
+		TestCase.assertEquals(Math.toRadians(30), t.getRotationAngle(), 1.0e-3);
 		
 		t.rotate(Rotation.ofDegrees(50));
-		TestCase.assertEquals(Math.toRadians(80), t.getRotation(), 1.0e-3);
+		TestCase.assertEquals(Math.toRadians(80), t.getRotationAngle(), 1.0e-3);
 		
 		t.identity();
 		
@@ -220,17 +220,17 @@ public class TransformTest {
 		
 		TestCase.assertEquals(0.0, tx.x);
 		TestCase.assertEquals(0.0, tx.y);
-		TestCase.assertEquals(Math.toRadians(45.000), tx.getRotation(), 1.0e-3);
+		TestCase.assertEquals(Math.toRadians(45.000), tx.getRotationAngle(), 1.0e-3);
 		
 		tx.setTranslationX(2.0);
 		TestCase.assertEquals(2.0, tx.x);
 		TestCase.assertEquals(0.0, tx.y);
-		TestCase.assertEquals(Math.toRadians(45.000), tx.getRotation(), 1.0e-3);
+		TestCase.assertEquals(Math.toRadians(45.000), tx.getRotationAngle(), 1.0e-3);
 		
 		tx.setTranslationY(3.0);
 		TestCase.assertEquals(2.0, tx.x);
 		TestCase.assertEquals(3.0, tx.y);
-		TestCase.assertEquals(Math.toRadians(45.000), tx.getRotation(), 1.0e-3);
+		TestCase.assertEquals(Math.toRadians(45.000), tx.getRotationAngle(), 1.0e-3);
 	}
 	
 	/**
@@ -243,7 +243,7 @@ public class TransformTest {
 		tx.translate(1.0, 0.0);
 		
 		tx.setRotation(Math.toRadians(30.0));
-		TestCase.assertEquals(30.000, Math.toDegrees(tx.getRotation()), 1.0e-3);
+		TestCase.assertEquals(30.000, Math.toDegrees(tx.getRotationAngle()), 1.0e-3);
 		TestCase.assertEquals(1.0, tx.x);
 		TestCase.assertEquals(0.0, tx.y);
 	}
@@ -293,7 +293,7 @@ public class TransformTest {
 		end.rotate(Math.toRadians(-168));
 		
 		Transform l = start.lerped(end, alpha);
-		TestCase.assertEquals(-3.089, l.getRotation(), 1.0e-3);
+		TestCase.assertEquals(-3.089, l.getRotationAngle(), 1.0e-3);
 		
 		// test opposing sign angles
 		start.identity();
@@ -303,7 +303,7 @@ public class TransformTest {
 		end.rotate(Math.toRadians(2.0));
 		
 		l = start.lerped(end, alpha);
-		TestCase.assertEquals(-0.034, l.getRotation(), 1.0e-3);
+		TestCase.assertEquals(-0.034, l.getRotationAngle(), 1.0e-3);
 	}
 	
 	/**

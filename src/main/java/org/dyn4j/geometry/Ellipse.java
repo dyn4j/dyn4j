@@ -170,6 +170,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 * additionally returns it.
 	 * @param localAxis the direction vector in local space
 	 * @return {@link Vector2}
+	 * @since 3.3.1
 	 */
 	private Vector2 getFarthestPoint(Vector2 localAxis) {
 		// localAxis is already in local coordinates
@@ -199,6 +200,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 * Typically this means that the ellipse is axis-aligned, but it could also
 	 * mean that the ellipse is not axis-aligned, but the given local space axis
 	 * has been rotated to match the alignment of the ellipse.
+	 * @since 3.3.1
 	 */
 	private void getFarthestPointOnAlignedEllipse(Vector2 localAxis) {
 		// an ellipse is a circle with a non-uniform scaling transformation applied
@@ -399,7 +401,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	}
 	
 	/**
-	 * Performs a golden section search of the ellipse bounded betwen the interval [xmin, xmax] for the farthest
+	 * Performs a golden section search of the ellipse bounded between the interval [xmin, xmax] for the farthest
 	 * point from the given point.
 	 * <p>
 	 * This method assumes that this ellipse is centered on the origin and 
@@ -544,14 +546,14 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 * Returns the rotation about the local center in radians.
 	 * @return double the rotation in radians
 	 */
-	public double getRotation() {
+	public double getRotationAngle() {
 		return this.rotation.toRadians();
 	}
 	
 	/**
 	 * @return the {@link Rotation} object that represents the local rotation
 	 */
-	public Rotation getRotationObject() {
+	public Rotation getRotation() {
 		return this.rotation.copy();
 	}
 	
