@@ -192,12 +192,8 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 		// so 1 is a good trade off
 		this.forces = new ArrayList<Force>(1);
 		this.torques = new ArrayList<Torque>(1);
-		// initialize the state
-		this.state = 0;
-		// allow sleeping
-		this.state |= Body.AUTO_SLEEP;
-		// start off active
-		this.state |= Body.ACTIVE;
+		// initialize the state (allow sleeping and start off active)
+		this.state = (Body.AUTO_SLEEP | Body.ACTIVE);
 		this.sleepTime = 0.0;
 		this.linearDamping = Body.DEFAULT_LINEAR_DAMPING;
 		this.angularDamping = Body.DEFAULT_ANGULAR_DAMPING;
@@ -959,17 +955,36 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	}
 	
 	/**
+	 * Returns whether 'state' has all the bits indicated by the binary mask 'mask' set.
+	 * 
+	 * @param mask The binary mask to select bits
+	 * @return boolean
+	 */
+	boolean getState(int mask) {
+		return (this.state & mask) == mask;
+	}
+	
+	/**
+	 * Sets (if flag == true) or clears (if flag == false) the bits indicated by the binary mask 'mask' in the 'state' field 
+	 * 
+	 * @param mask The binary mask to select bits
+	 * @param state true to set, false to clear bits
+	 */
+	void setState(int mask, boolean flag) {
+		if (flag) {
+			this.state |= mask;
+		} else {
+			this.state &= ~mask;
+		}
+	}
+	
+	/**
 	 * Sets the {@link Body} to allow or disallow automatic sleeping.
 	 * @param flag true if the {@link Body} is allowed to sleep
 	 * @since 1.2.0
 	 */
 	public void setAutoSleepingEnabled(boolean flag) {
-		// see if the body can already sleep
-		if (flag) {
-			this.state |= Body.AUTO_SLEEP;
-		} else {
-			this.state &= ~Body.AUTO_SLEEP;
-		}
+		this.setState(Body.AUTO_SLEEP, flag);
 	}
 	
 	/**
@@ -979,7 +994,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * @since 1.2.0
 	 */
 	public boolean isAutoSleepingEnabled() {
-		return (this.state & Body.AUTO_SLEEP) == Body.AUTO_SLEEP;
+		return this.getState(Body.AUTO_SLEEP);
 	}
 	
 	/**
@@ -987,7 +1002,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * @return boolean
 	 */
 	public boolean isAsleep() {
-		return (this.state & Body.ASLEEP) == Body.ASLEEP;
+		return this.getState(Body.ASLEEP);
 	}
 	
 	/**
@@ -999,17 +1014,17 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 */
 	public void setAsleep(boolean flag) {
 		if (flag) {
-			this.state |= Body.ASLEEP;
+			this.setState(Body.ASLEEP, true);
 			this.velocity.zero();
 			this.angularVelocity = 0.0;
 			this.forces.clear();
 			this.torques.clear();
 		} else {
 			// check if the body is asleep
-			if ((this.state & Body.ASLEEP) == Body.ASLEEP) {
+			if (this.getState(Body.ASLEEP)) {
 				// if the body is asleep then wake it up
 				this.sleepTime = 0.0;
-				this.state &= ~Body.ASLEEP;
+				this.setState(Body.ASLEEP, false);
 			}
 			// otherwise do nothing
 		}
@@ -1020,7 +1035,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * @return boolean
 	 */
 	public boolean isActive() {
-		return (this.state & Body.ACTIVE) == Body.ACTIVE;
+		return getState(Body.ACTIVE);
 	}
 	
 	/**
@@ -1028,11 +1043,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * @param flag true if this {@link Body} should be active
 	 */
 	public void setActive(boolean flag) {
-		if (flag) {
-			this.state |= Body.ACTIVE;
-		} else {
-			this.state &= ~Body.ACTIVE;
-		}
+		this.setState(Body.ACTIVE, flag);
 	}
 	
 	/**
@@ -1040,7 +1051,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * @return boolean true if this {@link Body} has been added to an {@link Island} 
 	 */
 	boolean isOnIsland() {
-		return (this.state & Body.ISLAND) == Body.ISLAND;
+		return this.getState(Body.ISLAND);
 	}
 	
 	/**
@@ -1048,11 +1059,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * @param flag true if the {@link Body} has been added to an {@link Island}
 	 */
 	void setOnIsland(boolean flag) {
-		if (flag) {
-			this.state |= Body.ISLAND;
-		} else {
-			this.state &= ~Body.ISLAND;
-		}
+		this.setState(Body.ISLAND, flag);
 	}
 	
 	/**
@@ -1062,7 +1069,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * @since 1.2.0
 	 */
 	public boolean isBullet() {
-		return (this.state & Body.BULLET) == Body.BULLET;
+		return this.getState(Body.BULLET);
 	}
 	
 	/**
@@ -1075,11 +1082,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * @since 1.2.0
 	 */
 	public void setBullet(boolean flag) {
-		if (flag) {
-			this.state |= Body.BULLET;
-		} else {
-			this.state &= ~Body.BULLET;
-		}
+		this.setState(Body.BULLET, flag);
 	}
 	
 	/**

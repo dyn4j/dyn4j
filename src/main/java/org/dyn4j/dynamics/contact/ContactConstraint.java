@@ -121,7 +121,7 @@ public class ContactConstraint extends Constraint implements Shiftable {
 		// set the normal
 		this.normal = manifold.getNormal();
 		// set the tangent
-		this.tangent = this.normal.cross(1.0);
+		this.tangent = this.normal.getLeftHandOrthogonalVector();
 		// set coefficients
 		this.friction = friction;
 		this.restitution = restitution;
