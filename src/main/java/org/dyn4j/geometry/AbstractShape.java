@@ -35,6 +35,9 @@ import org.dyn4j.DataContainer;
  * @since 1.0.0
  */
 public abstract class AbstractShape implements Shape, Transformable, DataContainer {
+	/** Identity Transform instance */
+	private static final Transform IDENTITY = new Transform();
+	
 	/** The shape's unique identifier */
 	protected final UUID id = UUID.randomUUID();
 	
@@ -213,7 +216,7 @@ public abstract class AbstractShape implements Shape, Transformable, DataContain
 	 */
 	@Override
 	public Interval project(Vector2 n) {
-		return this.project(n, Transform.IDENTITY);
+		return this.project(n, IDENTITY);
 	}
 	
 	/* (non-Javadoc)
@@ -221,7 +224,7 @@ public abstract class AbstractShape implements Shape, Transformable, DataContain
 	 */
 	@Override
 	public boolean contains(Vector2 point) {
-		return this.contains(point, Transform.IDENTITY);
+		return this.contains(point, IDENTITY);
 	}
 	
 	/* (non-Javadoc)
@@ -229,6 +232,6 @@ public abstract class AbstractShape implements Shape, Transformable, DataContain
 	 */
 	@Override
 	public AABB createAABB() {
-		return this.createAABB(Transform.IDENTITY);
+		return this.createAABB(IDENTITY);
 	}
 }

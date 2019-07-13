@@ -91,6 +91,9 @@ import org.dyn4j.resources.Messages;
  * @since 1.0.0
  */
 public class World implements Shiftable, DataContainer {
+	/** Identity Transform instance */
+	private static final Transform IDENTITY = new Transform();
+	
 	/** Earths gravity constant */
 	public static final Vector2 EARTH_GRAVITY = new Vector2(0.0, -9.8);
 	
@@ -2105,7 +2108,7 @@ public class World implements Shiftable, DataContainer {
 	 * @see #detect(Convex, boolean, List)
 	 */
 	public boolean detect(Convex convex, List<DetectResult> results) {
-		return this.detect(convex, Transform.IDENTITY, null, false, true, false, results);
+		return this.detect(convex, IDENTITY, null, false, true, false, results);
 	}
 
 	/**
@@ -2128,7 +2131,7 @@ public class World implements Shiftable, DataContainer {
 	 * @see #detect(Convex, boolean, boolean, List)
 	 */
 	public boolean detect(Convex convex, boolean ignoreSensors, List<DetectResult> results) {
-		return this.detect(convex, Transform.IDENTITY, null, ignoreSensors, true, false, results);
+		return this.detect(convex, IDENTITY, null, ignoreSensors, true, false, results);
 	}
 
 	/**
@@ -2150,7 +2153,7 @@ public class World implements Shiftable, DataContainer {
 	 * @see #detect(Convex, Transform, Filter, boolean, boolean, List)
 	 */
 	public boolean detect(Convex convex, boolean ignoreSensors, boolean ignoreInactive, List<DetectResult> results) {
-		return this.detect(convex, Transform.IDENTITY, null, ignoreSensors, ignoreInactive, false, results);
+		return this.detect(convex, IDENTITY, null, ignoreSensors, ignoreInactive, false, results);
 	}
 	
 	/**
@@ -2173,7 +2176,7 @@ public class World implements Shiftable, DataContainer {
 	 * @see #detect(Convex, Transform, Filter, boolean, boolean, boolean, List)
 	 */
 	public boolean detect(Convex convex, Filter filter, boolean ignoreSensors, boolean ignoreInactive, List<DetectResult> results) {
-		return this.detect(convex, Transform.IDENTITY, filter, ignoreSensors, ignoreInactive, false, results);
+		return this.detect(convex, IDENTITY, filter, ignoreSensors, ignoreInactive, false, results);
 	}
 	
 	/**
@@ -2197,7 +2200,7 @@ public class World implements Shiftable, DataContainer {
 	 * @since 3.1.9
 	 */
 	public boolean detect(Convex convex, Filter filter, boolean ignoreSensors, boolean ignoreInactive, boolean includeCollisionData, List<DetectResult> results) {
-		return this.detect(convex, Transform.IDENTITY, filter, ignoreSensors, ignoreInactive, includeCollisionData, results);
+		return this.detect(convex, IDENTITY, filter, ignoreSensors, ignoreInactive, includeCollisionData, results);
 	}
 	
 	/**
@@ -2469,7 +2472,7 @@ public class World implements Shiftable, DataContainer {
 	 * @since 3.1.9
 	 */
 	public boolean detect(Convex convex, Body body, boolean ignoreSensors, List<DetectResult> results) {
-		return this.detect(convex, Transform.IDENTITY, body, null, ignoreSensors, false, results);
+		return this.detect(convex, IDENTITY, body, null, ignoreSensors, false, results);
 	}
 	
 	/**
@@ -2491,7 +2494,7 @@ public class World implements Shiftable, DataContainer {
 	 * @since 3.1.9
 	 */
 	public boolean detect(Convex convex, Body body, Filter filter, boolean ignoreSensors, List<DetectResult> results) {
-		return this.detect(convex, Transform.IDENTITY, body, filter, ignoreSensors, false, results);
+		return this.detect(convex, IDENTITY, body, filter, ignoreSensors, false, results);
 	}
 	
 	/**
@@ -2515,7 +2518,7 @@ public class World implements Shiftable, DataContainer {
 	 * @since 3.1.9
 	 */
 	public boolean detect(Convex convex, Body body, Filter filter, boolean ignoreSensors, boolean includeCollisionData, List<DetectResult> results) {
-		return this.detect(convex, Transform.IDENTITY, body, filter, ignoreSensors, includeCollisionData, results);
+		return this.detect(convex, IDENTITY, body, filter, ignoreSensors, includeCollisionData, results);
 	}
 	
 	/**
