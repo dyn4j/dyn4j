@@ -35,6 +35,9 @@ import org.junit.Test;
  * @since 1.0.0
  */
 public class SegmentTest {
+	/** Identity Transform instance */
+	private static final Transform IDENTITY = new Transform();
+	
 	/**
 	 * Tests a failed create using one null point.
 	 * @since 3.1.0
@@ -371,7 +374,7 @@ public class SegmentTest {
 			new Vector2(1.0, 1.0)
 		);
 		
-		AABB aabb = s.createAABB(Transform.IDENTITY);
+		AABB aabb = s.createAABB(IDENTITY);
 		TestCase.assertEquals(0.0, aabb.getMinX(), 1.0e-3);
 		TestCase.assertEquals(0.0, aabb.getMinY(), 1.0e-3);
 		TestCase.assertEquals(1.0, aabb.getMaxX(), 1.0e-3);

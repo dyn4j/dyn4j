@@ -35,6 +35,9 @@ import org.junit.Test;
  * @since 3.1.5
  */
 public class EllipseTest {
+	/** Identity Transform instance */
+	private static final Transform IDENTITY = new Transform();
+	
 	/**
 	 * Tests a zero width.
 	 */
@@ -141,7 +144,7 @@ public class EllipseTest {
 		e.translate(1.0, 0.5);
 		e.rotate(Math.toRadians(30), 1.0, 0.5);
 		
-		i = e.project(y, Transform.IDENTITY);
+		i = e.project(y, IDENTITY);
 		TestCase.assertEquals(-1.161, i.min, 1.0e-3);
 		TestCase.assertEquals( 0.161, i.max, 1.0e-3);
 		
@@ -180,7 +183,7 @@ public class EllipseTest {
 		e.translate(1.0, 0.5);
 		e.rotate(Math.toRadians(30), 1.0, 0.5);
 		
-		p = e.getFarthestPoint(y, Transform.IDENTITY);
+		p = e.getFarthestPoint(y, IDENTITY);
 		TestCase.assertEquals( 0.509, p.x, 1.0e-3);
 		TestCase.assertEquals(-0.161, p.y, 1.0e-3);
 		
@@ -197,7 +200,7 @@ public class EllipseTest {
 	@Test(expected = UnsupportedOperationException.class)
 	public void getAxes() {
 		Ellipse e = new Ellipse(1.0, 0.5);
-		e.getAxes(new Vector2[] { new Vector2() }, Transform.IDENTITY);
+		e.getAxes(new Vector2[] { new Vector2() }, IDENTITY);
 	}
 	
 	/**
@@ -206,7 +209,7 @@ public class EllipseTest {
 	@Test(expected = UnsupportedOperationException.class)
 	public void getFoci() {
 		Ellipse e = new Ellipse(1.0, 0.5);
-		e.getFoci(Transform.IDENTITY);
+		e.getFoci(IDENTITY);
 	}
 	
 	/**
@@ -255,7 +258,7 @@ public class EllipseTest {
 		Ellipse e = new Ellipse(1.0, 0.5);
 		
 		// using an identity transform
-		AABB aabb = e.createAABB(Transform.IDENTITY);
+		AABB aabb = e.createAABB(IDENTITY);
 		TestCase.assertEquals(-0.500, aabb.getMinX(), 1.0e-3);
 		TestCase.assertEquals(-0.250, aabb.getMinY(), 1.0e-3);
 		TestCase.assertEquals( 0.500, aabb.getMaxX(), 1.0e-3);

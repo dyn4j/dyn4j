@@ -35,6 +35,9 @@ import org.junit.Test;
  * @since 1.0.0
  */
 public class PolygonTest {
+	/** Identity Transform instance */
+	private static final Transform IDENTITY = new Transform();
+	
 	/**
 	 * Tests not enough points.
 	 */
@@ -341,7 +344,7 @@ public class PolygonTest {
 			};
 		Polygon p = new Polygon(vertices);
 		
-		AABB aabb = p.createAABB(Transform.IDENTITY);
+		AABB aabb = p.createAABB(IDENTITY);
 		TestCase.assertEquals(-1.0, aabb.getMinX(), 1.0e-3);
 		TestCase.assertEquals(-1.0, aabb.getMinY(), 1.0e-3);
 		TestCase.assertEquals( 1.0, aabb.getMaxX(), 1.0e-3);

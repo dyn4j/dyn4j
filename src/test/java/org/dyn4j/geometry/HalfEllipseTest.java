@@ -35,6 +35,9 @@ import org.junit.Test;
  * @since 3.1.5
  */
 public class HalfEllipseTest {
+	/** Identity Transform instance */
+	private static final Transform IDENTITY = new Transform();
+	
 	/**
 	 * Tests the getRadius method for a point above the x-axis but below the evolute
 	 * to ensure that we obtain the correct max distance.
@@ -165,7 +168,7 @@ public class HalfEllipseTest {
 		e.translate(1.0, 0.5);
 		e.rotateAboutCenter(Math.toRadians(30));
 		
-		i = e.project(y, Transform.IDENTITY);
+		i = e.project(y, IDENTITY);
 		TestCase.assertEquals( 0.028, i.min, 1.0e-3);
 		TestCase.assertEquals( 1.189, i.max, 1.0e-3);
 		
@@ -204,7 +207,7 @@ public class HalfEllipseTest {
 		e.translate(1.0, 0.5);
 		e.rotate(Math.toRadians(30), 1.0, 0.5);
 		
-		p = e.getFarthestPoint(y, Transform.IDENTITY);
+		p = e.getFarthestPoint(y, IDENTITY);
 		TestCase.assertEquals( 0.133, p.x, 1.0e-3);
 		TestCase.assertEquals( 0.000, p.y, 1.0e-3);
 		
@@ -221,7 +224,7 @@ public class HalfEllipseTest {
 	@Test(expected = UnsupportedOperationException.class)
 	public void getAxes() {
 		HalfEllipse e = new HalfEllipse(1.0, 0.5);
-		e.getAxes(new Vector2[] { new Vector2() }, Transform.IDENTITY);
+		e.getAxes(new Vector2[] { new Vector2() }, IDENTITY);
 	}
 	
 	/**
@@ -230,7 +233,7 @@ public class HalfEllipseTest {
 	@Test(expected = UnsupportedOperationException.class)
 	public void getFoci() {
 		HalfEllipse e = new HalfEllipse(1.0, 0.5);
-		e.getFoci(Transform.IDENTITY);
+		e.getFoci(IDENTITY);
 	}
 	
 	/**
@@ -279,7 +282,7 @@ public class HalfEllipseTest {
 		HalfEllipse e = new HalfEllipse(1.0, 0.25);
 		
 		// using an identity transform
-		AABB aabb = e.createAABB(Transform.IDENTITY);
+		AABB aabb = e.createAABB(IDENTITY);
 		TestCase.assertEquals(-0.500, aabb.getMinX(), 1.0e-3);
 		TestCase.assertEquals( 0.000, aabb.getMinY(), 1.0e-3);
 		TestCase.assertEquals( 0.500, aabb.getMaxX(), 1.0e-3);

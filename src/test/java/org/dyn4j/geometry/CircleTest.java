@@ -35,6 +35,9 @@ import org.junit.Test;
  * @since 1.0.0
  */
 public class CircleTest {
+	/** Identity Transform instance */
+	private static final Transform IDENTITY = new Transform();
+	
 	/**
 	 * Tests a zero radius.
 	 */
@@ -211,7 +214,7 @@ public class CircleTest {
 		Circle c = new Circle(1.2);
 		
 		// using an identity transform
-		AABB aabb = c.createAABB(Transform.IDENTITY);
+		AABB aabb = c.createAABB(IDENTITY);
 		TestCase.assertEquals(-1.2, aabb.getMinX(), 1.0e-3);
 		TestCase.assertEquals(-1.2, aabb.getMinY(), 1.0e-3);
 		TestCase.assertEquals( 1.2, aabb.getMaxX(), 1.0e-3);

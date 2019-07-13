@@ -36,6 +36,9 @@ import org.junit.Test;
  * @since 3.1.5
  */
 public class SliceTest {
+	/** Identity Transform instance */
+	private static final Transform IDENTITY = new Transform();
+	
 	/**
 	 * Tests a zero radius.
 	 */
@@ -131,7 +134,7 @@ public class SliceTest {
 		e.translate(1.0, 0.5);
 		e.rotateAboutCenter(Math.toRadians(30));
 		
-		i = e.project(y, Transform.IDENTITY);
+		i = e.project(y, IDENTITY);
 		TestCase.assertEquals(0.177, i.min, 1.0e-3);
 		TestCase.assertEquals(0.996, i.max, 1.0e-3);
 		
@@ -170,7 +173,7 @@ public class SliceTest {
 		e.translate(1.0, 0.5);
 		e.rotate(Math.toRadians(30), 1.0, 0.5);
 		
-		p = e.getFarthestPoint(y, Transform.IDENTITY);
+		p = e.getFarthestPoint(y, IDENTITY);
 		TestCase.assertEquals( 1.573, p.x, 1.0e-3);
 		TestCase.assertEquals( 1.319, p.y, 1.0e-3);
 		
@@ -192,11 +195,11 @@ public class SliceTest {
 			new Vector2(2.0, -0.5),
 			new Vector2(1.0, 3.0)
 		};
-		Vector2[] axes = e.getAxes(foci, Transform.IDENTITY);
+		Vector2[] axes = e.getAxes(foci, IDENTITY);
 		TestCase.assertEquals(4, axes.length);
 		
 		// make sure we get back the right axes
-		axes = e.getAxes(null, Transform.IDENTITY);
+		axes = e.getAxes(null, IDENTITY);
 		TestCase.assertEquals(-0.422, axes[0].x, 1.0e-3);
 		TestCase.assertEquals( 0.906, axes[0].y, 1.0e-3);
 		TestCase.assertEquals(-0.422, axes[1].x, 1.0e-3);
@@ -209,7 +212,7 @@ public class SliceTest {
 	@Test
 	public void getFoci() {
 		Slice e = new Slice(1.0, Math.toRadians(50));
-		Vector2[] foci = e.getFoci(Transform.IDENTITY);
+		Vector2[] foci = e.getFoci(IDENTITY);
 		// should be two foci
 		TestCase.assertEquals(1, foci.length);
 		// make sure the foci are correct
@@ -264,7 +267,7 @@ public class SliceTest {
 		Slice e = new Slice(1.0, Math.toRadians(50));
 		
 		// using an identity transform
-		AABB aabb = e.createAABB(Transform.IDENTITY);
+		AABB aabb = e.createAABB(IDENTITY);
 		TestCase.assertEquals( 0.000, aabb.getMinX(), 1.0e-3);
 		TestCase.assertEquals(-0.422, aabb.getMinY(), 1.0e-3);
 		TestCase.assertEquals( 1.000, aabb.getMaxX(), 1.0e-3);
