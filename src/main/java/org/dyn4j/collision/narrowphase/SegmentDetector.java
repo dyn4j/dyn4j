@@ -33,7 +33,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Class devoted to improving performance of {@link Segment} detection queries.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.3.1
  * @since 2.0.0
  */
 public final class SegmentDetector {
@@ -160,8 +160,19 @@ public final class SegmentDetector {
 			return false;
 		}
 		
-		// compute s
-		double s = (t * d0.x + p0.x - p1.x) / d1.x;
+		double s = 0;
+		boolean isVertical = Math.abs(d1.x) <= Epsilon.E;
+		boolean isHorizontal = Math.abs(d1.y) <= Epsilon.E;
+		if (isVertical && isHorizontal) {
+			// it's a degenerate line segment
+			return false;
+		} if (isVertical) {
+			// use the y values to compute s
+			s = (t * d0.y + p0.y - p1.y) / d1.y;
+		} else {
+			// use the x values to compute s
+			s = (t * d0.x + p0.x - p1.x) / d1.x;
+		}
 		
 		// s should be in the range 0.0 <= s <= 1.0
 		if (s < 0.0 || s > 1.0) {

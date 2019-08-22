@@ -16,6 +16,7 @@ Bug Fixes:
     height and the given point is below the evolute.
   - Bug fix for the initial transform not updating if CCD is turned off
   - Bug fix for strange code in position solver
+  - Bug fix for wrong raycast results when using vertical segment/link shapes
     
 Deprecated:
   
