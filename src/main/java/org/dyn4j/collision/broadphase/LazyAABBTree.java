@@ -435,6 +435,8 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 * Internal method to insert a leaf in the tree and also perform all the collision detection required for that tree
 	 * 
 	 * @param item the leaf to insert
+	 * @param filter the broadphase filter
+	 * @param pairs a list containing the results
 	 */
 	void insertAndDetect(LazyAABBTreeLeaf<E, T> item, BroadphaseFilter<E, T> filter, List<BroadphasePair<E, T>> pairs) {
 		this.insert(item, true, filter, pairs);
@@ -764,8 +766,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 * Balances the subtree using node as the root.
 	 * Note that this is the exact same balancing routine as in {@link DynamicAABBTree} but greatly reduced in size and optimized 
 	 * 
-	 * @param node the root node of the subtree to balance
-	 * @return {@link LazyAABBTreeNode} the new root of the subtree
+	 * @param a the root node of the subtree to balance
 	 */
 	void balance(LazyAABBTreeNode a) {
 		// see if the node is a leaf node or if

@@ -40,7 +40,10 @@ import org.dyn4j.resources.Messages;
 public class Slice extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
 	
 	/** Half the total circular section in radians */
-	final double alpha, cosAlpha;
+	final double alpha;
+	
+	/** Cosine of half the total circular section in radians */
+	final double cosAlpha;
 	
 	/** The radius passed in at creation */
 	final double sliceRadius;
@@ -221,7 +224,7 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 		}
 		
 		// if (abs(angleBetween(localn, rotation)) < alpha)
-		if (localnRotated.x < cosAlpha) {
+		if (localnRotated.x < this.cosAlpha) {
 			double edge = this.vertices[0].dot(localn);
 			int maxIndex = 0;
 			
@@ -272,9 +275,9 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 		}
 		
 		// if (abs(angleBetween(localn, rotation)) < alpha)
-		if (localnRotated.x < cosAlpha) {
+		if (localnRotated.x < this.cosAlpha) {
 			// check if this section is nearly a half circle
-			if (cosAlpha <= 1.0e-6) {
+			if (this.cosAlpha <= 1.0e-6) {
 				// if so, we want to return the full back side
 				return Segment.getFarthestFeature(this.vertices[1], this.vertices[2], vector, transform);
 			}

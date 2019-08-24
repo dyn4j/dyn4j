@@ -47,6 +47,7 @@ import org.dyn4j.Epsilon;
  * @since 3.3.1
  */
 public class Rotation {
+	private static final double SQRT_2_INV = 1.0 / Math.sqrt(2);
 	
 	/** The cosine of the angle described by this Rotation */
 	protected double cost;
@@ -56,7 +57,6 @@ public class Rotation {
 	
 	/**
 	 * Alternative way to create a new {@link Rotation} from a given angle.
-	 * 
 	 * @param angle in radians
 	 * @return A {@link Rotation} for that angle
 	 */
@@ -66,7 +66,6 @@ public class Rotation {
 	
 	/**
 	 * Alternative way to create a new {@link Rotation} from a given angle, in degrees.
-	 * 
 	 * @param angle in degrees
 	 * @return A {@link Rotation} for that angle
 	 */
@@ -77,7 +76,6 @@ public class Rotation {
 	/**
 	 * Static method to create a {@link Rotation} object from the direction
 	 * of a given {@link Vector2}.
-	 * 
 	 * @param direction The {@link Vector2} describing a direction
 	 * @return A {@link Rotation} with the same direction
 	 */
@@ -100,7 +98,6 @@ public class Rotation {
 	/**
 	 * Creates a new {@link Rotation} representing the same rotation
 	 * of a {@link Transform} object.
-	 * 
 	 * @param transform The {@link Transform}
 	 * @return A {@link Rotation} representing the same rotation
 	 */
@@ -109,63 +106,65 @@ public class Rotation {
 		return new Rotation(transform.cost, transform.sint);
 	}
 	
-	/* ********************************************************************
-	 * Helper static methods to create Rotation objects for common angles *
-	 ******************************************************************** */
-	
 	/**
-	 * @return A new identity {@link Rotation}
+	 * Creates a new {@link Rotation} of 0 degrees.
+	 * @return {@link Rotation}
 	 */
 	public static Rotation rotation0() {
 		return new Rotation();
 	}
 	
 	/**
-	 * @return A new {@link Rotation} representing rotation by 90 degrees
+	 * Creates a new {@link Rotation} of 90 degrees.
+	 * @return {@link Rotation}
 	 */
 	public static Rotation rotation90() {
 		return new Rotation(0.0, 1.0);
 	}
 	
 	/**
-	 * @return A new {@link Rotation} representing rotation by 180 degrees
+	 * Creates a new {@link Rotation} of 180 degrees.
+	 * @return {@link Rotation}
 	 */
 	public static Rotation rotation180() {
 		return new Rotation(-1.0, 0.0);
 	}
 	
 	/**
-	 * @return A new {@link Rotation} representing rotation by 270 degrees
+	 * Creates a new {@link Rotation} of 270 degrees.
+	 * @return {@link Rotation}
 	 */
 	public static Rotation rotation270() {
 		return new Rotation(0.0, -1.0);
 	}
 	
-	private static final double SQRT_2_INV = 1.0 / Math.sqrt(2);
-	
 	/**
-	 * @return A new {@link Rotation} representing rotation by 45 degrees
+	 * Creates a new {@link Rotation} of 45 degrees.
+	 * @return {@link Rotation}
 	 */
 	public static Rotation rotation45() {
 		return new Rotation(SQRT_2_INV, SQRT_2_INV);
 	}
 	
 	/**
-	 * @return A new {@link Rotation} representing rotation by 135 degrees
+	 * Creates a new {@link Rotation} of 135 degrees.
+	 * @return {@link Rotation}
 	 */
 	public static Rotation rotation135() {
 		return new Rotation(-SQRT_2_INV, SQRT_2_INV);
 	}
 	
 	/**
-	 * @return A new {@link Rotation} representing rotation by 225 degrees
+	 * Creates a new {@link Rotation} of 225 degrees.
+	 * @return {@link Rotation}
 	 */
 	public static Rotation rotation225() {
 		return new Rotation(-SQRT_2_INV, -SQRT_2_INV);
 	}
 	
 	/**
-	 * @return A new {@link Rotation} representing rotation by 315 degrees
+	 * Creates a new {@link Rotation} of 315 degrees.
+	 * @return {@link Rotation}
 	 */
 	public static Rotation rotation315() {
 		return new Rotation(SQRT_2_INV, -SQRT_2_INV);
@@ -174,7 +173,6 @@ public class Rotation {
 	/**
 	 * Internal constructor that directly sets the cost and sint fields
 	 * of the {@link Rotation} without additional validation.
-	 * 
 	 * @param cost The cosine of some angle
 	 * @param sint The sine of the same angle
 	 */
@@ -224,9 +222,9 @@ public class Rotation {
 		final int prime = 31;
 		int result = 3;
 		long temp;
-		temp = Double.doubleToLongBits(cost);
+		temp = Double.doubleToLongBits(this.cost);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(sint);
+		temp = Double.doubleToLongBits(this.sint);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		return result;
 	}
@@ -259,8 +257,8 @@ public class Rotation {
 	/**
 	 * Returns true if the cos and sin components of this {@link Rotation}
 	 * are the same as the given {@link Rotation} given the specified error.
-	 * @param error The error
 	 * @param rotation the {@link Rotation} to compare to
+	 * @param error the error
 	 * @return boolean
 	 */
 	public boolean equals(Rotation rotation, double error) {
@@ -269,20 +267,24 @@ public class Rotation {
 	}
 	
 	/**
-	 * @param angle An angle in radians
-	 * @return true if the angle represents the same rotation as this {@link Rotation}, false otherwise
+	 * Returns true if the cos and sin components of this {@link Rotation}
+	 * are the same as the given angle
+	 * @param angle the angle in radians
+	 * @return boolean
 	 */
 	public boolean equals(double angle) {
 		return this.cost == Math.cos(angle) && this.sint == Math.sin(angle);
 	}
 	
 	/**
-	 * @param angle An angle in radians
-	 * @param error The error
-	 * @return true if the angle represents the same rotation as this {@link Rotation} given the specified error, false otherwise
+	 * Returns true if the cos and sin components of this {@link Rotation}
+	 * are the same as the given angle given the specified error.
+	 * @param angle the angle in radians
+	 * @param error the error
+	 * @return boolean
 	 */
-	public boolean equals(double radians, double error) {
-		return Math.abs(this.cost - Math.cos(radians)) < error && Math.abs(this.sint - Math.sin(radians)) < error;
+	public boolean equals(double angle, double error) {
+		return Math.abs(this.cost - Math.cos(angle)) < error && Math.abs(this.sint - Math.sin(angle)) < error;
 	}
 	
 	/* (non-Javadoc)
@@ -322,7 +324,7 @@ public class Rotation {
 	
 	/**
 	 * Sets this {@link Rotation} to the given angle.
-	 * @param angle The angle in radians
+	 * @param angle the angle in radians
 	 * @return {@link Rotation} this rotation
 	 */
 	public Rotation set(double angle) {
@@ -332,43 +334,49 @@ public class Rotation {
 	}
 	
 	/**
-	 * @return cos(theta) for the angle represented in this {@link Rotation}
+	 * Returns the value of cos(&theta;) for this {@link Rotation}.
+	 * @return double
 	 */
 	public double getCost() {
 		return this.cost;
 	}
 	
 	/**
-	 * @return sin(theta) for the angle represented in this {@link Rotation}
+	 * Returns the value of sin(&theta;) for this {@link Rotation}.
+	 * @return double
 	 */
 	public double getSint() {
 		return this.sint;
 	}
 	
 	/**
-	 * @return the angle represented in this {@link Rotation} in radians
+	 * Returns the angle in radians for this {@link Rotation}.
+	 * @return double
 	 */
 	public double toRadians() {
 		return Math.atan2(this.sint, this.cost);
 	}
 	
 	/**
-	 * @return the angle represented in this {@link Rotation} in degrees
+	 * Returns the angle in degrees for this {@link Rotation}.
+	 * @return double
 	 */
 	public double toDegrees() {
 		return Math.toDegrees(toRadians());
 	}
 	
 	/**
-	 * @return A new {@link Vector2} representing the same unit vector as this {@link Rotation}
+	 * Returns this {@link Rotation} as a unit length direction vector.
+	 * @return {@link Vector2}
 	 */
 	public Vector2 toVector() {
-		return new Vector2(cost, sint);
+		return new Vector2(this.cost, this.sint);
 	}
 	
 	/**
-	 * @param magnitude The magnitude for the resulting {@link Vector2}
-	 * @return A new {@link Vector2} representing the unit vector of this {@link Rotation} but with the given magnitude
+	 * Returns this {@link Rotation} as a direction vector with the given magnitude.
+	 * @param magnitude the magnitude
+	 * @return {@link Vector2}
 	 */
 	public Vector2 toVector(double magnitude) {
 		return new Vector2(cost * magnitude, sint * magnitude);
@@ -376,9 +384,8 @@ public class Rotation {
 	
 	/**
 	 * Internal helper method to perform rotations consisting of a 45 degree.
-	 * 
-	 * @param cost The cos of the angle
-	 * @param sint The sin of the angle
+	 * @param cost the cos of the angle
+	 * @param sint the sin of the angle
 	 * @return This {@link Rotation} after being set to (cost, sint) and rotated 45 degrees
 	 */
 	Rotation rotate45Helper(double cost, double sint) {
@@ -391,9 +398,8 @@ public class Rotation {
 	/**
 	 * Internal helper method to perform rotations consisting of a 45 degree.
 	 * Returns a new {@link Rotation} object.
-	 * 
-	 * @param cost The cos of the angle
-	 * @param sint The sin of the angle
+	 * @param cost the cos of the angle
+	 * @param sint the sin of the angle
 	 * @return A new {@link Rotation} with initial values (cost, sint) and then rotated 45 degrees
 	 */
 	Rotation getRotated45Helper(double cost, double sint) {
@@ -407,21 +413,24 @@ public class Rotation {
 	 ************************************ */
 	
 	/**
-	 * @return this {@link Rotation} after being rotated 45 degrees
+	 * Rotates this rotation 45 degrees and returns this rotation.
+	 * @return {@link Rotation}
 	 */
 	public Rotation rotate45() {
 		return this.rotate45Helper(this.cost, this.sint);
 	}
 	
 	/**
-	 * @return a new {@link Rotation} equal to this {@link Rotation} after being rotated 45 degrees
+	 * Rotates this rotation 45 degrees and returns a new rotation.
+	 * @return {@link Rotation}
 	 */
 	public Rotation getRotated45() {
 		return this.getRotated45Helper(this.cost, this.sint);
 	}
 	
 	/**
-	 * @return this {@link Rotation} after being rotated 90 degrees
+	 * Rotates this rotation 90 degrees and returns this rotation.
+	 * @return {@link Rotation}
 	 */
 	public Rotation rotate90() {
 		double temp = this.cost;
@@ -431,14 +440,16 @@ public class Rotation {
 	}
 	
 	/**
-	 * @return a new {@link Rotation} equal to this {@link Rotation} after being rotated 90 degrees
+	 * Rotates this rotation 90 degrees and returns a new rotation.
+	 * @return {@link Rotation}
 	 */
 	public Rotation getRotated90() {
 		return new Rotation(-this.sint, this.cost);
 	}
 	
 	/**
-	 * @return this {@link Rotation} after being rotated 135 degrees
+	 * Rotates this rotation 135 degrees and returns this rotation.
+	 * @return {@link Rotation}
 	 */
 	public Rotation rotate135() {
 		// Rotate by 90 and another 45
@@ -446,7 +457,8 @@ public class Rotation {
 	}
 	
 	/**
-	 * @return a new {@link Rotation} equal to this {@link Rotation} after being rotated 135 degrees
+	 * Rotates this rotation 135 degrees and returns a new rotation.
+	 * @return {@link Rotation}
 	 */
 	public Rotation getRotated135() {
 		// Rotate by 90 and another 45
@@ -454,7 +466,8 @@ public class Rotation {
 	}
 	
 	/**
-	 * @return this {@link Rotation} after being rotated 180 degrees
+	 * Rotates this rotation 180 degrees and returns this rotation.
+	 * @return {@link Rotation}
 	 */
 	public Rotation rotate180() {
 		this.cost = -this.cost;
@@ -463,14 +476,16 @@ public class Rotation {
 	}
 	
 	/**
-	 * @return a new {@link Rotation} equal to this {@link Rotation} after being rotated 180 degrees
+	 * Rotates this rotation 180 degrees and returns a new rotation.
+	 * @return {@link Rotation}
 	 */
 	public Rotation getRotated180() {
 		return new Rotation(-this.cost, -this.sint);
 	}
 	
 	/**
-	 * @return this {@link Rotation} after being rotated 225 degrees
+	 * Rotates this rotation 225 degrees and returns this rotation.
+	 * @return {@link Rotation}
 	 */
 	public Rotation rotate225() {
 		// Rotate by 180 and another 45
@@ -478,7 +493,8 @@ public class Rotation {
 	}
 	
 	/**
-	 * @return a new {@link Rotation} equal to this {@link Rotation} after being rotated 225 degrees
+	 * Rotates this rotation 225 degrees and returns a new rotation.
+	 * @return {@link Rotation}
 	 */
 	public Rotation getRotated225() {
 		// Rotate by 180 and another 45
@@ -486,7 +502,8 @@ public class Rotation {
 	}
 	
 	/**
-	 * @return this {@link Rotation} after being rotated 270 degrees
+	 * Rotates this rotation 270 degrees and returns this rotation.
+	 * @return {@link Rotation}
 	 */
 	public Rotation rotate270() {
 		double temp = this.cost;
@@ -496,14 +513,16 @@ public class Rotation {
 	}
 	
 	/**
-	 * @return a new {@link Rotation} equal to this {@link Rotation} after being rotated 270 degrees
+	 * Rotates this rotation 270 degrees and returns a new rotation.
+	 * @return {@link Rotation}
 	 */
 	public Rotation getRotated270() {
 		return new Rotation(this.sint, -this.cost);
 	}
 	
 	/**
-	 * @return this {@link Rotation} after being rotated 315 degrees
+	 * Rotates this rotation 315 degrees and returns this rotation.
+	 * @return {@link Rotation}
 	 */
 	public Rotation rotate315() {
 		// Rotate by 270 and another 45
@@ -511,7 +530,8 @@ public class Rotation {
 	}
 	
 	/**
-	 * @return a new {@link Rotation} equal to this {@link Rotation} after being rotated 315 degrees
+	 * Rotates this rotation 315 degrees and returns a new rotation.
+	 * @return {@link Rotation}
 	 */
 	public Rotation getRotated315() {
 		// Rotate by 270 and another 45
@@ -519,10 +539,10 @@ public class Rotation {
 	}
 	
 	/**
-	 * If this {@link Rotation} represents the angle &thetasym;, after calling
-	 * this method the {@link Rotation} represents the angle -&thetasym;.
-	 * 
-	 * @return The inverse of this {@link Rotation}
+	 * Negates this rotation and returns this rotation.
+	 * <p>
+	 * Let &theta; be the rotation, then -&theta; is the inverse rotation.
+	 * @return {@link Rotation}
 	 */
 	public Rotation inverse() {
 		this.sint = -this.sint;
@@ -530,21 +550,21 @@ public class Rotation {
 	}
 	
 	/**
-	 * If this {@link Rotation} represents the angle &thetasym;, returns
-	 * an new {@link Rotation} representing the angle -&thetasym;.
-	 * 
-	 * @return A new {@link Rotation} representing inverse angle
+	 * Negates this rotation and returns a new rotation.
+	 * <p>
+	 * Let &theta; be the rotation, then -&theta; is the inverse rotation.
+	 * @return {@link Rotation}
 	 */
 	public Rotation getInversed() {
 		return new Rotation(this.cost, -this.sint);
 	}
 	
 	/**
-	 * Internal method that rotates this {@link Rotation} by an angle &thetasym;.
-	 * 
-	 * @param c cos(&thetasym;)
-	 * @param s sin(&thetasym;)
-	 * @return This {@link Rotation} after being rotated by &thetasym;
+	 * Internal method that rotates this {@link Rotation} by an angle &theta; and
+	 * returns this rotation.
+	 * @param c cos(&theta;)
+	 * @param s sin(&theta;)
+	 * @return {@link Rotation}
 	 */
 	Rotation rotate(double c, double s) {
 		double cost = this.cost;
@@ -558,11 +578,10 @@ public class Rotation {
 	
 	/**
 	 * Internal method that return a new {@link Rotation} representing
-	 * this {@link Rotation} after being rotated by an angle &thetasym;.
-	 * 
-	 * @param c cos(&thetasym;)
-	 * @param s sin(&thetasym;)
-	 * @return A new {@link Rotation} after being rotated by &thetasym;
+	 * this {@link Rotation} after being rotated by an angle &theta;.
+	 * @param c cos(&theta;)
+	 * @param s sin(&theta;)
+	 * @return {@link Rotation}
 	 */
 	public Rotation getRotated(double c, double s) {
 		return new Rotation(
@@ -571,47 +590,53 @@ public class Rotation {
 	}
 	
 	/**
-	 * @param rotation The {@link Rotation} object
-	 * @return This {@link Rotation} after being rotated by the argument
+	 * Rotates this rotation by the given rotation and returns this rotation.
+	 * @param rotation the {@link Rotation}
+	 * @return {@link Rotation}
 	 */
 	public Rotation rotate(Rotation rotation) {
 		return this.rotate(rotation.cost, rotation.sint);
 	}
 	
 	/**
-	 * @param rotation The {@link Rotation} object
-	 * @return A new {@link Rotation} which is this {@link Rotation} after being rotated by the argument
+	 * Rotates this rotation by the given rotation and returns a new rotation.
+	 * @param rotation the {@link Rotation}
+	 * @return {@link Rotation}
 	 */
 	public Rotation getRotated(Rotation rotation) {
 		return this.getRotated(rotation.cost, rotation.sint);
 	}
 	
 	/**
-	 * @param angle The rotation in radians
-	 * @return This {@link Rotation} after being rotated by the argument
+	 * Rotates this rotation by the given angle and returns this rotation.
+	 * @param angle the rotation in radians
+	 * @return {@link Rotation}
 	 */
 	public Rotation rotate(double angle) {
 		return this.rotate(Math.cos(angle), Math.sin(angle));
 	}
 	
 	/**
-	 * @param angle The rotation in radians
-	 * @return A new {@link Rotation} which is this {@link Rotation} after being rotated by the argument
+	 * Rotates this rotation by the given angle and returns a new rotation.
+	 * @param angle the rotation in radians
+	 * @return {@link Rotation}
 	 */
-	public Rotation getRotated(double radians) {
-		return this.getRotated(Math.cos(radians), Math.sin(radians));
+	public Rotation getRotated(double angle) {
+		return this.getRotated(Math.cos(angle), Math.sin(angle));
 	}
 	
 	/**
-	 * @return true if this {@link Rotation} is an identity rotation, false otherwise
+	 * Returns true if this rotation is an identity rotation.
+	 * @return boolean
 	 */
 	public boolean isIdentity() {
 		return this.cost == 1;
 	}
 	
 	/**
-	 * @param error The error
-	 * @return true if this {@link Rotation} is an identity rotation given the specified error, false otherwise
+	 * Returns true if this rotation is an identity rotation within the given error.
+	 * @param error the error
+	 * @return boolean
 	 */
 	public boolean isIdentity(double error) {
 		return Math.abs(this.cost - 1) < error;
@@ -620,9 +645,8 @@ public class Rotation {
 	/**
 	 * Returns the dot product of the this {@link Rotation} and the given {@link Rotation}
 	 * which is essentially the sine of the angle between those rotations.
-	 * 
 	 * @param rotation the {@link Rotation}
-	 * @return double cos(&thetasym;)
+	 * @return double
 	 */
 	public double dot(Rotation rotation) {
 		return this.cost * rotation.cost + this.sint * rotation.sint;
@@ -631,9 +655,8 @@ public class Rotation {
 	/**
 	 * Returns the cross product of the this {@link Rotation} and the given {@link Rotation}
 	 * which is essentially the sine of the angle between those rotations.
-	 * 
 	 * @param rotation the {@link Rotation}
-	 * @return double sin(&thetasym;)
+	 * @return double
 	 */
 	public double cross(Rotation rotation) {
 		return this.cost * rotation.sint - this.sint * rotation.cost;
@@ -642,9 +665,8 @@ public class Rotation {
 	/**
 	 * Returns the dot product of the this {@link Rotation} and the given {@link Vector2}.
 	 * For internal use.
-	 * 
-	 * @param rotation the {@link Rotation}
-	 * @return double cos(&thetasym;) * |v|
+	 * @param vector the {@link Vector2}
+	 * @return double
 	 */
 	double dot(Vector2 vector) {
 		return this.cost * vector.x + this.sint * vector.y;
@@ -653,20 +675,18 @@ public class Rotation {
 	/**
 	 * Returns the cross product of the this {@link Rotation} and the given {@link Vector2}.
 	 * For internal use.
-	 * 
-	 * @param rotation the {@link Rotation}
-	 * @return double sin(&thetasym;) * |v|
+	 * @param vector the {@link Vector2}
+	 * @return double
 	 */
 	double cross(Vector2 vector) {
 		return this.cost * vector.y - this.sint * vector.x;
 	}
 
 	/**
-	 * Compares this {@link Rotation} with another one, based on the angle between them (The one with -&pi; &le; &thetasym; &le; &pi;)
-	 * Returns 1 if &thetasym; > 0, -1 if &thetasym; < 0 and 0 otherwise
-	 * 
-	 * @param other The {@link Rotation} to compare to
-	 * @return The comparison result; 1, -1 or 0 respectively 
+	 * Compares this {@link Rotation} with another one, based on the angle between them (The one with -&pi; &le; &theta; &le; &pi;)
+	 * Returns 1 if &theta; &gt; 0, -1 if &theta; &lt; 0 and 0 otherwise
+	 * @param other the {@link Rotation} to compare to
+	 * @return int 
 	 */
 	public int compare(Rotation other) {
 		// cmp = sin(&thetasym;) where &thetasym; is the angle between this rotation and the other
@@ -683,11 +703,10 @@ public class Rotation {
 	}
 	
 	/**
-	 * Compares this {@link Rotation} with a {@link Vector2}, based on the angle between them (The one with -&pi; &le; &thetasym; &le; &pi;)
-	 * Returns 1 if &thetasym; > 0, -1 if &thetasym; < 0 and 0 otherwise
-	 * 
-	 * @param other The {@link Vector2} to compare to
-	 * @return The comparison result; 1, -1 or 0 respectively 
+	 * Compares this {@link Rotation} with a {@link Vector2}, based on the angle between them (The one with -&pi; &le; &theta; &le; &pi;)
+	 * Returns 1 if &theta; &gt; 0, -1 if &theta; &lt; 0 and 0 otherwise
+	 * @param other the {@link Vector2} to compare to
+	 * @return int 
 	 */
 	public int compare(Vector2 other) {
 		// cmp = |v| * sin(&thetasym;) where &thetasym; is the angle between this rotation and the other
@@ -705,10 +724,9 @@ public class Rotation {
 	
 	/**
 	 * Returns the angle between this and the given {@link Rotation}
-	 * represented again as a new {@link Rotation}.
-	 * 
+	 * represented as a new {@link Rotation}.
 	 * @param rotation the {@link Rotation}
-	 * @return A new {@link Rotation} representing the angle between them
+	 * @return {@link Rotation}
 	 */
 	public Rotation getRotationBetween(Rotation rotation) {
 		return new Rotation(this.dot(rotation), this.cross(rotation));
@@ -717,9 +735,8 @@ public class Rotation {
 	/**
 	 * Returns the angle between this {@link Rotation} and the
 	 * given {@link Vector2} represented as a new {@link Rotation}.
-	 * 
 	 * @param vector the {@link Vector2}
-	 * @return A new {@link Rotation} representing the angle between them
+	 * @return {@link Rotation}
 	 */
 	public Rotation getRotationBetween(Vector2 vector) {
 		return this.getRotationBetween(Rotation.of(vector));

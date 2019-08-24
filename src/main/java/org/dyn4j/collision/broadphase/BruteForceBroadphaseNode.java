@@ -30,7 +30,7 @@ import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Transform;
 
 /**
- * Simple helper class that holds information for each item in the {@link PlainBroadphase}.
+ * Simple helper class that holds information for each item in the {@link BruteForceBroadphase}.
  * 
  * @author Manolis Tsamis
  * @version 3.3.1
@@ -39,11 +39,23 @@ import org.dyn4j.geometry.Transform;
  * @param <T> the {@link Fixture} type
  */
 class BruteForceBroadphaseNode<E extends Collidable<T>, T extends Fixture> {
+	/** The collidable */
 	public final E collidable;
+	
+	/** The fixture */
 	public final T fixture;
+	
+	/** The AABB */
 	public AABB aabb;
+	
+	/** Whether the node has been tested or not */
 	boolean tested;
 
+	/**
+	 * Minimal constructor.
+	 * @param collidable the collidable
+	 * @param fixture the fixture
+	 */
 	BruteForceBroadphaseNode(E collidable, T fixture) {
 		this.collidable = collidable;
 		this.fixture = fixture;

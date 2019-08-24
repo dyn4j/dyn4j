@@ -965,10 +965,9 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	}
 	
 	/**
-	 * Sets (if flag == true) or clears (if flag == false) the bits indicated by the binary mask 'mask' in the 'state' field 
-	 * 
-	 * @param mask The binary mask to select bits
-	 * @param state true to set, false to clear bits
+	 * Sets (if flag == true) or clears (if flag == false) the bits indicated by the binary mask 'mask' in the 'state' field.
+	 * @param mask the binary mask to select bits
+	 * @param flag true to set, false to clear bits
 	 */
 	void setState(int mask, boolean flag) {
 		if (flag) {

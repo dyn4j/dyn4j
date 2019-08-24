@@ -45,11 +45,17 @@ import org.dyn4j.resources.Messages;
  * @since 3.0.0
  */
 public class AABB implements Translatable {
-	/** The minimum extent */
-	protected double minX, minY;
+	/** The minimum extent along the x-axis */
+	protected double minX;
 	
-	/** The maximum extent */
-	protected double maxX, maxY;
+	/** The minimum extent along the y-axis */
+	protected double minY;
+	
+	/** The maximum extent along the x-axis */
+	protected double maxX;
+	
+	/** The maximum extent along the y-axis */
+	protected double maxY;
 	
 	/**
 	 * Method to create the valid AABB defined by the two points point1 and point2.

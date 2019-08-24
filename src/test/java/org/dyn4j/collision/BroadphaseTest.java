@@ -61,6 +61,7 @@ import junit.framework.TestCase;
 public class BroadphaseTest {
 	/**
 	 * We will be testing all broadphases one by one
+	 * @return Collection&lt;Object[]&gt;
 	 */
 	@Parameters
     public static Collection<Object[]> data() {
@@ -494,11 +495,11 @@ public class BroadphaseTest {
 	
 	/**
 	 * Deterministic randomized test, used to test various core functionalities of all broad-phase detectors, simulating some complex scenarios.
-	 * This test uses a {@link PlainBroadphase} for reference and tests the output of the broad-phase against the reference broad-phase.
+	 * This test uses a {@link BruteForceBroadphase} for reference and tests the output of the broad-phase against the reference broad-phase.
 	 * For all queries (detect, detect(AABB) and raycast) the output of the broad-phase must contain all pairs/items returned by the reference broad-phase (and maybe some more),
-	 * because {@link PlainBroadphase} always returns the minimal answer set.
+	 * because {@link BruteForceBroadphase} always returns the minimal answer set.
 	 * <p>
-	 * The {@link PlainBroadphase} implements only simple brute force algorithms so we can consider it's implementation bug free.
+	 * The {@link BruteForceBroadphase} implements only simple brute force algorithms so we can consider it's implementation bug free.
 	 */
 	@Test
 	public void randomizedTest() {

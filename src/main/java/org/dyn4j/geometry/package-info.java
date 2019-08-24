@@ -35,7 +35,6 @@
  * <li>{@link org.dyn4j.geometry.Circle}
  * <li>{@link org.dyn4j.geometry.Polygon} an arbitrary convex polygon
  * <li>{@link org.dyn4j.geometry.Rectangle}
- * <li>{@link org.dyn4j.geometry.RegularPolygon}
  * <li>{@link org.dyn4j.geometry.Triangle}
  * <li>{@link org.dyn4j.geometry.Slice} a piece of a circle
  * <li>{@link org.dyn4j.geometry.Ellipse}

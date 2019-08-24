@@ -664,10 +664,9 @@ public class Vector2 {
 	}
 	
 	/**
-	 * Internal helper method that rotates about the origin by an angle &thetasym;.
-	 * 
-	 * @param c cos(&thetasym;)
-	 * @param s sin(&thetasym;)
+	 * Internal helper method that rotates about the origin by an angle &theta;.
+	 * @param cos cos(&theta;)
+	 * @param sin sin(&theta;)
 	 * @return {@link Vector2} this vector
 	 * @since 3.3.1
 	 */
@@ -721,10 +720,9 @@ public class Vector2 {
 	}
 	
 	/**
-	 * Internal helper method that rotates about the given coordinates by an angle &thetasym;.
-	 * 
-	 * @param c cos(&thetasym;)
-	 * @param s sin(&thetasym;)
+	 * Internal helper method that rotates about the given coordinates by an angle &theta;.
+	 * @param cos cos(&theta;)
+	 * @param sin sin(&theta;)
 	 * @param x the x coordinate to rotate about
 	 * @param y the y coordinate to rotate about
 	 * @return {@link Vector2} this vector
@@ -766,6 +764,8 @@ public class Vector2 {
 	/**
 	 * Rotates about the given coordinates by the inverse angle -&thetasym;.
 	 * @param theta the rotation angle in radians
+	 * @param x the x coordinate to rotate about
+	 * @param y the y coordinate to rotate about
 	 * @return {@link Vector2} this vector
 	 * @since 3.3.1
 	 */
@@ -776,6 +776,8 @@ public class Vector2 {
 	/**
 	 * Rotates about the given coordinates by the inverse angle -&thetasym;.
 	 * @param rotation the {@link Rotation}
+	 * @param x the x coordinate to rotate about
+	 * @param y the y coordinate to rotate about
 	 * @return {@link Vector2} this vector
 	 * @since 3.3.1
 	 */
