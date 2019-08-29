@@ -157,6 +157,16 @@ public class PolygonTest {
 		
 		// should be on a vertex
 		TestCase.assertTrue(p.contains(pt, t));
+
+		t.translate(0.5, 0.5);
+		
+		// should be on an edge
+		TestCase.assertTrue(p.contains(pt, t));
+		
+		t.translate(-1.0, -1.0);
+		
+		// should be outside, but colinear
+		TestCase.assertFalse(p.contains(pt, t));
 	}
 	
 	/**
@@ -363,4 +373,25 @@ public class PolygonTest {
 		TestCase.assertEquals( 2.366, aabb.getMaxX(), 1.0e-3);
 		TestCase.assertEquals( 2.866, aabb.getMaxY(), 1.0e-3);
 	}
+
+	/**
+	 * Tests the translate methods.
+	 */
+	@Test
+	public void containsPointCoIncident() {
+		Vector2[] vertices = new Vector2[] {
+				new Vector2(2.0, 0.0), 
+				new Vector2(4.0, 0.0), 
+				new Vector2(7.0, 3.0), 
+				new Vector2(7.0, 5.0), 
+				new Vector2(5.0, 7.0), 
+				new Vector2(3.0, 7.0), 
+				new Vector2(0.0, 4.0), 
+				new Vector2(0.0, 2.0)
+			};
+		Polygon p = new Polygon(vertices);
+		
+		TestCase.assertFalse(p.contains(new Vector2(0.0, 0.0)));
+	}
+	
 }
