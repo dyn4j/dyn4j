@@ -96,6 +96,18 @@ public class PolygonTest {
 			new Vector2(1.0, -1.0)
 		});
 	}
+
+	/**
+	 * Tests degenerate poly.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createDegenerate() {
+		new Polygon(new Vector2[] {
+			new Vector2(1.0, 0.0),
+			new Vector2(2.0, 0.0),
+			new Vector2(1.0, 0.0)
+		});
+	}
 	
 	/**
 	 * Tests null point array.
@@ -375,10 +387,11 @@ public class PolygonTest {
 	}
 
 	/**
-	 * Tests the translate methods.
+	 * Tests the contains method against a point that is coincident with
+	 * the starting edge of the polygon.
 	 */
 	@Test
-	public void containsPointCoIncident() {
+	public void containsPointCoIncidentStart() {
 		Vector2[] vertices = new Vector2[] {
 				new Vector2(2.0, 0.0), 
 				new Vector2(4.0, 0.0), 
@@ -394,4 +407,68 @@ public class PolygonTest {
 		TestCase.assertFalse(p.contains(new Vector2(0.0, 0.0)));
 	}
 	
+	/**
+	 * Tests the contains method against a point that is coincident with
+	 * the starting edge of the polygon.
+	 */
+	@Test
+	public void containsPointCoIncidentMid() {
+		Vector2[] vertices = new Vector2[] {
+				new Vector2(0.0, 4.0),
+				new Vector2(0.0, 2.0),
+				new Vector2(2.0, 0.0), 
+				new Vector2(4.0, 0.0), 
+				new Vector2(7.0, 3.0), 
+				new Vector2(7.0, 5.0), 
+				new Vector2(5.0, 7.0), 
+				new Vector2(3.0, 7.0) 
+			};
+		Polygon p = new Polygon(vertices);
+		
+		TestCase.assertFalse(p.contains(new Vector2(0.0, 0.0)));
+	}
+	
+	/**
+	 * Tests the contains method against a point that is coincident with
+	 * the starting edge of a polygon that has two coincident edges.
+	 */
+	@Test
+	public void containsPointCoIncidentWithCoincidentEdges() {
+		Vector2[] vertices = new Vector2[] {
+				new Vector2(2.0, 0.0), 
+				new Vector2(4.0, 0.0), 
+				new Vector2(5.0, 0.0), 
+				new Vector2(7.0, 3.0), 
+				new Vector2(7.0, 5.0), 
+				new Vector2(5.0, 7.0), 
+				new Vector2(3.0, 7.0), 
+				new Vector2(0.0, 4.0), 
+				new Vector2(0.0, 2.0)
+			};
+		Polygon p = new Polygon(vertices);
+		
+		TestCase.assertFalse(p.contains(new Vector2(0.0, 0.0)));
+	}
+	
+	/**
+	 * Tests the contains method against a point that is coincident with
+	 * the starting edge of a polygon that has two coincident edges.
+	 */
+	@Test
+	public void containsPointCoIncidentWithCoincidentEdges2() {
+		Vector2[] vertices = new Vector2[] {
+				new Vector2(2.0, 0.0), 
+				new Vector2(4.0, 0.0), 
+				new Vector2(5.0, 0.0), 
+				new Vector2(7.0, 3.0), 
+				new Vector2(7.0, 5.0), 
+				new Vector2(5.0, 7.0), 
+				new Vector2(3.0, 7.0), 
+				new Vector2(0.0, 4.0), 
+				new Vector2(0.0, 2.0)
+			};
+		Polygon p = new Polygon(vertices);
+		
+		TestCase.assertTrue(p.contains(new Vector2(4.5, 0.0)));
+	}
 }

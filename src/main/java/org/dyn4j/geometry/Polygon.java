@@ -287,17 +287,6 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		// get the location of the point relative to the first two vertices
 		double last = Segment.getLocation(p, p1, p2);
 		
-		// check for colinearity
-		if (Math.abs(last) <= Epsilon.E) {
-			// if the point is colinear with the line that passes through p1 and p2
-			// then it must be between the two points for it to be on the shape
-			// otherwise it's not and we can exit early
-			if (isBetween(p, p1, p2)) {
-				return true;
-			}
-			return false;
-		}
-		
 		int size = this.vertices.length;
 		// loop through the rest of the vertices
 		for (int i = 1; i < size; i++) {
@@ -313,43 +302,26 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 			// do side of line test
 			double location = Segment.getLocation(p, p1, p2);
 			
-			// check for colinearity
-			if (Math.abs(location) <= Epsilon.E) {
-				// if the point is colinear with the line that passes through p1 and p2
-				// then it must be between the two points for it to be on the shape
-				// otherwise it's not and we can exit early
-				if (isBetween(p, p1, p2)) {
-					return true;
-				}
-				return false;
-			}
-			
 			// multiply the last location with this location
 			// if they are the same sign then the opertation will yield a positive result
 			// -x * -y = +xy, x * y = +xy, -x * y = -xy, x * -y = -xy
 			if (last * location < 0) {
 				return false;
 			}
+			
+			// update the last location, but only if it's not zero
+			// a location of zero indicates that the point lies ON the line
+			// through p1 and p2. We can ignore these values because the
+			// convexity requirement of the shape will ensure that if it's
+			// outside, a sign will change.
+			if (Math.abs(location) > Epsilon.E) {
+				last = location;
+			}
 		}
+		
 		return true;
 	}
 	
-	/**
-	 * Returns true if the given point is inside the rectangular area defined by p1 and p2.
-	 * @param p the point
-	 * @param p1 the max or min
-	 * @param p2 the max or min
-	 * @return boolean
-	 */
-	private static final boolean isBetween(Vector2 p, Vector2 p1, Vector2 p2) {
-		// the point is colinear with the edge
-		if (p.x <= Math.max(p1.x, p2.x) && p.x >= Math.min(p1.x, p2.x) &&
-			p.y <= Math.max(p1.y, p2.y) && p.y >= Math.min(p1.y, p2.y)) {
-			return true;
-		}
-		return false;
-	}
-
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.AbstractShape#rotate(org.dyn4j.geometry.Rotation, double, double)
 	 */
