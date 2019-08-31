@@ -520,8 +520,7 @@ final class DoubleEdgeList {
 					
 					// make sure the angle is less than pi before we create
 					// a triangle from the points
-					// epsilon is to handle near colinearity
-					if (cross < Epsilon.E) {
+					if (cross < -Epsilon.E) {
 						// add the half edges
 						this.addHalfEdges(v.data, vt1.data);
 						// remove the top element
@@ -647,7 +646,12 @@ final class DoubleEdgeList {
 				Vector2 r = currRight.data.point;
 				
 				// which has the smaller y?
-				if (l.y > r.y) {
+				double diff = l.y - r.y;
+				// if it's equal compare the x values
+				if (diff == 0) {
+					diff = r.x - l.x;
+				}
+				if (diff > 0) {
 					sorted.add(currLeft);
 					currLeft.chainType = MonotoneChainType.LEFT;
 					currLeft = currLeft.next;

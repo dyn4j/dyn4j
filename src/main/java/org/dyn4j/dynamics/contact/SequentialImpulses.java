@@ -558,15 +558,16 @@ public class SequentialImpulses implements ContactConstraintSolver {
 		  
 			// get the penetration axis
 			Vector2 N = contactConstraint.normal;
-			
-			// get the world centers of mass
-			Vector2 c1 = t1.getTransformed(m1.getCenter());
-			Vector2 c2 = t2.getTransformed(m2.getCenter());
-			Vector2 cdiff = c1.subtract(c2);
-			
+
 			// solve normal constraints
 			for (int k = 0; k < cSize; k++) {
 				Contact contact = contacts.get(k);
+				
+				// get the world centers of mass
+				// NOTE: the world center needs to be recomputed each iteration because
+				//       we are modifying the transform in each iteration
+				Vector2 c1 = t1.getTransformed(m1.getCenter());
+				Vector2 c2 = t2.getTransformed(m2.getCenter());
 				
 				// get r1 and r2
 				Vector2 r1 = contact.p1.difference(m1.getCenter());
@@ -575,8 +576,9 @@ public class SequentialImpulses implements ContactConstraintSolver {
 				t2.transformR(r2);
 				
 				// get the world contact points
-				Vector2 rdiff = r1.subtract(r2);
-				Vector2 dp = cdiff.subtract(rdiff);
+				Vector2 p1 = c1.sum(r1);
+				Vector2 p2 = c2.sum(r2);
+				Vector2 dp = p1.subtract(p2);
 				
 				// estimate the current penetration
 				double penetration = dp.dot(N) - contact.depth;

@@ -129,7 +129,7 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 			double cross = p0.to(p1).cross(p1.to(p2));
 			double tsign = Math.signum(cross);
 			area += cross;
-			// check for colinear points (for now its allowed)
+			// check for colinear edges (for now its allowed)
 			if (Math.abs(cross) > Epsilon.E) {
 				// check for convexity
 				if (sign != 0.0 && tsign != sign) {
@@ -141,6 +141,10 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		// check for CCW
 		if (area < 0.0) {
 			throw new IllegalArgumentException(Messages.getString("geometry.polygon.invalidWinding"));
+		}
+		// don't allow degenerate polygons
+		if (area <= 0.0) {
+			throw new IllegalArgumentException(Messages.getString("geometry.polygon.zeroArea"));
 		}
 		// if we've made it this far then continue;
 		return true;
