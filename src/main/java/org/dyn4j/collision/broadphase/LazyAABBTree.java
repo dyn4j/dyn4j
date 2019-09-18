@@ -73,6 +73,9 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	/** Whether there are leafs waiting to be batch-removed */
 	boolean pendingRemoves = false;
 	
+	/** Whether there are leafs waiting to be batch-inserted */
+	boolean pendingInserts = false;
+	
 	/**
 	 * Default constructor.
 	 */
@@ -103,6 +106,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		}
 		
 		this.root = null;
+		this.pendingInserts = true;
 	}
 	
 	/**
@@ -117,6 +121,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		}
 		
 		this.root = null;
+		this.pendingInserts = true;
 	}
 	
 	/* (non-Javadoc)
@@ -141,10 +146,12 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 			LazyAABBTreeLeaf<E, T> node = new LazyAABBTreeLeaf<E, T>(collidable, fixture);
 			
 			this.elementMap.put(key, node);
-			
 			this.elements.add(node);
+			
 			this.sorted = false;
 		}
+		
+		this.pendingInserts = true;
 	}
 	
 	/* (non-Javadoc)
@@ -255,6 +262,11 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		this.elementMap.clear();
 		this.elements.clear();
 		this.root = null;
+		
+		// Important: since everything is removed there's no pending work to do
+		this.sorted = true;
+		this.pendingRemoves = false;
+		this.pendingInserts = false;
 	}
 	
 	/* (non-Javadoc)
@@ -292,7 +304,11 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 * Assumes all leafs marked for removal are <b>not</b> on the tree.
 	 */
 	void doPendingRemoves() {
+		// We use the check (this.pendingRemoves) to avoid scanning all elements (O(n)) when
+		// detect(AABB) or raycast are called a lot of times consecutively
 		if (this.pendingRemoves) {
+			// Important: because we're removing elements this.elements.size() can change in the loop
+			// so we must call it in each loop iteration
 			for (int i = 0; i < this.elements.size(); i++) {
 				LazyAABBTreeLeaf<E, T> node = this.elements.get(i);
 				
@@ -300,20 +316,20 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 					// removed nodes are not on the tree, no need to check.
 					// Just remove the element from the list by swapping it with the last one and removing the last
 					
-					if (this.elements.size() == 1) {
-						this.elements.remove(0);
-					} else {
-						int lastIndex = this.elements.size() - 1;
-						
-						// Swap with the last
-						this.elements.set(i, this.elements.get(lastIndex));
-						
-						// And remove the last
-						// No copying involved here, just a size decrease
-						this.elements.remove(lastIndex);
-						
-						i--;
-					}
+					// Note that works ok for the case elements.size() == 1
+					// so no need to have an extra branch for that case
+					
+					int lastIndex = this.elements.size() - 1;
+					
+					// Swap with the last
+					this.elements.set(i, this.elements.get(lastIndex));
+					
+					// And remove the last
+					// No copying involved here, just a size decrease
+					this.elements.remove(lastIndex);
+					
+					// don't forget to check the new element that was moved into position i
+					i--;
 				}
 			}
 			
@@ -354,6 +370,26 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 			this.sorted = true;
 		}
 	}
+
+	/**
+	 * Internal method to ensure that all nodes are on the tree.
+	 */
+	void ensureOnTree() {
+		// We use the check (this.pendingInserts) to avoid scanning all elements (O(n)) when
+		// detect(AABB) or raycast are called a lot of times consecutively
+		if (this.pendingInserts) {
+			int size = this.elements.size();
+			for (int i = 0; i < size; i++) {
+				LazyAABBTreeLeaf<E, T> node = this.elements.get(i);
+				
+				if (!node.isOnTree()) {
+					this.insert(node);
+				}
+			}
+			
+			this.pendingInserts = false;
+		}
+	}
 	
 	/**
 	 * Internal method that ensures the whole tree is built. This just creates the tree and performs no detection.
@@ -362,14 +398,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	void build() {
 		this.doPendingRemoves();
 		this.ensureSorted();
-		
-		for (int i = 0; i < this.elements.size(); i++) {
-			LazyAABBTreeLeaf<E, T> node = this.elements.get(i);
-			
-			if (!node.isOnTree()) {
-				this.insert(node);
-			}
-		}
+		this.ensureOnTree();
 	}
 	
 	/**
@@ -383,7 +412,8 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		this.doPendingRemoves();
 		this.ensureSorted();
 		
-		for (int i = 0; i < this.elements.size(); i++) {
+		int size = this.elements.size();
+		for (int i = 0; i < size; i++) {
 			LazyAABBTreeLeaf<E, T> node = this.elements.get(i);
 			
 			this.insertAndDetect(node, filter, pairs);
@@ -712,6 +742,9 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 */
 	@Override
 	public void shift(Vector2 shift) {
+		// make sure the tree is built
+		this.build();
+		
 		// Left intact from DynamicAABBTree
 		
 		// we need to update all nodes in the tree (not just the
