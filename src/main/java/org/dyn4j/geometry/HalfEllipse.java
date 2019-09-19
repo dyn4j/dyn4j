@@ -311,31 +311,53 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	 */
 	@Override
 	public AABB createAABB(Transform transform) {
-		// Inlined projection of x axis
+		// Fast computation of HalfEllipse AABB without resorting to getFarthestPoint related methods
+		// Based on the Ellipse AABB calculation + adjusting the result for the missing side
 		
-		// Equivalent of temp = transform.getInverseTransformedR(Vector2.X_AXIS)
-		Vector2 temp = new Vector2(transform.cost, -transform.sint);
-		// Equivalent of maxX = this.project(Vector2.X_AXIS, transform).getMax();
-		double maxX = transform.getTransformedX(this.getFarthestPoint(temp));
+		// First calculate the Ellipse AABB
+		// Taken from Ellipse#createAABB with slight modifications
+		Vector2 u = this.rotation.toVector();
+		transform.transformR(u);
 		
-		// Equivalent of temp = transform.getInverseTransformedR(Vector2.INV_X_AXIS)
-		temp.set(-transform.cost, transform.sint);
-		// Equivalent of minX = this.project(Vector2.X_AXIS, transform).getMin();
-		double minX = transform.getTransformedX(this.getFarthestPoint(temp));
+		double x2 = u.x * u.x;
+		double y2 = u.y * u.y;
 		
-		// Inlined projection of y axis
+		double hw2 = this.halfWidth * this.halfWidth;
+		double hh2 = this.height * this.height / 4.0; // half height squared
 		
-		// Equivalent of temp = transform.getInverseTransformedR(Vector2.Y_AXIS)
-		temp.set(transform.sint, transform.cost);
-		// Equivalent of maxY = this.project(Vector2.Y_AXIS, transform).getMax();
-		double maxY = transform.getTransformedY(this.getFarthestPoint(temp));
+		double aabbHalfWidth = Math.sqrt(x2 * hw2 + y2 * hh2);
+		double aabbHalfHeight = Math.sqrt(y2 * hw2 + x2 * hh2); 
 		
-		// Equivalent of temp = transform.getInverseTransformedR(Vector2.INV_Y_AXIS)
-		temp.set(-transform.sint, -transform.cost);
-		// Equivalent of minY = this.project(Vector2.Y_AXIS, transform).getMin();
-		double minY = transform.getTransformedY(this.getFarthestPoint(temp));
+		double cx = transform.getTransformedX(this.ellipseCenter);
+		double cy = transform.getTransformedY(this.ellipseCenter);
 		
-		return new AABB(minX, minY, maxX, maxY);
+		double minx = cx - aabbHalfWidth;
+		double miny = cy - aabbHalfHeight;
+		double maxx = cx + aabbHalfWidth;
+		double maxy = cy + aabbHalfHeight;
+		
+		// Now adjust for the missing side
+		// Every time one point will come from the Ellipse AABB and the other from the left and right vertices
+		// Depending on the total rotation u, there are four possible cases
+		if (u.y > 0) {
+			if (u.x > 0) {
+				maxx = transform.getTransformedX(this.vertexRight);
+				miny = transform.getTransformedY(this.vertexLeft);
+			} else {
+				maxx = transform.getTransformedX(this.vertexLeft);
+				maxy = transform.getTransformedY(this.vertexRight);	
+			}
+		} else {
+			if (u.x > 0) {
+				minx = transform.getTransformedX(this.vertexLeft);
+				miny = transform.getTransformedY(this.vertexRight);
+			} else {
+				minx = transform.getTransformedX(this.vertexRight);
+				maxy = transform.getTransformedY(this.vertexLeft);	
+			}
+		}
+		
+		return new AABB(minx, miny, maxx, maxy);
 	}
 	
 	/* (non-Javadoc)
