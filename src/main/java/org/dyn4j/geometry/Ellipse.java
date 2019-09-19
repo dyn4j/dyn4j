@@ -248,32 +248,33 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 */
 	@Override
 	public AABB createAABB(Transform transform) {
-		// because the vectors are the x and y axis we can perform various meaningful optimizations
+		// Fast computation of Ellipse AABB without resorting to getFarthestPoint related methods
+		// Also see http://www.iquilezles.org/www/articles/ellipses/ellipses.htm
 		
-		// Inlined projection of x axis
-		// Interval x = this.project(Vector2.X_AXIS, transform);
+		// u is a unit vector with the world and local rotation
+		Vector2 u = this.rotation.toVector();
+		transform.transformR(u);
 		
-		// Equivalent of transform.getInverseTransformedR(Vector2.X_AXIS)
-		Vector2 temp = new Vector2(transform.cost, -transform.sint);
-		// Equivalent of p1x = this.getFarthestPoint(Vector2.X_AXIS, transform).x;
-		double p1x = transform.getTransformedX(this.getFarthestPoint(temp));	
+		double x2 = u.x * u.x;
+		double y2 = u.y * u.y;
 		
-		double c = transform.getTransformedX(this.center);
-		double minx = 2 * c - p1x;
-		double maxx = p1x;
+		// Half width half height squared
+		double hw2 = this.halfWidth * this.halfWidth;
+		double hh2 = this.halfHeight * this.halfHeight;
 		
-		// Inlined projection of y axis
-		// Interval y = this.project(Vector2.Y_AXIS, transform);
+		// calculate the resulting AABB's half width and half height
+		double aabbHalfWidth = Math.sqrt(x2 * hw2 + y2 * hh2);
+		double aabbHalfHeight = Math.sqrt(y2 * hw2 + x2 * hh2); 
 		
-		// Equivalent of transform.getInverseTransformedR(Vector2.Y_AXIS)
-		temp = new Vector2(transform.sint, transform.cost);
-		// Equivalent of p1y = this.getFarthestPoint(Vector2.Y_AXIS, transform).y;
-		double p1y = transform.getTransformedY(this.getFarthestPoint(temp));	
+		// compute world center
+		double cx = transform.getTransformedX(this.center);
+		double cy = transform.getTransformedY(this.center);
 		
-		// Rest of projection code
-		c = transform.getTransformedY(this.center);
-		double miny = 2 * c - p1y;
-		double maxy = p1y;
+		// combine to form the ellipse AABB
+		double minx = cx - aabbHalfWidth;
+		double miny = cy - aabbHalfHeight;
+		double maxx = cx + aabbHalfWidth;
+		double maxy = cy + aabbHalfHeight;
 		
 		return new AABB(minx, miny, maxx, maxy);
 	}
