@@ -285,19 +285,21 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		// This method doesn't care about vertex winding
 		// inverse transform the point to put it in local coordinates
 		Vector2 p = transform.getInverseTransformed(point);
-		Vector2 p1 = this.vertices[0];
-		Vector2 p2 = this.vertices[1];
+		
+		// start from the pair (p1 = last, p2 = first) so there's no need to check in the loop for wrap-around of the i + 1 vertice
+		int size = this.vertices.length;
+		Vector2 p1 = this.vertices[size - 1];
+		Vector2 p2 = this.vertices[0];
 		
 		// get the location of the point relative to the first two vertices
 		double last = Segment.getLocation(p, p1, p2);
 		
-		int size = this.vertices.length;
 		// loop through the rest of the vertices
-		for (int i = 1; i < size; i++) {
+		for (int i = 0; i < size - 1; i++) {
 			// p1 is now p2
 			p1 = p2;
 			// p2 is the next point
-			p2 = this.vertices[(i + 1) == size ? 0 : i + 1];
+			p2 = this.vertices[i + 1];
 			// check if they are equal (one of the vertices)
 			if (p.equals(p1)) {
 				return true;
@@ -310,6 +312,7 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 			// if they are the same sign then the opertation will yield a positive result
 			// -x * -y = +xy, x * y = +xy, -x * y = -xy, x * -y = -xy
 			if (last * location < 0) {
+				// reminder: (-0.0 < 0.0) evaluates to false and not true
 				return false;
 			}
 			
@@ -535,11 +538,11 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 			ac.add(this.vertices[i]);
 		}
 		ac.divide(n);
-		// loop through the vertices
-		for (int i = 0; i < n; i++) {
+		// loop through the vertices using two variables to avoid branches in the loop
+		for (int i1 = n - 1, i2 = 0; i2 < n; i1 = i2++) {
 			// get two vertices
-			Vector2 p1 = this.vertices[i];
-			Vector2 p2 = i + 1 < n ? this.vertices[i + 1] : this.vertices[0];
+			Vector2 p1 = this.vertices[i1];
+			Vector2 p2 = this.vertices[i2];
 			// get the vector from the center to the point
 			p1 = p1.difference(ac);
 			p2 = p2.difference(ac);
