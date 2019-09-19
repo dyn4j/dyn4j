@@ -249,7 +249,7 @@ public class Mass {
 		// if all the masses are infinite
 		if (m > 0.0) {
 			// compute the center by dividing by the total mass
-			c.multiply(1.0 / m);
+			c.divide(m);
 		}
 		// after obtaining the new center of mass we need
 		// to compute the interia tensor about the center

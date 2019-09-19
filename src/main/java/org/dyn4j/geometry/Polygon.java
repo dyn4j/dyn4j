@@ -534,7 +534,7 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		for (int i = 0; i < n; i++) {
 			ac.add(this.vertices[i]);
 		}
-		ac.multiply(1.0 / n);
+		ac.divide(n);
 		// loop through the vertices
 		for (int i = 0; i < n; i++) {
 			// get two vertices
@@ -565,7 +565,7 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		double m = density * area;
 		// finish the centroid calculation by dividing by the total area
 		// and adding in the average center
-		center.multiply(1.0 / area);
+		center.divide(area);
 		Vector2 c = center.sum(ac);
 		// finish the inertia tensor by dividing by the total area and multiplying by d / 6
 		I *= (density / 6.0);
