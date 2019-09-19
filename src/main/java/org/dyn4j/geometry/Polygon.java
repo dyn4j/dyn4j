@@ -138,13 +138,13 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 			}
 			sign = tsign;
 		}
+		// don't allow degenerate polygons
+		if (Math.abs(area) <= Epsilon.E) {
+			throw new IllegalArgumentException(Messages.getString("geometry.polygon.zeroArea"));
+		}
 		// check for CCW
 		if (area < 0.0) {
 			throw new IllegalArgumentException(Messages.getString("geometry.polygon.invalidWinding"));
-		}
-		// don't allow degenerate polygons
-		if (area <= 0.0) {
-			throw new IllegalArgumentException(Messages.getString("geometry.polygon.zeroArea"));
 		}
 		// if we've made it this far then continue;
 		return true;
@@ -403,14 +403,14 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		PointFeature vm = new PointFeature(maximum, index);
 		// is the left or right edge more perpendicular?
 		if (leftN.dot(localn) < rightN.dot(localn)) {
-			int l = index + 1 == count ? 0 : index + 1;
+			int l = (index == count - 1) ? 0 : index + 1;
 			
 			Vector2 left = transform.getTransformed(this.vertices[l]);
 			PointFeature vl = new PointFeature(left, l);
 			// make sure the edge is the right winding
 			return new EdgeFeature(vm, vl, vm, maximum.to(left), index + 1);
 		} else {
-			int r = index - 1 < 0 ? count - 1 : index - 1;
+			int r = (index == 0) ? count - 1 : index - 1;
 			
 			Vector2 right = transform.getTransformed(this.vertices[r]);
 			PointFeature vr = new PointFeature(right, r);
