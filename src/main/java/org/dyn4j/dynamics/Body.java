@@ -367,11 +367,8 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	@Override
 	public List<BodyFixture> removeAllFixtures() {
 		List<BodyFixture> fixtures = super.removeAllFixtures();
-		int size = fixtures.size();
 		if (this.world != null) {
-			for (int i = 0; i < size; i++) {
-				this.world.broadphaseDetector.remove(this, fixtures.get(i));
-			}
+			this.world.broadphaseDetector.remove(this);
 		}
 		return fixtures;
 	}
@@ -382,8 +379,8 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	@Override
 	public List<BodyFixture> removeFixtures(Vector2 point) {
 		List<BodyFixture> fixtures = super.removeFixtures(point);
-		int size = fixtures.size();
 		if (this.world != null) {
+			int size = fixtures.size();
 			for (int i = 0; i < size; i++) {
 				this.world.broadphaseDetector.remove(this, fixtures.get(i));
 			}
@@ -630,14 +627,14 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * @since 3.1.1
 	 */
 	public Body applyTorque(double torque) {
-		// apply the torque
-		this.torques.add(new Torque(torque));
 		// check the angular mass of the body
 		if (this.mass.getInertia() == 0.0) {
 			// this means that applying a torque will do nothing
 			// so, just return
 			return this;
 		}
+		// apply the torque
+		this.torques.add(new Torque(torque));
 		// wake up the body
 		this.setAsleep(false);
 		// return this body
