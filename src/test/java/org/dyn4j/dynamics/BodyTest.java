@@ -1118,6 +1118,8 @@ public class BodyTest {
 	@Test
 	public void getAccumulatedForce() {
 		Body b = new Body();
+		
+		// note: if the body has zero mass applyForce will do nothing, so we add a fixture with some mass/inertia
 		b.addFixture(Geometry.createCircle(1.0));
 		b.setMass(MassType.NORMAL);
 		
@@ -1158,6 +1160,10 @@ public class BodyTest {
 	@Test
 	public void getAccumulatedTorque() {
 		Body b = new Body();
+		
+		// note: if the body has zero inertia applyTorque will do nothing, so we add a fixture with some mass/inertia
+		b.addFixture(Geometry.createCircle(1.0));
+		b.setMass(MassType.NORMAL);
 		
 		// no torque applied yet
 		double t = b.getAccumulatedTorque();
