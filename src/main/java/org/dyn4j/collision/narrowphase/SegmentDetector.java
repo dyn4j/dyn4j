@@ -98,7 +98,7 @@ public final class SegmentDetector {
 			// segment and the ray; ie d0 = d1
 			
 			// get the common direction's normal
-			Vector2 n = d0.cross(1.0);
+			Vector2 n = d0.getRightHandOrthogonalVector();
 			// project a point from each onto the normal
 			double nDotP0 = n.dot(p0);
 			double nDotP1 = n.dot(p1);

@@ -134,7 +134,7 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 		
 		// we need to change the normal to the reference edge's normal
 		// since they may not have been the same
-		Vector2 frontNormal = refev.cross(1.0);
+		Vector2 frontNormal = refev.getRightHandOrthogonalVector();
 		// also get the maximum point's depth
 		double frontOffset = frontNormal.dot(reference.getMaximum().getPoint());
 		
