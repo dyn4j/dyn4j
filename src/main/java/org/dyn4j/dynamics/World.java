@@ -235,7 +235,7 @@ public class World implements Shiftable, DataContainer {
 	 */
 	public World(Capacity initialCapacity, Bounds bounds) {
 		// check for null capacity
-		if (initialCapacity == null) initialCapacity = new Capacity();
+		if (initialCapacity == null) initialCapacity = Capacity.DEFAULT_CAPACITY;
 		
 		// initialize all the classes with default values
 		this.settings = new Settings();
