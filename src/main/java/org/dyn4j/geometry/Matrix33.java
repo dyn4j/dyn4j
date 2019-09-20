@@ -32,7 +32,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * Used to solve 3x3 systems of equations.
  * @author William Bittle
- * @version 3.1.9
+ * @version 3.3.1
  * @since 1.0.0
  */
 public class Matrix33 {
@@ -130,6 +130,7 @@ public class Matrix33 {
 	/**
 	 * Returns a copy of this {@link Matrix33}.
 	 * @return {@link Matrix33}
+	 * @since 3.3.1
 	 */
 	public Matrix33 copy() {
 		return new Matrix33(this);

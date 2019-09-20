@@ -32,7 +32,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * Used to solve 2x2 systems of equations.
  * @author William Bittle
- * @version 3.1.9
+ * @version 3.3.1
  * @since 1.0.0
  */
 public class Matrix22 {
@@ -97,6 +97,7 @@ public class Matrix22 {
 	/**
 	 * Returns a copy of this {@link Matrix22}.
 	 * @return {@link Matrix22}
+	 * @since 3.3.1
 	 */
 	public Matrix22 copy() {
 		return new Matrix22(this);

@@ -169,6 +169,7 @@ public class AABB implements Translatable {
 	/**
 	 * Returns a copy of this {@link AABB}.
 	 * @return {@link AABB}
+	 * @since 3.3.1
 	 */
 	public AABB copy() {
 		return new AABB(this);
