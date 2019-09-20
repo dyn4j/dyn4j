@@ -114,9 +114,8 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 		// normalize it
 		refev.normalize();
 		
-		// compute the offsets of the reference edge points along the reference edge
+		// compute the offset of the reference edge points along the reference edge
 		double offset1 = -refev.dot(reference.getVertex1().getPoint());
-		double offset2 = refev.dot(reference.getVertex2().getPoint());
 		
 		// clip the incident edge by the reference edge's left edge
 		List<PointFeature> clip1 = this.clip(incident.getVertex1(), incident.getVertex2(), refev.getNegative(), offset1);
@@ -124,6 +123,9 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 		if (clip1.size() < 2) {
 			return false;
 		}
+		
+		// compute the offset of the reference edge points along the reference edge
+		double offset2 = refev.dot(reference.getVertex2().getPoint());
 		
 		// clip the clip1 edge by the reference edge's right edge
 		List<PointFeature> clip2 = this.clip(clip1.get(0), clip1.get(1), refev, offset2);
