@@ -226,6 +226,7 @@ public class AABB implements Translatable {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Translatable#translate(org.dyn4j.geometry.Vector2)
 	 */
+	@Override
 	public void translate(Vector2 translation) {
 		translate(translation.x, translation.y);
 	}
