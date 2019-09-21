@@ -323,7 +323,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		double y2 = u.y * u.y;
 		
 		double hw2 = this.halfWidth * this.halfWidth;
-		double hh2 = this.height * this.height / 4.0; // half height squared
+		double hh2 = this.height * this.height; // half height squared
 		
 		double aabbHalfWidth = Math.sqrt(x2 * hw2 + y2 * hh2);
 		double aabbHalfHeight = Math.sqrt(y2 * hw2 + x2 * hh2); 
