@@ -172,7 +172,7 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 		// get the axis in local coordinates
 		this.xAxis = body2.getLocalVector(n);
 		// get the perpendicular axis
-		this.yAxis = this.xAxis.cross(1.0);
+		this.yAxis = this.xAxis.getRightHandOrthogonalVector();
 		// get the initial rotation
 		this.referenceAngle = body1.getTransform().getRotationAngle() - body2.getTransform().getRotationAngle();
 		// initialize

@@ -110,15 +110,8 @@ public abstract class AbstractCollidable<T extends Fixture> implements Collidabl
 	 * @see org.dyn4j.collision.Collidable#removeFixture(org.dyn4j.collision.Fixture)
 	 */
 	public boolean removeFixture(T fixture) {
-		// make sure the passed in fixture is not null
-		if (fixture == null) return false;
-		// get the number of fixtures
-		int size = this.fixtures.size();
-		// check fixtures size
-		if (size > 0) {
-			return this.fixtures.remove(fixture);
-		}
-		return false;
+		// because the fixture list contains no nulls, this handles the case fixture == null as well
+		return this.fixtures.remove(fixture);
 	}
 	
 	/* (non-Javadoc)
@@ -144,7 +137,7 @@ public abstract class AbstractCollidable<T extends Fixture> implements Collidabl
 	 * @see org.dyn4j.collision.Collidable#containsFixture(org.dyn4j.collision.Fixture)
 	 */
 	public boolean containsFixture(T fixture) {
-		if (fixture == null) return false;
+		// because the fixture list contains no nulls, this handles the case fixture == null as well
 		return this.fixtures.contains(fixture);
 	}
 	

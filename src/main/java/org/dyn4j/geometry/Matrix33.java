@@ -32,7 +32,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * Used to solve 3x3 systems of equations.
  * @author William Bittle
- * @version 3.1.9
+ * @version 3.3.1
  * @since 1.0.0
  */
 public class Matrix33 {
@@ -127,6 +127,15 @@ public class Matrix33 {
 		this.m20 = matrix.m20; this.m21 = matrix.m21; this.m22 = matrix.m22;
 	}
 	
+	/**
+	 * Returns a copy of this {@link Matrix33}.
+	 * @return {@link Matrix33}
+	 * @since 3.3.1
+	 */
+	public Matrix33 copy() {
+		return new Matrix33(this);
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -218,14 +227,8 @@ public class Matrix33 {
 	 * @return {@link Matrix33} a new matrix containing the result
 	 */
 	public Matrix33 sum(Matrix33 matrix) {
-		// make a copy of this matrix
-		Matrix33 rm = new Matrix33(this);
-		// perform the addition
-		rm.m00 += matrix.m00; rm.m01 += matrix.m01; rm.m02 += matrix.m02;
-		rm.m10 += matrix.m10; rm.m11 += matrix.m11; rm.m12 += matrix.m12;
-		rm.m20 += matrix.m20; rm.m21 += matrix.m21; rm.m22 += matrix.m22;
-		// return the new matrix
-		return rm;
+		// make a copy of this matrix and perform the addition
+		return this.copy().add(matrix);
 	}
 	
 	/**
@@ -254,14 +257,8 @@ public class Matrix33 {
 	 * @return {@link Matrix33} a new matrix containing the result
 	 */
 	public Matrix33 difference(Matrix33 matrix) {
-		// make a copy of this matrix
-		Matrix33 rm = new Matrix33(this);
-		// perform the subtraction
-		rm.m00 -= matrix.m00; rm.m01 -= matrix.m01; rm.m02 -= matrix.m02;
-		rm.m10 -= matrix.m10; rm.m11 -= matrix.m11; rm.m12 -= matrix.m12;
-		rm.m20 -= matrix.m20; rm.m21 -= matrix.m21; rm.m22 -= matrix.m22;
-		// return the new matrix
-		return rm;
+		// make a copy of this matrix and perform the subtraction
+		return this.copy().subtract(matrix);
 	}
 	
 	/**
@@ -308,20 +305,8 @@ public class Matrix33 {
 	 * @return {@link Matrix33} a new matrix containing the result
 	 */
 	public Matrix33 product(Matrix33 matrix) {
-		Matrix33 rm = new Matrix33();
-		// row 1
-		rm.m00 = this.m00 * matrix.m00 + this.m01 * matrix.m10 + this.m02 * matrix.m20;
-		rm.m01 = this.m00 * matrix.m01 + this.m01 * matrix.m11 + this.m02 * matrix.m21;
-		rm.m02 = this.m00 * matrix.m02 + this.m01 * matrix.m12 + this.m02 * matrix.m22;
-		// row 2
-		rm.m10 = this.m10 * matrix.m00 + this.m11 * matrix.m10 + this.m12 * matrix.m20;
-		rm.m11 = this.m10 * matrix.m01 + this.m11 * matrix.m11 + this.m12 * matrix.m21;
-		rm.m12 = this.m10 * matrix.m02 + this.m11 * matrix.m12 + this.m12 * matrix.m22;
-		// row 3
-		rm.m20 = this.m20 * matrix.m00 + this.m21 * matrix.m10 + this.m22 * matrix.m20;
-		rm.m21 = this.m20 * matrix.m01 + this.m21 * matrix.m11 + this.m22 * matrix.m21;
-		rm.m22 = this.m20 * matrix.m02 + this.m21 * matrix.m12 + this.m22 * matrix.m22;
-		return rm;
+		// make a copy of this matrix and perform the multiplication
+		return this.copy().multiply(matrix);
 	}
 	
 	/**
@@ -353,11 +338,7 @@ public class Matrix33 {
 	 * @return {@link Vector3} the vector result
 	 */
 	public Vector3 product(Vector3 vector) {
-		Vector3 r = new Vector3();
-		r.x = this.m00 * vector.x + this.m01 * vector.y + this.m02 * vector.z;
-		r.y = this.m10 * vector.x + this.m11 * vector.y + this.m12 * vector.z;
-		r.z = this.m20 * vector.x + this.m21 * vector.y + this.m22 * vector.z;
-		return r;
+		return this.multiply(vector.copy());
 	}
 	
 	/**
@@ -385,11 +366,7 @@ public class Matrix33 {
 	 * @return {@link Vector3} the vector result
 	 */
 	public Vector3 productT(Vector3 vector) {
-		Vector3 r = new Vector3();
-		r.x = this.m00 * vector.x + this.m10 * vector.y + this.m20 * vector.z;
-		r.y = this.m01 * vector.x + this.m11 * vector.y + this.m21 * vector.z;
-		r.z = this.m02 * vector.x + this.m12 * vector.y + this.m22 * vector.z;
-		return r;
+		return this.multiplyT(vector.copy());
 	}
 	
 	/**
@@ -424,20 +401,8 @@ public class Matrix33 {
 	 * @return {@link Matrix33} a new matrix containing the result
 	 */
 	public Matrix33 product(double scalar) {
-		// make a copy of this matrix
-		Matrix33 rm = new Matrix33(this);
-		// multiply by the scalar
-		rm.m00 *= scalar;
-		rm.m01 *= scalar;
-		rm.m02 *= scalar;
-		rm.m10 *= scalar;
-		rm.m11 *= scalar;
-		rm.m12 *= scalar;
-		rm.m20 *= scalar;
-		rm.m21 *= scalar;
-		rm.m22 *= scalar;
-		// return the new matrix
-		return rm;
+		// make a copy of this matrix and perform the scalar multiplication
+		return this.copy().multiply(scalar);
 	}
 	
 	/**
@@ -531,30 +496,8 @@ public class Matrix33 {
 	 * @return {@link Matrix33} a new matrix containing the result
 	 */
 	public Matrix33 getInverse() {
-		Matrix33 rm = new Matrix33();
-		// get the determinant
-		double det = this.determinant();
-		// check for zero determinant
-		if (Math.abs(det) > Epsilon.E) {
-			det = 1.0 / det;
-		}
-		
-		// compute the cofactor determinants and apply the signs
-		// and transpose the matrix and multiply by the inverse 
-		// of the determinant
-		rm.m00 =  det * (this.m11 * this.m22 - this.m12 * this.m21);
-		rm.m01 = -det * (this.m01 * this.m22 - this.m21 * this.m02); // actually m10 in the cofactor matrix
-		rm.m02 =  det * (this.m01 * this.m12 - this.m11 * this.m02); // actually m20 in the cofactor matrix
-		
-		rm.m10 = -det * (this.m10 * this.m22 - this.m20 * this.m12); // actually m01 in the cofactor matrix
-		rm.m11 =  det * (this.m00 * this.m22 - this.m20 * this.m02);
-		rm.m12 = -det * (this.m00 * this.m12 - this.m10 * this.m02); // actually m21 in the cofactor matrix
-		
-		rm.m20 =  det * (this.m10 * this.m21 - this.m20 * this.m11); // actually m02 in the cofactor matrix
-		rm.m21 = -det * (this.m00 * this.m21 - this.m20 * this.m01); // actually m12 in the cofactor matrix
-		rm.m22 =  det * (this.m00 * this.m11 - this.m10 * this.m01);
-		
-		return rm;
+		// make a copy of this matrix and perform the inversion
+		return this.copy().invert();
 	}
 
 	/**

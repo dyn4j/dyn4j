@@ -160,7 +160,7 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 		// get the axis in local coordinates
 		this.xAxis = body2.getLocalVector(n);
 		// get the perpendicular axis
-		this.yAxis = this.xAxis.cross(1.0);
+		this.yAxis = this.xAxis.getRightHandOrthogonalVector();
 		
 		// initialize
 		this.invK = 0.0;

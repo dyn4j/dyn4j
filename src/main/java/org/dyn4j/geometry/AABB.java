@@ -167,6 +167,15 @@ public class AABB implements Translatable {
 	}
 	
 	/**
+	 * Returns a copy of this {@link AABB}.
+	 * @return {@link AABB}
+	 * @since 3.3.1
+	 */
+	public AABB copy() {
+		return new AABB(this);
+	}
+	
+	/**
 	 * Sets this aabb to the given aabb's value and returns
 	 * this AABB.
 	 * @param aabb the aabb to copy
@@ -292,11 +301,7 @@ public class AABB implements Translatable {
 	 * @return {@link AABB} the resulting union
 	 */
 	public AABB getUnion(AABB aabb) {
-		return new AABB(
-				Math.min(this.minX, aabb.minX),
-				Math.min(this.minY, aabb.minY),
-				Math.max(this.maxX, aabb.maxX),
-				Math.max(this.maxY, aabb.maxY));
+		return this.copy().union(aabb);
 	}
 	
 	/**
@@ -339,18 +344,7 @@ public class AABB implements Translatable {
 	 * @since 3.1.1
 	 */
 	public AABB getIntersection(AABB aabb) {
-		double minx = Math.max(this.minX, aabb.minX);
-		double miny = Math.max(this.minY, aabb.minY);
-		double maxx = Math.min(this.maxX, aabb.maxX);
-		double maxy = Math.min(this.maxY, aabb.maxY);
-		
-		// check for a bad AABB
-		if (minx > maxx || miny > maxy) {
-			// the two AABBs were not overlapping
-			// return a degenerate one
-			return new AABB(0.0, 0.0, 0.0, 0.0);
-		}
-		return new AABB(minx, miny, maxx, maxy);
+		return this.copy().intersection(aabb);
 	}
 	
 	/**
@@ -402,28 +396,7 @@ public class AABB implements Translatable {
 	 * @since 3.1.1
 	 */
 	public AABB getExpanded(double expansion) {
-		double e = expansion * 0.5;
-		double minx = this.minX - e;
-		double miny = this.minY - e;
-		double maxx = this.maxX + e;
-		double maxy = this.maxY + e;
-		// we only need to verify the new aabb if the expansion
-		// was inwardly
-		if (expansion < 0.0) {
-			// if the aabb is invalid then set the min/max(es) to
-			// the middle value of their current values
-			if (minx > maxx) {
-				double mid = (minx + maxx) * 0.5;
-				minx = mid;
-				maxx = mid;
-			}
-			if (miny > maxy) {
-				double mid = (miny + maxy) * 0.5;
-				miny = mid;
-				maxy = mid;
-			}
-		}
-		return new AABB(minx, miny, maxx, maxy);
+		return this.copy().expand(expansion);
 	}
 	
 	/**

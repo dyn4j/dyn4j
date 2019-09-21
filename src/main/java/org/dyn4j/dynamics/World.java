@@ -235,7 +235,7 @@ public class World implements Shiftable, DataContainer {
 	 */
 	public World(Capacity initialCapacity, Bounds bounds) {
 		// check for null capacity
-		if (initialCapacity == null) initialCapacity = new Capacity();
+		if (initialCapacity == null) initialCapacity = Capacity.DEFAULT_CAPACITY;
 		
 		// initialize all the classes with default values
 		this.settings = new Settings();
@@ -3342,15 +3342,7 @@ public class World implements Shiftable, DataContainer {
 		if (clazz == null) return null;
 		// create a new list and loop over the listeners
 		List<T> listeners = new ArrayList<T>();
-		int lSize = this.listeners.size();
-		for (int i = 0; i < lSize; i++) {
-			Listener listener = this.listeners.get(i);
-			// check if the listener is of the given type
-			if (clazz.isInstance(listener)) {
-				// if so, add it to the new list
-				listeners.add(clazz.cast(listener));
-			}
-		}
+		getListeners(clazz, listeners);
 		// return the new list
 		return listeners;
 	}

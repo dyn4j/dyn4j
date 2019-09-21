@@ -32,7 +32,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * Used to solve 2x2 systems of equations.
  * @author William Bittle
- * @version 3.1.9
+ * @version 3.3.1
  * @since 1.0.0
  */
 public class Matrix22 {
@@ -92,6 +92,15 @@ public class Matrix22 {
 	public Matrix22(Matrix22 matrix) {
 		this.m00 = matrix.m00; this.m01 = matrix.m01;
 		this.m10 = matrix.m10; this.m11 = matrix.m11;
+	}
+	
+	/**
+	 * Returns a copy of this {@link Matrix22}.
+	 * @return {@link Matrix22}
+	 * @since 3.3.1
+	 */
+	public Matrix22 copy() {
+		return new Matrix22(this);
 	}
 	
 	/* (non-Javadoc)
@@ -170,15 +179,8 @@ public class Matrix22 {
 	 * @return {@link Matrix22} a new matrix containing the result
 	 */
 	public Matrix22 sum(Matrix22 matrix) {
-		// make a copy of this matrix
-		Matrix22 rm = new Matrix22(this);
-		// perform the addition
-		rm.m00 += matrix.m00;
-		rm.m01 += matrix.m01;
-		rm.m10 += matrix.m10;
-		rm.m11 += matrix.m11;
-		// return the new matrix
-		return rm;
+		// make a copy of this matrix and perform the addition
+		return this.copy().add(matrix);
 	}
 	
 	/**
@@ -208,15 +210,8 @@ public class Matrix22 {
 	 * @return {@link Matrix22} a new matrix containing the result
 	 */
 	public Matrix22 difference(Matrix22 matrix) {
-		// make a copy of this matrix
-		Matrix22 rm = new Matrix22(this);
-		// perform the subtraction
-		rm.m00 -= matrix.m00;
-		rm.m01 -= matrix.m01;
-		rm.m10 -= matrix.m10;
-		rm.m11 -= matrix.m11;
-		// return the new matrix
-		return rm;
+		// make a copy of this matrix and perform the subtraction
+		return this.copy().subtract(matrix);
 	}
 	
 	/**
@@ -250,12 +245,8 @@ public class Matrix22 {
 	 * @return {@link Matrix22} a new matrix containing the result
 	 */
 	public Matrix22 product(Matrix22 matrix) {
-		Matrix22 rm = new Matrix22();
-		rm.m00 = this.m00 * matrix.m00 + this.m01 * matrix.m10;
-		rm.m01 = this.m00 * matrix.m01 + this.m01 * matrix.m11;
-		rm.m10 = this.m10 * matrix.m00 + this.m11 * matrix.m10;
-		rm.m11 = this.m10 * matrix.m01 + this.m11 * matrix.m11;
-		return rm;
+		// make a copy of this matrix and perform the multiplication
+		return this.copy().multiply(matrix);
 	}
 	
 	/**
@@ -285,10 +276,7 @@ public class Matrix22 {
 	 * @return {@link Vector2} the vector result
 	 */
 	public Vector2 product(Vector2 vector) {
-		Vector2 r = new Vector2();
-		r.x = this.m00 * vector.x + this.m01 * vector.y;
-		r.y = this.m10 * vector.x + this.m11 * vector.y;
-		return r;
+		return this.multiply(vector.copy());
 	}
 	
 	/**
@@ -314,10 +302,7 @@ public class Matrix22 {
 	 * @return {@link Vector2} the vector result
 	 */
 	public Vector2 productT(Vector2 vector) {
-		Vector2 r = new Vector2();
-		r.x = this.m00 * vector.x + this.m10 * vector.y;
-		r.y = this.m01 * vector.x + this.m11 * vector.y;
-		return r;
+		return this.multiplyT(vector.copy());
 	}
 	
 	/**
@@ -347,15 +332,8 @@ public class Matrix22 {
 	 * @return {@link Matrix22} a new matrix containing the result
 	 */
 	public Matrix22 product(double scalar) {
-		// make a copy of this matrix
-		Matrix22 rm = new Matrix22(this);
-		// multiply by the scalar
-		rm.m00 *= scalar;
-		rm.m01 *= scalar;
-		rm.m10 *= scalar;
-		rm.m11 *= scalar;
-		// return the new matrix
-		return rm;
+		// make a copy of this matrix and perform the scalar multiplication
+		return this.copy().multiply(scalar);
 	}
 	
 	/**
@@ -384,9 +362,7 @@ public class Matrix22 {
 	 * @return {@link Matrix22} a new matrix contianing the transpose
 	 */
 	public Matrix22 getTranspose() {
-		Matrix22 rm = new Matrix22(this);
-		rm.transpose();
-		return rm;
+		return this.copy().transpose();
 	}
 	
 	/**
@@ -425,18 +401,8 @@ public class Matrix22 {
 	 * @return {@link Matrix22} a new matrix containing the result
 	 */
 	public Matrix22 getInverse() {
-		// get the determinant
-		double det = this.determinant();
-		// check for zero determinant
-		if (Math.abs(det) > Epsilon.E) {
-			det = 1.0 / det;
-		}
-		Matrix22 rm = new Matrix22();
-		rm.m00 =  det * this.m11;
-		rm.m01 = -det * this.m01;
-		rm.m10 = -det * this.m10;
-		rm.m11 =  det * this.m00;
-		return rm;
+		// make a copy of this matrix and perform the inversion
+		return this.copy().invert();
 	}
 	
 	/**
