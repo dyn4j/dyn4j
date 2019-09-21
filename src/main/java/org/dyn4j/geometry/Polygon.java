@@ -138,13 +138,13 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 			}
 			sign = tsign;
 		}
+		// don't allow degenerate polygons
+		if (Math.abs(area) <= Epsilon.E) {
+			throw new IllegalArgumentException(Messages.getString("geometry.polygon.zeroArea"));
+		}
 		// check for CCW
 		if (area < 0.0) {
 			throw new IllegalArgumentException(Messages.getString("geometry.polygon.invalidWinding"));
-		}
-		// don't allow degenerate polygons
-		if (area <= 0.0) {
-			throw new IllegalArgumentException(Messages.getString("geometry.polygon.zeroArea"));
 		}
 		// if we've made it this far then continue;
 		return true;
@@ -285,19 +285,21 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		// This method doesn't care about vertex winding
 		// inverse transform the point to put it in local coordinates
 		Vector2 p = transform.getInverseTransformed(point);
-		Vector2 p1 = this.vertices[0];
-		Vector2 p2 = this.vertices[1];
+		
+		// start from the pair (p1 = last, p2 = first) so there's no need to check in the loop for wrap-around of the i + 1 vertice
+		int size = this.vertices.length;
+		Vector2 p1 = this.vertices[size - 1];
+		Vector2 p2 = this.vertices[0];
 		
 		// get the location of the point relative to the first two vertices
 		double last = Segment.getLocation(p, p1, p2);
 		
-		int size = this.vertices.length;
 		// loop through the rest of the vertices
-		for (int i = 1; i < size; i++) {
+		for (int i = 0; i < size - 1; i++) {
 			// p1 is now p2
 			p1 = p2;
 			// p2 is the next point
-			p2 = this.vertices[(i + 1) == size ? 0 : i + 1];
+			p2 = this.vertices[i + 1];
 			// check if they are equal (one of the vertices)
 			if (p.equals(p1)) {
 				return true;
@@ -310,6 +312,7 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 			// if they are the same sign then the opertation will yield a positive result
 			// -x * -y = +xy, x * y = +xy, -x * y = -xy, x * -y = -xy
 			if (last * location < 0) {
+				// reminder: (-0.0 < 0.0) evaluates to false and not true
 				return false;
 			}
 			
@@ -403,14 +406,14 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		PointFeature vm = new PointFeature(maximum, index);
 		// is the left or right edge more perpendicular?
 		if (leftN.dot(localn) < rightN.dot(localn)) {
-			int l = index + 1 == count ? 0 : index + 1;
+			int l = (index == count - 1) ? 0 : index + 1;
 			
 			Vector2 left = transform.getTransformed(this.vertices[l]);
 			PointFeature vl = new PointFeature(left, l);
 			// make sure the edge is the right winding
 			return new EdgeFeature(vm, vl, vm, maximum.to(left), index + 1);
 		} else {
-			int r = index - 1 < 0 ? count - 1 : index - 1;
+			int r = (index == 0) ? count - 1 : index - 1;
 			
 			Vector2 right = transform.getTransformed(this.vertices[r]);
 			PointFeature vr = new PointFeature(right, r);
@@ -534,12 +537,12 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		for (int i = 0; i < n; i++) {
 			ac.add(this.vertices[i]);
 		}
-		ac.multiply(1.0 / n);
-		// loop through the vertices
-		for (int i = 0; i < n; i++) {
+		ac.divide(n);
+		// loop through the vertices using two variables to avoid branches in the loop
+		for (int i1 = n - 1, i2 = 0; i2 < n; i1 = i2++) {
 			// get two vertices
-			Vector2 p1 = this.vertices[i];
-			Vector2 p2 = i + 1 < n ? this.vertices[i + 1] : this.vertices[0];
+			Vector2 p1 = this.vertices[i1];
+			Vector2 p2 = this.vertices[i2];
 			// get the vector from the center to the point
 			p1 = p1.difference(ac);
 			p2 = p2.difference(ac);
@@ -565,7 +568,7 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		double m = density * area;
 		// finish the centroid calculation by dividing by the total area
 		// and adding in the average center
-		center.multiply(1.0 / area);
+		center.divide(area);
 		Vector2 c = center.sum(ac);
 		// finish the inertia tensor by dividing by the total area and multiplying by d / 6
 		I *= (density / 6.0);
