@@ -26,6 +26,8 @@ package org.dyn4j.geometry;
 
 import junit.framework.TestCase;
 
+import java.util.Iterator;
+
 import org.junit.Test;
 
 /**
@@ -71,5 +73,23 @@ public class WoundTest {
 		
 		Triangle t = Geometry.createEquilateralTriangle(2.0);
 		TestCase.assertEquals(2.255, t.getRadius(c), 1.0e-3);
+	}
+	
+	/**
+	 * Test for a bug in the WoundIterator class.
+	 */
+	@Test
+	public void woundIteratorIndex() {
+		Wound w = Geometry.createPolygon(
+				new Vector2(0.0, 0.0),
+				new Vector2(1.0, 0.0),
+				new Vector2(0.0, 1.0));
+		Iterator<Vector2> it = w.getVertexIterator();
+		int i = 0; 
+		while (it.hasNext()) {
+			Vector2 v = it.next();
+			TestCase.assertEquals(w.getVertices()[i], v);
+			i++;
+		}
 	}
 }

@@ -66,8 +66,7 @@ final class WoundIterator implements Iterator<Vector2> {
 			throw new IndexOutOfBoundsException();
 		}
 		try {
-			this.index++;
-			Vector2 v = this.vectors[this.index];
+			Vector2 v = this.vectors[this.index++];
 			return v.copy();
 		} catch (IndexOutOfBoundsException ex) {
 			throw new ConcurrentModificationException();
