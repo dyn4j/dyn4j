@@ -76,10 +76,10 @@ public class WoundTest {
 	}
 	
 	/**
-	 * Test for a bug in the WoundIterator class.
+	 * Test to ensure that the first element returned is the first vertex.
 	 */
 	@Test
-	public void woundIteratorIndex() {
+	public void woundIteratorStartIndex() {
 		Wound w = Geometry.createPolygon(
 				new Vector2(0.0, 0.0),
 				new Vector2(1.0, 0.0),
@@ -91,5 +91,24 @@ public class WoundTest {
 			TestCase.assertEquals(w.getVertices()[i], v);
 			i++;
 		}
+	}
+	
+	/**
+	 * Test to ensure that the entire set of vertices are returned.
+	 */
+	@Test
+	public void woundIteratorCount() {
+		Wound w = Geometry.createPolygon(
+				new Vector2(0.0, 0.0),
+				new Vector2(1.0, 0.0),
+				new Vector2(0.0, 1.0));
+		Iterator<Vector2> it = w.getVertexIterator();
+		int i = 0; 
+		while (it.hasNext()) {
+			it.next();
+			i++;
+		}
+		
+		TestCase.assertEquals(w.getVertices().length, i);
 	}
 }

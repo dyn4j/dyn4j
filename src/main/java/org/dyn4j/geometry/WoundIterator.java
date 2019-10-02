@@ -47,6 +47,7 @@ final class WoundIterator implements Iterator<Vector2> {
 	 */
 	public WoundIterator(Vector2[] vectors) {
 		this.vectors = vectors;
+		this.index = 0;
 	}
 	
 	/* (non-Javadoc)
@@ -54,7 +55,7 @@ final class WoundIterator implements Iterator<Vector2> {
 	 */
 	@Override
 	public boolean hasNext() {
-		return this.index + 1 < this.vectors.length;
+		return this.index < this.vectors.length;
 	}
 
 	/* (non-Javadoc)
