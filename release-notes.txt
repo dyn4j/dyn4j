@@ -22,6 +22,8 @@ Bug Fixes:
   - Bug fixes for the SweepLine algorithm where it would produce incorrect
   	results
   - Fix for a small bug in the BroadphaseKey equals method
+  - Fix for Wound.getVertexIterator and Wound.getNormalIterator methods
+    to ensure all array elements are returned
     
 Deprecated:
   

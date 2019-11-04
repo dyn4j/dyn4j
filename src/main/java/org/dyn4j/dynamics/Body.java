@@ -556,6 +556,8 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * The force is not applied immediately, but instead stored in the 
 	 * force accumulator ({@link #getAccumulatedForce()}).  This is to 
 	 * preserve the last time step's computed force ({@link #getForce()}.
+	 * <p>
+	 * The force is assumed to be in world space coordinates.
 	 * @param force the force
 	 * @return {@link Body} this body
 	 * @throws NullPointerException if force is null
@@ -589,6 +591,8 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * The force is not applied immediately, but instead stored in the 
 	 * force accumulator ({@link #getAccumulatedForce()}).  This is to 
 	 * preserve the last time step's computed force ({@link #getForce()}.
+	 * <p>
+	 * The force is assumed to be in world space coordinates.
 	 * @param force the force
 	 * @return {@link Body} this body
 	 * @throws NullPointerException if force is null
@@ -689,6 +693,8 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * force/torque accumulators ({@link #getAccumulatedForce()} and
 	 * {@link #getAccumulatedTorque()}).  This is to preserve the last time 
 	 * step's computed force ({@link #getForce()} and torque ({@link #getTorque()}).
+	 * <p>
+	 * The force and point are assumed to be in world space coordinates.
 	 * @param force the force
 	 * @param point the application point in world coordinates
 	 * @return {@link Body} this body
@@ -739,6 +745,8 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * <b>NOTE:</b> Applying an impulse differs from applying a force and/or torque. Forces
 	 * and torques are stored in accumulators, but impulses are applied to the
 	 * velocities of the body immediately.
+	 * <p>
+	 * The impulse is assumed to be in world space coordinates.
 	 * @param impulse the impulse to apply
 	 * @return {@link Body} this body
 	 * @throws NullPointerException if impulse is null
@@ -807,6 +815,8 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * <b>NOTE:</b> Applying an impulse differs from applying a force and/or torque. Forces
 	 * and torques are stored in accumulators, but impulses are applied to the
 	 * velocities of the body immediately.
+	 * <p>
+	 * The impulse and point are assumed to be in world space coordinates.
 	 * @param impulse the impulse to apply
 	 * @param point the world space point to apply the impulse
 	 * @return {@link Body} this body
