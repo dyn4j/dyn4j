@@ -3255,9 +3255,11 @@ public class World implements Shiftable, DataContainer {
 	
 	/**
 	 * Returns the world id.
+	 * @deprecated ID schemes should be implemented by the user where needed
 	 * @return UUID
 	 * @since 3.2.0
 	 */
+	@Deprecated(forRemoval = true)
 	public UUID getId() {
 		return this.id;
 	}

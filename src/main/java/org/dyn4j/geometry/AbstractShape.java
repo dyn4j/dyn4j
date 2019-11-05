@@ -83,6 +83,7 @@ public abstract class AbstractShape implements Shape, Transformable, DataContain
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Shape#getId()
 	 */
+	@Deprecated(forRemoval = true)
 	@Override
 	public UUID getId() {
 		return this.id;

@@ -141,9 +141,11 @@ public abstract class Joint extends Constraint implements Shiftable, DataContain
 	
 	/**
 	 * Returns the unique identifier for this joint instance.
+	 * @deprecated ID schemes should be implemented by the user where needed
 	 * @return String
 	 * @since 3.0.1
 	 */
+	@Deprecated(forRemoval = true)
 	public UUID getId() {
 		return this.id;
 	}

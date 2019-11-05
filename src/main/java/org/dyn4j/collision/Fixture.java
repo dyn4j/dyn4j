@@ -106,8 +106,10 @@ public class Fixture implements DataContainer {
 	 * Returns the id for this fixture.
 	 * <p>
 	 * This identifier is constant for the life of this {@link Fixture}.
+	 * @deprecated ID schemes should be implemented by the user where needed
 	 * @return UUID
 	 */
+	@Deprecated(forRemoval = true)
 	public UUID getId() {
 		return this.id;
 	}
