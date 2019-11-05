@@ -35,21 +35,21 @@ import org.dyn4j.geometry.Shape;
  * Represents and id for a contact constraint between two {@link Convex}
  * {@link Shape}s on two {@link Body}s.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.3.1
  * @since 1.0.0
  */
 public final class ContactConstraintId {
-	/** The first {@link Body}'s id */
-	private final UUID body1Id;
+	/** The first {@link Body} */
+	private final Body body1;
 	
-	/** The second {@link Body}'s id */
-	private final UUID body2Id;
+	/** The second {@link Body} */
+	private final Body body2;
 	
-	/** The first {@link Body}'s {@link Convex} {@link Shape} id */
-	private final UUID fixture1Id;
+	/** The first {@link Body}'s {@link Convex} {@link Shape} */
+	private final BodyFixture fixture1;
 	
-	/** The second {@link Body}'s {@link Convex} {@link Shape} id */
-	private final UUID fixture2Id;
+	/** The second {@link Body}'s {@link Convex} {@link Shape} */
+	private final BodyFixture fixture2;
 	
 	/**
 	 * Full constructor.
@@ -59,10 +59,10 @@ public final class ContactConstraintId {
 	 * @param fixture2 the second {@link Body}'s {@link BodyFixture}
 	 */
 	public ContactConstraintId(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2) {
-		this.body1Id = body1.getId();
-		this.body2Id = body2.getId();
-		this.fixture1Id = fixture1.getId();
-		this.fixture2Id = fixture2.getId();
+		this.body1 = body1;
+		this.body2 = body2;
+		this.fixture1 = fixture1;
+		this.fixture2 = fixture2;
 	}
 	
 	/* (non-Javadoc)
@@ -74,11 +74,11 @@ public final class ContactConstraintId {
 		if (other == this) return true;
 		if (other instanceof ContactConstraintId) {
 			ContactConstraintId o = (ContactConstraintId) other;
-			if ((this.body1Id.equals(o.body1Id) && this.body2Id.equals(o.body2Id)
-			  && this.fixture1Id.equals(o.fixture1Id) && this.fixture2Id.equals(o.fixture2Id))
+			if ((this.body1 == o.body1 && this.body2 == o.body2
+			  && this.fixture1 == o.fixture1 && this.fixture2 == o.fixture2)
 			  // the order of the objects doesn't matter
-			 || (this.body1Id.equals(o.body2Id) && this.body2Id.equals(o.body1Id)
-			  && this.fixture1Id.equals(o.fixture2Id) && this.fixture2Id.equals(o.fixture1Id))) {
+			 || (this.body1 == o.body2 && this.body2 == o.body1
+			  && this.fixture1 == o.fixture2 && this.fixture2 == o.fixture1)) {
 				return true;
 			}
 		}
@@ -91,8 +91,8 @@ public final class ContactConstraintId {
 	@Override
 	public int hashCode() {
 		int hash = 1;
-		hash = hash * 31 + body1Id.hashCode() + body2Id.hashCode();
-		hash = hash * 31 + fixture1Id.hashCode() + fixture2Id.hashCode();
+		hash = hash * 31 + body1.hashCode() + body2.hashCode();
+		hash = hash * 31 + fixture1.hashCode() + fixture2.hashCode();
 		return hash;
 	}
 	
@@ -102,47 +102,83 @@ public final class ContactConstraintId {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("ContactConstraintId[Body1Id=").append(this.body1Id)
-		.append("|Body2Id=").append(this.body2Id)
-		.append("|Fixture1Id=").append(this.fixture1Id)
-		.append("|Fixture2Id=").append(this.fixture2Id)
+		sb.append("ContactConstraintId[Body1=").append(this.body1.getId())
+		.append("|Body2=").append(this.body2.getId())
+		.append("|Fixture1=").append(this.fixture1.getId())
+		.append("|Fixture2=").append(this.fixture2.getId())
 		.append("]");
 		return sb.toString();
 	}
-
+	
 	/**
 	 * Returns the id of the first body.
-	 * @return String
+	 * @return UUID
 	 * @since 3.1.2
 	 */
 	public UUID getBody1Id() {
-		return this.body1Id;
+		return this.body1.getId();
 	}
 
 	/**
 	 * Returns the id of the second body.
-	 * @return String
+	 * @return UUID
 	 * @since 3.1.2
 	 */
 	public UUID getBody2Id() {
-		return this.body2Id;
+		return this.body2.getId();
 	}
 
 	/**
 	 * Returns the id of the fixture on the first body.
-	 * @return String
+	 * @return UUID
 	 * @since 3.1.2
 	 */
 	public UUID getFixture1Id() {
-		return this.fixture1Id;
+		return this.fixture1.getId();
 	}
 
 	/**
 	 * Returns the id of the fixture on the second body.
-	 * @return String
+	 * @return UUID
 	 * @since 3.1.2
 	 */
 	public UUID getFixture2Id() {
-		return this.fixture2Id;
+		return this.fixture2.getId();
+	}
+	
+	/**
+	 * Returns the first body.
+	 * @return Body
+	 * @since 3.3.1
+	 */
+	public Body getBody1() {
+		return this.body1;
+	}
+
+	/**
+	 * Returns the second body.
+	 * @return Body
+	 * @since 3.3.1
+	 */
+	public Body getBody2() {
+		return this.body2;
+	}
+
+	/**
+	 * Returns the id of the fixture on the first body.
+	 * @return BodyFixture
+	 * @since 3.3.1
+	 */
+	public BodyFixture getFixture1() {
+		return this.fixture1;
+	}
+
+	/**
+	 * Returns the id of the fixture on the second body.
+	 * @return BodyFixture
+	 * @since 3.3.1
+	 */
+	public BodyFixture getFixture2() {
+		return this.fixture2;
 	}
 }
