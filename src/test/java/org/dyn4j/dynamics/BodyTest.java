@@ -52,7 +52,7 @@ import org.junit.Test;
 /**
  * Class to test the {@link Body} class.
  * @author William Bittle
- * @version 3.1.8
+ * @version 3.3.1
  * @since 1.0.2
  */
 public class BodyTest {
@@ -64,7 +64,6 @@ public class BodyTest {
 		Body b = new Body();
 		
 		// these field should be defaulted
-		TestCase.assertNotNull(b.getId());
 		TestCase.assertNotNull(b.contacts);
 		TestCase.assertNotNull(b.getFixtures());
 		TestCase.assertNotNull(b.force);

@@ -33,7 +33,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Fixture} class.
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.3.1
  * @since 3.1.1
  */
 public class FixtureTest {
@@ -52,15 +52,6 @@ public class FixtureTest {
 	@Test(expected = NullPointerException.class)
 	public void createNullFixture() {
 		new Fixture(null);
-	}
-	
-	/**
-	 * Tests that an id is created for a fixture.
-	 */
-	@Test
-	public void getId() {
-		Fixture f = new Fixture(Geometry.createCircle(1.0));
-		TestCase.assertNotNull(f.getId());
 	}
 	
 	/**

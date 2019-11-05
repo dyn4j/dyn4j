@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Test case for the AbstractShape class.
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.3.1
  * @since 3.1.1
  */
 public class AbstractShapeTest {
@@ -57,15 +57,6 @@ public class AbstractShapeTest {
 		public Interval project(Vector2 n, Transform transform) { return null; }
 	}
 	
-	/**
-	 * Tests that an id is created for a fixture.
-	 */
-	@Test
-	public void getId() {
-		Shape s = new TestShape();
-		TestCase.assertNotNull(s.getId());
-	}
-
 	/**
 	 * Make sure storage of user data is working.
 	 */
