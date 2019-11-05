@@ -86,14 +86,6 @@ public abstract class AbstractCollidable<T extends Fixture> implements Collidabl
 	}
 	
 	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		return this.id.hashCode();
-	}
-	
-	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.Collidable#removeFixture(org.dyn4j.collision.Fixture)
 	 */
 	public boolean removeFixture(T fixture) {

@@ -89,14 +89,6 @@ public class Fixture implements DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		return this.id.hashCode();
-	}
-	
-	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
