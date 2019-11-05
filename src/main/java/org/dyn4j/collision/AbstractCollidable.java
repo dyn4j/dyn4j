@@ -86,19 +86,6 @@ public abstract class AbstractCollidable<T extends Fixture> implements Collidabl
 	}
 	
 	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) return false;
-		if (obj == this) return true;
-		if (obj instanceof AbstractCollidable) {
-			return this.id.equals(((AbstractCollidable<?>)obj).id);
-		}
-		return false;
-	}
-	
-	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
