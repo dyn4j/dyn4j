@@ -31,14 +31,14 @@ import org.dyn4j.collision.Fixture;
  * Represents a key for a {@link BroadphaseItem} used for fast look ups in
  * the {@link BroadphaseDetector}s.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.3.1
  * @since 3.2.0
  */
 final class BroadphaseKey {
-	/** The {@link Collidable}s id */
+	/** The {@link Collidable} */
 	final Collidable<?> collidable;
 	
-	/** The {@link Fixture}s id */
+	/** The {@link Fixture} */
 	final Fixture fixture;
 	
 	/** The pre-computed hashcode */
@@ -46,8 +46,8 @@ final class BroadphaseKey {
 	
 	/**
 	 * Minimal constructor.
-	 * @param collidable the collidable id
-	 * @param fixture the fixture id
+	 * @param collidable the {@link Collidable}
+	 * @param fixture the {@link Fixture}
 	 */
 	public BroadphaseKey(Collidable<?> collidable, Fixture fixture) {
 		this.collidable = collidable;
@@ -58,8 +58,8 @@ final class BroadphaseKey {
 	
 	/**
 	 * Creates and returns a new key for the given {@link Collidable} and {@link Fixture}.
-	 * @param collidable the collidable
-	 * @param fixture the fixture
+	 * @param collidable the {@link Collidable}
+	 * @param fixture the {@link Fixture}
 	 * @return {@link BroadphaseKey}
 	 */
 	public static final BroadphaseKey get(Collidable<?> collidable, Fixture fixture) {
@@ -106,8 +106,8 @@ final class BroadphaseKey {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("BroadphaseKey[CollidableId=").append(this.collidable)
-		.append("|FixtureId=").append(this.fixture)
+		sb.append("BroadphaseKey[Collidable=").append(this.collidable.getId())
+		.append("|Fixture=").append(this.fixture.getId())
 		.append("]");
 		return sb.toString();
 	}
