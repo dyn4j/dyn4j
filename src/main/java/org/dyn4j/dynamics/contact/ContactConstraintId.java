@@ -173,7 +173,7 @@ public final class ContactConstraintId {
 	}
 
 	/**
-	 * Returns the id of the fixture on the first body.
+	 * Returns the fixture on the first body.
 	 * @return BodyFixture
 	 * @since 3.3.1
 	 */
@@ -182,7 +182,7 @@ public final class ContactConstraintId {
 	}
 
 	/**
-	 * Returns the id of the fixture on the second body.
+	 * Returns the fixture on the second body.
 	 * @return BodyFixture
 	 * @since 3.3.1
 	 */
