@@ -78,8 +78,8 @@ public final class BroadphaseItem<E extends Collidable<T>, T extends Fixture> {
 	@Override
 	public int hashCode() {
 		int hash = 17;
-		hash = hash * 31 + this.collidable.getId().hashCode();
-		hash = hash * 31 + this.fixture.getId().hashCode();
+		hash = hash * 31 + this.collidable.hashCode();
+		hash = hash * 31 + this.fixture.hashCode();
 		return hash;
 	}
 	
