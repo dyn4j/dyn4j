@@ -34,7 +34,7 @@ import org.dyn4j.geometry.AABB;
  * Note: This class has a natural ordering that is inconsistent with equals.
  * @author William Bittle
  * @since 3.2.3
- * @version 3.2.0
+ * @version 3.3.1
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
  */
@@ -76,16 +76,7 @@ final class SapProxy<E extends Collidable<T>, T extends Fixture> implements Comp
 		} else {
 			// if the x values are the same then compare on the y values
 			diff = this.aabb.getMinY() - o.aabb.getMinY();
-			if (diff != 0) {
-				return (int)Math.signum(diff);
-			} else {
-				// finally if their y values are the same then compare on the ids
-				diff = this.collidable.getId().compareTo(o.collidable.getId());
-				if (diff == 0) {
-					return this.fixture.getId().compareTo(o.fixture.getId());
-				}
-				return (int)Math.signum(diff);
-			}
+			return (int)Math.signum(diff);
 		}
 	}
 
