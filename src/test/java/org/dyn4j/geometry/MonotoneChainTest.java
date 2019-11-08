@@ -37,6 +37,9 @@ import junit.framework.TestCase;
  * @since 3.3.1
  */
 public class MonotoneChainTest {
+	/** Identity Transform instance */
+	private static final Transform IDENTITY = new Transform();
+	
 	/** The point cloud */
 	private Vector2[] cloud;
 	
@@ -71,7 +74,7 @@ public class MonotoneChainTest {
 		// make sure all the points are either on or contained in the hull
 		for (int i = 0; i < this.cloud.length; i++) {
 			Vector2 p = this.cloud[i];
-			if (!poly.contains(p, Transform.IDENTITY)) {
+			if (!poly.contains(p, IDENTITY)) {
 				TestCase.fail("Hull does not contain all points.");
 			}
 		}
@@ -93,7 +96,7 @@ public class MonotoneChainTest {
 		// make sure all the points are either on or contained in the hull
 		for (int i = 0; i < this.cloud.length; i++) {
 			Vector2 p = this.cloud[i];
-			if (!poly.contains(p, Transform.IDENTITY)) {
+			if (!poly.contains(p, IDENTITY)) {
 				TestCase.fail("Hull does not contain all points.");
 			}
 		}
@@ -134,7 +137,7 @@ public class MonotoneChainTest {
 		// make sure all the points are either on or contained in the hull
 		for (int i = 0; i < cloud.length; i++) {
 			Vector2 p = cloud[i];
-			if (!poly.contains(p, Transform.IDENTITY)) {
+			if (!poly.contains(p, IDENTITY)) {
 				TestCase.fail("Hull does not contain all points.");
 			}
 		}
@@ -162,7 +165,7 @@ public class MonotoneChainTest {
 		// make sure all the points are either on or contained in the hull
 		for (int i = 0; i < cloud.length; i++) {
 			Vector2 p = cloud[i];
-			if (!poly.contains(p, Transform.IDENTITY)) {
+			if (!poly.contains(p, IDENTITY)) {
 				TestCase.fail("Hull does not contain all points.");
 			}
 		}
@@ -192,7 +195,7 @@ public class MonotoneChainTest {
 		// make sure all the points are either on or contained in the hull
 		for (int i = 0; i < cloud.length; i++) {
 			Vector2 p = cloud[i];
-			if (!poly.contains(p, Transform.IDENTITY)) {
+			if (!poly.contains(p, IDENTITY)) {
 				TestCase.fail("Hull does not contain all points.");
 			}
 		}
@@ -224,7 +227,7 @@ public class MonotoneChainTest {
 		// make sure all the points are either on or contained in the hull
 		for (int i = 0; i < cloud.length; i++) {
 			Vector2 p = cloud[i];
-			if (!poly.contains(p, Transform.IDENTITY)) {
+			if (!poly.contains(p, IDENTITY)) {
 				TestCase.fail("Hull does not contain all points.");
 			}
 		}
@@ -259,7 +262,7 @@ public class MonotoneChainTest {
 		// make sure all the points are either on or contained in the hull
 		for (int i = 0; i < cloud.length; i++) {
 			Vector2 p = cloud[i];
-			if (!poly.contains(p, Transform.IDENTITY)) {
+			if (!poly.contains(p, IDENTITY)) {
 				TestCase.fail("Hull does not contain all points.");
 			}
 		}
@@ -296,7 +299,7 @@ public class MonotoneChainTest {
 		// make sure all the points are either on or contained in the hull
 		for (int i = 0; i < cloud.length; i++) {
 			Vector2 p = cloud[i];
-			if (!poly.contains(p, Transform.IDENTITY)) {
+			if (!poly.contains(p, IDENTITY)) {
 				TestCase.fail("Hull does not contain all points.");
 			}
 		}
@@ -324,7 +327,7 @@ public class MonotoneChainTest {
 		// make sure all the points are either on or contained in the hull
 		for (int i = 0; i < cloud.length; i++) {
 			Vector2 p = cloud[i];
-			if (!poly.contains(p, Transform.IDENTITY)) {
+			if (!poly.contains(p, IDENTITY)) {
 				TestCase.fail("Hull does not contain all points.");
 			}
 		}
@@ -352,7 +355,7 @@ public class MonotoneChainTest {
 		// make sure all the points are either on or contained in the hull
 		for (int i = 0; i < cloud.length; i++) {
 			Vector2 p = cloud[i];
-			if (!poly.contains(p, Transform.IDENTITY)) {
+			if (!poly.contains(p, IDENTITY)) {
 				TestCase.fail("Hull does not contain all points.");
 			}
 		}
@@ -381,7 +384,7 @@ public class MonotoneChainTest {
 		// make sure all the points are either on or contained in the hull
 		for (int i = 0; i < cloud.length; i++) {
 			Vector2 p = cloud[i];
-			if (!poly.contains(p, Transform.IDENTITY)) {
+			if (!poly.contains(p, IDENTITY)) {
 				TestCase.fail("Hull does not contain all points.");
 			}
 		}
@@ -411,7 +414,7 @@ public class MonotoneChainTest {
 		// make sure all the points are either on or contained in the hull
 		for (int i = 0; i < cloud.length; i++) {
 			Vector2 p = cloud[i];
-			if (!poly.contains(p, Transform.IDENTITY)) {
+			if (!poly.contains(p, IDENTITY)) {
 				TestCase.fail("Hull does not contain all points.");
 			}
 		}
@@ -438,7 +441,7 @@ public class MonotoneChainTest {
 		// make sure all the points are either on or contained in the hull
 		for (int i = 0; i < cloud.length; i++) {
 			Vector2 p = cloud[i];
-			if (!poly.contains(p, Transform.IDENTITY)) {
+			if (!poly.contains(p, IDENTITY)) {
 				TestCase.fail("Hull does not contain all points.");
 			}
 		}
@@ -467,7 +470,7 @@ public class MonotoneChainTest {
 		// make sure all the points are either on or contained in the hull
 		for (int i = 0; i < cloud.length; i++) {
 			Vector2 p = cloud[i];
-			if (!poly.contains(p, Transform.IDENTITY)) {
+			if (!poly.contains(p, IDENTITY)) {
 				TestCase.fail("Hull does not contain all points.");
 			}
 		}
