@@ -47,6 +47,9 @@ import org.junit.Test;
  * @since 1.2.0
  */
 public class ConservativeAdvancementTest {
+	/** Identity Transform instance */
+	private static final Transform IDENTITY = new Transform();
+	
 	/** A test time step */
 	private static final double TIME_STEP = 1.0 / 60.0;
 	
@@ -90,7 +93,7 @@ public class ConservativeAdvancementTest {
 		
 		// detect the time of impact
 		TimeOfImpact toi = new TimeOfImpact();
-		boolean collision = this.detector.getTimeOfImpact(this.c1, t1, dp1, 0.0, this.c2, Transform.IDENTITY, new Vector2(), 0.0, 0.0, 1.0, toi);
+		boolean collision = this.detector.getTimeOfImpact(this.c1, t1, dp1, 0.0, this.c2, IDENTITY, new Vector2(), 0.0, 0.0, 1.0, toi);
 		TestCase.assertTrue(collision);
 		
 		// test the TOI
@@ -122,7 +125,7 @@ public class ConservativeAdvancementTest {
 		
 		// detect the time of impact
 		TimeOfImpact toi = new TimeOfImpact();
-		boolean collision = this.detector.getTimeOfImpact(this.c1, t1, dp1, 0.0, this.c2, Transform.IDENTITY, new Vector2(), 0.0, 0.0, 1.0, toi);
+		boolean collision = this.detector.getTimeOfImpact(this.c1, t1, dp1, 0.0, this.c2, IDENTITY, new Vector2(), 0.0, 0.0, 1.0, toi);
 		TestCase.assertTrue(collision);
 		
 		// test the TOI

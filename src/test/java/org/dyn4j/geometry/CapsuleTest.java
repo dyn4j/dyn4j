@@ -35,6 +35,9 @@ import org.junit.Test;
  * @since 3.1.5
  */
 public class CapsuleTest {
+	/** Identity Transform instance */
+	private static final Transform IDENTITY = new Transform();
+	
 	/**
 	 * Tests a zero width.
 	 */
@@ -143,7 +146,7 @@ public class CapsuleTest {
 		e.translate(1.0, 0.5);
 		e.rotate(Math.toRadians(30), 1.0, 0.5);
 		
-		i = e.project(y, Transform.IDENTITY);
+		i = e.project(y, IDENTITY);
 		TestCase.assertEquals(-1.25, i.min, 1.0e-3);
 		TestCase.assertEquals( 0.25, i.max, 1.0e-3);
 		
@@ -182,7 +185,7 @@ public class CapsuleTest {
 		e.translate(1.0, 0.5);
 		e.rotate(Math.toRadians(30), 1.0, 0.5);
 		
-		p = e.getFarthestPoint(y, Transform.IDENTITY);
+		p = e.getFarthestPoint(y, IDENTITY);
 		TestCase.assertEquals( 0.566, p.x, 1.0e-3);
 		TestCase.assertEquals(-0.25, p.y, 1.0e-3);
 		
@@ -204,11 +207,11 @@ public class CapsuleTest {
 			new Vector2(2.0, -0.5),
 			new Vector2(1.0, 3.0)
 		};
-		Vector2[] axes = e.getAxes(foci, Transform.IDENTITY);
+		Vector2[] axes = e.getAxes(foci, IDENTITY);
 		TestCase.assertEquals(4, axes.length);
 		
 		// make sure we get back the right axes
-		axes = e.getAxes(null, Transform.IDENTITY);
+		axes = e.getAxes(null, IDENTITY);
 		TestCase.assertEquals(1.000, axes[0].x, 1.0e-3);
 		TestCase.assertEquals(0.000, axes[0].y, 1.0e-3);
 		TestCase.assertEquals(0.000, axes[1].x, 1.0e-3);
@@ -221,7 +224,7 @@ public class CapsuleTest {
 	@Test
 	public void getFoci() {
 		Capsule e = new Capsule(1.0, 0.5);
-		Vector2[] foci = e.getFoci(Transform.IDENTITY);
+		Vector2[] foci = e.getFoci(IDENTITY);
 		// should be two foci
 		TestCase.assertEquals(2, foci.length);
 		// make sure the foci are correct
@@ -277,7 +280,7 @@ public class CapsuleTest {
 		Capsule e = new Capsule(1.0, 0.5);
 		
 		// using an identity transform
-		AABB aabb = e.createAABB(Transform.IDENTITY);
+		AABB aabb = e.createAABB(IDENTITY);
 		TestCase.assertEquals(-0.500, aabb.getMinX(), 1.0e-3);
 		TestCase.assertEquals(-0.250, aabb.getMinY(), 1.0e-3);
 		TestCase.assertEquals( 0.500, aabb.getMaxX(), 1.0e-3);
