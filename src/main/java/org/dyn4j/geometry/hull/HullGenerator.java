@@ -32,8 +32,11 @@ import org.dyn4j.geometry.Vector2;
  * Represents an algorithm used to create a convex hull of a given point set.
  * <p>
  * The hulls are returned as {@link Vector2}[]s that can then be used to create a {@link Convex} {@link Shape}.
+ * <p>
+ * Algorithms implementing this interface are intended for general use but does not imply that
+ * the results produced would be appropriate for the core dyn4j engine.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.3.1
  * @since 2.2.0
  */
 public interface HullGenerator {

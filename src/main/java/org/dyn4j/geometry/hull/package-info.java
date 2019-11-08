@@ -26,17 +26,23 @@
 /**
  * This package contains algorithms used to create convex hulls of point clouds.
  * <p>
- * Currently supported algorithms:
+ * {@link org.dyn4j.geometry.hull.HullGenerator} four different implementations:
  * <ul>
  * <li>{@link org.dyn4j.geometry.hull.GiftWrap}</li>
  * <li>{@link org.dyn4j.geometry.hull.GrahamScan}</li>
  * <li>{@link org.dyn4j.geometry.hull.MonotoneChain}</li>
  * <li>{@link org.dyn4j.geometry.hull.DivideAndConquer}</li>
  * </ul>
- * All algorithms produce identical hulls but have different complexity.  All the algorithms implement
- * the {@link org.dyn4j.geometry.hull.HullGenerator} interface.
+ * The hulls are returned as {@link org.dyn4j.geometry.Vector2}[]s that can then be used to create a 
+ * {@link org.dyn4j.geometry.Convex} {@link org.dyn4j.geometry.Shape}.
+ * <p>
+ * Algorithms implementing this interface are intended for general use but does not imply that
+ * the results produced would be appropriate for the core dyn4j engine.
+ * <p>
+ * All algorithms should produce a valid convex hull that encapsulates all the given points, but there's
+ * no guarantee that the algorithms produce identical results.
  * @author William Bittle 
- * @version 2.2.2
+ * @version 3.3.1
  * @since 2.2.0
  */
 package org.dyn4j.geometry.hull;

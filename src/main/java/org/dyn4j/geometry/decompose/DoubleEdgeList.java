@@ -31,6 +31,7 @@ import org.dyn4j.Epsilon;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Polygon;
+import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
@@ -53,7 +54,7 @@ import org.dyn4j.resources.Messages;
  * can be achieved since the indexing of the {@link #vertices} list is the same as the source {@link Vector2}[].
  * No check is performed to ensure that a pair of {@link DoubleEdgeListHalfEdge}s are added that already exist.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.3.1
  * @since 2.2.0
  */
 final class DoubleEdgeList {
@@ -196,6 +197,15 @@ final class DoubleEdgeList {
 		// the reference face
 		DoubleEdgeListHalfEdge prev1 = this.getPreviousEdge(v1, referenceDoubleEdgeListFace);
 		DoubleEdgeListHalfEdge prev2 = this.getPreviousEdge(v2, referenceDoubleEdgeListFace);
+		
+		// check for self intersection before setting up half edges
+		if (Segment.getSegmentIntersection(
+				prev1.origin.point, 
+				prev1.next.origin.point, 
+				prev2.origin.point, 
+				prev2.next.origin.point) != null) {
+			throw new IllegalArgumentException("The input must be a simple polygon. Edges " + prev1.origin.point + " -> " + prev1.next.origin.point + " and " + prev2.origin.point + " -> " + prev2.next.origin.point + " cross each other.");
+		}
 		
 		face.edge = left;
 		referenceDoubleEdgeListFace.edge = right;

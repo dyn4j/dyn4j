@@ -24,6 +24,11 @@ Bug Fixes:
   - Fix for a small bug in the BroadphaseKey equals method
   - Fix for Wound.getVertexIterator and Wound.getNormalIterator methods
     to ensure all array elements are returned
+  - Fix for NPE in SweepLine w/ detection of crossing edges and degenerate
+    simple polygons throwing IllegalArgumentException
+  - Fixes for the DivideAndConquer, GiftWrap, and GrahamScan convex hull
+    generation algorithms for colinear and coincident points and for 
+    precision loss
     
 Deprecated:
   

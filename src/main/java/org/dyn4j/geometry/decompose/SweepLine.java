@@ -48,7 +48,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * This algorithm total complexity is O(n log n).
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.3.1
  * @since 2.2.0
  */
 public class SweepLine implements Decomposer, Triangulator {
@@ -186,6 +186,9 @@ public class SweepLine implements Decomposer, Triangulator {
 		// and attach its helper to this vertex
 		SweepLineEdge ej = sweepstate.tree.search(new ClosestEdgeToVertexSearchCriteria(vertex)).closest;
 		
+		// this indicates that there's self intersection or holes
+		if (ej == null) throw new IllegalArgumentException("The input must be a simple polygon");
+		
 		// connect v to ej.helper
 		sweepstate.dcel.addHalfEdges(vertex.index, ej.helper.index);
 		
@@ -219,11 +222,16 @@ public class SweepLine implements Decomposer, Triangulator {
 		sweepstate.tree.remove(eiPrev);
 		// find the edge closest to the given vertex
 		SweepLineEdge ej = sweepstate.tree.search(new ClosestEdgeToVertexSearchCriteria(vertex)).closest;
+		
+		// this indicates that there's self intersection or holes
+		if (ej == null) throw new IllegalArgumentException("The input must be a simple polygon");
+		
 		// is the edge's helper a merge vertex
 		if (ej.helper.type == SweepLineVertexType.MERGE) {
 			// connect v to ej.helper
 			sweepstate.dcel.addHalfEdges(vertex.index, ej.helper.index);
 		}
+		
 		// set the closest edge's helper to this vertex
 		ej.helper = vertex;
 	}
@@ -254,6 +262,10 @@ public class SweepLine implements Decomposer, Triangulator {
 		} else {
 			// otherwise find the closest edge
 			SweepLineEdge ej = sweepstate.tree.search(new ClosestEdgeToVertexSearchCriteria(vertex)).closest;
+			
+			// this indicates that there's self intersection or holes
+			if (ej == null) throw new IllegalArgumentException("The input must be a simple polygon");
+			
 			// check the helper type
 			if (ej.helper.type == SweepLineVertexType.MERGE) {
 				// connect v to ej.helper

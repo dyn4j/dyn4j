@@ -24,8 +24,8 @@
  */
 package org.dyn4j.geometry.hull;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Vector2;
@@ -34,13 +34,13 @@ import org.dyn4j.resources.Messages;
 /**
  * Implementation of the Gift Wrapping convex hull algorithm.
  * <p>
- * This implementation is not sensitive to colinear points and returns only
- * the points of the convex hull.
+ * This algorithm handles coincident and colinear points by ignoring them during processing. This ensures
+ * the produced hull will not have coincident or colinear vertices.
  * <p>
  * This algorithm is O(nh) worst case where n is the number of points and h is the
  * number of sides in the resulting convex hull.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.3.1
  * @since 2.2.0
  */
 public class GiftWrap implements HullGenerator {
@@ -71,39 +71,58 @@ public class GiftWrap implements HullGenerator {
 			}
 		}
 		
-		// initialize the hull size to the worst case size
-		List<Vector2> hull = new ArrayList<Vector2>(size);
+		Vector2 current = leftMost;
+		
+		// use a linked hash set to maintain insertion order
+		// but also to have the set property of no duplicates
+		Set<Vector2> hull = new LinkedHashSet<Vector2>();
 		do {
-			// add the left most point
-			hull.add(leftMost);
+			hull.add(current);
 			// check all the points to see if anything is more left than the next point
-			Vector2 maxLeft = points[0];
-			// check if the first point in the array is the leftMost point
-			// if so, then we need to choose another point so that the location
-			// check performs correctly
-			if (maxLeft == leftMost) maxLeft = points[1];
+			Vector2 next = points[0];
+			if (current == next) next = points[1];
 			// loop over the points to find a more left point than the current
 			for (int j = 0; j < size; j++) {
-				Vector2 t = points[j];
-				// don't worry about the points that create the line we are inspecting
-				// since we know that they are already the left most
-				if (t == maxLeft) continue;
-				if (t == leftMost) continue;
+				Vector2 test = points[j];
+				if (test == current) continue;
+				if (test == next) continue;
 				// check the point relative to the current line
-				if (Segment.getLocation(t, leftMost, maxLeft) < 0.0) {
-					// this point is further left than the current point
-					maxLeft = t;
+				double location = Segment.getLocation(test, current, next);
+				if (location < 0.0) {
+					next = test;
+				} else if (location == 0.0) {
+					// in the case of colinear or coincident verticies
+					// only select this vertex if it's farther away
+					// than the current vertex
+					double d1 = test.distanceSquared(current);
+					double d2 = next.distanceSquared(current);
+					if (d1 > d2) {
+						next = test;
+					} else {
+						// if it's not farther, compute the winding
+						Vector2 l1 = current.to(next);
+						Vector2 l2 = next.to(test);
+						double cross = l1.cross(l2);
+						
+						// if the winding is anti-clockwise but the location test
+						// yielded they were colinear, then we encountered 
+						// sufficient numeric error - trust the winding
+						// in these cases
+						if (cross < 0.0) {
+							next = test;
+						}
+					}
 				}
 			}
-			// set the new leftMost point
-			leftMost = maxLeft;
+			
+			current = next;
 			// loop until we repeat the first leftMost point
-		} while (leftMost != hull.get(0));
+		} while (leftMost != current);
 		
 		// copy the list into an array
 		Vector2[] hullPoints = new Vector2[hull.size()];
 		hull.toArray(hullPoints);
-		
+
 		// return the array
 		return hullPoints;
 	}

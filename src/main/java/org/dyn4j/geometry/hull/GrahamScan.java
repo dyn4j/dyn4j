@@ -35,12 +35,12 @@ import org.dyn4j.resources.Messages;
 /**
  * Implementation of the Graham Scan convex hull algorithm.
  * <p>
- * This implementation is not sensitive to colinear points and returns only
- * the points of the convex hull.
+ * This algorithm handles coincident and colinear points by ignoring them during processing. This ensures
+ * the produced hull will not have coincident or colinear vertices.
  * <p>
  * This algorithm is O(n log n) where n is the number of input points.
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.3.1
  * @since 2.2.0
  */
 public class GrahamScan implements HullGenerator {
@@ -66,7 +66,7 @@ public class GrahamScan implements HullGenerator {
 			if (p.y < minY.y) {
 				minY = p;
 			} else if (p.y == minY.y) {
-				if (p.x < minY.x) {
+				if (p.x > minY.x) {
 					minY = p;
 				}
 			}
@@ -99,15 +99,31 @@ public class GrahamScan implements HullGenerator {
 			Vector2 p2 = stack.get(sSize - 1);
 			// get the current point
 			Vector2 p3 = points[i];
+			
 			// test if the current point is to the left of the line
 			// created by the top two items in the stack (the last edge
 			// on the current convex hull)
-			double location = Segment.getLocation(p3, p1, p2);
-			if (location > 0.0) {
+			
+			double location2 = Segment.getLocation(p3, p1, p2);
+			if (location2 > 0.0) {
 				// if its to the left, then push the new point on
 				// the stack since it maintains convexity
-				// push
-				stack.add(p3);
+				
+				// however, it's possible in extreme cases that the 
+				// location test above will encounter numeric error
+				// and report an incorrect value.
+				
+				// to catch this scenario, confirm that the winding
+				// of the new point is anti-clockwise before adding
+				// it to the hull
+				Vector2 e1 = p1.to(p2);
+				Vector2 e2 = p2.to(p3);
+				double location = e1.cross(e2);
+				
+				if (location > 0.0) {
+					stack.add(p3);
+				}
+				
 				i++;
 			} else {
 				// otherwise the pop the previous point off the stack

@@ -34,7 +34,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link EarClipping} class.
  * @author William Bittle
- * @version 3.1.10
+ * @version 3.3.1
  * @since 2.2.0
  */
 public class EarClippingTest extends AbstractDecomposeTest {
@@ -667,5 +667,129 @@ public class EarClippingTest extends AbstractDecomposeTest {
 		
 		// the result should have n - 2 triangles shapes
 		TestCase.assertEquals(vertices.length - 2, result.size());
+	}
+
+	/**
+	 * Tests the triangulation to confirm it fails properly on self-intersecting edges.
+	 * @since 3.3.1
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void triangulateFailSelfIntersection1() {
+		Vector2[] vertices = new Vector2[] {
+			new Vector2(-0.07792188619765694, 0.10364292899125216),
+			new Vector2(0.1, -0.2),
+			new Vector2(0.15, 0.0),
+			new Vector2(0.2, 0.07),
+			new Vector2(0.21037640391727175, 0.06289919008100842),
+			new Vector2(0.3079072605141815, -0.20863138522549773)
+		};
+		
+		// decompose the poly
+		this.algo.triangulate(vertices);
+	}
+	
+	/**
+	 * Tests the triangulation to confirm it fails properly on self-intersecting edges.
+	 * @since 3.3.1
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void triangulateFailSelfIntersection2() {
+		Vector2[] vertices = new Vector2[] {
+			new Vector2(-0.07792188619765694, 0.10364292899125216),
+			new Vector2(0.2412466770151972, -0.3145214553981004),
+			new Vector2(0.21037640391727175, 0.06289919008100842),
+			new Vector2(0.3079072605141815, -0.20863138522549773)
+		};
+		
+		// decompose the poly
+		this.algo.triangulate(vertices);
+	}
+	
+	/**
+	 * Tests the triangulation to confirm it fails properly on self-intersecting edges.
+	 * @since 3.3.1
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void triangulateFailSelfIntersection3() {
+		Vector2[] vertices = new Vector2[] {
+			new Vector2(-0.07792188619765694, 0.10364292899125216),
+			new Vector2(0.1, -0.2),
+			new Vector2(0.2412466770151972, -0.3145214553981004),
+			new Vector2(0.21037640391727175, 0.06289919008100842),
+			new Vector2(0.3079072605141815, -0.20863138522549773)
+		};
+		
+		// decompose the poly
+		this.algo.triangulate(vertices);
+	}
+	
+	/**
+	 * Tests the triangulation to confirm it fails properly on self-intersecting edges.
+	 * @since 3.3.1
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void triangulateFailSelfIntersection4() {
+		Vector2[] vertices = new Vector2[] {
+			new Vector2(-0.22574647794211955, 0.3562272754868271),
+			new Vector2(-0.24724056392833493, -0.06552204150010887),
+			new Vector2(0.2551995234048088, -0.4678431592201415),
+			new Vector2(-0.11272047497863902, -0.40936273068655504)
+		};
+		
+		// decompose the poly
+		this.algo.triangulate(vertices);
+	}
+
+	/**
+	 * Tests the triangulation to confirm it fails properly on self-intersecting edges.
+	 * @since 3.3.1
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void triangulateFailSelfIntersection5() {
+		Vector2[] vertices = new Vector2[] {
+			new Vector2(0.187521000630546, -0.2171227524343904),
+			new Vector2(-0.05418163781638374, -0.4552384293706746),
+			new Vector2(-0.12615265827683775, 0.08842525905551823),
+			new Vector2(-0.4197343412893181, -0.45293439849558936)
+		};
+		
+		// decompose the poly
+		this.algo.triangulate(vertices);
+	}
+	
+	/**
+	 * Tests the triangulation to confirm it fails properly on self-intersecting edges.
+	 * @since 3.3.1
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void triangulateFailSelfIntersection6() {
+		Vector2[] vertices = new Vector2[] {
+			new Vector2(0.1595990921676319, 0.20158036631684495),
+			new Vector2(0.3627243978540108, -0.2125801642934565),
+			new Vector2(0.4972213824759445, -0.2197501458724339),
+			new Vector2(-0.17530050402164232, -0.10202036313267437)
+		};
+		
+		// decompose the poly
+		this.algo.triangulate(vertices);
+	}
+	
+	/**
+	 * Tests the triangulation to confirm it fails properly on degenerate data.
+	 * @since 3.3.1
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void triangulateFailureDegenerateGusAsf() {
+		// degenerate ploygon
+		Vector2[] vertices = new Vector2[] {
+				new Vector2(70.5, 360.0),
+				new Vector2(70.947212,360.89444),
+				new Vector2(71.394424,361.78884899999997),
+				new Vector2(71.158356,361.316711),
+				new Vector2(70.71114299999999,360.422302)
+		};
+		
+		// decompose the poly
+		this.algo.triangulate(vertices);
 	}
 }

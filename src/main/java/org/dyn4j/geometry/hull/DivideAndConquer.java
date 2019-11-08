@@ -32,12 +32,12 @@ import org.dyn4j.resources.Messages;
 /**
  * Implementation of the Divide and Conquer convex hull algorithm.
  * <p>
- * This implementation is not sensitive to colinear points and returns only
- * the points of the convex hull.
+ * This algorithm handles coincident and colinear points by ignoring them during processing. This ensures
+ * the produced hull will not have coincident or colinear vertices.
  * <p>
  * This algorithm is O(n log n) where n is the number of input points.
  * @author William Bittle
- * @version 2.2.3
+ * @version 3.3.1
  * @since 2.2.0
  */
 public class DivideAndConquer implements HullGenerator {
@@ -55,8 +55,8 @@ public class DivideAndConquer implements HullGenerator {
 		if (size <= 2) return points;
 		
 		try {
-			// sort the points by the x coordinate
-			Arrays.sort(points, new MinXPointComparator());
+			// sort the points by the x coordinate, then the y coordinate
+			Arrays.sort(points, new MinXYPointComparator());
 		} catch (NullPointerException e) {
 			// this will be hit if any of the points are null
 			throw new NullPointerException(Messages.getString("geometry.hull.nullPoints"));
