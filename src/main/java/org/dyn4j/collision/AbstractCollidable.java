@@ -86,27 +86,6 @@ public abstract class AbstractCollidable<T extends Fixture> implements Collidabl
 	}
 	
 	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) return false;
-		if (obj == this) return true;
-		if (obj instanceof AbstractCollidable) {
-			return this.id.equals(((AbstractCollidable<?>)obj).id);
-		}
-		return false;
-	}
-	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		return this.id.hashCode();
-	}
-	
-	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.Collidable#removeFixture(org.dyn4j.collision.Fixture)
 	 */
 	public boolean removeFixture(T fixture) {
@@ -363,6 +342,7 @@ public abstract class AbstractCollidable<T extends Fixture> implements Collidabl
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.Collidable#getId()
 	 */
+	@Deprecated(forRemoval = true)
 	public UUID getId() {
 		return this.id;
 	}

@@ -24,8 +24,6 @@
  */
 package org.dyn4j.collision.broadphase;
 
-import java.util.UUID;
-
 import org.dyn4j.collision.Collidable;
 import org.dyn4j.collision.Fixture;
 
@@ -33,25 +31,25 @@ import org.dyn4j.collision.Fixture;
  * Represents a key for a {@link BroadphaseItem} used for fast look ups in
  * the {@link BroadphaseDetector}s.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.3.1
  * @since 3.2.0
  */
 final class BroadphaseKey {
-	/** The {@link Collidable}s id */
-	final UUID collidable;
+	/** The {@link Collidable} */
+	final Collidable<?> collidable;
 	
-	/** The {@link Fixture}s id */
-	final UUID fixture;
+	/** The {@link Fixture} */
+	final Fixture fixture;
 	
 	/** The pre-computed hashcode */
 	private final int hashCode;
 	
 	/**
 	 * Minimal constructor.
-	 * @param collidable the collidable id
-	 * @param fixture the fixture id
+	 * @param collidable the {@link Collidable}
+	 * @param fixture the {@link Fixture}
 	 */
-	public BroadphaseKey(UUID collidable, UUID fixture) {
+	public BroadphaseKey(Collidable<?> collidable, Fixture fixture) {
 		this.collidable = collidable;
 		this.fixture = fixture;
 		// pre compute the hash
@@ -60,12 +58,12 @@ final class BroadphaseKey {
 	
 	/**
 	 * Creates and returns a new key for the given {@link Collidable} and {@link Fixture}.
-	 * @param collidable the collidable
-	 * @param fixture the fixture
+	 * @param collidable the {@link Collidable}
+	 * @param fixture the {@link Fixture}
 	 * @return {@link BroadphaseKey}
 	 */
 	public static final BroadphaseKey get(Collidable<?> collidable, Fixture fixture) {
-		return new BroadphaseKey(collidable.getId(), fixture.getId());
+		return new BroadphaseKey(collidable, fixture);
 	}
 	
 	/* (non-Javadoc)
@@ -77,8 +75,8 @@ final class BroadphaseKey {
 		if (obj == this) return true;
 		if (obj instanceof BroadphaseKey) {
 			BroadphaseKey key = (BroadphaseKey)obj;
-			return key.collidable.equals(this.collidable) &&
-				   key.fixture.equals(this.fixture);
+			return key.collidable == this.collidable &&
+				   key.fixture == this.fixture;
 		}
 		return false;
 	}
@@ -108,8 +106,8 @@ final class BroadphaseKey {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("BroadphaseKey[CollidableId=").append(this.collidable)
-		.append("|FixtureId=").append(this.fixture)
+		sb.append("BroadphaseKey[Collidable=").append(this.collidable.getId())
+		.append("|Fixture=").append(this.fixture.getId())
 		.append("]");
 		return sb.toString();
 	}
