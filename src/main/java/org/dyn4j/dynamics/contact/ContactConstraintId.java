@@ -102,10 +102,10 @@ public final class ContactConstraintId {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("ContactConstraintId[Body1=").append(this.body1.getId())
-		.append("|Body2=").append(this.body2.getId())
-		.append("|Fixture1=").append(this.fixture1.getId())
-		.append("|Fixture2=").append(this.fixture2.getId())
+		sb.append("ContactConstraintId[Body1=").append(this.body1.hashCode())
+		.append("|Body2=").append(this.body2.hashCode())
+		.append("|Fixture1=").append(this.fixture1.hashCode())
+		.append("|Fixture2=").append(this.fixture2.hashCode())
 		.append("]");
 		return sb.toString();
 	}

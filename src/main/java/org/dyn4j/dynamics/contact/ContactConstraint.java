@@ -140,10 +140,10 @@ public class ContactConstraint extends Constraint implements Shiftable {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("ContactConstraint[").append(super.toString())
-		  .append("|Body1=").append(this.body1.getId())
-		  .append("|Fixture1=").append(this.fixture1.getId())
-		  .append("|Body2=").append(this.body2.getId())
-		  .append("|Fixture2=").append(this.fixture2.getId())
+		  .append("|Body1=").append(this.body1.hashCode())
+		  .append("|Fixture1=").append(this.fixture1.hashCode())
+		  .append("|Body2=").append(this.body2.hashCode())
+		  .append("|Fixture2=").append(this.fixture2.hashCode())
 		  .append("|Normal=").append(this.normal)
 		  .append("|Tangent=").append(this.tangent)
 		  .append("|Friction=").append(this.friction)

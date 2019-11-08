@@ -114,8 +114,8 @@ final class SapProxy<E extends Collidable<T>, T extends Fixture> implements Comp
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("SapProxy[Collidable=").append(this.collidable != null ? this.collidable.getId() : "null")
-		  .append("|Fixture=").append(this.fixture != null ? this.fixture.getId() : "null")
+		sb.append("SapProxy[Collidable=").append(this.collidable != null ? this.collidable.hashCode() : "null")
+		  .append("|Fixture=").append(this.fixture != null ? this.fixture.hashCode() : "null")
 		  .append("|AABB=").append(this.aabb.toString())
 		  .append("|Tested=").append(this.tested)
 		  .append("]");

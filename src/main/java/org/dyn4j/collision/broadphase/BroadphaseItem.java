@@ -89,8 +89,8 @@ public final class BroadphaseItem<E extends Collidable<T>, T extends Fixture> {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("BroadphaseItem[Collidable=").append(this.collidable.getId())
-		.append("|Fixture=").append(this.fixture.getId())
+		sb.append("BroadphaseItem[Collidable=").append(this.collidable.hashCode())
+		.append("|Fixture=").append(this.fixture.hashCode())
 		.append("]");
 		return sb.toString();
 	}

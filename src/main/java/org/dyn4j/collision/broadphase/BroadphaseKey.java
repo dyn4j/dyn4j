@@ -106,8 +106,8 @@ final class BroadphaseKey {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("BroadphaseKey[Collidable=").append(this.collidable.getId())
-		.append("|Fixture=").append(this.fixture.getId())
+		sb.append("BroadphaseKey[Collidable=").append(this.collidable.hashCode())
+		.append("|Fixture=").append(this.fixture.hashCode())
 		.append("]");
 		return sb.toString();
 	}
