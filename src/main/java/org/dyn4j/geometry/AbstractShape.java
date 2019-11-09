@@ -31,7 +31,7 @@ import org.dyn4j.DataContainer;
 /**
  * Base implementation of the {@link Shape} interface.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 1.0.0
  */
 public abstract class AbstractShape implements Shape, Transformable, DataContainer {

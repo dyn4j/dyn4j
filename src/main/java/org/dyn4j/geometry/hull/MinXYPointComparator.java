@@ -32,7 +32,7 @@ import org.dyn4j.geometry.Vector2;
  * Represents a comparator that sorts points by their x coordinate
  * lowest to highest then by the y coordinate lowest to highest.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 2.2.0
  */
 final class MinXYPointComparator implements Comparator<Vector2> {

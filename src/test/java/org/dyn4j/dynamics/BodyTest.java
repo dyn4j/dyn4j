@@ -52,7 +52,7 @@ import org.junit.Test;
 /**
  * Class to test the {@link Body} class.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 1.0.2
  */
 public class BodyTest {

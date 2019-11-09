@@ -40,7 +40,7 @@ import org.dyn4j.resources.Messages;
  * {@link Polygon} approximation. Another option is to use the GJK or your own collision detection
  * algorithm for this shape only and use SAT on others.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 3.1.7
  */
 public class Ellipse extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
@@ -170,7 +170,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 * additionally returns it.
 	 * @param localAxis the direction vector in local space
 	 * @return {@link Vector2}
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	private Vector2 getFarthestPoint(Vector2 localAxis) {
 		// localAxis is already in local coordinates
@@ -200,7 +200,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 * Typically this means that the ellipse is axis-aligned, but it could also
 	 * mean that the ellipse is not axis-aligned, but the given local space axis
 	 * has been rotated to match the alignment of the ellipse.
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	private void getFarthestPointOnAlignedEllipse(Vector2 localAxis) {
 		// an ellipse is a circle with a non-uniform scaling transformation applied
@@ -330,7 +330,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 * @param b the half height of the ellipse
 	 * @param point the query point
 	 * @return {@link Vector2}
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	static final Vector2 getFarthestPointOnEllipse(double a, double b, Vector2 point) 
 	{
@@ -414,7 +414,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 * @param b the half height of the ellipse
 	 * @param point the query point
 	 * @return {@link Vector2}
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	static final Vector2 getFarthestPointOnBoundedEllipse(double xmin, double xmax, double a, double b, Vector2 point) 
 	{
@@ -472,7 +472,7 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	 * @param q the query point
 	 * @param p output; the point on the ellipse
 	 * @return double
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	private static double getSquaredDistance(double a2, double ba, double x, Vector2 q, Vector2 p) {
 		// compute the y value for the given x on the ellipse:

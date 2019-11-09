@@ -27,7 +27,7 @@ package org.dyn4j.geometry;
 /**
  * Interface representing an object that can be rotated.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 3.2.0
  */
 public interface Rotatable {
@@ -40,7 +40,7 @@ public interface Rotatable {
 	/**
 	 * Rotates the object about the origin.
 	 * @param rotation the {@link Rotation} representing the rotation amount
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	public abstract void rotate(Rotation rotation);
 	
@@ -55,7 +55,7 @@ public interface Rotatable {
 	 * Rotates the object about the given point.
 	 * @param rotation the {@link Rotation} representing the rotation amount
 	 * @param point the point to rotate about
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	public abstract void rotate(Rotation rotation, Vector2 point);
 	
@@ -72,7 +72,7 @@ public interface Rotatable {
 	 * @param rotation the {@link Rotation} representing the rotation amount
 	 * @param x the x coordinate to rotate about
 	 * @param y the y coordinate to rotate about
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	public abstract void rotate(Rotation rotation, double x, double y);
 }

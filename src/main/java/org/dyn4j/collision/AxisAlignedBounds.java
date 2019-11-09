@@ -35,7 +35,7 @@ import org.dyn4j.resources.Messages;
  * This class compares its AABB with the AABB of the given body and returns true
  * if they do not overlap.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 3.1.1
  */
 public class AxisAlignedBounds extends AbstractBounds implements Bounds, Translatable {

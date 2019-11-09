@@ -43,8 +43,8 @@ import org.dyn4j.Epsilon;
  * The receiver of a Rotation object can be sure it always represents a valid rotation.
  * 
  * @author Manolis Tsamis
- * @version 3.3.1
- * @since 3.3.1
+ * @version 3.4.0
+ * @since 3.4.0
  */
 public class Rotation {
 	private static final double SQRT_2_INV = 1.0 / Math.sqrt(2);

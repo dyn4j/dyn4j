@@ -27,7 +27,7 @@ package org.dyn4j;
 /**
  * The version of the engine.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 1.0.0
  */
 public final class Version {

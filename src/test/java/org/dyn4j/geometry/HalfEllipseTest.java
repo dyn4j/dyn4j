@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link HalfEllipse} class.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 3.1.5
  */
 public class HalfEllipseTest {
@@ -41,7 +41,7 @@ public class HalfEllipseTest {
 	/**
 	 * Tests the getRadius method for a point above the x-axis but below the evolute
 	 * to ensure that we obtain the correct max distance.
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	@Test
 	public void getRadius() {

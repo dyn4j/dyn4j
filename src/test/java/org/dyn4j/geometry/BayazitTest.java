@@ -34,7 +34,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Bayazit} class.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 3.0.0
  */
 public class BayazitTest extends AbstractDecomposeTest {
@@ -375,7 +375,7 @@ public class BayazitTest extends AbstractDecomposeTest {
 
 	/**
 	 * Tests the triangulation to confirm it fails properly on self-intersecting edges.
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void decomposeFailSelfIntersection1() {
@@ -394,7 +394,7 @@ public class BayazitTest extends AbstractDecomposeTest {
 	
 	/**
 	 * Tests the triangulation to confirm it fails properly on self-intersecting edges.
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void decomposeFailSelfIntersection2() {
@@ -411,7 +411,7 @@ public class BayazitTest extends AbstractDecomposeTest {
 	
 	/**
 	 * Tests the triangulation to confirm it fails properly on self-intersecting edges.
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void decomposeFailSelfIntersection3() {
@@ -429,7 +429,7 @@ public class BayazitTest extends AbstractDecomposeTest {
 	
 	/**
 	 * Tests the triangulation to confirm it fails properly on self-intersecting edges.
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void decomposeFailSelfIntersection4() {
@@ -446,7 +446,7 @@ public class BayazitTest extends AbstractDecomposeTest {
 
 	/**
 	 * Tests the triangulation to confirm it fails properly on self-intersecting edges.
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void decomposeFailSelfIntersection5() {
@@ -463,7 +463,7 @@ public class BayazitTest extends AbstractDecomposeTest {
 	
 	/**
 	 * Tests the triangulation to confirm it fails properly on self-intersecting edges.
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void decomposeFailSelfIntersection6() {
@@ -480,7 +480,7 @@ public class BayazitTest extends AbstractDecomposeTest {
 	
 	/**
 	 * Tests the triangulation to confirm it fails properly on degenerate data.
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void decomposeFailureDegenerateGusAsf() {

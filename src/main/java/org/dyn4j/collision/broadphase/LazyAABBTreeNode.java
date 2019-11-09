@@ -31,8 +31,8 @@ import org.dyn4j.geometry.AABB;
  * <p>
  * The AABB of the node should be the union of all the AABBs below this node.
  * @author Manolis Tsamis
- * @version 3.3.1
- * @since 3.3.1
+ * @version 3.4.0
+ * @since 3.4.0
  */
 class LazyAABBTreeNode {
 	/** The left child */

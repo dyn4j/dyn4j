@@ -34,7 +34,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link SweepLine} class.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 3.0.0
  */
 public class SweepLineTest extends AbstractDecomposeTest {
@@ -671,7 +671,7 @@ public class SweepLineTest extends AbstractDecomposeTest {
 	
 	/**
 	 * Tests the triangulation to confirm it fails properly on self-intersecting edges.
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void triangulateFailSelfIntersection1() {
@@ -690,7 +690,7 @@ public class SweepLineTest extends AbstractDecomposeTest {
 	
 	/**
 	 * Tests the triangulation to confirm it fails properly on self-intersecting edges.
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void triangulateFailSelfIntersection2() {
@@ -707,7 +707,7 @@ public class SweepLineTest extends AbstractDecomposeTest {
 	
 	/**
 	 * Tests the triangulation to confirm it fails properly on self-intersecting edges.
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void triangulateFailSelfIntersection3() {
@@ -725,7 +725,7 @@ public class SweepLineTest extends AbstractDecomposeTest {
 	
 	/**
 	 * Tests the triangulation to confirm it fails properly on self-intersecting edges.
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void triangulateFailSelfIntersection4() {
@@ -742,7 +742,7 @@ public class SweepLineTest extends AbstractDecomposeTest {
 
 	/**
 	 * Tests the triangulation to confirm it fails properly on self-intersecting edges.
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void triangulateFailSelfIntersection5() {
@@ -759,7 +759,7 @@ public class SweepLineTest extends AbstractDecomposeTest {
 	
 	/**
 	 * Tests the triangulation to confirm it fails properly on self-intersecting edges.
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void triangulateFailSelfIntersection6() {
@@ -776,7 +776,7 @@ public class SweepLineTest extends AbstractDecomposeTest {
 	
 	/**
 	 * Tests the triangulation to confirm it fails properly on degenerate data.
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void triangulateFailureDegenerateGusAsf() {

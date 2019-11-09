@@ -31,7 +31,7 @@ import org.dyn4j.collision.Fixture;
  * Represents a key for a {@link BroadphaseItem} used for fast look ups in
  * the {@link BroadphaseDetector}s.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 3.2.0
  */
 final class BroadphaseKey {
