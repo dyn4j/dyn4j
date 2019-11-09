@@ -91,8 +91,8 @@ final class DynamicAABBTreeLeaf<E extends Collidable<T>, T extends Fixture> exte
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("DynamicAABBTreeLeaf[Collidable=").append(this.collidable.getId())
-		  .append("|Fixture=").append(this.fixture.getId())
+		sb.append("DynamicAABBTreeLeaf[Collidable=").append(this.collidable.hashCode())
+		  .append("|Fixture=").append(this.fixture.hashCode())
 		  .append("|AABB=").append(this.aabb.toString())
 		  .append("|Height=").append(this.height)
 		  .append("|Tested=").append(this.tested)

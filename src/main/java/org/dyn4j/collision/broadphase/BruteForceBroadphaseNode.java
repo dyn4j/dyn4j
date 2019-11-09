@@ -80,7 +80,7 @@ class BruteForceBroadphaseNode<E extends Collidable<T>, T extends Fixture> {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("PlainBroadphaseNode[AABB=").append(this.aabb.toString())
-		.append("|Fixture=").append(this.fixture.getId())
+		.append("|Fixture=").append(this.fixture.hashCode())
 		.append("]");
 		return sb.toString();
 	}

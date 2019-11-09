@@ -74,8 +74,8 @@ public class DetectResult {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("DetectResult[Body=").append(this.body.getId())
-		  .append("|Fixture=").append(this.fixture.getId())
+		sb.append("DetectResult[Body=").append(this.body.hashCode())
+		  .append("|Fixture=").append(this.fixture.hashCode())
 		  .append("|Penetration=").append(this.penetration)
 		  .append("]");
 		return sb.toString();
