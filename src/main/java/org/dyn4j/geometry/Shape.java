@@ -38,7 +38,7 @@ import org.dyn4j.DataContainer;
  * mutable objects.  It's recommended that a {@link Shape}, after creation and use, remain
  * unchanged and instead be replaced with a new {@link Shape} if modification is necessary.
  * @author William Bittle
- * @version 3.1.4
+ * @version 3.3.1
  * @since 1.0.0
  */
 public interface Shape extends Transformable, DataContainer {	
@@ -87,7 +87,7 @@ public interface Shape extends Transformable, DataContainer {
 	 * Returns the {@link Interval} of this {@link Shape} projected onto the given {@link Vector2} 
 	 * given the {@link Transform}.
 	 * <p>
-	 * This is the same as calling {@link #project(Vector2, Transform)} and passing {@link Transform#IDENTITY}.
+	 * This is the same as calling {@link #project(Vector2, Transform)} and passing a new {@link Transform}.
 	 * @param vector {@link Vector2} to project onto
 	 * @return {@link Interval}
 	 * @throws NullPointerException if the given vector is null
@@ -113,7 +113,7 @@ public interface Shape extends Transformable, DataContainer {
 	 * <p>
 	 * The given point is assumed to be in world space.
 	 * <p>
-	 * This is the same as calling {@link #contains(Vector2, Transform)} and passing {@link Transform#IDENTITY}.
+	 * This is the same as calling {@link #contains(Vector2, Transform)} and passing a new {@link Transform}.
 	 * @param point world space point
 	 * @return boolean
 	 * @throws NullPointerException if the given point is null
@@ -146,7 +146,7 @@ public interface Shape extends Transformable, DataContainer {
 	/**
 	 * Creates an {@link AABB} from this {@link Shape}.
 	 * <p>
-	 * This is the same as calling {@link #createAABB(Transform)} and passing {@link Transform#IDENTITY}.
+	 * This is the same as calling {@link #createAABB(Transform)} and passing a new {@link Transform}.
 	 * @return {@link AABB} the {@link AABB} enclosing this {@link Shape}
 	 * @since 3.1.4
 	 */

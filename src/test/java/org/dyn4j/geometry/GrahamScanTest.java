@@ -24,8 +24,9 @@
  */
 package org.dyn4j.geometry;
 
+import java.util.Random;
+
 import org.dyn4j.geometry.hull.GrahamScan;
-import org.junit.Before;
 import org.junit.Test;
 
 import junit.framework.TestCase;
@@ -39,23 +40,23 @@ import junit.framework.TestCase;
 public class GrahamScanTest {
 	/** Identity Transform instance */
 	private static final Transform IDENTITY = new Transform();
-	
-	/** The point cloud */
-	private Vector2[] cloud;
-	
+
 	/**
-	 * Sets up the testing point cloud.
+	 * Returns a random point cloud
+	 * @param seed the random seed
+	 * @return Vector2[]
 	 */
-	@Before
-	public void setup() {
+	private Vector2[] generate(long seed) {
+		Random random = new Random(seed);
 		// randomize the size from 4 to 100
-		int size = (int) Math.floor(Math.random() * 96.0 + 4.0);
+		int size = (int) Math.floor(random.nextDouble() * 96.0 + 4.0);
 		// create the cloud container
-		this.cloud = new Vector2[size];
+		Vector2[] cloud = new Vector2[size];
 		// fill the cloud with a random distribution of points
 		for (int i = 0; i < size; i++) {
-			this.cloud[i] = new Vector2(Math.random() * 2.0 - 1.0, Math.random() * 2.0 - 1.0);
+			cloud[i] = new Vector2(random.nextDouble() * 2.0 - 1.0, random.nextDouble() * 2.0 - 1.0);
 		}
+		return cloud;
 	}
 	
 	/**
@@ -64,16 +65,17 @@ public class GrahamScanTest {
 	 */
 	@Test
 	public void gsRandom1() {
+		Vector2[] cloud = this.generate(0);
 		GrahamScan gs = new GrahamScan();
-		Vector2[] hull = gs.generate(this.cloud);
+		Vector2[] hull = gs.generate(cloud);
 		
 		// make sure we can create a polygon from it
 		// (this will check for convexity, winding, etc)
 		Polygon poly = new Polygon(hull);
 		
 		// make sure all the points are either on or contained in the hull
-		for (int i = 0; i < this.cloud.length; i++) {
-			Vector2 p = this.cloud[i];
+		for (int i = 0; i < cloud.length; i++) {
+			Vector2 p = cloud[i];
 			if (!poly.contains(p, IDENTITY)) {
 				TestCase.fail("Hull does not contain all points.");
 			}
@@ -86,16 +88,17 @@ public class GrahamScanTest {
 	 */
 	@Test
 	public void gsRandom2() {
+		Vector2[] cloud = this.generate(5);
 		GrahamScan gs = new GrahamScan();
-		Vector2[] hull = gs.generate(this.cloud);
+		Vector2[] hull = gs.generate(cloud);
 		
 		// make sure we can create a polygon from it
 		// (this will check for convexity, winding, etc)
 		Polygon poly = new Polygon(hull);
 		
 		// make sure all the points are either on or contained in the hull
-		for (int i = 0; i < this.cloud.length; i++) {
-			Vector2 p = this.cloud[i];
+		for (int i = 0; i < cloud.length; i++) {
+			Vector2 p = cloud[i];
 			if (!poly.contains(p, IDENTITY)) {
 				TestCase.fail("Hull does not contain all points.");
 			}
