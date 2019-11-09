@@ -104,8 +104,8 @@ public class GrahamScan implements HullGenerator {
 			// created by the top two items in the stack (the last edge
 			// on the current convex hull)
 			
-			double location2 = Segment.getLocation(p3, p1, p2);
-			if (location2 > 0.0) {
+			double location = Segment.getLocation(p3, p1, p2);
+			if (location > 0.0) {
 				// if its to the left, then push the new point on
 				// the stack since it maintains convexity
 				
@@ -118,9 +118,9 @@ public class GrahamScan implements HullGenerator {
 				// it to the hull
 				Vector2 e1 = p1.to(p2);
 				Vector2 e2 = p2.to(p3);
-				double location = e1.cross(e2);
+				double cross = e1.cross(e2);
 				
-				if (location > 0.0) {
+				if (cross >= 0.0) {
 					stack.add(p3);
 				}
 				

@@ -59,6 +59,7 @@ public class GiftWrap implements HullGenerator {
 		
 		// find the left most point
 		double x = Double.MAX_VALUE;
+		double y = Double.MAX_VALUE;
 		Vector2 leftMost = null;
 		for (int i = 0; i < size; i++) {
 			Vector2 p = points[i];
@@ -68,6 +69,11 @@ public class GiftWrap implements HullGenerator {
 			if (p.x < x) {
 				x = p.x;
 				leftMost = p;
+				y = p.y;
+			} else if (p.x == x && p.y < y) {
+				x = p.x;
+				leftMost = p;
+				y = p.y;
 			}
 		}
 		
@@ -82,7 +88,7 @@ public class GiftWrap implements HullGenerator {
 			Vector2 next = points[0];
 			if (current == next) next = points[1];
 			// loop over the points to find a more left point than the current
-			for (int j = 0; j < size; j++) {
+			for (int j = 1; j < size; j++) {
 				Vector2 test = points[j];
 				if (test == current) continue;
 				if (test == next) continue;
@@ -96,7 +102,10 @@ public class GiftWrap implements HullGenerator {
 					// than the current vertex
 					double d1 = test.distanceSquared(current);
 					double d2 = next.distanceSquared(current);
-					if (d1 > d2) {
+					// we also need to confirm that it's farther away in
+					// the direction of the current->next vector
+					double dot = current.to(next).dot(current.to(test));
+					if (d1 > d2 && dot >= 0) {
 						next = test;
 					} else {
 						// if it's not farther, compute the winding

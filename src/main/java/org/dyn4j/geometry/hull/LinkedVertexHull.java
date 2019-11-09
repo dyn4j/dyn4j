@@ -121,8 +121,11 @@ final class LinkedVertexHull {
 		LinkedVertex rightRoot = right.root;
 		
 		// check for coincident vertices and ignore them
+		// shouldn't happen since DivideAndConquer filters them
+		// before starting the divide/merge process
 		double d = leftRoot.point.distanceSquared(rightRoot.point);
-		if (d == 0.0) return left;
+		if (d == 0.0) 
+			return left;
 		
 		// wire up the hulls
 		leftRoot.next = rightRoot;
@@ -239,12 +242,6 @@ final class LinkedVertexHull {
 			double crossR = rv.cross(upper);
 			double crossL = upper.getNegative().cross(lv);
 			
-			// check for both convex
-			if (crossR > 0.0 && crossL > 0.0) {
-				// l and r contain the vertices for the upper bridge
-				break;
-			}
-
 			// this can happen when two line segments that are colinear are being merged
 			if (crossR == 0.0 && crossL == 0.0 && left.size == 2 && right.size == 2) {
 				// both segments are colinear so take only
@@ -257,15 +254,21 @@ final class LinkedVertexHull {
 				hull.size = 2;
 				return hull;
 			}
-			
+
+			// check for both convex
+			if (crossR >= 0.0 && crossL >= 0.0) {
+				// l and r contain the vertices for the upper bridge
+				break;
+			}
+
 			// check not convex or colinear
-			if (crossR <= 0.0) {
+			if (crossR < 0.0) {
 				// then we need to move clockwise on the right side by one
 				ru = ru.prev;
 			}
 			
 			// check not convex or colinear
-			if (crossL <= 0.0) {
+			if (crossL < 0.0) {
 				// then we need to move counter-clockwise on the left side by one
 				lu = lu.next;
 			}
@@ -292,12 +295,6 @@ final class LinkedVertexHull {
 			double crossR = lower.cross(rv);
 			double crossL = lv.cross(lower.getNegative());
 			
-			// check for both convex
-			if (crossR > 0.0 && crossL > 0.0) {
-				// l and r contain the vertices for the upper bridge
-				break;
-			}
-			
 			// this can happen when two line segments that are colinear are being merged
 			if (crossR == 0.0 && crossL == 0.0 && left.size == 2 && right.size == 2) {
 				// both segments are colinear
@@ -310,15 +307,21 @@ final class LinkedVertexHull {
 				hull.size = 2;
 				return hull;
 			}
+
+			// check for both convex
+			if (crossR >= 0.0 && crossL >= 0.0) {
+				// l and r contain the vertices for the upper bridge
+				break;
+			}
 			
 			// check not convex or colinear
-			if (crossR <= 0.0) {
+			if (crossR < 0.0) {
 				// then we need to move counter-clockwise on the right side by one
 				rl = rl.next;
 			}
 			
 			// check not convex or colinear
-			if (crossL <= 0.0) {
+			if (crossL < 0.0) {
 				// then we need to move clockwise on the left side by one
 				ll = ll.prev;
 			}

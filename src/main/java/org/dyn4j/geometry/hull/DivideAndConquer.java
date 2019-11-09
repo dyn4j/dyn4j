@@ -24,7 +24,9 @@
  */
 package org.dyn4j.geometry.hull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
@@ -61,6 +63,30 @@ public class DivideAndConquer implements HullGenerator {
 			// this will be hit if any of the points are null
 			throw new NullPointerException(Messages.getString("geometry.hull.nullPoints"));
 		}
+		
+		// check for coincident points
+		// since they're ordered, we can iterate sequentially
+		List<Vector2> cleansed = new ArrayList<Vector2>();
+		for (int i = 0; i < size;) {
+			Vector2 p0 = points[i++];
+			cleansed.add(p0);
+			
+			if (i < size) {
+				Vector2 p1 = points[i];
+				while (p1.equals(p0)) {
+					i++;
+					if (i >= size) {
+						break;
+					}
+					p1 = points[i];
+				}
+			}
+		}
+		
+		points = cleansed.toArray(new Vector2[0]);
+		size = points.length;
+
+		if (cleansed.size() <= 2) return points;
 		
 		// perform the divide and conquer algorithm on the point cloud
 		LinkedVertexHull hull = this.divide(points, 0, size - 1);

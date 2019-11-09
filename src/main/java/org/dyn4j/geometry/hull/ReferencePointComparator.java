@@ -32,7 +32,7 @@ import org.dyn4j.geometry.Vector2;
  * Comparator class to compare points by their angle from the positive
  * x-axis with reference from a given point.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.3.1
  * @since 2.2.0
  */
 final class ReferencePointComparator implements Comparator<Vector2> {
@@ -59,6 +59,13 @@ final class ReferencePointComparator implements Comparator<Vector2> {
 		Vector2 v1 = reference.to(p1);
 		Vector2 v2 = reference.to(p2);
 		// compare the vector's angles with the x-axis
-		return (int) Math.signum(v2.getAngleBetween(ReferencePointComparator.X_AXIS) - v1.getAngleBetween(ReferencePointComparator.X_AXIS));
+		int diff = (int) Math.signum(v2.getAngleBetween(ReferencePointComparator.X_AXIS) - v1.getAngleBetween(ReferencePointComparator.X_AXIS));
+		if (diff == 0.0) {
+			double cross = v1.cross(v2);
+			if (cross > 0.0) return -1;
+			else if (cross < 0.0) return 1;
+			else return diff;
+		}
+		return diff;
 	}
 }

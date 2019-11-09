@@ -301,7 +301,7 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 			// p2 is the next point
 			p2 = this.vertices[i + 1];
 			// check if they are equal (one of the vertices)
-			if (p.equals(p1)) {
+			if (p.equals(p1) || p.equals(p2)) {
 				return true;
 			}
 			

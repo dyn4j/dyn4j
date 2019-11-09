@@ -475,4 +475,123 @@ public class MonotoneChainTest {
 			}
 		}
 	}
+	
+
+	/**
+	 * Tests the Monotone Chain class against a prior failure case.
+	 */
+	@Test
+	public void mono11() {
+		// coincident vertices
+		Vector2[] cloud = new Vector2[] {
+			new Vector2(-5.214810023866061, -5.581528163221621),
+			new Vector2(-3.2956195481849493, 6.700146933201903),
+			new Vector2(2.159226322162535, -2.2353877725618476),
+			new Vector2(4.84788802330902, -6.921113359457114),
+			new Vector2(4.84788802330902, -6.921113359457114)
+		};
+		
+		MonotoneChain mono = new MonotoneChain();
+		Vector2[] hull = mono.generate(cloud);
+		
+		// make sure we can create a polygon from it
+		// (this will check for convexity, winding, etc)
+		Polygon poly = new Polygon(hull);
+		
+		// make sure all the points are either on or contained in the hull
+		for (int i = 0; i < cloud.length; i++) {
+			Vector2 p = cloud[i];
+			if (!poly.contains(p, IDENTITY)) {
+				TestCase.fail("Hull does not contain all points.");
+			}
+		}
+	}
+	
+	/**
+	 * Tests the Monotone Chain class against a prior failure case.
+	 */
+	@Test
+	public void mono12() {
+		// coincident vertices
+		Vector2[] cloud = new Vector2[] {
+			new Vector2(-0.33826889474805055, 8.329321811558497),
+			new Vector2(-3.5586156659982215, -3.467244912905423),
+			new Vector2(-3.5586156659982215, -4.566140779700733),
+			new Vector2(-3.5586156659982215, -3.05702346750299),
+			new Vector2(1.1178446483487536, -3.05702346750299),
+		};
+		
+		MonotoneChain mono = new MonotoneChain();
+		Vector2[] hull = mono.generate(cloud);
+		
+		// make sure we can create a polygon from it
+		// (this will check for convexity, winding, etc)
+		Polygon poly = new Polygon(hull);
+		
+		// make sure all the points are either on or contained in the hull
+		for (int i = 0; i < cloud.length; i++) {
+			Vector2 p = cloud[i];
+			if (!poly.contains(p, IDENTITY)) {
+				TestCase.fail("Hull does not contain all points.");
+			}
+		}
+	}
+
+	/**
+	 * Tests the Monotone Chain class against a prior failure case.
+	 */
+	@Test
+	public void mono13() {
+		// coincident vertices
+		Vector2[] cloud = new Vector2[] {
+			new Vector2(-0.9025337983824699, 4.56709308364953),
+			new Vector2(-5.5168621708920345, 0.34366552069341916),
+			new Vector2(-2.400927400987851, 3.19563523962121),
+			new Vector2(-9.419896312210547, 3.19563523962121)
+		};
+		
+		MonotoneChain mono = new MonotoneChain();
+		Vector2[] hull = mono.generate(cloud);
+		
+		// make sure we can create a polygon from it
+		// (this will check for convexity, winding, etc)
+		Polygon poly = new Polygon(hull);
+		
+		// make sure all the points are either on or contained in the hull
+		for (int i = 0; i < cloud.length; i++) {
+			Vector2 p = cloud[i];
+			if (!poly.contains(p, IDENTITY)) {
+				TestCase.fail("Hull does not contain all points.");
+			}
+		}
+	}
+
+	/**
+	 * Tests the Monotone Chain class against a prior failure case.
+	 */
+	@Test
+	public void mono14() {
+		// coincident vertices
+		Vector2[] cloud = new Vector2[] {
+			new Vector2(5.916275853509346, -4.228267720344762),
+			new Vector2(8.31483976082672, -0.3807196367883092),
+			new Vector2(3.9941738969349405, -0.491971233546733),
+			new Vector2(-5.952110964171484, -0.7480752942332325)
+		};
+		
+		MonotoneChain mono = new MonotoneChain();
+		Vector2[] hull = mono.generate(cloud);
+		
+		// make sure we can create a polygon from it
+		// (this will check for convexity, winding, etc)
+		Polygon poly = new Polygon(hull);
+		
+		// make sure all the points are either on or contained in the hull
+		for (int i = 0; i < cloud.length; i++) {
+			Vector2 p = cloud[i];
+			if (!poly.contains(p, IDENTITY)) {
+				TestCase.fail("Hull does not contain all points.");
+			}
+		}
+	}
 }
