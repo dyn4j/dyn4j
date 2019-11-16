@@ -43,7 +43,7 @@ import org.dyn4j.resources.Messages;
  * When the mass type is changed, the original mass and inertia values are not lost. This allows the
  * swapping of mass types without recomputing the mass.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.3.1
  * @since 1.0.0
  * @see MassType
  */
@@ -226,7 +226,7 @@ public class Mass {
 			if (m != null) {
 				return new Mass(masses.get(0));
 			} else {
-				throw new NullPointerException(Messages.getString("geometry.mass.invalidMassListSize"));
+				throw new NullPointerException(Messages.getString("geometry.mass.nullMassListElement"));
 			}
 		}
 		

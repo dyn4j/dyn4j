@@ -112,44 +112,44 @@ public final class ContactConstraintId {
 	
 	/**
 	 * Returns the id of the first body.
-	 * @deprecated ID schemes should be implemented by the user where needed
+	 * @deprecated ID schemes should be implemented by the user where needed; since 3.3.1
 	 * @return UUID
 	 * @since 3.1.2
 	 */
-	@Deprecated(forRemoval = true)
+	@Deprecated
 	public UUID getBody1Id() {
 		return this.body1.getId();
 	}
 
 	/**
 	 * Returns the id of the second body.
-	 * @deprecated ID schemes should be implemented by the user where needed
+	 * @deprecated ID schemes should be implemented by the user where needed; since 3.3.1
 	 * @return UUID
 	 * @since 3.1.2
 	 */
-	@Deprecated(forRemoval = true)
+	@Deprecated
 	public UUID getBody2Id() {
 		return this.body2.getId();
 	}
 
 	/**
 	 * Returns the id of the fixture on the first body.
-	 * @deprecated ID schemes should be implemented by the user where needed
+	 * @deprecated ID schemes should be implemented by the user where needed; since 3.3.1
 	 * @return UUID
 	 * @since 3.1.2
 	 */
-	@Deprecated(forRemoval = true)
+	@Deprecated
 	public UUID getFixture1Id() {
 		return this.fixture1.getId();
 	}
 
 	/**
 	 * Returns the id of the fixture on the second body.
-	 * @deprecated ID schemes should be implemented by the user where needed
+	 * @deprecated ID schemes should be implemented by the user where needed; since 3.3.1
 	 * @return UUID
 	 * @since 3.1.2
 	 */
-	@Deprecated(forRemoval = true)
+	@Deprecated
 	public UUID getFixture2Id() {
 		return this.fixture2.getId();
 	}

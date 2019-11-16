@@ -33,6 +33,13 @@ package org.dyn4j.geometry;
  * @since 1.0.0
  */
 public class Transform implements Transformable {
+	/**
+	 * NOTE: as of being deprecated this instance is no longer immutable.
+	 * @deprecated create your own instances of {@link Transform} instead; since 3.3.1
+	 */
+	@Deprecated
+	public static final Transform IDENTITY = new Transform();
+	
 	/** the cosine of the rotation angle */
 	protected double cost = 1.0;
 	

@@ -75,6 +75,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	 * of the given width and height.
 	 * @param valid always true or this constructor would not be called
 	 * @param width the width
+	 * @param height the height
 	 * @param center the center
 	 * @param vertexLeft the first vertex
 	 * @param vertexRight the second vertex

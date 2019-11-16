@@ -342,7 +342,7 @@ public abstract class AbstractCollidable<T extends Fixture> implements Collidabl
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.Collidable#getId()
 	 */
-	@Deprecated(forRemoval = true)
+	@Deprecated
 	public UUID getId() {
 		return this.id;
 	}

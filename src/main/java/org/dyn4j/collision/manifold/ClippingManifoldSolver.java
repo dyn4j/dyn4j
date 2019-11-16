@@ -75,18 +75,19 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 			PointFeature vertex = (PointFeature) feature1;
 			ManifoldPoint mp = new ManifoldPoint(ManifoldPointId.DISTANCE, vertex.getPoint(), penetration.getDepth());
 			manifold.points.add(mp);
-			manifold.normal = n.negate();
+			manifold.normal = n.getNegative();
 			return true;
 		}
 		
 		// get the reference feature for the second convex shape
-		Feature feature2 = convex2.getFarthestFeature(n.getNegative(), transform2);
+		Vector2 ne = n.getNegative();
+		Feature feature2 = convex2.getFarthestFeature(ne, transform2);
 		// check for vertex
 		if (feature2 instanceof PointFeature) {
 			PointFeature vertex = (PointFeature) feature2;
 			ManifoldPoint mp = new ManifoldPoint(ManifoldPointId.DISTANCE, vertex.getPoint(), penetration.getDepth());
 			manifold.points.add(mp);
-			manifold.normal = n.negate();
+			manifold.normal = ne;
 			return true;
 		}
 		

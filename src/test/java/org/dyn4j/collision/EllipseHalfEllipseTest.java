@@ -345,25 +345,32 @@ public class EllipseHalfEllipseTest extends AbstractTest {
 		TestCase.assertTrue(this.cmfs.getManifold(p, c2, t2, c1, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		
-		t1.translate(0.0, -1.15);
+		t1.translate(0.0, -0.15);
 		
 		// test overlap gjk
-		this.gjk.detect(c1, t1, c2, t2, p);
+		TestCase.assertTrue(this.gjk.detect(c1, t1, c2, t2, p));
 		TestCase.assertTrue(this.cmfs.getManifold(p, c1, t1, c2, t2, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
 		p1 = mp.getPoint();
 		TestCase.assertEquals( 0.000, p1.x, 1.0e-3);
-		TestCase.assertEquals(-0.899, p1.y, 1.0e-3);
-		TestCase.assertEquals( 0.250, mp.getDepth(), 1.0e-3);
+		TestCase.assertEquals( 0.100, p1.y, 1.0e-3);
+		TestCase.assertEquals( 0.100, mp.getDepth(), 1.0e-3);
 		// try reversing the shapes
-		this.gjk.detect(c2, t2, c1, t1, p);
+		TestCase.assertTrue(this.gjk.detect(c2, t2, c1, t1, p));
 		TestCase.assertTrue(this.cmfs.getManifold(p, c2, t2, c1, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		mp = m.getPoints().get(0);
 		p1 = mp.getPoint();
 		TestCase.assertEquals( 0.000, p1.x, 1.0e-3);
-		TestCase.assertEquals(-0.899, p1.y, 1.0e-3);
-		TestCase.assertEquals( 0.250, mp.getDepth(), 1.0e-3);
+		TestCase.assertEquals( 0.100, p1.y, 1.0e-3);
+		TestCase.assertEquals( 0.100, mp.getDepth(), 1.0e-3);
+
+		t1.translate(0.0, -1.0);
+		
+		// test overlap gjk
+		TestCase.assertFalse(this.gjk.detect(c1, t1, c2, t2, p));
+		// try reversing the shapes
+		TestCase.assertFalse(this.gjk.detect(c2, t2, c1, t1, p));
 	}
 }

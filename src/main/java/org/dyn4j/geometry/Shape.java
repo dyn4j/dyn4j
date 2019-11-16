@@ -44,10 +44,10 @@ import org.dyn4j.DataContainer;
 public interface Shape extends Transformable, DataContainer {	
 	/**
 	 * Returns the unique identifier for this shape instance.
-	 * @deprecated ID schemes should be implemented by the user where needed
+	 * @deprecated ID schemes should be implemented by the user where needed; since 3.3.1
 	 * @return UUID
 	 */
-	@Deprecated(forRemoval = true)
+	@Deprecated
 	public abstract UUID getId();
 	
 	/**
