@@ -250,7 +250,7 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 				this.limitState = LimitState.AT_LOWER;
 			} else if (angle >= this.upperLimit) {
 				// is it currently at the upper limit?
-				if (this.limitState == LimitState.AT_UPPER) {
+				if (this.limitState != LimitState.AT_UPPER) {
 					// if not then make the limit impulse zero
 					this.impulse.z = 0.0;
 				}
