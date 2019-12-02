@@ -7,11 +7,23 @@ import org.junit.Test;
 
 import junit.framework.TestCase;
 
+/**
+ * Test cases and randomized versions for the methods in {@link RobustGeometry} class.
+ * @author Manolis Tsamis
+ * @version 3.4.0
+ * @since 3.4.0
+ */
 public class RobustGeometryTest {
 	
 	/** Seed for the randomized test. Can be any value */
 	private static final int SEED = 0;
 	
+	/**
+	 * Randomized test to check almost colinear vectors.
+	 * Chose three random, almost colinear, points and then exhaustively check for all
+	 * floating point values near the tested point. This will trigger the most
+	 * complex paths in {@link RobustGeometry#getLocation(Vector2, Vector2, Vector2)}
+	 */
 	@Test
 	public void randomizedTest() {
 		// Constant seed so we always get the same sequence of randoms
@@ -50,6 +62,10 @@ public class RobustGeometryTest {
 		}
 	}
 	
+	/**
+	 * Another randomized test but with uniform random points.
+	 * This will mostly trigger the short path in {@link RobustGeometry#getLocation(Vector2, Vector2, Vector2)}
+	 */
 	@Test
 	public void randomizedTest2() {
 		// Constant seed so we always get the same sequence of randoms
@@ -70,13 +86,25 @@ public class RobustGeometryTest {
 		}
 	}
 	
-	private double getLocationExact(Vector2 pa, Vector2 pb, Vector2 pc) {
-		BigDecimal pax = new BigDecimal(pa.x);
-		BigDecimal pay = new BigDecimal(pa.y);
-		BigDecimal pbx = new BigDecimal(pb.x);
-		BigDecimal pby = new BigDecimal(pb.y);
-		BigDecimal pcx = new BigDecimal(pc.x);
-		BigDecimal pcy = new BigDecimal(pc.y);
+	/**
+	 * Helper method to compute the equivalent of {@link Segment#getLocation(Vector2, Vector2, Vector2)}
+	 * but with exact arithmetic, via the use of {@link BigDecimal}.
+	 * The result is returned as a double which is an approximation of the computed value
+	 * but this is the best we can request given the requirements.
+	 * 
+	 * @param point the point
+	 * @param linePoint1 the first point of the line
+	 * @param linePoint2 the second point of the line
+	 * @return the approximation as double of the result
+	 * @see Segment#getLocation(Vector2, Vector2, Vector2)
+	 */
+	private double getLocationExact(Vector2 point, Vector2 linePoint1, Vector2 linePoint2) {
+		BigDecimal pax = new BigDecimal(point.x);
+		BigDecimal pay = new BigDecimal(point.y);
+		BigDecimal pbx = new BigDecimal(linePoint1.x);
+		BigDecimal pby = new BigDecimal(linePoint1.y);
+		BigDecimal pcx = new BigDecimal(linePoint2.x);
+		BigDecimal pcy = new BigDecimal(linePoint2.y);
 		
 		BigDecimal d1 = pcx.subtract(pbx).multiply(pay.subtract(pby));
 		BigDecimal d2 = pax.subtract(pbx).multiply(pcy.subtract(pby));

@@ -6,8 +6,17 @@ import org.junit.Test;
 
 import junit.framework.TestCase;
 
+/**
+ * Test cases and randomized versions for the methods in {@link CompoundDecimal} class.
+ * @author Manolis Tsamis
+ * @version 3.4.0
+ * @since 3.4.0
+ */
 public class CompoundDecimalTest {
 	
+	/**
+	 * Test the various ways to create new {@link CompoundDecimal} instances
+	 */
 	@Test
 	public void create() {
 		CompoundDecimal ed = new CompoundDecimal(2);
@@ -38,6 +47,9 @@ public class CompoundDecimalTest {
 		TestCase.assertEquals(0.1 * 0.2, ed6.getEstimation());
 	}
 	
+	/**
+	 * Tests for methods that check the logical/physical size of a {@link CompoundDecimal}
+	 */
 	@Test
 	public void size() {
 		CompoundDecimal ed = new CompoundDecimal(2);
@@ -49,6 +61,9 @@ public class CompoundDecimalTest {
 		TestCase.assertEquals(2, ed.capacity());
 	}
 	
+	/**
+	 * Tests for appending new components to a {@link CompoundDecimal}
+	 */
 	@Test
 	public void append() {
 		CompoundDecimal ed = new CompoundDecimal(5);
@@ -68,7 +83,10 @@ public class CompoundDecimalTest {
 		TestCase.assertEquals(3, ed.size());
 		TestCase.assertEquals(111.0, ed.get(2));
 	}
-
+	
+	/**
+	 * Tests the various ways to copy {@link CompoundDecimal}s
+	 */
 	@Test
 	public void copy() {
 		CompoundDecimal ed = new CompoundDecimal(2);
@@ -99,6 +117,9 @@ public class CompoundDecimalTest {
 		TestCase.assertEquals(15.0, ed.get(1));
 	}
 	
+	/**
+	 * Test the clear method
+	 */
 	@Test
 	public void clear() {
 		CompoundDecimal ed = new CompoundDecimal(2);
@@ -111,6 +132,9 @@ public class CompoundDecimalTest {
 		TestCase.assertEquals(0, ed.size());
 	}
 	
+	/**
+	 * Test the method that removes unnecessary zeros from a {@link CompoundDecimal}
+	 */
 	@Test
 	public void removeZeros() {
 		CompoundDecimal ed = new CompoundDecimal(6);
@@ -127,6 +151,9 @@ public class CompoundDecimalTest {
 		TestCase.assertEquals(3, ed.size());
 	}
 	
+	/**
+	 * Test the method that negates the value of a {@link CompoundDecimal}
+	 */
 	@Test
 	public void negate() {
 		CompoundDecimal ed = new CompoundDecimal(5);
@@ -152,6 +179,9 @@ public class CompoundDecimalTest {
 		TestCase.assertEquals(-10.0, ed.getEstimation());
 	}
 	
+	/**
+	 * Test the method that estimates a {@link CompoundDecimal}'s value with a double
+	 */
 	@Test
 	public void getEstimation() {
 		CompoundDecimal ed = new CompoundDecimal(5);
@@ -174,6 +204,9 @@ public class CompoundDecimalTest {
 		TestCase.assertEquals(1.0, ed.getEstimation());
 	}
 	
+	/**
+	 * Test the normalize method that ensures a {@link CompoundDecimal} has at least one component
+	 */
 	@Test
 	public void normalize() {
 		CompoundDecimal ed = new CompoundDecimal(2);
@@ -191,6 +224,9 @@ public class CompoundDecimalTest {
 		TestCase.assertEquals(-4.0, ed2.get(1));
 	}
 	
+	/**
+	 * Test the addition method. The sum method is also throughly tested below with more randomized tests.
+	 */
 	@Test
 	public void sum() {
 		CompoundDecimal ed1 = CompoundDecimal.valueOf(10.0);
@@ -208,6 +244,11 @@ public class CompoundDecimalTest {
 	/** Seed for the randomized test. Can be any value */
 	private static final int SEED = 0;
 	
+	/**
+	 * Test the methods that checks whether a particular {@link CompoundDecimal} honors the
+	 * invariants described in the corresponding class.
+	 * Also checks that the result of various operations continues to satisfy those invariants (as they should). 
+	 */
 	@Test
 	public void checkInvariants() {
 		CompoundDecimal ed1 = new CompoundDecimal(3);
@@ -270,32 +311,51 @@ public class CompoundDecimalTest {
 			TestCase.assertTrue(test.checkInvariants());
 		}
 	}
-
+	
+	/**
+	 * Check {@link IndexOutOfBoundsException} for negative index.
+	 */
 	@Test(expected = IndexOutOfBoundsException.class)
 	public void testIndex1() {
 		new CompoundDecimal(1).get(-1);
 	}
-
+	
+	/**
+	 * Check {@link IndexOutOfBoundsException} for index bigger than capacity.
+	 */
 	@Test(expected = IndexOutOfBoundsException.class)
 	public void testIndex2() {
 		new CompoundDecimal(2).get(2);
 	}
-
+	
+	/**
+	 * Check {@link IndexOutOfBoundsException} for adding more components than the capacity.
+	 */
 	@Test(expected = IndexOutOfBoundsException.class)
 	public void testIndex3() {
 		new CompoundDecimal(2).append(0.0).append(0.0).append(0.0);
 	}
-
+	
+	/**
+	 * Check {@link IllegalArgumentException} for creating a {@link CompoundDecimal} with negative capacity.
+	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void testArgument1() {
 		new CompoundDecimal(-5);
 	}
-
+	
+	/**
+	 * Check {@link IllegalArgumentException} for creating a {@link CompoundDecimal} with zero capacity.
+	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void testArgument2() {
 		new CompoundDecimal(0);
 	}
 	
+	/**
+	 * Check that ensureInvariants fires the corresponding {@link IllegalStateException} if
+	 * the invariants do not hold.
+	 */
 	@Test(expected = IllegalStateException.class)
 	public void testState() {
 		CompoundDecimal ed = new CompoundDecimal(2);
