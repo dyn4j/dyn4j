@@ -26,20 +26,25 @@ public class RobustGeometryTest {
 			Vector2 pb = pa.product(random.nextDouble());
 			Vector2 pc = pa.product(random.nextDouble());
 			
-			for (int x = -blockSize; x <= blockSize; x++) {
-				for (int y = -blockSize; y <= blockSize; y++) {
-					long coordX = Double.doubleToLongBits(pc.x);
-					long coordY = Double.doubleToLongBits(pc.y);
-
-					double offsetCoordX = Double.longBitsToDouble(coordX + x);
-					double offsetCoordY = Double.longBitsToDouble(coordY + y);
+			//loop to all directions
+			for (int up = 0; up <= 4; up++) {
+				boolean xUp = (up % 2) == 0;
+				boolean yUp = (up / 2) == 0;
+				
+				Vector2 pcOffset = pc.copy();
+				
+				// test all adjacent floating point values in this quadrant
+				for (int y = 0; y < blockSize; y++) {
+					for (int x = 0; x < blockSize; x++) {
+						double exact = getLocationExact(pcOffset, pa, pb);
+						double robust = RobustGeometry.getLocation(pcOffset, pa, pb);
+						
+						TestCase.assertEquals(Math.signum(exact), Math.signum(robust));
+						
+						pcOffset.x = xUp? Math.nextUp(pcOffset.x) : Math.nextDown(pcOffset.x);
+					}
 					
-					Vector2 pcOffset = new Vector2(offsetCoordX, offsetCoordY);
-					
-					double exact = getLocationExact(pcOffset, pa, pb);
-					double robust = RobustGeometry.getLocation(pcOffset, pa, pb);
-					
-					TestCase.assertEquals(Math.signum(exact), Math.signum(robust));
+					pcOffset.y = yUp? Math.nextUp(pcOffset.y) : Math.nextDown(pcOffset.y);
 				}
 			}
 		}
