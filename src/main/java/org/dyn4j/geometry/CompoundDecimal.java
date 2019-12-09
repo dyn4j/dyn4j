@@ -629,41 +629,4 @@ import java.util.Arrays;
 		
 		return error;
 	}
-	
-	/**
-	 * Performs cross product on four primitives and also allocates a new {@link CompoundDecimal}
-	 * with the appropriate capacity to store the result.
-	 * 
-	 * @param ax The x value of the vector a
-	 * @param ay The y value of the vector a
-	 * @param bx The x value of the vector b
-	 * @param by The y value of the vector b
-	 * @return The result
-	 * @see #Cross_Product(double, double, double, double, CompoundDecimal)
-	 */
-	public static CompoundDecimal Cross_Product(double ax, double ay, double bx, double by) {
-		return CompoundDecimal.Cross_Product(ax, ay, bx, by, new CompoundDecimal(4));
-	}
-	
-	/**
-	 * Performs the cross product of two vectors a, b, that is ax * by - ay * bx but with extended precision
-	 * and stores the 4 component result in the given {@link CompoundDecimal} result.
-	 * 
-	 * @param ax The x value of the vector a
-	 * @param ay The y value of the vector a
-	 * @param bx The x value of the vector b
-	 * @param by The y value of the vector b
-	 * @param result The {@link CompoundDecimal} in which the cross product is stored
-	 * @return The result
-	 */
-	public static CompoundDecimal Cross_Product(double ax, double ay, double bx, double by, CompoundDecimal result) {
-		double axby = ax * by;
-		double aybx = bx * ay;
-		double axbyTail = CompoundDecimal.fromProduct(ax, by, axby);
-		double aybxTail = CompoundDecimal.fromProduct(bx, ay, aybx);
-		
-		CompoundDecimal.fromDiff2x2(axbyTail, axby, aybxTail, aybx, result);
-		
-		return result;
-	}
 }

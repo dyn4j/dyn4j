@@ -61,6 +61,43 @@ public final class RobustGeometry {
 	}
 	
 	/**
+	 * Performs cross product on four primitives and also allocates a new {@link CompoundDecimal}
+	 * with the appropriate capacity to store the result.
+	 * 
+	 * @param ax The x value of the vector a
+	 * @param ay The y value of the vector a
+	 * @param bx The x value of the vector b
+	 * @param by The y value of the vector b
+	 * @return The result
+	 * @see #cross(double, double, double, double, CompoundDecimal)
+	 */
+	public static CompoundDecimal cross(double ax, double ay, double bx, double by) {
+		return cross(ax, ay, bx, by, new CompoundDecimal(4));
+	}
+	
+	/**
+	 * Performs the cross product of two vectors a, b, that is ax * by - ay * bx but with extended precision
+	 * and stores the 4 component result in the given {@link CompoundDecimal} result.
+	 * 
+	 * @param ax The x value of the vector a
+	 * @param ay The y value of the vector a
+	 * @param bx The x value of the vector b
+	 * @param by The y value of the vector b
+	 * @param result The {@link CompoundDecimal} in which the cross product is stored
+	 * @return The result
+	 */
+	public static CompoundDecimal cross(double ax, double ay, double bx, double by, CompoundDecimal result) {
+		double axby = ax * by;
+		double aybx = bx * ay;
+		double axbyTail = CompoundDecimal.fromProduct(ax, by, axby);
+		double aybxTail = CompoundDecimal.fromProduct(bx, ay, aybx);
+		
+		CompoundDecimal.fromDiff2x2(axbyTail, axby, aybxTail, aybx, result);
+		
+		return result;
+	}
+	
+	/**
 	 * Robust side-of-line test.
 	 * Computes the same value with {@link Segment#getLocation(Vector2, Vector2, Vector2)} but with
 	 * enough precision so the sign of the result is correct for any {@link Vector2}s pa, pb, pc.
@@ -117,7 +154,7 @@ public final class RobustGeometry {
 		// Calculate the cross product but with more precision than before
 		// But don't bother yet to perform the differences acx, acy, bcx, bcy
 		// with full precision
-		CompoundDecimal.Cross_Product(acx, acy, bcx, bcy, B);
+		RobustGeometry.cross(acx, acy, bcx, bcy, B);
 		
 		double det = B.getEstimation();
 		double errorBound = errorBoundB * detSum;
@@ -148,13 +185,13 @@ public final class RobustGeometry {
 		// This case is so rare that we don't know if there are any inputs going into it
 		// At this point we have to go full out and calculate all the products with full precision
 		
-		CompoundDecimal.Cross_Product(acxTail, bcx, acyTail, bcy, buffer);
+		RobustGeometry.cross(acxTail, bcx, acyTail, bcy, buffer);
 		B.sum(buffer, C1);
 		
-		CompoundDecimal.Cross_Product(acx, bcxTail, acy, bcyTail, buffer);
+		RobustGeometry.cross(acx, bcxTail, acy, bcyTail, buffer);
 		C1.sum(buffer, C2);
 		
-		CompoundDecimal.Cross_Product(acxTail, bcxTail, acyTail, bcyTail, buffer);
+		RobustGeometry.cross(acxTail, bcxTail, acyTail, bcyTail, buffer);
 		C2.sum(buffer, D);
 		
 		// return the most significant component of the last buffer D.
