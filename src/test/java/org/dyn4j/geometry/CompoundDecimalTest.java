@@ -307,7 +307,8 @@ public class CompoundDecimalTest {
 			double c = random.nextDouble() * 10 - 5;
 			double d = random.nextDouble() * 10 - 5;
 			
-			test = CompoundDecimal.Cross_Product(a, b, c, d);
+			// Also check with the related RobustGeometry.cross method
+			test = RobustGeometry.cross(a, b, c, d);
 			TestCase.assertTrue(test.checkInvariants());
 		}
 	}
