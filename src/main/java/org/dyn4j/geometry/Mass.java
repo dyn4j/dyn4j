@@ -139,6 +139,14 @@ public class Mass {
 		this.invInertia = mass.invInertia;
 	}
 	
+	/**
+	 * Copies this {@link Mass}.
+	 * @return {@link Mass}
+	 */
+	public Mass copy() {
+		return new Mass(this);
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
