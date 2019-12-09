@@ -509,7 +509,10 @@ public class Transform implements Transformable {
 	 * @return double angle in the range [-&pi;, &pi;]
 	 */
 	public double getRotationAngle() {
-		return Math.atan2(this.sint, this.cost);
+		// Copied from Rotation class; See there for more info
+		double acos = Math.acos(this.cost);
+		double angle = (this.sint >= 0)? acos: -acos;
+		return angle;
 	}
 	
 	/**
