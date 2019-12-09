@@ -16,12 +16,6 @@ public final class RobustGeometry {
 	private static final double resultErrorBound;
 	private static final double errorBoundA, errorBoundB, errorBoundC;
 	
-	/** Internal {@link CompoundDecimal} used to store incremental approximations of the result */
-	private static final CompoundDecimal B, C1, C2, D;
-	
-	/** Internal {@link CompoundDecimal} buffer to store the immediate result of sums */
-	private static final CompoundDecimal buffer;
-	
 	/**
 	 * Initializer that computes the necessary splitter value and error bounds based on the machine epsilon.
 	 * Also instantiates the internal {@link CompoundDecimal} variables.
@@ -50,14 +44,6 @@ public final class RobustGeometry {
 		errorBoundA = (3 + 16 * epsilon) * epsilon;
 		errorBoundB = (2 + 12 * epsilon) * epsilon;
 		errorBoundC = (9 + 64 * epsilon) * epsilon * epsilon;
-		
-		// allocate the {@link CompoundDecimal}s based on the max amount of components
-		// that will possibly be needed for each
-		B = new CompoundDecimal(4);
-		C1 = new CompoundDecimal(8);
-		C2 = new CompoundDecimal(12);
-		D = new CompoundDecimal(16);
-		buffer = new CompoundDecimal(4);
 	}
 	
 	/**
@@ -154,7 +140,7 @@ public final class RobustGeometry {
 		// Calculate the cross product but with more precision than before
 		// But don't bother yet to perform the differences acx, acy, bcx, bcy
 		// with full precision
-		RobustGeometry.cross(acx, acy, bcx, bcy, B);
+		CompoundDecimal B = RobustGeometry.cross(acx, acy, bcx, bcy);
 		
 		double det = B.getEstimation();
 		double errorBound = errorBoundB * detSum;
@@ -185,14 +171,17 @@ public final class RobustGeometry {
 		// This case is so rare that we don't know if there are any inputs going into it
 		// At this point we have to go full out and calculate all the products with full precision
 		
+		// Re-usable buffer to store the results of the 3 cross products needed below
+		CompoundDecimal buffer = new CompoundDecimal(4);
+		
 		RobustGeometry.cross(acxTail, bcx, acyTail, bcy, buffer);
-		B.sum(buffer, C1);
+		CompoundDecimal C1 = B.sum(buffer);
 		
 		RobustGeometry.cross(acx, bcxTail, acy, bcyTail, buffer);
-		C1.sum(buffer, C2);
+		CompoundDecimal C2 = C1.sum(buffer);
 		
 		RobustGeometry.cross(acxTail, bcxTail, acyTail, bcyTail, buffer);
-		C2.sum(buffer, D);
+		CompoundDecimal D = C2.sum(buffer);
 		
 		// return the most significant component of the last buffer D.
 		// reminder: components are non-overlapping so this is ok
