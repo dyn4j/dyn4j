@@ -611,13 +611,13 @@ import java.util.Arrays;
 		// the exact order of those operations is necessary for correct functionality 
 		
 		// split a in two parts
-		double ac = RobustGeometry.splitter * a;
+		double ac = RobustGeometry.SPLITTER * a;
 		double abig = ac - a;
 		double ahi = ac - abig;
 		double alo = a - ahi;
 		
 		// split b in two parts
-		double bc = RobustGeometry.splitter * b;
+		double bc = RobustGeometry.SPLITTER * b;
 		double bbig = bc - b;
 		double bhi = bc - bbig;
 		double blo = b - bhi;

@@ -10,11 +10,11 @@ package org.dyn4j.geometry;
  */
 public final class RobustGeometry {
 	/** Constant that {@link CompoundDecimal} uses to split doubles when calculation multiplication error */
-	static final int splitter;
+	static final int SPLITTER;
 	
 	/** Error bounds used to adaptively use as much precision is required for a correct result */
-	private static final double resultErrorBound;
-	private static final double errorBoundA, errorBoundB, errorBoundC;
+	private static final double RESULT_ERROR_BOUND;
+	private static final double ERROR_BOUND_A, ERROR_BOUND_B, ERROR_BOUND_C;
 	
 	/**
 	 * Initializer that computes the necessary splitter value and error bounds based on the machine epsilon.
@@ -37,13 +37,13 @@ public final class RobustGeometry {
 		
 		splitterMut += 1.0;
 		
-		splitter = splitterMut;
+		SPLITTER = splitterMut;
 		
 		// compute bounds as described in the paper
-		resultErrorBound = (3 + 8 * epsilon) * epsilon;
-		errorBoundA = (3 + 16 * epsilon) * epsilon;
-		errorBoundB = (2 + 12 * epsilon) * epsilon;
-		errorBoundC = (9 + 64 * epsilon) * epsilon * epsilon;
+		RESULT_ERROR_BOUND = (3 + 8 * epsilon) * epsilon;
+		ERROR_BOUND_A = (3 + 16 * epsilon) * epsilon;
+		ERROR_BOUND_B = (2 + 12 * epsilon) * epsilon;
+		ERROR_BOUND_C = (9 + 64 * epsilon) * epsilon * epsilon;
 	}
 	
 	/**
@@ -113,7 +113,7 @@ public final class RobustGeometry {
 		}
 		
 		double detSum = Math.abs(detLeft + detRight);
-		if (Math.abs(det) >= errorBoundA * detSum) {
+		if (Math.abs(det) >= ERROR_BOUND_A * detSum) {
 			// This will cover the vast majority of cases
 			return det;
 		}
@@ -143,7 +143,7 @@ public final class RobustGeometry {
 		CompoundDecimal B = RobustGeometry.cross(acx, acy, bcx, bcy);
 		
 		double det = B.getEstimation();
-		double errorBound = errorBoundB * detSum;
+		double errorBound = ERROR_BOUND_B * detSum;
 		if (Math.abs(det) >= errorBound) {
 			return det;
 		}
@@ -160,7 +160,7 @@ public final class RobustGeometry {
 			return det;
 		}
 		
-		errorBound = errorBoundC * detSum + resultErrorBound * Math.abs(det);
+		errorBound = ERROR_BOUND_C * detSum + RESULT_ERROR_BOUND * Math.abs(det);
 		// But don't use full precision to calculate the following cross products with the tail values
 		det += (acx * bcyTail + bcy * acxTail) - (acy * bcxTail + bcx * acyTail);
 		
