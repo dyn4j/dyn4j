@@ -376,7 +376,19 @@ public class Rotation {
 	 * @return double
 	 */
 	public double toRadians() {
-		return Math.atan2(this.sint, this.cost);
+		// Since we have the cos and sin values computed we can use
+		// the Math.acos function which is much faster than Math.atan2
+		
+		// We can find the angle in the range [0, &pi;] with Math.acos
+		// and then we'll use the sign of the sin value to find in which
+		// semicircle we are and extend the result to [-&pi;, &pi;]
+		
+		// Apart from being quite faster this is also more precise
+		// (see the documentation of Math.acos and Math.atan2)
+		
+		double acos = Math.acos(this.cost);
+		double angle = (this.sint >= 0)? acos: -acos;
+		return angle;
 	}
 	
 	/**
