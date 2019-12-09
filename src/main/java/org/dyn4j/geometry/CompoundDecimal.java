@@ -176,7 +176,10 @@ import java.util.Arrays;
 		return this;
 	}
 	
+	/** The mask to get the mantissa of a double as per the standard; Taken from {@link DoubleConsts#SIGN_BIT_MASK} */
     private static final long SIGNIF_BIT_MASK = 0x000FFFFFFFFFFFFFL;
+    
+    /** The implicit bit in the mantissa of a double */
     private static final long IMPLICIT_MANTISSA_BIT = 0x0010000000000000L;
     
     /**
@@ -206,25 +209,51 @@ import java.util.Arrays;
 					return false;
 				}
 				
-				// get the exponents
+				// A number n in the floating point representation can be written as
+				// n = +/- 0.1xxxxx...x * 2 ^ exp
+				//   mantissa ^~~~~~~~^       ^~~ exponent
+				// where the above x are the binary digits either 0 or 1 except for the first digit after the decimal point
+				// which is always 1. The exponent part is essentially a shift of the decimal point
+				
+				// If we have two numbers a, b with a > b then they're non-overlapping if a's lower set bit to
+				// be to the left of b's higher set bit *after those have been scaled by their exponents accordingly*.
+				// The sign is irrelevant for this.
+				// a = -0.10101011 * 2^5 = -10101.011
+				// b = 0.111001 * 2^-1 = 0.0111001
+				
+				// if we align a and b we can see that they overlap
+				// -10101.011
+				//      0.0111001
+				//         ^^ overlap
+				// They would also overlap if b's exponent was -2 (for a single bit)
+				// only if b's exponent where less than -2 then there would be no overlap
+				
+				// get the value of the exponents
 				int exp1 = Math.getExponent(lastValue);
 				int exp2 = Math.getExponent(currentValue);
 				
-				// get the significants
+				// get the significants (the binary representation of the mantissa part)
+				// The first, always 1 bit is not actually stored, so we'll add it ourselves
 				long mantissa1 = (Double.doubleToLongBits(lastValue) & SIGNIF_BIT_MASK) | IMPLICIT_MANTISSA_BIT;
 				long mantissa2 = (Double.doubleToLongBits(currentValue) & SIGNIF_BIT_MASK) | IMPLICIT_MANTISSA_BIT;
 				
 				// We want to find the logical location of the most significant bit in the smallest component
 				// and of the least significant bit in the largest component, accounting for the exponents as well
-				// In the following convention bit numbering is done from msd to lsd
+				// In the following convention bit numbering is done from the higher to the lowest bit.
+				// Note that the first bit of the double representation won't be the first in the long below.
+				// This is logical since the mantissa is fewer bits wide than a long, but it's not a problem
+				// since both the msd and lsd will have the same difference.
 				int msd1 = Long.numberOfLeadingZeros(mantissa1);
 				int lsd2 = Long.SIZE - Long.numberOfTrailingZeros(mantissa2) - 1;
 				
+				// Apply the exponents
 				// The exponents are essentially shifts in the bit positions
 				msd1 -= exp1;
 				lsd2 -= exp2;
 				
-				// The non-overlapping property
+				// Finally check for the non-overlapping property
+				// We want the lower bit of the currentValue's representation to be higher than
+				// lastValue's higher bit
 				if (!(lsd2 < msd1)) {
 					return false;
 				}
