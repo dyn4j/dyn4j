@@ -422,7 +422,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		// we need to translate/rotate the point so that this ellipse is
 		// considered centered at the origin with it's semi-major axis aligned
 		// with the x-axis and its semi-minor axis aligned with the y-axis
-		Vector2 p = point.difference(this.ellipseCenter).rotate(-this.getRotationAngle());
+		Vector2 p = point.difference(this.ellipseCenter).inverseRotate(this.rotation);
 		
 		// get the farthest point
 		Vector2 fp = Ellipse.getFarthestPointOnEllipse(this.halfWidth, this.height, p);
@@ -446,7 +446,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		// we need to translate/rotate the point so that this ellipse is
 		// considered centered at the origin with it's semi-major axis aligned
 		// with the x-axis and its semi-minor axis aligned with the y-axis
-		Vector2 p = point.difference(this.ellipseCenter).rotate(-this.getRotationAngle());
+		Vector2 p = point.difference(this.ellipseCenter).inverseRotate(this.rotation);
 		
 		// if the point is below the x axis, then we only need to perform the ellipse code
 		if (p.y < 0) {
@@ -553,8 +553,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		// get the world space point into local coordinates
 		Vector2 localPoint = transform.getInverseTransformed(point);
 		// account for local rotation
-		double r = this.getRotationAngle();
-		localPoint.rotate(-r, this.ellipseCenter.x, this.ellipseCenter.y);
+		localPoint.inverseRotate(this.rotation, this.ellipseCenter);
 		
 		// translate into local coordinates
 		double x = (localPoint.x - this.ellipseCenter.x);
@@ -569,10 +568,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		double b2 = this.height * this.height;
 		double value = x2 / a2 + y2 / b2;
 		
-		if (value <= 1.0) {
-			return true;
-		}
-		return false;
+		return value <= 1.0;
 	}
 	
 
