@@ -32,39 +32,6 @@ import java.util.Arrays;
 	/** The number of components this {@link CompoundDecimal} currently contains */
 	private int size;
 	
-	/** An index that is used to sequentially iterate the components of this {@link CompoundDecimal} */
-	private int mark;
-	
-	/**
-	 * Advances the iteration mark to the next component
-	 */
-	public void advanceMark() {
-		this.mark++;
-	}
-	
-	/**
-	 * Resets the iteration mark to point to the first element.
-	 * Should be called to initiate the iteration.
-	 */
-	public void resetMark() {
-		this.mark = 0;
-	}
-	
-	/**
-	 * @return The component currently pointed by the iteration mark.
-	 */
-	public double getCurrent() {
-		return this.get(mark);
-	}
-	
-	/**
-	 * @return boolean true iff the iteration mark currently points
-	 * to a valid component within the logical bounds of this {@link CompoundDecimal}
-	 */
-	public boolean hasMore() {
-		return this.mark < this.size;
-	}
-	
 	/**
 	 * Creates a new {@link CompoundDecimal} with the specified length.
 	 * The initial {@link CompoundDecimal} created does not contains any components.
@@ -363,18 +330,18 @@ import java.util.Arrays;
 	 * 
 	 * @param carry The carry from previous computations
 	 * @param e The {@link CompoundDecimal} that probably has more components
+	 * @param eIndex The index to the next component of e that has to be examined
 	 * @param result The {@link CompoundDecimal} in which the result is stored
 	 * @return The result
 	 */
-	CompoundDecimal sumEpilogue(double carry, CompoundDecimal e, CompoundDecimal result) {
-		double error, sum;
-		
-		while (e.hasMore()) {
-			double enow = e.getCurrent();
-			error = fromSum(carry, enow, sum = carry + enow);
+	CompoundDecimal sumEpilogue(double carry, CompoundDecimal e, int eIndex, CompoundDecimal result) {
+		for (; eIndex < e.size(); eIndex++) {
+			double enow = e.get(eIndex);
+			double sum = carry + enow;
+			double error = fromSum(carry, enow, sum);
+			
 			carry = sum;
 			result.appendNonZero(error);
-			e.advanceMark();
 		}
 		
 		result.appendNonZero(carry);
@@ -395,78 +362,77 @@ import java.util.Arrays;
 	 * @return The result
 	 */
 	public CompoundDecimal sum(CompoundDecimal f, CompoundDecimal result) {
-		CompoundDecimal e = this;
-		
 		// The following algorithm performs addition of two CompoundDecimals
 		// It is based on the original fast_expansion_sum_zeroelim function written
 		// by the author of the said paper
 		
+		CompoundDecimal e = this;
 		result.clear();
-		e.resetMark();
-		f.resetMark();
 		
-		// enow and fnow is the current component examined from each of e and f
-		double enow = e.getCurrent();
-		double fnow = f.getCurrent();
+		// eIndex and fIndex are used to iterate the components of e and f accordingly
+		int eIndex = 0, fIndex = 0;
+		// enow = e[eIndex] and fnow = f[fIndex] is the current component examined for e and f
+		double enow = e.get(eIndex);
+		double fnow = f.get(fIndex);
 		
 		// sum will be used to store the sum needed for the fromSum method
 		// error will store the error as returned from fromSum method
 		// carry will store the value that will be summed in the next sum
 		double carry, sum, error;
 		
-		// (fnow > enow) == (fnow > -enow)
 		// each time we need the next component in increasing magnitude
+		// (fnow > enow) == (fnow > -enow)
 		if (Math.abs(enow) <= Math.abs(fnow)) {
 			carry = enow;
-			e.advanceMark();
+			eIndex++;
 			
-			if (!e.hasMore()) {
-				return sumEpilogue(carry, f, result);
+			if (eIndex >= e.size()) {
+				return sumEpilogue(carry, f, fIndex, result);
 			}
 			
-			enow = e.getCurrent();
+			enow = e.get(eIndex);
 		} else {
 			carry = fnow;
-			f.advanceMark();
+			fIndex++;
 			
-			if (!f.hasMore()) {
-				return sumEpilogue(carry, e, result);
+			if (fIndex >= f.size()) {
+				return sumEpilogue(carry, e, eIndex, result);
 			}
 			
-			fnow = f.getCurrent();
+			fnow = f.get(fIndex);
 		}
 		
 		while (true) {
 			if (Math.abs(enow) <= Math.abs(fnow)) {
 				// perform the addition with the carry from the previous iterarion
 				error = fromSum(carry, enow, sum = carry + enow);
-				e.advanceMark();
+				eIndex++;
 				carry = sum;
 				
 				// append + zero elimination
 				result.appendNonZero(error);
 				
 				// if this CompoundDecimal has no more components then move to the epilogue
-				if (!e.hasMore()) {
-					return sumEpilogue(carry, f, result);
+				if (eIndex >= e.size()) {
+					return sumEpilogue(carry, f, fIndex, result);
 				}
 				
-				enow = e.getCurrent();
+				enow = e.get(eIndex);
 			} else {
 				// perform the addition with the carry from the previous iterarion
 				error = fromSum(carry, fnow, sum = carry + fnow);
-				f.advanceMark();
+				fIndex++;
 				carry = sum;
 				
 				// append + zero elimination
 				result.appendNonZero(error);
 				
 				// if this CompoundDecimal has no more components then move to the epilogue
-				if (!f.hasMore()) {
-					return sumEpilogue(carry, e, result);
+				if (fIndex >= f.size()) {
+					return sumEpilogue(carry, e, eIndex, result);
 				}
 				
-				fnow = f.getCurrent();
+				fnow = f.get(fIndex);
 			}				
 		}
 	}
