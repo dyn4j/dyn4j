@@ -320,7 +320,7 @@ import java.util.Arrays;
 	 * @see #sum(CompoundDecimal, CompoundDecimal)
 	 */
 	public CompoundDecimal sum(CompoundDecimal f) {
-		return this.sum(f, new CompoundDecimal(this.size() + f.size()));
+		return this.sum(f, null);
 	}
 	
 	/**
@@ -352,13 +352,15 @@ import java.util.Arrays;
 	
 	/**
 	 * Performs the addition of this {@link CompoundDecimal} with the given {@link CompoundDecimal} f
-	 * and stores the result in the provided {@link CompoundDecimal} result.
-	 * Calling this method will erase all existing components of result.
+	 * and stores the result in the provided {@link CompoundDecimal} {@code result}.
+	 * If {@code result} is null it allocates a new {@link CompoundDecimal} with the 
+	 * appropriate capacity to store the result. Otherwise the components of {@code result}
+	 * are cleared and the resulting value is stored there, assuming there is enough capacity.
 	 * 
 	 * Be careful that it must be {@code f} &ne; {@code result} &ne; {@code this}.
 	 * 
 	 * @param f The {@link CompoundDecimal} to sum with this {@link CompoundDecimal}
-	 * @param result The {@link CompoundDecimal} in which the sum is stored
+	 * @param result The {@link CompoundDecimal} in which the sum is stored or null to allocate a new one
 	 * @return The result
 	 */
 	public CompoundDecimal sum(CompoundDecimal f, CompoundDecimal result) {
@@ -366,8 +368,14 @@ import java.util.Arrays;
 		// It is based on the original fast_expansion_sum_zeroelim function written
 		// by the author of the said paper
 		
+		// allocate a new instance of sufficient size if result is null or just clear
+		if (result == null) {
+			result = new CompoundDecimal(this.size() + f.size());
+		} else {
+			result.clear();	
+		}
+		
 		CompoundDecimal e = this;
-		result.clear();
 		
 		// eIndex and fIndex are used to iterate the components of e and f accordingly
 		int eIndex = 0, fIndex = 0;
@@ -550,7 +558,9 @@ import java.util.Arrays;
 	
 	/**
 	 * Given two unrolled expansions (a0, a1) and (b0, b1) performs the difference
-	 * (a0, a1) - (b0, b1) and stores the 4 component result in the given {@link CompoundDecimal} result.
+	 * (a0, a1) - (b0, b1) and stores the 4 component result in the given {@link CompoundDecimal} {@code result}.
+	 * In the same way as with {@link CompoundDecimal#sum(CompoundDecimal, CompoundDecimal)} if {@code result} is null
+	 * a new one is allocated, otherwise the existing is cleared and used.
 	 * Does not perform zero elimination.
 	 * This is also a helper method to allow fast computation of the cross product
 	 * without the overhead of creating new {@link CompoundDecimal} and performing
@@ -560,12 +570,19 @@ import java.util.Arrays;
 	 * @param a1 The second component of a
 	 * @param b0 The first component of b
 	 * @param b1 The second component of b
-	 * @param result The {@link CompoundDecimal} in which the difference is stored
+	 * @param result The {@link CompoundDecimal} in which the difference is stored or null to allocate a new one
 	 * @return The result
 	 */
 	static CompoundDecimal fromDiff2x2(double a0, double a1, double b0, double b1, CompoundDecimal result) {
 		// the exact order of those operations is necessary for correct functionality 
 		// This is a rewrite of the corresponding Two_Two_Diff macro in the original code
+		
+		// allocate a new instance of sufficient size if result is null or just clear
+		if (result == null) {
+			result = new CompoundDecimal(4);
+		} else {
+			result.clear();	
+		}
 		
 		// x0-x1-x2-x3 store the resulting components with increasing magnitude
 		double x0, x1, x2, x3;
@@ -584,7 +601,6 @@ import java.util.Arrays;
 		x1 = CompoundDecimal.fromDiff(imm1, b1, imm = imm1 - b1);
 		x2 = CompoundDecimal.fromSum(imm2, imm, x3 = imm2 + imm);
 		
-		result.clear();
 		result.append(x0);
 		result.append(x1);
 		result.append(x2);

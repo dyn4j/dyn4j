@@ -58,12 +58,14 @@ public final class RobustGeometry {
 	 * @see #cross(double, double, double, double, CompoundDecimal)
 	 */
 	public static CompoundDecimal cross(double ax, double ay, double bx, double by) {
-		return cross(ax, ay, bx, by, new CompoundDecimal(4));
+		return cross(ax, ay, bx, by, null);
 	}
 	
 	/**
 	 * Performs the cross product of two vectors a, b, that is ax * by - ay * bx but with extended precision
-	 * and stores the 4 component result in the given {@link CompoundDecimal} result.
+	 * and stores the 4 component result in the given {@link CompoundDecimal} {@code result}.
+	 * In the same way as with {@link CompoundDecimal#sum(CompoundDecimal, CompoundDecimal)} if {@code result} is null
+	 * a new one is allocated, otherwise the existing is cleared and used.
 	 * 
 	 * @param ax The x value of the vector a
 	 * @param ay The y value of the vector a
@@ -78,9 +80,10 @@ public final class RobustGeometry {
 		double axbyTail = CompoundDecimal.fromProduct(ax, by, axby);
 		double aybxTail = CompoundDecimal.fromProduct(bx, ay, aybx);
 		
-		CompoundDecimal.fromDiff2x2(axbyTail, axby, aybxTail, aybx, result);
+		// result can be null in which case CompoundDecimal.fromDiff2x2 will allocate a new one
+		CompoundDecimal newResult = CompoundDecimal.fromDiff2x2(axbyTail, axby, aybxTail, aybx, result);
 		
-		return result;
+		return newResult;
 	}
 	
 	/**
