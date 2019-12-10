@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.dyn4j.geometry.Segment;
+import org.dyn4j.geometry.RobustGeometry;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
@@ -40,7 +40,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * This algorithm is O(n log n) worst case where n is the number of points.
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.3.1
  * @since 2.2.0
  */
 public class MonotoneChain implements HullGenerator {
@@ -65,6 +65,11 @@ public class MonotoneChain implements HullGenerator {
 			// throw a null pointer exception with a good message
 			throw new NullPointerException(Messages.getString("geometry.hull.nullPoints"));
 		}
+		
+		// This algorithm is very resilient to errors even with the vastly imprecise 
+		// Segment#getLocation. But we still implement it with RobustGeometry#getLocation
+		// in order to provide better coincident point removal and consistent results
+		// with the rest algorithms; the added overhead is quite small
 		
 		// find the points whose x values are the smallest and largest
 		int minmin = 0, minmax = 0, maxmin = 0, maxmax = 0;
@@ -120,7 +125,7 @@ public class MonotoneChain implements HullGenerator {
 			// get the current point
 			Vector2 p = points[i];
 			// where is it relative to the dividing line?
-			if (Segment.getLocation(p, lp1, lp2) >= 0.0) {
+			if (RobustGeometry.getLocation(p, lp1, lp2) >= 0.0) {
 				// if its on or to the left of the dividing line
 				// check if this invalidates any points currently
 				// in the convex hull
@@ -130,7 +135,7 @@ public class MonotoneChain implements HullGenerator {
 					Vector2 p2 = lower.get(lSize - 2);
 					// check if the point is to the left of the
 					// last edge in the current convex hull
-					if (Segment.getLocation(p, p2, p1) > 0.0) {
+					if (RobustGeometry.getLocation(p, p2, p1) > 0.0) {
 						// if so, we can safely add the new point and
 						// maintain convexity
 						break;
@@ -159,7 +164,7 @@ public class MonotoneChain implements HullGenerator {
 			// get the current point
 			Vector2 p = points[i];
 			// where is it relative to the dividing line?
-			if (Segment.getLocation(p, up1, up2) >= 0.0) {
+			if (RobustGeometry.getLocation(p, up1, up2) >= 0.0) {
 				// if its on or to the left of the dividing line
 				// check if this invalidates any points currently
 				// in the convex hull
@@ -169,7 +174,7 @@ public class MonotoneChain implements HullGenerator {
 					Vector2 p2 = upper.get(uSize - 2);
 					// check if the point is to the left of the
 					// last edge in the current convex hull
-					if (Segment.getLocation(p, p2, p1) > 0.0) {
+					if (RobustGeometry.getLocation(p, p2, p1) > 0.0) {
 						// if so, we can safely add the new point and
 						// maintain convexity
 						break;
