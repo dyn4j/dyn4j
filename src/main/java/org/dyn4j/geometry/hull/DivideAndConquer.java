@@ -24,9 +24,7 @@
  */
 package org.dyn4j.geometry.hull;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
@@ -64,32 +62,11 @@ public class DivideAndConquer implements HullGenerator {
 			throw new NullPointerException(Messages.getString("geometry.hull.nullPoints"));
 		}
 		
-		// check for coincident points
-		// since they're ordered, we can iterate sequentially
-		List<Vector2> cleansed = new ArrayList<Vector2>();
-		for (int i = 0; i < size;) {
-			Vector2 p0 = points[i++];
-			cleansed.add(p0);
-			
-			if (i < size) {
-				Vector2 p1 = points[i];
-				while (p1.equals(p0)) {
-					i++;
-					if (i >= size) {
-						break;
-					}
-					p1 = points[i];
-				}
-			}
-		}
-		
-		points = cleansed.toArray(new Vector2[0]);
-		size = points.length;
-
-		if (cleansed.size() <= 2) return points;
+		// No need to pre-process the input and remove coincident points
+		// Those are gracefully handled and removed in the main algorithm 
 		
 		// perform the divide and conquer algorithm on the point cloud
-		LinkedVertexHull hull = this.divide(points, 0, size - 1);
+		LinkedVertexHull hull = this.divide(points, 0, size);
 		
 		// return the array
 		return hull.toArray();
@@ -98,17 +75,15 @@ public class DivideAndConquer implements HullGenerator {
 	/**
 	 * Recursive method to subdivide and merge the points.
 	 * @param points the array of points
-	 * @param first the first index
-	 * @param last the last index
+	 * @param first the first index inclusive
+	 * @param last the last index exclusive
 	 * @return {@link LinkedVertexHull} the convex hull created
 	 */
 	final LinkedVertexHull divide(Vector2[] points, int first, int last) {
 		// compute the size of the hull we need to create
 		int size = last - first;
-		// check if its zero
-		if (size == 0) {
-			// if its zero then we only have one point
-			// create a hull containing the one point
+		if (size == 1) {
+			// if we only have one point create a hull containing the one point
 			return new LinkedVertexHull(points[first]);
 		} else {
 			// otherwise find the middle index
@@ -116,7 +91,7 @@ public class DivideAndConquer implements HullGenerator {
 			// create the left convex hull
 			LinkedVertexHull left = divide(points, first, mid);
 			// create the right convex hull
-			LinkedVertexHull right = divide(points, mid + 1, last);
+			LinkedVertexHull right = divide(points, mid, last);
 			// merge the two convex hulls
 			return LinkedVertexHull.merge(left, right);
 		}
