@@ -282,22 +282,28 @@ public class Rectangle extends Polygon implements Convex, Wound, Shape, Transfor
 		// AABB, we have to find in which of the four possible rotation states this
 		// rectangle currently is. This is done below by comparing the first two vertices
 		
-		Vector2 v0 = transform.getTransformed(this.vertices[0]);
-		Vector2 v1 = transform.getTransformed(this.vertices[1]);
-		Vector2 v2 = transform.getTransformed(this.vertices[2]);
-		Vector2 v3 = transform.getTransformed(this.vertices[3]);
+		// It's more convenient to use transform.getTransformed instead but we can
+		// split to transform.getTransformedX/Y to save 4 Vector2 allocations 'for free'
+		double v0x = transform.getTransformedX(this.vertices[0]);
+		double v0y = transform.getTransformedY(this.vertices[0]);
+		double v1x = transform.getTransformedX(this.vertices[1]);
+		double v1y = transform.getTransformedY(this.vertices[1]);
+		double v2x = transform.getTransformedX(this.vertices[2]);
+		double v2y = transform.getTransformedY(this.vertices[2]);
+		double v3x = transform.getTransformedX(this.vertices[3]);
+		double v3y = transform.getTransformedY(this.vertices[3]);
 		
-		if (v0.y > v1.y) {
-			if (v0.x < v1.x) {
-				return new AABB(v0.x, v1.y, v2.x, v3.y);
+		if (v0y > v1y) {
+			if (v0x < v1x) {
+				return new AABB(v0x, v1y, v2x, v3y);
 			} else {
-				return new AABB(v1.x, v2.y, v3.x, v0.y);
+				return new AABB(v1x, v2y, v3x, v0y);
 			}
 		} else {
-			if (v0.x < v1.x) {
-				return new AABB(v3.x, v0.y, v1.x, v2.y);
+			if (v0x < v1x) {
+				return new AABB(v3x, v0y, v1x, v2y);
 			} else {
-				return new AABB(v2.x, v3.y, v0.x, v1.y);
+				return new AABB(v2x, v3y, v0x, v1y);
 			}
 		}
 	}

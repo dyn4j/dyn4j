@@ -25,6 +25,7 @@
 package org.dyn4j.geometry;
 
 import org.dyn4j.Epsilon;
+import org.dyn4j.resources.Messages;
 
 /**
  * This class represents a rotation (in 2D space).
@@ -93,6 +94,27 @@ public class Rotation {
 		
 		// The rotation is the normalized vector
 		return new Rotation(direction.x / magnitude, direction.y / magnitude);
+	}
+	
+	/**
+	 * Static method to create a {@link Rotation} from a pair of values that lie on the unit circle;
+	 * That is a pair of values (x, y) such that x = cos(&theta;), y = sin(&theta;) for some value &theta;
+	 * This method is provided for the case where the cos and sin values are already computed and
+	 * the overhead can be avoided.
+	 * This method will check whether those values are indeed on the unit circle and otherwise throw an {@link IllegalArgumentException}.
+	 * @param cost The x value = cos(&theta;)
+	 * @param sint The y value = sin(&theta;)
+	 * @throws IllegalArgumentException if (cost, sint) is not on the unit circle
+	 * @return A {@link Rotation} defined by (cost, sint)
+	 */
+	public static Rotation of(double cost, double sint) {
+		double magnitude = cost * cost + sint * sint;
+		
+		if (Math.abs(magnitude - 1) > Epsilon.E) {
+			throw new IllegalArgumentException(Messages.getString("geometry.rotation.invalidPoint"));
+		}
+		
+		return new Rotation(cost, sint);
 	}
 	
 	/**
@@ -354,7 +376,19 @@ public class Rotation {
 	 * @return double
 	 */
 	public double toRadians() {
-		return Math.atan2(this.sint, this.cost);
+		// Since we have the cos and sin values computed we can use
+		// the Math.acos function which is much faster than Math.atan2
+		
+		// We can find the angle in the range [0, &pi;] with Math.acos
+		// and then we'll use the sign of the sin value to find in which
+		// semicircle we are and extend the result to [-&pi;, &pi;]
+		
+		// Apart from being quite faster this is also more precise
+		// (see the documentation of Math.acos and Math.atan2)
+		
+		double acos = Math.acos(this.cost);
+		double angle = (this.sint >= 0)? acos: -acos;
+		return angle;
 	}
 	
 	/**
@@ -379,7 +413,7 @@ public class Rotation {
 	 * @return {@link Vector2}
 	 */
 	public Vector2 toVector(double magnitude) {
-		return new Vector2(cost * magnitude, sint * magnitude);
+		return new Vector2(this.cost * magnitude, this.sint * magnitude);
 	}
 	
 	/**
