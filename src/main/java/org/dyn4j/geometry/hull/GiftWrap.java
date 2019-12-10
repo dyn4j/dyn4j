@@ -27,7 +27,7 @@ package org.dyn4j.geometry.hull;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.dyn4j.geometry.Segment;
+import org.dyn4j.geometry.RobustGeometry;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
@@ -93,7 +93,9 @@ public class GiftWrap implements HullGenerator {
 				if (test == current) continue;
 				if (test == next) continue;
 				// check the point relative to the current line
-				double location = Segment.getLocation(test, current, next);
+				// Use the robust side of line test because otherwise this algorithm
+				// can fall in an endless loop
+				double location = RobustGeometry.getLocation(test, current, next);
 				if (location < 0.0) {
 					next = test;
 				} else if (location == 0.0) {
@@ -135,4 +137,5 @@ public class GiftWrap implements HullGenerator {
 		// return the array
 		return hullPoints;
 	}
+	
 }
