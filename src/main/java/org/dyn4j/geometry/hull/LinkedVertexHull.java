@@ -119,13 +119,13 @@ final class LinkedVertexHull {
 			LinkedVertex prevLu = lu;
 			LinkedVertex prevRu = ru;
 			
-			while (limitRightU > 0 && RobustGeometry.getLocation(ru.prev.point, lu.point, ru.point) <= 0) {
-				ru = ru.prev;
+			while (limitRightU > 0 && RobustGeometry.getLocation(ru.next.point, lu.point, ru.point) <= 0) {
+				ru = ru.next;
 				limitRightU--;
 			}
 			
-			while (limitLeftU > 0 && RobustGeometry.getLocation(lu.next.point, lu.point, ru.point) <= 0) {
-				lu = lu.next;
+			while (limitLeftU > 0 && RobustGeometry.getLocation(lu.prev.point, lu.point, ru.point) <= 0) {
+				lu = lu.prev;
 				limitLeftU--;
 			}
 			
@@ -147,13 +147,13 @@ final class LinkedVertexHull {
 			LinkedVertex prevLl = ll;
 			LinkedVertex prevRl = rl;
 			
-			while (limitRightL > 0 && RobustGeometry.getLocation(rl.next.point, ll.point, rl.point) >= 0) {
-				rl = rl.next;
+			while (limitRightL > 0 && RobustGeometry.getLocation(rl.prev.point, ll.point, rl.point) >= 0) {
+				rl = rl.prev;
 				limitRightL--;
 			}
 			
-			while (limitLeftL > 0 && RobustGeometry.getLocation(ll.prev.point, ll.point, rl.point) >= 0) {
-				ll = ll.prev;
+			while (limitLeftL > 0 && RobustGeometry.getLocation(ll.next.point, ll.point, rl.point) >= 0) {
+				ll = ll.next;
 				limitLeftL--;
 			}
 			
@@ -164,12 +164,11 @@ final class LinkedVertexHull {
 		}
 		
 		// link the hull
+		lu.next = ru;
+		ru.prev = lu;
 		
-		lu.prev = ru;
-		ru.next = lu;
-		
-		ll.next = rl;
-		rl.prev = ll;
+		ll.prev = rl;
+		rl.next = ll;
 		
 		// We could compute size with a closed-form type based on the four values
 		// of limitLeft/Right/L/U but it is not straightforward and there is no observable
