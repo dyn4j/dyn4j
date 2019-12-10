@@ -110,7 +110,9 @@ public class GrahamScan implements HullGenerator {
 			
 			// Use the robust side of line test because otherwise this algorithm
 			// can produce incorrect results in edge cases
-			double location = RobustGeometry.getLocation(p3, p1, p2);
+			// The order of parameters here must match the one in ReferenceComparator
+			// in order to obtain correct results and winding
+			double location = RobustGeometry.getLocation(p3, p2, p1);
 			
 			if (location < 0.0) {
 				// if its to the left, then push the new point on

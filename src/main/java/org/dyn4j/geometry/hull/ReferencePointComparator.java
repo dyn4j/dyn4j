@@ -55,7 +55,9 @@ final class ReferencePointComparator implements Comparator<Vector2> {
 	public int compare(Vector2 p1, Vector2 p2) {
 		// we can use the getLocation method to successfully sort by angle to the reference point
 		// This is also must faster than using atan2 to compute the angles of the points.
-		int sign = (int) Math.signum(RobustGeometry.getLocation(p2, reference, p1));
+		// The order of parameters here must match the one in GrahamScan
+		// in order to obtain correct results and winding
+		int sign = (int) Math.signum(RobustGeometry.getLocation(p2, p1, reference));
 		
 		if (sign == 0) {
 			// If the point are colinear we *must* choose the one that is more close to the reference point
