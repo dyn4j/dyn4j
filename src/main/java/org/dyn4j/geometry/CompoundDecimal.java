@@ -49,7 +49,7 @@ import java.util.Arrays;
  * @version 3.4.0
  * @since 3.4.0
  */
-/* strictfp */ class CompoundDecimal {
+class CompoundDecimal {
 	/** The array storing this {@link CompoundDecimal}'s component values */
 	private final double[] components;
 	
