@@ -26,6 +26,7 @@ package org.dyn4j.geometry.hull;
 
 import java.util.Comparator;
 
+import org.dyn4j.geometry.RobustGeometry;
 import org.dyn4j.geometry.Vector2;
 
 /**
@@ -36,9 +37,6 @@ import org.dyn4j.geometry.Vector2;
  * @since 2.2.0
  */
 final class ReferencePointComparator implements Comparator<Vector2> {
-	/** The positive x-axis */
-	private static final Vector2 X_AXIS = new Vector2(1.0, 0.0);
-	
 	/** The reference point for testing polar angles */
 	final Vector2 reference;
 	
@@ -55,17 +53,15 @@ final class ReferencePointComparator implements Comparator<Vector2> {
 	 */
 	@Override
 	public int compare(Vector2 p1, Vector2 p2) {
-		// get the vectors from p to the points
-		Vector2 v1 = reference.to(p1);
-		Vector2 v2 = reference.to(p2);
-		// compare the vector's angles with the x-axis
-		int diff = (int) Math.signum(v2.getAngleBetween(ReferencePointComparator.X_AXIS) - v1.getAngleBetween(ReferencePointComparator.X_AXIS));
-		if (diff == 0.0) {
-			double cross = v1.cross(v2);
-			if (cross > 0.0) return -1;
-			else if (cross < 0.0) return 1;
-			else return diff;
+		// we can use the getLocation method to successfully sort by angle to the reference point
+		// This is also must faster than using atan2 to compute the angles of the points.
+		int sign = (int) Math.signum(RobustGeometry.getLocation(p2, reference, p1));
+		
+		if (sign == 0) {
+			// If the point are colinear we *must* choose the one that is more close to the reference point
+			return Double.compare(reference.distanceSquared(p1), reference.distanceSquared(p2));
 		}
-		return diff;
+		
+		return sign;
 	}
 }
