@@ -34,13 +34,10 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link MonotoneChain} algorithm.
  * @author William Bittle
- * @version 3.3.1
- * @since 3.3.1
+ * @version 3.4.0
+ * @since 3.4.0
  */
 public class MonotoneChainTest {
-	/** Identity Transform instance */
-	private static final Transform IDENTITY = new Transform();
-
 	/**
 	 * Returns a random point cloud
 	 * @param seed the random seed
@@ -77,7 +74,7 @@ public class MonotoneChainTest {
 		// make sure all the points are either on or contained in the hull
 		for (int i = 0; i < cloud.length; i++) {
 			Vector2 p = cloud[i];
-			if (!poly.contains(p, IDENTITY)) {
+			if (!RobustGeometryTest.robustPolygonContains(poly.getVertices(), p)) {
 				TestCase.fail("Hull does not contain all points.");
 			}
 		}

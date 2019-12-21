@@ -27,6 +27,7 @@ package org.dyn4j.geometry;
 import java.math.BigDecimal;
 import java.util.Random;
 
+import org.dyn4j.Epsilon;
 import org.junit.Test;
 
 import junit.framework.TestCase;
@@ -135,6 +136,64 @@ public class RobustGeometryTest {
 		BigDecimal result = d1.subtract(d2);
 		
 		return result.doubleValue();
+	}
+	
+	/**
+	 * This is a helper method to test the convex hull generators.
+	 * 
+	 * Tests if {@code point} is contained in the convex polygon defined by {@code vertices}.
+	 * This points must be from a {@link Polygon} instance, validated through it's constructor.
+	 * Uses robust geometric predicates.
+	 * 
+	 * @param vertices A list of vertices in CW/CCW order that describe a convex polygon
+	 * @param point The point to test
+	 * @return boolean
+	 * @see Polygon#contains(Vector2)
+	 */
+	public static boolean robustPolygonContains(Vector2[] vertices, Vector2 point) {
+		// Copied from Polygon#contains but uses RobustGeometry#getLocation instead
+		
+		// start from the pair (p1 = last, p2 = first) so there's no need to check in the loop for wrap-around of the i + 1 vertice
+		int size = vertices.length;
+		Vector2 p1 = vertices[size - 1];
+		Vector2 p2 = vertices[0];
+		
+		// get the location of the point relative to the first two vertices
+		double last = RobustGeometry.getLocation(point, p1, p2);
+		
+		// loop through the rest of the vertices
+		for (int i = 0; i < size - 1; i++) {
+			// p1 is now p2
+			p1 = p2;
+			// p2 is the next point
+			p2 = vertices[i + 1];
+			// check if they are equal (one of the vertices)
+			if (point.equals(p1) || point.equals(p2)) {
+				return true;
+			}
+			
+			// do side of line test
+			double location = RobustGeometry.getLocation(point, p1, p2);
+			
+			// multiply the last location with this location
+			// if they are the same sign then the opertation will yield a positive result
+			// -x * -y = +xy, x * y = +xy, -x * y = -xy, x * -y = -xy
+			if (last * location < 0) {
+				// reminder: (-0.0 < 0.0) evaluates to false and not true
+				return false;
+			}
+			
+			// update the last location, but only if it's not zero
+			// a location of zero indicates that the point lies ON the line
+			// through p1 and p2. We can ignore these values because the
+			// convexity requirement of the shape will ensure that if it's
+			// outside, a sign will change.
+			if (Math.abs(location) > Epsilon.E) {
+				last = location;
+			}
+		}
+		
+		return true;
 	}
 	
 }
