@@ -35,7 +35,7 @@ import org.dyn4j.geometry.Shape;
  * Represents and id for a contact constraint between two {@link Convex}
  * {@link Shape}s on two {@link Body}s.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 1.0.0
  */
 public final class ContactConstraintId {
@@ -157,7 +157,7 @@ public final class ContactConstraintId {
 	/**
 	 * Returns the first body.
 	 * @return Body
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	public Body getBody1() {
 		return this.body1;
@@ -166,7 +166,7 @@ public final class ContactConstraintId {
 	/**
 	 * Returns the second body.
 	 * @return Body
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	public Body getBody2() {
 		return this.body2;
@@ -175,7 +175,7 @@ public final class ContactConstraintId {
 	/**
 	 * Returns the fixture on the first body.
 	 * @return BodyFixture
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	public BodyFixture getFixture1() {
 		return this.fixture1;
@@ -184,7 +184,7 @@ public final class ContactConstraintId {
 	/**
 	 * Returns the fixture on the second body.
 	 * @return BodyFixture
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	public BodyFixture getFixture2() {
 		return this.fixture2;

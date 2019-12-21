@@ -31,7 +31,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link Rotation} class.
  * @author Manolis Tsamis
- * @since 3.3.1
+ * @since 3.4.0
  */
 public class RotationTest {
 	/**

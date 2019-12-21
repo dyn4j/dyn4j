@@ -40,7 +40,7 @@ import org.dyn4j.resources.Messages;
  * This algorithm is O(nh) worst case where n is the number of points and h is the
  * number of sides in the resulting convex hull.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 2.2.0
  */
 public class GiftWrap implements HullGenerator {

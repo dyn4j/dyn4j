@@ -42,7 +42,7 @@
  * All algorithms should produce a valid convex hull that encapsulates all the given points, but there's
  * no guarantee that the algorithms produce identical results.
  * @author William Bittle 
- * @version 3.3.1
+ * @version 3.4.0
  * @since 2.2.0
  */
 package org.dyn4j.geometry.hull;

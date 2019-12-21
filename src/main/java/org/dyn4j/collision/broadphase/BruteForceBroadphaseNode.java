@@ -33,8 +33,8 @@ import org.dyn4j.geometry.Transform;
  * Simple helper class that holds information for each item in the {@link BruteForceBroadphase}.
  * 
  * @author Manolis Tsamis
- * @version 3.3.1
- * @since 3.3.1
+ * @version 3.4.0
+ * @since 3.4.0
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
  */

@@ -40,7 +40,7 @@ import org.dyn4j.resources.Messages;
  * {@link Polygon} approximation. Another option is to use the GJK or your own collision detection
  * algorithm for this shape only and use SAT on others.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 3.1.7
  */
 public class HalfEllipse extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
@@ -232,7 +232,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	 * Typically this means that the ellipse is axis-aligned, but it could also
 	 * mean that the ellipse is not axis-aligned, but the given local space axis
 	 * has been rotated to match the alignment of the ellipse.
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	private void getFarthestPointOnAlignedEllipse(Vector2 localAxis) {
 		// an ellipse is a circle with a non-uniform scaling transformation applied
@@ -401,7 +401,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	 * Returns the maximum distance between the two vertices of the ellipse and the given point.
 	 * @param point the point
 	 * @return double
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	private double getMaxDistanceToVertices(Vector2 point) {
 		// find the maximum radius from the center
@@ -416,7 +416,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	 * Returns the maximum distance from the given point to the ellipse.
 	 * @param point the point
 	 * @return double
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	private double getMaxDistanceEllipse(Vector2 point) {
 		// we need to translate/rotate the point so that this ellipse is
@@ -437,7 +437,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	 * Returns the maximum distance between the given point and the half ellipse.
 	 * @param point the point
 	 * @return double
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	private double getMaxDistanceHalfEllipse(Vector2 point) {
 		final double a = this.halfWidth;

@@ -33,7 +33,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Class devoted to improving performance of {@link Segment} detection queries.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 2.0.0
  */
 public final class SegmentDetector {

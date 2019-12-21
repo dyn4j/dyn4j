@@ -39,7 +39,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents an impulse based rigid {@link Body} physics collision resolver.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 3.2.0
  */
 public class SequentialImpulses implements ContactConstraintSolver {
@@ -51,7 +51,7 @@ public class SequentialImpulses implements ContactConstraintSolver {
 	 * @param contact The contact
 	 * @param n The normal
 	 * @return The mass coefficient
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	private double getMassCoefficient(ContactConstraint contactConstraint, Contact contact, Vector2 n) {
 		return this.getMassCoefficient(contactConstraint, contact.r1, contact.r2, n);
@@ -65,7 +65,7 @@ public class SequentialImpulses implements ContactConstraintSolver {
 	 * @param r2 The contact.r2 field
 	 * @param n The normal
 	 * @return The mass coefficient
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	private double getMassCoefficient(ContactConstraint contactConstraint, Vector2 r1, Vector2 r2, Vector2 n) {
 		Mass m1 = contactConstraint.getBody1().getMass();
@@ -83,7 +83,7 @@ public class SequentialImpulses implements ContactConstraintSolver {
 	 * @param contactConstraint The {@link ContactConstraint} of the bodies
 	 * @param contact The corresponding {@link contact}
 	 * @param J
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	private void updateBodies(ContactConstraint contactConstraint, Contact contact, Vector2 J) {
 		Body b1 = contactConstraint.getBody1();
@@ -106,7 +106,7 @@ public class SequentialImpulses implements ContactConstraintSolver {
 	 * @param contactConstraint The {@link ContactConstraint}
 	 * @param contact The {@link Contact}
 	 * @return double
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	private double getRelativeVelocityAlongNormal(ContactConstraint contactConstraint, Contact contact) {
 		Vector2 rv = this.getRelativeVelocity(contactConstraint, contact);
@@ -119,7 +119,7 @@ public class SequentialImpulses implements ContactConstraintSolver {
 	 * @param contactConstraint The {@link ContactConstraint}
 	 * @param contact The {@link Contact}
 	 * @return The relative velocity vector
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	private Vector2 getRelativeVelocity(ContactConstraint contactConstraint, Contact contact) {
 		Body b1 = contactConstraint.getBody1();
@@ -488,7 +488,7 @@ public class SequentialImpulses implements ContactConstraintSolver {
 	 * @param contact2 The second contact
 	 * @param x
 	 * @param a
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	private void updateBodies(ContactConstraint contactConstraint, Contact contact1, Contact contact2, Vector2 x, Vector2 a) {
 		Body b1 = contactConstraint.getBody1();

@@ -54,7 +54,7 @@ import junit.framework.TestCase;
 /**
  * Class used to test the {@link BroadphaseDetector} methods.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 3.0.0
  */
 @RunWith(Parameterized.class)
