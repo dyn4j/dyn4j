@@ -31,25 +31,25 @@ import org.junit.Test;
 import junit.framework.TestCase;
 
 /**
- * Test cases and randomized versions for the methods in {@link CompoundDecimal} class.
+ * Test cases and randomized versions for the methods in {@link AdaptiveDecimal} class.
  * @author Manolis Tsamis
  * @version 3.4.0
  * @since 3.4.0
  */
-public class CompoundDecimalTest {
+public class AdaptiveDecimalTest {
 	
 	/**
-	 * Test the various ways to create new {@link CompoundDecimal} instances
+	 * Test the various ways to create new {@link AdaptiveDecimal} instances
 	 */
 	@Test
 	public void create() {
-		CompoundDecimal ed = new CompoundDecimal(2);
+		AdaptiveDecimal ed = new AdaptiveDecimal(2);
 		TestCase.assertEquals(0, ed.size());
 		TestCase.assertEquals(2, ed.capacity());
 		
 		ed.append(1.0);
 		
-		CompoundDecimal ed2 = new CompoundDecimal(ed);
+		AdaptiveDecimal ed2 = new AdaptiveDecimal(ed);
 		TestCase.assertEquals(1, ed.size());
 		TestCase.assertEquals(2, ed.capacity());
 		
@@ -58,25 +58,25 @@ public class CompoundDecimalTest {
 		
 		TestCase.assertEquals(1.0, ed.get(0));
 		
-		CompoundDecimal ed3 = CompoundDecimal.valueOf(10.0);
+		AdaptiveDecimal ed3 = AdaptiveDecimal.valueOf(10.0);
 		TestCase.assertEquals(10.0, ed3.get(0));
 		
-		CompoundDecimal ed4 = CompoundDecimal.fromSum(0.1, 0.2);
+		AdaptiveDecimal ed4 = AdaptiveDecimal.fromSum(0.1, 0.2);
 		TestCase.assertEquals(0.1 + 0.2, ed4.getEstimation());
 		
-		CompoundDecimal ed5 = CompoundDecimal.fromDiff(0.1, 0.2);
+		AdaptiveDecimal ed5 = AdaptiveDecimal.fromDiff(0.1, 0.2);
 		TestCase.assertEquals(0.1 - 0.2, ed5.getEstimation());
 		
-		CompoundDecimal ed6 = CompoundDecimal.fromProduct(0.1, 0.2);
+		AdaptiveDecimal ed6 = AdaptiveDecimal.fromProduct(0.1, 0.2);
 		TestCase.assertEquals(0.1 * 0.2, ed6.getEstimation());
 	}
 	
 	/**
-	 * Tests for methods that check the logical/physical size of a {@link CompoundDecimal}
+	 * Tests for methods that check the logical/physical size of a {@link AdaptiveDecimal}
 	 */
 	@Test
 	public void size() {
-		CompoundDecimal ed = new CompoundDecimal(2);
+		AdaptiveDecimal ed = new AdaptiveDecimal(2);
 		TestCase.assertEquals(0, ed.size());
 		TestCase.assertEquals(2, ed.capacity());
 		
@@ -86,11 +86,11 @@ public class CompoundDecimalTest {
 	}
 	
 	/**
-	 * Tests for appending new components to a {@link CompoundDecimal}
+	 * Tests for appending new components to a {@link AdaptiveDecimal}
 	 */
 	@Test
 	public void append() {
-		CompoundDecimal ed = new CompoundDecimal(5);
+		AdaptiveDecimal ed = new AdaptiveDecimal(5);
 		
 		ed.append(1.0);
 		TestCase.assertEquals(1, ed.size());
@@ -109,14 +109,14 @@ public class CompoundDecimalTest {
 	}
 	
 	/**
-	 * Tests the various ways to copy {@link CompoundDecimal}s
+	 * Tests the various ways to copy {@link AdaptiveDecimal}s
 	 */
 	@Test
 	public void copy() {
-		CompoundDecimal ed = new CompoundDecimal(2);
+		AdaptiveDecimal ed = new AdaptiveDecimal(2);
 		ed.append(0.1).append(15.0);
 		
-		CompoundDecimal copy = ed.copy();
+		AdaptiveDecimal copy = ed.copy();
 		
 		TestCase.assertEquals(0.1, copy.get(0));
 		TestCase.assertEquals(15.0, copy.get(1));
@@ -127,7 +127,7 @@ public class CompoundDecimalTest {
 		TestCase.assertEquals(0.1, ed.get(0));
 		TestCase.assertEquals(15.0, ed.get(1));
 		
-		CompoundDecimal copy2 = new CompoundDecimal(5);
+		AdaptiveDecimal copy2 = new AdaptiveDecimal(5);
 		copy2.copyFrom(ed);
 		
 		TestCase.assertEquals(0.1, copy2.get(0));
@@ -146,7 +146,7 @@ public class CompoundDecimalTest {
 	 */
 	@Test
 	public void clear() {
-		CompoundDecimal ed = new CompoundDecimal(2);
+		AdaptiveDecimal ed = new AdaptiveDecimal(2);
 		ed.append(0.1).append(15.0);
 		
 		TestCase.assertEquals(2, ed.size());
@@ -157,11 +157,11 @@ public class CompoundDecimalTest {
 	}
 	
 	/**
-	 * Test the method that removes unnecessary zeros from a {@link CompoundDecimal}
+	 * Test the method that removes unnecessary zeros from a {@link AdaptiveDecimal}
 	 */
 	@Test
 	public void removeZeros() {
-		CompoundDecimal ed = new CompoundDecimal(6);
+		AdaptiveDecimal ed = new AdaptiveDecimal(6);
 		
 		ed.removeZeros();
 		TestCase.assertEquals(0, ed.size());
@@ -176,26 +176,26 @@ public class CompoundDecimalTest {
 	}
 	
 	/**
-	 * Test the method that negates the value of a {@link CompoundDecimal}
+	 * Test the method that negates the value of a {@link AdaptiveDecimal}
 	 */
 	@Test
 	public void negate() {
-		CompoundDecimal ed = new CompoundDecimal(5);
+		AdaptiveDecimal ed = new AdaptiveDecimal(5);
 		
 		ed.negate();
 		
 		ed.append(1.0);
-		ed = ed.sum(CompoundDecimal.valueOf(2.0));
-		ed = ed.sum(CompoundDecimal.valueOf(3.0));
-		ed = ed.sum(CompoundDecimal.valueOf(5.0));
+		ed = ed.sum(AdaptiveDecimal.valueOf(2.0));
+		ed = ed.sum(AdaptiveDecimal.valueOf(3.0));
+		ed = ed.sum(AdaptiveDecimal.valueOf(5.0));
 		ed.negate();
 		
 		TestCase.assertEquals(-11.0, ed.getEstimation());
 		
 		ed.clear();
 		ed.append(-1.0);
-		ed = ed.sum(CompoundDecimal.valueOf(-2.0));
-		ed = ed.sum(CompoundDecimal.valueOf(-7.0));
+		ed = ed.sum(AdaptiveDecimal.valueOf(-2.0));
+		ed = ed.sum(AdaptiveDecimal.valueOf(-7.0));
 		ed.negate();
 		
 		TestCase.assertEquals(10.0, ed.getEstimation());
@@ -204,42 +204,42 @@ public class CompoundDecimalTest {
 	}
 	
 	/**
-	 * Test the method that estimates a {@link CompoundDecimal}'s value with a double
+	 * Test the method that estimates a {@link AdaptiveDecimal}'s value with a double
 	 */
 	@Test
 	public void getEstimation() {
-		CompoundDecimal ed = new CompoundDecimal(5);
+		AdaptiveDecimal ed = new AdaptiveDecimal(5);
 		
 		TestCase.assertEquals(0.0, ed.getEstimation());
 		
 		ed.append(0.0);
-		ed = ed.sum(CompoundDecimal.valueOf(1.0e-5));
-		ed = ed.sum(CompoundDecimal.valueOf(1.0e2));
-		ed = ed.sum(CompoundDecimal.valueOf(1.0e100));
+		ed = ed.sum(AdaptiveDecimal.valueOf(1.0e-5));
+		ed = ed.sum(AdaptiveDecimal.valueOf(1.0e2));
+		ed = ed.sum(AdaptiveDecimal.valueOf(1.0e100));
 		
 		TestCase.assertEquals(1.0e100, ed.getEstimation());
 		
 		ed.clear();
 		ed.append(1.0);
-		ed = ed.sum(CompoundDecimal.valueOf(2.0));
-		ed = ed.sum(CompoundDecimal.valueOf(3.0));
-		ed = ed.sum(CompoundDecimal.valueOf(-5.0));
+		ed = ed.sum(AdaptiveDecimal.valueOf(2.0));
+		ed = ed.sum(AdaptiveDecimal.valueOf(3.0));
+		ed = ed.sum(AdaptiveDecimal.valueOf(-5.0));
 		
 		TestCase.assertEquals(1.0, ed.getEstimation());
 	}
 	
 	/**
-	 * Test the normalize method that ensures a {@link CompoundDecimal} has at least one component
+	 * Test the normalize method that ensures a {@link AdaptiveDecimal} has at least one component
 	 */
 	@Test
 	public void normalize() {
-		CompoundDecimal ed = new CompoundDecimal(2);
+		AdaptiveDecimal ed = new AdaptiveDecimal(2);
 		TestCase.assertEquals(0, ed.size());
 		ed.normalize();
 		
 		TestCase.assertEquals(1, ed.size());
 		
-		CompoundDecimal ed2 = new CompoundDecimal(2);
+		AdaptiveDecimal ed2 = new AdaptiveDecimal(2);
 		ed2.append(1.0).append(-4.0);
 		ed2.normalize();
 		
@@ -253,15 +253,15 @@ public class CompoundDecimalTest {
 	 */
 	@Test
 	public void sum() {
-		CompoundDecimal ed1 = CompoundDecimal.valueOf(10.0);
-		CompoundDecimal ed2 = CompoundDecimal.valueOf(3.0);
+		AdaptiveDecimal ed1 = AdaptiveDecimal.valueOf(10.0);
+		AdaptiveDecimal ed2 = AdaptiveDecimal.valueOf(3.0);
 		
-		CompoundDecimal result = ed1.sum(ed2);
+		AdaptiveDecimal result = ed1.sum(ed2);
 		TestCase.assertEquals(13.0, result.getEstimation(), 1.0e-9);
 		
-		CompoundDecimal ed3 = CompoundDecimal.valueOf(0.35);
+		AdaptiveDecimal ed3 = AdaptiveDecimal.valueOf(0.35);
 		
-		CompoundDecimal result2 = result.sum(ed3);
+		AdaptiveDecimal result2 = result.sum(ed3);
 		TestCase.assertEquals(13.35, result2.getEstimation(), 1.0e-9);
 	}
 	
@@ -269,34 +269,34 @@ public class CompoundDecimalTest {
 	private static final int SEED = 0;
 	
 	/**
-	 * Test the methods that checks whether a particular {@link CompoundDecimal} honors the
+	 * Test the methods that checks whether a particular {@link AdaptiveDecimal} honors the
 	 * invariants described in the corresponding class.
 	 * Also checks that the result of various operations continues to satisfy those invariants (as they should). 
 	 */
 	@Test
 	public void checkInvariants() {
-		CompoundDecimal ed1 = new CompoundDecimal(3);
+		AdaptiveDecimal ed1 = new AdaptiveDecimal(3);
 		ed1.append(1.0).append(0.0).append(0.2);
 		TestCase.assertFalse(ed1.checkInvariants());
 
-		CompoundDecimal ed2 = new CompoundDecimal(5);
+		AdaptiveDecimal ed2 = new AdaptiveDecimal(5);
 		ed2.append(-1.0).append(0.0).append(0.0).append(0.2).append(0.0);
 		TestCase.assertFalse(ed2.checkInvariants());
 
-		CompoundDecimal ed3 = new CompoundDecimal(2);
+		AdaptiveDecimal ed3 = new AdaptiveDecimal(2);
 		ed3.append(1.0e-2).append(1.0e2 + 1.0e-2);
 		TestCase.assertFalse(ed3.checkInvariants());
 
-		CompoundDecimal ed4 = new CompoundDecimal(5);
+		AdaptiveDecimal ed4 = new AdaptiveDecimal(5);
 		ed4.append(-1.0 / 4.0).append(0.0).append(0.0).append(4.0 + 1.0 / 4.0).append(0.0);
 		TestCase.assertFalse(ed4.checkInvariants());
 		
-		CompoundDecimal ed5 = new CompoundDecimal(5);
+		AdaptiveDecimal ed5 = new AdaptiveDecimal(5);
 		ed5.append(0.0).append(1.0 / 4.0).append(0.0).append(4.0 + 32.0).append(32.0 * 32.0);
 		TestCase.assertTrue(ed5.checkInvariants());
 		ed5.ensureInvariants();
 		
-		CompoundDecimal ed6 = new CompoundDecimal(3);
+		AdaptiveDecimal ed6 = new AdaptiveDecimal(3);
 		ed6.append(0.0).append(0.0).append(0.0);
 		TestCase.assertTrue(ed6.checkInvariants());
 		ed5.ensureInvariants();
@@ -305,10 +305,10 @@ public class CompoundDecimalTest {
 		Random random = new Random(SEED);
 		final int iterations = 10000;
 		
-		CompoundDecimal acc = CompoundDecimal.valueOf(0);
+		AdaptiveDecimal acc = AdaptiveDecimal.valueOf(0);
 		
 		for (int i=0;i<iterations;i++) {
-			CompoundDecimal test = CompoundDecimal.valueOf(random.nextDouble() * 10 - 5);
+			AdaptiveDecimal test = AdaptiveDecimal.valueOf(random.nextDouble() * 10 - 5);
 			acc = acc.sum(test);
 			
 			TestCase.assertTrue(acc.checkInvariants());
@@ -317,15 +317,15 @@ public class CompoundDecimalTest {
 		for (int i=0;i<iterations;i++) {
 			double a = random.nextDouble() * 10 - 5;
 			double b = random.nextDouble() * 10 - 5;
-			CompoundDecimal test;
+			AdaptiveDecimal test;
 
-			test = CompoundDecimal.fromSum(a, b);
+			test = AdaptiveDecimal.fromSum(a, b);
 			TestCase.assertTrue(test.checkInvariants());
 			
-			test = CompoundDecimal.fromDiff(a, b);
+			test = AdaptiveDecimal.fromDiff(a, b);
 			TestCase.assertTrue(test.checkInvariants());
 			
-			test = CompoundDecimal.fromProduct(a, b);
+			test = AdaptiveDecimal.fromProduct(a, b);
 			TestCase.assertTrue(test.checkInvariants());
 
 			double c = random.nextDouble() * 10 - 5;
@@ -342,7 +342,7 @@ public class CompoundDecimalTest {
 	 */
 	@Test(expected = IndexOutOfBoundsException.class)
 	public void testIndex1() {
-		new CompoundDecimal(1).get(-1);
+		new AdaptiveDecimal(1).get(-1);
 	}
 	
 	/**
@@ -350,7 +350,7 @@ public class CompoundDecimalTest {
 	 */
 	@Test(expected = IndexOutOfBoundsException.class)
 	public void testIndex2() {
-		new CompoundDecimal(2).get(2);
+		new AdaptiveDecimal(2).get(2);
 	}
 	
 	/**
@@ -358,23 +358,23 @@ public class CompoundDecimalTest {
 	 */
 	@Test(expected = IndexOutOfBoundsException.class)
 	public void testIndex3() {
-		new CompoundDecimal(2).append(0.0).append(0.0).append(0.0);
+		new AdaptiveDecimal(2).append(0.0).append(0.0).append(0.0);
 	}
 	
 	/**
-	 * Check {@link IllegalArgumentException} for creating a {@link CompoundDecimal} with negative capacity.
+	 * Check {@link IllegalArgumentException} for creating a {@link AdaptiveDecimal} with negative capacity.
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void testArgument1() {
-		new CompoundDecimal(-5);
+		new AdaptiveDecimal(-5);
 	}
 	
 	/**
-	 * Check {@link IllegalArgumentException} for creating a {@link CompoundDecimal} with zero capacity.
+	 * Check {@link IllegalArgumentException} for creating a {@link AdaptiveDecimal} with zero capacity.
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void testArgument2() {
-		new CompoundDecimal(0);
+		new AdaptiveDecimal(0);
 	}
 	
 	/**
@@ -383,7 +383,7 @@ public class CompoundDecimalTest {
 	 */
 	@Test(expected = IllegalStateException.class)
 	public void testState() {
-		CompoundDecimal ed = new CompoundDecimal(2);
+		AdaptiveDecimal ed = new AdaptiveDecimal(2);
 		ed.append(1.0).append(0.5);
 		ed.ensureInvariants();
 	}

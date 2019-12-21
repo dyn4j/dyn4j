@@ -34,7 +34,7 @@ import java.util.Arrays;
  * be found at <a href="http://www.cs.cmu.edu/~quake/robust.html">http://www.cs.cmu.edu/~quake/robust.html</a>
  * <p>
  * Short description:
- * The value of this {@link CompoundDecimal} is represented as the sum of some components,
+ * The value of this {@link AdaptiveDecimal} is represented as the sum of some components,
  * where each component is a double value.
  * The components must be stored in increasing magnitude order, but there can be any amount of
  * zeros between components. The components must also satisfy the non-overlapping property, that is
@@ -49,20 +49,20 @@ import java.util.Arrays;
  * @version 3.4.0
  * @since 3.4.0
  */
-class CompoundDecimal {
-	/** The array storing this {@link CompoundDecimal}'s component values */
+class AdaptiveDecimal {
+	/** The array storing this {@link AdaptiveDecimal}'s component values */
 	private final double[] components;
 	
-	/** The number of components this {@link CompoundDecimal} currently contains */
+	/** The number of components this {@link AdaptiveDecimal} currently contains */
 	private int size;
 	
 	/**
-	 * Creates a new {@link CompoundDecimal} with the specified length.
-	 * The initial {@link CompoundDecimal} created does not contains any components.
+	 * Creates a new {@link AdaptiveDecimal} with the specified length.
+	 * The initial {@link AdaptiveDecimal} created does not contains any components.
 	 * 
-	 * @param length The maximum number of components this {@link CompoundDecimal} can store
+	 * @param length The maximum number of components this {@link AdaptiveDecimal} can store
 	 */
-	public CompoundDecimal(int length) {
+	public AdaptiveDecimal(int length) {
 		if (length <= 0) {
 			throw new IllegalArgumentException();
 		}
@@ -73,52 +73,52 @@ class CompoundDecimal {
 	
 	/**
 	 * Deep copy constructor.
-	 * @param other the {@link CompoundDecimal} to copy from
+	 * @param other the {@link AdaptiveDecimal} to copy from
 	 */
-	public CompoundDecimal(CompoundDecimal other) {
+	public AdaptiveDecimal(AdaptiveDecimal other) {
 		this.components = Arrays.copyOf(other.components, other.capacity());
 		this.size = other.size;
 	}
 	
 	/**
-	 * Internal helper constructor to create a {@link CompoundDecimal} with two components
+	 * Internal helper constructor to create a {@link AdaptiveDecimal} with two components
 	 * @param a0 the component with the smallest magnitude
 	 * @param a1 the component with the largest magnitude
 	 */
-	protected CompoundDecimal(double a0, double a1) {
+	protected AdaptiveDecimal(double a0, double a1) {
 		this.components = new double[] {a0, a1};
 		this.size = 2;
 	}
 	
 	/**
-	 * @return The number of components this {@link CompoundDecimal} currently has
+	 * @return The number of components this {@link AdaptiveDecimal} currently has
 	 */
 	public int size() {
 		return this.size;
 	}
 	
 	/**
-	 * @return The maximum number of components this {@link CompoundDecimal} can hold
+	 * @return The maximum number of components this {@link AdaptiveDecimal} can hold
 	 */
 	public int capacity() {
 		return this.components.length;
 	}
 	
 	/**
-	 * @return A deep copy of this {@link CompoundDecimal}
+	 * @return A deep copy of this {@link AdaptiveDecimal}
 	 */
-	public CompoundDecimal copy() {
-		return new CompoundDecimal(this);
+	public AdaptiveDecimal copy() {
+		return new AdaptiveDecimal(this);
 	}
 	
 	/**
-	 * Copies the components of another {@link CompoundDecimal} into this.
-	 * The capacity of the this {@link CompoundDecimal} is not modified and it should
+	 * Copies the components of another {@link AdaptiveDecimal} into this.
+	 * The capacity of the this {@link AdaptiveDecimal} is not modified and it should
 	 * be enough to hold all the components.
 	 * 
-	 * @param other The {@link CompoundDecimal} to copy from
+	 * @param other The {@link AdaptiveDecimal} to copy from
 	 */
-	public void copyFrom(CompoundDecimal other) {
+	public void copyFrom(AdaptiveDecimal other) {
 		System.arraycopy(other.components, 0, this.components, 0, other.size());
 		this.size = other.size;
 	}
@@ -140,10 +140,10 @@ class CompoundDecimal {
 	 * Appends a new component after all the existing components.
 	 * 
 	 * @param value The component
-	 * @return this {@link CompoundDecimal}
-	 * @throws IndexOutOfBoundsException if this {@link CompoundDecimal} has no capacity for more components
+	 * @return this {@link AdaptiveDecimal}
+	 * @throws IndexOutOfBoundsException if this {@link AdaptiveDecimal} has no capacity for more components
 	 */
-	public CompoundDecimal append(double value) {
+	public AdaptiveDecimal append(double value) {
 		if (this.size >= this.capacity()) {
 			throw new IndexOutOfBoundsException();
 		}
@@ -157,9 +157,9 @@ class CompoundDecimal {
 	 * if it has a non zero value.
 	 * 
 	 * @param value The component
-	 * @return this {@link CompoundDecimal}
+	 * @return this {@link AdaptiveDecimal}
 	 */
-	public CompoundDecimal appendNonZero(double value) {
+	public AdaptiveDecimal appendNonZero(double value) {
 		if (value != 0.0) {
 			this.append(value);
 		}
@@ -174,14 +174,14 @@ class CompoundDecimal {
     private static final long IMPLICIT_MANTISSA_BIT = 0x0010000000000000L;
     
     /**
-     * Returns a boolean value describing if this {@link CompoundDecimal} is a valid
+     * Returns a boolean value describing if this {@link AdaptiveDecimal} is a valid
      * representation as described in the header of this class.
      * Checks for the magnitude and non-overlapping property.
-     * The invariants can be violated if bad input components are appended to this {@link CompoundDecimal}.
+     * The invariants can be violated if bad input components are appended to this {@link AdaptiveDecimal}.
      * The append methods do not check for those conditions because there is a big overhead for the check.
      * The output of the exposed operations must satisfy the invariants, given that their input also does so.
      * 
-     * @return true iff this {@link CompoundDecimal} satisfies the described invariants
+     * @return true iff this {@link AdaptiveDecimal} satisfies the described invariants
      */
 	public boolean checkInvariants() {
 		if (this.size == 0) {
@@ -267,21 +267,21 @@ class CompoundDecimal {
 	}
 	
 	/**
-	 * Removes the components of this {@link CompoundDecimal}.
+	 * Removes the components of this {@link AdaptiveDecimal}.
 	 * 
-	 * @return this {@link CompoundDecimal}
+	 * @return this {@link AdaptiveDecimal}
 	 */
-	public CompoundDecimal clear() {
+	public AdaptiveDecimal clear() {
 		this.size = 0;
 		return this;
 	}
 	
 	/**
-	 * Removes all the components with zero value from this {@link CompoundDecimal}.
+	 * Removes all the components with zero value from this {@link AdaptiveDecimal}.
 	 * 
-	 * @return this {@link CompoundDecimal}
+	 * @return this {@link AdaptiveDecimal}
 	 */
-	public CompoundDecimal removeZeros() {
+	public AdaptiveDecimal removeZeros() {
 		int oldSize = this.size;
 		this.clear();
 		
@@ -293,12 +293,12 @@ class CompoundDecimal {
 	}
 	
 	/**
-	 * Ensures this {@link CompoundDecimal} has at least one component.
+	 * Ensures this {@link AdaptiveDecimal} has at least one component.
 	 * That is, appends the zero value if there are currently zero components.
 	 * 
-	 * @return this {@link CompoundDecimal}
+	 * @return this {@link AdaptiveDecimal}
 	 */
-	public CompoundDecimal normalize() {
+	public AdaptiveDecimal normalize() {
 		if (this.size == 0) {
 			append(0.0);
 		}
@@ -307,12 +307,12 @@ class CompoundDecimal {
 	}
 	
 	/**
-	 * Negates the logical value of this {@link CompoundDecimal}.
+	 * Negates the logical value of this {@link AdaptiveDecimal}.
 	 * This can be used with sum to perform subtraction .
 	 * 
-	 * @return this {@link CompoundDecimal}
+	 * @return this {@link AdaptiveDecimal}
 	 */
-	public CompoundDecimal negate() {
+	public AdaptiveDecimal negate() {
 		for (int i = 0; i < this.size; i++) {
 			this.components[i] = -this.components[i];
 		}
@@ -321,7 +321,7 @@ class CompoundDecimal {
 	}
 	
 	/**
-	 * Computes an approximation for the value of this {@link CompoundDecimal} that fits in a double.
+	 * Computes an approximation for the value of this {@link AdaptiveDecimal} that fits in a double.
 	 * 
 	 * @return The approximation
 	 */
@@ -336,33 +336,33 @@ class CompoundDecimal {
 	}
 	
 	/**
-	 * Performs addition and also allocates a new {@link CompoundDecimal} with the 
+	 * Performs addition and also allocates a new {@link AdaptiveDecimal} with the 
 	 * appropriate capacity to store the result.
 	 * 
-	 * @param f The {@link CompoundDecimal} to sum with this {@link CompoundDecimal}
-	 * @return A new {@link CompoundDecimal} that holds the result of the addition
-	 * @see #sum(CompoundDecimal, CompoundDecimal)
+	 * @param f The {@link AdaptiveDecimal} to sum with this {@link AdaptiveDecimal}
+	 * @return A new {@link AdaptiveDecimal} that holds the result of the addition
+	 * @see #sum(AdaptiveDecimal, AdaptiveDecimal)
 	 */
-	public CompoundDecimal sum(CompoundDecimal f) {
+	public AdaptiveDecimal sum(AdaptiveDecimal f) {
 		return this.sum(f, null);
 	}
 	
 	/**
 	 * Helper method to implement the sum procedure.
-	 * Sums the remaining components of a single {@link CompoundDecimal} to the result
+	 * Sums the remaining components of a single {@link AdaptiveDecimal} to the result
 	 * and the initial carry value from previous computations
 	 * 
 	 * @param carry The carry from previous computations
-	 * @param e The {@link CompoundDecimal} that probably has more components
+	 * @param e The {@link AdaptiveDecimal} that probably has more components
 	 * @param eIndex The index to the next component of e that has to be examined
-	 * @param result The {@link CompoundDecimal} in which the result is stored
+	 * @param result The {@link AdaptiveDecimal} in which the result is stored
 	 * @return The result
 	 */
-	CompoundDecimal sumEpilogue(double carry, CompoundDecimal e, int eIndex, CompoundDecimal result) {
+	AdaptiveDecimal sumEpilogue(double carry, AdaptiveDecimal e, int eIndex, AdaptiveDecimal result) {
 		for (; eIndex < e.size(); eIndex++) {
 			double enow = e.get(eIndex);
 			double sum = carry + enow;
-			double error = fromSum(carry, enow, sum);
+			double error = getErrorComponentFromSum(carry, enow, sum);
 			
 			carry = sum;
 			result.appendNonZero(error);
@@ -375,31 +375,31 @@ class CompoundDecimal {
 	}
 	
 	/**
-	 * Performs the addition of this {@link CompoundDecimal} with the given {@link CompoundDecimal} f
-	 * and stores the result in the provided {@link CompoundDecimal} {@code result}.
-	 * If {@code result} is null it allocates a new {@link CompoundDecimal} with the 
+	 * Performs the addition of this {@link AdaptiveDecimal} with the given {@link AdaptiveDecimal} f
+	 * and stores the result in the provided {@link AdaptiveDecimal} {@code result}.
+	 * If {@code result} is null it allocates a new {@link AdaptiveDecimal} with the 
 	 * appropriate capacity to store the result. Otherwise the components of {@code result}
 	 * are cleared and the resulting value is stored there, assuming there is enough capacity.
 	 * 
 	 * Be careful that it must be {@code f} &ne; {@code result} &ne; {@code this}.
 	 * 
-	 * @param f The {@link CompoundDecimal} to sum with this {@link CompoundDecimal}
-	 * @param result The {@link CompoundDecimal} in which the sum is stored or null to allocate a new one
+	 * @param f The {@link AdaptiveDecimal} to sum with this {@link AdaptiveDecimal}
+	 * @param result The {@link AdaptiveDecimal} in which the sum is stored or null to allocate a new one
 	 * @return The result
 	 */
-	public CompoundDecimal sum(CompoundDecimal f, CompoundDecimal result) {
-		// The following algorithm performs addition of two CompoundDecimals
+	public AdaptiveDecimal sum(AdaptiveDecimal f, AdaptiveDecimal result) {
+		// The following algorithm performs addition of two AdaptiveDecimals
 		// It is based on the original fast_expansion_sum_zeroelim function written
 		// by the author of the said paper
 		
 		// allocate a new instance of sufficient size if result is null or just clear
 		if (result == null) {
-			result = new CompoundDecimal(this.size() + f.size());
+			result = new AdaptiveDecimal(this.size() + f.size());
 		} else {
 			result.clear();	
 		}
 		
-		CompoundDecimal e = this;
+		AdaptiveDecimal e = this;
 		
 		// eIndex and fIndex are used to iterate the components of e and f accordingly
 		int eIndex = 0, fIndex = 0;
@@ -407,8 +407,8 @@ class CompoundDecimal {
 		double enow = e.get(eIndex);
 		double fnow = f.get(fIndex);
 		
-		// sum will be used to store the sum needed for the fromSum method
-		// error will store the error as returned from fromSum method
+		// sum will be used to store the sum needed for the getErrorComponentFromSum method
+		// error will store the error as returned from getErrorComponentFromSum method
 		// carry will store the value that will be summed in the next sum
 		double carry, sum, error;
 		
@@ -437,14 +437,14 @@ class CompoundDecimal {
 		while (true) {
 			if (Math.abs(enow) <= Math.abs(fnow)) {
 				// perform the addition with the carry from the previous iterarion
-				error = fromSum(carry, enow, sum = carry + enow);
+				error = getErrorComponentFromSum(carry, enow, sum = carry + enow);
 				eIndex++;
 				carry = sum;
 				
 				// append + zero elimination
 				result.appendNonZero(error);
 				
-				// if this CompoundDecimal has no more components then move to the epilogue
+				// if this AdaptiveDecimal has no more components then move to the epilogue
 				if (eIndex >= e.size()) {
 					return sumEpilogue(carry, f, fIndex, result);
 				}
@@ -452,14 +452,14 @@ class CompoundDecimal {
 				enow = e.get(eIndex);
 			} else {
 				// perform the addition with the carry from the previous iterarion
-				error = fromSum(carry, fnow, sum = carry + fnow);
+				error = getErrorComponentFromSum(carry, fnow, sum = carry + fnow);
 				fIndex++;
 				carry = sum;
 				
 				// append + zero elimination
 				result.appendNonZero(error);
 				
-				// if this CompoundDecimal has no more components then move to the epilogue
+				// if this AdaptiveDecimal has no more components then move to the epilogue
 				if (fIndex >= f.size()) {
 					return sumEpilogue(carry, e, eIndex, result);
 				}
@@ -492,52 +492,105 @@ class CompoundDecimal {
 	}
 	
 	/**
-	 * Creates a {@link CompoundDecimal} with only a single component.
+	 * Creates a {@link AdaptiveDecimal} with only a single component.
 	 * 
 	 * @param value The component
-	 * @return {@link CompoundDecimal}
+	 * @return {@link AdaptiveDecimal}
 	 */
-	public static CompoundDecimal valueOf(double value) {
-		return new CompoundDecimal(1).append(value);
+	public static AdaptiveDecimal valueOf(double value) {
+		return new AdaptiveDecimal(1).append(value);
 	}
 	
 	/**
-	 * Creates a {@link CompoundDecimal} that holds the result of the
+	 * Creates a {@link AdaptiveDecimal} that holds the result of the
 	 * addition of two double values.
 	 * 
 	 * @param a The first value
 	 * @param b The second value
-	 * @return A new {@link CompoundDecimal} that holds the resulting sum
+	 * @return A new {@link AdaptiveDecimal} that holds the resulting sum
 	 */
-	public static CompoundDecimal fromSum(double a, double b) {
+	public static AdaptiveDecimal fromSum(double a, double b) {
 		double sum = a + b;
-		return new CompoundDecimal(fromSum(a, b, sum), sum);
+		return new AdaptiveDecimal(getErrorComponentFromSum(a, b, sum), sum);
 	}
 	
 	/**
-	 * Creates a {@link CompoundDecimal} that holds the result of the
+	 * Creates a {@link AdaptiveDecimal} that holds the result of the
 	 * difference of two double values.
 	 * 
 	 * @param a The first value
 	 * @param b The second value
-	 * @return A new {@link CompoundDecimal} that holds the resulting difference
+	 * @return A new {@link AdaptiveDecimal} that holds the resulting difference
 	 */
-	public static CompoundDecimal fromDiff(double a, double b) {
+	public static AdaptiveDecimal fromDiff(double a, double b) {
 		double diff = a - b;
-		return new CompoundDecimal(fromDiff(a, b, diff), diff);
+		return new AdaptiveDecimal(getErrorComponentFromDifference(a, b, diff), diff);
 	}
-
+	
 	/**
-	 * Creates a {@link CompoundDecimal} that holds the result of the
+	 * Given two unrolled expansions (a0, a1) and (b0, b1) performs the difference
+	 * (a0, a1) - (b0, b1) and stores the 4 component result in the given {@link AdaptiveDecimal} {@code result}.
+	 * In the same way as with {@link AdaptiveDecimal#sum(AdaptiveDecimal, AdaptiveDecimal)} if {@code result} is null
+	 * a new one is allocated, otherwise the existing is cleared and used.
+	 * Does not perform zero elimination.
+	 * This is also a helper method to allow fast computation of the cross product
+	 * without the overhead of creating new {@link AdaptiveDecimal} and performing
+	 * the generalized sum procedure.
+	 * 
+	 * @param a0 The first component of a
+	 * @param a1 The second component of a
+	 * @param b0 The first component of b
+	 * @param b1 The second component of b
+	 * @param result The {@link AdaptiveDecimal} in which the difference is stored or null to allocate a new one
+	 * @return The result
+	 */
+	static AdaptiveDecimal fromDiff(double a0, double a1, double b0, double b1, AdaptiveDecimal result) {
+		// the exact order of those operations is necessary for correct functionality 
+		// This is a rewrite of the corresponding Two_Two_Diff macro in the original code
+		
+		// allocate a new instance of sufficient size if result is null or just clear
+		if (result == null) {
+			result = new AdaptiveDecimal(4);
+		} else {
+			result.clear();	
+		}
+		
+		// x0-x1-x2-x3 store the resulting components with increasing magnitude
+		double x0, x1, x2, x3;
+		
+		// variable to store immediate results for each pair of Diff/Sum
+		double imm;
+		
+		// variables to store immediate results across the two pairs 
+		double imm1, imm2;
+		
+		// Diff (a0, a1) - b0, result = (x0, imm1, imm2)
+		x0 = AdaptiveDecimal.getErrorComponentFromDifference(a0, b0, imm = a0 - b0);
+		imm1 = AdaptiveDecimal.getErrorComponentFromSum(a1, imm, imm2 = a1 + imm);
+		
+		// Diff (imm1, imm2) - b1, result = (x1, x2, x3)
+		x1 = AdaptiveDecimal.getErrorComponentFromDifference(imm1, b1, imm = imm1 - b1);
+		x2 = AdaptiveDecimal.getErrorComponentFromSum(imm2, imm, x3 = imm2 + imm);
+		
+		result.append(x0);
+		result.append(x1);
+		result.append(x2);
+		result.append(x3);
+		
+		return result;
+	}
+	
+	/**
+	 * Creates a {@link AdaptiveDecimal} that holds the result of the
 	 * product of two double values.
 	 * 
 	 * @param a The first value
 	 * @param b The second value
-	 * @return A new {@link CompoundDecimal} that holds the resulting product
+	 * @return A new {@link AdaptiveDecimal} that holds the resulting product
 	 */
-	public static CompoundDecimal fromProduct(double a, double b) {
+	public static AdaptiveDecimal fromProduct(double a, double b) {
 		double product = a * b;
-		return new CompoundDecimal(fromProduct(a, b, product), a * b);
+		return new AdaptiveDecimal(getErrorComponentFromProduct(a, b, product), a * b);
 	}
 	
 	/**
@@ -549,7 +602,7 @@ class CompoundDecimal {
 	 * @param sum Their sum, must always be sum = fl(a + b)
 	 * @return The error described above
 	 */
-	static double fromSum(double a, double b, double sum) {
+	static double getErrorComponentFromSum(double a, double b, double sum) {
 		// the exact order of those operations is necessary for correct functionality 
 		double bvirt = sum - a;
 		double avirt = sum - bvirt;
@@ -569,7 +622,7 @@ class CompoundDecimal {
 	 * @param diff Their difference, must always be diff = fl(a - b)
 	 * @return The error described above
 	 */
-	static double fromDiff(double a, double b, double diff) {
+	static double getErrorComponentFromDifference(double a, double b, double diff) {
 		// the exact order of those operations is necessary for correct functionality 
 		double bvirt = a - diff;
 		double avirt = diff + bvirt;
@@ -581,59 +634,6 @@ class CompoundDecimal {
 	}
 	
 	/**
-	 * Given two unrolled expansions (a0, a1) and (b0, b1) performs the difference
-	 * (a0, a1) - (b0, b1) and stores the 4 component result in the given {@link CompoundDecimal} {@code result}.
-	 * In the same way as with {@link CompoundDecimal#sum(CompoundDecimal, CompoundDecimal)} if {@code result} is null
-	 * a new one is allocated, otherwise the existing is cleared and used.
-	 * Does not perform zero elimination.
-	 * This is also a helper method to allow fast computation of the cross product
-	 * without the overhead of creating new {@link CompoundDecimal} and performing
-	 * the generalized sum procedure.
-	 * 
-	 * @param a0 The first component of a
-	 * @param a1 The second component of a
-	 * @param b0 The first component of b
-	 * @param b1 The second component of b
-	 * @param result The {@link CompoundDecimal} in which the difference is stored or null to allocate a new one
-	 * @return The result
-	 */
-	static CompoundDecimal fromDiff2x2(double a0, double a1, double b0, double b1, CompoundDecimal result) {
-		// the exact order of those operations is necessary for correct functionality 
-		// This is a rewrite of the corresponding Two_Two_Diff macro in the original code
-		
-		// allocate a new instance of sufficient size if result is null or just clear
-		if (result == null) {
-			result = new CompoundDecimal(4);
-		} else {
-			result.clear();	
-		}
-		
-		// x0-x1-x2-x3 store the resulting components with increasing magnitude
-		double x0, x1, x2, x3;
-		
-		// variable to store immediate results for each pair of Diff/Sum
-		double imm;
-		
-		// variables to store immediate results across the two pairs 
-		double imm1, imm2;
-		
-		// Diff (a0, a1) - b0, result = (x0, imm1, imm2)
-		x0 = CompoundDecimal.fromDiff(a0, b0, imm = a0 - b0);
-		imm1 = CompoundDecimal.fromSum(a1, imm, imm2 = a1 + imm);
-		
-		// Diff (imm1, imm2) - b1, result = (x1, x2, x3)
-		x1 = CompoundDecimal.fromDiff(imm1, b1, imm = imm1 - b1);
-		x2 = CompoundDecimal.fromSum(imm2, imm, x3 = imm2 + imm);
-		
-		result.append(x0);
-		result.append(x1);
-		result.append(x2);
-		result.append(x3);
-		
-		return result;
-	}
-	
-	/**
 	 * Given two values a, b and their product = fl(a * b) calculates the value error for which
 	 * fl(a) * fl(b) = fl(a * b) + fl(error).
 	 * 
@@ -642,7 +642,7 @@ class CompoundDecimal {
 	 * @param product Their product, must always be product = fl(a * b)
 	 * @return The error described above
 	 */
-	public static double fromProduct(double a, double b, double product) {
+	public static double getErrorComponentFromProduct(double a, double b, double product) {
 		// the exact order of those operations is necessary for correct functionality 
 		
 		// split a in two parts

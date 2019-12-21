@@ -33,7 +33,7 @@ package org.dyn4j.geometry;
  * @since 3.4.0
  */
 public final class RobustGeometry {
-	/** Constant that {@link CompoundDecimal} uses to split doubles when calculation multiplication error */
+	/** Constant that {@link AdaptiveDecimal} uses to split doubles when calculation multiplication error */
 	static final int SPLITTER;
 	
 	/** Error bounds used to adaptively use as much precision is required for a correct result */
@@ -42,7 +42,7 @@ public final class RobustGeometry {
 	
 	/**
 	 * Initializer that computes the necessary splitter value and error bounds based on the machine epsilon.
-	 * Also instantiates the internal {@link CompoundDecimal} variables.
+	 * Also instantiates the internal {@link AdaptiveDecimal} variables.
 	 */
 	static {
 		// calculate the splitter and epsilon as described in the paper
@@ -71,7 +71,7 @@ public final class RobustGeometry {
 	}
 	
 	/**
-	 * Performs cross product on four primitives and also allocates a new {@link CompoundDecimal}
+	 * Performs cross product on four primitives and also allocates a new {@link AdaptiveDecimal}
 	 * with the appropriate capacity to store the result.
 	 * 
 	 * @param ax The x value of the vector a
@@ -79,33 +79,33 @@ public final class RobustGeometry {
 	 * @param bx The x value of the vector b
 	 * @param by The y value of the vector b
 	 * @return The result
-	 * @see #cross(double, double, double, double, CompoundDecimal)
+	 * @see #cross(double, double, double, double, AdaptiveDecimal)
 	 */
-	public static CompoundDecimal cross(double ax, double ay, double bx, double by) {
+	public static AdaptiveDecimal cross(double ax, double ay, double bx, double by) {
 		return cross(ax, ay, bx, by, null);
 	}
 	
 	/**
 	 * Performs the cross product of two vectors a, b, that is ax * by - ay * bx but with extended precision
-	 * and stores the 4 component result in the given {@link CompoundDecimal} {@code result}.
-	 * In the same way as with {@link CompoundDecimal#sum(CompoundDecimal, CompoundDecimal)} if {@code result} is null
+	 * and stores the 4 component result in the given {@link AdaptiveDecimal} {@code result}.
+	 * In the same way as with {@link AdaptiveDecimal#sum(AdaptiveDecimal, AdaptiveDecimal)} if {@code result} is null
 	 * a new one is allocated, otherwise the existing is cleared and used.
 	 * 
 	 * @param ax The x value of the vector a
 	 * @param ay The y value of the vector a
 	 * @param bx The x value of the vector b
 	 * @param by The y value of the vector b
-	 * @param result The {@link CompoundDecimal} in which the cross product is stored
+	 * @param result The {@link AdaptiveDecimal} in which the cross product is stored
 	 * @return The result
 	 */
-	public static CompoundDecimal cross(double ax, double ay, double bx, double by, CompoundDecimal result) {
+	public static AdaptiveDecimal cross(double ax, double ay, double bx, double by, AdaptiveDecimal result) {
 		double axby = ax * by;
 		double aybx = bx * ay;
-		double axbyTail = CompoundDecimal.fromProduct(ax, by, axby);
-		double aybxTail = CompoundDecimal.fromProduct(bx, ay, aybx);
+		double axbyTail = AdaptiveDecimal.getErrorComponentFromProduct(ax, by, axby);
+		double aybxTail = AdaptiveDecimal.getErrorComponentFromProduct(bx, ay, aybx);
 		
-		// result can be null in which case CompoundDecimal.fromDiff2x2 will allocate a new one
-		CompoundDecimal newResult = CompoundDecimal.fromDiff2x2(axbyTail, axby, aybxTail, aybx, result);
+		// result can be null in which case AdaptiveDecimal.fromDiff will allocate a new one
+		AdaptiveDecimal newResult = AdaptiveDecimal.fromDiff(axbyTail, axby, aybxTail, aybx, result);
 		
 		return newResult;
 	}
@@ -127,7 +127,7 @@ public final class RobustGeometry {
 	public static double getLocation(Vector2 point, Vector2 linePoint1, Vector2 linePoint2) {
 		// This code is based on the original code by Jonathan Richard Shewchuk
 		// For more details about the correctness and error bounds check the note
-		// in the CompoundDecimal class and the corresponding paper of the author.
+		// in the AdaptiveDecimal class and the corresponding paper of the author.
 		
 		// In the beginning try the simple-straightforward computation with floating point values
 		// and no extra precision, as in Segment#getLocation
@@ -167,7 +167,7 @@ public final class RobustGeometry {
 		// Calculate the cross product but with more precision than before
 		// But don't bother yet to perform the differences acx, acy, bcx, bcy
 		// with full precision
-		CompoundDecimal B = RobustGeometry.cross(acx, acy, bcx, bcy);
+		AdaptiveDecimal B = RobustGeometry.cross(acx, acy, bcx, bcy);
 		
 		double det = B.getEstimation();
 		double errorBound = ERROR_BOUND_B * detSum;
@@ -177,10 +177,10 @@ public final class RobustGeometry {
 		
 		// Since we need more precision to produce the result at this point
 		// we have to calculate the differences with full precision
-		double acxTail = CompoundDecimal.fromDiff(point.x, linePoint2.x, acx);
-		double acyTail = CompoundDecimal.fromDiff(point.y, linePoint2.y, acy);
-		double bcxTail = CompoundDecimal.fromDiff(linePoint1.x, linePoint2.x, bcx);
-		double bcyTail = CompoundDecimal.fromDiff(linePoint1.y, linePoint2.y, bcy);
+		double acxTail = AdaptiveDecimal.getErrorComponentFromDifference(point.x, linePoint2.x, acx);
+		double acyTail = AdaptiveDecimal.getErrorComponentFromDifference(point.y, linePoint2.y, acy);
+		double bcxTail = AdaptiveDecimal.getErrorComponentFromDifference(linePoint1.x, linePoint2.x, bcx);
+		double bcyTail = AdaptiveDecimal.getErrorComponentFromDifference(linePoint1.y, linePoint2.y, bcy);
 		
 		if (acxTail == 0 && acyTail == 0 && bcxTail == 0 && bcyTail == 0) {
 			// trivial case: the extra precision was not needed after all
@@ -199,16 +199,16 @@ public final class RobustGeometry {
 		// At this point we have to go full out and calculate all the products with full precision
 		
 		// Re-usable buffer to store the results of the 3 cross products needed below
-		CompoundDecimal buffer = new CompoundDecimal(4);
+		AdaptiveDecimal buffer = new AdaptiveDecimal(4);
 		
 		RobustGeometry.cross(acxTail, bcx, acyTail, bcy, buffer);
-		CompoundDecimal C1 = B.sum(buffer);
+		AdaptiveDecimal C1 = B.sum(buffer);
 		
 		RobustGeometry.cross(acx, bcxTail, acy, bcyTail, buffer);
-		CompoundDecimal C2 = C1.sum(buffer);
+		AdaptiveDecimal C2 = C1.sum(buffer);
 		
 		RobustGeometry.cross(acxTail, bcxTail, acyTail, bcyTail, buffer);
-		CompoundDecimal D = C2.sum(buffer);
+		AdaptiveDecimal D = C2.sum(buffer);
 		
 		// return the most significant component of the last buffer D.
 		// reminder: components are non-overlapping so this is ok
