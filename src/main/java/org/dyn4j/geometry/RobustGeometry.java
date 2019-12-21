@@ -146,7 +146,7 @@ public final class RobustGeometry {
 		}
 		
 		// For the few harder cases we need to use the adaptive precision implementation
-		return getLocation(point, linePoint1, linePoint2, detSum);
+		return getLocationAdaptive(point, linePoint1, linePoint2, detSum);
 	}
 	
 	/**
@@ -158,7 +158,7 @@ public final class RobustGeometry {
 	 * @return double
 	 * @see #getLocation(Vector2, Vector2, Vector2)
 	 */
-	private static double getLocation(Vector2 point, Vector2 linePoint1, Vector2 linePoint2, double detSum) {
+	private static double getLocationAdaptive(Vector2 point, Vector2 linePoint1, Vector2 linePoint2, double detSum) {
 		double acx = point.x - linePoint2.x;
 		double acy = point.y - linePoint2.y;
 		double bcx = linePoint1.x - linePoint2.x;
@@ -214,5 +214,4 @@ public final class RobustGeometry {
 		// reminder: components are non-overlapping so this is ok
 		return D.get(D.size() - 1);
 	}
-	
 }
