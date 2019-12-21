@@ -35,7 +35,7 @@ package org.dyn4j.geometry;
 public class Transform implements Transformable {
 	/**
 	 * NOTE: as of being deprecated this instance is no longer immutable.
-	 * @deprecated create your own instances of {@link Transform} instead; since 3.3.1
+	 * @deprecated create your own instances of {@link Transform} instead; since 3.4.0
 	 */
 	@Deprecated
 	public static final Transform IDENTITY = new Transform();

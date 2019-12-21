@@ -112,7 +112,7 @@ public final class ContactConstraintId {
 	
 	/**
 	 * Returns the id of the first body.
-	 * @deprecated ID schemes should be implemented by the user where needed; since 3.3.1
+	 * @deprecated ID schemes should be implemented by the user where needed; since 3.4.0
 	 * @return UUID
 	 * @since 3.1.2
 	 */
@@ -123,7 +123,7 @@ public final class ContactConstraintId {
 
 	/**
 	 * Returns the id of the second body.
-	 * @deprecated ID schemes should be implemented by the user where needed; since 3.3.1
+	 * @deprecated ID schemes should be implemented by the user where needed; since 3.4.0
 	 * @return UUID
 	 * @since 3.1.2
 	 */
@@ -134,7 +134,7 @@ public final class ContactConstraintId {
 
 	/**
 	 * Returns the id of the fixture on the first body.
-	 * @deprecated ID schemes should be implemented by the user where needed; since 3.3.1
+	 * @deprecated ID schemes should be implemented by the user where needed; since 3.4.0
 	 * @return UUID
 	 * @since 3.1.2
 	 */
@@ -145,7 +145,7 @@ public final class ContactConstraintId {
 
 	/**
 	 * Returns the id of the fixture on the second body.
-	 * @deprecated ID schemes should be implemented by the user where needed; since 3.3.1
+	 * @deprecated ID schemes should be implemented by the user where needed; since 3.4.0
 	 * @return UUID
 	 * @since 3.1.2
 	 */
