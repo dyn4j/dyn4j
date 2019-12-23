@@ -34,7 +34,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * A {@link Rectangle} must have a width and height greater than zero.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 1.0.0
  */
 public class Rectangle extends Polygon implements Convex, Wound, Shape, Transformable, DataContainer {

@@ -33,7 +33,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Fixture} class.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 3.1.1
  */
 public class FixtureTest {

@@ -39,7 +39,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Used to solve the contact constraints and joints for a group of interconnected bodies.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 1.0.0
  */
 final class Island {

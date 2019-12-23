@@ -41,7 +41,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * A base implementation of the {@link Collidable} interface.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 3.2.0
  * @param <T> the {@link Fixture} type
  */

@@ -33,7 +33,7 @@ import org.dyn4j.geometry.Vector2;
  * Comparator class to compare points by their angle from the positive
  * x-axis with reference from a given point.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 2.2.0
  */
 final class ReferencePointComparator implements Comparator<Vector2> {

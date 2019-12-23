@@ -53,7 +53,7 @@ public interface Collidable<T extends Fixture> extends Transformable, Shiftable,
 	 * Returns a unique identifier for this {@link Collidable}.
 	 * <p>
 	 * This identifier is constant for the life of this {@link Collidable}.
-	 * @deprecated ID schemes should be implemented by the user where needed; since 3.3.1
+	 * @deprecated ID schemes should be implemented by the user where needed; since 3.4.0
 	 * @return UUID the unique id
 	 * @since 3.0.0
 	 */

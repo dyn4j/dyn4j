@@ -36,8 +36,8 @@ import org.dyn4j.geometry.Transform;
  * @author Manolis Tsamis
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
- * @version 3.3.1
- * @since 3.3.1
+ * @version 3.4.0
+ * @since 3.4.0
  */
 final class LazyAABBTreeLeaf<E extends Collidable<T>, T extends Fixture> extends LazyAABBTreeNode {
 	/** The {@link Collidable} */

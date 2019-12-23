@@ -32,7 +32,7 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * The root vertex can be any point on the hull.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 3.2.0
  */
 final class LinkedVertexHull {

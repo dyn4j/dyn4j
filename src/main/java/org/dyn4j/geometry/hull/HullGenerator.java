@@ -36,7 +36,7 @@ import org.dyn4j.geometry.Vector2;
  * Algorithms implementing this interface are intended for general use but does not imply that
  * the results produced would be appropriate for the core dyn4j engine.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 2.2.0
  */
 public interface HullGenerator {

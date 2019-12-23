@@ -29,13 +29,13 @@ package org.dyn4j.geometry;
  * <p>
  * Supported operations are rotation and translation.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 1.0.0
  */
 public class Transform implements Transformable {
 	/**
 	 * NOTE: as of being deprecated this instance is no longer immutable.
-	 * @deprecated create your own instances of {@link Transform} instead; since 3.3.1
+	 * @deprecated create your own instances of {@link Transform} instead; since 3.4.0
 	 */
 	@Deprecated
 	public static final Transform IDENTITY = new Transform();
@@ -62,7 +62,7 @@ public class Transform implements Transformable {
 	/**
 	 * Public copy constructor constructor
 	 * @param transform the transform to copy
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	public Transform(Transform transform) {
 		this.cost = transform.cost;
@@ -77,7 +77,7 @@ public class Transform implements Transformable {
 	 * @param sint the negative sine
 	 * @param x the x translation
 	 * @param y the y translation
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	private Transform(double cost, double sint, double x, double y) {
 		this.cost = cost;
@@ -101,7 +101,7 @@ public class Transform implements Transformable {
 	 * Internal helper method to rotate this {@link Transform} by an angle &thetasym;
 	 * @param c cos(&thetasym;)
 	 * @param s sin(&thetasym;)
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	void rotate(double c, double s) {
 		// perform an optimized version of matrix multiplication
@@ -139,7 +139,7 @@ public class Transform implements Transformable {
 	 * @param s sin(&thetasym;)
 	 * @param x the x coordinate of the point
 	 * @param y the y coordinate of the point
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	void rotate(double c, double s, double x, double y) {
 		// perform an optimized version of the matrix multiplication:
@@ -238,7 +238,7 @@ public class Transform implements Transformable {
 	 * Transforms only the x coordinate of the given {@link Vector2} and returns the result.
 	 * @param vector the {@link Vector2} to transform
 	 * @return the transformed x coordinate
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	public double getTransformedX(Vector2 vector) {
 		return this.cost * vector.x - this.sint * vector.y + this.x;
@@ -248,7 +248,7 @@ public class Transform implements Transformable {
 	 * Transforms only the y coordinate of the given {@link Vector2} and returns the result.
 	 * @param vector the {@link Vector2} to transform
 	 * @return the transformed y coordinate
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	public double getTransformedY(Vector2 vector) {
 		return this.sint * vector.x + this.cost * vector.y + this.y;
@@ -257,7 +257,7 @@ public class Transform implements Transformable {
 	/**
 	 * Transforms only the x coordinate of the given {@link Vector2} and places the result in the x field of the given {@link Vector2}.
 	 * @param vector the {@link Vector2} to transform
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	public void transformX(Vector2 vector) {
 		vector.x = this.cost * vector.x - this.sint * vector.y + this.x;
@@ -266,7 +266,7 @@ public class Transform implements Transformable {
 	/**
 	 * Transforms only the y coordinate of the given {@link Vector2} and places the result in the y field of the given {@link Vector2}.
 	 * @param vector the {@link Vector2} to transform
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	public void transformY(Vector2 vector) {
 		vector.y = this.sint * vector.x + this.cost * vector.y + this.y;
@@ -517,7 +517,7 @@ public class Transform implements Transformable {
 	
 	/**
 	 * @return the {@link Rotation} object representing the rotation of this {@link Transform}
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	public Rotation getRotation() {
 		return Rotation.of(this);
@@ -547,7 +547,7 @@ public class Transform implements Transformable {
 	 * rotation.
 	 * @param rotation the {@link Rotation}
 	 * @return A new {@link Rotation} object representing the old rotation of this {@link Transform}
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	public Rotation setRotation(Rotation rotation) {
 		// get the current rotation
@@ -689,7 +689,7 @@ public class Transform implements Transformable {
 	 * Helper method for the lerp methods below.
 	 * Performs rotation but leaves translation intact.
 	 * @param theta the angle of rotation in radians
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	private void rotateOnly(double theta) {
 		//perform rotation by theta but leave x and y intact

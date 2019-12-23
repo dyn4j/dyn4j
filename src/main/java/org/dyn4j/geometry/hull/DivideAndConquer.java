@@ -37,7 +37,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * This algorithm is O(n log n) where n is the number of input points.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 2.2.0
  */
 public class DivideAndConquer implements HullGenerator {

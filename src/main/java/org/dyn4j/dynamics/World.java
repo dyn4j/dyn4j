@@ -87,7 +87,7 @@ import org.dyn4j.resources.Messages;
  * there are multiple {@link CollisionListener}s and <b>any</b> one of them returns false for an event, the collision is skipped.  However,
  * all listeners will still be called no matter if the first returned false.
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 1.0.0
  */
 public class World implements Shiftable, DataContainer {
@@ -3258,7 +3258,7 @@ public class World implements Shiftable, DataContainer {
 	
 	/**
 	 * Returns the world id.
-	 * @deprecated ID schemes should be implemented by the user where needed; since 3.3.1
+	 * @deprecated ID schemes should be implemented by the user where needed; since 3.4.0
 	 * @return UUID
 	 * @since 3.2.0
 	 */

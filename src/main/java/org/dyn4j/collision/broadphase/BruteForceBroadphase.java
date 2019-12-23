@@ -52,8 +52,8 @@ import org.dyn4j.geometry.Vector2;
  * This property is used to test the other broad-phase detectors correctly.
  * 
  * @author Manolis Tsamis
- * @version 3.3.1
- * @since 3.3.1
+ * @version 3.4.0
+ * @since 3.4.0
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
  */

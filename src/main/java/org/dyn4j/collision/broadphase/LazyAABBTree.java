@@ -54,8 +54,8 @@ import org.dyn4j.geometry.Vector2;
  * @author Manolis Tsamis
  * @param <E> the {@link Collidable} type
  * @param <T> the {@link Fixture} type
- * @version 3.3.1
- * @since 3.3.1
+ * @version 3.4.0
+ * @since 3.4.0
  */
 public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends AbstractBroadphaseDetector<E, T> implements BatchBroadphaseDetector<E, T> {
 	/** The root node of the tree */

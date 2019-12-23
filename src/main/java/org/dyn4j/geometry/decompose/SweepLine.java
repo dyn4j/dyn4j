@@ -48,7 +48,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * This algorithm total complexity is O(n log n).
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 2.2.0
  */
 public class SweepLine implements Decomposer, Triangulator {

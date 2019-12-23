@@ -39,7 +39,7 @@ import org.dyn4j.Epsilon;
  * a.zero().add(1, 2).multiply(2);
  * </pre>
  * @author William Bittle
- * @version 3.3.1
+ * @version 3.4.0
  * @since 1.0.0
  */
 public class Vector2 {
@@ -522,7 +522,7 @@ public class Vector2 {
 	 * Divides this {@link Vector2} by the given scalar.
 	 * @param scalar the scalar
 	 * @return {@link Vector2} this vector
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	public Vector2 divide(double scalar) {
 		this.x /= scalar;
@@ -545,7 +545,7 @@ public class Vector2 {
 	 * a new {@link Vector2} containing the result.
 	 * @param scalar the scalar
 	 * @return {@link Vector2}
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	public Vector2 quotient(double scalar) {
 		return new Vector2(this.x / scalar, this.y / scalar);
@@ -668,7 +668,7 @@ public class Vector2 {
 	 * @param cos cos(&theta;)
 	 * @param sin sin(&theta;)
 	 * @return {@link Vector2} this vector
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	Vector2 rotate(double cos, double sin) {
 		double x = this.x;
@@ -693,7 +693,7 @@ public class Vector2 {
 	 * Rotates about the origin.
 	 * @param rotation the {@link Rotation}
 	 * @return {@link Vector2} this vector
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	public Vector2 rotate(Rotation rotation) {
 		return this.rotate(rotation.cost, rotation.sint);
@@ -703,7 +703,7 @@ public class Vector2 {
 	 * Rotates about the origin by the inverse angle -&thetasym;.
 	 * @param theta the rotation angle in radians
 	 * @return {@link Vector2} this vector
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	public Vector2 inverseRotate(double theta) {
 		return this.rotate(Math.cos(theta), -Math.sin(theta));
@@ -713,7 +713,7 @@ public class Vector2 {
 	 * Rotates about the origin by the inverse angle -&thetasym;.
 	 * @param rotation the {@link Rotation}
 	 * @return {@link Vector2} this vector
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	public Vector2 inverseRotate(Rotation rotation) {
 		return this.rotate(rotation.cost, -rotation.sint);
@@ -726,7 +726,7 @@ public class Vector2 {
 	 * @param x the x coordinate to rotate about
 	 * @param y the y coordinate to rotate about
 	 * @return {@link Vector2} this vector
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	Vector2 rotate(double cos, double sin, double x, double y) {
 		double tx = (this.x - x);
@@ -755,7 +755,7 @@ public class Vector2 {
 	 * @param x the x coordinate to rotate about
 	 * @param y the y coordinate to rotate about
 	 * @return {@link Vector2} this vector
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	public Vector2 rotate(Rotation rotation, double x, double y) {
 		return this.rotate(rotation.cost, rotation.sint, x, y);
@@ -767,7 +767,7 @@ public class Vector2 {
 	 * @param x the x coordinate to rotate about
 	 * @param y the y coordinate to rotate about
 	 * @return {@link Vector2} this vector
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	public Vector2 inverseRotate(double theta, double x, double y) {
 		return this.rotate(Math.cos(theta), -Math.sin(theta), x, y);
@@ -779,7 +779,7 @@ public class Vector2 {
 	 * @param x the x coordinate to rotate about
 	 * @param y the y coordinate to rotate about
 	 * @return {@link Vector2} this vector
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	public Vector2 inverseRotate(Rotation rotation, double x, double y) {
 		return this.rotate(rotation.cost, -rotation.sint, x, y);
@@ -800,7 +800,7 @@ public class Vector2 {
 	 * @param rotation the {@link Rotation}
 	 * @param point the point to rotate about
 	 * @return {@link Vector2} this vector
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	public Vector2 rotate(Rotation rotation, Vector2 point) {
 		return this.rotate(rotation, point.x, point.y);
@@ -811,7 +811,7 @@ public class Vector2 {
 	 * @param theta the rotation angle in radians
 	 * @param point the point to rotate about
 	 * @return {@link Vector2} this vector
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	public Vector2 inverseRotate(double theta, Vector2 point) {
 		return this.inverseRotate(theta, point.x, point.y);
@@ -822,7 +822,7 @@ public class Vector2 {
 	 * @param rotation the {@link Rotation}
 	 * @param point the point to rotate about
 	 * @return {@link Vector2} this vector
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	public Vector2 inverseRotate(Rotation rotation, Vector2 point) {
 		return this.inverseRotate(rotation, point.x, point.y);
@@ -931,7 +931,7 @@ public class Vector2 {
 	 * Returns the angle in radians in the range -&pi; to &pi;.
 	 * @param otherAngle the angle. Must be in the range -&pi; to &pi;
 	 * @return angle in radians [-&pi;, &pi;]
-	 * @since 3.3.1
+	 * @since 3.4.0
 	 */
 	public double getAngleBetween(double otherAngle) {
 		double a = otherAngle - Math.atan2(this.y, this.x);
