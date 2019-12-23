@@ -34,13 +34,10 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link GrahamScan} algorithm.
  * @author William Bittle
- * @version 3.3.1
- * @since 3.3.1
+ * @version 3.4.0
+ * @since 3.4.0
  */
 public class GrahamScanTest {
-	/** Identity Transform instance */
-	private static final Transform IDENTITY = new Transform();
-
 	/**
 	 * Returns a random point cloud
 	 * @param seed the random seed
@@ -60,12 +57,13 @@ public class GrahamScanTest {
 	}
 	
 	/**
-	 * Tests the Graham Scan class against the random
-	 * point cloud.
+	 * Test a point cloud with the {@link GrahamScan} hull algorithm.
+	 * The result must be a valid {@link Polygon} and contain all the original
+	 * points.
+	 * 
+	 * @param cloud The point cloud
 	 */
-	@Test
-	public void gsRandom1() {
-		Vector2[] cloud = this.generate(0);
+	private void testCloud(Vector2[] cloud) {
 		GrahamScan gs = new GrahamScan();
 		Vector2[] hull = gs.generate(cloud);
 		
@@ -76,7 +74,7 @@ public class GrahamScanTest {
 		// make sure all the points are either on or contained in the hull
 		for (int i = 0; i < cloud.length; i++) {
 			Vector2 p = cloud[i];
-			if (!poly.contains(p, IDENTITY)) {
+			if (!RobustGeometryTest.robustPolygonContains(poly.getVertices(), p)) {
 				TestCase.fail("Hull does not contain all points.");
 			}
 		}
@@ -87,22 +85,19 @@ public class GrahamScanTest {
 	 * point cloud.
 	 */
 	@Test
+	public void gsRandom1() {
+		Vector2[] cloud = this.generate(0);
+		this.testCloud(cloud);
+	}
+	
+	/**
+	 * Tests the Graham Scan class against the random
+	 * point cloud.
+	 */
+	@Test
 	public void gsRandom2() {
 		Vector2[] cloud = this.generate(5);
-		GrahamScan gs = new GrahamScan();
-		Vector2[] hull = gs.generate(cloud);
-		
-		// make sure we can create a polygon from it
-		// (this will check for convexity, winding, etc)
-		Polygon poly = new Polygon(hull);
-		
-		// make sure all the points are either on or contained in the hull
-		for (int i = 0; i < cloud.length; i++) {
-			Vector2 p = cloud[i];
-			if (!poly.contains(p, IDENTITY)) {
-				TestCase.fail("Hull does not contain all points.");
-			}
-		}
+		this.testCloud(cloud);
 	}
 	
 	/**
@@ -129,21 +124,8 @@ public class GrahamScanTest {
 				new Vector2(0.7785392212464266, 0.7209603726626324),
 				new Vector2(0.8940177489295154, -0.1882690653739989)
 		};
-		
-		GrahamScan gs = new GrahamScan();
-		Vector2[] hull = gs.generate(cloud);
-		
-		// make sure we can create a polygon from it
-		// (this will check for convexity, winding, etc)
-		Polygon poly = new Polygon(hull);
-		
-		// make sure all the points are either on or contained in the hull
-		for (int i = 0; i < cloud.length; i++) {
-			Vector2 p = cloud[i];
-			if (!poly.contains(p, IDENTITY)) {
-				TestCase.fail("Hull does not contain all points.");
-			}
-		}
+
+		this.testCloud(cloud);
 	}
 	
 	/**
@@ -157,21 +139,8 @@ public class GrahamScanTest {
 			new Vector2(13.0, 1.0), 
 			new Vector2(27.918475169266998, 1.0)
 		};
-		
-		GrahamScan gs = new GrahamScan();
-		Vector2[] hull = gs.generate(cloud);
-		
-		// make sure we can create a polygon from it
-		// (this will check for convexity, winding, etc)
-		Polygon poly = new Polygon(hull);
-		
-		// make sure all the points are either on or contained in the hull
-		for (int i = 0; i < cloud.length; i++) {
-			Vector2 p = cloud[i];
-			if (!poly.contains(p, IDENTITY)) {
-				TestCase.fail("Hull does not contain all points.");
-			}
-		}
+
+		this.testCloud(cloud);
 	}
 	
 	/**
@@ -187,21 +156,8 @@ public class GrahamScanTest {
 				new Vector2(1.0, 1.0), 
 				new Vector2(5.0, 0.0)
 		};
-		
-		GrahamScan gs = new GrahamScan();
-		Vector2[] hull = gs.generate(cloud);
-		
-		// make sure we can create a polygon from it
-		// (this will check for convexity, winding, etc)
-		Polygon poly = new Polygon(hull);
-		
-		// make sure all the points are either on or contained in the hull
-		for (int i = 0; i < cloud.length; i++) {
-			Vector2 p = cloud[i];
-			if (!poly.contains(p, IDENTITY)) {
-				TestCase.fail("Hull does not contain all points.");
-			}
-		}
+
+		this.testCloud(cloud);
 	}
 
 	/**
@@ -219,21 +175,8 @@ public class GrahamScanTest {
 			new Vector2(0.09713620217398017, 286668.0866273699), 
 			new Vector2(104.83526669412421, 579.583503857007)
 		};
-		
-		GrahamScan gs = new GrahamScan();
-		Vector2[] hull = gs.generate(cloud);
-		
-		// make sure we can create a polygon from it
-		// (this will check for convexity, winding, etc)
-		Polygon poly = new Polygon(hull);
-		
-		// make sure all the points are either on or contained in the hull
-		for (int i = 0; i < cloud.length; i++) {
-			Vector2 p = cloud[i];
-			if (!poly.contains(p, IDENTITY)) {
-				TestCase.fail("Hull does not contain all points.");
-			}
-		}
+
+		this.testCloud(cloud);
 	}
 	
 	/**
@@ -254,21 +197,8 @@ public class GrahamScanTest {
 			new Vector2(1.0, 0.03504029713737921),
 			new Vector2(1.0, 82.55330004652801)
 		};
-		
-		GrahamScan gs = new GrahamScan();
-		Vector2[] hull = gs.generate(cloud);
-		
-		// make sure we can create a polygon from it
-		// (this will check for convexity, winding, etc)
-		Polygon poly = new Polygon(hull);
-		
-		// make sure all the points are either on or contained in the hull
-		for (int i = 0; i < cloud.length; i++) {
-			Vector2 p = cloud[i];
-			if (!poly.contains(p, IDENTITY)) {
-				TestCase.fail("Hull does not contain all points.");
-			}
-		}
+
+		this.testCloud(cloud);
 	}
 	
 	/**
@@ -291,21 +221,8 @@ public class GrahamScanTest {
 			new Vector2(1.2474786776966758E20, 1.4802417824918536E11), 
 			new Vector2(1.0, 15.084034859698757)
 		};
-		
-		GrahamScan gs = new GrahamScan();
-		Vector2[] hull = gs.generate(cloud);
-		
-		// make sure we can create a polygon from it
-		// (this will check for convexity, winding, etc)
-		Polygon poly = new Polygon(hull);
-		
-		// make sure all the points are either on or contained in the hull
-		for (int i = 0; i < cloud.length; i++) {
-			Vector2 p = cloud[i];
-			if (!poly.contains(p, IDENTITY)) {
-				TestCase.fail("Hull does not contain all points.");
-			}
-		}
+
+		this.testCloud(cloud);
 	}
 	
 	/**
@@ -319,21 +236,8 @@ public class GrahamScanTest {
 			new Vector2(334.68865889609134, 3.955720227287777E-23), 
 			new Vector2(5.758935896542613E22, 8.12199057379559E21)
 		};
-		
-		GrahamScan gs = new GrahamScan();
-		Vector2[] hull = gs.generate(cloud);
-		
-		// make sure we can create a polygon from it
-		// (this will check for convexity, winding, etc)
-		Polygon poly = new Polygon(hull);
-		
-		// make sure all the points are either on or contained in the hull
-		for (int i = 0; i < cloud.length; i++) {
-			Vector2 p = cloud[i];
-			if (!poly.contains(p, IDENTITY)) {
-				TestCase.fail("Hull does not contain all points.");
-			}
-		}
+
+		this.testCloud(cloud);
 	}
 	
 	/**
@@ -347,21 +251,8 @@ public class GrahamScanTest {
 			new Vector2(69464.96179292782, 0.05006981639456297), 
 			new Vector2(0.03735960666625501, 0.3783853688716485)
 		};
-		
-		GrahamScan gs = new GrahamScan();
-		Vector2[] hull = gs.generate(cloud);
-		
-		// make sure we can create a polygon from it
-		// (this will check for convexity, winding, etc)
-		Polygon poly = new Polygon(hull);
-		
-		// make sure all the points are either on or contained in the hull
-		for (int i = 0; i < cloud.length; i++) {
-			Vector2 p = cloud[i];
-			if (!poly.contains(p, IDENTITY)) {
-				TestCase.fail("Hull does not contain all points.");
-			}
-		}
+
+		this.testCloud(cloud);
 	}
 	
 	/**
@@ -376,21 +267,8 @@ public class GrahamScanTest {
 			new Vector2(69464.96179292782, 0.05006981639456297), 
 			new Vector2(0.03735960666625501, 0.3783853688716485)
 		};
-		
-		GrahamScan gs = new GrahamScan();
-		Vector2[] hull = gs.generate(cloud);
-		
-		// make sure we can create a polygon from it
-		// (this will check for convexity, winding, etc)
-		Polygon poly = new Polygon(hull);
-		
-		// make sure all the points are either on or contained in the hull
-		for (int i = 0; i < cloud.length; i++) {
-			Vector2 p = cloud[i];
-			if (!poly.contains(p, IDENTITY)) {
-				TestCase.fail("Hull does not contain all points.");
-			}
-		}
+
+		this.testCloud(cloud);
 	}
 
 	/**
@@ -406,21 +284,8 @@ public class GrahamScanTest {
 			new Vector2(24, 6),
 			new Vector2(6, 6)
 		};
-		
-		GrahamScan gs = new GrahamScan();
-		Vector2[] hull = gs.generate(cloud);
-		
-		// make sure we can create a polygon from it
-		// (this will check for convexity, winding, etc)
-		Polygon poly = new Polygon(hull);
-		
-		// make sure all the points are either on or contained in the hull
-		for (int i = 0; i < cloud.length; i++) {
-			Vector2 p = cloud[i];
-			if (!poly.contains(p, IDENTITY)) {
-				TestCase.fail("Hull does not contain all points.");
-			}
-		}
+
+		this.testCloud(cloud);
 	}
 	
 	/**
@@ -433,21 +298,8 @@ public class GrahamScanTest {
 				new Vector2(57, 1.0),
 				new Vector2(13, 1.0),
 				new Vector2(27, 10.0)};
-		
-		GrahamScan gs = new GrahamScan();
-		Vector2[] hull = gs.generate(cloud);
-		
-		// make sure we can create a polygon from it
-		// (this will check for convexity, winding, etc)
-		Polygon poly = new Polygon(hull);
-		
-		// make sure all the points are either on or contained in the hull
-		for (int i = 0; i < cloud.length; i++) {
-			Vector2 p = cloud[i];
-			if (!poly.contains(p, IDENTITY)) {
-				TestCase.fail("Hull does not contain all points.");
-			}
-		}
+
+		this.testCloud(cloud);
 	}
 
 	/**
@@ -463,20 +315,7 @@ public class GrahamScanTest {
 			new Vector2(2.7404621676247265, -4.946792659796997), 
 		};
 		
-		GrahamScan gs = new GrahamScan();
-		Vector2[] hull = gs.generate(cloud);
-		
-		// make sure we can create a polygon from it
-		// (this will check for convexity, winding, etc)
-		Polygon poly = new Polygon(hull);
-		
-		// make sure all the points are either on or contained in the hull
-		for (int i = 0; i < cloud.length; i++) {
-			Vector2 p = cloud[i];
-			if (!poly.contains(p, IDENTITY)) {
-				TestCase.fail("Hull does not contain all points.");
-			}
-		}
+		this.testCloud(cloud);
 	}
 
 	/**
@@ -493,20 +332,7 @@ public class GrahamScanTest {
 			new Vector2(4.84788802330902, -6.921113359457114)
 		};
 		
-		GrahamScan gs = new GrahamScan();
-		Vector2[] hull = gs.generate(cloud);
-		
-		// make sure we can create a polygon from it
-		// (this will check for convexity, winding, etc)
-		Polygon poly = new Polygon(hull);
-		
-		// make sure all the points are either on or contained in the hull
-		for (int i = 0; i < cloud.length; i++) {
-			Vector2 p = cloud[i];
-			if (!poly.contains(p, IDENTITY)) {
-				TestCase.fail("Hull does not contain all points.");
-			}
-		}
+		this.testCloud(cloud);
 	}
 	
 	/**
@@ -522,21 +348,8 @@ public class GrahamScanTest {
 			new Vector2(-3.5586156659982215, -3.05702346750299),
 			new Vector2(1.1178446483487536, -3.05702346750299),
 		};
-		
-		GrahamScan gs = new GrahamScan();
-		Vector2[] hull = gs.generate(cloud);
-		
-		// make sure we can create a polygon from it
-		// (this will check for convexity, winding, etc)
-		Polygon poly = new Polygon(hull);
-		
-		// make sure all the points are either on or contained in the hull
-		for (int i = 0; i < cloud.length; i++) {
-			Vector2 p = cloud[i];
-			if (!poly.contains(p, IDENTITY)) {
-				TestCase.fail("Hull does not contain all points.");
-			}
-		}
+
+		this.testCloud(cloud);
 	}
 
 	/**
@@ -551,21 +364,8 @@ public class GrahamScanTest {
 			new Vector2(-2.400927400987851, 3.19563523962121),
 			new Vector2(-9.419896312210547, 3.19563523962121)
 		};
-		
-		GrahamScan gs = new GrahamScan();
-		Vector2[] hull = gs.generate(cloud);
-		
-		// make sure we can create a polygon from it
-		// (this will check for convexity, winding, etc)
-		Polygon poly = new Polygon(hull);
-		
-		// make sure all the points are either on or contained in the hull
-		for (int i = 0; i < cloud.length; i++) {
-			Vector2 p = cloud[i];
-			if (!poly.contains(p, IDENTITY)) {
-				TestCase.fail("Hull does not contain all points.");
-			}
-		}
+
+		this.testCloud(cloud);
 	}
 
 	/**
@@ -580,20 +380,7 @@ public class GrahamScanTest {
 			new Vector2(3.9941738969349405, -0.491971233546733),
 			new Vector2(-5.952110964171484, -0.7480752942332325)
 		};
-		
-		GrahamScan gs = new GrahamScan();
-		Vector2[] hull = gs.generate(cloud);
-		
-		// make sure we can create a polygon from it
-		// (this will check for convexity, winding, etc)
-		Polygon poly = new Polygon(hull);
-		
-		// make sure all the points are either on or contained in the hull
-		for (int i = 0; i < cloud.length; i++) {
-			Vector2 p = cloud[i];
-			if (!poly.contains(p, IDENTITY)) {
-				TestCase.fail("Hull does not contain all points.");
-			}
-		}
+
+		this.testCloud(cloud);
 	}
 }

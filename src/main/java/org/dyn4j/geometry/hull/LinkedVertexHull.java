@@ -24,6 +24,7 @@
  */
 package org.dyn4j.geometry.hull;
 
+import org.dyn4j.geometry.RobustGeometry;
 import org.dyn4j.geometry.Vector2;
 
 /**
@@ -35,9 +36,6 @@ import org.dyn4j.geometry.Vector2;
  * @since 3.2.0
  */
 final class LinkedVertexHull {
-	/** The hull's root vertex */
-	LinkedVertex root;
-
 	/** The vertex that has the smallest x coordinate */
 	LinkedVertex leftMost;
 	
@@ -56,7 +54,6 @@ final class LinkedVertexHull {
 	 */
 	public LinkedVertexHull(Vector2 point) {
 		LinkedVertex root = new LinkedVertex(point);
-		this.root = root;
 		this.leftMost = root;
 		this.rightMost = root;
 		this.size = 1;
@@ -69,7 +66,8 @@ final class LinkedVertexHull {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("LinkedVertexHull[Size=").append(this.size)
-		  .append("|Root=").append(this.root.point);
+		.append("|LeftMostPoint=").append(this.leftMost.point)
+		.append("|RightMostPoint=").append(this.rightMost.point);
 		return sb.toString();
 	}
 	
@@ -79,11 +77,13 @@ final class LinkedVertexHull {
 	 */
 	public final Vector2[] toArray() {
 		Vector2[] points = new Vector2[this.size];
-		LinkedVertex vertex = this.root;
+		LinkedVertex vertex = this.leftMost;
+		
 		for (int i = 0; i < this.size; i++) {
 			points[i] = vertex.point;
 			vertex = vertex.next;
 		}
+		
 		return points;
 	}
 	
@@ -97,288 +97,94 @@ final class LinkedVertexHull {
 	 * @return {@link LinkedVertexHull} the merged convex hull
 	 */
 	public static final LinkedVertexHull merge(LinkedVertexHull left, LinkedVertexHull right) {
-		// check the size of the hulls
-		if (left.size == 1 && right.size == 1) {
-			// the 1,1 case
-			return LinkedVertexHull.mergePointPoint(left, right);
-		} else if (left.size + right.size == 3) {
-			// the 1,2 or 2,1 cases
-			return LinkedVertexHull.mergePointSegment(left, right);
-		} else {
-			// all other cases
-			return LinkedVertexHull.mergeHulls(left, right);
-		}
-	}
-
-	/**
-	 * Merges the given left and right point hulls.
-	 * @param left the left hull
-	 * @param right the right hull
-	 * @return {@link LinkedVertexHull} a line segment hull
-	 */
-	static final LinkedVertexHull mergePointPoint(LinkedVertexHull left, LinkedVertexHull right) {
-		LinkedVertex leftRoot = left.root;
-		LinkedVertex rightRoot = right.root;
+		// This merge algorithm handles all cases, including point-point and point-segment without special cases.
+		// It finds the upper and lower edges that connect the two hulls such that the resulting hull remains convex
 		
-		// check for coincident vertices and ignore them
-		// shouldn't happen since DivideAndConquer filters them
-		// before starting the divide/merge process
-		double d = leftRoot.point.distanceSquared(rightRoot.point);
-		if (d == 0.0) 
-			return left;
-		
-		// wire up the hulls
-		leftRoot.next = rightRoot;
-		leftRoot.prev = rightRoot;
-		rightRoot.next = leftRoot;
-		rightRoot.prev = leftRoot;
-		// create a hull
-		LinkedVertexHull hull = new LinkedVertexHull();
-		hull.root = leftRoot;
-		hull.leftMost = leftRoot;
-		hull.rightMost = rightRoot;
-		hull.size = 2;
-		// return the hull
-		return hull;
-	}
-	
-	/**
-	 * Performs a merge of a point hull and segment hull returning a triangular hull.
-	 * @param left the left hull
-	 * @param right the right hull
-	 * @return {@link LinkedVertexHull} a triangular hull
-	 */
-	static final LinkedVertexHull mergePointSegment(LinkedVertexHull left, LinkedVertexHull right) {
-		// the 1,2 or 2,1 case
-		LinkedVertexHull hull = new LinkedVertexHull();
-		hull.size = 3;
-		
-		LinkedVertexHull point = left;
-		LinkedVertexHull segment = right;
-		if (left.size == 1) {
-			// the 1,2 case
-			hull.leftMost = left.root;
-			hull.rightMost = right.rightMost;
-		} else {
-			// the 2,1 case
-			hull.leftMost = left.leftMost;
-			hull.rightMost = right.root;
-			point = right;
-			segment = left;
-		}
-		hull.root = point.root;
-		
-		// get the line segment points
-		Vector2 p1 = segment.root.point;
-		Vector2 p2 = segment.root.next.point;
-		// get the point
-		Vector2 p = point.root.point;
-		
-		// compute the winding
-		Vector2 v1 = p.to(p1);
-		Vector2 v2 = p1.to(p2);
-		double area = v1.cross(v2);
-		
-		// check the winding to find where to place the point
-		if (area < 0.0) {
-			// then we use the point hull as the second point
-			// insert v in between v1->v2 to create v1->v->v2
-			point.root.next = segment.root.next;	// v->v2
-			segment.root.next.prev = point.root;	// v2<-v
-			point.root.prev = segment.root;			// v1<-v
-			segment.root.next = point.root;			// v1->v
-		} else if (area > 0.0) {
-			// then we use the point hull as the first point
-			// prepend v to v1->v2 to create v->v1->v2
-			point.root.next = segment.root;			// v->v1
-			segment.root.prev = point.root;			// v1<-v
-			point.root.prev = segment.root.next;	// v2<-v
-			segment.root.next.next = point.root;	// v2->v
-		} else {
-			// if the points are all colinear, then return
-			// a new hull that's a segment of the extreme
-			// vertices (i.e. removing one of the points)
-			
-			// replace v2 with v
-			segment.root.next = point.root;
-			point.root.next = segment.root;
-			segment.root.prev = point.root;
-			point.root.prev = segment.root;
-			hull.size = 2;
-		}
-		
-		return hull;
-	}
-	
-	/**
-	 * Performs a merge of the left and right hulls into one hull.
-	 * @param left the left hull
-	 * @param right the right hull
-	 * @return {@link LinkedVertexHull} a convex hull
-	 */
-	static final LinkedVertexHull mergeHulls(LinkedVertexHull left, LinkedVertexHull right) {
-		// otherwise we need to run the algorithm to find the upper and lower edges
-		// that connect the two hulls such that the resulting hull remains convex
 		LinkedVertexHull hull = new LinkedVertexHull();
 		hull.leftMost = left.leftMost;
 		hull.rightMost = right.rightMost;
 		
-		// find the upper edge connection
-		// start with leftmost to right most
 		LinkedVertex lu = left.rightMost;
 		LinkedVertex ru = right.leftMost;
-		Vector2 upper = lu.point.to(ru.point);
-		upper.normalize();
-		// allow the loop to go through every point on the left and right side
-		// before stopping, this condition is really a catch for degenerate
-		// cases.  Non-degenerate cases should hit the break; statement
-		for (int i = 0; i < left.size * right.size; i++) {
-			// go counter-clockwise
-			Vector2 lv = LinkedVertexHull.getEdge(lu, false);
-			// go clockwise
-			Vector2 rv = LinkedVertexHull.getEdge(ru, true);
+		
+		// We don't use strict inequalities when checking the result of getLocation
+		// so we can remove coincident points in the hull.
+		// As a result we must limit the number of loops that go to the left or right
+		// because else ru = ru.prev can loop over and never terminate
+		// We can walk at most side.size - 1 before looping over
+		int limitRightU = right.size - 1;
+		int limitLeftU = left.size - 1;
+		
+		while (true) {
+			LinkedVertex prevLu = lu;
+			LinkedVertex prevRu = ru;
 			
-			// what's the winding on both hulls given the upper edge connection?
-			double crossR = rv.cross(upper);
-			double crossL = upper.getNegative().cross(lv);
-			
-			// this can happen when two line segments that are colinear are being merged
-			if (crossR == 0.0 && crossL == 0.0 && left.size == 2 && right.size == 2) {
-				// both segments are colinear so take only
-				// the max and min of the two segments
-				hull.root = hull.leftMost;
-				hull.leftMost.next = hull.rightMost;
-				hull.rightMost.next = hull.leftMost;
-				hull.leftMost.prev = hull.rightMost;
-				hull.rightMost.prev = hull.leftMost;
-				hull.size = 2;
-				return hull;
+			while (limitRightU > 0 && RobustGeometry.getLocation(ru.next.point, lu.point, ru.point) <= 0) {
+				ru = ru.next;
+				limitRightU--;
 			}
-
-			// check for both convex
-			if (crossR >= 0.0 && crossL >= 0.0) {
-				// l and r contain the vertices for the upper bridge
+			
+			while (limitLeftU > 0 && RobustGeometry.getLocation(lu.prev.point, lu.point, ru.point) <= 0) {
+				lu = lu.prev;
+				limitLeftU--;
+			}
+			
+			// If no progress is made there's nothing else to do
+			if (lu == prevLu && ru == prevRu) {
 				break;
 			}
-
-			// check not convex or colinear
-			if (crossR < 0.0) {
-				// then we need to move clockwise on the right side by one
-				ru = ru.prev;
-			}
-			
-			// check not convex or colinear
-			if (crossL < 0.0) {
-				// then we need to move counter-clockwise on the left side by one
-				lu = lu.next;
-			}
-			
-			// compute the new upper edge connection
-			upper = lu.point.to(ru.point);
 		}
 		
-		// find the lower edge connection
+		// Same as before, for the other side
+		
 		LinkedVertex ll = left.rightMost;
 		LinkedVertex rl = right.leftMost;
-		Vector2 lower = ll.point.to(rl.point);
-		lower.normalize();
-		// allow the loop to go through every point on the left and right side
-		// before stopping, this condition is really a catch for degenerate
-		// cases.  Non-degenerate cases should hit the break; statement
-		for (int i = 0; i < left.size * right.size; i++) {
-			// go clockwise
-			Vector2 lv = LinkedVertexHull.getEdge(ll, true);
-			// go counter-clockwise
-			Vector2 rv = LinkedVertexHull.getEdge(rl, false);
-
-			// what's the winding on both hulls given the lower edge connection?
-			double crossR = lower.cross(rv);
-			double crossL = lv.cross(lower.getNegative());
+		
+		int limitRightL = right.size - 1;
+		int limitLeftL = left.size - 1;
+		
+		while (true) {
+			LinkedVertex prevLl = ll;
+			LinkedVertex prevRl = rl;
 			
-			// this can happen when two line segments that are colinear are being merged
-			if (crossR == 0.0 && crossL == 0.0 && left.size == 2 && right.size == 2) {
-				// both segments are colinear
-				// NOTE: it shouldn't be possible to get here
-				hull.root = hull.leftMost;
-				hull.leftMost.next = hull.rightMost;
-				hull.rightMost.next = hull.leftMost;
-				hull.leftMost.prev = hull.rightMost;
-				hull.rightMost.prev = hull.leftMost;
-				hull.size = 2;
-				return hull;
+			while (limitRightL > 0 && RobustGeometry.getLocation(rl.prev.point, ll.point, rl.point) >= 0) {
+				rl = rl.prev;
+				limitRightL--;
 			}
-
-			// check for both convex
-			if (crossR >= 0.0 && crossL >= 0.0) {
-				// l and r contain the vertices for the upper bridge
+			
+			while (limitLeftL > 0 && RobustGeometry.getLocation(ll.next.point, ll.point, rl.point) >= 0) {
+				ll = ll.next;
+				limitLeftL--;
+			}
+			
+			// If no progress is made there's nothing else to do
+			if (ll == prevLl && rl == prevRl) {
 				break;
 			}
-			
-			// check not convex or colinear
-			if (crossR < 0.0) {
-				// then we need to move counter-clockwise on the right side by one
-				rl = rl.next;
-			}
-			
-			// check not convex or colinear
-			if (crossL < 0.0) {
-				// then we need to move clockwise on the left side by one
-				ll = ll.prev;
-			}
-			
-			// compute the new lower edge connection
-			lower = ll.point.to(rl.point);
 		}
 		
-		// wire up the two hulls using the lower and upper edge
-		// connections found above (the other vertices will be
-		// garbage collected)
-		lu.prev = ru;
-		ru.next = lu;
-		ll.next = rl;
-		rl.prev = ll;
+		// link the hull
+		lu.next = ru;
+		ru.prev = lu;
 		
-		// set the root of the hull to any of the bridge points
-		// or any point on the convex hull
-		hull.root = lu;
+		ll.prev = rl;
+		rl.next = ll;
 		
-		// count the number of points
-		LinkedVertex v0 = hull.root;
-		LinkedVertex v = v0;
+		// We could compute size with a closed-form type based on the four values
+		// of limitLeft/Right/L/U but it is not straightforward and there is no observable
+		// speed gain. So use a simple loop instead
 		int size = 0;
+		LinkedVertex v = lu;
+		
 		do {
 			size ++;
 			v = v.next;
-		} while (v != v0);
+		} while (v != lu);
+		
 		// set the size
 		hull.size = size;
 		
 		// return the merged hull
 		return hull;
-	}
-	
-	/**
-	 * Returns the clockwise or anti-clockwise edge from the given vertex and
-	 * checks for numeric precision loss.
-	 * @param vertex the vertex
-	 * @param clockwise the desired winding
-	 * @return {@link Vector2}
-	 */
-	private static final Vector2 getEdge(LinkedVertex vertex, boolean clockwise) {
-		Vector2 a = vertex.point;
-		Vector2 b = clockwise ? vertex.prev.point : vertex.next.point;
-		Vector2 n = a.to(b);
-		
-		// check for lost precision due to large points and small points being subtracted
-		// NOTE: we could normalize all the time, but since we aren't comparing the dot/cross
-		//		 products, we only need to normalize those that lose precision
-		double d1 = a.getMagnitudeSquared();
-		double d2 = b.getMagnitudeSquared();
-		double dx = Math.abs(d1 - d2);
-		if (dx == d1 || dx == d2) {
-			// if we get precision loss, we need to normalize the edge
-			n.normalize();
-		}
-		return n;
 	}
 }

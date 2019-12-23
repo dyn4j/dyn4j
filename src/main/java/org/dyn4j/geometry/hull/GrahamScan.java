@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.dyn4j.geometry.Segment;
+import org.dyn4j.geometry.RobustGeometry;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
@@ -79,21 +79,25 @@ public class GrahamScan implements HullGenerator {
 		
 		// build the hull
 		List<Vector2> stack = new ArrayList<Vector2>();
+		
 		// push
 		stack.add(points[0]);
 		stack.add(points[1]);
+		
 		int i = 2;
 		while (i < size) {
 			int sSize = stack.size();
 			// if the stack size is one then just
 			// push the current point onto the stack
 			// thereby making a line segment
+			
 			if (sSize == 1) {
 				// push
 				stack.add(points[i]);
 				i++;
 				continue;
 			}
+			
 			// otherwise get the top two items off the stack
 			Vector2 p1 = stack.get(sSize - 2);
 			Vector2 p2 = stack.get(sSize - 1);
@@ -104,26 +108,16 @@ public class GrahamScan implements HullGenerator {
 			// created by the top two items in the stack (the last edge
 			// on the current convex hull)
 			
-			double location = Segment.getLocation(p3, p1, p2);
-			if (location > 0.0) {
+			// Use the robust side of line test because otherwise this algorithm
+			// can produce incorrect results in edge cases
+			// The order of parameters here must match the one in ReferenceComparator
+			// in order to obtain correct results and winding
+			double location = RobustGeometry.getLocation(p3, p2, p1);
+			
+			if (location < 0.0) {
 				// if its to the left, then push the new point on
 				// the stack since it maintains convexity
-				
-				// however, it's possible in extreme cases that the 
-				// location test above will encounter numeric error
-				// and report an incorrect value.
-				
-				// to catch this scenario, confirm that the winding
-				// of the new point is anti-clockwise before adding
-				// it to the hull
-				Vector2 e1 = p1.to(p2);
-				Vector2 e2 = p2.to(p3);
-				double cross = e1.cross(e2);
-				
-				if (cross >= 0.0) {
-					stack.add(p3);
-				}
-				
+				stack.add(p3);
 				i++;
 			} else {
 				// otherwise the pop the previous point off the stack
