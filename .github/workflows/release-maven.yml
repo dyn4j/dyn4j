@@ -21,7 +21,7 @@ jobs:
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn -Pdyn4j-release-github --settings settings.xml deploy
+        run: mvn -B -e -Pdyn4j-release-github -Dmaven.wagon.http.pool=false --settings settings.xml deploy
         #run: mvn -B deploy -Pdyn4j-release-github --file pom.xml
         
       #- name: Release to Maven Central
