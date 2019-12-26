@@ -1,6 +1,6 @@
 ![alt tag](https://raw.githubusercontent.com/wnbittle/dyn4j/master/dyn4j.png)
 
-![Actions Status](https://github.com/dyn4j/dyn4j/workflows/Maven CI/badge.svg)](https://github.com/dyn4j/dyn4j/actions)
+![Actions Status](https://github.com/dyn4j/dyn4j/workflows/Maven%20CI/badge.svg)](https://github.com/dyn4j/dyn4j/actions)
 
 ## Java Collision Detection and Physics Engine
 
