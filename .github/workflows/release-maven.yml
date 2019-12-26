@@ -35,11 +35,11 @@ jobs:
       #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       #  run: mvn -B -e -Pdyn4j-release-github -Dmaven.wagon.http.pool=false --settings settings.xml deploy
         
-      - name: Release to Maven Central
+      - name: Build and Release to Maven Central
         uses: samuelmeuli/action-maven-publish@v1
         with:
           gpg_private_key: ${{ secrets.gpg_private_key }}
           gpg_passphrase: ${{ secrets.gpg_passphrase }}
           nexus_username: ${{ secrets.nexus_username }}
           nexus_password: ${{ secrets.nexus_password }}
-          maven_args: -Pdyn4j-release-central
+          maven_args: -B -e -Pdyn4j-release-central
