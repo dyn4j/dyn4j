@@ -10,6 +10,10 @@ New Features:
   - New BruteForceBroadphase detector (by mtsamis)
   - Geometry optimizations (by mtsamis)
   - Dynamics optimizations (by mtsamis)
+  - New Rotation class for more efficient rotations (by mtsamis)
+  - New divide, quotient, and inverseRotate methods for Vector2 (by mtsamis)
+  - New RobustGeometry class for dealing with error in floating point 
+    computations (specifically for geometry at the moment) (by mtsamis)
 
 Bug Fixes:
   - Bug fix for HalfEllipse.getRadius(Vector2) when the half width < half
@@ -28,9 +32,13 @@ Bug Fixes:
     simple polygons throwing IllegalArgumentException
   - Fixes for the DivideAndConquer, GiftWrap, and GrahamScan convex hull
     generation algorithms for colinear and coincident points and for 
-    precision loss
+    precision loss (by mtsamis)
     
 Deprecated:
+  - getId methods in all classes are going away in the next version. If you
+    need an id, please use the setUserData method.
+  - Transform.IDENTITY - please use new Transform() instead of this static
+    final property.
   
 Breaking Changes:
   - double getRotation() methods were replaced with Rotation getRotation()
@@ -40,6 +48,9 @@ Breaking Changes:
   
 Other:
   - Updated broadphase tests (by mtsamis)
+  - Many more (and improved) unit tests for the geometry package (by mtsamis)
+  - Updated the Ray class constructors to normalize the input direction to
+    help avoid common usage issues.
 
 ===============================================================================
 Version 3.3.0

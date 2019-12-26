@@ -68,14 +68,6 @@
       <name>GitHub</name>
       <url>https://github.com/dyn4j/dyn4j</url>
     </site>
-    <repository>
-      <id>sonatype-nexus-staging</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-    </repository>
-    <snapshotRepository>
-      <id>sonatype-nexus-snapshots</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-    </snapshotRepository>
   </distributionManagement>
   
   <build>
@@ -366,17 +358,30 @@
 
   <profiles>
 
-    <!-- Sign artifacts when deploying to Central -->
+    <!--
+      Enable the staging plugin for releases
+
+      This will deploy the code to Maven Central in a single command:
+
+      $ mvn clean deploy -Ddyn4j.release=true
+    -->
     <profile>
-      <id>dyn4j-deployment</id>
-      <activation>
-        <property>
-          <name>dyn4j.deployment</name>
-        </property>
-      </activation>
+      <id>dyn4j-release-central</id>
+      
+	  <distributionManagement>
+		<repository>
+		  <id>sonatype-nexus-staging</id>
+		  <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+		<snapshotRepository>
+		  <id>sonatype-nexus-snapshots</id>
+		  <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+		</snapshotRepository>
+	  </distributionManagement>
+	  
       <build>
         <plugins>
-
+        
           <!--
           Maven GPG plugin.
           https://maven.apache.org/plugins/maven-gpg-plugin/
@@ -391,8 +396,10 @@
                 <id>sign-artifacts</id>
                 <phase>verify</phase>
                 <configuration>
-                  <keyname>${gpg.keyname}</keyname>
-                  <passphraseServerId>${gpg.keyserver}</passphraseServerId>
+                	<gpgArguments>
+                		<arg>--pinentry-mode</arg>
+                		<arg>loopback</arg>
+                	</gpgArguments>
               	</configuration>
                 <goals>
                   <goal>sign</goal>
@@ -400,27 +407,7 @@
               </execution>
             </executions>
           </plugin>
-        </plugins>
-      </build>
-    </profile>
-
-    <!--
-      Enable the staging plugin for releases
-
-      This will deploy the code to Maven Central in a single command:
-
-      $ mvn clean deploy -Ddyn4j.release=true
-    -->
-    <profile>
-      <id>dyn4j-release</id>
-      <activation>
-        <property>
-          <name>dyn4j.release</name>
-        </property>
-      </activation>
-
-      <build>
-        <plugins>
+        
           <plugin>
             <groupId>org.sonatype.plugins</groupId>
             <artifactId>nexus-staging-maven-plugin</artifactId>
@@ -434,7 +421,7 @@
                 </goals>
                 <configuration>
                 	<nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                	<serverId>${nexus.server}</serverId>
+                	<serverId>sonatype-nexus-staging</serverId>
                 	<autoReleaseAfterClose>false</autoReleaseAfterClose>
                 </configuration>
               </execution>
@@ -442,6 +429,19 @@
           </plugin>
         </plugins>
       </build>
+    </profile>
+    
+    <profile>
+      <id>dyn4j-release-github</id>
+      
+	  <distributionManagement>
+		<repository>
+		  <id>github</id>
+		  <name>GitHub dyn4j Apache Maven Packages</name>
+		  <url>https://maven.pkg.github.com/dyn4j/dyn4j</url>
+		</repository>
+	  </distributionManagement>
+      
     </profile>
   </profiles>
   <dependencies>

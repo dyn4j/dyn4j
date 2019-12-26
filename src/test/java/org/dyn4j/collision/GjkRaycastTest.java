@@ -48,7 +48,7 @@ import org.junit.Test;
  * Test cases for the {@link Gjk#raycast(Ray, double, Convex, Transform, Raycast)}
  * method.
  * @author William Bittle
- * @version 3.1.5
+ * @version 3.4.0
  * @since 2.0.0
  */
 public class GjkRaycastTest {
@@ -194,7 +194,6 @@ public class GjkRaycastTest {
 	@Test
 	public void raycastCircle() {
 		Vector2 d = new Vector2(2.0, 1.0);
-		d.normalize();
 		Ray ray = new Ray(d);
 		Gjk gjk = new Gjk();
 		Convex c = Geometry.createCircle(0.5);

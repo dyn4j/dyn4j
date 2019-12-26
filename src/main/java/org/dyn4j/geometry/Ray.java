@@ -31,7 +31,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * A ray is a vector with a start point.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.4.0
  * @since 2.0.0
  */
 public class Ray {
@@ -52,7 +52,7 @@ public class Ray {
 	
 	/**
 	 * Creates a ray from the origin in the given direction.
-	 * @param direction the direction; must be normalized
+	 * @param direction the direction
 	 */
 	public Ray(Vector2 direction) {
 		this(new Vector2(), direction);
@@ -71,7 +71,7 @@ public class Ray {
 	/**
 	 * Creates a ray from the given start point in the given direction.
 	 * @param start the start point
-	 * @param direction the direction; must be normalized
+	 * @param direction the direction
 	 * @throws NullPointerException if start or direction is null
 	 * @throws IllegalArgumentException if direction is the zero vector
 	 */
@@ -80,7 +80,7 @@ public class Ray {
 		if (direction == null) throw new NullPointerException(Messages.getString("geometry.ray.nullDirection"));
 		if (direction.isZero()) throw new IllegalArgumentException(Messages.getString("geometry.ray.zeroDirection"));
 		this.start = start;
-		this.direction = direction;
+		this.direction = direction.getNormalized();
 	}
 	
 	/* (non-Javadoc)

@@ -1,5 +1,7 @@
 ![alt tag](https://raw.githubusercontent.com/wnbittle/dyn4j/master/dyn4j.png)
 
+[![Actions Status](https://github.com/dyn4j/dyn4j/workflows/Maven CI/badge.svg)](https://github.com/dyn4j/dyn4j/actions)
+
 ## Java Collision Detection and Physics Engine
 
 A 100% Java 2D collision detection and physics engine.  Designed to be fast, stable, extensible, and easy to use.  dyn4j is free for use in commercial and non-commercial applications.
