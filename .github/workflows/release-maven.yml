@@ -1,34 +1,45 @@
-name: Maven Release
+name: Maven CD
 
-# push trigger just for testing
-on: [push] 
+on: 
+  # push is just for testing this pipeline
+  [push] 
+  # milestone will be the real trigger once this is fully working
   #milestone:
   #  types: [closed]
+  # deployment since this is only triggered via API right now
+  #  deployment
   
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+      # checkout the repo
       - name: Check out Git repository
         uses: actions/checkout@v1
       
+      # we build with JDK 9 so we can build the module-info.java
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
           java-version: '9.0.x'
-          
-      - name: Release to GitHub
-        env:
-          GITHUB_USERNAME: x-access-token
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn -B -e -Pdyn4j-release-github -Dmaven.wagon.http.pool=false --settings settings.xml deploy
-        #run: mvn -B deploy -Pdyn4j-release-github --file pom.xml
+      
+      # release to GitHub packages
+      # NOTE: this will fail with error 422 if the version in the pom is the same as an existing package
+      # NOTE: must use x-access-token as the username when using GITHUB_TOKEN
+      # NOTE: must use a settings.xml file since the CLI doesn't accept username/password arguments
+      # NOTE: must use -Dmaven.wagon.http.pool=false to have the sources and javadoc jars published
+      # NOTE: the profile dyn4j-release-github uses the maven deploy plugin
+      #- name: Build and Release to GitHub Packages
+      #  env:
+      #    GITHUB_USERNAME: x-access-token
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #  run: mvn -B -e -Pdyn4j-release-github -Dmaven.wagon.http.pool=false --settings settings.xml deploy
         
-      #- name: Release to Maven Central
-      #  uses: samuelmeuli/action-maven-publish@v1
-      #  with:
-      #    gpg_private_key: ${{ secrets.gpg_private_key }}
-      #    gpg_passphrase: ${{ secrets.gpg_passphrase }}
-      #    nexus_username: ${{ secrets.nexus_username }}
-      #    nexus_password: ${{ secrets.nexus_password }}
-      #    maven_args: -Pdyn4j-release-central
+      - name: Release to Maven Central
+        uses: samuelmeuli/action-maven-publish@v1
+        with:
+          gpg_private_key: ${{ secrets.gpg_private_key }}
+          gpg_passphrase: ${{ secrets.gpg_passphrase }}
+          nexus_username: ${{ secrets.nexus_username }}
+          nexus_password: ${{ secrets.nexus_password }}
+          maven_args: -Pdyn4j-release-central
