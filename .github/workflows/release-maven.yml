@@ -1,0 +1,31 @@
+name: Maven Release
+
+# push trigger just for testing
+on: [push] 
+  #milestone:
+  #  types: [closed]
+  
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v1
+      
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: '9.0.x'
+          
+      - name: Release to GitHub
+        run: mvn deploy -Pdyn4j-release-github -Dregistry=https://maven.pkg.github.com/dyn4j -Dtoken=${{ secrets.GITHUB_TOKEN }}
+        #run: mvn -B deploy -Pdyn4j-release-github --file pom.xml
+        
+      #- name: Release to Maven Central
+      #  uses: samuelmeuli/action-maven-publish@v1
+      #  with:
+      #    gpg_private_key: ${{ secrets.gpg_private_key }}
+      #    gpg_passphrase: ${{ secrets.gpg_passphrase }}
+      #    nexus_username: ${{ secrets.nexus_username }}
+      #    nexus_password: ${{ secrets.nexus_password }}
+      #    maven_args: -Pdyn4j-release-central

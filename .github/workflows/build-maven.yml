@@ -1,22 +1,18 @@
-name: Maven Build
+name: Maven CI
 
 on: [push]
 
 jobs:
   build:
 
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix: 
-        java: ['9.0.x']
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v1
     - name: Set up JDK
       uses: actions/setup-java@v1
       with:
-        java-version: ${{ matrix.java }}
+        java-version: '9.0.x'
         
     - name: Build with Maven
       run: mvn -B clean package --file pom.xml
