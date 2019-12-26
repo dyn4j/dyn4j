@@ -18,7 +18,10 @@ jobs:
           java-version: '9.0.x'
           
       - name: Release to GitHub
-        run: mvn deploy -Pdyn4j-release-github -Dregistry=https://maven.pkg.github.com/dyn4j -Dtoken=${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_USERNAME: x-access-token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: mvn -Pdyn4j-release-github --settings settings.xml deploy
         #run: mvn -B deploy -Pdyn4j-release-github --file pom.xml
         
       #- name: Release to Maven Central
