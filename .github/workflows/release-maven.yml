@@ -34,9 +34,16 @@ jobs:
       #    GITHUB_USERNAME: x-access-token
       #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       #  run: mvn -B -e -Pdyn4j-release-github -Dmaven.wagon.http.pool=false --settings settings.xml deploy
-        
+      
+      # release to Maven Central
+      # NOTE: this is using https://github.com/samuelmeuli/action-maven-publish
+      # NOTE: the gpg_private_key needs to be the entire output from "gpg -a --export-secret-keys KEY_ID"
+      # NOTE: https://oss.sonatype.org/ to login
       - name: Build and Release to Maven Central
         uses: samuelmeuli/action-maven-publish@v1
+        env:
+          NEXUS_USERNAME: ${{ secrets.nexus_username }}
+          NEXUS_PASSWORD: ${{ secrets.nexus_password }}
         with:
           gpg_private_key: ${{ secrets.gpg_private_key }}
           gpg_passphrase: ${{ secrets.gpg_passphrase }}
