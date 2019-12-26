@@ -3,7 +3,7 @@
 
   <groupId>org.dyn4j</groupId>
   <artifactId>dyn4j</artifactId>
-  <version>3.4.0</version>
+  <version>3.3.1</version>
 
   <name>dyn4j</name>
   <url>http://www.dyn4j.org</url>
@@ -81,14 +81,6 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-clean-plugin</artifactId>
           <version>${dyn4j.maven-clean-plugin.version}</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-deploy-plugin</artifactId>
-          <version>${dyn4j.maven-deploy-plugin.version}</version>
-          <configuration>
-          	<skip>true</skip>
-          </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -433,6 +425,16 @@
     
     <profile>
       <id>dyn4j-release-github</id>
+      
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-deploy-plugin</artifactId>
+            <version>${dyn4j.maven-deploy-plugin.version}</version>
+          </plugin>
+        </plugins>
+      </build>
       
 	  <distributionManagement>
 		<repository>
