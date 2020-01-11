@@ -16,26 +16,28 @@ The project is comprised of the main project and tests managed here and two othe
 ### Getting Started
 dyn4j comes with a lot of features and extensibility, but getting started is easy.
 
-#### Step 1 Add dyn4j to Your Project
-Add dyn4j to your classpath by downloading a release from 
-[Releases](https://github.com/wnbittle/dyn4j/releases) or [Maven Central](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.dyn4j%22%20AND%20a%3A%22dyn4j%22)
-
-Or by adding a Maven dependency:
+#### Step 1: Add dyn4j to Your Project
+Add dyn4j to your classpath by adding a Maven dependency from 
+[Maven Central](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.dyn4j%22%20AND%20a%3A%22dyn4j%22) or 
+[GitHub Packages](https://github.com/dyn4j/dyn4j/packages)
 ```xml
 <dependency>
     <groupId>org.dyn4j</groupId>
     <artifactId>dyn4j</artifactId>
-    <version>3.3.0</version>
+    <version>3.4.0</version>
 </dependency>
 ```
 
-#### Step 2 Create a World
+If you are not using Maven you can download the jar from either of the links above.  
+**NOTE:** [Releases](https://github.com/wnbittle/dyn4j/releases) are no longer being created as of 3.4.0.
+
+#### Step 2: Create a World
 ```java
 World world = new World();
 ```
 This creates a new simulation environment with default settings.  The default settings use the meter-kilogram-seconds system and include the default pipeline classes.
 
-#### Step 3 Add Some Bodies
+#### Step 3: Add Some Bodies
 ```java
 Body body = new Body();
 body.addFixture(Geometry.createCircle(1.0));
@@ -45,14 +47,14 @@ world.addBody(body);
 ```
 A body is the primary unit of simulation and completely rigid.  A body is comprised of many fixtures or shapes.  While the shapes of dyn4j are all convex (and must be), a collection of these shapes can be used to create a body that is not.  A body can be initially placed in a scene by translating or rotating it.  Once the shape(s) of a body is defined, it must be given a mass by calling a setMass method.  The mass type is typically MassType.NORMAL or MassType.INFINITE.  When set to NORMAL, the mass will be calculated based on the shapes.  An INFINITE mass body might represent a floor, ground, or something unmovable.
 
-#### Step 4 Add Some Joints
+#### Step 4: Add Some Joints
 ```java
 PinJoint joint = new PinJoint(body, new Vector2(0, 0), 4, 0.7, 1000);
 world.addJoint(joint);
 ```
 A joint is a constraint on the motion of one or more bodies.  There are many joint types that serve different purposes.  Generally, joints are used to link bodies together in a specified way.  Bodies can have multiple joints attached to them making for some interesting combinations.
 
-#### Step 5 Run the Simulation
+#### Step 5: Run the Simulation
 ```java
 for (int i = 0; i < 100; i++) {
     world.step(1);
