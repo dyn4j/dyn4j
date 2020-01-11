@@ -3,7 +3,7 @@
 
   <groupId>org.dyn4j</groupId>
   <artifactId>dyn4j</artifactId>
-  <version>3.4.0</version>
+  <version>3.4.1</version>
 
   <name>dyn4j</name>
   <url>http://www.dyn4j.org</url>
@@ -264,6 +264,7 @@
                 <sourceFileExcludes>
                 	<sourceFileExclude>module-info.java</sourceFileExclude>
                 </sourceFileExcludes>
+                <overview>${basedir}/overview.html</overview>
                 <archive>
                   <manifestEntries>
                     <Specification-Title>${project.name}</Specification-Title>
