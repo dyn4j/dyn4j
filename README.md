@@ -14,7 +14,9 @@ The project is comprised of the main project and tests managed here and two othe
 * Java 1.6+
 
 ### Getting Started
-dyn4j comes with a lot of features and extensibility, but getting started is easy.
+dyn4j comes with a lot of features and extensibility, but getting started is easy.  If you are looking for a quick start, take a look at the following video.
+
+[![Getting started with dyn4j](https://img.youtube.com/vi/OqOcT8z-m_w/0.jpg)](https://www.youtube.com/watch?v=OqOcT8z-m_w)
 
 #### Step 1: Add dyn4j to Your Project
 Add dyn4j to your classpath by adding a Maven dependency from 
