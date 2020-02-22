@@ -10,7 +10,7 @@
 - [#71](https://github.com/dyn4j/dyn4j/issues/71) Removed all references to UUID in the project as promised in the previous version's deprecation.
   
 **Other:**
-- Replaced release-notes.txt with RELEASE-NOTES.md for better formatting and maintenance.
+- [#98](https://github.com/dyn4j/dyn4j/issues/98) Replaced release-notes.txt with RELEASE-NOTES.md for better formatting and maintenance.
 
 ## v3.4.0 - January 10th, 2020
 
