@@ -24,8 +24,6 @@
  */
 package org.dyn4j.collision;
 
-import java.util.UUID;
-
 import org.dyn4j.DataContainer;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Shape;
@@ -56,13 +54,10 @@ import org.dyn4j.resources.Messages;
  * A {@link Fixture} can be flagged as a sensor fixture to enable standard collision detection, but disable
  * collision resolution (response).
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.4.1
  * @since 2.0.0
  */
 public class Fixture implements DataContainer {
-	/** The id for the fixture */
-	protected final UUID id;
-	
 	/** The convex shape for this fixture */
 	protected final Convex shape;
 	
@@ -82,7 +77,6 @@ public class Fixture implements DataContainer {
 	 */
 	public Fixture(Convex shape) {
 		if (shape == null) throw new NullPointerException(Messages.getString("collision.fixture.nullShape"));
-		this.id = UUID.randomUUID();
 		this.shape = shape;
 		this.filter = Filter.DEFAULT_FILTER;
 		this.sensor = false;
@@ -94,24 +88,11 @@ public class Fixture implements DataContainer {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Fixture[Id=").append(this.id)
-		.append("|Shape=").append(this.shape)
+		sb.append("Fixture[Shape=").append(this.shape)
 		.append("|Filter=").append(this.filter)
 		.append("|IsSensor=").append(this.sensor)
 		.append("]");
 		return sb.toString();
-	}
-	
-	/**
-	 * Returns the id for this fixture.
-	 * <p>
-	 * This identifier is constant for the life of this {@link Fixture}.
-	 * @deprecated ID schemes should be implemented by the user where needed; since 3.4.0
-	 * @return UUID
-	 */
-	@Deprecated
-	public UUID getId() {
-		return this.id;
 	}
 	
 	/**

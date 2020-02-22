@@ -24,8 +24,6 @@
  */
 package org.dyn4j.dynamics.contact;
 
-import java.util.UUID;
-
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Convex;
@@ -35,7 +33,7 @@ import org.dyn4j.geometry.Shape;
  * Represents and id for a contact constraint between two {@link Convex}
  * {@link Shape}s on two {@link Body}s.
  * @author William Bittle
- * @version 3.4.0
+ * @version 3.4.1
  * @since 1.0.0
  */
 public final class ContactConstraintId {
@@ -108,50 +106,6 @@ public final class ContactConstraintId {
 		.append("|Fixture2=").append(this.fixture2.hashCode())
 		.append("]");
 		return sb.toString();
-	}
-	
-	/**
-	 * Returns the id of the first body.
-	 * @deprecated ID schemes should be implemented by the user where needed; since 3.4.0
-	 * @return UUID
-	 * @since 3.1.2
-	 */
-	@Deprecated
-	public UUID getBody1Id() {
-		return this.body1.getId();
-	}
-
-	/**
-	 * Returns the id of the second body.
-	 * @deprecated ID schemes should be implemented by the user where needed; since 3.4.0
-	 * @return UUID
-	 * @since 3.1.2
-	 */
-	@Deprecated
-	public UUID getBody2Id() {
-		return this.body2.getId();
-	}
-
-	/**
-	 * Returns the id of the fixture on the first body.
-	 * @deprecated ID schemes should be implemented by the user where needed; since 3.4.0
-	 * @return UUID
-	 * @since 3.1.2
-	 */
-	@Deprecated
-	public UUID getFixture1Id() {
-		return this.fixture1.getId();
-	}
-
-	/**
-	 * Returns the id of the fixture on the second body.
-	 * @deprecated ID schemes should be implemented by the user where needed; since 3.4.0
-	 * @return UUID
-	 * @since 3.1.2
-	 */
-	@Deprecated
-	public UUID getFixture2Id() {
-		return this.fixture2.getId();
 	}
 	
 	/**

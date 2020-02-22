@@ -37,7 +37,7 @@ import org.dyn4j.resources.Messages;
  * {@link BodyFixture} extends the {@link Fixture} class, adding physical features
  * like density and friction.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.4.1
  * @since 2.0.0
  * @see Fixture
  */
@@ -77,8 +77,7 @@ public class BodyFixture extends Fixture implements DataContainer {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("BodyFixture[Id=").append(this.id)
-		.append("|Shape=").append(this.shape)
+		sb.append("BodyFixture[Shape=").append(this.shape)
 		.append("|Filter=").append(this.filter)
 		.append("|IsSensor=").append(this.sensor)
 		.append("|Density=").append(this.density)

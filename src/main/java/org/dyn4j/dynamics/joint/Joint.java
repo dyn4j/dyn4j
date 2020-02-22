@@ -24,8 +24,6 @@
  */
 package org.dyn4j.dynamics.joint;
 
-import java.util.UUID;
-
 import org.dyn4j.DataContainer;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Constraint;
@@ -37,13 +35,10 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents constrained motion between two {@link Body}s.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.4.1
  * @since 1.0.0
  */
 public abstract class Joint extends Constraint implements Shiftable, DataContainer {
-	/** The joint's unique identifier */
-	protected final UUID id = UUID.randomUUID();
-	
 	/** Whether the pair of bodies joined together can collide with each other */
 	protected boolean collisionAllowed;
 
@@ -80,9 +75,8 @@ public abstract class Joint extends Constraint implements Shiftable, DataContain
 	 */
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Id=").append(this.id)
 		// body1, body2, island
-		.append("|").append(super.toString())
+		sb.append("|").append(super.toString())
 		.append("|IsCollisionAllowed=").append(this.collisionAllowed);
 		return sb.toString();
 	}
@@ -138,17 +132,6 @@ public abstract class Joint extends Constraint implements Shiftable, DataContain
 	 * @return double
 	 */
 	public abstract double getReactionTorque(double invdt);
-	
-	/**
-	 * Returns the unique identifier for this joint instance.
-	 * @deprecated ID schemes should be implemented by the user where needed; since 3.4.0
-	 * @return String
-	 * @since 3.0.1
-	 */
-	@Deprecated
-	public UUID getId() {
-		return this.id;
-	}
 	
 	/**
 	 * Returns true if this {@link Joint} is active.

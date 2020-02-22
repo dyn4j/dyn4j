@@ -24,8 +24,6 @@
  */
 package org.dyn4j.geometry;
 
-import java.util.UUID;
-
 import org.dyn4j.DataContainer;
 
 /**
@@ -38,18 +36,10 @@ import org.dyn4j.DataContainer;
  * mutable objects.  It's recommended that a {@link Shape}, after creation and use, remain
  * unchanged and instead be replaced with a new {@link Shape} if modification is necessary.
  * @author William Bittle
- * @version 3.4.0
+ * @version 3.4.1
  * @since 1.0.0
  */
-public interface Shape extends Transformable, DataContainer {	
-	/**
-	 * Returns the unique identifier for this shape instance.
-	 * @deprecated ID schemes should be implemented by the user where needed; since 3.4.0
-	 * @return UUID
-	 */
-	@Deprecated
-	public abstract UUID getId();
-	
+public interface Shape extends Transformable, DataContainer {
 	/**
 	 * Returns the center/centroid of the {@link Shape} in local coordinates.
 	 * @return {@link Vector2}

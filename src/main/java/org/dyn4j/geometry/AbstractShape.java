@@ -24,22 +24,17 @@
  */
 package org.dyn4j.geometry;
 
-import java.util.UUID;
-
 import org.dyn4j.DataContainer;
 
 /**
  * Base implementation of the {@link Shape} interface.
  * @author William Bittle
- * @version 3.4.0
+ * @version 3.4.1
  * @since 1.0.0
  */
 public abstract class AbstractShape implements Shape, Transformable, DataContainer {
 	/** Identity Transform instance */
 	private static final Transform IDENTITY = new Transform();
-	
-	/** The shape's unique identifier */
-	protected final UUID id = UUID.randomUUID();
 	
 	/** The center of this {@link Shape} */
 	protected Vector2 center;
@@ -77,19 +72,9 @@ public abstract class AbstractShape implements Shape, Transformable, DataContain
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Id=").append(this.id)
-		.append("|Center=").append(this.center)
+		sb.append("Center=").append(this.center)
 		.append("|Radius=").append(this.radius);
 		return sb.toString();
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Shape#getId()
-	 */
-	@Deprecated
-	@Override
-	public UUID getId() {
-		return this.id;
 	}
 	
 	/* (non-Javadoc)

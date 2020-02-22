@@ -26,7 +26,6 @@ package org.dyn4j.collision;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.geometry.AABB;
@@ -40,7 +39,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents an object that can collide with other objects.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.4.1
  * @since 1.0.0
  * @param <T> the {@link Fixture} type
  * @see AbstractCollidable
@@ -48,17 +47,6 @@ import org.dyn4j.geometry.Vector2;
 public interface Collidable<T extends Fixture> extends Transformable, Shiftable, DataContainer {
 	/** Number of fixtures typically attached to a {@link Collidable} */
 	public static final int TYPICAL_FIXTURE_COUNT = 1;
-	
-	/**
-	 * Returns a unique identifier for this {@link Collidable}.
-	 * <p>
-	 * This identifier is constant for the life of this {@link Collidable}.
-	 * @deprecated ID schemes should be implemented by the user where needed; since 3.4.0
-	 * @return UUID the unique id
-	 * @since 3.0.0
-	 */
-	@Deprecated
-	public abstract UUID getId();
 	
 	/**
 	 * Creates an {@link AABB} from this {@link Collidable}'s attached {@link Fixture}s.

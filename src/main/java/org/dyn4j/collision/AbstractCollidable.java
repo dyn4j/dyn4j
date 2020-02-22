@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.geometry.AABB;
@@ -41,14 +40,11 @@ import org.dyn4j.geometry.Vector2;
 /**
  * A base implementation of the {@link Collidable} interface.
  * @author William Bittle
- * @version 3.4.0
+ * @version 3.4.1
  * @since 3.2.0
  * @param <T> the {@link Fixture} type
  */
 public abstract class AbstractCollidable<T extends Fixture> implements Collidable<T>, Transformable, DataContainer {
-	/** The {@link Collidable}'s unique identifier */
-	protected final UUID id;
-	
 	/** The current {@link Transform} */
 	protected Transform transform;
 
@@ -79,7 +75,6 @@ public abstract class AbstractCollidable<T extends Fixture> implements Collidabl
 	 */
 	public AbstractCollidable(int fixtureCount) {
 		int size = fixtureCount <= 0 ? Collidable.TYPICAL_FIXTURE_COUNT : fixtureCount;
-		this.id = UUID.randomUUID();
 		this.fixtures = new ArrayList<T>(size);
 		this.radius = 0.0;
 		this.transform = new Transform();
@@ -337,14 +332,6 @@ public abstract class AbstractCollidable<T extends Fixture> implements Collidabl
 	 */
 	public void setUserData(Object userData) {
 		this.userData = userData;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.Collidable#getId()
-	 */
-	@Deprecated
-	public UUID getId() {
-		return this.id;
 	}
 	
 	/* (non-Javadoc)

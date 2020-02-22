@@ -30,7 +30,6 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Listener;
@@ -87,7 +86,7 @@ import org.dyn4j.resources.Messages;
  * there are multiple {@link CollisionListener}s and <b>any</b> one of them returns false for an event, the collision is skipped.  However,
  * all listeners will still be called no matter if the first returned false.
  * @author William Bittle
- * @version 3.4.0
+ * @version 3.4.1
  * @since 1.0.0
  */
 public class World implements Shiftable, DataContainer {
@@ -100,9 +99,6 @@ public class World implements Shiftable, DataContainer {
 	/** Zero gravity constant */
 	public static final Vector2 ZERO_GRAVITY = new Vector2(0.0, 0.0);
 
-	/** The world id */
-	protected final UUID id = UUID.randomUUID();
-	
 	// settings
 	
 	/** The dynamics settings for this world */
@@ -3254,17 +3250,6 @@ public class World implements Shiftable, DataContainer {
 	 */
 	public void setUpdateRequired(boolean flag) {
 		this.updateRequired = flag;
-	}
-	
-	/**
-	 * Returns the world id.
-	 * @deprecated ID schemes should be implemented by the user where needed; since 3.4.0
-	 * @return UUID
-	 * @since 3.2.0
-	 */
-	@Deprecated
-	public UUID getId() {
-		return this.id;
 	}
 	
 	/**
