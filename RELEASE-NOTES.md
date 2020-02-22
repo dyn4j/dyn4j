@@ -18,17 +18,17 @@ Other
 [GitHub Release](https://github.com/dyn4j/dyn4j/packages/93466?version=3.4.0)
 
 New Features:
-- Arithmetic optimizations @mtsamis
-- Small performance enhancement in the Island class @mtsamis
-- Memory footprint improvements @mtsamis
-- AABB unpack and performance enhancements @mtsamis
-- New LazyAABBTree broadphase detector @mtsamis
-- New BruteForceBroadphase detector @mtsamis
-- Geometry optimizations @mtsamis
-- Dynamics optimizations @mtsamis
-- New Rotation class for more efficient rotations @mtsamis
-- New divide, quotient, and inverseRotate methods for Vector2 @mtsamis
-- New RobustGeometry class for dealing with error in floating point computations (specifically for geometry at the moment) @mtsamis
+- Arithmetic optimizations [@mtsamis](https://github.com/mtsamis)
+- Small performance enhancement in the Island class [@mtsamis](https://github.com/mtsamis)
+- Memory footprint improvements [@mtsamis](https://github.com/mtsamis)
+- AABB unpack and performance enhancements [@mtsamis](https://github.com/mtsamis)
+- New LazyAABBTree broadphase detector [@mtsamis](https://github.com/mtsamis)
+- New BruteForceBroadphase detector [@mtsamis](https://github.com/mtsamis)
+- Geometry optimizations [@mtsamis](https://github.com/mtsamis)
+- Dynamics optimizations [@mtsamis](https://github.com/mtsamis)
+- New Rotation class for more efficient rotations [@mtsamis](https://github.com/mtsamis)
+- New divide, quotient, and inverseRotate methods for Vector2 [@mtsamis](https://github.com/mtsamis)
+- New RobustGeometry class for dealing with error in floating point computations (specifically for geometry at the moment) [@mtsamis](https://github.com/mtsamis)
 
 Bug Fixes:
 - [#45](https://github.com/dyn4j/dyn4j/issues/45) Bug fix for HalfEllipse.getRadius(Vector2) when the half width < half height and the given point is below the evolute.
@@ -62,10 +62,10 @@ Other:
 
 New Features:
 - [#30](https://github.com/dyn4j/dyn4j/issues/30) Performance improvements for Android
-- [#29](https://github.com/dyn4j/dyn4j/issues/29) Java 9 modules support @io7m
-- [#29](https://github.com/dyn4j/dyn4j/issues/29) OSGi support @io7m
+- [#29](https://github.com/dyn4j/dyn4j/issues/29) Java 9 modules support [@io7m](https://github.com/io7m)
+- [#29](https://github.com/dyn4j/dyn4j/issues/29) OSGi support [@io7m](https://github.com/io7m)
 - More control of iteration count and epsilon values in the GJK algorithm
-- [#29](https://github.com/dyn4j/dyn4j/issues/29) Proper Maven-ization of the project with automated building, testing, and packaging @by io7m
+- [#29](https://github.com/dyn4j/dyn4j/issues/29) Proper Maven-ization of the project with automated building, testing, and packaging [@io7m](https://github.com/io7m)
 - Added an enabled flag for the ContactConstraint class to allow contacts to be temporarily turned off, but still warm started and tracked.
 
 Bug Fixes:
