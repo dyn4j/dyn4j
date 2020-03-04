@@ -1447,6 +1447,8 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * <p>
 	 * Linear damping is used to reduce the linear velocity over time.  The default is
 	 * zero and larger values will cause the linear velocity to reduce faster.
+	 * <p>
+	 * The units are seconds<sup>-1</sup>. 
 	 * @param linearDamping the linear damping; must be greater than or equal to zero
 	 * @throws IllegalArgumentException if linearDamping is less than zero
 	 */
@@ -1469,6 +1471,8 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	 * <p>
 	 * Angular damping is used to reduce the angular velocity over time.  The default is
 	 * zero and larger values will cause the angular velocity to reduce faster.
+	 * <p>
+	 * The units are seconds<sup>-1</sup>.
 	 * @param angularDamping the angular damping; must be greater than or equal to zero
 	 * @throws IllegalArgumentException if angularDamping is less than zero
 	 */
