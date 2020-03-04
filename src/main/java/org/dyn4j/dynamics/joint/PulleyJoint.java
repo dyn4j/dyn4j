@@ -63,7 +63,7 @@ import org.dyn4j.resources.Messages;
  * behave as if connected by flexible rope pass in <code>true</code> to the 
  * {@link #setSlackEnabled(boolean)} method.
  * @author William Bittle
- * @version 3.2.1
+ * @version 3.4.1
  * @since 2.1.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Pulley_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/12/pulley-constraint/" target="_blank">Pulley Constraint</a>
@@ -470,6 +470,8 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 	 * @since 3.2.1
 	 */
 	public void setLength(double length) {
+		if (length < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.pulley.invalidLength"));
+		
 		this.length = length;
 		// wake up both bodies
 		this.body1.setAsleep(false);
