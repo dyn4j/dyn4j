@@ -47,9 +47,13 @@ import org.dyn4j.resources.Messages;
  * context, the joint will apply linear and angular friction to stop the body's motion.
  * <p>
  * Setting the maximum force and torque values will determine the rate at which the motion
- * is stopped.
+ * is stopped.  These values are defaulted to 10 and 0.25 respectively.
+ * <p>
+ * NOTE: In versions 3.4.0 and below, the maximum force and torque values were 0 by default.
+ * This was changed in 3.4.1 to allow users to better understand the use of this joint
+ * when first using it.
  * @author William Bittle
- * @version 3.2.0
+ * @version 3.4.1
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Friction_Joint" target="_blank">Documentation</a>
  */
@@ -104,6 +108,11 @@ public class FrictionJoint extends Joint implements Shiftable, DataContainer {
 		this.K = new Matrix22();
 		this.linearImpulse = new Vector2();
 		this.angularImpulse = 0.0;
+		
+		// the maximum force in Newtons
+		this.maximumForce = 10;
+		// the maximum torque in Newton-Meters
+		this.maximumTorque = 0.25;
 	}
 	
 	/* (non-Javadoc)
