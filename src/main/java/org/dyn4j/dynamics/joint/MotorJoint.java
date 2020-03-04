@@ -166,7 +166,7 @@ public class MotorJoint extends Joint implements Shiftable, DataContainer {
 		double invI1 = m1.getInverseInertia();
 		double invI2 = m2.getInverseInertia();
 		
-		Vector2 r1 = t1.getTransformedR(this.body1.getLocalCenter().getNegative());
+		Vector2 r1 = t1.getTransformedR(this.linearTarget.difference(this.body1.getLocalCenter()));
 		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().getNegative());
 		
 		// compute the K inverse matrix
@@ -186,8 +186,7 @@ public class MotorJoint extends Joint implements Shiftable, DataContainer {
 		// compute the error in the linear and angular targets
 		Vector2 d1 = r1.sum(this.body1.getWorldCenter());
 		Vector2 d2 = r2.sum(this.body2.getWorldCenter());
-		Vector2 d0 = t1.getTransformedR(this.linearTarget);
-		this.linearError = d2.subtract(d1).subtract(d0);
+		this.linearError = d2.subtract(d1);
 		this.angularError = this.getAngularError();
 		
 		// account for variable time step
