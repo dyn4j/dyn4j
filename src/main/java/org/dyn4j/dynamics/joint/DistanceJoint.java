@@ -51,7 +51,7 @@ import org.dyn4j.resources.Messages;
  * zero.  A good starting point is a frequency of 8.0 and damping ratio of 0.3
  * then adjust as necessary.
  * @author William Bittle
- * @version 3.2.1
+ * @version 3.4.1
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Distance_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/09/distance-constraint/" target="_blank">Distance Constraint</a>
@@ -375,11 +375,13 @@ public class DistanceJoint extends Joint implements Shiftable, DataContainer {
 	public void setDistance(double distance) {
 		// make sure the distance is greater than zero
 		if (distance < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.distance.invalidDistance"));
-		// wake up both bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
-		// set the new target distance
-		this.distance = distance;
+		if (this.distance != distance) {
+			// wake up both bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+			// set the new target distance
+			this.distance = distance;
+		}
 	}
 	
 	/**

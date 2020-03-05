@@ -51,7 +51,7 @@ import org.dyn4j.resources.Messages;
  * {@link DistanceJoint}.  The upper and lower limits can be enabled
  * separately.
  * @author William Bittle
- * @version 3.2.1
+ * @version 3.4.1
  * @since 2.2.1
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Rope_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/09/distance-constraint/" target="_blank">Distance Constraint</a>
@@ -402,14 +402,17 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 		if (upperLimit < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.rope.lessThanZeroUpperLimit"));
 		// make sure the minimum is less than or equal to the maximum
 		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidUpperLimit"));
-		// make sure its changed and enabled before waking the bodies
-		if (this.upperLimitEnabled && upperLimit != this.upperLimit) {
-			// wake up both bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
+		
+		if (this.upperLimit != upperLimit) {
+			// make sure its changed and enabled before waking the bodies
+			if (this.upperLimitEnabled) {
+				// wake up both bodies
+				this.body1.setAsleep(false);
+				this.body2.setAsleep(false);
+			}
+			// set the new target distance
+			this.upperLimit = upperLimit;
 		}
-		// set the new target distance
-		this.upperLimit = upperLimit;
 	}
 	
 	/**
@@ -417,11 +420,13 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 	 * @param flag true if the upper limit should be enabled
 	 */
 	public void setUpperLimitEnabled(boolean flag) {
-		// wake up both bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
-		// set the flag
-		this.upperLimitEnabled = flag;
+		if (this.upperLimitEnabled != flag) {
+			// wake up both bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+			// set the flag
+			this.upperLimitEnabled = flag;
+		}
 	}
 	
 	/**
@@ -450,14 +455,17 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 		if (lowerLimit < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.rope.lessThanZeroLowerLimit"));
 		// make sure the minimum is less than or equal to the maximum
 		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLowerLimit"));
-		// make sure its changed and enabled before waking the bodies
-		if (this.lowerLimitEnabled && lowerLimit != this.lowerLimit) {
-			// wake up both bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
+		
+		if (this.lowerLimit != lowerLimit) {
+			// make sure its changed and enabled before waking the bodies
+			if (this.lowerLimitEnabled) {
+				// wake up both bodies
+				this.body1.setAsleep(false);
+				this.body2.setAsleep(false);
+			}
+			// set the new target distance
+			this.lowerLimit = lowerLimit;
 		}
-		// set the new target distance
-		this.lowerLimit = lowerLimit;
 	}
 
 	/**
@@ -465,11 +473,13 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 	 * @param flag true if the lower limit should be enabled
 	 */
 	public void setLowerLimitEnabled(boolean flag) {
-		// wake up both bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
-		// set the flag
-		this.lowerLimitEnabled = flag;
+		if (this.lowerLimitEnabled != flag) {
+			// wake up both bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+			// set the flag
+			this.lowerLimitEnabled = flag;
+		}
 	}
 
 	/**
@@ -493,15 +503,18 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 		if (upperLimit < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.rope.lessThanZeroUpperLimit"));
 		// make sure the min < max
 		if (lowerLimit > upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLimits"));
-		// make sure one of the limits is enabled and has changed before waking the bodies
-		if ((this.lowerLimitEnabled && lowerLimit != this.lowerLimit) || (this.upperLimitEnabled && upperLimit != this.upperLimit)) {
-			// wake up the bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
+		
+		if (this.lowerLimit != lowerLimit || this.upperLimit != upperLimit) {
+			// make sure one of the limits is enabled and has changed before waking the bodies
+			if (this.lowerLimitEnabled || this.upperLimitEnabled) {
+				// wake up the bodies
+				this.body1.setAsleep(false);
+				this.body2.setAsleep(false);
+			}
+			// set the limits
+			this.upperLimit = upperLimit;
+			this.lowerLimit = lowerLimit;
 		}
-		// set the limits
-		this.upperLimit = upperLimit;
-		this.lowerLimit = lowerLimit;
 	}
 
 	/**
@@ -512,8 +525,7 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 	 */
 	public void setLimitsEnabled(double lowerLimit, double upperLimit) {
 		// enable the limits
-		this.upperLimitEnabled = true;
-		this.lowerLimitEnabled = true;
+		this.setLimitsEnabled(true);
 		// set the values
 		this.setLimits(lowerLimit, upperLimit);
 	}
@@ -524,11 +536,13 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 	 * @since 2.2.2
 	 */
 	public void setLimitsEnabled(boolean flag) {
-		this.upperLimitEnabled = flag;
-		this.lowerLimitEnabled = flag;
-		// wake up the bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
+		if (this.upperLimitEnabled != flag || this.lowerLimitEnabled != flag) {
+			this.upperLimitEnabled = flag;
+			this.lowerLimitEnabled = flag;
+			// wake up the bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+		}
 	}
 	
 	/**
@@ -542,15 +556,18 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 	public void setLimits(double limit) {
 		// make sure the distance is greater than zero
 		if (limit < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.rope.invalidLimit"));
-		// make sure one of the limits is enabled and has changed before waking the bodies
-		if ((this.lowerLimitEnabled && limit != this.lowerLimit) || (this.upperLimitEnabled && limit != this.upperLimit)) {
-			// wake up the bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
+		
+		if (this.lowerLimit != limit || this.upperLimit != limit) {
+			// make sure one of the limits is enabled and has changed before waking the bodies
+			if (this.lowerLimitEnabled || this.upperLimitEnabled) {
+				// wake up the bodies
+				this.body1.setAsleep(false);
+				this.body2.setAsleep(false);
+			}
+			// set the limits
+			this.upperLimit = limit;
+			this.lowerLimit = limit;
 		}
-		// set the limits
-		this.upperLimit = limit;
-		this.lowerLimit = limit;
 	}
 	
 	/**
@@ -564,8 +581,7 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 	 */
 	public void setLimitsEnabled(double limit) {
 		// enable the limits
-		this.upperLimitEnabled = true;
-		this.lowerLimitEnabled = true;
+		this.setLimitsEnabled(true);
 		// set the values
 		this.setLimits(limit);
 	}

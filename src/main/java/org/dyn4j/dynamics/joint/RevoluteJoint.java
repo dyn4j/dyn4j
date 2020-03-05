@@ -74,7 +74,7 @@ import org.dyn4j.resources.Messages;
  * clockwise or counter-clockwise rotation.  The maximum motor torque must be 
  * greater than zero for the motor to apply any motion.
  * @author William Bittle
- * @version 3.2.1
+ * @version 3.4.1
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Revolute_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/07/point-to-point-constraint/" target="_blank">Point-to-Point Constraint</a>
@@ -569,11 +569,13 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 	 * @param flag true if the motor should be enabled
 	 */
 	public void setMotorEnabled(boolean flag) {
-		// wake up the associated bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
-		// set the flag
-		this.motorEnabled = flag;
+		if (this.motorEnabled != flag) {
+			// wake up the associated bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+			// set the flag
+			this.motorEnabled = flag;
+		}
 	}
 	
 	/**
@@ -593,8 +595,13 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 	public void setMaximumMotorTorque(double maximumMotorTorque) {
 		// make sure its positive
 		if (maximumMotorTorque < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidMaximumMotorTorque"));
-		// set the max
-		this.maximumMotorTorque = maximumMotorTorque;
+		if (this.maximumMotorTorque != maximumMotorTorque) {
+			if (this.motorEnabled) {
+				this.body1.setAsleep(false);
+				this.body2.setAsleep(false);
+			}
+			this.maximumMotorTorque = maximumMotorTorque;
+		}
 	}
 	
 	/**
@@ -611,14 +618,16 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 	 * @see #setMaximumMotorTorque(double)
 	 */
 	public void setMotorSpeed(double motorSpeed) {
-		// only wake the bodies if the motor is enabled
-		if (this.motorEnabled) {
-			// if so, then wake up the bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
+		if (this.motorSpeed != motorSpeed) {
+			// only wake the bodies if the motor is enabled
+			if (this.motorEnabled) {
+				// if so, then wake up the bodies
+				this.body1.setAsleep(false);
+				this.body2.setAsleep(false);
+			}
+			// set the motor speed
+			this.motorSpeed = motorSpeed;
 		}
-		// set the motor speed
-		this.motorSpeed = motorSpeed;
 	}
 	
 	/**
@@ -673,14 +682,16 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 	 */
 	public void setUpperLimit(double upperLimit) {
 		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidUpperLimit"));
-		// only wake the bodies if the motor is enabled and the limit has changed
-		if (this.limitEnabled && upperLimit != this.upperLimit) {
-			// wake up the bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
+		if (this.upperLimit != upperLimit) {
+			// only wake the bodies if the motor is enabled and the limit has changed
+			if (this.limitEnabled) {
+				// wake up the bodies
+				this.body1.setAsleep(false);
+				this.body2.setAsleep(false);
+			}
+			// set the new value
+			this.upperLimit = upperLimit;
 		}
-		// set the new value
-		this.upperLimit = upperLimit;
 	}
 	
 	/**
@@ -702,14 +713,16 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 	 */
 	public void setLowerLimit(double lowerLimit) {
 		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLowerLimit"));
-		// only wake the bodies if the motor is enabled and the limit has changed
-		if (this.limitEnabled && lowerLimit != this.lowerLimit) {
-			// wake up the bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
+		if (this.lowerLimit != lowerLimit) {
+			// only wake the bodies if the motor is enabled and the limit has changed
+			if (this.limitEnabled) {
+				// wake up the bodies
+				this.body1.setAsleep(false);
+				this.body2.setAsleep(false);
+			}
+			// set the new value
+			this.lowerLimit = lowerLimit;
 		}
-		// set the new value
-		this.lowerLimit = lowerLimit;
 	}
 	
 	/**
@@ -724,15 +737,17 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 	 */
 	public void setLimits(double lowerLimit, double upperLimit) {
 		if (lowerLimit > upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLimits"));
-		// only wake the bodies if the motor is enabled and one of the limits has changed
-		if (this.limitEnabled && (lowerLimit != this.lowerLimit || upperLimit != this.upperLimit)) {
-			// wake up the bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
+		if (this.lowerLimit != lowerLimit || this.upperLimit != upperLimit) {
+			// only wake the bodies if the motor is enabled and one of the limits has changed
+			if (this.limitEnabled) {
+				// wake up the bodies
+				this.body1.setAsleep(false);
+				this.body2.setAsleep(false);
+			}
+			// set the values
+			this.lowerLimit = lowerLimit;
+			this.upperLimit = upperLimit;
 		}
-		// set the values
-		this.lowerLimit = lowerLimit;
-		this.upperLimit = upperLimit;
 	}
 	
 	/**

@@ -471,11 +471,12 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 	 */
 	public void setLength(double length) {
 		if (length < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.pulley.invalidLength"));
-		
-		this.length = length;
-		// wake up both bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
+		if (this.length != length) {
+			this.length = length;
+			// wake up both bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+		}
 	}
 	
 	/**

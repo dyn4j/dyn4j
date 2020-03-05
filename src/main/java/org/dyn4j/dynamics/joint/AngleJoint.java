@@ -78,7 +78,7 @@ import org.dyn4j.resources.Messages;
  * the world space center points for the joined bodies.  This constraint 
  * doesn't need anchor points.
  * @author William Bittle
- * @version 3.2.1
+ * @version 3.4.1
  * @since 2.2.2
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Angle_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/12/angle-constraint/" target="_blank">Angle Constraint</a>
@@ -430,11 +430,14 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 	 * @param flag true if the angle limits should be enforced
 	 */
 	public void setLimitEnabled(boolean flag) {
-		// wake up both bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
-		// set the flag
-		this.limitEnabled = flag;
+		// only wake the bodies if the flag changes
+		if (this.limitEnabled != flag) {
+			// wake up both bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+			// set the flag
+			this.limitEnabled = flag;
+		}
 	}
 	
 	/**
@@ -464,11 +467,15 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 	public void setUpperLimit(double upperLimit) {
 		// make sure the minimum is less than or equal to the maximum
 		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidUpperLimit"));
-		// wake up both bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
-		// set the new target angle
-		this.upperLimit = upperLimit;
+		if (this.upperLimit != upperLimit) {
+			if (this.limitEnabled) {
+				// wake up both bodies
+				this.body1.setAsleep(false);
+				this.body2.setAsleep(false);
+			}
+			// set the new target angle
+			this.upperLimit = upperLimit;
+		}
 	}
 	
 	/**
@@ -489,11 +496,15 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 	public void setLowerLimit(double lowerLimit) {
 		// make sure the minimum is less than or equal to the maximum
 		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLowerLimit"));
-		// wake up both bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
-		// set the new target angle
-		this.lowerLimit = lowerLimit;
+		if (this.lowerLimit != lowerLimit) {
+			if (this.limitEnabled) {
+				// wake up both bodies
+				this.body1.setAsleep(false);
+				this.body2.setAsleep(false);
+			}
+			// set the new target angle
+			this.lowerLimit = lowerLimit;
+		}
 	}
 	
 	/**
@@ -507,12 +518,16 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 	public void setLimits(double lowerLimit, double upperLimit) {
 		// make sure the min < max
 		if (lowerLimit > upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLimits"));
-		// wake up the bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
-		// set the limits
-		this.upperLimit = upperLimit;
-		this.lowerLimit = lowerLimit;
+		if (this.lowerLimit != lowerLimit || this.upperLimit != upperLimit) {
+			if (this.limitEnabled) {
+				// wake up the bodies
+				this.body1.setAsleep(false);
+				this.body2.setAsleep(false);
+			}
+			// set the limits
+			this.upperLimit = upperLimit;
+			this.lowerLimit = lowerLimit;
+		}
 	}
 
 	/**
@@ -524,10 +539,10 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 	 * @throws IllegalArgumentException if lowerLimit is greater than upperLimit
 	 */
 	public void setLimitsEnabled(double lowerLimit, double upperLimit) {
+		// enable the limits
+		this.setLimitEnabled(true);
 		// set the values
 		this.setLimits(lowerLimit, upperLimit);
-		// enable the limits
-		this.limitEnabled = true;
 	}
 	
 	/**
@@ -537,12 +552,16 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 	 * @param limit the desired limit
 	 */
 	public void setLimits(double limit) {
-		// wake up the bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
-		// set the limits
-		this.upperLimit = limit;
-		this.lowerLimit = limit;
+		if (this.lowerLimit != limit || this.upperLimit != limit) {
+			if (this.limitEnabled) {
+				// wake up the bodies
+				this.body1.setAsleep(false);
+				this.body2.setAsleep(false);
+			}
+			// set the limits
+			this.upperLimit = limit;
+			this.lowerLimit = limit;
+		}
 	}
 	
 	/**
@@ -552,10 +571,7 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 	 * @param limit the desired limit
 	 */
 	public void setLimitsEnabled(double limit) {
-		// set the values
-		this.setLimits(limit);
-		// enable the limits
-		this.limitEnabled = true;
+		this.setLimitsEnabled(limit, limit);
 	}
 	
 	/**

@@ -67,7 +67,7 @@ import org.dyn4j.resources.Messages;
  * or opposite the axis direction.  The maximum motor force must be greater 
  * than zero for the motor to apply any motion.
  * @author William Bittle
- * @version 3.2.1
+ * @version 3.4.1
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Prismatic_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2011/03/prismatic-constraint/" target="_blank">Prismatic Constraint</a>
@@ -691,7 +691,7 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 	 * @return boolean
 	 */
 	public boolean isMotorEnabled() {
-		return motorEnabled;
+		return this.motorEnabled;
 	}
 	
 	/**
@@ -699,11 +699,14 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 	 * @param motorEnabled true if the motor should be enabled
 	 */
 	public void setMotorEnabled(boolean motorEnabled) {
-		// wake up the joined bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
-		// set the new value
-		this.motorEnabled = motorEnabled;
+		// only wake the bodies if the enable flag changed
+		if (this.motorEnabled != motorEnabled) {
+			// wake up the joined bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+			// set the new value
+			this.motorEnabled = motorEnabled;
+		}
 	}
 	
 	/**
@@ -711,7 +714,7 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 	 * @return double
 	 */
 	public double getMotorSpeed() {
-		return motorSpeed;
+		return this.motorSpeed;
 	}
 	
 	/**
@@ -720,14 +723,17 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 	 * @see #setMaximumMotorForce(double)
 	 */
 	public void setMotorSpeed(double motorSpeed) {
-		// only wake up the bodies if the motor is currently enabled
-		if (this.motorEnabled) {
-			// wake up the joined bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
+		// don't do anything if the motor speed isn't changing
+		if (this.motorSpeed != motorSpeed) {
+			// only wake up the bodies if the motor is currently enabled
+			if (this.motorEnabled) {
+				// wake up the joined bodies
+				this.body1.setAsleep(false);
+				this.body2.setAsleep(false);
+			}
+			// set the new value
+			this.motorSpeed = motorSpeed;
 		}
-		// set the new value
-		this.motorSpeed = motorSpeed;
 	}
 	
 	/**
@@ -736,7 +742,7 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 	 * @return double
 	 */
 	public double getMaximumMotorForce() {
-		return maximumMotorForce;
+		return this.maximumMotorForce;
 	}
 	
 	/**
@@ -749,8 +755,16 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 	public void setMaximumMotorForce(double maximumMotorForce) {
 		// make sure its greater than or equal to zero
 		if (maximumMotorForce < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidMaximumMotorForce"));
-		// set the new value
-		this.maximumMotorForce = maximumMotorForce;
+		// don't do anything if the max motor force isn't changing
+		if (this.maximumMotorForce != maximumMotorForce) {
+			if (this.motorEnabled) {
+				// wake up the joined bodies
+				this.body1.setAsleep(false);
+				this.body2.setAsleep(false);
+			}
+			// set the new value
+			this.maximumMotorForce = maximumMotorForce;
+		}
 	}
 	
 	/**
@@ -775,11 +789,13 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 	 * @param limitEnabled true if the limit should be enabled.
 	 */
 	public void setLimitEnabled(boolean limitEnabled) {
-		// wake up the joined bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
-		// set the new value
-		this.limitEnabled = limitEnabled;
+		if (this.limitEnabled != limitEnabled) {
+			// wake up the joined bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+			// set the new value
+			this.limitEnabled = limitEnabled;
+		}
 	}
 	
 	/**
@@ -787,7 +803,7 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 	 * @return double
 	 */
 	public double getLowerLimit() {
-		return lowerLimit;
+		return this.lowerLimit;
 	}
 	
 	/**
@@ -798,16 +814,19 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 	public void setLowerLimit(double lowerLimit) {
 		// check for valid value
 		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLowerLimit"));
-		// make sure the limits are enabled and that the limit has changed
-		if (this.limitEnabled && lowerLimit != this.lowerLimit) {
-			// wake up the joined bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// reset the limit impulse
-			this.impulse.z = 0.0;
+		
+		if (this.lowerLimit != lowerLimit) {
+			// make sure the limits are enabled and that the limit has changed
+			if (this.limitEnabled) {
+				// wake up the joined bodies
+				this.body1.setAsleep(false);
+				this.body2.setAsleep(false);
+				// reset the limit impulse
+				this.impulse.z = 0.0;
+			}
+			// set the new value
+			this.lowerLimit = lowerLimit;
 		}
-		// set the new value
-		this.lowerLimit = lowerLimit;
 	}
 	
 	/**
@@ -815,7 +834,7 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 	 * @return double
 	 */
 	public double getUpperLimit() {
-		return upperLimit;
+		return this.upperLimit;
 	}
 
 	/**
@@ -826,16 +845,19 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 	public void setUpperLimit(double upperLimit) {
 		// check for valid value
 		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidUpperLimit"));
-		// make sure the limits are enabled and that the limit has changed
-		if (this.limitEnabled && upperLimit != this.upperLimit) {
-			// wake up the joined bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			// reset the limit impulse
-			this.impulse.z = 0.0;
+		
+		if (this.upperLimit != upperLimit) {
+			// make sure the limits are enabled and that the limit has changed
+			if (this.limitEnabled) {
+				// wake up the joined bodies
+				this.body1.setAsleep(false);
+				this.body2.setAsleep(false);
+				// reset the limit impulse
+				this.impulse.z = 0.0;
+			}
+			// set the new value
+			this.upperLimit = upperLimit;
 		}
-		// set the new value
-		this.upperLimit = upperLimit;
 	}
 	
 	/**
@@ -849,16 +871,18 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 	public void setLimits(double lowerLimit, double upperLimit) {
 		if (lowerLimit > upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLimits"));
 		// make sure the limits are enabled and that the limit has changed
-		if (this.limitEnabled) {
-			// wake up the bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
+		if (this.lowerLimit != lowerLimit || this.upperLimit != upperLimit) {
+			if (this.limitEnabled) {
+				// wake up the bodies
+				this.body1.setAsleep(false);
+				this.body2.setAsleep(false);
+			}
 			// reset the limit impulse
 			this.impulse.z = 0.0;
+			// set the values
+			this.lowerLimit = lowerLimit;
+			this.upperLimit = upperLimit;
 		}
-		// set the values
-		this.lowerLimit = lowerLimit;
-		this.upperLimit = upperLimit;
 	}
 	
 	/**
@@ -872,14 +896,11 @@ public class PrismaticJoint extends Joint implements Shiftable, DataContainer {
 	 */
 	public void setLimitsEnabled(double lowerLimit, double upperLimit) {
 		if (lowerLimit > upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLimits"));
-		// wake up the bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
-		// set the values
-		this.lowerLimit = lowerLimit;
-		this.upperLimit = upperLimit;
 		// enable the limits
-		this.limitEnabled = true;
+		this.setLimitEnabled(true);
+		// set the limits
+		this.setLimits(lowerLimit, upperLimit);
+		// NOTE: one of these will wake the bodies
 	}
 	
 	/**

@@ -55,7 +55,7 @@ import org.dyn4j.resources.Messages;
  * clockwise or counter-clockwise rotation.  The maximum motor torque must be 
  * greater than zero for the motor to apply any motion.
  * @author William Bittle
- * @version 3.2.1
+ * @version 3.4.1
  * @since 3.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Wheel_Joint" target="_blank">Documentation</a>
  */
@@ -581,6 +581,9 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 
 	/**
 	 * Returns true if this wheel joint is a spring wheel joint.
+	 * <p>
+	 * Since the frequency cannot be less than or equal to zero, this should
+	 * always returne true.
 	 * @return boolean
 	 */
 	public boolean isSpring() {
@@ -659,11 +662,13 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 	 * @param motorEnabled true if the motor should be enabled
 	 */
 	public void setMotorEnabled(boolean motorEnabled) {
-		// wake up the joined bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
-		// set the new value
-		this.motorEnabled = motorEnabled;
+		if (this.motorEnabled != motorEnabled) {
+			// wake up the joined bodies
+			this.body1.setAsleep(false);
+			this.body2.setAsleep(false);
+			// set the new value
+			this.motorEnabled = motorEnabled;
+		}
 	}
 	
 	/**
@@ -680,11 +685,15 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 	 * @see #setMaximumMotorTorque(double)
 	 */
 	public void setMotorSpeed(double motorSpeed) {
-		// wake up the joined bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
-		// set the new value
-		this.motorSpeed = motorSpeed;
+		if (this.motorSpeed != motorSpeed) {
+			if (this.motorEnabled) {
+				// wake up the joined bodies
+				this.body1.setAsleep(false);
+				this.body2.setAsleep(false);
+			}
+			// set the new value
+			this.motorSpeed = motorSpeed;
+		}
 	}
 	
 	/**
@@ -706,11 +715,16 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 	public void setMaximumMotorTorque(double maximumMotorTorque) {
 		// make sure its greater than or equal to zero
 		if (maximumMotorTorque < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidMaximumMotorTorque"));
-		// wake up the joined bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
-		// set the new value
-		this.maximumMotorTorque = maximumMotorTorque;
+		
+		if (this.maximumMotorTorque != maximumMotorTorque) {
+			if (this.motorEnabled) {
+				// wake up the joined bodies
+				this.body1.setAsleep(false);
+				this.body2.setAsleep(false);
+			}
+			// set the new value
+			this.maximumMotorTorque = maximumMotorTorque;
+		}
 	}
 	
 	/**

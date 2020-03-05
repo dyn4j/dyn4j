@@ -63,7 +63,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * Renamed from MouseJoint in 3.2.0.
  * @author William Bittle
- * @version 3.2.1
+ * @version 3.4.1
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Pin_Joint" target="_blank">Documentation</a>
  */
@@ -321,10 +321,13 @@ public class PinJoint extends Joint implements Shiftable, DataContainer {
 	public void setTarget(Vector2 target) {
 		// make sure the target is non null
 		if (target == null) throw new NullPointerException(Messages.getString("dynamics.joint.pin.nullTarget"));
-		// wake up the body
-		this.body2.setAsleep(false);
-		// set the new target
-		this.target = target;
+		// only wake the body if the target has changed
+		if (!target.equals(this.target)) {
+			// wake up the body
+			this.body2.setAsleep(false);
+			// set the new target
+			this.target = target;
+		}
 	}
 	
 	/**
