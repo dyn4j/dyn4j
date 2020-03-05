@@ -1,8 +1,12 @@
 ## v3.4.1 - _In Development_
 
 **New Features:**
+- [#102](https://github.com/dyn4j/dyn4j/issues/102) Added guards on Joint setX methods to ensure that the joined bodies are not awakened unless necessary
+- [#103](https://github.com/dyn4j/dyn4j/issues/103) Updated the FrictionJoint default max force/torque to non-zero values to better illustrate it's use to new users
 
 **Bug Fixes:**
+- [#106](https://github.com/dyn4j/dyn4j/issues/106) PulleyJoint no longer allows negative length
+- [#100](https://github.com/dyn4j/dyn4j/issues/100) Fixed unrealistic falling of bodies under gravity when bound together by a MotorJoint
     
 **Deprecated:**
   
@@ -11,6 +15,7 @@
   
 **Other:**
 - [#98](https://github.com/dyn4j/dyn4j/issues/98) Replaced release-notes.txt with RELEASE-NOTES.md for better formatting and maintenance.
+- [#101](https://github.com/dyn4j/dyn4j/issues/101) Added unit documentation for damping values on the Body class
 
 ## v3.4.0 - January 10th, 2020
 
