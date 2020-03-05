@@ -75,6 +75,7 @@ public abstract class Joint extends Constraint implements Shiftable, DataContain
 	 */
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
+		sb.append("HashCode=").append(this.hashCode());
 		// body1, body2, island
 		sb.append("|").append(super.toString())
 		.append("|IsCollisionAllowed=").append(this.collisionAllowed);

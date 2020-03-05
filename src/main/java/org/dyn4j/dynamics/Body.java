@@ -211,7 +211,7 @@ public class Body extends AbstractCollidable<BodyFixture> implements Collidable<
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Body[Fixtures={");
+		sb.append("Body[HashCode=").append(this.hashCode()).append("|Fixtures={");
 		// append all the shapes
 		int size = this.fixtures.size();
 		for (int i = 0; i < size; i++) {

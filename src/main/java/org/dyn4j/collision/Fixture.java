@@ -88,7 +88,8 @@ public class Fixture implements DataContainer {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Fixture[Shape=").append(this.shape)
+		sb.append("Fixture[HashCode=").append(this.hashCode())
+		.append("|Shape=").append(this.shape)
 		.append("|Filter=").append(this.filter)
 		.append("|IsSensor=").append(this.sensor)
 		.append("]");

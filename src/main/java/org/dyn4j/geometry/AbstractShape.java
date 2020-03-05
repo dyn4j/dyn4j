@@ -72,7 +72,8 @@ public abstract class AbstractShape implements Shape, Transformable, DataContain
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Center=").append(this.center)
+		sb.append("HashCode=").append(this.hashCode())
+		.append("|Center=").append(this.center)
 		.append("|Radius=").append(this.radius);
 		return sb.toString();
 	}

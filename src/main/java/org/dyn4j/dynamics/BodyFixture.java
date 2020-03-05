@@ -77,7 +77,8 @@ public class BodyFixture extends Fixture implements DataContainer {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("BodyFixture[Shape=").append(this.shape)
+		sb.append("BodyFixture[HashCode=").append(this.hashCode())
+		.append("|Shape=").append(this.shape)
 		.append("|Filter=").append(this.filter)
 		.append("|IsSensor=").append(this.sensor)
 		.append("|Density=").append(this.density)
