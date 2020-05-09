@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,21 +24,19 @@
  */
 package org.dyn4j.dynamics;
 
-import org.dyn4j.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.collision.broadphase.BroadphaseFilter;
 import org.dyn4j.collision.broadphase.DefaultBroadphaseFilter;
 
 /**
- * Represents a {@link BroadphaseFilter} for the {@link BroadphaseDetector#detect(BroadphaseFilter)} method.
- * <p>
- * This filter extends the {@link DefaultBroadphaseFilter} class and adds filtering for the additional information
- * in the {@link Body} class.
+ * Encapsulates logic used to filter the broadphase pairs based on filters, body state, etc.
  * <p>
  * Extend this class to add additional filtering capabilities to the broad-phase.
  * @author William Bittle
- * @version 3.2.4
+ * @version 4.0.0
  * @since 3.2.0
+ * @deprecated Deprecated in 4.0.0. Use the DetectBroadphaseFilter in the world package instead.
  */
+@Deprecated
 public class DetectBroadphaseFilter extends DefaultBroadphaseFilter<Body, BodyFixture> implements BroadphaseFilter<Body, BodyFixture> {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseFilter#isAllowed(org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture, org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
@@ -46,12 +44,12 @@ public class DetectBroadphaseFilter extends DefaultBroadphaseFilter<Body, BodyFi
 	@Override
 	public boolean isAllowed(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2) {
 		// inactive objects don't have collision detection/response
-		if (!body1.isActive() || !body2.isActive()) return false;
+		if (!body1.isEnabled() || !body2.isEnabled()) return false;
 		// one body must be dynamic (unless one is a sensor)
 		if (!body1.isDynamic() && !body2.isDynamic() && !fixture1.isSensor() && !fixture2.isSensor()) return false;
 		// check for connected pairs who's collision is not allowed
 		if (body1.isConnected(body2, false)) return false;
-		
+		// check super class filter logic
 		return super.isAllowed(body1, fixture1, body2, fixture2);
 	}
 }

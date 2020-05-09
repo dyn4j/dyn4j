@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,9 +24,11 @@
  */
 package org.dyn4j.collision.narrowphase;
 
+import org.dyn4j.Copyable;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Ray;
 import org.dyn4j.geometry.Shape;
+import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Vector2;
 
 /**
@@ -36,10 +38,11 @@ import org.dyn4j.geometry.Vector2;
  * The point is the point on the {@link Convex} {@link Shape} where the ray
  * intersects. The normal is the normal of the edge the {@link Ray} intersects.
  * @author William Bittle
- * @version 3.0.2
+ * @version 4.0.0
  * @since 2.0.0
  */
-public class Raycast {
+//TODO need to final these fields?
+public class Raycast implements Shiftable, Copyable<Raycast> {
 	/** The hit point */
 	protected Vector2 point;
 	
@@ -137,5 +140,22 @@ public class Raycast {
 	 */
 	public void setDistance(double distance) {
 		this.distance = distance;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Shiftable#shift(org.dyn4j.geometry.Vector2)
+	 */
+	@Override
+	public void shift(Vector2 shift) {
+		this.point.x += shift.x;
+		this.point.y += shift.y;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.Copyable#copy()
+	 */
+	@Override
+	public Raycast copy() {
+		return new Raycast(this.point.copy(), this.normal.copy(), this.distance);
 	}
 }

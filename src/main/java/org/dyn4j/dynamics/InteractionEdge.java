@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,10 +27,12 @@ package org.dyn4j.dynamics;
 /**
  * Represents an interaction of a body in an interaction graph.
  * @author William Bittle
- * @version 3.2.0
+ * @version 4.0.0
  * @since 3.2.0
  * @param <T> the interaction type
+ * @deprecated Deprecated in 4.0.0. No longer needed.
  */
+@Deprecated
 abstract class InteractionEdge<T> {
 	/** The connected body */
 	final Body other;

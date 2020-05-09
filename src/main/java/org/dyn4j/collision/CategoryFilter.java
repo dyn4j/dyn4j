@@ -90,7 +90,7 @@ package org.dyn4j.collision;
  * @version 3.2.0
  * @since 1.0.0
  */
-public class CategoryFilter implements Filter {
+public final class CategoryFilter implements Filter {
 	/** The category this object is in */
 	protected final long category;
 	

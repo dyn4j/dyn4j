@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,21 +27,23 @@ package org.dyn4j.collision;
 import org.dyn4j.Listener;
 
 /**
- * Represents a {@link Listener} object that is notified when a {@link Collidable} 
+ * Represents a {@link Listener} object that is notified when a {@link CollisionBody} 
  * goes out of {@link Bounds}.
  * <p>
  * NOTE: Modification of the simulation in these methods can cause unexpected behavior.
  * @author William Bittle
- * @version 3.2.0
+ * @version 4.0.0
  * @since 1.0.0
  * @see Bounds
+ * @deprecated Deprecated in 4.0.0. Use the BoundsListener interface in the world package instead.
  */
+@Deprecated
 public interface BoundsListener extends Listener {
 	/**
-	 * Method called when a {@link Collidable} is outside the {@link Bounds} of a simulation.
-	 * @param collidable the {@link Collidable} outside the {@link Bounds}
-	 * @param <E> the {@link Collidable} type
-	 * @param <T> the {@link Fixture} type
+	 * Method called when a {@link CollisionBody} is outside the {@link Bounds} of a simulation.
+	 * @param body the {@link CollisionBody} outside the {@link Bounds}
+	 * @param <T> the {@link CollisionBody} type
+	 * @param <E> the {@link Fixture} type
 	 */
-	public abstract <E extends Collidable<T>, T extends Fixture> void outside(E collidable);
+	public abstract <T extends CollisionBody<E>, E extends Fixture> void outside(T body);
 }

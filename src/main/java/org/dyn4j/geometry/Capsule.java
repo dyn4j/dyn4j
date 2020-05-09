@@ -304,7 +304,7 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 		
 		return new AABB(minX, minY, maxX, maxY);
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Shape#createMass(double)
 	 */

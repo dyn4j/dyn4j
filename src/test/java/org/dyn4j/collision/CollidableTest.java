@@ -24,40 +24,46 @@
  */
 package org.dyn4j.collision;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Transformable;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Test {@link Collidable} class for junit test cases.
+ * Test {@link CollisionBody} class for junit test cases.
  * @author William Bittle
  * @version 3.2.0
  * @since 1.0.0
  */
-public class CollidableTest extends AbstractCollidable<Fixture> implements Collidable<Fixture>, Transformable {
+public class CollidableTest extends AbstractCollisionBody<Fixture> implements CollisionBody<Fixture>, Transformable {
 	/**
 	 * Full constructor.
 	 * @param fixtures the {@link Fixture}s list
 	 */
 	public CollidableTest(List<Fixture> fixtures) {
-		this.fixtures = fixtures;
+		this.fixtures.addAll(fixtures);
 		this.transform = new Transform();
 	}
 	
 	/**
 	 * Optional constructor.
 	 * <p>
-	 * Uses default {@link BodyFixture} settings.
+	 * Uses default {@link Fixture} settings.
 	 * @param shape the shape to use
 	 */
 	public CollidableTest(Convex shape) {
-		this.fixtures = new ArrayList<Fixture>();
-		this.fixtures.add(new BodyFixture(shape));
+		this.fixtures.add(new Fixture(shape));
+		this.transform = new Transform();
+	}
+	
+	/**
+	 * Optional constructor.
+	 * @param fixture the fixture to use
+	 */
+	public CollidableTest(Fixture fixture) {
+		this.fixtures.add(fixture);
 		this.transform = new Transform();
 	}
 

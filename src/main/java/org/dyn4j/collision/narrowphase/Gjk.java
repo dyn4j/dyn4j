@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dyn4j.Epsilon;
-import org.dyn4j.collision.Collidable;
+import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Ray;
@@ -108,7 +108,7 @@ import org.dyn4j.resources.Messages;
  * was added last, many optimizations can be done.  For these optimizations please refer
  * to the source documentation on {@link Gjk#checkSimplex(List, Vector2)}.
  * <p>
- * Once {@link Gjk} has found that the two {@link Collidable}s are penetrating it will exit 
+ * Once {@link Gjk} has found that the two {@link CollisionBody}s are penetrating it will exit 
  * and hand off the resulting simplex to a {@link MinkowskiPenetrationSolver} to find the
  * collision depth and normal.
  * <p>
@@ -118,7 +118,7 @@ import org.dyn4j.resources.Messages;
  * {@link Shape}s.  Refer to {@link Gjk#distance(Convex, Transform, Convex, Transform, Separation)}
  * for details on the implementation.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.0.0
  * @since 1.0.0
  * @see Epa
  * @see <a href="http://www.dyn4j.org/2010/04/gjk-gilbert-johnson-keerthi/" target="_blank">GJK (Gilbert-Johnson-Keerthi)</a>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,21 +26,17 @@
 /**
  * Sub package of the Collision package handling broad-phase collision detection.
  * <p>
- * Broad-phase collision detection is the process of detecting collision between all the {@link org.dyn4j.collision.Collidable}
+ * Broad-phase collision detection is the process of detecting collision between all the {@link org.dyn4j.collision.CollisionBody}
  * {@link org.dyn4j.collision.Fixture}s. The broad-phase attempts to reduce the O(n<sup>2</sup>) complexity of
  * this process by using specialized data structures.  The broad-phase is not exact, but instead finds pairs of
  * {@link org.dyn4j.collision.Fixture}s that could be colliding.  While not exact, the broad-phase is conservative.
  * In other words, the broad-phase will never miss collisions, but will detect false positives.
  * <p>
- * There are two broad-phase implementations, {@link org.dyn4j.collision.broadphase.Sap} and 
- * {@link org.dyn4j.collision.broadphase.DynamicAABBTree}, both with their own merits. Generally, they have similar
- * performance.
- * <p>
- * This package also contains an interface for filtering the results of the {@link org.dyn4j.collision.broadphase.BroadphaseDetector}s
- * methods: {@link org.dyn4j.collision.broadphase.BroadphaseFilter}s.  These can be useful in both logic and performance to pre-filter
- * results before performing more expensive logic.
+ * There are two broad-phase implementations at this time: {@link org.dyn4j.collision.broadphase.Sap} and 
+ * {@link org.dyn4j.collision.broadphase.DynamicAABBTree}, each with their 
+ * own merits and drawbacks. The {@link org.dyn4j.collision.broadphase.DynamicAABBTree} is the default.
  * @author William Bittle
- * @version 3.2.0
+ * @version 4.0.0
  * @since 1.0.0
  */
 package org.dyn4j.collision.broadphase;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -36,9 +36,6 @@
  * in a variety of classes are defined based on the MKS unit system.  Use the {@link org.dyn4j.UnitConversion}
  * class to help convert from other units to MKS.
  * <p>
- * The {@link org.dyn4j.Listener} interface is a marker interface for a variety of listeners used
- * in the library.
- * <p>
  * Many classes in the library implement the {@link org.dyn4j.DataContainer} interface.  This interface defines
  * a simple set of methods for store custom data along with the objects in the library.
  * <p>
@@ -50,7 +47,7 @@
  * to create a member variable which encapsulates a reference to another piece of data, a primitive for
  * example to provide mutability on a single reference.
  * @author William Bittle
- * @version 2.2.2
+ * @version 4.0.0
  * @since 2.2.2
  */
 package org.dyn4j;

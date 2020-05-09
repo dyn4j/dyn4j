@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,9 +26,9 @@ package org.dyn4j.dynamics.joint;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
-import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
-import org.dyn4j.dynamics.Step;
+import org.dyn4j.dynamics.TimeStep;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Transform;
@@ -63,22 +63,23 @@ import org.dyn4j.resources.Messages;
  * behave as if connected by flexible rope pass in <code>true</code> to the 
  * {@link #setSlackEnabled(boolean)} method.
  * @author William Bittle
- * @version 3.4.1
+ * @version 4.0.0
  * @since 2.1.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Pulley_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/12/pulley-constraint/" target="_blank">Pulley Constraint</a>
+ * @param <T> the {@link PhysicsBody} type
  */
-public class PulleyJoint extends Joint implements Shiftable, DataContainer {
-	/** The world space pulley anchor point for the first {@link Body} */
+public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
+	/** The world space pulley anchor point for the first {@link PhysicsBody} */
 	protected Vector2 pulleyAnchor1;
 	
-	/** The world space pulley anchor point for the second {@link Body} */
+	/** The world space pulley anchor point for the second {@link PhysicsBody} */
 	protected Vector2 pulleyAnchor2;
 	
-	/** The local anchor point on the first {@link Body} */
+	/** The local anchor point on the first {@link PhysicsBody} */
 	protected Vector2 localAnchor1;
 	
-	/** The local anchor point on the second {@link Body} */
+	/** The local anchor point on the second {@link PhysicsBody} */
 	protected Vector2 localAnchor2;
 	
 	/** The pulley ratio for modeling a block-and-tackle */
@@ -118,17 +119,17 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 	/**
 	 * Minimal constructor.
 	 * <p>
-	 * Creates a pulley joint between the two given {@link Body}s using the given anchor points.
-	 * @param body1 the first {@link Body}
-	 * @param body2 the second {@link Body}
+	 * Creates a pulley joint between the two given {@link PhysicsBody}s using the given anchor points.
+	 * @param body1 the first {@link PhysicsBody}
+	 * @param body2 the second {@link PhysicsBody}
 	 * @param pulleyAnchor1 the first pulley anchor point
 	 * @param pulleyAnchor2 the second pulley anchor point
-	 * @param bodyAnchor1 the first {@link Body}'s anchor point
-	 * @param bodyAnchor2 the second {@link Body}'s anchor point
+	 * @param bodyAnchor1 the first {@link PhysicsBody}'s anchor point
+	 * @param bodyAnchor2 the second {@link PhysicsBody}'s anchor point
 	 * @throws NullPointerException if body1, body2, pulleyAnchor1, pulleyAnchor2, bodyAnchor1, or bodyAnchor2 is null
 	 * @throws IllegalArgumentException if body1 == body2
 	 */
-	public PulleyJoint(Body body1, Body body2, Vector2 pulleyAnchor1, Vector2 pulleyAnchor2, Vector2 bodyAnchor1, Vector2 bodyAnchor2) {
+	public PulleyJoint(T body1, T body2, Vector2 pulleyAnchor1, Vector2 pulleyAnchor2, Vector2 bodyAnchor1, Vector2 bodyAnchor2) {
 		super(body1, body2, false);
 		// verify the bodies are not the same instance
 		if (body1 == body2) throw new IllegalArgumentException(Messages.getString("dynamics.joint.sameBody"));
@@ -177,10 +178,10 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void initializeConstraints(Step step, Settings settings) {
+	public void initializeConstraints(TimeStep step, Settings settings) {
 		double linearTolerance = settings.getLinearTolerance();
 		
 		Transform t1 = this.body1.getTransform();
@@ -264,10 +265,10 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void solveVelocityConstraints(Step step, Settings settings) {
+	public void solveVelocityConstraints(TimeStep step, Settings settings) {
 		if (this.limitState != LimitState.INACTIVE) {
 			Transform t1 = this.body1.getTransform();
 			Transform t2 = this.body2.getTransform();
@@ -306,10 +307,10 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public boolean solvePositionConstraints(Step step, Settings settings) {
+	public boolean solvePositionConstraints(TimeStep step, Settings settings) {
 		if (this.limitState != LimitState.INACTIVE) {
 			double linearTolerance = settings.getLinearTolerance();
 			
@@ -433,7 +434,7 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Returns the pulley anchor point for the first {@link Body}
+	 * Returns the pulley anchor point for the first {@link PhysicsBody}
 	 * in world coordinates.
 	 * @return {@link Vector2}
 	 */
@@ -442,7 +443,7 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Returns the pulley anchor point for the second {@link Body}
+	 * Returns the pulley anchor point for the second {@link PhysicsBody}
 	 * in world coordinates.
 	 * @return {@link Vector2}
 	 */
@@ -474,14 +475,14 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 		if (this.length != length) {
 			this.length = length;
 			// wake up both bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
+			this.body1.setAtRest(false);
+			this.body2.setAtRest(false);
 		}
 	}
 	
 	/**
 	 * Returns the current length from the first pulley anchor point to the
-	 * anchor point on the first {@link Body}.
+	 * anchor point on the first {@link PhysicsBody}.
 	 * <p>
 	 * This is used, in conjunction with length2, to compute the total length
 	 * when the ratio is changed.
@@ -495,7 +496,7 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 
 	/**
 	 * Returns the current length from the second pulley anchor point to the
-	 * anchor point on the second {@link Body}.
+	 * anchor point on the second {@link PhysicsBody}.
 	 * <p>
 	 * This is used, in conjunction with length1, to compute the total length
 	 * when the ratio is changed.
@@ -534,8 +535,8 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 			// compute the new length
 			this.length = this.length1 + this.ratio * this.length2;
 			// wake up both bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
+			this.body1.setAtRest(false);
+			this.body2.setAtRest(false);
 		}
 	}
 	

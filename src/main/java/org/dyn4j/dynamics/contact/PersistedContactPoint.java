@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -36,9 +36,11 @@ import org.dyn4j.geometry.Vector2;
  * normal, and depth.
  * @author William Bittle
  * @see ContactPoint
- * @version 3.3.0
+ * @version 4.0.0
  * @since 1.0.0
+ * @deprecated Deprecated in 4.0.0. Use the {@link Contact} interface instead.
  */
+@Deprecated
 public class PersistedContactPoint extends ContactPoint {
 	/** The previous contact point */
 	protected final Vector2 oldPoint;
@@ -82,7 +84,8 @@ public class PersistedContactPoint extends ContactPoint {
 	 * @param oldConstraint the old constraint
 	 * @param oldContact the old contact
 	 */
-	public PersistedContactPoint(ContactConstraint newConstraint, Contact newContact, ContactConstraint oldConstraint, Contact oldContact) {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public PersistedContactPoint(ContactConstraint newConstraint, ContactConstraintContact newContact, ContactConstraint oldConstraint, ContactConstraintContact oldContact) {
 		super(newConstraint, newContact);
 		this.oldDepth = oldContact.depth;
 		this.oldNormal = oldConstraint.normal;

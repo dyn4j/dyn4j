@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,26 +24,26 @@
  */
 package org.dyn4j.collision.broadphase;
 
-import org.dyn4j.collision.Collidable;
+import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.collision.Fixture;
 
 /**
- * Represents a broad-phase collision detection algorithm that also can perform a batch update operation that is more efficient than updating all the collidable and fixtures one by one.
+ * Represents a broad-phase collision detection algorithm that also can perform a batch update operation that is more efficient than updating all the bodies and fixtures one by one.
  * This is initially added because it makes a very big difference for the implementation of LazyAABBTree, but it can be useful in other future broadphase detectors as well.
  * When the World.java class uses a BatchBroadphaseDetector it will just call batchUpdate() once instead of updating each body seperately.
  * 
  * Note that operations of batch addition or deletion did not seem important or commonplace, so the interface just provides a batch update method.
  * 
  * @author Manolis Tsamis
- * @param <E> the {@link Collidable} type
- * @param <T> the {@link Fixture} type
- * @version 3.4.0
+ * @param <T> the {@link CollisionBody} type
+ * @param <E> the {@link Fixture} type
+ * @version 4.0.0
  * @since 3.4.0
  */
-public interface BatchBroadphaseDetector<E extends Collidable<T>, T extends Fixture> extends BroadphaseDetector<E, T> {
+public interface BatchBroadphaseDetector<T extends CollisionBody<E>, E extends Fixture> extends BroadphaseDetector<T, E> {
 	
 	/**
-	 * Updates all the {@link Fixture}s on all the {@link Collidable}s that have been added to this {@link BroadphaseDetector} up until now.
+	 * Updates all the {@link Fixture}s on all the {@link CollisionBody}s that have been added to this {@link BroadphaseDetector} up until now.
 	 */
 	public abstract void batchUpdate();
 	

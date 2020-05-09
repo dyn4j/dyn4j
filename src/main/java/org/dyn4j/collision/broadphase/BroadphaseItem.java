@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,34 +24,37 @@
  */
 package org.dyn4j.collision.broadphase;
 
-import org.dyn4j.collision.Collidable;
+import org.dyn4j.collision.CollisionBody;
+import org.dyn4j.collision.CollisionItem;
 import org.dyn4j.collision.Fixture;
 
 /**
- * Represents a single {@link Collidable} {@link Fixture} that has been detected by a 
- * {@link BroadphaseDetector}.
- * <p>
- * A broad-phase item is a {@link Collidable}-{@link Fixture} pair.
+ * An implementation of the {@link CollisionItem} interface used by the {@link BroadphaseDetector}s.
  * @author William Bittle
- * @version 3.2.0
+ * @version 4.0.0
  * @since 3.2.0
- * @param <E> the {@link Collidable} type
- * @param <T> the {@link Fixture} type
+ * @param <T> the {@link CollisionBody} type
+ * @param <E> the {@link Fixture} type
  */
-public final class BroadphaseItem<E extends Collidable<T>, T extends Fixture> {
-	/** The {@link Collidable} */
-	final E collidable;
+public final class BroadphaseItem<T extends CollisionBody<E>, E extends Fixture> implements CollisionItem<T, E> {
+	/** The {@link CollisionBody} */
+	T body;
 	
 	/** The {@link Fixture} */
-	final T fixture;
+	E fixture;
 	
 	/**
-	 * Minimal constructor.
-	 * @param collidable the collidable
-	 * @param fixture the fixture
+	 * Constructor for reuse.
 	 */
-	public BroadphaseItem(E collidable, T fixture) {
-		this.collidable = collidable;
+	public BroadphaseItem() {}
+
+	/**
+	 * Full constructor.
+	 * @param body the {@link CollisionBody}
+	 * @param fixture the {@link Fixture}
+	 */
+	public BroadphaseItem(T body, E fixture) {
+		this.body = body;
 		this.fixture = fixture;
 	}
 	
@@ -60,16 +63,7 @@ public final class BroadphaseItem<E extends Collidable<T>, T extends Fixture> {
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) return false;
-		if (obj == this) return true;
-		if (obj instanceof BroadphaseItem) {
-			BroadphaseItem<?, ?> pair = (BroadphaseItem<?, ?>)obj;
-			if (pair.collidable == this.collidable &&
-				pair.fixture == this.fixture) {
-				return true;
-			}
-		}
-		return false;
+		return CollisionItem.equals(this, obj);
 	}
 	
 	/* (non-Javadoc)
@@ -77,10 +71,7 @@ public final class BroadphaseItem<E extends Collidable<T>, T extends Fixture> {
 	 */
 	@Override
 	public int hashCode() {
-		int hash = 17;
-		hash = hash * 31 + this.collidable.hashCode();
-		hash = hash * 31 + this.fixture.hashCode();
-		return hash;
+		return CollisionItem.getHashCode(this.body, this.fixture);
 	}
 	
 	/* (non-Javadoc)
@@ -89,25 +80,31 @@ public final class BroadphaseItem<E extends Collidable<T>, T extends Fixture> {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("BroadphaseItem[Collidable=").append(this.collidable.hashCode())
+		sb.append("BroadphaseItem[Body=").append(this.body.hashCode())
 		.append("|Fixture=").append(this.fixture.hashCode())
 		.append("]");
 		return sb.toString();
 	}
 
-	/**
-	 * Returns the {@link Collidable}.
-	 * @return E
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.CollisionItem#getBody()
 	 */
-	public E getCollidable() {
-		return this.collidable;
+	public T getBody() {
+		return this.body;
 	}
 
-	/**
-	 * Returns the {@link Fixture}.
-	 * @return T
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.CollisionItem#getFixture()
 	 */
-	public T getFixture() {
+	public E getFixture() {
 		return this.fixture;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.CollisionItem#copy()
+	 */
+	@Override
+	public CollisionItem<T, E> copy() {
+		return new BroadphaseItem<T, E>(this.body, this.fixture);
 	}
 }

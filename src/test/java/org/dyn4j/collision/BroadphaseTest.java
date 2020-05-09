@@ -32,11 +32,9 @@ import java.util.Random;
 
 import org.dyn4j.collision.broadphase.AbstractBroadphaseDetector;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
-import org.dyn4j.collision.broadphase.BroadphaseItem;
-import org.dyn4j.collision.broadphase.BroadphasePair;
+import org.dyn4j.collision.broadphase.BruteForceBroadphase;
 import org.dyn4j.collision.broadphase.DynamicAABBTree;
 import org.dyn4j.collision.broadphase.LazyAABBTree;
-import org.dyn4j.collision.broadphase.BruteForceBroadphase;
 import org.dyn4j.collision.broadphase.Sap;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Geometry;
@@ -85,6 +83,7 @@ public class BroadphaseTest {
      */
     public BroadphaseTest(BroadphaseDetector<CollidableTest, Fixture> broadphase) {
     	this.broadphase = broadphase;
+    	this.broadphase.setUpdateTrackingEnabled(false);
     }
     
 	/**
@@ -328,7 +327,7 @@ public class BroadphaseTest {
 		// add the items to the broadphases
 		this.broadphase.add(ct1); this.broadphase.add(ct2); this.broadphase.add(ct3); this.broadphase.add(ct4);
 		
-		List<BroadphasePair<CollidableTest, Fixture>> pairs = this.broadphase.detect();
+		List<CollisionPair<CollidableTest, Fixture>> pairs = this.broadphase.detect();
 		TestCase.assertEquals(1, pairs.size());
 	}
 	
@@ -353,12 +352,12 @@ public class BroadphaseTest {
 		// this aabb should include:
 		// ct3 and ct4
 		AABB aabb = new AABB(0.0, -2.0, 1.0, 1.0);
-		List<BroadphaseItem<CollidableTest, Fixture>> list;
+		List<CollisionItem<CollidableTest, Fixture>> list;
 		
 		list = this.broadphase.detect(aabb);
 		TestCase.assertEquals(2, list.size());
-		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct3, ct3.getFixture(0))));
-		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct4, ct4.getFixture(0))));
+		TestCase.assertTrue(this.containsItem(ct3, ct3.getFixture(0), list));//list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct3, ct3.getFixture(0))));
+		TestCase.assertTrue(this.containsItem(ct4, ct4.getFixture(0), list));//list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct4, ct4.getFixture(0))));
 		
 		// should include:
 		// ct2, ct3, and ct4
@@ -366,9 +365,9 @@ public class BroadphaseTest {
 		
 		list = this.broadphase.detect(aabb);
 		TestCase.assertEquals(3, list.size());
-		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct2, ct2.getFixture(0))));
-		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct3, ct3.getFixture(0))));
-		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct4, ct4.getFixture(0))));
+		TestCase.assertTrue(this.containsItem(ct2, ct2.getFixture(0), list));//list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct2, ct2.getFixture(0))));
+		TestCase.assertTrue(this.containsItem(ct3, ct3.getFixture(0), list));//list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct3, ct3.getFixture(0))));
+		TestCase.assertTrue(this.containsItem(ct4, ct4.getFixture(0), list));//list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct4, ct4.getFixture(0))));
 	}
 	
 	/**
@@ -389,30 +388,30 @@ public class BroadphaseTest {
 		// add the items to the broadphases
 		this.broadphase.add(ct1); this.broadphase.add(ct2); this.broadphase.add(ct3); this.broadphase.add(ct4);
 		
-		List<BroadphaseItem<CollidableTest, Fixture>> list;
+		List<CollisionItem<CollidableTest, Fixture>> list;
 		
 		// ray that points in the positive x direction and starts at the origin
 		Ray r = new Ray(new Vector2(1.0, 0.0));
 		// infinite length
 		double l = 0.0;
 		
-		list = this.broadphase.raycast(r, l);
+		list = this.broadphase.detect(r, l);
 		TestCase.assertEquals(0, list.size());
 		
 		// try a different ray
 		r = new Ray(new Vector2(-3.0, 0.75), new Vector2(1.0, 0.0));
-		list = this.broadphase.raycast(r, l);
+		list = this.broadphase.detect(r, l);
 		TestCase.assertEquals(3, list.size());
-		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct1, ct1.getFixture(0))));
-		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct2, ct2.getFixture(0))));
-		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct4, ct4.getFixture(0))));
+		TestCase.assertTrue(this.containsItem(ct1, ct1.getFixture(0), list));//list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct1, ct1.getFixture(0))));
+		TestCase.assertTrue(this.containsItem(ct2, ct2.getFixture(0), list));//list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct2, ct2.getFixture(0))));
+		TestCase.assertTrue(this.containsItem(ct4, ct4.getFixture(0), list));//list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct4, ct4.getFixture(0))));
 		
 		// try one more ray
 		r = new Ray(new Vector2(-3.0, -2.0), new Vector2(1.0, 2.0).getNormalized());
-		list = this.broadphase.raycast(r, l);
+		list = this.broadphase.detect(r, l);
 		TestCase.assertEquals(2, list.size());
-		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct1, ct1.getFixture(0))));
-		TestCase.assertTrue(list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct2, ct2.getFixture(0))));
+		TestCase.assertTrue(this.containsItem(ct1, ct1.getFixture(0), list));//list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct1, ct1.getFixture(0))));
+		TestCase.assertTrue(this.containsItem(ct2, ct2.getFixture(0), list));//list.contains(new BroadphaseItem<CollidableTest, Fixture>(ct2, ct2.getFixture(0))));
 	}
 	
 	/**
@@ -462,7 +461,7 @@ public class BroadphaseTest {
 		this.broadphase.add(ct1); this.broadphase.add(ct2); this.broadphase.add(ct3); this.broadphase.add(ct4);
 		
 		// perform a detect on the whole broadphase
-		List<BroadphasePair<CollidableTest, Fixture>> pairs = this.broadphase.detect();
+		List<CollisionPair<CollidableTest, Fixture>> pairs = this.broadphase.detect();
 		TestCase.assertEquals(1, pairs.size());
 		
 		// shift the broadphases
@@ -537,14 +536,14 @@ public class BroadphaseTest {
 			
 			// Now start querying
 			// First test detect
-			List<BroadphasePair<CollidableTest, Fixture>> referenceDetect = reference.detect();
-			List<BroadphasePair<CollidableTest, Fixture>> otherDetect = this.broadphase.detect();
+			List<CollisionPair<CollidableTest, Fixture>> referenceDetect = reference.detect();
+			List<CollisionPair<CollidableTest, Fixture>> otherDetect = this.broadphase.detect();
 			
 			// The pairs returned from {@link PlainBroadphase} are the minimum possible
 			// if any of those is missing from the broadphase being tested, something is wrong
-			for (BroadphasePair<CollidableTest, Fixture> pair : referenceDetect) {
+			for (CollisionPair<CollidableTest, Fixture> pair : referenceDetect) {
 				// Be careful to have correct pair equality here. See pairExists
-				if (!pairExists(pair, otherDetect)) {
+				if (!containsPair(pair, otherDetect)) {
 					TestCase.fail("detect() is missing pairs");
 				}
 			}
@@ -558,12 +557,12 @@ public class BroadphaseTest {
 				double aabbY = -5 + random.nextDouble() * (10 - aabbHeight);
 				
 				AABB aabb = new AABB(aabbX, aabbY, aabbX + aabbWidth, aabbY + aabbHeight);
-				List<BroadphaseItem<CollidableTest, Fixture>> referenceAABBDetect = reference.detect(aabb);
-				List<BroadphaseItem<CollidableTest, Fixture>> otherAABBDetect = this.broadphase.detect(aabb);
+				List<CollisionItem<CollidableTest, Fixture>> referenceAABBDetect = reference.detect(aabb);
+				List<CollisionItem<CollidableTest, Fixture>> otherAABBDetect = this.broadphase.detect(aabb);
 				
 				// Again, because the items returned from {@link PlainBroadphase} are the minimum possible
 				// if any of those are missing from the broadphase being tested, something is wrong
-				for (BroadphaseItem<CollidableTest, Fixture> item : referenceAABBDetect) {
+				for (CollisionItem<CollidableTest, Fixture> item : referenceAABBDetect) {
 					// Since we don't have pairs here we can rely on BroadphaseItem#equals
 					if (!otherAABBDetect.contains(item)) {
 						TestCase.fail("detect(AABB) is missing items");
@@ -580,10 +579,10 @@ public class BroadphaseTest {
 				Vector2 start = new Vector2(random.nextDouble() * 10 - 5, random.nextDouble() * 10 - 5);
 				Ray randomRay = new Ray(start, random.nextDouble() * Geometry.TWO_PI);
 				
-				List<BroadphaseItem<CollidableTest, Fixture>> referenceRaycast = reference.raycast(randomRay, rayLength);
-				List<BroadphaseItem<CollidableTest, Fixture>> otherRaycast = this.broadphase.raycast(randomRay, rayLength);
+				List<CollisionItem<CollidableTest, Fixture>> referenceRaycast = reference.detect(randomRay, rayLength);
+				List<CollisionItem<CollidableTest, Fixture>> otherRaycast = this.broadphase.detect(randomRay, rayLength);
 				
-				for (BroadphaseItem<CollidableTest, Fixture> item : referenceRaycast) {
+				for (CollisionItem<CollidableTest, Fixture> item : referenceRaycast) {
 					if (!otherRaycast.contains(item)) {
 						TestCase.fail("raycast() is missing items");
 					}
@@ -592,23 +591,51 @@ public class BroadphaseTest {
 		}
 	}
 	
+	private boolean containsItem(CollidableTest collidable, Fixture fixture, List<CollisionItem<CollidableTest, Fixture>> items) {
+		for (CollisionItem<CollidableTest, Fixture> item : items) {
+			if (item.getBody() == collidable && item.getFixture() == fixture) {
+				return true;
+			}
+		}
+		
+		return false;
+		
+		
+//		if (pairs.contains(pair)) {
+//			return true;
+//		} else {
+//			CollisionPair<CollidableTest, Fixture> reversePair = new <CollidableTest, Fixture>(
+//					pair.getCollidable2(), pair.getFixture2(), pair.getCollidable1(), pair.getFixture1());
+//			
+//			return pairs.contains(reversePair);
+//		}
+	}
+	
 	/**
-	 * Simple helper method that finds if a {@link BroadphasePair} or it's reverse pair is
-	 * contained in a list of {@link BroadphasePair}s.
+	 * Simple helper method that finds if a {@link CollisionPair} or it's reverse pair is
+	 * contained in a list of {@link CollisionPair}s.
 	 * 
 	 * @param pair The pair to search
 	 * @param pairs The list of pairs
 	 * @return true if pair or it's reverse is contained in the list, false otherwise
 	 */
-	private boolean pairExists(BroadphasePair<CollidableTest, Fixture> pair, List<BroadphasePair<CollidableTest, Fixture>> pairs) {
-		if (pairs.contains(pair)) {
-			return true;
-		} else {
-			BroadphasePair<CollidableTest, Fixture> reversePair = new BroadphasePair<CollidableTest, Fixture>(
-					pair.getCollidable2(), pair.getFixture2(), pair.getCollidable1(), pair.getFixture1());
-			
-			return pairs.contains(reversePair);
+	private boolean containsPair(CollisionPair<CollidableTest, Fixture> pair, List<CollisionPair<CollidableTest, Fixture>> pairs) {
+		for (CollisionPair<CollidableTest, Fixture> test : pairs) {
+			if (CollisionPair.equals(test, pair)) {
+				return true;
+			}
 		}
+		
+		return false;
+		
+		
+//		if (pairs.contains(pair)) {
+//			return true;
+//		} else {
+//			CollisionPair<CollidableTest, Fixture> reversePair = new <CollidableTest, Fixture>(
+//					pair.getCollidable2(), pair.getFixture2(), pair.getCollidable1(), pair.getFixture1());
+//			
+//			return pairs.contains(reversePair);
+//		}
 	}
-	
 }

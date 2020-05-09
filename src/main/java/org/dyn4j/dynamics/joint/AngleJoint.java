@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,9 +26,9 @@ package org.dyn4j.dynamics.joint;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
-import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
-import org.dyn4j.dynamics.Step;
+import org.dyn4j.dynamics.TimeStep;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
@@ -78,12 +78,13 @@ import org.dyn4j.resources.Messages;
  * the world space center points for the joined bodies.  This constraint 
  * doesn't need anchor points.
  * @author William Bittle
- * @version 3.4.1
+ * @version 4.0.0
  * @since 2.2.2
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Angle_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/12/angle-constraint/" target="_blank">Angle Constraint</a>
+ * @param <T> the {@link PhysicsBody} type
  */
-public class AngleJoint extends Joint implements Shiftable, DataContainer {
+public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
 	/** The angular velocity ratio */
 	protected double ratio;
 	
@@ -114,12 +115,12 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 
 	/**
 	 * Minimal constructor.
-	 * @param body1 the first {@link Body}
-	 * @param body2 the second {@link Body}
+	 * @param body1 the first {@link PhysicsBody}
+	 * @param body2 the second {@link PhysicsBody}
 	 * @throws NullPointerException if body1 or body2 is null
 	 * @throws IllegalArgumentException if body1 == body2
 	 */
-	public AngleJoint(Body body1, Body body2) {
+	public AngleJoint(T body1, T body2) {
 		// default no collision allowed
 		super(body1, body2, false);
 		// verify the bodies are not the same instance
@@ -156,10 +157,10 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void initializeConstraints(Step step, Settings settings) {
+	public void initializeConstraints(TimeStep step, Settings settings) {
 		double angularTolerance = settings.getAngularTolerance();
 		
 		Mass m1 = this.body1.getMass();
@@ -232,10 +233,10 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void solveVelocityConstraints(Step step, Settings settings) {
+	public void solveVelocityConstraints(TimeStep step, Settings settings) {
 		Mass m1 = this.body1.getMass();
 		Mass m2 = this.body2.getMass();
 		
@@ -284,10 +285,10 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public boolean solvePositionConstraints(Step step, Settings settings) {
+	public boolean solvePositionConstraints(TimeStep step, Settings settings) {
 		// check if the constraint needs to be applied
 		if (this.limitState != LimitState.INACTIVE) {
 			double angularTolerance = settings.getAngularTolerance();
@@ -394,7 +395,7 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 	}
 
 	/**
-	 * Returns the relative angle between the two {@link Body}s in radians in the range [-&pi;, &pi;].
+	 * Returns the relative angle between the two {@link PhysicsBody}s in radians in the range [-&pi;, &pi;].
 	 * @return double
 	 * @since 3.1.0
 	 */
@@ -433,8 +434,8 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 		// only wake the bodies if the flag changes
 		if (this.limitEnabled != flag) {
 			// wake up both bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
+			this.body1.setAtRest(false);
+			this.body2.setAtRest(false);
 			// set the flag
 			this.limitEnabled = flag;
 		}
@@ -470,8 +471,8 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 		if (this.upperLimit != upperLimit) {
 			if (this.limitEnabled) {
 				// wake up both bodies
-				this.body1.setAsleep(false);
-				this.body2.setAsleep(false);
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
 			}
 			// set the new target angle
 			this.upperLimit = upperLimit;
@@ -499,8 +500,8 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 		if (this.lowerLimit != lowerLimit) {
 			if (this.limitEnabled) {
 				// wake up both bodies
-				this.body1.setAsleep(false);
-				this.body2.setAsleep(false);
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
 			}
 			// set the new target angle
 			this.lowerLimit = lowerLimit;
@@ -521,8 +522,8 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 		if (this.lowerLimit != lowerLimit || this.upperLimit != upperLimit) {
 			if (this.limitEnabled) {
 				// wake up the bodies
-				this.body1.setAsleep(false);
-				this.body2.setAsleep(false);
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
 			}
 			// set the limits
 			this.upperLimit = upperLimit;
@@ -555,8 +556,8 @@ public class AngleJoint extends Joint implements Shiftable, DataContainer {
 		if (this.lowerLimit != limit || this.upperLimit != limit) {
 			if (this.limitEnabled) {
 				// wake up the bodies
-				this.body1.setAsleep(false);
-				this.body2.setAsleep(false);
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
 			}
 			// set the limits
 			this.upperLimit = limit;

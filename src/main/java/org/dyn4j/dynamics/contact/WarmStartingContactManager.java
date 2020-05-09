@@ -39,6 +39,7 @@ import org.dyn4j.geometry.Shiftable;
  * @deprecated Use {@link DefaultContactManager} instead
  */
 @Deprecated
+@SuppressWarnings("rawtypes")
 public class WarmStartingContactManager extends DefaultContactManager implements ContactManager, Shiftable {
 	/** Another map that will be reused */
 	Map<ContactConstraintId, ContactConstraint> constraints1 = null;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@
  * Joints are solved using an iterative constraint based approach in the same manner as contacts.
  * <p>
  * All joints, with exception of the {@link org.dyn4j.dynamics.joint.PinJoint} join a pair
- * of {@link org.dyn4j.dynamics.Body}s.
+ * of {@link org.dyn4j.dynamics.PhysicsBody}s.
  * <p>
  * Current joint implementations:
  * <ul>
@@ -54,7 +54,7 @@
  * configuration with linear spring/damper and angular motor</li>
  * </ul>
  * @author William Bittle
- * @version 3.2.0
+ * @version 4.0.0
  * @since 1.0.0
  */
 package org.dyn4j.dynamics.joint;

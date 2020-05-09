@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,7 @@
  */
 package org.dyn4j.collision;
 
+import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Rotatable;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Translatable;
@@ -35,10 +36,10 @@ import org.dyn4j.geometry.Vector2;
  * By default all bounds are {@link Translatable} but not {@link Rotatable}.
  * <p>
  * Though not part of the bounds contract, a bounds object should only return true
- * from the {@link #isOutside(Collidable)} method when a {@link Collidable} is
+ * from the {@link #isOutside(CollisionBody)} method when a {@link CollisionBody} is
  * <strong>fully</strong> outside the bounds.
  * @author William Bittle
- * @version 3.2.0
+ * @version 4.0.0
  * @since 1.0.0
  */
 public interface Bounds extends Translatable, Shiftable {
@@ -50,12 +51,23 @@ public interface Bounds extends Translatable, Shiftable {
 	public abstract Vector2 getTranslation();
 	
 	/**
-	 * Returns true if the given {@link Collidable} is <strong>fully</strong> outside the bounds.
+	 * Returns true if the given {@link CollisionBody} is <strong>fully</strong> outside the bounds.
 	 * <p>
-	 * If the {@link Collidable} contains zero {@link Fixture}s then 
-	 * {@link Collidable} is considered to be outside the bounds.
-	 * @param collidable the {@link Collidable} to test
+	 * If the {@link CollisionBody} contains zero {@link Fixture}s then 
+	 * {@link CollisionBody} is considered to be outside the bounds.
+	 * @param body the {@link CollisionBody} to test
 	 * @return boolean true if outside the bounds
 	 */
-	public abstract boolean isOutside(Collidable<?> collidable);
+	public abstract boolean isOutside(CollisionBody<?> body);
+	
+	/**
+	 * Returns true if the given {@link AABB} is <strong>fully</strong> outside the bounds.
+	 * <p>
+	 * If the {@link AABB} is a degenerate {@link AABB} (has zero area) then it's 
+	 * considered to be outside the bounds.
+	 * @param aabb the {@link AABB} to test
+	 * @return boolean true if outside the bounds
+	 * @since 4.0.0
+	 */
+	public abstract boolean isOutside(AABB aabb);
 }

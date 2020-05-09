@@ -24,195 +24,781 @@
  */
 package org.dyn4j.dynamics;
 
-import junit.framework.TestCase;
-
 import org.dyn4j.dynamics.joint.RopeJoint;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
 
+import junit.framework.TestCase;
+
 /**
  * Test case for the {@link RopeJoint} class.
  * @author William Bittle
- * @version 3.0.1
+ * @version 3.4.1
  * @since 2.2.2
  */
-public class RopeJointTest {
+public class RopeJointTest extends AbstractJointTest {
 	/**
 	 * Tests the successful creation of an rope joint.
 	 */
 	@Test
 	public void createSuccess() {
-		new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
+		new RopeJoint(b1, b2, new Vector2(), new Vector2());
 	}
 	
 	/**
 	 * Tests the failed creation of an rope joint.
 	 */
 	@Test(expected = NullPointerException.class)
-	public void createFail1() {
-		new RopeJoint(null, new Body(), new Vector2(), new Vector2());
+	public void createWithNullBody1() {
+		new RopeJoint(null, b2, new Vector2(), new Vector2());
 	}
 
 	/**
 	 * Tests the failed creation of an rope joint.
 	 */
 	@Test(expected = NullPointerException.class)
-	public void createFail2() {
-		new RopeJoint(new Body(), null, new Vector2(), new Vector2());
+	public void createWithNullBody2() {
+		new RopeJoint(b1, null, new Vector2(), new Vector2());
 	}
 	
 	/**
 	 * Tests the failed creation of an rope joint.
 	 */
 	@Test(expected = NullPointerException.class)
-	public void createFail3() {
-		new RopeJoint(new Body(), new Body(), null, new Vector2());
+	public void createWithNullAnchor1() {
+		new RopeJoint(b1, b2, null, new Vector2());
 	}
 	
 	/**
 	 * Tests the failed creation of an rope joint.
 	 */
 	@Test(expected = NullPointerException.class)
-	public void createFail4() {
-		new RopeJoint(new Body(), new Body(), new Vector2(), null);
+	public void createWithNullAnchor2() {
+		new RopeJoint(b1, b2, new Vector2(), null);
 	}
 	
 	/**
 	 * Tests the failed creation of an rope joint.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void createFail5() {
-		Body b = new Body();
-		new RopeJoint(b, b, new Vector2(), new Vector2());
+	public void createWithSameBody() {
+		new RopeJoint(b1, b1, new Vector2(), new Vector2());
 	}
 	
+//	/**
+//	 * Tests the successful setting of the maximum distance.
+//	 */
+//	@Test
+//	public void setMaximum() {
+//		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
+//		rj.setUpperLimit(10);
+//		
+//		TestCase.assertEquals(10.0, rj.getUpperLimit());
+//	}
+//	
+//	/**
+//	 * Tests the failed setting of the maximum distance.
+//	 */
+//	@Test(expected = IllegalArgumentException.class)
+//	public void setMaximumFail1() {
+//		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
+//		rj.setUpperLimit(-10);
+//	}
+//
+//	/**
+//	 * Tests the failed setting of the maximum distance.
+//	 */
+//	@Test(expected = IllegalArgumentException.class)
+//	public void setMaximumFail2() {
+//		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
+//		rj.setLowerLimit(2);
+//		rj.setUpperLimit(1);
+//	}
+//	
+//	/**
+//	 * Tests the successful setting of the minimum distance.
+//	 */
+//	@Test
+//	public void setMinimum() {
+//		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
+//		rj.setUpperLimit(10);
+//		rj.setLowerLimit(2);
+//		
+//		TestCase.assertEquals(2.0, rj.getLowerLimit());
+//	}
+//	
+//	/**
+//	 * Tests the failed setting of the maximum distance.
+//	 */
+//	@Test(expected = IllegalArgumentException.class)
+//	public void setMinimumFail1() {
+//		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
+//		rj.setUpperLimit(-3);
+//	}
+//	
+//	/**
+//	 * Tests the failed setting of the maximum distance.
+//	 */
+//	@Test(expected = IllegalArgumentException.class)
+//	public void setMinimumFail2() {
+//		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
+//		rj.setUpperLimit(1);
+//		rj.setLowerLimit(2);
+//	}
+//	
+//	/**
+//	 * Tests the successful setting of the minimum and maximum distance.
+//	 */
+//	@Test
+//	public void setMinAndMax() {
+//		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
+//		rj.setLimits(7, 10);
+//		
+//		TestCase.assertEquals(7.0, rj.getLowerLimit());
+//		TestCase.assertEquals(10.0, rj.getUpperLimit());
+//	}
+//	
+//	/**
+//	 * Tests the failed setting of the minimum and maximum distance.
+//	 */
+//	@Test(expected = IllegalArgumentException.class)
+//	public void setMinAndMaxFail1() {
+//		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
+//		rj.setLimits(7, -10);
+//	}
+//	
+//	/**
+//	 * Tests the failed setting of the minimum and maximum distance.
+//	 */
+//	@Test(expected = IllegalArgumentException.class)
+//	public void setMinAndMaxFail2() {
+//		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
+//		rj.setLimits(-7, 10);
+//	}
+//	
+//	/**
+//	 * Tests the failed setting of the minimum and maximum distance.
+//	 */
+//	@Test(expected = IllegalArgumentException.class)
+//	public void setMinAndMaxFail3() {
+//		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
+//		rj.setLimits(-7, -10);
+//	}
+//	
+//	/**
+//	 * Tests the failed setting of the minimum and maximum distance.
+//	 */
+//	@Test(expected = IllegalArgumentException.class)
+//	public void setMinAndMaxFail4() {
+//		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
+//		rj.setLimits(10, 7);
+//	}
+//	
+//	/**
+//	 * Tests the successful setting of the minimum and maximum distance.
+//	 */
+//	@Test
+//	public void setMinMax() {
+//		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
+//		rj.setLimits(10);
+//		
+//		TestCase.assertEquals(10.0, rj.getLowerLimit());
+//		TestCase.assertEquals(10.0, rj.getUpperLimit());
+//	}
+//	
+//	/**
+//	 * Tests the failed setting of the minimum and maximum distance.
+//	 */
+//	@Test(expected = IllegalArgumentException.class)
+//	public void setMinMaxFail1() {
+//		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
+//		rj.setLimits(-10);
+//	}
+	
+
+	
+	
+	
+	
+	
+	
+	
+	
 	/**
-	 * Tests the successful setting of the maximum distance.
+	 * Tests the successful setting of the upper limit.
 	 */
 	@Test
-	public void setMaximum() {
-		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
-		rj.setUpperLimit(10);
+	public void setUpperLimitSuccess() {
+		RopeJoint rj = new RopeJoint(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
 		
-		TestCase.assertEquals(10.0, rj.getUpperLimit());
+		TestCase.assertEquals(1.0, rj.getUpperLimit());
+		
+		rj.setUpperLimit(2.0);
+		
+		TestCase.assertEquals(2.0, rj.getUpperLimit(), 1e-6);
 	}
 	
 	/**
-	 * Tests the failed setting of the maximum distance.
+	 * Tests the failed setting of the upper limit.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void setMaximumFail1() {
-		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
-		rj.setUpperLimit(-10);
+	public void setUpperLimitNegative() {
+		RopeJoint rj = new RopeJoint(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		
+		TestCase.assertEquals(1.0, rj.getUpperLimit());
+		
+		rj.setUpperLimit(-1.0);
+	}
+	
+	/**
+	 * Tests the successful setting of the lower limit.
+	 */
+	@Test
+	public void setLowerLimit() {
+		RopeJoint rj = new RopeJoint(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		
+		TestCase.assertEquals(1.0, rj.getLowerLimit());
+		
+		rj.setLowerLimit(0.0);
+		
+		TestCase.assertEquals(0.0, rj.getLowerLimit(), 1e-6);
+	}
+	
+	/**
+	 * Tests the failed setting of the lower limit.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setLowerLimitNegative() {
+		RopeJoint rj = new RopeJoint(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		
+		TestCase.assertEquals(1.0, rj.getLowerLimit());
+		
+		rj.setLowerLimit(-1.0);
+	}
+	
+	/**
+	 * Tests the successful setting of the lower and upper limits.
+	 */
+	@Test
+	public void setUpperAndLowerLimits() {
+		RopeJoint rj = new RopeJoint(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		
+		TestCase.assertEquals(1.0, rj.getLowerLimit());
+		TestCase.assertEquals(1.0, rj.getUpperLimit());
+		
+		rj.setLimits(0.0, 1.0);		
+		TestCase.assertEquals(0.0, rj.getLowerLimit(), 1e-6);
+		TestCase.assertEquals(1.0, rj.getUpperLimit(), 1e-6);
+		
+		rj.setLimits(1.0, 2.0);		
+		TestCase.assertEquals(1.0, rj.getLowerLimit(), 1e-6);
+		TestCase.assertEquals(2.0, rj.getUpperLimit(), 1e-6);
+		
+		rj.setLimits(1.0, 1.0);
+		TestCase.assertEquals(1.0, rj.getLowerLimit());
+		TestCase.assertEquals(1.0, rj.getUpperLimit());
+	}
+	
+	/**
+	 * Tests the failed setting of the lower and upper limits.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setUpperAndLowerLimitsInvalid() {
+		RopeJoint rj = new RopeJoint(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		
+		TestCase.assertEquals(1.0, rj.getLowerLimit());
+		TestCase.assertEquals(1.0, rj.getUpperLimit());
+		
+		rj.setLimits(1.0, 0.0);
 	}
 
 	/**
-	 * Tests the failed setting of the maximum distance.
+	 * Tests the failed setting of the lower and upper limits.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void setMaximumFail2() {
-		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
-		rj.setLowerLimit(2);
-		rj.setUpperLimit(1);
+	public void setUpperAndLowerLimitsNegative() {
+		RopeJoint rj = new RopeJoint(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		
+		TestCase.assertEquals(1.0, rj.getLowerLimit());
+		TestCase.assertEquals(1.0, rj.getUpperLimit());
+		
+		rj.setLimits(-1.0, 0.0);
 	}
 	
 	/**
-	 * Tests the successful setting of the minimum distance.
+	 * Tests the sleep interaction when enabling/disabling the limits.
 	 */
 	@Test
-	public void setMinimum() {
-		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
-		rj.setUpperLimit(10);
-		rj.setLowerLimit(2);
+	public void setLimitsEnabledSleep() {
+		RopeJoint rj = new RopeJoint(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
 		
+		// by default the limit is enabled
+		TestCase.assertTrue(rj.isUpperLimitEnabled());
+		TestCase.assertTrue(rj.isLowerLimitEnabled());
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
+		
+		// lets disable it first and ensure that the bodies are awake
+		rj.setLimitsEnabled(false);
+		TestCase.assertFalse(rj.isUpperLimitEnabled());
+		TestCase.assertFalse(rj.isLowerLimitEnabled());
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
+		
+		// then put the bodies to sleep
+		b1.setAsleep(true);
+		b2.setAsleep(true);
+		
+		// if we disable it again, the bodies should not wake
+		rj.setLimitsEnabled(false);
+		TestCase.assertFalse(rj.isUpperLimitEnabled());
+		TestCase.assertFalse(rj.isLowerLimitEnabled());
+		TestCase.assertTrue(b1.isAsleep());
+		TestCase.assertTrue(b2.isAsleep());
+		
+		// when we enable it, we should awake the bodies
+		rj.setLimitsEnabled(true);
+		TestCase.assertTrue(rj.isUpperLimitEnabled());
+		TestCase.assertTrue(rj.isLowerLimitEnabled());
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
+		
+		// if we enable it when it's already enabled and the bodies are asleep
+		// it should not wake the bodies
+		b1.setAsleep(true);
+		b2.setAsleep(true);
+		rj.setLimitsEnabled(true);
+		TestCase.assertTrue(rj.isUpperLimitEnabled());
+		TestCase.assertTrue(rj.isLowerLimitEnabled());
+		TestCase.assertTrue(b1.isAsleep());
+		TestCase.assertTrue(b2.isAsleep());
+		
+		// if we disable the limit, then the bodies should be reawakened
+		rj.setLimitsEnabled(false);
+		TestCase.assertFalse(rj.isUpperLimitEnabled());
+		TestCase.assertFalse(rj.isLowerLimitEnabled());
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
+	}
+	
+	/**
+	 * Tests the sleep interaction when changing the limits to the same value.
+	 */
+	@Test
+	public void setLimitsSameSleep() {
+		RopeJoint rj = new RopeJoint(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		
+		// by default the limit is enabled
+		TestCase.assertTrue(rj.isUpperLimitEnabled());
+		TestCase.assertTrue(rj.isLowerLimitEnabled());
+		
+		// the default upper and lower limits should be equal
+		double defaultLowerLimit = rj.getLowerLimit();
+		double defaultUpperLimit = rj.getUpperLimit();
+		TestCase.assertEquals(defaultLowerLimit, defaultUpperLimit);
+
+		// the bodies should be initially awake
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
+
+		// then put the bodies to sleep
+		b1.setAsleep(true);
+		b2.setAsleep(true);
+		
+		// set the limits to the current value - since the value hasn't changed
+		// the bodies should remain asleep
+		rj.setLimits(defaultLowerLimit, defaultUpperLimit);
+		TestCase.assertTrue(rj.isUpperLimitEnabled());
+		TestCase.assertTrue(rj.isLowerLimitEnabled());
+		TestCase.assertTrue(b1.isAsleep());
+		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertEquals(defaultLowerLimit, rj.getLowerLimit());
+		TestCase.assertEquals(defaultUpperLimit, rj.getUpperLimit());
+		
+		// set the limits to a different value - the bodies should wake up
+		rj.setLimits(2.0);
+		TestCase.assertTrue(rj.isUpperLimitEnabled());
+		TestCase.assertTrue(rj.isLowerLimitEnabled());
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
 		TestCase.assertEquals(2.0, rj.getLowerLimit());
+		TestCase.assertEquals(2.0, rj.getUpperLimit());
+		
+		// test the scenario where only the lower limit value changes
+		rj.setLowerLimit(0.0);
+		TestCase.assertEquals(0.0, rj.getLowerLimit());
+		b1.setAsleep(true);
+		b2.setAsleep(true);
+		
+		rj.setLimits(2.0);
+		TestCase.assertTrue(rj.isUpperLimitEnabled());
+		TestCase.assertTrue(rj.isLowerLimitEnabled());
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertEquals(2.0, rj.getLowerLimit());
+		TestCase.assertEquals(2.0, rj.getUpperLimit());
+		
+		// test the scenario where only the upper limit value changes
+		rj.setUpperLimit(3.0);
+		TestCase.assertEquals(3.0, rj.getUpperLimit());
+		b1.setAsleep(true);
+		b2.setAsleep(true);
+		
+		rj.setLimits(2.0);
+		TestCase.assertTrue(rj.isUpperLimitEnabled());
+		TestCase.assertTrue(rj.isLowerLimitEnabled());
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertEquals(2.0, rj.getLowerLimit());
+		TestCase.assertEquals(2.0, rj.getUpperLimit());
+		
+		// now disable the limit, and the limits should change
+		// but the bodies should not wake
+		rj.setLimitsEnabled(false);
+		b1.setAsleep(true);
+		b2.setAsleep(true);
+		
+		rj.setLimits(1.0);
+		TestCase.assertFalse(rj.isUpperLimitEnabled());
+		TestCase.assertFalse(rj.isLowerLimitEnabled());
+		TestCase.assertTrue(b1.isAsleep());
+		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertEquals(1.0, rj.getLowerLimit());
+		TestCase.assertEquals(1.0, rj.getUpperLimit());
 	}
 	
 	/**
-	 * Tests the failed setting of the maximum distance.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setMinimumFail1() {
-		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
-		rj.setUpperLimit(-3);
-	}
-	
-	/**
-	 * Tests the failed setting of the maximum distance.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setMinimumFail2() {
-		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
-		rj.setUpperLimit(1);
-		rj.setLowerLimit(2);
-	}
-	
-	/**
-	 * Tests the successful setting of the minimum and maximum distance.
+	 * Tests the sleep interaction when changing the limits to different values.
 	 */
 	@Test
-	public void setMinAndMax() {
-		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
-		rj.setLimits(7, 10);
+	public void setLimitsDifferentSleep() {
+		RopeJoint rj = new RopeJoint(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
 		
-		TestCase.assertEquals(7.0, rj.getLowerLimit());
-		TestCase.assertEquals(10.0, rj.getUpperLimit());
+		// by default the limit is enabled
+		TestCase.assertTrue(rj.isUpperLimitEnabled());
+		TestCase.assertTrue(rj.isLowerLimitEnabled());
+		
+		// the default upper and lower limits should be equal
+		double defaultLowerLimit = rj.getLowerLimit();
+		double defaultUpperLimit = rj.getUpperLimit();
+		TestCase.assertEquals(defaultLowerLimit, defaultUpperLimit);
+
+		// the bodies should be initially awake
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
+
+		// then put the bodies to sleep
+		b1.setAsleep(true);
+		b2.setAsleep(true);
+		
+		// set the limits to the current value - since the value hasn't changed
+		// the bodies should remain asleep
+		rj.setLimits(defaultLowerLimit, defaultUpperLimit);
+		TestCase.assertTrue(rj.isUpperLimitEnabled());
+		TestCase.assertTrue(rj.isLowerLimitEnabled());
+		TestCase.assertTrue(b1.isAsleep());
+		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertEquals(defaultLowerLimit, rj.getLowerLimit());
+		TestCase.assertEquals(defaultUpperLimit, rj.getUpperLimit());
+		
+		// set the limits to a different value - the bodies should wake up
+		rj.setLimits(2.0, 3.0);
+		TestCase.assertTrue(rj.isUpperLimitEnabled());
+		TestCase.assertTrue(rj.isLowerLimitEnabled());
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertEquals(2.0, rj.getLowerLimit());
+		TestCase.assertEquals(3.0, rj.getUpperLimit());
+		
+		// test the scenario where only the lower limit value changes
+		rj.setLowerLimit(1.0);
+		TestCase.assertEquals(1.0, rj.getLowerLimit());
+		b1.setAsleep(true);
+		b2.setAsleep(true);
+		
+		rj.setLimits(0.0, 3.0);
+		TestCase.assertTrue(rj.isUpperLimitEnabled());
+		TestCase.assertTrue(rj.isLowerLimitEnabled());
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertEquals(0.0, rj.getLowerLimit());
+		TestCase.assertEquals(3.0, rj.getUpperLimit());
+		
+		// test the scenario where only the upper limit value changes
+		rj.setUpperLimit(2.0);
+		TestCase.assertEquals(2.0, rj.getUpperLimit());
+		b1.setAsleep(true);
+		b2.setAsleep(true);
+		
+		rj.setLimits(0.0, 1.0);
+		TestCase.assertTrue(rj.isUpperLimitEnabled());
+		TestCase.assertTrue(rj.isLowerLimitEnabled());
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertEquals(0.0, rj.getLowerLimit());
+		TestCase.assertEquals(1.0, rj.getUpperLimit());
+		
+		// now disable the limit, and the limits should change
+		// but the bodies should not wake
+		rj.setLimitsEnabled(false);
+		b1.setAsleep(true);
+		b2.setAsleep(true);
+		
+		rj.setLimits(1.0, 2.0);
+		TestCase.assertFalse(rj.isUpperLimitEnabled());
+		TestCase.assertFalse(rj.isLowerLimitEnabled());
+		TestCase.assertTrue(b1.isAsleep());
+		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertEquals(1.0, rj.getLowerLimit());
+		TestCase.assertEquals(2.0, rj.getUpperLimit());
 	}
 	
 	/**
-	 * Tests the failed setting of the minimum and maximum distance.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setMinAndMaxFail1() {
-		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
-		rj.setLimits(7, -10);
-	}
-	
-	/**
-	 * Tests the failed setting of the minimum and maximum distance.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setMinAndMaxFail2() {
-		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
-		rj.setLimits(-7, 10);
-	}
-	
-	/**
-	 * Tests the failed setting of the minimum and maximum distance.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setMinAndMaxFail3() {
-		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
-		rj.setLimits(-7, -10);
-	}
-	
-	/**
-	 * Tests the failed setting of the minimum and maximum distance.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setMinAndMaxFail4() {
-		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
-		rj.setLimits(10, 7);
-	}
-	
-	/**
-	 * Tests the successful setting of the minimum and maximum distance.
+	 * Tests the sleep interaction when changing the lower limit.
 	 */
 	@Test
-	public void setMinMax() {
-		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
-		rj.setLimits(10);
+	public void setLowerLimitSleep() {
+		RopeJoint rj = new RopeJoint(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
 		
-		TestCase.assertEquals(10.0, rj.getLowerLimit());
-		TestCase.assertEquals(10.0, rj.getUpperLimit());
+		// by default the limit is enabled
+		TestCase.assertTrue(rj.isLowerLimitEnabled());
+		
+		// the default upper and lower limits should be equal
+		double defaultLowerLimit = rj.getLowerLimit();
+		double defaultUpperLimit = rj.getUpperLimit();
+
+		// the bodies should be initially awake
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
+
+		// then put the bodies to sleep
+		b1.setAsleep(true);
+		b2.setAsleep(true);
+		
+		// set the lower limit to the current value - since the value hasn't changed
+		// the bodies should remain asleep
+		rj.setLowerLimit(defaultLowerLimit);
+		TestCase.assertTrue(rj.isLowerLimitEnabled());
+		TestCase.assertTrue(b1.isAsleep());
+		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertEquals(defaultLowerLimit, rj.getLowerLimit());
+		TestCase.assertEquals(defaultUpperLimit, rj.getUpperLimit());
+		
+		// set the limit to a different value - the bodies should wake up
+		rj.setLowerLimit(0.5);
+		TestCase.assertTrue(rj.isLowerLimitEnabled());
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertEquals(0.5, rj.getLowerLimit());
+		TestCase.assertEquals(defaultUpperLimit, rj.getUpperLimit());
+		
+		// now disable the limit, and the lower limit should change
+		// but the bodies should not wake
+		rj.setLimitsEnabled(false);
+		b1.setAsleep(true);
+		b2.setAsleep(true);
+		
+		rj.setLowerLimit(0.2);
+		TestCase.assertTrue(b1.isAsleep());
+		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertEquals(0.2, rj.getLowerLimit());
+		TestCase.assertEquals(defaultUpperLimit, rj.getUpperLimit());
+	}
+
+	/**
+	 * Tests the sleep interaction when changing the upper limit.
+	 */
+	@Test
+	public void setUpperLimitSleep() {
+		RopeJoint rj = new RopeJoint(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		
+		// by default the limit is enabled
+		TestCase.assertTrue(rj.isUpperLimitEnabled());
+		
+		// the default upper and lower limits should be equal
+		double defaultLowerLimit = rj.getLowerLimit();
+		double defaultUpperLimit = rj.getUpperLimit();
+
+		// the bodies should be initially awake
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
+
+		// then put the bodies to sleep
+		b1.setAsleep(true);
+		b2.setAsleep(true);
+		
+		// set the upper limit to the current value - since the value hasn't changed
+		// the bodies should remain asleep
+		rj.setUpperLimit(defaultUpperLimit);
+		TestCase.assertTrue(rj.isUpperLimitEnabled());
+		TestCase.assertTrue(b1.isAsleep());
+		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertEquals(defaultLowerLimit, rj.getLowerLimit());
+		TestCase.assertEquals(defaultUpperLimit, rj.getUpperLimit());
+		
+		// set the limit to a different value - the bodies should wake up
+		rj.setUpperLimit(2.0);
+		TestCase.assertTrue(rj.isUpperLimitEnabled());
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertEquals(defaultLowerLimit, rj.getLowerLimit());
+		TestCase.assertEquals(2.0, rj.getUpperLimit());
+		
+		// now disable the limit, and the upper limit should change
+		// but the bodies should not wake
+		rj.setLimitsEnabled(false);
+		b1.setAsleep(true);
+		b2.setAsleep(true);
+		
+		rj.setUpperLimit(3.0);
+		TestCase.assertTrue(b1.isAsleep());
+		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertEquals(defaultLowerLimit, rj.getLowerLimit());
+		TestCase.assertEquals(3.0, rj.getUpperLimit());
 	}
 	
 	/**
-	 * Tests the failed setting of the minimum and maximum distance.
+	 * Tests the sleep interaction when changing the limits and enabling them.
 	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setMinMaxFail1() {
-		RopeJoint rj = new RopeJoint(new Body(), new Body(), new Vector2(), new Vector2());
-		rj.setLimits(-10);
+	@Test
+	public void setLimitsEnabledSameSleep() {
+		RopeJoint rj = new RopeJoint(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		
+		// by default the limit is enabled
+		TestCase.assertTrue(rj.isUpperLimitEnabled());
+		TestCase.assertTrue(rj.isLowerLimitEnabled());
+		
+		// the default upper and lower limits should be equal
+		double defaultLowerLimit = rj.getLowerLimit();
+		double defaultUpperLimit = rj.getUpperLimit();
+		TestCase.assertEquals(defaultLowerLimit, defaultUpperLimit);
+
+		// the bodies should be initially awake
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
+
+		// then put the bodies to sleep
+		b1.setAsleep(true);
+		b2.setAsleep(true);
+		
+		// the limit should already be enabled and the value isn't changing
+		// so the bodies should not wake
+		rj.setLimitsEnabled(defaultLowerLimit, defaultUpperLimit);
+		TestCase.assertTrue(rj.isUpperLimitEnabled());
+		TestCase.assertTrue(rj.isLowerLimitEnabled());
+		TestCase.assertTrue(b1.isAsleep());
+		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertEquals(defaultLowerLimit, rj.getLowerLimit());
+		TestCase.assertEquals(defaultUpperLimit, rj.getUpperLimit());
+		
+		// the limit should already be enabled and the value is changing
+		// so the bodies should wake
+		rj.setLimitsEnabled(2.0, 2.0);
+		TestCase.assertTrue(rj.isUpperLimitEnabled());
+		TestCase.assertTrue(rj.isLowerLimitEnabled());
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertEquals(2.0, rj.getLowerLimit());
+		TestCase.assertEquals(2.0, rj.getUpperLimit());
+		
+		b1.setAsleep(true);
+		b2.setAsleep(true);
+		rj.setLimitsEnabled(false);
+		
+		// the limit is not enabled but the value isn't changing
+		// so the bodies should still wake
+		rj.setLimitsEnabled(1.0, 1.0);
+		TestCase.assertTrue(rj.isUpperLimitEnabled());
+		TestCase.assertTrue(rj.isLowerLimitEnabled());
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertEquals(1.0, rj.getLowerLimit());
+		TestCase.assertEquals(1.0, rj.getUpperLimit());
+	}
+
+	/**
+	 * Tests the sleep interaction when changing the limits to different values and enabling them.
+	 */
+	@Test
+	public void setLimitsEnabledDifferentSleep() {
+		RopeJoint rj = new RopeJoint(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		
+		// by default the limit is enabled
+		TestCase.assertTrue(rj.isUpperLimitEnabled());
+		TestCase.assertTrue(rj.isLowerLimitEnabled());
+		
+		// the default upper and lower limits should be equal
+		double defaultLowerLimit = rj.getLowerLimit();
+		double defaultUpperLimit = rj.getUpperLimit();
+		TestCase.assertEquals(defaultLowerLimit, defaultUpperLimit);
+
+		// the bodies should be initially awake
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
+
+		// then put the bodies to sleep
+		b1.setAsleep(true);
+		b2.setAsleep(true);
+		
+		// set the limits to the current value - since the value hasn't changed
+		// and the limit is already enabled the bodies should remain asleep
+		rj.setLimitsEnabled(defaultLowerLimit, defaultUpperLimit);
+		TestCase.assertTrue(rj.isUpperLimitEnabled());
+		TestCase.assertTrue(rj.isLowerLimitEnabled());
+		TestCase.assertTrue(b1.isAsleep());
+		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertEquals(defaultLowerLimit, rj.getLowerLimit());
+		TestCase.assertEquals(defaultUpperLimit, rj.getUpperLimit());
+		
+		// set the limits to a different value - the bodies should wake up
+		rj.setLimitsEnabled(0.0, 2.0);
+		TestCase.assertTrue(rj.isUpperLimitEnabled());
+		TestCase.assertTrue(rj.isLowerLimitEnabled());
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertEquals(0.0, rj.getLowerLimit());
+		TestCase.assertEquals(2.0, rj.getUpperLimit());
+		
+		// test the scenario where only the lower limit value changes
+		rj.setLowerLimit(0.5);
+		TestCase.assertEquals(0.5, rj.getLowerLimit());
+		b1.setAsleep(true);
+		b2.setAsleep(true);
+		
+		rj.setLimitsEnabled(0.0, 2.0);
+		TestCase.assertTrue(rj.isUpperLimitEnabled());
+		TestCase.assertTrue(rj.isLowerLimitEnabled());
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertEquals(0.0, rj.getLowerLimit());
+		TestCase.assertEquals(2.0, rj.getUpperLimit());
+		
+		// test the scenario where only the upper limit value changes
+		rj.setUpperLimit(3.0);
+		TestCase.assertEquals(3.0, rj.getUpperLimit());
+		b1.setAsleep(true);
+		b2.setAsleep(true);
+		
+		rj.setLimitsEnabled(0.0, 2.0);
+		TestCase.assertTrue(rj.isUpperLimitEnabled());
+		TestCase.assertTrue(rj.isLowerLimitEnabled());
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertEquals(0.0, rj.getLowerLimit());
+		TestCase.assertEquals(2.0, rj.getUpperLimit());
+		
+		// now disable the limit and make sure they wake
+		// even though the limits don't change
+		rj.setLimitsEnabled(false);
+		b1.setAsleep(true);
+		b2.setAsleep(true);
+		
+		rj.setLimitsEnabled(0.5, 4.0);
+		TestCase.assertTrue(rj.isUpperLimitEnabled());
+		TestCase.assertTrue(rj.isLowerLimitEnabled());
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertEquals(0.5, rj.getLowerLimit());
+		TestCase.assertEquals(4.0, rj.getUpperLimit());
 	}
 }

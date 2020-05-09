@@ -24,35 +24,19 @@
  */
 package org.dyn4j.dynamics;
 
-import junit.framework.TestCase;
-
 import org.dyn4j.dynamics.joint.WeldJoint;
 import org.dyn4j.geometry.Vector2;
-import org.junit.Before;
 import org.junit.Test;
+
+import junit.framework.TestCase;
 
 /**
  * Used to test the {@link WeldJoint} class.
  * @author William Bittle
- * @version 3.0.2
+ * @version 3.4.1
  * @since 1.0.2
  */
-public class WeldJointTest {
-	/** The first body used for testing */
-	private Body b1;
-	
-	/** The second body used for testing */
-	private Body b2;
-	
-	/**
-	 * Sets up the test.
-	 */
-	@Before
-	public void setup() {
-		this.b1 = new Body();
-		this.b2 = new Body();
-	}
-	
+public class WeldJointTest extends AbstractJointTest {
 	/**
 	 * Tests the successful creation case.
 	 */
@@ -60,12 +44,28 @@ public class WeldJointTest {
 	public void createSuccess() {
 		new WeldJoint(b1, b2, new Vector2());
 	}
+
+	/**
+	 * Tests the create method passing a null body1.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createWithNullBody1() {
+		new WeldJoint(null, b2, new Vector2());
+	}
+	
+	/**
+	 * Tests the create method passing a null body2.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createWithNullBody2() {
+		new WeldJoint(b1, null, new Vector2());
+	}
 	
 	/**
 	 * Tests the create method passing a null anchor.
 	 */
 	@Test(expected = NullPointerException.class)
-	public void createNullAnchor() {
+	public void createWithNullAnchor() {
 		new WeldJoint(b1, b2, null);
 	}
 	
@@ -73,7 +73,7 @@ public class WeldJointTest {
 	 * Tests the create method passing the same body.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void createSameBody() {
+	public void createWithSameBody() {
 		new WeldJoint(b1, b1, new Vector2());
 	}
 	
@@ -135,9 +135,15 @@ public class WeldJointTest {
 	@Test
 	public void setDampingRatio() {
 		WeldJoint wj = new WeldJoint(b1, b2, new Vector2());
+		
 		wj.setDampingRatio(0.0);
+		TestCase.assertEquals(0.0, wj.getDampingRatio());
+		
 		wj.setDampingRatio(1.0);
+		TestCase.assertEquals(1.0, wj.getDampingRatio());
+		
 		wj.setDampingRatio(0.2);
+		TestCase.assertEquals(0.2, wj.getDampingRatio());
 	}
 	
 	/**
@@ -145,7 +151,7 @@ public class WeldJointTest {
 	 * @since 3.0.2
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void setNegativeDampingRatio() {
+	public void setDampingRatioNegative() {
 		WeldJoint wj = new WeldJoint(b1, b2, new Vector2());
 		wj.setDampingRatio(-1.0);
 	}
@@ -155,7 +161,7 @@ public class WeldJointTest {
 	 * @since 3.0.2
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void setGreaterThan1DampingRatio() {
+	public void setDampingRatioGreaterThan1() {
 		WeldJoint wj = new WeldJoint(b1, b2, new Vector2());
 		wj.setDampingRatio(2.0);
 	}
@@ -167,9 +173,15 @@ public class WeldJointTest {
 	@Test
 	public void setFrequency() {
 		WeldJoint wj = new WeldJoint(b1, b2, new Vector2());
+		
 		wj.setFrequency(0.0);
+		TestCase.assertEquals(0.0, wj.getFrequency());
+		
 		wj.setFrequency(1.0);
+		TestCase.assertEquals(1.0, wj.getFrequency());
+		
 		wj.setFrequency(29.0);
+		TestCase.assertEquals(29.0, wj.getFrequency());
 	}
 	
 	/**
@@ -177,7 +189,7 @@ public class WeldJointTest {
 	 * @since 3.0.2
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void setNegativeFrequency() {
+	public void setFrequencyNegative() {
 		WeldJoint wj = new WeldJoint(b1, b2, new Vector2());
 		wj.setFrequency(-0.3);
 	}

@@ -316,7 +316,8 @@ public final class LinkPostProcessor implements NarrowphasePostProcessor {
 			// the normal can't be outside the upper
 			if (n.difference(upper).dot(normal) < 0){
 				// use the upper normal
-				penetration.normal = upper;
+				penetration.normal.x = upper.x;
+				penetration.normal.y = upper.y;
 				// adjust the depth
 				penetration.depth = upper.dot(n) * penetration.depth;
 			}
@@ -324,7 +325,8 @@ public final class LinkPostProcessor implements NarrowphasePostProcessor {
 			// the normal can't be outside the lower
 			if (n.difference(lower).dot(normal) < 0) {
 				// use the lower normal
-				penetration.normal = lower;
+				penetration.normal.x = lower.x;
+				penetration.normal.y = lower.y;
 				// adjust the depth
 				penetration.depth = lower.dot(n) * penetration.depth;
 			}

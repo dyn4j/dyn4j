@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,9 +33,11 @@ import org.dyn4j.geometry.Ray;
 /**
  * Represents a {@link BroadphaseFilter} for the {@link BroadphaseDetector#raycast(Ray, double, BroadphaseFilter)} method.
  * @author William Bittle
- * @version 3.2.0
+ * @version 4.0.0
  * @since 3.2.0
+ * @deprecated Deprecated in 4.0.0. Use the DetectFilter in the world package instead.
  */
+@Deprecated
 public class RaycastBroadphaseFilter extends BroadphaseFilterAdapter<Body, BodyFixture> implements BroadphaseFilter<Body, BodyFixture> {
 	/** True to ignore inactive bodies */
 	private final boolean ignoreInactive;

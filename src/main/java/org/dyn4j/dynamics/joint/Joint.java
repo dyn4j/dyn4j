@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -25,20 +25,27 @@
 package org.dyn4j.dynamics.joint;
 
 import org.dyn4j.DataContainer;
-import org.dyn4j.dynamics.Body;
-import org.dyn4j.dynamics.Constraint;
+import org.dyn4j.collision.CollisionBody;
+import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
-import org.dyn4j.dynamics.Step;
+import org.dyn4j.dynamics.TimeStep;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Represents constrained motion between two {@link Body}s.
+ * Represents constrained motion between two {@link PhysicsBody}s.
  * @author William Bittle
- * @version 3.4.1
+ * @version 4.0.0
  * @since 1.0.0
+ * @param <T> the {@link PhysicsBody} type
  */
-public abstract class Joint extends Constraint implements Shiftable, DataContainer {
+public abstract class Joint<T extends PhysicsBody> implements Shiftable, DataContainer {
+	/** The first linked body */
+	protected final T body1;
+	
+	/** The second linked body */
+	protected final T body2;
+	
 	/** Whether the pair of bodies joined together can collide with each other */
 	protected boolean collisionAllowed;
 
@@ -46,28 +53,37 @@ public abstract class Joint extends Constraint implements Shiftable, DataContain
 	protected Object userData;
 	
 	/**
+	 * True if this joint is on an island.
+	 * @deprecated Deprecated in 4.0.0. No replacement needed.
+	 */
+	@Deprecated
+	boolean onIsland;
+	
+	/**
 	 * Optional constructor.
 	 * <p>
 	 * Assumes that the joined bodies do not participate 
 	 * in collision detection and resolution.
-	 * @param body1 the first {@link Body}
-	 * @param body2 the second {@link Body}
+	 * @param body1 the first {@link PhysicsBody}
+	 * @param body2 the second {@link PhysicsBody}
 	 * @throws NullPointerException if body1 or body2 is null
 	 */
-	public Joint(Body body1, Body body2) {
+	public Joint(T body1, T body2) {
 		this(body1, body2, false);
 	}
 	
 	/**
 	 * Full constructor.
-	 * @param body1 the first {@link Body}
-	 * @param body2 the second {@link Body}
-	 * @param collisionAllowed true if the joined {@link Body}s can take part in collision detection
+	 * @param body1 the first {@link PhysicsBody}
+	 * @param body2 the second {@link PhysicsBody}
+	 * @param collisionAllowed true if the joined {@link PhysicsBody}s can take part in collision detection
 	 * @throws NullPointerException if body1 or body2 is null
 	 */
-	public Joint(Body body1, Body body2, boolean collisionAllowed) {
-		super(body1, body2);
+	public Joint(T body1, T body2, boolean collisionAllowed) {
+		this.body1 = body1;
+		this.body2 = body2;
 		this.collisionAllowed = collisionAllowed;
+		this.onIsland = false;
 	}
 	
 	/* (non-Javadoc)
@@ -87,14 +103,14 @@ public abstract class Joint extends Constraint implements Shiftable, DataContain
 	 * @param step the time step information
 	 * @param settings the current world settings
 	 */
-	public abstract void initializeConstraints(Step step, Settings settings);
+	public abstract void initializeConstraints(TimeStep step, Settings settings);
 	
 	/**
 	 * Solves the velocity constraints.
 	 * @param step the time step information
 	 * @param settings the current world settings
 	 */
-	public abstract void solveVelocityConstraints(Step step, Settings settings);
+	public abstract void solveVelocityConstraints(TimeStep step, Settings settings);
 	
 	/**
 	 * Solves the position constraints.
@@ -102,24 +118,56 @@ public abstract class Joint extends Constraint implements Shiftable, DataContain
 	 * @param settings the current world settings
 	 * @return boolean true if the position constraints were solved
 	 */
-	public abstract boolean solvePositionConstraints(Step step, Settings settings);
+	public abstract boolean solvePositionConstraints(TimeStep step, Settings settings);
 	
 	/**
-	 * Returns the anchor point on the first {@link Body} in
+	 * Returns the first body.
+	 * @return T
+	 */
+	public T getBody1() {
+		return this.body1;
+	}
+	
+	/**
+	 * Returns the second body.
+	 * @return T
+	 */
+	public T getBody2() {
+		return this.body2;
+	}
+
+	/**
+	 * Returns the body that does not match the given body.
+	 * <p>
+	 * If the given body is neither body1 or body2, null is returned.
+	 * @param body the body
+	 * @return T
+	 */
+	public T getOtherBody(CollisionBody<?> body) {
+		if (this.body1 == body) {
+			return this.body2;
+		} else if (this.body2 == body) {
+			return this.body1;
+		}
+		return null;
+	}
+	
+	/**
+	 * Returns the anchor point on the first {@link PhysicsBody} in
 	 * world coordinates.
 	 * @return {@link Vector2}
 	 */
 	public abstract Vector2 getAnchor1();
 	
 	/**
-	 * Returns the anchor point on the second {@link Body} in
+	 * Returns the anchor point on the second {@link PhysicsBody} in
 	 * world coordinates.
 	 * @return {@link Vector2}
 	 */
 	public abstract Vector2 getAnchor2();
 	
 	/**
-	 * Returns the force applied to the {@link Body}s in order
+	 * Returns the force applied to the {@link PhysicsBody}s in order
 	 * to satisfy the constraint in newtons.
 	 * @param invdt the inverse delta time
 	 * @return {@link Vector2}
@@ -127,7 +175,7 @@ public abstract class Joint extends Constraint implements Shiftable, DataContain
 	public abstract Vector2 getReactionForce(double invdt);
 	
 	/**
-	 * Returns the torque applied to the {@link Body}s in order
+	 * Returns the torque applied to the {@link PhysicsBody}s in order
 	 * to satisfy the constraint in newton-meters.
 	 * @param invdt the inverse delta time
 	 * @return double
@@ -137,15 +185,27 @@ public abstract class Joint extends Constraint implements Shiftable, DataContain
 	/**
 	 * Returns true if this {@link Joint} is active.
 	 * <p>
-	 * A joint is only active if both joined {@link Body}s are active.
+	 * A joint is only active if both joined {@link PhysicsBody}s are active.
 	 * @return boolean
+	 * @deprecated Deprecated in 4.0.0. Use the isEnabled method instead
 	 */
+	@Deprecated
 	public boolean isActive() {
 		return this.body1.isActive() && this.body2.isActive();
 	}
 	
 	/**
-	 * Returns true if collision between the joined {@link Body}s is allowed.
+	 * Returns true if this {@link Joint} is enabled.
+	 * <p>
+	 * A joint is only enabled if both joined {@link PhysicsBody}s are enabled.
+	 * @return boolean
+	 */
+	public boolean isEnabled() {
+		return this.body1.isEnabled() && this.body2.isEnabled();
+	}
+	
+	/**
+	 * Returns true if collision between the joined {@link PhysicsBody}s is allowed.
 	 * @return boolean
 	 */
 	public boolean isCollisionAllowed() {
@@ -153,15 +213,15 @@ public abstract class Joint extends Constraint implements Shiftable, DataContain
 	}
 	
 	/**
-	 * Sets whether collision is allowed between the joined {@link Body}s.
+	 * Sets whether collision is allowed between the joined {@link PhysicsBody}s.
 	 * @param flag true if collisions are allowed
 	 */
 	public void setCollisionAllowed(boolean flag) {
 		// is it different than the current value
 		if (this.collisionAllowed != flag) {
 			// wake up both bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
+			this.body1.setAtRest(false);
+			this.body2.setAtRest(false);
 			// set the new value
 			this.collisionAllowed = flag;
 		}
@@ -179,5 +239,25 @@ public abstract class Joint extends Constraint implements Shiftable, DataContain
 	 */
 	public void setUserData(Object userData) {
 		this.userData = userData;
+	}
+	
+	/**
+	 * Returns true if this joint is on an island.
+	 * @return boolean
+	 * @deprecated Deprecated in 4.0.0. No replacement needed.
+	 */
+	@Deprecated
+	public boolean isOnIsland() {
+		return this.onIsland;
+	}
+	
+	/**
+	 * Flags this joint as being on an island.
+	 * @param flag true if this joint is on an island
+	 * @deprecated Deprecated in 4.0.0. No replacement needed.
+	 */
+	@Deprecated
+	public void setOnIsland(boolean flag) {
+		this.onIsland = flag;
 	}
 }

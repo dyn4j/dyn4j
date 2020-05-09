@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,9 +26,9 @@ package org.dyn4j.dynamics.joint;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
-import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
-import org.dyn4j.dynamics.Step;
+import org.dyn4j.dynamics.TimeStep;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Shiftable;
@@ -51,17 +51,18 @@ import org.dyn4j.resources.Messages;
  * {@link DistanceJoint}.  The upper and lower limits can be enabled
  * separately.
  * @author William Bittle
- * @version 3.4.1
+ * @version 4.0.0
  * @since 2.2.1
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Rope_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/09/distance-constraint/" target="_blank">Distance Constraint</a>
  * @see <a href="http://www.dyn4j.org/2010/12/max-distance-constraint/" target="_blank">Max Distance Constraint</a>
+ * @param <T> the {@link PhysicsBody} type
  */
-public class RopeJoint extends Joint implements Shiftable, DataContainer {
-	/** The local anchor point on the first {@link Body} */
+public class RopeJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
+	/** The local anchor point on the first {@link PhysicsBody} */
 	protected Vector2 localAnchor1;
 	
-	/** The local anchor point on the second {@link Body} */
+	/** The local anchor point on the second {@link PhysicsBody} */
 	protected Vector2 localAnchor2;
 	
 	/** The maximum distance between the two world space anchor points */
@@ -96,14 +97,14 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 	 * Minimal constructor.
 	 * <p>
 	 * Creates a rope joint between the two bodies that acts like a distance joint.
-	 * @param body1 the first {@link Body}
-	 * @param body2 the second {@link Body}
+	 * @param body1 the first {@link PhysicsBody}
+	 * @param body2 the second {@link PhysicsBody}
 	 * @param anchor1 in world coordinates
 	 * @param anchor2 in world coordinates
 	 * @throws NullPointerException if body1, body2, anchor1, or anchor2 is null
 	 * @throws IllegalArgumentException if body1 == body2
 	 */
-	public RopeJoint(Body body1, Body body2, Vector2 anchor1, Vector2 anchor2) {
+	public RopeJoint(T body1, T body2, Vector2 anchor1, Vector2 anchor2) {
 		super(body1, body2, false);
 		// verify the bodies are not the same instance
 		if (body1 == body2) throw new IllegalArgumentException(Messages.getString("dynamics.joint.sameBody"));
@@ -139,10 +140,10 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void initializeConstraints(Step step, Settings settings) {
+	public void initializeConstraints(TimeStep step, Settings settings) {
 		double linearTolerance = settings.getLinearTolerance();
 		
 		Transform t1 = this.body1.getTransform();
@@ -242,10 +243,10 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void solveVelocityConstraints(Step step, Settings settings) {
+	public void solveVelocityConstraints(TimeStep step, Settings settings) {
 		// check if the constraint need to be applied
 		if (this.limitState != LimitState.INACTIVE) {
 			Transform t1 = this.body1.getTransform();
@@ -283,10 +284,10 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public boolean solvePositionConstraints(Step step, Settings settings) {
+	public boolean solvePositionConstraints(TimeStep step, Settings settings) {
 		// check if the constraint need to be applied
 		if (this.limitState != LimitState.INACTIVE) {
 			// if the limits are equal it doesn't matter if we
@@ -407,8 +408,8 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 			// make sure its changed and enabled before waking the bodies
 			if (this.upperLimitEnabled) {
 				// wake up both bodies
-				this.body1.setAsleep(false);
-				this.body2.setAsleep(false);
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
 			}
 			// set the new target distance
 			this.upperLimit = upperLimit;
@@ -422,8 +423,8 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 	public void setUpperLimitEnabled(boolean flag) {
 		if (this.upperLimitEnabled != flag) {
 			// wake up both bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
+			this.body1.setAtRest(false);
+			this.body2.setAtRest(false);
 			// set the flag
 			this.upperLimitEnabled = flag;
 		}
@@ -460,8 +461,8 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 			// make sure its changed and enabled before waking the bodies
 			if (this.lowerLimitEnabled) {
 				// wake up both bodies
-				this.body1.setAsleep(false);
-				this.body2.setAsleep(false);
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
 			}
 			// set the new target distance
 			this.lowerLimit = lowerLimit;
@@ -475,8 +476,8 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 	public void setLowerLimitEnabled(boolean flag) {
 		if (this.lowerLimitEnabled != flag) {
 			// wake up both bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
+			this.body1.setAtRest(false);
+			this.body2.setAtRest(false);
 			// set the flag
 			this.lowerLimitEnabled = flag;
 		}
@@ -508,8 +509,8 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 			// make sure one of the limits is enabled and has changed before waking the bodies
 			if (this.lowerLimitEnabled || this.upperLimitEnabled) {
 				// wake up the bodies
-				this.body1.setAsleep(false);
-				this.body2.setAsleep(false);
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
 			}
 			// set the limits
 			this.upperLimit = upperLimit;
@@ -540,8 +541,8 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 			this.upperLimitEnabled = flag;
 			this.lowerLimitEnabled = flag;
 			// wake up the bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
+			this.body1.setAtRest(false);
+			this.body2.setAtRest(false);
 		}
 	}
 	
@@ -561,8 +562,8 @@ public class RopeJoint extends Joint implements Shiftable, DataContainer {
 			// make sure one of the limits is enabled and has changed before waking the bodies
 			if (this.lowerLimitEnabled || this.upperLimitEnabled) {
 				// wake up the bodies
-				this.body1.setAsleep(false);
-				this.body2.setAsleep(false);
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
 			}
 			// set the limits
 			this.upperLimit = limit;

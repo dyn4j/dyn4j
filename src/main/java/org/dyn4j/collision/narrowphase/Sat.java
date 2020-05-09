@@ -174,7 +174,8 @@ public class Sat implements NarrowphaseDetector {
 		}
 		
 		// fill the penetration object
-		penetration.normal = n;
+		penetration.normal.x = n.x;
+		penetration.normal.y = n.y;
 		penetration.depth = overlap;
 		// return true
         return true;

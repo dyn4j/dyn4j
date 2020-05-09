@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,24 +26,25 @@ package org.dyn4j.dynamics.contact;
 
 import java.util.List;
 
-import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
-import org.dyn4j.dynamics.Step;
+import org.dyn4j.dynamics.TimeStep;
 
 /**
- * Represents an impulse/velocity based rigid {@link Body} physics collision resolver.
+ * Represents an impulse/velocity based rigid {@link PhysicsBody} collision resolver.
  * @author William Bittle
- * @version 3.2.0
+ * @version 4.0.0
  * @since 3.2.0
+ * @param <T> the {@link PhysicsBody} type
  */
-public interface ContactConstraintSolver {
+public interface ContactConstraintSolver<T extends PhysicsBody> {
 	/**
 	 * Performs initialization of the contact constraints.
 	 * @param contactConstraints the contact constraints to solve
 	 * @param step the time step information
 	 * @param settings the current settings
 	 */
-	public void initialize(List<ContactConstraint> contactConstraints, Step step, Settings settings);
+	public void initialize(List<ContactConstraint<T>> contactConstraints, TimeStep step, Settings settings);
 	
 	/**
 	 * Solves the {@link ContactConstraint}s on the velocity level.
@@ -51,7 +52,7 @@ public interface ContactConstraintSolver {
 	 * @param step the time step information
 	 * @param settings the current settings
 	 */
-	public void solveVelocityContraints(List<ContactConstraint> contactConstraints, Step step, Settings settings);
+	public void solveVelocityContraints(List<ContactConstraint<T>> contactConstraints, TimeStep step, Settings settings);
 	
 	/**
 	 * Solves the {@link ContactConstraint}s on the position level.
@@ -60,5 +61,5 @@ public interface ContactConstraintSolver {
 	 * @param settings the current settings
 	 * @return boolean true if the constraints have been solved
 	 */
-	public boolean solvePositionContraints(List<ContactConstraint> contactConstraints, Step step, Settings settings);
+	public boolean solvePositionContraints(List<ContactConstraint<T>> contactConstraints, TimeStep step, Settings settings);
 }

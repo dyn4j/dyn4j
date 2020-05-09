@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,9 +26,9 @@ package org.dyn4j.dynamics.joint;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
-import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
-import org.dyn4j.dynamics.Step;
+import org.dyn4j.dynamics.TimeStep;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Matrix22;
@@ -50,18 +50,19 @@ import org.dyn4j.resources.Messages;
  * is stopped.  These values are defaulted to 10 and 0.25 respectively.
  * <p>
  * NOTE: In versions 3.4.0 and below, the maximum force and torque values were 0 by default.
- * This was changed in 3.4.1 to allow users to better understand the use of this joint
+ * This was changed in 4.0.0 to allow users to better understand the use of this joint
  * when first using it.
  * @author William Bittle
- * @version 3.4.1
+ * @version 4.0.0
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Friction_Joint" target="_blank">Documentation</a>
+ * @param <T> the {@link PhysicsBody} type
  */
-public class FrictionJoint extends Joint implements Shiftable, DataContainer {
-	/** The local anchor point on the first {@link Body} */
+public class FrictionJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
+	/** The local anchor point on the first {@link PhysicsBody} */
 	protected Vector2 localAnchor1;
 	
-	/** The local anchor point on the second {@link Body} */
+	/** The local anchor point on the second {@link PhysicsBody} */
 	protected Vector2 localAnchor2;
 	
 	/** The maximum force the constraint can apply */
@@ -88,13 +89,13 @@ public class FrictionJoint extends Joint implements Shiftable, DataContainer {
 	
 	/**
 	 * Minimal constructor.
-	 * @param body1 the first {@link Body}
-	 * @param body2 the second {@link Body}
+	 * @param body1 the first {@link PhysicsBody}
+	 * @param body2 the second {@link PhysicsBody}
 	 * @param anchor the anchor point in world coordinates
 	 * @throws NullPointerException if body1, body2, or anchor is null
 	 * @throws IllegalArgumentException if body1 == body2
 	 */
-	public FrictionJoint(Body body1, Body body2, Vector2 anchor) {
+	public FrictionJoint(T body1, T body2, Vector2 anchor) {
 		// default no collision allowed
 		super(body1, body2, false);
 		// verify the bodies are not the same instance
@@ -130,10 +131,10 @@ public class FrictionJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void initializeConstraints(Step step, Settings settings) {
+	public void initializeConstraints(TimeStep step, Settings settings) {
 		Transform t1 = this.body1.getTransform();
 		Transform t2 = this.body2.getTransform();
 		
@@ -172,10 +173,10 @@ public class FrictionJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void solveVelocityConstraints(Step step, Settings settings) {
+	public void solveVelocityConstraints(TimeStep step, Settings settings) {
 		Transform t1 = this.body1.getTransform();
 		Transform t2 = this.body2.getTransform();
 		
@@ -235,7 +236,7 @@ public class FrictionJoint extends Joint implements Shiftable, DataContainer {
 	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public boolean solvePositionConstraints(Step step, Settings settings) {
+	public boolean solvePositionConstraints(TimeStep step, Settings settings) {
 		// nothing to do here for this joint
 		return true;
 	}

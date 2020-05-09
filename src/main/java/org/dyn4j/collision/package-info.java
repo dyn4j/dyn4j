@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,13 +32,14 @@
  * conservative, algorithm is used to detect possible collision pairs.  This process is
  * called the broad-phase.  Next, after obtaining all the possible collision pairs, each
  * pair is tested using an accurate algorithm.  This is called the narrow-phase.  After
- * the narrow-phase is complete, another phase, Manifold generation, generates the contact points.
+ * the narrow-phase is complete, another phase, Manifold generation, generates the contact 
+ * points.
  * <p>
  * <b>Broad-phase</b>
  * <p>
  * The {@link org.dyn4j.collision.broadphase.BroadphaseDetector}s will determine whether 
  * two {@link org.dyn4j.geometry.Convex} {@link org.dyn4j.geometry.Shape}s can possibly 
- * penetrate, returning only valid {@link org.dyn4j.collision.broadphase.BroadphasePair}s, which 
+ * penetrate, returning only valid {@link org.dyn4j.collision.CollisionPair}s, which 
  * should then be sent to a {@link org.dyn4j.collision.narrowphase.NarrowphaseDetector}.
  * <p>
  * <b>Narrow-phase</b>
@@ -47,7 +48,7 @@
  * {@link org.dyn4j.geometry.Convex} {@link org.dyn4j.geometry.Shape}s penetrate and 
  * return a {@link org.dyn4j.collision.narrowphase.Penetration}.
  * <p>
- * A {@link org.dyn4j.collision.narrowphase.Penetration} object represents the minimum distance 
+ * The {@link org.dyn4j.collision.narrowphase.Penetration} object represents the minimum distance 
  * along some vector required to push the {@link org.dyn4j.geometry.Shape}s out of the penetration.
  * <p>
  * The narrow-phase also contains classes for supporting multiple detectors at once via the
@@ -67,29 +68,33 @@
  * A collision {@link org.dyn4j.collision.manifold.Manifold} represents the collision point(s) between 
  * the two {@link org.dyn4j.geometry.Convex} {@link org.dyn4j.geometry.Shape}s.
  * <p>
- * <b>CCD and Raycasting</b>
+ * <b>Continuous Collision Detection (CCD) and Raycasting</b>
  * <p>
- * Outside of what's called discrete collision detection, there's continuous collision detection.
- * This is the process of detecting (would be) missed collisions in the discrete process since it's only
- * checking for collisions at instants in time.  These detectors implement the {@link org.dyn4j.collision.continuous.TimeOfImpactDetector}
+ * The process outlined above is called discrete collision detection. Outside of this process, there's 
+ * continuous collision detection and raycasting.
+ * <p>
+ * Continuous collision detection (CCD) is the process
+ * of detecting missed collisions that the discrete process couldn't detect. The discrete process fails
+ * to detect some collisions due to it being run on a set interval - if a sufficiently small object is going
+ * fast enough, for example.  CCD detectors implement the {@link org.dyn4j.collision.continuous.TimeOfImpactDetector}
  * interface and return a {@link org.dyn4j.collision.continuous.TimeOfImpact} object when a collision is
  * detected.
  * <p>
- * This package also supports raycasting for both the broad and narrow phases.  These detectors implement
- * the {@link org.dyn4j.collision.narrowphase.RaycastDetector} interface and return {@link org.dyn4j.collision.narrowphase.Raycast}
- * objects when a ray hits a {@link org.dyn4j.collision.Fixture}.
+ * This package also supports raycasting for both the broad and narrow phases. These detectors implement
+ * the {@link org.dyn4j.collision.narrowphase.RaycastDetector} interface and return 
+ * {@link org.dyn4j.collision.narrowphase.Raycast} objects when a ray hits a {@link org.dyn4j.collision.Fixture}.
  * <p>
  * The following is a list of implementations of the above interfaces:
  * <ul>
  * <li>{@link org.dyn4j.collision.broadphase.BroadphaseDetector}s
  * 	<ul>
- *	<li>{@link org.dyn4j.collision.broadphase.Sap}</li>
- * 	<li>{@link org.dyn4j.collision.broadphase.DynamicAABBTree}</li>
+ *  <li>{@link org.dyn4j.collision.broadphase.DynamicAABBTree} [DEFAULT]</li>	
+ *  <li>{@link org.dyn4j.collision.broadphase.Sap}</li>
  * 	</ul>
  * </li>
  * <li>{@link org.dyn4j.collision.narrowphase.NarrowphaseDetector}
  * 	<ul>
- * 	<li>{@link org.dyn4j.collision.narrowphase.Gjk}</li>
+ * 	<li>{@link org.dyn4j.collision.narrowphase.Gjk} [DEFAULT]</li>
  * 	<li>{@link org.dyn4j.collision.narrowphase.Sat}</li>
  * 	</ul>
  * </li>
@@ -110,7 +115,7 @@
  * </li>
  * </ul>
  * @author William Bittle
- * @version 3.2.0
+ * @version 4.0.0
  * @since 1.0.0
  */
 package org.dyn4j.collision;

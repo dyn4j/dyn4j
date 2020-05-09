@@ -24,87 +24,83 @@
  */
 package org.dyn4j.dynamics;
 
-import junit.framework.TestCase;
-
 import org.dyn4j.dynamics.joint.PinJoint;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
-import org.junit.Before;
 import org.junit.Test;
+
+import junit.framework.TestCase;
 
 /**
  * Used to test the {@link PinJoint} class.
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.4.1
  * @since 1.0.2
  */
-public class PinJointTest {
-	/** The body used for testing */
-	private Body b;
-	
-	/**
-	 * Sets up the test.
-	 */
-	@Before
-	public void setup() {
-		this.b = new Body();
-	}
-	
+public class PinJointTest extends AbstractJointTest {
 	/**
 	 * Tests the successful creation case.
 	 */
 	@Test
 	public void createSuccess() {
-		new PinJoint(b, new Vector2(), 4.0, 0.4, 10.0);
+		new PinJoint(b1, new Vector2(), 4.0, 0.4, 10.0);
+	}
+	
+	/**
+	 * Tests the create method passing a null body.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createWithNullBody() {
+		new PinJoint(null, new Vector2(), 4.0, 0.4, 10.0);
 	}
 	
 	/**
 	 * Tests the create method passing a null target point.
 	 */
 	@Test(expected = NullPointerException.class)
-	public void createNullTarget() {
-		new PinJoint(b, null, 4.0, 0.4, 10.0);
+	public void createWithNullTarget() {
+		new PinJoint(b1, null, 4.0, 0.4, 10.0);
 	}
 	
 	/**
 	 * Tests the create method passing a zero frequency.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void createZeroFrequency() {
-		new PinJoint(b, new Vector2(), 0.0, 0.4, 10.0);
+	public void createWithZeroFrequency() {
+		new PinJoint(b1, new Vector2(), 0.0, 0.4, 10.0);
 	}
 	
 	/**
 	 * Tests the create method passing a negative frequency.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void createNegativeFrequency() {
-		new PinJoint(b, new Vector2(), -2.0, 0.4, 10.0);
+	public void createWithNegativeFrequency() {
+		new PinJoint(b1, new Vector2(), -2.0, 0.4, 10.0);
 	}
 	
 	/**
 	 * Tests the create method passing a damping ratio greater than 1.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void createGreaterThan1DampingRatio() {
-		new PinJoint(b, new Vector2(), 4.0, 1.0001, 10.0);
+	public void createWithGreaterThan1DampingRatio() {
+		new PinJoint(b1, new Vector2(), 4.0, 1.0001, 10.0);
 	}
 	
 	/**
 	 * Tests the create method passing a negative damping ratio.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void createNegativeDampingRatio() {
-		new PinJoint(b, new Vector2(), 4.0, -0.4, 10.0);
+	public void createWithNegativeDampingRatio() {
+		new PinJoint(b1, new Vector2(), 4.0, -0.4, 10.0);
 	}
 	
 	/**
 	 * Tests the create method passing a negative damping ratio.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void createNegativeMaxForce() {
-		new PinJoint(b, new Vector2(), 4.0, 0.4, -10.0);
+	public void createWithNegativeMaximumForce() {
+		new PinJoint(b1, new Vector2(), 4.0, 0.4, -10.0);
 	}
 	
 	/**
@@ -112,9 +108,15 @@ public class PinJointTest {
 	 */
 	@Test
 	public void setTarget() {
-		PinJoint mj = new PinJoint(b, new Vector2(), 4.0, 0.4, 10.0);
-		mj.setTarget(new Vector2());
-		mj.setTarget(new Vector2(2.0, 1.032));
+		PinJoint pj = new PinJoint(b1, new Vector2(), 4.0, 0.4, 10.0);
+		
+		Vector2 v1 = new Vector2();
+		pj.setTarget(v1);
+		TestCase.assertTrue(v1.equals(pj.getTarget()));
+		
+		Vector2 v2 = new Vector2(2.0, 1.032);
+		pj.setTarget(v2);
+		TestCase.assertTrue(v2.equals(pj.getTarget()));
 	}
 	
 	/**
@@ -122,39 +124,50 @@ public class PinJointTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void setNullTarget() {
-		PinJoint mj = new PinJoint(b, new Vector2(), 4.0, 0.4, 10.0);
-		mj.setTarget(null);
+		PinJoint pj = new PinJoint(b1, new Vector2(), 4.0, 0.4, 10.0);
+		pj.setTarget(null);
 	}
 	
 	/**
 	 * Tests valid maximum force values.
 	 */
 	@Test
-	public void setMaxForce() {
-		PinJoint mj = new PinJoint(b, new Vector2(), 4.0, 0.4, 10.0);
-		mj.setMaximumForce(0.0);
-		mj.setMaximumForce(10.0);
-		mj.setMaximumForce(2548.0);
+	public void setMaximumForce() {
+		PinJoint pj = new PinJoint(b1, new Vector2(), 4.0, 0.4, 10.0);
+		
+		pj.setMaximumForce(0.0);
+		TestCase.assertEquals(0.0, pj.getMaximumForce());
+		
+		pj.setMaximumForce(10.0);
+		TestCase.assertEquals(10.0, pj.getMaximumForce());
+		
+		pj.setMaximumForce(2548.0);
+		TestCase.assertEquals(2548.0, pj.getMaximumForce());
 	}
 	
 	/**
 	 * Tests a negative maximum force value.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void setNegativeMaxForce() {
-		PinJoint mj = new PinJoint(b, new Vector2(), 4.0, 0.4, 10.0);
-		mj.setMaximumForce(-2.0);
+	public void setNegativeMaximumForce() {
+		PinJoint pj = new PinJoint(b1, new Vector2(), 4.0, 0.4, 10.0);
+		pj.setMaximumForce(-2.0);
 	}
-	
+
 	/**
 	 * Tests valid damping ratio values.
 	 */
 	@Test
 	public void setDampingRatio() {
-		PinJoint mj = new PinJoint(b, new Vector2(), 4.0, 0.4, 10.0);
-		mj.setDampingRatio(0.0);
-		mj.setDampingRatio(1.0);
-		mj.setDampingRatio(0.2);
+		PinJoint pj = new PinJoint(b1, new Vector2(), 4.0, 0.4, 10.0);
+		pj.setDampingRatio(0.0);
+		TestCase.assertEquals(0.0, pj.getDampingRatio());
+		
+		pj.setDampingRatio(1.0);
+		TestCase.assertEquals(1.0, pj.getDampingRatio());
+		
+		pj.setDampingRatio(0.2);
+		TestCase.assertEquals(0.2, pj.getDampingRatio());
 	}
 	
 	/**
@@ -162,17 +175,17 @@ public class PinJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setNegativeDampingRatio() {
-		PinJoint mj = new PinJoint(b, new Vector2(), 4.0, 0.4, 10.0);
-		mj.setDampingRatio(-1.0);
+		PinJoint pj = new PinJoint(b1, new Vector2(), 4.0, 0.4, 10.0);
+		pj.setDampingRatio(-1.0);
 	}
 	
 	/**
 	 * Tests a greater than one damping ratio value.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void setGreaterThan1DampingRatio() {
-		PinJoint mj = new PinJoint(b, new Vector2(), 4.0, 0.4, 10.0);
-		mj.setDampingRatio(2.0);
+	public void setDampingRatioGreaterThan1() {
+		PinJoint pj = new PinJoint(b1, new Vector2(), 4.0, 0.4, 10.0);
+		pj.setDampingRatio(2.0);
 	}
 	
 	/**
@@ -180,9 +193,16 @@ public class PinJointTest {
 	 */
 	@Test
 	public void setFrequency() {
-		PinJoint mj = new PinJoint(b, new Vector2(), 4.0, 0.4, 10.0);
-		mj.setFrequency(1.0);
-		mj.setFrequency(29.0);
+		PinJoint pj = new PinJoint(b1, new Vector2(), 4.0, 0.4, 10.0);
+		
+		pj.setFrequency(0.1);
+		TestCase.assertEquals(0.1, pj.getFrequency());
+		
+		pj.setFrequency(1.0);
+		TestCase.assertEquals(1.0, pj.getFrequency());
+		
+		pj.setFrequency(29.0);
+		TestCase.assertEquals(29.0, pj.getFrequency());
 	}
 	
 	/**
@@ -190,17 +210,17 @@ public class PinJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setNegativeFrequency() {
-		PinJoint mj = new PinJoint(b, new Vector2(), 4.0, 0.4, 10.0);
-		mj.setFrequency(-0.3);
+		PinJoint pj = new PinJoint(b1, new Vector2(), 4.0, 0.4, 10.0);
+		pj.setFrequency(-0.3);
 	}
-	
+
 	/**
 	 * Tests a zero frequency value.
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setZeroFrequency() {
-		PinJoint mj = new PinJoint(b, new Vector2(), 4.0, 0.4, 10.0);
-		mj.setFrequency(0.0);
+		PinJoint pj = new PinJoint(b1, new Vector2(), 4.0, 0.4, 10.0);
+		pj.setFrequency(0.0);
 	}
 
 	/**
@@ -210,14 +230,14 @@ public class PinJointTest {
 	@Test
 	public void shiftCoordinates() {
 		World w = new World();
-		PinJoint mj = new PinJoint(b, new Vector2(), 4.0, 0.4, 10.0);
-		mj.setTarget(new Vector2(1.0, -1.0));
+		PinJoint pj = new PinJoint(b1, new Vector2(), 4.0, 0.4, 10.0);
+		pj.setTarget(new Vector2(1.0, -1.0));
 		
-		w.addJoint(mj);
+		w.addJoint(pj);
 		w.shift(new Vector2(-1.0, 2.0));
 		
-		TestCase.assertEquals(0.0, mj.getTarget().x, 1.0e-3);
-		TestCase.assertEquals(1.0, mj.getTarget().y, 1.0e-3);
+		TestCase.assertEquals(0.0, pj.getTarget().x, 1.0e-3);
+		TestCase.assertEquals(1.0, pj.getTarget().y, 1.0e-3);
 	}
 	
 	/**
@@ -234,15 +254,48 @@ public class PinJointTest {
 		body.setMass(MassType.FIXED_LINEAR_VELOCITY);
 		w.addBody(body);
 		
-		PinJoint mj = new PinJoint(body, new Vector2(0.5, 0.0), 8.0, 0.3, 1000.0);
-		w.addJoint(mj);
+		PinJoint pj = new PinJoint(body, new Vector2(0.5, 0.0), 8.0, 0.3, 1000.0);
+		w.addJoint(pj);
 		
-		mj.setTarget(new Vector2(0.7, -0.5));
+		pj.setTarget(new Vector2(0.7, -0.5));
 		
 		w.step(1);
 		
-		TestCase.assertTrue(mj.getReactionForce(w.step.invdt).getMagnitude() > 0);
-		TestCase.assertTrue(mj.getReactionForce(w.step.invdt).getMagnitude() <= 1000.0);
+		TestCase.assertTrue(pj.getReactionForce(w.step.invdt).getMagnitude() > 0);
+		TestCase.assertTrue(pj.getReactionForce(w.step.invdt).getMagnitude() <= 1000.0);
 		TestCase.assertTrue(body.getTransform().getRotationAngle() < 0);
+	}
+
+	/**
+	 * Tests the body's sleep state when changing the target.
+	 */
+	@Test
+	public void setTargetSleep() {
+		PinJoint pj = new PinJoint(b1, new Vector2(), 4.0, 0.4, 10.0);
+		
+		Vector2 defaultTarget = pj.getTarget();
+		
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertTrue(defaultTarget.equals(pj.getTarget()));
+		
+		b1.setAsleep(true);
+		
+		// set the target to the same value
+		pj.setTarget(defaultTarget);
+		TestCase.assertTrue(b1.isAsleep());
+		TestCase.assertTrue(defaultTarget.equals(pj.getTarget()));
+		
+		// set the target to a different value and make
+		// sure the bodies are awakened
+		Vector2 target = new Vector2(1.0, 1.0);
+		pj.setTarget(target);
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertTrue(target.equals(pj.getTarget()));
+		
+		// set the target to the same value
+		b1.setAsleep(true);
+		pj.setTarget(target);
+		TestCase.assertTrue(b1.isAsleep());
+		TestCase.assertTrue(target.equals(pj.getTarget()));
 	}
 }

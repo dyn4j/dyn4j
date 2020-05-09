@@ -75,7 +75,9 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 			PointFeature vertex = (PointFeature) feature1;
 			ManifoldPoint mp = new ManifoldPoint(ManifoldPointId.DISTANCE, vertex.getPoint(), penetration.getDepth());
 			manifold.points.add(mp);
-			manifold.normal = n.getNegative();
+			manifold.normal.x = -n.x;
+			manifold.normal.y = -n.y;
+			//= n.getNegative();
 			return true;
 		}
 		
@@ -87,7 +89,9 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 			PointFeature vertex = (PointFeature) feature2;
 			ManifoldPoint mp = new ManifoldPoint(ManifoldPointId.DISTANCE, vertex.getPoint(), penetration.getDepth());
 			manifold.points.add(mp);
-			manifold.normal = ne;
+//			manifold.normal = ne;
+			manifold.normal.x = ne.x;
+			manifold.normal.y = ne.y;
 			return true;
 		}
 		
@@ -142,7 +146,9 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 		double frontOffset = frontNormal.dot(reference.getMaximum().getPoint());
 		
 		// set the normal
-		manifold.normal = flipped ? frontNormal.getNegative() : frontNormal;
+//		manifold.normal = flipped ? frontNormal.getNegative() : frontNormal;
+		manifold.normal.x = flipped ? -frontNormal.x : frontNormal.x;
+		manifold.normal.y = flipped ? -frontNormal.y : frontNormal.y;
 		
 		// test if the clip points are behind the reference edge
 		for (int i = 0; i < clip2.size(); i++) {

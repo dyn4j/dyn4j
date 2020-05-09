@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,9 +26,9 @@ package org.dyn4j.dynamics.joint;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
-import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
-import org.dyn4j.dynamics.Step;
+import org.dyn4j.dynamics.TimeStep;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
@@ -74,16 +74,17 @@ import org.dyn4j.resources.Messages;
  * clockwise or counter-clockwise rotation.  The maximum motor torque must be 
  * greater than zero for the motor to apply any motion.
  * @author William Bittle
- * @version 3.4.1
+ * @version 4.0.0
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Revolute_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/07/point-to-point-constraint/" target="_blank">Point-to-Point Constraint</a>
+ * @param <T> the {@link PhysicsBody} type
  */
-public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
-	/** The local anchor point on the first {@link Body} */
+public class RevoluteJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
+	/** The local anchor point on the first {@link PhysicsBody} */
 	protected Vector2 localAnchor1;
 	
-	/** The local anchor point on the second {@link Body} */
+	/** The local anchor point on the second {@link PhysicsBody} */
 	protected Vector2 localAnchor2;
 	
 	/** Whether the motor for this {@link Joint} is enabled or not */
@@ -104,7 +105,7 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 	/** The lower limit of the {@link Joint} */
 	protected double lowerLimit;
 	
-	/** The initial angle between the two {@link Body}s */
+	/** The initial angle between the two {@link PhysicsBody}s */
 	protected double referenceAngle;
 	
 	// current state
@@ -128,13 +129,13 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 	
 	/**
 	 * Minimal constructor.
-	 * @param body1 the first {@link Body}
-	 * @param body2 the second {@link Body}
+	 * @param body1 the first {@link PhysicsBody}
+	 * @param body2 the second {@link PhysicsBody}
 	 * @param anchor the anchor point in world coordinates
 	 * @throws NullPointerException if body1, body2 or anchor is null
 	 * @throws IllegalArgumentException if body1 == body2
 	 */
-	public RevoluteJoint(Body body1, Body body2, Vector2 anchor) {
+	public RevoluteJoint(T body1, T body2, Vector2 anchor) {
 		// default to no collision allowed between the bodies
 		super(body1, body2, false);
 		// verify the bodies are not the same instance
@@ -179,10 +180,10 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void initializeConstraints(Step step, Settings settings) {
+	public void initializeConstraints(TimeStep step, Settings settings) {
 		double angularTolerance = settings.getAngularTolerance();
 		
 		Transform t1 = this.body1.getTransform();
@@ -277,10 +278,10 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void solveVelocityConstraints(Step step, Settings settings) {
+	public void solveVelocityConstraints(TimeStep step, Settings settings) {
 		Transform t1 = this.body1.getTransform();
 		Transform t2 = this.body2.getTransform();
 		
@@ -380,10 +381,10 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public boolean solvePositionConstraints(Step step, Settings settings) {
+	public boolean solvePositionConstraints(TimeStep step, Settings settings) {
 		double linearTolerance = settings.getLinearTolerance();
 		double angularTolerance = settings.getAngularTolerance();
 		double maxAngularCorrection = settings.getMaximumAngularCorrection();
@@ -540,7 +541,7 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Returns the relative speed at which the {@link Body}s
+	 * Returns the relative speed at which the {@link PhysicsBody}s
 	 * are rotating in radians/second.
 	 * @return double
 	 */
@@ -549,7 +550,7 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Returns the relative angle between the two {@link Body}s in radians in the range [-&pi;, &pi;].
+	 * Returns the relative angle between the two {@link PhysicsBody}s in radians in the range [-&pi;, &pi;].
 	 * @return double
 	 */
 	public double getJointAngle() {
@@ -571,8 +572,8 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 	public void setMotorEnabled(boolean flag) {
 		if (this.motorEnabled != flag) {
 			// wake up the associated bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
+			this.body1.setAtRest(false);
+			this.body2.setAtRest(false);
 			// set the flag
 			this.motorEnabled = flag;
 		}
@@ -597,8 +598,8 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 		if (maximumMotorTorque < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidMaximumMotorTorque"));
 		if (this.maximumMotorTorque != maximumMotorTorque) {
 			if (this.motorEnabled) {
-				this.body1.setAsleep(false);
-				this.body2.setAsleep(false);
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
 			}
 			this.maximumMotorTorque = maximumMotorTorque;
 		}
@@ -622,8 +623,8 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 			// only wake the bodies if the motor is enabled
 			if (this.motorEnabled) {
 				// if so, then wake up the bodies
-				this.body1.setAsleep(false);
-				this.body2.setAsleep(false);
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
 			}
 			// set the motor speed
 			this.motorSpeed = motorSpeed;
@@ -654,8 +655,8 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 		// check if its changing
 		if (this.limitEnabled != flag) {
 			// wake up both bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
+			this.body1.setAtRest(false);
+			this.body2.setAtRest(false);
 			// set the new value
 			this.limitEnabled = flag;
 			// clear the accumulated limit impulse
@@ -686,8 +687,8 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 			// only wake the bodies if the motor is enabled and the limit has changed
 			if (this.limitEnabled) {
 				// wake up the bodies
-				this.body1.setAsleep(false);
-				this.body2.setAsleep(false);
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
 			}
 			// set the new value
 			this.upperLimit = upperLimit;
@@ -717,8 +718,8 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 			// only wake the bodies if the motor is enabled and the limit has changed
 			if (this.limitEnabled) {
 				// wake up the bodies
-				this.body1.setAsleep(false);
-				this.body2.setAsleep(false);
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
 			}
 			// set the new value
 			this.lowerLimit = lowerLimit;
@@ -741,8 +742,8 @@ public class RevoluteJoint extends Joint implements Shiftable, DataContainer {
 			// only wake the bodies if the motor is enabled and one of the limits has changed
 			if (this.limitEnabled) {
 				// wake up the bodies
-				this.body1.setAsleep(false);
-				this.body2.setAsleep(false);
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
 			}
 			// set the values
 			this.lowerLimit = lowerLimit;

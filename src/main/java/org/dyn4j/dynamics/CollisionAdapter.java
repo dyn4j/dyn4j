@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -37,9 +37,11 @@ import org.dyn4j.dynamics.contact.ContactConstraint;
  * <p>
  * By default this class allows processing to continue for all collision events.
  * @author William Bittle
- * @version 3.2.0
+ * @version 4.0.0
  * @since 1.0.0
+ * @deprecated Deprecated in 4.0.0. Use the CollisionListenerAdapter in the world package instead.
  */
+@Deprecated
 public class CollisionAdapter implements CollisionListener, Listener {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.CollisionListener#collision(org.dyn4j.dynamics.Body, org.dyn4j.dynamics.BodyFixture, org.dyn4j.dynamics.Body, org.dyn4j.dynamics.BodyFixture)
@@ -62,6 +64,7 @@ public class CollisionAdapter implements CollisionListener, Listener {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.CollisionListener#collision(org.dyn4j.dynamics.contact.ContactConstraint)
 	 */
+	@SuppressWarnings("rawtypes")
 	@Override
 	public boolean collision(ContactConstraint contactConstraint) { return true; }
 }

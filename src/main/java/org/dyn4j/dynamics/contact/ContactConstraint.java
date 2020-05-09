@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -25,35 +25,52 @@
 package org.dyn4j.dynamics.contact;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import org.dyn4j.collision.CollisionBody;
+import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.collision.manifold.Manifold;
 import org.dyn4j.collision.manifold.ManifoldPoint;
+import org.dyn4j.collision.manifold.ManifoldPointId;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
-import org.dyn4j.dynamics.Constraint;
+import org.dyn4j.dynamics.PhysicsBody;
+import org.dyn4j.dynamics.Settings;
 import org.dyn4j.geometry.Matrix22;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Represents a {@link Contact} constraint for each {@link Body} pair.  
+ * Represents a {@link ContactConstraintContact} constraint for each {@link Body} pair.  
  * @author William Bittle
- * @version 3.2.5
+ * @version 4.0.0
  * @since 1.0.0
+ * @param <T> The {@link PhysicsBody} type
  */
-public class ContactConstraint extends Constraint implements Shiftable {
-	/** The unique contact id */
+public final class ContactConstraint<T extends PhysicsBody> implements Shiftable {
+	/** 
+	 * The unique contact id 
+	 * @deprecated Deprecated in 4.0.0.
+	 */
+	@Deprecated
 	protected final ContactConstraintId id;
+
+	/**
+	 * True if this joint is on an island.
+	 * @deprecated Deprecated in 4.0.0. No replacement needed.
+	 */
+	@Deprecated
+	boolean onIsland;
 	
-	/** The first {@link Body}'s {@link BodyFixture} */
-	protected final BodyFixture fixture1;
-	
-	/** The second {@link Body}'s {@link BodyFixture} */
-	protected final BodyFixture fixture2;
+	/** The collision pair */
+	protected final CollisionPair<T, BodyFixture> pair;
 	
 	/** The {@link Contact}s */
-	protected final List<Contact> contacts;
+	protected final List<ContactConstraintContact> contacts;
+	
+	/** An unmodifiable view of the {@link Contact}s */
+	protected final List<ContactConstraintContact> contactsUnmodifiable;
 	
 	/** The penetration normal */
 	protected Vector2 normal;
@@ -76,6 +93,8 @@ public class ContactConstraint extends Constraint implements Shiftable {
 	/** True if the contact should be evaluated */
 	protected boolean enabled;
 	
+	// TODO can we reuse these?
+	
 	/** The K matrix for block solving a contact pair */
 	Matrix22 K;
 	
@@ -84,37 +103,35 @@ public class ContactConstraint extends Constraint implements Shiftable {
 	
 	/**
 	 * Full constructor.
-	 * @param body1 the first {@link Body}
-	 * @param fixture1 the first {@link Body}'s {@link BodyFixture}
-	 * @param body2 the second {@link Body}
-	 * @param fixture2 the second {@link Body}'s {@link BodyFixture}
+	 * @param pair the pair
 	 * @param manifold the contact {@link Manifold}
 	 * @param friction the friction for the contact constraint
 	 * @param restitution the restitution for the contact constraint
 	 */
-	public ContactConstraint(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2, Manifold manifold, double friction, double restitution) {
-		super(body1, body2);
-		// set the involved convex shapes
-		this.fixture1 = fixture1;
-		this.fixture2 = fixture2;
+	@Deprecated
+	public ContactConstraint(CollisionPair<T, BodyFixture> pair, Manifold manifold, double friction, double restitution) {
+		// set the pair
+		this.pair = pair;
 		// create the constraint id
-		this.id = new ContactConstraintId(body1, fixture1, body2, fixture2);
+		this.id = new ContactConstraintId(pair.getBody1(), pair.getFixture1(), pair.getBody2(), pair.getFixture2());
+		this.onIsland = false;
 		// get the manifold points
 		List<ManifoldPoint> points = manifold.getPoints();
 		// get the manifold point size
 		int mSize = points.size();
 		// create contact array
-		this.contacts = new ArrayList<Contact>(mSize);
+		this.contacts = new ArrayList<ContactConstraintContact>(mSize);
+		this.contactsUnmodifiable = Collections.unmodifiableList(this.contacts);
 		// create contacts for each point
 		for (int l = 0; l < mSize; l++) {
 			// get the manifold point
 			ManifoldPoint point = points.get(l);
 			// create a contact from the manifold point
-			Contact contact = new Contact(point.getId(),
-					                      point.getPoint(), 
-					                      point.getDepth(), 
-					                      this.body1.getLocalPoint(point.getPoint()), 
-					                      this.body2.getLocalPoint(point.getPoint()));
+			ContactConstraintContact contact = new ContactConstraintContact(point.getId(),
+	              point.getPoint(), 
+	              point.getDepth(), 
+	              pair.getBody1().getLocalPoint(point.getPoint()), 
+	              pair.getBody2().getLocalPoint(point.getPoint()));
 			// add the contact to the array
 			this.contacts.add(contact);
 		}
@@ -127,8 +144,124 @@ public class ContactConstraint extends Constraint implements Shiftable {
 		this.restitution = restitution;
 		// set the sensor flag (if either fixture is a sensor then the
 		// contact constraint between the fixtures is a sensor)
-		this.sensor = fixture1.isSensor() || fixture2.isSensor();
+		this.sensor = pair.getFixture1().isSensor() || pair.getFixture2().isSensor();
 		// by default the tangent speed is zero
+		this.tangentSpeed = 0;
+		this.enabled = true;
+	}
+	
+	/**
+	 * Full constructor.
+	 * @param pair the pair
+	 */
+	@SuppressWarnings("deprecation")
+	public ContactConstraint(CollisionPair<T, BodyFixture> pair) {
+		// set the pair
+		this.pair = pair;
+		// create the constraint id
+		this.id = new ContactConstraintId(pair.getBody1(), pair.getFixture1(), pair.getBody2(), pair.getFixture2());
+		this.onIsland = false;
+		// create contact array
+		this.contacts = new ArrayList<ContactConstraintContact>(2);
+		this.contactsUnmodifiable = Collections.unmodifiableList(this.contacts);
+		// set the normal
+		this.normal = null;
+		// set the tangent
+		this.tangent = null;
+		// set coefficients
+		this.friction = 0.0;
+		this.restitution = 0.0;
+		// set the sensor flag (if either fixture is a sensor then the
+		// contact constraint between the fixtures is a sensor)
+		this.sensor = false;
+		// by default the tangent speed is zero
+		this.tangentSpeed = 0;
+		this.enabled = true;
+	}
+	
+	/**
+	 * Updates this {@link ContactConstraint} with the new {@link Manifold} information and reports
+	 * begin, persist, and end events to the handler.
+	 * @param manifold the new manifold
+	 * @param settings the settings
+	 * @param handler the handler
+	 */
+	public void update(Manifold manifold, Settings settings, ContactUpdateHandler handler) {
+		double maxWarmStartDistanceSquared = settings.getMaximumWarmStartDistanceSquared();
+		boolean isWarmStartEnabled = settings.isWarmStartingEnabled();
+		
+		T body1 = this.pair.getBody1();
+		T body2 = this.pair.getBody2();
+		BodyFixture fixture1 = this.pair.getFixture1();
+		BodyFixture fixture2 = this.pair.getFixture2();
+		
+		List<ManifoldPoint> points = manifold.getPoints();
+		// get the manifold point size
+		int mSize = points.size();
+		// create contact array
+		List<ContactConstraintContact> contacts = new ArrayList<ContactConstraintContact>(mSize);
+		// create contacts for each point
+		for (int l = 0; l < mSize; l++) {
+			// get the manifold point
+			ManifoldPoint point = points.get(l);
+			// create a contact from the manifold point
+			ContactConstraintContact contact = new ContactConstraintContact(point.getId(),
+                  point.getPoint(), 
+                  point.getDepth(), 
+                  body1.getLocalPoint(point.getPoint()), 
+                  body2.getLocalPoint(point.getPoint()));
+			// add the contact to the array
+			contacts.add(contact);
+			
+			// find a matching contact
+			boolean found = false;
+			int cSize = this.contacts.size();
+			for (int j = cSize - 1; j >= 0; j--) {
+				ContactConstraintContact old = this.contacts.get(j);
+				if ((contact.id == ManifoldPointId.DISTANCE && contact.p.distanceSquared(old.p) <= maxWarmStartDistanceSquared) || contact.id.equals(old.id)) {
+					found = true;
+					// notify that this contact was persisted from
+					// an existing contact
+					handler.persist(contact, old);
+					
+					// only warm start if it's enabled
+					if (isWarmStartEnabled) {
+						// copy last time's data over
+						contact.jn = old.jn;
+						contact.jt = old.jt;
+					}
+					
+					// remove this contact from the current list
+					// so that only "end" contacts are left in the list
+					this.contacts.remove(old);
+					break;
+				}
+			}
+			
+			if (!found) {
+				// notify that this contact is new
+				handler.begin(contact);
+			}
+		}
+		
+		// notify of contacts that have "ended"
+		int cSize = this.contacts.size();
+		for (int j = cSize - 1; j >= 0; j--) {
+			ContactConstraintContact old = this.contacts.get(j);
+			handler.end(old);
+		}
+		
+		// clear all the old contacts and add
+		// the new ones
+		this.contacts.clear();
+		this.contacts.addAll(contacts);
+		
+		// reset all other data
+		this.normal = manifold.getNormal();
+		this.tangent = this.normal.getLeftHandOrthogonalVector();
+		this.friction = handler.getFriction(fixture1, fixture2);
+		this.restitution = handler.getRestitution(fixture1, fixture2);
+		this.sensor = fixture1.isSensor() || fixture2.isSensor();
 		this.tangentSpeed = 0;
 		this.enabled = true;
 	}
@@ -140,10 +273,10 @@ public class ContactConstraint extends Constraint implements Shiftable {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("ContactConstraint[").append(super.toString())
-		  .append("|Body1=").append(this.body1.hashCode())
-		  .append("|Fixture1=").append(this.fixture1.hashCode())
-		  .append("|Body2=").append(this.body2.hashCode())
-		  .append("|Fixture2=").append(this.fixture2.hashCode())
+		  .append("|Body1=").append(this.pair.getBody1().hashCode())
+		  .append("|Fixture1=").append(this.pair.getFixture1().hashCode())
+		  .append("|Body2=").append(this.pair.getBody2().hashCode())
+		  .append("|Fixture2=").append(this.pair.getFixture2().hashCode())
 		  .append("|Normal=").append(this.normal)
 		  .append("|Tangent=").append(this.tangent)
 		  .append("|Friction=").append(this.friction)
@@ -169,7 +302,7 @@ public class ContactConstraint extends Constraint implements Shiftable {
 		int size = this.contacts.size();
 		// loop over the contacts
 		for (int i = 0; i < size; i++) {
-			Contact c = this.contacts.get(i);
+			ContactConstraintContact c = this.contacts.get(i);
 			// translate the world space contact point
 			c.p.add(shift);
 			// c.p1 and c.p2 are in local coordinates
@@ -180,7 +313,9 @@ public class ContactConstraint extends Constraint implements Shiftable {
 	/**
 	 * Returns the contact constraint id.
 	 * @return {@link ContactConstraintId}
+	 * @deprecated Deprecated in 4.0.0. No replacement.
 	 */
+	@Deprecated
 	public ContactConstraintId getId() {
 		return this.id;
 	}
@@ -202,37 +337,46 @@ public class ContactConstraint extends Constraint implements Shiftable {
 	}
 	
 	/**
-	 * Returns the list of {@link Contact}s.
+	 * Returns the list of {@link ContactConstraintContact}s.
 	 * <p>
 	 * Modification of the list is permitted.
-	 * @return List&lt;{@link Contact}&gt; the list of {@link Contact}s
+	 * @return List&lt;{@link ContactConstraintContact}&gt; the list of {@link ContactConstraintContact}s
 	 */
-	public List<Contact> getContacts() {
-		return this.contacts;
+	public List<? extends SolvedContact> getContacts() {
+		return this.contactsUnmodifiable;
+	}
+	
+	/**
+	 * Returns the {@link CollisionPair}.
+	 * @return {@link CollisionPair}
+	 * @since 4.0.0
+	 */
+	public CollisionPair<T, BodyFixture> getCollisionPair() {
+		return this.pair;
 	}
 	
 	/**
 	 * Returns the first {@link Body}.
-	 * @return {@link Body} the first {@link Body}
+	 * @return {@link Body}
 	 */
-	public Body getBody1() {
-		return this.body1;
+	public T getBody1() {
+		return this.pair.getBody1();
 	}
 	
+	/**
+	 * Returns the second {@link Body}.
+	 * @return {@link Body}
+	 */
+	public T getBody2() {
+		return this.pair.getBody2();
+	}
+
 	/**
 	 * Returns the first {@link Body}'s {@link BodyFixture}.
 	 * @return {@link BodyFixture} the first {@link Body}'s {@link BodyFixture}
 	 */
 	public BodyFixture getFixture1() {
-		return this.fixture1;
-	}
-	
-	/**
-	 * Returns the second {@link Body}.
-	 * @return {@link Body} the second {@link Body}
-	 */
-	public Body getBody2() {
-		return this.body2;
+		return this.pair.getFixture1();
 	}
 	
 	/**
@@ -240,7 +384,51 @@ public class ContactConstraint extends Constraint implements Shiftable {
 	 * @return {@link BodyFixture} the second {@link Body}'s {@link BodyFixture}
 	 */
 	public BodyFixture getFixture2() {
-		return this.fixture2;
+		return this.pair.getFixture2();
+	}
+	
+	/**
+	 * Returns the body that matches the given body.
+	 * <p>
+	 * If the given body is neither body1 or body2, null is returned.
+	 * @param body the body
+	 * @return T
+	 */
+	public T getBody(CollisionBody<?> body) {
+		return this.pair.getBody(body);
+	}
+	
+	/**
+	 * Returns the fixture for the body that matches the given body.
+	 * <p>
+	 * If the given body is neither body1 or body2, null is returned.
+	 * @param body the body
+	 * @return E
+	 */
+	public BodyFixture getFixture(CollisionBody<?> body) {
+		return this.pair.getFixture(body);
+	}
+	
+	/**
+	 * Returns the body that does not match the given body.
+	 * <p>
+	 * If the given body is neither body1 or body2, null is returned.
+	 * @param body the body
+	 * @return T
+	 */
+	public T getOtherBody(CollisionBody<?> body) {
+		return this.pair.getOtherBody(body);
+	}
+	
+	/**
+	 * Returns the fixture for the body that does not match the given body.
+	 * <p>
+	 * If the given body is neither body1 or body2, null is returned.
+	 * @param body the body
+	 * @return E
+	 */
+	public BodyFixture getOtherFixture(CollisionBody<?> body) {
+		return this.pair.getOtherFixture(body);
 	}
 	
 	/**
@@ -351,5 +539,25 @@ public class ContactConstraint extends Constraint implements Shiftable {
 	 */
 	public boolean isEnabled() {
 		return this.enabled;
+	}
+
+	/**
+	 * Returns true if this contact constraint is on an island.
+	 * @return boolean
+	 * @deprecated Deprecated in 4.0.0. No replacement needed.
+	 */
+	@Deprecated
+	public boolean isOnIsland() {
+		return this.onIsland;
+	}
+	
+	/**
+	 * Flags this contact constraint as being on an island.
+	 * @param flag true if this contact constraint is on an island
+	 * @deprecated Deprecated in 4.0.0. No replacement needed.
+	 */
+	@Deprecated
+	public void setOnIsland(boolean flag) {
+		this.onIsland = flag;
 	}
 }

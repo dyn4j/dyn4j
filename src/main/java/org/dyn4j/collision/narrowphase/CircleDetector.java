@@ -71,8 +71,9 @@ public final class CircleDetector {
 		// check difference
 		if (mag < radii * radii) {
 			// then we have a collision
-			penetration.normal = v;
-			penetration.depth = radii - v.normalize();
+			penetration.normal.x = v.x;
+			penetration.normal.y = v.y;
+			penetration.depth = radii - penetration.normal.normalize();
 			return true;
 		}
 		return false;

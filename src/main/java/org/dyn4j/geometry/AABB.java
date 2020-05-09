@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2017 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,7 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.Copyable;
 import org.dyn4j.resources.Messages;
 
 /**
@@ -41,10 +42,10 @@ import org.dyn4j.resources.Messages;
  * <p>
  * The {@link #expand(double)} method can be used to expand the bounds of the {@link AABB} by some amount.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.0.0
  * @since 3.0.0
  */
-public class AABB implements Translatable {
+public class AABB implements Translatable, Copyable<AABB> {
 	/** The minimum extent along the x-axis */
 	protected double minX;
 	
@@ -166,10 +167,8 @@ public class AABB implements Translatable {
 		this.maxY = aabb.maxY;
 	}
 	
-	/**
-	 * Returns a copy of this {@link AABB}.
-	 * @return {@link AABB}
-	 * @since 3.4.0
+	/* (non-Javadoc)
+	 * @see org.dyn4j.Copyable#copy()
 	 */
 	public AABB copy() {
 		return new AABB(this);

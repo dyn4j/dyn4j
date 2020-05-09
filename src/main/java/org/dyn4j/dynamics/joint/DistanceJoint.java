@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,9 +26,9 @@ package org.dyn4j.dynamics.joint;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
-import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
-import org.dyn4j.dynamics.Step;
+import org.dyn4j.dynamics.TimeStep;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
@@ -41,7 +41,7 @@ import org.dyn4j.resources.Messages;
  * Implementation of a fixed length distance joint.
  * <p>
  * Given the two world space anchor points a distance is computed and used
- * to constrain the attached {@link Body}s at that distance.  The bodies can rotate
+ * to constrain the attached {@link PhysicsBody}s at that distance.  The bodies can rotate
  * freely about the anchor points and the whole system can move and rotate freely, but
  * the distance between the two anchor points is fixed.
  * <p>
@@ -51,16 +51,17 @@ import org.dyn4j.resources.Messages;
  * zero.  A good starting point is a frequency of 8.0 and damping ratio of 0.3
  * then adjust as necessary.
  * @author William Bittle
- * @version 3.4.1
+ * @version 4.0.0
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Distance_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/09/distance-constraint/" target="_blank">Distance Constraint</a>
+ * @param <T> the {@link PhysicsBody} type
  */
-public class DistanceJoint extends Joint implements Shiftable, DataContainer {
-	/** The local anchor point on the first {@link Body} */
+public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
+	/** The local anchor point on the first {@link PhysicsBody} */
 	protected Vector2 localAnchor1;
 	
-	/** The local anchor point on the second {@link Body} */
+	/** The local anchor point on the second {@link PhysicsBody} */
 	protected Vector2 localAnchor2;
 	
 	/** The oscillation frequency in hz */
@@ -95,16 +96,16 @@ public class DistanceJoint extends Joint implements Shiftable, DataContainer {
 	 * Minimal constructor.
 	 * <p>
 	 * Creates a fixed distance {@link Joint} where the joined 
-	 * {@link Body}s do not participate in collision detection and
+	 * {@link PhysicsBody}s do not participate in collision detection and
 	 * resolution.
-	 * @param body1 the first {@link Body}
-	 * @param body2 the second {@link Body}
+	 * @param body1 the first {@link PhysicsBody}
+	 * @param body2 the second {@link PhysicsBody}
 	 * @param anchor1 in world coordinates
 	 * @param anchor2 in world coordinates
 	 * @throws NullPointerException if body1, body2, anchor1, or anchor2 is null
 	 * @throws IllegalArgumentException if body1 == body2
 	 */
-	public DistanceJoint(Body body1, Body body2, Vector2 anchor1, Vector2 anchor2) {
+	public DistanceJoint(T body1, T body2, Vector2 anchor1, Vector2 anchor2) {
 		super(body1, body2, false);
 		// verify the bodies are not the same instance
 		if (body1 == body2) throw new IllegalArgumentException(Messages.getString("dynamics.joint.sameBody"));
@@ -134,10 +135,10 @@ public class DistanceJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void initializeConstraints(Step step, Settings settings) {
+	public void initializeConstraints(TimeStep step, Settings settings) {
 		double linearTolerance = settings.getLinearTolerance();
 		
 		Transform t1 = body1.getTransform();
@@ -213,10 +214,10 @@ public class DistanceJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void solveVelocityConstraints(Step step, Settings settings) {
+	public void solveVelocityConstraints(TimeStep step, Settings settings) {
 		Transform t1 = body1.getTransform();
 		Transform t2 = body2.getTransform();
 		Mass m1 = body1.getMass();
@@ -251,10 +252,10 @@ public class DistanceJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public boolean solvePositionConstraints(Step step, Settings settings) {
+	public boolean solvePositionConstraints(TimeStep step, Settings settings) {
 		// check if this is a spring damper
 		if (this.frequency > 0.0) {
 			// don't solve position constraints for spring damper
@@ -360,7 +361,7 @@ public class DistanceJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Returns the rest distance between the two constrained {@link Body}s in meters.
+	 * Returns the rest distance between the two constrained {@link PhysicsBody}s in meters.
 	 * @return double
 	 */
 	public double getDistance() {
@@ -368,7 +369,7 @@ public class DistanceJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Sets the rest distance between the two constrained {@link Body}s in meters.
+	 * Sets the rest distance between the two constrained {@link PhysicsBody}s in meters.
 	 * @param distance the distance in meters
 	 * @throws IllegalArgumentException if distance is less than zero
 	 */
@@ -377,8 +378,8 @@ public class DistanceJoint extends Joint implements Shiftable, DataContainer {
 		if (distance < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.distance.invalidDistance"));
 		if (this.distance != distance) {
 			// wake up both bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
+			this.body1.setAtRest(false);
+			this.body2.setAtRest(false);
 			// set the new target distance
 			this.distance = distance;
 		}

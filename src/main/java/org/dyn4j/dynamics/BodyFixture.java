@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -37,7 +37,7 @@ import org.dyn4j.resources.Messages;
  * {@link BodyFixture} extends the {@link Fixture} class, adding physical features
  * like density and friction.
  * @author William Bittle
- * @version 3.4.1
+ * @version 4.0.0
  * @since 2.0.0
  * @see Fixture
  */
@@ -129,9 +129,6 @@ public class BodyFixture extends Fixture implements DataContainer {
 	 * <p>
 	 * A higher value of friction will slow the object down faster.  A friction value of
 	 * zero represents no friction.
-	 * <p>
-	 * Since two {@link BodyFixture}s participate in a collision, their coefficients will
-	 * be mixed by a {@link CoefficientMixer} to product a single value for the collision.
 	 * @param friction the coefficient of friction; must be greater than zero
 	 * @throws IllegalArgumentException if friction is less than zero
 	 */
@@ -159,9 +156,6 @@ public class BodyFixture extends Fixture implements DataContainer {
 	 * <p>
 	 * Due to floating point precision and accuracy, a value of 1.0 may not produce a fully
 	 * ellastic bounce (all the velocity is retained).
-	 * <p>
-	 * Since two {@link BodyFixture}s participate in a collision, their coefficients will
-	 * be mixed by a {@link CoefficientMixer} to product a single value for the collision.
 	 * @param restitution the coefficient of restitution; must be greater than zero
 	 * @throws IllegalArgumentException if restitution is less than zero
 	 */

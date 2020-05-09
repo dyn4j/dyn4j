@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,9 +27,11 @@ package org.dyn4j.collision.manifold;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.dyn4j.Copyable;
 import org.dyn4j.collision.narrowphase.Penetration;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Shape;
+import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Vector2;
 
 /**
@@ -40,21 +42,22 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * All {@link ManifoldPoint}s are in world space coordinates.
  * @author William Bittle
- * @version 3.0.2
+ * @version 4.0.0
  * @since 1.0.0
  */
-public class Manifold {
+public class Manifold implements Shiftable, Copyable<Manifold> {
 	/** The {@link ManifoldPoint} in world space */
-	protected List<ManifoldPoint> points;
+	protected final List<ManifoldPoint> points;
 	
 	/** The penetration normal */
-	protected Vector2 normal;
+	protected final Vector2 normal;
 	
 	/**
 	 * Default constructor.
 	 */
 	public Manifold() {
 		this.points = new ArrayList<ManifoldPoint>(2);
+		this.normal = new Vector2();
 	}
 	
 	/**
@@ -64,7 +67,7 @@ public class Manifold {
 	 */
 	public Manifold(List<ManifoldPoint> points, Vector2 normal) {
 		this.points = points;
-		this.normal = normal;
+		this.normal = normal.copy();
 	}
 	
 	/* (non-Javadoc)
@@ -89,7 +92,7 @@ public class Manifold {
 	 */
 	public void clear() {
 		this.points.clear();
-		this.normal = null;
+		this.normal.zero();
 	}
 	
 	/**
@@ -113,7 +116,9 @@ public class Manifold {
 	 * @param points the point list
 	 */
 	public void setPoints(List<ManifoldPoint> points) {
-		this.points = points;
+//		this.points = points;
+		this.points.clear();
+		this.points.addAll(points);
 	}
 	
 	/**
@@ -123,6 +128,30 @@ public class Manifold {
 	 * @param normal the manifold normal
 	 */
 	public void setNormal(Vector2 normal) {
-		this.normal = normal;
+		this.normal.x = normal.x;
+		this.normal.y = normal.y;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Shiftable#shift(org.dyn4j.geometry.Vector2)
+	 */
+	@Override
+	public void shift(Vector2 shift) {
+		for (ManifoldPoint point : this.points) {
+			point.point.x += shift.x;
+			point.point.y += shift.y;
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.Copyable#copy()
+	 */
+	@Override
+	public Manifold copy() {
+		ArrayList<ManifoldPoint> points = new ArrayList<ManifoldPoint>(this.points.size());
+		for (ManifoldPoint point : this.points) {
+			points.add(point.copy());
+		}
+		return new Manifold(points, normal.copy());
 	}
 }

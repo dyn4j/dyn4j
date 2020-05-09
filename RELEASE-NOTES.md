@@ -1,4 +1,4 @@
-## v3.4.1 - _In Development_
+## v3.5.0- _In Development_
 
 **New Features:**
 - [#102](https://github.com/dyn4j/dyn4j/issues/102) Added guards on Joint setX methods to ensure that the joined bodies are not awakened unless necessary

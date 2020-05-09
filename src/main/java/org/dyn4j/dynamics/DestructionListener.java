@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -36,9 +36,11 @@ import org.dyn4j.dynamics.joint.Joint;
  * where it was attached to a {@link Joint}.  The joint must be removed as well.  These methods
  * will be called when any such implicit destruction events happen.
  * @author William Bittle
- * @version 3.1.1
+ * @version 4.0.0
  * @since 1.0.0
+ * @deprecated Deprecated in 4.0.0. Use the DestructionListener in the world package instead.
  */
+@Deprecated
 public interface DestructionListener extends Listener {
 	/**
 	 * Called when implicit destruction of a {@link Joint} has occurred.
@@ -48,6 +50,7 @@ public interface DestructionListener extends Listener {
 	 * @see World#removeAllBodiesAndJoints(boolean)
 	 * @param joint the {@link Joint} that was destroyed
 	 */
+	@SuppressWarnings("rawtypes")
 	public void destroyed(Joint joint);
 	
 	/**

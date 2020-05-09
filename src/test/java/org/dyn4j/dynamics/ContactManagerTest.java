@@ -29,6 +29,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.dyn4j.collision.broadphase.BroadphasePair;
 import org.dyn4j.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.collision.manifold.Manifold;
 import org.dyn4j.collision.manifold.ManifoldPoint;
@@ -43,6 +44,7 @@ import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.dynamics.contact.PersistedContactPoint;
 import org.dyn4j.dynamics.contact.DefaultContactManager;
 import org.dyn4j.dynamics.contact.SolvedContactPoint;
+import org.dyn4j.dynamics.contact.SolvedContact;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Vector2;
@@ -189,21 +191,21 @@ public class ContactManagerTest {
 		// b1 - b2 (2 contacts)
 		if (gjk.detect(c1, b1.getTransform(), c2, b2.getTransform(), p)) {
 			cms.getManifold(p, c1, b1.getTransform(), c2, b2.getTransform(), m);
-			cc = new ContactConstraint(b1, f1, b2, f2, m, 0, 0);
+			cc = new ContactConstraint(new BroadphasePair(b1, f1, b2, f2), m, 0, 0);
 			this.contactManager.queue(cc);
 		}
 		
 		// b1 - b3 (2 contacts)
 		if (gjk.detect(c1, b1.getTransform(), c3, b3.getTransform(), p)) {
 			cms.getManifold(p, c1, b1.getTransform(), c3, b3.getTransform(), m);
-			cc = new ContactConstraint(b1, f1, b3, f3, m, 0, 0);
+			cc = new ContactConstraint(new BroadphasePair(b1, f1, b3, f3), m, 0, 0);
 			this.contactManager.queue(cc);
 		}
 		
 		// b1 - b4 (2 contacts)
 		if (gjk.detect(c1, b1.getTransform(), c4, b4.getTransform(), p)) {
 			cms.getManifold(p, c1, b1.getTransform(), c4, b4.getTransform(), m);
-			cc = new ContactConstraint(b1, f1, b4, f4, m, 0, 0);
+			cc = new ContactConstraint(new BroadphasePair(b1, f1, b4, f4), m, 0, 0);
 			this.contactManager.queue(cc);
 		}
 		
@@ -211,7 +213,7 @@ public class ContactManagerTest {
 		p.clear(); m.clear();
 		if (gjk.detect(c2, b2.getTransform(), c3, b3.getTransform(), p)) {
 			cms.getManifold(p, c2, b2.getTransform(), c3, b3.getTransform(), m);
-			cc = new ContactConstraint(b2, f2, b3, f3, m, 0, 0);
+			cc = new ContactConstraint(new BroadphasePair(b2, f2, b3, f3), m, 0, 0);
 			this.contactManager.queue(cc);
 		}
 		
@@ -219,7 +221,7 @@ public class ContactManagerTest {
 		p.clear(); m.clear();
 		if (gjk.detect(c2, b2.getTransform(), c4, b4.getTransform(), p)) {
 			cms.getManifold(p, c2, b2.getTransform(), c4, b4.getTransform(), m);
-			cc = new ContactConstraint(b2, f2, b4, f4, m, 0, 0);
+			cc = new ContactConstraint(new BroadphasePair(b2, f2, b4, f4), m, 0, 0);
 			this.contactManager.queue(cc);
 		}
 		
@@ -227,7 +229,7 @@ public class ContactManagerTest {
 		p.clear(); m.clear();
 		if (gjk.detect(c3, b3.getTransform(), c4, b4.getTransform(), p)) {
 			cms.getManifold(p, c3, b3.getTransform(), c4, b4.getTransform(), m);
-			cc = new ContactConstraint(b3, f3, b4, f4, m, 0, 0);
+			cc = new ContactConstraint(new BroadphasePair(b3, f3, b4, f4), m, 0, 0);
 			this.contactManager.queue(cc);
 		}
 		
@@ -243,21 +245,21 @@ public class ContactManagerTest {
 		// b1 - b2 (2 contacts)
 		if (gjk.detect(c1, b1.getTransform(), c2, b2.getTransform(), p)) {
 			cms.getManifold(p, c1, b1.getTransform(), c2, b2.getTransform(), m);
-			cc = new ContactConstraint(b1, f1, b2, f2, m, 0, 0);
+			cc = new ContactConstraint(new BroadphasePair(b1, f1, b2, f2), m, 0, 0);
 			this.contactManager.queue(cc);
 		}
 		
 		// b1 - b3 (2 contacts)
 		if (gjk.detect(c1, b1.getTransform(), c3, b3.getTransform(), p)) {
 			cms.getManifold(p, c1, b1.getTransform(), c3, b3.getTransform(), m);
-			cc = new ContactConstraint(b1, f1, b3, f3, m, 0, 0);
+			cc = new ContactConstraint(new BroadphasePair(b1, f1, b3, f3), m, 0, 0);
 			this.contactManager.queue(cc);
 		}
 		
 		// b1 - b4 (2 contacts)
 		if (gjk.detect(c1, b1.getTransform(), c4, b4.getTransform(), p)) {
 			cms.getManifold(p, c1, b1.getTransform(), c4, b4.getTransform(), m);
-			cc = new ContactConstraint(b1, f1, b4, f4, m, 0, 0);
+			cc = new ContactConstraint(new BroadphasePair(b1, f1, b4, f4), m, 0, 0);
 			this.contactManager.queue(cc);
 		}
 		
@@ -265,7 +267,7 @@ public class ContactManagerTest {
 		p.clear(); m.clear();
 		if (gjk.detect(c2, b2.getTransform(), c3, b3.getTransform(), p)) {
 			cms.getManifold(p, c2, b2.getTransform(), c3, b3.getTransform(), m);
-			cc = new ContactConstraint(b2, f2, b3, f3, m, 0, 0);
+			cc = new ContactConstraint(new BroadphasePair(b2, f2, b3, f3), m, 0, 0);
 			this.contactManager.queue(cc);
 		}
 		
@@ -273,7 +275,7 @@ public class ContactManagerTest {
 		p.clear(); m.clear();
 		if (gjk.detect(c2, b2.getTransform(), c4, b4.getTransform(), p)) {
 			cms.getManifold(p, c2, b2.getTransform(), c4, b4.getTransform(), m);
-			cc = new ContactConstraint(b2, f2, b4, f4, m, 0, 0);
+			cc = new ContactConstraint(new BroadphasePair(b2, f2, b4, f4), m, 0, 0);
 			this.contactManager.queue(cc);
 		}
 		
@@ -281,7 +283,7 @@ public class ContactManagerTest {
 		p.clear(); m.clear();
 		if (gjk.detect(c3, b3.getTransform(), c4, b4.getTransform(), p)) {
 			cms.getManifold(p, c3, b3.getTransform(), c4, b4.getTransform(), m);
-			cc = new ContactConstraint(b3, f3, b4, f4, m, 0, 0);
+			cc = new ContactConstraint(new BroadphasePair(b3, f3, b4, f4), m, 0, 0);
 			this.contactManager.queue(cc);
 		}
 	}
@@ -293,11 +295,11 @@ public class ContactManagerTest {
 	public void addRemove() {
 		ArrayList<ManifoldPoint> points = new ArrayList<ManifoldPoint>();
 		points.add(new ManifoldPoint(ManifoldPointId.DISTANCE, new Vector2(), 1));
-		ContactConstraint cc = new ContactConstraint(
+		ContactConstraint cc = new ContactConstraint(new BroadphasePair(
 				new Body(), 
 				new BodyFixture(Geometry.createCircle(1.0)), 
 				new Body(), 
-				new BodyFixture(Geometry.createCircle(1.0)), 
+				new BodyFixture(Geometry.createCircle(1.0))), 
 				new Manifold(points, new Vector2()), 
 				0, 0);
 		
@@ -320,11 +322,11 @@ public class ContactManagerTest {
 	public void shiftCoordinates() {
 		List<ManifoldPoint> points = new ArrayList<ManifoldPoint>(2);
 		points.add(new ManifoldPoint(ManifoldPointId.DISTANCE, new Vector2(2.0, 0.0), 1.0));
-		ContactConstraint cc = new ContactConstraint(
+		ContactConstraint<Body> cc = new ContactConstraint(new BroadphasePair(
 				new Body(), 
 				new BodyFixture(Geometry.createCircle(1.0)), 
 				new Body(), 
-				new BodyFixture(Geometry.createCircle(1.0)), 
+				new BodyFixture(Geometry.createCircle(1.0))), 
 				new Manifold(points, new Vector2(1.0, 0.0)), 
 				0, 0);
 		
@@ -346,11 +348,11 @@ public class ContactManagerTest {
 	public void clear() {
 		ArrayList<ManifoldPoint> points = new ArrayList<ManifoldPoint>();
 		points.add(new ManifoldPoint(ManifoldPointId.DISTANCE, new Vector2(), 1));
-		ContactConstraint cc = new ContactConstraint(
+		ContactConstraint cc = new ContactConstraint(new BroadphasePair(
 				new Body(), 
 				new BodyFixture(Geometry.createCircle(1.0)), 
 				new Body(), 
-				new BodyFixture(Geometry.createCircle(1.0)), 
+				new BodyFixture(Geometry.createCircle(1.0))), 
 				new Manifold(points, new Vector2()), 
 				0, 0);
 		

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,9 +29,11 @@ import org.dyn4j.collision.manifold.ManifoldPointId;
 /**
  * Represents a contact point id to identify contacts from frame to frame.
  * @author William Bittle
- * @version 3.2.0
+ * @version 4.0.0
  * @since 3.1.2
+ * @deprecated Deprecated in 4.0.0. No longer needed.
  */
+@Deprecated
 public final class ContactPointId {
 	/** The contact constraint id */
 	private final ContactConstraintId contactConstraintId;

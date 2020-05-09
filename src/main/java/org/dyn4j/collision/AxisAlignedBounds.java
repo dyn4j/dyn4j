@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -35,10 +35,10 @@ import org.dyn4j.resources.Messages;
  * This class compares its AABB with the AABB of the given body and returns true
  * if they do not overlap.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.0.0
  * @since 3.1.1
  */
-public class AxisAlignedBounds extends AbstractBounds implements Bounds, Translatable {
+public final class AxisAlignedBounds extends AbstractBounds implements Bounds, Translatable {
 	/** The local coordinates AABB */
 	protected final AABB aabb;
 	
@@ -69,17 +69,29 @@ public class AxisAlignedBounds extends AbstractBounds implements Bounds, Transla
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.Bounds#isOutside(org.dyn4j.collision.Collidable)
+	 * @see org.dyn4j.collision.Bounds#isOutside(org.dyn4j.collision.CollisionBody)
 	 */
 	@Override
-	public boolean isOutside(Collidable<?> collidable) {
+	public boolean isOutside(CollisionBody<?> body) {
 		Vector2 tx = this.transform.getTranslation();
 		
 		AABB aabbBounds = this.aabb.getTranslated(tx);
-		AABB aabbBody = collidable.createAABB();
+		AABB aabbBody = body.createAABB();
 		
 		// test the projections for overlap
 		return !aabbBounds.overlaps(aabbBody);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.Bounds#isOutside(org.dyn4j.geometry.AABB)
+	 */
+	@Override
+	public boolean isOutside(AABB aabb) {
+		Vector2 tx = this.transform.getTranslation();
+		AABB aabbBounds = this.aabb.getTranslated(tx);
+		
+		// test the projections for overlap
+		return !aabbBounds.overlaps(aabb);
 	}
 	
 	/**

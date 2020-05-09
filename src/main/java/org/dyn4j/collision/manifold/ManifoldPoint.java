@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,8 @@
  */
 package org.dyn4j.collision.manifold;
 
+import org.dyn4j.Copyable;
+import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Vector2;
 
 /**
@@ -32,16 +34,16 @@ import org.dyn4j.geometry.Vector2;
  * The depth represents the distance along the {@link Manifold} normal to this
  * contact point. This can vary for every {@link ManifoldPoint} in a {@link Manifold}.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.0.0
  * @since 1.0.0
  * @see Manifold
  */
-public class ManifoldPoint {
+public class ManifoldPoint implements Shiftable, Copyable<ManifoldPoint> {
 	/** The id for this manifold point */
 	protected final ManifoldPointId id;
 	
 	/** The point in world coordinates */
-	protected Vector2 point;
+	protected final Vector2 point;
 	
 	/** The penetration depth */
 	protected double depth;
@@ -52,6 +54,7 @@ public class ManifoldPoint {
 	 */
 	public ManifoldPoint(ManifoldPointId id) {
 		this.id = id;
+		this.point = new Vector2();
 	}
 	
 	/**
@@ -62,7 +65,7 @@ public class ManifoldPoint {
 	 */
 	public ManifoldPoint(ManifoldPointId id, Vector2 point, double depth) {
 		this.id = id;
-		this.point = point;
+		this.point = point.copy();
 		this.depth = depth;
 	}
 	
@@ -101,7 +104,8 @@ public class ManifoldPoint {
 	 * @since 3.1.5
 	 */
 	public void setPoint(Vector2 point) {
-		this.point = point;
+		this.point.x = point.x;
+		this.point.y = point.y;
 	}
 
 	/**
@@ -119,5 +123,22 @@ public class ManifoldPoint {
 	 */
 	public void setDepth(double depth) {
 		this.depth = depth;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Shiftable#shift(org.dyn4j.geometry.Vector2)
+	 */
+	@Override
+	public void shift(Vector2 shift) {
+		this.point.x += shift.x;
+		this.point.y += shift.y;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.Copyable#copy()
+	 */
+	@Override
+	public ManifoldPoint copy() {
+		return new ManifoldPoint(this.id, this.point.copy(), this.depth);
 	}
 }

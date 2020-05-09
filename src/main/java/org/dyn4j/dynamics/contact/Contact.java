@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -25,124 +25,32 @@
 package org.dyn4j.dynamics.contact;
 
 import org.dyn4j.collision.manifold.ManifoldPointId;
-import org.dyn4j.dynamics.Body;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Represents a contact point between two {@link Body} objects.
+ * Represents a contact of a {@link ContactConstraint}.
  * @author William Bittle
- * @version 3.2.0
- * @since 1.0.0
+ * @version 4.0.0
+ * @since 4.0.0
  */
-public final class Contact {
-	/** The manifold point id for warm starting */
-	final ManifoldPointId id;
-	
-	/** The contact point in world space */
-	final Vector2 p;
-	
-	/** The contact penetration depth */
-	final double depth;
-	
-	/** The contact point in {@link Body}1 space */
-	final Vector2 p1;
-	
-	/** The contact point in {@link Body}2 space */
-	final Vector2 p2;
-	
-	/** The {@link Vector2} from the center of {@link Body}1 to the contact point */
-	Vector2 r1;
-	
-	/** The {@link Vector2} from the center of {@link Body}2 to the contact point */
-	Vector2 r2;
-	
-	/** The accumulated normal impulse */
-	double jn;
-	
-	/** The accumulated tangent impulse */
-	double jt;
-	
-	/** The accumulated position impulse */
-	double jp;
-	
-	/** The mass normal */
-	double massN;
-	
-	/** The mass tangent */
-	double massT;
-	
-	/** The velocity bias */
-	double vb;
-	
+public interface Contact {
 	/**
-	 * Full constructor.
-	 * @param id the manifold point id used for warm starting
-	 * @param point the world space collision point
-	 * @param depth the penetration depth of this point
-	 * @param p1 the collision point in {@link Body}1's local space
-	 * @param p2 the collision point in {@link Body}2's local space
-	 */
-	public Contact(ManifoldPointId id, Vector2 point, double depth, Vector2 p1, Vector2 p2) {
-		this.id = id;
-		this.p = point;
-		this.depth = depth;
-		this.p1 = p1;
-		this.p2 = p2;
-	}
-	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("Contact[Id=").append(this.id)
-		.append("|Point=").append(this.p)
-		.append("|Depth=").append(this.depth)
-		.append("|NormalImpulse=").append(this.jn)
-		.append("|TangentImpulse=").append(this.jt)
-		.append("]");
-		return sb.toString();
-	}
-	
-	/**
-	 * Returns the manifold point id.
+	 * Returns the {@link ManifoldPointId} for this contact.
+	 * <p>
+	 * This identifies the contact to warm-starting.
 	 * @return {@link ManifoldPointId}
-	 * @since 3.1.2
 	 */
-	public ManifoldPointId getId() {
-		return this.id;
-	}
+	public ManifoldPointId getId();
 	
 	/**
 	 * Returns the world space collision point.
 	 * @return {@link Vector2} the collision point in world space
 	 */
-	public Vector2 getPoint() {
-		return this.p;
-	}
+	public Vector2 getPoint();
 	
 	/**
 	 * Returns the penetration depth of this point.
 	 * @return double the penetration depth
 	 */
-	public double getDepth() {
-		return this.depth;
-	}
-	
-	/**
-	 * Returns the accumulated normal impulse applied at this point.
-	 * @return double the accumulated normal impulse
-	 */
-	public double getNormalImpulse() {
-		return this.jn;
-	}
-	
-	/**
-	 * Returns the accumulated tangential impulse applied at this point.
-	 * @return double the accumulated tangential impulse
-	 */
-	public double getTangentialImpulse() {
-		return this.jt;
-	}
+	public double getDepth();
 }

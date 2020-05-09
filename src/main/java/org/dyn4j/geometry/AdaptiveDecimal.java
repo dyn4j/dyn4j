@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2017 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,6 +26,8 @@ package org.dyn4j.geometry;
 
 import java.util.Arrays;
 
+import org.dyn4j.Copyable;
+
 /**
  * This is an implementation of multi-precision decimals based on the original work by Jonathan Richard Shewchuk,
  * "Routines for Arbitrary Precision Floating-point Arithmetic and Fast Robust Geometric Predicates".
@@ -46,10 +48,10 @@ import java.util.Arrays;
  * is the default and only model the Java specification describes.
  * 
  * @author Manolis Tsamis
- * @version 3.4.0
+ * @version 4.0.0
  * @since 3.4.0
  */
-class AdaptiveDecimal {
+class AdaptiveDecimal implements Copyable<AdaptiveDecimal> {
 	/** The array storing this {@link AdaptiveDecimal}'s component values */
 	private final double[] components;
 	
@@ -104,8 +106,8 @@ class AdaptiveDecimal {
 		return this.components.length;
 	}
 	
-	/**
-	 * @return A deep copy of this {@link AdaptiveDecimal}
+	/* (non-Javadoc)
+	 * @see org.dyn4j.Copyable#copy()
 	 */
 	public AdaptiveDecimal copy() {
 		return new AdaptiveDecimal(this);

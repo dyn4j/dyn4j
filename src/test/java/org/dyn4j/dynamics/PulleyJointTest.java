@@ -24,35 +24,19 @@
  */
 package org.dyn4j.dynamics;
 
-import junit.framework.TestCase;
-
 import org.dyn4j.dynamics.joint.PulleyJoint;
 import org.dyn4j.geometry.Vector2;
-import org.junit.Before;
 import org.junit.Test;
+
+import junit.framework.TestCase;
 
 /**
  * Used to test the {@link PulleyJoint} class.
  * @author William Bittle
- * @version 3.1.1
+ * @version 3.4.1
  * @since 2.1.0
  */
-public class PulleyJointTest {
-	/** The first body used for testing */
-	private Body b1;
-	
-	/** The second body used for testing */
-	private Body b2;
-	
-	/**
-	 * Sets up the test.
-	 */
-	@Before
-	public void setup() {
-		this.b1 = new Body();
-		this.b2 = new Body();
-	}
-	
+public class PulleyJointTest extends AbstractJointTest {
 	/**
 	 * Tests the successful creation case.
 	 */
@@ -60,12 +44,28 @@ public class PulleyJointTest {
 	public void createSuccess() {
 		new PulleyJoint(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
 	}
+
+	/**
+	 * Tests the create method passing a null body1.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createWithNullBody1() {
+		new PulleyJoint(null, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
+	}
+
+	/**
+	 * Tests the create method passing a null body2.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createWithNullBody2() {
+		new PulleyJoint(b1, null, new Vector2(), new Vector2(), new Vector2(), new Vector2());
+	}
 	
 	/**
 	 * Tests the create method passing a null anchor.
 	 */
 	@Test(expected = NullPointerException.class)
-	public void createNullAnchor1() {
+	public void createWithNullAnchor1() {
 		new PulleyJoint(b1, b2, null, new Vector2(), new Vector2(), new Vector2());
 	}
 	
@@ -73,7 +73,7 @@ public class PulleyJointTest {
 	 * Tests the create method passing a null anchor.
 	 */
 	@Test(expected = NullPointerException.class)
-	public void createNullAnchor2() {
+	public void createWithNullAnchor2() {
 		new PulleyJoint(b1, b2, new Vector2(), null, new Vector2(), new Vector2());
 	}
 	
@@ -81,7 +81,7 @@ public class PulleyJointTest {
 	 * Tests the create method passing a null anchor.
 	 */
 	@Test(expected = NullPointerException.class)
-	public void createNullAnchor3() {
+	public void createWithNullAnchor3() {
 		new PulleyJoint(b1, b2, new Vector2(), new Vector2(), null, new Vector2());
 	}
 	
@@ -89,7 +89,7 @@ public class PulleyJointTest {
 	 * Tests the create method passing a null anchor.
 	 */
 	@Test(expected = NullPointerException.class)
-	public void createNullAnchor4() {
+	public void createWithNullAnchor4() {
 		new PulleyJoint(b1, b2, new Vector2(), new Vector2(), new Vector2(), null);
 	}
 	
@@ -97,7 +97,7 @@ public class PulleyJointTest {
 	 * Tests the create method passing the same body.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void createSameBody() {
+	public void createWithSameBody() {
 		new PulleyJoint(b1, b1, new Vector2(), new Vector2(), new Vector2(), new Vector2());
 	}
 	
@@ -107,6 +107,7 @@ public class PulleyJointTest {
 	@Test
 	public void setRatio() {
 		PulleyJoint pj = new PulleyJoint(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
+		
 		pj.setRatio(2.0);
 		TestCase.assertEquals(2.0, pj.getRatio());
 	}
@@ -117,8 +118,8 @@ public class PulleyJointTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setRatioNegative() {
 		PulleyJoint pj = new PulleyJoint(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
+		
 		pj.setRatio(-1.0);
-		TestCase.assertEquals(2.0, pj.getRatio());
 	}
 	
 	/**
@@ -127,7 +128,97 @@ public class PulleyJointTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setRatioZero() {
 		PulleyJoint pj = new PulleyJoint(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
+		
 		pj.setRatio(0.0);
+	}
+	
+	/**
+	 * Tests the setRatio method wrt. sleeping.
+	 */
+	@Test
+	public void setRatioSleep() {
+		PulleyJoint pj = new PulleyJoint(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
+		
+		double ratio = pj.getRatio();
+		TestCase.assertEquals(1.0, ratio);
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
+		
+		b1.setAsleep(true);
+		b2.setAsleep(true);
+		
+		pj.setRatio(ratio);
+		TestCase.assertEquals(ratio, pj.getRatio());
+		TestCase.assertTrue(b1.isAsleep());
+		TestCase.assertTrue(b2.isAsleep());
+		
+		pj.setRatio(2.0);
+		TestCase.assertEquals(2.0, pj.getRatio());
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
+	}
+	
+	/**
+	 * Tests the setSlackEnabled method.
+	 */
+	@Test
+	public void setSlackEnabled() {
+		PulleyJoint pj = new PulleyJoint(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
+		
+		TestCase.assertFalse(pj.isSlackEnabled());
+		
+		pj.setSlackEnabled(true);
+		TestCase.assertTrue(pj.isSlackEnabled());
+		
+		pj.setSlackEnabled(false);
+		TestCase.assertFalse(pj.isSlackEnabled());
+	}
+	
+	/**
+	 * Tests the setLength method.
+	 */
+	@Test
+	public void setLength() {
+		PulleyJoint pj = new PulleyJoint(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
+		
+		pj.setLength(2.0);
+		TestCase.assertEquals(2.0, pj.getLength());
+	}
+	
+	/**
+	 * Tests the setLength method passing a negative value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setLengthNegative() {
+		PulleyJoint pj = new PulleyJoint(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
+		
+		pj.setLength(-1.0);
+	}
+	
+	/**
+	 * Tests the setRatio method wrt. sleeping.
+	 */
+	@Test
+	public void setLengthSleep() {
+		PulleyJoint pj = new PulleyJoint(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
+		
+		double length = pj.getLength();
+		TestCase.assertEquals(0.0, length);
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
+		
+		b1.setAsleep(true);
+		b2.setAsleep(true);
+		
+		pj.setLength(length);
+		TestCase.assertEquals(length, pj.getLength());
+		TestCase.assertTrue(b1.isAsleep());
+		TestCase.assertTrue(b2.isAsleep());
+		
+		pj.setLength(2.0);
+		TestCase.assertEquals(2.0, pj.getLength());
+		TestCase.assertFalse(b1.isAsleep());
+		TestCase.assertFalse(b2.isAsleep());
 	}
 	
 	/**

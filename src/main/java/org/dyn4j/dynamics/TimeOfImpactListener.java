@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -36,9 +36,11 @@ import org.dyn4j.collision.continuous.TimeOfImpact;
  * <p>
  * Modification of the {@link World} is not permitted during these methods.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.0.0
  * @since 1.2.0
+ * @deprecated Deprecated in 4.0.0. Use the TimeOfImpactListener in the world package instead.
  */
+@Deprecated
 public interface TimeOfImpactListener extends Listener {
 	/**
 	 * Called when a time of impact has been detected between two bodies.

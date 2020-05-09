@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,7 @@
  */
 package org.dyn4j.collision.continuous;
 
+import org.dyn4j.Copyable;
 import org.dyn4j.collision.narrowphase.Separation;
 
 /**
@@ -32,10 +33,10 @@ import org.dyn4j.collision.narrowphase.Separation;
  * The {@link #getTime()} is in the range of [0, 1] and represents the time within the current
  * timestep that the collision occurred.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.0.0
  * @since 1.2.0
  */
-public class TimeOfImpact {
+public class TimeOfImpact implements Copyable<TimeOfImpact> {
 	/** The time of impact in the range [0, 1] */
 	protected double time;
 	
@@ -101,5 +102,13 @@ public class TimeOfImpact {
 	 */
 	public void setSeparation(Separation separation) {
 		this.separation = separation;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.Copyable#copy()
+	 */
+	@Override
+	public TimeOfImpact copy() {
+		return new TimeOfImpact(this.time, this.separation.copy());
 	}
 }

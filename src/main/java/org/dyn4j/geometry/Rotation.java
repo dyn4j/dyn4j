@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,7 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.Copyable;
 import org.dyn4j.Epsilon;
 import org.dyn4j.resources.Messages;
 
@@ -44,10 +45,11 @@ import org.dyn4j.resources.Messages;
  * The receiver of a Rotation object can be sure it always represents a valid rotation.
  * 
  * @author Manolis Tsamis
- * @version 3.4.0
+ * @version 4.0.0
  * @since 3.4.0
  */
-public class Rotation {
+public class Rotation implements Copyable<Rotation> {
+	/** 1/sqrt(2) */
 	private static final double SQRT_2_INV = 1.0 / Math.sqrt(2);
 	
 	/** The cosine of the angle described by this Rotation */
@@ -229,8 +231,8 @@ public class Rotation {
 		this.sint = Math.sin(angle);
 	}
 	
-	/**
-	 * @return a copy of this {@link Rotation}
+	/* (non-Javadoc)
+	 * @see org.dyn4j.Copyable#copy()
 	 */
 	public Rotation copy() {
 		return new Rotation(this.cost, this.sint);
@@ -604,8 +606,8 @@ public class Rotation {
 		double cost = this.cost;
 		double sint = this.sint;
 		
-		this.cost = cost * c - sint * s;
-		this.sint = cost * s + sint * c;
+		this.cost = Interval.clamp(cost * c - sint * s, -1.0, 1.0);
+		this.sint = Interval.clamp(cost * s + sint * c, -1.0, 1.0);
 		
 		return this;
 	}
@@ -619,8 +621,8 @@ public class Rotation {
 	 */
 	public Rotation getRotated(double c, double s) {
 		return new Rotation(
-				this.cost * c - this.sint * s,
-				this.cost * s + this.sint * c);
+				Interval.clamp(this.cost * c - this.sint * s, -1.0, 1.0),
+				Interval.clamp(this.cost * s + this.sint * c, -1.0, 1.0));
 	}
 	
 	/**

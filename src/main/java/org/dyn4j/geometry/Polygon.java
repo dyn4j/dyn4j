@@ -361,7 +361,6 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 	 */
 	@Override
 	public Interval project(Vector2 vector, Transform transform) {
-		//System.out.println(1);
 		double v = 0.0;
     	// get the first point
 		Vector2 p = transform.getTransformed(this.vertices[0]);

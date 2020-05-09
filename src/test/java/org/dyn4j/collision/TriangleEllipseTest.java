@@ -28,7 +28,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.dyn4j.collision.broadphase.BroadphasePair;
+import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.collision.manifold.Manifold;
 import org.dyn4j.collision.manifold.ManifoldPoint;
@@ -97,7 +97,7 @@ public class TriangleEllipseTest extends AbstractTest {
 	}
 	
 	/**
-	 * Tests {@link Collidable} AABB.
+	 * Tests {@link CollisionBody} AABB.
 	 */
 	@Test	
 	public void detectCollidableAABB() {
@@ -130,7 +130,7 @@ public class TriangleEllipseTest extends AbstractTest {
 	 */
 	@Test
 	public void detectBroadphase() {
-		List<BroadphasePair<CollidableTest, Fixture>> pairs;
+		List<CollisionPair<CollidableTest, Fixture>> pairs;
 		
 		// create some collidables
 		CollidableTest ct1 = new CollidableTest(t);

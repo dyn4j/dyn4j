@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,15 +24,17 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.Copyable;
+
 /**
  * Represents a transformation matrix.
  * <p>
  * Supported operations are rotation and translation.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.0.0
  * @since 1.0.0
  */
-public class Transform implements Transformable {
+public class Transform implements Transformable, Copyable<Transform> {
 	/**
 	 * NOTE: as of being deprecated this instance is no longer immutable.
 	 * @deprecated create your own instances of {@link Transform} instead; since 3.4.0
@@ -105,8 +107,8 @@ public class Transform implements Transformable {
 	 */
 	void rotate(double c, double s) {
 		// perform an optimized version of matrix multiplication
-		double cost = c * this.cost - s * this.sint;
-		double sint = s * this.cost + c * this.sint;
+		double cost = Interval.clamp(c * this.cost - s * this.sint, -1.0, 1.0);
+		double sint = Interval.clamp(s * this.cost + c * this.sint, -1.0, 1.0);
 		double x   = c * this.x - s * this.y;
 		double y   = s * this.x + c * this.y;
 		
@@ -144,8 +146,8 @@ public class Transform implements Transformable {
 	void rotate(double c, double s, double x, double y) {
 		// perform an optimized version of the matrix multiplication:
 		// M(new) = inverse(T) * R * T * M(old)
-		double cost = c * this.cost - s * this.sint;
-		double sint = s * this.cost + c * this.sint;
+		double cost = Interval.clamp(c * this.cost - s * this.sint, -1.0, 1.0);
+		double sint = Interval.clamp(s * this.cost + c * this.sint, -1.0, 1.0);
 		this.cost = cost;
 		this.sint = sint;
 		
@@ -204,9 +206,8 @@ public class Transform implements Transformable {
 		this.y += vector.y;
 	}
 	
-	/**
-	 * Copies this {@link Transform}.
-	 * @return {@link Transform}
+	/* (non-Javadoc)
+	 * @see org.dyn4j.Copyable#copy()
 	 */
 	public Transform copy() {
 		return new Transform(this);
@@ -696,8 +697,8 @@ public class Transform implements Transformable {
 		double cos = Math.cos(theta);
 		double sin = Math.sin(theta);
 		
-		double cost = cos * this.cost - sin * this.sint;
-		double sint = sin * this.cost + cos * this.sint;
+		double cost = Interval.clamp(cos * this.cost - sin * this.sint, -1.0, 1.0);
+		double sint = Interval.clamp(sin * this.cost + cos * this.sint, -1.0, 1.0);
 		this.cost = cost;
 		this.sint = sint;
 	}

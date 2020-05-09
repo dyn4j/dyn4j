@@ -28,6 +28,7 @@ import java.util.ArrayList;
 
 import junit.framework.TestCase;
 
+import org.dyn4j.collision.broadphase.BroadphasePair;
 import org.dyn4j.collision.manifold.Manifold;
 import org.dyn4j.collision.manifold.ManifoldPoint;
 import org.dyn4j.dynamics.contact.ContactConstraint;
@@ -72,7 +73,12 @@ public class IslandTest {
 		
 		i.add(new Body());
 		i.add(new AngleJoint(new Body(), new Body()));
-		i.add(new ContactConstraint(new Body(), new BodyFixture(Geometry.createCircle(1.0)), new Body(), new BodyFixture(Geometry.createCircle(1.0)), new Manifold(new ArrayList<ManifoldPoint>(), new Vector2()), 0, 0));
+		i.add(new ContactConstraint(new BroadphasePair(
+				new Body(), 
+				new BodyFixture(Geometry.createCircle(1.0)), 
+				new Body(), 
+				new BodyFixture(Geometry.createCircle(1.0))), 
+				new Manifold(new ArrayList<ManifoldPoint>(), new Vector2()), 0, 0));
 		
 		TestCase.assertEquals(1, i.bodies.size());
 		TestCase.assertEquals(1, i.joints.size());
@@ -88,7 +94,12 @@ public class IslandTest {
 		
 		i.add(new Body());
 		i.add(new AngleJoint(new Body(), new Body()));
-		i.add(new ContactConstraint(new Body(), new BodyFixture(Geometry.createCircle(1.0)), new Body(), new BodyFixture(Geometry.createCircle(1.0)), new Manifold(new ArrayList<ManifoldPoint>(), new Vector2()), 0, 0));
+		i.add(new ContactConstraint(new BroadphasePair(
+				new Body(), 
+				new BodyFixture(Geometry.createCircle(1.0)), 
+				new Body(), 
+				new BodyFixture(Geometry.createCircle(1.0))), 
+				new Manifold(new ArrayList<ManifoldPoint>(), new Vector2()), 0, 0));
 		
 		TestCase.assertEquals(1, i.bodies.size());
 		TestCase.assertEquals(1, i.joints.size());

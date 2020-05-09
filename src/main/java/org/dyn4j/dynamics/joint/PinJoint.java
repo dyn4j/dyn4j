@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,9 +26,9 @@ package org.dyn4j.dynamics.joint;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
-import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
-import org.dyn4j.dynamics.Step;
+import org.dyn4j.dynamics.TimeStep;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Matrix22;
@@ -63,11 +63,12 @@ import org.dyn4j.resources.Messages;
  * <p>
  * Renamed from MouseJoint in 3.2.0.
  * @author William Bittle
- * @version 3.4.1
+ * @version 4.0.0
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Pin_Joint" target="_blank">Documentation</a>
+ * @param <T> the {@link PhysicsBody} type
  */
-public class PinJoint extends Joint implements Shiftable, DataContainer {
+public class PinJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
 	/** The world space target point */
 	protected Vector2 target;
 	
@@ -109,7 +110,7 @@ public class PinJoint extends Joint implements Shiftable, DataContainer {
 	 * @throws NullPointerException if body or anchor is null
 	 * @throws IllegalArgumentException if frequency is less than or equal to zero, or if dampingRatio is less than zero or greater than one, or if maxForce is less than zero
 	 */
-	public PinJoint(Body body, Vector2 anchor, double frequency, double dampingRatio, double maximumForce) {
+	public PinJoint(T body, Vector2 anchor, double frequency, double dampingRatio, double maximumForce) {
 		super(body, body, false);
 		// check for a null anchor
 		if (anchor == null) throw new NullPointerException(Messages.getString("dynamics.joint.pin.nullAnchor"));
@@ -148,11 +149,11 @@ public class PinJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void initializeConstraints(Step step, Settings settings) {
-		Body body = this.body2;
+	public void initializeConstraints(TimeStep step, Settings settings) {
+		T body = this.body2;
 		Transform transform = body.getTransform();
 		
 		Mass mass = this.body2.getMass();
@@ -209,11 +210,11 @@ public class PinJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void solveVelocityConstraints(Step step, Settings settings) {
-		Body body = this.body2;
+	public void solveVelocityConstraints(TimeStep step, Settings settings) {
+		T body = this.body2;
 		Transform transform = body.getTransform();
 		
 		Mass mass = this.body2.getMass();
@@ -248,10 +249,10 @@ public class PinJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public boolean solvePositionConstraints(Step step, Settings settings) {
+	public boolean solvePositionConstraints(TimeStep step, Settings settings) {
 		// nothing to do here for this joint
 		return true;
 	}
@@ -324,7 +325,7 @@ public class PinJoint extends Joint implements Shiftable, DataContainer {
 		// only wake the body if the target has changed
 		if (!target.equals(this.target)) {
 			// wake up the body
-			this.body2.setAsleep(false);
+			this.body2.setAtRest(false);
 			// set the new target
 			this.target = target;
 		}

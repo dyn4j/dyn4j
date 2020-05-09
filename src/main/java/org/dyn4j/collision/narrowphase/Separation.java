@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,8 +24,10 @@
  */
 package org.dyn4j.collision.narrowphase;
 
+import org.dyn4j.Copyable;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Shape;
+import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Vector2;
 
 /**
@@ -33,10 +35,11 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * The separation normal should always be normalized.
  * @author William Bittle
- * @version 3.0.2
+ * @version 4.0.0
  * @since 1.0.0
  */
-public class Separation {
+// TODO need to final these fields?
+public class Separation implements Shiftable, Copyable<Separation> {
 	/** The normalized axis of separation */
 	protected Vector2 normal;
 	
@@ -156,5 +159,24 @@ public class Separation {
 	 */
 	public void setPoint2(Vector2 point2) {
 		this.point2 = point2;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Shiftable#shift(org.dyn4j.geometry.Vector2)
+	 */
+	@Override
+	public void shift(Vector2 shift) {
+		this.point1.x += shift.x;
+		this.point1.y += shift.y;
+		this.point2.x += shift.x;
+		this.point2.y += shift.y;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.Copyable#copy()
+	 */
+	@Override
+	public Separation copy() {
+		return new Separation(this.normal.copy(), this.distance, this.point1.copy(), this.point2.copy());
 	}
 }

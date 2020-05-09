@@ -102,7 +102,8 @@ public class Epa implements MinkowskiPenetrationSolver {
 				// return n as the direction and the projection
 				// as the depth since this is the closest found
 				// edge and it cannot increase any more
-				penetration.normal = edge.normal;
+				penetration.normal.x = edge.normal.x;
+				penetration.normal.y = edge.normal.y;
 				penetration.depth = projection;
 				return;
 			}
@@ -115,7 +116,8 @@ public class Epa implements MinkowskiPenetrationSolver {
 		// if we made it here then we know that we hit the maximum number of iterations
 		// this is really a catch all termination case
 		// set the normal and depth equal to the last edge we created
-		penetration.normal = edge.normal;
+		penetration.normal.x = edge.normal.x;
+		penetration.normal.y = edge.normal.y;
 		penetration.depth = point.dot(edge.normal);
 	}
 	

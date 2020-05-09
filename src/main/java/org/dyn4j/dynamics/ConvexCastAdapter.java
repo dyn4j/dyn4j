@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -34,9 +34,11 @@ import org.dyn4j.geometry.Convex;
  * <p>
  * By default all methods return true.
  * @author William Bittle
- * @version 3.2.0
+ * @version 4.0.0
  * @since 3.1.5
+ * @deprecated Deprecated in 4.0.0. Use the iterator methods in the World class instead.
  */
+@Deprecated
 public class ConvexCastAdapter implements ConvexCastListener {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.ConvexCastListener#allow(org.dyn4j.geometry.Convex, org.dyn4j.dynamics.Body, org.dyn4j.dynamics.BodyFixture)

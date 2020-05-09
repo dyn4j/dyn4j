@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,9 +24,14 @@
  */
 package org.dyn4j.collision.broadphase;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-import org.dyn4j.collision.Collidable;
+import org.dyn4j.collision.CollisionBody;
+import org.dyn4j.collision.CollisionItem;
+import org.dyn4j.collision.CollisionPair;
+import org.dyn4j.collision.Collisions;
 import org.dyn4j.collision.Fixture;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
@@ -37,62 +42,97 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Abstract implementation of a {@link BroadphaseDetector}.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.0.0
  * @since 1.0.0
- * @param <E> the {@link Collidable} type
- * @param <T> the {@link Fixture} type
+ * @param <T> the {@link CollisionBody} type
+ * @param <E> the {@link Fixture} type
  */
-public abstract class AbstractBroadphaseDetector<E extends Collidable<T>, T extends Fixture> implements BroadphaseDetector<E, T> {
-	/** The default broadphase filter object */
-	protected final BroadphaseFilter<E, T> defaultFilter = new DefaultBroadphaseFilter<E, T>();
-	
+public abstract class AbstractBroadphaseDetector<T extends CollisionBody<E>, E extends Fixture> implements BroadphaseDetector<T, E> {
 	/** The {@link AABB} expansion value */
 	protected double expansion = BroadphaseDetector.DEFAULT_AABB_EXPANSION;
 	
+	/** True if update tracking is enabled */
+	protected boolean updateTrackingEnabled = true;
+	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#add(org.dyn4j.collision.Collidable)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#add(org.dyn4j.collision.CollisionBody)
 	 */
 	@Override
-	public void add(E collidable) {
-		int size = collidable.getFixtureCount();
+	public void add(T body) {
+		int size = body.getFixtureCount();
 		// iterate over the new list
 		for (int i = 0; i < size; i++) {
-			T fixture = collidable.getFixture(i);
-			this.add(collidable, fixture);
+			E fixture = body.getFixture(i);
+			this.add(body, fixture);
 		}
 	}
 
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#remove(org.dyn4j.collision.Collidable)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#remove(org.dyn4j.collision.CollisionBody)
 	 */
 	@Override
-	public void remove(E collidable) {
-		int size = collidable.getFixtureCount();
+	public void remove(T body) {
+		int size = body.getFixtureCount();
 		if (size == 0) return;
+		// create an item to reuse so we don't allocate a bunch of these
+		BroadphaseItem<T, E> item = new BroadphaseItem<T, E>(body, null);
 		for (int i = 0; i < size; i++) {
-			T fixture = collidable.getFixture(i);
-			this.remove(collidable, fixture);
+			E fixture = body.getFixture(i);
+			item.fixture = fixture;
+			this.remove(item);
 		}
 	}
 
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#update(org.dyn4j.collision.Collidable)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#update(org.dyn4j.collision.CollisionBody)
 	 */
 	@Override
-	public void update(E collidable) {
-		int size = collidable.getFixtureCount();
+	public void update(T body) {
+		int size = body.getFixtureCount();
 		// iterate over the new list
 		for (int i = 0; i < size; i++) {
-			T fixture = collidable.getFixture(i);
-			this.update(collidable, fixture);
+			E fixture = body.getFixture(i);
+			this.update(body, fixture);
 		}
 	}
-		
+	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.collision.Collidable, org.dyn4j.collision.Collidable)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#setUpdated(org.dyn4j.collision.CollisionBody)
 	 */
 	@Override
-	public boolean detect(E a, E b) {
+	public void setUpdated(T body) {
+		int size = body.getFixtureCount();
+		// iterate over the new list
+		for (int i = 0; i < size; i++) {
+			E fixture = body.getFixture(i);
+			this.setUpdated(body, fixture);
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#isUpdated(org.dyn4j.collision.CollisionBody)
+	 */
+	@Override
+	public boolean isUpdated(T body) {
+		int size = body.getFixtureCount();
+		if (size == 0) return false;
+		boolean updated = false;
+		// create an item to reuse so we don't allocate a bunch of these
+		BroadphaseItem<T, E> item = new BroadphaseItem<T, E>(body, null);
+		// iterate over the new list
+		for (int i = 0; i < size; i++) {
+			E fixture = body.getFixture(i);
+			item.fixture = fixture;
+			updated |= this.isUpdated(item);
+		}
+		return updated;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.CollisionBody)
+	 */
+	@Override
+	public boolean detect(T a, T b) {
 		// attempt to use this broadphase's cache
 		AABB aAABB = this.getAABB(a);
 		AABB bAABB = this.getAABB(b);
@@ -106,15 +146,20 @@ public abstract class AbstractBroadphaseDetector<E extends Collidable<T>, T exte
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#getAABB(org.dyn4j.collision.Collidable)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#getAABB(org.dyn4j.collision.CollisionBody)
 	 */
 	@Override
-	public AABB getAABB(E collidable) {
-		int size = collidable.getFixtureCount();
-		if (size == 0) return new AABB(0, 0, 0, 0);
-		AABB union = this.getAABB(collidable, collidable.getFixture(0));
+	public AABB getAABB(T body) {
+		int size = body.getFixtureCount();
+		if (size == 0) {
+			return new AABB(0, 0, 0, 0);
+		}
+		// create an item to reuse so we don't allocate a bunch of these
+		BroadphaseItem<T, E> item = new BroadphaseItem<T, E>(body, body.getFixture(0));
+		AABB union = this.getAABB(item);
 		for (int i = 1; i < size; i++) {
-			AABB aabb = this.getAABB(collidable, collidable.getFixture(i));
+			item.fixture = body.getFixture(i);
+			AABB aabb = this.getAABB(item);
 			union.union(aabb);
 		}
 		return union;
@@ -138,16 +183,18 @@ public abstract class AbstractBroadphaseDetector<E extends Collidable<T>, T exte
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#contains(org.dyn4j.collision.Collidable)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#contains(org.dyn4j.collision.CollisionBody)
 	 */
 	@Override
-	public boolean contains(E collidable) {
-		int size = collidable.getFixtureCount();
-		
+	public boolean contains(T body) {
+		int size = body.getFixtureCount();
+		if (size == 0) return false;
+		// create an item to reuse so we don't allocate a bunch of these
+		BroadphaseItem<T, E> item = new BroadphaseItem<T, E>(body, null);
 		for (int i = 0; i < size; i++) {
-			T fixture = collidable.getFixture(i);
-			
-			if (!this.contains(collidable, fixture)) {
+			E fixture = body.getFixture(i);
+			item.fixture = fixture;
+			if (!this.contains(item)) {
 				return false;
 			}
 		}
@@ -155,11 +202,136 @@ public abstract class AbstractBroadphaseDetector<E extends Collidable<T>, T exte
 		return true;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect()
+	 */
+	@Override
+	public List<CollisionPair<T, E>> detect() {
+		int eSize = Collisions.getEstimatedCollisionPairs(this.size());
+		List<CollisionPair<T, E>> items = new ArrayList<CollisionPair<T,E>>(eSize);
+		Iterator<CollisionPair<T, E>> it = this.detectIterator(true);
+		while (it.hasNext()) {
+			CollisionPair<T, E> item = it.next();
+			items.add(item.copy());
+		}
+		return items;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(boolean)
+	 */
+	@Override
+	public List<CollisionPair<T, E>> detect(boolean forceFullDetection) {
+		int eSize = Collisions.getEstimatedCollisionPairs(this.size());
+		List<CollisionPair<T, E>> items = new ArrayList<CollisionPair<T,E>>(eSize);
+		Iterator<CollisionPair<T, E>> it = this.detectIterator(forceFullDetection);
+		while (it.hasNext()) {
+			CollisionPair<T, E> item = it.next();
+			items.add(item.copy());
+		}
+		return items;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.collision.broadphase.BroadphaseFilter)
+	 */
+	@Deprecated
+	@Override
+	public List<CollisionPair<T, E>> detect(BroadphaseFilter<T, E> filter) {
+		int eSize = Collisions.getEstimatedCollisionPairs(this.size());
+		List<CollisionPair<T, E>> items = new ArrayList<CollisionPair<T,E>>(eSize);
+		Iterator<CollisionPair<T, E>> it = this.detectIterator(true);
+		while (it.hasNext()) {
+			CollisionPair<T, E> item = it.next();
+			if (filter.isAllowed(item.getBody1(), item.getFixture1(), item.getBody2(), item.getFixture2())) {
+				items.add(item.copy());
+			}
+		}
+		return items;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.geometry.AABB)
+	 */
+	@Override
+	public List<CollisionItem<T, E>> detect(AABB aabb) {
+		int eSize = Collisions.getEstimatedCollisionsPerObject();
+		List<CollisionItem<T, E>> items = new ArrayList<CollisionItem<T,E>>(eSize);
+		Iterator<CollisionItem<T, E>> it = this.detectIterator(aabb);
+		while (it.hasNext()) {
+			CollisionItem<T, E> item = it.next();
+			items.add(item.copy());
+		}
+		return items;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.geometry.AABB, org.dyn4j.collision.broadphase.BroadphaseFilter)
+	 */
+	@Deprecated
+	@Override
+	public List<CollisionItem<T, E>> detect(AABB aabb, BroadphaseFilter<T, E> filter) {
+		int eSize = Collisions.getEstimatedCollisionsPerObject();
+		List<CollisionItem<T, E>> items = new ArrayList<CollisionItem<T,E>>(eSize);
+		Iterator<CollisionItem<T, E>> it = this.detectIterator(aabb);
+		while (it.hasNext()) {
+			CollisionItem<T, E> item = it.next();
+			if (filter.isAllowed(aabb, item.getBody(), item.getFixture())) {
+				items.add(item.copy());
+			}
+		}
+		return items;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.geometry.Ray, double)
+	 */
+	@Override
+	public List<CollisionItem<T, E>> detect(Ray ray, double length) {
+		int eSize = Collisions.getEstimatedRaycastCollisions(this.size());
+		List<CollisionItem<T, E>> items = new ArrayList<CollisionItem<T,E>>(eSize);
+		Iterator<CollisionItem<T, E>> it = this.detectIterator(ray, length);
+		while (it.hasNext()) {
+			CollisionItem<T, E> item = it.next();
+			items.add(item.copy());
+		}
+		return items;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#raycast(org.dyn4j.geometry.Ray, double)
+	 */
+	@Deprecated
+	@Override
+	public List<CollisionItem<T, E>> raycast(Ray ray, double length) {
+		return this.detect(ray, length);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.geometry.Ray, length, org.dyn4j.collision.broadphase.BroadphaseFilter)
+	 */
+	@Deprecated
+	@Override
+	public List<CollisionItem<T, E>> raycast(Ray ray, double length, BroadphaseFilter<T, E> filter) {
+		int eSize = Collisions.getEstimatedRaycastCollisions(this.size());
+		List<CollisionItem<T, E>> items = new ArrayList<CollisionItem<T,E>>(eSize);
+		Iterator<CollisionItem<T, E>> it = this.detectIterator(ray, length);
+		while (it.hasNext()) {
+			CollisionItem<T, E> item = it.next();
+			if (filter.isAllowed(ray, length, item.getBody(), item.getFixture())) {
+				items.add(item.copy());
+			}
+		}
+		return items;
+	}
+
 	/**
 	 * Returns true if the ray and AABB intersect.
 	 * <p>
 	 * This method is ideally called for a number of AABBs where the invDx and invDy can
 	 * be computed once.
+	 * <p>
+	 * <a href="http://tavianator.com/2011/05/fast-branchless-raybounding-box-intersections/">http://tavianator.com/2011/05/fast-branchless-raybounding-box-intersections/</a>
 	 * @param start the start position of the ray
 	 * @param length the length of the ray
 	 * @param invDx the inverse of the x component of the ray direction
@@ -167,7 +339,7 @@ public abstract class AbstractBroadphaseDetector<E extends Collidable<T>, T exte
 	 * @param aabb the AABB to test
 	 * @return true if the AABB and ray intersect
 	 */
-	protected boolean raycast(Vector2 start, double length, double invDx, double invDy, AABB aabb) {
+	static boolean raycast(Vector2 start, double length, double invDx, double invDy, AABB aabb) {
 		// see here for implementation details
 		// http://tavianator.com/2011/05/fast-branchless-raybounding-box-intersections/
 		double tx1 = (aabb.getMinX() - start.x) * invDx;
@@ -187,30 +359,6 @@ public abstract class AbstractBroadphaseDetector<E extends Collidable<T>, T exte
 		if (tmin > length) return false;
 		// along the ray, tmax should be larger than tmin
 		return tmax >= tmin;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect()
-	 */
-	@Override
-	public List<BroadphasePair<E, T>> detect() {
-		return this.detect(this.defaultFilter);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.geometry.AABB)
-	 */
-	@Override
-	public List<BroadphaseItem<E, T>> detect(AABB aabb) {
-		return this.detect(aabb, this.defaultFilter);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#raycast(org.dyn4j.geometry.Ray, double)
-	 */
-	@Override
-	public List<BroadphaseItem<E, T>> raycast(Ray ray, double length) {
-		return this.raycast(ray, length, this.defaultFilter);
 	}
 	
 	/* (non-Javadoc)
@@ -235,5 +383,21 @@ public abstract class AbstractBroadphaseDetector<E extends Collidable<T>, T exte
 	@Override
 	public void setAABBExpansion(double expansion) {
 		this.expansion = expansion;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#isUpdateTrackingEnabled()
+	 */
+	@Override
+	public boolean isUpdateTrackingEnabled() {
+		return this.updateTrackingEnabled;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#setUpdateTrackingEnabled(boolean)
+	 */
+	@Override
+	public void setUpdateTrackingEnabled(boolean flag) {
+		this.updateTrackingEnabled = flag;
 	}
 }

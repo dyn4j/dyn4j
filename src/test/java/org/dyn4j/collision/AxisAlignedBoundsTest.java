@@ -376,6 +376,45 @@ public class AxisAlignedBoundsTest {
 	}
 	
 	/**
+	 * Tests the isOutside method on a {@link Segment}.
+	 */
+	@Test
+	public void isOutsideAABB() {
+		// create some shapes
+		AABB aabb = new AABB(0,0,1,1);
+		
+		// should be in
+		TestCase.assertFalse(bounds.isOutside(aabb));
+		
+		// test half way in and out
+		aabb.translate(9.5, 0.0);
+		TestCase.assertFalse(bounds.isOutside(aabb));
+		
+		// test all the way out
+		aabb.translate(1.5, 0.0);
+		TestCase.assertTrue(bounds.isOutside(aabb));
+		
+		// test half way out a corner
+		aabb.translate(-1.5, 9.5);
+		TestCase.assertFalse(bounds.isOutside(aabb));
+		
+		// test moving the bounds
+		bounds.translate(2.0, 1.0);
+		
+		// test half way in and out
+		aabb.translate(2.0, 0.0);
+		TestCase.assertFalse(bounds.isOutside(aabb));
+		
+		// test all the way out
+		aabb.translate(1.0, 0.0);
+		TestCase.assertTrue(bounds.isOutside(aabb));
+		
+		// test half way out a corner
+		aabb.translate(-0.5, 1.0);
+		TestCase.assertFalse(bounds.isOutside(aabb));
+	}
+	
+	/**
 	 * Tests shifting the coordinates of the bounds.
 	 */
 	@Test

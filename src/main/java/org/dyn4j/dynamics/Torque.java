@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,7 +29,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents a torque about the z-axis.
  * @author William Bittle
- * @version 3.2.0
+ * @version 4.0.0
  * @since 1.0.0
  */
 public class Torque {
@@ -84,7 +84,7 @@ public class Torque {
 	 * Returns true if this torque should be removed.
 	 * <p>
 	 * Implement this method to create {@link Torque} objects
-	 * that are not cleared each iteration by the {@link World}.
+	 * that are not cleared during the accumulation step.
 	 * <p>
 	 * The default implementation always returns true.
 	 * @param elapsedTime the elapsed time since the last call to this method

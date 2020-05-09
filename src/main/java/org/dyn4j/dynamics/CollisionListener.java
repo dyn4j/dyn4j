@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -54,9 +54,11 @@ import org.dyn4j.geometry.Shape;
  * Modification of the {@link World} is permitted in these methods.  Modification of the {@link Body}'s
  * fixtures is not permitted (adding/removing will cause a runtime exception).
  * @author William Bittle
- * @version 3.2.0
+ * @version 4.0.0
  * @since 1.0.0
+ * @deprecated Deprecated in 4.0.0. Use the CollisionListener in the world package instead.
  */
+@Deprecated
 public interface CollisionListener extends Listener {
 	/**
 	 * Called when two {@link BodyFixture}s are colliding as determined by the {@link BroadphaseDetector}.
@@ -151,5 +153,6 @@ public interface CollisionListener extends Listener {
 	 * @return boolean true if processing should continue for this collision
 	 * @since 3.0.2
 	 */
+	@SuppressWarnings("rawtypes")
 	public abstract boolean collision(ContactConstraint contactConstraint);
 }

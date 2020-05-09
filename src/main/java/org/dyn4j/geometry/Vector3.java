@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,7 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.Copyable;
 import org.dyn4j.Epsilon;
 
 /**
@@ -32,10 +33,10 @@ import org.dyn4j.Epsilon;
  * Used to solve 3x3 systems of equations.
  * @see Vector2
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.0.0
  * @since 1.0.0
  */
-public class Vector3 {
+public class Vector3 implements Copyable<Vector3> {
 	/** The magnitude of the x component of this {@link Vector3} */
 	public double x;
 	
@@ -96,9 +97,8 @@ public class Vector3 {
 		this.z = p2.z - p1.z;
 	}
 	
-	/**
-	 * Returns a copy of this {@link Vector3}.
-	 * @return {@link Vector3}
+	/* (non-Javadoc)
+	 * @see org.dyn4j.Copyable#copy()
 	 */
 	public Vector3 copy() {
 		return new Vector3(this.x, this.y, this.z);

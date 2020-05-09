@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -39,9 +39,12 @@ import org.dyn4j.resources.Messages;
 /**
  * Used to solve the contact constraints and joints for a group of interconnected bodies.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.0.0
  * @since 1.0.0
+ * @deprecated Deprecated in 4.0.0. Use the Island class in the world package instead.
  */
+@Deprecated
+@SuppressWarnings({"rawtypes", "unchecked"})
 final class Island {
 	/** The list of {@link Body}s on this {@link Island} */
 	final List<Body> bodies;
@@ -276,15 +279,15 @@ final class Island {
 					if (body.velocity.getMagnitudeSquared() > sleepLinearVelocitySquared || body.angularVelocity > sleepAngularVelocity) {
 						// if either the linear or angular velocity is above the 
 						// threshold then reset the sleep time
-						body.sleepTime = 0.0;
+						body.atRestTime = 0.0;
 						minSleepTime = 0.0;
 					} else {
 						// then increment the sleep time
-						body.sleepTime += step.dt;
-						minSleepTime = Math.min(minSleepTime, body.sleepTime);
+						body.atRestTime += step.dt;
+						minSleepTime = Math.min(minSleepTime, body.atRestTime);
 					}
 				} else {
-					body.sleepTime = 0.0;
+					body.atRestTime = 0.0;
 					minSleepTime = 0.0;
 				}
 			}

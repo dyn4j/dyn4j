@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2002 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,7 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.Copyable;
 import org.dyn4j.Epsilon;
 import org.dyn4j.resources.Messages;
 
@@ -32,10 +33,10 @@ import org.dyn4j.resources.Messages;
  * <p>
  * Used to solve 3x3 systems of equations.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.0.0
  * @since 1.0.0
  */
-public class Matrix33 {
+public class Matrix33 implements Copyable<Matrix33> {
 	/** The element at 0,0 */
 	public double m00;
 	
@@ -127,10 +128,8 @@ public class Matrix33 {
 		this.m20 = matrix.m20; this.m21 = matrix.m21; this.m22 = matrix.m22;
 	}
 	
-	/**
-	 * Returns a copy of this {@link Matrix33}.
-	 * @return {@link Matrix33}
-	 * @since 3.4.0
+	/* (non-Javadoc)
+	 * @see org.dyn4j.Copyable#copy()
 	 */
 	public Matrix33 copy() {
 		return new Matrix33(this);

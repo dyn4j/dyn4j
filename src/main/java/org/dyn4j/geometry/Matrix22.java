@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,7 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.Copyable;
 import org.dyn4j.Epsilon;
 import org.dyn4j.resources.Messages;
 
@@ -32,10 +33,10 @@ import org.dyn4j.resources.Messages;
  * <p>
  * Used to solve 2x2 systems of equations.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.0.0
  * @since 1.0.0
  */
-public class Matrix22 {
+public class Matrix22 implements Copyable<Matrix22> {
 	/** The element at 0,0 */
 	public double m00;
 	
@@ -94,10 +95,8 @@ public class Matrix22 {
 		this.m10 = matrix.m10; this.m11 = matrix.m11;
 	}
 	
-	/**
-	 * Returns a copy of this {@link Matrix22}.
-	 * @return {@link Matrix22}
-	 * @since 3.4.0
+	/* (non-Javadoc)
+	 * @see org.dyn4j.Copyable#copy()
 	 */
 	public Matrix22 copy() {
 		return new Matrix22(this);
@@ -394,6 +393,29 @@ public class Matrix22 {
 		this.m10 = -det * c;
 		this.m11 =  det * a;
 		return this;
+	}
+	
+	/**
+	 * Performs the inverse of this {@link Matrix22} and places the
+	 * result in the given {@link Matrix22}.
+	 * @param dest the destination for the inverse
+	 * @since 4.0.0
+	 */
+	public void setInverse(Matrix22 dest) {
+		// get the determinant
+		double det = this.determinant();
+		// check for zero determinant
+		if (Math.abs(det) > Epsilon.E) {
+			det = 1.0 / det;
+		}
+//		double a = this.m00;
+//		double b = this.m01;
+//		double c = this.m10;
+//		double d = this.m11;
+		dest.m00 =  det * this.m11;
+		dest.m01 = -det * this.m01;
+		dest.m10 = -det * this.m10;
+		dest.m11 =  det * this.m00;
 	}
 	
 	/**

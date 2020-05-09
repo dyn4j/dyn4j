@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,7 +24,7 @@
  */
 package org.dyn4j.collision.broadphase;
 
-import org.dyn4j.collision.Collidable;
+import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.collision.Fixture;
 
 /**
@@ -32,29 +32,21 @@ import org.dyn4j.collision.Fixture;
  * <p>
  * The leaf nodes in a {@link DynamicAABBTree} are the nodes that contain the {@link Fixture} AABBs.
  * @author William Bittle
- * @version 3.2.0
+ * @version 4.0.0
  * @since 3.2.0
- * @param <E> the {@link Collidable} type
- * @param <T> the {@link Fixture} type
+ * @param <T> the {@link CollisionBody} type
+ * @param <E> the {@link Fixture} type
  */
-final class DynamicAABBTreeLeaf<E extends Collidable<T>, T extends Fixture> extends DynamicAABBTreeNode {
-	/** The {@link Collidable} */
-	final E collidable;
-	
-	/** The {@link Fixture} */
-	final T fixture;
-	
-	/** Flag used to determine if a node has been tested before */
-	boolean tested = false;
+final class DynamicAABBTreeLeaf<T extends CollisionBody<E>, E extends Fixture> extends DynamicAABBTreeNode {
+	/** The collsion item */
+	final BroadphaseItem<T, E> item;
 	
 	/**
 	 * Minimal constructor.
-	 * @param collidable the collidable
-	 * @param fixture the fixture
+	 * @param item the collision item
 	 */
-	public DynamicAABBTreeLeaf(E collidable, T fixture) {
-		this.collidable = collidable;
-		this.fixture = fixture;
+	public DynamicAABBTreeLeaf(BroadphaseItem<T, E> item) {
+		this.item = item;
 	}
 	
 	/* (non-Javadoc)
@@ -66,8 +58,7 @@ final class DynamicAABBTreeLeaf<E extends Collidable<T>, T extends Fixture> exte
 		if (obj == this) return true;
 		if (obj instanceof DynamicAABBTreeLeaf) {
 			DynamicAABBTreeLeaf<?, ?> leaf = (DynamicAABBTreeLeaf<?, ?>)obj;
-			if (leaf.collidable == this.collidable &&
-				leaf.fixture == this.fixture) {
+			if (leaf.item.equals(this.item)) {
 				return true;
 			}
 		}
@@ -79,10 +70,7 @@ final class DynamicAABBTreeLeaf<E extends Collidable<T>, T extends Fixture> exte
 	 */
 	@Override
 	public int hashCode() {
-		int hash = 17;
-		hash = hash * 31 + this.collidable.hashCode();
-		hash = hash * 31 + this.fixture.hashCode();
-		return hash;
+		return this.item.hashCode();
 	}
 	
 	/* (non-Javadoc)
@@ -91,11 +79,10 @@ final class DynamicAABBTreeLeaf<E extends Collidable<T>, T extends Fixture> exte
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("DynamicAABBTreeLeaf[Collidable=").append(this.collidable.hashCode())
-		  .append("|Fixture=").append(this.fixture.hashCode())
+		sb.append("DynamicAABBTreeLeaf[Body=").append(this.item.body.hashCode())
+		  .append("|Fixture=").append(this.item.fixture.hashCode())
 		  .append("|AABB=").append(this.aabb.toString())
 		  .append("|Height=").append(this.height)
-		  .append("|Tested=").append(this.tested)
 		  .append("]");
 		return sb.toString();
 	}

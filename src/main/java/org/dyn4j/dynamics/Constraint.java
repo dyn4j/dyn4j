@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -30,9 +30,11 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents some physical constraint between a pair of {@link Body}s.
  * @author William Bittle
- * @version 3.2.0
+ * @version 4.0.0
  * @since 1.0.0
+ * @deprecated Deprecated in 4.0.0. Replacement was not needed.
  */
+@Deprecated
 public abstract class Constraint implements Shiftable {
 	/** The first {@link Body} */
 	protected final Body body1;
@@ -45,14 +47,6 @@ public abstract class Constraint implements Shiftable {
 	/** Whether the {@link Constraint} has been added to an {@link Island} or not */
 	boolean onIsland;
 
-	/** 
-	 * The world the constraint has been added to
-	 * <p>
-	 * This is really only used for Joints to determine if they have been added
-	 * to a world already. 
-	 */
-	World world;
-	
 	/**
 	 * Full constructor.
 	 * @param body1 the first participating {@link Body}
