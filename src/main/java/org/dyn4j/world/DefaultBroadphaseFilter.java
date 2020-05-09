@@ -29,11 +29,8 @@ import org.dyn4j.collision.Filter;
 import org.dyn4j.collision.Fixture;
 
 /**
- * A default filter for {@link BroadphaseDetector}s that filters {@link Fixture}s by 
- * their {@link Filter}s.
- * <p>
- * This is the default {@link BroadphaseFilter} used in the {@link BroadphaseDetector}s.  Use the methods
- * in the {@link BroadphaseDetector} that accept {@link BroadphaseFilter}a to override the filter.
+ * The default filter for {@link CollisionWorld}s that filters {@link Fixture}s by 
+ * their {@link Filter}s and their enable flags.
  * <p>
  * It's recommended that this class be extended when creating custom {@link BroadphaseFilter}s to ensure
  * the default functionality is retained. 

@@ -31,7 +31,7 @@ package org.dyn4j;
  * @since 4.0.0
  * @param <T> the copied object type
  */
-public interface Copyable<T extends Copyable<T>> {
+public interface Copyable<T extends Copyable<? extends T>> {
 	/**
 	 * Returns a deep copy of this object.
 	 * @return T

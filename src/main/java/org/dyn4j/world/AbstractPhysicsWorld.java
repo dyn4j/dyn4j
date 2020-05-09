@@ -92,6 +92,8 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		this.step = new TimeStep(this.settings.getStepFrequency());
 		this.gravity = PhysicsWorld.EARTH_GRAVITY.copy();
 		
+		// override the broadphase filter
+		// the CollisionWorld uses the DefaultBroadphaseFilter
 		this.detectBroadphaseFilter = new DetectBroadphaseFilter<T>(this);
 		this.coefficientMixer = CoefficientMixer.DEFAULT_MIXER;
 		this.contactConstraintSolver = new SequentialImpulses<T>();
