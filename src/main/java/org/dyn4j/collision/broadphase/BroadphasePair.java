@@ -24,6 +24,7 @@
  */
 package org.dyn4j.collision.broadphase;
 
+import org.dyn4j.collision.AbstractCollisionPair;
 import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.collision.Fixture;
@@ -36,7 +37,7 @@ import org.dyn4j.collision.Fixture;
  * @param <T> the {@link CollisionBody} type
  * @param <E> the {@link Fixture} type
  */
-public final class BroadphasePair<T extends CollisionBody<E>, E extends Fixture> implements CollisionPair<T, E> {
+public final class BroadphasePair<T extends CollisionBody<E>, E extends Fixture> extends AbstractCollisionPair<T, E> implements CollisionPair<T, E> {
 	
 	// the first
 	
@@ -78,7 +79,7 @@ public final class BroadphasePair<T extends CollisionBody<E>, E extends Fixture>
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		return CollisionPair.equals(this, obj);
+		return AbstractCollisionPair.equals(this, obj);
 	}
 	
 	/* (non-Javadoc)
@@ -86,7 +87,7 @@ public final class BroadphasePair<T extends CollisionBody<E>, E extends Fixture>
 	 */
 	@Override
 	public int hashCode() {
-		return CollisionPair.getHashCode(this.body1, this.fixture1, this.body2, this.fixture2);
+		return AbstractCollisionPair.getHashCode(this.body1, this.fixture1, this.body2, this.fixture2);
 	}
 	
 	/* (non-Javadoc)

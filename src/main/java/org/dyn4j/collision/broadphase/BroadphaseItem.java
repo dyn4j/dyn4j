@@ -24,6 +24,7 @@
  */
 package org.dyn4j.collision.broadphase;
 
+import org.dyn4j.collision.AbstractCollisionItem;
 import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.collision.CollisionItem;
 import org.dyn4j.collision.Fixture;
@@ -36,7 +37,7 @@ import org.dyn4j.collision.Fixture;
  * @param <T> the {@link CollisionBody} type
  * @param <E> the {@link Fixture} type
  */
-public final class BroadphaseItem<T extends CollisionBody<E>, E extends Fixture> implements CollisionItem<T, E> {
+public final class BroadphaseItem<T extends CollisionBody<E>, E extends Fixture> extends AbstractCollisionItem<T, E> implements CollisionItem<T, E> {
 	/** The {@link CollisionBody} */
 	T body;
 	
@@ -63,7 +64,7 @@ public final class BroadphaseItem<T extends CollisionBody<E>, E extends Fixture>
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		return CollisionItem.equals(this, obj);
+		return AbstractCollisionItem.equals(this, obj);
 	}
 	
 	/* (non-Javadoc)
@@ -71,7 +72,7 @@ public final class BroadphaseItem<T extends CollisionBody<E>, E extends Fixture>
 	 */
 	@Override
 	public int hashCode() {
-		return CollisionItem.getHashCode(this.body, this.fixture);
+		return AbstractCollisionItem.getHashCode(this.body, this.fixture);
 	}
 	
 	/* (non-Javadoc)

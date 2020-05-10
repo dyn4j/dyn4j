@@ -36,49 +36,6 @@ import org.dyn4j.Copyable;
  */
 public interface CollisionPair<T extends CollisionBody<E>, E extends Fixture> extends Copyable<CollisionPair<T, E>> {
 	/**
-	 * Returns the hashcode for a collision pair.
-	 * @param body1 the first body
-	 * @param fixture1 the first body's fixture
-	 * @param body2 the second body
-	 * @param fixture2 the second body's fixture
-	 * @return int
-	 */
-	public static int getHashCode(CollisionBody<?> body1, Fixture fixture1, CollisionBody<?> body2, Fixture fixture2) {
-		int h1 = CollisionItem.getHashCode(body1, fixture1);
-		int h2 = CollisionItem.getHashCode(body2, fixture2);
-		// the total can be in any order
-		return h1 + h2;
-	}
-	
-	/**
-	 * Returns true if the given pair and object are equal.
-	 * @param pairA the first pair
-	 * @param obj the other object
-	 * @return boolean
-	 */
-	public static boolean equals(CollisionPair<?, ?> pairA, Object obj) {
-		if (obj == pairA) return true;
-		if (obj == null || pairA == null) return false;
-		if (obj instanceof CollisionPair) {
-			CollisionPair<?, ?> pairB = (CollisionPair<?, ?>)obj;
-			
-			CollisionBody<?> c1a = pairA.getBody1();
-			Fixture f1a = pairA.getFixture1();
-			CollisionBody<?> c2a = pairA.getBody2();
-			Fixture f2a = pairA.getFixture2();
-			
-			CollisionBody<?> c1b = pairB.getBody1();
-			Fixture f1b = pairB.getFixture1();
-			CollisionBody<?> c2b = pairB.getBody2();
-			Fixture f2b = pairB.getFixture2();
-			
-			return (c1b == c1a && f1b == f1a && c2b == c2a && f2b == f2a) || 
-				   (c1b == c2a && f1b == f2a && c2b == c1a && f2b == f1a);
-		}
-		return false;
-	}
-	
-	/**
 	 * Returns the first {@link CollisionBody}.
 	 * @return E
 	 */

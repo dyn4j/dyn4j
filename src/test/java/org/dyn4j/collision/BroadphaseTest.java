@@ -621,7 +621,7 @@ public class BroadphaseTest {
 	 */
 	private boolean containsPair(CollisionPair<CollidableTest, Fixture> pair, List<CollisionPair<CollidableTest, Fixture>> pairs) {
 		for (CollisionPair<CollidableTest, Fixture> test : pairs) {
-			if (CollisionPair.equals(test, pair)) {
+			if (pair.equals(test)) {
 				return true;
 			}
 		}

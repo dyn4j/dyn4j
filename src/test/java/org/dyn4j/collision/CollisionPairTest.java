@@ -76,8 +76,8 @@ public class CollisionPairTest {
 	public void hashCodeTest() {
 		// HashCode must be the same for the same input, but could be the same for different input
 		// in this particular case, the hashcode for re-ordered body/fixtures should be the same
-		int h1 = CollisionPair.getHashCode(this.cb1, this.f1a, this.cb2, this.f2);
-		int h2 = CollisionPair.getHashCode(this.cb2, this.f2, this.cb1, this.f1a);
+		int h1 = AbstractCollisionPair.getHashCode(this.cb1, this.f1a, this.cb2, this.f2);
+		int h2 = AbstractCollisionPair.getHashCode(this.cb2, this.f2, this.cb1, this.f1a);
 		
 		TestCase.assertEquals(h1, h2);
 		
@@ -92,19 +92,19 @@ public class CollisionPairTest {
 	
 	@Test
 	public void equalsTest() {
-		TestCase.assertTrue(CollisionPair.equals(this.pair_1a_to_2, this.pair_1a_to_2));
-		TestCase.assertTrue(CollisionPair.equals(this.pair_1a_to_2, this.pair_2_to_1a));
+		TestCase.assertTrue(AbstractCollisionPair.equals(this.pair_1a_to_2, this.pair_1a_to_2));
+		TestCase.assertTrue(AbstractCollisionPair.equals(this.pair_1a_to_2, this.pair_2_to_1a));
 		
-		TestCase.assertFalse(CollisionPair.equals(this.pair_1a_to_2, this.pair_1b_to_2));
-		TestCase.assertFalse(CollisionPair.equals(this.pair_1b_to_2, this.pair_1a_to_2));
+		TestCase.assertFalse(AbstractCollisionPair.equals(this.pair_1a_to_2, this.pair_1b_to_2));
+		TestCase.assertFalse(AbstractCollisionPair.equals(this.pair_1b_to_2, this.pair_1a_to_2));
 		
-		TestCase.assertFalse(CollisionPair.equals(this.pair_1a_to_2, this.pair_2_to_1b));
-		TestCase.assertFalse(CollisionPair.equals(this.pair_2_to_1b, this.pair_1a_to_2));
+		TestCase.assertFalse(AbstractCollisionPair.equals(this.pair_1a_to_2, this.pair_2_to_1b));
+		TestCase.assertFalse(AbstractCollisionPair.equals(this.pair_2_to_1b, this.pair_1a_to_2));
 		
-		TestCase.assertTrue(CollisionPair.equals(this.pair_2_to_3, this.pair_2_to_3));
-		TestCase.assertTrue(CollisionPair.equals(this.pair_2_to_3, this.pair_3_to_2));
-		TestCase.assertTrue(CollisionPair.equals(this.pair_3_to_2, this.pair_2_to_3));
-		TestCase.assertTrue(CollisionPair.equals(this.pair_3_to_2, this.pair_3_to_2));
+		TestCase.assertTrue(AbstractCollisionPair.equals(this.pair_2_to_3, this.pair_2_to_3));
+		TestCase.assertTrue(AbstractCollisionPair.equals(this.pair_2_to_3, this.pair_3_to_2));
+		TestCase.assertTrue(AbstractCollisionPair.equals(this.pair_3_to_2, this.pair_2_to_3));
+		TestCase.assertTrue(AbstractCollisionPair.equals(this.pair_3_to_2, this.pair_3_to_2));
 	}
 	
 	@Test

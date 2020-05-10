@@ -22,60 +22,49 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.world;
+package org.dyn4j.collision;
 
-import org.dyn4j.collision.AbstractCollisionItem;
-import org.dyn4j.collision.CollisionBody;
-import org.dyn4j.collision.CollisionItem;
-import org.dyn4j.collision.Fixture;
+import org.dyn4j.Copyable;
 
 /**
- * Class used to save on allocation of {@link CollisionItem}s during pipeline operation.
+ * Abstract implementation of the {@link CollisionItem} interface.
  * @author William Bittle
  * @version 4.0.0
  * @since 4.0.0
  * @param <T> the {@link CollisionBody} type
  * @param <E> the {@link Fixture} type
  */
-final class CollisionItemAdapter<T extends CollisionBody<E>, E extends Fixture> extends AbstractCollisionItem<T, E> implements CollisionItem<T, E> {
-	/** The body */
-	private T body;
+public abstract class AbstractCollisionItem<T extends CollisionBody<E>, E extends Fixture> implements CollisionItem<T, E>, Copyable<CollisionItem<T, E>> {
 	
-	/** The fixture */
-	private E fixture;
-
+	// NOTE: if we ever move to Java 8 or higher, move these methods to the CollisionItem interface
+	
 	/**
-	 * Sets the body/fixture of this item.
-	 * @param body the body
-	 * @param fixture the fixture
+	 * Returns the hashcode for a collision item.
+	 * @param body the first body
+	 * @param fixture the first body's fixture
+	 * @return int
 	 */
-	public void set(T body, E fixture) {
-		this.body = body;
-		this.fixture = fixture;
+	public static int getHashCode(CollisionBody<?> body, Fixture fixture) {
+		final int prime = 17;
+		int h1 = 1;
+		h1 = h1 * prime + body.hashCode();
+		h1 = h1 * prime + fixture.hashCode();
+		return h1;
 	}
 	
-	@Override
-	public int hashCode() {
-		return AbstractCollisionItem.getHashCode(this.body, this.fixture);
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		return AbstractCollisionItem.equals(this, obj);
-	}
-	
-	@Override
-	public T getBody() {
-		return this.body;
-	}
-
-	@Override
-	public E getFixture() {
-		return this.fixture;
-	}
-
-	@Override
-	public CollisionItem<T, E> copy() {
-		throw new UnsupportedOperationException();
+	/**
+	 * Returns true if the given item and object are equal.
+	 * @param item the item
+	 * @param obj the other object
+	 * @return boolean
+	 */
+	public static boolean equals(CollisionItem<?, ?> item, Object obj) {
+		if (obj == item) return true;
+		if (obj == null || item == null) return false;
+		if (obj instanceof CollisionItem) {
+			CollisionItem<?, ?> other = (CollisionItem<?, ?>)obj;
+			return other.getBody() == item.getBody() && other.getFixture() == item.getFixture();
+		}
+		return false;
 	}
 }

@@ -36,36 +36,6 @@ import org.dyn4j.Copyable;
  */
 public interface CollisionItem<T extends CollisionBody<E>, E extends Fixture> extends Copyable<CollisionItem<T, E>> {
 	/**
-	 * Returns the hashcode for a collision item.
-	 * @param body the first body
-	 * @param fixture the first body's fixture
-	 * @return int
-	 */
-	public static int getHashCode(CollisionBody<?> body, Fixture fixture) {
-		final int prime = 17;
-		int h1 = 1;
-		h1 = h1 * prime + body.hashCode();
-		h1 = h1 * prime + fixture.hashCode();
-		return h1;
-	}
-	
-	/**
-	 * Returns true if the given item and object are equal.
-	 * @param item the item
-	 * @param obj the other object
-	 * @return boolean
-	 */
-	public static boolean equals(CollisionItem<?, ?> item, Object obj) {
-		if (obj == item) return true;
-		if (obj == null || item == null) return false;
-		if (obj instanceof CollisionItem) {
-			CollisionItem<?, ?> other = (CollisionItem<?, ?>)obj;
-			return other.getBody() == item.getBody() && other.getFixture() == item.getFixture();
-		}
-		return false;
-	}
-	
-	/**
 	 * Returns the {@link CollisionBody}.
 	 * @return T
 	 */
