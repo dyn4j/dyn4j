@@ -33,7 +33,7 @@ import junit.framework.TestCase;
 /**
  * Used to test the {@link WeldJoint} class.
  * @author William Bittle
- * @version 3.4.1
+ * @version 4.0.0
  * @since 1.0.2
  */
 public class WeldJointTest extends AbstractJointTest {

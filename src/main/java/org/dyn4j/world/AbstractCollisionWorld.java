@@ -146,7 +146,17 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 
 	@Override
 	public void removeAllBodies() {
-		this.removeAllBodies(false);
+		int bsize = this.bodies.size();
+		for (int i = 0; i < bsize; i++) {
+			// get the body
+			T body = this.bodies.get(i);
+			// set the world property to null
+			body.setFixtureModificationHandler(null);
+		}
+		
+		this.bodies.clear();
+		this.broadphaseDetector.clear();
+		this.collisionData.clear();
 	}
 
 	public boolean containsBody(T body) {
@@ -154,16 +164,33 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	}
 	
 	public boolean removeBody(int index) {
-		return this.removeBody(index, false);
+		T body = this.bodies.get(index);
+		return this.removeBody(body);
 	}
 
-	public boolean removeBody(int index, boolean notify) {
-		T body = this.bodies.get(index);
-		return this.removeBody(body, notify);
-	}
-	
 	public boolean removeBody(T body) {
-		return this.removeBody(body, false);
+		// remove the body from the list
+		boolean removed = this.bodies.remove(body);
+		
+		// only remove joints and contacts if the body was removed
+		if (removed) {
+			// set the world property to null
+			body.setFixtureModificationHandler(null);
+			
+			// remove the body from the broadphase
+			this.broadphaseDetector.remove(body);
+			
+			// remove any collision data
+			Iterator<V> iterator = this.collisionData.values().iterator();
+			while(iterator.hasNext()) {
+				V collision = iterator.next();
+				if (collision.getBody1() == body || collision.getBody2() == body) {
+					iterator.remove();
+				}
+			}
+		}
+		
+		return removed;
 	}
 	
 	@Override
@@ -841,6 +868,11 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 			
 			return collision;
 		}
+		
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
 	}
 	
 	private final class BodyIterator implements Iterator<T> {
@@ -937,6 +969,10 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 			return this.reusableResult;
 		}
 		
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
 	}
 	
 	private final class AABBBodyDetectIterator implements Iterator<DetectResult<T, E>>  {
@@ -980,6 +1016,11 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		@Override
 		public DetectResult<T, E> next() {
 			return this.reusableResult;
+		}
+		
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
 		}
 	}
 	
@@ -1032,6 +1073,11 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		@Override
 		public ConvexDetectResult<T, E> next() {
 			return this.reusableResult;
+		}
+		
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
 		}
 	}
 	
@@ -1086,6 +1132,11 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		@Override
 		public ConvexDetectResult<T, E> next() {
 			return this.reusableResult;
+		}
+		
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
 		}
 	}
 	
@@ -1144,6 +1195,11 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		@Override
 		public RaycastResult<T, E> next() {
 			return this.reusableResult;
+		}
+		
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
 		}
 	}
 
@@ -1223,6 +1279,11 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		@Override
 		public ConvexCastResult<T, E> next() {
 			return this.reusableResult;
+		}
+		
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
 		}
 	}
 

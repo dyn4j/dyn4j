@@ -996,6 +996,11 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 		public CollisionPair<T, E> next() {
 			return this.reusablePair;
 		}
+		
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
 	}
 
 	/**
@@ -1117,6 +1122,11 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 		@Override
 		public CollisionItem<T, E> next() {
 			return this.reusableItem;
+		}
+		
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
 		}
 	}
 
@@ -1274,6 +1284,11 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 		@Override
 		public CollisionItem<T, E> next() {
 			return this.reusableItem;
+		}
+		
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
 		}
 	}
 }

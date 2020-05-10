@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,9 +26,6 @@ package org.dyn4j.world.listener;
 
 import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.collision.Fixture;
-import org.dyn4j.collision.manifold.Manifold;
-import org.dyn4j.collision.narrowphase.Penetration;
-import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.world.BroadphaseCollisionData;
 import org.dyn4j.world.ManifoldCollisionData;
 import org.dyn4j.world.NarrowphaseCollisionData;
@@ -41,18 +38,20 @@ import org.dyn4j.world.NarrowphaseCollisionData;
  * <p>
  * By default this class allows processing to continue for all collision events.
  * @author William Bittle
- * @version 3.2.0
+ * @version 4.0.0
  * @since 1.0.0
+ * @param <T> the {@link CollisionBody} type
+ * @param <E> the {@link Fixture} type
  */
 public class CollisionListenerAdapter<T extends CollisionBody<E>, E extends Fixture> implements CollisionListener<T, E> {
 	@Override
-	public boolean collision(BroadphaseCollisionData<T, E> data) { return true; }
+	public boolean collision(BroadphaseCollisionData<T, E> collision) { return true; }
 	
 	@Override
-	public boolean collision(NarrowphaseCollisionData<T, E> data) { return true; }
+	public boolean collision(NarrowphaseCollisionData<T, E> collision) { return true; }
 
 	@Override
-	public boolean collision(ManifoldCollisionData<T, E> data) { return true; }
+	public boolean collision(ManifoldCollisionData<T, E> collision) { return true; }
 	
 //	@Override
 //	public boolean collision(ContactConstraint contactConstraint) { return true; }

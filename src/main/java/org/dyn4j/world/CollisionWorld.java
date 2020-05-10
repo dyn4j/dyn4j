@@ -49,9 +49,6 @@ public interface CollisionWorld<T extends CollisionBody<E>, E extends Fixture, V
 	
 	/**
 	 * Removes the {@link CollisionBody} at the given index from this {@link CollisionWorld}.
-	 * <p>
-	 * Use the {@link #removeBody(int, boolean)} method to enable implicit
-	 * destruction notification.
 	 * @param index the index of the body to remove.
 	 * @return boolean true if the body was removed
 	 * @since 3.2.0
@@ -59,65 +56,18 @@ public interface CollisionWorld<T extends CollisionBody<E>, E extends Fixture, V
 	public boolean removeBody(int index);
 
 	/**
-	 * Removes the {@link CollisionBody} at the given index from this {@link CollisionWorld}.
-	 * <p>
-	 * When a body is removed, joints and contacts may be implicitly destroyed.
-	 * Pass true to the notify parameter to be notified of the destruction of these objects
-	 * via the {@link DestructionListener}s.
-	 * <p>
-	 * This method does not trigger {@link ContactListener#end(ContactPoint)} events
-	 * for the contacts that are being removed.
-	 * @param index the index of the body to remove.
-	 * @param notify true if implicit destruction should be notified
-	 * @return boolean true if the body was removed
-	 * @since 3.2.0
-	 */
-	public boolean removeBody(int index, boolean notify);
-	
-	/**
 	 * Removes the given {@link CollisionBody} from this {@link CollisionWorld}.
-	 * <p>
-	 * Use the {@link #removeBody(CollisionBody, boolean)} method to enable implicit
-	 * destruction notification.
 	 * @param body the {@link CollisionBody} to remove.
 	 * @return boolean true if the body was removed
 	 */
 	public boolean removeBody(T body);
 	
 	/**
-	 * Removes the given {@link CollisionBody} from this {@link CollisionWorld}.
-	 * <p>
-	 * When a body is removed, joints and contacts may be implicitly destroyed.
-	 * Pass true to the notify parameter to be notified of the destruction of these objects
-	 * via the {@link DestructionListener}s.
-	 * <p>
-	 * This method does not trigger {@link ContactListener#end(ContactPoint)} events
-	 * for the contacts that are being removed.
-	 * @param body the {@link CollisionBody} to remove
-	 * @param notify true if implicit destruction should be notified
-	 * @return boolean true if the body was removed
-	 * @since 3.1.1
-	 */
-	public boolean removeBody(T body, boolean notify);
-
-	/**
-	 * This is a convenience method for the {@link #removeAllBodiesAndJoints()} method since all joints will be removed
-	 * when all bodies are removed anyway.
-	 * <p>
-	 * This method does not notify of the destroyed contacts, joints, etc.
-	 * @see #removeAllBodies(boolean)
+	 * Removes all bodies from this world.
 	 * @since 3.0.1
 	 */
 	public void removeAllBodies();
 	
-	/**
-	 * This is a convenience method for the {@link #removeAllBodiesAndJoints(boolean)} method since all joints will be removed
-	 * when all bodies are removed anyway.
-	 * @param notify true if destruction of joints and contacts should be notified of by the {@link DestructionListener}
-	 * @since 3.0.1
-	 */
-	public void removeAllBodies(boolean notify);
-
 	/**
 	 * Returns the number of {@link CollisionBody}s in this {@link CollisionWorld}.
 	 * @return int the number of bodies

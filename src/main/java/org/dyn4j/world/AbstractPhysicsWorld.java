@@ -228,6 +228,27 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		Joint<T> joint = this.joints.get(index);
 		return removeJoint(joint);
 	}
+	
+	@Override
+	public void removeAllBodies() {
+		this.removeAllBodiesAndJoints(false);
+	}
+	
+	@Override
+	public boolean removeBody(int index) {
+		return this.removeBody(index, false);
+	}
+	
+	@Override
+	public boolean removeBody(int index, boolean notify) {
+		T body = this.bodies.get(index);
+		return this.removeBody(body, notify);
+	}
+	
+	@Override
+	public boolean removeBody(T body) {
+		return this.removeBody(body, false);
+	}
 
 	@Override
 	public void removeAllBodiesAndJoints() {
@@ -365,9 +386,18 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	
 	@Override
 	public void removeAllBodies(boolean notify) {
+		int bsize = this.bodies.size();
+		
 		// if we don't need to notify of anything being
 		// destroyed, then we can just clear everything
 		if (!notify) {
+			for (int i = 0; i < bsize; i++) {
+				// get the body
+				T body = this.bodies.get(i);
+				// set the world property to null
+				body.setFixtureModificationHandler(null);
+			}
+			
 			this.clear();
 			return;
 		}
@@ -381,7 +411,6 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		
 		// loop over the bodies and clear all
 		// joints and contacts
-		int bsize = this.bodies.size();
 		for (int i = 0; i < bsize; i++) {
 			// get the body
 			T body = this.bodies.get(i);

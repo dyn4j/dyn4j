@@ -33,7 +33,7 @@ import junit.framework.TestCase;
 /**
  * Used to test the {@link WheelJoint} class.
  * @author William Bittle
- * @version 3.4.1
+ * @version 4.0.0
  * @since 3.0.0
  */
 public class WheelJointTest extends AbstractJointTest {

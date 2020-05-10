@@ -29,8 +29,7 @@ import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.collision.Fixture;
 
 /**
- * Represents a {@link PipelineListener} object that is notified when a {@link CollisionBody} 
- * goes out of {@link Bounds}.
+ * Represents an object that is notified when a {@link CollisionBody} goes out of {@link Bounds}.
  * <p>
  * NOTE: Modification of the simulation in these methods can cause unexpected behavior.
  * @author William Bittle

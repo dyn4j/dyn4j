@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -28,9 +28,7 @@ import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.collision.Fixture;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.collision.manifold.Manifold;
-import org.dyn4j.collision.manifold.ManifoldSolver;
 import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
-import org.dyn4j.collision.narrowphase.Penetration;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Shape;
@@ -44,77 +42,64 @@ import org.dyn4j.world.NarrowphaseCollisionData;
  * Events for a pair of bodies (as long as they pass the criteria for the event to be called)
  * will be called in the following order:
  * <ol>
- * <li>Collision detected by the broadphase: {@link #collision(Body, BodyFixture, Body, BodyFixture)}</li>
- * <li>Collision detected by the narrowphase: {@link #collision(Body, BodyFixture, Body, BodyFixture, Penetration)}</li>
- * <li>Contact manifold created by the manifold solver:{@link #collision(Body, BodyFixture, Body, BodyFixture, Manifold)}</li>
- * <li>Contact constraint created: {@link #collision(ContactConstraint)}</li>
+ * <li>Collision detected by the broadphase: {@link #collision(BroadphaseCollisionData)}</li>
+ * <li>Collision detected by the narrowphase: {@link #collision(NarrowphaseCollisionData)}</li>
+ * <li>Contact manifold created by the manifold solver:{@link #collision(ManifoldCollisionData)}</li>
  * </ol>
  * Returning false from any of the listener methods will halt processing of that event.  Other
  * {@link CollisionListener}s will still be notified of that event, but subsequent events will
  * not occur (this indicates that you didn't want the collision to be resolved later).
- * <p>
- * Modification of the {@link World} is permitted in these methods.  Modification of the {@link Body}'s
- * fixtures is not permitted (adding/removing will cause a runtime exception).
  * @author William Bittle
- * @version 3.2.0
+ * @version 4.0.0
  * @since 1.0.0
+ * @param <T> the {@link CollisionBody} type
+ * @param <E> the {@link Fixture} type
  */
 public interface CollisionListener<T extends CollisionBody<E>, E extends Fixture> {
 	/**
-	 * Called when two {@link BodyFixture}s are colliding as determined by the {@link BroadphaseDetector}.
-	 * 	 * <p>
-	 * {@link Body} objects can have many {@link Convex} {@link Shape}s that make up their geometry.  Because
-	 * of this, this method may be called multiple times if two multi-fixtured {@link Body}s are colliding.
+	 * Called when two {@link Fixture}s are colliding as determined by the {@link BroadphaseDetector}.
 	 * <p>
-	 * This method is called when the two {@link BodyFixture}'s expanded {@link AABB}s are overlapping.
+	 * {@link CollisionBody} objects can have many {@link Convex} {@link Shape}s that make up their geometry.  Because
+	 * of this, this method may be called multiple times if two multi-fixtured {@link CollisionBody}s are colliding.
+	 * <p>
+	 * This method is called when the two {@link Fixture}'s expanded {@link AABB}s are overlapping.
 	 * Visually the bodies may not appear to be colliding (which is a valid case).  If you need to 
-	 * make sure the {@link Body}s are colliding, and not just their AABBs, use the 
-	 * {@link #collision(Body, BodyFixture, Body, BodyFixture, Penetration)} method.
+	 * make sure the {@link CollisionBody}s are colliding, and not just their AABBs, use the 
+	 * {@link #collision(NarrowphaseCollisionData)} method.
 	 * <p>
 	 * Return false from this method to stop processing of this collision.  Other 
 	 * {@link CollisionListener}s will still be notified of this event, however, no further
 	 * collision or contact events will occur for this pair.
 	 * <p>
-	 * The {@link #collision(Body, BodyFixture, Body, BodyFixture, Penetration)} method is next
-	 * in the sequence of collision events.
-	 * @param body1 the first {@link Body}
-	 * @param fixture1 the first {@link Body}'s {@link BodyFixture}
-	 * @param body2 the second {@link Body}
-	 * @param fixture2 the second {@link Body}'s {@link BodyFixture}
+	 * The {@link #collision(NarrowphaseCollisionData)} method is next in the sequence of collision events.
+	 * @param collision the broadphase collision data
 	 * @return boolean true if processing should continue for this collision
 	 * @since 3.2.0
 	 */
-	public abstract boolean collision(BroadphaseCollisionData<T, E> data);
+	public abstract boolean collision(BroadphaseCollisionData<T, E> collision);
 	
 	/**
-	 * Called when two {@link BodyFixture}s are colliding as determined by the {@link NarrowphaseDetector}.
+	 * Called when two {@link Fixture}s are colliding as determined by the {@link NarrowphaseDetector}.
 	 * <p>
-	 * {@link Body} objects can have many {@link Convex} {@link Shape}s that make up their geometry.  Because
-	 * of this, this method may be called multiple times if two multi-fixtured {@link Body}s are colliding.
-	 * <p>
-	 * Modification of the {@link Penetration} object is allowed.  The {@link Penetration} object passed 
-	 * will be used to generate the contact manifold in the {@link ManifoldSolver}.
+	 * {@link CollisionBody} objects can have many {@link Convex} {@link Shape}s that make up their geometry.  Because
+	 * of this, this method may be called multiple times if two multi-fixtured {@link CollisionBody}s are colliding.
 	 * <p>
 	 * Return false from this method to stop processing of this collision.  Other 
 	 * {@link CollisionListener}s will still be notified of this event, however, no further
 	 * collision or contact events will occur for this pair.
 	 * <p>
-	 * The {@link #collision(Body, BodyFixture, Body, BodyFixture, Manifold)} method is next
+	 * The {@link #collision(ManifoldCollisionData)} method is next
 	 * in the sequence of collision events.
-	 * @param body1 the first {@link Body}
-	 * @param fixture1 the first {@link Body}'s {@link BodyFixture}
-	 * @param body2 the second {@link Body}
-	 * @param fixture2 the second {@link Body}'s {@link BodyFixture}
-	 * @param penetration the {@link Penetration} between the {@link Shape}s
+	 * @param collision the narrowphase collision data
 	 * @return boolean true if processing should continue for this collision
 	 */
-	public abstract boolean collision(NarrowphaseCollisionData<T, E> data);
+	public abstract boolean collision(NarrowphaseCollisionData<T, E> collision);
 	
 	/**
-	 * Called when two {@link BodyFixture}s are colliding and a contact {@link Manifold} has been found.
+	 * Called when two {@link Fixture}s are colliding and a contact {@link Manifold} has been found.
 	 * <p>
-	 * {@link Body} objects can have many {@link Convex} {@link Shape}s that make up their geometry.  Because
-	 * of this, this method may be called multiple times if two multi-fixtured {@link Body}s are colliding.
+	 * {@link CollisionBody} objects can have many {@link Convex} {@link Shape}s that make up their geometry.  Because
+	 * of this, this method may be called multiple times if two multi-fixtured {@link CollisionBody}s are colliding.
 	 * <p>
 	 * Modification of the {@link Manifold} object is allowed.  The {@link Manifold} is used to create contact 
 	 * constraints.
@@ -122,22 +107,16 @@ public interface CollisionListener<T extends CollisionBody<E>, E extends Fixture
 	 * Return false from this method to stop processing of this collision.  Other 
 	 * {@link CollisionListener}s will still be notified of this event, however, no further
 	 * collision or contact events will occur for this pair.
-	 * <p>
-	 * The {@link #collision(ContactConstraint)} method is next in the sequence of collision events.
-	 * @param body1 the first {@link Body}
-	 * @param fixture1 the first {@link Body}'s {@link BodyFixture}
-	 * @param body2 the second {@link Body}
-	 * @param fixture2 the second {@link Body}'s {@link BodyFixture}
-	 * @param manifold the contact {@link Manifold} for the collision
+	 * @param collision the manifold collision data
 	 * @return boolean true if processing should continue for this collision
 	 */
-	public abstract boolean collision(ManifoldCollisionData<T, E> data);
+	public abstract boolean collision(ManifoldCollisionData<T, E> collision);
 	
 	/**
 	 * Called after a {@link ContactConstraint} has been created for a collision.
 	 * <p>
-	 * {@link Body} objects can have many {@link Convex} {@link Shape}s that make up their geometry.  Because
-	 * of this, this method may be called multiple times if two multi-fixtured {@link Body}s are colliding.
+	 * {@link CollisionBody} objects can have many {@link Convex} {@link Shape}s that make up their geometry.  Because
+	 * of this, this method may be called multiple times if two multi-fixtured {@link CollisionBody}s are colliding.
 	 * <p>
 	 * Modification of the friction and restitution (both computed using the {@link CoefficientMixer}
 	 * and sensor fields is allowed.

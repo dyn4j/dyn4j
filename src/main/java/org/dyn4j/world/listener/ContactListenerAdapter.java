@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,7 +24,6 @@
  */
 package org.dyn4j.world.listener;
 
-import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.contact.Contact;
 import org.dyn4j.dynamics.contact.SolvedContact;
@@ -33,24 +32,25 @@ import org.dyn4j.world.ContactCollisionData;
 /**
  * Convenience class for implementing the {@link ContactListener} interface.
  * @author William Bittle
- * @version 3.3.0
+ * @version 4.0.0
  * @since 1.0.0
+ * @param <T> the {@link PhysicsBody} type
  */
 public class ContactListenerAdapter<T extends PhysicsBody> implements ContactListener<T> {
 
 	@Override
-	public void begin(ContactCollisionData<T> data, Contact contact) {}
+	public void begin(ContactCollisionData<T> collision, Contact contact) {}
 
 	@Override
-	public void end(ContactCollisionData<T> data, Contact contact) {}
+	public void end(ContactCollisionData<T> collision, Contact contact) {}
 
 	@Override
-	public void persist(ContactCollisionData<T> data, Contact oldContact, Contact newContact) {}
+	public void persist(ContactCollisionData<T> collision, Contact oldContact, Contact newContact) {}
 
 	@Override
-	public void preSolve(ContactCollisionData<T> data, Contact contact) {}
+	public void preSolve(ContactCollisionData<T> collision, Contact contact) {}
 
 	@Override
-	public void postSolve(ContactCollisionData<T> data, SolvedContact contact) {}
+	public void postSolve(ContactCollisionData<T> collision, SolvedContact contact) {}
 
 }

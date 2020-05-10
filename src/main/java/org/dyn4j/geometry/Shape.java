@@ -36,7 +36,7 @@ import org.dyn4j.DataContainer;
  * mutable objects.  It's recommended that a {@link Shape}, after creation and use, remain
  * unchanged and instead be replaced with a new {@link Shape} if modification is necessary.
  * @author William Bittle
- * @version 3.4.1
+ * @version 4.0.0
  * @since 1.0.0
  */
 public interface Shape extends Transformable, DataContainer {

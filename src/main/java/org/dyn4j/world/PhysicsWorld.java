@@ -27,6 +27,7 @@ package org.dyn4j.world;
 import java.util.Iterator;
 import java.util.List;
 
+import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
@@ -252,7 +253,41 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	 * @since 3.1.1
 	 */
 	public void removeAllBodiesAndJoints(boolean notify);
+
+	/**
+	 * Removes the {@link CollisionBody} at the given index from this {@link CollisionWorld}.
+	 * <p>
+	 * When a body is removed, joints and contacts may be implicitly destroyed.
+	 * Pass true to the notify parameter to be notified of the destruction of these objects
+	 * via the {@link DestructionListener}s.
+	 * @param index the index of the body to remove.
+	 * @param notify true if implicit destruction should be notified
+	 * @return boolean true if the body was removed
+	 * @since 3.2.0
+	 */
+	public boolean removeBody(int index, boolean notify);
 	
+	/**
+	 * Removes the given {@link CollisionBody} from this {@link CollisionWorld}.
+	 * <p>
+	 * When a body is removed, joints and contacts may be implicitly destroyed.
+	 * Pass true to the notify parameter to be notified of the destruction of these objects
+	 * via the {@link DestructionListener}s.
+	 * @param body the {@link CollisionBody} to remove
+	 * @param notify true if implicit destruction should be notified
+	 * @return boolean true if the body was removed
+	 * @since 3.1.1
+	 */
+	public boolean removeBody(T body, boolean notify);
+
+	/**
+	 * This is a convenience method for the {@link #removeAllBodiesAndJoints(boolean)} method since all joints will be removed
+	 * when all bodies are removed anyway.
+	 * @param notify true if destruction of joints and contacts should be notified of by the {@link DestructionListener}
+	 * @since 3.0.1
+	 */
+	public void removeAllBodies(boolean notify);
+
 	/**
 	 * Removes all {@link Joint}s from this {@link World}.
 	 * <p>

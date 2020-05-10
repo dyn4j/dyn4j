@@ -383,6 +383,11 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 		public CollisionPair<T, E> next() {
 			return this.reusablePair;
 		}
+		
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
 	}
 	
 	/**
@@ -437,6 +442,11 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 		@Override
 		public BroadphaseItem<T, E> next() {
 			return this.reusableItem;
+		}
+		
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
 		}
 	}
 
@@ -529,6 +539,11 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 		@Override
 		public BroadphaseItem<T, E> next() {
 			return this.reusableItem;
+		}
+		
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
 		}
 	}
 }

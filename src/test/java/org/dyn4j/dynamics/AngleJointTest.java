@@ -32,7 +32,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link AngleJoint} class.
  * @author William Bittle
- * @version 3.4.1
+ * @version 4.0.0
  * @since 2.2.2
  */
 public class AngleJointTest extends AbstractJointTest {

@@ -618,6 +618,11 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 		public CollisionPair<T, E> next() {
 			return this.reusablePair;
 		}
+		
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
 	}
 	
 	/**
@@ -676,6 +681,11 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 		@Override
 		public CollisionItem<T, E> next() {
 			return this.reusableItem;
+		}
+		
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
 		}
 	}
 	
@@ -777,6 +787,11 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 		@Override
 		public BroadphaseItem<T, E> next() {
 			return this.reusableItem;
+		}
+		
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
 		}
 	}
 }

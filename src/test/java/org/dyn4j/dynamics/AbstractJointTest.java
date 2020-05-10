@@ -29,8 +29,8 @@ import org.junit.Before;
 /**
  * Base class for Joint test cases.
  * @author William Bittle
- * @version 3.4.1
- * @since 3.4.1
+ * @version 4.0.0
+ * @since 4.0.0
  */
 public abstract class AbstractJointTest {
 	/** The first body used for testing */

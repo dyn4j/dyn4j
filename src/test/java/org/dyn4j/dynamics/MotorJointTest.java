@@ -33,8 +33,8 @@ import junit.framework.TestCase;
 /**
  * Used to test the {@link MotorJoint} class.
  * @author William Bittle
- * @version 3.4.1
- * @since 3.4.1
+ * @version 4.0.0
+ * @since 4.0.0
  */
 public class MotorJointTest extends AbstractJointTest {
 	/**

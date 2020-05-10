@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,65 +26,56 @@ package org.dyn4j.world.listener;
 
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.PhysicsBody;
-import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.contact.Contact;
 import org.dyn4j.dynamics.contact.SolvedContact;
 import org.dyn4j.world.ContactCollisionData;
+import org.dyn4j.world.PhysicsWorld;
 
 /**
  * Represents an object that is notified of contact events.
  * <p>
- * Implement this interface and register it with the {@link World}
+ * Implement this interface and register it with a {@link PhysicsWorld}
  * to be notified when contact events occur.  Contact events occur after all 
  * {@link CollisionListener} events have been raised.
- * <p>
- * Modification of the {@link World} is permitted from any of these methods.
- * <p>
- * Returning false from any of the listener methods will disable the whole contact
- * constraint.  Other {@link ContactListener}s will still be notified of this event
- * and other contact events for this constraint. A disabled contact constraint will 
- * not be solved. Contact constraints disabled this way are only disabled for this 
- * timestep.
- * <p>
- * If a body is to be removed, make sure to return false to disable the contact.  Otherwise
- * the contact between the bodies will still be resolved even if the body has been removed.
- * If a body is removed you should check the remaining contacts for that body and return
- * false from the those as well.
  * @author William Bittle
- * @version 3.2.5
+ * @version 4.0.0
  * @since 1.0.0
+ * @param <T> the {@link PhysicsBody} type
  */
 public interface ContactListener<T extends PhysicsBody> {
 	/**
 	 * Called before contact constraints are solved.
-	 * @param point the contact point
-	 * @return boolean true if the contact should remain enabled
+	 * @param collision the collision data
+	 * @param contact the contact
 	 */
-	public abstract void preSolve(ContactCollisionData<T> data, Contact contact);
+	public abstract void preSolve(ContactCollisionData<T> collision, Contact contact);
 	
 	/**
 	 * Called when two {@link BodyFixture}s begin to overlap, generating a contact point.
-	 * @param point the contact point that was added
-	 * @return boolean true if the contact should remain enabled
+	 * @param collision the collision data
+	 * @param contact the contact
 	 */
-	public abstract void begin(ContactCollisionData<T> data, Contact contact);
+	public abstract void begin(ContactCollisionData<T> collision, Contact contact);
 	
 	/**
-	 * Called when two {@link BodyFixture}s begin to separate.
-	 * @param point the contact point that was removed
+	 * Called when two {@link BodyFixture}s begin to separate and the contact point is no longer valid.
+	 * @param collision the collision data
+	 * @param contact the contact
 	 */
-	public abstract void end(ContactCollisionData<T> data, Contact contact);
+	public abstract void end(ContactCollisionData<T> collision, Contact contact);
 	
 	/**
 	 * Called when two {@link BodyFixture}s remain in contact.
-	 * @param point the persisted contact point
-	 * @return boolean true if the contact should remain enabled
+	 * @param collision the collision data
+	 * @param oldContact the old contact
+	 * @param newContact the new contact
 	 */
-	public abstract void persist(ContactCollisionData<T> data, Contact oldContact, Contact newContact);
+	public abstract void persist(ContactCollisionData<T> collision, Contact oldContact, Contact newContact);
 	
 	/**
 	 * Called after contacts have been solved.
-	 * @param point the contact point that was solved
+	 * @param collision the collision data
+	 * @param contact the contact
 	 */
-	public abstract void postSolve(ContactCollisionData<T> data, SolvedContact contact);
+	public abstract void postSolve(ContactCollisionData<T> collision, SolvedContact contact);
 }
