@@ -102,7 +102,7 @@ public final class BroadphaseItem<T extends CollisionBody<E>, E extends Fixture>
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.CollisionItem#copy()
+	 * @see org.dyn4j.Copyable#copy()
 	 */
 	@Override
 	public CollisionItem<T, E> copy() {

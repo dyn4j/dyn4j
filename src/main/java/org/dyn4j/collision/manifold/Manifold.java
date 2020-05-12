@@ -67,7 +67,7 @@ public class Manifold implements Shiftable, Copyable<Manifold> {
 	 */
 	public Manifold(List<ManifoldPoint> points, Vector2 normal) {
 		this.points = points;
-		this.normal = normal.copy();
+		this.normal = normal;
 	}
 	
 	/* (non-Javadoc)
@@ -116,9 +116,10 @@ public class Manifold implements Shiftable, Copyable<Manifold> {
 	 * @param points the point list
 	 */
 	public void setPoints(List<ManifoldPoint> points) {
-//		this.points = points;
 		this.points.clear();
-		this.points.addAll(points);
+		for (ManifoldPoint point : points) {
+			this.points.add(point.copy());
+		}
 	}
 	
 	/**
@@ -130,6 +131,20 @@ public class Manifold implements Shiftable, Copyable<Manifold> {
 	public void setNormal(Vector2 normal) {
 		this.normal.x = normal.x;
 		this.normal.y = normal.y;
+	}
+	
+	/**
+	 * Copies (deep) the given {@link Manifold} to this {@link Manifold}.
+	 * @param manifold the manifold to copy
+	 * @since 4.0.0
+	 */
+	public void setTo(Manifold manifold) {
+		this.normal.x = manifold.normal.x;
+		this.normal.y = manifold.normal.y;
+		this.points.clear();
+		for (ManifoldPoint point : manifold.points) {
+			this.points.add(point.copy());
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -152,6 +167,6 @@ public class Manifold implements Shiftable, Copyable<Manifold> {
 		for (ManifoldPoint point : this.points) {
 			points.add(point.copy());
 		}
-		return new Manifold(points, normal.copy());
+		return new Manifold(points, this.normal.copy());
 	}
 }

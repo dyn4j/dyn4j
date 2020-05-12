@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -212,5 +212,23 @@ public abstract class AbstractShape implements Shape, Transformable, DataContain
 	@Override
 	public AABB createAABB() {
 		return this.createAABB(IDENTITY);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Shape#computeAABB(org.dyn4j.geometry.AABB)
+	 */
+	@Override
+	public void computeAABB(AABB aabb) {
+		this.computeAABB(IDENTITY, aabb);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Shape#createAABB(org.dyn4j.geometry.Transform)
+	 */
+	@Override
+	public AABB createAABB(Transform transform) {
+		AABB aabb = new AABB(0,0,0,0);
+		this.computeAABB(transform, aabb);
+		return aabb;
 	}
 }

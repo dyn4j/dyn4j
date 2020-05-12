@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,9 +24,11 @@
  */
 package org.dyn4j.world.listener;
 
+import org.dyn4j.collision.Fixture;
 import org.dyn4j.collision.continuous.TimeOfImpact;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.PhysicsBody;
+import org.dyn4j.world.PhysicsWorld;
 
 /**
  * Interface to listen for time of impact events.
@@ -35,23 +37,24 @@ import org.dyn4j.dynamics.PhysicsBody;
  * the discrete collision detection routines, and then caught by the continuous
  * collision detection routines.
  * <p>
- * Modification of the {@link World} is not permitted during these methods.
+ * Modification of the {@link PhysicsWorld} is not permitted during these methods.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.0.0
  * @since 1.2.0
+ * @param <T> the {@link PhysicsBody} type
  */
 public interface TimeOfImpactListener<T extends PhysicsBody> {
 	/**
 	 * Called when a time of impact has been detected between two bodies.
 	 * <p>
 	 * Returning true from this method indicates that the collision of these
-	 * two {@link Body}s should be processed (solved).
+	 * two {@link PhysicsBody}s should be processed (solved).
 	 * <p>
 	 * The values of the <code>toi</code> parameter can be changed in this method.
-	 * @param body1 the first {@link Body}
-	 * @param fixture1 the first {@link Body}'s fixture
-	 * @param body2 the second {@link Body}
-	 * @param fixture2 the second {@link Body}'s fixture
+	 * @param body1 the first {@link PhysicsBody}
+	 * @param fixture1 the first {@link PhysicsBody}'s {@link Fixture}
+	 * @param body2 the second {@link PhysicsBody}
+	 * @param fixture2 the second {@link PhysicsBody}'s {@link Fixture}
 	 * @param toi the {@link TimeOfImpact}
 	 * @return boolean true if the collision should be handled
 	 * @since 2.0.0

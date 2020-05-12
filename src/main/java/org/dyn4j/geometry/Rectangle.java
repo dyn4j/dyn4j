@@ -273,10 +273,10 @@ public class Rectangle extends Polygon implements Convex, Wound, Shape, Transfor
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Shape#createAABB(org.dyn4j.geometry.Transform)
+	 * @see org.dyn4j.geometry.Polygon#setAABB(org.dyn4j.geometry.Transform, org.dyn4j.geometry.AABB)
 	 */
 	@Override
-	public AABB createAABB(Transform transform) {
+	public void computeAABB(Transform transform, AABB aabb) {
 		// since we know that this is a rectangle we can get away with much fewer
 		// comparisons to find the correct AABB. Each vertex maps to one point of the
 		// AABB, we have to find in which of the four possible rotation states this
@@ -295,15 +295,27 @@ public class Rectangle extends Polygon implements Convex, Wound, Shape, Transfor
 		
 		if (v0y > v1y) {
 			if (v0x < v1x) {
-				return new AABB(v0x, v1y, v2x, v3y);
+				aabb.minX = v0x;
+				aabb.minY = v1y;
+				aabb.maxX = v2x;
+				aabb.maxY = v3y;
 			} else {
-				return new AABB(v1x, v2y, v3x, v0y);
+				aabb.minX = v1x;
+				aabb.minY = v2y;
+				aabb.maxX = v3x;
+				aabb.maxY = v0y;
 			}
 		} else {
 			if (v0x < v1x) {
-				return new AABB(v3x, v0y, v1x, v2y);
+				aabb.minX = v3x;
+				aabb.minY = v0y;
+				aabb.maxX = v1x;
+				aabb.maxY = v2y;
 			} else {
-				return new AABB(v2x, v3y, v0x, v1y);
+				aabb.minX = v2x;
+				aabb.minY = v3y;
+				aabb.maxX = v0x;
+				aabb.maxY = v1y;
 			}
 		}
 	}

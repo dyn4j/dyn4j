@@ -2,12 +2,18 @@
 Version 4.0.0
 ===============================================================================
 New Features:
-
+  - Major performance increase due to broadphase pipeline enhancement
+  - Performance improvements due to reduced memory allocations and the
+    benefit of reduced memory usage
+  
 Bug Fixes:
-    
+  
 Deprecated:
+  - A lot. Almost everything has a replacement though.
   
 Breaking Changes:
+  - There will be some behavioral differences, but they should be minor.  The
+    biggest effect on users will be the large amount of deprecation.
   
 Other:
 

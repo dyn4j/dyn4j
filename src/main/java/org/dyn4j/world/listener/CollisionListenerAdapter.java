@@ -44,15 +44,21 @@ import org.dyn4j.world.NarrowphaseCollisionData;
  * @param <E> the {@link Fixture} type
  */
 public class CollisionListenerAdapter<T extends CollisionBody<E>, E extends Fixture> implements CollisionListener<T, E> {
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.listener.CollisionListener#collision(org.dyn4j.world.BroadphaseCollisionData)
+	 */
 	@Override
 	public boolean collision(BroadphaseCollisionData<T, E> collision) { return true; }
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.listener.CollisionListener#collision(org.dyn4j.world.NarrowphaseCollisionData)
+	 */
 	@Override
 	public boolean collision(NarrowphaseCollisionData<T, E> collision) { return true; }
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.listener.CollisionListener#collision(org.dyn4j.world.ManifoldCollisionData)
+	 */
 	@Override
 	public boolean collision(ManifoldCollisionData<T, E> collision) { return true; }
-	
-//	@Override
-//	public boolean collision(ContactConstraint contactConstraint) { return true; }
 }

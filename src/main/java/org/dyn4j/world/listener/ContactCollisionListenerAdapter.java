@@ -24,42 +24,26 @@
  */
 package org.dyn4j.world.listener;
 
+import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.PhysicsBody;
-import org.dyn4j.dynamics.TimeStep;
 import org.dyn4j.world.ContactCollisionData;
-import org.dyn4j.world.PhysicsWorld;
 
 /**
- * Convenience class for implementing the {@link StepListener} interface.
+ * Convenience class for implementing the {@link ContactCollisionListener} interface.
+ * <p>
+ * This class can be used to implement only the methods desired instead of all
+ * the methods contained in the {@link ContactCollisionListener} interface.
+ * <p>
+ * By default this class allows processing to continue for all collision events.
  * @author William Bittle
  * @version 4.0.0
  * @since 1.0.0
  * @param <T> the {@link PhysicsBody} type
- * @param <V> the {@link ContactCollisionData} type
  */
-public class StepListenerAdapter<T extends PhysicsBody, V extends ContactCollisionData<T>> implements StepListener<T, V> {
+public class ContactCollisionListenerAdapter<T extends PhysicsBody> extends CollisionListenerAdapter<T, BodyFixture> implements ContactCollisionListener<T> {
 	/* (non-Javadoc)
-	 * @see org.dyn4j.world.listener.StepListener#begin(org.dyn4j.dynamics.TimeStep, org.dyn4j.world.PhysicsWorld)
+	 * @see org.dyn4j.world.listener.ContactCollisionListener#collision(org.dyn4j.world.ContactCollisionData)
 	 */
 	@Override
-	public void begin(TimeStep step, PhysicsWorld<T, V> world) {}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.world.listener.StepListener#updatePerformed(org.dyn4j.dynamics.TimeStep, org.dyn4j.world.PhysicsWorld)
-	 */
-	@Override
-	public void updatePerformed(TimeStep step, PhysicsWorld<T, V> world) {}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.world.listener.StepListener#postSolve(org.dyn4j.dynamics.TimeStep, org.dyn4j.world.PhysicsWorld)
-	 */
-	@Override
-	public void postSolve(TimeStep step, PhysicsWorld<T, V> world) {}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.world.listener.StepListener#end(org.dyn4j.dynamics.TimeStep, org.dyn4j.world.PhysicsWorld)
-	 */
-	@Override
-	public void end(TimeStep step, PhysicsWorld<T, V> world) {}
-
+	public boolean collision(ContactCollisionData<T> collision) { return true; }
 }

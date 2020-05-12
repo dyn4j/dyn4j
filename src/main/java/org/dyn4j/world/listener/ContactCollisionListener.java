@@ -24,42 +24,37 @@
  */
 package org.dyn4j.world.listener;
 
+import org.dyn4j.collision.CollisionBody;
+import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.PhysicsBody;
-import org.dyn4j.dynamics.TimeStep;
+import org.dyn4j.dynamics.contact.ContactConstraint;
+import org.dyn4j.geometry.Convex;
+import org.dyn4j.geometry.Shape;
 import org.dyn4j.world.ContactCollisionData;
-import org.dyn4j.world.PhysicsWorld;
 
 /**
- * Convenience class for implementing the {@link StepListener} interface.
+ * Extended version of the {@link CollisionListener} class to support reporting {@link ContactCollisionData} events.
  * @author William Bittle
  * @version 4.0.0
  * @since 1.0.0
- * @param <T> the {@link PhysicsBody} type
- * @param <V> the {@link ContactCollisionData} type
+ * @param <T> the {@link CollisionBody} type
+ * @see CollisionListener
  */
-public class StepListenerAdapter<T extends PhysicsBody, V extends ContactCollisionData<T>> implements StepListener<T, V> {
-	/* (non-Javadoc)
-	 * @see org.dyn4j.world.listener.StepListener#begin(org.dyn4j.dynamics.TimeStep, org.dyn4j.world.PhysicsWorld)
+public interface ContactCollisionListener<T extends PhysicsBody> extends CollisionListener<T, BodyFixture> {
+	/**
+	 * Called when two {@link BodyFixture}s are colliding and a {@link ContactConstraint} has been setup.
+	 * <p>
+	 * {@link PhysicsBody} objects can have many {@link Convex} {@link Shape}s that make up their geometry.  Because
+	 * of this, this method may be called multiple times if two multi-fixtured {@link PhysicsBody}s are colliding.
+	 * <p>
+	 * Modification of the {@link ContactConstraint} object is allowed.  The {@link ContactConstraint} is used to 
+	 * resolve the collision.
+	 * <p>
+	 * Return false from this method to stop processing of this collision.  Other 
+	 * {@link CollisionListener}s will still be notified of this event, however, no further
+	 * collision or contact events will occur for this pair.
+	 * @param collision the contact collision data
+	 * @return boolean true if processing should continue for this collision
 	 */
-	@Override
-	public void begin(TimeStep step, PhysicsWorld<T, V> world) {}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.world.listener.StepListener#updatePerformed(org.dyn4j.dynamics.TimeStep, org.dyn4j.world.PhysicsWorld)
-	 */
-	@Override
-	public void updatePerformed(TimeStep step, PhysicsWorld<T, V> world) {}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.world.listener.StepListener#postSolve(org.dyn4j.dynamics.TimeStep, org.dyn4j.world.PhysicsWorld)
-	 */
-	@Override
-	public void postSolve(TimeStep step, PhysicsWorld<T, V> world) {}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.world.listener.StepListener#end(org.dyn4j.dynamics.TimeStep, org.dyn4j.world.PhysicsWorld)
-	 */
-	@Override
-	public void end(TimeStep step, PhysicsWorld<T, V> world) {}
-
+	public abstract boolean collision(ContactCollisionData<T> collision);
 }

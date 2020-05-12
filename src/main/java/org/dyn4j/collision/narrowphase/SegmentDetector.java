@@ -138,8 +138,10 @@ public final class SegmentDetector {
 				
 				// set the raycast fields
 				raycast.distance = d;
-				raycast.point = p;
-				raycast.normal = d0.getNegative();
+				raycast.point.x = p.x;
+				raycast.point.y = p.y;
+				raycast.normal.x = -d0.x;
+				raycast.normal.y = -d0.y;
 				return true;
 			} else {
 				// parallel but not overlapping
@@ -189,9 +191,11 @@ public final class SegmentDetector {
 		}
 		
 		// populate the raycast result
-		raycast.point = p;
-		raycast.normal = l;
 		raycast.distance = t;
+		raycast.point.x = p.x;
+		raycast.point.y = p.y;
+		raycast.normal.x = l.x;
+		raycast.normal.y = l.y;
 		
 		// return success
 		return true;

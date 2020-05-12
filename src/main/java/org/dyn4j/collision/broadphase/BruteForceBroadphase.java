@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.collision.CollisionItem;
@@ -82,7 +83,7 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 		
 		if (node != null) {
 			// if the body-fixture has already been added just update it
-			node.aabb = aabb;
+			node.aabb.set(aabb);
 		} else {
 			// else add the new node
 			this.map.put(key, new AABBBroadphaseProxy<T, E>(key, aabb));
@@ -163,15 +164,6 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 	@Override
 	public void clearUpdates() {
 		// no-op
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#getAABB(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
-	 */
-	@Override
-	public AABB getAABB(T body, E fixture) {
-		CollisionItem<T, E> key = new BroadphaseItem<T, E>(body, fixture);
-		return this.getAABB(key);
 	}
 	
 	/* (non-Javadoc)
@@ -300,8 +292,14 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 		/** The inner-iterator for all objects to test with the current object */
 		private Iterator<AABBBroadphaseProxy<T, E>> innerIterator;
 		
-		/** A reusable pair for collision output */
-		private final BroadphasePair<T, E> reusablePair;
+		/** A reusable pair to output collisions */
+		private final BroadphasePair<T, E> currentPair;
+		
+		/** A reusable pair to output collisions */
+		private final BroadphasePair<T, E> nextPair;
+		
+		/** True if there's another pair */
+		private boolean hasNext;
 		
 		/**
 		 * Default constructor.
@@ -309,13 +307,16 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 		public DetectPairsIterator() {
 			this.tested = new HashMap<CollisionItem<T, E>, Boolean>();
 			this.outerIterator = BruteForceBroadphase.this.map.values().iterator();
-			this.reusablePair = new BroadphasePair<T, E>();
 			
 			// get the first item to test
 			this.currentProxy = null;
 			if (this.outerIterator.hasNext()) {
 				this.currentProxy = this.outerIterator.next();
 			}
+			
+			this.currentPair = new BroadphasePair<T, E>();
+			this.nextPair = new BroadphasePair<T, E>();
+			this.hasNext = this.findNext();
 		}
 		
 		/* (non-Javadoc)
@@ -323,6 +324,43 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 		 */
 		@Override
 		public boolean hasNext() {
+			return this.hasNext;
+		}
+
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#next()
+		 */
+		@Override
+		public CollisionPair<T, E> next() {
+			if (this.hasNext) {
+				// copy over to the one we return
+				this.currentPair.body1 = this.nextPair.body1;
+				this.currentPair.fixture1 = this.nextPair.fixture1;
+				this.currentPair.body2 = this.nextPair.body2;
+				this.currentPair.fixture2 = this.nextPair.fixture2;
+				
+				// find the next pair
+				this.hasNext = this.findNext();
+				
+				// return the current pair
+				return this.currentPair;
+			}
+			throw new NoSuchElementException();
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#remove()
+		 */
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+		
+		/**
+		 * Returns true if there's another pair to process and sets the pair to the nextPair.
+		 * @return boolean
+		 */
+		private boolean findNext() {
 			// test each body in the collection against every other body in the collection O(n^2)
 			while (this.currentProxy != null) {
 				// if the inner-iterator is null, this means that we advanced to another outer-iterator item
@@ -338,17 +376,15 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 					// if they are the same body, then skip it
 					if (b.item.body == this.currentProxy.item.body) continue;
 					
-//					int bKey = CollisionItem.getHashCode(b.item.body, b.item.fixture);
-					boolean tested = this.tested.containsKey(b.item);
-					
 					// if this pair has already been tested, then skip it
+					boolean tested = this.tested.containsKey(b.item);
 					if (tested) continue;
 					
 					if (this.currentProxy.aabb.overlaps(b.aabb)) {
-						this.reusablePair.body1 = this.currentProxy.item.body;
-						this.reusablePair.fixture1 = this.currentProxy.item.fixture;
-						this.reusablePair.body2 = b.item.body;
-						this.reusablePair.fixture2 = b.item.fixture;
+						this.nextPair.body1 = this.currentProxy.item.body;
+						this.nextPair.fixture1 = this.currentProxy.item.fixture;
+						this.nextPair.body2 = b.item.body;
+						this.nextPair.fixture2 = b.item.fixture;
 						
 						// in this iterator we can immediately exit when we find a collision
 						// because the outer/inner iterator track our position so we can
@@ -359,7 +395,6 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 				
 				// we've made it through all other objects, so we're done with the outer
 				// iterator object (A) so indicate that it's been tested
-//				int aKey = CollisionItem.getHashCode(this.currentProxy.item.body, this.currentProxy.item.fixture);
 				this.tested.put(this.currentProxy.item, true);
 				
 				// clear the inner iterator since we're moving onto another item
@@ -374,19 +409,6 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 			}
 			
 			return false;
-		}
-
-		/* (non-Javadoc)
-		 * @see java.util.Iterator#next()
-		 */
-		@Override
-		public CollisionPair<T, E> next() {
-			return this.reusablePair;
-		}
-		
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
 		}
 	}
 	
@@ -403,8 +425,8 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 		/** The iterator for testing all objects in this broadphase */
 		private final Iterator<AABBBroadphaseProxy<T, E>> iterator;
 		
-		/** A reusable item to save on allocation */
-		private final BroadphaseItem<T, E> reusableItem;
+		/** The next item */
+		private CollisionItem<T, E> nextItem;
 		
 		/**
 		 * Minimal constructor.
@@ -413,7 +435,7 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 		public DetectAABBIterator(AABB aabb) {
 			this.aabb = aabb;
 			this.iterator = BruteForceBroadphase.this.map.values().iterator();
-			this.reusableItem = new BroadphaseItem<T, E>();
+			this.findNext();
 		}
 		
 		/* (non-Javadoc)
@@ -421,32 +443,47 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 		 */
 		@Override
 		public boolean hasNext() {
-			// just iterate all pairs - the iterator maintains the position
-			while (this.iterator.hasNext()) {
-				AABBBroadphaseProxy<T, E> b = this.iterator.next();
-				
-				if (this.aabb.overlaps(b.aabb)) {
-					this.reusableItem.body = b.item.body;
-					this.reusableItem.fixture = b.item.fixture;
-					
-					return true;
-				}
-			}
-			
-			return false;
+			return this.nextItem != null;
 		}
 
 		/* (non-Javadoc)
 		 * @see java.util.Iterator#next()
 		 */
 		@Override
-		public BroadphaseItem<T, E> next() {
-			return this.reusableItem;
+		public CollisionItem<T, E> next() {
+			if (this.nextItem != null) {
+				CollisionItem<T, E> item = this.nextItem;
+				this.findNext();
+				return item;
+			}
+			throw new NoSuchElementException();
 		}
 		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#remove()
+		 */
 		@Override
 		public void remove() {
 			throw new UnsupportedOperationException();
+		}
+		
+		/**
+		 * Returns true if there's a next item and sets the nextItem to it.
+		 * @return boolean
+		 */
+		private boolean findNext() {
+			this.nextItem = null;
+			
+			// just iterate all pairs - the iterator maintains the position
+			while (this.iterator.hasNext()) {
+				AABBBroadphaseProxy<T, E> b = this.iterator.next();
+				if (this.aabb.overlaps(b.aabb)) {
+					this.nextItem = b.item;
+					return true;
+				}
+			}
+			
+			return false;
 		}
 	}
 
@@ -475,8 +512,8 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 		/** The iterator for testing all objects in this broadphase */
 		private final Iterator<AABBBroadphaseProxy<T, E>> iterator;
 		
-		/** A reusable item to save on allocation */
-		private final BroadphaseItem<T, E> reusableItem;
+		/** The next item */
+		private CollisionItem<T, E> nextItem;
 		
 		/**
 		 * Minimal constructor.
@@ -486,7 +523,6 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 		public DetectRayIterator(Ray ray, double length) {
 			this.ray = ray;
 			this.iterator = BruteForceBroadphase.this.map.values().iterator();
-			this.reusableItem = new BroadphaseItem<T, E>();
 			
 			// create an aabb from the ray
 			Vector2 s = ray.getStart();
@@ -509,6 +545,8 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 			// precompute
 			this.invDx = 1.0 / d.x;
 			this.invDy = 1.0 / d.y;
+			
+			this.findNext();
 		}
 		
 		/* (non-Javadoc)
@@ -516,34 +554,48 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 		 */
 		@Override
 		public boolean hasNext() {
-			// just iterate all pairs - the iterator maintains the position
-			while (this.iterator.hasNext()) {
-				AABBBroadphaseProxy<T, E> b = this.iterator.next();
-				
-				if (this.aabb.overlaps(b.aabb)) {
-					if (AbstractBroadphaseDetector.raycast(this.ray.getStart(), this.length, this.invDx, this.invDy, b.aabb)) {
-						this.reusableItem.body = b.item.body;
-						this.reusableItem.fixture = b.item.fixture;
-						
-						return true;
-					}
-				}
-			}
-			
-			return false;
+			return this.nextItem != null;
 		}
 
 		/* (non-Javadoc)
 		 * @see java.util.Iterator#next()
 		 */
 		@Override
-		public BroadphaseItem<T, E> next() {
-			return this.reusableItem;
+		public CollisionItem<T, E> next() {
+			if (this.nextItem != null) {
+				CollisionItem<T, E> item = this.nextItem;
+				this.findNext();
+				return item;
+			}
+			throw new NoSuchElementException();
 		}
 		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#remove()
+		 */
 		@Override
 		public void remove() {
 			throw new UnsupportedOperationException();
+		}
+		
+		/**
+		 * Returns true if there's a next item and sets the nextItem to it.
+		 * @return boolean
+		 */
+		private boolean findNext() {
+			this.nextItem = null;
+			
+			while (this.iterator.hasNext()) {
+				AABBBroadphaseProxy<T, E> b = this.iterator.next();
+				if (this.aabb.overlaps(b.aabb)) {
+					if (AbstractBroadphaseDetector.raycast(this.ray.getStart(), this.length, this.invDx, this.invDy, b.aabb)) {
+						this.nextItem = b.item;
+						return true;
+					}
+				}
+			}
+			
+			return false;
 		}
 	}
 }

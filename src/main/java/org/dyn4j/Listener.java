@@ -29,7 +29,7 @@ package org.dyn4j;
  * @author William Bittle
  * @version 4.0.0
  * @since 3.1.0
- * @deprecated Deprecated in 4.0.0. Use the PipelineListener in the pipeline package instead.
+ * @deprecated Deprecated in 4.0.0. No longer needed.
  */
 @Deprecated
 public interface Listener {}

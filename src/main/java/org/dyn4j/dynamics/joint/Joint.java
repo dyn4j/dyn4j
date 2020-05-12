@@ -25,6 +25,7 @@
 package org.dyn4j.dynamics.joint;
 
 import org.dyn4j.DataContainer;
+import org.dyn4j.Ownable;
 import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
@@ -39,7 +40,7 @@ import org.dyn4j.geometry.Vector2;
  * @since 1.0.0
  * @param <T> the {@link PhysicsBody} type
  */
-public abstract class Joint<T extends PhysicsBody> implements Shiftable, DataContainer {
+public abstract class Joint<T extends PhysicsBody> implements Shiftable, DataContainer, Ownable {
 	/** The first linked body */
 	protected final T body1;
 	
@@ -51,6 +52,9 @@ public abstract class Joint<T extends PhysicsBody> implements Shiftable, DataCon
 
 	/** The user data */
 	protected Object userData;
+	
+	/** [INTERNAL] The joint owner */
+	protected Object owner;
 	
 	/**
 	 * True if this joint is on an island.
@@ -259,5 +263,19 @@ public abstract class Joint<T extends PhysicsBody> implements Shiftable, DataCon
 	@Deprecated
 	public void setOnIsland(boolean flag) {
 		this.onIsland = flag;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.Ownable#getOwner()
+	 */
+	public Object getOwner() {
+		return this.owner;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.Ownable#setOwner(java.lang.Object)
+	 */
+	public void setOwner(Object owner) {
+		this.owner = owner;
 	}
 }

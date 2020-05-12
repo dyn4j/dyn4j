@@ -197,7 +197,7 @@ public class BroadphaseTest {
 			this.broadphase.add(ct);
 			
 			// get the current aabb
-			AABB aabbSap = this.broadphase.getAABB(ct, f);
+			AABB aabbSap = this.broadphase.getAABB(ct, f).copy();
 			
 			// move the collidable a bit
 			ct.translate(0.05, 0.0);
@@ -206,7 +206,7 @@ public class BroadphaseTest {
 			this.broadphase.update(ct, f);
 			
 			// the aabbs should not have been updated because of the expansion code
-			TestCase.assertSame(aabbSap, this.broadphase.getAABB(ct, f));
+			TestCase.assertEquals(aabbSap, this.broadphase.getAABB(ct, f));
 		}
 	}
 	
@@ -222,7 +222,7 @@ public class BroadphaseTest {
 		this.broadphase.add(ct);
 		
 		// make sure they are there
-		AABB aabbSap = this.broadphase.getAABB(ct, f);
+		AABB aabbSap = this.broadphase.getAABB(ct, f).copy();
 		
 		// move the collidable enough so its AABB goes out of the expanded AABB
 		ct.translate(0.5, 0.0);
@@ -263,7 +263,7 @@ public class BroadphaseTest {
 		// add the item to the broadphases
 		this.broadphase.add(ct);
 		
-		AABB aabbSap = this.broadphase.getAABB(ct);
+		AABB aabbSap = this.broadphase.getAABB(ct).copy();
 		
 		AABB aabb = ct.createAABB();
 		
@@ -433,7 +433,7 @@ public class BroadphaseTest {
 			// add the item to the broadphases
 			this.broadphase.add(ct);
 			
-			AABB aabbSap = this.broadphase.getAABB(ct);
+			AABB aabbSap = this.broadphase.getAABB(ct).copy();
 			
 			AABB aabb = ct.createAABB();
 			// don't forget that the aabb is expanded

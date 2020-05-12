@@ -39,7 +39,9 @@ import org.dyn4j.collision.Fixture;
  * @param <E> the {@link Fixture} type
  * @version 4.0.0
  * @since 3.4.0
+ * @deprecated Deprecated in 4.0.0. No replacement needed.
  */
+@Deprecated
 public interface BatchBroadphaseDetector<T extends CollisionBody<E>, E extends Fixture> extends BroadphaseDetector<T, E> {
 	
 	/**

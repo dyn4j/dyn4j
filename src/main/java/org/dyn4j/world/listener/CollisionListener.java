@@ -111,27 +111,4 @@ public interface CollisionListener<T extends CollisionBody<E>, E extends Fixture
 	 * @return boolean true if processing should continue for this collision
 	 */
 	public abstract boolean collision(ManifoldCollisionData<T, E> collision);
-	
-	/**
-	 * Called after a {@link ContactConstraint} has been created for a collision.
-	 * <p>
-	 * {@link CollisionBody} objects can have many {@link Convex} {@link Shape}s that make up their geometry.  Because
-	 * of this, this method may be called multiple times if two multi-fixtured {@link CollisionBody}s are colliding.
-	 * <p>
-	 * Modification of the friction and restitution (both computed using the {@link CoefficientMixer}
-	 * and sensor fields is allowed.
-	 * <p>
-	 * Setting the tangent velocity of the {@link ContactConstraint} can create a conveyor effect.
-	 * <p>
-	 * Return false from this method to stop processing of this collision.  Other 
-	 * {@link CollisionListener}s will still be notified of this event, however, no further
-	 * collision or contact events will occur for this pair.
-	 * <p>
-	 * This is the last collision event before contact processing (via {@link ContactListener}s) occur.
-	 * @param contactConstraint the contact constraint
-	 * @return boolean true if processing should continue for this collision
-	 * @since 3.0.2
-	 */
-	// TODO need to do something else with this
-//	public abstract boolean collision(ContactConstraint contactConstraint);
 }

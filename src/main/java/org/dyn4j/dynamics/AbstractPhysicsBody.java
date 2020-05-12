@@ -30,6 +30,7 @@ import java.util.List;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
+import org.dyn4j.Ownable;
 import org.dyn4j.collision.AbstractCollisionBody;
 import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.geometry.AABB;
@@ -48,7 +49,7 @@ import org.dyn4j.resources.Messages;
  * @version 4.0.0
  * @since 4.0.0
  */
-public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixture> implements PhysicsBody, CollisionBody<BodyFixture>, Transformable, DataContainer {
+public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixture> implements PhysicsBody, CollisionBody<BodyFixture>, Transformable, DataContainer, Ownable {
 	/** The default linear damping; value = {@link #DEFAULT_LINEAR_DAMPING} */
 	public static final double DEFAULT_LINEAR_DAMPING = 0.0;
 	

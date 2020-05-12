@@ -38,24 +38,28 @@ import org.dyn4j.geometry.Vector2;
  * @version 4.0.0
  * @since 1.0.0
  */
-// TODO need to final these fields?
 public class Separation implements Shiftable, Copyable<Separation> {
 	/** The normalized axis of separation */
-	protected Vector2 normal;
+	protected final Vector2 normal;
 	
 	/** The separating distance along the axis */
 	protected double distance;
 	
 	/** The closest point on the first {@link Convex} {@link Shape} to the second */
-	protected Vector2 point1;
+	protected final Vector2 point1;
 	
 	/** The closest point on the second {@link Convex} {@link Shape} to the first */
-	protected Vector2 point2;
+	protected final Vector2 point2;
 	
 	/**
 	 * Default constructor.
 	 */
-	public Separation() {}
+	public Separation() {
+		this.normal = new Vector2();
+		this.distance = 0;
+		this.point1 = new Vector2();
+		this.point2 = new Vector2();
+	}
 	
 	/**
 	 * Full constructor.
@@ -89,10 +93,10 @@ public class Separation implements Shiftable, Copyable<Separation> {
 	 * Clears the separation information.
 	 */
 	public void clear() {
-		this.normal = null;
+		this.normal.zero();
 		this.distance = 0;
-		this.point1 = null;
-		this.point2 = null;
+		this.point1.zero();
+		this.point2.zero();
 	}
 	
 	/**
@@ -134,7 +138,8 @@ public class Separation implements Shiftable, Copyable<Separation> {
 	 * @param normal the separation normal
 	 */
 	public void setNormal(Vector2 normal) {
-		this.normal = normal;
+		this.normal.x = normal.x;
+		this.normal.y = normal.y;
 	}
 	
 	/**
@@ -150,7 +155,8 @@ public class Separation implements Shiftable, Copyable<Separation> {
 	 * @param point1 the closest point on the first {@link Convex} {@link Shape}
 	 */
 	public void setPoint1(Vector2 point1) {
-		this.point1 = point1;
+		this.point1.x = point1.x;
+		this.point1.y = point1.y;
 	}
 	
 	/**
@@ -158,9 +164,25 @@ public class Separation implements Shiftable, Copyable<Separation> {
 	 * @param point2 the closest point on the second {@link Convex} {@link Shape}
 	 */
 	public void setPoint2(Vector2 point2) {
-		this.point2 = point2;
+		this.point2.x = point2.x;
+		this.point2.y = point2.y;
 	}
-
+	
+	/**
+	 * Copies (deep) the given {@link Separation} information to this {@link Separation}.
+	 * @param separation the separation to copy
+	 * @since 4.0.0
+	 */
+	public void setTo(Separation separation) {
+		this.distance = separation.distance;
+		this.normal.x = separation.normal.x;
+		this.normal.y = separation.normal.y;
+		this.point1.x = separation.point1.x;
+		this.point1.y = separation.point1.y;
+		this.point2.x = separation.point2.x;
+		this.point2.y = separation.point2.y;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Shiftable#shift(org.dyn4j.geometry.Vector2)
 	 */

@@ -284,10 +284,10 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 	}
 
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Shape#createAABB(org.dyn4j.geometry.Transform)
+	 * @see org.dyn4j.geometry.Shape#computeAABB(org.dyn4j.geometry.Transform, org.dyn4j.geometry.AABB)
 	 */
 	@Override
-	public AABB createAABB(Transform transform) {
+	public void computeAABB(Transform transform, AABB aabb) {
 		// Inlined projection of x axis
 		// Interval x = this.project(Vector2.X_AXIS, transform);
 		Vector2 p1 = this.getFarthestPoint(Vector2.X_AXIS, transform);
@@ -302,7 +302,10 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 		double minY = 2 * c - p1.y;
 		double maxY = p1.y;
 		
-		return new AABB(minX, minY, maxX, maxY);
+		aabb.maxX = maxX;
+		aabb.maxY = maxY;
+		aabb.minX = minX;
+		aabb.minY = minY;
 	}
 	
 	/* (non-Javadoc)

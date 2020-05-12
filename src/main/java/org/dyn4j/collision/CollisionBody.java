@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.dyn4j.DataContainer;
+import org.dyn4j.Ownable;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Shape;
@@ -44,7 +45,7 @@ import org.dyn4j.geometry.Vector2;
  * @param <T> the {@link Fixture} type
  * @see AbstractCollisionBody
  */
-public interface CollisionBody<T extends Fixture> extends Transformable, Shiftable, DataContainer {
+public interface CollisionBody<T extends Fixture> extends Transformable, Shiftable, DataContainer, Ownable {
 	/** Number of fixtures typically attached to a {@link CollisionBody} */
 	public static final int TYPICAL_FIXTURE_COUNT = 1;
 

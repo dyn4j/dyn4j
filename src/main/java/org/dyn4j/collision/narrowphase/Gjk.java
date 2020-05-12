@@ -456,7 +456,8 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 				// in the direction of n so we can stop now
 				// normalize d
 				d.normalize();
-				separation.normal = d;
+				separation.normal.x = d.x;
+				separation.normal.y = d.y;
 				// compute the real distance
 				separation.distance = -c.point.dot(d);
 				// get the closest points
@@ -479,7 +480,8 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 				// nearly zero separation)
 				d.normalize();
 				separation.distance = p1.normalize();
-				separation.normal = d;
+				separation.normal.x = d.x;
+				separation.normal.y = d.y;
 				this.findClosestPoints(a, c, separation);
 				return true;
 			} else if (p2Mag <= Epsilon.E) {
@@ -487,7 +489,8 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 				// nearly zero separation)
 				d.normalize();
 				separation.distance = p2.normalize();
-				separation.normal = d;
+				separation.normal.x = d.x;
+				separation.normal.y = d.y;
 				this.findClosestPoints(c, b, separation);
 				return true;
 			}
@@ -507,7 +510,8 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 		// if we made it here then we know that we hit the maximum number of iterations
 		// this is really a catch all termination case
 		d.normalize();
-		separation.normal = d;
+		separation.normal.x = d.x;
+		separation.normal.y = d.y;
 		separation.distance = -c.point.dot(d);
 		// get the closest points
 		this.findClosestPoints(a, b, separation);
@@ -569,8 +573,10 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			}
 		}
 		// set the new points in the separation object
-		separation.point1 = p1;
-		separation.point2 = p2;
+		separation.point1.x = p1.x;
+		separation.point1.y = p1.y;
+		separation.point2.x = p2.x;
+		separation.point2.y = p2.y;
 	}
 	
 	/**
@@ -736,8 +742,11 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 		}
 		
 		// set the raycast result values
-		raycast.point = x;
-		raycast.normal = n; n.normalize();
+		raycast.point.x = x.x;
+		raycast.point.y = x.y;
+		raycast.normal.x = n.x;
+		raycast.normal.y = n.y;
+		raycast.normal.normalize();
 		raycast.distance = lambda;
 		
 		// return true to indicate that we were successful

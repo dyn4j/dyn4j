@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dyn4j.DataContainer;
+import org.dyn4j.Ownable;
 import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.dynamics.contact.Contact;
 import org.dyn4j.dynamics.contact.ContactConstraint;
@@ -44,7 +45,7 @@ import org.dyn4j.geometry.Transformable;
  * @since 1.0.0
  */
 @SuppressWarnings("deprecation")
-public class Body extends AbstractPhysicsBody implements PhysicsBody, CollisionBody<BodyFixture>, Transformable, DataContainer {
+public class Body extends AbstractPhysicsBody implements PhysicsBody, CollisionBody<BodyFixture>, Transformable, DataContainer, Ownable {
 	/** 
 	 * The {@link Body}'s contacts
 	 * @deprecated Deprecated in 4.0.0. No longer needed.

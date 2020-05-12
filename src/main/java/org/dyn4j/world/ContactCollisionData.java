@@ -24,6 +24,7 @@
  */
 package org.dyn4j.world;
 
+import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.contact.ContactConstraint;
@@ -36,6 +37,22 @@ import org.dyn4j.dynamics.contact.ContactConstraint;
  * @param <T> the {@link PhysicsBody} type
  */
 public interface ContactCollisionData<T extends PhysicsBody> extends CollisionData<T, BodyFixture> {
+	/**
+	 * Returns true if the {@link CollisionPair} is a contact constraint collision.
+	 * @see #setContactConstraintCollision(boolean)
+	 * @return boolean
+	 */
+	public boolean isContactConstraintCollision();
+	
+	/**
+	 * Set to true if the {@link CollisionPair} created a {@link ContactConstraint} and interaction edge.
+	 * <p>
+	 * This will always be true if {@link #isManifoldCollision()} is true.
+	 * @param flag true if the above conditions are met
+	 * @see #setManifoldCollision(boolean)
+	 */
+	public void setContactConstraintCollision(boolean flag);
+	
 	/**
 	 * Returns the {@link ContactConstraint}.
 	 * @return {@link ContactConstraint}

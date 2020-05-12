@@ -754,11 +754,39 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 	 */
 	@Override
 	public AABB createAABB(Transform transform) {
+		AABB aabb = new AABB(0,0,0,0);
+		this.computeAABB(transform, aabb);
+		return aabb;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Shape#computeAABB(org.dyn4j.geometry.Transform, org.dyn4j.geometry.AABB)
+	 */
+	@Override
+	public void computeAABB(Transform transform, AABB aabb) {
     	// get the transformed points
 		Vector2 p0 = transform.getTransformed(this.vertices[0]);
 		Vector2 p1 = transform.getTransformed(this.vertices[1]);
 		
-		// create the aabb
-		return AABB.createAABBFromPoints(p0, p1);
+		double maxX = p0.x;
+		double minX = p1.x;
+		if (maxX < minX) {
+			double temp = maxX;
+			maxX = minX;
+			minX = temp;
+		}
+		
+		double maxY = p0.y;
+		double minY = p1.y;
+		if (maxY < minY) {
+			double temp = maxY;
+			maxY = minY;
+			minY = temp;
+		}
+		
+		aabb.minX = minX;
+		aabb.maxX = maxX;
+		aabb.minY = minY;
+		aabb.maxY = maxY;
 	}
 }

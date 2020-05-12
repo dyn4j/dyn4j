@@ -260,6 +260,10 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	 * If the body and its fixture have not been added to this
 	 * broad-phase, a new AABB is created and returned (but not added to
 	 * broad-phase).
+	 * <p>
+	 * NOTE: The {@link AABB} returned from this method should not be modified.
+	 * Instead use the {@link AABB#copy()} method to create a new instance to 
+	 * modify.
 	 * @param body the {@link CollisionBody}
 	 * @param fixture the {@link Fixture}
 	 * @return {@link AABB}
@@ -273,6 +277,10 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	 * If the body and its fixture have not been added to this
 	 * broad-phase, a new AABB is created and returned (but not added to
 	 * broad-phase).
+	 * <p>
+	 * NOTE: The {@link AABB} returned from this method should not be modified.
+	 * Instead use the {@link AABB#copy()} method to create a new instance to 
+	 * modify.
 	 * @param item the collision item
 	 * @return {@link AABB}
 	 * @since 4.0.0
@@ -395,10 +403,6 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	/**
 	 * Performs a broad-phase collision test using the given {@link AABB} and returns
 	 * the items that overlap.
-	 * <p>
-	 * NOTE: This method returns {@link CollisionItem}s that are mutable internally. If you need
-	 * to store the items outside of the iteration, be sure to call the {@link CollisionItem#copy()}
-	 * method to create a copy of the item data.
 	 * @param aabb the {@link AABB} to test
 	 * @return Iterator&lt;{@link CollisionItem}&gt;
 	 * @since 4.0.0
@@ -445,10 +449,6 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	/**
 	 * Performs a raycast over all the bodies in the broad-phase and returns the
 	 * items that intersect.
-	 * <p>
-	 * NOTE: This method returns {@link CollisionItem}s that are mutable internally. If you need
-	 * to store the items outside of the iteration, be sure to call the {@link CollisionItem#copy()}
-	 * method to create a copy of the item data.
 	 * @param ray the {@link Ray}
 	 * @param length the length of the ray; 0.0 for infinite length
 	 * @return Iterator&lt;{@link CollisionItem}&gt;

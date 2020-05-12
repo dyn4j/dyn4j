@@ -26,6 +26,7 @@ package org.dyn4j.dynamics;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
+import org.dyn4j.Ownable;
 import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
@@ -74,7 +75,7 @@ import org.dyn4j.geometry.Vector2;
  * @version 4.0.0
  * @since 1.0.0
  */
-public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, Shiftable, DataContainer {
+public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, Shiftable, DataContainer, Ownable {
 	/**
 	 * Creates a {@link BodyFixture} for the given {@link Convex} {@link Shape},
 	 * adds it to the {@link PhysicsBody}, and returns it for configuration.
@@ -394,6 +395,10 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	/**
 	 * Updates the at-rest time for this body based on the given timestep and
 	 * returns the current at-rest time.
+	 * <p>
+	 * For {@link #isStatic()} bodies, this method will return -1 to indicate
+	 * that this body can always be at-rest since it's velocity is zero and
+	 * cannot be moved.
 	 * @return double
 	 * @param timestep the timestep information
 	 * @param settings the world settings

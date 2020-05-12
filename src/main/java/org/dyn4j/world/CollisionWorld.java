@@ -1,3 +1,27 @@
+/*
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without modification, are permitted 
+ * provided that the following conditions are met:
+ * 
+ *   * Redistributions of source code must retain the above copyright notice, this list of conditions 
+ *     and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
+ *     and the following disclaimer in the documentation and/or other materials provided with the 
+ *     distribution.
+ *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *     promote products derived from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package org.dyn4j.world;
 
 import java.util.Collection;
@@ -20,15 +44,33 @@ import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.listener.BoundsListener;
 import org.dyn4j.world.listener.CollisionListener;
-import org.dyn4j.world.listener.DestructionListener;
 import org.dyn4j.world.result.ConvexCastResult;
 import org.dyn4j.world.result.ConvexDetectResult;
 import org.dyn4j.world.result.DetectResult;
 import org.dyn4j.world.result.RaycastResult;
 
+/**
+ * Represents a world where {@link CollisionBody}s are added to participate in collision detection.
+ * <p>
+ * Along with defining the necessary methods to maintain the {@link CollisionBody}s in an instance, this 
+ * interface exposes the broad-narrow-manifold phases of collision detection allowing a user to swap 
+ * implementations.
+ * <p>
+ * This interface also defines the basic static queries a user would want to perform against the world
+ * including raycating, convex casting, AABB, and convex queries.
+ * <p>
+ * NOTE: This interface does not define a collision detection pipeline or process. Instead it defines the
+ * necessary components to build one.
+ * @author William Bittle
+ * @version 4.0.0
+ * @since 4.0.0
+ * @param <T> the {@link CollisionBody} type
+ * @param <E> the {@link Fixture} type
+ * @param <V> the {@link CollisionData} type
+ */
 public interface CollisionWorld<T extends CollisionBody<E>, E extends Fixture, V extends CollisionData<T, E>> extends Shiftable {
 	/** The default {@link CollisionBody} count */
-	public static final int DEFAULT_BODY_COUNT = 32;
+	public static final int DEFAULT_BODY_COUNT = 64;
 	
 	/**
 	 * Adds the given {@link CollisionBody} to this {@link CollisionWorld}.
@@ -130,8 +172,22 @@ public interface CollisionWorld<T extends CollisionBody<E>, E extends Fixture, V
 	
 	// listeners
 	
+	/**
+	 * Returns the collision listeners attached to this world.
+	 * <p>
+	 * The returned list can be used manipulate the listeners of this world.
+	 * @return List&lt;{@link CollisionListener}&gt;
+	 * @since 4.0.0
+	 */
 	public List<CollisionListener<T, E>> getCollisionListeners();
 	
+	/**
+	 * Returns the bounds listeners attached to this world.
+	 * <p>
+	 * The returned list can be used manipulate the listeners of this world.
+	 * @return List&lt;{@link BoundsListener}&gt;
+	 * @since 4.0.0
+	 */
 	public List<BoundsListener<T, E>> getBoundsListeners();
 	
 	// broadphase
@@ -228,36 +284,286 @@ public interface CollisionWorld<T extends CollisionBody<E>, E extends Fixture, V
 	 */
 	public TimeOfImpactDetector getTimeOfImpactDetector();
 	
-	public Collection<V> getCollisionData();
-	public Iterator<V> getCollisionDataIterator();
+	// collision detection
 	
-	// TODO the only thing i don't like about this is that there's so much generics and the caller will have to deal with them as well
+	/**
+	 * Returns an unmodifiable collection of the tracked collision data in this world.
+	 * @return Collection&lt;V&gt;
+	 * @since 4.0.0
+	 */
+	public Collection<V> getCollisionData();
+	
+	/**
+	 * Returns an iterator for the tracked collision data in this world.
+	 * <p>
+	 * The returned iterator does not support the remove method.
+	 * @return Iterator&lt;V&gt;
+	 * @since 4.0.0
+	 */
+	public Iterator<V> getCollisionDataIterator();
 	
 	// AABB Detection
 	
+	/**
+	 * Returns a list of {@link DetectResult}s containing all the body-fixtures that 
+	 * overlap with the given {@link AABB} using the current state of the {@link BroadphaseDetector}.
+	 * @param aabb the aabb
+	 * @param filter the filter; can be null
+	 * @return List&lt;{@link DetectResult}&gt;
+	 */
 	public List<DetectResult<T, E>> detect(AABB aabb, DetectFilter<T, E> filter);
+	
+	/**
+	 * Returns an iterator of {@link DetectResult}s containing all the body-fixtures that 
+	 * overlap with the given {@link AABB} using the current state of the {@link BroadphaseDetector}.
+	 * <p>
+	 * NOTE: The returned {@link DetectResult}s are reused internally. You should call the {@link DetectResult#copy()}
+	 * method to create a copy of the result if you need to keep it outside of the iteration.
+	 * @param aabb the aabb
+	 * @param filter the filter; can be null
+	 * @return Iterator&lt;{@link DetectResult}&gt;
+	 */
 	public Iterator<DetectResult<T, E>> detectIterator(AABB aabb, DetectFilter<T, E> filter);
+	
+	/**
+	 * Returns a list of {@link DetectResult}s containing all the body-fixtures that 
+	 * overlap with the given {@link AABB} using the current state of the {@link BroadphaseDetector},
+	 * only testing against the given {@link CollisionBody}.
+	 * @param aabb the aabb
+	 * @param body the body
+	 * @param filter the filter; can be null
+	 * @return List&lt;{@link DetectResult}&gt;
+	 */
 	public List<DetectResult<T, E>> detect(AABB aabb, T body, DetectFilter<T, E> filter);
+	
+	/**
+	 * Returns an iterator of {@link DetectResult}s containing all the body-fixtures that 
+	 * overlap with the given {@link AABB} using the current state of the {@link BroadphaseDetector},
+	 * only testing against the given {@link CollisionBody}.
+	 * <p>
+	 * NOTE: The returned {@link DetectResult}s are reused internally. You should call the {@link DetectResult#copy()}
+	 * method to create a copy of the result if you need to keep it outside of the iteration.
+	 * @param aabb the aabb
+	 * @param body the body
+	 * @param filter the filter; can be null
+	 * @return Iterator&lt;{@link DetectResult}&gt;
+	 */
 	public Iterator<DetectResult<T, E>> detectIterator(AABB aabb, T body, DetectFilter<T, E> filter);
 	
 	// Convex Detection
 	
+	/**
+	 * Returns a list of {@link ConvexDetectResult}s containing all the body-fixtures that 
+	 * overlap with the given {@link Convex} using the current state of the {@link BroadphaseDetector}.
+	 * @param convex the convex
+	 * @param transform the transform
+	 * @param filter the filter; can be null
+	 * @return List&lt;{@link ConvexDetectResult}&gt;
+	 */
 	public List<ConvexDetectResult<T, E>> detect(Convex convex, Transform transform, DetectFilter<T, E> filter);
+	
+	/**
+	 * Returns an iterator of {@link ConvexDetectResult}s containing all the body-fixtures that 
+	 * overlapped with the given {@link Convex} using the current state of the {@link BroadphaseDetector}.
+	 * @param convex the convex
+	 * @param transform the transform
+	 * @param filter the filter; can be null
+	 * @return Iterator&lt;{@link ConvexDetectResult}&gt;
+	 */
 	public Iterator<ConvexDetectResult<T, E>> detectIterator(Convex convex, Transform transform, DetectFilter<T, E> filter);
+	
+	/**
+	 * Returns a list of {@link ConvexDetectResult}s containing all the body-fixtures that 
+	 * overlapped with the given {@link Convex} using the current state of the {@link BroadphaseDetector},
+	 * only testing against the given {@link CollisionBody}.
+	 * @param convex the convex
+	 * @param transform the transform
+	 * @param body the body
+	 * @param filter the filter; can be null
+	 * @return List&lt;{@link ConvexDetectResult}&gt;
+	 */
 	public List<ConvexDetectResult<T, E>> detect(Convex convex, Transform transform, T body, DetectFilter<T, E> filter);
+	
+	/**
+	 * Returns an iterator of {@link ConvexDetectResult}s containing all the body-fixtures that 
+	 * overlapped with the given {@link Convex} using the current state of the {@link BroadphaseDetector},
+	 * only testing against the given {@link CollisionBody}.
+	 * @param convex the convex
+	 * @param transform the transform
+	 * @param body the body
+	 * @param filter the filter; can be null
+	 * @return Iterator&lt;{@link ConvexDetectResult}&gt;
+	 */
 	public Iterator<ConvexDetectResult<T, E>> detectIterator(Convex convex, Transform transform, T body, DetectFilter<T, E> filter);
 	
 	// raycast
 
+	/**
+	 * Returns a list of {@link RaycastResult}s containing all the body-fixtures that 
+	 * overlap with the given {@link Ray} using the current state of the {@link BroadphaseDetector}.
+	 * @param ray the ray
+	 * @param maxLength the max length of the ray; use 0 for infinite length
+	 * @param filter the filter; can be null
+	 * @return List&lt;{@link RaycastResult}&gt;
+	 */
 	public List<RaycastResult<T, E>> raycast(Ray ray, double maxLength, DetectFilter<T, E> filter);
+	
+	/**
+	 * Returns an iterator of {@link RaycastResult}s containing all the body-fixtures that 
+	 * overlap with the given {@link Ray} using the current state of the {@link BroadphaseDetector}.
+	 * @param ray the ray
+	 * @param maxLength the max length of the ray; use 0 for infinite length
+	 * @param filter the filter; can be null
+	 * @return Iterator&lt;{@link RaycastResult}&gt;
+	 */
 	public Iterator<RaycastResult<T, E>> raycastIterator(Ray ray, double maxLength, DetectFilter<T, E> filter);
+
+	/**
+	 * Returns a list of {@link RaycastResult}s containing all the body-fixtures that 
+	 * overlap with the given {@link Ray} only testing against the given {@link CollisionBody}.
+	 * <p>
+	 * This method does not use the current state of the {@link BroadphaseDetector} and instead tests the
+	 * given body's fixtures directly.
+	 * @param ray the ray
+	 * @param maxLength the max length of the ray; use 0 for infinite length
+	 * @param body the body
+	 * @param filter the filter; can be null
+	 * @return List&lt;{@link RaycastResult}&gt;
+	 */
+	public List<RaycastResult<T, E>> raycast(Ray ray, double maxLength, T body, DetectFilter<T, E> filter);
+	
+	/**
+	 * Returns an iterator of {@link RaycastResult}s containing all the body-fixtures that 
+	 * overlap with the given {@link Ray} only testing against the given {@link CollisionBody}.
+	 * <p>
+	 * This method does not use the current state of the {@link BroadphaseDetector} and instead tests the
+	 * given body's fixtures directly.
+	 * @param ray the ray
+	 * @param maxLength the max length of the ray; use 0 for infinite length
+	 * @param body the body
+	 * @param filter the filter; can be null
+	 * @return Iterator&lt;{@link RaycastResult}&gt;
+	 */
+	public Iterator<RaycastResult<T, E>> raycastIterator(Ray ray, double maxLength, T body, DetectFilter<T, E> filter);
+	
+	/**
+	 * Returns the closest {@link RaycastResult} that overlaps with the given {@link Ray} 
+	 * using the current state of the {@link BroadphaseDetector}.
+	 * <p>
+	 * The closest is defined as the closest intersection of the ray and a fixture to the 
+	 * ray's start point.
+	 * @param ray the ray
+	 * @param maxLength the max length of the ray; use 0 for infinite length
+	 * @param filter the filter; can be null
+	 * @return {@link RaycastResult}
+	 */
 	public RaycastResult<T, E> raycastClosest(Ray ray, double maxLength, DetectFilter<T, E> filter);
-	public RaycastResult<T, E> raycast(Ray ray, double maxLength, T body, DetectFilter<T, E> filter);
+	
+	/**
+	 * Returns the closest {@link RaycastResult} that overlaps with the given {@link Ray} 
+	 * only testing against the given {@link CollisionBody}.
+	 * <p>
+	 * The closest is defined as the closest intersection of the ray and a fixture to the 
+	 * ray's start point.
+	 * <p>
+	 * This method does not use the current state of the {@link BroadphaseDetector} and instead tests the
+	 * given body's fixtures directly.
+	 * @param ray the ray
+	 * @param maxLength the max length of the ray; use 0 for infinite length
+	 * @param body the body
+	 * @param filter the filter; can be null
+	 * @return {@link RaycastResult}
+	 */
+	public RaycastResult<T, E> raycastClosest(Ray ray, double maxLength, T body, DetectFilter<T, E> filter);
 	
 	// convex cast
 	
+	/**
+	 * Returns a list of {@link ConvexCastResult}s containing all the body-fixtures that 
+	 * overlap with the given {@link Convex} over the given deltaPosition and deltaAngle
+	 * using the current state of the {@link BroadphaseDetector}.
+	 * <p>
+	 * The deltaPosition and deltaAngle parameters define the cast of the convex. Imagine moving
+	 * the given convex from it's current transform position to the given position and rotating
+	 * the given convex from it's current transform rotation to the given rotation. This method detects
+	 * if there was any collisions between these start and end states.
+	 * <p>
+	 * This method assumes linear motion, meaning that the direction of motion is in the same direction
+	 * for the start and end states as defined by the deltaPosition parameter.
+	 * @param convex the convex
+	 * @param transform the transform
+	 * @param deltaPosition the change in position of the convex
+	 * @param deltaAngle the change in rotation of the convex
+	 * @param filter the filter; can be null
+	 * @return List&lt;{@link ConvexCastResult}&gt;
+	 */
 	public List<ConvexCastResult<T, E>> convexCast(Convex convex, Transform transform, Vector2 deltaPosition, double deltaAngle, DetectFilter<T, E> filter);
+	
+	/**
+	 * Returns an iterator of {@link ConvexCastResult}s containing all the body-fixtures that 
+	 * overlap with the given {@link Convex} over the given deltaPosition and deltaAngle
+	 * using the current state of the {@link BroadphaseDetector}.
+	 * <p>
+	 * The deltaPosition and deltaAngle parameters define the cast of the convex. Imagine moving
+	 * the given convex from it's current transform position to the given position and rotating
+	 * the given convex from it's current transform rotation to the given rotation. This method detects
+	 * if there was any collisions between these start and end states.
+	 * <p>
+	 * This method assumes linear motion, meaning that the direction of motion is in the same direction
+	 * for the start and end states as defined by the deltaPosition parameter.
+	 * @param convex the convex
+	 * @param transform the transform
+	 * @param deltaPosition the change in position of the convex
+	 * @param deltaAngle the change in rotation of the convex
+	 * @param filter the filter; can be null
+	 * @return Iterator&lt;{@link ConvexCastResult}&gt;
+	 */
 	public Iterator<ConvexCastResult<T, E>> convexCastIterator(Convex convex, Transform transform, Vector2 deltaPosition, double deltaAngle, DetectFilter<T, E> filter);
+	
+	/**
+	 * Returns the closest {@link ConvexCastResult} that overlaps with the given {@link Convex} 
+	 * over the given deltaPosition and deltaAngle using the current state of the {@link BroadphaseDetector}.
+	 * <p>
+	 * The closest is defined as the closest intersection from the initial position/rotation of
+	 * the given convex.
+	 * <p>
+	 * The deltaPosition and deltaAngle parameters define the cast of the convex. Imagine moving
+	 * the given convex from it's current transform position to the given position and rotating
+	 * the given convex from it's current transform rotation to the given rotation. This method detects
+	 * if there was any collisions between these start and end states.
+	 * <p>
+	 * This method assumes linear motion, meaning that the direction of motion is in the same direction
+	 * for the start and end states as defined by the deltaPosition parameter.
+	 * @param convex the convex
+	 * @param transform the transform
+	 * @param deltaPosition the change in position of the convex
+	 * @param deltaAngle the change in rotation of the convex
+	 * @param filter the filter; can be null
+	 * @return {@link ConvexCastResult}
+	 */
 	public ConvexCastResult<T, E> convexCastClosest(Convex convex, Transform transform, Vector2 deltaPosition, double deltaAngle, DetectFilter<T, E> filter);
-	public ConvexCastResult<T, E> convexCast(Convex convex, Transform transform, Vector2 deltaPosition, double deltaAngle, T body, DetectFilter<T, E> filter);
+	
+	/**
+	 * Returns the closest {@link ConvexCastResult} that overlaps with the given {@link Convex} 
+	 * over the given deltaPosition and deltaAngle only testing against the given {@link CollisionBody}.
+	 * <p>
+	 * The closest is defined as the closest intersection from the initial position/rotation of
+	 * the given convex.
+	 * <p>
+	 * The deltaPosition and deltaAngle parameters define the cast of the convex. Imagine moving
+	 * the given convex from it's current transform position to the given position and rotating
+	 * the given convex from it's current transform rotation to the given rotation. This method detects
+	 * if there was any collisions between these start and end states.
+	 * <p>
+	 * This method assumes linear motion, meaning that the direction of motion is in the same direction
+	 * for the start and end states as defined by the deltaPosition parameter.
+	 * @param convex the convex
+	 * @param transform the transform
+	 * @param deltaPosition the change in position of the convex
+	 * @param deltaAngle the change in rotation of the convex
+	 * @param body the body
+	 * @param filter the filter; can be null
+	 * @return {@link ConvexCastResult}
+	 */
+	public ConvexCastResult<T, E> convexCastClosest(Convex convex, Transform transform, Vector2 deltaPosition, double deltaAngle, T body, DetectFilter<T, E> filter);
 }

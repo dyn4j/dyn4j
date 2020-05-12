@@ -40,7 +40,7 @@ import org.dyn4j.collision.Fixture;
  */
 public class BoundsListenerAdapter<T extends CollisionBody<E>, E extends Fixture> implements BoundsListener<T, E> {
 	/* (non-Javadoc)
-	 * @see org.dyn4j.pipeline.BoundsListener#outside(org.dyn4j.collision.CollisionBody)
+	 * @see org.dyn4j.world.listener.BoundsListener#outside(org.dyn4j.collision.CollisionBody)
 	 */
 	public void outside(T body) {}
 }

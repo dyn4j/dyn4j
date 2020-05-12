@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.collision.CollisionItem;
@@ -63,6 +64,9 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 	/** Map to store what objects were updated since the last detection phase */
 	private final Map<CollisionItem<T, E>, DynamicAABBTreeLeaf<T, E>> updated;
 	
+	/** A reusable {@link AABB} for updates to reduce allocation */
+	private final AABB updatedAABB;
+	
 	/**
 	 * Default constructor.
 	 */
@@ -85,9 +89,10 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 		this.map = new LinkedHashMap<CollisionItem<T, E>, DynamicAABBTreeLeaf<T, E>>(initialCapacity * 4 / 3 + 1, 0.75f);
 		this.updated = new LinkedHashMap<CollisionItem<T, E>, DynamicAABBTreeLeaf<T, E>>(initialCapacity * 4 / 3 + 1, 0.75f);
 		this.updateTrackingEnabled = true;
+		this.updatedAABB = new AABB(0,0,0,0);
 	}
 	
-	/* (non-Javadoc)
+	/*(non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#add(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
 	 */
 	@Override
@@ -113,12 +118,13 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 	 */
 	private void add(BroadphaseItem<T, E> key, T body, E fixture) {
 		Transform tx = body.getTransform();
-		AABB aabb = fixture.getShape().createAABB(tx);
+//		AABB aabb = fixture.getShape().createAABB(tx);
+		fixture.getShape().computeAABB(tx, this.updatedAABB);
 		// expand the aabb
-		aabb.expand(this.expansion);
+		this.updatedAABB.expand(this.expansion);
 		// create a new node for the body
 		DynamicAABBTreeLeaf<T, E> node = new DynamicAABBTreeLeaf<T, E>(key);
-		node.aabb = aabb;
+		node.aabb.set(this.updatedAABB);
 		// add the proxy to the map
 		this.map.put(key, node);
 		// insert the node into the tree
@@ -185,18 +191,19 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 	private void update(CollisionItem<T, E> key, DynamicAABBTreeLeaf<T, E> node, T body, E fixture) {
 		Transform tx = body.getTransform();
 		// create the new aabb
-		AABB aabb = fixture.getShape().createAABB(tx);
+//		AABB aabb = fixture.getShape().createAABB(tx);
+		fixture.getShape().computeAABB(tx, this.updatedAABB);
 		// see if the old aabb contains the new one
-		if (node.aabb.contains(aabb)) {
+		if (node.aabb.contains(this.updatedAABB)) {
 			// if so, don't do anything
 			return;
 		}
 		// otherwise expand the new aabb
-		aabb.expand(this.expansion);
+		this.updatedAABB.expand(this.expansion);
 		// remove the current node from the tree
 		this.remove(node);
 		// set the new aabb
-		node.aabb = aabb;
+		node.aabb.set(this.updatedAABB);
 		// reinsert the node
 		this.insert(node);
 		
@@ -245,7 +252,7 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#setUpdateTrackingEnabled(boolean)
+	 * @see org.dyn4j.collision.broadphase.AbstractBroadphaseDetector#setUpdateTrackingEnabled(boolean)
 	 */
 	@Override
 	public void setUpdateTrackingEnabled(boolean flag) {
@@ -268,15 +275,6 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 	@Override
 	public void clearUpdates() {
 		this.updated.clear();
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#getAABB(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
-	 */
-	@Override
-	public AABB getAABB(T body, E fixture) {
-		CollisionItem<T, E> key = new BroadphaseItem<T, E>(body, fixture);
-		return this.getAABB(key);
 	}
 	
 	/* (non-Javadoc)
@@ -443,20 +441,20 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 			// compute the cost of descending to the left
 			double costl = 0.0;
 			if (left.isLeaf()) {
-				costl = temp.set(left.aabb).union(itemAABB).getPerimeter() + descendCost;
+				costl = temp.union(left.aabb, itemAABB).getPerimeter() + descendCost;
 			} else {
 				double oldPerimeter = left.aabb.getPerimeter();
-				double newPerimeter = temp.set(left.aabb).union(itemAABB).getPerimeter();
+				double newPerimeter = temp.union(left.aabb, itemAABB).getPerimeter();
 				costl = newPerimeter - oldPerimeter + descendCost;
 			}
 			
 			// compute the cost of descending to the right
 			double costr = 0.0;
 			if (right.isLeaf()) {
-				costr = temp.set(right.aabb).union(itemAABB).getPerimeter() + descendCost;
+				costr = temp.union(right.aabb, itemAABB).getPerimeter() + descendCost;
 			} else {
 				double oldPerimeter = right.aabb.getPerimeter();
-				double newPerimeter = temp.set(right.aabb).union(itemAABB).getPerimeter();
+				double newPerimeter = temp.union(right.aabb, itemAABB).getPerimeter();
 				costr = newPerimeter - oldPerimeter + descendCost;
 			}
 			
@@ -480,7 +478,9 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 		DynamicAABBTreeNode parent = node.parent;
 		DynamicAABBTreeNode newParent = new DynamicAABBTreeNode();
 		newParent.parent = node.parent;
-		newParent.aabb = node.aabb.getUnion(itemAABB);
+//		newParent.aabb = node.aabb.getUnion(itemAABB);
+//		newParent.aabb.set(node.aabb.getUnion(itemAABB));
+		newParent.aabb.union(node.aabb, itemAABB);
 		newParent.height = node.height + 1;
 		
 		if (parent != null) {
@@ -515,7 +515,8 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 			
 			// neither node should be null
 			node.height = 1 + Math.max(left.height, right.height);
-			node.aabb.set(left.aabb).union(right.aabb);
+			// the node's AABB should be the union of it's children
+			node.aabb.union(left.aabb, right.aabb);
 			
 			node = node.parent;
 		}
@@ -570,7 +571,8 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 				
 				// neither node should be null
 				n.height = 1 + Math.max(left.height, right.height);
-				n.aabb.set(left.aabb).union(right.aabb);
+//				n.aabb.set(left.aabb).union(right.aabb);
+				n.aabb.union(left.aabb, right.aabb);
 				
 				n = n.parent;
 			}
@@ -633,8 +635,10 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 				a.right = g;
 				g.parent = a;
 				// update the aabb
-				a.aabb.set(b.aabb).union(g.aabb);
-				c.aabb.set(a.aabb).union(f.aabb);
+//				a.aabb.set(b.aabb).union(g.aabb);
+				a.aabb.union(b.aabb, g.aabb);
+//				c.aabb.set(a.aabb).union(f.aabb);
+				c.aabb.union(a.aabb, f.aabb);
 				// update the heights
 				a.height = 1 + Math.max(b.height, g.height);
 				c.height = 1 + Math.max(a.height, f.height);
@@ -644,8 +648,10 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 				a.right = f;
 				f.parent = a;
 				// update the aabb
-				a.aabb.set(b.aabb).union(f.aabb);
-				c.aabb.set(a.aabb).union(g.aabb);
+//				a.aabb.set(b.aabb).union(f.aabb);
+				a.aabb.union(b.aabb, f.aabb);
+//				c.aabb.set(a.aabb).union(g.aabb);
+				c.aabb.union(a.aabb, g.aabb);
 				// update the heights
 				a.height = 1 + Math.max(b.height, f.height);
 				c.height = 1 + Math.max(a.height, g.height);
@@ -682,8 +688,10 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 				a.left = e;
 				e.parent = a;
 				// update the aabb
-				a.aabb.set(c.aabb).union(e.aabb);
-				b.aabb.set(a.aabb).union(d.aabb);
+//				a.aabb.set(c.aabb).union(e.aabb);
+				a.aabb.union(c.aabb, e.aabb);
+//				b.aabb.set(a.aabb).union(d.aabb);
+				b.aabb.union(a.aabb, d.aabb);
 				// update the heights
 				a.height = 1 + Math.max(c.height, e.height);
 				b.height = 1 + Math.max(a.height, d.height);
@@ -693,8 +701,10 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 				a.left = d;
 				d.parent = a;
 				// update the aabb
-				a.aabb.set(c.aabb).union(d.aabb);
-				b.aabb.set(a.aabb).union(e.aabb);
+//				a.aabb.set(c.aabb).union(d.aabb);
+				a.aabb.union(c.aabb, d.aabb);
+//				b.aabb.set(a.aabb).union(e.aabb);
+				b.aabb.union(a.aabb, e.aabb);
 				// update the heights
 				a.height = 1 + Math.max(c.height, d.height);
 				b.height = 1 + Math.max(a.height, e.height);
@@ -845,7 +855,13 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 		private DynamicAABBTreeNode currentNode;
 		
 		/** A reusable pair to output collisions */
-		private final BroadphasePair<T, E> reusablePair;
+		private final BroadphasePair<T, E> currentPair;
+		
+		/** A reusable pair to output collisions */
+		private final BroadphasePair<T, E> nextPair;
+		
+		/** True if there's another pair */
+		private boolean hasNext;
 		
 		/**
 		 * Minimal constructor.
@@ -854,7 +870,9 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 		public DetectPairsIterator(Iterator<DynamicAABBTreeLeaf<T, E>> bodyIterator) {
 			this.iterator = bodyIterator;
 			this.tested = new HashMap<CollisionItem<T, E>, Boolean>();
-			this.reusablePair = new BroadphasePair<T, E>();
+			this.currentPair = new BroadphasePair<T, E>();
+			this.nextPair = new BroadphasePair<T, E>();
+			this.hasNext = this.findNext();
 		}
 		
 		/* (non-Javadoc)
@@ -862,6 +880,44 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 		 */
 		@Override
 		public boolean hasNext() {
+			return this.hasNext;
+		}
+
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#next()
+		 */
+		@Override
+		public CollisionPair<T, E> next() {
+			if (this.hasNext) {
+				// copy over to the one we return
+				this.currentPair.body1 = this.nextPair.body1;
+				this.currentPair.fixture1 = this.nextPair.fixture1;
+				this.currentPair.body2 = this.nextPair.body2;
+				this.currentPair.fixture2 = this.nextPair.fixture2;
+				
+				// find the next pair
+				this.hasNext = this.findNext();
+				
+				// return the current pair
+				return this.currentPair;
+			}
+			throw new NoSuchElementException();
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#remove()
+		 */
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+		
+		/**
+		 * Returns true if there's another pair to process and sets
+		 * the nextPair field to that pair.
+		 * @return boolean
+		 */
+		private boolean findNext() {
 			// iterate through the list of AABBs to test the entire
 			// broadphase against
 			while (this.iterator.hasNext() || this.currentLeaf != null) {
@@ -878,7 +934,7 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 				}
 			
 				// is there another collision with the current leaf?
-				if (this.findNextCollisionPair()) {
+				if (this.findNextForCurrentLeaf()) {
 					return true;
 				}
 				
@@ -887,7 +943,7 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 			
 			return false;
 		}
-
+		
 		/**
 		 * Conversion of the non-recursive detection method into a finite state machine.
 		 * <p>
@@ -895,7 +951,7 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 		 * result in storage to be reported in the call to the {@link #next()} method.
 		 * @return boolean
 		 */
-		private boolean findNextCollisionPair() {
+		private boolean findNextForCurrentLeaf() {
 			boolean foundCollision = false;
 			
 			// find the next collision pair (if there is one)
@@ -925,10 +981,10 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 							// itself
 							if (!tested) {
 								// its a leaf so we have a collision
-								this.reusablePair.body1 = node.item.body;
-								this.reusablePair.fixture1 = node.item.fixture;
-								this.reusablePair.body2 = leaf.item.body;
-								this.reusablePair.fixture2 = leaf.item.fixture;
+								this.nextPair.body1 = node.item.body;
+								this.nextPair.fixture1 = node.item.fixture;
+								this.nextPair.body2 = leaf.item.body;
+								this.nextPair.fixture2 = leaf.item.fixture;
 								
 								// we can't return here because we need to advance the detection
 								// to the next node to test before we exit from this method
@@ -989,18 +1045,6 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 			return foundCollision;
 		}
 		
-		/* (non-Javadoc)
-		 * @see java.util.Iterator#next()
-		 */
-		@Override
-		public CollisionPair<T, E> next() {
-			return this.reusablePair;
-		}
-		
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
 	}
 
 	/**
@@ -1016,8 +1060,8 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 		/** Internal state to track the node in the tree we're testing against */
 		private DynamicAABBTreeNode currentNode;
 		
-		/** A reusable item to report back overlap and avoid allocation */
-		private final BroadphaseItem<T, E> reusableItem;
+		/** The next item to return */
+		private BroadphaseItem<T, E> nextItem;
 		
 		/**
 		 * Minimal constructor.
@@ -1026,7 +1070,7 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 		public DetectAABBIterator(AABB aabb) {
 			this.aabb = aabb;
 			this.currentNode = DynamicAABBTree.this.root;
-			this.reusableItem = new BroadphaseItem<T, E>();
+			this.findNext();
 		}
 		
 		/* (non-Javadoc)
@@ -1034,7 +1078,28 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 		 */
 		@Override
 		public boolean hasNext() {
-			return this.findNextCollisionItem();
+			return this.nextItem != null;
+		}
+
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#next()
+		 */
+		@Override
+		public CollisionItem<T, E> next() {
+			if (this.nextItem != null) {
+				CollisionItem<T, E> item = this.nextItem;
+				this.findNext();
+				return item;
+			}
+			throw new NoSuchElementException();
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#remove()
+		 */
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
 		}
 
 		/**
@@ -1044,7 +1109,8 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 		 * result in storage to be reported in the call to the {@link #next()} method.
 		 * @return boolean
 		 */
-		private boolean findNextCollisionItem() {
+		private boolean findNext() {
+			this.nextItem = null;
 			boolean foundCollision = false;
 			
 			// start where we left off
@@ -1065,8 +1131,7 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 						DynamicAABBTreeLeaf<T, E> leaf = (DynamicAABBTreeLeaf<T, E>)node;
 						
 						// record the collision details
-						this.reusableItem.body = leaf.item.body;
-						this.reusableItem.fixture = leaf.item.fixture;
+						this.nextItem = leaf.item;
 						
 						// we can't return here because we need to advance the detection
 						// to the next node to test before we exit from this method
@@ -1115,19 +1180,6 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 			
 			return foundCollision;
 		}
-		
-		/* (non-Javadoc)
-		 * @see java.util.Iterator#next()
-		 */
-		@Override
-		public CollisionItem<T, E> next() {
-			return this.reusableItem;
-		}
-		
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
 	}
 
 	/**
@@ -1155,8 +1207,8 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 		/** Internal state to track the node in the tree we're testing against */
 		private DynamicAABBTreeNode currentNode;
 		
-		/** A reusable item to report back overlap and avoid allocation */
-		private final BroadphaseItem<T, E> reusableItem;
+		/** The next item to return */
+		private CollisionItem<T, E> nextItem;
 		
 		/**
 		 * Minimal constructor.
@@ -1166,7 +1218,6 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 		public DetectRayIterator(Ray ray, double length) {
 			this.ray = ray;
 			this.currentNode = DynamicAABBTree.this.root;
-			this.reusableItem = new BroadphaseItem<T, E>();
 			
 			// create an aabb from the ray
 			Vector2 s = ray.getStart();
@@ -1189,6 +1240,8 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 			// precompute
 			this.invDx = 1.0 / d.x;
 			this.invDy = 1.0 / d.y;
+			
+			this.findNext();
 		}
 		
 		/* (non-Javadoc)
@@ -1196,7 +1249,28 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 		 */
 		@Override
 		public boolean hasNext() {
-			return this.findNextCollisionItem();
+			return this.nextItem != null;
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#next()
+		 */
+		@Override
+		public CollisionItem<T, E> next() {
+			if (this.nextItem != null) {
+				CollisionItem<T, E> item = this.nextItem;
+				this.findNext();
+				return item;
+			}
+			throw new NoSuchElementException();
+		}
+
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#remove()
+		 */
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
 		}
 
 		/**
@@ -1206,7 +1280,8 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 		 * result in storage to be reported in the call to the {@link #next()} method.
 		 * @return boolean
 		 */
-		private boolean findNextCollisionItem() {
+		private boolean findNext() {
+			this.nextItem = null;
 			boolean foundCollision = false;
 			
 			// start where we left off
@@ -1227,8 +1302,7 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 						DynamicAABBTreeLeaf<T, E> leaf = (DynamicAABBTreeLeaf<T, E>)node;
 
 						// set the collision details
-						this.reusableItem.body = leaf.item.body;
-						this.reusableItem.fixture = leaf.item.fixture;
+						this.nextItem = leaf.item;
 						
 						// we can't return here because we need to advance the detection
 						// to the next node to test before we exit from this method
@@ -1276,19 +1350,6 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 			}
 			
 			return foundCollision;
-		}
-		
-		/* (non-Javadoc)
-		 * @see java.util.Iterator#next()
-		 */
-		@Override
-		public CollisionItem<T, E> next() {
-			return this.reusableItem;
-		}
-		
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
 		}
 	}
 }

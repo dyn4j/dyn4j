@@ -1,3 +1,27 @@
+/*
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without modification, are permitted 
+ * provided that the following conditions are met:
+ * 
+ *   * Redistributions of source code must retain the above copyright notice, this list of conditions 
+ *     and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
+ *     and the following disclaimer in the documentation and/or other materials provided with the 
+ *     distribution.
+ *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *     promote products derived from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package org.dyn4j.world;
 
 import java.util.ArrayDeque;
@@ -31,11 +55,24 @@ import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
+import org.dyn4j.world.listener.CollisionListener;
+import org.dyn4j.world.listener.ContactCollisionListener;
 import org.dyn4j.world.listener.ContactListener;
 import org.dyn4j.world.listener.DestructionListener;
 import org.dyn4j.world.listener.StepListener;
 import org.dyn4j.world.listener.TimeOfImpactListener;
 
+/**
+ * Abstract implementation of the {@link PhysicsWorld} interface.
+ * <p>
+ * This class pulls together the concept of a time-step with collision detection, collision resolution,
+ * constraint solving, force/torque integration, etc.
+ * @author William Bittle
+ * @version 4.0.0
+ * @since 4.0.0
+ * @param <T> the {@link PhysicsBody} type
+ * @param <V> the {@link ContactCollisionData} type
+ */
 public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends ContactCollisionData<T>> extends AbstractCollisionWorld<T, BodyFixture, V> implements PhysicsWorld<T, V> {
 	/** The dynamics settings for this world */
 	protected Settings settings;
@@ -60,32 +97,47 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	
 	// listeners
 	
+	/** The list of {@link ContactListener}s */
 	protected final List<ContactListener<T>> contactListeners;
 	
+	/** The list of {@link DestructionListener}s */
 	protected final List<DestructionListener<T>> destructionListeners;
 	
+	/** The list of {@link TimeOfImpactListener}s */
 	protected final List<TimeOfImpactListener<T>> timeOfImpactListeners;
 	
+	/** The list of {@link StepListener}s */
 	protected final List<StepListener<T, V>> stepListeners;
 	
-	// temp data
+	// state data
 
-	// TODO rename to fullUpdateRequired?
-	protected boolean updateRequired;
-	
 	/** The accumulated time */
 	protected double time;
 	
+	/** The interaction graph */
 	protected final Map<T, InteractionGraphNode<T>> interactionGraph;
 	
+	/** A temporary list of only the {@link ContactConstraint} collisions from the last detection */
+	protected final List<V> contactCollisions;
+
+	/** True if an update to the collision data or interaction graph is needed before a step of the engine */
+	protected boolean updateRequired;
+	
+	/**
+	 * Default constructor.
+	 * <p>
+	 * Uses the {@link CollisionWorld#DEFAULT_BODY_COUNT} as the initial capacity.
+	 */
 	public AbstractPhysicsWorld() {
-		this(64);
+		this(DEFAULT_BODY_COUNT);
 	}
 
+	/**
+	 * Optional constructor.
+	 * @param initialBodyCapacity the default initial body capacity
+	 */
 	public AbstractPhysicsWorld(int initialBodyCapacity) {
 		super(initialBodyCapacity);
-		
-		this.updateRequired = true;
 		
 		// initialize all the classes with default values
 		this.settings = new Settings();
@@ -93,7 +145,8 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		this.gravity = PhysicsWorld.EARTH_GRAVITY.copy();
 		
 		// override the broadphase filter
-		// the CollisionWorld uses the DefaultBroadphaseFilter
+		// the CollisionWorld uses the DefaultBroadphaseFilter but 
+		// the PhysicsWorld needs to use the DetectBroadphaseFilter
 		this.detectBroadphaseFilter = new DetectBroadphaseFilter<T>(this);
 		this.coefficientMixer = CoefficientMixer.DEFAULT_MIXER;
 		this.contactConstraintSolver = new SequentialImpulses<T>();
@@ -107,25 +160,38 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		this.stepListeners = new ArrayList<StepListener<T,V>>();
 		
 		this.time = 0.0;
-		
 		this.interactionGraph = new LinkedHashMap<T, InteractionGraphNode<T>>(Collisions.getEstimatedCollisionPairs(initialBodyCapacity));
+		this.contactCollisions = new ArrayList<V>();
+		this.updateRequired = true;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#update(double)
+	 */
 	@Override
 	public boolean update(double elapsedTime) {
 		return this.update(elapsedTime, -1.0, 1);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#update(double, int)
+	 */
 	@Override
 	public boolean update(double elapsedTime, int maximumSteps) {
 		return this.update(elapsedTime, -1.0, maximumSteps);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#update(double, double)
+	 */
 	@Override
 	public boolean update(double elapsedTime, double stepElapsedTime) {
 		return this.update(elapsedTime, stepElapsedTime, 1);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#update(double, double, int)
+	 */
 	@Override
 	public boolean update(double elapsedTime, double stepElapsedTime, int maximumSteps) {
 		// make sure the update time is greater than zero
@@ -149,6 +215,9 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		return steps > 0;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#updatev(double)
+	 */
 	@Override
 	public void updatev(double elapsedTime) {
 		// make sure the update time is greater than zero
@@ -159,6 +228,9 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		this.step();
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#step(int)
+	 */
 	@Override
 	public void step(int steps) {
 		// get the frequency from settings
@@ -167,6 +239,9 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		this.step(steps, invhz);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#step(int, double)
+	 */
 	@Override
 	public void step(int steps, double elapsedTime) {
 		// make sure the number of steps is greather than zero
@@ -182,89 +257,111 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.AbstractCollisionWorld#addBody(org.dyn4j.collision.CollisionBody)
+	 */
 	@Override
 	public void addBody(T body) {
 		super.addBody(body);
 		this.addInteractionGraphNode(body);
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#addJoint(org.dyn4j.dynamics.joint.Joint)
+	 */
 	@Override
 	public void addJoint(Joint<T> joint) {
 		// check for null joint
 		if (joint == null) throw new NullPointerException(Messages.getString("dynamics.world.addNullJoint"));
-		// TODO what to do with this?
-//		// implicitly cast to constraint
-//		Constraint constraint = joint;
-//		// dont allow adding it twice
-//		if (constraint.world == this) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingBody"));
-//		// dont allow a joint that already is assigned to another world
-//		if (constraint.world != null) throw new IllegalArgumentException(Messages.getString("dynamics.world.addOtherWorldBody"));
+		// dont allow adding it twice
+		if (joint.getOwner() == this) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingBody"));
+		// dont allow a joint that already is assigned to another world
+		if (joint.getOwner() != null) throw new IllegalArgumentException(Messages.getString("dynamics.world.addOtherWorldBody"));
 		// add the joint to the joint list
 		this.joints.add(joint);
 		// set that its attached to this world
-//		constraint.world = this;
+		joint.setOwner(this);
 		// get the associated bodies
 		this.addInteractionGraphEdge(joint);
-		
-//		PhysicsPipelineBody body1 = (PhysicsPipelineBody)joint.getBody1();
-//		PhysicsPipelineBody body2 = (PhysicsPipelineBody)joint.getBody2();
-//		// create a joint edge from the first body to the second
-//		JointEdge<PhysicsPipelineBody> jointEdge1 = new JointEdge(body2, joint);
-//		// add the edge to the body
-//		body1.getJoints().add(jointEdge1);
-//		// create a joint edge from the second body to the first
-//		JointEdge jointEdge2 = new JointEdge(body1, joint);
-//		// add the edge to the body
-//		body2.joints.add(jointEdge2);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#containsJoint(org.dyn4j.dynamics.joint.Joint)
+	 */
 	@Override
 	public boolean containsJoint(Joint<T> joint) {
 		return this.joints.contains(joint);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#removeJoint(int)
+	 */
 	@Override
 	public boolean removeJoint(int index) {
 		Joint<T> joint = this.joints.get(index);
 		return removeJoint(joint);
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.AbstractCollisionWorld#removeAllBodies()
+	 */
 	@Override
 	public void removeAllBodies() {
 		this.removeAllBodiesAndJoints(false);
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.AbstractCollisionWorld#removeBody(int)
+	 */
 	@Override
 	public boolean removeBody(int index) {
 		return this.removeBody(index, false);
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#removeBody(int, boolean)
+	 */
 	@Override
 	public boolean removeBody(int index, boolean notify) {
 		T body = this.bodies.get(index);
 		return this.removeBody(body, notify);
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.AbstractCollisionWorld#removeBody(org.dyn4j.collision.CollisionBody)
+	 */
 	@Override
 	public boolean removeBody(T body) {
 		return this.removeBody(body, false);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#removeAllBodiesAndJoints()
+	 */
 	@Override
 	public void removeAllBodiesAndJoints() {
 		this.removeAllBodiesAndJoints(false);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#removeAllJoints()
+	 */
 	@Override
 	public void removeAllJoints() {
 		this.removeAllJoints(false);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#removeAllBodiesAndJoints(boolean)
+	 */
 	@Override
 	public void removeAllBodiesAndJoints(boolean notify) {
 		this.removeAllBodies(notify);
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#removeBody(org.dyn4j.dynamics.PhysicsBody, boolean)
+	 */
 	@Override
 	public boolean removeBody(T body, boolean notify) {
 		// check for null body
@@ -284,6 +381,8 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		if (removed) {
 			// set the world property to null
 			body.setFixtureModificationHandler(null);
+			body.setOwner(null);
+			
 			// remove the body from the broadphase
 			this.broadphaseDetector.remove(body);
 			// remove from the interaction graph
@@ -297,6 +396,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			while (jointIterator.hasNext()) {
 				// get the joint edge
 				Joint<T> joint = jointIterator.next();
+				joint.setOwner(null);
 				// get the other body
 				T other = joint.getOtherBody(body);
 				// wake up the other body
@@ -359,6 +459,9 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		return removed;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#removeJoint(org.dyn4j.dynamics.joint.Joint)
+	 */
 	@Override
 	public boolean removeJoint(Joint<T> joint) {
 		// NOTE: there's nothing to notify when removing a Joint
@@ -367,6 +470,8 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		// removing a joint is pretty easy, we just need to make sure
 		// we remove the joint from the interaction graph nodes
 		if (removed) {
+			joint.setOwner(null);
+			
 			// remove the interaction edges
 			T body1 = joint.getBody1();
 			T body2 = joint.getBody2();
@@ -384,6 +489,9 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		return removed;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#removeAllBodies(boolean)
+	 */
 	@Override
 	public void removeAllBodies(boolean notify) {
 		int bsize = this.bodies.size();
@@ -396,6 +504,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 				T body = this.bodies.get(i);
 				// set the world property to null
 				body.setFixtureModificationHandler(null);
+				body.setOwner(null);
 			}
 			
 			this.clear();
@@ -416,6 +525,8 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			T body = this.bodies.get(i);
 			// set the world property to null
 			body.setFixtureModificationHandler(null);
+			body.setOwner(null);
+			
 			// notify of all the destroyed contacts
 			InteractionGraphNode<T> node = this.interactionGraph.get(body);
 			
@@ -426,6 +537,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			while (jointIterator.hasNext()) {
 				// get the joint edge
 				Joint<T> joint = jointIterator.next();
+				joint.setOwner(null);
 				// get the other body
 				T other = joint.getOtherBody(body);
 				// remove the joint edge from the other body
@@ -480,6 +592,9 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		this.clear();
 	}
 	
+	/**
+	 * Helper method to clear the world of bodies and joints.
+	 */
 	protected void clear() {
 		this.bodies.clear();
 		this.broadphaseDetector.clear();
@@ -488,6 +603,9 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		this.joints.clear();
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#removeAllJoints(boolean)
+	 */
 	@Override
 	public void removeAllJoints(boolean notify) {
 		List<DestructionListener<T>> destructionListeners = null;
@@ -497,7 +615,8 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		
 		int size = this.joints.size();
 		for (int i = 0; i < size; i++) {
-			Joint<T> joint = this.joints.get(i);			
+			Joint<T> joint = this.joints.get(i);
+			joint.setOwner(null);
 
 			// remove the interaction edges
 			T body1 = joint.getBody1();
@@ -521,108 +640,167 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#getSettings()
+	 */
 	@Override
 	public Settings getSettings() {
 		return this.settings;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#setSettings(org.dyn4j.dynamics.Settings)
+	 */
 	@Override
 	public void setSettings(Settings settings) {
 		if (settings == null) throw new NullPointerException(Messages.getString("dynamics.world.nullSettings"));
 		this.settings = settings;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#setGravity(org.dyn4j.geometry.Vector2)
+	 */
 	@Override
 	public void setGravity(Vector2 gravity) {
 		if (gravity == null) throw new NullPointerException(Messages.getString("dynamics.world.nullGravity"));
 		this.gravity = gravity;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#getGravity()
+	 */
 	@Override
 	public Vector2 getGravity() {
 		return this.gravity;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#getCoefficientMixer()
+	 */
 	@Override
 	public CoefficientMixer getCoefficientMixer() {
 		return this.coefficientMixer;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#setCoefficientMixer(org.dyn4j.world.CoefficientMixer)
+	 */
 	@Override
 	public void setCoefficientMixer(CoefficientMixer coefficientMixer) {
 		if (coefficientMixer == null) throw new NullPointerException(Messages.getString("dynamics.world.nullCoefficientMixer"));
 		this.coefficientMixer = coefficientMixer;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#setContactConstraintSolver(org.dyn4j.dynamics.contact.ContactConstraintSolver)
+	 */
 	@Override
 	public void setContactConstraintSolver(ContactConstraintSolver<T> constraintSolver) {
 		if (constraintSolver == null) throw new NullPointerException(Messages.getString("dynamics.world.nullContactConstraintSolver"));
 		this.contactConstraintSolver = constraintSolver;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#getContactConstraintSolver()
+	 */
 	@Override
 	public ContactConstraintSolver<T> getContactConstraintSolver() {
 		return this.contactConstraintSolver;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#setTimeOfImpactSolver(org.dyn4j.dynamics.contact.TimeOfImpactSolver)
+	 */
 	@Override
 	public void setTimeOfImpactSolver(TimeOfImpactSolver<T> timeOfImpactSolver) {
 		if (timeOfImpactSolver == null) throw new NullPointerException(Messages.getString("dynamics.world.nullTimeOfImpactSolver"));
 		this.timeOfImpactSolver = timeOfImpactSolver;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#getTimeOfImpactSolver()
+	 */
 	@Override
 	public TimeOfImpactSolver<T> getTimeOfImpactSolver() {
 		return this.timeOfImpactSolver;
 	}
 	
-
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#getJointCount()
+	 */
 	@Override
 	public int getJointCount() {
 		return this.joints.size();
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#getJoint(int)
+	 */
 	@Override
 	public Joint<T> getJoint(int index) {
 		return this.joints.get(index);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#getJoints()
+	 */
 	@Override
 	public List<Joint<T>> getJoints() {
 		return Collections.unmodifiableList(this.joints);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#getJointIterator()
+	 */
 	@Override
 	public Iterator<Joint<T>> getJointIterator() {
 		return new JointIterator();
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#getStep()
+	 */
 	@Override
 	public TimeStep getStep() {
 		return this.step;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#getAccumulatedTime()
+	 */
 	@Override
 	public double getAccumulatedTime() {
 		return this.time;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#setAccumulatedTime(double)
+	 */
 	@Override
 	public void setAccumulatedTime(double elapsedTime) {
 		if (elapsedTime < 0.0) return;
 		this.time = elapsedTime;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#setUpdateRequired(boolean)
+	 */
 	@Override
 	public void setUpdateRequired(boolean flag) {
 		this.updateRequired = flag;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#isUpdateRequired()
+	 */
 	@Override
 	public boolean isUpdateRequired() {
 		return this.updateRequired;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.AbstractCollisionWorld#isEmpty()
+	 */
 	@Override
 	public boolean isEmpty() {
 		int nb = this.bodies.size();
@@ -630,6 +808,9 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		return nb <= 0 && nj <= 0;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.AbstractCollisionWorld#shift(org.dyn4j.geometry.Vector2)
+	 */
 	@Override
 	public void shift(Vector2 shift) {
 		super.shift(shift);
@@ -642,6 +823,9 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#isInContact(org.dyn4j.dynamics.PhysicsBody, org.dyn4j.dynamics.PhysicsBody)
+	 */
 	@Override
 	public boolean isInContact(T body1, T body2) {
 		InteractionGraphNode<T> node = this.interactionGraph.get(body1);
@@ -657,6 +841,9 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		return false;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#getContacts(org.dyn4j.dynamics.PhysicsBody)
+	 */
 	@Override
 	public List<ContactConstraint<T>> getContacts(T body) {
 		List<ContactConstraint<T>> contacts = new ArrayList<ContactConstraint<T>>();
@@ -667,6 +854,9 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		return contacts;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#getInContactBodies(org.dyn4j.dynamics.PhysicsBody, boolean)
+	 */
 	@Override
 	public List<T> getInContactBodies(T body, boolean includeSensedContact) {
 		List<T> bodies = new ArrayList<T>();
@@ -685,6 +875,9 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		return bodies;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#isJoined(org.dyn4j.dynamics.PhysicsBody, org.dyn4j.dynamics.PhysicsBody, boolean)
+	 */
 	@Override
 	public boolean isJoined(T body1, T body2, boolean includeCollisionNotAllowed) {
 		InteractionGraphNode<T> node = this.interactionGraph.get(body1);
@@ -702,6 +895,9 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		return false;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#getJoints(org.dyn4j.dynamics.PhysicsBody)
+	 */
 	@Override
 	public List<Joint<T>> getJoints(T body) {
 		List<Joint<T>> contacts = new ArrayList<Joint<T>>();
@@ -712,6 +908,9 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		return contacts;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#getJoinedBodies(org.dyn4j.dynamics.PhysicsBody)
+	 */
 	@Override
 	public List<T> getJoinedBodies(T body) {
 		List<T> bodies = new ArrayList<T>();
@@ -730,26 +929,41 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		return bodies;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#getContactListeners()
+	 */
 	@Override
 	public List<ContactListener<T>> getContactListeners() {
 		return this.contactListeners;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#getDestructionListeners()
+	 */
 	@Override
 	public List<DestructionListener<T>> getDestructionListeners() {
 		return this.destructionListeners;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#getTimeOfImpactListeners()
+	 */
 	@Override
 	public List<TimeOfImpactListener<T>> getTimeOfImpactListeners() {
 		return this.timeOfImpactListeners;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#getStepListeners()
+	 */
 	@Override
 	public List<StepListener<T, V>> getStepListeners() {
 		return this.stepListeners;
 	}
 	
+	/**
+	 * Performs a full step of the engine.
+	 */
 	protected void step() {
 		// get all the step listeners
 		List<StepListener<T, V>> stepListeners = this.stepListeners;
@@ -778,13 +992,11 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		
 		// notify of all the contacts that will be solved and all the sensed contacts
 		if (contactListeners.size() > 0) {
-			for (ContactCollisionData<T> data : this.collisionData.values()) {
-				if (data.isManifoldCollision()) {
-					ContactConstraint<T> cc = data.getContactConstraint();
-					for (Contact contact : cc.getContacts()) {
-						for (ContactListener<T> listener : contactListeners) {
-							listener.preSolve(data, contact);
-						}
+			for (ContactCollisionData<T> data : this.contactCollisions) {
+				ContactConstraint<T> cc = data.getContactConstraint();
+				for (Contact contact : cc.getContacts()) {
+					for (ContactListener<T> listener : contactListeners) {
+						listener.preSolve(data, contact);
 					}
 				}
 			}
@@ -897,13 +1109,11 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		
 		// notify of the all solved contacts
 		if (contactListeners.size() > 0) {
-			for (ContactCollisionData<T> data : this.collisionData.values()) {
-				if (data.isManifoldCollision()) {
-					ContactConstraint<T> cc = data.getContactConstraint();
-					for (SolvedContact contact : cc.getContacts()) {
-						for (ContactListener<T> listener : contactListeners) {
-							listener.postSolve(data, contact);
-						}
+			for (ContactCollisionData<T> data : this.contactCollisions) {
+				ContactConstraint<T> cc = data.getContactConstraint();
+				for (SolvedContact contact : cc.getContacts()) {
+					for (ContactListener<T> listener : contactListeners) {
+						listener.postSolve(data, contact);
 					}
 				}
 			}
@@ -936,46 +1146,91 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.AbstractCollisionWorld#detectCollisions(java.util.Iterator)
+	 */
+	@Override
 	protected void detectCollisions(Iterator<V> iterator) {
 		// clear the contact interactions
 		for (InteractionGraphNode<T> node : this.interactionGraph.values()) {
 			node.contacts.clear();
 		}
 		
+		// this is rebuilt every time so clear it
+		this.contactCollisions.clear();
+		
+		List<ContactCollisionListener<T>> listeners = this.getContactCollisionListeners();
 		WarmStartHandler wsh = new WarmStartHandler();
 		
 		// if the iterator has returned something then it's made it past
 		// the manifold stage and is ready to become a contact constraint
-//		Iterator<V> iterator = this.detectIterator();
 		while (iterator.hasNext()) {
-			V data = iterator.next();
+			V collision = iterator.next();
 
 			// get the current contact constraint data
-			ContactConstraint<T> cc = data.getContactConstraint();
+			ContactConstraint<T> cc = collision.getContactConstraint();
 			
 			// we can exit early if the collision didn't make it to the manifold stage
 			// and there's no existing contacts to report ending
-			if (!data.isManifoldCollision() && cc.getContacts().size() == 0) {
+			if (!collision.isManifoldCollision() && cc.getContacts().size() == 0) {
 				continue;
 			}
 			
 			// setup the handler
-			wsh.data = data;
+			wsh.data = collision;
 			
 			// update the contact constraint
 			// NOTE: in the case of an empty manifold, this method will also report
 			//       end notifications for any existing contacts
-			cc.update(data.getManifold(), this.settings, wsh);
+			cc.update(collision.getManifold(), this.settings, wsh);
 			
 			// we only want to add interaction edges if the collision actually made it past
 			// the manifold generation stage
-			if (data.isManifoldCollision()) {
+			if (collision.isManifoldCollision()) {
+				// run it through the listeners
+				boolean allow = true;
+				for (ContactCollisionListener<T> listener : listeners) {
+					if (!listener.collision(collision)) {
+						allow = false;
+					}
+				}
+				
+				// did any not allow it?
+				if (!allow) {
+					continue;
+				}
+				
+				// set the flag for contact constraint
+				collision.setContactConstraintCollision(true);
+				
 				// build the contact edges
 				this.addInteractionGraphEdge(cc);
+				
+				// add it to a list of only Contact Constraint Collisions for
+				// quicker post/pre solve notification
+				this.contactCollisions.add(collision);
 			}
 		}
 	}
 	
+	/**
+	 * Returns the {@link CollisionListener}s who are of type {@link ContactCollisionListener}.
+	 * @return List&lt;{@link ContactCollisionListener}&gt;
+	 */
+	protected final List<ContactCollisionListener<T>> getContactCollisionListeners() {
+		List<ContactCollisionListener<T>> listeners = new ArrayList<ContactCollisionListener<T>>();
+		for (CollisionListener<T, BodyFixture> listener : this.collisionListeners) {
+			if (listener instanceof ContactCollisionListener) {
+				listeners.add((ContactCollisionListener<T>)listener);
+			}
+		}
+		return listeners;
+	}
+	
+	/**
+	 * Adds an interaction graph node for the given body.
+	 * @param body the body
+	 */
 	private final void addInteractionGraphNode(T body) {
 		InteractionGraphNode<T> node = this.interactionGraph.get(body);
 		
@@ -985,9 +1240,13 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		}
 	}
 	
-	private final void addInteractionGraphEdge(ContactConstraint<T> cc) {
-		T body1 = cc.getBody1();
-		T body2 = cc.getBody2();
+	/**
+	 * Adds an interaction graph edge for the given {@link ContactConstraint}.
+	 * @param contactConstraint the contact constraint
+	 */
+	private final void addInteractionGraphEdge(ContactConstraint<T> contactConstraint) {
+		T body1 = contactConstraint.getBody1();
+		T body2 = contactConstraint.getBody2();
 		
 		InteractionGraphNode<T> node1 = this.interactionGraph.get(body1);
 		InteractionGraphNode<T> node2 = this.interactionGraph.get(body2);
@@ -1001,10 +1260,14 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			this.interactionGraph.put(body1, node2);
 		}
 		
-		node1.contacts.add(cc);
-		node2.contacts.add(cc);
+		node1.contacts.add(contactConstraint);
+		node2.contacts.add(contactConstraint);
 	}
 	
+	/**
+	 * Adds an interaction graph edge for the given {@link Joint}.
+	 * @param joint the joint
+	 */
 	private final void addInteractionGraphEdge(Joint<T> joint) {
 		T body1 = joint.getBody1();
 		T body2 = joint.getBody2();
@@ -1267,16 +1530,25 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			this.listeners = AbstractPhysicsWorld.this.contactListeners;
 		}
 
+		/* (non-Javadoc)
+		 * @see org.dyn4j.dynamics.contact.ContactUpdateHandler#getFriction(org.dyn4j.dynamics.BodyFixture, org.dyn4j.dynamics.BodyFixture)
+		 */
 		@Override
 		public double getFriction(BodyFixture fixture1, BodyFixture fixture2) {
 			return AbstractPhysicsWorld.this.coefficientMixer.mixFriction(fixture1.getFriction(), fixture2.getFriction());
 		}
 
+		/* (non-Javadoc)
+		 * @see org.dyn4j.dynamics.contact.ContactUpdateHandler#getRestitution(org.dyn4j.dynamics.BodyFixture, org.dyn4j.dynamics.BodyFixture)
+		 */
 		@Override
 		public double getRestitution(BodyFixture fixture1, BodyFixture fixture2) {
 			return AbstractPhysicsWorld.this.coefficientMixer.mixFriction(fixture1.getRestitution(), fixture2.getRestitution());
 		}
 
+		/* (non-Javadoc)
+		 * @see org.dyn4j.dynamics.contact.ContactUpdateHandler#begin(org.dyn4j.dynamics.contact.Contact)
+		 */
 		@Override
 		public void begin(Contact contact) {
 			int size = this.listeners.size();
@@ -1286,6 +1558,9 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			}
 		}
 
+		/* (non-Javadoc)
+		 * @see org.dyn4j.dynamics.contact.ContactUpdateHandler#persist(org.dyn4j.dynamics.contact.Contact, org.dyn4j.dynamics.contact.Contact)
+		 */
 		@Override
 		public void persist(Contact oldContact, Contact newContact) {
 			int size = this.listeners.size();
@@ -1295,6 +1570,9 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			}
 		}
 
+		/* (non-Javadoc)
+		 * @see org.dyn4j.dynamics.contact.ContactUpdateHandler#end(org.dyn4j.dynamics.contact.Contact)
+		 */
 		@Override
 		public void end(Contact contact) {
 			int size = this.listeners.size();
@@ -1366,5 +1644,4 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			}
 		}
 	}
-
 }

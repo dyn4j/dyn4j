@@ -56,8 +56,10 @@ public class SegmentDetectorTest {
 		
 		// should not intersect
 		TestCase.assertFalse(collision);
-		TestCase.assertNull(raycast.getNormal());
-		TestCase.assertNull(raycast.getPoint());
+		TestCase.assertEquals(raycast.getNormal().x, 0.0);
+		TestCase.assertEquals(raycast.getNormal().y, 0.0);
+		TestCase.assertEquals(raycast.getPoint().x, 0.0);
+		TestCase.assertEquals(raycast.getPoint().y, 0.0);
 		TestCase.assertEquals(0.0, raycast.getDistance());
 	}
 	
@@ -102,8 +104,10 @@ public class SegmentDetectorTest {
 		
 		// should not intersect
 		TestCase.assertFalse(collision);
-		TestCase.assertNull(raycast.getNormal());
-		TestCase.assertNull(raycast.getPoint());
+		TestCase.assertEquals(raycast.getNormal().x, 0.0);
+		TestCase.assertEquals(raycast.getNormal().y, 0.0);
+		TestCase.assertEquals(raycast.getPoint().x, 0.0);
+		TestCase.assertEquals(raycast.getPoint().y, 0.0);
 		TestCase.assertEquals(0.0, raycast.getDistance());
 	}
 	

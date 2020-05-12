@@ -293,14 +293,16 @@ public class ContactManagerTest {
 	 */
 	@Test
 	public void addRemove() {
-		ArrayList<ManifoldPoint> points = new ArrayList<ManifoldPoint>();
-		points.add(new ManifoldPoint(ManifoldPointId.DISTANCE, new Vector2(), 1));
+		Manifold manifold = new Manifold();
+		ManifoldPoint mp = new ManifoldPoint(ManifoldPointId.DISTANCE);
+		mp.setDepth(1.0);
+		manifold.getPoints().add(mp);
 		ContactConstraint cc = new ContactConstraint(new BroadphasePair(
 				new Body(), 
 				new BodyFixture(Geometry.createCircle(1.0)), 
 				new Body(), 
 				new BodyFixture(Geometry.createCircle(1.0))), 
-				new Manifold(points, new Vector2()), 
+				manifold, 
 				0, 0);
 		
 		ContactManager cm = new DefaultContactManager();
@@ -320,14 +322,18 @@ public class ContactManagerTest {
 	 */
 	@Test
 	public void shiftCoordinates() {
-		List<ManifoldPoint> points = new ArrayList<ManifoldPoint>(2);
-		points.add(new ManifoldPoint(ManifoldPointId.DISTANCE, new Vector2(2.0, 0.0), 1.0));
+		Manifold manifold = new Manifold();
+		manifold.getNormal().x = 1.0;
+		ManifoldPoint mp = new ManifoldPoint(ManifoldPointId.DISTANCE);
+		mp.getPoint().x = 2.0;
+		mp.setDepth(1.0);
+		manifold.getPoints().add(mp);
 		ContactConstraint<Body> cc = new ContactConstraint(new BroadphasePair(
 				new Body(), 
 				new BodyFixture(Geometry.createCircle(1.0)), 
 				new Body(), 
 				new BodyFixture(Geometry.createCircle(1.0))), 
-				new Manifold(points, new Vector2(1.0, 0.0)), 
+				manifold, 
 				0, 0);
 		
 		ContactManager cm = new DefaultContactManager();
@@ -346,14 +352,16 @@ public class ContactManagerTest {
 	 */
 	@Test
 	public void clear() {
-		ArrayList<ManifoldPoint> points = new ArrayList<ManifoldPoint>();
-		points.add(new ManifoldPoint(ManifoldPointId.DISTANCE, new Vector2(), 1));
+		Manifold manifold = new Manifold();
+		ManifoldPoint mp = new ManifoldPoint(ManifoldPointId.DISTANCE);
+		mp.setDepth(1.0);
+		manifold.getPoints().add(mp);
 		ContactConstraint cc = new ContactConstraint(new BroadphasePair(
 				new Body(), 
 				new BodyFixture(Geometry.createCircle(1.0)), 
 				new Body(), 
 				new BodyFixture(Geometry.createCircle(1.0))), 
-				new Manifold(points, new Vector2()), 
+				manifold, 
 				0, 0);
 		
 		ContactManager cm = new DefaultContactManager();

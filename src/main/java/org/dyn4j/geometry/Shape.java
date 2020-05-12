@@ -151,4 +151,24 @@ public interface Shape extends Transformable, DataContainer {
 	 * @since 3.0.0
 	 */
 	public abstract AABB createAABB(Transform transform);
+
+	/**
+	 * Computes the {@link AABB} from this {@link Shape} and places
+	 * the result in the given {@link AABB}.
+	 * <p>
+	 * This is the same as calling {@link #computeAABB(Transform, AABB)} and passing a new {@link Transform}.
+	 * @param aabb the destination {@link AABB}
+	 * @since 4.0.0
+	 */
+	public abstract void computeAABB(AABB aabb);
+	
+	/**
+	 * Computes the {@link AABB} from this {@link Shape} after applying the given
+	 * transformation and places the result in the given {@link AABB}.
+	 * @param transform the {@link Transform} for this {@link Shape}
+	 * @param aabb the destination {@link AABB}
+	 * @throws NullPointerException if the given transform is null
+	 * @since 4.0.0
+	 */
+	public abstract void computeAABB(Transform transform, AABB aabb);
 }

@@ -254,18 +254,17 @@ public class WorldTest {
 		w.addBody((Body) null);
 	}
 	
-	// TODO need to remove this?
-//	/**
-//	 * Tests the add body method attempting to add the
-//	 * same body more than once.
-//	 */
-//	@Test(expected = IllegalArgumentException.class)
-//	public void addSameBody() {
-//		World w = new World();
-//		Body b1 = new Body();
-//		w.addBody(b1);
-//		w.addBody(b1);
-//	}
+	/**
+	 * Tests the add body method attempting to add the
+	 * same body more than once.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void addSameBody() {
+		World w = new World();
+		Body b1 = new Body();
+		w.addBody(b1);
+		w.addBody(b1);
+	}
 	
 	/**
 	 * Tests the add body method.
@@ -802,22 +801,21 @@ public class WorldTest {
 		w.setSettings(null);
 	}
 	
-	// TODO need to remove this?
-//	/**
-//	 * Tests adding a body to a world that has already been added to a different world.
-//	 * @since 3.1.0
-//	 */
-//	@Test(expected = IllegalArgumentException.class)
-//	public void addBodyFromAnotherWorld() {
-//		World w1 = new World();
-//		World w2 = new World();
-//		
-//		Body b = new Body();
-//		
-//		w1.addBody(b);
-//		
-//		w2.addBody(b);
-//	}
+	/**
+	 * Tests adding a body to a world that has already been added to a different world.
+	 * @since 3.1.0
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void addBodyFromAnotherWorld() {
+		World w1 = new World();
+		World w2 = new World();
+		
+		Body b = new Body();
+		
+		w1.addBody(b);
+		
+		w2.addBody(b);
+	}
 	
 	/**
 	 * Tests the get/add/remove listeners methods.

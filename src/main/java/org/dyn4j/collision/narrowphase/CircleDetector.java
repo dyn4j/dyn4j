@@ -71,9 +71,9 @@ public final class CircleDetector {
 		// check difference
 		if (mag < radii * radii) {
 			// then we have a collision
+			penetration.depth = radii - v.normalize();
 			penetration.normal.x = v.x;
 			penetration.normal.y = v.y;
-			penetration.depth = radii - penetration.normal.normalize();
 			return true;
 		}
 		return false;
@@ -135,10 +135,13 @@ public final class CircleDetector {
 		// check difference
 		if (mag >= radii * radii) {
 			// then the circles are separated
-			separation.normal = v;
 			separation.distance = v.normalize() - radii;
-			separation.point1 = ce1.add(v.x * r1, v.y * r1);
-			separation.point2 = ce2.add(-v.x * r2, -v.y * r2);
+			separation.normal.x = v.x;
+			separation.normal.y = v.y;
+			separation.point1.x = ce1.x + v.x * r1;
+			separation.point1.y = ce1.y + v.y * r1;
+			separation.point2.x = ce2.x - v.x * r2;
+			separation.point2.y = ce2.y - v.y * r2;
 			return true;
 		}
 		return false;
@@ -239,8 +242,10 @@ public final class CircleDetector {
 		Vector2 n = ce.to(p); n.normalize();
 		
 		// populate the raycast result
-		raycast.point = p;
-		raycast.normal = n;
+		raycast.point.x = p.x;
+		raycast.point.y = p.y;
+		raycast.normal.x = n.x;
+		raycast.normal.y = n.y;
 		raycast.distance = t;
 		
 		// return success

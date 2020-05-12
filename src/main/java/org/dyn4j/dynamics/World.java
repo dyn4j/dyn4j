@@ -2709,14 +2709,14 @@ public class World implements Shiftable, DataContainer {
 		// check for null body
 		if (body == null) throw new NullPointerException(Messages.getString("dynamics.world.addNullBody"));
 		// dont allow adding it twice
-//		if (body.world == this) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingBody"));
-//		// dont allow a body that already is assigned to another world
-//		if (body.world != null) throw new IllegalArgumentException(Messages.getString("dynamics.world.addOtherWorldBody"));
+		if (body.getOwner() == this) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingBody"));
+		// dont allow a body that already is assigned to another world
+		if (body.getOwner() != null) throw new IllegalArgumentException(Messages.getString("dynamics.world.addOtherWorldBody"));
 		// add it to the world
 		this.bodies.add(body);
 		// set the world property on the body
-//		body.world = this;
 		body.setFixtureModificationHandler(new BodyModificationHandler(body));
+		body.setOwner(this);
 		// add it to the broadphase
 		this.broadphaseDetector.add(body);
 	}
@@ -2731,16 +2731,13 @@ public class World implements Shiftable, DataContainer {
 	public void addJoint(Joint joint) {
 		// check for null joint
 		if (joint == null) throw new NullPointerException(Messages.getString("dynamics.world.addNullJoint"));
-		// implicitly cast to constraint
-//		Constraint constraint = joint;
 		// dont allow adding it twice
-//		if (constraint.world == this) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingBody"));
-//		// dont allow a joint that already is assigned to another world
-//		if (constraint.world != null) throw new IllegalArgumentException(Messages.getString("dynamics.world.addOtherWorldBody"));
+		if (joint.getOwner() == this) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingBody"));
+		// dont allow a joint that already is assigned to another world
+		if (joint.getOwner() != null) throw new IllegalArgumentException(Messages.getString("dynamics.world.addOtherWorldBody"));
 		// add the joint to the joint list
 		this.joints.add(joint);
-		// set that its attached to this world
-//		constraint.world = this;
+		joint.setOwner(this);
 		// get the associated bodies
 		Body body1 = (Body)joint.getBody1();
 		Body body2 = (Body)joint.getBody2();
@@ -2845,8 +2842,8 @@ public class World implements Shiftable, DataContainer {
 		// only remove joints and contacts if the body was removed
 		if (removed) {
 			// set the world property to null
-//			body.world = null;
 			body.setFixtureModificationHandler(null);
+			body.setOwner(null);
 			
 			// remove the body from the broadphase
 			this.broadphaseDetector.remove(body);
@@ -2861,9 +2858,7 @@ public class World implements Shiftable, DataContainer {
 				aIterator.remove();
 				// get the joint
 				Joint joint = jointEdge.interaction;
-				// set the world property to null
-//				Constraint constraint = joint;
-//				constraint.world = null;
+				joint.setOwner(null);
 				// get the other body
 				Body other = jointEdge.other;
 				// wake up the other body
@@ -2975,8 +2970,7 @@ public class World implements Shiftable, DataContainer {
 		// see if the given joint was removed
 		if (removed) {
 			// set the world property to null
-//			Constraint constraint = joint;
-//			constraint.world = null;
+			joint.setOwner(null);
 			
 			// get the involved bodies
 			Body body1 = (Body)joint.getBody1();
@@ -3095,8 +3089,8 @@ public class World implements Shiftable, DataContainer {
 			// clear all the contacts
 			body.contacts.clear();
 			// set the world to null
-//			body.world = null;
 			body.setFixtureModificationHandler(null);
+			body.setOwner(null);
 		}
 		// do we need to notify?
 		if (notify) {
@@ -3105,9 +3099,7 @@ public class World implements Shiftable, DataContainer {
 			for (int i = 0; i < jsize; i++) {
 				// get the joint
 				Joint joint = this.joints.get(i);
-				// set the world property to null
-//				Constraint constraint = joint;
-//				constraint.world = null;
+				joint.setOwner(null);
 				// call the destruction listeners
 				for (DestructionListener dl : listeners) {
 					dl.destroyed(joint);
@@ -3173,9 +3165,7 @@ public class World implements Shiftable, DataContainer {
 		for (int i = 0; i < jSize; i++) {
 			// remove the joint from the joint list
 			Joint joint = this.joints.get(i);
-			// set the world property to null
-//			Constraint constraint = joint;
-//			constraint.world = null;
+			joint.setOwner(null);
 			
 			// get the involved bodies
 			Body body1 = (Body)joint.getBody1();

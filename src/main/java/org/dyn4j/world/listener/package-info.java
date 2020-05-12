@@ -22,78 +22,13 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.world;
-
-import java.util.ConcurrentModificationException;
-import java.util.Iterator;
-
-import org.dyn4j.dynamics.PhysicsBody;
-import org.dyn4j.dynamics.joint.Joint;
 
 /**
- * Represents an iterator for {@link Joint}s in a {@link World}.
+ * Package contains the listeners used in the {@link org.dyn4j.world.CollisionWorld} and 
+ * {@link org.dyn4j.world.PhysicsWorld} classes to notify a user of events occurring in
+ * the engine.
  * @author William Bittle
  * @version 4.0.0
- * @since 3.2.0
- * @param <T> the {@link PhysicsBody} type
+ * @since 4.0.0
  */
-final class JointIterator<T extends PhysicsBody> implements Iterator<Joint<T>> {
-	/** The world to iterate over */
-	private final World world;
-	
-	/** The current index */
-	private int index;
-	
-	/**
-	 * Minimal constructor.
-	 * @param world the world to iterate over
-	 */
-	public JointIterator(World world) {
-		this.world = world;
-		this.index = -1;
-	}
-	
-	/* (non-Javadoc)
-	 * @see java.util.Iterator#hasNext()
-	 */
-	@Override
-	public boolean hasNext() {
-		return this.index + 1 < this.world.getJointCount();
-	}
-
-	/* (non-Javadoc)
-	 * @see java.util.Iterator#next()
-	 */
-	@Override
-	public Joint next() {
-		if (this.index >= this.world.getJointCount()) {
-			throw new IndexOutOfBoundsException();
-		}
-		try {
-			this.index++;
-			Joint joint = this.world.getJoint(this.index);
-			return joint;
-		} catch (IndexOutOfBoundsException ex) {
-			throw new ConcurrentModificationException();
-		}
-	}
-
-	/* (non-Javadoc)
-	 * @see java.util.Iterator#remove()
-	 */
-	@Override
-	public void remove() {
-		if (this.index < 0) {
-			throw new IllegalStateException();
-		}
-		if (this.index >= this.world.getJointCount()) {
-			throw new IndexOutOfBoundsException();
-		}
-		try {
-			this.world.removeJoint(this.index);
-			this.index--;
-		} catch (IndexOutOfBoundsException ex) {
-			throw new ConcurrentModificationException();
-		}
-	}
-}
+package org.dyn4j.world.listener;

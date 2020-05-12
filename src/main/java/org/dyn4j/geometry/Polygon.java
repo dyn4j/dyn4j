@@ -580,10 +580,10 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Shape#createAABB(org.dyn4j.geometry.Transform)
+	 * @see org.dyn4j.geometry.Shape#computeAABB(org.dyn4j.geometry.Transform, org.dyn4j.geometry.AABB)
 	 */
 	@Override
-	public AABB createAABB(Transform transform) {
+	public void computeAABB(Transform transform, AABB aabb) {
 		// get the first point
 		Vector2 p = transform.getTransformed(this.vertices[0]);
 		
@@ -615,7 +615,9 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
             }
         }
         
-		// create the aabb
-		return new AABB(minX, minY, maxX, maxY);
+		aabb.minX = minX;
+		aabb.minY = minY;
+		aabb.maxX = maxX;
+		aabb.maxY = maxY;
 	}
 }

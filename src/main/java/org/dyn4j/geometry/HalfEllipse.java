@@ -308,10 +308,10 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	}
 
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Shape#createAABB(org.dyn4j.geometry.Transform)
+	 * @see org.dyn4j.geometry.Shape#computeAABB(org.dyn4j.geometry.Transform, org.dyn4j.geometry.AABB)
 	 */
 	@Override
-	public AABB createAABB(Transform transform) {
+	public void computeAABB(Transform transform, AABB aabb) {
 		// Fast computation of HalfEllipse AABB without resorting to getFarthestPoint related methods
 		// Based on the Ellipse AABB calculation + adjusting the result for the missing side
 		
@@ -332,33 +332,36 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		double cx = transform.getTransformedX(this.ellipseCenter);
 		double cy = transform.getTransformedY(this.ellipseCenter);
 		
-		double minx = cx - aabbHalfWidth;
-		double miny = cy - aabbHalfHeight;
-		double maxx = cx + aabbHalfWidth;
-		double maxy = cy + aabbHalfHeight;
+		double minX = cx - aabbHalfWidth;
+		double minY = cy - aabbHalfHeight;
+		double maxX = cx + aabbHalfWidth;
+		double maxY = cy + aabbHalfHeight;
 		
 		// Now adjust for the missing side
 		// Every time one point will come from the Ellipse AABB and the other from the left and right vertices
 		// Depending on the total rotation u, there are four possible cases
 		if (u.y > 0) {
 			if (u.x > 0) {
-				maxx = transform.getTransformedX(this.vertexRight);
-				miny = transform.getTransformedY(this.vertexLeft);
+				maxX = transform.getTransformedX(this.vertexRight);
+				minY = transform.getTransformedY(this.vertexLeft);
 			} else {
-				maxx = transform.getTransformedX(this.vertexLeft);
-				maxy = transform.getTransformedY(this.vertexRight);	
+				maxX = transform.getTransformedX(this.vertexLeft);
+				maxY = transform.getTransformedY(this.vertexRight);	
 			}
 		} else {
 			if (u.x > 0) {
-				minx = transform.getTransformedX(this.vertexLeft);
-				miny = transform.getTransformedY(this.vertexRight);
+				minX = transform.getTransformedX(this.vertexLeft);
+				minY = transform.getTransformedY(this.vertexRight);
 			} else {
-				minx = transform.getTransformedX(this.vertexRight);
-				maxy = transform.getTransformedY(this.vertexLeft);	
+				minX = transform.getTransformedX(this.vertexRight);
+				maxY = transform.getTransformedY(this.vertexLeft);	
 			}
 		}
 		
-		return new AABB(minx, miny, maxx, maxy);
+		aabb.minX = minX;
+		aabb.minY = minY;
+		aabb.maxX = maxX;
+		aabb.maxY = maxY;
 	}
 	
 	/* (non-Javadoc)

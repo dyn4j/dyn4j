@@ -37,19 +37,33 @@ import org.dyn4j.world.ContactCollisionData;
  * @param <T> the {@link PhysicsBody} type
  */
 public class ContactListenerAdapter<T extends PhysicsBody> implements ContactListener<T> {
-
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.listener.ContactListener#begin(org.dyn4j.world.ContactCollisionData, org.dyn4j.dynamics.contact.Contact)
+	 */
 	@Override
 	public void begin(ContactCollisionData<T> collision, Contact contact) {}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.listener.ContactListener#end(org.dyn4j.world.ContactCollisionData, org.dyn4j.dynamics.contact.Contact)
+	 */
 	@Override
 	public void end(ContactCollisionData<T> collision, Contact contact) {}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.listener.ContactListener#persist(org.dyn4j.world.ContactCollisionData, org.dyn4j.dynamics.contact.Contact, org.dyn4j.dynamics.contact.Contact)
+	 */
 	@Override
 	public void persist(ContactCollisionData<T> collision, Contact oldContact, Contact newContact) {}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.listener.ContactListener#preSolve(org.dyn4j.world.ContactCollisionData, org.dyn4j.dynamics.contact.Contact)
+	 */
 	@Override
 	public void preSolve(ContactCollisionData<T> collision, Contact contact) {}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.listener.ContactListener#postSolve(org.dyn4j.world.ContactCollisionData, org.dyn4j.dynamics.contact.SolvedContact)
+	 */
 	@Override
 	public void postSolve(ContactCollisionData<T> collision, SolvedContact contact) {}
 

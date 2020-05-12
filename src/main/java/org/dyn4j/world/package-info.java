@@ -34,45 +34,44 @@
  * <p>
  * A constraint based approach is used to solving contacts and joints.
  * <p>
- * Create a {@link org.dyn4j.dynamics.World} object to gain access the dynamics engine.  Create 
- * {@link org.dyn4j.dynamics.Body}s and add them to the {@link org.dyn4j.dynamics.World}.  
- * Add the {@link org.dyn4j.dynamics.World#update(double)} method to your game loop (notice the 
- * {@link org.dyn4j.dynamics.World#update(double)} method requires the elapsed time to 
+ * Create a {@link org.dyn4j.world.World} object to gain access the dynamics engine.  Create 
+ * {@link org.dyn4j.dynamics.Body}s and add them to the {@link org.dyn4j.world.World}.  
+ * Add the {@link org.dyn4j.world.World#update(double)} method to your game loop (notice the 
+ * {@link org.dyn4j.world.World#update(double)} method requires the elapsed time to 
  * be in seconds).
  * <p>
- * Upon creating a {@link org.dyn4j.dynamics.World} a {@link org.dyn4j.collision.Bounds} 
+ * Upon creating a {@link org.dyn4j.world.World} a {@link org.dyn4j.collision.Bounds} 
  * object may be supplied.  The {@link org.dyn4j.collision.Bounds} will determine when 
  * {@link org.dyn4j.dynamics.Body}s go out of bounds and deactivate them.  Using the 
- * {@link org.dyn4j.dynamics.World#World()} constructor will create a world that has no bounds,
- * in which case the {@link org.dyn4j.dynamics.World#getBounds()} method will return null.
+ * {@link org.dyn4j.world.World#World()} constructor will create a world that has no bounds,
+ * in which case the {@link org.dyn4j.world.World#getBounds()} method will return null.
  * <p>
- * A {@link org.dyn4j.dynamics.World} object also contains a number listeners that can be used to 
+ * A {@link org.dyn4j.world.World} object also contains a number listeners that can be used to 
  * respond to events that happen within the world, contact for instance.
  * <ul>
- * <li>{@link org.dyn4j.collision.BoundsListener} for responding to out of bounds bodies</li>
- * <li>{@link org.dyn4j.dynamics.DestructionListener} for responding to bodies and joints that are 
+ * <li>{@link org.dyn4j.world.listener.BoundsListener} for responding to out of bounds bodies</li>
+ * <li>{@link org.dyn4j.world.listener.DestructionListener} for responding to bodies and joints that are 
  * implicitly destroyed by some other action</li>
- * <li>{@link org.dyn4j.dynamics.StepListener} for performing logic at the end/beginning of a time 
+ * <li>{@link org.dyn4j.world.listener.StepListener} for performing logic at the end/beginning of a time 
  * step</li>
- * <li>{@link org.dyn4j.dynamics.CollisionListener} for responding to collision detection events</li>
- * <li>{@link org.dyn4j.dynamics.contact.ContactListener} for responding to contact events</li>
- * <li>{@link org.dyn4j.dynamics.RaycastListener} for responding to raycast events</li>
- * <li>{@link org.dyn4j.dynamics.TimeOfImpactListener} for responding to time of impact events</li>
+ * <li>{@link org.dyn4j.world.listener.CollisionListener} for responding to collision detection events</li>
+ * <li>{@link org.dyn4j.world.listener.ContactCollisionListener} for responding to contact collision detection events</li>
+ * <li>{@link org.dyn4j.world.listener.ContactListener} for responding to contact events</li>
+ * <li>{@link org.dyn4j.world.listener.TimeOfImpactListener} for responding to time of impact events</li>
  * </ul>
  * Please read the respective documentation on each listener.  Certain operations on the 
- * {@link org.dyn4j.dynamics.World} object may not be allowed inside the listener methods.
+ * {@link org.dyn4j.world.World} object may not be allowed inside the listener methods.
  * <p>
- * The gravity of the {@link org.dyn4j.dynamics.World} object can be changed, and can be in any 
- * direction via the {@link org.dyn4j.dynamics.World#setGravity(org.dyn4j.geometry.Vector2)} method.
+ * The gravity of the {@link org.dyn4j.world.World} object can be changed, and can be in any 
+ * direction via the {@link org.dyn4j.world.World#setGravity(org.dyn4j.geometry.Vector2)} method.
  * <p>
  * The dynamics engine may require some configuration.  The defaults should cover most applications, 
  * however, they can be changed using the {@link org.dyn4j.dynamics.Settings} class on the 
- * {@link org.dyn4j.dynamics.World}.  Any setting can be changed at runtime so that no source code 
+ * {@link org.dyn4j.world.World}.  Any setting can be changed at runtime so that no source code 
  * modification is needed.  Refer to the source of {@link org.dyn4j.dynamics.Settings} and the 
  * Sandbox for details on what each individual setting controls.
  * @author William Bittle
  * @version 4.0.0
- * @since 1.0.0
+ * @since 4.0.0
  */
-// TODO review comments
 package org.dyn4j.world;

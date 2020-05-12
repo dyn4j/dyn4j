@@ -55,6 +55,8 @@ public class AbstractShapeTest {
 		public double getRadius(Vector2 center) { return 0.0; }
 		@Override
 		public Interval project(Vector2 n, Transform transform) { return null; }
+		@Override
+		public void computeAABB(Transform transform, AABB aabb) { }
 	}
 	
 	/**

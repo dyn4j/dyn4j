@@ -78,7 +78,7 @@ public class IslandTest {
 				new BodyFixture(Geometry.createCircle(1.0)), 
 				new Body(), 
 				new BodyFixture(Geometry.createCircle(1.0))), 
-				new Manifold(new ArrayList<ManifoldPoint>(), new Vector2()), 0, 0));
+				new Manifold(), 0, 0));
 		
 		TestCase.assertEquals(1, i.bodies.size());
 		TestCase.assertEquals(1, i.joints.size());
@@ -99,7 +99,7 @@ public class IslandTest {
 				new BodyFixture(Geometry.createCircle(1.0)), 
 				new Body(), 
 				new BodyFixture(Geometry.createCircle(1.0))), 
-				new Manifold(new ArrayList<ManifoldPoint>(), new Vector2()), 0, 0));
+				new Manifold(), 0, 0));
 		
 		TestCase.assertEquals(1, i.bodies.size());
 		TestCase.assertEquals(1, i.joints.size());

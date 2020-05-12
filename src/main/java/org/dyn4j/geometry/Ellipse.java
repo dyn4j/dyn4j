@@ -244,10 +244,10 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	}
 
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Shape#createAABB(org.dyn4j.geometry.Transform)
+	 * @see org.dyn4j.geometry.Shape#computeAABB(org.dyn4j.geometry.Transform, org.dyn4j.geometry.AABB)
 	 */
 	@Override
-	public AABB createAABB(Transform transform) {
+	public void computeAABB(Transform transform, AABB aabb) {
 		// Fast computation of Ellipse AABB without resorting to getFarthestPoint related methods
 		// Also see http://www.iquilezles.org/www/articles/ellipses/ellipses.htm
 		
@@ -271,12 +271,10 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 		double cy = transform.getTransformedY(this.center);
 		
 		// combine to form the ellipse AABB
-		double minx = cx - aabbHalfWidth;
-		double miny = cy - aabbHalfHeight;
-		double maxx = cx + aabbHalfWidth;
-		double maxy = cy + aabbHalfHeight;
-		
-		return new AABB(minx, miny, maxx, maxy);
+		aabb.minX = cx - aabbHalfWidth;
+		aabb.minY = cy - aabbHalfHeight;
+		aabb.maxX = cx + aabbHalfWidth;
+		aabb.maxY = cy + aabbHalfHeight;
 	}
 	
 	/* (non-Javadoc)

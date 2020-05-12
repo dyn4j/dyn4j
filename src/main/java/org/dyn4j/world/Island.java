@@ -218,6 +218,10 @@ final class Island<T extends PhysicsBody> {
 				PhysicsBody body = this.bodies.get(i);
 				
 				double bodySleepTime = body.updateAtRestTime(step, settings);
+				if (bodySleepTime < 0) {
+					continue;
+				}
+				
 				minSleepTime = Math.min(minSleepTime, bodySleepTime);
 			}
 			

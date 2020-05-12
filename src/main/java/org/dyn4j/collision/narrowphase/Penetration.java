@@ -118,6 +118,17 @@ public class Penetration implements Shiftable, Copyable<Penetration> {
 		this.depth = depth;
 	}
 	
+	/**
+	 * Copies (deep) the given {@link Penetration} information to this {@link Penetration}.
+	 * @param penetration the penetration to copy
+	 * @since 4.0.0
+	 */
+	public void setTo(Penetration penetration) {
+		this.depth = penetration.depth;
+		this.normal.x = penetration.normal.x;
+		this.normal.y = penetration.normal.y;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Shiftable#shift(org.dyn4j.geometry.Vector2)
 	 */

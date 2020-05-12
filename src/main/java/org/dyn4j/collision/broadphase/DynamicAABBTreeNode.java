@@ -48,7 +48,14 @@ class DynamicAABBTreeNode {
 	int height;
 	
 	/** The aabb containing all children */
-	AABB aabb;
+	final AABB aabb;
+	
+	/**
+	 * Default constructor.
+	 */
+	public DynamicAABBTreeNode() {
+		this.aabb = new AABB(0,0,0,0);
+	}
 	
 	/**
 	 * Returns true if this node is a leaf node.

@@ -133,7 +133,7 @@ public final class BroadphasePair<T extends CollisionBody<E>, E extends Fixture>
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.CollisionPair#copy()
+	 * @see org.dyn4j.Copyable#copy()
 	 */
 	@Override
 	public CollisionPair<T, E> copy() {

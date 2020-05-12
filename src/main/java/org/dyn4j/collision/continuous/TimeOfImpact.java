@@ -41,12 +41,15 @@ public class TimeOfImpact implements Copyable<TimeOfImpact> {
 	protected double time;
 	
 	/** The separation at the time of impact */
-	protected Separation separation;
+	protected final Separation separation;
 	
 	/**
 	 * Default constructor.
 	 */
-	public TimeOfImpact() {}
+	public TimeOfImpact() {
+		this.time = 0;
+		this.separation = new Separation();
+	}
 	
 	/**
 	 * Full constructor.
@@ -101,7 +104,17 @@ public class TimeOfImpact implements Copyable<TimeOfImpact> {
 	 * @param separation the separation
 	 */
 	public void setSeparation(Separation separation) {
-		this.separation = separation;
+		this.separation.setTo(separation);
+	}
+	
+	/**
+	 * Copies (deep) the given {@link TimeOfImpact} to this {@link TimeOfImpact}.
+	 * @param toi the time of impact data to copy
+	 * @since 4.0.0
+	 */
+	public void setTo(TimeOfImpact toi) {
+		this.time = toi.time;
+		this.separation.setTo(toi.separation);
 	}
 	
 	/* (non-Javadoc)

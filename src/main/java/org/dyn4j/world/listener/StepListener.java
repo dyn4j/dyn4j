@@ -24,7 +24,6 @@
  */
 package org.dyn4j.world.listener;
 
-import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.TimeStep;
 import org.dyn4j.world.ContactCollisionData;
@@ -38,6 +37,7 @@ import org.dyn4j.world.PhysicsWorld;
  * @version 4.0.0
  * @since 1.0.0
  * @param <T> the {@link PhysicsBody} type
+ * @param <V> the {@link ContactCollisionData} type
  */
 public interface StepListener<T extends PhysicsBody, V extends ContactCollisionData<T>> {
 	/**

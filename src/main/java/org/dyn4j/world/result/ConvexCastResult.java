@@ -28,33 +28,74 @@ import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.collision.Fixture;
 import org.dyn4j.collision.continuous.TimeOfImpact;
 
+/**
+ * Represents a reusable {@link DetectResult} for convex casting.
+ * @author William Bittle
+ * @version 4.0.0
+ * @since 4.0.0
+ * @param <T> the {@link CollisionBody} type
+ * @param <E> the {@link Fixture} type
+ */
 public class ConvexCastResult<T extends CollisionBody<E>, E extends Fixture> extends DetectResult<T, E> implements Comparable<ConvexCastResult<T, E>> {
-	protected TimeOfImpact timeOfImpact;
+	/** The time of impact data */
+	protected final TimeOfImpact timeOfImpact;
 	
+	/**
+	 * Default constructor.
+	 */
 	public ConvexCastResult() {
-		
+		this.timeOfImpact = new TimeOfImpact();
 	}
 	
+	/**
+	 * Full constructor.
+	 * @param body the body
+	 * @param fixture the fixture
+	 * @param timeOfImpact the time of impact
+	 */
 	public ConvexCastResult(T body, E fixture, TimeOfImpact timeOfImpact) {
 		super(body, fixture);
 		this.timeOfImpact = timeOfImpact;
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
 	@Override
 	public int compareTo(ConvexCastResult<T, E> o) {
 		return (int)Math.signum(this.timeOfImpact.getTime() - o.timeOfImpact.getTime());
 	}
 	
+	/**
+	 * Returns the {@link TimeOfImpact} data.
+	 * @return {@link TimeOfImpact}
+	 */
 	public TimeOfImpact getTimeOfImpact() {
 		return this.timeOfImpact;
 	}
 
+	/**
+	 * Sets the time of impact data.
+	 * @param timeOfImpact the time of impact data
+	 */
 	public void setTimeOfImpact(TimeOfImpact timeOfImpact) {
-		this.timeOfImpact = timeOfImpact;
+		this.timeOfImpact.setTo(timeOfImpact);
+	}
+	
+	/**
+	 * Copies (deep) the given result to this result.
+	 * @param result the result to copy
+	 */
+	public void setTo(ConvexCastResult<T, E> result) {
+		super.setTo(result);
+		this.timeOfImpact.setTo(result.timeOfImpact);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.result.DetectResult#copy()
+	 */
 	@Override
 	public ConvexCastResult<T, E> copy() {
-		return new ConvexCastResult<T, E>(this.body, this.fixture, this.timeOfImpact);
+		return new ConvexCastResult<T, E>(this.body, this.fixture, this.timeOfImpact.copy());
 	}
 }

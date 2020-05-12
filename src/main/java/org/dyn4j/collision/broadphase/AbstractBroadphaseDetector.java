@@ -156,13 +156,22 @@ public abstract class AbstractBroadphaseDetector<T extends CollisionBody<E>, E e
 		}
 		// create an item to reuse so we don't allocate a bunch of these
 		BroadphaseItem<T, E> item = new BroadphaseItem<T, E>(body, body.getFixture(0));
-		AABB union = this.getAABB(item);
+		AABB union = this.getAABB(item).copy();
 		for (int i = 1; i < size; i++) {
 			item.fixture = body.getFixture(i);
 			AABB aabb = this.getAABB(item);
 			union.union(aabb);
 		}
 		return union;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#getAABB(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
+	 */
+	@Override
+	public AABB getAABB(T body, E fixture) {
+		CollisionItem<T, E> key = new BroadphaseItem<T, E>(body, fixture);
+		return this.getAABB(key);
 	}
 	
 	/* (non-Javadoc)

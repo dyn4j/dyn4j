@@ -22,44 +22,24 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.world.listener;
-
-import org.dyn4j.dynamics.PhysicsBody;
-import org.dyn4j.dynamics.TimeStep;
-import org.dyn4j.world.ContactCollisionData;
-import org.dyn4j.world.PhysicsWorld;
+package org.dyn4j;
 
 /**
- * Convenience class for implementing the {@link StepListener} interface.
+ * Represents an object that can be owned by a single owner.
  * @author William Bittle
  * @version 4.0.0
- * @since 1.0.0
- * @param <T> the {@link PhysicsBody} type
- * @param <V> the {@link ContactCollisionData} type
+ * @since 4.0.0
  */
-public class StepListenerAdapter<T extends PhysicsBody, V extends ContactCollisionData<T>> implements StepListener<T, V> {
-	/* (non-Javadoc)
-	 * @see org.dyn4j.world.listener.StepListener#begin(org.dyn4j.dynamics.TimeStep, org.dyn4j.world.PhysicsWorld)
+public interface Ownable {
+	/**
+	 * Returns the owner for this body.
+	 * @return Object
 	 */
-	@Override
-	public void begin(TimeStep step, PhysicsWorld<T, V> world) {}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.world.listener.StepListener#updatePerformed(org.dyn4j.dynamics.TimeStep, org.dyn4j.world.PhysicsWorld)
+	public Object getOwner();
+	
+	/**
+	 * Sets the owner of this body.
+	 * @param owner the owner
 	 */
-	@Override
-	public void updatePerformed(TimeStep step, PhysicsWorld<T, V> world) {}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.world.listener.StepListener#postSolve(org.dyn4j.dynamics.TimeStep, org.dyn4j.world.PhysicsWorld)
-	 */
-	@Override
-	public void postSolve(TimeStep step, PhysicsWorld<T, V> world) {}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.world.listener.StepListener#end(org.dyn4j.dynamics.TimeStep, org.dyn4j.world.PhysicsWorld)
-	 */
-	@Override
-	public void end(TimeStep step, PhysicsWorld<T, V> world) {}
-
+	public void setOwner(Object owner);
 }

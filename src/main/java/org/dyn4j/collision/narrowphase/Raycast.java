@@ -41,13 +41,12 @@ import org.dyn4j.geometry.Vector2;
  * @version 4.0.0
  * @since 2.0.0
  */
-//TODO need to final these fields?
 public class Raycast implements Shiftable, Copyable<Raycast> {
 	/** The hit point */
-	protected Vector2 point;
+	protected final Vector2 point;
 	
 	/** The normal at the hit point */
-	protected Vector2 normal;
+	protected final Vector2 normal;
 	
 	/** The distance from the start of the {@link Ray} to the hit point */
 	protected double distance;
@@ -55,7 +54,10 @@ public class Raycast implements Shiftable, Copyable<Raycast> {
 	/**
 	 * Default constructor.
 	 */
-	public Raycast() {}
+	public Raycast() {
+		this.point = new Vector2();
+		this.normal = new Vector2();
+	}
 	
 	/**
 	 * Full constructor.
@@ -87,8 +89,8 @@ public class Raycast implements Shiftable, Copyable<Raycast> {
 	 * their default values.
 	 */
 	public void clear() {
-		this.point = null;
-		this.normal = null;
+		this.point.zero();
+		this.normal.zero();
 		this.distance = 0.0;
 	}
 	
@@ -105,7 +107,8 @@ public class Raycast implements Shiftable, Copyable<Raycast> {
 	 * @param point the hit point
 	 */
 	public void setPoint(Vector2 point) {
-		this.point = point;
+		this.point.x = point.x;
+		this.point.y = point.y;
 	}
 	
 	/**
@@ -121,7 +124,8 @@ public class Raycast implements Shiftable, Copyable<Raycast> {
 	 * @param normal the normal at the hit point
 	 */
 	public void setNormal(Vector2 normal) {
-		this.normal = normal;
+		this.normal.x = normal.x;
+		this.normal.y = normal.y;
 	}
 	
 	/**
@@ -140,6 +144,19 @@ public class Raycast implements Shiftable, Copyable<Raycast> {
 	 */
 	public void setDistance(double distance) {
 		this.distance = distance;
+	}
+	
+	/**
+	 * Copies (deep) the given {@link Raycast} information to this {@link Raycast}.
+	 * @param raycast the raycast to copy
+	 * @since 4.0.0
+	 */
+	public void setTo(Raycast raycast) {
+		this.distance = raycast.distance;
+		this.normal.x = raycast.normal.x;
+		this.normal.y = raycast.normal.y;
+		this.point.x = raycast.point.x;
+		this.point.y = raycast.point.y;
 	}
 	
 	/* (non-Javadoc)

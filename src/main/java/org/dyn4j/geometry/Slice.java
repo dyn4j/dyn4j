@@ -318,10 +318,10 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Shape#createAABB(org.dyn4j.geometry.Transform)
+	 * @see org.dyn4j.geometry.Shape#computeAABB(org.dyn4j.geometry.Transform, org.dyn4j.geometry.AABB)
 	 */
 	@Override
-	public AABB createAABB(Transform transform) {
+	public void computeAABB(Transform transform, AABB aabb) {
 		// Inlined projection of x axis
 		// Interval x = this.project(Vector2.X_AXIS, transform);
 		double minX = this.getFarthestPoint(Vector2.INV_X_AXIS, transform).x;
@@ -332,7 +332,10 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 		double minY = this.getFarthestPoint(Vector2.INV_Y_AXIS, transform).y;
 		double maxY = this.getFarthestPoint(Vector2.Y_AXIS, transform).y;
 		
-		return new AABB(minX, minY, maxX, maxY);
+		aabb.maxX = maxX;
+		aabb.maxY = maxY;
+		aabb.minX = minX;
+		aabb.minY = minY;
 	}
 	
 	/* (non-Javadoc)

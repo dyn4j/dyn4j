@@ -212,6 +212,43 @@ public class AABB implements Translatable, Copyable<AABB> {
 	}
 	
 	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		long temp;
+		// have to do this because Double.hashcode is Java 8
+		temp = Double.doubleToLongBits(this.maxX);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(this.maxY);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(this.minX);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(this.minY);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (this == obj) return true;
+		if (obj instanceof AABB) {
+			AABB other = (AABB) obj;
+			return this.maxX == other.maxX &&
+					this.minX == other.minX &&
+					this.maxY == other.maxY &&
+					this.minY == other.minY;
+		}
+		return false;
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Translatable#translate(double, double)
 	 */
 	@Override
@@ -293,6 +330,22 @@ public class AABB implements Translatable, Copyable<AABB> {
 		this.maxY = Math.max(this.maxY, aabb.maxY);
 		return this;
 	}
+
+	/**
+	 * Performs a union of the given {@link AABB}s and places the result
+	 * into this {@link AABB} and then returns this {@link AABB}.
+	 * @param aabb1 the first {@link AABB} to union
+	 * @param aabb2 the second {@link AABB} to union
+	 * @return {@link AABB}
+	 * @since 4.0.0
+	 */
+	public AABB union(AABB aabb1, AABB aabb2) {
+		this.minX = Math.min(aabb1.minX, aabb2.minX);
+		this.minY = Math.min(aabb1.minY, aabb2.minY);
+		this.maxX = Math.max(aabb1.maxX, aabb2.maxX);
+		this.maxY = Math.max(aabb1.maxY, aabb2.maxY);
+		return this;
+	}
 	
 	/**
 	 * Performs a union of this {@link AABB} and the given {@link AABB} returning
@@ -319,6 +372,36 @@ public class AABB implements Translatable, Copyable<AABB> {
 		this.minY = Math.max(this.minY, aabb.minY);
 		this.maxX = Math.min(this.maxX, aabb.maxX);
 		this.maxY = Math.min(this.maxY, aabb.maxY);
+		
+		// check for a bad AABB
+		if (this.minX > this.maxX || this.minY > this.maxY) {
+			// the two AABBs were not overlapping
+			// set this AABB to a degenerate one
+			this.minX = 0.0;
+			this.minY = 0.0;
+			this.maxX = 0.0;
+			this.maxY = 0.0;
+		}
+		
+		return this;
+	}
+	
+	/**
+	 * Performs the intersection of the given {@link AABB}s and places
+	 * the result into this {@link AABB} and then returns this {@link AABB}.
+	 * <p>
+	 * If the given {@link AABB}s do not overlap, this {@link AABB} is
+	 * set to a zero {@link AABB}.
+	 * @param aabb1 the first {@link AABB} to intersect
+	 * @param aabb2 the second {@link AABB} to intersect
+	 * @return {@link AABB}
+	 * @since 4.0.0
+	 */
+	public AABB intersection(AABB aabb1, AABB aabb2) {
+		this.minX = Math.max(aabb1.minX, aabb2.minX);
+		this.minY = Math.max(aabb1.minY, aabb2.minY);
+		this.maxX = Math.min(aabb1.maxX, aabb2.maxX);
+		this.maxY = Math.min(aabb1.maxY, aabb2.maxY);
 		
 		// check for a bad AABB
 		if (this.minX > this.maxX || this.minY > this.maxY) {

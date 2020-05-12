@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,29 +24,30 @@
  */
 package org.dyn4j.world.listener;
 
-import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.dynamics.PhysicsBody;
-import org.dyn4j.dynamics.contact.Contact;
 import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.dynamics.joint.Joint;
+import org.dyn4j.world.PhysicsWorld;
 
 /**
  * Interface to listen for implicit destruction events.
  * <p>
- * These events can happen when, for example, a {@link Body} is removed from a {@link World}
+ * These events can happen when, for example, a {@link PhysicsBody} is removed from a {@link PhysicsWorld}
  * where it was attached to a {@link Joint}.  The joint must be removed as well.  These methods
  * will be called when any such implicit destruction events happen.
  * @author William Bittle
- * @version 3.1.1
+ * @version 4.0.0
  * @since 1.0.0
+ * @param <T> the {@link PhysicsBody} type
  */
 public interface DestructionListener<T extends PhysicsBody> {
 	/**
 	 * Called when implicit destruction of a {@link Joint} has occurred.
 	 * <p>
-	 * Modification of the {@link World} is permitted during this method.
-	 * @see World#removeBody(Body)
-	 * @see World#removeAllBodiesAndJoints(boolean)
+	 * Modification of the {@link PhysicsWorld} is permitted during this method.
+	 * @see PhysicsWorld#removeBody(CollisionBody)
+	 * @see PhysicsWorld#removeAllBodiesAndJoints(boolean)
 	 * @param joint the {@link Joint} that was destroyed
 	 */
 	public void destroyed(Joint<T> joint);
@@ -54,19 +55,19 @@ public interface DestructionListener<T extends PhysicsBody> {
 	/**
 	 * Called when implicit destruction of a {@link ContactConstraint} has occurred.
 	 * <p>
-	 * Modification of the {@link World} is not permitted during this method.
-	 * @see World#removeBody(Body)
-	 * @see World#removeAllBodiesAndJoints(boolean)
-	 * @param contactPoint the {@link ContactPoint} that was destroyed
+	 * Modification of the {@link PhysicsWorld} is not permitted during this method.
+	 * @see PhysicsWorld#removeBody(CollisionBody)
+	 * @see PhysicsWorld#removeAllBodiesAndJoints(boolean)
+	 * @param contactConstraint the {@link ContactConstraint} that was destroyed
 	 */
 	public void destroyed(ContactConstraint<T> contactConstraint);
 	
 	/**
-	 * Called when implicit destruction of a {@link Body} has occurred.
+	 * Called when implicit destruction of a {@link PhysicsBody} has occurred.
 	 * <p>
-	 * Modification of the {@link World} is not permitted during this method.
-	 * @see World#removeAllBodiesAndJoints(boolean)
-	 * @param body the {@link Body} that was destroyed
+	 * Modification of the {@link PhysicsWorld} is not permitted during this method.
+	 * @see PhysicsWorld#removeAllBodiesAndJoints(boolean)
+	 * @param body the {@link PhysicsBody} that was destroyed
 	 * @since 1.0.2
 	 */
 	public void destroyed(T body);

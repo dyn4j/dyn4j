@@ -40,7 +40,7 @@ import org.dyn4j.geometry.Vector2;
  */
 public class ManifoldPoint implements Shiftable, Copyable<ManifoldPoint> {
 	/** The id for this manifold point */
-	protected final ManifoldPointId id;
+	protected ManifoldPointId id;
 	
 	/** The point in world coordinates */
 	protected final Vector2 point;
@@ -49,12 +49,13 @@ public class ManifoldPoint implements Shiftable, Copyable<ManifoldPoint> {
 	protected double depth;
 	
 	/**
-	 * Minimal constructor.
-	 * @param id the id for this manifold point
+	 * Optional constructor.
+	 * @param id the id for this manifold point; cannot be null
 	 */
 	public ManifoldPoint(ManifoldPointId id) {
-		this.id = id;
+		this.id = id == null ? ManifoldPointId.DISTANCE : id;
 		this.point = new Vector2();
+		this.depth = 0;
 	}
 	
 	/**
@@ -123,6 +124,18 @@ public class ManifoldPoint implements Shiftable, Copyable<ManifoldPoint> {
 	 */
 	public void setDepth(double depth) {
 		this.depth = depth;
+	}
+	
+	/**
+	 * Copies (deep) the given {@link ManifoldPoint} to this {@link ManifoldPoint}.
+	 * @param manifoldPoint the manifold point to copy
+	 * @since 4.0.0
+	 */
+	public void setTo(ManifoldPoint manifoldPoint) {
+		this.id = manifoldPoint.id;
+		this.depth = manifoldPoint.depth;
+		this.point.x = manifoldPoint.point.x;
+		this.point.y = manifoldPoint.point.y;
 	}
 	
 	/* (non-Javadoc)

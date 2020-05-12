@@ -43,7 +43,7 @@ final class AABBBroadphaseProxy<T extends CollisionBody<E>, E extends Fixture> i
 	final BroadphaseItem<T, E> item;
 	
 	/** The body's aabb */
-	AABB aabb;
+	final AABB aabb;
 	
 	/**
 	 * Full constructor.

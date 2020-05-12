@@ -1,3 +1,27 @@
+/*
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without modification, are permitted 
+ * provided that the following conditions are met:
+ * 
+ *   * Redistributions of source code must retain the above copyright notice, this list of conditions 
+ *     and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
+ *     and the following disclaimer in the documentation and/or other materials provided with the 
+ *     distribution.
+ *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *     promote products derived from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package org.dyn4j.world;
 
 import java.util.ArrayList;
@@ -8,6 +32,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import org.dyn4j.collision.Bounds;
 import org.dyn4j.collision.CollisionBody;
@@ -45,6 +70,16 @@ import org.dyn4j.world.result.ConvexDetectResult;
 import org.dyn4j.world.result.DetectResult;
 import org.dyn4j.world.result.RaycastResult;
 
+/**
+ * Abstract implementation of the {@link CollisionWorld} interface.
+ * @author William Bittle
+ * @version 4.0.0
+ * @since 4.0.0
+ * @param <T> the {@link CollisionBody} type
+ * @param <E> the {@link Fixture} type
+ * @param <V> the {@link CollisionData} type
+ * @see CollisionWorld
+ */
 public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E extends Fixture, V extends CollisionData<T, E>> implements CollisionWorld<T, E, V>, Shiftable {
 	
 	// algorithms
@@ -78,6 +113,9 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	/** The list of all bodies in the world */
 	protected final List<T> bodies;
 	
+	/** An unmodifiable view of the bodies */
+	protected final List<T> unmodifiableBodies;
+	
 	// collision tracking
 	
 	/** The full set of tracked collision data */
@@ -88,8 +126,10 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	
 	// listeners
 	
+	/** The collision listeners */
 	protected final List<CollisionListener<T, E>> collisionListeners;
-	
+
+	/** The bounds listeners */
 	protected final List<BoundsListener<T, E>> boundsListeners;
 	
 	/**
@@ -106,6 +146,10 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	 * @param initialBodyCapacity the default initial body capacity
 	 */
 	public AbstractCollisionWorld(int initialBodyCapacity) {
+		if (initialBodyCapacity < 0) {
+			initialBodyCapacity = DEFAULT_BODY_COUNT;
+		}
+		
 		this.bounds = null;
 		this.broadphaseDetector = new DynamicAABBTree<T, E>(initialBodyCapacity);
 		this.detectBroadphaseFilter = new DefaultBroadphaseFilter<T, E>();
@@ -116,34 +160,38 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		this.timeOfImpactDetector = new ConservativeAdvancement();
 		
 		this.bodies = new ArrayList<T>(initialBodyCapacity);
+		this.unmodifiableBodies = Collections.unmodifiableList(this.bodies);
 		
 		this.collisionData = new LinkedHashMap<CollisionPair<T, E>, V>(Collisions.getEstimatedCollisionPairs(initialBodyCapacity));
 		this.unmodifiableCollisionData = Collections.unmodifiableMap(this.collisionData);
 		
-		this.collisionListeners = new ArrayList<CollisionListener<T,E>>();
-		this.boundsListeners = new ArrayList<BoundsListener<T,E>>();
+		this.collisionListeners = new ArrayList<CollisionListener<T,E>>(10);
+		this.boundsListeners = new ArrayList<BoundsListener<T,E>>(10);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#addBody(org.dyn4j.collision.CollisionBody)
+	 */
 	@Override
 	public void addBody(T body) {
 		// check for null body
 		if (body == null) throw new NullPointerException(Messages.getString("dynamics.world.addNullBody"));
-
-		FixtureModificationHandler<E> handler = body.getFixtureModificationHandler();
-		// dont allow a body that already is assigned to another world
-		if (handler != null) throw new IllegalArgumentException(Messages.getString("dynamics.world.addOtherWorldBody"));
 		// dont allow adding it twice
-		// TODO remove this or no?
-//		if (handler. == this) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingBody"));
+		if (body.getOwner() == this) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingBody"));
+		// dont allow a body that already is assigned to another world
+		if (body.getOwner() != null) throw new IllegalArgumentException(Messages.getString("dynamics.world.addOtherWorldBody"));
 		// add it to the world
 		this.bodies.add(body);
 		// set the world property on the body
-//		body.world = this;
 		body.setFixtureModificationHandler(new BodyModificationHandler(body));
+		body.setOwner(this);
 		// add it to the broadphase
 		this.broadphaseDetector.add(body);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#removeAllBodies()
+	 */
 	@Override
 	public void removeAllBodies() {
 		int bsize = this.bodies.size();
@@ -152,6 +200,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 			T body = this.bodies.get(i);
 			// set the world property to null
 			body.setFixtureModificationHandler(null);
+			body.setOwner(null);
 		}
 		
 		this.bodies.clear();
@@ -159,15 +208,24 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		this.collisionData.clear();
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#containsBody(org.dyn4j.collision.CollisionBody)
+	 */
 	public boolean containsBody(T body) {
 		return this.bodies.contains(body);
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#removeBody(int)
+	 */
 	public boolean removeBody(int index) {
 		T body = this.bodies.get(index);
 		return this.removeBody(body);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#removeBody(org.dyn4j.collision.CollisionBody)
+	 */
 	public boolean removeBody(T body) {
 		// remove the body from the list
 		boolean removed = this.bodies.remove(body);
@@ -176,11 +234,13 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		if (removed) {
 			// set the world property to null
 			body.setFixtureModificationHandler(null);
+			body.setOwner(null);
 			
 			// remove the body from the broadphase
 			this.broadphaseDetector.remove(body);
 			
 			// remove any collision data
+			// NOTE: this isn't particularly efficient
 			Iterator<V> iterator = this.collisionData.values().iterator();
 			while(iterator.hasNext()) {
 				V collision = iterator.next();
@@ -193,39 +253,66 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		return removed;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#getBodies()
+	 */
 	@Override
 	public List<T> getBodies() {
-		return Collections.unmodifiableList(this.bodies);
+		return this.unmodifiableBodies;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#getBody(int)
+	 */
 	@Override
 	public T getBody(int index) {
 		return this.bodies.get(index);
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#getBodyCount()
+	 */
 	@Override
 	public int getBodyCount() {
 		return this.bodies.size();
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#isEmpty()
+	 */
 	@Override
 	public boolean isEmpty() {
 		return this.bodies.isEmpty();
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#getBodyIterator()
+	 */
 	@Override
 	public Iterator<T> getBodyIterator() {
 		return new BodyIterator();
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#setBounds(org.dyn4j.collision.Bounds)
+	 */
+	@Override
 	public void setBounds(Bounds bounds) {
 		this.bounds = bounds;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#getBounds()
+	 */
+	@Override
 	public Bounds getBounds() {
 		return this.bounds;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#setBroadphaseDetector(org.dyn4j.collision.broadphase.BroadphaseDetector)
+	 */
+	@Override
 	public void setBroadphaseDetector(BroadphaseDetector<T, E> broadphaseDetector) {
 		if (broadphaseDetector == null) throw new NullPointerException(Messages.getString("dynamics.world.nullBroadphaseDetector"));
 		// set the new broadphase
@@ -238,10 +325,18 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#getBroadphaseDetector()
+	 */
+	@Override
 	public BroadphaseDetector<T, E> getBroadphaseDetector() {
 		return this.broadphaseDetector;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#setDetectBroadphaseFilter(org.dyn4j.world.BroadphaseFilter)
+	 */
+	@Override
 	public void setDetectBroadphaseFilter(BroadphaseFilter<T, E> filter) {
 		if (filter == null) {
 			this.detectBroadphaseFilter = new DefaultBroadphaseFilter<T, E>();
@@ -250,46 +345,85 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#getDetectBroadphaseFilter()
+	 */
+	@Override
 	public BroadphaseFilter<T, E> getDetectBroadphaseFilter() {
 		return this.detectBroadphaseFilter;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#setNarrowphaseDetector(org.dyn4j.collision.narrowphase.NarrowphaseDetector)
+	 */
+	@Override
 	public void setNarrowphaseDetector(NarrowphaseDetector narrowphaseDetector) {
 		if (narrowphaseDetector == null) throw new NullPointerException(Messages.getString("dynamics.world.nullNarrowphaseDetector"));
 		this.narrowphaseDetector = narrowphaseDetector;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#getNarrowphaseDetector()
+	 */
+	@Override
 	public NarrowphaseDetector getNarrowphaseDetector() {
 		return this.narrowphaseDetector;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#setManifoldSolver(org.dyn4j.collision.manifold.ManifoldSolver)
+	 */
+	@Override
 	public void setManifoldSolver(ManifoldSolver manifoldSolver) {
 		if (manifoldSolver == null) throw new NullPointerException(Messages.getString("dynamics.world.nullManifoldSolver"));
 		this.manifoldSolver = manifoldSolver;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#getManifoldSolver()
+	 */
+	@Override
 	public ManifoldSolver getManifoldSolver() {
 		return this.manifoldSolver;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#setRaycastDetector(org.dyn4j.collision.narrowphase.RaycastDetector)
+	 */
+	@Override
 	public void setRaycastDetector(RaycastDetector raycastDetector) {
 		if (raycastDetector == null) throw new NullPointerException(Messages.getString("dynamics.world.nullRaycastDetector"));
 		this.raycastDetector = raycastDetector;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#getRaycastDetector()
+	 */
+	@Override
 	public RaycastDetector getRaycastDetector() {
 		return this.raycastDetector;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#setTimeOfImpactDetector(org.dyn4j.collision.continuous.TimeOfImpactDetector)
+	 */
+	@Override
 	public void setTimeOfImpactDetector(TimeOfImpactDetector timeOfImpactDetector) {
 		if (timeOfImpactDetector == null) throw new NullPointerException(Messages.getString("dynamics.world.nullTimeOfImpactDetector"));
 		this.timeOfImpactDetector = timeOfImpactDetector;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#getTimeOfImpactDetector()
+	 */
+	@Override
 	public TimeOfImpactDetector getTimeOfImpactDetector() {
 		return this.timeOfImpactDetector;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Shiftable#shift(org.dyn4j.geometry.Vector2)
+	 */
 	@Override
 	public void shift(Vector2 shift) {
 		// update the broadphase
@@ -313,34 +447,50 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#getCollisionData()
+	 */
 	@Override
 	public Collection<V> getCollisionData() {
 		return this.unmodifiableCollisionData.values();
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#getCollisionDataIterator()
+	 */
 	@Override
 	public Iterator<V> getCollisionDataIterator() {
 		return this.unmodifiableCollisionData.values().iterator();
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#getCollisionListeners()
+	 */
 	@Override
 	public List<CollisionListener<T, E>> getCollisionListeners() {
 		return this.collisionListeners;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#getBoundsListeners()
+	 */
 	@Override
 	public List<BoundsListener<T, E>> getBoundsListeners() {
 		return this.boundsListeners;
 	}
 	
+	/**
+	 * Performs collision detection on the world.
+	 * <p>
+	 * Implement the {@link #detectCollisions(Iterator)} method to get access
+	 * to the generated collision information.
+	 */
 	protected void detect() {
 		// get the bounds listeners
 		List<BoundsListener<T, E>> boundsListeners = this.boundsListeners;
 		
 		int blSize = boundsListeners.size();
 		int bSize = this.bodies.size();
-		
-		// TODO batch broadphase/LazyAABBTree
 		
 		// update all AABBs in the broadphase (can skip those who's transforms are identical?  i don't think so because they could change the shape of the colliable)
 		CollisionItemAdapter<T, E> bAdapter = new CollisionItemAdapter<T, E>();
@@ -399,14 +549,27 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		this.broadphaseDetector.clearUpdates();
 	}
 
+	/**
+	 * Creates a new {@link CollisionData} instance for the given pair.
+	 * @param pair the pair
+	 * @return V
+	 */
 	protected abstract V createCollisionData(CollisionPair<T, E> pair);
 	
+	/**
+	 * Detects collisions between all bodies in the world.
+	 * <p>
+	 * Implementors must use the given iterator to go through the collisions
+	 * found in the broad, narrow and manifold phases.
+	 * @param iterator the collision iterator
+	 */
 	protected abstract void detectCollisions(Iterator<V> iterator);
-	
-	// TODO comments
 	
 	// AABB
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#detect(org.dyn4j.geometry.AABB, org.dyn4j.world.DetectFilter)
+	 */
 	@Override
 	public List<DetectResult<T, E>> detect(AABB aabb, DetectFilter<T, E> filter) {
 		List<DetectResult<T, E>> results = new ArrayList<DetectResult<T, E>>();
@@ -419,11 +582,17 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		return results;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#detectIterator(org.dyn4j.geometry.AABB, org.dyn4j.world.DetectFilter)
+	 */
 	@Override
 	public Iterator<DetectResult<T, E>> detectIterator(AABB aabb, DetectFilter<T, E> filter) {
 		return new AABBDetectIterator(aabb, filter);
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#detect(org.dyn4j.geometry.AABB, org.dyn4j.collision.CollisionBody, org.dyn4j.world.DetectFilter)
+	 */
 	@Override
 	public List<DetectResult<T, E>> detect(AABB aabb, T body, DetectFilter<T, E> filter) {
 		List<DetectResult<T, E>> results = new ArrayList<DetectResult<T, E>>();
@@ -436,6 +605,9 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		return results;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#detectIterator(org.dyn4j.geometry.AABB, org.dyn4j.collision.CollisionBody, org.dyn4j.world.DetectFilter)
+	 */
 	@Override
 	public Iterator<DetectResult<T, E>> detectIterator(AABB aabb, T body, DetectFilter<T, E> filter) {
 		return new AABBBodyDetectIterator(aabb, body, filter);
@@ -443,6 +615,9 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	
 	// convex
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#detect(org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform, org.dyn4j.world.DetectFilter)
+	 */
 	@Override
 	public List<ConvexDetectResult<T, E>> detect(Convex convex, Transform transform, DetectFilter<T, E> filter) {
 		List<ConvexDetectResult<T, E>> results = new ArrayList<ConvexDetectResult<T, E>>();
@@ -455,11 +630,17 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		return results;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#detectIterator(org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform, org.dyn4j.world.DetectFilter)
+	 */
 	@Override
 	public Iterator<ConvexDetectResult<T, E>> detectIterator(Convex convex, Transform transform, DetectFilter<T, E> filter) {
 		return new ConvexDetectIterator(convex, transform, filter);
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#detect(org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform, org.dyn4j.collision.CollisionBody, org.dyn4j.world.DetectFilter)
+	 */
 	@Override
 	public List<ConvexDetectResult<T, E>> detect(Convex convex, Transform transform, T body, DetectFilter<T, E> filter) {
 		List<ConvexDetectResult<T, E>> results = new ArrayList<ConvexDetectResult<T, E>>();
@@ -472,6 +653,9 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		return results;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#detectIterator(org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform, org.dyn4j.collision.CollisionBody, org.dyn4j.world.DetectFilter)
+	 */
 	@Override
 	public Iterator<ConvexDetectResult<T, E>> detectIterator(Convex convex, Transform transform, T body, DetectFilter<T, E> filter) {
 		return new ConvexBodyDetectIterator(convex, transform, body, filter);
@@ -479,6 +663,9 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	
 	// raycast
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#raycast(org.dyn4j.geometry.Ray, double, org.dyn4j.world.DetectFilter)
+	 */
 	@Override
 	public List<RaycastResult<T, E>> raycast(Ray ray, double maxLength, DetectFilter<T, E> filter) {
 		List<RaycastResult<T, E>> results = new ArrayList<RaycastResult<T, E>>();
@@ -491,11 +678,40 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		return results;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#raycastIterator(org.dyn4j.geometry.Ray, double, org.dyn4j.world.DetectFilter)
+	 */
 	@Override
 	public Iterator<RaycastResult<T, E>> raycastIterator(Ray ray, double maxLength, DetectFilter<T, E> filter) {
 		return new RaycastDetectIterator(ray, maxLength, filter);
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#raycast(org.dyn4j.geometry.Ray, double, org.dyn4j.collision.CollisionBody, org.dyn4j.world.DetectFilter)
+	 */
+	@Override
+	public List<RaycastResult<T, E>> raycast(Ray ray, double maxLength, T body, DetectFilter<T, E> filter) {
+		List<RaycastResult<T, E>> results = new ArrayList<RaycastResult<T, E>>();
+		
+		Iterator<RaycastResult<T, E>> iterator = this.raycastIterator(ray, maxLength, body, filter);
+		while (iterator.hasNext()) {
+			results.add(iterator.next().copy());
+		}
+		
+		return results;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#raycastIterator(org.dyn4j.geometry.Ray, double, org.dyn4j.collision.CollisionBody, org.dyn4j.world.DetectFilter)
+	 */
+	@Override
+	public Iterator<RaycastResult<T, E>> raycastIterator(Ray ray, double maxLength, T body, DetectFilter<T, E> filter) {
+		return new RaycastBodyDetectIterator(ray, maxLength, body, filter);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#raycastClosest(org.dyn4j.geometry.Ray, double, org.dyn4j.world.DetectFilter)
+	 */
 	@Override
 	public RaycastResult<T, E> raycastClosest(Ray ray, double maxLength, DetectFilter<T, E> filter) {
 		// check for the desired length
@@ -542,8 +758,11 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		return result;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#raycastClosest(org.dyn4j.geometry.Ray, double, org.dyn4j.collision.CollisionBody, org.dyn4j.world.DetectFilter)
+	 */
 	@Override
-	public RaycastResult<T, E> raycast(Ray ray, double maxLength, T body, DetectFilter<T, E> filter) {
+	public RaycastResult<T, E> raycastClosest(Ray ray, double maxLength, T body, DetectFilter<T, E> filter) {
 		// set the maximum length
 		double max = 0.0;
 		if (maxLength > 0.0) {
@@ -592,8 +811,11 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	
 	// convex cast
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#convexCastClosest(org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform, org.dyn4j.geometry.Vector2, double, org.dyn4j.collision.CollisionBody, org.dyn4j.world.DetectFilter)
+	 */
 	@Override
-	public ConvexCastResult<T, E> convexCast(Convex convex, Transform transform, Vector2 deltaPosition, double deltaAngle, T body, DetectFilter<T, E> filter) {
+	public ConvexCastResult<T, E> convexCastClosest(Convex convex, Transform transform, Vector2 deltaPosition, double deltaAngle, T body, DetectFilter<T, E> filter) {
 		ConvexCastResult<T, E> result = null;
 		
 		final Vector2 dp2 = new Vector2();
@@ -636,6 +858,9 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		return result;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#convexCast(org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform, org.dyn4j.geometry.Vector2, double, org.dyn4j.world.DetectFilter)
+	 */
 	@Override
 	public List<ConvexCastResult<T, E>> convexCast(Convex convex, Transform transform, Vector2 deltaPosition, double deltaAngle, DetectFilter<T, E> filter) {
 		List<ConvexCastResult<T, E>> results = new ArrayList<ConvexCastResult<T, E>>();
@@ -648,6 +873,9 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		return results;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#convexCastClosest(org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform, org.dyn4j.geometry.Vector2, double, org.dyn4j.world.DetectFilter)
+	 */
 	@Override
 	public ConvexCastResult<T, E> convexCastClosest(Convex convex, Transform transform, Vector2 deltaPosition, double deltaAngle, DetectFilter<T, E> filter) {
 		// compute a conservative AABB for the motion of the convex
@@ -706,6 +934,9 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		return min;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#convexCastIterator(org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform, org.dyn4j.geometry.Vector2, double, org.dyn4j.world.DetectFilter)
+	 */
 	@Override
 	public Iterator<ConvexCastResult<T, E>> convexCastIterator(Convex convex, Transform transform, Vector2 deltaPosition, double deltaAngle, DetectFilter<T, E> filter) {
 		return new ConvexCastDetectIterator(convex, transform, deltaPosition, deltaAngle, filter);
@@ -933,18 +1164,56 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	
 	private final class AABBDetectIterator implements Iterator<DetectResult<T, E>>  {
 		private final DetectFilter<T, E> filter;
-		private final DetectResult<T, E> reusableResult;
-		
 		private final Iterator<CollisionItem<T, E>> iterator;
+		
+		private final DetectResult<T, E> currentResult;
+		private final DetectResult<T, E> nextResult;
+		private boolean hasNext;
 		
 		public AABBDetectIterator(AABB aabb, DetectFilter<T, E> filter) {
 			this.filter = filter;
-			this.reusableResult = new DetectResult<T, E>();
 			this.iterator = AbstractCollisionWorld.this.broadphaseDetector.detectIterator(aabb);
+			
+			this.currentResult = new DetectResult<T, E>();
+			this.nextResult = new DetectResult<T, E>();
+			
+			this.hasNext = this.findNext();
 		}
 		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#hasNext()
+		 */
 		@Override
 		public boolean hasNext() {
+			return this.hasNext;
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#next()
+		 */
+		@Override
+		public DetectResult<T, E> next() {
+			if (this.hasNext) {
+				this.currentResult.setTo(this.nextResult);
+				this.hasNext = this.findNext();
+				return this.currentResult;
+			}
+			throw new NoSuchElementException();
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#remove()
+		 */
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+		
+		/**
+		 * Returns true if there's another item in the iteration and sets the nextItem.
+		 * @return boolean
+		 */
+		private boolean findNext() {
 			while (this.iterator.hasNext()) {
 				CollisionItem<T, E> item = this.iterator.next();
 				
@@ -955,23 +1224,13 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 					continue;
 				}
 				
-				this.reusableResult.setBody(body);
-				this.reusableResult.setFixture(fixture);
+				this.nextResult.setBody(body);
+				this.nextResult.setFixture(fixture);
 				
 				return true;
 			}
 			
 			return false;
-		}
-		
-		@Override
-		public DetectResult<T, E> next() {
-			return this.reusableResult;
-		}
-		
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
 		}
 	}
 	
@@ -979,20 +1238,58 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		private final AABB aabb;
 		private final T body;
 		private final DetectFilter<T, E> filter;
-		private final DetectResult<T, E> reusableResult;
-		
 		private final Iterator<E> iterator;
+		
+		private final DetectResult<T, E> currentResult;
+		private final DetectResult<T, E> nextResult;
+		private boolean hasNext;
 		
 		public AABBBodyDetectIterator(AABB aabb, T body, DetectFilter<T, E> filter) {
 			this.aabb = aabb;
 			this.body = body;
 			this.filter = filter;
-			this.reusableResult = new DetectResult<T, E>();
 			this.iterator = body.getFixtureIterator();
+			
+			this.currentResult = new DetectResult<T, E>();
+			this.nextResult = new DetectResult<T, E>();
+			
+			this.hasNext = this.findNext();
 		}
 		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#hasNext()
+		 */
 		@Override
 		public boolean hasNext() {
+			return this.hasNext;
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#next()
+		 */
+		@Override
+		public DetectResult<T, E> next() {
+			if (this.hasNext) {
+				this.currentResult.setTo(this.nextResult);
+				this.hasNext = this.findNext();
+				return this.currentResult;
+			}
+			throw new NoSuchElementException();
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#remove()
+		 */
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+		
+		/**
+		 * Returns true if there's another item in the iteration and sets the nextItem.
+		 * @return boolean
+		 */
+		private boolean findNext() {
 			while (this.iterator.hasNext()) {
 				E fixture = this.iterator.next();
 				
@@ -1003,24 +1300,14 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 				AABB aabb = AbstractCollisionWorld.this.broadphaseDetector.getAABB(this.body, fixture);
 				
 				if (this.aabb.overlaps(aabb)) {
-					this.reusableResult.setBody(body);
-					this.reusableResult.setFixture(fixture);
+					this.nextResult.setBody(this.body);
+					this.nextResult.setFixture(fixture);
 					
 					return true;
 				}
 			}
 			
 			return false;
-		}
-		
-		@Override
-		public DetectResult<T, E> next() {
-			return this.reusableResult;
-		}
-		
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
 		}
 	}
 	
@@ -1029,23 +1316,58 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		private final Transform transform;
 		private final AABB aabb;
 		private final DetectFilter<T, E> filter;
-		private final ConvexDetectResult<T, E> reusableResult;
-		
 		private final Iterator<CollisionItem<T, E>> iterator;
+		
+		private final ConvexDetectResult<T, E> currentResult;
+		private final ConvexDetectResult<T, E> nextResult;
+		private boolean hasNext;
 		
 		public ConvexDetectIterator(Convex convex, Transform transform, DetectFilter<T, E> filter) {
 			this.convex = convex;
 			this.transform = transform;
 			this.filter = filter;
-			this.reusableResult = new ConvexDetectResult<T, E>();
-			this.reusableResult.setPenetration(new Penetration());
-			
 			this.aabb = convex.createAABB(transform);
 			this.iterator = AbstractCollisionWorld.this.broadphaseDetector.detectIterator(this.aabb);
+			
+			this.currentResult = new ConvexDetectResult<T, E>();
+			this.nextResult = new ConvexDetectResult<T, E>();
+			this.hasNext = this.findNext();
 		}
 		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#hasNext()
+		 */
 		@Override
 		public boolean hasNext() {
+			return this.hasNext;
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#next()
+		 */
+		@Override
+		public ConvexDetectResult<T, E> next() {
+			if (this.hasNext) {
+				this.currentResult.setTo(this.nextResult);
+				this.hasNext = this.findNext();
+				return this.currentResult;
+			}
+			throw new NoSuchElementException();
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#remove()
+		 */
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+		
+		/**
+		 * Returns true if there's another item in the iteration and sets the nextItem.
+		 * @return boolean
+		 */
+		private boolean findNext() {
 			while (this.iterator.hasNext()) {
 				CollisionItem<T, E> item = this.iterator.next();
 				
@@ -1059,25 +1381,15 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 				Convex convex1 = fixture.getShape();
 				Transform transform1 = body.getTransform();
 				
-				if (AbstractCollisionWorld.this.narrowphaseDetector.detect(convex1, transform1, this.convex, this.transform, this.reusableResult.getPenetration())) {
-					this.reusableResult.setBody(body);
-					this.reusableResult.setFixture(fixture);
+				if (AbstractCollisionWorld.this.narrowphaseDetector.detect(convex1, transform1, this.convex, this.transform, this.nextResult.getPenetration())) {
+					this.nextResult.setBody(body);
+					this.nextResult.setFixture(fixture);
 				}
 				
 				return true;
 			}
 			
 			return false;
-		}
-		
-		@Override
-		public ConvexDetectResult<T, E> next() {
-			return this.reusableResult;
-		}
-		
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
 		}
 	}
 	
@@ -1087,24 +1399,59 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		private final T body;
 		private final AABB aabb;
 		private final DetectFilter<T, E> filter;
-		private final ConvexDetectResult<T, E> reusableResult;
-		
 		private final Iterator<E> iterator;
+		
+		private final ConvexDetectResult<T, E> currentResult;
+		private final ConvexDetectResult<T, E> nextResult;
+		private boolean hasNext;
 		
 		public ConvexBodyDetectIterator(Convex convex, Transform transform, T body, DetectFilter<T, E> filter) {
 			this.convex = convex;
 			this.transform = transform;
 			this.body = body;
 			this.filter = filter;
-			this.reusableResult = new ConvexDetectResult<T, E>();
-			this.reusableResult.setPenetration(new Penetration());
-			
 			this.aabb = convex.createAABB(transform);
 			this.iterator = body.getFixtureIterator();
+			
+			this.currentResult = new ConvexDetectResult<T, E>();
+			this.nextResult = new ConvexDetectResult<T, E>();
+			this.hasNext = this.findNext();
 		}
 		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#hasNext()
+		 */
 		@Override
 		public boolean hasNext() {
+			return this.hasNext;
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#next()
+		 */
+		@Override
+		public ConvexDetectResult<T, E> next() {
+			if (this.hasNext) {
+				this.currentResult.setTo(this.nextResult);
+				this.hasNext = this.findNext();
+				return this.currentResult;
+			}
+			throw new NoSuchElementException();
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#remove()
+		 */
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+		
+		/**
+		 * Returns true if there's another item in the iteration and sets the nextItem.
+		 * @return boolean
+		 */
+		private boolean findNext() {
 			while (this.iterator.hasNext()) {
 				E fixture = this.iterator.next();
 				
@@ -1117,9 +1464,9 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 					Convex convex1 = fixture.getShape();
 					Transform transform1 = this.body.getTransform();
 					
-					if (AbstractCollisionWorld.this.narrowphaseDetector.detect(convex1, transform1, this.convex, this.transform, this.reusableResult.getPenetration())) {
-						this.reusableResult.setBody(this.body);
-						this.reusableResult.setFixture(fixture);
+					if (AbstractCollisionWorld.this.narrowphaseDetector.detect(convex1, transform1, this.convex, this.transform, this.nextResult.getPenetration())) {
+						this.nextResult.setBody(this.body);
+						this.nextResult.setFixture(fixture);
 					}
 					
 					return true;
@@ -1128,44 +1475,68 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 			
 			return false;
 		}
-		
-		@Override
-		public ConvexDetectResult<T, E> next() {
-			return this.reusableResult;
-		}
-		
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
 	}
 	
 	private final class RaycastDetectIterator implements Iterator<RaycastResult<T, E>> {
 		private final Ray ray;
+		private double max;
 		private final DetectFilter<T, E> filter;
-		
 		private final Iterator<CollisionItem<T, E>> iterator;
 		
-		private final RaycastResult<T, E> reusableResult;
-		private double max;
+		private final RaycastResult<T, E> currentResult;
+		private final RaycastResult<T, E> nextResult;
+		private boolean hasNext;
 		
 		public RaycastDetectIterator(Ray ray, double maxLength, DetectFilter<T, E> filter) {
 			this.ray = ray;
 			this.filter = filter;
 			this.iterator = AbstractCollisionWorld.this.broadphaseDetector.detectIterator(ray, maxLength);
 			
-			this.reusableResult = new RaycastResult<T, E>();
-			this.reusableResult.setRaycast(new Raycast());
-			
 			double max = 0.0;
 			if (maxLength > 0.0) {
 				max = maxLength;
 			}
 			this.max = max;
+			
+			this.currentResult = new RaycastResult<T, E>();
+			this.nextResult = new RaycastResult<T, E>();
+			this.hasNext = this.findNext();
 		}
 		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#hasNext()
+		 */
 		@Override
 		public boolean hasNext() {
+			return this.hasNext;
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#next()
+		 */
+		@Override
+		public RaycastResult<T, E> next() {
+			if (this.hasNext) {
+				this.currentResult.setTo(this.nextResult);
+				this.hasNext = this.findNext();
+				return this.currentResult;
+			}
+			throw new NoSuchElementException();
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#remove()
+		 */
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+		
+		/**
+		 * Returns true if there's another item in the iteration and sets the nextItem.
+		 * @return boolean
+		 */
+		private boolean findNext() {
 			while (this.iterator.hasNext()) {
 				CollisionItem<T, E> item = this.iterator.next();
 				T body = item.getBody();
@@ -1180,10 +1551,10 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 				Convex convex = fixture.getShape();
 				
 				// perform the raycast
-				if (AbstractCollisionWorld.this.raycastDetector.raycast(this.ray, this.max, convex, transform, this.reusableResult.getRaycast())) {
+				if (AbstractCollisionWorld.this.raycastDetector.raycast(this.ray, this.max, convex, transform, this.nextResult.getRaycast())) {
 					// we found a collision to report
-					this.reusableResult.setBody(body);
-					this.reusableResult.setFixture(fixture);
+					this.nextResult.setBody(body);
+					this.nextResult.setFixture(fixture);
 					
 					return true;
 				}
@@ -1191,15 +1562,92 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 			
 			return false;
 		}
+	}
+	
+	private final class RaycastBodyDetectIterator implements Iterator<RaycastResult<T, E>> {
+		private final Ray ray;
+		private double max;
+		private final T body;
+		private final DetectFilter<T, E> filter;
+		private final Iterator<E> iterator;
 		
-		@Override
-		public RaycastResult<T, E> next() {
-			return this.reusableResult;
+		private final RaycastResult<T, E> currentResult;
+		private final RaycastResult<T, E> nextResult;
+		private boolean hasNext;
+		
+		public RaycastBodyDetectIterator(Ray ray, double maxLength, T body, DetectFilter<T, E> filter) {
+			this.ray = ray;
+			this.body = body;
+			this.filter = filter;
+			this.iterator = body.getFixtureIterator();
+			
+			double max = 0.0;
+			if (maxLength > 0.0) {
+				max = maxLength;
+			}
+			this.max = max;
+			
+			this.currentResult = new RaycastResult<T, E>();
+			this.nextResult = new RaycastResult<T, E>();
+			this.hasNext = this.findNext();
 		}
 		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#hasNext()
+		 */
+		@Override
+		public boolean hasNext() {
+			return this.hasNext;
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#next()
+		 */
+		@Override
+		public RaycastResult<T, E> next() {
+			if (this.hasNext) {
+				this.currentResult.setTo(this.nextResult);
+				this.hasNext = this.findNext();
+				return this.currentResult;
+			}
+			throw new NoSuchElementException();
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#remove()
+		 */
 		@Override
 		public void remove() {
 			throw new UnsupportedOperationException();
+		}
+		
+		/**
+		 * Returns true if there's another item in the iteration and sets the nextItem.
+		 * @return boolean
+		 */
+		private boolean findNext() {
+			while (this.iterator.hasNext()) {
+				E fixture = this.iterator.next();
+				
+				if (this.filter != null && !this.filter.isAllowed(this.body, fixture)) {
+					continue;
+				}
+				
+				// get the convex shape
+				Transform transform = this.body.getTransform();
+				Convex convex = fixture.getShape();
+				
+				// perform the raycast
+				if (AbstractCollisionWorld.this.raycastDetector.raycast(this.ray, this.max, convex, transform, this.nextResult.getRaycast())) {
+					// we found a collision to report
+					this.nextResult.setBody(this.body);
+					this.nextResult.setFixture(fixture);
+					
+					return true;
+				}
+			}
+			
+			return false;
 		}
 	}
 
@@ -1213,7 +1661,9 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		private final AABB aabb;
 		private final Iterator<CollisionItem<T, E>> iterator;
 		
-		private final ConvexCastResult<T, E> reusableResult;
+		private final ConvexCastResult<T, E> currentResult;
+		private final ConvexCastResult<T, E> nextResult;
+		private boolean hasNext;
 		
 		public ConvexCastDetectIterator(Convex convex, Transform transform, Vector2 deltaPosition, double deltaAngle, DetectFilter<T, E> filter) {
 			this.convex = convex;
@@ -1238,12 +1688,45 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 			
 			this.iterator = AbstractCollisionWorld.this.broadphaseDetector.detectIterator(this.aabb);
 			
-			this.reusableResult = new ConvexCastResult<T, E>();
-			this.reusableResult.setTimeOfImpact(new TimeOfImpact());
+			this.currentResult = new ConvexCastResult<T, E>();
+			this.nextResult = new ConvexCastResult<T, E>();
+			this.hasNext = this.findNext();
 		}
 		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#hasNext()
+		 */
 		@Override
 		public boolean hasNext() {
+			return this.hasNext;
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#next()
+		 */
+		@Override
+		public ConvexCastResult<T, E> next() {
+			if (this.hasNext) {
+				this.currentResult.setTo(this.nextResult);
+				this.hasNext = this.findNext();
+				return this.currentResult;
+			}
+			throw new NoSuchElementException();
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#remove()
+		 */
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+		
+		/**
+		 * Returns true if there's another item in the iteration and sets the nextItem.
+		 * @return boolean
+		 */
+		private boolean findNext() {
 			final Vector2 dp2 = new Vector2();
 			
 			// loop over the potential collisions
@@ -1265,9 +1748,9 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 				if (AbstractCollisionWorld.this.timeOfImpactDetector.getTimeOfImpact(
 						this.convex, this.transform, this.deltaPosition, this.deltaAngle, 
 						c, bodyTransform, dp2, 0.0, 
-						0.0, 1.0, this.reusableResult.getTimeOfImpact())) {
-					this.reusableResult.setBody(body);
-					this.reusableResult.setFixture(fixture);
+						0.0, 1.0, this.nextResult.getTimeOfImpact())) {
+					this.nextResult.setBody(body);
+					this.nextResult.setFixture(fixture);
 					
 					return true;
 				}
@@ -1275,35 +1758,46 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 			
 			return false;
 		}
-		
-		@Override
-		public ConvexCastResult<T, E> next() {
-			return this.reusableResult;
-		}
-		
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
 	}
 
+	/**
+	 * {@link FixtureModificationHandler} used to update the broadphase when fixtures
+	 * are added or removed from {@link CollisionBody}s.
+	 * @author William Bittle
+	 * @version 4.0.0
+	 * @since 4.0.0
+	 */
 	private final class BodyModificationHandler implements FixtureModificationHandler<E> {
+		/** The body */
 		private final T body;
 		
+		/**
+		 * Minimal constructor.
+		 * @param body the body
+		 */
 		public BodyModificationHandler(T body) {
 			this.body = body;
 		}
 
+		/* (non-Javadoc)
+		 * @see org.dyn4j.collision.FixtureModificationHandler#onFixtureAdded(org.dyn4j.collision.Fixture)
+		 */
 		@Override
 		public void onFixtureAdded(E fixture) {
 			AbstractCollisionWorld.this.broadphaseDetector.add(this.body, fixture);
 		}
 		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.collision.FixtureModificationHandler#onFixtureRemoved(org.dyn4j.collision.Fixture)
+		 */
 		@Override
 		public void onFixtureRemoved(E fixture) {
 			AbstractCollisionWorld.this.broadphaseDetector.remove(this.body, fixture);
 		}
 		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.collision.FixtureModificationHandler#onAllFixturesRemoved()
+		 */
 		@Override
 		public void onAllFixturesRemoved() {
 			AbstractCollisionWorld.this.broadphaseDetector.remove(this.body);

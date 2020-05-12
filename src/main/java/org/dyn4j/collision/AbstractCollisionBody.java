@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.dyn4j.DataContainer;
+import org.dyn4j.Ownable;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Rotation;
@@ -46,7 +47,7 @@ import org.dyn4j.resources.Messages;
  * @since 4.0.0
  * @param <T> the {@link Fixture} type
  */
-public abstract class AbstractCollisionBody<T extends Fixture> implements CollisionBody<T>, Transformable, DataContainer {
+public abstract class AbstractCollisionBody<T extends Fixture> implements CollisionBody<T>, Transformable, DataContainer, Ownable {
 	/** The current {@link Transform} */
 	protected Transform transform;
 
@@ -65,8 +66,11 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/** True if the body is enabled */
 	protected boolean enabled;
 	
-	/** [INTERNAL] Use for notifcation of fixture modification events */
+	/** [INTERNAL] Used for notifcation of fixture modification events */
 	protected FixtureModificationHandler<T> fixtureModificationHandler;
+	
+	/** [INTERNAL] User for ownership by another object */
+	protected Object owner;
 	
 	/**
 	 * Default constructor.
@@ -475,6 +479,22 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	@Override
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.Ownable#getOwner()
+	 */
+	@Override
+	public Object getOwner() {
+		return this.owner;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.Ownable#setOwner(java.lang.Object)
+	 */
+	@Override
+	public void setOwner(Object owner) {
+		this.owner = owner;
 	}
 	
 	/* (non-Javadoc)

@@ -190,13 +190,15 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Shape#createAABB(org.dyn4j.geometry.Transform)
+	 * @see org.dyn4j.geometry.Shape#computeAABB(org.dyn4j.geometry.Transform, org.dyn4j.geometry.AABB)
 	 */
 	@Override
-	public AABB createAABB(Transform transform) {
+	public void computeAABB(Transform transform, AABB aabb) {
 		// if the transform is not null then transform the center
 		Vector2 center = transform.getTransformed(this.center);
-		// return a new aabb
-		return new AABB(center, this.radius);
+		aabb.minX = center.x - this.radius;
+		aabb.minY = center.y - this.radius;
+		aabb.maxX = center.x + this.radius;
+		aabb.maxY = center.y + this.radius;
 	}
 }
