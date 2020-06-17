@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -25,8 +25,6 @@
 package org.dyn4j.dynamics;
 
 import org.dyn4j.dynamics.joint.DistanceJoint;
-import org.dyn4j.geometry.Geometry;
-import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
 
@@ -44,7 +42,7 @@ public class DistanceJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void createWithTwoDifferentBodies() {
-		new DistanceJoint(b1, b2, new Vector2(), new Vector2());
+		new DistanceJoint<Body>(b1, b2, new Vector2(), new Vector2());
 	}
 
 	/**
@@ -52,7 +50,7 @@ public class DistanceJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createWithNullBody1() {
-		new DistanceJoint(null, b2, new Vector2(), new Vector2());
+		new DistanceJoint<Body>(null, b2, new Vector2(), new Vector2());
 	}
 
 	/**
@@ -60,7 +58,7 @@ public class DistanceJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createWithNullBody2() {
-		new DistanceJoint(b1, null, new Vector2(), new Vector2());
+		new DistanceJoint<Body>(b1, null, new Vector2(), new Vector2());
 	}
 	
 	/**
@@ -68,7 +66,7 @@ public class DistanceJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createWithNullAnchor1Point() {
-		new DistanceJoint(b1, b2, null, new Vector2());
+		new DistanceJoint<Body>(b1, b2, null, new Vector2());
 	}
 	
 	/**
@@ -76,7 +74,7 @@ public class DistanceJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createWithNullAnchor2Point() {
-		new DistanceJoint(b1, b2, new Vector2(), null);
+		new DistanceJoint<Body>(b1, b2, new Vector2(), null);
 	}
 	
 	/**
@@ -84,7 +82,7 @@ public class DistanceJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createWithSameBody() {
-		new DistanceJoint(b1, b1, new Vector2(), new Vector2());
+		new DistanceJoint<Body>(b1, b1, new Vector2(), new Vector2());
 	}
 	
 	/**
@@ -92,7 +90,7 @@ public class DistanceJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void isSpring() {
-		DistanceJoint dj = new DistanceJoint(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		TestCase.assertFalse(dj.isSpring());
 		
 		dj.setFrequency(0.0);
@@ -113,7 +111,7 @@ public class DistanceJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void isSpringDamper() {
-		DistanceJoint dj = new DistanceJoint(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		TestCase.assertFalse(dj.isSpringDamper());
 		
 		dj.setFrequency(0.0);
@@ -141,7 +139,7 @@ public class DistanceJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setPositiveDistance() {
-		DistanceJoint dj = new DistanceJoint(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		
 		dj.setDistance(0.0);
 		TestCase.assertEquals(0.0, dj.getDistance());
@@ -155,7 +153,7 @@ public class DistanceJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setNegativeDistance() {
-		DistanceJoint dj = new DistanceJoint(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		dj.setDistance(-2.0);
 	}
 	
@@ -164,7 +162,7 @@ public class DistanceJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setDampingRatio() {
-		DistanceJoint dj = new DistanceJoint(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		dj.setDampingRatio(0.0);
 		TestCase.assertEquals(0.0, dj.getDampingRatio());
 		
@@ -180,7 +178,7 @@ public class DistanceJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setNegativeDampingRatio() {
-		DistanceJoint dj = new DistanceJoint(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		dj.setDampingRatio(-1.0);
 	}
 	
@@ -189,7 +187,7 @@ public class DistanceJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setDampingRatioGreaterThan1() {
-		DistanceJoint dj = new DistanceJoint(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		dj.setDampingRatio(2.0);
 	}
 	
@@ -198,7 +196,7 @@ public class DistanceJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setFrequency() {
-		DistanceJoint dj = new DistanceJoint(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		
 		dj.setFrequency(0.0);
 		TestCase.assertEquals(0.0, dj.getFrequency());
@@ -215,7 +213,7 @@ public class DistanceJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setNegativeFrequency() {
-		DistanceJoint dj = new DistanceJoint(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		dj.setFrequency(-0.3);
 	}
 
@@ -223,81 +221,29 @@ public class DistanceJointTest extends AbstractJointTest {
 	 * Tests the body's sleep state when changing the distance.
 	 */
 	@Test
-	public void setDistanceSleep() {
-		DistanceJoint dj = new DistanceJoint(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+	public void setDistanceAtRest() {
+		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		
 		double distance = dj.getDistance();
 		
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(distance, dj.getDistance());
 		
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		// set the distance to the same value
 		dj.setDistance(distance);
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(distance, dj.getDistance());
 		
 		// set the distance to a different value and make
 		// sure the bodies are awakened
 		dj.setDistance(10);
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(10.0, dj.getDistance());
-	}
-	
-
-	/**
-	 * Tests the body separation as enforced by the distance joint.
-	 */
-	@Test
-	public void simulateDistanceChange() {
-		World w = new World();
-		// take gravity out the picture
-		w.setGravity(World.ZERO_GRAVITY);
-		
-		// take friction and damping out of the picture
-		
-		Body g = new Body();
-		BodyFixture gf = g.addFixture(Geometry.createRectangle(10.0, 0.5));
-		gf.setFriction(0.0);
-		g.setMass(MassType.INFINITE);
-		g.setLinearDamping(0.0);
-		g.setAngularDamping(0.0);
-		w.addBody(g);
-		
-		Body b = new Body();
-		BodyFixture bf = b.addFixture(Geometry.createCircle(0.5));
-		bf.setFriction(0.0);
-		b.setMass(MassType.NORMAL);
-		b.translate(0.0, 2.0);
-		b.setLinearDamping(0.0);
-		b.setAngularDamping(0.0);
-		w.addBody(b);
-		
-		DistanceJoint dj = new DistanceJoint(g, b, g.getWorldCenter(), b.getWorldCenter());
-		
-		dj.setDistance(10.0);
-		w.addJoint(dj);
-		
-		Vector2 v1 = g.getWorldCenter();
-		Vector2 v2 = b.getWorldCenter();
-		TestCase.assertTrue(v1.distance(v2) < dj.getDistance());
-		
-		// the way the distance joint is currently working is that it will immediately try to solve
-		// it to be the correct distance apart, but the position solver is bound by the default
-		// correction factor, which is 0.2m. The world is also specified to run 10 position solving
-		// iterations as well so this accounts for +2m difference each iteration, so after 4 iterations
-		// we should be at 10m (we'll set these defaults below just in case they change in the future)
-		w.getSettings().setMaximumLinearCorrection(0.2);
-		w.getSettings().setPositionConstraintSolverIterations(10);
-		w.step(4);
-		
-		v1 = g.getWorldCenter();
-		v2 = b.getWorldCenter();
-		TestCase.assertEquals(v1.distance(v2), dj.getDistance(), 1e-5);	
 	}
 }

@@ -26,7 +26,6 @@ package org.dyn4j.world.listener;
 
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.TimeStep;
-import org.dyn4j.world.ContactCollisionData;
 import org.dyn4j.world.PhysicsWorld;
 
 /**
@@ -37,15 +36,14 @@ import org.dyn4j.world.PhysicsWorld;
  * @version 4.0.0
  * @since 1.0.0
  * @param <T> the {@link PhysicsBody} type
- * @param <V> the {@link ContactCollisionData} type
  */
-public interface StepListener<T extends PhysicsBody, V extends ContactCollisionData<T>> {
+public interface StepListener<T extends PhysicsBody> extends WorldEventListener {
 	/**
 	 * Called before a simulation step is performed.
 	 * @param step the step information
 	 * @param world the simulation {@link PhysicsWorld}
 	 */
-	public abstract void begin(TimeStep step, PhysicsWorld<T, V> world);
+	public abstract void begin(TimeStep step, PhysicsWorld<T, ?> world);
 	
 	/**
 	 * Called after collision detection and contact updates have been performed due
@@ -55,7 +53,7 @@ public interface StepListener<T extends PhysicsBody, V extends ContactCollisionD
 	 * @since 3.0.1
 	 * @see PhysicsWorld#setUpdateRequired(boolean)
 	 */
-	public abstract void updatePerformed(TimeStep step, PhysicsWorld<T, V> world);
+	public abstract void updatePerformed(TimeStep step, PhysicsWorld<T, ?> world);
 	
 	/**
 	 * Called after the world has been solved but before new contacts are found.
@@ -63,12 +61,12 @@ public interface StepListener<T extends PhysicsBody, V extends ContactCollisionD
 	 * @param world the simulation {@link PhysicsWorld}
 	 * @since 3.2.0
 	 */
-	public abstract void postSolve(TimeStep step, PhysicsWorld<T, V> world);
+	public abstract void postSolve(TimeStep step, PhysicsWorld<T, ?> world);
 	
 	/**
 	 * Called after a simulation step has been performed.
 	 * @param step the step information
 	 * @param world the simulation {@link PhysicsWorld}
 	 */
-	public abstract void end(TimeStep step, PhysicsWorld<T, V> world);
+	public abstract void end(TimeStep step, PhysicsWorld<T, ?> world);
 }

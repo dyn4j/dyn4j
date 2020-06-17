@@ -43,7 +43,7 @@ import org.dyn4j.world.PhysicsWorld;
  * @since 1.2.0
  * @param <T> the {@link PhysicsBody} type
  */
-public interface TimeOfImpactListener<T extends PhysicsBody> {
+public interface TimeOfImpactListener<T extends PhysicsBody> extends WorldEventListener {
 	/**
 	 * Called when a time of impact has been detected between two bodies.
 	 * <p>

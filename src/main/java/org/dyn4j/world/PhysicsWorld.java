@@ -27,6 +27,7 @@ package org.dyn4j.world;
 import java.util.Iterator;
 import java.util.List;
 
+import org.dyn4j.DataContainer;
 import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.PhysicsBody;
@@ -36,6 +37,7 @@ import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.dynamics.contact.ContactConstraintSolver;
 import org.dyn4j.dynamics.contact.TimeOfImpactSolver;
 import org.dyn4j.dynamics.joint.Joint;
+import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.listener.ContactListener;
 import org.dyn4j.world.listener.DestructionListener;
@@ -52,13 +54,13 @@ import org.dyn4j.world.listener.TimeOfImpactListener;
  * @param <T> the {@link PhysicsBody} type
  * @param <V> the {@link ContactCollisionData} type
  */
-public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionData<T>> extends CollisionWorld<T, BodyFixture, V> {
+public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionData<T>> extends CollisionWorld<T, BodyFixture, V>, Shiftable, DataContainer {
 	/** Earths gravity constant */
 	public static final Vector2 EARTH_GRAVITY = new Vector2(0.0, -9.8);
 	
 	/** Zero gravity constant */
 	public static final Vector2 ZERO_GRAVITY = new Vector2(0.0, 0.0);
-
+	
 	/**
 	 * Updates the {@link PhysicsWorld}.
 	 * <p>
@@ -333,36 +335,40 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	public Vector2 getGravity();
 
 	/**
-	 * Returns the list of {@link ContactListener}s.
+	 * Adds the given {@link ContactListener} to this world.
 	 * <p>
-	 * Use the returned list to add/remove listeners.
-	 * @return List&lt;{@link ContactListener}&gt;
+	 * NOTE: No effort is made to prevent duplicate listeners from being added.
+	 * @param listener the listener to add
+	 * @return boolean
 	 */
-	public List<ContactListener<T>> getContactListeners();
+	public boolean addListener(ContactListener<T> listener);
 	
 	/**
-	 * Returns the list of {@link DestructionListener}s.
+	 * Adds the given {@link DestructionListener} to this world.
 	 * <p>
-	 * Use the returned list to add/remove listeners.
-	 * @return List&lt;{@link DestructionListener}&gt;
+	 * NOTE: No effort is made to prevent duplicate listeners from being added.
+	 * @param listener the listener to add
+	 * @return boolean
 	 */
-	public List<DestructionListener<T>> getDestructionListeners();
+	public boolean addListener(DestructionListener<T> listener);
 	
 	/**
-	 * Returns the list of {@link TimeOfImpactListener}s.
+	 * Adds the given {@link StepListener} to this world.
 	 * <p>
-	 * Use the returned list to add/remove listeners.
-	 * @return List&lt;{@link TimeOfImpactListener}&gt;
+	 * NOTE: No effort is made to prevent duplicate listeners from being added.
+	 * @param listener the listener to add
+	 * @return boolean
 	 */
-	public List<TimeOfImpactListener<T>> getTimeOfImpactListeners();
+	public boolean addListener(StepListener<T> listener);
 	
 	/**
-	 * Returns the list of {@link StepListener}s.
+	 * Adds the given {@link TimeOfImpactListener} to this world.
 	 * <p>
-	 * Use the returned list to add/remove listeners.
-	 * @return List&lt;{@link StepListener}&gt;
+	 * NOTE: No effort is made to prevent duplicate listeners from being added.
+	 * @param listener the listener to add
+	 * @return boolean
 	 */
-	public List<StepListener<T, V>> getStepListeners();
+	public boolean addListener(TimeOfImpactListener<T> listener);
 	
 	/**
 	 * Returns the {@link CoefficientMixer}.
@@ -460,9 +466,22 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	 * The returned object contains the step information (elapsed time)
 	 * for the last and the previous time step.
 	 * @return {@link TimeStep} the current step object
+	 * @since 4.0.0
 	 */
-	public TimeStep getStep();
+	public TimeStep getTimeStep();
 
+	/**
+	 * Returns the {@link TimeStep} object used to advance
+	 * the simulation.
+	 * <p>
+	 * The returned object contains the step information (elapsed time)
+	 * for the last and the previous time step.
+	 * @return {@link TimeStep} the current step object
+	 * @deprecated Deprecated in 4.0.0. Use the {@link #getTimeStep()} method instead.
+	 */
+	@Deprecated
+	public TimeStep getStep();
+	
 	/**
 	 * Returns the current accumulated time.
 	 * <p>
@@ -573,10 +592,18 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	 * Returns true if the two {@link PhysicsBody}s are joined via a {@link Joint}.
 	 * @param body1 the first body
 	 * @param body2 the second body
-	 * @param includeCollisionNotAllowed true to include joints where collision is not allowed
 	 * @return boolean
 	 */
-	public boolean isJoined(T body1, T body2, boolean includeCollisionNotAllowed);
+	public boolean isJoined(T body1, T body2);
+	
+	/**
+	 * Returns true if the two {@link PhysicsBody}s are joined by at least one {@link Joint}
+	 * where the collision allowed property is true.
+	 * @param body1 the first body
+	 * @param body2 the second body
+	 * @return boolean
+	 */
+	public boolean isJointCollisionAllowed(T body1, T body2);
 	
 	/**
 	 * Returns the {@link PhysicsBody}s joined to the given {@link PhysicsBody} via {@link Joint}s.

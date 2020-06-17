@@ -155,7 +155,7 @@ public class DefaultContactManager implements ContactManager, Shiftable {
 			// define the old contact constraint
 			ContactConstraint oldContactConstraint = null;
 			
-			List<ContactConstraintContact> contacts = newContactConstraint.contacts;
+			List<SolvableContact> contacts = newContactConstraint.contacts;
 			int nsize = contacts.size();
 			
 			// get the old contact constraint
@@ -166,19 +166,19 @@ public class DefaultContactManager implements ContactManager, Shiftable {
 			
 			// check if the contact constraint exists
 			if (oldContactConstraint != null) {
-				List<ContactConstraintContact> ocontacts = oldContactConstraint.contacts;
+				List<SolvableContact> ocontacts = oldContactConstraint.contacts;
 				int osize = ocontacts.size();
 				// create an array for removed contacts
 				boolean[] persisted = new boolean[osize];
 				// warm start the constraint
 				for (int j = nsize - 1; j >= 0; j--) {
 					// get the new contact
-					ContactConstraintContact newContact = contacts.get(j);
+					SolvableContact newContact = contacts.get(j);
 					// loop over the old contacts
 					boolean found = false;
 					for (int k = 0; k < osize; k++) {
 						// get the old contact
-						ContactConstraintContact oldContact = ocontacts.get(k);
+						SolvableContact oldContact = ocontacts.get(k);
 						// check if the id type is distance, if so perform a distance check using the warm start distance
 						// else just compare the ids
 						if ((newContact.id == ManifoldPointId.DISTANCE && newContact.p.distanceSquared(oldContact.p) <= warmStartDistanceSquared) 
@@ -233,7 +233,7 @@ public class DefaultContactManager implements ContactManager, Shiftable {
 					// check the boolean array
 					if (!persisted[j]) {
 						// get the contact
-						ContactConstraintContact contact = ocontacts.get(j);
+						SolvableContact contact = ocontacts.get(j);
 						// notify of new contact (begin of contact)
 						ContactPoint point = new ContactPoint(newContactConstraint, contact);
 						// call the listeners
@@ -248,7 +248,7 @@ public class DefaultContactManager implements ContactManager, Shiftable {
 				// if the old contact point was not found notify of the new contact
 				for (int j = nsize - 1; j >= 0; j--) {
 					// get the contact
-					ContactConstraintContact contact = contacts.get(j);
+					SolvableContact contact = contacts.get(j);
 					// notify of new contact (begin of contact)
 					ContactPoint point = new ContactPoint(newContactConstraint, contact);
 					// call the listeners and set the enabled flag to the result
@@ -280,7 +280,7 @@ public class DefaultContactManager implements ContactManager, Shiftable {
 				int rsize = contactConstraint.contacts.size();
 				for (int i = 0; i < rsize; i++) {
 					// get the contact
-					ContactConstraintContact contact = (ContactConstraintContact) contactConstraint.contacts.get(i);
+					SolvableContact contact = (SolvableContact) contactConstraint.contacts.get(i);
 					// set the contact point values
 					ContactPoint point = new ContactPoint(contactConstraint, contact);
 					// call the listeners
@@ -325,7 +325,7 @@ public class DefaultContactManager implements ContactManager, Shiftable {
 			// iterate backwards so we can remove
 			for (int j = csize - 1; j >= 0; j--) {
 				// get the contact
-				ContactConstraintContact contact = (ContactConstraintContact) contactConstraint.contacts.get(j);
+				SolvableContact contact = (SolvableContact) contactConstraint.contacts.get(j);
 				// notify of the contact that will be solved
 				ContactPoint point = new ContactPoint(contactConstraint, contact);
 				// call the listeners and set the enabled flag to the result
@@ -364,7 +364,7 @@ public class DefaultContactManager implements ContactManager, Shiftable {
 			int rsize = contactConstraint.contacts.size();
 			for (int j = 0; j < rsize; j++) {
 				// get the contact
-				ContactConstraintContact contact = (ContactConstraintContact) contactConstraint.contacts.get(j);
+				SolvableContact contact = (SolvableContact) contactConstraint.contacts.get(j);
 				// set the contact point values
 				SolvedContactPoint point = new SolvedContactPoint(contactConstraint, contact);
 				// notify of them being solved

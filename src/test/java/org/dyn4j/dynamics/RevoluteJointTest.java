@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -42,7 +42,7 @@ public class RevoluteJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void createSuccess() {
-		new RevoluteJoint(b1, b2, new Vector2());
+		new RevoluteJoint<Body>(b1, b2, new Vector2());
 	}
 	
 	/**
@@ -50,7 +50,7 @@ public class RevoluteJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createWithNullBody1() {
-		new RevoluteJoint(null, b2, new Vector2());
+		new RevoluteJoint<Body>(null, b2, new Vector2());
 	}
 	
 	/**
@@ -58,7 +58,7 @@ public class RevoluteJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createWithNullBody2() {
-		new RevoluteJoint(b1, null, new Vector2());
+		new RevoluteJoint<Body>(b1, null, new Vector2());
 	}
 	
 	/**
@@ -66,7 +66,7 @@ public class RevoluteJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createWithNullAnchor() {
-		new RevoluteJoint(b1, b2, null);
+		new RevoluteJoint<Body>(b1, b2, null);
 	}
 	
 	/**
@@ -74,7 +74,7 @@ public class RevoluteJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createWithSameBody() {
-		new RevoluteJoint(b1, b1, new Vector2());
+		new RevoluteJoint<Body>(b1, b1, new Vector2());
 	}
 	
 	/**
@@ -82,7 +82,7 @@ public class RevoluteJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setMaximumMotorTorque() {
-		RevoluteJoint rj = new RevoluteJoint(b1, b2, new Vector2());
+		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
 		
 		rj.setMaximumMotorTorque(0.0);
 		TestCase.assertEquals(0.0, rj.getMaximumMotorTorque());
@@ -99,7 +99,7 @@ public class RevoluteJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setMaximumMotorTorqueNegative() {
-		RevoluteJoint rj = new RevoluteJoint(b1, b2, new Vector2());
+		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
 		rj.setMaximumMotorTorque(-2.0);
 	}
 
@@ -108,41 +108,41 @@ public class RevoluteJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setMaximumMotorTorqueSleep() {
-		RevoluteJoint rj = new RevoluteJoint(b1, b2, new Vector2());
+		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
 		
 		TestCase.assertFalse(rj.isMotorEnabled());
 		TestCase.assertEquals(0.0, rj.getMaximumMotorTorque());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		
 		rj.setMotorEnabled(true);
 
 		// then put the bodies to sleep
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		// don't change the max force
 		rj.setMaximumMotorTorque(0.0);
 		TestCase.assertEquals(0.0, rj.getMaximumMotorTorque());
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 		
 		// change the max force
 		rj.setMaximumMotorTorque(2.0);
 		TestCase.assertEquals(2.0, rj.getMaximumMotorTorque());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		
 		// disable the motor and change the value
 		// the bodies shouldn't wake up
 		rj.setMotorEnabled(false);
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		rj.setMaximumMotorTorque(1.0);
 		TestCase.assertEquals(1.0, rj.getMaximumMotorTorque());
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 	}
 
 	/**
@@ -150,7 +150,7 @@ public class RevoluteJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setMotorEnabled() {
-		RevoluteJoint rj = new RevoluteJoint(b1, b2, new Vector2());
+		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
 		
 		TestCase.assertFalse(rj.isMotorEnabled());
 		
@@ -166,40 +166,40 @@ public class RevoluteJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setMotorEnabledSleep() {
-		RevoluteJoint rj = new RevoluteJoint(b1, b2, new Vector2());
+		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
 		
 		TestCase.assertFalse(rj.isMotorEnabled());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		
 		// then put the bodies to sleep
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		// disable the motor
 		rj.setMotorEnabled(false);
 		TestCase.assertFalse(rj.isMotorEnabled());
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 		
 		// enable the motor
 		rj.setMotorEnabled(true);
 		TestCase.assertTrue(rj.isMotorEnabled());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		
 		// set the motor to enabled again
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		rj.setMotorEnabled(true);
 		TestCase.assertTrue(rj.isMotorEnabled());
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());		
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());		
 		
 		rj.setMotorEnabled(false);
 		TestCase.assertFalse(rj.isMotorEnabled());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 	}
 
 	/**
@@ -207,7 +207,7 @@ public class RevoluteJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setMotorSpeed() {
-		RevoluteJoint rj = new RevoluteJoint(b1, b2, new Vector2());
+		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
 		
 		TestCase.assertEquals(0.0, rj.getMotorSpeed());
 		
@@ -226,41 +226,41 @@ public class RevoluteJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setMotorSpeedSleep() {
-		RevoluteJoint rj = new RevoluteJoint(b1, b2, new Vector2());
+		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
 		
 		TestCase.assertFalse(rj.isMotorEnabled());
 		TestCase.assertEquals(0.0, rj.getMotorSpeed());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		
 		rj.setMotorEnabled(true);
 
 		// then put the bodies to sleep
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		// don't change the speed
 		rj.setMotorSpeed(0.0);
 		TestCase.assertEquals(0.0, rj.getMotorSpeed());
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 		
 		// change the speed
 		rj.setMotorSpeed(2.0);
 		TestCase.assertEquals(2.0, rj.getMotorSpeed());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		
 		// disable the motor and change the value
 		// the bodies shouldn't wake up
 		rj.setMotorEnabled(false);
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		rj.setMotorSpeed(-1.0);
 		TestCase.assertEquals(-1.0, rj.getMotorSpeed());
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 	}
 	
 	/**
@@ -268,7 +268,7 @@ public class RevoluteJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setUpperLimitSuccess() {
-		RevoluteJoint rj = new RevoluteJoint(b1, b2, new Vector2());
+		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
 		rj.setUpperLimit(Math.toRadians(10));
 		
 		TestCase.assertEquals(Math.toRadians(10), rj.getUpperLimit(), 1e-6);
@@ -279,7 +279,7 @@ public class RevoluteJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setUpperLimitInvalid() {
-		RevoluteJoint rj = new RevoluteJoint(b1, b2, new Vector2());
+		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
 		rj.setUpperLimit(Math.toRadians(-10));
 	}
 	
@@ -288,7 +288,7 @@ public class RevoluteJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setLowerLimit() {
-		RevoluteJoint rj = new RevoluteJoint(b1, b2, new Vector2());
+		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
 		rj.setLowerLimit(Math.toRadians(-10));
 		
 		TestCase.assertEquals(Math.toRadians(-10), rj.getLowerLimit(), 1e-6);
@@ -299,7 +299,7 @@ public class RevoluteJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setLowerLimitInvalid() {
-		RevoluteJoint rj = new RevoluteJoint(b1, b2, new Vector2());
+		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
 		rj.setLowerLimit(Math.toRadians(10));
 	}
 	
@@ -308,7 +308,7 @@ public class RevoluteJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setUpperAndLowerLimits() {
-		RevoluteJoint rj = new RevoluteJoint(b1, b2, new Vector2());
+		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
 		rj.setLimits(Math.toRadians(-30), Math.toRadians(20));
 		
 		TestCase.assertEquals(Math.toRadians(-30), rj.getLowerLimit(), 1e-6);
@@ -320,7 +320,7 @@ public class RevoluteJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setUpperAndLowerLimitsInvalid() {
-		RevoluteJoint rj = new RevoluteJoint(b1, b2, new Vector2());
+		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
 		rj.setLimits(Math.toRadians(30), Math.toRadians(20));
 	}
 	
@@ -329,7 +329,7 @@ public class RevoluteJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setUpperAndLowerLimitsToSameValue() {
-		RevoluteJoint rj = new RevoluteJoint(b1, b2, new Vector2());
+		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
 		rj.setLimits(Math.toRadians(30), Math.toRadians(30));
 		
 		TestCase.assertEquals(Math.toRadians(30), rj.getLowerLimit(), 1e-6);
@@ -341,7 +341,7 @@ public class RevoluteJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setLimitEnabledSleep() {
-		RevoluteJoint rj = new RevoluteJoint(b1, b2, new Vector2());
+		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
 		
 		// by default the limit is enabled
 		TestCase.assertFalse(rj.isLimitEnabled());
@@ -351,39 +351,39 @@ public class RevoluteJointTest extends AbstractJointTest {
 		// lets disable it first and ensure that the bodies are awake
 		rj.setLimitEnabled(false);
 		TestCase.assertFalse(rj.isLimitEnabled());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		
 		// then put the bodies to sleep
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		// if we disable it again, the bodies should not wake
 		rj.setLimitEnabled(false);
 		TestCase.assertFalse(rj.isLimitEnabled());
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 		
 		// when we enable it, we should awake the bodies
 		rj.setLimitEnabled(true);
 		TestCase.assertTrue(rj.isLimitEnabled());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		
 		// if we enable it when it's already enabled and the bodies are asleep
 		// it should not wake the bodies
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		rj.setLimitEnabled(true);
 		TestCase.assertTrue(rj.isLimitEnabled());
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 		
 		// if we disable the limit, then the bodies should be reawakened
 		rj.setLimitEnabled(false);
 		TestCase.assertFalse(rj.isLimitEnabled());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 	}
 	
 	/**
@@ -391,7 +391,7 @@ public class RevoluteJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setLimitsSameSleep() {
-		RevoluteJoint rj = new RevoluteJoint(b1, b2, new Vector2());
+		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
 		
 		// by default the limit is enabled
 		TestCase.assertFalse(rj.isLimitEnabled());
@@ -404,66 +404,66 @@ public class RevoluteJointTest extends AbstractJointTest {
 		TestCase.assertEquals(defaultLowerLimit, defaultUpperLimit);
 
 		// the bodies should be initially awake
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 
 		// then put the bodies to sleep
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		// set the limits to the current value - since the value hasn't changed
 		// the bodies should remain asleep
 		rj.setLimits(defaultLowerLimit, defaultUpperLimit);
 		TestCase.assertTrue(rj.isLimitEnabled());
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, rj.getLowerLimit());
 		TestCase.assertEquals(defaultUpperLimit, rj.getUpperLimit());
 		
 		// set the limits to a different value - the bodies should wake up
 		rj.setLimits(Math.PI, Math.PI);
 		TestCase.assertTrue(rj.isLimitEnabled());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(Math.PI, rj.getLowerLimit());
 		TestCase.assertEquals(Math.PI, rj.getUpperLimit());
 		
 		// test the scenario where only the lower limit value changes
 		rj.setLowerLimit(-Math.PI);
 		TestCase.assertEquals(-Math.PI, rj.getLowerLimit());
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		rj.setLimits(Math.PI, Math.PI);
 		TestCase.assertTrue(rj.isLimitEnabled());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(Math.PI, rj.getLowerLimit());
 		TestCase.assertEquals(Math.PI, rj.getUpperLimit());
 		
 		// test the scenario where only the upper limit value changes
 		rj.setUpperLimit(2*Math.PI);
 		TestCase.assertEquals(2*Math.PI, rj.getUpperLimit());
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		rj.setLimits(Math.PI, Math.PI);
 		TestCase.assertTrue(rj.isLimitEnabled());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(Math.PI, rj.getLowerLimit());
 		TestCase.assertEquals(Math.PI, rj.getUpperLimit());
 		
 		// now disable the limit, and the limits should change
 		// but the bodies should not wake
 		rj.setLimitEnabled(false);
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		rj.setLimits(-Math.PI, -Math.PI);
 		TestCase.assertFalse(rj.isLimitEnabled());
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(-Math.PI, rj.getLowerLimit());
 		TestCase.assertEquals(-Math.PI, rj.getUpperLimit());
 	}
@@ -473,7 +473,7 @@ public class RevoluteJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setLimitsDifferentSleep() {
-		RevoluteJoint rj = new RevoluteJoint(b1, b2, new Vector2());
+		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
 		
 		// by default the limit is enabled
 		TestCase.assertFalse(rj.isLimitEnabled());
@@ -486,66 +486,66 @@ public class RevoluteJointTest extends AbstractJointTest {
 		TestCase.assertEquals(defaultLowerLimit, defaultUpperLimit);
 
 		// the bodies should be initially awake
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 
 		// then put the bodies to sleep
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		// set the limits to the current value - since the value hasn't changed
 		// the bodies should remain asleep
 		rj.setLimits(defaultLowerLimit, defaultUpperLimit);
 		TestCase.assertTrue(rj.isLimitEnabled());
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, rj.getLowerLimit());
 		TestCase.assertEquals(defaultUpperLimit, rj.getUpperLimit());
 		
 		// set the limits to a different value - the bodies should wake up
 		rj.setLimits(-Math.PI, Math.PI);
 		TestCase.assertTrue(rj.isLimitEnabled());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(-Math.PI, rj.getLowerLimit());
 		TestCase.assertEquals(Math.PI, rj.getUpperLimit());
 		
 		// test the scenario where only the lower limit value changes
 		rj.setLowerLimit(-2*Math.PI);
 		TestCase.assertEquals(-2*Math.PI, rj.getLowerLimit());
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		rj.setLimits(-Math.PI, Math.PI);
 		TestCase.assertTrue(rj.isLimitEnabled());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(-Math.PI, rj.getLowerLimit());
 		TestCase.assertEquals(Math.PI, rj.getUpperLimit());
 		
 		// test the scenario where only the upper limit value changes
 		rj.setUpperLimit(2*Math.PI);
 		TestCase.assertEquals(2*Math.PI, rj.getUpperLimit());
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		rj.setLimits(-Math.PI, Math.PI);
 		TestCase.assertTrue(rj.isLimitEnabled());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(-Math.PI, rj.getLowerLimit());
 		TestCase.assertEquals(Math.PI, rj.getUpperLimit());
 		
 		// now disable the limit, and the limits should change
 		// but the bodies should not wake
 		rj.setLimitEnabled(false);
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		rj.setLimits(Math.PI, 2*Math.PI);
 		TestCase.assertFalse(rj.isLimitEnabled());
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(Math.PI, rj.getLowerLimit());
 		TestCase.assertEquals(2*Math.PI, rj.getUpperLimit());
 	}
@@ -555,7 +555,7 @@ public class RevoluteJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setLowerLimitSleep() {
-		RevoluteJoint rj = new RevoluteJoint(b1, b2, new Vector2());
+		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
 		
 		// by default the limit is enabled
 		TestCase.assertFalse(rj.isLimitEnabled());
@@ -567,39 +567,39 @@ public class RevoluteJointTest extends AbstractJointTest {
 		double defaultUpperLimit = rj.getUpperLimit();
 
 		// the bodies should be initially awake
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 
 		// then put the bodies to sleep
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		// set the lower limit to the current value - since the value hasn't changed
 		// the bodies should remain asleep
 		rj.setLowerLimit(defaultLowerLimit);
 		TestCase.assertTrue(rj.isLimitEnabled());
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, rj.getLowerLimit());
 		TestCase.assertEquals(defaultUpperLimit, rj.getUpperLimit());
 		
 		// set the limit to a different value - the bodies should wake up
 		rj.setLowerLimit(-Math.PI);
 		TestCase.assertTrue(rj.isLimitEnabled());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(-Math.PI, rj.getLowerLimit());
 		TestCase.assertEquals(defaultUpperLimit, rj.getUpperLimit());
 		
 		// now disable the limit, and the lower limit should change
 		// but the bodies should not wake
 		rj.setLimitEnabled(false);
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		rj.setLowerLimit(-2*Math.PI);
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(-2*Math.PI, rj.getLowerLimit());
 		TestCase.assertEquals(defaultUpperLimit, rj.getUpperLimit());
 	}
@@ -609,7 +609,7 @@ public class RevoluteJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setUpperLimitSleep() {
-		RevoluteJoint rj = new RevoluteJoint(b1, b2, new Vector2());
+		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
 		
 		// by default the limit is enabled
 		TestCase.assertFalse(rj.isLimitEnabled());
@@ -621,39 +621,39 @@ public class RevoluteJointTest extends AbstractJointTest {
 		double defaultUpperLimit = rj.getUpperLimit();
 
 		// the bodies should be initially awake
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 
 		// then put the bodies to sleep
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		// set the upper limit to the current value - since the value hasn't changed
 		// the bodies should remain asleep
 		rj.setUpperLimit(defaultUpperLimit);
 		TestCase.assertTrue(rj.isLimitEnabled());
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, rj.getLowerLimit());
 		TestCase.assertEquals(defaultUpperLimit, rj.getUpperLimit());
 		
 		// set the limit to a different value - the bodies should wake up
 		rj.setUpperLimit(Math.PI);
 		TestCase.assertTrue(rj.isLimitEnabled());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, rj.getLowerLimit());
 		TestCase.assertEquals(Math.PI, rj.getUpperLimit());
 		
 		// now disable the limit, and the upper limit should change
 		// but the bodies should not wake
 		rj.setLimitEnabled(false);
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		rj.setUpperLimit(2*Math.PI);
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, rj.getLowerLimit());
 		TestCase.assertEquals(2*Math.PI, rj.getUpperLimit());
 	}

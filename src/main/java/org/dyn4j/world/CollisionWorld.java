@@ -24,10 +24,10 @@
  */
 package org.dyn4j.world;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.dyn4j.DataContainer;
 import org.dyn4j.collision.Bounds;
 import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.collision.Fixture;
@@ -44,6 +44,7 @@ import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.listener.BoundsListener;
 import org.dyn4j.world.listener.CollisionListener;
+import org.dyn4j.world.listener.WorldEventListener;
 import org.dyn4j.world.result.ConvexCastResult;
 import org.dyn4j.world.result.ConvexDetectResult;
 import org.dyn4j.world.result.DetectResult;
@@ -68,7 +69,7 @@ import org.dyn4j.world.result.RaycastResult;
  * @param <E> the {@link Fixture} type
  * @param <V> the {@link CollisionData} type
  */
-public interface CollisionWorld<T extends CollisionBody<E>, E extends Fixture, V extends CollisionData<T, E>> extends Shiftable {
+public interface CollisionWorld<T extends CollisionBody<E>, E extends Fixture, V extends CollisionData<T, E>> extends Shiftable, DataContainer {
 	/** The default {@link CollisionBody} count */
 	public static final int DEFAULT_BODY_COUNT = 64;
 	
@@ -173,22 +174,70 @@ public interface CollisionWorld<T extends CollisionBody<E>, E extends Fixture, V
 	// listeners
 	
 	/**
-	 * Returns the collision listeners attached to this world.
-	 * <p>
-	 * The returned list can be used manipulate the listeners of this world.
-	 * @return List&lt;{@link CollisionListener}&gt;
-	 * @since 4.0.0
+	 * Removes all listeners from this world.
 	 */
-	public List<CollisionListener<T, E>> getCollisionListeners();
+	public void removeAllListeners();
 	
 	/**
-	 * Returns the bounds listeners attached to this world.
+	 * Removes all listeners of the given type from this world.
 	 * <p>
-	 * The returned list can be used manipulate the listeners of this world.
-	 * @return List&lt;{@link BoundsListener}&gt;
-	 * @since 4.0.0
+	 * This is typically called in one of two ways:
+	 * <ul>
+	 * <li>Using the base listener interface. removeAllListeners(BoundsListener.class) for example.
+	 * <li>Using a user defined type to remove listeners that are specific to a piece of functionality.  removeAllListeners(SoundListener.class) for example.
+	 * </ul>
+	 * @param <L> the type to remove
+	 * @param clazz the class object for the type to remove
 	 */
-	public List<BoundsListener<T, E>> getBoundsListeners();
+	public <L extends WorldEventListener> void removeAllListeners(Class<L> clazz);
+	
+	/**
+	 * Returns a list of listeners that are or extend from the given type.
+	 * <p>
+	 * This is typically called in one of two ways:
+	 * <ul>
+	 * <li>Using the base listener interface. getListeners(BoundsListener.class) for example.
+	 * <li>Using a user defined type to get listeners that are specific to a piece of functionality.  getListeners(SoundListener.class) for example.
+	 * </ul>
+	 * @param <L> the type to get
+	 * @param clazz the class object for the type to get
+	 * @return List
+	 */
+	public <L extends WorldEventListener> List<L> getListeners(Class<L> clazz);
+
+	/**
+	 * Returns true if the given listeners is registered to this world.
+	 * @param listener the listener
+	 * @return boolean
+	 */
+	public boolean containsListener(WorldEventListener listener);
+	
+	/**
+	 * Removes the given listener from this world and returns true if it was removed.
+	 * <p>
+	 * This method will return false if the listener was not found in this world.
+	 * @param listener the listener
+	 * @return boolean
+	 */
+	public boolean removeListener(WorldEventListener listener);
+	
+	/**
+	 * Adds the given {@link CollisionListener} to this world.
+	 * <p>
+	 * NOTE: No effort is made to prevent duplicate listeners from being added.
+	 * @param listener the listener to add
+	 * @return boolean
+	 */
+	public boolean addListener(CollisionListener<T, E> listener);
+	
+	/**
+	 * Adds the given {@link BoundsListener} to this world.
+	 * <p>
+	 * NOTE: No effort is made to prevent duplicate listeners from being added.
+	 * @param listener the listener to add
+	 * @return boolean
+	 */
+	public boolean addListener(BoundsListener<T, E> listener);
 	
 	// broadphase
 	
@@ -284,21 +333,29 @@ public interface CollisionWorld<T extends CollisionBody<E>, E extends Fixture, V
 	 */
 	public TimeOfImpactDetector getTimeOfImpactDetector();
 	
-	// collision detection
+	// collision data
 	
 	/**
-	 * Returns an unmodifiable collection of the tracked collision data in this world.
-	 * @return Collection&lt;V&gt;
-	 * @since 4.0.0
-	 */
-	public Collection<V> getCollisionData();
-	
-	/**
-	 * Returns an iterator for the tracked collision data in this world.
+	 * Returns the collision data for the given body-fixture pairs.
 	 * <p>
-	 * The returned iterator does not support the remove method.
+	 * This returns the collision data for any pair that was detected in the broadphase. Use the {@link CollisionData}
+	 * methods to inspect the type of collision or the details about the collision.
+	 * <p>
+	 * Returns null if the body-fixtures are not colliding or if either no longer exists in the world.
+	 * @param body1 the first body
+	 * @param fixture1 the first body's fixture
+	 * @param body2 the second body
+	 * @param fixture2 the second body's fixture
+	 * @return V
+	 */
+	public V getCollisionData(T body1, E fixture1, T body2, E fixture2);
+	
+	/**
+	 * Returns an iterator that can be used to enumerate all the collisions in the world.
+	 * <p>
+	 * This returns the collision data for any pair that was detected in the broadphase. Use the {@link CollisionData}
+	 * methods to inspect the type of collision or the details about the collision.
 	 * @return Iterator&lt;V&gt;
-	 * @since 4.0.0
 	 */
 	public Iterator<V> getCollisionDataIterator();
 	

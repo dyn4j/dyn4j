@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -42,7 +42,7 @@ public class WeldJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void createSuccess() {
-		new WeldJoint(b1, b2, new Vector2());
+		new WeldJoint<Body>(b1, b2, new Vector2());
 	}
 
 	/**
@@ -50,7 +50,7 @@ public class WeldJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createWithNullBody1() {
-		new WeldJoint(null, b2, new Vector2());
+		new WeldJoint<Body>(null, b2, new Vector2());
 	}
 	
 	/**
@@ -58,7 +58,7 @@ public class WeldJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createWithNullBody2() {
-		new WeldJoint(b1, null, new Vector2());
+		new WeldJoint<Body>(b1, null, new Vector2());
 	}
 	
 	/**
@@ -66,7 +66,7 @@ public class WeldJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createWithNullAnchor() {
-		new WeldJoint(b1, b2, null);
+		new WeldJoint<Body>(b1, b2, null);
 	}
 	
 	/**
@@ -74,7 +74,7 @@ public class WeldJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createWithSameBody() {
-		new WeldJoint(b1, b1, new Vector2());
+		new WeldJoint<Body>(b1, b1, new Vector2());
 	}
 	
 	/**
@@ -83,7 +83,7 @@ public class WeldJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void isSpring() {
-		WeldJoint wj = new WeldJoint(b1, b2, new Vector2());
+		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
 		TestCase.assertFalse(wj.isSpring());
 		
 		wj.setFrequency(0.0);
@@ -105,7 +105,7 @@ public class WeldJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void isSpringDamper() {
-		WeldJoint wj = new WeldJoint(b1, b2, new Vector2());
+		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
 		TestCase.assertFalse(wj.isSpringDamper());
 		
 		wj.setFrequency(0.0);
@@ -134,7 +134,7 @@ public class WeldJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setDampingRatio() {
-		WeldJoint wj = new WeldJoint(b1, b2, new Vector2());
+		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
 		
 		wj.setDampingRatio(0.0);
 		TestCase.assertEquals(0.0, wj.getDampingRatio());
@@ -152,7 +152,7 @@ public class WeldJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setDampingRatioNegative() {
-		WeldJoint wj = new WeldJoint(b1, b2, new Vector2());
+		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
 		wj.setDampingRatio(-1.0);
 	}
 	
@@ -162,7 +162,7 @@ public class WeldJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setDampingRatioGreaterThan1() {
-		WeldJoint wj = new WeldJoint(b1, b2, new Vector2());
+		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
 		wj.setDampingRatio(2.0);
 	}
 	
@@ -172,7 +172,7 @@ public class WeldJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setFrequency() {
-		WeldJoint wj = new WeldJoint(b1, b2, new Vector2());
+		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
 		
 		wj.setFrequency(0.0);
 		TestCase.assertEquals(0.0, wj.getFrequency());
@@ -190,7 +190,7 @@ public class WeldJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setFrequencyNegative() {
-		WeldJoint wj = new WeldJoint(b1, b2, new Vector2());
+		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
 		wj.setFrequency(-0.3);
 	}
 }

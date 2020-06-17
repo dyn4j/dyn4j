@@ -47,7 +47,7 @@ import org.dyn4j.geometry.Vector2;
 public class SequentialImpulses<T extends PhysicsBody> implements ContactConstraintSolver<T> {
 	
 	/**
-	 * Compute the mass coefficient for a {@link ContactConstraintContact}.
+	 * Compute the mass coefficient for a {@link SolvableContact}.
 	 * 
 	 * @param contactConstraint The {@link ContactConstraint} of the contact
 	 * @param contact The contact
@@ -55,12 +55,12 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 	 * @return The mass coefficient
 	 * @since 3.4.0
 	 */
-	private double getMassCoefficient(ContactConstraint<T> contactConstraint, ContactConstraintContact contact, Vector2 n) {
+	private double getMassCoefficient(ContactConstraint<T> contactConstraint, SolvableContact contact, Vector2 n) {
 		return this.getMassCoefficient(contactConstraint, contact.r1, contact.r2, n);
 	}
 	
 	/**
-	 * Compute the mass coefficient for a {@link ContactConstraintContact}.
+	 * Compute the mass coefficient for a {@link SolvableContact}.
 	 * 
 	 * @param contactConstraint The {@link ContactConstraint} of the contact
 	 * @param r1 The contact.r1 field
@@ -87,7 +87,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 	 * @param J
 	 * @since 3.4.0
 	 */
-	private void updateBodies(ContactConstraint<T> contactConstraint, ContactConstraintContact contact, Vector2 J) {
+	private void updateBodies(ContactConstraint<T> contactConstraint, SolvableContact contact, Vector2 J) {
 		PhysicsBody b1 = contactConstraint.getBody1();
 		PhysicsBody b2 = contactConstraint.getBody2();
 		Mass m1 = b1.getMass();
@@ -106,11 +106,11 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 	 * Compute the relative velocity to the {@link ContactConstraint}'s normal.
 	 * 
 	 * @param contactConstraint The {@link ContactConstraint}
-	 * @param contact The {@link ContactConstraintContact}
+	 * @param contact The {@link SolvableContact}
 	 * @return double
 	 * @since 3.4.0
 	 */
-	private double getRelativeVelocityAlongNormal(ContactConstraint<T> contactConstraint, ContactConstraintContact contact) {
+	private double getRelativeVelocityAlongNormal(ContactConstraint<T> contactConstraint, SolvableContact contact) {
 		Vector2 rv = this.getRelativeVelocity(contactConstraint, contact);
 		return contactConstraint.normal.dot(rv);
 	}
@@ -119,11 +119,11 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 	 * Compute the relative velocity of this {@link ContactConstraint}'s bodies.
 	 * 
 	 * @param contactConstraint The {@link ContactConstraint}
-	 * @param contact The {@link ContactConstraintContact}
+	 * @param contact The {@link SolvableContact}
 	 * @return The relative velocity vector
 	 * @since 3.4.0
 	 */
-	private Vector2 getRelativeVelocity(ContactConstraint<T> contactConstraint, ContactConstraintContact contact) {
+	private Vector2 getRelativeVelocity(ContactConstraint<T> contactConstraint, SolvableContact contact) {
 		PhysicsBody b1 = contactConstraint.getBody1();
 		PhysicsBody b2 = contactConstraint.getBody2();
 		
@@ -147,7 +147,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 			ContactConstraint<T> contactConstraint = contactConstraints.get(i);
 			
 			// get the contacts
-			List<ContactConstraintContact> contacts = contactConstraint.contacts;
+			List<SolvableContact> contacts = contactConstraint.contacts;
 			// get the size
 			int cSize = contacts.size();
 			if (cSize == 0) return; 
@@ -178,7 +178,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 			
 			// loop through the contact points
 			for (int j = 0; j < cSize; j++) {
-				ContactConstraintContact contact = contacts.get(j);
+				SolvableContact contact = contacts.get(j);
 				
 				// calculate ra and rb
 				contact.r1 = c1.to(contact.p);
@@ -204,8 +204,8 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 			// does this contact have 2 points?
 			if (cSize == 2) {
 				// setup the block solver
-				ContactConstraintContact contact1 = contacts.get(0);
-				ContactConstraintContact contact2 = contacts.get(1);
+				SolvableContact contact1 = contacts.get(0);
+				SolvableContact contact2 = contacts.get(1);
 				
 				double rn1A = contact1.r1.cross(N);
 				double rn1B = contact1.r2.cross(N);
@@ -274,11 +274,11 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 			Vector2 T = contactConstraint.tangent;
 			
 			// get the contacts and contact size
-			List<ContactConstraintContact> contacts = contactConstraint.contacts;
+			List<SolvableContact> contacts = contactConstraint.contacts;
 			int cSize = contacts.size();
 			
 			for (int j = 0; j < cSize; j++) {
-				ContactConstraintContact contact = contacts.get(j);
+				SolvableContact contact = contacts.get(j);
 				
 				// scale the accumulated impulses by the delta time ratio
 				contact.jn *= ratio;
@@ -300,7 +300,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 			ContactConstraint<T> contactConstraint = contactConstraints.get(i);
 			
 			// get the contact list
-			List<ContactConstraintContact> contacts = contactConstraint.contacts;
+			List<SolvableContact> contacts = contactConstraint.contacts;
 			int cSize = contacts.size();
 			if (cSize == 0) continue;
 			
@@ -312,7 +312,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 			
 			// evaluate friction impulse
 			for (int k = 0; k < cSize; k++) {
-				ContactConstraintContact contact = contacts.get(k);
+				SolvableContact contact = contacts.get(k);
 				
 				// get the relative velocity
 				Vector2 rv = this.getRelativeVelocity(contactConstraint, contact);
@@ -340,7 +340,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 			// check the number of contacts to solve
 			if (cSize == 1) {
 				// if its one then solve the one contact
-				ContactConstraintContact contact = contacts.get(0);
+				SolvableContact contact = contacts.get(0);
 				
 				// get the relative velocity and project it onto the penetration normal
 				double rvn = this.getRelativeVelocityAlongNormal(contactConstraint, contact);
@@ -392,8 +392,8 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 				//    = A * x + b'
 				// b' = b - A * a;
 				
-				ContactConstraintContact contact1 = contacts.get(0);
-				ContactConstraintContact contact2 = contacts.get(1);
+				SolvableContact contact1 = contacts.get(0);
+				SolvableContact contact2 = contacts.get(1);
 				
 				// create a vector containing the current accumulated impulses
 				Vector2 a = new Vector2(contact1.jn, contact2.jn);
@@ -493,7 +493,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 	 * @param a
 	 * @since 3.4.0
 	 */
-	private void updateBodies(ContactConstraint<T> contactConstraint, ContactConstraintContact contact1, ContactConstraintContact contact2, Vector2 x, Vector2 a) {
+	private void updateBodies(ContactConstraint<T> contactConstraint, SolvableContact contact1, SolvableContact contact2, Vector2 x, Vector2 a) {
 		PhysicsBody b1 = contactConstraint.getBody1();
 		PhysicsBody b2 = contactConstraint.getBody2();
 		Mass m1 = b1.getMass();
@@ -545,7 +545,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 			ContactConstraint<T> contactConstraint = contactConstraints.get(i);
 			
 			// get the contact list
-			List<ContactConstraintContact> contacts = contactConstraint.contacts;
+			List<SolvableContact> contacts = contactConstraint.contacts;
 			int cSize = contacts.size();
 			if (cSize == 0) continue;
 			
@@ -564,7 +564,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 
 			// solve normal constraints
 			for (int k = 0; k < cSize; k++) {
-				ContactConstraintContact contact = contacts.get(k);
+				SolvableContact contact = contacts.get(k);
 				
 				// get the world centers of mass
 				// NOTE: the world center needs to be recomputed each iteration because

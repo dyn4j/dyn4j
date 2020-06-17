@@ -25,7 +25,6 @@
 package org.dyn4j.world;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
@@ -34,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import org.dyn4j.DataContainer;
 import org.dyn4j.collision.Bounds;
 import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.collision.CollisionItem;
@@ -42,6 +42,7 @@ import org.dyn4j.collision.Collisions;
 import org.dyn4j.collision.Fixture;
 import org.dyn4j.collision.FixtureModificationHandler;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
+import org.dyn4j.collision.broadphase.BroadphasePair;
 import org.dyn4j.collision.broadphase.DynamicAABBTree;
 import org.dyn4j.collision.continuous.ConservativeAdvancement;
 import org.dyn4j.collision.continuous.TimeOfImpact;
@@ -65,6 +66,7 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 import org.dyn4j.world.listener.BoundsListener;
 import org.dyn4j.world.listener.CollisionListener;
+import org.dyn4j.world.listener.WorldEventListener;
 import org.dyn4j.world.result.ConvexCastResult;
 import org.dyn4j.world.result.ConvexDetectResult;
 import org.dyn4j.world.result.DetectResult;
@@ -80,7 +82,10 @@ import org.dyn4j.world.result.RaycastResult;
  * @param <V> the {@link CollisionData} type
  * @see CollisionWorld
  */
-public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E extends Fixture, V extends CollisionData<T, E>> implements CollisionWorld<T, E, V>, Shiftable {
+public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E extends Fixture, V extends CollisionData<T, E>> implements CollisionWorld<T, E, V>, Shiftable, DataContainer {
+	
+	/** The user data */
+	protected Object userData;
 	
 	// algorithms
 	
@@ -118,11 +123,14 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	
 	// collision tracking
 	
-	/** The full set of tracked collision data */
+	/** 
+	 * The full set of tracked collision data
+	 * <p>
+	 * NOTE: This collection could contain collisions for bodies or fixtures that no longer
+	 * exist in the world. Using the {@link #getCollisionDataIterator()} filters those out
+	 * automatically if reading the collision is needed. 
+	 */
 	protected final Map<CollisionPair<T, E>, V> collisionData;
-	
-	/** An unmodifiable view of the collision data */
-	protected final Map<CollisionPair<T, E>, V> unmodifiableCollisionData;
 	
 	// listeners
 	
@@ -163,7 +171,6 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		this.unmodifiableBodies = Collections.unmodifiableList(this.bodies);
 		
 		this.collisionData = new LinkedHashMap<CollisionPair<T, E>, V>(Collisions.getEstimatedCollisionPairs(initialBodyCapacity));
-		this.unmodifiableCollisionData = Collections.unmodifiableMap(this.collisionData);
 		
 		this.collisionListeners = new ArrayList<CollisionListener<T,E>>(10);
 		this.boundsListeners = new ArrayList<BoundsListener<T,E>>(10);
@@ -239,15 +246,12 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 			// remove the body from the broadphase
 			this.broadphaseDetector.remove(body);
 			
-			// remove any collision data
-			// NOTE: this isn't particularly efficient
-			Iterator<V> iterator = this.collisionData.values().iterator();
-			while(iterator.hasNext()) {
-				V collision = iterator.next();
-				if (collision.getBody1() == body || collision.getBody2() == body) {
-					iterator.remove();
-				}
-			}
+			// NOTE: I've opted to remove any collision data in the next collision 
+			// detection phase. The effect is that users of the stored collisionData need 
+			// to understand that the data stored there could include collision information 
+			// for bodies that no longer exist in the world. The alternative is to iterate 
+			// the entire set of pairs checking for this body - which isn't particularly
+			// efficient.
 		}
 		
 		return removed;
@@ -443,16 +447,10 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		
 		// update the cached data
 		for (V item : this.collisionData.values()) {
-			item.shift(shift);
+			if (item.isManifoldCollision()) {
+				item.shift(shift);
+			}
 		}
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.world.CollisionWorld#getCollisionData()
-	 */
-	@Override
-	public Collection<V> getCollisionData() {
-		return this.unmodifiableCollisionData.values();
 	}
 	
 	/* (non-Javadoc)
@@ -460,23 +458,186 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	 */
 	@Override
 	public Iterator<V> getCollisionDataIterator() {
-		return this.unmodifiableCollisionData.values().iterator();
-	}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.world.CollisionWorld#getCollisionListeners()
-	 */
-	@Override
-	public List<CollisionListener<T, E>> getCollisionListeners() {
-		return this.collisionListeners;
+		return new CollisionDataIterator();
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.world.CollisionWorld#getBoundsListeners()
+	 * @see org.dyn4j.world.CollisionWorld#getCollisionData(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture, org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
 	 */
 	@Override
-	public List<BoundsListener<T, E>> getBoundsListeners() {
-		return this.boundsListeners;
+	public V getCollisionData(T body1, E fixture1, T body2, E fixture2) {
+		CollisionItemAdapter<T, E> item = new CollisionItemAdapter<T, E>();
+		
+		// makes sure the body and fixture are still part of this world
+		item.set(body1, fixture1);
+		if (!this.broadphaseDetector.contains(item)) {
+			return null;
+		}
+
+		// makes sure the body and fixture are still part of this world
+		item.set(body2, fixture2);
+		if (!this.broadphaseDetector.contains(item)) {
+			return null;
+		}
+		
+		BroadphasePair<T, E> pair = new BroadphasePair<T, E>(body1, fixture1, body2, fixture2);
+		return this.collisionData.get(pair);
+	}
+	
+	/**
+	 * Adds the listeners from the given source to the given list of listeners if they are or extend from the given class.
+	 * @param <L> the listener type
+	 * @param clazz the class to check
+	 * @param listeners the list of listeners to add to
+	 * @param source the source list of listeners to check
+	 */
+	@SuppressWarnings("unchecked")
+	protected <L extends WorldEventListener> void getListeners(Class<L> clazz, List<L> listeners, List<?> source) {
+		for (Object listener : source) {
+			if (clazz.isInstance(listener)) {
+				listeners.add((L) listener);
+			}
+		}
+	}
+	
+	/**
+	 * Removes the listeners from the given source if they are or extend from the given class.
+	 * @param <L> the listener type
+	 * @param clazz the class to check
+	 * @param source the source list of listeners to check and remove from
+	 */
+	protected <L extends WorldEventListener> void removeListeners(Class<L> clazz, List<?> source) {
+		Iterator<?> it = source.iterator();
+		while (it.hasNext()) {
+			Object listener = it.next();
+			if (clazz.isInstance(listener)) {
+				it.remove();
+			}
+		}
+	}
+	
+	/**
+	 * Removes the given listener from the given source and returns true if it was found and removed.
+	 * @param <L> the listener type
+	 * @param listener the listener object to remove
+	 * @param source the source list of listeners to check and remove from
+	 * @return boolean
+	 */
+	protected <L extends WorldEventListener> boolean removeListener(L listener, List<?> source) {
+		boolean removed = false;
+		Iterator<?> it = source.iterator();
+		while (it.hasNext()) {
+			Object test = it.next();
+			if (test == listener) {
+				it.remove();
+				removed = true;
+			}
+		}
+		return removed;
+	}
+	
+	/**
+	 * Returns true if the given listener is contained in the given source list of listeners.
+	 * @param <L> the listener type
+	 * @param listener the listener object to find
+	 * @param source the source list of listeners to check
+	 * @return boolean
+	 */
+	protected <L extends WorldEventListener> boolean containsListener(L listener, List<?> source) {
+		Iterator<?> it = source.iterator();
+		while (it.hasNext()) {
+			Object test = it.next();
+			if (test == listener) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#getListeners(java.lang.Class)
+	 */
+	@Override
+	public <L extends WorldEventListener> List<L> getListeners(Class<L> clazz) {
+		List<L> listeners = new ArrayList<L>();
+		this.getListeners(clazz, listeners, this.boundsListeners);
+		this.getListeners(clazz, listeners, this.collisionListeners);
+		return listeners;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#removeAllListeners(java.lang.Class)
+	 */
+	@Override
+	public <L extends WorldEventListener> void removeAllListeners(Class<L> clazz) {
+		this.removeListeners(clazz, this.boundsListeners);
+		this.removeListeners(clazz, this.collisionListeners);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#removeAllListeners()
+	 */
+	@Override
+	public void removeAllListeners() {
+		this.boundsListeners.clear();
+		this.collisionListeners.clear();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#containsListener(org.dyn4j.world.listener.WorldEventListener)
+	 */
+	@Override
+	public boolean containsListener(WorldEventListener listener) {
+		if (this.containsListener(listener, this.collisionListeners)) {
+			return true;
+		}
+		if (this.containsListener(listener, this.boundsListeners)) {
+			return true;
+		}
+		return false;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#removeListener(org.dyn4j.world.listener.WorldEventListener)
+	 */
+	@Override
+	public boolean removeListener(WorldEventListener listener) {
+		boolean removed = false;
+		removed |= this.removeListener(listener, this.boundsListeners);
+		removed |= this.removeListener(listener, this.collisionListeners);
+		return removed;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#addListener(org.dyn4j.world.listener.BoundsListener)
+	 */
+	@Override
+	public boolean addListener(BoundsListener<T, E> listener) {
+		return this.boundsListeners.add(listener);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#addListener(org.dyn4j.world.listener.CollisionListener)
+	 */
+	@Override
+	public boolean addListener(CollisionListener<T, E> listener) {
+		return this.collisionListeners.add(listener);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.DataContainer#getUserData()
+	 */
+	@Override
+	public Object getUserData() {
+		return this.userData;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.DataContainer#setUserData(java.lang.Object)
+	 */
+	@Override
+	public void setUserData(Object data) {
+		this.userData = data;
 	}
 	
 	/**
@@ -508,7 +669,6 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 			// instead of building an AABB for the whole body, let's check
 			// each fixture AABB so that we can exit early (in most cases
 			// one fixture will be within bounds). This also saves an allocation
-			// TODO is this faster or slower than the old process?
 			if (this.bounds != null) {
 				boolean withinBounds = false;
 				
@@ -1023,6 +1183,14 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 			// 		2. if so, then check if their AABBs still overlap
 			this.adapter1.set(body1, fixture1);
 			this.adapter2.set(body2, fixture2);
+			
+			// we need to remove the pair if either body/fixture doesn't exist anymore too
+			if (!AbstractCollisionWorld.this.broadphaseDetector.contains(this.adapter1) ||
+				!AbstractCollisionWorld.this.broadphaseDetector.contains(this.adapter2)) {
+				this.iterator.remove();
+				return collision;
+			}
+			
 			if (AbstractCollisionWorld.this.broadphaseDetector.isUpdated(this.adapter1) || AbstractCollisionWorld.this.broadphaseDetector.isUpdated(this.adapter2)) {
 				// then we need to verify the pair is still valid
 				AABB aabb1 = AbstractCollisionWorld.this.broadphaseDetector.getAABB(this.adapter1);
@@ -1760,6 +1928,74 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		}
 	}
 
+	private final class CollisionDataIterator implements Iterator<V> {
+		private final Iterator<V> iterator;
+		private final CollisionItemAdapter<T, E> item = new CollisionItemAdapter<T, E>();
+		private V current;
+		
+		private boolean hasNext;
+		
+		public CollisionDataIterator() {
+			this.iterator = AbstractCollisionWorld.this.collisionData.values().iterator();
+			this.hasNext = this.findNext();
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#hasNext()
+		 */
+		@Override
+		public boolean hasNext() {
+			return this.hasNext;
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#next()
+		 */
+		@Override
+		public V next() {
+			if (this.hasNext) {
+				V current = this.current;
+				this.hasNext = this.findNext();
+				return current;
+			}
+			throw new NoSuchElementException();
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#remove()
+		 */
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+		
+		/**
+		 * Returns true if there's another item in the iteration and sets the nextItem.
+		 * @return boolean
+		 */
+		private boolean findNext() {
+			while (this.iterator.hasNext()) {
+				V collision = this.iterator.next();
+				
+				// makes sure the body and fixture are still part of this world
+				this.item.set(collision.getBody1(), collision.getFixture1());
+				if (!AbstractCollisionWorld.this.broadphaseDetector.contains(item)) {
+					continue;
+				}
+
+				// makes sure the body and fixture are still part of this world
+				this.item.set(collision.getBody2(), collision.getFixture2());
+				if (!AbstractCollisionWorld.this.broadphaseDetector.contains(item)) {
+					continue;
+				}
+				
+				this.current = collision;
+				return true;
+			}
+			return false;
+		}
+	}
+	
 	/**
 	 * {@link FixtureModificationHandler} used to update the broadphase when fixtures
 	 * are added or removed from {@link CollisionBody}s.

@@ -39,7 +39,7 @@ import org.dyn4j.collision.Fixture;
  * @param <T> the {@link CollisionBody} type
  * @param <E> the {@link Fixture} type
  */
-public interface BoundsListener<T extends CollisionBody<E>, E extends Fixture> {
+public interface BoundsListener<T extends CollisionBody<E>, E extends Fixture> extends WorldEventListener {
 	/**
 	 * Method called when a {@link CollisionBody} is outside the {@link Bounds} of a simulation.
 	 * @param body the {@link CollisionBody} outside the {@link Bounds}

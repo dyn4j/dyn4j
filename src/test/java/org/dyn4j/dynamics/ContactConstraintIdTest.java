@@ -36,6 +36,7 @@ import org.junit.Test;
  * @version 2.0.0
  * @since 1.0.0
  */
+@Deprecated
 public class ContactConstraintIdTest {
 	/**
 	 * Test case for the hashCode method.

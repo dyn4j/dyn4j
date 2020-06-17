@@ -58,7 +58,7 @@ public final class BroadphasePair<T extends CollisionBody<E>, E extends Fixture>
 	/**
 	 * Default constructor.
 	 */
-	public BroadphasePair() {}
+	BroadphasePair() {}
 	
 	/**
 	 * Full constructor.

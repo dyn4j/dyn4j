@@ -22,42 +22,48 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.world.listener;
+package org.dyn4j.simulation;
 
-import org.dyn4j.dynamics.PhysicsBody;
-import org.dyn4j.dynamics.TimeStep;
-import org.dyn4j.world.PhysicsWorld;
+import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.joint.PinJoint;
+import org.dyn4j.geometry.Geometry;
+import org.dyn4j.geometry.MassType;
+import org.dyn4j.geometry.Vector2;
+import org.dyn4j.world.World;
+import org.junit.Test;
+
+import junit.framework.TestCase;
 
 /**
- * Convenience class for implementing the {@link StepListener} interface.
+ * Used to test the {@link PinJoint} class.
  * @author William Bittle
  * @version 4.0.0
- * @since 1.0.0
- * @param <T> the {@link PhysicsBody} type
+ * @since 1.0.2
  */
-public class StepListenerAdapter<T extends PhysicsBody> implements StepListener<T> {
-	/* (non-Javadoc)
-	 * @see org.dyn4j.world.listener.StepListener#begin(org.dyn4j.dynamics.TimeStep, org.dyn4j.world.PhysicsWorld)
+public class PinJointSimulationTest {
+	/**
+	 * Tests the pin joint with a body who has FIXED_LINEAR_VELOCITY as its
+	 * mass type.  The pin joint applied at a point on the body should rotate
+	 * the body (before it wasn't doing anything).
 	 */
-	@Override
-	public void begin(TimeStep step, PhysicsWorld<T, ?> world) {}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.world.listener.StepListener#updatePerformed(org.dyn4j.dynamics.TimeStep, org.dyn4j.world.PhysicsWorld)
-	 */
-	@Override
-	public void updatePerformed(TimeStep step, PhysicsWorld<T, ?> world) {}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.world.listener.StepListener#postSolve(org.dyn4j.dynamics.TimeStep, org.dyn4j.world.PhysicsWorld)
-	 */
-	@Override
-	public void postSolve(TimeStep step, PhysicsWorld<T, ?> world) {}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.world.listener.StepListener#end(org.dyn4j.dynamics.TimeStep, org.dyn4j.world.PhysicsWorld)
-	 */
-	@Override
-	public void end(TimeStep step, PhysicsWorld<T, ?> world) {}
-
+	@Test
+	public void fixedLinearVelocity() {
+		World w = new World();
+		
+		Body body = new Body();
+		body.addFixture(Geometry.createCircle(1.0));
+		body.setMass(MassType.FIXED_LINEAR_VELOCITY);
+		w.addBody(body);
+		
+		PinJoint<Body> pj = new PinJoint<Body>(body, new Vector2(0.5, 0.0), 8.0, 0.3, 1000.0);
+		w.addJoint(pj);
+		
+		pj.setTarget(new Vector2(0.7, -0.5));
+		
+		w.step(1);
+		
+		TestCase.assertTrue(pj.getReactionForce(w.getTimeStep().getInverseDeltaTime()).getMagnitude() > 0);
+		TestCase.assertTrue(pj.getReactionForce(w.getTimeStep().getInverseDeltaTime()).getMagnitude() <= 1000.0);
+		TestCase.assertTrue(body.getTransform().getRotationAngle() < 0);
+	}
 }

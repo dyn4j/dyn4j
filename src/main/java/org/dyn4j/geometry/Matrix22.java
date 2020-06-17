@@ -401,17 +401,13 @@ public class Matrix22 implements Copyable<Matrix22> {
 	 * @param dest the destination for the inverse
 	 * @since 4.0.0
 	 */
-	public void setInverse(Matrix22 dest) {
+	public void invert(Matrix22 dest) {
 		// get the determinant
 		double det = this.determinant();
 		// check for zero determinant
 		if (Math.abs(det) > Epsilon.E) {
 			det = 1.0 / det;
 		}
-//		double a = this.m00;
-//		double b = this.m01;
-//		double c = this.m10;
-//		double d = this.m11;
 		dest.m00 =  det * this.m11;
 		dest.m01 = -det * this.m01;
 		dest.m10 = -det * this.m10;

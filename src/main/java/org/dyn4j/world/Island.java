@@ -186,8 +186,9 @@ final class Island<T extends PhysicsBody> {
 		// integrate the positions
 		for (int i = 0; i < size; i++) {
 			PhysicsBody body = this.bodies.get(i);
-			
-			// FIXME there's a bug here i think - static bodies are allowed to participate in many islands. This means that if it's a moving static body, it's position will be updated more than once
+			// this works for static bodies since they don't move
+			// and this works for kinematic/dynamic bodies because
+			// they will only be added to one island
 			body.integratePosition(step, settings);
 		}
 		

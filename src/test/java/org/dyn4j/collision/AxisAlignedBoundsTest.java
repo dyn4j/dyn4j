@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -41,7 +41,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link AxisAlignedBounds} class.
  * @author William Bittle
- * @version 3.1.1
+ * @version 4.0.0
  * @since 3.1.1
  */
 public class AxisAlignedBoundsTest {
@@ -376,7 +376,8 @@ public class AxisAlignedBoundsTest {
 	}
 	
 	/**
-	 * Tests the isOutside method on a {@link Segment}.
+	 * Tests the isOutside method on a {@link AABB}.
+	 * @since 4.0.0
 	 */
 	@Test
 	public void isOutsideAABB() {

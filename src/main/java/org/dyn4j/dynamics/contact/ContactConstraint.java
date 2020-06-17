@@ -42,7 +42,7 @@ import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Represents a {@link ContactConstraintContact} constraint for each {@link Body} pair.  
+ * Represents a {@link SolvableContact} constraint for each {@link Body} pair.  
  * @author William Bittle
  * @version 4.0.0
  * @since 1.0.0
@@ -67,10 +67,10 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	protected final CollisionPair<T, BodyFixture> pair;
 	
 	/** The {@link Contact}s */
-	protected final List<ContactConstraintContact> contacts;
+	protected final List<SolvableContact> contacts;
 	
 	/** An unmodifiable view of the {@link Contact}s */
-	protected final List<ContactConstraintContact> contactsUnmodifiable;
+	protected final List<SolvableContact> contactsUnmodifiable;
 	
 	/** The penetration normal */
 	protected Vector2 normal;
@@ -120,14 +120,14 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 		// get the manifold point size
 		int mSize = points.size();
 		// create contact array
-		this.contacts = new ArrayList<ContactConstraintContact>(mSize);
+		this.contacts = new ArrayList<SolvableContact>(mSize);
 		this.contactsUnmodifiable = Collections.unmodifiableList(this.contacts);
 		// create contacts for each point
 		for (int l = 0; l < mSize; l++) {
 			// get the manifold point
 			ManifoldPoint point = points.get(l);
 			// create a contact from the manifold point
-			ContactConstraintContact contact = new ContactConstraintContact(point.getId(),
+			SolvableContact contact = new SolvableContact(point.getId(),
 	              point.getPoint(), 
 	              point.getDepth(), 
 	              pair.getBody1().getLocalPoint(point.getPoint()), 
@@ -162,7 +162,7 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 		this.id = new ContactConstraintId(pair.getBody1(), pair.getFixture1(), pair.getBody2(), pair.getFixture2());
 		this.onIsland = false;
 		// create contact array
-		this.contacts = new ArrayList<ContactConstraintContact>(2);
+		this.contacts = new ArrayList<SolvableContact>(2);
 		this.contactsUnmodifiable = Collections.unmodifiableList(this.contacts);
 		// set the normal
 		this.normal = null;
@@ -195,17 +195,28 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 		BodyFixture fixture1 = this.pair.getFixture1();
 		BodyFixture fixture2 = this.pair.getFixture2();
 		
+		// reset all other data
+		// NOTE: we need to do this before any listeners are called because the user
+		// may want to update some of these and we don't want to reset them
+		this.normal = manifold.getNormal();
+		this.tangent = this.normal.getLeftHandOrthogonalVector();
+		this.friction = handler.getFriction(fixture1, fixture2);
+		this.restitution = handler.getRestitution(fixture1, fixture2);
+		this.sensor = fixture1.isSensor() || fixture2.isSensor();
+		this.tangentSpeed = 0;
+		this.enabled = true;
+		
 		List<ManifoldPoint> points = manifold.getPoints();
 		// get the manifold point size
 		int mSize = points.size();
 		// create contact array
-		List<ContactConstraintContact> contacts = new ArrayList<ContactConstraintContact>(mSize);
+		List<SolvableContact> contacts = new ArrayList<SolvableContact>(mSize);
 		// create contacts for each point
 		for (int l = 0; l < mSize; l++) {
 			// get the manifold point
 			ManifoldPoint point = points.get(l);
 			// create a contact from the manifold point
-			ContactConstraintContact contact = new ContactConstraintContact(point.getId(),
+			SolvableContact contact = new SolvableContact(point.getId(),
                   point.getPoint(), 
                   point.getDepth(), 
                   body1.getLocalPoint(point.getPoint()), 
@@ -217,7 +228,7 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 			boolean found = false;
 			int cSize = this.contacts.size();
 			for (int j = cSize - 1; j >= 0; j--) {
-				ContactConstraintContact old = this.contacts.get(j);
+				SolvableContact old = this.contacts.get(j);
 				if ((contact.id == ManifoldPointId.DISTANCE && contact.p.distanceSquared(old.p) <= maxWarmStartDistanceSquared) || contact.id.equals(old.id)) {
 					found = true;
 					// notify that this contact was persisted from
@@ -247,7 +258,7 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 		// notify of contacts that have "ended"
 		int cSize = this.contacts.size();
 		for (int j = cSize - 1; j >= 0; j--) {
-			ContactConstraintContact old = this.contacts.get(j);
+			SolvableContact old = this.contacts.get(j);
 			handler.end(old);
 		}
 		
@@ -255,15 +266,6 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 		// the new ones
 		this.contacts.clear();
 		this.contacts.addAll(contacts);
-		
-		// reset all other data
-		this.normal = manifold.getNormal();
-		this.tangent = this.normal.getLeftHandOrthogonalVector();
-		this.friction = handler.getFriction(fixture1, fixture2);
-		this.restitution = handler.getRestitution(fixture1, fixture2);
-		this.sensor = fixture1.isSensor() || fixture2.isSensor();
-		this.tangentSpeed = 0;
-		this.enabled = true;
 	}
 	
 	/* (non-Javadoc)
@@ -302,7 +304,7 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 		int size = this.contacts.size();
 		// loop over the contacts
 		for (int i = 0; i < size; i++) {
-			ContactConstraintContact c = this.contacts.get(i);
+			SolvableContact c = this.contacts.get(i);
 			// translate the world space contact point
 			c.p.add(shift);
 			// c.p1 and c.p2 are in local coordinates
@@ -337,10 +339,10 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	}
 	
 	/**
-	 * Returns the list of {@link ContactConstraintContact}s.
+	 * Returns the list of {@link SolvableContact}s.
 	 * <p>
 	 * Modification of the list is permitted.
-	 * @return List&lt;{@link ContactConstraintContact}&gt; the list of {@link ContactConstraintContact}s
+	 * @return List&lt;{@link SolvableContact}&gt; the list of {@link SolvableContact}s
 	 */
 	public List<? extends SolvedContact> getContacts() {
 		return this.contactsUnmodifiable;

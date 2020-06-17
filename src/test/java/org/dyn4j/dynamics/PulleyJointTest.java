@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -42,7 +42,7 @@ public class PulleyJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void createSuccess() {
-		new PulleyJoint(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
+		new PulleyJoint<Body>(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
 	}
 
 	/**
@@ -50,7 +50,7 @@ public class PulleyJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createWithNullBody1() {
-		new PulleyJoint(null, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
+		new PulleyJoint<Body>(null, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
 	}
 
 	/**
@@ -58,7 +58,7 @@ public class PulleyJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createWithNullBody2() {
-		new PulleyJoint(b1, null, new Vector2(), new Vector2(), new Vector2(), new Vector2());
+		new PulleyJoint<Body>(b1, null, new Vector2(), new Vector2(), new Vector2(), new Vector2());
 	}
 	
 	/**
@@ -66,7 +66,7 @@ public class PulleyJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createWithNullAnchor1() {
-		new PulleyJoint(b1, b2, null, new Vector2(), new Vector2(), new Vector2());
+		new PulleyJoint<Body>(b1, b2, null, new Vector2(), new Vector2(), new Vector2());
 	}
 	
 	/**
@@ -74,7 +74,7 @@ public class PulleyJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createWithNullAnchor2() {
-		new PulleyJoint(b1, b2, new Vector2(), null, new Vector2(), new Vector2());
+		new PulleyJoint<Body>(b1, b2, new Vector2(), null, new Vector2(), new Vector2());
 	}
 	
 	/**
@@ -82,7 +82,7 @@ public class PulleyJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createWithNullAnchor3() {
-		new PulleyJoint(b1, b2, new Vector2(), new Vector2(), null, new Vector2());
+		new PulleyJoint<Body>(b1, b2, new Vector2(), new Vector2(), null, new Vector2());
 	}
 	
 	/**
@@ -90,7 +90,7 @@ public class PulleyJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createWithNullAnchor4() {
-		new PulleyJoint(b1, b2, new Vector2(), new Vector2(), new Vector2(), null);
+		new PulleyJoint<Body>(b1, b2, new Vector2(), new Vector2(), new Vector2(), null);
 	}
 	
 	/**
@@ -98,7 +98,7 @@ public class PulleyJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createWithSameBody() {
-		new PulleyJoint(b1, b1, new Vector2(), new Vector2(), new Vector2(), new Vector2());
+		new PulleyJoint<Body>(b1, b1, new Vector2(), new Vector2(), new Vector2(), new Vector2());
 	}
 	
 	/**
@@ -106,7 +106,7 @@ public class PulleyJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setRatio() {
-		PulleyJoint pj = new PulleyJoint(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
+		PulleyJoint<Body> pj = new PulleyJoint<Body>(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
 		
 		pj.setRatio(2.0);
 		TestCase.assertEquals(2.0, pj.getRatio());
@@ -117,7 +117,7 @@ public class PulleyJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setRatioNegative() {
-		PulleyJoint pj = new PulleyJoint(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
+		PulleyJoint<Body> pj = new PulleyJoint<Body>(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
 		
 		pj.setRatio(-1.0);
 	}
@@ -127,7 +127,7 @@ public class PulleyJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setRatioZero() {
-		PulleyJoint pj = new PulleyJoint(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
+		PulleyJoint<Body> pj = new PulleyJoint<Body>(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
 		
 		pj.setRatio(0.0);
 	}
@@ -137,25 +137,25 @@ public class PulleyJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setRatioSleep() {
-		PulleyJoint pj = new PulleyJoint(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
+		PulleyJoint<Body> pj = new PulleyJoint<Body>(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
 		
 		double ratio = pj.getRatio();
 		TestCase.assertEquals(1.0, ratio);
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		pj.setRatio(ratio);
 		TestCase.assertEquals(ratio, pj.getRatio());
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 		
 		pj.setRatio(2.0);
 		TestCase.assertEquals(2.0, pj.getRatio());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 	}
 	
 	/**
@@ -163,7 +163,7 @@ public class PulleyJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setSlackEnabled() {
-		PulleyJoint pj = new PulleyJoint(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
+		PulleyJoint<Body> pj = new PulleyJoint<Body>(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
 		
 		TestCase.assertFalse(pj.isSlackEnabled());
 		
@@ -179,7 +179,7 @@ public class PulleyJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setLength() {
-		PulleyJoint pj = new PulleyJoint(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
+		PulleyJoint<Body> pj = new PulleyJoint<Body>(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
 		
 		pj.setLength(2.0);
 		TestCase.assertEquals(2.0, pj.getLength());
@@ -190,7 +190,7 @@ public class PulleyJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setLengthNegative() {
-		PulleyJoint pj = new PulleyJoint(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
+		PulleyJoint<Body> pj = new PulleyJoint<Body>(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
 		
 		pj.setLength(-1.0);
 	}
@@ -200,25 +200,25 @@ public class PulleyJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setLengthSleep() {
-		PulleyJoint pj = new PulleyJoint(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
+		PulleyJoint<Body> pj = new PulleyJoint<Body>(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
 		
 		double length = pj.getLength();
 		TestCase.assertEquals(0.0, length);
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		pj.setLength(length);
 		TestCase.assertEquals(length, pj.getLength());
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 		
 		pj.setLength(2.0);
 		TestCase.assertEquals(2.0, pj.getLength());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 	}
 	
 	/**
@@ -227,12 +227,9 @@ public class PulleyJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void shiftCoordinates() {
-		World w = new World();
+		PulleyJoint<Body> pj = new PulleyJoint<Body>(b1, b2, new Vector2(1.0, 0.0), new Vector2(-1.0, 1.0), new Vector2(), new Vector2());
 		
-		PulleyJoint pj = new PulleyJoint(b1, b2, new Vector2(1.0, 0.0), new Vector2(-1.0, 1.0), new Vector2(), new Vector2());
-		
-		w.addJoint(pj);
-		w.shift(new Vector2(-1.0, 2.0));
+		pj.shift(new Vector2(-1.0, 2.0));
 		
 		TestCase.assertEquals( 0.0, pj.getPulleyAnchor1().x, 1.0e-3);
 		TestCase.assertEquals( 2.0, pj.getPulleyAnchor1().y, 1.0e-3);

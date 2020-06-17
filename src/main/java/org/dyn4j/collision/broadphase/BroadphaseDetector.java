@@ -205,6 +205,8 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	/**
 	 * Returns true if any of the {@link Fixture}s on the given {@link CollisionBody}
 	 * are included in the updated list.
+	 * <p>
+	 * If {@link #isUpdateTrackingEnabled()} is false, this method will always return true.
 	 * @param body the {@link CollisionBody}
 	 * @return boolean
 	 * @since 4.0.0
@@ -213,6 +215,8 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	
 	/**
 	 * Returns true if the given {@link Fixture} is included in the updated list.
+	 * <p>
+	 * If {@link #isUpdateTrackingEnabled()} is false, this method will always return true.
 	 * @param body the {@link CollisionBody}
 	 * @param fixture the {@link Fixture}
 	 * @return boolean
@@ -222,6 +226,8 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	
 	/**
 	 * Returns true if the given {@link Fixture} is included in the updated list.
+	 * <p>
+	 * If {@link #isUpdateTrackingEnabled()} is false, this method will always return true.
 	 * @param item the collision item
 	 * @return boolean
 	 * @since 4.0.0
@@ -495,8 +501,22 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	/**
 	 * Returns whether this particular {@link BroadphaseDetector} supports expanding AABBs.
 	 * @return boolean
+	 * @deprecated Deprecated in 4.0.0. Use the {@link #isAABBExpansionSupported()} method instead.
 	 */
+	@Deprecated
 	public abstract boolean supportsAABBExpansion();
+	
+	/**
+	 * Returns whether this particular {@link BroadphaseDetector} supports expanding AABBs.
+	 * @return boolean
+	 */
+	public abstract boolean isAABBExpansionSupported();
+	
+	/**
+	 * Returns whether this particular {@link BroadphaseDetector} supports update tracking.
+	 * @return boolean
+	 */
+	public abstract boolean isUpdateTrackingSupported();
 	
 	/**
 	 * Returns the {@link AABB} expansion value used to improve performance of broad-phase updates.
@@ -538,6 +558,8 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	 * In addition, when enabling this feature (after disabling it), the user is expected to re-update all
 	 * items in the broadphase manually to ensure the updates set is non-empty.  Typically this will self
 	 * heal in the next iteration though.
+	 * <p>
+	 * NOTE: Some broadphase detectors may not support this feature.
 	 * @param flag true to turn on update tracking
 	 * @since 4.0.0
 	 */

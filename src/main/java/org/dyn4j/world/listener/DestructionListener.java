@@ -41,7 +41,7 @@ import org.dyn4j.world.PhysicsWorld;
  * @since 1.0.0
  * @param <T> the {@link PhysicsBody} type
  */
-public interface DestructionListener<T extends PhysicsBody> {
+public interface DestructionListener<T extends PhysicsBody> extends WorldEventListener {
 	/**
 	 * Called when implicit destruction of a {@link Joint} has occurred.
 	 * <p>

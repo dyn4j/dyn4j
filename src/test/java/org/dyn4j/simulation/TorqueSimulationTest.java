@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -22,28 +22,55 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.world.listener;
+package org.dyn4j.simulation;
 
-import org.dyn4j.dynamics.BodyFixture;
-import org.dyn4j.dynamics.PhysicsBody;
-import org.dyn4j.world.ContactCollisionData;
+import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.Torque;
+import org.dyn4j.geometry.Geometry;
+import org.dyn4j.geometry.MassType;
+import org.dyn4j.world.World;
+import org.junit.Test;
+
+import junit.framework.TestCase;
 
 /**
- * Convenience class for implementing the {@link ContactCollisionListener} interface.
- * <p>
- * This class can be used to implement only the methods desired instead of all
- * the methods contained in the {@link ContactCollisionListener} interface.
- * <p>
- * By default this class allows processing to continue for all collision events.
+ * Class used to test the {@link Torque} class.
  * @author William Bittle
- * @version 4.0.0
- * @since 1.0.0
- * @param <T> the {@link PhysicsBody} type
+ * @version 3.1.1
+ * @since 1.0.2
  */
-public class ContactCollisionListenerAdapter<T extends PhysicsBody> extends CollisionListenerAdapter<T, BodyFixture> implements ContactCollisionListener<T> {
-	/* (non-Javadoc)
-	 * @see org.dyn4j.world.listener.ContactCollisionListener#collision(org.dyn4j.world.ContactCollisionData)
+public class TorqueSimulationTest {
+	/**
+	 * Tests the apply method where the torque is retained for two steps.
 	 */
-	@Override
-	public boolean collision(ContactCollisionData<T> collision) { return true; }
+	@Test
+	public void applyTimed() {
+		World w = new World();
+		Body b = new Body();
+		b.addFixture(Geometry.createCircle(1.0));
+		b.setMass(MassType.NORMAL);
+		
+		Torque t = new Torque(1.0) {
+			private double time = 0;
+			public boolean isComplete(double elapsedTime) {
+				time += elapsedTime;
+				if (time >= 2.0 / 60.0) {
+					return true;
+				}
+				return false;
+			}
+		};
+		
+		b.applyTorque(t);
+		w.addBody(b);
+		
+		w.step(1);
+		
+		// make sure the torque is still there
+		TestCase.assertEquals(1.0, b.getAccumulatedTorque());
+		
+		w.step(1);
+		
+		TestCase.assertEquals(0.0, b.getAccumulatedTorque());
+	}
 }

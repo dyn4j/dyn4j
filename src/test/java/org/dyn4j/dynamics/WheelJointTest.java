@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -42,7 +42,7 @@ public class WheelJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void createSuccess() {
-		new WheelJoint(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		new WheelJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
 	}
 
 	/**
@@ -50,7 +50,7 @@ public class WheelJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createWithNullBody1() {
-		new WheelJoint(null, b2, new Vector2(), new Vector2(0.0, 1.0));
+		new WheelJoint<Body>(null, b2, new Vector2(), new Vector2(0.0, 1.0));
 	}
 
 	/**
@@ -58,7 +58,7 @@ public class WheelJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createWithNullBody2() {
-		new WheelJoint(b1, null, new Vector2(), new Vector2(0.0, 1.0));
+		new WheelJoint<Body>(b1, null, new Vector2(), new Vector2(0.0, 1.0));
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class WheelJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createWithNullAnchor() {
-		new WheelJoint(b1, b2, null, new Vector2(0.0, 1.0));
+		new WheelJoint<Body>(b1, b2, null, new Vector2(0.0, 1.0));
 	}
 
 	/**
@@ -74,7 +74,7 @@ public class WheelJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createWithNullAxis() {
-		new WheelJoint(b1, b2, new Vector2(), null);
+		new WheelJoint<Body>(b1, b2, new Vector2(), null);
 	}
 	
 	/**
@@ -82,7 +82,7 @@ public class WheelJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createWithSameBody() {
-		new WheelJoint(b1, b1, new Vector2(), new Vector2(0.0, 1.0));
+		new WheelJoint<Body>(b1, b1, new Vector2(), new Vector2(0.0, 1.0));
 	}
 
 	/**
@@ -90,7 +90,7 @@ public class WheelJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void isSpring() {
-		WheelJoint wj = new WheelJoint(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		
 		// by default is a spring
 		TestCase.assertTrue(wj.isSpring());
@@ -107,7 +107,7 @@ public class WheelJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void isSpringDamper() {
-		WheelJoint wj = new WheelJoint(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		TestCase.assertFalse(wj.isSpringDamper());
 		
 		wj.setFrequency(1.0);
@@ -128,7 +128,7 @@ public class WheelJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setDampingRatio() {
-		WheelJoint wj = new WheelJoint(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		
 		wj.setDampingRatio(0.0);
 		TestCase.assertEquals(0.0, wj.getDampingRatio());
@@ -145,7 +145,7 @@ public class WheelJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setDampingRatioNegative() {
-		WheelJoint wj = new WheelJoint(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		wj.setDampingRatio(-1.0);
 	}
 	
@@ -154,7 +154,7 @@ public class WheelJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setDampingRatioGreaterThan1() {
-		WheelJoint wj = new WheelJoint(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		wj.setDampingRatio(2.0);
 	}
 	
@@ -163,7 +163,7 @@ public class WheelJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setFrequency() {
-		WheelJoint wj = new WheelJoint(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 
 		wj.setFrequency(1.0);
 		TestCase.assertEquals(1.0, wj.getFrequency());
@@ -177,7 +177,7 @@ public class WheelJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setFrequencyNegative() {
-		WheelJoint wj = new WheelJoint(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		wj.setFrequency(-0.3);
 	}
 
@@ -186,7 +186,7 @@ public class WheelJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setFrequencyZero() {
-		WheelJoint wj = new WheelJoint(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		wj.setFrequency(0.0);
 	}
 	
@@ -195,7 +195,7 @@ public class WheelJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setMaximumMotorTorque() {
-		WheelJoint wj = new WheelJoint(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		
 		wj.setMaximumMotorTorque(0.0);
 		TestCase.assertEquals(0.0, wj.getMaximumMotorTorque());
@@ -212,7 +212,7 @@ public class WheelJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setMaximumMotorTorqueNegative() {
-		WheelJoint wj = new WheelJoint(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		wj.setMaximumMotorTorque(-2.0);
 	}
 
@@ -221,41 +221,41 @@ public class WheelJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setMaximumMotorTorqueSleep() {
-		WheelJoint wj = new WheelJoint(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		
 		TestCase.assertFalse(wj.isMotorEnabled());
 		TestCase.assertEquals(0.0, wj.getMaximumMotorTorque());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		
 		wj.setMotorEnabled(true);
 
 		// then put the bodies to sleep
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		// don't change the max force
 		wj.setMaximumMotorTorque(0.0);
 		TestCase.assertEquals(0.0, wj.getMaximumMotorTorque());
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 		
 		// change the max force
 		wj.setMaximumMotorTorque(2.0);
 		TestCase.assertEquals(2.0, wj.getMaximumMotorTorque());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		
 		// disable the motor and change the value
 		// the bodies shouldn't wake up
 		wj.setMotorEnabled(false);
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		wj.setMaximumMotorTorque(1.0);
 		TestCase.assertEquals(1.0, wj.getMaximumMotorTorque());
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 	}
 
 	/**
@@ -263,7 +263,7 @@ public class WheelJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setMotorEnabled() {
-		WheelJoint wj = new WheelJoint(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		
 		TestCase.assertFalse(wj.isMotorEnabled());
 		
@@ -279,40 +279,40 @@ public class WheelJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setMotorEnabledSleep() {
-		WheelJoint wj = new WheelJoint(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		
 		TestCase.assertFalse(wj.isMotorEnabled());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		
 		// then put the bodies to sleep
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		// disable the motor
 		wj.setMotorEnabled(false);
 		TestCase.assertFalse(wj.isMotorEnabled());
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 		
 		// enable the motor
 		wj.setMotorEnabled(true);
 		TestCase.assertTrue(wj.isMotorEnabled());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		
 		// set the motor to enabled again
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		wj.setMotorEnabled(true);
 		TestCase.assertTrue(wj.isMotorEnabled());
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());		
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());		
 		
 		wj.setMotorEnabled(false);
 		TestCase.assertFalse(wj.isMotorEnabled());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 	}
 
 	/**
@@ -320,7 +320,7 @@ public class WheelJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setMotorSpeed() {
-		WheelJoint wj = new WheelJoint(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		
 		TestCase.assertEquals(0.0, wj.getMotorSpeed());
 		
@@ -339,41 +339,41 @@ public class WheelJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setMotorSpeedSleep() {
-		WheelJoint wj = new WheelJoint(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		
 		TestCase.assertFalse(wj.isMotorEnabled());
 		TestCase.assertEquals(0.0, wj.getMotorSpeed());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		
 		wj.setMotorEnabled(true);
 
 		// then put the bodies to sleep
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		// don't change the speed
 		wj.setMotorSpeed(0.0);
 		TestCase.assertEquals(0.0, wj.getMotorSpeed());
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 		
 		// change the speed
 		wj.setMotorSpeed(2.0);
 		TestCase.assertEquals(2.0, wj.getMotorSpeed());
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		
 		// disable the motor and change the value
 		// the bodies shouldn't wake up
 		wj.setMotorEnabled(false);
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		wj.setMotorSpeed(-1.0);
 		TestCase.assertEquals(-1.0, wj.getMotorSpeed());
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 	}
 	
 }

@@ -979,6 +979,22 @@ public final class LazyAABBTree<T extends CollisionBody<E>, E extends Fixture> e
 	}
 	
 	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#isAABBExpansionSupported()
+	 */
+	@Override
+	public boolean isAABBExpansionSupported() {
+		return false;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#isUpdateTrackingSupported()
+	 */
+	@Override
+	public boolean isUpdateTrackingSupported() {
+		return false;
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#optimize()
 	 */
 	@Override

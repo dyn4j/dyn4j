@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -34,7 +34,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Test {@link CollisionBody} class for junit test cases.
  * @author William Bittle
- * @version 3.2.0
+ * @version 4.0.0
  * @since 1.0.0
  */
 public class CollidableTest extends AbstractCollisionBody<Fixture> implements CollisionBody<Fixture>, Transformable {
@@ -67,26 +67,21 @@ public class CollidableTest extends AbstractCollisionBody<Fixture> implements Co
 		this.transform = new Transform();
 	}
 
-	@Override
-	public CollidableTest addFixture(Fixture fixture) {
-		this.fixtures.add(fixture);
-		return this;
-	}
-
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.CollisionBody#addFixture(org.dyn4j.geometry.Convex)
+	 */
 	@Override
 	public Fixture addFixture(Convex convex) {
 		Fixture bf = new Fixture(convex);
-		this.fixtures.add(bf);
+		super.addFixture(bf);
 		return bf;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.CollisionBody#getLocalCenter()
+	 */
 	@Override
 	public Vector2 getLocalCenter() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Vector2 getWorldCenter() {
 		throw new UnsupportedOperationException();
 	}
 }

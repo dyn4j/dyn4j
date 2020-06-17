@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -42,7 +42,7 @@ public class MotorJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void createWithTwoDifferentBodies() {
-		new MotorJoint(b1, b2);
+		new MotorJoint<Body>(b1, b2);
 	}
 	
 	/**
@@ -50,7 +50,7 @@ public class MotorJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createWithNullBody2() {
-		new MotorJoint(b1, null);
+		new MotorJoint<Body>(b1, null);
 	}
 	
 	/**
@@ -58,7 +58,7 @@ public class MotorJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createWithNullBody1() {
-		new MotorJoint(null, b2);
+		new MotorJoint<Body>(null, b2);
 	}
 	
 	/**
@@ -66,7 +66,7 @@ public class MotorJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createWithSameBody() {
-		new MotorJoint(b1, b1);
+		new MotorJoint<Body>(b1, b1);
 	}
 	
 	/**
@@ -74,7 +74,7 @@ public class MotorJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setValidCorrectionFactor() {
-		MotorJoint mj = new MotorJoint(b1, b2);
+		MotorJoint<Body> mj = new MotorJoint<Body>(b1, b2);
 		
 		mj.setCorrectionFactor(0.0);
 		TestCase.assertEquals(0.0, mj.getCorrectionFactor());
@@ -91,7 +91,7 @@ public class MotorJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setNegativeCorrectionFactor() {
-		MotorJoint mj = new MotorJoint(b1, b2);
+		MotorJoint<Body> mj = new MotorJoint<Body>(b1, b2);
 		mj.setCorrectionFactor(-1.0);
 	}
 
@@ -100,7 +100,7 @@ public class MotorJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setCorrectionFactorGreaterThan1() {
-		MotorJoint mj = new MotorJoint(b1, b2);
+		MotorJoint<Body> mj = new MotorJoint<Body>(b1, b2);
 		mj.setCorrectionFactor(1.1);
 	}
 
@@ -109,7 +109,7 @@ public class MotorJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setMaximumTorque() {
-		MotorJoint mj = new MotorJoint(b1, b2);
+		MotorJoint<Body> mj = new MotorJoint<Body>(b1, b2);
 		
 		mj.setMaximumTorque(0.0);
 		TestCase.assertEquals(0.0, mj.getMaximumTorque());
@@ -126,7 +126,7 @@ public class MotorJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setNegativeMaximumTorque() {
-		MotorJoint mj = new MotorJoint(b1, b2);
+		MotorJoint<Body> mj = new MotorJoint<Body>(b1, b2);
 		mj.setMaximumTorque(-2.0);
 	}
 	
@@ -135,7 +135,7 @@ public class MotorJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setMaximumForce() {
-		MotorJoint mj = new MotorJoint(b1, b2);
+		MotorJoint<Body> mj = new MotorJoint<Body>(b1, b2);
 		
 		mj.setMaximumForce(0.0);
 		TestCase.assertEquals(0.0, mj.getMaximumForce());
@@ -152,7 +152,7 @@ public class MotorJointTest extends AbstractJointTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setNegativeMaximumForce() {
-		MotorJoint mj = new MotorJoint(b1, b2);
+		MotorJoint<Body> mj = new MotorJoint<Body>(b1, b2);
 		mj.setMaximumForce(-2.0);
 	}
 	
@@ -161,37 +161,37 @@ public class MotorJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setLinearTargetSleep() {
-		MotorJoint mj = new MotorJoint(b1, b2);
+		MotorJoint<Body> mj = new MotorJoint<Body>(b1, b2);
 		
 		Vector2 defaultLinearTarget = mj.getLinearTarget();
 		
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertTrue(defaultLinearTarget.equals(mj.getLinearTarget()));
 		
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		// set the target to the same value
 		mj.setLinearTarget(defaultLinearTarget);
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertTrue(defaultLinearTarget.equals(mj.getLinearTarget()));
 		
 		// set the target to a different value and make
 		// sure the bodies are awakened
 		Vector2 target = new Vector2(1.0, 1.0);
 		mj.setLinearTarget(target);
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertTrue(target.equals(mj.getLinearTarget()));
 		
 		// set the target to the same value
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		mj.setLinearTarget(target);
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertTrue(target.equals(mj.getLinearTarget()));
 	}
 
@@ -200,36 +200,36 @@ public class MotorJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void setAngularTargetSleep() {
-		MotorJoint mj = new MotorJoint(b1, b2);
+		MotorJoint<Body> mj = new MotorJoint<Body>(b1, b2);
 		
 		double defaultAngularTarget = mj.getAngularTarget();
 		
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(defaultAngularTarget, mj.getAngularTarget());
 		
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		
 		// set the target to the same value
 		mj.setAngularTarget(defaultAngularTarget);
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(defaultAngularTarget, mj.getAngularTarget());
 		
 		// set the target to a different value and make
 		// sure the bodies are awakened
 		mj.setAngularTarget(1.0);
-		TestCase.assertFalse(b1.isAsleep());
-		TestCase.assertFalse(b2.isAsleep());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(1.0, mj.getAngularTarget());
 		
 		// set the target to the same value
-		b1.setAsleep(true);
-		b2.setAsleep(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
 		mj.setAngularTarget(1.0);
-		TestCase.assertTrue(b1.isAsleep());
-		TestCase.assertTrue(b2.isAsleep());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(1.0, mj.getAngularTarget());
 	}
 }

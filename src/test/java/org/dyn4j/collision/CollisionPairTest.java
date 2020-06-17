@@ -33,6 +33,12 @@ import org.junit.Test;
 
 import junit.framework.TestCase;
 
+/**
+ * Test cases for pair hashcode/equals.
+ * @author William Bittle
+ * @version 4.0.0
+ * @since 4.0.0
+ */
 public class CollisionPairTest {
 	private CollisionBody<Fixture> cb1;
 	private CollisionBody<Fixture> cb2;
@@ -72,6 +78,9 @@ public class CollisionPairTest {
 		this.pair_3_to_2 = new BroadphasePair<CollisionBody<Fixture>, Fixture>(this.cb3, this.f3, this.cb2, this.f2);
 	}
 	
+	/**
+	 * Tests the hashcode method.
+	 */
 	@Test
 	public void hashCodeTest() {
 		// HashCode must be the same for the same input, but could be the same for different input
@@ -90,6 +99,9 @@ public class CollisionPairTest {
 		TestCase.assertEquals(h1, h2);
 	}
 	
+	/**
+	 * Tests the equals method.
+	 */
 	@Test
 	public void equalsTest() {
 		TestCase.assertTrue(AbstractCollisionPair.equals(this.pair_1a_to_2, this.pair_1a_to_2));
@@ -107,6 +119,9 @@ public class CollisionPairTest {
 		TestCase.assertTrue(AbstractCollisionPair.equals(this.pair_3_to_2, this.pair_3_to_2));
 	}
 	
+	/**
+	 * Tests the hashcode/equals method in a standard Map implementation.
+	 */
 	@Test
 	public void mapTest() {
 		HashMap<CollisionPair<CollisionBody<Fixture>, Fixture>, Object> map = new HashMap<CollisionPair<CollisionBody<Fixture>,Fixture>, Object>();

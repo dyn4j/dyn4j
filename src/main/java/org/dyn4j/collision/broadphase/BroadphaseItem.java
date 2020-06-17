@@ -47,7 +47,7 @@ public final class BroadphaseItem<T extends CollisionBody<E>, E extends Fixture>
 	/**
 	 * Constructor for reuse.
 	 */
-	public BroadphaseItem() {}
+	BroadphaseItem() {}
 
 	/**
 	 * Full constructor.

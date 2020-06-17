@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,25 +24,27 @@
  */
 package org.dyn4j.dynamics;
 
-import java.util.ArrayList;
-
-import junit.framework.TestCase;
-
 import org.dyn4j.collision.broadphase.BroadphasePair;
 import org.dyn4j.collision.manifold.Manifold;
-import org.dyn4j.collision.manifold.ManifoldPoint;
+import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.Capacity;
+import org.dyn4j.dynamics.Island;
 import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.dynamics.joint.AngleJoint;
 import org.dyn4j.geometry.Geometry;
-import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
+
+import junit.framework.TestCase;
 
 /**
  * Test case for the {@link Island} class.
  * @author William Bittle
- * @version 3.1.1
+ * @version 4.0.0
  * @since 3.1.1
  */
+@Deprecated
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class IslandTest {
 	/**
 	 * Tests the successful creation of an island.

@@ -42,7 +42,7 @@ import org.dyn4j.world.PhysicsWorld;
  * @since 1.0.0
  * @param <T> the {@link PhysicsBody} type
  */
-public interface ContactListener<T extends PhysicsBody> {
+public interface ContactListener<T extends PhysicsBody> extends WorldEventListener {
 	/**
 	 * Called before contact constraints are solved.
 	 * @param collision the collision data

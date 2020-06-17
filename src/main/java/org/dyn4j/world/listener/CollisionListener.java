@@ -55,7 +55,7 @@ import org.dyn4j.world.NarrowphaseCollisionData;
  * @param <T> the {@link CollisionBody} type
  * @param <E> the {@link Fixture} type
  */
-public interface CollisionListener<T extends CollisionBody<E>, E extends Fixture> {
+public interface CollisionListener<T extends CollisionBody<E>, E extends Fixture> extends WorldEventListener {
 	/**
 	 * Called when two {@link Fixture}s are colliding as determined by the {@link BroadphaseDetector}.
 	 * <p>

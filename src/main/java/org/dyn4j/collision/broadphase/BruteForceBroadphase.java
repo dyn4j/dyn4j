@@ -261,7 +261,24 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#supportsAABBExpansion()
 	 */
 	@Override
+	@Deprecated
 	public boolean supportsAABBExpansion() {
+		return false;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.AbstractBroadphaseDetector#isAABBExpansionSupported()
+	 */
+	@Override
+	public boolean isAABBExpansionSupported() {
+		return false;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.AbstractBroadphaseDetector#isUpdateTrackingSupported()
+	 */
+	@Override
+	public boolean isUpdateTrackingSupported() {
 		return false;
 	}
 	

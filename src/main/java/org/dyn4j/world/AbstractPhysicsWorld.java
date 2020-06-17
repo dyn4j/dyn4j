@@ -34,6 +34,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.dyn4j.DataContainer;
 import org.dyn4j.collision.Collisions;
 import org.dyn4j.collision.Filter;
 import org.dyn4j.collision.continuous.TimeOfImpact;
@@ -52,15 +53,15 @@ import org.dyn4j.dynamics.contact.TimeOfImpactSolver;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
+import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
-import org.dyn4j.world.listener.CollisionListener;
-import org.dyn4j.world.listener.ContactCollisionListener;
 import org.dyn4j.world.listener.ContactListener;
 import org.dyn4j.world.listener.DestructionListener;
 import org.dyn4j.world.listener.StepListener;
 import org.dyn4j.world.listener.TimeOfImpactListener;
+import org.dyn4j.world.listener.WorldEventListener;
 
 /**
  * Abstract implementation of the {@link PhysicsWorld} interface.
@@ -73,7 +74,7 @@ import org.dyn4j.world.listener.TimeOfImpactListener;
  * @param <T> the {@link PhysicsBody} type
  * @param <V> the {@link ContactCollisionData} type
  */
-public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends ContactCollisionData<T>> extends AbstractCollisionWorld<T, BodyFixture, V> implements PhysicsWorld<T, V> {
+public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends ContactCollisionData<T>> extends AbstractCollisionWorld<T, BodyFixture, V> implements PhysicsWorld<T, V>, Shiftable, DataContainer {
 	/** The dynamics settings for this world */
 	protected Settings settings;
 	
@@ -94,6 +95,9 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 
 	/** The {@link Joint} list */
 	protected final List<Joint<T>> joints;
+
+	/** The unmodifiable {@link Joint} list */
+	protected final List<Joint<T>> unmodifiableJoints;
 	
 	// listeners
 	
@@ -107,7 +111,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	protected final List<TimeOfImpactListener<T>> timeOfImpactListeners;
 	
 	/** The list of {@link StepListener}s */
-	protected final List<StepListener<T, V>> stepListeners;
+	protected final List<StepListener<T>> stepListeners;
 	
 	// state data
 
@@ -117,7 +121,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	/** The interaction graph */
 	protected final Map<T, InteractionGraphNode<T>> interactionGraph;
 	
-	/** A temporary list of only the {@link ContactConstraint} collisions from the last detection */
+	/** A temporary list of only the {@link ContactConstraint} collisions from the last detection; cleared and refilled each step */
 	protected final List<V> contactCollisions;
 
 	/** True if an update to the collision data or interaction graph is needed before a step of the engine */
@@ -153,15 +157,18 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		this.timeOfImpactSolver = new TimeOfImpactSolver<T>();
 		
 		this.joints = new ArrayList<Joint<T>>(16);
+		this.unmodifiableJoints = Collections.unmodifiableList(this.joints);
 		
 		this.contactListeners = new ArrayList<ContactListener<T>>();
 		this.destructionListeners = new ArrayList<DestructionListener<T>>();
 		this.timeOfImpactListeners = new ArrayList<TimeOfImpactListener<T>>();
-		this.stepListeners = new ArrayList<StepListener<T,V>>();
+		this.stepListeners = new ArrayList<StepListener<T>>();
 		
 		this.time = 0.0;
-		this.interactionGraph = new LinkedHashMap<T, InteractionGraphNode<T>>(Collisions.getEstimatedCollisionPairs(initialBodyCapacity));
-		this.contactCollisions = new ArrayList<V>();
+		
+		int estimatedCollisionPairs = Collisions.getEstimatedCollisionPairs(initialBodyCapacity);
+		this.interactionGraph = new LinkedHashMap<T, InteractionGraphNode<T>>(estimatedCollisionPairs);
+		this.contactCollisions = new ArrayList<V>(estimatedCollisionPairs);
 		this.updateRequired = true;
 	}
 	
@@ -418,6 +425,14 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			
 			// CONTACT CLEANUP
 			
+			// NOTE: I've opted to remove any collision data in the next collision 
+			// detection phase except for the contact-constraint collision data. 
+			// The effect is that users of the stored collisionData need 
+			// to understand that the data stored there could include collision information 
+			// for bodies that no longer exist in the world. The alternative is to iterate 
+			// the entire set of pairs checking for this body - which isn't particularly
+			// efficient.
+			
 			Iterator<ContactConstraint<T>> contactConstraintIterator = node.contacts.iterator();
 			while (contactConstraintIterator.hasNext()) {
 				// get the contact edge
@@ -552,6 +567,14 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			
 			// CONTACT CLEANUP
 			
+			// NOTE: I've opted to remove any collision data in the next collision 
+			// detection phase except for the contact-constraint collision data. 
+			// The effect is that users of the stored collisionData need 
+			// to understand that the data stored there could include collision information 
+			// for bodies that no longer exist in the world. The alternative is to iterate 
+			// the entire set of pairs checking for this body - which isn't particularly
+			// efficient.
+			
 			Iterator<ContactConstraint<T>> contactConstraintIterator = node.contacts.iterator();
 			while (contactConstraintIterator.hasNext()) {
 				// get the contact edge
@@ -600,6 +623,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		this.broadphaseDetector.clear();
 		this.collisionData.clear();
 		this.interactionGraph.clear();
+		this.contactCollisions.clear();
 		this.joints.clear();
 	}
 	
@@ -638,6 +662,8 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 				}
 			}
 		}
+		
+		this.joints.clear();
 	}
 
 	/* (non-Javadoc)
@@ -746,7 +772,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	@Override
 	public List<Joint<T>> getJoints() {
-		return Collections.unmodifiableList(this.joints);
+		return this.unmodifiableJoints;
 	}
 
 	/* (non-Javadoc)
@@ -760,6 +786,15 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	/* (non-Javadoc)
 	 * @see org.dyn4j.world.PhysicsWorld#getStep()
 	 */
+	@Override
+	public TimeStep getTimeStep() {
+		return this.step;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#getStep()
+	 */
+	@Deprecated
 	@Override
 	public TimeStep getStep() {
 		return this.step;
@@ -865,6 +900,10 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			int size = node.contacts.size();
 			for (int i = 0; i < size; i++) {
 				ContactConstraint<T> cc = node.contacts.get(i);
+				if (!includeSensedContact && cc.isSensor()) {
+					continue;
+				}
+				
 				T other = cc.getOtherBody(body);
 				// basic dup detection
 				if (!bodies.contains(other)) {
@@ -876,23 +915,72 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	}
 
 	/* (non-Javadoc)
-	 * @see org.dyn4j.world.PhysicsWorld#isJoined(org.dyn4j.dynamics.PhysicsBody, org.dyn4j.dynamics.PhysicsBody, boolean)
+	 * @see org.dyn4j.world.PhysicsWorld#isJointCollisionAllowed(org.dyn4j.dynamics.PhysicsBody, org.dyn4j.dynamics.PhysicsBody)
 	 */
 	@Override
-	public boolean isJoined(T body1, T body2, boolean includeCollisionNotAllowed) {
+	public boolean isJointCollisionAllowed(T body1, T body2) {
+		// check for a null body
+		if (body1 == null || body2 == null) {
+			return false;
+		}
+		
 		InteractionGraphNode<T> node = this.interactionGraph.get(body1);
 		if (node != null) {
 			int size = node.joints.size();
+			
+			// if there are no joints on this body, then the
+			// collision is allowed
+			if (size == 0) return true;
+			
+			// if any joint connecting body1 and body2 allows collision
+			// then the collision is allowed
 			for (int i = 0; i < size; i++) {
-				Joint<T> cc = node.joints.get(i);
-				if (cc.isCollisionAllowed() || includeCollisionNotAllowed) {
-					if (cc.getBody1() == body2 || cc.getBody2() == body2) {
+				Joint<T> joint = this.joints.get(i);
+				// testing object references should be sufficient
+				if (joint.getBody1() == body2 || joint.getBody2() == body2) {
+					// check if collision is allowed
+					// we do an or here to find if there is at least one
+					// joint joining the two bodies that allows collision
+					if (joint.isCollisionAllowed()) {
 						return true;
 					}
 				}
 			}
 		}
+		
+		// not found, so return false
 		return false;
+		
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#isJoined(org.dyn4j.dynamics.PhysicsBody, org.dyn4j.dynamics.PhysicsBody, boolean)
+	 */
+	@Override
+	public boolean isJoined(T body1, T body2) {
+		// check for a null body
+		if (body1 == null || body2 == null) {
+			return false;
+		}
+		
+		InteractionGraphNode<T> node = this.interactionGraph.get(body1);
+		if (node != null) {
+			int size = node.joints.size();
+			// check the size
+			if (size == 0) return false;
+			// loop over all the joints
+			for (int i = 0; i < size; i++) {
+				Joint<T> joint = this.joints.get(i);
+				// testing object references should be sufficient
+				if (joint.getBody1() == body2 || joint.getBody2() == body2) {
+					return true;
+				}
+			}
+		}
+		
+		// not found, so return false
+		return false;
+		
 	}
 
 	/* (non-Javadoc)
@@ -916,7 +1004,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		List<T> bodies = new ArrayList<T>();
 		InteractionGraphNode<T> node = this.interactionGraph.get(body);
 		if (node != null) {
-			int size = node.contacts.size();
+			int size = node.joints.size();
 			for (int i = 0; i < size; i++) {
 				Joint<T> cc = node.joints.get(i);
 				T other = cc.getOtherBody(body);
@@ -930,35 +1018,112 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.world.PhysicsWorld#getContactListeners()
+	 * @see org.dyn4j.world.AbstractCollisionWorld#getListeners(java.lang.Class)
 	 */
 	@Override
-	public List<ContactListener<T>> getContactListeners() {
-		return this.contactListeners;
+	public <L extends WorldEventListener> List<L> getListeners(Class<L> clazz) {
+		List<L> listeners = super.getListeners(clazz);
+		
+		this.getListeners(clazz, listeners, this.stepListeners);
+		this.getListeners(clazz, listeners, this.contactListeners);
+		this.getListeners(clazz, listeners, this.destructionListeners);
+		this.getListeners(clazz, listeners, this.timeOfImpactListeners);
+		
+		return listeners;
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.world.PhysicsWorld#getDestructionListeners()
+	 * @see org.dyn4j.world.AbstractCollisionWorld#removeAllListeners(java.lang.Class)
 	 */
 	@Override
-	public List<DestructionListener<T>> getDestructionListeners() {
-		return this.destructionListeners;
+	public <L extends WorldEventListener> void removeAllListeners(Class<L> clazz) {
+		super.removeAllListeners(clazz);
+		
+		this.removeListeners(clazz, this.stepListeners);
+		this.removeListeners(clazz, this.contactListeners);
+		this.removeListeners(clazz, this.destructionListeners);
+		this.removeListeners(clazz, this.timeOfImpactListeners);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.AbstractCollisionWorld#removeAllListeners()
+	 */
+	@Override
+	public void removeAllListeners() {
+		super.removeAllListeners();
+		
+		this.stepListeners.clear();
+		this.contactListeners.clear();
+		this.destructionListeners.clear();
+		this.timeOfImpactListeners.clear();
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.world.PhysicsWorld#getTimeOfImpactListeners()
+	 * @see org.dyn4j.world.AbstractCollisionWorld#containsListener(org.dyn4j.world.listener.WorldEventListener)
 	 */
 	@Override
-	public List<TimeOfImpactListener<T>> getTimeOfImpactListeners() {
-		return this.timeOfImpactListeners;
+	public boolean containsListener(WorldEventListener listener) {
+		if (super.containsListener(listener)) {
+			return true;
+		}
+		if (this.containsListener(listener, this.stepListeners)) {
+			return true;
+		}
+		if (this.containsListener(listener, this.contactListeners)) {
+			return true;
+		}
+		if (this.containsListener(listener, this.destructionListeners)) {
+			return true;
+		}
+		if (this.containsListener(listener, this.timeOfImpactListeners)) {
+			return true;
+		}
+		return false;
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.world.PhysicsWorld#getStepListeners()
+	 * @see org.dyn4j.world.AbstractCollisionWorld#removeListener(org.dyn4j.world.listener.WorldEventListener)
 	 */
 	@Override
-	public List<StepListener<T, V>> getStepListeners() {
-		return this.stepListeners;
+	public boolean removeListener(WorldEventListener listener) {
+		boolean removed = super.removeListener(listener);
+		removed |= this.removeListener(listener, this.stepListeners);
+		removed |= this.removeListener(listener, this.contactListeners);
+		removed |= this.removeListener(listener, this.destructionListeners);
+		removed |= this.removeListener(listener, this.timeOfImpactListeners);
+		return removed;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#addListener(org.dyn4j.world.listener.ContactListener)
+	 */
+	@Override
+	public boolean addListener(ContactListener<T> listener) {
+		return this.contactListeners.add(listener);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#addListener(org.dyn4j.world.listener.DestructionListener)
+	 */
+	@Override
+	public boolean addListener(DestructionListener<T> listener) {
+		return this.destructionListeners.add(listener);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#addListener(org.dyn4j.world.listener.StepListener)
+	 */
+	@Override
+	public boolean addListener(StepListener<T> listener) {
+		return this.stepListeners.add(listener);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#addListener(org.dyn4j.world.listener.TimeOfImpactListener)
+	 */
+	@Override
+	public boolean addListener(TimeOfImpactListener<T> listener) {
+		return this.timeOfImpactListeners.add(listener);
 	}
 	
 	/**
@@ -966,14 +1131,14 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	protected void step() {
 		// get all the step listeners
-		List<StepListener<T, V>> stepListeners = this.stepListeners;
+		List<StepListener<T>> stepListeners = this.stepListeners;
 		List<ContactListener<T>> contactListeners = this.contactListeners;
 		
 		int sSize = stepListeners.size();
 		
 		// notify the step listeners
 		for (int i = 0; i < sSize; i++) {
-			StepListener<T, V> sl = stepListeners.get(i);
+			StepListener<T> sl = stepListeners.get(i);
 			sl.begin(this.step, this);
 		}
 		
@@ -983,7 +1148,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			this.detect();
 			// notify that an update was performed
 			for (int i = 0; i < sSize; i++) {
-				StepListener<T, V> sl = stepListeners.get(i);
+				StepListener<T> sl = stepListeners.get(i);
 				sl.updatePerformed(this.step, this);
 			}
 			// set the update required flag to false
@@ -1127,7 +1292,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		
 		// notify the step listener
 		for (int i = 0; i < sSize; i++) {
-			StepListener<T, V> sl = stepListeners.get(i);
+			StepListener<T> sl = stepListeners.get(i);
 			sl.postSolve(this.step, this);
 		}
 		
@@ -1141,7 +1306,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		
 		// notify the step listener
 		for (int i = 0; i < sSize; i++) {
-			StepListener<T, V> sl = stepListeners.get(i);
+			StepListener<T> sl = stepListeners.get(i);
 			sl.end(this.step, this);
 		}
 	}
@@ -1159,7 +1324,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		// this is rebuilt every time so clear it
 		this.contactCollisions.clear();
 		
-		List<ContactCollisionListener<T>> listeners = this.getContactCollisionListeners();
+		// a resuable handler for begin/persist/end contact event handling
 		WarmStartHandler wsh = new WarmStartHandler();
 		
 		// if the iterator has returned something then it's made it past
@@ -1185,46 +1350,22 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			cc.update(collision.getManifold(), this.settings, wsh);
 			
 			// we only want to add interaction edges if the collision actually made it past
-			// the manifold generation stage
+			// the manifold generation stage and all listeners allowed it to proceed
 			if (collision.isManifoldCollision()) {
-				// run it through the listeners
-				boolean allow = true;
-				for (ContactCollisionListener<T> listener : listeners) {
-					if (!listener.collision(collision)) {
-						allow = false;
-					}
-				}
-				
-				// did any not allow it?
-				if (!allow) {
-					continue;
-				}
-				
 				// set the flag for contact constraint
 				collision.setContactConstraintCollision(true);
 				
 				// build the contact edges
 				this.addInteractionGraphEdge(cc);
 				
-				// add it to a list of only Contact Constraint Collisions for
-				// quicker post/pre solve notification
-				this.contactCollisions.add(collision);
+				// add it to a list of contact-constraint only collisions for
+				// quicker post/pre solve notification if it's enabled and
+				// not a sensor collision
+				if (cc.isEnabled() && !cc.isSensor()) {
+					this.contactCollisions.add(collision);
+				}
 			}
 		}
-	}
-	
-	/**
-	 * Returns the {@link CollisionListener}s who are of type {@link ContactCollisionListener}.
-	 * @return List&lt;{@link ContactCollisionListener}&gt;
-	 */
-	protected final List<ContactCollisionListener<T>> getContactCollisionListeners() {
-		List<ContactCollisionListener<T>> listeners = new ArrayList<ContactCollisionListener<T>>();
-		for (CollisionListener<T, BodyFixture> listener : this.collisionListeners) {
-			if (listener instanceof ContactCollisionListener) {
-				listeners.add((ContactCollisionListener<T>)listener);
-			}
-		}
-		return listeners;
 	}
 	
 	/**
@@ -1284,11 +1425,11 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			node1.joints.add(joint);
 		}
 		
-		if (body1 != null) {
+		if (body2 != null && body1 != body2) {
 			InteractionGraphNode<T> node2 = this.interactionGraph.get(body2);
 			if (node2 == null) {
 				node2 = new InteractionGraphNode<T>(body2);
-				this.interactionGraph.put(body1, node2);
+				this.interactionGraph.put(body2, node2);
 			}
 			node2.joints.add(joint);
 		}
@@ -1405,8 +1546,8 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			// dynamic vs. static/kinematic unless its a bullet
 			if (body2.isDynamic() && !bullet) continue;
 			
-			// check for connected pairs who's collision is not allowed
-			if (this.isJoined(body1, body2, false)) continue;
+			// check for joints who's collision is not allowed
+			if (!this.isJointCollisionAllowed(body1, body2)) continue;
 			
 			// check for bodies already in collision
 			if (this.isInContact(body1, body2)) continue;

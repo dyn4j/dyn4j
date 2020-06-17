@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,17 +24,15 @@
  */
 package org.dyn4j.dynamics;
 
-import junit.framework.TestCase;
-
-import org.dyn4j.geometry.Geometry;
-import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
+
+import junit.framework.TestCase;
 
 /**
  * Class used to test the {@link Force} class.
  * @author William Bittle
- * @version 3.1.1
+ * @version 4.0.0
  * @since 1.0.2
  */
 public class ForceTest {
@@ -111,39 +109,5 @@ public class ForceTest {
 	public void setNullVector() {
 		Force f = new Force();
 		f.set((Vector2) null);
-	}
-	
-	/**
-	 * Tests the apply method where the force is retained for two steps.
-	 */
-	@Test
-	public void applyTimed() {
-		World w = new World();
-		Body b = new Body();
-		b.addFixture(Geometry.createCircle(1.0));
-		b.setMass(MassType.NORMAL);
-		
-		Force f = new Force() {
-			private double time = 0;
-			public boolean isComplete(double elapsedTime) {
-				time += elapsedTime;
-				if (time >= 2.0 / 60.0) {
-					return true;
-				}
-				return false;
-			}
-		};
-		
-		b.applyForce(f);
-		w.addBody(b);
-		
-		w.step(1);
-		
-		// make sure the force is still there
-		TestCase.assertEquals(1, b.forces.size());
-		
-		w.step(1);
-		
-		TestCase.assertEquals(0, b.forces.size());
 	}
 }

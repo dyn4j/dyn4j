@@ -374,7 +374,24 @@ public abstract class AbstractBroadphaseDetector<T extends CollisionBody<E>, E e
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#supportsAABBExpansion()
 	 */
 	@Override
+	@Deprecated
 	public boolean supportsAABBExpansion() {
+		return true;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#isAABBExpansionSupported()
+	 */
+	@Override
+	public boolean isAABBExpansionSupported() {
+		return true;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#isUpdateTrackingSupported()
+	 */
+	@Override
+	public boolean isUpdateTrackingSupported() {
 		return true;
 	}
 	

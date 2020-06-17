@@ -85,7 +85,7 @@ public class PersistedContactPoint extends ContactPoint {
 	 * @param oldContact the old contact
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public PersistedContactPoint(ContactConstraint newConstraint, ContactConstraintContact newContact, ContactConstraint oldConstraint, ContactConstraintContact oldContact) {
+	public PersistedContactPoint(ContactConstraint newConstraint, SolvableContact newContact, ContactConstraint oldConstraint, SolvableContact oldContact) {
 		super(newConstraint, newContact);
 		this.oldDepth = oldContact.depth;
 		this.oldNormal = oldConstraint.normal;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -60,9 +60,11 @@ import junit.framework.TestCase;
 /**
  * Contains the test cases for the {@link World} class.
  * @author William Bittle
- * @version 3.3.0
+ * @version 4.0.0
  * @since 1.0.2
  */
+@Deprecated
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class WorldTest {
 	/**
 	 * Step listener for testing.

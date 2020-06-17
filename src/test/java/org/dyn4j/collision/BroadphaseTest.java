@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,6 +32,7 @@ import java.util.Random;
 
 import org.dyn4j.collision.broadphase.AbstractBroadphaseDetector;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
+import org.dyn4j.collision.broadphase.BroadphaseItem;
 import org.dyn4j.collision.broadphase.BruteForceBroadphase;
 import org.dyn4j.collision.broadphase.DynamicAABBTree;
 import org.dyn4j.collision.broadphase.LazyAABBTree;
@@ -52,10 +53,11 @@ import junit.framework.TestCase;
 /**
  * Class used to test the {@link BroadphaseDetector} methods.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.0.0
  * @since 3.0.0
  */
 @RunWith(Parameterized.class)
+@SuppressWarnings("deprecation")
 public class BroadphaseTest {
 	/**
 	 * We will be testing all broadphases one by one
@@ -99,7 +101,7 @@ public class BroadphaseTest {
 	 * Tests the add method.
 	 */
 	@Test
-	public void add() {
+	public void addWithShape() {
 		CollidableTest ct = new CollidableTest(Geometry.createCircle(1.0));
 		
 		// make sure its not there first
@@ -116,7 +118,7 @@ public class BroadphaseTest {
 	 * Tests the add method with fixtures.
 	 */
 	@Test
-	public void add2() {
+	public void addWithFixture() {
 		CollidableTest ct = new CollidableTest(Geometry.createCircle(1.0));
 		ct.addFixture(Geometry.createCircle(0.5));
 		
@@ -140,7 +142,7 @@ public class BroadphaseTest {
 	 * Tests the remove method.
 	 */
 	@Test
-	public void remove() {
+	public void removeBody() {
 		CollidableTest ct1 = new CollidableTest(Geometry.createCircle(1.0));
 		ct1.addFixture(Geometry.createCircle(3.0));
 		CollidableTest ct2 = new CollidableTest(Geometry.createCircle(2.0));
@@ -166,7 +168,7 @@ public class BroadphaseTest {
 	 * Tests the add method with fixtures.
 	 */
 	@Test
-	public void remove2() {
+	public void removeFixture() {
 		CollidableTest ct = new CollidableTest(Geometry.createCircle(1.0));
 		ct.addFixture(Geometry.createCircle(0.5));
 		
@@ -189,7 +191,7 @@ public class BroadphaseTest {
 	 */
 	@Test
 	public void updateSmall() {
-		if (this.broadphase.supportsAABBExpansion()) {
+		if (this.broadphase.isAABBExpansionSupported()) {
 			CollidableTest ct = new CollidableTest(Geometry.createCircle(1.0));
 			Fixture f = ct.getFixture(0);
 			
@@ -197,16 +199,27 @@ public class BroadphaseTest {
 			this.broadphase.add(ct);
 			
 			// get the current aabb
-			AABB aabbSap = this.broadphase.getAABB(ct, f).copy();
+			AABB aabb = this.broadphase.getAABB(ct, f).copy();
 			
 			// move the collidable a bit
-			ct.translate(0.05, 0.0);
+			double dx = this.broadphase.getAABBExpansion() / 2.0;
+			if (dx <= 0.0) {
+				dx = 0.05;
+			}
+			ct.translate(dx, 0.0);
 			
 			// update the broadphases
 			this.broadphase.update(ct, f);
 			
 			// the aabbs should not have been updated because of the expansion code
-			TestCase.assertEquals(aabbSap, this.broadphase.getAABB(ct, f));
+			TestCase.assertEquals(aabb, this.broadphase.getAABB(ct, f));
+			
+			// check for update
+			if (this.broadphase.isUpdateTrackingEnabled()) {
+				TestCase.assertFalse(this.broadphase.isUpdated(ct));
+				TestCase.assertFalse(this.broadphase.isUpdated(new BroadphaseItem<CollidableTest, Fixture>(ct, f)));
+				TestCase.assertFalse(this.broadphase.isUpdated(ct, f));
+			}
 		}
 	}
 	
@@ -222,16 +235,26 @@ public class BroadphaseTest {
 		this.broadphase.add(ct);
 		
 		// make sure they are there
-		AABB aabbSap = this.broadphase.getAABB(ct, f).copy();
+		AABB aabb = this.broadphase.getAABB(ct, f).copy();
 		
 		// move the collidable enough so its AABB goes out of the expanded AABB
-		ct.translate(0.5, 0.0);
+		double dx = this.broadphase.getAABBExpansion() * 2.0;
+		if (dx <= 0.0) {
+			dx = 1.0;
+		}
+		ct.translate(dx, 0.0);
 		
 		// update the broadphases
 		this.broadphase.update(ct);
 		
 		// the aabbs should have been updated because the translation was large enough
-		TestCase.assertNotSame(aabbSap, this.broadphase.getAABB(ct, f));
+		TestCase.assertFalse(aabb.equals(this.broadphase.getAABB(ct, f)));
+		
+		// this will always return true for some detectors, but for those that
+		// it doesn't, it should return true because of the update above
+		TestCase.assertTrue(this.broadphase.isUpdated(ct));
+		TestCase.assertTrue(this.broadphase.isUpdated(new BroadphaseItem<CollidableTest, Fixture>(ct, f)));
+		TestCase.assertTrue(this.broadphase.isUpdated(ct, f));
 	}
 	
 	/**
@@ -267,7 +290,7 @@ public class BroadphaseTest {
 		
 		AABB aabb = ct.createAABB();
 		
-		if (this.broadphase.supportsAABBExpansion()) {
+		if (this.broadphase.isAABBExpansionSupported()) {
 			// don't forget that the aabb could be expanded
 			aabb.expand(this.broadphase.getAABBExpansion());	
 		}
@@ -294,7 +317,7 @@ public class BroadphaseTest {
 	 * @since 3.1.0
 	 */
 	@Test
-	public void detectAbstract() {
+	public void detectConvexAndTransform() {
 		CollidableTest ct1 = new CollidableTest(Geometry.createCircle(1.0));
 		CollidableTest ct2 = new CollidableTest(Geometry.createUnitCirclePolygon(5, 0.5));
 		ct1.translate(-2.0, 0.0);
@@ -374,7 +397,7 @@ public class BroadphaseTest {
 	 * Tests the raycast method.
 	 */
 	@Test
-	public void raycast() {
+	public void detectRay() {
 		CollidableTest ct1 = new CollidableTest(Geometry.createCircle(1.0));
 		CollidableTest ct2 = new CollidableTest(Geometry.createUnitCirclePolygon(5, 0.5));
 		CollidableTest ct3 = new CollidableTest(Geometry.createRectangle(1.0, 0.5));
@@ -419,7 +442,7 @@ public class BroadphaseTest {
 	 */
 	@Test
 	public void expansion() {
-		if (this.broadphase.supportsAABBExpansion()) {
+		if (this.broadphase.isAABBExpansionSupported()) {
 			// test the default
 			TestCase.assertEquals(BroadphaseDetector.DEFAULT_AABB_EXPANSION, this.broadphase.getAABBExpansion());
 			
@@ -433,12 +456,12 @@ public class BroadphaseTest {
 			// add the item to the broadphases
 			this.broadphase.add(ct);
 			
-			AABB aabbSap = this.broadphase.getAABB(ct).copy();
+			AABB bfaabb = this.broadphase.getAABB(ct).copy();
 			
 			AABB aabb = ct.createAABB();
 			// don't forget that the aabb is expanded
 			aabb.expand(0.3);
-			TestCase.assertTrue(isEqual(aabbSap, aabb));
+			TestCase.assertTrue(isEqual(bfaabb, aabb));
 		}
 	}
 	
@@ -591,6 +614,14 @@ public class BroadphaseTest {
 		}
 	}
 	
+	/**
+	 * Simple helper method that finds if the given {@link CollisionBody} and {@link Fixture} is
+	 * contained in a list of {@link CollisionItem}s.
+	 * @param collidable the body
+	 * @param fixture the fixture
+	 * @param items the items
+	 * @return boolean
+	 */
 	private boolean containsItem(CollidableTest collidable, Fixture fixture, List<CollisionItem<CollidableTest, Fixture>> items) {
 		for (CollisionItem<CollidableTest, Fixture> item : items) {
 			if (item.getBody() == collidable && item.getFixture() == fixture) {
@@ -599,16 +630,6 @@ public class BroadphaseTest {
 		}
 		
 		return false;
-		
-		
-//		if (pairs.contains(pair)) {
-//			return true;
-//		} else {
-//			CollisionPair<CollidableTest, Fixture> reversePair = new <CollidableTest, Fixture>(
-//					pair.getCollidable2(), pair.getFixture2(), pair.getCollidable1(), pair.getFixture1());
-//			
-//			return pairs.contains(reversePair);
-//		}
 	}
 	
 	/**
@@ -627,15 +648,5 @@ public class BroadphaseTest {
 		}
 		
 		return false;
-		
-		
-//		if (pairs.contains(pair)) {
-//			return true;
-//		} else {
-//			CollisionPair<CollidableTest, Fixture> reversePair = new <CollidableTest, Fixture>(
-//					pair.getCollidable2(), pair.getFixture2(), pair.getCollidable1(), pair.getFixture1());
-//			
-//			return pairs.contains(reversePair);
-//		}
 	}
 }

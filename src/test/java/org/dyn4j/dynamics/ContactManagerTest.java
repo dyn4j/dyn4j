@@ -24,11 +24,6 @@
  */
 package org.dyn4j.dynamics;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import junit.framework.TestCase;
-
 import org.dyn4j.collision.broadphase.BroadphasePair;
 import org.dyn4j.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.collision.manifold.Manifold;
@@ -41,15 +36,16 @@ import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.dynamics.contact.ContactListener;
 import org.dyn4j.dynamics.contact.ContactManager;
 import org.dyn4j.dynamics.contact.ContactPoint;
-import org.dyn4j.dynamics.contact.PersistedContactPoint;
 import org.dyn4j.dynamics.contact.DefaultContactManager;
+import org.dyn4j.dynamics.contact.PersistedContactPoint;
 import org.dyn4j.dynamics.contact.SolvedContactPoint;
-import org.dyn4j.dynamics.contact.SolvedContact;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Before;
 import org.junit.Test;
+
+import junit.framework.TestCase;
 
 /**
  * Used to test the {@link DefaultContactManager} class.
@@ -57,6 +53,8 @@ import org.junit.Test;
  * @version 3.3.0
  * @since 1.0.2
  */
+@Deprecated
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class ContactManagerTest {
 	/** The world */
 	private World world;

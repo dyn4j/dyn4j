@@ -76,7 +76,7 @@ public class SolvedContactPoint extends ContactPoint {
 	 * @param contact the contact
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public SolvedContactPoint(ContactConstraint constraint, ContactConstraintContact contact) {
+	public SolvedContactPoint(ContactConstraint constraint, SolvableContact contact) {
 		super(constraint, contact);
 		this.normalImpulse = contact.jn;
 		this.tangentialImpulse = contact.jt;

@@ -55,7 +55,6 @@
  * <li>{@link org.dyn4j.world.listener.StepListener} for performing logic at the end/beginning of a time 
  * step</li>
  * <li>{@link org.dyn4j.world.listener.CollisionListener} for responding to collision detection events</li>
- * <li>{@link org.dyn4j.world.listener.ContactCollisionListener} for responding to contact collision detection events</li>
  * <li>{@link org.dyn4j.world.listener.ContactListener} for responding to contact events</li>
  * <li>{@link org.dyn4j.world.listener.TimeOfImpactListener} for responding to time of impact events</li>
  * </ul>

@@ -29,13 +29,13 @@ import org.dyn4j.dynamics.Body;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Represents a contact point between two {@link Body} objects.
+ * Represents a contact point between two {@link Body} objects that
+ * has the necessary information to allow solving.
  * @author William Bittle
  * @version 4.0.0
  * @since 1.0.0
  */
-// TODO don't really like the name...
-final class ContactConstraintContact implements Contact, SolvedContact {
+final class SolvableContact implements Contact, SolvedContact {
 	/** The manifold point id for warm starting */
 	final ManifoldPointId id;
 	
@@ -83,7 +83,7 @@ final class ContactConstraintContact implements Contact, SolvedContact {
 	 * @param p1 the collision point in {@link Body}1's local space
 	 * @param p2 the collision point in {@link Body}2's local space
 	 */
-	public ContactConstraintContact(ManifoldPointId id, Vector2 point, double depth, Vector2 p1, Vector2 p2) {
+	public SolvableContact(ManifoldPointId id, Vector2 point, double depth, Vector2 p1, Vector2 p2) {
 		this.id = id;
 		this.p = point;
 		this.depth = depth;

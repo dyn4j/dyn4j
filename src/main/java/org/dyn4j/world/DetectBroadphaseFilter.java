@@ -58,7 +58,7 @@ public class DetectBroadphaseFilter<T extends PhysicsBody> extends DefaultBroadp
 		// one body must be dynamic (unless one is a sensor)
 		if (!body1.isDynamic() && !body2.isDynamic() && !fixture1.isSensor() && !fixture2.isSensor()) return false;
 		// check for connected pairs who's collision is not allowed
-		if (this.world.isJoined(body1, body2, false)) return false;
+		if (!this.world.isJointCollisionAllowed(body1, body2)) return false;
 		// check super class filter logic
 		return super.isAllowed(body1, fixture1, body2, fixture2);
 	}

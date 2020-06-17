@@ -27,8 +27,6 @@ package org.dyn4j.dynamics;
 import java.util.Iterator;
 import java.util.List;
 
-import junit.framework.TestCase;
-
 import org.dyn4j.collision.broadphase.BroadphasePair;
 import org.dyn4j.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.collision.manifold.Manifold;
@@ -50,12 +48,15 @@ import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
 
+import junit.framework.TestCase;
+
 /**
  * Class to test the {@link Body} class.
  * @author William Bittle
  * @version 3.4.0
  * @since 1.0.2
  */
+@SuppressWarnings("deprecation")
 public class BodyTest {
 	/**
 	 * Tests the constructor.
@@ -75,7 +76,7 @@ public class BodyTest {
 		TestCase.assertNotNull(b.getTransform());
 		TestCase.assertNotNull(b.transform0);
 		TestCase.assertNotNull(b.velocity);
-//		TestCase.assertNull(b.world);
+		TestCase.assertNull(b.getOwner());
 	}
 	
 	/**
@@ -466,41 +467,41 @@ public class BodyTest {
 		// modify the force/torque values
 		
 		// test the apply force method
-		b.setAsleep(true);
+		b.setAtRest(true);
 		b.applyForce(new Force(new Vector2(0.0, 2.0)));
 		TestCase.assertEquals(1, b.forces.size());
 		TestCase.assertTrue(b.force.isZero());
-		TestCase.assertFalse(b.isAsleep());
+		TestCase.assertFalse(b.isAtRest());
 		
 		// test the apply force vector method
-		b.setAsleep(true);
+		b.setAtRest(true);
 		b.applyForce(new Vector2(0.0, 2.0));
 		TestCase.assertEquals(1, b.forces.size());
 		TestCase.assertTrue(b.force.isZero());
-		TestCase.assertFalse(b.isAsleep());
+		TestCase.assertFalse(b.isAtRest());
 		
 		// test the apply force at point method
-		b.setAsleep(true);
+		b.setAtRest(true);
 		b.applyForce(new Vector2(0.0, 2.0), new Vector2(0.0, 0.5));
 		TestCase.assertEquals(1, b.forces.size());
 		TestCase.assertEquals(1, b.torques.size());
 		TestCase.assertTrue(b.force.isZero());
 		TestCase.assertEquals(0.0, b.torque);
-		TestCase.assertFalse(b.isAsleep());
+		TestCase.assertFalse(b.isAtRest());
 		
 		// test the apply torque method
-		b.setAsleep(true);
+		b.setAtRest(true);
 		b.applyTorque(new Torque(0.4));
 		TestCase.assertEquals(1, b.torques.size());
 		TestCase.assertEquals(0.0, b.torque);
-		TestCase.assertFalse(b.isAsleep());
+		TestCase.assertFalse(b.isAtRest());
 		
 		// test the apply torque value method
-		b.setAsleep(true);
+		b.setAtRest(true);
 		b.applyTorque(0.4);
 		TestCase.assertEquals(1, b.torques.size());
 		TestCase.assertEquals(0.0, b.torque);
-		TestCase.assertFalse(b.isAsleep());
+		TestCase.assertFalse(b.isAtRest());
 	}
 	
 	/**
@@ -591,7 +592,7 @@ public class BodyTest {
 		TestCase.assertFalse(0.0 == b.torque);
 		TestCase.assertTrue(b.forces.isEmpty());
 		TestCase.assertTrue(b.torques.isEmpty());
-		TestCase.assertFalse(b.isAsleep());
+		TestCase.assertFalse(b.isAtRest());
 	}
 	
 	/**
@@ -645,18 +646,18 @@ public class BodyTest {
 	}
 	
 	/**
-	 * Tests the sleep flag methods.
+	 * Tests the at-rest flag methods.
 	 */
 	@Test
-	public void sleeping() {
+	public void atRest() {
 		Body b = new Body();
-		b.setAutoSleepingEnabled(true);
-		TestCase.assertTrue(b.isAutoSleepingEnabled());
-		b.setAutoSleepingEnabled(false);
-		TestCase.assertFalse(b.isAutoSleepingEnabled());
+		b.setAtRestDetectionEnabled(true);
+		TestCase.assertTrue(b.isAtRestDetectionEnabled());
+		b.setAtRestDetectionEnabled(false);
+		TestCase.assertFalse(b.isAtRestDetectionEnabled());
 		
-		b.setAsleep(false);
-		TestCase.assertFalse(b.isAsleep());
+		b.setAtRest(false);
+		TestCase.assertFalse(b.isAtRest());
 		
 		// test that we can sleep the body even if the
 		// auto sleep is not enabled.
@@ -667,8 +668,8 @@ public class BodyTest {
 		b.torque = 1.2;
 		b.applyTorque(0.3);
 		b.applyForce(new Vector2(1.0, 1.0));
-		b.setAsleep(true);
-		TestCase.assertTrue(b.isAsleep());
+		b.setAtRest(true);
+		TestCase.assertTrue(b.isAtRest());
 		TestCase.assertTrue(b.forces.isEmpty());
 		TestCase.assertTrue(b.torques.isEmpty());
 		TestCase.assertEquals(1.2, b.torque);
@@ -681,21 +682,22 @@ public class BodyTest {
 	 * Tests the active methods.
 	 */
 	@Test
-	public void active() {
+	public void enabled() {
 		Body b = new Body();
-		TestCase.assertTrue(b.isActive());
+		TestCase.assertTrue(b.isEnabled());
 		
-		b.setActive(false);
-		TestCase.assertFalse(b.isActive());
+		b.setEnabled(false);
+		TestCase.assertFalse(b.isEnabled());
 		
-		b.setActive(true);
-		TestCase.assertTrue(b.isActive());
+		b.setEnabled(true);
+		TestCase.assertTrue(b.isEnabled());
 	}
 	
 	/**
 	 * Tests the on island methods.
 	 */
 	@Test
+	@Deprecated
 	public void onIsland() {
 		Body b = new Body();
 		TestCase.assertFalse(b.isOnIsland());
@@ -711,6 +713,8 @@ public class BodyTest {
 	 * Tests the is connected method.
 	 */
 	@Test
+	@Deprecated
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void isConnected() {
 		Body b1 = new Body();
 		Body b2 = new Body();
@@ -750,6 +754,8 @@ public class BodyTest {
 	 * @since 2.2.2
 	 */
 	@Test
+	@Deprecated
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void isConnectedTwoOrMoreJoints() {
 		Body b1 = new Body();
 		Body b2 = new Body();
@@ -830,6 +836,8 @@ public class BodyTest {
 	 * Tests the getJoinedBodies method.
 	 */
 	@Test
+	@Deprecated
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void getJoinedBodies() {
 		Body b1 = new Body();
 		Body b2 = new Body();
@@ -855,6 +863,8 @@ public class BodyTest {
 	 * Tests the getJoints method.
 	 */
 	@Test
+	@Deprecated
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void getJoints() {
 		Body b1 = new Body();
 		Body b2 = new Body();
@@ -880,6 +890,8 @@ public class BodyTest {
 	 * Test the getInContactBodies method.
 	 */
 	@Test
+	@Deprecated
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void getInContactBodies() {
 		Convex c1 = Geometry.createCircle(1.0);
 		Convex c2 = Geometry.createEquilateralTriangle(0.5);
@@ -940,6 +952,8 @@ public class BodyTest {
 	 * Test the getContacts method.
 	 */
 	@Test
+	@Deprecated
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void getContacts() {
 		Convex c1 = Geometry.createCircle(1.0);
 		Convex c2 = Geometry.createEquilateralTriangle(0.5);
@@ -1204,6 +1218,8 @@ public class BodyTest {
 	 * body.
 	 */
 	@Test
+	@Deprecated
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void getJoinedBodiesMulti() {
 		World w = new World();
 		
@@ -1229,6 +1245,7 @@ public class BodyTest {
 	 * body.
 	 */
 	@Test
+	@Deprecated
 	public void getInContactBodiesMulti() {
 		World w = new World();
 		

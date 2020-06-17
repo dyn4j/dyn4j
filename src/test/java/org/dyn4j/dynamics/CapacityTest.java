@@ -34,6 +34,7 @@ import org.junit.Test;
  * @version 3.1.1
  * @since 3.1.1
  */
+@Deprecated
 public class CapacityTest {
 	/**
 	 * Tests the successful creation of a capacity.
