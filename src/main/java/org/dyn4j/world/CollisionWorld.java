@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -338,10 +338,11 @@ public interface CollisionWorld<T extends CollisionBody<E>, E extends Fixture, V
 	/**
 	 * Returns the collision data for the given body-fixture pairs.
 	 * <p>
-	 * This returns the collision data for any pair that was detected in the broadphase. Use the {@link CollisionData}
+	 * This returns the collision data for any pair that was detected in the broadphase. Use the 
+	 * {@link CollisionData#isBroadphaseCollision()}, {@link CollisionData#isManifoldCollision()}, etc.
 	 * methods to inspect the type of collision or the details about the collision.
 	 * <p>
-	 * Returns null if the body-fixtures are not colliding or if either no longer exists in the world.
+	 * Returns null if the body-fixtures are not colliding or if either no longer exist in the world.
 	 * @param body1 the first body
 	 * @param fixture1 the first body's fixture
 	 * @param body2 the second body
@@ -351,10 +352,13 @@ public interface CollisionWorld<T extends CollisionBody<E>, E extends Fixture, V
 	public V getCollisionData(T body1, E fixture1, T body2, E fixture2);
 	
 	/**
-	 * Returns an iterator that can be used to enumerate all the collisions in the world.
+	 * Returns an iterator that can be used to enumerate all the collisions in this world.
 	 * <p>
-	 * This returns the collision data for any pair that was detected in the broadphase. Use the {@link CollisionData}
+	 * This returns the collision data for any pair that was detected in the broadphase. Use the 
+	 * {@link CollisionData#isBroadphaseCollision()}, {@link CollisionData#isManifoldCollision()}, etc.
 	 * methods to inspect the type of collision or the details about the collision.
+	 * <p>
+	 * NOTE: This iterator does NOT support removal.
 	 * @return Iterator&lt;V&gt;
 	 */
 	public Iterator<V> getCollisionDataIterator();

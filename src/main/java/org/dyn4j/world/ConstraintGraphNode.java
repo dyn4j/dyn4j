@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -25,6 +25,7 @@
 package org.dyn4j.world;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.dyn4j.dynamics.PhysicsBody;
@@ -32,7 +33,7 @@ import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.dynamics.joint.Joint;
 
 /**
- * Represents a node in the interaction graph of a world.
+ * Represents a node in the constraint graph.
  * <p>
  * Each node is a {@link PhysicsBody} with the {@link ContactConstraint}s and
  * {@link Joint}s being the edges to the other nodes.
@@ -41,7 +42,7 @@ import org.dyn4j.dynamics.joint.Joint;
  * @since 4.0.0
  * @param <T> the {@link PhysicsBody} type
  */
-public final class InteractionGraphNode<T extends PhysicsBody> {
+public final class ConstraintGraphNode<T extends PhysicsBody> {
 	// node data
 	
 	/** The body */
@@ -49,19 +50,52 @@ public final class InteractionGraphNode<T extends PhysicsBody> {
 	
 	// edges
 	
-	/** The other bodies in contact with this body */
-	protected final List<ContactConstraint<T>> contacts;
+	/** The contact constraints connecting this body and other bodies */
+	protected final List<ContactConstraint<T>> contactConstraints;
 	
-	/** The other bodies joined to this body */
+	/** The joints connecting this body and other bodies */
 	protected final List<Joint<T>> joints;
+
+	/** An unmodifiable view of the contacts list */
+	protected final List<ContactConstraint<T>> contactConstraintsUnmodifiable;
+	
+	/** An unmodifiable view of the joints list */
+	protected final List<Joint<T>> jointsUnmodifiable;
 	
 	/**
 	 * Minimal constructor.
 	 * @param body the body
 	 */
-	public InteractionGraphNode(T body) {
+	public ConstraintGraphNode(T body) {
 		this.body = body;
-		this.contacts = new ArrayList<ContactConstraint<T>>();
+		this.contactConstraints = new ArrayList<ContactConstraint<T>>();
 		this.joints = new ArrayList<Joint<T>>();
+		
+		this.jointsUnmodifiable = Collections.unmodifiableList(this.joints);
+		this.contactConstraintsUnmodifiable = Collections.unmodifiableList(this.contactConstraints);
+	}
+	
+	/**
+	 * Returns the body at this node.
+	 * @return T
+	 */
+	public T getBody() {
+		return this.body;
+	}
+	
+	/**
+	 * Returns the list of joints this body is connected with.
+	 * @return List&lt;{@link Joint}&lt;T&gt;&gt;
+	 */
+	public List<Joint<T>> getJoints() {
+		return this.jointsUnmodifiable;
+	}
+	
+	/**
+	 * Returns the list of contact constraints this body is connected with.
+	 * @return List&lt;{@link ContactConstraint}&lt;T&gt;&gt;
+	 */
+	public List<ContactConstraint<T>> getContactConstraints() {
+		return this.contactConstraintsUnmodifiable;
 	}
 }

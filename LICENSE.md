@@ -1,4 +1,4 @@
-Copyright (c) 2010-2017 William Bittle  http://www.dyn4j.org/
+Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:

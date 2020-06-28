@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -25,9 +25,7 @@
 package org.dyn4j.world;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.dyn4j.collision.Collisions;
 import org.dyn4j.dynamics.Body;
@@ -46,7 +44,7 @@ import org.dyn4j.geometry.Vector2;
  * @since 1.0.0
  * @param <T> the {@link PhysicsBody} type
  */
-final class Island<T extends PhysicsBody> {
+public final class Island<T extends PhysicsBody> {
 	/** The list of {@link Body}s on this {@link Island} */
 	final List<T> bodies;
 
@@ -56,9 +54,6 @@ final class Island<T extends PhysicsBody> {
 	/** The list of {@link ContactConstraint}s on this {@link Island} */
 	final List<ContactConstraint<T>> contactConstraints;
 
-	/** A global map to see if a body, joint, or contact constraint has been added to the island already */
-	final Map<Object, Boolean> added;
-	
 	/**
 	 * Default constructor.
 	 * @since 3.2.0
@@ -82,7 +77,6 @@ final class Island<T extends PhysicsBody> {
 		this.bodies = new ArrayList<T>(bodyCount);
 		this.joints = new ArrayList<Joint<T>>(jointCount);
 		this.contactConstraints = new ArrayList<ContactConstraint<T>>(contactConstraintCount);
-		this.added = new HashMap<Object, Boolean>(contactConstraintCount + bodyCount + jointCount);
 	}
 
 	/**
@@ -92,7 +86,6 @@ final class Island<T extends PhysicsBody> {
 		this.bodies.clear();
 		this.joints.clear();
 		this.contactConstraints.clear();
-		this.added.clear();
 	}
 	
 	/**
@@ -100,10 +93,7 @@ final class Island<T extends PhysicsBody> {
 	 * @param body the {@link Body}
 	 */
 	public void add(T body) {
-		if (!this.added.containsKey(body)) {
-			this.bodies.add(body);
-			this.added.put(body, true);
-		}
+		this.bodies.add(body);
 	}
 	
 	/**
@@ -111,10 +101,7 @@ final class Island<T extends PhysicsBody> {
 	 * @param contactConstraint the {@link ContactConstraint}
 	 */
 	public void add(ContactConstraint<T> contactConstraint) {
-		if (!this.added.containsKey(contactConstraint)) {
-			this.contactConstraints.add(contactConstraint);
-			this.added.put(contactConstraint, true);
-		}
+		this.contactConstraints.add(contactConstraint);
 	}
 	
 	/**
@@ -122,20 +109,7 @@ final class Island<T extends PhysicsBody> {
 	 * @param joint the {@link Joint}
 	 */
 	public void add(Joint<T> joint) {
-		if (!this.added.containsKey(joint)) {
-			this.joints.add(joint);
-			this.added.put(joint, true);
-		}
-	}
-	
-	/**
-	 * Returns true if the given object has already been
-	 * added to this island.
-	 * @param object the object (body, joint, or contact constraint)
-	 * @return boolean
-	 */
-	public boolean isOnIsland(Object object) {
-		return this.added.containsKey(object);
+		this.joints.add(joint);
 	}
 	
 	/**

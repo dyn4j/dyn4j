@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -24,15 +24,11 @@
  */
 package org.dyn4j.world;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
-import java.util.Deque;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.collision.Collisions;
@@ -97,7 +93,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	protected final List<Joint<T>> joints;
 
 	/** The unmodifiable {@link Joint} list */
-	protected final List<Joint<T>> unmodifiableJoints;
+	protected final List<Joint<T>> jointsUnmodifiable;
 	
 	// listeners
 	
@@ -118,8 +114,8 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	/** The accumulated time */
 	protected double time;
 	
-	/** The interaction graph */
-	protected final Map<T, InteractionGraphNode<T>> interactionGraph;
+	/** The interaction graph between bodies */
+	protected final ConstraintGraph<T> interactionGraph;
 	
 	/** A temporary list of only the {@link ContactConstraint} collisions from the last detection; cleared and refilled each step */
 	protected final List<V> contactCollisions;
@@ -142,6 +138,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	public AbstractPhysicsWorld(int initialBodyCapacity) {
 		super(initialBodyCapacity);
+		int initialJointCapacity = 16;
 		
 		// initialize all the classes with default values
 		this.settings = new Settings();
@@ -156,8 +153,8 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		this.contactConstraintSolver = new SequentialImpulses<T>();
 		this.timeOfImpactSolver = new TimeOfImpactSolver<T>();
 		
-		this.joints = new ArrayList<Joint<T>>(16);
-		this.unmodifiableJoints = Collections.unmodifiableList(this.joints);
+		this.joints = new ArrayList<Joint<T>>(initialJointCapacity);
+		this.jointsUnmodifiable = Collections.unmodifiableList(this.joints);
 		
 		this.contactListeners = new ArrayList<ContactListener<T>>();
 		this.destructionListeners = new ArrayList<DestructionListener<T>>();
@@ -167,7 +164,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		this.time = 0.0;
 		
 		int estimatedCollisionPairs = Collisions.getEstimatedCollisionPairs(initialBodyCapacity);
-		this.interactionGraph = new LinkedHashMap<T, InteractionGraphNode<T>>(estimatedCollisionPairs);
+		this.interactionGraph = new ConstraintGraph<T>(initialBodyCapacity, initialJointCapacity);
 		this.contactCollisions = new ArrayList<V>(estimatedCollisionPairs);
 		this.updateRequired = true;
 	}
@@ -270,7 +267,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	@Override
 	public void addBody(T body) {
 		super.addBody(body);
-		this.addInteractionGraphNode(body);
+		this.interactionGraph.addNode(body);
 	}
 	
 	/* (non-Javadoc)
@@ -281,15 +278,26 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		// check for null joint
 		if (joint == null) throw new NullPointerException(Messages.getString("dynamics.world.addNullJoint"));
 		// dont allow adding it twice
-		if (joint.getOwner() == this) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingBody"));
+		if (joint.getOwner() == this) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingJoint"));
 		// dont allow a joint that already is assigned to another world
-		if (joint.getOwner() != null) throw new IllegalArgumentException(Messages.getString("dynamics.world.addOtherWorldBody"));
+		if (joint.getOwner() != null) throw new IllegalArgumentException(Messages.getString("dynamics.world.addOtherWorldJoint"));
+		
+		// check the bodies
+		T body1 = joint.getBody1();
+		T body2 = joint.getBody2();
+		
+		// FIXME need new message for this scenario
+		// dont allow someone to add a joint to the world when the joined bodies dont exist yet
+		if (!this.interactionGraph.containsNode(body1) || !this.interactionGraph.containsNode(body2)) {
+			throw new IllegalArgumentException("dynamics.world.addJointWithoutBodies");
+		}
+		
 		// add the joint to the joint list
 		this.joints.add(joint);
 		// set that its attached to this world
 		joint.setOwner(this);
 		// get the associated bodies
-		this.addInteractionGraphEdge(joint);
+		this.interactionGraph.addEdge(joint);
 	}
 
 	/* (non-Javadoc)
@@ -393,24 +401,22 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			// remove the body from the broadphase
 			this.broadphaseDetector.remove(body);
 			// remove from the interaction graph
-			InteractionGraphNode<T> node = this.interactionGraph.remove(body);
+			ConstraintGraphNode<T> node = this.interactionGraph.removeNode(body);
 			
 			// JOINT CLEANUP
 			
 			// wake up any bodies connected to this body by a joint
 			// and destroy the joints and remove the edges
-			Iterator<Joint<T>> jointIterator = node.joints.iterator();
-			while (jointIterator.hasNext()) {
-				// get the joint edge
-				Joint<T> joint = jointIterator.next();
+			int jSize = node.joints.size();
+			for (int j = 0; j < jSize; j++) {
+				Joint<T> joint = node.joints.get(j);
+				
+				// remove the ownership
 				joint.setOwner(null);
 				// get the other body
 				T other = joint.getOtherBody(body);
 				// wake up the other body
 				other.setAtRest(false);
-				// remove the joint edge from the other body
-				InteractionGraphNode<T> otherNode = this.interactionGraph.get(other);
-				otherNode.joints.remove(joint);
 				
 				// notify of the destroyed joint
 				if (notify) {
@@ -433,20 +439,14 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			// the entire set of pairs checking for this body - which isn't particularly
 			// efficient.
 			
-			Iterator<ContactConstraint<T>> contactConstraintIterator = node.contacts.iterator();
-			while (contactConstraintIterator.hasNext()) {
-				// get the contact edge
-				ContactConstraint<T> contactConstraint = contactConstraintIterator.next();
+			int ccSize = node.contactConstraints.size();
+			for (int j = 0; j < ccSize; j++) {
+				ContactConstraint<T> contactConstraint = node.contactConstraints.get(j);
 
 				// get the other body involved
-				T other = contactConstraint.getOtherBody(body);
-				
+				T other = contactConstraint.getOtherBody(body);				
 				// wake the other body
 				other.setAtRest(false);
-				
-				// find the other contact edge
-				InteractionGraphNode<T> otherNode = this.interactionGraph.get(other);
-				otherNode.contacts.remove(contactConstraint);
 				
 				// remove the stored collision data
 				V data = this.collisionData.remove(contactConstraint.getCollisionPair());
@@ -454,9 +454,9 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 				if (notify) {
 					// notify of contact end
 					List<? extends SolvedContact> contacts = contactConstraint.getContacts();
-					int csize = contacts.size();
-					for (int j = 0; j < csize; j++) {
-						Contact contact = contacts.get(j);
+					int cSize = contacts.size();
+					for (int k = 0; k < cSize; k++) {
+						Contact contact = contacts.get(k);
 						// call the destruction listeners
 						for (ContactListener<T> cl : contactListeners) {
 							cl.end(data, contact);
@@ -487,20 +487,9 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		if (removed) {
 			joint.setOwner(null);
 			
-			// remove the interaction edges
-			T body1 = joint.getBody1();
-			T body2 = joint.getBody2();
-			
-			if (body1 != null) {
-				InteractionGraphNode<T> node = this.interactionGraph.get(body1);
-				node.joints.remove(joint);
-			}
-			
-			if (body2 != null) {
-				InteractionGraphNode<T> node = this.interactionGraph.get(body2);
-				node.joints.remove(joint);
-			}
+			this.interactionGraph.removeEdge(joint);
 		}
+		
 		return removed;
 	}
 	
@@ -510,18 +499,25 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	@Override
 	public void removeAllBodies(boolean notify) {
 		int bsize = this.bodies.size();
+		int jsize = this.joints.size();
 		
 		// if we don't need to notify of anything being
 		// destroyed, then we can just clear everything
 		if (!notify) {
+			// remove ownership and modification handler
 			for (int i = 0; i < bsize; i++) {
-				// get the body
 				T body = this.bodies.get(i);
-				// set the world property to null
 				body.setFixtureModificationHandler(null);
 				body.setOwner(null);
 			}
 			
+			// remove ownership
+			for (int i = 0; i < jsize; i++) {
+				Joint<T> joint = this.joints.get(i);
+				joint.setOwner(null);
+			}
+			
+			// then just clear everything
 			this.clear();
 			return;
 		}
@@ -538,26 +534,26 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		for (int i = 0; i < bsize; i++) {
 			// get the body
 			T body = this.bodies.get(i);
+			
 			// set the world property to null
 			body.setFixtureModificationHandler(null);
 			body.setOwner(null);
 			
 			// notify of all the destroyed contacts
-			InteractionGraphNode<T> node = this.interactionGraph.get(body);
+			// NOTE: we do a remove here because this will remove the edges
+			// from the graph so that we don't report destruction for joints
+			// and contact constraints twice
+			ConstraintGraphNode<T> node = this.interactionGraph.removeNode(body);
 			
 			// JOINT CLEANUP
 			
 			// destroy the joints and remove the edges
-			Iterator<Joint<T>> jointIterator = node.joints.iterator();
-			while (jointIterator.hasNext()) {
-				// get the joint edge
-				Joint<T> joint = jointIterator.next();
+			int jSize = node.joints.size();
+			for (int j = 0; j < jSize; j++) {
+				Joint<T> joint = node.joints.get(j);
+				
+				// clear the owner
 				joint.setOwner(null);
-				// get the other body
-				T other = joint.getOtherBody(body);
-				// remove the joint edge from the other body
-				InteractionGraphNode<T> otherNode = this.interactionGraph.get(other);
-				otherNode.joints.remove(joint);
 				
 				// notify of the destroyed joint
 				for (DestructionListener<T> dl : destructionListeners) {
@@ -575,24 +571,18 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			// the entire set of pairs checking for this body - which isn't particularly
 			// efficient.
 			
-			Iterator<ContactConstraint<T>> contactConstraintIterator = node.contacts.iterator();
-			while (contactConstraintIterator.hasNext()) {
-				// get the contact edge
-				ContactConstraint<T> contactConstraint = contactConstraintIterator.next();
-				// get the other body involved
-				T other = contactConstraint.getOtherBody(body);
-				// find the other contact edge
-				InteractionGraphNode<T> otherNode = this.interactionGraph.get(other);
-				otherNode.contacts.remove(contactConstraint);
+			int ccSize = node.contactConstraints.size();
+			for (int j = 0; j < ccSize; j++) {
+				ContactConstraint<T> contactConstraint = node.contactConstraints.get(j);
 				
 				// remove the stored collision data
 				V data = this.collisionData.remove(contactConstraint.getCollisionPair());
 				
 				// notify of contact end
 				List<? extends SolvedContact> contacts = contactConstraint.getContacts();
-				int csize = contacts.size();
-				for (int j = 0; j < csize; j++) {
-					Contact contact = contacts.get(j);
+				int cSize = contacts.size();
+				for (int k = 0; k < cSize; k++) {
+					Contact contact = contacts.get(k);
 					// call the destruction listeners
 					for (ContactListener<T> cl : contactListeners) {
 						cl.end(data, contact);
@@ -640,28 +630,18 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		int size = this.joints.size();
 		for (int i = 0; i < size; i++) {
 			Joint<T> joint = this.joints.get(i);
+			
+			// clear the owner
 			joint.setOwner(null);
 
-			// remove the interaction edges
-			T body1 = joint.getBody1();
-			T body2 = joint.getBody2();
-			
-			if (body1 != null) {
-				InteractionGraphNode<T> node = this.interactionGraph.get(body1);
-				node.joints.remove(joint);
-			}
-			
-			if (body2 != null) {
-				InteractionGraphNode<T> node = this.interactionGraph.get(body2);
-				node.joints.remove(joint);
-			}
-			
 			if (notify) {
 				for (DestructionListener<T> dl : destructionListeners) {
 					dl.destroyed(joint);
 				}
 			}
 		}
+		
+		this.interactionGraph.removeAllJointEdges();
 		
 		this.joints.clear();
 	}
@@ -772,7 +752,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	@Override
 	public List<Joint<T>> getJoints() {
-		return this.unmodifiableJoints;
+		return this.jointsUnmodifiable;
 	}
 
 	/* (non-Javadoc)
@@ -863,17 +843,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	@Override
 	public boolean isInContact(T body1, T body2) {
-		InteractionGraphNode<T> node = this.interactionGraph.get(body1);
-		if (node != null) {
-			int size = node.contacts.size();
-			for (int i = 0; i < size; i++) {
-				ContactConstraint<T> cc = node.contacts.get(i);
-				if (cc.getBody1() == body2 || cc.getBody2() == body2) {
-					return true;
-				}
-			}
-		}
-		return false;
+		return this.interactionGraph.isInContact(body1, body2);
 	}
 	
 	/* (non-Javadoc)
@@ -881,12 +851,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	@Override
 	public List<ContactConstraint<T>> getContacts(T body) {
-		List<ContactConstraint<T>> contacts = new ArrayList<ContactConstraint<T>>();
-		InteractionGraphNode<T> node = this.interactionGraph.get(body);
-		if (node != null) {
-			return Collections.unmodifiableList(node.contacts);
-		}
-		return contacts;
+		return this.interactionGraph.getContacts(body);
 	}
 	
 	/* (non-Javadoc)
@@ -894,24 +859,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	@Override
 	public List<T> getInContactBodies(T body, boolean includeSensedContact) {
-		List<T> bodies = new ArrayList<T>();
-		InteractionGraphNode<T> node = this.interactionGraph.get(body);
-		if (node != null) {
-			int size = node.contacts.size();
-			for (int i = 0; i < size; i++) {
-				ContactConstraint<T> cc = node.contacts.get(i);
-				if (!includeSensedContact && cc.isSensor()) {
-					continue;
-				}
-				
-				T other = cc.getOtherBody(body);
-				// basic dup detection
-				if (!bodies.contains(other)) {
-					bodies.add(other);
-				}
-			}
-		}
-		return bodies;
+		return this.interactionGraph.getInContactBodies(body, includeSensedContact);
 	}
 
 	/* (non-Javadoc)
@@ -919,38 +867,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	@Override
 	public boolean isJointCollisionAllowed(T body1, T body2) {
-		// check for a null body
-		if (body1 == null || body2 == null) {
-			return false;
-		}
-		
-		InteractionGraphNode<T> node = this.interactionGraph.get(body1);
-		if (node != null) {
-			int size = node.joints.size();
-			
-			// if there are no joints on this body, then the
-			// collision is allowed
-			if (size == 0) return true;
-			
-			// if any joint connecting body1 and body2 allows collision
-			// then the collision is allowed
-			for (int i = 0; i < size; i++) {
-				Joint<T> joint = this.joints.get(i);
-				// testing object references should be sufficient
-				if (joint.getBody1() == body2 || joint.getBody2() == body2) {
-					// check if collision is allowed
-					// we do an or here to find if there is at least one
-					// joint joining the two bodies that allows collision
-					if (joint.isCollisionAllowed()) {
-						return true;
-					}
-				}
-			}
-		}
-		
-		// not found, so return false
-		return false;
-		
+		return this.interactionGraph.isJointCollisionAllowed(body1, body2);
 	}
 	
 	/* (non-Javadoc)
@@ -958,29 +875,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	@Override
 	public boolean isJoined(T body1, T body2) {
-		// check for a null body
-		if (body1 == null || body2 == null) {
-			return false;
-		}
-		
-		InteractionGraphNode<T> node = this.interactionGraph.get(body1);
-		if (node != null) {
-			int size = node.joints.size();
-			// check the size
-			if (size == 0) return false;
-			// loop over all the joints
-			for (int i = 0; i < size; i++) {
-				Joint<T> joint = this.joints.get(i);
-				// testing object references should be sufficient
-				if (joint.getBody1() == body2 || joint.getBody2() == body2) {
-					return true;
-				}
-			}
-		}
-		
-		// not found, so return false
-		return false;
-		
+		return this.interactionGraph.isJoined(body1, body2);
 	}
 
 	/* (non-Javadoc)
@@ -988,12 +883,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	@Override
 	public List<Joint<T>> getJoints(T body) {
-		List<Joint<T>> contacts = new ArrayList<Joint<T>>();
-		InteractionGraphNode<T> node = this.interactionGraph.get(body);
-		if (node != null) {
-			return Collections.unmodifiableList(node.joints);
-		}
-		return contacts;
+		return this.interactionGraph.getJoints(body);
 	}
 
 	/* (non-Javadoc)
@@ -1001,20 +891,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	@Override
 	public List<T> getJoinedBodies(T body) {
-		List<T> bodies = new ArrayList<T>();
-		InteractionGraphNode<T> node = this.interactionGraph.get(body);
-		if (node != null) {
-			int size = node.joints.size();
-			for (int i = 0; i < size; i++) {
-				Joint<T> cc = node.joints.get(i);
-				T other = cc.getOtherBody(body);
-				// basic dup detection
-				if (!bodies.contains(other)) {
-					bodies.add(other);
-				}
-			}
-		}
-		return bodies;
+		return this.interactionGraph.getJoinedBodies(body);
 	}
 	
 	/* (non-Javadoc)
@@ -1180,97 +1057,100 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			body.getInitialTransform().set(body.getTransform());
 		}
 		
-		// perform a depth first search of the contact graph
-		// to create islands for constraint solving
-		Deque<InteractionGraphNode<T>> stack = new ArrayDeque<InteractionGraphNode<T>>(size);
-
-		// create an island to reuse
-		Island<T> island = new Island<T>(size, this.joints.size());
-		for (InteractionGraphNode<T> seed : this.interactionGraph.values()) {
-			T seedBody = seed.body;
-			
-			// skip if asleep, in active, static, or already on an island
-			if (island.isOnIsland(seedBody) || seedBody.isAtRest() || !seedBody.isEnabled() || seedBody.isStatic()) {
-				continue;
-			}
-			
-			island.clear();
-			stack.clear();
-			stack.push(seed);
-			
-			while (stack.size() > 0) {
-				InteractionGraphNode<T> node = stack.pop();
-				T body = node.body;
-				// add it to the island
-				island.add(body);
-				// make sure the body is awake
-				body.setAtRest(false);
-				
-				// if its static then continue since we don't want the
-				// island to span more than one static object
-				// this keeps the size of the islands small
-				if (body.isStatic()) {
-					continue;
-				}
-				
-				// loop over the contact edges of this body
-				int ceSize = node.contacts.size();
-				for (int j = 0; j < ceSize; j++) {
-					ContactConstraint<T> contactConstraint = node.contacts.get(j);
-					
-					// skip disabled or sensor contacts or contacts already on the island
-					if (!contactConstraint.isEnabled() || contactConstraint.isSensor() || island.isOnIsland(contactConstraint)) {
-						continue;
-					}
-					
-					// get the other body
-					T other = contactConstraint.getOtherBody(body);
-					// add the contact constraint to the island list
-					island.add(contactConstraint);
-					
-					// has the other body been added to an island yet?
-					if (!island.isOnIsland(other)) {
-						// if not then add this body to the stack
-						stack.push(this.interactionGraph.get(other));
-					}
-				}
-				
-				// loop over the joint edges of this body
-				int jeSize = node.joints.size();
-				for (int j = 0; j < jeSize; j++) {
-					Joint<T> joint = node.joints.get(j);
-					
-					// check if the joint is inactive
-					if (!joint.isEnabled() || island.isOnIsland(joint)) {
-						continue;
-					}
-					
-					// get the other body
-					T other = joint.getOtherBody(body);
-					
-					// check if the joint has already been added to an island
-					// or if the other body is not active
-					if (!other.isEnabled()) {
-						continue;
-					}
-					
-					// add the joint to the island
-					island.add(joint);
-					// check if the other body has been added to an island
-					if (!island.isOnIsland(other)) {
-						// if not then add the body to the stack
-						stack.push(this.interactionGraph.get(other));
-					}
-				}
-			}
-			
-			// solve the island
-			island.solve(this.contactConstraintSolver, this.gravity, this.step, this.settings);
-		}
+		// solve the world by using the interaction graph to produce a set of islands
+		this.interactionGraph.solve(this.contactConstraintSolver, this.gravity, this.step, this.settings);
 		
-		// allow memory to be reclaimed
-		stack.clear();
-		island.clear();
+//		// perform a depth first search of the contact graph
+//		// to create islands for constraint solving
+//		Deque<InteractionGraphNode<T>> stack = new ArrayDeque<InteractionGraphNode<T>>(size);
+//
+//		// create an island to reuse
+//		Island<T> island = new Island<T>(size, this.joints.size());
+//		for (InteractionGraphNode<T> seed : this.interactionGraph.values()) {
+//			T seedBody = seed.body;
+//			
+//			// skip if asleep, in active, static, or already on an island
+//			if (island.isOnIsland(seedBody) || seedBody.isAtRest() || !seedBody.isEnabled() || seedBody.isStatic()) {
+//				continue;
+//			}
+//			
+//			island.clear();
+//			stack.clear();
+//			stack.push(seed);
+//			
+//			while (stack.size() > 0) {
+//				InteractionGraphNode<T> node = stack.pop();
+//				T body = node.body;
+//				// add it to the island
+//				island.add(body);
+//				// make sure the body is awake
+//				body.setAtRest(false);
+//				
+//				// if its static then continue since we don't want the
+//				// island to span more than one static object
+//				// this keeps the size of the islands small
+//				if (body.isStatic()) {
+//					continue;
+//				}
+//				
+//				// loop over the contact edges of this body
+//				int ceSize = node.contacts.size();
+//				for (int j = 0; j < ceSize; j++) {
+//					ContactConstraint<T> contactConstraint = node.contacts.get(j);
+//					
+//					// skip disabled or sensor contacts or contacts already on the island
+//					if (!contactConstraint.isEnabled() || contactConstraint.isSensor() || island.isOnIsland(contactConstraint)) {
+//						continue;
+//					}
+//					
+//					// get the other body
+//					T other = contactConstraint.getOtherBody(body);
+//					// add the contact constraint to the island list
+//					island.add(contactConstraint);
+//					
+//					// has the other body been added to an island yet?
+//					if (!island.isOnIsland(other)) {
+//						// if not then add this body to the stack
+//						stack.push(this.interactionGraph.get(other));
+//					}
+//				}
+//				
+//				// loop over the joint edges of this body
+//				int jeSize = node.joints.size();
+//				for (int j = 0; j < jeSize; j++) {
+//					Joint<T> joint = node.joints.get(j);
+//					
+//					// check if the joint is inactive
+//					if (!joint.isEnabled() || island.isOnIsland(joint)) {
+//						continue;
+//					}
+//					
+//					// get the other body
+//					T other = joint.getOtherBody(body);
+//					
+//					// check if the joint has already been added to an island
+//					// or if the other body is not active
+//					if (!other.isEnabled()) {
+//						continue;
+//					}
+//					
+//					// add the joint to the island
+//					island.add(joint);
+//					// check if the other body has been added to an island
+//					if (!island.isOnIsland(other)) {
+//						// if not then add the body to the stack
+//						stack.push(this.interactionGraph.get(other));
+//					}
+//				}
+//			}
+//			
+//			// solve the island
+//			island.solve(this.contactConstraintSolver, this.gravity, this.step, this.settings);
+//		}
+//		
+//		// allow memory to be reclaimed
+//		stack.clear();
+//		island.clear();
 		
 		// notify of the all solved contacts
 		if (contactListeners.size() > 0) {
@@ -1316,10 +1196,8 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	@Override
 	protected void detectCollisions(Iterator<V> iterator) {
-		// clear the contact interactions
-		for (InteractionGraphNode<T> node : this.interactionGraph.values()) {
-			node.contacts.clear();
-		}
+		// clear the contact interactions since we'll be recreating them
+		this.interactionGraph.removeAllContactEdges();
 		
 		// this is rebuilt every time so clear it
 		this.contactCollisions.clear();
@@ -1356,7 +1234,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 				collision.setContactConstraintCollision(true);
 				
 				// build the contact edges
-				this.addInteractionGraphEdge(cc);
+				this.interactionGraph.addEdge(cc);
 				
 				// add it to a list of contact-constraint only collisions for
 				// quicker post/pre solve notification if it's enabled and
@@ -1368,73 +1246,6 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		}
 	}
 	
-	/**
-	 * Adds an interaction graph node for the given body.
-	 * @param body the body
-	 */
-	private final void addInteractionGraphNode(T body) {
-		InteractionGraphNode<T> node = this.interactionGraph.get(body);
-		
-		if (node == null) {
-			node = new InteractionGraphNode<T>(body);
-			this.interactionGraph.put(body, node);
-		}
-	}
-	
-	/**
-	 * Adds an interaction graph edge for the given {@link ContactConstraint}.
-	 * @param contactConstraint the contact constraint
-	 */
-	private final void addInteractionGraphEdge(ContactConstraint<T> contactConstraint) {
-		T body1 = contactConstraint.getBody1();
-		T body2 = contactConstraint.getBody2();
-		
-		InteractionGraphNode<T> node1 = this.interactionGraph.get(body1);
-		InteractionGraphNode<T> node2 = this.interactionGraph.get(body2);
-		
-		if (node1 == null) {
-			node1 = new InteractionGraphNode<T>(body1);
-			this.interactionGraph.put(body1, node1);
-		}
-		if (node2 == null) {
-			node2 = new InteractionGraphNode<T>(body2);
-			this.interactionGraph.put(body1, node2);
-		}
-		
-		node1.contacts.add(contactConstraint);
-		node2.contacts.add(contactConstraint);
-	}
-	
-	/**
-	 * Adds an interaction graph edge for the given {@link Joint}.
-	 * @param joint the joint
-	 */
-	private final void addInteractionGraphEdge(Joint<T> joint) {
-		T body1 = joint.getBody1();
-		T body2 = joint.getBody2();
-		
-		// some joints (one really) is a uni-body joint
-		// all others are pairwise
-		
-		if (body1 != null) {
-			InteractionGraphNode<T> node1 = this.interactionGraph.get(body1);	
-			if (node1 == null) {
-				node1 = new InteractionGraphNode<T>(body1);
-				this.interactionGraph.put(body1, node1);
-			}
-			node1.joints.add(joint);
-		}
-		
-		if (body2 != null && body1 != body2) {
-			InteractionGraphNode<T> node2 = this.interactionGraph.get(body2);
-			if (node2 == null) {
-				node2 = new InteractionGraphNode<T>(body2);
-				this.interactionGraph.put(body2, node2);
-			}
-			node2.joints.add(joint);
-		}
-	}
-
 	/**
 	 * Solves the time of impact for all the {@link PhysicsBody}s in this world.
 	 * <p>

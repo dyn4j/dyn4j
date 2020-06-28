@@ -1,0 +1,577 @@
+/*
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without modification, are permitted 
+ * provided that the following conditions are met:
+ * 
+ *   * Redistributions of source code must retain the above copyright notice, this list of conditions 
+ *     and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
+ *     and the following disclaimer in the documentation and/or other materials provided with the 
+ *     distribution.
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
+ *     promote products derived from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package org.dyn4j.world;
+
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.dyn4j.collision.Collisions;
+import org.dyn4j.dynamics.PhysicsBody;
+import org.dyn4j.dynamics.Settings;
+import org.dyn4j.dynamics.TimeStep;
+import org.dyn4j.dynamics.contact.ContactConstraint;
+import org.dyn4j.dynamics.contact.ContactConstraintSolver;
+import org.dyn4j.dynamics.joint.Joint;
+import org.dyn4j.geometry.Vector2;
+
+/**
+ * Represents a graph of constraints involving {@link PhysicsBody}s with the desire
+ * to split the graph into smaller solvable chunks.
+ * <p>
+ * The graph is maintained by using the various add/remove methods. The {@link PhysicsWorld}
+ * is a consumer of this object, adding nodes and edges when bodies/joints are added. During
+ * the collision detection process, contact edges are cleared and recreated.
+ * <p>
+ * Solving of the graph happens internally by performing depth-first traversal and 
+ * the building of {@link Island}s separated by static {@link PhysicsBody}s.
+ * @author William Bittle
+ * @version 4.0.0
+ * @since 4.0.0
+ * @param <T> the {@link PhysicsBody} type
+ */
+public final class ConstraintGraph<T extends PhysicsBody> {
+	/** The constraint graph storage mechanism */
+	private final Map<T, ConstraintGraphNode<T>> graph;
+
+	/** Stack for depth-first traversal of the graph */
+	private final Deque<ConstraintGraphNode<T>> stack;
+
+	/** Fast lookup of the objects (Body, Joint, ContactConstraint) that have been added to an island */
+	private final Map<Object, Boolean> onIsland;
+	
+	/** Fast lookup of static bodies that have been added to the current island */
+	private final Map<T, Boolean> staticOnIsland;
+	
+	/** A reusable island instance for solving */
+	private final Island<T> island;
+	
+	/**
+	 * Minimal constructor.
+	 */
+	public ConstraintGraph() {
+		this(64, 16);
+	}
+	
+	/**
+	 * Full constructor.
+	 * @param initialBodyCount the initial body count
+	 * @param initialJointCount the initial joint count
+	 */
+	public ConstraintGraph(int initialBodyCount, int initialJointCount) {
+		if (initialBodyCount <= 0) initialBodyCount = 64;
+		if (initialJointCount <= 0) initialJointCount = 16;
+		
+		int contactConstraintCount = Collisions.getEstimatedCollisionPairs(initialBodyCount);
+		int stackSize = Math.max((int)Math.log(initialBodyCount), 8);
+		int totalSize = Math.max(initialBodyCount + initialJointCount + contactConstraintCount, 64);
+		
+		this.graph = new LinkedHashMap<T, ConstraintGraphNode<T>>(initialBodyCount);
+		this.stack = new ArrayDeque<ConstraintGraphNode<T>>(stackSize);
+		this.onIsland = new HashMap<Object, Boolean>(totalSize);
+		this.staticOnIsland = new HashMap<T, Boolean>(totalSize / 2);
+		this.island = new Island<T>(initialBodyCount, initialJointCount);
+	}
+	
+	/**
+	 * Adds an interaction graph node for the given body.
+	 * @param body the body
+	 */
+	public void addNode(T body) {
+		ConstraintGraphNode<T> node = this.graph.get(body);
+		
+		if (node == null) {
+			node = new ConstraintGraphNode<T>(body);
+			this.graph.put(body, node);
+		}
+	}
+	
+	/**
+	 * Adds an interaction graph edge for the given {@link ContactConstraint}.
+	 * @param contactConstraint the contact constraint
+	 */
+	public void addEdge(ContactConstraint<T> contactConstraint) {
+		T body1 = contactConstraint.getBody1();
+		T body2 = contactConstraint.getBody2();
+		
+		ConstraintGraphNode<T> node1 = this.graph.get(body1);
+		ConstraintGraphNode<T> node2 = this.graph.get(body2);
+		
+		if (node1 == null) {
+			node1 = new ConstraintGraphNode<T>(body1);
+			this.graph.put(body1, node1);
+		}
+		if (node2 == null) {
+			node2 = new ConstraintGraphNode<T>(body2);
+			this.graph.put(body1, node2);
+		}
+		
+		node1.contactConstraints.add(contactConstraint);
+		node2.contactConstraints.add(contactConstraint);
+	}
+	
+	/**
+	 * Adds an interaction graph edge for the given {@link Joint}.
+	 * @param joint the joint
+	 */
+	public void addEdge(Joint<T> joint) {
+		T body1 = joint.getBody1();
+		T body2 = joint.getBody2();
+		
+		// some joints (one really) is a uni-body joint
+		// all others are pairwise
+		
+		if (body1 != null) {
+			ConstraintGraphNode<T> node1 = this.graph.get(body1);	
+			if (node1 == null) {
+				node1 = new ConstraintGraphNode<T>(body1);
+				this.graph.put(body1, node1);
+			}
+			node1.joints.add(joint);
+		}
+		
+		if (body2 != null && body1 != body2) {
+			ConstraintGraphNode<T> node2 = this.graph.get(body2);
+			if (node2 == null) {
+				node2 = new ConstraintGraphNode<T>(body2);
+				this.graph.put(body2, node2);
+			}
+			node2.joints.add(joint);
+		}
+	}
+
+	/**
+	 * Returns true if the given body is part of the interaction graph.
+	 * @param body the body
+	 * @return boolean
+	 */
+	public boolean containsNode(T body) {
+		return this.graph.containsKey(body);
+	}
+	
+	/**
+	 * Removes the given body from the graph.
+	 * <p>
+	 * A body represents a node in the graph, therefore removing the node
+	 * will remove the edges between the given node and other nodes as well.
+	 * @param body the body to remove
+	 * @return {@link ConstraintGraphNode}&lt;T&gt;
+	 */
+	public ConstraintGraphNode<T> removeNode(T body) {
+		// remove the node
+		ConstraintGraphNode<T> node = this.graph.remove(body);
+		
+		// remove any joints edges
+		int jSize = node.joints.size();
+		for (int i = 0; i < jSize; i++) {
+			Joint<T> joint = node.joints.get(i);
+			// get the other body
+			T other = joint.getOtherBody(body);
+			// remove the joint edge from the other body
+			ConstraintGraphNode<T> otherNode = this.graph.get(other);
+			otherNode.joints.remove(joint);
+		}
+		
+		// remove any contact constraint edges
+		int cSize = node.contactConstraints.size();
+		for (int i = 0; i < cSize; i++) {
+			ContactConstraint<T> contactConstraint = node.contactConstraints.get(i);
+			// get the other body involved
+			T other = contactConstraint.getOtherBody(body);
+			// find the other contact edge
+			ConstraintGraphNode<T> otherNode = this.graph.get(other);
+			otherNode.contactConstraints.remove(contactConstraint);
+		}
+		
+		return node;
+	}
+	
+	/**
+	 * Removes the given joint from the graph.
+	 * <p>
+	 * A joint is an edge connecting body nodes. This method removes the edges
+	 * related to the given joint.
+	 * @param joint the joint to remove
+	 */
+	public void removeEdge(Joint<T> joint) {
+		// remove the interaction edges
+		T body1 = joint.getBody1();
+		T body2 = joint.getBody2();
+		
+		if (body1 != null) {
+			ConstraintGraphNode<T> node = this.graph.get(body1);
+			node.joints.remove(joint);
+		}
+		
+		if (body2 != null) {
+			ConstraintGraphNode<T> node = this.graph.get(body2);
+			node.joints.remove(joint);
+		}
+	}
+	
+	/**
+	 * Returns the node for the given body on the graph.
+	 * <p>
+	 * Returns null if the body is not on the graph.
+	 * @param body the body to remove
+	 * @return {@link ConstraintGraphNode}&lt;T&gt;
+	 */
+	public ConstraintGraphNode<T> getNode(T body) {
+		return this.graph.get(body);
+	}
+	
+	/**
+	 * Removes all edges in the graph related to contact constraints.
+	 */
+	public void removeAllContactEdges() {
+		for (ConstraintGraphNode<T> node : this.graph.values()) {
+			node.contactConstraints.clear();
+		}
+	}
+	
+	/**
+	 * Removes all edges in the graph related to joints.
+	 */
+	public void removeAllJointEdges() {
+		for (ConstraintGraphNode<T> node : this.graph.values()) {
+			node.joints.clear();
+		}
+	}
+	
+	/**
+	 * Clears the graph of all nodes and edges.
+	 */
+	public void clear() {
+		this.graph.clear();
+	}
+	
+	/**
+	 * Returns the number of nodes in the graph.
+	 * @return int
+	 */
+	public int size() {
+		return this.graph.size();
+	}
+	
+	// helpers
+	
+	/**
+	 * Returns true if the given {@link PhysicsBody}s are currently in collision.
+	 * <p>
+	 * Collision is defined as the two bodies interacting to the level of {@link ContactConstraint}
+	 * generation and solving.
+	 * @param body1 the first body
+	 * @param body2 the second body
+	 * @return boolean
+	 */
+	public boolean isInContact(T body1, T body2) {
+		ConstraintGraphNode<T> node = this.graph.get(body1);
+		if (node != null) {
+			int size = node.contactConstraints.size();
+			for (int i = 0; i < size; i++) {
+				ContactConstraint<T> cc = node.contactConstraints.get(i);
+				if (cc.getBody1() == body2 || cc.getBody2() == body2) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Returns the {@link ContactConstraint}s for the given {@link PhysicsBody}.
+	 * <p>
+	 * These represent the contact pairs between the given body and the others it's colliding with.
+	 * Each {@link ContactConstraint} could have 1 or 2 contacts associated with it.
+	 * @param body the body
+	 * @return List&lt;{@link ContactConstraint}&gt;
+	 */
+	public List<ContactConstraint<T>> getContacts(T body) {
+		List<ContactConstraint<T>> contacts = new ArrayList<ContactConstraint<T>>();
+		ConstraintGraphNode<T> node = this.graph.get(body);
+		if (node != null) {
+			return node.contactConstraintsUnmodifiable;
+		}
+		return contacts;
+	}
+
+	/**
+	 * Returns a list of all {@link PhysicsBody}s that are in contact with the given {@link PhysicsBody}.
+	 * @param body the body
+	 * @param includeSensedContact true if sensed contacts should be included in the results
+	 * @return List&lt;{@link PhysicsBody}&gt;
+	 */
+	public List<T> getInContactBodies(T body, boolean includeSensedContact) {
+		List<T> bodies = new ArrayList<T>();
+		ConstraintGraphNode<T> node = this.graph.get(body);
+		if (node != null) {
+			int size = node.contactConstraints.size();
+			for (int i = 0; i < size; i++) {
+				ContactConstraint<T> cc = node.contactConstraints.get(i);
+				if (!includeSensedContact && cc.isSensor()) {
+					continue;
+				}
+				
+				T other = cc.getOtherBody(body);
+				// basic dup detection
+				if (!bodies.contains(other)) {
+					bodies.add(other);
+				}
+			}
+		}
+		return bodies;
+	}
+
+	/**
+	 * Returns true if the two {@link PhysicsBody}s are joined by at least one {@link Joint}
+	 * where the collision allowed property is true.
+	 * @param body1 the first body
+	 * @param body2 the second body
+	 * @return boolean
+	 */
+	public boolean isJointCollisionAllowed(T body1, T body2) {
+		// check for a null body
+		if (body1 == null || body2 == null) {
+			return false;
+		}
+		
+		ConstraintGraphNode<T> node = this.graph.get(body1);
+		if (node != null) {
+			int size = node.joints.size();
+			
+			// if there are no joints on this body, then the
+			// collision is allowed
+			if (size == 0) return true;
+			
+			// if any joint connecting body1 and body2 allows collision
+			// then the collision is allowed
+			for (int i = 0; i < size; i++) {
+				Joint<T> joint = node.joints.get(i);
+				// testing object references should be sufficient
+				if (joint.getBody1() == body2 || joint.getBody2() == body2) {
+					// check if collision is allowed
+					// we do an or here to find if there is at least one
+					// joint joining the two bodies that allows collision
+					if (joint.isCollisionAllowed()) {
+						return true;
+					}
+				}
+			}
+		}
+		
+		// not found, so return false
+		return false;
+		
+	}
+	
+	/**
+	 * Returns true if the two {@link PhysicsBody}s are joined via a {@link Joint}.
+	 * @param body1 the first body
+	 * @param body2 the second body
+	 * @return boolean
+	 */
+	public boolean isJoined(T body1, T body2) {
+		// check for a null body
+		if (body1 == null || body2 == null) {
+			return false;
+		}
+		
+		ConstraintGraphNode<T> node = this.graph.get(body1);
+		if (node != null) {
+			int size = node.joints.size();
+			// check the size
+			if (size == 0) return false;
+			// loop over all the joints
+			for (int i = 0; i < size; i++) {
+				Joint<T> joint = node.joints.get(i);
+				// testing object references should be sufficient
+				if (joint.getBody1() == body2 || joint.getBody2() == body2) {
+					return true;
+				}
+			}
+		}
+		
+		// not found, so return false
+		return false;
+		
+	}
+
+	/**
+	 * Returns the {@link Joint}s the given {@link PhysicsBody} is a member of.
+	 * @param body the body
+	 * @return List&lt;{@link Joint}&gt;
+	 */
+	public List<Joint<T>> getJoints(T body) {
+		List<Joint<T>> contacts = new ArrayList<Joint<T>>();
+		ConstraintGraphNode<T> node = this.graph.get(body);
+		if (node != null) {
+			return node.jointsUnmodifiable;
+		}
+		return contacts;
+	}
+
+	/**
+	 * Returns the {@link PhysicsBody}s joined to the given {@link PhysicsBody} via {@link Joint}s.
+	 * @param body the body
+	 * @return List&lt;{@link PhysicsBody}&gt;
+	 */
+	public List<T> getJoinedBodies(T body) {
+		List<T> bodies = new ArrayList<T>();
+		ConstraintGraphNode<T> node = this.graph.get(body);
+		if (node != null) {
+			int size = node.joints.size();
+			for (int i = 0; i < size; i++) {
+				Joint<T> cc = node.joints.get(i);
+				T other = cc.getOtherBody(body);
+				// basic dup detection
+				if (!bodies.contains(other)) {
+					bodies.add(other);
+				}
+			}
+		}
+		return bodies;
+	}
+	
+	/**
+	 * Solves the interation graph constraints (Joints/Contacts) by splitting the graph into
+	 * {@link Island}s. Each {@link Island} represents a segment of the constraint graph that
+	 * can be solved in isolation.
+	 * @param solver the contact constraint solver
+	 * @param gravity the world gravity
+	 * @param step the time step information
+	 * @param settings the settings
+	 */
+	public void solve(ContactConstraintSolver<T> solver, Vector2 gravity, TimeStep step, Settings settings) {
+		// perform a depth first search of the contact graph
+		// to create islands for constraint solving
+		// and solve them sequentially
+		
+		this.stack.clear();
+		this.onIsland.clear();
+		this.staticOnIsland.clear();
+		
+		// create an island to reuse
+		for (ConstraintGraphNode<T> seed : this.graph.values()) {
+			T seedBody = seed.body;
+			
+			// skip if asleep, in active, static, or already on an island
+			if (this.onIsland.containsKey(seedBody) || seedBody.isAtRest() || !seedBody.isEnabled() || seedBody.isStatic()) {
+				continue;
+			}
+			
+			this.island.clear();
+			this.stack.clear();
+			this.stack.push(seed);
+			
+			while (this.stack.size() > 0) {
+				ConstraintGraphNode<T> node = this.stack.pop();
+				T body = node.body;
+				// add it to the island
+				this.island.add(body);
+				// make sure the body is awake
+				body.setAtRest(false);
+				
+				// if its static then continue since we don't want the
+				// island to span more than one static object
+				// this keeps the size of the islands small
+				if (body.isStatic()) {
+					this.staticOnIsland.put(body, Boolean.TRUE);
+					continue;
+				} else {
+					this.onIsland.put(body, Boolean.TRUE);
+				}
+				
+				// loop over the contact edges of this body
+				int ceSize = node.contactConstraints.size();
+				for (int j = 0; j < ceSize; j++) {
+					ContactConstraint<T> contactConstraint = node.contactConstraints.get(j);
+					
+					// skip disabled or sensor contacts or contacts already on the island
+					if (!contactConstraint.isEnabled() || contactConstraint.isSensor() || this.onIsland.containsKey(contactConstraint)) {
+						continue;
+					}
+					
+					// get the other body
+					T other = contactConstraint.getOtherBody(body);
+					// add the contact constraint to the island list
+					this.island.add(contactConstraint);
+					this.onIsland.put(contactConstraint, Boolean.TRUE);
+					
+					// has the other body been added to an island yet?
+					if (!this.onIsland.containsKey(other) && !this.staticOnIsland.containsKey(other)) {
+						// if not then add this body to the stack
+						this.stack.push(this.graph.get(other));
+					}
+				}
+				
+				// loop over the joint edges of this body
+				int jeSize = node.joints.size();
+				for (int j = 0; j < jeSize; j++) {
+					Joint<T> joint = node.joints.get(j);
+					
+					// check if the joint is inactive
+					if (!joint.isEnabled() || this.onIsland.containsKey(joint)) {
+						continue;
+					}
+					
+					// get the other body
+					T other = joint.getOtherBody(body);
+					
+					// check if the joint has already been added to an island
+					// or if the other body is not active
+					if (!other.isEnabled()) {
+						continue;
+					}
+					
+					// add the joint to the island
+					this.island.add(joint);
+					this.onIsland.put(joint, Boolean.TRUE);
+					
+					// check if the other body has been added to an island
+					if (!this.onIsland.containsKey(other) && !this.staticOnIsland.containsKey(other)) {
+						// if not then add the body to the stack
+						this.stack.push(this.graph.get(other));
+					}
+				}
+			}
+			
+			// solve the island
+			this.island.solve(solver, gravity, step, settings);
+			
+			// islands can reuse static bodies because these are what split the
+			// whole constraint graph into islands
+			this.staticOnIsland.clear();
+		}
+		
+		// allow memory to be reclaimed
+		this.stack.clear();
+		this.island.clear();
+		this.onIsland.clear();
+	}
+}

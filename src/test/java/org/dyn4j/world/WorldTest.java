@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -147,8 +147,8 @@ public class WorldTest {
 		TestCase.assertNotNull(w.timeOfImpactDetector);
 		TestCase.assertNotNull(w.timeOfImpactListeners);
 		TestCase.assertNotNull(w.timeOfImpactSolver);
-		TestCase.assertNotNull(w.unmodifiableBodies);
-		TestCase.assertNotNull(w.unmodifiableJoints);
+		TestCase.assertNotNull(w.bodiesUnmodifiable);
+		TestCase.assertNotNull(w.jointsUnmodifiable);
 		TestCase.assertTrue(w.updateRequired);
 	}
 	
@@ -316,11 +316,11 @@ public class WorldTest {
 		TestCase.assertNotNull(j.getOwner());
 		TestCase.assertEquals(w, j.getOwner());
 		
-		InteractionGraphNode<Body> n1 = w.interactionGraph.get(b1);
+		ConstraintGraphNode<Body> n1 = w.interactionGraph.getNode(b1);
 		TestCase.assertNotNull(n1);
 		TestCase.assertEquals(1, n1.joints.size());
 
-		InteractionGraphNode<Body> n2 = w.interactionGraph.get(b2);
+		ConstraintGraphNode<Body> n2 = w.interactionGraph.getNode(b2);
 		TestCase.assertNotNull(n2);
 		TestCase.assertEquals(1, n2.joints.size());
 	}
@@ -401,12 +401,12 @@ public class WorldTest {
 		// make sure it really is the first body
 		TestCase.assertEquals(b1, w.getBody(0));
 		
-		InteractionGraphNode<Body> n1 = w.interactionGraph.get(b1);
+		ConstraintGraphNode<Body> n1 = w.interactionGraph.getNode(b1);
 		TestCase.assertNotNull(n1);
-		TestCase.assertEquals(0, n1.contacts.size());
+		TestCase.assertEquals(0, n1.contactConstraints.size());
 		TestCase.assertEquals(0, n1.joints.size());
 
-		InteractionGraphNode<Body> n2 = w.interactionGraph.get(b2);
+		ConstraintGraphNode<Body> n2 = w.interactionGraph.getNode(b2);
 		TestCase.assertNull(n2);
 
 		// make sure the destruction listener was called for the one
@@ -485,12 +485,12 @@ public class WorldTest {
 		// make sure it really is the first body
 		TestCase.assertEquals(b1, w.getBody(0));
 		
-		InteractionGraphNode<Body> n1 = w.interactionGraph.get(b1);
+		ConstraintGraphNode<Body> n1 = w.interactionGraph.getNode(b1);
 		TestCase.assertNotNull(n1);
-		TestCase.assertEquals(0, n1.contacts.size());
+		TestCase.assertEquals(0, n1.contactConstraints.size());
 		TestCase.assertEquals(0, n1.joints.size());
 
-		InteractionGraphNode<Body> n2 = w.interactionGraph.get(b2);
+		ConstraintGraphNode<Body> n2 = w.interactionGraph.getNode(b2);
 		TestCase.assertNull(n2);
 
 		// make sure the destruction listener was called for the joint
@@ -546,11 +546,11 @@ public class WorldTest {
 		TestCase.assertEquals(2, w.getBodyCount());
 		TestCase.assertNull(j.getOwner());
 		
-		InteractionGraphNode<Body> n1 = w.interactionGraph.get(b1);
+		ConstraintGraphNode<Body> n1 = w.interactionGraph.getNode(b1);
 		TestCase.assertNotNull(n1);
 		TestCase.assertEquals(0, n1.joints.size());
 
-		InteractionGraphNode<Body> n2 = w.interactionGraph.get(b2);
+		ConstraintGraphNode<Body> n2 = w.interactionGraph.getNode(b2);
 		TestCase.assertNotNull(n2);
 		TestCase.assertEquals(0, n2.joints.size());
 	}
@@ -867,11 +867,11 @@ public class WorldTest {
 		TestCase.assertNotNull(b2.getFixtureModificationHandler());
 		TestCase.assertNull(j.getOwner());
 		
-		InteractionGraphNode<Body> n1 = w.interactionGraph.get(b1);
+		ConstraintGraphNode<Body> n1 = w.interactionGraph.getNode(b1);
 		TestCase.assertNotNull(n1);
 		TestCase.assertEquals(0, n1.joints.size());
 
-		InteractionGraphNode<Body> n2 = w.interactionGraph.get(b2);
+		ConstraintGraphNode<Body> n2 = w.interactionGraph.getNode(b2);
 		TestCase.assertNotNull(n2);
 		TestCase.assertEquals(0, n2.joints.size());
 	}
@@ -896,11 +896,11 @@ public class WorldTest {
 		w.removeAllBodiesAndJoints();
 		TestCase.assertTrue(w.isEmpty());
 		
-		w.addJoint(j);
-		TestCase.assertFalse(w.isEmpty());
-		
 		w.addBody(b1);
 		w.addBody(b2);
+		TestCase.assertFalse(w.isEmpty());
+		
+		w.addJoint(j);
 		TestCase.assertFalse(w.isEmpty());
 	}
 	
@@ -1093,6 +1093,9 @@ public class WorldTest {
 		
 		Body b1 = new Body();
 		Body b2 = new Body();
+		
+		w.addBody(b1);
+		w.addBody(b2);
 		
 		w.addJoint(new AngleJoint<Body>(b1, b2));
 		w.addJoint(new AngleJoint<Body>(b1, b2));
