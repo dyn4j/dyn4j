@@ -24,9 +24,14 @@
  */
 package org.dyn4j;
 
-import junit.framework.TestCase;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.Test;
+
+import junit.framework.TestCase;
 
 /**
  * Test case for the {@link Version} class.
@@ -36,7 +41,7 @@ import org.junit.Test;
  */
 public class VersionTest {
 	/**
-	 * Tests the get verion number methods.
+	 * Tests the get version number methods.
 	 */
 	@Test
 	public void versions() {
@@ -45,5 +50,37 @@ public class VersionTest {
 		TestCase.assertEquals(Version.getMajorNumber(), version[0]);
 		TestCase.assertEquals(Version.getMinorNumber(), version[1]);
 		TestCase.assertEquals(Version.getRevisionNumber(), version[2]);
+	}
+	
+	/**
+	 * Tests the get version method.
+	 */
+	@Test
+	public void getVersionString() {
+		String version = Version.getVersion();
+		TestCase.assertNotNull(version);
+		TestCase.assertTrue(version.length() > 0);
+	}
+	
+	/**
+	 * Tests the main method printing the version.
+	 * @throws UnsupportedEncodingException if an error occurs building the stream that redirects System.out for testing
+	 */
+	@Test
+	public void main() throws UnsupportedEncodingException {
+	    final PrintStream original = System.out;
+	    
+	    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	    final String utf8 = StandardCharsets.UTF_8.name();
+	    final PrintStream ps = new PrintStream(baos, true, utf8);
+	    
+	    System.setOut(ps);
+	    Version.main(null);
+	    System.setOut(original);
+	    
+	    String version = baos.toString(utf8);
+	    
+		TestCase.assertNotNull(version);
+		TestCase.assertTrue(version.length() > 0);
 	}
 }

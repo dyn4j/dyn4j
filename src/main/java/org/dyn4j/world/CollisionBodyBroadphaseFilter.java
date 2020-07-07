@@ -40,7 +40,7 @@ import org.dyn4j.collision.Fixture;
  * @version 4.0.0
  * @since 3.2.0
  */
-public class DefaultBroadphaseFilter<T extends CollisionBody<E>, E extends Fixture> extends BroadphaseFilterAdapter<T, E> implements BroadphaseFilter<T, E> {
+public class CollisionBodyBroadphaseFilter<T extends CollisionBody<E>, E extends Fixture> extends BroadphaseFilterAdapter<T, E> implements BroadphaseFilter<T, E> {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseFilter#isAllowed(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture, org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
 	 */

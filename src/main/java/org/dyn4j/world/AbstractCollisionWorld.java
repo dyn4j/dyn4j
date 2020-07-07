@@ -66,7 +66,6 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 import org.dyn4j.world.listener.BoundsListener;
 import org.dyn4j.world.listener.CollisionListener;
-import org.dyn4j.world.listener.WorldEventListener;
 import org.dyn4j.world.result.ConvexCastResult;
 import org.dyn4j.world.result.ConvexDetectResult;
 import org.dyn4j.world.result.DetectResult;
@@ -96,7 +95,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	protected BroadphaseDetector<T, E> broadphaseDetector;
 	
 	/** The {@link BroadphaseFilter} for detection */
-	protected BroadphaseFilter<T, E> detectBroadphaseFilter;
+	protected BroadphaseFilter<T, E> broadphaseFilter;
 	
 	/** The {@link NarrowphaseDetector} */
 	protected NarrowphaseDetector narrowphaseDetector;
@@ -137,8 +136,14 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	/** The collision listeners */
 	protected final List<CollisionListener<T, E>> collisionListeners;
 
+	/** The collision listeners (unmodifiable view) */
+	protected final List<CollisionListener<T, E>> collisionListenersUnmodifiable;
+	
 	/** The bounds listeners */
 	protected final List<BoundsListener<T, E>> boundsListeners;
+	
+	/** The bounds listeners (unmodifiable view) */
+	protected final List<BoundsListener<T, E>> boundsListenersUnmodifiable;
 	
 	/**
 	 * Default constructor.
@@ -160,7 +165,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		
 		this.bounds = null;
 		this.broadphaseDetector = new DynamicAABBTree<T, E>(initialBodyCapacity);
-		this.detectBroadphaseFilter = new DefaultBroadphaseFilter<T, E>();
+		this.broadphaseFilter = new CollisionBodyBroadphaseFilter<T, E>();
 		this.narrowphaseDetector = new Gjk();
 		this.narrowphasePostProcessor = new LinkPostProcessor();
 		this.manifoldSolver = new ClippingManifoldSolver();
@@ -174,6 +179,8 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		
 		this.collisionListeners = new ArrayList<CollisionListener<T,E>>(10);
 		this.boundsListeners = new ArrayList<BoundsListener<T,E>>(10);
+		this.boundsListenersUnmodifiable = Collections.unmodifiableList(this.boundsListeners);
+		this.collisionListenersUnmodifiable = Collections.unmodifiableList(this.collisionListeners);
 	}
 
 	/* (non-Javadoc)
@@ -338,23 +345,20 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.world.CollisionWorld#setDetectBroadphaseFilter(org.dyn4j.world.BroadphaseFilter)
+	 * @see org.dyn4j.world.CollisionWorld#setBroadphaseFilter(org.dyn4j.world.BroadphaseFilter)
 	 */
 	@Override
-	public void setDetectBroadphaseFilter(BroadphaseFilter<T, E> filter) {
-		if (filter == null) {
-			this.detectBroadphaseFilter = new DefaultBroadphaseFilter<T, E>();
-		} else {
-			this.detectBroadphaseFilter = filter;
-		}
+	public void setBroadphaseFilter(BroadphaseFilter<T, E> filter) {
+		if (filter == null) throw new NullPointerException(Messages.getString("dynamics.world.nullBroadphaseFilter"));
+		this.broadphaseFilter = filter;
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.world.CollisionWorld#getDetectBroadphaseFilter()
+	 * @see org.dyn4j.world.CollisionWorld#getBroadphaseFilter()
 	 */
 	@Override
-	public BroadphaseFilter<T, E> getDetectBroadphaseFilter() {
-		return this.detectBroadphaseFilter;
+	public BroadphaseFilter<T, E> getBroadphaseFilter() {
+		return this.broadphaseFilter;
 	}
 	
 	/* (non-Javadoc)
@@ -372,6 +376,23 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	@Override
 	public NarrowphaseDetector getNarrowphaseDetector() {
 		return this.narrowphaseDetector;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#setNarrowphasePostProcessor(org.dyn4j.collision.narrowphase.NarrowphasePostProcessor)
+	 */
+	@Override
+	public void setNarrowphasePostProcessor(NarrowphasePostProcessor narrowphasePostProcessor) {
+		if (narrowphasePostProcessor == null) throw new NullPointerException(Messages.getString("dynamics.world.nullNarrowphasePostProcessor"));
+		this.narrowphasePostProcessor = narrowphasePostProcessor;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#getNarrowphasePostProcessor()
+	 */
+	@Override
+	public NarrowphasePostProcessor getNarrowphasePostProcessor() {
+		return this.narrowphasePostProcessor;
 	}
 	
 	/* (non-Javadoc)
@@ -466,6 +487,8 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	 */
 	@Override
 	public V getCollisionData(T body1, E fixture1, T body2, E fixture2) {
+		if (body1 == null || body2 == null || fixture1 == null || fixture2 == null) return null;
+		
 		CollisionItemAdapter<T, E> item = new CollisionItemAdapter<T, E>();
 		
 		// makes sure the body and fixture are still part of this world
@@ -484,94 +507,20 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		return this.collisionData.get(pair);
 	}
 	
-	/**
-	 * Adds the listeners from the given source to the given list of listeners if they are or extend from the given class.
-	 * @param <L> the listener type
-	 * @param clazz the class to check
-	 * @param listeners the list of listeners to add to
-	 * @param source the source list of listeners to check
-	 */
-	@SuppressWarnings("unchecked")
-	protected <L extends WorldEventListener> void getListeners(Class<L> clazz, List<L> listeners, List<?> source) {
-		for (Object listener : source) {
-			if (clazz.isInstance(listener)) {
-				listeners.add((L) listener);
-			}
-		}
-	}
-	
-	/**
-	 * Removes the listeners from the given source if they are or extend from the given class.
-	 * @param <L> the listener type
-	 * @param clazz the class to check
-	 * @param source the source list of listeners to check and remove from
-	 */
-	protected <L extends WorldEventListener> void removeListeners(Class<L> clazz, List<?> source) {
-		Iterator<?> it = source.iterator();
-		while (it.hasNext()) {
-			Object listener = it.next();
-			if (clazz.isInstance(listener)) {
-				it.remove();
-			}
-		}
-	}
-	
-	/**
-	 * Removes the given listener from the given source and returns true if it was found and removed.
-	 * @param <L> the listener type
-	 * @param listener the listener object to remove
-	 * @param source the source list of listeners to check and remove from
-	 * @return boolean
-	 */
-	protected <L extends WorldEventListener> boolean removeListener(L listener, List<?> source) {
-		boolean removed = false;
-		Iterator<?> it = source.iterator();
-		while (it.hasNext()) {
-			Object test = it.next();
-			if (test == listener) {
-				it.remove();
-				removed = true;
-			}
-		}
-		return removed;
-	}
-	
-	/**
-	 * Returns true if the given listener is contained in the given source list of listeners.
-	 * @param <L> the listener type
-	 * @param listener the listener object to find
-	 * @param source the source list of listeners to check
-	 * @return boolean
-	 */
-	protected <L extends WorldEventListener> boolean containsListener(L listener, List<?> source) {
-		Iterator<?> it = source.iterator();
-		while (it.hasNext()) {
-			Object test = it.next();
-			if (test == listener) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	/* (non-Javadoc)
-	 * @see org.dyn4j.world.CollisionWorld#getListeners(java.lang.Class)
+	 * @see org.dyn4j.world.CollisionWorld#getBoundsListeners()
 	 */
 	@Override
-	public <L extends WorldEventListener> List<L> getListeners(Class<L> clazz) {
-		List<L> listeners = new ArrayList<L>();
-		this.getListeners(clazz, listeners, this.boundsListeners);
-		this.getListeners(clazz, listeners, this.collisionListeners);
-		return listeners;
+	public List<BoundsListener<T, E>> getBoundsListeners() {
+		return this.boundsListenersUnmodifiable;
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.world.CollisionWorld#removeAllListeners(java.lang.Class)
+	 * @see org.dyn4j.world.CollisionWorld#getCollisionListeners()
 	 */
 	@Override
-	public <L extends WorldEventListener> void removeAllListeners(Class<L> clazz) {
-		this.removeListeners(clazz, this.boundsListeners);
-		this.removeListeners(clazz, this.collisionListeners);
+	public List<CollisionListener<T, E>> getCollisionListeners() {
+		return this.collisionListenersUnmodifiable;
 	}
 	
 	/* (non-Javadoc)
@@ -584,35 +533,42 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.world.CollisionWorld#containsListener(org.dyn4j.world.listener.WorldEventListener)
+	 * @see org.dyn4j.world.CollisionWorld#removeAllBoundsListeners()
 	 */
 	@Override
-	public boolean containsListener(WorldEventListener listener) {
-		if (this.containsListener(listener, this.collisionListeners)) {
-			return true;
-		}
-		if (this.containsListener(listener, this.boundsListeners)) {
-			return true;
-		}
-		return false;
+	public void removeAllBoundsListeners() {
+		this.boundsListeners.clear();
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.world.CollisionWorld#removeListener(org.dyn4j.world.listener.WorldEventListener)
+	 * @see org.dyn4j.world.CollisionWorld#removeAllCollisionListeners()
 	 */
 	@Override
-	public boolean removeListener(WorldEventListener listener) {
-		boolean removed = false;
-		removed |= this.removeListener(listener, this.boundsListeners);
-		removed |= this.removeListener(listener, this.collisionListeners);
-		return removed;
+	public void removeAllCollisionListeners() {
+		this.collisionListeners.clear();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#removeBoundsListener(org.dyn4j.world.listener.BoundsListener)
+	 */
+	@Override
+	public boolean removeBoundsListener(BoundsListener<T, E> listener) {
+		return this.boundsListeners.remove(listener);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.CollisionWorld#removeCollisionListener(org.dyn4j.world.listener.CollisionListener)
+	 */
+	@Override
+	public boolean removeCollisionListener(CollisionListener<T, E> listener) {
+		return this.collisionListeners.remove(listener);
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.world.CollisionWorld#addListener(org.dyn4j.world.listener.BoundsListener)
 	 */
 	@Override
-	public boolean addListener(BoundsListener<T, E> listener) {
+	public boolean addBoundsListener(BoundsListener<T, E> listener) {
 		return this.boundsListeners.add(listener);
 	}
 	
@@ -620,7 +576,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	 * @see org.dyn4j.world.CollisionWorld#addListener(org.dyn4j.world.listener.CollisionListener)
 	 */
 	@Override
-	public boolean addListener(CollisionListener<T, E> listener) {
+	public boolean addCollisionListener(CollisionListener<T, E> listener) {
 		return this.collisionListeners.add(listener);
 	}
 	
@@ -653,7 +609,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		int blSize = boundsListeners.size();
 		int bSize = this.bodies.size();
 		
-		// update all AABBs in the broadphase (can skip those who's transforms are identical?  i don't think so because they could change the shape of the colliable)
+		// update all AABBs in the broadphase
 		CollisionItemAdapter<T, E> bAdapter = new CollisionItemAdapter<T, E>();
 		for (int i = 0; i < bSize; i++) {
 			T body = this.bodies.get(i);
@@ -1205,7 +1161,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 			}
 			
 			// check broadphase filter conditions
-			if (!AbstractCollisionWorld.this.detectBroadphaseFilter.isAllowed(body1, fixture1, body2, fixture2)) {
+			if (!AbstractCollisionWorld.this.broadphaseFilter.isAllowed(body1, fixture1, body2, fixture2)) {
 				return collision;
 			}
 			
@@ -1278,6 +1234,9 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		/** The current index */
 		private int index;
 		
+		/** True if the current element has been removed */
+		private boolean removed = false;
+		
 		/**
 		 * Minimal constructor.
 		 */
@@ -1298,11 +1257,12 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		 */
 		@Override
 		public T next() {
-			if (this.index >= AbstractCollisionWorld.this.bodies.size()) {
+			if (this.index + 1 >= AbstractCollisionWorld.this.bodies.size()) {
 				throw new IndexOutOfBoundsException();
 			}
 			try {
 				this.index++;
+				this.removed = false;
 				T body = AbstractCollisionWorld.this.bodies.get(this.index);
 				return body;
 			} catch (IndexOutOfBoundsException ex) {
@@ -1315,7 +1275,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		 */
 		@Override
 		public void remove() {
-			if (this.index < 0) {
+			if (this.index < 0 || this.removed) {
 				throw new IllegalStateException();
 			}
 			if (this.index >= AbstractCollisionWorld.this.bodies.size()) {
@@ -1324,6 +1284,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 			try {
 				AbstractCollisionWorld.this.removeBody(this.index);
 				this.index--;
+				this.removed = true;
 			} catch (IndexOutOfBoundsException ex) {
 				throw new ConcurrentModificationException();
 			}
@@ -1983,7 +1944,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 					continue;
 				}
 
-				// makes sure the body and fixture are still part of this world
+				// make sure the body and fixture are still part of this world
 				this.item.set(collision.getBody2(), collision.getFixture2());
 				if (!AbstractCollisionWorld.this.broadphaseDetector.contains(item)) {
 					continue;

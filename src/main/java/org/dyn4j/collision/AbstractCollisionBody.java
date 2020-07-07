@@ -140,14 +140,14 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	 * @see org.dyn4j.collision.CollisionBody#removeAllFixtures()
 	 */
 	public List<T> removeAllFixtures() {
-		// return the current list
+		// return a list of the current fixtures
 		List<T> fixtures = new ArrayList<T>(this.fixtures);
-		// create a new list to replace the current list
-		this.fixtures.clear();
+		// notify of removal
 		if (this.fixtureModificationHandler != null) {
 			this.fixtureModificationHandler.onAllFixturesRemoved();
 		}
-		// return the current list
+		// lastly clear the list
+		this.fixtures.clear();
 		return fixtures;
 	}
 
@@ -523,11 +523,15 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 		/** The current index */
 		private int index;
 		
+		/** True if the current element has been removed */
+		private boolean removed;
+		
 		/**
 		 * Default constructor.
 		 */
 		public FixtureIterator() {
 			this.index = -1;
+			this.removed = false;
 		}
 		
 		/* (non-Javadoc)
@@ -548,6 +552,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 			}
 			try {
 				this.index++;
+				this.removed = false;
 				T fixture = AbstractCollisionBody.this.fixtures.get(this.index);
 				return fixture;
 			} catch (IndexOutOfBoundsException ex) {
@@ -560,7 +565,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 		 */
 		@Override
 		public void remove() {
-			if (this.index < 0) {
+			if (this.index < 0 || this.removed) {
 				throw new IllegalStateException();
 			}
 			if (this.index >= AbstractCollisionBody.this.fixtures.size()) {
@@ -569,6 +574,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 			try {
 				AbstractCollisionBody.this.removeFixture(this.index);
 				this.index--;
+				this.removed = true;
 			} catch (IndexOutOfBoundsException ex) {
 				throw new ConcurrentModificationException();
 			}

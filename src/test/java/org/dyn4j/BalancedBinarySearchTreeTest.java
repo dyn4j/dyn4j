@@ -33,6 +33,9 @@ import org.junit.Test;
 
 /**
  * Test case for the {@link BinarySearchTree} class.
+ * <p>
+ * For visualizing the tests.
+ * https://www.cs.usfca.edu/~galles/visualization/RedBlack.html
  * @author William Bittle
  * @version 3.2.3
  * @since 2.2.0
@@ -87,7 +90,7 @@ public class BalancedBinarySearchTreeTest {
 		TestCase.assertTrue(tree.insert(5));
 		TestCase.assertTrue(tree.contains(5));
 		
-		BinarySearchTree<Integer> t2 = new BinarySearchTree<Integer>();
+		BinarySearchTree<Integer> t2 = new BinarySearchTree<Integer>(true);
 		t2.insert(14);
 		t2.insert(8);
 		t2.insert(16);
@@ -163,9 +166,6 @@ public class BalancedBinarySearchTreeTest {
 	@Test
 	public void removeNotFound() {
 		TestCase.assertFalse(tree.remove(7));
-		
-		BinarySearchTreeNode<Integer> node = new BinarySearchTreeNode<Integer>(-3);
-		TestCase.assertFalse(tree.remove(node));
 	}
 	
 	/**
@@ -214,7 +214,7 @@ public class BalancedBinarySearchTreeTest {
 	public void isEmpty() {
 		TestCase.assertFalse(tree.isEmpty());
 		
-		BinarySearchTree<Integer> test = new BinarySearchTree<Integer>();
+		BinarySearchTree<Integer> test = new BinarySearchTree<Integer>(true);
 		TestCase.assertTrue(test.isEmpty());
 	}
 	
@@ -239,12 +239,6 @@ public class BalancedBinarySearchTreeTest {
 	public void contains() {
 		TestCase.assertTrue(tree.contains(9));
 		TestCase.assertFalse(tree.contains(14));
-		
-		BinarySearchTreeNode<Integer> node = tree.get(-3);
-		TestCase.assertTrue(tree.contains(node));
-		
-		node = new BinarySearchTreeNode<Integer>(-3);
-		TestCase.assertFalse(tree.contains(node));
 	}
 	
 	/**

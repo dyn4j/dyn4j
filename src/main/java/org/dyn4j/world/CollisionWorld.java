@@ -35,6 +35,7 @@ import org.dyn4j.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.collision.continuous.TimeOfImpactDetector;
 import org.dyn4j.collision.manifold.ManifoldSolver;
 import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
+import org.dyn4j.collision.narrowphase.NarrowphasePostProcessor;
 import org.dyn4j.collision.narrowphase.RaycastDetector;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
@@ -44,7 +45,6 @@ import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.listener.BoundsListener;
 import org.dyn4j.world.listener.CollisionListener;
-import org.dyn4j.world.listener.WorldEventListener;
 import org.dyn4j.world.result.ConvexCastResult;
 import org.dyn4j.world.result.ConvexDetectResult;
 import org.dyn4j.world.result.DetectResult;
@@ -172,54 +172,51 @@ public interface CollisionWorld<T extends CollisionBody<E>, E extends Fixture, V
 	public Bounds getBounds();
 	
 	// listeners
+
+	/**
+	 * Returns an unmodifiable list of all the collision listeners registered to this world.
+	 * @return List&lt;{@link CollisionListener}&gt;
+	 */
+	public List<CollisionListener<T, E>> getCollisionListeners();
+	
+	/**
+	 * Returns an unmodifiable list of all the bounds listeners registered to this world.
+	 * @return List&lt;{@link BoundsListener}&gt;
+	 */
+	public List<BoundsListener<T, E>> getBoundsListeners();
 	
 	/**
 	 * Removes all listeners from this world.
 	 */
 	public void removeAllListeners();
-	
-	/**
-	 * Removes all listeners of the given type from this world.
-	 * <p>
-	 * This is typically called in one of two ways:
-	 * <ul>
-	 * <li>Using the base listener interface. removeAllListeners(BoundsListener.class) for example.
-	 * <li>Using a user defined type to remove listeners that are specific to a piece of functionality.  removeAllListeners(SoundListener.class) for example.
-	 * </ul>
-	 * @param <L> the type to remove
-	 * @param clazz the class object for the type to remove
-	 */
-	public <L extends WorldEventListener> void removeAllListeners(Class<L> clazz);
-	
-	/**
-	 * Returns a list of listeners that are or extend from the given type.
-	 * <p>
-	 * This is typically called in one of two ways:
-	 * <ul>
-	 * <li>Using the base listener interface. getListeners(BoundsListener.class) for example.
-	 * <li>Using a user defined type to get listeners that are specific to a piece of functionality.  getListeners(SoundListener.class) for example.
-	 * </ul>
-	 * @param <L> the type to get
-	 * @param clazz the class object for the type to get
-	 * @return List
-	 */
-	public <L extends WorldEventListener> List<L> getListeners(Class<L> clazz);
 
 	/**
-	 * Returns true if the given listeners is registered to this world.
-	 * @param listener the listener
-	 * @return boolean
+	 * Removes all collision listeners from this world.
 	 */
-	public boolean containsListener(WorldEventListener listener);
+	public void removeAllCollisionListeners();
 	
 	/**
-	 * Removes the given listener from this world and returns true if it was removed.
+	 * Removes all bounds listeners from this world.
+	 */
+	public void removeAllBoundsListeners();
+
+	/**
+	 * Removes the given collision listener from this world and returns true if it was removed.
 	 * <p>
 	 * This method will return false if the listener was not found in this world.
 	 * @param listener the listener
 	 * @return boolean
 	 */
-	public boolean removeListener(WorldEventListener listener);
+	public boolean removeCollisionListener(CollisionListener<T, E> listener);
+	
+	/**
+	 * Removes the given bounds listener from this world and returns true if it was removed.
+	 * <p>
+	 * This method will return false if the listener was not found in this world.
+	 * @param listener the listener
+	 * @return boolean
+	 */
+	public boolean removeBoundsListener(BoundsListener<T, E> listener);
 	
 	/**
 	 * Adds the given {@link CollisionListener} to this world.
@@ -228,7 +225,7 @@ public interface CollisionWorld<T extends CollisionBody<E>, E extends Fixture, V
 	 * @param listener the listener to add
 	 * @return boolean
 	 */
-	public boolean addListener(CollisionListener<T, E> listener);
+	public boolean addCollisionListener(CollisionListener<T, E> listener);
 	
 	/**
 	 * Adds the given {@link BoundsListener} to this world.
@@ -237,7 +234,7 @@ public interface CollisionWorld<T extends CollisionBody<E>, E extends Fixture, V
 	 * @param listener the listener to add
 	 * @return boolean
 	 */
-	public boolean addListener(BoundsListener<T, E> listener);
+	public boolean addBoundsListener(BoundsListener<T, E> listener);
 	
 	// broadphase
 	
@@ -257,19 +254,19 @@ public interface CollisionWorld<T extends CollisionBody<E>, E extends Fixture, V
 	/**
 	 * Sets the {@link BroadphaseFilter} used when detecting collisions for each time step.
 	 * <p>
-	 * This should always be an instance of a class that extends the {@link DetectBroadphaseFilter}
+	 * This should always be an instance of a class that extends the {@link PhysicsBodyBroadphaseFilter}
 	 * so that the standard filters are retained.
 	 * @param filter the filter
 	 * @since 3.2.2
 	 */
-	public void setDetectBroadphaseFilter(BroadphaseFilter<T, E> filter);
+	public void setBroadphaseFilter(BroadphaseFilter<T, E> filter);
 	
 	/**
 	 * Returns the {@link BroadphaseFilter} used when detecting collisions for each time step.
 	 * @return {@link BroadphaseFilter}
 	 * @since 3.2.2
 	 */
-	public BroadphaseFilter<T, E> getDetectBroadphaseFilter();
+	public BroadphaseFilter<T, E> getBroadphaseFilter();
 	
 	// narrowphase
 	
@@ -285,6 +282,19 @@ public interface CollisionWorld<T extends CollisionBody<E>, E extends Fixture, V
 	 * @return {@link NarrowphaseDetector} the narrow-phase collision detection algorithm
 	 */
 	public NarrowphaseDetector getNarrowphaseDetector();
+
+	/**
+	 * Sets the narrow-phase post processing algorithm.
+	 * @param narrowphasePostProcessor the narrow-phase post processing algorithm
+	 * @throws NullPointerException if narrowphasePostProcessor is null
+	 */
+	public void setNarrowphasePostProcessor(NarrowphasePostProcessor narrowphasePostProcessor);
+	
+	/**
+	 * Returns the narrow-phase post processing algorithm.
+	 * @return {@link NarrowphasePostProcessor} the narrow-phase post processing algorithm
+	 */
+	public NarrowphasePostProcessor getNarrowphasePostProcessor();
 	
 	// manifold
 	

@@ -66,6 +66,15 @@ public class AABBTest {
 	}
 	
 	/**
+	 * Creates an aabb from a negative radius.
+	 * @since 4.0.0
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createRadiusNegative() {
+		new AABB(new Vector2(-1.0, 1.0), -1.0);
+	}
+	
+	/**
 	 * Tests the successful copy of an AABB.
 	 */
 	@Test
@@ -298,12 +307,15 @@ public class AABBTest {
 		
 		// test containment
 		TestCase.assertTrue(aabb.contains(0.0, 0.5));
+		TestCase.assertTrue(aabb.contains(new Vector2(0.0, 0.5)));
 		
 		// test no containment
 		TestCase.assertFalse(aabb.contains(0.0, 2.0));
+		TestCase.assertFalse(aabb.contains(new Vector2(0.0, 2.0)));
 		
 		// test on edge
 		TestCase.assertTrue(aabb.contains(0.0, 1.0));
+		TestCase.assertTrue(aabb.contains(new Vector2(0.0, 1.0)));
 	}
 	
 	/**
@@ -324,6 +336,18 @@ public class AABBTest {
 		// test using separated aabbs (should give a zero AABB)
 		AABB aabb3 = new AABB(-4.0, 2.0, -3.0, 4.0);
 		aabbr = aabb1.getIntersection(aabb3);
+		TestCase.assertEquals(0.0, aabbr.getMinX(), 1.0E-4);
+		TestCase.assertEquals(0.0, aabbr.getMinY(), 1.0E-4);
+		TestCase.assertEquals(0.0, aabbr.getMaxX(), 1.0E-4);
+		TestCase.assertEquals(0.0, aabbr.getMaxY(), 1.0E-4);
+		
+		aabbr.intersection(aabb1, aabb2);
+		TestCase.assertEquals(-1.0, aabbr.getMinX(), 1.0E-4);
+		TestCase.assertEquals(0.0, aabbr.getMinY(), 1.0E-4);
+		TestCase.assertEquals(2.0, aabbr.getMaxX(), 1.0E-4);
+		TestCase.assertEquals(0.5, aabbr.getMaxY(), 1.0E-4);
+		
+		aabbr.intersection(aabb1, aabb3);
 		TestCase.assertEquals(0.0, aabbr.getMinX(), 1.0E-4);
 		TestCase.assertEquals(0.0, aabbr.getMinY(), 1.0E-4);
 		TestCase.assertEquals(0.0, aabbr.getMaxX(), 1.0E-4);
@@ -354,5 +378,45 @@ public class AABBTest {
 		TestCase.assertFalse(aabb.isDegenerate());
 		TestCase.assertFalse(aabb.isDegenerate(Epsilon.E));
 		TestCase.assertTrue(aabb.isDegenerate(0.000001));
+	}
+	
+	/**
+	 * Tests the equals method.
+	 */
+	@Test
+	public void testEquals() {
+		AABB aabb1 = new AABB(-2.0, 0.0, 2.0, 1.0);
+		AABB aabb2 = new AABB(-1.0, -2.0, 5.0, 2.0);
+		AABB aabb3 = new AABB(-1.0, -2.0, 5.0, 2.0);
+		
+		TestCase.assertFalse(aabb1.equals(null));
+		TestCase.assertTrue(aabb1.equals(aabb1));
+		TestCase.assertFalse(aabb1.equals(aabb2));
+		TestCase.assertFalse(aabb1.equals(aabb3));
+		TestCase.assertTrue(aabb2.equals(aabb3));
+		TestCase.assertFalse(aabb1.equals(new Object()));
+	}
+	
+	/**
+	 * Tests the hashcode method.
+	 */
+	@Test
+	public void testHashcode() {
+		AABB aabb1 = new AABB(-2.0, 0.0, 2.0, 1.0);
+		AABB aabb2 = new AABB(-1.0, -2.0, 5.0, 2.0);
+		AABB aabb3 = new AABB(-1.0, -2.0, 5.0, 2.0);
+		
+		TestCase.assertEquals(aabb1.hashCode(), aabb1.hashCode());
+		TestCase.assertEquals(aabb2.hashCode(), aabb3.hashCode());
+		TestCase.assertFalse(aabb1.hashCode() == aabb2.hashCode());
+	}
+	
+	/**
+	 * Tests the toString method.
+	 */
+	@Test
+	public void testToString() {
+		AABB aabb1 = new AABB(-2.0, 0.0, 2.0, 1.0);
+		TestCase.assertNotNull(aabb1.toString());
 	}
 }

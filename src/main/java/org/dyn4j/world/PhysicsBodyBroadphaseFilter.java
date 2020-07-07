@@ -36,7 +36,7 @@ import org.dyn4j.dynamics.PhysicsBody;
  * @since 3.2.0
  * @param <T> the {@link PhysicsBody} type
  */
-public class DetectBroadphaseFilter<T extends PhysicsBody> extends DefaultBroadphaseFilter<T, BodyFixture> implements BroadphaseFilter<T, BodyFixture> {
+public class PhysicsBodyBroadphaseFilter<T extends PhysicsBody> extends CollisionBodyBroadphaseFilter<T, BodyFixture> implements BroadphaseFilter<T, BodyFixture> {
 	/** The world */
 	private final PhysicsWorld<T, ?> world;
 	
@@ -44,7 +44,7 @@ public class DetectBroadphaseFilter<T extends PhysicsBody> extends DefaultBroadp
 	 * Minimal constructor.
 	 * @param world the world
 	 */
-	public DetectBroadphaseFilter(PhysicsWorld<T, ?> world) {
+	public PhysicsBodyBroadphaseFilter(PhysicsWorld<T, ?> world) {
 		this.world = world;
 	}
 	

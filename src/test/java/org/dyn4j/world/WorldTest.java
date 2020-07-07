@@ -56,15 +56,12 @@ import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.listener.BoundsListener;
 import org.dyn4j.world.listener.BoundsListenerAdapter;
-import org.dyn4j.world.listener.CollisionListener;
 import org.dyn4j.world.listener.CollisionListenerAdapter;
-import org.dyn4j.world.listener.ContactListener;
 import org.dyn4j.world.listener.ContactListenerAdapter;
 import org.dyn4j.world.listener.DestructionListener;
 import org.dyn4j.world.listener.DestructionListenerAdapter;
 import org.dyn4j.world.listener.StepListener;
 import org.dyn4j.world.listener.StepListenerAdapter;
-import org.dyn4j.world.listener.TimeOfImpactListener;
 import org.dyn4j.world.listener.TimeOfImpactListenerAdapter;
 import org.dyn4j.world.result.ConvexDetectResult;
 import org.junit.Test;
@@ -123,6 +120,8 @@ public class WorldTest {
 	public void createSuccess() {
 		World w = new World();
 		TestCase.assertNotNull(w.bodies);
+		TestCase.assertNotNull(w.bodiesUnmodifiable);
+		TestCase.assertNull(w.bounds);
 		TestCase.assertNotNull(w.boundsListeners);
 		TestCase.assertNotNull(w.broadphaseDetector);
 		TestCase.assertNotNull(w.coefficientMixer);
@@ -132,7 +131,7 @@ public class WorldTest {
 		TestCase.assertNotNull(w.contactConstraintSolver);
 		TestCase.assertNotNull(w.contactListeners);
 		TestCase.assertNotNull(w.destructionListeners);
-		TestCase.assertNotNull(w.detectBroadphaseFilter);
+		TestCase.assertNotNull(w.broadphaseFilter);
 		TestCase.assertNotNull(w.gravity);
 		TestCase.assertNotNull(w.interactionGraph);
 		TestCase.assertNotNull(w.joints);
@@ -183,7 +182,7 @@ public class WorldTest {
 	public void updatev() {
 		World w = new World();
 		WTStepListener sl = new WTStepListener();
-		w.addListener(sl);
+		w.addStepListener(sl);
 		
 		// a step is always taken unless the update time
 		// is zero or less
@@ -205,7 +204,7 @@ public class WorldTest {
 	public void stepInt() {
 		World w = new World();
 		WTStepListener sl = new WTStepListener();
-		w.addListener(sl);
+		w.addStepListener(sl);
 		
 		// make sure the specified number of steps are taken
 		w.step(3);
@@ -226,7 +225,7 @@ public class WorldTest {
 	public void stepIntElapsed() {
 		World w = new World();
 		WTStepListener sl = new WTStepListener();
-		w.addListener(sl);
+		w.addStepListener(sl);
 		
 		// make sure the specified number of steps are taken
 		w.step(3, 1.0 / 50.0);
@@ -343,7 +342,7 @@ public class WorldTest {
 		
 		// setup the destruction listener
 		WTDestructionListener dl = new WTDestructionListener();
-		w.addListener(dl);
+		w.addDestructionListener(dl);
 		
 		// test removing a null body
 		boolean success = w.removeBody((Body) null);
@@ -426,7 +425,7 @@ public class WorldTest {
 		
 		// setup the destruction listener
 		WTDestructionListener dl = new WTDestructionListener();
-		w.addListener(dl);
+		w.addDestructionListener(dl);
 		
 		// test removing a null body
 		boolean success = w.removeBody((Body) null);
@@ -596,9 +595,9 @@ public class WorldTest {
 	public void addListener() {
 		World w = new World();
 		BoundsListener<Body, BodyFixture> bl = new BoundsListenerAdapter<Body, BodyFixture>();
-		w.addListener(bl);
+		w.addBoundsListener(bl);
 		
-		TestCase.assertSame(bl, w.getListeners(BoundsListener.class).get(0));
+		TestCase.assertSame(bl, w.getBoundsListeners().get(0));
 	}
 	
 	/**
@@ -747,7 +746,7 @@ public class WorldTest {
 		
 		// setup the listener
 		WTDestructionListener dl = new WTDestructionListener();
-		w.addListener(dl);
+		w.addDestructionListener(dl);
 		
 		// setup the bodies
 		Convex c1 = Geometry.createCircle(1.0);
@@ -789,7 +788,7 @@ public class WorldTest {
 		
 		// setup the listener
 		WTDestructionListener dl = new WTDestructionListener();
-		w.addListener(dl);
+		w.addDestructionListener(dl);
 		
 		// setup the bodies
 		Convex c1 = Geometry.createCircle(1.0);
@@ -959,27 +958,27 @@ public class WorldTest {
 		TimeOfImpactListenerAdapter<Body> ta = new TimeOfImpactListenerAdapter<Body>();
 		ContactListenerAdapter<Body> na = new ContactListenerAdapter<Body>();
 		
-		w.addListener(ba);
+		w.addBoundsListener(ba);
 		TestCase.assertEquals(1, w.boundsListeners.size());
 		
-		w.addListener(ca);
+		w.addCollisionListener(ca);
 		TestCase.assertEquals(1, w.collisionListeners.size());
 		
-		w.addListener(da);
+		w.addDestructionListener(da);
 		TestCase.assertEquals(1, w.destructionListeners.size());
 		
-		w.addListener(sa);
+		w.addStepListener(sa);
 		TestCase.assertEquals(1, w.stepListeners.size());
 		
-		w.addListener(ta);
+		w.addTimeOfImpactListener(ta);
 		TestCase.assertEquals(1, w.timeOfImpactListeners.size());
 		
-		w.addListener(na);
+		w.addContactListener(na);
 		TestCase.assertEquals(1, w.contactListeners.size());
 		
 		// test the multi-listener functionality
-		w.addListener(new WTStepListener());
-		w.addListener(new WTStepListener());
+		w.addStepListener(new WTStepListener());
+		w.addStepListener(new WTStepListener());
 		w.step();
 		TestCase.assertEquals(3, w.stepListeners.size());
 		// verify both were called
@@ -987,22 +986,22 @@ public class WorldTest {
 		TestCase.assertEquals(1, ((WTStepListener)w.stepListeners.get(2)).steps);
 		
 		// test removing
-		w.removeAllListeners(BoundsListener.class);
+		w.removeAllBoundsListeners();
 		TestCase.assertEquals(0, w.boundsListeners.size());
 		
-		w.removeAllListeners(CollisionListener.class);
+		w.removeAllCollisionListeners();
 		TestCase.assertEquals(0, w.collisionListeners.size());
 		
-		w.removeAllListeners(DestructionListener.class);
+		w.removeAllDestructionListeners();
 		TestCase.assertEquals(0, w.destructionListeners.size());
 		
-		w.removeAllListeners(StepListener.class);
+		w.removeAllStepListeners();
 		TestCase.assertEquals(0, w.stepListeners.size());
 		
-		w.removeAllListeners(TimeOfImpactListener.class);
+		w.removeAllTimeOfImpactListeners();
 		TestCase.assertEquals(0, w.timeOfImpactListeners.size());
 		
-		w.removeAllListeners(ContactListener.class);
+		w.removeAllContactListeners();
 		TestCase.assertEquals(0, w.contactListeners.size());
 	}
 	
@@ -1152,7 +1151,7 @@ public class WorldTest {
 		world.addBody(b4);
 		
 		// override the contact adapter to simulate a disabled contact
-		world.addListener(new ContactListenerAdapter<Body>() {
+		world.addContactListener(new ContactListenerAdapter<Body>() {
 			@Override
 			public void begin(ContactCollisionData<Body> collision, Contact contact) {
 				

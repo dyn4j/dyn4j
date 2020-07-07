@@ -334,6 +334,88 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	 */
 	public Vector2 getGravity();
 
+	// listeners
+	
+	/**
+	 * Returns an unmodifiable list of all the contact listeners registered to this world.
+	 * @return List&lt;{@link ContactListener}&gt;
+	 */
+	public List<ContactListener<T>> getContactListeners();
+	
+	/**
+	 * Returns an unmodifiable list of all the destruction listeners registered to this world.
+	 * @return List&lt;{@link DestructionListener}&gt;
+	 */
+	public List<DestructionListener<T>> getDestructionListeners();
+	
+	/**
+	 * Returns an unmodifiable list of all the step listeners registered to this world.
+	 * @return List&lt;{@link StepListener}&gt;
+	 */
+	public List<StepListener<T>> getStepListeners();
+	
+	/**
+	 * Returns an unmodifiable list of all the time of impact listeners registered to this world.
+	 * @return List&lt;{@link TimeOfImpactListener}&gt;
+	 */
+	public List<TimeOfImpactListener<T>> getTimeOfImpactListeners();
+	
+	/**
+	 * Removes all contact listeners from this world.
+	 */
+	public void removeAllContactListeners();
+	
+	/**
+	 * Removes all destruction listeners from this world.
+	 */
+	public void removeAllDestructionListeners();
+	
+	/**
+	 * Removes all step listeners from this world.
+	 */
+	public void removeAllStepListeners();
+	
+	/**
+	 * Removes all time of impact listeners from this world.
+	 */
+	public void removeAllTimeOfImpactListeners();
+	
+	/**
+	 * Removes the given contact listener from this world and returns true if it was removed.
+	 * <p>
+	 * This method will return false if the listener was not found in this world.
+	 * @param listener the listener
+	 * @return boolean
+	 */
+	public boolean removeContactListener(ContactListener<T> listener);
+	
+	/**
+	 * Removes the given destruction listener from this world and returns true if it was removed.
+	 * <p>
+	 * This method will return false if the listener was not found in this world.
+	 * @param listener the listener
+	 * @return boolean
+	 */
+	public boolean removeDestructionListener(DestructionListener<T> listener);
+	
+	/**
+	 * Removes the given step listener from this world and returns true if it was removed.
+	 * <p>
+	 * This method will return false if the listener was not found in this world.
+	 * @param listener the listener
+	 * @return boolean
+	 */
+	public boolean removeStepListener(StepListener<T> listener);
+	
+	/**
+	 * Removes the given time of impact listener from this world and returns true if it was removed.
+	 * <p>
+	 * This method will return false if the listener was not found in this world.
+	 * @param listener the listener
+	 * @return boolean
+	 */
+	public boolean removeTimeOfImpactListener(TimeOfImpactListener<T> listener);
+	
 	/**
 	 * Adds the given {@link ContactListener} to this world.
 	 * <p>
@@ -341,7 +423,7 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	 * @param listener the listener to add
 	 * @return boolean
 	 */
-	public boolean addListener(ContactListener<T> listener);
+	public boolean addContactListener(ContactListener<T> listener);
 	
 	/**
 	 * Adds the given {@link DestructionListener} to this world.
@@ -350,7 +432,7 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	 * @param listener the listener to add
 	 * @return boolean
 	 */
-	public boolean addListener(DestructionListener<T> listener);
+	public boolean addDestructionListener(DestructionListener<T> listener);
 	
 	/**
 	 * Adds the given {@link StepListener} to this world.
@@ -359,7 +441,7 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	 * @param listener the listener to add
 	 * @return boolean
 	 */
-	public boolean addListener(StepListener<T> listener);
+	public boolean addStepListener(StepListener<T> listener);
 	
 	/**
 	 * Adds the given {@link TimeOfImpactListener} to this world.
@@ -368,7 +450,9 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	 * @param listener the listener to add
 	 * @return boolean
 	 */
-	public boolean addListener(TimeOfImpactListener<T> listener);
+	public boolean addTimeOfImpactListener(TimeOfImpactListener<T> listener);
+	
+	// algorithms
 	
 	/**
 	 * Returns the {@link CoefficientMixer}.

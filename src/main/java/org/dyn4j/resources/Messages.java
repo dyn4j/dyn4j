@@ -51,7 +51,7 @@ public final class Messages {
 		try {
 			return BUNDLE.getString(key);
 		} catch (MissingResourceException ex) {
-			return String.format("Key %1$ not found.", key);
+			return String.format("Key %1$s not found.", key);
 		}
 	}
 }

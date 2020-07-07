@@ -57,7 +57,6 @@ import org.dyn4j.world.listener.ContactListener;
 import org.dyn4j.world.listener.DestructionListener;
 import org.dyn4j.world.listener.StepListener;
 import org.dyn4j.world.listener.TimeOfImpactListener;
-import org.dyn4j.world.listener.WorldEventListener;
 
 /**
  * Abstract implementation of the {@link PhysicsWorld} interface.
@@ -99,15 +98,27 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	
 	/** The list of {@link ContactListener}s */
 	protected final List<ContactListener<T>> contactListeners;
+
+	/** The unmodifiable list of {@link ContactListener}s */
+	protected final List<ContactListener<T>> contactListenersUnmodifiable;
 	
 	/** The list of {@link DestructionListener}s */
 	protected final List<DestructionListener<T>> destructionListeners;
 	
+	/** The unmodifiable list of {@link DestructionListener}s */
+	protected final List<DestructionListener<T>> destructionListenersUnmodifiable;
+	
 	/** The list of {@link TimeOfImpactListener}s */
 	protected final List<TimeOfImpactListener<T>> timeOfImpactListeners;
 	
+	/** The unmodifiable list of {@link TimeOfImpactListener}s */
+	protected final List<TimeOfImpactListener<T>> timeOfImpactListenersUnmodifiable;
+	
 	/** The list of {@link StepListener}s */
 	protected final List<StepListener<T>> stepListeners;
+	
+	/** The unmodifiable list of {@link StepListener}s */
+	protected final List<StepListener<T>> stepListenersUnmodifiable;
 	
 	// state data
 
@@ -148,7 +159,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		// override the broadphase filter
 		// the CollisionWorld uses the DefaultBroadphaseFilter but 
 		// the PhysicsWorld needs to use the DetectBroadphaseFilter
-		this.detectBroadphaseFilter = new DetectBroadphaseFilter<T>(this);
+		this.broadphaseFilter = new PhysicsBodyBroadphaseFilter<T>(this);
 		this.coefficientMixer = CoefficientMixer.DEFAULT_MIXER;
 		this.contactConstraintSolver = new SequentialImpulses<T>();
 		this.timeOfImpactSolver = new TimeOfImpactSolver<T>();
@@ -160,6 +171,11 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		this.destructionListeners = new ArrayList<DestructionListener<T>>();
 		this.timeOfImpactListeners = new ArrayList<TimeOfImpactListener<T>>();
 		this.stepListeners = new ArrayList<StepListener<T>>();
+		
+		this.contactListenersUnmodifiable = Collections.unmodifiableList(this.contactListeners);
+		this.destructionListenersUnmodifiable = Collections.unmodifiableList(this.destructionListeners);
+		this.timeOfImpactListenersUnmodifiable = Collections.unmodifiableList(this.timeOfImpactListeners);
+		this.stepListenersUnmodifiable = Collections.unmodifiableList(this.stepListeners);
 		
 		this.time = 0.0;
 		
@@ -895,33 +911,37 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.world.AbstractCollisionWorld#getListeners(java.lang.Class)
+	 * @see org.dyn4j.world.PhysicsWorld#getContactListeners()
 	 */
 	@Override
-	public <L extends WorldEventListener> List<L> getListeners(Class<L> clazz) {
-		List<L> listeners = super.getListeners(clazz);
-		
-		this.getListeners(clazz, listeners, this.stepListeners);
-		this.getListeners(clazz, listeners, this.contactListeners);
-		this.getListeners(clazz, listeners, this.destructionListeners);
-		this.getListeners(clazz, listeners, this.timeOfImpactListeners);
-		
-		return listeners;
+	public List<ContactListener<T>> getContactListeners() {
+		return this.contactListenersUnmodifiable;
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.world.AbstractCollisionWorld#removeAllListeners(java.lang.Class)
+	 * @see org.dyn4j.world.PhysicsWorld#getDestructionListeners()
 	 */
 	@Override
-	public <L extends WorldEventListener> void removeAllListeners(Class<L> clazz) {
-		super.removeAllListeners(clazz);
-		
-		this.removeListeners(clazz, this.stepListeners);
-		this.removeListeners(clazz, this.contactListeners);
-		this.removeListeners(clazz, this.destructionListeners);
-		this.removeListeners(clazz, this.timeOfImpactListeners);
+	public List<DestructionListener<T>> getDestructionListeners() {
+		return this.destructionListenersUnmodifiable;
 	}
-
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#getStepListeners()
+	 */
+	@Override
+	public List<StepListener<T>> getStepListeners() {
+		return this.stepListenersUnmodifiable;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#getTimeOfImpactListeners()
+	 */
+	@Override
+	public List<TimeOfImpactListener<T>> getTimeOfImpactListeners() {
+		return this.timeOfImpactListenersUnmodifiable;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.world.AbstractCollisionWorld#removeAllListeners()
 	 */
@@ -936,70 +956,98 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.world.AbstractCollisionWorld#containsListener(org.dyn4j.world.listener.WorldEventListener)
+	 * @see org.dyn4j.world.PhysicsWorld#removeAllContactListeners()
 	 */
 	@Override
-	public boolean containsListener(WorldEventListener listener) {
-		if (super.containsListener(listener)) {
-			return true;
-		}
-		if (this.containsListener(listener, this.stepListeners)) {
-			return true;
-		}
-		if (this.containsListener(listener, this.contactListeners)) {
-			return true;
-		}
-		if (this.containsListener(listener, this.destructionListeners)) {
-			return true;
-		}
-		if (this.containsListener(listener, this.timeOfImpactListeners)) {
-			return true;
-		}
-		return false;
+	public void removeAllContactListeners() {
+		this.contactListeners.clear();
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.world.AbstractCollisionWorld#removeListener(org.dyn4j.world.listener.WorldEventListener)
+	 * @see org.dyn4j.world.PhysicsWorld#removeAllDestructionListeners()
 	 */
 	@Override
-	public boolean removeListener(WorldEventListener listener) {
-		boolean removed = super.removeListener(listener);
-		removed |= this.removeListener(listener, this.stepListeners);
-		removed |= this.removeListener(listener, this.contactListeners);
-		removed |= this.removeListener(listener, this.destructionListeners);
-		removed |= this.removeListener(listener, this.timeOfImpactListeners);
-		return removed;
+	public void removeAllDestructionListeners() {
+		this.destructionListeners.clear();
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.world.PhysicsWorld#addListener(org.dyn4j.world.listener.ContactListener)
+	 * @see org.dyn4j.world.PhysicsWorld#removeAllStepListeners()
 	 */
 	@Override
-	public boolean addListener(ContactListener<T> listener) {
+	public void removeAllStepListeners() {
+		this.stepListeners.clear();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#removeAllTimeOfImpactListeners()
+	 */
+	@Override
+	public void removeAllTimeOfImpactListeners() {
+		this.timeOfImpactListeners.clear();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#removeContactListener(org.dyn4j.world.listener.ContactListener)
+	 */
+	@Override
+	public boolean removeContactListener(ContactListener<T> listener) {
+		return this.contactListeners.remove(listener);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#removeDestructionListener(org.dyn4j.world.listener.DestructionListener)
+	 */
+	@Override
+	public boolean removeDestructionListener(DestructionListener<T> listener) {
+		return this.destructionListeners.remove(listener);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#removeStepListener(org.dyn4j.world.listener.StepListener)
+	 */
+	@Override
+	public boolean removeStepListener(StepListener<T> listener) {
+		return this.stepListeners.remove(listener);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#removeTimeOfImpactListener(org.dyn4j.world.listener.TimeOfImpactListener)
+	 */
+	@Override
+	public boolean removeTimeOfImpactListener(TimeOfImpactListener<T> listener) {
+		return this.timeOfImpactListeners.remove(listener);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#addContactListener(org.dyn4j.world.listener.ContactListener)
+	 */
+	@Override
+	public boolean addContactListener(ContactListener<T> listener) {
 		return this.contactListeners.add(listener);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.world.PhysicsWorld#addListener(org.dyn4j.world.listener.DestructionListener)
+	 * @see org.dyn4j.world.PhysicsWorld#addDestructionListener(org.dyn4j.world.listener.DestructionListener)
 	 */
 	@Override
-	public boolean addListener(DestructionListener<T> listener) {
+	public boolean addDestructionListener(DestructionListener<T> listener) {
 		return this.destructionListeners.add(listener);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.world.PhysicsWorld#addListener(org.dyn4j.world.listener.StepListener)
+	 * @see org.dyn4j.world.PhysicsWorld#addStepListener(org.dyn4j.world.listener.StepListener)
 	 */
 	@Override
-	public boolean addListener(StepListener<T> listener) {
+	public boolean addStepListener(StepListener<T> listener) {
 		return this.stepListeners.add(listener);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.world.PhysicsWorld#addListener(org.dyn4j.world.listener.TimeOfImpactListener)
+	 * @see org.dyn4j.world.PhysicsWorld#addTimeOfImpactListener(org.dyn4j.world.listener.TimeOfImpactListener)
 	 */
 	@Override
-	public boolean addListener(TimeOfImpactListener<T> listener) {
+	public boolean addTimeOfImpactListener(TimeOfImpactListener<T> listener) {
 		return this.timeOfImpactListeners.add(listener);
 	}
 	

@@ -29,15 +29,13 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import org.dyn4j.resources.Messages;
-
 /**
  * An iterator class for looping through the elements of a {@link BinarySearchTree} 
  * in order or in reverse order.
  * <p>
  * The {@link #remove()} method is unsupported.
  * @author William Bittle
- * @version 3.2.3
+ * @version 4.0.0
  * @since 2.2.0
  * @param <E> the comparable type
  */
@@ -98,8 +96,6 @@ final class BinarySearchTreeIterator<E extends Comparable<E>> implements Iterato
 	 * @since 3.2.3
 	 */
 	private BinarySearchTreeIterator(BinarySearchTreeNode<E> root, E from, E to, boolean inOrder) {
-		// check for null
-		if (root == null) throw new NullPointerException(Messages.getString("binarySearchTree.nullSubTreeForIterator"));
 		// set the direction
 		this.inOrder = inOrder;
 		// create the node stack and initialize it
