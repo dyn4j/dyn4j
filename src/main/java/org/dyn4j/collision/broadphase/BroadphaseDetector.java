@@ -207,6 +207,8 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	 * are included in the updated list.
 	 * <p>
 	 * If {@link #isUpdateTrackingEnabled()} is false, this method will always return true.
+	 * <p>
+	 * Returns false if the given body is not part of this broadphase.
 	 * @param body the {@link CollisionBody}
 	 * @return boolean
 	 * @since 4.0.0
@@ -217,6 +219,8 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	 * Returns true if the given {@link Fixture} is included in the updated list.
 	 * <p>
 	 * If {@link #isUpdateTrackingEnabled()} is false, this method will always return true.
+	 * <p>
+	 * Returns false if the given body-fixture pair is not part of this broadphase.
 	 * @param body the {@link CollisionBody}
 	 * @param fixture the {@link Fixture}
 	 * @return boolean
@@ -228,6 +232,8 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	 * Returns true if the given {@link Fixture} is included in the updated list.
 	 * <p>
 	 * If {@link #isUpdateTrackingEnabled()} is false, this method will always return true.
+	 * <p>
+	 * Returns false if the given body-fixture pair is not part of this broadphase.
 	 * @param item the collision item
 	 * @return boolean
 	 * @since 4.0.0

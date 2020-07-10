@@ -228,6 +228,6 @@ public class WorldCollisionData<T extends PhysicsBody> implements ContactCollisi
 		this.penetration.clear();
 		this.manifold.clear();
 		// don't clear the contact constraint because we need to report
-		// ending of contacts when it happens
+		// ending of contacts based on the old data
 	}
 }

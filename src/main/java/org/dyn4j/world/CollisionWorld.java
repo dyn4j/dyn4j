@@ -472,8 +472,10 @@ public interface CollisionWorld<T extends CollisionBody<E>, E extends Fixture, V
 	/**
 	 * Returns a list of {@link RaycastResult}s containing all the body-fixtures that 
 	 * overlap with the given {@link Ray} using the current state of the {@link BroadphaseDetector}.
+	 * <p>
+	 * If the ray begins inside a fixture, that fixture will not be included in the results.
 	 * @param ray the ray
-	 * @param maxLength the max length of the ray; use 0 for infinite length
+	 * @param maxLength the max length of the ray; any value less than or equal to zero represents infinite length
 	 * @param filter the filter; can be null
 	 * @return List&lt;{@link RaycastResult}&gt;
 	 */
@@ -482,8 +484,10 @@ public interface CollisionWorld<T extends CollisionBody<E>, E extends Fixture, V
 	/**
 	 * Returns an iterator of {@link RaycastResult}s containing all the body-fixtures that 
 	 * overlap with the given {@link Ray} using the current state of the {@link BroadphaseDetector}.
+	 * <p>
+	 * If the ray begins inside a fixture, that fixture will not be included in the results.
 	 * @param ray the ray
-	 * @param maxLength the max length of the ray; use 0 for infinite length
+	 * @param maxLength the max length of the ray; any value less than or equal to zero represents infinite length
 	 * @param filter the filter; can be null
 	 * @return Iterator&lt;{@link RaycastResult}&gt;
 	 */
@@ -495,8 +499,10 @@ public interface CollisionWorld<T extends CollisionBody<E>, E extends Fixture, V
 	 * <p>
 	 * This method does not use the current state of the {@link BroadphaseDetector} and instead tests the
 	 * given body's fixtures directly.
+	 * <p>
+	 * If the ray begins inside a fixture, that fixture will not be included in the results.
 	 * @param ray the ray
-	 * @param maxLength the max length of the ray; use 0 for infinite length
+	 * @param maxLength the max length of the ray; any value less than or equal to zero represents infinite length
 	 * @param body the body
 	 * @param filter the filter; can be null
 	 * @return List&lt;{@link RaycastResult}&gt;
@@ -509,8 +515,10 @@ public interface CollisionWorld<T extends CollisionBody<E>, E extends Fixture, V
 	 * <p>
 	 * This method does not use the current state of the {@link BroadphaseDetector} and instead tests the
 	 * given body's fixtures directly.
+	 * <p>
+	 * If the ray begins inside a fixture, that fixture will not be included in the results.
 	 * @param ray the ray
-	 * @param maxLength the max length of the ray; use 0 for infinite length
+	 * @param maxLength the max length of the ray; any value less than or equal to zero represents infinite length
 	 * @param body the body
 	 * @param filter the filter; can be null
 	 * @return Iterator&lt;{@link RaycastResult}&gt;
@@ -523,8 +531,10 @@ public interface CollisionWorld<T extends CollisionBody<E>, E extends Fixture, V
 	 * <p>
 	 * The closest is defined as the closest intersection of the ray and a fixture to the 
 	 * ray's start point.
+	 * <p>
+	 * If the ray begins inside a fixture, that fixture will not be included in the results.
 	 * @param ray the ray
-	 * @param maxLength the max length of the ray; use 0 for infinite length
+	 * @param maxLength the max length of the ray; any value less than or equal to zero represents infinite length
 	 * @param filter the filter; can be null
 	 * @return {@link RaycastResult}
 	 */
@@ -539,8 +549,10 @@ public interface CollisionWorld<T extends CollisionBody<E>, E extends Fixture, V
 	 * <p>
 	 * This method does not use the current state of the {@link BroadphaseDetector} and instead tests the
 	 * given body's fixtures directly.
+	 * <p>
+	 * If the ray begins inside a fixture, that fixture will not be included in the results.
 	 * @param ray the ray
-	 * @param maxLength the max length of the ray; use 0 for infinite length
+	 * @param maxLength the max length of the ray; any value less than or equal to zero represents infinite length
 	 * @param body the body
 	 * @param filter the filter; can be null
 	 * @return {@link RaycastResult}

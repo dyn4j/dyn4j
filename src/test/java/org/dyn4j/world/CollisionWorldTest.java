@@ -1,3 +1,27 @@
+/*
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without modification, are permitted 
+ * provided that the following conditions are met:
+ * 
+ *   * Redistributions of source code must retain the above copyright notice, this list of conditions 
+ *     and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
+ *     and the following disclaimer in the documentation and/or other materials provided with the 
+ *     distribution.
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
+ *     promote products derived from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package org.dyn4j.world;
 
 import java.util.Iterator;
@@ -25,18 +49,27 @@ import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.MassType;
+import org.dyn4j.geometry.Ray;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.listener.BoundsListener;
 import org.dyn4j.world.listener.BoundsListenerAdapter;
 import org.dyn4j.world.listener.CollisionListener;
 import org.dyn4j.world.listener.CollisionListenerAdapter;
+import org.dyn4j.world.result.ConvexCastResult;
 import org.dyn4j.world.result.ConvexDetectResult;
 import org.dyn4j.world.result.DetectResult;
+import org.dyn4j.world.result.RaycastResult;
 import org.junit.Test;
 
 import junit.framework.TestCase;
 
+/**
+ * Tests for the AbstractCollisionWorld class.
+ * @author William Bittle
+ * @version 4.0.0
+ * @since 4.0.0
+ */
 public class CollisionWorldTest {
 	private class TestWorld extends AbstractCollisionWorld<Body, BodyFixture, WorldCollisionData<Body>> {
 
@@ -56,9 +89,16 @@ public class CollisionWorldTest {
 		@Override
 		protected void detectCollisions(Iterator<WorldCollisionData<Body>> iterator) {
 			while (iterator.hasNext()) {
-				WorldCollisionData<Body> collision = iterator.next();
-				
+				iterator.next();
 			}
+		}
+	}
+	
+	private class BoundsListenerCounter extends BoundsListenerAdapter<Body, BodyFixture> {
+		int n = 0;
+		@Override
+		public void outside(Body body) {
+			n++;
 		}
 	}
 	
@@ -499,7 +539,7 @@ public class CollisionWorldTest {
 			TestCase.fail();
 		}
 	}
-	
+
 	/**
 	 * Tests the getBounds and setBounds methods.
 	 */
@@ -1105,6 +1145,263 @@ public class CollisionWorldTest {
 		
 		TestCase.assertNull(w.getUserData());
 	}
+
+	/**
+	 * Tests the detect method.
+	 */
+	@Test
+	public void detectBroadphaseFilterNotAllowed() {
+		TestWorld w = new TestWorld();
+		w.setBroadphaseFilter(new CollisionBodyBroadphaseFilter<Body, BodyFixture>() {
+			@Override
+			public boolean isAllowed(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2) {
+				boolean allowed = super.isAllowed(body1, fixture1, body2, fixture2);
+				allowed &= (body1.getMass().getType() != MassType.INFINITE || body2.getMass().getType() != MassType.INFINITE);
+				return allowed;
+			}
+		});
+		
+		// setup the bodies
+		Convex c1 = Geometry.createCircle(1.0);
+		Convex c2 = Geometry.createEquilateralTriangle(0.5);
+
+		Body b1 = new Body(); b1.addFixture(c1); b1.setMass(MassType.INFINITE);
+		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(MassType.INFINITE);
+		
+		// add them to the world
+		w.addBody(b1);
+		w.addBody(b2);
+		
+		// test broadphase filtering
+		w.detect();
+		Iterator<WorldCollisionData<Body>> it = w.getCollisionDataIterator();
+		while (it.hasNext()) {
+			WorldCollisionData<Body> data = it.next();
+			TestCase.assertFalse(data.isBroadphaseCollision());
+			TestCase.assertFalse(data.isNarrowphaseCollision());
+			TestCase.assertFalse(data.isManifoldCollision());
+		}
+	}
+	
+	/**
+	 * Tests the detect method.
+	 */
+	@Test
+	public void detectNoLongerColliding() {
+		TestWorld w = new TestWorld();
+		
+		// setup the bodies
+		Convex c1 = Geometry.createCircle(1.0);
+		Convex c2 = Geometry.createEquilateralTriangle(0.5);
+
+		Body b1 = new Body(); b1.addFixture(c1); b1.setMass(MassType.INFINITE);
+		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(MassType.INFINITE);
+		
+		// add them to the world
+		w.addBody(b1);
+		w.addBody(b2);
+		
+		// test broadphase filtering
+		w.detect();
+		Iterator<WorldCollisionData<Body>> it = w.getCollisionDataIterator();
+		TestCase.assertTrue(it.hasNext());
+		
+		// test no longer overlapping
+		b1.translate(10,  10);
+		
+		w.detect();
+		
+		it = w.getCollisionDataIterator();
+		TestCase.assertFalse(it.hasNext());
+	}
+	
+	/**
+	 * Tests the detect iterator remove method.
+	 */
+	@Test(expected = UnsupportedOperationException.class)
+	public void detectIteratorRemove() {
+		TestWorld w = new TestWorld() {
+			@Override
+			protected void detectCollisions(Iterator<WorldCollisionData<Body>> iterator) {
+				while (iterator.hasNext()) {
+					iterator.next();
+					iterator.remove();
+				}
+			}
+		};
+		
+		// setup the bodies
+		Convex c1 = Geometry.createCircle(1.0);
+		Convex c2 = Geometry.createEquilateralTriangle(0.5);
+
+		Body b1 = new Body(); b1.addFixture(c1); b1.setMass(MassType.NORMAL);
+		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(MassType.NORMAL);
+		
+		// add them to the world
+		w.addBody(b1);
+		w.addBody(b2);
+		
+		w.detect();
+	}
+	
+	/**
+	 * Tests the detect method wrt. listeners.
+	 */
+	@Test
+	public void detectListeners() {
+		TestWorld w = new TestWorld();
+		
+		// setup the bodies
+		Convex c1 = Geometry.createCircle(1.0);
+		Convex c2 = Geometry.createEquilateralTriangle(0.5);
+
+		Body b1 = new Body(); b1.addFixture(c1); b1.setMass(MassType.NORMAL);
+		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(MassType.NORMAL);
+		
+		// add them to the world
+		w.addBody(b1);
+		w.addBody(b2);
+		
+		// test filtering in the broadphase listener
+		w.addCollisionListener(new CollisionListenerAdapter<Body, BodyFixture>(){
+			@Override
+			public boolean collision(BroadphaseCollisionData<Body, BodyFixture> collision) {
+				return false;
+			}
+		});
+		
+		w.detect();
+		
+		Iterator<WorldCollisionData<Body>> it = w.getCollisionDataIterator();
+		while (it.hasNext()) {
+			WorldCollisionData<Body> data = it.next();
+			TestCase.assertFalse(data.isBroadphaseCollision());
+			TestCase.assertFalse(data.isNarrowphaseCollision());
+			TestCase.assertFalse(data.isManifoldCollision());
+		}
+		
+		// test filtering in the narrowphase listener
+		w.removeAllCollisionListeners();
+		w.addCollisionListener(new CollisionListenerAdapter<Body, BodyFixture>(){
+			@Override
+			public boolean collision(NarrowphaseCollisionData<Body, BodyFixture> collision) {
+				return false;
+			}
+		});
+		
+		w.detect();
+		
+		it = w.getCollisionDataIterator();
+		while (it.hasNext()) {
+			WorldCollisionData<Body> data = it.next();
+			TestCase.assertTrue(data.isBroadphaseCollision());
+			TestCase.assertFalse(data.isNarrowphaseCollision());
+			TestCase.assertFalse(data.isManifoldCollision());
+		}
+		
+		// test filtering in the narrowphase listener
+		w.removeAllCollisionListeners();
+		w.addCollisionListener(new CollisionListenerAdapter<Body, BodyFixture>(){
+			@Override
+			public boolean collision(ManifoldCollisionData<Body, BodyFixture> collision) {
+				return false;
+			}
+		});
+		
+		w.detect();
+		
+		it = w.getCollisionDataIterator();
+		while (it.hasNext()) {
+			WorldCollisionData<Body> data = it.next();
+			TestCase.assertTrue(data.isBroadphaseCollision());
+			TestCase.assertTrue(data.isNarrowphaseCollision());
+			TestCase.assertFalse(data.isManifoldCollision());
+		}
+	}
+	
+	/**
+	 * Tests the detect method wrt. bounds.
+	 */
+	@Test
+	public void detectWithBounds() {
+		TestWorld w = new TestWorld();
+		BoundsListenerCounter bl = new BoundsListenerCounter();
+		
+		w.setBounds(new AxisAlignedBounds(10, 10));
+		w.addBoundsListener(bl);
+		
+		// setup the bodies
+		Convex c1 = Geometry.createCircle(1.0);
+		Convex c2 = Geometry.createCircle(0.5);
+		Convex c3 = Geometry.createCircle(0.5);
+		c3.translate(1, 0);
+
+		Body b1 = new Body(); b1.addFixture(c1); b1.setMass(MassType.NORMAL);
+		Body b2 = new Body(); b2.addFixture(c2); b2.addFixture(c3); b2.setMass(MassType.NORMAL);
+		
+		// add them to the world
+		w.addBody(b1);
+		w.addBody(b2);
+		
+		w.detect();
+		
+		TestCase.assertEquals(0, bl.n);
+		
+		bl.n = 0;
+		b1.translate(20, 20);
+		
+		w.detect();
+		
+		TestCase.assertEquals(1, bl.n);
+		
+		// halfway outside of the bounds
+		bl.n = 0;
+		b1.translate(-20, -20);
+		b2.translate(5.0, 0.0);
+		
+		w.detect();
+		
+		TestCase.assertEquals(0, bl.n);
+	}
+
+	/**
+	 * Tests the detect method wrt. disabled bodies.
+	 */
+	@Test
+	public void detectWithDisabled() {
+		TestWorld w = new TestWorld();
+		
+		// setup the bodies
+		Convex c1 = Geometry.createCircle(1.0);
+		Convex c2 = Geometry.createCircle(0.5);
+
+		Body b1 = new Body(); b1.addFixture(c1); b1.setMass(MassType.NORMAL);
+		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(MassType.NORMAL);
+		
+		// add them to the world
+		w.addBody(b1);
+		w.addBody(b2);
+		
+		w.detect();
+		
+		Iterator<WorldCollisionData<Body>> it = w.getCollisionDataIterator();
+		TestCase.assertTrue(it.hasNext());
+		WorldCollisionData<Body> data = it.next();
+		TestCase.assertTrue(data.isBroadphaseCollision());
+		TestCase.assertTrue(data.isNarrowphaseCollision());
+		TestCase.assertTrue(data.isManifoldCollision());
+		
+		b1.setEnabled(false);
+		
+		w.detect();
+		
+		it = w.getCollisionDataIterator();
+		TestCase.assertTrue(it.hasNext());
+		data = it.next();
+		TestCase.assertFalse(data.isBroadphaseCollision());
+		TestCase.assertFalse(data.isNarrowphaseCollision());
+		TestCase.assertFalse(data.isManifoldCollision());
+	}
 	
 	/**
 	 * Tests the detect AABB methods.
@@ -1177,7 +1474,7 @@ public class CollisionWorldTest {
 	 * Tests the detect AABB (against a body) methods.
 	 */
 	@Test
-	public void detectAABBvsBody() {
+	public void detectAABBAgainstSingleBody() {
 		TestWorld w = new TestWorld();
 
 		// setup the bodies
@@ -1453,12 +1750,11 @@ public class CollisionWorldTest {
 		TestCase.assertEquals(1, results.size());
 	}
 	
-	
 	/**
 	 * Tests the detect convex (against a body) methods.
 	 */
 	@Test
-	public void detectConvexvsBody() {
+	public void detectConvexAgainstSingleBody() {
 		TestWorld w = new TestWorld();
 
 		// setup the bodies
@@ -1589,7 +1885,7 @@ public class CollisionWorldTest {
 	}
 
 	/**
-	 * Tests the detect AABB iterator method.
+	 * Tests the detect Convex iterator method.
 	 */
 	@Test
 	public void detectConvexIteratorFailures() {
@@ -1666,7 +1962,672 @@ public class CollisionWorldTest {
 			TestCase.fail();
 		}
 	}
+
+	/**
+	 * Tests the raycast methods.
+	 */
+	@Test
+	public void raycast() {
+		TestWorld w = new TestWorld();
+
+		// setup the bodies
+		Convex c1 = Geometry.createCircle(0.5);
+		Convex c2 = Geometry.createRectangle(1.0, 0.5);
+
+		Body b1 = new Body(); b1.addFixture(c1); b1.setMass(MassType.NORMAL);
+		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(MassType.NORMAL);
+		
+		long m1 = 1;
+		long m2 = 2;
+		long m3 = 4;
+		CategoryFilter cf = new CategoryFilter(m1, m1 | m2);
+		b1.getFixture(0).setFilter(cf);
+		b2.getFixture(0).setFilter(cf);
+		
+		b1.translate(1.0, 1.0);
+		
+		// add them to the world
+		w.addBody(b1);
+		w.addBody(b2);
+		
+		DetectFilter<Body, BodyFixture> filter = new DetectFilter<Body, BodyFixture>(
+				true,
+				true,
+				null);
+		
+		Ray ray = new Ray(new Vector2(-1, -1),  new Vector2(1, 1));
+		
+		// test standard detect
+		List<RaycastResult<Body, BodyFixture>> results = w.raycast(ray, Double.MAX_VALUE, filter);
+		TestCase.assertEquals(2, results.size());
+		
+		// test something disabled
+		b1.setEnabled(false);
+		results = w.raycast(ray, Double.MAX_VALUE, filter);
+		TestCase.assertEquals(1, results.size());
+		
+		// test a sensor fixture
+		b2.getFixture(0).setSensor(true);
+		results = w.raycast(ray, Double.MAX_VALUE, filter);
+		TestCase.assertEquals(0, results.size());
+		
+		b1.setEnabled(true);
+		b2.getFixture(0).setSensor(false);
+		
+		// test filter
+		CategoryFilter cf2 = new CategoryFilter(m3, m3);
+		filter = new DetectFilter<Body, BodyFixture>(
+				true,
+				true,
+				cf2);
+		
+		results = w.raycast(ray, Double.MAX_VALUE, filter);
+		TestCase.assertEquals(0, results.size());
+		
+		// raycast closest (no match due to filter)
+		RaycastResult<Body, BodyFixture> result = w.raycastClosest(ray, 0, filter);
+		TestCase.assertNull(result);
+
+		filter = new DetectFilter<Body, BodyFixture>(
+				true,
+				true,
+				null);
+		
+		// test length bounds
+		double length = Math.sqrt(1.5*1.5 + 1.3*1.3);
+		results = w.raycast(ray, length, filter);
+		TestCase.assertEquals(1, results.size());
+		
+		// raycast closest
+		result = w.raycastClosest(ray, Double.MAX_VALUE, filter);
+		TestCase.assertNotNull(result);
+		TestCase.assertEquals(b2, result.getBody());
+		TestCase.assertEquals(b2.getFixture(0), result.getFixture());
+		
+		// raycast closest w/ length
+		result = w.raycastClosest(ray, length, filter);
+		TestCase.assertNotNull(result);
+		TestCase.assertEquals(b2, result.getBody());
+		TestCase.assertEquals(b2.getFixture(0), result.getFixture());
+		
+		// test ray starting in object (it shouldn't detect one of them)
+		ray = new Ray(new Vector2(0, 0),  new Vector2(1, 1));
+		results = w.raycast(ray, -1, filter);
+		TestCase.assertEquals(1, results.size());
+		
+		// test ray starting in object (it shouldn't detect one of them) w/ closest
+		result = w.raycastClosest(ray, Double.MAX_VALUE, filter);
+		TestCase.assertNotNull(result);
+		TestCase.assertEquals(b1, result.getBody());
+		TestCase.assertEquals(b1.getFixture(0), result.getFixture());
+		
+		// test zero results
+		ray = new Ray(new Vector2(0, 0),  new Vector2(-1, -1));
+		results = w.raycast(ray, length, filter);
+		TestCase.assertEquals(0, results.size());
+
+		// another zero result test
+		ray = new Ray(new Vector2(-1, 1),  new Vector2(-2, 2));
+		results = w.raycast(ray, -1, filter);
+		TestCase.assertEquals(0, results.size());
+	}
+
+	/**
+	 * Tests the raycast (against a body) methods.
+	 */
+	@Test
+	public void raycastAgainstSingleBody() {
+		TestWorld w = new TestWorld();
+
+		// setup the bodies
+		Convex c1 = Geometry.createCircle(0.5);
+		Convex c2 = Geometry.createRectangle(1.0, 0.5);
+		Convex c3 = Geometry.createCircle(0.5);
+
+		Body b1 = new Body(); b1.addFixture(c1); BodyFixture f3 = b1.addFixture(c3); f3.getShape().translate(0.75, 0.75); b1.setMass(MassType.NORMAL);
+		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(MassType.NORMAL);
+		
+		long m1 = 1;
+		long m2 = 2;
+		long m3 = 4;
+		CategoryFilter cf = new CategoryFilter(m1, m1 | m2);
+		b1.getFixture(0).setFilter(cf);
+		b1.getFixture(1).setFilter(cf);
+		b2.getFixture(0).setFilter(cf);
+		
+		b1.translate(1.0, 1.0);
+		
+		// add them to the world
+		w.addBody(b1);
+		w.addBody(b2);
+		
+		DetectFilter<Body, BodyFixture> filter = new DetectFilter<Body, BodyFixture>(
+				true,
+				true,
+				null);
+		
+		Ray ray = new Ray(new Vector2(-1, -1),  new Vector2(1, 1));
+		
+		// test standard detect
+		List<RaycastResult<Body, BodyFixture>> results = w.raycast(ray, Double.MAX_VALUE, b1, filter);
+		TestCase.assertEquals(2, results.size());
+		
+		// raycast closest
+		RaycastResult<Body, BodyFixture> result = w.raycastClosest(ray, -1, b1, filter);
+		TestCase.assertNotNull(result);
+		TestCase.assertEquals(b1, result.getBody());
+		TestCase.assertEquals(b1.getFixture(0), result.getFixture());
+		
+		// test something disabled
+		b1.setEnabled(false);
+		results = w.raycast(ray, Double.MAX_VALUE, b1, filter);
+		TestCase.assertEquals(0, results.size());
+		b1.setEnabled(true);
+		
+		// test a sensor fixture
+		b1.getFixture(0).setSensor(true);
+		results = w.raycast(ray, Double.MAX_VALUE, b1, filter);
+		TestCase.assertEquals(1, results.size());
+		b1.getFixture(0).setSensor(false);
+		
+		// test filter
+		CategoryFilter cf2 = new CategoryFilter(m3, m3);
+		filter = new DetectFilter<Body, BodyFixture>(
+				true,
+				true,
+				cf2);
+		
+		results = w.raycast(ray, Double.MAX_VALUE, b1, filter);
+		TestCase.assertEquals(0, results.size());
+		
+		// raycast closest (no match due to filter)
+		result = w.raycastClosest(ray, 0, b1, filter);
+		TestCase.assertNull(result);
+		
+		// test filter 2
+		filter = new DetectFilter<Body, BodyFixture>(
+				true,
+				true,
+				cf);
+		
+		results = w.raycast(ray, Double.MAX_VALUE, b1, filter);
+		TestCase.assertEquals(2, results.size());
+		
+		// test length bounds
+		double length = Math.sqrt(1.5*1.5 + 1.3*1.3);
+		results = w.raycast(ray, length, b1, filter);
+		TestCase.assertEquals(0, results.size());
+		
+		// test length bounds (body2)
+		results = w.raycast(ray, length, b2, filter);
+		TestCase.assertEquals(1, results.size());
+		
+		// test ray starting in object (it shouldn't detect one of them)
+		ray = new Ray(new Vector2(0, 0),  new Vector2(1, 1));
+		results = w.raycast(ray, Double.MAX_VALUE, b1, filter);
+		TestCase.assertEquals(2, results.size());
+		
+		// raycast closest
+		result = w.raycastClosest(ray, Double.MAX_VALUE, b1, filter);
+		TestCase.assertNotNull(result);
+		TestCase.assertEquals(b1, result.getBody());
+		TestCase.assertEquals(b1.getFixture(0), result.getFixture());
+		
+		// test zero results
+		ray = new Ray(new Vector2(0, 0),  new Vector2(-1, -1));
+		results = w.raycast(ray, length, b1, filter);
+		TestCase.assertEquals(0, results.size());
+
+		// another zero result test (negative - which will mean infinite length)
+		ray = new Ray(new Vector2(-1, 1),  new Vector2(-2, 2));
+		results = w.raycast(ray, -1, b1, filter);
+		TestCase.assertEquals(0, results.size());
+	}
+
+	/**
+	 * Tests the raycast iterator method where we call hasNext many times 
+	 * before calling the next method to ensure that the next() method is the
+	 * only way to advance the iteration.
+	 */
+	@Test
+	public void raycastIterator() {
+		TestWorld w = new TestWorld();
+		
+		Ray ray = new Ray(new Vector2(-1, -1),  new Vector2(1, 1));
+		
+		// test getting an iterator for an empty world
+		Iterator<RaycastResult<Body, BodyFixture>> it = w.raycastIterator(ray, Double.MAX_VALUE, null);
+		TestCase.assertFalse(it.hasNext());
+		
+		it = w.raycastIterator(ray, 0, new Body(), null);
+		TestCase.assertFalse(it.hasNext());
+		
+		// setup the bodies
+		Convex c1 = Geometry.createCircle(0.5);
+		Convex c2 = Geometry.createRectangle(1.0, 0.5);
+
+		Body b1 = new Body(); b1.addFixture(c1); b1.setMass(MassType.NORMAL);
+		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(MassType.NORMAL);
+		
+		b1.translate(1.0, 1.0);
+		
+		// add them to the world
+		w.addBody(b1);
+		w.addBody(b2);
+		
+		// since the list based methods are built on top of the iterator methods
+		// we only need to test the failure cases for the iterator methods
+		
+		it = w.raycastIterator(ray, Double.MAX_VALUE, null);
+		for (int i = 0; i < 20; i++) {
+			it.hasNext();
+		}
+		
+		it.next();
+		
+		it = w.raycastIterator(ray, Double.MAX_VALUE, b1, null);
+		for (int i = 0; i < 20; i++) {
+			it.hasNext();
+		}
+		
+		it.next();
+	}
+
+	/**
+	 * Tests the detect Convex iterator method.
+	 */
+	@Test
+	public void raycastIteratorFailures() {
+		TestWorld w = new TestWorld();
+
+		// setup the bodies
+		Convex c1 = Geometry.createCircle(0.5);
+		Convex c2 = Geometry.createRectangle(1.0, 0.5);
+
+		Body b1 = new Body(); b1.addFixture(c1); b1.setMass(MassType.NORMAL);
+		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(MassType.NORMAL);
+		
+		b1.translate(1.0, 1.0);
+		
+		// add them to the world
+		w.addBody(b1);
+		w.addBody(b2);
+		
+		// since the list based methods are built on top of the iterator methods
+		// we only need to test the failure cases for the iterator methods
+		
+		Ray ray = new Ray(new Vector2(-1, -1),  new Vector2(1, 1));
+		
+		Iterator<RaycastResult<Body, BodyFixture>> it = w.raycastIterator(ray, 0.0, null);
+		
+		// test remove method
+		try {
+			while (it.hasNext()) {
+				it.next();
+				it.remove();
+			}
+			TestCase.fail();
+		} catch (UnsupportedOperationException ex) {
+		} catch (Exception ex) {
+			TestCase.fail();
+		}
+		
+		// test body remove method
+		it = w.raycastIterator(ray, 0.0, b1, null);
+		try {
+			while (it.hasNext()) {
+				it.next();
+				it.remove();
+			}
+			TestCase.fail();
+		} catch (UnsupportedOperationException ex) {
+		} catch (Exception ex) {
+			TestCase.fail();
+		}
+		
+		// test not checking hasNext
+		it = w.raycastIterator(ray, 0.0, null);
+		try {
+			for (int i = 0; i < 10; i++) {
+				it.next();
+			}
+			TestCase.fail();
+		} catch (NoSuchElementException ex) {
+		} catch (Exception ex) {
+			TestCase.fail();
+		}
+		
+		// test body not checking hasNext
+		it = w.raycastIterator(ray, 0.0, b1, null);
+		try {
+			for (int i = 0; i < 10; i++) {
+				it.next();
+			}
+			TestCase.fail();
+		} catch (NoSuchElementException ex) {
+		} catch (Exception ex) {
+			TestCase.fail();
+		}
+	}
 	
+	/**
+	 * Test the convex cast methods.
+	 */
+	@Test
+	public void convexCast() {
+		TestWorld w = new TestWorld();
+
+		// setup the bodies
+		Convex c1 = Geometry.createCircle(0.5);
+		Convex c2 = Geometry.createRectangle(1.0, 0.5);
+		Convex c3 = Geometry.createCircle(0.5);
+		c3.translate(0.75, 0.75);
+
+		Body b1 = new Body(); b1.addFixture(c1); b1.addFixture(c3); b1.setMass(MassType.NORMAL);
+		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(MassType.NORMAL);
+		
+		long m1 = 1;
+		long m2 = 2;
+		long m3 = 4;
+		CategoryFilter cf = new CategoryFilter(m1, m1 | m2);
+		b1.getFixture(0).setFilter(cf);
+		b2.getFixture(0).setFilter(cf);
+		b1.getFixture(1).setFilter(cf);
+		
+		b1.translate(1.0, 1.0);
+		
+		// add them to the world
+		w.addBody(b1);
+		w.addBody(b2);
+		
+		DetectFilter<Body, BodyFixture> filter = new DetectFilter<Body, BodyFixture>(
+				true,
+				true,
+				null);
+		
+		Convex convex = Geometry.createRectangle(0.5, 0.5);
+		Transform tx = new Transform(); 
+		tx.translate(-1.0, -1.0);
+		Vector2 dp = new Vector2(3, 3);
+		double da = Math.toRadians(45);
+		
+		// test standard detect
+		List<ConvexCastResult<Body, BodyFixture>> results = w.convexCast(convex, tx, dp, da, filter);
+		TestCase.assertEquals(3, results.size());
+		
+		// test something disabled
+		b1.setEnabled(false);
+		results = w.convexCast(convex, tx, dp, da, filter);
+		TestCase.assertEquals(1, results.size());
+		
+		// test a sensor fixture
+		b2.getFixture(0).setSensor(true);
+		results = w.convexCast(convex, tx, dp, da, filter);
+		TestCase.assertEquals(0, results.size());
+		
+		b1.setEnabled(true);
+		b2.getFixture(0).setSensor(false);
+		
+		// test filter
+		CategoryFilter cf2 = new CategoryFilter(m3, m3);
+		filter = new DetectFilter<Body, BodyFixture>(
+				true,
+				true,
+				cf2);
+		
+		results = w.convexCast(convex, tx, dp, da, filter);
+		TestCase.assertEquals(0, results.size());
+		
+		// cast closest (no match due to filter)
+		ConvexCastResult<Body, BodyFixture> result = w.convexCastClosest(convex, tx, dp, da, filter);
+		TestCase.assertNull(result);
+
+		filter = new DetectFilter<Body, BodyFixture>(
+				true,
+				true,
+				null);
+		
+		// test shorter cast
+		dp = new Vector2(0.5, 0.5);
+		results = w.convexCast(convex, tx, dp, da, filter);
+		TestCase.assertEquals(1, results.size());
+		
+		// cast closest
+		result = w.convexCastClosest(convex, tx, dp, da, filter);
+		TestCase.assertNotNull(result);
+		TestCase.assertEquals(b2, result.getBody());
+		TestCase.assertEquals(b2.getFixture(0), result.getFixture());
+		
+		// cast closest w/ long length
+		dp = new Vector2(5, 5);
+		result = w.convexCastClosest(convex, tx, dp, da, filter);
+		TestCase.assertNotNull(result);
+		TestCase.assertEquals(b2, result.getBody());
+		TestCase.assertEquals(b2.getFixture(0), result.getFixture());
+		
+		// test ray starting in object (it shouldn't detect one of them)
+		tx.identity();
+		results = w.convexCast(convex, tx, dp, da, filter);
+		TestCase.assertEquals(2, results.size());
+		
+		// test ray starting in object (it shouldn't detect one of them) w/ closest
+		result = w.convexCastClosest(convex, tx, dp, da, filter);
+		TestCase.assertNotNull(result);
+		TestCase.assertEquals(b1, result.getBody());
+		TestCase.assertEquals(b1.getFixture(0), result.getFixture());
+		
+		// test zero results
+		dp = new Vector2(-5, 5);
+		results = w.convexCast(convex, tx, dp, da, filter);
+		TestCase.assertEquals(0, results.size());
+
+		// another zero result test
+		dp = new Vector2(0.25, 0.25);
+		results = w.convexCast(convex, tx, dp, da, filter);
+		TestCase.assertEquals(0, results.size());
+	}
 	
-	// TODO detection methods
+
+	/**
+	 * Tests the convex cast (against a body) methods.
+	 */
+	@Test
+	public void convexCastAgainstSingleBody() {
+		TestWorld w = new TestWorld();
+
+		// setup the bodies
+		Convex c1 = Geometry.createCircle(0.5);
+		Convex c2 = Geometry.createRectangle(1.0, 0.5);
+		Convex c3 = Geometry.createCircle(0.5);
+		c3.translate(0.75, 0.75);
+
+		Body b1 = new Body(); b1.addFixture(c1); b1.addFixture(c3); b1.setMass(MassType.NORMAL);
+		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(MassType.NORMAL);
+		
+		long m1 = 1;
+		long m2 = 2;
+		long m3 = 4;
+		CategoryFilter cf = new CategoryFilter(m1, m1 | m2);
+		b1.getFixture(0).setFilter(cf);
+		b2.getFixture(0).setFilter(cf);
+		b1.getFixture(1).setFilter(cf);
+		
+		b1.translate(1.0, 1.0);
+		
+		// add them to the world
+		w.addBody(b1);
+		w.addBody(b2);
+		
+		DetectFilter<Body, BodyFixture> filter = new DetectFilter<Body, BodyFixture>(
+				true,
+				true,
+				null);
+		
+		Convex convex = Geometry.createRectangle(0.5, 0.5);
+		Transform tx = new Transform(); 
+		tx.translate(-1.0, -1.0);
+		Vector2 dp = new Vector2(3, 3);
+		double da = Math.toRadians(45);
+		
+		// test standard detect
+		ConvexCastResult<Body, BodyFixture> result = w.convexCastClosest(convex, tx, dp, da, b1, filter);
+		TestCase.assertNotNull(result);
+		
+		// test something disabled
+		b1.setEnabled(false);
+		result = w.convexCastClosest(convex, tx, dp, da, b1, filter);
+		TestCase.assertNull(result);
+		
+		// test a sensor fixture
+		b1.setEnabled(true);
+		b1.getFixture(0).setSensor(true);
+		result = w.convexCastClosest(convex, tx, dp, da, b1, filter);
+		TestCase.assertNotNull(result);
+		
+		b1.getFixture(0).setSensor(false);
+		
+		// test filter
+		CategoryFilter cf2 = new CategoryFilter(m3, m3);
+		filter = new DetectFilter<Body, BodyFixture>(
+				true,
+				true,
+				cf2);
+		
+		result = w.convexCastClosest(convex, tx, dp, da, b1, filter);
+		TestCase.assertNull(result);
+		
+		filter = new DetectFilter<Body, BodyFixture>(
+				true,
+				true,
+				null);
+		
+		// test shorter cast
+		dp = new Vector2(0.5, 0.5);
+		result = w.convexCastClosest(convex, tx, dp, da, b1, filter);
+		TestCase.assertNull(result);
+		
+		// cast closest w/ long length
+		dp = new Vector2(5, 5);
+		result = w.convexCastClosest(convex, tx, dp, da, b1, filter);
+		TestCase.assertNotNull(result);
+		TestCase.assertEquals(b1, result.getBody());
+		TestCase.assertEquals(b1.getFixture(0), result.getFixture());
+		
+		// test ray starting in object (it shouldn't detect one of them)
+		tx.identity();
+		tx.translate(0.75, 0.75);
+		result = w.convexCastClosest(convex, tx, dp, da, b1, filter);
+		TestCase.assertNotNull(result);
+		TestCase.assertEquals(b1, result.getBody());
+		TestCase.assertEquals(b1.getFixture(1), result.getFixture());
+		
+		// test zero results
+		dp = new Vector2(-5, 5);
+		result = w.convexCastClosest(convex, tx, dp, da, b1, filter);
+		TestCase.assertNull(result);
+
+		// another zero result test
+		dp = new Vector2(0.25, 0.25);
+		result = w.convexCastClosest(convex, tx, dp, da, b1, filter);
+		TestCase.assertNull(result);
+	}
+
+	/**
+	 * Tests the convex cast iterator method where we call hasNext many times 
+	 * before calling the next method to ensure that the next() method is the
+	 * only way to advance the iteration.
+	 */
+	@Test
+	public void convexCastIterator() {
+		TestWorld w = new TestWorld();
+		
+		Convex convex = Geometry.createRectangle(0.5, 0.5);
+		Transform tx = new Transform(); 
+		tx.translate(-1.0, -1.0);
+		Vector2 dp = new Vector2(3, 3);
+		double da = Math.toRadians(45);
+		
+		// test getting an iterator for an empty world
+		Iterator<ConvexCastResult<Body, BodyFixture>> it = w.convexCastIterator(convex, tx, dp, da, null);
+		TestCase.assertFalse(it.hasNext());
+		
+		// setup the bodies
+		Convex c1 = Geometry.createCircle(0.5);
+		Convex c2 = Geometry.createRectangle(1.0, 0.5);
+
+		Body b1 = new Body(); b1.addFixture(c1); b1.setMass(MassType.NORMAL);
+		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(MassType.NORMAL);
+		
+		b1.translate(1.0, 1.0);
+		
+		// add them to the world
+		w.addBody(b1);
+		w.addBody(b2);
+		
+		// since the list based methods are built on top of the iterator methods
+		// we only need to test the failure cases for the iterator methods
+		
+		it = w.convexCastIterator(convex, tx, dp, da, null);
+		for (int i = 0; i < 20; i++) {
+			it.hasNext();
+		}
+		
+		it.next();
+	}
+
+	/**
+	 * Tests the convex cast iterator method.
+	 */
+	@Test
+	public void convexCastIteratorFailures() {
+		TestWorld w = new TestWorld();
+
+		// setup the bodies
+		Convex c1 = Geometry.createCircle(0.5);
+		Convex c2 = Geometry.createRectangle(1.0, 0.5);
+
+		Body b1 = new Body(); b1.addFixture(c1); b1.setMass(MassType.NORMAL);
+		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(MassType.NORMAL);
+		
+		b1.translate(1.0, 1.0);
+		
+		// add them to the world
+		w.addBody(b1);
+		w.addBody(b2);
+		
+		// since the list based methods are built on top of the iterator methods
+		// we only need to test the failure cases for the iterator methods
+		
+		Convex convex = Geometry.createRectangle(0.5, 0.5);
+		Transform tx = new Transform(); 
+		tx.translate(-1.0, -1.0);
+		Vector2 dp = new Vector2(3, 3);
+		double da = Math.toRadians(45);
+		
+		Iterator<ConvexCastResult<Body, BodyFixture>> it = w.convexCastIterator(convex, tx, dp, da, null);
+		
+		// test remove method
+		try {
+			while (it.hasNext()) {
+				it.next();
+				it.remove();
+			}
+			TestCase.fail();
+		} catch (UnsupportedOperationException ex) {
+		} catch (Exception ex) {
+			TestCase.fail();
+		}
+		
+		// test not checking hasNext
+		it = w.convexCastIterator(convex, tx, dp, da, null);
+		try {
+			for (int i = 0; i < 10; i++) {
+				it.next();
+			}
+			TestCase.fail();
+		} catch (NoSuchElementException ex) {
+		} catch (Exception ex) {
+			TestCase.fail();
+		}
+	}
 }

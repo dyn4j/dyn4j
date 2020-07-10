@@ -1039,6 +1039,9 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 					0.0, ft2, timeOfImpact)) {
 				// only save the minimum
 				if (min == null || timeOfImpact.getTime() < min.getTimeOfImpact().getTime()) {
+					if (min == null) {
+						min = new ConvexCastResult<T, E>();
+					}
 					ft2 = timeOfImpact.getTime();
 					min.setBody(body);
 					min.setFixture(fixture);
